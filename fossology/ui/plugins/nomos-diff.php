@@ -24,13 +24,6 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-
-  /* FuzzyName comparison function */
-  function FuzzyCmp($Child1, $Child2)
-  {
-    return strcasecmp($Child1['fuzzyname'], $Child2['fuzzyname']);
-  }
-
 define("TITLE_ui_nomos_diff", _("Compare License Browser"));
 
 class ui_nomos_diff extends FO_Plugin
@@ -105,33 +98,15 @@ class ui_nomos_diff extends FO_Plugin
     return($this->State == PLUGIN_STATE_VALID);
   } // Initialize()
 
-  /* return array with:
-   * lft
-   * rgt
-   * upload_pk
-   * count
-   * agent_pk
+  /* return array with uploadtree record and:
+   *   agent_pk
    */
   function GetTreeInfo($Uploadtree_pk)
   {
     global $PG_CONN;
-    global $Plugins;
 
-    $TreeInfo = array();
-
-    /*******  Get license names and counts  ******/
-    /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree 
-              WHERE uploadtree_pk = $Uploadtree_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $TreeInfo['lft'] = $lft = $row["lft"];
-    $TreeInfo['rgt'] = $rgt = $row["rgt"];
-    $TreeInfo['upload_pk'] = $upload_pk = $row["upload_fk"];
-    pg_free_result($result);
-
-    $TreeInfo['agent_pk'] = LatestNomosAgentpk($upload_pk);
+    $TreeInfo = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $Uploadtree_pk");
+    $TreeInfo['agent_pk'] = LatestNomosAgentpk($TreeInfo['upload_fk']);
     return $TreeInfo;
   } 
 
@@ -147,8 +122,7 @@ class ui_nomos_diff extends FO_Plugin
     $VLic = '';
     $lft = $TreeInfo['lft'];
     $rgt = $TreeInfo['rgt'];
-    $upload_pk = $TreeInfo['upload_pk'];
-//    $count = $TreeInfo['count'];
+    $upload_pk = $TreeInfo['upload_fk'];
     $agent_pk = $TreeInfo['agent_pk'];
 
     /*  Get the counts for each license under this UploadtreePk*/
@@ -213,80 +187,6 @@ class ui_nomos_diff extends FO_Plugin
 
 
   /***********************************************************
-    FileList(): 
-    FileList() adds the following new elements to $Children:
-       linkurl - this is the entire formatted href inclusive <a to /a> 
-
-    $OneTwo = 1 for the first column list, 2 for the second.
-    $Children are non-artifact children of $Uploadtree_pk
-   ***********************************************************/
-  function FileList($Uploadtree_pk, $TreeInfo, $otheruploadtree_pk, $OneTwo, &$Children, $filter)
-  {
-    global $PG_CONN;
-    global $Plugins;
-
-    $TwoOne = ($OneTwo == 1) ? 2 : 1;
-
-    $upload_pk = $TreeInfo['upload_pk'];
-    $agent_pk = $TreeInfo['agent_pk'];
-    $ModLicView = &$Plugins[plugin_find_id("view-license")];
-
-    if (!empty($Children))
-    {
-      foreach($Children as &$Child)
-      {
-        if (empty($Child)) { continue; }
-
-        $IsDir = Isdir($Child['ufile_mode']);
-        $IsContainer = Iscontainer($Child['ufile_mode']);
-
-        /* Determine the hyperlink for non-containers to view-license  */
-        if (!empty($Child['pfile_fk']) && !empty($ModLicView))
-        {
-          $LinkUri = Traceback_uri();
-          $LinkUri .= "?mod=view-license&napk=$agent_pk&upload=$upload_pk&item=$Child[uploadtree_pk]";
-        }
-        else
-        {
-          $LinkUri = NULL;
-        }
-
-        /* Determine link for containers */
-        if (Iscontainer($Child['ufile_mode']))
-        {
-          //$Container_uploadtree_pk = DirGetNonArtifact($Child['uploadtree_pk']);
-          $Container_uploadtree_pk = $Child['uploadtree_pk'];
-          $LicUri = "?mod=$this->Name&item{$OneTwo}=$Uploadtree_pk&item{$TwoOne}=$otheruploadtree_pk&newitem{$OneTwo}=$Container_uploadtree_pk&col=$OneTwo";
-          if (!empty($filter)) $LicUri .= "&filter=$filter";
-        }
-        else
-        {
-          $LicUri = NULL;
-        }
-  
-        $HasHref = 0;
-        $HasBold = 0;
-        $Flink = "";
-        if ($IsContainer)
-        {
-          $Flink = "<a href='$LicUri'>"; $HasHref=1;
-          $Flink .= "<b>"; $HasBold=1;
-        }
-        else if (!empty($LinkUri)) 
-        {
-          $Flink .= "<a href='$LinkUri'>"; $HasHref=1;
-        }
-        $Flink .= $Child['ufile_name'];
-        if ($IsDir) { $Flink .= "/"; };
-        if ($HasBold) { $Flink .= "</b>"; }
-        if ($HasHref) { $Flink .= "</a>"; }
-        $Child["linkurl"] = $Flink;
-      }
-    }
-  } // FileList()
-
-
-  /***********************************************************
     ChildElt()
     Return the entire <td> ... </td> for $Child file listing table
     License differences are highlighted.
@@ -334,6 +234,7 @@ class ui_nomos_diff extends FO_Plugin
     $ColStr .= "</td>";
     return $ColStr;
   }
+
 
   /***********************************************************
     ItemComparisonRows()
@@ -384,135 +285,6 @@ class ui_nomos_diff extends FO_Plugin
   } // ItemComparisonRows()
 
 
-  /***********************************************************
-    AlignChildren
-    Return array with aligned children.
-    Each row contains aligning child records.
-    $Master[n][1] = child 1 row
-    $Master[n][2] = child 2 row
-   ***********************************************************/
-  function MakeMaster($Children1, $Children2)
-  {
-    $Master = array();
-    $row =  0;
-
-    if (!empty($Children1) && (!empty($Children2)))
-    {
-      $OneIdx = 0;  // $Children1 index
-      $TwoIdx = 0;  // $Children2 index
-      reset($Children1);
-      reset($Children2);
-      $Child1 = current($Children1);
-      $Child2 = current($Children2);
-      while (($Child1 !== false) and ($Child2 !== false)) 
-      {
-        $comp = strcasecmp($Child1['fuzzyname'], $Child2['fuzzyname']);
-        if ($comp < 0) $comp = -1;
-        else if ($comp > 0) $comp = 1;
-        switch($comp)
-        {
-          case -1:
-            /* Child1 < Child2  */
-            $Master[$row][1] = $Child1;
-            $Master[$row][2] = '';
-            $Child1 = next($Children1);
-            break;
-          case 0:
-            /* Child names match.  Put both in same table row. */
-            $Master[$row][1] = $Child1;
-            $Master[$row][2] = $Child2;
-            $Child1 = next($Children1);
-            $Child2 = next($Children2);
-            break;
-          case 1:
-            /* Child1 > Child2  */
-            $Master[$row][1] = '';
-            $Master[$row][2] = $Child2;
-            $Child2 = next($Children2);
-            break;
-        }
-        $row++;
-      }
-    }
-
-    /* Remaining Child1 recs */
-    if ($Child1 !== false)
-    {
-      $Child = current($Children1);
-      while($Child !== false)
-      {
-        $Master[$row][1] = $Child;
-        $Master[$row][2] = '';
-        $Child = next($Children1);
-        $row++;
-      }
-    }
-
-    /* Remaining Child2 recs */
-    if ($Child2 !== false)
-    {
-      $Child = current($Children2);
-      while($Child !== false)
-      {
-        $Master[$row][1] = '';
-        $Master[$row][2] = $Child;
-        $Child = next($Children2);
-        $row++;
-      }
-    }
-
-    return($Master);
-  } // MakeMaster()
-
-
- /**
-  * NextUploadtree_pk()
-  * \brief Given an uploadtree_pk in tree A ($A_pk), find the similarly named
-  *        one that is immediately under the uploadtree_pk in tree B ($B_pk).
-  *
-  * @param int   $A_pk      Tree A uploadtree_pk
-  * @param int   $B_pk      Tree B uploadtree_pk
-  *
-  * @return int  New uploadtree_pk in Tree B
-  */
-  function NextUploadtree_pk($A_pk, $B_pk)
-  {
-    global $PG_CONN;
-
-    /* look up the name of the $A_pk file */
-    $sql = "SELECT ufile_name FROM uploadtree WHERE uploadtree_pk = $A_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $AName = $row["ufile_name"];
-    pg_free_result($result);
-
-    $APhon = metaphone($AName);
-
-    /* Loop throught all the files under $B_pk  and look
-     * for the closest match.
-     */
-    $B_pk = DirGetNonArtifact($B_pk);
-    $sql = "SELECT uploadtree_pk, ufile_name FROM uploadtree WHERE parent = $B_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $BestDist = 99999;
-    $BestPk = 0;
-    while ($row = pg_fetch_assoc($result))
-    {
-      $ChildName = $row["ufile_name"];
-      $ChildPhon = metaphone($ChildName);
-      $PhonDist = levenshtein($APhon, $ChildPhon);
-      if ($PhonDist < $BestDist)
-      {
-        $BestDist = $PhonDist;
-        $BestPk = $row['uploadtree_pk'];
-      }
-    }
-    pg_free_result($result);
-
-    return $BestPk;
-  }
 
   /* AddLicStr
    * Add license array to Children array.
@@ -527,36 +299,6 @@ class ui_nomos_diff extends FO_Plugin
       $Child['licstr'] = implode(", ", $Child['licarray']);
     }
   }
-
-    
-  /* FuzzyName
-   * Add fuzzyname to $Children.
-   * The fuzzy name is used to do fuzzy matches.
-   * In this implementation the fuzzyname is just the filename
-   * with numbers, punctuation, and the file extension removed.
-   * Then sort $Children by fuzzyname.
-   */
-  function FuzzyName(&$Children)
-  { 
-    foreach($Children as $key1 => &$Child)
-    {
-      /* remove file extension */
-      if (strstr($Child['ufile_name'], ".") !== false)
-      {
-        $Ext = GetFileExt($Child['ufile_name']);
-        $ExtLen = strlen($Ext);
-        $NoExtName = substr($Child['ufile_name'], 0, -1*$ExtLen);
-      }
-      else
-        $NoExtName = $Child['ufile_name'];
-
-      $NoNumbName = preg_replace('/([0-9]|\.|-|_)/', "", $NoExtName);
-      $Child['fuzzyname'] = $NoNumbName;
-    }
-
-    usort($Children, "FuzzyCmp");
-    return;
-  }  /* End of FuzzyName */
 
 
   /* filter_samehash()
@@ -619,6 +361,8 @@ class ui_nomos_diff extends FO_Plugin
    */
   function filter_nolics(&$Master)
   { 
+    $NoLicStr = "No License Found";
+
     foreach($Master as $Key =>&$Pair)
     {
       $Pair1 = GetArrayVal("1", $Pair);
@@ -626,20 +370,20 @@ class ui_nomos_diff extends FO_Plugin
 
       if (empty($Pair1))
       {
-        if ($Pair2['licstr'] == 'No License Found')
+        if ($Pair2['licstr'] == $NoLicStr)
           unset($Master[$Key]);
         else
           continue;
       }
       else if (empty($Pair2))
       {
-        if ($Pair1['licstr'] == 'No License Found')
+        if ($Pair1['licstr'] == $NoLicStr)
           unset($Master[$Key]);
         else
           continue;
       }
-      else if (($Pair1['fuzzyname'] == $Pair2['fuzzyname'])
-              and ($Pair1['licstr'] == 'No License Found'))
+      else if (($Pair1['licstr'] == $NoLicStr)
+              and ($Pair2['licstr'] == $NoLicStr))
         unset($Master[$Key]);
     }
     return;
@@ -674,102 +418,6 @@ class ui_nomos_diff extends FO_Plugin
         break;
     }
   }
-
-
-  /* CompareDir($Child1, $Child2)
-   * Compare (recursively) the contents of two directories.
-   * If they are identical (matching pfile's)
-   * Then return True.  Else return False.
-   */
-  function CompareDir($Child1, $Child2)
-  {
-    global $PG_CONN;
-
-    $sql = "select pfile_fk from uploadtree where upload_fk=$Child1[upload_fk] 
-                   and lft between $Child1[lft] and $Child1[rgt]
-            except
-            select pfile_fk from uploadtree where upload_fk=$Child2[upload_fk] 
-                   and lft between $Child2[lft] and $Child2[rgt]
-            limit 1";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $numrows = pg_num_rows($result);
-    pg_free_result($result);
-    return ($numrows == 0) ? TRUE : FALSE;
-  }   
-
-
-/************************************************************
- * Dir2BrowseDiff(): 
- * Return a string which is a linked path to the file.
- *  This is a modified Dir2Browse() to support browsediff links.
- *  $Path1 - path array for tree 1
- *  $Path2 - path array for tree 2
- *  $filter - filter portion of URL, optional
- *  $Column - which path is being emitted, column 1 or 2
- ************************************************************/
-function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column)
-{
-  global $Plugins;
-  global $DB;
-
-  if ((count($Path1) < 1) || (count($Path2) < 1)) return "No path specified";
-
-  $V = "";
-  $filter_clause = (empty($filter)) ? "" : "&filter=$filter";
-  $Path = ($Column == 1) ? $Path1 : $Path2;
-  $Last = $Path[count($Path)-1];
-
-  /* Banner Box decorations */
-  $V .= "<div style='border: double gray; background-color:lightyellow'>\n";
-
-  /* Get/write the FOLDER list (in banner) */
-  $text = _("Folder");
-  $V .= "<b>$text</b>: ";
-  $List = FolderGetFromUpload($Path[0]['upload_fk']);
-  $Uri2 = Traceback_uri() . "?mod=$this->Name";
-
-  /* Define Freeze button */
-  $text = _("Freeze path");
-  $id = "Freeze{$Column}";
-  $alt =  _("Freeze this path so that selecting a new directory in the other path will not change this one.");
-  $Options = "id='$id' onclick='Freeze(\"$Column\")' title='$alt'";
-  $FreezeBtn = "<button type='button' $Options> $text </button>\n";
-
-  for($i=0; $i < count($List); $i++)
-  {
-    $Folder = $List[$i]['folder_pk'];
-    $FolderName = htmlentities($List[$i]['folder_name']);
-    $V .= "<b>$FolderName/</b> ";
-  }
-
-  $FirstPath=true; /* If firstpath is true, print FreezeBtn and starts a new line */
-  $V .= "&nbsp;&nbsp;&nbsp;$FreezeBtn";
-  $V .= "<br>";
-
-  /* Show the path within the upload */
-  for ($PathLev = 0; $PathLev < count($Path); $PathLev++)
-  {
-    @$PathElt1 = $Path1[$PathLev];
-    @$PathElt2 = $Path2[$PathLev];  // temporarily ignore notice of missing Path2[PathLev]
-    $PathElt = ($Column == 1) ? $PathElt1: $PathElt2;
-
-    if ($PathElt != $Last)
-    {
-      $href = "$Uri2&item1=$PathElt1[uploadtree_pk]&item2=$PathElt2[uploadtree_pk]{$filter_clause}&col=$Column";
-      $V .= "<a href='$href'>";
-    }
-
-    if (!$FirstPath) $V .= "<br>";
-    $V .= "&nbsp;&nbsp;<b>" . $PathElt['ufile_name'] . "/</b>";
-
-    if ($PathElt != $Last) $V .= "</a>";
-    $FirstPath = false;
-  }
-
-  $V .= "</div>\n";  // for box
-  return($V);
-} // Dir2BrowseDiff()
 
 
   /***********************************************************
@@ -855,7 +503,7 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column)
     /* Select list for filters */
     $SelectFilter = "<select name='diff_filter' id='diff_filter' onchange='ChangeFilter(this,$uploadtree_pk1, $uploadtree_pk2)'>";
     $Selected = ($filter == 'none') ? "selected" : "";
-    $SelectFilter .= "<option $Selected value='none'>Remove nothing";
+    $SelectFilter .= "<option $Selected value='none'>0. Remove nothing";
     $Selected = ($filter == 'samehash') ? "selected" : "";
     $SelectFilter .= "<option $Selected value='samehash'>1. Remove duplicate (same hash) files";
     $Selected = ($filter == 'samelic') ? "selected" : "";
@@ -867,7 +515,13 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column)
     $SelectFilter .= "</select>";
 
 
-    $OutBuf .= "<a name='flist' href='#histo' style='float:right'> Jump to histogram </a><br>";
+    $StyleRt = "style='float:right'";
+    $OutBuf .= "<a name='flist' href='#histo' $StyleRt > Jump to histogram </a><br>";
+    $text = _("Switch to bucket view");
+    $BucketURL = Traceback_uri();
+    $BucketURL .= "?mod=bucketsdiff&item1=$uploadtree_pk1&item2=$uploadtree_pk2";
+    $OutBuf .= "<a href='$BucketURL' $StyleRt > Switch to bucket differences</a> ";
+
 
 //    $TableStyle = "style='border-style:collapse;border:1px solid black'";
     $TableStyle = "";
@@ -881,15 +535,14 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column)
     $Path1 = Dir2Path($uploadtree_pk1);
     $Path2 = Dir2Path($uploadtree_pk2);
     $OutBuf .= "<td colspan=2>";
-    $OutBuf .= $this->Dir2BrowseDiff($Path1, $Path2, $filter, 1);
+    $OutBuf .= Dir2BrowseDiff($Path1, $Path2, $filter, 1, $this);
     $OutBuf .= "</td>";
     $OutBuf .= "<td $this->ColumnSeparatorStyleL colspan=3>";
-    $OutBuf .= $this->Dir2BrowseDiff($Path1, $Path2, $filter, 2);
+    $OutBuf .= Dir2BrowseDiff($Path1, $Path2, $filter, 2, $this);
     $OutBuf .= "</td></tr>";
 
     /* File comparison table */
     $OutBuf .= $this->ItemComparisonRows($Master, $TreeInfo1['agent_pk'], $TreeInfo2['agent_pk']);
- 
 
     /*  Separator row */
     $ColumnSeparatorStyleTop = "style='border:solid 0 #006600; border-top-width:2px; border-bottom-width:2px;'";
@@ -915,7 +568,7 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column)
 
 
   /***********************************************************
-   Output(): This function returns the scheduler status.
+   Output(): 
    Parms:
           filter: optional filter to apply
           item1:  uploadtree_pk of the column 1 tree
@@ -936,8 +589,8 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column)
     $in_uploadtree_pk1 = GetParm("item1",PARM_INTEGER);
     $in_uploadtree_pk2 = GetParm("item2",PARM_INTEGER);
 
-    if (empty($in_uploadtree_pk1) || empty($in_uploadtree_pk2))
-      Fatal("FATAL: Bad input parameters.  Both item1 and item2 must be specified.", __FILE__, __LINE__);
+    if (empty($in_uploadtree_pk1) && empty($in_uploadtree_pk2))
+      Fatal("Bad input parameters.  Both item1 and item2 must be specified.", __FILE__, __LINE__);
     $in_newuploadtree_pk1 = GetParm("newitem1",PARM_INTEGER);
     $in_newuploadtree_pk2 = GetParm("newitem2",PARM_INTEGER);
     $uploadtree_pk1  = $in_uploadtree_pk1;
@@ -946,14 +599,14 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column)
     if (!empty($in_newuploadtree_pk1))
     {
       if ($FreezeCol != 2)
-        $uploadtree_pk2  = $this->NextUploadtree_pk($in_newuploadtree_pk1, $in_uploadtree_pk2);
+        $uploadtree_pk2  = NextUploadtree_pk($in_newuploadtree_pk1, $in_uploadtree_pk2);
       $uploadtree_pk1  = $in_newuploadtree_pk1;
     }
     else
     if (!empty($in_newuploadtree_pk2))
     {
       if ($FreezeCol != 1)
-        $uploadtree_pk1 = $this->NextUploadtree_pk($in_newuploadtree_pk2, $in_uploadtree_pk1);
+        $uploadtree_pk1 = NextUploadtree_pk($in_newuploadtree_pk2, $in_uploadtree_pk1);
       $uploadtree_pk2 = $in_newuploadtree_pk2;
     }
 
@@ -1009,19 +662,18 @@ JSOUT;
       $Children2 = GetNonArtifactChildren($uploadtree_pk2);
 
       /* Add fuzzyname to children */
-      $this->FuzzyName($Children1);  // add fuzzyname to children
-      $this->FuzzyName($Children2);  // add fuzzyname to children
+      FuzzyName($Children1);  // add fuzzyname to children
+      FuzzyName($Children2);  // add fuzzyname to children
 
       /* add element licstr to children */
       $this->AddLicStr($TreeInfo1, $Children1);
       $this->AddLicStr($TreeInfo2, $Children2);
-      
-      /* add linkurl to children */
-      $this->FileList($uploadtree_pk1, $TreeInfo1, $in_uploadtree_pk2, 1, $Children1, $filter);
-      $this->FileList($uploadtree_pk2, $TreeInfo2, $in_uploadtree_pk1, 2, $Children2, $filter);
 
       /* Master array of children, aligned.   */
-      $Master = $this->MakeMaster($Children1, $Children2);
+      $Master = MakeMaster($Children1, $Children2);
+      
+      /* add linkurl to children */
+      FileList($Master, $TreeInfo1['agent_pk'], $TreeInfo2['agent_pk'], $filter, $this);
 
       /* Apply filter */
       $this->FilterChildren($filter, $Master);
