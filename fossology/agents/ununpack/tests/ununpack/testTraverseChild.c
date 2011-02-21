@@ -176,16 +176,16 @@ void testTraverseChild4PartitionFile()
   deleteTmpFiles("./test-result/");
   existed = file_dir_existed("./test-result/");
 
-  Filename = "./test-data/testdata4unpack/initrd.img-2.6.26-2-686";
-  MkDirs("./test-result/initrd.img-2.6.26-2-686.dir/");
-  strcpy(Queue[0].ChildRecurse, "./test-result/initrd.img-2.6.26-2-686.dir/");
+  Filename = "./test-data/testdata4unpack/vmlinuz-2.6.26-2-686";
+  MkDirs("./test-result/vmlinuz-2.6.26-2-686.dir/");
+  strcpy(Queue[0].ChildRecurse, "./test-result/vmlinuz-2.6.26-2-686.dir/");
   lstat64(Filename, &Stat);
   ContainerInfo CITemp;
   memset(&CITemp,0,sizeof(ContainerInfo));
   strcpy(CITemp.Source, Filename);
   strcpy(CITemp.Partdir, NewDir);
-  strcpy(CITemp.Partname, "initrd.img-2.6.26-2-686");
-  strcpy(CITemp.PartnameNew, "initrd.img-2.6.26-2-686.dir");
+  strcpy(CITemp.Partname, "vmlinuz-2.6.26-2-686");
+  strcpy(CITemp.PartnameNew, "vmlinuz-2.6.26-2-686");
   ParentInfo PITemp = {26, 1287725739, 1287725739, 0};
   lstat64(Filename, &Stat);
   CITemp.Stat = Stat;
@@ -198,7 +198,7 @@ void testTraverseChild4PartitionFile()
   } else
   {
     ParentWait();
-    existed = file_dir_existed("./test-result/initrd.img-2.6.26-2-686.dir/Partition_0000");
+    existed = file_dir_existed("./test-result/vmlinuz-2.6.26-2-686.dir/Partition_0000");
     CU_ASSERT_EQUAL(existed, 1); // existing
   }
 }

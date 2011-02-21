@@ -342,7 +342,7 @@ void testFindCmd4NtfsFile()
  */
 void testFindCmd4PartitionFile()
 {
-  char *Filename = "./test-data/testdata4unpack/initrd.img-2.6.26-2-686";
+  char *Filename = "./test-data/testdata4unpack/vmlinuz-2.6.26-2-686";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 26);
