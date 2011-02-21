@@ -378,11 +378,11 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
     $command = "$this->UNUNPACK_PATH/ununpack -qCR $TEST_DATA_PATH/".
-                "initrd.img-2.6.26-2-686 -d $TEST_RESULT_PATH";
+                "vmlinuz-2.6.26-2-686 -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm
        now, can not confirm this assertion is valid, need to confirm */ 
-    $this->assertFileExists("$TEST_RESULT_PATH/initrd.img-2.6.26-2-686.dir/Partition_0000");
+    $this->assertFileExists("$TEST_RESULT_PATH/vmlinuz-2.6.26-2-686.dir/Partition_0000");
   }
  
   /* command is ununpack -qCR xxxxx -d xxxxx, end */
