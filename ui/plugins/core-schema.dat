@@ -565,6 +565,32 @@
   $Schema["TABLE"]["copyright"]["copy_endbyte"]["UPDATE"] = "";
 
 
+  $Schema["TABLE"]["file_picker"]["file_picker_pk"]["DESC"] = "";
+  $Schema["TABLE"]["file_picker"]["file_picker_pk"]["ADD"] = "ALTER TABLE \"file_picker\" ADD COLUMN \"file_picker_pk\" int4;";
+  $Schema["TABLE"]["file_picker"]["file_picker_pk"]["ALTER"] = "ALTER TABLE \"file_picker\" ALTER COLUMN \"file_picker_pk\" SET NOT NULL, ALTER COLUMN \"file_picker_pk\" SET DEFAULT nextval('file_picker_file_picker_pk_seq'::regclass);";
+  $Schema["TABLE"]["file_picker"]["file_picker_pk"]["UPDATE"] = "UPDATE file_picker SET file_picker_pk=nextval('file_picker_file_picker_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["file_picker"]["user_fk"]["DESC"] = "";
+  $Schema["TABLE"]["file_picker"]["user_fk"]["ADD"] = "ALTER TABLE \"file_picker\" ADD COLUMN \"user_fk\" int4;";
+  $Schema["TABLE"]["file_picker"]["user_fk"]["ALTER"] = "ALTER TABLE \"file_picker\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["file_picker"]["user_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["file_picker"]["uploadtree_fk1"]["DESC"] = "";
+  $Schema["TABLE"]["file_picker"]["uploadtree_fk1"]["ADD"] = "ALTER TABLE \"file_picker\" ADD COLUMN \"uploadtree_fk1\" int4;";
+  $Schema["TABLE"]["file_picker"]["uploadtree_fk1"]["ALTER"] = "ALTER TABLE \"file_picker\" ALTER COLUMN \"uploadtree_fk1\" SET NOT NULL;";
+  $Schema["TABLE"]["file_picker"]["uploadtree_fk1"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["file_picker"]["uploadtree_fk2"]["DESC"] = "";
+  $Schema["TABLE"]["file_picker"]["uploadtree_fk2"]["ADD"] = "ALTER TABLE \"file_picker\" ADD COLUMN \"uploadtree_fk2\" int4;";
+  $Schema["TABLE"]["file_picker"]["uploadtree_fk2"]["ALTER"] = "ALTER TABLE \"file_picker\" ALTER COLUMN \"uploadtree_fk2\" SET NOT NULL;";
+  $Schema["TABLE"]["file_picker"]["uploadtree_fk2"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["file_picker"]["last_access_date"]["DESC"] = "";
+  $Schema["TABLE"]["file_picker"]["last_access_date"]["ADD"] = "ALTER TABLE \"file_picker\" ADD COLUMN \"last_access_date\" date;";
+  $Schema["TABLE"]["file_picker"]["last_access_date"]["ALTER"] = "ALTER TABLE \"file_picker\" ALTER COLUMN \"last_access_date\" SET NOT NULL;";
+  $Schema["TABLE"]["file_picker"]["last_access_date"]["UPDATE"] = "";
+
+
   $Schema["TABLE"]["folder"]["folder_pk"]["DESC"] = "";
   $Schema["TABLE"]["folder"]["folder_pk"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"folder_pk\" int4;";
   $Schema["TABLE"]["folder"]["folder_pk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_pk\" SET NOT NULL, ALTER COLUMN \"folder_pk\" SET DEFAULT nextval('folder_folder_pk_seq'::regclass);";
@@ -1515,32 +1541,6 @@
   $Schema["TABLE"]["scheduler_status"]["agent_param"]["UPDATE"] = "";
 
 
-  $Schema["TABLE"]["sqlagentproc"]["sap_pk"]["DESC"] = "";
-  $Schema["TABLE"]["sqlagentproc"]["sap_pk"]["ADD"] = "ALTER TABLE \"sqlagentproc\" ADD COLUMN \"sap_pk\" int4;";
-  $Schema["TABLE"]["sqlagentproc"]["sap_pk"]["ALTER"] = "ALTER TABLE \"sqlagentproc\" ALTER COLUMN \"sap_pk\" SET NOT NULL, ALTER COLUMN \"sap_pk\" SET DEFAULT nextval('sqlagentproc_sap_pk_seq'::regclass);";
-  $Schema["TABLE"]["sqlagentproc"]["sap_pk"]["UPDATE"] = "UPDATE sqlagentproc SET sap_pk=nextval('sqlagentproc_sap_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["sqlagentproc"]["sap_name"]["DESC"] = "COMMENT ON COLUMN \"sqlagentproc\".\"sap_name\" IS 'procedure name';";
-  $Schema["TABLE"]["sqlagentproc"]["sap_name"]["ADD"] = "ALTER TABLE \"sqlagentproc\" ADD COLUMN \"sap_name\" text;";
-  $Schema["TABLE"]["sqlagentproc"]["sap_name"]["ALTER"] = "ALTER TABLE \"sqlagentproc\" ALTER COLUMN \"sap_name\" SET NOT NULL;";
-  $Schema["TABLE"]["sqlagentproc"]["sap_name"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["sqlagentproc"]["sap_proc"]["DESC"] = "COMMENT ON COLUMN \"sqlagentproc\".\"sap_proc\" IS 'sql stmts';";
-  $Schema["TABLE"]["sqlagentproc"]["sap_proc"]["ADD"] = "ALTER TABLE \"sqlagentproc\" ADD COLUMN \"sap_proc\" text;";
-  $Schema["TABLE"]["sqlagentproc"]["sap_proc"]["ALTER"] = "ALTER TABLE \"sqlagentproc\" ALTER COLUMN \"sap_proc\" SET NOT NULL;";
-  $Schema["TABLE"]["sqlagentproc"]["sap_proc"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["sqlagentproc"]["agent_fk"]["DESC"] = "COMMENT ON COLUMN \"sqlagentproc\".\"agent_fk\" IS 'agent foreign key';";
-  $Schema["TABLE"]["sqlagentproc"]["agent_fk"]["ADD"] = "ALTER TABLE \"sqlagentproc\" ADD COLUMN \"agent_fk\" int4;";
-  $Schema["TABLE"]["sqlagentproc"]["agent_fk"]["ALTER"] = "ALTER TABLE \"sqlagentproc\" ALTER COLUMN \"agent_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["sqlagentproc"]["agent_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["sqlagentproc"]["sap_version"]["DESC"] = "COMMENT ON COLUMN \"sqlagentproc\".\"sap_version\" IS 'procedure version';";
-  $Schema["TABLE"]["sqlagentproc"]["sap_version"]["ADD"] = "ALTER TABLE \"sqlagentproc\" ADD COLUMN \"sap_version\" int4;";
-  $Schema["TABLE"]["sqlagentproc"]["sap_version"]["ALTER"] = "ALTER TABLE \"sqlagentproc\" ALTER COLUMN \"sap_version\" SET NOT NULL, ALTER COLUMN \"sap_version\" SET DEFAULT 1;";
-  $Schema["TABLE"]["sqlagentproc"]["sap_version"]["UPDATE"] = "UPDATE sqlagentproc SET sap_version=1";
-
-
   $Schema["TABLE"]["tag"]["tag_pk"]["DESC"] = "";
   $Schema["TABLE"]["tag"]["tag_pk"]["ADD"] = "ALTER TABLE \"tag\" ADD COLUMN \"tag_pk\" int4;";
   $Schema["TABLE"]["tag"]["tag_pk"]["ALTER"] = "ALTER TABLE \"tag\" ALTER COLUMN \"tag_pk\" SET NOT NULL, ALTER COLUMN \"tag_pk\" SET DEFAULT nextval('tags_tag_pk_seq'::regclass);";
@@ -1618,6 +1618,32 @@
   $Schema["TABLE"]["tag_ns_group"]["tag_ns_perm"]["ADD"] = "ALTER TABLE \"tag_ns_group\" ADD COLUMN \"tag_ns_perm\" int4;";
   $Schema["TABLE"]["tag_ns_group"]["tag_ns_perm"]["ALTER"] = "ALTER TABLE \"tag_ns_group\" ALTER COLUMN \"tag_ns_perm\" SET NOT NULL;";
   $Schema["TABLE"]["tag_ns_group"]["tag_ns_perm"]["UPDATE"] = "";
+
+
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_pk"]["DESC"] = "";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_pk"]["ADD"] = "ALTER TABLE \"tag_uploadtree\" ADD COLUMN \"tag_uploadtree_pk\" int4;";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_pk"]["ALTER"] = "ALTER TABLE \"tag_uploadtree\" ALTER COLUMN \"tag_uploadtree_pk\" SET NOT NULL, ALTER COLUMN \"tag_uploadtree_pk\" SET DEFAULT nextval('tags_uploadtree_tag_uploadtree_pk_seq'::regclass);";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_pk"]["UPDATE"] = "UPDATE tag_uploadtree SET tag_uploadtree_pk=nextval('tags_uploadtree_tag_uploadtree_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["tag_uploadtree"]["tag_fk"]["DESC"] = "";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_fk"]["ADD"] = "ALTER TABLE \"tag_uploadtree\" ADD COLUMN \"tag_fk\" int4;";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_fk"]["ALTER"] = "ALTER TABLE \"tag_uploadtree\" ALTER COLUMN \"tag_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["tag_uploadtree"]["uploadtree_fk"]["DESC"] = "";
+  $Schema["TABLE"]["tag_uploadtree"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"tag_uploadtree\" ADD COLUMN \"uploadtree_fk\" int4;";
+  $Schema["TABLE"]["tag_uploadtree"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"tag_uploadtree\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["tag_uploadtree"]["uploadtree_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_date"]["DESC"] = "";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_date"]["ADD"] = "ALTER TABLE \"tag_uploadtree\" ADD COLUMN \"tag_uploadtree_date\" timestamptz;";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_date"]["ALTER"] = "ALTER TABLE \"tag_uploadtree\" ALTER COLUMN \"tag_uploadtree_date\" SET NOT NULL;";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_date"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_text"]["DESC"] = "";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_text"]["ADD"] = "ALTER TABLE \"tag_uploadtree\" ADD COLUMN \"tag_uploadtree_text\" text;";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_text"]["ALTER"] = "ALTER TABLE \"tag_uploadtree\" ALTER COLUMN \"tag_uploadtree_text\" DROP NOT NULL;";
+  $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_text"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["upload"]["upload_pk"]["DESC"] = "";
@@ -1811,8 +1837,10 @@
   $Schema["SEQUENCE"]["tags_file_tag_file_pk_seq"] = "CREATE SEQUENCE \"tags_file_tag_file_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["group_group_pk_seq"] = "CREATE SEQUENCE \"group_group_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["group_user_member_group_user_member_pk_seq"] = "CREATE SEQUENCE \"group_user_member_group_user_member_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["tags_uploadtree_tag_uploadtree_pk_seq"] = "CREATE SEQUENCE \"tags_uploadtree_tag_uploadtree_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["tags_ns_tag_ns_pk_seq"] = "CREATE SEQUENCE \"tags_ns_tag_ns_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["tags_tag_pk_seq"] = "CREATE SEQUENCE \"tags_tag_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["file_picker_file_picker_pk_seq"] = "CREATE SEQUENCE \"file_picker_file_picker_pk_seq\" START 1;";
 
   $Schema["CONSTRAINT"]["FileLicense_pkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"FileLicense_pkey\" PRIMARY KEY (\"fl_pk\");";
   $Schema["CONSTRAINT"]["agent_lic_meta_pkey"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"agent_lic_meta_pkey\" PRIMARY KEY (\"agent_lic_meta_pk\");";
@@ -1826,6 +1854,7 @@
   $Schema["CONSTRAINT"]["bucket_pkey"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucket_pkey\" PRIMARY KEY (\"bucket_pk\");";
   $Schema["CONSTRAINT"]["bucketpool_pkey"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_pkey\" PRIMARY KEY (\"bucketpool_pk\");";
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
+  $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
   $Schema["CONSTRAINT"]["foldercontents_pkey"] = "ALTER TABLE \"foldercontents\" ADD CONSTRAINT \"foldercontents_pkey\" PRIMARY KEY (\"foldercontents_pk\");";
   $Schema["CONSTRAINT"]["group_group_member_pkey"] = "ALTER TABLE \"group_group_member\" ADD CONSTRAINT \"group_group_member_pkey\" PRIMARY KEY (\"group_group_member_pk\");";
@@ -1856,11 +1885,11 @@
   $Schema["CONSTRAINT"]["report_cache_user_pkey"] = "ALTER TABLE \"report_cache_user\" ADD CONSTRAINT \"report_cache_user_pkey\" PRIMARY KEY (\"report_cache_user_pk\");";
   $Schema["CONSTRAINT"]["rf_pkpk"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_pkpk\" PRIMARY KEY (\"rf_pk\");";
   $Schema["CONSTRAINT"]["scheduler_status_pkey"] = "ALTER TABLE \"scheduler_status\" ADD CONSTRAINT \"scheduler_status_pkey\" PRIMARY KEY (\"unique_scheduler\",\"agent_number\");";
-  $Schema["CONSTRAINT"]["sqlagentproc_pkey"] = "ALTER TABLE \"sqlagentproc\" ADD CONSTRAINT \"sqlagentproc_pkey\" PRIMARY KEY (\"sap_pk\");";
   $Schema["CONSTRAINT"]["tag_ns_group_pkey"] = "ALTER TABLE \"tag_ns_group\" ADD CONSTRAINT \"tag_ns_group_pkey\" PRIMARY KEY (\"tag_ns_group_pk\");";
   $Schema["CONSTRAINT"]["tags_file_pkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_pkey\" PRIMARY KEY (\"tag_file_pk\");";
   $Schema["CONSTRAINT"]["tags_ns_pkey"] = "ALTER TABLE \"tag_ns\" ADD CONSTRAINT \"tags_ns_pkey\" PRIMARY KEY (\"tag_ns_pk\");";
   $Schema["CONSTRAINT"]["tags_pkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_pkey\" PRIMARY KEY (\"tag_pk\");";
+  $Schema["CONSTRAINT"]["tags_uploadtree_pkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_pkey\" PRIMARY KEY (\"tag_uploadtree_pk\");";
   $Schema["CONSTRAINT"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"ufile_rel_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
   $Schema["CONSTRAINT"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pkey_idx\" PRIMARY KEY (\"upload_pk\");";
   $Schema["CONSTRAINT"]["user_pkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_pkey\" PRIMARY KEY (\"user_pk\");";
@@ -1874,6 +1903,7 @@
   $Schema["CONSTRAINT"]["bucket_file_bucket_fk_key"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_bucket_fk_key\" UNIQUE (\"bucket_fk\",\"pfile_fk\",\"agent_fk\",\"nomosagent_fk\");";
   $Schema["CONSTRAINT"]["bucketpool_bucketpool_name_key1"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_bucketpool_name_key1\" UNIQUE (\"bucketpool_name\",\"version\");";
   $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"dirmodemask\" UNIQUE (\"mimetype_name\");";
+  $Schema["CONSTRAINT"]["file_picker_user_fk_key"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_user_fk_key\" UNIQUE (\"user_fk\",\"uploadtree_fk1\",\"uploadtree_fk2\");";
   $Schema["CONSTRAINT"]["group_group_name_key"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_group_name_key\" UNIQUE (\"group_name\");";
   $Schema["CONSTRAINT"]["license_file_rf_fk_key"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_rf_fk_key\" UNIQUE (\"rf_fk\",\"agent_fk\",\"pfile_fk\");";
   $Schema["CONSTRAINT"]["licgroup_licgroup_name_key"] = "ALTER TABLE \"licgroup\" ADD CONSTRAINT \"licgroup_licgroup_name_key\" UNIQUE (\"licgroup_name\");";
@@ -1937,6 +1967,8 @@
   $Schema["CONSTRAINT"]["tags_file_pfile_fk_fkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["tags_file_tag_fk_fkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_tag_fk_fkey\" FOREIGN KEY (\"tag_fk\") REFERENCES \"tag\" (\"tag_pk\");";
   $Schema["CONSTRAINT"]["tags_tag_ns_fk_fkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_tag_ns_fk_fkey\" FOREIGN KEY (\"tag_ns_fk\") REFERENCES \"tag_ns\" (\"tag_ns_pk\");";
+  $Schema["CONSTRAINT"]["tags_uploadtree_tag_fk_fkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_tag_fk_fkey\" FOREIGN KEY (\"tag_fk\") REFERENCES \"tag\" (\"tag_pk\");";
+  $Schema["CONSTRAINT"]["tags_uploadtree_uploadtree_fk_fkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_uploadtree_fk_fkey\" FOREIGN KEY (\"uploadtree_fk\") REFERENCES \"uploadtree\" (\"uploadtree_pk\");";
   $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\");";
   $Schema["CONSTRAINT"]["users_default_bucketpool_pk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_default_bucketpool_pk_fkey\" FOREIGN KEY (\"default_bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\");";
 
