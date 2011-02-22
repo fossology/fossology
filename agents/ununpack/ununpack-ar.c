@@ -24,7 +24,7 @@
 /***************************************************
  ExtractAR(): Given an AR file, extract the contents to the
  directory.
- Returns: 0 on success, 1 on failure.
+ Returns: 0 on success, non-zero on failure.
  NOTE: This spawns multiple processes.
  Uses the following external commands: ar
  NOTE: Things that are known to cause failures:
@@ -40,6 +40,10 @@ int	ExtractAR	(char *Source, char *Destination)
   int rc;
   char TempSource[FILENAME_MAX];
   char CWD[FILENAME_MAX];
+
+  /* judge if the parameters are empty */
+  if ((NULL == Source) || (!strcmp(Source, "")) || (NULL == Destination) || (!strcmp(Destination, "")))
+    return 1;
 
   if (getcwd(CWD,sizeof(CWD)) == NULL)
         {

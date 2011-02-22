@@ -66,7 +66,7 @@ mode_t	GetISOMode	(char *Line)
  ISO images have magic type "application/x-iso".
  This can unpack any known ISO9660 format including:
  ISO9660, Rock Ridge, Joliet, and El Torrito.
- Returns: 0 on success, 1 on failure.
+ Returns: 0 on success, non-zero on failure.
  NOTE: This spawns multiple processes.
  Uses the following external commands: isoinfo grep
  ***************************************************/
@@ -79,6 +79,10 @@ int	ExtractISO	(char *Source, char *Destination)
   FILE *Fin;
   int rc;
   char TempSource[FILENAME_MAX], TempDestination[FILENAME_MAX];
+
+  /* judge if the parameters are empty */
+  if ((NULL == Source) || (!strcmp(Source, "")) || (NULL == Destination) || (!strcmp(Destination, "")))
+    return 1;
 
   if (!Quiet) fprintf(stderr,"Extracting ISO: %s\n",Source);
 
