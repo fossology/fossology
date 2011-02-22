@@ -258,7 +258,7 @@ FoundPerm:
  a directory, extract all files!
  This can handle any filesystem supported by fls/icat.
  Special: FAT is case-insensitive, so everything is converted to lowercase.
- Returns: 0 on success, 1 on failure.
+ Returns: 0 on success, non-zero on failure. 
  NOTE: This spawns multiple processes.
  Uses the following external commands: fls icat
  icat and fls are from the package "sleuthkit".
@@ -277,6 +277,10 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
   char TempSource[FILENAME_MAX];
   char TempInode[FILENAME_MAX], TempDest[FILENAME_MAX], TempS[FILENAME_MAX];
   permlist *Perms;
+
+  /* judge if the parameters are empty */ 
+  if ((NULL == FStype) || (!strcmp(FStype, "")) || (NULL == Source) || (!strcmp(Source, "")) || (NULL == Destination) || (!strcmp(Destination, "")))
+    return 1;
 
   if (!Quiet) fprintf(stderr,"Extracting %s: %s\n",FStype,Source);
 
