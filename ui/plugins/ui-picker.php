@@ -45,6 +45,9 @@ class ui_picker extends FO_Plugin
     global $DB;
     if (empty($DB)) { return(1); } /* No DB */
 
+    /* create it if it doesn't exist */
+    $this->Create_file_picker();
+
     return(0);
   } // Install()
 
@@ -61,9 +64,7 @@ class ui_picker extends FO_Plugin
 
 
   /***********************************************************
-   Initialze(): This is called before the plugin is used.
-   It should assume that Install() was already run one time
-   (possibly years ago and not during this object's creation).
+   Initialize(): This is called before the plugin is used.
    Returns true on success, false on failure.
    A failed initialize is not used by the system.
    NOTE: This function must NOT assume that other plugins are installed.
@@ -79,9 +80,40 @@ class ui_picker extends FO_Plugin
       $this->State=PLUGIN_STATE_VALID;
       array_push($Plugins,$this);
     }
-
     return($this->State == PLUGIN_STATE_VALID);
   } // Initialize()
+
+
+  /***********************************************************
+   Create_file_picker()
+     Create file_picker table.
+   ***********************************************************/
+  function Create_file_picker()
+  {
+     global $PG_CONN;
+
+     /* If table exists, then we are done */
+     $sql = "SELECT typlen  FROM pg_type where typname='file_picker' limit 1";
+     $result = pg_query($PG_CONN, $sql);
+     DBCheckResult($result, $sql, __FILE__, __LINE__);
+     if (pg_num_rows($result) > 0) return 0;
+     pg_free_result($result);
+
+     /* Create table */
+     $sql =
+"CREATE TABLE file_picker (
+    file_picker_pk integer NOT NULL PRIMARY KEY,
+    user_fk integer NOT NULL,
+    uploadtree_fk1 integer NOT NULL,
+    uploadtree_fk2 integer NOT NULL,
+    last_access_date date NOT NULL
+);
+ALTER TABLE ONLY file_picker
+    ADD CONSTRAINT file_picker_user_fk_key UNIQUE (user_fk, uploadtree_fk1, uploadtree_fk2);";
+
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+  }
 
 
   /***********************************************************
@@ -564,6 +596,12 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
   {
     global $PG_CONN;
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
+
+    /* create table if it doesn't exist (not assuming Install() was run. 
+     * eg. source update
+     */
+    $this->Create_file_picker();
+
 
     $RtnMod = GetParm("rtnmod",PARM_TEXT);
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
