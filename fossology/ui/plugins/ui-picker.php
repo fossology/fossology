@@ -102,7 +102,7 @@ class ui_picker extends FO_Plugin
      /* Create table */
      $sql =
 "CREATE TABLE file_picker (
-    file_picker_pk integer NOT NULL PRIMARY KEY,
+    file_picker_pk serial NOT NULL PRIMARY KEY,
     user_fk integer NOT NULL,
     uploadtree_fk1 integer NOT NULL,
     uploadtree_fk2 integer NOT NULL,
