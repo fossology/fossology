@@ -250,6 +250,13 @@ $text = _("Uploads");
 $text = _("Upload Name and Description");
 $text1 = _("Upload Date");
     $V.= "<th>$text</th><th>$text1</th></tr>\n";
+    
+    /* Browse-Pfile menu */
+    $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
+
+    /* Browse-Pfile menu without the compare menu item */
+    $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
+    
     foreach($Results as $Row) {
       if (empty($Row['upload_pk'])) {
         continue;
@@ -296,10 +303,12 @@ $text = _("Added from filesystem: ");
         $V.= "<br>$text" . htmlentities($uploadOrigin);
       }
       $V.= "<br>";
-      $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
       $Upload = $Row['upload_pk'];
       $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
-      $V.= menu_to_1list($MenuPfile, $Parm, " ", " ");
+      if (Iscontainer($Row['ufile_mode']))
+        $V.= menu_to_1list($MenuPfile, $Parm, " ", " ");
+      else
+        $V.= menu_to_1list($MenuPfileNoCompare, $Parm, " ", " ");
       $V.= "<br>" . $Desc;
       //          $V .= "<br>Contains $ItemCount ";
       //	  if ($ItemCount != "1") { $V .= "items."; }
