@@ -430,4 +430,26 @@ menu_print($MenuList,0);
 print "Max depth: $MenuMaxDepth\n";
 }
 **********/
+
+
+/***********************************************
+  menu_remove()
+  Remove a menu object (based on an object name)
+  from a menu list.
+
+  Returns a new menu list without $RmName
+  For example,
+    $mymenu = menu_find("Browse-Pfile", $MenuDepth);
+    $myNewMenu = menu_remove($mymenu, "Compare");
+***********************************************/
+function menu_remove($Menu, $RmName)
+{
+  $NewArray = array();
+  foreach ($Menu as $MenuObj)
+  {
+    if ($MenuObj->Name != $RmName) $NewArray[] = $MenuObj;
+  }
+  return $NewArray;
+}
+
 ?>
