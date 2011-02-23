@@ -546,11 +546,17 @@ return;
 
     $Selected = ($filter == 'samebucketlist') ? "selected" : "";
     $SelectFilter .= "<option $Selected value='samebucketlist'>Remove unchanged bucket lists";
-
     $SelectFilter .= "</select>";
 
+    $StyleRt = "style='float:right'";
+    $OutBuf .= "<a name='flist' href='#histo' $StyleRt > Jump to histogram </a><br>";
+    
+    /* Switch to license diff view */
+    $text = _("Switch to license view");
+    $switchURL = Traceback_uri();
+    $switchURL .= "?mod=nomosdiff&item1=$uploadtree_pk1&item2=$uploadtree_pk2";
+    $OutBuf .= "<a href='$switchURL' $StyleRt > $text </a> ";
 
-    $OutBuf .= "<a name='flist' href='#histo' style='float:right'> Jump to histogram </a><br>";
 
 //    $TableStyle = "style='border-style:collapse;border:1px solid black'";
     $TableStyle = "";

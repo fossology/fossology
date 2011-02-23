@@ -517,10 +517,12 @@ class ui_nomos_diff extends FO_Plugin
 
     $StyleRt = "style='float:right'";
     $OutBuf .= "<a name='flist' href='#histo' $StyleRt > Jump to histogram </a><br>";
+
+    /* Switch to bucket diff view */
     $text = _("Switch to bucket view");
     $BucketURL = Traceback_uri();
     $BucketURL .= "?mod=bucketsdiff&item1=$uploadtree_pk1&item2=$uploadtree_pk2";
-    $OutBuf .= "<a href='$BucketURL' $StyleRt > Switch to bucket differences</a> ";
+    $OutBuf .= "<a href='$BucketURL' $StyleRt > $text </a> ";
 
 
 //    $TableStyle = "style='border-style:collapse;border:1px solid black'";
