@@ -233,7 +233,7 @@ class ui_nomos_diff extends FO_Plugin
       $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk);
     $ColStr .= "</td>";
     return $ColStr;
-  }
+  }  /* ChildElt() */
 
 
   /***********************************************************
@@ -646,16 +646,17 @@ JSOUT;
 
     $TreeInfo1 = $this->GetTreeInfo($uploadtree_pk1);
     $TreeInfo2 = $this->GetTreeInfo($uploadtree_pk2);
-    $ErrText = _("No license data for tree %d.  Use Jobs > Agents to schedule a license scan.");
+    $ErrText = _("No license data for");
+    $ErrText2 = _("Use Jobs > Agents to schedule a license scan.");
     $ErrMsg= '';
     if ($TreeInfo1['agent_pk'] == 0)
     {
-      $ErrMsg = sprintf($ErrText, 1);
+      $ErrMsg = "$ErrText $TreeInfo1[ufile_name].<br>$ErrText2<p>";
     }
     else
     if ($TreeInfo2['agent_pk'] == 0)
     {
-      $ErrMsg = sprintf($ErrText, 2);
+      $ErrMsg = "$ErrText $TreeInfo2[ufile_name].<br>$ErrText2<p>";
     }
     else
     {
@@ -675,7 +676,8 @@ JSOUT;
       $Master = MakeMaster($Children1, $Children2);
       
       /* add linkurl to children */
-      FileList($Master, $TreeInfo1['agent_pk'], $TreeInfo2['agent_pk'], $filter, $this);
+      FileList($Master, $TreeInfo1['agent_pk'], $TreeInfo2['agent_pk'], $filter, $this,
+               $uploadtree_pk1, $uploadtree_pk2);
 
       /* Apply filter */
       $this->FilterChildren($filter, $Master);

@@ -710,7 +710,7 @@ JSOUT;
       $Master = MakeMaster($Children1, $Children2);
       
       /* add linkurl to children */
-      FileList($Master, $TreeInfo1['agent_pk'], $TreeInfo2['agent_pk'], $filter, $this);
+      FileList($Master, $TreeInfo1['agent_pk'], $TreeInfo2['agent_pk'], $filter, $this, $uploadtree_pk1, $uploadtree_pk2);
 
       /* Apply filter */
       $this->FilterChildren($filter, $Master, $BucketDefArray);
