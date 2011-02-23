@@ -212,11 +212,15 @@ function DirGetList($Upload,$UploadtreePk)
 function Dir2Path($UploadtreePk)
 {
   global $Plugins;
-  global $DB;
+  global $PG_CONN;
 
-  if (empty($DB) || (empty($UploadtreePk))) { return array(); }
+  if ((empty($UploadtreePk))) { return array(); }
 
-  $Rows = $DB->Action("SELECT * from uploadtree2path($UploadtreePk) ORDER BY lft ASC");
+  $sql = "SELECT * from uploadtree2path($UploadtreePk) ORDER BY lft ASC";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $Rows = pg_fetch_all($result);
+  pg_free_result($result);
 
   return($Rows);
 } // Dir2Path()
