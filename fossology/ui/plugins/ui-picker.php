@@ -169,34 +169,42 @@ ALTER TABLE ONLY file_picker
     }
     else
     {
-      foreach($Children as $Child)
+      if (empty($Children))
       {
-        if (empty($Child)) { continue; }
-        $OutBuf .= "<tr>";
+        $text = _("No children to compare");
+        $OutBuf .= "<tr><td colspan=2>$text</td></tr>";
+      }
+      else
+      {
+        foreach($Children as $Child)
+        {
+          if (empty($Child)) { continue; }
+          $OutBuf .= "<tr>";
 
-        $IsDir = Isdir($Child['ufile_mode']);
-        $IsContainer = Iscontainer($Child['ufile_mode']);
+          $IsDir = Isdir($Child['ufile_mode']);
+          $IsContainer = Iscontainer($Child['ufile_mode']);
 
-        $LinkUri = $Uri . "&bitem=$Child[uploadtree_pk]&item=$File1uploadtree_pk";
+          $LinkUri = $Uri . "&bitem=$Child[uploadtree_pk]&item=$File1uploadtree_pk";
 
-        $OutBuf .= "<td>";
-        $text = _("Select");
-        $Options = "id=filepick onclick='AppJump($Child[uploadtree_pk])')";
-        $OutBuf .= "<button type='button' $Options> $text </button>\n";
-        $OutBuf .= "</td>";
+          $OutBuf .= "<td>";
+          $text = _("Select");
+          $Options = "id=filepick onclick='AppJump($Child[uploadtree_pk])')";
+          $OutBuf .= "<button type='button' $Options> $text </button>\n";
+          $OutBuf .= "</td>";
   
-        $OutBuf .= "<td>";
-        if ($IsContainer)
-        {
-          $OutBuf .= "<a href='$LinkUri'> $Child[ufile_name]</a>"; 
+          $OutBuf .= "<td>";
+          if ($IsContainer)
+          {
+            $OutBuf .= "<a href='$LinkUri'> $Child[ufile_name]</a>"; 
+          }
+          else
+          {
+            $OutBuf .= $Child['ufile_name'];
+          }
+          if ($IsDir) { $OutBuf .= "/"; };
+          $OutBuf .= "</td>";
+          $OutBuf .= "</tr>";
         }
-        else
-        {
-          $OutBuf .= $Child['ufile_name'];
-        }
-        if ($IsDir) { $OutBuf .= "/"; };
-        $OutBuf .= "</td>";
-        $OutBuf .= "</tr>";
       }
     }
     $OutBuf .= "</table>";
