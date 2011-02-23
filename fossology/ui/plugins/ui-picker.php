@@ -361,7 +361,7 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     $ext = GetFileExt($FileName);
     $tail = ".$ext";
 
-    if (empty($NameRoot)) return "No suggestions found.";
+    if (empty($NameRoot)) return "";
 
     /* find non artifact containers with names similar to $FileName */
     $sql = "select uploadtree_pk from uploadtree
@@ -379,7 +379,7 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     pg_free_result($result);
 
     $rtncount = count($SuggestionsArray);
-    if ($rtncount == 0) return $SuggestionsArray;
+    if ($rtncount == 0) return "";
 
     /* Order the select list by the  beginning of the path */
     natsort($SuggestionsArray);

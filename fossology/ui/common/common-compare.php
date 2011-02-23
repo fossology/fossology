@@ -177,13 +177,9 @@ function FuzzyCmp($Master1, $Master2)
     /* Remaining Child2 recs */
     foreach ($Children2 as $Child)
     {
-      while($Child !== false)
-      {
-        $Master[$row][1] = '';
-        $Master[$row][2] = $Child;
-        $Child = next($Children2);
-        $row++;
-      }
+      $row++;
+      $Master[$row][1] = '';
+      $Master[$row][2] = $Child;
     }
 
     /* Sort master by child1 */
@@ -199,7 +195,7 @@ function FuzzyCmp($Master1, $Master2)
     FileList() adds the element linkurl to the $Master elements.
        linkurl - this is the entire formatted href inclusive <a to /a> 
    ***********************************************************/
-  function FileList(&$Master, $agent_pk1, $agent_pk2, $filter, $plugin)
+  function FileList(&$Master, $agent_pk1, $agent_pk2, $filter, $plugin, $uploadtree_pk1, $uploadtree_pk2)
   {
     global $PG_CONN;
     global $Plugins;
@@ -211,10 +207,10 @@ function FuzzyCmp($Master1, $Master2)
       foreach($Master as &$MasterRow)
       {
         if (!empty($MasterRow[1]))
-          $MasterRow[1]["linkurl"] = GetDiffLink($MasterRow, 1, $agent_pk1, $filter, $plugin, $ModLicView);
+          $MasterRow[1]["linkurl"] = GetDiffLink($MasterRow, 1, $agent_pk1, $filter, $plugin, $ModLicView, $uploadtree_pk1, $uploadtree_pk2);
 
         if (!empty($MasterRow[2]))
-          $MasterRow[2]["linkurl"] = GetDiffLink($MasterRow, 2, $agent_pk2, $filter, $plugin, $ModLicView);
+          $MasterRow[2]["linkurl"] = GetDiffLink($MasterRow, 2, $agent_pk2, $filter, $plugin, $ModLicView, $uploadtree_pk1, $uploadtree_pk2);
       }
     }
   } // FileList()
@@ -223,17 +219,28 @@ function FuzzyCmp($Master1, $Master2)
   /* GetDiffLink()
    * Return the link for one side of a diff element.
    */
-  function GetDiffLink($MasterRow, $side, $agent_pk, $filter, $plugin, $ModLicView)
+  function GetDiffLink($MasterRow, $side, $agent_pk, $filter, $plugin, $ModLicView, $uploadtree_pk1, $uploadtree_pk2)
   {
     /* calculate opposite side number */
-    $OppositeSide = ($side == 1) ? 2 : 1;
+    if ($side == 1)
+    {
+      $OppositeSide = 2;
+      $OppositeItem = $uploadtree_pk2;
+    }
+    else
+    {
+      $OppositeSide = 1;
+      $OppositeItem = $uploadtree_pk1;
+    }
+
     $OppositeChild = $MasterRow[$OppositeSide];
     $Child = $MasterRow[$side];
 
-    if (!empty($OppositeChild))
-      $OppositeParm = "&item{$OppositeSide}=$OppositeChild[uploadtree_pk]";
+    /* if the opposite column element is empty, then use the original uploadtree_pk */
+    if (empty($OppositeChild))
+      $OppositeParm = "&item{$OppositeSide}=$OppositeItem";
     else
-      $OppositeParm = '';
+      $OppositeParm = "&item{$OppositeSide}=$OppositeChild[uploadtree_pk]";
 
     $IsDir = Isdir($Child['ufile_mode']);
     $IsContainer = Iscontainer($Child['ufile_mode']);
@@ -253,7 +260,6 @@ function FuzzyCmp($Master1, $Master2)
     if (Iscontainer($Child['ufile_mode']))
     {
       $Container_uploadtree_pk = $Child['uploadtree_pk'];
-      //$LicUri = "?mod=$plugin->Name&item{$side}=$Child[uploadtree_pk]{$OppositeParm}&newitem{$side}=$Container_uploadtree_pk&col=$side";
       $LicUri = "?mod=$plugin->Name&item{$side}=$Child[uploadtree_pk]{$OppositeParm}&col=$side";
       if (!empty($filter)) $LicUri .= "&filter=$filter";
     }
@@ -404,6 +410,10 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin)
   if ((count($Path1) < 1) || (count($Path2) < 1)) return "No path specified";
 
   $V = "";
+  $Last1 = $Path1[count($Path1)-1];
+  $Last2 = $Path2[count($Path2)-1];
+  $item1 = $Last1['uploadtree_pk'];
+  $item2 = $Last2['uploadtree_pk'];
   $filter_clause = (empty($filter)) ? "" : "&filter=$filter";
   $Path = ($Column == 1) ? $Path1 : $Path2;
   $Last = $Path[count($Path)-1];
@@ -445,6 +455,7 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin)
     if ($PathElt != $Last)
     {
       $href = "$Uri2&item1=$PathElt1[uploadtree_pk]&item2=$PathElt2[uploadtree_pk]{$filter_clause}&col=$Column";
+//      $href = "$Uri2&item1=$item1&item2=$item2&newitem{$Column}=$PathElt[uploadtree_pk]{$filter_clause}&col=$Column";
       $V .= "<a href='$href'>";
     }
 
