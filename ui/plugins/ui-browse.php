@@ -110,7 +110,21 @@ class ui_browse extends FO_Plugin {
     $V = "";
     /* Use plugin "view" and "download" if they exist. */
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
+
+    /* there are three types of Browse-Pfile menus */
+    /* menu as defined by their plugins */
     $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
+    /* menu but without Compare */
+    $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
+    /* menu with only Tag and Compare */
+    $MenuTag = array();
+    foreach($MenuPfile as $key => $value) 
+    {
+      if (($value->Name == 'Tag') or ($value->Name == 'Compare'))
+      {
+            $MenuTag[] = $value;
+      }
+    }
 
     /* Get the (non artifact) children  */
     $Results = GetNonArtifactChildren($Item);
@@ -168,18 +182,14 @@ class ui_browse extends FO_Plugin {
         $V.= "</b>";
       }
       $V.= "</td>\n";
-      if (!Isdir($Row['ufile_mode'])) {
+
+      if (!Iscontainer($Row['ufile_mode']))
+        $V.= menu_to_1list($MenuPfileNoCompare, $Parm, "<td>", "</td>\n");
+      else if (!Isdir($Row['ufile_mode'])) 
         $V.= menu_to_1list($MenuPfile, $Parm, "<td>", "</td>\n");
-      }
-      /* For directories only [Tag] option should be shown */
-      else {
-        foreach($MenuPfile as $key => $value) {
-          if ($value->Name == 'Tag'){
-            $MenuTag = array($MenuPfile[$key]);
-            $V.= menu_to_1list($MenuTag, $Parm, "<td>", "</td>\n");
-	  }
-        }
-      }
+      else 
+        $V.= menu_to_1list($MenuTag, $Parm, "<td>", "</td>\n");
+
       $V.= "</td>";
     } /* foreach($Results as $Row) */
     $V.= "</table>\n";
