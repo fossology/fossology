@@ -665,7 +665,7 @@ $text = _("Last");
       else
       {
         $Meta = GetMimeType($Item);
-        list($Type,$Junk) = split("/",$Meta,2);
+        list($Type,$Junk) = explode("/",$Meta,2);
         if ($Type == 'text') 
         { $Format = 'flow'; }
         else switch($Meta)
