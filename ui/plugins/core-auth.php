@@ -170,6 +170,14 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
         $_SESSION['UserLevel'] = $R['user_perm'];
         $_SESSION['UserEmail'] = $R['user_email'];
         $_SESSION['UserEnote'] = $R['email_notify'];
+        if(empty($R['ui_preference']))
+        {
+          $_SESSION['UiPref'] = 'original';
+        }
+        else
+        {
+          $_SESSION['UiPref'] = $R['ui_preference'];
+        }
         $Level = @$_SESSION['UserLevel'];
         /* Check for instant logouts */
         if (empty($R['user_pass'])) {
@@ -189,6 +197,14 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
             $_SESSION['UserLevel'] = $R['user_perm'];
             $_SESSION['UserEmail'] = $R['user_email'];
             $_SESSION['UserEnote'] = $R['email_notify'];
+            if(empty($R['ui_preference']))
+            {
+              $_SESSION['UiPref'] = 'original';
+            }
+            else
+            {
+              $_SESSION['UiPref'] = $R['ui_preference'];
+            }
           }
         }
       }
@@ -205,22 +221,19 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
         $_SESSION['UserLevel'] = $R['user_perm'];
         $_SESSION['UserEmail'] = $R['user_email'];
         $_SESSION['UserEnote'] = $R['email_notify'];
+        if(empty($R['ui_preference']))
+        {
+          $_SESSION['UiPref'] = 'original';
+        }
+        else
+        {
+          $_SESSION['UiPref'] = $R['ui_preference'];
+        }
       }
     }
 
     /* Disable all plugins with >= $Level access */
-    $LoginFlag = empty($_SESSION['User']);
-    $Max = count($Plugins);
-    for ($i = 0;$i < $Max;$i++) {
-      $P = & $Plugins[$i];
-      if ($P->State == PLUGIN_STATE_INVALID) {
-        continue;
-      }
-      if (($P->DBaccess > $Level) || (empty($_SESSION['User']) && $P->LoginFlag)) {
-        $P->Destroy();
-        $P->State = PLUGIN_STATE_INVALID;
-      }
-    }
+    plugin_disable($Level);
     $this->State = PLUGIN_STATE_READY;
   } // PostInitialize()
 
@@ -264,6 +277,14 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
     $_SESSION['UserId'] = $R['user_pk'];
     $_SESSION['UserEmail'] = $R['user_email'];
     $_SESSION['UserEnote'] = $R['email_notify'];
+    if(empty($R['ui_preference']))
+    {
+      $_SESSION['UiPref'] = 'simple';
+    }
+    else
+    {
+      $_SESSION['UiPref'] = $R['ui_preference'];
+    }
     $_SESSION['Folder'] = $R['root_folder_fk'];
     $_SESSION['time_check'] = time() + (480 * 60);
     /* No specified permission means ALL permission */
@@ -362,7 +383,7 @@ $text = _("Password:");
             $V.= "</table>";
             $V.= "<P/>";
             $V.= "<script type=\"text/javascript\">document.getElementById(\"unamein\").focus();</script>";
-/* Commenting out the Validate IP option since it's probably overkill for this app, 
+/* Commenting out the Validate IP option since it's probably overkill for this app,
    and it confuses people.
 $text = _("Validate IP.\n");
             $V.= "<input type='checkbox' name='checkip' value='1'>$text";
