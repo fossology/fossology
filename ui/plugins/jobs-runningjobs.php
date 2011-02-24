@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-define("TITLE_jobs_runningjobs", _("Show Agent Status"));
+define("TITLE_jobs_runningjobs", _("Show Scheduler Status"));
 
 class jobs_runningjobs extends FO_Plugin
   {
@@ -33,7 +33,7 @@ class jobs_runningjobs extends FO_Plugin
   var $Version    = "1.0";
   var $MenuList   = "Admin::Scheduler::Status";
   var $Dependency = array("db");
-  var $DBaccess   = PLUGIN_DB_DOWNLOAD;
+  var $DBaccess   = PLUGIN_DB_DELETE;
 
   /***********************************************************
    Output(): This function returns the scheduler status.
@@ -71,13 +71,13 @@ class jobs_runningjobs extends FO_Plugin
 	/** Do the SQL **/
 	global $DB;
 	$Results = $DB->Action("SELECT * FROM scheduler_status WHERE record_update > now()-interval '600' ORDER BY $OrderBy $OrderDir;");
-	if (!is_array($Results) || count($Results) == 0) 
-    { 
+	if (!is_array($Results) || count($Results) == 0)
+    {
 $text = _("The FOSSology job scheduler does not appear to be running.");
       echo "<h3>$text</h3>";
       echo _("If this is unexpected, look in the log file (typically /var/log/fossology/fossology.log) for errors. ");
       echo _(" Otherwise, you may want to restart the scheduler (typically sudo /etc/init.d/fossology start)");
-      return; 
+      return;
     }
 
 	/* Put the results in a table */

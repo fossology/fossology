@@ -53,11 +53,10 @@ define("TITLE_myJobs", _("My Jobs Status"));
 class myJobs extends FO_Plugin {
 	public $Name       = "myjobs";
 	public $Title      = TITLE_myJobs;
-	public $MenuList   = "Jobs::MyJobs";
-	public $MenuOrder  = 0;    // Don't appear in a menu (internal plugin) BUG!
-	public $MenuTarget = 0;
+	public $MenuList   = "Jobs::My Jobs";
 	public $LoginFlag  = 1;    // Must be logged in
-	public $Dependency = array('upload_file', 'upload_url', 'upload_srv_files');
+	public $Dependency = array('db');
+	public $DBaccess = PLUGIN_DB_UPLOAD;
 	private $Interval  = 7;    // default refresh time
 
 	/**
@@ -71,7 +70,7 @@ class myJobs extends FO_Plugin {
 	public function displayJob($uploadId=NULL) {
 		
 		// Create the style and heading
-$text = _("Click Job Name:Id to see the job details");	
+$text = _("Click Job Name:Id to see the job details");
 $text1 = _("Page updates every");
 $text2 = _("seconds");
 $text3 = _("Running Jobs");
@@ -83,7 +82,7 @@ $text8 = _("Active");
 $text9 = _("Pending");
 $text10 = _("Failed");
 		$Heading = "<table border=2 align='center' cellspacing=1 cellpadding=5>\n" .
-		    "<caption align='top'>$text<br>". 
+		    "<caption align='top'>$text<br>".
 		    "$text1 $this->Interval $text2</caption>\n" .
         "   <tr>\n" .
         "     <th colspan=6 align='center'>$text3</th>\n" .
@@ -111,6 +110,7 @@ $text10 = _("Failed");
 							</script>";
 		*/
 
+		/* @todo find out where $head is set or remove */
 		print $head . $Heading . $Tbl . $Refresh;
 		
 		/*
@@ -140,7 +140,7 @@ $text = _("Fatal internal ERROR! Cannot connect to the DataBase");
 		
 		$SqlUploadList = "SELECT  DISTINCT ON (job_upload_fk) job_upload_fk," .
                      "upload_filename from job,upload " .
-                    "WHERE job_user_fk=$_SESSION[UserId] " .
+                    "WHERE upload_userid='$_SESSION[UserId]' " .
                     "AND upload_pk=job_upload_fk order by job_upload_fk;\n";
 		$JobPhase = array('total' => 'bgcolor="#FFFFCC"',
                       'completed' => 'bgcolor="#D3D3D3"',
@@ -151,6 +151,10 @@ $text = _("Fatal internal ERROR! Cannot connect to the DataBase");
 		$UploadList = $DB->Action($SqlUploadList);
 		$CompletedJobs = array();
 		$T = '';
+		if(empty($UploadList))
+		{
+		  echo "<h3>No Jobs!?</h3>";
+		}
 		foreach($UploadList as $upload) {
 			$status = JobListSummary($upload['job_upload_fk']);
 
