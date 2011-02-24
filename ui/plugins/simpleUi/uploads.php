@@ -604,7 +604,7 @@ class uploads extends FO_Plugin
         $text = _("Use the");
         $text1 = _("Upload File");
         $text2 = _("option to select and upload the file.");
-        $intro .= "$text <a href='${Uri}?mod=ajax_fileUpload'>$text1</a> $text2\n";
+        $intro .= "$text <a href=$Uri?mod=ajax_fileUpload onclick='UploadFile_Get(\"" . Traceback_uri() . "?mod=ajax_fileUpload\")'>$text1</a> $text2\n";
         $intro .= _("While this can be very convenient (particularly if the file is not readily accessible online),\n");
         $intro .= _("uploading via your web browser can be slow for large files,\n");
         $intro .= _("and files larger than 650 Megabytes may not be uploadable.\n");
@@ -614,7 +614,7 @@ class uploads extends FO_Plugin
         $text = _("Use the");
         $text1 = _("Upload from URL");
         $text2 = _("option to specify a remote server.");
-        $intro .= "$text <a href='${Uri}?mod=ajax_urlUpload'>$text1</a> $text2\n";
+        $intro .= "$text <a href=$Url?mod=ajax_urlUpload >$text1</a> $text2\n";
         $intro .= _("This is the most flexible option, but the URL must denote a publicly accessible HTTP, HTTPS, or FTP location.\n");
         $intro .= _("URLs that require authentication or human interactions cannot be downloaded through this automated system.\n");
         $intro .= "<P />\n";
@@ -625,10 +625,8 @@ class uploads extends FO_Plugin
         $choice .= "<input type='radio' name='uploadfurl' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />Upload from a URL on the intra or internet<br />\n";
         $choice .= "<input type='radio' name='uploadfurl' value='opts' onclick='UploadOpts_Get(\"" .Traceback_uri() . "?mod=ajax_optsForm\")' />More Options<br />\n";
 
-        $choice .= "\n<div>\n
-                   <hr>
-                   <p id='fileform'></p>
-                   </div>";
+        $choice .= "\n<div>\n<hr>\n<p id='fileform'></p>\n</div>\n";
+ 
         /* Create the AJAX (Active HTTP) javascript for doing the replys
          * and showing the response.
          */
@@ -734,5 +732,4 @@ return;
 }
 };
 $NewPlugin = new uploads;
-
 ?>
