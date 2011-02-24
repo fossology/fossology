@@ -53,6 +53,7 @@ install: all $(iPATHFILE)
 	
 	cd $(DESTDIR)$(WEBDIR)/plugins/simpleUi; \
 	for link in $(LINKS); do \
+	 [ -h $${link:3} -a -e $${link:3} ] && continue; \
 		ln -s $$link  $${link:3}; \
 	done
 		
