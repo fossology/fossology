@@ -30,7 +30,7 @@ class agent_add extends FO_Plugin
 {
   public $Name       = "agent_add";
   public $Title      = TITLE_agent_add;
-  public $MenuList   = "Jobs::Agents";
+  public $MenuList   = "Jobs::Schedule Agents";
   public $Version    = "1.1";
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_ANALYZE;
@@ -64,9 +64,9 @@ $text = _("Upload not found.");
       $Found = -1;
       for($ac=0; ($Found < 0) && !empty($agent_list[$ac]->URI); $ac++)
       {
-        if (!strcmp($agent_list[$ac]->URI,$agentlist[$al])) 
-        { 
-          $Found = $al; 
+        if (!strcmp($agent_list[$ac]->URI,$agentlist[$al]))
+        {
+          $Found = $al;
           break;
         }
       }

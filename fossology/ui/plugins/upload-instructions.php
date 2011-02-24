@@ -33,7 +33,7 @@ class upload_instructions extends FO_Plugin
   public $Version    = "1.0";
   public $MenuList   = "Upload::Instructions";
   public $MenuOrder  = 10;
-  public $Dependency = array("upload_file","upload_srv_files","upload_url");
+  public $Dependency = array();
   public $DBaccess   = PLUGIN_DB_UPLOAD;
 
   /*********************************************

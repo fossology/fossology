@@ -7,8 +7,14 @@ include $(VARS)
 # also set in Makefile.conf, but we override with a shorter version
 iPATHFILE=pathinclude.php
 
-DIRS=images plugins common template locale
+DIRS=images plugins common template plugins/simpleUi locale
 FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$" |grep -v $(iPATHFILE)`
+LINKS=`find .. -type f | grep -v svn | grep -v tests | grep -E "(php)$$" | \
+			   grep -v 'simpleUi' | grep -v 'copyright/library.php' | grep -v 'copyright/list.php' \
+			   | grep -v 'copyright/view.php' | grep -v 'copyright/agent.php' \
+			   | grep -v 'copyright/oneshot.php' | grep -v 'copyright/hist.php' `
+RMLINKS=`find . -type l `
+
 
 all:
 
@@ -44,14 +50,24 @@ install: all $(iPATHFILE)
 	done
 
 	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
-
+	
+	cd $(DESTDIR)$(WEBDIR)/plugins/simpleUi; \
+	for link in $(LINKS); do \
+		ln -s $$link  $${link:3}; \
+	done
+		
 uninstall:
 	for file in $(FILES); do \
 		rm -f $(DESTDIR)$(WEBDIR)/$$file; \
 	done
-
+	
 	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
-
+	
+	cd $(DESTDIR)$(WEBDIR)/plugins/simpleUi; \
+	for link in $(RMLINKS); do \
+		rm -f $$link; \
+	done
+	
 	for dir in $(DIRS); do \
 		rmdir $(DESTDIR)$(WEBDIR)/$$dir; \
 	done
