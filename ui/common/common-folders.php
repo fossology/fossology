@@ -86,7 +86,7 @@ function GetUserRootFolder()
  * Array is in top down order.
  * FolderList = array({'folder_pk'=>folder_pk, 'folder_name'=>folder_name}, ...
  *
- * If you need to know the folder_pk of an upload or uploadtree, use GetFolder()
+ * If you need to know the folder_pk of an upload or uploadtree, use GetFolderFromItem()
  ************************************************************/
 function Folder2Path($folder_pk)
 {
@@ -124,19 +124,19 @@ function Folder2Path($folder_pk)
 
 
 /************************************************************
- * GetFolder(): 
+ * GetFolderFromItem(): 
  *   $upload_pk
  *   $uploadtree_pk
  * Either $upload_pk OR $uploadtree_pk must be passed in.
  *  
  * Return the folder_pk that the upload_pk (or uploadtree_pk) is in:
  ************************************************************/
-function GetFolder($upload_pk="", $uploadtree_pk="")
+function GetFolderFromItem($upload_pk="", $uploadtree_pk="")
 {
   global $PG_CONN;
 
   /* validate inputs */
-  if (empty($uploadtree_pk) and empty($upload_pk)) return "__FILE__:__LINE__ GetFolder(empty)<br>";
+  if (empty($uploadtree_pk) and empty($upload_pk)) return "__FILE__:__LINE__ GetFolderFromItem(empty)<br>";
   
   if (empty($upload_pk))
   {
@@ -150,7 +150,7 @@ function GetFolder($upload_pk="", $uploadtree_pk="")
   $FolderRow = pg_fetch_assoc($result);
   pg_free_result($result);
   return $FolderRow['parent_fk'];
-} // GetFolder()
+} // GetFolderFromItem()
 
 
 /***********************************************************
@@ -414,7 +414,7 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
  This is recursive!
  NOTE: If there is a recursive loop in the folder table, then
  this will loop INFINITELY.
- DEPRECATED!  USE Folder2Path() and GetFolder()
+ DEPRECATED!  USE Folder2Path() and GetFolderFromItem()
  ***********************************************************/
 $FolderGetFromUpload_1_Prepared=0;
 $FolderGetFromUpload_2_Prepared=0;
