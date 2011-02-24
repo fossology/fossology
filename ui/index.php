@@ -33,14 +33,14 @@ require_once("common/common.php");
 /****************************************************
  This is the main guts of the UI: Find the plugin and run it.
  ****************************************************/
-plugin_load("plugins");
+plugin_load("plugins/simpleUi");
 
 $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) { $Mod = "Default"; }
 $PluginId = plugin_find_id($Mod);
 if ($PluginId >= 0)
   {
-  /* Initialize global system configuration variables $SysConfig[] */ 
+  /* Initialize global system configuration variables $SysConfig[] */
   InitSysConfig();
 
   /* Found a plugin, so call it! */
