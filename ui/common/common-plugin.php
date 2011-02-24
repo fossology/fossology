@@ -71,6 +71,43 @@ function plugin_cmp($a,$b)
   return($rc);
 } // plugin_cmp()
 
+/**
+ * \brief plugin_disable
+ * disable all plugins that have a level greater than the users permission level.
+ *
+ * @param $Level the users DBaccess level
+ * @return void
+ */
+function plugin_disable($Level)
+{
+  global $Plugins;
+  
+  if(empty($Level))
+  {
+    return(0);
+  }
+  
+  /* Disable all plugins with >= $Level access */
+  //echo "<pre>COMP: starting to disable plugins\n</pre>";
+  $LoginFlag = empty($_SESSION['User']);
+  $Max = count($Plugins);
+  for ($i = 0;$i < $Max;$i++)
+  {
+    $P = & $Plugins[$i];
+    if ($P->State == PLUGIN_STATE_INVALID)
+    {
+      //echo "<pre>COMP: Plugin $P->Name is in INVALID state\n</pre>";
+      continue;
+    }
+    if (($P->DBaccess > $Level) || (empty($_SESSION['User']) && $P->LoginFlag)) {
+      //echo "<pre>COMP: Going to disable $P->Name\n</pre>";
+      //echo "<pre>COMP: disabling plugins with $P->DBaccess  >= $Level\n</pre>";
+      $P->Destroy();
+      $P->State = PLUGIN_STATE_INVALID;
+    }
+  }
+} // plugin_disable
+
 /*****************************************
  plugin_sort(): Given a loaded plugin list,
  sort the plugins by dependencies!
