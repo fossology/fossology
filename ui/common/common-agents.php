@@ -321,8 +321,8 @@ function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0, $ExtraWhere="
 	$agentCond = "";
 
 	$sql = "SELECT * FROM $TableName, agent
-           WHERE agent_pk=agent_fk and ars_success=true and upload_fk='$upload_pk' and agent_enabled=true 
-           $agentCond $ExtraWhere 
+           WHERE agent_pk=agent_fk and ars_success=true and upload_fk='$upload_pk' and agent_enabled=true
+           $agentCond $ExtraWhere
            order by agent_ts desc $LimitClause";
            $result = pg_query($PG_CONN, $sql);
            DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -600,4 +600,50 @@ function userAgents()
 	return($agentsChecked);
 }
 
+function userDefaultAgents($upload_pk)
+{
+  global $Plugins;
+  global $DB;
+
+  //echo "<pre>UDA: upload pk is:$upload_pk\n</pre>";
+  if(empty($upload_pk))
+  {
+    return;
+  }
+
+  /*
+   * foreach agent in the list
+   *   agentCheck on the upload_pk
+   *    if OK: AgentAdd
+   */
+  // get the default agents selected by the user
+  $userName = $_SESSION['User'];
+  $SQL = "SELECT user_name, user_agent_list FROM users WHERE
+            user_name='$userName';";
+  $uList = $DB->Action($SQL);
+
+  // Ulist can be empty if the user does not have the correct permissions
+  // or has not selected any default/preferred agents or sql failed.
+  if(empty($uList))
+  {
+    return;       // nothing to schedule or sql failed....
+
+  }
+  $agentList = explode(',',$uList[0]['user_agent_list']);
+
+  foreach($agentList as $agent)
+  {
+    $agentRef = &$Plugins[plugin_find_id($agent)];
+    if (empty($agentRef))
+    {
+      continue;
+    }
+    $rc = $agentRef->AgentCheck($upload_pk);
+    if ($rc == 0)
+    {
+      $agentRef->AgentAdd($upload_pk);
+    }
+  }
+  return;
+} // userDefaultAgents
 ?>
