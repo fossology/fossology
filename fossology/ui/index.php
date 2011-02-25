@@ -33,7 +33,7 @@ require_once("common/common.php");
 /****************************************************
  This is the main guts of the UI: Find the plugin and run it.
  ****************************************************/
-plugin_load("plugins/simpleUi");
+plugin_load("plugins");
 
 $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) { $Mod = "Default"; }
