@@ -1783,6 +1783,11 @@
   $Schema["TABLE"]["users"]["default_bucketpool_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"default_bucketpool_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["users"]["default_bucketpool_fk"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["users"]["ui_preference"]["DESC"] = "COMMENT ON COLUMN \"users\".\"ui_preference\" IS 'ui preference for the user, either simple or original';";
+  $Schema["TABLE"]["users"]["ui_preference"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"ui_preference\" varchar;";
+  $Schema["TABLE"]["users"]["ui_preference"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"ui_preference\" DROP NOT NULL, ALTER COLUMN \"ui_preference\" SET DEFAULT 'simple'::character varying;";
+  $Schema["TABLE"]["users"]["ui_preference"]["UPDATE"] = "UPDATE users SET ui_preference='simple'::character varying";
+
 
 
   $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::unknown AS ts, NULL::unknown AS upload_pk, NULL::unknown AS pfile_fk, NULL::unknown AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::unknown AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
