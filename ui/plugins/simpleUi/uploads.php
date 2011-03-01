@@ -23,7 +23,7 @@
  * Created on Feb 11, 2011 by Mark Donohoe
  */
 
-define("TITLE_uploads", _("Uploads"));
+define("TITLE_uploads", _("Upload Files for Analysis"));
 
 class uploads extends FO_Plugin
 {
@@ -593,37 +593,44 @@ class uploads extends FO_Plugin
           }
         }
 
+        $topText .= _("To submit a file for scanning and analysis by FOSSology, a
+                    method below must be chosen to upload the file.\n");
+        $typeText .= "$topText";
+        $typeText .= _("The file you upload can be a gzip, bzip, upx, zip, tar, cpio,
+         rar, rpm, debian package, iso, msi, cab, 7z, among  others.  It may
+         also be a filesystem (fat, ntfs, ext2, ext3), or even an x86 boot partition.\n");
+        $intro .= "$typeText<br><br>";
+        $depending = _("Depdending on the method chosen, there may be file size
+          or other limits.\n");
+        $intro .= "$depending<br><br>";
 
         $Url = Traceback_uri();
-        $intro .= _("FOSSology has many options for importing and uploading files for analysis.\n");
-        $intro .= _("The options vary based on <i>where</i> the data to upload is located.\n");
-        $intro .= _("The data may be located:\n");
-        $intro .= "<ul>\n";
-        $text = _("On your browser system");
-        $intro .= "<li><b>$text</b>.\n";
-        $text = _("Use the");
-        $text1 = _("Upload File");
-        $text2 = _("option to select and upload the file.");
-        $intro .= "$text <a href=$Uri?mod=ajax_fileUpload onclick='UploadFile_Get(\"" . Traceback_uri() . "?mod=ajax_fileUpload\")'>$text1</a> $text2\n";
-        $intro .= _("While this can be very convenient (particularly if the file is not readily accessible online),\n");
-        $intro .= _("uploading via your web browser can be slow for large files,\n");
-        $intro .= _("and files larger than 650 Megabytes may not be uploadable.\n");
-        $intro .= "<P />\n";
-        $text = _("On a remote server");
-        $intro .= "<li><b>$text</b>.\n";
-        $text = _("Use the");
-        $text1 = _("Upload from URL");
-        $text2 = _("option to specify a remote server.");
-        $intro .= "$text <a href=$Url?mod=ajax_urlUpload >$text1</a> $text2\n";
-        $intro .= _("This is the most flexible option, but the URL must denote a publicly accessible HTTP, HTTPS, or FTP location.\n");
-        $intro .= _("URLs that require authentication or human interactions cannot be downloaded through this automated system.\n");
-        $intro .= "<P />\n";
         $choice .= $intro;
         //$choice .= "<br>\n";
+        
+        $fileText .= _("Upload a File from your computer");
+        $urlText .= _("Upload from a URL on the intra or internet");
+        $srvText .= _("Upload a File from the FOSSology Web Server");
         $choice .= "<form name='uploads' enctype='multipart/form-data' method='post'>\n";
-        $choice .= "<input type='radio' name='uploadfurl' value='file' onclick='UploadFile_Get(\"" .Traceback_uri() . "?mod=ajax_fileUpload\")' />Upload a File from your computer<br />\n";
-        $choice .= "<input type='radio' name='uploadfurl' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />Upload from a URL on the intra or internet<br />\n";
-        $choice .= "<input type='radio' name='uploadfurl' value='opts' onclick='UploadOpts_Get(\"" .Traceback_uri() . "?mod=ajax_optsForm\")' />More Options<br />\n";
+        $choice .= "<input type='radio' name='uploads' id='file' value='file' onclick='UploadFile_Get(\"" .Traceback_uri() . "?mod=ajax_fileUpload\")' />$fileText<br />\n";
+        $choice .= "<input type='radio' name='uploads' id='url' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />$urlText<br />\n";
+        $choice .= "<input type='radio' name='uploads' id='srv' value='srv' onclick='UploadSrv_Get(\"" .Traceback_uri() . "?mod=ajax_srvUpload\")' />$srvText<br />\n";
+        
+        $or=_("--OR--");
+        $oneShotText = _("Submit a file to be analyzed in real time.  Neither the
+          file, nor the results, will be stored in FOSSology.  The uploaded file
+          will be scanned as a single file.  That is, for example, if you upload
+          an rpm file, the rpm itself will be scanned, and not the individual
+          files in the rpm.");
+        //<strong><hr style='width:1%;text-align:left;margin-left:0'/>$or
+        //
+        $osChoice = "<p style='text-indent:75px'>\n
+                    <strong>$or</strong><p>$oneShotText</p>\n";
+        $choice .= $osChoice;
+        $choice .= "<input type='radio' name='uploads' id='oneshot' value='osn' onclick='UploadOsN_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotNomos\")' />Analyze a single file for licenses<br />\n";
+        $choice .= "<input type='radio' name='uploads' id='oneshotcopy' value='copy' onclick='UploadCopyR_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotCopyright\")' />Analyze a single file for Copyrights, Email and URL's<br />\n";
+        
+        //$choice .= "<input type='radio' name='uploadfurl' value='opts' onclick='UploadOpts_Get(\"" .Traceback_uri() . "?mod=ajax_optsForm\")' />More Options<br />\n";
 
         $choice .= "\n<div>\n<hr>\n<p id='fileform'></p>\n</div>\n";
  
@@ -659,20 +666,19 @@ class uploads extends FO_Plugin
         $choice .= $choiceUrl;
 
         // More Options
-
+        /*
         $options .= ActiveHTTPscript("UploadOpts");
         $options .= "<script language='javascript'>\n
         function UploadOpts_Reply()
         {
           if ((UploadOpts.readyState==4) && (UploadOpts.status==200))
           {\n
-            /* Remove all options */
             document.getElementById('fileform').innerHTML = UploadOpts.responseText;\n
-            /* Add new options */
           }
         }
         </script>\n";
         $choice .= $options;
+        */
 
         // upload from server
         $uploadSrv .= ActiveHTTPscript("UploadSrv");
@@ -682,7 +688,7 @@ class uploads extends FO_Plugin
           if ((UploadSrv.readyState==4) && (UploadSrv.status==200))
           {\n
             /* Remove all options */
-            document.getElementById('optsform').innerHTML = UploadSrv.responseText;\n
+            document.getElementById('fileform').innerHTML = UploadSrv.responseText;\n
             /* Add new options */
           }
         }
@@ -696,7 +702,7 @@ class uploads extends FO_Plugin
         {
           if ((UploadOsN.readyState==4) && (UploadOsN.status==200))
           {\n
-            document.getElementById('optsform').innerHTML = UploadOsN.responseText;\n
+            document.getElementById('fileform').innerHTML = UploadOsN.responseText;\n
           }
         }
         </script>\n";
@@ -709,7 +715,7 @@ class uploads extends FO_Plugin
         {
           if ((UploadCopyR.readyState==4) && (UploadCopyR.status==200))
           {\n
-            document.getElementById('optsform').innerHTML = UploadCopyR.responseText;\n
+            document.getElementById('fileform').innerHTML = UploadCopyR.responseText;\n
           }
         }
         </script>\n";

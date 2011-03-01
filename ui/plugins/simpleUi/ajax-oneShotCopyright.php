@@ -141,29 +141,31 @@ class ajax_oneShotCopyright extends FO_Plugin {
       case "HTML":
 
         /* Display instructions */
-        $V.= _("This analyzer allows you to upload a single file for copyright/email/url analysis.\n");
-        $V.= _("The limitations:\n");
-        $V.= "<ul>\n";
-        $V.= _("<li>The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n");
-        $V.= _("<li>Files that contain files are <b>not</b> unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for copyright/email/urls and nothing will likely be found.\n");
-        $V.= _("<li>Results are <b>not</b> stored. As soon as you get your results, your uploaded file is removed from the system.\n");
-        $V.= "</ul>\n";
+        $text.= _("This analyzer allows you to upload a single file for
+                copyright/email/url analysis from your computer.\n");
+        $text1 .= _("The limitations:\n");
+        $V .= "$text<br>$text1";
+        $V .= "<ul>\n";
+        $V .= _("<li>The analysis is done in real-time. Large files may take a while. This method will not work for files larger than 100 kilobytes.\n");
+        $V .= _("Files larger than 100K will be discarded and not analyzed.\n");
+        $V .= _("<li>Files that contain files are <b>not</b> unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for copyright/email/urls and nothing will likely be found.\n");
+        $V .= _("<li>Results are <b>not</b> stored. As soon as you get your results, your uploaded file is removed from the system.\n");
+        $V .= "</ul>\n";
         /* Display the form */
-        $V.= "<form name='oscopyright' enctype='multipart/form-data' method='post'>\n";
+        $V .= "<form name='oscopyright' enctype='multipart/form-data' method='post'>\n";
         $V .= "<input type='hidden' name='uploadform' value='oneShotCopyright'>\n";
-        $V.= "<ol>\n";
-        $V.= _("<li>Select the file to upload:<br />\n");
-        $V.= "<input name='licfile' size='60' type='file' /><br />\n";
-        $V.= _("<b>NOTE</b>: Files larger than 100K will be discarded and not analyzed.<P />\n");
+        $V .= "<ol>\n";
+        $V .= _("<li>Select the file to upload:<br />\n");
+        $V .= "<input name='licfile' size='60' type='file' /><br /><br>\n";
         $text = _("Check if you want to see the highlighted text");
-        $V.= "<li><input type='checkbox' name='highlight' value='1'>$text.\n";
-        $V.= _("Unchecked returns a simple list that summarizes the identified types.");
-        $V.= "<P />\n";
-        $V.= "</ol>\n";
-        $V.= "<input type='hidden' name='showheader' value='1'>";
+        $V .= "<li><input type='checkbox' name='highlight' value='1'>$text.\n";
+        $V .= _("Unchecked returns a simple list that summarizes the identified types.");
+        $V .= "<P />\n";
+        $V .= "</ol>\n";
+        $V .= "<input type='hidden' name='showheader' value='1'>";
         $text = _("Analyze");
-        $V.= "<input type='submit' value='$text!'>\n";
-        $V.= "</form>\n";
+        $V .= "<input type='submit' value='$text!'>\n";
+        $V .= "</form>\n";
         break;
       case "Text":
         break;

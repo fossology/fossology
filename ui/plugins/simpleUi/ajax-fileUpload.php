@@ -63,11 +63,16 @@ class ajax_fileUpload extends FO_Plugin {
         }
         /* Display instructions */
         $V .= $result;
-        $V.= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from your computer to FOSSology.\n");
-        $V.= _("Your system has imposed a maximum file size of");
-        $V.= " ".  ini_get('post_max_size') . " ";
-        $V.= _("bytes.");
         /* Display the form */
+        
+        $usageFile .= _("Use this option to select and upload a file on your browser
+        system. While this can be very convenient (particularly if the file is not
+        readily accessible online), uploading via your web browser can be slow
+        for large files. Files larger than 650 Megabytes may not be uploadable. ");
+        $usageFile .= _("Your system has imposed a maximum file size of");
+        $usageFile .= " ".  ini_get('post_max_size') . " ";
+        $usageFile .= _("bytes.");
+        $V .= $usageFile;
         $V.= "<form name='file' id='file' enctype='multipart/form-data' method='post'>\n"; // no url = this url
         $V .= "<input type='hidden' name='uploadform' value='fileupload'>\n";
         $V.= "<ol>\n";
