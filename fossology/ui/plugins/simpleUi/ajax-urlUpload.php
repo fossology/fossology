@@ -62,9 +62,11 @@ class ajax_urlUpload extends FO_Plugin
           $GetURL = 'http://';
         }
         /* Display instructions */
-        $V .= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from a remote web or FTP server to FOSSology.\n");
-        $V .= _("The file to upload must be accessible via a URL and must not require human interaction ");
-        $V .= _("such as login credentials.\n");
+        $intro .= _("Uploading from a URL or FTP site is often the most flexible
+         option, but the URL must denote a publicly accessible HTTP, HTTPS,
+         or FTP location.  URLs that require authentication or human
+         interactions cannot be downloaded through this upload option.\n");
+        $V .= $intro;
         /* Display the form */
         $V .= "<form name='url' id='url' enctype='multipart/form-data' method='post'>\n"; // no url = this url
         $V .= "<input type='hidden' name='uploadform' value='urlupload'>\n";
@@ -77,11 +79,8 @@ class ajax_urlUpload extends FO_Plugin
         $text = _("Enter the URL to the file:");
         $V .= "<li>$text<br />\n";
         $V .= "<INPUT type='text' name='geturl' size=60 value='" . htmlentities($GetURL) . "'/><br />\n";
-        $text = _("NOTE");
-        $text1 = _(": If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file. The URL can begin with HTTP://, HTTPS://, or FTP://.");
-        $V .= "<b>$text</b>$text1<P />\n";
         $text = _("(Optional) Enter a viewable name for this file:");
-        $V .= "<li>$text<br />\n";
+        $V .= "<br><li>$text<br />\n";
         $text = _("NOTE");
         $text1 = _(": If no name is provided, then the uploaded file name will be used.");
         $V .= "<b>$text</b>$text1<P />\n";

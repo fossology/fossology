@@ -61,7 +61,7 @@ class ajax_oneShotNomos extends FO_Plugin
         break;
       case "HTML":
         /* Display instructions */
-        $V .= _("This analyzer allows you to upload a single file for license analysis.\n");
+        $V .= _("This analyzer allows you to upload a single file from your computer for license analysis.\n");
         $V .= _("The limitations:\n");
         $V .= "<ul>\n";
         $V .= _("<li>The analysis is done in real-time. Large files may take a while." .
