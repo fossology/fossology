@@ -46,6 +46,7 @@ require_once("common-pkg.php");
 require_once("common-tags.php");
 require_once("common-compare.php");
 require_once("common-db.php");
+require_once("common-auth.php");
 
 /* Only include the command-line interface functions if it is required. */
 global $UI_CLI;
