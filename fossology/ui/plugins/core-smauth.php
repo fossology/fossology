@@ -1,25 +1,25 @@
 <?php
 /***********************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ ***********************************************************/
 /*************************************************
-Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
+ Restrict usage: Every PHP file should have this
+ at the very beginning.
+ This prevents hacking attempts.
+ *************************************************/
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
@@ -35,11 +35,11 @@ class core_smauth extends FO_Plugin {
   var $PluginLevel = 1000; /* make this run first! */
   var $LoginFlag = 0;
   /***********************************************************
-  Install(): Only used during installation.
-  This may be called multiple times.
-  Used to ensure the DB has the right default columns.
-  Returns 0 on success, non-zero on failure.
-  ***********************************************************/
+   Install(): Only used during installation.
+   This may be called multiple times.
+   Used to ensure the DB has the right default columns.
+   Returns 0 on success, non-zero on failure.
+   ***********************************************************/
   function Install() {
     global $PG_CONN;
     if (empty($PG_CONN)) {
@@ -49,15 +49,15 @@ class core_smauth extends FO_Plugin {
   } // Install()
 
   /******************************************
-  PostInitialize(): This is where the magic for
-  Authentication happens.
-  ******************************************/
+   PostInitialize(): This is where the magic for
+   Authentication happens.
+   ******************************************/
   function PostInitialize() {
     global $Plugins;
     global $PG_CONN;
 
     if (siteminder_check() == -1) {return;}
-    
+
     $UID = siteminder_check();
 
     session_name("Login");
@@ -78,7 +78,7 @@ class core_smauth extends FO_Plugin {
     if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
 
     /* Enable or disable plugins based on login status */
-    $Level = PLUGIN_DB_NONE; 
+    $Level = PLUGIN_DB_NONE;
     if (@$_SESSION['User']) {
       /* If you are logged in, then the default level is "Download". */
       if ("X" . $_SESSION['UserLevel'] == "X") {
@@ -100,6 +100,14 @@ class core_smauth extends FO_Plugin {
         $_SESSION['UserLevel'] = $R['user_perm'];
         $_SESSION['UserEmail'] = $R['user_email'];
         $_SESSION['UserEnote'] = $R['email_notify'];
+        if(empty($R['ui_preference']))
+        {
+          $_SESSION['UiPref'] = 'simple';
+        }
+        else
+        {
+          $_SESSION['UiPref'] = $R['ui_preference'];
+        }
         $Level = @$_SESSION['UserLevel'];
         pg_free_result($result);
       }
@@ -109,25 +117,15 @@ class core_smauth extends FO_Plugin {
     }
 
     /* Disable all plugins with >= $Level access */
-    $LoginFlag = empty($_SESSION['User']);
-    $Max = count($Plugins);
-    for ($i = 0;$i < $Max;$i++) {
-      $P = & $Plugins[$i];
-      if ($P->State == PLUGIN_STATE_INVALID) {
-        continue;
-      }
-      if (($P->DBaccess > $Level) || (empty($_SESSION['User']) && $P->LoginFlag)) {
-        $P->Destroy();
-        $P->State = PLUGIN_STATE_INVALID;
-      }
-    }
+    plugin_disable($Level);
+
     $this->State = PLUGIN_STATE_READY;
   } // PostInitialize()
 
   /******************************************
-  CheckUser(): See if a username is valid.
-  Returns string on match, or null on no-match.
-  ******************************************/
+   CheckUser(): See if a username is valid.
+   Returns string on match, or null on no-match.
+   ******************************************/
   function CheckUser($Email) {
     global $PG_CONN;
     if (empty($Email)) {
@@ -144,7 +142,7 @@ class core_smauth extends FO_Plugin {
     if (empty($R['user_name'])) {
       $sql = "INSERT INTO users
               (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
-       email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk) 
+       email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk)
               VALUES ('$Email','HP User','','',5,'$Email','y','',1,1)";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -159,13 +157,21 @@ class core_smauth extends FO_Plugin {
 
     /* Check the email */
     if (strcmp($Email, $R['user_email']) != 0) {
-        return;
+      return;
     }
     /* If you make it here, then username and email were good! */
     $_SESSION['User'] = $R['user_name'];
     $_SESSION['UserId'] = $R['user_pk'];
     $_SESSION['UserEmail'] = $R['user_email'];
     $_SESSION['UserEnote'] = $R['email_notify'];
+    if(empty($R['ui_preference']))
+    {
+      $_SESSION['UiPref'] = 'simple';
+    }
+    else
+    {
+      $_SESSION['UiPref'] = $R['ui_preference'];
+    }
     $_SESSION['Folder'] = $R['root_folder_fk'];
     $_SESSION['time_check'] = time() + (480 * 60);
     /* No specified permission means ALL permission */
@@ -183,8 +189,8 @@ class core_smauth extends FO_Plugin {
   } // CheckUser()
 
   /******************************************
-    Output(): 
-  ******************************************/
+   Output():
+   ******************************************/
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
@@ -198,15 +204,15 @@ class core_smauth extends FO_Plugin {
       case "XML":
         break;
       case "HTML":
-          $_SESSION['User'] = NULL;
-          $_SESSION['UserId'] = NULL;
-          $_SESSION['UserLevel'] = NULL;
-          $_SESSION['UserEmail'] = NULL;
-          $_SESSION['Folder'] = NULL;
-          $Uri = Traceback_uri() . "?mod=refresh&remod=default";
-          $V.= "<script language='javascript'>\n";
-          $V.= "window.open('$Uri','_top');\n";
-          $V.= "</script>\n";
+        $_SESSION['User'] = NULL;
+        $_SESSION['UserId'] = NULL;
+        $_SESSION['UserLevel'] = NULL;
+        $_SESSION['UserEmail'] = NULL;
+        $_SESSION['Folder'] = NULL;
+        $Uri = Traceback_uri() . "?mod=refresh&remod=default";
+        $V.= "<script language='javascript'>\n";
+        $V.= "window.open('$Uri','_top');\n";
+        $V.= "</script>\n";
         break;
       case "Text":
         break;

@@ -179,7 +179,7 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
         $_SESSION['UserEnote'] = $R['email_notify'];
         if(empty($R['ui_preference']))
         {
-          $_SESSION['UiPref'] = 'original';
+          $_SESSION['UiPref'] = 'simple';
         }
         else
         {
@@ -206,7 +206,7 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
             $_SESSION['UserEnote'] = $R['email_notify'];
             if(empty($R['ui_preference']))
             {
-              $_SESSION['UiPref'] = 'original';
+              $_SESSION['UiPref'] = 'simple';
             }
             else
             {
@@ -249,7 +249,10 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
   Returns string on match, or null on no-match.
   ******************************************/
   function CheckUser($User, $Pass, $Referer) {
+    
     global $DB;
+    
+    //echo "<pre>CheckUser:Referer is:$Referer\n";
     $V = "";
     if (empty($User)) {
       return;
@@ -308,7 +311,7 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
       $_SESSION['NoPopup'] = 0;
     }
     /* Need to refresh the screen */
-    $V.= "<script language='javascript'>\n";
+    $V .= "<script language='javascript'>\n";
     /* Use the previous redirect, but only use it if it comes from this
     server's Traceback_uri().  (Ignore hostname.) */
     $Redirect = preg_replace("@^[^/]*//[^/]*@", "", GetParm("redirect", PARM_TEXT));
@@ -316,14 +319,24 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
     if (preg_match("/[?&]mod=(Default|" . $this->Name . ")/", $Redirect)) {
       $Redirect = ""; /* don't reference myself! */
     }
+    //echo "<pre>CheckUser:Uri is:$Uri Redirect is:$Redirect\n";
     if (empty($Redirect) || strncmp($Redirect, $Uri, strlen($Uri))) {
       $Uri = Traceback_uri();
     } else {
       $Uri = $Redirect;
     }
+    //echo "<pre>CheckUser:Uri is:$Uri\n";
     /* Redirect window */
-    $V.= "window.open('$Referer','_top');\n";
-    $V.= "</script>\n";
+
+    if($_SESSION['UiPref'] == 'simple')
+    {
+      //echo "<pre>CheckUser:replaceing default with simpleUi\n";
+      $Referer = str_replace('default', 'simple_UI', $Referer);
+      //echo "<pre>CheckUser:Referer is now:$Referer\n";
+    }
+
+    $V .= "window.open('$Referer','_top');\n";
+    $V .= "</script>\n";
     return ($V);
   } // CheckUser()
 
