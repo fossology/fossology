@@ -67,6 +67,7 @@ class db_access extends FO_Plugin
     $this->State = PLUGIN_STATE_READY;
     global $DB;
     $DB = $this;
+    if (!$this->db_init()) { return(0); }
     return($this->State == PLUGIN_STATE_READY);
     } // PostInitialize()
 
