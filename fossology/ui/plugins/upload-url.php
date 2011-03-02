@@ -150,8 +150,8 @@ $text = _("Upload failed for");
           $GetURL = 'http://';
         }
         /* Display instructions */
-        $V.= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from a remote web or FTP server to FOSSology.\n");
-        $V.= _("The file to upload must be accessible via a URL and must not require human interaction ");
+        $V.= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) or a directory from a remote web or FTP server to FOSSology.\n");
+        $V.= _("The file or directory to upload must be accessible via a URL and must not require human interaction ");
         $V.= _("such as login credentials.\n");
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
