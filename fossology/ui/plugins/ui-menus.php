@@ -312,7 +312,7 @@ class ui_menu extends FO_Plugin
 
         $V .= "<td align='right' valign='bottom'>";
         /* Handle login information */
-        if (plugin_find_id("auth") >= 0)
+        if (plugin_find_id("auth") >= 0 || plugin_find_id("smauth") >= 0)
         {
           /* Width matches logo image */
           if (empty($_SESSION['User']))

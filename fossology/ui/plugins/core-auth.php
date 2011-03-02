@@ -123,6 +123,13 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
     if (empty($DB)) {
       return (0);
     }
+
+    /* if Site Minder enabled core-auth will be disabled*/
+    if (siteminder_check() != -1)
+    {
+      return(0);
+    }
+    
     session_name("Login");
     session_start();
     $Now = time();
