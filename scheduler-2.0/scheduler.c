@@ -31,8 +31,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* unix system includes */
 #include <dirent.h>
-#include <pthread.h>
+#include <fcntl.h>
 #include <signal.h>
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -99,15 +100,15 @@ void prnt_sig(int signo)
 {
   switch(signo)
   {
-    case SIGINT:
-      lprintf("SIGNALS: Scheduler killed by interrupt signal, unclean death\n");
+    case SIGINT: case SIGQUIT: case SIGTERM:
+      lprintf("SIGNALS: Scheduler killed by SIGINT, SIGQUIT, SIGTERM: unclean death\n");
       kill_agents();
       event_loop_terminate();
       break;
     case SIGALRM:
       lprintf("SIGNALS: Scheduler received alarm signal, checking job states\n");
       event_signal(agent_update_event, NULL);
-      event_signal(database_update_event, NULL);
+      // TODO decide if want??? event_signal(database_update_event, NULL);
       alarm(CHECK_TIME);
       break;
   }
@@ -116,6 +117,93 @@ void prnt_sig(int signo)
 /* ************************************************************************** */
 /* **** main utility functions ********************************************** */
 /* ************************************************************************** */
+
+/**
+ * TODO
+ *
+ * @return
+ */
+int unlock_scheduler()
+{
+  return shm_unlink(process_name);
+}
+
+/**
+ * TODO
+ *
+ * @return
+ */
+pid_t get_locked_pid()
+{
+  pid_t pid = 0;
+  ssize_t bytes;
+  int handle, rc;
+  char buf[10];
+
+  /* Initialize memory */
+  handle = rc = 0;
+  memset(buf, '\0', sizeof(buf));
+
+  /* open the shared memory */
+  if((handle = shm_open(process_name, O_RDONLY, 0444)) < 0)
+  {
+    if(errno != ENOENT)
+      ERROR("failed to acquire shared memory", process_name);
+    return 0;
+  }
+
+  /* find out who owns the shared memory */
+  bytes = read(handle, buf, sizeof(buf));
+  if((pid = atoi(buf)) < 2)
+  {
+    if(shm_unlink(process_name) == -1)
+      ERROR("failed to remove invalid lock");
+    return 0;
+  }
+
+  /* check to see if the pid is a valid process */
+  if(kill(pid, 0) == 0)
+    return pid;
+
+  /* process that created lock is dead, create new lock */
+  VERBOSE2("LOCK: PID[%d] is stale. Attempt to unlock.\n")
+  if(unlock_scheduler())
+    ERROR("LOCK: PID[%d] is stale but unlock failed");
+
+  return 0;
+}
+
+/**
+ * TODO
+ *
+ * @return
+ */
+pid_t lock_scheduler()
+{
+  pid_t pid;
+  int handle;
+  char buf[10];
+
+  /* return if lock already exists */
+  if((pid = get_locked_pid()))
+    return pid;
+
+  /* no lock, create a new lock file */
+  if((handle = shm_open(process_name, O_RDWR|O_CREAT|O_EXCL, 0744)) == -1)
+  {
+    ERROR("failed to open shared memory");
+    return -1;
+  }
+
+  sprintf(buf, "%-9.9d", getpid());
+  if(write(handle, buf, sizeof(buf)) < 1)
+  {
+    ERROR("failed to write pid to lock file");
+    return -1;
+  }
+
+  return 0;
+}
 
 /**
  * Correctly set the project user and group. The fossology scheduler must run as
@@ -157,6 +245,30 @@ void set_usr_grp()
     fprintf(stderr, "FATAL %s.%d: %s must run this as %s\n", __FILE__, __LINE__, process_name, PROJECT_USER);
     fprintf(stderr, "FATAL SETUID aborting due to error: %s\n", strerror(errno));
     exit(-1);
+  }
+}
+
+/**
+ * TODO
+ */
+void kill_scheduler()
+{
+  pid_t pid;
+
+  if((pid = get_locked_pid()))
+  {
+    if(kill(pid, SIGQUIT) == -1)
+    {
+      ERROR("Unable to send SIGQUIT to PID %d", pid);
+      return;
+    }
+    else
+    {
+      fprintf(stderr, "Exiting %s PID %d\n", process_name, pid);
+      lprintf(        "Exiting %s PID %d\n", process_name, pid);
+    }
+
+    unlock_scheduler();
   }
 }
 
@@ -263,7 +375,16 @@ void load_config()
     /* check for the list of available hosts */
     else if(strncmp(buffer, "hosts:", 6) == 0)
     {
-      // TODO
+      while(fscanf(istr, "%s %s %s %d", name, cmd, buffer, &max) == 4)
+      {
+        if(strcmp(cmd, "localhost") == 0)
+          strcpy(buffer, AGENT_DIR);
+
+        host_init(name, cmd, buffer, max);
+
+        VERBOSE2("CONFIG: added new host\n   name      = %s\n   address   = %s\n   directory = %s\n   max       = %d\n",
+            name, cmd, buffer, max);
+      }
     }
   }
 }
@@ -357,9 +478,11 @@ void usage(char* app_name)
   fprintf(stderr, "  options:\n");
   fprintf(stderr, "    -d :: Run as a daemon, causes init to own the process\n");
   fprintf(stderr, "    -h :: Print the usage for the program and exit\n");
-  fprintf(stderr, "    -i :: Initialize the database and exit\n");
+  fprintf(stderr, "    -i :: Initialize database connection and exit\n");
+  fprintf(stderr, "    -k :: kills all running schedulers and exit\n");
   fprintf(stderr, "    -L :: Print to this file instead of default log file\n");
   fprintf(stderr, "    -p :: set the port that the scheduler should listen on\n");
+  fprintf(stderr, "    -R :: reset any jobs that aren't complete when scheduler starts\n");
   fprintf(stderr, "    -t :: Test run every type of agent, then quit\n");
   fprintf(stderr, "    -T :: Test run every type of agent, then run normally\n");
   fprintf(stderr, "    -v :: set verbose to true, used for debugging\n");
@@ -387,8 +510,8 @@ void usage(char* app_name)
 int main(int argc, char** argv)
 {
   /* locals */
+  int db_reset = 0;   // flag to reset the job queue upon database connection
   int c;              // used for parsing the arguments
-  int run_daemon = 0; // flag to run the scheduler as a daemon
   int rc;             // destination of return status for system calls
   int test = 0;       // flag to run the tests before starting scheduler
   char buffer[2048];  // character buffer, used multiple times
@@ -400,21 +523,28 @@ int main(int argc, char** argv)
   /* ********************* */
   /* *** parse options *** */
   /* ********************* */
-  while((c = getopt(argc, argv, "diL:p:tTv:h")) != -1)
+  while((c = getopt(argc, argv, "dikL:p:RtTv:h")) != -1)
   {
     switch(c)
     {
       case 'd':
-        run_daemon = 1;
+        rc = daemon(0, 0);
+        fclose(stdin);
         break;
       case 'i':
-        // TODO initialize database and exit
-        break;
+        database_init();
+        return 0;
+      case 'k':
+        kill_scheduler();
+        return 0;
       case 'L':
         set_log(optarg);
         break;
       case 'p':
         set_port(atoi(optarg));
+        break;
+      case 'R':
+        db_reset = 1;
         break;
       case 't':
         test = 2;
@@ -437,35 +567,36 @@ int main(int argc, char** argv)
     return -1;
   }
 
-  /* ********************** */
-  /* *** handle options *** */
-  /* ********************** */
+  if((rc = lock_scheduler()) <= 0 && !get_locked_pid())
+    FATAL("scheduler lock error");
+
+  /* ********************************** */
+  /* *** do all the initializations *** */
+  /* ********************************** */
   g_thread_init(NULL);
   g_type_init();
   set_usr_grp();
   job_list_init();
-  host_list_init(10); // TODO have this set with localhost in conf file
+  host_list_init();
   load_config();
   interface_init();
   database_init();
 
-  if(run_daemon)
-  {
-    // TODO old scheduler used log file to decide second arg?
-    rc = daemon(0, 1);
-    fclose(stdin);
-  }
-
-  /* ********************** */
-  /* *** handle signals *** */
-  /* ********************** */
+  /* ********************************** */
+  /* *** initialize signal handlers *** */
+  /* ********************************** */
   signal(SIGCHLD, chld_sig);
   signal(SIGALRM, prnt_sig);
   signal(SIGINT,  prnt_sig);
+  signal(SIGQUIT, prnt_sig);
+  signal(SIGTERM, prnt_sig);
 
-  /* ********************** */
-  /* *** run any tests **** */
-  /* ********************** */
+  /* *********************************** */
+  /* *** post initialization checks **** */
+  /* *********************************** */
+  if(db_reset)
+    database_reset_queue();
+
   if(test > 0)
   {
     test_agents();
@@ -473,6 +604,9 @@ int main(int argc, char** argv)
       closing = 1;
   }
 
+  /* *************************************** */
+  /* *** enter the scheduler event loop **** */
+  /* *************************************** */
   alarm(CHECK_TIME);
   event_loop_enter(update_scheduler);
 

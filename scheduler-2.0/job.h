@@ -54,6 +54,7 @@ void job_destroy(job j);
 /* ************************************************************************** */
 
 void job_verbose_event(job j);
+void job_status_event(void* param);
 
 void job_add_agent(job j, void* a);
 void job_remove_agent(job j, void* a);
@@ -75,9 +76,9 @@ char* job_next(job j);
 /* **** Job list Functions ************************************************** */
 /* ************************************************************************** */
 
-job  next_job();
-job  get_job(int id);
-int  num_jobs();
-int  active_jobs();
+job next_job();
+job get_job(int id);
+int num_jobs();
+int active_jobs();
 
 #endif /* JOB_H_INCLUDE */

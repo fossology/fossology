@@ -305,7 +305,7 @@ int event_loop_enter(void(*update)(void))
 }
 
 /**
- * stops the event loop from executing. This will wake up and threads that are
+ * stops the event loop from executing. This will wake up any threads that are
  * waiting on either a push into the event loop, or are trying to take from
  * the event loop and the put() and take() functions will return errors.
  *

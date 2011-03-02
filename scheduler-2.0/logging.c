@@ -84,53 +84,6 @@ void log_event(char* str)
   g_free(str);
 }
 
-/**
- * Takes a format string and returns a new string that has all the correct time
- * stamps inserted into the format string. This will insert a time stamp at the
- * start of the string and after any new line characters.
- *
- * @param fmt the original formating string
- * @return the new formating string, this string needs to be freed upon completion
- */
-char* insert_time_stamp(char* fmt)
-{
-  /* locals */
-  char time_buffer[64];
-  char time_stamp[64];
-  char cpy[1024];
-  char* ret = NULL;
-  char* curr;
-  time_t t = time(NULL);
-  int nl_count = 1;
-
-  /* create the time stamp */
-  strftime(time_buffer, sizeof(time_buffer),"%F %T",localtime(&t));
-  sprintf(time_stamp, "%s scheduler [%d] ::", time_buffer, getpid());
-  memset(cpy, '\0', sizeof(cpy));
-  strcpy(cpy, fmt);
-
-  /* count the number of new lines in the string */
-  for(curr = cpy; *curr; curr++)
-  {
-    if(*curr == '\n')
-    {
-      *curr = 0;
-      nl_count++;
-    }
-  }
-
-  /* allocate the new string and put in base time stamp */
-  ret = (char*)calloc(strlen(fmt) + nl_count*strlen(time_stamp) + 1, sizeof(char));
-  sprintf(ret, "%s", time_stamp);
-
-  /* copy over the rest of the string and time stamps */
-  for(curr = cpy; curr - cpy < strlen(fmt); curr++)
-    if(*curr == '\n')
-      sprintf(&ret[strlen(ret)], "%s\n%s", curr, time_stamp);
-
-  return ret;
-}
-
 /* ************************************************************************** */
 /* **** logging functions *************************************************** */
 /* ************************************************************************** */
@@ -196,7 +149,7 @@ const char* lname()
  *
  * @param fmt the format for the printed data
  * @param ... the remaining arguments
- * @return
+ * @return 1 on success, 0 otherwise
  */
 int lprintf(const char* fmt, ...)
 {
@@ -204,20 +157,22 @@ int lprintf(const char* fmt, ...)
   int rc;
 
   va_start(args, fmt);
-  rc = lprintf_v(fmt, args);
+  rc = vlprintf(fmt, args);
   va_end(args);
 
   return rc;
 }
 
 /**
- * TODO
+ * The provides the same functionality for lprintf as vprintf does for printf.
+ * If somebody wanted to create a custom logging function, they could simply
+ * use this function within a va_start va_end pair.
  *
- * @param fmt
- * @param args
- * @return
+ * @param fmt the formatting string for the print
+ * @param args the arguemtn for the print in and form of a va_list
+ * @return 1 on success, 0 otherwise
  */
-int lprintf_v(const char* fmt, va_list args)
+int vlprintf(const char* fmt, va_list args)
 {
   /* static used to determine if a '\n' needs to be printed */
   static int n_line = 1;
@@ -238,16 +193,14 @@ int lprintf_v(const char* fmt, va_list args)
   curr = strtok(tmp, "\n");
   while(curr != NULL)
   {
-    if(n_line)
-      if(fprintf(log_file, "%s scheduler [%d] :: ", time_buf, getpid()) == 0)
+    if(n_line && fprintf(log_file, "%s scheduler [%d] :: ", time_buf, getpid()) == 0)
         return 0;
 
     if(fprintf(log_file, "%s", curr) == 0)
       return 0;
 
     n_line = ((curr = strtok(NULL, "\n")) != NULL);
-    if(n_line)
-      if(fprintf(log_file, "\n") == 0)
+    if(n_line && fprintf(log_file, "\n") == 0)
         return 0;
   }
 
@@ -268,7 +221,7 @@ int lprintf_v(const char* fmt, va_list args)
  * @param fmt
  * @return
  */
-int lprintf_c(const char* fmt, ...)
+int clprintf(const char* fmt, ...)
 {
   va_list args;
   char* buf;

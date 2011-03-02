@@ -90,11 +90,11 @@ void* interface_thread(void* param)
   {
     if(g_input_stream_read_all(conn->istr, buffer, header.bytes_following, &size, NULL, NULL) == 0)
     {
-      lprintf_c("ERROR: unable to read from interface socket, attempted to read %d bytes", header.bytes_following);
+      clprintf("ERROR: unable to read from interface socket, attempted to read %d bytes", header.bytes_following);
       g_thread_exit(NULL);
     }
 
-    if(TVERBOSE2) lprintf_c("INTERFACE: recieved \"%s\"\n", buffer);
+    if(TVERBOSE2) clprintf("INTERFACE: recieved \"%s\"\n", buffer);
     /* convert all characters before first ' ' to lower case */
     for(cmd = buffer, args = NULL; *cmd && args == NULL; cmd++)
     {
@@ -110,23 +110,24 @@ void* interface_thread(void* param)
     if(g_str_has_prefix("exit", cmd))
     {
       g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
-      if(TVERBOSE2) lprintf_c("INTERFACE: closing connection to user interface\n");
+      if(TVERBOSE2) clprintf("INTERFACE: closing connection to user interface\n");
       return NULL;
     }
     else if(g_str_has_prefix("close", cmd))
     {
       g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
-      if(TVERBOSE2) lprintf_c("INTERFACE: shutting down scheduler\n");
+      if(TVERBOSE2) clprintf("INTERFACE: shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
       return NULL;
     }
     else if(g_str_has_prefix("pause", cmd))
-      job_pause(get_job(atoi(&buffer[10])));
+      job_pause(get_job(atoi(args)), 1);
     else if(g_str_has_prefix("reload", cmd))
       load_config();
     else if(g_str_has_prefix("status", cmd))
     {
-      // TODO define the format for this output for jobs and scheduler
+      if(args == NULL) event_signal(job_status_event, conn->ostr);
+      // TODO job specific status
     }
     else if(g_str_has_prefix("restart", cmd))
       job_restart(get_job(atoi(args)));
@@ -139,13 +140,13 @@ void* interface_thread(void* param)
       event_signal(database_update_event, NULL);
     else
     {
-      lprintf_c("ERROR %s.%d: Interface recieved invalid command: %s\n", cmd);
+      clprintf("ERROR %s.%d: Interface recieved invalid command: %s\n", cmd);
     }
 
     memset(buffer, '\0', sizeof(buffer));
   }
 
-  lprintf_c("ERROR %s.%d: Interface connection closed unexpectantly\n", __FILE__, __LINE__);
+  clprintf("ERROR %s.%d: Interface connection closed unexpectantly\n", __FILE__, __LINE__);
 
   return NULL;
 }
@@ -206,7 +207,7 @@ void* listen_thread(void* unused)
 
 
   if(TVERBOSE2)
-    lprintf_c("INTERFACE: listenning port is %d\n", i_port);
+    clprintf("INTERFACE: listenning port is %d\n", i_port);
 
   /* wait for new connections */
   for(;;)
@@ -216,7 +217,7 @@ void* listen_thread(void* unused)
     if(i_terminate)
       break;
     if(TVERBOSE2)
-      lprintf_c("INTERFACE: new interface connection\n");
+      clprintf("INTERFACE: new interface connection\n");
 
     client_threads = g_list_append(client_threads,
         interface_conn_init(new_connection));
