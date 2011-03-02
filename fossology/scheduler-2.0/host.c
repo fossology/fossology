@@ -78,11 +78,10 @@ int find_host(char* host_name, host h, struct find_struct* fs)
  *
  * @param max
  */
-void host_list_init(int max)
+void host_list_init()
 {
   if(host_list == NULL)
     host_list = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)host_destroy);
-  host_init("localhost", "localhost", AGENT_DIR, max);
 }
 
 /**
@@ -195,4 +194,15 @@ host get_host(int num)
 host name_host(char* name)
 {
   return g_tree_lookup(host_list, name);
+}
+
+/**
+ * Gets the number of hosts that were in the configuration data. This is needed
+ * because there must be at least one host to run the agents on.
+ *
+ * @return the number of hosts read from the config files
+ */
+int num_hosts()
+{
+  return g_tree_nnodes(host_list);
 }

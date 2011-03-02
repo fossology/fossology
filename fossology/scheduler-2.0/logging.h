@@ -84,8 +84,8 @@ extern int verbose;
 const char* lname();
 void set_log(const char* name);
 int  lprintf(const char* fmt, ...);
-int  lprintf_v(const char* fmt, va_list args);
-int  lprintf_c(const char* fmt, ...);
+int  vlprintf(const char* fmt, va_list args);
+int  clprintf(const char* fmt, ...);
 
 
 #endif /* LOGGING_H_INCLUDE */

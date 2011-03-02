@@ -110,7 +110,7 @@ struct agent_internal
 /**
  * TODO
  */
-char* status_strings[] = {
+const char* status_strings[] = {
     "AG_FAILED",
     "AG_CREATED",
     "AG_SPAWNED",
@@ -163,16 +163,17 @@ int update(int* pid_ptr, agent a, gpointer unused)
     /* check last checkin time */
     if(time(NULL) - a->check_in > TILL_DEATH)
     {
+      ERROR("JOB[%d].%s[%d] no heartbeat for %d seconds",
+          job_id(a->owner), job_type(a->owner), a->pid, time(NULL) - a->check_in);
       agent_fail(a);
       return 0;
     }
 
     /* check items processed */
-    if(a->status != AG_PAUSED &&
-       a->check_analyzed == a->total_analyzed)
-    {
+    if(a->status != AG_PAUSED && a->check_analyzed == a->total_analyzed)
       a->n_updates++;
-    }
+    else
+      a->n_updates = 0;
     if(a->n_updates > NUM_UPDATES)
     {
       agent_fail(a);
@@ -181,7 +182,7 @@ int update(int* pid_ptr, agent a, gpointer unused)
 
     a->check_analyzed = a->total_analyzed;
 
-    VERBOSE3("JOB[%d].%s[%d]: agent updated correctly, processed %d items",
+    VERBOSE3("JOB[%d].%s[%d]: agent updated correctly, processed %d items\n",
           job_id(a->owner), a->meta_data->name, a->pid, a->check_analyzed);
   }
 
@@ -238,25 +239,19 @@ void agent_listen(agent a)
   int i;                      // simple indexing variable
 
   TEST_NULV(a);
-  /* send the size of a job to the agent */
-  aprintf(a, "%d\n", CHECKOUT_SIZE);
-
-  /* initalize memory */
-  memset(buffer, '\0', sizeof(buffer));
-
   while(a->status == AG_CREATED || a->status == AG_SPAWNED || a->status == AG_RUNNING)
   {
     /* get message from agent */
     if(fgets(buffer, sizeof(buffer), a->read) == NULL)
     {
-      lprintf_c("T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
+      clprintf("T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
           __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
     }
 
     if(TVERBOSE3)
     {
       buffer[strlen(buffer) - 1] = '\0';
-      lprintf_c("JOB[%d].%s[%d]: received: \"%s\"\n",
+      clprintf("JOB[%d].%s[%d]: received: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, buffer);
     }
 
@@ -290,31 +285,29 @@ void agent_listen(agent a)
       a->total_analyzed = i;
     }
     /* agent is failing, log why */
-    else if(strncmp(buffer, "FATAL", 5))
+    else if(strncmp(buffer, "FATAL", 5) == 0)
     {
-      lprintf_c("FATAL:JOB[%d].%s[%d]: \"%s\"\n",
+      clprintf("FATAL:JOB[%d].%s[%d]: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, &buffer[5]);
-      // TODO I may need to update the db here
       break;
     }
     /* the agent has recieved an error, log what */
-    else if(strncmp(buffer, "ERROR", 5))
+    else if(strncmp(buffer, "ERROR", 5) == 0)
     {
-      lprintf_c("ERROR:JOB[%d].%s[%d]: \"%s\"\n",
+      clprintf("ERROR:JOB[%d].%s[%d]: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, &buffer[5]);
-      // TODO I may need to update the db here
       break;
     }
     /* we aren't quite sure what the agent sent, log it */
     else
     {
-      lprintf_c("JOB[%d].%s[%d]: %s",
-          job_id(a->owner), a->meta_data->name, a->pid);
+      clprintf("JOB[%d].%s[%d]: message \"%s\"\n",
+          job_id(a->owner), a->meta_data->name, a->pid, buffer);
     }
   }
 
   if(TVERBOSE3)
-    lprintf_c("JOB[%d].%s[%d]: communication thread closing\n",
+    clprintf("JOB[%d].%s[%d]: communication thread closing\n",
         job_id(a->owner), a->meta_data->name, a->pid);
 }
 
@@ -350,7 +343,7 @@ void* agent_spawn(void* passed)
     /* set the child's stdin and stdout to use the pipes */
     dup2(a->from_parent, fileno(stdin));
     dup2(a->to_parent, fileno(stdout));
-    dup2(a->to_parent, fileno(stderr));
+    //dup2(a->to_parent, fileno(stderr));
 
     /* close all the unnecessary file descriptors */
     g_tree_foreach(agents, (GTraverseFunc)agent_close_fd, a);
@@ -382,7 +375,7 @@ void* agent_spawn(void* passed)
     }
 
     /* we should never reach here */
-    lprintf_c("ERROR %s.%d: JOB[%d].AGENT[%d] exec failed\nERROR errno is: %s\n",
+    clprintf("ERROR %s.%d: JOB[%d].AGENT[%d] exec failed\nERROR errno is: %s\n",
         __FILE__, __LINE__, job_id(a->owner), getpid(), strerror(errno));
   }
   /* we are in the parent */
@@ -394,7 +387,7 @@ void* agent_spawn(void* passed)
   /* error case */
   else
   {
-    lprintf_c("ERROR %s.%d: JOB[%d].AGENT[%d] for failed\nERROR errno is: %s\n",
+    clprintf("ERROR %s.%d: JOB[%d].AGENT[%d] for failed\nERROR errno is: %s\n",
         __FILE__, __LINE__, job_id(a->owner), getpid(), strerror(errno));
   }
 
@@ -660,7 +653,6 @@ void agent_death_event(void* pids)
 
     if(a->status != AG_CLOSING)
     {
-      errno = ECONNABORTED;
       ERROR("JOB[%d].%s[%d]: agent closed unexpectedly, agent status was %s",
           job_id(a->owner), a->meta_data->name, a->pid, status_strings[a->status]);
       agent_fail(a);
@@ -794,6 +786,7 @@ void agent_fail(agent a)
  */
 void agent_close(agent a)
 {
+  lprintf("AGENT: %d.%s\n", a->pid, status_strings[a->status]);
   if(a->status != AG_CLOSING && a->status != AG_FAILED)
   {
     transition(a, AG_CLOSING);
@@ -828,6 +821,19 @@ host agent_host(agent a)
  * TODO
  *
  * @param a
+ * @param ostr
+ */
+void agent_print_status(agent a, GOutputStream* ostr)
+{
+
+
+
+}
+
+/**
+ * TODO
+ *
+ * @param a
  * @param fmt
  * @return
  */
@@ -835,19 +841,24 @@ int aprintf(agent a, const char* fmt, ...)
 {
   va_list args;
   int rc;
-  char buf[1024];
+  char* tmp;
 
   va_start(args, fmt);
   if(TVERBOSE3)
   {
-    vsprintf(buf, fmt, args);
-    buf[strlen(buf) - 1] = '\0';
-    lprintf_c("JOB[%d].%s[%d]: sent to agent \"%s\"\n",
-        job_id(a->owner), a->meta_data->name, a->pid, buf);
+    tmp = g_strdup_vprintf(fmt, args);
+    tmp[strlen(tmp) - 1] = '\0';
+    clprintf("JOB[%d].%s[%d]: sent to agent \"%s\"\n",
+        job_id(a->owner), a->meta_data->name, a->pid, tmp);
+    rc = fprintf(a->write, "%s\n", tmp);
+    g_free(tmp);
   }
-  rc = vfprintf(a->write, fmt, args);
-  fflush(a->write);
+  else
+  {
+    rc = vfprintf(a->write, fmt, args);
+  }
   va_end(args);
+  fflush(a->write);
 
   return rc;
 }

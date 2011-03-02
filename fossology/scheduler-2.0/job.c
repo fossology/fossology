@@ -31,6 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* other library includes */
 #include <glib.h>
+#include <gio/gio.h>
 
 #define TEST_NULV(j) if(!j) { errno = EINVAL; ERROR("job passed is NULL, cannot proceed"); return; }
 #define TEST_NULL(j, ret) if(!j) { errno = EINVAL; ERROR("job passed is NULL, cannot proceed"); return ret; }
@@ -66,7 +67,7 @@ struct job_internal
 /**
  * TODO
  */
-char* status_string[] = {
+const char* status_string[] = {
     "JB_CHECKEDOUT",
     "JB_STARTED",
     "JB_COMPLETE",
@@ -99,6 +100,41 @@ int is_active(int* job_id, job j, int* counter)
 }
 
 /**
+ * Prints the jobs status to the output stream.
+ *
+ * @param job_id the id number that the job was created with
+ *   @note if the int pointed to by the job_id is value 0, that means
+ *         print all agent status as well
+ * @param j the job itself
+ * @param ostr the output stream to write everything to
+ * @return always returns 0
+ */
+int job_sstatus(int* job_id, job j, GOutputStream* ostr)
+{
+  gchar* status_str = g_strdup_printf("job:%d status:%s type:%s, priority:%d running:%d finished:%d failed:%d",
+      j->id,
+      status_string[j->status],
+      j->agent_type,
+      j->priority,
+      g_list_length(j->running_agents),
+      g_list_length(j->finished_agents),
+      g_list_length(j->failed_agents));
+
+  VERBOSE2("%s\n", status_str);
+  g_output_stream_write(ostr, status_str, strlen(status_str), NULL, NULL);
+
+  if(*job_id == 0)
+  {
+    g_list_foreach(j->running_agents, (GFunc)agent_print_status, ostr);
+    g_list_foreach(j->finished_agents, (GFunc)agent_print_status, ostr);
+    g_list_foreach(j->failed_agents, (GFunc)agent_print_status, ostr);
+  }
+
+  g_free(status_str);
+  return 0;
+}
+
+/**
  * Changes the status of the job and updates the database with the new job status
  *
  * @param j the job to update the status on
@@ -110,7 +146,15 @@ void job_transition(job j, job_status new_status)
   gchar* sql = NULL;
   PGresult* db_result;
 
+  /* book keeping */
   TEST_NULV(j);
+  VERBOSE2("JOB[%d]: job status changed: %s => %s\n",
+      j->id, status_string[j->status], status_string[new_status]);
+
+  /* check to make sure that this is a real job */
+  if(j->id < 0)
+    j->status = new_status;
+
   /* check how to update database */
   switch(new_status)
   {
@@ -157,10 +201,6 @@ void job_transition(job j, job_status new_status)
             WHERE jq_pk = '%d';", j->id);
       break;
   }
-
-  // TODO check if this is the correct verbose level
-  VERBOSE2("JOB[%d]: job status changed: %s => %s\n",
-      j->id, status_string[j->status], status_string[new_status]);
 
   /* change the status */
   j->status = new_status;
@@ -305,6 +345,16 @@ void job_verbose_event(job j)
 }
 
 /**
+ * TODO
+ *
+ * @param ostr
+ */
+void job_status_event(void* param)
+{
+  g_tree_foreach(job_list, (GTraverseFunc)job_sstatus, param);
+}
+
+/**
  * Adds a new agent to the jobs list of agents. When a job is created it doesn't
  * contain any agents that can process its data. When an agent is ready, it will
  * add itself to the job using this function and begin processing the jobs data.
@@ -384,6 +434,7 @@ void job_set_priority(job j, int pri)
 void job_set_data(job j, char* data, int sql)
 {
   j->data = g_strdup(data);
+  j->idx = 0;
 
   if(sql)
   {
@@ -432,10 +483,6 @@ void job_update(job j)
         {
           restart++;
         }
-
-        /* get rid of the failed agent */
-        a = iter->data;
-        agent_close(a);
       }
 
       g_list_free(j->failed_agents);
@@ -528,7 +575,7 @@ int job_is_open(job j)
 
   /* check to see if we even need to worry about sql stuff */
   if(j->db_result == NULL)
-    return (!j->idx && j->data != NULL);
+    return (j->idx == 0 && j->data != NULL);
 
   g_mutex_lock(j->lock);
   if(j->idx < PQntuples(j->db_result))
@@ -588,12 +635,8 @@ char* job_next(job j)
   TEST_NULL(j, NULL);
   if(j->db_result == NULL)
   {
-    if(j->idx == 0)
-    {
-      j->idx = 1;
-      return j->data;
-    }
-    return NULL;
+    j->idx = 1;
+    return j->data;
   }
 
   g_mutex_lock(j->lock);
@@ -651,6 +694,7 @@ int num_jobs()
 }
 
 /**
+ * TODO
  *
  * @return
  */

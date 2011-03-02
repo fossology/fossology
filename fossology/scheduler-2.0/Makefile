@@ -59,15 +59,22 @@ all: $(EXE) $(CLI)
 $(EXE): scheduler.c $(OBJS) $(VARS) $(HEAD) $(DEPEN)
 	$(CC) scheduler.c $(OBJS) $(DEF) $(FODEF) $(CFLAGS_LOCAL) -o $@
 
-$(CLI): schedulerCLI.c schedulerCLI.h $(DEPEN)
-	$(CC) schedulerCLI.c $(CFLAGS_LOCAL) -o $@
+$(CLI): schedulerCLI.c schedulerCLI.h Makefile
+	$(CC) schedulerCLI.c $(CFLAGS_LOCAL) $(DEF) -o $@
 
 #######################
-# library buidl rules #
+# library build rules #
 #######################
 
 libscheduler.a: $(OBJS) $(DEPEN)
 	ar cvr $@ $(OBJS)
+
+##################
+# init.d scripts #
+##################
+
+include $(TOP)/Makefile.process
+defconf/init.d/fossology: defconf/init.d/fossology-process
 
 ######################
 # object build rules #
@@ -94,11 +101,22 @@ job.o: %.o: %.c %.h agent.h database.h scheduler.h $(DEPEN)
 logging.o: %.o: %.c $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
+#######################
+# install build rules #
+#######################
+
+install: $(EXE)
+	@ echo "Installing init script..."
+
+#####################
+# other build rules #
+#####################
+
 clean:
 	rm -f $(OBJS) *.a
 	rm -f $(EXE) $(CLI)
 
-
+include $(DEPS)
 
 
 

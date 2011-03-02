@@ -759,7 +759,7 @@ void copyright_usage(char* arg)
 int main(int argc, char** argv)
 {
   /* primitives */
-  char input[FILENAME_MAX];     // input buffer
+  char* input;                  // input buffer
   char sql[512];                // buffer for database access
   int c, i = -1;                // temporary int containers
   int num_files = 0;            // the number of rows in a job
@@ -855,7 +855,6 @@ int main(int argc, char** argv)
     pair_init(&curr, string_function_registry(), int_function_registry());
     db_connected = 1;
     agent_pk = GetAgentKey(DataBase, AGENT_NAME, 0, "", AGENT_DESC);
-    memset(input, '\0', sizeof(input));
 
     /* make sure that we are connected to the database */
     if(!check_copyright_table(pgConn))
@@ -864,7 +863,7 @@ int main(int argc, char** argv)
     }
 
     scheduler_connect();
-    while(scheduler_next() != NULL)
+    while((input = scheduler_next()) != NULL)
     {
       upload_pk = atol(input);
 

@@ -69,6 +69,21 @@ void database_destroy()
 /* ************************************************************************** */
 
 /**
+ * Resets the any jobs in the job queue that are not completed. This is to make
+ * sure that any jobs that were running with the scheduler shutdown are run correctly
+ * when it starts up again.
+ */
+void database_reset_queue()
+{
+  database_exec("\
+      UPDATE jobqueue \
+        SET jq_starttime=null, \
+            jq_endtext=null, \
+            jq_schedinfo=null\
+        WHERE jq_endtime is NULL;");
+}
+
+/**
  * TODO
  *
  * @param unused

@@ -25,6 +25,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* unix library includes */
 #include <sys/types.h>
 
+/* glib includes */
+#include <gio/gio.h>
+
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
@@ -99,7 +102,8 @@ void agent_restart(agent a, agent ref);
 void agent_fail(agent a);
 void agent_close(agent a);
 host agent_host(agent a);
-int  aprintf(agent a, const char* fmt, ...);  // TODO determine if I need this
+void agent_print_status(agent a, GOutputStream* ostr);
+int  aprintf(agent a, const char* fmt, ...);
 ssize_t agent_write(agent a, const void* buf, size_t count);
 
 /* ************************************************************************** */

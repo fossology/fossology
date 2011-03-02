@@ -32,6 +32,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <netdb.h>
 #include <unistd.h>
 
+#ifndef DEFAULT_SETUP
+#define DEFAULT_SETUP ""
+#endif
+
 int s;        ///< the socket that the CLI will use to communicate
 int verbose;  ///< the verbose flag for the cli
 
@@ -62,18 +66,20 @@ int network_write(void* buf, size_t count)
 
 int main(int argc, char** argv)
 {
-  struct sockaddr_in addr;
-  struct hostent* host_info;
-  fd_set fds;
-  int port_number = -1;
-  long host_addr;
-  int c, closing;
-  size_t bytes;
-  char host[FILENAME_MAX];
-  char buffer[1024];
+  /* local variables */
+  struct sockaddr_in addr;    // used when creating socket to scheduler
+  struct hostent* host_info;  // information used to connect to correct host
+  fd_set fds;                 // file descriptor set used in select statement
+  int port_number = -1;       // the port that the CLI will connect on
+  long host_addr;             // the address of the host
+  int c, closing;             // flags and loop variables
+  size_t bytes;               // variable to caputre return of read
+  char host[FILENAME_MAX];    // string to hold the name of the host
+  char buffer[1024];          // string buffer used to read
+  FILE* istr;                 // file used for reading configuration
 
   /* initialize memory */
-  memset(host, '\0', sizeof(host));
+  strcpy(host, "localhost");
   memset(buffer, '\0', sizeof(buffer));
   closing = 0;
   verbose = 0;
@@ -98,19 +104,23 @@ int main(int argc, char** argv)
     }
   }
 
-  /* check the scheduler shared memory for port number */
-  if(port_number != 0)
+  /* check the scheduler config for port number */
+  if(port_number < 0)
   {
-    // TODO
+    istr = fopen("Scheduler.conf", "r");
+    while(port_number < 0 && fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
+    {
+      if(buffer[0] == '#' || buffer[0] == '\0');
+      else if(strncmp(buffer, "port=", 5) == 0)
+        port_number = atoi(buffer + 5);
+    }
+    memset(buffer, '\0', sizeof(buffer));
   }
 
   /* open the connection to the scheduler */
   s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-  if(host[0])
-    host_info = gethostbyname(host);
-  else
-    host_info = gethostbyname("localhost");
+  host_info = gethostbyname(host);
   memcpy(&host_addr, host_info->h_addr, host_info->h_length);
 
   addr.sin_addr.s_addr = host_addr;
@@ -120,9 +130,11 @@ int main(int argc, char** argv)
   if(connect(s, (struct sockaddr*)&addr, sizeof(addr)) == -1)
   {
     fprintf(stderr, "ERROR: could not connect to host\n");
+    fprintf(stderr, "ERROR: attempted to connect to \"%s:%d\"\n", host, port_number);
     return 0;
   }
 
+  /* listen to the scheulder */
   while(!closing)
   {
     /* prepare for read */
@@ -132,17 +144,18 @@ int main(int argc, char** argv)
     memset(buffer, '\0', sizeof(buffer));
     c = select(s + 1, &fds, NULL, NULL, NULL);
 
-    /* read from the ready file descriptor */
+    /* check the socket */
     if(FD_ISSET(s, &fds))
     {
       bytes = read(s, buffer, sizeof(buffer));
 
       if(strncmp(buffer, "CLOSE", 5) == 0)
         closing = 1;
-      else if(network_write(buffer, strlen(buffer)) != strlen(buffer))
-        fprintf(stderr, "ERROR: failed to send message to scheduler\n");
+      else
+        printf("SCHEDULER: %s\n", buffer);
     }
 
+    /* check stdin */
     if(FD_ISSET(fileno(stdin), &fds))
     {
       bytes = read(fileno(stdin), buffer, sizeof(buffer));
@@ -154,6 +167,5 @@ int main(int argc, char** argv)
     }
   }
 
-  //g_io_stream_close((GIOStream)host_conn, NULL, NULL);
   return 0;
 }

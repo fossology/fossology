@@ -31,10 +31,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
 
-int items_processed;   ///< the number of items processed by the agent
-char buffer[2048];          ///< the last thing received from the scheduler
-int valid;                  ///< if the information stored in buffer is valid
-int notifications;          ///< the gap between notifying the scheduler that it has finished
+int  items_processed;   ///< the number of items processed by the agent
+char buffer[2048];      ///< the last thing received from the scheduler
+int  valid;             ///< if the information stored in buffer is valid
 
 /**
  * Global verbose flags that agents should use instead of specific verbose
@@ -89,15 +88,6 @@ void scheduler_connect()
   memset(buffer, 0, sizeof(buffer));
   valid = 0;
   verbose = 0;
-  notifications = 100;
-
-  /* receive the number of items between notifications */
-  if(fgets(buffer, sizeof(buffer), stdin) == NULL)
-  {
-    // TODO fatal error
-    exit(-1);
-  }
-  notifications = atoi(buffer);
 
   /* send "OK" to the scheduler */
   fprintf(stdout, "OK\n");
@@ -139,12 +129,13 @@ void scheduler_disconnect()
  *
  * Steps taken by this function:
  *   - get the next line from the scheduler
- *   - if the line reads "WAIT"
- *     - pause this agent until the scheduler sends something else
+ *     - if the scheduler has paused this agent this will block till unpaused
  *   - check for "CLOSE" from scheduler, return NULL if received
  *   - check for "VERBOSE" from scheduler
  *     - if this is received turn the verbose flag to whatever is specified
  *     - a new line must be received, perform same task (i.e. recursive call)
+ *   - check for "END" from scheduler, if received print OK and recurse
+ *     - this is used to simplify communications within the scheduler
  *   - return whatever has been received
  *
  * @return char* for the next thing to analyze, NULL if there is nothing

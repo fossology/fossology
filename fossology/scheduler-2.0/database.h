@@ -32,6 +32,7 @@ void database_destroy();
 /* **** event and functions ************************************************* */
 /* ************************************************************************** */
 
+void database_reset_queue();
 void database_update_event(void* unused);
 PGresult* database_exec(char* sql);
 

@@ -125,74 +125,74 @@ int	main	(int argc, char *argv[])
 
   /* check args */
   while((c = getopt(argc,argv,"dkHiIL:lvqRtTh")) != -1)
-    {
+  {
     switch(c)
-      {
+    {
       case 'd':
-	RunAsDaemon=1;
-	break;
+        RunAsDaemon=1;
+        break;
       case 'H':
-	IgnoreHost=1;
-	break;
+        IgnoreHost=1;
+        break;
       case 'i':
-	DB = DBopen();
-	if (!DB)
-	  {
-	  fprintf(stderr, "FATAL: Unable to connect to database\n");
-	  exit(-1);
-	  }
-	/* Nothing to initialize */
-	DBclose(DB);
-	return(0);
+        DB = DBopen();
+        if (!DB)
+        {
+          fprintf(stderr, "FATAL: Unable to connect to database\n");
+          exit(-1);
+        }
+        /* Nothing to initialize */
+        DBclose(DB);
+        return(0);
       case 'I':
-	UseStdin=1;
-	break;
+        UseStdin=1;
+        break;
       case 'k': /* kill the scheduler */
-         KillScheduler = 1;
+        KillScheduler = 1;
       case 'l': /* tell the scheduler to redo logs */
-	break;
+        break;
       case 'L':
-	LogFile=optarg;
-	break;
+        LogFile=optarg;
+        break;
       case 'q':
-	ShowState=0;
-	break;
+        ShowState=0;
+        break;
       case 'R':
-	ResetQueue=1;
-	break;
+        ResetQueue=1;
+        break;
       case 't':
-	Test=2;
-	break;
+        Test=2;
+        break;
       case 'T':
-	Test=1;
-	break;
+        Test=1;
+        break;
       case 'v':
-	Verbose++;
-	break;
+        Verbose++;
+        break;
       case 'h':
       default:
-	Usage(argv[0]);
-	DBclose(DB);
-	exit(-1);
-      }
+        Usage(argv[0]);
+        DBclose(DB);
+        exit(-1);
     }
+  }
 
   if ((optind != argc-1) && (optind != argc))
-	{
-	Usage(argv[0]);
-	DBclose(DB);
-	exit(-1);
-	}
+  {
+    Usage(argv[0]);
+    DBclose(DB);
+    exit(-1);
+  }
 
   /* set to PROJECTUSER and PROJECTGROUP */
   SetPuserPgrp(ProcessName);
 
   if (KillScheduler)
   {
-	  DB = DBopen();
+    DB = DBopen();
     if (!DB)
     {
-	    fprintf(stderr, "FATAL: Unable to connect to database\n");
+      fprintf(stderr, "FATAL: Unable to connect to database\n");
       exit(-1);
     }
 
@@ -270,19 +270,19 @@ int	main	(int argc, char *argv[])
 
   /* Log to file? (Not if I'm killing schedulers) */
   if ((dup2(fileno(stdout),fileno(stderr))) < 0)
-      {
-      LogPrint("FATAL: Unable to write to redirect stderr to log.  Exiting. \n");
-      DBclose(DB);
-      exit(-1);
-      }
+  {
+    LogPrint("FATAL: Unable to write to redirect stderr to log.  Exiting. \n");
+    DBclose(DB);
+    exit(-1);
+  }
 
   /* init queue */
   DB = DBopen();
   if (!DB)
-    {
+  {
     LogPrint("FATAL: Unable to connect to database.  Exiting. \n");
     exit(-1);
-    }
+  }
 
   DBSetHostname();
 
@@ -291,11 +291,11 @@ int	main	(int argc, char *argv[])
 
   /* If we're resetting the queue */
   if (ResetQueue)
-	{
+  {
     /* If someone has a start without an end, then it is a hung process */
     DBLockAccess(DB,"UPDATE jobqueue SET jq_starttime=null WHERE jq_endtime is NULL;");
     LogPrint("Job queue reset.\n");
-	}
+  }
 
   /* init storage */
   DBQinit();
@@ -304,11 +304,11 @@ int	main	(int argc, char *argv[])
 
   /* Check for good agents */
   if (SelfTest())
-    {
+  {
     LogPrint("FATAL: Self Test failed.  Inconsistent agent(s) detected.  Exiting. \n");
     DBclose(DB);
     exit(-1);
-    }
+  }
 
   /* Check for competing schedulers */
   if (DBCheckSchedulerUnique())
@@ -331,12 +331,12 @@ int	main	(int argc, char *argv[])
       LogPrint("STATUS: %d agents failed to initialize.\n",rc);
 
     if ((Test > 1) || rc)
-	  {
-	    LogPrint("*** %d agent failures.  Scheduler exiting. \n", rc);
+    {
+      LogPrint("*** %d agent failures.  Scheduler exiting. \n", rc);
       /* clean up scheduler */
       StopScheduler(0);
       exit(0);
-  	}
+    }
   }
 
 
@@ -346,113 +346,113 @@ int	main	(int argc, char *argv[])
   Thread=0;
   Fed=0;
   while(KeepRunning)
-    {
+  {
     SaveStatus();
 
     /* check for data to process */
     if (UseStdin)
-	{
-	rc = SelectAnyData(1,fileno(stdin));
-	if (feof(stdin)) SLOWDEATH=1;
-	}
+    {
+      rc = SelectAnyData(1,fileno(stdin));
+      if (feof(stdin)) SLOWDEATH=1;
+    }
     else rc = SelectAnyData(0,0);
 
     if (rc & 0x01) /* got stdin input to feed to a child */
-	{
-	IsUrgent=0;
-	Len=ReadCmd(stdin,Input,MAXCMD);
-	if (Len < 0) break; /* skip blank lines and EOF */
-	if (Len == 0) continue; /* skip blank lines and EOF */
-	if (Input[0]=='!')
-	  {
-	  IsUrgent=1;
-	  Input[0]=' ';
-	  }
-
-	/* Got a command! */
-	if (Verbose) LogPrint("Parent got command: %s\n",Input);
-	Arg = strchr(Input,'|');
-	if (!Arg)
-		{
-		LogPrint("ERROR: Unknown command (len=%d) '%s'\n",Len,Input);
-		continue; /* skip unknown lines */
-		}
-	Arg[0]='\0'; Arg++;	/* skip space */
-	while((Arg[0] != '\0') && isspace(Arg[0]))	Arg++;
-
-	/* feed command to child */
-	/* handle special commands (scheduler is the child) */
-	Fed=SchedulerCommand(Input,Arg);
-
-	/* if command needs child, find a child to feed it to */
-	while(!Fed)
-	  {
-	  Thread = GetChild(Input,IsUrgent);
-	  if (Thread < 0)
-	    {
-	    if (SelectAnyData(0,0) & 0x02) /* wait for a child to become ready */
-		{
-		Thread = GetChild(Input,IsUrgent);
-		}
-	    }
-	  if (Thread >= 0)
-		{
-		if (CM[Thread].Status != ST_RUNNING)
-		  {
-		  ChangeStatus(Thread,ST_RUNNING);
-		  }
-		if (Verbose) LogPrint("(a) Feeding child[%d]: '%s'\n",Thread,Arg);
-		memset(CM[Thread].Parm,'\0',MAXCMD);
-		strcpy(CM[Thread].Parm,Arg);
-		Input[Len++]='\n'; /* add a \n to end of Arg */
-		write(CM[Thread].ChildStdin,Arg,strlen(Arg));
-		Fed=1;
-		}
-	  /* Thread == -1 is a timeout -- retry the request */
-	  else if (Thread <= -2)
-		{
-		LogPrint("ERROR: No living engines for '%s'\n",Input);
-		Fed=1;	/* skip this bad command */
-		}
-	  } /* while not Fed */
-	} /* if processing stdin input */
-    else
-	{
-	/* this will pause if it detects a fast loop */
-	Fed = DBProcessQueue(DB);
-	}
-//    if (Verbose) printf("Time: %d  Fed=%d\n",(int)time(NULL),Fed);
-    if (Fed==0)
+    {
+      IsUrgent=0;
+      Len=ReadCmd(stdin,Input,MAXCMD);
+      if (Len < 0) break; /* skip blank lines and EOF */
+      if (Len == 0) continue; /* skip blank lines and EOF */
+      if (Input[0]=='!')
       {
+        IsUrgent=1;
+        Input[0]=' ';
+      }
+
+      /* Got a command! */
+      if (Verbose) LogPrint("Parent got command: %s\n",Input);
+      Arg = strchr(Input,'|');
+      if (!Arg)
+      {
+        LogPrint("ERROR: Unknown command (len=%d) '%s'\n",Len,Input);
+        continue; /* skip unknown lines */
+      }
+      Arg[0]='\0'; Arg++;	/* skip space */
+      while((Arg[0] != '\0') && isspace(Arg[0]))	Arg++;
+
+      /* feed command to child */
+      /* handle special commands (scheduler is the child) */
+      Fed=SchedulerCommand(Input,Arg);
+
+      /* if command needs child, find a child to feed it to */
+      while(!Fed)
+      {
+        Thread = GetChild(Input,IsUrgent);
+        if (Thread < 0)
+        {
+          if (SelectAnyData(0,0) & 0x02) /* wait for a child to become ready */
+          {
+            Thread = GetChild(Input,IsUrgent);
+          }
+        }
+        if (Thread >= 0)
+        {
+          if (CM[Thread].Status != ST_RUNNING)
+          {
+            ChangeStatus(Thread,ST_RUNNING);
+          }
+          if (Verbose) LogPrint("(a) Feeding child[%d]: '%s'\n",Thread,Arg);
+          memset(CM[Thread].Parm,'\0',MAXCMD);
+          strcpy(CM[Thread].Parm,Arg);
+          Input[Len++]='\n'; /* add a \n to end of Arg */
+          write(CM[Thread].ChildStdin,Arg,strlen(Arg));
+          Fed=1;
+        }
+        /* Thread == -1 is a timeout -- retry the request */
+        else if (Thread <= -2)
+        {
+          LogPrint("ERROR: No living engines for '%s'\n",Input);
+          Fed=1;	/* skip this bad command */
+        }
+      } /* while not Fed */
+    } /* if processing stdin input */
+    else
+    {
+      /* this will pause if it detects a fast loop */
+      Fed = DBProcessQueue(DB);
+    }
+    //    if (Verbose) printf("Time: %d  Fed=%d\n",(int)time(NULL),Fed);
+    if (Fed==0)
+    {
       /* What happens if there was no job to process? */
       StaleChild();
       if (SLOWDEATH)
-	{
-	Thread=0;
-	while((Thread < MaxThread) && (CM[Thread].Status != ST_RUNNING))
-		Thread++;
-	/* nothing running? Quit! */
-	if (Thread >= MaxThread) KeepRunning=0;
-	/* else, keep running */
-	} /* if SLOWDEATH */
-      }
-    } /* while reading a command */
+      {
+        Thread=0;
+        while((Thread < MaxThread) && (CM[Thread].Status != ST_RUNNING))
+          Thread++;
+        /* nothing running? Quit! */
+        if (Thread >= MaxThread) KeepRunning=0;
+        /* else, keep running */
+      } /* if SLOWDEATH */
+    }
+  } /* while reading a command */
 
   /* if it gets here, then either all children are dead or there is
      no more input */
 
   /* wait for all children to finish */
   while(RunCount > 0)
-    {
+  {
     SelectAnyData(0,0);
-    }
+  }
 
   /* tell children "no more food" by closing stdin */
   if (Verbose) LogPrint("Telling all children: No more items to process.\n");
   for(Thread=0; Thread < MaxThread; Thread++)
-    {
+  {
     if (CM[Thread].Status > ST_FREE) CheckClose(CM[Thread].ChildStdin);
-    }
+  }
 
   /* At this point, there should be no children */
   SLOWDEATH=1;
@@ -461,14 +461,14 @@ int	main	(int argc, char *argv[])
   /* clean up: kill children (should be redundant) */
   signal(SIGCHLD,SIG_IGN); /* ignore screams of death */
   for(Thread=0; (Thread < MaxThread); Thread++)
-    {
+  {
     if (CM[Thread].Status > ST_FREE)
-      {
+    {
       /* kill the children! kill! kill! */
       if (CM[Thread].Status == ST_RUNNING)
-	{
-	if (CM[Thread].IsDB) DBremoveChild(Thread,1,"Scheduler ended");
-	}
+      {
+        if (CM[Thread].IsDB) DBremoveChild(Thread,1,"Scheduler ended");
+      }
       CM[Thread].IsDB=0;
       CheckClose(CM[Thread].ChildStdin);
       CheckClose(CM[Thread].ChildStdinRev);
@@ -480,8 +480,8 @@ int	main	(int argc, char *argv[])
       CM[Thread].ChildStdoutRev = 0;
       ChangeStatus(Thread,ST_FREE);
       if (CM[Thread].ChildPid) kill(CM[Thread].ChildPid,SIGKILL);
-      }
     }
+  }
 
   /* scheduler cleanup */
   if (DB) DBErrorClose();  /* currently a noop */
