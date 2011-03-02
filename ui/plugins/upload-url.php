@@ -40,7 +40,7 @@ class upload_url extends FO_Plugin {
    Returns NULL on success, string on failure.
    *********************************************/
 
-  function Upload($Folder, $GetURL, $Desc, $Name) {
+  function Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level) {
     /* See if the URL looks valid */
     if (empty($Folder)) {
 $text = _("Invalid folder");
@@ -78,9 +78,15 @@ $text = _("Failed to insert upload record");
 $text = _("Failed to insert job record");
       return ($text);
     }
+    /* Set default values */
+    if (empty($Level) && !is_numeric($Level) || $Level < 0) 
+    {
+      $Level = 1;
+    }
     /* Prepare the job: job "wget" has jobqueue item "wget" */
     /** 2nd parameter is obsolete **/
-    $jobqueuepk = JobQueueAdd($jobpk, "wget", "$uploadpk - $GetURL", "no", NULL, NULL);
+    $jq_args = "$uploadpk - $GetURL --accept=$Accept --reject=$Reject -l $Level";
+    $jobqueuepk = JobQueueAdd($jobpk, "wget", $jq_args, "no", NULL, NULL);
     if (empty($jobqueuepk)) {
 $text = _("Failed to insert task 'wget' into job queue");
       return ($text);
@@ -115,18 +121,29 @@ $text1 = _("has been scheduled. It is");
         $GetURL = GetParm('geturl', PARM_TEXT);
         $Desc = GetParm('description', PARM_TEXT); // may be null
         $Name = GetParm('name', PARM_TEXT); // may be null
+        $Accept = GetParm('accept', PARM_TEXT); // may be null
+        $Reject = GetParm('reject', PARM_TEXT); // may be null
+        $Level = GetParm('level', PARM_TEXT); // may be null
         if (!empty($GetURL) && !empty($Folder)) {
-          $rc = $this->Upload($Folder, $GetURL, $Desc, $Name);
+          $rc = $this->Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level);
           if (empty($rc)) {
             /* Need to refresh the screen */
             $GetURL = NULL;
             $Desc = NULL;
             $Name = NULL;
+            $Accept = NULL;
+            $Reject = NULL;
+            $Level = NULL;
           }
           else {
 $text = _("Upload failed for");
             $V.= displayMessage("$text $GetURL: $rc");
           }
+        }
+        
+        /* Set default values */
+        if (empty($Level)) {
+          $Level = 1;
         }
         /* Set default values */
         if (empty($GetURL)) {
@@ -159,6 +176,22 @@ $text = _("(Optional) Enter a viewable name for this file:");
 $text = _("NOTE");
 $text1 = _(": If no name is provided, then the uploaded file name will be used.");
         $V.= "<b>$text</b>$text1<P />\n";
+$text = _("(Optional) Enter comma-separated lists of file name suffixes or patterns to accept:");
+        $V.= "<li>$text<br />\n";
+        $V.= "<INPUT type='text' name='accept' size=60 value='" . htmlentities($Accept) . "'/><P />\n";
+$text = _("NOTE");
+$text1 = _(": If any of the wildcard characters, *, ?, [ or ], appear in an element of acclist, it will be treated as a pattern, rather than a suffix.");
+        $V.= "<b>$text</b>$text1<P />\n";
+$text = _("(Optional) Enter comma-separated lists of file name suffixes or patterns to reject:");
+        $V.= "<li>$text<br />\n";
+        $V.= "<INPUT type='text' name='reject' size=60 value='" . htmlentities($Reject) . "'/><P />\n";
+$text = _("NOTE");
+$text1 = _(": If any of the wildcard characters, *, ?, [ or ], appear in an element of rejlist, it will be treated as a pattern, rather than a suffix.");
+        $V.= "<b>$text</b>$text1<P />\n";
+$text = _("(Optional) maximum recursion depth (inf or 0 for infinite):");
+        $V.= "<li>$text<br />\n";
+        $V.= "<INPUT type='text' name='level' size=60 value='" . htmlentities($Level) . "'/><P />\n";
+
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
 $text = _("Select optional analysis");
           $V.= "<li>$text<br />\n";
