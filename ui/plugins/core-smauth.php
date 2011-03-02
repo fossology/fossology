@@ -142,8 +142,9 @@ class core_smauth extends FO_Plugin {
     if (empty($R['user_name'])) {
       $sql = "INSERT INTO users
               (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
-       email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk)
-              VALUES ('$Email','HP User','','',5,'$Email','y','',1,1)";
+       email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk,
+       ui_preference)
+              VALUES ('$Email','HP User','','',5,'$Email','y','',1,1,'simple')";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
