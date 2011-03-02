@@ -58,6 +58,7 @@ void *DB;
 long GlobalUploadKey=-1;
 char GlobalTempFile[MAXCMD];
 char GlobalURL[MAXCMD];
+char GlobalParam[MAXCMD];
 int GlobalImportGold=1;	/* set to 0 to not store file in gold repository */
 gid_t ForceGroup=-1;
 
@@ -250,7 +251,7 @@ int	TaintURL	(char *Sin, char *Sout, int SoutSize)
 /*********************************************************
  GetURL(): Do the wget.
  *********************************************************/
-int	GetURL	(char *TempFile, char *URL)
+int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
 {
   char CMD[MAXCMD];
   char TaintedURL[MAXCMD];
@@ -258,7 +259,7 @@ int	GetURL	(char *TempFile, char *URL)
   int rc;
   FILE *Fin;
 #if 1
-  char WgetArgs[]="--no-check-certificate --progress=dot";
+  char WgetArgs[]="--no-check-certificate --progress=dot -rc -np -e robots=off";
 #else
   /* wget < 1.10 does not support "--no-check-certificate" */
   char WgetArgs[]="--progress=dot";
@@ -285,20 +286,34 @@ int	GetURL	(char *TempFile, char *URL)
      admin did not notice that they expired and not because of a hijacking
      attempt.
    ***/
+ 
+  struct stat sb;
+
+  /* Run from scheduler! delete the temp directory, /var/local/lib/fossology/agents/wget */
+  if (!stat(TempFileDir, &sb) && TempFile && TempFile[0])
+  {
+    memset(CMD,'\0',MAXCMD);
+    snprintf(CMD,MAXCMD-1, "rm -rf %s 2>&1", TempFileDir);
+    system(CMD);
+  }
 
   if (TempFile && TempFile[0])
-    {
+  {
     /* Delete the temp file if it exists */
     unlink(TempFile);
-    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s -O '%s' '%s' 2>&1",
-	PROXYFILE,WgetArgs,TempFile,TaintedURL);
-    }
-  else
-    {
-    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s '%s' 2>&1",
-	PROXYFILE,WgetArgs,TaintedURL);
-    }
-
+    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s -P %s %s %s 2>&1",
+        PROXYFILE,WgetArgs,TempFileDir,TaintedURL,GlobalParam);
+  }
+  else if(TempFileDir && TempFileDir[0])
+  {
+    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s -P %s %s %s 2>&1",
+      PROXYFILE,WgetArgs, TempFileDir, TaintedURL, GlobalParam);
+  }
+  else 
+  {
+    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s %s %s 2>&1",
+      PROXYFILE,WgetArgs,TaintedURL, GlobalParam);
+  }
   Fin = popen(CMD,"r");
   if (!Fin)
     {
@@ -319,7 +334,15 @@ int	GetURL	(char *TempFile, char *URL)
   InitHeartbeat();
 
   rc = pclose(Fin);  /* rc is the exit status */
-
+ 
+  /* Run from scheduler! tar /var/local/lib/fossology/agents/wget to one temp file */
+  if (!stat(TempFileDir, &sb) && TempFile && TempFile[0])
+  {
+    memset(CMD,'\0',MAXCMD);
+    snprintf(CMD,MAXCMD-1, "tar -cvvf %s -C %s ./ 2>&1", TempFile, TempFileDir);
+    system(CMD);
+  }
+  
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
 	{
 	printf("ERROR upload %ld Download failed\n",GlobalUploadKey);
@@ -408,20 +431,23 @@ void    SetEnv  (char *S, char *TempFileDir)
   /* third value is the URL location -- taint any single-quotes */
   SLen=0;
   GLen=0;
-  while((GLen < MAXCMD-4) && S[SLen])
-    {
+  while((GLen < MAXCMD-4) && S[SLen] && !isspace(S[SLen]))
+  {
     if ((S[SLen] == '\'') || isspace(S[SLen]) || !isprint(S[SLen]))
-	{
-	sprintf(GlobalURL+GLen,"%%%02x",(unsigned char)(S[SLen]));
-	GLen += 3;
-	}
+    {
+      sprintf(GlobalURL+GLen,"%%%02x",(unsigned char)(S[SLen]));
+      GLen += 3;
+    }
     else GlobalURL[GLen++] = S[SLen];
     SLen++;
-    }
+  }
+  S+=SLen;
 
+  while(S[0] && isspace(S[0])) S++; /* skip spaces */
+  strncpy(GlobalParam, S, sizeof(GlobalParam)); // get the parameters, kind of " --accept=rpm --reject=fosso -l 1* "
 #if 1
-  printf("  LOG upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s\n  URL=%s\n",GlobalUploadKey,
-  	GlobalUploadKey,GlobalTempFile,GlobalURL);
+  printf("  LOG upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s\n  URL=%s  GlobalParam=%s\n",GlobalUploadKey,
+  	GlobalUploadKey,GlobalTempFile,GlobalURL,GlobalParam);
 #endif
 } /* SetEnv() */
 
@@ -434,8 +460,11 @@ void	Usage	(char *Name)
   printf("  -i  :: Initialize the DB connection then exit (nothing downloaded)\n");
   printf("  -g group :: Set the group on processed files (e.g., -g fossy).\n");
   printf("  -G  :: Do NOT copy the file to the gold repository.\n");
-  printf("  -d dir :: directory to use file for temporary file storage\n");
+  printf("  -d dir :: directory for downloaded file storage\n");
   printf("  -k key :: upload key identifier (number)\n");
+  printf("  -A acclist :: Specify comma-separated lists of file name suffixes or patterns to accept.\n");
+  printf("  -R rejlist :: Specify comma-separated lists of file name suffixes or patterns to reject.\n");
+  printf("  -l depth :: Specify recursion maximum depth level depth.  The default maximum depth is 5.\n");
   printf("  OBJ :: if a URL is listed, then it is retrieved.\n");
   printf("         if a file is listed, then it used.\n");
   printf("         if OBJ and Key are provided, then it is inserted into\n");
@@ -455,10 +484,11 @@ int	main	(int argc, char *argv[])
 
   memset(GlobalTempFile,'\0',MAXCMD);
   memset(GlobalURL,'\0',MAXCMD);
+  memset(GlobalParam,'\0',MAXCMD);
+  memset(Parm,'\0',MAXCMD);
   GlobalUploadKey = -1;
-
   /* Process command-line */
-  while((c = getopt(argc,argv,"d:Gg:ik:")) != -1)
+  while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:")) != -1)
     {
     switch(c)
 	{
@@ -483,6 +513,15 @@ int	main	(int argc, char *argv[])
 		if (!GlobalTempFile[0])
 			strcpy(GlobalTempFile,"wget.default_download");
 		break;
+        case 'A':
+                sprintf(GlobalParam, "%s -A %s ",GlobalParam, optarg);
+                break;
+        case 'R':
+                sprintf(GlobalParam, "%s -R %s ",GlobalParam, optarg);
+                break;
+        case 'l':
+                sprintf(GlobalParam, "%s -l %s ",GlobalParam, optarg);
+                break;
 	default:
 		Usage(argv[0]);
 		exit(-1);
@@ -528,7 +567,7 @@ int	main	(int argc, char *argv[])
       alarm(60);
       Heartbeat(0);
       if (Debug) printf("It's a URL\n");
-      if (GetURL(GlobalTempFile,GlobalURL) != 0)
+      if (GetURL(GlobalTempFile,GlobalURL,TempFileDir) != 0)
 	{
 	printf("ERROR: Download of %s failed.\n",GlobalURL);
 	fflush(stdout);
@@ -565,10 +604,22 @@ int	main	(int argc, char *argv[])
     Heartbeat(0);
 	/* 3 parameters: uploadpk downloadfile url */
 	SetEnv(Parm,TempFileDir); /* set globals */
-	if (GetURL(GlobalTempFile,GlobalURL) == 0)
+        char TempDir[MAXCMD];
+        memset(TempDir,'\0',MAXCMD);
+        snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
+	if (GetURL(GlobalTempFile,GlobalURL,TempDir) == 0)
 		{
-		DBLoadGold();
-		unlink(GlobalTempFile);
+	  	  DBLoadGold();
+		  unlink(GlobalTempFile);
+                  struct stat sb;
+                  /* Run from scheduler! delete the temp directory, /var/local/lib/fossology/agents/wget */
+                  if (!stat(TempDir, &sb))
+                  {
+                    char CMD[MAXCMD];
+                    memset(CMD,'\0',MAXCMD);
+                    snprintf(CMD,MAXCMD-1, "rm -rf %s 2>&1", TempDir);
+                    system(CMD);
+                  }
 		}
 	else
 		{
