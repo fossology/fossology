@@ -88,6 +88,10 @@ int	CheckAgents	()
  List each license file found.
  Returns 1 on success, 0 on failure.
  *********************************************************/
+
+/* Disabled by Mark */
+
+/*
 int	CheckLicenses	()
 {
   FILE *Fin;
@@ -99,7 +103,7 @@ int	CheckLicenses	()
   Cksum *Checksum;
   char *String;
 
-  /* License.bsam contains relative filenames.  Go to the relative root. */
+  /* License.bsam contains relative filenames.  Go to the relative root.
   if (chdir(LICDIR))
     {
     printf("FATAL: Unable to access directory '%s'\n",LICDIR);
@@ -107,7 +111,8 @@ int	CheckLicenses	()
     }
   if (Verbose) printf("# chdir(%s)\n",LICDIR);
 
-  /* Open the bsam license cache. */
+  /* Open the bsam license cache.
+
   Fin = fopen(BSAMLIC,"rb");
   if (!Fin)
     {
@@ -132,7 +137,7 @@ int	CheckLicenses	()
      1. Make sure each file exists on the file system.
      2. Make sure each checksum exists in the database.
      3. Is the bsam file properly formatted?
-   *****/
+
   while(!feof(Fin))
     {
     c = fgetc(Fin);
@@ -148,7 +153,8 @@ int	CheckLicenses	()
       if (Verbose > 1) printf("# License.bsam: Type=%04x  Len=%d\n",Type,Len);
       switch(Type)
 	{
-	case 0x0001: /* Filename */
+	case 0x0001: /* Filename
+
 		memset(Data,'\0',sizeof(Data));
 		for(i=0; (i<Len) && (i<sizeof(Data)-1); i++)
 		  {
@@ -166,7 +172,8 @@ int	CheckLicenses	()
 		  printf("License.bsam: License does not exist: '%s'\n",Data);
 		  return(1);
 		  }
-		/* Compute checksum for the file */
+		/* Compute checksum for the file
+
 		Ftest = fopen(Data,"r");
 		if (!Ftest)
 		  {
@@ -185,7 +192,8 @@ int	CheckLicenses	()
 		free(Checksum);
 		fclose(Ftest);
 		break;
-	case 0x0110: /* function unique */
+	case 0x0110: /* function unique
+
 		memset(Data,'\0',sizeof(Data));
 		for(i=0; (i<Len) && (i<sizeof(Data)-1); i++)
 		  {
@@ -201,7 +209,8 @@ int	CheckLicenses	()
 		memset(SQL,'\0',sizeof(SQL));
 		snprintf(SQL,sizeof(SQL),"SELECT * FROM agent_lic_raw WHERE lic_unique = '%s';",Data);
 		DBaccess(DB,SQL);
-		/* Test against DB */
+		/* Test against DB
+
 		if (DBdatasize(DB) != 1)
 		  {
 		  printf("ERROR: License unqiue '%s' not found in database.\n",Data);
@@ -219,17 +228,19 @@ int	CheckLicenses	()
 		    }
 		  }
 		break;
-	} /* switch */
-      /* Align with byte position */
+	} /* switch
+      /* Align with byte position
       }
     if ((Len % 2) != 0) fgetc(Fin);
     } /* while !eof */
 
-  /* All done! */
+  /* All done!
+
   fclose(Fin);
   fflush(stdout);
   return(1);
-} /* CheckLicenses() */
+} /* CheckLicenses()
+/*
 
 /*********************************************************
  CheckPerm(): Make sure a specific repo path look correct.
@@ -491,7 +502,7 @@ int     ReadFileLine        (FILE *Fin)
   while(isspace(L[0])) L++;
   rc = L[0];
 
-  if (CheckRepo()) if (CheckLicenses()) CheckAgents(); 
+  if (CheckRepo()) CheckAgents();
   return(rc);
 } /* ReadFileLine() */
 
@@ -560,7 +571,7 @@ int	main	(int argc, char *argv[])
     }
   else /* !Scheduler */
     {
-    if (CheckRepo()) if (CheckLicenses()) CheckAgents(); 
+    if (CheckRepo()) CheckAgents();
     }
 
   DBclose(DB);
