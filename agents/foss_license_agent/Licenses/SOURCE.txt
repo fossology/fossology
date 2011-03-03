@@ -1,4 +1,0 @@
-http://opensource.org/licenses/index.php
-http://www.fsf.org/licensing/licenses/
-http://www.xfree86.org/3.3.6/COPYRIGHT2.html#3
-http://creativecommons.org/license/
