@@ -132,10 +132,9 @@ $text = _("Fatal internal ERROR! Cannot connect to the DataBase");
 			return(FALSE);
 		}
 		
-	  $webServer = $_SERVER['SERVER_NAME'];
 		$uri = Traceback_uri();
 		$params = "?mod=showjobs&show=detail&history=1&upload=";
-		$jobDetails = $webServer . $uri . $params;
+		$jobDetails =  $uri . $params;
 		
 		$SqlUploadList = "SELECT  DISTINCT ON (job_upload_fk) job_upload_fk," .
                      "upload_filename from job,upload " .
