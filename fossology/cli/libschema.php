@@ -535,11 +535,6 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 		print "FATAL! cannot initialize Agents\n";
 		$initFail = TRUE;
 	}
-	if(initBsamFiles($Debug) != 0)
-	{
-		print "FATAL! cannot initialize bsam license cache\n";
-		$initFail = TRUE;
-	}
 	if($initFail !== FALSE)
 	{
 	  print "One or more steps in the system initialization failed\n";
@@ -988,118 +983,6 @@ function initAgents($Debug = 1) {
 	}
 	return(0);
 } // InitAgents()
-
-/**
- * initBsamFiles
- * \brief Initialize bSam license cache datafiles.
- *
- * @param string $Debug, debug flag
- *
- */
-
-function initBsamFiles($Debug = 1)
-{
-	print "  Initializing data files.  This may take a few minutes.\n";
-	flush();
-	$CWD = getcwd();
-	global $DATADIR;
-	global $AGENTDIR;
-	global $PROJECTSTATEDIR;
-	global $PROJECTUSER;
-
-	if ($Debug) {
-		print "Going to $DATADIR/agents/licenses\n";
-	}
-	chdir("$DATADIR/agents/licenses");
-	$CMD = 'find . -type f | grep -v "\.meta" | sed -e "s@^./@@"';
-	$Filelist = explode("\n", shell_exec($CMD));
-	sort($Filelist);
-	$Realdir = "$PROJECTSTATEDIR/agents";
-	if (!is_dir($Realdir)) {
-		die("FATAL: Directory '$Realdir' does not exist. Aborting.\n");
-	}
-	if (!is_writable($Realdir)) {
-		die("FATAL: Directory '$Realdir' is not writable. Aborting.\n");
-	}
-	$Realfile = "$Realdir/License.bsam";
-	//print "DBUG: initBsFiles: Realfile is:$Realfile\n";
-	$Tempfile = $Realfile . ".new";
-	//print "DBUG: initBsFiles: Tempfile is:$Tempfile\n";
-	if (file_exists($Tempfile)) {
-		if (!unlink($Tempfile)) {
-			print "initBsamFiles: Unable to delete '$Tempfile'\n";
-			flush();
-			return(1);
-		}
-	}
-
-	$Count = 0;
-	print "    Processing " . (count($Filelist) - 1) . " license templates.\n";
-	flush();
-	print "    ";
-	foreach($Filelist as $File) {
-		if (empty($File)) {
-			continue;
-		}
-		$Count++;
-		if (file_exists($File . ".meta")) {
-			$CMD = "$AGENTDIR/Filter_License -Q -O -M '" . $File . ".meta' '$File' >> $Tempfile";
-		}
-		else {
-			$CMD = "$AGENTDIR/Filter_License -Q -O '$File' >> $Tempfile";
-		}
-		if ($Debug) {
-			print "$CMD\n";
-		}
-		else {
-			print ".";
-			flush();
-			if (($Count % 50) == 0) {
-				print "$Count\n    ";
-				flush();
-			}
-			system($CMD, $rc);
-			if ($rc != 0) {
-				print "Command failed: '$CMD'. Aborting.\n";
-				flush();
-				return(1);
-			}
-		}
-	}
-	/* Test the new file */
-	$CMD = "$AGENTDIR/bsam-engine -t '$Tempfile'";
-	if ($Debug) {
-		print "$CMD\n";
-	}
-	else {
-		system($CMD, $rc);
-		if ($rc != 0) {
-			print "FAILED: Unable to validate the new cache file.\n";
-			print "Command failed: '$CMD'. Aborting.\n";
-			flush();
-			return(1);
-		}
-	}
-	/* Move it into place */
-	@chgrp($Realfile, "fossy");
-	@chmod($Realfile, 0660);
-	$CMD = "cat '$Tempfile' > '$Realfile'";
-	if ($Debug) {
-		print "$CMD\n";
-	}
-	else {
-		system($CMD, $rc);
-		unlink($Tempfile);
-		if ($rc != 0) {
-			print "Command failed: '$CMD'. Aborting.\n";
-			flush();
-			return(1);
-		}
-	}
-	print "!\n";
-	flush();
-	return(0);
-} // initBsamFiles()
 
 /**
  * initPlugins
