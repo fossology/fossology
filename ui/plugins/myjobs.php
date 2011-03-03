@@ -110,8 +110,7 @@ $text10 = _("Failed");
 							</script>";
 		*/
 
-		/* @todo find out where $head is set or remove */
-		print $head . $Heading . $Tbl . $Refresh;
+		print $Heading . $Tbl . $Refresh;
 		
 		/*
 		$setTimer = "\n\n<script type=\"text/javascript\">
@@ -133,7 +132,7 @@ $text = _("Fatal internal ERROR! Cannot connect to the DataBase");
 			return(FALSE);
 		}
 		
-	  $webServer = $_SESSION['SERVER_NAME'];
+	  $webServer = $_SERVER['SERVER_NAME'];
 		$uri = Traceback_uri();
 		$params = "?mod=showjobs&show=detail&history=1&upload=";
 		$jobDetails = $webServer . $uri . $params;
