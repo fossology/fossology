@@ -71,6 +71,8 @@ class core_smauth extends FO_Plugin {
         $_SESSION['UserLevel'] = NULL;
         $_SESSION['UserEmail'] = NULL;
         $_SESSION['Folder'] = NULL;
+        $_SESSION['UiPref'] = NULL;
+        /* TODO: need to clear SiteMinder session */
       }
     }
 
@@ -79,7 +81,7 @@ class core_smauth extends FO_Plugin {
 
     /* Enable or disable plugins based on login status */
     $Level = PLUGIN_DB_NONE;
-    if (@$_SESSION['User']) {
+    if (@$_SESSION['User']) {  //TODO: also need to check SiteMinder session
       /* If you are logged in, then the default level is "Download". */
       if ("X" . $_SESSION['UserLevel'] == "X") {
         $Level = PLUGIN_DB_DOWNLOAD;
@@ -132,6 +134,12 @@ class core_smauth extends FO_Plugin {
       return;
     }
     $Email = str_replace("'", "''", $Email); /* protect DB */
+    $FolderName = substr($Email, 0, strpos($Email,'@')); 
+    $FolderName = trim($FolderName);
+    if (empty($FolderName)) {
+      return;
+    }
+    $FolderDes = "Folder created for " . $FolderName;
 
     /* See if the user exists */
     $sql = "SELECT * FROM users WHERE user_email = '$Email';";
@@ -140,14 +148,47 @@ class core_smauth extends FO_Plugin {
     $R = pg_fetch_assoc($result);
     pg_free_result($result);
     if (empty($R['user_name'])) {
+      //check if folder name exists under the parent?
+      pg_exec("BEGIN;");
+      $sql = "SELECT * FROM folderlist WHERE name = '$FolderName' AND parent = '1' AND foldercontents_mode = '1';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      if (!empty($row['name']))
+        return;
+      pg_free_result($result);
+      
+      //create folder for the user
+      $sql = "INSERT INTO folder (folder_name, folder_desc) VALUES ('$FolderName', '$FolderDes');";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+      $sql = "SELECT folder_pk FROM folder WHERE folder_name='$FolderName' AND folder_desc = '$FolderDes';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      //print_r($row);
+      if (empty($row['folder_pk']))
+        return;
+      $FolderPk = $row['folder_pk'];
+      //echo $FolderPk;
+      pg_free_result($result);
+
+      $sql = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('1','1','$FolderPk');";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+
+      //create user
       $sql = "INSERT INTO users
               (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
        email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk,
        ui_preference)
-              VALUES ('$Email','HP User','','',5,'$Email','y','',1,1,'simple')";
+              VALUES ('$Email','HP User','','',5,'$Email','y','agent_bucket,agent_copyright',$FolderPk,1,'simple')";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
+      pg_exec("COMMIT;");
     } /* no user */
 
     $sql = "SELECT * FROM users WHERE user_email = '$Email';";
@@ -205,6 +246,7 @@ class core_smauth extends FO_Plugin {
       case "XML":
         break;
       case "HTML":
+        /* TODO:logout need to clear SiteMinder session */
         $_SESSION['User'] = NULL;
         $_SESSION['UserId'] = NULL;
         $_SESSION['UserLevel'] = NULL;
