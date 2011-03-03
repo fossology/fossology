@@ -92,7 +92,8 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
 
-  /** filter license **/
+  /** filter license disabled by Mark **/
+  /*
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,"%s/Filter_License",AGENTDIR);
   for(i=0; i<NumCPU; i++)
@@ -101,8 +102,10 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
     fprintf(Fout,Rcmd,Cmd);
     fprintf(Fout,"\n");
     }
+  */
 
-  /** license analysis (uses bsam) ***/
+  /** license analysis (uses bsam) disabled by Mark **/
+  /*
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,"%s/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -T license -O n -- - %s/agents/License.bsam",AGENTDIR,PROJECTSTATEDIR);
   for(i=0; i<NumCPU1; i++)
@@ -111,6 +114,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
     fprintf(Fout,Rcmd,Cmd);
     fprintf(Fout,"\n");
     }
+  */
 
   /* nomos license Agent */
     memset(Cmd,'\0',sizeof(Cmd));
@@ -143,7 +147,8 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
       fprintf(Fout,"\n");
       }
 
-  /** license inspector (uses licinspect) ***/
+  /** license inspector (uses licinspect) disabled by Mark***/
+    /*
     memset(Cmd,'\0',sizeof(Cmd));
     snprintf(Cmd,sizeof(Cmd)-1,"%s/licinspect",AGENTDIR);
     for(i=0; i<NumCPU1; i++)
@@ -152,6 +157,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
       fprintf(Fout,Rcmd,Cmd);
       fprintf(Fout,"\n");
       }
+   */
 
   /** mimetype ***/
   memset(Cmd,'\0',sizeof(Cmd));
@@ -163,19 +169,23 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
     fprintf(Fout,"\n");
     }
 
-  /** specagent (it's fast, so only allocate one) ***/
+  /** specagent (it's fast, so only allocate one) disabled by Mark **/
+  /*
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,"%s/specagent",AGENTDIR);
   fprintf(Fout,"agent=specagent %s| ",CmdHost);
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
+  */
 
-  /** filter clean ***/
+  /** filter clean disabled by Mark **/
+  /*
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,"%s/filter_clean -s",AGENTDIR);
   fprintf(Fout,"agent=filter_clean %s| ",CmdHost);
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
+  */
 
   /** delagent -- host-less **/
   memset(Cmd,'\0',sizeof(Cmd));
