@@ -852,7 +852,7 @@ int	FindCmd	(char *Filename)
          { 
            /* .deb and .udeb as application/x-debian-package*/
            char CMDTemp[FILENAME_MAX];
-           sprintf(CMDTemp, "file %s |grep \'Debian binary package\'", Filename);
+           sprintf(CMDTemp, "file '%s' |grep \'Debian binary package\'", Filename);
            rc = system(CMDTemp);
            if (rc==0) // is one debian package
     	   {
@@ -873,7 +873,7 @@ int	FindCmd	(char *Filename)
              {		
                memset(CMDTemp, 0, FILENAME_MAX);
                /* get the file type */
-               sprintf(CMDTemp, "file %s", Filename);
+               sprintf(CMDTemp, "file '%s'", Filename);
                FILE *fp;
                char Output[FILENAME_MAX];
                /* Open the command for reading. */
@@ -2147,8 +2147,7 @@ int RemoveDir(char *dirpath)
   char RMcmd[FILENAME_MAX];
   int rc;
   memset(RMcmd, '\0', sizeof(RMcmd));
-  strcat(RMcmd,"rm -rf ");
-  strcat(RMcmd,dirpath);
+  snprintf(RMcmd, FILENAME_MAX -1, "rm -rf '%s'", dirpath);
   rc = system(RMcmd);
   return rc;
 } /* RemoveDir() */
