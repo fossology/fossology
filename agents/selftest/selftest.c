@@ -240,7 +240,7 @@ int	CheckLicenses	()
   fflush(stdout);
   return(1);
 } /* CheckLicenses()
-/*
+*/
 
 /*********************************************************
  CheckPerm(): Make sure a specific repo path look correct.
