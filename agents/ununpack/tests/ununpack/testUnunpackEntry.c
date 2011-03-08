@@ -22,65 +22,70 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* used funtions */
 int     UnunpackEntry(int argc, char *argv[]);
 
-/* test functions */
 
-#if 0
 /**
- * @brief when unpack end, do not delete all the unpacked files
- * quiet (generate no output).
- * force continue when unpack tool fails.
- * recursively unpack
+ * @brief when unpack end, do not delete the unpacked files
  */
 void testUnunpackEntryNormal()
 {
-  int argc = 5;
-  char *argv[] = {"../ununpack", "-qCR", "./test-data/testdata4unpack.7z", "-d", "./test-result/"};
-  deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
-  UnunpackEntry(argc, argv);
-  existed = file_dir_existed("./test-result/testdata4unpack.7z.dir/testdata4unpack/libfossagent.a.dir/libfossagent.o");
-  CU_ASSERT_EQUAL(existed, 1); // ./test-result/ is existing
+  int Pid = fork();
+  if (Pid < 0)
+  {
+    fprintf(stderr,"Fork error!\n");
+    exit(-1);
+  }
+  else  if (Pid == 0)
+  {
+    int argc = 5;
+    char *argv[] = {"../ununpack", "-qCR", "./test-data/testdata4unpack.7z", "-d", "./test-result/"};
+    deleteTmpFiles("./test-result/");
+    existed = file_dir_existed("./test-result/");
+    CU_ASSERT_EQUAL(existed, 0); // ./test-result/ does not exist
+    UnunpackEntry(argc, argv);
+    exit(0);
+  } else
+  {
+    int status;
+    waitpid(Pid, &status, 0);
+    existed = file_dir_existed("./test-result/testdata4unpack.7z.dir/testdata4unpack/libfossagent.a.dir/libfossagent.o");
+    CU_ASSERT_EQUAL(existed, 1); // the file above exists 
+  }
 }
-#endif
+
 
 /**
  * @brief when unpack end, delete all the unpacked files
  */
 void testUnunpackEntryNormalDeleteResult()
 {
-  int argc = 5;
-
-  char *argv[] = {"../ununpack", "-qCRLx", "./test-data/testdata4unpack.7z", "-d", "./test-result/"};
-  deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
-  UnunpackEntry(argc, argv);
-  existed = file_dir_existed("./test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
+  int Pid = fork();
+  if (Pid < 0)
+  {
+    fprintf(stderr,"Fork error!\n");
+    exit(-1);
+  }
+  else  if (Pid == 0)
+  {
+    int argc = 5;
+    char *argv[] = {"../ununpack", "-qCRx", "./test-data/testdata4unpack.7z", "-d", "./test-result/"};
+    deleteTmpFiles("./test-result/");
+    existed = file_dir_existed("./test-result/");
+    CU_ASSERT_EQUAL(existed, 0); // ./test-result/ does not exist
+    int rc = system("mkdir ./test-result; cp ./test-data/testdata4unpack/ununpack.c.Z ./test-result");
+    if (rc != 0) exit(-1);
+    UnunpackEntry(argc, argv);
+    exit(0);
+  } else
+  {
+    int status;
+    waitpid(Pid, &status, 0);
+    existed = file_dir_existed("./test-result/testdata4unpack.7z.dir/testdata4unpack/libfossagent.a.dir/libfossagent.o");
+    CU_ASSERT_EQUAL(existed, 0); // the file above does not exist
+    existed = file_dir_existed("./test-result/");
+    CU_ASSERT_EQUAL(existed, 0); // ./test-result/ does not exist 
+  }
 }
 
-#if 0
-/**
- * @brief when unpack end, do not delete all the unpacked files
- * the package is ext3 type
- * multy process
- */
-void testUnunpackEntryNormalMultyProcess1()
-{
-  int argc = 7;
-  char *argv[] = {"../ununpack", "-qCR", "-m", "5", "./test-data/testdata4unpack/ext3test-image", "-d", "./test-result/"};  
-  deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
-  UnunpackEntry(argc, argv);
-  existed = file_dir_existed("./test-result/libfossagent.a.dir/");
-  CU_ASSERT_EQUAL(existed, 1); // existing
-  printf("one start\n");
-}
-#endif
-
-/** only one multy process, otherwise will fail, please notice **/
 
 /**
  * @brief when unpack end, do not delete all the unpacked files
@@ -89,14 +94,28 @@ void testUnunpackEntryNormalMultyProcess1()
  */
 void testUnunpackEntryNormalMultyProcess()
 {
-  int argc = 5;
-  char *argv[] = {"../ununpack", "-qCR", "./test-data/testdata4unpack/rpm.tar", "-d", "./test-result/"}; 
-  deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
-  UnunpackEntry(argc, argv);
-  existed = file_dir_existed("./test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
-  CU_ASSERT_EQUAL(existed, 1); // existing
+  int Pid = fork();
+  if (Pid < 0)
+  {
+    fprintf(stderr,"Fork error!\n");
+    exit(-1);
+  }
+  else  if (Pid == 0)
+  {
+    int argc = 7;
+    char *argv[] = {"../ununpack", "-qCR", "-m", "5", "./test-data/testdata4unpack/rpm.tar", "-d", "./test-result/"}; 
+    deleteTmpFiles("./test-result/");
+    existed = file_dir_existed("./test-result/");
+    CU_ASSERT_EQUAL(existed, 0); // ./test-result/ does not exist
+    UnunpackEntry(argc, argv);
+    exit(0);
+  } else
+  {
+    int status;
+    waitpid(Pid, &status, 0);
+    existed = file_dir_existed("./test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
+    CU_ASSERT_EQUAL(existed, 1); // the file above exists 
+  }
 }
 
 /**
@@ -104,25 +123,30 @@ void testUnunpackEntryNormalMultyProcess()
  */
 void testUnunpackEntryOptionInvalid()
 {
-  int argc = 5;
-  char *argv[] = {"../ununpack", "-qCRs",
-         "./test-data/testdata4unpack/rpm.tar", "-d", "./test-result/"}; // option H is invalid
-  deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
-  
   int Pid = fork();
-  if (Pid == 0)
+  if (Pid < 0)
+  {     
+    fprintf(stderr,"Fork error!\n");    
+    exit(-1);     
+  }    
+  else if (Pid == 0)
   {
+    int argc = 5;
+    char *argv[] = {"../ununpack", "-qCRs",
+         "./test-data/testdata4unpack/rpm.tar", "-d", "./test-result/"}; // option H is invalid
+    deleteTmpFiles("./test-result/");
+    existed = file_dir_existed("./test-result/");
+    CU_ASSERT_EQUAL(existed, 0); // ./test-result/ does not exist
     UnunpackEntry(argc, argv);
+    exit(0);
   } else
   {
     int status;
     waitpid(Pid, &status, 0);
     int code = WEXITSTATUS(status);
     existed = file_dir_existed("./test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
-    CU_ASSERT_EQUAL(existed, 0); // not existing
-    CU_ASSERT_EQUAL(code, 25); 
+    CU_ASSERT_EQUAL(existed, 0); // the file above does not exist 
+    CU_ASSERT_EQUAL(code, 25); // the exit code of unpack agent is 25
   }
 }
 
@@ -130,7 +154,7 @@ CU_TestInfo UnunpackEntry_testcases[] =
 {
     {"Testing the function UnunpackEntry, option is invalid:", testUnunpackEntryOptionInvalid},
     {"Testing the function UnunpackEntry, multy process :", testUnunpackEntryNormalMultyProcess},
-//    {"Testing testUnunpackEntryNormal:", testUnunpackEntryNormal},
+    {"Testing testUnunpackEntryNormal:", testUnunpackEntryNormal},
     {"Testing the function UnunpackEntry, delete unpack result:", testUnunpackEntryNormalDeleteResult},
     CU_TEST_INFO_NULL
 };
