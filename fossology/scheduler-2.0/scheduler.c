@@ -53,8 +53,13 @@ char* process_name = "fossology-scheduler";
 #define PROJECT_GROUP "fossyology"
 #endif
 
+/* global flags */
 int verbose = 0;
 int closing = 0;
+
+/* user group and password of scheduler */
+struct group*  grp;
+struct passwd* pwd;
 
 /* ************************************************************************** */
 /* **** signals and events ************************************************** */
@@ -108,7 +113,7 @@ void prnt_sig(int signo)
     case SIGALRM:
       lprintf("SIGNALS: Scheduler received alarm signal, checking job states\n");
       event_signal(agent_update_event, NULL);
-      // TODO decide if want??? event_signal(database_update_event, NULL);
+      event_signal(database_update_event, NULL);
       alarm(CHECK_TIME);
       break;
   }
@@ -212,9 +217,6 @@ pid_t lock_scheduler()
  */
 void set_usr_grp()
 {
-  struct group*  grp;
-  struct passwd* pwd;
-
   /* make sure group exists */
   grp = getgrnam(PROJECT_GROUP);
   if(!grp)
@@ -520,6 +522,9 @@ int main(int argc, char** argv)
   memset(buffer, '\0', sizeof(buffer));
   verbose = 0;
 
+  /* make sure we are running as fossy */
+  set_usr_grp();
+
   /* ********************* */
   /* *** parse options *** */
   /* ********************* */
@@ -575,7 +580,6 @@ int main(int argc, char** argv)
   /* ********************************** */
   g_thread_init(NULL);
   g_type_init();
-  set_usr_grp();
   job_list_init();
   host_list_init();
   load_config();

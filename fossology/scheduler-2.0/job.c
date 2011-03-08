@@ -100,7 +100,9 @@ int is_active(int* job_id, job j, int* counter)
 }
 
 /**
- * Prints the jobs status to the output stream.
+ * Prints the jobs status to the output stream. The output will be in this
+ * format:
+ *   job:<id> status:<status> type:<agent type> priority:<priority> running:<# running> finished:<#finished> failed:<# failed>
  *
  * @param job_id the id number that the job was created with
  *   @note if the int pointed to by the job_id is value 0, that means
@@ -111,7 +113,7 @@ int is_active(int* job_id, job j, int* counter)
  */
 int job_sstatus(int* job_id, job j, GOutputStream* ostr)
 {
-  gchar* status_str = g_strdup_printf("job:%d status:%s type:%s, priority:%d running:%d finished:%d failed:%d",
+  gchar* status_str = g_strdup_printf("job:%d status:%s type:%s, priority:%d running:%d finished:%d failed:%d\n",
       j->id,
       status_string[j->status],
       j->agent_type,
@@ -120,7 +122,7 @@ int job_sstatus(int* job_id, job j, GOutputStream* ostr)
       g_list_length(j->finished_agents),
       g_list_length(j->failed_agents));
 
-  VERBOSE2("%s\n", status_str);
+  VERBOSE2("JOB_STATUS: %s", status_str);
   g_output_stream_write(ostr, status_str, strlen(status_str), NULL, NULL);
 
   if(*job_id == 0)
@@ -281,7 +283,7 @@ job job_init(char* type, int id)
 {
   job j = (job)calloc(1, sizeof(struct job_internal));
 
-  j->agent_type = type;
+  j->agent_type = g_strdup(type);
   j->running_agents =  NULL;
   j->finished_agents = NULL;
   j->failed_agents =   NULL;
@@ -320,6 +322,7 @@ void job_destroy(job j)
   g_list_free(j->running_agents);
   g_list_free(j->finished_agents);
   g_list_free(j->failed_agents);
+  g_free(j->agent_type);
   g_free(j->data);
 
   free(j);
@@ -381,6 +384,9 @@ void job_remove_agent(job j, void* a)
   TEST_NULV(j);
   TEST_NULV(a);
   j->finished_agents = g_list_remove(j->finished_agents, a);
+
+  if(j->finished_agents == NULL)
+    g_tree_remove(job_list, &j->id);
 }
 
 /**
@@ -489,11 +495,11 @@ void job_update(job j)
       j->failed_agents = NULL;
 
       if(restart == 0)
+      {
         job_transition(j, JB_FAILED);
+        g_tree_remove(job_list, &j->id);
+      }
     }
-
-    if(restart == 0)
-      g_tree_remove(job_list, &j->id);
   }
 }
 

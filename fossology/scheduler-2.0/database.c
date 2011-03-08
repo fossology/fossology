@@ -75,12 +75,12 @@ void database_destroy()
  */
 void database_reset_queue()
 {
-  database_exec("\
+  PQclear(database_exec("\
       UPDATE jobqueue \
         SET jq_starttime=null, \
             jq_endtext=null, \
             jq_schedinfo=null\
-        WHERE jq_endtime is NULL;");
+        WHERE jq_endtime is NULL;"));
 }
 
 /**
@@ -138,6 +138,8 @@ void database_update_event(void* unused)
     j = job_init(type, job_id);
     job_set_data(j, value, (pfile && pfile[0] != '\0'));
   }
+
+  PQclear(db_result);
 }
 
 /**

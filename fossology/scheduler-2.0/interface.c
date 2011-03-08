@@ -88,6 +88,7 @@ void* interface_thread(void* param)
 
   while(g_input_stream_read(conn->istr, &header, sizeof(header), NULL, NULL) != 0)
   {
+    memset(buffer, '\0', sizeof(buffer));
     if(g_input_stream_read_all(conn->istr, buffer, header.bytes_following, &size, NULL, NULL) == 0)
     {
       clprintf("ERROR: unable to read from interface socket, attempted to read %d bytes", header.bytes_following);
@@ -223,6 +224,7 @@ void* listen_thread(void* unused)
         interface_conn_init(new_connection));
   }
 
+  g_socket_listener_close(server_socket);
   return NULL;
 }
 
@@ -257,13 +259,16 @@ void interface_destroy()
   {
     i_terminate = 1;
     client = g_socket_client_new();
-    g_socket_client_connect_to_host(client, "127.0.0.1", i_port, NULL, NULL);
+    g_io_stream_close((GIOStream*)(g_socket_client_connect_to_host(client, "127.0.0.1", i_port, NULL, NULL)), NULL, NULL);
     g_thread_join(socket_thread);
 
     for(iter = client_threads; iter != NULL; iter = iter->next)
     {
       interface_conn_destroy(iter->data);
     }
+
+
+    g_object_unref(client);
   }
 }
 
