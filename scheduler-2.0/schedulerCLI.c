@@ -36,8 +36,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define DEFAULT_SETUP ""
 #endif
 
-int s;        ///< the socket that the CLI will use to communicate
-int verbose;  ///< the verbose flag for the cli
+int s;          ///< the socket that the CLI will use to communicate
+int verbose;    ///< the verbose flag for the cli
+int n_line = 1; ///< flag that indicates if the last thing printed ended in a new line
 
 /* ************************************************************************** */
 /* **** utility functions *************************************************** */
@@ -58,6 +59,24 @@ int network_write(void* buf, size_t count)
 
   /* send the actual message */
   return write(s, buf, count);
+}
+
+void interface_usage()
+{
+  /* print cli usage */
+  printf("FOSSology scheduler command line interface\n");
+  printf("for all options any prefix will work when sending command\n");
+  printf("usage:\n");
+  printf("  exit: close the connection to scheduler\n");
+  printf("  close: shutdown the scheduler gracefully\n");
+  printf("  pause <job id>: pauses a job indefinitely\n");
+  printf("  reload: reload the configuration information\n");
+  printf("  status: scheduler responds with status information\n");
+  printf("  status <job id>: get the status of all agent on specified job\n");
+  printf("  restart <job id>: restart a paused job\n");
+  printf("  verbose <level>: change the level of verbose for scheduler\n");
+  printf("  verbose <job id> <level>: change the verbose for all agents on a job\n");
+  printf("  database: causes the scheduler to check the job queue\n");
 }
 
 /* ************************************************************************** */
@@ -135,6 +154,7 @@ int main(int argc, char** argv)
   }
 
   /* listen to the scheulder */
+  interface_usage();
   while(!closing)
   {
     /* prepare for read */
@@ -149,17 +169,24 @@ int main(int argc, char** argv)
     {
       bytes = read(s, buffer, sizeof(buffer));
 
-      if(strncmp(buffer, "CLOSE", 5) == 0)
+      if(bytes == 0 || strncmp(buffer, "CLOSE", 5) == 0)
         closing = 1;
       else
-        printf("SCHEDULER: %s\n", buffer);
+        printf("SCHEDULER: %s", buffer);
     }
 
     /* check stdin */
     if(FD_ISSET(fileno(stdin), &fds))
     {
       bytes = read(fileno(stdin), buffer, sizeof(buffer));
+      if(buffer[0] == 'h')
+      {
+        interface_usage();
+        continue;
+      }
+
       bytes = network_write(buffer, strlen(buffer) - 1);
+
     }
 
     if(verbose) {

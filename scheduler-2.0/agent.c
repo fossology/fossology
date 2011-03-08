@@ -108,7 +108,9 @@ struct agent_internal
 };
 
 /**
- * TODO
+ * strings used to print the status of an agent. The status is actually an enum,
+ * which is just an integer, so this provides the status in a human readable
+ * format.
  */
 const char* status_strings[] = {
     "AG_FAILED",
@@ -127,10 +129,10 @@ const char* status_strings[] = {
  * This function will be called by g_tree_foreach() which is the reason for its
  * formatting. This will close all of the agent's pipes
  *
- * @param pid_ptr   the key that was used to store this agent (not needed by this function)
- * @param a         the agent that is being closed
- * @param excepted  there is one agent that we don't want to close the pipes on, this is it
- * @return always returns 0, TODO
+ * @param pid_ptr the key that was used to store this agent
+ * @param a the agent that is being closed
+ * @param excepted this is an agent we don't want to close, this is it
+ * @return always returns 0 to indicate that the traversal should continue
  */
 int agent_close_fd(int* pid_ptr, agent a, agent excepted)
 {
@@ -153,7 +155,7 @@ int agent_close_fd(int* pid_ptr, agent a, agent excepted)
  * @param pid_ptr pointer to key in g_tree, is not used in this function
  * @param a the agent that needs to be updated
  * @param unused data that is also not used in this function
- * @return always returns 0, TODO
+ * @return always returns 0 to indicate that the traversal should continue
  */
 int update(int* pid_ptr, agent a, gpointer unused)
 {
@@ -190,26 +192,30 @@ int update(int* pid_ptr, agent a, gpointer unused)
 }
 
 /**
- * TODO
+ * GTraversalFunction that kills all of the agents. This is used for an unclean
+ * death since all of the child processes will be sent a kill signal instead of
+ * existing cleanly.
  *
- * @param name
- * @param a
+ * @param pid the process id associated with the agent
+ * @param a pointer to the information associated with an agent
  * @param unused
- * @return
+ * @return always returns 0 to indicate that the traversal should continue
  */
-int agent_kill(char* name, agent a, gpointer unused)
+int agent_kill(int* pid, agent a, gpointer unused)
 {
   kill(a->pid, SIGKILL);
   return 0;
 }
 
 /**
- * TODO
+ * GTraversalFunction that will test all of the agents. This will create
+ * a job and an agent for each type of agent and traverses the meta_agent
+ * tree instead of the agent tree.
  *
- * @param name
- * @param ma
+ * @param name the name of the meta agent (e.g. "nomos", "copyright", etc...)
+ * @param ma the meta_agent structure needed for agent creation
  * @param unused
- * @return
+ * @return always returns 0 to indicate that the traversal should continue
  */
 int agent_test(char* name, meta_agent ma)
 {
@@ -223,12 +229,7 @@ int agent_test(char* name, meta_agent ma)
  * send SPAWNED, then it will wait for any other information from the agent.
  * Information that it can receive includes:
  *
- *  1:      This should be sent only once when the agent is ready for data
- *  2:      The agent has finished execution and is closing
- *  3:      The agent has been killed by the scheduler, usually for lack of heart beat
- *          If an agent has actually died, the heart beat should take care of this
- *  4::%d   registers the heart beat for the agent, the number provided should be increasing
- * <other>: Will be written to the agents log as debugging information
+ * TODO list things that can be received
  *
  * @param a the agent that will be listened on
  */
@@ -314,8 +315,8 @@ void agent_listen(agent a)
 /**
  * Spawns a new agent using the command passed in using the meta agent. This
  * function will call the fork and exec necessary to create a new agent. As a
- * result what this function does will change depending on if it is running
- * in the child or the parent.
+ * result what this function does will change depending on if it is running in
+ * the child or the parent.
  *
  * child:
  *   will duplicate the stdin, stdout, and stderr pipes for printing to the
@@ -375,8 +376,8 @@ void* agent_spawn(void* passed)
     }
 
     /* we should never reach here */
-    clprintf("ERROR %s.%d: JOB[%d].AGENT[%d] exec failed\nERROR errno is: %s\n",
-        __FILE__, __LINE__, job_id(a->owner), getpid(), strerror(errno));
+    clprintf("ERROR %s.%d: JOB[%d].%s[%d] exec failed\nERROR errno is: %s\n",
+        __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, getpid(), strerror(errno));
   }
   /* we are in the parent */
   else if(a->pid > 0)
@@ -387,20 +388,22 @@ void* agent_spawn(void* passed)
   /* error case */
   else
   {
-    clprintf("ERROR %s.%d: JOB[%d].AGENT[%d] for failed\nERROR errno is: %s\n",
-        __FILE__, __LINE__, job_id(a->owner), getpid(), strerror(errno));
+    clprintf("ERROR %s.%d: JOB[%d].%s[%d] for failed\nERROR errno is: %s\n",
+        __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, getpid(), strerror(errno));
   }
 
   return NULL;
 }
 
 /**
- * TODO
+ * Changes the status of the agent internal to the scheduler. This function
+ * is used to transition between agent states instead of a raw set of the status
+ * so that correct printing of the verbose message is guaranteed
  *
- * @param a
- * @param new_status
+ * @param a the agent to change the status for
+ * @param new_status the new status of the agent
  */
-void transition(agent a, agent_status new_status)
+void agent_transition(agent a, agent_status new_status)
 {
   VERBOSE3("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
         job_id(a->owner), a->meta_data->name, a->pid,
@@ -415,9 +418,9 @@ void transition(agent a, agent_status new_status)
 /**
  * Creates a new meta agent. This will take and parse the information necessary
  * for the creation of a new agent instance. The name of the agent, the cmd for
- * starting the agent, the number of these agents that can run simutaniously, and
- * any special conditions for this agent. This function is where the cmd will get
- * parsed to be passed as command line args to the new agent.
+ * starting the agent, the number of these agents that can run simutaniously,
+ * and any special conditions for this agent. This function is where the cmd
+ * will get parsed to be passed as command line args to the new agent.
  *
  * @param name the name of the agent (i.e. nomos, buckets, etc...)
  * @param cmd the command for starting the agent in a shell
@@ -579,11 +582,12 @@ agent agent_init(host host_machine, job j)
 }
 
 /**
- * Allocate and spawn a new agent based upon an old agent. This will spawn the new
- * agent
+ * Allocate and spawn a new agent based upon an old agent. This will spawn the
+ * new agent and set it up to analyze the same data that the old agent was
+ * working on. This is used when an agent fails but the job hasn't finished.
  *
- * @param a
- * @return
+ * @param a the agent that will be copied
+ * @return the new agent
  */
 agent agent_copy(agent a)
 {
@@ -605,10 +609,10 @@ agent agent_copy(agent a)
  * frees the memory associated with an agent.
  *
  * This include:
- *  all of the files that are open in the agent
- *  all of the pipes still open for the agent
- *  inform the os that the process can die using a waitpid()
- *  free the internal data structure of the agent
+ *  1. all of the files that are open in the agent
+ *  2. all of the pipes still open for the agent
+ *  3. inform the os that the process can die using a waitpid()
+ *  4. free the internal data structure of the agent
  *
  * @param a the agent to destroy
  */
@@ -633,14 +637,18 @@ void agent_destroy(agent a)
 /* ************************************************************************** */
 
 /**
- * TODO
+ * Event created when any number of agents die. This takes a NULL terminated
+ * list of pid's that will be iterated across. An agent_death_event should only
+ * be created for agents that have been moved to status AG_CLOSING and to get an
+ * agent in any other status is an error and will result in the agent being
+ * failed.
  *
- * @param pids
+ * @param pids NULL terminated list of pids
  */
 void agent_death_event(void* pids)
 {
   /* locals */
-  int* curr;      // the current pid being manipulated
+  pid_t* curr;      // the current pid being manipulated
   int  db = 0;    // flag to run a database update
   agent a;        // agent to be accessed
 
@@ -650,6 +658,9 @@ void agent_death_event(void* pids)
   for(curr = (int*)pids; *curr; curr++)
   {
     a = g_tree_lookup(agents, curr);
+
+    if(job_id(a->owner) >= 0)
+      db = 1;
 
     if(a->status != AG_CLOSING)
     {
@@ -661,9 +672,6 @@ void agent_death_event(void* pids)
     {
       agent_close(a);
     }
-
-    if(job_id(a->owner) >= 0)
-      db = 1;
   }
 
   if(db) database_update_event(NULL);
@@ -673,9 +681,12 @@ void agent_death_event(void* pids)
 }
 
 /**
- * TODO
+ * Event created when a new agent has been created. This means that the agent
+ * has been allocated internally and the fork() call has successfully executed.
+ * The agent has not yet communicated with the scheduler when this event is
+ * created.
  *
- * @param a
+ * @param a the agent that has been created.
  */
 void agent_create_event(agent a)
 {
@@ -685,21 +696,24 @@ void agent_create_event(agent a)
       job_id(a->owner), a->meta_data->name, a->pid);
 
   g_tree_insert(agents, &a->pid, a);
-  transition(a, AG_SPAWNED);
+  agent_transition(a, AG_SPAWNED);
   job_add_agent(a->owner, a);
 }
 
 /**
- * TODO
+ * Event created when an agent is ready for more data. This will event will be
+ * created when an agent first communicates with the scheduler, so this will
+ * handle changing its status to AG_RUNNING. This will also be created every
+ * time an agent finishes a block of data.
  *
- * @param a
+ * @param a the agent that is ready.
  */
 void agent_ready_event(agent a)
 {
   TEST_NULV(a);
   if(a->status == AG_SPAWNED)
   {
-    transition(a, AG_RUNNING);
+    agent_transition(a, AG_RUNNING);
     VERBOSE2("JOB[%d].%s[%d]: agent successfully created\n",
           job_id(a->owner), a->meta_data->name, a->pid);
   }
@@ -708,7 +722,7 @@ void agent_ready_event(agent a)
   {
     if(!job_is_open(a->owner))
     {
-      transition(a, AG_PAUSED);
+      agent_transition(a, AG_PAUSED);
       job_finish_agent(a->owner, a);
       job_update(a->owner);
     }
@@ -727,9 +741,12 @@ void agent_ready_event(agent a)
 }
 
 /**
- * TODO
+ * Event created when the scheduler receives a SIGALRM. This will loop over
+ * every agent and call the update function on it. This will kill any agents
+ * that are hung without heart beat or any agents that have stopped updating
+ * the number of item processed.
  *
- * @param unused
+ * @param unused needed since this an event, but should be NULL
  */
 void agent_update_event(void* unused)
 {
@@ -737,10 +754,12 @@ void agent_update_event(void* unused)
 }
 
 /**
- * TODO
+ * Used when trying to run the data that another copy of this agent failed on.
+ * This will be called by the job when updating and will only be called on an
+ * agent that already successfully completed.
  *
- * @param a
- * @param ref
+ * @param a the agent that will be restarted
+ * @param ref the agent to get the data from
  */
 void agent_restart(agent a, agent ref)
 {
@@ -761,15 +780,17 @@ void agent_restart(agent a, agent ref)
 }
 
 /**
- * TODO
+ * Fails an agent. This will move the agent status to AG_FAILED and send a
+ * SIGKILL to the relevant agent. It will also update the agents status within
+ * the job that owns it and close the associated communication thread.
  *
- * @param a
+ * @param a the agent that is failing.
  */
 void agent_fail(agent a)
 {
   TEST_NULV(a);
   kill(a->pid, SIGKILL);
-  transition(a, AG_FAILED);
+  agent_transition(a, AG_FAILED);
   job_fail_agent(a->owner, a);
   if(write(a->to_parent, "@@@1\n", 5) != 5)
   {
@@ -780,36 +801,38 @@ void agent_fail(agent a)
 }
 
 /**
- * TODO
+ * Closes an agent. This function should be called twice for every agent that
+ * completes execution correctly. The first time this will move the agent status
+ * to AG_CLOSING and tell the agent to close by printing "CLOSE" to the agent's
+ * pipe. The second time this will be called from within an agent_death_event.
+ * It will remove the agent from the job and join on it communication thread.
  *
  * @param a
  */
 void agent_close(agent a)
 {
-  lprintf("AGENT: %d.%s\n", a->pid, status_strings[a->status]);
   if(a->status != AG_CLOSING && a->status != AG_FAILED)
   {
-    transition(a, AG_CLOSING);
+    agent_transition(a, AG_CLOSING);
     aprintf(a, "CLOSE\n");
   }
   else
   {
-    job_remove_agent(a->owner, a);
-    // TODO change to detach when the scheduler is done
     g_thread_join(a->thread);
 
     VERBOSE2("JOB[%d].%s[%d]: successfully removed from the system\n",
           job_id(a->owner), a->meta_data->name, a->pid);
 
+    job_remove_agent(a->owner, a);
     g_tree_remove(agents, &a->pid);
   }
 }
 
 /**
- * TODO
+ * Gets the host that the agent is running on
  *
- * @param a
- * @return
+ * @param a the agent to get the host for
+ * @return the host the agent is running on
  */
 host agent_host(agent a)
 {
@@ -818,24 +841,42 @@ host agent_host(agent a)
 }
 
 /**
- * TODO
+ * Prints the status of the agent to the output stream provided. The formating
+ * for this is as such:
+ *   agent:<pid> host:<host> type:<type> status:<status> time:<time>
  *
  * @param a
  * @param ostr
  */
 void agent_print_status(agent a, GOutputStream* ostr)
 {
+  gchar* status_str;
+  char time_buf[64];
 
+  TEST_NULV(a);
+  TEST_NULV(ostr);
 
+  strftime(time_buf, sizeof(time_buf), "%F %T", localtime(&a->check_in));
+  status_str = g_strdup_printf("agent:%d host:%s type:%s status:%s time:%s\n",
+      a->pid,
+      host_name(a->host_machine),
+      a->meta_data->name,
+      status_strings[a->status],
+      time_buf);
 
+  VERBOSE2("AGENT_STATUS: %s", status_str);
+  g_output_stream_write(ostr, status_str, strlen(status_str), NULL, NULL);
+  g_free(status_str);
+  return;
 }
 
 /**
- * TODO
+ * Acts as a standard printf, but prints the agents instead of stdout. This is
+ * the main function used by the scheduler when communicating with the agents.
  *
- * @param a
- * @param fmt
- * @return
+ * @param a the agent to send the formated data to
+ * @param fmt the formating string for the data
+ * @return if the print was successful
  */
 int aprintf(agent a, const char* fmt, ...)
 {
@@ -864,12 +905,15 @@ int aprintf(agent a, const char* fmt, ...)
 }
 
 /**
- * TODO
+ * Write information to the communication thread for the agent. This is used
+ * when the scheduler needs to wake up or kill the thread used to talk to the
+ * agent. When using this function, one should always print "@@@..." where ...
+ * is the message that is actually getting sent.
  *
- * @param a
- * @param buf
- * @param count
- * @return
+ * @param a the agent to send the information to
+ * @param buf the actual data
+ * @param count the number of bytes to write to the agent
+ * @return returns if the write was successful
  */
 ssize_t agent_write(agent a, const void* buf, size_t count)
 {
@@ -881,7 +925,8 @@ ssize_t agent_write(agent a, const void* buf, size_t count)
 /* ************************************************************************** */
 
 /**
- * TODO
+ * Calls the agent test function for every type of agent. This is used when
+ * either the -t or -T option are used upon scheduler creation.
  */
 void test_agents()
 {
@@ -889,7 +934,9 @@ void test_agents()
 }
 
 /**
- * TODO
+ * Call the agent_kill function for every agent within the system. This will
+ * send a SIGKILL to every child process of the scheduler. Used when shutting
+ * down the scheduler.
  */
 void kill_agents()
 {
@@ -897,7 +944,9 @@ void kill_agents()
 }
 
 /**
- * TODO
+ * destroys both the meta agent and agent lists. This is used when the scheduler
+ * is cleanly shutting down or when the scheduler is reloading its configuration
+ * data.
  */
 void agent_list_clean()
 {
@@ -908,12 +957,13 @@ void agent_list_clean()
 }
 
 /**
- * TODO
+ * Creates a new meta agent and adds it to the list of meta agents. This will
+ * parse the shell command that will start the agent process.
  *
- * @param name
- * @param cmd
- * @param max
- * @param spc
+ * @param name the name of the meta agent (e.g. "nomos", "copyright", etc...)
+ * @param cmd the shell command used to the run the agent
+ * @param max the max number of this type of agent that can run concurrently
+ * @param spc anything special about the agent type
  */
 int add_meta_agent(char* name, char* cmd, int max, int spc)
 {
@@ -955,9 +1005,11 @@ int is_meta_agent(char* name)
 }
 
 /**
- * TODO
+ * Gets the number of agents that still exist within the scheduler. Not
+ * all of these agents are necessarily associated with a child process, but
+ * most should be.
  *
- * @return
+ * @return the number of agents in the agent tree
  */
 int num_agents()
 {
