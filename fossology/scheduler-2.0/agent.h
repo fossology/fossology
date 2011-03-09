@@ -110,7 +110,7 @@ ssize_t agent_write(agent a, const void* buf, size_t count);
 /* **** static functions and meta agents ************************************ */
 /* ************************************************************************** */
 
-void test_agents();
+void test_agents(host h);
 void kill_agents();
 void agent_list_clean();
 int  add_meta_agent(char* name, char* cmd, int max, int spc);

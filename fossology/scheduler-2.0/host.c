@@ -69,20 +69,23 @@ int find_host(char* host_name, host h, struct find_struct* fs)
   return 0;
 }
 
-/* ************************************************************************** */
-/* **** Contructor Destructor *********************************************** */
-/* ************************************************************************** */
-
 /**
  * TODO
  *
- * @param max
+ * @param host_name
+ * @param h
+ * @param func
+ * @return
  */
-void host_list_init()
+int for_host(char* host_name, host h, void(*func)(host))
 {
-  if(host_list == NULL)
-    host_list = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)host_destroy);
+  func(h);
+  return 0;
 }
+
+/* ************************************************************************** */
+/* **** Contructor Destructor *********************************************** */
+/* ************************************************************************** */
 
 /**
  * TODO
@@ -114,6 +117,8 @@ void host_init(char* name, char* address, char* agent_dir, int max)
   h->max = max;
   h->running = 0;
 
+  if(host_list == NULL)
+      host_list = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)host_destroy);
   g_tree_insert(host_list, h->name, h);
 }
 
@@ -194,6 +199,16 @@ host get_host(int num)
 host name_host(char* name)
 {
   return g_tree_lookup(host_list, name);
+}
+
+/**
+ * Calls the given function, passing each host as an argument to the function
+ *
+ * @param callback the function to call on every host
+ */
+void for_each_host(void(*callback)(host))
+{
+  g_tree_foreach(host_list, (GTraverseFunc)for_host, callback);
 }
 
 /**

@@ -69,9 +69,10 @@ struct meta_agent_internal
 {
     char name[256];             ///< the name associated with this agent i.e. nomos, copyright...
     char raw_cmd[MAX_CMD + 1];  ///< the raw command that will start the agent, used for ssh
-    char* parsed_cmd[MAX_ARGS]; ///< the parsed set of commands used to run the agent on localhost
     int max_run;                ///< the maximum number that can run at once -1 if no limit
     int special;                ///< any special condition associated with the agent
+    char* version;              ///< the version of the agent that is running on all hosts
+    int valid;                  ///< flag indicating if the meta_agent is valid
 };
 
 /**
@@ -214,13 +215,13 @@ int agent_kill(int* pid, agent a, gpointer unused)
  *
  * @param name the name of the meta agent (e.g. "nomos", "copyright", etc...)
  * @param ma the meta_agent structure needed for agent creation
- * @param unused
+ * @param h the host to start the agent on
  * @return always returns 0 to indicate that the traversal should continue
  */
-int agent_test(char* name, meta_agent ma)
+int agent_test(char* name, meta_agent ma, host h)
 {
   job j = job_init(ma->name, -1);
-  agent_init(name_host("localhost"), j);
+  agent_init(h, j);
   return 0;
 }
 
@@ -235,11 +236,41 @@ int agent_test(char* name, meta_agent ma)
  */
 void agent_listen(agent a)
 {
+  /* status locals */
+  static GStaticMutex version_lock = G_STATIC_MUTEX_INIT;
+
   /* locals */
   char buffer[1024];          // buffer to store c strings read from agent, size is arbitraryssed
   int i;                      // simple indexing variable
 
   TEST_NULV(a);
+
+  /* validate the agent version */
+  if(fgets(buffer, sizeof(buffer), a->read) == NULL)
+  {
+    clprintf("T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
+        __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
+    g_thread_exit(NULL);
+  }
+
+  g_static_mutex_lock(&version_lock);
+  buffer[strlen(buffer) - 1] = '\0';
+  if(a->meta_data->version == NULL && a->meta_data->valid)
+  {
+    a->meta_data->version = g_strdup(buffer);
+    VERBOSE2("META_AGENT[%s] version is: \"%s\"\n", a->meta_data->name, buffer);
+  }
+  else if(strcmp(a->meta_data->version, buffer) != 0)
+  {
+    clprintf("ERROR %s.%d: META_DATA[%s] invalid agent spawn check\n", __FILE__, __LINE__, a->meta_data->name);
+    clprintf("ERROR: meta_datd: \"%s\" != received: \"%s\"", a->meta_data->version, buffer);
+    a->meta_data->valid = 0;
+    agent_fail(a);
+    return;
+  }
+  g_static_mutex_unlock(&version_lock);
+
+  /* enter listening loop */
   while(a->status == AG_CREATED || a->status == AG_SPAWNED || a->status == AG_RUNNING)
   {
     /* get message from agent */
@@ -247,6 +278,7 @@ void agent_listen(agent a)
     {
       clprintf("T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
           __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
+      g_thread_exit(NULL);
     }
 
     if(TVERBOSE3)
@@ -334,7 +366,9 @@ void* agent_spawn(void* passed)
 {
   /* locals */
   agent a = (agent)passed;    // the agent that is being spawned
-  char* args[MAX_ARGS + 1];   // the arguments that will be passed to the child
+  gchar* tmp;                 // pointer to temporary string
+  gchar** args;               // the arguments that will be passed to the child
+  int argc;                   // the number of arguments parsed
   char buffer[2048];          // character buffer
 
   TEST_NULL(a, NULL);
@@ -344,7 +378,7 @@ void* agent_spawn(void* passed)
     /* set the child's stdin and stdout to use the pipes */
     dup2(a->from_parent, fileno(stdin));
     dup2(a->to_parent, fileno(stdout));
-    //dup2(a->to_parent, fileno(stderr));
+    dup2(a->to_parent, fileno(stderr));
 
     /* close all the unnecessary file descriptors */
     g_tree_foreach(agents, (GTraverseFunc)agent_close_fd, a);
@@ -356,9 +390,9 @@ void* agent_spawn(void* passed)
     /* were parsed when the meta_agent was created    */
     if(strcmp(host_address(a->host_machine), "localhost") == 0)
     {
-      sprintf(buffer, "%s/%s", AGENT_DIR, a->meta_data->parsed_cmd[0]);
-      memcpy(args, a->meta_data->parsed_cmd, sizeof(a->meta_data->parsed_cmd));
-      args[0] = buffer;
+      g_shell_parse_argv(a->meta_data->raw_cmd, &argc, &args, NULL);
+      tmp = args[0];
+      args[0] = g_strdup_printf("%s/%s", AGENT_DIR, tmp);
       execv(args[0], args);
     }
     /* otherwise the agent will be started using ssh   */
@@ -367,6 +401,7 @@ void* agent_spawn(void* passed)
     /* command as the last argument to the ssh command */
     else
     {
+      args = g_new(char*, 4);
       sprintf(buffer, "%s/%s", host_agent_dir(a->host_machine), a->meta_data->raw_cmd);
       args[0] = "/usr/bin/ssh";
       args[1] = host_address(a->host_machine);
@@ -433,8 +468,6 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc)
   /* locals */
   meta_agent ma;
   char cpy[MAX_CMD + 1];
-  char* loc_1, * loc_2;
-  int i = 0;
 
   /* test inputs */
   if(!name || !cmd)
@@ -457,39 +490,11 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc)
   strcpy(cpy, cmd);
   strcpy(ma->name, name);
   strcpy(ma->raw_cmd, cmd);
+  strcat(ma->raw_cmd, " scheduler_start");
   ma->max_run = max;
   ma->special = spc;
-  memset(ma->parsed_cmd, 0, sizeof(ma->parsed_cmd));
-
-  /* parse the command like a normal command line argument */
-  loc_1 = cpy;
-  while(loc_1)
-  {
-    if(*loc_1 == '"')
-    {
-      loc_2 = strchr(loc_1 + 1, '"');
-      if(loc_2 != NULL)
-        *loc_2 = 0;
-      ma->parsed_cmd[i] = (char*)calloc(1, strlen(loc_1 + 1) + 1);
-      strcpy(ma->parsed_cmd[i++], loc_1 + 1);
-      if(loc_2 == NULL)
-        loc_1 = NULL;
-      else
-        loc_1 = loc_2 + 2;
-    }
-    else
-    {
-      loc_2 = strchr(loc_1, ' ');
-      if(loc_2 != NULL)
-        *loc_2 = 0;
-      ma->parsed_cmd[i] = (char*)calloc(1, strlen(loc_1) + 1);
-      strcpy(ma->parsed_cmd[i++], loc_1);
-      if(loc_2 == NULL)
-        loc_1 = NULL;
-      else
-        loc_1 = loc_2 + 1;
-    }
-  }
+  ma->version = NULL;
+  ma->valid = 1;
 
   return ma;
 }
@@ -502,14 +507,8 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc)
  */
 void meta_agent_destroy(meta_agent ma)
 {
-  int i;
-
-  TEST_NULV(ma)
-  for(i = 0; ma->parsed_cmd[i]; i++)
-  {
-    free(ma->parsed_cmd[i]);
-  }
-
+  TEST_NULV(ma);
+  g_free(ma->version);
   free(ma);
 }
 
@@ -539,6 +538,13 @@ agent agent_init(host host_machine, job j)
   a = (agent)calloc(1, sizeof(struct agent_internal));
   a->meta_data = g_tree_lookup(meta_agents, job_type(j));
   a->status = AG_CREATED;
+
+  /* check if the agent is valid */
+  if(!a->meta_data->valid)
+  {
+    ERROR("agent %s has been invalidated by version information");
+    return NULL;
+  }
 
   /* create the pipes between the child and the parent */
   if(pipe(parent_to_child) != 0)
@@ -927,10 +933,12 @@ ssize_t agent_write(agent a, const void* buf, size_t count)
 /**
  * Calls the agent test function for every type of agent. This is used when
  * either the -t or -T option are used upon scheduler creation.
+ *
+ * @param h the host to start the agents on,
  */
-void test_agents()
+void test_agents(host h)
 {
-  g_tree_foreach(meta_agents, (GTraverseFunc)agent_test, NULL);
+  g_tree_foreach(meta_agents, (GTraverseFunc)agent_test, h);
 }
 
 /**
