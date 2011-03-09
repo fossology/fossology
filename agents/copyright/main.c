@@ -862,7 +862,7 @@ int main(int argc, char** argv)
       exit(-1);
     }
 
-    scheduler_connect();
+    scheduler_connect(argc, argv);
     while((input = scheduler_next()) != NULL)
     {
       upload_pk = atol(input);

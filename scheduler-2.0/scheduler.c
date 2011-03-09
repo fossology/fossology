@@ -297,6 +297,34 @@ void load_config()
 
   /* clear all previous configurations */
   agent_list_clean();
+  host_list_clean();
+
+  /* load the scheduler configuration */
+  istr = fopen("Scheduler.conf", "r"); //< change file path
+  while(fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
+  {
+    /* skip comments and blank lines */
+    if(buffer[0] == '#');
+    else if(buffer[0] == '\0');
+    /* check the port that the interface wil use */
+    else if(strncmp(buffer, "port=", 5) == 0 && !is_port_set())
+      set_port(atoi(&buffer[5]));
+    /* check for the list of available hosts */
+    else if(strncmp(buffer, "hosts:", 6) == 0)
+    {
+      while(fscanf(istr, "%s %s %s %d", name, cmd, buffer, &max) == 4)
+      {
+        if(strcmp(cmd, "localhost") == 0)
+          strcpy(buffer, AGENT_DIR);
+
+        host_init(name, cmd, buffer, max);
+
+        VERBOSE2("CONFIG: added new host\n   name      = %s\n   address   = %s\n   directory = %s\n   max       = %d\n",
+            name, cmd, buffer, max);
+      }
+    }
+  }
+  fclose(istr);
 
   /* load the configureation for the agents */
   while((ep = readdir(dp)) != NULL)
@@ -361,34 +389,7 @@ void load_config()
   }
   closedir(dp);
 
-  /* load the configuration for the hosts */
-  // TODO
-
-  /* load the scheduler configuration */
-  istr = fopen("Scheduler.conf", "r"); //< change file path
-  while(fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
-  {
-    /* skip comments and blank lines */
-    if(buffer[0] == '#');
-    else if(buffer[0] == '\0');
-    /* check the port that the interface wil use */
-    else if(strncmp(buffer, "port=", 5) == 0 && !is_port_set())
-      set_port(atoi(&buffer[5]));
-    /* check for the list of available hosts */
-    else if(strncmp(buffer, "hosts:", 6) == 0)
-    {
-      while(fscanf(istr, "%s %s %s %d", name, cmd, buffer, &max) == 4)
-      {
-        if(strcmp(cmd, "localhost") == 0)
-          strcpy(buffer, AGENT_DIR);
-
-        host_init(name, cmd, buffer, max);
-
-        VERBOSE2("CONFIG: added new host\n   name      = %s\n   address   = %s\n   directory = %s\n   max       = %d\n",
-            name, cmd, buffer, max);
-      }
-    }
-  }
+  for_each_host(test_agents);
 }
 
 /**
@@ -471,56 +472,39 @@ gint int_compare(gconstpointer a, gconstpointer b, gpointer user_data)
 /* ************************************************************************** */
 
 /**
+ * main function for FOSSology scheduler, does command line parsing,
+ * Initialization and then simply enters the event loop.
  *
- * @param app_name
- */
-void usage(char* app_name)
-{
-  fprintf(stderr, "Usage: %s [options]\n", app_name);
-  fprintf(stderr, "  options:\n");
-  fprintf(stderr, "    -d :: Run as a daemon, causes init to own the process\n");
-  fprintf(stderr, "    -h :: Print the usage for the program and exit\n");
-  fprintf(stderr, "    -i :: Initialize database connection and exit\n");
-  fprintf(stderr, "    -k :: kills all running schedulers and exit\n");
-  fprintf(stderr, "    -L :: Print to this file instead of default log file\n");
-  fprintf(stderr, "    -p :: set the port that the scheduler should listen on\n");
-  fprintf(stderr, "    -R :: reset any jobs that aren't complete when scheduler starts\n");
-  fprintf(stderr, "    -t :: Test run every type of agent, then quit\n");
-  fprintf(stderr, "    -T :: Test run every type of agent, then run normally\n");
-  fprintf(stderr, "    -v :: set verbose to true, used for debugging\n");
-}
-
-/**
- * @brief start point for the scheduler
- *
- * TODO change this to be more informative
- * Usage: fossology-scheduler [options] < 'typed command
- *   options:\n");
- *     -d :: Run as a daemon, causes init to own the process
- *     -h :: Print the usage for the program and exit
- *     -i :: Initialize the database and exit
- *     -L :: Print to this file instead of default log file
- *     -p :: set the port that the scheduler should listen on
- *     -t :: Test run every type of agent, then quit
- *     -T :: Test run every type of agent, then run normally
- *     -v :: set verbose to true, used for debugging
- *
- * @param argc
- * @param argv
- * @return
+ * @param argc the command line argument cound
+ * @param argv the command line argument values
+ * @return if the program ran correctly
  */
 int main(int argc, char** argv)
 {
   /* locals */
-  int db_reset = 0;   // flag to reset the job queue upon database connection
-  int c;              // used for parsing the arguments
-  int rc;             // destination of return status for system calls
-  int test = 0;       // flag to run the tests before starting scheduler
-  char buffer[2048];  // character buffer, used multiple times
+  gboolean db_reset = FALSE;  // flag to reset the job queue upon database connection
+  gboolean ki_sched = FALSE;  // flag that indicates that the scheduler will be killed after start
+  gboolean db_init  = FALSE;  // flag indicating a database test
+  gboolean s_daemon = FALSE;  // flag indicating if the scheduler should run as a daemon
+  gboolean test_die = FALSE;  // flag to run the tests then die
+  int port = -1;              // the port the scheduler will listen on
+  char* log = NULL;           // used when a different log from the default is used
+  GOptionContext* options;    // option context used for command line parsing
+  int rc;                     // used for return values of
 
-  /* initialize memory */
-  memset(buffer, '\0', sizeof(buffer));
-  verbose = 0;
+  /* the options for the command line parser */
+  GOptionEntry entries[] =
+  {
+      { "daemon",   'd', 0, G_OPTION_ARG_NONE,   &s_daemon, "Run scheduler as daemon"                     },
+      { "database", 'i', 0, G_OPTION_ARG_NONE,   &db_init,  "Initialize database connection and exit"     },
+      { "kill",     'k', 0, G_OPTION_ARG_NONE,   &ki_sched, "Kills all running schedulers and exit"       },
+      { "log",      'L', 0, G_OPTION_ARG_STRING, &log,      "Prints log here instead of default log file" },
+      { "port",     'p', 0, G_OPTION_ARG_INT,    &port,     "Set the port the interface listens on"       },
+      { "reset",    'R', 0, G_OPTION_ARG_NONE,   &db_reset, "Reset the job queue upon startup"            },
+      { "test",     't', 0, G_OPTION_ARG_NONE,   &test_die, "Close the scheduler after running tests"     },
+      { "verbose",  'v', 0, G_OPTION_ARG_INT,    &verbose,  "Set the scheudler verbose level"             },
+      {NULL}
+  };
 
   /* make sure we are running as fossy */
   set_usr_grp();
@@ -528,51 +512,19 @@ int main(int argc, char** argv)
   /* ********************* */
   /* *** parse options *** */
   /* ********************* */
-  while((c = getopt(argc, argv, "dikL:p:RtTv:h")) != -1)
-  {
-    switch(c)
-    {
-      case 'd':
-        rc = daemon(0, 0);
-        fclose(stdin);
-        break;
-      case 'i':
-        database_init();
-        return 0;
-      case 'k':
-        kill_scheduler();
-        return 0;
-      case 'L':
-        set_log(optarg);
-        break;
-      case 'p':
-        set_port(atoi(optarg));
-        break;
-      case 'R':
-        db_reset = 1;
-        break;
-      case 't':
-        test = 2;
-        break;
-      case 'T':
-        test = 1;
-        break;
-      case 'v':
-        verbose = atoi(optarg);
-        break;
-      case 'h': default:
-        usage(argv[0]);
-        return -1;
-    }
-  }
+  options = g_option_context_new("- scheduler for FOSSology");
+  g_option_context_add_main_entries(options, entries, NULL);
+  g_option_context_set_ignore_unknown_options(options, TRUE);
+  g_option_context_parse(options, &argc, &argv, NULL);
+  g_option_context_free(options);
 
-  if((optind != argc - 1) && (optind != argc))
-  {
-    usage(argv[0]);
-    return -1;
-  }
+  if(s_daemon) { rc = daemon(0, 0); }
+  if(db_init) { database_init(); return 0; }
+  if(ki_sched) { kill_scheduler(); return 0; }
+  if(port >= 0) {set_port(port); }
+  if(log != NULL) {set_log(log); }
 
-  if((rc = lock_scheduler()) <= 0 && !get_locked_pid())
+  if(lock_scheduler() <= 0 && !get_locked_pid())
     FATAL("scheduler lock error");
 
   /* ********************************** */
@@ -580,8 +532,6 @@ int main(int argc, char** argv)
   /* ********************************** */
   g_thread_init(NULL);
   g_type_init();
-  job_list_init();
-  host_list_init();
   load_config();
   interface_init();
   database_init();
@@ -600,13 +550,8 @@ int main(int argc, char** argv)
   /* *********************************** */
   if(db_reset)
     database_reset_queue();
-
-  if(test > 0)
-  {
-    test_agents();
-    if(test > 1)
-      closing = 1;
-  }
+  if(test_die)
+    closing = 1;
 
   /* *************************************** */
   /* *** enter the scheduler event loop **** */

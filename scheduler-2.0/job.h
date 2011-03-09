@@ -44,7 +44,6 @@ typedef enum {
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
-void job_list_init();
 void job_list_clean();
 job job_init(char* type, int id);
 void job_destroy(job j);

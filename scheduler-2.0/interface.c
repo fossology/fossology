@@ -83,7 +83,7 @@ void* interface_thread(void* param)
   interface_connection* conn = param;
   network_header header;
   char buffer[1024];
-  char* cmd, * args;
+  char* cmd, * tmp;
   unsigned long size;
 
   while(g_input_stream_read(conn->istr, &header, sizeof(header), NULL, NULL) != 0)
@@ -97,16 +97,9 @@ void* interface_thread(void* param)
 
     if(TVERBOSE2) clprintf("INTERFACE: recieved \"%s\"\n", buffer);
     /* convert all characters before first ' ' to lower case */
-    for(cmd = buffer, args = NULL; *cmd && args == NULL; cmd++)
-    {
+    for(cmd = buffer; *cmd; cmd++)
       *cmd = g_ascii_tolower(*cmd);
-      if(*cmd == ' ' && args == NULL)
-      {
-        args = cmd + 1;
-        *cmd = '\0';
-      }
-    }
-    cmd = buffer;
+    cmd = strtok(buffer, " ");
 
     if(g_str_has_prefix("exit", cmd))
     {
@@ -122,26 +115,27 @@ void* interface_thread(void* param)
       return NULL;
     }
     else if(g_str_has_prefix("pause", cmd))
-      job_pause(get_job(atoi(args)), 1);
+      job_pause(get_job(atoi(strtok(NULL, " "))), 1);
     else if(g_str_has_prefix("reload", cmd))
       load_config();
     else if(g_str_has_prefix("status", cmd))
     {
-      if(args == NULL) event_signal(job_status_event, conn->ostr);
+      if((cmd = strtok(NULL, " ")) == NULL) event_signal(job_status_event, conn->ostr);
       // TODO job specific status
     }
     else if(g_str_has_prefix("restart", cmd))
-      job_restart(get_job(atoi(args)));
+      job_restart(get_job(atoi(strtok(NULL, " "))));
     else if(g_str_has_prefix("verbose", cmd))
     {
-      if((cmd = strchr(args, ' ')) == NULL) verbose = atoi(args);
-      else job_verbose_event(job_verbose(get_job(atoi(args)), atoi(cmd+1)));
+      cmd = strtok(NULL, " ");
+      if((tmp = strtok(NULL, " ")) == NULL) verbose = atoi(cmd);
+      else job_verbose_event(job_verbose(get_job(atoi(cmd)), atoi(tmp)));
     }
     else if(g_str_has_prefix("database", cmd))
       event_signal(database_update_event, NULL);
     else
     {
-      clprintf("ERROR %s.%d: Interface recieved invalid command: %s\n", cmd);
+      clprintf("ERROR %s.%d: Interface received invalid command: %s\n", __FILE__, __LINE__, cmd);
     }
 
     memset(buffer, '\0', sizeof(buffer));

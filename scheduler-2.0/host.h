@@ -35,7 +35,6 @@ typedef struct host_internal* host;
 /* **** Contructor Destructor *********************************************** */
 /* ************************************************************************** */
 
-void host_list_init();
 void host_list_clean();
 
 void host_init(char* name, char* address, char* agent_dir, int max);
@@ -51,6 +50,7 @@ char* host_agent_dir(host h);
 
 host get_host(int num);
 host name_host(char* name);
+void for_each_host(void(*callback)(host));
 int  num_hosts();
 
 #endif /* HOST_H_INCLUDE */

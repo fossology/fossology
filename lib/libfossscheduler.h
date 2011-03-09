@@ -101,7 +101,7 @@ extern int verbose;
 /* ************************************************************************** */
 
 void  scheduler_heart(int i);
-void  scheduler_connect();
+void  scheduler_connect(int argc, char** argv);
 void  scheduler_disconnect();
 char* scheduler_next();
 

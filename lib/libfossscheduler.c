@@ -27,6 +27,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define ALARM_SECS 30
 
+#ifndef SVN_REV
+#define SVN_REV "ERROR"
+#endif
+
 /* ************************************************************************** */
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
@@ -81,8 +85,22 @@ void  scheduler_heart(int i)
  * Making a call to this function should be the first thing that an agent does
  * after parsing its command line arguments.
  */
-void scheduler_connect()
+void scheduler_connect(int argc, char** argv)
 {
+  /* local variables */
+  int i;
+  int found = 0;
+
+  /* check for --scheduler command line option */
+  for(i = 0; i < argc && !found; i++)
+  {
+    if(strcmp(argv[i], "scheduler_start") == 0)
+    {
+      fprintf(stdout, "%s\n", SVN_REV);
+      found = 1;
+    }
+  }
+
   /* initialize memory associated with agent connection */
   items_processed = 0;
   memset(buffer, 0, sizeof(buffer));
@@ -160,6 +178,12 @@ char* scheduler_next()
   else if(strncmp(buffer, "VERBOSE", 7) == 0)
   {
     verbose = atoi(&buffer[8]);
+    valid = 0;
+    return scheduler_next();
+  }
+  else if(strncmp(buffer, "VERSION", 7) == 0)
+  {
+    fprintf(stdout, "%s\n", SVN_REV);
     valid = 0;
     return scheduler_next();
   }
