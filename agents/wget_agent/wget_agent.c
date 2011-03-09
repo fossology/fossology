@@ -288,30 +288,33 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
    ***/
  
   struct stat sb;
+  int rc_system =0;
 
   /* Run from scheduler! delete the temp directory, /var/local/lib/fossology/agents/wget */
   if (!stat(TempFileDir, &sb) && TempFile && TempFile[0])
   {
     memset(CMD,'\0',MAXCMD);
-    snprintf(CMD,MAXCMD-1, "rm -rf %s 2>&1", TempFileDir);
-    system(CMD);
+    snprintf(CMD,MAXCMD-1, "rm -rf '%s' 2>&1", TempFileDir);
+    rc_system = system(CMD);
+    if (rc_system != 0) exit(23); // failed to delete the temperary directory
+     
   }
 
   if (TempFile && TempFile[0])
   {
     /* Delete the temp file if it exists */
     unlink(TempFile);
-    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s -P %s %s %s 2>&1",
+    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s -P '%s' '%s' %s 2>&1",
         PROXYFILE,WgetArgs,TempFileDir,TaintedURL,GlobalParam);
   }
   else if(TempFileDir && TempFileDir[0])
   {
-    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s -P %s %s %s 2>&1",
+    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s -P '%s' '%s' %s 2>&1",
       PROXYFILE,WgetArgs, TempFileDir, TaintedURL, GlobalParam);
   }
   else 
   {
-    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s %s %s 2>&1",
+    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s '%s' %s 2>&1",
       PROXYFILE,WgetArgs,TaintedURL, GlobalParam);
   }
   Fin = popen(CMD,"r");
@@ -339,8 +342,9 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
   if (!stat(TempFileDir, &sb) && TempFile && TempFile[0])
   {
     memset(CMD,'\0',MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar -cvvf %s -C %s ./ 2>&1", TempFile, TempFileDir);
-    system(CMD);
+    snprintf(CMD,MAXCMD-1, "tar -cvvf '%s' -C '%s' ./ 2>&1", TempFile, TempFileDir);
+    rc_system = system(CMD);
+    if (rc_system != 0) exit(24); // failed to archive the temperary directory as one temperary file
   }
   
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
@@ -617,8 +621,9 @@ int	main	(int argc, char *argv[])
                   {
                     char CMD[MAXCMD];
                     memset(CMD,'\0',MAXCMD);
-                    snprintf(CMD,MAXCMD-1, "rm -rf %s 2>&1", TempDir);
-                    system(CMD);
+                    snprintf(CMD,MAXCMD-1, "rm -rf '%s' 2>&1", TempDir);
+                    int rc_system = system(CMD); 
+                    if (rc_system != 0) exit(25); // failed to delete the temperary directory
                   }
 		}
 	else
