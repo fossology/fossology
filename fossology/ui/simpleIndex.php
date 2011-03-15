@@ -34,7 +34,7 @@ require_once("common/common.php");
  This is the main guts of the UI: Find the plugin and run it.
  ****************************************************/
 //$_SERVER['HTTP_SM_UNIVERSALID'] = "dong.ma@hp.com";
-plugin_load("plugins/simepleUi");
+plugin_load("plugins/simpleUi");
 
 /* check if Site Minder enabled */
 if (siteminder_check() != -1)
