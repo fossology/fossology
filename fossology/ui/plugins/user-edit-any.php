@@ -79,21 +79,8 @@ class user_edit_any extends FO_Plugin {
       $text = _("Invalid email address.  Not edited.");
       return ($text);
     }
-    
-    echo "<pre>session is:{$_SESSION['UiPref']}\n</pre>";
-    // Make sure the ui preference is set, default is simple ui
-    /*
-    if(empty($uiChoice))
-    {
-      
-      $_SESSION['UiPref'] = 'simple';
-    }
-    else
-    {
-      echo "<pre>Seeing uipref to$uiChoice\n</pre>";
-      $_SESSION['UiPref'] = $uiChoice;
-    }
-    */
+    //echo "<pre>session is:{$_SESSION['UiPref']}\n</pre>";
+
     /* Get existing user info for updating */
     $SQL = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
     $Results = $DB->Action($SQL);
