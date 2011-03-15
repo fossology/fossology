@@ -35,7 +35,7 @@ define("TITLE_SimpleUi", _("Simplified UI"));
 
 class simpleUi extends FO_Plugin
 {
-  public $Name = "simple UI";
+  public $Name = "simple_UI";
   public $Title = TITLE_SimpleUi;
   public $Version = "1.0";
   public $MenuList = "";
@@ -56,7 +56,7 @@ class simpleUi extends FO_Plugin
     //global $MenuList;
 
     // change the user-edit-self menu
-    $userEditSelf = plugin_find_any(user_edit_self);  // can be null
+    $userEditSelf = plugin_find_any('user_edit_self');  // can be null
     if(!empty($userEditSelf))
     {
       $userEditSelf->MenuList = "My Account";
@@ -114,15 +114,15 @@ class simpleUi extends FO_Plugin
     $plist = array(
       'search',
       'search_file',
-      'browse'
+      //'browse'
       );
       foreach($plist as $plugin)
       {
-        $pluginRef = plugin_find_any($plugin);  // can be null
+        $pluginRef = plugin_find_any_id($plugin);  // can be null
         if(!empty($pluginRef))
         {
-          $pluginRef->LoginFlag = 1; // must be logged in to use this plugin
-          //$pluginRef->PostInitialize();
+          $Plugins[$pluginRef]->LoginFlag = 1; // must be logged in to use this plugin
+          //$Plugins[$pluginRef]->RegisterMenus();
         }
       }
   }
@@ -238,13 +238,15 @@ class simpleUi extends FO_Plugin
     foreach($this->Dependency as $key => $val) {
       $id = plugin_find_id($val);
       if ($id < 0) {
-        echo "<pre>SIMP: depdendencies not met! for $this->Name\n</pre>";
+        //echo "<pre>SIMP: depdendencies not met! for $this->Name\n</pre>";
         $this->Destroy();
         return(0);
       }
     }
-    // this makes it so anybody above user level 5 gets the full UI ?
-    //echo "<pre>SIMP: uipref is:{$_SESSION['UiPref']}\n</pre>";
+
+    // echo "<pre>SIMP: uipref is:{$_SESSION['UiPref']}\n</pre>";
+    
+    // if user wants simple ui, make adjustments
     if($_SESSION['UiPref'] == 'simple')
     {
       //$this->adjustDependencies();
@@ -254,7 +256,7 @@ class simpleUi extends FO_Plugin
       plugin_disable(@$_SESSION['UserLevel']);
       $this->disablePlugins(array('search', 'agent_nomos_once',
         'agent_copyright_once', 'upload_file', 'upload_url', 'upload_srv_files',
-        'upload_instructions',));
+        'upload_instructions','admin_license_file','Admin_License','license'));
     }
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
