@@ -320,19 +320,24 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
       $Redirect = ""; /* don't reference myself! */
     }
     //echo "<pre>CheckUser:Uri is:$Uri Redirect is:$Redirect\n";
+    //echo "<pre>CheckUser:Referer is:$Referer\n</pre>";
+    
     if (empty($Redirect) || strncmp($Redirect, $Uri, strlen($Uri))) {
       $Uri = Traceback_uri();
     } else {
       $Uri = $Redirect;
     }
-    //echo "<pre>CheckUser:Uri is:$Uri\n";
     /* Redirect window */
 
     if($_SESSION['UiPref'] == 'simple')
     {
-      //echo "<pre>CheckUser:replaceing default with simpleUi\n";
-      $Referer = str_replace('default', 'simple_UI', $Referer);
-      //echo "<pre>CheckUser:Referer is now:$Referer\n";
+      if(!stristr($Referer, 'simpleIndex.php'))
+      {
+        //echo "<pre>CheckUser:setting simpleIndex\n";
+        $Referer = str_replace('?mod=refresh&remod=default',
+           'simpleIndex.php?mod=refresh&remod=simple_UI', $Referer);
+      }
+      //echo "<pre>CheckUser:Referer is now:$Referer\n</pre>";
     }
 
     $V .= "window.open('$Referer','_top');\n";
