@@ -582,9 +582,28 @@ class ui_nomos_diff extends FO_Plugin
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    $V="";
 
     $uTime = microtime(true);
-    $V="";
+/* */
+    $updcache = GetParm("updcache",PARM_INTEGER);
+    if ($updcache)
+      $this->UpdCache = $_GET['updcache'];
+    else
+      $this->UpdCache = 0;
+
+    /* Use Traceback_parm_keep to ensure that all parameters are in order */
+    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("item1","item2", "filter"));
+    if ($this->UpdCache != 0)
+    {
+      $Err = ReportCachePurgeByKey($CacheKey);
+    }
+    else
+      $V = ReportCacheGet($CacheKey);
+/**/
+
+    if (empty($V) )  // no cache exists
+    {
     $filter = GetParm("filter",PARM_STRING);
     if (empty($filter)) $filter = "samehash";
     $FreezeCol = GetParm("freeze",PARM_INTEGER);
@@ -626,24 +645,6 @@ print <<< JSOUT
 JSOUT;
     }
 
-/*
-    $updcache = GetParm("updcache",PARM_INTEGER);
-    if ($updcache)
-      $this->UpdCache = $_GET['updcache'];
-    else
-      $this->UpdCache = 0;
-
-     Use Traceback_parm_keep to ensure that all parameters are in order 
-    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item"));
-    if ($this->UpdCache != 0)
-    {
-      $V = "";
-      $Err = ReportCachePurgeByKey($CacheKey);
-    }
-    else
-      $V = ReportCacheGet($CacheKey);
-*/
-
     $TreeInfo1 = $this->GetTreeInfo($uploadtree_pk1);
     $TreeInfo2 = $this->GetTreeInfo($uploadtree_pk2);
     $ErrText = _("No license data for");
@@ -683,8 +684,6 @@ JSOUT;
       $this->FilterChildren($filter, $Master);
     }
 
-    if (empty($V) )  // no cache exists
-    {
       switch($this->OutputType)
       {
       case "XML":
@@ -699,22 +698,22 @@ JSOUT;
         break;
       default:
       }
-//      $Cached = false;
+      $Cached = false;
     }
-//    else
-//      $Cached = true;
+    else
+      $Cached = true;
 
-//    if (!$this->OutputToStdout) { return($V); }
+    if (!$this->OutputToStdout) { return($V); }
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
     $text = _("Elapsed time: %.2f seconds");
     printf( "<small>$text</small>", $Time);
 
-/*
+/**/
     if ($Cached) 
     {
-$text = _("cached");
-$text1 = _("Update");
+      $text = _("cached");
+      $text1 = _("Update");
       echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     }
     else
@@ -722,7 +721,7 @@ $text1 = _("Update");
       //  Cache Report if this took longer than 1/2 second
       if ($Time > 0.5) ReportCachePut($CacheKey, $V);
     }
-*/
+/**/
     return;
   }  /* End Output() */
 
