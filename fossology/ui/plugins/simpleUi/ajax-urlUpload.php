@@ -56,13 +56,19 @@ class ajax_urlUpload extends FO_Plugin
         break;
       case "HTML":
 
-        /* Set default values */
+        // Set default values
         if (empty($GetURL))
         {
           $GetURL = 'http://';
         }
+        if (empty($Level)) {
+          $Level = 1;
+        }
+        
+        $Name = $Accept = $Reject = NULL;
+        
         /* Display instructions */
-        $intro .= _("Uploading from a URL or FTP site is often the most flexible
+        $intro = _("Uploading from a URL or FTP site is often the most flexible
          option, but the URL must denote a publicly accessible HTTP, HTTPS,
          or FTP location.  URLs that require authentication or human
          interactions cannot be downloaded through this upload option.\n");
@@ -79,12 +85,46 @@ class ajax_urlUpload extends FO_Plugin
         $text = _("Enter the URL to the file:");
         $V .= "<li>$text<br />\n";
         $V .= "<INPUT type='text' name='geturl' size=60 value='" . htmlentities($GetURL) . "'/><br />\n";
-        $text = _("(Optional) Enter a viewable name for this file:");
-        $V .= "<br><li>$text<br />\n";
+        $text = _("(Optional) Enter a viewable name for this file.");
+        $V .= "<br><li>$text\n";
         $text = _("NOTE");
         $text1 = _(": If no name is provided, then the uploaded file name will be used.");
-        $V .= "<b>$text</b>$text1<P />\n";
+        $V .= "<b>$text</b>$text1<br />\n";
         $V .= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
+        $V .= "</ol>\n";
+        $V .= "<h3>Advanced Usage</h3>";
+        $advInstruction = _("
+        The optional fields below allow multiple files or directories to be
+        uploaded by using comma-separated lists of name suffixes or patterns to
+        select or exclude as entries to be uploaded.  These options are for users who
+        are comfortable using wildcards and patterns. For example, to select all
+        the iso files in the direcotory NewISOs, the select field would contain:
+        'iso'.  If there is no exclusion list, then
+        all files matching the selection criteria will be uploaded.   The
+        recursion depth default setting is 1.  This allows uploading all files
+        refrenced on the page link or all the files in a directory.  To include
+        sub-directories, increase the recursion depth. Setting the
+        recursion depth to more than five could result in very large data uploads
+        which might use all the available disk space and slow the network down
+        considerably.");
+        $adv2 = _("Use this option with care.  A large amount of data could be
+        uploaded.  Make sure the FOSSology server has enough room to hold the
+        uploaded data and analysis.");
+        $V .= "<p>$advInstruction</p><p>$adv2</p>\n";
+        $text = _("Select list: Enter comma-separated lists of file name suffixes or patterns to select.");
+        $V.= "<ol><li>$text\n";
+        $note1 = _("NOTE: ");
+        $wildCards = _("If any of the wildcard characters, *, ?, [ or ],
+        appear as an element of the list, it will be treated as a pattern, rather than a suffix.");
+        $V.= "<b>$note1</b>$wildCards<br />\n";
+        $V.= "<INPUT type='text' name='accept' size=60 value='" . htmlentities($Accept) . "'/><P />\n";
+        $text = _("Exclude list: Enter comma-separated lists of file name suffixes or
+        patterns to exclude: the same rules for wildcards apply to this list.");
+        $V.= "<li>$text<br />\n";
+        $V.= "<INPUT type='text' name='reject' size=60 value='" . htmlentities($Reject) . "'/><P />\n";
+$text = _("Maximum recursion depth: ");
+        $V.= "<li>$text";
+        $V.= "<INPUT type='text' name='level' size=1 value='" . htmlentities($Level) . "'/><P />\n";
         $V .= "</ol>\n";
         $text = _("Upload");
         $V .= "<input type='submit' value='$text!'>\n";

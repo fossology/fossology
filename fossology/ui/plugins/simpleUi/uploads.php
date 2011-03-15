@@ -322,7 +322,7 @@ class uploads extends FO_Plugin
     if (empty($ShortName)) {
       $ShortName = $Name;
     }
-    echo "<pre>UPSRV: name is:$Name\nShortName is:$ShortName\n</pre>";
+    //echo "<pre>UPSRV: name is:$Name\nShortName is:$ShortName\n</pre>";
     // Create an upload record.
     $jobq = NULL;
     $Mode = (1 << 3); // code for "it came from web upload"
@@ -373,7 +373,7 @@ class uploads extends FO_Plugin
    * @return NULL on success, string on failure.
    */
 
-  function uploadUrl($Folder, $GetURL, $Desc, $Name)
+  function uploadUrl($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level)
   {
 
     if (empty($Folder))
@@ -423,7 +423,8 @@ class uploads extends FO_Plugin
     }
     /* Prepare the job: job "wget" has jobqueue item "wget" */
     /** 2nd parameter is obsolete **/
-    $jobqueuepk = JobQueueAdd($jobpk, "wget", "$uploadpk - $GetURL", "no", NULL, NULL);
+    $jq_args = "$uploadpk - $GetURL --accept=$Accept --reject=$Reject -l $Level";
+    $jobqueuepk = JobQueueAdd($jobpk, "wget", $jq_args, "no", NULL, NULL);
     if (empty($jobqueuepk))
     {
       $text = _("Failed to insert task 'wget' into job queue");
@@ -487,15 +488,21 @@ class uploads extends FO_Plugin
           $Folder = GetParm('folder', PARM_INTEGER);
           $GetURL = GetParm('geturl', PARM_TEXT);
           $Name = GetParm('name', PARM_TEXT); // may be null
+          $Accept = GetParm('accept', PARM_TEXT); // may be null
+          $Reject = GetParm('reject', PARM_TEXT); // may be null
+          $Level = GetParm('level', PARM_TEXT); // may be null
           if (!empty($GetURL) && !empty($Folder))
           {
-            $rc = $this->uploadUrl($Folder, $GetURL, $Desc, $Name);
+            $rc = $this->uploadUrl($Folder, $GetURL, NULL, $Name, $Accept,
+                                   $Reject, $Level);
             if (empty($rc))
             {
               /* Need to refresh the screen */
               $GetURL = NULL;
-              $Desc = NULL;
               $Name = NULL;
+              $Accept = NULL;
+              $Reject = NULL;
+              $Level = NULL;
             }
             else
             {
@@ -593,29 +600,30 @@ class uploads extends FO_Plugin
           }
         }
 
-        $topText .= _("To submit a file for scanning and analysis by FOSSology, a
+        //$topText = $typeText = NULL;
+        $topText = _("To submit a file for scanning and analysis by FOSSology, a
                     method below must be chosen to upload the file.\n");
-        $typeText .= "$topText";
+        $typeText = "$topText";
         $typeText .= _("The file you upload can be a gzip, bzip, upx, zip, tar, cpio,
          rar, rpm, debian package, iso, msi, cab, 7z, among  others.  It may
          also be a filesystem (fat, ntfs, ext2, ext3), or even an x86 boot partition.\n");
-        $intro .= "$typeText<br><br>";
+        $intro = "$typeText<br><br>";
         $depending = _("Depdending on the method chosen, there may be file size
           or other limits.\n");
         $intro .= "$depending<br><br>";
 
         $Url = Traceback_uri();
-        $choice .= $intro;
+        $choice = $intro;
         //$choice .= "<br>\n";
-        
-        $fileText .= _("Upload a File from your computer");
-        $urlText .= _("Upload from a URL on the intra or internet");
-        $srvText .= _("Upload a File from the FOSSology Web Server");
+
+        $fileText = _("Upload a File from your computer");
+        $urlText = _("Upload from a URL on the intra or internet");
+        $srvText = _("Upload a File from the FOSSology Web Server");
         $choice .= "<form name='uploads' enctype='multipart/form-data' method='post'>\n";
         $choice .= "<input type='radio' name='uploads' id='file' value='file' onclick='UploadFile_Get(\"" .Traceback_uri() . "?mod=ajax_fileUpload\")' />$fileText<br />\n";
         $choice .= "<input type='radio' name='uploads' id='url' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />$urlText<br />\n";
         $choice .= "<input type='radio' name='uploads' id='srv' value='srv' onclick='UploadSrv_Get(\"" .Traceback_uri() . "?mod=ajax_srvUpload\")' />$srvText<br />\n";
-        
+
         $or=_("--OR--");
         $oneShotText = _("Submit a file to be analyzed in real time.  Neither the
           file, nor the results, will be stored in FOSSology.  The uploaded file
@@ -629,11 +637,11 @@ class uploads extends FO_Plugin
         $choice .= $osChoice;
         $choice .= "<input type='radio' name='uploads' id='oneshot' value='osn' onclick='UploadOsN_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotNomos\")' />Analyze a single file for licenses<br />\n";
         $choice .= "<input type='radio' name='uploads' id='oneshotcopy' value='copy' onclick='UploadCopyR_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotCopyright\")' />Analyze a single file for Copyrights, Email and URL's<br />\n";
-        
+
         //$choice .= "<input type='radio' name='uploadfurl' value='opts' onclick='UploadOpts_Get(\"" .Traceback_uri() . "?mod=ajax_optsForm\")' />More Options<br />\n";
 
         $choice .= "\n<div>\n<hr>\n<p id='fileform'></p>\n</div>\n";
- 
+
         /* Create the AJAX (Active HTTP) javascript for doing the replys
          * and showing the response.
          */
@@ -651,7 +659,7 @@ class uploads extends FO_Plugin
         </script>\n";
 
         // URL's
-        $choiceUrl .= ActiveHTTPscript("UploadUrl");
+        $choiceUrl = ActiveHTTPscript("UploadUrl");
         $choiceUrl .= "<script language='javascript'>\n
         function UploadUrl_Reply()
         {
@@ -671,17 +679,17 @@ class uploads extends FO_Plugin
         $options .= "<script language='javascript'>\n
         function UploadOpts_Reply()
         {
-          if ((UploadOpts.readyState==4) && (UploadOpts.status==200))
-          {\n
-            document.getElementById('fileform').innerHTML = UploadOpts.responseText;\n
-          }
+        if ((UploadOpts.readyState==4) && (UploadOpts.status==200))
+        {\n
+        document.getElementById('fileform').innerHTML = UploadOpts.responseText;\n
+        }
         }
         </script>\n";
         $choice .= $options;
         */
 
         // upload from server
-        $uploadSrv .= ActiveHTTPscript("UploadSrv");
+        $uploadSrv = ActiveHTTPscript("UploadSrv");
         $uploadSrv .= "<script language='javascript'>\n
         function UploadSrv_Reply()
         {
@@ -696,7 +704,7 @@ class uploads extends FO_Plugin
         $choice .= $uploadSrv;
 
         // One Shot License
-        $uploadOsN .= ActiveHTTPscript("UploadOsN");
+        $uploadOsN = ActiveHTTPscript("UploadOsN");
         $uploadOsN .= "<script language='javascript'>\n
         function UploadOsN_Reply()
         {
@@ -709,7 +717,7 @@ class uploads extends FO_Plugin
         $choice .= $uploadOsN;
 
         // One Shot Copyright
-        $uploadCopy .= ActiveHTTPscript("UploadCopyR");
+        $uploadCopy = ActiveHTTPscript("UploadCopyR");
         $uploadCopy .= "<script language='javascript'>\n
         function UploadCopyR_Reply()
         {
@@ -723,19 +731,19 @@ class uploads extends FO_Plugin
 
         $choice .= "</form>";
         break;
-  case "Text":
-    break;
-  default:
-    break;
-}
-if (!$this->OutputToStdout)
-{
-  return ($choice);
-}
-print ("$choice");
-return;
+      case "Text":
+        break;
+      default:
+        break;
+    }
+    if (!$this->OutputToStdout)
+    {
+      return ($choice);
+    }
+    print ("$choice");
+    return;
 
-}
+  }
 };
 $NewPlugin = new uploads;
 ?>
