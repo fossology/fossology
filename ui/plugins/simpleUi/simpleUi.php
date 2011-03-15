@@ -258,6 +258,10 @@ class simpleUi extends FO_Plugin
         'agent_copyright_once', 'upload_file', 'upload_url', 'upload_srv_files',
         'upload_instructions','admin_license_file','Admin_License','license'));
     }
+    else        // original ui, disable simple ui plugins
+    {
+      $this->disablePlugins(array('uploads'));
+    }
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
     return($this->State == PLUGIN_STATE_READY);
