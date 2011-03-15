@@ -36,6 +36,11 @@ class foconfig extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_USERADMIN;
   var $CreateAttempts = 0;
 
+  /* constants but defined as variables because of easier usage in code */
+  var $vartype_int = 1;
+  var $vartype_text = 2;
+  var $vartype_textarea = 3;
+
 
   /***********************************************************
    Install(): Create and configure database tables
@@ -74,16 +79,6 @@ class foconfig extends FO_Plugin
      if (pg_num_rows($result) > 0) return 0;
      pg_free_result($result);
 
-     /* create html_type.  Ignore if it already exists */
-     $sql = "Create type html_type as enum('int', 'text', 'textarea');";
-     $result = @pg_query($PG_CONN, $sql);
-     if ($result === false)
-     {
-       /* Ignore error if type already exists */
-       if (strpos(pg_last_error(), 'already exists') === FALSE)
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-     }
-
      /* Create the sysconfig table */
      $sql = "
 CREATE TABLE sysconfig (
@@ -91,7 +86,7 @@ CREATE TABLE sysconfig (
     variablename character varying(30) NOT NULL UNIQUE,
     conf_value text,
     ui_label character varying(60) NOT NULL,
-    vartype html_type NOT NULL,
+    vartype int NOT NULL,
     group_name character varying(20) NOT NULL,
     group_order int,
     description text NOT NULL,
@@ -134,29 +129,29 @@ COMMENT ON COLUMN sysconfig.validation_function IS 'Name of function to validate
      /*  Email */
      $SupportEmailLabelPrompt = _('Support Email Label');
      $SupportEmailLabelDesc = _('e.g. "Support"<br>Text that the user clicks on to create a new support email. This new email will be preaddressed to this support email address and subject.  HTML is ok.');
-     $ValueArray[] = "'SupportEmailLabel', 'Support', '$SupportEmailLabelPrompt',  'text', 'Support', 1, '$SupportEmailLabelDesc'";
+     $ValueArray[] = "'SupportEmailLabel', 'Support', '$SupportEmailLabelPrompt',  $this->vartype_text, 'Support', 1, '$SupportEmailLabelDesc'";
 
      $SupportEmailAddrPrompt = _('Support Email Address');
      $SupportEmailAddrDesc = _('e.g. "support@mycompany.com"<br>Individual or group email address to those providing FOSSology support.');
-     $ValueArray[] = "'SupportEmailAddr', null, '$SupportEmailAddrPrompt', 'text', 'Support', 2, '$SupportEmailAddrDesc'";
+     $ValueArray[] = "'SupportEmailAddr', null, '$SupportEmailAddrPrompt', $this->vartype_text, 'Support', 2, '$SupportEmailAddrDesc'";
 
      $SupportEmailSubjectPrompt = _('Support Email Subject line');
      $SupportEmailSubjectDesc = _('e.g. "fossology support"<br>Subject line to use on support email.');
-     $ValueArray[] = "'SupportEmailSubject', 'FOSSology Support', '$SupportEmailSubjectPrompt', 'text', 'Support', 3, '$SupportEmailSubjectDesc'";
+     $ValueArray[] = "'SupportEmailSubject', 'FOSSology Support', '$SupportEmailSubjectPrompt', $this->vartype_text, 'Support', 3, '$SupportEmailSubjectDesc'";
 
      /*  Banner Message */
      $BannerMsgPrompt = _('Banner message');
      $BannerMsgDesc = _('This is message will be displayed on every page with a banner.  HTML is ok.');
-     $ValueArray[] = "'BannerMsg', null, '$BannerMsgPrompt', 'textarea', 'Banner', 1, '$BannerMsgDesc'";
+     $ValueArray[] = "'BannerMsg', null, '$BannerMsgPrompt', $this->vartype_textarea, 'Banner', 1, '$BannerMsgDesc'";
 
      /*  Logo  */
      $LogoImagePrompt = _('Logo Image URL');
      $LogoImageDesc = _('e.g. "http://mycompany.com/images/companylogo.png" or "images/mylogo.png"<br>This image replaces the fossology project logo. Image is constrained to 150px wide.  80-100px high is a good target.');
-     $ValueArray[] = "'LogoImage', null, '$LogoImagePrompt', 'text', 'Logo', 1, '$LogoImageDesc'";
+     $ValueArray[] = "'LogoImage', null, '$LogoImagePrompt', $this->vartype_text, 'Logo', 1, '$LogoImageDesc'";
 
      $LogoLinkPrompt = _('Logo URL');
      $LogoLinkDesc = _('e.g. "http://mycompany.com/fossology"<br>URL a person goes to when they click on the logo');
-     $ValueArray[] = "'LogoLink', null, '$LogoLinkPrompt', 'text', 'Logo', 2, '$LogoLinkDesc'" ;
+     $ValueArray[] = "'LogoLink', null, '$LogoLinkPrompt', $this->vartype_text, 'Logo', 2, '$LogoLinkDesc'" ;
      /* Doing all the rows as a single insert will fail if any row is a dupe.
         So insert each one individually so that new variables get added. 
       */
@@ -213,13 +208,13 @@ COMMENT ON COLUMN sysconfig.validation_function IS 'Name of function to validate
       $OutBuf .= "<tr><td>$row[ui_label]</td><td>";
       switch ($row['vartype'])
       {
-        case 'int':
-        case 'text':
+        case $this->vartype_int:
+        case $this->vartype_text:
           $ConfVal = htmlentities($row['conf_value']);
           $OutBuf .= "<INPUT type='text' name='new[$row[variablename]]' size='70' value='$ConfVal' title='$row[description]' $InputStyle>";
           $OutBuf .= "<br>$row[description]";
           break;
-        case 'textarea':
+        case $this->vartype_textarea:
           $ConfVal = htmlentities($row['conf_value']);
           $OutBuf .= "<br><textarea name='new[$row[variablename]]' rows=3 cols=80 title='$row[description]' $InputStyle>$ConfVal</textarea>";
           $OutBuf .= "<br>$row[description]";
