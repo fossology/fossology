@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010, 2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -20,6 +20,23 @@
   This file contains common functions for the
   copyright ui plugin.
  ************************************************************/
+
+/***********************************************************
+ Sort query histogram results (by content)
+ ***********************************************************/
+function hist_rowcmp($rowa, $rowb)
+{
+  return (strnatcasecmp($rowa['content'], $rowb['content']));
+}
+
+/***********************************************************
+ Sort rows by filename
+ ***********************************************************/
+function copyright_namecmp($rowa, $rowb)
+{
+  return (strnatcasecmp($rowa['ufile_name'], $rowb['ufile_name']));
+}
+
 
 /*
  * Return files with a given copyright.
@@ -118,5 +135,87 @@ function CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
   return $FileCount;
 }
 
+
+  /***********************************************************
+   StmtReorder(): 
+   rearrange copyright statment to try and put the holder first,
+   followed by the rest of the statement.
+   For example,
+     copyright (c) aaron seigo <aseigo kde.org>
+   would reorder to
+     aaron seigo <aseigo kde.org> | copyright (c)
+   this way the output will be better grouped by author.
+   ***********************************************************/
+  function StmtReorder($content)
+  {
+    // NOT YET IMPLEMENTED
+    return $content;
+  }
+
+
+  /***********************************************************
+   MassageContent(): 
+   Input row array contains: pfile, content and type
+   Output records: massaged content, type, hash
+                   where content has been simplified from
+                   the raw records and hash is the md5 of this
+                   new content.
+   If $hash non zero, only rows with that hash will
+   be returned.
+   On empty row, return true, else false
+   ***********************************************************/
+  function MassageContent(&$row, $hash)
+  {
+    /* Step 1: Clean up content
+     */
+    $OriginalContent = $row['content'];
+
+    /* remove control characters */
+    $content = preg_replace('/[\x0-\x1f]/', ' ', $OriginalContent);   
+
+    if ($row['type'] == 'statement')
+    {
+      /* !"#$%&' */
+      $content = preg_replace('/([\x21-\x27])|([*@])/', ' ', $content);   
+
+      /*  numbers-numbers, two or more digits, ', ' */
+      $content = preg_replace('/(([0-9]+)-([0-9]+))|([0-9]{2,})|(,)/', ' ', $content);  
+      $content = preg_replace('/ : /', ' ', $content);  // free :, probably followed a date
+    }
+    else
+    if ($row['type'] == 'email')
+    {
+      $content = str_replace(":;<=>()", " ", $content);
+    }
+
+    /* remove double spaces */
+    $content = preg_replace('/\s\s+/', ' ', $content);
+
+    /* remove leading/trailing whitespace and some punctuation */
+    $content = trim($content, "\t \n\r<>./\"\'");
+
+    /* remove leading "dnl " */
+    if ((strlen($content) > 4) &&
+        (substr_compare($content, "dnl ", 0, 4, true) == 0))
+      $content = substr($content, 4);
+
+    /* skip empty content */
+    if (empty($content)) return true;
+
+    /* Step 1B: rearrange copyright statments to try and put the holder first,
+     * followed by the rest of the statement, less copyright years.
+     */
+/* Not yet implemented
+      if ($row['type'] == 'statement') $content = $this->StmtReorder($content);
+*/
+
+    //  $row['original'] = $OriginalContent;   // to compare original to new content
+    $row['content'] = $content; 
+    $row['copyright_count'] = 1;
+    $row['hash'] = md5($row['content']);
+    if ($hash && ($row['hash'] != $hash)) return true;
+
+    return false;
+  }  /* End of MassageContent() */
 
 ?>
