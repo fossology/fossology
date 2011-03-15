@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010,2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -25,14 +25,6 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 define("TITLE_copyright_hist", _("Copyright/Email/URL Browser"));
-
-/***********************************************************
- Sort query histogram results 
- ***********************************************************/
-function hist_rowcmp($rowa, $rowb)
-{
-  return (strnatcasecmp(ltrim($rowa['content'], "<(."), ltrim($rowb['content'], "<(.")));
-}
 
 class copyright_hist extends FO_Plugin
 {
@@ -73,11 +65,127 @@ class copyright_hist extends FO_Plugin
       }
       else
       {
-$text = _("View copyright/email/url histogram");
+       $text = _("View copyright/email/url histogram");
        menu_insert("Browse::Copyright/Email/URL",10,$URI,$text);
       }
     }
   } // RegisterMenus()
+
+
+  /***********************************************************
+   GroupHolders(): Combine copyright holders by name
+   Input records contain: content and type
+   Output records: copyright_count, content, type, hash
+                   where content has been simplified from
+                   the raw records and hash is the md5 of this
+                   new content.
+   If $hash non zero, only rows with that hash will
+   be returned.
+   ***********************************************************/
+  function GroupHolders(&$rows, $hash)
+  {
+    /* Step 1: Clean up content, and add hash
+     */
+    $NumRows = count($rows);
+    for($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++)
+    {
+      if (MassageContent($rows[$RowIdx], $hash)) 
+        unset($rows[$RowIdx]);
+/* debug to compare original with new content
+else
+{
+echo "<br>row $RowIdx: ".htmlentities($rows[$RowIdx]['content']) . "<br>";
+echo "row $RowIdx: ".htmlentities($rows[$RowIdx]['original']) . "<br>";
+}
+*/
+    }
+
+    /* Step 2: sort the array by the new content */
+    usort($rows, 'hist_rowcmp');
+
+    /* Step 3: group content (remove dups, add counts) */
+    $NumRows = count($rows);
+    for($RowIdx = 1; $RowIdx < $NumRows; $RowIdx++)
+    {
+      if ($rows[$RowIdx]['content'] == $rows[$RowIdx-1]['content'])
+      {
+        $rows[$RowIdx]['copyright_count'] = $rows[$RowIdx-1]['copyright_count'] + 1;
+        unset($rows[$RowIdx-1]);
+      }
+    }
+
+    /* note $rows indexes may not be contiguous due to unset in step 3 */
+    return $rows;
+  }  /* End GroupHolders() */
+
+
+  /*************************************************
+   * GetRows()
+   * Return rows to process, and $upload_pk
+   * If there are too many rows (see $MaxTreeRecs)
+   *  then a text error message is returned, not an array.
+   * If the optional $hash is supplied, only rows
+   * with that hash will be returned.
+   ************************************************/
+  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash=0)
+  {
+    global $PG_CONN;
+
+    /*******  Get license names and counts  ******/
+    /* Find lft and rgt bounds for this $Uploadtree_pk  */
+    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree 
+              WHERE uploadtree_pk = $Uploadtree_pk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $lft = $row["lft"];
+    $rgt = $row["rgt"];
+    $upload_pk = $row["upload_fk"];
+    pg_free_result($result);
+
+    /* Check for too many uploadtree rows to process.
+     * This is arbitrarily set to 100000.  The copyright display
+     * isn't very useful with more records and this check
+     * give the user immediate feedback, as opposed to
+     * waiting on a very long query.
+     * $MaxTreeRecs / 2 = number of uploadtree entries
+     */
+    $MaxTreeRecs = 200000;
+    if (($rgt - $lft) > $MaxTreeRecs)
+    {
+      $text = _("Too many rows to display");
+      return "<h2>$text</h2>";
+    }
+
+/* select copyright records that have No License Found (rf_fk=4)
+SELECT content, type from copyright, license_file,
+  (SELECT distinct(pfile_fk) as pf from uploadtree where upload_fk=16 and uploadtree.lft BETWEEN 1 and 2740850) as SS
+where copyright.pfile_fk=license_file.pfile_fk and rf_fk=4 and copyright.pfile_fk=pf;
+*/
+
+    /* get all the copyright records for this uploadtree.  */
+    $sql = "SELECT content, type from copyright,
+              (SELECT distinct(pfile_fk) as PF from uploadtree 
+                 where upload_fk=$upload_pk 
+                   and uploadtree.lft BETWEEN $lft and $rgt) as SS
+              where PF=pfile_fk and agent_fk=$Agent_pk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    if (pg_num_rows($result) == 0)
+    {
+      $text = _("No results to display.");
+      return "<h2>$text</h2>";
+    }
+
+    $rows = pg_fetch_all($result);
+    pg_free_result($result);
+
+    /* Combine results to attempt to group copyright holders */
+    $rows = $this->GroupHolders($rows, $hash);
+
+    return $rows;
+  }
 
 
   /***********************************************************
@@ -92,22 +200,12 @@ $text = _("View copyright/email/url histogram");
     $VF=""; // return values for file listing
     $VLic=""; // return values for license histogram
     $V=""; // total return value
+    $upload_pk = "";
+    $VCopyright = '';
     global $Plugins;
     global $DB;
 
     $ModLicView = &$Plugins[plugin_find_id("copyrightview")];
-
-    /*******  Get license names and counts  ******/
-    /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree 
-              WHERE uploadtree_pk = $Uploadtree_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $lft = $row["lft"];
-    $rgt = $row["rgt"];
-    $upload_pk = $row["upload_fk"];
-    pg_free_result($result);
 
     $Agent_name = "copyright";
     $Agent_desc = "copyright analysis agent";
@@ -116,36 +214,7 @@ $text = _("View copyright/email/url histogram");
     else
       $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
-    /* set maximum number of rows to display */
-    $max_rows = 4000;
-
-    /*  Get the counts under this UploadtreePk*/
-    $sql = "SELECT DISTINCT ON (count(content),content, hash, type) content, hash, type, count(content) as copyright_count
-              from copyright,
-                  (SELECT distinct(pfile_fk) as PF from uploadtree 
-                     where upload_fk=$upload_pk 
-                       and uploadtree.lft BETWEEN $lft and $rgt) as SS
-              where PF=pfile_fk and agent_fk=$Agent_pk 
-              group by content, hash, type 
-              limit $max_rows";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-    if (pg_num_rows($result) == 0)
-    {
-      echo _("<h2>No results to display.</h2>");
-      exit();
-    }
-
-    /* Get agent list */
-/* selecting the agent is a future feature
-    $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
-
-    $AgentSelect = AgentSelect($Agent_name, $upload_pk, "copyright", true, "agent_pk", $Agent_pk);
-    $VLic .= $AgentSelect;
-$text = _("Go");
-    $VLic .= "<input type='submit' value='$text'>";
-*/
+    $rows = $this->GetRows($Uploadtree_pk, $Agent_pk, $upload_pk);
 
     /* Write license histogram to $VLic  */
     $CopyrightCount = 0;
@@ -153,23 +222,12 @@ $text = _("Go");
     $NoCopyrightFound = 0;
     $VCopyright = "";
 
-    /* In the unlikely event that there are exactly $max_rows in the result, this
-     * warning will be displayed even though all the rows are going to be displayed.
-     * Otherwise, the warning is correct.
-     */
-    if (pg_num_rows($result) == $max_rows)
-    {
-$text = _("Too many rows to display.  Only first");
-$text1 = _("shown");
-      $VCopyright .= "<h2>$text $max_rows $text1.</h2>";
-    }
-    
     $VCopyright .= "<table border=1 width='100%' id='copyright'>\n";
-$text = _("Count");
-$text1 = _("Files");
-$text2 = _("Copyright Statements");
-$text3 = _("Email");
-$text4 = _("URL");
+    $text = _("Count");
+    $text1 = _("Files");
+    $text2 = _("Copyright Statements");
+    $text3 = _("Email");
+    $text4 = _("URL");
     $VCopyright .= "<tr><th width='10%'>$text</th>";
     $VCopyright .= "<th width='10%'>$text1</th>";
     $VCopyright .= "<th>$text2</th></tr>\n";
@@ -189,37 +247,41 @@ $text4 = _("URL");
     $VUrl .= "<tr><th width='10%'>$text</th>";
     $VUrl .= "<th width='10%'>$text1</th>";
     $VUrl .= "<th>$text4</th></tr>\n";
-
-    $rows = pg_fetch_all($result);
-
-    uasort($rows, 'hist_rowcmp');
-
+    
+//debugprint($rows, "rows");
+    if (!is_array($rows)) 
+     $VCopyright .= "<tr><td colspan=3>$rows</td></tr>";
+    else
     foreach($rows as $row)
     {
-
-        if ($row['content'] == '') {
-            continue;
-        }
-
+/*
+echo "<br>";
+echo $row['content'] . "<br>";
+echo htmlentities($row['content']) . "<br>";
+echo $row['copyright_count'] . "<br>";
+*/
+        $hash = $row['hash'];
         if ($row['type'] == 'statement') {
             $UniqueCopyrightCount++;
             $CopyrightCount += $row['copyright_count'];
             $VCopyright .= "<tr><td align='right'>$row[copyright_count]</td>";
             $VCopyright .= "<td align='center'><a href='";
             $VCopyright .= Traceback_uri();
-            $VCopyright .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
+            $VCopyright .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $hash . "&type=" . $row['type'] . "'>Show</a></td>";
             $VCopyright .= "<td align='left'>";
 
             /* strip out characters we don't want to see 
                This is a hack until the agent stops writing these chars to the db.
              */
             $S = $row['content'];
-            $S = htmlspecialchars($S);
-            // 0xc2 comes from utf-8 copyright symbol
-            $S = str_replace(" \n\r\0\x0b\'\"\x0xc2", " ", $S);
+            $S = htmlentities($S);
             $S = str_replace("&Acirc;","",$S);  // comes from utf-8 copyright symbol
-            $S = str_replace("\t","&nbsp;&nbsp;",$S);
             $VCopyright .= $S;
+
+            /* Debugging 
+            $hex = bin2hex($S);
+            $VCopyright .= "<br>$hex" ;
+              End Debugging */
 
             $VCopyright .= "</td>";
             $VCopyright .= "</tr>\n";
@@ -229,7 +291,7 @@ $text4 = _("URL");
             $VEmail .= "<tr><td align='right'>$row[copyright_count]</td>";
             $VEmail .= "<td align='center'><a href='";
             $VEmail .= Traceback_uri();
-            $VEmail .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
+            $VEmail .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $hash . "&type=" . $row['type'] . "'>Show</a></td>";
             $VEmail .= "<td align='left'>";
             $VEmail .= htmlentities($row['content']);
             $VEmail .= "</td>";
@@ -240,7 +302,7 @@ $text4 = _("URL");
             $VUrl .= "<tr><td align='right'>$row[copyright_count]</td>";
             $VUrl .= "<td align='center'><a href='";
             $VUrl .= Traceback_uri();
-            $VUrl .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
+            $VUrl .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $hash . "&type=" . $row['type'] . "'>Show</a></td>";
             $VUrl .= "<td align='left'>";
             $VUrl .= htmlentities($row['content']);
             $VUrl .= "</td>";
@@ -271,8 +333,6 @@ $text1 = _("Total URLs");
     $VUrl .= "$text: $UniqueUrlCount<br>\n";
     $NetUrl = $UrlCount;
     $VUrl .= "$text1: $NetUrl";
-
-    pg_free_result($result);
 
 
     /*******    File Listing     ************/
