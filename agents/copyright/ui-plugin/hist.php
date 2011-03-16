@@ -39,13 +39,15 @@ class copyright_hist extends FO_Plugin
   /***********************************************************
    Install(): Create and configure database tables
    ***********************************************************/
-  // function Install()
-  // {
-  //   global $DB;
-  //   if (empty($DB)) { return(1); } /* No DB */
+/*
+  function Install()
+  {
+    global $DB;
+    if (empty($DB)) { return(1); } 
 
-  //   return(0);
-  // } // Install()
+    return(0);
+  } // Install()
+*/
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
@@ -127,7 +129,7 @@ echo "row $RowIdx: ".htmlentities($rows[$RowIdx]['original']) . "<br>";
    * If the optional $hash is supplied, only rows
    * with that hash will be returned.
    ************************************************/
-  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash=0)
+  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash=0, $filter)
   {
     global $PG_CONN;
 
@@ -157,18 +159,24 @@ echo "row $RowIdx: ".htmlentities($rows[$RowIdx]['original']) . "<br>";
       return "<h2>$text</h2>";
     }
 
-/* select copyright records that have No License Found (rf_fk=4)
-SELECT content, type from copyright, license_file,
-  (SELECT distinct(pfile_fk) as pf from uploadtree where upload_fk=16 and uploadtree.lft BETWEEN 1 and 2740850) as SS
-where copyright.pfile_fk=license_file.pfile_fk and rf_fk=4 and copyright.pfile_fk=pf;
-*/
-
-    /* get all the copyright records for this uploadtree.  */
-    $sql = "SELECT content, type from copyright,
+    if ($filter == "nolics")
+    {
+      /* select copyright records that have No License Found (rf_fk=4) */
+      $sql = "SELECT content, type from copyright, license_file,
+              (SELECT distinct(pfile_fk) as pf from uploadtree 
+                where upload_fk=$upload_pk and uploadtree.lft BETWEEN $lft and $rgt) as SS
+             where copyright.pfile_fk=license_file.pfile_fk and rf_fk=4 
+                   and copyright.pfile_fk=pf and copyright.agent_fk=$Agent_pk";
+    }
+    else
+    {
+      /* get all the copyright records for this uploadtree.  */
+      $sql = "SELECT content, type from copyright,
               (SELECT distinct(pfile_fk) as PF from uploadtree 
                  where upload_fk=$upload_pk 
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$Agent_pk";
+    }
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
@@ -193,7 +201,7 @@ where copyright.pfile_fk=license_file.pfile_fk and rf_fk=4 and copyright.pfile_f
    (1) The histogram for the directory BY LICENSE.
    (2) The file listing for the directory.
    ***********************************************************/
-  function ShowUploadHist($Uploadtree_pk,$Uri)
+  function ShowUploadHist($Uploadtree_pk, $Uri, $filter)
   {
     global $PG_CONN;
 
@@ -214,7 +222,7 @@ where copyright.pfile_fk=license_file.pfile_fk and rf_fk=4 and copyright.pfile_f
     else
       $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
-    $rows = $this->GetRows($Uploadtree_pk, $Agent_pk, $upload_pk);
+    $rows = $this->GetRows($Uploadtree_pk, $Agent_pk, $upload_pk, 0, $filter);
 
     /* Write license histogram to $VLic  */
     $CopyrightCount = 0;
@@ -248,20 +256,14 @@ where copyright.pfile_fk=license_file.pfile_fk and rf_fk=4 and copyright.pfile_f
     $VUrl .= "<th width='10%'>$text1</th>";
     $VUrl .= "<th>$text4</th></tr>\n";
     
-//debugprint($rows, "rows");
     if (!is_array($rows)) 
      $VCopyright .= "<tr><td colspan=3>$rows</td></tr>";
     else
     foreach($rows as $row)
     {
-/*
-echo "<br>";
-echo $row['content'] . "<br>";
-echo htmlentities($row['content']) . "<br>";
-echo $row['copyright_count'] . "<br>";
-*/
         $hash = $row['hash'];
-        if ($row['type'] == 'statement') {
+        if ($row['type'] == 'statement') 
+        {
             $UniqueCopyrightCount++;
             $CopyrightCount += $row['copyright_count'];
             $VCopyright .= "<tr><td align='right'>$row[copyright_count]</td>";
@@ -285,7 +287,9 @@ echo $row['copyright_count'] . "<br>";
 
             $VCopyright .= "</td>";
             $VCopyright .= "</tr>\n";
-        } else if ($row['type'] == 'email') {
+        } 
+        else if ($row['type'] == 'email') 
+        {
             $UniqueEmailCount++;
             $EmailCount += $row['copyright_count'];
             $VEmail .= "<tr><td align='right'>$row[copyright_count]</td>";
@@ -296,7 +300,9 @@ echo $row['copyright_count'] . "<br>";
             $VEmail .= htmlentities($row['content']);
             $VEmail .= "</td>";
             $VEmail .= "</tr>\n";
-        } else if ($row['type'] == 'url') {
+        } 
+        else if ($row['type'] == 'url') 
+        {
             $UniqueUrlCount++;
             $UrlCount += $row['copyright_count'];
             $VUrl .= "<tr><td align='right'>$row[copyright_count]</td>";
@@ -312,24 +318,24 @@ echo $row['copyright_count'] . "<br>";
 
     $VCopyright .= "</table>\n";
     $VCopyright .= "<p>\n";
-$text = _("Unique Copyrights");
-$text1 = _("Total Copyrights");
+    $text = _("Unique Copyrights");
+    $text1 = _("Total Copyrights");
     $VCopyright .= "$text: $UniqueCopyrightCount<br>\n";
     $NetCopyright = $CopyrightCount;
     $VCopyright .= "$text1: $NetCopyright";
 
     $VEmail .= "</table>\n";
     $VEmail .= "<p>\n";
-$text = _("Unique Emails");
-$text1 = _("Total Emails");
+    $text = _("Unique Emails");
+    $text1 = _("Total Emails");
     $VEmail .= "$text: $UniqueEmailCount<br>\n";
     $NetEmail = $EmailCount;
     $VEmail .= "$text1: $NetEmail";
 
     $VUrl .= "</table>\n";
     $VUrl .= "<p>\n";
-$text = _("Unique URLs");
-$text1 = _("Total URLs");
+    $text = _("Unique URLs");
+    $text1 = _("Total URLs");
     $VUrl .= "$text: $UniqueUrlCount<br>\n";
     $NetUrl = $UrlCount;
     $VUrl .= "$text1: $NetUrl";
@@ -401,7 +407,6 @@ $text1 = _("Total URLs");
       if ($LicCount)
       {
         $VF .= "[" . number_format($LicCount,0,"",",") . "&nbsp;";
-        //$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
         $VF .= "license" . ($LicCount == 1 ? "" : "s");
         $VF .= "</a>";
         $VF .= "]";
@@ -413,7 +418,6 @@ $text1 = _("Total URLs");
       $ChildCount++;
     }
     $VF .= "</table>\n";
-    // print "ChildCount=$ChildCount  ChildLicCount=$ChildLicCount\n";
 
     /***************************************
      Problem: $ChildCount can be zero!
@@ -434,10 +438,10 @@ $text1 = _("Total URLs");
     }
 
     /* Combine VF and VLic */
-$text = _("Jump to");
-$text1 = _("Emails");
-$text2 = _("Copyright Statements");
-$text3 = _("URLs");
+    $text = _("Jump to");
+    $text1 = _("Emails");
+    $text2 = _("Copyright Statements");
+    $text3 = _("URLs");
     $V .= "<table border=0 width='100%'>\n";
     $V .= "<tr><td><a name=\"statements\"></a>$text: <a href=\"#emails\">$text1</a> | <a href=\"#urls\">$text3</a></td><td></td></tr>\n";
     $V .= "<tr><td valign='top' width='50%'>$VCopyright</td><td valign='top'>$VF</td></tr>\n";
@@ -459,54 +463,66 @@ $text3 = _("URLs");
   {
     $uTime = microtime(true);
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    $V="";
+    $OutBuf="";
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
-
-    switch(GetParm("show",PARM_STRING))
-    {
-    case 'detail':
-      $Show='detail';
-      break;
-    case 'summary':
-    default:
-      $Show='summary';
-    }
+    $filter = GetParm("filter",PARM_STRING);
 
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
 /********  disable cache to see if this is fast enough without it *****
     $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder")) . "&show=$Show";
     if ($this->UpdCache != 0)
     {
-      $V = "";
+      $OutBuf .= "";
       $Err = ReportCachePurgeByKey($CacheKey);
     }
     else
-      $V = ReportCacheGet($CacheKey);
+      $OutBuf .= ReportCacheGet($CacheKey);
 ***********************************************/
 
-    if (empty($V) )  // no cache exists
+    if (empty($OutBuf) )  // no cache exists
     {
       switch($this->OutputType)
       {
       case "XML":
         break;
       case "HTML":
-        $V .= "<font class='text'>\n";
+        $OutBuf .= "\n<script language='javascript'>\n";
+        /* function to replace this page specifying a new filter parameter */
+        $OutBuf .= "function ChangeFilter(selectObj, upload, item){";
+        $OutBuf .= "  var selectidx = selectObj.selectedIndex;";
+        $OutBuf .= "  var filter = selectObj.options[selectidx].value;";
+        $OutBuf .= '  window.location.assign("?mod=' . $this->Name .'&upload="+upload+"&item="+item +"&filter=" + filter); ';
+    $OutBuf .= "}</script>\n";
+
+        $OutBuf .= "<font class='text'>\n";
 
         /************************/
         /* Show the folder path */
         /************************/
-        $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
-
+        $OutBuf .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
         if (!empty($Upload))
         {
           $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
-          $V .= $this->ShowUploadHist($Item,$Uri);
+
+          /* Select list for filters */
+          $SelectFilter = "<select name='view_filter' id='view_filter' onchange='ChangeFilter(this,$Upload, $Item)'>";
+
+          $text = _("Show all");
+          $Selected = ($filter == 'none') ? "selected" : "";
+          $SelectFilter .= "<option $Selected value='none'>$text";
+
+          $text = _("Show files without licenses");
+          $Selected = ($filter == 'nolics') ? "selected" : "";
+          $SelectFilter .= "<option $Selected value='nolics'>$text";
+
+          $SelectFilter .= "</select>";
+          $OutBuf .= $SelectFilter;
+
+          $OutBuf .= $this->ShowUploadHist($Item, $Uri, $filter);
         }
-        $V .= "</font>\n";
-/*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>Loading...</div>"; */
+        $OutBuf .= "</font>\n";
         break;
       case "Text":
         break;
@@ -516,16 +532,16 @@ $text3 = _("URLs");
       /*  Cache Report */
 /********  disable cache to see if this is fast enough without it *****
       $Cached = false;
-      ReportCachePut($CacheKey, $V);
+      ReportCachePut($CacheKey, $OutBuf);
 **************************************************/
     }
     else
       $Cached = true;
 
-    if (!$this->OutputToStdout) { return($V); }
-    print "$V";
+    if (!$this->OutputToStdout) { return($OutBuf); }
+    print "$OutBuf";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
-$text = _("Elapsed time: %.2f seconds");
+    $text = _("Elapsed time: %.2f seconds");
     printf( "<small>$text</small>", $Time);
 
 /********  disable cache to see if this is fast enough without it *****
