@@ -24,6 +24,24 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+/***********************************************************
+ Sort folder and upload names
+ ***********************************************************/
+function picker_name_cmp($rowa, $rowb)
+{
+  return (strnatcasecmp($rowa['name'], $rowb['name']));
+}
+
+
+/***********************************************************
+ Sort filenames
+ ***********************************************************/
+function picker_ufile_name_cmp($rowa, $rowb)
+{
+  return (strnatcasecmp($rowa['ufile_name'], $rowb['ufile_name']));
+}
+
+
 define("TITLE_ui_picker", _("File Picker"));
 
 class ui_picker extends FO_Plugin
@@ -135,13 +153,15 @@ ALTER TABLE ONLY file_picker
 
     if (!empty($FolderContents))
     {
+      usort($FolderContents, 'picker_name_cmp');
+
       /* write subfolders */
       foreach ($FolderContents as $Folder)
       {
         if (array_key_exists('folder_pk', $Folder))
         {
           $folder_pk = $Folder['folder_pk'];
-          $folder_name = htmlentities($Folder['folder_name']);
+          $folder_name = htmlentities($Folder['name']);
           $OutBuf .= "<tr>";
 
           $OutBuf .= "<td></td>";
@@ -153,7 +173,7 @@ ALTER TABLE ONLY file_picker
         else if (array_key_exists('uploadtree_pk', $Folder))
         {
           $bitem = $Folder['uploadtree_pk'];
-          $upload_filename = htmlentities($Folder['upload_filename']);
+          $upload_filename = htmlentities($Folder['name']);
           $OutBuf .= "<tr>";
           $OutBuf .= "<td>";
           $text = _("Select");
@@ -176,6 +196,7 @@ ALTER TABLE ONLY file_picker
       }
       else
       {
+        usort($Children, 'picker_ufile_name_cmp');
         foreach($Children as $Child)
         {
           if (empty($Child)) { continue; }
@@ -418,21 +439,23 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     else
       $DirectoryList = '';
 
-//debugprint($FolderList, "FolderList");
-//debugprint($DirectoryList, "DirectoryList");
-
     // Get HTML for folder/directory list.
     // This is the stuff in the yellow bar.
-    $OutBuf .= $this->HTMLPath($Browseuploadtree_pk, $FolderList, $DirectoryList);
+    $OutBuf .= $this->HTMLPath($uploadtree_pk, $FolderList, $DirectoryList);
 
     /* Get list of folders in this folder 
      * That is, $DirectoryList is empty 
      */
-    if (!empty($infolder_pk))
-      $FolderContents = $this->GetFolderContents($folder_pk);
-    else
+    if (empty($infolder_pk))
+    {
       $FolderContents = array();
-    $Children = GetNonArtifactChildren($Browseuploadtree_pk);
+      $Children = GetNonArtifactChildren($Browseuploadtree_pk);
+    }
+    else
+    {
+      $Children = array();
+      $FolderContents = $this->GetFolderContents($folder_pk);
+    }
     $OutBuf .= $this->HTMLFileList($uploadtree_pk, $Children, $FolderContents);
 
     return $OutBuf;
@@ -473,7 +496,7 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
       switch($FCrow['foldercontents_mode'])
       {
         case 1:  /*******   child is folder   *******/
-          $sql = "select folder_pk, folder_name from folder where folder_pk=$FCrow[child_id]";
+          $sql = "select folder_pk, folder_name as name from folder where folder_pk=$FCrow[child_id]";
           $FolderResult = pg_query($PG_CONN, $sql);
           DBCheckResult($FolderResult, $sql, __FILE__, __LINE__);
           $FolderRow = pg_fetch_assoc($FolderResult);
@@ -482,7 +505,7 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
           $FolderContents[] = $FolderRow;
         break;
         case 2:  /*******   child is upload   *******/
-          $sql = "select upload_pk, upload_filename from upload where upload_pk=$FCrow[child_id] and ((upload_mode & (1<<5))!=0)";
+          $sql = "select upload_pk, upload_filename as name from upload where upload_pk=$FCrow[child_id] and ((upload_mode & (1<<5))!=0)";
           $UpResult = pg_query($PG_CONN, $sql);
           DBCheckResult($UpResult, $sql, __FILE__, __LINE__);
           $NumRows = pg_num_rows($UpResult);
@@ -617,6 +640,9 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     $folder_pk = GetParm("folder",PARM_INTEGER);
     $user_pk = $_SESSION['UserId'];
 
+    /* Item to start Browse window on */
+    $Browseuploadtree_pk = GetParm("bitem",PARM_INTEGER); 
+
     /* After picking an item2, this logic will record the pick in 
      * the picker history, and then redirect both item1 and item2 to the
      * comparison app.
@@ -636,9 +662,6 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     }
 
     $OutBuf = "";
-
-    /* Item to start Browse window on */
-    $Browseuploadtree_pk = GetParm("bitem",PARM_INTEGER); 
 
     switch($this->OutputType)
     {
