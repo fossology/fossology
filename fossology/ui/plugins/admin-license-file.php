@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -514,7 +514,7 @@ function FamilyNames()
   foreach ($Shortnamearray as $shortname)
   {
     // start with exceptions
-    if (($shortname == "No License Found")
+    if (($shortname == "No_license_found")
         || ($shortname == "Unknown license"))
     {
       $familynamearray[$shortname] = $shortname;

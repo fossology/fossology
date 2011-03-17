@@ -176,7 +176,7 @@ class ui_nomos_diff extends FO_Plugin
       $VLic .= ">$row[licname] </a>";
       $VLic .= "</td>";
       $VLic .= "</tr>\n";
-      if ($row['licname'] == "No License Found") $NoLicFound =  $row['liccount'];
+      if ($row['licname'] == "No_license_found") $NoLicFound =  $row['liccount'];
     }
     pg_free_result($result);
     $VLic .= "</table>\n";
@@ -355,13 +355,13 @@ class ui_nomos_diff extends FO_Plugin
 
 
   /* filter_nolics
-   * removes pairs of "No License Found"
-   * Or pairs that only have one file and "No License Found"
+   * removes pairs of "No_license_found"
+   * Or pairs that only have one file and "No_license_found"
    * Uses fuzzyname.
    */
   function filter_nolics(&$Master)
   { 
-    $NoLicStr = "No License Found";
+    $NoLicStr = "No_license_found";
 
     foreach($Master as $Key =>&$Pair)
     {
