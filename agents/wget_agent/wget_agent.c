@@ -338,15 +338,6 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
 
   rc = pclose(Fin);  /* rc is the exit status */
  
-  /* Run from scheduler! tar /var/local/lib/fossology/agents/wget to one temp file */
-  if (!stat(TempFileDir, &sb) && TempFile && TempFile[0])
-  {
-    memset(CMD,'\0',MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar -cvvf '%s' -C '%s' ./ 2>&1", TempFile, TempFileDir);
-    rc_system = system(CMD);
-    if (rc_system != 0) exit(24); // failed to archive the temperary directory as one temperary file
-  }
-  
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
 	{
 	printf("ERROR upload %ld Download failed\n",GlobalUploadKey);
@@ -376,6 +367,29 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
 	DBclose(DB);
 	exit(14);
 	}
+
+  /* Run from scheduler! store /var/local/lib/fossology/agents/wget/../<files|directories> to one temp file */
+  if (TempFile && TempFile[0])
+  {
+    char TempFilePath[MAXCMD];
+    memset(TempFilePath,'\0',MAXCMD);
+    /* for one url http://a.org/test.deb, TempFilePath should be /var/local/lib/fossology/agents/wget/a.org/test.deb */
+    snprintf(TempFilePath, MAXCMD-1, "%s/%s", TempFileDir, TaintedURL + 7);
+    if (!stat(TempFilePath, &sb))
+    {
+      memset(CMD,'\0',MAXCMD);
+      if (S_ISDIR(sb.st_mode))
+      {
+        snprintf(CMD,MAXCMD-1, "tar -cvvf '%s' -C '%s' ./ 2>&1", TempFile, TempFilePath);
+      }
+      else
+      {
+        snprintf(CMD,MAXCMD-1, "mv '%s' '%s' 2>&1", TempFilePath, TempFile);
+      }
+      rc_system = system(CMD);
+      if (rc_system != 0) exit(24); // failed to store the temperary directory(one file) as one temperary file
+    }
+  } 
 
   if (TempFile && TempFile[0] && !IsFile(TempFile,1))
 	{
