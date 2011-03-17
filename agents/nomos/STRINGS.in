@@ -3513,6 +3513,10 @@ e /* (INFILE(j)) */
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(copyright.{0,10}(abandon|eliminat|disclaim|relinquish|remove|withdraw)|(abandon|eliminat|disclaim|relinquish|remove|withdraw).{0,10}copyright)"
 #
+%ENTRY%	_LT_PUBDOM_7
+%KEY%	"public"
+%STR%	"is =FEW= public domain"
+#
 %ENTRY%	_LT_PUBDOMNOTcpyrt
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 %STR%	"no =FEW= copyright =SOME= \<public\>[ -]domain"

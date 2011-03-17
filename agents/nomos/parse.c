@@ -25,7 +25,7 @@
 #include "nomos_regex.h"
 #include "_autodefs.h"
 
-/* DEBUG 
+/* DEBUG  
 #define PROC_TRACE 1
 #define DOCTOR_DEBUG 1
    DEBUG */
@@ -4283,12 +4283,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	INTERESTING("Algorithmics");
     }
     /*
-     * Dyade
-     */
-    if (INFILE(_LT_DYADE)) {
-	INTERESTING("Dyade");
-    }
-    /*
      * Pixware
      */
     if (INFILE(_LT_PIXWARE_EULA)) {
@@ -4896,21 +4890,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (!lmem[_mGPL] && INFILE(_LT_EXCEPT_1)) {
 	INTERESTING("Link-exception");
     }
-    /*
-     * Check for indemnification statements/requirements
-     */
-    if HASKW(kwbm, _KW_indemnify) {
-	    for (i = 0; i < NINDEMNITY; i++) {
-		if (INFILE(_INDEMNITY_first+i)) {
-		    (void) strcpy(name, "Indemnity");
-		    if (lDebug) {
-			(void) sprintf(name+9, "(%d)", i+1);
-		    }
-		    MEDINTEREST(name);      /* MEDINTEREST? */
-		    break;
-		}
-	    }
-	}
+
     /*
      * If there's a no-warranty statement in the file, remember the regex.
      * Ditto for phrase stating restrictions.
@@ -7761,6 +7741,9 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_6)) {
 	LOWINTEREST(lDebug ? "No-more-copyright" : LS_PD_CLM);
+	ret = 1;
+    } else if (INFILE(_LT_PUBDOM_7)) {
+	LOWINTEREST(lDebug ? "Pubdom(7)" : LS_PD_CLM);
 	ret = 1;
     } else if (HASKW(kwbm, _KW_public_domain) && score < 3) {
 	LOWINTEREST(LS_PD_ONLY);
