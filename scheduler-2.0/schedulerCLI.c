@@ -172,7 +172,7 @@ int main(int argc, char** argv)
       if(bytes == 0 || strncmp(buffer, "CLOSE", 5) == 0)
         closing = 1;
       else
-        printf("SCHEDULER: %s", buffer);
+        printf("%s", buffer);
     }
 
     /* check stdin */

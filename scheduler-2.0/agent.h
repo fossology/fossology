@@ -99,9 +99,9 @@ void agent_ready_event(agent a);
 void agent_update_event(void* unused);
 
 void agent_restart(agent a, agent ref);
-void agent_fail(agent a);
 void agent_close(agent a);
-host agent_host(agent a);
+void agent_pause(agent a, int stop);
+void agent_unpause(agent a);
 void agent_print_status(agent a, GOutputStream* ostr);
 int  aprintf(agent a, const char* fmt, ...);
 ssize_t agent_write(agent a, const void* buf, size_t count);

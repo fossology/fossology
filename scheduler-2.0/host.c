@@ -173,6 +173,28 @@ char* host_agent_dir(host h)
 }
 
 /**
+ * TODO
+ *
+ * @param h
+ */
+void host_increase_load(host h)
+{
+  h->running++;
+  VERBOSE3("HOST[%s] load increased to %d\n", h->name, h->running);
+}
+
+/**
+ * TODO
+ *
+ * @param h
+ */
+void host_decrease_load(host h)
+{
+  h->running--;
+  VERBOSE3("HOST[%s] load decreased to %d\n", h->name, h->running);
+}
+
+/**
  * Gets a host for which there are at least num agents available to start
  * new agents on.
  *
@@ -185,6 +207,7 @@ host get_host(int num)
   fs.h = NULL;
   fs.req = num;
   g_tree_foreach(host_list, (GTraverseFunc)find_host, &fs);
+  fs.h->running++;
   return fs.h;
 }
 

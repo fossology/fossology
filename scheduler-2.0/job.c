@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <agent.h>
 #include <database.h>
 #include <event.h>
+#include <job.h>
 #include <logging.h>
 #include <scheduler.h>
 
@@ -60,7 +61,6 @@ struct job_internal
     /* information about job status */
     int priority;           ///< importance of the job, currently only two types
     int verbose;            ///< the verbose level for all of the agents in this job
-    int paused;             ///< if this job has been paused until further notice
     int id;                 ///< the identifier for this job
 };
 
@@ -94,8 +94,8 @@ GSequence* job_queue = NULL;
  */
 int is_active(int* job_id, job j, int* counter)
 {
-  if((j->running_agents != NULL && j->finished_agents != NULL && j->failed_agents != NULL) || j->id < 0)
-    (*counter)++;
+  if((j->running_agents != NULL || j->finished_agents != NULL || j->failed_agents != NULL) || j->id < 0)
+    ++(*counter);
   return 0;
 }
 
@@ -219,6 +219,50 @@ void job_transition(job j, job_status new_status)
 }
 
 /**
+ * Causes all agents that are working on the job to pause. This will simply cause
+ * the scheduler to stop sending new information to the agents in question.
+ *
+ * @param j the job to pause
+ */
+void job_pause(job j, int cli)
+{
+  GList* iter;
+
+  TEST_NULV(j);
+
+  if(cli) job_transition(j, JB_CLI_PAUSED);
+  else job_transition(j, JB_SCH_PAUSED);
+
+  for(iter = j->running_agents; iter != NULL; iter = iter->next)
+    agent_pause(iter->data, j->db_result == NULL);
+}
+
+/**
+ * Restart the agents that are working on this job. This will cause the scheduler
+ * to start sending information to the agents again.
+ *
+ * @param j the job to restart
+ */
+void job_restart(job j)
+{
+  GList* iter;
+
+  TEST_NULV(j);
+  if(j->status != JB_SCH_PAUSED && j->status != JB_CLI_PAUSED)
+  {
+    ERROR("attempt to restart job %d failed, job status was %s", j->id, status_string[j->status]);
+    return;
+  }
+
+  for(iter = j->running_agents; iter != NULL; iter = iter->next)
+  {
+    if(j->db_result != NULL) agent_write(iter->data, "OK\n", 3);
+    agent_unpause(iter->data);
+  }
+  job_transition(j, JB_STARTED);
+}
+
+/**
  * Used to compare two different jobs in the priority queue. This simply compares
  * their priorities so that jobs with a high priority are scheduler before low
  * priority jobs.
@@ -282,7 +326,6 @@ job job_init(char* type, int id)
   j->idx = 0;
   j->priority = 0;
   j->verbose = 0;
-  j->paused = 0;
   j->id = id;
 
   if(job_list == NULL)
@@ -346,9 +389,38 @@ void job_verbose_event(job j)
  *
  * @param ostr
  */
-void job_status_event(void* param)
+void job_status_event(void* p)
 {
-  g_tree_foreach(job_list, (GTraverseFunc)job_sstatus, param);
+  int tmp = 0;
+  arg_int* params = p;
+
+  if(!params->second)
+    g_tree_foreach(job_list, (GTraverseFunc)job_sstatus, params->first);
+  else
+    job_sstatus(&tmp, g_tree_lookup(job_list, &params->second), params->first);
+  g_free(params);
+}
+
+/**
+ * TODO
+ *
+ * @param params
+ */
+void job_pause_event(void* p)
+{
+  arg_int* params = p;
+  job_pause(params->first, params->second);
+  g_free(params);
+}
+
+/**
+ * TODO
+ *
+ * @param p
+ */
+void job_restart_event(void* p)
+{
+  job_restart(p);
 }
 
 /**
@@ -456,10 +528,14 @@ void job_update(job j)
   int restart = 0;
 
   TEST_NULV(j)
-  if(!j->paused && j->running_agents == NULL)
+  if(j->status != JB_SCH_PAUSED && j->status != JB_CLI_PAUSED && j->running_agents == NULL)
   {
     /* this indicates a correctly finished job */
-    if(j->failed_agents == NULL)
+    if(closing)
+    {
+      /* do doing */
+    }
+    else if(j->failed_agents == NULL)
     {
       job_transition(j, JB_COMPLETE);
       for(iter = j->finished_agents; iter != NULL; iter = iter->next)
@@ -498,43 +574,6 @@ void job_update(job j)
 }
 
 /**
- * Causes all agents that are working on the job to pause. This will simply cause
- * the scheduler to stop sending new information to the agents in question.
- *
- * @param j the job to pause
- */
-void job_pause(job j, int cli)
-{
-  TEST_NULV(j);
-  j->paused = 1;
-
-  if(cli) job_transition(j, JB_CLI_PAUSED);
-  else job_transition(j, JB_SCH_PAUSED);
-}
-
-/**
- * Restart the agents that are working on this job. This will cause the scheduler
- * to start sending information to the agents again.
- *
- * @param j the job to restart
- */
-void job_restart(job j)
-{
-  GList* iter;
-
-  TEST_NULV(j);
-  if(j->paused)
-  {
-    ERROR("attempt to restart job %d failed, job wasn't paused", j->id);
-    return;
-  }
-
-  j->paused = 0;
-  for(iter = j->running_agents; iter != NULL; iter = iter->next)
-    agent_write(iter->data, "OK\n", 3);
-}
-
-/**
  * Gets the id number for the job.
  *
  * @param j the job to get the id of;
@@ -554,7 +593,7 @@ int job_id(job j)
 int job_is_paused(job j)
 {
   TEST_NULL(j, -1);
-  return j->paused;
+  return j->status == JB_SCH_PAUSED || j->status == JB_CLI_PAUSED;
 }
 
 /**

@@ -40,11 +40,7 @@ struct event_internal {
 
 /** internal structure for the event loop */
 struct event_loop_internal {
-  GCond* wait_t;                ///< the wait condition used for threads taking from the queue
-  GCond* wait_p;                ///< the wait condition used for threads placing into the queue
-  GMutex* lock;                 ///< the mutex that will lockt he concurrent queue
-  event queue[EVENT_LOOP_SIZE]; ///< the circular queue for the event loop
-  int head, tail;               ///< the front and back of the queue
+  GAsyncQueue* queue;           ///< the queue that is the core of the event loop
   int terminated;               ///< flag that signals the end of the event loop
   int occupied;                 ///< flag that determines if there is already a thread in this loop
 };
@@ -76,12 +72,7 @@ event_loop event_loop_get()
     return &vl_singleton;
   }
 
-  vl_singleton.wait_t = g_cond_new();
-  vl_singleton.wait_p = g_cond_new();
-  vl_singleton.lock = g_mutex_new();
-
-  memset(vl_singleton.queue, 0, sizeof(vl_singleton.queue));
-  vl_singleton.head = vl_singleton.tail = 0;
+  vl_singleton.queue = g_async_queue_new_full((GDestroyNotify)event_destroy);
   vl_singleton.terminated = 0;
   el_created = 1;
 
@@ -93,19 +84,9 @@ event_loop event_loop_get()
  *
  * @param vl
  */
-void event_loop_destroy(event_loop vl)
+void event_loop_destroy()
 {
-  int i;
-
-  for(i = 0; i < EVENT_LOOP_SIZE; i++) {
-    if(vl->queue[i] != NULL) {
-      event_destroy(vl->queue[i]);
-    }
-  }
-
-  g_cond_free(vl->wait_p);
-  g_cond_free(vl->wait_t);
-  g_mutex_free(vl->lock);
+  g_async_queue_unref(event_loop_get()->queue);
 }
 
 /**
@@ -120,30 +101,7 @@ void event_loop_destroy(event_loop vl)
  */
 int event_loop_put(event_loop vl, event e)
 {
-  if(vl->terminated)
-  {
-    return 0;
-  }
-  g_mutex_lock(vl->lock);
-
-  /* check to see if the queue is full */
-  while((vl->tail + 1) % EVENT_LOOP_SIZE == vl->head)
-  {
-    g_cond_wait(vl->wait_p, vl->lock);
-    if(vl->terminated)
-    {
-      g_mutex_unlock(vl->lock);
-      return 0;
-    }
-  }
-
-  /* queue has space, add the event */
-  vl->queue[vl->tail] = e;
-  vl->tail = (vl->tail + 1) % EVENT_LOOP_SIZE;
-
-  /* clean up for the end of the function */
-  g_cond_signal(vl->wait_t);
-  g_mutex_unlock(vl->lock);
+  g_async_queue_push(vl->queue, e);
   return 1;
 }
 
@@ -158,33 +116,21 @@ int event_loop_put(event_loop vl, event e)
  */
 event event_loop_take(event_loop vl)
 {
-  /* locals */
   event ret;
+
   if(vl->terminated)
   {
     return NULL;
   }
-  g_mutex_lock(vl->lock);
 
-  /* check if the queue is empty, if so wait for something */
-  while(vl->head == vl->tail)
+  ret = g_async_queue_pop(vl->queue);
+
+  if(ret->func == NULL)
   {
-    g_cond_wait(vl->wait_t, vl->lock);
-    if(vl->terminated)
-    {
-      g_mutex_unlock(vl->lock);
-      return NULL;
-    }
+    event_destroy(ret);
+    ret = NULL;
   }
 
-  /* there is an item in the queue, take it */
-  ret = vl->queue[vl->head];
-  vl->queue[vl->head] = NULL;
-  vl->head = (vl->head + 1) % EVENT_LOOP_SIZE;
-
-  /* clean up for the end of the function */
-  g_cond_signal(vl->wait_p);
-  g_mutex_unlock(vl->lock);
   return ret;
 }
 
@@ -205,7 +151,7 @@ event event_loop_take(event_loop vl)
  */
 event event_init(void(*func)(void*), void* arg)
 {
-  event e = (event)calloc(1, sizeof(struct event_internal));
+  event e = g_new(struct event_internal, 1);
 
   e->func = func;
   e->argument = arg;
@@ -220,7 +166,7 @@ event event_init(void(*func)(void*), void* arg)
  */
 void event_destroy(event e)
 {
-  free(e);
+  g_free(e);
 }
 
 /* ************************************************************************** */
@@ -240,33 +186,6 @@ void event_signal(void* func, void* args) {
 }
 
 /**
- * destroys the old event loop singleton. This function should really only be
- * called when the program is about to exit. However, it could be called during
- * program execution as long as it is understood that all instances of
- * event_loop will be invalidated until another call to event_loop_get is made.
- * This function is also not thread safe and should only be called if main is
- * the only thread currently running.
- */
-void event_loop_reset()
-{
-  event_loop vl;
-  int i;
-
-  if(el_created)
-  {
-    vl = event_loop_get();
-    for(i = 0; i < EVENT_LOOP_SIZE; i++)
-    {
-      if(vl->queue[i] != NULL)
-      {
-        event_destroy(vl->queue[i]);
-      }
-    }
-    el_created = 0;
-  }
-}
-
-/**
  * Enters the event loop. This function will not return until another thread
  * chooses to terminate the event loop. Essentially this function should not
  * return until the program is ready to exit. There should also only be one
@@ -277,28 +196,28 @@ void event_loop_reset()
  *          0x0:   successful execution
  *          0x01:  attempt to enter a loop that is occupied
  */
-int event_loop_enter(void(*update)(void))
+int event_loop_enter(void(*call_back)(void))
 {
   event e;
   event_loop vl = event_loop_get();
 
   /* start by checking to make sure this is the only thread in this loop */
-  g_mutex_lock(vl->lock);
+  g_async_queue_lock(vl->queue);
   if(vl->occupied)
   {
-    g_mutex_unlock(vl->lock);
+    g_async_queue_unlock(vl->queue);
     return 0x01;
   }
   vl->occupied = 1;
   vl->terminated = 0;
-  g_mutex_unlock(vl->lock);
+  g_async_queue_unlock(vl->queue);
 
   /* from here on out, this is the only thread in this event loop     */
   /* the loop to execute events is very simple, grab event, run event */
   while((e = event_loop_take(vl)) != NULL) {
     e->func(e->argument);
     event_destroy(e);
-    update();
+    call_back();
   }
 
   return 0x0;
@@ -314,14 +233,10 @@ int event_loop_enter(void(*update)(void))
 void event_loop_terminate()
 {
   event_loop vl = event_loop_get();
-  g_mutex_lock(vl->lock);
 
   vl->terminated = 1;
   vl->occupied = 0;
-  g_cond_broadcast(vl->wait_p);
-  g_cond_broadcast(vl->wait_t);
-
-  g_mutex_unlock(vl->lock);
+  event_signal(NULL, NULL);
 }
 
 

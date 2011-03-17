@@ -46,22 +46,4 @@ gint int_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 /* **** SQL strings ********************************************************* */
 /* ************************************************************************** */
 
-/**
- *
- */
-/*char* check_queue = "\
-SELECT * \
-  FROM getrunnable() \
-  LIMIT 10;";*/
-
-/**
- *
- */
-/*char* check_extended = "\
-SELECT DISTINCT(jobqueue.*), job.* \
-  FROM jobqueue \
-    LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk \
-    LEFT JOIN jobqueue AS depends ON depends.jq_pk = jobdepends.jdep_jq_depends_fk \
-    LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk WHERE jobqueue.jq_starttime IS NULL AND ( (depends.jq_endtime IS NOT NULL AND depends.jq_end_bits < 2 ) OR jobdepends.jdep_jq_depends_fk IS NULL) ORDER BY job.job_priority DESC,job.job_queued ASC LIMIT 6;";*/
-
 #endif /* SCHEDULER_H_INCLUDE */

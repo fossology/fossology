@@ -127,6 +127,43 @@ const char* status_strings[] = {
 /* ************************************************************************** */
 
 /**
+ * Changes the status of the agent internal to the scheduler. This function
+ * is used to transition between agent states instead of a raw set of the status
+ * so that correct printing of the verbose message is guaranteed
+ *
+ * @param a the agent to change the status for
+ * @param new_status the new status of the agent
+ */
+void agent_transition(agent a, agent_status new_status)
+{
+  VERBOSE3("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
+        job_id(a->owner), a->meta_data->name, a->pid,
+        status_strings[a->status], status_strings[new_status]);
+  a->status = new_status;
+}
+
+/**
+ * Fails an agent. This will move the agent status to AG_FAILED and send a
+ * SIGKILL to the relevant agent. It will also update the agents status within
+ * the job that owns it and close the associated communication thread.
+ *
+ * @param a the agent that is failing.
+ */
+void agent_fail(agent a)
+{
+  TEST_NULV(a);
+  agent_transition(a, AG_FAILED);
+  kill(a->pid, SIGKILL);
+  job_fail_agent(a->owner, a);
+  if(write(a->to_parent, "@@@1\n", 5) != 5)
+  {
+    ERROR("JOB[%d].%s[%d]: Failed to kill agent thread cleanly",
+        job_id(a->owner), a->meta_data->name, a->pid);
+  }
+  job_update(a->owner);
+}
+
+/**
  * This function will be called by g_tree_foreach() which is the reason for its
  * formatting. This will close all of the agent's pipes
  *
@@ -164,7 +201,7 @@ int update(int* pid_ptr, agent a, gpointer unused)
   if(a->status == AG_SPAWNED || a->status == AG_RUNNING || a->status == AG_PAUSED)
   {
     /* check last checkin time */
-    if(time(NULL) - a->check_in > TILL_DEATH)
+    if(time(NULL) - a->check_in > TILL_DEATH && !job_is_paused(a->owner))
     {
       ERROR("JOB[%d].%s[%d] no heartbeat for %d seconds",
           job_id(a->owner), job_type(a->owner), a->pid, time(NULL) - a->check_in);
@@ -276,8 +313,8 @@ void agent_listen(agent a)
     /* get message from agent */
     if(fgets(buffer, sizeof(buffer), a->read) == NULL)
     {
-      clprintf("T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
-          __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
+      //clprintf("T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
+      //    __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
       g_thread_exit(NULL);
     }
 
@@ -395,7 +432,7 @@ void* agent_spawn(void* passed)
       args[0] = g_strdup_printf("%s/%s", AGENT_DIR, tmp);
       execv(args[0], args);
     }
-    /* otherwise the agent will be started using ssh   */
+    /* otherwise the agent willprintf("HELLO\n");l be started using ssh   */
     /* if the agent is started using ssh we don't need */
     /* to fully parse the arguments, just pass the run */
     /* command as the last argument to the ssh command */
@@ -428,22 +465,6 @@ void* agent_spawn(void* passed)
   }
 
   return NULL;
-}
-
-/**
- * Changes the status of the agent internal to the scheduler. This function
- * is used to transition between agent states instead of a raw set of the status
- * so that correct printing of the verbose message is guaranteed
- *
- * @param a the agent to change the status for
- * @param new_status the new status of the agent
- */
-void agent_transition(agent a, agent_status new_status)
-{
-  VERBOSE3("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
-        job_id(a->owner), a->meta_data->name, a->pid,
-        status_strings[a->status], status_strings[new_status]);
-  a->status = new_status;
 }
 
 /* ************************************************************************** */
@@ -674,10 +695,7 @@ void agent_death_event(void* pids)
           job_id(a->owner), a->meta_data->name, a->pid, status_strings[a->status]);
       agent_fail(a);
     }
-    else
-    {
-      agent_close(a);
-    }
+    agent_close(a);
   }
 
   if(db) database_update_event(NULL);
@@ -786,27 +804,6 @@ void agent_restart(agent a, agent ref)
 }
 
 /**
- * Fails an agent. This will move the agent status to AG_FAILED and send a
- * SIGKILL to the relevant agent. It will also update the agents status within
- * the job that owns it and close the associated communication thread.
- *
- * @param a the agent that is failing.
- */
-void agent_fail(agent a)
-{
-  TEST_NULV(a);
-  kill(a->pid, SIGKILL);
-  agent_transition(a, AG_FAILED);
-  job_fail_agent(a->owner, a);
-  if(write(a->to_parent, "@@@1\n", 5) != 5)
-  {
-    ERROR("JOB[%d].%s[%d]: Failed to kill agent thread cleanly",
-        job_id(a->owner), a->meta_data->name, a->pid);
-  }
-  job_update(a->owner);
-}
-
-/**
  * Closes an agent. This function should be called twice for every agent that
  * completes execution correctly. The first time this will move the agent status
  * to AG_CLOSING and tell the agent to close by printing "CLOSE" to the agent's
@@ -835,15 +832,30 @@ void agent_close(agent a)
 }
 
 /**
- * Gets the host that the agent is running on
+ * Pauses an agent, this will pause the agent, if the boolean flag passed in is
+ * true, this will send a stop signal to the process and then decrease the load
+ * on the host machine.
  *
- * @param a the agent to get the host for
- * @return the host the agent is running on
+ * @param a the agent to pause
+ * @param stop if a SIGSTOP needs to be sent to the agent
  */
-host agent_host(agent a)
+void agent_pause(agent a, int stop)
 {
-  TEST_NULL(a, NULL);
-  return a->host_machine;
+  if(stop) kill(a->pid, SIGSTOP);
+  host_decrease_load(a->host_machine);
+}
+
+/**
+ * Uppauses the agent, this will send a SIGCONT to the process regardless of if
+ * a SIGTOP was sent. If the process wasn't SIGSTOP'd this will do nothing. Also
+ * increases the load on the host.
+ *
+ * @param a the agent to unpause
+ */
+void agent_unpause(agent a)
+{
+  kill(a->pid, SIGCONT);
+  host_increase_load(a->host_machine);
 }
 
 /**
@@ -863,7 +875,7 @@ void agent_print_status(agent a, GOutputStream* ostr)
   TEST_NULV(ostr);
 
   strftime(time_buf, sizeof(time_buf), "%F %T", localtime(&a->check_in));
-  status_str = g_strdup_printf("agent:%d host:%s type:%s status:%s time:%s\n",
+  status_str = g_strdup_printf("  agent:%d host:%s type:%s status:%s time:%s\n",
       a->pid,
       host_name(a->host_machine),
       a->meta_data->name,

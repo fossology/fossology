@@ -53,7 +53,9 @@ void job_destroy(job j);
 /* ************************************************************************** */
 
 void job_verbose_event(job j);
-void job_status_event(void* param);
+void job_status_event(void* p);
+void job_pause_event(void* p);
+void job_restart_event(void* p);
 
 void job_add_agent(job j, void* a);
 void job_remove_agent(job j, void* a);
@@ -62,8 +64,6 @@ void job_fail_agent(job j, void* a);
 void job_set_priority(job j, int pri);
 void job_set_data(job j, char* data, int sql);
 void job_update(job j);
-void job_pause(job j, int cli);
-void job_restart(job j);
 int  job_id(job j);
 int  job_is_paused(job j);
 int  job_is_open(job j);
