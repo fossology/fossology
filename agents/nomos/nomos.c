@@ -763,7 +763,7 @@ FUNCTION int recordScanToDB(cacheroot_t *pcroot, struct curScan *scanRecord) {
     noneFound = strstr(scanRecord->compLic, LS_NONE);
     if (noneFound != NULL)
     {
-      rf_pk = get_rfpk(pcroot, "No License Found");
+      rf_pk = get_rfpk(pcroot, "No_License_Found");
       if (updateLicenseFile(rf_pk) == FALSE)  return (-1);
       return (0);
     }

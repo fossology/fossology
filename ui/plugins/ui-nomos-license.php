@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-define("TITLE_ui_nomos_license", _("Nomos License Browser"));
+define("TITLE_ui_nomos_license", _("License Browser"));
 
 class ui_nomos_license extends FO_Plugin
 {
@@ -39,12 +39,24 @@ class ui_nomos_license extends FO_Plugin
   var $HighlightColor = '#4bfe78';
 
   /***********************************************************
-   Install(): Create and configure database tables
+   Install(): Only used during installation.
+   Return 0 on success, non-zero on failure.
    ***********************************************************/
   function Install()
   {
-    global $DB;
+    global $DB, $PG_CONN;
+
     if (empty($DB)) { return(1); } /* No DB */
+    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) return(1); }
+
+    /* The license "No License Found" was changed to "No_license_found"
+     * in v1.4 because one shot depends on license names that are one
+     * string (no spaces).  So make sure the users db is updated.
+     */
+    $sql = "update license_ref set rf_shortname='No_license_found'
+               where rf_shortname='No License Found'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
 
     return(0);
   } // Install()
@@ -65,7 +77,7 @@ class ui_nomos_license extends FO_Plugin
       $nomosURI = "view-license&napk=$nomosAgentpk" . Traceback_parm_keep(array("show","format","page","upload","item"));
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-       menu_insert("Browse::Nomos License",1);
+       menu_insert("Browse::License Browser",1);
        //menu_insert("Browse::[BREAK]",100);
        //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
       }

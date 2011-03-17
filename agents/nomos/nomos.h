@@ -147,7 +147,7 @@ size_t hashEntries;
  */
 #define	LS_NONE		"None"
 #define	LS_UNLIKELY	"LikelyNot"
-#define	LS_NOSUM	"No License Found"
+#define	LS_NOSUM	"No_License_Found"
 #define	LS_UNCL		"UnclassifiedLicense"
 #define	LS_NOT_PD	"NOT-public-domain"
 #define	LS_PD_CLM	"Public-domain-claim"
