@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006,2009,2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -147,7 +147,7 @@ size_t hashEntries;
  */
 #define	LS_NONE		"None"
 #define	LS_UNLIKELY	"LikelyNot"
-#define	LS_NOSUM	"No_License_Found"
+#define	LS_NOSUM	"No_license_found"
 #define	LS_UNCL		"UnclassifiedLicense"
 #define	LS_NOT_PD	"NOT-public-domain"
 #define	LS_PD_CLM	"Public-domain-claim"

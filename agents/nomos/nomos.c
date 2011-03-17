@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -763,7 +763,7 @@ FUNCTION int recordScanToDB(cacheroot_t *pcroot, struct curScan *scanRecord) {
     noneFound = strstr(scanRecord->compLic, LS_NONE);
     if (noneFound != NULL)
     {
-      rf_pk = get_rfpk(pcroot, "No_License_Found");
+      rf_pk = get_rfpk(pcroot, "No_license_found");
       if (updateLicenseFile(rf_pk) == FALSE)  return (-1);
       return (0);
     }
