@@ -47,6 +47,8 @@ void host_destroy(host h);
 char* host_name(host h);
 char* host_address(host h);
 char* host_agent_dir(host h);
+void host_increase_load(host h);
+void host_decrease_load(host h);
 
 host get_host(int num);
 host name_host(char* name);

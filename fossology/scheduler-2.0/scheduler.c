@@ -105,16 +105,23 @@ void prnt_sig(int signo)
 {
   switch(signo)
   {
-    case SIGINT: case SIGQUIT: case SIGTERM:
-      lprintf("SIGNALS: Scheduler killed by SIGINT, SIGQUIT, SIGTERM: unclean death\n");
-      kill_agents();
-      event_loop_terminate();
-      break;
     case SIGALRM:
       lprintf("SIGNALS: Scheduler received alarm signal, checking job states\n");
       event_signal(agent_update_event, NULL);
       event_signal(database_update_event, NULL);
       alarm(CHECK_TIME);
+      break;
+    case SIGTERM:
+      lprintf("SIGNALS: Scheduler received terminate signal, shutting down scheduler\n");
+      event_signal(scheduler_close_event, NULL);
+      break;
+    case SIGQUIT:
+      lprintf("SIGNALS: Scheduler received quit signal, shutting down scheduler\n");
+      event_signal(scheduler_close_event, NULL);
+      break;
+    case SIGINT:
+      lprintf("SIGNALS: Scheduler received interrupt signal, shutting down scheduler\n");
+      event_signal(scheduler_close_event, NULL);
       break;
   }
 }
@@ -283,11 +290,11 @@ void load_config()
   struct dirent* ep;        // information about directory
   FILE* istr;               // file pointer to agent.conf
   char* tmp;                // pointer into a string
-  char buffer[2048];        // TODO
-  char name[MAX_NAME + 1];  // TODO
-  char cmd [MAX_CMD  + 1];  // TODO
-  int max = -1;             // TODO
-  int special = 0;          // TODO
+  char buffer[2048];        // standard string buffer
+  char name[MAX_NAME + 1];  // buffer to hold the host and agent names
+  char cmd [MAX_CMD  + 1];  // buffer to hold the cmd associated with an agent
+  int max = -1;             // the number of agents to a host or number of one type running
+  int special = 0;          // anything that is special about the agent (EXCLUSIVE)
 
   // TODO set this up with DEFAULT_SETUP instead of this
   if((dp = opendir("./agents/")) == NULL)
@@ -400,6 +407,7 @@ void load_config()
 void scheduler_close_event(void* unused)
 {
   closing = 1;
+  kill_agents();
 }
 
 /**
@@ -414,6 +422,7 @@ int close_scheduler()
   agent_list_clean();
   interface_destroy();
   database_destroy();
+  event_loop_destroy();
   return 0;
 }
 
@@ -536,14 +545,11 @@ int main(int argc, char** argv)
   interface_init();
   database_init();
 
-  /* ********************************** */
-  /* *** initialize signal handlers *** */
-  /* ********************************** */
   signal(SIGCHLD, chld_sig);
   signal(SIGALRM, prnt_sig);
-  signal(SIGINT,  prnt_sig);
-  signal(SIGQUIT, prnt_sig);
   signal(SIGTERM, prnt_sig);
+  signal(SIGQUIT, prnt_sig);
+  signal(SIGINT,  prnt_sig);
 
   /* *********************************** */
   /* *** post initialization checks **** */

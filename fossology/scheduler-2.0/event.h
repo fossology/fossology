@@ -30,6 +30,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef struct event_internal* event;
 
 /**
+ * structure used to pass an argument and an integer to an event.
+ */
+typedef struct
+{
+    void* first;
+    int second;
+} arg_int;
+
+/**
  * An event loop that can be waited on. This essentially implements a concurrent
  * queue that a the creation thread will wait on. events can be added to the
  * event loop and will be executed and destroy correctly by the thread waiting
@@ -51,9 +60,8 @@ void event_destroy(event e);
 /* ************************************************************************** */
 
 void event_signal(void* func, void* args);
-void event_loop_reset();
 void event_loop_terminate();
-int event_loop_enter(void(*)(void));
-
+int  event_loop_enter(void(*)(void));
+void event_loop_destroy();
 
 #endif /* EVENT_H_INCLUDE */

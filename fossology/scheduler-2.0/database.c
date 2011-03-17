@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <agent.h>
 #include <database.h>
 #include <logging.h>
+#include <scheduler.h>
 
 /* std library includes */
 
@@ -95,6 +96,12 @@ void database_update_event(void* unused)
   int i, job_id;
   char* value, * type, * pfile;
   job j;
+
+  if(closing)
+  {
+    lprintf("ERRO %s.%d: scheduler is closing, will not perform database update\n", __FILE__, __LINE__);
+    return;
+  }
 
   /* make the database query */
   db_result = PQexec(db_conn, basic_checkout);

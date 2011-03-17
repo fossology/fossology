@@ -51,6 +51,7 @@ int i_terminate = 0;    ///< flag indicating if the interface has been killed
 int i_port = -1;        ///< the port that the scheduler is listening on
 GThread* socket_thread; ///< thread that will create new connections
 GList* client_threads;  ///< threads that are currently running some form of scheduler interface
+GCancellable* cancel;   ///< used to shut down all interfaces when closing the scheudler
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
@@ -85,11 +86,12 @@ void* interface_thread(void* param)
   char buffer[1024];
   char* cmd, * tmp;
   unsigned long size;
+  arg_int* params;
 
-  while(g_input_stream_read(conn->istr, &header, sizeof(header), NULL, NULL) != 0)
+  while(g_input_stream_read_all(conn->istr, &header, sizeof(header), &size, cancel, NULL))
   {
     memset(buffer, '\0', sizeof(buffer));
-    if(g_input_stream_read_all(conn->istr, buffer, header.bytes_following, &size, NULL, NULL) == 0)
+    if(g_input_stream_read_all(conn->istr, buffer, header.bytes_following, &size, cancel, NULL) == 0)
     {
       clprintf("ERROR: unable to read from interface socket, attempted to read %d bytes", header.bytes_following);
       g_thread_exit(NULL);
@@ -100,6 +102,7 @@ void* interface_thread(void* param)
     for(cmd = buffer; *cmd; cmd++)
       *cmd = g_ascii_tolower(*cmd);
     cmd = strtok(buffer, " ");
+    size = 0;
 
     if(g_str_has_prefix("exit", cmd))
     {
@@ -115,16 +118,25 @@ void* interface_thread(void* param)
       return NULL;
     }
     else if(g_str_has_prefix("pause", cmd))
-      job_pause(get_job(atoi(strtok(NULL, " "))), 1);
+    {
+      params = g_new(arg_int, 1);
+      params->first = get_job(atoi(strtok(NULL, " ")));
+      params->second = 1;
+      event_signal(job_pause_event, params);
+    }
     else if(g_str_has_prefix("reload", cmd))
       load_config();
     else if(g_str_has_prefix("status", cmd))
     {
-      if((cmd = strtok(NULL, " ")) == NULL) event_signal(job_status_event, conn->ostr);
-      // TODO job specific status
+      params = g_new(arg_int, 1);
+      params->first = conn->ostr;
+      params->second = (cmd = strtok(NULL, " ")) == NULL ? 0 : atoi(cmd);
+      event_signal(job_status_event, params);
     }
     else if(g_str_has_prefix("restart", cmd))
-      job_restart(get_job(atoi(strtok(NULL, " "))));
+    {
+      event_signal(job_restart_event, get_job(atoi(strtok(NULL, " "))));
+    }
     else if(g_str_has_prefix("verbose", cmd))
     {
       cmd = strtok(NULL, " ");
@@ -172,7 +184,6 @@ interface_connection* interface_conn_init(GSocketConnection* conn)
 void interface_conn_destroy(interface_connection* inter)
 {
   g_thread_join(inter->thread);
-  g_io_stream_close((GIOStream*)inter->conn, NULL, NULL);
 }
 
 /**
@@ -200,14 +211,13 @@ void* listen_thread(void* unused)
   else if(!g_socket_listener_add_inet_port(server_socket, i_port, NULL, NULL))
     FATAL("Could not create interface, invalid port number: %d", i_port);
 
-
   if(TVERBOSE2)
     clprintf("INTERFACE: listenning port is %d\n", i_port);
 
   /* wait for new connections */
   for(;;)
   {
-    new_connection = g_socket_listener_accept(server_socket, NULL, NULL, NULL);
+    new_connection = g_socket_listener_accept(server_socket, NULL, cancel, NULL);
 
     if(i_terminate)
       break;
@@ -218,6 +228,7 @@ void* listen_thread(void* unused)
         interface_conn_init(new_connection));
   }
 
+  VERBOSE2("INTERFACE: socket listening thread closing\n");
   g_socket_listener_close(server_socket);
   return NULL;
 }
@@ -238,6 +249,8 @@ void interface_init()
     i_created = 1;
     socket_thread = g_thread_create(listen_thread, NULL, 1, NULL);
   }
+
+  cancel = g_cancellable_new();
 }
 
 /**
@@ -245,24 +258,19 @@ void interface_init()
  */
 void interface_destroy()
 {
-  GSocketClient* client;
   GList* iter;
 
   /* only destroy the interface if it has been created */
   if(i_created)
   {
     i_terminate = 1;
-    client = g_socket_client_new();
-    g_io_stream_close((GIOStream*)(g_socket_client_connect_to_host(client, "127.0.0.1", i_port, NULL, NULL)), NULL, NULL);
+    g_cancellable_cancel(cancel);
     g_thread_join(socket_thread);
 
     for(iter = client_threads; iter != NULL; iter = iter->next)
     {
       interface_conn_destroy(iter->data);
     }
-
-
-    g_object_unref(client);
   }
 }
 
