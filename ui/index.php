@@ -33,16 +33,8 @@ require_once("common/common.php");
 /****************************************************
  This is the main guts of the UI: Find the plugin and run it.
  ****************************************************/
-//$_SERVER['HTTP_SM_UNIVERSALID'] = "dong.ma@hp.com";
+//$_SERVER['HTTP_SMUNIVERSALID'] = "dong.ma@hp.com";
 plugin_load("plugins");
-
-/* check if Site Minder enabled */
-if (siteminder_check() != -1)
-{
-  $Uri = Traceback_uri() . "?mod=smauth";
-} else {
-  $Uri = Traceback_uri() . "?mod=auth";
-}
 
 $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) { $Mod = "Default"; }
@@ -60,7 +52,7 @@ if ($PluginId >= 0)
   }
 else
   {
-  //$Uri = Traceback_uri() . "?mod=auth";
+  $Uri = Traceback_uri() . "?mod=auth";
   $text = _("Module unavailable or your login session timed out.");
   print "$text <P />";
   $text01= _("Click here to continue.");

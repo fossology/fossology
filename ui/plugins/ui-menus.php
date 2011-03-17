@@ -327,8 +327,10 @@ class ui_menu extends FO_Plugin
           {
             $text = _("User");
             $V .= "<small>$text:</small> " . @$_SESSION['User'] . "<br>";
-            $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
-
+            if (plugin_find_id("auth") >= 0)
+              $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
+            else
+              $V .= "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
             /* Use global system SupportEmail variables, if addr and label are set */
             if ($SysConf['SupportEmailLabel'] and $SysConf['SupportEmailAddr'])
             {
