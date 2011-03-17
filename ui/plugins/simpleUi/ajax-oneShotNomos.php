@@ -61,27 +61,19 @@ class ajax_oneShotNomos extends FO_Plugin
         break;
       case "HTML":
         /* Display instructions */
-        $V .= _("This analyzer allows you to upload a single file from your computer for license analysis.\n");
-        $V .= _("The limitations:\n");
-        $V .= "<ul>\n";
-        $V .= _("<li>The analysis is done in real-time. Large files may take a while." .
-             " This method is not recommended for files larger than a few hundred kilobytes.\n");
-        $text = _("Files that contain files are");
-        $text1 = _("not");
-        $text2 = _("unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.");
-        $V .= "<li>$text <b>$text1</b> $text2\n";
-        $text = _("Results are");
-        $text1 = _("not");
-        $text2 = _("stored. As soon as you get your results, your uploaded file is removed from the system. ");
-        $V .= "<li>$text <b>$text1</b> $text2\n";
-        $V .= "</ul>\n";
+        $V .= _("This analyzer allows you to upload a single file from your
+        computer for license analysis.  \n");
+        $V .= _("The analysis is done in real-time. Large files may take a
+        while to upload.  Due to the time it takes to upload large files, this
+        method is not recommended for files larger than a few hundred kilobytes.\n");
+
         /* Display the form */
         $V .= "<form enctype='multipart/form-data' method='post'>\n";
         $V .= "<input type='hidden' name='uploadform' value='oneShotNomos'>\n";
-        $V .= "<ul>\n";
+        $V .= "<ol>\n";
         $V .= _("<li>Select the file to upload:<br />\n");
         $V .= "<input name='licfile' size='60' type='file' /><br />\n";
-        $V .= "</ul>\n";
+        $V .= "</ol>\n";
         $V .= "<input type='hidden' name='showheader' value='1'>";
         $V .= "<br>\n";
         $text = _("Analyze");

@@ -56,11 +56,13 @@ class ajax_srvUpload extends FO_Plugin
         break;
       case "HTML":
         
+        $topText = _("This option only uploads files located on the FOSSology
+        web server. Use this option if you have large source directories to
+        analyze. If your file is located elsewhere, then use one of the other
+        upload options.");
         /* Display instructions */
-        $V.= _("This option permits uploading a file, set of files, or a directory from the web server to FOSSology.\n");
-        $V.= _("This option is designed for developers who have large source code directories that they wish to analyze (and the directories are already mounted on the web server's system).\n");
-        $V.= _("This option only uploads files located on the FOSSology web server.\n");
-        $V.= _("If your file is located elsewhere, then use one of the other upload options.\n");
+        $V .= $topText;
+        
         /* Display the form */
         $V.= "<form name='uploadsrv' method='post'>\n"; // no url = this url
         $V .= "<input type='hidden' name='uploadform' value='srvupload'>\n";
@@ -68,16 +70,15 @@ class ajax_srvUpload extends FO_Plugin
         $text = _("Select the folder for storing the upload:");
         $V.= "<li>$text\n";
         $V.= "<select name='folder'>\n";
-        //$V .= FolderListOption($FolderPk,0);
         $V.= FolderListOption(-1, 0);
         $V.= "</select>\n";
-        $text = _("Select the directory or file(s) on the server to upload:");
-        $V.= "<p><li>$text<br />\n";
+        $text = _("Select the directory or file(s) on the server to upload. ");
+        $Note = _("NOTE: ");
+        $text1 = _("Contents under a directory will be recursively included.
+        If you specify a regular expression for the filename, then multiple
+        filenames will be selected.");
+        $V.= "<p><li>$text<strong>$Note</strong>$text1<br />\n";
         $V.= "<input type='text' name='sourcefiles' size='60' value='" . htmlentities($SourceFiles, ENT_QUOTES) . "'/><br />\n";
-        $text = _("NOTE");
-        $text1 = _(": Contents under a directory will be recursively included.");
-        $V.= "<strong>$text</strong>$text1\n";
-        $V.= _("If you specify a regular expression for the filename, then multiple filenames will be selected.\n");
         $text = _("Files can be placed in alphabetized sub-folders for organization.");
         $V.= "<p><li>$text\n";
         $V.= "<br /><input type='radio' name='groupnames' value='0'";
@@ -90,11 +91,11 @@ class ajax_srvUpload extends FO_Plugin
           $V.= " checked";
         }
         $V.= " />Enable alphabetized sub-folders";
-        $text = _("(Optional) Enter a viewable name for this Upload:");
-        $V.= "<p><li>$text<br />\n";
-        $text = _("NOTE");
-        $text1 = _(": If no name is provided, then the uploaded file name will be used.");
-        $V.= "<b>$text</b>$text1<P />\n";
+        $text = _("(Optional) Enter a viewable name for this Upload. ");
+        
+        $Note = _("NOTE: ");
+        $text1 = _("If no name is provided, then the uploaded file name will be used.");
+        $V.= "<p><li>$text<b>$Note</b>$text1<br />\n";
         $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name, ENT_QUOTES) . "' /><br />\n";
         $V.= "</ol>\n";
         $text = _("Upload");
