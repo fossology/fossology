@@ -237,7 +237,7 @@ $text = _("Show");
       $VLic .= ">$row[licname] </a>";
       $VLic .= "</td>";
       $VLic .= "</tr>\n";
-      if ($row['licname'] == "No License Found") $NoLicFound =  $row['liccount'];
+      if ($row['licname'] == "No_license_found") $NoLicFound =  $row['liccount'];
     }
     $VLic .= "</table>\n";
     $VLic .= "<p>\n";
