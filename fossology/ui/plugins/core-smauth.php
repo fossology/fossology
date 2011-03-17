@@ -154,31 +154,40 @@ class core_smauth extends FO_Plugin {
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
-      if (!empty($row['name']))
-        return;
       pg_free_result($result);
-      
-      //create folder for the user
-      $sql = "INSERT INTO folder (folder_name, folder_desc) VALUES ('$FolderName', '$FolderDes');";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-      $sql = "SELECT folder_pk FROM folder WHERE folder_name='$FolderName' AND folder_desc = '$FolderDes';";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $row = pg_fetch_assoc($result);
-      //print_r($row);
-      if (empty($row['folder_pk']))
-        return;
-      $FolderPk = $row['folder_pk'];
-      //echo $FolderPk;
-      pg_free_result($result);
+      if (empty($row['name'])){
+        //create folder for the user
+        $sql = "INSERT INTO folder (folder_name, folder_desc) VALUES ('$FolderName', '$FolderDes');";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
+        $sql = "SELECT folder_pk FROM folder WHERE folder_name='$FolderName' AND folder_desc = '$FolderDes';";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        //print_r($row);
+        if (empty($row['folder_pk']))
+          return;
+        $FolderPk = $row['folder_pk'];
+        //echo $FolderPk;
+        pg_free_result($result);
 
-      $sql = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('1','1','$FolderPk');";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-
+        $sql = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('1','1','$FolderPk');";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
+      } else {
+        $sql = "SELECT folder_pk FROM folder WHERE folder_name='$FolderName' AND folder_desc = '$FolderDes';";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        //print_r($row);
+        if (empty($row['folder_pk']))
+          return;
+        $FolderPk = $row['folder_pk'];
+        //echo $FolderPk;
+        pg_free_result($result);
+      }
       //create user
       $sql = "INSERT INTO users
               (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
@@ -229,7 +238,6 @@ class core_smauth extends FO_Plugin {
       $_SESSION['NoPopup'] = 0;
     }
   } // CheckUser()
-
   /******************************************
    Output():
    ******************************************/
@@ -252,7 +260,9 @@ class core_smauth extends FO_Plugin {
         $_SESSION['UserLevel'] = NULL;
         $_SESSION['UserEmail'] = NULL;
         $_SESSION['Folder'] = NULL;
-        $Uri = Traceback_uri() . "?mod=refresh&remod=default";
+        $_SESSION['UiPref'] = NULL;
+        $Uri = Traceback_uri() . "logout.html";
+        //$Uri = Traceback_uri() . "?mod=refresh&remod=default";
         $V.= "<script language='javascript'>\n";
         $V.= "window.open('$Uri','_top');\n";
         $V.= "</script>\n";

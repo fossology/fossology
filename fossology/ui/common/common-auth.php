@@ -30,8 +30,8 @@ if (!isset($GlobalReady)) { exit; }
  return -1 if it is not enabled.
  *****************************************/
 function siteminder_check() {
-  if (isset($_SERVER['HTTP_SM_UNIVERSALID'])){
-    $SEA = $_SERVER['HTTP_SM_UNIVERSALID'];
+  if (isset($_SERVER['HTTP_SMUNIVERSALID'])){
+    $SEA = $_SERVER['HTTP_SMUNIVERSALID'];
     return $SEA;
   }
   return(-1);
