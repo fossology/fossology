@@ -494,7 +494,7 @@ class uploads extends FO_Plugin
           if (!empty($GetURL) && !empty($Folder))
           {
             $rc = $this->uploadUrl($Folder, $GetURL, NULL, $Name, $Accept,
-                                   $Reject, $Level);
+            $Reject, $Level);
             if (empty($rc))
             {
               /* Need to refresh the screen */
@@ -608,9 +608,6 @@ class uploads extends FO_Plugin
          rar, rpm, debian package, iso, msi, cab, 7z, among  others.  It may
          also be a filesystem (fat, ntfs, ext2, ext3), or even an x86 boot partition.\n");
         $intro = "$typeText<br><br>";
-        $depending = _("Depdending on the method chosen, there may be file size
-          or other limits.\n");
-        $intro .= "$depending<br><br>";
 
         $Url = Traceback_uri();
         $choice = $intro;
@@ -624,17 +621,21 @@ class uploads extends FO_Plugin
         $choice .= "<input type='radio' name='uploads' id='url' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />$urlText<br />\n";
         $choice .= "<input type='radio' name='uploads' id='srv' value='srv' onclick='UploadSrv_Get(\"" .Traceback_uri() . "?mod=ajax_srvUpload\")' />$srvText<br />\n";
 
-        $or=_("--OR--");
-        $oneShotText = _("Submit a file to be analyzed in real time.  Neither the
-          file, nor the results, will be stored in FOSSology.  The uploaded file
-          will be scanned as a single file.  That is, for example, if you upload
-          an rpm file, the rpm itself will be scanned, and not the individual
-          files in the rpm.");
-        //<strong><hr style='width:1%;text-align:left;margin-left:0'/>$or
-        //
-        $osChoice = "<p style='text-indent:75px'>\n
+        $or = _("--OR--");
+        $oneShotText = _("Submit a file to be analyzed in real time.\n");
+        $res = _("Results are");
+        $Not = _(" not ");
+        $text2 = _("stored. As soon as you get your results, your uploaded file
+         is removed from the system. ");
+        $oneShotText .= "$res<b>$Not</b>$text2\n";
+        
+        $oneShotText .= _("The uploaded file will be scanned as a single file.
+         For example, if you upload a rpm file, the rpm itself will be scanned,
+         and not the individual files in the rpm.");
+
+        $Text = "<p style='text-indent:75px'>\n
                     <strong>$or</strong><p>$oneShotText</p>\n";
-        $choice .= $osChoice;
+        $choice .= $Text;
         $choice .= "<input type='radio' name='uploads' id='oneshot' value='osn' onclick='UploadOsN_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotNomos\")' />Analyze a single file for licenses<br />\n";
         $choice .= "<input type='radio' name='uploads' id='oneshotcopy' value='copy' onclick='UploadCopyR_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotCopyright\")' />Analyze a single file for Copyrights, Email and URL's<br />\n";
 
@@ -672,21 +673,6 @@ class uploads extends FO_Plugin
         }
         </script>\n";
         $choice .= $choiceUrl;
-
-        // More Options
-        /*
-        $options .= ActiveHTTPscript("UploadOpts");
-        $options .= "<script language='javascript'>\n
-        function UploadOpts_Reply()
-        {
-        if ((UploadOpts.readyState==4) && (UploadOpts.status==200))
-        {\n
-        document.getElementById('fileform').innerHTML = UploadOpts.responseText;\n
-        }
-        }
-        </script>\n";
-        $choice .= $options;
-        */
 
         // upload from server
         $uploadSrv = ActiveHTTPscript("UploadSrv");

@@ -47,7 +47,10 @@ class ajax_fileUpload extends FO_Plugin {
   /*
    Output(): Generate the text for this plugin.
   */
-  function Output() {
+  function Output()
+  {
+    $Name = NULL;
+      
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
@@ -65,41 +68,34 @@ class ajax_fileUpload extends FO_Plugin {
         $V .= $result;
         /* Display the form */
         
-        $usageFile .= _("Use this option to select and upload a file on your browser
-        system. While this can be very convenient (particularly if the file is not
-        readily accessible online), uploading via your web browser can be slow
-        for large files. Files larger than 650 Megabytes may not be uploadable. ");
+        $usageFile = _("Files larger than 650 Megabytes may not be uploadable. ");
         $usageFile .= _("Your system has imposed a maximum file size of");
         $usageFile .= " ".  ini_get('post_max_size') . " ";
         $usageFile .= _("bytes.");
         $V .= $usageFile;
-        $V.= "<form name='file' id='file' enctype='multipart/form-data' method='post'>\n"; // no url = this url
+        $V .= "<form name='file' id='file' enctype='multipart/form-data' method='post'>\n"; // no url = this url
         $V .= "<input type='hidden' name='uploadform' value='fileupload'>\n";
-        $V.= "<ol>\n";
+        $V .= "<ol>\n";
         $text = _("Select the folder for storing the uploaded file:");
-        $V.= "<li>$text\n";
-        $V.= "<select name='folder'>\n";
-        $V.= FolderListOption(-1, 0);
-        $V.= "</select><P />\n";
+        $V .= "<li>$text\n";
+        $V .= "<select name='folder'>\n";
+        $V .= FolderListOption(-1, 0);
+        $V .= "</select><P />\n";
         $text = _("Select the file to upload:");
-        $V.= "<li>$text<br />\n";
-        $V.= "<input name='getfile' size='60' type='file' /><br />\n";
-        $text = _("NOTE");
-        $text1 = _(": If the file is larger than 650 Megs (one CD-ROM), then this method will not work with some browsers (e.g., Internet Explorer). Only attach files smaller than 650 Megs.");
-        $V.= "<b>$text</b>$text1<P />\n";
-        $text = _("(Optional) Enter a viewable name for this file:");
-        $V.= "<li>$text<br />\n";
-        $text = _("NOTE");
-        $text1 = _(": If no name is provided, then the uploaded file name will be used.");
-        $V.= "<b>$text</b>$text1<P />\n";
-        $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
-        $V.= "</ol>\n";
+        $V .= "<li>$text<br />\n";
+        $V .= "<input name='getfile' size='60' type='file' /><br><br />\n";
+        $text = _("(Optional) Enter a viewable name for this file.  ");
+        $Note = _("NOTE: ");
+        $text1 = _("If no name is provided, then the uploaded file name will be used.");
+        $V .= "<li>$text<b>$Note</b>$text1<br />\n";
+        $V .= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
+        $V .= "</ol>\n";
         $text = _("It may take time to transmit the file from your computer to this server. Please be patient.");
-        $V.= "$text<br>\n";
+        $V .= "$text<br>\n";
         $text = _("Upload");
-        $V.= "<input type='submit' value='$text!'
+        $V .= "<input type='submit' value='$text!'
                 //onclick='UpFileResults_Get(\"" .Traceback_uri() . "?mod=ajax_fileUpload\")'>\n";
-        $V.= "</form>\n";
+        $V .= "</form>\n";
         break;
       case "Text":
         break;

@@ -68,10 +68,10 @@ class ajax_urlUpload extends FO_Plugin
         $Name = $Accept = $Reject = NULL;
         
         /* Display instructions */
-        $intro = _("Uploading from a URL or FTP site is often the most flexible
-         option, but the URL must denote a publicly accessible HTTP, HTTPS,
+        $intro = _("Uploading from a URL or FTP site is the most flexible
+         option.  The URL must denote a publicly accessible HTTP, HTTPS,
          or FTP location.  URLs that require authentication or human
-         interactions cannot be downloaded through this upload option.\n");
+         interactions cannot be downloaded using this upload option.\n");
         $V .= $intro;
         /* Display the form */
         $V .= "<form name='url' id='url' enctype='multipart/form-data' method='post'>\n"; // no url = this url
@@ -92,6 +92,8 @@ class ajax_urlUpload extends FO_Plugin
         $V .= "<b>$text</b>$text1<br />\n";
         $V .= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
         $V .= "</ol>\n";
+        $Upload = _("Upload");
+        $V .= "<input type='submit' value='$Upload!'>\n";
         $V .= "<h3>Advanced Usage</h3>";
         $advInstruction = _("
         The optional fields below allow multiple files or directories to be
