@@ -127,7 +127,8 @@ $text = _("Parameters");
 	  $Count++;
 
 	  $V .= "  <tr bgcolor='" . $BGColor[$Val['agent_status']] . "'>\n";
-	  $V .= "    <td>" .  ereg_replace("^(....-..-.. ..:..:..).*","\\1",$Val['record_update']) . "</td>\n";
+	  $V .= "    <td>" .  preg_replace("/^(....-..-.. ..:..:..).*/","\\1",
+	   $Val['record_update']) . "</td>\n";
 	  $V .= "    <td align=center>" . $Val['agent_status'] . "</td>\n";
 	  if ($Val['agent_number'] == -1)
 	    {
@@ -135,7 +136,7 @@ $text = _("Parameters");
 	    }
 	  else
 	    {
-	    $VV = ereg_replace(".*agent=([^ ]*).*","\\1",$Val['agent_attrib']);
+	    $VV = preg_replace("/.*agent=([^ ]*).*/","\\1",$Val['agent_attrib']);
 	    }
 	  $V .= "    <td align=center>" . htmlentities($VV) . "</td>\n";
 	  $V .= "    <td align=center>" . htmlentities($Val['agent_host']) . "</td>\n";
