@@ -77,14 +77,13 @@ $UserCacheStat = 0;  // default, don't know
     $EscKey = pg_escape_string($CacheKey);
 
     // update time last accessed
-    $Result = $DB->Action("UPDATE report_cache SET report_cache_tla = now() WHERE report_cache_key='$EscKey'",
-                          $PGError);
+    $sql = "UPDATE report_cache SET report_cache_tla = now() WHERE report_cache_key='$EscKey'";
+    $Result = $DB->Action($sql, $PGError);
 
     // Get the cached data
     $sql = "SELECT report_cache_value FROM report_cache WHERE report_cache_key='$EscKey'";
     $Result = $DB->Action($sql);
     if (empty($Result)) return;  // no cache records
-
     return $Result[0]['report_cache_value'];
   } // ReportCacheGet()
 
@@ -96,7 +95,7 @@ $UserCacheStat = 0;  // default, don't know
    ***********************************************************/
   function ReportCachePut($CacheKey, $CacheValue)
   {
-    global $DB;
+    global $PG_CONN;
     global $UserCacheStat;
 
     /* Check if user has cache turned off
@@ -118,24 +117,32 @@ $UserCacheStat = 0;  // default, don't know
     $ParsedURI = array();
     parse_str($EscKey, $ParsedURI);
     /* use 'upload= ' to define the upload in the cache key */
-    if (!empty($ParsedURI['upload'])) 
+    if (array_key_exists("upload", $ParsedURI))
       $Upload = $ParsedURI['upload'];
     else
-      if (empty($Upload) and (!empty($ParsedURI['item'])))
+      if (array_key_exists("item", $ParsedURI))
       {
-        $Result = $DB->Action("SELECT upload_fk FROM uploadtree WHERE uploadtree_pk='$ParsedURI[item]'");
-        $Upload = $Result['upload_fk'];
-      }
+        $sql = "SELECT upload_fk FROM uploadtree WHERE uploadtree_pk='$ParsedURI[item]'";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-    $Result = $DB->Action("INSERT INTO report_cache (report_cache_key, report_cache_value, report_cache_uploadfk) 
-                           VALUES ('$EscKey', '$EscValue', '$Upload')",
-                          $PGError);
-    
+        $row = pg_fetch_assoc($result);
+        $Upload = $row['upload_fk'];
+        pg_free_result($result);
+      }
+    if (empty($Upload)) $Upload = "Null";
+
+    $sql = "INSERT INTO report_cache (report_cache_key, report_cache_value, report_cache_uploadfk) 
+                           VALUES ('$EscKey', '$EscValue', $Upload)";
+    $result = pg_query($PG_CONN, $sql);
+    $PGError = pg_last_error($PG_CONN); 
     /* If duplicate key, do an update, else report the error */
-    if (strpos($PGError, "duplicate") >> 0)
-      $Result = $DB->Action("UPDATE report_cache SET report_cache_value = '$EscValue', report_cache_tla=now() WHERE report_cache_key = '$EscKey'",
-                            $PGError);
-    if ($PGError) echo "UPDATE: $PGError";
+    if (strpos($PGError, "uplicate") > 0)
+    {
+      $sql = "UPDATE report_cache SET report_cache_value = '$EscValue', report_cache_tla=now() WHERE report_cache_key = '$EscKey'";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+    }
   } // ReportCacheInit()
 
   /***********************************************************
