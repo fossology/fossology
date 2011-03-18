@@ -126,6 +126,7 @@ if (!$FailFlag)
 else
   {
   print "Initialization had errors.\n";
+  exit(1);
   }
 exit(0);
 ?>
