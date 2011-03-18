@@ -282,6 +282,11 @@ PHP5:
   runtime: urpmi cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
                  mkisofs p7zip poppler-utils rpm tar unzip gzip
 
+In order to unpack rar(>=RAR 3.x) file(s), you need to install rar(non-free)
+manually. In debian, you can install it through adding the non-free source,
+then apt-get install unrar. In centos and fedora, you can install it through
+adding the rpmfusion source, then yum install unrar.
+
 For those distributions where you can't get cabextract, unrar, or upx
 as prebuilt packages, you can choose to do without those, but if fossology
 encounters any of those container types it will be unable to scan them,
