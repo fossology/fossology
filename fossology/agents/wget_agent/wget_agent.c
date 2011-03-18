@@ -67,6 +67,17 @@ int Debug=0;
 
 
 /*********************************************************
+Get the position (ending + 1) of http|https|ftp:// of one url
+ *********************************************************/
+int GetPosition(char *URL)
+{
+  if (NULL != strstr(URL, "http://"))  return 7;
+  if (NULL != strstr(URL, "https://"))  return 8;
+  if (NULL != strstr(URL, "ftp://"))  return 6;
+  return 0;
+}
+
+/*********************************************************
  DBLoadGold(): Insert a file into the database and repository.
  (This mimicks the old webgoldimport.)
  *********************************************************/
@@ -374,7 +385,9 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
     char TempFilePath[MAXCMD];
     memset(TempFilePath,'\0',MAXCMD);
     /* for one url http://a.org/test.deb, TempFilePath should be /var/local/lib/fossology/agents/wget/a.org/test.deb */
-    snprintf(TempFilePath, MAXCMD-1, "%s/%s", TempFileDir, TaintedURL + 7);
+    int Position = GetPosition(TaintedURL);
+    if (0 == Position) exit(26);
+    snprintf(TempFilePath, MAXCMD-1, "%s/%s", TempFileDir, TaintedURL + Position);
     if (!stat(TempFilePath, &sb))
     {
       memset(CMD,'\0',MAXCMD);

@@ -84,7 +84,10 @@ $text = _("Failed to insert job record");
       $Level = 1;
     }
     /* Prepare the job: job "wget" has jobqueue item "wget" */
-    /** 2nd parameter is obsolete **/
+    /* first trim, then get rid of whitespaces before and after each comma letter */
+    $Accept = preg_replace('/\s*,\s*/', ',', trim($Accept));
+    $Reject = preg_replace('/\s*,\s*/', ',', trim($Reject));
+    
     $jq_args = "$uploadpk - $GetURL --accept=$Accept --reject=$Reject -l $Level";
     $jobqueuepk = JobQueueAdd($jobpk, "wget", $jq_args, "no", NULL, NULL);
     if (empty($jobqueuepk)) {
