@@ -315,7 +315,7 @@ class user_edit_self extends FO_Plugin
         $V.= "$Style<th>5.</th><th>$text</th><td><input type=checkbox ";
         $V.= "</tr>\n";
         $V.= "</tr>\n";
-        $text = _("Default Agents: Select the agent(s) to automatically run when uploading data. These selections can be changed on the upload screens.");
+        $text = _("Default scans.");
         $V .= "$Style<th>6.</th><th>$text\n</th><td>\n";
         /*
          * added this code so the form makes sense.  You can have an admin define default agents
@@ -350,7 +350,7 @@ class user_edit_self extends FO_Plugin
         $V.= "</td>";
         $V .= "</tr>\n";
         $text = _("User Interface Options");
-        $text1 = _("Use the simplified UI (Default)");
+        $text1 = _("Use the simplified UI");
         $text2 = _("Use the original UI");
         $V .= "$Style<th>11.</th><th>$text</th><td><input type='radio'" .
                 "name='whichui' value='simple' checked='checked'>" .
