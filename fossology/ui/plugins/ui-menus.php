@@ -332,7 +332,7 @@ class ui_menu extends FO_Plugin
             else
               $V .= "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
             /* Use global system SupportEmail variables, if addr and label are set */
-            if ($SysConf['SupportEmailLabel'] and $SysConf['SupportEmailAddr'])
+            if (@$SysConf['SupportEmailLabel'] and @$SysConf['SupportEmailAddr'])
             {
               $V .= " | ";
               $V .= "<small><a href='mailto:$SysConf[SupportEmailAddr]?subject=$SysConf[SupportEmailSubject]'>$SysConf[SupportEmailLabel]</a>";
