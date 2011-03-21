@@ -67,7 +67,7 @@ class uploadAgentDataTest extends fossologyTestCase {
     $urlList = array('http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz',
                          'http://www.gnu.org/licenses/gpl-3.0.txt',
                          'http://www.gnu.org/licenses/agpl-3.0.txt',
-                         'http://filch.ostt/~markd/fossDirsOnly.tar.bz2');
+                         'http://ldl.usa.hp.com/~markd/fossDirsOnly.tar.bz2');
     /* upload the archives using the upload from file menu */
     //$desciption = "File $upload uploaded by Upload Data Test";
     print "Starting file uploads\n";
