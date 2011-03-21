@@ -33,7 +33,7 @@ class admin_license_file extends FO_Plugin
   var $Title      = TITLE_admin_license_file;
   var $MenuList   = "Admin::License Admin";
   var $Dependency = array("db");
-  var $DBaccess   = PLUGIN_DB_WRITE;
+  var $DBaccess   = PLUGIN_DB_USERADMIN;
 
 /***********************************************************
  RegisterMenus(): Customize submenus.
