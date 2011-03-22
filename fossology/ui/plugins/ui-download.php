@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -27,194 +27,136 @@ if (!isset($GlobalReady)) { exit; }
 define("TITLE_ui_download", _("Download File"));
 
 class ui_download extends FO_Plugin
-  {
+{
   var $Name       = "download";
   var $Title      = TITLE_ui_download;
   var $Version    = "1.0";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_DOWNLOAD;
-  var $NoHeader   = 1;
+  var $NoHTML     = 1;
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
   function RegisterMenus()
-    {
-$text = _("Download this file");
+  {
+    $text = _("Download this file");
     menu_insert("Browse-Pfile::Download",0,$this->Name,$text);
-    } // RegisterMenus()
+  } // RegisterMenus()
 
   /***********************************************************
-   OutputOpen(): This function is called when user output is
-   requested.  This function is responsible for assigning headers.
-   The type of output depends on the metatype for the pfile.
-   If the pfile is not defined, then use application/octet-stream.
+   CheckRestore()
+   Called if there is no file.  User is queried if they want
+   to reunpack.
    ***********************************************************/
-  function OutputOpen($Type,$ToStdout)
-    {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    $this->OutputType=$Type;
-    $this->OutputToStdout=$ToStdout;
-
+  function CheckRestore($Item, $Filename)
+  {
     global $Plugins;
     global $DB;
-    $Item = GetParm("item",PARM_INTEGER);
-    if (empty($Item))
-	    {
-	    $this->OutputType = "corrupt";
-	    return;
-	    }
-    /* Added by vincent to implement when click donwload link, the file not in the repository, add a page to ask user if want to reunpack */
-    /** Begin:  **/
-    $Fin = NULL;
-    if (empty($Fin))
-      {
-      $Fin = @fopen( RepPathItem($Item) ,"rb");
-      if (empty($Fin))
-	      {  
-        $this->NoHeader = 0;
-        switch($this->OutputType)
-          {
-          case "XML":
-            $V = "<xml>\n";
-          break;
-          case "HTML":
-            header('Content-type: text/html');
-            header("Pragma: no-cache"); /* for IE cache control */
-            header('Cache-Control: no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0'); /* prevent HTTP/1.1 caching */
-            header('Expires: Expires: Thu, 19 Nov 1981 08:52:00 GMT'); /* mark it as expired (value from Apache default) */
-            if ($this->NoHTML) { return; }
-            $V = "";
-            if (($this->NoMenu == 0) && ($this->Name != "menus"))
-              {
-              $Menu = &$Plugins[plugin_find_id("menus")];
-              $Menu->OutputSet($Type,$ToStdout);
-              }
-            else { $Menu = NULL; }
 
-            /* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
-            $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
-            // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
-            // $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
-            // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "xhtml1-strict.dtd">' . "\n";
+    $this->NoHeader = 0;
+    header('Content-type: text/html');
+    header("Pragma: no-cache"); /* for IE cache control */
+    header('Cache-Control: no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0'); /* prevent HTTP/1.1 caching */
+    header('Expires: Expires: Thu, 19 Nov 1981 08:52:00 GMT'); /* mark it as expired (value from Apache default) */
 
-            $V .= "<html>\n";
-            $V .= "<head>\n";
-            $V .= "<meta name='description' content='The study of Open Source'>\n";
-            if ($this->NoHeader == 0)
-              {
-              /** Known bug: DOCTYPE "should" be in the HEADER
-              and the HEAD tags should come first.
-              Also, IE will ignore <style>...</style> tags that are NOT
-              in a <head>...</head>block.
-           **/
-              if (!empty($this->Title)) { $V .= "<title>" . htmlentities($this->Title) . "</title>\n"; }
-              $V .= "<link rel='stylesheet' href='fossology.css'>\n";
-              print $V; $V="";
-              if (!empty($Menu)) { print $Menu->OutputCSS(); }
-              $V .= "</head>\n";
-  
-              $V .= "<body class='text'>\n";
-              print $V; $V="";
-              if (!empty($Menu)) { $Menu->Output($this->Title); }
-              }
-          break;
-          case "Text":
-          break;
-          default:
-          break;
-          }
-        $this->OutputType = "corrupt";
-     
-        $P = &$Plugins[plugin_find_id("view")];
-        $P->ShowView(NULL,"browse");
-	      return;
-	     }
-      }
-    /** END **/
-    /* Get filename */
-    /** By using pfile and ufile, we cut down the risk of users blindly
-        guessing in order to download arbitrary files.
-	NOTE: The user can still iterate through every possible pfile and
-	ufile in order to find files.  And since the numbers are sequential,
-	they can optimize their scan.
-	However, it will still take plenty of queries to find most files.
-	Later: This will check if the user has access permission to the ufile.
-     **/
-    $Sql = "SELECT * FROM uploadtree WHERE uploadtree_pk = $Item LIMIT 1;";
-    $Results = $DB->Action($Sql);
-    $Name = $Results[0]['ufile_name'];
-    if (empty($Name))
-	{
-	$this->OutputType = "corrupt";
-	return;
-	}
-
-    /* Get meta type */
-    switch($this->OutputType)
-      {
-      case "XML":
-	$V = "<xml>\n";
-	break;
-      case "HTML":
-	$Meta = GetMimeType($Item);
-	header("Content-Type: $Meta");
-	// header('Content-Length: ' . $Results[0]['pfile_size']);
-	header('Content-Disposition: attachment; filename="' . $Name . '"');
-	break;
-      case "Text":
-	break;
-      default:
-	break;
-      }
-    if (!$this->OutputToStdout) { return($V); }
-    print "$V";
-    return;
-    } // OutputOpen()
-
-  /***********************************************************
-   OutputClose(): This function is called when user output is
-   completed.
-   ***********************************************************/
-  function OutputClose()
+    $V = "";
+    if (($this->NoMenu == 0) && ($this->Name != "menus"))
     {
-    } // OutputClose()
+      $Menu = &$Plugins[plugin_find_id("menus")];
+    }
+    else { $Menu = NULL; }
+
+    /* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
+    $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
+
+    $V .= "<html>\n";
+    $V .= "<head>\n";
+    $V .= "<meta name='description' content='The study of Open Source'>\n";
+    if ($this->NoHeader == 0)
+    {
+      /** Known bug: DOCTYPE "should" be in the HEADER
+          and the HEAD tags should come first.
+          Also, IE will ignore <style>...</style> tags that are NOT
+          in a <head>...</head>block.
+       **/
+      if (!empty($this->Title)) $V .= "<title>" . htmlentities($this->Title) . "</title>\n"; 
+      $V .= "<link rel='stylesheet' href='fossology.css'>\n";
+      if (!empty($Menu)) print $Menu->OutputCSS();
+      $V .= "</head>\n";
+      $V .= "<body class='text'>\n";
+      print $V;
+      if (!empty($Menu)) { $Menu->Output($this->Title); }
+    }
+     
+    $P = &$Plugins[plugin_find_id("view")];
+    $P->ShowView(NULL,"browse");
+	exit;
+  } // CheckRestore()
+
 
   /***********************************************************
    Output(): This function is called when user output is
    requested.  This function is responsible for content.
-   (OutputOpen and Output are separated so one plugin
-   can call another plugin's Output.)
-   This uses $OutputType.
-   The $ToStdout flag is "1" if output should go to stdout, and
-   0 if it should be returned as a string.  (Strings may be parsed
-   and used by other plugins.)
    ***********************************************************/
   function Output()
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return; }
-    $V="";
     global $Plugins;
-    global $DB;
-    $Item = GetParm("item",PARM_INTEGER);
-    if (empty($Item)) { return; }
-    switch($this->OutputType)
-      {
-      case "XML":
-      case "HTML":
-      case "Text":
-	/* Regardless of the format, dump the file's contents */
-	$Filename = RepPathItem($Item);
-	if (empty($Filename)) return;
-	if ($this->OutputToStdout) { readfile($Filename); }
-	else { return($V); }
-      default:
-	break;
-      }
-    return;
-    } // Output()
+    global $DB, $PG_CONN;
 
-  };
+    if (!$PG_CONN) 
+    { 
+      $dbok = $DB->db_init(); 
+      if (!$dbok)
+      {
+        $text = _("Missing database connection.");
+        echo "<h2>$text</h2>";
+        return;
+      }
+    }
+
+    $Item = GetParm("item",PARM_INTEGER);
+
+    $text = _("Invalid item parameter");
+    if (empty($Item)) 
+    {
+      echo "<h2>$text</h2>";
+      return;
+    }
+
+	$Filename = RepPathItem($Item);
+	if (empty($Filename))
+    {
+      echo "<h2>$text: $Filename</h2>";
+      return;
+    }
+
+    $Fin = @fopen( RepPathItem($Item) ,"rb");
+    /* note that CheckRestore() does not return. */
+    if (empty($Fin)) $this->CheckRestore($Item, $Filename);
+
+    $sql = "SELECT ufile_name FROM uploadtree WHERE uploadtree_pk = $Item LIMIT 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    if (pg_num_rows($result) != 1)
+    {
+      $text = _("Missing item");
+      echo "<h2>$text: $Item</h2>";
+      return;
+    }
+    $Name = $row['ufile_name'];
+    pg_free_result($result);
+
+    if (($rv = DownloadFile($Filename, $Name)) !== True)
+    {
+      $text = _("Download failed");
+      echo "<h2>$text</h2>$Filename<br>$rv";
+    }
+  } // Output()
+
+};
 $NewPlugin = new ui_download;
 $NewPlugin->Initialize();
 ?>
