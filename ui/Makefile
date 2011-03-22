@@ -53,8 +53,9 @@ install: all $(iPATHFILE)
 	
 	cd $(DESTDIR)$(WEBDIR)/plugins/simpleUi; \
 	for link in $(LINKS); do \
-	 [ -h $${link:3} ] && continue; \
-		ln -s $$link  $${link:3}; \
+	 replink=$${link#../}; \
+	 [ -h $${replink} ] && continue; \
+		ln -s $$link  $${replink}; \
 	done
 		
 uninstall:
