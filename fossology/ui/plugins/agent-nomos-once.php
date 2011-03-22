@@ -226,7 +226,7 @@ $text = _("A one shot license analysis shows the following license(s) in file");
         }
 
         $Item = GetParm('item', PARM_INTEGER); // may be null
-        if (!empty($Item) && !empty($DB)) {
+        if (!empty($Item) && !empty($DB) && !empty($_FILES)) {
           /* Get the pfile info */
           $Results = $DB->Action("SELECT * FROM pfile
 		        INNER JOIN uploadtree ON uploadtree_pk = $Item
@@ -237,7 +237,7 @@ $text = _("A one shot license analysis shows the following license(s) in file");
             $Repo = $Results[0]['pfile_sha1'] . "." . $Results[0]['pfile_md5'] . "." . $Results[0]['pfile_size'];
             $Repo = trim(shell_exec("$LIBEXECDIR/reppath files '$Repo'"));
             $tmp_name = $Repo;
-$text = _("A one shot license analysis shows the following license(s) in file");
+            $text = _("A one shot license analysis shows the following license(s) in file");
             $keep = "<strong>$text </strong><em>{$_FILES['licfile']['name']}:</em> ";
             $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
             print displayMessage(NULL, $keep);
