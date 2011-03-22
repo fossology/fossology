@@ -191,4 +191,46 @@ function GetArrayVal($Key, $Arr)
     return "";
 }
 
+
+/* send the download file to the user 
+   Returns True on success, error message on failure.
+ */
+function DownloadFile($path, $name) 
+{
+    $regfile = file_exists($path);
+    if (!$regfile) return _("File does not exist");
+
+    $regfile = is_file($path);
+    if (!$regfile) return _("Not a regular file");
+
+    $connstat = connection_status();
+    if ($connstat != 0) return _("Lost connection.");
+
+    session_write_close();
+    ob_end_clean();
+//    header("Cache-Control: no-store, no-cache, must-revalidate");
+//    header("Cache-Control: post-check=0, pre-check=0", false);
+//    header("Pragma: no-cache");
+    header("Expires: ".gmdate("D, d M Y H:i:s", mktime(date("H")+2, date("i"), date("s"), date("m"), date("d"), date("Y")))." GMT");
+    header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
+    header('Content-Description: File Transfer');
+    header("Content-Type: application/octet-stream");
+    header("Content-Length: ".(string)(filesize($path)));
+    header("Content-Disposition: attachment; filename=$name");
+    header("Content-Transfer-Encoding: binary\n");
+
+    /* read/write in chunks to optimize large file downloads */
+    if ($file = fopen($path, 'rb')) 
+    {
+        while(!feof($file) and (connection_status()==0)) 
+        {
+            print(fread($file, 1024*8));
+            flush();
+        }
+        fclose($file);
+    }
+    if ((connection_status()==0) and !connection_aborted()) return True;
+    return _("Lost connection.");
+}
+
 ?>
