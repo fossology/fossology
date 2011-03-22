@@ -85,8 +85,8 @@ if [ $BUILDTIME ]; then
             build-essential libtext-template-perl subversion rpm librpm-dev \
             python python-dev python-pyrex libpcre3-dev
          case "$CODENAME" in
-            etch|dapper) apt-get install postgresql-server-dev-8.1;;
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
+            squeeze) apt-get install postgresql-server-dev-8.4;;
             sid) apt-get install postgresql-server-dev-8.4;;
             karmic|lucid|maverick) apt-get install postgresql-server-dev-8.4;;
             isadora) apt-get install postgresql-server-dev-8.4;;
@@ -137,11 +137,11 @@ if [ $RUNTIME ]; then
                php-gettext
          case "$CODENAME" in
             dapper) [ $AGENT ] || apt-get install postgresql-8.1;;
-            etch)
-               [ $AGENT ] || apt-get install postgresql-8.1
-               apt-get install libextractor-plugins;;
             lenny|hardy)
                [ $AGENT ] || apt-get install postgresql-8.3
+               apt-get install libextractor-plugins;;
+            squeeze)
+               [ $AGENT ] || apt-get install postgresql-8.4
                apt-get install libextractor-plugins;;
             sid)
                [ $AGENT ] || apt-get install postgresql-8.4
