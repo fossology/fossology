@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -43,42 +43,36 @@ class ui_default extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
-$text = _("FOSSology");
-$text1 = _("is a framework for software analysis tools. The current tools identify");
-	$V .= "<b>$text</b> $text1\n";
-	$V .= _("licenses in software, allow browsing of uploaded file hierarchies, and extract\n");
-	$V .= _("MIME type and meta data information.\n");
+    $text = _("FOSSology");
+    $text1 = _("is a framework for software analysis tools.");
+	$V .= "<b>$text</b> $text1 ";
 
-	$V .= _("This website is an interface into the FOSSology project. With it, you can:\n");
+	$V .= _("With it, you can:");
 	$V .= "<ul>\n";
-$text = _("Browse uploaded files and content.");
+    $text = _("Upload files into the fossology repository.");
 	$V .= "<li>$text\n";
-$text = _("View file contents and meta data.");
+
+    $text = _("Unpack files (tar, bz2, iso's, and many others) into its component files.");
 	$V .= "<li>$text\n";
-$text = _("Display analysis results.");
+    
+    $text = _("Browse upload file trees.");
 	$V .= "<li>$text\n";
-	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DOWNLOAD)
-	  {
-$text = _("Download files.");
-	  $V .= "<li>$text\n";
-	  }
-	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_UPLOAD)
-	  {
-$text = _("Upload files to analyze.");
-	  $V .= "<li>$text\n";
-$text = _("Unpack and store the data within the files for analysis.");
-	  $V .= "<li>$text\n";
-	  }
-	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
-	  {
-$text = _("Invoke specialized agents to scan and analyze the files.");
-	  $V .= "<li>$text\n";
-	  }
-	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_USERADMIN)
-	  {
-$text = _("Create and manage user accounts.");
-	  $V .= "<li>$text\n";
-	  }
+
+    $text = _("View file contents and meta data.");
+	$V .= "<li>$text\n";
+
+    $text = _("Scan for software licenses.");
+	$V .= "<li>$text\n";
+
+    $text = _("Scan for copyrights and other author information.");
+	$V .= "<li>$text\n";
+
+    $text = _("Tag files and attach notes.");
+    $V .= "<li>$text\n";
+
+    $text = _("Report files with your a custom classification scheme.");
+    $V .= "<li>$text\n";
+
 	$V .= "</ul>\n";
 	$V .= "<P />\n";
 
