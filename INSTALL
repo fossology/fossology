@@ -310,7 +310,16 @@ numbers into the build.
           yum install perl-Text-Template subversion
  On Mandriva:
    build: urpmi perl-Text-Template subversion gcc make perl 
-
+   
+2.1.2.6 -  Optional Email Notifications
+```````````````````````````````````````
+Fossology can send email to users when their jobs finish.  To enable this 
+feature sendmail and a mail transport agent (MTA) must be installed.  The script
+fo-installdeps does NOT install a MTA as there is no easy way for fossology to
+determine which MTA your site uses.  All mail transport agents(MTA) (like 
+postfix, exim, sendmail, etc.) provide a sendmail command and you probably
+already have it on your system, but you may need to configure the MTA to be 
+able to send the mail where you want it to go.
 
 2.1.3 Adjusting the Kernel
 --------------------------
