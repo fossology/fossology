@@ -125,14 +125,16 @@ fi
 
 if [ $RUNTIME ]; then
    echo "*** Installing $DISTRO runtime dependencies ***";
+   echo "*** For optional email notifications a Mail Transport Agent Must be ***";
+   echo "*** installed. Consult with your system administrator. Or try ***";
+   echo "*** apt-get install mail-transport-agent, pick one and install it***";
    case "$DISTRO" in
       Debian|Ubuntu|LinuxMint)
          [ $AGENT ] || apt-get install apache2 libapache2-mod-php5
          apt-get install \
-            mail-transport-agent \
             php5 php5-pgsql php-pear php5-cli \
             libmagic1 libxml2 libextractor1c2a \
-            binutils bzip2 cabextract cpio sleuthkit mkisofs xpdf-utils \
+            binutils bzip2 cabextract cpio sleuthkit xpdf-utils \
                rpm tar upx-ucl unrar unzip p7zip libpcre3 \
                php-gettext
          case "$CODENAME" in
