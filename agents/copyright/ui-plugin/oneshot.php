@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -82,59 +82,12 @@ class agent_copyright_once extends FO_Plugin {
             }
         }
         pclose($Fin);
-        if ($Highlight) {
             $Fin = fopen($TempFile, "r");
             if ($Fin) {
                 $View->SortHighlightMenu();
                 $View->ShowView($Fin,$ModBack, 1,1,NULL,True);
                 fclose($Fin);
             }
-        }
-        else {
-$text = _("Copyright Statments");
-$text1 = _("Emails");
-$text2 = _("URLs");
-$text3 = _("Total");
-            print "<table width=100%>\n";
-            print "<tr><td>$text:</td></tr>\n";
-            print "<tr><td><hr></td></tr>\n";
-            if (count($stuff['statement']) > 0) {
-                foreach ($stuff['statement'] as $i) {
-                    print "<tr><td>$i</td></tr>\n";
-                }
-                print "<tr><td><hr></td></tr>\n";
-            }
-            print "<tr><td>$text3: ".count($stuff['statement'])."</td></tr>\n";
-            print "</table>\n";
-            
-            print "<br><br>\n";
-            
-            print "<table width=100%>\n";
-            print "<tr><td>$text1:</td></tr>\n";
-            print "<tr><td><hr></td></tr>\n";
-            if (count($stuff['email']) > 0) {
-                foreach ($stuff['email'] as $i) {
-                    print "<tr><td>$i</td></tr>\n";
-                }
-                print "<tr><td><hr></td></tr>\n";
-            }
-            print "<tr><td>$text3: ".count($stuff['email'])."</td></tr>\n";
-            print "</table>\n";
-            
-            print "<br><br>\n";
-            
-            print "<table width=100%>\n";
-            print "<tr><td>$text2:</td></tr>\n";
-            print "<tr><td><hr></td></tr>\n";
-            if (count($stuff['url']) > 0) {
-                foreach ($stuff['url'] as $i) {
-                    print "<tr><td>$i</td></tr>\n";
-                }
-                print "<tr><td><hr></td></tr>\n";
-            }
-            print "<tr><td>$text3: ".count($stuff['url'])."</td></tr>\n";
-            print "</table>\n";
-        }
         /* Clean up */
         return ($V);
     } // AnalyzeOne()
@@ -248,10 +201,6 @@ $text = _("Copyright/Email/URL One-shot, real-time analysis");
                     $Repo = trim(shell_exec("$LIBEXECDIR/reppath files '$Repo'"));
                     $_FILES['licfile']['tmp_name'] = $Repo;
                     $_FILES['licfile']['size'] = $Results[0]['pfile_size'];
-                    if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
-                        /* Size is not too big.  */
-                        print $this->AnalyzeOne($Highlight) . "\n";
-                    }
                     /* Do not unlink the or it will delete the repo file! */
                     if (!empty($_FILES['licfile']['unlink_flag'])) {
                         unlink($_FILES['licfile']['tmp_name']);
@@ -259,28 +208,22 @@ $text = _("Copyright/Email/URL One-shot, real-time analysis");
                     return;
                 }
             }
+
             /* Display instructions */
             $V.= _("This analyzer allows you to upload a single file for copyright/email/url analysis.\n");
-            $V.= _("The limitations:\n");
             $V.= "<ul>\n";
-            $V.= _("<li>The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n");
-            $V.= _("<li>Files that contain files are <b>not</b> unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for copyright/email/urls and nothing will likely be found.\n");
-            $V.= _("<li>Results are <b>not</b> stored. As soon as you get your results, your uploaded file is removed from the system.\n");
+            $V.= "<li>" . _("The analysis is done in real-time.");
+            $V.= "<li>" . _("Files that contain files are <b>not</b> unpacked. If you upload a container like a gzip file, then only that binary file will be scanned.\n");
+            $V.= "<li>" . _("Results are <b>not</b> stored. As soon as you get your results, your uploaded file is removed from the system.\n");
             $V.= "</ul>\n";
             /* Display the form */
             $V.= "<form enctype='multipart/form-data' method='post'>\n";
-            $V.= "<ol>\n";
-            $V.= _("<li>Select the file to upload:<br />\n");
-            $V.= "<input name='licfile' size='60' type='file' /><br />\n";
-            $V.= _("<b>NOTE</b>: Files larger than 100K will be discarded and not analyzed.<P />\n");
-$text = _("Check if you want to see the highlighted text");
-            $V.= "<li><input type='checkbox' name='highlight' value='1'>$text.\n";
-            $V.= _("Unchecked returns a simple list that summarizes the identified types.");
-            $V.= "<P />\n";
-            $V.= "</ol>\n";
+            $V.= _("Select the file to upload:");
+            $V.= "<br><input name='licfile' size='60' type='file' /><br />\n";
             $V.= "<input type='hidden' name='showheader' value='1'>";
-$text = _("Analyze");
-            $V.= "<input type='submit' value='$text!'>\n";
+
+            $text = _("Upload and scan");
+            $V.= "<p><input type='submit' value='$text'>\n";
             $V.= "</form>\n";
             break;
         case "Text":
