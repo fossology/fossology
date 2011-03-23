@@ -432,14 +432,15 @@ $text = _("Phrase");
  *
  * @param int  $uploadtree_pk
  *
- * @return 0 on error or no children, list of child uploadtree recs + pfile_size + pfile_mimetypefk on success.
+ * @return list of child uploadtree recs + pfile_size + pfile_mimetypefk on success.
+ *         list may be empty if there are no children.
  * Child list is sorted by ufile_name.
  */
 function GetNonArtifactChildren($uploadtree_pk)
 {
   global $PG_CONN;
   
-$foundChildren = array();
+  $foundChildren = array();
 
   /* Find all the children */
   $sql = "select uploadtree.*, pfile_size, pfile_mimetypefk from uploadtree 
@@ -450,7 +451,7 @@ $foundChildren = array();
   if (pg_num_rows($result) == 0)
   {
     pg_free_result($result);
-    return 0;
+    return $foundChildren;
   }
   $children = pg_fetch_all($result);
   pg_free_result($result);
