@@ -49,6 +49,7 @@ $text = _("View file information");
 	{
 	menu_insert("View::Info",1);
 	menu_insert("View-Meta::Info",1);
+	menu_insert("Browse::Info",-3);
 	}
     else
 	{
@@ -274,7 +275,7 @@ $text = _("Total meta data records");
      **********************************/
     if ($ShowHeader)
       {
-      $V .= Dir2Browse("browse",$Item,NULL,1,"View");
+      $V .= Dir2Browse("browse",$Item,NULL,1,"Browse");
       } // if ShowHeader
 
     /**********************************
