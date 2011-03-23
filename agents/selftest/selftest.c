@@ -283,7 +283,7 @@ void	GenerateTestData	()
     Fout = fopen(Path,"w");
     if (!Fout)
       {
-      printf("FATAL: Unable to write to repository.\n");
+      printf("FATAL: Unable to write to repository: %s\n", Path);
       exit(-1);
       }
     //fprintf(Fout,"%s",ctime(&Time));
