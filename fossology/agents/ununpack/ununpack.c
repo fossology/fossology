@@ -40,6 +40,7 @@
 #include "libfossagent.h"
 
 #include <sys/timeb.h>
+#include <sys/stat.h>
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
@@ -74,6 +75,7 @@ void *DB=NULL;	/* the DB repository */
 PGconn *PGconn4DB = NULL; /* PGconn from DB */
 int Agent_pk=-1;	/* agent ID */
 #define MAXSQL	4096
+#define PATH_MAX 4096
 char SQL[MAXSQL];
 
 enum BITS {
@@ -90,6 +92,43 @@ int TotalCompressedFiles=0;
 int TotalDirectories=0;
 int TotalContainers=0;
 int TotalArtifacts=0;
+
+/*
+ * @brief judge if the file is one inflated file
+ * @parameter Name: File Name
+ * @parameter Name: inflated radio
+ * @return: 1 on is one inflated file, 0 on is not
+ */
+int IsInflatedFile(char *FileName, int InflateSize)
+{
+  int result = 0;
+  char FileNameParent[PATH_MAX];
+  memset(FileNameParent, 0, PATH_MAX);
+  struct stat st, stParent;
+  strncpy(FileNameParent, FileName, sizeof(FileNameParent));
+  char  *lastSlashPos = strrchr(FileNameParent, '/');
+  if (NULL != lastSlashPos)
+  {
+    /* get the parent container,
+       e.g. for the file ./10g.tar.bz.dir/10g.tar, partent file is ./10g.tar.bz.dir
+    */
+    FileNameParent[lastSlashPos - FileNameParent] = '\0';
+    if (!strcmp(FileNameParent + strlen(FileNameParent) - 4, ".dir"))
+    {
+      /* get the parent file, must be one file
+         e.g. for the file ./10g.tar.bz.dir/10g.tar, partent file is ./10g.tar.bz
+      */
+      FileNameParent[strlen(FileNameParent) - 4] = '\0';
+      stat(FileNameParent, &stParent);
+      stat(FileName, &st);
+      if(S_ISREG(stParent.st_mode) && (st.st_size/stParent.st_size > InflateSize))
+      {
+        result = 1;
+      }
+    }
+  }
+  return result;
+}
 
 /* store the upload file name */
 char UploadFileName[FILENAME_MAX];
@@ -1903,6 +1942,8 @@ int	Traverse	(char *Filename, char *Basename,
   /***********************************************/
   else if (S_ISREG(CI.Stat.st_mode))
     {
+    if(IsInflatedFile(CI.Source, 1000)) return 0; // if the file is one compression bombs, do not unpack this file
+
     /***********************************************/
     /* if it's a regular file, then process it! */
     /***********************************************/
