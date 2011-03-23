@@ -15,6 +15,18 @@ install:
 	$(INSTALL_DATA) agent.php $(DESTDIR)$(WEBDIR)/plugins/copyright/agent.php
 	$(INSTALL_DATA) oneshot.php $(DESTDIR)$(WEBDIR)/plugins/copyright/oneshot.php
 	
+srcinstall:
+	mkdir ../../../ui/plugins/copyright
+# have to create a version of copyright.php to include from the source
+	sed -e "1,\$$s/\$$WEBDIR\.'\/plugins\//'/" copyright.php > ../../../ui/plugins/copyright.php
+#	cp copyright.php ../../../ui/plugins/copyright.php
+	cp library.php ../../../ui/plugins/copyright/library.php
+	cp hist.php ../../../ui/plugins/copyright/hist.php
+	cp list.php ../../../ui/plugins/copyright/list.php
+	cp view.php ../../../ui/plugins/copyright/view.php
+	cp agent.php ../../../ui/plugins/copyright/agent.php
+	cp oneshot.php ../../../ui/plugins/copyright/oneshot.php
+	
 uninstall:
 	rm -f $(DESTDIR)$(WEBDIR)/plugins/copyright.php
 	rm -rf $(DESTDIR)$(WEBDIR)/plugins/copyright/
@@ -25,5 +37,16 @@ uninstall:
               rmdir $(DESTDIR)$(WEBDIR)/plugins; \
            fi; \
         fi
-    
-.PHONY: install uninstall
+
+srcuninstall:
+	rm -f ../../../ui/plugins/copyright.php
+	rm -rf ../../../ui/plugins/copyright/
+	@if [ -d ../../../ui/plugins ]; then \
+   	   if [ "`ls -A ../../../ui/plugins`" ]; then \
+	      echo "WARNING: ../../../ui/plugins not empty, not removing";\
+           else \
+              rmdir ../../../ui/plugins; \
+           fi; \
+        fi
+   
+.PHONY: install uninstall srcinstall srcuninstall
