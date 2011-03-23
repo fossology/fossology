@@ -134,7 +134,7 @@ if [ $RUNTIME ]; then
          apt-get install \
             php5 php5-pgsql php-pear php5-cli \
             libmagic1 libxml2 libextractor1c2a \
-            binutils bzip2 cabextract cpio sleuthkit xpdf-utils \
+            binutils bzip2 cabextract cpio genisoimage sleuthkit xpdf-utils \
                rpm tar upx-ucl unrar unzip p7zip libpcre3 \
                php-gettext
          case "$CODENAME" in
