@@ -57,6 +57,18 @@ install: all $(iPATHFILE)
 	 [ -h $${replink} ] && continue; \
 		ln -s $$link  $${replink}; \
 	done
+	
+# the src install target is for installing inside of a source tree.  This allows
+# developers to use the sourcetree to run the ui from the source tree instead of
+# the standard install location.
+srcinstall: all $(iPATHFILE)
+
+	cd plugins/simpleUi; \
+	for link in $(LINKS); do \
+	 replink=$${link#../}; \
+	 [ -h $${replink} ] && continue; \
+		ln -s $$link  $${replink}; \
+	done
 		
 uninstall:
 	for file in $(FILES); do \
@@ -75,6 +87,13 @@ uninstall:
 	done
 
 	rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
+	
+srcuninstall:
+
+	cd plugins/simpleUi; \
+	for link in $(RMLINKS); do \
+		rm -f $$link; \
+	done
 
 test: all
 	@echo "*** Tests are still run by hand for ui/ ***"
@@ -85,4 +104,4 @@ coverage:
 clean:
 	rm -f *.o core $(iPATHFILE)
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall srcinstall srcuninstall clean test
