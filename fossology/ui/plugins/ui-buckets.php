@@ -316,7 +316,7 @@ $text = _("Unique buckets");
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($Uploadtree_pk);
 
-    if (!is_array($Children))
+    if (count($Children) == 0)
     {
       $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$Uploadtree_pk'");
       if (empty($Results) || (IsDir($Results[0]['ufile_mode']))) { return; }
