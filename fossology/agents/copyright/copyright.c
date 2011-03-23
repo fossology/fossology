@@ -88,7 +88,7 @@ int find_beginning(char* ptext, int idx)
 
   while (idx-- && (idx > minidx))
   {
-    if (ptext[idx] == '\n') return MAX(0, idx-1);
+    if (!isalpha(ptext[idx])) return MAX(0, idx);
   }
 
   return idx;
