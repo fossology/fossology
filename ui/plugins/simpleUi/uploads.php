@@ -630,7 +630,7 @@ class uploads extends FO_Plugin
         $choice .= "<form name='uploads' enctype='multipart/form-data' method='post'>\n";
         $choice .= "<input type='radio' name='uploads' id='file' value='file' onclick='UploadFile_Get(\"" .Traceback_uri() . "?mod=ajax_fileUpload\")' />$fileText<br />\n";
         $choice .= "<input type='radio' name='uploads' id='url' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />$urlText<br />\n";
-        $choice .= "<input type='radio' name='uploads' id='srv' value='srv' onclick='UploadSrv_Get(\"" .Traceback_uri() . "?mod=ajax_srvUpload\")' />$srvText<br />\n";
+//        $choice .= "<input type='radio' name='uploads' id='srv' value='srv' onclick='UploadSrv_Get(\"" .Traceback_uri() . "?mod=ajax_srvUpload\")' />$srvText<br />\n";
 
         $or = _("--OR--");
         $oneShotText = _("Submit a file to be analyzed in real time.\n");
