@@ -421,6 +421,17 @@ class uploads extends FO_Plugin
       $text = _("Failed to insert job record");
       return ($text);
     }
+
+    /* Set default values */
+    if (empty($Level) && !is_numeric($Level) || $Level < 0)
+    {
+      $Level = 1;
+    }
+    
+    /* first trim, then get rid of whitespaces before and after each comma letter */
+    $Accept = preg_replace('/\s*,\s*/', ',', trim($Accept));
+    $Reject = preg_replace('/\s*,\s*/', ',', trim($Reject));
+    
     /* Prepare the job: job "wget" has jobqueue item "wget" */
     /** 2nd parameter is obsolete **/
     $jq_args = "$uploadpk - $GetURL --accept=$Accept --reject=$Reject -l $Level";
@@ -628,7 +639,7 @@ class uploads extends FO_Plugin
         $text2 = _("stored. As soon as you get your results, your uploaded file
          is removed from the system. ");
         $oneShotText .= "$res<b>$Not</b>$text2\n";
-        
+
         $oneShotText .= _("The uploaded file will be scanned as a single file.
          For example, if you upload a rpm file, the rpm itself will be scanned,
          and not the individual files in the rpm.");
