@@ -1208,6 +1208,10 @@
 %KEY%	"so(ftware|urce)"
 %STR%	"put such notice in a particular source code file due to its structure then you must include such notice in a location such as a relevant directory"
 #
+%ENTRY%	_LT_DYADE_2
+%KEY%	"dyade"
+%STR%	"dyade_public_license"
+#
 %ENTRY%	_LT_EBT
 %KEY%	"permi[st]"
 %STR%	"permission to use copy modify and/?o?r? distribute the rainbow"
