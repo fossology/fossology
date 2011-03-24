@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -52,7 +52,7 @@ class upload_file extends FO_Plugin {
   function Upload($Folder, $TempFile, $Desc, $Name) {
     /* See if the URL looks valid */
     if (empty($Folder)) {
-$text = _("Invalid folder");
+      $text = _("Invalid folder");
       return ($text);
     }
     if (empty($Name)) {
@@ -67,19 +67,19 @@ $text = _("Invalid folder");
     $Mode = (1 << 3); // code for "it came from web upload"
     $uploadpk = JobAddUpload($ShortName, $originName, $Desc, $Mode, $Folder);
     if (empty($uploadpk)) {
-$text = _("Failed to insert upload record");
+      $text = _("Failed to insert upload record");
       return ($text);
     }
     /* move the temp file */
     //echo "<pre>uploadfile: renaming uploaded file\n</pre>";
     if (!move_uploaded_file($TempFile, "$TempFile-uploaded")) {
-$text = _("Could not save uploaded file");
+      $text = _("Could not save uploaded file");
       return ($text);
     }
     $UploadedFile = "$TempFile" . "-uploaded";
     //echo "<pre>uploadfile: \$UploadedFile is:$UploadedFile\n</pre>";
     if (!chmod($UploadedFile, 0660)) {
-$text = _("ERROR! could not update permissions on downloaded file");
+      $text = _("ERROR! could not update permissions on downloaded file");
       return ($text);
     }
 
@@ -100,8 +100,8 @@ $text = _("ERROR! could not update permissions on downloaded file");
     AgentCheckBoxDo($uploadpk);
 
     if($wgetRtn == 0) {
-$text = _("The file");
-$text1 = _("has been uploaded. It is");
+      $text = _("The file");
+      $text1 = _("has been uploaded. It is");
       $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
       $Msg = "$text $Name $text1 ";
       $keep = '<a href=' . $Url . '>upload #' . $uploadpk . "</a>.\n";
@@ -139,7 +139,7 @@ $text1 = _("has been uploaded. It is");
             $Name = NULL;
           }
           else {
-$text = _("Upload failed for file");
+            $text = _("Upload failed for file");
             $V.= displayMessage("$text {$_FILES[getfile][name]}: $rc");
           }
         }
@@ -150,42 +150,38 @@ $text = _("Upload failed for file");
         }
         /* Display instructions */
         $V.= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from your computer to FOSSology.\n");
-        $V.= _("Your system has imposed a maximum file size of");
+        $V.= _("Your FOSSology server has imposed a maximum file size of");
         $V.= " ".  ini_get('post_max_size') . " ";
         $V.= _("bytes.");
         /* Display the form */
         $V.= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-$text = _("Select the folder for storing the uploaded file:");
+        $text = _("Select the folder for storing the uploaded file:");
         $V.= "<li>$text\n";
         $V.= "<select name='folder'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
-$text = _("Select the file to upload:");
+        $text = _("Select the file to upload:");
         $V.= "<li>$text<br />\n";
         $V.= "<input name='getfile' size='60' type='file' /><br />\n";
-$text = _("NOTE");
-$text1 = _(": If the file is larger than 650 Megs (one CD-ROM), then this method will not work with some browsers (e.g., Internet Explorer). Only attach files smaller than 650 Megs.");
-        $V.= "<b>$text</b>$text1<P />\n";
-$text = _("(Optional) Enter a description of this file:");
+        $text = _("(Optional) Enter a description of this file:");
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
-$text = _("(Optional) Enter a viewable name for this file:");
+        $text = _("(Optional) Enter a viewable name for this file:");
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
-$text = _("NOTE");
-$text1 = _(": If no name is provided, then the uploaded file name will be used.");
-        $V.= "<b>$text</b>$text1<P />\n";
+        $text1 = _("If no name is provided, then the uploaded file name will be used.");
+        $V.= "$text1<P />\n";
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
-$text = _("Select optional analysis");
+        $text = _("Select optional analysis");
           $V.= "<li>$text<br />\n";
           $V.= AgentCheckBoxMake(-1, "agent_unpack");
         }
         $V.= "</ol>\n";
-$text = _("It may take time to transmit the file from your computer to this server. Please be patient.");
+        $text = _("After you press Upload, please be patient while your file is transferring.");
         $V.= "$text<br>\n";
-$text = _("Upload");
-        $V.= "<input type='submit' value='$text!'>\n";
+        $text = _("Upload");
+        $V.= "<p>&nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='$text'>\n";
         $V.= "</form>\n";
         break;
       case "Text":
