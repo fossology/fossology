@@ -1,25 +1,25 @@
 <?php
 /***********************************************************
-Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ ***********************************************************/
 /*************************************************
-Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
+ Restrict usage: Every PHP file should have this
+ at the very beginning.
+ This prevents hacking attempts.
+ *************************************************/
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
@@ -35,11 +35,11 @@ class core_auth extends FO_Plugin {
   var $Dependency = array("db");
   var $LoginFlag = 0;
   /***********************************************************
-  Install(): Only used during installation.
-  This may be called multiple times.
-  Used to ensure the DB has the right default columns.
-  Returns 0 on success, non-zero on failure.
-  ***********************************************************/
+   Install(): Only used during installation.
+   This may be called multiple times.
+   Used to ensure the DB has the right default columns.
+   Returns 0 on success, non-zero on failure.
+   ***********************************************************/
   function Install() {
     global $DB;
     if (empty($DB)) {
@@ -59,12 +59,12 @@ class core_auth extends FO_Plugin {
       $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
 	VALUES ('Default User','Default User when nobody is logged in','Seed','Pass',$Level,NULL,1);";
       $DB->Action($SQL);
-$text = _("*** Created default user: 'Default User'.");
+      $text = _("*** Created default user: 'Default User'.");
       print "$text\n";
     }
     /* There must always be at least one user with user-admin access.
-    If he does not exist, make it user "fossy".
-    If user "fossy" does not exist, add him with the default password 'fossy'. */
+     If he does not exist, make it user "fossy".
+     If user "fossy" does not exist, add him with the default password 'fossy'. */
     $Perm = PLUGIN_DB_USERADMIN;
     $Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Perm;");
     if (empty($Results[0]['user_name'])) {
@@ -77,14 +77,14 @@ $text = _("*** Created default user: 'Default User'.");
         $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass," .
                "user_perm,user_email,email_notify,root_folder_fk)
 		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,'fossy','y',1);";
-$text = _("*** Created default administrator: 'fossy' with password 'fossy'.");
+        $text = _("*** Created default administrator: 'fossy' with password 'fossy'.");
         print "$text\n";
       }
       else {
         /* User "fossy" exists!  Update it. */
         $SQL = "UPDATE users SET user_perm = $Perm, email_notify = 'y'," .
                " user_email= 'fossy' WHERE user_name = 'fossy';";
-$text = _("*** Existing user 'fossy' promoted to default administrator.");
+        $text = _("*** Existing user 'fossy' promoted to default administrator.");
         print "$text\n";
       }
       $DB->Action($SQL);
@@ -97,11 +97,11 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
   } // Install()
 
   /******************************************
-  GetIP(): Retrieve the user's IP address.
-  Some proxy systems pass forwarded IP address info.
-  This ensures that someone who steals the cookie won't
-  gain access unless they come from the same IP.
-  ******************************************/
+   GetIP(): Retrieve the user's IP address.
+   Some proxy systems pass forwarded IP address info.
+   This ensures that someone who steals the cookie won't
+   gain access unless they come from the same IP.
+   ******************************************/
   function GetIP() {
     /* NOTE: This can be easily defeated wtih fake HTTP headers. */
     $Vars = array('HTTP_CLIENT_IP', 'HTTP_X_COMING_FROM', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED');
@@ -114,9 +114,9 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
   } // GetIP()
 
   /******************************************
-  PostInitialize(): This is where the magic for
-  Authentication happens.
-  ******************************************/
+   PostInitialize(): This is where the magic for
+   Authentication happens.
+   ******************************************/
   function PostInitialize() {
     global $Plugins;
     global $DB;
@@ -129,7 +129,7 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
     {
       return(0);
     }
-    
+
     session_name("Login");
     session_start();
     $Now = time();
@@ -245,13 +245,13 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
   } // PostInitialize()
 
   /******************************************
-  CheckUser(): See if a username/password is valid.
-  Returns string on match, or null on no-match.
-  ******************************************/
+   CheckUser(): See if a username/password is valid.
+   Returns string on match, or null on no-match.
+   ******************************************/
   function CheckUser($User, $Pass, $Referer) {
-    
+
     global $DB;
-    
+
     //echo "<pre>CheckUser:Referer is:$Referer\n";
     $V = "";
     if (empty($User)) {
@@ -313,41 +313,50 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
     /* Need to refresh the screen */
     $V .= "<script language='javascript'>\n";
     /* Use the previous redirect, but only use it if it comes from this
-    server's Traceback_uri().  (Ignore hostname.) */
+     server's Traceback_uri().  (Ignore hostname.) */
     $Redirect = preg_replace("@^[^/]*//[^/]*@", "", GetParm("redirect", PARM_TEXT));
     $Uri = Traceback_uri();
     if (preg_match("/[?&]mod=(Default|" . $this->Name . ")/", $Redirect)) {
       $Redirect = ""; /* don't reference myself! */
     }
-    //echo "<pre>CheckUser:Uri is:$Uri Redirect is:$Redirect\n";
+    //echo "<pre>CheckUser:Uri is:$Uri Redirect is:$Redirect\n</pre>";
     //echo "<pre>CheckUser:Referer is:$Referer\n</pre>";
-    
+
     if (empty($Redirect) || strncmp($Redirect, $Uri, strlen($Uri))) {
       $Uri = Traceback_uri();
     } else {
       $Uri = $Redirect;
     }
     /* Redirect window */
-
+    //echo "<pre>CheckUser:Redirect is:$Redirect\n</pre>";
     if($_SESSION['UiPref'] == 'simple')
     {
       if(!stristr($Referer, 'simpleIndex.php'))
       {
-        //echo "<pre>CheckUser:setting simpleIndex\n";
-        $Referer = str_replace('?mod=refresh&remod=default',
+        
+        if(stristr($Referer, 'default'))
+        {
+          $Referer = str_replace('?mod=refresh&remod=default',
            'simpleIndex.php?mod=refresh&remod=simple_UI', $Referer);
+        }
+        else
+        {
+          $replace = $Uri . "simpleIndex.php?mod=refresh&remod=simple_UI";
+          //echo "<pre>CheckUser:setting OTHER Referer:$Referer\n</pre>";
+          $Referer = preg_replace("|$Uri|", $replace, $Referer);
+        }
       }
-      //echo "<pre>CheckUser:Referer is now:$Referer\n</pre>";
+      //echo "<pre>CheckUser:SimpleUI-Referer is now:$Referer\n</pre>";
     }
-
+    //echo "<pre>CheckUser:Referer after if block:$Referer\n</pre>";
     $V .= "window.open('$Referer','_top');\n";
     $V .= "</script>\n";
     return ($V);
   } // CheckUser()
 
   /******************************************
-  Output(): This is only called when the user logs out.
-  ******************************************/
+   Output(): This is only called when the user logs out.
+   ******************************************/
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
@@ -355,7 +364,7 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
     $V = "";
     switch ($this->OutputType) {
       case "XML":
-      break;
+        break;
       case "HTML":
         if (empty($_SESSION['User'])) {
           $User = GetParm("username", PARM_TEXT);
@@ -372,7 +381,7 @@ $text = _("*** Existing user 'fossy' promoted to default administrator.");
           } else {
             /* Check for init and first-time use */
             if (plugin_find_id("init") >= 0) {
-$text = _("The system requires initialization. Please login and use the Initialize option under the Admin menu.");
+              $text = _("The system requires initialization. Please login and use the Initialize option under the Admin menu.");
               $V.= "<b>$text</b>";
               $V.= "<P />\n";
               /* Check for a default user */
@@ -401,52 +410,52 @@ $text = _("The system requires initialization. Please login and use the Initiali
             $V.= "<form method='post'>\n";
             $V.= "<input type='hidden' name='HTTP_REFERER' value='$Referer'>";
             $V.= "<table border=0>";
-$text = _("Username:");
+            $text = _("Username:");
             $V.= "<tr><td>$text</td><td><input type='text' size=20 name='username' id='unamein'></td></tr>\n";
-$text = _("Password:");
+            $text = _("Password:");
             $V.= "<tr><td>$text</td><td><input type='password' size=20 name='password'></td></tr>\n";
             $V.= "</table>";
             $V.= "<P/>";
             $V.= "<script type=\"text/javascript\">document.getElementById(\"unamein\").focus();</script>";
-/* Commenting out the Validate IP option since it's probably overkill for this app,
-   and it confuses people.
-$text = _("Validate IP.\n");
-            $V.= "<input type='checkbox' name='checkip' value='1'>$text";
-            $Referer = @$_SERVER['HTTP_REFERER'];
-            if (!empty($Referer)) {
-              $V.= "<input type='hidden' name='redirect' value='$Referer'>";
-            }
-$text = _("This option deters session hijacking by linking your session to your IP address (");
-$text1 = _("). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.");
-            $V.= "$text" . @$_SESSION['ip'] . "$text1<P />\n";
-*/
-$text = _("Login");
+            /* Commenting out the Validate IP option since it's probably overkill for this app,
+             and it confuses people.
+             $text = _("Validate IP.\n");
+             $V.= "<input type='checkbox' name='checkip' value='1'>$text";
+             $Referer = @$_SERVER['HTTP_REFERER'];
+             if (!empty($Referer)) {
+             $V.= "<input type='hidden' name='redirect' value='$Referer'>";
+             }
+             $text = _("This option deters session hijacking by linking your session to your IP address (");
+             $text1 = _("). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.");
+             $V.= "$text" . @$_SESSION['ip'] . "$text1<P />\n";
+             */
+            $text = _("Login");
             $V.= "<input type='submit' value='$text'>\n";
             $V.= "</form>\n";
           }
         } else
         /* It's a logout */ {
-          $_SESSION['User'] = NULL;
-          $_SESSION['UserId'] = NULL;
-          $_SESSION['UserLevel'] = NULL;
-          $_SESSION['UserEmail'] = NULL;
-          $_SESSION['Folder'] = NULL;
-          $Uri = Traceback_uri() . "?mod=refresh&remod=default";
-          $V.= "<script language='javascript'>\n";
-          $V.= "window.open('$Uri','_top');\n";
-          $V.= "</script>\n";
+        $_SESSION['User'] = NULL;
+        $_SESSION['UserId'] = NULL;
+        $_SESSION['UserLevel'] = NULL;
+        $_SESSION['UserEmail'] = NULL;
+        $_SESSION['Folder'] = NULL;
+        $Uri = Traceback_uri() . "?mod=refresh&remod=default";
+        $V.= "<script language='javascript'>\n";
+        $V.= "window.open('$Uri','_top');\n";
+        $V.= "</script>\n";
         }
         break;
       case "Text":
         break;
       default:
         break;
-      }
-      if (!$this->OutputToStdout) {
-        return ($V);
-      }
-      print ($V);
-      return;
+    }
+    if (!$this->OutputToStdout) {
+      return ($V);
+    }
+    print ($V);
+    return;
   } // Output()
 
 };
