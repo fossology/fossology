@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,6 +19,7 @@
 #include <ctype.h>
 
 #include "nomos.h"
+
 #include "parse.h"
 #include "list.h"
 #include "util.h"
@@ -4876,6 +4877,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (INFILE(_LT_ZEND_1) || INFILE(_URL_ZEND)) {
        INTERESTING("Zend_v2.0");
     }
+
+    /* Dyade Public License
+     * http://old.koalateam.com/jackaroo/DYADE_PUBLIC_LICENSE.TXT
+     */
+    if (INFILE(_LT_DYADE) && INFILE(_LT_DYADE_2)) 
+    {
+       INTERESTING("Dyade");
+    }
+
     /*
      * The Stallman paper "Why Software Should Be Free" is a red-herring.
      * His 1986 interview in Byte magazine also is, too.
@@ -4989,6 +4999,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    }
 	}
     }
+    
+    /* Check for Public Domain */
+    pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
+
     /*
      * NOW look for unclassified licenses, if we haven't found anything yet.
      * And avoid checking .po files -- message catalogues are known to have
@@ -4999,7 +5013,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * for no-warranty was moved ABOVE this check in case we can use that info)
      */
     if (maxInterest != IL_HIGH && !lmem[_fDOC]) {
-	pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
 	if (!pd &&
 	    checkUnclassified(filetext, size, scp->score, isML,
 			      isPS, nw)) {
@@ -7700,53 +7713,53 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
     }
     ret = 0;        /* default answer is "no" */
     if (INFILE(_LT_PUBDOM_CC)) {
-	LOWINTEREST(lDebug ? "Pubdom(CC)" : LS_PD_CLM);
+	INTERESTING(lDebug ? "Pubdom(CC)" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_ODC)) {
-	LOWINTEREST(lDebug ? "Pubdom(ODC)" : LS_PD_CLM);
+	INTERESTING(lDebug ? "Pubdom(ODC)" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_PDD)) {
-	LOWINTEREST(lDebug ? "Pubdom(PDD)" : LS_PD_CLM);
+	INTERESTING(lDebug ? "Pubdom(PDD)" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_USE)) {
-	LOWINTEREST(lDebug ? "Pubdom(use)" : LS_PD_CLM);
+	INTERESTING(lDebug ? "Pubdom(use)" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_NOTclaim)) {
-	LOWINTEREST(LS_NOT_PD);
+	INTERESTING(LS_NOT_PD);
 	ret = 1;
     } else if (INFILE(_CR_PUBDOM)) {
 	if (INFILE(_LT_PUBDOMNOTcpyrt)) {
-	    LOWINTEREST(LS_PD_CLM);
+	    INTERESTING(LS_PD_CLM);
 	} else {
-	    LOWINTEREST(LS_PD_CPRT);
+	    INTERESTING(LS_PD_CPRT);
 	}
 	ret = 1;
     } else if (INFILE(_CR_NONE)) {
-	LOWINTEREST(lDebug ? "Pubdom(no-CR)" : LS_PD_CLM);
+	INTERESTING(lDebug ? "Pubdom(no-CR)" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_1)) {
-	LOWINTEREST(lDebug ? "Pubdom(1)" : LS_PD_CLM);
+	INTERESTING(lDebug ? "Pubdom(1)" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_2) && !INFILE(_PHR_PUBLIC_FUNCT)) {
-	LOWINTEREST(lDebug ? "Pubdom(2)" : LS_PD_CLM);
+	INTERESTING(lDebug ? "Pubdom(2)" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_3)) {
-	LOWINTEREST(lDebug ? "Pubdom(3)" : LS_PD_CLM);
+	INTERESTING(lDebug ? "Pubdom(3)" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_4)) {
-	LOWINTEREST(lDebug ? "Pubdom(4)" : LS_PD_CLM);
+	INTERESTING(lDebug ? "Pubdom(4)" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_5)) {
-	LOWINTEREST(lDebug ? "Pubdom(5)" : LS_PD_CLM);
+	INTERESTING(lDebug ? "Pubdom(5)" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_6)) {
-	LOWINTEREST(lDebug ? "No-more-copyright" : LS_PD_CLM);
+	INTERESTING(lDebug ? "No-more-copyright" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_7)) {
-	LOWINTEREST(lDebug ? "Pubdom(7)" : LS_PD_CLM);
+	INTERESTING(lDebug ? "Pubdom(7)" : LS_PD_CLM);
 	ret = 1;
     } else if (HASKW(kwbm, _KW_public_domain) && score < 3) {
-	LOWINTEREST(LS_PD_ONLY);
+	INTERESTING(LS_PD_ONLY);
 	ret = 1;
     }
     return(ret);
@@ -7762,11 +7775,6 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
 void checkCornerCases(char *filetext, int size, int score,
    int kwbm, int isML, int isPS, int nw, int force)
 {
-#ifdef BOBGREMOVE
-    char ccbuf[myBUFSIZ];
-    char *cp;
-    int pri = (force ? IL_MED : IL_LOW);
-#endif  /*  BOBGREMOVE  */
 
 #ifdef  PROC_TRACE
     traceFunc("== checkCornerCases(%p, %d, %d, %d, %d, %d, %d, %d)\n",
@@ -7780,57 +7788,6 @@ void checkCornerCases(char *filetext, int size, int score,
 	LOWINTEREST("non-ATT-BSD");
     }
 
-#ifdef BOBGREMOVE
-#if     (DEBUG > 5)
-    printf("checkCornerCases: kwbm = 0x%08x\n", kwbm);
-#endif  /* DEBUG > 5 */
-
-    if (nw && maxInterest < IL_MED) { /* not HIGH, nor MEDIUM */
-	LOWINTEREST("No-warranty");
-    }
-    /*
-     * See if authorship can be inferred: need an appropriate verb + year + "by"
-     */
-    if (!(*licStr) && HASREGEX(_TEXT_AUTHORSHIP, filetext)) {
-	int n = 40;
-	int offset = 0;
-	do {
-#ifdef  DEBUG
-	    printf("Found @ %d [", cur.regm.rm_so);
-	    cp = filetext + offset + cur.regm.rm_so;
-	    while (cp < (filetext + offset + cur.regm.rm_eo)) {
-		printf("%c", *cp++);
-	    }
-	    printf("] (%d)\n", cur.regm.rm_eo);
-#endif  /* DEBUG */
-	    offset += cur.regm.rm_eo;
-	    cp = filetext+(offset > n ? offset-n : 0);
-#ifdef  DEBUG
-	    printf("offset = %d, look back to %d (%c%c%c%c%c)\n",
-		   offset, cp-filetext, *cp, *(cp+1), *(cp+2),
-		   *(cp+3), *(cp+4));
-#endif  /* DEBUG */
-	    strncpy(ccbuf, cp, 2*n);
-	    ccbuf[2*n] = NULL_CHAR;
-	    doctorBuffer(ccbuf, isML, isPS, NO);
-#ifdef  DEBUG
-	    printf("ccbuf: %s\n", ccbuf);
-#endif  /* DEBUG */
-	    if (!idxGrep(_TEXT_BY, ccbuf, REG_ICASE|REG_EXTENDED)) {
-		continue;
-	    }
-	    if (!idxGrep(_TEXT_YR, ccbuf, REG_ICASE|REG_EXTENDED)) {
-		continue;
-	    }
-	    LOWINTEREST("Authorship-inference");
-	    break;
-#ifdef  DEBUG
-	    printf("Now, search @ offset %d\n", offset);
-#endif  /* DEBUG */
-	} while (idxGrep(_TEXT_AUTHORSHIP, filetext+offset,
-			 REG_ICASE|REG_EXTENDED));
-    }
-#endif  /* BOBGREMOVE */
     /*
      * FINAL cases: (close to giving up) -- lowest-importance items
      */
@@ -7838,14 +7795,6 @@ void checkCornerCases(char *filetext, int size, int score,
 	if (HASTEXT(_TEXT_TRADEMARK, 0)) {      /* a trademark? */
 	    LOWINTEREST(LS_TDMKONLY);
 	}
-#ifdef BOBGREMOVE
-	else if (HASKW(kwbm, _KW_patent)) {     /* a patent? */
-	    LOWINTEREST(LS_PATRONLY);
-	}
-	else if (HASREGEX(_CR_ZZZMAYBE, filetext)) {
-	    addRef("Possible-copyright", pri);
-	}
-#endif  /* BOBGREMOVE */
     }
     if (!(*licStr)) {
 	/*
@@ -7854,9 +7803,6 @@ void checkCornerCases(char *filetext, int size, int score,
 	 * have observed to this point.
 	 */
 	listClear(&whereList, NO);      /* force 'nothing to report' */
-#ifdef  BOBGREMOVE
-	addRef(score <= _scINVALID ? LS_NONE : LS_UNLIKELY, IL_NONE);
-#endif  /* BOBGREMOVE */
     }
     return;
 }

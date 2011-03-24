@@ -150,7 +150,7 @@ size_t hashEntries;
 #define	LS_NOSUM	"No_license_found"
 #define	LS_UNCL		"UnclassifiedLicense"
 #define	LS_NOT_PD	"NOT-public-domain"
-#define	LS_PD_CLM	"Public-domain-claim"
+#define	LS_PD_CLM	"Public-domain"
 #define	LS_PD_CPRT	"Public-domain(C)"
 #define	LS_PD_ONLY	"Public-domain-ref"
 #define	LS_CPRTONLY	"Misc-Copyright"
