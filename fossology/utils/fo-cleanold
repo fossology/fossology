@@ -67,6 +67,25 @@ if [ `id -u` != "0" ] ; then
    exit 1
 fi
 
+# BUCKET DATA EXCEPTION
+# NOTE: for a little while the buckets agent instructed users to install
+# bucket data and scripts in $DATADIR/bucketpools/ which was not the right
+# FHS location and was later fixed. If we encounter anything in this dir
+# we don't want to delete it (unless we're deleting everything anyway).
+# This check can be removed once a fossology release no longer supports 
+# upgrading from v1.3
+if [ ! $EVERYTHING ]; then
+  for BUCKET in /usr/share/fossology/bucketpools/ /usr/local/share/fossology/bucketpools/; do
+    if [ -d $BUCKET ] && [ $(ls -A $BUCKET) ]; then
+        echo "ERROR: you have bucket data in $BUCKET,"
+        echo " please migrate it to the new location. See"
+        echo " http://fossology.org/buckets for more info." 
+        exit 1
+    fi
+  done  
+fi
+# END BUCKET DATA EXCEPTION
+
 ## Files
 # config files from 0.9.0 and older installs
 # NOTE: we don't bother to look for nomos3 conffiles
