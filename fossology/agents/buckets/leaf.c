@@ -267,7 +267,7 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
          */
         /* put together complete file path to file */
         snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
-                 DATADIR, bucketDefArray->bucketpool_pk, bucketDefArray->dataFilename);
+                 PROJECTSTATEDIR, bucketDefArray->bucketpool_pk, bucketDefArray->dataFilename);
 			if ((pid = fork()) < 0)
       {
         printf("FATAL: fork failure, %s\n", strerror(errno));

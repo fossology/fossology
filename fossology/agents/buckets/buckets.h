@@ -65,7 +65,7 @@ struct bucketdef_struct
   int      bucket_type;
   char    *regex;           /* regex string */
   regex_t  compRegex;       /* compiled regex if type=3 */
-  char    *dataFilename;    /* File in DATADIR */
+  char    *dataFilename;    /* File in PROJECTSTATEDIR */
   int     *match_only;      /* array of rf_pk's if type=2 */
   int    **match_every;     /* list of arrays of rf_pk's if type=1 */
   regex_file_t *regex_row;  /* array of regex_file_structs if type=5 */

@@ -133,7 +133,7 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
     if (strlen(bucketDefList[rowNum].dataFilename) > 0)
     {
       snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s",
-        DATADIR, bucketpool_pk, bucketDefList[rowNum].dataFilename);
+        PROJECTSTATEDIR, bucketpool_pk, bucketDefList[rowNum].dataFilename);
       if (stat(filepath, &statbuf) == -1)
       {
         hostname[0] = 0;
@@ -216,7 +216,7 @@ FUNCTION int *getMatchOnly(PGconn *pgConn, int bucketpool_pk,
 
   /* put together complete file path to match_only file */
   snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
-           DATADIR, bucketpool_pk, filename);
+           PROJECTSTATEDIR, bucketpool_pk, filename);
 
   /* open filepath */
   fin = fopen(filepath, "r");
@@ -300,7 +300,7 @@ FUNCTION int **getMatchEvery(PGconn *pgConn, int bucketpool_pk,
 
   /* put together complete file path to match_every file */
   snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
-           DATADIR, bucketpool_pk, filename);
+           PROJECTSTATEDIR, bucketpool_pk, filename);
 
   /* open filepath */
   fin = fopen(filepath, "r");
@@ -391,7 +391,7 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
 
   /* put together complete file path to match_every file */
   snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
-           DATADIR, bucketpool_pk, filename);
+           PROJECTSTATEDIR, bucketpool_pk, filename);
 
   /* open filepath */
   fin = fopen(filepath, "r");
