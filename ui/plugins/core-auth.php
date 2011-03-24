@@ -370,7 +370,7 @@ class core_auth extends FO_Plugin {
           $User = GetParm("username", PARM_TEXT);
           $Pass = GetParm("password", PARM_TEXT);
           $Referer = GetParm("HTTP_REFERER", PARM_TEXT);
-          if (empty($Referer)) $Referer = $_SERVER['HTTP_REFERER'];
+          if (empty($Referer)) $Referer = GetArrayVal('HTTP_REFERER', $_SERVER);
           if (!empty($User)) {
             $VP = $this->CheckUser($User, $Pass, $Referer);
           } else {
