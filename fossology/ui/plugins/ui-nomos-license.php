@@ -77,16 +77,14 @@ class ui_nomos_license extends FO_Plugin
       $nomosURI = "view-license&napk=$nomosAgentpk" . Traceback_parm_keep(array("show","format","page","upload","item"));
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-       menu_insert("Browse::License Browser",1);
-       //menu_insert("Browse::[BREAK]",100);
-       //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
+       menu_insert("Browse::License Browser",100);
       }
       else
       {
-$text = _("View nomos license histogram");
-       menu_insert("Browse::Nomos License",10,$URI,$text);
-$text = _("nomos license");
-       menu_insert("View::Nomos License",10,$nomosURI,$text);
+        $text = _("license histogram");
+        $MenuName = "License Browser";
+        menu_insert("Browse::$MenuName",100,$URI,$text);
+        menu_insert("View::$MenuName",100,$nomosURI,$text);
       }
     }
   } // RegisterMenus()
