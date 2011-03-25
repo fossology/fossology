@@ -55,18 +55,25 @@ class ui_license_list extends FO_Plugin {
       "upload",
       "item",
     ));
+    $MenuDisplayString = _("License List");
+    $MenuDisplayStringDL = _("License List Download");
     $Item = GetParm("item", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);
     if (!empty($Item) && !empty($Upload)) {
       if (GetParm("mod", PARM_STRING) == $this->Name) {
-        menu_insert("Browse::Nomos License List", 1);
-//        menu_insert("Browse::[BREAK]", 100);
-        menu_insert("Browse::Nomos License List Download", 1, $URI . "&output=dltext");
+        menu_insert("Browse::$MenuDisplayString", 1);
+        menu_insert("Browse::$MenuDisplayStringLicenseDL", 1, $URI . "&output=dltext");
       }
       else {
-$text = _("Nomos license listing");
-        menu_insert("Browse::Nomos License List", 1, $URI, $text);
-        menu_insert("Browse::Nomos License List Download", 1, $URI . "&output=dltext");
+        menu_insert("Browse::$MenuDisplayString", 1, $URI, $MenuDisplayString);
+        menu_insert("Browse::$MenuDisplayStringDL", 1, $URI . "&output=dltext", $MenuDisplayStringDL);
+
+/* bobg - This is to use a select list in the micro menu to replace the above List 
+          and Download, but put this select list in a form
+$LicChoices = array("Lic Download" => "Download", "Lic display" => "Display");
+$LicChoice = Array2SingleSelect($LicChoices, $SLName="LicDL");
+        menu_insert("Browse::Nomos License List Download2", 1, $URI . "&output=dltext", NULL,NULL, $LicChoice);
+*/
       }
     }
   } // RegisterMenus()
