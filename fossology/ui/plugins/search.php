@@ -61,7 +61,7 @@ $text = _("Invalid URL, nonexistant item");
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
-    $SQL = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file INNER JOIN tag ON tag_pk = tag_fk AND tag LIKE '$tag') T ON uploadtree.pfile_fk = T.pfile_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt";
+    $SQL = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file INNER JOIN tag ON tag_pk = tag_fk AND (tag = '$tag' OR tag LIKE '$tag')) T ON uploadtree.pfile_fk = T.pfile_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt";
     $Offset = $Page * $Max;
 
     /* search only containers of all files */
@@ -185,7 +185,7 @@ $text = _("Total matched:");
     {
       $TagSQL = "SELECT * FROM (";
       $TagSQL .= substr($SQL,0,-1);
-      $TagSQL .= ") U INNER JOIN (SELECT * FROM tag_file INNER JOIN tag ON tag_pk = tag_fk AND tag LIKE '$tag') T ON U.pfile_fk = T.pfile_fk";
+      $TagSQL .= ") U INNER JOIN (SELECT * FROM tag_file INNER JOIN tag ON tag_pk = tag_fk AND (tag = '$tag' OR tag LIKE '$tag')) T ON U.pfile_fk = T.pfile_fk";
       $SQL = $TagSQL;
     }
 
