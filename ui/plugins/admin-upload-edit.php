@@ -57,8 +57,8 @@ class upload_properties extends FO_Plugin {
       $set = 0;
       if (!empty($NewName)) {
         /*
-           Use pfile_fk to select the correct entry in the upload tree, artifacts
-           (e.g. directories of the upload do not have pfiles).
+         Use pfile_fk to select the correct entry in the upload tree, artifacts
+         (e.g. directories of the upload do not have pfiles).
          */
         $Sql = "SELECT pfile_fk FROM upload WHERE upload_pk=$uploadId;";
         $pfile = $DB->Action($Sql);
@@ -69,17 +69,20 @@ class upload_properties extends FO_Plugin {
         $oldFileName = basename($oFN[0]['ufile_name']);
 
         /* Always keep ufile_name and upload_filename in sync */
-        $Sql = "UPDATE uploadtree SET ufile_name='$NewName' ".
+        if (!empty($NewName))
+        {
+          $Sql = "UPDATE uploadtree SET ufile_name='$NewName' ".
               "WHERE upload_fk=$uploadId AND pfile_fk=$pfileFk;";
-        $Results = $DB->Action($Sql);
-        $Row = $Results[0];
+          $Results = $DB->Action($Sql);
+          $Row = $Results[0];
 
-        $Sql = "UPDATE upload SET upload_filename='$NewName' ".
+          $Sql = "UPDATE upload SET upload_filename='$NewName' ".
               "WHERE upload_pk=$uploadId AND pfile_fk=$pfileFk;";
-        $Results = $DB->Action($Sql);
-        $Row = $Results[0];
+          $Results = $DB->Action($Sql);
+          $Row = $Results[0];
 
-        $set = 1;
+          $set = 1;
+        }
       }
       /* Note using this method, there is no way for the user to create a
        * 'blank' i.e. empty description, they can set it to "" or '' but
@@ -115,16 +118,24 @@ class upload_properties extends FO_Plugin {
           $NewName = GetParm('newname', PARM_TEXT);
           $NewDesc = GetParm('newdesc', PARM_TEXT);
           $rc = $this->EditUploadProperties($FolderSelectId, $uploadId, $NewName, $NewDesc);
-          if ($rc == 1) {
-$text = _("Upload Properties changed");
+          if($rc == 0)
+          {
+            $text = _("Nothing to Change");
             $V.= displayMessage($text);
           }
-$text =_("The upload properties that can be changed are the upload name and
-                 description.  First select the folder that the upload is stored in.  " . "Then select the upload to edit. Then enter the new values. If no " . "value is entered, then the corresponding field will not be changed.");
-          $V.= "<p>$text</p>";
+          if ($rc == 1) {
+            $text = _("Upload Properties changed");
+            $V.= displayMessage($text);
+          }
+
           /* Get the folder info */
           $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$FolderSelectId';");
           $Folder = & $Results[0];
+
+          $text =_("The upload properties that can be changed are the upload name and
+                 description.  First select the folder that the upload is stored in.  " . "Then select the upload to edit. Then enter the new values. If no " . "value is entered, then the corresponding field will not be changed.");
+          $V.= "<p>$text</p>";
+
           /* Create the AJAX (Active HTTP) javascript for doing the reply
            and showing the response. */
           $V.= ActiveHTTPscript("Uploads");
@@ -142,14 +153,14 @@ $text =_("The upload properties that can be changed are the upload name and
           /* Build the HTML form */
           $V.= "<form name='formy' method='post'>\n"; // no url = this url
           $V.= "<ol>\n";
-$text = _("Select the folder that contains the upload:  \n");
+          $text = _("Select the folder that contains the upload:  \n");
           $V.= "<li>$text";
           $V.= "<select name='oldfolderid'\n";
           $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
           $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
           $V.= FolderListOption(-1, 0);
           $V.= "</select><P />\n";
-$text = _("Select the upload you wish to edit:  \n");
+          $text = _("Select the upload you wish to edit:  \n");
           $V.= "<li>$text";
           $V.= "<select name='uploadid'>\n";
           $List = FolderListUploads(-1);
@@ -165,16 +176,31 @@ $text = _("Select the upload you wish to edit:  \n");
             $V.= "</option>\n";
           }
           $V.= "</select><P />\n";
-$text = _("Change upload name:  \n");
+          $text = _("Change upload name:  \n");
           $V.= "<li>$text";
-          $V.= "<INPUT type='text' name='newname' size=40 value=\"" . htmlentities($Folder['upload_filename'], ENT_COMPAT) . "\" />\n";
-$text = _("Change upload description:  \n");
+          if(!(empty($Folder['upload_filename'])))
+          {
+            $V.= "<INPUT type='text' name='newname' size=40 value=\"" . htmlentities($Folder['upload_filename'], ENT_COMPAT) . "\" />\n";
+
+          }
+          else
+          {
+            $V.= "<INPUT type='text' name='newname' size=40 />\n";
+          }
+          $text = _("Change upload description:  \n");
           $V.= "<P /><li>$text";
-          $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['upload_desc'], ENT_COMPAT) . "\" />\n";
+          if(!(empty($Folder['upload_desc'])))
+          {
+            $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['upload_desc'], ENT_COMPAT) . "\" />\n";
+          }
+          else
+          {
+            $V.= "<INPUT type='text' name='newdesc' size=60 />\n";
+          }
           //$V .= "<P /><li>Change Upload Source Location:  \n";
           //$V .= "<INPUT type='text' name='newsrc' size=60 value=\"" . htmlentities($Folder['folder_src'],ENT_COMPAT) . "\" />\n";
           $V.= "</ol>\n";
-$text = _("Edit");
+          $text = _("Edit");
           $V.= "<input type='submit' value='$text!'>\n";
           $V.= "</form>\n";
           break;
