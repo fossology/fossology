@@ -53,6 +53,7 @@ class user_add extends FO_Plugin {
 
     /* Get the parameters */
     $User = str_replace("'", "''", GetParm('username', PARM_TEXT));
+    $User = trim($User);
     $Pass = GetParm('pass1', PARM_TEXT);
     $Pass2 = GetParm('pass2', PARM_TEXT);
     $Seed = rand() . rand();
