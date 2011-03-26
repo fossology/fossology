@@ -106,28 +106,6 @@ class simpleUi extends FO_Plugin
   } // adjustDependencies
 
   /**
-   * \brief change the LoginFlag for selected plugins to must be logged in.
-   *
-   */
-  function adjustLoginFlag()
-  {
-    $plist = array(
-      'search',
-      'search_file',
-      //'browse'
-      );
-      foreach($plist as $plugin)
-      {
-        $pluginRef = plugin_find_any_id($plugin);  // can be null
-        if(!empty($pluginRef))
-        {
-          $Plugins[$pluginRef]->LoginFlag = 1; // must be logged in to use this plugin
-          //$Plugins[$pluginRef]->RegisterMenus();
-        }
-      }
-  }
-
-  /**
    *  \brief Change the DBaccess attribute to PLUGIN_DB_DELETE for selected
    *  plugins. This makes the plugin only available to user with permissions
    *  > 5.
@@ -251,7 +229,6 @@ class simpleUi extends FO_Plugin
     {
       //$this->adjustDependencies();
       $this->adjustMenus();
-      $this->adjustLoginFlag();
       $this->changeDBaccess(array('search','search_file',));
       plugin_disable(@$_SESSION['UserLevel']);
       $this->disablePlugins(array('search', 'agent_nomos_once',

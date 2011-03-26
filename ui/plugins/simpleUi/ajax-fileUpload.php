@@ -64,8 +64,7 @@ class ajax_fileUpload extends FO_Plugin {
         if (empty($GetURL)) {
           $GetURL = 'http://';
         }
-        /* Display instructions */
-        $V .= $result;
+
         /* Display the form */
         
         $usageFile = _("Files larger than 650 Megabytes may not be uploadable. ");
