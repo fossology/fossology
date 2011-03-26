@@ -67,8 +67,7 @@ class ajax_fileUpload extends FO_Plugin {
 
         /* Display the form */
         
-        $usageFile = _("Files larger than 650 Megabytes may not be uploadable. ");
-        $usageFile .= _("Your system has imposed a maximum file size of");
+        $usageFile = _("Your FOSSology server has imposed a maximum file size of");
         $usageFile .= " ".  ini_get('post_max_size') . " ";
         $usageFile .= _("bytes.");
         $V .= $usageFile;
