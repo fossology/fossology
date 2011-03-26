@@ -625,8 +625,8 @@ class uploads extends FO_Plugin
         //$choice .= "<br>\n";
 
         $fileText = _("Upload a File from your computer");
-        $urlText = _("Upload from a URL on the intra or internet");
-        $srvText = _("Upload a File from the FOSSology Web Server");
+        $urlText = _("Upload from a URL");
+//        $srvText = _("Upload a File from the FOSSology Web Server");
         $choice .= "<form name='uploads' enctype='multipart/form-data' method='post'>\n";
         $choice .= "<input type='radio' name='uploads' id='file' value='file' onclick='UploadFile_Get(\"" .Traceback_uri() . "?mod=ajax_fileUpload\")' />$fileText<br />\n";
         $choice .= "<input type='radio' name='uploads' id='url' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />$urlText<br />\n";
