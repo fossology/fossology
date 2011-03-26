@@ -34,6 +34,16 @@ class core_auth extends FO_Plugin {
   var $PluginLevel = 1000; /* make this run first! */
   var $Dependency = array("db");
   var $LoginFlag = 0;
+  public static $origReferer;
+
+  /*
+   * getter to retreive value of static var
+   */
+  public function staticValue()
+  {
+    return self::$origReferer;
+  }
+
   /***********************************************************
    Install(): Only used during installation.
    This may be called multiple times.
@@ -252,7 +262,6 @@ class core_auth extends FO_Plugin {
 
     global $DB;
 
-    //echo "<pre>CheckUser:Referer is:$Referer\n";
     $V = "";
     if (empty($User)) {
       return;
@@ -319,9 +328,6 @@ class core_auth extends FO_Plugin {
     if (preg_match("/[?&]mod=(Default|" . $this->Name . ")/", $Redirect)) {
       $Redirect = ""; /* don't reference myself! */
     }
-    //echo "<pre>CheckUser:Uri is:$Uri Redirect is:$Redirect\n</pre>";
-    //echo "<pre>CheckUser:Referer is:$Referer\n</pre>";
-
     if (empty($Redirect) || strncmp($Redirect, $Uri, strlen($Uri))) {
       $Uri = Traceback_uri();
     } else {
@@ -333,18 +339,17 @@ class core_auth extends FO_Plugin {
     {
       if(!stristr($Referer, 'simpleIndex.php'))
       {
-        
-        if(stristr($Referer, 'default'))
+        // adjust uri so replacement below works.
+        if(stristr($Uri, 'index.php'))
         {
-          $Referer = str_replace('?mod=refresh&remod=default',
-           'simpleIndex.php?mod=refresh&remod=simple_UI', $Referer);
+          //echo "<pre>CheckUser:URI Before replace:$Uri\n</pre>";
+          $Uri = preg_replace('/index.php*/', '', $Uri);
         }
-        else
-        {
-          $replace = $Uri . "simpleIndex.php?mod=refresh&remod=simple_UI";
-          //echo "<pre>CheckUser:setting OTHER Referer:$Referer\n</pre>";
-          $Referer = preg_replace("|$Uri|", $replace, $Referer);
-        }
+        //echo "<pre>CheckUser:Before replace of uri, Uri is:$Uri\n</pre>";
+        $replace = $Uri . "simpleIndex.php?mod=refresh&remod=simple_UI";
+        //echo "<pre>CheckUser:setting OTHER Referer:$Referer\n</pre>";
+        $Referer = preg_replace("|$Uri|", $replace, $Referer);
+
       }
       //echo "<pre>CheckUser:SimpleUI-Referer is now:$Referer\n</pre>";
     }
@@ -358,6 +363,7 @@ class core_auth extends FO_Plugin {
    Output(): This is only called when the user logs out.
    ******************************************/
   function Output() {
+
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
@@ -435,12 +441,18 @@ class core_auth extends FO_Plugin {
           }
         } else
         /* It's a logout */ {
+        //echo "<pre>Output:It's a logout\n</pre>";
         $_SESSION['User'] = NULL;
         $_SESSION['UserId'] = NULL;
         $_SESSION['UserLevel'] = NULL;
         $_SESSION['UserEmail'] = NULL;
         $_SESSION['Folder'] = NULL;
-        $Uri = Traceback_uri() . "?mod=refresh&remod=default";
+        $Uri = Traceback_uri();
+        if(stristr($Uri, 'simpleIndex.php'))
+        {
+          $Uri = str_replace('simpleIndex.php', 'index.php?mod=Default', $Uri);
+        }
+        //echo "<pre>Output:Uri is:$Uri\n</pre>";
         $V.= "<script language='javascript'>\n";
         $V.= "window.open('$Uri','_top');\n";
         $V.= "</script>\n";
