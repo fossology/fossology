@@ -56,61 +56,61 @@ if (!isset($GlobalReady)) { exit; }
  */
 function AgentCheckBoxMake($upload_pk,$SkipAgent=NULL) {
 
-	global $Plugins;
-	global $DB;
+  global $Plugins;
+  global $DB;
 
-	$AgentList = menu_find("Agents",$Depth);
-	$V = "";
+  $AgentList = menu_find("Agents",$Depth);
+  $V = "";
 
-	if (!empty($AgentList)) {
-		// get user agent preferences
-		$userName = $_SESSION['User'];
-		$SQL = "SELECT user_name, user_agent_list FROM users WHERE
+  if (!empty($AgentList)) {
+    // get user agent preferences
+    $userName = $_SESSION['User'];
+    $SQL = "SELECT user_name, user_agent_list FROM users WHERE
 				    user_name='$userName';";
-		$uList = $DB->Action($SQL);
+    $uList = $DB->Action($SQL);
 
-		// Ulist should never be empty, if it is, something really wrong,
-		// like the user_agent_list column is missing.
-		if(empty($uList))
-		{
-$text = _("Fatal! Query Failed getting user_agent_list for user");
-			return("<h3 style='color:red'>$text $UserName</h3>");
-		}
-		$list = explode(',',$uList[0]['user_agent_list']);
+    // Ulist should never be empty, if it is, something really wrong,
+    // like the user_agent_list column is missing.
+    if(empty($uList))
+    {
+      $text = _("Fatal! Query Failed getting user_agent_list for user");
+      return("<h3 style='color:red'>$text $UserName</h3>");
+    }
+    $list = explode(',',$uList[0]['user_agent_list']);
 
-		foreach($AgentList as $AgentItem) {
-			$Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
-			if (empty($Agent)) {
-				continue;
-			}
-			if ($Agent->Name == $SkipAgent) {
-				continue;
-			}
-			if ($upload_pk != -1) {
-				$rc = $Agent->AgentCheck($upload_pk);
-			}
-			else {
-				$rc = 0;
-			}
-			if ($rc == 0) {
-				$Name = htmlentities($Agent->Name);
-				$Desc = htmlentities($AgentItem->Name);
+    foreach($AgentList as $AgentItem) {
+      $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
+      if (empty($Agent)) {
+        continue;
+      }
+      if ($Agent->Name == $SkipAgent) {
+        continue;
+      }
+      if ($upload_pk != -1) {
+        $rc = $Agent->AgentCheck($upload_pk);
+      }
+      else {
+        $rc = 0;
+      }
+      if ($rc == 0) {
+        $Name = htmlentities($Agent->Name);
+        $Desc = htmlentities($AgentItem->Name);
 
-				// display user agent preferences
+        // display user agent preferences
 
-				if(in_array($Name, $list))
-				{
-					$Selected = " checked ";
-				}
-				else
-				{
-					$Selected = "";
-				}
-				$V .= "<input type='checkbox' name='Check_$Name' value='1' $Selected />$Desc<br />\n";
-			}
-		}
-	}
-	return($V);
+        if(in_array($Name, $list))
+        {
+          $Selected = " checked ";
+        }
+        else
+        {
+          $Selected = "";
+        }
+        $V .= "<input type='checkbox' name='Check_$Name' value='1' $Selected />$Desc<br />\n";
+      }
+    }
+  }
+  return($V);
 } // AgentCheckBoxMake()
 
 /************************************************************
@@ -121,29 +121,29 @@ $text = _("Fatal! Query Failed getting user_agent_list for user");
  ************************************************************/
 function AgentCheckBoxDo($upload_pk)
 {
-	global $Plugins;
-	$AgentList = menu_find("Agents",$Depth);
-	$V = "";
-	if (!empty($AgentList)) {
-		foreach($AgentList as $AgentItem) {
-			/*
-			 The URI below contains the agent name e.g agent_license, this is
-			 not be confused with the Name attribute in the class, for example,
-			 the Name attribute for agent_license is: Schedule License Analysis
-			 */
-			$Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
-			if (empty($Agent)) {
-				continue;
-			}
-			$rc = $Agent->AgentCheck($upload_pk);
-			$Name = htmlentities($Agent->Name);
-			$Parm = GetParm("Check_" . $Name,PARM_INTEGER);
-			if (($rc == 0) && ($Parm == 1)) {
-				$Agent->AgentAdd($upload_pk);
-			}
-		}
-	}
-	return($V);
+  global $Plugins;
+  $AgentList = menu_find("Agents",$Depth);
+  $V = "";
+  if (!empty($AgentList)) {
+    foreach($AgentList as $AgentItem) {
+      /*
+       The URI below contains the agent name e.g agent_license, this is
+       not be confused with the Name attribute in the class, for example,
+       the Name attribute for agent_license is: Schedule License Analysis
+       */
+      $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
+      if (empty($Agent)) {
+        continue;
+      }
+      $rc = $Agent->AgentCheck($upload_pk);
+      $Name = htmlentities($Agent->Name);
+      $Parm = GetParm("Check_" . $Name,PARM_INTEGER);
+      if (($rc == 0) && ($Parm == 1)) {
+        $Agent->AgentAdd($upload_pk);
+      }
+    }
+  }
+  return($V);
 } // AgentCheckBoxDo()
 
 /**
@@ -155,19 +155,19 @@ function AgentCheckBoxDo($upload_pk)
 function bucketPools()
 {
 
-	/*
-	 * need a way to determine a bucket agent from other agents.....
-	 */
-	global $DB;
+  /*
+   * need a way to determine a bucket agent from other agents.....
+   */
+  global $DB;
 
-	$html = "";
-	$SQL = "SELECT bucketpool_pk, bucketpool_name FROM bucketpool" .
+  $html = "";
+  $SQL = "SELECT bucketpool_pk, bucketpool_name FROM bucketpool" .
 	        " ORDER BY bucketpool_pk;";
-	$pools = $DB->Action($SQL);
-	DBCheckResult($pools, $SQL, __FILE__, __LINE__);
+  $pools = $DB->Action($SQL);
+  DBCheckResult($pools, $SQL, __FILE__, __LINE__);
 
 
-	return(TRUE);
+  return(TRUE);
 }
 
 /**
@@ -179,12 +179,18 @@ function bucketPools()
  */
 
 function CheckEnotification() {
-	if ($_SESSION['UserEnote'] == 'y') {
-		return(TRUE);
-	}
-	else {
-		return(FALSE);
-	}
+  if(array_key_exists('UserEnote', $_SESSION))
+  {
+    if ($_SESSION['UserEnote'] == 'y')
+    {
+      return(TRUE);
+    }
+    else
+    {
+      return(FALSE);
+    }
+  }
+  return(FALSE);
 }
 
 /**
@@ -198,56 +204,56 @@ function CheckEnotification() {
  * @return array $depends, array of dependencies
  */
 function FindDependent($UploadPk, $list=NULL) {
-	/*
-	 * Find the jobs that fo_notify should depend on. fo_notify is
-	 * dependent on the following agents:
-	 *   copyright
-	 *   nomos
-	 *   package
-	 *   bucket
-	 *
-	 *   Determine if the above agents are scheduled and create a list of
-	 *   jq_pk for each agent.
-	 *
-	 */
-	global $DB;
+  /*
+   * Find the jobs that fo_notify should depend on. fo_notify is
+   * dependent on the following agents:
+   *   copyright
+   *   nomos
+   *   package
+   *   bucket
+   *
+   *   Determine if the above agents are scheduled and create a list of
+   *   jq_pk for each agent.
+   *
+   */
+  global $DB;
 
-	$Depends = array();
-	/* get job list for this upload */
+  $Depends = array();
+  /* get job list for this upload */
 
-	// get the list of jobs for this upload
-	$Sql = "SELECT job_upload_fk, job_pk, job_name FROM job WHERE " .
+  // get the list of jobs for this upload
+  $Sql = "SELECT job_upload_fk, job_pk, job_name FROM job WHERE " .
   "job_upload_fk = $UploadPk order by job_pk desc;";
-	$Jobs = $DB->Action($Sql);
+  $Jobs = $DB->Action($Sql);
 
-	$jobList = array();
-	foreach($Jobs as $Row) {
-		if($Row['job_name'] == 'Copyright Analysis') {
-			$jobList[] = $Row['job_pk'];
-		}
-		elseif($Row['job_name'] == 'Bucket Analysis')
-		{
-			$jobList[] = $Row['job_pk'];
-		}
-		elseif($Row['job_name'] == 'Package Agents')
-		{
-			$jobList[] = $Row['job_pk'];
-		}
-		elseif($Row['job_name'] == 'Nomos License Analysis')
-		{
-			$jobList[] = $Row['job_pk'];
-		}
-	}
+  $jobList = array();
+  foreach($Jobs as $Row) {
+    if($Row['job_name'] == 'Copyright Analysis') {
+      $jobList[] = $Row['job_pk'];
+    }
+    elseif($Row['job_name'] == 'Bucket Analysis')
+    {
+      $jobList[] = $Row['job_pk'];
+    }
+    elseif($Row['job_name'] == 'Package Agents')
+    {
+      $jobList[] = $Row['job_pk'];
+    }
+    elseif($Row['job_name'] == 'Nomos License Analysis')
+    {
+      $jobList[] = $Row['job_pk'];
+    }
+  }
 
-	// get the jq_pk's for each job, retrun the list of jq_pk's
-	foreach($jobList as $job)
-	{
-		$Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE jq_job_fk = $job " .
+  // get the jq_pk's for each job, retrun the list of jq_pk's
+  foreach($jobList as $job)
+  {
+    $Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE jq_job_fk = $job " .
 					 " order by jq_pk desc;";
-		$Q = $DB->Action($Sql);
-		$Depends[] = $Q[0]['jq_pk'];
-	}
-	return($Depends);
+    $Q = $DB->Action($Sql);
+    $Depends[] = $Q[0]['jq_pk'];
+  }
+  return($Depends);
 } // FindDependent
 
 /**
@@ -263,27 +269,27 @@ function FindDependent($UploadPk, $list=NULL) {
 
 function GetAgentKey($agentName, $agentDesc)
 {
-	global $PG_CONN;
+  global $PG_CONN;
 
-	/* get the exact agent rec requested */
-	$sqlselect = "SELECT agent_pk FROM agent WHERE agent_name ='$agentName' order by agent_ts desc limit 1";
-	$result = pg_query($PG_CONN, $sqlselect);
-	DBCheckResult($result, $sqlselect, __FILE__, __LINE__);
+  /* get the exact agent rec requested */
+  $sqlselect = "SELECT agent_pk FROM agent WHERE agent_name ='$agentName' order by agent_ts desc limit 1";
+  $result = pg_query($PG_CONN, $sqlselect);
+  DBCheckResult($result, $sqlselect, __FILE__, __LINE__);
 
-	if (pg_num_rows($result) == 0)
-	{
-		/* no match, so add an agent rec */
-		$sql = "INSERT INTO agent (agent_name,agent_desc,agent_enabled) VALUES ('$agentName',E'$agentDesc',1)";
-		$result = pg_query($PG_CONN, $sqlselect);
-		DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) == 0)
+  {
+    /* no match, so add an agent rec */
+    $sql = "INSERT INTO agent (agent_name,agent_desc,agent_enabled) VALUES ('$agentName',E'$agentDesc',1)";
+    $result = pg_query($PG_CONN, $sqlselect);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-		/* get inserted agent_pk */
-		$result = pg_query($PG_CONN, $sqlselect);
-		DBCheckResult($result, $sqlselect, __FILE__, __LINE__);
-	}
+    /* get inserted agent_pk */
+    $result = pg_query($PG_CONN, $sqlselect);
+    DBCheckResult($result, $sqlselect, __FILE__, __LINE__);
+  }
 
-	$row = pg_fetch_assoc($result);
-	return $row["agent_pk"];
+  $row = pg_fetch_assoc($result);
+  return $row["agent_pk"];
 
 } // GetAgentKey
 
@@ -310,17 +316,17 @@ function GetAgentKey($agentName, $agentDesc)
  */
 function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0, $ExtraWhere="")
 {
-	global $DB, $PG_CONN;
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+  global $DB, $PG_CONN;
+  if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
 
-	$LimitClause = "";
-	if ($limit > 0) $LimitClause = " limit $limit";
-	if ($agent_fk)
-	$agentCond = " and agent_fk='$agent_fk' ";
-	else
-	$agentCond = "";
+  $LimitClause = "";
+  if ($limit > 0) $LimitClause = " limit $limit";
+  if ($agent_fk)
+  $agentCond = " and agent_fk='$agent_fk' ";
+  else
+  $agentCond = "";
 
-	$sql = "SELECT * FROM $TableName, agent
+  $sql = "SELECT * FROM $TableName, agent
            WHERE agent_pk=agent_fk and ars_success=true and upload_fk='$upload_pk' and agent_enabled=true
            $agentCond $ExtraWhere
            order by agent_ts desc $LimitClause";
@@ -362,39 +368,39 @@ function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0, $ExtraWhere="
 function AgentSelect($TableName, $upload_pk, $DataOnly=true,
 $SLName, $SLID, $SelectedKey="")
 {
-	echo "DO NOT USE: PRELIMINARY AND INCOMPLETE<br>";
-	/*
-	 / get the agent recs /
-	 $sql = "SELECT * FROM $TableName, agent
-	 WHERE upload_fk='$upload_pk' and agent_enabled=true order by agent_ts desc";
-	 $result = pg_query($PG_CONN, $sql);
-	 DBCheckResult($result, $sql, __FILE__, __LINE__);
+  echo "DO NOT USE: PRELIMINARY AND INCOMPLETE<br>";
+  /*
+   / get the agent recs /
+   $sql = "SELECT * FROM $TableName, agent
+   WHERE upload_fk='$upload_pk' and agent_enabled=true order by agent_ts desc";
+   $result = pg_query($PG_CONN, $sql);
+   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-	 / Create an assoc array to build the select list from.
-	 * "{agent_pk} [,{agent_pk} ...] => {agent name} ( {agentrevision} ), ... [ NO DATA]
-	 * For example:
-	 *   123 => nomos(rev 1)
-	 *   111,123 => bucket(rev 5), nomos(rev 7)
-	 *   112,179 => bucket(latest rev), nomos(latest rev) NO DATA
-	 or one could just use the ars_pk instead of the pk list, but that is another
-	 indirection.
-	 /
-	 while ($row = pg_fetch_assoc($result))
-	 {
-	 }
-	 $AgentList = GetAgentDataList($AgentName, $upload_pk, $tablename);
-	 $SelArray = array();
+   / Create an assoc array to build the select list from.
+   * "{agent_pk} [,{agent_pk} ...] => {agent name} ( {agentrevision} ), ... [ NO DATA]
+   * For example:
+   *   123 => nomos(rev 1)
+   *   111,123 => bucket(rev 5), nomos(rev 7)
+   *   112,179 => bucket(latest rev), nomos(latest rev) NO DATA
+   or one could just use the ars_pk instead of the pk list, but that is another
+   indirection.
+   /
+   while ($row = pg_fetch_assoc($result))
+   {
+   }
+   $AgentList = GetAgentDataList($AgentName, $upload_pk, $tablename);
+   $SelArray = array();
 
-	 if ($SelectedKey == "") $SelectedKey = $AgentList[0]['agent_pk'];
+   if ($SelectedKey == "") $SelectedKey = $AgentList[0]['agent_pk'];
 
-	 / create key/val array for pulldown /
-	 foreach($AgentList as $AgentRec)
-	 {
-	 $DataInd = ($AgentRec['data']) ? "" : ", NO DATA";
-	 $SelArray[$AgentRec['agent_pk']] = "$AgentRec[agent_name] rev: $AgentRec[agent_rev]$DataInd";
-	 }
-	 return "Results from:" . Array2SingleSelect($SelArray, $SLName, $SelectedKey, false, false);
-	 */
+   / create key/val array for pulldown /
+   foreach($AgentList as $AgentRec)
+   {
+   $DataInd = ($AgentRec['data']) ? "" : ", NO DATA";
+   $SelArray[$AgentRec['agent_pk']] = "$AgentRec[agent_name] rev: $AgentRec[agent_rev]$DataInd";
+   }
+   return "Results from:" . Array2SingleSelect($SelArray, $SLName, $SelectedKey, false, false);
+   */
 }
 
 /**
@@ -411,26 +417,26 @@ $SLName, $SLID, $SelectedKey="")
  */
 function Largestjq_pk($Jobs) {
 
-	global $DB;
+  global $DB;
 
-	if (is_array($Jobs)) {
-		$largest = 0;
-		foreach ($Jobs as $job) {
-			$Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
+  if (is_array($Jobs)) {
+    $largest = 0;
+    foreach ($Jobs as $job) {
+      $Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
              "jq_job_fk = $job order by jq_pk desc limit 1;";
-			$JobQueue = $DB->Action($Sql);
-			if ($largest < $JobQueue[0]['jq_pk']) {
-				$largest = $JobQueue[0]['jq_pk'];
-			}
-		}
-		return($largest);
-	}
-	else {
-		$Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
+      $JobQueue = $DB->Action($Sql);
+      if ($largest < $JobQueue[0]['jq_pk']) {
+        $largest = $JobQueue[0]['jq_pk'];
+      }
+    }
+    return($largest);
+  }
+  else {
+    $Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
            "jq_job_fk = $Jobs order by jq_pk desc limit 1;";
-		$JobQueue = $DB->Action($Sql);
-		return($JobQueue[0]['jq_pk']);
-	}
+    $JobQueue = $DB->Action($Sql);
+    return($JobQueue[0]['jq_pk']);
+  }
 }
 /**
  * MostRows
@@ -447,25 +453,25 @@ function Largestjq_pk($Jobs) {
  */
 function MostRows($Jobs) {
 
-	global $DB;
+  global $DB;
 
-	if (is_array($Jobs)) {
-		$rows = 0;
-		$MostRows = 0;
-		$largest = 0;
-		foreach ($Jobs as $job) {
-			$Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
+  if (is_array($Jobs)) {
+    $rows = 0;
+    $MostRows = 0;
+    $largest = 0;
+    foreach ($Jobs as $job) {
+      $Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
              "jq_job_fk = $job order by jq_pk desc;";
-			$JobQueue = $DB->Action($Sql);
-			$rows = count($JobQueue);
-			if ($MostRows < $rows) {
-				$MostRows = $rows;
-				$largest = $JobQueue[0]['jq_pk'];
-			}
-		}
-		//print "  MR: MostRows is:$MostRows\n<br>Largest Jq:$largest\n<br>";
-		return($largest);
-	}
+      $JobQueue = $DB->Action($Sql);
+      $rows = count($JobQueue);
+      if ($MostRows < $rows) {
+        $MostRows = $rows;
+        $largest = $JobQueue[0]['jq_pk'];
+      }
+    }
+    //print "  MR: MostRows is:$MostRows\n<br>Largest Jq:$largest\n<br>";
+    return($largest);
+  }
 }
 /**
  * ScheduleEmailNotification
@@ -494,69 +500,69 @@ function MostRows($Jobs) {
 function scheduleEmailNotification($upload_pk,$webServer,$Email=NULL,
 $UserName=NULL,$Depends) {
 
-	global $DB;
+  global $DB;
 
-	if (empty($DB)) {
-		return;
-	}
+  if (empty($DB)) {
+    return;
+  }
 
-	if (empty($upload_pk)) {
-$text = _("Invalid parameter (upload_pk)");
-		return ($text);
-	}
+  if (empty($upload_pk)) {
+    $text = _("Invalid parameter (upload_pk)");
+    return ($text);
+  }
 
-	// should we die if webServer is empty?  For now just make a stab at it.
-	if(empty($webServer))
-	{
-		$webServer = $_SERVER['SERVER_NAME'];
-	}
+  // should we die if webServer is empty?  For now just make a stab at it.
+  if(empty($webServer))
+  {
+    $webServer = $_SERVER['SERVER_NAME'];
+  }
 
-	/* set up input for fo-notify */
-	$Nparams = '';
-	$To = NULL;
+  /* set up input for fo-notify */
+  $Nparams = '';
+  $To = NULL;
 
-	$Nparams .= "-w $webServer ";
-	/* If email is passed in, favor that over the session */
-	if(!empty($Email)) {
-		$To = " -e $Email";
-	}
-	elseif (!empty($_SESSION['UserEmail'])) {
-		$To = " -e {$_SESSION['UserEmail']}";
-		//print "  SEN: Setting To to Email in session To:$To\n";
-	}
-	if(empty($To)) {
-$text = _("FATAL: Email Notification: no email address supplied, cannot send mail, common-agents::scheduleEmailNotification Your job should be scheduled, you will not get email notifying you it is done");
-		return($text);
-	}
-	$Nparams .= "$To";
-	/* Upload Pk */
-	$upload_id = trim($upload_pk);
-	$UploadId = "-u $upload_id";
-	$Nparams .= " $UploadId";
-	/*
-	 * UserName is NOT the email address it's the description for the user field
-	 * in the Add A User screen..... need to fix that screen....
-	 */
-	if (!empty($UserName)) {
-		$Nparams .= " -n $UserName";
-	}
+  $Nparams .= "-w $webServer ";
+  /* If email is passed in, favor that over the session */
+  if(!empty($Email)) {
+    $To = " -e $Email";
+  }
+  elseif (!empty($_SESSION['UserEmail'])) {
+    $To = " -e {$_SESSION['UserEmail']}";
+    //print "  SEN: Setting To to Email in session To:$To\n";
+  }
+  if(empty($To)) {
+    $text = _("FATAL: Email Notification: no email address supplied, cannot send mail, common-agents::scheduleEmailNotification Your job should be scheduled, you will not get email notifying you it is done");
+    return($text);
+  }
+  $Nparams .= "$To";
+  /* Upload Pk */
+  $upload_id = trim($upload_pk);
+  $UploadId = "-u $upload_id";
+  $Nparams .= " $UploadId";
+  /*
+   * UserName is NOT the email address it's the description for the user field
+   * in the Add A User screen..... need to fix that screen....
+   */
+  if (!empty($UserName)) {
+    $Nparams .= " -n $UserName";
+  }
 
-	/* Prepare the job: job "fo-notify" */
-	$jobpk = JobAddJob($upload_pk,"fo_notify",-1);
-	if (empty($jobpk) || ($jobpk < 0)) {
-$text = _("Failed to insert job record, job fo_notify not created");
-		return($text);
-	}
+  /* Prepare the job: job "fo-notify" */
+  $jobpk = JobAddJob($upload_pk,"fo_notify",-1);
+  if (empty($jobpk) || ($jobpk < 0)) {
+    $text = _("Failed to insert job record, job fo_notify not created");
+    return($text);
+  }
 
-	/* Prepare the job: job fo-notify has jobqueue item fo-notify */
-	$jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,
-	$Depends,TRUE);
-	if (empty($jobqueuepk)) {
-$text = _("Failed to insert task 'fo_notify' into job queue");
-		return($text);
-	}
+  /* Prepare the job: job fo-notify has jobqueue item fo-notify */
+  $jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,
+  $Depends,TRUE);
+  if (empty($jobqueuepk)) {
+    $text = _("Failed to insert task 'fo_notify' into job queue");
+    return($text);
+  }
 
-	return(NULL);
+  return(NULL);
 }
 
 /**
@@ -570,34 +576,34 @@ $text = _("Failed to insert task 'fo_notify' into job queue");
 
 function userAgents()
 {
-	global $Plugins;
-	global $DB;
+  global $Plugins;
+  global $DB;
 
-	$agentsChecked = "";
+  $agentsChecked = "";
 
-	$AgentList = menu_find("Agents",$Depth);
-	if (!empty($AgentList)) {
-		foreach($AgentList as $AgentItem) {
-			/*
-			 The URI below contains the agent name e.g agent_license, this is
-			 not be confused with the Name attribute in the class, for example,
-			 the Name attribute for agent_license is: Schedule License Analysis
-			 */
-			$Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
-			if (empty($Agent)) {
-				continue;
-			}
-			$Name = htmlentities($Agent->Name);
-			$Parm = GetParm("Check_" . $Name,PARM_INTEGER);
-			if ($Parm == 1) {
-				// save the name
-				$agentsChecked .= $Name . ',';
-			}
-		}
-		// remove , from last name
-		$agentsChecked = trim($agentsChecked, ',');
-	}
-	return($agentsChecked);
+  $AgentList = menu_find("Agents",$Depth);
+  if (!empty($AgentList)) {
+    foreach($AgentList as $AgentItem) {
+      /*
+       The URI below contains the agent name e.g agent_license, this is
+       not be confused with the Name attribute in the class, for example,
+       the Name attribute for agent_license is: Schedule License Analysis
+       */
+      $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
+      if (empty($Agent)) {
+        continue;
+      }
+      $Name = htmlentities($Agent->Name);
+      $Parm = GetParm("Check_" . $Name,PARM_INTEGER);
+      if ($Parm == 1) {
+        // save the name
+        $agentsChecked .= $Name . ',';
+      }
+    }
+    // remove , from last name
+    $agentsChecked = trim($agentsChecked, ',');
+  }
+  return($agentsChecked);
 }
 
 function userDefaultAgents($upload_pk)
