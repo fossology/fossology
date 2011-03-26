@@ -271,14 +271,17 @@ class user_edit_self extends FO_Plugin
             $V.= displayMessage($rc);
           }
         }
+
+        // Get the user data
+        $Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';");
+        $R = $Results[0];
+
         /* Build HTML form */
         $V.= "<form name='formy' method='POST'>\n"; // no url = this url
         $V.= _("You <font color='red'>must</font> provide your current password in order to make any changes.<br />\n");
         $text = _("Enter your password");
         $V.= "$text: <input type='password' name='pass0' size=20>\n";
         $V.= "<hr>\n";
-        $Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';");
-        $R = $Results[0];
         $V.= _("To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n");
         $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
         $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
@@ -312,7 +315,8 @@ class user_edit_self extends FO_Plugin
           $Checked = "checked='checked'";
         }
         $text = _("E-mail Notification");
-        $V.= "$Style<th>5.</th><th>$text</th><td><input type=checkbox ";
+        $V .= "$Style<th>5.</th><th>$text</th><td>\n";
+        $V .= "<input name='emailnotify' type='checkbox' value=1 $Checked>";
         $V.= "</tr>\n";
         $V.= "</tr>\n";
         $text = _("Default scans.");
