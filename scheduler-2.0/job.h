@@ -45,7 +45,7 @@ typedef enum {
 /* ************************************************************************** */
 
 void job_list_clean();
-job job_init(char* type, int id);
+job  job_init(char* type, int id);
 void job_destroy(job j);
 
 /* ************************************************************************** */
@@ -53,14 +53,14 @@ void job_destroy(job j);
 /* ************************************************************************** */
 
 void job_verbose_event(job j);
-void job_status_event(void* p);
-void job_pause_event(void* p);
-void job_restart_event(void* p);
+void job_status_event(void* param);
+void job_pause_event(void* param);
+void job_restart_event(void* param);
 
-void job_add_agent(job j, void* a);
+void job_add_agent(job j, void* age);
 //void job_remove_agent(job j, void* a);
-void job_finish_agent(job j, void* a);
-void job_fail_agent(job j, void* a);
+void job_finish_agent(job j, void* age);
+void job_fail_agent(job j, void* age);
 void job_set_priority(job j, int pri);
 void job_set_data(job j, char* data, int sql);
 void job_update(job j);

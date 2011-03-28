@@ -328,10 +328,10 @@ void job_verbose_event(job j)
  *
  * @param ostr
  */
-void job_status_event(void* p)
+void job_status_event(void* param)
 {
   int tmp = 0;
-  arg_int* params = p;
+  arg_int* params = param;
 
   if(!params->second)
     g_tree_foreach(job_list, (GTraverseFunc)job_sstatus, params->first);
@@ -345,9 +345,9 @@ void job_status_event(void* p)
  *
  * @param params
  */
-void job_pause_event(void* p)
+void job_pause_event(void* param)
 {
-  arg_int* params = p;
+  arg_int* params = param;
   job_pause(params->first, params->second);
   g_free(params);
 }
@@ -357,9 +357,9 @@ void job_pause_event(void* p)
  *
  * @param p
  */
-void job_restart_event(void* p)
+void job_restart_event(void* param)
 {
-  job_restart(p);
+  job_restart(param);
 }
 
 /**
