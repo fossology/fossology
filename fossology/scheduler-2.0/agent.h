@@ -100,7 +100,7 @@ void agent_update_event(void* unused);
 
 void agent_restart(agent a, agent ref);
 void agent_close(agent a);
-void agent_pause(agent a, int stop);
+void agent_pause(agent a);
 void agent_unpause(agent a);
 void agent_print_status(agent a, GOutputStream* ostr);
 int  aprintf(agent a, const char* fmt, ...);

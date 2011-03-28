@@ -127,6 +127,44 @@ void prnt_sig(int signo)
 }
 
 /* ************************************************************************** */
+/* **** The actual scheduler ************************************************ */
+/* ************************************************************************** */
+
+/**
+ * The heart of the scheduler, the actual scheduling algorithm. This will be
+ * passed to the event loop as a call back and will be called every time an event
+ * is executed. Therefore the code should be light weight since it will be run
+ * very frequently.
+ *
+ * TODO:
+ *   currently this will only grab a job and create a single agent to execute
+ *   the job.
+ *
+ *   TODO: allow for runonpfile jobs to have multiple agents based on size
+ *   TODO: allow for job preemption. The scheduler can pause jobs, allow it
+ *   TODO: allow for specific hosts to be chossen.
+ */
+void update_scheduler()
+{
+  job j;
+  host h;
+
+  if(closing && num_agents() == 0 && active_jobs() == 0)
+  {
+    event_loop_terminate();
+    return;
+  }
+
+  while((j = next_job()) != NULL)
+  {
+    if((h = get_host(1)) == NULL)
+      continue;
+
+    agent_init(h, j);
+  }
+}
+
+/* ************************************************************************** */
 /* **** main utility functions ********************************************** */
 /* ************************************************************************** */
 
@@ -424,29 +462,6 @@ int close_scheduler()
   database_destroy();
   event_loop_destroy();
   return 0;
-}
-
-/**
- * TODO
- */
-void update_scheduler()
-{
-  job j;
-  host h;
-
-  if(closing && num_agents() == 0 && active_jobs() == 0)
-  {
-    event_loop_terminate();
-    return;
-  }
-
-  while((j = next_job()) != NULL)
-  {
-    if((h = get_host(1)) == NULL)
-      continue;
-
-    agent_init(h, j);
-  }
 }
 
 /**
