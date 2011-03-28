@@ -536,7 +536,7 @@ void meta_agent_destroy(meta_agent ma)
  *
  * @param meta_data, the
  */
-agent agent_init(host host_machine, job j)
+agent agent_init(host host_machine, job owner)
 {
   /* local variables */
   agent a;
@@ -544,7 +544,7 @@ agent agent_init(host host_machine, job j)
   int parent_to_child[2];
 
   /* check inputs */
-  if(!j || g_tree_lookup(meta_agents, job_type(j)) == NULL)
+  if(!owner || g_tree_lookup(meta_agents, job_type(owner)) == NULL)
   {
     errno = EINVAL;
     ERROR("invalid arguments passed to agent_init");
@@ -553,7 +553,7 @@ agent agent_init(host host_machine, job j)
 
   /* allocate memory and do trivial assignments */
   a = (agent)calloc(1, sizeof(struct agent_internal));
-  a->meta_data = g_tree_lookup(meta_agents, job_type(j));
+  a->meta_data = g_tree_lookup(meta_agents, job_type(owner));
   a->status = AG_CREATED;
 
   /* check if the agent is valid */
@@ -566,12 +566,12 @@ agent agent_init(host host_machine, job j)
   /* create the pipes between the child and the parent */
   if(pipe(parent_to_child) != 0)
   {
-    ERROR("JOB[%d.%s] failed to create parent to child pipe", job_id(j), job_type(j));
+    ERROR("JOB[%d.%s] failed to create parent to child pipe", job_id(owner), job_type(owner));
     return NULL;
   }
   if(pipe(child_to_parent) != 0)
   {
-    ERROR("JOB[%d.%s] failed to create child to parent pipe", job_id(j), job_type(j));
+    ERROR("JOB[%d.%s] failed to create child to parent pipe", job_id(owner), job_type(owner));
     return NULL;
   }
 
@@ -583,19 +583,19 @@ agent agent_init(host host_machine, job j)
 
   /* initialize other info */
   a->host_machine = host_machine;
-  a->owner = j;
+  a->owner = owner;
   a->updated = 0;
   a->n_updates = 0;
 
   /* open the relevant file pointers */
   if((a->read = fdopen(a->from_child, "r")) == NULL)
   {
-    ERROR("JOB[%d.%s] failed to initialize read file", job_id(j), job_type(j));
+    ERROR("JOB[%d.%s] failed to initialize read file", job_id(owner), job_type(owner));
     return NULL;
   }
   if((a->write = fdopen(a->to_child, "w")) == NULL)
   {
-    ERROR("JOB[%d.%s] failed to initialize write file", job_id(j), job_type(j));
+    ERROR("JOB[%d.%s] failed to initialize write file", job_id(owner), job_type(owner));
     return NULL;
   }
 

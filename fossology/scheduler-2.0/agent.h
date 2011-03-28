@@ -81,13 +81,14 @@ typedef int agent_pk;
 /* ************************************************************************** */
 
 /* meta agent */
+void agent_list_clean();
 meta_agent meta_agent_init(char* name, char* cmd, int max, int spc);
 void meta_agent_destroy(meta_agent ma);
 
 /* agent */
-agent agent_init(host host_machine, job j);
+agent agent_init(host host_machine, job owner);
 agent agent_copy(agent a);
-void agent_destroy(agent a);
+void  agent_destroy(agent a);
 
 /* ************************************************************************** */
 /* **** Modifier Functions and events *************************************** */
@@ -112,7 +113,6 @@ ssize_t agent_write(agent a, const void* buf, size_t count);
 
 void test_agents(host h);
 void kill_agents();
-void agent_list_clean();
 int  add_meta_agent(char* name, char* cmd, int max, int spc);
 int  is_meta_agent();
 int  num_agents();
