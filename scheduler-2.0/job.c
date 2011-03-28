@@ -144,78 +144,17 @@ int job_sstatus(int* job_id, job j, GOutputStream* ostr)
  */
 void job_transition(job j, job_status new_status)
 {
-  /* locals */
-  gchar* sql = NULL;
-  PGresult* db_result;
-
   /* book keeping */
   TEST_NULV(j);
   VERBOSE2("JOB[%d]: job status changed: %s => %s\n",
       j->id, status_string[j->status], status_string[new_status]);
 
-  /* check to make sure that this is a real job */
-  if(j->id < 0)
-    j->status = new_status;
-
-  /* check how to update database */
-  switch(new_status)
-  {
-    case JB_CHECKEDOUT: break;
-    case JB_STARTED:
-      sql = g_strdup_printf(" \
-          UPDATE jobqueue \
-            SET jq_starttime = now(), \
-                jq_schedinfo ='%s.%d', \
-                jq_endtext = 'Started' \
-            WHERE jq_pk = '%d';", "localhost", getpid(), j->id);
-      break;
-    case JB_COMPLETE:
-      sql = g_strdup_printf(" \
-          UPDATE jobqueue \
-            SET jq_endtime = now(), \
-                jq_end_bits = jq_end_bits | 1, \
-                jq_schedinfo = null, \
-                jq_endtext = 'Completed' \
-            WHERE jq_pk = '%d';", j->id);
-      break;
-    case JB_RESTART:
-      sql = g_strdup_printf(" \
-          UPDATE jobqueue \
-            SET jq_endtime = now(), \
-                jq_end_bits = jq_end_bits | 2, \
-                jq_schedinfo = null, \
-                jq_endtext = 'Restart' \
-            WHERE jq_pk = '%d';", j->id);
-      break;
-    case JB_FAILED:
-      sql = g_strdup_printf(" \
-          UPDATE jobqueue \
-            SET jq_starttime = null, \
-                jq_endtime = null, \
-                jq_schedinfo = null, \
-                jq_endtext = 'Failed' \
-            WHERE jq_pk = '%d';", j->id);
-      break;
-    case JB_SCH_PAUSED: case JB_CLI_PAUSED:
-      sql = g_strdup_printf(" \
-          UPDATE jobqueue \
-            SET jq_endtext = 'Paused' \
-            WHERE jq_pk = '%d';", j->id);
-      break;
-  }
-
-  /* change the status */
+  /* change the job status */
   j->status = new_status;
 
-  /* update the database job queue */
-  db_result = database_exec(sql);
-  if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
-  {
-    lprintf("ERROR %s.%d: failed to update job status in job queue\n", __FILE__, __LINE__);
-    lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
-  }
-  PQclear(db_result);
-  g_free(sql);
+  /* only update database for real jobs */
+  if(j->id >= 0)
+    database_update_job(j->id, new_status);
 }
 
 /**
@@ -234,7 +173,7 @@ void job_pause(job j, int cli)
   else job_transition(j, JB_SCH_PAUSED);
 
   for(iter = j->running_agents; iter != NULL; iter = iter->next)
-    agent_pause(iter->data, j->db_result == NULL);
+    agent_pause(iter->data);
 }
 
 /**
@@ -510,7 +449,7 @@ void job_set_data(job j, char* data, int sql)
 
   if(sql)
   {
-    j->db_result = database_exec(j->data);
+    j->db_result = PQexec(db_conn, j->data);
     j->lock = g_mutex_new();
   }
 }
@@ -624,7 +563,7 @@ int job_is_open(job j)
   else
   {
     PQclear(j->db_result);
-    j->db_result = database_exec(j->data);
+    j->db_result = PQexec(db_conn, j->data);
     j->idx = 0;
 
     retval = PQntuples(j->db_result) != 0;

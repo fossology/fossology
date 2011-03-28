@@ -153,14 +153,12 @@ void agent_fail(agent a)
 {
   TEST_NULV(a);
   agent_transition(a, AG_FAILED);
-  kill(a->pid, SIGKILL);
   job_fail_agent(a->owner, a);
   if(write(a->to_parent, "@@@1\n", 5) != 5)
   {
     ERROR("JOB[%d].%s[%d]: Failed to kill agent thread cleanly",
         job_id(a->owner), a->meta_data->name, a->pid);
   }
-  job_update(a->owner);
 }
 
 /**
@@ -205,7 +203,7 @@ int update(int* pid_ptr, agent a, gpointer unused)
     {
       ERROR("JOB[%d].%s[%d] no heartbeat for %d seconds",
           job_id(a->owner), job_type(a->owner), a->pid, time(NULL) - a->check_in);
-      agent_fail(a);
+      kill(a->pid, SIGKILL);
       return 0;
     }
 
@@ -216,7 +214,7 @@ int update(int* pid_ptr, agent a, gpointer unused)
       a->n_updates = 0;
     if(a->n_updates > NUM_UPDATES)
     {
-      agent_fail(a);
+      kill(a->pid, SIGKILL);
       return 0;
     }
 
@@ -257,7 +255,9 @@ int agent_kill(int* pid, agent a, gpointer unused)
  */
 int agent_test(char* name, meta_agent ma, host h)
 {
-  job j = job_init(ma->name, -1);
+  static int id_gen = -1;
+
+  job j = job_init(ma->name, id_gen--);
   agent_init(h, j);
   return 0;
 }
@@ -302,7 +302,8 @@ void agent_listen(agent a)
     clprintf("ERROR %s.%d: META_DATA[%s] invalid agent spawn check\n", __FILE__, __LINE__, a->meta_data->name);
     clprintf("ERROR: meta_datd: \"%s\" != received: \"%s\"", a->meta_data->version, buffer);
     a->meta_data->valid = 0;
-    agent_fail(a);
+    kill(a->pid, SIGKILL);
+    g_static_mutex_unlock(&version_lock);
     return;
   }
   g_static_mutex_unlock(&version_lock);
@@ -312,11 +313,7 @@ void agent_listen(agent a)
   {
     /* get message from agent */
     if(fgets(buffer, sizeof(buffer), a->read) == NULL)
-    {
-      //clprintf("T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
-      //    __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
       g_thread_exit(NULL);
-    }
 
     if(TVERBOSE3)
     {
@@ -343,8 +340,7 @@ void agent_listen(agent a)
     /* the agent has indicated that it is ready for data */
     if(strncmp(buffer, "OK", 2) == 0)
     {
-      if(!job_is_paused(a->owner))
-        event_signal(agent_ready_event, a);
+      event_signal(agent_ready_event, a);
     }
     /* heart beat received from agent */
     else if(strncmp(buffer, "HEART", 5) == 0)
@@ -369,7 +365,7 @@ void agent_listen(agent a)
       break;
     }
     /* we aren't quite sure what the agent sent, log it */
-    else
+    else if(verbose == 0)
     {
       clprintf("JOB[%d].%s[%d]: message \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, buffer);
@@ -448,7 +444,7 @@ void* agent_spawn(void* passed)
     }
 
     /* we should never reach here */
-    clprintf("ERROR %s.%d: JOB[%d].%s[%d] exec failed\nERROR errno is: %s\n",
+    lprintf("ERROR %s.%d: JOB[%d].%s[%d] exec failed\nERROR errno is: %s\n",
         __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, getpid(), strerror(errno));
   }
   /* we are in the parent */
@@ -460,7 +456,7 @@ void* agent_spawn(void* passed)
   /* error case */
   else
   {
-    clprintf("ERROR %s.%d: JOB[%d].%s[%d] for failed\nERROR errno is: %s\n",
+    clprintf("ERROR %s.%d: JOB[%d].%s[%d] fork failed\nERROR errno is: %s\n",
         __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, getpid(), strerror(errno));
   }
 
@@ -511,7 +507,7 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc)
   strcpy(cpy, cmd);
   strcpy(ma->name, name);
   strcpy(ma->raw_cmd, cmd);
-  strcat(ma->raw_cmd, " scheduler_start");
+  strcat(ma->raw_cmd, " --scheduler_start");
   ma->max_run = max;
   ma->special = spc;
   ma->version = NULL;
@@ -630,6 +626,7 @@ agent agent_copy(agent a)
   cpy->generation = a->generation + 1;
 
   return cpy;
+  return NULL;
 }
 
 /**
@@ -696,6 +693,7 @@ void agent_death_event(void* pids)
       agent_fail(a);
     }
     agent_close(a);
+    job_update(a->owner);
   }
 
   if(db) database_update_event(NULL);
@@ -758,7 +756,7 @@ void agent_ready_event(agent a)
       {
         ERROR("JOB[%d].%s[%d]: failed sending new data to agent",
             job_id(a->owner), a->meta_data->name, a->pid);
-        agent_fail(a);
+        kill(a->pid, SIGKILL);
       }
     }
   }
@@ -799,7 +797,7 @@ void agent_restart(agent a, agent ref)
   {
     ERROR("JOB[%d].%s[%d]: failed to restart agent with new data",
         job_id(a->owner), a->meta_data->name, a->pid);
-    agent_fail(a);
+    kill(a->pid, SIGKILL);
   }
 }
 
@@ -818,35 +816,31 @@ void agent_close(agent a)
   {
     agent_transition(a, AG_CLOSING);
     aprintf(a, "CLOSE\n");
+    return;
   }
-  else
-  {
-    g_thread_join(a->thread);
+  g_thread_join(a->thread);
 
-    VERBOSE2("JOB[%d].%s[%d]: successfully removed from the system\n",
-          job_id(a->owner), a->meta_data->name, a->pid);
+  VERBOSE2("JOB[%d].%s[%d]: successfully removed from the system\n",
+      job_id(a->owner), a->meta_data->name, a->pid);
 
-    job_remove_agent(a->owner, a);
-    g_tree_remove(agents, &a->pid);
-  }
+  job_remove_agent(a->owner, a);
+  g_tree_remove(agents, &a->pid);
 }
 
 /**
- * Pauses an agent, this will pause the agent, if the boolean flag passed in is
- * true, this will send a stop signal to the process and then decrease the load
- * on the host machine.
+ * Pauses an agent, this will pause the agent by sending a SIGSTOP to the
+ * process and then decrease the load on the host machine.
  *
  * @param a the agent to pause
- * @param stop if a SIGSTOP needs to be sent to the agent
  */
-void agent_pause(agent a, int stop)
+void agent_pause(agent a)
 {
-  if(stop) kill(a->pid, SIGSTOP);
+  kill(a->pid, SIGSTOP);
   host_decrease_load(a->host_machine);
 }
 
 /**
- * Uppauses the agent, this will send a SIGCONT to the process regardless of if
+ * Unpause the agent, this will send a SIGCONT to the process regardless of if
  * a SIGTOP was sent. If the process wasn't SIGSTOP'd this will do nothing. Also
  * increases the load on the host.
  *

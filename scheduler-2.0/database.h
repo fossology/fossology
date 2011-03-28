@@ -18,12 +18,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef DATABASE_H_INCLUDE
 #define DATABASE_H_INCLUDE
 
+/* local includes */
+#include <job.h>
+
 /* postgresql library */
 #include <libpq-fe.h>
 
 /* ************************************************************************** */
 /* **** constructor destructor ********************************************** */
 /* ************************************************************************** */
+
+extern PGconn* db_conn;
 
 void database_init();
 void database_destroy();
@@ -34,7 +39,6 @@ void database_destroy();
 
 void database_reset_queue();
 void database_update_event(void* unused);
-PGresult* database_exec(char* sql);
-
+void database_update_job(int j_id, job_status status);
 
 #endif /* DATABASE_H_INCLUDE */

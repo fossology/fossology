@@ -33,9 +33,45 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 void* db_struct = NULL;
 PGconn* db_conn = NULL;
 
-char* basic_checkout = "\
+const char* basic_checkout = "\
     SELECT * FROM getrunnable()\
     LIMIT 10;";
+
+const char* jobsql_started = "\
+    UPDATE jobqueue \
+      SET jq_starttime = now(), \
+          jq_schedinfo ='%s.%d', \
+          jq_endtext = 'Started' \
+      WHERE jq_pk = '%d';";
+
+const char* jobsql_complete = "\
+    UPDATE jobqueue \
+      SET jq_endtime = now(), \
+          jq_end_bits = jq_end_bits | 1, \
+          jq_schedinfo = null, \
+          jq_endtext = 'Completed' \
+      WHERE jq_pk = '%d';";
+
+const char* jobsql_restart = "\
+    UPDATE jobqueue \
+      SET jq_endtime = now(), \
+          jq_end_bits = jq_end_bits | 2, \
+          jq_schedinfo = null, \
+          jq_endtext = 'Restart' \
+      WHERE jq_pk = '%d';";
+
+const char* jobsql_failed = "\
+    UPDATE jobqueue \
+      SET jq_starttime = null, \
+          jq_endtime = null, \
+          jq_schedinfo = null, \
+          jq_endtext = 'Failed' \
+      WHERE jq_pk = '%d';";
+
+const char* jobsql_paused = "\
+    UPDATE jobqueue \
+      SET jq_endtext = 'Paused' \
+      WHERE jq_pk = '%d';";
 
 /* ************************************************************************** */
 /* **** local functions ***************************************************** */
@@ -76,12 +112,20 @@ void database_destroy()
  */
 void database_reset_queue()
 {
-  PQclear(database_exec("\
+  PGresult* db_result = PQexec(db_conn, "\
       UPDATE jobqueue \
         SET jq_starttime=null, \
             jq_endtext=null, \
             jq_schedinfo=null\
-        WHERE jq_endtime is NULL;"));
+        WHERE jq_endtime is NULL;");
+
+  if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
+  {
+    lprintf("ERROR %s.%d: failed to reset job queue\n");
+    lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
+  }
+
+  PQclear(db_result);
 }
 
 /**
@@ -99,7 +143,7 @@ void database_update_event(void* unused)
 
   if(closing)
   {
-    lprintf("ERRO %s.%d: scheduler is closing, will not perform database update\n", __FILE__, __LINE__);
+    lprintf("ERROR %s.%d: scheduler is closing, will not perform database update\n", __FILE__, __LINE__);
     return;
   }
 
@@ -109,6 +153,7 @@ void database_update_event(void* unused)
   {
     lprintf("ERROR %s.%d: database update failed on call to PQexec\n", __FILE__, __LINE__);
     lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
+    PQclear(db_result);
     return;
   }
 
@@ -150,14 +195,46 @@ void database_update_event(void* unused)
 }
 
 /**
- * Used by other parts of the scheduler to gain access to the database. The
- * libpq that is being used should have been compiled for thread safety since
- * this can be called from any thread.
+ * TODO
  *
- * @param sql the sql command to execute
- * @return the PGresult that is created by the exec
+ * @param j_id
+ * @param status
  */
-PGresult* database_exec(char* sql)
+void database_update_job(int j_id, job_status status)
 {
-  return PQexec(db_conn, sql);
+  /* locals */
+  gchar* sql = NULL;
+  PGresult* db_result;
+
+  /* check how to update database */
+    switch(status)
+    {
+      case JB_CHECKEDOUT:
+        break;
+      case JB_STARTED:
+        sql = g_strdup_printf(jobsql_started, "localhost", getpid(), j_id);
+        break;
+      case JB_COMPLETE:
+        sql = g_strdup_printf(jobsql_complete, j_id);
+        break;
+      case JB_RESTART:
+        sql = g_strdup_printf(jobsql_restart, j_id);
+        break;
+      case JB_FAILED:
+        sql = g_strdup_printf(jobsql_failed, j_id);
+        break;
+      case JB_SCH_PAUSED: case JB_CLI_PAUSED:
+        sql = g_strdup_printf(jobsql_paused, j_id);
+        break;
+    }
+
+    /* update the database job queue */
+    db_result = PQexec(db_conn, sql);
+    if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
+    {
+      lprintf("ERROR %s.%d: failed to update job status in job queue\n", __FILE__, __LINE__);
+      lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
+    }
+    PQclear(db_result);
+    g_free(sql);
 }

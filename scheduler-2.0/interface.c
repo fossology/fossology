@@ -84,6 +84,7 @@ void* interface_thread(void* param)
   interface_connection* conn = param;
   network_header header;
   char buffer[1024];
+  char org[sizeof(buffer)];
   char* cmd, * tmp;
   unsigned long size;
   arg_int* params;
@@ -99,6 +100,7 @@ void* interface_thread(void* param)
 
     if(TVERBOSE2) clprintf("INTERFACE: recieved \"%s\"\n", buffer);
     /* convert all characters before first ' ' to lower case */
+    memcpy(org, buffer, sizeof(buffer));
     for(cmd = buffer; *cmd; cmd++)
       *cmd = g_ascii_tolower(*cmd);
     cmd = strtok(buffer, " ");
@@ -137,11 +139,10 @@ void* interface_thread(void* param)
     {
       event_signal(job_restart_event, get_job(atoi(strtok(NULL, " "))));
     }
-    else if(g_str_has_prefix("verbose", cmd))
+    else if(g_str_has_prefix("verbose", cmd) && (tmp = strtok(NULL, " ")) != NULL)
     {
-      cmd = strtok(NULL, " ");
-      if((tmp = strtok(NULL, " ")) == NULL) verbose = atoi(cmd);
-      else job_verbose_event(job_verbose(get_job(atoi(cmd)), atoi(tmp)));
+      if((cmd = strtok(NULL, " ")) == NULL) verbose = atoi(tmp);
+      else job_verbose_event(job_verbose(get_job(atoi(tmp)), atoi(cmd)));
     }
     else if(g_str_has_prefix("database", cmd))
       event_signal(database_update_event, NULL);
