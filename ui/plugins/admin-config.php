@@ -107,6 +107,7 @@ COMMENT ON COLUMN sysconfig.group_name IS 'Name of this variables group in the u
 COMMENT ON COLUMN sysconfig.group_order IS 'The order this variable appears in the user interface group';
 COMMENT ON COLUMN sysconfig.description IS 'Description of variable to document how/where the variable value is used.';
 COMMENT ON COLUMN sysconfig.validation_function IS 'Name of function to validate input. Not currently implemented.';
+COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textarea';
     ";
     /* this is a non critical update */
     $result = @pg_send_query($PG_CONN, $sql);
