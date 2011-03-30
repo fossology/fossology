@@ -519,7 +519,8 @@ class uploads extends FO_Plugin
             else
             {
               $text = _("Upload failed for");
-              $results .= displayMessage("$text $GetURL: $rc");
+              //$results .= displayMessage("$text $GetURL: $rc");
+              echo displayMessage("$text $GetURL: $rc");
             }
           }
         }
