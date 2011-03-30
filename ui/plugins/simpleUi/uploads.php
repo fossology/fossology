@@ -112,8 +112,8 @@ class uploads extends FO_Plugin
         fclose($Fin);
       }
       $uri = Traceback_uri();
-      $toUploads = "<a href='$uri?mod=uploads>Back to Uploads</a>\n";
-      echo $toUploads;
+      //$toUploads = "<a href='$uri?mod=uploads'>Back to Uploads</a>\n";
+      //echo $toUploads;
     }
     else
     {
@@ -168,7 +168,7 @@ class uploads extends FO_Plugin
       print "</table>\n";
       echo "<br>\n";
       $uri = Traceback_uri();
-      $toUploads = "<a href='$uri?mod=uploads>Back to Uploads</a>\n";
+      $toUploads = "<a href='$uri?mod=uploads'>Back to Uploads</a>\n";
       echo $toUploads;
     }
     /* Clean up */
@@ -194,6 +194,7 @@ class uploads extends FO_Plugin
     }
     /* Create an upload record. */
     $Mode = (1 << 3); // code for "it came from web upload"
+    $Desc = NULL;     // no description field for simpleUi
     $uploadpk = JobAddUpload($ShortName, $originName, $Desc, $Mode, $Folder);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
@@ -427,11 +428,11 @@ class uploads extends FO_Plugin
     {
       $Level = 1;
     }
-    
+
     /* first trim, then get rid of whitespaces before and after each comma letter */
     $Accept = preg_replace('/\s*,\s*/', ',', trim($Accept));
     $Reject = preg_replace('/\s*,\s*/', ',', trim($Reject));
-    
+
     /* Prepare the job: job "wget" has jobqueue item "wget" */
     /** 2nd parameter is obsolete **/
     $jq_args = "$uploadpk - $GetURL --accept=$Accept --reject=$Reject -l $Level";
@@ -575,7 +576,7 @@ class uploads extends FO_Plugin
             $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
             print displayMessage(NULL,$keep);
             $uri = Traceback_uri();
-            $toUploads = "<a href='$uri?mod=uploads>Back to Uploads</a>\n";
+            $toUploads = "<a href='$uri?mod=uploads'>Back to Uploads</a>\n";
             $_FILES['licfile'] = NULL;
             echo $toUploads;
 
@@ -600,8 +601,9 @@ class uploads extends FO_Plugin
             {
               /* Size is not too big.  */
               print $this->AnalyzeOne($Highlight) . "\n";
-              $uri = Traceback_uri();
-              $toUploads = "<a href='$uri?mod=uploads>Back to Uploads</a>\n";
+              //$uri = Traceback_uri();
+              //$toUploads = "<a href='$uri?mod=uploads'>Back to Uploads</a>\n";
+              //echo $toUploads;
             }
             if (!empty($_FILES['licfile']['unlink_flag']))
             {
@@ -626,11 +628,11 @@ class uploads extends FO_Plugin
 
         $fileText = _("Upload a File from your computer");
         $urlText = _("Upload from a URL");
-//        $srvText = _("Upload a File from the FOSSology Web Server");
+        //        $srvText = _("Upload a File from the FOSSology Web Server");
         $choice .= "<form name='uploads' enctype='multipart/form-data' method='post'>\n";
         $choice .= "<input type='radio' name='uploads' id='file' value='file' onclick='UploadFile_Get(\"" .Traceback_uri() . "?mod=ajax_fileUpload\")' />$fileText<br />\n";
         $choice .= "<input type='radio' name='uploads' id='url' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />$urlText<br />\n";
-//        $choice .= "<input type='radio' name='uploads' id='srv' value='srv' onclick='UploadSrv_Get(\"" .Traceback_uri() . "?mod=ajax_srvUpload\")' />$srvText<br />\n";
+        //        $choice .= "<input type='radio' name='uploads' id='srv' value='srv' onclick='UploadSrv_Get(\"" .Traceback_uri() . "?mod=ajax_srvUpload\")' />$srvText<br />\n";
 
         $or = _("--OR--");
         $oneShotText = _("Submit a file to be analyzed in real time.\n");
@@ -652,22 +654,38 @@ class uploads extends FO_Plugin
 
         //$choice .= "<input type='radio' name='uploadfurl' value='opts' onclick='UploadOpts_Get(\"" .Traceback_uri() . "?mod=ajax_optsForm\")' />More Options<br />\n";
 
-        $choice .= "\n<div>\n<hr>\n<p id='fileform'></p>\n</div>\n";
+        $choice .= "\n<div id='hozrow'>\n<hr>\n</div>\n";
 
         /* Create the AJAX (Active HTTP) javascript for doing the replys
          * and showing the response.
          */
+        
+        $choice .= "<script language='javascript'>\n
+          function rmUpText()\n
+          {\n
+            var div = document.getElementById('upform');\n
+            var parent = div.parentNode;\n
+            parent.removeChild(div);\n
+          }\n
+          </script>\n";
+        
         $choice .= ActiveHTTPscript("UploadFile");
         $choice .= "<script language='javascript'>\n
-        function UploadFile_Reply()
-        {
+        function UploadFile_Reply()\n
+        {\n
           if ((UploadFile.readyState==4) && (UploadFile.status==200))
           {\n
-            /* Remove all options */
-            document.getElementById('fileform').innerHTML = UploadFile.responseText;\n
-            /* Add new options */
-          }
-        }
+            if (document.getElementById('upform'))\n
+            {\n
+              rmUpText();\n
+            }\n
+            var newdiv = document.createElement(\"div\");\n
+            newdiv.id='upform';\n
+            newdiv.innerHTML = UploadFile.responseText;\n
+            var hoz = document.getElementById(\"hozrow\");\n
+            hoz.appendChild(newdiv);\n
+          }\n
+        }\n
         </script>\n";
 
         // URL's
@@ -677,9 +695,15 @@ class uploads extends FO_Plugin
         {
           if ((UploadUrl.readyState==4) && (UploadUrl.status==200))
           {\n
-            /* Remove all options */
-            document.getElementById('fileform').innerHTML = UploadUrl.responseText;\n
-            /* Add new options */
+            if (document.getElementById('upform'))\n
+            {\n
+              rmUpText();\n
+            }\n
+            var newdiv = document.createElement(\"div\");\n
+            newdiv.id='upform';\n
+            newdiv.innerHTML = UploadUrl.responseText;\n
+            var hoz = document.getElementById(\"hozrow\");\n
+            hoz.appendChild(newdiv);\n
           }
         }
         </script>\n";
@@ -692,8 +716,15 @@ class uploads extends FO_Plugin
         {
           if ((UploadSrv.readyState==4) && (UploadSrv.status==200))
           {\n
-            /* Remove all options */
-            document.getElementById('fileform').innerHTML = UploadSrv.responseText;\n
+            if (document.getElementById('upform'))\n
+            {\n
+              rmUpText();\n
+            }\n
+            var newdiv = document.createElement(\"div\");\n
+            newdiv.id='upform';\n
+            newdiv.innerHTML = UploadSrv.responseText;\n
+            var hoz = document.getElementById(\"hozrow\");\n
+            hoz.appendChild(newdiv);\n
             /* Add new options */
           }
         }
@@ -707,7 +738,15 @@ class uploads extends FO_Plugin
         {
           if ((UploadOsN.readyState==4) && (UploadOsN.status==200))
           {\n
-            document.getElementById('fileform').innerHTML = UploadOsN.responseText;\n
+            if (document.getElementById('upform'))\n
+            {\n
+              rmUpText();\n
+            }\n
+            var newdiv = document.createElement(\"div\");\n
+            newdiv.id='upform';\n
+            newdiv.innerHTML = UploadOsN.responseText;\n
+            var hoz = document.getElementById(\"hozrow\");\n
+            hoz.appendChild(newdiv);\n
           }
         }
         </script>\n";
@@ -720,7 +759,15 @@ class uploads extends FO_Plugin
         {
           if ((UploadCopyR.readyState==4) && (UploadCopyR.status==200))
           {\n
-            document.getElementById('fileform').innerHTML = UploadCopyR.responseText;\n
+            if (document.getElementById('upform'))\n
+            {\n
+              rmUpText();\n
+            }\n
+            var newdiv = document.createElement(\"div\");\n
+            newdiv.id='upform';\n
+            newdiv.innerHTML = UploadCopyR.responseText;\n
+            var hoz = document.getElementById(\"hozrow\");\n
+            hoz.appendChild(newdiv);\n
           }
         }
         </script>\n";
