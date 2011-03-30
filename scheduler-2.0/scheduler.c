@@ -46,13 +46,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 char* process_name = "fossology-scheduler";
 
-#ifndef PROJECT_USER
-#define PROJECT_USER "fossology"
-#endif
-#ifndef PROJECT_GROUP
-#define PROJECT_GROUP "fossyology"
-#endif
-
 /* global flags */
 int verbose = 0;
 int closing = 0;

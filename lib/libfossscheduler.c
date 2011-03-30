@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ALARM_SECS 30
 
 #ifndef SVN_REV
-#define SVN_REV "ERROR"
+#define SVN_REV "SVN_REV Unknown"
 #endif
 
 /* ************************************************************************** */
@@ -38,6 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 int  items_processed;   ///< the number of items processed by the agent
 char buffer[2048];      ///< the last thing received from the scheduler
 int  valid;             ///< if the information stored in buffer is valid
+int  found;             ///< if the agent is even connected to the scheduler
 
 /**
  * Global verbose flags that agents should use instead of specific verbose
@@ -85,20 +86,17 @@ void  scheduler_heart(int i)
  * Making a call to this function should be the first thing that an agent does
  * after parsing its command line arguments.
  */
-void scheduler_connect(int argc, char** argv)
+void scheduler_connect(int* argc, char** argv)
 {
-  /* local variables */
-  int i;
-  int found = 0;
+  found = 0;
 
   /* check for --scheduler command line option */
-  for(i = 0; i < argc && !found; i++)
+  if(strcmp(argv[(*argc) - 1], "--scheduler_start") == 0)
   {
-    if(strcmp(argv[i], "scheduler_start") == 0)
-    {
-      fprintf(stdout, "%s\n", SVN_REV);
-      found = 1;
-    }
+    fprintf(stdout, "%s\n", SVN_REV);
+    (*argc)--;
+    argv[*argc] = NULL;
+    found = 1;
   }
 
   /* initialize memory associated with agent connection */
@@ -108,15 +106,18 @@ void scheduler_connect(int argc, char** argv)
   verbose = 0;
 
   /* send "OK" to the scheduler */
-  fprintf(stdout, "OK\n");
-  fflush(stdout);
+  exit(0);
+  if(found) {
+    fprintf(stdout, "OK\n");
+    fflush(stdout);
 
-  /* check the nfs mounts for the agent */
-  // TODO
+    /* check the nfs mounts for the agent */
+    // TODO
 
-  /* set up the heartbeat() */
-  signal(SIGALRM, heartbeat);
-  alarm(ALARM_SECS);
+    /* set up the heartbeat() */
+    signal(SIGALRM, heartbeat);
+    alarm(ALARM_SECS);
+  }
 }
 
 /**
@@ -132,8 +133,10 @@ void scheduler_connect(int argc, char** argv)
 void scheduler_disconnect()
 {
   /* send "CLOSED" to the scheduler */
-  fprintf(stdout, "BYE\n");
-  fflush(stdout);
+  if(found) {
+    fprintf(stdout, "BYE\n");
+    fflush(stdout);
+  }
 
   /* call exit(0) */
   exit(0);
