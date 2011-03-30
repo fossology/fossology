@@ -106,7 +106,7 @@ class user_edit_self extends FO_Plugin
     $Perm = GetParm('permission', PARM_INTEGER);
     $Folder = GetParm('folder', PARM_INTEGER);
     $Email = GetParm('email', PARM_TEXT);
-    $Email_notify = GetParm('enote', PARM_TEXT);
+    $Email_notify = GetParm('emailnotify', PARM_TEXT);
     $agentList = userAgents();
     $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
     $uiChoice = GetParm('whichui', PARM_TEXT);
