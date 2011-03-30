@@ -146,11 +146,17 @@ class user_edit_self extends FO_Plugin
     $Results = $DB->Action($SQL);
     $R = & $Results[0];
     /* Make sure old password matched */
-    $Hash = sha1($R['user_seed'] . $Pass0);
-    if ($Hash != $R['user_pass'])
+    /* if login by siteminder, didn't check old password just get old password*/
+    if (siteminder_check() == -1)
     {
-      $text = _("Authentication password did not match. No change.");
-      return ($text);
+      $Hash = sha1($R['user_seed'] . $Pass0);
+      if ($Hash != $R['user_pass'])
+      {
+        $text = _("Authentication password did not match. No change.");
+        return ($text);
+      }
+    } else {
+      $Pass0 = $R['user_pass'];
     }
     /* Update the user */
     $GotUpdate = 0;
@@ -278,10 +284,14 @@ class user_edit_self extends FO_Plugin
 
         /* Build HTML form */
         $V.= "<form name='formy' method='POST'>\n"; // no url = this url
-        $V.= _("You <font color='red'>must</font> provide your current password in order to make any changes.<br />\n");
-        $text = _("Enter your password");
-        $V.= "$text: <input type='password' name='pass0' size=20>\n";
-        $V.= "<hr>\n";
+        /* if login by siteminder, didn't show this in page*/
+        if (siteminder_check() == -1)
+        {
+          $V.= _("You <font color='red'>must</font> provide your current password in order to make any changes.<br />\n");
+          $text = _("Enter your password");
+          $V.= "$text: <input type='password' name='pass0' size=20>\n";
+          $V.= "<hr>\n";
+        }
         $V.= _("To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n");
         $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
         $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
