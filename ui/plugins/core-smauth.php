@@ -130,6 +130,7 @@ class core_smauth extends FO_Plugin {
    ******************************************/
   function CheckUser($Email) {
     global $PG_CONN;
+
     if (empty($Email)) {
       return;
     }
@@ -141,6 +142,50 @@ class core_smauth extends FO_Plugin {
     }
     $FolderDes = "Folder created for " . $FolderName;
 
+    /* Get default User description and bucketpool from sysconf table */
+    $UserDesc = 'null';
+    $BucketPool = 'null';
+    $sql = "SELECT typlen  FROM pg_type where typname='sysconfig' limit 1";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) > 0) {
+      pg_free_result($result);
+      // Get UserDesc from sysconfig
+      $sql = "SELECT conf_value FROM sysconfig WHERE variablename = 'UserDesc';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $R = pg_fetch_assoc($result);
+      pg_free_result($result);
+      if (!empty($R['conf_value']))
+        $UserDesc = "'".$R['conf_value']."'";
+      
+      // Get BucketPool from sysconfig
+      $sql = "SELECT conf_value FROM sysconfig WHERE variablename = 'BucketPool';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $R = pg_fetch_assoc($result);
+      pg_free_result($result);
+      if (!empty($R['conf_value'])) {
+        $BucketPool = $R['conf_value'];
+        //Check if the bucketpool defined in sysconfig exist in bucketpool table
+        $sql = "SELECT bucketpool_pk  FROM bucketpool WHERE bucketpool_pk=$BucketPool AND active='Y'";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        if (pg_num_rows($result) < 1) {
+          pg_free_result($result);
+          $BucketPool = 'null';       //didn't exist in bucketpool table, set it 'null'
+        }
+      } else {
+        /* if didn't define bucketpool from sycconf. Get bucketpool from bucketpool table*/
+        $sql = "SELECT bucketpool_pk FROM bucketpool WHERE active='Y' ORDER BY bucketpool_pk;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $R = pg_fetch_assoc($result);
+        pg_free_result($result);
+        if (!empty($R['bucketpool_pk']))
+          $BucketPool = $R['bucketpool_pk'];
+      }
+    }
     /* See if the user exists */
     $sql = "SELECT * FROM users WHERE user_email = '$Email';";
     $result = pg_query($PG_CONN, $sql);
@@ -193,7 +238,7 @@ class core_smauth extends FO_Plugin {
               (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
        email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk,
        ui_preference)
-              VALUES ('$Email','HP User','','',5,'$Email','y','agent_bucket,agent_copyright',$FolderPk,1,'simple')";
+              VALUES ('$Email',$UserDesc,null,null,5,'$Email','y','agent_bucket,agent_copyright',$FolderPk,$BucketPool,'simple')";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
