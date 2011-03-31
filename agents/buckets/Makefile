@@ -11,7 +11,7 @@ CFLAGS_LOCALO=$(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
 EXE=buckets
 OBJS=validate.o inits.o liccache.o walk.o leaf.o match.o container.o child.o write.c
 HDRS=buckets.h
-DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"'
+DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
 
 all: $(EXE)
 
