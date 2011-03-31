@@ -34,7 +34,7 @@ class search_file extends FO_Plugin
   var $MenuList   = "Search";
   var $Dependency = array("db","view","browse");
   var $DBaccess   = PLUGIN_DB_READ;
-  var $LoginFlag  = 0;
+  public $LoginFlag  = 0;
 
   /***********************************************************
    GetUploadtreeFromName(): Given a name, return all records.
@@ -84,6 +84,51 @@ class search_file extends FO_Plugin
     return($V);
   } // GetUploadtreeFromName()
 
+  function PostInitialize()
+  {
+    global $Plugins;
+    global $DB, $PG_CONN;
+    
+    if ($this->State != PLUGIN_STATE_VALID) {
+      return(0);
+    } // don't run
+    if (empty($_SESSION['User']) && $this->LoginFlag) {
+      return(0);
+    }
+    // Make sure dependencies are met
+    foreach($this->Dependency as $key => $val) {
+      $id = plugin_find_id($val);
+      if ($id < 0) {
+        $this->Destroy();
+        return(0);
+      }
+    }
+    // It worked, so mark this plugin as ready.
+    $this->State = PLUGIN_STATE_READY;
+    $Sql = "SELECT * from sysconfig WHERE variablename='GlobalSearch';";
+    $result = pg_query($PG_CONN, $Sql);
+    DBCheckResult($result, $Sql, __FILE__, __LINE__);
+    $searchInfo = pg_fetch_all($result);
+    $confValue = strtoupper($searchInfo[0]['conf_value']);
+    //echo "<pre>SF-POSTI: checking values\n</pre>";
+    if($confValue == "TRUE")
+    {
+
+      if ($this->MenuList !== "") {
+        menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+      }
+      return($this->State == PLUGIN_STATE_READY);
+    }
+    if($confValue == "FALSE")
+    {
+      $pluginRef = plugin_find_any('search_file');  // can be null
+      if(!empty($pluginRef))
+      {
+        return($pluginRef->State = PLUGIN_STATE_INVALID);
+      }
+    }
+  } // PostInitialize()
+
   /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
@@ -92,6 +137,7 @@ class search_file extends FO_Plugin
     $URI = $this->Name;
     $text = _("Search based on filename");
     menu_insert("Search::Filename",0,$URI,$text);
+
   } // RegisterMenus()
 
   /***********************************************************
@@ -154,6 +200,4 @@ class search_file extends FO_Plugin
 
 };
 $NewPlugin = new search_file;
-$NewPlugin->Initialize();
-
 ?>

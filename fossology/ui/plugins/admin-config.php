@@ -44,9 +44,9 @@ class foconfig extends FO_Plugin
 
   /***********************************************************
    Install(): Create and configure database tables
-     If the sysconfig table doesn't exist then 
-       create it
-       create records for the core variables.
+   If the sysconfig table doesn't exist then
+   create it
+   create records for the core variables.
    ***********************************************************/
   function Install()
   {
@@ -66,21 +66,21 @@ class foconfig extends FO_Plugin
 
   /************************************************
    Create_sysconfig()
-     Create the sysconfig table.
+   Create the sysconfig table.
    ************************************************/
-   function Create_sysconfig()
-   {
-     global $PG_CONN;
+  function Create_sysconfig()
+  {
+    global $PG_CONN;
 
-     /* If sysconfig exists, then we are done */
-     $sql = "SELECT typlen  FROM pg_type where typname='sysconfig' limit 1";
-     $result = pg_query($PG_CONN, $sql);
-     DBCheckResult($result, $sql, __FILE__, __LINE__);
-     if (pg_num_rows($result) > 0) return 0;
-     pg_free_result($result);
+    /* If sysconfig exists, then we are done */
+    $sql = "SELECT typlen  FROM pg_type where typname='sysconfig' limit 1";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) > 0) return 0;
+    pg_free_result($result);
 
-     /* Create the sysconfig table */
-     $sql = "
+    /* Create the sysconfig table */
+    $sql = "
 CREATE TABLE sysconfig (
     sysconfig_pk serial NOT NULL PRIMARY KEY,
     variablename character varying(30) NOT NULL UNIQUE,
@@ -117,59 +117,70 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
 
   /************************************************
    Populate_sysconfig()
-     Populate the sysconfig table with core variables.
-     Any plugins will load their own config variables.
+   Populate the sysconfig table with core variables.
+   Any plugins will load their own config variables.
    ************************************************/
-   function Populate_sysconfig()
-   {
-     global $PG_CONN;
+  function Populate_sysconfig()
+  {
+    global $PG_CONN;
 
-     $Columns = "variablename, conf_value, ui_label, vartype, group_name, group_order, description";
-     $ValueArray = array();
+    $Columns = "variablename, conf_value, ui_label, vartype, group_name, group_order, description";
+    $ValueArray = array();
 
-     /*  Email */
-     $SupportEmailLabelPrompt = _('Support Email Label');
-     $SupportEmailLabelDesc = _('e.g. "Support"<br>Text that the user clicks on to create a new support email. This new email will be preaddressed to this support email address and subject.  HTML is ok.');
-     $ValueArray[] = "'SupportEmailLabel', 'Support', '$SupportEmailLabelPrompt',  $this->vartype_text, 'Support', 1, '$SupportEmailLabelDesc'";
+    /*  Email */
+    $SupportEmailLabelPrompt = _('Support Email Label');
+    $SupportEmailLabelDesc = _('e.g. "Support"<br>Text that the user clicks on to create a new support email. This new email will be preaddressed to this support email address and subject.  HTML is ok.');
+    $ValueArray[] = "'SupportEmailLabel', 'Support', '$SupportEmailLabelPrompt',  $this->vartype_text, 'Support', 1, '$SupportEmailLabelDesc'";
 
-     $SupportEmailAddrPrompt = _('Support Email Address');
-     $SupportEmailAddrDesc = _('e.g. "support@mycompany.com"<br>Individual or group email address to those providing FOSSology support.');
-     $ValueArray[] = "'SupportEmailAddr', null, '$SupportEmailAddrPrompt', $this->vartype_text, 'Support', 2, '$SupportEmailAddrDesc'";
+    $SupportEmailAddrPrompt = _('Support Email Address');
+    $SupportEmailAddrDesc = _('e.g. "support@mycompany.com"<br>Individual or group email address to those providing FOSSology support.');
+    $ValueArray[] = "'SupportEmailAddr', null, '$SupportEmailAddrPrompt', $this->vartype_text, 'Support', 2, '$SupportEmailAddrDesc'";
 
-     $SupportEmailSubjectPrompt = _('Support Email Subject line');
-     $SupportEmailSubjectDesc = _('e.g. "fossology support"<br>Subject line to use on support email.');
-     $ValueArray[] = "'SupportEmailSubject', 'FOSSology Support', '$SupportEmailSubjectPrompt', $this->vartype_text, 'Support', 3, '$SupportEmailSubjectDesc'";
+    $SupportEmailSubjectPrompt = _('Support Email Subject line');
+    $SupportEmailSubjectDesc = _('e.g. "fossology support"<br>Subject line to use on support email.');
+    $ValueArray[] = "'SupportEmailSubject', 'FOSSology Support', '$SupportEmailSubjectPrompt', $this->vartype_text, 'Support', 3, '$SupportEmailSubjectDesc'";
 
-     /*  Banner Message */
-     $BannerMsgPrompt = _('Banner message');
-     $BannerMsgDesc = _('This is message will be displayed on every page with a banner.  HTML is ok.');
-     $ValueArray[] = "'BannerMsg', null, '$BannerMsgPrompt', $this->vartype_textarea, 'Banner', 1, '$BannerMsgDesc'";
+    /*  Banner Message */
+    $BannerMsgPrompt = _('Banner message');
+    $BannerMsgDesc = _('This is message will be displayed on every page with a banner.  HTML is ok.');
+    $ValueArray[] = "'BannerMsg', null, '$BannerMsgPrompt', $this->vartype_textarea, 'Banner', 1, '$BannerMsgDesc'";
 
-     /*  Logo  */
-     $LogoImagePrompt = _('Logo Image URL');
-     $LogoImageDesc = _('e.g. "http://mycompany.com/images/companylogo.png" or "images/mylogo.png"<br>This image replaces the fossology project logo. Image is constrained to 150px wide.  80-100px high is a good target.');
-     $ValueArray[] = "'LogoImage', null, '$LogoImagePrompt', $this->vartype_text, 'Logo', 1, '$LogoImageDesc'";
+    /*  Logo  */
+    $LogoImagePrompt = _('Logo Image URL');
+    $LogoImageDesc = _('e.g. "http://mycompany.com/images/companylogo.png" or "images/mylogo.png"<br>This image replaces the fossology project logo. Image is constrained to 150px wide.  80-100px high is a good target.');
+    $ValueArray[] = "'LogoImage', null, '$LogoImagePrompt', $this->vartype_text, 'Logo', 1, '$LogoImageDesc'";
 
-     $LogoLinkPrompt = _('Logo URL');
-     $LogoLinkDesc = _('e.g. "http://mycompany.com/fossology"<br>URL a person goes to when they click on the logo');
-     $ValueArray[] = "'LogoLink', null, '$LogoLinkPrompt', $this->vartype_text, 'Logo', 2, '$LogoLinkDesc'" ;
-     /* Doing all the rows as a single insert will fail if any row is a dupe.
-        So insert each one individually so that new variables get added. 
-      */
-     foreach ($ValueArray as $Values)
-     {   
-       $sql = "insert into sysconfig ({$Columns}) values ($Values);";
-       $result = @pg_query($PG_CONN, $sql);
-       if ($result===false && strpos(pg_last_error($PG_CONN), 'duplicate key') === FALSE)
-          DBCheckResult($result, $sql, __FILE__, __LINE__);
-     }
-   }
+    $LogoLinkPrompt = _('Logo URL');
+    $LogoLinkDesc = _('e.g. "http://mycompany.com/fossology"<br>URL a person goes to when they click on the logo');
+    $ValueArray[] = "'LogoLink', null, '$LogoLinkPrompt', $this->vartype_text, 'Logo', 2, '$LogoLinkDesc'" ;
+     
+    $BrowsePrompt = _("Allow Public Browsing");
+    $BrowseDesc = _("Allow anyone to browse the repository, even if not logged in.");
+    $ValueArray[] = "'PublicBrowse', TRUE, '$BrowsePrompt', $this->vartype_int,
+      'UI', 1, '$BrowseDesc'";
+     
+    $SearchPrompt = _("Allow Global Searches");
+    $SearchDesc = _("Allow searching all folders in the system, even if not logged in.");
+    $ValueArray[] = "'GlobalSearch', TRUE, '$SearchPrompt', $this->vartype_int,
+      'UI', 1, '$SearchDesc'";
+     
+    /* Doing all the rows as a single insert will fail if any row is a dupe.
+     So insert each one individually so that new variables get added.
+     */
+    foreach ($ValueArray as $Values)
+    {
+      $sql = "insert into sysconfig ({$Columns}) values ($Values);";
+      $result = @pg_query($PG_CONN, $sql);
+      if ($result===false && strpos(pg_last_error($PG_CONN), 'duplicate key') === FALSE)
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+    }
+  }
 
 
   /************************************************
    HTMLout(): Generate HTML output.
    ************************************************/
-  function HTMLout() 
+  function HTMLout()
   {
     global $PG_CONN;
     $OutBuf="";
@@ -180,11 +191,11 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     if ($result === false)
     {
       if (($this->CreateAttempts > 0) || (strpos(pg_last_error(), 'relation "sysconfig" does not exist') === FALSE))
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
       else
       {
         /* failure was because the sysconfig table hasn't been created yet.
-           So create it, but don't try more than once.
+         So create it, but don't try more than once.
          */
         $this->CreateAttempts++;
         $this->Create_sysconfig();
@@ -239,21 +250,21 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
   /************************************************
    Output(): Generate output.
    ************************************************/
-  function Output() 
+  function Output()
   {
     global $PG_CONN;
     global $Plugins;
-    
+
     if ($this->State != PLUGIN_STATE_READY) { return; }
     if (empty($PG_CONN)) return;
 
     $newarray = GetParm("new", PARM_RAW);
     $oldarray = GetParm("old", PARM_RAW);
-    
-//debugprint($newarray, "New array");
-//debugprint($oldarray, "Old array");
 
-    /* Compare new and old array 
+    //debugprint($newarray, "New array");
+    //debugprint($oldarray, "Old array");
+
+    /* Compare new and old array
      * and update DB with new values */
     $UpdateMsg = "";
     if (!empty($newarray))
@@ -262,8 +273,8 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
       {
         if ($VarValue != $oldarray[$VarName])
         {
-          $sql = "update sysconfig set conf_value='" . 
-                    pg_escape_string($VarValue) .
+          $sql = "update sysconfig set conf_value='" .
+          pg_escape_string($VarValue) .
                     "' where variablename='$VarName'";
           $result = pg_query($PG_CONN, $sql);
           DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -277,20 +288,20 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     /* Verify that the tables and all the core variables are defined  */
     $this->Create_sysconfig();
     $this->Populate_sysconfig();
-    
+
     $OutBuf = '';
     switch($this->OutputType)
     {
       case "XML":
-	break;
+        break;
       case "HTML":
         if ($UpdateMsg) $OutBuf .= "<span style='background-color:#ff8a8a'>$UpdateMsg</style><hr>";
         $OutBuf .= $this->HTMLout();
-	break;
+        break;
       case "Text":
-	break;
+        break;
       default:
-	break;
+        break;
     }
     if (!$this->OutputToStdout) { return($OutBuf); }
     print($OutBuf);
