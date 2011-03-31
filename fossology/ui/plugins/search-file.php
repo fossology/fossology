@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 define("TITLE_search_file", _("Search for File"));
 
 class search_file extends FO_Plugin
-  {
+{
   var $Name       = "search_file";
   var $Title      = TITLE_search_file;
   var $Version    = "1.0";
@@ -40,7 +40,7 @@ class search_file extends FO_Plugin
    GetUploadtreeFromName(): Given a name, return all records.
    ***********************************************************/
   function GetUploadtreeFromName($Filename,$Page, $ContainerOnly=1)
-    {
+  {
     global $DB;
     $Max = 50;
     $Filename = str_replace("'","''",$Filename); // protect DB
@@ -49,9 +49,9 @@ class search_file extends FO_Plugin
 	INNER JOIN pfile ON pfile_fk = pfile_pk";
     if ($ContainerOnly) $SQL .= " AND ((uploadtree.ufile_mode & (1<<29)) != 0) ";
     foreach($Terms as $Key => $T)
-	{
-	$SQL .= " AND ufile_name LIKE '$T'";
-	}
+    {
+      $SQL .= " AND ufile_name LIKE '$T'";
+    }
     $Offset = $Page * $Max;
     $SQL .= " ORDER BY pfile_pk,ufile_name DESC LIMIT $Max OFFSET $Offset;";
     $Results = $DB->Action($SQL);
@@ -59,100 +59,100 @@ class search_file extends FO_Plugin
     $Count = count($Results);
 
     if (($Page > 0) || ($Count >= $Max))
-      {
+    {
       $Uri = Traceback_uri() . "?mod=" . $this->Name;
       $Uri .= "&filename=" . urlencode($Filename);
       $Uri .= "&allfiles=" . GetParm("allfiles",PARM_INTEGER);
       $VM = MenuEndlessPage($Page, ($Count >= $Max),$Uri) . "<P />\n";
       $V .= $VM;
-      }
+    }
     else
-      {
+    {
       $VM = "";
-      }
+    }
 
     if ($Count == 0)
-	{
-	$V .= _("No results.\n");
-	return($V);
-	}
+    {
+      $V .= _("No results.\n");
+      return($V);
+    }
 
     $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
 
     /* put page menu at the bottom, too */
     if (!empty($VM)) { $V .= "<P />\n" . $VM; }
     return($V);
-    } // GetUploadtreeFromName()
+  } // GetUploadtreeFromName()
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
   function RegisterMenus()
-    {
+  {
     $URI = $this->Name;
-$text = _("Search based on filename");
+    $text = _("Search based on filename");
     menu_insert("Search::Filename",0,$URI,$text);
-    } // RegisterMenus()
+  } // RegisterMenus()
 
   /***********************************************************
    Output(): Display the loaded menu and plugins.
    ***********************************************************/
   function Output()
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     global $Plugins;
     switch($this->OutputType)
-      {
+    {
       case "XML":
         break;
       case "HTML":
-	$V .= menu_to_1html(menu_find("Search",$MenuDepth),1);
+        $V .= menu_to_1html(menu_find("Search",$MenuDepth),1);
 
-	$Filename = GetParm("filename",PARM_STRING);
-	$Page = GetParm("page",PARM_INTEGER);
-	$allfiles = GetParm("allfiles",PARM_INTEGER);
-	$Uri = preg_replace("/&filename=[^&]*/","",Traceback());
-	$Uri = preg_replace("/&page=[^&]*/","",$Uri);
+        $Filename = GetParm("filename",PARM_STRING);
+        $Page = GetParm("page",PARM_INTEGER);
+        $allfiles = GetParm("allfiles",PARM_INTEGER);
+        $Uri = preg_replace("/&filename=[^&]*/","",Traceback());
+        $Uri = preg_replace("/&page=[^&]*/","",$Uri);
 
-	$V .= _("You can use '%' as a wild-card.\n");
-	$V .= "<form action='$Uri' method='POST'>\n";
-	$V .= "<ul>\n";
-$text = _("Enter the filename to find:");
-	$V .= "<li>$text<P>";
-	$V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
-$text = _("By default only containers (rpms, tars, isos, etc) are shown.");
-	$V .= "<li>$text<P>";
-$text = _("Show All Files");
-	$V .= "<INPUT type='checkbox' name='allfiles' value='1'";
-	if ($allfiles == '1') { $V .= " checked"; }
-	$V .= "> $text\n";
-	$V .= "</ul>\n";
-$text = _("Search");
-	$V .= "<input type='submit' value='$text!'>\n";
-	$V .= "</form>\n";
+        $V .= _("You can use '%' as a wild-card.\n");
+        $V .= "<form action='$Uri' method='POST'>\n";
+        $V .= "<ul>\n";
+        $text = _("Enter the filename to find:");
+        $V .= "<li>$text<P>";
+        $V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
+        $text = _("By default only containers (rpms, tars, isos, etc) are shown.");
+        $V .= "<li>$text<P>";
+        $text = _("Show All Files");
+        $V .= "<INPUT type='checkbox' name='allfiles' value='1'";
+        if ($allfiles == '1') { $V .= " checked"; }
+        $V .= "> $text\n";
+        $V .= "</ul>\n";
+        $text = _("Search");
+        $V .= "<input type='submit' value='$text!'>\n";
+        $V .= "</form>\n";
 
-	if (!empty($Filename))
-	  {
-	  if (empty($Page)) { $Page = 0; }
-	  if (empty($allfiles)) { $ContainerOnly = 1; }
-	  $V .= "<hr>\n";
-$text = _("Files matching");
-	  $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
-	  $V .= $this->GetUploadtreeFromName($Filename,$Page, $ContainerOnly);
-	  }
+        if (!empty($Filename))
+        {
+          if (empty($Page)) { $Page = 0; }
+          if (empty($allfiles)) { $ContainerOnly = 1; }
+          $V .= "<hr>\n";
+          $text = _("Files matching");
+          $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
+          $V .= $this->GetUploadtreeFromName($Filename,$Page, $ContainerOnly);
+        }
         break;
       case "Text":
         break;
       default:
         break;
-      }
+    }
     if (!$this->OutputToStdout) { return($V); }
     print("$V");
     return;
-    } // Output()
+  } // Output()
 
-  };
+};
 $NewPlugin = new search_file;
 $NewPlugin->Initialize();
 
