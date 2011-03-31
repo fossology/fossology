@@ -41,7 +41,8 @@ class FoldersMoveMenuTest extends fossologyTestCase
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Folders /'));
-    $this->assertTrue($this->myassertText($loggedIn, '/Create/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Create/'),
+      "Organize->Folders->Create NOT found!\n");
     /* ok, this proves the text is on the page, let's see if we can
      * get to the move page.
      */
