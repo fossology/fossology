@@ -78,7 +78,8 @@ if [ ! $EVERYTHING ]; then
   for BUCKET in /usr/share/fossology/bucketpools/ /usr/local/share/fossology/bucketpools/; do
     if [ -d $BUCKET ] && [ $(ls -A $BUCKET) ]; then
         echo "ERROR: you have bucket data in $BUCKET,"
-        echo " please migrate it to the new location. See"
+        echo " please migrate it to the new location and ensure this directory"
+        echo " is empty before re-running fo-cleanold. See"
         echo " http://fossology.org/buckets for more info." 
         exit 1
     fi
