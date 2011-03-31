@@ -64,7 +64,8 @@ class UploadFileTest extends fossologyTestCase
     $upload_name = 'TestUploadFile-' . "$id";
     $this->assertTrue($this->mybrowser->setField('name', $upload_name ));
     /* we won't select any agents this time' */
-    $page = $this->mybrowser->clickSubmit('Upload!');
+    $page = $this->mybrowser->clickSubmit('Upload');
+    //print "*********** Page after pressing Upload! **************\n$page\n";
     $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, '/The file .*? has been uploaded/'),
       "FAILURE:Did not find the message 'The file .*? has been uploaded'\n");
