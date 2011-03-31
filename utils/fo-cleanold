@@ -134,9 +134,11 @@ FILES="
 /usr/local/bin/wrapGFM
 /usr/local/include/FMDir
 /usr/local/include/fm-paths.php
+/usr/local/include/libfossagent.h
 /usr/local/include/libfossdb.h
 /usr/local/include/libfossrepo.h
 /usr/local/lib/libcp2foss.h.php
+/usr/local/lib/libfossagent.a
 /usr/local/lib/libfossdb.a
 /usr/local/lib/libfossrepo.a
 /usr/local/lib/lib_projxml.h.php
@@ -144,7 +146,9 @@ FILES="
 /usr/local/lib/fossology/agents/departition
 /usr/local/lib/fossology/agents/mkbsamcache
 /usr/local/share/man/man1/cp2foss.1
+/usr/local/share/man/man1/fo_notify.1
 /usr/local/share/man/man1/fossjobs.1
+/usr/local/share/man/man1/fosslic.1
 "
 
 DIRS="/usr/local/fossology/
