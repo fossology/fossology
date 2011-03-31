@@ -399,6 +399,8 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
   {
     printf("FATAL: %s.%s.%d Failure to initialize bucket %s (pool=%d).\nError: %s\n",
            __FILE__, fcnName, __LINE__, filepath, bucketpool_pk, strerror(errno));
+    printf("In v1.3, files were in %s.  To be LSB compliate, v1.4 now requires them to be in %s\n",
+           DATADIR, PROJECTSTATEDIR);
     return 0;
   }
 
