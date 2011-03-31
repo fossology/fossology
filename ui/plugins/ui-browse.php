@@ -45,20 +45,9 @@ class ui_browse extends FO_Plugin {
   function Install() {
 
     global $DB;
-    global $PG_CONN;
 
     if (empty($DB)) {
-      $pluginRef = plugin_find_any('db');  // can be null
-      if(!empty($pluginRef))
-      {
-        $pluginRef->State == PLUGIN_STATE_VALID;
-        $pluginRef->PostInitialize();
-        if(empty($DB))
-        {
-          return (1);
-        }
-        $pluginRef->db_init();
-      }
+      return(1);
     } /* No DB */
 
     /****************
@@ -83,6 +72,37 @@ class ui_browse extends FO_Plugin {
       }
       $DB->Action("SELECT setval('folder_folder_pk_seq',$Max);");
     }
+    return (0);
+  } // Install()
+
+  function PostInitialize()
+  {
+    global $Plugins;
+    global $DB, $PG_CONN;
+
+    if ($this->State != PLUGIN_STATE_VALID) {
+      return(0);
+    } // don't run
+    if (empty($_SESSION['User']) && $this->LoginFlag) {
+      return(0);
+    }
+    // Make sure dependencies are met
+    foreach($this->Dependency as $key => $val) {
+      $id = plugin_find_id($val);
+      if ($id < 0) {
+        $this->Destroy();
+        return(0);
+      }
+    }
+    // It worked, so mark this plugin as ready.
+    $this->State = PLUGIN_STATE_READY;
+    $Sql = "SELECT * from sysconfig WHERE variablename='GlobalSearch';";
+    $result = pg_query($PG_CONN, $Sql);
+    DBCheckResult($result, $Sql, __FILE__, __LINE__);
+    $searchInfo = pg_fetch_all($result);
+    $confValue = strtoupper($searchInfo[0]['conf_value']);
+    //echo "<pre>SF-POSTI: checking values\n</pre>";
+
     // check if public browsing is allowed
     $Sql = "SELECT * from sysconfig WHERE variablename='PublicBrowse';";
     $result = pg_query($PG_CONN, $Sql);
@@ -92,19 +112,32 @@ class ui_browse extends FO_Plugin {
     if($confValue == "TRUE")
     {
       $this->LoginFlag = 0;
+      if ($this->MenuList !== "") {
+        menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+      }
+      return($this->State == PLUGIN_STATE_READY);
     }
     if($confValue == "FALSE")
     {
       $this->LoginFlag = 1;
-      $pluginRef = plugin_find_any('browse');  // can be null
-      if(!empty($pluginRef))
+      if (empty($_SESSION['User']))   // not logged in
       {
-        $pluginRef->State = PLUGIN_STATE_VALID;
+        $pluginRef = plugin_find_any('browse');  // can be null
+        if(!empty($pluginRef))
+        {
+          return($pluginRef->State = PLUGIN_STATE_INVALID);
+          //$pluginRef->State = PLUGIN_STATE_VALID;
+        }
+      }
+      else    // logged in
+      {
+        if ($this->MenuList !== "") {
+          menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+        }
       }
     }
     pg_free_result($result);
-    return (0);
-  } // Install()
+  } // PostInitialize()
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
