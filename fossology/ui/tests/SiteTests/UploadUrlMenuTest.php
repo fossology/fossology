@@ -49,7 +49,7 @@ class UploadUrlMenuTest extends fossologyTestCase
      */
     $page = $this->mybrowser->get("$URL?mod=upload_url");
     $this->assertTrue($this->myassertText($page, '/Upload from URL/'));
-    $this->assertTrue($this->myassertText($page, '/Enter the URL to the file:/'));
+    $this->assertTrue($this->myassertText($page, '/Enter the URL to the file/'));
   }
 }
 ?>
