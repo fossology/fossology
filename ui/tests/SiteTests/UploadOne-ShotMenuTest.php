@@ -47,9 +47,9 @@ class UploadOneShotMenuTest extends fossologyTestCase
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $this->mybrowser->get("$URL?mod=upload_url");
-    $this->assertTrue($this->myassertText($page, '/Upload from URL/'));
-    $this->assertTrue($this->myassertText($page, '/Enter the URL to the file:/'));
+    $page = $this->mybrowser->get("$URL?mod=agent_nomos_once");
+    $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'));
+    $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
   }
 }
 ?>
