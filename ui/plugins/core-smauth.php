@@ -176,14 +176,18 @@ class core_smauth extends FO_Plugin {
           $BucketPool = 'null';       //didn't exist in bucketpool table, set it 'null'
         }
       } else {
-        /* if didn't define bucketpool from sycconf. Get bucketpool from bucketpool table*/
-        $sql = "SELECT bucketpool_pk FROM bucketpool WHERE active='Y' ORDER BY bucketpool_pk;";
+        /* if didn't define bucketpool from sycconf.And only a single bucketpool record, get bucketpool from bucketpool table. If more than one, set it null*/
+        $sql = "SELECT bucketpool_pk FROM bucketpool;";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $R = pg_fetch_assoc($result);
-        pg_free_result($result);
-        if (!empty($R['bucketpool_pk']))
-          $BucketPool = $R['bucketpool_pk'];
+        if (pg_num_rows($result) == 1) {
+          $R = pg_fetch_assoc($result);
+          pg_free_result($result);
+          if (!empty($R['bucketpool_pk']))
+            $BucketPool = $R['bucketpool_pk'];
+        } else {
+          $BucketPool = 'null';
+        }
       }
     }
     /* See if the user exists */
