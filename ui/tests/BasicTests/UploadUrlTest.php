@@ -51,7 +51,7 @@ class UploadUrlTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($loggedIn, '/From URL/'));
     $page = $this->mybrowser->get("$URL?mod=upload_url");
     $this->assertTrue($this->myassertText($page, '/Upload from URL/'));
-    $this->assertTrue($this->myassertText($page, '/Enter the URL to the file:/'));
+    $this->assertTrue($this->myassertText($page, '/Enter the URL to the file/'));
 
     /* select Testing folder, filename based on pid or session number */
 
