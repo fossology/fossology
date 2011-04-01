@@ -550,9 +550,9 @@ $text1 = _("Definition\n");
       }
     }
     $this->InitAgents($Debug);
-    $this->InitDatafiles($Debug);
     return (0);
   } // InitSchema()
+  
   /***********************************************************
   InitAgents(): Every agent program must be run one time with
   a "-i" before being used.  This allows them to configure the DB
@@ -585,105 +585,6 @@ $text1 = _("Definition\n");
       }
     }
   } // InitAgents()
-  /***********************************************************
-  InitDatafiles(): Initialize any datafiles.
-  ***********************************************************/
-  function InitDatafiles($Debug = 1) {
-    print "  Initializing data files.  This may take a few minutes.\n";
-    flush();
-    $CWD = getcwd();
-    global $DATADIR;
-    global $AGENTDIR;
-    global $PROJECTSTATEDIR;
-    if ($Debug) {
-      print "Going to $DATADIR/agents/licenses\n";
-    }
-    chdir("$DATADIR/agents/licenses");
-    $CMD = 'find . -type f | grep -v "\.meta" | sed -e "s@^./@@"';
-    $Filelist = explode("\n", shell_exec($CMD));
-    sort($Filelist);
-    $Realdir = "$PROJECTSTATEDIR/agents";
-    if (!is_dir($Realdir)) {
-      die("FATAL: Directory '$Realdir' does not exist. Aborting.\n");
-    }
-    if (!is_writable($Realdir)) {
-      die("FATAL: Directory '$Realdir' is not writable. Aborting.\n");
-    }
-    $Realfile = "$Realdir/License.bsam";
-    $Tempfile = $Realfile . ".new";
-    if (file_exists($Tempfile)) {
-      if (!unlink($Tempfile)) {
-        print "Unable to delete '$Tempfile'\n";
-        flush();
-        exit(1);
-      }
-    }
-    $Count = 0;
-    print "    Processing " . (count($Filelist) - 1) . " license templates.\n";
-    flush();
-    print "    ";
-    foreach($Filelist as $File) {
-      if (empty($File)) {
-        continue;
-      }
-      $Count++;
-      if (file_exists($File . ".meta")) {
-        $CMD = "$AGENTDIR/Filter_License -Q -O -M '" . $File . ".meta' '$File' >> $Tempfile";
-      }
-      else {
-        $CMD = "$AGENTDIR/Filter_License -Q -O '$File' >> $Tempfile";
-      }
-      if ($Debug) {
-        print "$CMD\n";
-      }
-      else {
-        print ".";
-        flush();
-        if (($Count % 50) == 0) {
-          print "$Count\n    ";
-          flush();
-        }
-        system($CMD, $rc);
-        if ($rc != 0) {
-          print "Command failed: '$CMD'. Aborting.\n";
-          flush();
-          exit;
-        }
-      }
-    }
-    /* Test the new file */
-    $CMD = "$AGENTDIR/bsam-engine -t '$Tempfile'";
-    if ($Debug) {
-      print "$CMD\n";
-    }
-    else {
-      system($CMD, $rc);
-      if ($rc != 0) {
-        print "FAILED: Unable to validate the new cache file.\n";
-        print "Command failed: '$CMD'. Aborting.\n";
-        flush();
-        exit;
-      }
-    }
-    /* Move it into place */
-    @chgrp($Realfile, "fossy");
-    @chmod($Realfile, 0660);
-    $CMD = "cat '$Tempfile' > '$Realfile'";
-    if ($Debug) {
-      print "$CMD\n";
-    }
-    else {
-      system($CMD, $rc);
-      unlink($Tempfile);
-      if ($rc != 0) {
-        print "Command failed: '$CMD'. Aborting.\n";
-        flush();
-        exit;
-      }
-    }
-    print "!\n";
-    flush();
-  } // InitDatafiles()
 
   /***********************************************************
   (): This function is called when user output is
