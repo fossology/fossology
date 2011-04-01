@@ -103,8 +103,14 @@ class ui_menu extends FO_Plugin
           {
             $V .= '" target="' . $M->Target . '">';
           }
-          if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName . "(" . $M->Order . ")"; }
-          else { $V .= $M->Name; }
+          if (@$_SESSION['fullmenudebug'] == 1)
+          {
+            $V .= $M->FullName . "(" . $M->Order . ")";
+          }
+          else
+          {
+            $V .= $M->Name;
+          }
         }
         else
         {
@@ -112,15 +118,27 @@ class ui_menu extends FO_Plugin
           if (empty($M->SubMenu))
           {
             $V .= "<font color='#C0C0C0'>";
-            if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName . "(" . $M->Order . ")"; }
-          //else { $V .= $M->Name; }
-            else { $V .= ''; }
+            if (@$_SESSION['fullmenudebug'] == 1)
+            {
+              $V .= $M->FullName . "(" . $M->Order . ")";
+            }
+            //else { $V .= $M->Name; }
+            else
+            {
+              $V .= '';
+            }
             $V .= "</font>";
           }
           else
           {
-            if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName . "(" . $M->Order . ")"; }
-            else { $V .= $M->Name; }
+            if (@$_SESSION['fullmenudebug'] == 1)
+            {
+              $V .= $M->FullName . "(" . $M->Order . ")";
+            }
+            else
+            {
+              $V .= $M->Name;
+            }
           }
         }
 
@@ -138,8 +156,11 @@ class ui_menu extends FO_Plugin
     }
     $V .= "</ul>\n";
     $V .= "<!--[if lt IE 7]></td></tr></table></a><![endif]-->\n";
-    return($V);
-  } // menu_html()
+    // Remove all empty menus of the form
+    // <li><a href=\"#\"><font color='#C0C0C0'></font></a>
+    $NewV = preg_replace("|<li><a href=\"#\"><font color(.*)*?$|m", '', $V);
+    return($NewV);
+    } // menu_html()
 
   /********************************************
    OutputCSS(): Create the output CSS.
@@ -328,9 +349,9 @@ class ui_menu extends FO_Plugin
             $text = _("User");
             $V .= "<small>$text:</small> " . @$_SESSION['User'] . "<br>";
             if (plugin_find_id("auth") >= 0)
-              $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
+            $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
             else
-              $V .= "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
+            $V .= "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
             /* Use global system SupportEmail variables, if addr and label are set */
             if (@$SysConf['SupportEmailLabel'] and @$SysConf['SupportEmailAddr'])
             {
