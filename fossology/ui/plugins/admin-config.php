@@ -35,6 +35,7 @@ class foconfig extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
   var $CreateAttempts = 0;
+  public $PluginLevel = 50;    // run before 'regular' plugins
 
   /* constants but defined as variables because of easier usage in code */
   var $vartype_int = 1;
