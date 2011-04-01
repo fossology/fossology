@@ -1,5 +1,5 @@
-/* **************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+/***************************************************************
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,18 +14,17 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-************************************************************** */
+***************************************************************/
+
+/***************************************************************
+ * @brief Common C agent functions
+ *
+ * This file contains common C agent funcitons and the 
+ * API for working with the scheduler.
+***************************************************************/
+
 /* local includes */
-#include <libfossscheduler.h>
-
-/* library includes */
-#include <signal.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/file.h>
-#include <unistd.h>
-
-#define ALARM_SECS 30
+#include "libfossscheduler.h"
 
 #ifndef SVN_REV
 #define SVN_REV "SVN_REV Unknown"
@@ -50,9 +49,14 @@ int  found;             ///< if the agent is even connected to the scheduler
 int verbose;
 
 /**
- * TODO
+ * @brief fo_heartbeat() isn an internal function to send a heartbeat to the 
+ * scheduler along with the number of items processed.
+ * Agents should NOT call this function directly.
+ *
+ * This is the alarm SIGALRM function.
+ * @return void
  */
-void heartbeat()
+void fo_heartbeat()
 {
   fprintf(stdout, "HEART: %d\n", items_processed);
   fflush(stdout);
@@ -64,16 +68,22 @@ void heartbeat()
 /* ************************************************************************** */
 
 /**
- * TODO
+ * @brief fo_scheduler_heart() 
+ * This function must be called by agents to let the scheduler know they
+ * are alive and how many items they have processed.
  *
- * @param i
+ * @param i   This is the number of itmes processed since the last call to 
+ * fo_scheduler_heart()
+ *
+ * @return void
  */
-void  scheduler_heart(int i)
+void  fo_scheduler_heart(int i)
 {
   items_processed += i;
 }
 
 /**
+ * @brief fo_scheduler_connect()
  * Function to establish a connection between an agent and the scheduler.
  *
  * Steps taken by this function:
@@ -85,8 +95,12 @@ void  scheduler_heart(int i)
  *
  * Making a call to this function should be the first thing that an agent does
  * after parsing its command line arguments.
+ *
+ * @param int* argc
+ * @param char** argv
+ * @returns void
  */
-void scheduler_connect(int* argc, char** argv)
+void fo_scheduler_connect(int* argc, char** argv)
 {
   found = 0;
 
@@ -106,8 +120,8 @@ void scheduler_connect(int* argc, char** argv)
   verbose = 0;
 
   /* send "OK" to the scheduler */
-  exit(0);
-  if(found) {
+  if(found) 
+  {
     fprintf(stdout, "OK\n");
     fflush(stdout);
 
@@ -115,25 +129,23 @@ void scheduler_connect(int* argc, char** argv)
     // TODO
 
     /* set up the heartbeat() */
-    signal(SIGALRM, heartbeat);
+    signal(SIGALRM, fo_heartbeat);
     alarm(ALARM_SECS);
   }
 }
 
 /**
- * Function to cleanup the connection between an agent and the scheduler
- *
- * Steps taken by this function:
- *   - send "CLOSED" to the scheduler
- *   - return or call exit(0)
- *
+ * @brief Function to disconnect the scheduler connection.
  * Making a call to this function should be the last thing that an agent does
- * before exiting
+ * before exiting.
+ *
+ * @return There is no return.  This function calls an exit(0)
  */
-void scheduler_disconnect()
+void fo_scheduler_disconnect()
 {
   /* send "CLOSED" to the scheduler */
-  if(found) {
+  if(found) 
+  {
     fprintf(stdout, "BYE\n");
     fflush(stdout);
   }
@@ -143,9 +155,8 @@ void scheduler_disconnect()
 }
 
 /**
- * Most important part of the agent API. This function will get the next
- * part of the job that is being performed. This function will return a
- * string, it will be the job of the agent to decide how this string is
+ * @brief Get the next data to process from the scheduler.
+ * It is the job of the agent to decide how this string is
  * interpreted.
  *
  * Steps taken by this function:
@@ -162,7 +173,7 @@ void scheduler_disconnect()
  * @return char* for the next thing to analyze, NULL if there is nothing
  *          left in this job, in which case the agent should close
  */
-char* scheduler_next()
+char* fo_scheduler_next()
 {
   fflush(stdout);
 
@@ -176,19 +187,19 @@ char* scheduler_next()
   {
     fprintf(stdout, "OK\n");
     fflush(stdout);
-    return scheduler_next();
+    return fo_scheduler_next();
   }
   else if(strncmp(buffer, "VERBOSE", 7) == 0)
   {
     verbose = atoi(&buffer[8]);
     valid = 0;
-    return scheduler_next();
+    return fo_scheduler_next();
   }
   else if(strncmp(buffer, "VERSION", 7) == 0)
   {
     fprintf(stdout, "%s\n", SVN_REV);
     valid = 0;
-    return scheduler_next();
+    return fo_scheduler_next();
   }
 
   valid = 1;
@@ -196,11 +207,14 @@ char* scheduler_next()
 }
 
 /**
- * TODO
+ * @brief Get the last read string from the scheduler.
  *
- * @return
+ * @return Returns the string buffer if it is valid.  
+ * If it is not valid, return NULL
+ * The buffer is not valid if the last received data from the scheduler
+ * was a command, rather than data to operate on.
  */
-char* scheduler_current()
+char* fo_scheduler_current()
 {
   return valid ? buffer : NULL;
 }
