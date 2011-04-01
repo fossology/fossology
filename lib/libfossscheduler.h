@@ -23,6 +23,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* library includes */
 #include <stdio.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/file.h>
+#include <unistd.h>
+
+#define ALARM_SECS 30
+
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
@@ -100,15 +108,15 @@ extern int verbose;
 /* **** Agent api *********************************************************** */
 /* ************************************************************************** */
 
-void  scheduler_heart(int i);
-void  scheduler_connect(int* argc, char** argv);
-void  scheduler_disconnect();
-char* scheduler_next();
+void  fo_scheduler_heart(int i);
+void  fo_scheduler_connect(int* argc, char** argv);
+void  fo_scheduler_disconnect();
+char* fo_scheduler_next();
 
 /* ************************************************************************** */
 /* **** Accessor Functions ************************************************** */
 /* ************************************************************************** */
 
-char* scheduler_current();
+char* fo_scheduler_current();
 
 #endif /* LIBFOSSSCHEDULER_H_INCLUDE */
