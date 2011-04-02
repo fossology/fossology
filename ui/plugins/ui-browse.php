@@ -96,12 +96,6 @@ class ui_browse extends FO_Plugin {
     }
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
-    $Sql = "SELECT * from sysconfig WHERE variablename='GlobalSearch';";
-    $result = pg_query($PG_CONN, $Sql);
-    DBCheckResult($result, $Sql, __FILE__, __LINE__);
-    $searchInfo = pg_fetch_all($result);
-    $confValue = strtoupper($searchInfo[0]['conf_value']);
-    //echo "<pre>SF-POSTI: checking values\n</pre>";
 
     // check if public browsing is allowed
     $Sql = "SELECT * from sysconfig WHERE variablename='PublicBrowse';";
@@ -126,7 +120,6 @@ class ui_browse extends FO_Plugin {
         if(!empty($pluginRef))
         {
           return($pluginRef->State = PLUGIN_STATE_INVALID);
-          //$pluginRef->State = PLUGIN_STATE_VALID;
         }
       }
       else    // logged in
