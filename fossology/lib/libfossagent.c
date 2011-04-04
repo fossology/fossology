@@ -19,62 +19,7 @@
  ***************************************************************/
 #include "libfossology.h"
 
-#define lstat64(x,y) lstat(x,y)
-#define stat64(x,y) stat(x,y)
-typedef struct stat stat_t;
-
 #define FUNCTION
-
-
-/**********************************************
- ReadLine(): Read a command from a stream.
- If the line is empty, then try again.
- Returns line length, or -1 of EOF.
- **********************************************/
-FUNCTION int fo_ReadLine (FILE *Fin, char *Line, int MaxLine)
-{
-  int C;
-  int i;
-
-  if (!Fin) return(-1);
-  if (feof(Fin)) return(-1);
-  memset(Line,'\0',MaxLine);
-  i=0;
-  C=fgetc(Fin);
-  if (C<0) return(-1);
-  while(!feof(Fin) && (C>=0) && (i<MaxLine))
-    {
-    if (C=='\n')
-        {
-        if (i > 0) return(i);
-        /* if it is a blank line, then ignore it. */
-        }
-    else
-        {
-        Line[i]=C;
-        i++;
-        }
-    C=fgetc(Fin);
-    }
-  return(i);
-} /* fo_ReadLine() */
-
-
-/***************************************************
- IsFile(): Given a filename, is it a file?
- Link: should it follow symbolic links?
- Returns 1=yes, 0=no.
- ***************************************************/
-FUNCTION int fo_IsFile  (char *Fname, int Link)
-{
-  stat_t Stat;
-  int rc;
-  if (!Fname || (Fname[0]=='\0')) return(0);  /* not a directory */
-  if (Link) rc = stat64(Fname,&Stat);
-  else rc = lstat64(Fname,&Stat);
-  if (rc != 0) return(0); /* bad name */
-  return(S_ISREG(Stat.st_mode));
-} /* fo_IsFile() */
 
 
 /*********************************************************

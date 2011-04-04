@@ -19,7 +19,7 @@ all: $(OBJS) $(REPMAINS) $(LIB) $(EXE)
 $(LIB): $(OBJS)
 	$(AR) cr $@ $(OBJS)
 
-$(EXE): $(REPMAINS)  $(LIB)
+$(EXE): %: %.c $(REPMAINS)  $(LIB)
 	$(CC) $< $(ALL_CFLAGS) $(LIB) -o $@
 
 install: install-dev install-lib install-exe

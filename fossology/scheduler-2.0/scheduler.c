@@ -44,7 +44,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <glib.h>
 #include <gio/gio.h>
 
-char* process_name = "fossology-scheduler";
+#ifndef PROCESS_NAME
+#define PROCESS_NAME "fo_scheduler"
+#endif
 
 /* global flags */
 int verbose = 0;
@@ -116,6 +118,9 @@ void prnt_sig(int signo)
       lprintf("SIGNALS: Scheduler received interrupt signal, shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
       break;
+    case SIGHUP:
+      load_config();
+      break;
   }
 }
 
@@ -168,7 +173,7 @@ void update_scheduler()
  */
 int unlock_scheduler()
 {
-  return shm_unlink(process_name);
+  return shm_unlink(PROCESS_NAME);
 }
 
 /**
@@ -188,10 +193,10 @@ pid_t get_locked_pid()
   memset(buf, '\0', sizeof(buf));
 
   /* open the shared memory */
-  if((handle = shm_open(process_name, O_RDONLY, 0444)) < 0)
+  if((handle = shm_open(PROCESS_NAME, O_RDONLY, 0444)) < 0)
   {
     if(errno != ENOENT)
-      ERROR("failed to acquire shared memory", process_name);
+      ERROR("failed to acquire shared memory", PROCESS_NAME);
     return 0;
   }
 
@@ -199,7 +204,7 @@ pid_t get_locked_pid()
   bytes = read(handle, buf, sizeof(buf));
   if((pid = atoi(buf)) < 2)
   {
-    if(shm_unlink(process_name) == -1)
+    if(shm_unlink(PROCESS_NAME) == -1)
       ERROR("failed to remove invalid lock");
     return 0;
   }
@@ -232,7 +237,7 @@ pid_t lock_scheduler()
     return pid;
 
   /* no lock, create a new lock file */
-  if((handle = shm_open(process_name, O_RDWR|O_CREAT|O_EXCL, 0744)) == -1)
+  if((handle = shm_open(PROCESS_NAME, O_RDWR|O_CREAT|O_EXCL, 0744)) == -1)
   {
     ERROR("failed to open shared memory");
     return -1;
@@ -266,7 +271,7 @@ void set_usr_grp()
   setgroups(1, &(grp->gr_gid));
   if((setgid(grp->gr_gid) != 0) || (setegid(grp->gr_gid) != 0))
   {
-    fprintf(stderr, "FATAL %s.%d: %s must be run as root or %s\n", __FILE__, __LINE__, process_name, PROJECT_USER);
+    fprintf(stderr, "FATAL %s.%d: %s must be run as root or %s\n", __FILE__, __LINE__, PROCESS_NAME, PROJECT_USER);
     fprintf(stderr, "FATAL Set group '%s' aborting due to error: %s\n", PROJECT_GROUP, strerror(errno));
     exit(-1);
   }
@@ -282,7 +287,7 @@ void set_usr_grp()
   /* run as correct user, not as root or any other user */
   if((setuid(pwd->pw_uid) != 0) || (seteuid(pwd->pw_uid) != 0))
   {
-    fprintf(stderr, "FATAL %s.%d: %s must run this as %s\n", __FILE__, __LINE__, process_name, PROJECT_USER);
+    fprintf(stderr, "FATAL %s.%d: %s must run this as %s\n", __FILE__, __LINE__, PROCESS_NAME, PROJECT_USER);
     fprintf(stderr, "FATAL SETUID aborting due to error: %s\n", strerror(errno));
     exit(-1);
   }
@@ -304,8 +309,8 @@ void kill_scheduler()
     }
     else
     {
-      fprintf(stderr, "Exiting %s PID %d\n", process_name, pid);
-      lprintf(        "Exiting %s PID %d\n", process_name, pid);
+      fprintf(stderr, "Exiting %s PID %d\n", PROCESS_NAME, pid);
+      lprintf(        "Exiting %s PID %d\n", PROCESS_NAME, pid);
     }
 
     unlock_scheduler();
@@ -328,9 +333,11 @@ void load_config()
   int special = 0;          // anything that is special about the agent (EXCLUSIVE)
 
   // TODO set this up with DEFAULT_SETUP instead of this
-  if((dp = opendir("./agents/")) == NULL)
+  snprintf(buffer, sizeof(buffer), "%s/agents/", DEFAULT_SETUP);
+  if((dp = opendir(buffer)) == NULL)
   {
-    FATAL("Could not opend agent.conf directory");
+    FATAL("Could not open agent config directory");
+    return;
   }
 
   /* clear all previous configurations */
@@ -338,7 +345,8 @@ void load_config()
   host_list_clean();
 
   /* load the scheduler configuration */
-  istr = fopen("Scheduler.conf", "r"); //< change file path
+  snprintf(buffer, sizeof(buffer), "%s/fossology.conf", DEFAULT_SETUP);
+  istr = fopen(buffer, "r"); //< change file path
   while(fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
   {
     /* skip comments and blank lines */
@@ -558,6 +566,7 @@ int main(int argc, char** argv)
   signal(SIGTERM, prnt_sig);
   signal(SIGQUIT, prnt_sig);
   signal(SIGINT,  prnt_sig);
+  signal(SIGHUP,  prnt_sig);
 
   /* *********************************** */
   /* *** post initialization checks **** */

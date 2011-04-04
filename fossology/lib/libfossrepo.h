@@ -40,6 +40,7 @@
 #define LIBFOSSREPO_H
 
 #include <stdlib.h>
+
 /* specify support for files > 2G */
 #define __USE_LARGEFILE64
 #define __USE_FILE_OFFSET64
@@ -54,7 +55,6 @@
 #include <errno.h>
 #include <time.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <grp.h>

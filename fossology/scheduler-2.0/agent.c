@@ -324,7 +324,9 @@ void agent_listen(agent a)
 
     /* check for messages from scheduler or clean agent death */
     if( strncmp(buffer, "BYE", 3) == 0 || strncmp(buffer, "@@@1", 4) == 0)
+    {
       break;
+    }
     if(strncmp(buffer, "@@@0", 4) == 0 && a->updated)
     {
       aprintf(a, "%s\n", job_next(a->owner));
@@ -586,6 +588,8 @@ agent agent_init(host host_machine, job owner)
   a->owner = owner;
   a->updated = 0;
   a->n_updates = 0;
+  a->generation = 0;
+  a->data = NULL;
 
   /* open the relevant file pointers */
   if((a->read = fdopen(a->from_child, "r")) == NULL)
@@ -615,7 +619,7 @@ agent agent_init(host host_machine, job owner)
 agent agent_copy(agent a)
 {
   TEST_NULL(a, NULL);
-  if(a->generation == MAX_GENERATION)
+  if(a->generation >= MAX_GENERATION)
     return NULL;
 
   VERBOSE3("JOB[%d].%s[%d]: creating copy of agent\n",
@@ -626,7 +630,6 @@ agent agent_copy(agent a)
   cpy->generation = a->generation + 1;
 
   return cpy;
-  return NULL;
 }
 
 /**

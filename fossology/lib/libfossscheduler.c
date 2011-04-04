@@ -178,32 +178,34 @@ char* fo_scheduler_next()
   fflush(stdout);
 
   /* get the next line from the scheduler and possibly WAIT */
-  if(fgets(buffer, sizeof(buffer), stdin) == NULL || strncmp(buffer, "CLOSE", 5) == 0)
-  {
-    valid = 0;
-    return NULL;
-  }
-  else if(strncmp(buffer, "END", 3) == 0)
-  {
-    fprintf(stdout, "OK\n");
-    fflush(stdout);
-    return fo_scheduler_next();
-  }
-  else if(strncmp(buffer, "VERBOSE", 7) == 0)
-  {
-    verbose = atoi(&buffer[8]);
-    valid = 0;
-    return fo_scheduler_next();
-  }
-  else if(strncmp(buffer, "VERSION", 7) == 0)
-  {
-    fprintf(stdout, "%s\n", SVN_REV);
-    valid = 0;
-    return fo_scheduler_next();
+  while(fgets(buffer, sizeof(buffer), stdin) != NULL &&
+      strncmp(buffer, "CLOSE", 5) != 0) {
+    if(strncmp(buffer, "END", 3) == 0)
+    {
+      fprintf(stdout, "OK\n");
+      fflush(stdout);
+      valid = 0;
+      continue;
+    }
+    else if(strncmp(buffer, "VERBOSE", 7) == 0)
+    {
+      verbose = atoi(&buffer[8]);
+      valid = 0;
+      continue;
+    }
+    else if(strncmp(buffer, "VERSION", 7) == 0)
+    {
+      fprintf(stdout, "%s\n", SVN_REV);
+      valid = 0;
+      continue;
+    }
+
+    valid = 1;
+    return buffer;
   }
 
-  valid = 1;
-  return buffer;
+  valid = 0;
+  return NULL;
 }
 
 /**

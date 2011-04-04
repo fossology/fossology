@@ -19,7 +19,7 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(CFLAGS_SCHED) $(ALL_CFLAGS) -I. -lpq -lpcre
+CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpq -lpcre
 DEF = -DDATADIR='"$(DATADIR)"'
 
 EXE = copyright

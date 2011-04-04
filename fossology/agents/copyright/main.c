@@ -23,10 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <ctype.h>
 
 /* other library includes */
-#include <libfossagent.h>
-#include <libfossdb.h>
-#include <libfossrepo.h>
-#include <libfossscheduler.h>
+#include <libfossology.h>
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
@@ -392,7 +389,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   /* find the correct path to the file */
   if(*(int*)pair_second(current_file) >= 0)
   {
-    file_name = RepMkPath("files", (char*)pair_first(current_file));
+    file_name = fo_RepMkPath("files", (char*)pair_first(current_file));
   }
   else
   {
@@ -497,7 +494,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   }
 
   fclose(input_fp);
-  scheduler_heart(1);
+  fo_scheduler_heart(1);
 }
 
 /* ************************************************************************** */
@@ -767,7 +764,6 @@ int main(int argc, char** argv)
   long agent_pk = 0;            // the agents primary key
 
   /* Database structs */
-  void* DataBase = NULL;        // the Database object itself
   PGconn* pgConn = NULL;        // the connection to Database
   PGresult* pgResult = NULL;    // result of a database access
 
@@ -792,8 +788,11 @@ int main(int argc, char** argv)
     return -1;
   }
 
+  /* connect to scheduler */
+  fo_scheduler_connect(&argc, argv);
+
   /* parse the command line options */
-  while((c = getopt(argc, argv, "dc:ti")) != -1)
+  while((c = getopt(argc, argv, "dc:ti-")) != -1)
   {
     switch(c)
     {
@@ -825,13 +824,14 @@ int main(int argc, char** argv)
         copyright_destroy(copy);
         return 0;
       case 'i': /* initialize database connections */
-        DataBase = DBopen();
-        if(!DataBase) {
+        pgConn = fo_dbconnect();
+        if(!pgConn) {
           fprintf(cerr, "FATAL %s.%d: Copyright agent unable to connect to database.\n", __FILE__, __LINE__);
           exit(-1);
         }
-        DBclose(DataBase);
+        PQfinish(pgConn);
         return 0;
+      case '-': /* do nothing */ break;
       default: /* error, print usage */
         copyright_usage(argv[0]);
         return -1;
@@ -843,18 +843,17 @@ int main(int argc, char** argv)
   if(num_files == 0)
   {
     /* open the database */
-    DataBase = DBopen();
-    if(!DataBase)
+    pgConn = fo_dbconnect();
+    if(!pgConn)
     {
       fprintf(cerr, "FATAL: %s.%d: Copyright agent unable to connect to database.\n", __FILE__, __LINE__);
       exit(-1);
     }
 
     /* book keeping */
-    pgConn = DBgetconn(DataBase);
     pair_init(&curr, string_function_registry(), int_function_registry());
     db_connected = 1;
-    agent_pk = GetAgentKey(DataBase, AGENT_NAME, 0, "", AGENT_DESC);
+    agent_pk = fo_GetAgentKey(pgConn, AGENT_NAME, 0, "", AGENT_DESC);
 
     /* make sure that we are connected to the database */
     if(!check_copyright_table(pgConn))
@@ -862,8 +861,7 @@ int main(int argc, char** argv)
       exit(-1);
     }
 
-    scheduler_connect(argc, argv);
-    while((input = scheduler_next()) != NULL)
+    while((input = fo_scheduler_next()) != NULL)
     {
       upload_pk = atol(input);
 
@@ -887,7 +885,7 @@ int main(int argc, char** argv)
 
   if(db_connected)
   {
-    DBclose(DataBase);
+    PQfinish(pgConn);
   }
 
   if(verbose)
@@ -896,7 +894,7 @@ int main(int argc, char** argv)
   }
 
   copyright_destroy(copy);
-  scheduler_disconnect();
+  fo_scheduler_disconnect();
 
   return 0;
 }

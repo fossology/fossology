@@ -30,7 +30,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** data and sql statements ********************************************* */
 /* ************************************************************************** */
 
-void* db_struct = NULL;
 PGconn* db_conn = NULL;
 
 const char* basic_checkout = "\
@@ -84,11 +83,7 @@ const char* jobsql_paused = "\
  */
 void database_init()
 {
-  if(db_struct == NULL)
-    db_struct = DBopen();
-
-  if(db_conn == NULL)
-    db_conn = DBgetconn(db_struct);
+  db_conn = fo_dbconnect();
 }
 
 /**
@@ -96,8 +91,7 @@ void database_init()
  */
 void database_destroy()
 {
-  DBclose(db_struct);
-  db_struct = NULL;
+  PQfinish(db_conn);
   db_conn = NULL;
 }
 

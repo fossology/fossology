@@ -19,6 +19,8 @@
  ************************************************************/
 #include "libfossrepo.h"
 
+#include <sys/stat.h>
+
 #ifndef FOSSREPO_CONF
 #define FOSSREPO_CONF "/srv/fossology/repository"
 #endif
@@ -936,7 +938,7 @@ int	fo_RepOpen	()
     fo_RepMunmap(Config);
     }
 
-  chdir(CWD);
+  if(chdir(CWD)) return 0;
   return(RepConfig != NULL);
 } /* fo_RepOpen() */
 
