@@ -20,15 +20,16 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CC = gcc
 GLIB_FLAGS = `pkg-config --cflags --libs glib-2.0` -lgthread-2.0 -lgio-2.0
-CFLAGS_LOCAL = $(GLIB_FLAGS) $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpthread
-DEF   = -DAGENT_DIR='"$(DESTDIR)$(AGENTDIR)"' -DLOG_DIR='"$(LOGDIR)"' -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology/"'
-FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' -DPROJECT_GROUP='"$(PROJECTGROUP)"'
+CFLAGS_LOCAL = $(GLIB_FLAGS) $(CFLAGS_FO) $(ALL_CFLAGS) -I. -lpq -lpthread
+DEF   = -DAGENT_DIR='"$(DESTDIR)$(AGENTDIR)"' -DLOG_DIR='"$(LOGDIR)"' -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"'
 DEPEN = Makefile logging.h
 
-EXE = fossology-scheduler
-CLI = fossology-cli
+EXE = fo_scheduler
+CLI = fo_cli
+FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' -DPROJECT_GROUP='"$(PROJECTGROUP)"' -DPROCESS_NAME='"$(EXE)"'
+
+INITFILE=init.d/fossology
 
 #######################
 # objects and headers #
@@ -54,7 +55,7 @@ HEAD = agent.h \
 # executable build rules #
 ##########################
 
-all: $(EXE) $(CLI)
+all: $(EXE) $(CLI) defconf/init.d/fossology
 
 $(EXE): scheduler.c $(OBJS) $(VARS) $(HEAD) $(DEPEN)
 	$(CC) scheduler.c $(OBJS) $(DEF) $(FODEF) $(CFLAGS_LOCAL) -o $@
@@ -105,8 +106,10 @@ logging.o: %.o: %.c $(DEPEN)
 # install build rules #
 #######################
 
-install: $(EXE)
-	@ echo "Installing init script..."
+install: all
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(LIBEXECDIR)/$(EXE)
+	$(INSTALL_PROGRAM  $(CLI) $(DESTDIR)$(LIBEXECDIR)/$(CLI)
+	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
 
 #####################
 # other build rules #
@@ -114,10 +117,16 @@ install: $(EXE)
 
 clean:
 	rm -f $(OBJS) *.a
-	rm -f $(EXE) $(CLI)
+	rm -f $(EXE) $(CLI) defconf/init.d/fossology
+
+test: all
+	@echo "NOTICE: no tests available for 2.0 scheduler"
+
+coverage:
+	@echo "NOTICE: no coverage available for 2.0 scheduler"
 
 include $(DEPS)
 
-
+.PHONE: all install uninstall clean test coverage
 
 

@@ -390,7 +390,7 @@ void job_remove_agent(job j, void* a)
   TEST_NULV(a);
   j->finished_agents = g_list_remove(j->finished_agents, a);
 
-  if(j->finished_agents == NULL)
+  if(j->finished_agents == NULL && j->status == JB_COMPLETE)
     g_tree_remove(job_list, &j->id);
 }
 
@@ -486,7 +486,7 @@ void job_update(job j)
       for(iter = j->failed_agents; iter != NULL; iter = iter->next)
       {
         /* get a new agent to handle the data from the fail agent */
-        if(j->finished_agents != NULL)
+        /*if(j->finished_agents != NULL)
         {
           a = (agent)g_list_first(j->finished_agents);
           j->finished_agents = g_list_remove(j->finished_agents, a);
@@ -494,7 +494,7 @@ void job_update(job j)
           agent_restart(a, (agent)iter->data);
           restart++;
         }
-        else if(agent_copy((agent)iter->data) != NULL)
+        else*/ if(agent_copy((agent)iter->data) != NULL)
         {
           restart++;
         }

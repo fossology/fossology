@@ -41,6 +41,8 @@
 #include "libfossdb.h"
 #include "libfossagent.h"
 
+#include "libfossscheduler.h"
+
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif /* SVN_REV */
@@ -862,7 +864,7 @@ int main(int argc, char **argv) {
 
     char *cp;
     char *agent_desc = "Nomos License Detection Agency";
-    char parm[myBUFSIZ];
+    char *parm = NULL;
     char **files_to_be_scanned; /**< The list of files to scan */
     char sqlbuf[1024];
     PGresult *result;
@@ -942,7 +944,7 @@ int main(int argc, char **argv) {
     /*
      Deal with command line options
      */
-
+    scheduler_connect(&argc, argv);
     while ((c = getopt(argc, argv, "hi")) != -1) {
 
         /* printf("start of while; argc is:%d\n", argc); */
@@ -984,15 +986,11 @@ int main(int argc, char **argv) {
         /* We're being run from the scheduler */
         /* DEBUG printf("   LOG: nomos agent starting up in scheduler mode....\n"); */
         schedulerMode = 1;
-        signal(SIGALRM, ShowHeartbeat);
-        alarm(AlarmSecs);
 
-        printf("OK\n");
-        fflush(stdout);
         /* read upload_pk from scheduler */
-        while (ReadLine(stdin, parm, myBUFSIZ) >= 0) 
+        while (scheduler_next() != NULL)
         {
-          upload_pk = atoi(parm);
+          upload_pk = atoi(scheduler_current());
           if (upload_pk == 0) continue; 
 
           /* Is this a duplicate request (same upload_pk, sameagent_fk)?
@@ -1009,8 +1007,6 @@ int main(int argc, char **argv) {
           {
             printf("LOG: Ignoring requested nomos analysis of upload %d - Results are already in database.\n",
                   upload_pk);
-            printf("OK\n");
-            fflush(stdout);
             continue;
           }
           PQclear(result);
@@ -1073,7 +1069,7 @@ int main(int argc, char **argv) {
             }
             freeAndClearScan(&cur);
 
-            Heartbeat(++HBItemsProcessed);
+            scheduler_heart(1);
           }
           PQclear(result);
 
@@ -1083,8 +1079,6 @@ int main(int argc, char **argv) {
                    ars_pk);
           result = PQexec(gl.pgConn, sqlbuf);
           if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
-          printf("OK\n"); /* tell scheduler ready for more data */
-          fflush(stdout);
         }
     }
     else {
@@ -1100,6 +1094,7 @@ int main(int argc, char **argv) {
         }
     }
     lrcache_free(&cacheroot);  // for valgrind
+    scheduler_disconnect();
     Bail(100);
 
     /* this will never execute but prevents a compiler warning about reaching 

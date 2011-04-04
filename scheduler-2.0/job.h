@@ -58,7 +58,7 @@ void job_pause_event(void* param);
 void job_restart_event(void* param);
 
 void job_add_agent(job j, void* age);
-//void job_remove_agent(job j, void* a);
+void job_remove_agent(job j, void* a);
 void job_finish_agent(job j, void* age);
 void job_fail_agent(job j, void* age);
 void job_set_priority(job j, int pri);

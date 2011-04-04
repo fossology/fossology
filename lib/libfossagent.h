@@ -18,21 +18,7 @@
 #define LIBFOSSAGENT_H
 
 #include <stdlib.h>
-
-/* specify support for files > 2G */
-#define __USE_LARGEFILE64
-#define __USE_FILE_OFFSET64
-
 #include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <string.h>
-#include <ctype.h>
-#include <signal.h>
-#include <grp.h>
-#include <errno.h>
 #include <libpq-fe.h>
 
 int  fo_GetAgentKey   (PGconn *pgConn, char *agent_name, long unused, char *cpunused, char *agent_desc);

@@ -12,4 +12,5 @@
 #ENABLED="0"
 
 # You can override scheduler options here
-#SCHEDULEROPT="-L /other/log/directory/"
+#SCHEDULEROPT_V1="-F /other/log/directory/"
+#SCHEDULEROPT_V2="--log=/other/log/directory/"
