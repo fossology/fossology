@@ -21,6 +21,7 @@
 #define	_GNU_SOURCE
 #endif	/* not defined _GNU_SOURCE */
 #include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <search.h>
 #include <unistd.h>
@@ -393,11 +394,6 @@ typedef	struct scanResults scanres_t;
 #define	MTAG_ENV	"environment variable"
 #define	MTAG_SCANRES	"scan-results list"
 
-#define	LABEL_ATTR	"==== Attributes ===="
-#define	LABEL_TEXT	"==== File Text ===="
-#define	LABEL_PATH	"Path:"
-#define	LABEL_CNTS	"Counts:"
-#define LABEL_HOTW	"Hotword: "
 
 /**
    Functions defined in nomos.c, used in other files
