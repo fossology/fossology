@@ -467,23 +467,19 @@ FILE *popenProc(char *command, char *mode)
 
 
 /*
- * VERY simple words-and-lines count, does NOT have to be perfect!
+ * VERY simple line count, does NOT have to be perfect!
  */
 char *wordCount(char *textp)
 {
     static char wcbuf[64];
-    int words;
     int lines;
-    int inword;
     char *cp;
 
 #ifdef	PROC_TRACE
 	traceFunc("== wordCount(%p)\n", textp);
 #endif	/* PROC_TRACE */
 
-    words = 0;
     lines = 0;
-    inword = 0;
     for (cp = textp; *cp; cp++) {
 	switch (*cp) {
 	case '\f':
@@ -492,28 +488,18 @@ char *wordCount(char *textp)
 	case '\r':
 	case '\v':
 	    lines++;
-	    if (inword) {
-		words++;
-		inword = 0;
-	    }
 	    break;
 	case ' ':
 	case '\t':
-	    if (inword) {
-		words++;
-		inword = 0;
-	    }
 	    break;
 	default:
-	    inword++;
 	    break;
 	}
     }
-    (void) sprintf(wcbuf, "%d lines, %d words", lines, words);
+    (void) sprintf(wcbuf, "%d lines", lines);
     /*
      * Save these values for use elsewhere, too.
      */
-    cur.nWords = words;
     cur.nLines = lines;
     return(wcbuf);
 }
@@ -1224,82 +1210,6 @@ void appendFile(char *pathname, char *str)
     return;
 }
 
-
-/* CDB ?? Really needed ?? Can we get rid of it easily */
-/*
- * This is the filter routine called in nftw() callback functions.  The 
- * general rule is to return 1 if we DON'T want to unpack an inode.
- * One flag we implement here is whether or not we want to remove any
- * files whose link count is >1.  We DON'T want to do this in the first
- * pass through a distribution, as it's reasonable for RPMs to have
- * links to other identical RPMs in other distros.
- */
-int nftwFileFilter(char *pathname, struct stat *st, int onlySingleLink)
-{
-    int ret = 0;
-    
-    if (S_ISDIR(st->st_mode)) {	/* no dirs, please */
-	if (access(pathname, X_OK) != 0) {
-	    chmodInode(pathname, (st->st_mode | S_IXUSR));
-#ifdef	QA_CHECKS
-	    Warn("corrected bad dir (mode) \"%s\"", pathname);
-#endif	/* QA_CHECKS */
-	}
-	return(1);
-    }
-#if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-	traceFunc("== nftwFileFilter(\"%s\", %p)\n", pathname, st);
-#endif	/* PROC_TRACE || UNPACK_DEBUG */
-
-    if (!S_ISREG(st->st_mode)) {
-#ifdef	UNPACK_DEBUG
-	if (S_ISLNK(st->st_mode)) {
-	    printf("*** symlink %s (stat)\n", pathname);
-	}
-	else if (S_ISBLK(st->st_mode)) {
-	    printf("*** block-mode %s (stat)\n", pathname);
-	}
-	else if (S_ISCHR(st->st_mode)) {
-	    printf("*** char-mode %s (stat)\n", pathname);
-	}
-	else if (S_ISSOCK(st->st_mode)) {
-	    printf("*** socket %s (stat)\n", pathname);
-	}
-	else if (S_ISFIFO(st->st_mode)) {
-	    printf("*** fifo/pipe %s (stat)\n", pathname);
-	}
-	else {
-	    printf("*** UNKNOWN? 0%o %s (stat)\n", st->st_mode,
-		   pathname);
-	    mySystem("ls -lid \"%s\"", pathname);
-	    mySystem("file \"%s\"", pathname);
-	}
-#endif	/* UNPACK_DEBUG */
-	ret = 1;
-    }
-    if (onlySingleLink && st->st_nlink != 1) {
-#ifdef	UNPACK_DEBUG
-	printf("+++ %s nlink == %d\n", pathname, st->st_nlink);
-#endif	/* UNPACK_DEBUG */
-	ret = 1;
-    }
-    if (st->st_size == 0) {
-#ifdef	UNPACK_DEBUG
-	printf("--- %s empty\n", pathname);
-#endif	/* UNPACK_DEBUG */
-	ret = 1;
-    }
-#ifdef notdef
-    if (!optionIsSet(OPTS_SRCONLY) && IS_HUGE(st->st_blocks)) {
-#ifdef	UNPACK_DEBUG
-	printf("*** huge file %s (%d blocks)\n", pathname,
-	       st->st_blocks);
-#endif	/* UNPACK_DEBUG */
-	ret = 1;
-    }
-#endif /* notdef */
-    return(ret);
-}
 
 int mySystem(const char *fmt, ...)
 {

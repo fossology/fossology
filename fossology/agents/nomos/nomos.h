@@ -316,14 +316,10 @@ struct curScan {
     list_t parseList;
     list_t offList;
     list_t lList;
-    list_t cList; 				/**< CDB - I don't think this is actually used. */
-    list_t eList; 				/**< CDB - I don't think this is actually used. */
     char compLic[myBUFSIZ];  	/**< the license(s) found, None or NotLikely.
     							     comma separated if multiple names are found.
      							*/
-    char name[128]; 			/* CDB, set, but not used. */
     int nLines;
-    int nWords; 				/**< CDB, set, but not used. */
     int cliMode;                /**< boolean to indicate running from command line */
     char *tmpLics;              /**< pointer to storage for parsed names */
     char *licenseList[512];     /**< list of license names found, can be a single name */
