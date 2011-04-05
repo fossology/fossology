@@ -345,37 +345,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		Note("%s-generated link, ignore header (%d bytes)!",
 		    gl.progName, scp->dataOffset);
 	}
-#if	0
-    if (strGrep(LABEL_TEXT, filetext, REG_ICASE|REG_NEWLINE)) {
-	char *x;
-	x = filetext + cur.regm.rm_eo;
-	cp = filetext + cur.regm.rm_eo;
-	(void) sprintf(name, "^\\[%s\\]$", LABEL_ATTR);
-	if (strGrep(LABEL_ATTR, filetext, REG_ICASE|REG_NEWLINE) &&
-	    strGrep(LABEL_PATH, filetext, REG_ICASE) &&
-	    strGrep(LABEL_CNTS, filetext, REG_ICASE)) {
-	    cp = strchr(x, '\n');
-	    if (lDiags) {
-		Note("%s-generated link, ignore header!",
-		     gl.progName);
-	    }
-	    filetext = cp+1;
-	}
-    } else if (strGrep(LABEL_HOTW, filetext, REG_ICASE|REG_NEWLINE)) {
-	if ((cp = findEol(filetext + cur.regm.rm_eo)) != NULL_STR) {
-	    while (isEOL(*cp)) {
-		cp++;
-	    }
-	    if (*cp == strncmp(cp, "########", 8) == 0) { /* CDB ? Precedence */
-		filetext += cur.regm.rm_so;
-		if (lDiags) {
-		    Note("%s-generated hotword file",
-			 gl.progName);
-		}
-	    }
-	}
-    }
-#endif
 
     /*
      * It's been observed over time that the file-magic() stuff doesn't always

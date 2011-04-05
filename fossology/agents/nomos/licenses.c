@@ -627,10 +627,6 @@ void licenseScan(list_t *licenseList) {
             /*printf("Zero length file: %s\n", cp); */
             continue;
         }
-        if (scp->dataOffset == iMadeThis(textp)) {
-            textp += scp->dataOffset;
-            cur.stbuf.st_size -= scp->dataOffset;
-        }
         scp->size = cur.stbuf.st_size; /* Where did this get set ? CDB */
         /*
          * Disinterest #3 (discriminate-by-file-content):
@@ -638,12 +634,18 @@ void licenseScan(list_t *licenseList) {
          * also be skipped (some are quite large!).  _UTIL_MAGIC (see _autodata.c)
          * contains a regex for MOST of the files we're interested in, but there
          * ARE some exceptions (logged below).
+         *
          *****
          * exception (A): patch/diff files are sometimes identified as "data".
          *****
          * FIX-ME: we don't currently use _UTIL_FILTER, which is set up to
          * exclude some files by filename.
          */
+         /*
+         * Scan for keywords (_KW_), and use the number found for the score.
+         */
+         assert(NKEYWORDS >= sizeof(scp->kwbm));
+         
             for (scp->kwbm = c = 0; c < NKEYWORDS; c++) {
                 if (idxGrep(c + _KW_first, textp, REG_EXTENDED | REG_ICASE)) {
                     scp->kwbm |= (1 << c);
