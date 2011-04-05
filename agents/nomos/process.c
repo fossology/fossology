@@ -129,7 +129,6 @@ void processRawSource()
     listDump(&cur.regfList, NO);
 #endif	/* PACKAGE_DEBUG */
 
-    (void) strcpy(cur.name, "(no package name)");
     processNonPackagedFiles();
     return;
 }

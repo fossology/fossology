@@ -151,6 +151,12 @@
 #####
 # License Text entries start here...
 #####
+#
+# Open Font License
+%ENTRY%	_LT_OPEN_FONT
+%KEY%	"font"
+%STR%	"open font license"
+
 %ENTRY%	_LT_ACAA_RIGHTS
 %KEY%	"so(ftware|urce)"
 %STR%	"ada conformity assessment authority ACAA (obtained|holds) unlimited rights in the software and documentation contained herein"

@@ -680,8 +680,6 @@ FUNCTION void freeAndClearScan(struct curScan *thisScan) {
     listClear(&thisScan->fLicFoundMap, DEALLOC_LIST);
     listClear(&thisScan->parseList, DEALLOC_LIST);
     listClear(&thisScan->lList, DEALLOC_LIST);
-    listClear(&thisScan->cList, DEALLOC_LIST);
-    listClear(&thisScan->eList, DEALLOC_LIST);
 
     /* remove keys, data and hash table */
     hdestroy();
@@ -720,8 +718,6 @@ FUNCTION void processFile(char *fileToScan) {
     listInit(&cur.fLicFoundMap, 0, "file-license-found map");
     listInit(&cur.parseList, 0, "license-components list");
     listInit(&cur.lList, 0, "license-list");
-    listInit(&cur.cList, 0, "copyright-list");
-    listInit(&cur.eList, 0, "eula-list");
 
     processRawSource();
 

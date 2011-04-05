@@ -596,7 +596,6 @@ void licenseScan(list_t *licenseList) {
      */
 
     lowest = nSkip = 0;
-
     for (scp = scores; (p = listIterate(licenseList)) != NULL_ITEM; scp++) {
 
         /*
@@ -855,12 +854,10 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
         if (scores[idx].dataOffset) {
             textp += scores[idx].dataOffset;
         }
-        /*
-         CDB - the wordCount function called here currently has the
-         important side-effect of setting nLines and nWords in the
-         global structure "cur".
-         */
+
+        /* wordCount() sets nLines in global structure "cur".  */
         wordCount(textp);
+
         /*
          * Report which package (if any) this file came from
          */
