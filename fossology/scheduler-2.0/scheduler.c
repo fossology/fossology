@@ -158,7 +158,7 @@ void update_scheduler()
     if((h = get_host(1)) == NULL)
       continue;
 
-    agent_init(h, j);
+    agent_init(h, j, 0);
   }
 }
 

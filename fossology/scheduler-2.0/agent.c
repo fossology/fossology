@@ -258,7 +258,7 @@ int agent_test(char* name, meta_agent ma, host h)
   static int id_gen = -1;
 
   job j = job_init(ma->name, id_gen--);
-  agent_init(h, j);
+  agent_init(h, j, 0);
   return 0;
 }
 
@@ -436,7 +436,7 @@ void* agent_spawn(void* passed)
     /* command as the last argument to the ssh command */
     else
     {
-      args = g_new(char*, 4);
+      args = g_new0(char*, 4);
       sprintf(buffer, "%s/%s", host_agent_dir(a->host_machine), a->meta_data->raw_cmd);
       args[0] = "/usr/bin/ssh";
       args[1] = host_address(a->host_machine);
@@ -538,7 +538,7 @@ void meta_agent_destroy(meta_agent ma)
  *
  * @param meta_data, the
  */
-agent agent_init(host host_machine, job owner)
+agent agent_init(host host_machine, job owner, int gen)
 {
   /* local variables */
   agent a;
@@ -588,7 +588,7 @@ agent agent_init(host host_machine, job owner)
   a->owner = owner;
   a->updated = 0;
   a->n_updates = 0;
-  a->generation = 0;
+  a->generation = gen;
   a->data = NULL;
 
   /* open the relevant file pointers */
@@ -625,9 +625,8 @@ agent agent_copy(agent a)
   VERBOSE3("JOB[%d].%s[%d]: creating copy of agent\n",
         job_id(a->owner), a->meta_data->name, a->pid);
 
-  agent cpy = agent_init(a->host_machine, a->owner);
+  agent cpy = agent_init(a->host_machine, a->owner, a->generation + 1);
   cpy->data = a->data;
-  cpy->generation = a->generation + 1;
 
   return cpy;
 }

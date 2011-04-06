@@ -86,7 +86,7 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc);
 void meta_agent_destroy(meta_agent ma);
 
 /* agent */
-agent agent_init(host host_machine, job owner);
+agent agent_init(host host_machine, job owner, int gen);
 agent agent_copy(agent a);
 void  agent_destroy(agent a);
 
