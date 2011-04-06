@@ -21,7 +21,7 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 GLIB_FLAGS = `pkg-config --cflags --libs glib-2.0` -lgthread-2.0 -lgio-2.0
-CFLAGS_LOCAL = $(GLIB_FLAGS) $(CFLAGS_FO) $(ALL_CFLAGS) -I. -lpq -lpthread
+CFLAGS_LOCAL = $(GLIB_FLAGS) $(ALL_CFLAGS) -I. -lpq -lpthread
 DEF   = -DAGENT_DIR='"$(DESTDIR)$(AGENTDIR)"' -DLOG_DIR='"$(LOGDIR)"' -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"'
 DEPEN = Makefile logging.h
 
