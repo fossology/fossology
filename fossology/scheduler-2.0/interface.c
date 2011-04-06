@@ -121,7 +121,7 @@ void* interface_thread(void* param)
     }
     else if(g_str_has_prefix("pause", cmd))
     {
-      params = g_new(arg_int, 1);
+      params = g_new0(arg_int, 1);
       params->first = get_job(atoi(strtok(NULL, " ")));
       params->second = 1;
       event_signal(job_pause_event, params);
@@ -130,7 +130,7 @@ void* interface_thread(void* param)
       load_config();
     else if(g_str_has_prefix("status", cmd))
     {
-      params = g_new(arg_int, 1);
+      params = g_new0(arg_int, 1);
       params->first = conn->ostr;
       params->second = (cmd = strtok(NULL, " ")) == NULL ? 0 : atoi(cmd);
       event_signal(job_status_event, params);
@@ -167,7 +167,7 @@ void* interface_thread(void* param)
  */
 interface_connection* interface_conn_init(GSocketConnection* conn)
 {
-  interface_connection* inter = (interface_connection*)calloc(1, sizeof(interface_connection));
+  interface_connection* inter = g_new0(interface_connection, 1);
 
   inter->conn = conn;
   inter->istr = g_io_stream_get_input_stream((GIOStream*)inter->conn);

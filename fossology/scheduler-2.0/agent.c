@@ -504,7 +504,7 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc)
   }
 
   /* inputs are valid, create the meta_agent */
-  ma = (meta_agent)calloc(1, sizeof(struct meta_agent_internal));
+  ma = g_new0(struct meta_agent_internal, 1);
 
   strcpy(cpy, cmd);
   strcpy(ma->name, name);
@@ -528,7 +528,7 @@ void meta_agent_destroy(meta_agent ma)
 {
   TEST_NULV(ma);
   g_free(ma->version);
-  free(ma);
+  g_free(ma);
 }
 
 /**
@@ -554,7 +554,7 @@ agent agent_init(host host_machine, job owner, int gen)
   }
 
   /* allocate memory and do trivial assignments */
-  a = (agent)calloc(1, sizeof(struct agent_internal));
+  a = g_new(struct agent_internal, 1);
   a->meta_data = g_tree_lookup(meta_agents, job_type(owner));
   a->status = AG_CREATED;
 
@@ -655,7 +655,7 @@ void agent_destroy(agent a)
   fclose(a->read);
 
   /* release the child process */
-  free(a);
+  g_free(a);
 }
 
 /* ************************************************************************** */
@@ -701,7 +701,7 @@ void agent_death_event(void* pids)
   if(db) database_update_event(NULL);
 
   /* clean up the passed params */
-  free(pids);
+  g_free(pids);
 }
 
 /**

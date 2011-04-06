@@ -76,7 +76,7 @@ void chld_sig(int signo)
   int status;       // status returned by waitpit()
 
   /* initialize memory */
-  pid_list = (pid_t*)calloc(num_agents() + 1, sizeof(pid_t));
+  pid_list = g_new0(pid_t, num_agents() + 1);
   idx = 0;
 
   /* get all of the dead children's pids */
@@ -350,8 +350,8 @@ void load_config()
   while(fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
   {
     /* skip comments and blank lines */
-    if(buffer[0] == '#');
-    else if(buffer[0] == '\0');
+    if(buffer[0] == '#') { /* do nothing */ }
+    else if(buffer[0] == '\0') { /* do nothing */ }
     /* check the port that the interface wil use */
     else if(strncmp(buffer, "port=", 5) == 0 && !is_port_set())
       set_port(atoi(&buffer[5]));
@@ -390,7 +390,7 @@ void load_config()
       /* file to close                            */
       while(fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
       {
-        if(buffer[0] == '#');
+        if(buffer[0] == '#') { /* do nothing */ }
         else if(strncmp(buffer, "name=", 5) == 0)
           strncpy(name, buffer + 5, strlen(buffer + 5) - 1);
         else if(strncmp(buffer, "command=", 8) == 0)
