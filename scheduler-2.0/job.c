@@ -252,7 +252,7 @@ void job_list_clean()
  */
 job job_init(char* type, int id)
 {
-  job j = (job)calloc(1, sizeof(struct job_internal));
+  job j = g_new0(struct job_internal, 1);
 
   j->agent_type = g_strdup(type);
   j->running_agents =  NULL;
@@ -300,8 +300,7 @@ void job_destroy(job j)
   g_list_free(j->failed_agents);
   g_free(j->agent_type);
   g_free(j->data);
-
-  free(j);
+  g_free(j);
 }
 
 /* ************************************************************************** */

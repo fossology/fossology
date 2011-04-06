@@ -109,7 +109,7 @@ void host_list_clean()
  */
 void host_init(char* name, char* address, char* agent_dir, int max)
 {
-  host h = (host)calloc(1, sizeof(struct host_internal));
+  host h = g_new0(struct host_internal, 1);
 
   h->name = g_strdup(name);
   h->address = g_strdup(address);
@@ -132,7 +132,7 @@ void host_destroy(host h)
   g_free(h->name);
   g_free(h->address);
   g_free(h->agent_dir);
-  free(h);
+  g_free(h);
 }
 
 /* ************************************************************************** */
