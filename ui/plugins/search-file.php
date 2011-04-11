@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -36,12 +36,39 @@ class search_file extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_READ;
   public $LoginFlag  = 0;
 
+  function PostInitialize()
+  {
+    global $SysConf;
+
+    /* This plugin is only valid if the system allows global searching
+     * (searching across the entire repository).  Or if the user
+     * is an admin.
+     */
+    if ((strcasecmp(@$SysConf["GlobalSearch"],"true") == 0) or
+        (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN))
+      $this->State = PLUGIN_STATE_READY;
+    else
+      $this->State = PLUGIN_STATE_INVALID; // No authorization for global search
+    return $this->State;
+  }
+
+  /***********************************************************
+   RegisterMenus(): Customize submenus.
+   ***********************************************************/
+  function RegisterMenus()
+  {
+    global $SysConf;
+
+    menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+  } // RegisterMenus()
+
   /***********************************************************
    GetUploadtreeFromName(): Given a name, return all records.
    ***********************************************************/
   function GetUploadtreeFromName($Filename,$Page, $ContainerOnly=1)
   {
     global $DB;
+
     $Max = 50;
     $Filename = str_replace("'","''",$Filename); // protect DB
     $Terms = split("[[:space:]][[:space:]]*",$Filename);
@@ -83,62 +110,6 @@ class search_file extends FO_Plugin
     if (!empty($VM)) { $V .= "<P />\n" . $VM; }
     return($V);
   } // GetUploadtreeFromName()
-
-  function PostInitialize()
-  {
-    global $Plugins;
-    global $DB, $PG_CONN;
-    
-    if ($this->State != PLUGIN_STATE_VALID) {
-      return(0);
-    } // don't run
-    if (empty($_SESSION['User']) && $this->LoginFlag) {
-      return(0);
-    }
-    // Make sure dependencies are met
-    foreach($this->Dependency as $key => $val) {
-      $id = plugin_find_id($val);
-      if ($id < 0) {
-        $this->Destroy();
-        return(0);
-      }
-    }
-    // It worked, so mark this plugin as ready.
-    $this->State = PLUGIN_STATE_READY;
-    $Sql = "SELECT * from sysconfig WHERE variablename='GlobalSearch';";
-    $result = pg_query($PG_CONN, $Sql);
-    DBCheckResult($result, $Sql, __FILE__, __LINE__);
-    $searchInfo = pg_fetch_all($result);
-    $confValue = strtoupper($searchInfo[0]['conf_value']);
-    //echo "<pre>SF-POSTI: checking values\n</pre>";
-    if($confValue == "TRUE")
-    {
-
-      if ($this->MenuList !== "") {
-        menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
-      }
-      return($this->State == PLUGIN_STATE_READY);
-    }
-    if($confValue == "FALSE")
-    {
-      $pluginRef = plugin_find_any('search_file');  // can be null
-      if(!empty($pluginRef))
-      {
-        return($pluginRef->State = PLUGIN_STATE_INVALID);
-      }
-    }
-  } // PostInitialize()
-
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
-  function RegisterMenus()
-  {
-    $URI = $this->Name;
-    $text = _("Search based on filename");
-    menu_insert("Search::Filename",0,$URI,$text);
-
-  } // RegisterMenus()
 
   /***********************************************************
    Output(): Display the loaded menu and plugins.

@@ -34,6 +34,18 @@ require_once("common/common.php");
  This is the main guts of the UI: Find the plugin and run it.
  ****************************************************/
 //$_SERVER['HTTP_SMUNIVERSALID'] = "dong.ma@hp.com";
+
+/* Connect to the database.  If the connection fails,
+ * DBconnect() will print a failure message and exit.
+ */
+DBconnect();
+
+/* Initialize global system configuration variables $SysConfig[] */
+ConfigInit();
+
+/* Initialize the global system configuration variables */
+$SysConf = ConfigInit();
+
 plugin_load("plugins");
 
 $Mod = GetParm("mod",PARM_STRING);
@@ -41,9 +53,6 @@ if (!isset($Mod)) { $Mod = "Default"; }
 $PluginId = plugin_find_id($Mod);
 if ($PluginId >= 0)
   {
-  /* Initialize global system configuration variables $SysConfig[] */
-  InitSysConfig();
-
   /* Found a plugin, so call it! */
   $Plugins[$PluginId]->OutputOpen("HTML",1);
   // error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
@@ -69,31 +78,4 @@ else
 plugin_unload();
 return(0);
 
-/*  Initialize global system configuration variables $SysConfig[] */
-function InitSysConfig()
-{
-  global $SysConf;
-  global $PG_CONN;
-  global $Plugins;
-
-  $PluginId = plugin_find_id("foconfig");
-  if ($PluginId >= 0)
-  {
-    /* make sure config table exists */
-    $Plugins[$PluginId]->Install();
-    $sql = "select variablename, conf_value from sysconfig";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-    while($row = pg_fetch_assoc($result))
-    {
-      $SysConf[$row['variablename']] = $row['conf_value'];
-    }
-    pg_free_result($result);
-  }
-  else
-  {
-    /* nothing, plugins will use default variables */
-  }
-}
 ?>

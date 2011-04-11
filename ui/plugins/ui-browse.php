@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -37,7 +37,7 @@ class ui_browse extends FO_Plugin {
   var $MenuList = "Browse";
   var $Dependency = array("db");
   public $DBaccess = PLUGIN_DB_READ;
-  public $LoginFlag = 0;
+  public $LoginFlag = 1;
 
   /***********************************************************
    Install(): Create and configure database tables
@@ -77,67 +77,29 @@ class ui_browse extends FO_Plugin {
 
   function PostInitialize()
   {
-    global $Plugins;
-    global $DB, $PG_CONN;
+    global $SysConf;
 
-    if ($this->State != PLUGIN_STATE_VALID) {
-      return(0);
-    } // don't run
-    if (empty($_SESSION['User']) && $this->LoginFlag) {
-      return(0);
-    }
-    // Make sure dependencies are met
-    foreach($this->Dependency as $key => $val) {
-      $id = plugin_find_id($val);
-      if ($id < 0) {
-        $this->Destroy();
-        return(0);
-      }
-    }
-    // It worked, so mark this plugin as ready.
-    $this->State = PLUGIN_STATE_READY;
+    /* This plugin is only valid if the system allows global browsing
+     * (browsing across the entire repository).  Or if the user
+     * is an admin.
+     */
+    if ((strcasecmp(@$SysConf["GlobalBrowse"],"true") == 0) or
+        (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN))
+      $this->State = PLUGIN_STATE_READY;
+    else
+      $this->State = PLUGIN_STATE_INVALID; // No authorization for global search
+    return $this->State;
 
-    // check if public browsing is allowed
-    $Sql = "SELECT * from sysconfig WHERE variablename='PublicBrowse';";
-    $result = pg_query($PG_CONN, $Sql);
-    DBCheckResult($result, $Sql, __FILE__, __LINE__);
-    $browseInfo = pg_fetch_all($result);
-    $confValue = strtoupper($browseInfo[0]['conf_value']);
-    if($confValue == "TRUE")
-    {
-      $this->LoginFlag = 0;
-      if ($this->MenuList !== "") {
-        menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
-      }
-      return($this->State == PLUGIN_STATE_READY);
-    }
-    if($confValue == "FALSE")
-    {
-      $this->LoginFlag = 1;
-      if (empty($_SESSION['User']))   // not logged in
-      {
-        $pluginRef = plugin_find_any('browse');  // can be null
-        if(!empty($pluginRef))
-        {
-          return($pluginRef->State = PLUGIN_STATE_INVALID);
-        }
-      }
-      else    // logged in
-      {
-        if ($this->MenuList !== "") {
-          menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
-        }
-      }
-    }
-    pg_free_result($result);
   } // PostInitialize()
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
-  function RegisterMenus() {
-
+  function RegisterMenus() 
+  {
     global $PG_CONN;
+
+    menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
 
     $Upload = GetParm("upload", PARM_INTEGER);
     if (empty($Upload)) {
@@ -148,12 +110,12 @@ class ui_browse extends FO_Plugin {
       "upload",
       "item"
       ));
-      if (GetParm("mod", PARM_STRING) == $this->Name) {
-        menu_insert("Browse::Browse", 1);
-      }
-      else {
-        menu_insert("Browse::Browse", 1, $URI);
-      }
+    if (GetParm("mod", PARM_STRING) == $this->Name) 
+      menu_insert("Browse::Browse", 1);
+    else 
+      menu_insert("Browse::Browse", 1, $URI);
+
+    return($this->State == PLUGIN_STATE_READY);
   } // RegisterMenus()
 
   /***********************************************************

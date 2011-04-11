@@ -20,13 +20,44 @@
  *  This file contains common core database functions
  **********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+
+/*****************************************
+ DBconnect()
+   Connect to database engine.
+   This is a no-op if $PG_CONN already has a value.
+
+ Params:
+   $Options" = an optional list of attributes for
+               connecting to the database. E.g.:
+     "dbname=text host=text user=text password=text"
+
+ If $Options is null, then connection parameters 
+ will be read from Db.conf.
+
+ Returns:
+   Success: $PG_CONN, the postgres connection object
+            Also, the global $PG_CONN is set.
+   Failure: Error message is printed and exit
+ *****************************************/
+function DBconnect($Options="")
+{
+  global $DATADIR, $PROJECT, $SYSCONFDIR;
+  global $PG_CONN;
+
+  if (!empty($PG_CONN)) return $PG_CONN;
+
+  $path="$SYSCONFDIR/$PROJECT/Db.conf";
+  if (empty($Options))
+    $PG_CONN = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
+  else
+    $PG_CONN = pg_pconnect(str_replace(";", " ", $Options));
+
+  if (empty($PG_CONN))
+  {
+    $text = _("Could not connect to FOSSology database.");
+  }
+  return($PG_CONN);
+} /* End DBconnect() */
 
 
 /*****************************************

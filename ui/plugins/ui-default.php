@@ -80,22 +80,6 @@ $text = _("Where to Begin...");
 	$V .= "<b>$text</b><br />\n";
 	$V .= _("The menu at the top contains all the primary capabilities of FOSSology.\n");
 	$V .= "<ul>\n";
-	if (plugin_find_id("browse") >= 0)
-	  {
-	  $V .= "<li><b>";
-$text = _("Browse");
-	  $V .= "<a href='" . Traceback_Uri() . "?mod=browse'>$text</a>";
-$text = _(": If you don't know where to start, try browsing the currently uploaded projects.");
-	  $V .= "</b>$text\n";
-	  }
-	if (plugin_find_id("search_file") >= 0)
-	  {
-	  $V .= "<li><b>";
-$text = _("Search");
-	  $V .= "<a href='" . Traceback_Uri() . "?mod=search_file'>$text</a>";
-$text = _(": Look through the uploaded projects for specific files.");
-	  $V .= "</b>$text\n";
-	  }
 	if (empty($_SESSION['UserId']))
 	  {
 	  $V .= "<li><b>";
