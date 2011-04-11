@@ -81,25 +81,10 @@ class db_access extends FO_Plugin
      "dbname=text host=text user=text password=text"
    *******************************************************/
   function db_init($Options="")
-    {
-    global $DATADIR, $PROJECT, $SYSCONFDIR;
-    global $PG_CONN;
-
-    if (isset($this->_pg_conn)) { return(1); }
-    $path="$SYSCONFDIR/$PROJECT/Db.conf";
-    if (empty($Options))
-      {
-      $this->_pg_conn = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
-      }
-    else
-      {
-      $this->_pg_conn = pg_pconnect(str_replace(";", " ", $Options));
-      }
-    if (!isset($this->_pg_conn)) return(0);
-    $this->Error = 0;
-    $PG_CONN = $this->_pg_conn;
-    return(1);
-    }
+  {
+    $this->_pg_conn = DBconnect($Options);
+    return ($this->_pg_conn);
+  }
 
   /***********************************************************
    GetAffectedRows(): Returns the number of affected rows from

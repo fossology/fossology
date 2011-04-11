@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -39,24 +39,11 @@ class ui_welcome extends FO_Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
-
     switch($this->OutputType)
       {
       case "XML":
 	break;
       case "HTML":
-	if (plugin_find_id("browse") >= 0)
-	  {
-$text = _("Browse");
-	  $Browse = "<a href='" . Traceback_uri() . "?mod=browse'>$text</a>";
-	  }
-	else { $Browse = _("Browse"); }
-	if (plugin_find_id("search_file") >= 0)
-	  {
-$text = _("Search");
-	  $Search = "<a href='" . Traceback_uri() . "?mod=search_file'>$text</a>";
-	  }
-	else { $Search = _("Search"); }
 	if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
 	  {
 $text = _("Login");
@@ -143,8 +130,6 @@ $text58 = _("- A community website with information on Open Source Governance.")
       <blockquote> 
         <p><font face='Arial, Helvetica, sans-serif'> $text31<br>
           <br>
-          <strong><em>$Browse: </em></strong>$text32<br>
-          <strong><em>$Search:</em></strong> $text33<br>
           <strong><em>$Login:</em></strong> $text34<br>
           $text35</font></p>
       </blockquote></td>

@@ -606,33 +606,6 @@ function checkresult($result, $sql="", $lineno)
 	}
 	return(TRUE);
 }
-/**
- * dbConnect
- * \brief establish a connection to the database.
- *
- *@param string $Options  an optional list of attributes for connecting to the
- * database. E.g.: "dbname=text host=text user=text password=text"
- *
- * @return $PGCONN on success, dies on failure (no return).
- */
-function dbConnect($Options="")
-{
-	global $DATADIR, $PROJECT, $SYSCONFDIR;
-	global $PGCONN;
-
-	if (isset($PGCONN)) { return(TRUE); }
-	$path="$SYSCONFDIR/$PROJECT/Db.conf";
-	if (empty($Options))
-	{
-		$PGCONN = pg_connect(str_replace(";", " ", file_get_contents($path)));
-	}
-	else
-	{
-		$PGCONN = pg_connect(str_replace(";", " ", $Options));
-	}
-	if (!isset($PGCONN)) die ("connection to db failed\n");
-	return($PGCONN);
-}
 
 /*
  * GetSchema

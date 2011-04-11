@@ -28,6 +28,7 @@ if (!isset($GlobalReady)) { exit; }
  These are common functions to be used by anyone.
  *****************************************************************/
 
+require_once("common-sysconfig.php");
 require_once("common-menu.php");
 require_once("common-plugin.php");
 require_once("common-folders.php");

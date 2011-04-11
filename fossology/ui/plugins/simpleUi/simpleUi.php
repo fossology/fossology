@@ -229,7 +229,6 @@ class simpleUi extends FO_Plugin
     {
       //$this->adjustDependencies();
       $this->adjustMenus();
-      $this->changeDBaccess('search_file');
       plugin_disable(@$_SESSION['UserLevel']);
       $this->disablePlugins(array('agent_nomos_once','agent_copyright_once',
         'upload_file', 'upload_url', 'upload_srv_files',
