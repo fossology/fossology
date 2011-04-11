@@ -39,6 +39,17 @@ class search_file extends FO_Plugin
   function PostInitialize()
   {
     global $SysConf;
+ 
+    // Check that all Dependencies are met
+    foreach($this->Dependency as $key => $val) 
+    { 
+      $id = plugin_find_id($val);        
+      if ($id < 0) 
+      {
+        $this->Destroy(); 
+        return(0); 
+      } 
+    } 
 
     /* This plugin is only valid if the system allows global searching
      * (searching across the entire repository).  Or if the user
