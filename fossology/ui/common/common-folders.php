@@ -345,11 +345,19 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
 
   /* Load this folder's parent */
   if ($ShowParent && ($ParentFolder != FolderGetTop()))
-    {
+  {
     $Results = $DB->Action("SELECT parent_fk FROM foldercontents WHERE foldercontents_mode = 1 AND child_id = '$ParentFolder' LIMIT 1;");
-    $P = $Results[0]['parent_fk'];
-    if (!empty($P) && ($P != 0)) { $ParentFolder=$P; }
+    if (count($Results) > 0)
+    {
+      $P = $Results[0]['parent_fk'];
+      if (!empty($P) && ($P != 0)) { $ParentFolder=$P; }
     }
+    else
+    {
+      // No parent
+      return "";
+    }
+  }
 
   /* Load this folder's name */
   $Results = $DB->Action("SELECT folder_name,folder_desc FROM folder WHERE folder_pk=$ParentFolder LIMIT 1;");
