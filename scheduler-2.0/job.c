@@ -390,7 +390,10 @@ void job_remove_agent(job j, void* a)
   j->finished_agents = g_list_remove(j->finished_agents, a);
 
   if(j->finished_agents == NULL && j->status == JB_COMPLETE)
+  {
+    VERBOSE2("JOB[%d]: job removed from system\n");
     g_tree_remove(job_list, &j->id);
+  }
 }
 
 /**

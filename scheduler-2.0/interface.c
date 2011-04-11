@@ -215,6 +215,7 @@ void* listen_thread(void* unused)
   if(TVERBOSE2)
     clprintf("INTERFACE: listenning port is %d\n", i_port);
 
+  clprintf("ENTERING LOOP\n");
   /* wait for new connections */
   for(;;)
   {
