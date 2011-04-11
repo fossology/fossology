@@ -75,30 +75,12 @@ class ui_browse extends FO_Plugin {
     return (0);
   } // Install()
 
-  function PostInitialize()
-  {
-    global $SysConf;
-
-    /* This plugin is only valid if the system allows global browsing
-     * (browsing across the entire repository).  Or if the user
-     * is an admin.
-     */
-    if ((strcasecmp(@$SysConf["GlobalBrowse"],"true") == 0) or
-        (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN))
-      $this->State = PLUGIN_STATE_READY;
-    else
-      $this->State = PLUGIN_STATE_INVALID; // No authorization for global search
-    return $this->State;
-
-  } // PostInitialize()
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
   function RegisterMenus() 
   {
-    global $PG_CONN;
-
     menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
 
     $Upload = GetParm("upload", PARM_INTEGER);
@@ -417,7 +399,7 @@ class ui_browse extends FO_Plugin {
     $V = "";
     $Folder = GetParm("folder", PARM_INTEGER);
     if (empty($Folder)) {
-      $Folder = FolderGetTop();
+      $Folder = GetUserRootFolder();
     }
     $Upload = GetParm("upload", PARM_INTEGER);
     $Item = GetParm("item", PARM_INTEGER);
