@@ -31,7 +31,7 @@ class ajax_oneShotCopyright extends FO_Plugin {
   public $Name = "ajax_oneShotCopyright";
   public $Title = TITLE_ajax_oneShotCopyright;
   public $Version = "1.0";
-  public $Dependency = array("view","copyrightview",);
+  public $Dependency = array("view");
   public $NoHTML = 1;
   /** For anyone to access, without login, use: **/
   // public $DBaccess   = PLUGIN_DB_NONE;
