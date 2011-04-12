@@ -128,7 +128,7 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     /*  Email */
     $SupportEmailLabelPrompt = _('Support Email Label');
     $SupportEmailLabelDesc = _('e.g. "Support"<br>Text that the user clicks on to create a new support email. This new email will be preaddressed to this support email address and subject.  HTML is ok.');
-    $ValueArray[] = "'SupportEmailLabel', 'Support', '$SupportEmailLabelPrompt'," 
+    $ValueArray[] = "'SupportEmailLabel', 'Support', '$SupportEmailLabelPrompt',"
                     . CONFIG_TYPE_TEXT .
                     ",'Support', 1, '$SupportEmailLabelDesc'";
 
@@ -166,13 +166,13 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
      
     $BrowsePrompt = _("Allow Global Browsing");
     $BrowseDesc = _("Allow browsing the entire repository.");
-    $ValueArray[] = "'GlobalBrowse', TRUE, '$BrowsePrompt', "
+    $ValueArray[] = "'GlobalBrowse', FALSE, '$BrowsePrompt', "
                     . CONFIG_TYPE_INT .
                     ",'UI', 1, '$BrowseDesc'";
      
     $SearchPrompt = _("Allow Global Searches");
     $SearchDesc = _("Allow searching all folders in the system.");
-    $ValueArray[] = "'GlobalSearch', TRUE, '$SearchPrompt', "
+    $ValueArray[] = "'GlobalSearch', FALSE, '$SearchPrompt', "
                     . CONFIG_TYPE_INT .
                     ",'UI', 1, '$SearchDesc'";
      
