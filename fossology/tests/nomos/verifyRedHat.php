@@ -169,13 +169,13 @@ class rhelTest extends fossologyTestCase
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
     //print "miniMenu is:\n";print_r($miniMenu) . "\n";
-    $url = makeUrl($this->host, $miniMenu['Nomos License']);
+    $url = makeUrl($this->host, $miniMenu['License Browser']);
      if($url === NULL) { $this->fail("verifyRedHat Failed, host/url is not set"); }
 
     $page = $this->mybrowser->get($url);
     //print "page after get of $url is:\n$page\n";
-    $this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
-          "verifyRedHat FAILED! Nomos License Browser Title not found\n");
+    $this->assertTrue($this->myassertText($page, '/License Browser/'),
+          "verifyRedHat FAILED! License Browser Title not found\n");
 
     // check that license summarys are correct
     $licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
