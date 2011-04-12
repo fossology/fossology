@@ -72,7 +72,7 @@
     global $PG_CONN;
 
     /* If sysconfig exists, then we are done */
-    $sql = "SELECT typlen  FROM pg_type where typname='sysconfig' limit 1";
+    $sql = "SELECT typlen  FROM pg_type where typname='sysconfig' limit 1;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 0) return 0;
