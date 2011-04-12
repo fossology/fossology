@@ -1005,7 +1005,7 @@ function MakeFunctions($Debug) {
 	 GetRunnable() is a DB function for listing the runnable items
 	 in the jobqueue. This is used by the scheduler.
 	 ********************************************/
-	$SQL = 'CREATE LANGUAGE plpgsql;
+	$SQL = '
 CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
 DECLARE
   jqrec jobqueue;
