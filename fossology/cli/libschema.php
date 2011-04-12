@@ -1059,7 +1059,7 @@ LANGUAGE plpgsql;
 	 * uploadtree2path(uploadtree_pk integer) is a DB function that returns
 	 * the non-artifact parents of an uploadtree_pk
 	 ********************************************/
-	$SQL = 'CREATE LANGUAGE plpgsql;
+	$SQL = '
 CREATE or REPLACE function uploadtree2path(uploadtree_pk_in int) returns setof uploadtree as $$
 DECLARE
   UTrec   uploadtree;
