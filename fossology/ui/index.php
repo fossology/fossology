@@ -25,6 +25,7 @@
  ***************************************************************/
 $GlobalReady=1;
 $SysConf = array();
+$PG_CONN = 0;   // Database connection
 
 //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
 require_once(dirname(__FILE__) . '/../php/pathinclude.php');
@@ -41,9 +42,6 @@ require_once("common/common.php");
 DBconnect();
 
 /* Initialize global system configuration variables $SysConfig[] */
-ConfigInit();
-
-/* Initialize the global system configuration variables */
 $SysConf = ConfigInit();
 
 plugin_load("plugins");

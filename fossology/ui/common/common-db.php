@@ -55,6 +55,9 @@ function DBconnect($Options="")
   if (empty($PG_CONN))
   {
     $text = _("Could not connect to FOSSology database.");
+    echo "<h2>$text</h2>";
+    debugbacktrace();
+    exit;
   }
   return($PG_CONN);
 } /* End DBconnect() */
