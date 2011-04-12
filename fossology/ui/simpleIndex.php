@@ -34,6 +34,18 @@ require_once("common/common.php");
  This is the main guts of the UI: Find the plugin and run it.
  ****************************************************/
 //$_SERVER['HTTP_SMUNIVERSALID'] = "dong.ma@hp.com";
+
+/* Connect to the database.  If the connection fails,
+ * DBconnect() will print a failure message and exit.
+ */
+DBconnect();
+
+/* Initialize global system configuration variables $SysConfig[] */
+ConfigInit();
+
+/* Initialize the global system configuration variables */
+$SysConf = ConfigInit();
+
 plugin_load("plugins/simpleUi");
 
 $Mod = GetParm("mod",PARM_STRING);
@@ -42,7 +54,7 @@ $PluginId = plugin_find_id($Mod);
 if ($PluginId >= 0)
   {
   /* Initialize global system configuration variables $SysConfig[] */
-  InitSysConfig();
+  //InitSysConfig();
 
   /* Found a plugin, so call it! */
   $Plugins[$PluginId]->OutputOpen("HTML",1);
