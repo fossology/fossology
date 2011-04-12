@@ -211,6 +211,10 @@ class user_edit_self extends FO_Plugin
     if ($default_bucketpool_fk != $R['default_bucketpool_fk'])
     {
       if ($default_bucketpool_fk == 0) $default_bucketpool_fk='NULL';
+      if ($GotUpdate)
+      {
+        $SQL.= ", ";
+      }
       $SQL.= " default_bucketpool_fk = $default_bucketpool_fk";
       $GotUpdate = 1;
     }
@@ -366,11 +370,25 @@ class user_edit_self extends FO_Plugin
         $text = _("User Interface Options");
         $text1 = _("Use the simplified UI");
         $text2 = _("Use the original UI");
-        $V .= "$Style<th>11.</th><th>$text</th><td><input type='radio'" .
-                "name='whichui' value='simple' checked='checked'>" .
+        $sCheck = NULL;
+        $oCheck = NULL;
+        if($R['ui_preference'] == 'simple')
+        {
+          $sCheck = "checked='checked'";
+          $oCheck = NULL;
+        }
+        else if ($R['ui_preference'] == 'original')
+        {
+          $oCheck = "checked='checked'";
+          $sCheck = NULL;
+        }
+        $P = "$Style<th>11.</th><th>$text</th><td><input type='radio' " .
+                "name='whichui' value='simple' $sCheck>" .
                 "$text1<br><input type='radio'" .
-                "name='whichui' value='original'>" .
+                " name='whichui' value='original' $oCheck>" .
                 "$text2</td>\n";
+        echo "<pre>HTML is:\n" . htmlentities($P) . "\n</pre>";
+        $V .= $P;
         $V.= "</table><P />";
         $text = _("Update Account");
         $V.= "<input type='submit' value='$text'>\n";
