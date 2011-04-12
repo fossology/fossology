@@ -1005,7 +1005,7 @@ function MakeFunctions($Debug) {
 	 GetRunnable() is a DB function for listing the runnable items
 	 in the jobqueue. This is used by the scheduler.
 	 ********************************************/
-	$SQL = '
+	$SQL = 'CREATE LANGUAGE plpgsql;
 CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
 DECLARE
   jqrec jobqueue;
@@ -1059,7 +1059,7 @@ LANGUAGE plpgsql;
 	 * uploadtree2path(uploadtree_pk integer) is a DB function that returns
 	 * the non-artifact parents of an uploadtree_pk
 	 ********************************************/
-	$SQL = '
+	$SQL = 'CREATE LANGUAGE plpgsql;
 CREATE or REPLACE function uploadtree2path(uploadtree_pk_in int) returns setof uploadtree as $$
 DECLARE
   UTrec   uploadtree;
