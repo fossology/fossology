@@ -1,0 +1,53 @@
+FOSSology Copyright and Licensing
+=================================
+Copyright (C) 2007-2009 HP Development Company, L.P. and others.
+
+The original FOSSology source code and all associated documentation
+including these web pages are Copyright (C) 2007-2009 HP Development
+Company, L.P.
+
+Any modifications or additions to source code or documentation
+contributed to the FOSSology project from outside of Hewlett Packard
+Company or its affiliates are Copyright (C) the contributor, and should
+be noted as such in the comments section of the modified file(s).
+
+Licenses
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; version 2 of the License
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Exception:
+All of the FOSSology source code is licensed under the terms of the GNU
+General Public License version 2, with the following exceptions:
+
+* libfossdb and libfossrepo libraries are licensed under the terms of
+the GNU Lesser General Public License version 2.1
+
+    This library are free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+    02110-1301  USA
+
+
+Please see the files COPYING and COPYING.LGPL included with this
+software for the full text of these licenses.
