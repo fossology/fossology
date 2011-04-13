@@ -161,8 +161,8 @@ echo "row $RowIdx: ".htmlentities($rows[$RowIdx]['original']) . "<br>";
 
     if ($filter == "nolics")
     {
-      /* find rf_pk for "No License Found" */
-      $NoLicStr = "No License Found";
+      /* find rf_pk for "No_license_found" */
+      $NoLicStr = "No_license_found";
       $sql = "select rf_pk from license_ref where rf_shortname='$NoLicStr'";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -180,7 +180,7 @@ echo "row $RowIdx: ".htmlentities($rows[$RowIdx]['original']) . "<br>";
         $rf_clause .= " (rf_fk=$row[rf_pk])";
       }
 
-      /* select copyright records that have No License Found (rf_fk=4) */
+      /* select copyright records that have No_license_found */
       $sql = "SELECT content, type from copyright, license_file,
               (SELECT distinct(pfile_fk) as pf from uploadtree 
                 where upload_fk=$upload_pk and uploadtree.lft BETWEEN $lft and $rgt) as SS
