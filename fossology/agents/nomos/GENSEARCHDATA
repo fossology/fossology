@@ -1,0 +1,292 @@
+#!/bin/sh 
+#######
+#
+#  GENSEARCHDATA: Script to take STRINGS.in file and create _autodata.c
+#     and _autodefs.h files for initializing the search strings structure
+#     used to search for licenses.
+#
+#  Copyright (C) 2006,2009 Hewlett-Packard Development Company, L.P.
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  version 2 as published by the Free Software Foundation.
+# 
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+# 
+#  You should have received a copy of the GNU General Public License along
+#  with this program; if not, write to the Free Software Foundation, Inc.,
+#  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+###########
+
+PROG=$(basename $0)
+## [ $# -ne 1 ] && echo "Usage: $PROG input-file" && exit 1
+## [ ! -f $1 ] && echo "$PROG: $1 is not a file" && exit 1
+#
+# CDB? TMPDIR=/tmp/,cryptParse$$
+INFILE=STRINGS.in
+NEW_C=_autodata.c
+NEW_H=_autodefs.h
+STR_HIST=strings.HISTOGRAM
+
+# CDB? trap "rm -rf $TMPDIR" 0
+trap 'echo INTERRUPT!; exit 1' 1 2 3 15
+[ ! -f $INFILE ] && echo "$PROG: $INFILE: No such file or directory" && exit 2
+
+make encode > /dev/null || exit 2
+grep -Hn \"\" $INFILE && exit 2
+
+#####
+# Start construction of the new header file
+#####
+cat > $NEW_H <<@EOF@
+/*
+ * $(cat ./GenCodeCopyright)
+ *****
+ * License footprints, auto-generated $(date)
+ *****
+ * Prefixes on these strings are supposed to indicate the following:
+ *	  "_LT" == License Text footprints
+ *	  "_KW" == License Keywords
+ *	  "_CR" == License Copyrights
+ *	"_MISC" == Miscelleany in licenses
+ */
+#ifndef _AUTODEFS_H
+#define _AUTODEFS_H
+@EOF@
+
+#####
+# Start construction of the new source file
+#####
+cat > $NEW_C <<@EOF@
+/*
+ * $(cat ./GenCodeCopyright)
+ */
+#include "nomos.h"
+#include "$NEW_H"
+
+/*
+ * This source file was auto-generated $(date);
+ *****
+ * Changes to this file will NOT be kept; the file will be over-written
+ * the next time the license-specifications (./$INFILE) change!
+ */
+
+/* BEGIN ENCODED LICENSE-FOOTPRINTS SECTION */
+licSpec_t licSpec[NFOOTPRINTS] = {
+@EOF@
+cat > _STRFILTER <<- @EOF@
+sed -e 's/ =FEW= /.{0,30}/g' -e 's/ =SOME= /.{0,60}/g' -e 's/ =ANY= /.*/g' \
+    -e 's/=YEAR=/(19|20)[0-9][0-9][ ,-]+/g'
+@EOF@
+chmod 755 _STRFILTER
+## awk --lint '
+awk -v SRC=$NEW_C -v HDR=$NEW_H '
+#####
+# All strings to be encoded MUST be include double-quotes; this way,
+# we can check for syntax-errors and bail out when an error is found.
+#####
+function syntaxCheck(s) {
+	if (match(s, "\".*\"") == 0 && match(s, "=NULL=$") == 0) {
+		printf("ERROR (line %d): string not in quotes\n", nextLine);
+		exit 1;
+	}
+#	if (stateDebug) {
+#		printf("RSTART = %d, RLENGTH = %d\n", RSTART, RLENGTH);
+#	}
+}
+#####
+# Initialize.
+#####
+BEGIN {
+	lineNo = defineNo = inEntry = gotKey = gotStr = stateDebug = 0;
+##	stateDebug++;
+	defined = "";
+}
+#####
+# Ignore comments (lines starting with the # character)
+#####
+/^#/ {
+	lineNo++;
+	nextLine = lineNo+1;
+	next;
+}
+#####
+# %DEF% - insert a generic #define foo bar line
+#####
+/^[	 ]*%DEF%/ {
+	if (NF != 3) {
+		printf("ERROR (line %d), need 2 strings for %DEF%\n", nextLine);
+		exit 1;
+	}
+	printf("#define	%s	%s\n", $2, $3) >> HDR;
+	close(HDR);
+}
+#####
+# %ALIAS% - new symbolic name for the last #define created
+#####
+/^[	 ]*%ALIAS%/ {
+	if (defined == "") {
+		printf("%ALIAS% error - no previous #define string\n");
+		exit 1;
+	}
+	else if (NF == 1) {
+		printf("ERROR (line %d), syntax error\n", nextLine);
+		exit 1;
+	}
+	else if ($2 != "") {
+		printf("#define	%s	%s\n", $2, defined) >> HDR;
+		close(HDR);
+	}
+}
+#####
+# %ENTRY% - create new #define, increment counter (for NEXT #define)
+#####
+/^[	 ]*%ENTRY%/ {
+	printf("#define	%s	%d\n", $2, defineNo) >> HDR;
+	close(HDR);
+	defined=$2;
+	inEntry++;
+	if (stateDebug) {
+#		printf("... created ifdef #%d (%s)\n", defineNo, defined);
+		printf("... created ifdef #%d, ", defineNo);
+	}
+}
+#####
+# %KEY% - specify first of two strings for auto-generated search strings.
+# ... this is the lookup string used to find paragraphs of text.
+# ... this value must be declared/found PRIOR to the %STR% entry
+#####
+/^[	 ]*%KEY%/ {
+	syntaxCheck($0);
+	keyString = sprintf("%s", substr($0, RSTART, RLENGTH));
+	gotKey++;
+}
+#####
+# %STR% - specify second of two strings for auto-generated search strings
+# ... this is the actual text searched for in paragraphs
+# ... this value must be declared/found AFTER to the %KEY% entry
+#####
+/^[	 ]*%STR%/ {
+	syntaxCheck($0);
+	encodedString = sprintf("%s", substr($0, RSTART, RLENGTH));
+	gotStr++;
+}
+#####
+# Hmmm, malformed keywords cause troubles, so look for them.
+####
+/(^[	 ]*%ENTRY[ 	]|^[	 ]*ENTRY%[ 	])/ {
+	lineNo++;
+	printf("Malformed %ENTRY% keyword/entry, line %d\n", lineNo);
+	exit(1);
+}
+/(^[	 ]*%KEY[ 	]|^[	 ]*KEY%[ 	])/ {
+	lineNo++;
+	printf("Malformed %KEY% keyword/entry, line %d\n", lineNo);
+	exit(1);
+}
+/(^[	 ]*%STR[ 	]|^[	 ]*STR%[ 	])/ {
+	lineNo++;
+	printf("Malformed %STR% keyword/entry, line %d\n", lineNo);
+	exit(1);
+}
+/(^[	 ]*%DEF[ 	]|^[	 ]*DEF%[ 	])/ {
+	lineNo++;
+	printf("Malformed %DEF% keyword/entry, line %d\n", lineNo);
+	exit(1);
+}
+/(^[	 ]*%ALIAS[ 	]|^[	 ]*ALIAS%[ 	])/ {
+	lineNo++;
+	printf("Malformed %ALIAS% keyword/entry, line %d\n", lineNo);
+	exit(1);
+}
+{
+	lineNo++;
+	if (stateDebug && inEntry) {
+		printf("... in-ENTRY [%s]", defined);
+		if (gotKey) {
+			printf(", with Key %s", keyString);
+		}
+		if (gotStr) {
+			printf(" AND String!");
+		}
+		printf("\n");
+	}
+#####
+# %KEY% value MUST be declared before %STR% value
+#####
+	if (inEntry && gotStr && !gotKey) {
+		printf("Error (line %d): %STR% with no %KEY% value\n", \
+		    lineNo);
+		exit 1;
+	}
+#####
+# If we have everything, add the encoded strings to the source file.
+# Note we already added what we need to the header file (above).
+#####
+	if (inEntry && gotKey && gotStr) {
+# process search-key (seed)
+		KSlen = length(keyString);
+		cmd = sprintf("echo %s | ./_STRFILTER > _KTARGET", keyString);
+		system(cmd);
+		cmd = sprintf("./encode _KTARGET > _KEY");
+		system(cmd);
+		getline < "_KEY"
+		K=$0
+		close("_KEY");
+# process search-string (the paragraph)
+		CSlen = length(encodedString);
+		cmd = sprintf("echo %s | ./_STRFILTER > _STARGET", encodedString);
+		system(cmd);
+		cmd = sprintf("./encode _STARGET > _STR");
+		system(cmd);
+		getline < "_STR"
+		S=$0
+		close("_STR");
+# add the entry to the source file
+		printf("\n#if\t0\n  Seed[%s=#%03d]: (%d) %s\n", defined, \
+		    defineNo, KSlen-2, keyString) >> SRC;
+		printf("Phrase[%s=#%03d]: (%d) %s\n#endif\n", defined, \
+		    defineNo, CSlen-2, encodedString) >> SRC;
+		printf("{/*Seed*/%s,\n /*Text*/%s},\n", K, S) >> SRC;
+# reset everything in preparation for the next line
+		close(SRC);
+		inEntry = gotKey = gotStr = 0;
+		defineNo++;
+#		if (stateDebug) {
+#			printf("Next entry == #%d\n", defineNo);
+#		}
+	}
+	nextLine = lineNo+1;	# for syntax errors reported above
+}
+#####
+# All done, clean up whether we were successful or not.
+#####
+END {
+	cmd = sprintf("rm -f _KEY _STR _KTARGET _STARGET");
+	system(cmd);
+}' < $INFILE || exit 1
+#####
+# Above, we exit non-zero if awk bailed, and thus we intentionally leave
+# the auto-generated source file with a syntax error so we don't build.
+# The build _should_ fail until the error is repaired.
+#####
+grep "%KEY%" $INFILE | grep -v '^#' | sed -e 's/%KEY%	/ /g' | sort |
+    uniq -c | sort -nr > $STR_HIST
+# [ -f ${NEW_H}_TAIL ] && cat ${NEW_H}_TAIL >> $NEW_H		# no remove!
+#####
+# Complete the source-file so the build won't fail :)
+#####
+cat >> ${NEW_C} <<@EOF@
+
+};
+/* END ENCODED LICENSE-FOOTPRINTS SECTION */
+licText_t licText[NFOOTPRINTS];
+@EOF@
+cat >> $NEW_H <<@EOF@
+#endif /* _AUTODEFS_H */
+@EOF@
+exit 0

@@ -1,0 +1,169 @@
+
+
+Notes related to the transition of GF's original Nomos code to the current 
+version of the nomos agent checked into FOSSology's svn archive on 
+sourceforge.org.
+
+Author: Anonymous
+Date: 09/14/2009
+
+
+
+Rationale: Original goal was to migrate Nomos standalone functionality into
+an agent hosted in the FOSSology (henceforth referred to as FO) environment.
+The purpose being to retain Nomos' license-detection technology in a new
+environment.
+
+This report is at this writing but a sketch. Details and rationale can be 
+further elucidated by contacting the porter, Channing Benson 
+(channing.benson@hp.com).
+
+
+Notation/Etc.
+-------------
+
+Most comments that I added related to questions or decisions about the code
+are marked with the string "CDB", my initials. Typically, these indicate
+areas where I was unsure about how to best proceed or whether the code
+there was functional or useful.
+
+
+Things Left the Same:
+---------------------
+
+The entire preprocessing of STRINGS.in to _autodata.c and _autodefs.h has been
+left unchanged, with one exception. Previously, the strings were obfuscated
+by use of the program implemented in encode.c.  encode is still called, but
+it no longer obfuscates strings, it only escapes them into octal codes.
+
+The same is true of all the PRECHECK related files. 
+
+Remember, all files that begin with an underscore are auto-generated.
+
+
+File Changes:
+-------------
+
+Removals
+
+Some files made no sense to retain in the context of an FO agent. The following files have been removed from the Nomos codebase:
+
+conf.c - Stuff related to Nomos as a standalone tool no longer required in the
+	FO environment.
+
+md5.c, md5.h - Previously used for obfuscation that is no longer performed.
+
+report.c - Code related to producing the Nomos reports. Since, the Nomos agent
+	just sticks things in the DB, this is not needed. *NOTE*: a lot of 
+	bucket-related code is in this file.
+
+sources.c - Code for detecting file types and unpacking if necessary. In FO
+	this work is done by other components.
+
+Additions
+
+For stylistic reasons, header files were added to include the constants and
+entry points defined in most (all?) of the C files. Thus, for instance, for
+util.c, there is now a util.h file that contains the declarations for 
+functions defined in util.c. Another source file wishing to use those functions
+can now just #include util.h rather than write in the function prototypes by
+hand. Neat, huh?
+
+Name Changes
+
+For reasons related to the FO make system, the file regex.c was changed to
+nomos_regex.c.
+
+
+
+Stylistic Changes
+-----------------
+
+Many changes were made to make the code conform better to accepted norms
+for C code. I'm not sure I can recall all the exact examples, but for instance:
+
+- Declarations have been changed so that only one variable is declared on a 
+line.
+
+- Removed all "register" modifications to declarations under the assumption
+that modern compilers can do a much better job of register allocation than
+a programmer.
+
+- In some cases, for loops have been altered so that they have only one variant.
+The most significant of these occurs in licenses.c in the function licenseInit(). 
+There are a couple "for" loops in license.s/licenseInit() that run through 
+all the strings in 
+_autodata.c (i = 0; i < NFOOTPRINTS ....). In the original code, there are
+also two pointers that get incremented for each iteration (lp and ltp).
+Instead of maintaining these two pointers, I simply use the loop variable "i"
+to index into the appropriate array (licSpec for lp, and licText for ltp).
+
+Looking at the code side-by-side will make this much more clear. There may 
+be other cases of this, but this is the one that is most significant.
+
+- In many cases, the code that invokes the debug trace functions (surrounded
+by #ifdef PROC_TRACE and #ifdef PROC_TRACE_SWITCH has been replaced by a
+single function, traceFunc() which has the exact same functionality, but
+makes the code slightly easier to read (fewer #ifdefs). traceFunc is 
+defined in util.c. Substitution of this function is intermittent because
+when I started to incorporate the latest Nomos core code, I stopped making
+the substitution to speed the process.
+
+- Some comments have been edited to omit having all lines preceded by a '*'.
+This makes future editing easier.
+
+
+Structural Changes
+------------------
+
+The chief structural changes have been to eliminate unnecesary fields from
+the gl global structure and move other elements of that structure into a 
+"cur" structure (type curScan). The rationale behind this is that while the
+original Nomos does a whole job in one program invocation, the agent version
+of nomos will be invoked over and over again on a single file. the curScan
+structure is meant to hold all information pertinent to the scan of a single
+file. Thus, when a scan is finished, the structure is freed, and a new one
+created to handle the next file to be scanned.
+
+
+Changes in #ifdef inclusions/etc
+--------------------------------
+
+A lot of code from the original Nomos core has been removed due to it being
+surrounded by particular #ifdefs.
+
+Unfortunately, it's difficult to come up with a complete list of such code,
+but side-by-side examination of the files should make it obvious. For instance,
+all code surrounded by #ifdef SHOW_LOCATION has been included (and the #ifdefs
+removed) because the nomos agent is always interested in storing (and showing)
+the location where a particular license was found.
+
+#defines that have been removed (along with their associated code):
+[Note that questions about the meanings of these symbols should be referred
+to the original author.] It is highly possible that I have missed some of
+these occurrences in this document. In that case, trust the source, not what
+you read here.
+
+SAVE_REFLICENSES
+VENDOR_LICENSE_REFS
+ALL_ATTRIBUTIONS
+BRIEF_LIST
+SEARCH_CRYPTO
+
+
+Random Pertinent Information
+----------------------------
+
+It really helps to know the call hierarchy used by the nomos agent to actually
+detect licenses. As it is now, it looks like this:
+
+main() calls
+processRawSource() calls
+processNonPackagedFiles() calls
+processRegularFiles() calls
+licenseScan() calls [this function maintains the "score" file]
+saveLicenseData() calls
+makeLicenseSummary() [which adds licenses to cur.compLic]
+
+I have a note which says that the offsets (into the file) get cleared in 
+the function saveLicenseData().

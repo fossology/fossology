@@ -1,0 +1,13 @@
+fossology-dev for Debian
+------------------------
+The upstream FOSSology project provides two libraries, libfossdb and
+libfossrepo, that can be used by agents and user interfaces to access the
+database and repository. However the upstream authors are not committed
+to supporting a stable ABI in order for these to be shared libraries.
+
+So for now the Debian fossology-dev package is only providing them as
+archive libraries. If at some point there are out-of-tree agents that
+use the libraries then we can pursue creating shared libraries with
+a stable ABI. Please contact me if you use these libraries.
+
+ -- Matt Taggart <taggart@debian.org>  Fri, 17 Oct 2008 01:24:09 -0700
