@@ -106,45 +106,49 @@ void* interface_thread(void* param)
     cmd = strtok(buffer, " ");
     size = 0;
 
-    if(g_str_has_prefix("exit", cmd))
+    if(cmd == NULL)
+    {
+      break;
+    }
+    else if(strcmp(cmd, "exit") == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
       if(TVERBOSE2) clprintf("INTERFACE: closing connection to user interface\n");
       return NULL;
     }
-    else if(g_str_has_prefix("close", cmd))
+    else if(strcmp(cmd, "close") == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
       if(TVERBOSE2) clprintf("INTERFACE: shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
       return NULL;
     }
-    else if(g_str_has_prefix("pause", cmd))
+    else if(strcmp(cmd, "pause") == 0)
     {
       params = g_new0(arg_int, 1);
       params->first = get_job(atoi(strtok(NULL, " ")));
       params->second = 1;
       event_signal(job_pause_event, params);
     }
-    else if(g_str_has_prefix("reload", cmd))
+    else if(strcmp(cmd, "reload") == 0)
       load_config();
-    else if(g_str_has_prefix("status", cmd))
+    else if(strcmp(cmd, "status") == 0)
     {
       params = g_new0(arg_int, 1);
       params->first = conn->ostr;
       params->second = (cmd = strtok(NULL, " ")) == NULL ? 0 : atoi(cmd);
       event_signal(job_status_event, params);
     }
-    else if(g_str_has_prefix("restart", cmd))
+    else if(strcmp(cmd, "restart") == 0)
     {
       event_signal(job_restart_event, get_job(atoi(strtok(NULL, " "))));
     }
-    else if(g_str_has_prefix("verbose", cmd) && (tmp = strtok(NULL, " ")) != NULL)
+    else if(strcmp(cmd, "verbose") == 0 && (tmp = strtok(NULL, " ")) != NULL)
     {
       if((cmd = strtok(NULL, " ")) == NULL) verbose = atoi(tmp);
       else job_verbose_event(job_verbose(get_job(atoi(tmp)), atoi(cmd)));
     }
-    else if(g_str_has_prefix("database", cmd))
+    else if(strcmp(cmd, "database") == 0)
       event_signal(database_update_event, NULL);
     else
     {

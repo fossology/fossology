@@ -375,7 +375,7 @@ void load_config()
   /* load the configureation for the agents */
   while((ep = readdir(dp)) != NULL)
   {
-    sprintf(buffer, "agents/%s", ep->d_name);
+    sprintf(buffer, "%s/agents/%s", DEFAULT_SETUP, ep->d_name);
     if(ep->d_name[0] != '.' && (istr = fopen(buffer, "rb")) != NULL)
     {
       VERBOSE2("CONFIG: loading config file %s\n", buffer);
