@@ -48,9 +48,9 @@ function DBconnect($Options="")
 
   $path="$SYSCONFDIR/$PROJECT/Db.conf";
   if (empty($Options))
-    $PG_CONN = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
+    $PG_CONN = pg_pconnect(str_replace(";", " ", file_get_contents($path)), PGSQL_CONNECT_FORCE_NEW);
   else
-    $PG_CONN = pg_pconnect(str_replace(";", " ", $Options));
+    $PG_CONN = pg_pconnect(str_replace(";", " ", $Options), PGSQL_CONNECT_FORCE_NEW);
 
   if (empty($PG_CONN))
   {
