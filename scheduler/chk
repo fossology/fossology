@@ -1,5 +1,0 @@
-date
-ps -eo user,pid,pgrp,cmd|grep sched
-ps -eo user,pid,pgrp,cmd |grep fo_watchdog
-strings -f /dev/shm/*
-ls -l /dev/shm/*

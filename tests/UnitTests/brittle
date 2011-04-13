@@ -1,6 +1,0 @@
-NOTE: these unit tests will break.  They have the hardcoded url's with specific upload numbers.  Bet you they are not the same for each test.
-
-So, will need to create a checkTestEnv script that will see if the
-needed uploads are there and get the url's to feed to the tests.
-
-dangnabit!
