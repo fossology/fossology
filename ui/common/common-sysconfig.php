@@ -40,6 +40,8 @@
   {
     global $PG_CONN;
 
+    $SysConf = array();
+
     /* create if it doesn't exist */
     $NewTable = Create_sysconfig();
 
@@ -75,8 +77,9 @@
     $sql = "SELECT typlen  FROM pg_type where typname='sysconfig' limit 1;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) > 0) return 0;
+    $numrows = pg_num_rows($result);
     pg_free_result($result);
+    if ($numrows > 0) return 0;
 
     /* Create the sysconfig table */
     $sql = "
@@ -109,7 +112,7 @@ COMMENT ON COLUMN sysconfig.validation_function IS 'Name of function to validate
 COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textarea';
     ";
     /* this is a non critical update */
-    $result = @pg_send_query($PG_CONN, $sql);
+    $result = @pg_query($PG_CONN, $sql);
     return 1;
   }
 
@@ -126,65 +129,81 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     $ValueArray = array();
 
     /*  Email */
+    $Variable = "SupportEmailLabel";
     $SupportEmailLabelPrompt = _('Support Email Label');
     $SupportEmailLabelDesc = _('e.g. "Support"<br>Text that the user clicks on to create a new support email. This new email will be preaddressed to this support email address and subject.  HTML is ok.');
-    $ValueArray[] = "'SupportEmailLabel', 'Support', '$SupportEmailLabelPrompt',"
+    $ValueArray[$Variable] = "'$Variable', 'Support', '$SupportEmailLabelPrompt',"
                     . CONFIG_TYPE_TEXT .
                     ",'Support', 1, '$SupportEmailLabelDesc'";
 
+    $Variable = "SupportEmailAddr";
     $SupportEmailAddrPrompt = _('Support Email Address');
     $SupportEmailAddrDesc = _('e.g. "support@mycompany.com"<br>Individual or group email address to those providing FOSSology support.');
-    $ValueArray[] = "'SupportEmailAddr', null, '$SupportEmailAddrPrompt', "
+    $ValueArray[$Variable] = "'$Variable', null, '$SupportEmailAddrPrompt', "
                     . CONFIG_TYPE_TEXT .
                     ",'Support', 2, '$SupportEmailAddrDesc'";
 
+    $Variable = "SupportEmailSubject";
     $SupportEmailSubjectPrompt = _('Support Email Subject line');
     $SupportEmailSubjectDesc = _('e.g. "fossology support"<br>Subject line to use on support email.');
-    $ValueArray[] = "'SupportEmailSubject', 'FOSSology Support', '$SupportEmailSubjectPrompt',"
+    $ValueArray[$Variable] = "'$Variable', 'FOSSology Support', '$SupportEmailSubjectPrompt',"
                     . CONFIG_TYPE_TEXT .
                     ",'Support', 3, '$SupportEmailSubjectDesc'";
 
     /*  Banner Message */
+    $Variable = "BannerMsg";
     $BannerMsgPrompt = _('Banner message');
     $BannerMsgDesc = _('This is message will be displayed on every page with a banner.  HTML is ok.');
-    $ValueArray[] = "'BannerMsg', null, '$BannerMsgPrompt', "
+    $ValueArray[$Variable] = "'$Variable', null, '$BannerMsgPrompt', "
                     . CONFIG_TYPE_TEXTAREA .
                     ",'Banner', 1, '$BannerMsgDesc'";
 
     /*  Logo  */
+    $Variable = "LogoImage";
     $LogoImagePrompt = _('Logo Image URL');
     $LogoImageDesc = _('e.g. "http://mycompany.com/images/companylogo.png" or "images/mylogo.png"<br>This image replaces the fossology project logo. Image is constrained to 150px wide.  80-100px high is a good target.');
-    $ValueArray[] = "'LogoImage', null, '$LogoImagePrompt', "
+    $ValueArray[$Variable] = "'$Variable', null, '$LogoImagePrompt', "
                     . CONFIG_TYPE_TEXT .
                     ",'Logo', 1, '$LogoImageDesc'";
 
+    $Variable = "LogoLink";
     $LogoLinkPrompt = _('Logo URL');
     $LogoLinkDesc = _('e.g. "http://mycompany.com/fossology"<br>URL a person goes to when they click on the logo');
-    $ValueArray[] = "'LogoLink', null, '$LogoLinkPrompt', "
+    $ValueArray[$Variable] = "'$Variable', null, '$LogoLinkPrompt', "
                     . CONFIG_TYPE_TEXT .
                     ",'Logo', 2, '$LogoLinkDesc'" ;
      
+    $Variable = "GlobalBrowse";
     $BrowsePrompt = _("Allow Global Browsing");
     $BrowseDesc = _("Allow browsing the entire repository.");
-    $ValueArray[] = "'GlobalBrowse', FALSE, '$BrowsePrompt', "
+    $ValueArray[$Variable] = "'$Variable', FALSE, '$BrowsePrompt', "
                     . CONFIG_TYPE_INT .
                     ",'UI', 1, '$BrowseDesc'";
      
+    $Variable = "GlobalSearch";
     $SearchPrompt = _("Allow Global Searches");
     $SearchDesc = _("Allow searching all folders in the system.");
-    $ValueArray[] = "'GlobalSearch', FALSE, '$SearchPrompt', "
+    $ValueArray[$Variable] = "'$Variable', FALSE, '$SearchPrompt', "
                     . CONFIG_TYPE_INT .
                     ",'UI', 1, '$SearchDesc'";
      
     /* Doing all the rows as a single insert will fail if any row is a dupe.
      So insert each one individually so that new variables get added.
      */
-    foreach ($ValueArray as $Values)
+    foreach ($ValueArray as $Variable => $Values)
     {
-      $sql = "insert into sysconfig ({$Columns}) values ($Values);";
-      $result = @pg_query($PG_CONN, $sql);
-      if ($result===false && strpos(pg_last_error($PG_CONN), 'duplicate key') === FALSE)
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      /* Check if the variable already exists.  Insert it if it does not.
+       * This is better than an insert ignoring duplicates, because that
+       * generates a postresql log message.
+       */
+      $VarRec = GetSingleRec("sysconfig", "where variablename='$Variable'");
+      if (empty($VarRec))
+      {
+        $sql = "insert into sysconfig ({$Columns}) values ($Values);";
+        $result = @pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+      }
+      unset($VarRec);
     }
   }
 ?>
