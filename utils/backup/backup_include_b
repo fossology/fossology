@@ -1,0 +1,9 @@
++ /repository/
+- /*
++ /repository/localhost/
+- /repository/*
++ /repository/localhost/files/
++ /repository/localhost/gold/
+- /repository/localhost/*
++ /repository/localhost/files/[a-f]*
+- /repository/localhost/files/*

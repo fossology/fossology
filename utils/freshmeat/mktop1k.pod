@@ -1,0 +1,78 @@
+#/***********************************************************
+# get-projects.php
+# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# ***********************************************************/
+# Version: "$Id: $"
+
+=head1 NAME
+
+mktop1k: extract the top 1000 entries from the Freshmeat Rdf file into
+a file.
+
+=head1 SYNOPSIS
+
+mktop1k [-h] -i <in-file> -o <out-file> [-n nnn]
+
+=head1 DESCRIPTION
+
+B<mktop1k> by default extracts the top 1000 projects from a Freshmeat Rdf and 
+places the XML for those projects into a file for further processing. Any number
+of projects can be extracted by using the B<-n> command.
+
+=head2 Options
+
+=over
+
+=item B<-h>
+
+Standard help flag, prints the usage message.
+
+=item B<-i> I<in-file>
+
+The fully qaulified path to the Freshmeat Resource Definition File.
+
+=item B<-o> I<out-file>
+
+The fully qualified path where the output from B<mktop1k> should be saved.
+
+=item B<-n> I<nnn>
+
+Optional parameter to specify how many projects to exract.  Default is 1000.
+
+=back
+
+=head1 NOTES
+
+B<mktop1k> is part of the suite of programs used to process Freshmeat projects.
+
+=head1 EXAMPLES
+
+Extract the top 1000 projects into the file top1000.
+
+mktop1k -i ./freshmeat.rdf -o /tmp/top1000
+
+Extract the top 50 project into the file top-50.
+
+mktop1k -i ./freshmeat.rdf -o /tmp/top-50 -n 50
+
+=head1 AUTHOR
+
+Mark Donohoe for Hewlett-Packard Company
+
+=head1 SEE ALSO
+
+get-projects(1), diffm(1), Readme and wiki for the Freshmeat process.
+
