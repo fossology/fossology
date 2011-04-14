@@ -241,6 +241,17 @@ if [ $AGENT ]; then
      exit 1
    fi
 
+   # check for copyright link and create if it doesn't exist
+   echo "*** Checking Copyright link ***"
+   if [ -d $(DESTDIR)$(WEBDIR)/plugins/simpleUi ] 
+      then 
+         cd $(DESTDIR)$(WEBDIR)/plugins/simpleUi
+      if [ ! -h 'copyright.php' ] 
+      then
+         ln -s ../copyright.php copyright.php
+      fi
+   fi
+   
 fi # end of AGENT
 
 ########################################################################

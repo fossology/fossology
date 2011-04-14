@@ -15,17 +15,6 @@ install:
 	$(INSTALL_DATA) agent.php $(DESTDIR)$(WEBDIR)/plugins/copyright/agent.php
 	$(INSTALL_DATA) oneshot.php $(DESTDIR)$(WEBDIR)/plugins/copyright/oneshot.php
 
-# need to install simpleUi link, or copyright agent won't be visible.
-#
-	if [ -d $(DESTDIR)$(WEBDIR)/plugins/simpleUi ] ; \
-	then \
-		cd $(DESTDIR)$(WEBDIR)/plugins/simpleUi; \
-		if [ ! -h 'copyright.php' ] ; \
-		then \
-			ln -s ../copyright.php copyright.php; \
-		fi \
-	fi
-
 srcinstall:
 	mkdir ../../../ui/plugins/copyright
 # have to create a version of copyright.php to include from the source
