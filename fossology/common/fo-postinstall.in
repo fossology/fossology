@@ -245,11 +245,14 @@ if [ $AGENT ]; then
    echo "*** Checking Copyright link ***"
    if [ -d ${DESTDIR}${WEBDIR}/plugins/simpleUi ] 
       then 
+         echo "cding to {DESTDIR}${WEBDIR}/plugins/simpleUi"
          cd ${DESTDIR}${WEBDIR}/plugins/simpleUi
       if [ ! -h 'copyright.php' ] 
       then
+         echo "*** Creating link ***"
          ln -s ../copyright.php copyright.php
       fi
+      echo "Link not created!?"
    fi
    
 fi # end of AGENT
