@@ -241,8 +241,6 @@ if [ $AGENT ]; then
      exit 1
    fi
 
-   # check for copyright link and create if it doesn't exist
-   
 fi # end of AGENT
 
 ########################################################################
