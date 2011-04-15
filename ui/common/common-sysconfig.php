@@ -176,14 +176,14 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     $Variable = "GlobalBrowse";
     $BrowsePrompt = _("Allow Global Browsing");
     $BrowseDesc = _("Allow browsing the entire repository.");
-    $ValueArray[$Variable] = "'$Variable', "false", '$BrowsePrompt', "
+    $ValueArray[$Variable] = "'$Variable', 'false', '$BrowsePrompt', "
                     . CONFIG_TYPE_INT .
                     ",'UI', 1, '$BrowseDesc'";
      
     $Variable = "GlobalSearch";
     $SearchPrompt = _("Allow Global Searches");
     $SearchDesc = _("Allow searching all folders in the system.");
-    $ValueArray[$Variable] = "'$Variable', "false", '$SearchPrompt', "
+    $ValueArray[$Variable] = "'$Variable', 'false', '$SearchPrompt', "
                     . CONFIG_TYPE_INT .
                     ",'UI', 1, '$SearchDesc'";
      
