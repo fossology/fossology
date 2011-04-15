@@ -15,6 +15,21 @@ install:
 	$(INSTALL_DATA) agent.php $(DESTDIR)$(WEBDIR)/plugins/copyright/agent.php
 	$(INSTALL_DATA) oneshot.php $(DESTDIR)$(WEBDIR)/plugins/copyright/oneshot.php
 
+	if [ ! -d $(DESTDIR)$(WEBDIR)/plugins/simpleUi ] ; \
+		then \
+         mkdir -p $(DESTDIR)$(WEBDIR)/plugins/simpleUi; \
+         cd $(DESTDIR)$(WEBDIR)/plugins/simpleUi; \
+      if [ ! -h 'copyright.php' ] ; \
+      then \
+         ln -s ../copyright.php copyright.php; \
+         echo "Copyright link created"; \
+      fi \
+   else \
+         echo "Did not find $(DESTDIR)$(WEBDIR)/plugins/simpleUi"; \
+         echo "Could not create symlink in plugins/simpleUi"; \
+         echo "As root, create the symlink by hand."; \
+   fi
+	
 srcinstall:
 	mkdir ../../../ui/plugins/copyright
 # have to create a version of copyright.php to include from the source
@@ -26,7 +41,7 @@ srcinstall:
 	cp view.php ../../../ui/plugins/copyright/view.php
 	cp agent.php ../../../ui/plugins/copyright/agent.php
 	cp oneshot.php ../../../ui/plugins/copyright/oneshot.php
-	
+
 uninstall:
 	rm -f $(DESTDIR)$(WEBDIR)/plugins/copyright.php
 	rm -rf $(DESTDIR)$(WEBDIR)/plugins/copyright/
