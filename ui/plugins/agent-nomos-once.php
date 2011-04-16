@@ -24,7 +24,7 @@
 /**
  * agent-nomos-once
  * \brief Run an analysis for a single file, do not store results in the DB.
- * 
+ *
  * @version "$Id$"
  */
 global $GlobalReady;
@@ -112,17 +112,17 @@ class agent_nomos_once extends FO_Plugin {
       /* Populate _FILES from wget so the processing logic only has to look in one
        * place wether the data came from wget or the UI
        */
-      if (filesize($Ftmp) > 0) 
+      if (filesize($Ftmp) > 0)
       {
         $_FILES['licfile']['tmp_name'] = $Ftmp;
         $_FILES['licfile']['size'] = filesize($Ftmp);
         $_FILES['licfile']['unlink_flag'] = 1;
         $this->NoHTML = 1;
       }
-      else 
+      else
       {
         unlink($Ftmp);
-        /* If there is no input data, then something is wrong.  
+        /* If there is no input data, then something is wrong.
          * For example the php POST limit is too low and prevented
          * the data from coming through.  Or there was an apache redirect,
          * which removes the POST data.
@@ -144,11 +144,11 @@ class agent_nomos_once extends FO_Plugin {
           "item"
           ));
           menu_insert("View::[BREAK]", 100);
-$text = _("Nomos One-shot, real-time license analysis");
-          menu_insert("View::Nomos One-Shot", 101, $URI, $text);
+$text = _("One-shot License, real-time license analysis");
+          menu_insert("View::One-Shot License", 101, $URI, $text);
           menu_insert("View-Meta::[BREAK]", 100);
 $text = _("Nomos One-shot, real-time license analysis");
-          menu_insert("View-Meta::Nomos One-Shot", 101, $URI, $text);
+          menu_insert("View-Meta::One-Shot License", 101, $URI, $text);
       }
     }
   } // RegisterMenus()
