@@ -18,6 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef JOB_H_INCLUDE
 #define JOB_H_INCLUDE
 
+#include <stdio.h>
+
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
@@ -70,6 +72,7 @@ int  job_is_open(job j);
 job  job_verbose(job j, int level);
 char* job_type(job j);
 char* job_next(job j);
+FILE* job_log(job j);
 
 /* ************************************************************************** */
 /* **** Job list Functions ************************************************** */

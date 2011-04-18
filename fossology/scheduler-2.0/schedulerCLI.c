@@ -36,6 +36,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define DEFAULT_SETUP ""
 #endif
 
+#define P_WIDTH 25
+
 int s;          ///< the socket that the CLI will use to communicate
 int verbose;    ///< the verbose flag for the cli
 int n_line = 1; ///< flag that indicates if the last thing printed ended in a new line
@@ -66,17 +68,20 @@ void interface_usage()
   /* print cli usage */
   printf("FOSSology scheduler command line interface\n");
   printf("for all options any prefix will work when sending command\n");
-  printf("usage:\n");
-  printf("  exit: close the connection to scheduler\n");
-  printf("  close: shutdown the scheduler gracefully\n");
-  printf("  pause <job id>: pauses a job indefinitely\n");
-  printf("  reload: reload the configuration information\n");
-  printf("  status: scheduler responds with status information\n");
-  printf("  status <job id>: get the status of all agent on specified job\n");
-  printf("  restart <job id>: restart a paused job\n");
-  printf("  verbose <level>: change the level of verbose for scheduler\n");
-  printf("  verbose <job id> <level>: change the verbose for all agents on a job\n");
-  printf("  database: causes the scheduler to check the job queue\n");
+  printf("+--------------------------------------------------------------------------+\n");
+  printf("|%*s:   EFFECT                                       |\n", P_WIDTH, "COMMDNA");
+  printf("+--------------------------------------------------------------------------+\n");
+  printf("|%*s:   close the connection to scheduler            |\n", P_WIDTH, "exit");
+  printf("|%*s:   shutdown the scheduler gracefully            |\n", P_WIDTH, "close");
+  printf("|%*s:   pauses a job indefinitely                    |\n", P_WIDTH, "pause <job id>");
+  printf("|%*s:   reload the configuration information         |\n", P_WIDTH, "reload");
+  printf("|%*s:   scheduler responds with status information   |\n", P_WIDTH, "status");
+  printf("|%*s:   get the status of all agent on specified job |\n", P_WIDTH, "status <job id>");
+  printf("|%*s:   restart a paused job                         |\n", P_WIDTH, "restart <job id>");
+  printf("|%*s:   change the level of verbose for scheduler    |\n", P_WIDTH, "verbose <level>");
+  printf("|%*s:   change the verbose for all agents on a job   |\n", P_WIDTH, "verbose <job id> <level>");
+  printf("|%*s:   causes the scheduler to check the job queue  |\n", P_WIDTH, "database");
+  printf("+--------------------------------------------------------------------------+\n");
 }
 
 /* ************************************************************************** */
