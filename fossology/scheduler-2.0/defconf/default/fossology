@@ -1,0 +1,15 @@
+# Defaults for fossology initscript
+# sourced by /etc/init.d/fossology
+
+#
+# This is a POSIX shell fragment
+#
+
+# Should the daemon start on boot?
+# Set this to 1 to enable and to 0 to disable the init script, default is 1.
+# You might disable it on multi machine installs where things like NFS
+# might not ready when the scheduler starts
+#ENABLED="0"
+
+# You can override scheduler options here
+#SCHEDULEROPT="--log=/other/log/directory"
