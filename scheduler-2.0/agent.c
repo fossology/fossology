@@ -285,7 +285,8 @@ void agent_listen(agent a)
   /* validate the agent version */
   if(fgets(buffer, sizeof(buffer), a->read) == NULL)
   {
-    clprintf("T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
+    alprintf(job_log(a->owner),
+        "T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
         __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
     g_thread_exit(NULL);
   }
@@ -299,8 +300,12 @@ void agent_listen(agent a)
   }
   else if(strcmp(a->meta_data->version, buffer) != 0)
   {
-    clprintf("ERROR %s.%d: META_DATA[%s] invalid agent spawn check\n", __FILE__, __LINE__, a->meta_data->name);
-    clprintf("ERROR: meta_datd: \"%s\" != received: \"%s\"", a->meta_data->version, buffer);
+    alprintf(job_log(a->owner),
+        "ERROR %s.%d: META_DATA[%s] invalid agent spawn check\n",
+        __FILE__, __LINE__, a->meta_data->name);
+    alprintf(job_log(a->owner),
+        "ERROR: meta_datd: \"%s\" != received: \"%s\"",
+        a->meta_data->version, buffer);
     a->meta_data->valid = 0;
     kill(a->pid, SIGKILL);
     g_static_mutex_unlock(&version_lock);
@@ -318,7 +323,8 @@ void agent_listen(agent a)
     if(TVERBOSE3)
     {
       buffer[strlen(buffer) - 1] = '\0';
-      clprintf("JOB[%d].%s[%d]: received: \"%s\"\n",
+      alprintf(job_log(a->owner),
+          "JOB[%d].%s[%d]: received: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, buffer);
     }
 
@@ -355,27 +361,30 @@ void agent_listen(agent a)
     /* agent is failing, log why */
     else if(strncmp(buffer, "FATAL", 5) == 0)
     {
-      clprintf("FATAL:JOB[%d].%s[%d]: \"%s\"\n",
+      alprintf(job_log(a->owner),
+          "FATAL:JOB[%d].%s[%d]: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, &buffer[5]);
       break;
     }
     /* the agent has recieved an error, log what */
     else if(strncmp(buffer, "ERROR", 5) == 0)
     {
-      clprintf("ERROR:JOB[%d].%s[%d]: \"%s\"\n",
+      alprintf(job_log(a->owner),
+          "ERROR:JOB[%d].%s[%d]: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, &buffer[5]);
-      break;
     }
     /* we aren't quite sure what the agent sent, log it */
     else if(verbose == 0)
     {
-      clprintf("JOB[%d].%s[%d]: message \"%s\"\n",
+      alprintf(job_log(a->owner),
+          "JOB[%d].%s[%d]: notice: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, buffer);
     }
   }
 
   if(TVERBOSE3)
-    clprintf("JOB[%d].%s[%d]: communication thread closing\n",
+    alprintf(job_log(a->owner),
+        "JOB[%d].%s[%d]: communication thread closing\n",
         job_id(a->owner), a->meta_data->name, a->pid);
 }
 

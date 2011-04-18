@@ -148,7 +148,6 @@ const char* lname()
  * almost identically to a normal printf
  *
  * @param fmt the format for the printed data
- * @param ... the remaining arguments
  * @return 1 on success, 0 otherwise
  */
 int lprintf(const char* fmt, ...)
@@ -156,8 +155,35 @@ int lprintf(const char* fmt, ...)
   va_list args;
   int rc;
 
+  if(!fmt) return 0;
+  if(!log_file) log_open();
+
   va_start(args, fmt);
-  rc = vlprintf(fmt, args);
+  rc = vlprintf(log_file, fmt, args);
+  va_end(args);
+
+  return rc;
+}
+
+/**
+ * agent logging function. Since the agents will log to a different location
+ * this takes a file to print the log to. Other than that this will work exactly
+ * like lprintf in the all line will be prepended by a time stamp.
+ *
+ * @param dst the destination file
+ * @param fmt the formating string
+ * @return 1 on success, o otherwise
+ */
+int alprintf(FILE* dst, const char* fmt, ...)
+{
+  va_list args;
+  int rc;
+
+  if(!fmt) return 0;
+  if(!dst) return 0;
+
+  va_start(args, fmt);
+  rc = vlprintf(dst, fmt, args);
   va_end(args);
 
   return rc;
@@ -172,7 +198,7 @@ int lprintf(const char* fmt, ...)
  * @param args the arguemtn for the print in and form of a va_list
  * @return 1 on success, 0 otherwise
  */
-int vlprintf(const char* fmt, va_list args)
+int vlprintf(FILE* dst, const char* fmt, va_list args)
 {
   /* static used to determine if a '\n' needs to be printed */
   static int n_line = 1;
@@ -183,7 +209,7 @@ int vlprintf(const char* fmt, va_list args)
   char time_buf[64];
   int e_line;
 
-  if(!log_file) log_open();
+  if(!dst) return 0;
   if(!fmt) return 0;
 
   strftime(time_buf, sizeof(time_buf),"%F %T",localtime(&t));
@@ -193,21 +219,21 @@ int vlprintf(const char* fmt, va_list args)
   curr = strtok(tmp, "\n");
   while(curr != NULL)
   {
-    if(n_line && fprintf(log_file, "%s scheduler [%d] :: ", time_buf, getpid()) == 0)
+    if(n_line && fprintf(dst, "%s scheduler [%d] :: ", time_buf, getpid()) == 0)
         return 0;
 
-    if(fprintf(log_file, "%s", curr) == 0)
+    if(fprintf(dst, "%s", curr) == 0)
       return 0;
 
     n_line = ((curr = strtok(NULL, "\n")) != NULL);
-    if(n_line && fprintf(log_file, "\n") == 0)
+    if(n_line && fprintf(dst, "\n") == 0)
         return 0;
   }
 
   if(e_line)
   {
     n_line = 1;
-    if(fprintf(log_file, "\n") == 0)
+    if(fprintf(dst, "\n") == 0)
       return 0;
   }
 

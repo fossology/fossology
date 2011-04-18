@@ -16,6 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 ************************************************************** */
 
 /* local includes */
+#include <libfossrepo.h>
 #include <agent.h>
 #include <database.h>
 #include <event.h>
@@ -52,6 +53,7 @@ struct job_internal
     GList* running_agents;  ///< the list of agents assigned to this job that are still working
     GList* finished_agents; ///< the list of agents that have successfully finish their task
     GList* failed_agents;   ///< the list of agents that failed while working
+    FILE*  log;             ///< the log to print any agent logging messages to
     /* information for data manipluation */
     job_status status;      ///< the current status for the job
     char* data;             ///< the data associated with this job
@@ -254,18 +256,19 @@ job job_init(char* type, int id)
 {
   job j = g_new0(struct job_internal, 1);
 
-  j->agent_type = g_strdup(type);
-  j->running_agents =  NULL;
+  j->agent_type      = g_strdup(type);
+  j->running_agents  = NULL;
   j->finished_agents = NULL;
-  j->failed_agents =   NULL;
-  j->status = JB_CHECKEDOUT;
-  j->data = NULL;
-  j->db_result = NULL;
-  j->lock = NULL;
-  j->idx = 0;
-  j->priority = 0;
-  j->verbose = 0;
-  j->id = id;
+  j->failed_agents   = NULL;
+  j->log             = NULL;
+  j->status          = JB_CHECKEDOUT;
+  j->data            = NULL;
+  j->db_result       = NULL;
+  j->lock            = NULL;
+  j->idx             = 0;
+  j->priority        = 0;
+  j->verbose         = 0;
+  j->id              = id;
 
   if(job_list == NULL)
   {
@@ -293,6 +296,11 @@ void job_destroy(job j)
   {
     PQclear(j->db_result);
     g_mutex_free(j->lock);
+  }
+
+  if(j->log)
+  {
+    fclose(j->log);
   }
 
   g_list_free(j->running_agents);
@@ -628,6 +636,31 @@ char* job_next(job j)
   return retval;
 }
 
+/**
+ * Gets the log file for the particular job. If the job hasn't had anything to
+ * log yet, this will create the file from the repository and then return it.
+ *
+ * @param j the job to get the file for
+ * @return the FILE* to print the job's log infot o
+ */
+FILE* job_log(job j)
+{
+  char  file_name[7];
+  char* file_path;
+
+  if(j->log)
+    return j->log;
+
+  snprintf(file_name, sizeof(file_name), "%06d", j->id);
+  file_path = fo_RepMkPath("log", file_name);
+  VERBOSE2("JOB[%d]: job created log file:\n    %s\n", j->id, file_path);
+
+  // TODO enter that the job has created a new file into the database
+
+  j->log = fopen(file_path, "w");
+  return j->log;
+}
+
 /* ************************************************************************** */
 /* **** Job list Functions ************************************************** */
 /* ************************************************************************** */
@@ -653,7 +686,7 @@ job next_job()
 }
 
 /**
- * TODO
+ * get a job based upon the job's id number.
  *
  * @param id
  * @return

@@ -45,12 +45,12 @@ case "$1" in
     echo -n "Starting $DESC: "
     $DAEMON $SCHEDULEROPT
     echo "$NAME."
-    $WATCHDOG
+    #$WATCHDOG
 	;;
   stop)
     echo -n "Stopping $DESC: "
     # we don't really care about the exit code as long as it's stopped
-    $WATCHDOG -k
+    #$WATCHDOG -k
     $DAEMON --kill || true
     echo "$NAME."
 	;;
@@ -73,14 +73,14 @@ case "$1" in
 	#	just the same as "restart" except that it does nothing if the
 	#   daemon isn't already running.
 	# check wether $DAEMON is running. If so, restart
-    $WATCHDOG -k
+    #$WATCHDOG -k
 	$DAEMON --kill
 	$DAEMON $SCHEDULEROPT
     $WATCHDOG
 	;;
   restart)
     echo -n "Restarting $DESC: "
-    $WATCHDOG -k
+    #$WATCHDOG -k
 	$DAEMON --kill
 	$DAEMON $SCHEDULEROPT
 	echo "$NAME."
