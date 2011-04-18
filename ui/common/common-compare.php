@@ -100,85 +100,101 @@ function FuzzyCmp($Master1, $Master2)
     Each row contains aligning child records.
     $Master[n][1] = child 1 row
     $Master[n][2] = child 2 row
+    If $Sort is true, the master rows are sorted by fuzzy name.
+    If $Sort is false, the master rows are unsorted.
    ***********************************************************/
-  function MakeMaster($Children1, $Children2)
+  function MakeMaster($Children1, $Children2, $Sort=true)
   {
     $Master = array();
     $row =  -1;   // Master row number
 
     if (!empty($Children1) && (!empty($Children2)))
     {
-      foreach ($Children1 as $Child1)
+      foreach ($Children1 as $key1 => $Child1)
       {
-        $done = false;
-        $row++;
-
         /* find complete name match */
-        foreach ($Children2 as $key => $Child2)
+        foreach ($Children2 as $key2 => $Child2)
         {
           if ($Child1['ufile_name'] == $Child2['ufile_name'])
           {
+            $row++;
             $Master[$row][1] = $Child1;
             $Master[$row][2] = $Child2;
-            unset($Children2[$key]);
-            $done = true;
+            unset($Children1[$key1]);
+            unset($Children2[$key2]);
             break;
           }
         }
+      }
 
-        /* find fuzzy+extension match */
-        if (!$done) foreach ($Children2 as $key => $Child2)
+      /* find fuzzy+extension match */
+      foreach ($Children1 as $key1 => $Child1)
+      {
+        foreach ($Children2 as $key2 => $Child2)
         {
           if ($Child1['fuzzynameext'] == $Child2['fuzzynameext'])
           {
+            $row++;
             $Master[$row][1] = $Child1;
             $Master[$row][2] = $Child2;
-            unset($Children2[$key]);
-            $done = true;
+            unset($Children1[$key1]);
+            unset($Children2[$key2]);
             break;
           }
         }
+      }
 
-        /* find files that only differ by 1 character in fuzzyext */
-        if (!$done) foreach ($Children2 as $key => $Child2)
+      /* find files that only differ by 1 character in fuzzyext 
+       * names must be over 3 characters long
+       */
+      foreach ($Children1 as $key1 => $Child1)
+      {
+        foreach ($Children2 as $key2 => $Child2)
         {
+          if (strlen($Child1['fuzzynameext']) <= 3) continue;
           if (levenshtein($Child1['fuzzynameext'], $Child2['fuzzynameext']) == 1)
           {
+            $row++;
             $Master[$row][1] = $Child1;
             $Master[$row][2] = $Child2;
-            unset($Children2[$key]);
-            $done = true;
+            unset($Children1[$key1]);
+            unset($Children2[$key2]);
             break;
           }
         }
+      }
 
-        /* Look for fuzzy match */
-        if (!$done) foreach ($Children2 as $key => $Child2)
+      /* Look for fuzzy match */
+      foreach ($Children1 as $key1 => $Child1)
+      {
+        foreach ($Children2 as $key2 => $Child2)
         {
           if ($Child1['fuzzyname'] == $Child2['fuzzyname'])
           {
+            $row++;
             $Master[$row][1] = $Child1;
             $Master[$row][2] = $Child2;
-            unset($Children2[$key]);
-            $done = true;
+            unset($Children1[$key1]);
+            unset($Children2[$key2]);
             break;
           }
         }
-
-        /* no match so add it in by itself */
-        if (!$done) 
-        {
-          $Master[$row][1] = $Child1;
-          $Master[$row][2] = array();
-        }
       }
+    }
+
+    /* Add in nonmatching Child1 recs */
+    foreach ($Children1 as $Child)
+    {
+      $row++;
+      $Master[$row][1] = $Child;
+      $Master[$row][2] = array();
     }
 
     /* Remaining Child2 recs */
     foreach ($Children2 as $Child)
     {
       $row++;
-      $Master[$row][1] = '';
+      $Master[$row][1] = array();
       $Master[$row][2] = $Child;
     }
 
@@ -187,7 +203,6 @@ function FuzzyCmp($Master1, $Master2)
 
     return($Master);
   } // MakeMaster()
-
 
 
   /***********************************************************
@@ -397,26 +412,26 @@ function FuzzyCmp($Master1, $Master2)
  * Dir2BrowseDiff(): 
  * Return a string which is a linked path to the file.
  *  This is a modified Dir2Browse() to support browsediff links.
- *  $Path1 - path array for tree 1
- *  $Path2 - path array for tree 2
+ *  $Path   - path array for tree
  *  $filter - filter portion of URL, optional
  *  $Column - which path is being emitted, column 1 or 2
+ *  $Master - Master (from MakeMaster()) to be used for 
+ *            determining matched pairs.
  ************************************************************/
-function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin)
+function Dir2BrowseDiff ($Path, $filter, $Column, $plugin, $Master)
 {
   global $Plugins;
   global $DB;
 
-  if ((count($Path1) < 1) || (count($Path2) < 1)) return "No path specified";
+  /* data input assertions */
+  $text = _("Dir2BrowseDiff(): Missing inputs");
+  if ((count($Path) < 1) 
+      or (($Column != 1) and ($Column != 2))
+      or (empty($plugin)) or (empty($Master)))
+    Fatal($text, __FILE__, __LINE__);
 
   $V = "";
-  $Last1 = $Path1[count($Path1)-1];
-  $Last2 = $Path2[count($Path2)-1];
-  $item1 = $Last1['uploadtree_pk'];
-  $item2 = $Last2['uploadtree_pk'];
   $filter_clause = (empty($filter)) ? "" : "&filter=$filter";
-  $Path = ($Column == 1) ? $Path1 : $Path2;
-  $Last = $Path[count($Path)-1];
 
   /* Banner Box decorations */
   $V .= "<div style='border: double gray; background-color:lightyellow'>\n";
@@ -428,11 +443,20 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin)
   $Uri2 = Traceback_uri() . "?mod=$plugin->Name";
 
   /* Define Freeze button */
+/* TEMPORARILY REMOVE Apr 27, 2011 - It's not clear that we need this and I broke it while
+changing the Dir2PathDiff links.  Then new Dir2PathDiff links work so well
+this doesn't seem to be necessary.
+I don't want to fix this if we don't need
+the freeze button (which is confusing UI element). 
+Remove all the freeze code (here and in the diff plugins) in v 1.4.1 after we see 
+how this goes in 1.4.
+
   $text = _("Freeze path");
   $id = "Freeze{$Column}";
   $alt =  _("Freeze this path so that selecting a new directory in the other path will not change this one.");
   $Options = "id='$id' onclick='Freeze(\"$Column\")' title='$alt'";
   $FreezeBtn = "<button type='button' $Options> $text </button>\n";
+*/
 
   for($i=0; $i < count($List); $i++)
   {
@@ -442,32 +466,62 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin)
   }
 
   $FirstPath=true; /* If firstpath is true, print FreezeBtn and starts a new line */
+/* SEE above TEMP REMOVE 
   $V .= "&nbsp;&nbsp;&nbsp;$FreezeBtn";
+*/
   $V .= "<br>";
 
   /* Show the path within the upload */
-  for ($PathLev = 0; $PathLev < count($Path); $PathLev++)
+  $LastItem = $Path[count($Path)-1]['uploadtree_pk'];
+  $OtherColumn = ($Column == 1) ? 2:1;
+  foreach($Path as $Pathrec)
   {
-    @$PathElt1 = $Path1[$PathLev];
-    @$PathElt2 = $Path2[$PathLev];  // temporarily ignore notice of missing Path2[PathLev]
-    $PathElt = ($Column == 1) ? $PathElt1: $PathElt2;
-
-    if ($PathElt != $Last)
+    $Item = $Pathrec['uploadtree_pk'];
+    $OtherItem = FindMatchingItem($Pathrec['uploadtree_pk'], $Column, $OtherColumn, $Master);
+    if ($Column == 1)
     {
-      $href = "$Uri2&item1=$PathElt1[uploadtree_pk]&item2=$PathElt2[uploadtree_pk]{$filter_clause}&col=$Column";
-//      $href = "$Uri2&item1=$item1&item2=$item2&newitem{$Column}=$PathElt[uploadtree_pk]{$filter_clause}&col=$Column";
-      $V .= "<a href='$href'>";
+      $Item1 = $Item;
+      $Item2 = $OtherItem;
     }
+    else
+    {
+      $Item1 = $OtherItem;
+      $Item2 = $Item;
+    }
+    $Name = "&nbsp;&nbsp;<b>" . $Pathrec['ufile_name'] . "/</b>";
+    if (($Item != $LastItem) and ($OtherItem))
+    {
+      $href = "$Uri2&item1=$Item1&item2=$Item2{$filter_clause}&col=$Column";
+      $V .= "<a href='$href'>$Name</a>";
+    }
+    else
+      $V .= $Name;
 
-    if (!$FirstPath) $V .= "<br>";
-    $V .= "&nbsp;&nbsp;<b>" . $PathElt['ufile_name'] . "/</b>";
-
-    if ($PathElt != $Last) $V .= "</a>";
-    $FirstPath = false;
+    $V .= "<br>";
   }
 
   $V .= "</div>\n";  // for box
   return($V);
 } // Dir2BrowseDiff()
+
+
+/************************************************************
+  FindMatchingItem()
+  Find the item (uploadtree_pk) from $ItemColumn in $Master $SearchColumn
+  that matches $Item
+  No match returns an empty string;
+************************************************************/
+function FindMatchingItem($Item, $ItemColumn, $SearchColumn, $Master)
+{
+  foreach($Master as $Pair)
+  {
+    if (empty($Pair[1]) or empty($Pair[2])) continue;
+    if ($Pair[$ItemColumn]['uploadtree_pk'] == $Item)
+    {
+      return $Pair[$SearchColumn]['uploadtree_pk'];
+    }
+  }
+  return '';
+}
 
 ?>

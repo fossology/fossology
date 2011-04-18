@@ -568,12 +568,16 @@ return;
     /* File path */
     $OutBuf .= "<tr>";
     $Path1 = Dir2Path($uploadtree_pk1);
+    FuzzyName($Path1);  // add fuzzyname to path elements
     $Path2 = Dir2Path($uploadtree_pk2);
+    FuzzyName($Path2);  // add fuzzyname to path elements
+
+    $PathMaster = MakeMaster($Path1, $Path2, false);
     $OutBuf .= "<td colspan=2>";
-    $OutBuf .= Dir2BrowseDiff($Path1, $Path2, $filter, 1, $this);
+    $OutBuf .= Dir2BrowseDiff($Path1, $filter, 1, $this, $PathMaster);
     $OutBuf .= "</td>";
     $OutBuf .= "<td $this->ColumnSeparatorStyleL colspan=3>";
-    $OutBuf .= Dir2BrowseDiff($Path1, $Path2, $filter, 2, $this);
+    $OutBuf .= Dir2BrowseDiff($Path2, $filter, 2, $this, $PathMaster);
     $OutBuf .= "</td></tr>";
 
     /* File comparison table */
