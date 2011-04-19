@@ -76,19 +76,18 @@ class verifyFossolyTest extends fossologyTestCase
 		// licenseCounts recorded 2010-11-19 for release 1.3
 		$licenseCounts = array(
      'GPL_v2' => 224,
-    'No License Found' => 72,
+    'No_license_found' => 72,
     'GPL' => 23,
     'LGPL_v2.1' => 17,
     'Apache_v2.0' => 2,
     'GFDL' => 2,
-    'Public-domain-claim' => 2,
+    'Public-domain' => 8,
     'APSL_v2.0' => 1,
     'Artistic' => 1,
     'Boost' => 1,
     'BSD' => 1,
     'FSF-possibility' => 1,
     'GPL_v2-possibility' => 1,
-    'Indemnity' => 1,
     'LGPL_v2.1+' => 1,
     'LGPL_v3+' => 1,
     'NPL' => 1,
@@ -101,8 +100,8 @@ class verifyFossolyTest extends fossologyTestCase
 );
 
 		$licenseSummary = array(
-      'Unique licenses'=> 23,
-      'Licenses found'=> 286,
+      'Unique licenses'=> 22,
+      'Licenses found'=> 291,
       'Files with no licenses'=> 72,
       'Files'=> 345
 		);
@@ -128,9 +127,11 @@ class verifyFossolyTest extends fossologyTestCase
 		/* Select archive */
 		$page = $this->mybrowser->clickLink($name);
 		//print "************ Page after select foss archive *************\n$page\n";
-		$this->assertTrue($this->myassertText($page, "/fossology\//"));
+		$this->assertTrue($this->myassertText($page, "/fossI16L335U29\.tar/"),
+		  "FAILURE! Could not find fossI16L335U29.tar link\n");
 
 		/* Select fossology link */
+		$page = $this->mybrowser->clickLink('fossI16L335U29.tar');
 		$page = $this->mybrowser->clickLink('fossology/');
 
 		/* need to check that there are 16 items */
@@ -149,12 +150,12 @@ class verifyFossolyTest extends fossologyTestCase
 		/* Select the License link to View License Historgram */
 		$mini = new parseMiniMenu($page);
 		$miniMenu = $mini->parseMiniMenu();
-		$url = makeUrl($this->host, $miniMenu['Nomos License']);
+		$url = makeUrl($this->host, $miniMenu['License Browser']);
 		if($url === NULL) { $this->fail("verifyFossl16L335 Failed, host/url is not set"); }
 
 		$page = $this->mybrowser->get($url);
 		//print "page after get of $url is:\n$page\n";
-		$this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
+		$this->assertTrue($this->myassertText($page, '/License Browser/'),
           "verifyFossl16L335 FAILED! Nomos License Browser Title not found\n");
 
 		// check that license summarys are correct
