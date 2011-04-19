@@ -53,7 +53,7 @@ class OneShotgplv21Test extends fossologyTestCase
     $this->assertTrue($this->myassertText($loggedIn, '/One-Shot Analysis/'),
                       "OneShotgplv21Test FAILED! Did not find One-Shot Analysis Menu\n");
 
-    $page = $this->mybrowser->get("$URL?mod=agent_license_once");
+    $page = $this->mybrowser->get("$URL?mod=agent_nomos_once");
     $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
     "OneShotgplv21Test FAILED! Did not find One-Shot License Analysis Title\n");
     $this->assertTrue($this->myassertText($page, '/The analysis is done in real-time/'),
@@ -65,8 +65,8 @@ class OneShotgplv21Test extends fossologyTestCase
                       "FAILED! Count not click Analyze button\n");
     /* Check for the correct analysis.... */
     $page = $this->mybrowser->getContent();
-    $this->assertTrue($this->myassertText($page, '/LGPL v2\.1 Preamble, LGPL v2\.1\+/'),
-    "OneShotgplv21Test FAILED! Did not find exactly 'LGPL v2.1 Preamble, LGPL v2.1+'\n");
+    $this->assertTrue($this->myassertText($page, '/LGPL_v2\.1/'),
+    "OneShotgplv21Test FAILED! Did not find exactly 'LGPL_v2.1'\n");
 
     $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
     "OneShotgplv21Test FAILED! Did not find One-Shot License Analysis Title\n");
