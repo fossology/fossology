@@ -60,7 +60,7 @@ class rhelTest extends fossologyTestCase
     global $URL;
 
     $licBaseLine = array(
-    'No License Found' => 6913,
+    'No_license_found' => 6913,
     'Apache_v2.0' => 858,
     'ATT' => 812,
     'GPL_v2+' => 289,
@@ -85,8 +85,8 @@ class rhelTest extends fossologyTestCase
     'GPL_v2' => 13,
     'Indemnity' => 11,
     'GPL-possibility' => 9,
-    'Public-domain-claim' => 9,
-    'Non-commercial!' => 7,
+    'Public-domain' => 24,
+    'Non-commercial!' => 6,
     'RSA-Security' => 7,
     'ATT-possibility' => 6,
     'LGPL_v2+' => 6,
@@ -137,8 +137,8 @@ class rhelTest extends fossologyTestCase
     );
 
     $licenseSummary = array(
-      'Unique licenses'        => 74,
-      'Licenses found'         => 3277,
+      'Unique licenses'        => 72,
+      'Licenses found'         => 3285,
       'Files with no licenses' => 6913,
       'Files'                  => 12595
     );
