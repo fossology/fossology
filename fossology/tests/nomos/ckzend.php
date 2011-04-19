@@ -85,7 +85,6 @@ class zendTest extends fossologyTestCase
 		$page = $this->mybrowser->get($viewLink);
 		$mini = new parseMiniMenu($page);
 		$miniMenu = $mini->parseMiniMenu();
-		print "miniMenu is:\n";print_r($miniMenu) . "\n";
 		$url = makeUrl($this->host, $miniMenu['License Browser']);
 		if($url === NULL) { $this->fail("ckzend Failed, host/url is not set"); }
 
