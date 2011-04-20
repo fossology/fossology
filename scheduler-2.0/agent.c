@@ -702,9 +702,9 @@ void agent_death_event(void* pids)
       ERROR("JOB[%d].%s[%d]: agent closed unexpectedly, agent status was %s",
           job_id(a->owner), a->meta_data->name, a->pid, status_strings[a->status]);
       agent_fail(a);
+      job_update(a->owner);
     }
     agent_close(a);
-    job_update(a->owner);
   }
 
   if(db) database_update_event(NULL);
@@ -826,6 +826,7 @@ void agent_close(agent a)
   if(a->status != AG_CLOSING && a->status != AG_FAILED)
   {
     agent_transition(a, AG_CLOSING);
+    close(a->to_parent);
     aprintf(a, "CLOSE\n");
     return;
   }

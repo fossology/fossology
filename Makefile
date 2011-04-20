@@ -5,7 +5,7 @@
 include Makefile.conf
 
 # the directories we do things in by default
-DIRS=devel db scheduler-2.0 agents ui cli common
+DIRS=devel lib db scheduler-2.0 agents ui cli common
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can

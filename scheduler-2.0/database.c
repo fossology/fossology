@@ -61,8 +61,7 @@ const char* jobsql_restart = "\
 
 const char* jobsql_failed = "\
     UPDATE jobqueue \
-      SET jq_starttime = null, \
-          jq_endtime = null, \
+      SET jq_endtime = now(), \
           jq_schedinfo = null, \
           jq_endtext = 'Failed' \
       WHERE jq_pk = '%d';";

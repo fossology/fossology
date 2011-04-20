@@ -148,6 +148,8 @@ void update_scheduler()
   job j;
   host h;
 
+  //VERBOSE2("EVENT:\n  close: %d\n  agents: %d\n  jobs: %d\n",
+  //    closing, num_agents(), active_jobs());
   if(closing && num_agents() == 0 && active_jobs() == 0)
   {
     event_loop_terminate();
