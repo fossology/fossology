@@ -16,6 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 ************************************************************** */
 
 /* local includes */
+#include <libfossrepo.h>
 #include <agent.h>
 #include <database.h>
 #include <event.h>
@@ -462,6 +463,7 @@ int close_scheduler()
   interface_destroy();
   database_destroy();
   event_loop_destroy();
+  fo_RepClose();
   return 0;
 }
 
@@ -557,6 +559,7 @@ int main(int argc, char** argv)
   /* ********************************** */
   g_thread_init(NULL);
   g_type_init();
+  fo_RepOpen();
   load_config();
   interface_init();
   database_init();

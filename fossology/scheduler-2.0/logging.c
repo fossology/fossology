@@ -237,6 +237,7 @@ int vlprintf(FILE* dst, const char* fmt, va_list args)
       return 0;
   }
 
+  fflush(dst);
   g_free(tmp);
   return 1;
 }

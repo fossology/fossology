@@ -651,13 +651,17 @@ FILE* job_log(job j)
   if(j->log)
     return j->log;
 
-  snprintf(file_name, sizeof(file_name), "%06d", j->id);
-  file_path = fo_RepMkPath("log", file_name);
+  if(j->id < 0)
+    return log_file;
+
+  snprintf(file_name, sizeof(file_name), "%07d", j->id);
+  file_path = fo_RepMkPath("logs", file_name);
   VERBOSE2("JOB[%d]: job created log file:\n    %s\n", j->id, file_path);
 
   // TODO enter that the job has created a new file into the database
 
-  j->log = fopen(file_path, "w");
+  j->log = fo_RepFwrite("logs", file_name);
+  free(file_path);
   return j->log;
 }
 

@@ -28,7 +28,7 @@ test -x $WATCHDOG || exit 0
 ENABLED=1
 
 # Include scheduler defaults if available
-SCHEDULEROPT="--daemon --reset" 
+SCHEDULEROPT="--daemon --reset --verbose=7" 
 if [ -f {$SYSCONFDIR}/default/fossology ] ; then
 	# This can override SCHEDULEROPT.
 	# Be sure to keep "-d" for daemon mode
