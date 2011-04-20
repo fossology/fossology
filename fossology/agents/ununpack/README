@@ -1,0 +1,4 @@
+ununpack uses the sha1 checksumming method defined by RFC 3174. You can
+find the text of this RFC at
+
+http://www.ietf.org/rfc/rfc3174.txt
