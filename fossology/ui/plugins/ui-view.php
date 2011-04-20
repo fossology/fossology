@@ -128,7 +128,7 @@ $text = _("View file contents");
   /***********************************************************
    _cmp_highlight(): Use for sorting the highlight list.
    ***********************************************************/
-  function _cmp_highlight($a,$b)
+  static function _cmp_highlight($a,$b)
     {
     if ($a['Start'] != $b['Start'])
 	{
@@ -220,7 +220,7 @@ $text = _("View file contents");
 	if ($First)
 	  {
 	  $First = 0;
-      if (!$ViewOnly) 
+      if (!$ViewOnly)
       {
 	    $V .= "<tr>";
 $text = _("Match");
@@ -666,7 +666,7 @@ $text = _("Last");
       {
         $Meta = GetMimeType($Item);
         list($Type,$Junk) = explode("/",$Meta,2);
-        if ($Type == 'text') 
+        if ($Type == 'text')
         { $Format = 'flow'; }
         else switch($Meta)
         {
@@ -749,7 +749,7 @@ $text = _("Unpack of Upload failed");
 	         }
   	       print $V;
 	     }
-	   }     
+	   }
 	   else {
 	     $flag = 1;
 $text = _("Reunpack job is running: you can see it in");
@@ -762,7 +762,7 @@ $text = _("File contents are not available in the repository.");
      print $P->ShowReunpackView($Item,$flag);
 	   return;
 	}
-	  /** END **/ 
+	  /** END **/
       }
     rewind($Fin);
     $Pages = "";
