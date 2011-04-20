@@ -139,24 +139,18 @@ class agent_copyright_once extends FO_Plugin {
             /* default header is plain text */
         }
         /* Only register with the menu system if the user is logged in. */
-        if (!empty($_SESSION['User'])) {
+        if (!empty($_SESSION['User'])) 
+        {
             // Debugging changes to license analysis NOTE: this comment doesn't make sense.
-            if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
-                menu_insert("Main::Upload::One-Shot Copyright/Email/URL", $this->MenuOrder, $this->Name, $this->MenuTarget);
-            }
-            // Debugging changes to license analysis
-            if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG) {
-                $URI = $this->Name . Traceback_parm_keep(array(
-                    "format",
-                    "upload",
-                    "item"
-                ));
+            if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) 
+            {
+               menu_insert("Main::Upload::One-Shot Copyright/Email/URL", $this->MenuOrder, $this->Name, $this->MenuTarget);
 
-$text = _("Copyright/Email/URL One-shot, real-time analysis");
-                menu_insert("View::[BREAK]", 100);
-                menu_insert("View::One-Shot Copyright/Email/URL", 101, $URI, $text);
-                menu_insert("View-Meta::[BREAK]", 100);
-                menu_insert("View-Meta::One-Shot Copyright/Email/URL", 101, $URI, $text);
+              $text = _("Copyright/Email/URL One-shot, real-time analysis");
+              menu_insert("View::[BREAK]", 100);
+              menu_insert("View::One-Shot Copyright/Email/URL", 101, $this->Name, $text);
+              menu_insert("View-Meta::[BREAK]", 100);
+              menu_insert("View-Meta::One-Shot Copyright/Email/URL", 101, $this->Name, $text);
             }
         }
     } // RegisterMenus()
