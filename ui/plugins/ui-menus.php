@@ -335,14 +335,10 @@ class ui_menu extends FO_Plugin
         /* Handle login information */
         if (plugin_find_id("auth") >= 0 || plugin_find_id("smauth") >= 0)
         {
-          /* Width matches logo image */
           if (empty($_SESSION['User']))
           {
             $text = _("login");
             $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>$text</b></a></small>";
-            $V .= " | ";
-            $text = _("HP Support");
-            $V .= "<small><a href='mailto:mary.laser@hp.com?subject=Support Help'>$text</a>";
           }
           else
           {
@@ -352,12 +348,13 @@ class ui_menu extends FO_Plugin
             $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
             else
             $V .= "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
-            /* Use global system SupportEmail variables, if addr and label are set */
-            if (@$SysConf['SupportEmailLabel'] and @$SysConf['SupportEmailAddr'])
-            {
-              $V .= " | ";
-              $V .= "<small><a href='mailto:$SysConf[SupportEmailAddr]?subject=$SysConf[SupportEmailSubject]'>$SysConf[SupportEmailLabel]</a>";
-            }
+          }
+
+          /* Use global system SupportEmail variables, if addr and label are set */
+          if (@$SysConf['SupportEmailLabel'] and @$SysConf['SupportEmailAddr'])
+          {
+            $V .= " | ";
+            $V .= "<small><a href='mailto:$SysConf[SupportEmailAddr]?subject=$SysConf[SupportEmailSubject]'>$SysConf[SupportEmailLabel]</a>";
           }
         }
         $V .= "</td>";
