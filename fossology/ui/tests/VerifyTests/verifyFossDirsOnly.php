@@ -101,6 +101,8 @@ class verifyDirsOnly extends fossologyTestCase
 
     /* Select archive */
     $page = $this->mybrowser->clickLink($name);
+    $page = $this->mybrowser->clickLink('fossDirsOnly.tar');
+    
     //print "************ Page after select foss archive *************\n$page\n";
     $this->assertTrue($this->myassertText($page, "/empty\//"),
       "verifyFossDirsOnly FAILED! 'empty/' not found\n");

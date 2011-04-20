@@ -102,6 +102,7 @@ class verify23D1F1L extends fossologyTestCase
 
 		/* Select archive */
 		$page = $this->mybrowser->clickLink($name);
+		$page = $this->mybrowser->clickLink(' foss23D1F1L.tar   ');
 		//print "************ Page after select foss archive *************\n$page\n";
 		$this->assertTrue($this->myassertText($page, "/foss23Dirs1File1Lic\//"),
       "verifyfoss23D1F1L FAILED! 'foss23Dirs1File1Lic/' not found\n");
@@ -159,7 +160,7 @@ class verify23D1F1L extends fossologyTestCase
 		print "Checking the number of files based on 'GPL_v2'\n";
 		$this->assertTrue($fileCnt == 1,
 		"FAILURE! Should only have 1 file with a GPL_v2 license: " .
-		"Testing/foss23D1F1L.bz2/foss23Dirs1File1Lic/cli/cp2foss.php, " . 
+		"Testing/foss23D1F1L.bz2/foss23Dirs1File1Lic/cli/cp2foss.php, " .
 		"got:$fileCnt\n");
 	}
 }
