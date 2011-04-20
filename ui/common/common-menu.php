@@ -167,11 +167,12 @@ function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, 
   $M = NULL;
   if (is_array($Menu)) {
     foreach($Menu as $Key => $Val) {
-      if (!strcmp($Val->Name, $PathParts[0]) && strcmp($Val->Name, "[BREAK]")) {
+      // need to escape the [ ] or the string will not match
+      if (!strcmp($Val->Name, $PathParts[0]) && strcmp($Val->Name, "\[BREAK\]")) {
         $M = & $Menu[$Key];
         break;
       }
-      else if (!strcmp($Val->Name, "[BREAK]") && ($Val->Order == $LastOrder)) {
+      else if (!strcmp($Val->Name, "\[BREAK\]") && ($Val->Order == $LastOrder)) {
         $M = & $Menu[$Key];
         break;
       }
