@@ -137,8 +137,8 @@ class rhelTest extends fossologyTestCase
     );
 
     $licenseSummary = array(
-      'Unique licenses'        => 72,
-      'Licenses found'         => 3285,
+      'Unique licenses'        => 73,
+      'Licenses found'         => 3282,
       'Files with no licenses' => 6913,
       'Files'                  => 12595
     );
