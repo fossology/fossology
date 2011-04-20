@@ -26,7 +26,7 @@
  *
  * @group copyright
  *
- * @version "$Id: cliParamsTest.php 3613 2010-10-27 03:12:41Z rrando $"
+ * @version "$Id$"
  *
  * Created on Oct 20, 2010
  */

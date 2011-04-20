@@ -85,14 +85,13 @@ class zendTest extends fossologyTestCase
 		$page = $this->mybrowser->get($viewLink);
 		$mini = new parseMiniMenu($page);
 		$miniMenu = $mini->parseMiniMenu();
-		//print "miniMenu is:\n";print_r($miniMenu) . "\n";
-		$url = makeUrl($this->host, $miniMenu['Nomos License']);
+		$url = makeUrl($this->host, $miniMenu['License Browser']);
 		if($url === NULL) { $this->fail("ckzend Failed, host/url is not set"); }
 
 		$this->assertTrue($this->myassertText($page, '/View File/'),
           "ckzend FAILED! View File Title not found\n");
 		$page = $this->mybrowser->get($url);
-		// Check License 
+		// Check License
 		// Get the displayed result
 		$matched = preg_match("/<hr>\nThe(.*?)<div class='text'>--/", $page, $matches);
 		//print "DBCKZ: we found:\n";print_r($matches) . "\n";
@@ -103,12 +102,12 @@ class zendTest extends fossologyTestCase
 		$stringToMatch = 'Nomos license detector found: Zend_v2\.0';
 		$this->assertTrue($found,"/$stringToMatch/",
           "ckzend FAILED! Nomos license string does not match\n" .
-		      "Expected: $stringToMatch\n" . 
+		      "Expected: $stringToMatch\n" .
 		      "     Got: $found\n");
 		$this->assertTrue($this->myassertText($page, '/View License/'),
           "ckzend FAILED! View License Title not found\n");
 		// Check One-shot Analysis
-		$urlOneShot = makeUrl($this->host, $miniMenu['Nomos One-Shot']);
+		$urlOneShot = makeUrl($this->host, $miniMenu['One-Shot License']);
 		if($urlOneShot === NULL) { $this->fail("ckzend Failed, cannot make One-Shot url"); }
 		$page = $this->mybrowser->get($urlOneShot);
 		$this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),

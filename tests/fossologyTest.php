@@ -528,8 +528,6 @@ class fossologyTest extends WebTestCase
       'mimetype' => 'Check_agent_mimetype',
       'nomos' => 'Check_agent_nomos',
       'package' => 'Check_agent_pkgagent',
-      'specagent' => 'Check_agent_specagent',
-      'license' => 'Check_agent_license',
     );
     /* check parameters and parse */
     if (is_null($agents)) {

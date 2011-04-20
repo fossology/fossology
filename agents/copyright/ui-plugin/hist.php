@@ -159,35 +159,35 @@ echo "row $RowIdx: ".htmlentities($rows[$RowIdx]['original']) . "<br>";
       return "<h2>$text</h2>";
     }
 
+    $sql = "";
     if ($filter == "nolics")
     {
-      /* find rf_pk for "No License Found" */
-      $NoLicStr = "No License Found";
-      $sql = "select rf_pk from license_ref where rf_shortname='$NoLicStr'";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      if (pg_num_rows($result) == 0)
-      {
-        $text = _("license_ref table missing entry for ");
-        return "<h2>$text $NoLicStr</h2>";
-      }
-      $rows = pg_fetch_all($result);
-      pg_free_result($result);
+      /* find rf_pk for "No_license_found" */
       $rf_clause = "";
-      foreach($rows as $row)
+      $NoLicStr = "No_license_found";
+      $sql_lr = "select rf_pk from license_ref where rf_shortname='$NoLicStr'";
+      $result = pg_query($PG_CONN, $sql_lr);
+      DBCheckResult($result, $sql_lr, __FILE__, __LINE__);
+      if (pg_num_rows($result) > 0)
       {
-        if (!empty($rf_clause)) $rf_clause .= " or ";
-        $rf_clause .= " (rf_fk=$row[rf_pk])";
-      }
+        $rows = pg_fetch_all($result);
+        pg_free_result($result);
+        foreach($rows as $row)
+        {
+          if (!empty($rf_clause)) $rf_clause .= " or ";
+          $rf_clause .= " (rf_fk=$row[rf_pk])";
+        }
 
-      /* select copyright records that have No License Found (rf_fk=4) */
-      $sql = "SELECT content, type from copyright, license_file,
-              (SELECT distinct(pfile_fk) as pf from uploadtree 
-                where upload_fk=$upload_pk and uploadtree.lft BETWEEN $lft and $rgt) as SS
-             where copyright.pfile_fk=license_file.pfile_fk and ($rf_clause) 
-                   and copyright.pfile_fk=pf and copyright.agent_fk=$Agent_pk";
+        /* select copyright records that have No_license_found */
+        $sql = "SELECT content, type from copyright, license_file,
+                (SELECT distinct(pfile_fk) as pf from uploadtree 
+                  where upload_fk=$upload_pk and uploadtree.lft BETWEEN $lft and $rgt) as SS
+               where copyright.pfile_fk=license_file.pfile_fk and ($rf_clause) 
+                     and copyright.pfile_fk=pf and copyright.agent_fk=$Agent_pk";
+      }
     }
-    else
+    
+    if (empty($sql))
     {
       /* get all the copyright records for this uploadtree.  */
       $sql = "SELECT content, type from copyright,
