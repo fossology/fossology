@@ -270,16 +270,19 @@ function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
   if (!empty($PreText)) { $V .= "$PreText<br>\n"; }
 
   /* Get the FOLDER list for the upload */
-$text = _("Folder");
+  $text = _("Folder");
   $V .= "<b>$text</b>: ";
-  $List = FolderGetFromUpload($Path[0]['upload_fk']);
-  $Uri2 = Traceback_uri() . "?mod=browse" . Traceback_parm_keep(array("show"));
-  for($i=0; $i < count($List); $i++)
+  if (array_key_exists(0, $Path))
+  {
+    $List = FolderGetFromUpload($Path[0]['upload_fk']);
+    $Uri2 = Traceback_uri() . "?mod=browse" . Traceback_parm_keep(array("show"));
+    for($i=0; $i < count($List); $i++)
     {
-    $Folder = $List[$i]['folder_pk'];
-    $FolderName = htmlentities($List[$i]['folder_name']);
-    $V .= "<b><a href='$Uri2&folder=$Folder'>$FolderName</a></b>/ ";
+      $Folder = $List[$i]['folder_pk'];
+      $FolderName = htmlentities($List[$i]['folder_name']);
+      $V .= "<b><a href='$Uri2&folder=$Folder'>$FolderName</a></b>/ ";
     }
+  }
 
   $FirstPath=1; /* every firstpath belongs on a new line */
 

@@ -83,12 +83,12 @@ class verify3filesCopyright extends fossologyTestCase
     // Likewise: copyrighted by Affero should be:
     // copyrighted by 278 Affero, Inc.
     $copyStd = array(
-    'copyright (c) 1991, 1999 free software foundation, inc.' => 1,
-    'copyright (c) 1989, 1991 free software foundation, inc. made with' => 1,
-    '* copyright (c) 2002-2004 sam leffler, errno consulting, atheros' => 1,
-    '* $id: copyright,v 1.2 2004/05/15 22:26:24 samleffler exp $' => 1,
-    'copyright (c) <year>  <name of author>' => 1,
-    'copyright    2002 affero inc.' => 1,
+    'copyright (c) free software foundation inc' => 1,
+    'copyright (c) free software foundation inc. made with' => 1,
+    'copyright (c) sam leffler errno consulting atheros' => 1,
+    'id: copyright v 1.2 / / : samleffler exp' => 1,
+    'copyright (c) <year> <name of author' => 1,
+    'copyright affero inc' => 1,
     );
 
 
