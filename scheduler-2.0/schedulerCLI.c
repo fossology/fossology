@@ -71,6 +71,7 @@ void interface_usage()
   printf("+--------------------------------------------------------------------------+\n");
   printf("|%*s:   EFFECT                                       |\n", P_WIDTH, "COMMDNA");
   printf("+--------------------------------------------------------------------------+\n");
+  printf("|%*s:   prints this usage statement                  |\n", P_WIDTH, "help");
   printf("|%*s:   close the connection to scheduler            |\n", P_WIDTH, "exit");
   printf("|%*s:   shutdown the scheduler gracefully            |\n", P_WIDTH, "close");
   printf("|%*s:   pauses a job indefinitely                    |\n", P_WIDTH, "pause <job id>");
@@ -82,6 +83,14 @@ void interface_usage()
   printf("|%*s:   change the verbose for all agents on a job   |\n", P_WIDTH, "verbose <job id> <level>");
   printf("|%*s:   causes the scheduler to check the job queue  |\n", P_WIDTH, "database");
   printf("+--------------------------------------------------------------------------+\n");
+}
+
+void print(int* a) {
+  int i;
+
+  for(i = 0; i < 4; i++) {
+    printf("%d\n", a[i]);
+  }
 }
 
 /* ************************************************************************** */
@@ -131,10 +140,11 @@ int main(int argc, char** argv)
   /* check the scheduler config for port number */
   if(port_number < 0)
   {
-    istr = fopen("Scheduler.conf", "r");
+    snprintf(buffer, sizeof(buffer), "%s/fossology.conf", DEFAULT_SETUP);
+    istr = fopen(buffer, "r");
     while(port_number < 0 && fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
     {
-      if(buffer[0] == '#' || buffer[0] == '\0');
+      if(buffer[0] == '#' || buffer[0] == '\0') { }
       else if(strncmp(buffer, "port=", 5) == 0)
         port_number = atoi(buffer + 5);
     }
@@ -184,7 +194,7 @@ int main(int argc, char** argv)
     if(FD_ISSET(fileno(stdin), &fds))
     {
       bytes = read(fileno(stdin), buffer, sizeof(buffer));
-      if(buffer[0] == 'h')
+      if(strcmp(buffer, "help\n") == 0)
       {
         interface_usage();
         continue;

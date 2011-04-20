@@ -28,7 +28,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* unix library includes */
 #include <pthread.h>
 
-extern int verbose;
+extern int   verbose;
+extern FILE* log_file;
 
 /* ************************************************************************** */
 /* **** ERROR MACROS ******************************************************** */
