@@ -3508,20 +3508,22 @@ e /* (INFILE(j)) */
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 %STR%	"(on|is|are|with) publica?l?ly available"
 #
-%ENTRY%	_LT_PUBDOM_4
-%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
-%STR%	"no =FEW= copyrights? (is|are|were|was|has) =FEW= (known|assert|claim|own|found)"
+# After making public domain an interesting license, these signatures
+# are way too broad.
+#%ENTRY%	_LT_PUBDOM_4
+#%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+#%STR%	"no =FEW= copyrights? (is|are|were|was|has) =FEW= (known|assert|claim|own|found)"
 #
-%ENTRY%	_LT_PUBDOM_5
-%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
-%STR%	"(this|the) (file|product|program|sourc(e|e code)|software|work|code|document|page) =FEW= not copyright"
+#%ENTRY%	_LT_PUBDOM_5
+#%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+#%STR%	"(this|the) (file|product|program|sourc(e|e code)|software|work|code|document|page) =FEW= not copyright"
 #####
 # Note the specific up-to-10-character pattern-match length here.
 #####
-%ENTRY%	_LT_PUBDOM_6
-%NOCHECK%
-%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
-%STR%	"(copyright.{0,10}(abandon|eliminat|disclaim|relinquish|remove|withdraw)|(abandon|eliminat|disclaim|relinquish|remove|withdraw).{0,10}copyright)"
+#%ENTRY%	_LT_PUBDOM_6
+#%NOCHECK%
+#%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+#%STR%	"(copyright.{0,10}(abandon|eliminat|disclaim|relinquish|remove|withdraw)|(abandon|eliminat|disclaim|relinquish|remove|withdraw).{0,10}copyright)"
 #
 %ENTRY%	_LT_PUBDOM_7
 %KEY%	"public"

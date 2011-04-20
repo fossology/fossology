@@ -38,6 +38,8 @@ require_once("common/common.php");
 
 /* Connect to the database.  If the connection fails,
  * DBconnect() will print a failure message and exit.
+ * The global $PG_CONN is set inside of DBconnect().  
+ * DBconnect uses side effects like this for backward compatibility.
  */
 DBconnect();
 

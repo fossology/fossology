@@ -126,7 +126,7 @@ then
    echo "ERROR when creating $LPath"
    exit 1
 fi
-mkdir -p '/home/fosstester/public_html/unitTests
+mkdir -p '/home/fosstester/public_html/unitTests'
 
 Path='/home/fosstester/public_html/TestResults/Data'
 mdirs='01 02 03 04 05 06 07 08 09 10 11 12 2008'

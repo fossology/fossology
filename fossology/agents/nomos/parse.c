@@ -27,8 +27,8 @@
 #include "_autodefs.h"
 
 /* DEBUG  
-#define PROC_TRACE 1
 #define DOCTOR_DEBUG 1
+#define PROC_TRACE 1
    DEBUG */
 
 /**
@@ -7705,6 +7705,7 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
     } else if (INFILE(_LT_PUBDOM_3)) {
 	INTERESTING(lDebug ? "Pubdom(3)" : LS_PD_CLM);
 	ret = 1;
+#ifdef REMOVED_AS_TOO_BROAD
     } else if (INFILE(_LT_PUBDOM_4)) {
 	INTERESTING(lDebug ? "Pubdom(4)" : LS_PD_CLM);
 	ret = 1;
@@ -7714,6 +7715,7 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
     } else if (INFILE(_LT_PUBDOM_6)) {
 	INTERESTING(lDebug ? "No-more-copyright" : LS_PD_CLM);
 	ret = 1;
+#endif // done removing too broad signatures
     } else if (INFILE(_LT_PUBDOM_7)) {
 	INTERESTING(lDebug ? "Pubdom(7)" : LS_PD_CLM);
 	ret = 1;
