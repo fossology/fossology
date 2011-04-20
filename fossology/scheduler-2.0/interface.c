@@ -217,7 +217,7 @@ void* listen_thread(void* unused)
     FATAL("Could not create interface, invalid port number: %d", i_port);
 
   if(TVERBOSE2)
-    clprintf("INTERFACE: listenning port is %d\n", i_port);
+    clprintf("INTERFACE: listening port is %d\n", i_port);
 
   /* wait for new connections */
   for(;;)

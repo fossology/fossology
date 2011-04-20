@@ -39,10 +39,9 @@ FUNCTION int fo_GetAgentKey(PGconn *pgConn, char * agent_name, long Upload_pk, c
 		  agent_name );
   result = PQexec(pgConn, sqlselect);
   if (fo_checkPQresult(pgConn, result, sqlselect, __FILE__, __LINE__)) return 0;
-  rc = PQntuples(result);
-  PQclear(result);
-  if (rc == 0)
+  if (PQntuples(result) == 0)
   {
+    PQclear(result);
     /* no match, so add an agent rec */
     sprintf(sql, "INSERT INTO agent (agent_name,agent_desc,agent_enabled) VALUES ('%s',E'%s','%d')",
             agent_name, agent_desc, 1);
@@ -52,9 +51,9 @@ FUNCTION int fo_GetAgentKey(PGconn *pgConn, char * agent_name, long Upload_pk, c
     result = PQexec(pgConn, sqlselect);
     if (fo_checkPQresult(pgConn, result, sqlselect, __FILE__, __LINE__)) return 0;
     rc = PQntuples(result);
-    PQclear(result);
   }
 
   Agent_pk = atol(PQgetvalue(result, 0, 0));
+  PQclear(result);
   return Agent_pk;
 } /* fo_GetAgentKey() */
