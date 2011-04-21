@@ -85,7 +85,7 @@ class rhelTest extends fossologyTestCase
     'GPL_v2' => 13,
     'Indemnity' => 11,
     'GPL-possibility' => 9,
-    'Public-domain' => 24,
+    'Public-domain' => 20,
     'Non-commercial!' => 6,
     'RSA-Security' => 7,
     'ATT-possibility' => 6,
@@ -137,8 +137,8 @@ class rhelTest extends fossologyTestCase
     );
 
     $licenseSummary = array(
-      'Unique licenses'        => 73,
-      'Licenses found'         => 3282,
+      'Unique licenses'        => 72,
+      'Licenses found'         => 3281,
       'Files with no licenses' => 6913,
       'Files'                  => 12595
     );
