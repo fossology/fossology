@@ -102,7 +102,7 @@ class verify23D1F1L extends fossologyTestCase
 
 		/* Select archive */
 		$page = $this->mybrowser->clickLink($name);
-		$page = $this->mybrowser->clickLink(' foss23D1F1L.tar   ');
+		$page = $this->mybrowser->clickLink('foss23D1F1L.tar');
 		//print "************ Page after select foss archive *************\n$page\n";
 		$this->assertTrue($this->myassertText($page, "/foss23Dirs1File1Lic\//"),
       "verifyfoss23D1F1L FAILED! 'foss23Dirs1File1Lic/' not found\n");
@@ -123,12 +123,12 @@ class verify23D1F1L extends fossologyTestCase
 		/* Select the License link to View License Historgram */
 		$mini = new parseMiniMenu($page);
 		$miniMenu = $mini->parseMiniMenu();
-		$url = makeUrl($this->host, $miniMenu['Nomos License']);
+		$url = makeUrl($this->host, $miniMenu['License Browser']);
 		if($url === NULL) { $this->fail("verify23D1F1L Failed, host is not set"); }
 
 		$page = $this->mybrowser->get($url);
 		//print "page after get of $url is:\n$page\n";
-		$this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
+		$this->assertTrue($this->myassertText($page, '/License Browser/'),
           "verify23D1F1L FAILED! License Browser Title not found\n");
 		
 		// verify license summaries
