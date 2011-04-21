@@ -123,12 +123,12 @@ class verifyDirsOnly extends fossologyTestCase
     /* Select the License link to View License Historgram */
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
-    $url = makeUrl($this->host, $miniMenu['Nomos License']);
+    $url = makeUrl($this->host, $miniMenu['License Browser']);
     if($url === NULL) { $this->fail("verifyFossDirsOnly Failed, host is not set"); }
 
     $page = $this->mybrowser->get($url);
     //print "page after get of $url is:\n$page\n";
-    $this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
+    $this->assertTrue($this->myassertText($page, '/License Browser/'),
           "verifyFossDirsOnly FAILED! Nomos License Browser Title not found\n");
     
     $licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
