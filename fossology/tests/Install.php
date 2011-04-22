@@ -199,10 +199,16 @@ if($rtn != 0) {
 }
 $last = exec("./configTestEnv.php 'http://localhost/repo/' fosstester fosstester",$tossme, $rtn);
 if($rtn != 0) {
-	print "./configTestEnv.php Failed for fosstester, Investigate\n";
+  print "./configTestEnv.php Failed for fosstester, Investigate\n";
 }
 /* Remove the symlink in /usr/local/bin for fo-runTests it will get reestablished
  * when fosstester user configures.
  */
+echo "Removing fo-runtests link in /usr/local/bin/\n";
 $last = exec('sudo rm /usr/local/bin/fo-runTests', $tossme, $rtn);
+echo "Creating fo-runtests link in /usr/local/bin/\n";
+$last = exec("ln -s fo-runtests.php /usr/local/bin/fo-runtests",$tossme, $rtn);
+if($rtn != 0) {
+  print "FATAL! Could create fo-runtests link, Investigate and create by hand\n";
+}
 ?>

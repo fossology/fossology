@@ -107,7 +107,7 @@ class uploadTestDataTest extends fossologyTestCase
     print "Starting Url uploads\n";
     foreach($urlList as $url)
     {
-      $this->uploadUrl($rootFolder, $url, null, null, '1,2,3,4,5');
+      $this->uploadUrl($rootFolder, $url, null, null, '1,2,4,5');
     }
   }
 }
