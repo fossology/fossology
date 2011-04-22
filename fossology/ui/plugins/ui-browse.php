@@ -76,27 +76,10 @@ class ui_browse extends FO_Plugin {
   } // Install()
 
 
-  function PostInitialize()
-  {
-    global $SysConf;
-     
-    /* This plugin is only valid if the system allows global browsing
-     * (browsing across the entire repository).  Or if the user
-     * is an admin.
-     */
-    if ((strcasecmp(@$SysConf["GlobalBrowse"],"true") == 0) or
-    (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN))
-    $this->State = PLUGIN_STATE_READY;
-    else
-    $this->State = PLUGIN_STATE_INVALID; // No authorization for global search
-    return $this->State;
-     
-  } // PostInitialize()
-
   /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
-  function RegisterMenus()
+  function RegisterMenus() 
   {
     menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
 
@@ -105,13 +88,16 @@ class ui_browse extends FO_Plugin {
       return;
     }
     // For the Browse menu, permit switching between detail and simple.
-    $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
-      if (GetParm("mod", PARM_STRING) == $this->Name)
+    $URI = $this->Name . Traceback_parm_keep(array(
+      "upload",
+      "item"
+      ));
+    if (GetParm("mod", PARM_STRING) == $this->Name) 
       menu_insert("Browse::Browse", 1);
-      else
+    else 
       menu_insert("Browse::Browse", 1, $URI);
 
-      return($this->State == PLUGIN_STATE_READY);
+    return($this->State == PLUGIN_STATE_READY);
   } // RegisterMenus()
 
   /***********************************************************
