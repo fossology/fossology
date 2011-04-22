@@ -79,44 +79,16 @@ class ui_browse extends FO_Plugin {
   function PostInitialize()
   {
     global $SysConf;
-    
-    // Check that all Dependencies are met
-    foreach($this->Dependency as $key => $val)
-    {
-      $id = plugin_find_id($val);
-      if ($id < 0)
-      {
-        $this->Destroy();
-        return(0);
-      }
-    }
-    if((strcasecmp(@$SysConf["GlobalBrowse"],"true") == 0))
-    {
-      if ($this->MenuList !== "")
-      {
-        menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
-      }
-        return($this->State == PLUGIN_STATE_READY);
-   }
-   if((strcasecmp(@$SysConf["GlobalBrowse"],"false") == 0))
-   {
-     if (empty($_SESSION['User']))   // not logged in, no browse menu allowed
-     {
-       $pluginRef = plugin_find_any('browse');  // can be null
-       if(!empty($pluginRef))
-       {
-         return($pluginRef->State = PLUGIN_STATE_INVALID);
-       }
-    }
-    else    // logged in
-    {
-      if ($this->MenuList !== "")
-      {
-        menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
-       }
-       return($this->State == PLUGIN_STATE_READY);
-     }
-   }
+     
+    /* This plugin is only valid if the system allows global browsing
+     * (browsing across the entire repository).  Or if the user
+     * is an admin.
+     */
+    if ((strcasecmp(@$SysConf["GlobalBrowse"],"true") == 0) or
+    (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN))
+    $this->State = PLUGIN_STATE_READY;
+    else
+    $this->State = PLUGIN_STATE_INVALID; // No authorization for global search
     return $this->State;
      
   } // PostInitialize()
