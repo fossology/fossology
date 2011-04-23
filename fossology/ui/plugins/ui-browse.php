@@ -15,6 +15,10 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
+/**
+ * @version "$Id$"
+ */
 /*************************************************
  Restrict usage: Every PHP file should have this
  at the very beginning.
@@ -76,10 +80,32 @@ class ui_browse extends FO_Plugin {
   } // Install()
 
 
+  function PostInitialize()
+  {
+    global $SysConf;
+    
+    // Check that all Dependencies are met
+    foreach($this->Dependency as $key => $val)
+    {
+      $id = plugin_find_id($val);
+      if ($id < 0)
+      {
+        $this->Destroy();
+        return(0);
+      }
+    }
+    if ((strcasecmp(@$SysConf["GlobalBrowse"],"true") == 0) or
+    !empty($_SESSION['User']))
+      $this->State = PLUGIN_STATE_READY;
+    else
+      $this->State = PLUGIN_STATE_INVALID; // No authorization for global search
+    return $this->State;
+  } // Postinitialize
+  
   /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
-  function RegisterMenus() 
+  function RegisterMenus()
   {
     menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
 
@@ -92,12 +118,12 @@ class ui_browse extends FO_Plugin {
       "upload",
       "item"
       ));
-    if (GetParm("mod", PARM_STRING) == $this->Name) 
+      if (GetParm("mod", PARM_STRING) == $this->Name)
       menu_insert("Browse::Browse", 1);
-    else 
+      else
       menu_insert("Browse::Browse", 1, $URI);
 
-    return($this->State == PLUGIN_STATE_READY);
+      return($this->State == PLUGIN_STATE_READY);
   } // RegisterMenus()
 
   /***********************************************************
