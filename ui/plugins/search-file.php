@@ -40,24 +40,18 @@ class search_file extends FO_Plugin
   {
     global $SysConf;
  
-    // Check that all Dependencies are met
-    foreach($this->Dependency as $key => $val) 
-    { 
-      $id = plugin_find_id($val);        
-      if ($id < 0) 
-      {
-        $this->Destroy(); 
-        return(0); 
-      } 
-    } 
-
     /* This plugin is only valid if the system allows global searching
-     * (searching across the entire repository).  Or if the user
-     * is an admin.
+     * (searching across the entire repository) and UserLevel >= this plugin DBaccess.  
+     * Or if the user is an admin.
      */
-    if ((strcasecmp(@$SysConf["GlobalSearch"],"true") == 0) or
+    if (((strcasecmp(@$SysConf["GlobalSearch"],"true") == 0)
+         and (@$_SESSION['UserLevel'] >= $this->DBaccess))
+        or
         (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN))
+    {
+      menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
       $this->State = PLUGIN_STATE_READY;
+    }    
     else
       $this->State = PLUGIN_STATE_INVALID; // No authorization for global search
     return $this->State;

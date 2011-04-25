@@ -41,7 +41,7 @@ class ui_browse extends FO_Plugin {
   var $MenuList = "Browse";
   var $Dependency = array("db");
   public $DBaccess = PLUGIN_DB_READ;
-  public $LoginFlag = 1;
+  public $LoginFlag = 0;
 
   /***********************************************************
    Install(): Create and configure database tables
@@ -83,20 +83,19 @@ class ui_browse extends FO_Plugin {
   function PostInitialize()
   {
     global $SysConf;
-    
-    // Check that all Dependencies are met
-    foreach($this->Dependency as $key => $val)
+
+    /* This plugin is only valid if the system allows global browsing
+     * (browsing across the entire repository) and UserLevel >= this plugin DBaccess.  
+     * Or if the user is an admin.
+     */
+    if (((strcasecmp(@$SysConf["GlobalBrowse"],"true") == 0) 
+         and (@$_SESSION['UserLevel'] >= $this->DBaccess))
+        or
+        (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN))
     {
-      $id = plugin_find_id($val);
-      if ($id < 0)
-      {
-        $this->Destroy();
-        return(0);
-      }
-    }
-    if ((strcasecmp(@$SysConf["GlobalBrowse"],"true") == 0) or
-    !empty($_SESSION['User']))
+      menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
       $this->State = PLUGIN_STATE_READY;
+    }
     else
       $this->State = PLUGIN_STATE_INVALID; // No authorization for global search
     return $this->State;
@@ -107,8 +106,6 @@ class ui_browse extends FO_Plugin {
    ***********************************************************/
   function RegisterMenus()
   {
-    menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
-
     $Upload = GetParm("upload", PARM_INTEGER);
     if (empty($Upload)) {
       return;
