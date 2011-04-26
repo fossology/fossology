@@ -15,10 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
-/**
- * @version "$Id$"
- */
 /*************************************************
  Restrict usage: Every PHP file should have this
  at the very beginning.
@@ -41,7 +37,7 @@ class ui_browse extends FO_Plugin {
   var $MenuList = "Browse";
   var $Dependency = array("db");
   public $DBaccess = PLUGIN_DB_READ;
-  public $LoginFlag = 0;
+  public $LoginFlag = 1;
 
   /***********************************************************
    Install(): Create and configure database tables
@@ -80,32 +76,13 @@ class ui_browse extends FO_Plugin {
   } // Install()
 
 
-  function PostInitialize()
-  {
-    global $SysConf;
-
-    /* This plugin is only valid if the system allows global browsing
-     * (browsing across the entire repository) and UserLevel >= this plugin DBaccess.  
-     * Or if the user is an admin.
-     */
-    if (((strcasecmp(@$SysConf["GlobalBrowse"],"true") == 0) 
-         and (@$_SESSION['UserLevel'] >= $this->DBaccess))
-        or
-        (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN))
-    {
-      menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
-      $this->State = PLUGIN_STATE_READY;
-    }
-    else
-      $this->State = PLUGIN_STATE_INVALID; // No authorization for global search
-    return $this->State;
-  } // Postinitialize
-  
   /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
-  function RegisterMenus()
+  function RegisterMenus() 
   {
+    menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+
     $Upload = GetParm("upload", PARM_INTEGER);
     if (empty($Upload)) {
       return;
@@ -115,12 +92,12 @@ class ui_browse extends FO_Plugin {
       "upload",
       "item"
       ));
-      if (GetParm("mod", PARM_STRING) == $this->Name)
+    if (GetParm("mod", PARM_STRING) == $this->Name) 
       menu_insert("Browse::Browse", 1);
-      else
+    else 
       menu_insert("Browse::Browse", 1, $URI);
 
-      return($this->State == PLUGIN_STATE_READY);
+    return($this->State == PLUGIN_STATE_READY);
   } // RegisterMenus()
 
   /***********************************************************
