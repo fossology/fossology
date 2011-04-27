@@ -174,18 +174,11 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
                     ",'Logo', 2, '$LogoLinkDesc'" ;
      
     $Variable = "GlobalBrowse";
-    $BrowsePrompt = _("Allow Global Browsing");
-    $BrowseDesc = _("Allow browsing the entire repository.");
+    $BrowsePrompt = _("Global Browsing");
+    $BrowseDesc = _("true = allow browsing and searching the entire repository.<br>false = user can only browse/search their own uploads.");
     $ValueArray[$Variable] = "'$Variable', 'false', '$BrowsePrompt', "
                     . CONFIG_TYPE_INT .
                     ",'UI', 1, '$BrowseDesc'";
-     
-    $Variable = "GlobalSearch";
-    $SearchPrompt = _("Allow Global Searches");
-    $SearchDesc = _("Allow searching all folders in the system.");
-    $ValueArray[$Variable] = "'$Variable', 'false', '$SearchPrompt', "
-                    . CONFIG_TYPE_INT .
-                    ",'UI', 1, '$SearchDesc'";
      
     /* Doing all the rows as a single insert will fail if any row is a dupe.
      So insert each one individually so that new variables get added.
