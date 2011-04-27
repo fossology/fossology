@@ -288,7 +288,9 @@ echo "row $RowIdx: ".htmlentities($rows[$RowIdx]['original']) . "<br>";
             $VCopyright .= "<tr><td align='right'>$row[copyright_count]</td>";
             $VCopyright .= "<td align='center'><a href='";
             $VCopyright .= Traceback_uri();
-            $VCopyright .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $hash . "&type=" . $row['type'] . "'>Show</a></td>";
+            $URLargs = "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $hash . "&type=" . $row['type'];
+            if (!empty($filter)) $URLargs .= "&filter=$filter";
+            $VCopyright .= $URLargs. "'>Show</a></td>";
             $VCopyright .= "<td align='left'>";
 
             /* strip out characters we don't want to see 
