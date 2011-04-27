@@ -82,11 +82,6 @@ function plugin_disable($Level)
 {
   global $Plugins;
   
-  if(empty($Level))
-  {
-    return(0);
-  }
-  
   /* Disable all plugins with >= $Level access */
   //echo "<pre>COMP: starting to disable plugins\n</pre>";
   $LoginFlag = empty($_SESSION['User']);
