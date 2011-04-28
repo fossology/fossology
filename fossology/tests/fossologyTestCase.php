@@ -87,14 +87,14 @@ class fossologyTestCase extends fossologyTest
     {
       return (NULL);
     } else
-      if ($this->myassertText($page, "/User already exists\.  Not added/"))
-      {
-        return ('User already exists.  Not added');
-      } else
-        if ($this->myassertText($page, "/ERROR/"))
-        {
-          return ("addUser FAILED! ERROR when adding users, please investigate");
-        }
+    if ($this->myassertText($page, "/User already exists\.  Not added/"))
+    {
+      return ('User already exists.  Not added');
+    } else
+    if ($this->myassertText($page, "/ERROR/"))
+    {
+      return ("addUser FAILED! ERROR when adding users, please investigate");
+    }
     return (NULL);
   } // addUser
 
@@ -121,9 +121,9 @@ class fossologyTestCase extends fossologyTest
     if (empty ($number))
     {
       return (array (
-        0,
+      0,
         'ERROR! Must supply a number to verify'
-      ));
+        ));
     }
 
     $headers = getMailSubjects();
@@ -136,7 +136,7 @@ class fossologyTestCase extends fossologyTest
     //print "Got back from getMailSubjects:\n";print_r($headers) . "\n";
 
     /*
-       check for errors
+     check for errors
      */
     /**
      * @TODO use exceptions here, so you can indicated the correct item.
@@ -182,7 +182,7 @@ class fossologyTestCase extends fossologyTest
    * @param string $description Optional user defined description, a
    * default description is always created.
    *
-   * Reports: pass or fail.
+   * @return exists with failure or returns folder id.
    *
    */
   public function createFolder($parent = null, $name, $description = null)
@@ -200,6 +200,10 @@ class fossologyTestCase extends fossologyTest
     { // set default if null
       $description = "Folder $name created by createFolder as subfolder of $parent";
     }
+    if(empty($name))
+    {
+      $this->fail("FATAL! No folder name supplied, cannot create folder\n");
+    }
     $page = $this->mybrowser->get($URL);
     // There is only 1 create menu, so just select it
     // No need to make sure we are in folders menu.
@@ -211,20 +215,25 @@ class fossologyTestCase extends fossologyTest
       $FolderId = $this->getFolderId($parent, $page, 'parentid');
     }
     $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
-    $this->assertTrue($this->mybrowser->setField('newname', $name));
-    $this->assertTrue($this->mybrowser->setField('description', "$description"));
-    $page = $this->mybrowser->clickSubmit('Create!');
-    $this->assertTrue($page);
-    if ($this->myassertText($page, "/Folder $name Created/"))
+    $this->assertTrue($this->mybrowser->setField('newname', $name),
+      "FATAL! Could not set newname for folder:$name\n");
+    $this->assertTrue($this->mybrowser->setField('description', "$description"),
+      "FATAL! Could not set description for folder:$name\n");
+    $createdPage = $this->mybrowser->clickSubmit('Create!');
+    $this->assertTrue($createdPage);
+    if ($this->myassertText($createdPage, "/Folder $name Created/"))
     {
-      return (NULL);
+      $folderId = $this->getFolderId($name, $createdPage, 'parentid');
+      return ($folderId);
     }
-    if ($this->myassertText($page, "/Folder $name Exists/"))
+    if ($this->myassertText($createdPage, "/Folder $name Exists/"))
     {
-      return ("Folder $name Exists");
-    } else
+      $folderId = $this->getFolderId($name, $createdPage, 'parentid');
+      return ($folderId);
+    }
+    else
     {
-      $this->fail("Failure! Unknown Error when creating folder $name\n");
+      $this->fail("Failure! Did not find phrase 'Folder $name Created'\n");
     }
   }
 
@@ -560,7 +569,9 @@ class fossologyTestCase extends fossologyTest
    *
    * @return NULL on pass, string on failure (for now only returns NULL)
    */
-  protected function setUserFields($UserName = NULL, $Description = NULL, $Email = NULL, $Access = 1, $Folder = 1, $Block = NULL, $Blank = NULL, $Password = NULL, $EmailNotify = NULL)
+  protected function setUserFields($UserName = NULL, $Description = NULL,
+  $Email = NULL, $Access = 1, $Folder = 1, $Block = NULL, $Blank = NULL,
+  $Password = NULL, $EmailNotify = NULL, $BucketPool = 1, $Ui = 'simple')
   {
 
     $FailStrings = NULL;
@@ -603,53 +614,93 @@ class fossologyTestCase extends fossologyTest
     {
       unset ($EmailNotify);
     }
+    if ($BucketPool == NULL)
+    {
+      $BucketPool = 1;  // default bucket pool
+    }
+    if (strcasecmp($Ui, 'simple'))
+    {
+      $simple = TRUE;
+    }
+    else if (strcasecmp($Ui, 'original'))
+    {
+      $orignal = TRUE;
+    }
 
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Add');
-    $this->assertTrue($this->myassertText($page, '/Add A User/'), "Did NOT find Title, 'Add A User'");
+    $this->assertTrue($this->myassertText($page, '/Add A User/'),
+      "Did NOT find Title, 'Add A User'");
 
     if (!empty ($UserName))
     {
-      $this->assertTrue($this->mybrowser->setField('username', $UserName), "Could Not set the username field");
+      $this->assertTrue($this->mybrowser->setField('username', $UserName),
+        "Could Not set the username field");
     }
     if (!empty ($Description))
     {
-      $this->assertTrue($this->mybrowser->setField('description', $Description), "Could Not set the description field");
+      $this->assertTrue($this->mybrowser->setField('description', $Description),
+        "Could Not set the description field");
     }
     if (!empty ($Email))
     {
-      $this->assertTrue($this->mybrowser->setField('email', $Email), "Could Not set the email field");
+      $this->assertTrue($this->mybrowser->setField('email', $Email),
+        "Could Not set the email field");
     }
     if (!empty ($Access))
     {
-      $this->assertTrue($this->mybrowser->setField('permission', $Access), "Could Not set the permission field");
+      $this->assertTrue($this->mybrowser->setField('permission', $Access),
+        "Could Not set the permission field");
     } else
     {
       return ('FATAL: Access/permission is a required field');
     }
     if (!empty ($Folder))
     {
-      $this->assertTrue($this->mybrowser->setField('folder', $Folder), "Could Not set the folder Field");
+      $this->assertTrue($this->mybrowser->setField('folder', $Folder),
+        "Could Not set the folder Field");
     }
     if (!empty ($Block))
     {
-      $this->assertTrue($this->mybrowser->setField('block', $Block), "Could Not set the block Field");
+      $this->assertTrue($this->mybrowser->setField('block', $Block),
+        "Could Not set the block Field");
     }
     if (!empty ($Blank))
     {
-      $this->assertTrue($this->mybrowser->setField('blank', $Blank), "Could Not set the blank Field");
+      $this->assertTrue($this->mybrowser->setField('blank', $Blank),
+        "Could Not set the blank Field");
     }
     if (!empty ($Password))
     {
-      $this->assertTrue($this->mybrowser->setField('pass1', $Password), "Could Not set the pass1 field");
-      $this->assertTrue($this->mybrowser->setField('pass2', $Password), "Could Not set the pass2 field");
+      $this->assertTrue($this->mybrowser->setField('pass1', $Password),
+        "Could Not set the pass1 field");
+      $this->assertTrue($this->mybrowser->setField('pass2', $Password),
+        "Could Not set the pass2 field");
     }
     if (isset ($EmailNotify))
     {
-      $this->assertTrue($this->mybrowser->setField('enote', TRUE), "Could Not set the enote Field to non default value");
+      $this->assertTrue($this->mybrowser->setField('enote', TRUE),
+        "Could Not set the enote Field to non default value");
     } else
     {
-      $this->assertTrue($this->mybrowser->setField('enote', FALSE), "Could Not set the enote Field");
+      $this->assertTrue($this->mybrowser->setField('enote', FALSE),
+        "Could Not set the enote Field");
+    }
+    if (!empty($BucketPool))
+    {
+      $this->assertTrue($this->mybrowser->setField('default_bucketpool_fk', $BucketPool),
+        "Could Not set the default bucketpool select");
+    }
+    if ($simple)
+    {
+      $this->assertTrue($this->mybrowser->setField('simple', 'checked'),
+        "Could Not set the simple check box");
+
+    }
+    if($original)
+    {
+      $this->assertTrue($this->mybrowser->setField('original', 'checked'),
+        "Could Not set the original check box");
     }
     return (NULL);
   } // setUserFields
