@@ -270,10 +270,10 @@ class fossologyTest extends WebTestCase
       $this->setUser($User);
     }
     /*
-    else {
-      $this->setUser($USER);
-    }
-    */
+     else {
+     $this->setUser($USER);
+     }
+     */
     $url = $this->mybrowser->getUrl();
     $loggedIn = $this->mybrowser->get($URL);
     //$this->assertTrue($this->myassertText($loggedIn, "/User:<\/small> $User/"),
@@ -291,7 +291,7 @@ class fossologyTest extends WebTestCase
     //print "page after logout sequence is:$p\n";
 
     if($this->myassertText($page,"/This login uses HTTP/") !== TRUE) {
-    //if($this->myassertText($page,"/Where to Begin\.\.\./") !== TRUE) {
+      //if($this->myassertText($page,"/Where to Begin\.\.\./") !== TRUE) {
       $this->fail("FAIL! Did not find string 'This login uses HTTP', Is user logged out?\n");
       //$this->fail("FAIL! Did not find string 'Where to Begin...', Is user logged out?\n");
       $this->setUser(NULL);
@@ -327,9 +327,8 @@ class fossologyTest extends WebTestCase
     if(!strlen($this->User)) {
       $this->setUser($USER);
     }
-    if(!strlen($this->Password)) {
-      $this->setPassword($PASSWORD);
-    }
+    // no check on the password, as it could be blank, just use it...
+
     $this->assertTrue($this->mybrowser->setField('username', $this->User),
       "Fatal! could not set username field in login form for $this->User\n");
     $this->assertTrue($this->mybrowser->setField('password', $this->Password),
@@ -385,9 +384,9 @@ class fossologyTest extends WebTestCase
     $selectList = $hpage->getElementsByTagName('select');
     $optionList = $hpage->getElementsByTagName('option');
     /*
-    * gather the section names and group the options with each section
-    * collect the data at the same time.  Assemble into the data structure.
-    */
+     * gather the section names and group the options with each section
+     * collect the data at the same time.  Assemble into the data structure.
+     */
     for($i=0; $i < $selectList->length; $i++) {
       $ChildList = $selectList->item($i)->childNodes;
       foreach($ChildList as $child) {
@@ -470,7 +469,7 @@ class fossologyTest extends WebTestCase
    */
   public function parseFossjobs($all=NULL) {
     /*
-       use fossjobs to get the upload ids
+     use fossjobs to get the upload ids
      */
     $last = exec('fossjobs -u',$uploadList, $rtn);
     foreach ($uploadList as $upload) {
@@ -478,9 +477,9 @@ class fossologyTest extends WebTestCase
         continue;
       }
       /*
-         NOTE: the split below can sometimes cause a php notice, there is no
-         real error, and the notice can be ignored.  The third item in the list is
-         never used.  The coding to suppress the error is not worth it.
+       NOTE: the split below can sometimes cause a php notice, there is no
+       real error, and the notice can be ignored.  The third item in the list is
+       never used.  The coding to suppress the error is not worth it.
        */
       list($upId, $file, $restOfLine) = split(' ', $upload);
       if($upId == '#') {
@@ -490,7 +489,7 @@ class fossologyTest extends WebTestCase
       $uploadId = rtrim($upId, ':');
       $Uploads[$uploadId] = $file;
       /*
-         gather up the last uploads done on each file (file is not unique)
+       gather up the last uploads done on each file (file is not unique)
        */
       $LastUploads[$file] = $uploadId;
     }
@@ -556,17 +555,17 @@ class fossologyTest extends WebTestCase
     else {
       foreach ($numberList as $number) {
         switch ($number) {
-        	case 1 :
-          	$checklist[] = $agentList['buckets'];
+          case 1 :
+            $checklist[] = $agentList['buckets'];
             break;
           case 2 :
-          	$checklist[] = $agentList['copyright'];
+            $checklist[] = $agentList['copyright'];
             break;
-        	case 3 :
+          case 3 :
             $checklist[] = $agentList['mimetype'];
             break;
-        	case 4 :
-          	$checklist[] = $agentList['nomos'];
+          case 4 :
+            $checklist[] = $agentList['nomos'];
             break;
           case 5 :
             $checklist[] = $agentList['package'];
@@ -693,22 +692,22 @@ class fossologyTest extends WebTestCase
     return(TRUE);
   } // set SelectAttr
 
-/**
- * __chopPage
- *
- * return the last 1.5K characters of the string, useful for just looking at
- * the end of a returned page.
- *
- * @param string $page
- * @return string
- */
-private function __chopPage($page) {
+  /**
+   * __chopPage
+   *
+   * return the last 1.5K characters of the string, useful for just looking at
+   * the end of a returned page.
+   *
+   * @param string $page
+   * @return string
+   */
+  private function __chopPage($page) {
 
-  if(!strlen($page)) {
-    return(FALSE);
-  }
-  return(substr($page,-1536));
-} // chopPage
+    if(!strlen($page)) {
+      return(FALSE);
+    }
+    return(substr($page,-1536));
+  } // chopPage
 
 } // fossolgyTest
 ?>
