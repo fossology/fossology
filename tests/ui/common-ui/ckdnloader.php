@@ -49,9 +49,11 @@ class ckdownloaderTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($loggedIn, '/>My Account</'),
       "Fail! My Account menu was not found");
 
-    // @todo check that browse shows the users folder (defect in 1.4.0 in that if it's
-    // empty, it won't show)... add this in for 1.4.1
-
+    // Check that browse shows the users folder
+    $page = $this->mybrowser->get("$URL" . 'simpleIndex.php?mod=browse');
+    $this->assertTrue($this->myassertText($loggedIn, '/>downloader</'),
+      "Fail! Folder downloader was NOT found");
+    
     // check that some menus are not present
     $this->assertFalse($this->myassertText($loggedIn, '/>Upload</'),
       "Fail! Upload menu found, it should not be visible");

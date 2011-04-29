@@ -54,8 +54,10 @@ class ckAnaUserTest extends fossologyTestCase
       "Fail! Jobs menu was NOT found");
 
 
-    // @todo check that browse shows the users folder (defect in 1.4.0 in that if it's
-    // empty, it won't show)... add this in for 1.4.1
+    // Check that browse shows the users folder
+    $page = $this->mybrowser->get("$URL" . 'simpleIndex.php?mod=browse');
+    $this->assertTrue($this->myassertText($loggedIn, '/>anauser</'),
+      "Fail! Folder anauser was NOT found");
 
     // check that some menus are not present
     $this->assertFalse($this->myassertText($loggedIn, '/>Delete Folder</'),
