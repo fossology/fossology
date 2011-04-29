@@ -52,7 +52,7 @@ int	ExtractAR	(char *Source, char *Destination)
         }
   if (Verbose > 1) printf("CWD: %s\n",CWD);
 
-  if (!Quiet) fprintf(stderr,"Extracting ar: %s\n",Source);
+  if (!Quiet && (Verbose > 1)) fprintf(stderr,"Extracting ar: %s\n",Source);
   chdir(Destination);
 
   if (TaintString(TempSource,FILENAME_MAX,Source,1,NULL))
