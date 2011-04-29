@@ -1940,7 +1940,17 @@
 #
 %ENTRY%	_LT_GPL_NAMED
 %KEY%	"licen[cs]"
-%STR%	"licen[cs]e ([^l]gpl|GNU (gpl|(g?eneral p|p)ublic licen[cs]e))"
+#%STR%	"licen[cs]e ([^l]gpl|GNU (gpl|(g?eneral p|p)ublic licen[cs]e))"
+%STR%	"([^l]gpl|GNU) ((g?eneral p|p)ublic) licen[cs]e"
+#
+%ENTRY%	_LT_GPL_NAMED2
+%KEY%	"gpl"
+%STR%	"(under|terms|releas) ==SOME== (^l|^a)gpl"
+#
+# To catch things like "this is GPL".
+%ENTRY%	_LT_GPL_NAMED3
+%KEY%	"gpl"
+%STR%	"\<gpl\>"
 #####
 # FIX-ME: these 'patterns' are really references, are they not?
 #####
@@ -2770,6 +2780,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_LGPL_NAMED
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e (GNU (lgpl|lesser GNU general public licen[cs]e|(library|lesser) (g?eneral p|p)ublic licen[cs]e))"
+# To catch things like "this is LGPL".
+%ENTRY%	_LT_LGPL_NAMED2
+%KEY%	"lgpl"
+%STR%	"\<lgpl\>"
 #
 %ENTRY%	_LT_LGPL_OR
 %NOCHECK%
@@ -7327,6 +7341,18 @@ k
 %ENTRY%	_TEXT_GFDL_NOT_GPL
 %KEY%	"licen[cs]"
 %STR%	"in parallel under your choice of free software licen[cs]e such as the GNU general public licen[cs]e"
+#
+# typical use:
+# The licence and distribution terms for any publically available version or
+# derivative of this code cannot be changed. i.e. this code cannot simply be
+# copied and put under another distribution licence
+# [including the GNU Public Licence.]
+%ENTRY%	_TEXT_NOT_GPL
+%KEY%	"(gnu|gpl)"
+%STR%	"not\> =SOME= (\<gnu\>|\<gpl\>)"
+%ENTRY%	_TEXT_NOT_GPL2
+%KEY%	"(gnu|gpl)"
+%STR%	"not\> =SOME= cop(y|ied) =SOME= another =SOME= (\<gnu\>|\<gpl\>)"
 #
 %ENTRY%	_TEXT_GPLV1
 %KEY%	"(\<gnu|free\>|l?gpl)"

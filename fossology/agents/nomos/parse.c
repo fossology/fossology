@@ -578,7 +578,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	lmem[_fBSD] = 1;
     }
     /*
-     * FIX-ME: this license text explicitly mentiosn "for no-profit", and as
+     * FIX-ME: this license text explicitly mentions "for no-profit", and as
      * such it should list it in the license-summary, yes?
      */
     else if (INFILE(_LT_BSD_5)) {
@@ -1369,11 +1369,18 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	INTERESTING(lDebug ? "GPL(proj)" : cp);
 	lmem[_mGPL] = 1;
     }
-    if (!lmem[_mGPL] && INFILE(_LT_GPL_NAMED)) {
+
+    if (!lmem[_mGPL] && !lmem[_mGFDL] 
+         && (!INFILE(_TEXT_NOT_GPL))
+         && (!INFILE(_TEXT_NOT_GPL2))
+         && (INFILE(_LT_GPL_NAMED) 
+             || INFILE(_LT_GPL_NAMED2)
+             || INFILE(_LT_GPL_NAMED3))) {
 	cp = GPLVERS();
 	INTERESTING(lDebug ? "GPL(named)" : cp);
     }
-    if (!lmem[_mLGPL] && INFILE(_LT_LGPL_NAMED)) {
+    if (!lmem[_mLGPL] && (INFILE(_LT_LGPL_NAMED)
+                          || INFILE(_LT_LGPL_NAMED2))) {
 	cp = LGPLVERS();
 	INTERESTING(lDebug ? "LGPL(named)" : cp);
     }
