@@ -406,8 +406,10 @@ class ui_browse extends FO_Plugin {
      */
     if (empty($Folder_URL))
     {
-      if (empty($Upload))
-        Fatal("Missing upload and folder parameters",__FILE__, __LINE__);
+      if (empty($Upload)) 
+        $Folder_URL = GetUserRootFolder();
+      else
+      {
       $sql = "select parent_fk from foldercontents where child_id=$Upload and foldercontents_mode=2";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -417,6 +419,7 @@ class ui_browse extends FO_Plugin {
       $row = pg_fetch_assoc($result);
       $Folder_URL = $row['parent_fk'];
       pg_free_result($result);
+      }
     }
 
     $Folder = GetValidFolder($Folder_URL);
