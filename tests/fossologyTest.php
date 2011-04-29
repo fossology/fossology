@@ -228,18 +228,17 @@ class fossologyTest extends WebTestCase
     global $USER;
     global $PASSWORD;
 
-    if(strlen($User)) {
+    // user name passed in, use what is supplied, (can have blank password)
+    if(!empty($User)) {
       $this->setUser($User);
-    }
-    else {
-      $this->setUser($USER);
-    }
-    if(!strlen($Password)) {
       $this->setPassword($Password);
     }
-    else {
+    else      // no valid paramaters, use user in TestEnvironment.php
+    {
+      $this->setUser($USER);
       $this->setPassword($PASSWORD);
     }
+
     $browser = $this->_browser();
     $page = $this->mybrowser->get($URL);
     $this->assertTrue($page,"Login FAILED! did not fetch a web page, can't login\n'");
@@ -327,8 +326,9 @@ class fossologyTest extends WebTestCase
     if(!strlen($this->User)) {
       $this->setUser($USER);
     }
-    // no check on the password, as it could be blank, just use it...
-
+    // no check on the password, as it could be blank, just use it...It should
+    // have been set (if there was one) in Login
+    //echo "FTDB: user is:$this->User and Password:$this->Password\n";
     $this->assertTrue($this->mybrowser->setField('username', $this->User),
       "Fatal! could not set username field in login form for $this->User\n");
     $this->assertTrue($this->mybrowser->setField('password', $this->Password),
@@ -336,9 +336,10 @@ class fossologyTest extends WebTestCase
     $this->assertTrue($this->mybrowser->isSubmit('Login'));
     $page = $this->mybrowser->clickSubmit('Login');
     $this->assertTrue($page,"FATAL! did not get a valid page back from Login\n");
+    //print "DB: _RDBL: After Login ****page is:$page\n";
     $page = $this->mybrowser->get("$URL?mod=Default");
     //$p = $this->__chopPage($page);
-    //print "DB: _RDBL: After Login ****page is:$p\n";
+    //print "DB: _RDBL: After mod=Default ****page is:$page\n";
     $this->assertTrue($this->myassertText($page, "/User:<\/small>\s$this->User/"),
       "Did not find User:<\/small> $this->User\nThe User may not be logged in\n");
     $this->mybrowser->setCookie('Login', $cookieValue, $host);

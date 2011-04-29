@@ -575,6 +575,8 @@ class fossologyTestCase extends fossologyTest
   {
 
     $FailStrings = NULL;
+    $simple = FALSE;
+    $original = FALSE;
 
     global $URL;
 
