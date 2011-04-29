@@ -384,7 +384,7 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   global $DB;
   if (empty($DB)) { return; }
   if (empty($ParentFolder)) { return; }
-  if ($ParentFolder == "-1") { return(FolderListDiv(FolderGetTop(),0)); }
+  if ($ParentFolder == "-1") { return(FolderListDiv(GetUserRootFolder(),0)); }
   $Browse = &$Plugins[plugin_find_id("browse")];
   $Uri = Traceback_uri();
   $V="";
@@ -406,7 +406,7 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
     }
 
   /* Load this folder's parent */
-  if ($ShowParent && ($ParentFolder != GetRootFolder()))
+  if ($ShowParent && ($ParentFolder != GetUserRootFolder()))
   {
     $Results = $DB->Action("SELECT parent_fk FROM foldercontents WHERE foldercontents_mode = 1 AND child_id = '$ParentFolder' LIMIT 1;");
     if (count($Results) > 0)
