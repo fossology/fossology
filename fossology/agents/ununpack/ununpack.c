@@ -734,8 +734,8 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
     {
     if (Where && Verbose && Out)
 	fprintf(stderr,"Extracting %s: %s > %s\n",Cmd,File,Out);
-    else if (Where) fprintf(stderr,"Extracting %s in %s: %s\n",Cmd,Where,File);
-    else fprintf(stderr,"Testing %s: %s\n",Cmd,File);
+    else if (Where && (Verbose > 1)) fprintf(stderr,"Extracting %s in %s: %s\n",Cmd,Where,File);
+    else if (Verbose > 1) fprintf(stderr,"Testing %s: %s\n",Cmd,File);
     }
 
   if (getcwd(CWD,sizeof(CWD)) == NULL)

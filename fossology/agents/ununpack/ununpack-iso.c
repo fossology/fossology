@@ -84,7 +84,7 @@ int	ExtractISO	(char *Source, char *Destination)
   if ((NULL == Source) || (!strcmp(Source, "")) || (NULL == Destination) || (!strcmp(Destination, "")))
     return 1;
 
-  if (!Quiet) fprintf(stderr,"Extracting ISO: %s\n",Source);
+  if (!Quiet && (Verbose >1)) fprintf(stderr,"Extracting ISO: %s\n",Source);
 
   /* get list of directories in the ISO and make the directories */
   if (TaintString(TempSource,FILENAME_MAX,Source,1,NULL) ||
