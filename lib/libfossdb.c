@@ -194,4 +194,3 @@ int fo_checkPQcommand(PGconn *pgConn, PGresult *result, char *sql, char *FileID,
    PQclear(result);
    return (-1);
 } /* fo_checkPQcommand */
-

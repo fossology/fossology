@@ -9,7 +9,7 @@ CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' -DFOSSREPO_CONF='"$(S
 EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck
 REPMAINS=reppath.c repwrite.c repcat.c repexist.c repcopyin.c repremove.c rephost.c repmmapcheck.c
 LIB=libfossology.a
-OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o 
+OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o
 
 all: $(OBJS) $(REPMAINS) $(LIB) $(EXE)
 
