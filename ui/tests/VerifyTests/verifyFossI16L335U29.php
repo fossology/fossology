@@ -77,8 +77,8 @@ class verifyFossolyTest extends fossologyTestCase
 		$licenseCounts = array(
      'GPL_v2' => 224,
     'No_license_found' => 72,
-    'GPL' => 23,
-    'LGPL_v2.1' => 17,
+    'GPL' => 24,
+    'LGPL_v2.1' => 19,
     'Apache_v2.0' => 2,
     'GFDL' => 2,
     'Public-domain' => 8,
@@ -88,6 +88,7 @@ class verifyFossolyTest extends fossologyTestCase
     'BSD' => 1,
     'FSF-possibility' => 1,
     'GPL_v2-possibility' => 1,
+		'LGPL' => 4,
     'LGPL_v2.1+' => 1,
     'LGPL_v3+' => 1,
     'NPL' => 1,
@@ -100,8 +101,8 @@ class verifyFossolyTest extends fossologyTestCase
 );
 
 		$licenseSummary = array(
-      'Unique licenses'=> 22,
-      'Licenses found'=> 291,
+      'Unique licenses'=> 23,
+      'Licenses found'=> 298,
       'Files with no licenses'=> 72,
       'Files'=> 345
 		);
