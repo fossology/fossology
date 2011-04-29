@@ -398,6 +398,28 @@ class ui_browse extends FO_Plugin {
 
     $V = "";
     $Folder_URL = GetParm("folder", PARM_INTEGER);
+    $Upload = GetParm("upload", PARM_INTEGER);  // upload_pk to browse
+    $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
+
+    if (empty($Upload) or empty($Item))
+      Fatal("Missing Upload $Upload, or Item $Item parameters",__FILE__, __LINE__);
+
+    /* kludge for plugins not supplying a folder parameter.
+     * Find what folder this upload is in.  Error if in multiple folders.
+     */
+    if (empty($Folder_URL))
+    {
+      $sql = "select parent_fk from foldercontents where child_id=$Upload and foldercontents_mode=2";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if ( pg_num_rows($result) > 1)
+        Fatal("Upload $Upload found in multiple folders.",__FILE__, __LINE__);
+      
+      $row = pg_fetch_assoc($result);
+      $Folder_URL = $row['parent_fk'];
+      pg_free_result($result);
+    }
+
     $Folder = GetValidFolder($Folder_URL);
     if ($Folder != $Folder_URL)
     {
@@ -408,7 +430,6 @@ class ui_browse extends FO_Plugin {
       echo "<script type=\"text/javascript\"> window.location.replace(\"$NewURL\"); </script>";
     }
 
-    $Upload = GetParm("upload", PARM_INTEGER);  // upload_pk to browse
     if (HaveUploadPerm($Upload) === false) 
     {
       /* user trying to access upload without permission.  Redirect to their 
@@ -418,7 +439,6 @@ class ui_browse extends FO_Plugin {
       echo "<script type=\"text/javascript\"> window.location.replace(\"$NewURL\"); </script>";
     }
 
-    $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
     if (HaveItemPerm($Item) === false) 
     {
       /* user trying to access item without permission.  Redirect to their 
