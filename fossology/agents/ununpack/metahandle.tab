@@ -154,7 +154,7 @@ Magic: "application/x-tar"
   CmdPre: "-xSf"
   # tar has undocumented return codes. mknod is one of them, but it is
   # acceptable.  Solution: ignore return codes.
-  CmdPost: "2>&1 ; echo ''"
+  CmdPost: "2>&1"
   MetaCmd: ""
   Type: CMD_ARC
   Status: 1
@@ -167,7 +167,7 @@ Magic: "application/x-gtar"
   CmdPre: "-xSf"
   # tar has undocumented return codes. mknod is one of them, but it is
   # acceptable.  Solution: ignore return codes.
-  CmdPost: "2>&1 ; echo ''"
+  CmdPost: "2>&1"
   MetaCmd: ""
   Type: CMD_ARC
   Status: 1
