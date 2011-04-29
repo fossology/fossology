@@ -124,6 +124,7 @@
   
    NOTE: This implementation is a kludge until permissions are 
          implemented on folders, uploads, and items.
+   NOTE: This function doesn't check if the $RequestedFolder exists.
    ***********************************************************/
   function GetValidFolder($RequestedFolder)
   {
