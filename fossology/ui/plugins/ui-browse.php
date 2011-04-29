@@ -401,14 +401,13 @@ class ui_browse extends FO_Plugin {
     $Upload = GetParm("upload", PARM_INTEGER);  // upload_pk to browse
     $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
 
-    if (empty($Upload) or empty($Item))
-      Fatal("Missing Upload $Upload, or Item $Item parameters",__FILE__, __LINE__);
-
     /* kludge for plugins not supplying a folder parameter.
      * Find what folder this upload is in.  Error if in multiple folders.
      */
     if (empty($Folder_URL))
     {
+      if (empty($Upload))
+        Fatal("Missing upload and folder parameters",__FILE__, __LINE__);
       $sql = "select parent_fk from foldercontents where child_id=$Upload and foldercontents_mode=2";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
