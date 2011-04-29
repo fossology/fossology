@@ -267,7 +267,7 @@ class ui_browse extends FO_Plugin {
     $text = _("Folder Navigation");
     $V.= "<center><H3>$text</H3></center>\n";
     $V.= "<center><small>";
-    if ($Folder != FolderGetTop()) {
+    if ($Folder != GetUserRootFolder()) {
       $text = _("Top");
       $V.= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>$text</a> |";
     }
