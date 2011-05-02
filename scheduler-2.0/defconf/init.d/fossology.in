@@ -1,6 +1,6 @@
 #! /bin/sh
 # Init script for the {$PROJECT} scheduler.
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 #
 # Based on the example skeleton:
 #	Written by Miquel van Smoorenburg <miquels@cistron.nl>.

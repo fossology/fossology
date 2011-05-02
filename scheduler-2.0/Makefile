@@ -30,6 +30,7 @@ CLI = fo_cli
 FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' -DPROJECT_GROUP='"$(PROJECTGROUP)"' -DPROCESS_NAME='"$(EXE)"'
 
 INITFILE=init.d/fossology
+CONFFILE=fossology.conf
 
 #######################
 # objects and headers #
@@ -106,10 +107,22 @@ logging.o: %.o: %.c $(DEPEN)
 # install build rules #
 #######################
 
-install: all
+install: all install-conf
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(LIBEXECDIR)/$(EXE)
 	$(INSTALL_PROGRAM  $(CLI) $(DESTDIR)$(LIBEXECDIR)/$(CLI)
 	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
+
+install-conf:
+	@ echo "Installing config files..."
+	@if [ ! -f $(DESTDIR)$(SYSCONFDIR)/fossology/$(CONFFILE) -o "$(OVERWRITE)" ] ; then \
+	  mkdir -p $(DESTDIR)$(SYSCONFDIR)/fossology/$(dir $(CONFFILE)); \
+	  cp $(CONFFILE) $(DESDIR)$(SYSCONFDIR)/fossology/; \
+	fi
+	@ echo "Installing init script..."
+	@if [ ! -f $(DESTDIR)$(INITDIR)/$(INITFILE) ] ; then \
+	  mkdir -p $(DESTDIR)$(INITDIR)/$(dir $(INITFILE)); \
+	fi
+	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE);
 
 #####################
 # other build rules #

@@ -1,6 +1,10 @@
 # FOSSology Makefile - agents dir
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 #
+
+TOP=..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
 
 # the directories we do things in by default
 DIRS = Shell ununpack wget_agent mimetype sqlagent delagent adj2nest selftest nomos pkgagent copyright buckets
@@ -24,6 +28,9 @@ $(BUILDDIRS):
 # install depends on everything being built first
 install: all $(INSTALLDIRS)
 $(INSTALLDIRS):
+	if [ ! -d $(DESTDIR)$(SYSCONFDIR)/fossology/agents.d ] ; then \
+	  mkdir -p $(DESTDIR)$(SYSCONFDIR)/fossology/agents.d; \
+	fi
 	$(MAKE) -C $(@:install-%=%) install
 
 uninstall: $(UNINSTALLDIRS)
