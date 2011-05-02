@@ -161,31 +161,24 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     /*  Logo  */
     $Variable = "LogoImage";
     $LogoImagePrompt = _('Logo Image URL');
-    $LogoImageDesc = _('e.g. "http://mycompany.com/images/companylogo.png" or "images/mylogo.png"<br>This image replaces the fossology project logo. Image is constrained to 150px wide.  80-100px high is a good target.');
+    $LogoImageDesc = _('e.g. "http://mycompany.com/images/companylogo.png" or "images/mylogo.png"<br>This image replaces the fossology project logo. Image is constrained to 150px wide.  80-100px high is a good target.  If you change this URL, you MUST also enter a logo URL.');
     $ValueArray[$Variable] = "'$Variable', null, '$LogoImagePrompt', "
                     . CONFIG_TYPE_TEXT .
                     ",'Logo', 1, '$LogoImageDesc'";
 
     $Variable = "LogoLink";
     $LogoLinkPrompt = _('Logo URL');
-    $LogoLinkDesc = _('e.g. "http://mycompany.com/fossology"<br>URL a person goes to when they click on the logo');
+    $LogoLinkDesc = _('e.g. "http://mycompany.com/fossology"<br>URL a person goes to when they click on the logo.  If you change the Logo URL, you MUST also enter a Logo Image.');
     $ValueArray[$Variable] = "'$Variable', null, '$LogoLinkPrompt', "
                     . CONFIG_TYPE_TEXT .
                     ",'Logo', 2, '$LogoLinkDesc'" ;
      
     $Variable = "GlobalBrowse";
-    $BrowsePrompt = _("Allow Global Browsing");
-    $BrowseDesc = _("Allow browsing the entire repository.");
+    $BrowsePrompt = _("Global Browsing");
+    $BrowseDesc = _("true = allow browsing and searching the entire repository.<br>false = user can only browse/search their own uploads.");
     $ValueArray[$Variable] = "'$Variable', 'false', '$BrowsePrompt', "
                     . CONFIG_TYPE_INT .
                     ",'UI', 1, '$BrowseDesc'";
-     
-    $Variable = "GlobalSearch";
-    $SearchPrompt = _("Allow Global Searches");
-    $SearchDesc = _("Allow searching all folders in the system.");
-    $ValueArray[$Variable] = "'$Variable', 'false', '$SearchPrompt', "
-                    . CONFIG_TYPE_INT .
-                    ",'UI', 1, '$SearchDesc'";
      
     /* Doing all the rows as a single insert will fail if any row is a dupe.
      So insert each one individually so that new variables get added.

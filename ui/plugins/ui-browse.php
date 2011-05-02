@@ -15,10 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
-/**
- * @version "$Id$"
- */
 /*************************************************
  Restrict usage: Every PHP file should have this
  at the very beginning.
@@ -42,6 +38,24 @@ class ui_browse extends FO_Plugin {
   var $Dependency = array("db");
   public $DBaccess = PLUGIN_DB_READ;
   public $LoginFlag = 0;
+
+
+  function PostInitialize()
+  {
+    /* Keep the Browse main menu item from appearing if there are 
+     * browse restrictions and the user isn't logged in.
+     * Technically, this PostInitialize() is incorrect, but it implements
+     * the above expected behavior, which for practical purposes is reasonable
+     * because if one wants to give the default user permission to browse,
+     * they should turn on GlobalBrowse (i.e. no browse restrictions).
+     */
+    if (IsRestrictedTo() and empty($_SESSION["User"]))
+      $this->State = PLUGIN_STATE_INVALID;
+    else
+      $this->State = PLUGIN_STATE_READY;
+    return $this->State;
+  }
+
 
   /***********************************************************
    Install(): Create and configure database tables
@@ -80,32 +94,13 @@ class ui_browse extends FO_Plugin {
   } // Install()
 
 
-  function PostInitialize()
-  {
-    global $SysConf;
-
-    /* This plugin is only valid if the system allows global browsing
-     * (browsing across the entire repository) and UserLevel >= this plugin DBaccess.  
-     * Or if the user is an admin.
-     */
-    if (((strcasecmp(@$SysConf["GlobalBrowse"],"true") == 0) 
-         and (@$_SESSION['UserLevel'] >= $this->DBaccess))
-        or
-        (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN))
-    {
-      menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
-      $this->State = PLUGIN_STATE_READY;
-    }
-    else
-      $this->State = PLUGIN_STATE_INVALID; // No authorization for global search
-    return $this->State;
-  } // Postinitialize
-  
   /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
-  function RegisterMenus()
+  function RegisterMenus() 
   {
+    menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+
     $Upload = GetParm("upload", PARM_INTEGER);
     if (empty($Upload)) {
       return;
@@ -115,12 +110,12 @@ class ui_browse extends FO_Plugin {
       "upload",
       "item"
       ));
-      if (GetParm("mod", PARM_STRING) == $this->Name)
+    if (GetParm("mod", PARM_STRING) == $this->Name) 
       menu_insert("Browse::Browse", 1);
-      else
+    else 
       menu_insert("Browse::Browse", 1, $URI);
 
-      return($this->State == PLUGIN_STATE_READY);
+    return($this->State == PLUGIN_STATE_READY);
   } // RegisterMenus()
 
   /***********************************************************
@@ -245,20 +240,26 @@ class ui_browse extends FO_Plugin {
   function ShowFolder($Folder, $Show) {
     global $Plugins;
     global $DB;
-    $ReAnalyze = & $Plugins[plugin_find_id("agent_reset_license") ]; /* may be null */
-    $Analyze = & $Plugins[plugin_find_id("agent_license") ]; /* may be null */
+
     $V = "";
-    /* Get list of fully unpacked uploads */
-    /*** last unpack task: lft is set by adj2nest ***/
+    /* Get list of uploads in this folder 
+     * If the user is browse restricted, then restrict the list.
+     */
+    $UserId = IsRestrictedTo();
+    if ($UserId === false)
+      $UserCondition = "";  // no browse restriction
+    else
+      $UserCondition = " and upload_userid='$UserId'";  // browse restriction
     $Sql = "SELECT * FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
         AND parent IS NULL
-        AND lft IS NOT NULL
+        AND lft IS NOT NULL $UserCondition
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
         ORDER BY upload_filename,upload_desc,upload_pk,upload_origin;";
     $Results = $DB->Action($Sql);
+
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     $V.= "<table border=1 width='100%'>";
     $V.= "<tr><td valign='top' width='20%'>\n";
@@ -266,7 +267,7 @@ class ui_browse extends FO_Plugin {
     $text = _("Folder Navigation");
     $V.= "<center><H3>$text</H3></center>\n";
     $V.= "<center><small>";
-    if ($Folder != FolderGetTop()) {
+    if ($Folder != GetUserRootFolder()) {
       $text = _("Top");
       $V.= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>$text</a> |";
     }
@@ -374,34 +375,6 @@ class ui_browse extends FO_Plugin {
       }
       $V.= $Status['failed'] . _(" failed.");
 
-      /* bobg: bsam license analysis is deprecated */
-      if (isset($__OBSOLETE__))
-      {
-        /* Check for re-do license analysis */
-        if (!empty($ReAnalyze)) {
-          /* Check if the analysis already exists and is not running */
-          $V.= "<tr><td>";
-          $Status = $Analyze->AgentCheck($UploadPk);
-          $Uri = Traceback_uri() . "?mod=" . $this->Name . Traceback_parm_keep(array(
-          "folder"
-          ));
-          if ($Status == 0) {
-            $V.= "<a href='";
-            $V.= $Uri . "&analyze=$UploadPk";
-            $text = _("license analysis");
-            $text1 = _("Schedule");
-            $V.= "'>$text1</a> $text";
-          }
-          else if ($Status == 2) {
-            $V.= "<a href='";
-            $V.= $Uri . "&reanalyze=$UploadPk";
-            $text = _("license analysis");
-            $text1 = _("Reschedule");
-            $V.= "'>$text1</a>$text";
-          }
-        }
-      }
-      /* End of the record */
       $V.= "<tr><td colspan=2>&nbsp;</td></tr>\n";
     }
     $V.= "</table>\n";
@@ -410,55 +383,76 @@ class ui_browse extends FO_Plugin {
     return ($V);
   } /* ShowFolder() */
 
+ 
+
   /***********************************************************
    Output(): This function returns the scheduler status.
    ***********************************************************/
-  function Output() {
+  function Output() 
+  {
     global $PG_CONN;
-
-    if ($this->State != PLUGIN_STATE_READY) {
-      return (0);
-    }
-    $V = "";
-    $Folder = GetParm("folder", PARM_INTEGER);
-    if (empty($Folder)) {
-      $Folder = GetUserRootFolder();
-    }
-    $Upload = GetParm("upload", PARM_INTEGER);
-    $Item = GetParm("item", PARM_INTEGER);
-    $Uri = Traceback_uri() . "?mod=" . $this->Name;
     global $Plugins;
     global $DB;
 
+    if ($this->State != PLUGIN_STATE_READY)  return (0);
+
+    $V = "";
+    $Folder_URL = GetParm("folder", PARM_INTEGER);
+    $Upload = GetParm("upload", PARM_INTEGER);  // upload_pk to browse
+    $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
+
+    /* kludge for plugins not supplying a folder parameter.
+     * Find what folder this upload is in.  Error if in multiple folders.
+     */
+    if (empty($Folder_URL))
+    {
+      if (empty($Upload)) 
+        $Folder_URL = GetUserRootFolder();
+      else
+      {
+      $sql = "select parent_fk from foldercontents where child_id=$Upload and foldercontents_mode=2";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if ( pg_num_rows($result) > 1)
+        Fatal("Upload $Upload found in multiple folders.",__FILE__, __LINE__);
+      
+      $row = pg_fetch_assoc($result);
+      $Folder_URL = $row['parent_fk'];
+      pg_free_result($result);
+      }
+    }
+
+    $Folder = GetValidFolder($Folder_URL);
+    if ($Folder != $Folder_URL)
+    {
+      /* user is trying to access folder without permission.  Redirect to their 
+       * root folder.
+       */
+      $NewURL = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
+      echo "<script type=\"text/javascript\"> window.location.replace(\"$NewURL\"); </script>";
+    }
+
+    if (HaveUploadPerm($Upload) === false) 
+    {
+      /* user trying to access upload without permission.  Redirect to their 
+       * specified folder.
+       */
+      $NewURL = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
+      echo "<script type=\"text/javascript\"> window.location.replace(\"$NewURL\"); </script>";
+    }
+
+    if (HaveItemPerm($Item) === false) 
+    {
+      /* user trying to access item without permission.  Redirect to their 
+       * specified folder.
+       */
+      $NewURL = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
+      if (!empty($Upload)) $NewURL .= "&upload=$Upload";
+      echo "<script type=\"text/javascript\"> window.location.replace(\"$NewURL\"); </script>";
+    }
+
     $Show = 'detail';                                           // always use detail
 
-    /* Check for re-analysis */
-    $ReAnalyze = & $Plugins[plugin_find_id("agent_reset_license") ]; /* may be null */
-    $Analyze = & $Plugins[plugin_find_id("agent_license") ]; /* may be null */
-    $UploadPk = GetParm("reanalyze", PARM_INTEGER);
-    if (!empty($ReAnalyze) && !empty($UploadPk)) {
-      $rc = $ReAnalyze->RemoveLicenseMeta($UploadPk, NULL, 1);
-      if (empty($rc)) {
-        $text = _("License data re-analysis added to job queue");
-        $V.= displayMessage($text);
-      }
-      else {
-        $text = _("Scheduling of re-analysis failed, return code");
-        $V.= displayMessage("$text: $rc");
-      }
-    }
-    $UploadPk = GetParm("analyze", PARM_INTEGER);
-    if (!empty($Analyze) && !empty($UploadPk)) {
-      $rc = $Analyze->AgentAdd($UploadPk);
-      if (empty($rc)) {
-        $text = _("License data analysis added to job queue");
-        $V.= displayMessage($text);
-      }
-      else {
-        $text = _("Scheduling of re-analysis failed, return code");
-        $V.= displayMessage("$text: $rc");
-      }
-    }
     switch ($this->OutputType) {
       case "XML":
         break;
@@ -511,9 +505,9 @@ class ui_browse extends FO_Plugin {
           }
           $V.= $this->ShowItem($Upload, $Item, $Show, $Folder);
         }
-        else if (!empty($Folder)) {
+        else 
           $V.= $this->ShowFolder($Folder, $Show);
-        }
+        
         $V.= "</font>\n";
         break;
       case "Text":

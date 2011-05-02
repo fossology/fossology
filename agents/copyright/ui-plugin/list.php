@@ -127,20 +127,41 @@ class copyright_list extends FO_Plugin
   /*************************************************
    * GetRequestedRows()
    * Remove unwanted rows by hash and type and
-   * exclusions
+   * exclusions and filter
    * Returns new array and $NumRows
    * $NumRows is the number of instances.
    ************************************************/
-  function GetRequestedRows($rows, $hash, $type, $excl, &$NumRows)
+  function GetRequestedRows($rows, $hash, $type, $excl, &$NumRows, $filter)
   {
+    global $PG_CONN;
+
     $NumRows = count($rows);
     $prev = 0;
     $ExclArray = explode(":", $excl);
 
+    /* filter will need to know the rf_pk of "No_license_found" */
+    if (!empty($filter))
+    {
+      $NoLicStr = "No_license_found";
+      $sql = "select rf_pk from license_ref where rf_shortname='$NoLicStr'";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result) > 0)
+      {
+        /* assume there is only one license ref called $NoLicStr */
+        $lr_row = pg_fetch_assoc($result);
+        $NoLic_rf_pk = $lr_row['rf_pk'];
+      }
+      else
+        $NoLic_rf_pk = 0;
+      pg_free_result($result);
+    }
+
     for($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++)
     {
+      $row = $rows[$RowIdx];
       /* Remove undesired types */
-      if ($rows[$RowIdx]['type'] != $type)
+      if ($row['type'] != $type)
       {
         unset($rows[$RowIdx]);
         continue;
@@ -149,7 +170,7 @@ class copyright_list extends FO_Plugin
       /* remove excluded files */
       if ($excl) 
       {
-        $FileExt = GetFileExt($rows[$RowIdx]['ufile_name']);
+        $FileExt = GetFileExt($row['ufile_name']);
         if (in_array($FileExt, $ExclArray))
         {
           unset($rows[$RowIdx]);
@@ -157,8 +178,24 @@ class copyright_list extends FO_Plugin
         }
       }
 
+      /* apply filters */
+      if (($filter == "nolics") and ($NoLic_rf_pk))
+      {
+        /* discard file unless it has no license */
+        $sql = "select rf_fk from license_file where rf_fk=$NoLic_rf_pk and pfile_fk={$row['pf']}";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $FoundRows = pg_num_rows($result);
+        pg_free_result($result);
+        if ($FoundRows == 0)
+        {
+          unset($rows[$RowIdx]);
+          continue;
+        }
+      }
+
       /* rewrite content for easier human assimilation */
-      if (MassageContent($rows[$RowIdx], $hash))
+      if (MassageContent($row, $hash))
         unset($rows[$RowIdx]);
     }
 
@@ -212,6 +249,7 @@ class copyright_list extends FO_Plugin
 	$hash = GetParm("hash",PARM_RAW);
 	$type = GetParm("type",PARM_RAW);
 	$excl = GetParm("excl",PARM_RAW);
+	$filter = GetParm("filter",PARM_RAW);
 	if (empty($uploadtree_pk) || empty($hash) || empty($type) || empty($agent_pk)) 
     {
       $text = _("is missing required parameters");
@@ -224,9 +262,9 @@ class copyright_list extends FO_Plugin
     /* get all rows */
     $rows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk);
 
-    /* slim down to all rows with this hash and type */
+    /* slim down to all rows with this hash, type, and filter */
     $NumInstances = 0;
-    $rows = $this->GetRequestedRows($rows, $hash, $type, $excl, $NumInstances);
+    $rows = $this->GetRequestedRows($rows, $hash, $type, $excl, $NumInstances, $filter);
 
 //debugprint($rows, "rows");
 

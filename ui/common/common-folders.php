@@ -76,6 +76,68 @@ function GetUserRootFolder()
   return $root_folder_fk;
 } // GetUserRootFolder()
 
+/************************************************************
+ GetRootFolder(): 
+ Return the top-of-tree folder_pk.
+ This is typically the folder_pk for the folder "Software Repository"
+ but this function has no dependency on the folder name.
+ Technically, one could create multiple roots, but that would be a
+ bad thing and the UI won't let you do that.
+ ************************************************************/
+function GetRootFolder()
+{
+  global $PG_CONN;
+
+  /* if there is only a single folder, then that must be the root */
+  $sql = "select folder_pk from folder limit 2";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) == 1)
+  {
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    return $row['folder_pk'];
+  }
+  else if (pg_num_rows($result) == 0)
+  {
+    $text = _("This database has not been properly installed: No root folder found.");
+    echo "$text<br>";
+    echo __FILE__ . ":" . __LINE__ . ":". __FUNCTION__ ."<br>";
+    exit;
+  }
+
+  /* Get all the folder_pk's  of folders that have children 
+   * and remove all the folders that are themselves children.
+   * The remainder (folder that is never a child) is the root.
+   * We should probably give some thought to having all folders in foldercontents.
+   * The root folder would just have a null parent.  That would be lots simpler
+   * than what we have to go through here.
+   */
+  $sql = "select distinct parent_fk as folder_pk from foldercontents where foldercontents_mode=1
+          except select distinct child_id as folder_pk from foldercontents where foldercontents_mode=1 ";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) == 0)
+  {
+    $text = _("This database has not been properly installed: No root folder found.");
+    echo "$text<br>";
+    echo __FILE__ . ":" . __LINE__ . ":". __FUNCTION__ ."<br>";
+    exit;
+  }
+  if (pg_num_rows($result) > 1)
+  {
+    $text = _("This database has not been properly installed: Multiple root folders found.");
+    echo "$text<br>";
+    echo __FILE__ . ":" . __LINE__ . ":". __FUNCTION__ ."<br>";
+    exit;
+  }
+  $row = pg_fetch_assoc($result);
+  pg_free_result($result);
+
+
+  return $row['folder_pk'];
+} // GetRootFolder()
+
 
 /************************************************************
  * Folder2Path(): 
@@ -322,7 +384,7 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   global $DB;
   if (empty($DB)) { return; }
   if (empty($ParentFolder)) { return; }
-  if ($ParentFolder == "-1") { return(FolderListDiv(FolderGetTop(),0)); }
+  if ($ParentFolder == "-1") { return(FolderListDiv(GetUserRootFolder(),0)); }
   $Browse = &$Plugins[plugin_find_id("browse")];
   $Uri = Traceback_uri();
   $V="";
@@ -344,7 +406,7 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
     }
 
   /* Load this folder's parent */
-  if ($ShowParent && ($ParentFolder != FolderGetTop()))
+  if ($ShowParent && ($ParentFolder != GetUserRootFolder()))
   {
     $Results = $DB->Action("SELECT parent_fk FROM foldercontents WHERE foldercontents_mode = 1 AND child_id = '$ParentFolder' LIMIT 1;");
     if (count($Results) > 0)
@@ -407,8 +469,10 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
     $Hide="";
     if ($Depth > 0) { $Hide = "style='display:none;'"; }
     $V .= "<div id='TreeDiv-$ParentFolder' $Hide>\n";
+
     foreach($Results as $R)
       {
+      if (!HaveFolderPerm($R['folder_pk'])) continue;
       $V .= FolderListDiv($R['folder_pk'],$Depth+1,$Highlight);
       }
     $V .= "</div>\n";

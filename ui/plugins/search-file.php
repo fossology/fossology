@@ -38,22 +38,11 @@ class search_file extends FO_Plugin
 
   function PostInitialize()
   {
-    global $SysConf;
- 
-    /* This plugin is only valid if the system allows global searching
-     * (searching across the entire repository) and UserLevel >= this plugin DBaccess.  
-     * Or if the user is an admin.
-     */
-    if (((strcasecmp(@$SysConf["GlobalSearch"],"true") == 0)
-         and (@$_SESSION['UserLevel'] >= $this->DBaccess))
-        or
-        (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN))
-    {
-      menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
-      $this->State = PLUGIN_STATE_READY;
-    }    
+    /* This plugin is only valid if the system allows global searching */
+    if (IsRestrictedTo())
+      $this->State = PLUGIN_STATE_INVALID; 
     else
-      $this->State = PLUGIN_STATE_INVALID; // No authorization for global search
+      $this->State = PLUGIN_STATE_READY;
     return $this->State;
   }
 

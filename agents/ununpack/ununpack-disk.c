@@ -282,7 +282,7 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
   if ((NULL == FStype) || (!strcmp(FStype, "")) || (NULL == Source) || (!strcmp(Source, "")) || (NULL == Destination) || (!strcmp(Destination, "")))
     return 1;
 
-  if (!Quiet) fprintf(stderr,"Extracting %s: %s\n",FStype,Source);
+  if (!Quiet && (Verbose >1)) fprintf(stderr,"Extracting %s: %s\n",FStype,Source);
 
   if (!strcmp(FStype,"fat"))	FatFlag=1;
 
