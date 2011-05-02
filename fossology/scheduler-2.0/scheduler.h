@@ -26,16 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* other library includes */
 #include <glib.h>
 
-#ifndef gsize
-#define gsize unsigned long
-#endif
-#ifndef G_MAXULONG
-#define G_MAXULONG ULONG_MAX
-#endif
-#ifndef G_MAXSIZE
-#define G_MAXSIZE G_MAXULONG
-#endif
-
 #define CHECKOUT_SIZE 100
 
 extern int verbose;

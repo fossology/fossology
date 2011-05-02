@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -101,7 +101,7 @@ install: all
 	make -C ui-plugin install
 	$(INSTALL_DATA) copyright.dic $(DESTDIR)$(DATADIR)/
 	$(INSTALL_DATA) names.dic $(DESTDIR)$(DATADIR)/
-#	$(INSTALL_DATA) copyright.conf $(SYSCONFDIR)/fossology/agents/
+	$(INSTALL_DATA) copyright.conf $(SYSCONFDIR)/fossology/agents.d/
 
 uninstall:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)/$(EXE)

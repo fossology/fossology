@@ -45,6 +45,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <glib.h>
 #include <gio/gio.h>
 
+#define FOSS_CONF  "fossology.conf"
+#define AGENT_CONF "agents.d"
 #ifndef PROCESS_NAME
 #define PROCESS_NAME "fo_scheduler"
 #endif
@@ -52,10 +54,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* global flags */
 int verbose = 0;
 int closing = 0;
-
-/* user group and password of scheduler */
-struct group*  grp;
-struct passwd* pwd;
 
 /* ************************************************************************** */
 /* **** signals and events ************************************************** */
@@ -263,6 +261,10 @@ pid_t lock_scheduler()
  */
 void set_usr_grp()
 {
+  /* locals */
+  struct group*  grp;
+  struct passwd* pwd;
+
   /* make sure group exists */
   grp = getgrnam(PROJECT_GROUP);
   if(!grp)
@@ -336,7 +338,7 @@ void load_config()
   int special = 0;          // anything that is special about the agent (EXCLUSIVE)
 
   // TODO set this up with DEFAULT_SETUP instead of this
-  snprintf(buffer, sizeof(buffer), "%s/agents/", DEFAULT_SETUP);
+  snprintf(buffer, sizeof(buffer), "%s/%s/", DEFAULT_SETUP, AGENT_CONF);
   if((dp = opendir(buffer)) == NULL)
   {
     FATAL("Could not open agent config directory");
@@ -348,7 +350,7 @@ void load_config()
   host_list_clean();
 
   /* load the scheduler configuration */
-  snprintf(buffer, sizeof(buffer), "%s/fossology.conf", DEFAULT_SETUP);
+  snprintf(buffer, sizeof(buffer), "%s/%s", DEFAULT_SETUP, FOSS_CONF);
   istr = fopen(buffer, "r"); //< change file path
   while(fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
   {
@@ -378,7 +380,7 @@ void load_config()
   /* load the configureation for the agents */
   while((ep = readdir(dp)) != NULL)
   {
-    sprintf(buffer, "%s/agents/%s", DEFAULT_SETUP, ep->d_name);
+    sprintf(buffer, "%s/%s/%s", DEFAULT_SETUP, AGENT_CONF, ep->d_name);
     if(ep->d_name[0] != '.' && (istr = fopen(buffer, "rb")) != NULL)
     {
       VERBOSE2("CONFIG: loading config file %s\n", buffer);
