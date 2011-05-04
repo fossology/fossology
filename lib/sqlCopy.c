@@ -20,9 +20,10 @@
  * \file sqlCopy.c
  * \brief sqlCopy buffers sql inserts and performs batch copy's
  *        to the database.  Why do this?  Because this method is 
- *        roughtly 15x faster than individual sql inserts.
+ *        roughtly 15x faster than individual sql inserts for a
+ *        typical fossology table insert.
  *
- * Note that all data to be inserted is stored in memory (pCopy->DataRow), 
+ * Note that data to be inserted is stored in memory (pCopy->DataBuf), 
  * not an external file.  So the caller should give some consideration 
  * to the number of records buffered (UpdateInterval).
  *
@@ -30,13 +31,13 @@
  * 1. Get an sqlCopy_struct pointer from fo_sqlCopyCreate().
  * 2. Add records you want inserted into a single table in the
  *    database with fo_sqlCopyAdd().  This will buffer the recs
- *    until the UpdateInterval is reached.  At that point the
+ *    until no more data will fit into DataBuf.  At that point the
  *    records will be added to the database table in a single copy stmt.
  * 3. When the program is done, call fo_sqlCopyDestroy().  This will flush
  *    the remaining records out of the buffer and free memory.
  *
  * Two other functions may also come in handy:
- * 1. fo_sqlCopyExecute() will execute the copy immediately.
+ * 1. fo_sqlCopyExecute() will execute the copy to database immediately.
  * 2. fo_sqlCopyPrint() will print the sqlCopy structure. 
  *    It is good for debugging.
  **************************************************************/
@@ -49,21 +50,17 @@
  Constructor for sqlCopy_struct.  
 
  @param PGconn *PGconn  Database connection
- @param char *TableName
- @param int   UpdateInterval  Number of datarows buffered before writing
-                   to the database.
- @param int   NumColumns  number of column names passed in.
- @param char *Fmt  printf type format string for the column data
-                   conversion to a string.  All format specifiers should
-                   be separated by tabs. 
-                   For example, if your databse columns are a string type,
-                   integer, and another string type, $Fmt would be "%s\t%d\t%s"
- @param ...   char *ColumnNames
+ @param char   *TableName
+ @param int     BufSize  Size of the copy buffer in bytes.
+                If BufSize is smaller than needed to hold any
+                single row, then BufSize is automatically increased.
+ @param int     NumColumns  number of column names passed in.
+ @param ...     char *ColumnNames
 
  @return sqlCopy_struct
          On failure, ERROR to stdout, return 0
 ****************************************************/
-psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int UpdateInterval, int NumColumns, ...)
+psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int NumColumns, ...)
 {
   psqlCopy_t pCopy;
   va_list    ColumnNameArg;
@@ -77,36 +74,32 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int UpdateInterval,
   pCopy = malloc(sizeof(sqlCopy_t));
   if (!pCopy) ERROR_RETURN("sqlCopy malloc")
 
-  /* Allocate storage for all the data string pointers this one time */
-  pCopy->DataRows = calloc(UpdateInterval, sizeof(char *));
-  if (!pCopy->DataRows) 
+  /* Allocate storage for the data buffer */
+  if (BufSize < 1) BufSize = 1;
+  pCopy->DataBuf = calloc(BufSize, sizeof(char));
+
+  /* Save TableName */
+  pCopy->TableName = strdup(TableName);
+
+  /* check for malloc failures */
+  if ((!pCopy->DataBuf) || (!pCopy->TableName))
   {
     free(pCopy);
-    ERROR_RETURN("DataRows")
-  }
-
-  /* Allocate an array to keep track of the storage allocated to each DataRows[i] */
-  pCopy->RowLengths = calloc(UpdateInterval, sizeof(int));
-  if (!pCopy->RowLengths) 
-  {
-    fo_sqlCopyDestroy(pCopy, 0);
-    ERROR_RETURN("RowLengths")
+    ERROR_RETURN("sqlCopyCreate")
   }
 
   /* Save the DB connection */
   pCopy->PGconn = PGconn;
 
-  /* Save TableName */
-  strncpy(pCopy->TableName, TableName, sizeof(pCopy->TableName));
+  /* Save the data buffer size  */
+  pCopy->BufSize = BufSize;
 
-  /* Save UpdateInterval */
-  pCopy->UpdateInterval = UpdateInterval;
-
-  /* No data used yet */
-  pCopy->LastRow = -1;
+  /* Data buffer is empty */
+  pCopy->DataIdx = 0;
 
   /* Build the column name string pCopy->ColumnNames  */
   ColStrLength = 0;
+  pCopy->ColumnNames[0] = 0;
   for (ColIdx = 0; ColIdx < NumColumns; ColIdx++)
   {
     ColStr = va_arg(ColumnNameArg, char *);
@@ -114,7 +107,7 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int UpdateInterval,
     if (ColStrLength < sizeof(pCopy->ColumnNames))
     {
       if (ColIdx != 0) strncat(pCopy->ColumnNames, ",", sizeof(pCopy->ColumnNames));
-      strncat(pCopy->ColumnNames, va_arg(ColumnNameArg, char *), sizeof(pCopy->ColumnNames));
+      strncat(pCopy->ColumnNames, ColStr, sizeof(pCopy->ColumnNames));
     }
     else
     {
@@ -122,10 +115,9 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int UpdateInterval,
        ERROR_RETURN("pCopy->ColumnNames size too small")
     }
   }
-
   va_end(ColumnNameArg);
   return(pCopy);
-}
+}  /* End fo_sqlCopyCreate()  */
 
 
 /****************************************************
@@ -137,47 +129,49 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int UpdateInterval,
  @param psqlCopy_t Pointer to sqlCopy struct
  @param char *DataRow 
 
- The DataRow pointer is not saved.  This function allocates
- new storage for it.
- DataRow is tab delimited.  Any strings that include
- a tab need to replace it with '\t'
+ The fields in DataRow needs to be tab delimited.  
+ All strings should be escaped with PQescapeStringConn()
+
  For example, to insert a row with two character fields and an
  integer field, DataRow might look like:
    Mytab\tstring  <tab> string number 2 <tab> 36
  This could be created by:
-   snprintf(buf, sizeof(buf), "%s\t%s\t%d", str1, str2, val);
+   snprintf(buf, sizeof(buf), "%s\t%s\t%d\n", str1, str2, val);
  @return 0 if failure
 ****************************************************/
 int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
 {
-  int NewRowLength;
-  int LastRow;
+  int NewRowLen;
 
-  pCopy->LastRow++;
-  LastRow = pCopy->LastRow;
-
-  NewRowLength = strlen(DataRow);
-
-  /* if DataRows[LastRow] is too short to hold the new DataRow,
-   * free in and reallocate
+  /* Does new record fit in DataBuf? 
+   * For the purpose if calculating if DataRow will fit in DataBuf,
+   * assume the new DataRow does not have a newline at the end.
    */
-  if (NewRowLength > pCopy->RowLengths[LastRow])
+  NewRowLen = strlen(DataRow);
+  if ((pCopy->BufSize - pCopy->DataIdx) < (NewRowLen+1))
   {
-    /* buffer too small, free it */
-    if (pCopy->DataRows[LastRow]) free(pCopy->DataRows[LastRow]);
-
-    /* Reallocate the DataRow
-     * RowLengths do not include the null terminator */
-    pCopy->DataRows[LastRow] = calloc(NewRowLength+1, sizeof(char)); 
-    pCopy->RowLengths[LastRow] = NewRowLength;
-    if (!pCopy->DataRows[LastRow]) ERROR_RETURN("Malloc failed for DataRows")
+    /* if DataIdx is zero, then DataBuf isn't big enough to hold
+     * this record.  In this case make DataBuf larger.
+     */
+    if (pCopy->DataIdx == 0)
+    {
+      pCopy->DataBuf = realloc(pCopy->DataBuf, NewRowLen+2);
+      if (!pCopy->DataBuf) ERROR_RETURN("fo_sqlCopyAdd: Realloc for DataBuf failed");
+    }
+    else
+    {
+      /* Execute a copy to make room in DataBuf */
+      fo_sqlCopyExecute(pCopy);
+    }
   }
 
   /* copy in DataRow */
-  strcpy(pCopy->DataRows[LastRow], DataRow);
+  strcpy(pCopy->DataBuf+pCopy->DataIdx, DataRow);
+  pCopy->DataIdx += NewRowLen;
 
-  /* Update the DB if we have enough (UpdateInterval) rows */
-  if (LastRow >= pCopy->UpdateInterval) fo_sqlCopyExecute(pCopy);
+  /* If the DataRow was missing a newline, add one */
+  if (DataRow[NewRowLen-1] != '\n') pCopy->DataBuf[pCopy->DataIdx++] = '\n';
+
   return(1);
 }
 
@@ -186,11 +180,8 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
  fo_sqlCopyExecute()
 
  Execute the copy (ie insert the buffered records into the
- database.  This may be called anytime, not just when UpdateInterval 
- rows have been saved.
+ database.
  Then reset pCopy (effectively empty it).
- Note that DataRow memory is reused, instead of being
- freed in this function.
 
  @param psqlCopy_t Pointer to sqlCopy struct
 
@@ -205,36 +196,32 @@ int fo_sqlCopyExecute(psqlCopy_t pCopy)
 
   /* check pCopy */
   if (!pCopy) ERROR_RETURN("Null pCopy");
-  if (!pCopy->DataRows) ERROR_RETURN("Empty DataRows");
+  if (pCopy->DataIdx == 0) return(1);  /* nothing to copy */
 
   /* Start the Copy command */
-    sprintf(copystmt, "COPY %s(%s) from stdin", 
-            pCopy->TableName,
-            pCopy->ColumnNames);
-    result = PQexec(pCopy->PGconn, copystmt);
-    if (PGRES_COPY_IN != PQresultStatus(result)) 
-      ERROR_RETURN(PQresultErrorMessage(result))
-
-  /* Write each data row */
-  for (RowIdx = 0; RowIdx < pCopy->UpdateInterval && (pCopy->DataRows[RowIdx]); RowIdx++) 
+  sprintf(copystmt, "COPY %s(%s) from stdin", 
+          pCopy->TableName,
+          pCopy->ColumnNames);
+  result = PQexec(pCopy->PGconn, copystmt);
+  if (PGRES_COPY_IN == PQresultStatus(result)) 
   {
-    Row = pCopy->DataRows[RowIdx];
-    if (PQputCopyData(pCopy->PGconn, Row, strlen(Row)) != 1)
+    if (PQputCopyData(pCopy->PGconn, pCopy->DataBuf, pCopy->DataIdx) != 1)
       ERROR_RETURN(PQresultErrorMessage(result))
   }
+  else
+    if (!fo_checkPQresult(pCopy->PGconn, result, copystmt, __FILE__, __LINE__)) return 0;
+
+  PQclear(result);
 
   /* End copy  */
-  if (PQputCopyEnd(pCopy->PGconn, NULL) != 1) ERROR_RETURN("sqlCopyEnd Failure")
-  if (PQerrorMessage(pCopy->PGconn)) ERROR_RETURN(PQerrorMessage(pCopy->PGconn))
-
-  /* empty but do not deallocate DataRows strings */
-  for (RowIdx = 0; RowIdx < pCopy->UpdateInterval && (pCopy->DataRows[RowIdx]); RowIdx++) 
+  if (PQputCopyEnd(pCopy->PGconn, NULL) == 1) 
   {
-    pCopy->DataRows[RowIdx] = 0;
+    result = PQgetResult(pCopy->PGconn);
+    if (fo_checkPQcommand(pCopy->PGconn, result, "copy end", __FILE__, __LINE__)) return 0;
   }
 
-  /* Reset index to last data record */
-  pCopy->LastRow = -1;
+  /* reset DataBuf */
+  pCopy->DataIdx = 0;
 
   return(1);
 }
@@ -251,22 +238,17 @@ int fo_sqlCopyExecute(psqlCopy_t pCopy)
  @param int   ExecuteFlag  0 if DataRows should not be written,
                            1 if DataRows should be written
 
- @return Always returns (psqlCopy_t)0
+ @return void
 ****************************************************/
-psqlCopy_t fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag)
+void fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag)
 {
   int RowIdx;
 
-  if (!pCopy) return(0);
-  if (pCopy->DataRows)
-  {
-    for (RowIdx = 0; RowIdx < pCopy->UpdateInterval; RowIdx++) 
-      if(pCopy->DataRows[RowIdx]) free(pCopy->DataRows[RowIdx]);
-    free(pCopy->DataRows);
-  }
-  if (pCopy->RowLengths) free(pCopy->RowLengths);
+  if (!pCopy) return;
+  if (ExecuteFlag) fo_sqlCopyExecute(pCopy);
+  if (pCopy->TableName) free(pCopy->TableName);
+  if (pCopy->DataBuf) free(pCopy->DataBuf);
   free(pCopy);
-  return((psqlCopy_t)0);
 }
 
 
@@ -277,23 +259,21 @@ psqlCopy_t fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag)
  This is used for debugging.
 
  @param psqlCopy_t pCopy Pointer to sqlCopy struct
- @param int PrintRows    Number of DataRows to print
-
+ @param int PrintBytes   Number of DataBuf bytes to print.
+                         If zero, print the whole buffer.
  @return void
 ****************************************************/
-void fo_sqlCopyPrint(psqlCopy_t pCopy, int PrintRows)
+void fo_sqlCopyPrint(psqlCopy_t pCopy, int PrintBytes)
 {
-  int   Rows2Print;
-  int   RowIdx;
+  int idx;
 
-  printf("pCopy: %lx, TableName: %s, UpdateInterval: %d\n", 
-        (long)pCopy, pCopy->TableName, pCopy->UpdateInterval);
+  printf("========== fo_sqlCopyPrint  Start  ================\n");
+  printf("pCopy: %lx, TableName: %s, BufSize: %d, DataIdx: %d\n", 
+        (long)pCopy, pCopy->TableName, pCopy->BufSize, pCopy->DataIdx);
+  printf("       ColumnNames: %s\n", pCopy->ColumnNames);
 
-  if (pCopy->UpdateInterval <  PrintRows)
-    Rows2Print = pCopy->UpdateInterval;
-  else
-    Rows2Print = PrintRows; 
+  if (PrintBytes == 0) PrintBytes = pCopy->DataIdx;
+  for(idx=0; idx < PrintBytes; idx++) putchar(pCopy->DataBuf[idx]);
 
-  for (RowIdx = 0; RowIdx < Rows2Print && (pCopy->DataRows[RowIdx]); RowIdx++) 
-    printf("%s\n", pCopy->DataRows[RowIdx]);
+  printf("========== fo_sqlCopyPrint  End  ================");
 }

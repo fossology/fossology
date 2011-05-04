@@ -181,7 +181,7 @@ int fo_checkPQcommand(PGconn *pgConn, PGresult *result, char *sql, char *FileID,
 {
    if (!result)
    {
-     printf("FATAL: %s:%d, %s\nOn: %s\n", 
+     printf("FATAL: %s:%d, %sOn: %s\n", 
             FileID, LineNumb, PQerrorMessage(pgConn), sql);
      return -1;
    }
@@ -189,7 +189,7 @@ int fo_checkPQcommand(PGconn *pgConn, PGresult *result, char *sql, char *FileID,
    /* If no error, return */
    if (PQresultStatus(result) == PGRES_COMMAND_OK) return 0;
 
-   printf("ERROR: %s:%d, %s\nOn: %s\n", 
+   printf("ERROR: %s:%d, %sOn: %s\n", 
           FileID, LineNumb, PQresultErrorMessage(result), sql);
    PQclear(result);
    return (-1);
