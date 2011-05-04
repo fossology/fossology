@@ -6,21 +6,21 @@ include $(VARS)
 CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS)
 
 CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' -DFOSSREPO_CONF='"$(SYSCONFDIR)/fossology"' -DFOSSGROUP='"$(PROJECTGROUP)"'
-EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck
-REPMAINS=reppath.c repwrite.c repcat.c repexist.c repcopyin.c repremove.c rephost.c repmmapcheck.c
+EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck sqlCopyTest
 LIB=libfossology.a
 OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o
 
-all: $(OBJS) $(REPMAINS) $(LIB) $(EXE)
+all: $(LIB) $(EXE) $(VARS)
+
+$(LIB): $(OBJS) $(VARS)
+	$(AR) cr $@ $(OBJS)
+#	$(CC) -c $< $(CONFDEF) -fPIC $(ALL_CFLAGS)
+
+$(EXE): %: %.c $(LIB) $(VARS)
+	$(CC) $< $(ALL_CFLAGS) -lpq -o $@
 
 %.o: %.c %.h
-	$(CC) -c $< $(CONFDEF)  -I`pg_config --includedir` -fPIC $(ALL_CFLAGS)
-
-$(LIB): $(OBJS)
-	$(AR) cr $@ $(OBJS)
-
-$(EXE): %: %.c $(REPMAINS)  $(LIB)
-	$(CC) $< $(ALL_CFLAGS) $(LIB) -o $@
+	$(CC) -c $< $(CONFDEF)  -I`pg_config --includedir` -fPIC 
 
 install: install-dev install-lib install-exe
 

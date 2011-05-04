@@ -24,7 +24,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #include <libpq-fe.h>
+#include "libfossdb.h"    /* for the libfossdb error checking functions */
 
 #define ERROR_RETURN(Msg) {\
         printf("ERROR: %s:%d, %s\n   %s\n", __FILE__, __LINE__, Msg, strerror(errno)); \
@@ -34,21 +36,18 @@
 struct sqlCopy_struct
 {
   PGconn *PGconn;           /* Database connection */
-  char   TableName[256];    /* Database table to copy (insert) into */
+  char  *TableName;         /* Database table to copy (insert) into */
   char   ColumnNames[1024]; /* Comma separated list of column names */
-  int    UpdateInterval;    /* Execute copy after this number of DataRows are buffered 
-                             * This is also the number of pointers allocated for DataRows. */
-  int    LastRow;           /* Index to Last row with data */
-  int   *RowLengths;        /* Array to hold the maximum size string that will fit 
-                             * into DataRows[x].  This is so we can reuse that storage */
-  char **DataRows;          /* Data rows to insert */
+  int    BufSize;           /* Number of bytes allocated to DataBuf */
+  int    DataIdx;           /* Index into DataBuf where the next data is added */
+  char  *DataBuf;           /* Data to insert */
 };
 typedef struct sqlCopy_struct sqlCopy_t, *psqlCopy_t;
 
-psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int UpdateInterval, int NumColumns, ...);
+psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int NumColumns, ...);
 int        fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow);
 int        fo_sqlCopyExecute(psqlCopy_t pCopy);
-psqlCopy_t fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag);
+void       fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag);
 void       fo_sqlCopyPrint(psqlCopy_t pCopy, int PrintRows);
 
 #endif  /* _SQLCOPY_H */
