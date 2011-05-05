@@ -423,7 +423,8 @@ if (array_key_exists("v", $options)) {
 	}
 	print "calling verifyUploads with:$logFile\n";
 	if (!verifyUploads($logFile)) {
-		print "ERROR! verify upload tests had errors, please investigate\n";
+		print "NOTE: One or more verify upload tests had errors, please investigate\n";
+		echo "by running ui/tests/VerifyTests/runVerifyTests.php\n";
 		exit(1);
 	}
 	if (!is_null($rtn = saveResults())) {
@@ -475,6 +476,7 @@ function verifyUploads($logfile) {
 		LogAndPrint($VLF, $noVT);
 	}
 	fclose($VLF);
+	echo "Running runVerifyTests\n";
 	$VerifyLast = exec("./runVerifyTests.php >> $logfile 2>&1", $dummy, $Vrtn);
 	if($Vrtn == 0) {
 		return(TRUE);
