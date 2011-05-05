@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -647,7 +647,8 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
   char *repfile;
   char *filename;
   char SQL[MAXCMD];
-  int rc;
+  int  rc;
+  unsigned long lft, rgt;
   
   FILE *fp;
   char field[MAXCMD];
@@ -656,9 +657,28 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
   char *s = NULL;
   char temp[MAXCMD];
 
-  /* Get the debian/control file's rep path */
-  memset(SQL,0,sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT pfile_fk,ufile_name FROM uploadtree WHERE upload_fk = %ld AND lft > (SELECT lft FROM uploadtree WHERE pfile_fk = %ld AND upload_fk = %ld) AND rgt < (SELECT rgt FROM uploadtree WHERE pfile_fk = %ld AND upload_fk = %ld) AND ufile_name = 'control') TEMP INNER JOIN pfile ON TEMP.pfile_fk = pfile_pk;", upload_pk, pi->pFileFk, upload_pk, pi->pFileFk, upload_pk);
+  /* Get the debian control file's repository path */
+  /* First get the uploadtree bounds (lft,rgt) for the package */
+  snprintf(SQL,sizeof(SQL),"SELECT lft,rgt FROM uploadtree WHERE upload_fk = %ld AND pfile_fk = %ld limit 1",
+           upload_pk, pi->pFileFk);
+  rc = DBaccess(DB,SQL);
+  if (rc < 0)
+  {
+    printf("ERROR %s(%d): %s\n", __FILE__, __LINE__, SQL);
+    fflush(stdout);
+    return FALSE;
+  }
+  if (DBdatasize(DB) == 0)
+  {
+    printf("ERROR Missing debian package (internal data inconsistancy).  %s(%d): %s\n", __FILE__, __LINE__, SQL);
+    fflush(stdout);
+    return FALSE;
+  } 
+  lft = strtoul(DBgetvalue(DB,0,0), NULL, 10);	
+  rgt = strtoul(DBgetvalue(DB,0,1), NULL, 10);	
+
+  snprintf(SQL,sizeof(SQL),"SELECT pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size FROM pfile, uploadtree where (pfile_pk=pfile_fk) and (upload_fk = %ld) AND (lft > %ld) AND (rgt < %ld) AND (ufile_name = 'control')",
+           upload_pk, lft, rgt);
   rc = DBaccess(DB,SQL);
   if (rc < 0)
   {
@@ -675,7 +695,9 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
       fflush(stdout);
       return FALSE;
     }
-  } else {
+  } 
+  else 
+  {
     printf("LOG: Unable to find debian/control file! This file had wrong mimetype, ignore it!\n");
     memset(SQL,0,sizeof(SQL));
     snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_mimetypefk = NULL WHERE pfile_pk = %ld;", pi->pFileFk);
