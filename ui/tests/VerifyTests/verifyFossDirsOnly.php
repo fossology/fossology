@@ -54,7 +54,6 @@ class verifyDirsOnly extends fossologyTestCase
     global $name;
     global $safeName;
 
-    print "starting verifyFossDirsOnly-SetUp\n";
     $name = 'fossDirsOnly.tar.bz2';
     $safeName = escapeDots($name);
     $this->host = getHost($URL);
@@ -124,12 +123,13 @@ class verifyDirsOnly extends fossologyTestCase
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
     $url = makeUrl($this->host, $miniMenu['License Browser']);
-    if($url === NULL) { $this->fail("verifyFossDirsOnly Failed, host is not set"); }
+    if($url === NULL) { $this->fail(
+      "verifyFossDirsOnly Failed, host is not set or mini menu not found"); }
 
     $page = $this->mybrowser->get($url);
     //print "page after get of $url is:\n$page\n";
     $this->assertTrue($this->myassertText($page, '/License Browser/'),
-          "verifyFossDirsOnly FAILED! Nomos License Browser Title not found\n");
+          "verifyFossDirsOnly FAILED! License Browser Title not found\n");
     
     $licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
 		$licSummary->parseLicenseTbl();
@@ -139,7 +139,6 @@ class verifyDirsOnly extends fossologyTestCase
   		$this->assertEqual($licenseSummary[$key], $summary['count'],
   		"verifyFossDirsOnly FAILED! $key does not equal $licenseSummary[$key],
   		got $summary[count]\n");
-			//print "summary is:\n";print_r($summary) . "\n";
 		}
 		
     $dList = new parseLicenseTblDirs($page);
@@ -179,6 +178,7 @@ class verifyDirsOnly extends fossologyTestCase
    function check4Links($folderPath)
    {
     $flistSize = count($folderPath[0]);
+    
     foreach($folderPath as $flist)
     {
       $i = 0;
