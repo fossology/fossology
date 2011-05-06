@@ -2982,9 +2982,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_LT_PERL_3)) {
 	if (!lmem[_fOPENLDAP] && !TRYGROUP(famOPENLDAP)) {
 	    INTERESTING(lDebug ? "Artistic(Perl#3)" : "Artistic");
-	    if (!lmem[_mGPL]) {
-		INTERESTING(lDebug ? "GPL(Perl#3)" : "GPL");
-	    }
 	}
     }
     /*
