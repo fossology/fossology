@@ -1293,6 +1293,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING(lDebug ? "GPL-except-classpath_2" : "GPL-classpath-exception");
 	}
   else
+	if (INFILE(_LT_GPL_EXCEPT_BISON)) {
+	    INTERESTING(lDebug ? "GPL-except-Bison" : "GPL-Bison-exception");
+	}
+  else
 	if (INFILE(_LT_GPL_EXCEPT_1)) {
 	    INTERESTING(lDebug ? "GPL-except-1" : "GPL-exception");
 	}
@@ -1387,7 +1391,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     /*
      * MIT, X11, Open Group, NEC -- text is very long, search in 2 parts
      */
-    if (INFILE(_LT_MIT_1)) {
+    if (INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) {
 	if (INFILE(_LT_MIT_2)) {
 	    if (mCR_X11()) {
 		INTERESTING(lDebug ? "X11(1)" : "X11");
