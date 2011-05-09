@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -492,6 +492,7 @@ void copyright_analyze(copyright copy, FILE* istr)
   /* read the beginning 1M from the file */
   memset(buf, '\0', sizeof(buf));
   bufsize = fread(buf, sizeof(char), sizeof(buf)/sizeof(char), istr);
+  if (bufsize == 0) return;
   buf[bufsize-1] = 0;
 
   /* convert file to lower case and validate any characters */
