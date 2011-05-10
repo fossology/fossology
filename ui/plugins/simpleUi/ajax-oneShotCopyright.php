@@ -99,33 +99,8 @@ class ajax_oneShotCopyright extends FO_Plugin {
       $this->NoHTML = 1;
       /* default header is plain text */
     }
-    /*
-     // Only register with the menu system if the user is logged in.
-     if (!empty($_SESSION['User']))
-     {
-     // Debugging changes to license analysis NOTE: this comment doesn't make sense.
-     if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
-     {
-     menu_insert("Main::Upload::One-Shot Copyright/Email/URL", $this->MenuOrder, $this->Name, $this->MenuTarget);
-     }
-     // Debugging changes to license analysis
-     if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG)
-     {
-     $URI = $this->Name . Traceback_parm_keep(array(
-     "format",
-     "upload",
-     "item"
-     ));
-
-     $text = _("Copyright/Email/URL One-shot, real-time analysis");
-     menu_insert("View::[BREAK]", 100);
-     menu_insert("View::One-Shot Copyright/Email/URL", 101, $URI, $text);
-     menu_insert("View-Meta::[BREAK]", 100);
-     menu_insert("View-Meta::One-Shot Copyright/Email/URL", 101, $URI, $text);
-     }
-     }
-     */
   } // RegisterMenus()
+  
   /*********************************************
   Output(): Generate the text for this plugin.
   *********************************************/
@@ -150,16 +125,11 @@ class ajax_oneShotCopyright extends FO_Plugin {
         /* Display the form */
         $V .= "<form name='oscopyright' enctype='multipart/form-data' method='post'>\n";
         $V .= "<input type='hidden' name='uploadform' value='oneShotCopyright'>\n";
-        $V .= "<ol>\n";
-        $V .= _("<li>Select the file to upload:<br />\n");
+        $selText .= _("Select the file to upload:");
+        $V .= "<br />$selText<br />\n";
         $V .= "<input name='licfile' size='60' type='file' /><br /><br>\n";
-        $text = _("Check if you want to see the highlighted text");
-        $V .= "<li><input type='checkbox' name='highlight' value='1'>$text.\n";
-        $V .= _("Unchecked returns a simple list that summarizes the identified types.");
-        $V .= "<P />\n";
-        $V .= "</ol>\n";
         $V .= "<input type='hidden' name='showheader' value='1'>";
-        $text = _("Analyze");
+        $text = _("Upload and scan");
         $V .= "<input type='submit' value='$text!'>\n";
         $V .= "</form>\n";
         break;
