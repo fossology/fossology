@@ -82,11 +82,13 @@ class verify3filesCopyright extends fossologyTestCase
     // '* Copyright (c) 2002-2004 Sam Leffler, Errno Consulting, Atheros' => 1,
     // Likewise: copyrighted by Affero should be:
     // copyrighted by 278 Affero, Inc.
+    // this string has ossolated between removing the id: and not
+    // 'id: copyright v 1.2 / / : samleffler exp' => 1,
     $copyStd = array(
     'copyright (c) free software foundation inc' => 1,
     'copyright (c) free software foundation inc. made with' => 1,
     'copyright (c) sam leffler errno consulting atheros' => 1,
-    'id: copyright v 1.2 / / : samleffler exp' => 1,
+    'copyright v 1.2 / / : samleffler exp' => 1,
     'copyright (c) <year> <name of author' => 1,
     'copyright affero inc' => 1,
     );
