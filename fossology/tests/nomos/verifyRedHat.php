@@ -67,7 +67,7 @@ class rhelTest extends fossologyTestCase
     'CMU' => 247,
     'FSF' => 176,
     'BSD-style' => 154,
-    'LGPL' => 126,
+    'LGPL' => 127,
     'GPL_v3+' => 76,
     'Apache-possibility' => 62,
     'See-doc(OTHER)' => 28,
@@ -138,8 +138,8 @@ class rhelTest extends fossologyTestCase
     );
 
     $licenseSummary = array(
-      'Unique licenses'        => 71,
-      'Licenses found'         => 3317,
+      'Unique licenses'        => 70,
+      'Licenses found'         => 3316,
       'Files with no licenses' => 6885,
       'Files'                  => 12595
     );
