@@ -270,7 +270,7 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
   int rc;
   FILE *Fin;
 #if 1
-  char WgetArgs[]="--no-check-certificate --progress=dot -rc -np -e robots=off";
+  char WgetArgs[]="--no-check-certificate --progress=dot -rc -np -e robots=off -k";
 #else
   /* wget < 1.10 does not support "--no-check-certificate" */
   char WgetArgs[]="--progress=dot";
@@ -393,6 +393,9 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
       memset(CMD,'\0',MAXCMD);
       if (S_ISDIR(sb.st_mode))
       {
+        snprintf(CMD,MAXCMD-1, "find '%s' -mindepth 1 -type d -empty -exec rmdir {} \\; > /dev/null 2>&1", TempFilePath);
+        system(CMD); // delete all empty directories downloaded
+        memset(CMD,'\0',MAXCMD);
         snprintf(CMD,MAXCMD-1, "tar -cvvf '%s' -C '%s' ./ 2>&1", TempFile, TempFilePath);
       }
       else
@@ -475,7 +478,7 @@ void    SetEnv  (char *S, char *TempFileDir)
   S+=SLen;
 
   while(S[0] && isspace(S[0])) S++; /* skip spaces */
-  strncpy(GlobalParam, S, sizeof(GlobalParam)); // get the parameters, kind of " --accept=rpm --reject=fosso -l 1* "
+  strncpy(GlobalParam, S, sizeof(GlobalParam)); // get the parameters, kind of " -A rpm -R fosso -l 1* "
 #if 1
   printf("  LOG upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s\n  URL=%s  GlobalParam=%s\n",GlobalUploadKey,
   	GlobalUploadKey,GlobalTempFile,GlobalURL,GlobalParam);

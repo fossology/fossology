@@ -88,7 +88,16 @@ $text = _("Failed to insert job record");
     $Accept = preg_replace('/\s*,\s*/', ',', trim($Accept));
     $Reject = preg_replace('/\s*,\s*/', ',', trim($Reject));
     
-    $jq_args = "$uploadpk - $GetURL --accept=$Accept --reject=$Reject -l $Level";
+    $jq_args = "$uploadpk - $GetURL -l $Level ";
+    if (!empty($Accept)) {
+      $jq_args .= "-A $Accept ";
+    }
+    if (!empty($Reject)) { // reject the files index.html*
+      $jq_args .= "-R $Reject,index.html* ";
+    } else // reject the files index.html*
+    {
+      $jq_args .= "-R index.html* ";
+    }
     $jobqueuepk = JobQueueAdd($jobpk, "wget", $jq_args, "no", NULL, NULL);
     if (empty($jobqueuepk)) {
 $text = _("Failed to insert task 'wget' into job queue");
