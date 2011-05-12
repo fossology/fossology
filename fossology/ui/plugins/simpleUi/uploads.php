@@ -435,7 +435,16 @@ class uploads extends FO_Plugin
 
     /* Prepare the job: job "wget" has jobqueue item "wget" */
     /** 2nd parameter is obsolete **/
-    $jq_args = "$uploadpk - $GetURL --accept=$Accept --reject=$Reject -l $Level";
+    $jq_args = "$uploadpk - $GetURL -l $Level ";
+    if (!empty($Accept)) {
+      $jq_args .= "-A $Accept ";
+    }
+    if (!empty($Reject)) { // reject the files index.html*
+      $jq_args .= "-R $Reject,index.html* ";
+    } else // reject the files index.html*
+    {
+      $jq_args .= "-R index.html* ";
+    }
     $jobqueuepk = JobQueueAdd($jobpk, "wget", $jq_args, "no", NULL, NULL);
     if (empty($jobqueuepk))
     {
