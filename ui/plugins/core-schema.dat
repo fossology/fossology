@@ -758,16 +758,6 @@
   $Schema["TABLE"]["jobqueue"]["jq_args"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_args\" DROP NOT NULL;";
   $Schema["TABLE"]["jobqueue"]["jq_args"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["jobqueue"]["jq_length"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_length\" IS 'number of \"items\" to process (file size in K for example) or NULL/0 if unknown';";
-  $Schema["TABLE"]["jobqueue"]["jq_length"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_length\" int4;";
-  $Schema["TABLE"]["jobqueue"]["jq_length"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_length\" SET NOT NULL, ALTER COLUMN \"jq_length\" SET DEFAULT 0;";
-  $Schema["TABLE"]["jobqueue"]["jq_length"]["UPDATE"] = "UPDATE jobqueue SET jq_length=0";
-
-  $Schema["TABLE"]["jobqueue"]["jq_progress"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_progress\" IS '# items processed in same units as jq_length';";
-  $Schema["TABLE"]["jobqueue"]["jq_progress"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_progress\" int4;";
-  $Schema["TABLE"]["jobqueue"]["jq_progress"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_progress\" SET NOT NULL, ALTER COLUMN \"jq_progress\" SET DEFAULT 0;";
-  $Schema["TABLE"]["jobqueue"]["jq_progress"]["UPDATE"] = "UPDATE jobqueue SET jq_progress=0";
-
   $Schema["TABLE"]["jobqueue"]["jq_starttime"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_starttime\" IS 'set this field to indicate job is in progress';";
   $Schema["TABLE"]["jobqueue"]["jq_starttime"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_starttime\" timestamptz;";
   $Schema["TABLE"]["jobqueue"]["jq_starttime"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_starttime\" DROP NOT NULL;";
@@ -778,60 +768,20 @@
   $Schema["TABLE"]["jobqueue"]["jq_endtime"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_endtime\" DROP NOT NULL;";
   $Schema["TABLE"]["jobqueue"]["jq_endtime"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["jobqueue"]["jq_endurl"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_endurl\" IS 'optional URL associated with end of this job, error report for example';";
-  $Schema["TABLE"]["jobqueue"]["jq_endurl"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_endurl\" text;";
-  $Schema["TABLE"]["jobqueue"]["jq_endurl"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_endurl\" DROP NOT NULL;";
-  $Schema["TABLE"]["jobqueue"]["jq_endurl"]["UPDATE"] = "";
-
   $Schema["TABLE"]["jobqueue"]["jq_endtext"]["DESC"] = "";
   $Schema["TABLE"]["jobqueue"]["jq_endtext"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_endtext\" text;";
   $Schema["TABLE"]["jobqueue"]["jq_endtext"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_endtext\" DROP NOT NULL;";
   $Schema["TABLE"]["jobqueue"]["jq_endtext"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_end_bits\" IS 'bitmask(ok=0x1, fail=0x2, nonfatal=0x4)';";
-  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_end_bits\" int2;";
-  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_end_bits\" SET NOT NULL, ALTER COLUMN \"jq_end_bits\" SET DEFAULT 0;";
-  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["UPDATE"] = "UPDATE jobqueue SET jq_end_bits=0";
-
-  $Schema["TABLE"]["jobqueue"]["jq_sqlprogress"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_sqlprogress\" IS 'if set, an SQL query which returns a single value in same units as jq_length whereupon jq_progress is unusued';";
-  $Schema["TABLE"]["jobqueue"]["jq_sqlprogress"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_sqlprogress\" text;";
-  $Schema["TABLE"]["jobqueue"]["jq_sqlprogress"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_sqlprogress\" DROP NOT NULL;";
-  $Schema["TABLE"]["jobqueue"]["jq_sqlprogress"]["UPDATE"] = "";
-
   $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_schedinfo\" IS 'Field for information storage by job scheduler(s) presumably useful for cleanup after failures too';";
   $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_schedinfo\" text;";
   $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_schedinfo\" DROP NOT NULL;";
   $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["jobqueue"]["jq_units"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_units\" IS 'the units name of jq_progress and jq_length';";
-  $Schema["TABLE"]["jobqueue"]["jq_units"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_units\" varchar(32);";
-  $Schema["TABLE"]["jobqueue"]["jq_units"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_units\" DROP NOT NULL;";
-  $Schema["TABLE"]["jobqueue"]["jq_units"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["jobqueue"]["jq_statustime"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_statustime\" IS 'last time the agent gave a progress update, even when progress didn''t change';";
-  $Schema["TABLE"]["jobqueue"]["jq_statustime"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_statustime\" timestamptz;";
-  $Schema["TABLE"]["jobqueue"]["jq_statustime"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_statustime\" DROP NOT NULL;";
-  $Schema["TABLE"]["jobqueue"]["jq_statustime"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["jobqueue"]["jq_elapsedtime"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_elapsedtime\" IS 'Elapsed secs working on jq';";
-  $Schema["TABLE"]["jobqueue"]["jq_elapsedtime"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_elapsedtime\" int4;";
-  $Schema["TABLE"]["jobqueue"]["jq_elapsedtime"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_elapsedtime\" DROP NOT NULL, ALTER COLUMN \"jq_elapsedtime\" SET DEFAULT 0;";
-  $Schema["TABLE"]["jobqueue"]["jq_elapsedtime"]["UPDATE"] = "UPDATE jobqueue SET jq_elapsedtime=0";
-
-  $Schema["TABLE"]["jobqueue"]["jq_processedtime"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_processedtime\" IS 'sum of process times (secs) from all agents';";
-  $Schema["TABLE"]["jobqueue"]["jq_processedtime"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_processedtime\" int4;";
-  $Schema["TABLE"]["jobqueue"]["jq_processedtime"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_processedtime\" DROP NOT NULL, ALTER COLUMN \"jq_processedtime\" SET DEFAULT 0;";
-  $Schema["TABLE"]["jobqueue"]["jq_processedtime"]["UPDATE"] = "UPDATE jobqueue SET jq_processedtime=0";
-
-  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_itemsprocessed\" IS 'sum of files processed by all agents';";
-  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_itemsprocessed\" int4;";
-  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_itemsprocessed\" DROP NOT NULL, ALTER COLUMN \"jq_itemsprocessed\" SET DEFAULT 0;";
-  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["UPDATE"] = "UPDATE jobqueue SET jq_itemsprocessed=0";
-
-  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_repeat\" IS 'Should the job be repeated until no columns are returned? (yes or no)';";
-  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_repeat\" text;";
-  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_repeat\" SET NOT NULL, ALTER COLUMN \"jq_repeat\" SET DEFAULT 'no'::text;";
-  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["UPDATE"] = "UPDATE jobqueue SET jq_repeat='no'::text";
+  
+  $Schema["TABLE"]["jobqueue"]["jq_log"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_log\" IS 'Field that holds the name of the optional log file';";
+  $Schema["TABLE"]["jobqueue"]["jq_log"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_log\" text;";
+  $Schema["TABLE"]["jobqueue"]["jq_log"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_log\" DROP NOT NULL;";
+  $Schema["TABLE"]["jobqueue"]["jq_log"]["UPDATE"] = "";
 
   $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_runonpfile\" IS 'The column name for determining which host to run on';";
   $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_runonpfile\" text;";

@@ -32,9 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <netdb.h>
 #include <unistd.h>
 
-#ifndef DEFAULT_SETUP
-#define DEFAULT_SETUP ""
-#endif
+#include <glibtop/cpu.h>
 
 #define P_WIDTH 25
 
@@ -83,14 +81,6 @@ void interface_usage()
   printf("|%*s:   change the verbose for all agents on a job   |\n", P_WIDTH, "verbose <job id> <level>");
   printf("|%*s:   causes the scheduler to check the job queue  |\n", P_WIDTH, "database");
   printf("+--------------------------------------------------------------------------+\n");
-}
-
-void print(int* a) {
-  int i;
-
-  for(i = 0; i < 4; i++) {
-    printf("%d\n", a[i]);
-  }
 }
 
 /* ************************************************************************** */
