@@ -772,6 +772,11 @@
   $Schema["TABLE"]["jobqueue"]["jq_endtext"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_endtext\" text;";
   $Schema["TABLE"]["jobqueue"]["jq_endtext"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_endtext\" DROP NOT NULL;";
   $Schema["TABLE"]["jobqueue"]["jq_endtext"]["UPDATE"] = "";
+  
+  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_end_bits\" IS 'bitmask(ok=0x1, fail=0x2, nonfatal=0x4)';";
+  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_end_bits\" int2;";
+  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_end_bits\" SET NOT NULL, ALTER COLUMN \"jq_end_bits\" SET DEFAULT 0;";
+  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["UPDATE"] = "UPDATE jobqueue SET jq_end_bits=0";
 
   $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_schedinfo\" IS 'Field for information storage by job scheduler(s) presumably useful for cleanup after failures too';";
   $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_schedinfo\" text;";
