@@ -40,5 +40,6 @@ void database_destroy();
 void database_reset_queue();
 void database_update_event(void* unused);
 void database_update_job(int j_id, job_status status);
+void database_job_log(int j_id, char* log_name);
 
 #endif /* DATABASE_H_INCLUDE */

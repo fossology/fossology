@@ -658,8 +658,7 @@ FILE* job_log(job j)
   file_path = fo_RepMkPath("logs", file_name);
   VERBOSE2("JOB[%d]: job created log file:\n    %s\n", j->id, file_path);
 
-  // TODO enter that the job has created a new file into the database
-
+  database_job_log(j->id, file_path);
   j->log = fo_RepFwrite("logs", file_name);
   free(file_path);
   return j->log;

@@ -71,6 +71,11 @@ const char* jobsql_paused = "\
       SET jq_endtext = 'Paused' \
       WHERE jq_pk = '%d';";
 
+const char* jobsql_log = "\
+    UPDATE jobqueue \
+      SET jq_log = '%s' \
+      WHERE jq_pk = '%d';";
+
 /* ************************************************************************** */
 /* **** local functions ***************************************************** */
 /* ************************************************************************** */
@@ -231,3 +236,25 @@ void database_update_job(int j_id, job_status status)
     PQclear(db_result);
     g_free(sql);
 }
+
+/**
+ * TODO
+ *
+ * @param j_id
+ * @param log_name
+ */
+void database_job_log(int j_id, char* log_name) {
+  gchar* sql = NULL;
+  PGresult* db_result;
+
+  sql = g_strdup_printf(jobsql_log, log_name, j_id);
+  db_result = PQexec(db_conn, sql);
+  if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK) {
+    lprintf("ERROR %s.%d: failed to set the log file to \"%s\" for job %d\n", __FILE__, __LINE__, log_name, j_id);
+    lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
+  }
+  PQclear(db_result);
+  g_free(sql);
+}
+
+
