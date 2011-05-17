@@ -24,7 +24,7 @@
  *
  * Note that data to be inserted is stored in memory (pCopy->DataBuf), 
  * not an external file.  So the caller should give some consideration 
- * to the number of records buffered (UpdateInterval).
+ * to the number of records buffered.
  *
  *\code
  * How to use:
