@@ -15,7 +15,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP = ..
+TOP = ../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
