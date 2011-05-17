@@ -15,8 +15,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  **************************************************************/
 
-/**************************************************************
- * fo_sqlCopy functions
+/*!
  * \file sqlCopy.c
  * \brief sqlCopy buffers sql inserts and performs batch copy's
  *        to the database.  Why do this?  Because this method is 
@@ -27,6 +26,7 @@
  * not an external file.  So the caller should give some consideration 
  * to the number of records buffered (UpdateInterval).
  *
+ *\code
  * How to use:
  * 1. Get an sqlCopy_struct pointer from fo_sqlCopyCreate().
  * 2. Add records you want inserted into a single table in the
@@ -40,26 +40,27 @@
  * 1. fo_sqlCopyExecute() will execute the copy to database immediately.
  * 2. fo_sqlCopyPrint() will print the sqlCopy structure. 
  *    It is good for debugging.
- **************************************************************/
+\endcode
+ */
 
 #include "sqlCopy.h"
 
-/****************************************************
+/*!
  fo_sqlCopyCreate()
 
- Constructor for sqlCopy_struct.  
+ \brief Constructor for sqlCopy_struct.  
 
- @param PGconn *PGconn  Database connection
- @param char   *TableName
- @param int     BufSize  Size of the copy buffer in bytes.
+ \param PGconn *PGconn  Database connection
+ \param char   *TableName
+ \param int     BufSize  Size of the copy buffer in bytes.
                 If BufSize is smaller than needed to hold any
                 single row, then BufSize is automatically increased.
- @param int     NumColumns  number of column names passed in.
- @param ...     char *ColumnNames
+ \param int     NumColumns  number of column names passed in.
+ \param ...     char *ColumnNames
 
- @return sqlCopy_struct
+ \return sqlCopy_struct.
          On failure, ERROR to stdout, return 0
-****************************************************/
+*/
 psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int NumColumns, ...)
 {
   psqlCopy_t pCopy;
@@ -120,25 +121,27 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int Nu
 }  /* End fo_sqlCopyCreate()  */
 
 
-/****************************************************
+/*!
  fo_sqlCopyAdd()
 
- Add a data row to an sqlCopy 
+ \brief Add a data row to an sqlCopy 
  Use '\N' to pass in a null
 
- @param psqlCopy_t Pointer to sqlCopy struct
- @param char *DataRow 
+ \param psqlCopy_t Pointer to sqlCopy struct
+ \param char *DataRow 
 
+\verbatim
  The fields in DataRow needs to be tab delimited.  
  All strings should be escaped with PQescapeStringConn()
 
  For example, to insert a row with two character fields and an
  integer field, DataRow might look like:
-   Mytab\tstring  <tab> string number 2 <tab> 36
+   Mydata<tab>string  <tab> string number 2 <tab> 36
  This could be created by:
    snprintf(buf, sizeof(buf), "%s\t%s\t%d\n", str1, str2, val);
- @return 0 if failure
-****************************************************/
+\endverbatim
+ \return 0 if failure
+*/
 int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
 {
   int NewRowLen;
@@ -176,17 +179,17 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
 }
 
 
-/****************************************************
+/*!
  fo_sqlCopyExecute()
 
- Execute the copy (ie insert the buffered records into the
+ \brief Execute the copy (ie insert the buffered records into the
  database.
  Then reset pCopy (effectively empty it).
 
- @param psqlCopy_t Pointer to sqlCopy struct
+ \param psqlCopy_t Pointer to sqlCopy struct
 
- @return 0 on Failure (with msg), 1 on success.
-****************************************************/
+ \return 0 on Failure (with msg), 1 on success.
+*/
 int fo_sqlCopyExecute(psqlCopy_t pCopy)
 {
   int   RowIdx;
@@ -227,19 +230,19 @@ int fo_sqlCopyExecute(psqlCopy_t pCopy)
 }
 
 
-/****************************************************
+/*!
  fo_sqlCopyDestroy()
 
- Destructor for sqlCopy_struct.  This will execute CopyExecute
+ \brief Destructor for sqlCopy_struct.  This will execute CopyExecute
  if the ExecuteFlag is true and there are records that need
  to be written.
 
- @param psqlCopy_t Pointer to sqlCopy struct
- @param int   ExecuteFlag  0 if DataRows should not be written,
+ \param psqlCopy_t Pointer to sqlCopy struct
+ \param int   ExecuteFlag  0 if DataRows should not be written,
                            1 if DataRows should be written
 
- @return void
-****************************************************/
+ \return void
+*/
 void fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag)
 {
   int RowIdx;
@@ -252,17 +255,17 @@ void fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag)
 }
 
 
-/****************************************************
+/*!
  fo_sqlCopyPrint()
 
- Print the sqlCopy_struct.  
+ \brief Print the sqlCopy_struct.  
  This is used for debugging.
 
- @param psqlCopy_t pCopy Pointer to sqlCopy struct
- @param int PrintBytes   Number of DataBuf bytes to print.
+ \param psqlCopy_t pCopy Pointer to sqlCopy struct
+ \param int PrintBytes   Number of DataBuf bytes to print.
                          If zero, print the whole buffer.
- @return void
-****************************************************/
+ \return void
+*/
 void fo_sqlCopyPrint(psqlCopy_t pCopy, int PrintBytes)
 {
   int idx;
