@@ -1,0 +1,136 @@
+# fossched man page input file
+# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+#
+# VERSION: $Id: foss-scheduler.pod 548 2008-05-03 01:37:52Z rrando $
+#
+
+=head1 NAME
+
+foss-scheduler - The fossology scheduler daemon.  This daemon runs the
+fossogy job input queue and agents.
+
+=head1 SYNOPSIS
+
+/usr/local/fossology/agents/foss-scheduler [options] [setup.conf] < 'type command'
+
+=head1 DESCRIPTION
+
+This is the fossology job scheduler.  When an upload is analyzed by
+fossology it is the scheduler that takes the upload and schedules a
+number of agents to operate on that upload.  The most basic agents do
+things like unpack the archive and store it in the repository and the
+data-base.  Other agents perform tasks like license analysis, and
+meta-data analysis.
+
+The scheduler uses a configuration file to schedule the agents.  This
+allows for flexible scheduling depending on the machines resources
+available.  Usually the agent configuration file is created when
+fossology is installed.  If setup.conf is not specified then
+/usr/local/share/fossology/agents/foss-scheduler.conf is used.
+
+Advanced users or programmers adding agents to the system may need to
+regenerate this file or edit it directly.  A custom file can also be
+used.
+
+setup.conf: defines each engine -- one 'type command' per line
+FIXME: need a better description of 'type command', may need to tweak sked
+doc as well.
+
+stdin lists type+data, one per line.
+
+stdout comes from threads, non-interlaced and only when thread ends.
+
+stderr comes from threads, interlaced and immediate.
+
+Each command is executed as a running engine.
+Each stdin line is matched to a free engine of the same type.
+If no engine is free, then it will pause until one is available.
+
+For a detailed disucssion of foss-scheduler see [[scheduler]] under
+Developer Docs on the fossology home page.
+
+=head2 Options
+
+=over
+
+=item B<-i>
+
+Initialize the database, then exit.
+
+=item B<-k>
+
+Kill all running schedulers (on this system).
+B<-k> kills the foss-scheduler itself.  All other options are ignored.
+
+
+=item B<-d>
+
+Run as a daemon.  This is the standard way of starting the scheduler by hand.
+When invoked as a daemon, B<foss-scheduler> still generates stdout and stderr.
+
+=item B<-H>
+
+Ignore hosts for host-specific agent requests.
+
+=item B<-I>
+
+Use stdin and queue.  The default is to use the queue only.  This option is
+useful if when debugging foss-scheduler itself.
+
+=item B<-v>
+
+verbose (-v -v is more verbose).  This will produce a lot of output that
+can be useful when debugging or trying to see why an agent is dying.  If the
+output is going to a log file, the file can get really large fast.  Plan on
+the appropriate amount of space.
+
+=item B<-L log>
+
+Send stdout and stderr to log.  It is always a good idea to log the
+scheduler output.  Typically this is already done for you when
+fossology is started.  When starting B<foss-scheduler> by hand this
+option should be specified, or there will be no log output, (only to
+stdin/stderr).
+
+
+=item B<-q>
+
+Turn off show stages.  (FIXME: Need a better description)
+
+
+=item B<-R>
+
+Reset the job queue in case something was hung.
+
+=item B<-t>
+
+Test every agent to see if it runs, then quit.
+
+=item B<-T>
+
+Test every agent to see if it runs, then continue if no problems.
+
+=back
+
+=head1 Examples
+
+Stop the scheduler.  Below is the standard way to stop foss-scheduler.  This is
+usually done with sudo.
+
+   sudo /etc/init.d/fossology stop
+
+Start the scheduler, checking the sched.conf file for problems. This is useful
+when changes have been made to the sched.conf file and one wants to verify that
+all agents will run with the new file.
+
+   sudo /usr/local/fossology/agents/foss-scheduler -t
+
+Start the scheduler using a log and verbose
+
+   sudo /usr/local/fossology/agents/foss-scheduler -v -d -L /tmp/foss-scheduler.log
+
+=head1 Author
+
+Neal Krawetz
+
+
