@@ -15,11 +15,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  **************************************************************/
 
-/**************************************************************
- * Common database functions 
- * \file libfossdb.c
- * \brief common libpq database functions
- **************************************************************/
+/*!
+ \file libfossdb.c
+ \brief Common libpq database functions.
+ */
 
 #include "libfossdb.h"
 
@@ -28,10 +27,19 @@
 #endif
 
 
-/*****************************************************
- fo_dbconnect(): Open the DB.
- Returns PGconn*, or NULL on failure.
- *****************************************************/
+/*!
+ fo_dbconnect()
+
+ \brief Open the database with the parameters in
+        file FOSSDB_CONF.  For debugging you can
+        override the config file with the file specified
+        by the environment variable FOSSDBCONF.
+
+ \return PGconn*, or NULL on failure to process the config file.
+
+ \warning If the config file is processed but the PQ connect
+  function fails, this function will write an error message to stdout.
+****************************************************/
 PGconn *fo_dbconnect()
 {
   FILE *Fconf;
@@ -43,12 +51,6 @@ PGconn *fo_dbconnect()
   int C;
   int PosEqual; /* index of "=" in Line */
   int PosSemi;  /* index of ";" in Line */
-
-  /* Normally, this tries to open the file FOSSDB_CONF.
-     This is a compile-time string.
-     However, for debugging you can override the config file
-     with the environment variable "FOSSDBCONF".
-   */
 
   /* Env FOSSDBCONF = debugging override for the config file */
   Env = getenv("FOSSDBCONF");
@@ -122,23 +124,21 @@ PGconn *fo_dbconnect()
 } /* fo_dbconnect() */
  
 
-/****************************************************
+/*!
  fo_checkPQresult
-
- check the result status of a postgres SELECT
+ \brief Check the result status of a postgres SELECT
  If an error occured, write the error to stdout
 
- @param PGconn *pgConn
- @param PGresult *result
- @param char *sql     the sql query
- @param char * FileID is a file identifier string to write into 
+ \param PGconn *pgConn
+ \param PGresult *result
+ \param char *sql     the sql query
+ \param char * FileID is a file identifier string to write into 
                       the error message.  Typically the caller
                       will use __FILE__, but any identifier string
                       is ok.
- @param int LineNumb  the line number of the caller (__LINE__)
+ \param int LineNumb  the line number of the caller (__LINE__)
 
- @return 0 on OK, -1 on failure.
- On failure, result will be freed.
+ \return 0 on OK, -1 on failure.  On failure, result will be freed.
 ****************************************************/
 int fo_checkPQresult(PGconn *pgConn, PGresult *result, char *sql, char *FileID, int LineNumb)
 {
@@ -159,11 +159,10 @@ int fo_checkPQresult(PGconn *pgConn, PGresult *result, char *sql, char *FileID, 
 } /* fo_checkPQresult */
 
 
-/****************************************************
+/*!
  fo_checkPQcommand
-
- check the result status of a postgres commands (not select)
- If an error occured, write the error to stdout
+ @brief Check the result status of a postgres commands (not select)
+        If an error occured, write the error to stdout
 
  @param PGconn *pgConn
  @param PGresult *result
@@ -174,8 +173,7 @@ int fo_checkPQresult(PGconn *pgConn, PGresult *result, char *sql, char *FileID, 
                       is ok.
  @param int LineNumb  the line number of the caller (__LINE__)
 
- @return 0 on OK, -1 on failure.
- On failure, result will be freed.
+ @return 0 on OK, -1 on failure.  On failure, result will be freed.
 ****************************************************/
 int fo_checkPQcommand(PGconn *pgConn, PGresult *result, char *sql, char *FileID, int LineNumb)
 {
