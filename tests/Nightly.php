@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
-/***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+/*
+ Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+*/
 
 /**
  * Nightly test runs of Top of Trunk
@@ -121,102 +121,6 @@ if(array_key_exists('WORKSPACE', $_ENV))
 
 $tonight = new TestRun($path);
 
-// Step 1 update sources
-
-print "removing model.dat file so sources will update\n";
-$modelPath = '/home/fosstester/fossology/agents/copyright_analysis/model.dat';
-//$last = exec("rm $modelPath 2>&1", $output, $rtn);
-$last = exec("rm -f $modelPath ", $output, $rtn);
-
-// if the file doesn't exist, that's OK
-if((preg_match('/No such file or directory/',$last, $matches)) != 1)
-{
-	if($rtn != 0)
-	{
-		$error = "Error, could not remove $modelPath, sources will not update, exiting\n";
-		print $error;
-		reportError($error,NULL);
-		exit(1);
-	}
-}
-print "Updating sources with svn update\n";
-if($tonight->svnUpdate() !== TRUE)
-{
-	$error = "Error, could not svn Update the sources, aborting test\n";
-	print $error;
-	reportError($error,NULL);
-	exit(1);
-}
-
-//TODO: remove all log files as sudo
-
-// Step 2 make clean and make sources
-print "Making sources\n";
-if($tonight->makeSrcs() !== TRUE)
-{
-	$error = "There were Errors in the make of the sources examine make.out\n";
-	print $error;
-	reportError($error,'make.out');
-	exit(1);
-}
-//try to stop the scheduler before the make install step.
-print "Stopping Scheduler before install\n";
-if($tonight->stopScheduler() !== TRUE)
-{
-	$error = "Could not stop fossology-scheduler, maybe it wasn't running?\n";
-	print $error;
-	reportError($error, NULL);
-}
-
-// Step 4 install fossology
-print "Installing fossology\n";
-if($tonight->makeInstall() !== TRUE)
-{
-	$error = "There were Errors in the Installation examine make-install.out\n";
-	print $error;
-	reportError($error, 'mi.out');
-	exit(1);
-}
-
-// Step 5 run the post install process
-/*
- for most updates you don't have to remake the db and license cache.  Need to
- add a -d for turning it off.
- */
-
-print "Running fo-postinstall\n";
-$iRes = $tonight->foPostinstall();
-print "install results are:$iRes\n";
-
-if($iRes !== TRUE)
-{
-
-	$error = "There were errors in the postinstall process check fop.out\n";
-	print $error;
-	print "calling reportError\n";
-	reportError($error, 'fop.out');
-	exit(1);
-}
-
-// Step 6 run the scheduler test to make sure everything is clean
-print "Starting Scheduler Test\n";
-if($tonight->schedulerTest() !== TRUE)
-{
-	$error = "Error! in scheduler test examine ST.out\n";
-	print $error;
-	reportError($error, 'ST.out');
-	exit(1);
-}
-
-print "Starting Scheduler\n";
-if($tonight->startScheduler() !== TRUE)
-{
-	$error = "Error! Could not start fossology-scheduler\n";
-	print $error;
-	reportError($error, NULL);
-	exit(1);
-}
-
 print "Running tests\n";
 $testPath = "$tonight->srcPath" . "/tests";
 print "testpath is:$testPath\n";
@@ -226,16 +130,6 @@ if(!chdir($testPath))
 	print $error;
 	reportError($error);
 	exit(1);
-}
-
-print "Running Unit tests\n";
-
-$unitLast = exec('CUnit/runUnitTests.php > CUnit/log-UnitTests 2>&1',
-$results, $exitVal);
-if($exitVal != 0)
-{
-	print "FAILURES! There were errors in the Unit tests, examine" .
-	      "fossology/tests/Cunit/log-UnitTests\n";
 }
 
 print "Running Functional tests\n";
