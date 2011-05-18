@@ -1,11 +1,11 @@
 # FOSSology Makefile
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
 # pull in all our default variables
 include Makefile.conf
 
 # the directories we do things in by default
-DIRS=devel lib db src agents ui cli common
+DIRS=db src agents ui common
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
@@ -26,9 +26,9 @@ $(BUILDDIRS):
 	$(MAKE) -C $(@:build-%=%)
 
 # high level dependencies:
-# the scheduler and agents need the devel stuff built first
-build-scheduler: build-devel
-build-agents: build-devel
+# the scheduler and agents need the library built first
+build-scheduler: build-src
+build-agents: build-src
 
 # cli needs the php include file built in ui
 build-cli: build-ui
