@@ -18,7 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SCHEDULERCLI_H_INCLUDE
 #define SCHEDULERCLI_H_INCLUDE
 
-typedef struct {
+typedef struct
+{
     int bytes_following;
 } network_header;
 
