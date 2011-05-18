@@ -18,7 +18,7 @@
  ***********************************************************/
 
 /**
- * Nightly test runs of Top of Trunk
+ * Nightly Build and Install of Top of Trunk
  *
  * @param -h
  * @param [ -p <path>] the path to the fossology sources
@@ -31,9 +31,11 @@
  *
  * \todo save the fossology log file and start with a fresh one each night.
  *
+ * This script depends on jenkins environment variables
+ *
  * @version "$Id$"
  *
- * Created on Dec 18, 2008
+ * Created on May 17, 2011
  */
 
 require_once('TestRun.php');
@@ -50,12 +52,12 @@ $path = NULL;
 $options = getopt('hp:');
 if(array_key_exists('h', $options))
 {
-	echo $usage;
-	exit(0);
+  echo $usage;
+  exit(0);
 }
 if(array_key_exists('p', $options))
 {
-	$path = $options['p'];
+  $path = $options['p'];
 }
 
 /**
@@ -70,112 +72,113 @@ if(array_key_exists('p', $options))
  */
 function reportError($error, $file=NULL)
 {
-	global $mailTo;
+  global $mailTo;
 
-	if(is_file($file))
-	{
-		if(is_readable($file))
-		{
-			$longMsg = file_get_contnets($file);
-		}
-		else
-		{
-			$longMsg = "$file was not readable\n";
-		}
-	}
-	else if(strlen($file) != 0)
-	{
-		if(is_string($file))
-		{
-			$longMsg = $file;
-		}
-		else
-		{
-			$longMsg = "Could not append a non-string to the message, " .
+  if(is_file($file))
+  {
+    if(is_readable($file))
+    {
+      $longMsg = file_get_contents($file);
+    }
+    else
+    {
+      $longMsg = "$file was not readable\n";
+    }
+  }
+  else if(strlen($file) != 0)
+  {
+    if(is_string($file))
+    {
+      $longMsg = $file;
+    }
+    else
+    {
+      $longMsg = "Could not append a non-string to the message, " .
 			           "reportError was passed an invalid 2nd parameter\n";
-		}
-	}
+    }
+  }
 
-	$hdr = "There were errors in the nightly test setup." .
+  $hdr = "There were errors in the nightly test setup." .
 	       "The tests were not run due to one or more errors.\n\n";
 
-	$msg = $hdr . $error . "\n" . $longMsg . "\n";
+  $msg = $hdr . $error . "\n" . $longMsg . "\n";
 
-	// mailx will not take a string as the message body... save to a tmp
-	// file and give it that.
+  // mailx will not take a string as the message body... save to a tmp
+  // file and give it that.
 
-	$tmpFile = tempnam('.', 'testError');
-	$F = fopen($tmpFile, 'w') or die("Can not open tmp file $tmpFile\n");
-	fwrite($F, $msg);
-	fclose($F);
-	$last = exec("mailx -s 'test Setup Failed' $mailTo < $tmpFile ",$tossme, $rptGen);
+  $tmpFile = tempnam('.', 'testError');
+  $F = fopen($tmpFile, 'w') or die("Can not open tmp file $tmpFile\n");
+  fwrite($F, $msg);
+  fclose($F);
+  $last = exec("mailx -s 'test Setup Failed' $mailTo < $tmpFile ",$tossme, $rptGen);
 }
 
-// Using the standard source path /home/fosstester/fossology
-
+// check if we are running under jenkins, and if so, use that path
 if(array_key_exists('WORKSPACE', $_ENV))
 {
-	$apath = $_ENV['WORKSPACE'];
-	print "workspaces:\napath:$apath\n";
+  $JenkinsWkSpace = $_ENV['WORKSPACE'];
+  $path = $JenkinsWkSpace;
+  print "workspaces path is:$JenkinsWkSpace\n";
 }
 
 $tonight = new TestRun($path);
 
 // Step 1 update sources
 
-print "removing model.dat file so sources will update\n";
-$modelPath = '/home/fosstester/fossology/agents/copyright_analysis/model.dat';
-//$last = exec("rm $modelPath 2>&1", $output, $rtn);
-$last = exec("rm -f $modelPath ", $output, $rtn);
+/* not sure the code below will be needed with jenkins...
+ print "removing model.dat file so sources will update\n";
+ $modelPath = $WORKSPACE . 'fossology/agents/copyright_analysis/model.dat';
+ //$last = exec("rm $modelPath 2>&1", $output, $rtn);
+ $last = exec("rm -f $modelPath ", $output, $rtn);
 
-// if the file doesn't exist, that's OK
-if((preg_match('/No such file or directory/',$last, $matches)) != 1)
-{
-	if($rtn != 0)
-	{
-		$error = "Error, could not remove $modelPath, sources will not update, exiting\n";
-		print $error;
-		reportError($error,NULL);
-		exit(1);
-	}
-}
-print "Updating sources with svn update\n";
-if($tonight->svnUpdate() !== TRUE)
-{
-	$error = "Error, could not svn Update the sources, aborting test\n";
-	print $error;
-	reportError($error,NULL);
-	exit(1);
-}
-
+ // if the file doesn't exist, that's OK
+ if((preg_match('/No such file or directory/',$last, $matches)) != 1)
+ {
+ if($rtn != 0)
+ {
+ $error = "Error, could not remove $modelPath, sources will not update, exiting\n";
+ print $error;
+ reportError($error,NULL);
+ exit(1);
+ }
+ }
+ print "Updating sources with svn update\n";
+ if($tonight->svnUpdate() !== TRUE)
+ {
+ $error = "Error, could not svn Update the sources, aborting test\n";
+ print $error;
+ reportError($error,NULL);
+ exit(1);
+ }
+ */
 //TODO: remove all log files as sudo
 
 // Step 2 make clean and make sources
 print "Making sources\n";
 if($tonight->makeSrcs() !== TRUE)
 {
-	$error = "There were Errors in the make of the sources examine make.out\n";
-	print $error;
-	reportError($error,'make.out');
-	exit(1);
+  $error = "There were Errors in the make of the sources examine make.out\n";
+  print $error;
+  reportError($error,'make.out');
+  exit(1);
 }
 //try to stop the scheduler before the make install step.
 print "Stopping Scheduler before install\n";
 if($tonight->stopScheduler() !== TRUE)
 {
-	$error = "Could not stop fossology-scheduler, maybe it wasn't running?\n";
-	print $error;
-	reportError($error, NULL);
+  $error = "Could not stop fossology-scheduler, maybe it wasn't running?\n";
+  print $error;
+  reportError($error, NULL);
 }
 
 // Step 4 install fossology
 print "Installing fossology\n";
 if($tonight->makeInstall() !== TRUE)
 {
-	$error = "There were Errors in the Installation examine make-install.out\n";
-	print $error;
-	reportError($error, 'mi.out');
-	exit(1);
+  $error = "There were Errors in the Installation examine make-install.out\n";
+  print $error;
+  reportError($error, 'mi.out');
+  exit(1);
 }
 
 // Step 5 run the post install process
@@ -191,79 +194,29 @@ print "install results are:$iRes\n";
 if($iRes !== TRUE)
 {
 
-	$error = "There were errors in the postinstall process check fop.out\n";
-	print $error;
-	print "calling reportError\n";
-	reportError($error, 'fop.out');
-	exit(1);
+  $error = "There were errors in the postinstall process check fop.out\n";
+  print $error;
+  print "calling reportError\n";
+  reportError($error, 'fop.out');
+  exit(1);
 }
 
 // Step 6 run the scheduler test to make sure everything is clean
 print "Starting Scheduler Test\n";
 if($tonight->schedulerTest() !== TRUE)
 {
-	$error = "Error! in scheduler test examine ST.out\n";
-	print $error;
-	reportError($error, 'ST.out');
-	exit(1);
+  $error = "Error! in scheduler test examine ST.out\n";
+  print $error;
+  reportError($error, 'ST.out');
+  exit(1);
 }
 
 print "Starting Scheduler\n";
 if($tonight->startScheduler() !== TRUE)
 {
-	$error = "Error! Could not start fossology-scheduler\n";
-	print $error;
-	reportError($error, NULL);
-	exit(1);
+  $error = "Error! Could not start fossology-scheduler\n";
+  print $error;
+  reportError($error, NULL);
+  exit(1);
 }
-
-print "Running tests\n";
-$testPath = "$tonight->srcPath" . "/tests";
-print "testpath is:$testPath\n";
-if(!chdir($testPath))
-{
-	$error = "Error can't cd to $testPath\n";
-	print $error;
-	reportError($error);
-	exit(1);
-}
-
-print "Running Unit tests\n";
-
-$unitLast = exec('CUnit/runUnitTests.php > CUnit/log-UnitTests 2>&1',
-$results, $exitVal);
-if($exitVal != 0)
-{
-	print "FAILURES! There were errors in the Unit tests, examine" .
-	      "fossology/tests/Cunit/log-UnitTests\n";
-}
-
-print "Running Functional tests\n";
-/*
- * This fails if run by fosstester as Db.conf is not world readable and the
- * script is not running a fossy... need to think about this...
- *
- */
-$TestLast = exec('./testFOSSology.php -a -e', $results, $rtn);
-print "after running tests the output is\n";
-print_r($results) . "\n";
-
-
-/*
- * At this point should have results, generate the results summary and email it.
- *
- * 10-29-2009: the results are generated in testFOSSology.php and mailed there
- * for now.... it should be done here.
- */
-
-
-/*
- print "Stoping Scheduler\n";
- if($tonight->stopScheduler() !== TRUE)
- {
- print "Error! Could not stop fossology-scheduler\n";
- exit(1);
- }
- */
-
 ?>
