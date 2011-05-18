@@ -1,6 +1,6 @@
 # FOSSology Makefile - lib/libfossology
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
-TOP=..
+TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS)
