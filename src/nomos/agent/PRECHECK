@@ -1,0 +1,221 @@
+#!/bin/sh
+#***************************************************************
+# Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+#***************************************************************
+IN=STRINGS.in
+DATA=_strings.data
+LIST=_split_words
+OUT=/tmp/out$$
+MASTER=/tmp/mast$$
+TEMP=/tmp/temp$$
+C=_precheck.c
+DIR=split.dir
+PASS=checkstr.OK
+SHOW=""
+WORDLIST=""
+#trap "rm -f $OUT $TEMP; rm -rf save$DIR; mv $DIR save$DIR" 0	# for debugging
+trap "rm -f $OUT $MASTER $TEMP; rm -rf $DIR" 0
+#
+[ -f $LIST ] && WORDLIST="$(grep -v "^#" $LIST)"
+case "X$1" in
+	X-*)	PROC=less
+		SHOW="y"
+		shift 1 ;;
+	*)	PROC=cat ;;
+esac
+[ -z "$WORDLIST" ] && WORDLIST="$*"
+TRIES=$#
+rm -f $PASS
+#set -x
+awk -F\	 -v PASS="$PASS" 'BEGIN { f=0; c=1 }
+    /^%ENTRY%	_LT/ { f=1; NAME=$NF }
+    /^%KEY%/ { KEY=$NF }
+    /^%NOCHECK%/ { c=1 }
+    /^%STR%/ {
+        if (f) {
+    	    printf("[%s] %s: ", KEY, NAME);
+	    if ($0 !~ "\\(") {
+	        printf("%s", $0);
+	    }
+	    else {
+     	        N=length($0); x=0;
+	        for (i=1; i<=N; i++) {
+		    X=substr($0, i, 1);
+		    if (X == "(") {
+			    x++;
+		    }
+		    else if (X == ")") {
+			    X = "_";
+			    x--;
+		    }
+		    Y[i] = !x ? X : "_";
+	        }
+	        for (i=1; i<=N; i++) {
+		    printf("%c", Y[i]);
+	        }
+            }
+	    printf("\n");
+            f=0;
+	    if (c) {
+	        cmd = sprintf("echo %s >> %s", NAME, PASS);
+		system(cmd);
+	    }
+	    c=0;
+        }
+    }
+' $IN | sed -e 's/%STR%//g' |
+    tee $TEMP > $DATA
+# cp $TEMP file_1	# for debugging...
+awk -F\	 '
+BEGIN {
+	f=0;
+}
+/^%ENTRY%	_LT/ {
+	f=1;
+	NAME=$NF;
+}
+/^%STR%/ {
+	BUF=$NF;
+	if (f) {
+		printf("%s: ", NAME);
+		if ($NF ~ "[(]") {
+			max = length(BUF);
+			for (i = 1; i <= max; i++) {
+				ch = substr(BUF, i, 1);
+				if (ch == "(") {
+					nest++;
+					printf("_");
+				}
+				else if (ch == ")") {
+					nest--;
+					printf("_");
+				}
+				else if (nest) {
+					printf("_");
+				}
+				else {
+					printf("%c", ch);
+				}
+			}
+			printf("\n");
+		}
+		else {
+			printf("%s\n", $NF);
+		}
+		f=0;
+	}
+}' $IN  | sed -e 's/ =SOME= /________/g' -e 's/ =ANY= /_______/g' \
+       -e 's/ =FEW= /_______/g' | sed -e 's/___*/__/g' > $OUT
+# cp $OUT file_2	# for debugging
+(
+	mkdir $DIR || exit 1
+	cat > $C <<@EOF@
+#include "nomos.h"
+#include "_autodefs.h"
+/*
+ * $(cat ./GenCodeCopyright)
+ *****
+ * This source file was auto-generated $(date)
+ *****
+ * Changes to this file will NOT be kept; the file will be over-written
+ * the next time the license-specifications (./STRINGS.in) change!
+ *****
+ * Words used for pre-check exclusions:
+ */
+#if	0
+$(grep -v "^#" $LIST)
+#endif
+#define	M(x)	ltsr[x] = LTSR_SMASK;
+extern int strGrep();
+#ifdef	PROC_TRACE_SWITCH
+extern struct globals gl;
+#endif	/* PROC_TRACE_SWITCH */
+#ifdef	LTSR_DEBUG
+extern void showLTCache();
+#endif	/* LTSR_DEBUG */
+/* */
+void preloadResults(char *filetext, char *ltsr)
+{
+#if	0
+	int ret;	/* for possible debugging */
+#endif
+/* */
+#ifdef	PROC_TRACE
+#ifdef	PROC_TRACE_SWITCH
+    if (gl.ptswitch)
+#endif	/* PROC_TRACE_SWITCH */
+	printf("== preloadResults(%p, %p, %d, %d)\n", filetext, ltsr);
+#endif	/* PROC_TRACE */
+/* */
+@EOF@
+	rm -f split_[0-9]*
+	printf '*** START: %s license-text strings ***\n' $(wc -l < $OUT)
+	I=1
+	cp $OUT $MASTER
+	for WORD in $WORDLIST ; do
+# make sure the word regex-matches the string and NOT the tag
+		grep -i ".*: .*$WORD" $MASTER > $TEMP
+		WC=$(wc -l < $TEMP)
+		[ $WC -eq 1 ] && P="" || P="s"
+		printf "... \"$WORD\" in %d string$P\n" $WC
+		[ $WC -eq 0 ] && continue
+		FNAME=$(printf "$DIR/split_%02d.%s" $I "$WORD")
+		for i in $(seq 1 $WC) ; do
+			LINE=$(head -n $i $TEMP | tail -1)
+			TAG=$(expr "$LINE" : '\(.*\):')
+##			echo "$LINE" | sed -e 's/.*: //' | grep -iq "$WORD"
+##			if [ $? -ne 0 ]; then
+##				echo "\"$WORD\" is NOT in this line:" 
+##				echo "$LINE"
+##				sed -e "s/$TAG
+##				grep -v $TAG $FNAME > X
+##				mv -f X $FNAME
+##				continue
+##			fi
+			printf "\t\tM(%s);\n" $TAG >> $FNAME
+			grep -Fv "$LINE" $OUT > X
+			mv -f X $OUT
+		done
+		I=$((I+1))
+		cat >> $C <<@EOF@
+	if (!strGrep("$WORD", filetext, REG_ICASE)) {	/* match count $WC */
+#ifdef	LTSR_DEBUG
+		printf("DEBUG: eliminate searches for \"$WORD\"\n");
+#endif	/* LTSR_DEBUG */
+$(fmt $FNAME)
+	}
+#ifdef	LTSR_DEBUG
+	showLTCache("Cache after cuts for \"$WORD\":");
+#endif	/* LTSR_DEBUG */
+@EOF@
+	done 
+	printf "\treturn;\n}\n" >> $C
+	REM=$(wc -l < $OUT)
+	printf '*** DONE: %s strings have no pre-check exclusions ***\n' $REM
+	FNAME=split.OTHER
+	echo "$REM remaining license strings:" > $FNAME
+	sed -e 's/:.*//g' $OUT >> $FNAME
+# The file _autodata.c is always generated before we're called.
+	for WORD in $(tail -n $REM $FNAME) ; do
+		echo "====    ====" >> $FNAME
+		grep "${WORD}=" _autodata.c | grep Phrase >> $FNAME
+		grep "$WORD" $OUT | sed -e "s/$WORD/-->/" >> $FNAME
+	done
+	[ -n "$SHOW" ] && cat $OUT
+) | $PROC
+sed -e "s/^\[.*\] //g" -e "s/^.*: //g" -e 's,",,g' -e 's/[()]//g' -e 's/|/ /g' < $DATA | tr ' ' \\012 | sort | egrep -v '(___|=FEW=|=SOME=|=ANY=)' | sed -e 's/^[ 	]*//g' | uniq -c | sort -nr > words.HISTOGRAM
+exit 0
