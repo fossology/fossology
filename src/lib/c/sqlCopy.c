@@ -50,13 +50,13 @@
 
  \brief Constructor for sqlCopy_struct.  
 
- \param PGconn *PGconn  Database connection
- \param char   *TableName
- \param int     BufSize  Size of the copy buffer in bytes.
+ \param PGconn  Database connection
+ \param TableName
+ \param BufSize  Size of the copy buffer in bytes.
                 If BufSize is smaller than needed to hold any
                 single row, then BufSize is automatically increased.
- \param int     NumColumns  number of column names passed in.
- \param ...     char *ColumnNames
+ \param NumColumns  number of column names passed in.
+ \param ...     Variable char *ColumnNames
 
  \return sqlCopy_struct.
          On failure, ERROR to stdout, return 0
@@ -127,8 +127,8 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int Nu
  \brief Add a data row to an sqlCopy 
  Use '\N' to pass in a null
 
- \param psqlCopy_t Pointer to sqlCopy struct
- \param char *DataRow 
+ \param pCopy Pointer to sqlCopy struct
+ \param DataRow Row to insert
 
 \verbatim
  The fields in DataRow needs to be tab delimited.  
@@ -186,7 +186,7 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
  database.
  Then reset pCopy (effectively empty it).
 
- \param psqlCopy_t Pointer to sqlCopy struct
+ \param pCopy  Pointer to sqlCopy struct
 
  \return 0 on Failure (with msg), 1 on success.
 */
@@ -237,8 +237,8 @@ int fo_sqlCopyExecute(psqlCopy_t pCopy)
  if the ExecuteFlag is true and there are records that need
  to be written.
 
- \param psqlCopy_t Pointer to sqlCopy struct
- \param int   ExecuteFlag  0 if DataRows should not be written,
+ \param pCopy Pointer to sqlCopy struct
+ \param ExecuteFlag  0 if DataRows should not be written,
                            1 if DataRows should be written
 
  \return void
@@ -261,8 +261,8 @@ void fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag)
  \brief Print the sqlCopy_struct.  
  This is used for debugging.
 
- \param psqlCopy_t pCopy Pointer to sqlCopy struct
- \param int PrintBytes   Number of DataBuf bytes to print.
+ \param pCopy Pointer to sqlCopy struct
+ \param PrintBytes   Number of DataBuf bytes to print.
                          If zero, print the whole buffer.
  \return void
 */

@@ -17,16 +17,33 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ***************************************************************/
+
+/*!
+ * \file libfossagent.c
+ * \brief libfossagent.c contains general use functions for agents.
+ */
+
 #include "libfossology.h"
 
 #define FUNCTION
 
 
-/*********************************************************
- GetAgentKey(): Get the Agent Key from the database.
- Upload_pk is only used for error reporting.
- *********************************************************/
-FUNCTION int fo_GetAgentKey(PGconn *pgConn, char * agent_name, long Upload_pk, char *svn_rev, char *agent_desc)
+/*!
+ GetAgentKey() 
+ \brief Get the latest enabled agent key (agent_pk) from the database.
+
+ \param pgConn Database connection object pointer.
+ \param agent_name Name of agent to look up.
+ \param Upload_pk is only used for error reporting.
+ \param rev agent revision, if given this is the exact revision of the agent being requested.
+ \param agent_desc Description of the agent.  Used to write a new agent record in the
+                   case where no enabled agent records exist for this agent_name.
+ \return On success return agent_pk.  On sql failure, return 0, and the error will be
+         written to stdout.
+ \todo This function is not checking if the agent is enabled.  And it is not setting 
+       agent version when an agent record is inserted.
+ */
+FUNCTION int fo_GetAgentKey(PGconn *pgConn, char * agent_name, long Upload_pk, char *rev, char *agent_desc)
 {
   int rc;
   int Agent_pk=-1;    /* agent identifier */
