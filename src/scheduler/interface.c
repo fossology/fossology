@@ -40,11 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <glib.h>
 #include <gio/gio.h>
 
-#ifndef FIFO_LOCATION
-#define FIFO_LOCATION "/usr/local/share/fossology/scheduler.fifo"
-#endif
-
-#define FIFO_PERMISSIONS    666  ///< the permissions given to the fifo
+#define FIELD_WIDTH 10
 
 int i_created = 0;      ///< flag indicating if the interface already been created
 int i_terminate = 0;    ///< flag indicating if the interface has been killed
@@ -52,6 +48,8 @@ int i_port = -1;        ///< the port that the scheduler is listening on
 GThread* socket_thread; ///< thread that will create new connections
 GList* client_threads;  ///< threads that are currently running some form of scheduler interface
 GCancellable* cancel;   ///< used to shut down all interfaces when closing the scheudler
+
+#define netw g_output_stream_write
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
