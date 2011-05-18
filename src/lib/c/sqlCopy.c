@@ -46,8 +46,6 @@
 #include "sqlCopy.h"
 
 /*!
- fo_sqlCopyCreate()
-
  \brief Constructor for sqlCopy_struct.  
 
  \param PGconn  Database connection
@@ -122,8 +120,6 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int Nu
 
 
 /*!
- fo_sqlCopyAdd()
-
  \brief Add a data row to an sqlCopy 
  Use '\N' to pass in a null
 
@@ -180,8 +176,6 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
 
 
 /*!
- fo_sqlCopyExecute()
-
  \brief Execute the copy (ie insert the buffered records into the
  database.
  Then reset pCopy (effectively empty it).
@@ -231,8 +225,6 @@ int fo_sqlCopyExecute(psqlCopy_t pCopy)
 
 
 /*!
- fo_sqlCopyDestroy()
-
  \brief Destructor for sqlCopy_struct.  This will execute CopyExecute
  if the ExecuteFlag is true and there are records that need
  to be written.
@@ -256,8 +248,6 @@ void fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag)
 
 
 /*!
- fo_sqlCopyPrint()
-
  \brief Print the sqlCopy_struct.  
  This is used for debugging.
 

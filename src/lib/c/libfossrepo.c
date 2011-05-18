@@ -17,6 +17,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
  ************************************************************/
+
+/*!
+ * \file libfossrepo.c
+ * \brief Repository access functions.  All internal functions are prefixed by '_'.
+ */
+
 #include "libfossrepo.h"
 
 #include <sys/stat.h>
@@ -49,14 +55,17 @@ char RepPath[MAXLINE+1]="";
 #define REPCONFCHECK()	{ if (RepConfig==NULL) fo_RepOpen(); }
 
 
-/***********************************************
- @brief _RepCheckType(): Simple check to see if the string
- is valid.  Used for types, hostnames, and filenames.
- (Just like _RepCheckString, except dots are not allowed.)
+/*!
  This is an internal function.
- @param char *string to check
- @return Returns: 1=valid, 0=invalid.
- ***********************************************/
+
+ \brief Simple check to see if the string S is valid filename.  
+ \n A valid name is composed of only alphnumerics, and "&%_=+-"
+ \n Used for types, hostnames, and filenames.
+ \n (Just like _RepCheckString, except dots are not allowed.)
+
+ \param S string to check
+ \return  1=valid, 0=invalid.
+ */
 int	_RepCheckType	(char *S)
 {
   int i;
@@ -68,13 +77,16 @@ int	_RepCheckType	(char *S)
   return(1);
 } /* _RepCheckType() */
 
-/***********************************************
- @brief _RepCheckString(): Simple check to see if the string
- is valid.  Used for types, hostnames, and filenames.
+/*!
  This is an internal function.
- @param char *string to check
- @return Returns: 1=valid, 0=invalid.
- ***********************************************/
+
+ \brief Simple check to see if the string is valid.  
+ \n Valid strings only contain alpanumerics, and "@%_.=+-".
+ \n Used for types, hostnames, and filenames.
+
+ \param S string to check
+ \return 1=valid, 0=invalid.
+ */
 int	_RepCheckString	(char *S)
 {
   int i;
@@ -87,12 +99,12 @@ int	_RepCheckString	(char *S)
   return(1);
 } /* _RepCheckString() */
 
-/***********************************************
- @brief fo_RepGetRepPath(): Determine the path for the repository's root.
- The RepPath is where all the repository mounts are located.
+/*!
+ \brief Determine the path for the repository's root.
+ \n The RepPath is where all the repository mounts are located.
  The path should NOT end with a "/".
- @return Allocates and returns string with path or NULL.
- ***********************************************/
+ \return Allocates and returns string with the repo root path, or NULL.
+ */
 char *	fo_RepGetRepPath	()
 {
   char *MyRepPath=NULL;
@@ -105,12 +117,12 @@ char *	fo_RepGetRepPath	()
   return(MyRepPath);
 } /* fo_RepGetRepPath() */
 
-/***********************************************
- @brief fo_RepHostExist(): Determine if a host exists.
- @param char *Type This is the repo type (files, gold, ununpack, ...)
- @param char *Host Host to check
- @return Returns 1=exists, 0=not exists, -1 on error.
- ***********************************************/
+/*!
+ \brief Determine if a host exists.
+ \param Type This is the repo type (files, gold, ununpack, ...)
+ \param Host Host to check
+ \return 1=exists, 0=not exists, -1 on error.
+ */
 int	fo_RepHostExist	(char *Type, char *Host)
 {
   char LineHost[MAXHOSTNAMELEN];
@@ -171,15 +183,18 @@ int	fo_RepHostExist	(char *Type, char *Host)
   return(0);
 } /* fo_RepHostExist() */
 
-/***********************************************
- @brief _RepGetHost(): Determine the host for the tree.
+/*!
+ \brief Determine the host for the tree.
+
  This is an internal only function.
- @param char *Type is the type of data.
- @param char *Filename is the filename to match.
- @param int MatchNum used to identify WHICH match to return.
- (MatchNum permits fallback paths.)
- @return Allocates and returns string with hostname or NULL.
- ***********************************************/
+
+ \param Type is the type of data.
+ \param Filename is the filename to match.
+ \param MatchNum used to identify WHICH match to return.
+        (MatchNum permits fallback paths.)
+
+ \return Allocates and returns string with hostname or NULL.
+ */
 char *	_RepGetHost	(char *Type, char *Filename, int MatchNum)
 {
   char LineHost[MAXHOSTNAMELEN];
@@ -250,33 +265,35 @@ char *	_RepGetHost	(char *Type, char *Filename, int MatchNum)
   return(NewHost);
 } /* _RepGetHost() */
 
-/***********************************************
- @brief fo_RepGetHost(): Determine the host for the tree.
- @param char *Type is the type of data.
- @param char *Filename is the filename to match.
- @return Allocates and returns string with hostname or NULL.
+/*!
+ \brief Determine the host for a filename.
+
+ \param Type is the type of data.
+ \param Filename is the filename to match.
+ \return Allocates and returns string with hostname or NULL.
+
  Test with standalone:
- ./rephost files 00000cb69c3c9c9fd15cadbf4652bd1552c349de.6caae94bdb579d7c9ada36726cf2e97f.776
- ***********************************************/
+ \n./rephost files 00000cb69c3c9c9fd15cadbf4652bd1552c349de.6caae94bdb579d7c9ada36726cf2e97f.776
+ */
 char *	fo_RepGetHost	(char *Type, char *Filename)
 {
   return(_RepGetHost(Type,Filename,0));
 } /* fo_RepGetHost() */
 
-/***********************************************
- @brief fo_RepMkPathTmp(): Given a filename, construct the full
- path to the file.
- @param char *Type is the type of data.
- @param char *Filename 
- @param char *Ext is an optional extension (for making temporary files).
- @param int Which is used to identify WHICH match to return.
+/*!
+ \brief Given a filename, construct the full path to the file.
+ \param Type is the type of data.
+ \param Filename 
+ \param Ext is an optional extension (for making temporary files).
+ \param Which is used to identify WHICH match to return.
 
- @return Allocates and returns a string.
  This does NOT make the actual file or modify the file system!
- Caller must free the string!
- Test with standalone:
- ./reppath files 00000cb69c3c9c9fd15cadbf4652bd1552c349de.6caae94bdb579d7c9ada36726cf2e97f.776
- ***********************************************/
+ \n Caller must free the string!
+ \n Test with standalone:
+ \n ./reppath files 00000cb69c3c9c9fd15cadbf4652bd1552c349de.6caae94bdb579d7c9ada36726cf2e97f.776
+
+ \return Allocates and returns a string or NULL on error.
+ */
 char *	fo_RepMkPathTmp	(char *Type, char *Filename, char *Ext, int Which)
 {
   char *Path;
@@ -355,17 +372,17 @@ char *	fo_RepMkPathTmp	(char *Type, char *Filename, char *Ext, int Which)
   return(Path);
 } /* fo_RepMkPathTmp() */
 
-/***********************************************
- @brief fo_RepMkPath(): Given a filename, construct the full
- path to the file.
- @param char *Type is the type of data.
- @param char *Filename 
- @return Allocates and returns a string.
+/*!
+ \brief Given a filename, construct the full path to the file.
+ \param Type is the type of data.
+ \param Filename  filename
+
  This does NOT make the actual file or modify the file system!
- Caller must free the string!
- NOTE: This scans for alternate file locations, in case
- the file exists.
- ***********************************************/
+ \n Caller must free the string!
+
+ \return Allocates and returns a string.
+ \note This scans for alternate file locations, in case the file exists.
+ */
 char *	fo_RepMkPath	(char *Type, char *Filename)
 {
   char *Path, *AltPath;
@@ -392,14 +409,16 @@ char *	fo_RepMkPath	(char *Type, char *Filename)
   return(Path);
 } /* fo_RepMkPath() */
 
-/***********************************************
- @brief _RepUpdateTime(): Every file access (read/write) should update
- the timestamp on the file.  This allows us to determine
- when files are stale.
+/*!
+ \brief Update the last modified time of a file.
+        Every file access (read/write) should update the timestamp on the file.  
+        This allows us to determine when files are stale.
+
  Internal only function.
- @param char *File
- @return none
- ***********************************************/
+
+ \param File file name
+ \return none
+ */
 void	_RepUpdateTime	(char *File)
 {
   struct utimbuf Utime;
@@ -407,12 +426,13 @@ void	_RepUpdateTime	(char *File)
   utime(File,&Utime);
 } /* _RepUpdateTime() */
 
-/***************************************************
- @brief _RepMkDirs(): Same as command-line "mkdir -p".
+/*!
+ \brief Same as command-line "mkdir -p".
+
  Internal only.
- @param char *filename
- @reutrn Returns 0 on success, 1 on failure.
- ***************************************************/
+ \param Fname filename
+ \return 0 on success, 1 on failure.
+ */
 int	_RepMkDirs	(char *Fname)
 {
   char Dir[FILENAME_MAX+1];
@@ -452,13 +472,13 @@ int	_RepMkDirs	(char *Fname)
   return(rc);
 } /* _RepMkDirs() */
 
-/***********************************************
- @brief fo_RepRenameTmp(): Rename a temp file to a real file.
- @param char *Type is the type of data.
- @param char *Filename 
- @param char *Ext is an optional extension (for making temporary files).
- @return Returns 0 on succes, !0 on error.
- ***********************************************/
+/*!
+ \brief Rename a temp file to a real file.
+ \param Type is the type of data.
+ \param Filename 
+ \param Ext is an optional extension (for making temporary files).
+ \return 0 on succes, !0 on error.
+ */
 int	fo_RepRenameTmp	(char *Type, char *Filename, char *Ext)
 {
   char *FnameOld, *Fname;
@@ -478,14 +498,16 @@ int	fo_RepRenameTmp	(char *Type, char *Filename, char *Ext)
   return(rc);
 } /* fo_RepRenameTmp() */
 
-/***********************************************
- @brief fo_RepExist(): Determine if a file exists.
- @param char *Type is the type of data.
- @param char *Filename 
- @return Returns 1=exists, 0=not exists, -1 on error.
+/*!
+ \brief Determine if a file exists.
+
  Test with standalone:
- ./repexist files 00000cb69c3c9c9fd15cadbf4652bd1552c349de.6caae94bdb579d7c9ada36726cf2e97f.776
- ***********************************************/
+ \n ./repexist files 00000cb69c3c9c9fd15cadbf4652bd1552c349de.6caae94bdb579d7c9ada36726cf2e97f.776
+
+ \param Type is the type of data.
+ \param Filename 
+ \return 1=exists, 0=not exists, -1 on error.
+ */
 int	fo_RepExist	(char *Type, char *Filename)
 {
   char *Fname;
@@ -514,13 +536,15 @@ int	fo_RepExist	(char *Type, char *Filename)
   return(rc);
 } /* fo_RepExist() */
 
-/***********************************************
- @brief fo_RepRemove(): Delete a repository file.
- NOTE: This will LEAVE empty directories!
- @param char *Type is the type of data.
- @param char *Filename 
- @return Returns 0=deleted, !0=error from unlink().
- ***********************************************/
+/*!
+ \brief Delete a repository file.
+
+ \param Type is the type of data.
+ \param Filename 
+ \return 0=deleted, !0=error from unlink().
+
+ \note This will LEAVE empty directories!
+ */
 int	fo_RepRemove	(char *Type, char *Filename)
 {
   char *Fname;
@@ -549,23 +573,23 @@ int	fo_RepRemove	(char *Type, char *Filename)
   return(rc);
 } /* fo_RepRemove() */
 
-/***********************************************
- @brief fo_RepFclose(): Perform a fclose.
- @param FILE *Filehandle
- @return 0 if success or null file pointer else EOF
- ***********************************************/
+/*!
+ \brief Perform an fclose.
+ \param F Filehandle
+ \return 0 if success.  On error, EOF is returned and global errno is set. 
+ */
 int	fo_RepFclose	(FILE *F)
 {
   if (!F) return(0);
   return(fclose(F));
 } /* fo_RepFclose() */
 
-/***********************************************
- @brief fo_RepFread(): Perform an fopen for reading only.
- @param char *Type is the type of data.
- @param char *Filename 
- @return Returns FILE pointer, or NULL if file does not exist.
- ***********************************************/
+/*!
+ \brief Perform an fopen for reading only.
+ \param Type is the type of data.
+ \param Filename 
+ \return FILE pointer, or NULL if file does not exist.
+ */
 FILE *	fo_RepFread	(char *Type, char *Filename)
 {
   FILE *F=NULL;
@@ -594,13 +618,13 @@ FILE *	fo_RepFread	(char *Type, char *Filename)
   return(F);
 } /* fo_RepFread() */
 
-/***********************************************
- @brief fo_RepFwriteTmp(): Perform an fwrite.  Also creates directories.
- @param char *Type is the type of data.
- @param char *Filename 
- @param char *Ext is an optional extension (for making temporary files).
- @return Returns FILE pointer, or NULL if it fails.
- ***********************************************/
+/*!
+ \brief Perform an fwrite.  Also creates directories.
+ \param Type is the type of data.
+ \param Filename 
+ \param Ext is an optional extension (for making temporary files).
+ \return FILE pointer, or NULL if it fails.
+ */
 FILE *	fo_RepFwriteTmp	(char *Type, char *Filename, char *Ext)
 {
   FILE *F=NULL;
@@ -655,23 +679,23 @@ FILE *	fo_RepFwriteTmp	(char *Type, char *Filename, char *Ext)
   return(F);
 } /* fo_RepFwriteTmp() */
 
-/***********************************************
- @brief fo_RepFwrite(): Perform an fwrite.  Also creates directories.
+/*!
+ \brief Perform an fwrite.  Also creates directories.
  Same as fo_RepFwriteTmp but without ext.
- @param char *Type is the type of data.
- @param char *Filename 
- @return Returns FILE pointer, or NULL if it fails.
- ***********************************************/
+ \param Type is the type of data.
+ \param Filename 
+ \return FILE pointer, or NULL if it fails.
+ */
 FILE *	fo_RepFwrite	(char *Type, char *Filename)
 {
   return(fo_RepFwriteTmp(Type,Filename,NULL));
 } /* fo_RepFwrite() */
 
-/***********************************************
- @brief fo_RepMunmap(): Perform a munmap.
+/*!
+ \brief Perform a munmap.
  This frees the struct RepMmap.
- @param RepMmapStruct *M
- ***********************************************/
+ \param M RepMmapStruct pointer
+ */
 void	fo_RepMunmap	(RepMmapStruct *M)
 {
   if (!M) return;
@@ -680,11 +704,11 @@ void	fo_RepMunmap	(RepMmapStruct *M)
   free(M);
 } /* fo_RepMunmap() */
 
-/***********************************************
- @brief fo_RepMmapFile(): Perform a mmap on a regular file name.
- @param char *Filename
- @return Returns filled RepMmapStruc, or NULL on error.
- ***********************************************/
+/*!
+ \brief Perform a mmap on a regular file name.
+ \param Filename
+ \return filled RepMmapStruc, or NULL on error.
+ */
 RepMmapStruct *	fo_RepMmapFile	(char *Fname)
 {
   RepMmapStruct *M;
@@ -729,13 +753,13 @@ RepMmapStruct *	fo_RepMmapFile	(char *Fname)
   return(M);
 } /* fo_RepMmapFile() */
 
-/***********************************************
- @brief fo_RepMmap(): Perform a mmap.
- NOTE: This only works for READ-ONLY files!
- @param char *Type is the type of data.
- @param char *Filename is the filename to match.
- @return Returns an allocated struct RepMmap.
- ***********************************************/
+/*!
+ \brief Perform a mmap.
+ \param Type is the type of data.
+ \param Filename is the filename to match.
+ \return an allocated struct RepMmap.
+ \note This only works for READ-ONLY files!
+ */
 RepMmapStruct *	fo_RepMmap	(char *Type, char *Filename)
 {
   RepMmapStruct *M;
@@ -752,15 +776,15 @@ RepMmapStruct *	fo_RepMmap	(char *Type, char *Filename)
   return(M);
 } /* fo_RepMmap() */
 
-/***********************************************
- @brief fo_RepImport(): Import a file into the repository.
+/*!
+ \brief Import a file into the repository.
  This is a REALLY FAST copy.
- @param char *Source source filename
- @param char *Type is the type of data.
- @param char *Filename is the destination filename
- @param int  Link, true if this should be a hardlink instead of a copy
- @return Returns: 0=success, !0 for error.
- ***********************************************/
+ \param Source source filename
+ \param Type is the type of data.
+ \param Filename is the destination filename
+ \param Link, true if this should be a hardlink instead of a copy
+ \return 0=success, !0 for error.
+ */
 int	fo_RepImport	(char *Source, char *Type, char *Filename, int Link)
 {
   /*** code uses read/write ***/
@@ -839,12 +863,9 @@ int	fo_RepImport	(char *Source, char *Type, char *Filename, int Link)
   return(0);
 } /* fo_RepImport() */
 
-/***********************************************
- @brief fo_RepClose(): Every other function uses the repository
- configuration files.  Why open them 100,000 times when
- it can be opened once and stored in RAM?
- This unsets structures.
- ***********************************************/
+/*!
+ \brief Close and unmap the repository configuration file.
+ */
 void	fo_RepClose	()
 {
   RepDepth = 2; /* default depth */
@@ -857,13 +878,13 @@ void	fo_RepClose	()
     }
 } /* fo_RepClose() */
 
-/***********************************************
- @brief fo_RepOpen(): Every other function uses the repository
+/*!
+ \brief Every other function uses the repository
  configuration files.  Why open them 100,000 times when
  it can be opened once and stored in RAM?
  This sets global structures.
- @return Returns: 1 on opened, 0 on failed.
- ***********************************************/
+ \return 1 on opened, 0 on failed.
+ */
 int	fo_RepOpen	()
 {
   char CWD[PATH_MAX+1];
@@ -908,7 +929,7 @@ int	fo_RepOpen	()
     if (chdir(FOSSREPO_CONF)) return(0); /* no directory */
     }
 
-  /** I'm in the config directory. **/
+  /* I'm in the config directory. */
   /* Map the host file to a global. */
   RepConfig = fo_RepMmapFile("Hosts.conf");
 
