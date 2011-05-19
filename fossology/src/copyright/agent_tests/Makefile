@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -18,13 +18,19 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
+LOCALAGENTDIR=../agent
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I../ -lpcre -lcunit
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lpcre -lcunit
 EXE = test_copyright
 
 OBJECTS = test_cvector.o \
           test_copyright.o \
           test_radixtree.o \
+
+COVERAGE = copyright_cov.o \
+           cvector_cov.o \
+           radixtree_cov.o \
+           pair_cov.o \
 
 all: $(EXE)
 
@@ -32,22 +38,38 @@ test: $(EXE)
 	./$(EXE)
 
 coverage: $(OBJECTS) libcopyright_cov.a run_tests.c
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) ../libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
 	./$(EXE)
-	lcov --directory  ../   --capture --output-file cov.txt; \
+	lcov --directory  $(LOCALAGENTDIR)/   --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
 $(EXE): $(OBJECTS) libcopyright.a run_tests.c
-	$(CC) run_tests.c -o $@ $(OBJECTS) ../libcopyright.a $(CFLAGS_LOCAL)
+	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(CFLAGS_LOCAL)
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
 libcopyright.a:
-	$(MAKE) -C ../ $@
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
-libcopyright_cov.a:
-	$(MAKE) -C ../ $@
+libcopyright_cov.a: $(COVERAGE)
+    ar cvr $@ $(COVERAGE)
+
+########################
+# coverage build rules #
+########################
+copyright_cov.o: $(LOCALAGENTDIR)/copyright.c $(LOCALAGENTDIR)/copyright.h $(LOCALAGENTDIR)/cvector.h $(LOCALAGENTDIR)/radixtree.h
+    $(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $(DEF) -o $@
+
+cvector_cov.o: $(LOCALAGENTDIR)/cvector.c $(LOCALAGENTDIR)/cvector.h
+    $(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
+
+radixtree_cov.o: $(LOCALAGENTDIR)/radixtree.c $(LOCALAGENTDIR)/radixtree.h
+    $(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
+
+pair_cov.o:  $(LOCALAGENTDIR)/pair.c $(LOCALAGENTDIR)/pair.h $(LOCALAGENTDIR)/cvector.h
+    $(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
+
 
 clean:
 	rm -rf $(EXE) *.o *.g *.xml *.txt *.gcda *.gcno results

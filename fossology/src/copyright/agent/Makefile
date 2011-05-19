@@ -19,47 +19,38 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpcre
+CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpq -lpcre
 DEF = -DDATADIR='"$(DATADIR)"'
 
 EXE = copyright
-TESTDIR = tests
+TESTDIR = ../agent_tests
 
 OBJECTS  = copyright.o \
            cvector.o \
 		   radixtree.o \
 		   pair.o \
 
-COVERAGE = copyright_cov.o \
-           cvector_cov.o \
-           radixtree_cov.o \
-           pair_cov.o \
-
 ##########################
 # executable build rules #
 ##########################
-		 
-all: $(EXE)
+$(EXE): main.c $(FOLIB) $(FOLIB) $(VARS) $(OBJECTS)
+	$(CC) main.c $(FOLIB) $(OBJECTS) $(DEF) $(CFLAGS_LOCAL) -o $@
 
-test: $(OBJECTS)
+all: $(EXE) test
+
+test: 
 	$(MAKE) -C $(TESTDIR) test
-
-coverage: $(COVERAGE)
 	$(MAKE) -C $(TESTDIR) coverage
-
-$(EXE): main.c libcopyright.a $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) main.c libcopyright.a $(DEF) $(CFLAGS_LOCAL) -o $@
 	
 #######################
-# library buidl rules #
+# library build rules #
 #######################
+$(FOLIB):
+	$(MAKE) -C $(FOLIBDIR)
 
 libcopyright.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
 	
-libcopyright_cov.a: $(COVERAGE)
-	ar cvr $@ $(COVERAGE)
-
 ######################
 # object build rules #
 ######################
@@ -76,21 +67,6 @@ radixtree.o: %.o: %.c %.h
 pair.o: %.o: %.c %.h cvector.h
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
-########################
-# coverage build rules #
-########################
-
-copyright_cov.o: copyright.c copyright.h cvector.h radixtree.h
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $(DEF) -o $@
-
-cvector_cov.o: cvector.c cvector.h
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
-
-radixtree_cov.o: radixtree.c radixtree.h
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
-
-pair_cov.o:  pair.c pair.h cvector.h
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
 #######################
 # install build rules #
@@ -114,11 +90,9 @@ uninstall:
 #####################
 
 clean:
-	rm -f *.o *.gcno *.gcda *.a $(EXE)
-	rm -f False_Positives False_Negatives Matches Found
-	$(MAKE) -C tests/ clean
+	rm -f *.o *.a $(EXE)
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean test $(FOLIB)
 	

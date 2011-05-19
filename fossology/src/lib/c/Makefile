@@ -17,7 +17,7 @@ $(LIB): $(OBJS) $(VARS)
 #	$(CC) -c $< $(CONFDEF) -fPIC $(ALL_CFLAGS)
 
 $(EXE): %: %.c $(LIB) $(VARS)
-	$(CC) $< $(ALL_CFLAGS) -lpq -o $@
+	$(CC) $< $(ALL_CFLAGS) $(LIB) -lpq -o $@
 
 %.o: %.c %.h
 	$(CC) -c $< $(CONFDEF)  -I`pg_config --includedir` -fPIC 
