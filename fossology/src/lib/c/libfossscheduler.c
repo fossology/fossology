@@ -16,12 +16,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 ***************************************************************/
 
-/***************************************************************
- * @brief Common C agent functions
- *
- * This file contains common C agent funcitons and the 
- * API for working with the scheduler.
-***************************************************************/
+/*!
+ * \file libfossscheduler.c
+ * \brief Scheduler API for agents.
+*/
 
 /* local includes */
 #include "libfossscheduler.h"
@@ -49,7 +47,7 @@ int  found;             ///< if the agent is even connected to the scheduler
 int verbose;
 
 /**
- * @brief fo_heartbeat() isn an internal function to send a heartbeat to the 
+ * @brief Internal function to send a heartbeat to the 
  * scheduler along with the number of items processed.
  * Agents should NOT call this function directly.
  *
@@ -68,8 +66,7 @@ void fo_heartbeat()
 /* ************************************************************************** */
 
 /**
- * @brief fo_scheduler_heart() 
- * This function must be called by agents to let the scheduler know they
+ * @brief This function must be called by agents to let the scheduler know they
  * are alive and how many items they have processed.
  *
  * @param i   This is the number of itmes processed since the last call to 
@@ -83,8 +80,7 @@ void  fo_scheduler_heart(int i)
 }
 
 /**
- * @brief fo_scheduler_connect()
- * Function to establish a connection between an agent and the scheduler.
+ * @brief Establish a connection between an agent and the scheduler.
  *
  * Steps taken by this function:
  *   - initialize memory associated with agent connection
@@ -96,8 +92,8 @@ void  fo_scheduler_heart(int i)
  * Making a call to this function should be the first thing that an agent does
  * after parsing its command line arguments.
  *
- * @param int* argc
- * @param char** argv
+ * @param argc
+ * @param argv
  * @returns void
  */
 void fo_scheduler_connect(int* argc, char** argv)
@@ -125,8 +121,7 @@ void fo_scheduler_connect(int* argc, char** argv)
     fprintf(stdout, "OK\n");
     fflush(stdout);
 
-    /* check the nfs mounts for the agent */
-    // TODO
+    /* \todo check the nfs mounts for the agent */
 
     /* set up the heartbeat() */
     signal(SIGALRM, fo_heartbeat);
@@ -135,7 +130,7 @@ void fo_scheduler_connect(int* argc, char** argv)
 }
 
 /**
- * @brief Function to disconnect the scheduler connection.
+ * @brief Disconnect the scheduler connection.
  * Making a call to this function should be the last thing that an agent does
  * before exiting.
  *
