@@ -1,6 +1,6 @@
 # FOSSology Makefile - agents/copyright_analysis/ui-plugin
 # Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
-TOP=../../..
+TOP=../../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
