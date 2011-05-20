@@ -39,7 +39,7 @@ class TestAboutMenu extends fossologyTestCase
   function testMenuAbout()
   {
     global $URL;
-    print "starting testMenuAbout\n";
+    //print "starting testMenuAbout\n";
     $mybrowser = new SimpleBrowser();
     $page = $this->mybrowser->get($URL);
     $this->assertTrue($page);

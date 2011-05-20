@@ -42,9 +42,9 @@ class FoldersDeleteMenuTest extends fossologyTestCase
     $this->Login();
     /* we get the home page to get rid of the user logged in page */
     $loggedIn = $this->mybrowser->get($URL);
-    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
-    $this->assertTrue($this->myassertText($loggedIn, '/Folders /'));
-    $this->assertTrue($this->myassertText($loggedIn, '/Create/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/>Organize</'));
+    $this->assertTrue($this->myassertText($loggedIn, '/>Folders </'));
+    $this->assertTrue($this->myassertText($loggedIn, '/>Create</'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
