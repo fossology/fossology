@@ -1,7 +1,7 @@
 /***************************************************************
  adj2nest: Convert adjacency list to nested sets.
 
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -56,8 +56,7 @@
 #include <signal.h>
 #include <libgen.h>
 
-#include "libfossdb.h"
-#include "libfossagent.h"
+#include "libfossology.h"
 
 #define MAXCMD 4096
 char SQL[256];
@@ -66,7 +65,7 @@ char SQL[256];
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif
 
-void *DB=NULL;
+PGconn *pgConn = NULL;  // Database connection
 int Verbose=0;
 
 struct uploadtree
@@ -91,6 +90,8 @@ long SetNum=0; /* index for tracking set numbers */
 void	WalkTree	(long Index, long Depth)
 {
   long LeftSet;
+  PGresult* pgResult;
+
   if (Verbose)
     {
     int i;
@@ -109,7 +110,10 @@ void	WalkTree	(long Index, long Depth)
 
   snprintf(SQL,sizeof(SQL),"UPDATE uploadtree SET lft='%ld', rgt='%ld' WHERE uploadtree_pk='%ld';",
 	LeftSet,SetNum,Tree[Index].UploadtreePk);
-  DBaccess(DB,SQL);
+  pgResult = PQexec(pgConn, SQL);
+  fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__, __LINE__);
+  PQclear(pgResult);
+  fo_scheduler_heart(1);
 
   if (Tree[Index].Sibling > -1)
     {
@@ -190,50 +194,58 @@ void	LoadAdj	(long UploadPk)
 {
   long i;
   long Parent,Child;
-  void *UDB;
+  long RootRows, NonRootRows;
+  PGresult* pgNonRootResult;
+  PGresult* pgRootResult;
 
   snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM uploadtree WHERE upload_fk = %ld AND parent IS NOT NULL ORDER BY parent;",UploadPk);
-  DBaccess(DB,SQL);
-  TreeSize = DBdatasize(DB);
+  pgNonRootResult = PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, pgNonRootResult, SQL, __FILE__, __LINE__);
+
+  NonRootRows = PQntuples(pgNonRootResult);
+  TreeSize = NonRootRows;
   if (Verbose) printf("# Upload %ld: %ld items\n",UploadPk,TreeSize);
 
-  UDB=DBmove(DB);
   snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM uploadtree WHERE upload_fk = %ld AND parent IS NULL;",UploadPk);
-  DBaccess(DB,SQL);
-  TreeSize += DBdatasize(DB);
+  pgRootResult = PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, pgRootResult, SQL, __FILE__, __LINE__);
+
+  RootRows = PQntuples(pgRootResult);
+  TreeSize += RootRows;
 
   /* Got data! Populate the tree! */
   if (Tree) { free(Tree); }
   if (TreeSize <= 0) { Tree=NULL; return; }
   Tree = (uploadtree *)calloc(TreeSize+1,sizeof(uploadtree));
   for(i=0; i<TreeSize+1; i++)
-    {
+  {
     Tree[i].UploadtreePk=-1;
     Tree[i].Child=-1;
     Tree[i].Sibling=-1;
-    }
+  }
 
   TreeSet=0;
   SetNum=1;
 
   /* Load the roots */
-  for(i=0; i<DBdatasize(DB); i++)
-    {
-    Child = atol(DBgetvalue(DB,i,0));
+  for(i=0; i<RootRows; i++)
+  {
+    Child = atol(PQgetvalue(pgRootResult, i, 0));
     Tree[TreeSet].UploadtreePk = Child;
     TreeSet++;
-    }
+  }
 
   /* Load all non-roots */
-  for(i=0; i<DBdatasize(UDB); i++)
-    {
-    Child = atol(DBgetvalue(UDB,i,0));
-    Parent = atol(DBgetvalue(UDB,i,1));
+  for(i=0; i<NonRootRows; i++)
+  {
+    Child = atol(PQgetvalue(pgNonRootResult,i,0));
+    Parent = atol(PQgetvalue(pgNonRootResult,i,1));
     SetParent(Parent,Child);
-    }
+  }
 
   /* Free up DB memory */
-  DBclose(UDB);
+  PQclear(pgNonRootResult);
+  PQclear(pgRootResult);
   return;
 } /* LoadAdj() */
 
@@ -246,28 +258,31 @@ void	RunAllNew	()
 {
   int Row,MaxRow;
   long UploadPk;
-  void *UDB;
-  DBaccess(DB,"SELECT DISTINCT upload_pk,upload_desc,upload_filename FROM upload WHERE upload_pk IN ( SELECT DISTINCT upload_fk FROM uploadtree WHERE lft IS NULL );");
-  UDB=DBmove(DB);
-  MaxRow = DBdatasize(UDB);
+  PGresult *pgResult;
+
+  snprintf(SQL,sizeof(SQL), "SELECT DISTINCT upload_pk,upload_desc,upload_filename FROM upload WHERE upload_pk IN ( SELECT DISTINCT upload_fk FROM uploadtree WHERE lft IS NULL );");
+  pgResult = PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, pgResult, SQL, __FILE__, __LINE__);
+
+  MaxRow = PQntuples(pgResult);
   for(Row=0; Row < MaxRow; Row++)
-      {
-      UploadPk = atol(DBgetvalue(UDB,Row,0));
-      if (UploadPk >= 0)
-	{
-	char *S;
-	printf("Processing %ld :: %s",UploadPk,DBgetvalue(UDB,Row,2));
-	S = DBgetvalue(UDB,Row,1);
-	if (S && S[0]) printf(" (%s)",S);
-	printf("\n");
-	LoadAdj(UploadPk);
-	if (Tree) { DBaccess(DB,"BEGIN;"); WalkTree(0,0); DBaccess(DB,"COMMIT;"); }
-	if (Tree) free(Tree);
-	Tree=NULL;
-	TreeSize=0;
-	}
-      }
-  DBclose(UDB);
+  {
+    UploadPk = atol(PQgetvalue(pgResult,Row,0));
+    if (UploadPk >= 0)
+	  {
+      char *S;
+      printf("Processing %ld :: %s",UploadPk,PQgetvalue(pgResult,Row,2));
+      S = PQgetvalue(pgResult,Row,1);
+      if (S && S[0]) printf(" (%s)",S);
+      printf("\n");
+      LoadAdj(UploadPk);
+      if (Tree) WalkTree(0,0);
+      if (Tree) free(Tree);
+      Tree=NULL;
+      TreeSize=0;
+    }
+  }
+  PQclear(pgResult);
 } /* RunAllNew() */
 
 /*********************************************
@@ -277,24 +292,28 @@ void    ListUploads     ()
 {
   int Row,MaxRow;
   long NewPid;
+  PGresult *pgResult;
 
   printf("# Uploads\n");
-  DBaccess(DB,"SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;");
+  snprintf(SQL,sizeof(SQL), "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;");
+  pgResult = PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, pgResult, SQL, __FILE__, __LINE__);
 
   /* list each value */
-  MaxRow = DBdatasize(DB);
+  MaxRow = PQntuples(pgResult);
   for(Row=0; Row < MaxRow; Row++)
-      {
-      NewPid = atol(DBgetvalue(DB,Row,0));
-      if (NewPid >= 0)
-	{
-	char *S;
-	printf("%ld :: %s",NewPid,DBgetvalue(DB,Row,2));
-	S = DBgetvalue(DB,Row,1);
-	if (S && S[0]) printf(" (%s)",S);
-	printf("\n");
-	}
-      }
+  {
+    NewPid = atol(PQgetvalue(pgResult,Row,0));
+    if (NewPid >= 0)
+    {
+      char *S;
+      printf("%ld :: %s",NewPid,PQgetvalue(pgResult,Row,2));
+      S = PQgetvalue(pgResult,Row,1);
+      if (S && S[0]) printf(" (%s)",S);
+      printf("\n");
+    }
+  }
+  PQclear(pgResult);
 } /* ListUploads() */
 
 
@@ -460,79 +479,78 @@ void    Usage   (char *Name)
 /*********************************************************/
 int	main	(int argc, char *argv[])
 {
-  char Parm[MAXCMD];
   int c;
   int arg;
   long UploadPk=-1;
-  char *agent_desc = "Convert adjacency list to nested set (data retrieval optimization)";
+//  char *agent_desc = "Convert adjacency list to nested set (data retrieval optimization)";
 
-  DB = DBopen();
-  if (!DB)
-	{
-	printf("FATAL: Unable to connect to database\n");
-	fflush(stdout);
-	exit(-1);
-	}
-  GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
+  /* open the database */
+  pgConn = fo_dbconnect();
+  if(!pgConn)
+  {
+    printf("FATAL: %s.%d: Copyright agent unable to connect to database.\n", 
+            __FILE__, __LINE__);
+	  fflush(stdout);
+    exit(-1);
+  }
 
   /* Process command-line */
   while((c = getopt(argc,argv,"aiuv")) != -1)
-    {
+  {
     switch(c)
-	{
-	case 'a': /* run on ALL */
-		RunAllNew();
-		break;
-	case 'i':
-		/* GetAgentKey() already processed */
-		DBclose(DB);
-		return(0);
-	case 'v':	Verbose++; break;
-	case 'u':
-		/* list ids */
-		ListUploads();
-		DBclose(DB);
-		return(0);
-	default:
-		Usage(argv[0]);
-		fflush(stdout);
-		DBclose(DB);
-		exit(-1);
-	}
+    {
+      case 'a': /* run on ALL */
+      RunAllNew();
+      break;
+    case 'i':
+      PQfinish(pgConn);
+      return(0);
+    case 'v':	Verbose++; break;
+    case 'u':
+      /* list ids */
+      ListUploads();
+      PQfinish(pgConn);
+      return(0);
+    default:
+      Usage(argv[0]);
+      fflush(stdout);
+      PQfinish(pgConn);
+      exit(-1);
     }
+  }
 
   /* Process each file */
   for(arg=optind; arg < argc; arg++)
-    {
+  {
     UploadPk = atol(argv[arg]);
     LoadAdj(UploadPk);
-    if (Tree) { DBaccess(DB,"BEGIN;"); WalkTree(0,0); DBaccess(DB,"COMMIT;"); }
+    if (Tree) WalkTree(0,0); 
     if (Tree) free(Tree);
     Tree=NULL;
     TreeSize=0;
-    }
+  }
 
   /* No args?  Run from schedule! */
   if (argc == 1)
-    {
-    signal(SIGALRM,ShowHeartbeat);
-    alarm(60);
+  {
+    fo_scheduler_connect(&argc, argv);
     printf("OK\n"); /* inform scheduler that we are ready */
     fflush(stdout);
-    while(ReadLine(stdin,Parm,MAXCMD) >= 0)
-      {
-      UploadPk = atol(Parm);
+    while(fo_scheduler_next())
+    {
+      UploadPk = atol(fo_scheduler_current());
       LoadAdj(UploadPk);
-      if (Tree) { DBaccess(DB,"BEGIN;"); WalkTree(0,0); DBaccess(DB,"COMMIT;"); }
+      if (Tree) WalkTree(0,0); 
       if (Tree) free(Tree);
       Tree=NULL;
       TreeSize=0;
       printf("OK\n"); /* inform scheduler that we are ready */
       fflush(stdout);
-      } /* while() */
-    }
+    } /* while() */
+  }
 
-  DBclose(DB);
-  return(0);
+  PQfinish(pgConn);
+  fo_scheduler_disconnect();
+  return 0;
 } /* main() */
 
