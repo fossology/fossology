@@ -35,7 +35,7 @@ class TestRepoLogin extends fossologyTestCase{
   function testLogin(){
 
     global $URL;
-    print "login test starting\n";
+    //print "login test starting\n";
     $browser = & new SimpleBrowser();
     $this->setBrowser($browser);
     $this->Login();

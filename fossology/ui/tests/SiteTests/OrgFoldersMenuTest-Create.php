@@ -40,15 +40,15 @@ class FoldersCreateMenuTest extends fossologyTestCase
   function testCreateFolderMenu()
   {
     global $URL;
-    print "starting OrgFolderCreateMenuTest\n";
+    //print "starting OrgFolderCreateMenuTest\n";
 
     $this->Login();
     $loggedIn = $this->mybrowser->get($URL);
     /* we get the home page to get rid of the user logged in page */
     $page = $this->mybrowser->get($URL);
-    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
-    $this->assertTrue($this->myassertText($loggedIn, '/Folders /'));
-    $this->assertTrue($this->myassertText($loggedIn, '/Create/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/>Organize</'));
+    $this->assertTrue($this->myassertText($loggedIn, '/>Folders </'));
+    $this->assertTrue($this->myassertText($loggedIn, '/>Create</'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the create page.
      */
