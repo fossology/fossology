@@ -482,6 +482,7 @@ int	main	(int argc, char *argv[])
   int c;
   int arg;
   long UploadPk=-1;
+  PGresult *pgResult;
 //  char *agent_desc = "Convert adjacency list to nested set (data retrieval optimization)";
 
   /* open the database */
@@ -530,7 +531,7 @@ int	main	(int argc, char *argv[])
     TreeSize=0;
   }
 
-  /* No args?  Run from schedule! */
+  /* No args?  Run from scheduler */
   if (argc == 1)
   {
     fo_scheduler_connect(&argc, argv);
@@ -547,6 +548,13 @@ int	main	(int argc, char *argv[])
       printf("OK\n"); /* inform scheduler that we are ready */
       fflush(stdout);
     } /* while() */
+
+    /* update upload.upload_mode to say that adj2nest was successful */
+    snprintf(SQL, sizeof(SQL), "UPDATE upload SET upload_mode = upload_mode | (1<<6) WHERE upload_pk='%ld'",
+             UploadPk);
+    pgResult =  PQexec(pgConn, SQL); /* UPDATE upload */
+    if (fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__))
+    PQclear(pgResult);
   }
 
   PQfinish(pgConn);
