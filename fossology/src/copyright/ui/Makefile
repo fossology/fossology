@@ -17,6 +17,9 @@
 TOP=../../..
 include $(TOP)/Makefile.conf
 
+all:
+	echo "make copyright"
+
 install:
 	echo "make copyright install"
 	mkdir -p $(DESTDIR)$(WEBDIR)/plugins/
