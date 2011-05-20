@@ -34,9 +34,11 @@ OBJECTS  = copyright.o \
 # executable build rules #
 ##########################
 $(EXE): main.c $(FOLIB) $(FOLIB) $(VARS) $(OBJECTS)
+	echo "make copyright agent"
 	$(CC) main.c $(FOLIB) $(OBJECTS) $(DEF) $(CFLAGS_LOCAL) -o $@
 
 all: $(EXE) test
+	echo "make copyright agent"
 
 test: 
 	$(MAKE) -C $(TESTDIR) test
@@ -73,6 +75,7 @@ pair.o: %.o: %.c %.h cvector.h
 #######################
 
 install: all
+	echo "make copyright agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/
 	make -C ui-plugin install
 	$(INSTALL_DATA) copyright.dic $(DESTDIR)$(DATADIR)/
@@ -80,6 +83,7 @@ install: all
 	$(INSTALL_DATA) copyright.conf $(SYSCONFDIR)/fossology/agents.d/
 
 uninstall:
+	echo "make copyright agent uninstall"
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)/$(EXE)
 	rm -f $(DESTDIR)$(DATADIR)/copyright.dic
 	rm -f $(DESTDIR)$(DATADIR)/names.dic
@@ -90,6 +94,7 @@ uninstall:
 #####################
 
 clean:
+	echo "make copyright agent clean"
 	rm -f *.o *.a $(EXE)
 
 include $(DEPS)

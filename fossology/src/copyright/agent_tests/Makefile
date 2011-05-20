@@ -15,9 +15,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 TOP = ../../..
-VARS = $(TOP)/Makefile.conf
-DEPS = $(TOP)/Makefile.deps
-include $(VARS)
+include $(TOP)/Makefile.conf
 LOCALAGENTDIR=../agent
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lpcre -lcunit
@@ -33,11 +31,14 @@ COVERAGE = copyright_cov.o \
            pair_cov.o \
 
 all: $(EXE)
+	echo "make copyright agent_tests"
 
 test: $(EXE)
+	echo "make copyright agent_tests"
 	./$(EXE)
 
 coverage: $(OBJECTS) libcopyright_cov.a run_tests.c
+	echo "make copyright agent_tests coverage"
 	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
 	./$(EXE)
 	lcov --directory  $(LOCALAGENTDIR)/   --capture --output-file cov.txt; \
@@ -53,23 +54,30 @@ libcopyright.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 libcopyright_cov.a: $(COVERAGE)
-    ar cvr $@ $(COVERAGE)
+	ar cvr $@ $(COVERAGE)
 
 ########################
 # coverage build rules #
 ########################
 copyright_cov.o: $(LOCALAGENTDIR)/copyright.c $(LOCALAGENTDIR)/copyright.h $(LOCALAGENTDIR)/cvector.h $(LOCALAGENTDIR)/radixtree.h
-    $(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $(DEF) -o $@
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $(DEF) -o $@
 
 cvector_cov.o: $(LOCALAGENTDIR)/cvector.c $(LOCALAGENTDIR)/cvector.h
-    $(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
 radixtree_cov.o: $(LOCALAGENTDIR)/radixtree.c $(LOCALAGENTDIR)/radixtree.h
-    $(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
 pair_cov.o:  $(LOCALAGENTDIR)/pair.c $(LOCALAGENTDIR)/pair.h $(LOCALAGENTDIR)/cvector.h
-    $(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
-
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
 clean:
+	echo "make copyright agent_tests clean"
 	rm -rf $(EXE) *.o *.g *.xml *.txt *.gcda *.gcno results
+
+install:
+	echo "make copyright agent_tests nothing to install"
+uninstall:
+	echo "make copyright agent_tests nothing to uninstall"
+
+.PHONY: all install uninstall clean test 

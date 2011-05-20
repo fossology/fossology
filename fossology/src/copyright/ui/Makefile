@@ -1,10 +1,24 @@
-# FOSSology Makefile - agents/copyright_analysis/ui-plugin
-# Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
-TOP=../../../..
-VARS=$(TOP)/Makefile.conf
-include $(VARS)
+######################################################################
+# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+######################################################################
+TOP=../../..
+include $(TOP)/Makefile.conf
 
 install:
+	echo "make copyright install"
 	mkdir -p $(DESTDIR)$(WEBDIR)/plugins/
 	mkdir -p $(DESTDIR)$(WEBDIR)/plugins/copyright/
 	$(INSTALL_DATA) copyright.php $(DESTDIR)$(WEBDIR)/plugins/copyright.php
@@ -43,6 +57,7 @@ srcinstall:
 	cp oneshot.php ../../../ui/plugins/copyright/oneshot.php
 
 uninstall:
+	echo "make copyright uninstall"
 	rm -f $(DESTDIR)$(WEBDIR)/plugins/copyright.php
 	rm -rf $(DESTDIR)$(WEBDIR)/plugins/copyright/
 	@if [ -d $(DESTDIR)$(WEBDIR)/plugins ]; then \
