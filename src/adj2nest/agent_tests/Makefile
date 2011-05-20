@@ -14,33 +14,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP = ../..
-VARS = $(TOP)/Makefile.conf
-DEPS = $(TOP)/Makefile.deps
-include $(VARS)
-include $(DEPS)
-DIRS = agent agent_tests ui ui_tests
-
-TESTDIR = agent_tests
-
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
-
-all: 
-	$(call dirloop, )
-
-test: 
-	$(MAKE) -C $(TESTDIR) test
-
-coverage:
-	$(MAKE) -C $(TESTDIR) coverage
-
-install: all
-	$(call dirloop,install)
-
-uninstall:
-	$(call dirloop,uninstall)
-
+all:
+	echo "No adj2nest tests"
 clean:
-	$(call dirloop,clean)
-
-.PHONY: all install uninstall clean test id
+install:
+uninstall:
