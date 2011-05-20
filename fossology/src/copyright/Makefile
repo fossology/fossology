@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -14,35 +14,34 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-
-CFLAGS_LOCAL=-lpq $(ALL_CFLAGS)
-EXE=adj2nest
-
-all: $(EXE)
-
-$(EXE): %: %.c $(DB) $(REPO) $(VARS) $(FOLIB)
-	$(CC) $< $(CFLAGS_LOCAL) $(FOLIB) -o $@
-
-install: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
-
-uninstall:
-	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
-
-test: all
-	@echo "*** No tests available for src/$(EXE) ***"
-
-coverage:
-	@echo "NOTICE: no coverage available for adj2nest"
-
-clean:
-	rm -f $(EXE) *.o core
-
 include $(DEPS)
 
-.PHONY: all install uninstall clean test
+DIRS = agent agent_tests ui ui_tests
+
+TESTDIR = agent_tests
+
+dirloop=for dir in $(DIRS); do $(MAKE) -C $$dir $(1);  done
+		 
+all: 
+	$(call dirloop, )
+
+test: 
+	$(MAKE) -C $(TESTDIR) test
+
+coverage:
+	$(MAKE) -C $(TESTDIR) coverage
+
+install: all
+	$(call dirloop,install)
+
+uninstall:
+	$(call dirloop,uninstall)
+
+clean:
+	$(call dirloop,clean)
+
+.PHONY: all install uninstall clean test 
