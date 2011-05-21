@@ -36,7 +36,7 @@ $suiteName = 'Core Functional Tests';
 // Test path is relative to ....fossology/tests/
 $pTestPath = 'pkgagent';
 
-$emailTests = array(
+$pkgAgentTests = array(
   'suiteName' => $suiteName,
   'testPath'  => $pTestPath,
   'tests' => $ptests,

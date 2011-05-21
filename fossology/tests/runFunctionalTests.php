@@ -49,12 +49,19 @@ require_once('pkgAgentTests.php');
 global $testSuite;
 
 $paths = array();
+if(chdir('fossology/tests') === FALSE)
+{
+  echo "FATAL! cannot cd to fossology/tests\n";
+  exit(1);
+}
 $home = getcwd();
+//echo "rfT is at:$home \n";
 
 $testSuite = &new TestSuite('Fossology UI Functional Tests');
 
+
 // run createUIUsers first
-$testSuite->addTestSuite('createUIUsers.php');
+$testSuite->addTestFile('createUIUsers.php');
 
 // site
 //$sTests = & new TestSuite($siteTests['suiteName']);
@@ -76,12 +83,14 @@ if (chdir('../BasicTests') === FALSE)
 $paths['basic'] = $basicTests['testPath'];
 addTests($testSuite, $basicTests['tests']);
 
+/*
 // User tests
-if (chdir('../UserTests') === FALSE)
+if (chdir('../Users') === FALSE)
 {
   //LogAndPrint($LF, "ALL Tests ERROR: can't cd to $BasicTests\n");
-  echo "ERROR! can't cd to ../UserTests\n";
+  echo "ERROR! can't cd to ../User\n";
 }
+echo "rfT is at:" . getcwd() . "\n";
 $paths['user'] = $userTests['testPath'];
 addTests($testSuite, $userTests['tests']);
 
@@ -97,17 +106,21 @@ addTests($testSuite, $userTests['tests']);
 //pkgagent
 if (chdir($home) === FALSE)
 {
-  //LogAndPrint($LF, "ALL Tests ERROR: can't cd to $BasicTests\n");
+  //LogAndPrint($LF, "ALL Tests ERROR: can't cd to $home\n");
   echo "ERROR! can't cd to $home\n";
 }
 
 if (chdir($pkgAgentTests['testPath']) === FALSE)
 {
-  //LogAndPrint($LF, "ALL Tests ERROR: can't cd to $BasicTests\n");
-  echo "ERROR! can't cd to $home\n";
+  //LogAndPrint($LF, "ALL Tests ERROR: can't cd to {$pkgAgentTests['testPath']}\n");
+  echo "ERROR! can't cd to {$pkgAgentTests['testPath']}\n";
 }
 $paths['pkgagent'] = $pkgAgentTests['testPath'];
 addTests($testSuite, $pkgAgentTests['tests']);
+*/
+// run the tests loaded so far...
+
+$testSuite->run(new JUnitXMLReporter());
 
 // run uploads
 if(!_uploadTestData())
@@ -121,7 +134,7 @@ if (chdir($home) === FALSE) {
   //LogAndPrint($LF, $UInoHome);
   echo $UInoHome;
 }
-//print "Waiting for jobs to finish...\n";
+print "Waiting for jobs to finish...\n";
 $last = exec('./wait4jobs.php', $tossme, $jobsDone);
 //foreach($tossme as $line){
 //  print "$line\n";
@@ -131,8 +144,8 @@ if ($jobsDone != 0)
 {
   $errMsg = "ERROR! jobs are not finished after two hours, not running" .
     "verify tests, please investigate and run verify tests by hand\n" .
-  "Monitor the job Q and when the setup jobs are done, run:\n" .
-  "$myname -v -l $logFile\n";
+    "Monitor the job Q and when the setup jobs are done, run:\n" .
+    "$myname -v -l $logFile\n";
   $this->fail($errMsg);
   exit(1);
 }
@@ -155,7 +168,7 @@ if ($jobsDone == 0)
 // at this point.
 // @todo add in phpunit tests
 
-$testSuite->run(new JUnitXMLReporter());
+//$testSuite->run(new JUnitXMLReporter());
 
 // transform the report into html....
 
@@ -172,6 +185,7 @@ function addTests($suite, $testArray)
   {
     return;
   }
+  //echo "AddTests: is at:" . getcwd() . "\n";
   foreach($testArray as $test)
   {
     //echo "test is:$test\n";
@@ -208,12 +222,12 @@ function _uploadTestData() {
   }
   //LogAndPrint($LF, "\n");
   //$UpLast = exec("./uploadTestData.php  2>&1", $dummy, $SUrtn);
-  $UpLast = system("./rftjunit.php  -l uplTestData.php -j $testSuite 2>&1", $SUrtn);
+  $UpLast = system("./rftjunit.php  -l uplTestData.php  2>&1", $SUrtn);
   //LogAndPrint($LF, "\n");
   //$UpLast = exec("./rftjunit.php  -l uploadCopyrightData.php  2>&1", $copyrOut, $Copyrtn);
   //$AALast = exec("./rftjunit.php -l AgentAddData.php -n  2>&1", $agentAddOut, $AArtn);
-  $CrLast = system("./rftjunit.php  -l uploadCopyrightData.php  -j $testSuite 2>&1",$Copyrtn);
-  $AALast = system("./rftjunit.php -l AgentAddData.php -j $testSuite  2>&1", $AArtn);
+  $CrLast = system("./rftjunit.php  -l uploadCopyrightData.php   2>&1",$Copyrtn);
+  $AALast = system("./rftjunit.php -l AgentAddData.php   2>&1", $AArtn);
   //LogAndPrint($LF, "\n");
   // need to check the return on the setup and report accordingly.
   if ($SUrtn != 0) {
