@@ -24,8 +24,7 @@
 * Created on May 19, 2011 by Mark Donohoe
 */
 
-// List of tests to run, BasicSetup must be run 1st as the rest of the tests
-// depend on it.  Add your test at the end.
+// List of tests to run, Add your test at the end.
 $utests = array(
   'addUserTest.php',
   'dupUserTest.php',
@@ -35,7 +34,7 @@ $utests = array(
 
 $suiteName = 'Core Functional Tests';
 // Test path is relative to ....fossology/tests/
-$userTestPath = '../ui/tests/BasicTests';
+$userTestPath = '../Users';
 
 $userTests = array(
   'suiteName' => $suiteName,
