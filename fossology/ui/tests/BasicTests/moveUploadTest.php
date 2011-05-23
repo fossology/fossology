@@ -43,7 +43,7 @@ global $URL;
  * This test depends on
  *
  */
-class MoveFolderTest extends fossologyTestCase
+class MoveUploadTest extends fossologyTestCase
 {
   public $upload2Move;
   public $fromFolder='root';
