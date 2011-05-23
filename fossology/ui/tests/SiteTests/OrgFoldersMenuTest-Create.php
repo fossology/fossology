@@ -1,7 +1,7 @@
 <?php
 
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -26,8 +26,12 @@
  * Created on Jul 24, 2008
  */
 
-require_once ('../../../tests/fossologyTestCase.php');
-require_once ('../../../tests/TestEnvironment.php');
+// old requires when run by testFOSSology.php
+//require_once('../../../tests/fossologyTestCase.php');
+//require_once ('../../../tests/TestEnvironment.php');
+
+require_once('../../tests/fossologyTestCase.php');
+require_once ('../../tests/TestEnvironment.php');
 
 global $URL;
 global $USER;
