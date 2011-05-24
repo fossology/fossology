@@ -34,8 +34,13 @@
  * pass with a message to test by hand.
  *
  */
-require_once ('../../../tests/fossologyTestCase.php');
-require_once ('../../../tests/TestEnvironment.php');
+
+// old requires when run by testFOSSology.php
+//require_once('../../../tests/fossologyTestCase.php');
+//require_once ('../../../tests/TestEnvironment.php');
+
+require_once('../../tests/fossologyTestCase.php');
+require_once ('../../tests/TestEnvironment.php');
 
 global $URL;
 
@@ -57,5 +62,4 @@ class userEditAnyTest extends fossologyTestCase {
     $this->pass();
   }
 }
-
 ?>
