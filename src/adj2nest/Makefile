@@ -16,30 +16,26 @@
 ######################################################################
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
-DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-include $(DEPS)
 
-DIRS = agent agent_tests
-
+DIRS = agent agent_tests 
 TESTDIR = agent_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 		 
 all: 
-	echo "make adj2nest"
 	$(call dirloop, )
 
+test: 
+	$(MAKE) -C $(TESTDIR) test
+
 install: all
-	echo "make adj2nest install"
 	$(call dirloop,install)
 
 uninstall:
-	echo "make adj2nest uninstall"
 	$(call dirloop,uninstall)
 
 clean:
-	echo "make adj2nest clean"
 	$(call dirloop,clean)
 
-.PHONY: all install uninstall clean test coverage
+.PHONY: all install uninstall clean test 

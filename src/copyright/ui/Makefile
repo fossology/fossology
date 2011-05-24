@@ -18,7 +18,7 @@ TOP=../../..
 include $(TOP)/Makefile.conf
 
 all:
-	echo "make copyright"
+	@echo "make copyright ui"
 
 install:
 	echo "make copyright install"
