@@ -16,9 +16,7 @@
 ######################################################################
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
-DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-include $(DEPS)
 
 DIRS = agent agent_tests
 
@@ -27,19 +25,22 @@ TESTDIR = agent_tests
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 		 
 all: 
-	echo "make adj2nest"
+	@echo "make scheduler"
 	$(call dirloop, )
 
+test: 
+	$(MAKE) -C $(TESTDIR) test
+
 install: all
-	echo "make scheduler install"
+	@echo "make scheduler install"
 	$(call dirloop,install)
 
 uninstall:
-	echo "make scheduler uninstall"
+	@echo "make scheduler uninstall"
 	$(call dirloop,uninstall)
 
 clean:
-	echo "make scheduler clean"
+	@echo "make scheduler clean"
 	$(call dirloop,clean)
 
 .PHONY: all install uninstall clean test coverage
