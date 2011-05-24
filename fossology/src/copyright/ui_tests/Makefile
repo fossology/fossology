@@ -15,10 +15,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 all:
-	echo "No copyright agent_tests"
+	@echo "No copyright agent_tests"
 clean:
-	echo "No copyright agent_tests clean"
+	@echo "No copyright agent_tests clean"
 install:
-	echo "No copyright agent_tests install"
+	@echo "No copyright agent_tests install"
 uninstall:
-	echo "No copyright agent_tests uninstall"
+	@echo "No copyright agent_tests uninstall"

@@ -16,9 +16,7 @@
 ######################################################################
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
-DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-include $(DEPS)
 DIRS = agent agent_tests ui ui_tests
 
 TESTDIR = agent_tests
