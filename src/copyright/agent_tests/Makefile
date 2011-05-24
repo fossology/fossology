@@ -31,14 +31,14 @@ COVERAGE = copyright_cov.o \
            pair_cov.o \
 
 all: $(EXE)
-	echo "make copyright agent_tests"
+	@echo "make copyright agent_tests"
 
 test: $(EXE)
-	echo "make copyright agent_tests"
+	@echo "make copyright agent_tests"
 	./$(EXE)
 
 coverage: $(OBJECTS) libcopyright_cov.a run_tests.c
-	echo "make copyright agent_tests coverage"
+	@echo "make copyright agent_tests coverage"
 	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
 	./$(EXE)
 	lcov --directory  $(LOCALAGENTDIR)/   --capture --output-file cov.txt; \
@@ -72,12 +72,12 @@ pair_cov.o:  $(LOCALAGENTDIR)/pair.c $(LOCALAGENTDIR)/pair.h $(LOCALAGENTDIR)/cv
 	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
 clean:
-	echo "make copyright agent_tests clean"
+	@echo "make copyright agent_tests clean"
 	rm -rf $(EXE) *.o *.g *.xml *.txt *.gcda *.gcno results
 
 install:
-	echo "make copyright agent_tests nothing to install"
+	@echo "make copyright agent_tests nothing to install"
 uninstall:
-	echo "make copyright agent_tests nothing to uninstall"
+	@echo "make copyright agent_tests nothing to uninstall"
 
 .PHONY: all install uninstall clean test 
