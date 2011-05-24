@@ -1,49 +1,65 @@
-# FOSSology Makefile - agents/buckets
-# Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
-TOP=../..
+#####################################################################
+# Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+######################################################################
+TOP=../../..
 VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
-CFLAGS_LOCALO=$(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
+DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
+CFLAGS_LOCAL= $(DEF) $(ALL_CFLAGS) 
 
 EXE=buckets
 OBJS=validate.o inits.o liccache.o walk.o leaf.o match.o container.o child.o write.c
 HDRS=buckets.h
-DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
 
 all: $(EXE)
+	@echo "make bucket agent"
 
-$(EXE): %: %.c $(DB) $(REPO) $(VARS) $(OBJS) $(HDRS)
-	$(CC) $(OBJS) $< $(DEF) $(CFLAGS_LOCAL) -o $@
+$(EXE): buckets.c $(FOLIB) $(OBJS) $(HDRS)
+	$(CC) buckets.c $(OBJS) -lpq $(CFLAGS_LOCAL) -o $@
 
-write.o: $(DB) $(REPO) $(VARS) $(HDRS) write.c
-	$(CC) $(DEF) -c $(CFLAGS_LOCALO) write.c
+write.o: $(HDRS) write.c
+	$(CC) -c $(CFLAGS_LOCAL) write.c
 
-child.o: $(DB) $(REPO) $(VARS) $(HDRS) child.c
-	$(CC) $(DEF) -c $(CFLAGS_LOCALO) child.c
+child.o: $(HDRS) child.c
+	$(CC) -c $(CFLAGS_LOCAL) child.c
 
-container.o: $(DB) $(REPO) $(VARS) $(HDRS) container.c
-	$(CC) $(DEF) -c $(CFLAGS_LOCALO) container.c
+container.o: $(HDRS) container.c
+	$(CC) -c $(CFLAGS_LOCAL) container.c
 
-match.o: $(DB) $(REPO) $(VARS) $(HDRS) match.c
-	$(CC) $(DEF) -c $(CFLAGS_LOCALO) match.c
+match.o: $(HDRS) match.c
+	$(CC) -c $(CFLAGS_LOCAL) match.c
 
-walk.o: $(DB) $(REPO) $(VARS) $(HDRS) walk.c
-	$(CC) $(DEF) -c $(CFLAGS_LOCALO) walk.c
+walk.o: $(HDRS) walk.c
+	$(CC) -c $(CFLAGS_LOCAL) walk.c
 
-leaf.o: $(DB) $(REPO) $(VARS) $(HDRS) leaf.c
-	$(CC) $(DEF) -c $(CFLAGS_LOCALO) leaf.c
+leaf.o: $(HDRS) leaf.c
+	$(CC) -c $(CFLAGS_LOCAL) leaf.c
 
-validate.o: $(DB) $(REPO) $(VARS) $(HDRS) validate.c
-	$(CC) $(DEF) -c $(CFLAGS_LOCALO) validate.c
+validate.o: $(HDRS) validate.c
+	$(CC) -c $(CFLAGS_LOCAL) validate.c
 
-inits.o: $(DB) $(REPO) $(VARS) $(HDRS) inits.c
-	$(CC) $(DEF) -c $(CFLAGS_LOCALO) inits.c
+inits.o: $(HDRS) inits.c
+	$(CC) -c $(CFLAGS_LOCAL) inits.c
 
-liccache.o: $(DB) $(REPO) $(VARS) $(HDRS) liccache.c
-	$(CC) $(DEF) -c $(CFLAGS_LOCALO) liccache.c
+liccache.o: $(HDRS) inits.c
+	$(CC) -c $(CFLAGS_LOCAL) liccache.c
+
+$(FOLIB):
+	$(MAKE) -C $(FOLIBDIR)
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
@@ -60,6 +76,4 @@ coverage:
 clean:
 	rm -f $(EXE) *.o core
 
-include $(DEPS)
-
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean test $(FOLIB)

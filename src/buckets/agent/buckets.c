@@ -29,7 +29,6 @@
  additional buckets.
  */
 
-//#define BOBG
 #include "buckets.h"
 
 int debug = 0;
@@ -51,13 +50,10 @@ int main(int argc, char **argv)
   int verbose = 0;
   int ReadFromStdin = 1;
   int head_uploadtree_pk = 0;
-  void *DB;   // DB object from agent
   PGconn *pgConn;
   PGresult *topresult;
   PGresult *result;
   char sqlbuf[512];
-  char inbuf[64];
-  char *inbufp;
   char *Delims = ",= \t\n\r";
   char *token, *saveptr;
   int agent_pk = 0;
@@ -74,16 +70,13 @@ int main(int argc, char **argv)
   cacheroot_t  cacheroot;
   uploadtree_t  uploadtree;
 
-  extern int AlarmSecs;
-
   /* Connect to the database */
-  DB = DBopen();
-  if (!DB) 
+  pgConn = fo_dbconnect();
+  if (!pgConn) 
   {
     printf("FATAL: Bucket agent unable to connect to database, exiting...\n");
     exit(-1);
   }
-  pgConn = DBgetconn(DB);
 
   /* command line options */
   while ((cmdopt = getopt(argc, argv, "in:p:t:u:v")) != -1) 
@@ -91,7 +84,7 @@ int main(int argc, char **argv)
     switch (cmdopt) 
     {
       case 'i': /* "Initialize" */
-            DBclose(DB); /* DB was opened above, now close it and exit */
+            PQfinish(pgConn);
             exit(0);
       case 'n': /* bucketpool_name  */
             ReadFromStdin = 0;
@@ -145,7 +138,7 @@ int main(int argc, char **argv)
             break;
       default:
             Usage(argv[0]);
-            DBclose(DB);
+            PQfinish(pgConn);
             exit(-1);
     }
   }
@@ -168,7 +161,7 @@ int main(int argc, char **argv)
   /* get agent pk 
    * Note, if GetAgentKey fails, this process will exit.
    */
-  agent_pk = GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agentDesc);
+  agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), 0, SVN_REV, agentDesc);
 
   /*** Initialize the license_ref table cache ***/
   /* Build the license ref cache to hold 2**11 (2048) licenses.
@@ -182,14 +175,6 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-  /* set the heartbeat alarm signal */
-  /* But leave it off is verbose is on because it causes too much output
-     and obscures the debugging information */
-  if (verbose == 0)
-  {
-    signal(SIGALRM, ShowHeartbeat);
-    alarm(AlarmSecs);
-  }
 
   /* main processing loop */
   while(++readnum)
@@ -198,17 +183,13 @@ int main(int argc, char **argv)
     if (ReadFromStdin) 
     {
       bucketpool_pk = 0;
-      printf("OK\n");
-      fflush(stdout);
 
       /* Read the bucketpool_pk and upload_pk from stdin.
        * Format looks like 'bppk=123, upk=987'
        */
-      if (ReadLine(stdin, inbuf, sizeof(inbuf)) < 0) break;
-      inbufp = inbuf;
-      if (!inbufp) break;
+      if (!fo_scheduler_next()) break;
 
-      token = strtok_r(inbufp, Delims, &saveptr);
+      token = strtok_r(fo_scheduler_current(), Delims, &saveptr);
       while (token && (!uploadtree.upload_fk || !bucketpool_pk))
       {
         if (strcmp(token, "bppk") == 0)
@@ -227,7 +208,7 @@ int main(int argc, char **argv)
       sprintf(sqlbuf, "select uploadtree_pk, pfile_fk, ufile_name, ufile_mode,lft,rgt from uploadtree \
              where upload_fk='%d' and parent is null limit 1", uploadtree.upload_fk);
       topresult = PQexec(pgConn, sqlbuf);
-      if (checkPQresult(pgConn, topresult, sqlbuf, agentDesc, __LINE__)) return -1;
+      if (fo_checkPQresult(pgConn, topresult, sqlbuf, agentDesc, __LINE__)) return -1;
       if (PQntuples(topresult) == 0) 
       {
         printf("ERROR: %s.%s missing upload_pk %d.\nsql: %s", 
@@ -255,7 +236,7 @@ int main(int argc, char **argv)
        */
       sprintf(sqlbuf, "select pfile_fk, ufile_name, ufile_mode,lft,rgt, upload_fk from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
       topresult = PQexec(pgConn, sqlbuf);
-      if (checkPQresult(pgConn, topresult, sqlbuf, agentDesc, __LINE__)) return -1;
+      if (fo_checkPQresult(pgConn, topresult, sqlbuf, agentDesc, __LINE__)) return -1;
       if (PQntuples(topresult) == 0) 
       {
         printf("FATAL: %s.%s missing root uploadtree_pk %d\n", 
@@ -329,7 +310,7 @@ int main(int argc, char **argv)
     /*** Initialize DEB_SOURCE and DEB_BINARY  ***/
     sprintf(sqlbuf, "select mimetype_pk from mimetype where mimetype_name='application/x-debian-package'");
     result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
+    if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
     if (PQntuples(result) == 0)
     {
       printf("FATAL: (%s.%d) Missing application/x-debian-package mimetype.\n",__FILE__,__LINE__);
@@ -340,7 +321,7 @@ int main(int argc, char **argv)
 
     sprintf(sqlbuf, "select mimetype_pk from mimetype where mimetype_name='application/x-debian-source'");
     result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
+    if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
     if (PQntuples(result) == 0)
     {
       printf("FATAL: (%s.%d) Missing application/x-debian-source mimetype.\n",__FILE__,__LINE__);
@@ -358,7 +339,7 @@ int main(int argc, char **argv)
       printf("%s(%d): %s\n", __FILE__, __LINE__, sqlbuf);
     
     result = PQexec(pgConn, sqlbuf);
-    if (checkPQcommand(pgConn, result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+    if (fo_checkPQcommand(pgConn, result, sqlbuf, __FILE__ ,__LINE__)) return -1;
     PQclear(result);
 
 
@@ -368,7 +349,7 @@ int main(int argc, char **argv)
             order by ars_starttime desc limit 1",
             agent_pk, uploadtree.upload_fk, "false", nomos_agent_pk, bucketpool_pk);
     result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
+    if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
     if (PQntuples(result) == 0)
     {
       printf("FATAL: (%s.%d) Missing bucket_ars record.\n%s\n",__FILE__,__LINE__,sqlbuf);
@@ -410,7 +391,7 @@ int main(int argc, char **argv)
         printf("%s(%d): %s\n", __FILE__, __LINE__, sqlbuf);
       
       result = PQexec(pgConn, sqlbuf);
-      if (checkPQcommand(pgConn, result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+      if (fo_checkPQcommand(pgConn, result, sqlbuf, __FILE__ ,__LINE__)) return -1;
       PQclear(result);
     }
   }  /* end of main processing loop */
@@ -418,6 +399,7 @@ int main(int argc, char **argv)
   lrcache_free(&cacheroot);
   free(bucketDefArray);
 
-  DBclose(DB);
+  PQfinish(pgConn);
+  fo_scheduler_disconnect();
   return (0);
 }

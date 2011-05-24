@@ -56,7 +56,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   /* get uploadtree rec for uploadtree_pk */
   sprintf(sqlbuf, "select pfile_fk, lft, rgt, ufile_mode, ufile_name, upload_fk from uploadtree where uploadtree_pk=%d", uploadtree_pk);
   origresult = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(pgConn, origresult, sqlbuf, fcnName, __LINE__)) return -1;
+  if (fo_checkPQresult(pgConn, origresult, sqlbuf, fcnName, __LINE__)) return -1;
   if (PQntuples(origresult) == 0) 
   {
     printf("FATAL: %s.%s missing uploadtree_pk %d\n", __FILE__, fcnName, uploadtree_pk);
@@ -93,7 +93,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   sprintf(sqlbuf, "select uploadtree_pk,pfile_fk, lft, rgt, ufile_mode, ufile_name from uploadtree where parent=%d", 
           uploadtree_pk);
   result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(pgConn, result, sqlbuf, fcnName, __LINE__)) return -1;
+  if (fo_checkPQresult(pgConn, result, sqlbuf, fcnName, __LINE__)) return -1;
   numChildren = PQntuples(result);
   if (numChildren == 0) 
   {
@@ -210,7 +210,7 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
             select pkg_name, version, vendor, source_rpm as srcpkg from pkg_rpm where pfile_fk='%d' ",
             puploadtree->pfile_fk, puploadtree->pfile_fk);
     result = PQexec(pgConn, sql);
-    if (checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
+    if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
     isPkg = PQntuples(result);
 
     /* is the file a package?  

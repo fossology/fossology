@@ -32,9 +32,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
-#include "libfossdb.h"
-#include "libfossagent.h"
-#include "libfossrepo.h"
+#include <libfossology.h>
 #include "liccache.h"
 #define FUNCTION
 

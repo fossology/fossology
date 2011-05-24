@@ -31,10 +31,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "libfossdb.h"
-#include "libfossagent.h"
-#include "libfossrepo.h"
-
 #define FUNCTION
 
 /* shortname cache very simple nonresizing hash table */

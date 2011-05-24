@@ -3,7 +3,7 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS)
+CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
 
 CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' -DFOSSREPO_CONF='"$(SYSCONFDIR)/fossology"' -DFOSSGROUP='"$(PROJECTGROUP)"'
 EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck sqlCopyTest
@@ -18,10 +18,11 @@ $(LIB): $(OBJS) $(VARS)
 #	$(CC) -c $< $(CONFDEF) -fPIC $(ALL_CFLAGS)
 
 $(EXE): %: %.c $(LIB) $(VARS)
-	$(CC) $< $(ALL_CFLAGS) $(LIB) -lpq -o $@
+	$(CC) $< $(CONFDEF) $(CFLAGS_LOCAL) $(LIB) -o $@
 
 %.o: %.c %.h
-	$(CC) -c $< $(CONFDEF)  -I`pg_config --includedir` -fPIC 
+	$(CC) -c $< $(CONFDEF)  $(CFLAGS_FO)
+#	$(CC) -c $< $(CONFDEF)  -I`pg_config --includedir` -fPIC 
 
 install: install-dev install-lib install-exe
 	echo "make $(LIB) install"

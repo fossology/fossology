@@ -41,4 +41,4 @@ uninstall:
 clean:
 	$(call dirloop,clean)
 
-.PHONY: all install uninstall clean test id
+.PHONY: all install uninstall clean test 

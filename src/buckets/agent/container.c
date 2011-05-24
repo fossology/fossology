@@ -78,7 +78,7 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray,
     "SELECT lft,rgt,upload_fk FROM uploadtree WHERE uploadtree_pk ='%d'",
     uploadtree_pk);
   result = PQexec(pgConn, sql);
-  if (checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
+  if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
   numLics = PQntuples(result);
   if (numLics == 0) 
   {
@@ -109,7 +109,7 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray,
          bucketDefArray->nomos_agent_pk, bucketDefArray->bucketpool_pk);
   if (debug) printf("%s(%d): Find buckets in container for uploadtree_pk %d\n%s\n",__FILE__, __LINE__,uploadtree_pk, sql);
   result = PQexec(pgConn, sql);
-  if (checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
+  if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
   numLics = PQntuples(result);
   if (numLics == 0) 
   {
