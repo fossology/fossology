@@ -33,6 +33,7 @@ require_once('../../tests/fossologyTestCase.php');
 require_once ('../../tests/TestEnvironment.php');
 
 global $URL;
+
 /**
  * MoveFolderTest
  *
@@ -66,7 +67,6 @@ class MoveUploadTest extends fossologyTestCase
   {
     global $URL;
 
-    print "starting MoveUploadtest\n";
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'),
                       "FAIL! Could not find Organize menu\n");
