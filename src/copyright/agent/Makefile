@@ -1,4 +1,4 @@
-######################################################################
+#####################################################################
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
@@ -16,7 +16,6 @@
 ######################################################################
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
-DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpq -lpcre
@@ -25,16 +24,13 @@ DEF = -DDATADIR='"$(DATADIR)"'
 EXE = copyright
 TESTDIR = ../agent_tests
 
-OBJECTS  = copyright.o \
-           cvector.o \
-		   radixtree.o \
-		   pair.o \
+OBJECTS  = copyright.o cvector.o radixtree.o  pair.o
 
 ##########################
 # executable build rules #
 ##########################
 $(EXE): main.c $(FOLIB) $(FOLIB) $(VARS) $(OBJECTS)
-	echo "make copyright agent"
+	@echo "make copyright agent"
 	$(CC) main.c $(FOLIB) $(OBJECTS) $(DEF) $(CFLAGS_LOCAL) -o $@
 
 all: $(EXE) test
