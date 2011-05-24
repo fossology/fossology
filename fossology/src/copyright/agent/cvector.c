@@ -556,7 +556,11 @@ void  pointer_destroy(void* to_delete)
  */
 void  pointer_print(void** to_print, FILE* pfile)
 {
-  fprintf(pfile, "0x%X", (unsigned int)*to_print);
+#ifdef _LP64
+  fprintf(pfile, "0x%lX", (unsigned long)*to_print);
+#else
+  fprintf(pfile, "0x%X",  (unsigned int )*to_print);
+#endif
 }
 
 /* ********** string memory management functions ********** */

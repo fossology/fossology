@@ -87,8 +87,8 @@ void test_find_beginning()
   /* run some tests, these numbers index to specific locations in the above */
   /* string, i.e. they are magic numbers, only change them if you know the  */
   /* correct indices in the above string                                    */
-  CU_ASSERT_EQUAL(find_beginning(text, 10), -1);
-  CU_ASSERT_EQUAL(find_beginning(text, 60), 10);
+  CU_ASSERT_EQUAL(find_beginning(text, 10), 5);
+  CU_ASSERT_EQUAL(find_beginning(text, 60), 59);
   CU_ASSERT_EQUAL(find_beginning(text, 70), 65);
 
   test_failure();
@@ -166,7 +166,7 @@ void test_load_dictionary()
   radix_init(&tree);
 
   /* do the asserts */
-  CU_ASSERT_TRUE(load_dictionary(tree, "../copyright.dic"));
+  CU_ASSERT_TRUE(load_dictionary(tree, "../agent/copyright.dic"));
   CU_ASSERT_TRUE(radix_contains(tree, "copyright"));
   CU_ASSERT_TRUE(radix_contains(tree, "(c)"));
   CU_ASSERT_TRUE(radix_contains(tree, "author"));
