@@ -14,32 +14,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP = ../..
-VARS = $(TOP)/Makefile.conf
-DEPS = $(TOP)/Makefile.deps
-include $(VARS)
-include $(DEPS)
-
-DIRS = agent agent_tests
-
-TESTDIR = agent_tests
-
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
-		 
-all: 
-	echo "make adj2nest"
-	$(call dirloop, )
-
-install: all
-	echo "make scheduler install"
-	$(call dirloop,install)
-
-uninstall:
-	echo "make scheduler uninstall"
-	$(call dirloop,uninstall)
-
+all:
+	echo "No scheduler tests"
 clean:
-	echo "make scheduler clean"
-	$(call dirloop,clean)
-
-.PHONY: all install uninstall clean test coverage
+install:
+uninstall:
