@@ -131,10 +131,10 @@ void fo_scheduler_connect(int* argc, char** argv)
 
 /**
  * @brief Disconnect the scheduler connection.
- * Making a call to this function should be the last thing that an agent does
- * before exiting.
  *
- * @return There is no return.  This function calls an exit(0)
+ * Making a call to this function should be the last thing that an agent does
+ * before exiting. Any error reporting to stdout or stderr will not work after
+ * this function has finished execution.
  */
 void fo_scheduler_disconnect()
 {
@@ -144,9 +144,6 @@ void fo_scheduler_disconnect()
     fprintf(stdout, "BYE\n");
     fflush(stdout);
   }
-
-  /* call exit(0) */
-  exit(0);
 }
 
 /**
