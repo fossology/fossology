@@ -36,7 +36,6 @@ extern int debug;
 FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
                           int *bucketList, int agent_pk, int nomosagent_pk)
 {
-  extern long HBItemsProcessed;
   char     *fcnName = "writeBuckets";
   char      sql[1024];
   PGresult *result = 0;
@@ -48,7 +47,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
   {
     while(*bucketList)
     {
-      Heartbeat(++HBItemsProcessed);
+      fo_scheduler_heart(1);
       if (pfile_pk)
       {
         snprintf(sql, sizeof(sql), 
@@ -62,7 +61,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
         {  
           printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file.\n",
                   __FILE__,fcnName, __LINE__);
-          checkPQresult(pgConn, result, sql, __FILE__, __LINE__);
+          fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__);
               
           PQclear(result);
           rv = -1;

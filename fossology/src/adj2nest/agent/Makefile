@@ -19,13 +19,13 @@ TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
-CFLAGS_LOCAL=-lpq $(ALL_CFLAGS)
+CFLAGS_LOCAL= $(ALL_CFLAGS)
 EXE=adj2nest
 
 all: $(EXE)
 
 $(EXE): %: %.c $(DB) $(REPO) $(VARS) $(FOLIB)
-	$(CC) $< $(CFLAGS_LOCAL) $(FOLIB) -o $@
+	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)

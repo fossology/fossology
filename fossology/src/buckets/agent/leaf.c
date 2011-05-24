@@ -136,7 +136,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray,
        bucketDefArray->nomos_agent_pk);
 
   result = PQexec(pgConn, sql);
-  if (checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
+  if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
   numLics = PQntuples(result);
   
   /* make int array of rf_pk's for this pfile */
@@ -330,7 +330,7 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
                      "select pfile_mimetypefk from pfile where pfile_pk=%d",
                      puploadtree->pfile_fk);
             resultmime = PQexec(pgConn, sql);
-            if (checkPQresult(pgConn, resultmime, sql, fcnName, __LINE__)) return 0;
+            if (fo_checkPQresult(pgConn, resultmime, sql, fcnName, __LINE__)) return 0;
             mimetype = *(PQgetvalue(resultmime, 0, 0));
             PQclear(resultmime);
             if (mimetype == DEB_SOURCE) pkgtype = 's';

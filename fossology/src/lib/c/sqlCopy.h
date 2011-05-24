@@ -26,7 +26,7 @@
 #include <ctype.h>
 #include <time.h>
 #include <libpq-fe.h>
-#include "libfossdb.h"    /* for the libfossdb error checking functions */
+#include "libfossology.h"    /* for the libfossdb error checking functions */
 
 #define ERROR_RETURN(Msg) {\
         printf("ERROR: %s:%d, %s\n   %s\n", __FILE__, __LINE__, Msg, strerror(errno)); \

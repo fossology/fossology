@@ -18,7 +18,7 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpq -lpcre
+CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpcre
 DEF = -DDATADIR='"$(DATADIR)"'
 
 EXE = copyright
@@ -31,10 +31,10 @@ OBJECTS  = copyright.o cvector.o radixtree.o  pair.o
 ##########################
 $(EXE): main.c $(FOLIB) $(VARS) $(OBJECTS)
 	@echo "make copyright agent"
-	$(CC) main.c $(FOLIB) $(OBJECTS) $(DEF) $(CFLAGS_LOCAL) -o $@
+	$(CC) main.c $(OBJECTS) $(DEF) $(CFLAGS_LOCAL) -o $@
 
 all: $(EXE) test
-	echo "make copyright agent"
+	echo "make copyright agent and test"
 
 test: 
 	$(MAKE) -C $(TESTDIR) test

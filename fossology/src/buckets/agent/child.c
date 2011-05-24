@@ -58,7 +58,7 @@ FUNCTION int childInBucket(PGconn *pgConn, pbucketdef_t bucketDef, puploadtree_t
            bucketDef->nomos_agent_pk, upload_pk, lft, rgt);
 //  if (debug) printf("===%s:%d:\n%s\n===\n", __FILE__, __LINE__, sql);
   result = PQexec(pgConn, sql);
-  if (checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return -1;
+  if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return -1;
   rv = PQntuples(result);
   PQclear(result);
   if (rv) return 1;
@@ -74,7 +74,7 @@ FUNCTION int childInBucket(PGconn *pgConn, pbucketdef_t bucketDef, puploadtree_t
            bucketDef->nomos_agent_pk, upload_pk, lft, rgt);
 //  if (debug) printf("===%s:%d:\n%s\n===\n", __FILE__, __LINE__, sql);
   result = PQexec(pgConn, sql);
-  if (checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return -1;
+  if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return -1;
   rv = PQntuples(result);
   PQclear(result);
   if (rv) return 1;
