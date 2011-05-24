@@ -7,7 +7,8 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # the directories we do things in by default
-DIRS = lib/c scheduler 
+DIRS = adj2nest buckets cli copyright delagent lib mimetype nomos \
+       pkgagent scheduler Shell sqlagent tutorials ununpack wget_agent www
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
@@ -22,29 +23,29 @@ COVDIRS = $(DIRS:%=cov-%)
 all: $(BUILDDIRS)
 $(DIRS): $(BUILDDIRS)
 $(BUILDDIRS):
-	$(MAKE) -C $(@:build-%=%)
+	$(MAKE) -s -C $(@:build-%=%)
 
 # install depends on everything being built first
 install: all $(INSTALLDIRS)
 $(INSTALLDIRS):
-	$(MAKE) -C $(@:install-%=%) install 
+	$(MAKE) -s -C $(@:install-%=%) install 
 
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
-	$(MAKE) -C $(@:uninstall-%=%) uninstall
+	$(MAKE) -s -C $(@:uninstall-%=%) uninstall
 
 # test depends on everything being built first
 test: all $(TESTDIRS)
 $(TESTDIRS):
-	$(MAKE) -C $(@:test-%=%) test
+	$(MAKE) -s -C $(@:test-%=%) test
 
 coverage: $(COVDIRS)
 $(COVDIRS):
-	$(MAKE) -C $(@:cov-%=%) coverage
+	$(MAKE) -s -C $(@:cov-%=%) coverage
 
 clean: $(CLEANDIRS)
 $(CLEANDIRS):
-	$(MAKE) -C $(@:clean-%=%) clean
+	$(MAKE) -s -C $(@:clean-%=%) clean
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)

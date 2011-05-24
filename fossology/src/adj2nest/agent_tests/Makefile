@@ -15,7 +15,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 all:
-	echo "No adj2nest tests"
+test:
 clean:
 install:
 uninstall:
+	@echo "No adj2nest tests"

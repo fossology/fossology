@@ -17,7 +17,6 @@
 
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 CFLAGS_LOCAL=-lpq $(ALL_CFLAGS)
@@ -42,7 +41,5 @@ coverage:
 
 clean:
 	rm -f $(EXE) *.o core
-
-include $(DEPS)
 
 .PHONY: all install uninstall clean test
