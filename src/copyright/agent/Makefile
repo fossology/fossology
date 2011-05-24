@@ -29,7 +29,7 @@ OBJECTS  = copyright.o cvector.o radixtree.o  pair.o
 ##########################
 # executable build rules #
 ##########################
-$(EXE): main.c $(FOLIB) $(FOLIB) $(VARS) $(OBJECTS)
+$(EXE): main.c $(FOLIB) $(VARS) $(OBJECTS)
 	@echo "make copyright agent"
 	$(CC) main.c $(FOLIB) $(OBJECTS) $(DEF) $(CFLAGS_LOCAL) -o $@
 
@@ -92,8 +92,6 @@ uninstall:
 clean:
 	echo "make copyright agent clean"
 	rm -f *.o *.a $(EXE)
-
-include $(DEPS)
 
 .PHONY: all install uninstall clean test $(FOLIB)
 	
