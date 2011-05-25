@@ -52,7 +52,6 @@ require_once SIMPLE_TEST . 'reporter.php';
 require_once SIMPLE_TEST . 'web_tester.php';
 
 require_once ('TestEnvironment.php');
-$tr = TESTROOT;
 require_once($tr . '/testClasses/timer.php');
 
 
