@@ -947,6 +947,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING("GPL_v1");
 	    lmem[_mGPL] = 1;
 	}
+        else if (INFILE(_LT_GPL_V2)) {
+            INTERESTING("GPL_v2");
+            lmem[_mGPL] = 1;
+        }
 	else if (INFILE(_LT_GPL_1)) {
 	    if (INFILE(_TITLE_GPL2)) {
 		INTERESTING("GPL_v2");
@@ -1293,8 +1297,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING(lDebug ? "GPL-except-classpath_2" : "GPL-classpath-exception");
 	}
   else
-	if (INFILE(_LT_GPL_EXCEPT_BISON)) {
-	    INTERESTING(lDebug ? "GPL-except-Bison" : "GPL-Bison-exception");
+	if (INFILE(_LT_GPL_EXCEPT_BISON_1)) {
+	    INTERESTING(lDebug ? "GPL-except-Bison-1" : "GPL-Bison-exception");
+	}
+  else
+	if (INFILE(_LT_GPL_EXCEPT_BISON_2)) {
+	    INTERESTING(lDebug ? "GPL-except-Bison-2" : "GPL-Bison-exception");
 	}
   else
 	if (INFILE(_LT_GPL_EXCEPT_1)) {
@@ -1309,33 +1317,34 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	else if (INFILE(_PHR_GPL_DESCRIPTIONS)) {
 	    INTERESTING(lDebug ? "GPL-kinda" : "GPL");
 	}
-	if (!lmem[_mGPL] && !lmem[_mLGPL] && !lmem[_mGFDL]) {
-	    if (INFILE(_LT_FSF_1)) {
-		INTERESTING(lDebug ? "FSF(1)" : "FSF");
-	    }
-	    else if (INFILE(_LT_FSF_2)) {
-		INTERESTING(lDebug ? "FSF(2)" : "FSF");
-	    }
-	    else if (INFILE(_LT_FSF_3)) {
-		INTERESTING(lDebug ? "FSF(3)" : "FSF");
-	    }
-	    else if (mCR_FSF() && INFILE(_LT_FSF_4)) {
-		INTERESTING(lDebug ? "FSF(4)" : "FSF");
-	    }
-	    else if (mCR_FSF() && INFILE(_LT_FSF_5)) {
-		INTERESTING(lDebug ? "FSF(5)" : "FSF");
-	    }
-	    else if (INFILE(_LT_FSFref1)) {
-		INTERESTING(lDebug ? "FSF(ref1)" : "FSF");
-	    }
-	    else if (INFILE(_LT_FSFref2)) {
-		INTERESTING(lDebug ? "FSF(ref2)" : "FSF");
-	    }
-	    else if (INFILE(_LT_LGPLrefFSF) &&
-		     !INFILE(_PHR_NOT_UNDER_LGPL)) {
-		INTERESTING(lDebug ? "LGPL(FSF)" : "LGPL");
-		lmem[_mLGPL] = 1;
-	    }
+        /* checking for FSF */
+        if (INFILE(_LT_FSF_1)) {
+          INTERESTING(lDebug ? "FSF(1)" : "FSF");
+        }
+        else if (INFILE(_LT_FSF_2)) {
+          INTERESTING(lDebug ? "FSF(2)" : "FSF");
+        }
+        else if (INFILE(_LT_FSF_3)) {
+          INTERESTING(lDebug ? "FSF(3)" : "FSF");
+        }
+        else if (mCR_FSF() && INFILE(_LT_FSF_4)) {
+          INTERESTING(lDebug ? "FSF(4)" : "FSF");
+        }
+        else if (mCR_FSF() && INFILE(_LT_FSF_5)) {
+          INTERESTING(lDebug ? "FSF(5)" : "FSF");
+        }
+        else if (INFILE(_LT_FSFref1)) {
+          INTERESTING(lDebug ? "FSF(ref1)" : "FSF");
+        }
+        else if (INFILE(_LT_FSFref2)) {
+          INTERESTING(lDebug ? "FSF(ref2)" : "FSF");
+        }
+        else if (INFILE(_LT_LGPLrefFSF) &&
+                !INFILE(_PHR_NOT_UNDER_LGPL)) {
+          INTERESTING(lDebug ? "LGPL(FSF)" : "LGPL");
+          lmem[_mLGPL] = 1;
+        }
+        if (!lmem[_mGPL] && !lmem[_mLGPL] && !lmem[_mGFDL]) {
 	    /*
 	     * Check these patterns AFTER checking for FSF and GFDL, and only if the
 	     * CUPS license isn't present.
@@ -1811,6 +1820,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_LT_PNG_ZLIBref2)) {
 	INTERESTING(lDebug ? "ZLIB(4)" : "zlib/libpng");
+    }
+    else if (INFILE(_LT_PNG_ZLIBref3)) { /* might be zlib/libpng license, not sure */
+        INTERESTING(lDebug ? "ZLIB(5)" : "zlib/libpng-possibility");
     }
     else if (!LVAL(_TEXT_GNU_LIC_INFO) && INFILE(_URL_ZLIB)) {
 	INTERESTING(lDebug ? "ZLIB(url)" : "zlib/libpng");
@@ -5812,7 +5824,10 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
     }
     else if (GPL_INFILE(_PHR_FSF_V2_OR_LATER) ||
 	     INFILE(_PHR_GPL2_OR_LATER)) {
-	if (INFILE(_TITLE_GPL2)) {
+	if (INFILE(_TITLE_GPL_KDE)) {
+	    lstr = lDebug ? "GPL+KDE" : "GPL+KDE";
+	}
+	else if (INFILE(_TITLE_GPL2)) {
 	    lstr = lDebug ? "GPL-v2(#1)" : "GPL_v2";
 	}
 	else {
@@ -7561,6 +7576,15 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
     else if (INFILE(_LT_SEE_COPYING_7)) {
 	INTERESTING(lDebug ? "Gen-CPY-7" : "See-file(COPYING)");
     }
+    else if (INFILE(_LT_SEE_COPYING_8)) {
+	INTERESTING(lDebug ? "Gen-CPY-8" : "See-file(COPYING)");
+    }
+    else if (INFILE(_LT_SEE_COPYING_9)) {
+	INTERESTING(lDebug ? "Gen-CPY-9" : "See-file(COPYING)");
+    }
+    else if (INFILE(_LT_SEE_COPYING_10)) {
+	INTERESTING(lDebug ? "Gen-CPY-10" : "See-file(COPYING)");
+    }
     else if (INFILE(_LT_SEE_COPYING_LAST1)) {
 	INTERESTING(lDebug ? "Gen-CPY-L1" : "See-file(COPYING)");
     }
@@ -7587,6 +7611,9 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
     }
     else if (INFILE(_LT_SEE_LICENSE_7)) {
 	INTERESTING(lDebug ? "Gen-LIC-7" : "See-file(LICENSE)");
+    }
+    else if (INFILE(_LT_SEE_LICENSE_8)) {
+	INTERESTING(lDebug ? "Gen-LIC-8" : "See-file(LICENSE)");
     }
     else if (INFILE(_LT_SEE_LICENSE_LAST1)) {
 	INTERESTING(lDebug ? "Gen-LIC-L1" : "See-file(LICENSE)");
