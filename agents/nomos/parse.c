@@ -5824,8 +5824,9 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
     }
     else if (GPL_INFILE(_PHR_FSF_V2_OR_LATER) ||
 	     INFILE(_PHR_GPL2_OR_LATER)) {
-	if (INFILE(_TITLE_GPL_KDE)) {
-	    lstr = lDebug ? "GPL+KDE" : "GPL+KDE";
+        /* the version of GPL that is compatible with KDE is v2+, so does not judge the version of the GPL, it must be GPLv2+ */
+	if (INFILE(_TITLE_GPL_KDE)) { 
+	    lstr = lDebug ? "GPLv2+KDE" : "GPLv2+KDE";
 	}
 	else if (INFILE(_TITLE_GPL2)) {
 	    lstr = lDebug ? "GPL-v2(#1)" : "GPL_v2";
