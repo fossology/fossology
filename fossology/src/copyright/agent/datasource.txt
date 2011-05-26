@@ -1,0 +1,8 @@
+names.dic comes from:
+  http://www.outpost9.com/files/WordLists.html
+No license is given in the file or the above webpage.
+
+Other (unused) name sources are:
+  http://en.wikipedia.org/wiki/Names
+
+  Check out social security admin data files
