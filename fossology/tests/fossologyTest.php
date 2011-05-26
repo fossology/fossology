@@ -477,12 +477,8 @@ class fossologyTest extends WebTestCase
       if(empty($upload)) {
         continue;
       }
-      /*
-       NOTE: the split below can sometimes cause a php notice, there is no
-       real error, and the notice can be ignored.  The third item in the list is
-       never used.  The coding to suppress the error is not worth it.
-       */
-      list($upId, $file, $restOfLine) = split(' ', $upload);
+
+      list($upId, $file) = split(' ', $upload);
       if($upId == '#') {
         continue;
       }
