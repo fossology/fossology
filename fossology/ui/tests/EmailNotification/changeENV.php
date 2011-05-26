@@ -34,7 +34,16 @@ $opts = array();
 print "changeENV starting....\n";
 $opts = getopt('hc:');
 //print "changeENV: opts is:\n";print_r($opts) . "\n";
-$Usage = "{$argv[0]}: [-h] -c <change-string>\n";
+if(array_key_exists('SCRIPT_NAME', $_SERVER))
+{
+  $programName = $_SERVER['SCRIPT_NAME'];
+}
+else if(!empty($argv[0]))
+{
+  $programName = $argv[0];
+}
+//$Usage = "{$argv[0]}: [-h] -c <change-string>\n";
+$Usage = "$programName: [-h] -c <change-string>\n";
 
 if (empty($opts)) {
   print $Usage;
@@ -60,7 +69,19 @@ else {
   exit(1);
 }
 
-$testEnv = '../../../tests/TestEnvironment.php';
+$where = dirname(__FILE__);
+
+$testEnv = NULL;
+
+if(preg_match('!/home/jenkins!', $where, $matches))
+{
+        $testEnv = '../../tests/fossologyTestCase.php';
+}
+else
+{
+        //echo "using standard requires for running outside of jenkins\n";
+        $testEnv = '../../../tests/TestEnvironment.php';
+}
 
 $sedLine = "sed -e \"1,$ s/USER=.*/USER='$change2';/\" ".
                "-e \"1,$ s/WORD=.*/WORD='$change2';/\" $testEnv

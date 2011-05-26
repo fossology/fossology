@@ -28,12 +28,20 @@
  * Created on April 3, 2009
  */
 
-// old requires when run by testFOSSology.php
-//require_once('../../../tests/fossologyTestCase.php');
-//require_once ('../../../tests/TestEnvironment.php');
+$where = dirname(__FILE__);
 
-require_once('../../tests/fossologyTestCase.php');
-require_once ('../../tests/TestEnvironment.php');
+if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
+{
+  //echo "running from jenkins....fossology/tests\n";
+  require_once('../../tests/fossologyTestCase.php');
+  require_once ('../../tests/TestEnvironment.php');
+}
+else
+{
+  //echo "using requires for running outside of jenkins\n";
+  require_once('../../../tests/fossologyTestCase.php');
+  require_once ('../../../tests/TestEnvironment.php');
+}
 
 global $URL;
 
@@ -43,19 +51,31 @@ class uploadWoutEMailTest extends fossologyTestCase {
 
   public function setUp() {
     global $URL;
-    $last = exec('./changeENV.php -s fosstester -c noemail', $out, $rtn);
+
+    if (array_key_exists('WORKSPACE', $_ENV))
+    {
+      $WORKSPACE = $_ENV['WORKSPACE'];
+      $path = "$WORKSPACE" . "/fossology/ui/tests/EmailNotification/changeENV.php";
+      echo "UWOET: path with workspace is:$path\n";
+      global $WORKSPACE;
+    }
+    else
+    {
+      $path = './changeENV.php';
+    }
+    $last = exec("$path -s fosstester -c noemail", $out, $rtn);
     if($rtn > 0) {
-      $this->fail("Could not change the test environment file, stopping test\n");
+      $this->fail("Could not change the test environment file\n");
       print "Failure, output from changeENV is:\n";print_r($out) . "\n";
-      exit(1);
+      //exit(1);
     }
     $this->Login();
     //$this->Login();
     $result = $this->createFolder(1, 'Enote', 'Folder for Email notification uploads');
-    if(!is_null($result)) {
+    if(!is_numeric($result)) {
       if($result != 'Folder Enote Exists') {
-        $this->fail("Failure! folder Enote does not exist, stopping test\n");
-        exit(1);
+        $this->fail("Failure! folder Enote does not exist, Error is:$result\n");
+        //exit(1);
       }
     }
   }
@@ -63,6 +83,7 @@ class uploadWoutEMailTest extends fossologyTestCase {
   public function testUploadWoutEmail() {
 
     global $URL;
+    global $WORKSPACE;
 
     /* login noemail */
     print "Starting upload without email notificiation\n";
@@ -91,12 +112,24 @@ class uploadWoutEMailTest extends fossologyTestCase {
   }
 
   public function tearDown() {
+    
+    global $WORKSPACE;
+    
     print "Changing user back to fosstester";
-    $last = exec('./changeENV.php -s noemail -c fosstester', $out, $rtn);
+    if (array_key_exists('WORKSPACE', $_ENV))
+    {
+      $WORKSPACE = $_ENV['WORKSPACE'];
+      $path = "$WORKSPACE" . "/fossology/ui/tests/EmailNotification/changeENV.php";
+    }
+    else
+    {
+      $path = './changeENV.php';
+    }
+    $last = exec("$path -s noemail -c fosstester", $out, $rtn);
     if($rtn > 0) {
-      $this->fail("Could not change the test environment file, stopping test\n");
+      $this->fail("Could not change the test environment file\n");
       print "Failure, output from changeENV is:\n";print_r($out) . "\n";
-      exit(1);
+      //exit(1);
     }
   }
 };
