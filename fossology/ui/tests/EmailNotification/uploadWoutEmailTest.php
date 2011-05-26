@@ -56,14 +56,14 @@ class uploadWoutEMailTest extends fossologyTestCase {
     {
       $WORKSPACE = $_ENV['WORKSPACE'];
       $path = "$WORKSPACE" . "/fossology/ui/tests/EmailNotification/changeENV.php";
-      echo "UWOET: path with workspace is:$path\n";
       global $WORKSPACE;
     }
     else
     {
       $path = './changeENV.php';
     }
-    $last = exec("$path -s fosstester -c noemail", $out, $rtn);
+    // change the user in TestEnvironment to noemail
+    $last = exec("$path -c noemail", $out, $rtn);
     if($rtn > 0) {
       $this->fail("Could not change the test environment file\n");
       print "Failure, output from changeENV is:\n";print_r($out) . "\n";
@@ -125,7 +125,7 @@ class uploadWoutEMailTest extends fossologyTestCase {
     {
       $path = './changeENV.php';
     }
-    $last = exec("$path -s noemail -c fosstester", $out, $rtn);
+    $last = exec("$path -c fosstester", $out, $rtn);
     if($rtn > 0) {
       $this->fail("Could not change the test environment file\n");
       print "Failure, output from changeENV is:\n";print_r($out) . "\n";

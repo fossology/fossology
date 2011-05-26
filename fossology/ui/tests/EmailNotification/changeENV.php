@@ -75,7 +75,7 @@ $testEnv = NULL;
 
 if(preg_match('!/home/jenkins!', $where, $matches))
 {
-        $testEnv = '../../tests/fossologyTestCase.php';
+        $testEnv = '../../tests/TestEnvironment.php';
 }
 else
 {
