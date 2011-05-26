@@ -6129,7 +6129,7 @@ k
 #
 %ENTRY%	_TITLE_GPL_KDE
 %KEY%	"licen[cs]"
-%STR%	"gnu (general p|p)ublic licen[cs]e =ANY= accepted by the membership of kde"
+%STR%	"gnu (general p|p)ublic licen[cs]e =ANY= (accepted|approved) by (the membership of kde|trolltech asa =FEW= the kde free qt foundation)"
 #
 %ENTRY%	_TITLE_GPL3
 %KEY%	"licen[cs]"
@@ -6917,7 +6917,7 @@ k
 #
 %ENTRY%	_PHR_GPL2_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|gpl[_-]?v?2) =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|gpl[_-]?v?2) =ANY= (or|Alternatively) =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL21_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
