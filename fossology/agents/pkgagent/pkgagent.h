@@ -37,6 +37,7 @@
 #include "rpmmacro.h"
 
 #define MAXCMD 5000
+#define MAXLENGTH 256
 
 #define NO      0
 #define YES     1

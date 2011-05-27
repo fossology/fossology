@@ -752,7 +752,7 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
       char *depends = NULL;
       char tempvalue[MAXCMD];
       int size,i,length;
-      length = 256;
+      length = MAXLENGTH;
       size = 0;
       if (value[0] != '\0'){
         strncpy(tempvalue, value, sizeof(tempvalue));
@@ -902,7 +902,7 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
        char tempvalue[MAXCMD];
        int size,i,length;
        size = 0;
-       length = 256;
+       length = MAXLENGTH;
        if (value[0] != '\0'){
        strncpy(tempvalue, value, sizeof(tempvalue));
        depends = strtok(value, ",");
