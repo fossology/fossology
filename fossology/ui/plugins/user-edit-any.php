@@ -399,6 +399,7 @@ class user_edit_any extends FO_Plugin {
         $V.= "</tr>\n";
         $text = _("Select the user's access level.");
         $V.= "$Style<th>$text</th>";
+        $Val = GetParm('permission', PARM_INTEGER);
         $V.= "<td><select name='permission'>\n";
         $text1 = _("None (very basic, no database access)");
         $text2 = _("Read-only (read, but no writes or downloads)");
@@ -410,15 +411,15 @@ class user_edit_any extends FO_Plugin {
         $text8 = _("Debug (... and allows access to debugging functions)");
         $text9 = _("Full Administrator (all access including adding and deleting users)");
 
-        $V.= "<option value='" . PLUGIN_DB_NONE . "'>$text1</option>\n";
-        $V.= "<option selected value='" . PLUGIN_DB_READ . "'>$text2</option>\n";
-        $V.= "<option value='" . PLUGIN_DB_DOWNLOAD . "'>$text3</option>\n";
-        $V.= "<option value='" . PLUGIN_DB_WRITE . "'>$text4</option>\n";
-        $V.= "<option value='" . PLUGIN_DB_UPLOAD . "'>$text5</option>\n";
-        $V.= "<option value='" . PLUGIN_DB_ANALYZE . "'>$text6</option>\n";
-        $V.= "<option value='" . PLUGIN_DB_DELETE . "'>$text7</option>\n";
-        $V.= "<option value='" . PLUGIN_DB_DEBUG . "'>$text8</option>\n";
-        $V.= "<option value='" . PLUGIN_DB_USERADMIN . "'>$text9</option>\n";
+        $V.= "<option " . (($Val==0)?"selected":"") . " value='" . PLUGIN_DB_NONE . "'>$text1</option>\n";
+        $V.= "<option " . (($Val==1)?"selected":"") . " value='" . PLUGIN_DB_READ . "'>$text2</option>\n";
+        $V.= "<option " . (($Val==2)?"selected":"") . " value='" . PLUGIN_DB_DOWNLOAD . "'>$text3</option>\n";
+        $V.= "<option " . (($Val==3)?"selected":"") . " value='" . PLUGIN_DB_WRITE . "'>$text4</option>\n";
+        $V.= "<option " . (($Val==4)?"selected":"") . " value='" . PLUGIN_DB_UPLOAD . "'>$text5</option>\n";
+        $V.= "<option " . (($Val==5)?"selected":"") . " value='" . PLUGIN_DB_ANALYZE . "'>$text6</option>\n";
+        $V.= "<option " . (($Val==6)?"selected":"") . " value='" . PLUGIN_DB_DELETE . "'>$text7</option>\n";
+        $V.= "<option " . (($Val==7)?"selected":"") . " value='" . PLUGIN_DB_DEBUG . "'>$text8</option>\n";
+        $V.= "<option " . (($Val==10)?"selected":"") . " value='" . PLUGIN_DB_USERADMIN . "'>$text9</option>\n";
         $V.= "</select></td>\n";
         $V.= "</tr>\n";
         $text = _("Select the user's top-level folder. Access is restricted to this folder.");
