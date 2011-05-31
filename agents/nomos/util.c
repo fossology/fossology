@@ -34,6 +34,7 @@
 */
 
 #define	MM_CACHESIZE	20
+#define MAXLENGTH       100 
 
 #ifdef	REUSE_STATIC_MEMORY
 static char grepzone[10485760];	/* 10M for now, adjust if needed */
@@ -1006,7 +1007,33 @@ void printRegexMatch(int n, int cached)
     return;
 }
 
-
+/*
+ * @brief delete all null characters in the file
+ * @param pathname: the file path
+ */
+void HandleNullCharacter(char *pathname)
+{
+  int count = strlen(pathname); /* the length of pathname*/
+  count = MAXLENGTH + 4*count; /* size will be allocated */
+  char *commands = (char *)malloc(count*sizeof(char));
+  sprintf(commands, "od -t x1 '%s' | grep ' 00 ' >/dev/null 2>&1", pathname);
+  int rc = system(commands);
+#ifdef	DEBUG
+  printf("commands is:%s, rc is:%d\n", commands, rc);
+#endif	/* DEBUG */
+  if (0 == rc) /* if the file contains any null character */
+  {
+    memset(commands, '\0', count);
+    sprintf(commands, "tr -d '\\0' < '%s' > '%s.temp';mv '%s.temp' '%s' >/dev/null 2>&1", pathname, pathname, pathname, pathname);
+#ifdef	DEBUG
+    printf("commands is:%s\n", commands);
+    printf("the file %s contain null characters\n", pathname);
+#endif	/* DEBUG */
+    /* delete all null characters */
+    system(commands);
+  }
+  free(commands);
+}
 /*
  * Blarg.  Files that are EXACTLY a multiple of the system pagesize do
  * not get a NULL on the end of the buffer.  We need something
@@ -1036,7 +1063,6 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	mmapOpenListing();
 	Bail(12);
     }
-
     if ((mmp->fd = open(pathname, O_RDONLY)) < 0) {
 	if (errno == ENOENT) {
 	    mmp->inUse = 0;		/* overkill? */
@@ -1076,6 +1102,7 @@ char *mmapFile(char *pathname)	/* read-only for now */
 
 	rem = mmp->size-1;
 	cp = mmp->mmPtr;
+        HandleNullCharacter(pathname); /* delete all null characters in the scanned file */
 	while (rem > 0) {
     if ((n = (int) read(mmp->fd, cp, (size_t) rem)) < 0) {
       /* log error and move on.  This way error will be logged
