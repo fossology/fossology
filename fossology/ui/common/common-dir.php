@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 function Isdir($mode) { return(($mode & 1<<18) + ($mode & 0040000) != 0); }
 function Isartifact($mode) { return(($mode & 1<<28) != 0); }
 function Iscontainer($mode) { return(($mode & 1<<29) != 0); }
