@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 /************************************************************
  GetMimeTypeItem(): Given an uploadtree_pk, return a string that describes
  the mime type.  Note this only looks in the pfile rec.  For some mimetypes
