@@ -30,7 +30,7 @@ class admin_tag_ns extends FO_Plugin
   {
   var $Name       = "admin_tag_ns";
   var $Title      = TITLE_admin_tag_ns;
-  var $MenuList = "Admin::Groups::Manage TagNS";
+  var $MenuList = "Admin::Tag::Manage TagNS";
   var $Version = "1.3";
   var $Dependency = array("db");
   var $DBaccess = PLUGIN_DB_USERADMIN;
