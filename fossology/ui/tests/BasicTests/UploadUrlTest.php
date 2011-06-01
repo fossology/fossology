@@ -26,16 +26,21 @@
  */
 
 /*
- * Yuk! This test is ugly!  NOTE: Will need to set a proxy for this to
- * work inside hp.
+ * NOTE: Will need to set a proxy for this to work inside hp.
  */
-
-// old requires when run by testFOSSology.php
-//require_once('../../../tests/fossologyTestCase.php');
-//require_once ('../../../tests/TestEnvironment.php');
-
-require_once('../../tests/fossologyTestCase.php');
-require_once ('../../tests/TestEnvironment.php');
+$where = dirname(__FILE__);
+if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
+{
+  //echo "running from jenkins....fossology/tests\n";
+  require_once('../../tests/fossologyTestCase.php');
+  require_once ('../../tests/TestEnvironment.php');
+}
+else
+{
+  //echo "using requires for running outside of jenkins\n";
+  require_once('../../../tests/fossologyTestCase.php');
+  require_once ('../../../tests/TestEnvironment.php');
+}
 
 global $URL;
 
@@ -47,7 +52,6 @@ class UploadUrlTest extends fossologyTestCase
     global $URL;
 
     print "starting UploadUrlTest\n";
-    //$this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $this->Login();
 
     $loggedIn = $this->mybrowser->get($URL);

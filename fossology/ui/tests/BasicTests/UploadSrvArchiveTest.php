@@ -39,12 +39,19 @@
  * automatically do it. Well it could, but it's a bad idea.
  */
 
-// old requires when run by testFOSSology.php
-//require_once('../../../tests/fossologyTestCase.php');
-//require_once ('../../../tests/TestEnvironment.php');
-
-require_once('../../tests/fossologyTestCase.php');
-require_once ('../../tests/TestEnvironment.php');
+$where = dirname(__FILE__);
+if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
+{
+  //echo "running from jenkins....fossology/tests\n";
+  require_once('../../tests/fossologyTestCase.php');
+  require_once ('../../tests/TestEnvironment.php');
+}
+else
+{
+  //echo "using requires for running outside of jenkins\n";
+  require_once('../../../tests/fossologyTestCase.php');
+  require_once ('../../../tests/TestEnvironment.php');
+}
 
 global $URL;
 
