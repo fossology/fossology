@@ -24,12 +24,19 @@
  * Created on March 17, 2009
  */
 
-// old requires when run by testFOSSology.php
-//require_once('../../../tests/fossologyTestCase.php');
-//require_once ('../../../tests/TestEnvironment.php');
-
-require_once('../../tests/fossologyTestCase.php');
-require_once ('../../tests/TestEnvironment.php');
+$where = dirname(__FILE__);
+if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
+{
+  //echo "running from jenkins....fossology/tests\n";
+  require_once('../../tests/fossologyTestCase.php');
+  require_once ('../../tests/TestEnvironment.php');
+}
+else
+{
+  //echo "using requires for running outside of jenkins\n";
+  require_once('../../../tests/fossologyTestCase.php');
+  require_once ('../../../tests/TestEnvironment.php');
+}
 
 require_once (TESTROOT . '/testClasses/db.php');
 
@@ -69,11 +76,11 @@ class noEmailUserTest extends fossologyTestCase {
     /*
      * Verify, check the db for this user to ensure email_notify is NOT set.
      */
-    $dlink = new db('host=localhost dbname=fossology user=fosstester password=fosstester;');
+    $dlink = new db('host=localhost dbname=fossology user=fossy password=fossy;');
     print "Verifying User email notification setting\n";
     $Sql = "SELECT user_name, email_notify FROM users WHERE user_name='UserNoEmail';";
     $User = $dlink->dbQuery($Sql);
-    print "DB: User(SQL results) are:\n";print_r($User) . "\n";
+    //print "DB: User(SQL results) are:\n";print_r($User) . "\n";
     if((int)$User[0]['email_notify'] == 0) {
       $this->pass();
     }
