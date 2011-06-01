@@ -24,16 +24,20 @@
  * Created on Oct. 15, 2008
  */
 
-// old requires when run by testFOSSology.php
-//require_once('../../../tests/fossologyTestCase.php');
-//require_once ('../../../tests/TestEnvironment.php');
+$where = dirname(__FILE__);
+if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
+{
+  //echo "running from jenkins....fossology/tests\n";
+  require_once('../../tests/fossologyTestCase.php');
+  require_once ('../../tests/TestEnvironment.php');
+}
+else
+{
+  //echo "using requires for running outside of jenkins\n";
+  require_once('../../../tests/fossologyTestCase.php');
+  require_once ('../../../tests/TestEnvironment.php');
+}
 
-require_once('../../tests/fossologyTestCase.php');
-require_once ('../../tests/TestEnvironment.php');
-
-//require_once ('../../../tests/fossologyTest.php');
-
-/* every test must use these globals, at least $URL */
 global $URL;
 
 class BasicFolderTest extends fossologyTestCase
