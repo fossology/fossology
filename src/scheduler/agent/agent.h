@@ -114,7 +114,8 @@ ssize_t agent_write(agent a, const void* buf, size_t count);
 void test_agents(host h);
 void kill_agents();
 int  add_meta_agent(char* name, char* cmd, int max, int spc);
-int  is_meta_agent();
+int  is_meta_agent(char* name);
+int  is_exclusive(char* name);
 int  num_agents();
 
 #endif /* AGENT_H_INCLUDE */

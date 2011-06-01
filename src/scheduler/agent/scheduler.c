@@ -89,11 +89,16 @@ void chld_sig(int signo)
 }
 
 /**
- * TODO
+ * Handles any signals sent to the scheduler that are not SIGCHLD.
  *
- * @param signo
- * @param INFO
- * @param context
+ * Currently Handles:
+ *   SIGALRM: scheduler will run agent updates and database updates
+ *   SIGTERM: scheduler will gracefully shut down
+ *   SIGQUIT: scheduler will gracefully shut down
+ *   SIGINT:  scheduler will gracefully shut down
+ *   SIGHIP:  scheduler will reload configuration data
+ *
+ * @param signo the number of the signal that was sent
  */
 void prnt_sig(int signo)
 {
@@ -143,23 +148,43 @@ void prnt_sig(int signo)
  */
 void update_scheduler()
 {
-  job j;
-  host h;
+  /* queue used to hold jobs if an exclusive job enters the system */
+  static job j = NULL;
+  static int lockout = 0;
 
-  //VERBOSE2("EVENT:\n  close: %d\n  agents: %d\n  jobs: %d\n",
-  //    closing, num_agents(), active_jobs());
-  if(closing && num_agents() == 0 && active_jobs() == 0)
+  /* locals */
+  int n_agents = num_agents();
+  int n_jobs   = active_jobs();
+
+  if(closing && n_agents == 0 && n_jobs == 0)
   {
     event_loop_terminate();
     return;
   }
 
-  while((j = next_job()) != NULL)
-  {
-    if((h = get_host(1)) == NULL)
-      continue;
+  if(lockout && n_agents == 0 && n_jobs == 0)
+    lockout = 0;
 
-    agent_init(h, j, 0);
+  if(j == NULL && !lockout)
+  {
+    while((j = next_job()) != NULL)
+    {
+      if(is_exclusive(job_type(j)))
+        break;
+
+      // TODO handle no available host
+      //if((h = get_host(1)) == NULL)
+      //  continue;
+
+      agent_init(get_host(1), j, 0);
+    }
+  }
+
+  if(j != NULL && n_agents == 0 && n_jobs == 0)
+  {
+    agent_init(get_host(1), j, 0);
+    lockout = 1;
+    j = NULL;
   }
 }
 
@@ -411,11 +436,8 @@ void load_config()
           {
             if(strncmp(tmp, "EXCLUSIVE", 9) == 0)
               special |= SAG_EXCLUSIVE;
-            else if(strncmp(tmp, "NONE", 4) == 0)
-            {
+            else
               special = SAG_NONE;
-              break;
-            }
           }
         }
         else
@@ -521,6 +543,7 @@ int main(int argc, char** argv)
   int port = -1;              // the port the scheduler will listen on
   char* log = NULL;           // used when a different log from the default is used
   GOptionContext* options;    // option context used for command line parsing
+  GError* error = NULL;       // error object used during parsing
   int rc;                     // used for return values of
 
   /* the options for the command line parser */
@@ -533,21 +556,29 @@ int main(int argc, char** argv)
       { "port",     'p', 0, G_OPTION_ARG_INT,    &port,     "Set the port the interface listens on"       },
       { "reset",    'R', 0, G_OPTION_ARG_NONE,   &db_reset, "Reset the job queue upon startup"            },
       { "test",     't', 0, G_OPTION_ARG_NONE,   &test_die, "Close the scheduler after running tests"     },
-      { "verbose",  'v', 0, G_OPTION_ARG_INT,    &verbose,  "Set the scheudler verbose level"             },
+      { "verbose",  'v', 0, G_OPTION_ARG_INT,    &verbose,  "Set the scheduler verbose level"             },
       {NULL}
   };
-
-  /* make sure we are running as fossy */
-  set_usr_grp();
 
   /* ********************* */
   /* *** parse options *** */
   /* ********************* */
   options = g_option_context_new("- scheduler for FOSSology");
   g_option_context_add_main_entries(options, entries, NULL);
-  g_option_context_set_ignore_unknown_options(options, TRUE);
-  g_option_context_parse(options, &argc, &argv, NULL);
+  g_option_context_parse(options, &argc, &argv, &error);
+
+  if(error)
+  {
+    fprintf(stderr, "ERROR: %s\n", error->message);
+    fprintf(stderr, "%s", g_option_context_get_help(options, FALSE, NULL));
+    fflush(stderr);
+    return -1;
+  }
+
   g_option_context_free(options);
+
+  /* make sure we are running as fossy */
+  set_usr_grp();
 
   if(s_daemon) { rc = daemon(0, 0); }
   if(db_init) { database_init(); return 0; }
@@ -561,7 +592,6 @@ int main(int argc, char** argv)
   /* ********************************** */
   /* *** do all the initializations *** */
   /* ********************************** */
-  g_thread_init(NULL);
   g_type_init();
   fo_RepOpen();
   load_config();

@@ -38,12 +38,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossology.h>
 #include <glib.h>
 
-#define P_WIDTH 25
+#define P_WIDTH 30
 #define F_WIDTH 10
 
 #ifndef FOSS_CONF
 #define FOSS_CONF ".fossology.conf"
 #endif
+
+#define vprintf(...) if(verbose) printf(__VA_ARGS__);
 
 int s;          ///< the socket that the CLI will use to communicate
 int verbose;    ///< the verbose flag for the cli
@@ -126,6 +128,34 @@ void print_sql_table(PGresult* db_result)
   g_free(field_w);
 }
 
+void interface_usage()
+{
+  /* print cli usage */
+  printf("FOSSology scheduler command line interface\n");
+  printf("for all options any prefix will work when sending command\n");
+  printf("+-------------------------------------------------------------------------------+\n");
+  printf("|%*s:   EFFECT                                       |\n", P_WIDTH, "COMMAND [optional] <required>");
+  printf("+-------------------------------------------------------------------------------+\n");
+  printf("|%*s:   prints this usage statement                  |\n", P_WIDTH, "help");
+  printf("|%*s:   close the connection to scheduler            |\n", P_WIDTH, "exit");
+  printf("|%*s:   shutdown the scheduler gracefully            |\n", P_WIDTH, "close");
+  printf("|%*s:   pauses a job indefinitely                    |\n", P_WIDTH, "pause <job id>");
+  printf("|%*s:   reload the configuration information         |\n", P_WIDTH, "reload");
+  printf("|%*s:   scheduler responds with status information   |\n", P_WIDTH, "status [job id]");
+  printf("|%*s:   restart a paused job                         |\n", P_WIDTH, "restart <job id>");
+  printf("|%*s:   query/change the scheduler/job verbosity     |\n", P_WIDTH, "verbose [job id] [level]");
+  printf("|%*s:   causes the scheduler to check the job queue  |\n", P_WIDTH, "database");
+  printf("+-------------------------------------------------------------------------------+\n");
+  printf("|%*s:   goes into the schedule dialog                |\n", P_WIDTH, "get");
+  printf("|%*s:   uploads a file and schedulers a set of jobs  |\n", P_WIDTH, "upload");
+  printf("+-------------------------------------------------------------------------------+\n");
+  fflush(stdout);
+}
+
+/* ************************************************************************** */
+/* **** commands ************************************************************ */
+/* ************************************************************************** */
+
 void get_cmd()
 {
   /* locals */
@@ -136,14 +166,14 @@ void get_cmd()
 
   memset(buffer, '\0', sizeof(buffer));
   memset(cmd,    '\0', sizeof(cmd));
-  printf("Please enter the SQL select statement that you would like to run\n");
-  printf("Multiline SQL can be achieved using the '\\' character\n");
+  vprintf("Please enter the SQL select statement that you would like to run\n");
+  vprintf("Multiline SQL can be achieved using the '\\' character\n");
   fflush(stdout);
 
   buffer[0] = '\\'; buffer[1] = '\n';
   while(buffer[strlen(buffer) - 2] == '\\')
   {
-    printf("#: ");
+    vprintf("#: ");
     fflush(stdout);
 
     memset(buffer, '\0', sizeof(buffer));
@@ -190,32 +220,40 @@ void get_cmd()
   PQclear(db_result);
 }
 
-void interface_usage()
+void upload_cmd()
 {
-  /* print cli usage */
-  printf("FOSSology scheduler command line interface\n");
-  printf("for all options any prefix will work when sending command\n");
-  printf("+--------------------------------------------------------------------------+\n");
-  printf("|%*s:   EFFECT                                       |\n", P_WIDTH, "COMMDNA");
-  printf("+--------------------------------------------------------------------------+\n");
-  printf("|%*s:   prints this usage statement                  |\n", P_WIDTH, "help");
-  printf("|%*s:   close the connection to scheduler            |\n", P_WIDTH, "exit");
-  printf("|%*s:   shutdown the scheduler gracefully            |\n", P_WIDTH, "close");
-  printf("|%*s:   pauses a job indefinitely                    |\n", P_WIDTH, "pause <job id>");
-  printf("|%*s:   reload the configuration information         |\n", P_WIDTH, "reload");
-  printf("|%*s:   scheduler responds with status information   |\n", P_WIDTH, "status");
-  printf("|%*s:   get the status of all agent on specified job |\n", P_WIDTH, "status <job id>");
-  printf("|%*s:   restart a paused job                         |\n", P_WIDTH, "restart <job id>");
-  printf("|%*s:   change the level of verbose for scheduler    |\n", P_WIDTH, "verbose <level>");
-  printf("|%*s:   change the verbose for all agents on a job   |\n", P_WIDTH, "verbose <job id> <level>");
-  printf("|%*s:   causes the scheduler to check the job queue  |\n", P_WIDTH, "database");
-  printf("|%*s:   goes into the schedule dialog                |\n", P_WIDTH, "get");
-  printf("+--------------------------------------------------------------------------+\n");
-  fflush(stdout);
+  char file[FILENAME_MAX];
+  char agts[1024];
+  char path[1024];
+  char exec_call[4096];
+
+  /* get the file */
+  memset(file, '\0', sizeof(file));
+  vprintf("file: ");
+  if(fgets(file, sizeof(file), stdin) == NULL) return;
+  file[strlen(file) - 1] = '\0';
+
+  /* get agents list */
+  memset(agts, '\0', sizeof(agts));
+  vprintf("agents: ");
+  if(fgets(agts, sizeof(agts), stdin) == NULL) return;
+  agts[strlen(agts) - 1] = '\0';
+
+  /* get repo path for file */
+  memset(path, '\0', sizeof(path));
+  vprintf("repo path: ");
+  if(fgets(path, sizeof(path), stdin) == NULL) return;
+  path[strlen(path) - 1] = '\0';
+
+  /* compile call to shell */
+  snprintf(exec_call, sizeof(exec_call), "%s/cp2foss -f %s -q %s %s",
+      CLI_DIR, path, agts, file);
+
+  if(system(exec_call) != 0); // TODO
 }
 
 /* ************************************************************************** */
-/* **** main types ********************************************************** */
+/* **** main **************************************************************** */
 /* ************************************************************************** */
 
 int main(int argc, char** argv)
@@ -245,14 +283,14 @@ int main(int argc, char** argv)
 
   GOptionEntry entries[] =
   {
-      {"conf",    'c', 0, G_OPTION_ARG_STRING, &db_conf,
+      {"conf",  'c', 0, G_OPTION_ARG_STRING, &db_conf,
           "Set the file that will be used for the database configuration"},
-      {"host",    'h', 0, G_OPTION_ARG_STRING, &host,
+      {"host",  'h', 0, G_OPTION_ARG_STRING, &host,
           "Set the host that the scheduler is on"},
-      {"port",    'p', 0, G_OPTION_ARG_INT,    &port_number,
+      {"port",  'p', 0, G_OPTION_ARG_INT,    &port_number,
           "Set the port that the scheduler is listening on"},
-      {"verbose", 'v', 0, G_OPTION_ARG_NONE,   &verbose,
-          "Change the verbose level for the cli"},
+      {"quiet", 'q', 0, G_OPTION_ARG_NONE,   &verbose,
+          "Cause the CLI to not print usage hints"},
       {NULL}
   };
 
@@ -261,6 +299,9 @@ int main(int argc, char** argv)
   g_option_context_set_ignore_unknown_options(options, TRUE);
   g_option_context_parse(options, &argc, &argv, NULL);
   g_option_context_free(options);
+
+  /* change the verbose to conform to quite option */
+  verbose = !verbose;
 
   /* check the scheduler config for port number */
   if(port_number < 0)
@@ -294,12 +335,13 @@ int main(int argc, char** argv)
   if(connect(s, (struct sockaddr*)&addr, sizeof(addr)) == -1)
   {
     fprintf(stderr, "ERROR: could not connect to host\n");
-    fprintf(stderr, "ERROR: attempted to connect to \"%s:%d\"\n", host, port_number);
+    fprintf(stderr, "ERROR: attempted to connect to \"%s:%d\"\n",
+        host, port_number);
     return 0;
   }
 
   /* listen to the scheulder */
-  interface_usage();
+  if(verbose) interface_usage();
   while(!closing)
   {
     /* prepare for read */
@@ -330,8 +372,15 @@ int main(int argc, char** argv)
         continue;
       }
 
-      if(strcmp(buffer, "get\n") == 0) {
+      if(strcmp(buffer, "get\n") == 0)
+      {
         get_cmd();
+        continue;
+      }
+
+      if(strcmp(buffer, "upload\n") == 0)
+      {
+        upload_cmd();
         continue;
       }
 

@@ -141,9 +141,14 @@ void* interface_thread(void* param)
     {
       event_signal(job_restart_event, get_job(atoi(strtok(NULL, " "))));
     }
-    else if(strcmp(cmd, "verbose") == 0 && (tmp = strtok(NULL, " ")) != NULL)
+    else if(strcmp(cmd, "verbose") == 0)
     {
-      if((cmd = strtok(NULL, " ")) == NULL) verbose = atoi(tmp);
+      if((tmp = strtok(NULL, " ")) == NULL)
+      {
+        sprintf(buffer, "verbose %d\n", verbose);
+        g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+      }
+      else if((cmd = strtok(NULL, " ")) == NULL) verbose = atoi(tmp);
       else job_verbose_event(job_verbose(get_job(atoi(tmp)), atoi(cmd)));
     }
     else if(strcmp(cmd, "database") == 0)
@@ -186,6 +191,7 @@ interface_connection* interface_conn_init(GSocketConnection* conn)
  */
 void interface_conn_destroy(interface_connection* inter)
 {
+  g_object_unref(inter->conn);
   g_thread_join(inter->thread);
 }
 
@@ -233,6 +239,7 @@ void* listen_thread(void* unused)
 
   VERBOSE2("INTERFACE: socket listening thread closing\n");
   g_socket_listener_close(server_socket);
+  g_object_unref(server_socket);
   return NULL;
 }
 
