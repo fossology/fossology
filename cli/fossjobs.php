@@ -164,6 +164,7 @@ if (array_key_exists("u", $options)) {
     }
   }
 }
+if (array_key_exists("U", $options)) {
 $upload_pk_list = $options['U'];
 if ($upload_pk_list == 'ALL') {
   $upload_pk_list = "";
@@ -176,6 +177,7 @@ if ($upload_pk_list == 'ALL') {
       $upload_pk_list.= "," . $Results[$i]['upload_pk'];
     }
   }
+}
 }
 if (!empty($upload_pk_list)) {
   $reg_agents = array();
