@@ -178,11 +178,30 @@ class ui_view_license extends FO_Plugin
     { 
       $pfile_pk = 0;  // unknown, only have uploadtree_pk aka $Item
       $nomos_license_string = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $Item);
+      $nomos_license_array = explode(",", $nomos_license_string);
+      //print "nomos_license_string is:$nomos_license_string\n";
+      //print_r($nomos_license_array);
+
       if (!empty($nomos_license_string)) 
       {
-$text = _("The Nomos license scanner found:");
+        $text = _("The Nomos license scanner found:");
         $nomos_out = "$text <b>";
-        $nomos_out .= $nomos_license_string;
+      }
+      $rec_flag = 0;
+      foreach($nomos_license_array as $one_license) {
+        $one_license = trim($one_license);
+        $SQL = "select rf_text from license_ref where rf_shortname like '$one_license';";
+        $Results = $DB->Action($SQL);
+        $Lic = $Results[0];
+        $lincese_text = $Lic['rf_text'];
+        //print "sql is:$SQL,lincese_text is:$lincese_text\n";
+        if (0 == $rec_flag) {
+          $rec_flag = 1;
+        } else {
+          $nomos_out .= " ,";
+        } 
+        $nomos_out .= "<b>";
+        $nomos_out .= "<a title='$lincese_text'>$one_license</a>";
         $nomos_out .= "</b>";
       }
     }
