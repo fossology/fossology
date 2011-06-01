@@ -132,6 +132,14 @@ class foconfig extends FO_Plugin
       {
         if ($VarValue != $oldarray[$VarName])
         {
+          /* set the value of 'GlobalBrowse'. If the value is not 'true', set the value as 'false' */
+          if (!strcmp($VarName, "GlobalBrowse"))
+          {
+            if (strcmp($VarValue, "true"))
+            {
+              $VarValue = "false";
+            }
+          }
           $sql = "update sysconfig set conf_value='" .
           pg_escape_string($VarValue) .
                     "' where variablename='$VarName'";
