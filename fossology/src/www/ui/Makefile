@@ -15,7 +15,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP=../..
+TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
@@ -24,8 +24,7 @@ iPATHFILE=pathinclude.php
 
 DIRS=images locale
 
-
-all:
+all: $(iPATHFILE)
 
 $(iPATHFILE): $(VARS)
 	@echo "Building $(iPATHFILE)"
@@ -79,15 +78,6 @@ uninstall:
 
 	rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 	
-srcuninstall:
-
-	cd plugins/simpleUi; \
-	for link in $(RMLINKS); do \
-		rm -f $$link; \
-	done
-
-test: all
-	@echo "*** Tests are still run by hand for ui/ ***"
 
 clean:
 	rm -f *.o core $(iPATHFILE)
