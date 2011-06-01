@@ -545,7 +545,9 @@ void meta_agent_destroy(meta_agent ma)
  * type as the meta_agent that is passed to this function and the agent will run
  * on the host that is passed.
  *
- * @param meta_data, the
+ * @param host_machine the machine to start the agent on
+ * @param owner the job that this agent belongs to
+ * @param gen the generation of the data associated with this agent
  */
 agent agent_init(host host_machine, job owner, int gen)
 {
@@ -1028,6 +1030,18 @@ int add_meta_agent(char* name, char* cmd, int max, int spc)
 int is_meta_agent(char* name)
 {
   return g_tree_lookup(meta_agents, name) != NULL;
+}
+
+/**
+ * TODO
+ *
+ * @param name
+ * @return
+ */
+int is_exclusive(char* name)
+{
+  meta_agent ma = (meta_agent)g_tree_lookup(meta_agents, name);
+  return ma->special == SAG_EXCLUSIVE;
 }
 
 /**

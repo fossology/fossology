@@ -76,6 +76,13 @@ const char* jobsql_log = "\
       SET jq_log = '%s' \
       WHERE jq_pk = '%d';";
 
+const char* jobsql_email = "\
+    SELECT user_email, email_notify FROM users \
+      WHERE user_pk = ( \
+        SELECT job_user_fk FROM job \
+          WHERE job_pk = %d \
+      );";
+
 /* ************************************************************************** */
 /* **** local functions ***************************************************** */
 /* ************************************************************************** */
@@ -83,7 +90,7 @@ const char* jobsql_log = "\
 #define PQget(db_result, row, col) PQgetvalue(db_result, row, PQfnumber(db_result, col))
 
 /**
- *
+ * TODO
  */
 void database_init()
 {
@@ -91,12 +98,17 @@ void database_init()
 }
 
 /**
- *
+ * TODO
  */
 void database_destroy()
 {
   PQfinish(db_conn);
   db_conn = NULL;
+}
+
+void email_notification()
+{
+  // TODO
 }
 
 /* ************************************************************************** */
@@ -205,36 +217,38 @@ void database_update_job(int j_id, job_status status)
   PGresult* db_result;
 
   /* check how to update database */
-    switch(status)
-    {
-      case JB_CHECKEDOUT:
-        break;
-      case JB_STARTED:
-        sql = g_strdup_printf(jobsql_started, "localhost", getpid(), j_id);
-        break;
-      case JB_COMPLETE:
-        sql = g_strdup_printf(jobsql_complete, j_id);
-        break;
-      case JB_RESTART:
-        sql = g_strdup_printf(jobsql_restart, j_id);
-        break;
-      case JB_FAILED:
-        sql = g_strdup_printf(jobsql_failed, j_id);
-        break;
-      case JB_SCH_PAUSED: case JB_CLI_PAUSED:
-        sql = g_strdup_printf(jobsql_paused, j_id);
-        break;
-    }
+  switch(status)
+  {
+    case JB_CHECKEDOUT:
+      break;
+    case JB_STARTED:
+      sql = g_strdup_printf(jobsql_started, "localhost", getpid(), j_id);
+      break;
+    case JB_COMPLETE:
+      email_notification();
+      sql = g_strdup_printf(jobsql_complete, j_id);
+      break;
+    case JB_RESTART:
+      sql = g_strdup_printf(jobsql_restart, j_id);
+      break;
+    case JB_FAILED:
+      email_notification();
+      sql = g_strdup_printf(jobsql_failed, j_id);
+      break;
+    case JB_SCH_PAUSED: case JB_CLI_PAUSED:
+      sql = g_strdup_printf(jobsql_paused, j_id);
+      break;
+  }
 
-    /* update the database job queue */
-    db_result = PQexec(db_conn, sql);
-    if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
-    {
-      lprintf("ERROR %s.%d: failed to update job status in job queue\n", __FILE__, __LINE__);
-      lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
-    }
-    PQclear(db_result);
-    g_free(sql);
+  /* update the database job queue */
+  db_result = PQexec(db_conn, sql);
+  if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
+  {
+    lprintf("ERROR %s.%d: failed to update job status in job queue\n", __FILE__, __LINE__);
+    lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
+  }
+  PQclear(db_result);
+  g_free(sql);
 }
 
 /**

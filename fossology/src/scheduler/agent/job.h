@@ -78,9 +78,9 @@ FILE* job_log(job j);
 /* **** Job list Functions ************************************************** */
 /* ************************************************************************** */
 
-job next_job();
-job get_job(int id);
-int num_jobs();
-int active_jobs();
+job  next_job();
+job  get_job(int id);
+int  num_jobs();
+int  active_jobs();
 
 #endif /* JOB_H_INCLUDE */
