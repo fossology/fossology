@@ -115,8 +115,13 @@ class uploadWEMailTest extends fossologyTestCase {
     print "waiting for jobs to finish\n";
     $this->wait4jobs();
     print "verifying correct email was received\n";
-    if(!($this->checkEmailNotification(3))) {
-      $this->fail("checkEmailNotification failed, is local email configured?\n");
+    $results = $this->checkEmailNotification(3);
+    if(is_array($results)) {
+      $this->fail("checkEmailNotification failed,\n" .
+      "There were either errors in the results or" .
+      " email may not be configured on the system.\n" .
+      " Results returned from the check are:\n");
+      print_r($results) . "\n";
     }
   }
 };
