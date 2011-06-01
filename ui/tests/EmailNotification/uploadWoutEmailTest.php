@@ -45,6 +45,7 @@ else
 
 global $URL;
 
+
 class uploadWoutEMailTest extends fossologyTestCase {
 
   public $mybrowser;
@@ -52,10 +53,13 @@ class uploadWoutEMailTest extends fossologyTestCase {
   public function setUp() {
     global $URL;
 
+    $TR = TESTROOT;
+    $_ENV['TestRoot'] = $TR;
+
     if (array_key_exists('WORKSPACE', $_ENV))
     {
-      $WORKSPACE = $_ENV['WORKSPACE'];
-      $path = "$WORKSPACE" . "/fossology/ui/tests/EmailNotification/changeENV.php";
+      //echo "WORKSPACE EXISTS:{$_ENV['WORKSPACE']}\n";
+      $path = $_ENV['WORKSPACE'] . "/fossology/ui/tests/EmailNotification/changeENV.php";
       global $WORKSPACE;
     }
     else
@@ -63,19 +67,16 @@ class uploadWoutEMailTest extends fossologyTestCase {
       $path = './changeENV.php';
     }
     // change the user in TestEnvironment to noemail
-    $last = exec("$path -c noemail", $out, $rtn);
+    $last = exec("$path -c noemail -t $TR", $out, $rtn);
     if($rtn > 0) {
       $this->fail("Could not change the test environment file\n");
       print "Failure, output from changeENV is:\n";print_r($out) . "\n";
-      //exit(1);
     }
     $this->Login();
-    //$this->Login();
     $result = $this->createFolder(1, 'Enote', 'Folder for Email notification uploads');
     if(!is_numeric($result)) {
       if($result != 'Folder Enote Exists') {
         $this->fail("Failure! folder Enote does not exist, Error is:$result\n");
-        //exit(1);
       }
     }
   }
@@ -106,15 +107,30 @@ class uploadWoutEMailTest extends fossologyTestCase {
      * need to check email when they finish....
      */
     print "waiting for jobs to finish\n";
-    $this->wait4jobs();
+    if(!$this->wait4jobs())
+    {
+      echo "FATAL! Wait4Jobs failed...\n";
+      $this->fail("Wait4Jobs failed, cannot verify that no email was received\n");
+    }
     print "verifying  NO email was received\n";
     $this->checkEmailNotification(0);
   }
 
   public function tearDown() {
-    
+
     global $WORKSPACE;
     
+    if(array_key_exists('TestRoot', $_ENV))
+    {
+      $GTR = $_ENV['TestRoot'];
+    }
+    else
+    {
+      $msg = "No TestRoot environment varilable defined." .
+        "Cannot change TestEnvironment file back to fosstester\n";
+      $this->fail($msg);
+      return;
+    }
     print "Changing user back to fosstester";
     if (array_key_exists('WORKSPACE', $_ENV))
     {
@@ -125,7 +141,7 @@ class uploadWoutEMailTest extends fossologyTestCase {
     {
       $path = './changeENV.php';
     }
-    $last = exec("$path -c fosstester", $out, $rtn);
+    $last = exec("$path -c fosstester -t $GTR", $out, $rtn);
     if($rtn > 0) {
       $this->fail("Could not change the test environment file\n");
       print "Failure, output from changeENV is:\n";print_r($out) . "\n";
