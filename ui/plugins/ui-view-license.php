@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -50,13 +50,13 @@ class ui_view_license extends FO_Plugin
       menu_insert("View::[BREAK]",-19);
       if (GetParm("mod",PARM_STRING) == $this->Name)
 	{
-	menu_insert("View::bsam License",-21);
-	menu_insert("View-Meta::bsam License",-21);
+	menu_insert("View::Nomos License",-21);
+	menu_insert("View-Meta::Nomos License",-21);
 	}
       else
 	{
-	menu_insert("View::bsam License",-21,$URI,"View license histogram");
-	menu_insert("View-Meta::bsam License",-21,$URI,"View license histogram");
+	menu_insert("View::Nomos License",-21,$URI,"View license histogram");
+	menu_insert("View-Meta::Nomos License",-21,$URI,"View license histogram");
 	}
       }
     $Lic = GetParm("lic",PARM_INTEGER);
@@ -102,22 +102,25 @@ class ui_view_license extends FO_Plugin
    ***********************************************************/
   function ViewLicense($Item, $LicPk, $TokPfileStart, $nomos_out)
     {
-    global $DB;
+    global $PG_CONN;
     global $Plugins;
     $View = &$Plugins[plugin_find_id("view")];
 
     /* Find the license path */
     if (!empty($Item))
       {
-      $SQL = "SELECT license_path,tok_match,tok_license,lic_tokens
+      $sql = "SELECT license_path,tok_match,tok_license,lic_tokens
 	FROM agent_lic_meta
 	INNER JOIN uploadtree ON uploadtree_pk = '$Item'
 	AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
 	INNER JOIN agent_lic_raw ON lic_pk=lic_fk
 	WHERE lic_fk = $LicPk AND tok_pfile_start = $TokPfileStart
 	ORDER BY version DESC LIMIT 1;";
-      $Results = $DB->Action($SQL);
-      $Lic = $Results[0];
+      $result = pg_query($PG_CONN,$sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+      $Lic = pg_fetch_assoc($result);
+      pg_free_result($result);
       if (empty($Lic['license_path'])) { return; }
       }
 
@@ -126,26 +129,61 @@ class ui_view_license extends FO_Plugin
     $Lic['tok_pfile'] = $Lic['tok_license'];
 
     /* Load the License name and data */
-    $Results = $DB->Action("SELECT lic_name, lic_url FROM agent_lic_raw WHERE lic_pk = $LicPk;");
-    if (empty($Results[0]['lic_name'])) { return; }
+    $sql = "SELECT lic_name, lic_url FROM agent_lic_raw WHERE lic_pk = $LicPk;";
+    $result = pg_query($PG_CONN, $sql);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (empty($row['lic_name'])) { return; }
 
     /* View license text as a temp file */
     global $DATADIR;
-    $Ftmp = fopen("$DATADIR/agents/licenses/" . $Results[0]['lic_name'],"rb");
+    $Ftmp = fopen("$DATADIR/agents/licenses/" . $row['lic_name'],"rb");
 
     /* Save the path */
     $this->ConvertLicPathToHighlighting($Lic,NULL);
     $Text = "<div class='text'>";
-    $Text .= "<H1>License: " . $Results[0]['lic_name'] . "</H1>\n";
-    if (!empty($Results[0]['lic_url']) && (strtolower($Results[0]['lic_url']) != 'none'))
+    $Text .= "<H1>License: " . $row['lic_name'] . "</H1>\n";
+    if (!empty($row['lic_url']) && (strtolower($row['lic_url']) != 'none'))
       {
-      $Text .= "Reference URL: <a href=\"" . $Results[0]['lic_url'] . "\" target=_blank> " . $Results[0]['lic_url'] . "</a>";
+      $Text .= "Reference URL: <a href=\"" . $row['lic_url'] . "\" target=_blank> " . $row['lic_url'] . "</a>";
       }
     $Text .= "<hr>\n";
     $Text .= "</div>";
     $Text .= $nomos_out;
     $View->ShowView($Ftmp,"view",0,0,$Text);
     } // ViewLicense()
+
+ /***********************************************************
+   ViewLicenseText(): Given a uploadtree_pk, lic_pk
+   retrieve the license text and display it.
+   ***********************************************************/
+  function ViewLicenseText($Item, $LicPk, $TokPfileStart, $nomos_out)
+  {
+    global $PG_CONN;
+    global $Plugins;
+    $View = &$Plugins[plugin_find_id("view")];    
+
+    $sql = "select * from license_ref where rf_pk = $LicPk;";
+    $result = pg_query($PG_CONN, $sql);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (empty($row['rf_shortname'])) { return; }
+
+    $Text = "<div class='text'>";
+    $Text .= "<H1>License: " . $row['rf_shortname'] . "</H1>\n";
+    if (!empty($row['rf_url']) && (strtolower($row['rf_url']) != 'none'))
+    {
+      $Text .= "Reference URL: <a href=\"" . $row['rf_url'] . "\" target=_blank> " . $row['rf_url'] . "</a>";
+    }
+    if (!empty($row['rf_text']))
+    {
+      $Text .= "<b>License Text:</b> " . $row['rf_text'];
+    }
+    $Text .= "<hr>\n";
+    $Text .= "</div>";
+    $Text .= $nomos_out;
+    $View->ShowView(NULL,"view",0,0,$Text);
+  } // ViewLicenseText()
 
   /***********************************************************
    Output(): This function is called when user output is
@@ -156,7 +194,7 @@ class ui_view_license extends FO_Plugin
    ***********************************************************/
   function Output()
     {
-    global $DB, $PG_CONN;
+    global $PG_CONN;
 
     if ($this->State != PLUGIN_STATE_READY) { return; }
 
@@ -164,12 +202,12 @@ class ui_view_license extends FO_Plugin
 
     $V="";
     global $Plugins;
-    global $DB;
     $View = &$Plugins[plugin_find_id("view")];
     $LicId = GetParm("lic",PARM_INTEGER);
     $LicIdSet = GetParm("licset",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
     $nomosagent_pk = GetParm("napk",PARM_INTEGER);
+    $Upload = GetParm("upload",PARM_INTEGER);
 
     /* only display nomos results if we know the nomosagent_pk 
        Otherwise, we don't know what results to display.  */
@@ -177,38 +215,42 @@ class ui_view_license extends FO_Plugin
     if (!empty($nomosagent_pk))
     { 
       $pfile_pk = 0;  // unknown, only have uploadtree_pk aka $Item
-      $nomos_license_string = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $Item);
-      $nomos_license_array = explode(",", $nomos_license_string);
+      $nomos_license_array = GetFileLicenses($nomosagent_pk, $pfile_pk, $Item);
+      //$nomos_license_array = explode(",", $nomos_license_string);
       //print "nomos_license_string is:$nomos_license_string\n";
       //print_r($nomos_license_array);
 
-      if (!empty($nomos_license_string)) 
+      if (!empty($nomos_license_array)) 
       {
         $text = _("The Nomos license scanner found:");
         $nomos_out = "$text <b>";
       }
       $rec_flag = 0;
-      foreach($nomos_license_array as $one_license) {
+      foreach($nomos_license_array as $one_license_pk => $one_license) {
         $one_license = trim($one_license);
-        $SQL = "select rf_text from license_ref where rf_shortname like '$one_license';";
-        $Results = $DB->Action($SQL);
-        $Lic = $Results[0];
-        $lincese_text = $Lic['rf_text'];
-        //print "sql is:$SQL,lincese_text is:$lincese_text\n";
         if (0 == $rec_flag) {
           $rec_flag = 1;
         } else {
           $nomos_out .= " ,";
         } 
         $nomos_out .= "<b>";
-        $nomos_out .= "<a title='$lincese_text'>$one_license</a>";
+        $nomos_out .= "<a href='javascript:;' onClick=\"javascript:window.open('";
+        $nomos_out .= Traceback_uri();
+        $nomos_out .= "?mod=view-license";
+        $nomos_out .= "&lic=";
+        $nomos_out .= $one_license_pk;
+        $nomos_out .= "&upload=";
+        $nomos_out .= $Upload;
+        $nomos_out .= "&item=";
+        $nomos_out .= $Item;
+        $nomos_out .= "','License Text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$one_license</a>";
         $nomos_out .= "</b>";
       }
     }
 
     if (!empty($LicId))
 	{
-	$this->ViewLicense($Item,$LicId,$LicIdSet, $nomos_out);
+	$this->ViewLicenseText($Item,$LicId,$LicIdSet, $nomos_out);
 	return;
 	}
 
