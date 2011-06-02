@@ -42,7 +42,7 @@ class ui_view_license extends FO_Plugin
   function RegisterMenus()
     {
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
+/*    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     if (!empty($Item) && !empty($Upload))
@@ -58,9 +58,9 @@ class ui_view_license extends FO_Plugin
 	menu_insert("View::Nomos License",-21,$URI,"View license histogram");
 	menu_insert("View-Meta::Nomos License",-21,$URI,"View license histogram");
 	}
-      }
+      }*/
     $Lic = GetParm("lic",PARM_INTEGER);
-    if (!empty($Lic)) { $this->NoMenu = 1; }
+    if (!empty($Lic)) { $this->NoMenu = 1; } 
     } // RegisterMenus()
 
   /***********************************************************
@@ -182,7 +182,8 @@ class ui_view_license extends FO_Plugin
     $Text .= "<hr>\n";
     $Text .= "</div>";
     $Text .= $nomos_out;
-    $View->ShowView(NULL,"view",0,0,$Text);
+    //$View->ShowView(NULL,"view",0,0,$Text);
+    print($Text);    
   } // ViewLicenseText()
 
   /***********************************************************
