@@ -24,14 +24,32 @@
  * Created on Aug 25, 2008
  */
 
-require_once('../../../tests/fossologyTestCase.php');
-require_once('../../../tests/commonTestFuncs.php');
-require_once('../../../tests/TestEnvironment.php');
-require_once('../../../tests/testClasses/parseMiniMenu.php');
-require_once('../../../tests/testClasses/parseFolderPath.php');
-require_once('../../../tests/testClasses/parseLicenseTbl.php');
-require_once('../../../tests/testClasses/dom-parseLicenseTable.php');
-require_once('../../../tests/testClasses/parseLicenseTblDirs.php');
+$where = dirname(__FILE__);
+if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
+{
+  //echo "running from jenkins....fossology/tests\n";
+  require_once('../../tests/fossologyTestCase.php');
+  require_once('../../tests/commonTestFuncs.php');
+  require_once('../../tests/TestEnvironment.php');
+  require_once('../../tests/testClasses/parseMiniMenu.php');
+  require_once('../../tests/testClasses/parseFolderPath.php');
+  require_once('../../tests/testClasses/parseLicenseTbl.php');
+  require_once('../../tests/testClasses/dom-parseLicenseTable.php');
+  require_once('../../tests/testClasses/parseLicenseTblDirs.php');
+
+}
+else
+{
+  //echo "using requires for running outside of jenkins\n";
+  require_once('../../../tests/fossologyTestCase.php');
+  require_once('../../../tests/commonTestFuncs.php');
+  require_once('../../../tests/TestEnvironment.php');
+  require_once('../../../tests/testClasses/parseMiniMenu.php');
+  require_once('../../../tests/testClasses/parseFolderPath.php');
+  require_once('../../../tests/testClasses/parseLicenseTbl.php');
+  require_once('../../../tests/testClasses/dom-parseLicenseTable.php');
+  require_once('../../../tests/testClasses/parseLicenseTblDirs.php');
+}
 
 global $URL;
 
@@ -76,13 +94,13 @@ class verifyDirsOnly extends fossologyTestCase
     global $URL;
     global $name;
     global $safeName;
-    
+
     $licenseSummary = array(
     												'Unique licenses' 			 => 0,
     												'Licenses found'   			 => 0,
     												'Files with no licenses' => 0,
     												'Files'									 => 0
-    												);
+    );
 
     print "starting verifyFossDirsOnly test\n";
     $page = $this->mybrowser->clickLink('Browse');
@@ -101,7 +119,7 @@ class verifyDirsOnly extends fossologyTestCase
     /* Select archive */
     $page = $this->mybrowser->clickLink($name);
     $page = $this->mybrowser->clickLink('fossDirsOnly.tar');
-    
+
     //print "************ Page after select foss archive *************\n$page\n";
     $this->assertTrue($this->myassertText($page, "/empty\//"),
       "verifyFossDirsOnly FAILED! 'empty/' not found\n");
@@ -130,17 +148,17 @@ class verifyDirsOnly extends fossologyTestCase
     //print "page after get of $url is:\n$page\n";
     $this->assertTrue($this->myassertText($page, '/License Browser/'),
           "verifyFossDirsOnly FAILED! License Browser Title not found\n");
-    
+
     $licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
-		$licSummary->parseLicenseTbl();
-		
-  	foreach ($licSummary->hList as $summary) {
-  		$key = $summary['textOrLink'];
-  		$this->assertEqual($licenseSummary[$key], $summary['count'],
+    $licSummary->parseLicenseTbl();
+
+    foreach ($licSummary->hList as $summary) {
+      $key = $summary['textOrLink'];
+      $this->assertEqual($licenseSummary[$key], $summary['count'],
   		"verifyFossDirsOnly FAILED! $key does not equal $licenseSummary[$key],
   		got $summary[count]\n");
-		}
-		
+    }
+
     $dList = new parseLicenseTblDirs($page);
     $dirList = $dList->parseLicenseTblDirs();
     /*
@@ -175,10 +193,10 @@ class verifyDirsOnly extends fossologyTestCase
    * @return boolean
    *
    */
-   function check4Links($folderPath)
-   {
+  function check4Links($folderPath)
+  {
     $flistSize = count($folderPath[0]);
-    
+
     foreach($folderPath as $flist)
     {
       $i = 0;
@@ -197,6 +215,6 @@ class verifyDirsOnly extends fossologyTestCase
       }
     }
     return(TRUE);
-   }
+  }
 }
 ?>
