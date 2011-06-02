@@ -125,7 +125,7 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
   {
     global $PG_CONN;
 
-    $Columns = "variablename, conf_value, ui_label, vartype, group_name, group_order, description";
+    $Columns = "variablename, conf_value, ui_label, vartype, group_name, group_order, description, validation_function";
     $ValueArray = array();
 
     /*  Email */
@@ -134,21 +134,21 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     $SupportEmailLabelDesc = _('e.g. "Support"<br>Text that the user clicks on to create a new support email. This new email will be preaddressed to this support email address and subject.  HTML is ok.');
     $ValueArray[$Variable] = "'$Variable', 'Support', '$SupportEmailLabelPrompt',"
                     . CONFIG_TYPE_TEXT .
-                    ",'Support', 1, '$SupportEmailLabelDesc'";
+                    ",'Support', 1, '$SupportEmailLabelDesc', ''";
 
     $Variable = "SupportEmailAddr";
     $SupportEmailAddrPrompt = _('Support Email Address');
     $SupportEmailAddrDesc = _('e.g. "support@mycompany.com"<br>Individual or group email address to those providing FOSSology support.');
     $ValueArray[$Variable] = "'$Variable', null, '$SupportEmailAddrPrompt', "
                     . CONFIG_TYPE_TEXT .
-                    ",'Support', 2, '$SupportEmailAddrDesc'";
+                    ",'Support', 2, '$SupportEmailAddrDesc', ''";
 
     $Variable = "SupportEmailSubject";
     $SupportEmailSubjectPrompt = _('Support Email Subject line');
     $SupportEmailSubjectDesc = _('e.g. "fossology support"<br>Subject line to use on support email.');
     $ValueArray[$Variable] = "'$Variable', 'FOSSology Support', '$SupportEmailSubjectPrompt',"
                     . CONFIG_TYPE_TEXT .
-                    ",'Support', 3, '$SupportEmailSubjectDesc'";
+                    ",'Support', 3, '$SupportEmailSubjectDesc', ''";
 
     /*  Banner Message */
     $Variable = "BannerMsg";
@@ -156,7 +156,7 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     $BannerMsgDesc = _('This is message will be displayed on every page with a banner.  HTML is ok.');
     $ValueArray[$Variable] = "'$Variable', null, '$BannerMsgPrompt', "
                     . CONFIG_TYPE_TEXTAREA .
-                    ",'Banner', 1, '$BannerMsgDesc'";
+                    ",'Banner', 1, '$BannerMsgDesc', ''";
 
     /*  Logo  */
     $Variable = "LogoImage";
@@ -164,21 +164,23 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     $LogoImageDesc = _('e.g. "http://mycompany.com/images/companylogo.png" or "images/mylogo.png"<br>This image replaces the fossology project logo. Image is constrained to 150px wide.  80-100px high is a good target.  If you change this URL, you MUST also enter a logo URL.');
     $ValueArray[$Variable] = "'$Variable', null, '$LogoImagePrompt', "
                     . CONFIG_TYPE_TEXT .
-                    ",'Logo', 1, '$LogoImageDesc'";
+                    ",'Logo', 1, '$LogoImageDesc', ''";
 
     $Variable = "LogoLink";
     $LogoLinkPrompt = _('Logo URL');
     $LogoLinkDesc = _('e.g. "http://mycompany.com/fossology"<br>URL a person goes to when they click on the logo.  If you change the Logo URL, you MUST also enter a Logo Image.');
+    $LogoLinkValid = _('check_url');
     $ValueArray[$Variable] = "'$Variable', null, '$LogoLinkPrompt', "
                     . CONFIG_TYPE_TEXT .
-                    ",'Logo', 2, '$LogoLinkDesc'" ;
+                    ",'Logo', 2, '$LogoLinkDesc', '$LogoLinkValid'" ;
      
     $Variable = "GlobalBrowse";
     $BrowsePrompt = _("Global Browsing");
     $BrowseDesc = _("true = allow browsing and searching the entire repository.<br>false = user can only browse/search their own uploads.");
+    $BrowseValid = _("check_boolean");
     $ValueArray[$Variable] = "'$Variable', 'false', '$BrowsePrompt', "
                     . CONFIG_TYPE_INT .
-                    ",'UI', 1, '$BrowseDesc'";
+                    ",'UI', 1, '$BrowseDesc', '$BrowseValid'";
      
     /* Doing all the rows as a single insert will fail if any row is a dupe.
      So insert each one individually so that new variables get added.
@@ -199,4 +201,40 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
       unset($VarRec);
     }
   }
+
+  /************************************************
+   validation functions check_boolean().
+   check if the value format is valid,
+   only true/false is valid
+   return 1, if the value is valid, or 0
+   ************************************************/
+  function check_boolean($value)
+  {
+    if (!strcmp($value, 'true') || !strcmp($value, 'false'))
+    {
+      return 1;
+    }
+    else 
+    {
+      return 0;
+    }
+  }
+
+  /************************************************
+   validation functions check_url().
+   check if the url format is valid,
+   return 1, if the url is valid, or 0
+   ************************************************/
+  function check_url($url)
+  {
+    if (empty($url) || preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $url) != 1 || preg_match("@[[:space:]]@", $url) != 0) 
+    {
+      return 0;
+    }
+    else 
+    {
+      return 1;
+    }
+  }
+
 ?>
