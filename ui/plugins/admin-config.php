@@ -132,21 +132,34 @@ class foconfig extends FO_Plugin
       {
         if ($VarValue != $oldarray[$VarName])
         {
-          /* set the value of 'GlobalBrowse'. If the value is not 'true', set the value as 'false' */
-          if (!strcmp($VarName, "GlobalBrowse"))
-          {
-            if (strcmp($VarValue, "true"))
-            {
-              $VarValue = "false";
-            }
-          }
-          $sql = "update sysconfig set conf_value='" .
-          pg_escape_string($VarValue) .
-                    "' where variablename='$VarName'";
+          /* get validation_function row from sysconfig table */
+          $sql = "select validation_function from sysconfig where variablename='".pg_escape_string($VarName)."';";
           $result = pg_query($PG_CONN, $sql);
           DBCheckResult($result, $sql, __FILE__, __LINE__);
-          if (!empty($UpdateMsg)) $UpdateMsg .= ", ";
-          $UpdateMsg .= "$VarName";
+          $validation_function_array = pg_fetch_assoc($result);
+          $validation_function = $validation_function_array['validation_function'];
+          pg_free_result($result);
+          $is_empty = empty($validation_function);
+          /* 1. the validation_function is empty
+             2. the validation_function is not empty, and after checking, the value is valid
+             update sysconfig table
+          */
+          if ($is_empty || (!$is_empty && (1 == $validation_function($VarValue))))
+          {
+            $sql = "update sysconfig set conf_value='" .
+            pg_escape_string($VarValue) .
+              "' where variablename='$VarName'";
+            $result = pg_query($PG_CONN, $sql);
+            DBCheckResult($result, $sql, __FILE__, __LINE__);
+            pg_free_result($result);
+            if (!empty($UpdateMsg)) $UpdateMsg .= ", ";
+            $UpdateMsg .= "$VarName";
+          }
+          /* the validation_function is not empty, but after checking, the value is invalid */
+          else if (!$is_empty && (0 == $validation_function($VarValue)))
+          {
+            echo "<script>alert('You set $VarValue as the value of $VarName, it is invalid, please correct it!');</script>";
+          }
         }
       }
       if (!empty($UpdateMsg)) $UpdateMsg .= " updated.";
