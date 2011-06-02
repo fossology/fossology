@@ -15,15 +15,24 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
+# Uses:
+#   doxygen 
+#   schemaSpy  (http://schemaspy.sourceforge.net/)
+#   java       (apt-get install default-jre)
+#   postgres JDBC (apt-get install libpg-java)
+
 TOP=../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 DoxDir=$(FOSRCDIR)/srcdocs
+SchemaSpy=/usr/local/bin/schemaSpy
+PgJDBC=/usr/share/java/postgresql-jdbc3-8.4.jar
 
 all:
 
 	doxygen fodox.conf > fodox.log 2>fodox.errs
+	java -jar $(SchemaSpy) -t pgsql -cp $(PgJDBC) -db fossology -s public -host localhost -u fossy -p fossy -o $(DoxDir)/www/schemaspy
 
 clean:
 	rm -rf www *~ fodox.errs fodox.log
