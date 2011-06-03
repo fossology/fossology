@@ -493,6 +493,7 @@ function scheduleEmailNotification($upload_pk,$webServer,$Email=NULL,
 $UserName=NULL,$Depends) {
 
   global $DB;
+  global $SysConf;
 
   if (empty($DB)) {
     return;
@@ -514,6 +515,8 @@ $UserName=NULL,$Depends) {
   $To = NULL;
 
   $Nparams .= "-w $webServer ";
+  $URI = @$SysConf["URI"];
+  $Nparams .= "-p $URI ";
   /* If email is passed in, favor that over the session */
   if(!empty($Email)) {
     $To = " -e $Email";
