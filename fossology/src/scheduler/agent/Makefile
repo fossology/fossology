@@ -62,7 +62,7 @@ all: $(EXE) $(CLI) defconf/init.d/fossology
 $(EXE): scheduler.c $(OBJS) $(VARS) $(HEAD) $(DEPEN)
 	$(CC) scheduler.c $(OBJS) $(DEF) $(FODEF) $(CFLAGS_LOCAL) -o $@
 
-$(CLI): schedulerCLI.c schedulerCLI.h Makefile
+$(CLI): schedulerCLI.c Makefile
 	$(CC) schedulerCLI.c $(CFLAGS_LOCAL) $(DEF) -o $@
 
 #######################
@@ -95,10 +95,10 @@ event.o: %.o: %.c %.h $(DEPEN)
 host.o: %.o: %.c %.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
-interface.o: %.o: %.c %.h database.h schedulerCLI.h $(DEPEN)
+interface.o: %.o: %.c %.h database.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
-job.o: %.o: %.c %.h agent.h database.h scheduler.h $(DEPEN)
+job.o: %.o: %.c %.h agent.h database.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
 logging.o: %.o: %.c $(DEPEN)

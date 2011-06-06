@@ -22,7 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <job.h>
 #include <logging.h>
 #include <scheduler.h>
-#include <schedulerCLI.h>
 
 /* std library includes */
 #include <stdio.h>
@@ -41,6 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gio/gio.h>
 
 #define FIELD_WIDTH 10
+#define BUFFER_SIZE 1024
 
 int i_created = 0;      ///< flag indicating if the interface already been created
 int i_terminate = 0;    ///< flag indicating if the interface has been killed
@@ -80,23 +80,17 @@ typedef struct interface_connection
 void* interface_thread(void* param)
 {
   interface_connection* conn = param;
-  network_header header;
-  char buffer[1024];
+  char buffer[BUFFER_SIZE];
   char org[sizeof(buffer)];
   char* cmd, * tmp;
   unsigned long size;
   arg_int* params;
 
-  while(g_input_stream_read_all(conn->istr, &header, sizeof(header), &size, cancel, NULL))
-  {
-    memset(buffer, '\0', sizeof(buffer));
-    if(g_input_stream_read_all(conn->istr, buffer, header.bytes_following, &size, cancel, NULL) == 0)
-    {
-      clprintf("ERROR: unable to read from interface socket, attempted to read %d bytes", header.bytes_following);
-      g_thread_exit(NULL);
-    }
+  memset(buffer, '\0', sizeof(buffer));
 
-    if(TVERBOSE2) clprintf("INTERFACE: recieved \"%s\"\n", buffer);
+  while(g_input_stream_read(conn->istr, buffer, sizeof(buffer), cancel, NULL))
+  {
+    if(TVERBOSE2) clprintf("INTERFACE: received \"%s\"\n", buffer);
     /* convert all characters before first ' ' to lower case */
     memcpy(org, buffer, sizeof(buffer));
     for(cmd = buffer; *cmd; cmd++)
@@ -161,7 +155,7 @@ void* interface_thread(void* param)
     memset(buffer, '\0', sizeof(buffer));
   }
 
-  clprintf("ERROR %s.%d: Interface connection closed unexpectantly\n", __FILE__, __LINE__);
+  clprintf("NOTE %s.%d: Interface connection closed unexpectantly\n", __FILE__, __LINE__);
 
   return NULL;
 }

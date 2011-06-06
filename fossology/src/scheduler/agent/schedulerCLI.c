@@ -15,9 +15,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
 
-/* local includes */
-#include <schedulerCLI.h>
-
 /* std library includes */
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,23 +51,6 @@ PGconn* db;     ///< connection to the fossology database
 /* ************************************************************************** */
 /* **** utility functions *************************************************** */
 /* ************************************************************************** */
-
-int network_write(void* buf, size_t count)
-{
-  /* locals */
-  network_header header;
-
-  /* send message size */
-  header.bytes_following = count;
-  if(write(s, &header, sizeof(network_header)) == 0)
-  {
-    fprintf(stderr, "ERROR writing to scheduler socket\n");
-    return 0;
-  }
-
-  /* send the actual message */
-  return write(s, buf, count);
-}
 
 void print_sql_table(PGresult* db_result)
 {
@@ -384,7 +364,7 @@ int main(int argc, char** argv)
         continue;
       }
 
-      bytes = network_write(buffer, strlen(buffer) - 1);
+      bytes = write(s, buffer, strlen(buffer) - 1);
     }
   }
 
