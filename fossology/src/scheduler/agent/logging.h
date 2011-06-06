@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern int   verbose;
 extern FILE* log_file;
+extern char  log_name[FILENAME_MAX];
 
 /* ************************************************************************** */
 /* **** ERROR MACROS ******************************************************** */

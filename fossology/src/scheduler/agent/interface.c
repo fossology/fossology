@@ -155,8 +155,6 @@ void* interface_thread(void* param)
     memset(buffer, '\0', sizeof(buffer));
   }
 
-  clprintf("NOTE %s.%d: Interface connection closed unexpectantly\n", __FILE__, __LINE__);
-
   return NULL;
 }
 
