@@ -30,6 +30,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern int verbose;
 extern int closing;
+extern int s_pid;
+extern int s_daemon;
+extern int s_port;
 
 /* ************************************************************************** */
 /* **** Utility Functions *************************************************** */

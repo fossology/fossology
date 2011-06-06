@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* local includes */
 #include <event.h>
 #include <logging.h>
+#include <scheduler.h>
 
 /* std library includes */
 #include <time.h>
@@ -219,7 +220,7 @@ int vlprintf(FILE* dst, const char* fmt, va_list args)
   curr = strtok(tmp, "\n");
   while(curr != NULL)
   {
-    if(n_line && fprintf(dst, "%s scheduler [%d] :: ", time_buf, getpid()) == 0)
+    if(n_line && fprintf(dst, "%s scheduler [%d] :: ", time_buf, s_pid) == 0)
         return 0;
 
     if(fprintf(dst, "%s", curr) == 0)

@@ -332,13 +332,28 @@ void job_verbose_event(job j)
  */
 void job_status_event(void* param)
 {
+  const char end[] = "end\n";
+
   int tmp = 0;
   arg_int* params = param;
+  char buf[1024];
 
   if(!params->second)
+  {
+    memset(buf, '\0', sizeof(buf));
+    sprintf(buf, "scheduler[%d]: jobs:%d daemon:%d log:%s port:%d verbose:%d\n",
+        s_pid, num_jobs(), s_daemon, log_name, s_port, verbose);
+
+
+    g_output_stream_write(params->first, buf, strlen(buf), NULL, NULL);
     g_tree_foreach(job_list, (GTraverseFunc)job_sstatus, params->first);
+  }
   else
+  {
     job_sstatus(&tmp, g_tree_lookup(job_list, &params->second), params->first);
+  }
+
+  g_output_stream_write(params->first, end, sizeof(end), NULL, NULL);
   g_free(params);
 }
 

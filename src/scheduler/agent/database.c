@@ -87,7 +87,8 @@ const char* jobsql_email = "\
 /* **** local functions ***************************************************** */
 /* ************************************************************************** */
 
-#define PQget(db_result, row, col) PQgetvalue(db_result, row, PQfnumber(db_result, col))
+#define PQget(db_result, row, col) \
+  PQgetvalue(db_result, row, PQfnumber(db_result, col))
 
 /**
  * TODO

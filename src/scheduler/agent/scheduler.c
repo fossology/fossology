@@ -54,6 +54,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* global flags */
 int verbose = 0;
 int closing = 0;
+int s_pid;
+int s_daemon;
+int s_port;
 
 /* ************************************************************************** */
 /* **** signals and events ************************************************** */
@@ -321,6 +324,9 @@ void set_usr_grp()
     fprintf(stderr, "FATAL SETUID aborting due to error: %s\n", strerror(errno));
     exit(-1);
   }
+
+  /* set the scheduler pid */
+  s_pid = getpid();
 }
 
 /**
@@ -538,7 +544,6 @@ int main(int argc, char** argv)
   gboolean db_reset = FALSE;  // flag to reset the job queue upon database connection
   gboolean ki_sched = FALSE;  // flag that indicates that the scheduler will be killed after start
   gboolean db_init  = FALSE;  // flag indicating a database test
-  gboolean s_daemon = FALSE;  // flag indicating if the scheduler should run as a daemon
   gboolean test_die = FALSE;  // flag to run the tests then die
   int port = -1;              // the port the scheduler will listen on
   char* log = NULL;           // used when a different log from the default is used
@@ -553,7 +558,7 @@ int main(int argc, char** argv)
       { "database", 'i', 0, G_OPTION_ARG_NONE,   &db_init,  "Initialize database connection and exit"     },
       { "kill",     'k', 0, G_OPTION_ARG_NONE,   &ki_sched, "Kills all running schedulers and exit"       },
       { "log",      'L', 0, G_OPTION_ARG_STRING, &log,      "Prints log here instead of default log file" },
-      { "port",     'p', 0, G_OPTION_ARG_INT,    &port,     "Set the port the interface listens on"       },
+      { "port",     'p', 0, G_OPTION_ARG_INT,    &s_port,   "Set the port the interface listens on"       },
       { "reset",    'R', 0, G_OPTION_ARG_NONE,   &db_reset, "Reset the job queue upon startup"            },
       { "test",     't', 0, G_OPTION_ARG_NONE,   &test_die, "Close the scheduler after running tests"     },
       { "verbose",  'v', 0, G_OPTION_ARG_INT,    &verbose,  "Set the scheduler verbose level"             },
