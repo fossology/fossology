@@ -594,6 +594,9 @@ int main(int argc, char** argv)
   /* ********************************** */
   g_type_init();
   fo_RepOpen();
+  agent_list_init();
+  host_list_init();
+  job_list_init();
   load_config();
   interface_init();
   database_init();

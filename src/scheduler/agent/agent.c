@@ -972,6 +972,14 @@ void kill_agents()
 }
 
 /**
+ * Will create the meta_agents and agents maps
+ */
+void agent_list_init(void) {
+  meta_agents = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)meta_agent_destroy);
+  agents      = g_tree_new_full(int_compare   , NULL, NULL, (GDestroyNotify)agent_destroy);
+}
+
+/**
  * destroys both the meta agent and agent lists. This is used when the scheduler
  * is cleanly shutting down or when the scheduler is reloading its configuration
  * data.
@@ -979,9 +987,8 @@ void kill_agents()
 void agent_list_clean()
 {
   if(meta_agents) g_tree_destroy(meta_agents);
-  meta_agents = NULL;
   if(agents) g_tree_destroy(agents);
-  agents = NULL;
+  agent_list_init();
 }
 
 /**
@@ -1005,10 +1012,7 @@ int add_meta_agent(char* name, char* cmd, int max, int spc)
   }
 
   if(meta_agents == NULL)
-  {
-    meta_agents = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)meta_agent_destroy);
-    agents      = g_tree_new_full(int_compare   , NULL, NULL, (GDestroyNotify)agent_destroy);
-  }
+    agent_list_init();
 
   if(g_tree_lookup(meta_agents, name) == NULL)
   {
