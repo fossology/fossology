@@ -95,7 +95,7 @@ void host_list_clean()
   if(host_list != NULL)
   {
     g_tree_destroy(host_list);
-    host_list = NULL;
+    host_list_init();
   }
 }
 
@@ -117,8 +117,6 @@ void host_init(char* name, char* address, char* agent_dir, int max)
   h->max = max;
   h->running = 0;
 
-  if(host_list == NULL)
-      host_list = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)host_destroy);
   g_tree_insert(host_list, h->name, h);
 }
 
@@ -243,4 +241,12 @@ void for_each_host(void(*callback)(host))
 int num_hosts()
 {
   return g_tree_nnodes(host_list);
+}
+
+/**
+ * TODO
+ */
+void host_list_init()
+{
+  host_list = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)host_destroy);
 }

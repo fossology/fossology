@@ -54,5 +54,6 @@ host get_host(int num);
 host name_host(char* name);
 void for_each_host(void(*callback)(host));
 int  num_hosts();
+void host_list_init();
 
 #endif /* HOST_H_INCLUDE */

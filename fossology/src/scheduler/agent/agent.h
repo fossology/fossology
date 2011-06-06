@@ -82,6 +82,7 @@ typedef int agent_pk;
 
 /* meta agent */
 void agent_list_clean();
+void agent_list_init(void);
 meta_agent meta_agent_init(char* name, char* cmd, int max, int spc);
 void meta_agent_destroy(meta_agent ma);
 
@@ -112,10 +113,10 @@ ssize_t agent_write(agent a, const void* buf, size_t count);
 /* ************************************************************************** */
 
 void test_agents(host h);
-void kill_agents();
+void kill_agents(void);
 int  add_meta_agent(char* name, char* cmd, int max, int spc);
 int  is_meta_agent(char* name);
 int  is_exclusive(char* name);
-int  num_agents();
+int  num_agents(void);
 
 #endif /* AGENT_H_INCLUDE */

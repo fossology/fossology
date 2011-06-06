@@ -225,19 +225,20 @@ gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data)
 /**
  * TODO
  */
+void job_list_init()
+{
+  job_list = g_tree_new_full(int_compare, NULL, NULL, (GDestroyNotify)job_destroy);
+  job_queue = g_sequence_new(NULL);
+}
+
+/**
+ * TODO
+ */
 void job_list_clean()
 {
-  if(job_list != NULL)
-  {
-    g_tree_destroy(job_list);
-    job_list = NULL;
-  }
-
-  if(job_queue != NULL)
-  {
-    g_sequence_free(job_queue);
-    job_queue = NULL;
-  }
+  if(job_list) g_tree_destroy(job_list);
+  if(job_queue != NULL) g_sequence_free(job_queue);
+  job_list_init();
 }
 
 /**
@@ -269,12 +270,6 @@ job job_init(char* type, int id)
   j->priority        = 0;
   j->verbose         = 0;
   j->id              = id;
-
-  if(job_list == NULL)
-  {
-    job_list = g_tree_new_full(int_compare, NULL, NULL, (GDestroyNotify)job_destroy);
-    job_queue = g_sequence_new(NULL);
-  }
 
   g_tree_insert(job_list, &j->id, j);
   if(id >= 0) g_sequence_insert_sorted(job_queue, j, job_compare, NULL);
