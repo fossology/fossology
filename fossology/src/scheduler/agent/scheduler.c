@@ -366,7 +366,7 @@ void load_config()
   snprintf(buffer, sizeof(buffer), "%s/%s/", DEFAULT_SETUP, AGENT_CONF);
   if((dp = opendir(buffer)) == NULL)
   {
-    FATAL("Could not open agent config directory");
+    FATAL("Could not open agent config directory: %s", buffer);
     return;
   }
 
