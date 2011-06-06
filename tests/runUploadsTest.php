@@ -17,11 +17,16 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * \brief Run the simpletest FOSSology functional tests
+ * \brief Run the simpletest FOSSology upload tests
  *
- * Produces an junit formated xml report to stdout.
+ * The uploads are needed by the Verify tests that run after the uploads
+ * have been processed.
+ *
+ * Produces an junit formated xml report to stdout (for now).
  * Assumes being run as the user jenkins by the application jenkins.  The
  * script can be run standalone by other users from the jenkins workspace area.
+ *
+ * @return boolean
  *
  * @version "$Id$"
  */
@@ -33,40 +38,39 @@ require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 require_once '/usr/local/simpletest/extensions/junit_xml_reporter.php';
 
-class groupFuncTests extends TestSuite
+global $home;
+
+class uploadsTest extends TestSuite
 {
   function __construct($label=FALSE)
   {
     parent::__construct($label);
-    // run createUIUsers first
-    $this->addTestFile('createUIUsers.php');
-    if(chdir( '../ui/tests') === FALSE )
-    {
-      echo "FATAL! Cannot cd to the ui/tests directory\n";
-    }
-    $testPath = getcwd();
-    //echo "RFTCLASS: testPath is:$testPath\n";
-
-    $this->collect($testPath . '/SiteTests',
-    new SimplePatternCollector('/Test.php/'));
-    // BasicSetup Must be run before any of the BasicTests, they depend on it.
-    $this->addTestFile('BasicTests/BasicSetup.php');
-    $this->collect($testPath . '/BasicTests',
-    new SimplePatternCollector('/Test.php/'));
-    $this->collect($testPath . '/Users',
-    new SimplePatternCollector('/Test.php/'));
-    $this->collect($testPath . '/EmailNotification',
-    new SimplePatternCollector('/Test.php/'));
-    if(chdir( '../../tests') === FALSE )
-    {
-      echo "FATAL! Cannot cd to the ../../tests directory\n";
-    }
+    $this->addTestFile('uplTestData.php');
+    $this->addTestFile('uploadCopyrightData.php');
+    // agent add data is not ready yet....due to javascript.
+    //$this->addTestFile('AgentAddData.php');
+    // do the uploads and output in text...
   }
 }
 
-// collect the tests
-$testRun = new groupFuncTests('Fossology UI Functional Tests');
+// run the upload test data programs
+$home = getcwd();
 
-// run the collected tests
-$testRun->run(new JUnitXMLReporter());
+$uploadTest = new uploadsTest('Upload and Analyze Test Data');
+$uploadTest->run(new JUnitXMLReporter());
+
+// Waiting for upload jobs to finish...
+$last = exec('./wait4jobs.php', $tossme, $jobsDone);
+
+// @todo fix the message so the user runs the correct program...
+if ($jobsDone != 0)
+{
+  $errMsg = "ERROR! jobs are not finished after two hours, not running" .
+    "verify tests, please investigate and run verify tests by hand\n" .
+    "Monitor the job Q and when the setup jobs are done, run:\n" .
+    "$myname xxxx $logFile\n";
+  $this->fail($errMsg);
+  return(FALSE);
+}
+return(TRUE);
 ?>
