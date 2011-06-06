@@ -52,8 +52,16 @@ require_once SIMPLE_TEST . 'reporter.php';
 require_once SIMPLE_TEST . 'web_tester.php';
 
 require_once ('TestEnvironment.php');
-require_once($tr . '/testClasses/timer.php');
-
+if(defined('TESTROOT'))
+{
+  echo TESTROOT . "\n";
+  require_once(TESTROOT . '/testClasses/timer.php');
+}
+else
+{
+  echo "ERROR! cannot load /testClasses/timer.php, is TESTROOT defined?\n";
+  exit(1);
+}
 
 $Usage =  "Usage: $argv[0] options...
            Options:
