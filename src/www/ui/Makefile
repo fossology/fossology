@@ -45,6 +45,7 @@ $(iPATHFILE): $(VARS)
 	@echo "\$$DATADIR=\"$(DATADIR)\";" >> $(iPATHFILE)
 	@echo "\$$VERSION=\"$(VERSION)\";" >> $(iPATHFILE)
 	@echo "\$$SVN_REV=\"$(SVN_REV)\";" >> $(iPATHFILE)
+	@echo "\$$FOSRCDIR=\"$(FOSRCDIR)\";" >> $(iPATHFILE)
 	@echo "?>" >> $(iPATHFILE)
 
 install: all $(iPATHFILE)

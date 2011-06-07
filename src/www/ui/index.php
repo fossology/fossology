@@ -29,7 +29,7 @@ $PG_CONN = 0;   // Database connection
 
 //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
 require_once("pathinclude.php");
-require_once("common/common.php");
+require_once("$FOSRCDIR/lib/php/common.php");
 
 /****************************************************
  This is the main guts of the UI: Find the plugin and run it.
@@ -45,7 +45,9 @@ DBconnect();
 /* Initialize global system configuration variables $SysConfig[] */
 $SysConf = ConfigInit();
 
-plugin_load("plugins");
+echo "index.php calling plugin_load()<br>";
+plugin_load();
+echo "plugin_load finished<br>";
 
 $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) { $Mod = "Default"; }
@@ -71,7 +73,7 @@ else
   print "window.location.href = '$Uri';\n";
   print "}\n";
   /* Redirect in 5 seconds. */
-  print "window.setTimeout('Redirect()',5000);\n";
+//  print "window.setTimeout('Redirect()',5000);\n";
   print "</script>\n";
   }
 plugin_unload();

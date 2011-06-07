@@ -27,10 +27,6 @@ $GlobalReady=1;
 $SysConf = array();
 $PG_CONN = 0;   // Database connection
 
-//require("i18n.php"); DISABLED until i18n infrastructure is set-up.
-require_once(dirname(__FILE__) . '/../php/pathinclude.php');
-require_once("common/common.php");
-
 /****************************************************
  This is the main guts of the UI: Find the plugin and run it.
  ****************************************************/

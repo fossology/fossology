@@ -25,7 +25,6 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 global $WEBDIR;
-require_once("$WEBDIR/common/common.php");
 /*
  * myJobs plugin
  */
