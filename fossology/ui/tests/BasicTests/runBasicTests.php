@@ -53,7 +53,7 @@ $test->addTestFile('editFolderDescriptionOnlyTest.php');
 $test->addTestFile('moveFolderTest.php');
 $test->addTestFile('DupFolderTest.php');
 $test->addTestFile('DupUploadTest.php');
-$test->addTestFile('createFldrDeleteIt.php');
+$test->addTestFile('createFldrDeleteItTest.php');
 
 if (TextReporter::inCli())
 {
