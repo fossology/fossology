@@ -332,7 +332,7 @@ void job_verbose_event(job j)
  */
 void job_status_event(void* param)
 {
-  const char end[] = "end\n";
+  const char end[] = "end";
 
   int tmp = 0;
   arg_int* params = param;
@@ -341,7 +341,7 @@ void job_status_event(void* param)
   if(!params->second)
   {
     memset(buf, '\0', sizeof(buf));
-    sprintf(buf, "scheduler[%d]: jobs:%d daemon:%d log:%s port:%d verbose:%d\n",
+    sprintf(buf, "scheduler:%d daemon:%d jobs:%d log:%s port:%d verbose:%d\n",
         s_pid, num_jobs(), s_daemon, log_name, s_port, verbose);
 
 

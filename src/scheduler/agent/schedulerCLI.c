@@ -251,6 +251,7 @@ int main(int argc, char** argv)
   FILE* istr;                 // file used for reading configuration
   char db_conf[FILENAME_MAX]; // the file to use for the database configuration
   GOptionContext* options;    // the command line options parser
+  char* poss;                 // used to split incomming string on \n
 
   /* initialize memory */
   strcpy(host, "localhost");
@@ -334,12 +335,21 @@ int main(int argc, char** argv)
     /* check the socket */
     if(FD_ISSET(s, &fds))
     {
+      memset(buffer, '\0', sizeof(buffer));
       bytes = read(s, buffer, sizeof(buffer));
 
-      if(bytes == 0 || strncmp(buffer, "CLOSE", 5) == 0)
+      if(bytes == 0)
         closing = 1;
-      else
-        printf("%s", buffer);
+
+      poss = strtok(buffer, "\n");
+      for(poss = strtok(buffer, "\n"); poss != NULL; poss = strtok(NULL, "\n"))
+      {
+        if(strncmp(poss, "CLOSE", 5) == 0)
+          closing = 1;
+        else if(strcmp(poss, "end") != 0)
+          printf("%s\n", poss);
+      }
+      fflush(stdout);
     }
 
     /* check stdin */

@@ -324,9 +324,6 @@ void set_usr_grp()
     fprintf(stderr, "FATAL SETUID aborting due to error: %s\n", strerror(errno));
     exit(-1);
   }
-
-  /* set the scheduler pid */
-  s_pid = getpid();
 }
 
 /**
@@ -390,7 +387,10 @@ void load_config()
     else if(buffer[0] == '\0') { /* do nothing */ }
     /* check the port that the interface wil use */
     else if(strncmp(buffer, "port=", 5) == 0 && !is_port_set())
-      set_port(atoi(&buffer[5]));
+    {
+      if(s_port < 0) s_port = atoi(&buffer[5]);
+      set_port(s_port);
+    }
     /* check for the list of available hosts */
     else if(strncmp(buffer, "hosts:", 6) == 0)
     {
@@ -545,7 +545,6 @@ int main(int argc, char** argv)
   gboolean ki_sched = FALSE;  // flag that indicates that the scheduler will be killed after start
   gboolean db_init  = FALSE;  // flag indicating a database test
   gboolean test_die = FALSE;  // flag to run the tests then die
-  int port = -1;              // the port the scheduler will listen on
   char* log = NULL;           // used when a different log from the default is used
   GOptionContext* options;    // option context used for command line parsing
   GError* error = NULL;       // error object used during parsing
@@ -564,6 +563,11 @@ int main(int argc, char** argv)
       { "verbose",  'v', 0, G_OPTION_ARG_INT,    &verbose,  "Set the scheduler verbose level"             },
       {NULL}
   };
+
+  /* make sure port is correctly initialized */
+  s_pid = getpid();
+  s_daemon = FALSE;
+  s_port = -1;
 
   /* ********************* */
   /* *** parse options *** */
@@ -585,10 +589,10 @@ int main(int argc, char** argv)
   /* make sure we are running as fossy */
   set_usr_grp();
 
+  /* perform pre-initialization checks */
   if(s_daemon) { rc = daemon(0, 0); }
   if(db_init) { database_init(); return 0; }
   if(ki_sched) { kill_scheduler(); return 0; }
-  if(port >= 0) {set_port(port); }
   if(log != NULL) {set_log(log); }
 
   if(lock_scheduler() <= 0 && !get_locked_pid())
