@@ -332,7 +332,7 @@ void job_verbose_event(job j)
  */
 void job_status_event(void* param)
 {
-  const char end[] = "end";
+  const char end[] = "end\n";
 
   int tmp = 0;
   arg_int* params = param;
