@@ -883,7 +883,7 @@ void agent_print_status(agent a, GOutputStream* ostr)
   TEST_NULV(ostr);
 
   strftime(time_buf, sizeof(time_buf), "%F %T", localtime(&a->check_in));
-  status_str = g_strdup_printf("  agent:%d host:%s type:%s status:%s time:%s\n",
+  status_str = g_strdup_printf("agent:%d host:%s type:%s status:%s time:%s\n",
       a->pid,
       host_name(a->host_machine),
       a->meta_data->name,
