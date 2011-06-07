@@ -42,7 +42,7 @@ $test = &new TestSuite('Fossology Repo UI Verification Functional tests');
 $test->addTestFile('OneShot-lgpl2.1Test.php');
 $test->addTestFile('fossVerifyLicCntTest.php');
 $test->addTestFile('foss23dirs1File1LicTest.php');
-$test->addTestFile('verifyFossDirsOnlyTest.php');
+$test->addTestFile('fossDirsOnlyTest.php');
 $test->addTestFile('browseUploadedTest.php');
 
 
