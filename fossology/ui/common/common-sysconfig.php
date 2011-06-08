@@ -181,13 +181,6 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     $ValueArray[$Variable] = "'$Variable', 'false', '$BrowsePrompt', "
                     . CONFIG_TYPE_INT .
                     ",'UI', 1, '$BrowseDesc', '$BrowseValid'";
-
-    $Variable = "URI";
-    $URIPrompt = _("URI");
-    $URIDesc = _("http://hostname/URI/?... , if URI is repo, then http://hostname/repo/?....");
-    $ValueArray[$Variable] = "'$Variable', 'repo', '$URIPrompt', "
-                    . CONFIG_TYPE_TEXT .
-                    ",'others', 1, '$URIDesc', ''";
      
     /* Doing all the rows as a single insert will fail if any row is a dupe.
      So insert each one individually so that new variables get added.

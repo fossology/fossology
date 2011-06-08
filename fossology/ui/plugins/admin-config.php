@@ -133,11 +133,12 @@ class foconfig extends FO_Plugin
         if ($VarValue != $oldarray[$VarName])
         {
           /* get validation_function row from sysconfig table */
-          $sql = "select validation_function from sysconfig where variablename='".pg_escape_string($VarName)."';";
+          $sql = "select validation_function, ui_label from sysconfig where variablename='".pg_escape_string($VarName)."';";
           $result = pg_query($PG_CONN, $sql);
           DBCheckResult($result, $sql, __FILE__, __LINE__);
-          $validation_function_array = pg_fetch_assoc($result);
-          $validation_function = $validation_function_array['validation_function'];
+          $sys_array = pg_fetch_assoc($result);
+          $validation_function = $sys_array['validation_function'];
+          $ui_label = $sys_array['ui_label'];
           pg_free_result($result);
           $is_empty = empty($validation_function);
           /* 1. the validation_function is empty
@@ -158,7 +159,16 @@ class foconfig extends FO_Plugin
           /* the validation_function is not empty, but after checking, the value is invalid */
           else if (!$is_empty && (0 == $validation_function($VarValue)))
           {
-            echo "<script>alert('You set $VarValue as the value of $VarName, it is invalid, please correct it!');</script>";
+            if (!strcmp($validation_function, 'check_boolean'))
+            {
+              $warning_msg = _("Error: You set $ui_label to $VarValue. Valid  values are \'true\' and \'false\'.");
+              echo "<script>alert('$warning_msg');</script>";
+            }
+            else if  (!strcmp($validation_function, 'check_url'))
+            {
+              $warning_msg = _("Error: $ui_label $VarValue, is not a reachable URL.");
+              echo "<script>alert('$warning_msg');</script>";
+            }
           }
         }
       }
