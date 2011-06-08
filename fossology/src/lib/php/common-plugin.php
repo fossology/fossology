@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,22 +16,26 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+/**
+ * \file common-plugin.php
+ * \brief Core functions for user interface plugins
+ **/
 
-/*********************************
- Global array: don't touch!
- *********************************/
+/**
+ * \brief Global plugins array
+ **/
 $Plugins = array();
 
-/*****************************************
- plugin_cmp(): Compare two plugins for sorting.
- *****************************************/
+/**
+  \brief Sort compare function.  Sorts by dependency
+         relationship.  If a and b are at the same
+         dependency level, then sort by the plugin level.
+
+  \param Plugin a
+  \param Plugin b
+
+  \return -1, 0, 1 for plugin a being <, =, or > than b
+ **/
 function plugin_cmp($a,$b)
 {
   /* Sort by plugin version only when the name is the same */
@@ -44,14 +48,14 @@ function plugin_cmp($a,$b)
     }
 
   /* Sort by dependencies. */
-  /** check if $a is a dependency for $b **/
+  /* check if $a is a dependency for $b */
   // print "BEGIN Comparing $a->Name with $b->Name\n";
   foreach($a->Dependency as $val)
     {
     // print "Comparing $a->Name :: $val with $b->Name\n";
     if ($val == $b->Name) { return(1); }
     }
-  /** check if $b is a dependency for $a **/
+  /* check if $b is a dependency for $a */
   foreach($b->Dependency as $val)
     {
     // print "Comparing $b->Name :: $val with $a->Name\n";
@@ -72,20 +76,16 @@ function plugin_cmp($a,$b)
 } // plugin_cmp()
 
 /**
- * \brief plugin_disable
- * disable all plugins that have a level greater than the users permission level.
+ * \brief Disable all plugins that have a level greater than the users permission level.
  *
- * @param $Level the users DBaccess level
- * @return void
+ * \param $Level the users DBaccess level
+ * \return void
  */
 function plugin_disable($Level)
 {
   global $Plugins;
   
-  if(empty($Level))
-  {
-    return(0);
-  }
+  if(empty($Level)) return(0);
   
   /* Disable all plugins with >= $Level access */
   //echo "<pre>COMP: starting to disable plugins\n</pre>";
@@ -108,10 +108,10 @@ function plugin_disable($Level)
   }
 } // plugin_disable
 
-/*****************************************
- plugin_sort(): Given a loaded plugin list,
- sort the plugins by dependencies!
- *****************************************/
+/**
+ * \brief Sort the global $Plugins by dependencies.  This way plugins
+ *        get loaded in the correct order.
+ **/
 function plugin_sort()
 {
   global $Plugins;
@@ -172,12 +172,15 @@ function plugin_sort()
   usort($Plugins,'plugin_cmp');
 } // plugin_sort()
 
-/*****************************************
- plugin_find_id(): Given the official name of a plugin,
- find the index to it in the $Plugins array, or
- return -1 if it is not found.
- *****************************************/
-function plugin_find_id($Name) {
+/**
+ * \brief Given the official name of a plugin, find the index to it in the 
+ *        global $Plugins array.  
+ *        Only plugins in PLUGIN_STATE_READY are scanned.
+ * \param $Name Plugin name
+ * \return -1 if the plugin $Name is not found.
+ **/
+function plugin_find_id($Name) 
+{
   global $Plugins;
 
   foreach ($Plugins as $key => $val) {
@@ -192,12 +195,14 @@ function plugin_find_id($Name) {
   return(-1);
 } // plugin_find_id()
 
-/*****************************************
- plugin_find_any_id(): Given the official name of a plugin,
- find the index to it in the $Plugins array, or
- return -1 if it is not found.
- Unlike plugin_find_id(), this ignores plugin state.
- *****************************************/
+/**
+ * \brief Given the official name of a plugin, find the index to it in the 
+ *        global $Plugins array.
+ *
+ *        Note that Unlike plugin_find_id(), this ignores plugin state.
+ * \param $Name Plugin name
+ * \return -1 if it is not found.
+ **/
 function plugin_find_any_id($Name)
 {
   global $Plugins;
@@ -211,10 +216,11 @@ function plugin_find_any_id($Name)
   return(-1);
 } // plugin_find_any_id()
 
-/*****************************************
- plugin_find(): Given the official name of a plugin,
- return the $Plugins object, or NULL.
- *****************************************/
+/**
+ * \brief Given the official name of a plugin, return the $Plugins object.
+ *        Only plugins in PLUGIN_STATE_READY are scanned.
+ * \return NULL if the plugin name isn't found.
+ **/
 function plugin_find($Name)
 {
   global $Plugins;
@@ -230,10 +236,11 @@ function plugin_find($Name)
   return NULL;
 } // plugin_find()
 
-/*****************************************
- plugin_find_any(): Given the official name of a plugin,
- return the $Plugins object, or NULL.
- *****************************************/
+/**
+ * \brief Given the official name of a plugin, return the $Plugins object.
+ *        All plugins are scanned regardless of state.
+ * \return NULL if the plugin name isn't found.
+ **/
 function plugin_find_any($Name)
 {
   global $Plugins;
@@ -248,9 +255,12 @@ function plugin_find_any($Name)
   return NULL;
 } // plugin_find_any()
 
-/*****************************************
- plugin_init(): Initialize every plugin!
- *****************************************/
+/**
+ * \brief Initialize every plugin in the global $Plugins array.
+ *        plugin_sort() is called followed by the plugin
+ *        PostInitialize() if PLUGIN_STATE_VALID,
+ *        and RegisterMenus() if PLUGIN_STATE_READY.
+ **/
 function plugin_init()
 {
   global $Plugins;
@@ -265,32 +275,48 @@ function plugin_init()
     }
 } // plugin_init()
 
-/*****************************************
- plugin_load(): Load every plugin!
- *****************************************/
-function plugin_load($PlugDir, $CallInit=1)
+/**
+ * \brief Load every module ui found in mods-enabled
+ *
+ * \param $CallInit 1 = call plugin_init(), else ignored.
+ **/
+function plugin_load($CallInit=1)
 {
   global $Plugins;
+  global $SYSCONFDIR;
+  global $PROJECT;
 
-  /* Load everything found in the plugin directory */
-  if ($Dir = opendir($PlugDir))
+  $ModsEnabledDir = "$SYSCONFDIR/$PROJECT/mods-enabled";
+
+  /* Open $ModsEnabledDir and include all the php files found in the ui/ subdirectory */
+
+  if ((is_dir($ModsEnabledDir)) and ($EnabledDir = opendir($ModsEnabledDir)))
+  {
+    while (($ModDir = readdir($EnabledDir)) !== false)
     {
-    while (($File = readdir($Dir)) !== false)
-	{
-	if (substr($File,-4) === ".php")
-	  {
-	  // print "Loading $File\n";
-	  include_once("$PlugDir/$File");
-	  }
-	}
+      $ModDirPath = "$ModsEnabledDir/$ModDir/ui";
+      if (is_dir($ModDirPath) and ($Dir = opendir($ModDirPath)))
+      {
+        while (($File = readdir($Dir)) !== false)
+        {
+          if (substr($File,-4) === ".php")
+	      {
+            /* Load php found in the ui directory */
+//  	        echo "Loading: $ModDirPath/$File<br>"; 
+  	        include_once("$ModDirPath/$File"); 
+          }
+	    }
+      }
     }
+  }
+  closedir($EnabledDir);
   closedir($Dir);
   if ($CallInit == 1) { plugin_init(); }
 } // plugin_load()
 
-/*****************************************
- plugin_unload(): Unload every plugin!
- *****************************************/
+/**
+ * \brief Unload every plugin by calling its Destroy().
+ **/
 function plugin_unload()
 {
   global $Plugins;
