@@ -515,8 +515,10 @@ $UserName=NULL,$Depends) {
   $To = NULL;
 
   $Nparams .= "-w $webServer ";
-  $URI = @$SysConf["URI"];
-  $Nparams .= "-p $URI ";
+  /* FOSSology_URL, e.g. fossolog.org/repo/index.php */
+  $FOSSology_URL = $_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME'];
+  error_log("FOSSology_URL :$FOSSology_URL", 0);
+  $Nparams .= "-p $FOSSology_URL ";
   /* If email is passed in, favor that over the session */
   if(!empty($Email)) {
     $To = " -e $Email";

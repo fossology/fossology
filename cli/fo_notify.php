@@ -52,7 +52,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
     -n string      = optional, user name to address email to, this is not the email address.
     -u <upload_id> = Upload ID. (required)
     -w web-server  = required, string, fqdn of the webserver
-    -p URI         = optional URI, default: repo
+    -p FOSSology URL = required, string, $_SERVER[SERVER_NAME] + $_SERVER[SCRIPT_NAME]
 
     If no -e option is supplied, status is printed to standard out.
   ";
@@ -74,7 +74,6 @@ global $DB;
 
 $JobName   = "";
 $JobStatus = "";
-$URI = "repo";
 
 /* Process some of the parameters */
 $options = getopt("he:n:j:u:w:p:");
@@ -120,9 +119,10 @@ if (array_key_exists("u",$options)) {
 }
 
 if (array_key_exists("p",$options)) {
-	$URI = $options['p'];
-	if (empty($URI)) {
-          $URI = "repo";
+	$FOSSology_URL = $options['p'];
+	if (empty($FOSSology_URL)) {
+		print $Usage;
+		exit(1);
 	}
 }
 
@@ -192,7 +192,7 @@ else
 	exit(1);
 }
 
-$JobHistoryUrl = "http://$hostname/$URI/?mod=showjobs&history=1&upload=$upload_id";
+$JobHistoryUrl = "http://$FOSSology_URL?mod=showjobs&history=1&upload=$upload_id";
 
 // get the item to create the browse/license report link
 $licenseLinkError = NULL;
@@ -242,13 +242,13 @@ if($Agent_pk == 0)
 	if($fileCount == 1)
 	{
 		// view url
-		$licenseReportUrl = "http://$hostname/$URI/?mod=view" .
+		$licenseReportUrl = "http://$FOSSology_URL?mod=view" .
 												"&upload=$upload_id&show=detail&item=$item";
 	}
 	if($fileCount > 1)
 	{
 		// no license analysis scheduled, create a browse menu link to the upload
-		$licenseReportUrl = "http://$hostname/$URI/?mod=browse" .
+		$licenseReportUrl = "http://$FOSSology_URL?mod=browse" .
 												"&upload=$upload_id&show=detail&item=$item";
 	}
 	$licenseReport = "\n\nNo License analysis was scheduled, browse the upload at:" .
@@ -263,13 +263,13 @@ else
 		if($fileCount == 1)
 		{
 			// create view-license link
-			$licenseReportUrl = "http://$hostname/$URI/?mod=view-license&napk=$Agent_pk" .
+			$licenseReportUrl = "http://$FOSSology_URL?mod=view-license&napk=$Agent_pk" .
 													"&show=detail&upload=$upload_id&item=$item";
 		}
 		if($fileCount > 1)
 		{
 			// create nomoslicense link
-			$licenseReportUrl = "http://$hostname/$URI/?mod=nomoslicense" .
+			$licenseReportUrl = "http://$FOSSology_URL?mod=nomoslicense" .
 													"&upload=$upload_id&show=detail&item=$item";
 		}
 	}
