@@ -105,6 +105,7 @@ class uploadTestDataTest extends fossologyTestCase
       $this->webProxy = $PROXY;
     }
     print "Starting Url uploads\n";
+    echo "Using Proxy:$this->webProxy\n";
     foreach($urlList as $url)
     {
       $this->uploadUrl($rootFolder, $url, null, null, '1,2,4,5');
