@@ -16,29 +16,28 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/**********************************************************
- *  This file contains common core database functions
- **********************************************************/
+/**
+ *  \file common-db.php
+ *  \brief This file contains common database functions.
+ **/
 
 
-/*****************************************
- DBconnect()
-   Connect to database engine.
-   This is a no-op if $PG_CONN already has a value.
+/**
+   \brief Connect to database engine.
+          This is a no-op if $PG_CONN already has a value.
 
- Params:
-   $Options" = an optional list of attributes for
+   \param $Options an optional list of attributes for
                connecting to the database. E.g.:
      "dbname=text host=text user=text password=text"
 
  If $Options is null, then connection parameters 
  will be read from Db.conf.
 
- Returns:
+ \return 
    Success: $PG_CONN, the postgres connection object
             Also, the global $PG_CONN is set.
    Failure: Error message is printed and exit
- *****************************************/
+ **/
 function DBconnect($Options="")
 {
   global $DATADIR, $PROJECT, $SYSCONFDIR;
@@ -63,19 +62,21 @@ function DBconnect($Options="")
 } /* End DBconnect() */
 
 
-/*****************************************
- GetSingleRec
-   Retrieve a single database record
+/**
+   \brief Retrieve a single database record.
 
- Params:
-   $Table
-   $Where   SQL where clause 
-            e.g. "where uploadtree_pk=2"
+          This function does a:
+            "SELECT * from $Table $Where limit 1"
+          and returns the result as an associative array.
 
- Returns:
-   Associative array for this record.  
-   May be empty if no record found.
- *****************************************/
+   \param $Table   Table name
+   \param $Where   SQL where clause e.g. "where uploadtree_pk=2".
+                   Though a WHERE clause is the typical use, $Where
+                   can really be any options following the sql tablename.
+   \return 
+       Associative array for this record.  
+       May be empty if no record found.
+ **/
 function GetSingleRec($Table, $Where="")
 {
   global $PG_CONN;
@@ -88,5 +89,4 @@ function GetSingleRec($Table, $Where="")
   pg_free_result($result);
   return $row;
 }
-
 ?>
