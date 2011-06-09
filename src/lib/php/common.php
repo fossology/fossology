@@ -16,17 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 /*****************************************************************
  These are common functions to be used by anyone.
  *****************************************************************/
+require_once("template/template-plugin.php");
 
 require_once("common-sysconfig.php");
 require_once("common-menu.php");
@@ -55,8 +48,5 @@ if (!empty($UI_CLI) && ($UI_CLI == 1))
   {
   require_once("common-cli.php");
   }
-
-global $WEBDIR;
-require_once("$WEBDIR/template/template-plugin.php");
 
 ?>
