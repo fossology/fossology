@@ -29,12 +29,16 @@ DoxDir=$(FOSRCDIR)/srcdocs
 SchemaSpy=/usr/local/bin/schemaSpy
 PgJDBC=/usr/share/java/postgresql-jdbc3-8.4.jar
 
-all:
+all: doxygen schemaspy
+
+doxygen:
 
 	doxygen fodox.conf > fodox.log 2>fodox.errs
+
+schemaspy:
 	java -jar $(SchemaSpy) -t pgsql -cp $(PgJDBC) -db fossology -s public -host localhost -u fossy -p fossy -o $(DoxDir)/www/schemaspy
 
 clean:
 	rm -rf www *~ fodox.errs fodox.log
 
-.PHONY: all clean
+.PHONY: all clean doxygen schmaspy
