@@ -24,7 +24,7 @@
  * Assumes being run as the user jenkins by the application jenkins.  The
  * script can be run standalone by other users from the jenkins workspace area.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  */
 
 // @todo add in phpunit tests
