@@ -27,25 +27,20 @@ $GlobalReady=1;
 $SysConf = array();
 $PG_CONN = 0;   // Database connection
 
-//require("i18n.php"); DISABLED until i18n infrastructure is set-up.
-require_once("pathinclude.php");
-require_once("$FOSRCDIR/lib/php/common.php");
-
 /****************************************************
  This is the main guts of the UI: Find the plugin and run it.
  ****************************************************/
+//$_SERVER['HTTP_SMUNIVERSALID'] = "dong.ma@hp.com";
 
 /* Connect to the database.  If the connection fails,
  * DBconnect() will print a failure message and exit.
- * The global $PG_CONN is set inside of DBconnect().  
- * DBconnect uses this side effect for backward compatibility.
  */
 DBconnect();
 
 /* Initialize global system configuration variables $SysConfig[] */
 $SysConf = ConfigInit();
 
-plugin_load();
+plugin_load("plugins/simpleUi");
 
 $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) { $Mod = "Default"; }
@@ -65,7 +60,6 @@ else
   print "$text <P />";
   $text01= _("Click here to continue.");
   print "<a href='$Uri'>" . $text01 . "</a>";
-
   print "<script language='JavaScript'>\n";
   print "function Redirect()\n";
   print "{\n";
@@ -77,5 +71,4 @@ else
   }
 plugin_unload();
 return(0);
-
 ?>
