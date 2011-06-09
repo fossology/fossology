@@ -214,6 +214,11 @@ class user_edit_any extends FO_Plugin {
                                 user_pk != '" . @$_SESSION['UserId'] . "' ORDER BY user_name;";
         $Results = $DB->Action($SQL);
         /* Create JavaScript for updating users */
+$V.= "\n<script language='javascript'>\n";
+$V.= "document.onreadystatechange = function(){
+        if(document.readyState=='complete'){SetInfo(" . $Results[0]['user_pk'] . ");}
+      }";
+$V.= "</script>\n";
         $V.= "\n<script language='javascript'>\n";
         $V.= "var Username = new Array();\n";
         $V.= "var Userdesc = new Array();\n";
