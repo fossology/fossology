@@ -20,7 +20,7 @@
 * \brief common-Report is a library that contains functions used for help
 * in reporting test results.
 *
-* @version "$Id $"
+* @version "$Id$"
 *
 * Created on Jun 9, 2011 by Mark Donohoe
 */
