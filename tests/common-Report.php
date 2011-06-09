@@ -44,7 +44,6 @@ function check4failures($xmlFile=NULL)
   $analysis = 'Uploads-Test-Results.xml';
   $fail = 0;
 
-  echo "starting ck4Fail\n";
   if(file_exists($xmlFile))
   {
     $sx = simplexml_load_file($xmlFile);
@@ -61,10 +60,6 @@ function check4failures($xmlFile=NULL)
   {
     foreach($ts->testcase as $tc)
     {
-
-      echo "testcase name is:$n\n";
-      $c = $tc['classname'];
-      echo "class name is:$c\n";
       foreach($tc->failure as $failure)
       {
         //echo "failure is:$failure\n";
