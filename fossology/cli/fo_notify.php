@@ -52,7 +52,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
     -n string      = optional, user name to address email to, this is not the email address.
     -u <upload_id> = Upload ID. (required)
     -w web-server  = required, string, fqdn of the webserver
-    -p FOSSology URL = required, string, $_SERVER[SERVER_NAME] + $_SERVER[SCRIPT_NAME]
+    -p FOSSology URL = required, string, \$_SERVER[SERVER_NAME] + \$_SERVER[SCRIPT_NAME]
 
     If no -e option is supplied, status is printed to standard out.
   ";
