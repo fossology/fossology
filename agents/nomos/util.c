@@ -1007,26 +1007,17 @@ void printRegexMatch(int n, int cached)
     return;
 }
 
-/*
- * @brief Replace all occurrences of the search string with the replacement string
- * @param subject: The string being searched and replaced on 
- * @param size: mem size being searched and replaced on
- * @param replace: The replacement value that replaces found search values
- * @param search: The value being searched for
- */
-void ReplaceNulls(char *subject, int size, char replace, char search)
+/**
+ * \brief Replace all nulls in Buffer with blanks.
+ * \param Buffer: The data having its nulls replaced.
+ * \param BufferSize: Buffer size
+ **/
+void ReplaceNulls(char *Buffer, int BufferSize)
 {
-  if (subject && subject[0])
-  {
-    int index = 0;
-    for(index = 0; index < size; index++)  
-    {
-      if (search == subject[index])
-      {
-        subject[index] = replace;
-      }
-    }
-  }
+  char *pBuf;
+
+  for (pBuf = Buffer; BufferSize--; pBuf++)
+    if (*pBuf == 0) *pBuf = ' ';
 }
 
 /*
@@ -1109,7 +1100,8 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	    cp += n;
 	}
 	mmp->inUse = 1;
-        ReplaceNulls(mmp->mmPtr,  mmp->size-1, ' ', '\0'); /* replace null characters('\0') with ' ' */
+        /* Replace nulls with blanks so binary files can be scanned */
+        ReplaceNulls(mmp->mmPtr,  mmp->size-1); 
 	return((char *) mmp->mmPtr);
     }
     /*
