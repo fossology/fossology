@@ -17,13 +17,13 @@
  */
 
 /**
-* \brief common-Report is a library that contains functions used for help
-* in reporting test results.
-*
-* @version "$Id$"
-*
-* Created on Jun 9, 2011 by Mark Donohoe
-*/
+ * \brief common-Report is a library that contains functions used for help
+ * in reporting test results.
+ *
+ * @version "$Id$"
+ *
+ * Created on Jun 9, 2011 by Mark Donohoe
+ */
 
 /**
  * \brief Check the xml reports for failures
@@ -38,11 +38,10 @@
  * Created on Jun 8, 2011 by Mark Donohoe
  */
 
-function check4failures($xmlFile=NULL)
+function check4Failures($xmlFile=NULL)
 {
-  
-  $analysis = 'Uploads-Test-Results.xml';
-  $fail = 0;
+
+  $failures = array();
 
   if(file_exists($xmlFile))
   {
@@ -51,10 +50,8 @@ function check4failures($xmlFile=NULL)
   }
   else
   {
-    throw new Exception("can't find file $xmlFile");
+    throw new Exception("Can't find file $xmlFile");
   }
-
-  $failures = array();
 
   foreach($sx->testsuite as $ts)
   {
@@ -65,7 +62,7 @@ function check4failures($xmlFile=NULL)
         //echo "failure is:$failure\n";
         if(!empty($failure))
         {
-          $failures[] = $tc['name'];
+          $failures[] = $failure->name;
         }
       }
     }
@@ -76,5 +73,60 @@ function check4failures($xmlFile=NULL)
     return($failures);
   }
   return(NULL);
-}
+} // check4Failures
+
+
+/**
+ * \brief Check the CUnit xml reports for failures
+ *
+ *@param string $file path to the xml file to check
+ *
+ *@return null on success, array of testcase names that failed on failure
+ * Throws exception if input file does not exist.
+ *
+ * @version "$Id$"
+ *
+ * Created on Jun 9, 2011 by Mark Donohoe
+ */
+function check4CUnitFail($xmlFile=NULL)
+{
+  $failures = array();
+
+  if(file_exists($xmlFile))
+  {
+    $sx = simplexml_load_file($xmlFile);
+    //echo "cunit looks like:\n";print_r($sx) . "\n";
+  }
+  else
+  {
+    throw new Exception("can't find file $xmlFile");
+  }
+
+  // dive deep to get the data we need.
+  foreach($sx->CUNIT_RESULT_LISTING as $cuResutList)
+  {
+    foreach($cuResutList->CUNIT_RUN_SUITE as $cuRunSuite)
+    {
+      //echo "cuRunSuite is:\n";print_r($cuRunSuite) . "\n";
+      foreach($cuRunSuite->CUNIT_RUN_SUITE_SUCCESS as $cuTestRecord)
+      {
+        foreach($cuTestRecord as $cuRunStat)
+        {
+          foreach($cuRunStat->CUNIT_RUN_TEST_FAILURE as $failRecord)
+          {
+            //echo "failRecord is:\n";print_r($failRecord) . "\n";
+            $failures[] = $failRecord;
+          }
+        }
+      }
+    } // foreach($cuResutList->CUNIT_RUN_SUITE
+  } // foreach($sx->CUNIT_RESULT_LISTING
+  if(empty($failures))
+  {
+    return(NULL);  // success
+  }
+  else{
+    return($failures);
+  }
+} //check4CUnitFail
 ?>
