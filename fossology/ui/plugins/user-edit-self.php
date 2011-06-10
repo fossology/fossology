@@ -107,6 +107,7 @@ class user_edit_self extends FO_Plugin
     $Folder = GetParm('folder', PARM_INTEGER);
     $Email = GetParm('email', PARM_TEXT);
     $Email_notify = GetParm('emailnotify', PARM_TEXT);
+    error_log("Email_notify is:$Email_notify\n");
     $agentList = userAgents();
     $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
     $uiChoice = GetParm('whichui', PARM_TEXT);
@@ -194,6 +195,12 @@ class user_edit_self extends FO_Plugin
       {
         $SQL.= ", ";
       }
+      if ($Email_notify == 'on') {
+        $Email_notify = 'y';
+      } else {
+        $Email_notify = '';
+      }
+
       $SQL.= " email_notify = '$Email_notify'";
       $_SESSION['UserEnote'] = $Email_notify;
       $GotUpdate = 1;
@@ -330,7 +337,7 @@ class user_edit_self extends FO_Plugin
         }
         $text = _("E-mail Notification");
         $V .= "$Style<th>5.</th><th>$text</th><td>\n";
-        $V .= "<input name='emailnotify' type='checkbox' value=1 $Checked>";
+        $V .= "<input name='emailnotify' type='checkbox' $Checked>";
         $V.= "</tr>\n";
         $V.= "</tr>\n";
         $text = _("Default scans.");
