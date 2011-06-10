@@ -203,11 +203,11 @@ function ProcEnote($UploadPk) {
 
   /* get the user name from the previous upload */
   $previous = $UploadPk-1;
-  $Sql = "SELECT upload_pk,upload_userid,job_upload_fk,job_user_fk FROM upload,job WHERE " .
+  $Sql = "SELECT upload_pk,user_fk,job_upload_fk,job_user_fk FROM upload,job WHERE " .
            "job_upload_fk=$previous and upload_pk=$previous order by upload_pk desc;";
   $Users = $DB->Action($Sql);
   $UserPk = $Users[0]['job_user_fk'];
-  $UserId = $Users[0]['upload_userid'];
+  $UserId = $Users[0]['user_fk'];
   $Sql = "SELECT user_pk, user_name, user_email, email_notify FROM users WHERE " .
              "user_pk=$UserPk; ";
   $Uname= $DB->Action($Sql);
@@ -215,14 +215,14 @@ function ProcEnote($UploadPk) {
   $UserEmail = $Uname[0]['user_email'];
 
   /*
-   * If called as agent, current upload user name will be fossy with a upload_userid of NULL.
+   * If called as agent, current upload user name will be fossy with a user_fk of NULL.
    * Get the information to check that condition
    */
-  $Sql = "SELECT upload_pk,upload_userid,job_upload_fk,job_user_fk FROM upload,job WHERE " .
+  $Sql = "SELECT upload_pk,user_fk,job_upload_fk,job_user_fk FROM upload,job WHERE " .
            "job_upload_fk=$UploadPk and upload_pk=$UploadPk order by upload_pk desc;";
   $Users = $DB->Action($Sql);
   $UserPk = $Users[0]['job_user_fk'];
-  $UserId = $Users[0]['upload_userid'];
+  $UserId = $Users[0]['user_fk'];
 
   // need to find the jq_pk's of bucket, copyright, nomos and package 
   // agents to use as dependencies.
