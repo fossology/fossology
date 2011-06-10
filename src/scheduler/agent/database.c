@@ -31,10 +31,30 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 PGconn* db_conn = NULL;
+char fossy_url[256];
+
+const char* url_checkout = "\
+    SELECT conf_value FROM sysconfig\
+      WHERE variablename = 'FOSSology_URL';";
+
+const char* upload_common = "\
+    SELECT * FROM jobqueue \
+      WHERE jq_job_fk in ( \
+        SELECT job_pk FROM job \
+          WHERE job_upload_fk = %d \
+      );";
+
+const char* select_upload_fk =" \
+    SELECT job_upload_fk FROM job, jobqueue \
+      WHERE jq_job_fk = job_pk and jq_pk = %d;";
+
+const char* jobsql_email = "\
+    SELECT user_name, user_email, email_notify FROM users, upload \
+      WHERE user_pk = user_fk AND upload_pk = %d;";
 
 const char* basic_checkout = "\
     SELECT * FROM getrunnable()\
-    LIMIT 10;";
+      LIMIT 10;";
 
 const char* jobsql_started = "\
     UPDATE jobqueue \
@@ -76,13 +96,6 @@ const char* jobsql_log = "\
       SET jq_log = '%s' \
       WHERE jq_pk = '%d';";
 
-const char* jobsql_email = "\
-    SELECT user_email, email_notify FROM users \
-      WHERE user_pk = ( \
-        SELECT job_user_fk FROM job \
-          WHERE job_pk = %d \
-      );";
-
 /* ************************************************************************** */
 /* **** local functions ***************************************************** */
 /* ************************************************************************** */
@@ -95,7 +108,18 @@ const char* jobsql_email = "\
  */
 void database_init()
 {
+  PGresult* db_result;
+  char* result;
+
+  /* create the connection to the database */
   db_conn = fo_dbconnect();
+  memset(fossy_url, '\0', sizeof(fossy_url));
+
+  /* get the url for the fossology instance */
+  db_result = PQexec(db_conn, url_checkout);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK && PQntuples(db_result) != 0)
+    strcpy(fossy_url, (result = PQgetvalue(db_result, 0, 0)), strlen(result));
+  PQclear(db_result);
 }
 
 /**
@@ -107,9 +131,58 @@ void database_destroy()
   db_conn = NULL;
 }
 
-void email_notification()
+void email_notification(int job_id, int failed)
 {
-  // TODO
+  PGresult* db_result;
+  int tuples;
+  int i;
+  int col;
+  int upload_id;
+  char* val;
+  char sql[1024];
+
+  sprintf(sql, upload_common, job_id);
+  db_result = PQexec(db_conn, sql);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+  {
+    PQ_ERROR(db_result, "unable to check common uploads to job %d", job_id);
+    PQclear(db_result);
+    return;
+  }
+
+  tuples = PQntuples(db_result);
+  col = PQfnumber(db_result, "jq_endtext");
+  for(i = 0; i < tuples; i++)
+  {
+    val = PQgetvalue(db_result, i, col);
+    if(strcmp(val, "Started") == 0 ||
+       strcmp(val, "Paused")  == 0 ||
+       strcmp(val, "Restart") == 0 )
+    {
+      PQclear(db_result);
+      return;
+    }
+  }
+  PQclear(db_result);
+
+  sprintf(sql, jobsql_email, job_id);
+  db_result = PQexec(db_conn, sql);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+  {
+    PQ_ERROR(db_result, "unable to access email info for job %d", job_id);
+    PQclear(db_result);
+    return;
+  }
+
+  if(PQget(db_result, 0, "email_notify")[0] == 'y')
+  {
+
+
+
+
+  }
+
+  PQclear(db_result);
 }
 
 /* ************************************************************************** */
@@ -226,14 +299,14 @@ void database_update_job(int j_id, job_status status)
       sql = g_strdup_printf(jobsql_started, "localhost", getpid(), j_id);
       break;
     case JB_COMPLETE:
-      email_notification();
+      email_notification(j_id, 0);
       sql = g_strdup_printf(jobsql_complete, j_id);
       break;
     case JB_RESTART:
       sql = g_strdup_printf(jobsql_restart, j_id);
       break;
     case JB_FAILED:
-      email_notification();
+      email_notification(j_id, 1);
       sql = g_strdup_printf(jobsql_failed, j_id);
       break;
     case JB_SCH_PAUSED: case JB_CLI_PAUSED:

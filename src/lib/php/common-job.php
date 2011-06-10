@@ -240,7 +240,7 @@ function JobAddUpload($job_name, $filename, $desc, $UploadMode, $FolderPk) {
   $UserId = $_SESSION['UserId'];
   if (!empty($UserId)) {
     $DB->Action("INSERT INTO upload
-      (upload_desc,upload_filename,upload_userid,upload_mode,upload_origin) VALUES
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin) VALUES
       ('$desc','$job_name','$UserId','$UploadMode','$filename');");
     $Results = $DB->Action("SELECT currval('upload_upload_pk_seq') as upload_pk FROM upload;");
     $uploadpk = $Results[0]['upload_pk'];
@@ -250,7 +250,7 @@ function JobAddUpload($job_name, $filename, $desc, $UploadMode, $FolderPk) {
     }
   }
   else {
-    /* Create the upload record WITHOUT upload_userid */
+    /* Create the upload record WITHOUT user_fk */
     $DB->Action("INSERT INTO upload
       (upload_desc,upload_filename,upload_mode,upload_origin) VALUES
       ('$desc','$job_name','$UploadMode','$filename');");

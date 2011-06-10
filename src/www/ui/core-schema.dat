@@ -1616,10 +1616,10 @@
   $Schema["TABLE"]["upload"]["upload_filename"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"upload_filename\" SET NOT NULL;";
   $Schema["TABLE"]["upload"]["upload_filename"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["upload"]["upload_userid"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"upload_userid\" IS 'who uploaded this file FUTURE';";
-  $Schema["TABLE"]["upload"]["upload_userid"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"upload_userid\" text;";
-  $Schema["TABLE"]["upload"]["upload_userid"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"upload_userid\" DROP NOT NULL;";
-  $Schema["TABLE"]["upload"]["upload_userid"]["UPDATE"] = "";
+  $Schema["TABLE"]["upload"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"user_fk\" IS 'who uploaded this file FUTURE';";
+  $Schema["TABLE"]["upload"]["user_fk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"user_fk\" int4;";
+  $Schema["TABLE"]["upload"]["user_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"user_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload"]["user_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["upload"]["upload_mode"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"upload_mode\" IS '1 upload complete, 1<<1 gold (devel only), 1<<2 wget, 1<<3 web upload, 1<<4 discovery ; 1<<5 ununpack complete without fatal errors';";
   $Schema["TABLE"]["upload"]["upload_mode"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"upload_mode\" int4;";
