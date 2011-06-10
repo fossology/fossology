@@ -493,7 +493,7 @@ function scheduleEmailNotification($upload_pk,$webServer,$Email=NULL,
 $UserName=NULL,$Depends) {
 
   global $DB;
-  global $SysConf;
+  $SysConf = array();
 
   if (empty($DB)) {
     return;
@@ -513,11 +513,13 @@ $UserName=NULL,$Depends) {
   /* set up input for fo-notify */
   $Nparams = '';
   $To = NULL;
-
+  
+  if (empty($webServer)) $webServer = "localhost"; /* -w web-server, it is required, but deprecated */ 
   $Nparams .= "-w $webServer ";
-  /* FOSSology_URL, e.g. fossolog.org/repo/index.php */
-  $FOSSology_URL = $_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME'];
-  error_log("FOSSology_URL :$FOSSology_URL", 0);
+  /* FOSSology_URL, e.g. fossolog.org/repo/ */
+  /* Initialize global system configuration variables $SysConfig[] */
+  $SysConf = ConfigInit();
+  $FOSSology_URL = @$SysConf["FOSSologyURL"];
   $Nparams .= "-p $FOSSology_URL ";
   /* If email is passed in, favor that over the session */
   if(!empty($Email)) {
