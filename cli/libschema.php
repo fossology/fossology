@@ -525,6 +525,11 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 
 	$initFail = FALSE;
 
+        if(initLicenseRefTable($Verbose, $Debug) != 0)
+        {
+        	print "FATAL! cannot initialize license_ref table data\n";
+                $initFail = TRUE;
+        }
 	if(initPlugins($Verbose, $Debug) != 0)
 	{
 		print "FATAL! cannot initialize UI Plugins\n";
@@ -990,6 +995,53 @@ function initPlugins($Verbose, $Debug)
 	}
 	return (0);
 } // initPlugins()
+
+/**
+ * initLicenseRefTable
+ * \brief Initialize the license_ref table data
+ *
+ * @return 0 on success,1 on failure
+ */
+function initLicenseRefTable($Verbose, $Debug)
+{
+  global $LIBEXECDIR;
+
+  print "  Importing license_ref table data\n";
+  flush();
+
+  if (!is_dir($LIBEXECDIR)) {
+    print "FATAL: Directory '$LIBEXECDIR' does not exist.\n";
+    return (1);
+  }
+  $Dir = opendir($LIBEXECDIR);
+  if (!$Dir) {
+    print "FATAL: Unable to access '$LIBEXECDIR'.\n";
+    return (1);
+  }
+  $File = "$LIBEXECDIR/licenseref.txt";
+  if (!is_file($File)) {
+    print "FATAL: Unable to access '$File'.\n";
+    return (1);
+  }
+  $File = "$LIBEXECDIR/licenseref.sql";
+  if (is_file($File)) {
+    $Command = "su postgres -c 'psql < $File fossology'";
+    if ($Debug) {
+      print "$Command;\n";
+    }
+    else {
+      system($Command, $Status);
+      if ($Status != 0) {
+        print "FATAL: '$command' failed to initialize license_ref table data\n";
+        return (1);
+      }
+    }
+  } else {
+    print "FATAL: Unable to access '$File'.\n";
+    return (1);
+  }
+  return (0);
+} // initLicenseRefTable()
 
 /**
  * MakeFunctions

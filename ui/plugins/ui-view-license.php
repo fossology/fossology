@@ -59,7 +59,7 @@ class ui_view_license extends FO_Plugin
 	menu_insert("View-Meta::Nomos License",-21,$URI,"View license histogram");
 	}
       }*/
-    $Lic = GetParm("lic",PARM_INTEGER);
+    $Lic = GetParm("lic",PARM_STRING);
     if (!empty($Lic)) { $this->NoMenu = 1; } 
     } // RegisterMenus()
 
@@ -154,35 +154,50 @@ class ui_view_license extends FO_Plugin
     } // ViewLicense()
 
  /***********************************************************
-   ViewLicenseText(): Given a uploadtree_pk, lic_pk
+   ViewLicenseText(): Given a uploadtree_pk, lic_shortname
    retrieve the license text and display it.
    ***********************************************************/
-  function ViewLicenseText($Item, $LicPk, $TokPfileStart, $nomos_out)
+  function ViewLicenseText($Item, $LicShortname, $TokPfileStart, $nomos_out)
   {
     global $PG_CONN;
     global $Plugins;
     $View = &$Plugins[plugin_find_id("view")];    
 
-    $sql = "select * from license_ref where rf_pk = $LicPk;";
+    $sql = "select * from license_ref where rf_shortname = '$LicShortname' and rf_text != 'License by Nomos.';";
     $result = pg_query($PG_CONN, $sql);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if (empty($row['rf_shortname'])) { return; }
+    if (pg_num_rows($result) > 0)
+    {
+      while ($row = pg_fetch_assoc($result))
+      {
+        if (empty($row['rf_shortname'])) { continue; }
 
-    $Text = "<div class='text'>";
-    $Text .= "<H1>License: " . $row['rf_shortname'] . "</H1>\n";
-    if (!empty($row['rf_url']) && (strtolower($row['rf_url']) != 'none'))
-    {
-      $Text .= "Reference URL: <a href=\"" . $row['rf_url'] . "\" target=_blank> " . $row['rf_url'] . "</a>";
+        $Text = "<div class='text'>";
+        $Text .= "<H1>License: " . $row['rf_shortname'] . "</H1>\n";
+        if (!empty($row['rf_fullname']))
+        {
+          $Text .= "<H2>License Fullname: " . $row['rf_fullname'] . "</H2>\n";
+        }
+        if (!empty($row['rf_url']) && (strtolower($row['rf_url']) != 'none'))
+        {
+          $Text .= "<b>Reference URL:</b> <a href=\"" . $row['rf_url'] . "\" target=_blank> " . $row['rf_url'] . "</a><br>\n";
+        }
+        if (!empty($row['rf_text']))
+        {
+          $Text .= "<b>License Text:</b>\n" . $row['rf_text'];
+        }
+        $Text .= "<hr>\n";
+        $Text .= "</div>";
+      }
+    } else {
+      $Text = "<div class='text'>"; 
+      $Text .= "<H1>Original license text is not in the FOSSology database.</H1>\n";
+      $Text .= "<hr>\n";
+      $Text .= "</div>";
     }
-    if (!empty($row['rf_text']))
-    {
-      $Text .= "<b>License Text:</b> " . $row['rf_text'];
-    }
-    $Text .= "<hr>\n";
-    $Text .= "</div>";
-    $Text .= $nomos_out;
+    pg_free_result($result);
+    //$Text .= $nomos_out;
     //$View->ShowView(NULL,"view",0,0,$Text);
+    $Text = str_replace("\n","<br>\n",$Text);
     print($Text);    
   } // ViewLicenseText()
 
@@ -204,7 +219,7 @@ class ui_view_license extends FO_Plugin
     $V="";
     global $Plugins;
     $View = &$Plugins[plugin_find_id("view")];
-    $LicId = GetParm("lic",PARM_INTEGER);
+    $LicShortname = GetParm("lic",PARM_STRING);
     $LicIdSet = GetParm("licset",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
     $nomosagent_pk = GetParm("napk",PARM_INTEGER);
@@ -235,11 +250,11 @@ class ui_view_license extends FO_Plugin
           $nomos_out .= " ,";
         } 
         $nomos_out .= "<b>";
-        $nomos_out .= "<a href='javascript:;' onClick=\"javascript:window.open('";
+        $nomos_out .= "<a title='Show License Reference.' href='javascript:;' onClick=\"javascript:window.open('";
         $nomos_out .= Traceback_uri();
         $nomos_out .= "?mod=view-license";
         $nomos_out .= "&lic=";
-        $nomos_out .= $one_license_pk;
+        $nomos_out .= $one_license;
         $nomos_out .= "&upload=";
         $nomos_out .= $Upload;
         $nomos_out .= "&item=";
@@ -249,9 +264,9 @@ class ui_view_license extends FO_Plugin
       }
     }
 
-    if (!empty($LicId))
+    if (!empty($LicShortname))
 	{
-	$this->ViewLicenseText($Item,$LicId,$LicIdSet, $nomos_out);
+	$this->ViewLicenseText($Item,$LicShortname,$LicIdSet, $nomos_out);
 	return;
 	}
 
