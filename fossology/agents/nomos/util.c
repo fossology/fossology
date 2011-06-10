@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -1008,32 +1008,24 @@ void printRegexMatch(int n, int cached)
 }
 
 /*
- * @brief delete all null characters in the file
- * @param pathname: the file path
+ * @brief Replace all occurrences of the search string with the replacement string
+ * @param subject: The string being searched and replaced on 
+ * @param size: mem size being searched and replaced on
+ * @param replace: The replacement value that replaces found search values
+ * @param search: The value being searched for
  */
-void HandleNullCharacter(char *pathname)
+void ReplaceNulls(char *subject, int size, char replace, char search)
 {
-  int count = strlen(pathname); /* the length of pathname*/
-  count = MAXLENGTH + 4*count; /* size will be allocated */
-  char *commands = (char *)malloc(count*sizeof(char));
-  sprintf(commands, "od -t x1 '%s' | grep ' 00 ' >/dev/null 2>&1", pathname);
-  int rc = system(commands);
-#ifdef	DEBUG
-  printf("commands is:%s, rc is:%d\n", commands, rc);
-#endif	/* DEBUG */
-  if (0 == rc) /* if the file contains any null character */
+  int index = 0;
+  for(index = 0; index < size; index++)  
   {
-    memset(commands, '\0', count);
-    sprintf(commands, "tr -d '\\0' < '%s' > '%s.temp';mv '%s.temp' '%s' >/dev/null 2>&1", pathname, pathname, pathname, pathname);
-#ifdef	DEBUG
-    printf("commands is:%s\n", commands);
-    printf("the file %s contain null characters\n", pathname);
-#endif	/* DEBUG */
-    /* delete all null characters */
-    system(commands);
+    if (search == subject[index])
+    {
+      subject[index] = replace;
+    }
   }
-  free(commands);
 }
+
 /*
  * Blarg.  Files that are EXACTLY a multiple of the system pagesize do
  * not get a NULL on the end of the buffer.  We need something
@@ -1102,7 +1094,6 @@ char *mmapFile(char *pathname)	/* read-only for now */
 
 	rem = mmp->size-1;
 	cp = mmp->mmPtr;
-        HandleNullCharacter(pathname); /* delete all null characters in the scanned file */
 	while (rem > 0) {
     if ((n = (int) read(mmp->fd, cp, (size_t) rem)) < 0) {
       /* log error and move on.  This way error will be logged
@@ -1115,6 +1106,7 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	    cp += n;
 	}
 	mmp->inUse = 1;
+        ReplaceNulls(mmp->mmPtr,  mmp->size-1, ' ', '\0'); /* replace null characters('\0') with ' ' */
 	return((char *) mmp->mmPtr);
     }
     /*
