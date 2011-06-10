@@ -1016,12 +1016,15 @@ void printRegexMatch(int n, int cached)
  */
 void ReplaceNulls(char *subject, int size, char replace, char search)
 {
-  int index = 0;
-  for(index = 0; index < size; index++)  
+  if (subject && subject[0])
   {
-    if (search == subject[index])
+    int index = 0;
+    for(index = 0; index < size; index++)  
     {
-      subject[index] = replace;
+      if (search == subject[index])
+      {
+        subject[index] = replace;
+      }
     }
   }
 }
