@@ -24,7 +24,7 @@
  * be installed in the sources before tests can be run.  The data is kept on
  * fossology.org in /var/www/fossology.og/testing/testFiles/
  *
- * @version "$Id $"
+ * @version "$Id$"
  *
  * Created on Jun 8, 2011 by Mark Donohoe
  */
