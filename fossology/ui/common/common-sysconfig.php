@@ -248,7 +248,8 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
       {
         $hostname1 = gethostbyaddr($name);
       }
-      if (strcmp($name, $hostname) && strcmp($hostname, $hostname1))
+      $server_name = $_SERVER['SERVER_NAME'];
+      if (strcmp($name, $hostname) && strcmp($hostname, $hostname1) && strcmp($name, $server_name))
       {
         return 0;
       }
