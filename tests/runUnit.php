@@ -42,12 +42,14 @@ if(array_key_exists('WORKSPACE', $_ENV))
 }
 //echo "DB: runUnit: home is:$home\nwksp is:$WORKSPACE\n";
 
-$lastTD = exec('./checkTestData.php 2>&1', $tdOut, $tdRtn);
+
+$lastTD = exec($WORKSPACE . '/fossology/tests/checkTestData.php 2>&1',
+  $tdOut, $tdRtn);
 if($tdRtn != 0)
 {
-  echo "FATAL! runRUnit could not check or downlown load test data, stopping tests";
-  echo "Output was:";
-  print_r($tdOut) . "\n";
+  echo "FATAL! runUnit could not check or downlown load test data, stopping tests";
+  //echo "Output was:";
+  //print_r($tdOut) . "\n";
   exit(1);
 }
 //echo "DB: output from check TD is:\n";print_r($tdOut) . "\n";
