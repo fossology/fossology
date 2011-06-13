@@ -121,7 +121,7 @@ else
     if(!is_null($upFail))
     {
       echo "There were errors in $inFile\n";
-      print_r($upFail) . "\n";
+      //print_r($upFail) . "\n";
       exit(1);
     }
   }
@@ -166,7 +166,7 @@ else
     if(!is_null($urFail))
     {
       echo "There were errors in the $inFile\n";
-      print_r($urFail) . "\n";
+      //print_r($urFail) . "\n";
       exit(1);
     }
   }
@@ -210,7 +210,7 @@ if($bytes > 0)
       if(!is_null($verFail))
       {
         echo "There were errors in the $inFile\n";
-        print_r($verFail) . "\n";
+        //print_r($verFail) . "\n";
         exit(1);
       }
     }
