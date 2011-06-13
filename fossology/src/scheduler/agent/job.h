@@ -67,6 +67,7 @@ void job_fail_agent(job j, void* age);
 void job_set_priority(job j, int pri);
 void job_set_data(job j, char* data, int sql);
 void job_update(job j);
+void job_fail(job j);
 int  job_id(job j);
 int  job_is_paused(job j);
 int  job_is_open(job j);

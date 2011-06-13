@@ -569,10 +569,17 @@ agent agent_init(host host_machine, job owner, int gen)
   a->meta_data = g_tree_lookup(meta_agents, job_type(owner));
   a->status = AG_CREATED;
 
+  /* make sure that there is a metaagent for the job */
+  if(a->meta_data == NULL)
+  {
+    ERROR("meta agent %s does not exist", job_type(owner));
+    return NULL;
+  }
+
   /* check if the agent is valid */
   if(!a->meta_data->valid)
   {
-    ERROR("agent %s has been invalidated by version information");
+    ERROR("agent %s has been invalidated by version information", job_type(owner));
     return NULL;
   }
 
