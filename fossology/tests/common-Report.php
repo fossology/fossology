@@ -114,7 +114,7 @@ function check4CUnitFail($xmlFile=NULL)
         {
           foreach($cuRunStat->CUNIT_RUN_TEST_FAILURE as $failRecord)
           {
-            //echo "failRecord is:\n";print_r($failRecord) . "\n";
+            echo "failRecord is:\n";print_r($failRecord) . "\n";
             $failures[] = $failRecord;
           }
         }
