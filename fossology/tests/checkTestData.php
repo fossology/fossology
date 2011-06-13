@@ -29,16 +29,20 @@
  * Created on Jun 8, 2011 by Mark Donohoe
  */
 
-// Assumes running from fossology/tests
-
-/*
- * 1. check the paths for the data
- * if exists, next data set, if not download it
- * 2. wget the data
- * 3. unpack if needed.
- */
-
 $home = getcwd();
+$dirs = explode('/',$home);
+$size = count($dirs);
+// we are not in fossology/tests, cd there
+if($dirs[$size-1] == 'workspace' )
+{
+  if(chdir('fossology/tests') === FALSE)
+  {
+    echo "FATAL! Cannot cd to fossology/tests from" . getcwd() . "\n";
+    exit(1);
+  }
+  $home = getcwd();  // home should now be ...workspace/fossology/tests
+}
+
 $redHatPath = 'nomos/testdata';
 $unpackTestFile = '../agents/ununpack/tests/test-data/testdata4unpack/argmatch.c.gz';
 $unpackTests = '../agents/ununpack/tests';
@@ -68,9 +72,6 @@ if(!file_exists($redHatPath . "/" . $redHatDataFile))
   }
 }
 else
-{
-  echo "DB: rh file exists\n";
-}
 
 if(chdir($home) === FALSE)
 {
@@ -105,15 +106,10 @@ if(!file_exists($unpackTestFile))
     $errors++;
   }
 }
-else
-{
-  echo "DB: unpack file exists\n";
-}
 
 if($errors)
 {
   exit(1);
 }
 exit(0);
-
 ?>
