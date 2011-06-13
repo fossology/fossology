@@ -107,7 +107,6 @@ class user_edit_self extends FO_Plugin
     $Folder = GetParm('folder', PARM_INTEGER);
     $Email = GetParm('email', PARM_TEXT);
     $Email_notify = GetParm('emailnotify', PARM_TEXT);
-    error_log("Email_notify is:$Email_notify\n");
     $agentList = userAgents();
     $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
     $uiChoice = GetParm('whichui', PARM_TEXT);
