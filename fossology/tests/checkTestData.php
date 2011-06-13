@@ -40,7 +40,7 @@
 
 $home = getcwd();
 $redHatPath = 'nomos/testdata';
-$unpackPath = 'agents/ununpack/tests/testdata/testdata4unpack';
+$unpackTestFile = '../agents/ununpack/tests/test-data/testdata4unpack/argmatch.c.gz';
 $unpackTests = '../agents/ununpack/tests';
 $redHatDataFile = 'RedHat.tar.gz';
 $unpackDataFile = 'unpack-test-data.tar.bz2';
@@ -67,6 +67,10 @@ if(!file_exists($redHatPath . "/" . $redHatDataFile))
     $errors++;
   }
 }
+else
+{
+  echo "DB: rh file exists\n";
+}
 
 if(chdir($home) === FALSE)
 {
@@ -75,8 +79,9 @@ if(chdir($home) === FALSE)
 }
 
 // check/install ununpack data
-if(!file_exists($unpackPath))
+if(!file_exists($unpackTestFile))
 {
+  echo "$unpackTestFile DOES NOT EXIST!\n";
   if(chdir($unpackTests) === FALSE)
   {
     echo "FATAL! cannot cd to $unpackTests\n";
@@ -100,53 +105,15 @@ if(!file_exists($unpackPath))
     $errors++;
   }
 }
+else
+{
+  echo "DB: unpack file exists\n";
+}
+
 if($errors)
 {
   exit(1);
 }
 exit(0);
 
-/**
- * \brief call configTestEnv.php, print errors on failure
- *
- * This function will print errors.  Even so, the return value should be
- * checked.
- *
- *
- * @return boolean
- */
-function callConfig($sourcePath=NULL)
-{
-  
-  // default path
-  if(empty($sourcePath))
-  {
-    $sourcePath = '.';
-  }
-  // get fully qualified hostname
-  // assume /repo
-  $last = exec('hostname -f', $out, $rtn);
-  if($rtn != 0)
-  {
-    echo "Fatal, could not get fully qalified hostname, cannot create config file.\n";
-    echo "Error was\n";
-    print_r($out) . "\n";
-    return(FALSE);
-  }
-
-  $fossology = 'http://' . $last . '/repo/';
-  $user = 'fossy';
-  $pw = 'fossy';
-
-  $cmd = $sourcePath . "/configTestEnv.php $fossology $user $pw 2>&1";
-  $lastConfig = exec($cmd, $configOut, $rtn);
-  //echo "last is:$lastConfig, out is:\n";print_r($configOut) . "\n";
-  if($rtn != 0)
-  {
-    echo "Fatal, configTestEnv failed!, Error was:\n$lastConfig\n";
-    print_r($configOut) . "\n";
-    return(FALSE);
-  }
-  return(TRUE);
-}
 ?>
