@@ -33,9 +33,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 PGconn* db_conn = NULL;
 char fossy_url[256];
 
+/* email related sql */
 const char* url_checkout = "\
     SELECT conf_value FROM sysconfig\
       WHERE variablename = 'FOSSology_URL';";
+
+const char* select_upload_fk =" \
+    SELECT job_upload_fk FROM job, jobqueue \
+      WHERE jq_job_fk = job_pk and jq_pk = %d;";
 
 const char* upload_common = "\
     SELECT * FROM jobqueue \
@@ -44,14 +49,11 @@ const char* upload_common = "\
           WHERE job_upload_fk = %d \
       );";
 
-const char* select_upload_fk =" \
-    SELECT job_upload_fk FROM job, jobqueue \
-      WHERE jq_job_fk = job_pk and jq_pk = %d;";
-
 const char* jobsql_email = "\
     SELECT user_name, user_email, email_notify FROM users, upload \
       WHERE user_pk = user_fk AND upload_pk = %d;";
 
+/* job queue related sql */
 const char* basic_checkout = "\
     SELECT * FROM getrunnable()\
       LIMIT 10;";
@@ -97,11 +99,16 @@ const char* jobsql_log = "\
       WHERE jq_pk = '%d';";
 
 /* ************************************************************************** */
-/* **** local functions ***************************************************** */
+/* **** email format ******************************************************** */
 /* ************************************************************************** */
 
-#define PQget(db_result, row, col) \
-  PQgetvalue(db_result, row, PQfnumber(db_result, col))
+const char* email_fmt = "\
+Dear %s,\nDo not reply to this message. This is an automatically generated \
+message by the FOSSolgy system.\n\n";
+
+/* ************************************************************************** */
+/* **** local functions ***************************************************** */
+/* ************************************************************************** */
 
 /**
  * TODO
@@ -109,7 +116,6 @@ const char* jobsql_log = "\
 void database_init()
 {
   PGresult* db_result;
-  char* result;
 
   /* create the connection to the database */
   db_conn = fo_dbconnect();
@@ -118,7 +124,7 @@ void database_init()
   /* get the url for the fossology instance */
   db_result = PQexec(db_conn, url_checkout);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK && PQntuples(db_result) != 0)
-    strcpy(fossy_url, (result = PQgetvalue(db_result, 0, 0)), strlen(result));
+    strcpy(fossy_url, PQgetvalue(db_result, 0, 0));
   PQclear(db_result);
 }
 
@@ -141,12 +147,21 @@ void email_notification(int job_id, int failed)
   char* val;
   char sql[1024];
 
-  sprintf(sql, upload_common, job_id);
+  sprintf(sql, select_upload_fk, job_id);
+  db_result = PQexec(db_conn, sql);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+  {
+    PQ_ERROR(db_result, "unable to select the upload id for job %d", job_id);
+    return;
+  }
+  upload_id = atoi(PQgetvalue(db_result, 0, 0));
+  PQclear(db_result);
+
+  sprintf(sql, upload_common, upload_id);
   db_result = PQexec(db_conn, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
     PQ_ERROR(db_result, "unable to check common uploads to job %d", job_id);
-    PQclear(db_result);
     return;
   }
 
@@ -165,18 +180,17 @@ void email_notification(int job_id, int failed)
   }
   PQclear(db_result);
 
-  sprintf(sql, jobsql_email, job_id);
+  sprintf(sql, jobsql_email, upload_id);
   db_result = PQexec(db_conn, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
     PQ_ERROR(db_result, "unable to access email info for job %d", job_id);
-    PQclear(db_result);
     return;
   }
 
   if(PQget(db_result, 0, "email_notify")[0] == 'y')
   {
-
+    sprintf(sql, email_fmt, PQget(db_result, 0, "user_name"));
 
 
 
@@ -261,13 +275,6 @@ void database_update_event(void* unused)
     {
       lprintf("DB: got a command from job queue\n");
       // TODO handle command
-      continue;
-    }
-
-    /* make sure that we have an agent of that type */
-    if(!is_meta_agent(type))
-    {
-      ERROR("Invalid meta agent: %s", type);
       continue;
     }
 

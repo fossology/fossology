@@ -63,7 +63,8 @@ extern char  log_name[FILENAME_MAX];
 #define PQ_ERROR(pg_r, ...) { \
             fprintf(stderr, "ERROR %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); }
+            fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); } \
+            PQclear(pg_r);
 
 /** Macro that is called when any type of warning is generated */
 #define WARNING(...) { \

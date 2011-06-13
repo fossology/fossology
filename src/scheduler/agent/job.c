@@ -341,9 +341,8 @@ void job_status_event(void* param)
   if(!params->second)
   {
     memset(buf, '\0', sizeof(buf));
-    sprintf(buf, "scheduler:%d daemon:%d jobs:%d log:%s port:%d verbose:%d\n",
-        s_pid, num_jobs(), s_daemon, log_name, s_port, verbose);
-
+    sprintf(buf, "scheduler:%d revision:%s daemon:%d jobs:%d log:%s port:%d verbose:%d\n",
+        s_pid, SVN_REV, num_jobs(), s_daemon, log_name, s_port, verbose);
 
     g_output_stream_write(params->first, buf, strlen(buf), NULL, NULL);
     g_tree_foreach(job_list, (GTraverseFunc)job_sstatus, params->first);
@@ -524,12 +523,20 @@ void job_update(job j)
       j->failed_agents = NULL;
 
       if(restart == 0)
-      {
-        job_transition(j, JB_FAILED);
-        g_tree_remove(job_list, &j->id);
-      }
+        job_fail(j);
     }
   }
+}
+
+/**
+ * TODO
+ *
+ * @param j
+ */
+void job_fail(job j)
+{
+  job_transition(j, JB_FAILED);
+  g_tree_remove(job_list, &j->id);
 }
 
 /**
@@ -710,9 +717,9 @@ job get_job(int id)
 }
 
 /**
- * TODO
+ * gets the number of jobs that are currently registers to the scheduler
  *
- * @return
+ * @return integer representing number of currently known jobs
  */
 int num_jobs()
 {
@@ -720,9 +727,9 @@ int num_jobs()
 }
 
 /**
- * TODO
+ * gets the number of jobs that are not paused
  *
- * @return
+ * @return number of non-paused jobs
  */
 int active_jobs()
 {
