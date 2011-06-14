@@ -23,14 +23,29 @@
  *
  * Created on March 17, 2010
  */
-
-require_once('../fossologyTestCase.php');
-require_once('../commonTestFuncs.php');
-require_once('../TestEnvironment.php');
-require_once('../testClasses/parseBrowseMenu.php');
-require_once('../testClasses/parseMiniMenu.php');
-require_once('../testClasses/parseFolderPath.php');
-require_once('../testClasses/dom-parseLicenseTable.php');
+$where = dirname(__FILE__);
+if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
+{
+  //echo "running from jenkins....fossology/tests\n";
+  require_once('fossologyTestCase.php');
+  require_once('commonTestFuncs.php');
+  require_once('TestEnvironment.php');
+  require_once('testClasses/parseBrowseMenu.php');
+  require_once('testClasses/parseMiniMenu.php');
+  require_once('testClasses/parseFolderPath.php');
+  require_once('testClasses/dom-parseLicenseTable.php');
+}
+else
+{
+  //echo "using requires for running outside of jenkins\n";
+  require_once('../fossologyTestCase.php');
+  require_once('../commonTestFuncs.php');
+  require_once('../TestEnvironment.php');
+  require_once('../testClasses/parseBrowseMenu.php');
+  require_once('../testClasses/parseMiniMenu.php');
+  require_once('../testClasses/parseFolderPath.php');
+  require_once('../testClasses/dom-parseLicenseTable.php');
+}
 
 global $URL;
 
@@ -153,28 +168,28 @@ class verify3filesCopyright extends fossologyTestCase
     //print "entries in the table:\n";print_r($copyR->hList) . "\n";
     // Verify text and counts are correct
     $notFound = array();
-      $found = NULL;
-      foreach ($copyR->hList as $copyFound)
+    $found = NULL;
+    foreach ($copyR->hList as $copyFound)
+    {
+      $key = $copyFound['textOrLink'];
+      if(array_key_exists($key, $copyStd))
       {
-        $key = $copyFound['textOrLink'];
-        if(array_key_exists($key, $copyStd))
-        {
-          $this->pass("Pass: found $key in copyright table\n");
-          $found = 1;
-          // found one, check the count
-          $foundCount= $copyFound['count'];
-          $count = $copyStd[$key];
-          $this->assertEqual($count, $foundCount,
+        $this->pass("Pass: found $key in copyright table\n");
+        $found = 1;
+        // found one, check the count
+        $foundCount= $copyFound['count'];
+        $count = $copyStd[$key];
+        $this->assertEqual($count, $foundCount,
         "verify3files FAILED! the counts are not equal\n
          Expected:$count\nGot:$foundCount\n");
-         continue;
-        }
-        else
-        {
-          $notFound[] = $key;
-        }
-      } // foreach $copyR->
-     //} // foreach $copyStd
+        continue;
+      }
+      else
+      {
+        $notFound[] = $key;
+      }
+    } // foreach $copyR->
+    //} // foreach $copyStd
 
     // this is a hack for now... should be a better way to filter
     // Try in_array before insert?
