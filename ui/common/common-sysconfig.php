@@ -185,7 +185,9 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
 
     $Variable = "FOSSologyURL";
     $URLPrompt = _("FOSSology URL");
-    $FOSSologyURL = exec("hostname -f")."/repo/";
+    $hostname = exec("hostname -f");
+    if (empty($hostname)) $hostname = "localhost";
+    $FOSSologyURL = $hostname."/repo/";
     $URLDesc = _("URL of this FOSSology server, e.g. $FOSSologyURL");
     $URLValid = "check_fossology_url";
     $ValueArray[$Variable] = "'$Variable', '$FOSSologyURL', '$URLPrompt', "
@@ -243,6 +245,7 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     if (!empty($name))
     {
       $hostname = exec("hostname -f");
+      if (empty($hostname)) $hostname = "localhost";
       $res = check_IP($name);
       if($res)
       {
