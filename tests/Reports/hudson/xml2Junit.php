@@ -18,9 +18,8 @@
  */
 
 /**
- * xml2Junit
- * \brief transform an xml output into junit style xml that is
- * compatible with Jenkins
+ * xml2html
+ * \brief transform an xml output into html using the supplied style sheet
  *
  * @version "$Id$"
  *
@@ -28,9 +27,9 @@
  */
 
 /*
- * xml2Junit (x2j?)
+ * xml2html
  *
- * x2j [- h] -f <file> [-o <file>] -x <file>
+ * xml2html [- h] -f <file> [-o <file>] -x <file>
  *
  * -h usage
  * -f file the xml input file
@@ -87,8 +86,12 @@ if(array_key_exists('x',$options))
     exit(1);
   }
 }
-//$xslFile = 'simpletest_to_junit.xsl';
-//$ckz = '../../nomos/ckzend.xml';
+
+/* Debug
+echo "XML2J: after parameter processing\n";
+echo "infile:$xmlFile,\nout:$outputFile,\nxsl:$xslFile\n";
+echo "XMLJ2: we are operating at:" . getcwd() . "\n";
+*/
 
 $xsl = new XSLTProcessor();
 $xsldoc = new DOMDocument();
@@ -97,19 +100,19 @@ $xsl->importStyleSheet($xsldoc);
 
 $xmldoc = new DOMDocument();
 $xmldoc->load($xmlFile);
-//echo $xsl->transformToXML($xmldoc);
+$transformed = $xsl->transformToXML($xmldoc);
 
 if($outputFile)
 {
   // open file and write output
   $OF = fopen($outputFile, 'w') or
     die("Fatal cannot open output file $outputFile\n");
-  $wrote = fwrite($OF, $xsl->transformToXML($xmldoc));
+  $wrote = fwrite($OF, $transformed);
   fclose($OF);
 }
 else
 {
   // no output file, echo to stdout
-  echo $xsl->transformToXML($xmldoc);
+  echo $transformed;
 }
 ?>
