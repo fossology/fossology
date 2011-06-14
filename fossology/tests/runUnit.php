@@ -44,12 +44,12 @@ if(array_key_exists('WORKSPACE', $_ENV))
 
 
 $lastTD = exec($WORKSPACE . '/fossology/tests/checkTestData.php 2>&1',
-  $tdOut, $tdRtn);
+$tdOut, $tdRtn);
 if($tdRtn != 0)
 {
   echo "FATAL! runUnit could not check or downlown load test data, stopping tests";
-  //echo "Output was:";
-  //print_r($tdOut) . "\n";
+  echo "Output was:";
+  print_r($tdOut) . "\n";
   exit(1);
 }
 //echo "DB: output from check TD is:\n";print_r($tdOut) . "\n";
@@ -69,8 +69,6 @@ else {
   }
 }
 
-
-$xml2html=$WORKSPACE . "/fossology/tests/Reports/hudson/xml2Junit.php";
 $failures = 0;
 
 foreach($unitList as $unitTest)
@@ -118,7 +116,7 @@ foreach($unitList as $unitTest)
         if(!is_null($verFail))
         {
           //echo "There were errors in the $fileName\n";
-         //print_r($verFail) . "\n";
+          //print_r($verFail) . "\n";
           $failures++;
         }
       }
@@ -126,7 +124,30 @@ foreach($unitList as $unitTest)
       {
         echo "Failure: Could not check file $fileName for failures\n";
       }
-    }
+      // create html report for this file.... get List or Run string so the
+      // correct xsl file is used.
+      $type = "Run";
+      echo "for report: filename is:$fileName\n";
+      if(preg_grep("/Run/", array($fileName)))
+      {
+        $type = "Run";
+      }
+      else if(preg_grep("/List/", array($fileName)))
+      {
+        $type = "List";
+      }
+      $xslFile = "CUnit-$type.xsl";
+      // remove .xml from name
+      $outFile = basename($fileName, '.xml');
+      $outPath = $WORKSPACE . "/fossology/tests/Reports/$outFile.html";
+      $xslPath = "/home/jenkins/public_html/CUnit/$xslFile";
+      $report = genHtml($fileName, $outPath, $xslPath);
+      if(!empty($report))
+      {
+        echo "Error: Could not generate a HTML Test report from $fileName.\n";
+        echo "DB: report is:\n$report\n";
+      }
+    } //foreach(glob....
   }
   if(chdir('../..') === FALSE)
   {
