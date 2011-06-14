@@ -39,21 +39,6 @@ require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 require_once '/usr/local/simpletest/extensions/junit_xml_reporter.php';
 
-/*$where = dirname(__FILE__);
- echo "where is:$where\n";
- if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
- {
- echo "running from jenkins....fossology/tests\n";
- require_once('fossology/tests/common-report.php');
-
- }
- else
- {
- echo "using requires for running outside of jenkins\n";
- require_once('common-Report.php');
- }
- */
-
 require_once('common-Report.php');
 
 global $testSuite;
@@ -111,7 +96,7 @@ $report = genHtml($inFile, $outFile, $xslFile);
 if(!empty($report))
 {
   echo "Error: Could not generate an Upload Test HTML report." .
- "FunctionalTestResults.html. Error was\n$report\n";
+ "FunctionalTestResults.html.\n";
 }
 // check for failures in the report
 else
@@ -156,7 +141,7 @@ $report = genHtml($inFile, $outFile, $xslFile);
 if(!empty($report))
 {
   echo "Error: Could not generate an Upload Test HTML report " .
-    "Uploads-Results.xml. Error was\n$report\n";
+    "Uploads-Results.xml.\n";
 }
 // check for failures in the report
 else
@@ -199,8 +184,8 @@ if($bytes > 0)
   $report = genHtml($inFile, $outFile, $xslFile);
   if(!empty($report))
   {
-    echo "Error: Could not generate an Upload Test HTML report" .
-    "VerifyTestResults.html Error was\n$report\n";
+    echo "Error: Could not generate an Upload Test HTML report " .
+    "VerifyTestResults.html.";
   }
   // check for failures in the report
   else
@@ -225,47 +210,4 @@ else
 {
   echo "ERROR: No data written to file:\n$file\n";
 }
-
-
-/**
- * \brief Generate an html report from the junit xml
- *
- * @param string $inFile the xml input file
- * @param string $outFile the html output filename, the name should include .html
- * @param string $xslFile the xsl file used to transform the xml to html
- *
- * @return NULL on success, string on failure
- *
- * @todo check if there is an html extension, if not add one.
- */
-function genHtml($inFile=NULL, $outFile=NULL, $xslFile=NULL)
-{
-  // check parameters
-  if(empty($inFile))
-  {
-    return('Error: no input file');
-  }
-  else if(empty($outFile))
-  {
-    return('Error: no Output file');
-  }
-  else if(empty($xslFile))
-  {
-    return('Error: no xsl file');
-  }
-  $cmdLine = "Reports/hudson/xml2Junit.php -f $inFile -o $outFile -x $xslFile";
-  $last = exec("$cmdLine", $out, $rtn);
-  //echo "Last line of output from xml2:\n$last\n";
-  //echo "output from xml2 is:\n";
-  //print_r($out) . "\n";
-
-  if($rtn != 0)
-  {
-    $errorString = 'Error: xml2Junit had errors, see below';
-    $errorString .= implode(' ', $out);
-    return($errorString);
-  }
-  return(NULL);
-} // genHtml
-
 ?>
