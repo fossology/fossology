@@ -51,15 +51,15 @@ $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) { $Mod = "Default"; }
 $PluginId = plugin_find_id($Mod);
 if ($PluginId >= 0)
-  {
+{
   /* Found a plugin, so call it! */
   $Plugins[$PluginId]->OutputOpen("HTML",1);
-  // error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
+  // error_reporting(E_ALL | E_NOTICE);
   $Plugins[$PluginId]->Output();
   $Plugins[$PluginId]->OutputClose();
-  }
+}
 else
-  {
+{
   $Uri = Traceback_uri() . "?mod=auth";
   $text = _("Module unavailable or your login session timed out.");
   print "$text <P />";
@@ -74,8 +74,7 @@ else
   /* Redirect in 5 seconds. */
   print "window.setTimeout('Redirect()',5000);\n";
   print "</script>\n";
-  }
+}
 plugin_unload();
 return(0);
-
 ?>
