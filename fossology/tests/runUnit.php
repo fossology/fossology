@@ -127,7 +127,6 @@ foreach($unitList as $unitTest)
       // create html report for this file.... get List or Run string so the
       // correct xsl file is used.
       $type = "Run";
-      echo "for report: filename is:$fileName\n";
       if(preg_grep("/Run/", array($fileName)))
       {
         $type = "Run";
@@ -148,6 +147,13 @@ foreach($unitList as $unitTest)
         echo "DB: report is:\n$report\n";
       }
     } //foreach(glob....
+    // generate coverage report
+    $lastCover = exec('make coverage 2>&1', $makeCover, $coverRtn);
+    if($coverRtn != 0)
+    {
+      echo "Error! Coverage did not make for $unitTest\n";
+      continue;
+    }
   }
   if(chdir('../..') === FALSE)
   {
