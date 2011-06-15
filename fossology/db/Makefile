@@ -5,19 +5,17 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-all: dbcreate licenseref.sql
+all: dbcreate
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 # generate the dbcreate script
 dbcreate: dbcreate-process
 	chmod +x dbcreate
-licenseref.sql: licenseref.sql-process
 
 install: all
 	$(INSTALL_DATA) fossologyinit.sql $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
 	$(INSTALL_DATA) licenseref.sql $(DESTDIR)$(LIBEXECDIR)/licenseref.sql
-	$(INSTALL_DATA) licenseref.txt $(DESTDIR)$(LIBEXECDIR)/licenseref.txt
 	$(INSTALL_PROGRAM) dbcreate $(DESTDIR)$(LIBEXECDIR)/dbcreate
 	@if [ ! -f "$(DESTDIR)/etc/cron.d/fossology" -o "$(OVERWRITE)" ]; then \
 	   mkdir -p $(DESTDIR)/etc/cron.d/; \
@@ -31,7 +29,6 @@ install: all
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
 	rm -f $(DESTDIR)$(LIBEXECDIR)/licenseref.sql
-	rm -f $(DESTDIR)$(LIBEXECDIR)/licenseref.txt
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbcreate
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
@@ -47,7 +44,7 @@ uninstall:
 	@echo "  Remove by hand if you desire."
 
 clean:
-	rm -f core dbcreate licenseref.sql
+	rm -f core dbcreate
 
 test: all
 	@echo "NOTICE: no tests available for db"
