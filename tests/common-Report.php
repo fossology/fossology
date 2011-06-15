@@ -162,7 +162,7 @@ function genHtml($inFile=NULL, $outFile=NULL, $xslFile=NULL)
   if(array_key_exists('WORKSPACE', $_ENV))
   {
     $WORKSPACE = $_ENV['WORKSPACE'];
-    $cmdLine = "$WORKSPACE/fossology/tests/Reports/hudson/xml2html.php " .
+    $cmdLine = $WORKSPACE . "/fossology/tests/Reports/hudson/xml2html.php " .
       " -f $inFile -o $outFile -x $xslFile";
   }
   else {
