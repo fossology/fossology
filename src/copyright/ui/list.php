@@ -24,8 +24,6 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-require($WEBDIR.'/plugins/copyright/library.php');
-
 /*************************************************
  This plugin is used to:
    List files for a given copyright statement/email/url in a given
