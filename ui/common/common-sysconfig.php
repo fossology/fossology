@@ -138,10 +138,11 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
 
     $Variable = "SupportEmailAddr";
     $SupportEmailAddrPrompt = _('Support Email Address');
+    $SupportEmailAddrValid = "check_email_address";
     $SupportEmailAddrDesc = _('e.g. "support@mycompany.com"<br>Individual or group email address to those providing FOSSology support.');
     $ValueArray[$Variable] = "'$Variable', null, '$SupportEmailAddrPrompt', "
                     . CONFIG_TYPE_TEXT .
-                    ",'Support', 2, '$SupportEmailAddrDesc', ''";
+                    ",'Support', 2, '$SupportEmailAddrDesc', '$SupportEmailAddrValid'";
 
     $Variable = "SupportEmailSubject";
     $SupportEmailSubjectPrompt = _('Support Email Subject line');
@@ -216,7 +217,7 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
   }
 
   /************************************************
-   validation functions check_boolean().
+   validation function check_boolean().
    check if the value format is valid,
    only true/false is valid
    return 1, if the value is valid, or 0
@@ -234,7 +235,7 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
   }
 
   /************************************************
-   validation functions check_fossology_url().
+   validation function check_fossology_url().
    check if the url is valid,
    return value, 1: valid, 0: invalid
    ************************************************/
@@ -262,7 +263,7 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
   }
 
   /************************************************
-   validation functions check_logo_url().
+   validation function check_logo_url().
    check if the url is available,
    return value, 1: available, 0: unavailable
    ************************************************/
@@ -280,7 +281,7 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
   }
 
   /************************************************
-   validation functions check_logo_image_url().
+   validation function check_logo_image_url().
    check if the url is available,
    return value, 1: the url is available, 0: unavailable
    ************************************************/
@@ -299,7 +300,18 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     
   }
     
-   /************************************************
+  /************************************************
+   validation function check_email_address().
+   implement this function if needed in the future
+   check if the email address is valid,
+   return value, 1: valid, 0: invalid
+   ************************************************/
+  function check_email_address($email_address)
+  {
+    return 1;
+  }
+
+  /************************************************
    check if the url is available,
    return value, 1: available, 0: unavailable
    ************************************************/
