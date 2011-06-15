@@ -1,2 +1,0 @@
-DELETE FROM license_ref WHERE rf_text != 'License by Nomos.';
-COPY license_ref (rf_shortname,rf_text,rf_url,rf_add_date,rf_copyleft,"rf_OSIapproved",rf_fullname,"rf_FSFfree","rf_GPLv2compatible","rf_GPLv3compatible",rf_notes,"rf_Fedora",marydone,rf_active,rf_text_updatable,rf_md5,rf_detector_type) FROM '{$LIBEXECDIR}/licenseref.txt' DELIMITER '|';
