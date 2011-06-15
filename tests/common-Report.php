@@ -156,19 +156,18 @@ function genHtml($inFile=NULL, $outFile=NULL, $xslFile=NULL)
   {
     return('Error: no xsl file');
   }
-  // figure out where we are running in Jenkins so we can find xml2Junit
-  // @todo fix where utils like fo-runTests and xml2Junit.php go and install them
+  // figure out where we are running in Jenkins so we can find xml2html
+  // @todo fix where utils like fo-runTests and xml2html.php go and install them
   // as part of test setup.
   if(array_key_exists('WORKSPACE', $_ENV))
   {
     $WORKSPACE = $_ENV['WORKSPACE'];
-    echo "COMREP: WKSP is:$WORKSPACE\n";
-    $cmdLine = "$WORKSPACE/fossology/tests/Reports/hudson/xml2Junit.php " .
+    $cmdLine = "$WORKSPACE/fossology/tests/Reports/hudson/xml2html.php " .
       " -f $inFile -o $outFile -x $xslFile";
   }
   else {
   // else running from fossology/tests
-  $cmdLine = "Reports/hudson/xml2Junit.php -f $inFile -o $outFile -x $xslFile";
+  $cmdLine = "Reports/hudson/xml2html.php -f $inFile -o $outFile -x $xslFile";
   }
   $last = exec("$cmdLine", $out, $rtn);
   //echo "Last line of output from xml2:\n$last\n";
@@ -177,7 +176,7 @@ function genHtml($inFile=NULL, $outFile=NULL, $xslFile=NULL)
 
   if($rtn != 0)
   {
-    $errorString = 'Error: xml2Junit had errors, see below\n';
+    $errorString = 'Error: xml2html had errors, see below\n';
     $errorString .= implode(' ', $out);
     return($errorString);
   }
