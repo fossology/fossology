@@ -56,7 +56,7 @@ class ui_topnav extends FO_Plugin
     else
     {
       $LogoLink = 'http://fossology.org';
-      $LogoImg = 'images/fossology-logo.gif';
+      $LogoImg = Traceback_uri . 'images/fossology-logo.gif';
     }
 
 	$V .= "    <td width='15%'>";

@@ -37,6 +37,8 @@ class ui_welcome extends FO_Plugin
 
   function Output()
     {
+    $SiteURI = Traceback_uri();
+
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     switch($this->OutputType)
@@ -47,7 +49,7 @@ class ui_welcome extends FO_Plugin
 	if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
 	  {
 $text = _("Login");
-	  $Login = "<a href='" . Traceback_uri() . "?mod=auth'>$text</a>";
+	  $Login = "<a href='$SiteURI?mod=auth'>$text</a>";
 	  }
 	else { $Login = _("Login"); }
 $text1 = _("The FOSSology Toolset");
@@ -98,27 +100,27 @@ $text58 = _("- A community website with information on Open Source Governance.")
       <blockquote> 
         <p><font face='Arial, Helvetica, sans-serif'>$text11 <br>
           <br>
-          <img src='images/right-point-bullet.gif'>$text12<br>
-          <img src='images/right-point-bullet.gif'>$text13<br>
-          <img src='images/right-point-bullet.gif'>$text14</font></p>
+          <img src='${SiteURI}images/right-point-bullet.gif'>$text12<br>
+          <img src='${SiteURI}images/right-point-bullet.gif'>$text13<br>
+          <img src='${SiteURI}images/right-point-bullet.gif'>$text14</font></p>
         <p>&nbsp;</p>
       </blockquote></td>
-    <td><img src='images/white.png'></td>
+    <td><img src='${SiteURI}images/white.png'></td>
   </tr>
 </table>
 
 <table width='100%' border='0'>
   <tr> 
-    <td><img src='images/logo2.png' align='right'></td>
+    <td><img src='${SiteURI}images/logo2.png' align='right'></td>
     <td valign='top'>
       <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'>$text2</font></h3>
       <blockquote> 
         <p> <font face='Arial, Helvetica, sans-serif'>$text21<br>
           <br>
-          <img src='images/right-point-bullet.gif'>$text22<br>
-          <img src='images/right-point-bullet.gif'>$text23<br>
-          <img src='images/right-point-bullet.gif'>$text24<br>
-          <img src='images/right-point-bullet.gif'>$text25</font><br>
+          <img src='${SiteURI}images/right-point-bullet.gif'>$text22<br>
+          <img src='${SiteURI}images/right-point-bullet.gif'>$text23<br>
+          <img src='${SiteURI}images/right-point-bullet.gif'>$text24<br>
+          <img src='${SiteURI}images/right-point-bullet.gif'>$text25</font><br>
         </p>
       </blockquote></td>
   </tr>
@@ -150,13 +152,13 @@ $text58 = _("- A community website with information on Open Source Governance.")
           <em><strong>$text412</strong></em> &shy; $text413<br>
         </p>
       </blockquote></td>
-    <td><img src='images/fossology-flow4.png'></td>
+    <td><img src='${SiteURI}images/fossology-flow4.png'></td>
   </tr>
 </table>
 
 <table width='100%' border='0'>
   <tr> 
-    <td valign='top'> <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'><img src='images/white.png' align='left'>$text5</font></h3>
+    <td valign='top'> <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'><img src='${SiteURI}images/white.png' align='left'>$text5</font></h3>
       <blockquote> 
         <blockquote> 
           <p><font face='Arial, Helvetica, sans-serif'>$text51<br>

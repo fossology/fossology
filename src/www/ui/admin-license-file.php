@@ -179,7 +179,7 @@ $text = _("URL");
     $ob .= "?mod=" . $this->Name . 
            "&rf_pk=$row[rf_pk]".
            "&req_marydone=$_REQUEST[req_marydone]&req_shortname=$_REQUEST[req_shortname]' >".
-           "<img border=0 src='images/button_edit.png'></a></td>";
+           "<img border=0 src='" . Traceback_uri() . "images/button_edit.png'></a></td>";
 
     $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
 /* to allow editing in line
@@ -313,7 +313,7 @@ $text = _("Detector Type");
     $ob .= "<tr>";
 $text = _("URL");
     $ob .= "<td align=right>$text";
-    $ob .= "<a href='$row[rf_url]'><image border=0 src=images/right-point-bullet.gif></a></td>";
+    $ob .= "<a href='$row[rf_url]'><image border=0 src=" . Traceback_url() . "images/right-point-bullet.gif></a></td>";
     $ob .= "<td><input type='text' name='rf_url' value='$row[rf_url]' size=80></td>";
     $ob .= "</tr>";
 
