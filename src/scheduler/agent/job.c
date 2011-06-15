@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossrepo.h>
 #include <agent.h>
 #include <database.h>
-#include <event.h>
 #include <job.h>
 #include <logging.h>
 #include <scheduler.h>
@@ -30,6 +29,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* unix library includes */
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 /* other library includes */
 #include <glib.h>
@@ -61,7 +62,7 @@ struct job_internal
     GMutex* lock;           ///< lock to maintain data integrity
     int idx;                ///< the current index into the sql results
     /* information about job status */
-    int priority;           ///< importance of the job, currently only two types
+    int priority;           ///< importance of the job, maps directory to unix priority
     int verbose;            ///< the verbose level for all of the agents in this job
     int id;                 ///< the identifier for this job
 };
@@ -379,6 +380,20 @@ void job_restart_event(void* param)
 }
 
 /**
+ * TODO
+ *
+ * @param j
+ */
+void job_priority_event(arg_int* params)
+{
+  GList* iter;
+
+  ((job)params->first)->priority = params->second;
+  for(iter = ((job)params->first)->running_agents; iter; iter = iter->next)
+    setpriority(PRIO_PROCESS, agent_pid(iter->data), params->second);
+}
+
+/**
  * Adds a new agent to the jobs list of agents. When a job is created it doesn't
  * contain any agents that can process its data. When an agent is ready, it will
  * add itself to the job using this function and begin processing the jobs data.
@@ -439,19 +454,6 @@ void job_fail_agent(job j, void* a)
   TEST_NULV(a);
   j->running_agents  = g_list_remove(j->running_agents,  a);
   j->failed_agents   = g_list_append(j->failed_agents,   a);
-}
-
-/**
- * Changes the priority of a job. Since all jobs are stated with the lowest possible
- * priority, a call to this function is required if a higher priority job is necessary.
- *
- * @param j the job to change the priority of
- * @param pri the new priority for the job
- */
-void job_set_priority(job j, int pri)
-{
-  TEST_NULV(j);
-  j->priority = pri;
 }
 
 /**
@@ -542,12 +544,25 @@ void job_fail(job j)
 /**
  * Gets the id number for the job.
  *
- * @param j the job to get the id of;
+ * @param j relevant job
+ * @return j's id
  */
 int job_id(job j)
 {
   TEST_NULL(j, -1);
   return j->id;
+}
+
+/**
+ * Gets the priority of the job
+ *
+ * @param j relevant job
+ * @return j's priority
+ */
+int job_priority(job j)
+{
+  TEST_NULL(j, -1);
+  return j->priority;
 }
 
 /**

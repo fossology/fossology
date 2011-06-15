@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define JOB_H_INCLUDE
 
 #include <stdio.h>
+#include <event.h>
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
@@ -59,16 +60,17 @@ void job_verbose_event(job j);
 void job_status_event(void* param);
 void job_pause_event(void* param);
 void job_restart_event(void* param);
+void job_priority_event(arg_int* params);
 
 void job_add_agent(job j, void* age);
 void job_remove_agent(job j, void* a);
 void job_finish_agent(job j, void* age);
 void job_fail_agent(job j, void* age);
-void job_set_priority(job j, int pri);
 void job_set_data(job j, char* data, int sql);
 void job_update(job j);
 void job_fail(job j);
 int  job_id(job j);
+int  job_priority(job j);
 int  job_is_paused(job j);
 int  job_is_open(job j);
 job  job_verbose(job j, int level);

@@ -429,6 +429,10 @@ void* agent_spawn(void* passed)
     close(a->from_child);
     close(a->to_child);
 
+    /* set the priority of the process to the job's priority */
+    if(nice(job_priority(a->owner)) < 0)
+      ERROR("unable to correctly set priority of agent process %d", a->pid);
+
     /* if host is null, the agent will run locally to */
     /* run the agent localy, use the commands that    */
     /* were parsed when the meta_agent was created    */
@@ -935,6 +939,17 @@ int aprintf(agent a, const char* fmt, ...)
   fflush(a->write);
 
   return rc;
+}
+
+/**
+ * Gets the pid of the process associated with this agent
+ *
+ * @param a relevant agent
+ * @return the pid of the process
+ */
+int agent_pid(agent a)
+{
+  return a->pid;
 }
 
 /**

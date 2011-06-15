@@ -39,7 +39,7 @@ extern int s_port;
 /* ************************************************************************** */
 
 /* scheduler utility functions */
-void load_config();
+void load_config(void*);
 void scheduler_close_event(void*);
 
 /* glib related functions */
