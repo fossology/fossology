@@ -126,7 +126,7 @@ void prnt_sig(int signo)
       event_signal(scheduler_close_event, NULL);
       break;
     case SIGHUP:
-      load_config();
+      load_config(NULL);
       break;
   }
 }
@@ -353,7 +353,7 @@ void kill_scheduler()
 /**
  * TODO
  */
-void load_config()
+void load_config(void* args)
 {
   DIR* dp;                  // directory pointer used to load meta agents;
   struct dirent* ep;        // information about directory
@@ -606,7 +606,7 @@ int main(int argc, char** argv)
   agent_list_init();
   host_list_init();
   job_list_init();
-  load_config();
+  load_config(NULL);
   interface_init();
   database_init();
 

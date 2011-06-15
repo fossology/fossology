@@ -72,10 +72,24 @@ typedef struct interface_connection
 /* ************************************************************************** */
 
 /**
- * TODO
+ * function that will run the thread associated with a particular interface
+ * instance. Since multiple different command line a graphical user interfaces
+ * can exists simultatiously, this allows the scheduler to quickly perform any
+ * requests.
  *
- * @param
- * @return
+ * handle commands:
+ *     exit: close connection with scheduler
+ *    close: shutdown the scheduler
+ *    pause: pause a job that is currently running
+ *   reload: reload configuration information
+ *   status: request status for scheduler or job
+ *  restart: restart a paused job
+ *  verbose: change verbose level for scheduler or job
+ * priority: change the priority of job
+ * database: check the database job queue
+ *
+ * @param  pointer to the interface_connection structure
+ * @return not currently used
  */
 void* interface_thread(void* param)
 {
@@ -98,16 +112,19 @@ void* interface_thread(void* param)
     cmd = strtok(buffer, " ");
     size = 0;
 
+    /* ??? this shouldn't be able to happen */
     if(cmd == NULL)
-    {
       break;
-    }
+
+    /* the interface has chosen to close, acknowledge and end the thread */
     else if(strcmp(cmd, "exit") == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
       if(TVERBOSE2) clprintf("INTERFACE: closing connection to user interface\n");
       return NULL;
     }
+
+    /* scheduler instructed to shutdown, acknowledge and create close event */
     else if(strcmp(cmd, "close") == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
@@ -115,6 +132,8 @@ void* interface_thread(void* param)
       event_signal(scheduler_close_event, NULL);
       return NULL;
     }
+
+    /* scheduler instructed to pause a job, create a job pause event */
     else if(strcmp(cmd, "pause") == 0)
     {
       params = g_new0(arg_int, 1);
@@ -122,8 +141,16 @@ void* interface_thread(void* param)
       params->second = 1;
       event_signal(job_pause_event, params);
     }
+
+    /* scheduler instructed to reload it configuration data */
     else if(strcmp(cmd, "reload") == 0)
-      load_config();
+      event_signal(load_config, NULL);
+
+    /* a status request has been made for scheduler or job      */
+    /* * if scheduler request, print scheduler status followed  */
+    /*     by simple status for each job                        */
+    /* * if a job request, print simple status for job followed */
+    /*     by the status of every agent belonging to the job    */
     else if(strcmp(cmd, "status") == 0)
     {
       params = g_new0(arg_int, 1);
@@ -131,10 +158,12 @@ void* interface_thread(void* param)
       params->second = (cmd = strtok(NULL, " ")) == NULL ? 0 : atoi(cmd);
       event_signal(job_status_event, params);
     }
+
+    /* restart a paused job, simply create the apropriate event */
     else if(strcmp(cmd, "restart") == 0)
-    {
       event_signal(job_restart_event, get_job(atoi(strtok(NULL, " "))));
-    }
+
+    /* change the verbose level of the scheudler or a job */
     else if(strcmp(cmd, "verbose") == 0)
     {
       if((tmp = strtok(NULL, " ")) == NULL)
@@ -145,12 +174,28 @@ void* interface_thread(void* param)
       else if((cmd = strtok(NULL, " ")) == NULL) verbose = atoi(tmp);
       else job_verbose_event(job_verbose(get_job(atoi(tmp)), atoi(cmd)));
     }
+
+    /* changes the priority of a job */
+    else if(strcmp(cmd, "priority") == 0)
+    {
+      if((cmd = strtok(NULL, " ")) && ((tmp = strtok(NULL, " "))))
+      {
+        params = g_new0(arg_int, 1);
+        params->first = get_job(atoi(cmd));
+        params->second = atoi(tmp);
+        event_signal(job_priority_event, params);
+      }
+      else
+        ERROR("invalid priority cmd sent to scheduler");
+    }
+
+    /* check the job queue for any newly queued jobs */
     else if(strcmp(cmd, "database") == 0)
       event_signal(database_update_event, NULL);
+
+    /* scheudler recieved an unknown command from interface */
     else
-    {
       clprintf("ERROR %s.%d: Interface received invalid command: %s\n", __FILE__, __LINE__, cmd);
-    }
 
     memset(buffer, '\0', sizeof(buffer));
   }
@@ -159,10 +204,10 @@ void* interface_thread(void* param)
 }
 
 /**
- * TODO
+ * Given a new sockect, this will create the interface connection structure.
  *
- * @param conn
- * @return
+ * @param conn the socket that this interface is connected to
+ * @return the newly allocated and populated interface connection
  */
 interface_connection* interface_conn_init(GSocketConnection* conn)
 {
@@ -177,9 +222,11 @@ interface_connection* interface_conn_init(GSocketConnection* conn)
 }
 
 /**
- * TODO
+ * free the memory associated with an interface connection. It is important to
+ * note that this will block until the thread associated with the interface has
+ * closed correctly.
  *
- * @param inter
+ * @param inter the interface_connection that should be freed
  */
 void interface_conn_destroy(interface_connection* inter)
 {
@@ -188,10 +235,12 @@ void interface_conn_destroy(interface_connection* inter)
 }
 
 /**
- * TODO
+ * function that will listen for new connections to the server sockets. This
+ * creates a g_socket_listener and will loop waiting for new connections until
+ * the scheduler is closed.
  *
- * @param unused
- * @return
+ * @param  unused
+ * @return unused
  */
 void* listen_thread(void* unused)
 {
@@ -256,7 +305,8 @@ void interface_init()
 }
 
 /**
- * TODO
+ * closes all interface threads and closes the listening thread. This will block
+ * until all threads have closed correctly.
  */
 void interface_destroy()
 {
@@ -281,9 +331,9 @@ void interface_destroy()
 /* ************************************************************************** */
 
 /**
- * TODO
+ * Change the port that the scheudler will listen on.
  *
- * @param port_n
+ * @param port_n the port number to listen on
  */
 void set_port(int port_n)
 {
@@ -294,7 +344,7 @@ void set_port(int port_n)
 }
 
 /**
- * TODO
+ * testes if the scheduler port has been correctly set
  */
 int is_port_set()
 {
