@@ -52,7 +52,7 @@ cli_Init();
 global $Plugins;
 global $LIBEXECDIR;
 require_once("$LIBEXECDIR/libschema.php");
-
+require_once("$LIBEXECDIR/fossinit-licenseref.php");
 global $PGCONN;
 
 $usage = "Usage: " . basename($argv[0]) . " [options]
@@ -101,6 +101,9 @@ if (!file_exists($Filename))
 $PGCONN = dbConnect(NULL);
 $Debug=0;
 $FailFlag = ApplySchema($Filename,$Debug,$Verbose);
+
+/* initialize licenseref table */
+$FailFlag = initLicenseRefTable($Verbose,$Debug);
 
 /* Remove the "Need to initialize" flag */
 if (!$FailFlag)

@@ -525,11 +525,13 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 
 	$initFail = FALSE;
 
+        /* Remove initLicenseRefTable from libschema.php */
+        /* 
         if(initLicenseRefTable($Verbose, $Debug) != 0)
         {
         	print "FATAL! cannot initialize license_ref table data\n";
                 $initFail = TRUE;
-        }
+        }*/
 	if(initPlugins($Verbose, $Debug) != 0)
 	{
 		print "FATAL! cannot initialize UI Plugins\n";
@@ -1002,6 +1004,7 @@ function initPlugins($Verbose, $Debug)
  *
  * @return 0 on success,1 on failure
  */
+/*
 function initLicenseRefTable($Verbose, $Debug)
 {
   global $LIBEXECDIR;
@@ -1041,7 +1044,7 @@ function initLicenseRefTable($Verbose, $Debug)
     return (1);
   }
   return (0);
-} // initLicenseRefTable()
+} */// initLicenseRefTable()
 
 /**
  * MakeFunctions
