@@ -41,7 +41,8 @@ def main():
   global no_match
   global merge_me
   
-  parser = OptionParser()
+  usage = "Usage: %prog [options]\nTry '%prog --help' For more information"
+  parser = OptionParser(usage)
   parser.add_option("-d", "--dst", type="string",
           help=dst_help)
   parser.add_option("-s", "--src", type="string",
