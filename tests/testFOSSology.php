@@ -214,6 +214,11 @@ if (array_key_exists("a", $options)) {
 		}
 		LogAndPrint($LF, "The Email Notification tests mail fail as a result\n");
 	}
+	$ctdLast = exec('./checkTestData.php', $ctdOut, $ctdRtn);
+	if($ctdRtn != 0)
+	{
+	  LogAndPrint($LF, "ERROR when running check4TestData, see previous errors\n");
+	}
 
 	if (chdir($SiteTests) === FALSE) {
 		LogandPrint($LF, "ALL Tests ERROR: can't cd to $SiteTests\n");

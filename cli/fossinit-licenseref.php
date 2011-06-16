@@ -17,15 +17,16 @@
  */
 
 /**
- * fossinit-licenseref
- *
- */
+ * \file fossinit-licenseref.php
+ * \brief Initialize the license_ref table
+ **/
+
 /**
- * initLicenseRefTable
- * \brief Initialize the license_ref table data
+ * \brief initLicenseRefTable function, Initialize the license_ref table data.
  *
- * @return 0 on success,1 on failure
- */
+ * \param $Verbose verbose mode; $Debug display database debug information
+ * \return 0 on success,1 on failure
+ **/
 function initLicenseRefTable($Verbose, $Debug)
 {
   global $LIBEXECDIR;
@@ -38,27 +39,56 @@ function initLicenseRefTable($Verbose, $Debug)
     print "FATAL: Directory '$LIBEXECDIR' does not exist.\n";
     return (1);
   }
-  $Dir = opendir($LIBEXECDIR);
-  if (!$Dir) {
+  $dir = opendir($LIBEXECDIR);
+  if (!$dir) {
     print "FATAL: Unable to access '$LIBEXECDIR'.\n";
     return (1);
   }
-  $File = "$LIBEXECDIR/licenseref.sql";
+  $file = "$LIBEXECDIR/licenseref.sql";
   
-  if (is_file($File)) {
-    $Command = "su postgres -c 'psql < $File fossology'";
-    if ($Debug) {
-      print "$SQL;\n";
-    }
-    else {
-      system($Command, $Status);
-      if ($Status != 0) {
-        print "FATAL: '$Command' failed to initialize license_ref table data\n";
-        return (1);
+  if (is_file($file)) {
+    $handle = fopen($file, "r");
+    $pattern = '/^INSERT INTO/';
+    $sql = "";
+    $flag = 0;
+    while(!feof($handle))
+    {
+      $buffer = fgets($handle, 4096);
+      if ( preg_match($pattern, $buffer) == 0)
+      {
+        $sql .= $buffer;
+        continue;
+      } else {
+        if ($flag)
+        {
+          @$result = pg_query($PGCONN, $sql);
+          if ($result == FALSE)
+          {
+            $PGError = pg_last_error($PGCONN);
+            if ($Debug)
+            {
+              print "SQL failed: $PGError\n";
+            }
+          }
+          @pg_free_result($result);
+        }
+        $sql = $buffer;
+        $flag = 1;
       }
     }
+    @$result = pg_query($PGCONN, $sql);
+    if ($result == FALSE)
+    {
+      $PGError = pg_last_error($PGCONN);
+      if ($Debug)
+      {
+        print "SQL failed: $PGError\n";
+      }
+    }
+    @pg_free_result($result);
+    fclose($handle);
   } else {
-    print "FATAL: Unable to access '$File'.\n";
+    print "FATAL: Unable to access '$file'.\n";
     return (1);
   }
   return (0);
