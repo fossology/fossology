@@ -32,7 +32,7 @@
 $home = getcwd();
 $dirs = explode('/',$home);
 $size = count($dirs);
-// we are not in fossology/tests, cd there
+// are we being run by jenkins? if we are not in fossology/tests, cd there
 if($dirs[$size-1] == 'workspace' )
 {
   if(chdir('fossology/tests') === FALSE)
