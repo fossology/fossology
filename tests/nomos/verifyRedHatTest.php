@@ -23,7 +23,7 @@
  *
  * @return pass or fail
  *
- * @version "$Id: b1-verifyRedHat.php 3789 2011-01-21 23:43:34Z rrando $"
+ * @version "$Id$"
  *
  * Created on Oct. 6, 2010
  */
