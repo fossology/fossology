@@ -300,7 +300,7 @@ if (array_key_exists("a", $options)) {
 			LogAndPrint($LF, "ALL Tests ERROR: can't cd to $nomos\n");
 		}
 		// Nomos functional tests
-		$nomosTests = array('ckzend.php', 'verifyRedHat.php');
+		$nomosTests = array('ckZendTest.php', 'verifyRedHatTest.php');
 		foreach($nomosTests as $test)
 		{
 			$last = exec("fo-runTests -l $test -n 'Nomos Tests' >> $logFile 2>&1", $dummy, $rtn);
