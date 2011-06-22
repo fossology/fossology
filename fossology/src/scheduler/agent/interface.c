@@ -256,9 +256,7 @@ void* listen_thread(void* unused)
 
   /* create the server socket to listen for connections on */
   server_socket = g_socket_listener_new();
-  if(i_port < 0)
-    i_port = g_socket_listener_add_any_inet_port(server_socket, NULL, NULL);
-  else if(!g_socket_listener_add_inet_port(server_socket, i_port, NULL, NULL))
+  if(!g_socket_listener_add_inet_port(server_socket, i_port, NULL, NULL))
     FATAL("Could not create interface, invalid port number: %d", i_port);
 
   if(TVERBOSE2)

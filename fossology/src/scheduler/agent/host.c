@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 /**
- * TODO
+ * declaration of private members for the host type.
  */
 struct host_internal {
   char* name;         ///< the name of the host, used to store host internally to scheduler
@@ -42,8 +42,8 @@ struct host_internal {
 GTree* host_list = NULL;
 
 /**
- * used strictly by the find_host function. This is used so that two different parameter
- * can be passed to the find_host even though it is a GTraverFunction
+ * used strictly by the find_host function. This is used so that two different
+ * parameter can be passed to the find_host even though it is a GTraverFunction
  */
 struct find_struct {
     host h;   ///< a pointer to the host so that the host can be set
@@ -51,12 +51,13 @@ struct find_struct {
 };
 
 /**
- * TODO
+ * Finds a host that will satisfy the given restrictions. Since this is a g_tree
+ * traversal function, the key and value are passed.
  *
- * @param host_name
- * @param h
- * @param fs
- * @return
+ * @param host_name unused in the function (key used in mapping)
+ * @param h the current host structure
+ * @param fs struct that has number of agents required and returns host
+ * @return 1 if the current host is adequate, 0 otherwise
  */
 int find_host(char* host_name, host h, struct find_struct* fs)
 {
@@ -70,12 +71,13 @@ int find_host(char* host_name, host h, struct find_struct* fs)
 }
 
 /**
- * TODO
+ * allows a particular function to be called for every host. This is currently
+ * used during the self test of every type of agent.
  *
- * @param host_name
- * @param h
- * @param func
- * @return
+ * @param host_name unused
+ * @param h the host to pass into the function
+ * @param func the function to call for every host
+ * @return always return 0 so that it happens for all hosts
  */
 int for_host(char* host_name, host h, void(*func)(host))
 {
@@ -88,7 +90,7 @@ int for_host(char* host_name, host h, void(*func)(host))
 /* ************************************************************************** */
 
 /**
- * TODO
+ * removes all hosts from the host list, leaving a clean copy.
  */
 void host_list_clean()
 {
@@ -100,12 +102,12 @@ void host_list_clean()
 }
 
 /**
- * TODO
+ * creates a new host, and adds it to the host list.
  *
- * @param name
- * @param address
- * @param agent_dir
- * @param max
+ * @param name the name of the host
+ * @param address address that can be passed to ssh when starting agent on host
+ * @param agent_dir the location of agent binaries on the host
+ * @param max the max number of agent that can run on this host
  */
 void host_init(char* name, char* address, char* agent_dir, int max)
 {
@@ -121,9 +123,9 @@ void host_init(char* name, char* address, char* agent_dir, int max)
 }
 
 /**
- * TODO
+ * frees any memory associated with the host stucture
  *
- * @param h
+ * @param h the host to free the memory for.
  */
 void host_destroy(host h)
 {
@@ -171,9 +173,9 @@ char* host_agent_dir(host h)
 }
 
 /**
- * TODO
+ * Increase the number of running agents on a host by 1
  *
- * @param h
+ * @param h the relevant host
  */
 void host_increase_load(host h)
 {
@@ -182,9 +184,9 @@ void host_increase_load(host h)
 }
 
 /**
- * TODO
+ * Decrease the number of running agents on a hsot by 1
  *
- * @param h
+ * @param h the relevant host
  */
 void host_decrease_load(host h)
 {
@@ -244,9 +246,11 @@ int num_hosts()
 }
 
 /**
- * TODO
+ * Create the host list. The host list should be created so that it destroys
+ * any hosts when it is cleaned up.
  */
 void host_list_init()
 {
-  host_list = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)host_destroy);
+  host_list = g_tree_new_full(string_compare, NULL, NULL,
+      (GDestroyNotify)host_destroy);
 }

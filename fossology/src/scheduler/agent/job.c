@@ -45,7 +45,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 /**
- * TODO
+ * Internal declaraction of private members of the job strucutre.
  */
 struct job_internal
 {
