@@ -80,9 +80,8 @@ event_loop event_loop_get()
 }
 
 /**
- * TODO
- *
- * @param vl
+ * frees any memeory associated with the event queue. Any events that are in the
+ * queue when this gets called will be freed as well.
  */
 void event_loop_destroy()
 {

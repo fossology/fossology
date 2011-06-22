@@ -111,7 +111,9 @@ message by the FOSSolgy system.\n\n";
 /* ************************************************************************** */
 
 /**
- * TODO
+ * Initializes any one-time attributes relating to the database. Currently this
+ * includes creating the db connection and checking the URL of the fossology
+ * instance out of the db.
  */
 void database_init()
 {
@@ -129,7 +131,7 @@ void database_init()
 }
 
 /**
- * TODO
+ * close the connection to the database
  */
 void database_destroy()
 {
@@ -137,6 +139,12 @@ void database_destroy()
   db_conn = NULL;
 }
 
+/**
+ * TODO, unfinished function, needs the email construction
+ *
+ * @param job_id
+ * @param failed
+ */
 void email_notification(int job_id, int failed)
 {
   PGresult* db_result;
@@ -227,7 +235,7 @@ void database_reset_queue()
 }
 
 /**
- * TODO
+ * Checks the job queue for any new entries.
  *
  * @param unused
  */
@@ -286,10 +294,10 @@ void database_update_event(void* unused)
 }
 
 /**
- * TODO
+ * Change the status of a job in the database.
  *
- * @param j_id
- * @param status
+ * @param j_id id number of the relevant job
+ * @param status the new status of the job
  */
 void database_update_job(int j_id, job_status status)
 {
@@ -333,10 +341,10 @@ void database_update_job(int j_id, job_status status)
 }
 
 /**
- * TODO
+ * enters the name of the log file for a job into the database
  *
- * @param j_id
- * @param log_name
+ * @param j_id the id number for the relevant job
+ * @param log_name the name of the log file
  */
 void database_job_log(int j_id, char* log_name) {
   gchar* sql = NULL;

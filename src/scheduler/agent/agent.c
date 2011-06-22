@@ -1059,10 +1059,10 @@ int is_meta_agent(char* name)
 }
 
 /**
- * TODO
+ * tests if a particular meta agent is exclusive.
  *
- * @param name
- * @return
+ * @param name the name of the meta agent
+ * @return 1 if it is exclusive
  */
 int is_exclusive(char* name)
 {
