@@ -117,8 +117,8 @@ void interface_usage()
   printf("|%*s:   EFFECT                                       |\n", P_WIDTH, "COMMAND [optional] <required>");
   printf("+-------------------------------------------------------------------------------+\n");
   printf("|%*s:   prints this usage statement                  |\n", P_WIDTH, "help");
-  printf("|%*s:   close the connection to scheduler            |\n", P_WIDTH, "exit");
-  printf("|%*s:   shutdown the scheduler gracefully            |\n", P_WIDTH, "close");
+  printf("|%*s:   close the connection to scheduler            |\n", P_WIDTH, "close");
+  printf("|%*s:   shutdown the scheduler gracefully            |\n", P_WIDTH, "stop");
   printf("|%*s:   pauses a job indefinitely                    |\n", P_WIDTH, "pause <job id>");
   printf("|%*s:   reload the configuration information         |\n", P_WIDTH, "reload");
   printf("|%*s:   scheduler responds with status information   |\n", P_WIDTH, "status [job id]");

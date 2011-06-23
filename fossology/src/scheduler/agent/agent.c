@@ -1067,7 +1067,7 @@ int is_meta_agent(char* name)
 int is_exclusive(char* name)
 {
   meta_agent ma = (meta_agent)g_tree_lookup(meta_agents, name);
-  return ma->special == SAG_EXCLUSIVE;
+  return ma == NULL || ma->special == SAG_EXCLUSIVE;
 }
 
 /**
