@@ -117,7 +117,7 @@ void* interface_thread(void* param)
       break;
 
     /* the interface has chosen to close, acknowledge and end the thread */
-    else if(strcmp(cmd, "exit") == 0)
+    else if(strcmp(cmd, "close") == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
       if(TVERBOSE2) clprintf("INTERFACE: closing connection to user interface\n");
@@ -125,7 +125,7 @@ void* interface_thread(void* param)
     }
 
     /* scheduler instructed to shutdown, acknowledge and create close event */
-    else if(strcmp(cmd, "close") == 0)
+    else if(strcmp(cmd, "stop") == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
       if(TVERBOSE2) clprintf("INTERFACE: shutting down scheduler\n");
