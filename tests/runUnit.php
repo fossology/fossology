@@ -116,6 +116,7 @@ foreach($unitList as $unitTest)
         if(!is_null($verFail))
         {
           //echo "There were errors in the $fileName\n";
+          echo "There were Unit Test Failures in $unitTest\n";
           //print_r($verFail) . "\n";
           $failures++;
         }
