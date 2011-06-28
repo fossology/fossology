@@ -1,6 +1,6 @@
 # FOSSology Makefile - agents/ununpack
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-TOP=../..
+TOP=../../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
@@ -46,6 +46,8 @@ install: all $(VARS)
 	fi
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(AGENTDIR)/ununpack
 	$(INSTALL_PROGRAM) checksum $(DESTDIR)$(LIBEXECDIR)/checksum
+	$(INSTALL_DATA) ununpack.conf $(SYSCONFDIR)/fossology/agents.d/
+
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
@@ -74,7 +76,6 @@ coverage: libununpack_cov.a
 
 clean:
 	rm -f $(EXE) *.o core metahandle.h metahandle.c *.a *.gc*; \
-	$(MAKE) -C $(TESTDIR) clean
 
 include $(DEPS)
 
