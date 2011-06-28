@@ -16,15 +16,34 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- System configuration function library.
- *************************************************/
+/**
+ * \file common-sysconfig.php
+ * \brief System configuration functions.
+ **/
 
-/* Global Constants */
-  /* Data types for sysconfig table */
+
+/* Type constants for sysconfig table */
   define("CONFIG_TYPE_INT", 1);
   define("CONFIG_TYPE_TEXT", 2);
   define("CONFIG_TYPE_TEXTAREA", 3);
+
+
+/**
+  \brief Read fossology.conf
+
+  \param $ConfPath optional pathname to fossology configuration file.
+         The standard conf file name is 'fossology.conf'.
+
+  \return array with variable/value pair from fossology.conf
+ **/
+function fo_conf_read($ConfPath='')
+{
+  global $SYSCONFDIR;
+
+  if (empty($ConfPath)) $ConfPath = "$SYSCONFDIR/fossology/fossology.conf";
+  $ConfArray = parse_ini_file($ConfPath, true);
+  return $ConfArray;
+} // fo_conf_read()
 
 
   /***********************************************************
@@ -354,5 +373,4 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     } 
     else return 0; 
   }  
-
 ?>
