@@ -35,9 +35,7 @@
 #include "ununpack-iso.h"
 #include "ununpack-ar.h"
 #include "metahandle.h"
-#include "libfossrepo.h"
-#include "libfossdb.h"
-#include "libfossagent.h"
+#include <libfossology.h>
 
 #include <sys/timeb.h>
 #include <sys/stat.h>
@@ -71,8 +69,7 @@ char REP_FILES[16]="files";
 char *Pfile = NULL;
 char *Pfile_Pk = NULL; /* PK for *Pfile */
 char *Upload_Pk = NULL; /* PK for upload table */
-void *DB=NULL;	/* the DB repository */
-PGconn *PGconn4DB = NULL; /* PGconn from DB */
+PGconn *pgConn = NULL; /* PGconn from DB */
 int Agent_pk=-1;	/* agent ID */
 #define MAXSQL	4096
 #define PATH_MAX 4096
@@ -175,7 +172,7 @@ void	AlarmDisplay	(int Sig)
 void	SafeExit	(int rc)
 {
   fflush(stdout);
-  if (DB) DBclose(DB);
+  if (pgConn) PQfinish(pgConn); 
   exit(rc);
 } /* SafeExit() */
 
@@ -208,7 +205,7 @@ void	InitCmd	()
     CMD[i].DBindex = -1; /* invalid value */
     }
 
-  if (!PGconn4DB) return; /* DB must be open */
+  if (!pgConn) return; /* DB must be open */
 
   /* Load them up! */
   for(i=0; CMD[i].Magic != NULL; i++)
@@ -217,8 +214,8 @@ void	InitCmd	()
 ReGetCmd:
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT mimetype_pk FROM mimetype WHERE mimetype_name = '%s';",CMD[i].Magic);
-    result =  PQexec(PGconn4DB, SQL); /* SELECT */
-    if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__)) 
+    result =  PQexec(pgConn, SQL); /* SELECT */
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) 
     {
       SafeExit(4);
     }
@@ -232,8 +229,8 @@ ReGetCmd:
       PQclear(result);
       memset(SQL,'\0',MAXSQL);
       snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('%s');",CMD[i].Magic);
-      result =  PQexec(PGconn4DB, SQL); /* INSERT INTO mimetype */
-      if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+      result =  PQexec(pgConn, SQL); /* INSERT INTO mimetype */
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
       {
         SafeExit(5);
       }
@@ -457,6 +454,55 @@ inline int	IsDir	(char *Fname)
   return(S_ISDIR(Stat.st_mode));
 } /* IsDir() */
 
+/***************************************************
+ IsFile(): Given a filename, is it a file?
+ Link: should it follow symbolic links?
+ Returns 1=yes, 0=no.
+ ***************************************************/
+int      IsFile  (char *Fname, int Link)
+{
+  stat_t Stat;
+  int rc;
+  if (!Fname || (Fname[0]=='\0')) return(0);  /* not a directory */
+  if (Link) rc = stat64(Fname,&Stat);
+  else rc = lstat64(Fname,&Stat);
+  if (rc != 0) return(0); /* bad name */
+  return(S_ISREG(Stat.st_mode));
+} /* IsFile() */
+
+
+/**********************************************
+ ReadLine(): Read a command from a stream.
+ If the line is empty, then try again.
+ Returns line length, or -1 of EOF.
+ **********************************************/
+int     ReadLine (FILE *Fin, char *Line, int MaxLine)
+{
+  int C;
+  int i;
+
+  if (!Fin) return(-1);
+  if (feof(Fin)) return(-1);
+  memset(Line,'\0',MaxLine);
+  i=0;
+  C=fgetc(Fin);
+  if (C<0) return(-1);
+  while(!feof(Fin) && (C>=0) && (i<MaxLine))
+    {
+    if (C=='\n')
+        {
+        if (i > 0) return(i);
+        /* if it is a blank line, then ignore it. */
+        }
+    else
+        {
+        Line[i]=C;
+        i++;
+        }
+    C=fgetc(Fin);
+    }
+  return(i);
+} /* ReadLine() */
 
 /***************************************************
  IsExe(): Check if the executable exists.
@@ -1232,8 +1278,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
 	Fuid,Fuid+41,Fuid+74);
-  result =  PQexec(PGconn4DB, SQL); /* SELECT */
-  if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+  result =  PQexec(pgConn, SQL); /* SELECT */
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
   {
     SafeExit(33);
   }
@@ -1256,8 +1302,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
       snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size) VALUES ('%.40s','%.32s','%s');",
 	Fuid,Fuid+41,Fuid+74);
     }
-    result =  PQexec(PGconn4DB, SQL); /* INSERT INTO pfile */
-    if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+    result =  PQexec(pgConn, SQL); /* INSERT INTO pfile */
+    if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
     {
       SafeExit(34);
     }
@@ -1268,8 +1314,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
 	Fuid,Fuid+41,Fuid+74);
-    result =  PQexec(PGconn4DB, SQL);  /* SELECT */
-    if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+    result =  PQexec(pgConn, SQL);  /* SELECT */
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
     {
       SafeExit(15);
     }
@@ -1289,16 +1335,16 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
       PQclear(result);
       memset(SQL,'\0',MAXSQL);
       snprintf(SQL,MAXSQL,"BEGIN;");
-      result = PQexec(PGconn4DB, SQL);
-      if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+      result = PQexec(pgConn, SQL);
+      if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
       {
         SafeExit(45);
       }
       PQclear(result);
       memset(SQL,'\0',MAXSQL);
       snprintf(SQL,MAXSQL,"SELECT * FROM pfile WHERE pfile_pk = '%ld' FOR UPDATE;", CI->pfile_pk);
-      result =  PQexec(PGconn4DB, SQL); /* lock pfile */
-      if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+      result =  PQexec(pgConn, SQL); /* lock pfile */
+      if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
       {
         SafeExit(35);
       }
@@ -1307,8 +1353,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
       memset(SQL,'\0',MAXSQL);
       snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld' WHERE pfile_pk = '%ld';",
 		CMD[CI->PI.Cmd].DBindex, CI->pfile_pk);
-      result =  PQexec(PGconn4DB, SQL); /* UPDATE pfile */
-      if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+      result =  PQexec(pgConn, SQL); /* UPDATE pfile */
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
       {
         SafeExit(36);
       }
@@ -1316,8 +1362,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
       #if 0
       memset(SQL,'\0',MAXSQL);
       snprintf(SQL,MAXSQL,"COMMIT;");
-      result = PQexec(PGconn4DB, SQL);      
-      if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+      result = PQexec(pgConn, SQL);      
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
       {
         SafeExit(37);
       }
@@ -1366,8 +1412,8 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 	{
 	char *ufile_name;
 	snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
-        result =  PQexec(PGconn4DB, UfileName);
-        if (checkPQresult(PGconn4DB, result, UfileName, __FILE__, __LINE__))
+        result =  PQexec(pgConn, UfileName);
+        if (fo_checkPQresult(pgConn, result, UfileName, __FILE__, __LINE__))
         {
           SafeExit(38);
         }
@@ -1411,8 +1457,8 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,E'%s',%s);",
 	CI->PI.uploadtree_pk, CI->pfile_pk, CI->ufile_mode,
 	UfileName, Upload_Pk);
-    result =  PQexec(PGconn4DB, SQL); /* INSERT INTO uploadtree */
-    if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+    result =  PQexec(pgConn, SQL); /* INSERT INTO uploadtree */
+    if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
     {
       SafeExit(39);
     }
@@ -1422,8 +1468,8 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     {
     snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (upload_fk,pfile_fk,ufile_mode,ufile_name) VALUES (%s,%ld,%ld,'%s');",
 	Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
-    result =  PQexec(PGconn4DB, SQL); /* INSERT INTO uploadtree */
-    if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+    result =  PQexec(pgConn, SQL); /* INSERT INTO uploadtree */
+    if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
     {
       SafeExit(41);
     }
@@ -1434,8 +1480,8 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   /* snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name=E'%s';",
     Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName); */
   snprintf(SQL,MAXSQL,"SELECT currval('uploadtree_uploadtree_pk_seq');");
-  result =  PQexec(PGconn4DB, SQL);
-  if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+  result =  PQexec(pgConn, SQL);
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
   {
     SafeExit(42);
   }
@@ -1465,9 +1511,9 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
   if ((Fuid[0]!='\0') && UseRepository)
     {
     /* put file in repository */
-    if (!RepExist(REP_FILES,Fuid))
+    if (!fo_RepExist(REP_FILES,Fuid))
       {
-      if (RepImport(CI->Source,REP_FILES,Fuid,1) != 0)
+      if (fo_RepImport(CI->Source,REP_FILES,Fuid,1) != 0)
 	  {
 	  fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",CI->Source,Fuid);
 	  SafeExit(16);
@@ -1479,7 +1525,7 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
 
   /*****************************************/
   /* populate DB connection (skip artifacts) */
-  if (!PGconn4DB) return(1); /* No DB connection ? Quit! (and say it is unique) */
+  if (!pgConn) return(1); /* No DB connection ? Quit! (and say it is unique) */
 
   /* PERFORMANCE NOTE:
      I used to use and INSERT and an UPDATE.
@@ -2009,8 +2055,8 @@ int	Traverse	(char *Filename, char *Basename,
             char *UFileName;
             char SQL[MAXSQL];
             snprintf(SQL, MAXSQL,"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
-            result =  PQexec(PGconn4DB, SQL);  // get name of the upload file
-            if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+            result =  PQexec(pgConn, SQL);  // get name of the upload file
+            if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
             {
               SafeExit(32);
             }
@@ -2314,7 +2360,6 @@ int	UnunpackEntry	(int argc, char *argv[])
   int Recurse=0;
   char *ListOutName=NULL;
   char *Fname = NULL;
-  char *agent_desc = "Unpacks archives.  Also available from the command line";
 
   MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
   if (MagicCookie == NULL)
@@ -2348,32 +2393,31 @@ int	UnunpackEntry	(int argc, char *argv[])
 	case 'R':	Recurse=-1; break;
 	case 'r':	Recurse=atoi(optarg); break;
 	case 'i':
-		DB=DBopen();
-		if (!DB)
+                pgConn = fo_dbconnect();
+		if (!pgConn)
 			{
 			fprintf(stderr,"FATAL: Unable to access database\n");
 			SafeExit(20);
 			}
-		GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
-		DBclose(DB);
+                PQfinish(pgConn);
 		if (!IsExe("dpkg-source",Quiet))
 			printf("WARNING: dpkg-source is not available on this system.  This means that debian source packages will NOT be unpacked.\n");
 		return(0);
 		break; /* never reached */
 	case 'Q':
 		UseRepository=1;
-		DB=DBopen();
-		if (!DB)
+                /* get PGconn */
+                pgConn = fo_dbconnect();
+		if (!pgConn)
 		  {
 		  fprintf(stderr,"FATAL: Unable to access database\n");
 		  SafeExit(21);
 		  }
                 /* get PGconn */
-                PGconn4DB = DBgetconn(DB);
                 memset(SQL,'\0',MAXSQL);
                 snprintf(SQL,MAXSQL,"BEGIN;");
-                result =  PQexec(PGconn4DB, SQL);
-                if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+                result =  PQexec(pgConn, SQL);
+                if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
                 {
                   SafeExit(22);
                 }
@@ -2386,7 +2430,6 @@ int	UnunpackEntry	(int argc, char *argv[])
 		if (!Pfile_Pk) Pfile_Pk = getenv("pfile_fk");
 		Upload_Pk = getenv("ARG_upload_pk");
 		if (!Upload_Pk) Upload_Pk = getenv("upload_pk");
-		GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 		/* Check for all necessary parameters */
 		if (Verbose)
 		  {
@@ -2394,12 +2437,12 @@ int	UnunpackEntry	(int argc, char *argv[])
 		  printf("ENV Pfile_Pk=%s\n",Pfile_Pk);
 		  printf("ENV Upload_Pk=%s\n",Upload_Pk);
 		  }
-		if (DB && !Pfile)
+		if (pgConn && !Pfile)
 		  {
 		  printf("FATAL: Pfile not specified in environment.\n");
 		  SafeExit(23);
 		  }
-		if (DB && !Pfile_Pk)
+		if (pgConn && !Pfile_Pk)
 		  {
 		  printf("FATAL: Pfile_Pk not specified in environment.\n");
 		  SafeExit(24);
@@ -2472,8 +2515,8 @@ int	UnunpackEntry	(int argc, char *argv[])
   {
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s limit 1;",Upload_Pk);
-    result =  PQexec(PGconn4DB, SQL);
-    if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+    result =  PQexec(pgConn, SQL);
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
     {
       SafeExit(14);
     }
@@ -2495,10 +2538,10 @@ int	UnunpackEntry	(int argc, char *argv[])
     if (ListOutName != NULL)
       {
       fprintf(ListOutFile,"<source source=\"%s\" ",argv[optind]);
-      if (UseRepository && !RepExist(REP_FILES,argv[optind]))
+      if (UseRepository && !fo_RepExist(REP_FILES,argv[optind]))
 	{
 	/* make sure the source exists in the src repository */
-	if (RepImport(argv[optind],REP_FILES,argv[optind],1) != 0)
+	if (fo_RepImport(argv[optind],REP_FILES,argv[optind],1) != 0)
 	  {
 	  fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",argv[optind],argv[optind]);
 	  SafeExit(28);
@@ -2507,14 +2550,14 @@ int	UnunpackEntry	(int argc, char *argv[])
       }
     if (UseRepository)
 	{
-	if (RepExist(REP_FILES,argv[optind]))
+	if (fo_RepExist(REP_FILES,argv[optind]))
 		{
-		Fname=RepMkPath(REP_FILES,argv[optind]);
+		Fname=fo_RepMkPath(REP_FILES,argv[optind]);
 		}
-	else if (RepExist(REP_GOLD,argv[optind]))
+	else if (fo_RepExist(REP_GOLD,argv[optind]))
 		{
-		Fname=RepMkPath(REP_GOLD,argv[optind]);
-		if (RepImport(Fname,REP_FILES,argv[optind],1) != 0)
+		Fname=fo_RepMkPath(REP_GOLD,argv[optind]);
+		if (fo_RepImport(Fname,REP_FILES,argv[optind],1) != 0)
 		  {
 		  fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",Fname,argv[optind]);
 		  SafeExit(29);
@@ -2583,14 +2626,14 @@ int	UnunpackEntry	(int argc, char *argv[])
   /* process pfile from environment */
   if (Pfile)
     {
-    if (RepExist(REP_FILES,Pfile))
+    if (fo_RepExist(REP_FILES,Pfile))
 	{
-	Fname=RepMkPath(REP_FILES,Pfile);
+	Fname=fo_RepMkPath(REP_FILES,Pfile);
 	}
-    else if (RepExist(REP_GOLD,Pfile))
+    else if (fo_RepExist(REP_GOLD,Pfile))
 	{
-	Fname=RepMkPath(REP_GOLD,Pfile);
-	if (RepImport(Fname,REP_FILES,Pfile,1) != 0)
+	Fname=fo_RepMkPath(REP_GOLD,Pfile);
+	if (fo_RepImport(Fname,REP_FILES,Pfile,1) != 0)
 	  {
 	  fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",Fname,Pfile);
 	  SafeExit(30);
@@ -2630,44 +2673,35 @@ int	UnunpackEntry	(int argc, char *argv[])
 		TotalDirectories,TotalContainers);
 	fputs("</xml>\n",ListOutFile);
 	}
-  if (DB)
+  if (pgConn)
 	{
 	/* If it completes, mark it! */
 	if (Upload_Pk)
 	  {
 	  memset(SQL,'\0',MAXSQL);
 	  snprintf(SQL,MAXSQL,"UPDATE upload SET upload_mode = upload_mode | (1<<5) WHERE upload_pk = '%s';",Upload_Pk);
-          result =  PQexec(PGconn4DB, SQL); /* UPDATE upload */
-          if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+          result =  PQexec(pgConn, SQL); /* UPDATE upload */
+          if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
           {
             SafeExit(44);
           }
           PQclear(result);
 	  }
 
-	if (DB)
+	if (pgConn)
         {
 	  memset(SQL,'\0',MAXSQL);
           snprintf(SQL,MAXSQL,"COMMIT;");
-          result =  PQexec(PGconn4DB, SQL);
-          if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+          result =  PQexec(pgConn, SQL);
+          if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
 	  {
 	  SafeExit(31);
 	  } 
           PQclear(result);
         }
 
-	if (DB)
+	if (pgConn)
 	  {
-#if 0
-  /** Disabled -- DB will handle this **/
-	  /* Tell DB that lots of updates are done */
-	  /* This has no visible benefit for small files, but after unpacking
-	     a full ISO, analyze has a huge performance benefit. */
-	  MyDBaccess(DB,"ANALYZE mimetype;");
-	  MyDBaccess(DB,"ANALYZE pfile;");
-	  MyDBaccess(DB,"ANALYZE uploadtree;");
-#endif
 	  /* Tell the world how many items we proudly processed */
 	  /** Humans will ignore this, but the scheduler will use it. **/
 	  alarm(0);
@@ -2676,7 +2710,7 @@ int	UnunpackEntry	(int argc, char *argv[])
 	  fflush(stdout);
 	  }
 
-	DBclose(DB); DB=NULL;
+        PQfinish(pgConn);
 	}
   if (ListOutFile && (ListOutFile != stdout))
 	{
