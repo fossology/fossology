@@ -46,7 +46,7 @@ install: all $(VARS)
 	fi
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(AGENTDIR)/ununpack
 	$(INSTALL_PROGRAM) checksum $(DESTDIR)$(LIBEXECDIR)/checksum
-	$(INSTALL_DATA) ununpack.conf $(SYSCONFDIR)/fossology/agents.d/
+	$(INSTALL_DATA) ../ununpack.conf $(SYSCONFDIR)/fossology/agents.d/
 
 
 uninstall: $(VARS)

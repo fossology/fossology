@@ -1492,6 +1492,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   } 
 //End add by Vincent
   TotalItems++;
+  fo_scheduler_heart(1);
   return(0);
 } /* DBInsertUploadTree() */
 
@@ -2370,6 +2371,9 @@ int	UnunpackEntry	(int argc, char *argv[])
 
   magic_load(MagicCookie,NULL);
 
+  /* connect to the scheduler */
+  fo_scheduler_connect(&argc, argv);
+
   while((c = getopt(argc,argv,"ACd:FfHL:m:PQiqRr:T:t:vXx")) != -1)
     {
     switch(c)
@@ -2723,6 +2727,7 @@ int	UnunpackEntry	(int argc, char *argv[])
     deleteTmpFiles(NewDir);
   }
   // add by larry, end
+  fo_scheduler_disconnect();
 
   return(0);
 } /* UnunpackEntry() */
