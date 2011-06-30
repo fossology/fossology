@@ -420,7 +420,7 @@ void load_config(void* args)
     }
   }
 
-  /* load the configureation for the agents */
+  /* load the configuration for the agents */
   agent_conf = g_key_file_new();
   while((ep = readdir(dp)) != NULL)
   {
@@ -464,7 +464,9 @@ void load_config(void* args)
       }
     }
   }
+  g_key_file_free(agent_conf);
   closedir(dp);
+  fo_config_free();
 
   for_each_host(test_agents);
 }
