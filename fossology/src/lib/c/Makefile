@@ -3,11 +3,11 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO) `pkg-config glib-2.0 --cflags --libs`
+CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
 
 CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' -DFOSSREPO_CONF='"$(SYSCONFDIR)/fossology"' \
         -DFOSSGROUP='"$(PROJECTGROUP)"' -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"'
-EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck sqlCopyTest testconf
+EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck sqlCopyTest confTest
 LIB=libfossology.a
 OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o
 
