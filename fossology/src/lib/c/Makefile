@@ -3,12 +3,13 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
+CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO) `pkg-config glib-2.0 --cflags --libs`
 
-CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' -DFOSSREPO_CONF='"$(SYSCONFDIR)/fossology"' -DFOSSGROUP='"$(PROJECTGROUP)"'
-EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck sqlCopyTest
+CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' -DFOSSREPO_CONF='"$(SYSCONFDIR)/fossology"' \
+        -DFOSSGROUP='"$(PROJECTGROUP)"' -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"'
+EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck sqlCopyTest testconf
 LIB=libfossology.a
-OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o
+OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o
 
 all: $(LIB) $(EXE) $(VARS)
 	echo "make $(LIB)"
@@ -21,7 +22,7 @@ $(EXE): %: %.c $(LIB) $(VARS)
 	$(CC) $< $(CONFDEF) $(CFLAGS_LOCAL) $(LIB) -o $@
 
 %.o: %.c %.h
-	$(CC) -c $< $(CONFDEF)  $(CFLAGS_FO)
+	$(CC) -c $< $(CONFDEF)  $(CFLAGS_LOCAL)
 #	$(CC) -c $< $(CONFDEF)  -I`pg_config --includedir` -fPIC 
 
 install: install-dev install-lib install-exe

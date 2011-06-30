@@ -25,4 +25,5 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "libfossdb.h"
 #include "libfossagent.h"
 #include "sqlCopy.h"
+#include "fossconfig.h"
 #endif /* LIBFOSSOLOGY_H */
