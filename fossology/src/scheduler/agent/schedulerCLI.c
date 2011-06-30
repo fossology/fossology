@@ -245,13 +245,13 @@ int main(int argc, char** argv)
   int port_number = -1;       // the port that the CLI will connect on
   long host_addr;             // the address of the host
   int c, closing;             // flags and loop variables
-  size_t bytes;               // variable to caputre return of read
+  size_t bytes;               // variable to capture return of read
   char host[FILENAME_MAX];    // string to hold the name of the host
   char buffer[1024];          // string buffer used to read
-  FILE* istr;                 // file used for reading configuration
   char db_conf[FILENAME_MAX]; // the file to use for the database configuration
   GOptionContext* options;    // the command line options parser
-  char* poss;                 // used to split incomming string on \n
+  char* poss;                 // used to split incoming string on '\n'
+  GError* error = NULL;
 
   /* initialize memory */
   strcpy(host, "localhost");
@@ -287,15 +287,8 @@ int main(int argc, char** argv)
   /* check the scheduler config for port number */
   if(port_number < 0)
   {
-    snprintf(buffer, sizeof(buffer), "%s/fossology.conf", DEFAULT_SETUP);
-    istr = fopen(buffer, "r");
-    while(port_number < 0 && fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
-    {
-      if(buffer[0] == '#' || buffer[0] == '\0') { }
-      else if(strncmp(buffer, "port=", 5) == 0)
-        port_number = atoi(buffer + 5);
-    }
-    memset(buffer, '\0', sizeof(buffer));
+    fo_config_load(&error);
+    port_number = atoi(fo_config_get("FOSSOLOGY", "port", &error));
   }
 
   /* set up the connection to the database */

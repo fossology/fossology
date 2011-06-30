@@ -25,6 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <logging.h>
 #include <scheduler.h>
 
+#include <fossconfig.h>
+
 /* std library includes */
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,7 +47,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <glib.h>
 #include <gio/gio.h>
 
-#define FOSS_CONF  "fossology.conf"
 #define AGENT_CONF "agents.d"
 #ifndef PROCESS_NAME
 #define PROCESS_NAME "fo_scheduler"
@@ -357,19 +358,21 @@ void load_config(void* args)
 {
   DIR* dp;                  // directory pointer used to load meta agents;
   struct dirent* ep;        // information about directory
-  FILE* istr;               // file pointer to agent.conf
   char* tmp;                // pointer into a string
-  char buffer[2048];        // standard string buffer
-  char name[MAX_NAME + 1];  // buffer to hold the host and agent names
-  char cmd [MAX_CMD  + 1];  // buffer to hold the cmd associated with an agent
+  char addbuf[256];         // standard string buffer
+  char dirbuf[256];         // standard string buffer
   int max = -1;             // the number of agents to a host or number of one type running
   int special = 0;          // anything that is special about the agent (EXCLUSIVE)
+  char** keys;
+  GError* error = NULL;
+  int i;
+  GKeyFile* agent_conf;
+  char* name, * cmd;
 
-  // TODO set this up with DEFAULT_SETUP instead of this
-  snprintf(buffer, sizeof(buffer), "%s/%s/", DEFAULT_SETUP, AGENT_CONF);
-  if((dp = opendir(buffer)) == NULL)
+  snprintf(addbuf, sizeof(addbuf), "%s/%s/", DEFAULT_SETUP, AGENT_CONF);
+  if((dp = opendir(addbuf)) == NULL)
   {
-    FATAL("Could not open agent config directory: %s", buffer);
+    FATAL("Could not open agent config directory: %s", addbuf);
     return;
   }
 
@@ -377,79 +380,74 @@ void load_config(void* args)
   agent_list_clean();
   host_list_clean();
 
-  /* load the scheduler configuration */
-  snprintf(buffer, sizeof(buffer), "%s/%s", DEFAULT_SETUP, FOSS_CONF);
-  istr = fopen(buffer, "r"); //< change file path
-  while(fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
+  /* parse the config file */
+  fo_config_load(&error);
+  if(error)
   {
-    /* skip comments and blank lines */
-    if(buffer[0] == '#') { /* do nothing */ }
-    else if(buffer[0] == '\0') { /* do nothing */ }
-    /* check the port that the interface wil use */
-    else if(strncmp(buffer, "port=", 5) == 0 && !is_port_set())
+    lprintf("ERROR %s.%d: couldn't load configuration", __FILE__, __LINE__);
+    lprintf("%s", error->message);
+    return;
+  }
+
+  /* load the port setting */
+  if(s_port < 0)
+    s_port = atoi(fo_config_get("FOSSOLOGY", "port", &error));
+  set_port(s_port);
+
+  /* load the host settings */
+  keys = fo_config_key_set("HOSTS", &special);
+  for(i = 0; i < special; i++)
+  {
+    tmp = fo_config_get("HOSTS", keys[i], &error);
+    if(error)
     {
-      if(s_port < 0) s_port = atoi(&buffer[5]);
-      set_port(s_port);
+      lprintf(error->message);
+      error = NULL;
+      continue;
     }
-    /* check for the list of available hosts */
-    else if(strncmp(buffer, "hosts:", 6) == 0)
+
+    sscanf(tmp, "%s %s %d", addbuf, dirbuf, &max);
+    if(strcmp(addbuf, "localhost") == 0) strcpy(dirbuf, AGENT_DIR);
+
+    host_init(keys[i], addbuf, dirbuf, max);
+    if(TVERBOSE2)
     {
-      while(fscanf(istr, "%s %s %s %d", name, cmd, buffer, &max) == 4)
-      {
-        if(strcmp(cmd, "localhost") == 0)
-          strcpy(buffer, AGENT_DIR);
-
-        host_init(name, cmd, buffer, max);
-
-        VERBOSE2("CONFIG: added new host\n   name      = %s\n   address   = %s\n   directory = %s\n   max       = %d\n",
-            name, cmd, buffer, max);
-      }
+      lprintf("CONFIG: added new host\n");
+      lprintf("      name = %s\n", keys[i]);
+      lprintf("   address = %s\n", addbuf);
+      lprintf(" directory = %s\n", dirbuf);
+      lprintf("       max = %d\n", max);
     }
   }
-  fclose(istr);
 
   /* load the configureation for the agents */
+  agent_conf = g_key_file_new();
   while((ep = readdir(dp)) != NULL)
   {
-    sprintf(buffer, "%s/%s/%s", DEFAULT_SETUP, AGENT_CONF, ep->d_name);
-    if(ep->d_name[0] != '.' && (istr = fopen(buffer, "rb")) != NULL)
+    sprintf(addbuf, "%s/%s/%s", DEFAULT_SETUP, AGENT_CONF, ep->d_name);
+    if(ep->d_name[0] != '.')
     {
-      VERBOSE2("CONFIG: loading config file %s\n", buffer);
+      VERBOSE2("CONFIG: loading config file %s\n", addbuf);
 
-      /* initialize data */
-      memset(buffer, '\0', sizeof(buffer));
-      memset(name,   '\0', sizeof(name));
-      memset(cmd,    '\0', sizeof(cmd));
-
-      /* this is not actually a loop this is used */
-      /* so that all error cases still cause the  */
-      /* file to close                            */
-      while(fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
+      g_key_file_load_from_file(agent_conf, addbuf, G_KEY_FILE_NONE, &error);
+      if(error)
       {
-        if(buffer[0] == '#') { /* do nothing */ }
-        else if(strncmp(buffer, "name=", 5) == 0)
-          strncpy(name, buffer + 5, strlen(buffer + 5) - 1);
-        else if(strncmp(buffer, "command=", 8) == 0)
-          strncpy(cmd, buffer + 8, strlen(buffer + 8) - 1);
-        else if(strncmp(buffer, "max=", 4) == 0)
-          max = atoi(buffer + 4);
-        else if(strncmp(buffer, "special=", 6) == 0)
-        {
-          tmp = strtok(buffer, "=|") + 1;
-          special = 0;
+        lprintf("ERROR: %s\n", error->message);
+        error = NULL;
+        continue;
+      }
 
-          while((tmp = strtok(NULL, "=|")) != NULL)
-          {
-            if(strncmp(tmp, "EXCLUSIVE", 9) == 0)
-              special |= SAG_EXCLUSIVE;
-            else
-              special = SAG_NONE;
-          }
-        }
-        else
-        {
-          // TODO handle error case
-        }
+      special = 0;
+      name = g_key_file_get_string     (agent_conf, "default", "name", NULL);
+      cmd  = g_key_file_get_string     (agent_conf, "default", "command", NULL);
+      max  = g_key_file_get_integer    (agent_conf, "default", "max", NULL);
+      keys = g_key_file_get_string_list(agent_conf, "default", "special",
+          (gsize*)&max, NULL);
+
+      for(i = 0; i < max; i++)
+      {
+        if(strcmp(keys[i], "EXCLUSIVE") == 0)
+          special |= SAG_EXCLUSIVE;
       }
 
       if(!add_meta_agent(name, cmd, max, special))
@@ -459,11 +457,11 @@ void load_config(void* args)
       else if(TVERBOSE2)
       {
         lprintf("CONFIG: added new meta agent\n");
-        lprintf("   name    = %s\n   command = %s\n   max     = %d\n   special = %d\n",
-            name, cmd, max, special);
+        lprintf("    name = %s\n", name);
+        lprintf(" command = %s\n", cmd);
+        lprintf("     max = %d\n", max);
+        lprintf(" special = %d\n", keys);
       }
-
-      fclose(istr);
     }
   }
   closedir(dp);
