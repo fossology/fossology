@@ -880,7 +880,7 @@ int	FindCmd	(char *Filename)
        }
        else  // cpio failed so try 7zr (possibly from p7zip)
        {
-         rc = RunCommand("7zr","l -y",Filename,">/dev/null 2>&1",NULL,NULL);
+         rc = RunCommand("7zr","l -y -p",Filename,">/dev/null 2>&1",NULL,NULL);
          if (rc==0)
          {
            memset(Static,0,sizeof(Static));
@@ -901,7 +901,7 @@ int	FindCmd	(char *Filename)
     	   } 
            else /* for ms(.msi, .cab) file in debian os */
            {   
-             rc = RunCommand("7z","l -y",Filename,">/dev/null 2>&1",NULL,NULL);
+             rc = RunCommand("7z","l -y -p",Filename,">/dev/null 2>&1",NULL,NULL);
              if (rc==0)
              {
                memset(Static,0,sizeof(Static));

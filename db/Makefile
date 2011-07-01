@@ -15,6 +15,7 @@ dbcreate: dbcreate-process
 
 install: all
 	$(INSTALL_DATA) fossologyinit.sql $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
+	$(INSTALL_DATA) licenseref.sql $(DESTDIR)$(LIBEXECDIR)/licenseref.sql
 	$(INSTALL_PROGRAM) dbcreate $(DESTDIR)$(LIBEXECDIR)/dbcreate
 	@if [ ! -f "$(DESTDIR)/etc/cron.d/fossology" -o "$(OVERWRITE)" ]; then \
 	   mkdir -p $(DESTDIR)/etc/cron.d/; \
@@ -27,6 +28,7 @@ install: all
 
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
+	rm -f $(DESTDIR)$(LIBEXECDIR)/licenseref.sql
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbcreate
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \

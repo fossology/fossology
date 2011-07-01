@@ -751,22 +751,25 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
     if (!strcasecmp(field, "Depends")) {
       char *depends = NULL;
       char tempvalue[MAXCMD];
-      int size,i;
+      int size,i,length;
+      length = MAXLENGTH;
       size = 0;
       if (value[0] != '\0'){
         strncpy(tempvalue, value, sizeof(tempvalue));
         depends = strtok(value, ",");
         while (depends && (depends[0] != '\0')) {
+          if (strlen(depends) >= length)
+            length = strlen(depends) + 1;
           depends = strtok(NULL, ",");
           size++;
         }
         if (Verbose) { printf("SIZE:%d\n", size);}
         
         pi->depends = calloc(size, sizeof(char *));
-        pi->depends[0] = calloc(256, sizeof(char));
+        pi->depends[0] = calloc(length, sizeof(char));
         strcpy(pi->depends[0],strtok(tempvalue,","));
         for (i=1;i<size;i++){
-          pi->depends[i] = calloc(256, sizeof(char));
+          pi->depends[i] = calloc(length, sizeof(char));
           strcpy(pi->depends[i],strtok(NULL, ","));
         }
         pi->dep_size = size;
@@ -897,22 +900,25 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
     if (!strcasecmp(field, "Build-Depends")) {
        char *depends = NULL;
        char tempvalue[MAXCMD];
-       int size,i;
+       int size,i,length;
        size = 0;
+       length = MAXLENGTH;
        if (value[0] != '\0'){
        strncpy(tempvalue, value, sizeof(tempvalue));
        depends = strtok(value, ",");
        while (depends && (depends[0] != '\0')) {
+         if (strlen(depends) >= length)
+           length = strlen(depends) + 1;
          depends = strtok(NULL, ",");
          size++;
        }
        if (Verbose) { printf("SIZE:%d\n", size);}
        
        pi->depends = calloc(size, sizeof(char *));
-       pi->depends[0] = calloc(256, sizeof(char));
+       pi->depends[0] = calloc(length, sizeof(char));
        strcpy(pi->depends[0],strtok(tempvalue,","));
        for (i=1;i<size;i++){
-         pi->depends[i] = calloc(256, sizeof(char));
+         pi->depends[i] = calloc(length, sizeof(char));
          strcpy(pi->depends[i],strtok(NULL, ","));
        }
        pi->dep_size = size;

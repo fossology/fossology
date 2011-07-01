@@ -36,6 +36,7 @@ install: all
 	done
 	
 	$(INSTALL_DATA) libschema.php $(DESTDIR)$(LIBEXECDIR)/libschema.php
+	$(INSTALL_DATA) fossinit-licenseref.php $(DESTDIR)$(LIBEXECDIR)/fossinit-licenseref.php
 
 uninstall:
 	for file in $(EXE); do \
@@ -45,7 +46,7 @@ uninstall:
 	for file in $(MAN1FILES); do \
 		rm -f $(DESTDIR)$(MAN1DIR)/$$file; \
 	done
-
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fossinit-licenseref.php
 test: all
 	@echo "*** Tests are still run by hand for cli/ ***"
 

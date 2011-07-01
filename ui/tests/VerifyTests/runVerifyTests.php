@@ -39,10 +39,12 @@ print "\nStarting Verify Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
 $test = &new TestSuite('Fossology Repo UI Verification Functional tests');
 //$test->addTestFile('browseUploadedTest.php');
-$test->addTestFile('OneShot-lgpl2.1.php');
-$test->addTestFile('verifyFossI16L335U29.php');
-$test->addTestFile('verifyFoss23D1F1L.php');
-$test->addTestFile('verifyFossDirsOnly.php');
+$test->addTestFile('OneShot-lgpl2.1Test.php');
+$test->addTestFile('fossVerifyLicCntTest.php');
+$test->addTestFile('foss23dirs1File1LicTest.php');
+$test->addTestFile('fossDirsOnlyTest.php');
+$test->addTestFile('browseUploadedTest.php');
+
 
 if (TextReporter::inCli())
 {

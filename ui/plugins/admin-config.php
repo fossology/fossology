@@ -132,13 +132,44 @@ class foconfig extends FO_Plugin
       {
         if ($VarValue != $oldarray[$VarName])
         {
-          $sql = "update sysconfig set conf_value='" .
-          pg_escape_string($VarValue) .
-                    "' where variablename='$VarName'";
+          /* get validation_function row from sysconfig table */
+          $sql = "select validation_function, ui_label from sysconfig where variablename='".pg_escape_string($VarName)."';";
           $result = pg_query($PG_CONN, $sql);
           DBCheckResult($result, $sql, __FILE__, __LINE__);
-          if (!empty($UpdateMsg)) $UpdateMsg .= ", ";
-          $UpdateMsg .= "$VarName";
+          $sys_array = pg_fetch_assoc($result);
+          $validation_function = $sys_array['validation_function'];
+          $ui_label = $sys_array['ui_label'];
+          pg_free_result($result);
+          $is_empty = empty($validation_function);
+          /* 1. the validation_function is empty
+             2. the validation_function is not empty, and after checking, the value is valid
+             update sysconfig table
+          */
+          if ($is_empty || (!$is_empty && (1 == $validation_function($VarValue))))
+          {
+            $sql = "update sysconfig set conf_value='" .
+            pg_escape_string($VarValue) .
+              "' where variablename='$VarName'";
+            $result = pg_query($PG_CONN, $sql);
+            DBCheckResult($result, $sql, __FILE__, __LINE__);
+            pg_free_result($result);
+            if (!empty($UpdateMsg)) $UpdateMsg .= ", ";
+            $UpdateMsg .= "$VarName";
+          }
+          /* the validation_function is not empty, but after checking, the value is invalid */
+          else if (!$is_empty && (0 == $validation_function($VarValue)))
+          {
+            if (!strcmp($validation_function, 'check_boolean'))
+            {
+              $warning_msg = _("Error: You set $ui_label to $VarValue. Valid  values are \'true\' and \'false\'.");
+              echo "<script>alert('$warning_msg');</script>";
+            }
+            else if  (strpos($validation_function, "url"))
+            {
+              $warning_msg = _("Error: $ui_label $VarValue, is not a reachable URL.");
+              echo "<script>alert('$warning_msg');</script>";
+            }
+          }
         }
       }
       if (!empty($UpdateMsg)) $UpdateMsg .= " updated.";

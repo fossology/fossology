@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -23,8 +23,23 @@
  *
  * Created on March 17, 2009
  */
-require_once ('../../../tests/fossologyTestCase.php');
-require_once ('../../../tests/TestEnvironment.php');
+
+$where = dirname(__FILE__);
+if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
+{
+  //echo "running from jenkins....fossology/tests\n";
+  require_once('../../tests/fossologyTestCase.php');
+  require_once ('../../tests/TestEnvironment.php');
+}
+else
+{
+  //echo "using requires for running outside of jenkins\n";
+  require_once('../../../tests/fossologyTestCase.php');
+  require_once ('../../../tests/TestEnvironment.php');
+}
+
+global $USER;
+
 require_once (TESTROOT . '/testClasses/db.php');
 
 global $URL;
@@ -67,7 +82,9 @@ class EmailUserTest extends fossologyTestCase {
      * Verify, check the db entry for the user and make sure email_notify is set.
      */
     print "Verifying User email notification\n";
-    $dlink = new db('host=localhost dbname=fossology user=fosstester password=fosstester');
+    $dlink = null;
+    $dlink = new db('host=localhost dbname=fossology user=fossy password=fossy');
+    $dlink->Debug = TRUE;
     $Sql = "SELECT user_name, email_notify FROM users WHERE user_name='UserwEmail';";
     $User = $dlink->dbQuery($Sql);
     //print "Entryies are: {$User[0]['user_name']}, {$User[0]['email_notify']}\n";

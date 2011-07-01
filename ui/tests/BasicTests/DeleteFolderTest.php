@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -27,12 +27,20 @@
  *
  * Created on Aug 1, 2008
  */
+$where = dirname(__FILE__);
+if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
+{
+  //echo "running from jenkins....fossology/tests\n";
+  require_once('../../tests/fossologyTestCase.php');
+  require_once ('../../tests/TestEnvironment.php');
+}
+else
+{
+  //echo "using requires for running outside of jenkins\n";
+  require_once('../../../tests/fossologyTestCase.php');
+  require_once ('../../../tests/TestEnvironment.php');
+}
 
-
-require_once ('../../../tests/fossologyTestCase.php');
-require_once ('../../../tests/TestEnvironment.php');
-
-/* every test must use these globals, at least $URL */
 global $URL;
 
 class DeleteFolderTest extends fossologyTestCase

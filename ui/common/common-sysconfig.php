@@ -125,7 +125,7 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
   {
     global $PG_CONN;
 
-    $Columns = "variablename, conf_value, ui_label, vartype, group_name, group_order, description";
+    $Columns = "variablename, conf_value, ui_label, vartype, group_name, group_order, description, validation_function";
     $ValueArray = array();
 
     /*  Email */
@@ -134,21 +134,22 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     $SupportEmailLabelDesc = _('e.g. "Support"<br>Text that the user clicks on to create a new support email. This new email will be preaddressed to this support email address and subject.  HTML is ok.');
     $ValueArray[$Variable] = "'$Variable', 'Support', '$SupportEmailLabelPrompt',"
                     . CONFIG_TYPE_TEXT .
-                    ",'Support', 1, '$SupportEmailLabelDesc'";
+                    ",'Support', 1, '$SupportEmailLabelDesc', ''";
 
     $Variable = "SupportEmailAddr";
     $SupportEmailAddrPrompt = _('Support Email Address');
+    $SupportEmailAddrValid = "check_email_address";
     $SupportEmailAddrDesc = _('e.g. "support@mycompany.com"<br>Individual or group email address to those providing FOSSology support.');
     $ValueArray[$Variable] = "'$Variable', null, '$SupportEmailAddrPrompt', "
                     . CONFIG_TYPE_TEXT .
-                    ",'Support', 2, '$SupportEmailAddrDesc'";
+                    ",'Support', 2, '$SupportEmailAddrDesc', '$SupportEmailAddrValid'";
 
     $Variable = "SupportEmailSubject";
     $SupportEmailSubjectPrompt = _('Support Email Subject line');
     $SupportEmailSubjectDesc = _('e.g. "fossology support"<br>Subject line to use on support email.');
     $ValueArray[$Variable] = "'$Variable', 'FOSSology Support', '$SupportEmailSubjectPrompt',"
                     . CONFIG_TYPE_TEXT .
-                    ",'Support', 3, '$SupportEmailSubjectDesc'";
+                    ",'Support', 3, '$SupportEmailSubjectDesc', ''";
 
     /*  Banner Message */
     $Variable = "BannerMsg";
@@ -156,29 +157,44 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
     $BannerMsgDesc = _('This is message will be displayed on every page with a banner.  HTML is ok.');
     $ValueArray[$Variable] = "'$Variable', null, '$BannerMsgPrompt', "
                     . CONFIG_TYPE_TEXTAREA .
-                    ",'Banner', 1, '$BannerMsgDesc'";
+                    ",'Banner', 1, '$BannerMsgDesc', ''";
 
     /*  Logo  */
     $Variable = "LogoImage";
     $LogoImagePrompt = _('Logo Image URL');
+    $LogoImageValid = "check_logo_image_url";
     $LogoImageDesc = _('e.g. "http://mycompany.com/images/companylogo.png" or "images/mylogo.png"<br>This image replaces the fossology project logo. Image is constrained to 150px wide.  80-100px high is a good target.  If you change this URL, you MUST also enter a logo URL.');
     $ValueArray[$Variable] = "'$Variable', null, '$LogoImagePrompt', "
                     . CONFIG_TYPE_TEXT .
-                    ",'Logo', 1, '$LogoImageDesc'";
+                    ",'Logo', 1, '$LogoImageDesc', '$LogoImageValid'";
 
     $Variable = "LogoLink";
     $LogoLinkPrompt = _('Logo URL');
     $LogoLinkDesc = _('e.g. "http://mycompany.com/fossology"<br>URL a person goes to when they click on the logo.  If you change the Logo URL, you MUST also enter a Logo Image.');
+    $LogoLinkValid = "check_logo_url";
     $ValueArray[$Variable] = "'$Variable', null, '$LogoLinkPrompt', "
                     . CONFIG_TYPE_TEXT .
-                    ",'Logo', 2, '$LogoLinkDesc'" ;
+                    ",'Logo', 2, '$LogoLinkDesc', '$LogoLinkValid'" ;
      
     $Variable = "GlobalBrowse";
     $BrowsePrompt = _("Global Browsing");
     $BrowseDesc = _("true = allow browsing and searching the entire repository.<br>false = user can only browse/search their own uploads.");
+    $BrowseValid = "check_boolean";
     $ValueArray[$Variable] = "'$Variable', 'false', '$BrowsePrompt', "
                     . CONFIG_TYPE_INT .
-                    ",'UI', 1, '$BrowseDesc'";
+                    ",'UI', 1, '$BrowseDesc', '$BrowseValid'";
+
+    $Variable = "FOSSologyURL";
+    $URLPrompt = _("FOSSology URL");
+    $hostname = exec("hostname -f");
+    if (empty($hostname)) $hostname = "localhost";
+    $FOSSologyURL = $hostname."/repo/";
+    $URLDesc = _("URL of this FOSSology server, e.g. $FOSSologyURL");
+    $URLValid = "check_fossology_url";
+    $ValueArray[$Variable] = "'$Variable', '$FOSSologyURL', '$URLPrompt', "
+                    . CONFIG_TYPE_TEXT .
+                    ",'URL', 1, '$URLDesc', '$URLValid'";
+
      
     /* Doing all the rows as a single insert will fail if any row is a dupe.
      So insert each one individually so that new variables get added.
@@ -199,4 +215,144 @@ COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textare
       unset($VarRec);
     }
   }
+
+  /************************************************
+   validation function check_boolean().
+   check if the value format is valid,
+   only true/false is valid
+   return 1, if the value is valid, or 0
+   ************************************************/
+  function check_boolean($value)
+  {
+    if (!strcmp($value, 'true') || !strcmp($value, 'false'))
+    {
+      return 1;
+    }
+    else 
+    {
+      return 0;
+    }
+  }
+
+  /************************************************
+   validation function check_fossology_url().
+   check if the url is valid,
+   return value, 1: valid, 0: invalid
+   ************************************************/
+  function check_fossology_url($url)
+  {
+    $url_array = split("/", $url, 2);
+    $name = $url_array[0];
+    if (!empty($name))
+    {
+      $hostname = exec("hostname -f");
+      if (empty($hostname)) $hostname = "localhost";
+      $res = check_IP($name);
+      if($res)
+      {
+        $hostname1 = gethostbyaddr($name);
+      }
+      $server_name = $_SERVER['SERVER_NAME'];
+      if (strcmp($name, $hostname) && strcmp($hostname, $hostname1) && strcmp($name, $server_name))
+      {
+        return 0;
+      }
+    }
+    else return 0;
+    return 1;
+  }
+
+  /************************************************
+   validation function check_logo_url().
+   check if the url is available,
+   return value, 1: available, 0: unavailable
+   ************************************************/
+  function check_logo_url($url)
+  {
+    if (empty($url)) return 1; /* logo url can be null, with the default */
+
+    //$res = check_url($url);
+    $res = is_available($url);
+    if (1 == $res)
+    {
+      return 1;
+    }
+    else return 0;
+  }
+
+  /************************************************
+   validation function check_logo_image_url().
+   check if the url is available,
+   return value, 1: the url is available, 0: unavailable
+   ************************************************/
+  function check_logo_image_url($url)
+  {
+    if (empty($url)) return 1; /* logo url can be null, with the default */
+
+    $SysConf = ConfigInit();
+    $LogoLink = @$SysConf["LogoLink"];
+    $new_url = $LogoLink.$url;
+    if (is_available($url) || is_available($new_url))
+    {
+      return 1;
+    }
+    else return 0;
+    
+  }
+    
+  /************************************************
+   validation function check_email_address().
+   implement this function if needed in the future
+   check if the email address is valid,
+   return value, 1: valid, 0: invalid
+   ************************************************/
+  function check_email_address($email_address)
+  {
+    return 1;
+  }
+
+  /************************************************
+   check if the url is available,
+   return value, 1: available, 0: unavailable
+   ************************************************/
+  function is_available($url, $timeout = 2, $tries = 2)
+  {
+    global $SYSCONFDIR, $PROJECT;
+    $path = "$SYSCONFDIR/$PROJECT/Proxy.conf"; /* with proxy */
+    $commands = ". $path; wget --spider '$url' --tries=$tries --timeout=$timeout";
+    system($commands, $return_var);
+    if (0 == $return_var)
+    {
+      return 1;
+    }
+    else return 0;
+  }
+
+  /************************************************
+   check if the url is valid,
+   return value, 1: the url is valid, 0: invalid
+   ************************************************/
+  function check_url($url)
+  {
+    if (empty($url) || preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $url) != 1 || preg_match("@[[:space:]]@", $url) != 0) 
+    {
+      return 0;
+    }
+    else return 1;
+  }
+  
+  /************************************************
+   check if being ip,
+   return value, 1: yes, 0: not
+   ************************************************/
+  function check_IP($ip)
+  { 
+    $e="([0-9]|1[0-9]{2}|[1-9][0-9]|2[0-4][0-9]|25[0-5])"; 
+    if(ereg("^$e\.$e\.$e\.$e$",$ip))
+    { 
+      return 1;    
+    } 
+    else return 0; 
+  }  
+
 ?>

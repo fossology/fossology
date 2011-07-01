@@ -23,14 +23,6 @@
  this can be really slow.  For speed, folders are handled separately.
  *************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 /************************************************************
  FolderGetTop(): Find the top-of-tree folder_pk for the current user.
  TBD: "username" will be added in the future and it may change

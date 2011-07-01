@@ -42,7 +42,7 @@ $U .= "Optional proxy in the form http://web-proxy.xx.com:80xx\n";
 $U .= "The proxy format is not checked, so make sure it's correct\n";
 $U .= "Very little parameter checking is done.\n\n";
 $U .= "For example,\n$argv[0] 'http://fossology.org/' dbuser dbpasswd 'http://web-proxy.somebody.com:8080'\n";
-$U .= "Note the single quotes to keep the shell happy.\n";
+$U .= "Note the single quotes are used to keep the shell happy.\n";
 $usage = $U;
 
 // simple parameter checks
@@ -52,7 +52,12 @@ if((int)$argc < 4)
   exit(1);
 }
 
+// code below fixes php notice if no proxy used on the command line
 $proxy = '';
+if(empty($argv[4]))
+{
+  $argv[4] = '';
+}
 
 list($me, $url, $user, $password, $proxy) = $argv;
 //print "Params: U:$url USR:$user PW:password PROX:$proxy\n";
@@ -66,7 +71,7 @@ if('http://' != substr($url,0,7))
 $FD = fopen('./TestEnvironment.php', 'w') or die("Can't open ./TestEnvironment $php_errormsg\n");
 $startphp = "<?php\n";
 $testGlobals = "global \$USER;\n" .
-               "global \$PASSWORD;\n" . 
+               "global \$PASSWORD;\n" .
                "global \$URL;\n";
 $fullUrl = "\$URL='$url';\n";
 $usr = "\$USER='$user';\n";

@@ -1,7 +1,7 @@
 <?php
 
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -25,8 +25,19 @@
  * Created on Jul 21, 2008
  */
 
-require_once('../../../tests/fossologyTestCase.php');
-require_once ('../../../tests/TestEnvironment.php');
+$where = dirname(__FILE__);
+if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
+{
+  //echo "running from jenkins....fossology/tests\n";
+  require_once('../../tests/fossologyTestCase.php');
+  require_once ('../../tests/TestEnvironment.php');
+}
+else
+{
+  //echo "using requires for running outside of jenkins\n";
+  require_once('../../../tests/fossologyTestCase.php');
+  require_once ('../../../tests/TestEnvironment.php');
+}
 
 global $URL;
 global $USER;
@@ -39,7 +50,7 @@ class TestAboutMenu extends fossologyTestCase
   function testMenuAbout()
   {
     global $URL;
-    print "starting testMenuAbout\n";
+    //print "starting testMenuAbout\n";
     $mybrowser = new SimpleBrowser();
     $page = $this->mybrowser->get($URL);
     $this->assertTrue($page);

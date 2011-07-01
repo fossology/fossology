@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /***********************************************************
-Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -164,6 +164,7 @@ if (array_key_exists("u", $options)) {
     }
   }
 }
+if (array_key_exists("U", $options)) {
 $upload_pk_list = $options['U'];
 if ($upload_pk_list == 'ALL') {
   $upload_pk_list = "";
@@ -176,6 +177,7 @@ if ($upload_pk_list == 'ALL') {
       $upload_pk_list.= "," . $Results[$i]['upload_pk'];
     }
   }
+}
 }
 if (!empty($upload_pk_list)) {
   $reg_agents = array();

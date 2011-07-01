@@ -103,9 +103,10 @@ int	main	(int argc, char *argv[])
     /* printf("DEBUG: running in cli mode, processing file(s)\n"); */
     for (; optind < argc; optind++)
     {
-       struct rpmpkginfo *rpmpi;
-       rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
-       GetMetadata(argv[optind],rpmpi);
+       //struct rpmpkginfo *rpmpi;
+       //rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+       //GetMetadata(argv[optind],rpmpi);
+       ProcessUpload(atoi(argv[optind]));
     }
   }
 

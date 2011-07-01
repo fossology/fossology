@@ -21,8 +21,6 @@ all:
 $(iPATHFILE): ../Makefile.conf
 	@echo "Building $(iPATHFILE)"
 	@echo "<?php" > $(iPATHFILE)
-	@echo "global \$$GlobalReady;" >> $(iPATHFILE)
-	@echo "if (!isset(\$$GlobalReady)) { exit; }" >> $(iPATHFILE)
 	@echo "\$$BINDIR=\"$(BINDIR)\";" >> $(iPATHFILE)
 	@echo "\$$LIBDIR=\"$(LIBDIR)\";" >> $(iPATHFILE)
 	@echo "\$$LIBEXECDIR=\"$(LIBEXECDIR)\";" >> $(iPATHFILE)

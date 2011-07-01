@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -34,6 +34,7 @@
 */
 
 #define	MM_CACHESIZE	20
+#define MAXLENGTH       100 
 
 #ifdef	REUSE_STATIC_MEMORY
 static char grepzone[10485760];	/* 10M for now, adjust if needed */
@@ -1006,6 +1007,18 @@ void printRegexMatch(int n, int cached)
     return;
 }
 
+/**
+ * \brief Replace all nulls in Buffer with blanks.
+ * \param Buffer: The data having its nulls replaced.
+ * \param BufferSize: Buffer size
+ **/
+void ReplaceNulls(char *Buffer, int BufferSize)
+{
+  char *pBuf;
+
+  for (pBuf = Buffer; BufferSize--; pBuf++)
+    if (*pBuf == 0) *pBuf = ' ';
+}
 
 /*
  * Blarg.  Files that are EXACTLY a multiple of the system pagesize do
@@ -1036,7 +1049,6 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	mmapOpenListing();
 	Bail(12);
     }
-
     if ((mmp->fd = open(pathname, O_RDONLY)) < 0) {
 	if (errno == ENOENT) {
 	    mmp->inUse = 0;		/* overkill? */
@@ -1088,6 +1100,8 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	    cp += n;
 	}
 	mmp->inUse = 1;
+        /* Replace nulls with blanks so binary files can be scanned */
+        ReplaceNulls(mmp->mmPtr,  mmp->size-1); 
 	return((char *) mmp->mmPtr);
     }
     /*

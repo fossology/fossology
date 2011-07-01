@@ -28,13 +28,24 @@
  * @return 0 for OK, 1 for failure
  */
 
+global $TR;
+
 $argv = array();
 $opts = array();
 
 print "changeENV starting....\n";
-$opts = getopt('hc:');
+$opts = getopt('hc:t:');
 //print "changeENV: opts is:\n";print_r($opts) . "\n";
-$Usage = "{$argv[0]}: [-h] -c <change-string>\n";
+if(array_key_exists('SCRIPT_NAME', $_SERVER))
+{
+  $programName = $_SERVER['SCRIPT_NAME'];
+}
+else if(!empty($argv[0]))
+{
+  $programName = $argv[0];
+}
+//$Usage = "{$argv[0]}: [-h] -c <change-string>\n";
+$Usage = "$programName: [-h] -c <change-string> -t TestRoot\n";
 
 if (empty($opts)) {
   print $Usage;
@@ -46,7 +57,7 @@ if (array_key_exists("h",$opts)) {
   exit(0);
 }
 /*
-   Only required option, get it and check it
+ Only required option, get it and check it
  */
 if (array_key_exists("c",$opts)) {
   $change2 = $opts['c'];
@@ -55,20 +66,33 @@ if (array_key_exists("c",$opts)) {
     exit(1);
   }
 }
-else {
+$TestRoot = FALSE;
+if (array_key_exists("t",$opts)) {
+  $TestRoot = $opts['t'];
+  if(!strlen($TestRoot)) {
+    print $Usage;
+    exit(1);
+  }
+}
+if($argc < 3)
+{
   print $Usage;
   exit(1);
 }
 
-$testEnv = '../../../tests/TestEnvironment.php';
+if(empty($TestRoot)){
+  echo "TestRoot is Empty!\n";
+  exit(1);
+}
+
+$testEnv = $TestRoot . '/TestEnvironment.php';
 
 $sedLine = "sed -e \"1,$ s/USER=.*/USER='$change2';/\" ".
                "-e \"1,$ s/WORD=.*/WORD='$change2';/\" $testEnv
                ";
 $changed = exec($sedLine, $out, $rtn);
-//print "output is:\n";print_r($out) . "\n";
 
-$FH = fopen($testEnv, 'w') or die("Can't open $testEnv\n $phpErrorMsg");
+$FH = fopen($testEnv, 'w') or die("Can't open $testEnv\n");
 foreach ($out as $line) {
   if(FALSE === fwrite($FH, "$line\n")) {
     print "FATAL! cannot wite to $testEnv\n";

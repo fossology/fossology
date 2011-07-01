@@ -24,14 +24,6 @@
  *
  */
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
   /***********************************************************
    ReportCacheGet(): This function is used by Output()
    to see if the requested report is in the report cache.

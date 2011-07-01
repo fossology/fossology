@@ -1,3 +1,14 @@
+fossology (1.4.1~rc1) unstable; urgency=low
+
+  [ Build User ]
+  * Non-maintainer upload.
+  * 
+
+  [ Mark Donohoe ]
+  * 
+
+ -- Mark Donohoe <markd@localhost.localdomain>  Wed, 15 Jun 2011 16:34:39 -0700
+
 fossology (1.4.0~rc6+1) unstable; urgency=low
 
   [ Build User ]
