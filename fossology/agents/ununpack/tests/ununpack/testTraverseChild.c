@@ -119,9 +119,9 @@ void testTraverseChild4IsoFile()
   } else
   {
     ParentWait();
-    existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.JAR");
+    existed = file_dir_existed("./test-result/imagefile.iso.dir/test.jar");
     CU_ASSERT_EQUAL(existed, 1); // existing  
-    existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.JAR.dir");
+    existed = file_dir_existed("./test-result/imagefile.iso.dir/test.jar.dir");
     CU_ASSERT_EQUAL(existed, 0); // not existing
   }
 }

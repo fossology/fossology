@@ -87,7 +87,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $command = "$this->UNUNPACK_PATH/ununpack -qCR $TEST_DATA_PATH/imagefile.iso -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? if the package is unpacked, also need to check if unpacked content is valid */
-    $this->assertFileExists("$TEST_RESULT_PATH/imagefile.iso.dir/TEST.JAR");
+    $this->assertFileExists("$TEST_RESULT_PATH/imagefile.iso.dir/test.jar");
   }
  
   /* unpack rpm file */
@@ -406,7 +406,6 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
          ."xunzai_Contacts.msi.msi.dir/CONTACTS.CAB.dir/contact");
     $this->assertFileExists("$TEST_RESULT_PATH/testdata4unpack.7z.dir/testdata4unpack/"
      ."libpango1.0-udeb_1.28.1-1_i386.udeb.dir/data.tar.gz.dir/data.tar.dir/usr/lib/libpangox-1.0.so.0");
-    $this->assertFileExists("$TEST_RESULT_PATH/testdata4unpack.7z.dir/testdata4unpack/imagefile.iso.dir/TEST.JAR");
   }
 
   /* supporting DB, command is ununpack -RvQf xxxxx -d xxxxx */ 
