@@ -36,7 +36,7 @@ void testExtractISO1()
   Filename = "./test-data/testdata4unpack/imagefile.iso";
   MkDirs("./test-result/imagefile.iso.dir");
   Result = ExtractISO(Filename, "./test-result/imagefile.iso.dir");
-  existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.CPI");
+  existed = file_dir_existed("./test-result/imagefile.iso.dir/test.cpi");
   CU_ASSERT_EQUAL(Result, 0); 
   CU_ASSERT_EQUAL(existed, 1); 
 }
@@ -52,10 +52,11 @@ void testExtractISO2()
   Filename = "./test-data/testdata4unpack/523.iso";
   MkDirs("./test-result/523.iso.dir");
   Result = ExtractISO(Filename, "./test-result/523.iso.dir"); // 
-  existed = file_dir_existed("./test-result/523.iso.dir/523SFP/DOS4GW.EXE");
+  existed = file_dir_existed("./test-result/523.iso.dir/523sfp/DOS4GW.EXE");
   CU_ASSERT_EQUAL(Result, 0);
   CU_ASSERT_EQUAL(existed, 1); 
-  existed = file_dir_existed("./test-result/523.iso.dir/523SFP/P3P10131.BIN");
+  existed = file_dir_existed("./test-result/523.iso.dir/523sfp/p3p10131.bin");
+  CU_ASSERT_EQUAL(existed, 1); 
 
 }
 
