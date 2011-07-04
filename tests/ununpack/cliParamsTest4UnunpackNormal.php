@@ -86,8 +86,16 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     global $TEST_RESULT_PATH;
     $command = "$this->UNUNPACK_PATH/ununpack -qCR $TEST_DATA_PATH/imagefile.iso -d $TEST_RESULT_PATH";
     exec($command);
+    $command = "isoinfo -f -R -i $TEST_DATA_PATH/imagefile.iso | grep '\;1' > /dev/null ";
+    exec($command, $temp, $return_value);
+    print "return_value is:$return_value\n";
+    
     /* check if the result is ok? if the package is unpacked, also need to check if unpacked content is valid */
-    $this->assertFileExists("$TEST_RESULT_PATH/imagefile.iso.dir/test.jar");
+    if (0 != $return_value)
+      $this->assertFileExists("$TEST_RESULT_PATH/imagefile.iso.dir/test.jar");
+    else 
+      $this->assertFileExists("$TEST_RESULT_PATH/imagefile.iso.dir/TEST.JAR;1");
+    
   }
  
   /* unpack rpm file */

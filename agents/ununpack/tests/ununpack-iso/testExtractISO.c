@@ -36,9 +36,22 @@ void testExtractISO1()
   Filename = "./test-data/testdata4unpack/imagefile.iso";
   MkDirs("./test-result/imagefile.iso.dir");
   Result = ExtractISO(Filename, "./test-result/imagefile.iso.dir");
-  existed = file_dir_existed("./test-result/imagefile.iso.dir/test.cpi");
   CU_ASSERT_EQUAL(Result, 0); 
-  CU_ASSERT_EQUAL(existed, 1); 
+
+  int rc = 0;
+  char commands[250];
+  sprintf(commands, "isoinfo -f -R -i '%s' | grep '\;1' > /dev/null ", Filename);
+  rc = system(commands);
+  if (0 != rc)
+  {
+    existed = file_dir_existed("./test-result/imagefile.iso.dir/test.cpi");
+    CU_ASSERT_EQUAL(existed, 1); 
+  }
+  else
+  {
+    existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.CPI\;1");
+    CU_ASSERT_EQUAL(existed, 1); // existing
+  }
 }
 
 /**
