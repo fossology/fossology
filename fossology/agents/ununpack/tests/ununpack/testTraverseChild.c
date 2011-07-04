@@ -119,10 +119,22 @@ void testTraverseChild4IsoFile()
   } else
   {
     ParentWait();
-    existed = file_dir_existed("./test-result/imagefile.iso.dir/test.jar");
-    CU_ASSERT_EQUAL(existed, 1); // existing  
-    existed = file_dir_existed("./test-result/imagefile.iso.dir/test.jar.dir");
-    CU_ASSERT_EQUAL(existed, 0); // not existing
+    int rc = 0;
+    char commands[250];
+    sprintf(commands, "isoinfo -f -R -i '%s' | grep '\;1' > /dev/null ", Filename);
+    rc = system(commands);
+    if (0 != rc)
+    {
+      existed = file_dir_existed("./test-result/imagefile.iso.dir/test.jar");
+      CU_ASSERT_EQUAL(existed, 1); // existing  
+      existed = file_dir_existed("./test-result/imagefile.iso.dir/test.jar.dir");
+      CU_ASSERT_EQUAL(existed, 0); // not existing
+    }
+    else
+    {
+      existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.JAR\;1");
+      CU_ASSERT_EQUAL(existed, 1); // existing  
+    }
   }
 }
 
