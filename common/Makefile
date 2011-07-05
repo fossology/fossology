@@ -5,7 +5,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CONFFILES=Depth.conf RepPath.conf Hosts.conf Proxy.conf
+CONFFILES=fossology.conf
 CONFPATH=$(SYSCONFDIR)/fossology
 
 all: fo-postinstall defconf/Db.conf
@@ -26,21 +26,24 @@ install: all
 	if [ ! -e $(DESTDIR)$(CONFPATH) ] ; then \
 		mkdir -p $(DESTDIR)$(CONFPATH); \
 	fi
-
-	@for file in $(CONFFILES); do \
-		if [ ! -f $(DESTDIR)$(CONFPATH)/$$file -o "$(OVERWRITE)" ] ; then \
-			echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/$$file"; \
-		 	$(INSTALL_DATA) defconf/$$file $(DESTDIR)$(CONFPATH)/$$file; \
-		else \
-			echo "WARNING: $(DESTDIR)$(CONFPATH)/$$file already exists."; \
-			echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
-		fi \
-	done
+	
+	if [ ! -e $(DESTDIR)$(CONFPATH)/agents.d ] ; then \
+		mkdir -p $(DESTDIR)$(CONFPATH)/agents.d; \
+	fi
+	
 	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ] ; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/Db.conf"; \
 	 	$(INSTALL) -m 660 defconf/Db.conf $(DESTDIR)$(CONFPATH)/Db.conf; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/Db.conf already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+	fi \
+	
+	if [ ! -f $(DESTDIR)$(CONFPATH)/fossology.conf -o "$(OVERWRITE)"]; then \
+		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/fossology.conf"; \
+	 	$(INSTALL) -m 660 defconf/fossology.conf $(DESTDIR)$(CONFPATH)/fossolgy.conf; \
+	else \
+		echo "WARNING: $(DESTDIR)$(CONFPATH)/fossoloyg.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
 
