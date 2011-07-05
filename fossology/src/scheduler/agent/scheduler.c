@@ -366,7 +366,6 @@ void load_config(void* args)
   char** keys;
   GError* error = NULL;
   int i;
-  GKeyFile* agent_conf;
   char* name, * cmd;
 
   snprintf(addbuf, sizeof(addbuf), "%s/%s/", DEFAULT_SETUP, AGENT_CONF);
@@ -381,13 +380,9 @@ void load_config(void* args)
   host_list_clean();
 
   /* parse the config file */
-  fo_config_load(&error);
+  fo_config_load_default(&error);
   if(error)
-  {
-    lprintf("ERROR %s.%d: couldn't load configuration", __FILE__, __LINE__);
-    lprintf("%s", error->message);
-    return;
-  }
+    FATAL("%s", error->message);
 
   /* load the port setting */
   if(s_port < 0)
@@ -421,7 +416,6 @@ void load_config(void* args)
   }
 
   /* load the configuration for the agents */
-  agent_conf = g_key_file_new();
   while((ep = readdir(dp)) != NULL)
   {
     sprintf(addbuf, "%s/%s/%s", DEFAULT_SETUP, AGENT_CONF, ep->d_name);
@@ -429,7 +423,7 @@ void load_config(void* args)
     {
       VERBOSE2("CONFIG: loading config file %s\n", addbuf);
 
-      g_key_file_load_from_file(agent_conf, addbuf, G_KEY_FILE_NONE, &error);
+      fo_config_load(addbuf, &error);
       if(error)
       {
         lprintf("ERROR: %s\n", error->message);
@@ -438,17 +432,15 @@ void load_config(void* args)
       }
 
       special = 0;
-      name = g_key_file_get_string     (agent_conf, "default", "name", NULL);
-      cmd  = g_key_file_get_string     (agent_conf, "default", "command", NULL);
-      max  = g_key_file_get_integer    (agent_conf, "default", "max", NULL);
-      keys = g_key_file_get_string_list(agent_conf, "default", "special",
-          (gsize*)&max, NULL);
-
+      max = fo_config_list_length("default", "special", &error);
       for(i = 0; i < max; i++)
-      {
-        if(strcmp(keys[i], "EXCLUSIVE") == 0)
+        if(strcmp(fo_config_get_list("default", "special", i, &error),
+            "EXCLUSIVE"))
           special |= SAG_EXCLUSIVE;
-      }
+
+      name =      fo_config_get("default", "name", &error);
+      cmd  =      fo_config_get("default", "command", &error);
+      max  = atoi(fo_config_get("default", "max", &error));
 
       if(!add_meta_agent(name, cmd, max, special))
       {
@@ -460,14 +452,12 @@ void load_config(void* args)
         lprintf("    name = %s\n", name);
         lprintf(" command = %s\n", cmd);
         lprintf("     max = %d\n", max);
-        lprintf(" special = %d\n", keys);
+        lprintf(" special = %d\n", special);
       }
     }
   }
-  g_key_file_free(agent_conf);
   closedir(dp);
   fo_config_free();
-
   for_each_host(test_agents);
 }
 

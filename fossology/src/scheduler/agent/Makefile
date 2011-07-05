@@ -112,7 +112,6 @@ install: all install-conf
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(LIBEXECDIR)/$(EXE)
 	$(INSTALL_PROGRAM  $(CLI) $(DESTDIR)$(LIBEXECDIR)/$(CLI)
 	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
-	$(INSTALL_PROGRAM) fossology.conf $(SYSCONFDIR)/fossology/fossology.conf
 
 install-conf:
 	@ echo "Installing config files..."
