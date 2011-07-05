@@ -36,7 +36,9 @@ typedef enum
   fo_load_config
 } fo_error_codes;
 
-int   fo_config_load(GError** error);
+int   fo_config_is_open();
+int   fo_config_load_default(GError** error);
+int   fo_config_load(char* fname, GError** error);
 char* fo_config_get(char* group, char* key, GError** error);
 char* fo_config_get_list(char* group, char* key, int idx, GError** error);
 int   fo_config_is_list(char* group, char* key, GError** error);
