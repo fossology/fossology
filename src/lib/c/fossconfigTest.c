@@ -29,7 +29,7 @@ int main(int argc, char** argv)
   int j, nkeys;
   int k, nlist;
 
-  fo_config_load(&error);
+  fo_config_load_default(&error);
 
   groups = fo_config_group_set(&ngrps);
   for(i = 0; i < ngrps; i++)

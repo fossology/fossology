@@ -266,20 +266,49 @@ int key(GError** error) {
 /* ************************************************************************** */
 
 /**
- * load the configuration information from the fossology.conf file. If the user
- * has not done a fo_config_free since the last fo_config_load, this will make
- * sure to call that first. In other words, it is assumed that if this is called
- * the config file has changed and the user would like to use the new copy.
+ * tests if the configuration file has been opened
+ *
+ * @return 1 if open, 0 if not
+ */
+int fo_config_is_open()
+{
+  return group_map != NULL;
+}
+
+/**
+ * loads the default configuration file (fossology.conf). same as calling
+ * fo_config_load but the filename argument is not necessary
  *
  * @param error object that allows errors to propagate up the stack
  * @return 0 for failure, 1 for success
  */
-int fo_config_load(GError** error) {
+int fo_config_load_default(GError** error)
+{
   gchar fname[FILENAME_MAX];
-  char lexeme[1024];
+  char* Env;
+
+  Env = getenv("FOSSCONF");
+  if(Env && Env[0] != '\0')
+    strcpy(fname, Env);
+  else
+    g_snprintf(fname, sizeof(fname), "%s/%s", DEFAULT_SETUP, FOSS_CONF);
+
+  return fo_config_load(fname, error);
+}
+
+/**
+ * load the configuration information from the provided file. If the user has
+ * not done a fo_config_free since the last fo_config_load, this will make sure
+ * to call that first. In other words, it is assumed that if this is called the
+ * configuration file has changed and the user would like to use the new copy.
+ *
+ * @param fname the name of the configuration file
+ * @param error object that allows errors to propagate up the stack
+ * @return 0 for failure, 1 for success
+ */
+int fo_config_load(char* fname, GError** error) {
   int c;
 
-  g_snprintf(fname, sizeof(fname), "%s/%s", DEFAULT_SETUP, FOSS_CONF);
   if((yyin = fopen(fname, "r")) == NULL)
     throw_error(
         error,
@@ -291,7 +320,6 @@ int fo_config_load(GError** error) {
   if(group_map)
     fo_config_free();
 
-  memset(lexeme, '\0', sizeof(lexeme));
   group_map = g_tree_new_full(str_comp, NULL, g_free,
       (GDestroyNotify)g_tree_destroy);
   yyline = 1;
