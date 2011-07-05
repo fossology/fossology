@@ -76,7 +76,6 @@ install: all
 	make -C ui-plugin install
 	$(INSTALL_DATA) copyright.dic $(DESTDIR)$(DATADIR)/
 	$(INSTALL_DATA) names.dic $(DESTDIR)$(DATADIR)/
-	$(INSTALL_DATA) copyright.conf $(SYSCONFDIR)/fossology/agents.d/
 
 uninstall:
 	echo "make copyright agent uninstall"
