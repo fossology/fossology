@@ -7,8 +7,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # the directories we do things in by default
-DIRS = adj2nest buckets cli copyright delagent lib mimetype nomos \
-       pkgagent scheduler Shell sqlagent tutorials ununpack wget_agent www
+DIRS = adj2nest buckets cli copyright lib scheduler
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
@@ -28,7 +27,7 @@ $(BUILDDIRS):
 # install depends on everything being built first
 install: all $(INSTALLDIRS)
 $(INSTALLDIRS):
-	$(MAKE) -s -C $(@:install-%=%) install 
+	$(MAKE) -s -C $(@:install-%=%) install
 
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):

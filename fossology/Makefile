@@ -5,7 +5,7 @@
 include Makefile.conf
 
 # the directories we do things in by default
-DIRS=db src agents ui common
+DIRS=common db src
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
