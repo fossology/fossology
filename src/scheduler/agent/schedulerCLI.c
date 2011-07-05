@@ -126,7 +126,7 @@ void interface_usage()
   printf("|%*s:   query/change the scheduler/job verbosity     |\n", P_WIDTH, "verbose [job id] [level]");
   printf("|%*s:   causes the scheduler to check the job queue  |\n", P_WIDTH, "database");
   printf("+-------------------------------------------------------------------------------+\n");
-  printf("|%*s:   goes into the schedule dialog                |\n", P_WIDTH, "get");
+  printf("|%*s:   goes into the schedule dialog                |\n", P_WIDTH, "sql");
   printf("|%*s:   uploads a file and schedulers a set of jobs  |\n", P_WIDTH, "upload");
   printf("+-------------------------------------------------------------------------------+\n");
   fflush(stdout);
@@ -136,7 +136,7 @@ void interface_usage()
 /* **** commands ************************************************************ */
 /* ************************************************************************** */
 
-void get_cmd()
+void sql_cmd()
 {
   /* locals */
   PGresult* db_result;
@@ -287,7 +287,7 @@ int main(int argc, char** argv)
   /* check the scheduler config for port number */
   if(port_number < 0)
   {
-    fo_config_load(&error);
+    fo_config_load_default(&error);
     port_number = atoi(fo_config_get("FOSSOLOGY", "port", &error));
   }
 
@@ -355,9 +355,9 @@ int main(int argc, char** argv)
         continue;
       }
 
-      if(strcmp(buffer, "get\n") == 0)
+      if(strcmp(buffer, "sql\n") == 0)
       {
-        get_cmd();
+        sql_cmd();
         continue;
       }
 
