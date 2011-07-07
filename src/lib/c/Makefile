@@ -7,7 +7,7 @@ CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
 
 CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
         -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"'
-EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck sqlCopyTest confTest
+EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck sqlCopyTest fossconfigTest
 LIB=libfossology.a
 OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o
 

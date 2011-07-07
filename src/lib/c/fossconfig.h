@@ -47,5 +47,7 @@ void  fo_config_free(void);
 
 char** fo_config_group_set(int* length);
 char** fo_config_key_set(char* group, int* length);
+int    fo_config_has_group(char* group);
+int    fo_config_has_key(char* group, char* key);
 
 #endif /* FOSSCONFIG_H_INCLUDE */

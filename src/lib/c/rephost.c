@@ -31,21 +31,21 @@ int	main	(int argc, char *argv[])
   int i;
 
   if ((argc%2) != 1)
-    {
+  {
     fprintf(stderr,"Usage: %s type filename [type filename [...]]\n",argv[0]);
     exit(-1);
-    }
+  }
 
   for(i=1; i<argc; i+=2)
-    {
+  {
     Host=fo_RepGetHost(argv[i],argv[i+1]);
     if (!Host) printf("localhost\n");
     else
-      {
+    {
       printf("%s\n",Host);
       free(Host);
-      }
     }
+  }
   return(0);
 } /* main() */
 

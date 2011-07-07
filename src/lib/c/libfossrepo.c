@@ -24,8 +24,10 @@
  */
 
 #include "libfossrepo.h"
+#include "fossconfig.h"
 
 #include <sys/stat.h>
+#include <glib.h>
 
 #ifndef FOSSREPO_CONF
 #define FOSSREPO_CONF "/srv/fossology/repository"
@@ -41,18 +43,18 @@ char LibraryRepoBuildVersion[]="Library libfossrepo Build version: " SVN_REV ".\
 
 #define MAXHOSTNAMELEN	64
 #define MAXLINE	1024
+#define REPONAME "REPOSITORY"
 
 #define GROUP 0
 
 /*** Globals to simplify usage ***/
-RepMmapStruct *	RepConfig=NULL;
 int RepDepth=2;
 char RepPath[MAXLINE+1]="";
 #if GROUP
-  int RepGroup;	/* the repository group ID for setgid() */
+int RepGroup;	/* the repository group ID for setgid() */
 #endif
 
-#define REPCONFCHECK()	{ if (RepConfig==NULL) fo_RepOpen(); }
+#define REPCONFCHECK()	{ if (!*RepPath) fo_RepOpen(); }
 
 
 /*!
@@ -71,9 +73,9 @@ int	_RepCheckType	(char *S)
   int i;
   if (S==NULL) return(0);
   for(i=0; S[i] != '\0'; i++)
-    {
+  {
     if (!isalnum(S[i]) && !strchr("@%_=+-",S[i])) return(0);
-    }
+  }
   return(1);
 } /* _RepCheckType() */
 
@@ -93,9 +95,9 @@ int	_RepCheckString	(char *S)
   if (S==NULL) return(0);
   if (S[0]=='.') return(0);
   for(i=0; S[i] != '\0'; i++)
-    {
+  {
     if (!isalnum(S[i]) && !strchr("@%_.=+-",S[i])) return(0);
-    }
+  }
   return(1);
 } /* _RepCheckString() */
 
@@ -125,62 +127,28 @@ char *	fo_RepGetRepPath	()
  */
 int	fo_RepHostExist	(char *Type, char *Host)
 {
-  char LineHost[MAXHOSTNAMELEN];
-  char LineType[MAXHOSTNAMELEN];
-  char LineStart[MAXHOSTNAMELEN];
-  char LineEnd[MAXHOSTNAMELEN];
-  int Match=0;
-  int i,j;
+  char* entry;
+  int i, length;
+  GError* error;
 
   REPCONFCHECK();
-  if (!RepConfig || !_RepCheckType(Type)) return(-1);
+  if (!_RepCheckType(Type)) return(-1);
 
-  i=0;
-  while(!Match && (i < RepConfig->MmapSize))
-    {
-    memset(LineHost,0,sizeof(LineHost));
-    memset(LineType,0,sizeof(LineType));
-    memset(LineStart,0,sizeof(LineStart));
-    memset(LineEnd,0,sizeof(LineEnd));
-    /* read in 4 space-deliminated strings */
-    j=0;
-    while((i < RepConfig->MmapSize) && !isspace(RepConfig->Mmap[i]))
-      {
-      LineHost[j]=RepConfig->Mmap[i];
-      j++; i++;
-      }
-    while(isspace(RepConfig->Mmap[i])) i++;
-    j=0;
-    while((i < RepConfig->MmapSize) && !isspace(RepConfig->Mmap[i]))
-      {
-      LineType[j]=RepConfig->Mmap[i];
-      j++; i++;
-      }
-    while(isspace(RepConfig->Mmap[i])) i++;
-    j=0;
-    while((i < RepConfig->MmapSize) && !isspace(RepConfig->Mmap[i]))
-      {
-      LineStart[j]=RepConfig->Mmap[i];
-      j++; i++;
-      }
-    while(isspace(RepConfig->Mmap[i])) i++;
-    j=0;
-    while((i < RepConfig->MmapSize) && !isspace(RepConfig->Mmap[i]))
-      {
-      LineEnd[j]=RepConfig->Mmap[i];
-      j++; i++;
-      }
-    while(isspace(RepConfig->Mmap[i])) i++;
+  length = fo_config_list_length("REPOSITORY", Host, &error);
+  if(error)
+  {
+    fprintf(stderr, "ERROR: %s\n", error->message);
+    return 0;
+  }
 
-    /* Check if the host exists with the type */
-    if (_RepCheckString(LineHost) &&
-        ((!strcmp(LineType,"*") || !strcmp(LineType,Type))) )
-	{
-	if (!strcmp(LineHost,Host))	return(1);
-	}
-    } /* while reading data */
+  for(i = 0; i < length; i++)
+  {
+    entry = fo_config_get_list("REPOSITORY", Host, i, &error);
+    if(entry[0] == '*' || strncmp(Type, entry, strlen(Type)) == 0)
+      return 1;
+  }
 
-  return(0);
+  return 0;
 } /* fo_RepHostExist() */
 
 /*!
@@ -197,72 +165,51 @@ int	fo_RepHostExist	(char *Type, char *Host)
  */
 char *	_RepGetHost	(char *Type, char *Filename, int MatchNum)
 {
-  char LineHost[MAXHOSTNAMELEN];
-  char LineType[MAXHOSTNAMELEN];
-  char LineStart[MAXHOSTNAMELEN];
-  char LineEnd[MAXHOSTNAMELEN];
-  char *NewHost=NULL;
-  int Match=0;
-  int i,j;
+  char** hosts;
+  char entry[256];
+  char* start;
+  char* end;
+  char* ret = NULL;
+  int Match = 0;
+  int i, j, kl, hl;
+  GError* error = NULL;
 
   REPCONFCHECK();
-  if (!RepConfig || !_RepCheckType(Type) || !_RepCheckString(Filename))
-	return(NULL);
+  if (!_RepCheckType(Type) || !_RepCheckString(Filename))
+    return(NULL);
 
-  i=0;
-  while((Match != MatchNum) && (i < RepConfig->MmapSize))
+  hosts = fo_config_key_set(REPONAME, &kl);
+  for(i = 0; i < kl; i++)
+  {
+    hl = fo_config_list_length(REPONAME, hosts[i], &error);
+    for(j = 0; j < hl; j++)
     {
-    memset(LineHost,0,sizeof(LineHost));
-    memset(LineType,0,sizeof(LineType));
-    memset(LineStart,0,sizeof(LineStart));
-    memset(LineEnd,0,sizeof(LineEnd));
-    /* read in 4 space-deliminated strings */
-    j=0;
-    while((i < RepConfig->MmapSize) && !isspace(RepConfig->Mmap[i]))
-      {
-      LineHost[j]=RepConfig->Mmap[i];
-      j++; i++;
-      }
-    while(isspace(RepConfig->Mmap[i])) i++;
-    j=0;
-    while((i < RepConfig->MmapSize) && !isspace(RepConfig->Mmap[i]))
-      {
-      LineType[j]=RepConfig->Mmap[i];
-      j++; i++;
-      }
-    while(isspace(RepConfig->Mmap[i])) i++;
-    j=0;
-    while((i < RepConfig->MmapSize) && !isspace(RepConfig->Mmap[i]))
-      {
-      LineStart[j]=RepConfig->Mmap[i];
-      j++; i++;
-      }
-    while(isspace(RepConfig->Mmap[i])) i++;
-    j=0;
-    while((i < RepConfig->MmapSize) && !isspace(RepConfig->Mmap[i]))
-      {
-      LineEnd[j]=RepConfig->Mmap[i];
-      j++; i++;
-      }
-    while(isspace(RepConfig->Mmap[i])) i++;
+      strncpy(
+          entry,
+          fo_config_get_list(REPONAME, hosts[i], j, &error),
+          sizeof(entry));
+      strtok(entry, " ");
+      start = strtok(NULL, " ");
+      end   = strtok(NULL, " ");
 
-    if (_RepCheckString(LineHost) &&
-        ((!strcmp(LineType,"*") || !strcmp(LineType,Type))) )
-	{
-	if ((strncasecmp(LineStart,Filename,strlen(LineStart)) <= 0) &&
-	    (strncasecmp(LineEnd,Filename,strlen(LineEnd)) >= 0))
-		{
-		Match++;
-		if (Match == MatchNum)
-		  {
-		  NewHost = (char *)calloc(strlen(LineHost)+1,1);
-		  strcpy(NewHost,LineHost);
-		  }
-		}
-	}
-    } /* while reading data */
+      if(strcmp(entry, "*") == 0 || strcmp(entry, Type) == 0)
+      {
+        if ((strncasecmp(start, Filename, strlen(start)) <= 0) &&
+            (strncasecmp(end,   Filename, strlen(end))   >= 0))
+        {
+          Match++;
+          if (Match == MatchNum)
+          {
+            ret = (char*)calloc(strlen(hosts[i])+1, sizeof(char));
+            strcpy(ret, hosts[i]);
+            return ret;
+          }
+        }
+      }
+    }
+  }
 
-  return(NewHost);
+  return NULL;
 } /* _RepGetHost() */
 
 /*!
@@ -277,7 +224,7 @@ char *	_RepGetHost	(char *Type, char *Filename, int MatchNum)
  */
 char *	fo_RepGetHost	(char *Type, char *Filename)
 {
-  return(_RepGetHost(Type,Filename,0));
+  return(_RepGetHost(Type,Filename,1));
 } /* fo_RepGetHost() */
 
 /*!
@@ -333,42 +280,42 @@ char *	fo_RepMkPathTmp	(char *Type, char *Filename, char *Ext, int Which)
 
   /* check if the filename is too small */
   if (FilenameLen < RepDepth*2)
-    {
+  {
     for(i=0; i<FilenameLen; i++)
-      {
+    {
       Path[Len++] = tolower(Filename[i]);
       if (i%2 == 1) Path[Len++] = '/';
-      }
+    }
     for( ; i<RepDepth*2; i++)
-      {
+    {
       Path[Len++] = '_';
       if (i%2 == 1) Path[Len++] = '/';
-      }
     }
+  }
   else
-    {
+  {
     /* add the filename */
     for(i=0; i<RepDepth; i++)
-      {
+    {
       Path[Len] = tolower(Filename[i*2]);
       Path[Len+1] = tolower(Filename[i*2+1]);
       Path[Len+2] = '/';
       Len+=3;
-      }
     }
+  }
 
   for(i=0; Filename[i] != '\0'; i++)
-    {
+  {
     Path[Len] = tolower(Filename[i]);
     Len++;
-    }
+  }
 
   if (Ext)
-    {
+  {
     strcat(Path,".");
     strcat(Path,Ext);
     Len += strlen(Type)+1;
-    }
+  }
   return(Path);
 } /* fo_RepMkPathTmp() */
 
@@ -397,13 +344,13 @@ char *	fo_RepMkPath	(char *Type, char *Filename)
   /* Check if it exists in an alternate path */
   i=2;
   while(1)
-    {
+  {
     AltPath = fo_RepMkPathTmp(Type,Filename,NULL,i);
     if (!AltPath) return(Path); /* No alternate */
     /* If there is an alternate, return it. */
     if (!stat64(AltPath,&Stat)) { free(Path); return(AltPath); }
     i++;
-    }
+  }
 
   /* should never get here */
   return(Path);
@@ -446,29 +393,29 @@ int	_RepMkDirs	(char *Fname)
   memset(Dir,'\0',sizeof(Dir));
   strcpy(Dir,Fname);
   for(i=1; Dir[i] != '\0'; i++)
-    {
+  {
     if (Dir[i] == '/')
-	{
-	Dir[i]='\0';
-	Mask = umask(0000); /* mode: 0777 */
+    {
+      Dir[i]='\0';
+      Mask = umask(0000); /* mode: 0777 */
 #if GROUP
-	Gid = getegid();
-	setegid(RepGroup);
+      Gid = getegid();
+      setegid(RepGroup);
 #endif
-	rc=mkdir(Dir,0770); /* create this path segment */
+      rc=mkdir(Dir,0770); /* create this path segment */
 #if GROUP
-	setegid(Gid);
+      setegid(Gid);
 #endif
-	umask(Mask);
-	if (rc && (errno == EEXIST)) rc=0;
-	Dir[i]='/';
-	if (rc)
-	  {
-	  fprintf(stderr,"FATAL: 'mkdir %s' failed with rc=%d\n",Dir,rc);
-	  return(rc);
-	  }
-	}
+      umask(Mask);
+      if (rc && (errno == EEXIST)) rc=0;
+      Dir[i]='/';
+      if (rc)
+      {
+        fprintf(stderr,"FATAL: 'mkdir %s' failed with rc=%d\n",Dir,rc);
+        return(rc);
+      }
     }
+  }
   return(rc);
 } /* _RepMkDirs() */
 
@@ -487,11 +434,11 @@ int	fo_RepRenameTmp	(char *Type, char *Filename, char *Ext)
   FnameOld = fo_RepMkPathTmp(Type,Filename,Ext,1);
   Fname = fo_RepMkPath(Type,Filename);
   if (!FnameOld || !Fname)
-    {
+  {
     fprintf(stderr,"ERROR: Bad repository name: type='%s' name='%s'\n",
-	Type,Filename);
+        Type,Filename);
     return(-1);
-    }
+  }
   rc = rename(FnameOld,Fname);
   free(FnameOld);
   free(Fname);
@@ -515,22 +462,22 @@ int	fo_RepExist	(char *Type, char *Filename)
   int rc=0;
 
   if (!_RepCheckType(Type))
-    {
+  {
     fprintf(stderr,"ERROR: Invalid type '%s'\n",Type);
     return(-1);
-    }
+  }
   if (!_RepCheckString(Filename))
-    {
+  {
     fprintf(stderr,"ERROR: Invalid filename '%s'\n",Filename);
     return(-1);
-    }
+  }
 
   Fname = fo_RepMkPath(Type,Filename);
   if (!Fname)
-    {
+  {
     fprintf(stderr,"ERROR: Unable to allocate path for '%s/%s'\n",Type,Filename);
     return(-1);
-    }
+  }
   if (!stat64(Fname,&Stat)) rc=1;
   free(Fname);
   return(rc);
@@ -552,22 +499,22 @@ int	fo_RepRemove	(char *Type, char *Filename)
   int rc=0;
 
   if (!_RepCheckType(Type))
-    {
+  {
     fprintf(stderr,"ERROR: Invalid type '%s'\n",Type);
     return(0);
-    }
+  }
   if (!_RepCheckString(Filename))
-    {
+  {
     fprintf(stderr,"ERROR: Invalid filename '%s'\n",Filename);
     return(0);
-    }
+  }
 
   Fname = fo_RepMkPath(Type,Filename);
   if (!Fname)
-    {
+  {
     fprintf(stderr,"ERROR: Unable to allocate path for '%s/%s'\n",Type,Filename);
     return(0);
-    }
+  }
   if (!stat64(Fname,&Stat)) rc=unlink(Fname);
   free(Fname);
   return(rc);
@@ -596,22 +543,22 @@ FILE *	fo_RepFread	(char *Type, char *Filename)
   char *Fname;
 
   if (!_RepCheckType(Type))
-    {
+  {
     fprintf(stderr,"ERROR: Invalid type '%s'\n",Type);
     return(NULL);
-    }
+  }
   if (!_RepCheckString(Filename))
-    {
+  {
     fprintf(stderr,"ERROR: Invalid filename '%s'\n",Filename);
     return(NULL);
-    }
+  }
 
   Fname = fo_RepMkPath(Type,Filename);
   if (!Fname)
-    {
+  {
     fprintf(stderr,"ERROR: Unable to allocate path for '%s/%s'\n",Type,Filename);
     return(NULL);
-    }
+  }
   _RepUpdateTime(Fname);
   F = fopen(Fname,"rb");
   free(Fname);
@@ -635,27 +582,27 @@ FILE *	fo_RepFwriteTmp	(char *Type, char *Filename, char *Ext)
 #endif
 
   if (!_RepCheckType(Type))
-    {
+  {
     fprintf(stderr,"ERROR: Invalid type '%s'\n",Type);
     return(NULL);
-    }
+  }
   if (!_RepCheckString(Filename))
-    {
+  {
     fprintf(stderr,"ERROR: Invalid filename '%s'\n",Filename);
     return(NULL);
-    }
+  }
 
   Fname = fo_RepMkPathTmp(Type,Filename,Ext,1);
   if (!Fname)
-    {
+  {
     fprintf(stderr,"ERROR: Unable to allocate path for '%s/%s'\n",Type,Filename);
     return(NULL);
-    }
+  }
   if (_RepMkDirs(Fname))
-    {
+  {
     free(Fname);
     return(NULL);
-    }
+  }
   _RepUpdateTime(Fname);
   Mask = umask(0117); /* mode: 0660 */
 #if GROUP
@@ -666,7 +613,7 @@ FILE *	fo_RepFwriteTmp	(char *Type, char *Filename, char *Ext)
   if (!F)
   {
     fprintf(stderr, "ERROR: %s, in %s:%d, failed to open [%s]\n",
-            strerror(errno), __FILE__,__LINE__, Fname);
+        strerror(errno), __FILE__,__LINE__, Fname);
     free(Fname);
     return(NULL);
   }
@@ -721,20 +668,20 @@ RepMmapStruct *	fo_RepMmapFile	(char *Fname)
   /* open the file (memory map) */
   M->FileHandle = open(Fname,O_RDONLY);
   if (M->FileHandle == -1)
-    {
+  {
     fprintf(stderr,"ERROR: Unable to open file for mmap (%s)\n",Fname);
     free(M);
     return(NULL);
-    }
+  }
 
   /* find how big the file is (to allocate it) */
   if (fstat64(M->FileHandle,&Stat) == -1)
-    {
+  {
     fprintf(stderr,"ERROR: Unable to stat file (%s)\n",Fname);
     close(M->FileHandle);
     free(M);
     return(NULL);
-    }
+  }
   PageSize = getpagesize();
 
   /* only mmap the first 1G */
@@ -744,12 +691,12 @@ RepMmapStruct *	fo_RepMmapFile	(char *Fname)
   M->_MmapSize = M->MmapSize + PageSize - (M->MmapSize % PageSize);
   M->Mmap = mmap(0,M->_MmapSize,PROT_READ,MAP_PRIVATE,M->FileHandle,0);
   if (M->Mmap == MAP_FAILED)
-    {
+  {
     fprintf(stderr,"ERROR: Unable to mmap file (%s)\n",Fname);
     close(M->FileHandle); 
     free(M);
     return(NULL);
-    }
+  }
   return(M);
 } /* fo_RepMmapFile() */
 
@@ -800,63 +747,63 @@ int	fo_RepImport	(char *Source, char *Type, char *Filename, int Link)
 
   /* easy route: make a hard link */
   if (Link)
-    {
+  {
     FoutPath = fo_RepMkPath(Type,Filename);
     if (!FoutPath) return(0);
     if (_RepMkDirs(FoutPath)) /* make the directory */
-      {
+    {
       free(FoutPath);
       return(1);
-      }
+    }
     if (link(Source,FoutPath) == 0)
-      {
+    {
       free(FoutPath);
       return(0);
-      }
+    }
     free(FoutPath);
-    } /* try a hard link */
+  } /* try a hard link */
 
   /* hard route: actually copy the file */
   Fin = fopen(Source,"rb");
   if (!Fin)
-    {
+  {
     fprintf(stderr,"ERROR: Unable to open source file '%s'\n",Source);
     return(1);
-    }
+  }
   setvbuf(Fin,vBuf,_IOFBF,sizeof(vBuf));
 
   Fout = fo_RepFwriteTmp(Type,Filename,"I"); /* tmp = ".I" for importing... */
   if (!Fout)
-    {
+  {
     fprintf(stderr,"ERROR: Invalid -- type='%s' filename='%s'\n",Type,Filename);
     fclose(Fin);
     return(2);
-    }
+  }
 
   LenIn=1;
   while(LenIn > 0)
-    {
+  {
     LenIn=fread(Buf,1,sizeof(Buf),Fin);
     if (LenIn > 0)
-      {
+    {
       LenOut=0;
       while(LenOut < LenIn)
-	{
-	i = fwrite(Buf+LenOut,1,LenIn - LenOut,Fout);
-	LenOut += i;
-	if (i == 0)
-	  {
-	  /** Oh no!  Write failed! **/
-	  fclose(Fout);
-	  fo_RepFclose(Fout);
-	  fo_RepRemove(Type,Filename);
-	  fprintf(stderr,"ERROR: Write failed -- type='%s' filename='%s'\n",
-	 	Type,Filename);
-	  return(3);
-	  }
-	}
+      {
+        i = fwrite(Buf+LenOut,1,LenIn - LenOut,Fout);
+        LenOut += i;
+        if (i == 0)
+        {
+          /** Oh no!  Write failed! **/
+          fclose(Fout);
+          fo_RepFclose(Fout);
+          fo_RepRemove(Type,Filename);
+          fprintf(stderr,"ERROR: Write failed -- type='%s' filename='%s'\n",
+              Type,Filename);
+          return(3);
+        }
       }
     }
+  }
   fo_RepFclose(Fout);
   fclose(Fin);
   fo_RepRenameTmp(Type,Filename,"I"); /* mv .I to real name */
@@ -871,11 +818,6 @@ void	fo_RepClose	()
   RepDepth = 2; /* default depth */
   memset(RepPath,'\0',sizeof(RepPath));
   RepPath[0]='.'; /* default to local directory */
-  if (RepConfig != NULL)
-    {
-    fo_RepMunmap(RepConfig);
-    RepConfig = NULL;
-    }
 } /* fo_RepClose() */
 
 /*!
@@ -887,16 +829,21 @@ void	fo_RepClose	()
  */
 int	fo_RepOpen	()
 {
-  char CWD[PATH_MAX+1];
-  char *Env;
-  RepMmapStruct *Config;
-  int i;
+  GError* error = NULL;
+  char* path;
+
 #if GROUP
   struct group *Group;
   gid_t Gid;
 #endif
 
   fo_RepClose(); /* reset everything */
+  fo_config_load_default(&error);
+  if(error)
+  {
+    fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error->message);
+    return 0;
+  }
 
 #if GROUP
   /* Make sure we can use group */
@@ -905,61 +852,30 @@ int	fo_RepOpen	()
   RepGroup = Group->gr_gid;
   Gid = getegid();
   if ((Gid != RepGroup) && setegid(RepGroup))
-	{
-	perror("Huh?");
-	return(0);
-	}
+  {
+    perror("Huh?");
+    return(0);
+  }
   setegid(Gid);
 #endif
 
-  if (getcwd(CWD,sizeof(CWD)) == NULL) return(0); /* no directory */
+  /* Load the depth configuration */
+  RepDepth = atoi(fo_config_get("FOSSOLOGY", "depth", &error));
+  if(error)
+  {
+    fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error->message);
+    return 0;
+  }
 
-  /* By default, the configuration directory is FOSSREPO_CONF.
-     This variable is set during the compile-time.
-     For debugging, you can override the string with an environment
-     variable: FOSSREPCONF.
-   */
-  Env = getenv("FOSSREPCONF"); /* could be NULL */
-  if (Env && (Env[0] != '\0'))
-    {
-    if (chdir(Env))      return(0); /* no directory */
-    }
-  else
-    {
-    if (chdir(FOSSREPO_CONF)) return(0); /* no directory */
-    }
+  /* Load the path configuration */
+  path = fo_config_get("FOSSOLOGY", "path", &error);
+  if(error)
+  {
+    fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error->message);
+    return 0;
+  }
+  strncpy(RepPath, path, sizeof(RepPath));
 
-  /* I'm in the config directory. */
-  /* Map the host file to a global. */
-  RepConfig = fo_RepMmapFile("Hosts.conf");
-
-  /* Load the depth file. */
-  Config = fo_RepMmapFile("Depth.conf");
-  if (Config)
-    {
-    if ((Config->MmapSize > 1) && (Config->Mmap[Config->MmapSize-1] == '\n'))
-	{
-	RepDepth = atoi((char *)(Config->Mmap));
-	}
-    fo_RepMunmap(Config);
-    }
-
-  /* Load the path file. */
-  Config = fo_RepMmapFile("RepPath.conf");
-  if (Config)
-    {
-    for(i=0; (i<Config->MmapSize) && (Config->Mmap[i] != '\n'); i++)
-	;
-    if ((i > 0) && (Config->Mmap[i] == '\n')) strncpy(RepPath,(char *)(Config->Mmap),i);
-    while(RepPath[0] && (RepPath[strlen(RepPath)-1] == '/'))
-	{
-	/* RepPath should not end with a "/" */
-	RepPath[strlen(RepPath)-1] = '\0';
-	}
-    fo_RepMunmap(Config);
-    }
-
-  if(chdir(CWD)) return 0;
-  return(RepConfig != NULL);
+  return 1;
 } /* fo_RepOpen() */
 
