@@ -23,6 +23,8 @@
  * The results files have to be post processed to change where the xsl and dtd
  * files are located.  The xml files are also processed into html.
  *
+ * This script assumes that CUnit is installed on the system.
+ *
  * @version "$Id$"
  *
  * Created on Jun 10, 2011 by Mark Donohoe
@@ -73,6 +75,8 @@ $failures = 0;
 
 foreach($unitList as $unitTest)
 {
+  echo "DB: unit test is:$unitTest\n";
+  
   if(chdir($unitTest) === FALSE)
   {
     echo "Error! cannot cd to $unitTest, skipping test\n";
@@ -94,6 +98,7 @@ foreach($unitList as $unitTest)
     }
     foreach(glob("$unitTest*.xml") as $fileName)
     {
+      echo "DB: processing xml file:$fileName\n";
       $rFile = file_get_contents($fileName);
       // fix the Ref to xsl file
       $pat = '#href="#';
@@ -140,13 +145,14 @@ foreach($unitList as $unitTest)
       // remove .xml from name
       $outFile = basename($fileName, '.xml');
       $outPath = $WORKSPACE . "/fossology/tests/Reports/$outFile.html";
-      $xslPath = "/home/jenkins/public_html/CUnit/$xslFile";
+      $xslPath = "/usr/share/CUnit/$xslFile";
       $report = genHtml($fileName, $outPath, $xslPath);
       if(!empty($report))
       {
         echo "Error: Could not generate a HTML Test report from $fileName.\n";
         echo "DB: report is:\n$report\n";
       }
+      echo "DB: Generated html file:$outFile" . ".html\n";
     } //foreach(glob....
     // generate coverage report
     $lastCover = exec('make coverage 2>&1', $makeCover, $coverRtn);
