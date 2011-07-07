@@ -186,8 +186,6 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
 */
 int fo_sqlCopyExecute(psqlCopy_t pCopy)
 {
-  int   RowIdx;
-  char *Row;
   char  copystmt[2048];
   PGresult *result;
 
@@ -237,8 +235,6 @@ int fo_sqlCopyExecute(psqlCopy_t pCopy)
 */
 void fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag)
 {
-  int RowIdx;
-
   if (!pCopy) return;
   if (ExecuteFlag) fo_sqlCopyExecute(pCopy);
   if (pCopy->TableName) free(pCopy->TableName);
