@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <libfossology.h>
 #include <stdio.h>
+#include <errno.h>
 #include <glib.h>
 
 int main(int argc, char** argv)
@@ -29,7 +30,13 @@ int main(int argc, char** argv)
   int j, nkeys;
   int k, nlist;
 
-  fo_config_load_default(&error);
+  if(!fo_config_load_default(&error))
+  {
+    fprintf(stderr, "ERROR: %s\n", error->message);
+    fprintf(stderr, "ERROR: errno = %s\n", strerror(errno));
+    return -1;
+  }
+
 
   groups = fo_config_group_set(&ngrps);
   for(i = 0; i < ngrps; i++)

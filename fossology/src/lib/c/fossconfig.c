@@ -184,8 +184,8 @@ int group(GError** error)
         error,
         PARSE_ERROR,
         fo_invalid_group,
-        "%s[%d.%d]: invalid group name, group names end in ']'",
-        FOSS_CONF, yyline, yyposs);
+        "%s[line %d]: invalid group name, group names end in ']'",
+        FOSS_CONF, yyline);
 
   lex[--lex_idx] = '\0';
   key = g_strdup(lex);
@@ -222,8 +222,8 @@ int key(GError** error) {
         error,
         PARSE_ERROR,
         fo_invalid_key,
-        "%s[%d.%d] invalid key/value expression \"%s\"",
-        FOSS_CONF, yyline, yyposs, key);
+        "%s[line %d] invalid key/value expression \"%s\"",
+        FOSS_CONF, yyline, key);
 
   len = strlen(key);
   if(key[len - 1] == ']' && key[len - 2] != '[')
@@ -231,8 +231,8 @@ int key(GError** error) {
         error,
         PARSE_ERROR,
         fo_invalid_key,
-        "%s[%d.%d] invalid key/value expression \"%s\"",
-        FOSS_CONF, yyline, yyposs, key);
+        "%s[line %d] invalid key/value expression \"%s\"",
+        FOSS_CONF, yyline, key);
 
   next_nws();
   next_nl();
@@ -576,3 +576,30 @@ char** fo_config_key_set(char* group, int* length)
 
   return ret;
 }
+
+/**
+ * Checks if the currently parsed configuration file has a specific group
+ *
+ * @param group the name of the group to check for
+ * @return 1 if the group exists, 0 if it does not
+ */
+int    fo_config_has_group(char* group)
+{
+  return g_tree_lookup(group_map, group) != NULL;
+}
+
+/**
+ * Checks if the a specific group in the currrently parsed configuration file
+ * has a specific key
+ *
+ * @param group the group to check for the key
+ * @param key the key to check for
+ * @return 1 if the group has the key, 0 if it does not
+ */
+int    fo_config_has_key(char* group, char* key)
+{
+  return g_tree_lookup(
+         g_tree_lookup(group_map, group),
+         key) != NULL;
+}
+
