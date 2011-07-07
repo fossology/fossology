@@ -34,9 +34,7 @@ install: all
 	
 	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ] ; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/Db.conf"; \
-	 	$(INSTALL) -m 660 defconf/Db.conf $(DESTDIR)$(CONFPATH)/Db.conf; \
-	 	/bin/chown root:fossy $(DESTDIR)$(CONFPATH)/Db.conf; \
-	 	/bin/chmod 640 $(DESTDIR)$(CONFPATH)/Db.conf; \
+	 	$(INSTALL) -m 640 -g fossy defconf/Db.conf $(DESTDIR)$(CONFPATH)/Db.conf; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/Db.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
@@ -44,8 +42,7 @@ install: all
 	
 	if [ ! -f $(DESTDIR)$(CONFPATH)/fossology.conf -o "$(OVERWRITE)"]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/fossology.conf"; \
-	 	$(INSTALL) -m 660 defconf/fossology.conf $(DESTDIR)$(CONFPATH)/fossology.conf; \
-	 	/bin/chmod 666 $(DESTDIR)$(CONFPATH)/fossology.conf; \
+	 	$(INSTALL) -m 666 defconf/fossology.conf $(DESTDIR)$(CONFPATH)/fossology.conf; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/fossology.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
@@ -63,10 +60,8 @@ uninstall:
 	fi
 
 	@echo "WARNING: Cowardly refusing to remove the following"
-	@echo "      $(DESTDIR)$(CONFPATH)/Depth.conf"
-	@echo "      $(DESTDIR)$(CONFPATH)/Hosts.conf"
-	@echo "      $(DESTDIR)$(CONFPATH)/Proxy.conf"
-	@echo "      $(DESTDIR)$(CONFPATH)/RepPath.conf"
+	@echo "      $(DESTDIR)$(CONFPATH)/agents.d"
+	@echo "      $(DESTDIR)$(CONFPATH)/fossology.conf"
 	@echo "      $(DESTDIR)$(CONFPATH)/Db.conf"
 	@echo "  Remove by hand if you desire."
 
