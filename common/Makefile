@@ -34,6 +34,8 @@ install: all
 	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ] ; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/Db.conf"; \
 	 	$(INSTALL) -m 660 defconf/Db.conf $(DESTDIR)$(CONFPATH)/Db.conf; \
+	 	/bin/chown root:fossy $(DESTDIR)$(CONFPATH)/Db.conf \
+	 	/bin/chmod 640 $(DESTDIR)$(CONFPATH)/Db.conf \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/Db.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
@@ -41,9 +43,10 @@ install: all
 	
 	if [ ! -f $(DESTDIR)$(CONFPATH)/fossology.conf -o "$(OVERWRITE)"]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/fossology.conf"; \
-	 	$(INSTALL) -m 660 defconf/fossology.conf $(DESTDIR)$(CONFPATH)/fossolgy.conf; \
+	 	$(INSTALL) -m 660 defconf/fossology.conf $(DESTDIR)$(CONFPATH)/fossology.conf; \
+	 	/bin/chmod 666 $(DESTDIR)$(CONFPATH)/fossology.conf \
 	else \
-		echo "WARNING: $(DESTDIR)$(CONFPATH)/fossoloyg.conf already exists."; \
+		echo "WARNING: $(DESTDIR)$(CONFPATH)/fossology.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
 
