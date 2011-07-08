@@ -432,9 +432,10 @@ void load_config(void* args)
   /* load the configuration for the agents */
   while((ep = readdir(dp)) != NULL)
   {
-    sprintf(addbuf, "%s/%s/%s", DEFAULT_SETUP, AGENT_CONF, ep->d_name);
     if(ep->d_name[0] != '.')
     {
+      sprintf(addbuf, "%s/%s/%s/%s.conf",
+          DEFAULT_SETUP, AGENT_CONF, ep->d_name, ep->d_name);
       VERBOSE2("CONFIG: loading config file %s\n", addbuf);
 
       fo_config_load(addbuf, &error);
@@ -442,7 +443,8 @@ void load_config(void* args)
 
       if(!fo_config_has_group("default"))
       {
-        ERROR("%s must have a \"default\" group", addbuf);
+        lprintf("ERROR: %s must have a \"default\" group\n", addbuf);
+        lprintf("ERROR: cause by %s.%d\n", __FILE__, __LINE__);
         error = NULL;
         continue;
       }
