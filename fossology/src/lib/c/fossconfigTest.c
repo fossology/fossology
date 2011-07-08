@@ -30,7 +30,9 @@ int main(int argc, char** argv)
   int j, nkeys;
   int k, nlist;
 
-  if(!fo_config_load_default(&error))
+  if(argc != 1) fo_config_load(argv[1], &error);
+  else fo_config_load_default(&error);
+  if(error)
   {
     fprintf(stderr, "ERROR: %s\n", error->message);
     fprintf(stderr, "ERROR: errno = %s\n", strerror(errno));

@@ -78,6 +78,7 @@ FILE* yyin;
 char lex[1024];
 int lex_idx;
 int yyline, yyposs;
+char fname[FILENAME_MAX];
 
 #define FOSS_CONF "fossology.conf"
 #define yynext() (c = next()) != EOF
@@ -185,7 +186,7 @@ int group(GError** error)
         PARSE_ERROR,
         fo_invalid_group,
         "%s[line %d]: invalid group name, group names end in ']'",
-        FOSS_CONF, yyline);
+        fname, yyline);
 
   lex[--lex_idx] = '\0';
   key = g_strdup(lex);
@@ -212,6 +213,14 @@ int key(GError** error) {
   gchar* val;
   int    len;
 
+  if(current_group == NULL)
+    throw_error(
+        error,
+        PARSE_ERROR,
+        fo_invalid_key,
+        "%s[line %d] keys must have an associated group",
+        fname, yyline);
+
   while(yynext() && c != '=' && c != '\n' && !isspace(c));
   replace(c);
   key = g_strdup(lex);
@@ -223,7 +232,7 @@ int key(GError** error) {
         PARSE_ERROR,
         fo_invalid_key,
         "%s[line %d] invalid key/value expression \"%s\"",
-        FOSS_CONF, yyline, key);
+        fname, yyline, key);
 
   len = strlen(key);
   if(key[len - 1] == ']' && key[len - 2] != '[')
@@ -232,7 +241,7 @@ int key(GError** error) {
         PARSE_ERROR,
         fo_invalid_key,
         "%s[line %d] invalid key/value expression \"%s\"",
-        FOSS_CONF, yyline, key);
+        fname, yyline, key);
 
   next_nws();
   next_nl();
@@ -284,16 +293,17 @@ int fo_config_is_open()
  */
 int fo_config_load_default(GError** error)
 {
-  gchar fname[FILENAME_MAX];
+  char name[FILENAME_MAX];
   char* Env;
 
+  memset(name, '\0', sizeof(name));
   Env = getenv("FOSSCONF");
   if(Env && Env[0] != '\0')
-    strcpy(fname, Env);
+    strcpy(name, Env);
   else
-    g_snprintf(fname, sizeof(fname), "%s/%s", DEFAULT_SETUP, FOSS_CONF);
+    g_snprintf(name, sizeof(name), "%s/%s", DEFAULT_SETUP, FOSS_CONF);
 
-  return fo_config_load(fname, error);
+  return fo_config_load(name, error);
 }
 
 /**
@@ -306,9 +316,11 @@ int fo_config_load_default(GError** error)
  * @param error object that allows errors to propagate up the stack
  * @return 0 for failure, 1 for success
  */
-int fo_config_load(char* fname, GError** error) {
+int fo_config_load(char* rawname, GError** error) {
   int c;
 
+  memset(fname, '\0', sizeof(fname));
+  strcpy(fname, rawname);
   if((yyin = fopen(fname, "r")) == NULL)
     throw_error(
         error,
@@ -324,6 +336,7 @@ int fo_config_load(char* fname, GError** error) {
       (GDestroyNotify)g_tree_destroy);
   yyline = 1;
   yyposs = 0;
+  current_group = NULL;
 
   while((c = next_nws()) != EOF)
   {
@@ -358,6 +371,7 @@ int fo_config_load(char* fname, GError** error) {
 char* fo_config_get(char* group, char* key, GError** error)
 {
   GTree* tree;
+  char* ret = NULL;
 
   if(group_map == NULL)
     throw_error(
@@ -372,6 +386,13 @@ char* fo_config_get(char* group, char* key, GError** error)
         PARSE_ERROR,
         fo_missing_group,
         "ERROR: unknown group \"%s\"", group);
+
+  if((ret = g_tree_lookup(tree, key)) == NULL)
+    throw_error(
+        error,
+        PARSE_ERROR,
+        fo_missing_key,
+        "ERROR: unknown key=\"%s\" for group=\"%s\"", key, group);
 
   return g_tree_lookup(tree, key);
 }
