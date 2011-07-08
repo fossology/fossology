@@ -1029,7 +1029,7 @@ int add_meta_agent(char* name, char* cmd, int max, int spc)
   if(!name || !cmd)
   {
     errno = EINVAL;
-    ERROR("could job add new meta agent");
+    ERROR("couldn't add new meta agent");
     return 0;
   }
 

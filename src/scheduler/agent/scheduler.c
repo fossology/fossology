@@ -47,10 +47,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <glib.h>
 #include <gio/gio.h>
 
-#define AGENT_CONF "agents.d"
+#define AGENT_CONF "mods-enabled"
 #ifndef PROCESS_NAME
 #define PROCESS_NAME "fo_scheduler"
 #endif
+
+#define TEST_ERROR(...)                                            \
+  if(error)                                                        \
+  {                                                                \
+    lprintf("ERROR %s.%d: unable to open config file %s\n",       \
+      __FILE__, __LINE__, addbuf);                                 \
+    lprintf("ERROR %s.%d: ", __FILE__, __LINE__);                 \
+    lprintf(__VA_ARGS__);                                          \
+    lprintf("\n");                                                 \
+    lprintf("ERROR %s.%d: msg = %s\n",                            \
+      __FILE__, __LINE__, error->message);                         \
+    error = NULL;                                                  \
+    continue;                                                      \
+  }                                                                \
 
 /* global flags */
 int verbose = 0;
@@ -424,25 +438,34 @@ void load_config(void* args)
       VERBOSE2("CONFIG: loading config file %s\n", addbuf);
 
       fo_config_load(addbuf, &error);
-      if(error)
+      TEST_ERROR("no addition info");
+
+      if(!fo_config_has_group("default"))
       {
-        lprintf("ERROR: %s\n", error->message);
+        ERROR("%s must have a \"default\" group", addbuf);
         error = NULL;
         continue;
       }
 
       special = 0;
       max = fo_config_list_length("default", "special", &error);
+      TEST_ERROR("the special key should be of type list");
       for(i = 0; i < max; i++)
-        if(strcmp(fo_config_get_list("default", "special", i, &error),
-            "EXCLUSIVE"))
+      {
+        cmd = fo_config_get_list("default", "special", i, &error);
+        TEST_ERROR("failed to load element %d of special list", i)
+        if(strcmp(cmd, "EXCLUSIVE") == 0)
           special |= SAG_EXCLUSIVE;
+      }
 
-      name =      fo_config_get("default", "name", &error);
-      cmd  =      fo_config_get("default", "command", &error);
-      max  = atoi(fo_config_get("default", "max", &error));
+      name = fo_config_get("default", "name", &error);
+      TEST_ERROR("the default group must have a name key");
+      cmd  = fo_config_get("default", "command", &error);
+      TEST_ERROR("the default group must have a command key");
+      tmp  = fo_config_get("default", "max", &error);
+      TEST_ERROR("the default group must have a max key");
 
-      if(!add_meta_agent(name, cmd, max, special))
+      if(!add_meta_agent(name, cmd, atoi(tmp), special))
       {
         VERBOSE2("CONFIG: could not create meta agent using %s\n", ep->d_name);
       }
