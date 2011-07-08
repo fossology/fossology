@@ -33,7 +33,6 @@ coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
-	$(INSTALL_DATA) copyright.conf $(SYSCONFDIR)/fossology/agents.d/
 	$(call dirloop,install)
 
 uninstall:
