@@ -257,11 +257,7 @@ pid_t get_locked_pid()
   if(kill(pid, 0) == 0)
     return pid;
 
-  /* process that created lock is dead, create new lock */
-  VERBOSE2("LOCK: PID[%d] is stale. Attempt to unlock.\n")
-  if(unlock_scheduler())
-    ERROR("LOCK: PID[%d] is stale but unlock failed");
-
+  unlock_scheduler();
   return 0;
 }
 
@@ -439,7 +435,9 @@ void load_config(void* args)
       VERBOSE2("CONFIG: loading config file %s\n", addbuf);
 
       fo_config_load(addbuf, &error);
-      TEST_ERROR("no addition info");
+      if(error && error->code == fo_missing_file)
+        continue;
+      TEST_ERROR("no additional info");
 
       if(!fo_config_has_group("default"))
       {
