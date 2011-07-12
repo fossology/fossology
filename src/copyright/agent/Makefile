@@ -20,6 +20,8 @@ include $(VARS)
 
 CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpcre
 DEF = -DDATADIR='"$(DATADIR)"'
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
+MODULEDIR = $(shell dirname `pwd`)
 
 EXE = copyright
 TESTDIR = ../agent_tests
@@ -34,12 +36,12 @@ $(EXE): main.c $(FOLIB) $(VARS) $(OBJECTS)
 	$(CC) main.c $(OBJECTS) $(DEF) $(CFLAGS_LOCAL) -o $@
 
 all: $(EXE) test
-	echo "make copyright agent and test"
+	@echo "make copyright agent and test"
 
 test: 
 	$(MAKE) -C $(TESTDIR) test
 	$(MAKE) -C $(TESTDIR) coverage
-	
+
 #######################
 # library build rules #
 #######################
@@ -70,26 +72,26 @@ pair.o: %.o: %.c %.h cvector.h
 # install build rules #
 #######################
 
-install: all
-	echo "make copyright agent install"
+install: $(EXE)
+	@echo "make copyright agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/
-	make -C ui-plugin install
 	$(INSTALL_DATA) copyright.dic $(DESTDIR)$(DATADIR)/
 	$(INSTALL_DATA) names.dic $(DESTDIR)$(DATADIR)/
+	@ln -st $(CONFDIR)/mods-enabled $(MODULEDIR)/ copyright/
 
 uninstall:
-	echo "make copyright agent uninstall"
+	@echo "make copyright agent uninstall"
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)/$(EXE)
 	rm -f $(DESTDIR)$(DATADIR)/copyright.dic
 	rm -f $(DESTDIR)$(DATADIR)/names.dic
-	make -C ui-plugin uninstall
+	rm -f $(CONFDIR)/mods-enabled/copyright
 
 #####################
 # other build rules #
 #####################
 
 clean:
-	echo "make copyright agent clean"
+	@echo "make copyright agent clean"
 	rm -f *.o *.a $(EXE)
 
 .PHONY: all install uninstall clean test $(FOLIB)
