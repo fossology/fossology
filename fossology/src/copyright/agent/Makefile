@@ -78,7 +78,7 @@ install: $(EXE)
 	$(INSTALL_DATA) copyright.dic $(DESTDIR)$(DATADIR)/
 	$(INSTALL_DATA) names.dic $(DESTDIR)$(DATADIR)/
 	@if test ! -e $(CONFDIR)/mods-enabled/copyright; then \
-	  ln -s $(MODULEDIR)/copyright $(CONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make copyright agent uninstall"
