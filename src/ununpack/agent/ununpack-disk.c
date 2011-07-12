@@ -24,12 +24,12 @@
 #include <utime.h>
 
 struct permlist
-  {
-  char *inode;
-  struct utimbuf Times;
-  int perm; /* inode permissions */
-  struct permlist *Next;
-  };
+{
+    char *inode;
+    struct utimbuf Times;
+    int perm; /* inode permissions */
+    struct permlist *Next;
+};
 typedef struct permlist permlist;
 
 
@@ -43,9 +43,9 @@ void	FatDiskName	(char *Name)
   int i;
 
   for(i=0; Name[i] != '\0'; i++)
-    {
+  {
     if (isupper(Name[i])) Name[i]=tolower(Name[i]);
-    }
+  }
   /* i == strlen(Name) */
   if (i <= 0) return;
   i--;
@@ -53,10 +53,10 @@ void	FatDiskName	(char *Name)
   /* remove the parenthasis name */
   while((i>1) && (Name[i] != '(')) i--;
   if (Name[i]=='(')
-    {
+  {
     i--;
     if (Name[i]==' ') Name[i]='\0';
-    }
+  }
 } /* FatDiskName() */
 
 /***************************************************
@@ -66,12 +66,12 @@ void	FreeDiskPerms	(permlist *List)
 {
   permlist *Next;
   while(List)
-    {
+  {
     Next=List->Next;
     if (List->inode) free(List->inode);
     free(List);
     List=Next;
-    }
+  }
 } /* FreeDiskPerms() */
 
 /***************************************************
@@ -112,22 +112,22 @@ permlist *	ExtractDiskPerms	(char *FStype, char *Source)
    */
 
   snprintf(Cmd,sizeof(Cmd),"fls -m / -f '%s' -lpr '%s' 2>/dev/null",
-	FStype,Source);
+      FStype,Source);
   Fin = popen(Cmd,"r");
   if (!Fin)
-    {
+  {
     fprintf(stderr,"ERROR: Disk failed: %s\n",Cmd);
     return(NULL);
-    }
+  }
 
   while(ReadLine(Fin,Line,sizeof(Line)-1) >= 0)
-    {
+  {
     NewList = (permlist *)malloc(sizeof(permlist));
     if (!NewList)
-	{
-	printf("FATAL: Unable to allocated %d bytes of memory\n",(int)sizeof(permlist));
-	SafeExit(-1);
-	}
+    {
+      printf("FATAL: Unable to allocated %d bytes of memory\n",(int)sizeof(permlist));
+      SafeExit(-1);
+    }
     NewList->inode = NULL;
     NewList->Next = NULL;
     L=Line;
@@ -143,10 +143,10 @@ permlist *	ExtractDiskPerms	(char *FStype, char *Source)
     if (L <= inode) {FreeDiskPerms(NewList); continue;}
     NewList->inode = (char *)calloc(L-inode,1);
     if (!NewList->inode)
-	{
-	printf("FATAL: Unable to allocate %d bytes.\n",(int)(L-inode));
-	SafeExit(-1);
-	}
+    {
+      printf("FATAL: Unable to allocate %d bytes.\n",(int)(L-inode));
+      SafeExit(-1);
+    }
     memcpy(NewList->inode,inode,L-inode-1);
 
     L=strchr(L,'|'); if (!L) {FreeDiskPerms(NewList); continue;} L++; /* perm text */
@@ -163,7 +163,7 @@ permlist *	ExtractDiskPerms	(char *FStype, char *Source)
     /* save item */
     NewList->Next = List;
     List = NewList;
-    } /* while read line */
+  } /* while read line */
   pclose(Fin);
   return(List);
 } /* ExtractDiskPerms() */
@@ -179,13 +179,13 @@ int	SameInode	(char *Inode1, char *Inode2)
   int i;
   int v1,v2;
   for(i=0; Inode1[i] && Inode2[i]; i++)
-    {
+  {
     if (isdigit(Inode1[i]) || (Inode1[i]=='-'))
-      {
+    {
       if (Inode1[i] != Inode2[i]) return(0);
-      }
-    else break; /* out of the loop */
     }
+    else break; /* out of the loop */
+  }
   /* ok, they differ... */
   v1 = (isdigit(Inode1[i]) || (Inode1[i]=='-'));
   v2 = (isdigit(Inode2[i]) || (Inode2[i]=='-'));
@@ -200,7 +200,7 @@ int	SameInode	(char *Inode1, char *Inode2)
  Returns new list.
  ***************************************************/
 permlist *	SetDiskPerm	(char *inode, permlist *List,
-				 char *Destination, char *Target)
+    char *Destination, char *Target)
 {
   permlist *NewList, *Parent;
   char *Cwd;
@@ -217,35 +217,47 @@ permlist *	SetDiskPerm	(char *inode, permlist *List,
   /* else, find the list */
   Parent = List;
   while(Parent->Next)
-    {
+  {
     if (SameInode(Parent->Next->inode,inode))
-      {
+    {
       /* re-order so desired element is head of list */
       NewList = Parent->Next; /* hold matching element */
       Parent->Next = NewList->Next; /* bypass matching element */
       NewList->Next = List; /* move element to start of list */
       List = NewList; /* reset start of list */
       goto FoundPerm;
-      }
-    Parent = Parent->Next;
     }
+    Parent = Parent->Next;
+  }
   if (Verbose) fprintf(stderr,"LOG pfile %s WARNING Could not find inode: %s\n",Pfile,inode);
   return(List);	/* don't change list */
 
-FoundPerm:
+  FoundPerm:
   Cwd = getcwd(NULL,0);
   if (!Cwd)
-    {
+  {
     printf("ERROR: Current directory no longer exists! Aborting!\n");
     SafeExit(-1); /* this never returns */
-    }
-  chdir(Destination);
+  }
+
+  if(chdir(Destination) != 0)
+  {
+    fprintf(stderr, "ERROR %s.%d: Unable to change directory to %s\n",
+        __FILE__, __LINE__, Destination);
+    fprintf(stderr, "ERROR: errno is: %s\n", strerror(errno));
+  }
 
   if (Verbose > 1) fprintf(stderr,"DEBUG: setting inode %s, name %s to %07o\n",List->inode,Target,List->perm);
   chmod(Target,List->perm); /* allow suid */
   utime(Target,&(List->Times));
 
-  chdir(Cwd);
+  if(chdir(Cwd) != 0)
+  {
+    fprintf(stderr, "ERROR %s.%d: Unable to change directory to %s\n",
+        __FILE__, __LINE__, Cwd);
+    fprintf(stderr, "ERROR: errno is: %s\n", strerror(errno));
+  }
+
   free(Cwd);
   Parent = List->Next;
   List->Next=NULL;
@@ -290,23 +302,23 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
   /* NOTE: There is no distinction between real and deleted directories */
   /* CMD: fls -f 'FStype' -Dpr 'Source' */
   if (TaintString(TempSource,FILENAME_MAX,Source,1,NULL))
-	return(-1);
+    return(-1);
   snprintf(Cmd,sizeof(Cmd),"fls -f '%s' -Dpr '%s' 2>&1",FStype,TempSource);
   Fin = popen(Cmd,"r");
   if (!Fin)
-    {
+  {
     fprintf(stderr,"ERROR: Disk failed: %s\n",Cmd);
     return(-1);
-    }
+  }
   while(ReadLine(Fin,Line,sizeof(Line)-1) >= 0)
-    {
+  {
     /* check for errors */
     if (!memcmp(Line,"fls: ",5))
-	{
-	fprintf(stderr,"WARNING pfile %s Unable to extract\n",Pfile);
-	fprintf(stderr,"LOG pfile %s WARNING: fls extraction issue on '%s'. %s\n",
-		Pfile,TempSource,Line);
-	}
+    {
+      fprintf(stderr,"WARNING pfile %s Unable to extract\n",Pfile);
+      fprintf(stderr,"LOG pfile %s WARNING: fls extraction issue on '%s'. %s\n",
+          Pfile,TempSource,Line);
+    }
     /* line should start "d/d" */
     /* other line types: "l/d" */
     if (memcmp(Line,"d/d",3) != 0) continue;	/* line should start "d/d" */
@@ -317,11 +329,11 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
     s++;
     snprintf(Cmd,sizeof(Cmd),"%s/%s",Destination,s);
     if (MkDir(Cmd))
-	{
-	printf("ERROR: Unable to mkdir(%s) in ExtractDisk\n",Cmd);
-        if (!ForceContinue) SafeExit(-1);
-	}
+    {
+      printf("ERROR: Unable to mkdir(%s) in ExtractDisk\n",Cmd);
+      if (!ForceContinue) SafeExit(-1);
     }
+  }
   pclose(Fin);
 
   /* Get disk permissions */
@@ -330,27 +342,27 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
       (2) If we chmod before extraction then directory may not allow writing
       NOTE: Permissions on NTFS file systems looks broken in fls!
    **/
-    {
+  {
     Perms = ExtractDiskPerms(FStype,TempSource);
     if (!Perms)
-	{
-	fprintf(stderr,"WARNING pfile %s Unable to extract permission\n",Pfile);
-	fprintf(stderr,"LOG pfile %s WARNING: Unable to extract permission from %s\n",Pfile,Source);
-	}
+    {
+      fprintf(stderr,"WARNING pfile %s Unable to extract permission\n",Pfile);
+      fprintf(stderr,"LOG pfile %s WARNING: Unable to extract permission from %s\n",Pfile,Source);
     }
+  }
 
   /* get list of regular (not deleted) files to extract */
   /* CMD: fls -f 'FStype' -Fupr 'Source' */
   snprintf(Cmd,sizeof(Cmd),"fls -f '%s' -Fupr '%s' 2>/dev/null",FStype,TempSource);
   Fin = popen(Cmd,"r");
   if (!Fin)
-    {
+  {
     fprintf(stderr,"ERROR: Disk failed: %s\n",Cmd);
     FreeDiskPerms(Perms);
     return(-1);
-    }
+  }
   while(ReadLine(Fin,Line,sizeof(Line)-1) >= 0)
-    {
+  {
     if (FatFlag) FatDiskName(Line);
     /* Sample line: "r/r 95: etc/terminfo/b/bterm" */
     /* only handle regular files */
@@ -362,42 +374,42 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
     Inode = Line+4; /* should be a number ended with a colon */
     InodeLen=0;
     while(Inode[InodeLen] && (Inode[InodeLen] != ':'))
-	{
-	InodeLen++;
-	}
+    {
+      InodeLen++;
+    }
 
     /* CMD: icat -f 'FStype' 'Source' 'Inode' > 'Destination/s' */
     I=Inode[InodeLen];
     Inode[InodeLen]='\0';
     if (TaintString(TempInode,FILENAME_MAX,Inode,1,NULL) ||
-	TaintString(TempDest,FILENAME_MAX,Destination,1,NULL) ||
-	TaintString(TempS,FILENAME_MAX,s,1,NULL))
-	{
-	Inode[InodeLen]=I;
-	FreeDiskPerms(Perms);
-	return(-1);
-	}
+        TaintString(TempDest,FILENAME_MAX,Destination,1,NULL) ||
+        TaintString(TempS,FILENAME_MAX,s,1,NULL))
+    {
+      Inode[InodeLen]=I;
+      FreeDiskPerms(Perms);
+      return(-1);
+    }
     Inode[InodeLen]=I;
     if (Verbose) printf("Extracting: icat '%s/%s'\n",TempDest,TempS);
     snprintf(Cmd,sizeof(Cmd),"icat -f '%s' '%s' '%s' > '%s/%s' 2>/dev/null",
-	FStype,TempSource,TempInode,TempDest,TempS);
+        FStype,TempSource,TempInode,TempDest,TempS);
 
     rc = system(Cmd);
     if (WIFSIGNALED(rc))
-        {
-        printf("ERROR: Process killed by signal (%d): %s\n",WTERMSIG(rc),Cmd);
-        SafeExit(-1);
-        }
+    {
+      printf("ERROR: Process killed by signal (%d): %s\n",WTERMSIG(rc),Cmd);
+      SafeExit(-1);
+    }
     rc = WEXITSTATUS(rc);
     if (rc)
-      {
+    {
       fprintf(stderr,"WARNING pfile %s File extraction failed\n",Pfile);
       fprintf(stderr,"LOG pfile %s WARNING: Extraction failed (rc=%d): %s\n",Pfile,rc,Cmd);
-      }
+    }
 
     /* set file permissions */
     Perms = SetDiskPerm(Inode,Perms,Destination,s);
-    } /* while read Line */
+  } /* while read Line */
   pclose(Fin);
 
   /* get list of DELETED files to extract (fls -d means deleted) */
@@ -405,13 +417,13 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
   snprintf(Cmd,sizeof(Cmd),"fls -f '%s' -Fdpr '%s' 2>/dev/null",FStype,TempSource);
   Fin = popen(Cmd,"r");
   if (!Fin)
-    {
+  {
     fprintf(stderr,"ERROR: Disk failed: %s\n",Cmd);
     FreeDiskPerms(Perms);
     return(-1);
-    }
+  }
   while(ReadLine(Fin,Line,sizeof(Line)-1) >= 0)
-    {
+  {
     if (FatFlag) FatDiskName(Line);
     /* Sample line: "r/r 95: etc/terminfo/b/bterm" */
     /* only handle regular files */
@@ -422,9 +434,9 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
     Inode = Line+6; /* should be "* number:" or "* number(realloc)" */
     InodeLen=0;
     while(Inode[InodeLen] && !strchr(":(",Inode[InodeLen]))
-	{
-	InodeLen++;
-	}
+    {
+      InodeLen++;
+    }
     if (Inode[InodeLen] =='(') continue; /* skip reallocs */
     /* The same file may exist multiple times (lots of deletes).
        For uniqueness, the inode number is included.
@@ -433,46 +445,46 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
     I=Inode[InodeLen];
     Inode[InodeLen]='\0';
     if (TaintString(TempInode,FILENAME_MAX,Inode,1,NULL) ||
-	TaintString(TempDest,FILENAME_MAX,Destination,1,NULL) ||
-	TaintString(TempS,FILENAME_MAX,s,1,NULL))
-	{
-	Inode[InodeLen]=I;
-	FreeDiskPerms(Perms);
-	return(-1);
-	}
+        TaintString(TempDest,FILENAME_MAX,Destination,1,NULL) ||
+        TaintString(TempS,FILENAME_MAX,s,1,NULL))
+    {
+      Inode[InodeLen]=I;
+      FreeDiskPerms(Perms);
+      return(-1);
+    }
     Inode[InodeLen]=I;
     snprintf(Cmd,sizeof(Cmd),"icat -f '%s' '%s' '%s' > '%s/%s.deleted.%s' 2>/dev/null",
-	FStype,TempSource,TempInode,TempDest,TempS,TempInode);
+        FStype,TempSource,TempInode,TempDest,TempS,TempInode);
 
     if (Verbose) printf("Extracting: icat '%s/%s'\n",TempDest,TempS);
     rc = system(Cmd);
     if (WIFSIGNALED(rc))
-        {
-        printf("ERROR: Process killed by signal (%d): %s\n",WTERMSIG(rc),Cmd);
-        SafeExit(-1);
-        }
+    {
+      printf("ERROR: Process killed by signal (%d): %s\n",WTERMSIG(rc),Cmd);
+      SafeExit(-1);
+    }
     rc = WEXITSTATUS(rc);
     if (rc)
-      {
+    {
       fprintf(stderr,"WARNING pfile %s File extraction failed\n",Pfile);
       fprintf(stderr,"LOG pfile %s WARNING: Extraction failed (rc=%d): %s\n",Pfile,rc,Cmd);
-      }
+    }
 
     /* set file permissions */
     Perms = SetDiskPerm(Inode,Perms,Destination,s);
-    } /* while read line */
+  } /* while read line */
   pclose(Fin);
 
   /* for completeness, put back directory permissions */
   snprintf(Cmd,sizeof(Cmd),"fls -f '%s' -Dpr '%s' 2>/dev/null",FStype,TempSource);
   Fin = popen(Cmd,"r");
   if (!Fin)
-    {
+  {
     fprintf(stderr,"ERROR: Disk failed: %s\n",Cmd);
     return(-1);
-    }
+  }
   while(ReadLine(Fin,Line,sizeof(Line)-1) >= 0)
-    {
+  {
     if (memcmp(Line,"d/d",3) != 0) continue;	/* line should start "d/d" */
     if (FatFlag) FatDiskName(Line);
     Inode = Line+4;
@@ -480,7 +492,7 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
     if (s==NULL) continue;	/* there can be blank lines */
     s++;
     Perms = SetDiskPerm(Inode,Perms,Destination,s);
-    }
+  }
   pclose(Fin);
 
   /* all done! */
