@@ -46,17 +46,22 @@ int	ExtractAR	(char *Source, char *Destination)
     return 1;
 
   if (getcwd(CWD,sizeof(CWD)) == NULL)
-        {
-        fprintf(stderr,"ERROR: directory name longer than %d characters\n",(int)sizeof(CWD));
-        return(-1);
-        }
+  {
+    fprintf(stderr,"ERROR: directory name longer than %d characters\n",(int)sizeof(CWD));
+    return(-1);
+  }
   if (Verbose > 1) printf("CWD: %s\n",CWD);
-
   if (!Quiet) fprintf(stderr,"Extracting ar: %s\n",Source);
-  chdir(Destination);
+
+  if(chdir(Destination) != 0)
+  {
+    fprintf(stderr, "ERROR %s.%d: Unable to change directory to %s\n",
+        __FILE__, __LINE__, Destination);
+    fprintf(stderr, "ERROR: errno is: %s\n", strerror(errno));
+  }
 
   if (TaintString(TempSource,FILENAME_MAX,Source,1,NULL))
-	return(-1);
+    return(-1);
   memset(Cmd,'\0',sizeof(Cmd));
 
   /* get list of directories and make the directories */
@@ -68,24 +73,29 @@ int	ExtractAR	(char *Source, char *Destination)
 
   Fin = popen(Cmd,"r");
   if (!Fin)
-    {
+  {
     fprintf(stderr,"ERROR: ar failed: %s\n",Cmd);
-    chdir(CWD);
-    return(-1);
-    }
-  while(ReadLine(Fin,Line,sizeof(Line)-1) >= 0)
+    if(chdir(CWD) != 0)
     {
+      fprintf(stderr, "ERROR %s.%d: Unable to change directory to %s\n",
+          __FILE__, __LINE__, CWD);
+      fprintf(stderr, "ERROR: errno is: %s\n", strerror(errno));
+    }
+    return(-1);
+  }
+  while(ReadLine(Fin,Line,sizeof(Line)-1) >= 0)
+  {
     /* each line is a file.  Check for directories. */
     if (Line[0]=='/') { pclose(Fin); return(1); } /* NO ABSOLUTE PATHS! */
     s=strrchr(Line,'/'); /* find the last slash */
     if (s == NULL) continue;
     s[0]='\0';
     if (MkDir(Line))
-	{
-	fprintf(stderr,"ERROR: Unable to mkdir(%s) in ExtractAR\n",Line);
-	if (!ForceContinue) exit(-1);
-	}
+    {
+      fprintf(stderr,"ERROR: Unable to mkdir(%s) in ExtractAR\n",Line);
+      if (!ForceContinue) exit(-1);
     }
+  }
   pclose(Fin);
 
   /* Now let's extract each file */
@@ -95,12 +105,17 @@ int	ExtractAR	(char *Source, char *Destination)
     snprintf(Cmd,sizeof(Cmd)," (ar x '%s') 2>/dev/null",TempSource);
   rc = WEXITSTATUS(system(Cmd));
   if (rc)
-      {
-      fprintf(stderr,"ERROR: Command failed (rc=%d): %s\n",rc,Cmd);
-      }
+  {
+    fprintf(stderr,"ERROR: Command failed (rc=%d): %s\n",rc,Cmd);
+  }
 
   /* All done */
-  chdir(CWD);
+  if(chdir(CWD) != 0)
+  {
+    fprintf(stderr, "ERROR %s.%d: Unable to change directory to %s\n",
+        __FILE__, __LINE__, CWD);
+    fprintf(stderr, "ERROR: errno is: %s\n", strerror(errno));
+  }
   return(rc);
 } /* ExtractAR() */
 

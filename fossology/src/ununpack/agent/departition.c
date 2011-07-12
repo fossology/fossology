@@ -20,6 +20,7 @@
 #define _LARGEFILE64_SOURCE
 
 #include <stdlib.h>
+#include <errno.h>
 
 /* specify support for files > 2G */
 #ifndef __USE_LARGEFILE64
@@ -80,30 +81,30 @@ void	ExtractKernel	(int Fin)
   /* seek header */
   GZindex=0;
   while(GZindex < 4)
-    {
+  {
     ReadSize = read(Fin,Buffer+GZindex,1);
     if (ReadSize <= 0)
-      {
+    {
       /* this will fall out */
       GZindex=0;
       break;
-      }
+    }
     /* make sure I match the header! */
     if (!memcmp(Buffer,GZHead[0],GZindex+1) ||
         !memcmp(Buffer,GZHead[1],GZindex+1))
-      {
+    {
       GZindex++;
-      }
-    else
-      {
-      GZindex=0;
-      }
     }
+    else
+    {
+      GZindex=0;
+    }
+  }
   ReadSize=GZindex;
 
   if (ReadSize == 0) return; /* nothing to extract */
   if (ReadSize > 0)
-    {
+  {
     /* prepare file for writing */
     memset(Name,0,sizeof(Name));
     snprintf(Name,250,"Kernel_%04d",Counter);
@@ -113,28 +114,28 @@ void	ExtractKernel	(int Fin)
     /** BSD does not use nor need O_LARGEFILE **/
     Fout = open(Name,O_CREAT | O_WRONLY | O_TRUNC, 0644);
 #endif
-    }
+  }
 
   if (Fout == -1)
-    {
+  {
     perror("ERROR: Unable to create output file for kernel");
     exit(-1);
-    }
+  }
 
   /* Copy file */
   /** NOTE: ReadSize == bytes ready to save to file **/
   while(ReadSize > 0)
-    {
+  {
     Bp=Buffer;
     while(ReadSize > 0)
-    	{
-	WriteSize = write(Fout,Bp,ReadSize);
-	Bp += WriteSize;
-	ReadSize = ReadSize - WriteSize;
-	if (WriteSize <= 0) { break; } /* abort! */
-	}
-    ReadSize = read(Fin,Buffer,sizeof(Buffer));
+    {
+      WriteSize = write(Fout,Bp,ReadSize);
+      Bp += WriteSize;
+      ReadSize = ReadSize - WriteSize;
+      if (WriteSize <= 0) { break; } /* abort! */
     }
+    ReadSize = read(Fin,Buffer,sizeof(Buffer));
+  }
 
   /* close file */
   close(Fout);
@@ -166,37 +167,37 @@ void	ExtractPartition	(int Fin, u_long Start, u_long Size)
 
   /* Basic idiot test */
   if (Size <= 0)
-	{
-	/* invalid */
-	if (Verbose) fprintf(stderr,"ERROR: Partition size is <= 0.\n");
-	return;
-	}
+  {
+    /* invalid */
+    if (Verbose) fprintf(stderr,"ERROR: Partition size is <= 0.\n");
+    return;
+  }
 
   /* save position */
   Hold = lseek64(Fin,0,SEEK_CUR);
   if (Start < Hold)
-	{
-	/* invalid */
-	if (Verbose) fprintf(stderr,"ERROR: Start is before the starting area.\n");
-	lseek64(Fin,Hold,SEEK_SET);	/* rewind file */
-	return;
-	}
+  {
+    /* invalid */
+    if (Verbose) fprintf(stderr,"ERROR: Start is before the starting area.\n");
+    lseek64(Fin,Hold,SEEK_SET);	/* rewind file */
+    return;
+  }
 
   /* Don't go beyond the end of file */
   fstat64(Fin,&Stat);
   if (Start > Stat.st_size)
-	{
-	/* invalid */
-	if (Verbose) fprintf(stderr,"ERROR: Partition start is after then end of file.\n");
-	lseek64(Fin,Hold,SEEK_SET);	/* rewind file */
-	return;
-	}
+  {
+    /* invalid */
+    if (Verbose) fprintf(stderr,"ERROR: Partition start is after then end of file.\n");
+    lseek64(Fin,Hold,SEEK_SET);	/* rewind file */
+    return;
+  }
   if (Start + Size > Stat.st_size)
-    {
+  {
     /* permit partial files */
     if (Verbose) fprintf(stderr,"WARNING: Partition end is after then end of file; partition is truncated.\n");
     Size = Stat.st_size - Start;
-    }
+  }
 
   /* prepare file for writing */
   memset(Name,0,sizeof(Name));
@@ -208,36 +209,36 @@ void	ExtractPartition	(int Fin, u_long Start, u_long Size)
   Fout = open(Name,O_CREAT | O_WRONLY | O_TRUNC, 0644);
 #endif
   if (Fout == -1)
-      {
-      perror("ERROR: Unable to create output file for partition");
-      exit(-1);
-      }
+  {
+    perror("ERROR: Unable to create output file for partition");
+    exit(-1);
+  }
 
   /* Copy file */
   /*** Support very large disk space ***/
   lseek64(Fin,(off64_t)Start,SEEK_SET);
 
   while(Size > 0)
-    {
+  {
     if (Size > sizeof(Buffer))
-    	{
-	ReadSize = read(Fin,Buffer,sizeof(Buffer));
-	}
+    {
+      ReadSize = read(Fin,Buffer,sizeof(Buffer));
+    }
     else
-    	{
-	ReadSize = read(Fin,Buffer,Size);
-	}
+    {
+      ReadSize = read(Fin,Buffer,Size);
+    }
     if (ReadSize <= 0) Size=0; /* abort! */
     Bp = Buffer;
     while(ReadSize > 0)
-    	{
-	WriteSize = write(Fout,Bp,ReadSize);
-	Size = Size - WriteSize;
-	Bp += WriteSize;
-	ReadSize = ReadSize - WriteSize;
-	if (WriteSize <= 0) {ReadSize=0; Size=0;} /* abort! */
-	}
+    {
+      WriteSize = write(Fout,Bp,ReadSize);
+      Size = Size - WriteSize;
+      Bp += WriteSize;
+      ReadSize = ReadSize - WriteSize;
+      if (WriteSize <= 0) {ReadSize=0; Size=0;} /* abort! */
     }
+  }
 
   /* close file */
   close(Fout);
@@ -270,16 +271,20 @@ int	ReadMBR	(int Fin, u_long MBRStart)
 
   lseek(Fin,MBRStart,SEEK_SET);	/* rewind file */
   for(i=0; i<0x200; i++)
+  {
+    if(read(Fin,MBR+i,1) < 0)
     {
-    read(Fin,MBR+i,1);
+      fprintf(stderr, "ERROR %s.%d: unable to perform read", __FILE__, __LINE__);
+      fprintf(stderr, "ERROR errno is: %s\n", strerror(errno));
     }
+  }
 
   /* check if it really is a MBR */
   if ((MBR[0x1fe] != 0x55) || (MBR[0x1ff] != 0xaa))
-    {
+  {
     fprintf(stderr,"ERROR: No master boot record\n");
     return(0);
-    }
+  }
 
   /* 512 bytes per sector is pretty much standard.
      Apparently IBM's AS/400 systems use disks with 520 bytes/sector.
@@ -293,7 +298,7 @@ int	ReadMBR	(int Fin, u_long MBRStart)
 
   /* process each partition table */
   for(i=446; i<510; i+=16)
-    {
+  {
     /* 16 bytes describe each partition */
     ActiveFlag=MBR[i]; /* 0x1BE */
     Head[0]=MBR[i+1];
@@ -307,38 +312,38 @@ int	ReadMBR	(int Fin, u_long MBRStart)
     Start=MBR[i+ 8] + MBR[i+ 9]*256 + MBR[i+10]*256*256 + MBR[i+11]*256*256*256;
     Size= MBR[i+12] + MBR[i+13]*256 + MBR[i+14]*256*256 + MBR[i+15]*256*256*256;
     if (Type != 0) /* Type 0 is unused */
-      {
+    {
       printf("Partition: (Active=%d,Type=%x)\n",ActiveFlag & 0x80,Type);
       printf("           HSC Start=%d,%d,%d\n",Head[0],Sec[0],Cyl[0]);
       printf("           HSC End  =%d,%d,%d\n",Head[1],Sec[1],Cyl[1]);
       printf("           Sector: Start=%lu (%08lx)  End=%lu (%08lx)\n",
-    	Start,Start,Start+Size,Start+Size);
+          Start,Start,Start+Size,Start+Size);
       printf("           Byte: Logical start= %lu (%08lx)\n",
-    	MBRStart+(Start)*SectorSize,
-    	MBRStart+(Start)*SectorSize);
+          MBRStart+(Start)*SectorSize,
+          MBRStart+(Start)*SectorSize);
       printf("           Byte: Logical end  = %lu (%08lx)\n",
-    	MBRStart+(Size+Start)*SectorSize,
-    	MBRStart+(Size+Start)*SectorSize);
+          MBRStart+(Size+Start)*SectorSize,
+          MBRStart+(Size+Start)*SectorSize);
 
       if (Start == 0) /* if it is a Linux kernel */
-	  {
-	  ExtractKernel(Fin);
-	  break;
-	  }
+      {
+        ExtractKernel(Fin);
+        break;
       }
+    }
 
     /* check for extended partitions */
     /** Types: http://www.win.tue.nl/~aeb/partitions/partition_types-1.html **/
     switch(Type)
-      {
+    {
       case 0x00:	/* unused */
-      	break;
+        break;
       case 0x05:	/* extended partition */
       case 0x0f:	/* Win95 extended partition */
-	Offset = lseek(Fin,0,SEEK_CUR);
-	ReadMBR(Fin,MBRStart+(Start)*SectorSize);
-	Offset = lseek(Fin,Offset,SEEK_CUR);
-	break;
+        Offset = lseek(Fin,0,SEEK_CUR);
+        ReadMBR(Fin,MBRStart+(Start)*SectorSize);
+        Offset = lseek(Fin,Offset,SEEK_CUR);
+        break;
       case 0x06:	/* FAT (DOS 3.3+) */
       case 0x07:	/* OS/2 HPFS, Windows NTFS, Advanced Unix */
       case 0x0b:	/* Win95 OSR2 FAT32 */
@@ -346,16 +351,16 @@ int	ReadMBR	(int Fin, u_long MBRStart)
       case 0x82:	/* Linux swap */
       case 0x83:	/* Linux partition */
       default:
-	/* extract partition */
-	{
-	long S,E;
-	S=MBRStart+(Start)*SectorSize;
-	E=MBRStart+(Size)*SectorSize;
-	if (Verbose) fprintf(stderr,"Extracting type %02x: start=%04lx  size=%lu\n",Type,S,E);
-	ExtractPartition(Fin,S,E);
-	}
+        /* extract partition */
+      {
+        long S,E;
+        S=MBRStart+(Start)*SectorSize;
+        E=MBRStart+(Size)*SectorSize;
+        if (Verbose) fprintf(stderr,"Extracting type %02x: start=%04lx  size=%lu\n",Type,S,E);
+        ExtractPartition(Fin,S,E);
       }
-    } /* for MBR */
+    }
+  } /* for MBR */
   return(1);
 } /* ReadMBR() */
 
@@ -376,28 +381,28 @@ int	main	(int argc, char *argv[])
   int c;
 
   if ((argc < 2) || (argc > 3))
-    {
+  {
     Usage(argv[0]);
     exit(-1);
-    }
+  }
 
   while((c = getopt(argc,argv,"tv")) != -1)
-    {
+  {
     switch(c)
-	{
-	case 't':	Test=1; break;
-	case 'v':	Verbose++; break;
-	default:
-		Usage(argv[0]);
-		exit(-1);
-		break;
-	}
-    }
-  if (optind != argc-1)
     {
+      case 't':	Test=1; break;
+      case 'v':	Verbose++; break;
+      default:
+        Usage(argv[0]);
+        exit(-1);
+        break;
+    }
+  }
+  if (optind != argc-1)
+  {
     Usage(argv[0]);
     exit(-1);
-    }
+  }
 
 #ifdef O_LARGEFILE
   Fin = open(argv[optind],O_RDONLY | O_LARGEFILE);
@@ -406,10 +411,10 @@ int	main	(int argc, char *argv[])
   Fin = open(argv[optind],O_RDONLY);
 #endif
   if (Fin == -1)
-    {
+  {
     perror("ERROR: Unable to open diskimage");
     exit(-1);
-    }
+  }
 
   ReadMBR(Fin,0);
   close(Fin);
