@@ -18,6 +18,8 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
+MODULEDIR = $(shell dirname `pwd`)
 
 # also set in Makefile.conf, but we override with a shorter version
 iPATHFILE=pathinclude.php
@@ -59,6 +61,9 @@ install: all $(iPATHFILE)
 	done
 
 	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
+	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
+	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
+
 	
 	
 uninstall:
@@ -77,7 +82,9 @@ uninstall:
 		rmdir $(DESTDIR)$(WEBDIR)/$$dir; \
 	done
 
-	rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
+	@rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
+	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
+
 	
 
 clean:
