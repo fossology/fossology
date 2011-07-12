@@ -480,7 +480,6 @@ void    Usage   (char *Name)
 int	main	(int argc, char *argv[])
 {
   int c;
-  int arg;
   long UploadPk=-1;
   PGresult *pgResult;
 //  char *agent_desc = "Convert adjacency list to nested set (data retrieval optimization)";
@@ -494,6 +493,9 @@ int	main	(int argc, char *argv[])
 	  fflush(stdout);
     exit(-1);
   }
+
+  /* connect to scheduler.  Noop if not run from scheduler.  */
+  fo_scheduler_connect(&argc, argv);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"aiuv")) != -1)
@@ -520,42 +522,24 @@ int	main	(int argc, char *argv[])
     }
   }
 
-  /* Process each file */
-  for(arg=optind; arg < argc; arg++)
+  while(fo_scheduler_next())
   {
-    UploadPk = atol(argv[arg]);
+    UploadPk = atol(fo_scheduler_current());
     LoadAdj(UploadPk);
     if (Tree) WalkTree(0,0); 
     if (Tree) free(Tree);
     Tree=NULL;
     TreeSize=0;
-  }
-
-  /* No args?  Run from scheduler */
-  if (argc == 1)
-  {
-    fo_scheduler_connect(&argc, argv);
     printf("OK\n"); /* inform scheduler that we are ready */
     fflush(stdout);
-    while(fo_scheduler_next())
-    {
-      UploadPk = atol(fo_scheduler_current());
-      LoadAdj(UploadPk);
-      if (Tree) WalkTree(0,0); 
-      if (Tree) free(Tree);
-      Tree=NULL;
-      TreeSize=0;
-      printf("OK\n"); /* inform scheduler that we are ready */
-      fflush(stdout);
-    } /* while() */
+  } /* while() */
 
-    /* update upload.upload_mode to say that adj2nest was successful */
-    snprintf(SQL, sizeof(SQL), "UPDATE upload SET upload_mode = upload_mode | (1<<6) WHERE upload_pk='%ld'",
-             UploadPk);
-    pgResult =  PQexec(pgConn, SQL); /* UPDATE upload */
-    if (fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__))
-    PQclear(pgResult);
-  }
+  /* update upload.upload_mode to say that adj2nest was successful */
+  snprintf(SQL, sizeof(SQL), "UPDATE upload SET upload_mode = upload_mode | (1<<6) WHERE upload_pk='%ld'",
+           UploadPk);
+  pgResult =  PQexec(pgConn, SQL); /* UPDATE upload */
+  if (fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__))
+  PQclear(pgResult);
 
   PQfinish(pgConn);
   fo_scheduler_disconnect();
