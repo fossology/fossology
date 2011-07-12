@@ -4,6 +4,8 @@ TOP=../../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
+MODULEDIR = $(shell dirname `pwd`)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
 EXE=departition checksum ununpack
@@ -46,12 +48,17 @@ install: all $(VARS)
 	fi
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(AGENTDIR)/ununpack
 	$(INSTALL_PROGRAM) checksum $(DESTDIR)$(LIBEXECDIR)/checksum
+	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
+	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
+
 
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
 	rm -f $(DESTDIR)$(LIBEXECDIR)/checksum
 	rm -f $(DESTDIR)$(AGENTDIR)/ununpack
+	rm -f $(CONFDIR)/mods-enabled/ununpack
+
 
 $(OBJECTS): %.o: %.c metahandle.h
 	$(CC) -c $< $(CFLAGS_LOCAL) 
