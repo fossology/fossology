@@ -2428,27 +2428,29 @@ int	UnunpackEntry	(int argc, char *argv[])
                 PQclear(result);
 		signal(SIGALRM,AlarmDisplay);
 		alarm(10);
-		Pfile = getenv("ARG_pfile");
-		if (!Pfile) Pfile = getenv("pfile");
-		Pfile_Pk = getenv("ARG_pfile_fk");
-		if (!Pfile_Pk) Pfile_Pk = getenv("pfile_fk");
-		Upload_Pk = getenv("ARG_upload_pk");
-		if (!Upload_Pk) Upload_Pk = getenv("upload_pk");
+                int times = 0;
+                while(fo_scheduler_next())
+                {
+                  if (0 == times)  Pfile = fo_scheduler_current();
+                  if (1 == times)  Upload_Pk = fo_scheduler_current();
+                  if (2 == times)  Pfile_Pk = fo_scheduler_current();
+                } /* while() */
+ 
 		/* Check for all necessary parameters */
 		if (Verbose)
 		  {
-		  printf("ENV Pfile=%s\n",Pfile);
-		  printf("ENV Pfile_Pk=%s\n",Pfile_Pk);
-		  printf("ENV Upload_Pk=%s\n",Upload_Pk);
+		  printf("Pfile=%s\n",Pfile);
+		  printf("Pfile_Pk=%s\n",Pfile_Pk);
+		  printf("Upload_Pk=%s\n",Upload_Pk);
 		  }
 		if (pgConn && !Pfile)
 		  {
-		  printf("FATAL: Pfile not specified in environment.\n");
+		  printf("FATAL: Pfile is NULL.\n");
 		  SafeExit(23);
 		  }
 		if (pgConn && !Pfile_Pk)
 		  {
-		  printf("FATAL: Pfile_Pk not specified in environment.\n");
+		  printf("FATAL: Pfile_Pk is NULL.\n");
 		  SafeExit(24);
 		  }
 		InitCmd();
@@ -2627,7 +2629,7 @@ int	UnunpackEntry	(int argc, char *argv[])
   /* free memory */
   if (Fname) { free(Fname); Fname=NULL; }
 
-  /* process pfile from environment */
+  /* process pfile from scheduler */
   if (Pfile)
     {
     if (fo_RepExist(REP_FILES,Pfile))
