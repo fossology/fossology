@@ -32,6 +32,7 @@ FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' -DPROJECT_GROUP='"$(PROJECTGROUP)"' -D
 
 INITFILE=init.d/fossology
 CONFFILE=fossology.conf
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
 
 #######################
 # objects and headers #
@@ -114,12 +115,13 @@ install: all install-conf
 	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
 
 install-conf:
-	@ echo "Installing config files..."
-	@if [ ! -f $(DESTDIR)$(SYSCONFDIR)/fossology/$(CONFFILE) -o "$(OVERWRITE)" ] ; then \
-	  mkdir -p $(DESTDIR)$(SYSCONFDIR)/fossology/$(dir $(CONFFILE)); \
-	  cp $(CONFFILE) $(DESDIR)$(SYSCONFDIR)/fossology/; \
+	@mkdir -p $(CONFDIR)/mods-enabled
+	@ echo "Installing config files in $(CONFDIR)/"
+	@if [ ! -f $(CONFDIR)/$(CONFFILE) -o "$(OVERWRITE)" ] ; then \
+	  mkdir -p $(CONFDIR)/$(dir $(CONFFILE)); \
+	  cp $(CONFFILE) $(CONFDIR)/; \
 	fi
-	@ echo "Installing init script..."
+	@ echo "Installing init script in $(DESTDIR)$(INITDIR)/"
 	@if [ ! -f $(DESTDIR)$(INITDIR)/$(INITFILE) ] ; then \
 	  mkdir -p $(DESTDIR)$(INITDIR)/$(dir $(INITFILE)); \
 	fi
