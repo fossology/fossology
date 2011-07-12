@@ -18,6 +18,8 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
+MODULEDIR = $(shell dirname `pwd`)
 
 CFLAGS_LOCAL= $(ALL_CFLAGS)
 EXE=adj2nest
@@ -29,9 +31,13 @@ $(EXE): %: %.c $(DB) $(REPO) $(VARS) $(FOLIB)
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
+	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
-	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+	@rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
+
 
 test: all
 	@echo "*** No tests available for src/$(EXE) ***"
