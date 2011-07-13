@@ -99,7 +99,8 @@ void chld_sig(int signo)
   /* get all of the dead children's pids */
   while((n = waitpid(-1, &status, WNOHANG)) > 0)
   {
-    VERBOSE2("SIGNALS: received sigchld for pid %d\n", n);
+    if(TVERBOSE2)
+      clprintf("SIGNALS: received sigchld for pid %d\n", n);
     pid_list[idx++] = n;
   }
 
@@ -364,65 +365,27 @@ void kill_scheduler()
 /**
  * TODO
  */
-void load_config(void* args)
+void load_agent_config()
 {
   DIR* dp;                  // directory pointer used to load meta agents;
   struct dirent* ep;        // information about directory
-  char* tmp;                // pointer into a string
   char addbuf[256];         // standard string buffer
-  char dirbuf[256];         // standard string buffer
   int max = -1;             // the number of agents to a host or number of one type running
   int special = 0;          // anything that is special about the agent (EXCLUSIVE)
-  char** keys;
-  GError* error = NULL;
   int i;
-  char* name, * cmd;
+  char* name;
+  char* cmd;
+  char* tmp;
+  GError* error = NULL;
+
+  /* clear previous configurations */
+  agent_list_clean();
 
   snprintf(addbuf, sizeof(addbuf), "%s/%s/", DEFAULT_SETUP, AGENT_CONF);
   if((dp = opendir(addbuf)) == NULL)
   {
     FATAL("Could not open agent config directory: %s", addbuf);
     return;
-  }
-
-  /* clear all previous configurations */
-  agent_list_clean();
-  host_list_clean();
-
-  /* parse the config file */
-  fo_config_load_default(&error);
-  if(error)
-    FATAL("%s", error->message);
-
-  /* load the port setting */
-  if(s_port < 0)
-    s_port = atoi(fo_config_get("FOSSOLOGY", "port", &error));
-  set_port(s_port);
-
-  /* load the host settings */
-  keys = fo_config_key_set("HOSTS", &special);
-  for(i = 0; i < special; i++)
-  {
-    tmp = fo_config_get("HOSTS", keys[i], &error);
-    if(error)
-    {
-      lprintf(error->message);
-      error = NULL;
-      continue;
-    }
-
-    sscanf(tmp, "%s %s %d", addbuf, dirbuf, &max);
-    if(strcmp(addbuf, "localhost") == 0) strcpy(dirbuf, AGENT_DIR);
-
-    host_init(keys[i], addbuf, dirbuf, max);
-    if(TVERBOSE2)
-    {
-      lprintf("CONFIG: added new host\n");
-      lprintf("      name = %s\n", keys[i]);
-      lprintf("   address = %s\n", addbuf);
-      lprintf(" directory = %s\n", dirbuf);
-      lprintf("       max = %d\n", max);
-    }
   }
 
   /* load the configuration for the agents */
@@ -432,12 +395,17 @@ void load_config(void* args)
     {
       sprintf(addbuf, "%s/%s/%s/%s.conf",
           DEFAULT_SETUP, AGENT_CONF, ep->d_name, ep->d_name);
-      VERBOSE2("CONFIG: loading config file %s\n", addbuf);
 
       fo_config_load(addbuf, &error);
       if(error && error->code == fo_missing_file)
+      {
+        VERBOSE3("CONFIG: Could not find %s\n", addbuf);
+        g_error_free(error);
+        error = NULL;
         continue;
+      }
       TEST_ERROR("no additional info");
+      VERBOSE2("CONFIG: loading config file %s\n", addbuf);
 
       if(!fo_config_has_group("default"))
       {
@@ -480,8 +448,72 @@ void load_config(void* args)
     }
   }
   closedir(dp);
-  fo_config_free();
   for_each_host(test_agents);
+}
+
+/**
+ * TODO
+ */
+void load_foss_config()
+{
+  char* tmp;                // pointer into a string
+  char** keys;
+  int max = -1;             // the number of agents to a host or number of one type running
+  int special = 0;          // anything that is special about the agent (EXCLUSIVE)
+  char addbuf[256];         // standard string buffer
+  char dirbuf[256];         // standard string buffer
+  GError* error = NULL;
+  int i;
+
+  /* clear all previous configurations */
+  host_list_clean();
+
+  /* parse the config file */
+  fo_config_load_default(&error);
+  if(error)
+    FATAL("%s", error->message);
+
+  /* load the port setting */
+  if(s_port < 0)
+    s_port = atoi(fo_config_get("FOSSOLOGY", "port", &error));
+  set_port(s_port);
+
+  /* load the host settings */
+  keys = fo_config_key_set("HOSTS", &special);
+  for(i = 0; i < special; i++)
+  {
+    tmp = fo_config_get("HOSTS", keys[i], &error);
+    if(error)
+    {
+      lprintf(error->message);
+      error = NULL;
+      continue;
+    }
+
+    sscanf(tmp, "%s %s %d", addbuf, dirbuf, &max);
+    if(strcmp(addbuf, "localhost") == 0) strcpy(dirbuf, AGENT_DIR);
+
+    host_init(keys[i], addbuf, dirbuf, max);
+    if(TVERBOSE2)
+    {
+      lprintf("CONFIG: added new host\n");
+      lprintf("      name = %s\n", keys[i]);
+      lprintf("   address = %s\n", addbuf);
+      lprintf(" directory = %s\n", dirbuf);
+      lprintf("       max = %d\n", max);
+    }
+  }
+}
+
+/**
+ * TODO
+ *
+ * @param unused
+ */
+void load_config(void* unused)
+{
+  load_foss_config();
+  load_agent_config();
 }
 
 /**
@@ -619,9 +651,10 @@ int main(int argc, char** argv)
   agent_list_init();
   host_list_init();
   job_list_init();
-  load_config(NULL);
+  load_foss_config(NULL);
   interface_init();
   database_init();
+  load_agent_config();
 
   signal(SIGCHLD, chld_sig);
   signal(SIGALRM, prnt_sig);

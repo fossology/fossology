@@ -423,7 +423,7 @@ void job_remove_agent(job j, void* a)
 
   if(j->finished_agents == NULL && j->status == JB_COMPLETE)
   {
-    VERBOSE2("JOB[%d]: job removed from system\n");
+    VERBOSE2("JOB[%d]: job removed from system\n", j->id);
     g_tree_remove(job_list, &j->id);
   }
 }
@@ -680,11 +680,11 @@ FILE* job_log(job j)
   char  file_name[7];
   char* file_path;
 
+  if(j->id < 0)
+    return NULL;
+
   if(j->log)
     return j->log;
-
-  if(j->id < 0)
-    return log_file;
 
   snprintf(file_name, sizeof(file_name), "%07d", j->id);
   file_path = fo_RepMkPath("logs", file_name);

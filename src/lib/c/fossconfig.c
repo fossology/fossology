@@ -577,6 +577,7 @@ char** fo_config_key_set(char* group, int* length)
 {
   GTree* tree;
   char** ret;
+  *length = 0;
 
   if(!key_sets)
     key_sets = g_tree_new_full(str_comp, NULL, g_free, g_free);
@@ -584,13 +585,13 @@ char** fo_config_key_set(char* group, int* length)
   if(group_map == NULL)
     return NULL;
 
+  if((tree = g_tree_lookup(group_map, group)) == NULL)
+      return NULL;
+  *length = g_tree_nnodes(tree);
+
   if((ret = g_tree_lookup(key_sets, group)))
     return ret;
 
-  if((tree = g_tree_lookup(group_map, group)) == NULL)
-    return NULL;
-
-  *length = g_tree_nnodes(tree);
   ret = g_new0(char*, *length);
   g_tree_foreach(tree, (GTraverseFunc)collect_keys, ret);
   g_tree_insert(key_sets, g_strdup(group), ret);

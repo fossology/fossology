@@ -85,6 +85,26 @@ void log_event(char* str)
   g_free(str);
 }
 
+/**
+ * Performs a concurent write the log file. This is necessary so that a normal
+ * concurent write can happen and an agent concurrent write can happen.
+ *
+ * @param fmt formatting string for the arguments
+ * @param args variable argument list created by other functions
+ */
+int concurent_log(const char* fmt, va_list args)
+{
+  gchar* buf;
+
+  buf = g_strdup_vprintf(fmt, args);
+
+  if(buf == NULL)
+    return 0;
+
+  event_signal(log_event, buf);
+  return 1;
+}
+
 /* ************************************************************************** */
 /* **** logging functions *************************************************** */
 /* ************************************************************************** */
@@ -181,10 +201,10 @@ int alprintf(FILE* dst, const char* fmt, ...)
   int rc;
 
   if(!fmt) return 0;
-  if(!dst) return 0;
 
   va_start(args, fmt);
-  rc = vlprintf(dst, fmt, args);
+  if(dst) rc = vlprintf(dst, fmt, args);
+  else    rc = concurent_log(fmt, args);
   va_end(args);
 
   return rc;
@@ -252,20 +272,16 @@ int vlprintf(FILE* dst, const char* fmt, va_list args)
 int clprintf(const char* fmt, ...)
 {
   va_list args;
-  char* buf;
+  int ret;
 
   if(!log_file) log_open();
   if(!fmt) return 0;
 
   va_start(args, fmt);
-  buf = g_strdup_vprintf(fmt, args);
+  ret = concurent_log(fmt, args);
   va_end(args);
 
-  if(buf == NULL)
-    return 0;
-
-  event_signal(log_event, buf);
-  return 1;
+  return ret;
 }
 
 

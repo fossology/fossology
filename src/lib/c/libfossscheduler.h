@@ -72,7 +72,7 @@ extern int verbose;
             fprintf(stderr, "FATAL postgresql error: %s\n", PQresultErrorMessage(pg_r)); }
 
 #define ERROR(...) { \
-            fprintf(stderr, "ERROR %s.%d: "); \
+            fprintf(stderr, "ERROR %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
 

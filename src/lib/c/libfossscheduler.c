@@ -170,8 +170,11 @@ char* fo_scheduler_next()
   fflush(stdout);
 
   /* get the next line from the scheduler and possibly WAIT */
-  while(fgets(buffer, sizeof(buffer), stdin) != NULL &&
-      strncmp(buffer, "CLOSE", 5) != 0) {
+  while(fgets(buffer, sizeof(buffer), stdin) != NULL) {
+
+    printf("NOTE: recieved %s\n", buffer);
+    if(strncmp(buffer, "CLOSE", 5) == 0)
+      break;
     if(strncmp(buffer, "END", 3) == 0)
     {
       fprintf(stdout, "OK\n");
