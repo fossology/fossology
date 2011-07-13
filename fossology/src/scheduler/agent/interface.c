@@ -246,6 +246,7 @@ void* listen_thread(void* unused)
 {
   GSocketListener* server_socket;
   GSocketConnection* new_connection;
+  GError* error = NULL;
 
   /* validate new thread */
   if(i_terminate || !i_created)
@@ -256,8 +257,9 @@ void* listen_thread(void* unused)
 
   /* create the server socket to listen for connections on */
   server_socket = g_socket_listener_new();
-  if(!g_socket_listener_add_inet_port(server_socket, i_port, NULL, NULL))
-    FATAL("Could not create interface, invalid port number: %d", i_port);
+  g_socket_listener_add_inet_port(server_socket, i_port, NULL, &error);
+  if(error)
+    FATAL("%s", error->message);
 
   if(TVERBOSE2)
     clprintf("INTERFACE: listening port is %d\n", i_port);
@@ -265,12 +267,14 @@ void* listen_thread(void* unused)
   /* wait for new connections */
   for(;;)
   {
-    new_connection = g_socket_listener_accept(server_socket, NULL, cancel, NULL);
+    new_connection = g_socket_listener_accept(server_socket, NULL, cancel, &error);
 
     if(i_terminate)
       break;
     if(TVERBOSE2)
       clprintf("INTERFACE: new interface connection\n");
+    if(error)
+      FATAL("INTERFACE closing for %s", error->message);
 
     client_threads = g_list_append(client_threads,
         interface_conn_init(new_connection));

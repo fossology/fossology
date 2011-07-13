@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* local includes */
 #include <event.h>
+#include <logging.h>
 
 /* std libaray includes */
 #include <stdlib.h>

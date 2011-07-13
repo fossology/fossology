@@ -136,7 +136,8 @@ const char* status_strings[] = {
  */
 void agent_transition(agent a, agent_status new_status)
 {
-  VERBOSE3("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
+  if(TVERBOSE3)
+    clprintf("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
         job_id(a->owner), a->meta_data->name, a->pid,
         status_strings[a->status], status_strings[new_status]);
   a->status = new_status;
@@ -257,6 +258,7 @@ int agent_test(char* name, meta_agent ma, host h)
 {
   static int id_gen = -1;
 
+  VERBOSE3("META_AGENT[%s] testing\n", ma->name);
   job j = job_init(ma->name, id_gen--);
   agent_init(h, j, 0);
   return 0;
@@ -288,6 +290,14 @@ void agent_listen(agent a)
     alprintf(job_log(a->owner),
         "T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
         __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
+    g_thread_exit(NULL);
+  }
+
+  if(strncmp(buffer, "@@@", 3) == 0)
+  {
+    alprintf(job_log(a->owner),
+            "T_FATAL %s.%d: JOB[%d].%s[%d] agent closed before providing version information\n"
+            __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid);
     g_thread_exit(NULL);
   }
 
@@ -383,9 +393,11 @@ void agent_listen(agent a)
   }
 
   if(TVERBOSE3)
+  {
     alprintf(job_log(a->owner),
         "JOB[%d].%s[%d]: communication thread closing\n",
         job_id(a->owner), a->meta_data->name, a->pid);
+  }
 }
 
 /**
@@ -466,6 +478,7 @@ void* agent_spawn(void* passed)
   else if(a->pid > 0)
   {
     event_signal(agent_create_event, a);
+    close(a->from_parent);
     agent_listen(a);
   }
   /* error case */
@@ -839,10 +852,14 @@ void agent_close(agent a)
   if(a->status != AG_CLOSING && a->status != AG_FAILED)
   {
     agent_transition(a, AG_CLOSING);
-    close(a->to_parent);
     aprintf(a, "CLOSE\n");
     return;
   }
+
+  if(write(a->to_parent, "@@@1\n", 5) != 5)
+    VERBOSE2("JOB[%d].%s[%d]: write to agent unsuccessful",
+        job_id(a->owner), a->meta_data->name, a->pid);
+  close(a->to_parent);
   g_thread_join(a->thread);
 
   VERBOSE2("JOB[%d].%s[%d]: successfully removed from the system\n",

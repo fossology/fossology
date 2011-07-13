@@ -314,14 +314,14 @@ void database_update_job(int j_id, job_status status)
       sql = g_strdup_printf(jobsql_started, "localhost", getpid(), j_id);
       break;
     case JB_COMPLETE:
-      email_notification(j_id, 0);
+      //email_notification(j_id, 0);
       sql = g_strdup_printf(jobsql_complete, j_id);
       break;
     case JB_RESTART:
       sql = g_strdup_printf(jobsql_restart, j_id);
       break;
     case JB_FAILED:
-      email_notification(j_id, 1);
+      //email_notification(j_id, 1);
       sql = g_strdup_printf(jobsql_failed, j_id);
       break;
     case JB_SCH_PAUSED: case JB_CLI_PAUSED:
