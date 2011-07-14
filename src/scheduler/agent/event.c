@@ -37,6 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 struct event_internal {
   void(*func)(void*);           ///< the function that will be executed for this event
   void* argument;               ///< the arguments for the function
+  char* name;                   ///< name of the event, used for debugging
 };
 
 /** internal structure for the event loop */
@@ -149,12 +150,13 @@ event event_loop_take(event_loop vl)
  * @param arg the arguements for the function.
  * @return the new event wrapper for the function and arguments
  */
-event event_init(void(*func)(void*), void* arg)
+event event_init(void(*func)(void*), void* arg, char* name)
 {
   event e = g_new(struct event_internal, 1);
 
   e->func = func;
   e->argument = arg;
+  e->name = name;
 
   return e;
 }
@@ -181,8 +183,8 @@ void event_destroy(event e)
  * @param func
  * @param args
  */
-void event_signal(void* func, void* args) {
-  event_loop_put(event_loop_get(), event_init((event_function)func, args));
+void event_signal_ext(void* func, void* args, char* name) {
+  event_loop_put(event_loop_get(), event_init((event_function)func, args, name));
 }
 
 /**
@@ -215,6 +217,7 @@ int event_loop_enter(void(*call_back)(void))
   /* from here on out, this is the only thread in this event loop     */
   /* the loop to execute events is very simple, grab event, run event */
   while((e = event_loop_take(vl)) != NULL) {
+    VERBOSE4("EVENT: calling %s\n", e->name);
     e->func(e->argument);
     event_destroy(e);
     call_back();
