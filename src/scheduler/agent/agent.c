@@ -306,7 +306,8 @@ void agent_listen(agent a)
   if(a->meta_data->version == NULL && a->meta_data->valid)
   {
     a->meta_data->version = g_strdup(buffer);
-    VERBOSE2("META_AGENT[%s] version is: \"%s\"\n", a->meta_data->name, buffer);
+    if(TVERBOSE2)
+      clprintf("META_AGENT[%s] version is: \"%s\"\n", a->meta_data->name, buffer);
   }
   else if(strcmp(a->meta_data->version, buffer) != 0)
   {

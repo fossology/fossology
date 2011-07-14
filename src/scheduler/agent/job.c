@@ -490,12 +490,7 @@ void job_update(job j)
   TEST_NULV(j)
   if(j->status != JB_SCH_PAUSED && j->status != JB_CLI_PAUSED && j->running_agents == NULL)
   {
-    /* this indicates a correctly finished job */
-    if(closing)
-    {
-      /* do doing */
-    }
-    else if(j->failed_agents == NULL)
+    if(j->failed_agents == NULL)
     {
       job_transition(j, JB_COMPLETE);
       for(iter = j->finished_agents; iter != NULL; iter = iter->next)
@@ -515,7 +510,7 @@ void job_update(job j)
           agent_restart(a, (agent)iter->data);
           restart++;
         }
-        else if(agent_copy((agent)iter->data) != NULL)
+        else if(!closing && agent_copy((agent)iter->data) != NULL)
         {
           restart++;
         }
@@ -524,7 +519,7 @@ void job_update(job j)
       g_list_free(j->failed_agents);
       j->failed_agents = NULL;
 
-      if(restart == 0)
+      if(restart == 0 || closing)
         job_fail(j);
     }
   }
