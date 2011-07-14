@@ -71,13 +71,13 @@ struct job_internal
  * TODO
  */
 const char* status_string[] = {
-    "JB_CHECKEDOUT",
-    "JB_STARTED",
-    "JB_COMPLETE",
-    "JB_RESTART",
-    "JB_FAILED",
-    "JB_SCH_PAUSED",
-    "JB_CLI_PAUSED"};
+    "JOB_CHECKEDOUT",
+    "JOB_STARTED",
+    "JOB_COMPLETE",
+    "JOB_RESTART",
+    "JOB_FAILED",
+    "JOB_SCH_PAUSED",
+    "JOB_CLI_PAUSED"};
 
 /**
  * TODO
@@ -681,7 +681,7 @@ FILE* job_log(job j)
   if(j->log)
     return j->log;
 
-  snprintf(file_name, sizeof(file_name), "%07d", j->id);
+  snprintf(file_name, sizeof(file_name), "%06d", j->id);
   file_path = fo_RepMkPath("logs", file_name);
   VERBOSE2("JOB[%d]: job created log file:\n    %s\n", j->id, file_path);
 
