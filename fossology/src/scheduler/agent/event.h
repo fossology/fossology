@@ -52,14 +52,16 @@ typedef void(*event_function)(void*);
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
-event event_init(void(*func)(void*), void* arg);
+event event_init(void(*func)(void*), void* arg, char* name);
 void event_destroy(event e);
 
 /* ************************************************************************** */
 /* **** EventLoop Functions ************************************************* */
 /* ************************************************************************** */
 
-void event_signal(void* func, void* args);
+#define event_signal(func, args) event_signal_ext(func, args, #func)
+
+void event_signal_ext(void* func, void* args, char* name);
 void event_loop_terminate();
 int  event_loop_enter(void(*)(void));
 void event_loop_destroy();
