@@ -1,11 +1,11 @@
 # FOSSology Makefile - agents/pkgagent
-# Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 LANG=C
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
-TESTDIRS=tests
+TESTDIRS=../agent_tests
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -I/usr/include/rpm -lpq -lrpm -lrpmio $(ALL_CFLAGS)
 
 EXE=pkgagent
@@ -15,11 +15,12 @@ CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 
 all: $(EXE)
 	@echo "make pkgagent agent and test"
-$(EXE): main.c pkgagent.o $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
+
+$(EXE): main.c $(FOLIB) pkgagent.o $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
+	@echo "make pkgagent agent"
 	$(CC) main.c pkgagent.o  $(CFLAGS_LOCAL) -o $@
 
 pkgagent.o: pkgagent.c pkgagent.h
-	@echo "make pkgagent agent"
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
 		$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
 	else \
@@ -30,7 +31,7 @@ install: all
 	@echo "make pkgagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 	@if test ! -e $(CONFDIR)/mods-enabled/pkgagent; then \
-	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled/pkgagent ; fi;
 
 
 uninstall:

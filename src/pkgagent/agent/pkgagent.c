@@ -112,7 +112,7 @@ void	EscapeString	(const char *sourceString, char *escString, int esclen)
   }
    */
   //printf("TEST:esclen---%d,sourcelen---%d\n",esclen,len);
-  PQescapeStringConn(DB, escString, sourceString, len, &error);
+  PQescapeStringConn(db_conn, escString, sourceString, len, &error);
   if (error)
     printf("WARNING: %s line %d: Error escaping string with multibype character set?\n",__FILE__, __LINE__ );
 }
@@ -247,7 +247,7 @@ int    ProcessUpload (long upload_pk)
     result = PQexec(db_conn, sqlbuf);
     if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
     snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;");
-    result = PQexec(pgConn, sqlbuf);
+    result = PQexec(db_conn, sqlbuf);
     if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
     debmimetypepk = atoi(PQgetvalue(result, 0, 0));
     PQclear(result);
@@ -258,18 +258,18 @@ int    ProcessUpload (long upload_pk)
     }
   }
   snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;");
-  result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+  result = PQexec(db_conn, sqlbuf);
+  if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
   debsrcmimetypepk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
   if ( debsrcmimetypepk == 0 )
   {
     snprintf(sqlbuf, sizeof(sqlbuf), "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-source');");
-    result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    result = PQexec(db_conn, sqlbuf);
+    if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
     snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;");
-    result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    result = PQexec(db_conn, sqlbuf);
+    if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
     debsrcmimetypepk = atoi(PQgetvalue(result, 0, 0));
     PQclear(result);
     if ( debsrcmimetypepk == 0 )
@@ -282,8 +282,8 @@ int    ProcessUpload (long upload_pk)
   /*  retrieve the records to process */
   snprintf(sqlbuf, sizeof(sqlbuf),
       "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name AS mimetype FROM uploadtree INNER JOIN pfile ON upload_fk = '%ld' INNER JOIN mimetype ON (mimetype_pk = '%d' OR mimetype_pk = '%d' OR mimetype_pk = '%d') AND uploadtree.pfile_fk = pfile_pk AND pfile.pfile_mimetypefk = mimetype.mimetype_pk AND pfile_pk NOT IN (SELECT pkg_rpm.pfile_fk FROM pkg_rpm) AND pfile_pk NOT IN (SELECT pkg_deb.pfile_fk FROM pkg_deb);", upload_pk, mimetypepk, debmimetypepk, debsrcmimetypepk);
-  result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+  result = PQexec(db_conn, sqlbuf);
+  if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
 
   numrows = PQntuples(result);
   for (i=0; i<numrows; i++)
@@ -323,7 +323,7 @@ int    ProcessUpload (long upload_pk)
     else if (!strcasecmp(mimetype, "application/x-debian-source")){
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
       strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
-      repFile = RepMkPath("files", dpi->pFile);
+      repFile = fo_RepMkPath("files", dpi->pFile);
       if (!repFile) {
         FATAL("pfile %ld PkgAgent unable to open file %s\n",
             dpi->pFileFk, dpi->pFile);
@@ -536,58 +536,52 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
 int	RecordMetadataRPM	(struct rpmpkginfo *pi)
 {
   char SQL[MAXCMD];
-  int rc;
+  PGresult *result;
   int pkg_pk;
 
   memset(SQL,0,sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT pfile_fk FROM pkg_rpm WHERE pfile_fk = %ld;",pi->pFileFk);
-  rc = DBaccess(DB,SQL);
-  if (rc < 0)
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (PQntuples(result) <=0)
   {
-    printf("ERROR pfile %s Unable to access database.\n",pi->pFile);
-    printf("LOG pfile %s ERROR: %s\n",pi->pFile,SQL);
-    fflush(stdout);
-    return FALSE;
-  }
-  if (DBdatasize(DB) <=0)
-  {
+    PQclear(result);
     memset(SQL,0,sizeof(SQL));
-    DBaccess(DB,"BEGIN;");
+    result = PQexec(db_conn, "BEGIN;");
+    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+    PQclear(result);
+
     snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm (pkg_name,pkg_alias,pkg_arch,version,rpm_filename,license,pkg_group,packager,release,build_date,vendor,url,source_rpm,summary,description,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",trim(pi->pkgName),trim(pi->pkgAlias),trim(pi->pkgArch),trim(pi->version),trim(pi->rpmFilename),trim(pi->license),trim(pi->group),trim(pi->packager),trim(pi->release),pi->buildDate,trim(pi->vendor),trim(pi->url),trim(pi->sourceRPM),trim(pi->summary),trim(pi->description),pi->pFileFk);
-    rc = DBaccess(DB,SQL);
-    if (rc < 0)
+    result = PQexec(db_conn, SQL);
+    if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
     {
-      DBaccess(DB,"ROLLBACK;");
-      printf("ERROR pfile %s Unable to access database.\n",pi->pFile);
-      printf("LOG pfile %s ERROR: %s\n",pi->pFile,SQL);
-      fflush(stdout);
+      PQexec(db_conn, "ROLLBACK;");
       return FALSE;
     }
-    if (rc != 2)  
-    {
-      DBaccess(DB,"SELECT currval('pkg_rpm_pkg_pk_seq'::regclass);");
-      pkg_pk = atoi(DBgetvalue(DB,0,0));
+    PQclear(result);
 
-      if (Verbose) { printf("pkg_pk:%d\n",pkg_pk);}
-      int i;
-      for (i=0;i<pi->req_size;i++)
+    result = PQexec(db_conn,"SELECT currval('pkg_rpm_pkg_pk_seq'::regclass);");
+    if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+    pkg_pk = atoi(PQgetvalue(result,0,0));
+    PQclear(result);
+  
+    if (Verbose) { printf("pkg_pk:%d\n",pkg_pk);}
+    int i;
+    for (i=0;i<pi->req_size;i++)
+    {
+      memset(SQL,0,sizeof(SQL));
+      snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm_req (pkg_fk,req_value) values (%d,E'%s');",pkg_pk,trim(pi->requires[i]));
+      result = PQexec(db_conn, SQL);
+      if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
       {
-        memset(SQL,0,sizeof(SQL));
-        snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm_req (pkg_fk,req_value) values (%d,E'%s');",pkg_pk,trim(pi->requires[i]));
-        rc = DBaccess(DB,SQL);
-        if (rc < 0)
-        {
-          DBaccess(DB,"ROLLBACK;");
-          printf("LOG pkg %d ERROR: %s\n",pkg_pk,SQL);
-          fflush(stdout);
-          return FALSE;
-        }
+        PQexec(db_conn, "ROLLBACK;");
+        return FALSE;
       }
-      DBaccess(DB,"COMMIT;");
-    } else {
-      //ignore duplicate constraint failure, rollback transaction
-      DBaccess(DB,"ROLLBACK;"); 
+      PQclear(result);
     }
+    result = PQexec(db_conn, "COMMIT;");
+    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+    PQclear(result);
   }
   return TRUE;	
 } /* RecordMetadata(struct rpmpkginfo *pi) */
@@ -644,7 +638,7 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
   char *repfile;
   char *filename;
   char SQL[MAXCMD];
-  int  rc;
+  PGresult *result;
   unsigned long lft, rgt;
   
   FILE *fp;
@@ -658,47 +652,42 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
   /* First get the uploadtree bounds (lft,rgt) for the package */
   snprintf(SQL,sizeof(SQL),"SELECT lft,rgt FROM uploadtree WHERE upload_fk = %ld AND pfile_fk = %ld limit 1",
       upload_pk, pi->pFileFk);
-  rc = DBaccess(DB,SQL);
-  if (rc < 0)
-  {
-    printf("ERROR %s(%d): %s\n", __FILE__, __LINE__, SQL);
-    fflush(stdout);
-    return FALSE;
-  }
-  if (DBdatasize(DB) == 0)
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (PQntuples(result) == 0)
   {
     printf("ERROR Missing debian package (internal data inconsistancy).  %s(%d): %s\n", __FILE__, __LINE__, SQL);
     fflush(stdout);
     return FALSE;
   } 
-  lft = strtoul(DBgetvalue(DB,0,0), NULL, 10);	
-  rgt = strtoul(DBgetvalue(DB,0,1), NULL, 10);	
+  lft = strtoul(PQgetvalue(result,0,0), NULL, 10);	
+  rgt = strtoul(PQgetvalue(result,0,1), NULL, 10);	
+  PQclear(result);
 
   snprintf(SQL,sizeof(SQL),"SELECT pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size FROM pfile, uploadtree where (pfile_pk=pfile_fk) and (upload_fk = %ld) AND (lft > %ld) AND (rgt < %ld) AND (ufile_name = 'control')",
       upload_pk, lft, rgt);
-  rc = DBaccess(DB,SQL);
-  if (rc < 0)
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (PQntuples(result) > 0)
   {
-    printf("LOG ERROR: %s\n",SQL);
-    fflush(stdout);
-    return FALSE;
-  }
-  if (DBdatasize(DB) > 0)
-  {
-    filename = DBgetvalue(DB,0,0);	
-    repfile = RepMkPath("files", filename);
+    filename = PQgetvalue(result,0,0);	
+    repfile = fo_RepMkPath("files", filename);
     if (!repfile) {
       printf("FATAL: PkgAgent unable to open file %s\n",filename);
       fflush(stdout);
       return FALSE;
     }
+    PQclear(result);
   } 
   else 
   {
+    PQclear(result);
     printf("LOG: Unable to find debian/control file! This file had wrong mimetype, ignore it!\n");
     memset(SQL,0,sizeof(SQL));
     snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_mimetypefk = NULL WHERE pfile_pk = %ld;", pi->pFileFk);
-    DBaccess(DB,SQL);
+    result = PQexec(db_conn, SQL);
+    if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+    PQclear(result);
     return FALSE;
   }
 
@@ -788,59 +777,53 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
 int    RecordMetadataDEB       (struct debpkginfo *pi)
 {
   char SQL[MAXCMD];
-  int rc;
+  PGresult *result;
   int pkg_pk;
 
   memset(SQL,0,sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT pfile_fk FROM pkg_deb WHERE pfile_fk = %ld;",pi->pFileFk);
-  rc = DBaccess(DB,SQL);
-  if (rc < 0)
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (PQntuples(result) <=0)
   {
-    printf("ERROR pfile %s Unable to access database.\n",pi->pFile);
-    printf("LOG pfile %s ERROR: %s\n",pi->pFile,SQL);
-    fflush(stdout);
-    return FALSE;
-  }
-  if (DBdatasize(DB) <=0)
-  {
+    PQclear(result);
     memset(SQL,0,sizeof(SQL));
-    DBaccess(DB,"BEGIN;");
+    result = PQexec(db_conn, "BEGIN;");
+    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+    PQclear(result);
+
     snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,summary,description,format,uploaders,standards_version,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',%d,E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",trim(pi->pkgName),trim(pi->pkgArch),trim(pi->version),trim(pi->maintainer),pi->installedSize,trim(pi->section),trim(pi->priority),trim(pi->homepage),trim(pi->source),trim(pi->summary),trim(pi->description),trim(pi->format),trim(pi->uploaders),trim(pi->standardsVersion),pi->pFileFk);
-    rc = DBaccess(DB,SQL);
-    if (rc < 0)
+    result = PQexec(db_conn, SQL);
+    if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
     {
-      DBaccess(DB,"ROLLBACK;");
-      printf("ERROR pfile %s Unable to access database.\n",pi->pFile);
-      printf("LOG pfile %s ERROR: %s\n",pi->pFile,SQL);
-      fflush(stdout);
+      PQexec(db_conn, "ROLLBACK;");
       return FALSE;
     }
-    if (rc != 2)
-    {
-      DBaccess(DB,"SELECT currval('pkg_deb_pkg_pk_seq'::regclass);");
-      pkg_pk = atoi(DBgetvalue(DB,0,0));
+    PQclear(result);
 
-      if (Verbose) { printf("pkg_pk:%d\n",pkg_pk);}
-      int i;
-      for (i=0;i<pi->dep_size;i++)
+    result = PQexec(db_conn,"SELECT currval('pkg_deb_pkg_pk_seq'::regclass);");
+    if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+    pkg_pk = atoi(PQgetvalue(result,0,0));
+    PQclear(result);
+   
+    if (Verbose) { printf("pkg_pk:%d\n",pkg_pk);}
+    int i;
+    for (i=0;i<pi->dep_size;i++)
+    {
+      memset(SQL,0,sizeof(SQL));
+      snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb_req (pkg_fk,req_value) values (%d,E'%s');",pkg_pk,trim(pi->depends[i]));
+      if (Verbose) { printf("DEPENDS:%s\n",pi->depends[i]);}
+      result = PQexec(db_conn, SQL);
+      if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
       {
-        memset(SQL,0,sizeof(SQL));
-        snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb_req (pkg_fk,req_value) values (%d,E'%s');",pkg_pk,trim(pi->depends[i]));
-        if (Verbose) { printf("DEPENDS:%s\n",pi->depends[i]);}
-        rc = DBaccess(DB,SQL);
-        if (rc < 0)
-        {
-          DBaccess(DB,"ROLLBACK;");
-          printf("LOG pkg %d ERROR: %s\n",pkg_pk,SQL);
-          fflush(stdout);
-          return FALSE;
-        }
+        PQexec(db_conn, "ROLLBACK;");
+        return FALSE;
       }
-      DBaccess(DB,"COMMIT;");
-    } else {
-      //ignore duplicate constraint failure, rollback transaction
-      DBaccess(DB,"ROLLBACK;");
+      PQclear(result);
     }
+    result = PQexec(db_conn, "COMMIT;");
+    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+    PQclear(result);
   }
   return TRUE;
 }/* RecordMetadataDEB(struct debpkginfo *pi) */

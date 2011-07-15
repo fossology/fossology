@@ -1,5 +1,5 @@
 # FOSSology Makefile - test for agents/pkgagent
-# Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
 TOP=../../../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
@@ -12,7 +12,7 @@ CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 TEST_OBJ=testRun.o testGetFieldValue.o testGetMetadata.o 
 all: $(EXE)
 $(EXE): $(TEST_OBJ) pkgagent.o $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
-	$(CC) -o $@ ../../pkgagent.o $(TEST_OBJ) $(CFLAGS_LOCAL)
+	$(CC) -o $@ ../../agent/pkgagent.o $(TEST_OBJ) $(CFLAGS_LOCAL)
 
 $(TEST_OBJ): %.o: %.c
 	$(CC) -c -g $<
@@ -21,16 +21,16 @@ test: all $(EXE)
 	./$(EXE)
 
 coverage: $(TEST_OBJ) pkgagent_cov.o
-	$(CC) -o $(EXE) ../../pkgagent_cov.o $(TEST_OBJ) $(FLAG_COV) $(CFLAGS_LOCAL); \
+	$(CC) -o $(EXE) ../../agent/pkgagent_cov.o $(TEST_OBJ) $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
-	lcov --directory  ../../   --capture --output-file cov.txt; \
+	lcov --directory  ../../agent/   --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
 pkgagent_cov.o:
-	$(MAKE) -C ../../ $@
+	$(MAKE) -C ../../agent/ $@
 
 pkgagent.o:
-	$(MAKE) -C ../../ $@
+	$(MAKE) -C ../../agent/ $@
 
 clean:
 	rm -fr $(EXE) *.o core *.xml *.txt results
