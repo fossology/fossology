@@ -36,22 +36,22 @@ int Verbose = 0;
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif /* SVN_REV */
 
-int tag[15] = {RPMTAG_NAME,
-		RPMTAG_EPOCH,
-		RPMTAG_ARCH,
-		RPMTAG_VERSION,
-		RPMTAG_LICENSE,
-		RPMTAG_GROUP,
-		RPMTAG_PACKAGER,
-		RPMTAG_RELEASE,
-		RPMTAG_BUILDTIME,
-		RPMTAG_VENDOR,
-		RPMTAG_URL,
-		RPMTAG_SOURCERPM,
-		RPMTAG_SUMMARY,
-		RPMTAG_DESCRIPTION,
-		RPMTAG_REQUIRENAME
-        	};
+int tag[15] = { RPMTAG_NAME,
+    RPMTAG_EPOCH,
+    RPMTAG_ARCH,
+    RPMTAG_VERSION,
+    RPMTAG_LICENSE,
+    RPMTAG_GROUP,
+    RPMTAG_PACKAGER,
+    RPMTAG_RELEASE,
+    RPMTAG_BUILDTIME,
+    RPMTAG_VENDOR,
+    RPMTAG_URL,
+    RPMTAG_SOURCERPM,
+    RPMTAG_SUMMARY,
+    RPMTAG_DESCRIPTION,
+    RPMTAG_REQUIRENAME
+};
 
 /* ***********************************************
  *  Trimming whitespace
@@ -64,7 +64,7 @@ char *trim(char *str)
   while(isspace(*str)) str++;
 
   if(*str == 0)  // All spaces
-  return str;
+    return str;
 
   // Trim trailing space
   end = str + strlen(str) - 1;
@@ -82,8 +82,8 @@ char *trim(char *str)
  * ********************************************/
 void	EscapeString	(const char *sourceString, char *escString, int esclen)
 {
-	int len;
-	int error;
+  int len;
+  int error;
 
   /*  remove any backslashes from the string as they don't escape properly
    *  for example, "don\'t" in the input will cause an insert error
@@ -111,11 +111,11 @@ void	EscapeString	(const char *sourceString, char *escString, int esclen)
     printf("ERROR length of string was %d, max length is %d\n", len, esclen/2);
     return;
   }
-  */
-	//printf("TEST:esclen---%d,sourcelen---%d\n",esclen,len);
-	PQescapeStringConn(DB, escString, sourceString, len, &error);
-	if (error)
-		printf("WARNING: %s line %d: Error escaping string with multibype character set?\n",__FILE__, __LINE__ );
+   */
+  //printf("TEST:esclen---%d,sourcelen---%d\n",esclen,len);
+  PQescapeStringConn(DB, escString, sourceString, len, &error);
+  if (error)
+    printf("WARNING: %s line %d: Error escaping string with multibype character set?\n",__FILE__, __LINE__ );
 }
 
 /**********************************************
@@ -130,9 +130,9 @@ void	EscapeString	(const char *sourceString, char *escString, int esclen)
 	@param char *Value
 	@param int ValueMax
 	@param char Separator
-**********************************************/
+ **********************************************/
 char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
-                         char *Value, int ValueMax, char Separator)
+    char *Value, int ValueMax, char Separator)
 {
   int s,f,v;
   int GotQuote;
@@ -145,14 +145,14 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
   f=0; v=0;
 
   for(s=0; (Sin[s] != '\0') && !isspace(Sin[s]) && (Sin[s] != '='); s++)
-    {
+  {
     Field[f++] = Sin[s];
-    }
+  }
   while(isspace(Sin[s])) s++; /* skip spaces after field name */
   if (Sin[s] != Separator) /* if it is not a field, then just return it. */
-    {
+  {
     return(Sin+s);
-    }
+  }
   if (Sin[s]=='\0') return(NULL);
   s++; /* skip '=' */
   while(isspace(Sin[s])) s++; /* skip spaces after '=' */
@@ -160,28 +160,28 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
 
   GotQuote='\0';
   if ((Sin[s]=='\'') || (Sin[s]=='"'))
-    {
+  {
     GotQuote = Sin[s];
     s++; /* skip quote */
     if (Sin[s]=='\0') return(NULL);
-    }
+  }
   if (GotQuote)
-    {
+  {
     for( ; (Sin[s] != '\0') && (Sin[s] != GotQuote); s++)
-      {
+    {
       if (Sin[s]=='\\') Value[v++]=Sin[++s];
       else Value[v++]=Sin[s];
-      }
     }
+  }
   else
-    {
+  {
     /* if it gets here, then there is no quote */
     for( ; (Sin[s] != '\0') && !isspace(Sin[s]); s++)
-      {
+    {
       if (Sin[s]=='\\') Value[v++]=Sin[++s];
       else Value[v++]=Sin[s];
-      }
     }
+  }
   while(isspace(Sin[s])) s++; /* skip spaces */
   return(Sin+s);
 } /* GetFieldValue() */
@@ -207,10 +207,10 @@ int    ProcessUpload (long upload_pk)
 
   struct rpmpkginfo *pi;
   struct debpkginfo *dpi;
- 
+
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   dpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
-            
+
   pgConn = DBgetconn(DB);
   rpmReadConfigFiles(NULL, NULL);
 
@@ -283,10 +283,10 @@ int    ProcessUpload (long upload_pk)
 
   /*  retrieve the records to process */
   snprintf(sqlbuf, sizeof(sqlbuf),
-           "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name AS mimetype FROM uploadtree INNER JOIN pfile ON upload_fk = '%ld' INNER JOIN mimetype ON (mimetype_pk = '%d' OR mimetype_pk = '%d' OR mimetype_pk = '%d') AND uploadtree.pfile_fk = pfile_pk AND pfile.pfile_mimetypefk = mimetype.mimetype_pk AND pfile_pk NOT IN (SELECT pkg_rpm.pfile_fk FROM pkg_rpm) AND pfile_pk NOT IN (SELECT pkg_deb.pfile_fk FROM pkg_deb);", upload_pk, mimetypepk, debmimetypepk, debsrcmimetypepk);
+      "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name AS mimetype FROM uploadtree INNER JOIN pfile ON upload_fk = '%ld' INNER JOIN mimetype ON (mimetype_pk = '%d' OR mimetype_pk = '%d' OR mimetype_pk = '%d') AND uploadtree.pfile_fk = pfile_pk AND pfile.pfile_mimetypefk = mimetype.mimetype_pk AND pfile_pk NOT IN (SELECT pkg_rpm.pfile_fk FROM pkg_rpm) AND pfile_pk NOT IN (SELECT pkg_deb.pfile_fk FROM pkg_deb);", upload_pk, mimetypepk, debmimetypepk, debsrcmimetypepk);
   result = PQexec(pgConn, sqlbuf);
   if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
- 
+
   numrows = PQntuples(result);
   for (i=0; i<numrows; i++)
   {
@@ -294,7 +294,7 @@ int    ProcessUpload (long upload_pk)
 
     memset(pi,0,sizeof(struct rpmpkginfo));
     memset(dpi,0,sizeof(struct debpkginfo));
-        
+
     strcpy(mimetype, PQgetvalue(result, i, 2));
     /*  
      * if mimetype='application/x-rpm' process RPM packages
@@ -307,19 +307,19 @@ int    ProcessUpload (long upload_pk)
       repFile = RepMkPath("files", pi->pFile);
       if (!repFile) {
         printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
-                          pi->pFileFk, pi->pFile);
+            pi->pFileFk, pi->pFile);
         fflush(stdout);
         return FALSE;
       }
       if (GetMetadata(repFile,pi)){
-          RecordMetadataRPM(pi);
+        RecordMetadataRPM(pi);
       }
     }
     else if (!strcasecmp(mimetype, "application/x-debian-package")){
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
       strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
       if (GetMetadataDebBinary(upload_pk, dpi)){
-          RecordMetadataDEB(dpi);
+        RecordMetadataDEB(dpi);
       }
     }
     else if (!strcasecmp(mimetype, "application/x-debian-source")){
@@ -328,12 +328,12 @@ int    ProcessUpload (long upload_pk)
       repFile = RepMkPath("files", dpi->pFile);
       if (!repFile) {
         printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
-                          dpi->pFileFk, dpi->pFile);
+            dpi->pFileFk, dpi->pFile);
         fflush(stdout);
         return FALSE;
       }
       if (GetMetadataDebSource(repFile,dpi)){
-            RecordMetadataDEB(dpi);
+        RecordMetadataDEB(dpi);
       }
     } else {
       printf("LOG: Not RPM and DEBIAN package!\n");
@@ -382,52 +382,52 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
     if (msgstr != NULL){
       if (Verbose) { printf("%s:%s",tagName(tag[i]),msgstr);}
       switch (tag[i]) {
-      case RPMTAG_NAME:
-	      EscapeString(msgstr, pi->pkgName, sizeof(pi->pkgName));
-        break;
-      case RPMTAG_EPOCH:
-        EscapeString(msgstr, pi->pkgAlias, sizeof(pi->pkgAlias));
-        break;
-      case RPMTAG_ARCH:
-        EscapeString(msgstr, pi->pkgArch, sizeof(pi->pkgArch));
-        break;
-      case RPMTAG_VERSION:
-        EscapeString(msgstr, pi->version, sizeof(pi->version));
-        break;
-      case RPMTAG_LICENSE:
-        EscapeString(msgstr, pi->license, sizeof(pi->license));
-        break;
-      case RPMTAG_GROUP:
-        EscapeString(msgstr, pi->group, sizeof(pi->group));
-        break;
-      case RPMTAG_PACKAGER:
-	      EscapeString(msgstr, pi->packager, sizeof(pi->packager));
-        break;
-      case RPMTAG_RELEASE:
-        EscapeString(msgstr, pi->release, sizeof(pi->release));
-        break;
-      case RPMTAG_BUILDTIME:	
-	t = atol(msgstr);
-	tp = &t;
-	strncpy(pi->buildDate,asctime(gmtime((time_t*)tp)),sizeof(pi->buildDate));
-	break;
-      case RPMTAG_VENDOR:
-	EscapeString(msgstr, pi->vendor, sizeof(pi->vendor));
-	break;
-      case RPMTAG_URL:
-	EscapeString(msgstr, pi->url, sizeof(pi->url));
-	break;
-      case RPMTAG_SOURCERPM:
-	EscapeString(msgstr, pi->sourceRPM,sizeof(pi->sourceRPM));
-	break;
-      case RPMTAG_SUMMARY:
-        EscapeString(msgstr, pi->summary, sizeof(pi->summary));
-	break;
-      case RPMTAG_DESCRIPTION:
-	EscapeString(msgstr, pi->description, sizeof(pi->description));
-	break;
-      default:
-	break;
+        case RPMTAG_NAME:
+          EscapeString(msgstr, pi->pkgName, sizeof(pi->pkgName));
+          break;
+        case RPMTAG_EPOCH:
+          EscapeString(msgstr, pi->pkgAlias, sizeof(pi->pkgAlias));
+          break;
+        case RPMTAG_ARCH:
+          EscapeString(msgstr, pi->pkgArch, sizeof(pi->pkgArch));
+          break;
+        case RPMTAG_VERSION:
+          EscapeString(msgstr, pi->version, sizeof(pi->version));
+          break;
+        case RPMTAG_LICENSE:
+          EscapeString(msgstr, pi->license, sizeof(pi->license));
+          break;
+        case RPMTAG_GROUP:
+          EscapeString(msgstr, pi->group, sizeof(pi->group));
+          break;
+        case RPMTAG_PACKAGER:
+          EscapeString(msgstr, pi->packager, sizeof(pi->packager));
+          break;
+        case RPMTAG_RELEASE:
+          EscapeString(msgstr, pi->release, sizeof(pi->release));
+          break;
+        case RPMTAG_BUILDTIME:
+          t = atol(msgstr);
+          tp = &t;
+          strncpy(pi->buildDate,asctime(gmtime((time_t*)tp)),sizeof(pi->buildDate));
+          break;
+        case RPMTAG_VENDOR:
+          EscapeString(msgstr, pi->vendor, sizeof(pi->vendor));
+          break;
+        case RPMTAG_URL:
+          EscapeString(msgstr, pi->url, sizeof(pi->url));
+          break;
+        case RPMTAG_SOURCERPM:
+          EscapeString(msgstr, pi->sourceRPM,sizeof(pi->sourceRPM));
+          break;
+        case RPMTAG_SUMMARY:
+          EscapeString(msgstr, pi->summary, sizeof(pi->summary));
+          break;
+        case RPMTAG_DESCRIPTION:
+          EscapeString(msgstr, pi->description, sizeof(pi->description));
+          break;
+        default:
+          break;
       }
     }
     free((void *)msgstr); 
@@ -465,7 +465,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
     printf("Name:%s\n",pi->sourceRPM);
   }
 } /* ReadHeaderInfo(Header header, struct rpmpkginfo *pi) */
-   
+
 /**
  * GetMetadata(char *pkg, struct rpmpkginfo *pi)
  * 
@@ -481,50 +481,50 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
   //rpmpi.pFileFk = 4234634;
   //if (PKG_RPM)
   //{
-    FD_t fd;
-    rpmRC rpmrc;
-    Header header;
-    rpmts ts;
-    rpmVSFlags vsflags;
+  FD_t fd;
+  rpmRC rpmrc;
+  Header header;
+  rpmts ts;
+  rpmVSFlags vsflags;
 
-    vsflags = RPMVSF_DEFAULT;
-    ts = (rpmts) rpmtsCreate();
+  vsflags = RPMVSF_DEFAULT;
+  ts = (rpmts) rpmtsCreate();
 
-    fd = Fopen(pkg,"r");
-    if ( fd == NULL ||Ferror(fd)){
-      rpmlog(RPMLOG_ERR, "open of %s failed: %s\n", pkg, Fstrerror(fd));
-      if (fd){
-        Fclose(fd);
-      }
-      return FALSE;
+  fd = Fopen(pkg,"r");
+  if ( fd == NULL ||Ferror(fd)){
+    rpmlog(RPMLOG_ERR, "open of %s failed: %s\n", pkg, Fstrerror(fd));
+    if (fd){
+      Fclose(fd);
     }
+    return FALSE;
+  }
 
-    vsflags |= _RPMVSF_NOSIGNATURES;
-    vsflags |= _RPMVSF_NODIGESTS;
-    vsflags |= RPMVSF_NOHDRCHK;
-    vsflags |= RPMVSF_NEEDPAYLOAD;
-    
-    rpmtsSetVSFlags(ts, vsflags);
+  vsflags |= _RPMVSF_NOSIGNATURES;
+  vsflags |= _RPMVSF_NODIGESTS;
+  vsflags |= RPMVSF_NOHDRCHK;
+  vsflags |= RPMVSF_NEEDPAYLOAD;
 
-    //rpmReadConfigFiles(NULL, NULL);
-    rpmrc = rpmReadPackageFile(ts, fd, pkg,&header);
-    Fclose(fd);
-    ts = (rpmts) rpmtsFree(ts);
+  rpmtsSetVSFlags(ts, vsflags);
 
-    switch (rpmrc) {
+  //rpmReadConfigFiles(NULL, NULL);
+  rpmrc = rpmReadPackageFile(ts, fd, pkg,&header);
+  Fclose(fd);
+  ts = (rpmts) rpmtsFree(ts);
+
+  switch (rpmrc) {
     case RPMRC_OK:
     case RPMRC_NOKEY:
     case RPMRC_NOTTRUSTED:
-        break;
+      break;
     case RPMRC_NOTFOUND:
     case RPMRC_FAIL:
     default:
-        rpmlog(RPMLOG_ERR, "%s cannot be read or is not an RPM.\n", pkg);
-        return FALSE;
-    }
-    ReadHeaderInfo(header, pi);
-    //rpmFreeMacros(NULL);
-    header = headerFree(header);	
+      rpmlog(RPMLOG_ERR, "%s cannot be read or is not an RPM.\n", pkg);
+      return FALSE;
+  }
+  ReadHeaderInfo(header, pi);
+  //rpmFreeMacros(NULL);
+  header = headerFree(header);
   //}
   return TRUE;
 } /* GetMetadata(char *pkg, struct rpmpkginfo *pi) */
@@ -628,8 +628,8 @@ char * ParseDebFile(char *Sin, char *Field, char *Value)
     {
       Value[v++]=Sin[s];
     }
-      if (Verbose) { printf("Field is %s and Value is %s", Field, Value);}
-      return(Sin+s);
+    if (Verbose) { printf("Field is %s and Value is %s", Field, Value);}
+    return(Sin+s);
   } else
   {
     if (Verbose) { printf("ExValue is %s", Sin);}
@@ -660,7 +660,7 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
   /* Get the debian control file's repository path */
   /* First get the uploadtree bounds (lft,rgt) for the package */
   snprintf(SQL,sizeof(SQL),"SELECT lft,rgt FROM uploadtree WHERE upload_fk = %ld AND pfile_fk = %ld limit 1",
-           upload_pk, pi->pFileFk);
+      upload_pk, pi->pFileFk);
   rc = DBaccess(DB,SQL);
   if (rc < 0)
   {
@@ -678,7 +678,7 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
   rgt = strtoul(DBgetvalue(DB,0,1), NULL, 10);	
 
   snprintf(SQL,sizeof(SQL),"SELECT pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size FROM pfile, uploadtree where (pfile_pk=pfile_fk) and (upload_fk = %ld) AND (lft > %ld) AND (rgt < %ld) AND (ufile_name = 'control')",
-           upload_pk, lft, rgt);
+      upload_pk, lft, rgt);
   rc = DBaccess(DB,SQL);
   if (rc < 0)
   {
@@ -716,37 +716,37 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
   {
     s = ParseDebFile(line,field,value);
     if (!strcasecmp(field, "Description")) {
-	     EscapeString(value, pi->summary, sizeof(pi->summary));
-       strcpy(temp, "");
+      EscapeString(value, pi->summary, sizeof(pi->summary));
+      strcpy(temp, "");
     }
     if ((s[0] != '\0') && (temp!=NULL))
       strcat(temp,s);
     if (!strcasecmp(field, "Package")) {
-	     EscapeString(value, pi->pkgName, sizeof(pi->pkgName));
+      EscapeString(value, pi->pkgName, sizeof(pi->pkgName));
     }
     if (!strcasecmp(field, "Version")) {
-	     EscapeString(value, pi->version, sizeof(pi->version));
+      EscapeString(value, pi->version, sizeof(pi->version));
     }
     if (!strcasecmp(field, "Architecture")) {
-	     EscapeString(value, pi->pkgArch, sizeof(pi->pkgArch));
+      EscapeString(value, pi->pkgArch, sizeof(pi->pkgArch));
     }
     if (!strcasecmp(field, "Maintainer")) {
-	     EscapeString(value, pi->maintainer, sizeof(pi->maintainer));
+      EscapeString(value, pi->maintainer, sizeof(pi->maintainer));
     }
     if (!strcasecmp(field, "Installed-Size")) {
-       pi->installedSize=atol(value);
+      pi->installedSize=atol(value);
     }
     if (!strcasecmp(field, "Section")) {
-	     EscapeString(value, pi->section, sizeof(pi->section));
+      EscapeString(value, pi->section, sizeof(pi->section));
     }
     if (!strcasecmp(field, "Priority")) {
-	     EscapeString(value, pi->priority, sizeof(pi->priority));
+      EscapeString(value, pi->priority, sizeof(pi->priority));
     }
     if (!strcasecmp(field, "Homepage")) {
-	     EscapeString(value, pi->homepage, sizeof(pi->homepage));
+      EscapeString(value, pi->homepage, sizeof(pi->homepage));
     }
     if (!strcasecmp(field, "Source")) {
-	     EscapeString(value, pi->source, sizeof(pi->source));
+      EscapeString(value, pi->source, sizeof(pi->source));
     }
     if (!strcasecmp(field, "Depends")) {
       char *depends = NULL;
@@ -873,56 +873,56 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
     s = ParseDebFile(line,field,value);
 
     if (!strcasecmp(field, "Format")) {
-	     EscapeString(value, pi->format, sizeof(pi->format));
+      EscapeString(value, pi->format, sizeof(pi->format));
     }
     if (!strcasecmp(field, "Source")) {
-	     EscapeString(value, pi->source, sizeof(pi->source));
+      EscapeString(value, pi->source, sizeof(pi->source));
     }
     if (!strcasecmp(field, "Source")) {
-	     EscapeString(value, pi->pkgName, sizeof(pi->pkgName));
+      EscapeString(value, pi->pkgName, sizeof(pi->pkgName));
     }
     if (!strcasecmp(field, "Architecture")) {
-	     EscapeString(value, pi->pkgArch, sizeof(pi->pkgArch));
+      EscapeString(value, pi->pkgArch, sizeof(pi->pkgArch));
     }
     if (!strcasecmp(field, "Version")) {
-       if (strlen(pi->version) == 0)
-         EscapeString(value, pi->version, sizeof(pi->version));
+      if (strlen(pi->version) == 0)
+        EscapeString(value, pi->version, sizeof(pi->version));
     }
     if (!strcasecmp(field, "Maintainer")) {
-	     EscapeString(value, pi->maintainer, sizeof(pi->maintainer));
+      EscapeString(value, pi->maintainer, sizeof(pi->maintainer));
     }
     if (!strcasecmp(field, "Uploaders")) {
-	     EscapeString(value, pi->uploaders, sizeof(pi->uploaders));
+      EscapeString(value, pi->uploaders, sizeof(pi->uploaders));
     }
     if (!strcasecmp(field, "Standards-Version")) {
-       EscapeString(value, pi->standardsVersion, sizeof(pi->standardsVersion));
+      EscapeString(value, pi->standardsVersion, sizeof(pi->standardsVersion));
     }
     if (!strcasecmp(field, "Build-Depends")) {
-       char *depends = NULL;
-       char tempvalue[MAXCMD];
-       int size,i,length;
-       size = 0;
-       length = MAXLENGTH;
-       if (value[0] != '\0'){
-       strncpy(tempvalue, value, sizeof(tempvalue));
-       depends = strtok(value, ",");
-       while (depends && (depends[0] != '\0')) {
-         if (strlen(depends) >= length)
-           length = strlen(depends) + 1;
-         depends = strtok(NULL, ",");
-         size++;
-       }
-       if (Verbose) { printf("SIZE:%d\n", size);}
-       
-       pi->depends = calloc(size, sizeof(char *));
-       pi->depends[0] = calloc(length, sizeof(char));
-       strcpy(pi->depends[0],strtok(tempvalue,","));
-       for (i=1;i<size;i++){
-         pi->depends[i] = calloc(length, sizeof(char));
-         strcpy(pi->depends[i],strtok(NULL, ","));
-       }
-       pi->dep_size = size;
-       }
+      char *depends = NULL;
+      char tempvalue[MAXCMD];
+      int size,i,length;
+      size = 0;
+      length = MAXLENGTH;
+      if (value[0] != '\0'){
+        strncpy(tempvalue, value, sizeof(tempvalue));
+        depends = strtok(value, ",");
+        while (depends && (depends[0] != '\0')) {
+          if (strlen(depends) >= length)
+            length = strlen(depends) + 1;
+          depends = strtok(NULL, ",");
+          size++;
+        }
+        if (Verbose) { printf("SIZE:%d\n", size);}
+
+        pi->depends = calloc(size, sizeof(char *));
+        pi->depends[0] = calloc(length, sizeof(char));
+        strcpy(pi->depends[0],strtok(tempvalue,","));
+        for (i=1;i<size;i++){
+          pi->depends[i] = calloc(length, sizeof(char));
+          strcpy(pi->depends[i],strtok(NULL, ","));
+        }
+        pi->dep_size = size;
+      }
     }
   }
 
