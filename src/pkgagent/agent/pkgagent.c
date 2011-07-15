@@ -16,7 +16,7 @@
 
  ***************************************************************/
 /**
- * file pkgagent.c
+ * @file pkgagent.c
  * The package metadata agent puts data about each package (rpm and deb) into the database.
  * 
  * Pkgagent get RPM package info from rpm files using rpm library,
@@ -28,8 +28,7 @@
  */
 #include "pkgagent.h"
 
-void *DB=NULL;
-PGconn *pgConn = NULL; // the connection to Database
+PGconn *db_conn = NULL; // the connection to Database
 int Verbose = 0;
 
 #ifdef SVN_REV
@@ -211,25 +210,24 @@ int    ProcessUpload (long upload_pk)
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   dpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
 
-  pgConn = DBgetconn(DB);
   rpmReadConfigFiles(NULL, NULL);
 
   /*  "pkgagent" needs to know what? */
 
   /*  "pkgagent" needs to know the mimetype for 'application/x-rpm' and 'application/x-debian-package' and 'application/x-debian-source'*/
   snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm' LIMIT 1;");
-  result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1); 
+  result = PQexec(db_conn, sqlbuf);
+  if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1); 
   mimetypepk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
   if ( mimetypepk == 0 )
   {
     snprintf(sqlbuf, sizeof(sqlbuf), "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-rpm');");
-    result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    result = PQexec(db_conn, sqlbuf);
+    if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
     snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm' LIMIT 1;");
-    result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    result = PQexec(db_conn, sqlbuf);
+    if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
     mimetypepk = atoi(PQgetvalue(result, 0, 0));
     PQclear(result);
     if ( mimetypepk == 0 )
@@ -239,18 +237,18 @@ int    ProcessUpload (long upload_pk)
     }
   }
   snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;");
-  result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+  result = PQexec(db_conn, sqlbuf);
+  if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
   debmimetypepk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
   if ( debmimetypepk == 0 )
   {
     snprintf(sqlbuf, sizeof(sqlbuf), "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-package');");
-    result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    result = PQexec(db_conn, sqlbuf);
+    if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
     snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;");
     result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
     debmimetypepk = atoi(PQgetvalue(result, 0, 0));
     PQclear(result);
     if ( debmimetypepk == 0 )
@@ -304,7 +302,7 @@ int    ProcessUpload (long upload_pk)
     if (!strcasecmp(mimetype,"application/x-rpm")) {
       pi->pFileFk = atoi(PQgetvalue(result, i, 0));
       strncpy(pi->pFile, PQgetvalue(result, i, 1), sizeof(pi->pFile));
-      repFile = RepMkPath("files", pi->pFile);
+      repFile = fo_RepMkPath("files", pi->pFile);
       if (!repFile) {
         printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
             pi->pFileFk, pi->pFile);
@@ -327,9 +325,8 @@ int    ProcessUpload (long upload_pk)
       strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
       repFile = RepMkPath("files", dpi->pFile);
       if (!repFile) {
-        printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
+        FATAL("pfile %ld PkgAgent unable to open file %s\n",
             dpi->pFileFk, dpi->pFile);
-        fflush(stdout);
         return FALSE;
       }
       if (GetMetadataDebSource(repFile,dpi)){
@@ -338,7 +335,7 @@ int    ProcessUpload (long upload_pk)
     } else {
       printf("LOG: Not RPM and DEBIAN package!\n");
     }
-    Heartbeat(++HBItemsProcessed);
+    fo_scheduler_heart(1);
   }
   PQclear(result);
   rpmFreeMacros(NULL);

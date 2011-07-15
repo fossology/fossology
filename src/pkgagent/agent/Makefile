@@ -1,7 +1,7 @@
 # FOSSology Makefile - agents/pkgagent
 # Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
 LANG=C
-TOP=../..
+TOP=../../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
@@ -14,21 +14,29 @@ CFLAGS_LOCAL_RPM_4_4=$(CFLAGS_LOCAL) -D_RPM_4_4
 CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 
 all: $(EXE)
+	@echo "make pkgagent agent and test"
 $(EXE): main.c pkgagent.o $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
 	$(CC) main.c pkgagent.o  $(CFLAGS_LOCAL) -o $@
 
 pkgagent.o: pkgagent.c pkgagent.h
+	@echo "make pkgagent agent"
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
-	$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
+		$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
 	else \
-	$(CC) -c $< $(CFLAGS_LOCAL_RPM_4_4); \
+		$(CC) -c $< $(CFLAGS_LOCAL_RPM_4_4); \
 	fi
 
 install: all
+	@echo "make pkgagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	@if test ! -e $(CONFDIR)/mods-enabled/pkgagent; then \
+	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
+
 
 uninstall:
+	@echo "make pkgagent agent uninstall"
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+	rm -f $(CONFDIR)/mods-enabled/pkgagent
 
 test: all 
 	$(MAKE) -C $(TESTDIRS) test
@@ -38,12 +46,13 @@ coverage: pkgagent_cov.o
 
 pkgagent_cov.o: pkgagent.c pkgagent.h
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM) -o $@; \
+		$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM) -o $@; \
 	else \
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
-fi
+		$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
+	fi
 
 clean:
+	@echo "make pkgagent agent clean"
 	rm -f $(EXE) *.o core *.gc*; \
 	$(MAKE) -C $(TESTDIRS) clean
 
