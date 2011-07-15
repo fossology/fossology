@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,7 +16,7 @@
 
  ***************************************************************/
 /**
- * file pkgagent.c
+ * @file main.c
  * The package metadata agent puts data about each package (rpm and deb) into the database.
  * 
  * Pkgagent get RPM package info from rpm files using rpm library,
@@ -42,20 +42,21 @@ int	main	(int argc, char *argv[])
   int Agent_pk;
 
   long upload_pk = 0;           // the upload primary key
-  extern int AlarmSecs;
+
+  fo_scheduler_connect(&argc, argv);
   
   //glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   //glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
 
-  DB = DBopen();
-  if (!DB)
+  db_conn = fo_dbconnect();
+  if (!db_conn)
   {
     printf("FATAL: Unable to connect to database\n");
     fflush(stdout);
     exit(-1);
   }
 
-  Agent_pk = GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
+  Agent_pk = fo_GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"iv")) != -1)
@@ -78,24 +79,15 @@ int	main	(int argc, char *argv[])
   /* If no args, run from scheduler! */
   if (argc == 1)
   {
-    signal(SIGALRM,ShowHeartbeat);
-    alarm(AlarmSecs);
-
-    printf("OK\n"); /* inform scheduler that we are ready */
-    fflush(stdout);
-
-    while(ReadLine(stdin,Parm,MAXCMD) >= 0)
+    while(fo_scheduler_next())
     {
       if (Verbose) { printf("PKG: pkgagent read %s\n", Parm);}
       fflush(stdout);
 
-      upload_pk = atoi(Parm);
+      upload_pk = atoi(fo_scheduler_current());
       if (upload_pk ==0) continue;
 
       if(!ProcessUpload(upload_pk)) return -1;
-      sleep(15);
-      printf("OK\n");
-      fflush(stdout);
     }
   }
   else
@@ -109,6 +101,7 @@ int	main	(int argc, char *argv[])
     }
   }
 
-  DBclose(DB);
+  PQfinish(db_conn);
+  fo_scheduler_disconnect();
   return(0);
 } /* main() */

@@ -28,9 +28,7 @@
 
 #include <sys/wait.h>
 
-#include "libfossrepo.h"
-#include "libfossdb.h"
-#include "libfossagent.h"
+#include <libfossology.h>
 #include "rpmlib.h"
 #include "rpmts.h"
 #include "rpmlog.h"
@@ -88,9 +86,8 @@ struct debpkginfo
   char standardsVersion[MAXCMD];
 };
 
-extern void *DB;
+extern PGconn* db_conn;
 extern int Verbose;
-extern long HBItemsProcessed;
 
 int ProcessUpload(long upload_pk);
 
