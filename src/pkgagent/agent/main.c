@@ -61,18 +61,18 @@ int	main	(int argc, char *argv[])
   while((c = getopt(argc,argv,"iv")) != -1)
   {
     switch(c)
-	{
-	case 'i':
-                DBclose(DB);  /* DB was opened above, now close it and exit */
-                exit(0);
-        case 'v':
-                Verbose++;
-                break;
-	default:
-		Usage(argv[0]);
-		DBclose(DB);
-		exit(-1);
-	}
+    {
+      case 'i':
+        DBclose(DB);  /* DB was opened above, now close it and exit */
+        exit(0);
+      case 'v':
+        Verbose++;
+        break;
+      default:
+        Usage(argv[0]);
+        DBclose(DB);
+        exit(-1);
+    }
   }
 
   /* If no args, run from scheduler! */
@@ -91,7 +91,7 @@ int	main	(int argc, char *argv[])
 
       upload_pk = atoi(Parm);
       if (upload_pk ==0) continue;
-     
+
       if(!ProcessUpload(upload_pk)) return -1;
       sleep(15);
       printf("OK\n");
@@ -103,9 +103,9 @@ int	main	(int argc, char *argv[])
     /* printf("DEBUG: running in cli mode, processing file(s)\n"); */
     for (; optind < argc; optind++)
     {
-       struct rpmpkginfo *rpmpi;
-       rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
-       GetMetadata(argv[optind],rpmpi);
+      struct rpmpkginfo *rpmpi;
+      rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+      GetMetadata(argv[optind],rpmpi);
     }
   }
 

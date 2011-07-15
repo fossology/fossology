@@ -25,7 +25,7 @@ pkgagent.o: pkgagent.c pkgagent.h
 	fi
 
 install: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)	
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 uninstall:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
