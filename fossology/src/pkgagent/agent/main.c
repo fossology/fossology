@@ -56,7 +56,7 @@ int	main	(int argc, char *argv[])
     exit(-1);
   }
 
-  Agent_pk = fo_GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
+  Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"iv")) != -1)
@@ -64,14 +64,14 @@ int	main	(int argc, char *argv[])
     switch(c)
     {
       case 'i':
-        DBclose(DB);  /* DB was opened above, now close it and exit */
+        PQfinish(db_conn);  /* DB was opened above, now close it and exit */
         exit(0);
       case 'v':
         Verbose++;
         break;
       default:
         Usage(argv[0]);
-        DBclose(DB);
+        PQfinish(db_conn);        
         exit(-1);
     }
   }

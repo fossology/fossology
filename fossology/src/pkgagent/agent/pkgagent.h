@@ -28,18 +28,15 @@
 
 #include <sys/wait.h>
 
-#include <libfossology.h>
 #include "rpmlib.h"
 #include "rpmts.h"
 #include "rpmlog.h"
 #include "rpmmacro.h"
 
-#define MAXCMD 5000
+#include <libfossology.h>
 
-#define NO      0
-#define YES     1
-#define TRUE YES
-#define FALSE NO
+#define MAXCMD 5000
+#define MAXLENGTH 256
 
 struct rpmpkginfo 
 {
