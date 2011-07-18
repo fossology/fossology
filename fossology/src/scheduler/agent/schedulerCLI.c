@@ -121,6 +121,7 @@ void interface_usage()
   printf("|%*s:   shutdown the scheduler gracefully            |\n", P_WIDTH, "stop");
   printf("|%*s:   pauses a job indefinitely                    |\n", P_WIDTH, "pause <job id>");
   printf("|%*s:   reload the configuration information         |\n", P_WIDTH, "reload");
+  printf("|%*s:   prints a list of valid agents                |\n", P_WIDTH, "agents");
   printf("|%*s:   scheduler responds with status information   |\n", P_WIDTH, "status [job id]");
   printf("|%*s:   restart a paused job                         |\n", P_WIDTH, "restart <job id>");
   printf("|%*s:   query/change the scheduler/job verbosity     |\n", P_WIDTH, "verbose [job id] [level]");
@@ -334,10 +335,11 @@ int main(int argc, char** argv)
       if(bytes == 0)
         closing = 1;
 
-      poss = strtok(buffer, "\n");
       for(poss = strtok(buffer, "\n"); poss != NULL; poss = strtok(NULL, "\n"))
       {
-        if(strncmp(poss, "CLOSE", 5) == 0)
+        if(strncmp(poss, "received", 8) == 0)
+          continue;
+        else if(strncmp(poss, "CLOSE", 5) == 0)
           closing = 1;
         else if(strcmp(poss, "end") != 0)
           printf("%s\n", poss);
