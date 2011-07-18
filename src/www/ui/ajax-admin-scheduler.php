@@ -1,5 +1,5 @@
 <?php
-/*
+/***********************************************************
  Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
@@ -14,23 +14,18 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
+ ***********************************************************/
 
 /**
- * ajax-urlUpload
- * \brief display to upload from url form
- *
- * @version "$Id: ajax-urlUpload.php 3942 2011-03-17 23:24:33Z rrando $"
- * Created on Feb 14, 2011 by Mark Donohoe
- */
+ * \file ajax_admin_scheduler 
+ * \brief reaction when selecting one operation, different operation has different parameters to can be set
+ **/
 
 define("TITLE_ajax_admin_scheduler", _("URL"));
 
+/**
+ * \class ajax_admin_scheduler
+ **/
 class ajax_admin_scheduler extends FO_Plugin
 {
   public $Name = "ajax_admin_scheduler";
@@ -41,6 +36,13 @@ class ajax_admin_scheduler extends FO_Plugin
   public $NoHTML     = 1; /* This plugin needs no HTML content help */
   public $LoginFlag = 0;
 
+  /**
+   * \brief get the job list for the specified operation
+   * \param $type operation type, the job list is different
+           according to the type of the operation
+   * \return job list
+   * \todo get the job list from DB
+   **/
   function JobListOption($type)
   {
     if (empty($type))
@@ -55,32 +57,31 @@ class ajax_admin_scheduler extends FO_Plugin
     {
       $job_list_option .= "<option value='0'>scheduler</option>";
     }
-    $job_list_option .= "<option value='1'>1</option>";
-    $job_list_option .= "<option value='2'>2</option>";
-    $job_list_option .= "<option value='3'>3</option>";
+    /* TODO, get job list from dB */
     return $job_list_option;
   }
 
+  /**
+   * \brief get the verbose list
+   *        if the value of verbose is 1, set verbose as 1
+   * \return verbose list
+   **/
   function VerboseListOption()
   {
     $min = 1;
-    $max = 4;
+    $max = 3;
     for ($i = $min; $i <= $max; $i++)
     {
-      if ($i == $max)
-      {
-        $bitmask= pow(2, $i - 1) - 1;
-        $verbose_list_option .= "<option value='$bitmask'>$i</option>";
-      }
-      else
-      {
-        $bitmask = pow(2, $i -1);
-        $verbose_list_option .= "<option value='$bitmask'>$i</option>";
-      }
+      $bitmask= pow(2, $i) - 1;
+      $verbose_list_option .= "<option value='$bitmask'>$i</option>";
     }
     return $verbose_list_option;
   }
 
+  /**
+   * \brief get the priority list for setting, -20-20
+   * \return priority list
+   **/
   function PriorityListOption()
   {
     $min = -20;
@@ -100,8 +101,8 @@ class ajax_admin_scheduler extends FO_Plugin
   }
 
 
-  /*
-   Output(): Generate the text for this plugin.
+  /**
+   * \brief Generate the text for this plugin, when selecting one operation, return related html fragment to oprerate.
    */
   function Output()
   {
