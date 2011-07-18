@@ -245,6 +245,22 @@ int agent_kill(int* pid, agent a, gpointer unused)
 }
 
 /**
+ * GTraverseFunction that will print he name of every agent in alphabetical
+ * order separated by spaces.
+ *
+ * @param name the name of the agent
+ * @param ma the meta_agetns structure associated with the specific name
+ * @param ostr the output stream to write the data to, socket in this case
+ * @return always returns 0 to indicate that the traversal should continue
+ */
+int agent_list(char* name, meta_agent ma, GOutputStream* ostr)
+{
+  g_output_stream_write(ostr, name, strlen(name), NULL, NULL);
+  g_output_stream_write(ostr, " ",  1,            NULL, NULL);
+  return 0;
+}
+
+/**
  * GTraversalFunction that will test all of the agents. This will create
  * a job and an agent for each type of agent and traverses the meta_agent
  * tree instead of the agent tree.
@@ -1009,6 +1025,16 @@ void test_agents(host h)
 void kill_agents()
 {
   g_tree_foreach(agents, (GTraverseFunc)agent_kill, NULL);
+}
+
+/**
+ * TODO
+ *
+ * @param ostr
+ */
+void list_agents(GOutputStream* ostr)
+{
+  g_tree_foreach(meta_agents, (GTraverseFunc)agent_list, ostr);
 }
 
 /**

@@ -16,6 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 ************************************************************** */
 
 /* local includes */
+#include <agent.h>
 #include <database.h>
 #include <event.h>
 #include <interface.h>
@@ -116,10 +117,13 @@ void* interface_thread(void* param)
     if(cmd == NULL)
       break;
 
+    /* send recieved message */
+    g_output_stream_write(conn->ostr, "received\n", 9, NULL, NULL);
+
     /* the interface has chosen to close, acknowledge and end the thread */
-    else if(strcmp(cmd, "close") == 0)
+    if(strcmp(cmd, "close") == 0)
     {
-      g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
+      g_output_stream_write(conn->ostr, "CLOSE\n", 6, NULL, NULL);
       if(TVERBOSE2) clprintf("INTERFACE: closing connection to user interface\n");
       return NULL;
     }
@@ -127,7 +131,7 @@ void* interface_thread(void* param)
     /* scheduler instructed to shutdown, acknowledge and create close event */
     else if(strcmp(cmd, "stop") == 0)
     {
-      g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
+      g_output_stream_write(conn->ostr, "CLOSE\n", 6, NULL, NULL);
       if(TVERBOSE2) clprintf("INTERFACE: shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
       return NULL;
@@ -145,6 +149,9 @@ void* interface_thread(void* param)
     /* scheduler instructed to reload it configuration data */
     else if(strcmp(cmd, "reload") == 0)
       event_signal(load_config, NULL);
+
+    else if(strcmp(cmd, "agents") == 0)
+      event_signal(list_agents, conn->ostr);
 
     /* a status request has been made for scheduler or job      */
     /* * if scheduler request, print scheduler status followed  */
