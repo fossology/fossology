@@ -41,7 +41,6 @@ class ajax_admin_scheduler extends FO_Plugin
    * \param $type operation type, the job list is different
            according to the type of the operation
    * \return job list
-   * \todo get the job list from DB
    **/
   function JobListOption($type)
   {
@@ -49,15 +48,22 @@ class ajax_admin_scheduler extends FO_Plugin
     {
       return '';
     }
-    else if ('status' == $type)
-    {
-      $job_list_option .= "<option value='0'>ALL</option>";
-    }
-    else if ('verbose' == $type)
+    else if ('status' == $type || 'verbose' == $type)
     {
       $job_list_option .= "<option value='0'>scheduler</option>";
+      $job_array = GetJobList("");
     }
-    /* TODO, get job list from dB */
+    /* get job list from dB */
+    if ('pause' == $type)  $job_array = GetJobList("Started");
+    if ('restart' == $type)  $job_array = GetJobList("Paused");
+    if ('priority' == $type || 'pause' == $type)  $job_array = GetJobList("");
+    
+    foreach ($job_array as $key => $value) 
+    {
+      $job_id = $value['jq_pk'];
+      $job_list_option .= "<option value='$job_id'>$job_id</option>";
+    } 
+    
     return $job_list_option;
   }
 
@@ -117,19 +123,29 @@ class ajax_admin_scheduler extends FO_Plugin
       case "HTML":
        $operation = GetParm('operation', PARM_TEXT);
        $job_list_option = $this->JobListOption($operation);
-       if ('pause' == $operation || 'restart' == $operation || 'status'  == $operation)
+       if ('pause' == $operation || 'restart' == $operation)
        {
-         $V.= "Please select one job:<select name='job_list' id='job_list'>$job_list_option</select>";
+         $text = _("Select a job");
+         $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select>";
        }
        else if ('verbose'  == $operation) 
        {
          $verbose_list_option = $this->VerboseListOption();
-         $V.= "Please select one job:<select name='job_list' id='job_list'>$job_list_option</select><br>Please one verbosity level:<select name='level_list' id='level_list'>$verbose_list_option</select>";
+         $text1 = _("Select the scheduler or a job");
+         $text2 = _("Select a verbosity level");
+         $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option</select><br>$text2: <select name='level_list' id='level_list'>$verbose_list_option</select>";
+       }
+       else if ('status'  == $operation) 
+       {
+         $text = _("Select the scheduler or a job");
+         $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select><br></select>";
        }
        else if ('priority'  == $operation)
        {
          $priority_list_option = $this->PriorityListOption();
-         $V.= "Please select one job:<select name='job_list' id='job_list'>$job_list_option </select> <br>Set the priority for the specified job:<select name='priority_list' id='priority_list'>$priority_list_option</select>";
+         $text1 = _("Select a job");
+         $text2 = _("Select a priority level");
+         $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option </select> <br>$text2: <select name='priority_list' id='priority_list'>$priority_list_option</select>";
        }
         break;
       case "Text":
