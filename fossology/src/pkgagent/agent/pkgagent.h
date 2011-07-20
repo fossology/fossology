@@ -1,5 +1,5 @@
 /**************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -83,8 +83,8 @@ struct debpkginfo
   char standardsVersion[MAXCMD];
 };
 
-extern PGconn* db_conn;
 extern int Verbose;
+extern PGconn* db_conn;        // the connection to Database
 
 int ProcessUpload(long upload_pk);
 
