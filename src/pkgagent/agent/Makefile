@@ -6,7 +6,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 TESTDIRS=../agent_tests
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -I/usr/include/rpm -lpq -lrpm -lrpmio $(ALL_CFLAGS)
+CFLAGS_LOCAL=$(ALL_CFLAGS) -I/usr/include/rpm -lpq -lrpm -lrpmio
 
 EXE=pkgagent
 HDRS=pkgagent.h
@@ -16,7 +16,7 @@ CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 all: $(EXE)
 	@echo "make pkgagent agent and test"
 
-$(EXE): main.c $(FOLIB) pkgagent.o $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
+$(EXE): main.c $(FOLIB) pkgagent.o $(VARS) $(HDRS)
 	@echo "make pkgagent agent"
 	$(CC) main.c pkgagent.o  $(CFLAGS_LOCAL) -o $@
 

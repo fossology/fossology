@@ -16,7 +16,9 @@
 
  ***************************************************************/
 /**
- * @file main.c
+ * \file main.c
+ * \brief main for pkgagent
+ *
  * The package metadata agent puts data about each package (rpm and deb) into the database.
  * 
  * Pkgagent get RPM package info from rpm files using rpm library,
@@ -31,10 +33,41 @@
 #ifdef SVN_REV
 #endif /* SVN_REV */
 
-/***********************************************/
+/**
+ * \brief main function for the pkgagent
+ *
+ * There are 2 ways to use the pkgagent agent:
+ *   1. Command Line Analysis :: test a rpm file from the command line
+ *   2. Agent Based Analysis  :: run from the scheduler
+ *
+ * +-----------------------+
+ * | Command Line Analysis |
+ * +-----------------------+
+ *
+ * To analyze a rpm file from the command line:
+ *   file :: if files are rpm package listed, display their meta data
+ *   -v   :: verbose (-vv = more verbose)
+ *
+ *   example:
+ *     $ ./pkgagent rpmfile
+ *
+ * +----------------------+
+ * | Agent Based Analysis |
+ * +----------------------+
+ *
+ * To run the pkgagent as an agent simply run with no command line args
+ *   no file :: process data from the scheduler
+ *   -i      :: initialize the database, then exit
+ *
+ *   example:
+ *     $ upload_pk | ./pkgagent
+ *
+ * \param argc the number of command line arguments
+ * \param argv the command line arguments
+ * \return 0 on a successful program execution
+ */
 int	main	(int argc, char *argv[])
 {
-  char Parm[MAXCMD];
   int c;
   char *agent_desc = "Pulls metadata out of RPM or DEBIAN packages";
   //struct rpmpkginfo *glb_rpmpi;
@@ -51,8 +84,7 @@ int	main	(int argc, char *argv[])
   db_conn = fo_dbconnect();
   if (!db_conn)
   {
-    printf("FATAL: Unable to connect to database\n");
-    fflush(stdout);
+    FATAL("Unable to connect to database");
     exit(-1);
   }
 
@@ -81,23 +113,28 @@ int	main	(int argc, char *argv[])
   {
     while(fo_scheduler_next())
     {
-      if (Verbose) { printf("PKG: pkgagent read %s\n", Parm);}
-      fflush(stdout);
-
       upload_pk = atoi(fo_scheduler_current());
+
+      if (Verbose) { printf("PKG: pkgagent read %ld\n", upload_pk);}
       if (upload_pk ==0) continue;
 
-      if(!ProcessUpload(upload_pk)) return -1;
+      if(ProcessUpload(upload_pk) != 0) return -1;
     }
   }
   else
   {
-    /* printf("DEBUG: running in cli mode, processing file(s)\n"); */
+    if (Verbose) { printf("DEBUG: running in cli mode, processing file(s)\n");}
     for (; optind < argc; optind++)
     {
       struct rpmpkginfo *rpmpi;
       rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
-      GetMetadata(argv[optind],rpmpi);
+      rpmReadConfigFiles(NULL, NULL);
+      if(ProcessUpload(atoi(argv[optind])) == 0) 
+      //if(GetMetadata(argv[optind],rpmpi) != -1)
+        printf("OK\n");
+      else
+        printf("Fail\n");
+      rpmFreeMacros(NULL);
     }
   }
 

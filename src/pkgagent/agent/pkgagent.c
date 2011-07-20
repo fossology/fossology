@@ -16,7 +16,9 @@
 
  ***************************************************************/
 /**
- * @file pkgagent.c
+ * \file pkgagent.c
+ * \brief local function of pkgagent
+ *
  * The package metadata agent puts data about each package (rpm and deb) into the database.
  * 
  * Pkgagent get RPM package info from rpm files using rpm library,
@@ -28,13 +30,14 @@
  */
 #include "pkgagent.h"
 
-PGconn *db_conn = NULL; // the connection to Database
 int Verbose = 0;
+PGconn* db_conn = NULL;        // the connection to Database
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif /* SVN_REV */
 
+/** Array of RPMTAG */
 int tag[15] = { RPMTAG_NAME,
     RPMTAG_EPOCH,
     RPMTAG_ARCH,
@@ -52,9 +55,15 @@ int tag[15] = { RPMTAG_NAME,
     RPMTAG_REQUIRENAME
 };
 
-/* ***********************************************
- *  Trimming whitespace
- * ***********************************************/
+/**
+ * \brief Trimming whitespace
+ *
+ * will trim the lead/trail space
+ *
+ * \param str the string to trim
+ *
+ * \return the string after trim
+ */
 char *trim(char *str)
 {
   char *end;
@@ -74,11 +83,15 @@ char *trim(char *str)
   return str;
 }
 
-/**********************************************
- *  Escaping special characters(single quote)
- *  so that they cannot cause any harm
+/**
+ * \brief Escaping special characters(single quote)
  *
- * ********************************************/
+ *  Escaping special characters, so that they cannot cause any harm
+ *
+ * \param sourceString the source string need to escape
+ * \param escString the string after excape
+ * \param esclen the string length need to escape
+ */
 void	EscapeString	(const char *sourceString, char *escString, int esclen)
 {
   int len;
@@ -117,19 +130,20 @@ void	EscapeString	(const char *sourceString, char *escString, int esclen)
     printf("WARNING: %s line %d: Error escaping string with multibype character set?\n",__FILE__, __LINE__ );
 }
 
-/**********************************************
- GetFieldValue(): Given a string that contains
- field='value' pairs, save the items.
- Returns: pointer to start of next field, or
- NULL at \0.
-
-	@param char *Sin
-	@param char *Field
-	@param int FieldMax
-	@param char *Value
-	@param int ValueMax
-	@param char Separator
- **********************************************/
+/**
+ * \brief GetFieldValue()
+ *
+ * Given a string that contains field='value' pairs, save the items.
+ *
+ * \param char *Sin
+ * \param char *Field
+ * \param int FieldMax
+ * \param char *Value
+ * \param int ValueMax
+ * \param char Separator
+ *
+ * \return pointer to start of next field, or NULL at \0.
+ */
 char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
     char *Value, int ValueMax, char Separator)
 {
@@ -187,11 +201,13 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
 
 
 /**
- * ProcessUpload (long upload_pk)
+ * \brief ProcessUpload (long upload_pk)
  *
  * Get all pfile need to processed use upload_pk
- * Parameters:
- * 	@param upload_pk   upload_pk send from scheduler
+ *
+ * \param upload_pk the upload_pk send from scheduler
+ *
+ * \return 0 on OK, -1 on failure. 
  */
 int    ProcessUpload (long upload_pk)
 {
@@ -224,7 +240,7 @@ int    ProcessUpload (long upload_pk)
   {
     snprintf(sqlbuf, sizeof(sqlbuf), "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-rpm');");
     result = PQexec(db_conn, sqlbuf);
-    if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQcommand(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
     snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm' LIMIT 1;");
     result = PQexec(db_conn, sqlbuf);
     if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
@@ -232,8 +248,8 @@ int    ProcessUpload (long upload_pk)
     PQclear(result);
     if ( mimetypepk == 0 )
     {
-      printf("ERROR: pkgagent rpm mimetype not installed!\n");
-      return FALSE;
+      ERROR("pkgagent rpm mimetype not installed!");
+      return (-1);
     }
   }
   snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;");
@@ -245,7 +261,7 @@ int    ProcessUpload (long upload_pk)
   {
     snprintf(sqlbuf, sizeof(sqlbuf), "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-package');");
     result = PQexec(db_conn, sqlbuf);
-    if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQcommand(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
     snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;");
     result = PQexec(db_conn, sqlbuf);
     if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
@@ -253,8 +269,8 @@ int    ProcessUpload (long upload_pk)
     PQclear(result);
     if ( debmimetypepk == 0 )
     {
-      printf("ERROR: pkgagent deb mimetype not installed!\n");
-      return FALSE;
+      ERROR("pkgagent deb mimetype not installed!");
+      return (-1);
     }
   }
   snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;");
@@ -266,7 +282,7 @@ int    ProcessUpload (long upload_pk)
   {
     snprintf(sqlbuf, sizeof(sqlbuf), "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-source');");
     result = PQexec(db_conn, sqlbuf);
-    if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQcommand(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
     snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;");
     result = PQexec(db_conn, sqlbuf);
     if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
@@ -274,8 +290,8 @@ int    ProcessUpload (long upload_pk)
     PQclear(result);
     if ( debsrcmimetypepk == 0 )
     {
-      printf("ERROR: pkgagent deb source mimetype not installed!\n");
-      return FALSE;
+      ERROR("pkgagent deb source mimetype not installed!");
+      return (-1);
     }
   }
 
@@ -304,20 +320,19 @@ int    ProcessUpload (long upload_pk)
       strncpy(pi->pFile, PQgetvalue(result, i, 1), sizeof(pi->pFile));
       repFile = fo_RepMkPath("files", pi->pFile);
       if (!repFile) {
-        printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
+        FATAL("pfile %ld PkgAgent unable to open file %s",
             pi->pFileFk, pi->pFile);
-        fflush(stdout);
-        return FALSE;
+        return (-1);
       }
-      if (GetMetadata(repFile,pi)){
+      if (GetMetadata(repFile,pi) != -1){
         RecordMetadataRPM(pi);
       }
     }
     else if (!strcasecmp(mimetype, "application/x-debian-package")){
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
       strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
-      if (GetMetadataDebBinary(upload_pk, dpi)){
-        RecordMetadataDEB(dpi);
+      if (GetMetadataDebBinary(upload_pk, dpi) != -1){
+        if (RecordMetadataDEB(dpi) != 0) return (-1);
       }
     }
     else if (!strcasecmp(mimetype, "application/x-debian-source")){
@@ -327,9 +342,9 @@ int    ProcessUpload (long upload_pk)
       if (!repFile) {
         FATAL("pfile %ld PkgAgent unable to open file %s\n",
             dpi->pFileFk, dpi->pFile);
-        return FALSE;
+        return (-1);
       }
-      if (GetMetadataDebSource(repFile,dpi)){
+      if (GetMetadataDebSource(repFile,dpi) != -1){
         RecordMetadataDEB(dpi);
       }
     } else {
@@ -339,16 +354,16 @@ int    ProcessUpload (long upload_pk)
   }
   PQclear(result);
   rpmFreeMacros(NULL);
-  return TRUE;
+  return (0);
 }/*ProcessUpload (long upload_pk)*/
 
 /**
- * ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
+ * \brief ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
+ *
  * get RPM package info from rpm file header use rpm library
  *
- * Parameters:
- * 	@param Header header rpm header
- * 	@param struct *pi    rpmpkginfo global pointer
+ * \param Header header rpm header
+ * \param struct *pi rpmpkginfo global pointer
  */
 void ReadHeaderInfo(Header header, struct rpmpkginfo *pi) 
 {
@@ -464,14 +479,14 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
 } /* ReadHeaderInfo(Header header, struct rpmpkginfo *pi) */
 
 /**
- * GetMetadata(char *pkg, struct rpmpkginfo *pi)
+ * \brief GetMetadata(char *pkg, struct rpmpkginfo *pi)
  * 
  * Get RPM package info.
- * Parameters:
- * 	@param char *pkg                path of repo pfile
- * 	@param struct rpmpkginfo *pi    rpmpkginfo global pointer
- * Returns:
- * 		True for success
+ * 
+ * \param char *pkg path of repo pfile
+ * \param struct rpmpkginfo *pi rpmpkginfo global pointer
+ * 
+ * \return 0 on OK, -1 on failure.
  */
 int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
 {
@@ -493,7 +508,7 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
     if (fd){
       Fclose(fd);
     }
-    return FALSE;
+    return (-1);
   }
 
   vsflags |= _RPMVSF_NOSIGNATURES;
@@ -517,21 +532,23 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
     case RPMRC_FAIL:
     default:
       rpmlog(RPMLOG_ERR, "%s cannot be read or is not an RPM.\n", pkg);
-      return FALSE;
+      return (-1);
   }
   ReadHeaderInfo(header, pi);
   //rpmFreeMacros(NULL);
   header = headerFree(header);
   //}
-  return TRUE;
+  return (0);
 } /* GetMetadata(char *pkg, struct rpmpkginfo *pi) */
 
 /**
- * RecordMetadata(struct rpmpkginfo *pi)
+ * \brief RecordMetadata(struct rpmpkginfo *pi)
+ *
  * Store rpm package info into database
  *	
- * 	@param struct rpmpkginfo *pi
+ * \param struct rpmpkginfo *pi
  *
+ * \return 0 on OK, -1 on failure.
  */
 int	RecordMetadataRPM	(struct rpmpkginfo *pi)
 {
@@ -553,10 +570,10 @@ int	RecordMetadataRPM	(struct rpmpkginfo *pi)
 
     snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm (pkg_name,pkg_alias,pkg_arch,version,rpm_filename,license,pkg_group,packager,release,build_date,vendor,url,source_rpm,summary,description,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",trim(pi->pkgName),trim(pi->pkgAlias),trim(pi->pkgArch),trim(pi->version),trim(pi->rpmFilename),trim(pi->license),trim(pi->group),trim(pi->packager),trim(pi->release),pi->buildDate,trim(pi->vendor),trim(pi->url),trim(pi->sourceRPM),trim(pi->summary),trim(pi->description),pi->pFileFk);
     result = PQexec(db_conn, SQL);
-    if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
     {
       PQexec(db_conn, "ROLLBACK;");
-      return FALSE;
+      return (-1);
     }
     PQclear(result);
 
@@ -572,10 +589,10 @@ int	RecordMetadataRPM	(struct rpmpkginfo *pi)
       memset(SQL,0,sizeof(SQL));
       snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm_req (pkg_fk,req_value) values (%d,E'%s');",pkg_pk,trim(pi->requires[i]));
       result = PQexec(db_conn, SQL);
-      if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+      if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
       {
         PQexec(db_conn, "ROLLBACK;");
-        return FALSE;
+        return (-1);
       }
       PQclear(result);
     }
@@ -583,16 +600,21 @@ int	RecordMetadataRPM	(struct rpmpkginfo *pi)
     if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
     PQclear(result);
   }
-  return TRUE;	
+  return (0);	
 } /* RecordMetadata(struct rpmpkginfo *pi) */
 
 
-/* 
- * ParseDebFile(char *Sin, char *Field, char *Value)
+/** 
+ * \brief ParseDebFile(char *Sin, char *Field, char *Value)
  *
  * parse debian bianry control file with Field/Value pairs
  *
- * */
+ * \param char *Sin the string to parse
+ * \param char *Field the Field part of pairs
+ * \param char *Value the Value part of pairs
+ *
+ * \return the string after parse
+ */
 char * ParseDebFile(char *Sin, char *Field, char *Value)
 {
   int s,f,v;
@@ -629,9 +651,14 @@ char * ParseDebFile(char *Sin, char *Field, char *Value)
 } /* ParseDebFile(char *Sin, char *Field, char *Value) */
 
 /**
- * GetMetadataDebBinary(long upload_pk, struct debpkginfo *pi)
+ * \brief GetMetadataDebBinary(long upload_pk, struct debpkginfo *pi)
  *
  * get debian binary package info
+ *
+ * \param upload_pk the upload_pk
+ * \param pi the global pointor of debpkginfo
+ *
+ * \return 0 on OK, -1 on failure.
  */
 int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
 {
@@ -656,9 +683,8 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
   if (PQntuples(result) == 0)
   {
-    printf("ERROR Missing debian package (internal data inconsistancy).  %s(%d): %s\n", __FILE__, __LINE__, SQL);
-    fflush(stdout);
-    return FALSE;
+    ERROR("Missing debian package (internal data inconsistancy). SQL: %s\n", SQL);
+    return (-1);
   } 
   lft = strtoul(PQgetvalue(result,0,0), NULL, 10);	
   rgt = strtoul(PQgetvalue(result,0,1), NULL, 10);	
@@ -673,9 +699,8 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
     filename = PQgetvalue(result,0,0);	
     repfile = fo_RepMkPath("files", filename);
     if (!repfile) {
-      printf("FATAL: PkgAgent unable to open file %s\n",filename);
-      fflush(stdout);
-      return FALSE;
+      FATAL("PkgAgent unable to open file %s\n",filename);
+      return (-1);
     }
     PQclear(result);
   } 
@@ -686,16 +711,15 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
     memset(SQL,0,sizeof(SQL));
     snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_mimetypefk = NULL WHERE pfile_pk = %ld;", pi->pFileFk);
     result = PQexec(db_conn, SQL);
-    if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
     PQclear(result);
-    return FALSE;
+    return (-1);
   }
 
   /* Parse the debian/control file to get every Field and Value */
   if ((fp = fopen(repfile, "r")) == NULL){
-    printf("FATAL: Unable to open debian/control file %s\n",repfile);
-    fflush(stdout);
-    return FALSE;
+    FATAL("Unable to open debian/control file %s\n",repfile);
+    return (-1);
   }
 
   while (fgets(line,MAXCMD,fp)!=NULL)
@@ -766,13 +790,17 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
     EscapeString(temp, pi->description, sizeof(pi->description));
 
   fclose(fp);
-  return TRUE;
+  return (0);
 }/* GetMetadataDebBinary(struct debpkginfo *pi) */
 
 /**
- * RecordMetadataDEB(struct debpkginfo *pi)
+ * \brief RecordMetadataDEB(struct debpkginfo *pi)
  * 
  * Store debian package info into database
+ *
+ * \param pi the global pointor of debpkginfo
+ *
+ * \return 0 on OK, -1 on failure.
  */
 int    RecordMetadataDEB       (struct debpkginfo *pi)
 {
@@ -794,10 +822,10 @@ int    RecordMetadataDEB       (struct debpkginfo *pi)
 
     snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,summary,description,format,uploaders,standards_version,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',%d,E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",trim(pi->pkgName),trim(pi->pkgArch),trim(pi->version),trim(pi->maintainer),pi->installedSize,trim(pi->section),trim(pi->priority),trim(pi->homepage),trim(pi->source),trim(pi->summary),trim(pi->description),trim(pi->format),trim(pi->uploaders),trim(pi->standardsVersion),pi->pFileFk);
     result = PQexec(db_conn, SQL);
-    if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
     {
       PQexec(db_conn, "ROLLBACK;");
-      return FALSE;
+      return (-1);
     }
     PQclear(result);
 
@@ -814,10 +842,10 @@ int    RecordMetadataDEB       (struct debpkginfo *pi)
       snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb_req (pkg_fk,req_value) values (%d,E'%s');",pkg_pk,trim(pi->depends[i]));
       if (Verbose) { printf("DEPENDS:%s\n",pi->depends[i]);}
       result = PQexec(db_conn, SQL);
-      if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+      if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
       {
         PQexec(db_conn, "ROLLBACK;");
-        return FALSE;
+        return (-1);
       }
       PQclear(result);
     }
@@ -825,14 +853,19 @@ int    RecordMetadataDEB       (struct debpkginfo *pi)
     if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
     PQclear(result);
   }
-  return TRUE;
+  return (0);
 }/* RecordMetadataDEB(struct debpkginfo *pi) */
 
 /**
- * GetMetadataDebSource(char *repFile, struct debpkginfo *pi)
+ * \brief GetMetadataDebSource(char *repFile, struct debpkginfo *pi)
  *
  * get debian source package info from .dsc file
- **/
+ *
+ * \param repFile the pfile path name
+ * \param pi the global pointor of debpkginfo
+ *
+ * \return 0 on OK, -1 on failure.
+ */
 int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
 { 
   FILE *fp;
@@ -843,9 +876,8 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
 
   /*  Parse the debian .dsc file to get every Field and Value */
   if ((fp = fopen(repFile, "r")) == NULL){
-    printf("FATAL: Unable to open .dsc file %s\n",repFile);
-    fflush(stdout);
-    return FALSE;
+    FATAL("Unable to open .dsc file %s\n",repFile);
+    return (-1);
   }
 
   while (fgets(line,MAXCMD,fp)!=NULL)
@@ -907,7 +939,7 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
   }
 
   fclose(fp);
-  return TRUE;
+  return (0);
 }/*  GetMetadataDebSource(char *repFile, struct debpkginfo *pi) */
 
 /***********************************************
