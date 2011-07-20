@@ -488,4 +488,21 @@ function JobListSummary($upload_pk) {
   return ($Status);
 } // JobListSummary()
 
+/**
+ * \brief  Get job list
+ * \param string $status
+ * \return job list related to the jobstatus
+           array(i=> Array ( [jq_pk] =>j)
+ */
+function GetJobList($status)
+{
+  global $DB;
+  if (empty($DB)) {
+    return;
+  }
+  $SQL = "SELECT jq_pk FROM jobqueue WHERE jq_endtext like '$status%' order by jq_pk;";
+  $Results = $DB->Action($SQL);
+  return $Results;
+}
+
 ?>

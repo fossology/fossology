@@ -43,27 +43,92 @@ class admin_scheduler extends FO_Plugin
    **/
   function OperationListOption()
   {
-    $V.= "<option value='status'>status</option>";
-    $V.= "<option value='stop'>stop</option>";
-    $V.= "<option value='pause'>pause</option>";
-    $V.= "<option value='reload'>reload</option>";
-    $V.= "<option value='restart'>restart</option>";
-    $V.= "<option value='verbose'>verbose</option>";
-    $V.= "<option value='database'>database</option>";
-    $V.= "<option value='priority'>priority</option>";
+    $operation_name = _("Status");
+    $V.= "<option value='status'>$operation_name</option>";
+    $operation_name= _("Shutdown Scheduler");
+    $V.= "<option value='stop'>$operation_name</option>";
+    $operation_name = _("Reload");
+    $V.= "<option value='reload'>$operation_name</option>";
+    $operation_name = _("Agents");
+    $V.= "<option value='agents'>$operation_name</option>";
+    $operation_name = _("Pause");
+    $V.= "<option value='pause'>$operation_name</option>";
+    $operation_name = _("Restart paused job");
+    $V.= "<option value='restart'>$operation_name</option>";
+    $operation_name = _("Verbose");
+    $V.= "<option value='verbose'>$operation_name</option>";
+    $operation_name = _("Check job queue");
+    $V.= "<option value='database'>$operation_name</option>";
+    $operation_name = _("Priority");
+    $V.= "<option value='priority'>$operation_name</option>";
     return($V);
   } // FolderListOption()
 
   /**
    * \brief get the job list for the operation 'status'
    * \return job list
-   * \todo get the job list from DB
    **/
   function JobListOption()
   {
-    /* TODO, get job list from dB */
+    $job_list_option .= "<option value='0'>scheduler</option>";
+    $job_array = GetJobList(""); /* get all job list */
+
+    foreach ($job_array as $key => $value)
+    {
+      $job_id = $value['jq_pk'];
+      $job_list_option .= "<option value='$job_id'>$job_id</option>";
+    }
     return $job_list_option;
   } // JobListOption()
+
+  /**
+   * \brief get the related operation text, e.g. the operation text of 'stop' is 'Shutdown Schedule'
+   * \param $operation operation name, e.g. 'status'
+   * \return one operation text
+   **/
+  function GetOperationText($operation)
+  {
+    $operation_text = '';
+    $job_id = GetParm('job_list', PARM_TEXT);
+    if ('0' ==  $job_id)
+      $job_type = "scheduler";
+    else 
+      $job_type = "job $job_id";
+    switch ($operation)
+    {
+      case 'stop':
+        $operation_text = "Shutdown Schedule";
+        break;
+      case 'pause':
+        $operation_text = "Pause the $job_type";
+        break;
+      case 'reload':
+        $operation_text = "Reload the configuration information for the agents and hosts";
+        break;
+      case 'status':
+        $operation_text = "Get status of the $job_type";
+        break;
+      case 'agents':
+        $operation_text = "Get list of valid agents";
+        break;
+      case 'restart':
+        $operation_text = "Restart the $job_type";
+        break;
+      case 'verbose':
+        $level_id =  GetParm('level_list', PARM_TEXT);
+        $verbose_level =  log($level_id + 1, 2);
+        $operation_text = "Change the verbosity level of the $job_type as $verbose_level";
+        break;
+      case 'database':
+        $operation_text = "Force the scheduler to check the job queue";
+        break;
+      case 'priority':
+        $priority_id =  GetParm('priority_list', PARM_TEXT);
+        $operation_text = "Change the priority of the $job_type as $priority_id";
+        break;
+    }
+    return $operation_text;
+  }
 
   /**
   * \brief submit the specified operation
@@ -102,7 +167,7 @@ class admin_scheduler extends FO_Plugin
       return;
     }
     $msg = $operation;
-    if ('ALL' != $job_id && !empty($job_id) && 'scheduler' != $job_id) $msg .= " $job_id";
+    if (!empty($job_id) && 'scheduler' != $job_id) $msg .= " $job_id";
     if (!empty($priority_id)) $msg .= " $priority_id";
     if (!empty($level_id)) $msg .= " $level_id";
     $msg = trim($msg);
@@ -138,13 +203,16 @@ class admin_scheduler extends FO_Plugin
         {
           $report = "";
           $response_from_scheduler = $this->OperationSubmit($operation, $job_id, $priority_id, $level_id);
+          $operation_text = $this->GetOperationText($operation);
           if (empty($this->error_info))
           {
-            $status_msg .= "Operate '$operation' on the scheduler successfully.";
+            $text = _("successfully");
+            $status_msg .= "$operation_text $text.";
           }
           else   
           {
-            $status_msg .= "Operate '$operation' on the scheduler failed."; 
+            $text = _("failed");
+            $status_msg .= "$operation_text $text.";
           }
           $report .= $this->error_info;
           if (!empty($response_from_scheduler))
@@ -155,46 +223,49 @@ class admin_scheduler extends FO_Plugin
           echo displayMessage($status_msg, $report); 
         }
 
-        $V.= "List of operations on the scheduler:\n";
-        $V.= "<br>";
-        $V.= "<b>stop:</b> the scheduler will gracefully shutdown. Depending on what is currently running, this could take some time. \n";
-        $V.= "<br>";
-        $job_id_caption = htmlspecialchars('<job_id>');
-        $level_caption = htmlspecialchars('<level>');
-        $V.= "<b>pause $job_id_caption:</b> the scheduler will pause the specified job. Used exclusively on jobs that is running, if the job isn't running this will error. \n";
-        $V.= "<br>";
-        $V.= "<b>reload:</b> the scheduler will reload the configuration information for the agents and hosts. \n";
-        $V.= "<br>";
-        $V.= "<b>status: </b> this will get scheduler status and simple status for each job as the following:<br>";
-        $V.= "# scheduler:[#] daemon:[#] jobs:[#] log:[str] port:[#] verbose:[#]<br>";
-        $V.= "# job:[#] status:[str] type:[str] priority:[#] running:[#] finished[#] failed:[#]<br>";
-        $V.= ".<br># end";
-        $V.= "<br>";
-        $V.= "<b>status $job_id_caption:</b> this will get simple status for the specified job and the status of every agent belonging to the specified job as the following:<br>";
-        $V.= "# job:[#] status:[str] type:[str] priority:[#] running:[#] finished[#] failed:[#]<br>";
-        $V.= "# agent:[#] host:[str] type:[str] status:[str] time:[str]<br>";
-        $V.= ".<br># end";
-        $V.= "<br>";
-        $V.= "<b>restart $job_id_caption:</b> the scheduler will restart the specified job. Used exclusively on jobs that have been paused, if the job isn't paused this will error.<br>";
-        $V.= "<b>verbose $level_caption:</b> this will change the verbose level of the scheduler.<br>";
-        $V.= "<b>verbose $job_id_caption $level_caption:</b> this will change the the verbose level for all of the agents belonging to specified job.<br>";
-        $V.= "level 1: FATAL, ERROR, WARNING, and DEBUG messages from agents; FATAL, ERROR, WARNING messages from scheduler.<br>";
-        $V.= "level 2: All files that are loaded for agent information; All agent spawning and death information; All Job creation information; All messages received from user interfaces (GUI and CLI). including level 1.<br>";
-        $V.= "level 3: All host, agent and scheduler configuration information when loaded; All agent communications (send and receive); All job update information; All agent status changes. including level 1-2.<br>";
-        $V.= "<b>database:</b> the scheduler will check the database job queue for new jobs.<br>";
-        $V.= "<b>priority $job_id_caption $level_caption:</b> the scheduler will change the priority for the specified job, the range of nice values is -20..20(19)<br>";
+        $text = _("List of operations:");
+        $V.= $text;
+        $V.= "<ul>";
+        $text = _("Pause a job.");
+        $operation_name = _("Pause");
+        $V.= "<li><b>$operation_name</b>: $text</li>";
+        $text = _("Reload the configuration information for the agents and hosts.");
+        $operation_name = _("Reload");
+        $V.= "<li><b>$operation_name</b>: $text</li>";
+        $text = _("Display job or scheduler status.");
+        $operation_name = _("Status");
+        $V.= "<li><b>$operation_name</b>: $text</li>";
+        $text = _("Get list of valid agents.");
+        $operation_name = _("Agents");
+        $V.= "<li><b>$operation_name</b>: $text</li>";
+        $text = _("Restart a job that has been paused.");
+        $operation_name = _("Restart paused job");
+        $V.= "<li><b>$operation_name</b>: $text</li>";
+        $text = _("Change the verbosity level of the scheduler or a job.");
+        $operation_name = _("Verbose");
+        $V.= "<li><b>$operation_name</b>: $text</li>";
+        $text = _("Force the scheduler to check the job queue.");
+        $operation_name = _("Check job queue");
+        $V.= "<li><b>$operation_name</b>: $text</li>";
+        $text = _("Change the priority of a job.");
+        $operation_name = _("Priority");
+        $V.= "<li><b>$operation_name</b>: $text</li>";
+        $text = _("Shutdown the scheduler gracefully.  This will stop all background processing, but the user interface will still be available.  Depending on what is currently running, this could take some time.");
+        $operation_name = _("Shutdown Scheduler");
+        $V.= "<li><b>$operation_name</b>: $text</li>";
+        $V.= "</ul>";
         $V.= "<hr>";
 
-        $text = _("Select the operation on the scheduler:");
+        $text = _("Select an operation");
         $V.= "<form id='operation_form' method='post'>";
-        $V.= "<p><li>$text\n";
+        $V.= "<p><li>$text: ";
         $V.= "<select name='operation' id='operation' onchange='OperationSwich_Get(\"" .Traceback_uri() . "?mod=ajax_admin_scheduler&operation=\"+this.value)'<br />\n";
         $V.= $this->OperationListOption();
         $V.= "</select>\n"; 
         $V.= "<br><br>";
         $V.= "<div id='div_operation'>";
-        $text = _("Please select one job:");
-        $V.= "$text<select name='job_list' id='job_list'>";
+        $text = _("Select the scheduler or a job");
+        $V.= "$text: <select name='job_list' id='job_list'>";
         $V.= $this->JobListOption('status');
         $V.= "</select>";
         $V.= "</div>";
