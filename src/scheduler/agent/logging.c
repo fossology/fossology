@@ -21,6 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <scheduler.h>
 
 /* std library includes */
+#define _GNU_SOURCE
+#include <stdio.h>
 #include <time.h>
 
 /* unix includes */
