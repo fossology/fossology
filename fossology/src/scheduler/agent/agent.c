@@ -13,7 +13,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-************************************************************** */
+ ************************************************************** */
 
 /* local includes */
 #include <agent.h>
@@ -222,7 +222,7 @@ int update(int* pid_ptr, agent a, gpointer unused)
     a->check_analyzed = a->total_analyzed;
 
     VERBOSE3("JOB[%d].%s[%d]: agent updated correctly, processed %d items\n",
-          job_id(a->owner), a->meta_data->name, a->pid, a->check_analyzed);
+        job_id(a->owner), a->meta_data->name, a->pid, a->check_analyzed);
   }
 
   return 0;
@@ -300,25 +300,26 @@ void agent_listen(agent a)
 
   TEST_NULV(a);
 
+
   /* validate the agent version */
   if(fgets(buffer, sizeof(buffer), a->read) == NULL)
   {
     alprintf(job_log(a->owner),
-        "T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
+        "T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n",
         __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
     g_thread_exit(NULL);
   }
 
+  buffer[strlen(buffer) - 1] = '\0';
   if(strncmp(buffer, "@@@", 3) == 0)
   {
     alprintf(job_log(a->owner),
-            "T_FATAL %s.%d: JOB[%d].%s[%d] agent closed before providing version information\n"
-            __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid);
+        "T_FATAL %s.%d: JOB[%d].%s[%d] agent closed before providing version information\n",
+        __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid);
     g_thread_exit(NULL);
   }
 
   g_static_mutex_lock(&version_lock);
-  buffer[strlen(buffer) - 1] = '\0';
   if(a->meta_data->version == NULL && a->meta_data->valid)
   {
     a->meta_data->version = g_strdup(buffer);
@@ -346,14 +347,12 @@ void agent_listen(agent a)
     /* get message from agent */
     if(fgets(buffer, sizeof(buffer), a->read) == NULL)
       g_thread_exit(NULL);
+    buffer[strlen(buffer) - 1] = '\0';
 
     if(TVERBOSE3)
-    {
-      buffer[strlen(buffer) - 1] = '\0';
       alprintf(job_log(a->owner),
           "JOB[%d].%s[%d]: received: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, buffer);
-    }
 
     /* check for messages from scheduler or clean agent death */
     if( strncmp(buffer, "BYE", 3) == 0 || strncmp(buffer, "@@@1", 4) == 0)
@@ -362,7 +361,7 @@ void agent_listen(agent a)
     }
     if(strncmp(buffer, "@@@0", 4) == 0 && a->updated)
     {
-      aprintf(a, "%s\n", job_next(a->owner));
+      aprintf(a, "%s\n", a->data);
       aprintf(a, "END\n");
       fflush(a->write);
       a->updated = 0;
@@ -513,6 +512,7 @@ void* agent_spawn(void* passed)
 /* ************************************************************************** */
 
 /**
+    a->generation = 0;
  * Creates a new meta agent. This will take and parse the information necessary
  * for the creation of a new agent instance. The name of the agent, the cmd for
  * starting the agent, the number of these agents that can run simutaniously,
@@ -675,7 +675,7 @@ agent agent_copy(agent a)
     return NULL;
 
   VERBOSE3("JOB[%d].%s[%d]: creating copy of agent\n",
-        job_id(a->owner), a->meta_data->name, a->pid);
+      job_id(a->owner), a->meta_data->name, a->pid);
 
   agent cpy = agent_init(a->host_machine, a->owner, a->generation + 1);
   cpy->data = a->data;
@@ -742,6 +742,8 @@ void agent_death_event(void* pids)
 
     if(a->status != AG_CLOSING)
     {
+      alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent failed\n",
+          job_id(a->owner), a->meta_data->name, a->pid);
       ERROR("JOB[%d].%s[%d]: agent closed unexpectedly, agent status was %s",
           job_id(a->owner), a->meta_data->name, a->pid, status_strings[a->status]);
       agent_fail(a);
@@ -791,28 +793,31 @@ void agent_ready_event(agent a)
   {
     agent_transition(a, AG_RUNNING);
     VERBOSE2("JOB[%d].%s[%d]: agent successfully created\n",
-          job_id(a->owner), a->meta_data->name, a->pid);
+        job_id(a->owner), a->meta_data->name, a->pid);
   }
 
-  if(a->generation == 0)
+  if(a->generation != 0)
   {
-    if(!job_is_open(a->owner))
-    {
-      agent_transition(a, AG_PAUSED);
-      job_finish_agent(a->owner, a);
-      job_update(a->owner);
-    }
-    else
-    {
-      a->updated = 1;
-      a->generation = 0;
-      if(write(a->to_parent, "@@@0\n", 5) != 5)
-      {
-        ERROR("JOB[%d].%s[%d]: failed sending new data to agent",
-            job_id(a->owner), a->meta_data->name, a->pid);
-        kill(a->pid, SIGKILL);
-      }
-    }
+    a->updated = 1;
+  }
+  else if(!job_is_open(a->owner))
+  {
+    agent_transition(a, AG_PAUSED);
+    job_finish_agent(a->owner, a);
+    job_update(a->owner);
+    return;
+  }
+  else
+  {
+    a->data = job_next(a->owner);
+    a->updated = 1;
+  }
+
+  if(write(a->to_parent, "@@@0\n", 5) != 5)
+  {
+    ERROR("JOB[%d].%s[%d]: failed sending new data to agent",
+        job_id(a->owner), a->meta_data->name, a->pid);
+    kill(a->pid, SIGKILL);
   }
 }
 
@@ -842,7 +847,7 @@ void agent_restart(agent a, agent ref)
   TEST_NULV(a);
   TEST_NULV(ref);
   VERBOSE3("JOB[%d].%s[%d]: restarting agent to finish data from %s[%d]\n",
-        job_id(a->owner), a->meta_data->name, a->pid, ref->meta_data->name, ref->pid);
+      job_id(a->owner), a->meta_data->name, a->pid, ref->meta_data->name, ref->pid);
 
   a->data = ref->data;
   a->updated = 1;
@@ -960,7 +965,7 @@ int aprintf(agent a, const char* fmt, ...)
   {
     tmp = g_strdup_vprintf(fmt, args);
     tmp[strlen(tmp) - 1] = '\0';
-    clprintf("JOB[%d].%s[%d]: sent to agent \"%s\"\n",
+    alprintf(job_log(a->owner), "JOB[%d].%s[%d]: sent to agent \"%s\"\n",
         job_id(a->owner), a->meta_data->name, a->pid, tmp);
     rc = fprintf(a->write, "%s\n", tmp);
     g_free(tmp);
