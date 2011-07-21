@@ -7,6 +7,8 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 TESTDIRS=../agent_tests
 CFLAGS_LOCAL=$(ALL_CFLAGS) -I/usr/include/rpm -lpq -lrpm -lrpmio
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
+MODULEDIR = $(shell dirname `pwd`)
 
 EXE=pkgagent
 HDRS=pkgagent.h
