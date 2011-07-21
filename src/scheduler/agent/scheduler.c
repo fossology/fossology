@@ -646,6 +646,7 @@ int main(int argc, char** argv)
   /* ********************************** */
   /* *** do all the initializations *** */
   /* ********************************** */
+  g_thread_init(NULL);
   g_type_init();
   fo_RepOpen();
   agent_list_init();
