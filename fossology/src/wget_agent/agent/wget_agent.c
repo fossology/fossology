@@ -1,7 +1,7 @@
 /***************************************************************
  wget_agent: Retrieve a file and put it in the database.
 
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -17,6 +17,13 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ***************************************************************/
+
+/**
+ * \file wget_agent.c
+ * \brief dowload file from URL
+ *        locally to import the file to repo
+ */
+
 #include <stdlib.h>
 
 /* specify support for files > 2G */
@@ -38,11 +45,9 @@
 #define stat64(x,y) stat(x,y)
 typedef struct stat stat_t;
 
-#include "libfossrepo.h"
-#include "libfossdb.h"
-#include "libfossagent.h"
+#include "libfossology.h"
 
-#include "../ununpack/checksum.h"
+#include "../../ununpack/agent/checksum.h"
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
@@ -52,8 +57,7 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
 char SQL[MAXCMD];
 
 /* for the DB */
-void *DB;
-
+PGconn *pgConn = NULL;
 /* input for this system */
 long GlobalUploadKey=-1;
 char GlobalTempFile[MAXCMD];
@@ -65,10 +69,38 @@ gid_t ForceGroup=-1;
 /* for debugging */
 int Debug=0;
 
+/**
+ * \brief Given a filename, is it a file?
+ * \param int Link: should it follow symbolic links?
+ * \return int 1=yes, 0=no.
+ */
+int IsFile(char *Fname, int Link)
+{
+  stat_t Stat;
+  int rc;
+  if (!Fname || (Fname[0]=='\0')) return(0);  /* not a directory */
+  if (Link) rc = stat64(Fname,&Stat);
+  else rc = lstat64(Fname,&Stat);
+  if (rc != 0) return(0); /* bad name */
+  return(S_ISREG(Stat.st_mode));
+} /* IsFile() */
 
-/*********************************************************
-Get the position (ending + 1) of http|https|ftp:// of one url
- *********************************************************/
+/**
+ * \brief Closes the connection to the server. Also frees memory used by the PGconn object;then exit.
+ * \param int rc: exit value
+ */ 
+void  SafeExit  (int rc)
+{
+  if (pgConn) PQfinish(pgConn);
+  exit(rc);
+} /* SafeExit() */
+
+/**
+ * \brief Get the position (ending + 1) of http|https|ftp:// of one url
+ * \param char *URL: the URL
+ * \return the position (ending + 1) of http|https|ftp:// of one url
+ *         E.g. http://fossology.org, return 7
+ */
 int GetPosition(char *URL)
 {
   if (NULL != strstr(URL, "http://"))  return 7;
@@ -77,10 +109,10 @@ int GetPosition(char *URL)
   return 0;
 }
 
-/*********************************************************
- DBLoadGold(): Insert a file into the database and repository.
- (This mimicks the old webgoldimport.)
- *********************************************************/
+/**
+ * \brief Insert a file into the database and repository.
+ *        This mimicks the old webgoldimport.
+ */
 void	DBLoadGold	()
 {
   Cksum *Sum;
@@ -91,17 +123,17 @@ void	DBLoadGold	()
   char *Path;
   FILE *Fin;
   int rc;
+  PGresult *result;
 
   if (Debug) printf("Processing %s\n",GlobalTempFile);
   Fin = fopen(GlobalTempFile,"rb");
   if (!Fin)
 	{
-	printf("ERROR upload %ld Unable to open temp file.\n",GlobalUploadKey);
-	printf("LOG upload %ld Unable to open temp file %s from %s\n",
+		printf("ERROR upload %ld Unable to open temp file.\n",GlobalUploadKey);
+		printf("LOG upload %ld Unable to open temp file %s from %s\n",
 		GlobalUploadKey,GlobalTempFile,GlobalURL);
-	fflush(stdout);
-	DBclose(DB);
-	exit(1);
+		fflush(stdout);
+		SafeExit(1);
 	}
   Sum = SumComputeFile(Fin);
   fclose(Fin);
@@ -109,66 +141,61 @@ void	DBLoadGold	()
 
   if (!Sum)
 	{
-	printf("ERROR upload %ld Unable to compute checksum.\n",GlobalUploadKey);
-	printf("LOG upload %ld Unable to compute checksum for %s from %s\n",
+		printf("ERROR upload %ld Unable to compute checksum.\n",GlobalUploadKey);
+		printf("LOG upload %ld Unable to compute checksum for %s from %s\n",
 		GlobalUploadKey,GlobalTempFile,GlobalURL);
-	fflush(stdout);
-	DBclose(DB);
-	exit(2);
+		fflush(stdout);
+		SafeExit(2);
 	}
   if (Sum->DataLen <= 0)
 	{
-	printf("ERROR upload %ld No bytes downloaded from %s.\n",GlobalUploadKey,GlobalURL);
-	printf("LOG upload %ld No bytes downloaded from %s to %s.\n",
+		printf("ERROR upload %ld No bytes downloaded from %s.\n",GlobalUploadKey,GlobalURL);
+		printf("LOG upload %ld No bytes downloaded from %s to %s.\n",
 		GlobalUploadKey,GlobalURL,GlobalTempFile);
-	fflush(stdout);
-	DBclose(DB);
-	exit(3);
+		fflush(stdout);
+		SafeExit(3);
 	}
   Unique = SumToString(Sum);
   if (Debug) printf("Unique %s\n",Unique);
 
   if (GlobalImportGold)
-    {
+  {
     if (Debug) printf("Import Gold %s\n",Unique);
-    rc = RepImport(GlobalTempFile,"gold",Unique,1);
+    rc = fo_RepImport(GlobalTempFile,"gold",Unique,1);
     if (rc != 0)
-	{
-	printf("ERROR upload %ld Failed to import file into the repository (RepImport=%d).\n",GlobalUploadKey,rc);
-	printf("LOG upload %ld Failed to import %s from %s into gold %s\n",
-		GlobalUploadKey,GlobalTempFile,GlobalURL,Unique);
-	fflush(stdout);
-	DBclose(DB);
-	exit(4);
-	}
+		{
+			printf("ERROR upload %ld Failed to import file into the repository (RepImport=%d).\n",GlobalUploadKey,rc);
+			printf("LOG upload %ld Failed to import %s from %s into gold %s\n",
+			GlobalUploadKey,GlobalTempFile,GlobalURL,Unique);
+			fflush(stdout);
+			SafeExit(4);
+		}	
     /* Put the file in the "files" repository too */
-    Path = RepMkPath("gold",Unique);
+    Path = fo_RepMkPath("gold",Unique);
     if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
-    } /* if GlobalImportGold */
+  } /* if GlobalImportGold */
   else /* if !GlobalImportGold */
-    {
+  {
     Path = GlobalTempFile;
-    } /* else if !GlobalImportGold */
+  } /* else if !GlobalImportGold */
   if (Debug) printf("Path is %s\n",Path);
 
   if (!Path)
 	{
-	printf("ERROR upload %ld Failed to determine repository location.\n",GlobalUploadKey);
-	printf("LOG upload %ld Failed to determine repository location for %s in gold\n",
+		printf("ERROR upload %ld Failed to determine repository location.\n",GlobalUploadKey);
+		printf("LOG upload %ld Failed to determine repository location for %s in gold\n",
 		GlobalUploadKey,Unique);
-	fflush(stdout);
-	DBclose(DB);
-	exit(5);
+		fflush(stdout);
+		SafeExit(5);
 	}
   if (Debug) printf("Import files %s\n",Path);
-  if (RepImport(Path,"files",Unique,1) != 0)
+  if (fo_RepImport(Path,"files",Unique,1) != 0)
 	{
-	printf("ERROR upload %ld Failed to import file into the repository.\n",GlobalUploadKey);
-	printf("LOG upload %ld Failed to import %s from %s into files\n",
-		GlobalUploadKey,Unique,Path);
-	fflush(stdout);
-	DBclose(DB);
-	exit(6);
+		printf("ERROR upload %ld Failed to import file into the repository.\n",GlobalUploadKey);
+		printf("LOG upload %ld Failed to import %s from %s into files\n",
+			GlobalUploadKey,Unique,Path);
+		fflush(stdout);
+		SafeExit(6);
 	}
   if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
   if (Path != GlobalTempFile) free(Path);
@@ -182,63 +209,81 @@ void	DBLoadGold	()
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD-1,"SELECT pfile_pk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = %s;",
 	SHA1,MD5,Len);
-  if (DBaccess(DB,SQL) < 0)
-	{
-	printf("ERROR upload %ld Unable to select from the database\n",GlobalUploadKey);
-	printf("LOG upload %ld Unable to select from the database: %s\n",GlobalUploadKey,SQL);
-	fflush(stdout);
-	DBclose(DB);
-	exit(7);
-	}
+  result =  PQexec(pgConn, SQL); /* SELECT */
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+  {
+		SafeExit(7);
+  }
 
   /* See if pfile needs to be added */
-  if (DBdatasize(DB) <= 0)
+  if (PQntuples(result) <=0)
 	{
-	/* Insert it */
-	memset(SQL,'\0',MAXCMD);
-	snprintf(SQL,MAXCMD-1,"INSERT INTO pfile (pfile_sha1, pfile_md5, pfile_size) VALUES ('%.40s','%.32s',%s);",
+    /* Insert it */
+    memset(SQL,'\0',MAXCMD);
+    snprintf(SQL,MAXCMD-1,"INSERT INTO pfile (pfile_sha1, pfile_md5, pfile_size) VALUES ('%.40s','%.32s',%s);",
 		SHA1,MD5,Len);
-	if (DBaccess(DB,SQL) < 0)
+    PQclear(result);
+    result = PQexec(pgConn, SQL);
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
 		{
-		printf("ERROR upload %ld Unable to select from the database\n",GlobalUploadKey);
-		printf("LOG upload %ld Unable to select from the database: %s\n",GlobalUploadKey,SQL);
-		fflush(stdout);
-		DBclose(DB);
-		exit(8);
+			SafeExit(8);
 		}
-	DBaccess(DB,"SELECT currval('pfile_pfile_pk_seq');");
-	}
-  PfileKey = atol(DBgetvalue(DB,0,0));
+    PQclear(result);
+    result = PQexec(pgConn, "SELECT currval('pfile_pfile_pk_seq');");
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+    {
+      SafeExit(-1);
+    }
+  }
+  PfileKey = atol(PQgetvalue(result,0,0));
   if (Debug) printf("pfile_pk = %ld\n",PfileKey);
 
   /* Upload the DB so the pfile is linked to the upload record */
-  DBaccess(DB,"BEGIN;");
-  memset(SQL,'\0',MAXCMD);
+  PQclear(result);
+  result = PQexec(pgConn, "BEGIN;");
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+  {
+    SafeExit(-1);
+  }
+ 
+  memset(SQL,0,MAXCMD);
   snprintf(SQL,MAXCMD-1,"SELECT * FROM upload WHERE upload_pk=%ld FOR UPDATE;",GlobalUploadKey);
-  DBaccess(DB,SQL);
-  memset(SQL,'\0',MAXCMD);
+  PQclear(result);
+  result = PQexec(pgConn, SQL);
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+  {
+    SafeExit(-1);
+  }
+
+  memset(SQL,0,MAXCMD);
   snprintf(SQL,MAXCMD-1,"UPDATE upload SET pfile_fk=%ld WHERE upload_pk=%ld;",
 	PfileKey,GlobalUploadKey);
   if (Debug) printf("SQL=%s\n",SQL);
-  if (DBaccess(DB,SQL) < 0)
+  PQclear(result);
+  result = PQexec(pgConn, SQL);
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) 
 	{
-	printf("ERROR upload %ld Unable to update the database\n",GlobalUploadKey);
-	printf("LOG upload %ld Unable to update the database: %s\n",GlobalUploadKey,SQL);
-	fflush(stdout);
-	DBclose(DB);
-	exit(9);
+    SafeExit(9);
 	}
-  DBaccess(DB,"COMMIT;");
+  PQclear(result);
+  result = PQexec(pgConn, "COMMIT;");
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+  {
+    SafeExit(-1);
+  }
 
+  PQclear(result);
   /* Clean up */
   free(Sum);
 } /* DBLoadGold() */
 
 
-/*********************************************************
- TaintURL(): Given a URL string, taint-protect it.
- Returns: 1=tainted, 0=failed to taint
- *********************************************************/
+/**
+ * \brief Given a URL string, taint-protect it.
+ * \param char *Sin: the source URL
+ * \param char *Sout: the tainted URL  
+ * \return 1=tainted, 0=failed to taint
+ */
 int	TaintURL	(char *Sin, char *Sout, int SoutSize)
 {
   int i;
@@ -246,43 +291,45 @@ int	TaintURL	(char *Sin, char *Sout, int SoutSize)
   memset(Sout,'\0',SoutSize);
   SoutSize--; /* always keep the EOL */
   for(i=0,si=0; (si<SoutSize) && (Sin[i] != '\0'); i++)
-    {
+	{
     if (Sin[i] == '#') return(0);  /* end at the start of comment */
     if (!strchr("'`",Sin[i]) && !isspace(Sin[i])) Sout[si++] = Sin[i];
-    else
-	{
-	if (si+3 >= SoutSize) return(0); /* no room */
-	snprintf(Sout+si,4,"%%%02X",Sin[i]);
-	si+=3;
+		else
+		{
+			if (si+3 >= SoutSize) return(0); /* no room */
+			snprintf(Sout+si,4,"%%%02X",Sin[i]);
+			si+=3;
+		}
 	}
-    }
   return(Sin[i]=='\0');
 } /* TaintURL() */
 
-/*********************************************************
- GetURL(): Do the wget.
- *********************************************************/
+/**
+ * \brief Do the wget.
+ * \param char *TempFile: used when upload from URL by the scheduler, the downloaded file(directory) will be archived as this file
+ *                        when running from command, this parameter is null, e.g. /var/local/lib/fossology/agents/wget.32732
+ * \param char *URL: the url you want to download
+ * \param char *TempFileDir: where you want to store your downloaded file(directory)
+ * \return int, 0 on success, non-zero on failure.
+ */
 int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
 {
   char CMD[MAXCMD];
   char TaintedURL[MAXCMD];
-  char TmpLine[256];
   int rc;
-  FILE *Fin;
 #if 1
   char WgetArgs[]="--no-check-certificate --progress=dot -rc -np -e robots=off";
 #else
   /* wget < 1.10 does not support "--no-check-certificate" */
-  char WgetArgs[]="--progress=dot";
+  char WgetArgs[]="--progress=dot -rc -np -e robots=off";
 #endif
 
   if (!TaintURL(URL,TaintedURL,MAXCMD))
 	{
-	printf("FATAL: Failed to parse the URL\n");
-	printf("LOG: Failed to taint the URL '%s'\n",URL);
-	fflush(stdout);
-	DBclose(DB);
-	exit(10);
+    FATAL("Failed to parse the URL\n");
+    printf("LOG: Failed to taint the URL '%s'\n",URL);
+    fflush(stdout);
+		SafeExit(10);
 	}
 
   memset(CMD,'\0',MAXCMD);
@@ -328,55 +375,38 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
     snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s '%s' %s 2>&1",
       PROXYFILE,WgetArgs,TaintedURL, GlobalParam);
   }
-  Fin = popen(CMD,"r");
-  if (!Fin)
-    {
-    printf("FATAL upload %ld Failed to retrieve file.\n",GlobalUploadKey);
-    printf("LOG upload %ld Failed to run command: %s\n",GlobalUploadKey,CMD);
-    fflush(stdout);
-    DBclose(DB);
-    exit(11);
-    }
-
-  while(ReadLine(Fin,TmpLine,256) != -1)
-	{
-	/* Track if a line is read.
-	   If this does not change after a minute, then heartbeat will
-	   not display. This catches cases where wget hangs. */
-	InitHeartbeat();
-	}
-  InitHeartbeat();
-
-  rc = pclose(Fin);  /* rc is the exit status */
+  /* the command is like
+	   ". /usr/local/etc/fossology/Proxy.conf; 
+	   /usr/bin/wget --no-check-certificate --progress=dot -rc -np -e robots=off -k -P '/var/local/lib/fossology/agents/wget'
+		 'http://a.org/file' -l 1 -R index.html*  2>&1"
+	*/
+  rc = system(CMD); 
  
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
 	{
-	printf("ERROR upload %ld Download failed\n",GlobalUploadKey);
-	printf("LOG upload %ld Download failed; Return code %d from: %s\n",GlobalUploadKey,WEXITSTATUS(rc),CMD);
-	fflush(stdout);
-	unlink(GlobalTempFile);
-	DBclose(DB);
-	exit(12);
+		printf("ERROR upload %ld Download failed\n",GlobalUploadKey);
+		printf("LOG upload %ld Download failed; Return code %d from: %s\n",GlobalUploadKey,WEXITSTATUS(rc),CMD);
+		fflush(stdout);
+		unlink(GlobalTempFile);
+		SafeExit(12);
 	}
 
   if (WIFEXITED(rc) && WIFSIGNALED(rc))
 	{
-	printf("ERROR upload %ld Download killed by a signal\n",GlobalUploadKey);
-	printf("LOG upload %ld Download killed by signal %d\n",GlobalUploadKey,WTERMSIG(rc));
-	fflush(stdout);
-	unlink(GlobalTempFile);
-	DBclose(DB);
-	exit(13);
+		printf("ERROR upload %ld Download killed by a signal\n",GlobalUploadKey);
+		printf("LOG upload %ld Download killed by signal %d\n",GlobalUploadKey,WTERMSIG(rc));
+		fflush(stdout);
+		unlink(GlobalTempFile);
+		SafeExit(13);
 	}
 
   if (WIFEXITED(rc) && WIFSIGNALED(rc))
 	{
-	printf("ERROR upload %ld Download killed by a signal\n",GlobalUploadKey);
-	printf("LOG upload %ld Download killed by signal %d\n",GlobalUploadKey,WTERMSIG(rc));
-	fflush(stdout);
-	unlink(GlobalTempFile);
-	DBclose(DB);
-	exit(14);
+		printf("ERROR upload %ld Download killed by a signal\n",GlobalUploadKey);
+		printf("LOG upload %ld Download killed by signal %d\n",GlobalUploadKey,WTERMSIG(rc));
+		fflush(stdout);
+		unlink(GlobalTempFile);
+		SafeExit(14);
 	}
 
   /* Run from scheduler! store /var/local/lib/fossology/agents/wget/../<files|directories> to one temp file */
@@ -386,7 +416,7 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
     memset(TempFilePath,'\0',MAXCMD);
     /* for one url http://a.org/test.deb, TempFilePath should be /var/local/lib/fossology/agents/wget/a.org/test.deb */
     int Position = GetPosition(TaintedURL);
-    if (0 == Position) exit(26);
+    if (0 == Position) SafeExit(26);
     snprintf(TempFilePath, MAXCMD-1, "%s/%s", TempFileDir, TaintedURL + Position);
     if (!stat(TempFilePath, &sb))
     {
@@ -400,27 +430,28 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
         snprintf(CMD,MAXCMD-1, "mv '%s' '%s' 2>&1", TempFilePath, TempFile);
       }
       rc_system = system(CMD);
-      if (rc_system != 0) exit(24); // failed to store the temperary directory(one file) as one temperary file
+      if (rc_system != 0) SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
     }
   } 
 
   if (TempFile && TempFile[0] && !IsFile(TempFile,1))
 	{
-	printf("ERROR upload %ld File %s not created from %s\n",GlobalUploadKey,TempFile,URL);
-	printf("LOG upload %ld File not created from command: %s\n",GlobalUploadKey,CMD);
-	fflush(stdout);
-	DBclose(DB);
-	exit(15);
+		printf("ERROR upload %ld File %s not created from %s\n",GlobalUploadKey,TempFile,URL);
+		printf("LOG upload %ld File not created from command: %s\n",GlobalUploadKey,CMD);
+		fflush(stdout);
+		SafeExit(15);
 	}
 
   printf("LOG upload %ld Downloaded %s to %s\n",GlobalUploadKey,URL,TempFile);
   return(0);
 } /* GetURL() */
 
-/**********************************************
- SetEnv(): Convert input pairs into globals.
- This functions taints the parameters as needed.
- **********************************************/
+/**
+ * \brief Convert input pairs into globals.
+ *        This functions taints the parameters as needed.
+ * \param char *S: the parameters for wget_aget have 2 parts, one is from scheduler, that is S
+ * \param char *TempFileDir: the parameters for wget_aget have 2 parts, one is from wget_agent.conf, that is TempFileDir
+ */
 void    SetEnv  (char *S, char *TempFileDir)
 {
   int SLen,GLen; /* lengths for S and global string */
@@ -441,22 +472,22 @@ void    SetEnv  (char *S, char *TempFileDir)
   SLen=0;
   GLen=0;
   while((GLen < MAXCMD-4) && S[SLen] && !isspace(S[SLen]))
-    {
+  {
     if ((S[SLen] == '\'') || isspace(S[SLen]) || !isprint(S[SLen]))
-	{
-	sprintf(GlobalTempFile+GLen,"%%%02x",(unsigned char)(S[SLen]));
-	GLen += 3;
-	}
-    else GlobalTempFile[GLen++] = S[SLen];
+		{
+			sprintf(GlobalTempFile+GLen,"%%%02x",(unsigned char)(S[SLen]));
+			GLen += 3;
+		}
+		else GlobalTempFile[GLen++] = S[SLen];
     SLen++;
-    }
+	}
   S+=SLen;
   while(S[0] && isspace(S[0])) S++; /* skip spaces */
 #endif
   if (TempFileDir)
 	{
-	memset(GlobalTempFile,'\0',MAXCMD);
-	snprintf(GlobalTempFile,MAXCMD-1,"%s/wget.%d",TempFileDir,getpid());
+		memset(GlobalTempFile,'\0',MAXCMD);
+		snprintf(GlobalTempFile,MAXCMD-1,"%s/wget.%d",TempFileDir,getpid());
 	}
 
   /* third value is the URL location -- taint any single-quotes */
@@ -482,9 +513,10 @@ void    SetEnv  (char *S, char *TempFileDir)
 #endif
 } /* SetEnv() */
 
-/***********************************************
- Usage():
- ***********************************************/
+/**
+ * \brief Here are some suggested options
+ * \param char *Name: the name of the executable, ususlly it is wget_agent
+ */
 void	Usage	(char *Name)
 {
   printf("Usage: %s [options] [OBJ]\n",Name);
@@ -503,11 +535,52 @@ void	Usage	(char *Name)
   printf("  no file :: process data from the scheduler.\n");
 } /* Usage() */
 
-/*********************************************************/
+/**
+ * \brief main function for the wget_agent
+ *
+ * There are 3 ways to use the wget_agent:
+ *   1. Command Line download: download one file or one directory from the command line
+ *   2. Agent Based download: run from the scheduler
+ *   3. Command Line locally to import the file(directory): Import one file or one directory from the command line, used by upload from file and upload from server
+ *
+ *
+ * +-----------------------+
+ * | Command Line download |
+ * +-----------------------+
+ *
+ * To download one file or one directory from the command line:
+ *   example:
+ *   ./wget_agent http://www.aaa.com/bbb
+ *
+ * +----------------------+
+ * | Agent Based          |
+ * +----------------------+
+ * To download one file or one directory (one URL )from the scheduler:
+ *   example: 
+ * part 1 parameters from the scheduler:  19 - http://g.org -l 1 -R index.html*
+ *                                        19 is uploadpk, 'http://g.org' is downloadfile url, 
+ *                                        '-l 1  -R index.html*' is several parameters used by wget_agent
+ * part 2 parameters from wget_agent.conf:  -d /var/local/lib/fossology/agents
+ *                                          '/var/local/lib/fossology/agent' is directory for downloaded file(directory) 
+ *                                           storage temporarily, after all file(directory) is dowloaded, move them into repo
+ *                 
+ * +----------------------------------------------------+
+ * | Command Line locally to import the file(directory) |
+ * +----------------------------------------------------+
+ *
+ * To Import one file or one directory from the command line into repo:
+ *   example:
+ *   ./wget_agent -g fossy -k $uploadpk '$UploadedFile'
+ *
+ * \param argc the number of command line arguments
+ * \param argv the command line arguments
+ * \return 0 on a successful program execution
+ */
+
 int	main	(int argc, char *argv[])
 {
   int arg;
-  char Parm[MAXCMD];
+  char *Parm = NULL;
   char *TempFileDir=NULL;
   int c;
   int InitFlag=0;
@@ -516,8 +589,10 @@ int	main	(int argc, char *argv[])
   memset(GlobalTempFile,'\0',MAXCMD);
   memset(GlobalURL,'\0',MAXCMD);
   memset(GlobalParam,'\0',MAXCMD);
-  memset(Parm,'\0',MAXCMD);
   GlobalUploadKey = -1;
+
+  fo_scheduler_connect(&argc, argv);
+
   /* Process command-line */
   while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:")) != -1)
     {
@@ -555,121 +630,109 @@ int	main	(int argc, char *argv[])
                 break;
 	default:
 		Usage(argv[0]);
-		exit(-1);
+		SafeExit(-1);
 	}
     }
   if (argc - optind > 1)
 	{
 	Usage(argv[0]);
-	exit(-1);
+	SafeExit(-1);
 	}
 
   /* Init */
-  DB = DBopen();
-  if (!DB)
+	pgConn = fo_dbconnect();
+  if (!pgConn)
 	{
-	printf("FATAL: Unable to connect to database\n");
-	fflush(stdout);
-	exit(20);
+		FATAL("Unable to connect to database\n");
+		SafeExit(20);
 	}
 
   /* When initializing the DB, don't do anything else */
   if (InitFlag)
 	{
-	DBclose(DB);
+  if (pgConn) PQfinish(pgConn);
 	return(0);
 	}
 
   /* Get the Agent Key from the DB */
-  GetAgentKey(DB, basename(argv[0]), GlobalUploadKey, SVN_REV, agent_desc);
+  fo_GetAgentKey(pgConn, basename(argv[0]), GlobalUploadKey, SVN_REV, agent_desc);
 
   /* Run from the command-line (for testing) */
-  InitHeartbeat();
-  signal(SIGALRM,ShowHeartbeat);
   for(arg=optind; arg < argc; arg++)
-    {
+  {
     memset(GlobalURL,'\0',sizeof(GlobalURL));
     strncpy(GlobalURL,argv[arg],sizeof(GlobalURL));
     /* If the file contains "://" then assume it is a URL.
        Else, assume it is a file. */
     if (Debug) printf("Command-line: %s\n",GlobalURL);
     if (strstr(GlobalURL,"://"))
-      {
-      alarm(60);
-      Heartbeat(0);
+    {
+			fo_scheduler_heart(1);
       if (Debug) printf("It's a URL\n");
       if (GetURL(GlobalTempFile,GlobalURL,TempFileDir) != 0)
-	{
-	printf("ERROR: Download of %s failed.\n",GlobalURL);
-	fflush(stdout);
-	DBclose(DB);
-	exit(21);
-	}
-      InitHeartbeat();
+			{
+				printf("ERROR: Download of %s failed.\n",GlobalURL);
+				fflush(stdout);
+				SafeExit(21);
+			}
       if (GlobalUploadKey != -1) { DBLoadGold(); }
       unlink(GlobalTempFile);
-      alarm(0);
-      }
+    }
     else /* must be a file */
-      {
+    {
       if (Debug) printf("It's a file -- GlobalUploadKey = %ld\n",GlobalUploadKey);
       if (GlobalUploadKey != -1)
-	{
-	memcpy(GlobalTempFile,GlobalURL,MAXCMD);
-	DBLoadGold();
-	}
-      }
+			{
+				memcpy(GlobalTempFile,GlobalURL,MAXCMD);
+				DBLoadGold();
+			}
     }
+  }
 
   /* Run from scheduler! */
   if (optind == argc)
+  {
+		while(fo_scheduler_next())
     {
-    printf("OK\n"); /* inform scheduler that we are ready */
-    fflush(stdout);
-    InitHeartbeat();
-    alarm(60);
-    while(ReadLine(stdin,Parm,MAXCMD) >= 0)
-      {
-      if (Parm[0] != '\0')
-	{
-    Heartbeat(0);
-	/* 3 parameters: uploadpk downloadfile url */
-	SetEnv(Parm,TempFileDir); /* set globals */
+      Parm = fo_scheduler_current(); /* get piece of information, including upload_pk, downloadfile url, and parameters */
+      if (Parm && Parm[0])
+			{
+				fo_scheduler_heart(1);
+				/* set globals: uploadpk, downloadfile url, parameters */
+				SetEnv(Parm,TempFileDir);
         char TempDir[MAXCMD];
         memset(TempDir,'\0',MAXCMD);
         snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
-	if (GetURL(GlobalTempFile,GlobalURL,TempDir) == 0)
-		{
-	  	  DBLoadGold();
-		  unlink(GlobalTempFile);
-                  struct stat sb;
-                  /* Run from scheduler! delete the temp directory, /var/local/lib/fossology/agents/wget */
-                  if (!stat(TempDir, &sb))
-                  {
-                    char CMD[MAXCMD];
-                    memset(CMD,'\0',MAXCMD);
-                    snprintf(CMD,MAXCMD-1, "rm -rf '%s' 2>&1", TempDir);
-                    int rc_system = system(CMD); 
-                    if (rc_system != 0) exit(25); // failed to delete the temperary directory
-                  }
+				if (GetURL(GlobalTempFile,GlobalURL,TempDir) == 0)
+				{
+					DBLoadGold();
+					unlink(GlobalTempFile);
+					struct stat sb;
+					/* Run from scheduler! delete the temp directory, /var/local/lib/fossology/agents/wget */
+					if (!stat(TempDir, &sb))
+					{
+						char CMD[MAXCMD];
+						memset(CMD,'\0',MAXCMD);
+						snprintf(CMD,MAXCMD-1, "rm -rf '%s' 2>&1", TempDir);
+						int rc_system = system(CMD); 
+						if (rc_system != 0) SafeExit(25); // failed to delete the temperary directory
+					}
+				}
+				else
+				{
+					FATAL("upload %ld File retrieval failed.\n",GlobalUploadKey);
+					printf("LOG upload %ld File retrieval failed: uploadpk=%ld tempfile=%s URL=%s\n",GlobalUploadKey,GlobalUploadKey,GlobalTempFile,GlobalURL);
+					fflush(stdout);
+					if (pgConn) PQfinish(pgConn);
+					SafeExit(22);
+				}
+			}
 		}
-	else
-		{
-		printf("FATAL upload %ld File retrieval failed.\n",GlobalUploadKey);
-		printf("LOG upload %ld File retrieval failed: uploadpk=%ld tempfile=%s URL=%s\n",GlobalUploadKey,GlobalUploadKey,GlobalTempFile,GlobalURL);
-		fflush(stdout);
-		DBclose(DB);
-		exit(22);
-		}
-	printf("OK\n"); /* inform scheduler that we are ready */
-	fflush(stdout);
-	alarm(60);
-	}
-      }
-    } /* if run from scheduler */
+  } /* if run from scheduler */
 
   /* Clean up */
-  DBclose(DB);
+  if (pgConn) PQfinish(pgConn);
+  fo_scheduler_disconnect();
   return(0);
 } /* main() */
 
