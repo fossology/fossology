@@ -417,6 +417,7 @@ char* fo_config_get_list(char* group, char* key, int idx, GError** error)
   int depth;
   char* curr;
 
+
   if(group_map == NULL)
     throw_error(
         error,
@@ -425,11 +426,12 @@ char* fo_config_get_list(char* group, char* key, int idx, GError** error)
         "ERROR: you must call fo_config_load before any other calls\n");
 
   if(!fo_config_is_list(group, key, error))
-    throw_error(
-        error,
-        PARSE_ERROR,
-        fo_invalid_group,
-        "ERROR: %s[%s] must be of type list to get length", group, key);
+    if(!(*error))
+      throw_error(
+          error,
+          PARSE_ERROR,
+          fo_invalid_group,
+          "ERROR: %s[%s] must be of type list to get list element", group, key);
   if(*error)
     return NULL;
 
@@ -530,6 +532,7 @@ void fo_config_free()
   group_map = NULL;
   key_sets = NULL;
   group_set = NULL;
+  current_group = NULL;
 }
 
 /* ************************************************************************** */
@@ -605,7 +608,7 @@ char** fo_config_key_set(char* group, int* length)
  * @param group the name of the group to check for
  * @return 1 if the group exists, 0 if it does not
  */
-int    fo_config_has_group(char* group)
+int fo_config_has_group(char* group)
 {
   return g_tree_lookup(group_map, group) != NULL;
 }
@@ -618,10 +621,12 @@ int    fo_config_has_group(char* group)
  * @param key the key to check for
  * @return 1 if the group has the key, 0 if it does not
  */
-int    fo_config_has_key(char* group, char* key)
+int fo_config_has_key(char* group, char* key)
 {
-  return g_tree_lookup(
-         g_tree_lookup(group_map, group),
-         key) != NULL;
+  GTree* tree;
+
+  if((tree = g_tree_lookup(group_map, group)) == NULL)
+    return 0;
+  return g_tree_lookup(tree, key) != NULL;
 }
 
