@@ -36,23 +36,23 @@
           instead of through the functions in this file in case we need to keep
           track of other data associated with a connection.
           NOTE that failures write and error message to stdout.
+          If an error occurs, ErrMsg will contain a text error message.
  **/
-function fo_scheduler_connect($IPaddr='', $Port='')
+function fo_scheduler_connect($IPaddr='', $Port='', &$ErrMsg='')
 { 
   if (empty($IPaddr)) $IPaddr = '127.0.0.1';
   if (empty($Port)) $Port = 5555;
 
   if (($sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) 
   {
-    echo "socket_create() failed: reason: " . socket_strerror(socket_last_error()) . "<br>\n";
+    $ErrMsg = socket_strerror(socket_last_error());
     return false;
   }
 
   $result = socket_connect($sock, $IPaddr, $Port);
   if ($result === false) 
   {
-    echo "<h2>Connection to the scheduler failed.  Is the scheduler running?</h2>";
-    echo "socket_connect() failed.\nReason: ($result) " . socket_strerror(socket_last_error($sock)) . "<br>\n";
+    $ErrMsg = socket_strerror(socket_last_error());
     return false;
   } 
   return $sock;
