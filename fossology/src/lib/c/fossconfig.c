@@ -430,8 +430,16 @@ char* fo_config_get_list(char* group, char* key, int idx, GError** error)
       throw_error(
           error,
           PARSE_ERROR,
-          fo_invalid_group,
+          fo_invalid_key,
           "ERROR: %s[%s] must be of type list to get list element", group, key);
+
+  if(idx < 0 || idx >= fo_config_list_length(group, key, error))
+    throw_error(
+        error,
+        PARSE_ERROR,
+        fo_invalid_key,
+        "ERROR: %s[%s] %d is out of range", group, key, idx);
+
   if(*error)
     return NULL;
 
