@@ -49,7 +49,7 @@ extern char** group_set;
 /* * reason why all these #defines were added                               * */
 /* ************************************************************************** */
 
-#define CONF_FILE "confdata/conftest.conf"
+#define CONF_FILE   "confdata/conftest.conf"
 
 #define NONE             "none"
 #define GROUP(g)         GROUP_##g
@@ -112,9 +112,39 @@ void test_fo_config_load()
   CU_ASSERT_FALSE(fo_config_is_open());
 
   fo_config_load("dummy", &error);
-  CU_ASSERT_PTR_NOT_NULL(error);
+  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->code,   fo_missing_file);
   CU_ASSERT_STRING_EQUAL(error->message,
       "unable to open config file \"dummy\"");
+  g_clear_error(&error);
+
+  fo_config_load("confdata/invalid_group.conf", &error);
+  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->code,   fo_invalid_group);
+  CU_ASSERT_STRING_EQUAL(error->message,
+      "confdata/invalid_group.conf[line 5]: invalid group name");
+  g_clear_error(&error);
+
+  fo_config_load("confdata/no_group.conf", &error);
+  printf("%s\n", error->message);
+  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  CU_ASSERT_STRING_EQUAL(error->message,
+      "confdata/no_group.conf[line 3]: keys must have an associated group");
+  g_clear_error(&error);
+
+  fo_config_load("confdata/key_value.conf", &error);
+  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  CU_ASSERT_STRING_EQUAL(error->message,
+      "confdata/key_value.conf[line 4]: invalid key/value expression \"bad\"");
+  g_clear_error(&error);
+
+  fo_config_load("confdata/bad_key.conf", &error);
+  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  CU_ASSERT_STRING_EQUAL(error->message,
+      "confdata/bad_key.conf[line 4]: invalid key/value expression \"bad]\"");
   g_clear_error(&error);
 
   fo_config_load(CONF_FILE, &error);

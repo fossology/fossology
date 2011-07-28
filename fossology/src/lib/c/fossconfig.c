@@ -185,7 +185,7 @@ int group(GError** error)
         error,
         PARSE_ERROR,
         fo_invalid_group,
-        "%s[line %d]: invalid group name, group names end in ']'",
+        "%s[line %d]: invalid group name",
         fname, yyline);
 
   lex[--lex_idx] = '\0';
@@ -218,12 +218,13 @@ int key(GError** error) {
         error,
         PARSE_ERROR,
         fo_invalid_key,
-        "%s[line %d] keys must have an associated group",
+        "%s[line %d]: keys must have an associated group",
         fname, yyline);
 
   while(yynext() && c != '=' && c != '\n' && !isspace(c));
   replace(c);
   key = g_strdup(lex);
+  len = strlen(key);
 
   while(yynext() && c != '=' && c != '\n' && isspace(c));
   if(c != '=')
@@ -231,16 +232,15 @@ int key(GError** error) {
         error,
         PARSE_ERROR,
         fo_invalid_key,
-        "%s[line %d] invalid key/value expression \"%s\"",
+        "%s[line %d]: invalid key/value expression \"%s\"",
         fname, yyline, key);
 
-  len = strlen(key);
   if(key[len - 1] == ']' && key[len - 2] != '[')
     throw_error(
         error,
         PARSE_ERROR,
         fo_invalid_key,
-        "%s[line %d] invalid key/value expression \"%s\"",
+        "%s[line %d]: invalid key/value expression \"%s\"",
         fname, yyline, key);
 
   next_nws();
