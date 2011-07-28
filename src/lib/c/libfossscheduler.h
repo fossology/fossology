@@ -82,12 +82,12 @@ extern int verbose;
             fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); }
 
 #define WARNING(...) { \
-            fprintf(stderr, "WARNING %s.%d: "); \
+            fprintf(stderr, "WARNING %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
 
 #define DEBUG(...) { \
-            fprintf(stderr, "DEBUG %s.%d: "); \
+            fprintf(stderr, "DEBUG %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
 
