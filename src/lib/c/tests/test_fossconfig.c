@@ -126,6 +126,11 @@ void test_fo_config_load()
   CU_ASSERT_TRUE(fo_config_is_open());
 }
 
+/**
+ * Test the group set function. Note that the order the groups are in the names
+ * array is different from the order they are declared in the file. This is
+ * because the names are stored internally in alphabetical order
+ */
 void test_fo_config_group_set()
 {
   int length;
@@ -139,6 +144,10 @@ void test_fo_config_group_set()
   CU_ASSERT_STRING_EQUAL(names[3], GROUP(1));
 }
 
+/**
+ * Test the key set function. Again, keys are stored in alphabetical order, so
+ * the comparison order may be wonky.
+ */
 void test_fo_config_key_set()
 {
   int length;
@@ -173,12 +182,20 @@ void test_fo_config_key_set()
   CU_ASSERT_PTR_NULL(fo_config_key_set("none", &length));
 }
 
+/**
+ * Tests the has group function
+ */
 void test_fo_config_has_group()
 {
   CU_ASSERT_TRUE (fo_config_has_group(GROUP(0)));
   CU_ASSERT_FALSE(fo_config_has_group(NONE));
 }
 
+/**
+ * Test the has key function. There are three cases here because there are two
+ * ways that a config can not have a key. If the key isn't in the group or the
+ * group doesn't exist
+ */
 void test_fo_config_has_key()
 {
   CU_ASSERT_TRUE (fo_config_has_key(GROUP(0), KEY(0, 0)));
@@ -186,6 +203,10 @@ void test_fo_config_has_key()
   CU_ASSERT_FALSE(fo_config_has_key(GROUP(0), NONE));
 }
 
+/**
+ * Test the get function. This will also test the error cases of invalid key
+ * and invalid group names.
+ */
 void test_fo_config_get()
 {
   GError* error = NULL;
@@ -214,6 +235,10 @@ void test_fo_config_get()
   g_clear_error(&error);
 }
 
+/**
+ * Tests the is list function. Tests groups that has both and a group that
+ * doesn't have a list. Error cases are tested elsewhere.
+ */
 void test_fo_config_is_list()
 {
   GError* error = NULL;
@@ -224,6 +249,9 @@ void test_fo_config_is_list()
   CU_ASSERT_FALSE(fo_config_is_list(GROUP(3), KEY(3, 2), &error));
 }
 
+/**
+ * Tests the list length function. Includes test for none-list key error.
+ */
 void test_fo_config_list_length()
 {
   GError* error = NULL;
@@ -238,42 +266,59 @@ void test_fo_config_list_length()
   g_clear_error(&error);
 }
 
+/**
+ * Tests the get list function. Tests a none list key, and the index being out
+ * of the valid range.
+ */
 void test_fo_config_get_list()
 {
   GError* error = NULL;
 
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(
-      GROUP(3), KEY(3, 0), 0, &error), VAL_IDX(3, 0, 0));
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(
-      GROUP(3), KEY(3, 0), 1, &error), VAL_IDX(3, 0, 1));
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(
-      GROUP(3), KEY(3, 0), 2, &error), VAL_IDX(3, 0, 2));
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(
-      GROUP(3), KEY(3, 0), 3, &error), VAL_IDX(3, 0, 3));
+#define CONFIG_GET_LIST_ASSERT(g, k, i) \
+  CU_ASSERT_STRING_EQUAL(fo_config_get_list( \
+      GROUP(g), KEY(g, k), i, &error), VAL_IDX(g, k, i))
 
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(
-      GROUP(3), KEY(3, 1), 0, &error), VAL_IDX(3, 1, 0));
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(
-      GROUP(3), KEY(3, 1), 1, &error), VAL_IDX(3, 1, 1));
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(
-      GROUP(3), KEY(3, 1), 2, &error), VAL_IDX(3, 1, 2));
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(
-      GROUP(3), KEY(3, 1), 3, &error), VAL_IDX(3, 1, 3));
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(
-      GROUP(3), KEY(3, 1), 4, &error), VAL_IDX(3, 1, 4));
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(
-      GROUP(3), KEY(3, 1), 5, &error), VAL_IDX(3, 1, 5));
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(
-      GROUP(3), KEY(3, 1), 6, &error), VAL_IDX(3, 1, 6));
+  CONFIG_GET_LIST_ASSERT(3, 0, 0);
+  CONFIG_GET_LIST_ASSERT(3, 0, 1);
+  CONFIG_GET_LIST_ASSERT(3, 0, 2);
+  CONFIG_GET_LIST_ASSERT(3, 0, 3);
+
+  CONFIG_GET_LIST_ASSERT(3, 1, 0);
+  CONFIG_GET_LIST_ASSERT(3, 1, 1);
+  CONFIG_GET_LIST_ASSERT(3, 1, 2);
+  CONFIG_GET_LIST_ASSERT(3, 1, 3);
+  CONFIG_GET_LIST_ASSERT(3, 1, 4);
+  CONFIG_GET_LIST_ASSERT(3, 1, 5);
+  CONFIG_GET_LIST_ASSERT(3, 1, 6);
+
+#undef CONFIG_GET_LIST_ASSERT
 
   CU_ASSERT_PTR_NULL(fo_config_get_list(GROUP(3), KEY(3, 2), 0, &error));
   CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_invalid_group);
+  CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
   CU_ASSERT_STRING_EQUAL(error->message,
       "ERROR: four[not] must be of type list to get list element")
   g_clear_error(&error);
+
+  CU_ASSERT_PTR_NULL(fo_config_get_list(GROUP(3), KEY(3, 0), 4, &error));
+  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  CU_ASSERT_STRING_EQUAL(error->message,
+      "ERROR: four[is] 4 is out of range");
+  g_clear_error(&error);
+
+  CU_ASSERT_PTR_NULL(fo_config_get_list(GROUP(3), KEY(3, 0), -1, &error));
+  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  CU_ASSERT_STRING_EQUAL(error->message,
+      "ERROR: four[is] -1 is out of range");
+  g_clear_error(&error);
 }
 
+/**
+ * Tests the config free function. This makes sure that everything is correctly
+ * set to NULL after a free.
+ */
 void test_fo_config_free()
 {
   fo_config_free();
@@ -284,6 +329,10 @@ void test_fo_config_free()
   CU_ASSERT_PTR_NULL(group_set);
 }
 
+/**
+ * Loads the default FOSSology configuration file and makes sure that all
+ * required fields are present.
+ */
 void test_fo_config_load_default()
 {
   GError* error = NULL;
@@ -298,6 +347,8 @@ void test_fo_config_load_default()
   CU_ASSERT_TRUE(fo_config_has_key("FOSSOLOGY", "address"));
   CU_ASSERT_TRUE(fo_config_has_key("FOSSOLOGY", "depth"));
   CU_ASSERT_TRUE(fo_config_has_key("FOSSOLOGY", "path"));
+
+  fo_config_free();
 }
 
 /* ************************************************************************** */
