@@ -73,11 +73,12 @@ int	main	(int argc, char *argv[])
   //struct rpmpkginfo *glb_rpmpi;
   //struct debpkginfo *glb_debpi;
   int Agent_pk;
+  int ars_pk = 0;
 
-  long upload_pk = 0;           // the upload primary key
+  int upload_pk = 0;           // the upload primary key
 
   fo_scheduler_connect(&argc, argv);
-  
+
   //glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   //glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
 
@@ -103,7 +104,7 @@ int	main	(int argc, char *argv[])
         break;
       default:
         Usage(argv[0]);
-        PQfinish(db_conn);        
+        PQfinish(db_conn);
         exit(-1);
     }
   }
@@ -115,10 +116,38 @@ int	main	(int argc, char *argv[])
     {
       upload_pk = atoi(fo_scheduler_current());
 
-      if (Verbose) { printf("PKG: pkgagent read %ld\n", upload_pk);}
+      if (Verbose) { printf("PKG: pkgagent read %d\n", upload_pk);}
       if (upload_pk ==0) continue;
 
+      /* check ars table if this is duplicate request*/
+      /* TODO: need be changed with common ARS funtion
+      snprintf(sqlbuf, sizeof(sqlbuf),
+          "select ars_pk from pkgagent_ars,agent \
+          where agent_pk=agent_fk and ars_success=true \
+          and upload_fk='%d' and agent_fk='%d'",
+          upload_pk, Agent_pk);
+      ars_result = PQexec(db_conn, sqlbuf);
+      if (fo_checkPQresult(db_conn, ars_result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+      if (PQntuples(ars_result) != 0)
+      {
+        printf("LOG: Ignoring requested pkgagent analysis of upload %d - Results are already in database.\n",upload_pk);
+        continue;
+      }
+      PQclear(ars_result);
+      */ 
+
+      /* Record analysis start in pkgagent_ars, the pkgagent audit trail. */
+      /* TODO: use common ARS funtion
+      ars_pk = fo_WriteARS(db_conn, ars_pk, upload_pk, Agent_pk, 'pkgagent_ars', null, null);
+      */
+
+      /* process the upload_pk pkgagent */
       if(ProcessUpload(upload_pk) != 0) return -1;
+
+      /* Record analysis success in pkgagent_ars. */
+      /* TODO: use common ARS funtion
+      fo_WriteARS(db_conn, ars_pk, upload_pk, Agent_pk, 'pkgagent_ars', 'success', true);
+      */
     }
   }
   else
@@ -129,7 +158,7 @@ int	main	(int argc, char *argv[])
       struct rpmpkginfo *rpmpi;
       rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
       rpmReadConfigFiles(NULL, NULL);
-      if(ProcessUpload(atoi(argv[optind])) == 0) 
+      if(ProcessUpload(atoi(argv[optind])) == 0)
       //if(GetMetadata(argv[optind],rpmpi) != -1)
         printf("OK\n");
       else
