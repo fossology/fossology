@@ -15,6 +15,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
+/**
+ * @file test_fossconfig.c
+ * @brief unit tests for the fossconfig library section of libfossology.
+ */
+
 /* includes for files that will be tested */
 #include <fossconfig.h>
 
@@ -49,12 +54,12 @@ extern char** group_set;
 /* * reason why all these #defines were added                               * */
 /* ************************************************************************** */
 
-#define CONF_FILE   "confdata/conftest.conf"
+#define CONF_FILE "confdata/conftest.conf"
+#define NONE      "none"
 
-#define NONE             "none"
 #define GROUP(g)         GROUP_##g
 #define KEY(g, k)        GROUP_##g##_KEY_##k
-#define VAL(g, v)      GROUP_##g##_VALUE_##v
+#define VAL(g, v)        GROUP_##g##_VALUE_##v
 #define VAL_IDX(g, v, i) GROUP_##g##_VALUE_##v##_##i
 
 #define GROUP_0 "one"
@@ -99,11 +104,14 @@ extern char** group_set;
 /* ************************************************************************** */
 
 /**
- * test the fo_config_load function. This should check all of the error
- * conditions using different configuration files as will as a successful load.
- * It is important to note that if the fo_config_load of the valid configuration
- * file fails, all following test cases will fail as a result. Because of this,
- * a failure here will cause a fatal abort of testing.
+ * @brief test the fo_config_load function. This should check all of the error
+ *        conditions using different configuration files as will as a successful
+ *        load. It is important to note that if the fo_config_load of the valid
+ *        configuration file fails, all following test cases will fail as a
+ *        result. Because of this, a failure here will cause a fatal abort of
+ *        testing.
+ *
+ * @return void
  */
 void test_fo_config_load()
 {
@@ -126,7 +134,6 @@ void test_fo_config_load()
   g_clear_error(&error);
 
   fo_config_load("confdata/no_group.conf", &error);
-  printf("%s\n", error->message);
   CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
   CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
   CU_ASSERT_STRING_EQUAL(error->message,
@@ -157,9 +164,11 @@ void test_fo_config_load()
 }
 
 /**
- * Test the group set function. Note that the order the groups are in the names
- * array is different from the order they are declared in the file. This is
- * because the names are stored internally in alphabetical order
+ * @brief Test the group set function. Note that the order the groups are in the
+ *        names array is different from the order they are declared in the file.
+ *        This is because the names are stored internally in alphabetical order
+ *
+ * @return void
  */
 void test_fo_config_group_set()
 {
@@ -175,8 +184,10 @@ void test_fo_config_group_set()
 }
 
 /**
- * Test the key set function. Again, keys are stored in alphabetical order, so
- * the comparison order may be wonky.
+ * @brief Test the key set function. Again, keys are stored in alphabetical
+ *        order, so the comparison order may be wonky.
+ *
+ * @return void
  */
 void test_fo_config_key_set()
 {
@@ -213,7 +224,8 @@ void test_fo_config_key_set()
 }
 
 /**
- * Tests the has group function
+ * @brief Tests the has group function
+ * @return void
  */
 void test_fo_config_has_group()
 {
@@ -222,9 +234,11 @@ void test_fo_config_has_group()
 }
 
 /**
- * Test the has key function. There are three cases here because there are two
- * ways that a config can not have a key. If the key isn't in the group or the
- * group doesn't exist
+ * @brief Test the has key function. There are three cases here because there
+ *        are two ways that a config can not have a key. If the key isn't in the
+ *        group or the group doesn't exist
+ *
+ * @return void
  */
 void test_fo_config_has_key()
 {
@@ -234,8 +248,10 @@ void test_fo_config_has_key()
 }
 
 /**
- * Test the get function. This will also test the error cases of invalid key
- * and invalid group names.
+ * @brief Test the get function. This will also test the error cases of invalid
+ *        key and invalid group names.
+ *
+ * @return
  */
 void test_fo_config_get()
 {
@@ -266,8 +282,10 @@ void test_fo_config_get()
 }
 
 /**
- * Tests the is list function. Tests groups that has both and a group that
- * doesn't have a list. Error cases are tested elsewhere.
+ * @brief Tests the is list function. Tests groups that has both and a group
+ *        that doesn't have a list. Error cases are tested elsewhere.
+ *
+ * @return void
  */
 void test_fo_config_is_list()
 {
@@ -280,13 +298,17 @@ void test_fo_config_is_list()
 }
 
 /**
- * Tests the list length function. Includes test for none-list key error.
+ * @brief Tests the list length function. Checks both lists in the test file and
+ *        tests a none-list key error
+ *
+ * @return void
  */
 void test_fo_config_list_length()
 {
   GError* error = NULL;
 
   CU_ASSERT_EQUAL(fo_config_list_length(GROUP(3), KEY(3, 0), &error), 4);
+  CU_ASSERT_EQUAL(fo_config_list_length(GROUP(3), KEY(3, 1), &error), 7);
   CU_ASSERT_EQUAL(fo_config_list_length(GROUP(3), KEY(3, 2), &error), 0);
   CU_ASSERT_PTR_NOT_NULL(error);
   CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
@@ -297,8 +319,10 @@ void test_fo_config_list_length()
 }
 
 /**
- * Tests the get list function. Tests a none list key, and the index being out
- * of the valid range.
+ * @brief Tests the get list function. Tests a none list key, and the index
+ *        being out of the valid range.
+ *
+ * @return void
  */
 void test_fo_config_get_list()
 {
@@ -346,8 +370,10 @@ void test_fo_config_get_list()
 }
 
 /**
- * Tests the config free function. This makes sure that everything is correctly
- * set to NULL after a free.
+ * @brief Tests the config free function. This makes sure that everything is
+ *        correctly set to NULL after a free.
+ *
+ * @return void
  */
 void test_fo_config_free()
 {
@@ -360,8 +386,10 @@ void test_fo_config_free()
 }
 
 /**
- * Loads the default FOSSology configuration file and makes sure that all
- * required fields are present.
+ * @brief Loads the default FOSSology configuration file and makes sure that all
+ *        required fields are present.
+ *
+ * @return void
  */
 void test_fo_config_load_default()
 {
@@ -387,15 +415,16 @@ void test_fo_config_load_default()
 
 CU_TestInfo fossconfig_testcases[] =
 {
-    { "Test config_load\n",        test_fo_config_load        },
-    { "Test config_group_set\n",   test_fo_config_group_set   },
-    { "Test config_key_set\n",     test_fo_config_key_set     },
-    { "Test config_has_group\n",   test_fo_config_has_group   },
-    { "Test config_has_key\n",     test_fo_config_has_key     },
-    { "Test config_get\n",         test_fo_config_get         },
-    { "Test config_is_list\n",     test_fo_config_is_list     },
-    { "Test config_list_length\n", test_fo_config_list_length },
-    { "Test config_get_list\n",    test_fo_config_get_list    },
-    { "Test config_free\n",        test_fo_config_free        },
+    { "Test config_load\n",         test_fo_config_load         },
+    { "Test config_group_set\n",    test_fo_config_group_set    },
+    { "Test config_key_set\n",      test_fo_config_key_set      },
+    { "Test config_has_group\n",    test_fo_config_has_group    },
+    { "Test config_has_key\n",      test_fo_config_has_key      },
+    { "Test config_get\n",          test_fo_config_get          },
+    { "Test config_is_list\n",      test_fo_config_is_list      },
+    { "Test config_list_length\n",  test_fo_config_list_length  },
+    { "Test config_get_list\n",     test_fo_config_get_list     },
+    { "Test config_free\n",         test_fo_config_free         },
+    { "Test config_load_default\n", test_fo_config_load_default },
     CU_TEST_INFO_NULL
 };

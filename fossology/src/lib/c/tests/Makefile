@@ -30,11 +30,11 @@ test: $(EXE)
 	@echo "make library tests"
 	./$(EXE)
 
-coverage: $(OBJECTS) libfossology_cov.a test.c
+coverage: $(OBJS) libfossology_cov.a $(EXE).c
 	@echo "make library coverage tests"
-	$(CC) test.c -o $(EXE) $(OBJECTS) $(SRCDIR)/libfossology_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
+	$(CC) $(EXE).c -o $(EXE) $(OBJS) libfossology_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
 	./$(EXE)
-	lcov --direcotry $(SRCDIR)/ --capture --output-file cov.txt; \
+	lcov --directory $(SRCDIR)/ --capture --output-file cov.txt; \
 	genhtml -o results cov.txt
 
 $(EXE): $(OBJS) libfossology.a $(EXE).c
@@ -54,7 +54,7 @@ libfossology_cov.a: $(COVE)
 ########################
 
 fossconfig_cov.o: $(SRCDIR)/fossconfig.c $(SRCDIR)/fossconfig.h
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $@
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"' -o $@
 
 
 #####################
@@ -63,7 +63,7 @@ fossconfig_cov.o: $(SRCDIR)/fossconfig.c $(SRCDIR)/fossconfig.h
 
 clean:
 	@echo "make library tests clean"
-	rm -rf $(EXE) *.o *.g *.xml *.txt *.gcda results
+	rm -rf $(EXE) *.o *.g *.xml *.txt *.gcda *.gcno results
 
 install:
 	@echo "make library tests nothing to install"
