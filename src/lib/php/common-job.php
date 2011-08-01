@@ -489,20 +489,34 @@ function JobListSummary($upload_pk) {
 } // JobListSummary()
 
 /**
- * \brief  Get job list
- * \param string $status
- * \return job list related to the jobstatus
-           array(i=> Array ( [jq_pk] =>j)
+ * \brief  Get job list according the status
+
+ * \param string $status - the status might be:
+          Started, Completed, Restart, Failed, Paused, etc
+          the status 'Started' and 'Restart', you can call them as running status
+          to get all the running job list, you can set the $status as 'tart'
+
+ * \return job list related to the jobstatus,
+           the result is like: Array1, 2, 3, .., i), sorted
  */
 function GetJobList($status)
 {
+
+  /* get the job list according to the status */
   global $DB;
   if (empty($DB)) {
     return;
   }
-  $SQL = "SELECT jq_pk FROM jobqueue WHERE jq_endtext like '$status%' order by jq_pk;";
+  $SQL = "SELECT jq_pk FROM jobqueue WHERE jq_endtext like '%$status%' order by jq_pk;";
   $Results = $DB->Action($SQL);
-  return $Results;
+	$job_array = array();
+  foreach ($Results as $key => $value)
+  {
+    array_push($job_array, $value['jq_pk']);
+	}
+
+  sort($job_array, SORT_NUMERIC);
+	return $job_array;
 }
 
 ?>
