@@ -48,22 +48,25 @@ class ajax_admin_scheduler extends FO_Plugin
     {
       return '';
     }
-    else if ('status' == $type || 'verbose' == $type)
+    else if ('status' == $type || 'verbose' == $type || 'priority' == $type)
     {
-      $job_list_option .= "<option value='0'>scheduler</option>";
-      $job_array = GetJobList("");
+		  /* you can select scheduler besides jobs for 'status' and 'verbose',
+			   for 'priority', only jobs to select */
+			if ('priority' != $type)
+			{
+	      $job_list_option .= "<option value='0'>scheduler</option>";
+			}
+      $job_array = GetRunnableJobList();
     }
-    /* get job list from dB */
-    if ('pause' == $type)  $job_array = GetJobList("Started");
+    /* get job list from the table jobqueque */
+    if ('pause' == $type)  $job_array = GetJobList("tart");
     if ('restart' == $type)  $job_array = GetJobList("Paused");
-    if ('priority' == $type || 'pause' == $type)  $job_array = GetJobList("");
     
-    foreach ($job_array as $key => $value) 
+    for($i = 0; $i < sizeof($job_array); $i++)
     {
-      $job_id = $value['jq_pk'];
+      $job_id = $job_array[$i];
       $job_list_option .= "<option value='$job_id'>$job_id</option>";
     } 
-    
     return $job_list_option;
   }
 
