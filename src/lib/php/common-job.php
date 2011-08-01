@@ -489,7 +489,7 @@ function JobListSummary($upload_pk) {
 } // JobListSummary()
 
 /**
- * \brief  Get job list according the status
+ * \brief Gets the list of jobqueue records with the requested $status 
 
  * \param string $status - the status might be:
           Started, Completed, Restart, Failed, Paused, etc
@@ -497,25 +497,20 @@ function JobListSummary($upload_pk) {
           to get all the running job list, you can set the $status as 'tart'
 
  * \return job list related to the jobstatus,
-           the result is like: Array1, 2, 3, .., i), sorted
+           the result is like: Array(1, 2, 3, .., i), sorted
  */
 function GetJobList($status)
 {
+  /* Gets the list of jobqueue records with the requested $status */
+  global $PG_CONN;
+	if (empty($status)) return;
+  $sql = "SELECT jq_pk FROM jobqueue WHERE jq_endtext like '%$status%' order by jq_pk;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $job_array = array();
+  $job_array =	pg_fetch_all_columns($result, 0);
 
-  /* get the job list according to the status */
-  global $DB;
-  if (empty($DB)) {
-    return;
-  }
-  $SQL = "SELECT jq_pk FROM jobqueue WHERE jq_endtext like '%$status%' order by jq_pk;";
-  $Results = $DB->Action($SQL);
-	$job_array = array();
-  foreach ($Results as $key => $value)
-  {
-    array_push($job_array, $value['jq_pk']);
-	}
-
-  sort($job_array, SORT_NUMERIC);
+	pg_free_result($result);
 	return $job_array;
 }
 
