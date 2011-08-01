@@ -13,7 +13,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*********************************************************************/
+ *********************************************************************/
 
 #include <stdio.h>
 #include "CUnit/CUnit.h"
@@ -22,19 +22,19 @@ extern char *trim(char *str);
 
 void test_Trim_normal()
 {
-    char str[] = " test trim!   ";
-    char *predictValue = "test trim!";
-    char *Result = trim(str);
-    printf("test_Trim_normal Result is:%s\n", Result); 
-    CU_ASSERT_TRUE(!strcmp(Result, predictValue));
+  char str[] = " test trim!   ";
+  char *predictValue = "test trim!";
+  char *Result = trim(str);
+  printf("test_Trim_normal Result is:%s\n", Result);
+  CU_ASSERT_TRUE(!strcmp(Result, predictValue));
 }
 
 void test_Trim_str_is_null()
 {
-    char *str = "";
-    char *predictValue = "";
-    char *Result = trim(str);
-    CU_ASSERT_EQUAL(Result, predictValue);
+  char *str = "";
+  char *predictValue = "";
+  char *Result = trim(str);
+  CU_ASSERT_EQUAL(Result, predictValue);
 }
 
 void test_Trim_allspace()
@@ -45,9 +45,9 @@ void test_Trim_allspace()
   CU_ASSERT_TRUE(!strcmp(Result, predictValue));
 }
 CU_TestInfo testcases_Trim[] = {
-        {"Testing Trim, paramters are  normal:", test_Trim_normal},
-        {"Testing Trim, paramter is null:", test_Trim_str_is_null},
-        {"Testing Trim, paramter is allspace:", test_Trim_allspace},
-        CU_TEST_INFO_NULL
+    {"Testing Trim, paramters are  normal:", test_Trim_normal},
+    {"Testing Trim, paramter is null:", test_Trim_str_is_null},
+    {"Testing Trim, paramter is allspace:", test_Trim_allspace},
+    CU_TEST_INFO_NULL
 };
 
