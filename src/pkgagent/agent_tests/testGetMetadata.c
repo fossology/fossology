@@ -13,12 +13,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*********************************************************************/
+ *********************************************************************/
 #include "pkgagent.h"
 
 #include <stdio.h>
 #include "CUnit/CUnit.h"
-#define MAXCMD 8192
 
 /*
 struct rpmpkginfo {
@@ -47,21 +46,21 @@ extern int GetMetadata(char *pkg, struct rpmpkginfo *pi);
 
 void test_GetMetadata_normal()
 {
-    char *pkg = "./testdata/fossology-1.2.0-1.el5.i386.rpm";
-    struct rpmpkginfo *pi;
-    pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
-    int predictValue = 0;
-    rpmReadConfigFiles(NULL, NULL);
-    db_conn = fo_dbconnect();
-    int Result = GetMetadata(pkg, pi);
-    printf("GetMetadata Result is:%d\n", Result);
-    PQfinish(db_conn);
-    rpmFreeMacros(NULL);
-    CU_ASSERT_EQUAL(Result, predictValue);
+  char *pkg = "./testdata/fossology-1.2.0-1.el5.i386.rpm";
+  struct rpmpkginfo *pi;
+  pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+  int predictValue = 0;
+  rpmReadConfigFiles(NULL, NULL);
+  db_conn = fo_dbconnect();
+  int Result = GetMetadata(pkg, pi);
+  printf("GetMetadata Result is:%d\n", Result);
+  PQfinish(db_conn);
+  rpmFreeMacros(NULL);
+  CU_ASSERT_EQUAL(Result, predictValue);
 }
 
 CU_TestInfo testcases_GetMetadata[] = {
-	{"Testing the function GetMetadata, paramters are  normal", test_GetMetadata_normal}, 
-        CU_TEST_INFO_NULL
+    {"Testing the function GetMetadata, paramters are  normal", test_GetMetadata_normal},
+    CU_TEST_INFO_NULL
 };
 

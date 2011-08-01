@@ -10,7 +10,7 @@ CFLAGS_LOCAL=-I/usr/include/rpm -lpq -lrpm $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcu
 EXE=test_pkgagent
 CFLAGS_LOCAL_RPM_4_4=$(CFLAGS_LOCAL) -D_RPM_4_4
 CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
-TEST_OBJ=testRun.o testTrim.o testGetFieldValue.o testGetMetadata.o 
+TEST_OBJ=testRun.o testTrim.o testGetFieldValue.o testGetMetadata.o testRecordMetadataRPM.o testRecordMetadataDEB.o 
 all: $(EXE)
 $(EXE): $(TEST_OBJ) pkgagent.o $(VARS)
 	$(CC) -o $@ $(LOCALAGENTDIR)/pkgagent.o $(TEST_OBJ) $(CFLAGS_LOCAL)
