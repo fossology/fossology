@@ -384,6 +384,7 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
   int  line_count = 0;
   int  rv;
   int  rowNumb = 0;
+  int  errorCount = 0;
   char *Delims = " \t\n\r";
   char *token;
   char *saveptr;
@@ -444,6 +445,7 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
     {
       printf("ERROR: %s.%s.%d Invalid regular expression for file: %s, [%s], row: %d\n",
               __FILE__, fcnName, __LINE__, filepath, token, rowNumb);
+      errorCount++;
       break;
     }
 
@@ -465,6 +467,7 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
       {
         printf("ERROR: %s.%s.%d Invalid operator in file: %s, [%s], row: %d\n",
                __FILE__, fcnName, __LINE__, filepath, token, rowNumb);
+        errorCount++;
         break;
       }
     }
@@ -482,11 +485,17 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
     {
       printf("ERROR: %s.%s.%d Invalid regular expression for file: %s, [%s], row: %d\n",
               __FILE__, fcnName, __LINE__, filepath, token, rowNumb);
+      errorCount++;
       break;
     }
 
     rowNumb++;
   }
+
+  /* bad file data.  Die unceremoniously.
+   * todo: die more gracefully.
+   */
+  if (errorCount) exit(-1);
 
   if (!rowNumb)
   {
