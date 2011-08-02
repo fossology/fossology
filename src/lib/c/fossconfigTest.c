@@ -26,6 +26,7 @@ int main(int argc, char** argv)
   GError* error = NULL;
   char** groups;
   char** keys;
+  gchar* temp;
   int i, ngrps;
   int j, nkeys;
   int k, nlist;
@@ -53,8 +54,11 @@ int main(int argc, char** argv)
         nlist = fo_config_list_length(groups[i], keys[j], &error);
         printf("  %s:\n", keys[j]);
         for(k = 0; k < nlist; k++)
+        {
           printf("    [%d] = %s\n", k,
-              fo_config_get_list(groups[i], keys[j], k, &error));
+              (temp = fo_config_get_list(groups[i], keys[j], k, &error)));
+          g_free(temp);
+        }
       }
       else
       {
@@ -64,5 +68,6 @@ int main(int argc, char** argv)
     }
   }
 
+  fo_config_free();
   return 0;
 }
