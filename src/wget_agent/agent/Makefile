@@ -19,41 +19,58 @@ TOP=../../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
-
+TESTDIR=../agent_tests
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
 PROXYDEF=-DPROXYFILE='"$(SYSCONFDIR)/fossology/Proxy.conf"'
 EXE=wget_agent
 CHKHDR=../../ununpack/agent/checksum.h ../../ununpack/agent/md5.h ../../ununpack/agent/sha1.h
 CHKSRC=$(CHKHDR:%.h=%.c)
+OBJECTS=wget_agent.o
+HDIR=$(OBJS:.o=.h)
+COVERAGE=$(OBJECTS:%.o=%_cov.o)
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
 MODULEDIR = $(shell dirname `pwd`)
 
 all: $(EXE)
 
-$(EXE): %: %.c $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS)
+$(EXE): main.c libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS)
 	@echo "make pkgagent agent"
-	$(CC) $< $(CHKSRC) $(PROXYDEF) $(CFLAGS_LOCAL) -o $@
+	$(CC) main.c libwget_agent.a $(CHKSRC) $(PROXYDEF) $(CFLAGS_LOCAL) -o $@
 
 install: all
-	@echo "make wget_agent agent install"
+	@echo "make wget_agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 	@if test ! -e $(CONFDIR)/mods-enabled/wget_agent; then \
 	ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled/wget_agent ; fi;
 
 
 uninstall:
-	@echo "make wget_agent agent uninstall"
+	@echo "make wget_agent uninstall"
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
 
-test: all
-	@echo "*** No tests available for agents/$(EXE) ***"
+$(OBJECTS): %.o: %.c
+	$(CC) -c $< $(CFLAGS_LOCAL) $(PROXYDEF)
 
-coverage:
-	@echo "NOTICE: no coverage available for wget_agent"
+$(COVERAGE): %_cov.o: %.c
+	$(CC) -c $< $(CFLAGS_LOCAL) $(PROXYDEF) $(FLAG_COV) -o $@
+
+libwget_agent.a: $(OBJECTS)
+	ar cvr $@ $(OBJECTS)
+
+libwget_agent_cov.a: $(COVERAGE)
+	ar cvr $@ $(COVERAGE)
+
+test: libwget_agent.a
+	@echo "make test wget_agent"
+	$(MAKE) -C $(TESTDIR) test
+
+coverage: libwget_agent_cov.a
+	@echo "make coverage wget_agent"
+	$(MAKE) -C $(TESTDIR) coverage
 
 clean:
-	@echo "make wget_agent agent clean"
-	rm -f $(EXE) *.o core
+	@echo "make wget_agent clean"
+	rm -f $(EXE) *.o core *.a *.gc*; \
 
 include $(DEPS)
 

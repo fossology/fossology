@@ -20,40 +20,14 @@
 
 /**
  * \file wget_agent.c
- * \brief dowload file from URL
- *        locally to import the file to repo
  */
 
-#include <stdlib.h>
-
-/* specify support for files > 2G */
-#define __USE_LARGEFILE64
-#define __USE_FILE_OFFSET64
-
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <string.h>
-#include <ctype.h>
-#include <signal.h>
-#include <grp.h>
-#include <libgen.h>
-
-#define lstat64(x,y) lstat(x,y)
-#define stat64(x,y) stat(x,y)
-typedef struct stat stat_t;
-
-#include "libfossology.h"
-
-#include "../../ununpack/agent/checksum.h"
+#include "wget_agent.h"
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif
 
-#define MAXCMD	2048
 char SQL[MAXCMD];
 
 /* for the DB */
@@ -63,7 +37,7 @@ long GlobalUploadKey=-1;
 char GlobalTempFile[MAXCMD];
 char GlobalURL[MAXCMD];
 char GlobalParam[MAXCMD];
-int GlobalImportGold=1;	/* set to 0 to not store file in gold repository */
+int GlobalImportGold=1; /* set to 0 to not store file in gold repository */
 gid_t ForceGroup=-1;
 
 /* for debugging */
@@ -71,7 +45,9 @@ int Debug=0;
 
 /**
  * \brief Given a filename, is it a file?
- * \param int Link: should it follow symbolic links?
+ *
+ * \param int Link - should it follow symbolic links?
+ *
  * \return int 1=yes, 0=no.
  */
 int IsFile(char *Fname, int Link)
@@ -87,7 +63,8 @@ int IsFile(char *Fname, int Link)
 
 /**
  * \brief Closes the connection to the server. Also frees memory used by the PGconn object;then exit.
- * \param int rc: exit value
+ *
+ * \param int rc - exit value
  */ 
 void  SafeExit  (int rc)
 {
@@ -97,7 +74,9 @@ void  SafeExit  (int rc)
 
 /**
  * \brief Get the position (ending + 1) of http|https|ftp:// of one url
- * \param char *URL: the URL
+ *
+ * \param char *URL - the URL
+ *
  * \return the position (ending + 1) of http|https|ftp:// of one url
  *         E.g. http://fossology.org, return 7
  */
@@ -280,8 +259,10 @@ void	DBLoadGold	()
 
 /**
  * \brief Given a URL string, taint-protect it.
- * \param char *Sin: the source URL
- * \param char *Sout: the tainted URL  
+ *
+ * \param char *Sin - the source URL
+ * \param char *Sout - the tainted URL  
+ *
  * \return 1=tainted, 0=failed to taint
  */
 int	TaintURL	(char *Sin, char *Sout, int SoutSize)
@@ -306,10 +287,12 @@ int	TaintURL	(char *Sin, char *Sout, int SoutSize)
 
 /**
  * \brief Do the wget.
- * \param char *TempFile: used when upload from URL by the scheduler, the downloaded file(directory) will be archived as this file
+ *
+ * \param char *TempFile - used when upload from URL by the scheduler, the downloaded file(directory) will be archived as this file
  *                        when running from command, this parameter is null, e.g. /var/local/lib/fossology/agents/wget.32732
- * \param char *URL: the url you want to download
- * \param char *TempFileDir: where you want to store your downloaded file(directory)
+ * \param char *URL - the url you want to download
+ * \param char *TempFileDir - where you want to store your downloaded file(directory)
+ *
  * \return int, 0 on success, non-zero on failure.
  */
 int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
@@ -449,8 +432,9 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
 /**
  * \brief Convert input pairs into globals.
  *        This functions taints the parameters as needed.
- * \param char *S: the parameters for wget_aget have 2 parts, one is from scheduler, that is S
- * \param char *TempFileDir: the parameters for wget_aget have 2 parts, one is from wget_agent.conf, that is TempFileDir
+ *
+ * \param char *S - the parameters for wget_aget have 2 parts, one is from scheduler, that is S
+ * \param char *TempFileDir - the parameters for wget_aget have 2 parts, one is from wget_agent.conf, that is TempFileDir
  */
 void    SetEnv  (char *S, char *TempFileDir)
 {
@@ -515,7 +499,8 @@ void    SetEnv  (char *S, char *TempFileDir)
 
 /**
  * \brief Here are some suggested options
- * \param char *Name: the name of the executable, ususlly it is wget_agent
+ *
+ * \param char *Name - the name of the executable, ususlly it is wget_agent
  */
 void	Usage	(char *Name)
 {
@@ -534,205 +519,4 @@ void	Usage	(char *Name)
   printf("         the DB and repository.\n");
   printf("  no file :: process data from the scheduler.\n");
 } /* Usage() */
-
-/**
- * \brief main function for the wget_agent
- *
- * There are 3 ways to use the wget_agent:
- *   1. Command Line download: download one file or one directory from the command line
- *   2. Agent Based download: run from the scheduler
- *   3. Command Line locally to import the file(directory): Import one file or one directory from the command line, used by upload from file and upload from server
- *
- *
- * +-----------------------+
- * | Command Line download |
- * +-----------------------+
- *
- * To download one file or one directory from the command line:
- *   example:
- *   ./wget_agent http://www.aaa.com/bbb
- *
- * +----------------------+
- * | Agent Based          |
- * +----------------------+
- * To download one file or one directory (one URL )from the scheduler:
- *   example: 
- * part 1 parameters from the scheduler:  19 - http://g.org -l 1 -R index.html*
- *                                        19 is uploadpk, 'http://g.org' is downloadfile url, 
- *                                        '-l 1  -R index.html*' is several parameters used by wget_agent
- * part 2 parameters from wget_agent.conf:  -d /var/local/lib/fossology/agents
- *                                          '/var/local/lib/fossology/agent' is directory for downloaded file(directory) 
- *                                           storage temporarily, after all file(directory) is dowloaded, move them into repo
- *                 
- * +----------------------------------------------------+
- * | Command Line locally to import the file(directory) |
- * +----------------------------------------------------+
- *
- * To Import one file or one directory from the command line into repo:
- *   example:
- *   ./wget_agent -g fossy -k $uploadpk '$UploadedFile'
- *
- * \param argc the number of command line arguments
- * \param argv the command line arguments
- * \return 0 on a successful program execution
- */
-
-int	main	(int argc, char *argv[])
-{
-  int arg;
-  char *Parm = NULL;
-  char *TempFileDir=NULL;
-  int c;
-  int InitFlag=0;
-  char *agent_desc = "Network downloader.  Uses wget(1).";
-
-  memset(GlobalTempFile,'\0',MAXCMD);
-  memset(GlobalURL,'\0',MAXCMD);
-  memset(GlobalParam,'\0',MAXCMD);
-  GlobalUploadKey = -1;
-
-  fo_scheduler_connect(&argc, argv);
-
-  /* Process command-line */
-  while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:")) != -1)
-    {
-    switch(c)
-	{
-	case 'd':
-		TempFileDir = optarg;
-		break;
-	case 'g':
-		{
-		struct group *SG;
-		SG = getgrnam(optarg);
-		if (SG) ForceGroup = SG->gr_gid;
-		}
-		break;
-	case 'G':
-		GlobalImportGold=0;
-		break;
-	case 'i':
-		InitFlag=1;
-		break;
-	case 'k':
-		GlobalUploadKey = atol(optarg);
-		if (!GlobalTempFile[0])
-			strcpy(GlobalTempFile,"wget.default_download");
-		break;
-        case 'A':
-                sprintf(GlobalParam, "%s -A %s ",GlobalParam, optarg);
-                break;
-        case 'R':
-                sprintf(GlobalParam, "%s -R %s ",GlobalParam, optarg);
-                break;
-        case 'l':
-                sprintf(GlobalParam, "%s -l %s ",GlobalParam, optarg);
-                break;
-	default:
-		Usage(argv[0]);
-		SafeExit(-1);
-	}
-    }
-  if (argc - optind > 1)
-	{
-	Usage(argv[0]);
-	SafeExit(-1);
-	}
-
-  /* Init */
-	pgConn = fo_dbconnect();
-  if (!pgConn)
-	{
-		FATAL("Unable to connect to database\n");
-		SafeExit(20);
-	}
-
-  /* When initializing the DB, don't do anything else */
-  if (InitFlag)
-	{
-  if (pgConn) PQfinish(pgConn);
-	return(0);
-	}
-
-  /* Get the Agent Key from the DB */
-  fo_GetAgentKey(pgConn, basename(argv[0]), GlobalUploadKey, SVN_REV, agent_desc);
-
-  /* Run from the command-line (for testing) */
-  for(arg=optind; arg < argc; arg++)
-  {
-    memset(GlobalURL,'\0',sizeof(GlobalURL));
-    strncpy(GlobalURL,argv[arg],sizeof(GlobalURL));
-    /* If the file contains "://" then assume it is a URL.
-       Else, assume it is a file. */
-    if (Debug) printf("Command-line: %s\n",GlobalURL);
-    if (strstr(GlobalURL,"://"))
-    {
-			fo_scheduler_heart(1);
-      if (Debug) printf("It's a URL\n");
-      if (GetURL(GlobalTempFile,GlobalURL,TempFileDir) != 0)
-			{
-				printf("ERROR: Download of %s failed.\n",GlobalURL);
-				fflush(stdout);
-				SafeExit(21);
-			}
-      if (GlobalUploadKey != -1) { DBLoadGold(); }
-      unlink(GlobalTempFile);
-    }
-    else /* must be a file */
-    {
-      if (Debug) printf("It's a file -- GlobalUploadKey = %ld\n",GlobalUploadKey);
-      if (GlobalUploadKey != -1)
-			{
-				memcpy(GlobalTempFile,GlobalURL,MAXCMD);
-				DBLoadGold();
-			}
-    }
-  }
-
-  /* Run from scheduler! */
-  if (optind == argc)
-  {
-		while(fo_scheduler_next())
-    {
-      Parm = fo_scheduler_current(); /* get piece of information, including upload_pk, downloadfile url, and parameters */
-      if (Parm && Parm[0])
-			{
-				fo_scheduler_heart(1);
-				/* set globals: uploadpk, downloadfile url, parameters */
-				SetEnv(Parm,TempFileDir);
-        char TempDir[MAXCMD];
-        memset(TempDir,'\0',MAXCMD);
-        snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
-				if (GetURL(GlobalTempFile,GlobalURL,TempDir) == 0)
-				{
-					DBLoadGold();
-					unlink(GlobalTempFile);
-					struct stat sb;
-					/* Run from scheduler! delete the temp directory, /var/local/lib/fossology/agents/wget */
-					if (!stat(TempDir, &sb))
-					{
-						char CMD[MAXCMD];
-						memset(CMD,'\0',MAXCMD);
-						snprintf(CMD,MAXCMD-1, "rm -rf '%s' 2>&1", TempDir);
-						int rc_system = system(CMD); 
-						if (rc_system != 0) SafeExit(25); // failed to delete the temperary directory
-					}
-				}
-				else
-				{
-					FATAL("upload %ld File retrieval failed.\n",GlobalUploadKey);
-					printf("LOG upload %ld File retrieval failed: uploadpk=%ld tempfile=%s URL=%s\n",GlobalUploadKey,GlobalUploadKey,GlobalTempFile,GlobalURL);
-					fflush(stdout);
-					if (pgConn) PQfinish(pgConn);
-					SafeExit(22);
-				}
-			}
-		}
-  } /* if run from scheduler */
-
-  /* Clean up */
-  if (pgConn) PQfinish(pgConn);
-  fo_scheduler_disconnect();
-  return(0);
-} /* main() */
 
