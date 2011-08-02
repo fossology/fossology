@@ -92,7 +92,7 @@ $text = _("Show All Files");
 
 	if (empty($uploadtree_pk) || empty($bucket_pk) || empty($bucketpool_pk)) 
     {
-$text = _("is missing required parameters.");
+      $text = _("is missing required parameters.");
       echo $this->Name . " $text";
       return;
     }
@@ -125,9 +125,9 @@ $text = _("is missing required parameters.");
 	$V .= _("The following files are in bucket: '<b>");
 	$V .= $bucketNameCache[$bucket_pk];
 	$V .= "</b>'.\n";
-$text = _("Display");
-$text1 = _("excludes");
-$text2 = _("files with these licenses");
+    $text = _("Display");
+    $text1 = _("excludes");
+    $text2 = _("files with these licenses");
     if (!empty($Excl)) $V .= "<br>$text <b>$text1</b> $text2: $Excl";
 
 	$Offset = ($Page < 0) ? 0 : $Page*$Max;
@@ -198,7 +198,7 @@ $text2 = _("files with these licenses");
 
     /* file display loop/table */
     $V .= "<table>";
-$text = _("File");
+    $text = _("File");
     $V .= "<tr><th>$text</th><th>&nbsp";
     $ExclArray = explode(":", $Excl);
     $ItemNumb = 1;
@@ -215,14 +215,13 @@ if ($Count > 0)
         $URL = $baseURL ."&excl=".urlencode($Excl).":".$URLlicstring;
       else
         $URL = $baseURL ."&excl=$URLlicstring";
-$text = _("Exclude files with license");
+      $text = _("Exclude files with license");
       $Header = "<a href=$URL>$text: $licstring.</a>";
 
       $ok = true;
-      if ($Excl)
-      {
-        if (in_array($licstring, $ExclArray)) $ok = false;
-      }
+      if ($Excl) if (in_array($licstring, $ExclArray)) $ok = false;
+      if (empty($licstring)) $ok = false;
+
       if ($ok)
       {
         $nomosagent_pk = $row['nomosagent_fk'];
