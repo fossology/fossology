@@ -21,9 +21,11 @@ SRCDIR = ..
 CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(ALL_CFLAGS) -I$(SRCDIR) -I../ -lcunit
 EXE = testlibs
 
-OBJS = test_fossconfig.o \
+OBJS = test_fossconfig.o    \
+       test_fossscheduler.o \
 
-COVE = fossconfig_cov.o \
+COVE = fossconfig_cov.o    \
+       fossscheduler_cov.o \
 
 all: test
 test: $(EXE)
@@ -56,6 +58,9 @@ libfossology_cov.a: $(COVE)
 fossconfig_cov.o: $(SRCDIR)/fossconfig.c $(SRCDIR)/fossconfig.h
 	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"' -o $@
 
+fossscheduler_cov.o: $(SRCDIR)/fossscheduler.c $(SRCDIR)/fossscheduler.h
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
+
 
 #####################
 # other build rules #
@@ -63,7 +68,7 @@ fossconfig_cov.o: $(SRCDIR)/fossconfig.c $(SRCDIR)/fossconfig.h
 
 clean:
 	@echo "make library tests clean"
-	rm -rf $(EXE) *.o *.g *.xml *.txt *.gcda *.gcno results
+	rm -rf $(EXE) *.o *.g *.xml *.txt *.gcda *.gcno *.a results
 
 install:
 	@echo "make library tests nothing to install"

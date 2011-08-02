@@ -143,6 +143,9 @@ void fo_scheduler_disconnect()
   {
     fprintf(stdout, "BYE\n");
     fflush(stdout);
+
+    valid = 0;
+    found = 0;
   }
 }
 
@@ -170,9 +173,10 @@ char* fo_scheduler_next()
   fflush(stdout);
 
   /* get the next line from the scheduler and possibly WAIT */
-  while(fgets(buffer, sizeof(buffer), stdin) != NULL) {
-
-    printf("NOTE: recieved %s\n", buffer);
+  while(fgets(buffer, sizeof(buffer), stdin) != NULL)
+  {
+    if(verbose)
+      printf("NOTE: recieved %s\n", buffer);
     if(strncmp(buffer, "CLOSE", 5) == 0)
       break;
     if(strncmp(buffer, "END", 3) == 0)
@@ -191,6 +195,7 @@ char* fo_scheduler_next()
     else if(strncmp(buffer, "VERSION", 7) == 0)
     {
       fprintf(stdout, "%s\n", SVN_REV);
+      fflush(stdout);
       valid = 0;
       continue;
     }

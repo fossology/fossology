@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 extern CU_TestInfo fossconfig_testcases[];
+extern CU_TestInfo fossscheduler_testcases[];
 
 /**
  * array of every test suite. There should be at least one test suite for every
@@ -37,7 +38,8 @@ extern CU_TestInfo fossconfig_testcases[];
  */
 CU_SuiteInfo suites[] =
 {
-    { "Testing fossconfig", NULL, NULL, fossconfig_testcases },
+    { "Testing fossconfig",    NULL, NULL, fossconfig_testcases    },
+    { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
     CU_SUITE_INFO_NULL
 };
 
