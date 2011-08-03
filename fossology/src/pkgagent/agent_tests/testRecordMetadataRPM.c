@@ -90,6 +90,24 @@ void test_RecordMetadataRPM()
   int Result = RecordMetadataRPM(pi);
   printf("RecordMetadataRPM Result is:%d\n", Result);
 
+  /* Check data correction */
+  memset(SQL,'\0',MAXSQL);
+  snprintf(SQL,MAXSQL,"SELECT pkg_pk, pkg_name, pkg_arch, version, license, packager, release, vendor FROM pkg_rpm INNER JOIN pfile ON pfile_fk = '%ld' AND pfile_fk = pfile_pk;", pi->pFileFk);
+  result =  PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+  {
+    printf("Get pkg information ERROR!\n");
+    exit(-1);
+  }
+  CU_ASSERT_STRING_EQUAL(PQgetvalue(result, 0, 1), "Test Pkg");
+  CU_ASSERT_STRING_EQUAL(PQgetvalue(result, 0, 2), "Test Arch");
+  CU_ASSERT_STRING_EQUAL(PQgetvalue(result, 0, 3), "Test version");
+  CU_ASSERT_STRING_EQUAL(PQgetvalue(result, 0, 4), "Test license");
+  CU_ASSERT_STRING_EQUAL(PQgetvalue(result, 0, 5), "Test packager");
+  CU_ASSERT_STRING_EQUAL(PQgetvalue(result, 0, 6), "Test release");
+  CU_ASSERT_STRING_EQUAL(PQgetvalue(result, 0, 7), "Test vendor");
+  PQclear(result);
+
   /* Clear testing data in database */
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"DELETE FROM pkg_rpm_req WHERE pkg_fk IN (SELECT pkg_pk FROM pkg_rpm WHERE pfile_fk = '%ld');", pi->pFileFk);

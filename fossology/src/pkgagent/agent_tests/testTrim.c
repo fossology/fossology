@@ -45,7 +45,7 @@ void test_Trim_allspace()
   CU_ASSERT_TRUE(!strcmp(Result, predictValue));
 }
 CU_TestInfo testcases_Trim[] = {
-    {"Testing Trim, paramters are  normal:", test_Trim_normal},
+    {"Testing Trim, paramters are normal:", test_Trim_normal},
     {"Testing Trim, paramter is null:", test_Trim_str_is_null},
     {"Testing Trim, paramter is allspace:", test_Trim_allspace},
     CU_TEST_INFO_NULL

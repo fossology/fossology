@@ -27,14 +27,18 @@ extern CU_TestInfo testcases_Trim[];
 //extern CU_TestInfo testcases_ProcessUpload[];
 extern CU_TestInfo testcases_RecordMetadataRPM[];
 extern CU_TestInfo testcases_RecordMetadataDEB[];
+extern CU_TestInfo testcases_GetMetadataDebSource[];
+extern CU_TestInfo testcases_GetMetadataDebBinary[];
 
 CU_SuiteInfo suites[] = {
     {"Testing the function trim:", NULL, NULL, testcases_Trim},
     {"Testing the function GetFieldValue:", NULL, NULL, testcases_GetFieldValue},
-    {"Testing the function GetMetadata:", NULL, NULL, testcases_GetMetadata},
     //{"Testing the function ProcessUpload:", NULL, NULL, testcases_ProcessUpload},
-    {"Testing the function RecordMetadataRPM:", NULL, NULL, testcases_RecordMetadataRPM},
     {"Testing the function RecordMetadataDEB:", NULL, NULL, testcases_RecordMetadataDEB},
+    {"Testing the function GetMetadataDebSource:", NULL, NULL, testcases_GetMetadataDebSource},
+    {"Testing the function RecordMetadataRPM:", NULL, NULL, testcases_RecordMetadataRPM},
+    {"Testing the function GetMetadataDebBinary:", NULL, NULL, testcases_GetMetadataDebBinary},
+    {"Testing the function GetMetadata:", NULL, NULL, testcases_GetMetadata},
     CU_SUITE_INFO_NULL
 };
 
@@ -52,7 +56,7 @@ void AddTests(void)
 
 int main( int argc, char *argv[] )
 {
-  printf("test start\n");
+  printf("Test Start\n");
   if(CU_initialize_registry()){
 
     fprintf(stderr, "\nInitialization of Test Registry failed.\n");
@@ -65,7 +69,7 @@ int main( int argc, char *argv[] )
     CU_automated_run_tests();
     //CU_cleanup_registry();
   }
-  printf("end\n");
+  printf("Test End\n");
   printf("Results:\n");
   printf("  Number of suites run: %d\n", CU_get_number_of_suites_run());
   printf("  Number of tests run: %d\n", CU_get_number_of_tests_run());

@@ -92,7 +92,7 @@ char *trim(char *str)
  * \param escString the string after excape
  * \param esclen the string length need to escape
  */
-void	EscapeString	(const char *sourceString, char *escString, int esclen)
+void EscapeString (char *sourceString, char *escString, int esclen)
 {
   int len;
   int error;
@@ -209,7 +209,7 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
  *
  * \return 0 on OK, -1 on failure. 
  */
-int    ProcessUpload (long upload_pk)
+int ProcessUpload (long upload_pk)
 {
   char mimetype[128];
   char sqlbuf[1024];
@@ -368,7 +368,7 @@ int    ProcessUpload (long upload_pk)
 void ReadHeaderInfo(Header header, struct rpmpkginfo *pi) 
 {
   char fmt[128];
-  const char * msgstr;
+  char * msgstr;
   const char * errstr;
   int i,j;
   long *tp,t;
@@ -392,6 +392,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
 
     msgstr = headerSprintf(header, fmt, rpmTagTable, rpmHeaderFormats, &errstr);
     if (msgstr != NULL){
+      trim(msgstr);
       if (Verbose) { printf("%s:%s",tagName(tag[i]),msgstr);}
       switch (tag[i]) {
         case RPMTAG_NAME:
@@ -421,7 +422,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
         case RPMTAG_BUILDTIME:
           t = atol(msgstr);
           tp = &t;
-          strncpy(pi->buildDate,asctime(gmtime((time_t*)tp)),sizeof(pi->buildDate));
+          strncpy(pi->buildDate,trim(asctime(gmtime((time_t*)tp))),sizeof(pi->buildDate));
           break;
         case RPMTAG_VENDOR:
           EscapeString(msgstr, pi->vendor, sizeof(pi->vendor));
@@ -488,7 +489,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
  * 
  * \return 0 on OK, -1 on failure.
  */
-int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
+int GetMetadata (char *pkg, struct rpmpkginfo *pi)
 {
   //rpmpi.pFileFk = 4234634;
   //if (PKG_RPM)
@@ -550,7 +551,7 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
  *
  * \return 0 on OK, -1 on failure.
  */
-int	RecordMetadataRPM	(struct rpmpkginfo *pi)
+int RecordMetadataRPM (struct rpmpkginfo *pi)
 {
   char SQL[MAXCMD];
   PGresult *result;
@@ -660,7 +661,7 @@ char * ParseDebFile(char *Sin, char *Field, char *Value)
  *
  * \return 0 on OK, -1 on failure.
  */
-int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
+int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
 {
   char *repfile;
   char *filename;
@@ -725,6 +726,7 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
   while (fgets(line,MAXCMD,fp)!=NULL)
   {
     s = ParseDebFile(line,field,value);
+    trim(value);
     if (!strcasecmp(field, "Description")) {
       EscapeString(value, pi->summary, sizeof(pi->summary));
       strcpy(temp, "");
@@ -802,7 +804,7 @@ int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
  *
  * \return 0 on OK, -1 on failure.
  */
-int    RecordMetadataDEB       (struct debpkginfo *pi)
+int RecordMetadataDEB (struct debpkginfo *pi)
 {
   char SQL[MAXCMD];
   PGresult *result;
@@ -866,7 +868,7 @@ int    RecordMetadataDEB       (struct debpkginfo *pi)
  *
  * \return 0 on OK, -1 on failure.
  */
-int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
+int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
 { 
   FILE *fp;
   char field[MAXCMD];
@@ -884,6 +886,7 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
   {
     s = ParseDebFile(line,field,value);
 
+    trim(value);
     if (!strcasecmp(field, "Format")) {
       EscapeString(value, pi->format, sizeof(pi->format));
     }
@@ -902,6 +905,9 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
     }
     if (!strcasecmp(field, "Maintainer")) {
       EscapeString(value, pi->maintainer, sizeof(pi->maintainer));
+    }
+    if (!strcasecmp(field, "Homepage")) {
+      EscapeString(value, pi->homepage, sizeof(pi->homepage));
     }
     if (!strcasecmp(field, "Uploaders")) {
       EscapeString(value, pi->uploaders, sizeof(pi->uploaders));
@@ -951,7 +957,7 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
  Here are some suggested options (in addition to the program
  specific options you may already have).
  ***********************************************/
-void	Usage	(char *Name)
+void Usage (char *Name)
 { 
   printf("Usage: %s [options] [file [file [...]]\n",Name);
   printf("  -i   :: initialize the database, then exit.\n");

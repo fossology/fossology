@@ -19,31 +19,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include "CUnit/CUnit.h"
 
-/*
-struct rpmpkginfo {
-  char pkgName[256];
-  char pkgAlias[256];
-  char pkgArch[64];
-  char version[64];
-  char rpmFilename[256];
-  char license[512];
-  char group[128];
-  char packager[1024];
-  char release[64];
-  char buildDate[128];
-  char vendor[128];
-  char url[256];
-  char sourceRPM[256];
-  char summary[MAXCMD];
-  char description[MAXCMD];
-  long pFileFk;
-  char pFile[MAXCMD];
-  char **requires;
-  int req_size;
-};*/
-
 extern int GetMetadata(char *pkg, struct rpmpkginfo *pi);
 
+/**
+ * \brief test_GetMetadata()
+ * 
+ * Test pkgagent.c Function GetMetadata()
+ * Normal parameter
+ * 
+ */
 void test_GetMetadata_normal()
 {
   char *pkg = "./testdata/fossology-1.2.0-1.el5.i386.rpm";
@@ -53,14 +37,48 @@ void test_GetMetadata_normal()
   rpmReadConfigFiles(NULL, NULL);
   db_conn = fo_dbconnect();
   int Result = GetMetadata(pkg, pi);
-  printf("GetMetadata Result is:%d\n", Result);
+  printf("test_GetMetadata Result is:%d\n", Result);
+  //printf("test_GetMetadata Result is:%s\n", pi->buildDate); 
+  CU_ASSERT_STRING_EQUAL(pi->pkgName, "fossology");
+  CU_ASSERT_STRING_EQUAL(pi->pkgArch, "i386");
+  CU_ASSERT_STRING_EQUAL(pi->version, "1.2.0");
+  CU_ASSERT_STRING_EQUAL(pi->license, "GPLv2");
+  CU_ASSERT_STRING_EQUAL(pi->group, "Applications/Engineering");
+  CU_ASSERT_STRING_EQUAL(pi->release, "1.el5");
+  CU_ASSERT_STRING_EQUAL(pi->buildDate, "Mon Jul 12 03:30:32 2010");
+  CU_ASSERT_STRING_EQUAL(pi->url, "http://www.fossology.org");
+  CU_ASSERT_STRING_EQUAL(pi->sourceRPM, "fossology-1.2.0-1.el5.src.rpm");
+  CU_ASSERT_EQUAL(pi->req_size, 44);
   PQfinish(db_conn);
   rpmFreeMacros(NULL);
   CU_ASSERT_EQUAL(Result, predictValue);
 }
 
+/**
+ * \brief test_GetMetadata()
+ * 
+ * Test pkgagent.c Function GetMetadata()
+ * Wrong test file
+ * 
+ */
+void test_GetMetadata_no_testfile()
+{
+  char *pkg = "./testdata/fossology_1.4.1.dsc";
+  struct rpmpkginfo *pi;
+  pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+  int predictValue = -1;
+  rpmReadConfigFiles(NULL, NULL);
+  db_conn = fo_dbconnect();
+  int Result = GetMetadata(pkg, pi);
+  printf("test_GetMetadata Result is:%d\n", Result);
+  PQfinish(db_conn);
+  rpmFreeMacros(NULL); 
+  CU_ASSERT_EQUAL(Result, predictValue);
+}
+
 CU_TestInfo testcases_GetMetadata[] = {
     {"Testing the function GetMetadata, paramters are  normal", test_GetMetadata_normal},
+    {"Testing the function GetMetadata, test file doesn't exist", test_GetMetadata_no_testfile},
     CU_TEST_INFO_NULL
 };
 
