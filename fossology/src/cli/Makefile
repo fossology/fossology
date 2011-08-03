@@ -11,6 +11,12 @@ MAN1FILES=$(DOCS:%.pod=%.1)
 HTMLFILES=$(DOCS:%.pod=%.html)
 TEXTFILES=$(DOCS:%.pod=%.txt)
 
+#########################
+# iPATHFILE build rules #
+#########################
+$(iPATHFILE):
+	$(MAKE) -C $(FOWWWDIR)
+
 all: $(iPATHFILE) docs
 
 docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
