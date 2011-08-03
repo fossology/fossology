@@ -158,8 +158,8 @@ int	main	(int argc, char *argv[])
       struct rpmpkginfo *rpmpi;
       rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
       rpmReadConfigFiles(NULL, NULL);
-      if(ProcessUpload(atoi(argv[optind])) == 0)
-      //if(GetMetadata(argv[optind],rpmpi) != -1)
+      //if(ProcessUpload(atoi(argv[optind])) == 0)
+      if(GetMetadata(argv[optind],rpmpi) != -1)
         printf("OK\n");
       else
         printf("Fail\n");
