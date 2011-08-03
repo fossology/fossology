@@ -24,10 +24,16 @@ MODULEDIR = $(shell dirname `pwd`)
 CFLAGS_LOCAL= $(ALL_CFLAGS)
 EXE=adj2nest
 
+$(EXE): adj2nest.c $(FOLIB) $(VARS)
+	$(CC) $< $(CFLAGS_LOCAL) -o $@
+
 all: $(EXE)
 
-$(EXE): %: %.c $(DB) $(REPO) $(VARS) $(FOLIB)
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+#######################
+# library build rules #
+#######################
+$(FOLIB):
+	$(MAKE) -C $(FOLIBDIR)
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
