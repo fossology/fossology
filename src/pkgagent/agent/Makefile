@@ -29,6 +29,12 @@ pkgagent.o: pkgagent.c pkgagent.h
 		$(CC) -c $< $(CFLAGS_LOCAL_RPM_4_4); \
 	fi
 
+#######################
+# library build rules #
+#######################
+$(FOLIB):
+	$(MAKE) -C $(FOLIBDIR)
+
 install: all
 	@echo "make pkgagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
