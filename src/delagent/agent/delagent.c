@@ -2,7 +2,7 @@
  delagent: Remove an upload from the DB and repository
 
  Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -60,11 +60,11 @@ int	MyDBaccess	(void *V, char *S)
   if (Verbose > 1) printf("%s\n",S);
   rc = DBaccess(V,S);
   if (rc < 0)
-	{
-	fprintf(stderr,"FATAL: SQL failed: '%s'.\n",SQL);
-	DBclose(DB);
-	exit(-1);
-	}
+  {
+    fprintf(stderr,"FATAL: SQL failed: '%s'.\n",SQL);
+    DBclose(DB);
+    exit(-1);
+  }
   return(rc);
 } /* MyDBaccess() */
 
@@ -99,17 +99,17 @@ void	DeleteLicense	(long UploadId)
   /***********************************************/
   /* delete pfile licenses */
   if (Verbose) { printf("# Deleting licenses\n"); }
-      memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
-      MyDBaccess(DB,SQL);
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
+  MyDBaccess(DB,SQL);
 
-      memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
-      MyDBaccess(DB,SQL);
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
+  MyDBaccess(DB,SQL);
 
-      memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
-      MyDBaccess(DB,SQL);
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
+  MyDBaccess(DB,SQL);
   ItemsProcessed+=DBdatasize(VDB);
   Heartbeat(ItemsProcessed);
 
@@ -118,23 +118,23 @@ void	DeleteLicense	(long UploadId)
   if (Verbose) { printf("# Delete completed\n"); }
   if (Test) MyDBaccess(DB,"ROLLBACK;");
   else
-	{
-	MyDBaccess(DB,"COMMIT;");
+  {
+    MyDBaccess(DB,"COMMIT;");
 #if 0
-	/** Disabled: DB will take care of this **/
-	if (Verbose) { printf("# Running vacuum and analyze\n"); }
-	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
-	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
+    /** Disabled: DB will take care of this **/
+    if (Verbose) { printf("# Running vacuum and analyze\n"); }
+    MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
+    MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
 #endif
-	}
+  }
   DBaccess(DB,"SET statement_timeout = 120000;");
 
   DBclose(VDB);
   if (ItemsProcessed > 0)
-	{
-	/* use heartbeat to say how many are completed */
-	raise(SIGALRM);
-	}
+  {
+    /* use heartbeat to say how many are completed */
+    raise(SIGALRM);
+  }
   if (Verbose) { printf("Deleted licenses for upload %ld\n",UploadId); }
 } /* DeleteLicense() */
 
@@ -166,14 +166,14 @@ void	DeleteUpload	(long UploadId)
   MyDBaccess(DB,SQL);
 
   if (!Test)
-	{
-	/* The UI depends on uploadtree and folders for navigation.
+  {
+    /* The UI depends on uploadtree and folders for navigation.
 	   Delete them now to block timeouts from the UI. */
-	if (Verbose) { printf("# COMMIT;\n"); }
-	MyDBaccess(DB,"COMMIT;");
-	if (Verbose) { printf("# BEGIN;\n"); }
-	MyDBaccess(DB,"BEGIN;");
-	}
+    if (Verbose) { printf("# COMMIT;\n"); }
+    MyDBaccess(DB,"COMMIT;");
+    if (Verbose) { printf("# BEGIN;\n"); }
+    MyDBaccess(DB,"BEGIN;");
+  }
 
 
   /***********************************************/
@@ -257,7 +257,7 @@ void	DeleteUpload	(long UploadId)
   if (Verbose) { printf("# Deleting from licese_file\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM license_file USING %s_pfile "
-	   "WHERE pfile_fk = pfile_pk;",TempTable);
+      "WHERE pfile_fk = pfile_pk;",TempTable);
   MyDBaccess(DB,SQL);
 
   /* Delete pfile reference from tag and tag_file table */
@@ -350,29 +350,29 @@ void	DeleteUpload	(long UploadId)
   /***********************************************/
   /* Commit the change! */
   if (Test)
-	{
-	if (Verbose) { printf("# ROLLBACK\n"); }
-	MyDBaccess(DB,"ROLLBACK;");
-	}
+  {
+    if (Verbose) { printf("# ROLLBACK\n"); }
+    MyDBaccess(DB,"ROLLBACK;");
+  }
   else
-	{
-	if (Verbose) { printf("# COMMIT\n"); }
-	MyDBaccess(DB,"COMMIT;");
+  {
+    if (Verbose) { printf("# COMMIT\n"); }
+    MyDBaccess(DB,"COMMIT;");
 #if 0
-	/** Disabled: Database will take care of this **/
-	if (Verbose) { printf("# VACUUM and ANALYZE\n"); }
-	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
-	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
-	MyDBaccess(DB,"VACUUM ANALYZE attrib;");
-	MyDBaccess(DB,"VACUUM ANALYZE pfile;");
-	MyDBaccess(DB,"VACUUM ANALYZE foldercontents;");
-	MyDBaccess(DB,"VACUUM ANALYZE upload;");
-	MyDBaccess(DB,"VACUUM ANALYZE uploadtree;");
-	MyDBaccess(DB,"VACUUM ANALYZE jobdepends;");
-	MyDBaccess(DB,"VACUUM ANALYZE jobqueue;");
-	MyDBaccess(DB,"VACUUM ANALYZE job;");
+    /** Disabled: Database will take care of this **/
+    if (Verbose) { printf("# VACUUM and ANALYZE\n"); }
+    MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
+    MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
+    MyDBaccess(DB,"VACUUM ANALYZE attrib;");
+    MyDBaccess(DB,"VACUUM ANALYZE pfile;");
+    MyDBaccess(DB,"VACUUM ANALYZE foldercontents;");
+    MyDBaccess(DB,"VACUUM ANALYZE upload;");
+    MyDBaccess(DB,"VACUUM ANALYZE uploadtree;");
+    MyDBaccess(DB,"VACUUM ANALYZE jobdepends;");
+    MyDBaccess(DB,"VACUUM ANALYZE jobqueue;");
+    MyDBaccess(DB,"VACUUM ANALYZE job;");
 #endif
-	}
+  }
 
 
   /***********************************************/
@@ -394,36 +394,36 @@ void	DeleteUpload	(long UploadId)
   /* Whew!  Now to delete the actual pfiles from the repository. */
   /** If someone presses ^C now, then at least the DB is accurate. **/
   if (Test <= 1)
-    {
+  {
     for(Row=0; Row<MaxRow; Row++)
-      {
+    {
       memset(SQL,'\0',sizeof(SQL));
       S = DBgetvalue(VDB,Row,1); /* sha1.md5.len */
       if (RepExist("license",S))
-	{
-	if (Test) printf("TEST: Delete %s %s\n","license",S);
-	else RepRemove("license",S);
-	}
+      {
+        if (Test) printf("TEST: Delete %s %s\n","license",S);
+        else RepRemove("license",S);
+      }
       if (RepExist("files",S))
-	{
-	if (Test) printf("TEST: Delete %s %s\n","files",S);
-	else RepRemove("files",S);
-	}
+      {
+        if (Test) printf("TEST: Delete %s %s\n","files",S);
+        else RepRemove("files",S);
+      }
       if (RepExist("gold",S))
-	{
-	if (Test) printf("TEST: Delete %s %s\n","gold",S);
-	else RepRemove("gold",S);
-	}
+      {
+        if (Test) printf("TEST: Delete %s %s\n","gold",S);
+        else RepRemove("gold",S);
+      }
       ItemsProcessed++;
       Heartbeat(ItemsProcessed);
-      }
-    } /* if Test <= 1 */
+    }
+  } /* if Test <= 1 */
   DBclose(VDB);
   if (ItemsProcessed > 0)
-	{
-	/* use heartbeat to say how many are completed */
-	raise(SIGALRM);
-	}
+  {
+    /* use heartbeat to say how many are completed */
+    raise(SIGALRM);
+  }
   if (Verbose) { printf("Deleted upload %ld\n",UploadId); }
 } /* DeleteUpload() */
 
@@ -433,7 +433,7 @@ void	DeleteUpload	(long UploadId)
  deleted and the folders are deleted.
  *********************************************/
 void	ListFoldersRecurse	(void *VDB, long Parent, int Depth,
-				 int Row, int DelFlag)
+    int Row, int DelFlag)
 {
   int r,MaxRow;
   long Fid;
@@ -443,59 +443,59 @@ void	ListFoldersRecurse	(void *VDB, long Parent, int Depth,
   /* Find all folders with this parent and recurse */
   MaxRow = DBdatasize(VDB);
   for(r=0; r < MaxRow; r++)
-    {
+  {
     if (r == Row) continue; /* skip self-loops */
     /* NOTE: There can be an infinite loop if two rows point to each other.
        A->parent == B and B->parent == A  */
     if (atol(DBgetvalue(VDB,r,1)) == Parent)
-	{
-	if (!DelFlag)
-		{
-		for(i=0; i<Depth; i++) fputs("   ",stdout);
-		}
-	Fid = atol(DBgetvalue(VDB,r,0));
-	if (Fid != 0)
-		{
-		if (!DelFlag)
-			{
-			printf("%4ld :: %s",Fid,DBgetvalue(VDB,r,2));
-			Desc = DBgetvalue(VDB,r,3);
-			if (Desc && Desc[0]) printf(" (%s)",Desc);
-			printf("\n");
-			}
-		ListFoldersRecurse(VDB,Fid,Depth+1,r,DelFlag);
-		}
-	else
-		{
-		if (DelFlag) DeleteUpload(atol(DBgetvalue(VDB,r,4)));
-		else printf("%4s :: Contains: %s\n","--",DBgetvalue(VDB,r,2));
-		}
-	}
+    {
+      if (!DelFlag)
+      {
+        for(i=0; i<Depth; i++) fputs("   ",stdout);
+      }
+      Fid = atol(DBgetvalue(VDB,r,0));
+      if (Fid != 0)
+      {
+        if (!DelFlag)
+        {
+          printf("%4ld :: %s",Fid,DBgetvalue(VDB,r,2));
+          Desc = DBgetvalue(VDB,r,3);
+          if (Desc && Desc[0]) printf(" (%s)",Desc);
+          printf("\n");
+        }
+        ListFoldersRecurse(VDB,Fid,Depth+1,r,DelFlag);
+      }
+      else
+      {
+        if (DelFlag) DeleteUpload(atol(DBgetvalue(VDB,r,4)));
+        else printf("%4s :: Contains: %s\n","--",DBgetvalue(VDB,r,2));
+      }
     }
+  }
 
   /* if we're deleting folders, do it now */
   if (DelFlag)
-	{
-	switch(Parent)
-	  {
-	  case 1:	/* skip default parent */
-		printf("INFO: Default folder not deleted.\n");
-		break;
-	  case 0:	/* it's an upload */
-		break;
-	  default:	/* it's a folder */
-		memset(SQL,'\0',sizeof(SQL));
-		snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE foldercontents_mode = 1 AND child_id = '%ld';",Parent);
-		if (Test) printf("TEST: %s\n",SQL);
-		else MyDBaccess(DB,SQL);
+  {
+    switch(Parent)
+    {
+      case 1:	/* skip default parent */
+        printf("INFO: Default folder not deleted.\n");
+        break;
+      case 0:	/* it's an upload */
+        break;
+      default:	/* it's a folder */
+        memset(SQL,'\0',sizeof(SQL));
+        snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE foldercontents_mode = 1 AND child_id = '%ld';",Parent);
+        if (Test) printf("TEST: %s\n",SQL);
+        else MyDBaccess(DB,SQL);
 
-		memset(SQL,'\0',sizeof(SQL));
-		snprintf(SQL,sizeof(SQL),"DELETE FROM folder WHERE folder_pk = '%ld';",Parent);
-		if (Test) printf("TEST: %s\n",SQL);
-		else MyDBaccess(DB,SQL);
-		break;
-	  } /* switch() */
-	}
+        memset(SQL,'\0',sizeof(SQL));
+        snprintf(SQL,sizeof(SQL),"DELETE FROM folder WHERE folder_pk = '%ld';",Parent);
+        if (Test) printf("TEST: %s\n",SQL);
+        else MyDBaccess(DB,SQL);
+        break;
+    } /* switch() */
+  }
 } /* ListFoldersRecurse() */
 
 /*********************************************
@@ -519,46 +519,46 @@ void	ListFolders	()
   MaxRow = DBdatasize(VDB);
   DetachFlag=0;
   for(i=0; i < MaxRow; i++)
-      {
-      Fid = atol(DBgetvalue(VDB,i,1));
-      if (Fid == 1) continue;	/* skip default parent */
-      Match=0;
-      for(j=0; (j<MaxRow) && !Match; j++)
-	{
-	if ((i!=j) && (atol(DBgetvalue(VDB,j,0)) == Fid)) Match=1;
-	}
-      if (!Match && !atol(DBgetvalue(VDB,i,4)))
-	{
-	if (!DetachFlag) { printf("# Unlinked folders\n"); DetachFlag=1; }
-	printf("%4ld :: %s",Fid,DBgetvalue(VDB,i,2));
-	Desc = DBgetvalue(VDB,i,3);
-	if (Desc && Desc[0]) printf(" (%s)",Desc);
-	printf("\n");
-	ListFoldersRecurse(VDB,Fid,1,i,0);
-	}
-      }
+  {
+    Fid = atol(DBgetvalue(VDB,i,1));
+    if (Fid == 1) continue;	/* skip default parent */
+    Match=0;
+    for(j=0; (j<MaxRow) && !Match; j++)
+    {
+      if ((i!=j) && (atol(DBgetvalue(VDB,j,0)) == Fid)) Match=1;
+    }
+    if (!Match && !atol(DBgetvalue(VDB,i,4)))
+    {
+      if (!DetachFlag) { printf("# Unlinked folders\n"); DetachFlag=1; }
+      printf("%4ld :: %s",Fid,DBgetvalue(VDB,i,2));
+      Desc = DBgetvalue(VDB,i,3);
+      if (Desc && Desc[0]) printf(" (%s)",Desc);
+      printf("\n");
+      ListFoldersRecurse(VDB,Fid,1,i,0);
+    }
+  }
 
   /* Find detached uploads */
   DetachFlag=0;
   for(i=0; i < MaxRow; i++)
-      {
-      Fid = atol(DBgetvalue(VDB,i,1));
-      if (Fid == 1) continue;	/* skip default parent */
-      Match=0;
-      for(j=0; (j<MaxRow) && !Match; j++)
-	{
-	if ((i!=j) && (atol(DBgetvalue(VDB,j,0)) == Fid)) Match=1;
-	}
-      if (!Match && atol(DBgetvalue(VDB,i,4)))
-	{
-	if (!DetachFlag) { printf("# Unlinked uploads (uploads without folders)\n"); DetachFlag=1; }
-	printf("%4s",DBgetvalue(VDB,i,4));
-	printf(" :: %s",DBgetvalue(VDB,i,2));
-	Desc = DBgetvalue(VDB,i,3);
-	if (Desc && Desc[0]) printf(" (%s)",Desc);
-	printf("\n");
-	}
-      }
+  {
+    Fid = atol(DBgetvalue(VDB,i,1));
+    if (Fid == 1) continue;	/* skip default parent */
+    Match=0;
+    for(j=0; (j<MaxRow) && !Match; j++)
+    {
+      if ((i!=j) && (atol(DBgetvalue(VDB,j,0)) == Fid)) Match=1;
+    }
+    if (!Match && atol(DBgetvalue(VDB,i,4)))
+    {
+      if (!DetachFlag) { printf("# Unlinked uploads (uploads without folders)\n"); DetachFlag=1; }
+      printf("%4s",DBgetvalue(VDB,i,4));
+      printf(" :: %s",DBgetvalue(VDB,i,2));
+      Desc = DBgetvalue(VDB,i,3);
+      if (Desc && Desc[0]) printf(" (%s)",Desc);
+      printf("\n");
+    }
+  }
 
   DBclose(VDB);
 } /* ListFolders() */
@@ -577,17 +577,17 @@ void	ListUploads	()
   /* list each value */
   MaxRow = DBdatasize(DB);
   for(Row=0; Row < MaxRow; Row++)
-      {
-      NewPid = atol(DBgetvalue(DB,Row,0));
-      if (NewPid >= 0)
-	{
-	char *S;
-	printf("%ld :: %s",NewPid,DBgetvalue(DB,Row,2));
-	S = DBgetvalue(DB,Row,1);
-	if (S && S[0]) printf(" (%s)",S);
-	printf("\n");
-	}
-      }
+  {
+    NewPid = atol(DBgetvalue(DB,Row,0));
+    if (NewPid >= 0)
+    {
+      char *S;
+      printf("%ld :: %s",NewPid,DBgetvalue(DB,Row,2));
+      S = DBgetvalue(DB,Row,1);
+      if (S && S[0]) printf(" (%s)",S);
+      printf("\n");
+    }
+  }
 } /* ListUploads() */
 
 /*********************************************
@@ -638,24 +638,24 @@ int     ReadFileLine        (FILE *Fin)
   fflush(stdout);
 
   if (feof(Fin))
-    {
+  {
     return(-1);
-    }
+  }
 
   /* read a line */
   while(!feof(Fin) && (i < MAXLINE-1) && (C != '\n') && (C>0))
-    {
+  {
     C=fgetc(Fin);
     if ((C>0) && (C!='\n'))
-      {
+    {
       FullLine[i]=C;
       i++;
-      }
-    else if ((C=='\n') && (i==0))
-      {
-      C='@';  /* ignore blank lines */
-      }
     }
+    else if ((C=='\n') && (i==0))
+    {
+      C='@';  /* ignore blank lines */
+    }
+  }
   if ((i==0) && feof(Fin)) return(-1);
   if (Verbose > 1) fprintf(stderr,"DEBUG: Line='%s'\n",FullLine);
 
@@ -665,32 +665,32 @@ int     ReadFileLine        (FILE *Fin)
 
   /** Get the type of command: delete or list **/
   if (!strncasecmp(L,"DELETE",6) && isspace(L[6]))
-	{
-	Type=1; /* delete */
-	L+=6;
-	}
+  {
+    Type=1; /* delete */
+    L+=6;
+  }
   else if (!strncasecmp(L,"LIST",4) && isspace(L[4]))
-	{
-	Type=2; /* list */
-	L+=4;
-	}
+  {
+    Type=2; /* list */
+    L+=4;
+  }
   while(isspace(L[0])) L++;
   /** Get the target **/
   if (!strncasecmp(L,"UPLOAD",6) && (isspace(L[6]) || !L[6]))
-	{
-	Target=1; /* upload */
-	L+=6;
-	}
+  {
+    Target=1; /* upload */
+    L+=6;
+  }
   else if (!strncasecmp(L,"LICENSE",7) && (isspace(L[7]) || !L[7]))
-	{
-	Target=2; /* license */
-	L+=7;
-	}
+  {
+    Target=2; /* license */
+    L+=7;
+  }
   else if (!strncasecmp(L,"FOLDER",6) && (isspace(L[6]) || !L[6]))
-	{
-	Target=3; /* folder */
-	L+=6;
-	}
+  {
+    Target=3; /* folder */
+    L+=6;
+  }
   while(isspace(L[0])) L++;
   Id = atol(L);
 
@@ -702,9 +702,9 @@ int     ReadFileLine        (FILE *Fin)
   else if ((Type==2) && (Target==2))	{ ListUploads(); rc=1; }
   else if ((Type==2) && (Target==3))	{ ListFolders(); rc=1; }
   else
-    {
+  {
     printf("ERROR: Unknown command: '%s'\n",FullLine);
-    }
+  }
 
   return(rc);
 } /* ReadFileLine() */
@@ -747,19 +747,19 @@ int	main	(int argc, char *argv[])
   char *agent_desc = "Deletes upload.  Other list/delete options available from the command line.";
 
   while((c = getopt(argc,argv,"ifF:lL:sTuU:v")) != -1)
-    {
+  {
     switch(c)
-      {
+    {
       case 'i':
-	DB = DBopen();
-	if (!DB)
-	  {
-	  fprintf(stderr,"ERROR: Unable to open DB\n");
-	  exit(-1);
-	  }
-	GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
-	DBclose(DB);
-	return(0);
+        DB = DBopen();
+        if (!DB)
+        {
+          fprintf(stderr,"ERROR: Unable to open DB\n");
+          exit(-1);
+        }
+        GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
+        DBclose(DB);
+        return(0);
       case 'f': ListFolder=1; GotArg=1; break;
       case 'F': DelFolder=atol(optarg); GotArg=1; break;
       case 'L': DelLicense=atol(optarg); GotArg=1; break;
@@ -770,21 +770,21 @@ int	main	(int argc, char *argv[])
       case 'U': DelUpload=atol(optarg); GotArg=1; break;
       case 'v': Verbose++; break;
       default:	Usage(argv[0]); exit(-1);
-      }
     }
+  }
 
   if (!GotArg)
-    {
+  {
     Usage(argv[0]);
     exit(-1);
-    }
+  }
 
   DB = DBopen();
   if (!DB)
-	{
-	fprintf(stderr,"ERROR: Unable to open DB\n");
-	exit(-1);
-	}
+  {
+    fprintf(stderr,"ERROR: Unable to open DB\n");
+    exit(-1);
+  }
   GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
   signal(SIGALRM,ShowHeartbeat);
 
@@ -798,9 +798,9 @@ int	main	(int argc, char *argv[])
 
   /* process from the scheduler */
   if (Scheduler)
-    {
+  {
     while(ReadFileLine(stdin) >= 0) ;
-    }
+  }
 
   DBclose(DB);
   return(0);
