@@ -10,7 +10,9 @@ CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS) -I$(
 EXE=test_wget_agent
 TEST_OBJ_RUN=testRun.o utility.o
 TEST_OBJ=./wget_agent/testGetURL.o \
-         ./wget_agent/testSetEnv.o
+         ./wget_agent/testSetEnv.o \
+         ./wget_agent/testUtilities.o \
+         ./wget_agent/testDBLoadGold.o
 CHKHDR=$(LOCALAGENTDIR)/../../ununpack/agent/checksum.h ../../ununpack/agent/md5.h ../../ununpack/agent/sha1.h
 CHKSRC=$(CHKHDR:%.h=%.c)
 
@@ -44,6 +46,6 @@ libwget_agent.a:
 	$(MAKE) -C $(LOCALAGENTDIR)/ $@
 
 clean:
-	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt  *.gc* results test-result 
+	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt  *.gc* results test_result 
 
 include $(DEPS)

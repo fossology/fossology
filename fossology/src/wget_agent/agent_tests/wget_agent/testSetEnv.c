@@ -31,8 +31,30 @@ static char TempFileDir[MAX_LENGTH];
 /* test functions */
 
 /**
- * \brief 
- * the URL is one file 
+ * \brief initialize
+ */
+int  SetEnvInit()
+{
+	GlobalUploadKey = -1;
+	memset(GlobalTempFile, 0, MAXCMD);
+	memset(GlobalURL, 0, MAXCMD);
+	memset(GlobalParam, 0, MAXCMD);
+  return 0;
+}
+
+/**
+ * \brief clean the env 
+ */
+int  SetEnvClean()
+{
+  GlobalUploadKey = -1;
+  memset(GlobalTempFile, 0, MAXCMD);
+  memset(GlobalURL, 0, MAXCMD);
+  memset(GlobalParam, 0, MAXCMD);
+  return 0;
+}
+/**
+ * \brief set the global variables
  */
 void testSetEnvNormal()
 {
@@ -51,7 +73,9 @@ void testSetEnvNormal()
  */
 CU_TestInfo testcases_SetEnv[] =
 {
-  {"Testing the function SetEnv, :", testSetEnvNormal},
+#if 0
+#endif
+{"Testing the function SetEnv, set the env:", testSetEnvNormal},
   CU_TEST_INFO_NULL
 };
 
