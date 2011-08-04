@@ -23,6 +23,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /**
  * \file testGetURL.c
  * \brief testing for the function GetURL()
+ * int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
+ * char *TempFile - used when upload from URL by the scheduler, the downloaded file(directory) will be archived as this file
+ *               when running from command, this parameter is null, e.g. /var/local/lib/fossology/agents/wget.32732
+ * char *URL - the url you want to download
+ * char *TempFileDir - where you want to store your downloaded file(directory)
+ *
+ * return int, 0 on success, non-zero on failure.
  */
 
 static char TempFile[MAX_LENGTH];
@@ -36,7 +43,9 @@ int  GetURLInit()
 {
   return 0;
 }
-
+/**
+ * \brief clean the env
+ */
 int GetURLClean()
 {
 	if (file_dir_existed(TempFileDir))
@@ -49,8 +58,9 @@ int GetURLClean()
 /* test functions */
 
 /**
- * \brief 
- * the URL is one file 
+ * \brief the URL is one file 
+ * TempFileDir is ./test_result
+ * TempFile is empty
  */
 void testGetURLNormal_URLIsOneFile()
 {
@@ -62,11 +72,30 @@ void testGetURLNormal_URLIsOneFile()
 }
 
 /**
+ * \brief the URL is one dir 
+ * TempFileDir is ./test_result
+ * TempFile is not empty
+ */
+void testGetURLAbnormal_URLIsOneDir()
+{	
+	strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");
+  strcpy(URL, "http://fossology.org/debian/1.0.0/");
+  strcpy(TempFileDir, "./test_result/");
+  strcpy(TempFile, "./test_result/wget.tar");
+	GetURL(TempFile, URL, TempFileDir); 
+	int existed = file_dir_existed("./test_result/wget.tar");
+	CU_ASSERT_EQUAL(existed, 1); /* the file downloaded? */
+}
+
+/**
  * \brief testcases for function GetURL
  */
 CU_TestInfo testcases_GetURL[] =
 {
+#if 0
+#endif
   {"Testing the function GetURL, the URL is a normal file:", testGetURLNormal_URLIsOneFile},
+  {"Testing the function GetURL, the URL is a dir:", testGetURLAbnormal_URLIsOneDir},
   CU_TEST_INFO_NULL
 };
 

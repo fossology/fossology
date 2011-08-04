@@ -24,10 +24,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* for wget_agent.c, start */
 extern CU_TestInfo testcases_GetURL[];
 extern CU_TestInfo testcases_SetEnv[];
+extern CU_TestInfo testcases_Utiliies[];
+extern CU_TestInfo testcases_DBLoadGold[];
 
 /* GetURL */
 extern int GetURLInit();
 extern int GetURLClean();
+
+/* SetEvn */
+extern int SetEnvInit();
+extern int SetEnvClean();
+
+/* DBLoadGold */
+extern int DBLoadGoldInit();
+extern int DBLoadGoldClean();
 
 /* for wget_agent.c, end */
 
@@ -36,8 +46,12 @@ extern int GetURLClean();
  */
 CU_SuiteInfo suites[] = {
     // for wget_agent.c
+#if 0
+#endif
     {"Testing the function GetURL:", GetURLInit, GetURLClean, testcases_GetURL},
-    {"Testing the function SetEnv:", NULL, NULL, testcases_SetEnv},
+    {"Testing the function SetEnv:", SetEnvInit, SetEnvClean, testcases_SetEnv},
+    {"Testing the utility function:", NULL, NULL, testcases_Utiliies},
+    {"Testing the function DBLoadGold:", DBLoadGoldInit, DBLoadGoldClean, testcases_DBLoadGold},
     CU_SUITE_INFO_NULL
 };
 
