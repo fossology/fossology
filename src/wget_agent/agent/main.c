@@ -127,7 +127,12 @@ int main  (int argc, char *argv[])
     Usage(argv[0]);
     SafeExit(-1);
   }
-
+  pgConn = fo_dbconnect();
+  if (!pgConn)
+  {
+    FATAL("Unable to connect to database");
+    SafeExit(20);
+  }
 
   /* When initializing the DB, don't do anything else */
   if (InitFlag)
