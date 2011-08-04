@@ -22,4 +22,8 @@
 #include <libpq-fe.h>
 
 int  fo_GetAgentKey   (PGconn *pgConn, char *agent_name, long unused, char *cpunused, char *agent_desc);
+int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk,
+                         char *tableName, char *ars_status, int ars_success);
+int fo_CreateARSTable(PGconn *pgConn, char *table_name);
+
 #endif
