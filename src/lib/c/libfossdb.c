@@ -192,3 +192,30 @@ int fo_checkPQcommand(PGconn *pgConn, PGresult *result, char *sql, char *FileID,
    PQclear(result);
    return (-1);
 } /* fo_checkPQcommand */
+
+
+/**
+ @brief Check if table exists.
+        Note, this assumes the database name is 'fossology'.
+
+ @param pgConn database connection
+ @param tableName
+
+ @return 1 if table exists, 0 on error (which is logged) or if table does not exist.
+****************************************************/
+int fo_tableExists(PGconn *pgConn, char *tableName)
+{
+  char sql[256];
+  PGresult *result;
+  int  TabCount;
+
+  snprintf(sql, sizeof(sql), 
+           "select count(*) from tables where table_catalog='fossology' and table_name='%s'",
+          tableName);
+  result = PQexec(pgConn, sql);
+  if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__)) return 0;
+
+  TabCount = PQntuples(result);
+  PQclear(result);
+  return(TabCount);
+} /* fo_tableExists()  */

@@ -29,7 +29,6 @@
 
 
 /*!
- GetAgentKey() 
  \brief Get the latest enabled agent key (agent_pk) from the database.
 
  \param pgConn Database connection object pointer.
@@ -74,3 +73,97 @@ FUNCTION int fo_GetAgentKey(PGconn *pgConn, char * agent_name, long Upload_pk, c
   PQclear(result);
   return Agent_pk;
 } /* fo_GetAgentKey() */
+
+
+/**
+ \brief Write ars record
+  If the ars table does not exist, one is created by inheriting the ars_master table.
+  The new table is called {tableName}.  For example, "unpack_ars".
+  If ars_pk is zero a new ars record will be created. Otherwise, it is updated.
+
+ \param pgConn Database connection object pointer.
+ \param ars_pk  If zero, a new record will be created.
+ \param upload_pk
+ \parm  agent_pk   Agents should get this from fo_GetAgentKey()
+ \param tableName  ars table name
+ \parm  ars_status   Status to update ars_status.  May be null.
+ \parm  ars_success  Automatically set to false if ars_pk is zero.
+
+ \return On success write the ars record and return the ars_pk.  
+         On sql failure, return 0, and the error will be written to stdout.
+ */
+FUNCTION int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk,
+                         char *tableName, char *ars_status, int ars_success)
+{
+  char sql[1024];
+  PGresult *result;
+  int rv;
+
+  /* does ars table exist? 
+   * If not, create it.
+   */
+  rv = fo_tableExists(pgConn, tableName);
+  if (!rv) 
+  {
+    rv = fo_CreateARSTable(pgConn, tableName);
+    if (!rv) return(0);
+  }
+
+  /* If ars_pk is null, 
+   * write the ars_status=false record 
+   * and return the ars_pk.
+   */
+  if (!ars_pk)
+  {
+    snprintf(sql, sizeof(sql), "insert into %s (agent_fk, upload_fk) values(%d,%d)",
+             tableName, agent_pk, upload_pk);
+    result = PQexec(pgConn, sql);
+    if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) return 0;
+
+    /* get primary key */
+    snprintf(sql, sizeof(sql), "SELECT currval('nomos_ars_ars_pk_seq')");
+    result =  PQexec(pgConn, sql);
+    if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__))
+    {
+      PQclear(result);
+      return(0);
+    }
+    ars_pk = atoi(PQgetvalue(result, 0, 0));
+    PQclear(result);
+  }
+  else
+  {
+    /* If ars_pk is not null, update success, status and endtime */
+    snprintf(sql, sizeof(sql), "update into %s set ars_success='%s', ars_status='%s',ars_endtime=now()",
+             tableName, ars_success?"True":"False", ars_status);
+    result = PQexec(pgConn, sql);
+    if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) return 0;
+  }
+  return(ars_pk);
+}  /* fo_WriteARS() */
+
+
+/**
+ \brief Create ars table
+  
+ \param pgConn Database connection object pointer.
+ \param tableName  ars table name
+
+ \return 0 on failure
+ */
+FUNCTION int fo_CreateARSTable(PGconn *pgConn, char *tableName)
+{
+  char sql[1024];
+  PGresult *result;
+
+  snprintf(sql, sizeof(sql), "create table %s() inherits(ars_master);\
+  ALTER TABLE ONLY %s ADD CONSTRAINT %s_agent_fk_fkc FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);\
+  ALTER TABLE ONLY %s ADD CONSTRAINT %s_upload_fk_fkc FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk);", 
+  tableName, tableName, tableName, tableName, tableName);
+/*  ALTER TABLE ONLY %s ADD CONSTRAINT %s_pkey1 PRIMARY KEY (ars_pk); \  */
+
+
+  result = PQexec(pgConn, sql);
+  if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) return 0;
+  return 1;  /* success */
+}  /* fo_CreateARSTable() */
