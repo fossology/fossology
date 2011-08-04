@@ -37,6 +37,12 @@ $(EXE): main.c libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS)
 	@echo "make pkgagent agent"
 	$(CC) main.c libwget_agent.a $(CHKSRC) $(PROXYDEF) $(CFLAGS_LOCAL) -o $@
 
+#######################
+# library build rules #
+#######################
+$(FOLIB):
+	$(MAKE) -C $(FOLIBDIR)
+
 install: all
 	@echo "make wget_agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)

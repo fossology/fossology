@@ -203,7 +203,7 @@ void	DBLoadGold	()
 		SHA1,MD5,Len);
     PQclear(result);
     result = PQexec(pgConn, SQL);
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+    if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
 		{
 			SafeExit(8);
 		}
@@ -220,7 +220,7 @@ void	DBLoadGold	()
   /* Upload the DB so the pfile is linked to the upload record */
   PQclear(result);
   result = PQexec(pgConn, "BEGIN;");
-  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
   {
     SafeExit(-1);
   }
@@ -240,13 +240,13 @@ void	DBLoadGold	()
   if (Debug) printf("SQL=%s\n",SQL);
   PQclear(result);
   result = PQexec(pgConn, SQL);
-  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) 
+  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) 
 	{
     SafeExit(9);
 	}
   PQclear(result);
   result = PQexec(pgConn, "COMMIT;");
-  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
   {
     SafeExit(-1);
   }
