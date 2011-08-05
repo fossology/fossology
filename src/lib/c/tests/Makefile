@@ -23,6 +23,7 @@ EXE = testlibs
 
 OBJS = test_fossconfig.o    \
        test_fossscheduler.o \
+       test_libfossdb.o \
 
 COVE = fossconfig_cov.o    \
        fossscheduler_cov.o \
