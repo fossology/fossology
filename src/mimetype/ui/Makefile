@@ -14,31 +14,19 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP = ../..
-VARS = $(TOP)/Makefile.conf
+
+TOP=../../..
+VARS=$(TOP)/Makefile.conf
 include $(VARS)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
+MODULEDIR = $(shell dirname `pwd`)
 
-DIRS = agent agent_tests ui ui_tests
-TESTDIR = agent_tests
+all:
+	@echo "no build rule for 'all' in mimetype_ui)"
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
-
-all: 
-	$(call dirloop, )
-
-test: 
-	$(MAKE) -C $(TESTDIR) test
-
-coverage:
-	$(MAKE) -C $(TESTDIR) coverage
-
-install: all
-	$(call dirloop,install)
-
-uninstall:
-	$(call dirloop,uninstall)
+install:
+	@echo "no build rule for 'install' in mimetype_ui"
 
 clean:
-	$(call dirloop,clean)
+	@echo "no build rule for 'clean' in mimetype_ui"
 
-.PHONY: all install uninstall clean test 

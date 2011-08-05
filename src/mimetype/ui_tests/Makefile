@@ -14,31 +14,11 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP = ../..
-VARS = $(TOP)/Makefile.conf
-include $(VARS)
-
-DIRS = agent agent_tests ui ui_tests
-TESTDIR = agent_tests
-
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
-
-all: 
-	$(call dirloop, )
-
-test: 
-	$(MAKE) -C $(TESTDIR) test
-
-coverage:
-	$(MAKE) -C $(TESTDIR) coverage
-
-install: all
-	$(call dirloop,install)
-
-uninstall:
-	$(call dirloop,uninstall)
-
+all:
+	@echo "No mimetype ui_test"
 clean:
-	$(call dirloop,clean)
-
-.PHONY: all install uninstall clean test 
+	@echo "No mimetype ui_test clean"
+install:
+	@echo "No mimetype ui_test install"
+uninstall:
+	@echo "No mimetype ui_test uninstall"
