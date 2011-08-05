@@ -393,7 +393,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
     msgstr = headerSprintf(header, fmt, rpmTagTable, rpmHeaderFormats, &errstr);
     if (msgstr != NULL){
       trim(msgstr);
-      if (Verbose) { printf("%s:%s",tagName(tag[i]),msgstr);}
+      if (Verbose) { printf("%s:%s\n",tagName(tag[i]),msgstr);}
       switch (tag[i]) {
         case RPMTAG_NAME:
           EscapeString(msgstr, pi->pkgName, sizeof(pi->pkgName));
