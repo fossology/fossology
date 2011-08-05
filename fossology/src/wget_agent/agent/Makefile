@@ -34,7 +34,7 @@ MODULEDIR = $(shell dirname `pwd`)
 all: $(EXE)
 
 $(EXE): main.c libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS)
-	@echo "make pkgagent agent"
+	@echo "make wget_agent"
 	$(CC) main.c libwget_agent.a $(CHKSRC) $(PROXYDEF) $(CFLAGS_LOCAL) -o $@
 
 #######################

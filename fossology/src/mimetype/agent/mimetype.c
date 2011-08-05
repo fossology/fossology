@@ -1,8 +1,8 @@
 /***************************************************************
  Mimetype: Get the mimetype for a package.
 
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
- 
+ Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -84,7 +84,7 @@ char *	TaintString	(char *S)
   memset(String,'\0',sizeof(String));
   if (!S) return(String);
   for(i=0; (S[0]!='\0') && (i < sizeof(String)-1); S++)
-    {
+  {
     if (S[0]=='\n') { String[i++]='\\'; String[i++]='n'; }
     else if (S[0]=='\r') { String[i++]='\\'; String[i++]='r'; }
     else if (S[0]=='\a') { String[i++]='\\'; String[i++]='a'; }
@@ -92,7 +92,7 @@ char *	TaintString	(char *S)
     else if (S[0]=='\"') { String[i++]='\\'; String[i++]='"'; }
     else if (S[0]=='\\') { String[i++]='\\'; String[i++]='\\'; }
     else String[i++]=S[0];
-    }
+  }
   return(String);
 } /* TaintString() */
 
@@ -103,13 +103,13 @@ void	DBLoadMime	()
 {
   if (DBMime) DBclose(DBMime);
   if (DBaccess(DB,"SELECT mimetype_pk,mimetype_name FROM mimetype ORDER BY mimetype_pk ASC;") < 0)
-    {
+  {
     printf("ERROR: Unable to access database.\n");
     printf("LOG: Unable to access database: 'SELECT mimetype_pk,mimetype_name FROM mimetype ORDER BY mimetype_pk ASC;'\n");
     fflush(stdout);
     DBclose(DB);
     exit(-1);
-    }
+  }
   DBMime = DBmove(DB);
   MaxDBMime = DBdatasize(DBMime);
 } /* DBLoadMime() */
@@ -125,12 +125,12 @@ int	DBFindMime	(char *Mimetype)
   if (!Mimetype || (Mimetype[0]=='\0')) return(-1);
   if (!DBMime) DBLoadMime();
   for(i=0; i < MaxDBMime; i++)
-    {
+  {
     if (!strcmp(Mimetype,DBgetvalue(DBMime,i,1)))
-      {
+    {
       return(atoi(DBgetvalue(DBMime,i,0))); /* return mime type */
-      }
     }
+  }
 
   /* If it got here, then the mimetype is unknown.  Add it! */
   memset(SQL,'\0',sizeof(SQL));
@@ -163,7 +163,7 @@ int	CheckMimeTypes	(char *Ext)
   if (Verbose > 1) printf("DEBUG: Looking for mimetype based on extension: '%s'\n",Ext);
 
   while(ReadLine(FMimetype,Line,MAXCMD) > 0)
-    {
+  {
     if (Line[0] == '#') continue;	/* skip comments */
     /* find the extension */
     for(i=0; (Line[i] != '\0') && !isspace(Line[i]); i++)	;
@@ -176,24 +176,24 @@ int	CheckMimeTypes	(char *Ext)
     printf("CheckMimeTypes(%s) in '%s' from '%s\n",Ext,Line+i,Line);
 #endif
     for( ; Line[i] != '\0'; i++)
-	{
-	/* Line[i-1] is always valid */
-	/* if the previous character is not a word-space, then skip */
-	if ((Line[i-1] != '\0') && !isspace(Line[i-1]))
-		continue;	/* not start of a type */
-	/* if the first character does not match is a shortcut.
+    {
+      /* Line[i-1] is always valid */
+      /* if the previous character is not a word-space, then skip */
+      if ((Line[i-1] != '\0') && !isspace(Line[i-1]))
+        continue;	/* not start of a type */
+      /* if the first character does not match is a shortcut.
 	   if the string matches AND the next character is a word-space,
 	   then match. */
-	if ((Line[i] == Ext[0]) && !strncasecmp(Line+i,Ext,ExtLen) &&
-	    ( (Line[i+ExtLen] == '\0') || isspace(Line[i+ExtLen]) )
-	   )
-		{
-		/* it matched! */
-		if (Verbose) printf("DEBUG: Found mimetype by extension: '%s' = '%s'\n",Ext,Line);
-		return(DBFindMime(Line));	/* return metatype id */
-		}
-	}
+      if ((Line[i] == Ext[0]) && !strncasecmp(Line+i,Ext,ExtLen) &&
+          ( (Line[i+ExtLen] == '\0') || isspace(Line[i+ExtLen]) )
+      )
+      {
+        /* it matched! */
+        if (Verbose) printf("DEBUG: Found mimetype by extension: '%s' = '%s'\n",Ext,Line);
+        return(DBFindMime(Line));	/* return metatype id */
+      }
     }
+  }
 
   /* For specagent (used because the DB query 'like %.spec' is slow) */
   if (!strcasecmp(Ext,"spec")) return(DBFindMime("application/x-rpm-spec"));
@@ -216,41 +216,41 @@ int	DBCheckFileExtention	()
   if (!FMimetype) return(-1);
 
   if (Akey >= 0)
-    {
+  {
     memset(SQL,'\0',sizeof(SQL));
     snprintf(SQL,sizeof(SQL)-1,"SELECT distinct(ufile_name) FROM uploadtree WHERE pfile_fk = %d",Akey);
     if (DBaccess(DB,SQL) < 0)
-      {
+    {
       printf("ERROR: Unable to query the database.\n");
       printf("LOG: Unable to access database: '%s'\n",SQL);
       fflush(stdout);
       DBclose(DB);
       exit(-1);
-      }
+    }
 
     Maxu = DBdatasize(DB);
     for(u=0; u<Maxu; u++)
-      {
+    {
       Ext = strrchr(DBgetvalue(DB,u,0),'.'); /* find the extention */
       if (Ext)
-	{
-	Ext++; /* move past period */
-	rc = CheckMimeTypes(Ext);
-	if (rc >= 0) return(rc);
-	}
+      {
+        Ext++; /* move past period */
+        rc = CheckMimeTypes(Ext);
+        if (rc >= 0) return(rc);
       }
-    } /* if using DB */
+    }
+  } /* if using DB */
   else
-    {
+  {
     /* using command-line */
     Ext = strrchr(A,'.'); /* find the extention */
     if (Ext)
-      {
+    {
       Ext++; /* move past period */
       rc = CheckMimeTypes(Ext);
       if (rc >= 0) return(rc);
-      }
     }
+  }
   return(-1);
 } /* DBCheckFileExtention() */
 
@@ -278,10 +278,10 @@ int	GetDefaultMime	(char *MimeType, char *Filename)
   i=0; 
   C=fgetc(Fin);
   while(!feof(Fin) && isprint(C) && (i < 100))
-    {
+  {
     C=fgetc(Fin);
     i++;
-    }
+  }
   fclose(Fin);
 
   if (i==0) return(DBFindMime("application/x-empty"));
@@ -302,94 +302,94 @@ void	DBCheckMime	(char *Filename)
   int i;
 
   if (Akey >= 0)
-    {
+  {
     memset(SQL,'\0',sizeof(SQL));
     snprintf(SQL,sizeof(SQL)-1,"SELECT pfile_mimetypefk FROM pfile WHERE pfile_pk = %d AND pfile_mimetypefk is not null;",Akey);
     if (DBaccess(DB,SQL) < 0)
-      {
+    {
       printf("ERROR: Unable to query the database.\n");
       printf("LOG: Unable to access database: '%s'\n",SQL);
       fflush(stdout);
       DBclose(DB);
       exit(-1);
-      }
+    }
     if (DBdatasize(DB) > 0)
-	{
-	return;
-	}
-    } /* if using DB */
+    {
+      return;
+    }
+  } /* if using DB */
 
   /* Not in DB, so find out what it is... */
   /* Check using Magic */
   MagicType = (char *)magic_file(MagicCookie,Filename);
   memset(MimeType,'\0',MAXCMD);
   if (MagicType)
-      {
-      if (Verbose) printf("DEBUG: Found mimetype by magic: '%s'\n",MagicType);
-      /* Magic contains additional data after a ';' */
-      for(i=0;
-	  (i<MAXCMD) && (MagicType[i] != '\0') &&
-	  !isspace(MagicType[i]) && !strchr(",;",MagicType[i]);
-	  i++)
-	{
-	MimeType[i] = MagicType[i];
-	}
-      if (!strchr(MimeType,'/')) { memset(MimeType,'\0',MAXCMD); }
-      }
+  {
+    if (Verbose) printf("DEBUG: Found mimetype by magic: '%s'\n",MagicType);
+    /* Magic contains additional data after a ';' */
+    for(i=0;
+        (i<MAXCMD) && (MagicType[i] != '\0') &&
+            !isspace(MagicType[i]) && !strchr(",;",MagicType[i]);
+        i++)
+    {
+      MimeType[i] = MagicType[i];
+    }
+    if (!strchr(MimeType,'/')) { memset(MimeType,'\0',MAXCMD); }
+  }
 
   /* If there is no mimetype, or there is one but it is a default value,
      then determine based on extension */
   if (!strcmp(MimeType,"text/plain") || !strcmp(MimeType,"application/octet-stream") || (MimeType[0]=='\0'))
-	{
-	/* unknown type... Guess based on file extention */
-	MimeTypeID = DBCheckFileExtention();
-	/* not known?  */
-	if (MimeTypeID < 0) MimeTypeID = GetDefaultMime(MimeType,Filename);
-	}
+  {
+    /* unknown type... Guess based on file extention */
+    MimeTypeID = DBCheckFileExtention();
+    /* not known?  */
+    if (MimeTypeID < 0) MimeTypeID = GetDefaultMime(MimeType,Filename);
+  }
   else
-	{
-	/* We have a mime-type! Update the database */
-	MimeTypeID = DBFindMime(MimeType);
-	}
+  {
+    /* We have a mime-type! Update the database */
+    MimeTypeID = DBFindMime(MimeType);
+  }
 
   /* Make sure there is a mime-type */
   if (MimeTypeID < 0)
-	{
-	/* This should never happen; give it a default. */
-	MimeTypeID = DBFindMime("application/octet-stream");
-	}
+  {
+    /* This should never happen; give it a default. */
+    MimeTypeID = DBFindMime("application/octet-stream");
+  }
 
   /* Update pfile record */
   if (Akey >= 0)
-    {
+  {
     memset(SQL,'\0',sizeof(SQL));
     DBaccess(DB,"BEGIN;");
     snprintf(SQL,sizeof(SQL)-1,"SELECT * FROM pfile WHERE pfile_pk = %d FOR UPDATE;",Akey);
     DBaccess(DB,SQL);
     snprintf(SQL,sizeof(SQL)-1,"UPDATE pfile SET pfile_mimetypefk = %d WHERE pfile_pk = %d;",MimeTypeID,Akey);
     if (DBaccess(DB,SQL) < 0)
-      {
+    {
       printf("ERROR: Unable to update the database.\n");
       printf("LOG: Unable to update database: '%s'\n",SQL);
       fflush(stdout);
       DBclose(DB);
       exit(-1);
-      }
-    DBaccess(DB,"COMMIT;");
     }
+    DBaccess(DB,"COMMIT;");
+  }
   else
-    {
+  {
     /* IF no Akey, then display to stdout */
     int i;
     for(i=0; i < MaxDBMime; i++)
-      {
+    {
       if (MimeTypeID == atoi(DBgetvalue(DBMime,i,0)))
-	{
-	printf("%s : mimetype_pk=%d : ",DBgetvalue(DBMime,i,1),MimeTypeID);
-	}
+      {
+        printf("%s : mimetype_pk=%d : ",DBgetvalue(DBMime,i,1),MimeTypeID);
       }
-    printf("%s\n",Filename);
     }
+    printf("%s\n",Filename);
+  }
 } /* DBCheckMime() */
 
 /**********************************************
@@ -399,7 +399,7 @@ void	DBCheckMime	(char *Filename)
  NULL at \0.
  **********************************************/
 char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
-			 char *Value, int ValueMax)
+    char *Value, int ValueMax)
 {
   int s,f,v;
   int GotQuote;
@@ -412,14 +412,14 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
   f=0; v=0;
 
   for(s=0; (Sin[s] != '\0') && !isspace(Sin[s]) && (Sin[s] != '='); s++)
-    {
+  {
     Field[f++] = Sin[s];
-    }
+  }
   while(isspace(Sin[s])) s++; /* skip spaces after field name */
   if (Sin[s] != '=') /* if it is not a field, then just return it. */
-    {
+  {
     return(Sin+s);
-    }
+  }
   if (Sin[s]=='\0') return(NULL);
   s++; /* skip '=' */
   while(isspace(Sin[s])) s++; /* skip spaces after '=' */
@@ -427,28 +427,28 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
 
   GotQuote='\0';
   if ((Sin[s]=='\'') || (Sin[s]=='"'))
-    {
+  {
     GotQuote = Sin[s];
     s++; /* skip quote */
     if (Sin[s]=='\0') return(NULL);
-    }
+  }
   if (GotQuote)
-    {
+  {
     for( ; (Sin[s] != '\0') && (Sin[s] != GotQuote); s++)
-      {
+    {
       if (Sin[s]=='\\') Value[v++]=Sin[++s];
       else Value[v++]=Sin[s];
-      }
     }
+  }
   else
-    {
+  {
     /* if it gets here, then there is no quote */
     for( ; (Sin[s] != '\0') && !isspace(Sin[s]); s++)
-      {
+    {
       if (Sin[s]=='\\') Value[v++]=Sin[++s];
       else Value[v++]=Sin[s];
-      }
     }
+  }
   while(isspace(Sin[s])) s++; /* skip spaces */
   return(Sin+s);
 } /* GetFieldValue() */
@@ -469,24 +469,24 @@ void    SetEnv  (char *S)
   memset(A,'\0',sizeof(A));
 
   while(S && (S[0] != '\0'))
-    {
+  {
     S = GetFieldValue(S,Field,256,Value,1024);
     if (Value[0] != '\0')
-	{
-	if (!strcasecmp(Field,"akey")) Akey=atoi(Value);
-	else if (!strcasecmp(Field,"a")) strncpy(A,Value,sizeof(A));
-	else GotOther=1;
-	}
+    {
+      if (!strcasecmp(Field,"akey")) Akey=atoi(Value);
+      else if (!strcasecmp(Field,"a")) strncpy(A,Value,sizeof(A));
+      else GotOther=1;
     }
+  }
 
   if (GotOther || (Akey < 0) || (A[0]=='\0'))
-    {
+  {
     printf("ERROR: Data is in an unknown format.\n");
     printf("LOG: Unknown data: '%s'\n",OrigS);
     fflush(stdout);
     DBclose(DB);
     exit(-1);
-    }
+  }
 } /* SetEnv() */
 
 
@@ -515,97 +515,97 @@ int	main	(int argc, char *argv[])
   DB = DBopen();
   if (!DB)
   {
-	printf("FATAL: Unable to connect to database\n");
-	fflush(stdout);
-	exit(-1);
+    printf("FATAL: Unable to connect to database\n");
+    fflush(stdout);
+    exit(-1);
   }
   GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   FMimetype = fopen("/etc/mime.types","rb");
   if (!FMimetype)
-	{
-	printf("WARNING: Unable to open /etc/mime.types\n");
-	}
+  {
+    printf("WARNING: Unable to open /etc/mime.types\n");
+  }
 
   MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
   if (MagicCookie == NULL)
-	{
-	printf("FATAL: Failed to initialize magic cookie\n");
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
+  {
+    printf("FATAL: Failed to initialize magic cookie\n");
+    fflush(stdout);
+    DBclose(DB);
+    exit(-1);
+  }
   if (magic_load(MagicCookie,NULL) != 0)
-	{
-	printf("FATAL: Failed to load magic file: UnMagic\n");
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
+  {
+    printf("FATAL: Failed to load magic file: UnMagic\n");
+    fflush(stdout);
+    DBclose(DB);
+    exit(-1);
+  }
 
   /* Process command-line */
   while((c = getopt(argc,argv,"iv")) != -1)
-    {
+  {
     switch(c)
-	{
-	case 'i':
-		DBclose(DB);
-		return(0);
-	case 'v':
-		Verbose++;
-		break;
-	default:
-		Usage(argv[0]);
-		DBclose(DB);
-		exit(-1);
-	}
+    {
+      case 'i':
+        DBclose(DB);
+        return(0);
+      case 'v':
+        Verbose++;
+        break;
+      default:
+        Usage(argv[0]);
+        DBclose(DB);
+        exit(-1);
     }
+  }
 
   /* Run from the command-line (for testing) */
   for(arg=optind; arg < argc; arg++)
-    {
+  {
     Akey = -1;
     memset(A,'\0',sizeof(A));
     strncpy(A,argv[arg],sizeof(A));
     DBCheckMime(A);
-    }
+  }
 
   /* Run from scheduler! */
   if (argc == 1)
-    {
+  {
     signal(SIGALRM,ShowHeartbeat);
     alarm(60);
 
     printf("OK\n"); /* inform scheduler that we are ready */
     fflush(stdout);
     while(ReadLine(stdin,Parm,MAXCMD) >= 0)
-      {
+    {
       if (Parm[0] != '\0')
-	{
-	alarm(0);	/* allow scheduler to know if this hangs */
-	SetEnv(Parm); /* set environment (A and Akey globals) */
-	/* Process the repository file */
-	/** Find the path **/
-	Path = RepMkPath("files",A);
-	if (Path && RepExist("files",A))
-	  {
-	  /* Get the mimetype! */
-	  DBCheckMime(Path);
-	  }
-	else
-	  {
-	  printf("ERROR pfile %d Unable to process.\n",Akey);
-	  printf("LOG pfile %d File '%s' not found.\n",Akey,A);
-	  fflush(stdout);
-	  DBclose(DB);
-	  exit(-1);
-	  }
-	printf("OK\n"); /* inform scheduler that we are ready */
-	alarm(60);
-	fflush(stdout);
-	}
+      {
+        alarm(0);	/* allow scheduler to know if this hangs */
+        SetEnv(Parm); /* set environment (A and Akey globals) */
+        /* Process the repository file */
+        /** Find the path **/
+        Path = RepMkPath("files",A);
+        if (Path && RepExist("files",A))
+        {
+          /* Get the mimetype! */
+          DBCheckMime(Path);
+        }
+        else
+        {
+          printf("ERROR pfile %d Unable to process.\n",Akey);
+          printf("LOG pfile %d File '%s' not found.\n",Akey,A);
+          fflush(stdout);
+          DBclose(DB);
+          exit(-1);
+        }
+        printf("OK\n"); /* inform scheduler that we are ready */
+        alarm(60);
+        fflush(stdout);
       }
-    } /* if run from scheduler */
+    }
+  } /* if run from scheduler */
 
   /* Clean up */
   if (FMimetype) fclose(FMimetype);

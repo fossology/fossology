@@ -1,6 +1,6 @@
 # FOSSology Makefile - agents/mimetype
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-TOP=../..
+# Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+TOP=../../../
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
@@ -11,19 +11,30 @@ EXE=mimetype
 all: $(EXE)
 
 $(EXE): %: %.c $(DB) $(REPO) $(VARS)
+	@echo "make $(EXE)"
 	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
+#######################
+# library build rules #
+#######################
+$(FOLIB):
+	$(MAKE) -C $(FOLIBDIR)
+
 install: all
+	@echo "make $(EXE) install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 uninstall:
+	@echo "make $(EXE) uninstall"
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 test: all
-	@echo "*** No tests available for agents/$(EXE) ***"
+	@echo "make test $(EXE)"
+	$(MAKE) -C $(TESTDIR) test
 
 coverage:
-	@echo "NOTICE: no coverage available for mimetype"
+	@echo "make coverage $(EXE)"
+	$(MAKE) -C $(TESTDIR) coverage
 
 clean:
 	rm -f $(EXE) *.o core
