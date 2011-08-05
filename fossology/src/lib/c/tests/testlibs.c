@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* cunit includes */
 #include <CUnit/CUnit.h>
+#include <CUnit/Basic.h>
 #include <CUnit/Automated.h>
 
 /* ************************************************************************** */
@@ -31,6 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern CU_TestInfo fossconfig_testcases[];
 extern CU_TestInfo fossscheduler_testcases[];
+extern CU_TestInfo libfossdb_testcases[];
 
 /**
  * array of every test suite. There should be at least one test suite for every
@@ -38,8 +40,11 @@ extern CU_TestInfo fossscheduler_testcases[];
  */
 CU_SuiteInfo suites[] =
 {
+    { "Testing libfossdb",    NULL, NULL, libfossdb_testcases    },
     { "Testing fossconfig",    NULL, NULL, fossconfig_testcases    },
+    /*
     { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
+    */
     CU_SUITE_INFO_NULL
 };
 
@@ -49,6 +54,10 @@ CU_SuiteInfo suites[] =
 
 int main(int argc, char** argv)
 {
+  CU_pFailureRecord FailureList;
+  CU_RunSummary *pRunSummary;
+  int FailRec;
+
   if(CU_initialize_registry())
   {
     fprintf(stderr, "Initialization of Test Registry failed.'n");
@@ -68,13 +77,33 @@ int main(int argc, char** argv)
   CU_list_tests_to_file();
   CU_automated_run_tests();
 
+  pRunSummary = CU_get_run_summary();
   printf("Results:\n");
-  printf("  Number of suites run: %d\n", CU_get_number_of_suites_run());
-  printf("  Number of tests run: %d\n", CU_get_number_of_tests_run());
-  printf("  Number of tests failed: %d\n", CU_get_number_of_tests_failed());
-  printf("  Number of asserts: %d\n", CU_get_number_of_asserts());
-  printf("  Number of successes: %d\n", CU_get_number_of_successes());
-  printf("  Number of failures: %d\n", CU_get_number_of_failures());
+  printf("  Number of suites run: %d\n", pRunSummary->nSuitesRun);
+  printf("  Number of suites failed: %d\n", pRunSummary->nSuitesFailed);
+  printf("  Number of tests run: %d\n", pRunSummary->nTestsRun);
+  printf("  Number of tests failed: %d\n", pRunSummary->nTestsFailed);
+  printf("  Number of asserts: %d\n", pRunSummary->nAsserts);
+  printf("  Number of asserts failed: %d\n", pRunSummary->nAssertsFailed);
+  printf("  Number of failures: %d\n", pRunSummary->nFailureRecords);
+
+  /* Print any failures */
+  if (pRunSummary->nFailureRecords)
+  {
+    printf("\nFailures:\n");
+    FailureList = CU_get_failure_list();
+    for (FailRec=0; FailRec < pRunSummary->nFailureRecords; FailRec++)
+    {
+      printf("%d. File: %s  Line: %u   Test: %s\n",
+             FailRec+1, 
+             FailureList[FailRec].strFileName,
+             FailureList[FailRec].uiLineNumber,
+             (FailureList[FailRec].pTest)->pName);
+      printf("  %s\n",
+             FailureList[FailRec].strCondition);
+    }
+    printf("\n");
+  }
 
   CU_cleanup_registry();
 
