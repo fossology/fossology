@@ -210,7 +210,7 @@ int fo_tableExists(PGconn *pgConn, char *tableName)
   int  TabCount;
 
   snprintf(sql, sizeof(sql), 
-           "select count(*) from tables where table_catalog='fossology' and table_name='%s'",
+           "select count(*) from information_schema.tables where table_catalog='fossology' and table_name='%s'",
           tableName);
   result = PQexec(pgConn, sql);
   if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__)) return 0;
