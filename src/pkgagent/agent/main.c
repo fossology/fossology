@@ -92,7 +92,7 @@ int	main	(int argc, char *argv[])
   Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"iv")) != -1)
+  while((c = getopt(argc,argv,"ivh")) != -1)
   {
     switch(c)
     {
