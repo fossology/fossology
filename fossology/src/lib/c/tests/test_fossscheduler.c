@@ -54,8 +54,8 @@ extern void fo_heartbeat();
 char buffer[1024];
 int in_sub[2];
 int out_sub[2];
-FILE* stdin_t;
-FILE* stdout_t;
+int stdin_t;
+int stdout_t;
 FILE* read_from;
 FILE* write_to;
 
@@ -79,13 +79,13 @@ void set_up(void) {
   CU_ASSERT_TRUE_FATAL(!pipe(in_sub));
   CU_ASSERT_TRUE_FATAL(!pipe(out_sub));
 
+  stdin_t  = dup(fileno(stdin));
+  stdout_t = dup(fileno(stdout));
+
   dup2(out_sub[1], fileno(stdout));
   dup2( in_sub[0],  fileno(stdin));
   read_from = fdopen(out_sub[0], "rb");
   write_to  = fdopen( in_sub[1], "wb");
-
-  stdout_t = fopen("/dev/tty", "wb");
-  stdin_t  = fopen("/dev/tty", "rb");
 
   memset(buffer, '\0', sizeof(buffer));
 }
@@ -101,13 +101,13 @@ void tear_down(void) {
   fclose(read_from);
   fclose(write_to);
 
-  stdout = stdout_t;
-  stdin  = stdin_t;
-
   close(in_sub[0]);
   close(in_sub[1]);
   close(out_sub[0]);
   close(out_sub[1]);
+
+  dup2(stdin_t,  fileno(stdin));
+  dup2(stdout_t, fileno(stdout));
 }
 
 /**
