@@ -30,6 +30,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* *    declaration and add it to the suites array                          * */
 /* ************************************************************************** */
 
+/* macro to make suite declaration more readable */
+#define cu_suite_entry(entry) { #entry, NULL, NULL, entry }
+
 extern CU_TestInfo fossconfig_testcases[];
 extern CU_TestInfo fossscheduler_testcases[];
 extern CU_TestInfo libfossdb_testcases[];
@@ -40,11 +43,9 @@ extern CU_TestInfo libfossdb_testcases[];
  */
 CU_SuiteInfo suites[] =
 {
-    { "Testing libfossdb",    NULL, NULL, libfossdb_testcases    },
-    { "Testing fossconfig",    NULL, NULL, fossconfig_testcases    },
-    /*
-    { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
-    */
+    cu_suite_entry(    libfossdb_testcases),
+    cu_suite_entry(   fossconfig_testcases),
+    cu_suite_entry(fossscheduler_testcases),
     CU_SUITE_INFO_NULL
 };
 
@@ -91,16 +92,17 @@ int main(int argc, char** argv)
   if (pRunSummary->nFailureRecords)
   {
     printf("\nFailures:\n");
-    FailureList = CU_get_failure_list();
-    for (FailRec=0; FailRec < pRunSummary->nFailureRecords; FailRec++)
+    FailRec = 1;
+    for (FailureList = CU_get_failure_list(); FailureList; FailureList = FailureList->pNext)
     {
       printf("%d. File: %s  Line: %u   Test: %s\n",
-             FailRec+1, 
-             FailureList[FailRec].strFileName,
-             FailureList[FailRec].uiLineNumber,
-             (FailureList[FailRec].pTest)->pName);
+             FailRec,
+             FailureList->strFileName,
+             FailureList->uiLineNumber,
+             (FailureList->pTest)->pName);
       printf("  %s\n",
-             FailureList[FailRec].strCondition);
+             FailureList->strCondition);
+      FailRec++;
     }
     printf("\n");
   }
