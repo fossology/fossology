@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <glib.h>
 
-/* ************************************************************************** */
+/* ************************************0,0,120,120,32376,32376,8064,8064,8064,8064,32376,32376,120,120,0,0************************************** */
 /* *** utility ************************************************************** */
 /* ************************************************************************** */
 
@@ -213,20 +213,20 @@ int key(GError** error) {
   gchar* val;
   int    len;
 
+  while(yynext() && c != '=' && c != '\n' && !isspace(c));
+  replace(c);
+  key = g_strdup(lex);
+  len = strlen(key);
+  while(yynext() && c != '=' && c != '\n' && isspace(c));
+
   if(current_group == NULL)
     throw_error(
         error,
         PARSE_ERROR,
         fo_invalid_key,
-        "%s[line %d]: keys must have an associated group",
-        fname, yyline);
+        "%s[line %d]: key \"%s\" does not have an associated group",
+        fname, yyline, key);
 
-  while(yynext() && c != '=' && c != '\n' && !isspace(c));
-  replace(c);
-  key = g_strdup(lex);
-  len = strlen(key);
-
-  while(yynext() && c != '=' && c != '\n' && isspace(c));
   if(c != '=')
     throw_error(
         error,
@@ -347,7 +347,17 @@ int fo_config_load(char* rawname, GError** error) {
     {
       case ';': c = next_nl(); break;
       case '[': c = group(error); break;
-      default:  c = key(error); break;
+      default:
+        if(isalpha(c))
+          c = key(error);
+        else
+          throw_error(
+              error,
+              PARSE_ERROR,
+              fo_invalid_file,
+              "%s[line %d]: invalid char '%c', keys must start with alpha char",
+              fname, yyline, c);
+        break;
     }
 
     if(!c || c == EOF)
@@ -376,21 +386,21 @@ char* fo_config_get(char* group, char* key, GError** error)
   if(group_map == NULL)
     throw_error(
         error,
-        PARSE_ERROR,
+        RETRIEVE_ERROR,
         fo_load_config,
         "ERROR: you must call fo_config_load before any other calls");
 
   if((tree = g_tree_lookup(group_map, group)) == NULL)
     throw_error(
         error,
-        PARSE_ERROR,
+        RETRIEVE_ERROR,
         fo_missing_group,
         "ERROR: unknown group \"%s\"", group);
 
   if((ret = g_tree_lookup(tree, key)) == NULL)
     throw_error(
         error,
-        PARSE_ERROR,
+        RETRIEVE_ERROR,
         fo_missing_key,
         "ERROR: unknown key=\"%s\" for group=\"%s\"", key, group);
 
@@ -421,7 +431,7 @@ char* fo_config_get_list(char* group, char* key, int idx, GError** error)
   if(group_map == NULL)
     throw_error(
         error,
-        PARSE_ERROR,
+        RETRIEVE_ERROR,
         fo_load_config,
         "ERROR: you must call fo_config_load before any other calls\n");
 
@@ -429,14 +439,14 @@ char* fo_config_get_list(char* group, char* key, int idx, GError** error)
     if(!(*error))
       throw_error(
           error,
-          PARSE_ERROR,
+          RETRIEVE_ERROR,
           fo_invalid_key,
           "ERROR: %s[%s] must be of type list to get list element", group, key);
 
   if(idx < 0 || idx >= fo_config_list_length(group, key, error))
     throw_error(
         error,
-        PARSE_ERROR,
+        RETRIEVE_ERROR,
         fo_invalid_key,
         "ERROR: %s[%s] %d is out of range", group, key, idx);
 
@@ -475,21 +485,21 @@ int fo_config_is_list(char* group, char* key, GError** error)
   if(group_map == NULL)
     throw_error(
         error,
-        PARSE_ERROR,
+        RETRIEVE_ERROR,
         fo_load_config,
         "ERROR: you must call fo_config_load before any other calls");
 
   if((tree = g_tree_lookup(group_map, group)) == NULL)
     throw_error(
         error,
-        PARSE_ERROR,
+        RETRIEVE_ERROR,
         fo_missing_group,
         "ERROR: unknown group \"%s\"", group);
 
   if((val = g_tree_lookup(tree, key)) == NULL)
     throw_error(
         error,
-        PARSE_ERROR,
+        RETRIEVE_ERROR,
         fo_missing_key,
         "ERROR: unknown key/value expression \"%s\"", key);
 
@@ -512,7 +522,7 @@ int fo_config_list_length(char* group, char* key, GError** error)
   if(!fo_config_is_list(group, key, error))
     throw_error(
         error,
-        PARSE_ERROR,
+        RETRIEVE_ERROR,
         fo_invalid_group,
         "ERROR: %s[%s] must be of type list to get length", group, key);
   if(*error)

@@ -137,7 +137,7 @@ void test_fo_config_load()
   CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
   CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
   CU_ASSERT_STRING_EQUAL(error->message,
-      "confdata/no_group.conf[line 3]: keys must have an associated group");
+      "confdata/no_group.conf[line 3]: key \"bad\" does not have an associated group");
   g_clear_error(&error);
 
   fo_config_load("confdata/key_value.conf", &error);
@@ -152,6 +152,14 @@ void test_fo_config_load()
   CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
   CU_ASSERT_STRING_EQUAL(error->message,
       "confdata/bad_key.conf[line 4]: invalid key/value expression \"bad]\"");
+  g_clear_error(&error);
+
+  fo_config_load("confdata/key_name.conf", &error);
+  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->code, fo_invalid_file);
+  printf("%s\n", error->message);
+  CU_ASSERT_STRING_EQUAL(error->message,
+      "confdata/key_name.conf[line 1]: invalid char '#', keys must start with alpha char")
   g_clear_error(&error);
 
   fo_config_load(CONF_FILE, &error);
@@ -267,14 +275,14 @@ void test_fo_config_get()
   CU_ASSERT_STRING_EQUAL(fo_config_get(GROUP(3), KEY(3, 2), &error), VAL(3, 2));
 
   CU_ASSERT_PTR_NULL(fo_config_get(GROUP(0), NONE, &error));
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
   CU_ASSERT_EQUAL(error->code,   fo_missing_key);
   CU_ASSERT_STRING_EQUAL(error->message,
       "ERROR: unknown key=\"none\" for group=\"one\"");
   g_clear_error(&error);
 
   CU_ASSERT_PTR_NULL(fo_config_get(NONE, KEY(0, 0), &error));
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
   CU_ASSERT_EQUAL(error->code,   fo_missing_group);
   CU_ASSERT_STRING_EQUAL(error->message,
       "ERROR: unknown group \"none\"");
@@ -311,7 +319,7 @@ void test_fo_config_list_length()
   CU_ASSERT_EQUAL(fo_config_list_length(GROUP(3), KEY(3, 1), &error), 7);
   CU_ASSERT_EQUAL(fo_config_list_length(GROUP(3), KEY(3, 2), &error), 0);
   CU_ASSERT_PTR_NOT_NULL(error);
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
   CU_ASSERT_EQUAL(error->code,   fo_invalid_group);
   CU_ASSERT_STRING_EQUAL(error->message,
       "ERROR: four[not] must be of type list to get length");
@@ -348,21 +356,21 @@ void test_fo_config_get_list()
 #undef CONFIG_GET_LIST_ASSERT
 
   CU_ASSERT_PTR_NULL(fo_config_get_list(GROUP(3), KEY(3, 2), 0, &error));
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
   CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
   CU_ASSERT_STRING_EQUAL(error->message,
       "ERROR: four[not] must be of type list to get list element")
   g_clear_error(&error);
 
   CU_ASSERT_PTR_NULL(fo_config_get_list(GROUP(3), KEY(3, 0), 4, &error));
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
   CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
   CU_ASSERT_STRING_EQUAL(error->message,
       "ERROR: four[is] 4 is out of range");
   g_clear_error(&error);
 
   CU_ASSERT_PTR_NULL(fo_config_get_list(GROUP(3), KEY(3, 0), -1, &error));
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
   CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
   CU_ASSERT_STRING_EQUAL(error->message,
       "ERROR: four[is] -1 is out of range");
@@ -415,16 +423,16 @@ void test_fo_config_load_default()
 
 CU_TestInfo fossconfig_testcases[] =
 {
-    { "Test config_load\n",         test_fo_config_load         },
-    { "Test config_group_set\n",    test_fo_config_group_set    },
-    { "Test config_key_set\n",      test_fo_config_key_set      },
-    { "Test config_has_group\n",    test_fo_config_has_group    },
-    { "Test config_has_key\n",      test_fo_config_has_key      },
-    { "Test config_get\n",          test_fo_config_get          },
-    { "Test config_is_list\n",      test_fo_config_is_list      },
-    { "Test config_list_length\n",  test_fo_config_list_length  },
-    { "Test config_get_list\n",     test_fo_config_get_list     },
-    { "Test config_free\n",         test_fo_config_free         },
-    { "Test config_load_default\n", test_fo_config_load_default },
+    { "fo_config_load()",         test_fo_config_load         },
+    { "fo_config_group_set()",    test_fo_config_group_set    },
+    { "fo_config_key_set()",      test_fo_config_key_set      },
+    { "fo_config_has_group()",    test_fo_config_has_group    },
+    { "fo_config_has_key()",      test_fo_config_has_key      },
+    { "fo_config_get()",          test_fo_config_get          },
+    { "fo_config_is_list()",      test_fo_config_is_list      },
+    { "fo_config_list_length()",  test_fo_config_list_length  },
+    { "fo_config_get_list()",     test_fo_config_get_list     },
+    { "fo_config_free()",         test_fo_config_free         },
+    { "fo_config_load_default()", test_fo_config_load_default },
     CU_TEST_INFO_NULL
 };
