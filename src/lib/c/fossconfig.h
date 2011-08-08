@@ -29,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef enum
 {
   fo_missing_file,
+  fo_invalid_file,
   fo_invalid_key,
   fo_invalid_group,
   fo_missing_group,
