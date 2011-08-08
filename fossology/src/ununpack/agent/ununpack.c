@@ -1,7 +1,7 @@
 /*******************************************************************
  Ununpack: The universal unpacker.
 
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,9 +15,6 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- **************
- This time, it's rewritten in C for speed and multithreading.
  *******************************************************************/
 
 #include <stdlib.h>
@@ -70,7 +67,7 @@ char *Pfile = NULL;
 char *Pfile_Pk = NULL; /* PK for *Pfile */
 char *Upload_Pk = NULL; /* PK for upload table */
 PGconn *pgConn = NULL; /* PGconn from DB */
-int Agent_pk=-1;	/* agent ID */
+int agent_pk=-1;	/* agent ID */
 #define MAXSQL	4096
 #define PATH_MAX 4096
 char SQL[MAXSQL];
@@ -147,6 +144,7 @@ void	SafeExit	(int rc)
 {
   fflush(stdout);
   if (pgConn) PQfinish(pgConn); 
+  fo_scheduler_disconnect();
   exit(rc);
 } /* SafeExit() */
 
@@ -241,7 +239,7 @@ char *	DBTaintString	(char *S)
   NewS = (char *)calloc(NewLen,sizeof(char));
   if (!NewS)
   {
-    printf("ERROR: Unable to allocate %d bytes for string.\n",NewLen);
+    ERROR("Unable to allocate %d bytes for string.",NewLen)
     SafeExit(6);
   }
   j=0;
@@ -366,7 +364,7 @@ inline int	MkDirs	(char *Fname)
       {
         if (!S_ISDIR(Status.st_mode))
         {
-          fprintf(stderr,"FATAL: '%s' is not a directory.\n",Dir);
+          FATAL("'%s' is not a directory.",Dir)
           return(1);
         }
       }
@@ -376,8 +374,7 @@ inline int	MkDirs	(char *Fname)
         if (rc && (errno == EEXIST)) rc=0;
         if (rc)
         {
-          perror("FATAL: ununpack");
-          fprintf(stderr,"FATAL: 'mkdir %s' failed with rc=%d\n",Dir,rc);
+          FATAL("mkdir %s' failed, error: %s",Dir,strerror(errno))
           SafeExit(7);
         }
         chmod(Dir,02770);
@@ -389,8 +386,7 @@ inline int	MkDirs	(char *Fname)
   if (rc && (errno == EEXIST)) rc=0;
   if (rc)
   {
-    perror("FATAL: ununpack");
-    fprintf(stderr,"FATAL: 'mkdir %s' failed with rc=%d\n",Dir,rc);
+    FATAL("mkdir %s' failed, error: %s",Dir,strerror(errno))
     SafeExit(8);
   }
   chmod(Dir,02770);
@@ -521,7 +517,7 @@ int	IsExe	(char *Exe, int Quiet)
     strcat(TestCmd,Exe);
     if (IsFile(TestCmd,1))	return(1); /* found it! */
   }
-  if (!Quiet) fprintf(stderr,"  %s :: not found in $PATH\n",Exe);
+  if (!Quiet) WARNING("%s not found in $PATH",Exe)
   return(0); /* not in path */
 } /* IsExe() */
 
@@ -546,7 +542,7 @@ int	CopyFile	(char *Src, char *Dst)
   Fin = open(Src,O_RDONLY);
   if (Fin == -1)
   {
-    fprintf(stderr,"FATAL: Unable to open source '%s'\n",Src);
+    FATAL("Unable to open source '%s'",Src)
     return(1);
   }
 
@@ -562,7 +558,7 @@ int	CopyFile	(char *Src, char *Dst)
   Fout = open(Dst,O_WRONLY|O_CREAT|O_TRUNC,Stat.st_mode);
   if (Fout == -1)
   {
-    fprintf(stderr,"FATAL: Unable to open target '%s'\n",Dst);
+    FATAL("Unable to open target '%s'",Dst)
     close(Fin);
     return(1);
   }
@@ -571,8 +567,8 @@ int	CopyFile	(char *Src, char *Dst)
   Mmap = mmap(0,LenIn,PROT_READ,MAP_PRIVATE,Fin,0);
   if (Mmap == NULL)
   {
-    printf("FATAL pfile %s Unable to process file.\n",Pfile_Pk);
-    printf("LOG pfile %s Mmap failed during copy.\n",Pfile_Pk);
+    FATAL("pfile %s Unable to process file.",Pfile_Pk)
+    WARNING("pfile %s Mmap failed during copy.",Pfile_Pk)
     rc=1;
     goto CopyFileEnd;
   }
@@ -657,7 +653,7 @@ int     ParentWait      ()
   {
     if (!ForceContinue)
     {
-      printf("FATAL: Child had unnatural death\n");
+      FATAL("Child had unnatural death")
       SafeExit(9);
     }
     Queue[i].ChildCorrupt=1;
@@ -668,8 +664,8 @@ int     ParentWait      ()
   {
     if (!ForceContinue)
     {
-      printf("FATAL: Child had non-zero status: %d\n",Status);
-      printf("FATAL: Child was to recurse on %s\n",Queue[i].ChildRecurse);
+      FATAL("Child had non-zero status: %d",Status)
+      FATAL("Child was to recurse on %s",Queue[i].ChildRecurse)
       SafeExit(10);
     }
     Queue[i].ChildCorrupt=1;
@@ -750,20 +746,23 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
 
   if (!Cmd) return(0); /* nothing to do */
 
-  if (!Quiet)
+  if (Verbose)
   {
-    if (Where && Verbose && Out)
-      fprintf(stderr,"Extracting %s: %s > %s\n",Cmd,File,Out);
-    else if (Where) fprintf(stderr,"Extracting %s in %s: %s\n",Cmd,Where,File);
-    else fprintf(stderr,"Testing %s: %s\n",Cmd,File);
+    if (Where && Out)
+      DEBUG("Extracting %s: %s > %s",Cmd,File,Out)
+    else 
+    if (Where) 
+      DEBUG("Extracting %s in %s: %s\n",Cmd,Where,File)
+    else 
+      DEBUG("Testing %s: %s\n",Cmd,File)
   }
 
   if (getcwd(CWD,sizeof(CWD)) == NULL)
   {
-    fprintf(stderr,"FATAL: directory name longer than %d characters\n",(int)sizeof(CWD));
+    FATAL("directory name longer than %d characters",(int)sizeof(CWD))
     return(-1);
   }
-  if (Verbose > 1) printf("CWD: %s\n",CWD);
+  if (Verbose > 1) DEBUG("CWD: %s\n",CWD);
   if ((Where != NULL) && (Where[0] != '\0'))
   {
     if (chdir(Where) != 0)
@@ -771,11 +770,11 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
       MkDir(Where);
       if (chdir(Where) != 0)
       {
-        fprintf(stderr,"FATAL: Unable to access directory '%s'\n",Where);
+        FATAL("Unable to access directory '%s'",Where)
         return(-1);
       }
     }
-    if (Verbose > 1) printf("CWD: %s\n",Where);
+    if (Verbose > 1) DEBUG("CWD: %s",Where)
   }
 
   /* CMD: Cmd CmdPre 'CWD/File' CmdPost */
@@ -801,16 +800,16 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
   rc = system(Cmd1);
   if (WIFSIGNALED(rc))
   {
-    printf("ERROR: Process killed by signal (%d): %s\n",WTERMSIG(rc),Cmd1);
+    ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd1)
     SafeExit(11);
   }
   if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
   else rc=-1;
-  if (Verbose) printf("CMD: in %s -- %s ; rc=%d\n",Where,Cmd1,rc);
+  if (Verbose) DEBUG("in %s -- %s ; rc=%d",Where,Cmd1,rc)
 
   if(chdir(CWD) != 0)
-    ERROR("Unable to change directory to %s", CWD);
-  if (Verbose > 1) printf("CWD: %s\n",CWD);
+    ERROR("Unable to change directory to %s", CWD)
+  if (Verbose > 1) DEBUG("CWD: %s",CWD)
   return(rc);
 } /* RunCommand() */
 
@@ -851,7 +850,7 @@ int	FindCmd	(char *Filename)
     {
       //check .dsc file contect to verify if is debian source file
       if ((fp = fopen(Filename, "r")) == NULL){
-        printf("DEBUG: Unable to open .dsc file %s\n",Filename);
+        DEBUG("Unable to open .dsc file %s",Filename)
         return(-1);
       }
       j=0;	
@@ -863,7 +862,7 @@ int	FindCmd	(char *Filename)
       if ((strstr(line, "-----BEGIN PGP SIGNED MESSAGE-----") && strstr(line,"Source:")) || 
           (strstr(line, "Format:") && strstr(line, "Source:") && strstr(line, "Version:")))
       {
-        if (Verbose > 0) {printf("First bytes of .dsc file %s\n",line);}
+        if (Verbose > 0) DEBUG("First bytes of .dsc file %s\n",line)
         memset(Static,0,sizeof(Static));
         strcpy(Static,"application/x-debian-source");
         Type=Static;
@@ -940,13 +939,13 @@ int	FindCmd	(char *Filename)
               fp = popen(CMDTemp, "r");
               if (fp == NULL)
               {
-                printf("Failed to run command\n" );
+                printf("Failed to run command");
                 SafeExit(50);
               }
 
               /* Read the output the first line */
               if(fgets(Output, sizeof(Output) - 1, fp) == NULL)
-                ERROR("Failed read");
+                ERROR("Failed read")
 
               /* close */
               pclose(fp);
@@ -984,7 +983,7 @@ int	FindCmd	(char *Filename)
               else
               {
                 // only here to validate other octet file types
-                if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
+                if (Verbose > 0) DEBUG("octet mime type, file: %s", Filename)
               }
             }
           }
@@ -1038,8 +1037,8 @@ int	FindCmd	(char *Filename)
   if (Verbose > 0)
   {
     /* no match */
-    if (Match == -1) printf("MISS: Type=%s  %s\n",Type,Filename);
-    else printf("MATCH: Type=%d  %s %s %s %s\n",CMD[Match].Type,CMD[Match].Cmd,CMD[Match].CmdPre,Filename,CMD[Match].CmdPost);
+    if (Match == -1) DEBUG("MISS: Type=%s  %s",Type,Filename)
+    else DEBUG("MATCH: Type=%d  %s %s %s %s",CMD[Match].Type,CMD[Match].Cmd,CMD[Match].CmdPre,Filename,CMD[Match].CmdPost)
   }
 
   return(Match);
@@ -1099,13 +1098,13 @@ dirlist *	MakeDirList	(char *Fullname)
     dhead = (dirlist *)malloc(sizeof(dirlist));
     if (!dhead)
     {
-      printf("FATAL: Failed to allocate dirlist memory\n");
+      FATAL("Failed to allocate dirlist memory")
       SafeExit(12);
     }
     dhead->Name = (char *)malloc(strlen(Entry->d_name)+1);
     if (!dhead->Name)
     {
-      printf("FATAL: Failed to allocate dirlist.Name memory\n");
+      FATAL("Failed to allocate dirlist.Name memory")
       SafeExit(13);
     }
     memset(dhead->Name,'\0',strlen(Entry->d_name)+1);
@@ -1217,7 +1216,7 @@ typedef struct ContainerInfo ContainerInfo;
  ***************************************************/
 void	DebugContainerInfo	(ContainerInfo *CI)
 {
-  printf("Container:\n");
+  DEBUG("Container:")
   printf("  Source: %s\n",CI->Source); 
   printf("  Partdir: %s\n",CI->Partdir); 
   printf("  Partname: %s\n",CI->Partname); 
@@ -1302,7 +1301,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   if (Val)
   {
     CI->pfile_pk = atol(Val);
-    if (Verbose) fprintf(stderr,"pfile_pk = %ld\n",CI->pfile_pk);
+    if (Verbose) DEBUG("pfile_pk = %ld",CI->pfile_pk)
     /* For backwards compatibility... Do we need to update the mimetype? */
     if ((CMD[CI->PI.Cmd].DBindex > 0) &&
         (atol(PQgetvalue(result,0,1)) != CMD[CI->PI.Cmd].DBindex))
@@ -1442,7 +1441,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     }
     else /* No parent!  This is the first upload! */
     {
-      snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (upload_fk,pfile_fk,ufile_mode,ufile_name) VALUES (%s,%ld,%ld,'%s');",
+      snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (upload_fk,pfile_fk,ufile_mode,ufile_name) VALUES (%s,%ld,%ld,E'%s');",
           Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
       result =  PQexec(pgConn, SQL); /* INSERT INTO uploadtree */
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
@@ -1492,12 +1491,12 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
     {
       if (fo_RepImport(CI->Source,REP_FILES,Fuid,1) != 0)
       {
-        fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",CI->Source,Fuid);
+        ERROR("Failed to import '%s' as '%s' into the repository",CI->Source,Fuid)
         SafeExit(16);
       }
     }
-    if (Verbose) fprintf(stderr,"Repository[%s]: insert '%s' as '%s'\n",
-        REP_FILES,CI->Source,Fuid);
+    if (Verbose) DEBUG("Repository[%s]: insert '%s' as '%s'",
+        REP_FILES,CI->Source,Fuid)
   }
 
   /*****************************************/
@@ -1759,8 +1758,7 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
       if (!strcmp(CMD[CI->PI.Cmd].Magic,"application/x-zip") &&
           ((rc==1) || (rc==2) || (rc==51)) )
       {
-        fprintf(stderr,"WARNING pfile %s Minor zip error... ignoring error.\n",Pfile_Pk);
-        fprintf(stderr,"LOG pfile %s Minor zip error(%d)... ignoring error.\n",Pfile_Pk,rc);
+        WARNING("pfile %s Minor zip error(%d)... ignoring error.",Pfile_Pk,rc)
         rc=0;	/* lots of zip return codes */
       }
       break;
@@ -1804,10 +1802,8 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
   {
     /* if command failed but we want to continue anyway */
     /** Note: CMD_DEFAULT will never get here because rc==0 **/
-    fprintf(stderr,"%s pfile %s Command %s failed\n",
-        ForceContinue?"WARNING":"ERROR",Pfile_Pk,CMD[CI->PI.Cmd].Cmd);
-    fprintf(stderr,"LOG pfile %s %s Command %s failed: %s\n",
-        Pfile_Pk,ForceContinue?"WARNING":"ERROR",CMD[CI->PI.Cmd].Cmd,CI->Source);
+    ERROR("pfile %s Command %s failed on: %s",
+        Pfile_Pk, CMD[CI->PI.Cmd].Cmd, CI->Source)
     if (ForceContinue) rc=-1;
   }
   exit(rc);
@@ -1835,7 +1831,7 @@ int	Traverse	(char *Filename, char *Basename,
   int RecurseOk=1;	/* should it recurse? (only on unique inserts) */
 
   if (!Filename || (Filename[0]=='\0')) return(IsContainer);
-  if (Verbose > 0) printf("Traverse(%s) -- %s\n",Filename,Label);
+  if (Verbose > 0) DEBUG("Traverse(%s) -- %s",Filename,Label)
 
   /* clear the container */
   memset(&CI,0,sizeof(ContainerInfo));
@@ -1871,10 +1867,6 @@ int	Traverse	(char *Filename, char *Basename,
   strcpy(CI.Partname,CI.Source+i+1);
   strcpy(CI.PartnameNew,CI.Partname);
 
-#if 0 
-  fprintf(stderr,"TEST-> %s\n",CI.Partname);
-#endif
-
   /***********************************************/
   /* ignore anything that is not a directory or a file */
   /***********************************************/
@@ -1887,7 +1879,7 @@ int	Traverse	(char *Filename, char *Basename,
   if (rc != 0)
   {
     /* this should never happen... */
-    fprintf(stderr,"LOG pfile %s \"%s\" does not exist!\n",Pfile_Pk,Filename);
+    ERROR("pfile %s \"%s\" DOES NOT EXIST!!!",Pfile_Pk,Filename)
     /* goto TraverseEnd; */
     return(0);
   }
@@ -2013,8 +2005,8 @@ int	Traverse	(char *Filename, char *Basename,
         /* make the directory */
         if (MkDir(Queue[Index].ChildRecurse))
         {
-          printf("FATAL: Unable to mkdir(%s) in Traverse\n",
-              Queue[Index].ChildRecurse);
+          FATAL("Unable to mkdir(%s) in Traverse",
+              Queue[Index].ChildRecurse)
           if (!ForceContinue)
           {
             SafeExit(17);
@@ -2097,12 +2089,12 @@ int	Traverse	(char *Filename, char *Basename,
       rc = system(Cmd);
       if (WIFSIGNALED(rc))
       {
-        printf("ERROR: Process killed by signal (%d): %s\n",WTERMSIG(rc),Cmd);
+        ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd)
         SafeExit(18);
       }
       if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
       else rc=-1;
-      if (rc != 0) fprintf(stderr,"Unable to run command '%s'\n",Cmd);
+      if (rc != 0) ERROR("Unable to run command '%s'",Cmd)
       /* add it to the list of files */
       RecurseOk = DisplayContainerInfo(&CImeta,PI->Cmd);
       if (UnlinkAll) unlink(CImeta.Source);
@@ -2126,7 +2118,7 @@ int	Traverse	(char *Filename, char *Basename,
         /* Parent: Save child info */
         if (Pid == -1)
         {
-          perror("FATAL: Unable to fork child.\n");
+          FATAL("Unable to fork child.")
           SafeExit(19);
         }
         Queue[Index].ChildPid = Pid;
@@ -2182,7 +2174,7 @@ int	Traverse	(char *Filename, char *Basename,
       CI.HasChild = 0;
       DisplayContainerInfo(&CI,PI->Cmd);
     }
-    printf("Skipping (not a file or directory): %s\n",CI.Source);
+    DEBUG("Skipping (not a file or directory): %s",CI.Source)
   }
 
   TraverseEnd:
@@ -2306,15 +2298,14 @@ void	Usage	(char *Name)
   fprintf(stderr,"  -L out :: Generate a log of files extracted (in XML) to out.\n");
   fprintf(stderr,"  -F     :: Using files from the repository.\n");
   fprintf(stderr,"  -i     :: Initialize the database queue system, then exit.\n");
-  fprintf(stderr,"  -Q     :: Using database queue system. (Includes -F)\n");
-  fprintf(stderr,"            Each source name should come from the repository.\n");
-  fprintf(stderr,"            First 'gold' is checked, then 'files'.\n");
+  fprintf(stderr,"  -Q     :: Using scheduler queue system. (Includes -F)\n");
   fprintf(stderr,"            If -L is used, unpacked files are placed in 'files'.\n");
   fprintf(stderr,"      -T rep :: Set gold repository name to 'rep' (for testing)\n");
   fprintf(stderr,"      -t rep :: Set files repository name to 'rep' (for testing)\n");
   fprintf(stderr,"      -A     :: do not set the initial DB container as an artifact.\n");
   fprintf(stderr,"      -f     :: force processing files that already exist in the DB.\n");
   fprintf(stderr,"  -q     :: quiet (generate no output).\n");
+  fprintf(stderr,"  -U upload_pk :: upload to unpack (implies -RQ). Writes to db.\n");
   fprintf(stderr,"  -v     :: verbose (-vv = more verbose).\n");
   fprintf(stderr,"Currently identifies and processes:\n");
   fprintf(stderr,"  Compressed files: .Z .gz .bz .bz2 upx\n");
@@ -2331,16 +2322,20 @@ int	UnunpackEntry	(int argc, char *argv[])
 {
   int Pid;
   int c;
+  int rv;
   PGresult *result;
   char *NewDir=".";
-  int Recurse=0;
+  char *AgentName = "ununpack";
+  char *AgentARSName = "ununpack_ars";
+  int   Recurse=0;
+  int   ars_pk = 0;
   char *ListOutName=NULL;
   char *Fname = NULL;
 
   MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
   if (MagicCookie == NULL)
   {
-    fprintf(stderr,"FATAL: Failed to initialize magic cookie\n");
+    FATAL("Failed to initialize magic cookie")
     exit(-1);
   }
 
@@ -2349,7 +2344,7 @@ int	UnunpackEntry	(int argc, char *argv[])
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv);
 
-  while((c = getopt(argc,argv,"ACd:FfHL:m:PQiqRr:T:t:vXx")) != -1)
+  while((c = getopt(argc,argv,"ACd:FfHL:m:PQiqRr:T:t:U:vXx")) != -1)
   {
     switch(c)
     {
@@ -2370,57 +2365,22 @@ int	UnunpackEntry	(int argc, char *argv[])
         pgConn = fo_dbconnect();
         if (!pgConn)
         {
-          fprintf(stderr,"FATAL: Unable to access database\n");
+          FATAL("Unable to access database")
           SafeExit(20);
         }
         PQfinish(pgConn);
         if (!IsExe("dpkg-source",Quiet))
-          printf("WARNING: dpkg-source is not available on this system.  This means that debian source packages will NOT be unpacked.\n");
+          WARNING("dpkg-source is not available on this system.  This means that debian source packages will NOT be unpacked.")
         return(0);
         break; /* never reached */
       case 'Q':
         UseRepository=1;
-        /* get PGconn */
-        pgConn = fo_dbconnect();
-        if (!pgConn)
-        {
-          fprintf(stderr,"FATAL: Unable to access database\n");
-          SafeExit(21);
-        }
-        /* get PGconn */
-        memset(SQL,'\0',MAXSQL);
-        snprintf(SQL,MAXSQL,"BEGIN;");
-        result =  PQexec(pgConn, SQL);
-        if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
+
+        /* Get the upload_pk from the scheduler */
+        if((Upload_Pk = fo_scheduler_next()) == NULL)
         {
           SafeExit(22);
         }
-        PQclear(result);
-        if((Fname = fo_scheduler_next()) == NULL)
-        {
-          SafeExit(22);
-        }
-
-        sscanf(Fname, "%s %s %s", Pfile, Upload_Pk, Pfile_Pk);
-
-        /* Check for all necessary parameters */
-        if (Verbose)
-        {
-          printf("Pfile=%s\n",Pfile);
-          printf("Pfile_Pk=%s\n",Pfile_Pk);
-          printf("Upload_Pk=%s\n",Upload_Pk);
-        }
-        if (pgConn && !Pfile)
-        {
-          printf("FATAL: Pfile is NULL.\n");
-          SafeExit(23);
-        }
-        if (pgConn && !Pfile_Pk)
-        {
-          printf("FATAL: Pfile_Pk is NULL.\n");
-          SafeExit(24);
-        }
-        InitCmd();
         break;
       case 'q':	Quiet=1; break;
       case 'T':
@@ -2430,6 +2390,11 @@ int	UnunpackEntry	(int argc, char *argv[])
       case 't':
         memset(REP_FILES,0,sizeof(REP_FILES));
         strncpy(REP_FILES,optarg,sizeof(REP_FILES)-1);
+        break;
+      case 'U':	
+        UseRepository = 1;
+        Recurse = -1;
+        Upload_Pk = optarg; 
         break;
       case 'v':	Verbose++; break;
       case 'X':	UnlinkSource=1; break;
@@ -2446,10 +2411,70 @@ int	UnunpackEntry	(int argc, char *argv[])
     SafeExit(26);
   }
 
-  /*** post-process args ***/
-#if 0
-  umask(0077); /* default to user-only access */
-#endif
+  /* Open DB and Initialize CMD table */
+  if (UseRepository) 
+  {
+    pgConn = fo_dbconnect();
+    if (!pgConn)
+    {
+      FATAL("Unable to access database")
+      SafeExit(21);
+    }
+
+    /* Get the unpack agent key */
+    agent_pk = fo_GetAgentKey(pgConn, AgentName, atoi(Upload_Pk), 0,
+                              "Unpacks archives (iso, tar, etc)");
+
+    InitCmd();
+
+    /* does ars table exist? 
+     * If not, create it.
+     */
+    rv = fo_tableExists(pgConn, AgentARSName);
+    if (!rv)
+    {
+      rv = fo_CreateARSTable(pgConn, AgentARSName);
+      if (!rv) return(0);
+    }
+
+    /* Has this user previously unpacked this upload_pk successfully?
+     *    In this case we are done.  No new ars record is needed since no
+     *    processing is initiated.
+     * The unpack version is ignored.
+     */
+    snprintf(SQL,MAXSQL,
+        "SELECT ars_pk from %s where upload_fk='%s' and ars_success=TRUE",
+           AgentARSName, Upload_Pk);
+    result =  PQexec(pgConn, SQL);
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(51);
+
+    if (PQntuples(result) > 0) /* if there is a value */
+    {  
+      PQclear(result);
+      WARNING("Upload_pk %s, has already been unpacked.  No further action required", 
+              Upload_Pk)
+      fo_scheduler_disconnect();
+      return(0);
+    }
+    PQclear(result);
+
+    /* write the unpack_ars start record */
+    ars_pk = fo_WriteARS(pgConn, ars_pk, atoi(Upload_Pk), agent_pk, AgentARSName, 0, 0);
+
+    /* Get Pfile path and Pfile_Pk, from Upload_Pk */
+  snprintf(SQL,MAXSQL,
+        "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile, pfile_fk FROM upload INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk WHERE upload.upload_pk = '%s'", 
+           Upload_Pk);
+    result =  PQexec(pgConn, SQL);
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(51);
+
+    if (PQntuples(result) > 0) /* if there is a value */
+    {  
+      Pfile = strdup(PQgetvalue(result,0,0));
+      Pfile_Pk = strdup(PQgetvalue(result,0,1));
+      PQclear(result);
+    }
+  }
 
   CheckCommands(Quiet);
   if (NewDir) MkDir(NewDir);
@@ -2461,8 +2486,7 @@ int	UnunpackEntry	(int argc, char *argv[])
     else ListOutFile = fopen(ListOutName,"w");
     if (!ListOutFile)
     {
-      printf("WARNING pfile %s There was a processing error during a file-write\n",Pfile_Pk);
-      printf("LOG pfile %s Unable to write to %s\n",Pfile_Pk,ListOutName);
+      ERROR("pfile %s Unable to write to %s\n",Pfile_Pk,ListOutName)
       SafeExit(27);
     }
     else
@@ -2483,10 +2507,10 @@ int	UnunpackEntry	(int argc, char *argv[])
 	   of order.  Solution?  When using XML, only use 1 thread. */
     MaxThread=1;
   }
+
   //Begin add by vincent
   if (!ReunpackSwitch && UseRepository)
   {
-    memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s limit 1;",Upload_Pk);
     result =  PQexec(pgConn, SQL);
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
@@ -2499,8 +2523,8 @@ int	UnunpackEntry	(int argc, char *argv[])
     }
     PQclear(result);
   }
-
   //End add by vincent
+
   /*** process files ***/
   for( ; optind<argc; optind++)
   {
@@ -2516,11 +2540,12 @@ int	UnunpackEntry	(int argc, char *argv[])
         /* make sure the source exists in the src repository */
         if (fo_RepImport(argv[optind],REP_FILES,argv[optind],1) != 0)
         {
-          fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",argv[optind],argv[optind]);
+          ERROR("Failed to import '%s' as '%s' into the repository",argv[optind],argv[optind])
           SafeExit(28);
         }
       }
     }
+
     if (UseRepository)
     {
       if (fo_RepExist(REP_FILES,argv[optind]))
@@ -2532,7 +2557,7 @@ int	UnunpackEntry	(int argc, char *argv[])
         Fname=fo_RepMkPath(REP_GOLD,argv[optind]);
         if (fo_RepImport(Fname,REP_FILES,argv[optind],1) != 0)
         {
-          fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",Fname,argv[optind]);
+          ERROR("Failed to import '%s' as '%s' into the repository",Fname,argv[optind])
           SafeExit(29);
         }
       }
@@ -2608,7 +2633,7 @@ int	UnunpackEntry	(int argc, char *argv[])
       Fname=fo_RepMkPath(REP_GOLD,Pfile);
       if (fo_RepImport(Fname,REP_FILES,Pfile,1) != 0)
       {
-        fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",Fname,Pfile);
+        ERROR("Failed to import '%s' as '%s' into the repository",Fname,Pfile)
         SafeExit(30);
       }
     }
@@ -2661,28 +2686,7 @@ int	UnunpackEntry	(int argc, char *argv[])
       PQclear(result);
     }
 
-    if (pgConn)
-    {
-      memset(SQL,'\0',MAXSQL);
-      snprintf(SQL,MAXSQL,"COMMIT;");
-      result =  PQexec(pgConn, SQL);
-      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
-      {
-        SafeExit(31);
-      }
-      PQclear(result);
-    }
-
-    if (pgConn)
-    {
-      /* Tell the world how many items we proudly processed */
-      /** Humans will ignore this, but the scheduler will use it. **/
-      alarm(0);
-      printf("ItemsProcessed %ld\n",TotalItems);
-      TotalItems=0;
-      fflush(stdout);
-    }
-
+    if (ars_pk) fo_WriteARS(pgConn, ars_pk, atoi(Upload_Pk), agent_pk, AgentARSName, 0, 1);
     PQfinish(pgConn);
   }
   if (ListOutFile && (ListOutFile != stdout))
@@ -2690,14 +2694,13 @@ int	UnunpackEntry	(int argc, char *argv[])
     fclose(ListOutFile);
   }
 
-  // add by larry, start
   if (UnlinkAll && MaxThread > 1)
   {
     deleteTmpFiles(NewDir);
   }
-  // add by larry, end
+ 
+
   fo_scheduler_disconnect();
 
   return(0);
 } /* UnunpackEntry() */
-

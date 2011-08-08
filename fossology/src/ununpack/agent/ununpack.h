@@ -65,6 +65,7 @@
 #include "checksum.h"
 #include "md5.h"
 #include "sha1.h"
+#include "libfossology.h"
 
 extern int Verbose;
 extern int Quiet;
