@@ -176,7 +176,7 @@ char* fo_scheduler_next()
   while(fgets(buffer, sizeof(buffer), stdin) != NULL)
   {
     if(verbose)
-      printf("NOTE: recieved %s\n", buffer);
+      printf("NOTE: received %s\n", buffer);
     if(strncmp(buffer, "CLOSE", 5) == 0)
       break;
     if(strncmp(buffer, "END", 3) == 0)
