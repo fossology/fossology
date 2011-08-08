@@ -30,9 +30,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* *    declaration and add it to the suites array                          * */
 /* ************************************************************************** */
 
-/* macro to make suite declaration more readable */
-#define cu_suite_entry(entry) { #entry, NULL, NULL, entry }
-
 extern CU_TestInfo fossconfig_testcases[];
 extern CU_TestInfo fossscheduler_testcases[];
 extern CU_TestInfo libfossdb_testcases[];
@@ -43,9 +40,9 @@ extern CU_TestInfo libfossdb_testcases[];
  */
 CU_SuiteInfo suites[] =
 {
-    cu_suite_entry(    libfossdb_testcases),
-    cu_suite_entry(   fossconfig_testcases),
-    cu_suite_entry(fossscheduler_testcases),
+    { "Testing libfossdb",    NULL, NULL,      libfossdb_testcases },
+    { "Testing fossconfig",    NULL, NULL,    fossconfig_testcases },
+    { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
     CU_SUITE_INFO_NULL
 };
 
