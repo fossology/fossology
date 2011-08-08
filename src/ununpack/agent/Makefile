@@ -1,5 +1,5 @@
 # FOSSology Makefile - agents/ununpack
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
@@ -19,7 +19,7 @@ TESTDIR=tests
 OBJECTS=$(UUHDR:%.h=%.o)
 COVERAGE=$(OBJECTS:%.o=%_cov.o)
 
-all: $(EXE)
+all: $(FOLIB) $(EXE) 
 
 checksum: $(CHKHDR) $(CHKSRC) $(VARS)
 	$(CC) $(CHKSRC) -DMAIN $(ALL_CFLAGS) -o $@
@@ -37,6 +37,9 @@ metahandle.h: metahandle.tab metahandle.pl
 metahandle.c: metahandle.tab metahandle.pl
 	if [ ! -x metahandle.pl ] ; then chmod u+x metahandle.pl; fi
 	./metahandle.pl
+
+$(FOLIB):
+	$(MAKE) -C $(FOLIBDIR)
 
 install: all $(VARS)
 	if [ -e $(DESTDIR)$(BINDIR)/departition ] ; then \
@@ -85,4 +88,4 @@ clean:
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean test $(FOLIB)
