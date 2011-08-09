@@ -22,7 +22,7 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
 MODULEDIR = $(shell dirname `pwd`)
 
 all:
-	@echo "no build rule for 'all' in mimetype_ui)"
+	@echo "no build rule for 'all' in mimetype_ui"
 
 install:
 	@echo "no build rule for 'install' in mimetype_ui"
