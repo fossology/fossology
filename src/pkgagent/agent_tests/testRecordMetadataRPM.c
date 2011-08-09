@@ -77,6 +77,13 @@ void test_RecordMetadataRPM()
   strncpy(pi->release, "Test release", sizeof(pi->release));
   strncpy(pi->buildDate, "Test buildDate", sizeof(pi->buildDate));
   strncpy(pi->vendor, "Test vendor", sizeof(pi->vendor));
+  strncpy(pi->pkgAlias, "Test Alias", sizeof(pi->pkgAlias));
+  strncpy(pi->rpmFilename, "Test rpmfile", sizeof(pi->rpmFilename));
+  strncpy(pi->group, "Test group", sizeof(pi->group));
+  strncpy(pi->url, "Test url", sizeof(pi->url));
+  strncpy(pi->sourceRPM, "Test sourceRPM", sizeof(pi->sourceRPM));
+  strncpy(pi->summary, "Test summary", sizeof(pi->summary));
+  strncpy(pi->description, "Test description", sizeof(pi->description));
 
   data_size = 2;
   pi->requires = calloc(data_size, sizeof(char *));
@@ -138,6 +145,12 @@ void test_RecordMetadataRPM()
   PQclear(result);
 
   PQfinish(db_conn);
+  int k;
+  for(k=0; k< pi->req_size;k++)
+    free(pi->requires[k]);
+  free(pi->requires);
+  memset(pi, 0, sizeof(struct rpmpkginfo));
+  free(pi);
   CU_ASSERT_EQUAL(Result, predictValue);
 }
 

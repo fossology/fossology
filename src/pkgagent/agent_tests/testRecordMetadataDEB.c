@@ -74,6 +74,15 @@ void test_RecordMetadataDEB()
   strncpy(pi->version, "Test version", sizeof(pi->version));
   strncpy(pi->maintainer, "Test maintainer", sizeof(pi->maintainer));
   strncpy(pi->description, "Test description", sizeof(pi->description));
+  strncpy(pi->section, "Test section", sizeof(pi->section));
+  strncpy(pi->priority, "Test priority", sizeof(pi->priority));
+  strncpy(pi->homepage, "Test homepage", sizeof(pi->homepage));
+  strncpy(pi->source, "Test source", sizeof(pi->source));
+  strncpy(pi->summary, "Test summary", sizeof(pi->summary));
+  strncpy(pi->format, "Test format", sizeof(pi->format));
+  strncpy(pi->uploaders, "Test uploaders", sizeof(pi->uploaders));
+  strncpy(pi->standardsVersion, "Test standard", sizeof(pi->standardsVersion));
+  pi->installedSize = 0;
 
   data_size = 2;
   pi->depends = calloc(data_size, sizeof(char *));
@@ -134,6 +143,12 @@ void test_RecordMetadataDEB()
   PQclear(result);
 
   PQfinish(db_conn);
+  int k;
+  for(k=0; k< pi->dep_size;k++)
+  free(pi->depends[k]);
+  free(pi->depends);
+  memset(pi,0,sizeof(struct debpkginfo));
+  free(pi);
   CU_ASSERT_EQUAL(Result, predictValue);
 }
 

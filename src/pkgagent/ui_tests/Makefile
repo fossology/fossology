@@ -15,10 +15,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 all:
-	@echo "No pkgagent agent_tests"
+	@echo "No pkgagent ui_tests"
 clean:
-	@echo "No pkgagent agent_tests clean"
+	@echo "No pkgagent ui_tests clean"
 install:
-	@echo "No pkgagent agent_tests install"
+	@echo "No pkgagent ui_tests install"
 uninstall:
-	@echo "No pkgagent agent_tests uninstall"
+	@echo "No pkgagent ui_tests uninstall"
