@@ -275,7 +275,7 @@ int agent_test(char* name, meta_agent ma, host h)
   static int id_gen = -1;
 
   VERBOSE3("META_AGENT[%s] testing\n", ma->name);
-  job j = job_init(ma->name, id_gen--);
+  job j = job_init(ma->name, id_gen--, 0);
   agent_init(h, j, 0);
   return 0;
 }
@@ -399,8 +399,14 @@ void agent_listen(agent a)
           "ERROR:JOB[%d].%s[%d]: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, &buffer[5]);
     }
+    else if(strncmp(buffer, "WARNING", 7) == 0)
+    {
+      alprintf(job_log(a->owner),
+          "WARNING:JOB[%d].%s[%d]: \"%s\"\n",
+          job_id(a->owner), a->meta_data->name, a->pid, &buffer[5]);
+    }
     /* we aren't quite sure what the agent sent, log it */
-    else if(verbose == 0)
+    else if(!(TVERBOSE3))
     {
       alprintf(job_log(a->owner),
           "JOB[%d].%s[%d]: notice: \"%s\"\n",
@@ -879,8 +885,8 @@ void agent_close(agent a)
   }
 
   if(write(a->to_parent, "@@@1\n", 5) != 5)
-    VERBOSE2("JOB[%d].%s[%d]: write to agent unsuccessful",
-        job_id(a->owner), a->meta_data->name, a->pid);
+    VERBOSE2("JOB[%d].%s[%d]: write to agent unsuccessful: %s\n",
+        job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
   close(a->to_parent);
   g_thread_join(a->thread);
 
@@ -1040,6 +1046,7 @@ void kill_agents()
 void list_agents(GOutputStream* ostr)
 {
   g_tree_foreach(meta_agents, (GTraverseFunc)agent_list, ostr);
+  g_output_stream_write(ostr, "end\n", 4, NULL, NULL);
 }
 
 /**

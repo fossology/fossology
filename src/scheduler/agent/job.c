@@ -254,7 +254,7 @@ void job_list_clean()
  * @param data_size the number of elements in the data array
  * @return the new job
  */
-job job_init(char* type, int id)
+job job_init(char* type, int id, int priority)
 {
   job j = g_new0(struct job_internal, 1);
 
@@ -268,7 +268,7 @@ job job_init(char* type, int id)
   j->db_result       = NULL;
   j->lock            = NULL;
   j->idx             = 0;
-  j->priority        = 0;
+  j->priority        = priority;
   j->verbose         = 0;
   j->id              = id;
 

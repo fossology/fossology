@@ -55,13 +55,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TEST_ERROR(...)                                            \
   if(error)                                                        \
   {                                                                \
-    lprintf("ERROR %s.%d: unable to open config file %s\n",       \
-      __FILE__, __LINE__, addbuf);                                 \
-    lprintf("ERROR %s.%d: ", __FILE__, __LINE__);                 \
+    lprintf("ERROR %s.%d: %s\n",                                   \
+      __FILE__, __LINE__, error->message);                         \
+    lprintf("ERROR %s.%d: ", __FILE__, __LINE__);                  \
     lprintf(__VA_ARGS__);                                          \
     lprintf("\n");                                                 \
-    lprintf("ERROR %s.%d: msg = %s\n",                            \
-      __FILE__, __LINE__, error->message);                         \
     error = NULL;                                                  \
     continue;                                                      \
   }                                                                \
@@ -281,7 +279,7 @@ pid_t lock_scheduler()
   if((handle = shm_open(PROCESS_NAME, O_RDWR|O_CREAT|O_EXCL, 0744)) == -1)
   {
     ERROR("failed to open shared memory");
-    return -1;
+    return -1;event_signal(database_update_event, NULL);
   }
 
   sprintf(buf, "%-9.9d", getpid());
@@ -315,7 +313,7 @@ void set_usr_grp()
   /* set the project group */
   setgroups(1, &(grp->gr_gid));
   if((setgid(grp->gr_gid) != 0) || (setegid(grp->gr_gid) != 0))
-  {
+  {event_signal(database_update_event, NULL);
     fprintf(stderr, "FATAL %s.%d: %s must be run as root or %s\n", __FILE__, __LINE__, PROCESS_NAME, PROJECT_USER);
     fprintf(stderr, "FATAL Set group '%s' aborting due to error: %s\n", PROJECT_GROUP, strerror(errno));
     exit(-1);
@@ -675,6 +673,7 @@ int main(int argc, char** argv)
   /* *************************************** */
   /* *** enter the scheduler event loop **** */
   /* *************************************** */
+  event_signal(database_update_event, NULL);
   alarm(CHECK_TIME);
   event_loop_enter(update_scheduler);
 

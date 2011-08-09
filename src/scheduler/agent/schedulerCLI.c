@@ -125,6 +125,7 @@ void interface_usage()
   printf("|%*s:   scheduler responds with status information   |\n", P_WIDTH, "status [job id]");
   printf("|%*s:   restart a paused job                         |\n", P_WIDTH, "restart <job id>");
   printf("|%*s:   query/change the scheduler/job verbosity     |\n", P_WIDTH, "verbose [job id] [level]");
+  printf("|%*s:   change the priority of a particular job      |\n", P_WIDTH, "priority <job id> <level>");
   printf("|%*s:   causes the scheduler to check the job queue  |\n", P_WIDTH, "database");
   printf("+-------------------------------------------------------------------------------+\n");
   printf("|%*s:   goes into the schedule dialog                |\n", P_WIDTH, "sql");

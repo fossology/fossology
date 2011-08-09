@@ -49,7 +49,7 @@ typedef enum {
 
 void job_list_init();
 void job_list_clean();
-job  job_init(char* type, int id);
+job  job_init(char* type, int id, int priority);
 void job_destroy(job j);
 
 /* ************************************************************************** */
