@@ -76,6 +76,10 @@ int	main	(int argc, char *argv[])
   int ars_pk = 0;
 
   int upload_pk = 0;           // the upload primary key
+  char *AgentARSName = "pkgagent_ars";
+  int rv;
+  PGresult *ars_result;
+  char sqlbuf[1024]; 
 
   fo_scheduler_connect(&argc, argv);
 
@@ -119,8 +123,17 @@ int	main	(int argc, char *argv[])
       if (Verbose) { printf("PKG: pkgagent read %d\n", upload_pk);}
       if (upload_pk ==0) continue;
 
+      /* does ars table exist?
+       * If not, create it.
+       */
+      rv = fo_tableExists(db_conn, AgentARSName);
+      if (!rv)
+      {
+        rv = fo_CreateARSTable(db_conn, AgentARSName);
+        if (!rv) return(0);
+      }
+
       /* check ars table if this is duplicate request*/
-      /* TODO: need be changed with common ARS funtion
       snprintf(sqlbuf, sizeof(sqlbuf),
           "select ars_pk from pkgagent_ars,agent \
           where agent_pk=agent_fk and ars_success=true \
@@ -128,26 +141,22 @@ int	main	(int argc, char *argv[])
           upload_pk, Agent_pk);
       ars_result = PQexec(db_conn, sqlbuf);
       if (fo_checkPQresult(db_conn, ars_result, sqlbuf, __FILE__, __LINE__)) exit(-1);
-      if (PQntuples(ars_result) != 0)
+      if (PQntuples(ars_result) > 0)
       {
-        printf("LOG: Ignoring requested pkgagent analysis of upload %d - Results are already in database.\n",upload_pk);
+        PQclear(ars_result);
+        WARNING("Ignoring requested pkgagent analysis of upload %d - Results are already in database.\n",upload_pk);
         continue;
       }
       PQclear(ars_result);
-      */ 
 
       /* Record analysis start in pkgagent_ars, the pkgagent audit trail. */
-      /* TODO: use common ARS funtion
-      ars_pk = fo_WriteARS(db_conn, ars_pk, upload_pk, Agent_pk, 'pkgagent_ars', null, null);
-      */
+      ars_pk = fo_WriteARS(db_conn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 0);
 
       /* process the upload_pk pkgagent */
       if(ProcessUpload(upload_pk) != 0) return -1;
 
       /* Record analysis success in pkgagent_ars. */
-      /* TODO: use common ARS funtion
-      fo_WriteARS(db_conn, ars_pk, upload_pk, Agent_pk, 'pkgagent_ars', 'success', true);
-      */
+      if (ars_pk) fo_WriteARS(db_conn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 1);
     }
   }
   else
