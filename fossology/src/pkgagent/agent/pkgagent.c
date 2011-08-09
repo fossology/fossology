@@ -327,6 +327,11 @@ int ProcessUpload (long upload_pk)
       if (GetMetadata(repFile,pi) != -1){
         RecordMetadataRPM(pi);
       }
+      /* free memroy */
+      int i;
+      for(i=0; i< pi->req_size;i++)
+        free(pi->requires[i]);
+      free(pi->requires);
     }
     else if (!strcasecmp(mimetype, "application/x-debian-package")){
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
@@ -334,6 +339,11 @@ int ProcessUpload (long upload_pk)
       if (GetMetadataDebBinary(upload_pk, dpi) != -1){
         if (RecordMetadataDEB(dpi) != 0) return (-1);
       }
+      /* free memroy */
+      int i;
+      for(i=0; i< dpi->dep_size;i++)
+        free(dpi->depends[i]);
+      free(dpi->depends);
     }
     else if (!strcasecmp(mimetype, "application/x-debian-source")){
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
@@ -347,13 +357,21 @@ int ProcessUpload (long upload_pk)
       if (GetMetadataDebSource(repFile,dpi) != -1){
         RecordMetadataDEB(dpi);
       }
+      /* free memroy */
+      int i;
+      for(i=0; i< dpi->dep_size;i++)
+        free(dpi->depends[i]);
+      free(dpi->depends);
     } else {
       printf("LOG: Not RPM and DEBIAN package!\n");
     }
     fo_scheduler_heart(1);
   }
   PQclear(result);
+  rpmFreeCrypto();
   rpmFreeMacros(NULL);
+  free(pi);
+  free(dpi);
   return (0);
 }/*ProcessUpload (long upload_pk)*/
 

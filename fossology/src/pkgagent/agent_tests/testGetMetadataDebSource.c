@@ -35,10 +35,11 @@ void test_GetMetadataDebSource()
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
   int predictValue = 0;
   db_conn = fo_dbconnect();
+  strcpy(pi->version, "");
   int Result = GetMetadataDebSource(repFile, pi);
   printf("GetMetadataDebSource Result is:%d\n", Result);
 
-  //printf("GetMetadataDebSource Result is:%s\n", pi->homepage);
+  //printf("GetMetadataDebSource Result is:%s\n", pi->version);
   CU_ASSERT_STRING_EQUAL(pi->pkgName, "fossology");
   CU_ASSERT_STRING_EQUAL(pi->pkgArch, "any");
   CU_ASSERT_STRING_EQUAL(pi->version, "1.4.1");
@@ -47,6 +48,12 @@ void test_GetMetadataDebSource()
   CU_ASSERT_EQUAL(pi->dep_size, 13);
 
   PQfinish(db_conn);
+  int i;
+  for(i=0; i< pi->dep_size;i++)
+    free(pi->depends[i]);
+  free(pi->depends);
+  memset(pi, 0, sizeof(struct debpkginfo));
+  free(pi);
   CU_ASSERT_EQUAL(Result, predictValue);
 }
 

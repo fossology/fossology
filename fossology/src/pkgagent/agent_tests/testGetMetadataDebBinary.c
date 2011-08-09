@@ -323,6 +323,12 @@ void test_GetMetadataDebBinary()
     CU_FAIL_FATAL("Remove repository data ERROR!");
 
   PQfinish(db_conn);
+  int i;
+  for(i=0; i< pi->dep_size;i++)
+    free(pi->depends[i]);
+  free(pi->depends);
+  memset(pi, 0, sizeof(struct debpkginfo));
+  free(pi);
 }
 
 CU_TestInfo testcases_GetMetadataDebBinary[] = {

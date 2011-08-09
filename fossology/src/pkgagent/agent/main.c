@@ -163,7 +163,13 @@ int	main	(int argc, char *argv[])
         printf("OK\n");
       else
         printf("Fail\n");
+      rpmFreeCrypto();
       rpmFreeMacros(NULL);
+      int i;
+      for(i=0; i< rpmpi->req_size;i++)
+        free(rpmpi->requires[i]);
+      free(rpmpi->requires);
+      free(rpmpi);
     }
   }
 
