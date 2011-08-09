@@ -58,6 +58,10 @@ const char* basic_checkout = "\
     SELECT * FROM getrunnable()\
       LIMIT 10;";
 
+const char* change_priority = "\
+    SELECT job_priority FROM job \
+      WHERE job_pk = %s;";
+
 const char* jobsql_started = "\
     UPDATE jobqueue \
       SET jq_starttime = now(), \
@@ -76,7 +80,6 @@ const char* jobsql_complete = "\
 const char* jobsql_restart = "\
     UPDATE jobqueue \
       SET jq_endtime = now(), \
-          jq_end_bits = jq_end_bits | 2, \
           jq_schedinfo = null, \
           jq_endtext = 'Restart' \
       WHERE jq_pk = '%d';";
@@ -84,6 +87,7 @@ const char* jobsql_restart = "\
 const char* jobsql_failed = "\
     UPDATE jobqueue \
       SET jq_endtime = now(), \
+          jq_end_bits = jq_end_bits | 2, \
           jq_schedinfo = null, \
           jq_endtext = 'Failed' \
       WHERE jq_pk = '%d';";
@@ -95,7 +99,8 @@ const char* jobsql_paused = "\
 
 const char* jobsql_log = "\
     UPDATE jobqueue \
-      SET jq_log = '%s' \
+      SET jq_log = '%s', \
+          jq_end_bits = jq_end_bits | 4 \
       WHERE jq_pk = '%d';";
 
 /* ************************************************************************** */
@@ -243,8 +248,10 @@ void database_update_event(void* unused)
 {
   /* locals */
   PGresult* db_result;
+  PGresult* pri_result;
   int i, job_id;
-  char* value, * type, * pfile;
+  char sql[512];
+  char* value, * type, * pfile, * parent;
   job j;
 
   if(closing)
@@ -271,6 +278,7 @@ void database_update_event(void* unused)
       continue;
 
     /* get relevant values out of the job queue */
+    parent =      PQget(db_result, i, "jq_job_fk");
     type   =      PQget(db_result, i, "jq_type");
     pfile  =      PQget(db_result, i, "jq_runonpfile");
     value  =      PQget(db_result, i, "jq_args");
@@ -286,8 +294,20 @@ void database_update_event(void* unused)
       continue;
     }
 
-    j = job_init(type, job_id);
+    sprintf(sql, change_priority, parent);
+    pri_result = PQexec(db_conn, sql);
+    if(PQresultStatus(pri_result) != PGRES_TUPLES_OK)
+    {
+      lprintf("ERROR %s.%d: database update failed on call to PQexec\n", __FILE__, __LINE__);
+      lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
+      PQclear(db_result);
+      continue;
+    }
+
+    j = job_init(type, job_id, atoi(PQgetvalue(pri_result, 0, 0)));
     job_set_data(j, value, (pfile && pfile[0] != '\0'));
+
+    PQclear(pri_result);
   }
 
   PQclear(db_result);
