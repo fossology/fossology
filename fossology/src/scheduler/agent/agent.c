@@ -474,7 +474,8 @@ void* agent_spawn(void* passed)
     {
       g_shell_parse_argv(a->meta_data->raw_cmd, &argc, &args, NULL);
       tmp = args[0];
-      args[0] = g_strdup_printf("%s/%s", AGENT_DIR, tmp);
+      args[0] = g_strdup_printf("%s/fossology/mods-enabled/%s/agent/%s",
+          AGENT_DIR, a->meta_data->name, tmp);
       execv(args[0], args);
     }
     /* otherwise the agent willprintf("HELLO\n");l be started using ssh   */
@@ -484,7 +485,10 @@ void* agent_spawn(void* passed)
     else
     {
       args = g_new0(char*, 4);
-      sprintf(buffer, "%s/%s", host_agent_dir(a->host_machine), a->meta_data->raw_cmd);
+      sprintf(buffer, "%s/fossology/mods-enabled/%s/agent/%s",
+          host_agent_dir(a->host_machine),
+          a->meta_data->name,
+          a->meta_data->raw_cmd);
       args[0] = "/usr/bin/ssh";
       args[1] = host_address(a->host_machine);
       args[2] = buffer;
