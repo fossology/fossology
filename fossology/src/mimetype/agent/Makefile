@@ -7,12 +7,18 @@ include $(VARS)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
 EXE=mimetype
+OBJECTS=finder.o
+HDIR=$(OBJS:.o=.h)
+
+COVERAGE=$(OBJECTS:%.o=%_cov.o)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
+MODULEDIR = $(shell dirname `pwd`)
 
 all: $(EXE)
 
-$(EXE): %: %.c $(DB) $(REPO) $(VARS)
+$(EXE): mimetype.c libmimetype.a $(DB) $(REPO) $(VARS)
 	@echo "make $(EXE)"
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+	$(CC) mimetype.c libmimetype.a $(CFLAGS_LOCAL) -o $@
 
 #######################
 # library build rules #
@@ -23,6 +29,9 @@ $(FOLIB):
 install: all
 	@echo "make $(EXE) install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	@if test ! -e $(CONFDIR)/mods-enabled/mimetype; then \
+	ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled/mimetype ; fi;
+
 
 uninstall:
 	@echo "make $(EXE) uninstall"
@@ -35,6 +44,15 @@ test: all
 coverage:
 	@echo "make coverage $(EXE)"
 	$(MAKE) -C $(TESTDIR) coverage
+
+$(OBJECTS): %.o: %.c
+	$(CC) -c $< $(CFLAGS_LOCAL)
+
+$(COVERAGE): %_cov.o: %.c
+	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
+
+libmimetype.a: $(OBJECTS)
+	ar cvr $@ $(OBJECTS)
 
 clean:
 	rm -f $(EXE) *.o core
