@@ -14,23 +14,21 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP = ../../..
+TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = Unit Functional 
-COVDIR = Unit
+TESTFILE = 
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+all:
 
-all: 
-	$(call dirloop, )
-
-test: 
-	$(call dirloop, test)
+test: all
+	@echo "make mimetyme agent functional test"
+	@echo phpunit $(TESTFILE)
 
 coverage:
-	$(MAKE) -C $(COVDIR) coverage
+	@echo "no coverage in mimetype for agent_test/Functional"
+
 
 clean:
 	$(call dirloop,clean)

@@ -45,7 +45,7 @@ coverage:
 	@echo "make coverage $(EXE)"
 	$(MAKE) -C $(TESTDIR) coverage
 
-$(OBJECTS): %.o: %.c
+$(OBJECTS): %.o: %.c 
 	$(CC) -c $< $(CFLAGS_LOCAL)
 
 $(COVERAGE): %_cov.o: %.c
@@ -54,8 +54,11 @@ $(COVERAGE): %_cov.o: %.c
 libmimetype.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
 
+libmimetype_cov.a: $(COVERAGE)
+	ar cvr $@ $(COVERAGE)
+
 clean:
-	rm -f $(EXE) *.o core
+	rm -f $(EXE) *.o core *.a *.gc*
 
 include $(DEPS)
 
