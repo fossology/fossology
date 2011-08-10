@@ -322,11 +322,11 @@ function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0, $ExtraWhere="
            WHERE agent_pk=agent_fk and ars_success=true and upload_fk='$upload_pk' and agent_enabled=true
            $agentCond $ExtraWhere
            order by agent_ts desc $LimitClause";
-           $result = pg_query($PG_CONN, $sql);
-           DBCheckResult($result, $sql, __FILE__, __LINE__);
-           $resultArray =  pg_fetch_all($result);
-           pg_free_result($result);
-           return $resultArray;
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $resultArray =  pg_fetch_all($result);
+  pg_free_result($result);
+  return $resultArray;
 }
 
 
