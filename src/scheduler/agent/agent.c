@@ -494,7 +494,6 @@ void* agent_spawn(void* passed)
   agent a = (agent)passed;    // the agent that is being spawned
   gchar* tmp;                 // pointer to temporary string
   gchar** args;               // the arguments that will be passed to the child
-  gchar** rem; // TODO
   int argc;                   // the number of arguments parsed
   char buffer[2048];          // character buffer
 
@@ -516,38 +515,16 @@ void* agent_spawn(void* passed)
     if(nice(job_priority(a->owner)) < 0)
       ERROR("unable to correctly set priority of agent process %d", a->pid);
 
-fprintf(stderr, "forked correctly: ");
-
     /* if host is null, the agent will run locally to */
     /* run the agent localy, use the commands that    */
     /* were parsed when the meta_agent was created    */
     if(strcmp(host_address(a->host_machine), "localhost") == 0)
     {
-fprintf(stderr, "good\n");
-
-      /*if(!g_shell_parse_argv(a->meta_data->raw_cmd, &argc, &args, &err))
-      {
-        fprintf(stderr, "%s\n", err->message);
-        fflush(stderr);
-        exit(-1);
-      }*/
       shell_parse(a->meta_data->raw_cmd, &argc, &args);
-
-fprintf(stderr, "1\n");
-fflush(stderr);
 
       tmp = args[0];
       args[0] = g_strdup_printf(AGENT_BINARY,
           AGENT_DIR, a->meta_data->name, tmp);
-
-fprintf(stderr, "calL: \"");
-fflush(stderr);
-for(rem = args; *rem; rem++) {
-  fprintf(stderr, "%s ", *rem);
-  fflush(stderr);
-}
-fprintf(stderr, "\"\n");
-fflush(stderr);
 
       dup2(a->to_parent, fileno(stderr));
       execv(args[0], args);
@@ -558,7 +535,6 @@ fflush(stderr);
     /* command as the last argument to the ssh command */
     else
     {
-fprintf(stderr, "bad\n");
       args = g_new0(char*, 4);
       sprintf(buffer, AGENT_BINARY,
           host_agent_dir(a->host_machine),
