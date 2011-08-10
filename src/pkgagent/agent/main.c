@@ -172,13 +172,15 @@ int	main	(int argc, char *argv[])
         printf("OK\n");
       else
         printf("Fail\n");
+#ifdef _RPM_4_4_COMPAT
       rpmFreeCrypto();
-      rpmFreeMacros(NULL);
       int i;
       for(i=0; i< rpmpi->req_size;i++)
         free(rpmpi->requires[i]);
+#endif /* After RPM4.4 version*/
       free(rpmpi->requires);
       free(rpmpi);
+      rpmFreeMacros(NULL);
     }
   }
 

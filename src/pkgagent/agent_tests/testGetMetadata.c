@@ -50,12 +50,14 @@ void test_GetMetadata_normal()
   CU_ASSERT_STRING_EQUAL(pi->sourceRPM, "fossology-1.2.0-1.el5.src.rpm");
   CU_ASSERT_EQUAL(pi->req_size, 44);
   PQfinish(db_conn);
+#ifdef _RPM_4_4_COMPAT
   rpmFreeCrypto();
-  rpmFreeMacros(NULL);
   /* free memroy */
   int i;
   for(i=0; i< pi->req_size;i++)
     free(pi->requires[i]);
+#endif /* After RPM4.4 version*/
+  rpmFreeMacros(NULL);
   free(pi->requires);
   free(pi);
   CU_ASSERT_EQUAL(Result, predictValue);
@@ -79,7 +81,9 @@ void test_GetMetadata_no_testfile()
   int Result = GetMetadata(pkg, pi);
   printf("test_GetMetadata Result is:%d\n", Result);
   PQfinish(db_conn);
+#ifdef _RPM_4_4_COMPAT
   rpmFreeCrypto();
+#endif /* After RPM4.4 version*/
   rpmFreeMacros(NULL);
   memset(pi, 0, sizeof(struct rpmpkginfo));
   free(pi); 

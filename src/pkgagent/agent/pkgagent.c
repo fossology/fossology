@@ -328,9 +328,11 @@ int ProcessUpload (long upload_pk)
         RecordMetadataRPM(pi);
       }
       /* free memroy */
+#ifdef _RPM_4_4_COMPAT
       int i;
       for(i=0; i< pi->req_size;i++)
         free(pi->requires[i]);
+#endif /* After RPM4.4 version*/
       free(pi->requires);
     }
     else if (!strcasecmp(mimetype, "application/x-debian-package")){
@@ -368,7 +370,9 @@ int ProcessUpload (long upload_pk)
     fo_scheduler_heart(1);
   }
   PQclear(result);
+#ifdef _RPM_4_4_COMPAT
   rpmFreeCrypto();
+#endif /* After RPM4.4 version*/
   rpmFreeMacros(NULL);
   free(pi);
   free(dpi);
