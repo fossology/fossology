@@ -218,7 +218,7 @@ int event_loop_enter(void(*call_back)(void))
   /* from here on out, this is the only thread in this event loop     */
   /* the loop to execute events is very simple, grab event, run event */
   while((e = event_loop_take(vl)) != NULL) {
-    VERBOSE4("EVENT: calling %s\n", e->name);
+    //VERBOSE4("EVENT: calling %s\n", e->name);
     e->func(e->argument);
     event_destroy(e);
     call_back();

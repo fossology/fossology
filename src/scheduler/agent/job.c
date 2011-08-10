@@ -350,7 +350,16 @@ void job_status_event(void* param)
   }
   else
   {
-    job_sstatus(&tmp, g_tree_lookup(job_list, &params->second), params->first);
+    job stat = g_tree_lookup(job_list, &params->second);
+    if(stat)
+    {
+      job_sstatus(&tmp, g_tree_lookup(job_list, &params->second), params->first);
+    }
+    else
+    {
+      sprintf(buf, "ERROR: invalid job id = %d\n", params->second);
+      g_output_stream_write(params->first, buf, strlen(buf), NULL, NULL);
+    }
   }
 
   g_output_stream_write(params->first, end, sizeof(end), NULL, NULL);

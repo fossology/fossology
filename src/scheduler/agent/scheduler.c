@@ -442,6 +442,9 @@ void load_agent_config()
         lprintf(" command = %s\n", cmd);
         lprintf("     max = %d\n", max);
         lprintf(" special = %d\n", special);
+        lprintf("CONFIG: will use \"");
+        lprintf(AGENT_BINARY, AGENT_DIR, name, cmd);
+        lprintf("\"\n");
       }
     }
   }

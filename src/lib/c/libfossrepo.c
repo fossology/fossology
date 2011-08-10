@@ -166,7 +166,7 @@ int	fo_RepHostExist	(char *Type, char *Host)
 char *	_RepGetHost	(char *Type, char *Filename, int MatchNum)
 {
   char** hosts;
-  char entry[256];
+  char* entry;
   char* start;
   char* end;
   char* ret = NULL;
@@ -184,10 +184,7 @@ char *	_RepGetHost	(char *Type, char *Filename, int MatchNum)
     hl = fo_config_list_length(REPONAME, hosts[i], &error);
     for(j = 0; j < hl; j++)
     {
-      strncpy(
-          entry,
-          fo_config_get_list(REPONAME, hosts[i], j, &error),
-          sizeof(entry));
+      entry = fo_config_get_list(REPONAME, hosts[i], j, &error);
       strtok(entry, " ");
       start = strtok(NULL, " ");
       end   = strtok(NULL, " ");
@@ -206,6 +203,8 @@ char *	_RepGetHost	(char *Type, char *Filename, int MatchNum)
           }
         }
       }
+
+      g_free(entry);
     }
   }
 

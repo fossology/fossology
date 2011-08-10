@@ -28,6 +28,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define CHECKOUT_SIZE 100
 
+#define AGENT_BINARY "%s/fossology/mods-enabled/%s/agent/%s"
+
 extern int verbose;
 extern int closing;
 extern int s_pid;
