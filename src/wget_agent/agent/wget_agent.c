@@ -254,6 +254,7 @@ void	DBLoadGold	()
   PQclear(result);
   /* Clean up */
   free(Sum);
+  free(Unique);
 } /* DBLoadGold() */
 
 
