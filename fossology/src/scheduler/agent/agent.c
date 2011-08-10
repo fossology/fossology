@@ -414,12 +414,60 @@ void agent_listen(agent a)
     }
   }
 
-  if(TVERBOSE3)
+  if(TVERBOSE4)
   {
     alprintf(job_log(a->owner),
         "JOB[%d].%s[%d]: communication thread closing\n",
         job_id(a->owner), a->meta_data->name, a->pid);
   }
+}
+
+/**
+ * TODO
+ *
+ * @param input
+ * @param argc
+ * @param argv
+ */
+void shell_parse(char* input, int* argc, char*** argv)
+{
+  char* begin;
+  char* curr;
+  int idx = 0;
+
+  *argv = g_new0(char*, 30);
+  begin = NULL;
+
+  for(curr = input; *curr; curr++)
+  {
+    if(*curr == ' ')
+    {
+      if(begin == NULL)
+        continue;
+
+      if(*begin == '"')
+        continue;
+
+      *curr = '\0';
+      (*argv)[idx++] = g_strdup(begin);
+      begin = NULL;
+    }
+    else if(begin == NULL)
+    {
+      begin = curr;
+    }
+    else if(*begin == '"' && *curr == '"')
+    {
+      *begin = '\0';
+      *curr  = '\0';
+
+      (*argv)[idx++] = g_strdup(begin + 1);
+      begin = NULL;
+    }
+  }
+
+  (*argv)[idx++] = "--scheduler_start";
+  (*argc) = idx;
 }
 
 /**
@@ -446,6 +494,7 @@ void* agent_spawn(void* passed)
   agent a = (agent)passed;    // the agent that is being spawned
   gchar* tmp;                 // pointer to temporary string
   gchar** args;               // the arguments that will be passed to the child
+  gchar** rem; // TODO
   int argc;                   // the number of arguments parsed
   char buffer[2048];          // character buffer
 
@@ -456,7 +505,7 @@ void* agent_spawn(void* passed)
     /* set the child's stdin and stdout to use the pipes */
     dup2(a->from_parent, fileno(stdin));
     dup2(a->to_parent, fileno(stdout));
-    dup2(a->to_parent, fileno(stderr));
+    //dup2(a->to_parent, fileno(stderr));
 
     /* close all the unnecessary file descriptors */
     g_tree_foreach(agents, (GTraverseFunc)agent_close_fd, a);
@@ -467,15 +516,40 @@ void* agent_spawn(void* passed)
     if(nice(job_priority(a->owner)) < 0)
       ERROR("unable to correctly set priority of agent process %d", a->pid);
 
+fprintf(stderr, "forked correctly: ");
+
     /* if host is null, the agent will run locally to */
     /* run the agent localy, use the commands that    */
     /* were parsed when the meta_agent was created    */
     if(strcmp(host_address(a->host_machine), "localhost") == 0)
     {
-      g_shell_parse_argv(a->meta_data->raw_cmd, &argc, &args, NULL);
+fprintf(stderr, "good\n");
+
+      /*if(!g_shell_parse_argv(a->meta_data->raw_cmd, &argc, &args, &err))
+      {
+        fprintf(stderr, "%s\n", err->message);
+        fflush(stderr);
+        exit(-1);
+      }*/
+      shell_parse(a->meta_data->raw_cmd, &argc, &args);
+
+fprintf(stderr, "1\n");
+fflush(stderr);
+
       tmp = args[0];
-      args[0] = g_strdup_printf("%s/fossology/mods-enabled/%s/agent/%s",
+      args[0] = g_strdup_printf(AGENT_BINARY,
           AGENT_DIR, a->meta_data->name, tmp);
+
+fprintf(stderr, "calL: \"");
+fflush(stderr);
+for(rem = args; *rem; rem++) {
+  fprintf(stderr, "%s ", *rem);
+  fflush(stderr);
+}
+fprintf(stderr, "\"\n");
+fflush(stderr);
+
+      dup2(a->to_parent, fileno(stderr));
       execv(args[0], args);
     }
     /* otherwise the agent willprintf("HELLO\n");l be started using ssh   */
@@ -484,8 +558,9 @@ void* agent_spawn(void* passed)
     /* command as the last argument to the ssh command */
     else
     {
+fprintf(stderr, "bad\n");
       args = g_new0(char*, 4);
-      sprintf(buffer, "%s/fossology/mods-enabled/%s/agent/%s",
+      sprintf(buffer, AGENT_BINARY,
           host_agent_dir(a->host_machine),
           a->meta_data->name,
           a->meta_data->raw_cmd);
@@ -504,7 +579,6 @@ void* agent_spawn(void* passed)
   else if(a->pid > 0)
   {
     event_signal(agent_create_event, a);
-    close(a->from_parent);
     agent_listen(a);
   }
   /* error case */
@@ -531,6 +605,7 @@ void* agent_spawn(void* passed)
  *
  * @param name the name of the agent (i.e. nomos, buckets, etc...)
  * @param cmd the command for starting the agent in a shell
+ *
  * @param max the number of these that can concurrently, -1 for no limit
  * @param spc any special conditions associated with the agent
  * @return
@@ -891,7 +966,6 @@ void agent_close(agent a)
   if(write(a->to_parent, "@@@1\n", 5) != 5)
     VERBOSE2("JOB[%d].%s[%d]: write to agent unsuccessful: %s\n",
         job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
-  close(a->to_parent);
   g_thread_join(a->thread);
 
   VERBOSE2("JOB[%d].%s[%d]: successfully removed from the system\n",
@@ -938,11 +1012,15 @@ void agent_print_status(agent a, GOutputStream* ostr)
 {
   gchar* status_str;
   char time_buf[64];
+  struct tm* time_info;
 
   TEST_NULV(a);
   TEST_NULV(ostr);
 
-  strftime(time_buf, sizeof(time_buf), "%F %T", localtime(&a->check_in));
+  strcpy(time_buf, "(none)");
+  time_info = localtime(&a->check_in);
+  if(time_info)
+    strftime(time_buf, sizeof(time_buf), "%F %T", localtime(&a->check_in));
   status_str = g_strdup_printf("agent:%d host:%s type:%s status:%s time:%s\n",
       a->pid,
       host_name(a->host_machine),
