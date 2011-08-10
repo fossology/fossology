@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 /************************************************************
  These are common functions used by analysis agents.
  Analysis Agents should register themselves in the menu structure under the
@@ -330,11 +322,11 @@ function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0, $ExtraWhere="
            WHERE agent_pk=agent_fk and ars_success=true and upload_fk='$upload_pk' and agent_enabled=true
            $agentCond $ExtraWhere
            order by agent_ts desc $LimitClause";
-           $result = pg_query($PG_CONN, $sql);
-           DBCheckResult($result, $sql, __FILE__, __LINE__);
-           $resultArray =  pg_fetch_all($result);
-           pg_free_result($result);
-           return $resultArray;
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $resultArray =  pg_fetch_all($result);
+  pg_free_result($result);
+  return $resultArray;
 }
 
 
@@ -501,6 +493,7 @@ function scheduleEmailNotification($upload_pk,$webServer,$Email=NULL,
 $UserName=NULL,$Depends) {
 
   global $DB;
+  $SysConf = array();
 
   if (empty($DB)) {
     return;
@@ -520,8 +513,14 @@ $UserName=NULL,$Depends) {
   /* set up input for fo-notify */
   $Nparams = '';
   $To = NULL;
-
+  
+  if (empty($webServer)) $webServer = "localhost"; /* -w web-server, it is required, but deprecated */ 
   $Nparams .= "-w $webServer ";
+  /* FOSSology_URL, e.g. fossolog.org/repo/ */
+  /* Initialize global system configuration variables $SysConfig[] */
+  $SysConf = ConfigInit();
+  $FOSSology_URL = @$SysConf["FOSSologyURL"];
+  $Nparams .= "-p $FOSSology_URL ";
   /* If email is passed in, favor that over the session */
   if(!empty($Email)) {
     $To = " -e $Email";
