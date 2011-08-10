@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 function Isdir($mode) { return(($mode & 1<<18) + ($mode & 0040000) != 0); }
 function Isartifact($mode) { return(($mode & 1<<28) != 0); }
 function Iscontainer($mode) { return(($mode & 1<<29) != 0); }
@@ -235,9 +227,10 @@ function Dir2Path($UploadtreePk)
   $Enumerate - if >= zero number the folder/file path (the stuff in the yellow bar)
     starting with the value $Enumerate 
   $PreText - additional text to preceed the folder path
+  $PostText - text to follow the folder path
  ************************************************************/
 function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
-		     $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='')
+		     $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='')
 {
   global $Plugins;
   global $DB;
@@ -345,10 +338,12 @@ function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
     $V .= menu_to_1html(menu_find($ShowMicro,$MenuDepth),1);
     }
 
+
   if ($Enumerate >= 0)
-    {
+  {
+    if ($PostText) $V .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$PostText";
     $V .= "</td></tr></table>";
-    }
+  }
 
   if ($ShowBox)
     {
@@ -391,6 +386,10 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
   for($i=0; !empty($Listing[$i]['uploadtree_pk']); $i++)
   {
     $R = &$Listing[$i];
+    if (array_key_exists("licenses", $R))
+      $Licenses = $R["licenses"];
+    else
+      $Licenses = '';
 
     $Phrase='';
     if ($ShowPhrase && !empty($R['phrase_text']))
@@ -403,20 +402,20 @@ $text = _("Phrase");
 	{
 	$V .= "<P />\n";
 	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfDirPlugin,1,
-		NULL,$Count,$Phrase) . "\n";
+		NULL,$Count,$Phrase, $Licenses) . "\n";
 	}
     else if ($R['pfile_fk'] != $LastPfilePk)
 	{
 	$V .= "<P />\n";
 	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
-		NULL,$Count,$Phrase) . "\n";
+		NULL,$Count,$Phrase, $R['licenses']) . "\n";
 	$LastPfilePk = $R['pfile_fk'];
 	}
     else
 	{
 	$V .= "<div style='margin-left:2em;'>";
 	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
-		NULL,$Count,$Phrase) . "\n";
+		NULL,$Count,$Phrase, $R['licenses']) . "\n";
 	$V .= "</div>";
 	}
     $Count++;
