@@ -87,7 +87,6 @@ void	DBLoadMime	()
     exit(-1);
 	}
   MaxDBMime = PQntuples(DBMime);
-	printf("MaxDBMime is:%d\n", MaxDBMime);
 } /* DBLoadMime() */
 
 /**
