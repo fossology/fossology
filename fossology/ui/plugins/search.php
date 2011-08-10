@@ -123,7 +123,7 @@ class search extends FO_Plugin
     global $PG_CONN;
 
     /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree WHERE uploadtree_pk = $Item;";
+    $sql = "SELECT lft,rgt,upload_fk, pfile_fk FROM uploadtree WHERE uploadtree_pk = $Item;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1)
@@ -136,15 +136,11 @@ class search extends FO_Plugin
     $lft = $row["lft"];
     $rgt = $row["rgt"];
     $upload_pk = $row["upload_fk"];
+    $pfile_pk = $row["pfile_fk"];
     pg_free_result($result);
 
     $Filename = str_replace("'","''",$Filename); // protect DB
-    $Terms = split("[[:space:]][[:space:]]*",$Filename);
-    $SQL = "SELECT * FROM uploadtree INNER JOIN pfile ON pfile_pk = pfile_fk";
-    foreach($Terms as $Key => $T)
-    {
-      $SQL .= " AND ufile_name like '$T'";
-    }
+    $SQL = "SELECT * FROM uploadtree INNER JOIN pfile ON pfile_pk = pfile_fk AND ufile_name like '$Filename'";
     $NeedAnd=0;
     if (!empty($Mimetype) && ($Mimetype >= 0))
     {
@@ -190,6 +186,19 @@ class search extends FO_Plugin
     }
 
     $Results = $DB->Action($SQL);
+
+    /* get last nomos agent_pk that has data for this upload */
+    $Agent_name = "nomos";
+    $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
+    $nomosagent_pk = $AgentRec[0]["agent_fk"];
+    if ($nomosagent_pk)
+    {
+      /* add licenses to results */
+      foreach ($Results as &$utprec) 
+      {
+        $utprec['licenses'] = GetFileLicenses_string($nomosagent_pk, $utprec['pfile_fk'], 0);
+      }
+    }
 
     $V = "";
     $Count = count($Results);
