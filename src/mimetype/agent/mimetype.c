@@ -47,7 +47,7 @@ int	main	(int argc, char *argv[])
 {
   int arg;
   char *Parm = NULL;
-  char *Path;
+  char *Path = NULL;
   int c;
   char *agent_desc = "Determines mimetype for each file";
 
@@ -140,6 +140,12 @@ int	main	(int argc, char *argv[])
   } /* if run from scheduler */
 
   /* Clean up */
+	if(Path)
+	{
+    free(Path);
+    Path = NULL;
+	}
+	fo_config_free();
   if (FMimetype) fclose(FMimetype);
   magic_close(MagicCookie);
   if (DBMime) PQclear(DBMime);
