@@ -651,11 +651,19 @@ agent agent_init(host host_machine, job owner, int gen)
   int child_to_parent[2];
   int parent_to_child[2];
 
-  /* check inputs */
-  if(!owner || g_tree_lookup(meta_agents, job_type(owner)) == NULL)
+  /* check job input */
+  if(!owner)
   {
-    errno = EINVAL;
-    ERROR("invalid arguments passed to agent_init");
+    lprintf("ERROR %s.%d: NULL job passed to agent init\n", __FILE__, __LINE__);
+    lprintf("ERROR: no other information available\n");
+    return NULL;
+  }
+
+  /* check that the agent type exists */
+  if(g_tree_lookup(meta_agents, job_type(owner)) == NULL)
+  {
+    lprintf("ERROR %s.%d: agent type %s not found for job %d\n",
+        __FILE__, __LINE__, job_type(owner), job_id(owner));
     return NULL;
   }
 
