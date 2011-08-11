@@ -177,7 +177,14 @@ void	DBLoadGold	()
     SafeExit(6);
   }
   if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
-  if (Path != GlobalTempFile) free(Path);
+  if (Path != GlobalTempFile) 
+	{
+		if(Path)
+		{
+		  free(Path);
+		  Path = NULL;
+		}
+	}
 
   /* Now update the DB */
   /** Break out the sha1, md5, len components **/
@@ -253,8 +260,17 @@ void	DBLoadGold	()
 
   PQclear(result);
   /* Clean up */
-  free(Sum);
-  free(Unique);
+	if (Sum)
+	{
+    free(Sum);
+	  Sum = NULL;
+	}
+	if (Unique)
+	{
+	  free(Unique);
+	  Unique = NULL;
+	}
+	fo_config_free();
 } /* DBLoadGold() */
 
 
