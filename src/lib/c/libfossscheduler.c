@@ -103,7 +103,7 @@ void fo_scheduler_connect(int* argc, char** argv)
   /* check for --scheduler command line option */
   if(strcmp(argv[(*argc) - 1], "--scheduler_start") == 0)
   {
-    fprintf(stdout, "%s\n", SVN_REV);
+    fprintf(stdout, "VERSION: %s\n", SVN_REV);
     (*argc)--;
     argv[*argc] = NULL;
     found = 1;

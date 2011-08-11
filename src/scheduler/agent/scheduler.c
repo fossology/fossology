@@ -437,7 +437,7 @@ void load_agent_config()
       }
       else if(TVERBOSE2)
       {
-        lprintf("CONFIG: added new meta agent\n");
+        lprintf("CONFIG: added new agent\n");
         lprintf("    name = %s\n", name);
         lprintf(" command = %s\n", cmd);
         lprintf("     max = %d\n", max);
