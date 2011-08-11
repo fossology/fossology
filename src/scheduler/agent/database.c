@@ -283,7 +283,7 @@ void database_update_event(void* unused)
     pfile  =      PQget(db_result, i, "jq_runonpfile");
     value  =      PQget(db_result, i, "jq_args");
 
-    VERBOSE2("DB: JOB[%d] added:\n   type = %s\n   pfile = %d\n   value = %s\n",
+    VERBOSE2("DB: jq_pk[%d] added:\n   jq_type = %s\n   jq_runonpfile = %d\n   jq_args = %s\n",
         job_id, type, (pfile != NULL && pfile[0] != '\0'), value);
 
     /* check if this is a command */

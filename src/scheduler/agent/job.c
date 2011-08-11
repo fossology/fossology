@@ -542,7 +542,6 @@ void job_update(job j)
 void job_fail(job j)
 {
   job_transition(j, JB_FAILED);
-  g_tree_remove(job_list, &j->id);
 }
 
 /**

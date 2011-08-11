@@ -122,24 +122,25 @@ void prnt_sig(int signo)
   switch(signo)
   {
     case SIGALRM:
-      lprintf("SIGNALS: Scheduler received alarm signal, checking job states\n");
+      VERBOSE2("SIGNALS: Scheduler received alarm signal, checking job states\n");
       event_signal(agent_update_event, NULL);
       event_signal(database_update_event, NULL);
       alarm(CHECK_TIME);
       break;
     case SIGTERM:
-      lprintf("SIGNALS: Scheduler received terminate signal, shutting down scheduler\n");
+      VERBOSE2("SIGNALS: Scheduler received terminate signal, shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
       break;
     case SIGQUIT:
-      lprintf("SIGNALS: Scheduler received quit signal, shutting down scheduler\n");
+      VERBOSE2("SIGNALS: Scheduler received quit signal, shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
       break;
     case SIGINT:
-      lprintf("SIGNALS: Scheduler received interrupt signal, shutting down scheduler\n");
+      VERBOSE2("SIGNALS: Scheduler received interrupt signal, shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
       break;
     case SIGHUP:
+      VERBOSE2("SIGNALS: Scheduler received SGIHUP, reloading configuration data\n");
       load_config(NULL);
       break;
   }

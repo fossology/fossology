@@ -327,9 +327,10 @@ void agent_listen(agent a)
   }
 
   g_static_mutex_lock(&version_lock);
+  strcpy(buffer, &buffer[9]);
   if(a->meta_data->version == NULL && a->meta_data->valid)
   {
-    a->meta_data->version = g_strdup(&(buffer[9]));
+    a->meta_data->version = g_strdup(buffer);
     if(TVERBOSE2)
       clprintf("META_AGENT[%s] version is: \"%s\"\n",
           a->meta_data->name, a->meta_data->version);
@@ -340,7 +341,7 @@ void agent_listen(agent a)
         "ERROR %s.%d: META_DATA[%s] invalid agent spawn check\n",
         __FILE__, __LINE__, a->meta_data->name);
     alprintf(job_log(a->owner),
-        "ERROR: meta_datd: \"%s\" != received: \"%s\"",
+        "ERROR: version don't match: \"%s\" != received: \"%s\"\n",
         a->meta_data->version, buffer);
     a->meta_data->valid = 0;
     kill(a->pid, SIGKILL);
