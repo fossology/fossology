@@ -44,7 +44,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_ARGS 32       ///< the maximum number arguments passed to children  (arbitrary)
 #define TILL_DEATH 180    ///< how long to wait before agent is dead            (3 minutes)
 #define NUM_UPDATES 5     ///< the number of updates before agent is dead       (arbitrary)
-#define MAX_GENERATION 5  ///< the most agents that a piece of data can survive (arbitrary)
+#define MAX_GENERATION 0  ///< the most agents that a piece of data can survive (arbitrary)
 
 #ifndef AGENT_DIR
 #define AGENT_DIR ""      ///< the location of the agent executables for localhost
@@ -311,20 +311,25 @@ void agent_listen(agent a)
   }
 
   buffer[strlen(buffer) - 1] = '\0';
-  if(strncmp(buffer, "@@@", 3) == 0)
+  if(strncmp(buffer, "VERSION: ", 9) != 0)
   {
     alprintf(job_log(a->owner),
-        "T_FATAL %s.%d: JOB[%d].%s[%d] agent closed before providing version information\n",
+        "T_FATAL %s.%d: JOB[%d].%s[%d] agent didn't send version information\n",
         __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid);
+    clprintf("ERROR %s.%d: agent %s has been invalidated, removing from agents\n",
+        __FILE__, __LINE__, a->meta_data->name);
+    if(job_id(a->owner) >= 0)
+      g_tree_remove(meta_agents, a->meta_data->name);
     g_thread_exit(NULL);
   }
 
   g_static_mutex_lock(&version_lock);
   if(a->meta_data->version == NULL && a->meta_data->valid)
   {
-    a->meta_data->version = g_strdup(buffer);
+    a->meta_data->version = g_strdup(&(buffer[9]));
     if(TVERBOSE2)
-      clprintf("META_AGENT[%s] version is: \"%s\"\n", a->meta_data->name, buffer);
+      clprintf("META_AGENT[%s] version is: \"%s\"\n",
+          a->meta_data->name, a->meta_data->version);
   }
   else if(strcmp(a->meta_data->version, buffer) != 0)
   {
@@ -956,6 +961,12 @@ void agent_close(agent a)
       job_id(a->owner), a->meta_data->name, a->pid);
 
   job_remove_agent(a->owner, a);
+  if(a->status == AG_FAILED && job_id(a->owner) < 0)
+  {
+    lprintf("ERROR %s.%d: agent %s has failed scheduler startup test\n",
+        __FILE__, __LINE__, a->meta_data->name);
+    g_tree_remove(meta_agents, a->meta_data->name);
+  }
   g_tree_remove(agents, &a->pid);
 }
 
