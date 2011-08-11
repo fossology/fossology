@@ -50,8 +50,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define AGENT_DIR ""      ///< the location of the agent executables for localhost
 #endif
 
-#define TEST_NULV(j) if(!j) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
-#define TEST_NULL(j, ret) if(!j) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
+#define TEST_NULV(a) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
+#define TEST_NULL(a, ret) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
 
 GTree* meta_agents = NULL;   ///< The master list of all meta agents
 GTree* agents      = NULL;   ///< The master list of all of the agents
@@ -316,6 +316,9 @@ void agent_listen(agent a)
     alprintf(job_log(a->owner),
         "T_FATAL %s.%d: JOB[%d].%s[%d] agent didn't send version information\n",
         __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid);
+    alprintf(job_log(a->owner),
+        "T_FATAL: received \"%s\" and expecting \"VERSION: <version>\"\n",
+        buffer);
     clprintf("ERROR %s.%d: agent %s has been invalidated, removing from agents\n",
         __FILE__, __LINE__, a->meta_data->name);
     if(job_id(a->owner) >= 0)
