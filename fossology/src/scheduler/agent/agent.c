@@ -662,8 +662,8 @@ agent agent_init(host host_machine, job owner, int gen)
   /* check that the agent type exists */
   if(g_tree_lookup(meta_agents, job_type(owner)) == NULL)
   {
-    lprintf("ERROR %s.%d: agent type %s not found for job %d\n",
-        __FILE__, __LINE__, job_type(owner), job_id(owner));
+    lprintf("ERROR %s.%d: jq_pk %d jq_type %s does not match any module in mods-enabled\n",
+        __FILE__, __LINE__, job_id(owner), job_type(owner));
     return NULL;
   }
 
