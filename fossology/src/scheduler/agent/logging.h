@@ -56,8 +56,7 @@ extern char  log_name[FILENAME_MAX];
 #define ERROR(...) { \
             lprintf("ERROR %s.%d: ", __FILE__, __LINE__); \
             lprintf(__VA_ARGS__); \
-            lprintf("\n"); \
-            lprintf("ERROR errno is: %s\n", strerror(errno)); }
+            lprintf("\n"); }
 
 /** Macro that is called when any type of postgresql error is generated */
 #define PQ_ERROR(pg_r, ...) { \
