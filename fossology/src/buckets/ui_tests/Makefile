@@ -15,12 +15,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 test:
-	@echo "src/buckets/agent_tests: NO TESTS HAVE BEEN WRITTEN"
+	@echo "src/buckets/ui_tests: NO TESTS HAVE BEEN CREATED"
 clean:
-	@echo "src/buckets/agent_tests: NO TESTS HAVE BEEN WRITTEN. Nothing to Clean."
+	@echo "src/buckets/ui_tests: NO TESTS HAVE BEEN CREATED. Nothing to Clean."
 install:
-	@echo "src/buckets/agent_tests: NO TESTS HAVE BEEN WRITTEN. Nothing to install."
+	@echo "src/buckets/ui_tests: NO TESTS HAVE BEEN CREATED. Nothing to install."
 uninstall:
-	@echo "src/buckets/agent_tests: NO TESTS HAVE BEEN WRITTEN. Nothing to uninstall."
+	@echo "src/buckets/ui_tests: NO TESTS HAVE BEEN CREATED. Nothing to uninstall."
 
 .PHONY: all test clean install uninstall coverage

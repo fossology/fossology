@@ -14,13 +14,11 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-test:
-	@echo "src/buckets/agent_tests: NO TESTS HAVE BEEN WRITTEN"
-clean:
-	@echo "src/buckets/agent_tests: NO TESTS HAVE BEEN WRITTEN. Nothing to Clean."
+all:
+	
 install:
-	@echo "src/buckets/agent_tests: NO TESTS HAVE BEEN WRITTEN. Nothing to install."
+	@echo "src/buckets/ui: Nothing to install."
 uninstall:
-	@echo "src/buckets/agent_tests: NO TESTS HAVE BEEN WRITTEN. Nothing to uninstall."
+	@echo "src/buckets/ui: Nothing to uninstall."
 
-.PHONY: all test clean install uninstall coverage
+.PHONY: all clean test coverage install uninstall

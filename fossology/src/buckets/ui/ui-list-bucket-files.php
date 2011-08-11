@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,13 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
 
 /*************************************************
  This plugin is used to:
@@ -51,8 +44,6 @@ class list_bucket_files extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
   { 
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-
     // micro-menu
 	$bucketagent_pk = GetParm("bapk",PARM_INTEGER);
 	$uploadtree_pk = GetParm("item",PARM_INTEGER);
@@ -67,6 +58,24 @@ $text = _("Show All Files");
 
   } // RegisterMenus()
       
+ /***********************************************************
+   Initialize(): This is called before the plugin is used.
+   It should assume that Install() was already run one time
+   (possibly years ago and not during this object's creation).
+   Returns true on success, false on failure.
+   A failed initialize is not used by the system.
+   NOTE: This function must NOT assume that other plugins are installed.
+   ***********************************************************/
+  function Initialize()
+  {
+    global $Plugins;
+    $this->State=PLUGIN_STATE_VALID;
+    $this->State=PLUGIN_STATE_READY;
+    array_push($Plugins,$this);
+
+    return(true);
+  } // Initialize()
+
 
   /***********************************************************
    Output(): 
@@ -76,10 +85,7 @@ $text = _("Show All Files");
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     global $Plugins;
-    global $DB, $PG_CONN;
-
-    // make sure there is a db connection since I've pierced the core-db abstraction
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    global $PG_CONN;
 
     /*  Input parameters */
 	$bucketagent_pk = GetParm("bapk",PARM_INTEGER);
@@ -156,7 +162,10 @@ $text = _("Show All Files");
     {
     $limit = ($Page < 0) ? "":" limit $Offset+$Max";
     // Get all the uploadtree_pk's with this bucket (for this agent and bucketpool)
-    // in this subtree.  Some of these might be containers, some not.
+    // in this subtree.
+    // It would be best to sort by pfile_pk, so that the duplicate pfiles are
+    // correctly indented, but pfile_pk has no meaning to the user.  So a compromise,
+    // sorting by ufile_name is used.
     $sql = "select uploadtree.*, bucket_file.nomosagent_fk as nomosagent_fk
                from uploadtree, bucket_file, bucket_def
                where upload_fk=$upload_pk and uploadtree.lft between $lft and $rgt
@@ -165,7 +174,9 @@ $text = _("Show All Files");
                  and agent_fk=$bucketagent_pk
                  and bucket_fk=$bucket_pk
                  and bucketpool_fk=$bucketpool_pk
-                 and bucket_pk=bucket_fk offset $Offset $limit";
+                 and bucket_pk=bucket_fk 
+                 order by uploadtree.ufile_name
+                 offset $Offset $limit";
     $fileresult = pg_query($PG_CONN, $sql);
     DBCheckResult($fileresult, $sql, __FILE__, __LINE__);
     $Count = pg_num_rows($fileresult);
@@ -202,6 +213,8 @@ $text = _("Show All Files");
     $V .= "<tr><th>$text</th><th>&nbsp";
     $ExclArray = explode(":", $Excl);
     $ItemNumb = 1;
+    $PrevPfile_pk = 0;
+
 if ($Count > 0)
     while ($row = pg_fetch_assoc($fileresult, $RowNum))
     {
@@ -227,8 +240,17 @@ if ($Count > 0)
         $nomosagent_pk = $row['nomosagent_fk'];
         $LinkLast = "view-license&bapk=$bucketagent_pk&napk=$nomosagent_pk";
         $V .= "<tr><td>";
+        if ($PrevPfile_pk == $pfile_pk)
+          $V .= "<div style='margin-left:2em;'>";
+        else
+        {
+          $V .= "<div>";
+          $PrevPfile_pk = $pfile_pk;
+        }
         $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, 
                          $ShowMicro, $ItemNumb++, $Header);
+        $V .= "</div>";
+
         $V .= "</td>";
         $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
 

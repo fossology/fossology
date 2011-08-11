@@ -67,13 +67,7 @@ install: all
 uninstall:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
 
-test: all
-	@echo "*** No tests available for agents/$(EXE) ***"
-
-coverage:
-	@echo "NOTICE: no coverage available for buckets"
-
 clean:
 	rm -f $(EXE) *.o core
 
-.PHONY: all install uninstall clean test $(FOLIB)
+.PHONY: all install uninstall clean test $(FOLIB) coverage
