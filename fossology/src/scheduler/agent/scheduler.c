@@ -424,8 +424,7 @@ void load_agent_config()
           special |= SAG_EXCLUSIVE;
       }
 
-      name = fo_config_get("default", "name", &error);
-      TEST_ERROR("the default group must have a name key");
+      name = ep->d_name;
       cmd  = fo_config_get("default", "command", &error);
       TEST_ERROR("the default group must have a command key");
       tmp  = fo_config_get("default", "max", &error);
