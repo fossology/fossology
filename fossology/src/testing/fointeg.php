@@ -23,7 +23,7 @@
  * This utility can build, install and test fossology. See the usage message
  * for details.
  *
- * @version "$Id $"
+ * @version "$Id$"
  *
  * Created on Aug 12, 2011 by Mark Donohoe
  */
