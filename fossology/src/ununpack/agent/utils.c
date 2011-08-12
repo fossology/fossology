@@ -76,10 +76,10 @@ void	SafeExit	(int rc)
   exit(rc);
 } /* SafeExit() */
 
-/*
+/**
  * @brief get rid of the postfix
- * for example : test.gz --> test
- * @parameter Name: input file name
+ *   for example: test.gz --> test
+ * @param Name input file name
  */
 void RemovePostfix(char *Name)
 {
@@ -89,11 +89,12 @@ void RemovePostfix(char *Name)
   if (LastDot) *LastDot = 0;
 }
 
-/*************************************************
- InitCmd(): Initialize the metahandler CMD table.
- This ensures that (1) every mimetype is loaded
- and (2) every mimetype has an DBindex.
- *************************************************/
+/**
+ * @brief Initialize the metahandler CMD table.
+ * This ensures that:
+ *  - every mimetype is loaded
+ *  - every mimetype has an DBindex.
+ */
 void	InitCmd	()
 {
   int i;
@@ -143,55 +144,14 @@ void	InitCmd	()
   }
 } /* InitCmd() */
 
-/*************************************************
- DBTaintString(): Make a string safe for DB inserts.
- *************************************************/
-char *	DBTaintString	(char *S)
-{
-  char *NewS;
-  int i,j;
-  int NewLen;
 
-  /* Count number of bytes for the new string */
-  NewLen=1;
-  for(i=0; S[i] != '\0'; i++)
-  {
-    if (S[i]=='\'')	NewLen += 4;
-    else if (!isprint(S[i])) NewLen += 4;
-    else if (S[i]=='\n') NewLen += 2;
-    else if (S[i]=='\t') NewLen += 2;
-    else if (S[i]=='\\') NewLen += 2;
-    else NewLen++;
-  }
-
-  NewS = (char *)calloc(NewLen,sizeof(char));
-  if (!NewS)
-  {
-    ERROR("Unable to allocate %d bytes for string.",NewLen)
-    SafeExit(6);
-  }
-  j=0;
-  for(i=0; S[i] != '\0'; i++)
-  {
-    if (S[i]=='\'')
-    { NewS[j++]='\\'; NewS[j++]='x'; NewS[j++]='2'; NewS[j++]='7'; }
-    else if (!isprint(S[i]))
-    { sprintf(NewS+j,"\\x%02x",(unsigned char)(S[i])); j+=4; }
-    else if (S[i]=='\n') { sprintf(NewS+j,"\\n"); j+=2; }
-    else if (S[i]=='\t') { sprintf(NewS+j,"\\t"); j+=2; }
-    else if (S[i]=='\\') { sprintf(NewS+j,"\\\\"); j+=2; }
-    else { NewS[j++] = S[i]; }
-  }
-  return(NewS);
-} /* DBTaintString() */
-
-/*************************************************
- TaintString(): Protect strings intelligently.
- Prevents filenames containing ' or % or \ from screwing
- up system() and snprintf().  Even supports a "%s".
- NOTE: %s is assumed to be in single quotes!
- Returns: 0 on success, 1 on overflow.
- *************************************************/
+/**
+ * @brief Protect strings intelligently.
+ * Prevents filenames containing ' or % or \ from screwing
+ * up system() and snprintf().  Even supports a "%s".
+ * NOTE: %s is assumed to be in single quotes!
+ * @returns 0 on success, 1 on overflow.
+ **/
 int	TaintString	(char *Dest, int DestLen,
     char *Src, int ProtectQuotes, char *Replace)
 {
@@ -236,13 +196,13 @@ int	TaintString	(char *Dest, int DestLen,
   return(0);
 } /* TaintString() */
 
-/***************************************************
- Prune(): Given a filename and its stat, prune it!
- - Remove anything that is not a regular file or directory
- - Remove files when hard-link count > 1 (duplicate search)
- - Remove zero-length files
- Returns 1=pruned, 0=no change.
- ***************************************************/
+/**
+ * @brief Given a filename and its stat, prune it:
+ * - Remove anything that is not a regular file or directory
+ * - Remove files when hard-link count > 1 (duplicate search)
+ * - Remove zero-length files
+ * @returns 1=pruned, 0=no change.
+ **/
 inline int	Prune	(char *Fname, struct stat Stat)
 {
   if (!Fname || (Fname[0]=='\0')) return(1);  /* not a good name */
@@ -269,10 +229,11 @@ inline int	Prune	(char *Fname, struct stat Stat)
   return(0);
 } /* Prune() */
 
-/***************************************************
- MkDirs(): Same as command-line "mkdir -p".
- Returns 0 on success, 1 on failure.
- ***************************************************/
+/**
+ * @brief Same as command-line "mkdir -p".
+ * @param Fname file name
+ * @returns 0 on success, 1 on failure.
+ **/
 inline int	MkDirs	(char *Fname)
 {
   char Dir[FILENAME_MAX+1];
@@ -321,11 +282,12 @@ inline int	MkDirs	(char *Fname)
   return(rc);
 } /* MkDirs() */
 
-/***************************************************
- MkDir(): Smart mkdir.
- If mkdir fails, then try running MkDirs.
- Returns 0 on success, 1 on failure.
- ***************************************************/
+/**
+ * @brief Smart mkdir.
+ * If mkdir fails, then try running MkDirs.
+ * @param Fname file name
+ * @returns 0 on success, 1 on failure.
+ **/
 inline int	MkDir	(char *Fname)
 {
   if (mkdir(Fname,0770))
@@ -337,11 +299,11 @@ inline int	MkDir	(char *Fname)
   return(0);
 } /* MkDir() */
 
-/***************************************************
- IsDir(): Given a filename, is it a directory?
- Returns 1=yes, 0=no.
- (This is used by ISO and Disk extraction...)
- ***************************************************/
+/**
+ * @brief Given a filename, is it a directory?
+ * @param Fname file name
+ * @returns 1=yes, 0=no.
+ **/
 inline int	IsDir	(char *Fname)
 {
   struct stat Stat;
@@ -352,11 +314,11 @@ inline int	IsDir	(char *Fname)
   return(S_ISDIR(Stat.st_mode));
 } /* IsDir() */
 
-/***************************************************
- IsFile(): Given a filename, is it a file?
- Link: should it follow symbolic links?
- Returns 1=yes, 0=no.
- ***************************************************/
+/**
+ * @brief: Given a filename, is it a file?
+ * @param Link True if should it follow symbolic links
+ * @returns 1=yes, 0=no.
+ **/
 int      IsFile  (char *Fname, int Link)
 {
   struct stat Stat;
@@ -369,11 +331,14 @@ int      IsFile  (char *Fname, int Link)
 } /* IsFile() */
 
 
-/**********************************************
- ReadLine(): Read a command from a stream.
- If the line is empty, then try again.
- Returns line length, or -1 of EOF.
- **********************************************/
+/**
+ * @brief Read a command from a stream.
+ * If the line is empty, then try again.
+ * @param Fin  Input file pointer
+ * @param Line Output line buffer
+ * @param MaxLine Max line length
+ * @returns line length, or -1 of EOF.
+ **/
 int     ReadLine (FILE *Fin, char *Line, int MaxLine)
 {
   int C;
@@ -402,13 +367,14 @@ int     ReadLine (FILE *Fin, char *Line, int MaxLine)
   return(i);
 } /* ReadLine() */
 
-/***************************************************
- IsExe(): Check if the executable exists.
- (Like the command-line "which" but without returning
- the path.)
- This should only be used on relative path executables.
- Returns: 1 if exists, 0 if does not exist.
- ***************************************************/
+/**
+ * @brief Check if the executable exists.
+ * (Like the command-line "which" but without returning the path.)
+ * This should only be used on relative path executables.
+ * @param Exe Executable file name
+ * @param Quiet If true, do not write warning on file not found
+ * @returns: 1 if exists, 0 if does not exist.
+ **/
 int	IsExe	(char *Exe, int Quiet)
 {
   char *Path;
@@ -449,11 +415,13 @@ int	IsExe	(char *Exe, int Quiet)
   return(0); /* not in path */
 } /* IsExe() */
 
-/***************************************************
- CopyFile(): Copy a file.
- For speed: mmap and save.
- Returns: 0 if copy worked, 1 if failed.
- ***************************************************/
+/**
+ * @brief Copy a file.
+ * For speed: mmap and save.
+ * @param Src Source file path
+ * @param Dst Destination file path
+ * @returns: 0 if copy worked, 1 if failed.
+ **/
 int	CopyFile	(char *Src, char *Dst)
 {
   int Fin, Fout;
@@ -519,10 +487,10 @@ int	CopyFile	(char *Src, char *Dst)
 } /* CopyFile() */
 
 
-/**********************************************
- ParentWait(): Wait for a child.  Sets child status.
- Returns the queue record, or -1 if no more children.
- **********************************************/
+/**
+ * @brief Wait for a child.  Sets child status.
+ * @returns the queue record, or -1 if no more children.
+ **/
 int     ParentWait      ()
 {
   int i;
@@ -576,9 +544,10 @@ int     ParentWait      ()
 /***************************************************************************/
 /***************************************************************************/
 
-/*************************************************
- CheckCommands(): Make sure all commands are usable.
- *************************************************/
+/**
+ * @brief Make sure all commands are usable.
+ * @param Show Unused
+ **/
 void	CheckCommands	(int Show)
 {
   int i;
@@ -618,12 +587,18 @@ void	CheckCommands	(int Show)
   }
 } /* CheckCommands() */
 
-/*************************************************
- RunCommand(): try a command and return command code.
- Command becomes:
-    Cmd CmdPre 'File' CmdPost Out
-    If there is a %s, then that becomes Where.
- Returns -1 if command could not run.
+/**
+ * @brief Try a command and return command code.
+ * Command becomes:
+ * - Cmd CmdPre 'File' CmdPost Out
+ * - If there is a %s, then that becomes Where.
+ * @param Cmd
+ * @param CmdPre
+ * @param File
+ * @param CmdPost
+ * @param Out
+ * @param Where
+ * @returns -1 if command could not run.
  *************************************************/
 int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
     char *Out, char *Where)
@@ -1265,8 +1240,12 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   }
   else /* not an artifact -- use the name */
   {
-    char *S;
-    S = DBTaintString(CI->Partname);
+    char *S = 0;
+    int   error;
+    PQescapeStringConn(pgConn, S, CI->Partname, strlen(CI->Partname), &error);
+    if (error)
+        WARNING("Error escaping filename with multibype character set (%s).", CI->Partname)
+
     strncpy(UfileName,S,sizeof(UfileName));
     free(S);
   }
