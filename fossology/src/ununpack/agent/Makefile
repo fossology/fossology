@@ -8,35 +8,24 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
 MODULEDIR = $(shell dirname `pwd`)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
-EXE=departition checksum ununpack
+EXE=departition ununpack
 
 CHKHDR= checksum.h md5.h sha1.h
-CHKSRC=$(CHKHDR:%.h=%.c)
-UUHDR= ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h metahandle.h $(CHKHDR)
+CHKSRC=$(CHKHDR:%.h=%.c) traverse.c utils.c
+UUHDR= ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h $(CHKHDR)
 UUSRC=$(UUHDR:%.h=%.c)
 
 TESTDIR=tests
-OBJECTS=$(UUHDR:%.h=%.o)
+OBJECTS=$(UUHDR:%.h=%.o) utils.o traverse.o
 COVERAGE=$(OBJECTS:%.o=%_cov.o)
 
 all: $(FOLIB) $(EXE) 
 
-checksum: $(CHKHDR) $(CHKSRC) $(VARS)
-	$(CC) $(CHKSRC) -DMAIN $(ALL_CFLAGS) -o $@
-
 departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
 
-ununpack: main.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB)
-	$(CC) main.c libununpack.a $(CFLAGS_LOCAL) -o $@
-
-metahandle.h: metahandle.tab metahandle.pl
-	if [ ! -x metahandle.pl ] ; then chmod u+x metahandle.pl; fi
-	./metahandle.pl
-
-metahandle.c: metahandle.tab metahandle.pl
-	if [ ! -x metahandle.pl ] ; then chmod u+x metahandle.pl; fi
-	./metahandle.pl
+ununpack: ununpack.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB)
+	$(CC) ununpack.c libununpack.a $(CFLAGS_LOCAL) -o $@
 
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
@@ -50,7 +39,6 @@ install: all $(VARS)
 	   rm -f $(DESTDIR)$(AGENTDIR)/ununpack; \
 	fi
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(AGENTDIR)/ununpack
-	$(INSTALL_PROGRAM) checksum $(DESTDIR)$(LIBEXECDIR)/checksum
 	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
 	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
 
@@ -58,16 +46,15 @@ install: all $(VARS)
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
-	rm -f $(DESTDIR)$(LIBEXECDIR)/checksum
 	rm -f $(DESTDIR)$(AGENTDIR)/ununpack
 	rm -f $(CONFDIR)/mods-enabled/ununpack
 
 
-$(OBJECTS): %.o: %.c metahandle.h
+$(OBJECTS): %.o: %.c 
 	$(CC) -c $< $(CFLAGS_LOCAL) 
 
 
-$(COVERAGE): %_cov.o: %.c metahandle.h
+$(COVERAGE): %_cov.o: %.c 
 	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
 
 libununpack.a: $(OBJECTS)
@@ -84,7 +71,7 @@ coverage: libununpack_cov.a
 	$(MAKE) -C $(TESTDIR) coverage
 
 clean:
-	rm -f $(EXE) *.o core metahandle.h metahandle.c *.a *.gc*; \
+	rm -f $(EXE) *.o core *.a *.gc*; \
 
 include $(DEPS)
 

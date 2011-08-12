@@ -1,7 +1,7 @@
 /*******************************************************************
  Ununpack-ar: The universal unpacker - Code to unpack an AR file.
 
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -18,7 +18,7 @@
  *******************************************************************/
 
 #include "ununpack.h"
-#include "ununpack-ar.h"
+#include "externs.h"
 
 
 /***************************************************
@@ -50,8 +50,11 @@ int	ExtractAR	(char *Source, char *Destination)
     fprintf(stderr,"ERROR: directory name longer than %d characters\n",(int)sizeof(CWD));
     return(-1);
   }
-  if (Verbose > 1) printf("CWD: %s\n",CWD);
-  if (!Quiet) fprintf(stderr,"Extracting ar: %s\n",Source);
+  if (Verbose > 1) 
+  {
+    printf("CWD: %s\n",CWD);
+    if (!Quiet) fprintf(stderr,"Extracting ar: %s\n",Source);
+  }
 
   if(chdir(Destination) != 0)
   {

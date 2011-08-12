@@ -1,7 +1,7 @@
 /************************************************************
  checksum.h - Checksum computation header file
 
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,7 +19,22 @@
 #ifndef CHECKSUM_H
 #define CHECKSUM_H
 
+/* specify support for files > 2G */
+#define __USE_LARGEFILE64
+#define __USE_FILE_OFFSET64
+#define _LARGEFILE64_SOURCE
+
 #include <stdint.h> /* for uint8_t */
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
 
 struct Cksum
   {

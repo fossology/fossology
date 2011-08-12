@@ -1,7 +1,7 @@
 /************************************************************
  Code to compute a "less likely for collision" checksum.
 
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -17,7 +17,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  *********************
- Use -DMAIN to make it a command-line.
  The checksum value contains 3 parts:
    SHA1.MD5.Size
  SHA1 = SHA1 of the file.
@@ -26,24 +25,6 @@
  The chances of two files having the same size, same MD5, and
  same SHA1 is extremely unlikely.  (But it might happen!)
  ************************************************************/
-
-#include <stdlib.h>
-
-/* specify support for files > 2G */
-#define __USE_LARGEFILE64
-#define __USE_FILE_OFFSET64
-
-#include <stdio.h>
-#include <unistd.h>
-
-#include <stdint.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <dirent.h>
 
 #include "checksum.h"
 #include "md5.h"
@@ -56,7 +37,7 @@
 CksumFile *	SumOpenFile	(char *Fname)
 {
   CksumFile *CF;
-  struct stat64 Stat;
+  struct stat Stat;
 
   CF=(CksumFile *)calloc(1,sizeof(CksumFile));
   if (!CF) return(NULL);
@@ -74,7 +55,7 @@ CksumFile *	SumOpenFile	(char *Fname)
 	free(CF);
 	return(NULL);
 	}
-  if (fstat64(CF->FileHandle,&Stat) == -1)
+  if (fstat(CF->FileHandle,&Stat) == -1)
 	{
 	fprintf(stderr,"ERROR: Unable to stat file (%s)\n",Fname);
 	close(CF->FileHandle);
@@ -94,7 +75,7 @@ CksumFile *	SumOpenFile	(char *Fname)
 
   if (CF->MmapSize > 0)
     {
-    CF->Mmap = mmap64(0,CF->MmapSize,PROT_READ,MAP_PRIVATE,CF->FileHandle,0);
+    CF->Mmap = mmap(0,CF->MmapSize,PROT_READ,MAP_PRIVATE,CF->FileHandle,0);
     if (CF->Mmap == MAP_FAILED)
 	{
 	fprintf(stderr,"ERROR: Unable to mmap file (%s)\n",Fname);
@@ -279,7 +260,7 @@ void	RecurseFiles	(char *S)
 	if (CF == NULL)
 	  {
 	  FILE *Fin;
-	  Fin = fopen64(S,"rb");
+	  Fin = fopen(S,"rb");
 	  if (!Fin)
 	    {
 	    perror("Huh?");
@@ -325,7 +306,7 @@ void	RecurseFiles	(char *S)
 	  if (CF == NULL)
 	    {
 	    FILE *Fin;
-	    Fin = fopen64(NewS,"rb");
+	    Fin = fopen(NewS,"rb");
 	    if (!Fin)
 	      fprintf(stderr,"ERROR: Cannot open file \"%s\".\n",NewS);
 	    else
@@ -353,49 +334,3 @@ skip:
 	}
   closedir(Dir);
 } /* RecurseFiles() */
-
-
-/**************************************************************************/
-#ifdef MAIN
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
-char Version[]=SVN_REV;
-#endif
-int	main	(int argc, char *argv[])
-{
-  int i;
-  char *Result=NULL;
-  Cksum *Sum;
-
-  if (argc==1)
-	{
-	/* no args? read from stdin */
-	Sum = SumComputeFile(stdin);
-	if (Sum) { Result=SumToString(Sum); free(Sum); }
-	if (Result) { printf("%s\n",Result); free(Result); }
-	}
-
-  for(i=1; i<argc; i++)
-    {
-    if (!strcmp(argv[i],"-"))
-      {
-      /* read from stdin */
-      Sum = SumComputeFile(stdin);
-      if (Sum) { Result=SumToString(Sum); free(Sum); }
-      if (Result != NULL)
-	{
-	printf("%s %s\n",Result,argv[i]);
-	free(Result);
-	Result=NULL;
-	}
-      }
-    else
-      {
-      /* read from a file */
-      RecurseFiles(argv[i]);
-      }
-    }
-  return(0);
-} /* main() */
-#endif
-
