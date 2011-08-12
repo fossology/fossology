@@ -829,6 +829,7 @@ int main(int argc, char** argv)
           fprintf(cerr, "FATAL %s.%d: Copyright agent unable to connect to database.\n", __FILE__, __LINE__);
           exit(-1);
         }
+        copyright_destroy(copy);
         PQfinish(pgConn);
         return 0;
       default: /* error, print usage */
@@ -894,7 +895,7 @@ int main(int argc, char** argv)
   }
 
   copyright_destroy(copy);
-  fo_scheduler_disconnect();
+  fo_scheduler_disconnect(0);
 
   return 0;
 }

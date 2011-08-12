@@ -136,12 +136,12 @@ void fo_scheduler_connect(int* argc, char** argv)
  * before exiting. Any error reporting to stdout or stderr will not work after
  * this function has finished execution.
  */
-void fo_scheduler_disconnect()
+void fo_scheduler_disconnect(int retcode)
 {
   /* send "CLOSED" to the scheduler */
   if(found) 
   {
-    fprintf(stdout, "BYE\n");
+    fprintf(stdout, "BYE %d\n", retcode);
     fflush(stdout);
 
     valid = 0;
