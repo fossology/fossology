@@ -2,7 +2,7 @@
  Ununpack-disk: The universal unpacker.
  Code to unpack a disk file system.
 
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,7 +19,7 @@
  *******************************************************************/
 
 #include "ununpack.h"
-#include "ununpack-disk.h"
+#include "externs.h"
 
 #include <utime.h>
 
@@ -294,7 +294,7 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
   if ((NULL == FStype) || (!strcmp(FStype, "")) || (NULL == Source) || (!strcmp(Source, "")) || (NULL == Destination) || (!strcmp(Destination, "")))
     return 1;
 
-  if (!Quiet) fprintf(stderr,"Extracting %s: %s\n",FStype,Source);
+  if (!Quiet && Verbose) fprintf(stderr,"Extracting %s: %s\n",FStype,Source);
 
   if (!strcmp(FStype,"fat"))	FatFlag=1;
 

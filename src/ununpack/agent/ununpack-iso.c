@@ -2,7 +2,7 @@
  Ununpack-iso: The universal unpacker.
  Code to unpack an ISO file system.
 
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,8 +19,7 @@
  *******************************************************************/
 
 #include "ununpack.h"
-#include "ununpack-disk.h"
-
+#include "externs.h"
 
 /***************************************************
  GetISOMode(): Given a line in drwxrwxrwx format,
@@ -84,7 +83,7 @@ int	ExtractISO	(char *Source, char *Destination)
   if ((NULL == Source) || (!strcmp(Source, "")) || (NULL == Destination) || (!strcmp(Destination, "")))
     return 1;
 
-  if (!Quiet) fprintf(stderr,"Extracting ISO: %s\n",Source);
+  if (!Quiet && Verbose) fprintf(stderr,"Extracting ISO: %s\n",Source);
 
   /* get list of directories in the ISO and make the directories */
   if (TaintString(TempSource,FILENAME_MAX,Source,1,NULL) ||
