@@ -155,7 +155,6 @@ int  IsInflatedFile(char *FileName, int InflateSize);
 void SafeExit	(int rc);
 void RemovePostfix(char *Name);
 void  InitCmd ();
-char *  DBTaintString (char *S);
 int	TaintString	(char *Dest, int DestLen, char *Src, int ProtectQuotes, char *Replace);
 inline int  Prune (char *Fname, struct stat Stat);
 inline int	MkDirs	(char *Fname);
