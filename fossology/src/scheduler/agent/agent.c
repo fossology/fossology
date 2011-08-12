@@ -364,10 +364,23 @@ void agent_listen(agent a)
           job_id(a->owner), a->meta_data->name, a->pid, buffer);
 
     /* check for messages from scheduler or clean agent death */
-    if( strncmp(buffer, "BYE", 3) == 0 || strncmp(buffer, "@@@1", 4) == 0)
+    if(strncmp(buffer, "BYE", 3) == 0)
     {
+      if((i = atoi(&(buffer[4]))) == 0)
+      {
+        agent_transition(a, AG_CLOSING);
+        break;
+      }
+
+      alprintf(job_log(a->owner),
+          "JOB[%d].%s[%d]: agent failed with error code %d\n",
+          job_id(a->owner), a->meta_data->name, a->pid, i);
+      agent_fail(a);
       break;
     }
+
+    if(strncmp(buffer, "@@@1", 4) == 0)
+      break;
     if(strncmp(buffer, "@@@0", 4) == 0 && a->updated)
     {
       aprintf(a, "%s\n", a->data);
@@ -393,37 +406,16 @@ void agent_listen(agent a)
       a->check_analyzed = i - a->total_analyzed;
       a->total_analyzed = i;
     }
-    /* agent is failing, log why */
-    else if(strncmp(buffer, "FATAL", 5) == 0)
-    {
-      alprintf(job_log(a->owner),
-          "FATAL:JOB[%d].%s[%d]: \"%s\"\n",
-          job_id(a->owner), a->meta_data->name, a->pid, &buffer[5]);
-      break;
-    }
-    /* the agent has recieved an error, log what */
-    else if(strncmp(buffer, "ERROR", 5) == 0)
-    {
-      alprintf(job_log(a->owner),
-          "ERROR:JOB[%d].%s[%d]: \"%s\"\n",
-          job_id(a->owner), a->meta_data->name, a->pid, &buffer[5]);
-    }
-    else if(strncmp(buffer, "WARNING", 7) == 0)
-    {
-      alprintf(job_log(a->owner),
-          "WARNING:JOB[%d].%s[%d]: \"%s\"\n",
-          job_id(a->owner), a->meta_data->name, a->pid, &buffer[5]);
-    }
     /* we aren't quite sure what the agent sent, log it */
     else if(!(TVERBOSE3))
     {
       alprintf(job_log(a->owner),
-          "JOB[%d].%s[%d]: notice: \"%s\"\n",
+          "JOB[%d].%s[%d]: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, buffer);
     }
   }
 
-  if(TVERBOSE4)
+  if(TVERBOSE3)
   {
     alprintf(job_log(a->owner),
         "JOB[%d].%s[%d]: communication thread closing\n",
@@ -951,7 +943,6 @@ void agent_close(agent a)
 {
   if(a->status != AG_CLOSING && a->status != AG_FAILED)
   {
-    agent_transition(a, AG_CLOSING);
     aprintf(a, "CLOSE\n");
     return;
   }

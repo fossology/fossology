@@ -430,7 +430,7 @@ void job_remove_agent(job j, void* a)
   TEST_NULV(a);
   j->finished_agents = g_list_remove(j->finished_agents, a);
 
-  if(j->finished_agents == NULL && j->status == JB_COMPLETE)
+  if(j->finished_agents == NULL && (j->status == JB_COMPLETE || j->status == JB_FAILED))
   {
     VERBOSE2("JOB[%d]: job removed from system\n", j->id);
     g_tree_remove(job_list, &j->id);
@@ -493,7 +493,7 @@ void job_set_data(job j, char* data, int sql)
 void job_update(job j)
 {
   GList* iter;
-  agent a;
+  //agent a;
   int restart = 0;
 
   TEST_NULV(j)
@@ -508,9 +508,10 @@ void job_update(job j)
     /* this indicates a failed agent, attempt to recover */
     else
     {
-      for(iter = j->failed_agents; iter != NULL; iter = iter->next)
+      // This code will try the data again if that is desired
+      // TODO determine if this should be kept or removed
+      /*for(iter = j->failed_agents; iter != NULL; iter = iter->next)
       {
-        /* get a new agent to handle the data from the fail agent */
         if(j->finished_agents != NULL)
         {
           a = (agent)g_list_first(j->finished_agents);
@@ -523,7 +524,7 @@ void job_update(job j)
         {
           restart++;
         }
-      }
+      }*/
 
       g_list_free(j->failed_agents);
       j->failed_agents = NULL;

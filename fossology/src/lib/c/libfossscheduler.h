@@ -110,7 +110,7 @@ extern int verbose;
 
 void  fo_scheduler_heart(int i);
 void  fo_scheduler_connect(int* argc, char** argv);
-void  fo_scheduler_disconnect();
+void  fo_scheduler_disconnect(int retcode);
 char* fo_scheduler_next();
 
 /* ************************************************************************** */
