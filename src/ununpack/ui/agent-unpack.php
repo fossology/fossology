@@ -54,7 +54,7 @@ class agent_unpack extends FO_Plugin
   function AgentCheck($uploadpk)
   {
     global $DB;
-    $SQL = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job ON job_upload_fk = '$uploadpk' AND job_pk = jq_job_fk AND jq_type = 'unpack';";
+    $SQL = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job ON job_upload_fk = '$uploadpk' AND job_pk = jq_job_fk AND jq_type = 'ununpack';";
     $Results = $DB->Action($SQL);
     if (empty($Results[0]['jq_pk'])) { return(0); }
     if (empty($Results[0]['jq_endtime'])) { return(1); }
@@ -76,13 +76,15 @@ $text = _("Failed to insert job record");
 	return($text); }
     if (!empty($Depends) && !is_array($Depends)) { $Depends = array($Depends); }
 
-    /* job "unpack" has jobqueue item "unpack" */
+    /* job "unpack" has jobqueue item "unpack" 
     $jqargs = "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile,
 	    upload_pk, pfile_fk
 	    FROM upload
 	    INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk
 	    WHERE upload.upload_pk = '$uploadpk';";
-    $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"no","pfile",$Depends);
+*/
+    $jqargs = $uploadpk;
+    $jobqueuepk = JobQueueAdd($jobpk,"ununpack",$jqargs,"no","",$Depends);
     if (empty($jobqueuepk)) { 
 $text = _("Failed to insert item into job queue");
 	return($text); }
@@ -140,7 +142,7 @@ $text = _("Unpack of Upload failed:");
 		  INNER JOIN job ON job.job_upload_fk = upload.upload_pk
 		  INNER JOIN jobqueue ON jobqueue.jq_job_fk = job.job_pk
 		    AND job.job_name = 'unpack'
-		    AND jobqueue.jq_type = 'unpack'
+		    AND jobqueue.jq_type = 'ununpack'
 		    ORDER BY upload_pk
 		)
 		ORDER BY upload_pk DESC;";
