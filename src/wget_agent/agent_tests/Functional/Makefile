@@ -14,24 +14,25 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP = ../../..
+TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
+AGENTDIR = ../../agent
 
-DIRS = Unit Functional 
+TESTFILE = cliParamsTest4WgetAgent.php
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+all:
+	$(MAKE) -C $(AGENTDIR)/ $@
 
-all: 
-	$(call dirloop, )
-
-test: 
-	$(call dirloop, test)
+test: all
+	@echo "make wget_agent functional test"
+	phpunit $(TESTFILE)
 
 coverage:
-	$(call dirloop, coverage)
+	@echo "no coverage for agent_tests/Functional"
+
 
 clean:
-	$(call dirloop, clean)
+	rm -f *.xml
 
 .PHONY: all test coverage clean
