@@ -31,10 +31,10 @@ COVERAGE = copyright_cov.o \
            pair_cov.o \
 
 all: $(EXE)
-	@echo "make copyright agent_tests"
+	@echo "make copyright Unit agent_tests"
 
 test: $(EXE)
-	@echo "make copyright agent_tests"
+	@echo "make copyright Unit agent_tests"
 	./$(EXE)
 
 coverage: $(OBJECTS) libcopyright_cov.a run_tests.c
