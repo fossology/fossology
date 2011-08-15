@@ -79,6 +79,13 @@ int main  (int argc, char *argv[])
   memset(GlobalURL,'\0',MAXCMD);
   memset(GlobalParam,'\0',MAXCMD);
   GlobalUploadKey = -1;
+  int upload_pk = 0;           // the upload primary key
+  int Agent_pk;
+  int ars_pk = 0;
+  char *AgentARSName = "wget_agent_ars";
+  int rv;
+  char sqlbuf[1024]; 
+  PGresult *ars_result;
 
   fo_scheduler_connect(&argc, argv);
 
@@ -140,7 +147,8 @@ int main  (int argc, char *argv[])
     if (pgConn) PQfinish(pgConn);
     return(0);
   }
-
+  
+  Agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), 0, SVN_REV, agent_desc);
   /* Get the Agent Key from the DB */
   fo_GetAgentKey(pgConn, basename(argv[0]), GlobalUploadKey, SVN_REV, agent_desc);
 
@@ -184,9 +192,38 @@ int main  (int argc, char *argv[])
       Parm = fo_scheduler_current(); /* get piece of information, including upload_pk, downloadfile url, and parameters */
       if (Parm && Parm[0])
       {
+        /* does ars table exist?
+         * If not, create it.
+         */
+        rv = fo_tableExists(pgConn, AgentARSName);
+        if (!rv)
+        {
+          rv = fo_CreateARSTable(pgConn, AgentARSName);
+          if (!rv) return(0);
+        }  
+
+        /* check ars table if this is duplicate request*/
+        snprintf(sqlbuf, sizeof(sqlbuf),
+          "select ars_pk from pkgagent_ars,agent \
+          where agent_pk=agent_fk and ars_success=true \
+          and upload_fk='%d' and agent_fk='%d'",
+          upload_pk, Agent_pk);
+        ars_result = PQexec(pgConn, sqlbuf);
+        if (fo_checkPQresult(pgConn, ars_result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+        if (PQntuples(ars_result) > 0)
+        {
+          PQclear(ars_result);
+          WARNING("Ignoring requested wget_agent analysis of upload %d - Results are already in database.\n",upload_pk);
+          continue;
+        }
+        PQclear(ars_result);
+        /* Record analysis start in wget_agent_ars, the wget_agent audit trail. */
+        ars_pk = fo_WriteARS(pgConn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 0);
+
         fo_scheduler_heart(1);
         /* set globals: uploadpk, downloadfile url, parameters */
         SetEnv(Parm,TempFileDir);
+        upload_pk = GlobalUploadKey;
         char TempDir[MAXCMD];
         memset(TempDir,'\0',MAXCMD);
         snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
@@ -213,13 +250,15 @@ int main  (int argc, char *argv[])
           if (pgConn) PQfinish(pgConn);
           SafeExit(22);
         }
+        /* Record analysis success in wget_agent_ars. */
+        if (ars_pk) fo_WriteARS(pgConn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 1);
       }
     }
   } /* if run from scheduler */
 
   /* Clean up */
   if (pgConn) PQfinish(pgConn);
-  fo_scheduler_disconnect();
+  fo_scheduler_disconnect(0);
   return(0);
 } /* main() */
 
