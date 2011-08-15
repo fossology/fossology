@@ -814,6 +814,7 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
     EscapeString(temp, pi->description, sizeof(pi->description));
 
   fclose(fp);
+  free(repfile);
   return (0);
 }/* GetMetadataDebBinary(struct debpkginfo *pi) */
 

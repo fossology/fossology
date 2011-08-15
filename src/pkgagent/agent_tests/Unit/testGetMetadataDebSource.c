@@ -30,7 +30,7 @@ extern int GetMetadataDebSource(char *repFile, struct debpkginfo *pi);
  */
 void test_GetMetadataDebSource()
 {
-  char *repFile = "./testdata/fossology_1.4.1.dsc";
+  char *repFile = "../testdata/fossology_1.4.1.dsc";
   struct debpkginfo *pi;
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
   int predictValue = 0;
