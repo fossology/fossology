@@ -30,7 +30,7 @@ extern int GetMetadata(char *pkg, struct rpmpkginfo *pi);
  */
 void test_GetMetadata_normal()
 {
-  char *pkg = "./testdata/fossology-1.2.0-1.el5.i386.rpm";
+  char *pkg = "../testdata/fossology-1.2.0-1.el5.i386.rpm";
   struct rpmpkginfo *pi;
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   int predictValue = 0;
@@ -72,7 +72,7 @@ void test_GetMetadata_normal()
  */
 void test_GetMetadata_no_testfile()
 {
-  char *pkg = "./testdata/fossology_1.4.1.dsc";
+  char *pkg = "../testdata/fossology_1.4.1.dsc";
   struct rpmpkginfo *pi;
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   int predictValue = -1;

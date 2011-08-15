@@ -164,7 +164,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
  */
 int prepare_Repository()
 {
-  char *Source = "./testdata/control";
+  char *Source = "../testdata/control";
   char *Pfile = "F1D2319DF20ABC4CEB02CA5A3C2021BD87B26810.87972FC55E2CDD2609ED85051BE50BAF.722";
   if (!fo_RepExist("files",Pfile))
   {

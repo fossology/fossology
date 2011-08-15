@@ -185,6 +185,6 @@ int	main	(int argc, char *argv[])
   }
 
   PQfinish(db_conn);
-  fo_scheduler_disconnect();
+  fo_scheduler_disconnect(0);
   return(0);
 } /* main() */
