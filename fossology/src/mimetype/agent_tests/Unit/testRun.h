@@ -23,10 +23,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* for finder.c, start */
 extern CU_TestInfo testcases_DBCheckMime[];
+extern CU_TestInfo testcases_DBLoadMime[];
+extern CU_TestInfo testcases_DBFindMime[];
+extern CU_TestInfo testcases_CheckMimeTypes[];
+extern CU_TestInfo testcases_DBCheckFileExtention[];
+extern CU_TestInfo testcases_Utilities[];
+
+
 
 /* for DBCheckMime() */
 extern int DBCheckMimeInit();
 extern int DBCheckMimeClean();
+/* for DBLoadMime() */
+extern int DBLoadMimeInit();
+extern int DBLoadMimeClean();
+/* for DBFindMime() */
+extern int DBFindMimeInit();
+extern int DBFindMimeClean();
+/* for functions in testcases_DBCheckFileExtention */
+extern int DBInit();
+extern int DBClean();
 
 /* for finder.c, end */
 
@@ -35,9 +51,14 @@ extern int DBCheckMimeClean();
  */
 CU_SuiteInfo suites[] = {
     // for finder.c 
+    {"Testing the function DBCheckMime:", DBCheckMimeInit, DBCheckMimeClean, testcases_DBCheckMime},
 #if 0
 #endif
-    {"Testing the function DBCheckMime:", DBCheckMimeInit, DBCheckMimeClean, testcases_DBCheckMime},
+    {"Testing the function DBLoadMime:", DBLoadMimeInit, DBLoadMimeClean, testcases_DBLoadMime},
+    {"Testing the function DBFindMime:", DBFindMimeInit, DBFindMimeClean, testcases_DBFindMime},
+    {"Testing the function CheckMimeType:", DBInit, DBClean, testcases_CheckMimeTypes},
+    {"Testing the function DBCheckFileExtention:", DBInit, DBClean, testcases_DBCheckFileExtention},
+    {"Testing Utilities:", NULL, NULL, testcases_Utilities},
     CU_SUITE_INFO_NULL
 };
 
