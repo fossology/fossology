@@ -9,7 +9,10 @@ LOCALAGENTDIR=../../agent
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lmagic -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ -lcunit
 EXE=test_mimetype
 TEST_OBJ_RUN=testRun.o
-TEST_OBJ= ./finder/testDBCheckMime.o
+TEST_OBJ= ./finder/testDBCheckMime.o \
+          ./finder/testDBLoadMime.o \
+          ./finder/testDBFindMime.o \
+          ./finder/testOtheFunctions.o
 
 all: $(EXE)
 
@@ -24,11 +27,11 @@ $(TEST_OBJ): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
 	
 test: all $(EXE)
-	@echo "execute wget agent test"
+	@echo "execute mimetype test"
 	./$(EXE)
 
 coverage: libmimetype_cov.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) 
-	@echo "execute wget agent test and code coverage"
+	@echo "execute mimetype test and code coverage"
 	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
