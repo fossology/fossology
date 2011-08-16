@@ -82,6 +82,8 @@ class FoIntegration
    *
    * @param string $message The message to log.
    *
+   * @todo add in a time stamp for each entry written.
+   *
    * @return boolean, false if the write failed, true otherwise.
    *
    */
@@ -99,6 +101,24 @@ class FoIntegration
 } //fo_integration
 
 
+/**
+ *
+ * \brief make fossology, check for warnings and errors
+ *
+ * @param string $srcPath fully qualified path to the source tree, e.g.
+ * /home/myhome/fossology/src/
+ *
+ * @param string $logPath fully qualified path to the logfile, default is
+ * current working directory with filename fo_integration .log
+ *
+ * @return object reference or exception on failure.
+ *
+ * @todo if running in hudson, just to a make with output going to console and
+ * let jenkins count errors and warnings.
+ *
+ * @author markd
+ *
+ */
 class Build extends FoIntegration
 {
 
@@ -118,8 +138,10 @@ class Build extends FoIntegration
     {
       throw new exception("FATAL! can't cd to $this->srcPath\n");
     }
+    $this->log("Executing Make Clean\n");
     $mcLast = exec('make clean > make-clean.out 2>&1', $results, $rtn);
     //print "results of the make clean are:$rtn, $mcLast\n";
+    $this->log("Executing Make all\n");
     $makeLast = exec('make > make.out 2>&1', $results, $rtn);
     //print "results of the make are:$rtn, $makeLast\n"; print_r($results) . "\n";
     if ($rtn == 0)
