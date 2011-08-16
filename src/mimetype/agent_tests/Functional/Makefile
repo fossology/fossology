@@ -18,13 +18,15 @@ TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-TESTFILE = 
+TESTFILE = cliParamsTest4Mimetype.php 
+EXE_DIR = ../../agent/
 
 all:
+	$(MAKE) -C $(EXE_DIR)
 
 test: all
 	@echo "make mimetyme agent functional test"
-	@echo phpunit $(TESTFILE)
+	phpunit $(TESTFILE)
 
 coverage:
 	@echo "no coverage in mimetype for agent_test/Functional"
