@@ -30,7 +30,7 @@
  * Created on Jun 10, 2011 by Mark Donohoe
  */
 
-//require_once 'common-Report.php';
+require_once 'lib/common-Report.php';
 
 /**
  * \brief chdir to the supplied path or exit with a FATAL message
@@ -94,7 +94,6 @@ function backToParent($howFar)
   //echo "DB: output from check TD is:\n";print_r($tdOut) . "\n";
   if(is_null($WORKSPACE))
   {
-    // q test
     backToParent('..');
   }
   else {
@@ -113,18 +112,22 @@ function backToParent($howFar)
   // That is, just note it didn't find a dir and continue on?
   foreach($unitList as $unitTest)
   {
+    $makeOut = array();
+    $makeRtn = -777;
+    $makeCover = array();
+    $makeRtn = -777;
+    
     echo "DB: unit test is:$unitTest\n";
     $here = getcwd();
-    echo "We are now at:$here\n";
+    //echo "We are now at:$here\n";
 
-
-    if(chdir($unitTest . '/agent_tests/Unit') === FALSE)
+    if(@chdir($unitTest . '/agent_tests/Unit') === FALSE)
     {
       echo "Error! cannot cd to " . $unitTest . "/agent_tests/Unit, skipping test\n";
       continue;
     }
     $here = getcwd();
-    echo "Before unit test make we are at:$here\n";
+    //echo "Before unit test make we are at:$here\n";
     $lastMake = exec('make test 2>&1', $makeOut, $makeRtn);
     echo "results of make test are:\n";print_r($makeOut) . "\n";
     if($makeRtn != 0)
@@ -193,7 +196,7 @@ function backToParent($howFar)
         $xslFile = "CUnit-$type.xsl";
         // remove .xml from name
         $outFile = basename($fileName, '.xml');
-        $outPath = $WORKSPACE . "/fossology/tests/Reports/$outFile.html";
+        $outPath = $WORKSPACE . "/fossology/src/testing/reports/$outFile.html";
         $xslPath = "/usr/share/CUnit/$xslFile";
         $report = genHtml($fileName, $outPath, $xslPath);
         if(!empty($report))
