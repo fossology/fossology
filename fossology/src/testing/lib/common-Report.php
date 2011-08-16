@@ -20,7 +20,7 @@
  * \brief common-Report is a library that contains functions used for help
  * in reporting test results.
  *
- * @version "$Id: common-Report.php 4409 2011-06-15 17:10:01Z rrando $"
+ * @version "$Id: $"
  *
  * Created on Jun 9, 2011 by Mark Donohoe
  */
@@ -162,12 +162,13 @@ function genHtml($inFile=NULL, $outFile=NULL, $xslFile=NULL)
   if(array_key_exists('WORKSPACE', $_ENV))
   {
     $WORKSPACE = $_ENV['WORKSPACE'];
-    $cmdLine = $WORKSPACE . "/fossology/tests/Reports/hudson/xml2html.php " .
+    $cmdLine = $WORKSPACE . "/fossology/testing/reports/xml2html.php " .
       " -f $inFile -o $outFile -x $xslFile";
   }
   else {
-  // else running from fossology/tests
-  $cmdLine = "Reports/hudson/xml2html.php -f $inFile -o $outFile -x $xslFile";
+  // else running from fossology/src/testing
+  echo "**** DB: " . __FILE__ . " is at:" . getcwd() . "\n";
+  $cmdLine = "../../../testing/reports/xml2html.php -f $inFile -o $outFile -x $xslFile";
   }
   $last = exec("$cmdLine", $out, $rtn);
   //echo "Last line of output from xml2:\n$last\n";
