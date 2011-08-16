@@ -140,7 +140,9 @@ foreach($unitList as $unitTest)
     }
     else
     {
-      echo "Error! tests did not make for $unitTest\n";
+      echo "Error! tests did not make for $unitTest\nMake Transcript is:\n";
+      $makeErrors =  implode("\n", $makeOut);
+      echo $makeErrors . "\n\n";
       $failures++;
     }
     backToParent('../../..');
@@ -182,6 +184,7 @@ foreach($unitList as $unitTest)
       catch (Exception $e)
       {
         echo "Failure: Could not check file $fileName for failures\n";
+        continue;
       }
       // create html report for this file.... get List or Run string so the
       // correct xsl file is used.
@@ -211,7 +214,9 @@ foreach($unitList as $unitTest)
     $lastCover = exec('make coverage 2>&1', $makeCover, $coverRtn);
     if($coverRtn != 0)
     {
-      echo "Error! Coverage did not make for $unitTest\n";
+      echo "Error! Coverage did not make for $unitTest\nMake Transcript is:\n";
+      $coverErrors = implode("\n",$makeCover);
+      echo $coverErrors . "\n\n";
       $failures++;
       backToParent('../../../');
       continue;
