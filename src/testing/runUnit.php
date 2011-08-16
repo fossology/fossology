@@ -60,7 +60,7 @@ $modules = array();
 $unitList = array();
 
 // get the list of unit tests to run
-$modules = parse_ini_file('unitTests.ini',1);
+$modules = parse_ini_file('dataFiles/unitTests.ini',1);
 foreach($modules as $key => $value)
 {
   $unitList[] = $key;
