@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
-Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -20,10 +20,11 @@ Restrict usage: Every PHP file should have this
 at the very beginning.
 This prevents hacking attempts.
 *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
+
+/**
+ * \brief mimetype agent ui
+ * \class agent_mimetype
+ */
 
 define("TITLE_agent_mimetype", _("MIME-type Analysis (Determine mimetype of every file.  Not needed for licenses or buckets)"));
 
@@ -36,49 +37,63 @@ class agent_mimetype extends FO_Plugin {
     "db"
   );
   public $DBaccess = PLUGIN_DB_ANALYZE;
-  /***********************************************************
-  RegisterMenus(): Register additional menus.
-  ***********************************************************/
+  /**
+   * \brief Register additional menus.
+   */
   function RegisterMenus() {
     if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     } // don't run
     menu_insert("Agents::" . $this->Title, 0, $this->Name);
   }
-  /*********************************************
-  AgentCheck(): Check if the job is already in the
-  queue.  Returns:
-  0 = not scheduled
-  1 = scheduled but not completed
-  2 = scheduled and completed
-  *********************************************/
+
+  /**
+   * \brief check if the job is already in the
+   *  queue.  Returns:
+   * 0 = not scheduled
+   * 1 = scheduled but not completed
+   * 2 = scheduled and completed
+   * 
+   * \param $uploadpk - upload id
+   */
   function AgentCheck($uploadpk) {
-    global $DB;
-    $SQL = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job ON job_upload_fk = '$uploadpk' AND job_pk = jq_job_fk AND jq_type = 'mimetype';";
-    $Results = $DB->Action($SQL);
-    if (empty($Results[0]['jq_pk'])) {
+    global $PG_CONN;
+    $sql = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job ON job_upload_fk = '$uploadpk' AND job_pk = jq_job_fk AND jq_type = 'mimetype';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (empty($row['jq_pk'])) {
       return (0);
     }
-    if (empty($Results[0]['jq_endtime'])) {
+    if (empty($row['jq_endtime'])) {
       return (1);
     }
     return (2);
   } // AgentCheck()
-  /*********************************************
-  AgentAdd(): Given an uploadpk, add a job.
-  $Depends is for specifying other dependencies.
-  $Depends can be a jq_pk, or an array of jq_pks, or NULL.
-  Returns NULL on success, string on failure.
-  *********************************************/
+
+  /**
+   * \brief given an uploadpk, add a job.
+   **
+   * \param $uploadpk - upload id
+   * \param $Depends - for specifying other dependencies.
+   *  $Depends can be a jq_pk, or an array of jq_pks, or NULL.
+   * \param $Priority - Priority number
+   * 
+   * \return NULL on success, string on failure.
+   */
   function AgentAdd($uploadpk, $Depends = NULL, $Priority = 0) {
-    global $DB;
+    global $PG_CONN;
     /* Get dependency: "mimetype" require "adj2nest". */
-    $SQL = "SELECT jq_pk FROM jobqueue
+    $sql = "SELECT jq_pk FROM jobqueue
 	    INNER JOIN job ON job.job_upload_fk = '$uploadpk'
 	    AND job.job_pk = jobqueue.jq_job_fk
 	    WHERE jobqueue.jq_type = 'adj2nest';";
-    $Results = $DB->Action($SQL);
-    $Dep = $Results[0]['jq_pk'];
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    $Dep = $row['jq_pk'];
     if (empty($Dep)) {
       global $Plugins;
       $Unpack = & $Plugins[plugin_find_id("agent_unpack") ];
@@ -109,12 +124,7 @@ $text = _("Failed to insert job record");
       return ($text);
     }
     /* Add job: job "Default Meta Agents" has jobqueue item "mimetype" */
-    $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,
-	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
-	FROM uploadtree,pfile
-	WHERE uploadtree.pfile_fk = pfile.pfile_pk
-	   AND pfile_mimetypefk is NULL AND upload_fk = '$uploadpk'
-	LIMIT 5000;";
+    $jqargs = $uploadpk;
     $jobqueuepk = JobQueueAdd($jobpk, "mimetype", $jqargs, "yes", "a", $Dep);
     if (empty($jobqueuepk)) {
 $text = _("Failed to insert mimetype into job queue");
@@ -122,14 +132,15 @@ $text = _("Failed to insert mimetype into job queue");
     }
     return (NULL);
   } // AgentAdd()
-  /*********************************************
-  Output(): Generate the text for this plugin.
-  *********************************************/
+
+  /**
+   * \brief generate the text for this plugin.
+   */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    global $DB;
+    global $PG_CONN;
     $V = "";
     switch ($this->OutputType) {
       case "XML":
@@ -150,7 +161,7 @@ $text = _("Scheduling of Analysis failed: ");
           }
         }
         /* Get list of projects that are not scheduled for uploads */
-        $SQL = "SELECT upload_pk,upload_desc,upload_filename
+        $sql = "SELECT upload_pk,upload_desc,upload_filename
 		FROM upload
 		WHERE upload_pk NOT IN
 		(
@@ -162,8 +173,10 @@ $text = _("Scheduling of Analysis failed: ");
 		    ORDER BY upload_pk
 		)
 		ORDER BY upload_desc,upload_filename;";
-        $Results = $DB->Action($SQL);
-        if (empty($Results[0]['upload_pk'])) {
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        if (empty($row['upload_pk'])) {
           $V.= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
         }
         else {
@@ -174,6 +187,7 @@ $text = _("Scheduling of Analysis failed: ");
           $V.= _("Only uploads that are not already scheduled can be scheduled.\n");
 $text = _("Analyze:");
           $V.= "<p />\n$text <select name='upload'>\n";
+          $Results = pg_fetch_all($result);
           foreach($Results as $Row) {
             if (empty($Row['upload_pk'])) {
               continue;
@@ -186,6 +200,7 @@ $text = _("Analyze:");
             }
             $V.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
+          pg_free_result($result);
           $V.= "</select><P />\n";
 $text = _("Analyze");
           $V.= "<input type='submit' value='$text!'>\n";
