@@ -68,8 +68,8 @@ class parseFolderPath
    function countFiles()
    {
     /* Extract the folder path line from the page */
-    $regExp = "Folder<\/b>:.*";
-    $numberMatched = preg_match_all("|$regExp|", $this->page, $pathLines, PREG_SET_ORDER);
+    $regExp = "Folder<\/b>:.*?/font>";
+    $numberMatched = preg_match_all("|$regExp|s", $this->page, $pathLines, PREG_SET_ORDER);
     $this->filesWithLicense = $pathLines;
     //print "PFP:countFiles:matched is:$numberMatched\nFilesWithLicense:\n";
     //print_r($this->filesWithLicense) . "\n";
@@ -117,20 +117,28 @@ class parseFolderPath
       }
 
     }
-  }
+  } // parseFolderPath
+  
+  /**
+   * clean up the links to be usable
+   *
+   * @param array $list, the list to clean up
+   * @param int $matches, the size of the list
+   *
+   * @return array, the cleaned up list_bucket_files
+   *
+   * @todo fix the docs above to much more detailed.
+   */
   function _createRtnArray($list, $matches)
   {
     global $host;
-    /*
-     * if we have a match, the create return array, else return empty
-     * array
-     */
-    $size = count($list);
+
     /*
      * The last entry in the array is always a leaf name with no link
      * but it has to be cleaned up a bit....
      */
-    for ($i = 0; $i < $size; $i++)
+    
+    for ($i = 0; $i < $matches; $i++)
     {
       $cleanKey = trim($list[$i][2], "\/<>b");
       if (empty ($cleanKey))
@@ -155,7 +163,7 @@ class parseFolderPath
       }
     }
     return ($rtnList);
-  }
+  } // _createRtnArray
 
   public function setPage($page)
   {

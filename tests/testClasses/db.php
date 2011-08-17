@@ -26,12 +26,13 @@
  *
  * @param string $options e.g. db parameters user=foobar; password=ha;
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Jan 15, 2009
  */
 
 require_once (dirname(__FILE__) . '/../TestEnvironment.php');
+require_once (dirname(__FILE__) . '/../../ui/common/common-ui.php');
 
 global $URL;
 global $USER;
@@ -157,6 +158,8 @@ class db {
      * areas where better error checking can be done (e.g. where the @
      * is used)
      */
+    $uid = posix_getuid();
+    $uidInfo = posix_getpwuid($uid);
     $this->pg_rows = array ();
     if (!$this->_pg_conn) {
       return ($this->pg_rows); // think about this, is false better?
@@ -166,26 +169,14 @@ class db {
     }
 
     @ $result = pg_query($this->_pg_conn, $Sql);
+    DBCheckResult($result, $Sql, __FILE__, __LINE__);
 
-    /* Error handling */
-    if ($result == FALSE) {
-      $this->Error = 1;
-      //$PGError = pg_result_error_field($result, PGSQL_DIAG_SQLSTATE);
-      $PGError = pg_last_error($this->_pg_conn);
-      if ($this->Debug) {
-        print "--------\n";
-        print "DB-QU: SQL failed: $Sql\n";
-        print $PGError;
-      }
-      $this->pg_rows = 0;
-    }
-    else {
-      $this->Error = 0;
-      $this->pg_rows = pg_affected_rows($result);
-    }
+    $this->Error = 0;
+    $this->pg_rows = pg_affected_rows($result);
+
     /* if the query returned nothing then just return*/
     if (!isset ($result)) {
-      print "DB-QU: result not set!\n";
+      print "DB-Query: result not set!\n";
       return;
     }
     @ $rows = pg_fetch_all($result);

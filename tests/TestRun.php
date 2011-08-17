@@ -21,10 +21,6 @@
  * This class provides the methods needed to automate nightly
  * regressions tests for fossology using thi UI test suite.
  *
- * @param
- *
- * @return
- *
  * @version "$Id: TestRun.php 3579 2010-10-20 01:59:52Z rrando $"
  *
  * Created on Dec 18, 2008
@@ -91,6 +87,12 @@ class TestRun {
 		}
 	}
 
+	/**
+	 * \brief check out the top of trunk fossology sources.
+	 * Uses attribute set by the constructor.
+	 *
+	 * @return boolen
+	 */
 	public function checkOutTot() {
 
 		$Tot = 'svn co https://fossology.svn.sourceforge.net/svnroot/fossology/trunk/fossology';
@@ -239,9 +241,11 @@ class TestRun {
 		/**
 		 * stopScheduler
 		 *
-		 * Check to see if the scheduler is running, if so stop it:
+		 * \breief Check to see if the scheduler is running, if so stop it:
 		 * 1. stop it with the standard /etc/initd./fossology stop
 		 * 2. If it is still running find the pid and kill -9
+		 *
+		 * @return void
 		 */
 		public function stopScheduler() {
 			if ($this->checkScheduler() === $this->NotRunning) {

@@ -21,12 +21,34 @@
  * \brief Create an 'empty' test file for use in testing
  *
  * @version "$Id $"
+ *
+ * @todo need to add:
+ * - parameters, usage
+ * - log of what is getting created with what license
+ *
  * Created on Mar 15, 2011 by Mark Donohoe
  */
 
-$commentChar = NULL;
-$endChar = NULL;
+global $commentChar;
+global $endChar;
 
+ /*
+   * General flow:
+   * - use random suffix if none passed in.
+   * - create the default name, if none passed in
+   *   - Determine comment style
+   * - pick a license randomly
+   * - construct all needed file parts (choosing comment style before)
+   * - write the file.
+   *
+   */
+
+/*
+ * usage: createTestFiles($name, $suffix, $lic?)
+ * if no name, output is to stdout
+ * if no suffix, one is picked
+ * if name, used as a prefix so multiple names can be generated
+ */
 
 function createPHP($FD, $license)
 {
@@ -38,7 +60,7 @@ function createPHP($FD, $license)
   $startTag = "#!/usr/bin/php\n<?php\n";
   $endTag = "\n?>\n";
 
-  $sayHey = "echo \"Hello World!$newLine\"\n";
+  $sayHey = "echo \"Hello World!$newLine\";\n";
 
   if(empty($license))
   {
@@ -55,6 +77,18 @@ function createPerl($FD, $license)
 {
   global $commentChar;
   $startTag = "#!/usr/bin/perl\n";
+    
+  $sayHey = "print \"Hello World!$newLine\";\n";
+
+  if(empty($license))
+  {
+    $license = _("Copyright Randy Rando, licensed under the BSD license\n");
+  }
+  $cLic = $commentChar . "\n" . $license . "\n" . $endChar . "\n";
+  $body = $startTag . $cLic . $sayHey . $endTag;
+  //echo "Body is:\n$body\n";
+  $howMany = fwrite($FD,$body);
+  fclose($FD);
   echo "Perl files not implimented\n";
 }
 
