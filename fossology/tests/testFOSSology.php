@@ -214,6 +214,11 @@ if (array_key_exists("a", $options)) {
 		}
 		LogAndPrint($LF, "The Email Notification tests mail fail as a result\n");
 	}
+	$ctdLast = exec('./checkTestData.php', $ctdOut, $ctdRtn);
+	if($ctdRtn != 0)
+	{
+	  LogAndPrint($LF, "ERROR when running check4TestData, see previous errors\n");
+	}
 
 	if (chdir($SiteTests) === FALSE) {
 		LogandPrint($LF, "ALL Tests ERROR: can't cd to $SiteTests\n");
@@ -295,7 +300,7 @@ if (array_key_exists("a", $options)) {
 			LogAndPrint($LF, "ALL Tests ERROR: can't cd to $nomos\n");
 		}
 		// Nomos functional tests
-		$nomosTests = array('ckzend.php', 'verifyRedHat.php');
+		$nomosTests = array('ckZendTest.php', 'verifyRedHatTest.php');
 		foreach($nomosTests as $test)
 		{
 			$last = exec("fo-runTests -l $test -n 'Nomos Tests' >> $logFile 2>&1", $dummy, $rtn);
@@ -423,7 +428,8 @@ if (array_key_exists("v", $options)) {
 	}
 	print "calling verifyUploads with:$logFile\n";
 	if (!verifyUploads($logFile)) {
-		print "ERROR! verify upload tests had errors, please investigate\n";
+		print "NOTE: One or more verify upload tests had errors, please investigate\n";
+		echo "by running ui/tests/VerifyTests/runVerifyTests.php\n";
 		exit(1);
 	}
 	if (!is_null($rtn = saveResults())) {
@@ -475,6 +481,7 @@ function verifyUploads($logfile) {
 		LogAndPrint($VLF, $noVT);
 	}
 	fclose($VLF);
+	echo "Running runVerifyTests\n";
 	$VerifyLast = exec("./runVerifyTests.php >> $logfile 2>&1", $dummy, $Vrtn);
 	if($Vrtn == 0) {
 		return(TRUE);

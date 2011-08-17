@@ -17,27 +17,19 @@
  ***********************************************************/
 
 /**
- * bsam-uploads.php
+ * uplTestData
+ * \brief Upload Test data to the repo
  *
- *\brief (deprecated) bsam uploads.  Used by other tests to make sure
- * bsam  license counts are correct.  Sets mime, metadata and bsam license.
+ * Upload using upload from file, url.  Sets Mime-type, nomos and package
+ * agents.
  *
  * @param URL obtained from the test enviroment globals
  *
- * @version "$Id: uplTestData.php 2472 2009-08-24 19:35:52Z rrando $"
+ * @version "$Id: uplTestData.php 4132 2011-04-22 06:19:07Z rrando $"
  *
  * Created on Aug 15, 2008
  */
 
-/* Upload the following files from the fosstester home directory:
- * - simpletest_1.0.1.tar.gz
- * - gplv2.1
- * - Affero-v1.0
- * - http://www.gnu.org/licenses/gpl-3.0.txt
- * - http://www.gnu.org/licenses/agpl-3.0.txt
- */
-
-//require_once '/usr/local/simpletest/autorun.php';
 require_once ('fossologyTestCase.php');
 require_once ('TestEnvironment.php');
 
@@ -49,7 +41,7 @@ class uploadTestDataTest extends fossologyTestCase
   public $mybrowser;
   public $webProxy;
 
-    function setUp()
+  function setUp()
   {
     global $URL;
     $this->Login();
@@ -64,6 +56,9 @@ class uploadTestDataTest extends fossologyTestCase
     print "Creating Testing folder\n";
     $page = $this->mybrowser->get($URL);
     $this->createFolder(null, 'Testing', null);
+
+    print "Creating Copyright folder\n";
+    $this->createFolder(null, 'Copyright', null);
   }
 
   function testuploadTestDataTest() {
@@ -74,32 +69,23 @@ class uploadTestDataTest extends fossologyTestCase
     print "starting testUploadTestData\n";
     $rootFolder = 1;
     $upload = NULL;
-    $uploadList = array('TestData/archives/fossI16L518.tar.bz2',
-                        'TestData/archives/foss23D1F1L.tar.bz2',
-                        'TestData/licenses/gplv2.1',
-                        'TestData/licenses/Affero-v1.0');
-    $urlList = array('http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz',
-                     'http://www.gnu.org/licenses/gpl-3.0.txt',
-                     'http://www.gnu.org/licenses/agpl-3.0.txt',
-                     'http://osrb-1.fc.hp.com/~fosstester/fossDirsOnly.tar.bz2');
+    $uploadList = array('TestData/archives/foss23D1F1L.tar.bz2');
 
-    /* upload the archives using the upload from file menu */
+
+    /* upload the archives using the upload from file menu
+     *
+     * 1 = bucket agent
+     * 2 = copyright agent
+     * 3 = mime agent
+     * 4 = metadata agent
+     * 5 = nomos agent
+     * 6 = package agent
+     */
 
     print "Starting file uploads\n";
     foreach($uploadList as $upload) {
       $description = "File $upload uploaded by Upload Test Data Test";
-      $this->uploadFile('Testing', $upload, $description, null, '1,2,6');
-    }
-    /* Upload the urls using upload from url.  Check if the user specificed a
-     * web proxy for the environment.  If so, set the attribute. */
-    if(!(empty($PROXY)))
-    {
-      $this->webProxy = $PROXY;
-    }
-    print "Starting Url uploads\n";
-    foreach($urlList as $url)
-    {
-      $this->uploadUrl($rootFolder, $url, null, null, '1,2,6');
+      $this->uploadFile('Testing', $upload, $description, null, '1,2,3,4');
     }
   }
 }
