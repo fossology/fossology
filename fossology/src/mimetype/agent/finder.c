@@ -30,10 +30,10 @@ int Verbose=0;
 char SQL[MAXCMD];
 
 /** for the DB */
-PGresult *DBMime = NULL;	/* contents of mimetype */
-int  MaxDBMime=0;	/* how many rows in DBMime */
+PGresult *DBMime = NULL; /* contents of mimetype */
+int  MaxDBMime=0; /* how many rows in DBMime */
 PGconn *pgConn;
-int Agent_pk=-1;	/* agent identifier */
+int Agent_pk=-1; /* agent identifier */
 
 /** for /etc/mime.types */
 FILE *FMimetype=NULL;
@@ -52,7 +52,7 @@ char A[MAXCMD];
  *
  * \return char* - static string, tainted string.
  */
-char *	TaintString	(char *S)
+char * TaintString(char *S)
 {
   static char String[4096];
   int i;
@@ -75,17 +75,17 @@ char *	TaintString	(char *S)
 /**
  * \brief populate the DBMime table.
  */
-void	DBLoadMime	()
+void DBLoadMime()
 {
   if (DBMime) PQclear(DBMime);
-	memset(SQL, 0, MAXCMD);
+  memset(SQL, 0, MAXCMD);
   snprintf(SQL, MAXCMD-1, "SELECT mimetype_pk,mimetype_name FROM mimetype ORDER BY mimetype_pk ASC;");
-	DBMime =  PQexec(pgConn, SQL); /* SELECT */
-	if (fo_checkPQresult(pgConn, DBMime, SQL, __FILE__, __LINE__)) 
-	{
+  DBMime =  PQexec(pgConn, SQL); /* SELECT */
+  if (fo_checkPQresult(pgConn, DBMime, SQL, __FILE__, __LINE__)) 
+  {
     PQfinish(pgConn);
     exit(-1);
-	}
+  }
   MaxDBMime = PQntuples(DBMime);
 } /* DBLoadMime() */
 
@@ -97,10 +97,10 @@ void	DBLoadMime	()
  * \param char *Mimetype - mimetype_name
  * \return int - mimetype ID or -1 if not found.
  */
-int	DBFindMime	(char *Mimetype)
+int DBFindMime(char *Mimetype)
 {
   int i;
-	PGresult *result;
+  PGresult *result;
 
   if (!Mimetype || (Mimetype[0]=='\0')) return(-1);
   if (!DBMime) DBLoadMime();
@@ -119,12 +119,12 @@ int	DBFindMime	(char *Mimetype)
      prevent multiple mimetype agents from inserting the same data at the
      same type. */
   result = PQexec(pgConn, SQL);
-	if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
-	{
+  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
+  {
     PQfinish(pgConn);
     exit(-1);
-	}
-	PQclear(result);
+  }
+  PQclear(result);
 
   /* Now reload the mimetype table */
   DBLoadMime();
@@ -142,7 +142,7 @@ int	DBFindMime	(char *Mimetype)
  * the /etc/mime.types, add metatype to DB and return
  * DB index.  Otherwise, return -1.
  */
-int	CheckMimeTypes	(char *Ext)
+int CheckMimeTypes(char *Ext)
 {
   char Line[MAXCMD];
   int i;
@@ -156,10 +156,10 @@ int	CheckMimeTypes	(char *Ext)
 
   while(ReadLine(FMimetype,Line,MAXCMD) > 0)
   {
-    if (Line[0] == '#') continue;	/* skip comments */
+    if (Line[0] == '#') continue; /* skip comments */
     /* find the extension */
-    for(i=0; (Line[i] != '\0') && !isspace(Line[i]); i++)	;
-    if (Line[i] == '\0') continue;	/* no file types */
+    for(i=0; (Line[i] != '\0') && !isspace(Line[i]); i++);
+    if (Line[i] == '\0') continue; /* no file types */
     Line[i]='\0'; /* terminate the metatype */
     i++;
 
@@ -172,17 +172,17 @@ int	CheckMimeTypes	(char *Ext)
       /* Line[i-1] is always valid */
       /* if the previous character is not a word-space, then skip */
       if ((Line[i-1] != '\0') && !isspace(Line[i-1]))
-        continue;	/* not start of a type */
+        continue; /* not start of a type */
       /* if the first character does not match is a shortcut.
-	   if the string matches AND the next character is a word-space,
-	   then match. */
+      if the string matches AND the next character is a word-space,
+      then match. */
       if ((Line[i] == Ext[0]) && !strncasecmp(Line+i,Ext,ExtLen) &&
           ( (Line[i+ExtLen] == '\0') || isspace(Line[i+ExtLen]) )
       )
       {
         /* it matched! */
         if (Verbose) printf("DEBUG: Found mimetype by extension: '%s' = '%s'\n",Ext,Line);
-        return(DBFindMime(Line));	/* return metatype id */
+        return(DBFindMime(Line)); /* return metatype id */
       }
     }
   }
@@ -200,25 +200,25 @@ int	CheckMimeTypes	(char *Ext)
  *
  * \return int - return the mimetype id, or -1 if not found.
  */
-int	DBCheckFileExtention	()
+int DBCheckFileExtention()
 {
   int u, Maxu;
   char *Ext;
   int rc;
-	PGresult *result;
-	
+  PGresult *result;
+
   if (!FMimetype) return(-1);
 
   if (Akey >= 0)
   {
     memset(SQL,'\0',sizeof(SQL));
     snprintf(SQL,sizeof(SQL)-1,"SELECT distinct(ufile_name) FROM uploadtree WHERE pfile_fk = %d",Akey);
-		result = PQexec(pgConn, SQL);
+    result = PQexec(pgConn, SQL);
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
     {
       PQfinish(pgConn);
       exit(-1);
-		}
+    }
 
     Maxu = PQntuples(result);
     for(u=0; u<Maxu; u++)
@@ -231,7 +231,7 @@ int	DBCheckFileExtention	()
         if (rc >= 0) return(rc);
       }
     }
-		PQclear(result);
+    PQclear(result);
   } /* if using DB */
   else
   {
@@ -259,18 +259,18 @@ int	DBCheckFileExtention	()
  *
  * \return int - return -1 on error, or DB index to metatype.
  */
-int	GetDefaultMime	(char *MimeType, char *Filename)
+int GetDefaultMime(char *MimeType, char *Filename)
 {
   int i;
   FILE *Fin;
   int C;
 
   /* the common case: the default mime type is known already */
-  if (MimeType)	return(DBFindMime(MimeType));
+  if (MimeType) return(DBFindMime(MimeType));
 
   /* unknown mime, so find out what it is... */
   Fin = fopen(Filename,"rb");
-  if (!Fin)	return(-1);
+  if (!Fin) return(-1);
 
   i=0; 
   C=fgetc(Fin);
@@ -292,31 +292,31 @@ int	GetDefaultMime	(char *MimeType, char *Filename)
  *
  * \param char *Filename - the path of the file
  */
-void	DBCheckMime	(char *Filename)
+void DBCheckMime(char *Filename)
 {
   char MimeType[MAXCMD];
   char *MagicType;
   int MimeTypeID;
   int i;
-	PGresult *result;
+  PGresult *result;
 
   if (Akey >= 0)
   {
     memset(SQL,'\0',sizeof(SQL));
     snprintf(SQL,sizeof(SQL)-1,"SELECT pfile_mimetypefk FROM pfile WHERE pfile_pk = %d AND pfile_mimetypefk is not null;",Akey);
-		result =  PQexec(pgConn, SQL);
-		if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
-		{
+    result =  PQexec(pgConn, SQL);
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+    {
       PQfinish(pgConn);
       exit(-1);
-		}
+    }
 
     if (PQntuples(result) > 0)
     {
-		  PQclear(result);
+      PQclear(result);
       return;
     }
-		PQclear(result);
+    PQclear(result);
   } /* if using DB */
 
   /* Not in DB, so find out what it is... */
@@ -476,41 +476,6 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
 } /* GetFieldValue() */
 
 /**
- * \brief Convert field=value pairs into variables: A and Akey.
- * \param char *S - the string will be converted
- */
-void    SetEnv  (char *S)
-{
-  char Field[256];
-  char Value[1024];
-  int GotOther=0;
-  char *OrigS;
-
-  OrigS=S;
-  Akey=-1;
-  memset(A,'\0',sizeof(A));
-
-  while(S && (S[0] != '\0'))
-  {
-    S = GetFieldValue(S,Field,256,Value,1024);
-    if (Value[0] != '\0')
-    {
-      if (!strcasecmp(Field,"akey")) Akey=atoi(Value);
-      else if (!strcasecmp(Field,"a")) strncpy(A,Value,sizeof(A));
-      else GotOther=1;
-    }
-  }
-
-  if (GotOther || (Akey < 0) || (A[0]=='\0'))
-  {
-    printf("ERROR: Data is in an unknown format.\n");
-    printf("LOG: Unknown data: '%s'\n",OrigS);
-    PQfinish(pgConn);
-    exit(-1);
-  }
-} /* SetEnv() */
-
-/**
  * \brief read a line each time from one file
  *
  * \param FILE *Fin - the file stream
@@ -552,7 +517,7 @@ int ReadLine(FILE *Fin, char *Line, int MaxLine)
  *
  * \param char *Name - the name of the executable, ususlly it is mimetype
  */
-void	Usage	(char *Name)
+void Usage(char *Name)
 {
   printf("Usage: %s [options] [file [file [...]]\n",Name);
   printf("  -i   :: initialize the database, then exit.\n");
