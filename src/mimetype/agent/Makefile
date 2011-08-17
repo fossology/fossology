@@ -9,6 +9,7 @@ CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLA
 EXE=mimetype
 OBJECTS=finder.o
 HDIR=$(OBJS:.o=.h)
+TESTDIR=../agent_tests
 
 COVERAGE=$(OBJECTS:%.o=%_cov.o)
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology

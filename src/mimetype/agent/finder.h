@@ -27,14 +27,14 @@
 #include "libfossology.h"
 
 extern int Verbose;
-#define MAXCMD	256
+#define MAXCMD 256
 extern char SQL[MAXCMD];
 
 /** for the DB */
-extern PGresult *DBMime;	/* contents of mimetype table */
-extern int  MaxDBMime;	/* how many rows in DBMime */
+extern PGresult *DBMime; /* contents of mimetype table */
+extern int  MaxDBMime; /* how many rows in DBMime */
 extern PGconn *pgConn;
-extern int Agent_pk;	/* agent identifier */
+extern int Agent_pk; /* agent identifier */
 
 /** for /etc/mime.types */
 extern FILE *FMimetype;

@@ -86,9 +86,9 @@ class agent_mimetype extends FO_Plugin {
     global $PG_CONN;
     /* Get dependency: "mimetype" require "adj2nest". */
     $sql = "SELECT jq_pk FROM jobqueue
-	    INNER JOIN job ON job.job_upload_fk = '$uploadpk'
-	    AND job.job_pk = jobqueue.jq_job_fk
-	    WHERE jobqueue.jq_type = 'adj2nest';";
+            INNER JOIN job ON job.job_upload_fk = '$uploadpk'
+            AND job.job_pk = jobqueue.jq_job_fk
+            WHERE jobqueue.jq_type = 'adj2nest';";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
@@ -162,17 +162,17 @@ $text = _("Scheduling of Analysis failed: ");
         }
         /* Get list of projects that are not scheduled for uploads */
         $sql = "SELECT upload_pk,upload_desc,upload_filename
-		FROM upload
-		WHERE upload_pk NOT IN
-		(
-		  SELECT upload_pk FROM upload
-		  INNER JOIN job ON job.job_upload_fk = upload.upload_pk
-		  INNER JOIN jobqueue ON jobqueue.jq_job_fk = job.job_pk
-		    AND job.job_name = 'Default Meta Agents'
-		    AND jobqueue.jq_type = 'mimetype'
-		    ORDER BY upload_pk
-		)
-		ORDER BY upload_desc,upload_filename;";
+                FROM upload
+                WHERE upload_pk NOT IN
+                (
+                  SELECT upload_pk FROM upload
+                  INNER JOIN job ON job.job_upload_fk = upload.upload_pk
+                  INNER JOIN jobqueue ON jobqueue.jq_job_fk = job.job_pk
+                  AND job.job_name = 'Default Meta Agents'
+                  AND jobqueue.jq_type = 'mimetype'
+                  ORDER BY upload_pk
+                )
+                ORDER BY upload_desc,upload_filename;";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         $row = pg_fetch_assoc($result);
