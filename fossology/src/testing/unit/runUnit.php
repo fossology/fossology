@@ -30,7 +30,7 @@
  * Created on Jun 10, 2011 by Mark Donohoe
  */
 
-require_once 'lib/common-Report.php';
+require_once '../lib/common-Report.php';
 
 /**
  * \brief chdir to the supplied path or exit with a FATAL message
@@ -60,7 +60,7 @@ $modules = array();
 $unitList = array();
 
 // get the list of unit tests to run
-$modules = parse_ini_file('dataFiles/unitTests.ini',1);
+$modules = parse_ini_file('../dataFiles/unitTests.ini',1);
 foreach($modules as $key => $value)
 {
   $unitList[] = $key;
