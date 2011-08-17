@@ -20,7 +20,7 @@
  * \brief common-Report is a library that contains functions used for help
  * in reporting test results.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Jun 9, 2011 by Mark Donohoe
  */
@@ -84,7 +84,7 @@ function check4Failures($xmlFile=NULL)
  *@return null on success, array of testcase names that failed on failure
  * Throws exception if input file does not exist.
  *
- * @version "$Id: common-Report.php 4409 2011-06-15 17:10:01Z rrando $"
+ * @version "$Id$"
  *
  * Created on Jun 9, 2011 by Mark Donohoe
  */
