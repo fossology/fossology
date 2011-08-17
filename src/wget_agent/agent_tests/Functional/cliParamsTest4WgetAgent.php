@@ -25,8 +25,6 @@
  */
 require_once '/usr/share/php/PHPUnit/Framework.php';
 
-global $GlobalReady;
-$GlobalReady=TRUE;
 $TEST_RESULT_PATH = "./test_result";
 
 /**
@@ -48,7 +46,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     }
     else
     {
-      $this->assertFileExists($upStream,
+      $this->assertFileExists($WGET_PATH,
       $message = 'FATAL: cannot find executable file, stop testing\n');
     }
     // run it
