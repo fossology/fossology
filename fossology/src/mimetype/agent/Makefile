@@ -17,7 +17,7 @@ MODULEDIR = $(shell dirname `pwd`)
 
 all: $(EXE)
 
-$(EXE): mimetype.c libmimetype.a $(DB) $(REPO) $(VARS)
+$(EXE): mimetype.c $(FOLIB)libmimetype.a $(DB) $(REPO) $(VARS)
 	@echo "make $(EXE)"
 	$(CC) mimetype.c libmimetype.a $(CFLAGS_LOCAL) -o $@
 
