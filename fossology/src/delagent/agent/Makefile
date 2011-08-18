@@ -1,35 +1,61 @@
 # FOSSology Makefile - agent/delagent
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
-TOP=../..
+TOP=../../..
 
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
+TESTDIRS=../agent_tests
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
+CFLAGS_LOCAL=$(ALL_CFLAGS) -lpq
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
+MODULEDIR = $(shell dirname `pwd`)
+
 EXE=delagent
+HDRS=delagent.h
 
 all: $(EXE)
+	@echo "make delagent agent and test"
 
-$(EXE): %: %.c $(DB) $(REPO) $(VARS)
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+$(EXE): %: %.c $(FOLIB) delagent.o $(VARS) $(HDRS)
+	@echo "make delagent agent"
+	$(CC) $< delagent.o $(CFLAGS_LOCAL) -o $@
+
+delagent.o: util.c $(HDRS)
+	$(CC) -c $< $(CFLAGS_LOCAL) -o $@
+
+#######################
+# library build rules #
+#######################
+$(FOLIB):
+	$(MAKE) -c $(FOLIBDIR)
 
 install: all
+	@echo "make delagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	@if test ! -e $(CONFDIR)/mods-enabled/delagent; then \
+          ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled/delagent ; fi;
 
 uninstall:
+	@echo "make delagent agent uninstall"
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+	rm -f $(CONFDIR)/mods-enabled/delagent
 
 test: all
-	@echo "*** No tests available for agent/$(EXE) ***"
+	$(MAKE) -c $(TESTDIRS) test
 
-coverage:
-	@echo "NOTICE: no coverage available for delagent"
+coverage: delagent_cov.o
+	$(MAKE) -c $(TESTDIRS) coverage
+
+delagent_cov.o: util.c $(HDRS)
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
 clean:
+	@echo "make delagent agent clean"
 	rm -f $(EXE) *.o core
+	$(MAKE) -C $(TESTDIRS) clean
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean test coverage
