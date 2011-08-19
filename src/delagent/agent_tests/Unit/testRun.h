@@ -23,10 +23,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* for util.c, start */
 extern CU_TestInfo testcases_ListFolders[];
+extern CU_TestInfo testcases_DeleteFolders[];
 
-/* Database and Repository Init and Clean */
+/* Database Init and Clean */
 int DelagentDBInit();
 int DelagentDBClean();
+/* Database and RepositoryInit and Clean */
+int DelagentInit();
+int DelagentClean();
 
 /* for util.c, end */
 
@@ -35,6 +39,7 @@ int DelagentDBClean();
  */
 CU_SuiteInfo suites[] = {
     {"Testing the function ListFolders:", DelagentDBInit, DelagentDBClean, testcases_ListFolders},
+    {"Testing the function DeleteFolders:", DelagentInit, DelagentClean, testcases_DeleteFolders},
     CU_SUITE_INFO_NULL
 };
 
