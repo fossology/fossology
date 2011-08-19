@@ -35,4 +35,11 @@ coverage:
 clean:
 	$(call dirloop,clean)
 
+install:
+	@echo "No mimetype agent_tests install"
+
+uninstall:
+	@echo "No mimetype agent_tests uninstall"
+
+
 .PHONY: all test coverage clean

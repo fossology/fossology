@@ -1,4 +1,4 @@
-# FOSSology Makefile - test for wget_agent
+# FOSSology Makefile - test for mimetype 
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 TOP=../../../..
 VARS=$(TOP)/Makefile.conf

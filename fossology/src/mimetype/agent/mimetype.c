@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
       Parm = fo_scheduler_current();
       if (Parm && Parm[0])
       {
+        fo_scheduler_heart(1);
         upload_pk = atoi(Parm);
         /* does ars table exist?
          * If not, create it.
@@ -156,7 +157,7 @@ int main(int argc, char *argv[])
         }
         PQclear(result);
 
-        /* Record analysis start in pkgagent_ars, the pkgagent audit trail. */
+        /* Record analysis start in mimetype_ars, the mimetype audit trail. */
         ars_pk = fo_WriteARS(pgConn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 0);
 
         /** get all pfile ids on a upload record */
