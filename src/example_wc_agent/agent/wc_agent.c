@@ -19,10 +19,10 @@
 
  /**
   * /brief the word count agent, count the word count for one file
-  *  This should be used directly from the scheduler.
-  *  Each line from the scheduler should have two components:
-  *  pfile= and pfile_fk=
-  * TODO on what get from the scheduler
+  *  This should be used directly from the scheduler, do not support running from command line.
+  *  wc_agent get upload_id from the scheduler, then get all pfiles (the pfiles are belonging to this upload) 
+  *  which are not in the table agent_wc. if one pfile already in the table, it means that we arleady counted the word count
+  *  for this pfile, ignore it
   */
 
 #include <stdlib.h>
@@ -42,118 +42,43 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
 #define MAXCMD  2048
 
 /* for the DB */
-void *DB=NULL;
+void *pgConn = NULL;
 
 /* input for this system */
 long GlobalPfileFk=-1; /* the pfile_fk to process */
 char GlobalPfile[MAXCMD]; /* the pfile (sha1.md5.len) to process */
 
-
-/**********************************************
- GetFieldValue(): Given a string that contains
- field='value' pairs, save the items.
- Returns: pointer to start of next field, or NULL at \0.
- **********************************************/
-char * GetFieldValue(char *Sin, char *Field, int FieldMax,
-    char *Value, int ValueMax, char Separator)
+/**
+ * \brief check if the pfile_id is a file
+ * 
+ * \param long mode - mode of the pfile, if is from ufile_mode in table upload_tree
+ * container=1<<29, artifact=1<<28, project=1<<27, replica(same pfile)=1<<26, package=1<<25,directory=1<<18 
+ *
+ * \return 1 on yes, is a file; 0 on no,  not a file
+ */
+int IsFile(long mode)
 {
-  int s,f,v;
-  int GotQuote;
+ /** 
+  * if ((mode & 1<<18) + (mode & 0040000) != 0), is dir
+  * if ((mode & 1<<28) != 0), is artifact
+  * if ((mode & 1<<29) != 0), is container
+  * a file is not dir, artifact, and container
+  */
+ if (((mode & 1<<18) + (mode & 0040000) == 0) && ((mode & 1<<28) == 0) && ((mode & 1<<29) != 0)) return 1;
+ else return 0;
+}
 
-  memset(Field,0,FieldMax);
-  memset(Value,0,ValueMax);
-
-  while(isspace(Sin[0])) Sin++; /* skip initial spaces */
-  if (Sin[0]=='\0') return(NULL);
-  f=0; v=0;
-
-  for(s=0; (Sin[s] != '\0') && !isspace(Sin[s]) && (Sin[s] != '='); s++)
-  {
-    Field[f++] = Sin[s];
-  }
-  while(isspace(Sin[s])) s++; /* skip spaces after field name */
-  if (Sin[s] != Separator) /* if it is not a field, then just return it. */
-  {
-    return(Sin+s);
-  }
-  if (Sin[s]=='\0') return(NULL);
-  s++; /* skip '=' */
-  while(isspace(Sin[s])) s++; /* skip spaces after '=' */
-  if (Sin[s]=='\0') return(NULL);
-
-  GotQuote='\0';
-  if ((Sin[s]=='\'') || (Sin[s]=='"'))
-  {
-    GotQuote = Sin[s];
-    s++; /* skip quote */
-    if (Sin[s]=='\0') return(NULL);
-  }
-  if (GotQuote)
-  {
-    for( ; (Sin[s] != '\0') && (Sin[s] != GotQuote); s++)
-    {
-      if (Sin[s]=='\\') Value[v++]=Sin[++s];
-      else Value[v++]=Sin[s];
-    }
-  }
-  else
-  {
-    /* if it gets here, then there is no quote */
-    for( ; (Sin[s] != '\0') && !isspace(Sin[s]); s++)
-    {
-      if (Sin[s]=='\\') Value[v++]=Sin[++s];
-      else Value[v++]=Sin[s];
-    }
-  }
-  while(isspace(Sin[s])) s++; /* skip spaces */
-  return(Sin+s);
-} /* GetFieldValue() */
-
-/**********************************************
- SetEnv(): Convert input pairs from the scheduler
- into globals.
- **********************************************/
-void SetEnv(char *S)
-{
-  char Field[256];
-  char Value[1024];
-  int GotOther=0;
-  char *OrigS;
-
-  GlobalPfileFk = -1;
-  memset(GlobalPfile,'\0',MAXCMD);
-  if (!S) return;
-  OrigS=S;
-
-  while(S && (S[0] != '\0'))
-  {
-    S = GetFieldValue(S,Field,256,Value,1024,'=');
-    if (Value[0] != '\0')
-    {
-      if (!strcasecmp(Field,"pfile_fk")) GlobalPfileFk=atol(Value);
-      else if (!strcasecmp(Field,"pfile")) strncpy(GlobalPfile,Value,sizeof(GlobalPfile));
-      else GotOther=1;
-    }
-  }
-
-  if (GotOther || (GlobalPfileFk < 0) || (GlobalPfile[0]=='\0'))
-  {
-    printf("ERROR: Data is in an unknown format.\n");
-    printf("LOG: Unknown data: '%s'\n",OrigS);
-    fflush(stdout);
-    DBclose(DB);
-    exit(-1);
-  }
-} /* SetEnv() */
-
-
-/***********************************************
- ProcessData(): This function does the work.
- In this example, we'll just run wc and store the
- results in the database.
- Requires: DB open and ready.
- Returns 0 on success, != 0 on failure.
- ***********************************************/
+/** 
+ * \brief This function does the work.
+ * In this example, we'll just run wc and store the
+ * results in the database.
+ * Requires: DB open and ready.
+ * 
+ * \param long PfileFk - pfile id 
+ * \param char * Pfile - the file path in repo
+ *
+ * \return 0 on success, != 0 on failure.
+ */
 int ProcessData(long PfileFk, char *Pfile)
 {
   char *RepFile;
@@ -161,15 +86,15 @@ int ProcessData(long PfileFk, char *Pfile)
   char SQL[MAXCMD];
   long Bytes,Words,Lines;
   FILE *Fin;
+  PGresult *result;
 
   /* Get the path to the actual file */
-  RepFile = RepMkPath("files",Pfile);
+  RepFile = fo_RepMkPath("files",Pfile);
   if (!RepFile)
   {
-    printf("FATAL pfile %ld Word count unable to open file.\n",GlobalPfileFk);
+    FATAL("pfile %ld Word count unable to open file.\n",GlobalPfileFk);
     printf("LOG pfile %ld Word count unable to open file: pfile_fk=%ld pfile=%s\n",GlobalPfileFk,GlobalPfileFk,GlobalPfile);
-    fflush(stdout);
-    DBclose(DB);
+    PQfinish(pgConn);
     exit(-1);
   }
 
@@ -181,10 +106,9 @@ int ProcessData(long PfileFk, char *Pfile)
   Fin = popen(Cmd,"r");
   if (!Fin)
   {
-    printf("FATAL pfile %ld Word count unable to count words.\n",GlobalPfileFk);
+    FATAL("pfile %ld Word count unable to count words.\n",GlobalPfileFk);
     printf("LOG pfile %ld Word count unable to run command: %s\n",GlobalPfileFk,Cmd);
-    fflush(stdout);
-    DBclose(DB);
+    PQfinish(pgConn);
     exit(-1);
   }
 
@@ -192,7 +116,7 @@ int ProcessData(long PfileFk, char *Pfile)
   fscanf(Fin,"%ld %ld %ld",&Lines,&Words,&Bytes);
 
   /* Store the results */
-  if (!DB)
+  if (!pgConn)
   {
     printf("%s:  Bytes=%ld  Words=%ld  Lines=%ld\n",Pfile,Bytes,Words,Lines);
   }
@@ -202,36 +126,33 @@ int ProcessData(long PfileFk, char *Pfile)
     memset(Cmd,'\0',MAXCMD);
     snprintf(Cmd,MAXCMD,"INSERT INTO agent_wc (pfile_fk,wc_words,wc_lines) VALUES (%ld,%ld,%ld);",
         PfileFk,Words,Lines);
-    switch(DBaccess(DB,SQL))
+    result =  PQexec(pgConn, SQL);
+    if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
     {
-      case 1: /* Select worked! */
-      case 0: /* Insert worked! */
-      case -1: /* Constraint error */
-        /* Do nothing */
-        break;
-      case -2: /* Other error */
-      case -3: /* Timeout */
-      default: /* any other error */
-        printf("FATAL pfile %ld Database insert failed.\n",GlobalPfileFk);
-        printf("LOG pfile %ld Database insert failed: %s\n",GlobalPfileFk,SQL);
-        fflush(stdout);
-        DBclose(DB);
-        exit(-1);
+      FATAL("pfile %ld Database insert failed.\n",GlobalPfileFk);
+      printf("LOG pfile %ld Database insert failed: %s\n",GlobalPfileFk,SQL);
+      PQfinish(pgConn);
+      exit(-1);
     }
+    PQclear(result);
   }
 
   /* Clean up */
   pclose(Fin);
-  free(RepFile);
+  if(RepFile)
+  {
+    free(RepFile);
+    RepFile = NULL;
+  }
   return(0);
 } /* ProcessData() */
 
-/***********************************************
- Usage(): Say how to run this program.
- Many agents permit running from the command-line
- for testing.
- At minimum, you need "-i" to initialize the DB and exit.
- ***********************************************/
+/**
+ * \brief Say how to run this program.
+ *  Many agents permit running from the command-line
+ *  for testing.
+ *  At minimum, you need "-i" to initialize the DB and exit.
+ */
 void Usage(char *Name)
 {
   printf("Usage: %s [options]\n",Name);
@@ -245,8 +166,20 @@ int main(int argc, char *argv[])
 {
   int c;
   int InitFlag=0; /* is the system just going to initialize? */
-  char Parm[MAXCMD];
+  char *Parm = NULL;
   char *agent_desc = "File character, line, word count.";
+  int pfile_count = 0;
+  int Agent_pk = 0;
+  int ars_pk = 0;
+
+  int upload_pk = 0;           // the upload primary key
+  char *AgentARSName = "wc_agent_ars";
+  int rv;
+  PGresult *result;
+  char sqlbuf[MAXCMD];
+
+  /** initialize the scheduler connection */
+  fo_scheduler_connect(&argc, argv);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"i")) != -1)
@@ -263,55 +196,104 @@ int main(int argc, char *argv[])
   }
 
   /* Init */
-  DB = DBopen();
-  if (!DB)
+  pgConn = fo_dbconnect();
+  if (!pgConn )
   {
-    printf("FATAL: Unable to connect to database\n");
-    fflush(stdout);
+    FATAL("Unable to connect to database\n");
     exit(-1);
   }
-  GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
+  fo_GetAgentKey(pgConn , basename(argv[0]), 0, SVN_REV, agent_desc);
 
   /* When initializing the DB, don't do anything else */
   if (InitFlag)
   {
-    DBclose(DB);
+    PQfinish(pgConn);
     return(0);
   }
 
   /* Run from scheduler! */
   if (optind == argc)
   {
-    signal(SIGALRM,ShowHeartbeat);
-
-    printf("OK\n"); /* inform scheduler that we are ready */
-    fflush(stdout);
-    alarm(60);
-    while(ReadLine(stdin,Parm,MAXCMD) >= 0)
+    while(fo_scheduler_next())
     {
+      Parm = fo_scheduler_current();
       if (Parm[0] != '\0')
       {
-        alarm(0);       /* allow scheduler to know if this hangs */
-        Heartbeat(0);
-        /* 2 parameters: pfile_fk and pfile */
-        SetEnv(Parm); /* set globals */
-        if (ProcessData(GlobalPfileFk,GlobalPfile) != 0)
+        
+        fo_scheduler_heart(1);
+        /* 1 parameter: upload_pk */
+        upload_pk = atoi(Parm);
+        /* does ars table exist?
+         * If not, create it.
+         */
+        rv = fo_tableExists(pgConn, AgentARSName);
+        if (!rv)
         {
-          printf("FATAL pfile %ld Word count failed.\n",GlobalPfileFk);
-          printf("LOG pfile %ld Word count failed: pfile_fk=%ld pfile=%s\n",GlobalPfileFk,GlobalPfileFk,GlobalPfile);
-          fflush(stdout);
-          DBclose(DB);
+          rv = fo_CreateARSTable(pgConn, AgentARSName);
+          if (!rv) return(0);
+        }
+
+        /* check ars table if this is duplicate request*/
+        memset(sqlbuf, 0, sizeof(sqlbuf));
+        snprintf(sqlbuf, sizeof(sqlbuf),
+            "select ars_pk from wc_agent_ars,agent \
+            where agent_pk=agent_fk and ars_success=true \
+            and upload_fk='%d' and agent_fk='%d'",
+            upload_pk, Agent_pk);
+        result = PQexec(pgConn, sqlbuf);
+        if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) 
+        {
+          PQfinish(pgConn);
           exit(-1);
         }
-        printf("OK\n"); /* inform scheduler that we are ready */
-        fflush(stdout);
-        alarm(60);
+        if (PQntuples(result) > 0)
+        {
+          PQclear(result);
+          WARNING("Ignoring requested wc_agent analysis of upload %d - Results are already in database.\n",upload_pk);
+          continue;
+        }
+        PQclear(result);
+        /* Record analysis start in wc_agent_ars, the wc_agent audit trail. */
+        ars_pk = fo_WriteARS(pgConn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 0);
+
+        /** get all pfile ids on a upload record */
+        memset(sqlbuf, 0, sizeof(sqlbuf));
+        snprintf(sqlbuf, sizeof(sqlbuf), "SELECT DISTINCT(pfile_pk) as pfile_id, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile_path, ufile_mode FROM uploadtree, pfile  WHERE uploadtree.pfile_fk = pfile.pfile_pk AND pfile.pfile_pk not in(SELECT pfile_fk from agent_wc) AND upload_fk = '%d' LIMIT 5000;", upload_pk);
+        result = PQexec(pgConn, sqlbuf);
+        if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) 
+        {
+          PQfinish(pgConn);
+          exit(-1);
+        }
+        pfile_count = PQntuples(result);
+        int i;
+        long ufile_mode =  0;
+        for(i=0; i < pfile_count; i++)
+        {
+          ufile_mode = atoi(PQgetvalue(result, i, 2));
+          if (IsFile(ufile_mode)) /**< is a file? */
+          {
+            GlobalPfileFk = atoi(PQgetvalue(result, i, 0));
+            strncpy(GlobalPfile, PQgetvalue(result, i, 1), sizeof(GlobalPfile));
+            if (ProcessData(GlobalPfileFk,GlobalPfile) != 0)
+            {
+              FATAL("pfile %ld Word count failed.\n",GlobalPfileFk);
+              printf("LOG pfile %ld Word count failed: pfile_fk=%ld pfile=%s\n",GlobalPfileFk,GlobalPfileFk,GlobalPfile);
+              PQfinish(pgConn);
+              PQclear(result);
+              exit(-1);
+            }
+          }
+        }
+        PQclear(result);
       }
     }
   } /* if run from scheduler */
 
   /* Clean up */
-  DBclose(DB);
+  fo_config_free();
+  PQfinish(pgConn);
+  fo_scheduler_disconnect(0);
   return(0);
 } /* main() */
 

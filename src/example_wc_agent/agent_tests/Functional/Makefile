@@ -26,8 +26,8 @@ all:
 	$(MAKE) -C $(EXE_DIR)
 
 test: all
-	@echo "make $(AGENT_NAME) functional test"
-	phpunit $(TESTFILE)
+	@echo "no $(AGENT_NAME) functional test"
+#	phpunit $(TESTFILE)
 
 coverage:
 	@echo "no coverage in $(AGENT_NAME) functional test"
