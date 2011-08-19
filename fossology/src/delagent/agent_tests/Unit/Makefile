@@ -9,7 +9,7 @@ LOCALAGENTDIR=../../agent
 CFLAGS_LOCAL=-lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit
 EXE=test_delagent
 TEST_OBJ_RUN=testRun.o
-TEST_OBJ=testListFolders.o
+TEST_OBJ=testListFolders.o testDeleteFolders.o
 
 all: $(EXE)
 

@@ -43,7 +43,7 @@ int DelagentDBInit()
   if (rc != 0)
   {
     printf("Database initialize ERROR!\n");
-    exit(-1);
+    return -1; 
   }
 
   return 0;
@@ -62,7 +62,52 @@ int DelagentDBClean()
   if (rc != 0)
   {
     printf("Database clean ERROR!\n");
-    exit(-1);
+    return -1;
+  }
+
+  return 0;
+}
+
+/**
+ * \brief init db and repo
+ */
+int DelagentInit()
+{
+  char CMD[256];
+  int rc;
+
+  if (DelagentDBInit()!=0) return -1;
+
+  memset(CMD, '\0', sizeof(CMD));
+  sprintf(CMD, "su fossy -c 'sh testInitRepo.sh'");
+  rc = system(CMD);
+  if (rc != 0)
+  {
+    printf("Repository Init ERROR!\n");
+    DelagentDBClean();
+    return -1;
+  }
+
+  return 0;
+}
+
+/**
+ * \brief clean db and repo
+ */
+int DelagentClean()
+{
+  char CMD[256];
+  int rc;
+
+  if (DelagentDBClean()!=0) return -1;
+
+  memset(CMD, '\0', sizeof(CMD));
+  sprintf(CMD, "su fossy -c 'sh testCleanRepo.sh'");
+  rc = system(CMD);
+  if (rc != 0)
+  {
+    printf("Repository Clean ERROR!\n");
+    return -1;
   }
 
   return 0;

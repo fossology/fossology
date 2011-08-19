@@ -24,7 +24,7 @@ if [ "$UID" != "fossy" ];then
   exit 1
 fi
 
-echo $UID
+#echo $UID
 
 createdb fossologytest
 if [ $? -ne 0 ];

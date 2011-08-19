@@ -16,8 +16,6 @@
 #51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #*********************************************************************/
 
-VARS=../../../../Makefile.conf
-
 UID=`id -un`
 if [ "$UID" != "fossy" ];then
   echo "Must be fossy to run this script."
@@ -26,16 +24,7 @@ fi
 
 #echo $UID
 
-dropdb fossologytest
-if [ $? -ne 0 ];
-then
-  echo "Delete Test database Error!"
-  exit 1
-fi
+tar -xf ../testdata/testrepo_gold.tar -C /srv/fossology/repository/localhost/
+tar -xf ../testdata/testrepo_files.tar -C /srv/fossology/repository/localhost/
 
-PREFIX=`cat $VARS|grep -i '^PREFIX'|awk -F = '{print $2}'`
-cp $PREFIX/etc/fossology/Db.conf ~/
-sed -i 's/fossologytest/fossology/' ~/Db.conf
-cp ~/Db.conf $PREFIX/etc/fossology/Db.conf
-
-echo "Clean Test database success!"
+echo "Create Test Repository success!"

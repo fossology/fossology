@@ -21,50 +21,52 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 
 /**
- * \file testListFolders.c
- * \brief testing for the function ListFolders and ListUploads
+ * \file testDeleteFolders.c
+ * \brief testing for the function DeleteFolders and DeleteUploads
  */
 
-extern void ListFolders();
-extern void ListUploads();
+extern void DeleteFolder(long FolderId);
+extern void DeleteUpload(long UploadId);
 
 /* test functions */
 
 /**
- * \brief for function ListFolders
+ * \brief for function DeleteFolders
  */
-void testListFolders()
+void testDeleteFolders()
 {
+  long FolderId = 5;
   db_conn = fo_dbconnect();
   /** exectue the tested function */
-  ListFolders();
+  DeleteFolder(FolderId);
 
   PQfinish(db_conn);
-  CU_PASS("ListFolders PASS!");
+  CU_PASS("DeleteFolders PASS!");
 }
 
 /**
- * \brief for function ListUploads
+ * \brief for function DeleteUploads
  */
-void testListUploads()
+void testDeleteUploads()
 {
+  long UploadId = 85;
   db_conn = fo_dbconnect();
   /** exectue the tested function */
-  ListUploads();
+  DeleteUpload(UploadId);
 
   PQfinish(db_conn);
-  CU_PASS("ListUploads PASS!");
+  CU_PASS("DeleteUploads PASS!");
 }
 
 /**
- * \brief testcases for function ListFolders
+ * \brief testcases for function Delete
  */
-CU_TestInfo testcases_ListFolders[] =
+CU_TestInfo testcases_DeleteFolders[] =
 {
 #if 0
 #endif
-{"Testing the function ListFolders:", testListFolders},
-{"Testing the function ListUploads:", testListUploads},
+{"Testing the function DeleteFolders:", testDeleteFolders},
+{"Testing the function DeleteUploads:", testDeleteUploads},
   CU_TEST_INFO_NULL
 };
 
