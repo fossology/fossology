@@ -19,6 +19,10 @@ AGENT_NAME = example_wc_agent
 
 all:
 	@echo "No $(AGENT_NAME) agent unit test"
+test:
+	@echo "No $(AGENT_NAME) agent unit test"
+coverage:
+	@echo "No $(AGENT_NAME) agent unit coverage"
 clean:
 	@echo "No $(AGENT_NAME) agent unit clean"
 install:

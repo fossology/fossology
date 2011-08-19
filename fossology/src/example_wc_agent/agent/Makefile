@@ -7,17 +7,32 @@ include $(VARS)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS)
 EXE=wc_agent
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
+MODULEDIR = $(shell dirname `pwd`)
 
 all: $(EXE)
 
-$(EXE): %: %.c $(DB) $(REPO) $(VARS)
+$(EXE): %: %.c $(FOLIB) $(DB) $(REPO) $(VARS)
+	@echo "make $(EXE)"
 	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
+#######################
+# library build rules #
+#######################
+$(FOLIB):
+	$(MAKE) -C $(FOLIBDIR)
+
 install: all
+	@echo "make $(EXE) install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	@if test ! -e $(CONFDIR)/mods-enabled/wc_agent; then \
+	ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled/wc_agent ; fi;
+
 
 uninstall:
-	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+	@echo "make $(EXE) uninstall"
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE) \
+	rm -f $(CONFDIR)/mods-enabled/wc_agent
 
 test: all
 	@echo "*** No tests available for agent/$(EXE) ***"
