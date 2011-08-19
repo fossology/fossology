@@ -53,6 +53,7 @@ install: all
 uninstall:
 	@echo "make wget_agent uninstall"
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+	rm -f $(CONFDIR)/mods-enabled/wget_agent
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL) $(PROXYDEF)
