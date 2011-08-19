@@ -204,7 +204,7 @@ int main  (int argc, char *argv[])
 
         /* check ars table if this is duplicate request*/
         snprintf(sqlbuf, sizeof(sqlbuf),
-          "select ars_pk from pkgagent_ars,agent \
+          "select ars_pk from wget_agent_ars,agent \
           where agent_pk=agent_fk and ars_success=true \
           and upload_fk='%d' and agent_fk='%d'",
           upload_pk, Agent_pk);

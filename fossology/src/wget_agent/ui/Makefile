@@ -27,6 +27,9 @@ all:
 install:
 	@echo "no build rule for 'install' in src/wget_agent/ui"
 
+uninstall:
+	@echo "no build rule for 'uninstall' in src/wget_agent/ui"
+
 clean:
 	@echo "no build rule for 'clean' in src/wget_agent/ui"
 

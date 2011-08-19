@@ -34,4 +34,11 @@ coverage:
 clean:
 	$(call dirloop, clean)
 
+install:
+	@echo "No wget_agent agent_tests install"
+
+uninstall:
+	@echo "No wget_agent agent_tests uninstall"
+
+
 .PHONY: all test coverage clean
