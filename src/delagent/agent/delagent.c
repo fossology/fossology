@@ -28,7 +28,6 @@
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif
 
-int Test=0;
 /**
  * \brief main function for the delagent
  *
