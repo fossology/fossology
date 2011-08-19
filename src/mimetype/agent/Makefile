@@ -37,6 +37,7 @@ install: all
 uninstall:
 	@echo "make $(EXE) uninstall"
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+	rm -f $(CONFDIR)/mods-enabled/mimetype
 
 test: all
 	@echo "make test $(EXE)"

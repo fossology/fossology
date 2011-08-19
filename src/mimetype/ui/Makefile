@@ -27,6 +27,9 @@ all:
 install:
 	@echo "no build rule for 'install' in mimetype_ui"
 
+uninstall:
+	@echo "no build rule for 'uninstall' in mimetype_ui"
+
 clean:
 	@echo "no build rule for 'clean' in mimetype_ui"
 
