@@ -29,7 +29,7 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
 
   public $agentDir;
   public $pkgagent;
-  protected $testfile = '../agent_test/testdata/fossology-1.2.0-1.el5.i386.rpm';
+  protected $testfile = '../testdata/fossology-1.2.0-1.el5.i386.rpm';
 
   function setUp() {
 /*
@@ -54,18 +54,18 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
     }
 */
     //print "agent:$this->agentDir\npkgagent:$this->pkgagent\n";
-    $this->agentDir = '../agent';
-    $this->pkagent = $this->agentDir .'/pkgagent';
+    $this->agentDir = '../../agent';
+    $this->pkgagent = $this->agentDir .'/pkgagent';
     return;
   } // setUP
 
   function testHelp() {
     // pkgagent -h
-    $last = exec("$this->pkgagent -h 2>&1", $usageOut=array(), $rtn=NULL);
+    $last = exec("$this->pkgagent -h 2>&1", $usageOut, $rtn=NULL);
     //print "testHelp: last is:$last\nusageout is:\n";
     //print_r($usageOut) . "\n";
     // Check a couple of options for sanity
-    $usage = "Usage: $this->pkgagent [options]";
+    $usage = "Usage: $this->pkgagent [options] [file [file [...]]";
     $dashI = '-i   :: initialize the database, then exit.';
     $this->assertEquals($usage, $usageOut[0]);
     $this->assertEquals($dashI, trim($usageOut[1]));
@@ -74,12 +74,12 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
 
   function testI() {
     // pkgagent -i
-    $last = exec("$this->pkgagent -i 2>&1", $got=array(), $rtn=NULL);
+    $last = exec("$this->pkgagent -i 2>&1", $got, $rtn=NULL);
 
     if($rtn != 0){
       $this->fail("pkgagent FAILED!, return value is:$rtn\n");
     }else{
-      $this->pass();
+      $this->assertTrue(true);
     }
     if(!empty($got)) {
       $this->fail("pkgagent FAILED! output in -i test\n");
@@ -94,7 +94,7 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
 
     $expected = array(
         'OK');
-    $last = exec("$this->pkgagent $this->testfile 2>&1", $got=array(), $rtn=NULL);
+    $last = exec("$this->pkgagent $this->testfile 2>&1", $got, $rtn=NULL);
     //print "testOneRpm: last is:$last\ngot is:\n";
     //print_r($got) . "\n";
     $this->assertEquals($expected[0],$got[0]);
@@ -105,7 +105,7 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
   {
     // pkgagent -v rpmfile
 
-    $last = exec("$this->pkgagent -v $this->testfile 2>&1", $got=array(), $rtn=NULL);
+    $last = exec("$this->pkgagent -v $this->testfile 2>&1", $got, $rtn=NULL);
     //print "testOneRpm: last is:$last\ngot is:\n";
     //print_r($got) . "\n";
     // check the output
@@ -133,12 +133,12 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
                       'OK'
                      );
     $size = count($got);
-    foreach($std as $match) {
-      if(FALSE === in_array($match, $output)){
+    foreach($expected as $match) {
+      if(FALSE === in_array($match, $got)){
         $this->fail("pkgagent FAILED! did not fine $match in output\n");
       }
     }
-    $this->assertEquals('OK',$got[size-1]);
+    $this->assertEquals('OK',$got[$size-1]);
     return;
   }
 }
