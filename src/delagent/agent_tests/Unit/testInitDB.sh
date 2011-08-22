@@ -18,8 +18,8 @@
 
 VARS=../../../../Makefile.conf
 
-UID=`id -un`
-if [ "$UID" != "fossy" ];then
+FOSSYUID=`id -un`
+if [ "$FOSSYUID" != "fossy" ];then
   echo "Must be fossy to run this script."
   exit 1
 fi
@@ -33,7 +33,7 @@ then
   exit 1
 fi
 
-pg_restore -d fossologytest ../testdata/testdb_all.tar
+pg_restore -d fossologytest $HOME/testdata/testdb_all.tar
 
 PREFIX=`cat $VARS|grep -i '^PREFIX'|awk -F = '{print $2}'`
 cp $PREFIX/etc/fossology/Db.conf ~/
