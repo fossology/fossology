@@ -9,7 +9,7 @@ LOCALAGENTDIR=../../agent
 CFLAGS_LOCAL=-lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit
 EXE=test_delagent
 TEST_OBJ_RUN=testRun.o
-TEST_OBJ=testListFolders.o testDeleteFolders.o
+TEST_OBJ=testListFolders.o testDeleteFolders.o testReadParameter.o
 
 all: $(EXE)
 
@@ -24,7 +24,7 @@ $(TEST_OBJ): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
 	
 test: all $(EXE)
-	@echo "execute pkagent test"
+	@echo "execute delagent test"
 	./$(EXE)
 
 coverage: delagent_cov.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS) 

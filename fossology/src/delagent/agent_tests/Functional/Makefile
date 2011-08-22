@@ -23,7 +23,7 @@ all:
 	$(MAKE) -C $(AGENTDIR)/ $@
 
 test: all
-	@echo "make pkgagent functional test"
+	@echo "make delagent functional test"
 	phpunit $(TESTFILE)
 
 coverage:

@@ -17,8 +17,8 @@
 #*********************************************************************/
 
 
-UID=`id -un`
-if [ "$UID" != "fossy" ];then
+FOSSYUID=`id -un`
+if [ "$FOSSYUID" != "fossy" ];then
   echo "Must be fossy to run this script."
   exit 1
 fi

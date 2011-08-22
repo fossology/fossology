@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* for util.c, start */
 extern CU_TestInfo testcases_ListFolders[];
 extern CU_TestInfo testcases_DeleteFolders[];
+extern CU_TestInfo testcases_ReadParameter[];
 
 /* Database Init and Clean */
 int DelagentDBInit();
@@ -40,6 +41,7 @@ int DelagentClean();
 CU_SuiteInfo suites[] = {
     {"Testing the function ListFolders:", DelagentDBInit, DelagentDBClean, testcases_ListFolders},
     {"Testing the function DeleteFolders:", DelagentInit, DelagentClean, testcases_DeleteFolders},
+    {"Testing the function ReadParameter:", DelagentDBInit, DelagentDBClean, testcases_ReadParameter},
     CU_SUITE_INFO_NULL
 };
 

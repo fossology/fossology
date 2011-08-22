@@ -21,48 +21,36 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 
 /**
- * \file testListFolders.c
- * \brief testing for the function ListFolders and ListUploads
+ * \file testReadParameter.c
+ * \brief testing for the function ReadParameter
  */
 
-extern void ListFolders();
-extern void ListUploads();
+extern int ReadParameter(char *Parm);
 
 /* test functions */
 
 /**
- * \brief for function ListFolders
+ * \brief for function ReadParameter
  */
-void testListFolders()
+void testReadParameter()
 {
+  char *Parm = "LIST UPLOAD 85";
+  int result;
   db_conn = fo_dbconnect();
   /** exectue the tested function */
-  ListFolders();
+  result = ReadParameter(Parm);
   PQfinish(db_conn);
-  CU_PASS("ListFolders PASS!");
-}
-/**
- * \brief for function ListUploads
- */
-void testListUploads()
-{
-  db_conn = fo_dbconnect();
-  /** exectue the tested function */
-  ListUploads();
-
-  PQfinish(db_conn);
-  CU_PASS("ListUploads PASS!");
+  CU_ASSERT_EQUAL(result, 1);
 }
 
 /**
- * \brief testcases for function ListFolders
+ * \brief testcases for function ReadParameter
  */
-CU_TestInfo testcases_ListFolders[] =
+CU_TestInfo testcases_ReadParameter[] =
 {
 #if 0
 #endif
-{"Testing the function ListFolders:", testListFolders},
-{"Testing the function ListUploads:", testListUploads},
+{"Testing the function ReadParameter:", testReadParameter},
   CU_TEST_INFO_NULL
 };
 

@@ -53,7 +53,7 @@ delagent_cov.o: util.c $(HDRS)
 
 clean:
 	@echo "make delagent agent clean"
-	rm -f $(EXE) *.o core
+	rm -f $(EXE) *.o core *.gc*
 	$(MAKE) -C $(TESTDIRS) clean
 
 include $(DEPS)
