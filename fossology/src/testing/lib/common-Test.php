@@ -15,6 +15,14 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
+
+/**
+ * \brief common functions that a number of tests need.
+ *
+ * @version "$Id$"
+ */
+
 /**
  *  allFilePaths
  *
@@ -59,7 +67,34 @@ function allFilePaths($dir) {
     print $e->getMessage();
     return(array());
   }
-}
+} //allFilePaths
+
+/**
+ * \brief chdir to the supplied path or exit with a FATAL message
+ *
+ * @param string $howFar the string to chdir to.
+ *
+ * @example backToParent('..'); backToParent('../../..');
+ * backToParent('/home/somewhereElse/to/go');
+ */
+function backToParent($howFar)
+{
+  if(empty($howFar))
+  {
+    echo "FATAL! No input at line " . __LINE__ . " in " . __FILE__ . "\n";
+    exit(1);
+  }
+
+  $here = getcwd();
+
+  if(@chdir($howFar) == FALSE)
+  {
+    echo "FATAL! could not cd from:\n$here to:\n$howFar\n" .
+      "at line " . __LINE__ . " in " . __FILE__ . "\n";
+    exit(1);
+
+  }
+} // backToParent
 
 /**
  * \brief Check if the test data files exist, if not downloads and installs them.
@@ -68,13 +103,32 @@ function allFilePaths($dir) {
  * be installed in the sources before tests can be run.  The data is kept on
  * fossology.org in /var/www/fossology.og/testing/testFiles/
  *
- * @version "$Id: checkTestData.php 4420 2011-06-16 00:23:07Z rrando $"
+ * @version "$Id$"
  *
  * Created on Jun 8, 2011 by Mark Donohoe
  */
 
-funcition checkTestData()
+function checkTestData()
 {
+  $WORKSPACE = NULL;
+
+  if(array_key_exists('WORKSPACE', $_ENV))
+  {
+    $WORKSPACE = $_ENV['WORKSPACE'];
+  }
+  if(is_null($WORKSPACE))
+  {
+    // cd to ....fossology/src
+    backToParent('..');
+  }
+  else
+  {
+    if(@chdir($WORKSPACE . "/fossology/src") === FALSE)
+    {
+      echo "FATAL! runRUnit could not cd to " . $WORKSPACE . "/fossology/src\n";
+      exit(1);
+    }
+  }
   $home = getcwd();
   $dirs = explode('/',$home);
   $size = count($dirs);
@@ -183,82 +237,7 @@ function escapeDots($string)
     return (FALSE);
   }
   return ($estring);
-}
-
-/**
- * public function getHost
- *
- * returns the host (if present) from a URL
- *
- * @param string $URL a url in the form of http://somehost.xx.com/repo/
- *
- * @return string $host the somehost.xx.com part is returned or NULL,
- * if there is no host in the uri
- *
- */
-
-function getHost($URL)
-{
-  if (empty ($URL))
-  {
-    return (NULL);
-  }
-  $host = parse_url($URL, PHP_URL_HOST);
-  //print "DB: getHost: url is:$URL\nafter parse, found is:$found\n";
-  /*
-  * if the host is localhost, this won't work, so we go get the real
-  * host name.  This is due to the fact that on a server where
-  * the db and and scheduler are on the same system, the Db.conf
-  * file can have localhost for the hostname.
-  */
-  if ($host == 'localhost')
-  {
-    $realHost = exec("hostname -f", $out, $rtn);
-    if($rtn == 0)
-    {
-      $host = $realHost;
-    }
-  }
-  return ($host);
-} // getHost
-
-/**
- * getMailSubjects
- *
- * Check to see if there is new mail for the user
- *
- * NOTE: must be run by the user who owns the system mailbox in /var/mail
- *
- * @return array Subjects, list of Fossology subjects that match.  On error,
- * the first entry in the array will start with the string 'ERROR!'
- *
- */
-function getMailSubjects() {
-  /*
-   * use preg_match, but the test must be run by the user who owns the email file
-   * in /var/mail.
-   */
-  $MailFile = "/var/mail/";
-
-  //$user = get_current_user();
-  $user = exec('id -un', $out, $rtn);
-  $UserMail = $MailFile . $user;
-  if(file_exists($UserMail) === FALSE) {
-    return(array("ERROR! $UserMail does not exist"));
-  }
-  $FH = fopen($UserMail,'r');
-  if($FH === FALSE) {
-    return(array("ERROR! Cannot open $UserMail"));
-  }
-  while (! feof($FH)){
-    $line = fgets($FH);
-    $matched = preg_match('/Subject:\sFOSSology Results.*?$/',$line, $matches);
-    if($matched) {
-      $Subjects[] = $line;
-    }
-  }
-  return($Subjects);
-} //getMailSubjects
+} //escapeDots
 
 function lastDir($dirpath) {
   // can't have a tailing slash, remove it if there
@@ -266,28 +245,6 @@ function lastDir($dirpath) {
   $directories = explode('/',$dirpath);
   return(end($directories));
 }
-
-/**
- * makeUrl($host,$query)
- *
- * Make a url from the host and query strings.
- *
- * @param $string $host the host (e.g. somehost.com, host.privatenet)
- * @param $string $query the query to append to the host.
- *
- * @return the http string or NULL on error
- */
-function makeUrl($host, $query) {
-
-  if (empty ($host)) {
-    return (NULL);
-  }
-  if (empty ($query)) {
-    return (NULL);
-  }
-  return ("http://$host$query");
-}
-
 
 /**
  * \brief given a directory name, return a array of subdir paths and an array of
@@ -355,7 +312,7 @@ function filesByDir($dir) {
        print "DB: fileByDir: subpathname is:$sbn\n";
        $dirpath = $dirObject->getPath();
        print "DB: fileByDir: dirpath is:$dirpath\n";
-       	
+
        */
 
     } // foreach
