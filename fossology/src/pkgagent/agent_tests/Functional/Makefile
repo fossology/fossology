@@ -17,6 +17,8 @@
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
+
+TESTFILE = ft_cliPkgagentTest.php
 AGENTDIR = ../../agent
 
 all:
