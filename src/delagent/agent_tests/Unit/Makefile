@@ -18,10 +18,10 @@ $(EXE): delagent.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS)
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent.o $(CFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c 
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -C $(CFLAGS_LOCAL) $<
 
 $(TEST_OBJ): %.o: %.c 
-	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
+	$(CC) -C $(CFLAGS_LOCAL) $< -o $@
 	
 test: all $(EXE)
 	@echo "execute delagent test"

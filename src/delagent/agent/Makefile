@@ -23,7 +23,7 @@ $(EXE): %: %.c $(FOLIB) delagent.o $(VARS) $(HDRS)
 	$(CC) $< delagent.o $(CFLAGS_LOCAL) -o $@
 
 delagent.o: util.c $(HDRS)
-	$(CC) -c $< $(CFLAGS_LOCAL) -o $@
+	$(CC) -C $< $(CFLAGS_LOCAL) -o $@
 
 #######################
 # library build rules #
@@ -43,13 +43,13 @@ uninstall:
 	rm -f $(CONFDIR)/mods-enabled/delagent
 
 test: all
-	$(MAKE) -c $(TESTDIRS) test
+	$(MAKE) -C $(TESTDIRS) test
 
 coverage: delagent_cov.o
-	$(MAKE) -c $(TESTDIRS) coverage
+	$(MAKE) -C $(TESTDIRS) coverage
 
 delagent_cov.o: util.c $(HDRS)
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
+	$(CC) -C $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
 clean:
 	@echo "make delagent agent clean"
