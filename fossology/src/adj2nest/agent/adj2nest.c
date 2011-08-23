@@ -542,7 +542,7 @@ int	main	(int argc, char *argv[])
   PQclear(pgResult);
 
   PQfinish(pgConn);
-  fo_scheduler_disconnect();
+  fo_scheduler_disconnect(0);
   return 0;
 } /* main() */
 
