@@ -114,85 +114,85 @@ function fo_scheduler_close($SchedObj)
  **/
 function fo_communicate_with_scheduler($input, &$output, &$error_msg)
 {
-	$ConfArray = fo_conf_read(); /* read $SYSCONFDIR/$PROJECT/fossology.conf */
-	$address = $ConfArray['FOSSOLOGY']['address'];
-	$port =  $ConfArray['FOSSOLOGY']['port'];
-	$response_from_scheduler;
-	$sock = fo_scheduler_connect($address, $port, $error_msg); /* Connect to the scheduler */
-	if ($sock)
-	{
-		$msg = trim($input);
-		$write_result = fo_scheduler_write($sock, $msg);
-		if ($write_result)
-		{
-			while ($buf = fo_scheduler_read($sock))
-			{
+  $ConfArray = fo_conf_read(); /* read $SYSCONFDIR/$PROJECT/fossology.conf */
+  $address = $ConfArray['FOSSOLOGY']['address'];
+  $port =  $ConfArray['FOSSOLOGY']['port'];
+  $response_from_scheduler;
+  $sock = fo_scheduler_connect($address, $port, $error_msg); /* Connect to the scheduler */
+  if ($sock)
+  {
+    $msg = trim($input);
+    $write_result = fo_scheduler_write($sock, $msg);
+    if ($write_result)
+    {
+      while ($buf = fo_scheduler_read($sock))
+      {
         /* when get all response from the scheduler for the command 'status' or 'status <job_id>', or 'agents' 
-				   will get a string 'end' */
-				if (substr($buf, 0, 3) == "end") break; 
-				if (substr($buf, 0, 8) == "received") /* get a string 'received'*/
-				{
-					/* 1. if the command is not 'status'or 'status <job_id>' or 'agents', when receiving 
-					      a string 'received', that mean this communication is over.
-						 2. if the command is 'status'or 'status <job_id>' or 'agents', first receiving
-						    a string 'received', then will receive related response.
-								then a string 'end' as ending.
-					 */
-					if (substr($input, 0, 6) != "status" && substr($input, 0, 6) != "agents")
-						break; 
-				}
-				else /* do not save the symbol string 'received' as the output, they are just symbols */
-				{
-					$output .= "$buf<br>";
-				}
-			}
-		}
-		else
-		{
-			$error_msg = socket_strerror(socket_last_error($sock));
-		}
-	}
+           will get a string 'end' */
+        if (substr($buf, 0, 3) == "end") break; 
+        if (substr($buf, 0, 8) == "received") /* get a string 'received'*/
+        {
+          /* 1. if the command is not 'status'or 'status <job_id>' or 'agents', when receiving 
+                a string 'received', that mean this communication is over.
+             2. if the command is 'status'or 'status <job_id>' or 'agents', first receiving
+                a string 'received', then will receive related response.
+                then a string 'end' as ending.
+           */
+          if (substr($input, 0, 6) != "status" && substr($input, 0, 6) != "agents")
+            break; 
+        }
+        else /* do not save the symbol string 'received' as the output, they are just symbols */
+        {
+          $output .= "$buf<br>";
+        }
+      }
+    }
+    else
+    {
+      $error_msg = socket_strerror(socket_last_error($sock));
+    }
+  }
 
-	fo_scheduler_close($sock);
+  fo_scheduler_close($sock);
   /* failed to communicate with the scheduler */
-	if (empty($error_msg))
-	{
-		return true;
-	} 
-	else  /* communicate with the scheduler successfully */
-	{
-		return false;
-	}
+  if (empty($error_msg))
+  {
+    return true;
+  } 
+  else  /* communicate with the scheduler successfully */
+  {
+    return false;
+  }
 } // fo_communicate_with_scheduler()
 
 /**
  * \brief  Get runnable job list, the process is below:
            1. send command 'status'to scheduler
-					 2. the scheduler return status of all scheduled jobs
-			     3. retrieve the job list
-					 4. return the job list 
+           2. the scheduler return status of all scheduled jobs
+           3. retrieve the job list
+           4. return the job list 
 
  * \return an array, the runnable job list
            the array is like: Array(1, 2, 3, .., i), sorted, if no jobs, return nothing
  */
 function GetRunnableJobList()
 {
-	/* get the raw job list from scheduler 
-	   send command 'status' to the scheduler, get the all status of runnable jobs and scheduler 
-		 like:
-			scheduler:[#] daemon:[#] jobs:[#] log:[str] port:[#] verbose:[#]
-			job:[#] status:[str] type:[str] priority:[#] running:[#] finished[#] failed:[#]
-			job:[#] status:[str] type:[str] priority:[#] running:[#] finished[#] failed:[#]
-	 */
-	$command = "status";
-	$command_status = fo_communicate_with_scheduler($command, $status_info, $error_msg);
+  /* get the raw job list from scheduler 
+     send command 'status' to the scheduler, get the all status of runnable jobs and scheduler 
+     like:
+      scheduler:[#] daemon:[#] jobs:[#] log:[str] port:[#] verbose:[#]
+      job:[#] status:[str] type:[str] priority:[#] running:[#] finished[#] failed:[#]
+      job:[#] status:[str] type:[str] priority:[#] running:[#] finished[#] failed:[#]
+   */
+  $command = "status";
+  $command_status = fo_communicate_with_scheduler($command, $status_info, $error_msg);
   /* can not get status info from the scheduler, so can not get runnable jobs, probably the scheduler is not running */
-	if (false === $command_status) return ; 
-	$pattern = '/job:(\d+) /';
+  if (false === $command_status) return ; 
+  $pattern = '/job:(\d+) /';
   preg_match_all($pattern, $status_info, $matches);
   /* the $matches[1] is like: Array(1, 2, 3, .., i)  */
-	$job_array = $matches[1];
-	sort($job_array, SORT_NUMERIC);
+  $job_array = $matches[1];
+  sort($job_array, SORT_NUMERIC);
   return $job_array;
 } // GetRunnableJobList()
 
