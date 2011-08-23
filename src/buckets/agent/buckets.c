@@ -400,6 +400,6 @@ int main(int argc, char **argv)
   free(bucketDefArray);
 
   PQfinish(pgConn);
-  fo_scheduler_disconnect();
+  fo_scheduler_disconnect(0);
   return (0);
 }
