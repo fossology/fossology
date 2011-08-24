@@ -25,42 +25,6 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 /*****************************************
- DB2KeyValArray: 
-   Create an associative array by using table
-   rows to source the key/value pairs.
-
- Params:
-   $Table   tablename
-   $KeyCol  Key column name in $Table
-   $ValCol  Value column name in $Table
-   $Where   SQL where clause (optional)
-            This can really be any clause following the
-            table name in the sql
-
- Returns:
-   Array[Key] = Val for each row in the table
-   May be empty if no table rows or Where results
-   in no rows.
- *****************************************/
-function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where="")
-{
-  global $PG_CONN;
-
-  $ResArray = array();
-
-  $sql = "SELECT $KeyCol, $ValCol from $Table $Where";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-  while ($row = pg_fetch_assoc($result))
-  {
-    $ResArray[$row[$KeyCol]] = $row[$ValCol];
-  }
-  return $ResArray;
-}
-
-
-/*****************************************
  Array2SingleSelect: Build a single choice select pulldown
 
  Params:
@@ -90,39 +54,6 @@ function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "",
   }
   $str .= "</select>";
   return $str;
-}
-
-
-/*****************************************
- DBCheckResult: 
-   Check the postgres result for unexpected errors.
-   If found, treat them as fatal.
-
- Params:
-   $result  command result object
-   $sql     SQL command (optional)
-   $filenm  File name (__FILE__)
-   $lineno  Line number of the caller (__LINE__)
-
- Returns:
-   None, prints error, sql and line number, then exits(1)
- *****************************************/
-function DBCheckResult($result, $sql="", $filenm, $lineno)
-{
-  global $PG_CONN;
-
-  if (!$result)
-  {
-    echo "<hr>File: $filenm, Line number: $lineno<br>";
-    if (pg_connection_status($PG_CONN) === PGSQL_CONNECTION_OK)
-      echo pg_last_error($PG_CONN);
-    else
-      echo "FATAL: DB connection lost.";
-    echo "<br> $sql";
-    debugbacktrace();
-    echo "<hr>";
-    exit(1);
-  }
 }
 
 

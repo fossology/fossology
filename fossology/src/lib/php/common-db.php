@@ -89,4 +89,69 @@ function GetSingleRec($Table, $Where="")
   pg_free_result($result);
   return $row;
 }
+
+
+/**
+ * \brief Create an associative array by using table
+ *        rows to source the key/value pairs.
+ *
+ * \param $Table   tablename
+ * \param $KeyCol  Key column name in $Table
+ * \param $ValCol  Value column name in $Table
+ * \param $Where   SQL where clause (optional)
+ *                 This can really be any clause following the
+ *                 table name in the sql
+ *
+ * \return
+ *  Array[Key] = Val for each row in the table
+ *  May be empty if no table rows or Where results
+ *  in no rows.
+ **/
+function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where="")
+{
+  global $PG_CONN;
+
+  $ResArray = array();
+
+  $sql = "SELECT $KeyCol, $ValCol from $Table $Where";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+  while ($row = pg_fetch_assoc($result))
+  {
+    $ResArray[$row[$KeyCol]] = $row[$ValCol];
+  }
+  return $ResArray;
+}
+
+
+/**
+ * \brief Check the postgres result for unexpected errors.
+ *  If found, treat them as fatal.
+ *
+ * \param $result  command result object
+ * \param $sql     SQL command (optional)
+ * \param $filenm  File name (__FILE__)
+ * \param $lineno  Line number of the caller (__LINE__)
+ *
+ * \return None, prints error, sql and line number, then exits(1)
+ **/
+function DBCheckResult($result, $sql="", $filenm, $lineno)
+{
+  global $PG_CONN;
+
+  if (!$result)
+  {
+    echo "<hr>File: $filenm, Line number: $lineno<br>";
+    if (pg_connection_status($PG_CONN) === PGSQL_CONNECTION_OK)
+      echo pg_last_error($PG_CONN);
+    else
+      echo "FATAL: DB connection lost.";
+    echo "<br> $sql";
+    debugbacktrace();
+    echo "<hr>";
+    exit(1);
+  }
+}
+
 ?>
