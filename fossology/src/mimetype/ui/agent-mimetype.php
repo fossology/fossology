@@ -125,7 +125,7 @@ $text = _("Failed to insert job record");
     }
     /* Add job: job "Default Meta Agents" has jobqueue item "mimetype" */
     $jqargs = $uploadpk;
-    $jobqueuepk = JobQueueAdd($jobpk, "mimetype", $jqargs, "yes", "a", $Dep);
+    $jobqueuepk = JobQueueAdd($jobpk, "mimetype", $jqargs, "yes", NULL, $Dep);
     if (empty($jobqueuepk)) {
 $text = _("Failed to insert mimetype into job queue");
       return ($text);
