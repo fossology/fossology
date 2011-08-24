@@ -1,6 +1,6 @@
 Dr. Neal's Tutorial on Agent Creation
 by Dr. Neal Krawetz
-Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
 --------------------------------------------------------------
 
 
@@ -49,8 +49,16 @@ to perform a task on hundreds of DB items, then it either needs to process
 the SQL query itself (using parameters from the jq_args), or it needs to
 process one item that the scheduler retrieves using the MSQ.
 
-Since this example wc agent is expected to run on thousands of files in the
-repository, it is a good idea to use the host-specific, MSQ option.
+For this example wc agent, we have 2 options:
+One option is on any host, the value of the jobqueue.jq_args is set to upload_pk
+from the scheduler, wc_agent get every pfile and repository file name
+associated with the upload and that does not already exist in the agent_wc
+table. 
+Certainly jobqueue.jq_runonpfile should be set to NULL.
+We select this option now.
+
+The other option is expected to run on thousands
+of files in the repository, it is a good idea to use the host-specific, MSQ option.
 
 With MSQ queries, we need to know the data and the stop condition.  The
 stop condition identifies when the file has been processed.  In this
@@ -80,26 +88,10 @@ column from the SQL that denotes the host-specific information.
 ===========================================================
 Part II: The Agent
 
-There are two main ways to build the agent.  The main issue is around how
-to access the database.
+The main issue is around how to access the database.
 
-Option #1: Shell script.
-The agent can be implemented as a shell script.  This is great for a quick
-test agent, but not ideal for long-term or complicated agents.
-
-To make it an agent, use the "engine-shell" agent as a wrapper.  The shell
-will handle all of the scheduler communication.  For minimal DB access, you
-can use the dbinit program (/usr/local/fossology/test.d/dbinit).  The
-"wc_agent.sh" program uses this approach.
-
-Option #2: Standalone program.
-This is the more efficient method, and actually uses a programming
-language, like "C", to implement the agent and communicate with the
-database.  The "wc_agent.c" program uses this approach.
-
-
-In both of these samples, the "pfile" supplied by the scheduler is
-processed and results are stored in the agent_wc database table.
+The "upload_pk" supplied by the scheduler is processed and results are
+ stored in the agent_wc database table.
 
 
 ===========================================================
