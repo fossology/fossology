@@ -408,14 +408,14 @@ $text = _("Phrase");
 	{
 	$V .= "<P />\n";
 	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
-		NULL,$Count,$Phrase, $R['licenses']) . "\n";
+		NULL,$Count,$Phrase, $Licenses) . "\n";
 	$LastPfilePk = $R['pfile_fk'];
 	}
     else
 	{
 	$V .= "<div style='margin-left:2em;'>";
 	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
-		NULL,$Count,$Phrase, $R['licenses']) . "\n";
+		NULL,$Count,$Phrase, $Licenses) . "\n";
 	$V .= "</div>";
 	}
     $Count++;
