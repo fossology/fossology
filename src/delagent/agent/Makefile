@@ -23,13 +23,13 @@ $(EXE): %: %.c $(FOLIB) delagent.o $(VARS) $(HDRS)
 	$(CC) $< delagent.o $(CFLAGS_LOCAL) -o $@
 
 delagent.o: util.c $(HDRS)
-	$(CC) -C $< $(CFLAGS_LOCAL) -o $@
+	$(CC) -c $< $(CFLAGS_LOCAL) -o $@
 
 #######################
 # library build rules #
 #######################
 $(FOLIB):
-	$(MAKE) -C $(FOLIBDIR)
+	$(MAKE) -c $(FOLIBDIR)
 
 install: all
 	@echo "make delagent agent install"
