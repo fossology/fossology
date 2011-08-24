@@ -154,4 +154,49 @@ function DBCheckResult($result, $sql="", $filenm, $lineno)
   }
 }
 
+
+/**
+ * \brief Check if table exists.
+ *        Note, this assumes the database name is 'fossology'.
+ *
+ * \param $tableName
+ *
+ * \return 1 if table exists, 0 if not.
+**/
+function DB_TableExists($tableName)
+{
+  global $PG_CONN;
+
+  $sql = "select count(*) as count from information_schema.tables where table_catalog='fossology' and table_name='$tableName'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  $count = $row['count'];
+  pg_free_result($result);
+  return($count);
+} /* DB_TableExists()  */
+
+
+/**
+ * \brief Check if a column exists.
+ *        Note, this assumes the database name is 'fossology'.
+ *
+ * \param $tableName
+ * \param $colName
+ *
+ * \return 1 if column exists, 0 if not.
+**/
+function DB_ColExists($tableName, $colName)
+{
+  global $PG_CONN;
+
+  $sql = "select count(*) as count from information_schema.columns where table_catalog='fossology' and table_name='$tableName' and column_name='$colName'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  $count = $row['count'];
+  pg_free_result($result);
+  return($count);
+} /* DB_ColExists()  */
+
 ?>
