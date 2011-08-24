@@ -29,7 +29,7 @@ delagent.o: util.c $(HDRS)
 # library build rules #
 #######################
 $(FOLIB):
-	$(MAKE) -c $(FOLIBDIR)
+	$(MAKE) -C $(FOLIBDIR)
 
 install: all
 	@echo "make delagent agent install"
