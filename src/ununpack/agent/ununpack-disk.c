@@ -1,7 +1,4 @@
 /*******************************************************************
- Ununpack-disk: The universal unpacker.
- Code to unpack a disk file system.
-
  Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
@@ -18,6 +15,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *******************************************************************/
 
+/**
+ * \file ununpack-disk.c
+ * \brief The universal unpacker code to unpack a disk file system.
+ **/
+
 #include "ununpack.h"
 #include "externs.h"
 
@@ -33,11 +35,12 @@ struct permlist
 typedef struct permlist permlist;
 
 
-/***************************************************
- FatDiskName(): Special handling for FAT names.
- 1. Convert to lowercase.
- 2. remove any short name (name in parenthesis).
- ***************************************************/
+/**
+ * \brief Special handling for FAT names.
+ *  -  Convert to lowercase.
+ *  -  remove any short name (name in parenthesis).
+ * \param Name Filename
+ **/
 void	FatDiskName	(char *Name)
 {
   int i;
@@ -59,9 +62,10 @@ void	FatDiskName	(char *Name)
   }
 } /* FatDiskName() */
 
-/***************************************************
- FreeDiskPerms(): deallocate perms
- ***************************************************/
+/**
+ * \brief deallocate perms
+ * \param List permlist
+ **/
 void	FreeDiskPerms	(permlist *List)
 {
   permlist *Next;
@@ -74,11 +78,13 @@ void	FreeDiskPerms	(permlist *List)
   }
 } /* FreeDiskPerms() */
 
-/***************************************************
- ExtractDiskPerms(): Given a disk, load in all of the
- file permissions.
- Assumes Source is already quote-tainted!
- ***************************************************/
+/**
+ * \brief Given a disk, load in all of the file permissions.
+ *        Assumes Source is already quote-tainted!
+ * \param FStype Filesystem type
+ * \param Source Source filepath
+ * \return permlist
+ **/
 permlist *	ExtractDiskPerms	(char *FStype, char *Source)
 {
   permlist *List=NULL, *NewList;
@@ -168,12 +174,14 @@ permlist *	ExtractDiskPerms	(char *FStype, char *Source)
   return(List);
 } /* ExtractDiskPerms() */
 
-/***************************************************
- SameInode(): Determine if two inodes are the same.
- Strings MUST be null terminated!
- Valid characters: 0-9 and hyphen.
- Returns: 1 on match, 0 on miss.
- ***************************************************/
+/**
+ * \brief Determine if two inodes are the same.
+ *        Strings MUST be null terminated!
+ *        Valid characters: 0-9 and hyphen.
+ * \param Inode1
+ * \param Inode2
+ * \return 1 on match, 0 on miss.
+ **/
 int	SameInode	(char *Inode1, char *Inode2)
 {
   int i;
@@ -192,13 +200,15 @@ int	SameInode	(char *Inode1, char *Inode2)
   return(v1==v2); /* if they are both end-of-inode, then ok! */
 } /* SameInode() */
 
-/***************************************************
- SetDiskPerm(): Find a disk permission by inode, set the
- permissions on the file, and free the memory.
- Destination = target directory containing file
- Target = filename (may also include path components)
- Returns new list.
- ***************************************************/
+/**
+ * \brief Find a disk permission by inode, set the
+ *        permissions on the file, and free the memory.
+ * \param inode
+ * \param List permlist
+ * \param Destination = target directory containing file
+ * \param Target = filename (may also include path components)
+ * \return new permlist or NULL on error
+ **/
 permlist *	SetDiskPerm	(char *inode, permlist *List,
     char *Destination, char *Target)
 {
@@ -265,16 +275,19 @@ permlist *	SetDiskPerm	(char *inode, permlist *List,
   return(Parent);
 } /* SetDiskPerm() */
 
-/***************************************************
- ExtractDisk(): Given a disk image, type of system, and
- a directory, extract all files!
- This can handle any filesystem supported by fls/icat.
- Special: FAT is case-insensitive, so everything is converted to lowercase.
- Returns: 0 on success, non-zero on failure. 
- NOTE: This spawns multiple processes.
- Uses the following external commands: fls icat
- icat and fls are from the package "sleuthkit".
- ***************************************************/
+/**
+ * \brief Given a disk image, type of system, and
+ *        a directory, extract all files!
+ *        This can handle any filesystem supported by fls/icat.
+ *        Special: FAT is case-insensitive, so everything is converted to lowercase.
+ *        NOTE: This spawns multiple processes.
+ *        Uses the following external commands: fls icat
+ *        icat and fls are from the package "sleuthkit".
+ * \param Source
+ * \param FStype  filesystem type
+ * \param Destination
+ * \return 0 on success, non-zero on failure. 
+ **/
 int	ExtractDisk	(char *Source, char *FStype, char *Destination)
 {
   int rc;
@@ -500,4 +513,3 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
   FreeDiskPerms(Perms);
   return(0);
 } /* ExtractDisk() */
-
