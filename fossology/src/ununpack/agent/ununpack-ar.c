@@ -1,6 +1,4 @@
 /*******************************************************************
- Ununpack-ar: The universal unpacker - Code to unpack an AR file.
-
  Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
@@ -20,17 +18,22 @@
 #include "ununpack.h"
 #include "externs.h"
 
+/**
+ * \file ununpack-ar.c
+ * \brief The universal unpacker - Code to unpack an AR file.
+ **/
 
-/***************************************************
- ExtractAR(): Given an AR file, extract the contents to the
- directory.
- Returns: 0 on success, non-zero on failure.
- NOTE: This spawns multiple processes.
- Uses the following external commands: ar
- NOTE: Things that are known to cause failures:
-   - Absolute paths in ar files
-   - Same file name listed twice in the archive
- ***************************************************/
+/**
+ * \brief Given an AR file, extract the contents to the directory.
+ *        This uses the command ar
+ * \param Source  Pathname of source file
+ * \param Destination Unpack destination
+ * \return 0 on success, non-zero on failure.
+ * NOTE: This spawns multiple processes.
+ * NOTE: Things that are known to cause failures:
+ *   - Absolute paths in ar files
+ *   - Same file name listed twice in the archive
+ **/
 int	ExtractAR	(char *Source, char *Destination)
 {
   char Cmd[FILENAME_MAX*4]; /* command to run */
