@@ -20,7 +20,7 @@
 /**
  * \brief debug diff env/path when running with exec
  *
- * @version "$Id: $"
+ * @version "$Id$"
  * Created on Aug 24, 2011 by Mark Donohoe
  */
 
@@ -271,7 +271,6 @@ else
 $failures = 0;
 foreach($unitList as $unitTest)
 {
-  
   echo "\n";
   //echo "\n***** Next Test *****\n";
   //echo "DB: we are at:\n" . getcwd() . "\n";
@@ -312,6 +311,13 @@ foreach($unitList as $unitTest)
       //echo $makeErrors . "\n\n";
       $failures++;
     }
+    // make coverage
+    $lastCovr = exec('make coverage 2>&1', $covrOut, $covrRtn);
+    echo "Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
+    if($covrRtn != 0)
+    {
+      echo "Error! 'make coverage; of $unitTest did not succeed, return code:$cleanRtn\n";
+    }
     // some makefiles/tests are written to report a make 'failure' when a test
     // fails, so process the reports, as there should be a xml file.
     //echo "DB: AFTER makes != 0 we are at:\n" . getcwd() . "\n";
@@ -341,6 +347,14 @@ foreach($unitList as $unitTest)
       echo "No Unit Tests for module $unitTest\n";
       backToParent('../..');
       continue;
+    }
+
+    // make coverage
+    $lastCovr = exec('make coverage 2>&1', $covrOut, $covrRtn);
+    echo "Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
+    if($covrRtn != 0)
+    {
+      echo "Error! 'make coverage; of $unitTest did not succeed, return code:$cleanRtn\n";
     }
     // at this point there should be a .xm file to process
     //echo "DB: AFTER make=0 we are at:\n" . getcwd() . "\n";
