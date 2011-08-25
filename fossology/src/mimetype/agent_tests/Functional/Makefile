@@ -26,7 +26,7 @@ all:
 
 test: all
 	@echo "make mimetyme agent functional test"
-	phpunit $(TESTFILE)
+	phpunit --log-junit mimetype-Xunit.xml $(TESTFILE)
 
 coverage:
 	@echo "no coverage in mimetype for agent_test/Functional"

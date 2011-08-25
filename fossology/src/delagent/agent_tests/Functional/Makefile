@@ -26,7 +26,7 @@ all:
 
 test: all
 	@echo "make delagent functional test"
-	phpunit $(TESTFILE)
+	phpunit --log-junit delagent-Xunit.xml $(TESTFILE)
 
 coverage:
 	@echo "no coverage for agent_tests/Functional"
