@@ -19,8 +19,8 @@ all:
 test:
 	@echo "No copyright Functional agent_tests"
 clean:
-	@echo copyright Functional agent_tests clean"
+	@echo "copyright Functional agent_tests clean"
 install:
-	@echo copyright Functional agent_tests install"
+	@echo "copyright Functional agent_tests install"
 uninstall:
-	@echo copyright Functional agent_tests uninstall"
+	@echo "copyright Functional agent_tests uninstall"
