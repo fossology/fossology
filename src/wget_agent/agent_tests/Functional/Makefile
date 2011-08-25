@@ -26,7 +26,7 @@ all:
 
 test: all
 	@echo "make wget_agent functional test"
-	phpunit $(TESTFILE)
+	phpunit --log-junit wget_agent-Xunit.xml $(TESTFILE)
 
 coverage:
 	@echo "no coverage for agent_tests/Functional"

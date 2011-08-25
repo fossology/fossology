@@ -26,7 +26,7 @@ all:
 
 test: all
 	@echo "make pkgagent functional test"
-	phpunit $(TESTFILE)
+	phpunit --log-junit pkgagent-Xunit.xml $(TESTFILE)
 
 coverage:
 	@echo "no coverage for agent_tests/Functional"
