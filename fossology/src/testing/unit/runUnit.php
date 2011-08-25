@@ -271,6 +271,8 @@ else
 $failures = 0;
 foreach($unitList as $unitTest)
 {
+  
+  echo "\n";
   //echo "\n***** Next Test *****\n";
   //echo "DB: we are at:\n" . getcwd() . "\n";
   $makeOut = array();
