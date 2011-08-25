@@ -547,6 +547,7 @@ int     ParentWait      ()
 /**
  * @brief Make sure all commands are usable.
  * @param Show Unused
+ * @return void but updates global CMD Status
  **/
 void	CheckCommands	(int Show)
 {
@@ -680,11 +681,11 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
   return(rc);
 } /* RunCommand() */
 
-/***************************************************
- FindCmd(): Given a file name, determine the type of
- extraction command.  This uses Magic.
- Returns index to command-type, or -1 on error.
- ***************************************************/
+/**
+ * @brief Given a file name, determine the type of
+ *        extraction command.  This uses Magic.
+ * @returns index to command-type, or -1 on error.
+ **/
 int	FindCmd	(char *Filename)
 {
   char *Type;
@@ -909,9 +910,10 @@ int	FindCmd	(char *Filename)
 /***************************************************************************/
 /***************************************************************************/
 
-/***************************************************
- FreeDirList(): Free a list of files in a directory.
- ***************************************************/
+/**
+ * @brief Free a list of files in a directory list.
+ * @param DL directory list
+ **/
 void	FreeDirList	(dirlist *DL)
 {
   dirlist *d;
@@ -926,9 +928,11 @@ void	FreeDirList	(dirlist *DL)
   }
 } /* FreeDirList() */
 
-/***************************************************
- MakeDirList(): Allocate a list of files in a directory.
- ***************************************************/
+/**
+ * @brief Create a list of files in a directory.
+ * @param Fullname path to top level directory.
+ * @returns the directory list
+ **/
 dirlist *	MakeDirList	(char *Fullname)
 {
   dirlist *dlist=NULL, *dhead=NULL;
@@ -996,13 +1000,15 @@ dirlist *	MakeDirList	(char *Fullname)
   return(dlist);
 } /* MakeDirList() */
 
-/***************************************************
- SetDir(): Set a destination directory name.
- Smain = main extraction directory (may be null)
- Sfile = filename
- This will concatenate Smain and Sfile, but remove
- and terminating filename.
- ***************************************************/
+/**
+ * @brief  Set a destination directory name.
+ *         This will concatenate Smain and Sfile, but remove
+ *         and terminating filename.
+ * @param Dest returned directory name
+ * @param DestLen size of Dest
+ * @param Smain = main extraction directory (may be null)
+ * @param Sfile = filename
+ **/
 void	SetDir	(char *Dest, int DestLen, char *Smain, char *Sfile)
 {
   int i;
@@ -1037,9 +1043,10 @@ void	SetDir	(char *Dest, int DestLen, char *Smain, char *Sfile)
 } /* SetDir() */
 
 
-/***************************************************
- DebugContainerInfo(): Check the structure.
- ***************************************************/
+/**
+ * @brief print a ContainerInfo structure.
+ * @param CI ContainerInfo struct to print
+ **/
 void	DebugContainerInfo	(ContainerInfo *CI)
 {
   DEBUG("Container:")
@@ -1062,11 +1069,13 @@ void	DebugContainerInfo	(ContainerInfo *CI)
   printf("  Parent uploadtree_pk: %ld\n",CI->PI.uploadtree_pk);
 } /* DebugContainerInfo() */
 
-/***************************************************
- DBInsertPfile(): Insert a Pfile record.
- Sets the pfile_pk in CI.
- Returns: 1 if record exists, 0 if record does not exist.
- ***************************************************/
+/**
+ * @brief Insert a Pfile record.
+ *        Sets the pfile_pk in CI.
+ * @param CI
+ * @param Fuid string of sha1.md5.size
+ * @returns 1 if record exists, 0 if record does not exist.
+ **/
 int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 {
   PGresult *result;
@@ -1186,14 +1195,15 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   return(1);
 } /* DBInsertPfile() */
 
-/***************************************************
- DBInsertUploadTree(): Insert an UploadTree record.
- If the tree is a duplicate, then we need to replicate
- all of the uploadtree records for the tree.
- This uses Upload_Pk.
- Returns: 1 if tree exists for some other project (duplicate)
- and 0 if tree does not exist.
- ***************************************************/
+/**
+ * @brief Insert an UploadTree record.
+ *        If the tree is a duplicate, then we need to replicate
+ *        all of the uploadtree records for the tree.
+ *        This uses Upload_Pk.
+ * @param CI
+ * @param Mask mask file mode for ufile_mode
+ * @returns: 1 if tree exists for some other project (duplicate) and 0 if tree does not exist.
+ **/
 int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 {
   char UfileName[1024];
@@ -1301,12 +1311,15 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   return(0);
 } /* DBInsertUploadTree() */
 
-/***************************************************
- AddToRepository(): Add a ContainerInfo record to the
- repository AND to the database.
- This modifies the CI record's pfile and ufile indexes!
- Returns: 1 if added, 0 if already exists!
- ***************************************************/
+/**
+ * @brief Add a ContainerInfo record to the
+ *        repository AND to the database.
+ *        This modifies the CI record's pfile and ufile indexes!
+ * @param CI
+ * @param Fuid sha1.md5.size
+ * @param Mask file mode mask
+ * @returns: 1 if added, 0 if already exists!
+ **/
 int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
 {
   int IsUnique = 1;  /* is it a DB replica? */
@@ -1347,12 +1360,13 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
   return(IsUnique);
 } /* AddToRepository() */
 
-/**************************************************
- DisplayContainerInfo(): Print what can be printed in XML.
- Cmd = command used to create this file (parent)
- CI->Cmd = command to be used ON this file (child)
- Returns: 1 if item is unique, 0 if duplicate.
- ***************************************************/
+/**
+ * @brief Print what can be printed in XML.
+ * @param CI
+ * @param Cmd = command used to create this file (parent)
+ *              CI->Cmd = command to be used ON this file (child)
+ * @returns: 1 if item is unique, 0 if duplicate.
+ **/
 int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
 {
   int i;
@@ -1518,9 +1532,11 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
   return(AddToRepository(CI,Fuid,Mask));
 } /* DisplayContainerInfo() */
 
-/***************************************************
- RemoveDir(char* dirpath) Remove all files under dirpath
- ***************************************************/
+/**
+ * @brief Remove all files under dirpath (rm -rf)
+ * @param dirpath
+ * @returns shell exit code of rm -rf
+ **/
 int RemoveDir(char *dirpath)
 {
   char RMcmd[FILENAME_MAX];
@@ -1567,9 +1583,11 @@ char *PathCheck(char *DirPath)
   return(NewPath);
 }
 
-/**********************************************
- Usage(): Display program usage.
- **********************************************/
+/**
+ * @brief Display program usage.
+ * @param Name program name
+ * @param Version program version
+ **/
 void	Usage	(char *Name, char *Version)
 {
   fprintf(stderr,"Universal Unpacker, version %s, compiled %s %s\n",
@@ -1609,4 +1627,3 @@ void	Usage	(char *Name, char *Version)
   fprintf(stderr,"  Boot partitions: x86, vmlinuz\n");
   CheckCommands(Quiet);
 } /* Usage() */
-
