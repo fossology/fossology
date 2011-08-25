@@ -17,10 +17,14 @@
 #include "ununpack.h"
 #include "externs.h"
 
-/***************************************************
- TraverseStart(): Find all files (assuming a directory)
- and process all of them.
- ***************************************************/
+/**
+ * \brief Find all files (assuming a directory)
+ *        and process (unpack) all of them.
+ * \param Filename Pathname of file to process
+ * \param Label String displayed by debug messages
+ * \param NewDir Optional, specifies an alternate directory to extract to.
+ * \param Recurse >0 to recurse
+ **/
 void	TraverseStart	(char *Filename, char *Label, char *NewDir,
     int Recurse)
 {
@@ -85,11 +89,14 @@ void	TraverseStart	(char *Filename, char *Label, char *NewDir,
 } /* TraverseStart() */
 
 
-/***************************************************
- TraverseChild(): This is the child spawn for recursion.
- The child never leaves here!  It calls EXIT!
- Exit is 0 on success, non-zero on failure.
- ***************************************************/
+/**
+ * \brief Called by exec'd child to process.
+ *        The child never leaves here!  It calls EXIT!
+ *         Exit is 0 on success, non-zero on failure.
+ * \param Index Child index into the queue table
+ * \param CI The ContainerInfo
+ * \param NewDir Optional, specifies an alternate directory to extract to.
+ **/
 void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
 {
   int rc;
@@ -205,19 +212,22 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
   exit(rc);
 } /* TraverseChild() */
 
-/***************************************************
- Traverse(): Find all files, traverse all directories.
- This is a depth-first search, in inode order!
- Label is used for debugging.
- NewDir specifies an alternate directory to extract to.
- Default (NewDir==NULL) is to extract to the same directory
- as Filename.
- Returns: 1 if Filename was a container, 0 if not a container.
- (The return value is really only used by TraverseStart().)
- ***************************************************/
+/**
+ * \brief Find all files, traverse all directories.
+ *        This is a depth-first search, in inode order!
+ * \param Filename Pathname of file to process
+ * \param Basename Optional basename() of Filename
+ * \param Label is used for debugging.
+ * \param NewDir  Optional, specifies an alternate directory to extract to.
+ *                Default (NewDir==NULL) is to extract to the same directory
+ *                as Filename.
+ * \param Recurse >0 to recurse
+ * \param PI ParentInfo
+ * \return 1 if Filename was a container, 0 if not a container.
+ *        (The return value is really only used by TraverseStart().)
+ **/
 int	Traverse	(char *Filename, char *Basename,
-    char *Label, char *NewDir,
-    int Recurse, ParentInfo *PI)
+    char *Label, char *NewDir, int Recurse, ParentInfo *PI)
 {
   int rc;
   PGresult *result;
