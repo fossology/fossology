@@ -43,6 +43,7 @@ int DelagentDBInit()
   if (rc != 0)
   {
     printf("Database initialize ERROR!\n");
+    DelagentDBClean();
     return -1; 
   }
 
