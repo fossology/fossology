@@ -1,7 +1,4 @@
 /*******************************************************************
- Ununpack-iso: The universal unpacker.
- Code to unpack an ISO file system.
-
  Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
@@ -18,17 +15,23 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *******************************************************************/
 
+/**
+ * \file ununpack-iso.c
+ * \brief The universal unpacker code to unpack an ISO file system.
+ **/
+
 #include "ununpack.h"
 #include "externs.h"
 
-/***************************************************
- GetISOMode(): Given a line in drwxrwxrwx format,
- convert it to a numeric mode.
- Returns UGO mode bits.
- NOTE: ISO are always read-only!
- (They may be saved with write bits, but they can never
- be written to!)
- ***************************************************/
+/**
+ * \brief Given a line in drwxrwxrwx format,
+ *        convert it to a numeric mode.
+ * NOTE: ISO are always read-only!
+ * (They may be saved with write bits, but they can never
+ * be written to!)
+ * \param Line
+ * \return UGO mode bits.
+ **/
 mode_t	GetISOMode	(char *Line)
 {
   mode_t Mode=0;
@@ -59,16 +62,18 @@ mode_t	GetISOMode	(char *Line)
   return(Mode);
 } /* GetISOMode() */
 
-/***************************************************
- ExtractISO(): Given an ISO image and a directory,
- extract the image to the directory.
- ISO images have magic type "application/x-iso".
- This can unpack any known ISO9660 format including:
- ISO9660, Rock Ridge, Joliet, and El Torrito.
- Returns: 0 on success, non-zero on failure.
- NOTE: This spawns multiple processes.
- Uses the following external commands: isoinfo grep
- ***************************************************/
+/**
+ * \brief Given an ISO image and a directory,
+ *        extract the image to the directory.
+ *        ISO images have magic type "application/x-iso".
+ *        This can unpack any known ISO9660 format including:
+ *        ISO9660, Rock Ridge, Joliet, and El Torrito.
+ * NOTE: This spawns multiple processes.
+ * Uses the following external commands: isoinfo grep
+ * \param Source
+ * \param Destination
+ * \return 0 on success, non-zero on failure.
+ **/
 int	ExtractISO	(char *Source, char *Destination)
 {
   char Cmd[FILENAME_MAX*4]; /* command to run */
@@ -198,4 +203,3 @@ int	ExtractISO	(char *Source, char *Destination)
   /* All done */
   return(0);
 } /* ExtractISO() */
-
