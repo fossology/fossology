@@ -1,6 +1,4 @@
 /************************************************************
- Code to compute a "less likely for collision" checksum.
-
  Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
@@ -16,24 +14,27 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
- *********************
- The checksum value contains 3 parts:
-   SHA1.MD5.Size
- SHA1 = SHA1 of the file.
- MD5 = MD5 value of the file.
- Size = number of bytes in the file.
- The chances of two files having the same size, same MD5, and
- same SHA1 is extremely unlikely.  (But it might happen!)
  ************************************************************/
 
 #include "checksum.h"
 #include "md5.h"
 #include "sha1.h"
 
-/**********************************************
- SumOpenFile(): Open and mmap a file.
- Returns structure, or NULL on failure.
- **********************************************/
+/**
+ * \file  checksum.c
+ * \brief Code to compute a three part checksum: SHA1.MD5.Size
+ *   - SHA1 = SHA1 of the file.
+ *   - MD5 = MD5 value of the file.
+ *   - Size = number of bytes in the file.
+ * The chances of two files having the same size, same MD5, and
+ * same SHA1 is extremely unlikely.
+ **/
+
+/**
+ * \brief Open and mmap a file.
+ * \parapm Fname File pathname
+ * \return CksmFile ptr, or NULL on failure.
+ **/
 CksumFile *	SumOpenFile	(char *Fname)
 {
   CksumFile *CF;
@@ -87,9 +88,10 @@ CksumFile *	SumOpenFile	(char *Fname)
   return(CF);
 } /* SumOpenFile() */
 
-/**********************************************
- SumCloseFile(): Close a filename.
- **********************************************/
+/**
+ * \brief Close a file that was opened with SumOpenFile()
+ * \param CF CksumFile ptr
+ **/
 void	SumCloseFile	(CksumFile *CF)
 {
   if ((CF->MmapSize > 0) && CF->Mmap)	munmap(CF->Mmap,CF->MmapSize);
@@ -99,9 +101,11 @@ void	SumCloseFile	(CksumFile *CF)
   free(CF);
 } /* SumCloseFile() */
 
-/**********************************************
- CountDigits(): How many digits are in a number?
- **********************************************/
+/**
+ * \brief Count how many digits are in a number.
+ * \param Num Number
+ * \return number of digits
+ **/
 int	CountDigits	(uint64_t Num)
 {
   uint64_t Val=10;
@@ -114,12 +118,13 @@ int	CountDigits	(uint64_t Num)
   return(Digits);
 } /* CountDigits() */
 
-/**********************************************
- SumComputeFile(): Compute the checksum, allocate and
- return a string containing the sum value.
- NOTE: The calling function must free() the string!
- Returns NULL on error.
- **********************************************/
+/**
+ * \brief Compute the checksum, allocate and
+ *        return a string containing the sum value.
+ * NOTE: The calling function must free() the string!
+ * \param Fin Open file descriptor
+ * \return NULL on error.
+ **/
 Cksum *	SumComputeFile	(FILE *Fin)
 {
   int rc;
@@ -170,12 +175,13 @@ Cksum *	SumComputeFile	(FILE *Fin)
   return(Sum);
 } /* SumComputeFile() */
 
-/**********************************************
- SumComputeBuff(): Compute the checksum, allocate and
- return a string containing the sum value.
- NOTE: The calling function must free() the string!
- Returns NULL on error.
- **********************************************/
+/**
+ * \brief Compute the checksum, allocate and
+ *        return a Cksum containing the sum value.
+ * NOTE: The calling function must free() the returned Cksum!
+ * \param CF CksumFile ptr
+ * \return Cksum or NULL on error.
+ **/
 Cksum *	SumComputeBuff	(CksumFile *CF)
 {
   int rc;
@@ -210,12 +216,11 @@ Cksum *	SumComputeBuff	(CksumFile *CF)
 } /* SumComputeBuff() */
 
 
-/**********************************************
- SumToString(): Compute the checksum, allocate and
- return a string containing the sum value.
- NOTE: The calling function must free() the string!
- Returns NULL on error.
- **********************************************/
+/**
+ * \brief Return string representing a Cksum.
+ *  NOTE: The calling function must free() the string!
+ * \return "sha1.md5.size" string, or NULL on error.
+ **/
 char *	SumToString	(Cksum *Sum)
 {
   int i;
@@ -238,99 +243,3 @@ char *	SumToString	(Cksum *Sum)
   return(Result);
 } /* SumToString() */
 
-/**********************************************
- RecurseFiles(): Process all files in all directories.
- **********************************************/
-void	RecurseFiles	(char *S)
-{
-  char NewS[FILENAME_MAX+1];
-  DIR *Dir;
-  struct dirent *Entry;
-  struct stat64 Stat;
-  CksumFile *CF;
-  char *Result=NULL;
-  Cksum *Sum;
-
-  Dir = opendir(S);
-  if (Dir == NULL)
-	{
-	Result=NULL;
-	/* it's a single file -- compute checksum */
-	CF = SumOpenFile(S);
-	if (CF == NULL)
-	  {
-	  FILE *Fin;
-	  Fin = fopen(S,"rb");
-	  if (!Fin)
-	    {
-	    perror("Huh?");
-	    fprintf(stderr,"ERROR: cannot open file \"%s\".\n",S);
-	    }
-	  else
-	    {
-	    Sum = SumComputeFile(Fin);
-	    if (Sum) { Result=SumToString(Sum); free(Sum); }
-	    fclose(Fin);
-	    }
-	  }
-	else
-	  {
-	  Sum = SumComputeBuff(CF);
-	  if (Sum) { Result=SumToString(Sum); free(Sum); }
-	  SumCloseFile(CF);
-	  }
-	if (Result != NULL)
-		{
-		printf("%s %s\n",Result,S);
-		free(Result);
-		Result=NULL;
-		}
-	return;
-	}
-  Entry = readdir(Dir);
-  while(Entry != NULL)
-	{
-	if (!strcmp(Entry->d_name,".")) goto skip;
-	if (!strcmp(Entry->d_name,"..")) goto skip;
-	memset(NewS,'\0',sizeof(NewS));
-	strcpy(NewS,S);
-	strcat(NewS,"/");
-	strcat(NewS,Entry->d_name);
-	lstat64(NewS,&Stat);
-	Result=NULL;
-	if (S_ISDIR(Stat.st_mode)) RecurseFiles(NewS);
-	else
-	  {
-	  /* compute checksum */
-	  CF = SumOpenFile(NewS);
-	  if (CF == NULL)
-	    {
-	    FILE *Fin;
-	    Fin = fopen(NewS,"rb");
-	    if (!Fin)
-	      fprintf(stderr,"ERROR: Cannot open file \"%s\".\n",NewS);
-	    else
-	      {
-	      Sum = SumComputeFile(Fin);
-	      if (Sum) { Result=SumToString(Sum); free(Sum); }
-	      fclose(Fin);
-	      }
-	    }
-	  else
-	    {
-	    Sum = SumComputeBuff(CF);
-	    if (Sum) { Result=SumToString(Sum); free(Sum); }
-	    SumCloseFile(CF);
-	    }
-	  if (Result != NULL)
-		{
-		printf("%s %s\n",Result,NewS);
-		free(Result);
-		Result=NULL;
-		}
-	  }
-skip:
-	Entry = readdir(Dir);
-	}
-  closedir(Dir);
-} /* RecurseFiles() */
