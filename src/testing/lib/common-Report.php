@@ -156,20 +156,29 @@ function genHtml($inFile=NULL, $outFile=NULL, $xslFile=NULL)
   {
     return('Error: no xsl file');
   }
+  if(!defined('TESTROOT'))
+  {
+    $here = getcwd();
+    // set to ...fossology/src/testing
+    $fossology = 'fossology';
+    $startLen = strlen($fossology);
+    $startPos = strpos($here, $fossology);
+    if($startPos === FALSE)
+    {
+      return("FATAL! did not find fossology, are you cd'd into the sources?\n");
+    }
+
+    $path = substr($here, 0, $startPos+$startLen);
+    $trPath = $path . '/src/testing';
+    define('TESTROOT',$trPath);
+  }
   // figure out where we are running in Jenkins so we can find xml2html
   // @todo fix where utils like fo-runTests and xml2html.php go and install them
   // as part of test setup.
-  if(array_key_exists('WORKSPACE', $_ENV))
-  {
-    $WORKSPACE = $_ENV['WORKSPACE'];
-    $cmdLine = $WORKSPACE . "/fossology/testing/reports/xml2html.php " .
+
+    $cmdLine = TESTROOT . "/reports/xml2html.php " .
       " -f $inFile -o $outFile -x $xslFile";
-  }
-  else {
-  // else running from fossology/src/testing
-  echo "**** DB: " . __FILE__ . " is at:" . getcwd() . "\n";
-  $cmdLine = "../../../testing/reports/xml2html.php -f $inFile -o $outFile -x $xslFile";
-  }
+
   $last = exec("$cmdLine", $out, $rtn);
   //echo "Last line of output from xml2:\n$last\n";
   //echo "output from xml2 is:\n";
