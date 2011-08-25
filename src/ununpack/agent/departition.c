@@ -1,7 +1,5 @@
 /******************************************************************
- De-partition: Code to extract a partition table file systems.
-
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,6 +14,12 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ******************************************************************/
+
+/**
+ * \file departition.c
+ * \brief Extract a partition table from file systems.
+ **/
+
 
 #define _LARGEFILE64_SOURCE
 
@@ -46,20 +50,24 @@ char Version[]=SVN_REV;
 int	Test=0;	/* set to 0 to extract, 1 to just be verbose */
 int	Verbose=0;
 
-/****************************************************
- ExtractKernel(): Extract a kernel file system.
- The first linux kernels were files: vmlinux.
- The files got big, so they compressed them: vmlinux.gz
- Today, they are integrated into boot managers, so they
- actually are wrapped in a file system: vmlinux.gz + x86 sector = vmlinuz
- The location of the vmlinux.gz in vmlinuz varies based on
- boot options and versions.  (Assembly code is actually used to
- identify the offset.)
- So, we just scan until we find the start of the file.
- *.gz files begin with "1F 8B 08 00" or "1F 8B 08 08"
- Find the *.gz, then dump the entire file.
- (This is similar to the approach used by extract-ikconfig.)
- ****************************************************/
+/**
+ * \brief Extract a kernel file system and copy it to a new file 
+ *        called "Kernel_%04d",Counter
+ *
+ * \param Fin Open file descriptor
+ *
+ *        The first linux kernels were files: vmlinux.
+ *        The files got big, so they compressed them: vmlinux.gz
+ *        Today, they are integrated into boot managers, so they
+ *        actually are wrapped in a file system: vmlinux.gz + x86 sector = vmlinuz
+ *        The location of the vmlinux.gz in vmlinuz varies based on
+ *        boot options and versions.  (Assembly code is actually used to
+ *        identify the offset.)
+ *        So, we just scan until we find the start of the file.
+ *        *.gz files begin with "1F 8B 08 00" or "1F 8B 08 08"
+ *        Find the *.gz, then dump the entire file.
+ *        (This is similar to the approach used by extract-ikconfig.)
+ **/
 void	ExtractKernel	(int Fin)
 {
   long Hold;
@@ -145,13 +153,14 @@ void	ExtractKernel	(int Fin)
   lseek(Fin,Hold,SEEK_SET);	/* rewind file */
 } /* ExtractKernel() */
 
-/****************************************************
- ExtractPartition(): Dump a partition to a file
- Fin = source of data (disk image)
- Start/Size = begin and end of partition
- This function extracts, then returns the pointer back
- to the original location.
- ****************************************************/
+/**
+ * \brief Dump a partition to a file
+ *        This function extracts, then returns the pointer back
+ *        to the original location.
+ * \param Fin  source of data (disk image)
+ * \param Start  begin of partition
+ * \param Size   end of partition
+ **/
 void	ExtractPartition	(int Fin, u_long Start, u_long Size)
 {
   off64_t Hold;
@@ -248,12 +257,14 @@ void	ExtractPartition	(int Fin, u_long Start, u_long Size)
   lseek64(Fin,Hold,SEEK_SET);	/* rewind file */
 } /* ExtractPartition() */
 
-/****************************************************
- ReadMBR(): Read a master boot record (first 0x200 bytes).
- The MBR contains 446 bytes of assembly, and 4 partition tables.
- Start = offset for record
- Returns: 0=not MBR, 1=MBR
- ****************************************************/
+/**
+ * \brief Read a master boot record (first 0x200 bytes).
+ *        The MBR contains 446 bytes of assembly, and 4 partition tables.
+ *        Extracts kernel and partitions based on MBR.
+ * \param Fin Open file descriptor to read
+ * \param MBRStart offset for record
+ * \return 0=not MBR, 1=MBR
+ **/
 int	ReadMBR	(int Fin, u_long MBRStart)
 {
   unsigned char MBR[0x200]; /* master boot record sector */
@@ -364,9 +375,9 @@ int	ReadMBR	(int Fin, u_long MBRStart)
   return(1);
 } /* ReadMBR() */
 
-/**********************************************
- Usage():
- **********************************************/
+/**
+ * \brief Usage
+ **/
 void	Usage	(char *Filename)
 {
   fprintf(stderr,"Usage: %s [-t] diskimage\n",Filename);
@@ -374,7 +385,9 @@ void	Usage	(char *Filename)
   fprintf(stderr,"  -v = Verbose.\n");
 } /* Usage() */
 
-/*********************************************************************/
+/**
+ * \brief main
+**/
 int	main	(int argc, char *argv[])
 {
   int Fin;
