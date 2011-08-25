@@ -192,7 +192,6 @@ int	main(int argc, char *argv[])
 
   magic_load(MagicCookie,NULL);
 
-DEBUG("bobg UseRepository is %d", UseRepository)
   /* Open DB and Initialize CMD table */
   if (UseRepository) 
   {
@@ -207,7 +206,6 @@ DEBUG("bobg UseRepository is %d", UseRepository)
     agent_pk = fo_GetAgentKey(pgConn, AgentName, atoi(Upload_Pk), 0,
                               "Unpacks archives (iso, tar, etc)");
 
-DEBUG("bobg agent_pk is %d", agent_pk)
     InitCmd();
 
     /* does ars table exist? 
