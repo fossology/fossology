@@ -25,8 +25,17 @@ if [ "$FOSSYUID" != "fossy" ];then
 fi
 
 #echo $UID
+touch $HOME/connectdb.exp
+echo '#!/usr/bin/expect' > $HOME/connectdb.exp
+echo 'set timeout 30' >> $HOME/connectdb.exp
+echo 'spawn dropdb fossologytest' >> $HOME/connectdb.exp
+echo 'expect "Password:"' >> $HOME/connectdb.exp
+echo 'send "fossy\r"' >> $HOME/connectdb.exp
+echo 'interact' >> $HOME/connectdb.exp
 
-dropdb fossologytest
+expect $HOME/connectdb.exp
+rm -f $HOME/connectdb.exp
+
 if [ $? -ne 0 ];
 then
   echo "Delete Test database Error!"
@@ -35,7 +44,7 @@ fi
 
 PREFIX=`cat $VARS|grep -i '^PREFIX'|awk -F = '{print $2}'`
 cp $PREFIX/etc/fossology/Db.conf ~/
-sed -i 's/fossologytest/fossology/' ~/Db.conf
+#sed -i 's/fossologytest;/fossology;/' ~/Db.conf
 cp ~/Db.conf $PREFIX/etc/fossology/Db.conf
 
 echo "Clean Test database success!"
