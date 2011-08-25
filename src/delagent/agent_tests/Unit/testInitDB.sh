@@ -35,13 +35,14 @@ echo 'send "fossy\r"' >> $HOME/connectdb.exp
 echo 'interact' >> $HOME/connectdb.exp
 
 expect $HOME/connectdb.exp
-rm -f $HOME/connectdb.exp
 
 if [ $? -ne 0 ];
 then
   echo "Create Test database Error!"
   exit 1
 fi
+rm -f $HOME/connectdb.exp
+
 
 touch $HOME/connectdb.exp
 echo '#!/usr/bin/expect' > $HOME/connectdb.exp
@@ -52,6 +53,11 @@ echo 'send "fossy\r"' >> $HOME/connectdb.exp
 echo 'interact' >> $HOME/connectdb.exp
 
 expect $HOME/connectdb.exp
+if [ $? -ne 0 ];
+then
+  echo "Create Test database Error!"
+  exit 1
+fi
 rm -f $HOME/connectdb.exp
 
 PREFIX=`cat $VARS|grep -i '^PREFIX'|awk -F = '{print $2}'`

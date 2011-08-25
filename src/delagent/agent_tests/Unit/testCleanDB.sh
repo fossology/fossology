@@ -34,6 +34,11 @@ echo 'send "fossy\r"' >> $HOME/connectdb.exp
 echo 'interact' >> $HOME/connectdb.exp
 
 expect $HOME/connectdb.exp
+if [ $? -ne 0 ];
+then
+  echo "Delete Test database Error!"
+  exit 1
+fi
 rm -f $HOME/connectdb.exp
 
 if [ $? -ne 0 ];
@@ -44,7 +49,8 @@ fi
 
 PREFIX=`cat $VARS|grep -i '^PREFIX'|awk -F = '{print $2}'`
 cp $PREFIX/etc/fossology/Db.conf ~/
-#sed -i 's/fossologytest;/fossology;/' ~/Db.conf
+sed -i 's/fossologytest;/fossology;/' ~/Db.conf
 cp ~/Db.conf $PREFIX/etc/fossology/Db.conf
+rm -f ~/Db.conf
 
 echo "Clean Test database success!"
