@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,45 +16,41 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+/**
+ * \file common-active.php
+ * \brief These are common functions for performing active HTTP requests.
+ * (Used in place of AJAX or ActiveX.)
+ */
 
-/************************************************************
- These are common functions for performing active HTTP requests.
- (Used in place of AJAX or ActiveX.)
- ************************************************************/
-
-/*************************************************
- PopupAlert(): Generate a popup alert window.
- *************************************************/
-function PopupAlert	($Message) {
+/**
+ * \brief Generate a popup alert window.
+ *
+ * \param $Message - the message to alert
+ *
+ * \return the html to alert (with embeded javascript) 
+ */
+function PopupAlert($Message) {
   if (!empty($_SESSION['NoPopup']) && ($_SESSION['NoPopup'] == 1))
-    {
+  {
     $HTML = "<H3>" . htmlentities($Message,ENT_QUOTES) . "</H3>\n";
-    }
+  }
   else
-    {
+  {
     $HTML  = "<script language='javascript'>\n";
     $HTML .= "alert('" . htmlentities($Message,ENT_QUOTES) . "');\n";
     $HTML .= "</script>";
-    }
+  }
   return($HTML);
 } // PopupAlert()
 
 /**
- * displayMessage
- *
- * Display a message.  This is used to convey the results of button push like
+ * \brief Display a message.  This is used to convey the results of button push like
  * upload, submit, analyze, create, etc.
  *
- * @param string $Message the message to display
- * @param string $keep a safe text string NOT run through htmlentities
- * @return string $HTML the html to display (with embeded javascript)
+ * \param $Message the message to display
+ * \param $keep a safe text string NOT run through htmlentities
+ *
+ * \return the html to display (with embeded javascript)
  */
 function displayMessage($Message,$keep=NULL) {
 
@@ -73,32 +69,37 @@ function displayMessage($Message,$keep=NULL) {
            "  parent.removeChild(div);\n" .
            "}\n" .
            "</script>\n";
-    return($HTML);
+  return($HTML);
 }
 
-/*************************************************
- ActiveHTTPscript(): Given a function name, create the
- JavaScript needed for doing the request.
- The JavaScript takes a URL and returns the data.
- The JavaScript is Asynchronous (no wait while the request goes on).
- The $RequestName is the JavaScript variable name to use.
- The javascript function is named "${RequestName}_Get"
- The javascript function "${RequestName}_Reply" must be defined for
- handling the reply.  (You will need to make this Javascript function.)
- The javascript variable "${RequestName}.status" contains the
- reply's HTTP return code (200 means "OK") and "${RequestName}.readyState"
- is the handle's state (4 = "loaded").
- References:
-   http://www.w3schools.com/xml/xml_http.asp
- *************************************************/
-function ActiveHTTPscript	($RequestName,$IncludeScriptTags=1)
+/**
+ * \brief Given a function name, create the
+ * JavaScript needed for doing the request.
+ * The JavaScript takes a URL and returns the data.
+ * The JavaScript is Asynchronous (no wait while the request goes on).
+ * 
+ * \param $RequestName - the JavaScript variable name to use.
+ * The javascript function is named "${RequestName}_Get"
+ * The javascript function "${RequestName}_Reply" must be defined for
+ * handling the reply.  (You will need to make this Javascript function.)
+ * The javascript variable "${RequestName}.status" contains the
+ * reply's HTTP return code (200 means "OK") and "${RequestName}.readyState"
+ * is the handle's state (4 = "loaded").
+ * \param $IncludeScriptTags - if will append the javascript tag.  default value is 1.
+ * empty on no, other on yes
+ *
+ * \return the html (with embeded javascript)
+ *
+ * \see References: http://www.w3schools.com/xml/xml_http.asp
+ */
+function ActiveHTTPscript($RequestName,$IncludeScriptTags=1)
 {
   $HTML="";
 
   if ($IncludeScriptTags)
-    {
+  {
     $HTML="<script language='javascript'>\n<!--\n";
-    }
+  }
 
   $HTML .= "var $RequestName=null;\n";
   /* Check for browser support. */
@@ -119,9 +120,9 @@ function ActiveHTTPscript	($RequestName,$IncludeScriptTags=1)
   $HTML .= "  $RequestName.onreadystatechange=${RequestName}_Reply;\n";
   /***
    'true' means asynchronous request.
-   Rather than waiting for the reply, the reply is
-   managed by the onreadystatechange event handler.
-   ***/
+  Rather than waiting for the reply, the reply is
+  managed by the onreadystatechange event handler.
+  ***/
   $HTML .= "  $RequestName.open('GET',Url,true);\n";
   $HTML .= "  $RequestName.send(null);\n";
   $HTML .= "  }\n";
@@ -133,9 +134,9 @@ function ActiveHTTPscript	($RequestName,$IncludeScriptTags=1)
   $HTML .= "}\n";
 
   if ($IncludeScriptTags)
-    {
+  {
     $HTML .= "\n// -->\n</script>\n";
-    }
+  }
 
   return($HTML);
 } // ActiveHTTPscript()

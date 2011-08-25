@@ -16,40 +16,34 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+/**
+ * \file common-ui.php
+ */
 
-/*****************************************
- Array2SingleSelect: Build a single choice select pulldown
-
- Params:
-   $KeyValArray   Assoc array.  Use key/val pairs for list
-   $SLName        Select list name (default is "unnamed"),
-   $SelectedVal   Initially selected value or key, depends 
-                  on $SelElt
-   $FirstEmpty    True if the list starts off with an empty choice
-                  (default is false)
-   $SelElt        True (default) if $SelectedVal is a value
-                  False if $SelectedVal is a key
-   $Options       Optional.  Options to add to the select statment.
-                  For example, "id=myid onclick= ..."
- *****************************************/
-function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "", 
-                            $FirstEmpty=false, $SelElt=true, $Options="")
+/**
+ * \brief Build a single choice select pulldown
+ *
+ * \param $KeyValArray - Assoc array.  Use key/val pairs for list
+ * \param $SLName - Select list name (default is "unnamed"),
+ * \param $SelectedVal - Initially selected value or key, depends on $SelElt
+ * \param $FirstEmpty - True if the list starts off with an empty choice (default is false)
+ * \param $SelElt - True (default) if $SelectedVal is a value False if $SelectedVal is a key
+ * \param $Options - Optional.  Options to add to the select statment.
+ * For example, "id=myid onclick= ..."
+ *
+ * \return a string of select html 
+ */
+function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "",
+$FirstEmpty=false, $SelElt=true, $Options="")
 {
   $str ="\n<select name='$SLName' $Options>\n";
   if ($FirstEmpty) $str .= "<option value='' > \n";
   foreach ($KeyValArray as $key => $val)
   {
     if ($SelElt == true)
-      $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
+    $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
     else
-      $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
+    $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
     $str .= "<option value='$key' $SELECTED>$val\n";
   }
   $str .= "</select>";
@@ -57,18 +51,15 @@ function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "",
 }
 
 
-/*****************************************
- Fatal: 
-   Write message to stdout and die.
-
- Params:
-   $msg     Message to write
-   $filenm  File name (__FILE__)
-   $lineno  Line number of the caller (__LINE__)
-
- Returns:
-   None, prints error, file, and line number, then exits(1)
- *****************************************/
+/**
+ * \brief Write message to stdout and die.
+ *
+ * \param $msg - Message to write
+ * \param $filenm - File name (__FILE__)
+ * \param $lineno - Line number of the caller (__LINE__)
+ *
+ * \return None, prints error, file, and line number, then exits(1)
+ */
 function Fatal($msg, $filenm, $lineno)
 {
   echo "<hr>FATAL error, File: $filenm, Line number: $lineno<br>";
@@ -77,7 +68,9 @@ function Fatal($msg, $filenm, $lineno)
   exit(1);
 }
 
-
+/**
+ * \brief debug back trace
+ */
 function debugbacktrace()
 {
   echo "<pre>";
@@ -85,6 +78,9 @@ function debugbacktrace()
   echo "</pre>";
 }
 
+/**
+ * \brief print debug message
+ */
 function debugprint($val, $title)
 {
   echo $title, "<pre>";
@@ -92,16 +88,23 @@ function debugprint($val, $title)
   echo "</pre>";
 }
 
+/**
+ * \brief transelate a byte number to a proper type, xxx bytes to xxx B/KB/MB/GB/TB
+ */
 function HumanSize( $bytes )
 {
-    $types = array( 'B', 'KB', 'MB', 'GB', 'TB' );
-    for( $i = 0; $bytes >= 1024 && $i < ( count( $types ) -1 ); $bytes /= 1024, $i++ );
-    return( round( $bytes, 2 ) . " " . $types[$i] );
+  $types = array( 'B', 'KB', 'MB', 'GB', 'TB' );
+  for( $i = 0; $bytes >= 1024 && $i < ( count( $types ) -1 ); $bytes /= 1024, $i++ );
+  return( round( $bytes, 2 ) . " " . $types[$i] );
 }
-
-/************************************
- Return File Extension (text after last period)
- ************************************/
+ 
+/**
+ * \brief get File Extension (text after last period)
+ *
+ * \param $fname - file name
+ * 
+ * \return the file extension of the specified file name
+ */
 function GetFileExt($fname)
 {
   $extpos = strrpos($fname, '.') + 1;
@@ -110,58 +113,65 @@ function GetFileExt($fname)
 }
 
 
-/*
- * Return an array value, or "" if the array key does not exist
+/**
+ * \brief get the value from a array(map)
+ *
+ * \param $Key - key 
+ * \param $Arr - Whithin the Array, you can get value according to the key
+ *
+ * \return an array value, or "" if the array key does not exist
  */
 function GetArrayVal($Key, $Arr)
 {
   if (!is_array($Arr)) return "";
   if (array_key_exists($Key, $Arr))
-    return ($Arr[$Key]);
+  return ($Arr[$Key]);
   else
-    return "";
+  return "";
 }
 
 
-/* send the download file to the user 
-   Returns True on success, error message on failure.
+/**
+ * \brief send the download file to the user
+ * 
+ * \return True on success, error message on failure.
  */
-function DownloadFile($path, $name) 
+function DownloadFile($path, $name)
 {
-    $regfile = file_exists($path);
-    if (!$regfile) return _("File does not exist");
+  $regfile = file_exists($path);
+  if (!$regfile) return _("File does not exist");
 
-    $regfile = is_file($path);
-    if (!$regfile) return _("Not a regular file");
+  $regfile = is_file($path);
+  if (!$regfile) return _("Not a regular file");
 
-    $connstat = connection_status();
-    if ($connstat != 0) return _("Lost connection.");
+  $connstat = connection_status();
+  if ($connstat != 0) return _("Lost connection.");
 
-    session_write_close();
-    ob_end_clean();
-//    header("Cache-Control: no-store, no-cache, must-revalidate");
-//    header("Cache-Control: post-check=0, pre-check=0", false);
-//    header("Pragma: no-cache");
-    header("Expires: ".gmdate("D, d M Y H:i:s", mktime(date("H")+2, date("i"), date("s"), date("m"), date("d"), date("Y")))." GMT");
-    header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
-    header('Content-Description: File Transfer');
-    header("Content-Type: application/octet-stream");
-    header("Content-Length: ".(string)(filesize($path)));
-    header("Content-Disposition: attachment; filename=$name");
-    header("Content-Transfer-Encoding: binary\n");
+  session_write_close();
+  ob_end_clean();
+  //    header("Cache-Control: no-store, no-cache, must-revalidate");
+  //    header("Cache-Control: post-check=0, pre-check=0", false);
+  //    header("Pragma: no-cache");
+  header("Expires: ".gmdate("D, d M Y H:i:s", mktime(date("H")+2, date("i"), date("s"), date("m"), date("d"), date("Y")))." GMT");
+  header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
+  header('Content-Description: File Transfer');
+  header("Content-Type: application/octet-stream");
+  header("Content-Length: ".(string)(filesize($path)));
+  header("Content-Disposition: attachment; filename=$name");
+  header("Content-Transfer-Encoding: binary\n");
 
-    /* read/write in chunks to optimize large file downloads */
-    if ($file = fopen($path, 'rb')) 
+  /* read/write in chunks to optimize large file downloads */
+  if ($file = fopen($path, 'rb'))
+  {
+    while(!feof($file) and (connection_status()==0))
     {
-        while(!feof($file) and (connection_status()==0)) 
-        {
-            print(fread($file, 1024*8));
-            flush();
-        }
-        fclose($file);
+      print(fread($file, 1024*8));
+      flush();
     }
-    if ((connection_status()==0) and !connection_aborted()) return True;
-    return _("Lost connection.");
+    fclose($file);
+  }
+  if ((connection_status()==0) and !connection_aborted()) return True;
+  return _("Lost connection.");
 }
 
 ?>
