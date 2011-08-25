@@ -14,26 +14,24 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+***********************************************************/
+
 /**
- * General purpose classes used by fossology cli programs.
+ * \file common-cli.php
+ * \brief general purpose classes used by fossology cli programs.
  *
- * @package common-cli
+ * \package common-cli
  *
- * @version "$Id: common-cli.php 3444 2010-09-10 03:52:55Z madong $"
- *
+ * \version "$Id: common-cli.php 3444 2010-09-10 03:52:55Z madong $"
  */
 
 /**
- * function: cli_Init
- *
- * Initalize the fossology environment for cli use.  This routine loads
+ * \brief Initalize the fossology environment for cli use.  This routine loads
  * the plugins so they can be use by cli programs.  In the process of doing
  * that it disables the core-auth plugin.
  *
- * @return true
+ * \return true
  */
-
 function cli_Init()
 {
   // every cli must perform these steps
@@ -46,7 +44,9 @@ function cli_Init()
   /* Turn off authentication */
   /** The auth module hijacks and disables plugins, so turn it off. **/
   $P = &$Plugins[plugin_find_any_id("auth")];
-  if (!empty($P)) { $P->State = PLUGIN_STATE_FAIL; }
+  if (!empty($P)) {
+    $P->State = PLUGIN_STATE_FAIL;
+  }
   $_SESSION['User'] = 'fossy';
 
   /* Initialize plugins */
@@ -58,31 +58,28 @@ function cli_Init()
 } // cli_Init()
 
 /**
- * function cli_logger
- * write/append a message to the log handle passed in.
+ * \brief write/append a message to the log handle passed in.
  *
- * @param string $handle the path to the file
- * @param string $message the message to put in the log file, the string
+ * \param $handle - the path to the file
+ * \param $message - the message to put in the log file, the string
  * should not have a new line at the end, this function will add it.
- * @param string $mode the open mode, either 'a' or 'w'
+ * \param $mode - the open mode, either 'a' or 'w'
  *
- * NOTE: it is up to the caller to manage the mode
+ * \note it is up to the caller to manage the mode
  *
- * @return null on sucess, string for failure
- *
+ * \return null on sucess, string for failure
  */
-
 function cli_logger($handle, $message, $mode='a')
 {
   $message .= "\n";
   $FR = fopen($handle, $mode) or
-        die("Can't open $handle, $php_errormsg\n");
+  die("Can't open $handle, $php_errormsg\n");
   $wrote = fwrite ($FR, $message);
   fflush($FR);
   if ($wrote == -1)
   {
     fclose($FR);
-$text = _("ERROR: could not write message to");
+    $text = _("ERROR: could not write message to");
     return("$text $handle\n");
   }
   fclose($FR);
@@ -90,19 +87,15 @@ $text = _("ERROR: could not write message to");
 }
 
 /**
- * function cli_PrintDebugMessage
- *
- * print a debug message and optionally dump a structure
- *
+ * \brief print a debug message and optionally dump a structure
  * prints the message prepended with a DBG-> as the prefix.   The string
  * will have a new-line added to the end so that the caller does not have
  * to supply it.
  *
- * @param string $message the debug message to display
- * @param mixed  $dump    if not null, will be printed using print_r.
+ * \param $message - the debug message to display
+ * \param $dump - default null, if not null, will be printed using print_r.
  *
- * @return Null
- *
+ * \return Null
  */
 function cli_PrintDebugMessage($message, $dump=''){
 
