@@ -26,18 +26,38 @@ fi
 
 #echo $UID
 
-createdb fossologytest
+touch $HOME/connectdb.exp
+echo '#!/usr/bin/expect' > $HOME/connectdb.exp
+echo 'set timeout 30' >> $HOME/connectdb.exp
+echo 'spawn createdb fossologytest' >> $HOME/connectdb.exp
+echo 'expect "Password:"' >> $HOME/connectdb.exp
+echo 'send "fossy\r"' >> $HOME/connectdb.exp
+echo 'interact' >> $HOME/connectdb.exp
+
+expect $HOME/connectdb.exp
+rm -f $HOME/connectdb.exp
+
 if [ $? -ne 0 ];
 then
   echo "Create Test database Error!"
   exit 1
 fi
 
-pg_restore -d fossologytest $HOME/testdata/testdb_all.tar
+touch $HOME/connectdb.exp
+echo '#!/usr/bin/expect' > $HOME/connectdb.exp
+echo 'set timeout 30' >> $HOME/connectdb.exp
+echo 'spawn pg_restore -d fossologytest '$HOME'/testdata/testdb_all.tar' >> $HOME/connectdb.exp
+echo 'expect "Password:"' >> $HOME/connectdb.exp
+echo 'send "fossy\r"' >> $HOME/connectdb.exp
+echo 'interact' >> $HOME/connectdb.exp
+
+expect $HOME/connectdb.exp
+rm -f $HOME/connectdb.exp
 
 PREFIX=`cat $VARS|grep -i '^PREFIX'|awk -F = '{print $2}'`
 cp $PREFIX/etc/fossology/Db.conf ~/
-sed -i 's/fossology/fossologytest/' ~/Db.conf
+sed -i 's/fossology;/fossologytest;/' ~/Db.conf
 cp ~/Db.conf $PREFIX/etc/fossology/Db.conf
+rm -f ~/Db.conf
 
 echo "Create Test database success!"
