@@ -99,8 +99,8 @@ $xsldoc->load($xslFile);
 $xsl->importStyleSheet($xsldoc);
 
 $xmldoc = new DOMDocument();
-$xmldoc->load($xmlFile);
-$transformed = $xsl->transformToXML($xmldoc);
+@$xmldoc->load($xmlFile);
+@$transformed = $xsl->transformToXML($xmldoc);
 
 if($outputFile)
 {

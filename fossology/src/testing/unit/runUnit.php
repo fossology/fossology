@@ -57,11 +57,34 @@ function checkCUnit($fileName)
 } // checkCUnit
 
 /**
+ * \brief check the output of make for errors
+ *
+ * @param string $makeOut the output of make
+ *
+ * @return boolean
+ */
+function checkMakeErrors($makeOut)
+{
+  if(empty($makeOut))
+  {
+    return(FALSE);
+  }
+  $matched = 0;
+  $matches = array();
+
+  $pat = '/^make.*?\sError\s[0-9]+/';
+  $matched = preg_match($pat, $makeOut, $matches);
+
+  //echo "DB: matched is:$matched\n";
+  return($matched);
+}
+
+/**
  * \brief transform the xml to html for CUnit style reports
  *
  * @param string $fileName the xml file to transform
  *
- * @return
+ * @return boolean
  */
 function genCunitRep($fileName)
 {
@@ -82,9 +105,9 @@ function genCunitRep($fileName)
   }
   // remove .xml from name
   $outFile = basename($fileName, '.xml');
-  $outPath = TESTROOT . "/reports/$outFile.html";
+  $outPath = TESTROOT . "/reports/unit/$outFile.html";
   $xslPath = "/usr/share/CUnit/$xslFile";
-  echo "DB: Starting to generate html report for $fileName\n";
+  //echo "DB: Starting to generate html report for $fileName\n";
   $report = genHtml($fileName, $outPath, $xslPath);
   if(!empty($report))
   {
@@ -92,23 +115,44 @@ function genCunitRep($fileName)
     echo "DB: report is:\n$report\n";
     return(FALSE);
   }
-  else
-  {
-    echo "DB: Generated html file:$outFile" . ".html\n";
-  }
-
-
-
+  //echo "DB: Generated html file:$outFile" . ".html\n";
   return(TRUE);
 }
 
 /**
- * \brief transform the xml to html for XUnit style reports
+ * \brief gather and transform the xunit xml results files to html for
+ * XUnit style reports
  *
- * @param string $fileName the xml file to transform
+ * NOTE: this function assumes that it is running in
+ * ...fossology/src/<module-name>/agent_tests/Functional
+ *
+ * @param string $unitTest the name of the module to process
+ *
+ * @return boolean
  */
-function genXunitRep($fileName)
+function processXunit($unitTest)
 {
+  if(empty($unitTest))
+  {
+    return(FALSE);
+  }
+  foreach(glob("$unitTest*.xml") as $fileName)
+  {
+    //echo "DB: functional test file name is:$fileName\n";
+    // remove .xml from name
+    $outFile = basename($fileName, '.xml');
+    $outPath = TESTROOT . "/reports/functional/$outFile.html";
+    $xslPath = TESTROOT . "/reports/junit-noframes.xsl";
+    //echo "DB: Starting to generate html report for $fileName\n";
+    $report = genHtml($fileName, $outPath, $xslPath);
+    if(!empty($report))
+    {
+      echo "Error: Could not generate a HTML Test report from $fileName.\n";
+      echo "DB: report is:\n$report\n";
+      return(FALSE);
+    }
+    //echo "DB: Generated html file:$outFile" . ".html\n";
+  }
   return(TRUE);
 }
 
@@ -119,7 +163,7 @@ function genXunitRep($fileName)
  *
  * @return mixed NULL on success, newline terminated string on failure
  */
-function processReports($unitTest)
+function processCUnit($unitTest)
 {
   global $failures;
 
@@ -164,7 +208,7 @@ function processReports($unitTest)
   } // foreach
 
   return(NULL);
-} // processReports
+} // processCUnit
 
 /**
  * \breif change the references to the dtd's for cunit reports so they can be
@@ -237,7 +281,7 @@ $unit = TESTROOT . "/unit";
 
 if(@chdir($unit) === FALSE)
 {
-  echo "FATAL!, could not cd to:" . TESTROOT . "/unit\n";
+  echo "FATAL!, could not cd to:\n$unit\n";
   exit(1);
 }
 require_once('../lib/common-Report.php');
@@ -292,7 +336,7 @@ foreach($unitList as $unitTest)
     echo "Make clean of $unitTest did not succeed, return code:$cleanRtn\n";
   }
   $lastMake = exec('make test 2>&1', $makeOut, $makeRtn);
-  echo "Exit status of 'make test' of $unitTest is:$makeRtn\n";
+  //echo "DB: Exit status of 'make test' of $unitTest is:$makeRtn\n";
   if($makeRtn != 0)
   {
     $found = array();
@@ -305,18 +349,26 @@ foreach($unitList as $unitTest)
     }
     else
     {
-      echo "Error! tests did not make for $unitTest\n";
-      //echo "DB: Make Transcript is:\n";
+      // check for real make errors rather than test errors.
       //$makeErrors =  implode("\n", $makeOut);
-      //echo $makeErrors . "\n\n";
-      $failures++;
+      if(checkMakeErrors(implode("\n", $makeOut)))
+      {
+        echo "Error! There were make errors for unit test $unitTest\n";
+        $failures++;
+      }
     }
     // make coverage
     $lastCovr = exec('make coverage 2>&1', $covrOut, $covrRtn);
-    echo "Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
+    //echo "DB: Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
     if($covrRtn != 0)
     {
-      echo "Error! 'make coverage; of $unitTest did not succeed, return code:$cleanRtn\n";
+      //$makeErrors =  implode("\n", $makeOut);
+      if(checkMakeErrors(implode("\n", $covrOut)))
+      {
+        echo "Error! 'make coverage; of $unitTest did not succeed, " .
+          "return code:$covrRtn\n";
+        $failures++;
+      }
     }
     // some makefiles/tests are written to report a make 'failure' when a test
     // fails, so process the reports, as there should be a xml file.
@@ -328,9 +380,23 @@ foreach($unitList as $unitTest)
       backToParent('../..');
       continue;
     }
-    if(!is_NULL($error = processReports($unitTest)))
+    if(!is_NULL($error = processCUnit($unitTest)))
     {
       echo $error;
+    }
+    // process PHPUnit tests in agent_tests/Functional
+    // cd back to ../agent_tests from Unit
+    backToParent('..');
+    if(@chdir('Functional') === FALSE)
+    {
+      echo "Error! Could not cd to " . getcwd() . "/Functional, skipping reports\n";
+      backToParent('../../..');
+      continue;
+    }
+    if(!processXUnit($unitTest))
+    {
+      echo "Error! could not create html report for $unitTest at\n" .
+      __FILE__ . " on " . __LINE__ . "\n";
     }
     backToParent('../../..');
     continue;
@@ -351,10 +417,16 @@ foreach($unitList as $unitTest)
 
     // make coverage
     $lastCovr = exec('make coverage 2>&1', $covrOut, $covrRtn);
-    echo "Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
+    //echo "Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
     if($covrRtn != 0)
     {
-      echo "Error! 'make coverage; of $unitTest did not succeed, return code:$cleanRtn\n";
+      //$makeErrors =  implode("\n", $makeOut);
+      if(checkMakeErrors(implode("\n", $covrOut)))
+      {
+        echo "Error! 'make coverage; of $unitTest did not succeed, " .
+          "return code:$covrtRtn\n";
+        $failures++;
+      }
     }
     // at this point there should be a .xm file to process
     //echo "DB: AFTER make=0 we are at:\n" . getcwd() . "\n";
@@ -365,10 +437,26 @@ foreach($unitList as $unitTest)
       backToParent('../../..');
       continue;
     }
-    if(!is_NULL($error = processReports($unitTest)))
+    if(!is_NULL($error = processCUnit($unitTest)))
     {
       echo $error;
     }
+    // process PHPUnit tests in agent_tests/Functional
+    // cd back to ../agent_tests from Unit
+    backToParent('..');
+    //echo "DB: getting ready for FUNCTIONAL we are at:\n" . getcwd() . "\n";
+    if(@chdir('Functional') === FALSE)
+    {
+      echo "Error! Could not cd to " . getcwd() . "/Functional, skipping reports\n";
+      backToParent('../../..');
+      continue;
+    }
+    if(!processXUnit($unitTest))
+    {
+      echo "Error! could not create html report for $unitTest at\n" .
+      __FILE__ . " on " . __LINE__ . "\n";
+    }
+
     backToParent('../../..');
   } // else no make errors
 } // for

@@ -94,7 +94,7 @@ function check4CUnitFail($xmlFile=NULL)
 
   if(file_exists($xmlFile))
   {
-    $sx = simplexml_load_file($xmlFile);
+    $sx = @simplexml_load_file($xmlFile);
     //echo "cunit looks like:\n";print_r($sx) . "\n";
   }
   else
@@ -103,6 +103,8 @@ function check4CUnitFail($xmlFile=NULL)
   }
 
   // dive deep to get the data we need.
+  // @todo, test for an object and if not one, then report that xml file is
+  // corrupt.
   foreach($sx->CUNIT_RESULT_LISTING as $cuResutList)
   {
     foreach($cuResutList->CUNIT_RUN_SUITE as $cuRunSuite)
