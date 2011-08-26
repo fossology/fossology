@@ -1,5 +1,5 @@
 # FOSSology Makefile - test for agents/ununpack
-# Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
@@ -16,7 +16,7 @@ TEST_OBJ_UNUNPACK=./ununpack/testUnunpackEntry.o \
                   ./ununpack/testTraverseChild.o \
                   ./ununpack/testPrune.o \
                   ./ununpack/testCopyFile.o
-TEST_OBJ_UNUNPACK_AR=./ununpack-ar/testExtractAR.o
+TEST_OBJ_UNUNPACK_AR=test_ununpack-ar.c
 TEST_OBJ_UNUNPACK_ISO=./ununpack-iso/testExtractISO.o
 TEST_OBJ_UNUNPACK_DISK=./ununpack-disk/testExtractDisk.o \
                        ./ununpack-disk/testFatDiskName.o
