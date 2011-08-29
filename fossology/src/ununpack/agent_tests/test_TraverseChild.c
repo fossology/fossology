@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,62 +14,12 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+#include "run_tests.h"
 
-/* cunit includes */
-#include <CUnit/CUnit.h>
-#include "utility.h"
-
-struct ParentInfo
-  {
-  int Cmd;      /* index into command table used to run this */
-  time_t StartTime;     /* time when command started */
-  time_t EndTime;       /* time when command ended */
-  int ChildRecurseArtifact; /* child is an artifact -- don't log to XML */
-  long uploadtree_pk;	/* if DB is enabled, this is the parent */
-  };
-typedef struct ParentInfo ParentInfo;
-
-struct ContainerInfo
-  {
-  char Source[FILENAME_MAX];  /* Full source filename */
-  char Partdir[FILENAME_MAX];  /* directory name */
-  char Partname[FILENAME_MAX];  /* filename without directory */
-  char PartnameNew[FILENAME_MAX];  /* new filename without directory */
-  int TopContainer;	/* flag: 1=yes (so Stat is meaningless), 0=no */
-  int HasChild;	/* Can this a container have children? (include directories) */
-  int Pruned;	/* no longer exists due to pruning */
-  int Corrupt;	/* is this container/file known to be corrupted? */
-  stat_t Stat;
-  ParentInfo PI;
-  int Artifact; /* this container is an artifact -- don't log to XML */
-  int IsDir; /* this container is a directory */
-  int IsCompressed; /* this container is compressed */
-  long uploadtree_pk;	/* uploadtree of this item */
-  long pfile_pk;	/* pfile of this item */
-  long ufile_mode;	/* ufile_mode of this item */
-  };
-typedef struct ContainerInfo ContainerInfo;
-
-struct unpackqueue
-  {
-  int ChildPid; /* set to 0 if this record is not in use */
-  char ChildRecurse[FILENAME_MAX+1]; /* file (or directory) to recurse on */
-  int ChildStatus;	/* return code from child */
-  int ChildCorrupt;	/* return status from child */
-  int ChildEnd;	/* flag: 0=recurse, 1=don't recurse */
-  int ChildHasChild;	/* is the child likely to have children? */
-  stat_t ChildStat;
-  ParentInfo PI;
-  };
-typedef struct unpackqueue unpackqueue;
-#define MAXCHILD        4096
 extern unpackqueue Queue[MAXCHILD+1];    /* manage children */
 
-int     ParentWait      ();
-void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir);
-void InitCmd();
-static int Index = 0;
-static stat_t Stat;
+int Index = 0;
+struct stat Stat;
 
 /**
  * @brief initialize
@@ -90,7 +40,7 @@ void testTraverseChild4IsoFile()
   
   Filename = "./test-data/testdata4unpack/imagefile.iso";
   MkDirs("./test-result/imagefile.iso.dir/");
-  lstat64(Filename, &Stat);
+  lstat(Filename, &Stat);
   ContainerInfo CITemp;
   memset(&CITemp,0,sizeof(ContainerInfo));
   strcpy(CITemp.Source, Filename);
@@ -119,10 +69,22 @@ void testTraverseChild4IsoFile()
   } else
   {
     ParentWait();
-    existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.JAR");
-    CU_ASSERT_EQUAL(existed, 1); // existing  
-    existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.JAR.dir");
-    CU_ASSERT_EQUAL(existed, 0); // not existing
+    int rc = 0;
+    char commands[250];
+    sprintf(commands, "isoinfo -f -R -i '%s' | grep ';1' > /dev/null ", Filename);
+    rc = system(commands);
+    if (0 != rc)
+    {
+      existed = file_dir_existed("./test-result/imagefile.iso.dir/test.jar");
+      CU_ASSERT_EQUAL(existed, 1); // existing  
+      existed = file_dir_existed("./test-result/imagefile.iso.dir/test.jar.dir");
+      CU_ASSERT_EQUAL(existed, 0); // not existing
+    }
+    else
+    {
+      existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.JAR;1");
+      CU_ASSERT_EQUAL(existed, 1); // existing  
+    }
   }
 }
 
@@ -136,7 +98,7 @@ void testTraverseChild4DebianSourceFile()
 
   Filename = "./test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
   //  MkDirs("./test-result/fcitx_3.6.2-1.dsc.dir/");
-  lstat64(Filename, &Stat);
+  lstat(Filename, &Stat);
   ContainerInfo CITemp;
   memset(&CITemp,0,sizeof(ContainerInfo));
   strcpy(CITemp.Source, Filename);
@@ -179,7 +141,7 @@ void testTraverseChild4PartitionFile()
   Filename = "./test-data/testdata4unpack/vmlinuz-2.6.26-2-686";
   MkDirs("./test-result/vmlinuz-2.6.26-2-686.dir/");
   strcpy(Queue[0].ChildRecurse, "./test-result/vmlinuz-2.6.26-2-686.dir/");
-  lstat64(Filename, &Stat);
+  lstat(Filename, &Stat);
   ContainerInfo CITemp;
   memset(&CITemp,0,sizeof(ContainerInfo));
   strcpy(CITemp.Source, Filename);
@@ -187,7 +149,7 @@ void testTraverseChild4PartitionFile()
   strcpy(CITemp.Partname, "vmlinuz-2.6.26-2-686");
   strcpy(CITemp.PartnameNew, "vmlinuz-2.6.26-2-686");
   ParentInfo PITemp = {26, 1287725739, 1287725739, 0};
-  lstat64(Filename, &Stat);
+  lstat(Filename, &Stat);
   CITemp.Stat = Stat;
   CITemp.PI = PITemp;
   int Pid;
@@ -204,10 +166,14 @@ void testTraverseChild4PartitionFile()
 }
 
 
+/* ************************************************************************** */
+/* **** cunit test cases **************************************************** */
+/* ************************************************************************** */
+
 CU_TestInfo TraverseChild_testcases[] =
 {
-    {"Testing TraverseChild for iso file:", testTraverseChild4IsoFile},
-    {"Testing TraverseChild for debian source file:", testTraverseChild4DebianSourceFile},
-    {"Testing TraverseChild for departition:", testTraverseChild4PartitionFile},
-    CU_TEST_INFO_NULL
+  {"TraverseChild for iso file:", testTraverseChild4IsoFile},
+  {"TraverseChild for debian source file:", testTraverseChild4DebianSourceFile},
+  {"TraverseChild for departition:", testTraverseChild4PartitionFile},
+  CU_TEST_INFO_NULL
 };

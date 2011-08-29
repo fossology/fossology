@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,12 +14,8 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-/* cunit includes */
-#include <CUnit/CUnit.h>
-#include "utility.h"
-#include "metahandle.h"
+#include "run_tests.h"
 
-int	FindCmd	(char *Filename);
 
 /**
  * @brief initialize
@@ -352,27 +348,32 @@ void testFindCmd4PartitionFile()
   #endif
 }
 
+
+/* ************************************************************************** */
+/* **** cunit test cases **************************************************** */
+/* ************************************************************************** */
+
 CU_TestInfo FindCmd_testcases[] =
 {
-    {"Testing FindCmd normal:", testFindCmdNormal},
-    {"Testing FindCmd dsc file:", testFindCmd4DscFile},
-    {"Testing FindCmd cab file:", testFindCmd4CabFile},
-    {"Testing FindCmd msi file:", testFindCmd4MsiFile},
-    {"Testing FindCmd rpm file:", testFindCmd4RpmFile},
-    {"Testing FindCmd iso file:", testFindCmd4IsoFile},
-    {"Testing FindCmd zip file:", testFindCmd4ZipFile},
-    {"Testing FindCmd rar file:", testFindCmd4RarFile},
-    {"Testing FindCmd cpio file:", testFindCmd4CpioFile},
-    {"Testing FindCmd deb file:", testFindCmd4DebFile},
-    {"Testing FindCmd archive lib file:", testFindCmd4ArchiveLibFile},
-    {"Testing FindCmd tar file:", testFindCmd4TarFile},
-    {"Testing FindCmd Z file:", testFindCmd4ZFile},
-    {"Testing FindCmd exe file:", testFindCmd4ExeFile},
-    {"Testing FindCmd bz2 file:", testFindCmd4Bz2File},
-    {"Testing FindCmd ext2 file system:", testFindCmd4Ext2File},
-    {"Testing FindCmd ext3 file system:", testFindCmd4Ext3File},
-    {"Testing FindCmd fat file system:", testFindCmd4FatFile},
-    {"Testing FindCmd ntfs file system:", testFindCmd4NtfsFile},
-    {"Testing FindCmd partition:", testFindCmd4PartitionFile},
-    CU_TEST_INFO_NULL
+  {"FindCmd: normal:", testFindCmdNormal},
+  {"FindCmd: dsc", testFindCmd4DscFile},
+  {"FindCmd: cab", testFindCmd4CabFile},
+  {"FindCmd: msi", testFindCmd4MsiFile},
+  {"FindCmd: rpm", testFindCmd4RpmFile},
+  {"FindCmd: iso", testFindCmd4IsoFile},
+  {"FindCmd: zip", testFindCmd4ZipFile},
+  {"FindCmd: rar", testFindCmd4RarFile},
+  {"FindCmd: cpio", testFindCmd4CpioFile},
+  {"FindCmd: deb", testFindCmd4DebFile},
+  {"FindCmd: archive lib", testFindCmd4ArchiveLibFile},
+  {"FindCmd: tar", testFindCmd4TarFile},
+  {"FindCmd: Z", testFindCmd4ZFile},
+  {"FindCmd: exe", testFindCmd4ExeFile},
+  {"FindCmd: bz2", testFindCmd4Bz2File},
+  {"FindCmd: ext2 file system", testFindCmd4Ext2File},
+  {"FindCmd: ext3 file system", testFindCmd4Ext3File},
+  {"FindCmd: fat file system", testFindCmd4FatFile},
+  {"FindCmd: ntfs file system", testFindCmd4NtfsFile},
+  {"FindCmd: partition", testFindCmd4PartitionFile},
+  CU_TEST_INFO_NULL
 };

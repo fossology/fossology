@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,30 +14,12 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
-/* cunit includes */
-#include <CUnit/CUnit.h>
-#include "utility.h"
-
-struct ParentInfo
-  {
-  int Cmd;      /* index into command table used to run this */
-  time_t StartTime;     /* time when command started */
-  time_t EndTime;       /* time when command ended */
-  int ChildRecurseArtifact; /* child is an artifact -- don't log to XML */
-  long uploadtree_pk;	/* if DB is enabled, this is the parent */
-  };
-typedef struct ParentInfo ParentInfo;
+#include "run_tests.h"
 
 static char *Label = "called by main";
 static char *Basename ="";
 static ParentInfo *PI = NULL;
 static int Result = 0;
-
-/* used funtions */
-int     Traverse        (char *Filename, char *Basename,
-                         char *Label, char *NewDir,
-                         int Recurse, ParentInfo *PI);
 
 /**
  * @brief initialize
@@ -144,11 +126,16 @@ void testTraverseNullParams()
   CU_ASSERT_EQUAL(Result, 0); // Filename is not one containter
 }
 
+
+/* ************************************************************************** */
+/* **** cunit test cases **************************************************** */
+/* ************************************************************************** */
+
 CU_TestInfo Traverse_testcases[] =
 {
-    {"Testing Traverse normal package:", testTraverseNormal4Package},
-    {"Testing Traverse normal package another:", testTraverseNormal4Package2},
-    {"Testing Traverse normal directory:", testTraverseNormal4Dir},
-    {"Testing Traverse null paramters:", testTraverseNullParams},
-    CU_TEST_INFO_NULL
+  {"Traverse normal package:", testTraverseNormal4Package},
+  {"Traverse normal package another:", testTraverseNormal4Package2},
+  {"Traverse normal directory:", testTraverseNormal4Dir},
+  {"Traverse null paramters:", testTraverseNullParams},
+  CU_TEST_INFO_NULL
 };
