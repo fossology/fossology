@@ -1583,6 +1583,12 @@ char *PathCheck(char *DirPath)
   return(NewPath);
 }
 
+void deleteTmpFiles(char *dir)
+{
+  if (strcmp(dir, ".")) RemoveDir(dir);
+}
+
+
 /**
  * @brief Display program usage.
  * @param Name program name

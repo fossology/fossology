@@ -95,9 +95,9 @@ int	ExtractISO	(char *Source, char *Destination)
       TaintString(TempDestination,FILENAME_MAX,Destination,1,NULL))
 	return(-1);
   memset(Cmd,'\0',sizeof(Cmd));
-  /* Cmd: (isoinfo -l -R -i '%s' || isoinfo -l -R -J -i '%s' || isoinfo -l -i '%s') 2>/dev/null | grep '^Directory' */
-  snprintf(Cmd,sizeof(Cmd)," (isoinfo -l -R -i '%s' || isoinfo -l -R -J -i '%s' || isoinfo -l -i '%s') 2>/dev/null | grep '^Directory'",
-	TempSource,TempSource,TempSource);
+  snprintf(Cmd,sizeof(Cmd)," (isoinfo -l -R -J -i '%s' || isoinfo -l -R -i '%s' || isoinfo -l -i '%s') 2>/dev/null | grep '^Directory'",
+      TempSource,TempSource,TempSource);
+
 
   Fin = popen(Cmd,"r");
   if (!Fin)
@@ -120,7 +120,8 @@ int	ExtractISO	(char *Source, char *Destination)
   pclose(Fin);
 
   /* Now let's extract each file */
-  snprintf(Cmd,sizeof(Cmd),"(isoinfo -f -R -i '%s' || isoinfo -f -R -J -i '%s' || isoinfo -f -i '%s') 2>/dev/null",TempSource,TempSource,TempSource);
+  snprintf(Cmd,sizeof(Cmd),"(isoinfo -f -R -J -i '%s' || isoinfo -f -R -i '%s' || isoinfo -f -i '%s') 2>/dev/null",TempSource,TempSource,TempSource);
+
   Fin = popen(Cmd,"r");
   if (!Fin)
     {
@@ -137,7 +138,7 @@ int	ExtractISO	(char *Source, char *Destination)
     if (IsDir(Line))	continue;	/* don't do directories */
     if (Verbose > 1) printf("ISO file: %s\n",Line);
     /* create extraction command */
-    snprintf(Cmd,sizeof(Cmd),"(isoinfo -R -i '%s' -x '%s' || isoinfo -R -J -i '%s' -x '%s' || isoinfo -i '%s' -x '%s') > '%s' 2>/dev/null",TempSource,Line+Len,TempSource,Line+Len,TempSource,Line+Len,Line);
+    snprintf(Cmd,sizeof(Cmd),"(isoinfo -R -J -i '%s' -x '%s' || isoinfo -R -i '%s' -x '%s' || isoinfo -i '%s' -x '%s') > '%s' 2>/dev/null",TempSource,Line+Len,TempSource,Line+Len,TempSource, Line+Len,Line);
     rc = system(Cmd);
     if (WIFSIGNALED(rc))
         {
@@ -175,7 +176,7 @@ int	ExtractISO	(char *Source, char *Destination)
 
   /* Set the permissions on every file and directory */
   /** Only RockRidge saves permission information! **/
-  snprintf(Cmd,sizeof(Cmd),"(isoinfo -R -l -i '%s' ) 2>/dev/null",TempSource);
+    snprintf(Cmd,sizeof(Cmd),"(isoinfo -l -R -J -i '%s' || isoinfo -l -R -i '%s' || isoinfo -l -i '%s') 2>/dev/null",TempSource, TempSource, TempSource);
   Fin = popen(Cmd,"r");
   if (Fin)
     {

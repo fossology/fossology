@@ -19,6 +19,8 @@
 #ifndef UNPACK_DISK_H
 #define UNPACK_DISK_H
 
-int	ExtractDisk	(char *Source, char *FStype, char *Destination);
+int	 ExtractDisk(char *Source, char *FStype, char *Destination);
+void FatDiskName(char *Name);
+
 
 #endif
