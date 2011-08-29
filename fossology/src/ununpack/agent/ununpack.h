@@ -154,36 +154,37 @@ typedef struct cmdlist cmdlist;
 int  IsInflatedFile(char *FileName, int InflateSize);
 void SafeExit	(int rc);
 void RemovePostfix(char *Name);
-void  InitCmd ();
-int	TaintString	(char *Dest, int DestLen, char *Src, int ProtectQuotes, char *Replace);
+void InitCmd ();
+int	 TaintString	(char *Dest, int DestLen, char *Src, int ProtectQuotes, char *Replace);
 inline int  Prune (char *Fname, struct stat Stat);
 inline int	MkDirs	(char *Fname);
 inline int	MkDir	(char *Fname);
 inline int	IsDir	(char *Fname);
-int	IsFile	(char *Fname, int Link);
-int	ReadLine	(FILE *Fin, char *Line, int MaxLine);
-int	IsExe	(char *Exe, int Quiet);
-int	CopyFile	(char *Src, char *Dst);
-int   ParentWait();
-void  CheckCommands (int Show);
-int RunCommand  (char *Cmd, char *CmdPre, char *File, char *CmdPost, char *Out, char *Where);
-int FindCmd (char *Filename);
-void  FreeDirList (dirlist *DL);
-dirlist * MakeDirList (char *Fullname);
-void  SetDir  (char *Dest, int DestLen, char *Smain, char *Sfile);
-void  DebugContainerInfo  (ContainerInfo *CI);
-int DBInsertPfile (ContainerInfo *CI, char *Fuid);
-int DBInsertUploadTree  (ContainerInfo *CI, int Mask);
-int AddToRepository (ContainerInfo *CI, char *Fuid, int Mask);
-int DisplayContainerInfo  (ContainerInfo *CI, int Cmd);
 inline int	RemoveDir	(char *dirpath);
+int	 IsFile	(char *Fname, int Link);
+int	 ReadLine	(FILE *Fin, char *Line, int MaxLine);
+int	 IsExe	(char *Exe, int Quiet);
+int	 CopyFile	(char *Src, char *Dst);
+int  ParentWait();
+void CheckCommands (int Show);
+int  RunCommand  (char *Cmd, char *CmdPre, char *File, char *CmdPost, char *Out, char *Where);
+int  FindCmd (char *Filename);
+void FreeDirList (dirlist *DL);
+dirlist * MakeDirList (char *Fullname);
+void SetDir  (char *Dest, int DestLen, char *Smain, char *Sfile);
+void DebugContainerInfo  (ContainerInfo *CI);
+int  DBInsertPfile (ContainerInfo *CI, char *Fuid);
+int  DBInsertUploadTree  (ContainerInfo *CI, int Mask);
+int  AddToRepository (ContainerInfo *CI, char *Fuid, int Mask);
+int  DisplayContainerInfo  (ContainerInfo *CI, int Cmd);
 char *PathCheck(char *DirPath);
-void  Usage (char *Name, char *Version);
+void Usage (char *Name, char *Version);
+void deleteTmpFiles(char *dir);
 
 /* traverse.c */
-void  TraverseStart (char *Filename, char *Label, char *NewDir, int Recurse);
-void  TraverseChild (int Index, ContainerInfo *CI, char *NewDir);
-int Traverse (char *Filename, char *Basename, char *Label, char *NewDir,
+void TraverseStart (char *Filename, char *Label, char *NewDir, int Recurse);
+void TraverseChild (int Index, ContainerInfo *CI, char *NewDir);
+int  Traverse (char *Filename, char *Basename, char *Label, char *NewDir,
               int Recurse, ParentInfo *PI);
 
 #endif

@@ -16,7 +16,7 @@ UUHDR= ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h $(CHKHDR)
 UUSRC=$(UUHDR:%.h=%.c)
 
 TESTDIR=tests
-OBJECTS=$(UUHDR:%.h=%.o) utils.o traverse.o
+OBJECTS= checksum.o md5.o traverse.o ununpack-iso.o sha1.o ununpack-ar.o ununpack-disk.o utils.o
 COVERAGE=$(OBJECTS:%.o=%_cov.o)
 
 all: $(FOLIB) $(EXE) 
