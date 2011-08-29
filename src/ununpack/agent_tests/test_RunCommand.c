@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,13 +14,7 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
-/* cunit includes */
-#include <CUnit/CUnit.h>
-#include "utility.h"
-
-int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
-			 char *Out, char *Where);
+#include "run_tests.h"
 
 static char *Cmd = "";
 static char *CmdPre = "";
@@ -121,12 +115,17 @@ void testRunCommand4Rpm2()
   CU_ASSERT_EQUAL(Result, 0); // command could run
 }
 
+
+/* ************************************************************************** */
+/* **** cunit test cases **************************************************** */
+/* ************************************************************************** */
+
 CU_TestInfo RunCommand_testcases[] =
 {
-    {"Testing RunCommand for Zcat, just testing if the command can run:", testRunCommand4ZcatTesting},
-    {"Testing RunCommand for Zcat:", testRunCommand4Zcat},
-    {"Testing RunCommand for pdf:", testRunCommand4Pdf},
-    {"Testing RunCommand for rpm file, the command rpm2cpio", testRunCommand4Rpm1},
-    {"Testing RunCommand for rpm file, the command cpio", testRunCommand4Rpm2},
-    CU_TEST_INFO_NULL
+  {"RunCommand: Zcat, test if the command can run:", testRunCommand4ZcatTesting},
+  {"RunCommand: Zcat:", testRunCommand4Zcat},
+  {"RunCommand: pdf:", testRunCommand4Pdf},
+  {"RunCommand: rpm file with rpm2cpio", testRunCommand4Rpm1},
+  {"RunCommand: rpm file with cpio", testRunCommand4Rpm2},
+  CU_TEST_INFO_NULL
 };

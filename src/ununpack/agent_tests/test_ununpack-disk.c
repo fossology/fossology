@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,16 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
-/* cunit includes */
-#include <CUnit/CUnit.h>
-#include "ununpack-disk.h"
-#include "utility.h"
+#include "run_tests.h"
 
 /* locals */
 static int Result = 0;
-
-/* test functions */
 
 /**
  * @brief unpack disk image, ext2
@@ -105,22 +99,10 @@ void testExtractDisk4Ntfs()
   CU_ASSERT_EQUAL(existed, 1);
 }
 
-CU_TestInfo ExtractDisk_testcases[] =
-{
-    {"Testing function ExtractDisk for ext2 image:", testExtractDisk4Ext2},
-    {"Testing function ExtractDisk for ext3 image:", testExtractDisk4Ext3},
-    {"Testing function ExtractDisk for ext2 image, fs type is unknowed:", testExtractDisk4Ext2FstypeUnknow},
-    {"Testing function ExtractDisk for fat image:", testExtractDisk4Fat},
-//    {"Testing function ExtractDisk for nfts image:", testExtractDisk4Ntfs},
-    CU_TEST_INFO_NULL
-};
-
 
 /* locals */
 static char *Name = NULL;
 
-/* test functions */
-void FatDiskName(char *name);
 
 /**
  * @brief initialize
@@ -175,11 +157,21 @@ void testFatDiskNameNameEmpty()
   CU_ASSERT_EQUAL(strcmp(Name, ""), 0);
 }
 
-CU_TestInfo FatDiskName_testcases[] =
+
+/* ************************************************************************** */
+/* **** cunit test cases **************************************************** */
+/* ************************************************************************** */
+
+CU_TestInfo ununpack_disk_testcases[] =
 {
-    {"Testing function FatDiskName, 1:", testFatDiskName1},
-    {"Testing function FatDiskName, 2:", testFatDiskName2},
-    {"Testing function FatDiskName, 3:", testFatDiskName3},
-    {"Testing function FatDiskName, the parameter is empty:", testFatDiskNameNameEmpty},
-    CU_TEST_INFO_NULL
+  {"ExtractDisk: ext2 image:", testExtractDisk4Ext2},
+  {"ExtractDisk: ext3 image:", testExtractDisk4Ext3},
+  {"ExtractDisk: ext2 image, fs type is unknowed:", testExtractDisk4Ext2FstypeUnknow},
+  {"ExtractDisk: fat image:", testExtractDisk4Fat}, 
+  //    {"ExtractDisk: nfts image:", testExtractDisk4Ntfs},
+  {"FatDiskName: 1:", testFatDiskName1},
+  {"FatDiskName: 2:", testFatDiskName2},
+  {"FatDiskName: 3:", testFatDiskName3},
+  {"FatDiskName: empty parameter", testFatDiskNameNameEmpty},
+  CU_TEST_INFO_NULL
 };

@@ -1,63 +1,52 @@
-# FOSSology Makefile - test for agents/ununpack
+# FOSSology Makefile - ununpack/agent_tests
 # Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
 include $(VARS)
+AGENTDIR=../agent
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS) -I../ -I./ -lcunit
-EXE=test_ununpack
-TEST_OBJ_RUN=testRun.o utility.o 
-TEST_OBJ_UNUNPACK=./ununpack/testUnunpackEntry.o \
-                  ./ununpack/testTraverseStart.o \
-                  ./ununpack/testFindCmd.o \
-                  ./ununpack/testTraverse.o \
-                  ./ununpack/testRunCommand.o \
-                  ./ununpack/testTraverseChild.o \
-                  ./ununpack/testPrune.o \
-                  ./ununpack/testCopyFile.o
-TEST_OBJ_UNUNPACK_AR=test_ununpack-ar.c
-TEST_OBJ_UNUNPACK_ISO=./ununpack-iso/testExtractISO.o
-TEST_OBJ_UNUNPACK_DISK=./ununpack-disk/testExtractDisk.o \
-                       ./ununpack-disk/testFatDiskName.o
-TEST_OBJ=$(TEST_OBJ_RUN) $(TEST_OBJ_UNUNPACK) $(TEST_OBJ_UNUNPACK_AR) $(TEST_OBJ_UNUNPACK_ISO) $(TEST_OBJ_UNUNPACK_DISK)
+CFLAGS_LOCAL=-lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ -lcunit
+EXE=run_tests
+OBJS=	run_tests.o \
+		test_RunCommand.o \
+		test_CopyFile.o \
+		test_Traverse.o \
+		test_ununpack-ar.o \
+		test_FindCmd.o \
+		test_TraverseChild.o \
+		test_ununpack-disk.o \
+		test_Prune.o \
+		test_TraverseStart.o \
+		test_ununpack-iso.o
+#		test_TraverseUnunpackEntry.o \
 
 all: $(EXE)
 
-$(EXE): libununpack.a $(TEST_OBJ) $(VARS) $(DB) $(REPO) $(AGENTLIB)
-	$(CC) $(TEST_OBJ) ../libununpack.a $(CFLAGS_LOCAL) -o $@
+$(EXE): libununpack.a $(FOLIB) $(OBJS) $(VARS)
+	$(CC) $(OBJS) $(AGENTDIR)/libununpack.a $(CFLAGS_LOCAL) -o $@
 
-$(TEST_OBJ_RUN): %.o: %.c 
+$(OBJS): %.o: %.c 
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
-$(TEST_OBJ_UNUNPACK): %.o: %.c 
-	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
-
-$(TEST_OBJ_UNUNPACK_AR): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $< -o $@ -g
-
-$(TEST_OBJ_UNUNPACK_ISO): %.o: %.c 
-	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
-
-$(TEST_OBJ_UNUNPACK_DISK): %.o: %.c 
-	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
+$(FOLIB):
+	$(MAKE) -C $(FOLIBDIR)
 
 test: all $(EXE)
 	./$(EXE)
 
-coverage: $(TEST_OBJ) libununpack_cov.a $(VARS) $(DB) $(REPO) $(AGENTLIB)
-	$(CC) -o $(EXE) $(TEST_OBJ) ../libununpack_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
+coverage: $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
+	$(CC) -o $(EXE) $(OBJS) $(AGENTDIR)/libununpack_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory ../   --capture --output-file cov.txt; \
 	genhtml  -o results cov.txt
 
 libununpack_cov.a:
-	$(MAKE) -C ../ $@
+	$(MAKE) -C $(AGENTDIR) $@
 
 libununpack.a:
-	$(MAKE) -C ../ $@
+	$(MAKE) -C $(AGENTDIR) $@
 
 clean:
-	rm -fr $(EXE) $(TEST_OBJ) core *.xml *.txt results test-result 
+	rm -fr $(EXE) *.o core *.xml *.txt results test-result unpack-test-data.tar.bz2 test-data
 
 include $(DEPS)

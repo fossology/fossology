@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,21 +14,14 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
-/* cunit includes */
-#include <CUnit/CUnit.h>
-#include "utility.h"
-
-/* tested function */
-int	Prune	(char *Fname, stat_t Stat);
-
-int	CopyFile	(char *Src, char *Dst);
+#include "run_tests.h"
 
 /* local variables */
 static char *Fname = "";
-static stat_t Stat;
+struct stat Stat;
 static char *Dst = NULL;
 static int Result = 0;
+
 
 /**
  * @brief initialize
@@ -97,9 +90,14 @@ void testPruneCharFile()
 }
 #endif
 
+
+/* ************************************************************************** */
+/* **** cunit test cases **************************************************** */
+/* ************************************************************************** */
+
 CU_TestInfo Prune_testcases[] =
 {
-  {"Testing the function Prune, file size is 0:", testPruneFileFileSzieIs0},
-  {"Testing the function Prune, regular file, size > 0:", testPruneRegFile},
+  {"Prune: file size is 0", testPruneFileFileSzieIs0},
+  {"Prune: regular file, size > 0", testPruneRegFile},
   CU_TEST_INFO_NULL
 };

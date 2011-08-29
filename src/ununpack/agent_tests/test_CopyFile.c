@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,14 +14,7 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
-/* cunit includes */
-#include <CUnit/CUnit.h>
-#include "utility.h"
-#include <sys/stat.h>
-
-/* tested function */
-int	CopyFile	(char *Src, char *Dst);
+#include "run_tests.h"
 
 /* local variables */
 static char *Src = "";
@@ -29,6 +22,7 @@ static char *Dst = NULL;
 static struct stat statSrc;
 static struct stat statDst;
 static int Result = 0;
+
 
 /**
  * @brief initialize
@@ -94,11 +88,15 @@ void testCopyFileAbnormal()
   CU_ASSERT_EQUAL(Result, 1); // failed
 }
 
+
+/* ************************************************************************** */
+/* **** cunit test cases **************************************************** */
+/* ************************************************************************** */
+
 CU_TestInfo CopyFile_testcases[] =
 {
-  {"Testing the function CopyFile, file name:", testCopyFileNormalFile},
-  {"Testing the function CopyFile, dir name:", testCopyFileNormalDir},
-  {"Testing the function CopyFile, file name  is empty:", testCopyFileAbnormal},
+  {"CopyFile: file name", testCopyFileNormalFile},
+  {"CopyFile: dir name", testCopyFileNormalDir},
+  {"CopyFile: file name is empty", testCopyFileAbnormal},
   CU_TEST_INFO_NULL
 };
-

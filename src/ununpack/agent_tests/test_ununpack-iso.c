@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,16 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
-/* cunit includes */
-#include <CUnit/CUnit.h>
-#include "ununpack-iso.h"
-#include "utility.h"
+#include "run_tests.h"
 
 /* locals */
 static int Result = 0;
-
-/* test functions */
 
 /**
  * @brief unpack iso file
@@ -36,9 +30,22 @@ void testExtractISO1()
   Filename = "./test-data/testdata4unpack/imagefile.iso";
   MkDirs("./test-result/imagefile.iso.dir");
   Result = ExtractISO(Filename, "./test-result/imagefile.iso.dir");
-  existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.CPI");
   CU_ASSERT_EQUAL(Result, 0); 
-  CU_ASSERT_EQUAL(existed, 1); 
+
+  int rc = 0;
+  char commands[250];
+  sprintf(commands, "isoinfo -f -R -i '%s' | grep ';1' > /dev/null ", Filename);
+  rc = system(commands);
+  if (0 != rc)
+  {
+    existed = file_dir_existed("./test-result/imagefile.iso.dir/test.cpi");
+    CU_ASSERT_EQUAL(existed, 1); 
+  }
+  else
+  {
+    existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.CPI;1");
+    CU_ASSERT_EQUAL(existed, 1); // existing
+  }
 }
 
 /**
@@ -52,10 +59,11 @@ void testExtractISO2()
   Filename = "./test-data/testdata4unpack/523.iso";
   MkDirs("./test-result/523.iso.dir");
   Result = ExtractISO(Filename, "./test-result/523.iso.dir"); // 
-  existed = file_dir_existed("./test-result/523.iso.dir/523SFP/DOS4GW.EXE");
+  existed = file_dir_existed("./test-result/523.iso.dir/523sfp/DOS4GW.EXE");
   CU_ASSERT_EQUAL(Result, 0);
   CU_ASSERT_EQUAL(existed, 1); 
-  existed = file_dir_existed("./test-result/523.iso.dir/523SFP/P3P10131.BIN");
+  existed = file_dir_existed("./test-result/523.iso.dir/523sfp/p3p10131.bin");
+  CU_ASSERT_EQUAL(existed, 1); 
 
 }
 
@@ -71,10 +79,14 @@ void testExtractISO4EmptyParameters()
   CU_ASSERT_EQUAL(Result, 1); // fail to Extract  
 }
 
-CU_TestInfo ExtractISO_testcases[] =
+/* ************************************************************************** */
+/* **** cunit test cases **************************************************** */
+/* ************************************************************************** */
+
+CU_TestInfo ununpack_iso_testcases[] =
 {
-    {"Testing function testExtractAR for iso file 1:", testExtractISO1},
-    {"Testing function testExtractISO  for iso file 2:", testExtractISO2},
-    {"Testing function testExtractAR for abnormal parameters:", testExtractISO4EmptyParameters},
-    CU_TEST_INFO_NULL
+  {"testExtractAR: iso file 1:", testExtractISO1},
+  {"testExtractISO: iso file 2:", testExtractISO2},
+  {"testExtractAR: abnormal parameters:", testExtractISO4EmptyParameters},
+  CU_TEST_INFO_NULL
 };

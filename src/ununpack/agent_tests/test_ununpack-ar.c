@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,20 +14,14 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
-/* cunit includes */
-#include <CUnit/CUnit.h>
-#include "ununpack-ar.h"
-#include "utility.h"
+#include "run_tests.h"
 
 /* locals */
 static int Result = 0;
 
-/* test functions */
 
-/**
- * @brief unpack archive library file
- */
+ /** @brief unpack archive library file
+ **/
 void testExtractAR4ArchiveLibraryFile()
 {
   deleteTmpFiles("./test-result/");
@@ -69,10 +63,15 @@ void testExtractAR4EmptyParameters()
   CU_ASSERT_EQUAL(Result, 1); // fail to Extract archieve library 
 }
 
+
+/* ************************************************************************** */
+/* **** cunit test cases **************************************************** */
+/* ************************************************************************** */
+
 CU_TestInfo ExtractAR_testcases[] =
 {
-    {"Testing function testExtractAR for archive library file:", testExtractAR4ArchiveLibraryFile},
-    {"Testing function testExtractAR for deb file:", testExtractAR4DebFile},
-    {"Testing function testExtractAR for abnormal parameters:", testExtractAR4EmptyParameters},
-    CU_TEST_INFO_NULL
+  {"Testing function testExtractAR for archive library file:", testExtractAR4ArchiveLibraryFile},
+  {"Testing function testExtractAR for deb file:", testExtractAR4DebFile},
+  {"Testing function testExtractAR for abnormal parameters:", testExtractAR4EmptyParameters},
+  CU_TEST_INFO_NULL
 };
