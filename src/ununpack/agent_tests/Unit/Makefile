@@ -1,22 +1,22 @@
 # FOSSology Makefile - ununpack/agent_tests
 # Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
-TOP=../../..
+TOP=../../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-AGENTDIR=../agent
+AGENTDIR=../../agent
 
 CFLAGS_LOCAL=-lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ -lcunit
 EXE=run_tests
 OBJS=	run_tests.o \
-		test_RunCommand.o \
 		test_CopyFile.o \
+		test_FindCmd.o \
+		test_Prune.o \
+		test_RunCommand.o \
 		test_Traverse.o \
 		test_ununpack-ar.o \
-		test_FindCmd.o \
 		test_TraverseChild.o \
-		test_ununpack-disk.o \
-		test_Prune.o \
 		test_TraverseStart.o \
+		test_ununpack-disk.o \
 		test_ununpack-iso.o
 #		test_TraverseUnunpackEntry.o \
 
@@ -32,6 +32,8 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 test: all $(EXE)
+	rsync -a fossology.org:/var/www/fossology.org/testing/testFiles/unpack-test-data.tar.bz2 .
+	tar xjf unpack-test-data.tar.bz2
 	./$(EXE)
 
 coverage: $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
