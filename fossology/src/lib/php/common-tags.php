@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,74 +16,86 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+/**
+ * \file common-tags.php 
+ * \brief common function of tag
+ */
 
-/* GetAllTags(): Returns an array of:
-   tag_pk
-   tag_name
- for all tags in a given uploadtree_pk.
- This does NOT recurse.
- ***********************************************************/
+
+/**
+ * \brief GetAllTags()
+ *
+ * \param $Item the uploadtree_pk 
+ *
+ * \return an array of:
+ *  tag_pk
+ *  tag_name
+ */
 function GetAllTags($Item)
   {
-  global $DB;
-  if (empty($DB)) { return; }
+  global $PG_CONN;
+  if (empty($PG_CONN)) { return; }
   if (empty($Item)) { return; }
   $List=array();
 
   /* Get list of tags */
-  $SQL = "SELECT tag_pk, tag FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Item UNION SELECT tag_pk, tag FROM tag, tag_uploadtree WHERE tag.tag_pk = tag_uploadtree.tag_fk AND tag_uploadtree.uploadtree_fk = $Item;";
-  $Results = $DB->Action($SQL);
-  foreach($Results as $R)
+  $sql = "SELECT tag_pk, tag FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Item UNION SELECT tag_pk, tag FROM tag, tag_uploadtree WHERE tag.tag_pk = tag_uploadtree.tag_fk AND tag_uploadtree.uploadtree_fk = $Item;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  while ($R = pg_fetch_assoc($result))
     {
     if (empty($R['tag_pk'])) { continue; }
     $New['tag_pk'] = $R['tag_pk'];
     $New['tag_name'] = $R['tag'];
     array_push($List,$New);
     }
+  pg_free_result($result);
   return($List);
   } // GetAllTags()
 
-/* GetTaggingPerms($user_pk, $tag_ns_pk): Returns integer of:
-   0  None
-   1  Read Only
-   2  Read/Write
-   3  Admin
- ***********************************************************/
+/**
+ * \brief GetTaggingPerms: Get tags permissions
+ * 
+ * \param $user_pk
+ * \param $tag_ns_pk the tag namespace pk 
+ *
+ * \return integer of:
+ *  0  None
+ *  1  Read Only
+ *  2  Read/Write
+ *  3  Admin
+ */
 function GetTaggingPerms($user_pk, $tag_ns_pk)
 {
-  global $DB;
+  global $PG_CONN;
   $perm = 0;
 
   //if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
-  if (empty($DB)) { return(0); } /* No DB */
+  if (empty($PG_CONN)) { return(0); } /* No DB */
   if(empty($user_pk)){
     return (0);
   }
   $sql = "SELECT * FROM group_user_member WHERE user_fk=$user_pk;";
-  $result = $DB->Action($sql);
-  if (count($result) > 0)
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) > 0)
   {
-    foreach ($result as $row)
+    while ($row = pg_fetch_assoc($result))
     {
       $group_pk = $row['group_fk'];
       if (isset($tag_ns_pk))
         $sql = "SELECT * FROM tag_ns_group WHERE tag_ns_fk=$tag_ns_pk AND group_fk=$group_pk;";
       else
         $sql = "SELECT * FROM tag_ns_group WHERE group_fk=$group_pk;";
-      $result1 = $DB->Action($sql);
-      if (count($result1) > 0)
+      $result1 = pg_query($PG_CONN, $sql);
+      DBCheckResult($result1, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result1) > 0)
       {
-        foreach ($result1 as $row1)
+        while ($row1 = pg_fetch_assoc($result1))
         {
           if ($row1['tag_ns_fk'] == $tag_ns_pk)
           {
+            pg_free_result($result1);
             return ($row1['tag_ns_perm']);
           }else{
             $temp = $row1['tag_ns_perm'];
@@ -91,26 +103,27 @@ function GetTaggingPerms($user_pk, $tag_ns_pk)
           }
         }
       }
+      pg_free_result($result1);
     }
+    pg_free_result($result);
     return ($perm);
   }else{
+    pg_free_result($result);
     return (0);
   }
 }
 
-/*****************************************
- Array2SingleSelectTag: Build a single choice select pulldown for tagging
-
- Params:
-   $KeyValArray   Assoc array.  Use key/val pairs for list
-   $SLName        Select list name (default is "unnamed")
-   $SelectedVal   Initially selected value or key, depends
-                  on $SelElt
-   $FirstEmpty    True if the list starts off with an empty choice
-                  (default is false)
-   $SelElt        True (default) if $SelectedVal is a value
-                  False if $SelectedVal is a key
- *****************************************/
+/**
+ * \brief Array2SingleSelectTag: Build a single choice select pulldown for tagging
+ *
+ * \param $KeyValArray   Assoc array.  Use key/val pairs for list
+ * \param $SLName        Select list name (default is "unnamed")
+ * \param $SelectedVal   Initially selected value or key, depends on $SelElt
+ * \param $FirstEmpty    True if the list starts off with an empty choice (default is false)
+ * \param $SelElt        True (default) if $SelectedVal is a value False if $SelectedVal is a key
+ *
+ *\return string of html select
+ */
 function Array2SingleSelectTag($KeyValArray, $SLName="unnamed", $SelectedVal= "",
                             $FirstEmpty=false, $SelElt=true)
 {
@@ -130,3 +143,4 @@ function Array2SingleSelectTag($KeyValArray, $SLName="unnamed", $SelectedVal= ""
   $str .= "</select>";
   return $str;
 }
+?>

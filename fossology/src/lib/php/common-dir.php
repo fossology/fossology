@@ -16,14 +16,23 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+/**
+ * \file common-dir.php
+ * \brief Common Direcotory Functions
+ */
+
 function Isdir($mode) { return(($mode & 1<<18) + ($mode & 0040000) != 0); }
 function Isartifact($mode) { return(($mode & 1<<28) != 0); }
 function Iscontainer($mode) { return(($mode & 1<<29) != 0); }
 
-/************************************************
- Bytes2Human(): Convert a number of bytes into
- a human-readable format.
- ************************************************/
+/**
+ * \brief Bytes2Human()
+ *  Convert a number of bytes into a human-readable format.
+ * 
+ * \param bytes
+ * 
+ * \return human-readable format
+ */
 function Bytes2Human  ($Bytes)
 {
   if ($Bytes < 1024) { return($Bytes); }
@@ -44,9 +53,13 @@ function Bytes2Human  ($Bytes)
   return("$Bint PB");
 } // Bytes2Human()
 
-/************************************************************
- DirMode2String(): Convert a mode to string values.
- ************************************************************/
+/**
+ * \brief DirMode2String(): Convert a mode to string values.
+ *
+ * \param Dir mode
+ *
+ * \return string of dir mode
+ */
 function DirMode2String($Mode)
 {
   $V="";
@@ -96,88 +109,118 @@ function DirMode2String($Mode)
   return($V);
 } // DirMode2String()
 
-/************************************************************
- DirGetNonArtifact(): Given an artifact directory (uploadtree_pk),
- return the first non-artifact directory (uploadtree_pk).
- TBD: "username" will be added in the future and it may change
- how this function works.
- NOTE: This is recursive!
- ************************************************************/
+/**
+ * \brief DirGetNonArtifact(): Given an artifact directory (uploadtree_pk),
+ *  return the first non-artifact directory (uploadtree_pk).
+ *  TBD: "username" will be added in the future and it may change
+ *  how this function works.
+ *  NOTE: This is recursive!
+ *
+ * \param uploadtree_pk
+ *
+ * \return the first non-artifact directory uploadtree_pk
+ */
 $DirGetNonArtifact_Prepared=0;
 function DirGetNonArtifact($UploadtreePk)
 {
   global $Plugins;
-  global $DB;
-  if (empty($DB)) { return; }
+  global $PG_CONN;
+
+  $Children = array();
 
   /* Get contents of this directory */
   global $DirGetNonArtifact_Prepared;
   if (!$DirGetNonArtifact_Prepared)
-    {
+  {
     $DirGetNonArtifact_Prepared=1;
-    $DB->Prepare("DirGetNonArtifact",'SELECT * FROM uploadtree LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE parent = $1;'); 
+    $sql = "SELECT * FROM uploadtree LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE parent = $UploadtreePk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) > 0)
+    {
+      $Children = pg_fetch_all($result);
     }
-  $Children = $DB->Execute("DirGetNonArtifact",array($UploadtreePk));
+    pg_free_result($result); 
+  }
   $Recurse=NULL;
   foreach($Children as $C)
-    {
+  {
     if (empty($C['ufile_mode'])) { continue; }
     if (!Isartifact($C['ufile_mode']))
-      {
+    {
       return($UploadtreePk);
-      }
+    }
     if (($C['ufile_name'] == 'artifact.dir') ||
         ($C['ufile_name'] == 'artifact.unpacked'))
-      {
-      $Recurse = DirGetNonArtifact($C['uploadtree_pk']);
-      }
-    }
-  if (!empty($Recurse))
     {
-    return(DirGetNonArtifact($Recurse));
+      $Recurse = DirGetNonArtifact($C['uploadtree_pk']);
     }
+  }
+  if (!empty($Recurse))
+  {
+    return(DirGetNonArtifact($Recurse));
+  }
   return($UploadtreePk);
 } // DirGetNonArtifact()
 
 
-/************************************************************
- _DirCmp(): Compare function for usort() on directory items.
- ************************************************************/
+/**
+ * \brief DirCmp(): Compare function for usort() on directory items.
+ *
+ * \param $a $b to compare
+ *
+ * \return 0 if they are equal
+ *         <0 less than
+ *         >0 greater than
+ */
 function _DirCmp($a,$b)
 {
   return(strcasecmp($a['ufile_name'],$b['ufile_name']));
 } // _DirCmp()
 
-/************************************************************
- DirGetList(): Given a directory (uploadtree_pk),
- return the directory contents but resolve artifacts.
- TBD: "username" will be added in the future and it may change
- how this function works.
- Returns array of uploadtree records sorted by file name
- ************************************************************/
+/**
+ * \brief DirGetList(): Given a directory (uploadtree_pk),
+ *  return the directory contents but resolve artifacts.
+ *  TBD: "username" will be added in the future and it may change
+ *  how this function works.
+ *  Returns array of uploadtree records sorted by file name
+ * 
+ * \param $Upload upload_id
+ * \param $UploadtreePk
+ *
+ * \return array of uploadtree records sorted by file name
+ */
 $DirGetList_Prepared=0;
 function DirGetList($Upload,$UploadtreePk)
 { 
   global $Plugins;
-  global $DB;
-  if (empty($DB)) { return; }
+  global $PG_CONN;
     
   /* Get the basic directory contents */
   global $DirGetList_Prepared;
   if (!$DirGetList_Prepared) 
   {   
     $DirGetList_Prepared=1;
-    $DB->Prepare("DirGetList_1",'SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent IS NULL ORDER BY ufile_name ASC;');
-    $DB->Prepare("DirGetList_2",'SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent = $2 ORDER BY ufile_name ASC;');
-
   }
   if (empty($UploadtreePk)) 
-  { 
-    $Results=$DB->Execute("DirGetList_1",array($Upload)); 
+  {
+    $sql = "SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $Upload AND uploadtree.parent IS NULL ORDER BY ufile_name ASC;"; 
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $rows = pg_fetch_all($result);
+    if (!is_array($rows)) $rows = array();
+    pg_free_result($result);
+    $Results=$rows; 
   }
   else 
-  { 
-    $Results=$DB->Execute("DirGetList_2",array($Upload,$UploadtreePk)); 
+  {
+    $sql = "SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $Upload AND uploadtree.parent = $UploadtreePk ORDER BY ufile_name ASC;"; 
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $rows = pg_fetch_all($result);
+    if (!is_array($rows)) $rows = array();
+    pg_free_result($result);
+    $Results=$rows; 
   }
   usort($Results,'_DirCmp');
 
@@ -195,12 +238,16 @@ function DirGetList($Upload,$UploadtreePk)
 } // DirGetList()
 
 
-/************************************************************
- Dir2Path(): given an uploadtree_pk, return an array containing
- the path (with no artifacts).  Each element in the path is an array containing
- uploadtree records for $UploadtreePk and its parents.
- The path begins with the UploadtreePk record.
- ************************************************************/
+/**
+ * \brief Dir2Path(): given an uploadtree_pk, return an array containing
+ *  the path (with no artifacts).  Each element in the path is an array containing
+ *  uploadtree records for $UploadtreePk and its parents.
+ *  The path begins with the UploadtreePk record.
+ *
+ * \param $UploadtreePk
+ *
+ * \return array of containing
+ */
 function Dir2Path($UploadtreePk)
 {
   global $Plugins;
@@ -217,23 +264,26 @@ function Dir2Path($UploadtreePk)
   return($Rows);
 } // Dir2Path()
 
-/************************************************************
- Dir2Browse(): given an uploadtree_pk, return a
- string listing the browse paths.
-  $Mod - Module name (e.g. "browse")
-  $UploadtreePk
-  $LinkLast - create link (a href) for last item and use LinkLast as the module name
-  $ShowMicro - show micro menu
-  $Enumerate - if >= zero number the folder/file path (the stuff in the yellow bar)
-    starting with the value $Enumerate 
-  $PreText - additional text to preceed the folder path
-  $PostText - text to follow the folder path
- ************************************************************/
+/**
+ * \brief Dir2Browse(): given an uploadtree_pk, return a
+ *  string listing the browse paths.
+ *
+ * \param $Mod - Module name (e.g. "browse")
+ * \param $UploadtreePk
+ * \param $LinkLast - create link (a href) for last item and use LinkLast as the module name
+ * \param $ShowMicro - show micro menu
+ * \param $Enumerate - if >= zero number the folder/file path (the stuff in the yellow bar)
+ *   starting with the value $Enumerate 
+ * \param $PreText - additional text to preceed the folder path
+ * \param $PostText - text to follow the folder path
+ *
+ * \return string of browse paths
+ */
 function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
 		     $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='')
 {
   global $Plugins;
-  global $DB;
+  global $PG_CONN;
 
   $V = "";
   if ($ShowBox)
@@ -352,33 +402,44 @@ function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
   return($V);
 } // Dir2Browse()
 
-/************************************************************
- Dir2BrowseUpload(): given an upload_pk, return a string listing
- the browse paths.
- This calls Dir2Browse().
- ************************************************************/
+/**
+ * \brief Dir2BrowseUpload(): given an upload_pk, return a string listing
+ *  the browse paths.
+ *  This calls Dir2Browse().
+ *
+ * \param $Mod - Module name (e.g. "browse")
+ * \param $UploadPk
+ * \param $LinkLast - create link (a href) for last item and use LinkLast as the module name
+ * \param $ShowMicro - show micro menu
+ *
+ * \return string of browse paths
+ */
 function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL)
 {
-  global $DB;
+  global $PG_CONN;
   /* Find the file associated with the upload */
-  $SQL = "SELECT uploadtree_pk FROM upload INNER JOIN uploadtree ON upload_fk = '$UploadPk' AND parent is null;";
-  $Results = $DB->Action($SQL);
-  $UploadtreePk = $Results[0]['uploadtree_pk'];
+  $sql = "SELECT uploadtree_pk FROM upload INNER JOIN uploadtree ON upload_fk = '$UploadPk' AND parent is null;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  $UploadtreePk = $row['uploadtree_pk'];
+  pg_free_result($result);
   return(Dir2Browse($Mod,$UploadtreePk,$LinkLast,$ShowBox,$ShowMicro));
 } // Dir2BrowseUpload()
 
-/************************************************************
- Dir2FileList(): Given an array of pfiles/uploadtree, sorted by
- pfile, list all of the breadcrumbs for each file.
- If the pfile is a duplicate, then indent it.
-   $Listing = array from a database selection.  The SQL query should
-	use "ORDER BY pfile_fk" so that the listing can indent duplicate pfiles
-   $IfDirPlugin = string containing plugin name to use if this is a directory.
-                  or any other container
-   $IfFilePlugin = string containing plugin name to use if this is a file
-   $Count = first number for indexing the entries (may be -1 for no count)
- Returns string containing the listing.
- ************************************************************/
+/**
+ * \brief Dir2FileList(): Given an array of pfiles/uploadtree, sorted by
+ *  pfile, list all of the breadcrumbs for each file.
+ *  If the pfile is a duplicate, then indent it.
+ *
+ * \param $Listing = array from a database selection.  The SQL query should
+ *	use "ORDER BY pfile_fk" so that the listing can indent duplicate pfiles
+ * \param $IfDirPlugin = string containing plugin name to use if this is a directory or any other container
+ * \param $IfFilePlugin = string containing plugin name to use if this is a file
+ * \param $Count = first number for indexing the entries (may be -1 for no count)
+ *
+ * \return string containing the listing.
+ */
 function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowPhrase=0)
 {
   $LastPfilePk = -1;
@@ -424,7 +485,8 @@ $text = _("Phrase");
 } // Dir2FileList()
 
 
-/* Function: GetNonArtifactChildren
+/**
+ * \brief Function: GetNonArtifactChildren
  *
  * Find the non artifact children of an uploadtree pk.
  * If any children are artifacts, resolve them until you get
@@ -432,9 +494,9 @@ $text = _("Phrase");
  *
  * This function replaces DirGetList()
  *
- * @param int  $uploadtree_pk
+ * \param int  $uploadtree_pk
  *
- * @return list of child uploadtree recs + pfile_size + pfile_mimetypefk on success.
+ * \return list of child uploadtree recs + pfile_size + pfile_mimetypefk on success.
  *         list may be empty if there are no children.
  * Child list is sorted by ufile_name.
  */
@@ -483,11 +545,15 @@ function GetNonArtifactChildren($uploadtree_pk)
 }
 
 
-/************************************************************
- Uploadtree2PathStr(): 
-   Return string representation of uploadtree path.
-   Use Dir2Path to get $PathArray.
- ************************************************************/
+/**
+ * \brief Uploadtree2PathStr(): 
+ *  Return string representation of uploadtree path.
+ *  Use Dir2Path to get $PathArray.
+ *
+ * \param $PathArry
+ *
+ * \return string representation of uploadtree path
+ */
 function Uploadtree2PathStr ($PathArray)
 {
   $Path = "";
