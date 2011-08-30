@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /**
  * \file common-dir.php
@@ -28,9 +28,9 @@ function Iscontainer($mode) { return(($mode & 1<<29) != 0); }
 /**
  * \brief Bytes2Human()
  *  Convert a number of bytes into a human-readable format.
- * 
+ *
  * \param bytes
- * 
+ *
  * \return human-readable format
  */
 function Bytes2Human  ($Bytes)
@@ -70,41 +70,41 @@ function DirMode2String($Mode)
   if ($Mode & 0000400) { $V .= "r"; } else { $V .= "-"; }
   if ($Mode & 0000200) { $V .= "w"; } else { $V .= "-"; }
   if ($Mode & 0000100)
-    {
+  {
     if ($Mode & 0004000) { $V .= "s"; } /* setuid */
     else { $V .= "x"; }
-    }
+  }
   else
-    {
+  {
     if ($Mode & 0004000) { $V .= "S"; } /* setuid */
     else { $V .= "-"; }
-    }
+  }
 
   if ($Mode & 0000040) { $V .= "r"; } else { $V .= "-"; }
   if ($Mode & 0000020) { $V .= "w"; } else { $V .= "-"; }
   if ($Mode & 0000010)
-    {
+  {
     if ($Mode & 0002000) { $V .= "s"; } /* setgid */
     else { $V .= "x"; }
-    }
+  }
   else
-    {
+  {
     if ($Mode & 0002000) { $V .= "S"; } /* setgid */
     else { $V .= "-"; }
-    }
+  }
 
   if ($Mode & 0000004) { $V .= "r"; } else { $V .= "-"; }
   if ($Mode & 0000002) { $V .= "w"; } else { $V .= "-"; }
   if ($Mode & 0000001)
-    {
+  {
     if ($Mode & 0001000) { $V .= "t"; } /* sticky bit */
     else { $V .= "x"; }
-    }
+  }
   else
-    {
+  {
     if ($Mode & 0001000) { $V .= "T"; } /* setgid */
     else { $V .= "-"; }
-    }
+  }
 
   return($V);
 } // DirMode2String()
@@ -140,7 +140,7 @@ function DirGetNonArtifact($UploadtreePk)
     {
       $Children = pg_fetch_all($result);
     }
-    pg_free_result($result); 
+    pg_free_result($result);
   }
   $Recurse=NULL;
   foreach($Children as $C)
@@ -151,7 +151,7 @@ function DirGetNonArtifact($UploadtreePk)
       return($UploadtreePk);
     }
     if (($C['ufile_name'] == 'artifact.dir') ||
-        ($C['ufile_name'] == 'artifact.unpacked'))
+    ($C['ufile_name'] == 'artifact.unpacked'))
     {
       $Recurse = DirGetNonArtifact($C['uploadtree_pk']);
     }
@@ -184,7 +184,7 @@ function _DirCmp($a,$b)
  *  TBD: "username" will be added in the future and it may change
  *  how this function works.
  *  Returns array of uploadtree records sorted by file name
- * 
+ *
  * \param $Upload upload_id
  * \param $UploadtreePk
  *
@@ -192,35 +192,35 @@ function _DirCmp($a,$b)
  */
 $DirGetList_Prepared=0;
 function DirGetList($Upload,$UploadtreePk)
-{ 
+{
   global $Plugins;
   global $PG_CONN;
-    
+
   /* Get the basic directory contents */
   global $DirGetList_Prepared;
-  if (!$DirGetList_Prepared) 
-  {   
+  if (!$DirGetList_Prepared)
+  {
     $DirGetList_Prepared=1;
   }
-  if (empty($UploadtreePk)) 
+  if (empty($UploadtreePk))
   {
-    $sql = "SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $Upload AND uploadtree.parent IS NULL ORDER BY ufile_name ASC;"; 
+    $sql = "SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $Upload AND uploadtree.parent IS NULL ORDER BY ufile_name ASC;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $rows = pg_fetch_all($result);
     if (!is_array($rows)) $rows = array();
     pg_free_result($result);
-    $Results=$rows; 
+    $Results=$rows;
   }
-  else 
+  else
   {
-    $sql = "SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $Upload AND uploadtree.parent = $UploadtreePk ORDER BY ufile_name ASC;"; 
+    $sql = "SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $Upload AND uploadtree.parent = $UploadtreePk ORDER BY ufile_name ASC;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $rows = pg_fetch_all($result);
     if (!is_array($rows)) $rows = array();
     pg_free_result($result);
-    $Results=$rows; 
+    $Results=$rows;
   }
   usort($Results,'_DirCmp');
 
@@ -273,14 +273,14 @@ function Dir2Path($UploadtreePk)
  * \param $LinkLast - create link (a href) for last item and use LinkLast as the module name
  * \param $ShowMicro - show micro menu
  * \param $Enumerate - if >= zero number the folder/file path (the stuff in the yellow bar)
- *   starting with the value $Enumerate 
+ *   starting with the value $Enumerate
  * \param $PreText - additional text to preceed the folder path
  * \param $PostText - text to follow the folder path
  *
  * \return string of browse paths
  */
 function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
-		     $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='')
+$ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='')
 {
   global $Plugins;
   global $PG_CONN;
@@ -302,7 +302,7 @@ function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
   $Uri = Traceback_uri() . "?mod=$Mod";
 
   /* Get array of upload recs for this path, in top down order.
-     This does not contain artifacts.
+   This does not contain artifacts.
    */
   $Path = Dir2Path($UploadtreePk);
   $Last = &$Path[count($Path)-1];
@@ -331,62 +331,62 @@ function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
 
   /* Print the upload, itself (on the next line since it is not a folder) */
   if (count($Path) == -1)
-    {
+  {
     $Upload = $Path[0]['upload_fk'];
     $UploadName = htmlentities($Path[0]['ufile_name']);
     $UploadtreePk =  $Path[0]['uploadtree_pk'];
     $V .= "<br><b><a href='$Uri2&folder=$Folder&upload=$Upload&item=$UploadtreePk'>$UploadName</a></b>";
     // $FirstPath=0;
-    }
+  }
   else
-    $V .= "<br>";
-  
+  $V .= "<br>";
+
   /* Show the path within the upload */
   if ($FirstPath!=0)
-    {
+  {
     for($p=0; !empty($Path[$p]['uploadtree_pk']); $p++)
-      {
+    {
       $P = &$Path[$p];
       if (empty($P['ufile_name'])) { continue; }
       $UploadtreePk = $P['uploadtree_pk'];
 
       if (!$FirstPath) { $V .= "/ "; }
       if (!empty($LinkLast) || ($P != $Last))
-	{
+      {
         if ($P == $Last)
-	  {
-	    $Uri = Traceback_uri() . "?mod=$LinkLast";
-	  }
-	$V .= "<a href='$Uri&upload=" . $P['upload_fk'] . $Opt . "&item=" . $UploadtreePk . "'>";
-	}
+        {
+          $Uri = Traceback_uri() . "?mod=$LinkLast";
+        }
+        $V .= "<a href='$Uri&upload=" . $P['upload_fk'] . $Opt . "&item=" . $UploadtreePk . "'>";
+      }
 
       if (Isdir($P['ufile_mode']))
-	{
+      {
         $V .= $P['ufile_name'];
-	}
+      }
       else
-	{
+      {
         if (!$FirstPath && Iscontainer($P['ufile_mode']))
-	  {
-	    $V .= "<br>\n&nbsp;&nbsp;";
-	  }
-	$V .= "<b>" . $P['ufile_name'] . "</b>";
-	}
+        {
+          $V .= "<br>\n&nbsp;&nbsp;";
+        }
+        $V .= "<b>" . $P['ufile_name'] . "</b>";
+      }
 
       if (!empty($LinkLast) || ($P != $Last))
-	{
-	  $V .= "</a>";
-	}
-      $FirstPath = 0;
+      {
+        $V .= "</a>";
       }
+      $FirstPath = 0;
     }
+  }
   $V .= "</font>\n";
 
   if (!empty($ShowMicro))
-    {
+  {
     $MenuDepth = 0; /* unused: depth of micro menu */
     $V .= menu_to_1html(menu_find($ShowMicro,$MenuDepth),1);
-    }
+  }
 
 
   if ($Enumerate >= 0)
@@ -396,9 +396,9 @@ function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
   }
 
   if ($ShowBox)
-    {
+  {
     $V .= "</div>\n";
-    }
+  }
   return($V);
 } // Dir2Browse()
 
@@ -454,31 +454,31 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
 
     $Phrase='';
     if ($ShowPhrase && !empty($R['phrase_text']))
-      {
-$text = _("Phrase");
+    {
+      $text = _("Phrase");
       $Phrase = "<b>$text:</b> " . htmlentities($R['phrase_text']);
-      }
+    }
 
     if ((IsDir($R['ufile_mode'])) || (Iscontainer($R['ufile_mode'])))
-	{
-	$V .= "<P />\n";
-	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfDirPlugin,1,
-		NULL,$Count,$Phrase, $Licenses) . "\n";
-	}
+    {
+      $V .= "<P />\n";
+      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfDirPlugin,1,
+      NULL,$Count,$Phrase, $Licenses) . "\n";
+    }
     else if ($R['pfile_fk'] != $LastPfilePk)
-	{
-	$V .= "<P />\n";
-	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
-		NULL,$Count,$Phrase, $Licenses) . "\n";
-	$LastPfilePk = $R['pfile_fk'];
-	}
+    {
+      $V .= "<P />\n";
+      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
+      NULL,$Count,$Phrase, $Licenses) . "\n";
+      $LastPfilePk = $R['pfile_fk'];
+    }
     else
-	{
-	$V .= "<div style='margin-left:2em;'>";
-	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
-		NULL,$Count,$Phrase, $Licenses) . "\n";
-	$V .= "</div>";
-	}
+    {
+      $V .= "<div style='margin-left:2em;'>";
+      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
+      NULL,$Count,$Phrase, $Licenses) . "\n";
+      $V .= "</div>";
+    }
     $Count++;
   }
   return($V);
@@ -503,11 +503,11 @@ $text = _("Phrase");
 function GetNonArtifactChildren($uploadtree_pk)
 {
   global $PG_CONN;
-  
+
   $foundChildren = array();
 
   /* Find all the children */
-  $sql = "select uploadtree.*, pfile_size, pfile_mimetypefk from uploadtree 
+  $sql = "select uploadtree.*, pfile_size, pfile_mimetypefk from uploadtree
           left outer join pfile on (pfile_pk=pfile_fk)
           where parent=$uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
@@ -520,8 +520,8 @@ function GetNonArtifactChildren($uploadtree_pk)
   $children = pg_fetch_all($result);
   pg_free_result($result);
 
-  /* Loop through each child and replace any artifacts with their 
-     non artifact child.  Or skip them if they are not containers.
+  /* Loop through each child and replace any artifacts with their
+   non artifact child.  Or skip them if they are not containers.
    */
   foreach($children as $key => $child)
   {
@@ -532,13 +532,13 @@ function GetNonArtifactChildren($uploadtree_pk)
         unset($children[$key]);
         $NonAChildren = GetNonArtifactChildren($child['uploadtree_pk']);
         if ($NonAChildren)
-          $foundChildren = array_merge($foundChildren, $NonAChildren);
+        $foundChildren = array_merge($foundChildren, $NonAChildren);
       }
       else
         unset($children[$key]);
     }
     else
-      $foundChildren[$key] = $child;
+    $foundChildren[$key] = $child;
   }
   uasort($foundChildren, '_DirCmp');
   return $foundChildren;
@@ -546,7 +546,7 @@ function GetNonArtifactChildren($uploadtree_pk)
 
 
 /**
- * \brief Uploadtree2PathStr(): 
+ * \brief Uploadtree2PathStr():
  *  Return string representation of uploadtree path.
  *  Use Dir2Path to get $PathArray.
  *

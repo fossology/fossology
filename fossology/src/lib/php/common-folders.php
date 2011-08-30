@@ -14,11 +14,11 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /**
  * \file common-folders.php
- * \brief 
+ * \brief
  * Design note:
  *  Folders could be stored in a menu listing (using menu_insert).
  *  However, since menu_insert() runs a usort() during each insert,
@@ -49,7 +49,7 @@ function FolderGetTop()
 } // FolderGetTop()
 
 /**
- * \brief GetUserRootFolder(): 
+ * \brief GetUserRootFolder():
  *  Return the top-of-tree folder_pk for the current user.
  *  Fail if there is no user session.
  *
@@ -76,7 +76,7 @@ function GetUserRootFolder()
 } // GetUserRootFolder()
 
 /************************************************************
- GetRootFolder(): 
+ GetRootFolder():
  Return the top-of-tree folder_pk.
  This is typically the folder_pk for the folder "Software Repository"
  but this function has no dependency on the folder name.
@@ -104,7 +104,7 @@ function GetRootFolder()
     echo __FILE__ . ":" . __LINE__ . ":". __FUNCTION__ ."<br>";
     exit;
   }
-  /* Get all the folder_pk's  of folders that have children 
+  /* Get all the folder_pk's  of folders that have children
    * and remove all the folders that are themselves children.
    * The remainder (folder that is never a child) is the root.
    * We should probably give some thought to having all folders in foldercontents.
@@ -138,8 +138,8 @@ function GetRootFolder()
 
 
 /**
- * \brief Folder2Path(): 
- * 
+ * \brief Folder2Path():
+ *
  * Return an array of the folder_pk, folder_name
  * From the users.root_folder_fk to $folder_pk
  * Array is in top down order.
@@ -148,7 +148,7 @@ function GetRootFolder()
  * If you need to know the folder_pk of an upload or uploadtree, use GetFolderFromItem()
  *
  * \param $folder_pk
- *  
+ *
  * \return an array of the folder_pk, folder_name
  */
 function Folder2Path($folder_pk)
@@ -158,10 +158,10 @@ function Folder2Path($folder_pk)
 
   /* validate inputs */
   if (empty($folder_pk)) return __FILE__.":".__LINE__." Folder2Browse(empty)<br>";
-  
+
   /* Get users root folder */
   $root_folder_fk = GetUserRootFolder();   // will fail if no user session
-  
+
   while($folder_pk)
   {
     $sql = "select folder_pk, folder_name from folder where folder_pk='$folder_pk'";
@@ -170,28 +170,28 @@ function Folder2Path($folder_pk)
     $FolderRow = pg_fetch_assoc($result);
     pg_free_result($result);
     array_unshift($FolderList, $FolderRow);
-    
-    // Limit folders to user root.  Limit to an arbitrary 20 folders as a failsafe 
+
+    // Limit folders to user root.  Limit to an arbitrary 20 folders as a failsafe
     // against this loop going infinite.
     if (($folder_pk == $root_folder_fk) or (count($FolderList)>20)) break;
-    
+
     $sql = "select parent_fk from foldercontents where child_id='$folder_pk' and foldercontents_mode=1";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $FolderRow = pg_fetch_assoc($result);
     pg_free_result($result);
     $folder_pk = $FolderRow['parent_fk'];
-  } 
+  }
   return($FolderList);
 } // Folder2Path()
 
 
 /**
  * \brief GetFolderFromItem(): Either $upload_pk OR $uploadtree_pk must be passed in.
- * 
+ *
  * \param $upload_pk
  * \param $uploadtree_pk
- *  
+ *
  * \return the folder_pk that the upload_pk (or uploadtree_pk) is in:
  */
 function GetFolderFromItem($upload_pk="", $uploadtree_pk="")
@@ -200,13 +200,13 @@ function GetFolderFromItem($upload_pk="", $uploadtree_pk="")
 
   /* validate inputs */
   if (empty($uploadtree_pk) and empty($upload_pk)) return "__FILE__:__LINE__ GetFolderFromItem(empty)<br>";
-  
+
   if (empty($upload_pk))
   {
     $UTrec = GetSingleRec("uploadtree", "where uploadtree_pk=$uploadtree_pk");
     $upload_pk = $UTrec['upload_fk'];
   }
-  
+
   $sql = "select parent_fk from foldercontents where child_id='$upload_pk' and foldercontents_mode=2";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -232,7 +232,7 @@ function GetFolderFromItem($upload_pk="", $uploadtree_pk="")
  * \return full HTML
  */
 function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
-  {
+{
   global $Plugins;
   if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
   if (empty($ParentFolder)) { return; }
@@ -241,15 +241,15 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
   $V="";
 
   if (($Depth != 0) || $IncludeTop)
-    {
+  {
     if ($ParentFolder == $SelectId)
-      {
+    {
       $V .= "<option value='$ParentFolder' SELECTED>";
-      }
+    }
     else
-      {
+    {
       $V .= "<option value='$ParentFolder'>";
-      }
+    }
     if ($Depth != 0) { $V .= "&nbsp;&nbsp;"; }
     for($i=1; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
 
@@ -265,9 +265,9 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
     /* Now create the HTML */
     $V .= htmlentities($Name);
     $V .= "</option>\n";
-    }
-    /* Load any subfolders */
-    $sql = "SELECT folder.folder_pk, folder.folder_name AS name, 
+  }
+  /* Load any subfolders */
+  $sql = "SELECT folder.folder_pk, folder.folder_name AS name,
             folder.folder_desc AS description, 
             foldercontents.parent_fk AS parent, 
             foldercontents.foldercontents_mode, 
@@ -278,18 +278,18 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
             AND foldercontents.child_id = folder.folder_pk
             AND folder.folder_pk is not null
             ORDER BY name";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
   if (pg_num_rows($result) > 0)
-    {
+  {
     $Hide="";
     if ($Depth > 0) { $Hide = "style='display:none;'"; }
     while($row = pg_fetch_assoc($result))
-	{
-	$V .= FolderListOption($row['folder_pk'],$Depth+1,$IncludeTop,$SelectId);
-	}
+    {
+      $V .= FolderListOption($row['folder_pk'],$Depth+1,$IncludeTop,$SelectId);
     }
-    pg_free_result($result);
+  }
+  pg_free_result($result);
   return($V);
 } // FolderListOption()
 
@@ -339,7 +339,7 @@ function FolderListScript()
   $V .= "  var E = document.getElementsByTagName('div');\n";
   $V .= "  var First=1;\n";
   $V .= "  for(var i = 0; i < E.length; i++)\n";
-  $V .= "    {\n"; 
+  $V .= "    {\n";
   $V .= "    if (E[i].id.substr(0,8) == 'TreeDiv-')\n";
   $V .= "      {\n";
   $V .= "      var Element, State;\n";
@@ -387,9 +387,9 @@ function FolderGetName($FolderPk,$Top=-1)
   $Parent = $row['parent_fk'];
   $Name = $row['folder_name'];
   if (!empty($Parent) && ($FolderPk != $Top))
-      {
-      $Name = FolderGetName($Parent,$Top) . "/" . $Name;
-      }
+  {
+    $Name = FolderGetName($Parent,$Top) . "/" . $Name;
+  }
   return($Name);
 } // FolderGetName()
 
@@ -408,7 +408,7 @@ function FolderGetName($FolderPk,$Top=-1)
  * \return full HTML
  */
 function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
-  {
+{
   global $Plugins;
   global $PG_CONN;
   if (empty($PG_CONN)) { return; }
@@ -419,20 +419,20 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   $V="";
 
   if ($Depth != 0)
-    {
+  {
     $V .= "<font class='treehide1' color='white'>";
     $V .= "+&nbsp;";
     $V .= "</font>";
     if ($Depth > 1)
-      {
+    {
       for($i=1; $i < $Depth; $i++)
-	{
-	$V .= "<font class='treehide'>";
-	$V .= "+&nbsp;";
-	$V .= "</font>";
-	}
+      {
+        $V .= "<font class='treehide'>";
+        $V .= "+&nbsp;";
+        $V .= "</font>";
       }
     }
+  }
 
   /* Load this folder's parent */
   if ($ShowParent && ($ParentFolder != GetUserRootFolder()))
@@ -465,9 +465,9 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   if ($Name == "") { $Name = "[default]"; }
   $Desc = str_replace('"',"&quot;",$Desc);
   pg_free_result($result);
- 
+
   /* Load any subfolders */
-  $sql = "SELECT folder.folder_pk, folder.folder_name AS name, 
+  $sql = "SELECT folder.folder_pk, folder.folder_name AS name,
                                  folder.folder_desc AS description, 
                                  foldercontents.parent_fk AS parent, 
                                  foldercontents.foldercontents_mode, 
@@ -483,13 +483,13 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   if (pg_num_rows($result) > 0)
-    {
+  {
     $V .= '<a href="javascript:ShowHide(' . "'TreeDiv-$ParentFolder'" . ')"><font class="treebranch">+</font></a>';
-    }
+  }
   else
-    {
+  {
     $V .= "<font class='treearm'>&ndash;</font>";
-    }
+  }
   $V .= "&nbsp;";
   if (!empty($Desc)) { $Title = 'title="' . $Desc . '"'; }
   else { $Title = ""; }
@@ -498,30 +498,30 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   else { $Target = ""; }
   if (!empty($Browse)) { $V .= "<a $Title $Target class='treetext' href='$Uri?mod=browse&folder=$ParentFolder'>"; }
   if (!empty($Highlight) && ($Highlight == $ParentFolder))
-    { $V .= "<font style='border: 1pt solid; color:red; font-weight:bold;'>"; }
+  { $V .= "<font style='border: 1pt solid; color:red; font-weight:bold;'>"; }
   $V .= htmlentities($Name);
   if (!empty($Highlight) && ($Highlight == $ParentFolder))
-    { $V .= "</font>"; }
+  { $V .= "</font>"; }
   if (!empty($Browse)) { $V .= "</a>"; }
   $V .= "<br>\n";
   if (pg_num_rows($result) > 0)
-    {
+  {
     $Hide="";
     if ($Depth > 0) { $Hide = "style='display:none;'"; }
     $V .= "<div id='TreeDiv-$ParentFolder' $Hide>\n";
     while($row = pg_fetch_assoc($result))
-      {
+    {
       if (!HaveFolderPerm($R['folder_pk'])) continue;
       $V .= FolderListDiv($row['folder_pk'],$Depth+1,$Highlight);
-      }
-    $V .= "</div>\n";
     }
+    $V .= "</div>\n";
+  }
   pg_free_result($result);
   return($V);
 } /* FolderListDiv() */
 
 /**
- * \brief 
+ * \brief
  * FolderGetFromUpload(): Given an upload number, return the
  * folder path in an array containing folder_pk and name.
  * This is recursive!
@@ -572,18 +572,18 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $R = pg_fetch_assoc($result);
-  if (empty($R['parent_fk'])) 
+  if (empty($R['parent_fk']))
   {
-    pg_free_result($result); 
-    return; 
+    pg_free_result($result);
+    return;
   }
   $V = array();
   $V['folder_pk'] = $R['parent_fk'];
   $V['folder_name'] = $R['folder_name'];
   if ($R['parent_fk'] != 0)
-	{
-	$List = FolderGetFromUpload($Uploadpk,$R['parent_fk'],$Stop);
-	}
+  {
+    $List = FolderGetFromUpload($Uploadpk,$R['parent_fk'],$Stop);
+  }
   if (empty($List)) { $List = array(); }
   array_push($List,$V);
   pg_free_result($result);
@@ -603,7 +603,7 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
  *  Folders may be empty!
  */
 function FolderListUploads($ParentFolder=-1)
-  {
+{
   global $PG_CONN;
   if (empty($PG_CONN)) { return; }
   if (empty($ParentFolder)) { return; }
@@ -623,17 +623,17 @@ function FolderListUploads($ParentFolder=-1)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   while ($R = pg_fetch_assoc($result))
-    {
+  {
     if (empty($R['upload_pk'])) { continue; }
     $New['upload_pk'] = $R['upload_pk'];
     $New['upload_desc'] = $R['upload_desc'];
     $New['upload_ts'] = substr($R['upload_ts'],0,19);
     $New['name'] = $R['ufile_name'];
     array_push($List,$New);
-    }
+  }
   pg_free_result($result);
   return($List);
-  } // FolderListUploads()
+} // FolderListUploads()
 
 /**
  * \brief
@@ -651,7 +651,7 @@ function FolderListUploads($ParentFolder=-1)
  * \return array of all uploads, upload_pk, and folders
  */
 function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL)
-  {
+{
   global $PG_CONN;
   if (empty($PG_CONN)) { return; }
   if (empty($ParentFolder)) { return; }
@@ -660,7 +660,7 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL)
 
   /* Get list of uploads */
   /** mode 1<<1 = upload_fk **/
- $sql = "SELECT upload_pk, upload_desc, ufile_name, folder_name FROM foldercontents,uploadtree, u
+  $sql = "SELECT upload_pk, upload_desc, ufile_name, folder_name FROM foldercontents,uploadtree, u
 pload
     WHERE 
         foldercontents.parent_fk = '$ParentFolder'
@@ -672,15 +672,15 @@ pload
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   while ($R = pg_fetch_assoc($result))
-    {
+  {
     if (empty($R['upload_pk'])) { continue; }
     $New['upload_pk'] = $R['upload_pk'];
     $New['upload_desc'] = $R['upload_desc'];
     $New['name'] = $R['ufile_name'];
     $New['folder'] = $FolderPath . "/" . $R['folder_name'];
     array_push($List,$New);
-    }
-  pg_free_result($result);  
+  }
+  pg_free_result($result);
 
   /* Get list of subfolders and recurse */
   /** mode 1<<0 = folder_pk **/
@@ -694,14 +694,14 @@ pload
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   while ($R = pg_fetch_assoc($result))
-    {
+  {
     if (empty($R['id'])) { continue; }
     /* RECURSE! */
     $SubList = FolderListUploadsRecurse($R['id'],$FolderPath . "/" . $R['folder']);
     $List = array_merge($List,$SubList);
-    }
+  }
   pg_free_result($result);
   /* Return findings */
   return($List);
-  } // FolderListUploadsRecurse()
+} // FolderListUploadsRecurse()
 ?>

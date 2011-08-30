@@ -14,23 +14,23 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /**
-  * \file common-auth.php
-  * \brief This file contains common authentication funtion
-  */
+ * \file common-auth.php
+ * \brief This file contains common authentication funtion
+ */
 
 
 /**
-  * \brief siteminder_check() 
-  *        Check if Site Minder enabled.
-  *        If enabled, return $sea
-  * \return 
-  *   Not Enabled: -1
-  *   Enabled: $sea
-  *      
-  */
+ * \brief siteminder_check()
+ *        Check if Site Minder enabled.
+ *        If enabled, return $sea
+ * \return
+ *   Not Enabled: -1
+ *   Enabled: $sea
+ *
+ */
 function siteminder_check() {
   if (isset($_SERVER['HTTP_SMUNIVERSALID'])){
     $SEA = $_SERVER['HTTP_SMUNIVERSALID'];

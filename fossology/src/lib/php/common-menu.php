@@ -1,27 +1,27 @@
 <?php
 /***********************************************************
-Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ ***********************************************************/
 /**
- * \file common-menu.php 
+ * \file common-menu.php
  * \brief common function of menu
  */
 
 /**
- * \brief 
+ * \brief
  *  Code for creating a menu list (2D linked list) from a set of plugins.
  */
 class menu {
@@ -32,11 +32,11 @@ class menu {
   var $Target = NULL; // recommended name of window for showing results
   var $MaxDepth = 0; // How deep is SubMenu?
   var $SubMenu = NULL; // list to submenu list
-  
+
 };
 /*********************************
-Global array: don't touch!
-*********************************/
+ Global array: don't touch!
+ *********************************/
 $MenuList = array();
 $MenuMaxDepth = 0; // how deep is the tree (for UI display)
 /**
@@ -58,8 +58,8 @@ function MenuPage($Page, $TotalPage, $Uri = '') {
   $Uri = preg_replace("/&page=[^&]*/", "", $Uri);
   /* Create first page */
   if ($Page > 0) {
-$text = _("First");
-$text1 = _("Prev");
+    $text = _("First");
+    $text1 = _("Prev");
     $V.= "<a href='$Uri&page=0'>[$text]</a> ";
     $V.= "<a href='$Uri&page=" . ($Page - 1) . "'>[$text1]</a> ";
     if ($Page > 9) {
@@ -82,8 +82,8 @@ $text1 = _("Prev");
     if ($Page < $TotalPage - 9) {
       $V.= " ...";
     }
-$text = _("Next");
-$text1 = _("Last");
+    $text = _("Next");
+    $text1 = _("Last");
     $V.= " <a href='$Uri&page=" . ($Page + 1) . "'>[$text]</a>";
     $V.= " <a href='$Uri&page=" . ($TotalPage) . "'>[$text1]</a>";
   }
@@ -109,8 +109,8 @@ function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
   $Uri = preg_replace("/&page=[^&]*/", "", $Uri);
   /* Create first page */
   if ($Page > 0) {
-$text = _("First");
-$text1 = _("Prev");
+    $text = _("First");
+    $text1 = _("Prev");
     $V.= "<a href='$Uri&page=0'>[$text]</a> ";
     $V.= "<a href='$Uri&page=" . ($Page - 1) . "'>[$text1]</a> ";
     if ($Page > 9) {
@@ -127,7 +127,7 @@ $text1 = _("Prev");
   $V.= "<b>" . ($Page + 1) . "</b>";
   /* Create next page */
   if ($Next) {
-$text = _("Next");
+    $text = _("Next");
     $i = $Page + 1;
     $V.= " <a href='$Uri&page=$i'>" . ($i + 1) . "</a>";
     $V.= " ... <a href='$Uri&page=$i'>[$text]</a>";
@@ -183,9 +183,9 @@ function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, 
     $LastPart = 0;
   }
   /*****
-  $Menu is the top of the list.
-  $M is an object in the list.
-  *****/
+   $Menu is the top of the list.
+   $M is an object in the list.
+   *****/
   /* Check if the name exists in the array */
   $M = NULL;
   if (is_array($Menu)) {
@@ -238,7 +238,7 @@ function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, 
     }
     else {
       $Menu = array(
-        $M
+      $M
       );
     }
   }
@@ -264,7 +264,7 @@ function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target 
  * \brief menu_find(): Given a top-level menu name, return
  * the list of sub-menus below it and max depth of menu.
  * $Name may be a "::" separated list.
- * 
+ *
  * \param $Name top-level menu name
  * \param $MaxDepth
  * \param $Menu
@@ -308,7 +308,7 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
     global $Plugins;
     $Refresh = & $Plugins[plugin_find_id("refresh") ];
     if (!empty($Refresh)) {
-$text = _("Traceback");
+      $text = _("Traceback");
       $URL = Traceback_dir() . "?" . $Refresh->GetRefresh();
       $Std.= "<a href='$URL' target='_top'>$text</a>";
     }
@@ -317,7 +317,7 @@ $text = _("Traceback");
     if (!empty($Std)) {
       $Std.= " | ";
     }
-$text = _("Refresh");
+    $text = _("Refresh");
     $Std.= "<a href='" . Traceback() . "'>$text</a>";
   }
   $First = 1;
@@ -442,24 +442,24 @@ function menu_print(&$Menu, $Indent) {
 } // menu_print()
 // DEBUG CODE
 /**********
-if (0)
-{
-menu_insert("abc::def::",0,"");
-menu_insert("Applications::Accessories::Dictionary",0,"");
-menu_insert("Applications::Accessories::Ark",0,"");
-menu_insert("Places::Computer",3,"");
-menu_insert("Places::CD/DVD Creator",3,"");
-menu_insert("Places::Home Folder",4,"");
-menu_insert("Places::Network Servers",2,"");
-menu_insert("Places::Search for Files...",0,"");
-menu_insert("Places::Desktop",4,"");
-menu_insert("Places::Recent Documents",0,"");
-menu_insert("Places::Connect to Server...",2,"");
-menu_insert("Applications::Accessories::Calculator",0,"");
-menu_print($MenuList,0);
-print "Max depth: $MenuMaxDepth\n";
-}
-**********/
+ if (0)
+ {
+ menu_insert("abc::def::",0,"");
+ menu_insert("Applications::Accessories::Dictionary",0,"");
+ menu_insert("Applications::Accessories::Ark",0,"");
+ menu_insert("Places::Computer",3,"");
+ menu_insert("Places::CD/DVD Creator",3,"");
+ menu_insert("Places::Home Folder",4,"");
+ menu_insert("Places::Network Servers",2,"");
+ menu_insert("Places::Search for Files...",0,"");
+ menu_insert("Places::Desktop",4,"");
+ menu_insert("Places::Recent Documents",0,"");
+ menu_insert("Places::Connect to Server...",2,"");
+ menu_insert("Applications::Accessories::Calculator",0,"");
+ menu_print($MenuList,0);
+ print "Max depth: $MenuMaxDepth\n";
+ }
+ **********/
 
 
 /**
