@@ -15,19 +15,28 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TESTFILES = test_common_sysconfig.php 
+TESTFILES = test_common_sysconfig.php \
+						test_common_active.php \
+						test_common_cli.php \
+						test_common_cache.php \
+						test_common_auth.php \
+						test_common_parm.php \
 
-all:
+all: pathinclude
 
 test: all
-	@echo "make unit test commom php files"
+	@echo "make unit test for commom php files"
 	for TESTFILE  in $(TESTFILES); do (phpunit --log-junit $$TESTFILE-Xunit.xml $$TESTFILE); done
 
-coverage:
-	@echo "make unit coverage commom php files"
-	for TESTFILE  in $(TESTFILES); do (phpunit --coverage-html ./result $$TESTFILE); done
+coverage: all
+	@echo "make unit coverage for commom php files"
+	for TESTFILE  in $(TESTFILES); do (phpunit --coverage-html ./results $$TESTFILE); done
 
 clean:
-	rm -rf *.xml result
+	rm -rf *.xml results
 
-.PHONY: all test coverage clean
+pathinclude:
+	make -C ../../../www/ui/
+
+
+.PHONY: all test coverage clean pathinclude

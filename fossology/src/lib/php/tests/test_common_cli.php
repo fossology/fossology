@@ -17,27 +17,22 @@
  */
 
 /**
- * \file test_common_sysconfig.php
- * \brief unit tests for common-sysconfig.php
+ * \file test_common_cli.php
+ * \brief unit tests for common-cli.php
  */
 
-require_once('../common-sysconfig.php');
-require_once('../common-db.php');
-require_once('../../../www/ui/pathinclude.php');
+require_once('../common-cli.php');
 
 /**
- * \class test_common_sysconfig
+ * \class test_common_cli
  */
-class test_common_sysconfig extends PHPUnit_Framework_TestCase
+class test_common_cli extends PHPUnit_Framework_TestCase
 {
-  public $PG_CONN;
- 
   /* initialization */
   protected function setUp() 
   {
-    global $PG_CONN;
     /** require PHPUnit/Framework.php */
-    print "Start unit test for common-sysconfig.php\n";
+    print "Start unit test for common-cli.php\n";
     $php_lib1 = "/usr/share/php/PHPUnit/Framework.php";
     $php_lib2 = "/usr/share/pear/PHPUnit/Framework.php";
     if(file_exists($php_lib1))
@@ -52,34 +47,34 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
     {
       die("Could not find PHPUnit/Framework.php\n");
     }
-    $PG_CONN = DBconnect();
   }
 
   /**
-   * \brief test for ConfigInit()
-   * after ConfigInit() is executed, we can get some sysconfig information, 
-   * include: SupportEmailLabel, SupportEmailAddr, SupportEmailSubject, 
-   * BannerMsg, LogoImage, LogoLink, GlobalBrowse, FOSSologyURL
+   * \brief test for cli_logger 
    */
-  function testConfigInit()
+  function testcli_logger()
   {
-    $SysConf = ConfigInit();
-    $this->assertEquals("FOSSology Support",  $SysConf['SupportEmailSubject']);
-    $this->assertEquals("false",  $SysConf['GlobalBrowse']);
-    $hostname = exec("hostname -f");
-    if (empty($hostname)) $hostname = "localhost";
-    $FOSSologyURL = $hostname."/repo/";
-    $this->assertEquals($FOSSologyURL,  $SysConf['FOSSologyURL']);
+    $data = "test for cli log";
+    cli_logger("./cli.log", $data, "w");
+    $file_contents = file_get_contents("./cli.log");
+    $this->assertEquals("$data\n", $file_contents);
+    cli_logger("./cli.log", $data, "a");
+    $file_contents = file_get_contents("./cli.log");
+    $this->assertEquals("$data\n$data\n", $file_contents);
+    cli_logger("./cli.log", $data, "w");
+    $file_contents = file_get_contents("./cli.log");
+    $this->assertEquals("$data\n", $file_contents);
   }
-
-
+  
   /**
    * \brief clean the env
    */
   protected function tearDown() {
-    global $PG_CONN;
-    pg_close($PG_CONN);
-    print "unit test for common-sysconfig.php end\n";
+    if (file_exists("./cli.log"))
+    {
+      unlink("./cli.log");
+    }
+    print "unit test for common-cli.php end\n";
   }
 }
 
