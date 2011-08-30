@@ -87,9 +87,10 @@ function ReportCacheGet($CacheKey)
   $sql = "SELECT report_cache_value FROM report_cache WHERE report_cache_key='$EscKey';";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $cashedvalue = pg_fetch_row($result, 0);
+  $row = pg_fetch_assoc($result);
+  $cashedvalue = $row['report_cache_value'];
   pg_free_result($result);
-  return cashedvalue;
+  return $cashedvalue;
 } // ReportCacheGet()
 
 
