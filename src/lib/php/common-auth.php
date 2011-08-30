@@ -16,19 +16,21 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+/**
+  * \file common-auth.php
+  * \brief This file contains common authentication funtion
+  */
 
-/*****************************************
- siteminder_check(): Check if Site Minder enabled.
- if enabled, return $sea
- return -1 if it is not enabled.
- *****************************************/
+
+/**
+  * \brief siteminder_check() 
+  *        Check if Site Minder enabled.
+  *        If enabled, return $sea
+  * \return 
+  *   Not Enabled: -1
+  *   Enabled: $sea
+  *      
+  */
 function siteminder_check() {
   if (isset($_SERVER['HTTP_SMUNIVERSALID'])){
     $SEA = $_SERVER['HTTP_SMUNIVERSALID'];

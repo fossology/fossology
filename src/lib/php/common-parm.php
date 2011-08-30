@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,13 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+/**
+ * \file common-parm.php 
+ * \brief common function of parmeters
+ */
 
 define("PARM_INTEGER",1);
 define("PARM_NUMBER",2);
@@ -30,20 +27,22 @@ define("PARM_STRING",3);
 define("PARM_TEXT",4);
 define("PARM_RAW",5);
 
-/************************************************************
- GetParm(): Plugins should not use globals to access HTTP variables.
- This is because HTTP variables may contain hostile code/values.
- This function will retrieve the variables and check data types.
- PARM_INTEGER: Only integers are returned.
- PARM_NUMBER: Only numbers (decimals are fine) are returned.
- PARM_STRING: The variable is converted from URI encoding to text.
- PARM_TEXT: Like PARM_STRING, but all safe quoting is removed.
- PARM_RAW: Return the raw value.
- If the variable does not exist, OR is the wrong type (e.g., a string
- when it should be a number), then nothing is returned.
- NOTE: If a plugin wants to access these variable directly, it can.
- But it is responsible for all safety checks.
- ************************************************************/
+/**
+ * \brief GetParm()
+ *
+ * GetParm(): Plugins should not use globals to access HTTP variables.
+ * This is because HTTP variables may contain hostile code/values.
+ * This function will retrieve the variables and check data types.
+ * PARM_INTEGER: Only integers are returned.
+ * PARM_NUMBER: Only numbers (decimals are fine) are returned.
+ * PARM_STRING: The variable is converted from URI encoding to text.
+ * PARM_TEXT: Like PARM_STRING, but all safe quoting is removed.
+ * PARM_RAW: Return the raw value.
+ * If the variable does not exist, OR is the wrong type (e.g., a string
+ * when it should be a number), then nothing is returned.
+ * NOTE: If a plugin wants to access these variable directly, it can.
+ * But it is responsible for all safety checks.
+ */
 function GetParm($Name,$Type)
 {
   $Var = @$_GET[$Name];
@@ -71,28 +70,28 @@ function GetParm($Name,$Type)
   return;
 } // GetParm()
 
-/************************************************************
- Traceback(): The URI + query to this location.
- ************************************************************/
+/**
+ * \brief Traceback(): The URI + query to this location.
+ */
 function Traceback()
 {
   return(@$_SERVER['REQUEST_URI']);
 } // Traceback()
 
-/************************************************************
- Traceback_uri(): The URI without query to this location.
- ************************************************************/
+/**
+ * \brief Traceback_uri(): The URI without query to this location.
+ */
 function Traceback_uri()
 {
   $V = explode('?',@$_SERVER['REQUEST_URI'],2);
   return($V[0]);
 } // Traceback_uri()
 
-/************************************************************
- Traceback_parm(): The URI query to this location.
- If ShowMod is set, then the module name is included.
- Else, this begins with the first parameter.
- ************************************************************/
+/**
+ * \brief Traceback_parm(): The URI query to this location.
+ * If ShowMod is set, then the module name is included.
+ * Else, this begins with the first parameter.
+ */
 function Traceback_parm($ShowMod=1)
 {
   $V = array();
@@ -111,10 +110,9 @@ function Traceback_parm($ShowMod=1)
   return($V);
 } // Traceback_parm()
 
-/************************************************************
- Traceback_parm_keep(): Create a new URI, keeping only these
- items.
- ************************************************************/
+/**
+ * \brief Traceback_parm_keep(): Create a new URI, keeping only these items.
+ */
 function Traceback_parm_keep($List)
 {
   $Opt="";
@@ -128,9 +126,9 @@ function Traceback_parm_keep($List)
   return($Opt);
 } // Traceback_parm_keep()
 
-/************************************************************
- Traceback_dir(): The directory of the URI without query.
- ************************************************************/
+/**
+ * \brief Traceback_dir(): The directory of the URI without query.
+ */
 function Traceback_dir()
 {
   $V = explode('?',@$_SERVER['REQUEST_URI'],2);

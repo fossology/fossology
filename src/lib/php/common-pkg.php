@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,15 +16,15 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/************************************************************
-  This file contains common functions for the
-  package agent.
- ************************************************************/
+/**
+ * \file common-pkg.php
+ * \brief This file contains common functions for the package agent.
+ */
 
-/*
- * Return array of package mimetypes
- * Inputs:  none
- * Returns:
+/**
+ * \brief Get package mimetype
+ * 
+ * \return:
  *   Array of mimetype_pk's in the following order:
  *     application/x-rpm
  *     application/x-debian-package
@@ -53,15 +53,15 @@ function GetPkgMimetypes()
   return $pkArray;
 }
 
-/*
- * Increment counts of source package, binary package, and binary with no source
- * Inputs:  
- *   $uploadtree_row Uploadtree row + pfile_mimetypefk
- *   $MimetypeArray  Assoc array of mimetype names and mimetype_pk (from GetPkgMimetypes)
- *   &$NumSrcPkgs  Incremented if this is a source package
- *   &$NumBinPkgs  Incremented if this is a binary package
- *   &$NumBinNoSrcPkgs  Incremented if this binary pkg has no source package
- * Returns:
+/**
+ * \brief Increment counts of source package, binary package, and binary with no source
+ *  
+ * \param $uploadtree_row Uploadtree row + pfile_mimetypefk
+ * \param  $MimetypeArray  Assoc array of mimetype names and mimetype_pk (from GetPkgMimetypes)
+ * \param  &$NumSrcPkgs  Incremented if this is a source package
+ * \param  &$NumBinPkgs  Incremented if this is a binary package
+ * \param  &$NumBinNoSrcPkgs  Incremented if this binary pkg has no source package
+ * \return
  *   None.  This function increments values passed in by reference.
  */
 function IncrSrcBinCounts($uploadtree_row, $MimetypeArray, 

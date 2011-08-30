@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
-Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -15,18 +15,15 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
-/*************************************************
-Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-/*************************************************************
-Code for creating a menu list (2D linked list) from a set of plugins.
-*************************************************************/
+/**
+ * \file common-menu.php 
+ * \brief common function of menu
+ */
+
+/**
+ * \brief 
+ *  Code for creating a menu list (2D linked list) from a set of plugins.
+ */
 class menu {
   var $Name = ""; // name of the menu item
   var $URI = NULL; // URI for the plugin (everything after the "?mod=")
@@ -42,11 +39,17 @@ Global array: don't touch!
 *********************************/
 $MenuList = array();
 $MenuMaxDepth = 0; // how deep is the tree (for UI display)
-/***********************************************************
-MenuPage(): Create a "next" page menu.
-This function assumes the end number is known.
-Returns string containing menu.
-***********************************************************/
+/**
+ * \brief MenuPage(): Create a "next" page menu.
+ * This function assumes the end number is known.
+ * Returns string containing menu.
+ *
+ * \param $Page
+ * \param $TotalPage
+ * \param $Uri
+ *
+ * \return string containing menu
+ */
 function MenuPage($Page, $TotalPage, $Uri = '') {
   $V = "<font class='text'><center>";
   if (empty($Uri)) {
@@ -87,11 +90,17 @@ $text1 = _("Last");
   $V.= "</center></font>";
   return ($V);
 } // MenuPage
-/***********************************************************
-MenuEndlessPage(): Create a "next" page menu.
-This function assumes the end number is unknown.  (Hence, "endless".)
-Returns string containing menu.
-***********************************************************/
+/**
+ * \brief MenuEndlessPage(): Create a "next" page menu.
+ * This function assumes the end number is unknown.  (Hence, "endless".)
+ * Returns string containing menu.
+ *
+ * \param $Page
+ * \param $Next
+ * \param $Uri
+ *
+ * \return string containing menu
+ */
 function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
   $V = "<font class='text'><center>";
   if (empty($Uri)) {
@@ -126,9 +135,14 @@ $text = _("Next");
   $V.= "</center></font>";
   return ($V);
 } // MenuEndlessPage()
-/*****************************************
-menu_cmp(): Compare two menu items for sorting.
-*****************************************/
+/**
+ * \brief menu_cmp(): Compare two menu items for sorting.
+ *
+ * \param $a menu a
+ * \param $b menu b
+ *
+ * \return -1 a>b 1 a<b
+ */
 function menu_cmp(&$a, &$b) {
   if ($a->Order > $b->Order) {
     return (-1);
@@ -139,13 +153,22 @@ function menu_cmp(&$a, &$b) {
   $rc = strcmp($a->Name, $b->Name);
   return (strcmp($a->Name, $b->Name));
 } // menu_cmp()
-/***********************************************
-menu_insert_r(): Given a Path, order level for the last
-item, and a plugin name, insert the menu item.
-This is VERY recursive and returns the new menu.
-If $URI is blank, nothing is added.
-$LastOrder is used for grouping items in order.
-***********************************************/
+/**
+ * \brief menu_insert_r(): Given a Path, order level for the last
+ * item, and a plugin name, insert the menu item.
+ * This is VERY recursive and returns the new menu.
+ * If $URI is blank, nothing is added.
+ *
+ * \param $Menu
+ * \param $Path
+ * \param $LastOrder is used for grouping items in order.
+ * \param $Target
+ * \param $URI
+ * \param $HTML
+ * \param $Depth
+ * \param $FullName
+ * \param $Title
+ */
 function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, &$FullName, &$Title) {
   $AddNew = 0;
   $NeedSort = 0;
@@ -228,20 +251,26 @@ function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, 
   }
   return ($M->MaxDepth);
 } // menu_insert_r()
-/***********************************************
-menu_insert(): Given a Path, order level for the last
-item, and optional plugin name, insert the menu item.
-***********************************************/
+/**
+ * \brief menu_insert(): Given a Path, order level for the last
+ * item, and optional plugin name, insert the menu item.
+ */
 function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target = NULL, $HTML = NULL) {
   global $MenuList;
   $FullName = $Path;
   menu_insert_r($MenuList, $Path, $LastOrder, $Target, $URI, $HTML, 0, $FullName, $Title);
 } // menu_insert()
-/***********************************************
-menu_find(): Given a top-level menu name, return
-the list of sub-menus below it and max depth of menu.
-$Name may be a "::" separated list.
-***********************************************/
+/**
+ * \brief menu_find(): Given a top-level menu name, return
+ * the list of sub-menus below it and max depth of menu.
+ * $Name may be a "::" separated list.
+ * 
+ * \param $Name top-level menu name
+ * \param $MaxDepth
+ * \param $Menu
+ *
+ * \return list of sub-menus
+ */
 function menu_find($Name, &$MaxDepth, $Menu = NULL) {
   global $MenuList;
   if (empty($Menu)) {
@@ -264,12 +293,12 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL) {
   }
   return (NULL);
 } // menu_find()
-/***********************************************
-menu_to_1html(): Take a menu and render it as
-one HTML line.  This ignores submenus!
-If $ShowAll==0, then items without hyperlinks are hidden.
-This is commonly called the "micro-menu".
-***********************************************/
+/**
+ * \brief menu_to_1html(): Take a menu and render it as
+ * one HTML line.  This ignores submenus!
+ * If $ShowAll==0, then items without hyperlinks are hidden.
+ * This is commonly called the "micro-menu".
+ */
 $menu_to_1html_counter = 0;
 function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1) {
   $V = "";
@@ -346,13 +375,13 @@ $text = _("Refresh");
   $menu_to_1html_counter++;
   return ("<div id='menu1html-$menu_to_1html_counter' align='right' style='padding:0px 5px 0px 5px'><small>$V</small></div>");
 } // menu_to_1html()
-/***********************************************
-menu_to_1list(): Take a menu and render it as
-one HTML line with items in a "[name]" list.
-This ignores submenus!
-$Parm is a list of parameters to add to the URL.
-If $ShowAll==0, then items without hyperlinks are hidden.
-***********************************************/
+/**
+ * \brief menu_to_1list(): Take a menu and render it as
+ * one HTML line with items in a "[name]" list.
+ * This ignores submenus!
+ * $Parm is a list of parameters to add to the URL.
+ * If $ShowAll==0, then items without hyperlinks are hidden.
+ */
 function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1) {
   $V = "";
   $Std = "";
@@ -395,10 +424,10 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1) {
   }
   return ($V);
 } // menu_to_1list()
-/***********************************************
-menu_print(): Debugging code for printing the menu.
-This is recursive.
-***********************************************/
+/**
+ * \brief menu_print(): Debugging code for printing the menu.
+ * This is recursive.
+ */
 function menu_print(&$Menu, $Indent) {
   if (!isset($Menu)) {
     return;
@@ -433,16 +462,20 @@ print "Max depth: $MenuMaxDepth\n";
 **********/
 
 
-/***********************************************
-  menu_remove()
-  Remove a menu object (based on an object name)
-  from a menu list.
-
-  Returns a new menu list without $RmName
-  For example,
-    $mymenu = menu_find("Browse-Pfile", $MenuDepth);
-    $myNewMenu = menu_remove($mymenu, "Compare");
-***********************************************/
+/**
+ * \brief menu_remove()
+ *  Remove a menu object (based on an object name)
+ *  from a menu list.
+ *
+ * For example,
+ *   $mymenu = menu_find("Browse-Pfile", $MenuDepth);
+ *   $myNewMenu = menu_remove($mymenu, "Compare");
+ *
+ * \param $Menu
+ * \param $RmName remove name of menu
+ *
+ * \return a new menu list without $RmName
+ */
 function menu_remove($Menu, $RmName)
 {
   $NewArray = array();
