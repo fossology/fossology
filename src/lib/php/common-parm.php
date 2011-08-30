@@ -17,7 +17,7 @@
  ***********************************************************/
 
 /**
- * \file common-parm.php 
+ * \file common-parm.php
  * \brief common function of parmeters
  */
 

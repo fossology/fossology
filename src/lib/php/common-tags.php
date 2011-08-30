@@ -14,10 +14,10 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /**
- * \file common-tags.php 
+ * \file common-tags.php
  * \brief common function of tag
  */
 
@@ -25,14 +25,14 @@
 /**
  * \brief GetAllTags()
  *
- * \param $Item the uploadtree_pk 
+ * \param $Item the uploadtree_pk
  *
  * \return an array of:
  *  tag_pk
  *  tag_name
  */
 function GetAllTags($Item)
-  {
+{
   global $PG_CONN;
   if (empty($PG_CONN)) { return; }
   if (empty($Item)) { return; }
@@ -43,21 +43,21 @@ function GetAllTags($Item)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   while ($R = pg_fetch_assoc($result))
-    {
+  {
     if (empty($R['tag_pk'])) { continue; }
     $New['tag_pk'] = $R['tag_pk'];
     $New['tag_name'] = $R['tag'];
     array_push($List,$New);
-    }
+  }
   pg_free_result($result);
   return($List);
-  } // GetAllTags()
+} // GetAllTags()
 
 /**
  * \brief GetTaggingPerms: Get tags permissions
- * 
+ *
  * \param $user_pk
- * \param $tag_ns_pk the tag namespace pk 
+ * \param $tag_ns_pk the tag namespace pk
  *
  * \return integer of:
  *  0  None
@@ -125,7 +125,7 @@ function GetTaggingPerms($user_pk, $tag_ns_pk)
  *\return string of html select
  */
 function Array2SingleSelectTag($KeyValArray, $SLName="unnamed", $SelectedVal= "",
-                            $FirstEmpty=false, $SelElt=true)
+$FirstEmpty=false, $SelElt=true)
 {
   $str ="\n<select name='$SLName'>\n";
   if ($FirstEmpty) $str .= "<option value='' > \n";
@@ -137,7 +137,7 @@ function Array2SingleSelectTag($KeyValArray, $SLName="unnamed", $SelectedVal= ""
       $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
     $perm = GetTaggingPerms($_SESSION['UserId'],$key);
     if ($perm > 1) {
-    $str .= "<option value='$key' $SELECTED>$val\n";
+      $str .= "<option value='$key' $SELECTED>$val\n";
     }
   }
   $str .= "</select>";

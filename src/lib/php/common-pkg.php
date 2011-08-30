@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /**
  * \file common-pkg.php
@@ -23,7 +23,7 @@
 
 /**
  * \brief Get package mimetype
- * 
+ *
  * \return:
  *   Array of mimetype_pk's in the following order:
  *     application/x-rpm
@@ -37,7 +37,7 @@ function GetPkgMimetypes()
   $pkArray = array();
 
   /* Find lft and rgt bounds for this $uploadtree_pk  */
-  $sql = "select * from mimetype where 
+  $sql = "select * from mimetype where
              mimetype_name='application/x-rpm'
              or mimetype_name='application/x-debian-package'
              or mimetype_name='application/x-debian-source'";
@@ -55,7 +55,7 @@ function GetPkgMimetypes()
 
 /**
  * \brief Increment counts of source package, binary package, and binary with no source
- *  
+ *
  * \param $uploadtree_row Uploadtree row + pfile_mimetypefk
  * \param  $MimetypeArray  Assoc array of mimetype names and mimetype_pk (from GetPkgMimetypes)
  * \param  &$NumSrcPkgs  Incremented if this is a source package
@@ -64,12 +64,12 @@ function GetPkgMimetypes()
  * \return
  *   None.  This function increments values passed in by reference.
  */
-function IncrSrcBinCounts($uploadtree_row, $MimetypeArray, 
-                         &$NumSrcPkgs, &$NumBinPkgs, &$NumBinNoSrcPkgs)
+function IncrSrcBinCounts($uploadtree_row, $MimetypeArray,
+&$NumSrcPkgs, &$NumBinPkgs, &$NumBinNoSrcPkgs)
 {
   global $PG_CONN;
 
-  list($rpm_mtpk, $deb_mtsrcpk, $deb_mtbinpk) = $MimetypeArray; 
+  list($rpm_mtpk, $deb_mtsrcpk, $deb_mtbinpk) = $MimetypeArray;
 
   /* Debian source pkg? */
   if ($uploadtree_row['pfile_mimetypefk'] == $deb_mtsrcpk)
@@ -110,7 +110,7 @@ function IncrSrcBinCounts($uploadtree_row, $MimetypeArray,
     $row = pg_fetch_assoc($result);
     $source = $row['source_rpm'];
     pg_free_result($result);
-    if ((substr($source,0,6) == "(none)") || empty($source)) 
+    if ((substr($source,0,6) == "(none)") || empty($source))
     {
       $NumSrcPkgs++;
       return;
@@ -127,7 +127,7 @@ function IncrSrcBinCounts($uploadtree_row, $MimetypeArray,
   /* To get here we must be looking at a binary package */
   /* Find the source pkg in this upload */
   $source = trim($source);
-  $sql = "select uploadtree_pk from uploadtree, pfile where 
+  $sql = "select uploadtree_pk from uploadtree, pfile where
             upload_fk=$uploadtree_row[upload_fk] and ufile_name='$source' 
             and pfile_fk=pfile_pk and pfile_mimetypefk=$srcpkgmt limit 1";
   $result = pg_query($PG_CONN, $sql);
