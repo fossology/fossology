@@ -26,10 +26,8 @@
  */
 
 /**
- * \brief FolderGetTop(): Find the top-of-tree folder_pk for the current user.
- *  TBD: "username" will be added in the future and it may change
- *  how this function works.
- *  DEPRECATED - USE GetUserRootFolder()
+ * \brief DEPRECATED!  Find the top-of-tree folder_pk for the current user.
+ *  \todo DEPRECATED - USE GetUserRootFolder()
  */
 function FolderGetTop()
 {
@@ -49,8 +47,7 @@ function FolderGetTop()
 } // FolderGetTop()
 
 /**
- * \brief GetUserRootFolder():
- *  Return the top-of-tree folder_pk for the current user.
+ * \brief  Get the top-of-tree folder_pk for the current user.
  *  Fail if there is no user session.
  *
  * \return folder_pk for the current user
@@ -75,14 +72,10 @@ function GetUserRootFolder()
   return $root_folder_fk;
 } // GetUserRootFolder()
 
-/************************************************************
- GetRootFolder():
- Return the top-of-tree folder_pk.
- This is typically the folder_pk for the folder "Software Repository"
- but this function has no dependency on the folder name.
- Technically, one could create multiple roots, but that would be a
- bad thing and the UI won't let you do that.
- ************************************************************/
+/**
+ * \brief Get the fossology system root folder, default name is "Software Repository".
+ * \return root folder_pk
+ **/
 function GetRootFolder()
 {
   global $PG_CONN;
@@ -132,24 +125,20 @@ function GetRootFolder()
   $row = pg_fetch_assoc($result);
   pg_free_result($result);
 
-
   return $row['folder_pk'];
 } // GetRootFolder()
 
 
 /**
- * \brief Folder2Path():
- *
- * Return an array of the folder_pk, folder_name
- * From the users.root_folder_fk to $folder_pk
+ * \brief Return an array of folder_pk, folder_name
+ *        from the users.root_folder_fk to $folder_pk
  * Array is in top down order.
- * FolderList = array({'folder_pk'=>folder_pk, 'folder_name'=>folder_name}, ...
- *
  * If you need to know the folder_pk of an upload or uploadtree, use GetFolderFromItem()
  *
  * \param $folder_pk
  *
- * \return an array of the folder_pk, folder_name
+ * \return the folder list:
+ *         FolderList = array({'folder_pk'=>folder_pk, 'folder_name'=>folder_name}, ...
  */
 function Folder2Path($folder_pk)
 {
@@ -187,12 +176,13 @@ function Folder2Path($folder_pk)
 
 
 /**
- * \brief GetFolderFromItem(): Either $upload_pk OR $uploadtree_pk must be passed in.
+ * \brief Find what folder an item is in.
  *
- * \param $upload_pk
- * \param $uploadtree_pk
+ * \param $upload_pk (null if $uploadtree_pk is passed in)
+ * \param $uploadtree_pk (null if $upload_pk is passed in)
+ * If both $upload_pk and $uploadtree_pk is passed in, $upload_pk will be used.
  *
- * \return the folder_pk that the upload_pk (or uploadtree_pk) is in:
+ * \return the folder_pk that the upload_pk (or uploadtree_pk) is in
  */
 function GetFolderFromItem($upload_pk="", $uploadtree_pk="")
 {
@@ -217,19 +207,18 @@ function GetFolderFromItem($upload_pk="", $uploadtree_pk="")
 
 
 /**
- * \brief FolderListOption(): Create the tree, using OPTION tags.
- * The caller must already have created the FORM and SELECT tags.
- * It returns the full HTML.
+ * \brief Create the folder tree, using OPTION tags.
+ * NOTE: The caller must already have created the FORM and SELECT tags.
  * This is recursive!
  * NOTE: If there is a recursive loop in the folder table, then
  * this will loop INFINITELY.
  *
- * \param $ParentFolder
- * \param $Depth
- * \param $IncludeTop
- * \param $SelectId
+ * \param $ParentFolder Parents folder_fk
+ * \param $Depth  Tree depth to create
+ * \param $IncludeTop  True to include fossology root folder
+ * \param $SelectId folder_fk of selected folder
  *
- * \return full HTML
+ * \return HTML of the folder tree
  */
 function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
 {
@@ -294,7 +283,40 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
 } // FolderListOption()
 
 /**
- * \brief FolderListScript(): Create the javascript for FolderListDiv().
+ * \brief Given a folder_pk, return the full path to this folder.
+ *  This is recursive!
+ *  NOTE: If there is a recursive loop in the folder table, then
+ *  this will loop INFINITELY.
+ *
+ * \param $FolderPk
+ * \param $Top Optional, default is user's top folder. folder_pk of top of desired path.
+ *
+ * \return string full path of this folder
+ */
+function FolderGetName($FolderPk,$Top=-1)
+{
+  global $PG_CONN;
+  if ($Top == -1) { $Top = FolderGetTop(); }
+  $sql = "SELECT folder_name,parent_fk FROM folder
+	LEFT JOIN foldercontents ON foldercontents_mode = 1
+	AND child_id = '$FolderPk'
+	WHERE folder_pk = '$FolderPk'
+	LIMIT 1;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  $Parent = $row['parent_fk'];
+  $Name = $row['folder_name'];
+  if (!empty($Parent) && ($FolderPk != $Top))
+  {
+    $Name = FolderGetName($Parent,$Top) . "/" . $Name;
+  }
+  return($Name);
+} // FolderGetName()
+
+/**
+ * \brief Create the the folder list javascript
+ * \return javascript for FolderListDiv().
  */
 function FolderListScript()
 {
@@ -361,51 +383,17 @@ function FolderListScript()
 } // FolderListScript()
 
 /**
- * \brief FolderGetName(): Given a folder_pk, return the full path
- *  to this folder.
- *  This is recursive!
- *  NOTE: If there is a recursive loop in the folder table, then
- *  this will loop INFINITELY.
- *
- * \param $FolderPk
- * \param $Top
- *
- * \return full path of this folder
- */
-function FolderGetName($FolderPk,$Top=-1)
-{
-  global $PG_CONN;
-  if ($Top == -1) { $Top = FolderGetTop(); }
-  $sql = "SELECT folder_name,parent_fk FROM folder
-	LEFT JOIN foldercontents ON foldercontents_mode = 1
-	AND child_id = '$FolderPk'
-	WHERE folder_pk = '$FolderPk'
-	LIMIT 1;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  $Parent = $row['parent_fk'];
-  $Name = $row['folder_name'];
-  if (!empty($Parent) && ($FolderPk != $Top))
-  {
-    $Name = FolderGetName($Parent,$Top) . "/" . $Name;
-  }
-  return($Name);
-} // FolderGetName()
-
-/**
- * \brief FolderListDiv(): Create the tree, using DIVs.
- * It returns the full HTML.
+ * \brief Create the folder tree, using DIVs.
  * This is recursive!
  * NOTE: If there is a recursive loop in the folder table, then
  * this will loop INFINITELY.
  *
- * \param $ParentFolder
- * \param $Depth
- * \param $HighLight
- * \param $ShowParent
+ * \param $ParentFolder  folder_pk
+ * \param $Depth         folder depth to display, -1 to use users root folder
+ * \param $HighLight     Optional, folder_pk of folder to highlight.
+ * \param $ShowParent    Optional default is false. true if parent should be in shown in the tree.
  *
- * \return full HTML
+ * \return HTML of the folder tree
  */
 function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
 {
@@ -511,7 +499,7 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
     $V .= "<div id='TreeDiv-$ParentFolder' $Hide>\n";
     while($row = pg_fetch_assoc($result))
     {
-      if (!HaveFolderPerm($R['folder_pk'])) continue;
+      if (!HaveFolderPerm($row['folder_pk'])) continue;
       $V .= FolderListDiv($row['folder_pk'],$Depth+1,$Highlight);
     }
     $V .= "</div>\n";
@@ -521,13 +509,12 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
 } /* FolderListDiv() */
 
 /**
- * \brief
- * FolderGetFromUpload(): Given an upload number, return the
+ * \brief DEPRECATED! Given an upload number, return the
  * folder path in an array containing folder_pk and name.
  * This is recursive!
  * NOTE: If there is a recursive loop in the folder table, then
  * this will loop INFINITELY.
- * DEPRECATED!  USE Folder2Path() and GetFolderFromItem()
+ * \todo DEPRECATED!  USE Folder2Path() and GetFolderFromItem()
  */
 $FolderGetFromUpload_1_Prepared=0;
 $FolderGetFromUpload_2_Prepared=0;
@@ -539,7 +526,7 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
   if ($Stop == -1) { $Stop = FolderGetTop(); }
   if ($Folder == $Stop) { return; }
 
-  $SQL = "";
+  $sql = "";
   $Parm = "";
   if ($Folder < 0)
   {
@@ -548,7 +535,7 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
     $Parm = $Uploadpk;
     if (!$FolderGetFromUpload_1_Prepared)
     {
-      $SQL = "SELECT parent_fk,folder_name FROM foldercontents
+      $sql = "SELECT parent_fk,folder_name FROM foldercontents
 			  INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
 			  AND foldercontents.foldercontents_mode = 2
 			  WHERE foldercontents.child_id = $Parm LIMIT 1;";
@@ -562,7 +549,7 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
     $Parm = $Folder;
     if (!$FolderGetFromUpload_2_Prepared)
     {
-      $SQL = "SELECT parent_fk,folder_name FROM foldercontents
+      $sql = "SELECT parent_fk,folder_name FROM foldercontents
 			  INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
 			  AND foldercontents.foldercontents_mode = 1
 			  WHERE foldercontents.child_id = $Parm LIMIT 1;";
@@ -591,16 +578,13 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
 } // FolderGetFromUpload()
 
 /**
- * \brief
- * FolderListUploads(): Returns an array of:
- *   upload_pk
- *   upload_desc
- *   upload_ts
- *   ufile_name
- *  for all uploads in a given folder.
+ * \brief Returns an array of uploads in a folder.
  *  This does NOT recurse.
  *  The returned array is sorted by ufile_name and ufile_desc.
  *  Folders may be empty!
+ * \param $ParentFolder Optional folder_pk, default is users root folder.
+ * \return array{upload_pk, upload_desc, upload_ts, ufile_name}
+ *  for all uploads in a given folder.
  */
 function FolderListUploads($ParentFolder=-1)
 {
@@ -612,7 +596,7 @@ function FolderListUploads($ParentFolder=-1)
 
   /* Get list of uploads */
   /** mode 1<<1 = upload_fk **/
-  $SQL = "SELECT upload_pk, upload_desc, upload_ts, ufile_name
+  $sql = "SELECT upload_pk, upload_desc, upload_ts, ufile_name
 	FROM foldercontents,uploadtree,upload
 	WHERE foldercontents.parent_fk = '$ParentFolder'
 	AND foldercontents.foldercontents_mode = 2
@@ -636,19 +620,17 @@ function FolderListUploads($ParentFolder=-1)
 } // FolderListUploads()
 
 /**
- * \brief
- * FolderListUploadsRecurse(): Returns an array of all uploads, upload_pk,
- * and folders, starting from the ParentFolder.
+ * \brief Get uploads and folder info, starting from $ParentFolder.
  * The array is sorted by folder and upload name.
  * Folders that are empty do not show up.
  * This is recursive!
  * NOTE: If there is a recursive loop in the folder table, then
  * this will loop INFINITELY.
  *
- * \param $ParentFolder
- * \param $FolderPath
+ * \param $ParentFolder folder_pk, -1 for users root folder
+ * \param $FolderPath Used for recursion, caller should not specify.
  *
- * \return array of all uploads, upload_pk, and folders
+ * \return array of {upload_pk, upload_desc, name, folder}
  */
 function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL)
 {
