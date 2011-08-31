@@ -35,6 +35,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>
@@ -161,7 +162,7 @@ void	ExtractKernel	(int Fin)
  * \param Start  begin of partition
  * \param Size   end of partition
  **/
-void	ExtractPartition	(int Fin, u_long Start, u_long Size)
+void	ExtractPartition	(int Fin, uint64_t Start, uint64_t Size)
 {
   off64_t Hold;
   off_t ReadSize,WriteSize;
@@ -265,7 +266,7 @@ void	ExtractPartition	(int Fin, u_long Start, u_long Size)
  * \param MBRStart offset for record
  * \return 0=not MBR, 1=MBR
  **/
-int	ReadMBR	(int Fin, u_long MBRStart)
+int	ReadMBR	(int Fin, uint64_t MBRStart)
 {
   unsigned char MBR[0x200]; /* master boot record sector */
   int i;
@@ -274,11 +275,11 @@ int	ReadMBR	(int Fin, u_long MBRStart)
   /* partition descriptions */
   int ActiveFlag,Type;
   int Head[2],Sec[2],Cyl[2];
-  u_long Start,Size;
+  uint64_t Start,Size;
   /* disk descriptions */
-  u_long SectorSize;
-  u_long SectorPerCluster;
-  u_long SectorPerCylinder;
+  uint64_t SectorSize;
+  uint64_t SectorPerCluster;
+  uint64_t SectorPerCylinder;
 
   lseek(Fin,MBRStart,SEEK_SET);	/* rewind file */
   for(i=0; i<0x200; i++)
@@ -327,14 +328,14 @@ int	ReadMBR	(int Fin, u_long MBRStart)
       printf("Partition: (Active=%d,Type=%x)\n",ActiveFlag & 0x80,Type);
       printf("           HSC Start=%d,%d,%d\n",Head[0],Sec[0],Cyl[0]);
       printf("           HSC End  =%d,%d,%d\n",Head[1],Sec[1],Cyl[1]);
-      printf("           Sector: Start=%lu (%08lx)  End=%lu (%08lx)\n",
-          Start,Start,Start+Size,Start+Size);
-      printf("           Byte: Logical start= %lu (%08lx)\n",
-          MBRStart+(Start)*SectorSize,
-          MBRStart+(Start)*SectorSize);
-      printf("           Byte: Logical end  = %lu (%08lx)\n",
-          MBRStart+(Size+Start)*SectorSize,
-          MBRStart+(Size+Start)*SectorSize);
+      printf("           Sector: Start=%llu (%08llx)  End=%llu (%08llx)\n",
+          (unsigned long long)Start,(unsigned long long)Start,(unsigned long long)Start+Size,(unsigned long long)Start+Size);
+      printf("           Byte: Logical start= %llu (%08llx)\n",
+          (unsigned long long)MBRStart+(Start)*SectorSize,
+          (unsigned long long)MBRStart+(Start)*SectorSize);
+      printf("           Byte: Logical end  = %llu (%08llx)\n",
+          (unsigned long long)MBRStart+(Size+Start)*SectorSize,
+          (unsigned long long)MBRStart+(Size+Start)*SectorSize);
 
       if (Start == 0) /* if it is a Linux kernel */
       {
@@ -367,7 +368,7 @@ int	ReadMBR	(int Fin, u_long MBRStart)
         long S,E;
         S=MBRStart+(Start)*SectorSize;
         E=MBRStart+(Size)*SectorSize;
-        if (Verbose) fprintf(stderr,"Extracting type %02x: start=%04lx  size=%lu\n",Type,S,E);
+        if (Verbose) fprintf(stderr,"Extracting type %02x: start=%04llx  size=%llu\n",Type,(unsigned long long)S,(unsigned long long)E);
         ExtractPartition(Fin,S,E);
       }
     }
