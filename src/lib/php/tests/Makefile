@@ -24,6 +24,7 @@ TESTFILES = test_common_sysconfig.php \
 						test_common_menu.php \
 						test_common_pkg.php \
 						test_common_dir.php \
+						test_common_license_file.php \
 
 all: pathinclude
 

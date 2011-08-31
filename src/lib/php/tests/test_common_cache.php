@@ -122,7 +122,7 @@ class test_common_cached extends PHPUnit_Framework_TestCase
     $value = $row['report_cache_value'];
     pg_free_result($result);
     $this->assertEquals($CacheValue, $value);
-    $this->resetEvn4ReportCachePut();
+    $this->resetEnv4ReportCachePut();
   }
   
   /**
@@ -147,7 +147,7 @@ class test_common_cached extends PHPUnit_Framework_TestCase
     $value = $row['report_cache_value'];
     pg_free_result($result);
     $this->assertEquals($CacheValue, $value);
-    $this->resetEvn4ReportCachePut();
+    $this->resetEnv4ReportCachePut();
   }
 
   /**
@@ -170,10 +170,13 @@ class test_common_cached extends PHPUnit_Framework_TestCase
     $UserCacheStat = 2; /**<  Cache is off for this user */
     $value = ReportCacheGet($CacheKey);
     $this->assertEquals($CacheValue, $value);
-    $this->resetEvn4ReportCachePut();
+    $this->resetEnv4ReportCachePut();
   }
 
-  function resetEvn4ReportCachePut()
+  /**
+   * \brief reset enviroment after testing ReportCachePut
+   */
+  function resetEnv4ReportCachePut()
   {
     global $PG_CONN;
     global $upload_pk;
