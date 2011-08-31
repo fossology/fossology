@@ -26,12 +26,13 @@ function Isartifact($mode) { return(($mode & 1<<28) != 0); }
 function Iscontainer($mode) { return(($mode & 1<<29) != 0); }
 
 /**
- * \brief Bytes2Human()
+ * \brief DEPRECATED 
  *  Convert a number of bytes into a human-readable format.
+ * \todo Use HumanSize() instead.
  *
- * \param bytes
+ * \param $Bytes
  *
- * \return human-readable format
+ * \return human-readable string, e.g. 23KB or 1.3MB
  */
 function Bytes2Human  ($Bytes)
 {
@@ -54,9 +55,9 @@ function Bytes2Human  ($Bytes)
 } // Bytes2Human()
 
 /**
- * \brief DirMode2String(): Convert a mode to string values.
+ * \brief Convert a file mode to string values.
  *
- * \param Dir mode
+ * \param $Mode file mode (as octal integer)
  *
  * \return string of dir mode
  */
@@ -110,13 +111,13 @@ function DirMode2String($Mode)
 } // DirMode2String()
 
 /**
- * \brief DirGetNonArtifact(): Given an artifact directory (uploadtree_pk),
+ * \brief Given an artifact directory (uploadtree_pk),
  *  return the first non-artifact directory (uploadtree_pk).
  *  TBD: "username" will be added in the future and it may change
  *  how this function works.
  *  NOTE: This is recursive!
  *
- * \param uploadtree_pk
+ * \param $UploadtreePk uploadtree_pk
  *
  * \return the first non-artifact directory uploadtree_pk
  */
@@ -165,7 +166,7 @@ function DirGetNonArtifact($UploadtreePk)
 
 
 /**
- * \brief DirCmp(): Compare function for usort() on directory items.
+ * \brief Compare function for usort() on directory items.
  *
  * \param $a $b to compare
  *
@@ -179,14 +180,14 @@ function _DirCmp($a,$b)
 } // _DirCmp()
 
 /**
- * \brief DirGetList(): Given a directory (uploadtree_pk),
+ * \brief Given a directory (uploadtree_pk),
  *  return the directory contents but resolve artifacts.
  *  TBD: "username" will be added in the future and it may change
  *  how this function works.
- *  Returns array of uploadtree records sorted by file name
+ *  \todo DEPRECATED use GetNonArtifactChildren($uploadtree_pk)
  *
- * \param $Upload upload_id
- * \param $UploadtreePk
+ * \param $Upload upload_pk
+ * \param $UploadtreePk uploadtree_pk (may be empty, to specify the whole upload)
  *
  * \return array of uploadtree records sorted by file name
  */
@@ -239,14 +240,14 @@ function DirGetList($Upload,$UploadtreePk)
 
 
 /**
- * \brief Dir2Path(): given an uploadtree_pk, return an array containing
- *  the path (with no artifacts).  Each element in the path is an array containing
- *  uploadtree records for $UploadtreePk and its parents.
- *  The path begins with the UploadtreePk record.
+ * \brief Return the path (without artifacts) of an uploadtree_pk.
  *
  * \param $UploadtreePk
  *
- * \return array of containing
+ * \return an array containing the path (with no artifacts).  Each element 
+ *         in the path is an array containing uploadtree records for 
+ *         $UploadtreePk and its parents.
+ *         The path begins with the UploadtreePk record.
  */
 function Dir2Path($UploadtreePk)
 {
@@ -265,17 +266,17 @@ function Dir2Path($UploadtreePk)
 } // Dir2Path()
 
 /**
- * \brief Dir2Browse(): given an uploadtree_pk, return a
- *  string listing the browse paths.
+ * \brief Get an html linked string of a file browse path.
  *
  * \param $Mod - Module name (e.g. "browse")
  * \param $UploadtreePk
  * \param $LinkLast - create link (a href) for last item and use LinkLast as the module name
- * \param $ShowMicro - show micro menu
+ * \param $ShowBox - true to draw a box around the string
+ * \param $ShowMicro - true to show micro menu
  * \param $Enumerate - if >= zero number the folder/file path (the stuff in the yellow bar)
  *   starting with the value $Enumerate
- * \param $PreText - additional text to preceed the folder path
- * \param $PostText - text to follow the folder path
+ * \param $PreText - optional additional text to preceed the folder path
+ * \param $PostText - optional text to follow the folder path
  *
  * \return string of browse paths
  */
@@ -403,14 +404,14 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='')
 } // Dir2Browse()
 
 /**
- * \brief Dir2BrowseUpload(): given an upload_pk, return a string listing
- *  the browse paths.
+ * \brief Get an html linkes string of a file browse path.
  *  This calls Dir2Browse().
  *
  * \param $Mod - Module name (e.g. "browse")
  * \param $UploadPk
  * \param $LinkLast - create link (a href) for last item and use LinkLast as the module name
- * \param $ShowMicro - show micro menu
+ * \param $ShowBox - draw a box around the string (default true)
+ * \param $ShowMicro - show micro menu (default false)
  *
  * \return string of browse paths
  */
@@ -428,7 +429,7 @@ function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMic
 } // Dir2BrowseUpload()
 
 /**
- * \brief Dir2FileList(): Given an array of pfiles/uploadtree, sorted by
+ * \brief Given an array of pfiles/uploadtree, sorted by
  *  pfile, list all of the breadcrumbs for each file.
  *  If the pfile is a duplicate, then indent it.
  *
@@ -437,6 +438,7 @@ function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMic
  * \param $IfDirPlugin = string containing plugin name to use if this is a directory or any other container
  * \param $IfFilePlugin = string containing plugin name to use if this is a file
  * \param $Count = first number for indexing the entries (may be -1 for no count)
+ * \param $ShowPhrase Obsolete from bsam
  *
  * \return string containing the listing.
  */
@@ -486,9 +488,7 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
 
 
 /**
- * \brief Function: GetNonArtifactChildren
- *
- * Find the non artifact children of an uploadtree pk.
+ * \brief Find the non artifact children of an uploadtree pk.
  * If any children are artifacts, resolve them until you get
  * to a non-artifact.
  *
@@ -546,8 +546,7 @@ function GetNonArtifactChildren($uploadtree_pk)
 
 
 /**
- * \brief Uploadtree2PathStr():
- *  Return string representation of uploadtree path.
+ * \brief Get string representation of uploadtree path.
  *  Use Dir2Path to get $PathArray.
  *
  * \param $PathArry
@@ -561,5 +560,4 @@ function Uploadtree2PathStr ($PathArray)
     foreach($PathArray as $PathRow) $Path .= "/" . $PathRow['ufile_name'];
   return $Path;
 }
-
 ?>
