@@ -21,6 +21,9 @@ TESTFILES = test_common_sysconfig.php \
 						test_common_cache.php \
 						test_common_auth.php \
 						test_common_parm.php \
+						test_common_menu.php \
+						test_common_pkg.php \
+						test_common_dir.php \
 
 all: pathinclude
 
