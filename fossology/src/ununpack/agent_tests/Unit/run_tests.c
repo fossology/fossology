@@ -123,7 +123,7 @@ int main(int argc, char** argv)
       return -1;
     }
 
-    CU_set_output_filename("Ununpack_Tests");
+    CU_set_output_filename("ununpack_Tests");
     CU_list_tests_to_file();
     CU_automated_run_tests();
 
