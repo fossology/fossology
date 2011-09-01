@@ -23,13 +23,8 @@
 
 
 /**
- * \brief siteminder_check()
- *        Check if Site Minder enabled.
- *        If enabled, return $sea
- * \return
- *   Not Enabled: -1
- *   Enabled: $sea
- *
+ * \brief Check if SiteMinder is enabled.
+ * \return -1 if not enabled, or the users SEA if enabled
  */
 function siteminder_check() {
   if (isset($_SERVER['HTTP_SMUNIVERSALID'])){
