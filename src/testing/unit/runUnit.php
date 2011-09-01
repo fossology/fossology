@@ -174,8 +174,9 @@ function processCUnit($unitTest)
     __LINE__ . "\n");
   }
 
-  foreach(glob("$unitTest*.xml") as $fileName)
+  foreach(glob("$unitTest*.xml") as $fName)
   {
+    $fileName = strtolower($fName);
     //echo "DBPROCR: fileName is:$fileName\n";
     if(!tweakCUnit($fileName))
     {
