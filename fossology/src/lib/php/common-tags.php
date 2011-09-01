@@ -23,13 +23,11 @@
 
 
 /**
- * \brief GetAllTags()
+ * \brief Get all Tags of this unploadtree_pk
  *
  * \param $Item the uploadtree_pk
  *
- * \return an array of:
- *  tag_pk
- *  tag_name
+ * \return an array of: ag_pk and tag_name
  */
 function GetAllTags($Item)
 {
@@ -54,7 +52,7 @@ function GetAllTags($Item)
 } // GetAllTags()
 
 /**
- * \brief GetTaggingPerms: Get tags permissions
+ * \brief Get tags permissions
  *
  * \param $user_pk
  * \param $tag_ns_pk the tag namespace pk
@@ -114,7 +112,7 @@ function GetTaggingPerms($user_pk, $tag_ns_pk)
 }
 
 /**
- * \brief Array2SingleSelectTag: Build a single choice select pulldown for tagging
+ * \brief Build a single choice select pulldown for tagging
  *
  * \param $KeyValArray   Assoc array.  Use key/val pairs for list
  * \param $SLName        Select list name (default is "unnamed")

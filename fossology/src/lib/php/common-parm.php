@@ -28,11 +28,9 @@ define("PARM_TEXT",4);
 define("PARM_RAW",5);
 
 /**
- * \brief GetParm()
- *
- * GetParm(): Plugins should not use globals to access HTTP variables.
+ * \brief This function will retrieve the variables and check data types.
+*  Plugins should not use globals to access HTTP variables.
  * This is because HTTP variables may contain hostile code/values.
- * This function will retrieve the variables and check data types.
  * PARM_INTEGER: Only integers are returned.
  * PARM_NUMBER: Only numbers (decimals are fine) are returned.
  * PARM_STRING: The variable is converted from URI encoding to text.
@@ -42,6 +40,11 @@ define("PARM_RAW",5);
  * when it should be a number), then nothing is returned.
  * NOTE: If a plugin wants to access these variable directly, it can.
  * But it is responsible for all safety checks.
+ *
+ * \param $Name variable name
+ * \param $Type variable type
+ *
+ * \return string of variables
  */
 function GetParm($Name,$Type)
 {
@@ -71,7 +74,7 @@ function GetParm($Name,$Type)
 } // GetParm()
 
 /**
- * \brief Traceback(): The URI + query to this location.
+ * \brief Get the URI + query to this location.
  */
 function Traceback()
 {
@@ -79,7 +82,7 @@ function Traceback()
 } // Traceback()
 
 /**
- * \brief Traceback_uri(): The URI without query to this location.
+ * \brief Get the URI without query to this location.
  */
 function Traceback_uri()
 {
@@ -88,7 +91,7 @@ function Traceback_uri()
 } // Traceback_uri()
 
 /**
- * \brief Traceback_parm(): The URI query to this location.
+ * \brief Get the URI query to this location.
  * If ShowMod is set, then the module name is included.
  * Else, this begins with the first parameter.
  */
@@ -111,7 +114,7 @@ function Traceback_parm($ShowMod=1)
 } // Traceback_parm()
 
 /**
- * \brief Traceback_parm_keep(): Create a new URI, keeping only these items.
+ * \brief Create a new URI, keeping only these items.
  */
 function Traceback_parm_keep($List)
 {
@@ -127,7 +130,7 @@ function Traceback_parm_keep($List)
 } // Traceback_parm_keep()
 
 /**
- * \brief Traceback_dir(): The directory of the URI without query.
+ * \brief Get the directory of the URI without query.
  */
 function Traceback_dir()
 {

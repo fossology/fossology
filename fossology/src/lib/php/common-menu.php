@@ -40,7 +40,7 @@ class menu {
 $MenuList = array();
 $MenuMaxDepth = 0; // how deep is the tree (for UI display)
 /**
- * \brief MenuPage(): Create a "next" page menu.
+ * \brief Create a "next" page menu.
  * This function assumes the end number is known.
  * Returns string containing menu.
  *
@@ -91,7 +91,7 @@ function MenuPage($Page, $TotalPage, $Uri = '') {
   return ($V);
 } // MenuPage
 /**
- * \brief MenuEndlessPage(): Create a "next" page menu.
+ * \brief Create a "next" page menu.
  * This function assumes the end number is unknown.  (Hence, "endless".)
  * Returns string containing menu.
  *
@@ -136,7 +136,7 @@ function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
   return ($V);
 } // MenuEndlessPage()
 /**
- * \brief menu_cmp(): Compare two menu items for sorting.
+ * \brief Compare two menu items for sorting.
  *
  * \param $a menu a
  * \param $b menu b
@@ -154,7 +154,7 @@ function menu_cmp(&$a, &$b) {
   return (strcmp($a->Name, $b->Name));
 } // menu_cmp()
 /**
- * \brief menu_insert_r(): Given a Path, order level for the last
+ * \brief Given a Path, order level for the last
  * item, and a plugin name, insert the menu item.
  * This is VERY recursive and returns the new menu.
  * If $URI is blank, nothing is added.
@@ -261,7 +261,7 @@ function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target 
   menu_insert_r($MenuList, $Path, $LastOrder, $Target, $URI, $HTML, 0, $FullName, $Title);
 } // menu_insert()
 /**
- * \brief menu_find(): Given a top-level menu name, return
+ * \brief Given a top-level menu name, return
  * the list of sub-menus below it and max depth of menu.
  * $Name may be a "::" separated list.
  *
@@ -294,10 +294,17 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL) {
   return (NULL);
 } // menu_find()
 /**
- * \brief menu_to_1html(): Take a menu and render it as
+ * \brief Take a menu and render it as
  * one HTML line.  This ignores submenus!
  * If $ShowAll==0, then items without hyperlinks are hidden.
  * This is commonly called the "micro-menu".
+ *
+ * \param $Menu
+ * \param $ShowRefresh
+ * \param $ShowTraceback
+ * \param $ShowAll
+ *
+ * \return HTML string
  */
 $menu_to_1html_counter = 0;
 function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1) {
@@ -376,11 +383,19 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
   return ("<div id='menu1html-$menu_to_1html_counter' align='right' style='padding:0px 5px 0px 5px'><small>$V</small></div>");
 } // menu_to_1html()
 /**
- * \brief menu_to_1list(): Take a menu and render it as
+ * \brief Take a menu and render it as
  * one HTML line with items in a "[name]" list.
  * This ignores submenus!
  * $Parm is a list of parameters to add to the URL.
  * If $ShowAll==0, then items without hyperlinks are hidden.
+ *
+ * \param $Menu
+ * \param $Parm
+ * \param $Pre
+ * \param $Post
+ * \param $ShowAll
+ * 
+ * \return one HTML line with items in a "[name]" list
  */
 function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1) {
   $V = "";
@@ -425,8 +440,11 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1) {
   return ($V);
 } // menu_to_1list()
 /**
- * \brief menu_print(): Debugging code for printing the menu.
+ * \brief Debugging code for printing the menu.
  * This is recursive.
+ *
+ * \param $Menu
+ * \param $Indent
  */
 function menu_print(&$Menu, $Indent) {
   if (!isset($Menu)) {
@@ -463,8 +481,7 @@ function menu_print(&$Menu, $Indent) {
 
 
 /**
- * \brief menu_remove()
- *  Remove a menu object (based on an object name)
+ * \brief Remove a menu object (based on an object name)
  *  from a menu list.
  *
  * For example,
