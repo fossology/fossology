@@ -64,7 +64,7 @@ int main( int argc, char *argv[] )
   }else{
     AddTests();
 
-    CU_set_output_filename("Pkgagent Test");
+    CU_set_output_filename("pkgagent_Test");
     CU_list_tests_to_file();
     CU_automated_run_tests();
     //CU_cleanup_registry();
