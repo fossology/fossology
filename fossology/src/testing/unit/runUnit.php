@@ -72,10 +72,11 @@ function checkMakeErrors($makeOut)
   $matched = 0;
   $matches = array();
 
-  $pat = '/^make.*?\sError\s[0-9]+/';
+  $pat = '/make.*?Error\s[0-9]+/';
   $matched = preg_match($pat, $makeOut, $matches);
 
   //echo "DB: matched is:$matched\n";
+  //echo "DB: makeOut is:$makeOut\n";
   return($matched);
 }
 
@@ -350,10 +351,10 @@ foreach($unitList as $unitTest)
     else
     {
       // check for real make errors rather than test errors.
-      //$makeErrors =  implode("\n", $makeOut);
       if(checkMakeErrors(implode("\n", $makeOut)))
       {
         echo "Error! There were make errors for unit test $unitTest\n";
+        $makeOut = array();
         $failures++;
       }
     }
@@ -362,17 +363,16 @@ foreach($unitList as $unitTest)
     //echo "DB: Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
     if($covrRtn != 0)
     {
-      //$makeErrors =  implode("\n", $makeOut);
       if(checkMakeErrors(implode("\n", $covrOut)))
       {
         echo "Error! 'make coverage; of $unitTest did not succeed, " .
           "return code:$covrRtn\n";
+        $covrOut = array();
         $failures++;
       }
     }
     // some makefiles/tests are written to report a make 'failure' when a test
     // fails, so process the reports, as there should be a xml file.
-    //echo "DB: AFTER makes != 0 we are at:\n" . getcwd() . "\n";
     $unitDir = getcwd() . '/Unit';
     if(@chdir($unitDir) === FALSE)
     {
@@ -424,12 +424,12 @@ foreach($unitList as $unitTest)
       if(checkMakeErrors(implode("\n", $covrOut)))
       {
         echo "Error! 'make coverage; of $unitTest did not succeed, " .
-          "return code:$covrtRtn\n";
+          "return code:$covrRtn\n";
         $failures++;
+        $covrOut = array();
       }
     }
     // at this point there should be a .xm file to process
-    //echo "DB: AFTER make=0 we are at:\n" . getcwd() . "\n";
     $unitDir = getcwd() . '/Unit';
     if(@chdir($unitDir) === FALSE)
     {
@@ -444,7 +444,6 @@ foreach($unitList as $unitTest)
     // process PHPUnit tests in agent_tests/Functional
     // cd back to ../agent_tests from Unit
     backToParent('..');
-    //echo "DB: getting ready for FUNCTIONAL we are at:\n" . getcwd() . "\n";
     if(@chdir('Functional') === FALSE)
     {
       echo "Error! Could not cd to " . getcwd() . "/Functional, skipping reports\n";
