@@ -232,6 +232,7 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
   $offset = 0;
   $limit = 1;
   $order = "";
+  $result = NULL;
   foreach($Children as $row)
   {
     //$uTime2 = microtime(true);
@@ -243,7 +244,7 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
     if (pg_num_rows($result) > 0)
     $pkarray[$row['uploadtree_pk']] = $row['ufile_name'];
   }
-  pg_free_result($result);
+  if ($result) pg_free_result($result);
   return $pkarray;
 }
 
