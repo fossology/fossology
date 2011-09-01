@@ -184,11 +184,11 @@ function processCUnit($unitTest)
     //echo "DB: after tweak, we are at:\n" . getcwd() . "\n";
     $errors = array();
     $errors = checkCUnit($fileName);
-    //echo "DB: after checkCUnit, we are at:\n" . getcwd() . "\n";
+    //echo "DB: after checkCUnit, errors for $unitTest are\n";print_r($errors) .  "\n";
     if(is_object($errors[0]))
     {
       $failures++;
-      //return("There were Unit Test Failures in $unitTest\n");
+      echo "There were Unit Test Failures in $unitTest\n";
       //print_r($errors) . "\n";
     }
     else if(!is_NULL($errors))
