@@ -17,9 +17,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <stdio.h>
 #include "CUnit/CUnit.h"
+#include <pkgagent.h>
 
-extern char *trim(char *str);
+/**
+ * \file testTrim.c
+ * \brief unit test for Trim function
+ */
 
+/**
+ * \brief test case for input parameter is normal
+ */
 void test_Trim_normal()
 {
   char str[] = " test trim!   ";
@@ -29,6 +36,9 @@ void test_Trim_normal()
   CU_ASSERT_TRUE(!strcmp(Result, predictValue));
 }
 
+/**
+ * \brief test case for input parameter is null
+ */
 void test_Trim_str_is_null()
 {
   char *str = "";
@@ -37,6 +47,9 @@ void test_Trim_str_is_null()
   CU_ASSERT_EQUAL(Result, predictValue);
 }
 
+/**
+ * \brief test case for input parameter is all space
+ */
 void test_Trim_allspace()
 {
   char *str = "       ";
@@ -44,6 +57,10 @@ void test_Trim_allspace()
   char *Result = trim(str);
   CU_ASSERT_TRUE(!strcmp(Result, predictValue));
 }
+
+/**
+ * \brief testcases for function Trim
+ */
 CU_TestInfo testcases_Trim[] = {
     {"Testing Trim, paramters are normal:", test_Trim_normal},
     {"Testing Trim, paramter is null:", test_Trim_str_is_null},

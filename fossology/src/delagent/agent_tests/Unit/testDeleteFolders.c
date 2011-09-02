@@ -25,11 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * \brief testing for the function DeleteFolders and DeleteUploads
  */
 
-extern void DeleteFolder(long FolderId);
-extern void DeleteUpload(long UploadId);
-
-/* test functions */
-
 /**
  * \brief for function DeleteFolders
  */

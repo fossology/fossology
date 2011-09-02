@@ -25,11 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * \brief testing for the function ListFolders and ListUploads
  */
 
-extern void ListFolders();
-extern void ListUploads();
-
-/* test functions */
-
 /**
  * \brief for function ListFolders
  */

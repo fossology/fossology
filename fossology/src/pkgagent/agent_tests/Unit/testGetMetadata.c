@@ -19,14 +19,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include "CUnit/CUnit.h"
 
-extern int GetMetadata(char *pkg, struct rpmpkginfo *pi);
+/**
+ * \file testGetMetadata.c
+ * \brief unit test for GetMetadata function
+ */
 
 /**
- * \brief test_GetMetadata()
- * 
- * Test pkgagent.c Function GetMetadata()
- * Normal parameter
- * 
+ * \brief Test pkgagent.c Function GetMetadata() Normal parameter
  */
 void test_GetMetadata_normal()
 {
@@ -64,11 +63,7 @@ void test_GetMetadata_normal()
 }
 
 /**
- * \brief test_GetMetadata()
- * 
- * Test pkgagent.c Function GetMetadata()
- * Wrong test file
- * 
+ * \brief Test pkgagent.c Function GetMetadata() Wrong test file
  */
 void test_GetMetadata_no_testfile()
 {
@@ -90,6 +85,9 @@ void test_GetMetadata_no_testfile()
   CU_ASSERT_EQUAL(Result, predictValue);
 }
 
+/**
+ * \brief testcases for function GetMetadata
+ */
 CU_TestInfo testcases_GetMetadata[] = {
     {"Testing the function GetMetadata, paramters are  normal", test_GetMetadata_normal},
     {"Testing the function GetMetadata, test file doesn't exist", test_GetMetadata_no_testfile},

@@ -21,14 +21,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MAXSQL  4096
 
-/* Test pkgagent.c RecordMetadataDEB function */
-extern int RecordMetadataDEB(struct debpkginfo *pi);
+/**
+ * \file testRecordMetadataDEB.c
+ * \brief unit test for RecordMetadataDEB function
+ */
 
 /**
- * \brief test_RecordMetadataDEB(struct debpkginfo *pi)
- *
- * Test pkgagent.c function RecordMetadataDEB()
- *
+ * \brief Test pkgagent.c function RecordMetadataDEB()
  */
 void test_RecordMetadataDEB()
 {
@@ -152,6 +151,9 @@ void test_RecordMetadataDEB()
   CU_ASSERT_EQUAL(Result, predictValue);
 }
 
+/**
+ * \brief testcases for function RecordMetadataDEB
+ */
 CU_TestInfo testcases_RecordMetadataDEB[] = {
     {"Testing the function RecordMetadataDEB", test_RecordMetadataDEB},
     CU_TEST_INFO_NULL
