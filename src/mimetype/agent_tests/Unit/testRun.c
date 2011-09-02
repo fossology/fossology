@@ -57,9 +57,16 @@ int main( int argc, char *argv[] )
   {
     AddTests();
     /** mimetype */
-    CU_set_output_filename("mimetype");
+    CU_set_output_filename("mimetype_test");
     CU_list_tests_to_file();
     CU_automated_run_tests();
+    printf("Results:\n");
+    printf("  Number of suites run: %d\n", CU_get_number_of_suites_run());
+    printf("  Number of tests run: %d\n", CU_get_number_of_tests_run());
+    printf("  Number of tests failed: %d\n", CU_get_number_of_tests_failed());
+    printf("  Number of asserts: %d\n", CU_get_number_of_asserts());
+    printf("  Number of successes: %d\n", CU_get_number_of_successes());
+    printf("  Number of failures: %d\n", CU_get_number_of_failures());
     CU_cleanup_registry();
   }
   printf("end\n");
