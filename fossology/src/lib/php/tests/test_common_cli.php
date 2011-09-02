@@ -28,25 +28,11 @@ require_once('../common-cli.php');
  */
 class test_common_cli extends PHPUnit_Framework_TestCase
 {
-  /* initialization */
+  /**
+   * \brief initialization
+   */
   protected function setUp() 
   {
-    /** require PHPUnit/Framework.php */
-    print "Start unit test for common-cli.php\n";
-    $php_lib1 = "/usr/share/php/PHPUnit/Framework.php";
-    $php_lib2 = "/usr/share/pear/PHPUnit/Framework.php";
-    if(file_exists($php_lib1))
-    {
-      require_once($php_lib1);
-    }
-    else if(file_exists($php_lib2)) 
-    {
-      require_once($php_lib2);
-    }
-    else
-    {
-      die("Could not find PHPUnit/Framework.php\n");
-    }
   }
 
   /**
@@ -54,6 +40,8 @@ class test_common_cli extends PHPUnit_Framework_TestCase
    */
   function testcli_logger()
   {
+    print "Start unit test for common-cli.php\n";
+    print "test function cli_logger()\n";
     $data = "test for cli log";
     cli_logger("./cli.log", $data, "w");
     $file_contents = file_get_contents("./cli.log");
@@ -64,6 +52,7 @@ class test_common_cli extends PHPUnit_Framework_TestCase
     cli_logger("./cli.log", $data, "w");
     $file_contents = file_get_contents("./cli.log");
     $this->assertEquals("$data\n", $file_contents);
+    print "unit test for common-cli.php end\n";
   }
   
   /**
@@ -74,7 +63,6 @@ class test_common_cli extends PHPUnit_Framework_TestCase
     {
       unlink("./cli.log");
     }
-    print "unit test for common-cli.php end\n";
   }
 }
 

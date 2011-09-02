@@ -32,26 +32,12 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
 {
   public $PG_CONN;
  
-  /* initialization */
+  /**
+   * \brief initialization 
+   */
   protected function setUp() 
   {
     global $PG_CONN;
-    /** require PHPUnit/Framework.php */
-    print "Start unit test for common-sysconfig.php\n";
-    $php_lib1 = "/usr/share/php/PHPUnit/Framework.php";
-    $php_lib2 = "/usr/share/pear/PHPUnit/Framework.php";
-    if(file_exists($php_lib1))
-    {
-      require_once($php_lib1);
-    }
-    else if(file_exists($php_lib2)) 
-    {
-      require_once($php_lib2);
-    }
-    else
-    {
-      die("Could not find PHPUnit/Framework.php\n");
-    }
     $PG_CONN = DBconnect();
   }
 
@@ -63,6 +49,8 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
    */
   function testConfigInit()
   {
+    print "Start unit test for common-sysconfig.php\n";
+    print "test function ConfigInit()\n";
     $SysConf = ConfigInit();
     $this->assertEquals("FOSSology Support",  $SysConf['SupportEmailSubject']);
     $this->assertEquals("false",  $SysConf['GlobalBrowse']);
@@ -70,6 +58,7 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
     if (empty($hostname)) $hostname = "localhost";
     $FOSSologyURL = $hostname."/repo/";
     $this->assertEquals($FOSSologyURL,  $SysConf['FOSSologyURL']);
+    print "unit test for common-sysconfig.php end\n";
   }
 
 
@@ -79,8 +68,8 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
   protected function tearDown() {
     global $PG_CONN;
     pg_close($PG_CONN);
-    print "unit test for common-sysconfig.php end\n";
   }
+
 }
 
 ?>

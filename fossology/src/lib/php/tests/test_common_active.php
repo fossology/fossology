@@ -28,25 +28,11 @@ require_once('../common-active.php');
  */
 class test_common_active extends PHPUnit_Framework_TestCase
 {
-  /* initialization */
+  /**
+   * \brief initialization
+   */
   protected function setUp() 
   {
-    /** require PHPUnit/Framework.php */
-    print "Start unit test for common-active.php\n";
-    $php_lib1 = "/usr/share/php/PHPUnit/Framework.php";
-    $php_lib2 = "/usr/share/pear/PHPUnit/Framework.php";
-    if(file_exists($php_lib1))
-    {
-      require_once($php_lib1);
-    }
-    else if(file_exists($php_lib2)) 
-    {
-      require_once($php_lib2);
-    }
-    else
-    {
-      die("Could not find PHPUnit/Framework.php\n");
-    }
   }
 
   /**
@@ -54,6 +40,8 @@ class test_common_active extends PHPUnit_Framework_TestCase
    */
   function testActiveHTTPscript()
   {
+    print "Start unit test for common-active.php\n";
+    print "test function ActiveHTTPscript\n";
     /** $IncludeScriptTags is default 1 */
     $html_result = ActiveHTTPscript("test");
     $script_header = "<script language='javascript'>\n<!--\n";
@@ -96,13 +84,13 @@ class test_common_active extends PHPUnit_Framework_TestCase
     /** $IncludeScriptTags is no default 1 */
     $html_result = ActiveHTTPscript("test", 0);
     $this->assertEquals($html_expect, $html_result);
+    print "unit test for common-active.php end\n";
   }
 
   /**
    * \brief clean the env
    */
   protected function tearDown() {
-    print "unit test for common-active.php end\n";
   }
 }
 

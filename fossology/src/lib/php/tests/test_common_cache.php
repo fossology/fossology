@@ -34,30 +34,13 @@ class test_common_cached extends PHPUnit_Framework_TestCase
   public $upload_pk = 0;
   public $uploadtree_pk = 0;
   public $UserCacheStat = 0;
-  /* initialization */
+
+  /**
+   * \brief initialization
+   */
   protected function setUp() 
   {
     global $PG_CONN;
-    global $upload_pk;
-    global $uploadtree_pk;
-
-    /** require PHPUnit/Framework.php */
-    print "Start unit test for common-cache.php\n";
-    $php_lib1 = "/usr/share/php/PHPUnit/Framework.php";
-    $php_lib2 = "/usr/share/pear/PHPUnit/Framework.php";
-    if(file_exists($php_lib1))
-    {
-      require_once($php_lib1);
-    }
-    else if(file_exists($php_lib2)) 
-    {
-      require_once($php_lib2);
-    }
-    else
-    {
-      die("Could not find PHPUnit/Framework.php\n");
-    }
-
     $PG_CONN = DBconnect();
   }
 
@@ -105,6 +88,8 @@ class test_common_cached extends PHPUnit_Framework_TestCase
    */
   function testReportCachePut_upload_id_not_null()
   {
+    print "Start unit test for common-cache.php\n";
+    print "test function ReportCachePut()\n";
     global $PG_CONN;
     global $upload_pk;
     global $uploadtree_pk;
@@ -130,6 +115,7 @@ class test_common_cached extends PHPUnit_Framework_TestCase
    */
   function testReportCachePut_upload_id_null()
   {
+    print "test function ReportCachePut()\n";
     global $PG_CONN;
     global $upload_pk;
     global $uploadtree_pk;
@@ -155,6 +141,7 @@ class test_common_cached extends PHPUnit_Framework_TestCase
    */
   function testReportCacheGet()
   {
+    print "test function ReportCacheGet()\n";
     global $PG_CONN;
     global $upload_pk;
     global $uploadtree_pk;
@@ -171,6 +158,7 @@ class test_common_cached extends PHPUnit_Framework_TestCase
     $value = ReportCacheGet($CacheKey);
     $this->assertEquals($CacheValue, $value);
     $this->resetEnv4ReportCachePut();
+    print "unit test for common-cache.php end\n";
   }
 
   /**
@@ -205,8 +193,8 @@ class test_common_cached extends PHPUnit_Framework_TestCase
     global $PG_CONN;
     /** db close */
     pg_close($PG_CONN);
-    print "unit test for common-cache.php end\n";
   }
+
 }
 
 ?>
