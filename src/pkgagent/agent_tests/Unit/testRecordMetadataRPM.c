@@ -21,14 +21,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MAXSQL  4096
 
-/* Test pkgagent.c RecordMetadataRPM function */
-extern int RecordMetadataRPM(struct rpmpkginfo *pi);
+/**
+ * \file testRecordMetadataRPM.c
+ * \brief unit test for RecordMetadataRPM function
+ */
 
 /**
- * \brief test_RecordMetadata(struct rpmpkginfo *pi)
- *
- * Test pkgagent.c function RecordMetadata()
- *
+ * \brief Test pkgagent.c function RecordMetadata()
  */
 void test_RecordMetadataRPM()
 {
@@ -154,6 +153,9 @@ void test_RecordMetadataRPM()
   CU_ASSERT_EQUAL(Result, predictValue);
 }
 
+/**
+ * \brief testcases for function RecordMetadataRPM
+ */
 CU_TestInfo testcases_RecordMetadataRPM[] = {
     {"Testing the function RecordMetadataRPM", test_RecordMetadataRPM},
     CU_TEST_INFO_NULL

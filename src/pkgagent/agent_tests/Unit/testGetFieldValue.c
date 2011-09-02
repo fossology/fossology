@@ -15,11 +15,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *********************************************************************/
 
+/* library includes */
 #include <stdio.h>
+/* cunit includes */
 #include "CUnit/CUnit.h"
+/* includes for files that will be tested */
+#include <pkgagent.h>
 
-extern char * GetFieldValue(char *Sin, char *Field, int FieldMax, char *Value, int ValueMax, char Separator);
+/**
+ * \file testGetFieldValue.c
+ * \brief unit test for GetFieldValue function
+ */
 
+/**
+ * \brief test case for input parameter is normal
+ */
 void test_GetFieldValue_normal()
 {
   char *Sin = "hello name=larry, very good";
@@ -34,6 +44,9 @@ void test_GetFieldValue_normal()
   CU_ASSERT_TRUE(!strcmp(Result, predictValue));
 }
 
+/**
+ * \brief test case for input parameter is NULL
+ */
 void test_GetFieldValue_sin_is_null()
 {
   char *Sin = "";
@@ -48,6 +61,9 @@ void test_GetFieldValue_sin_is_null()
   CU_ASSERT_EQUAL(Result, predictValue);
 }
 
+/**
+ * \brief testcases for function GetFieldValue
+ */
 CU_TestInfo testcases_GetFieldValue[] = {
     {"Testing GetFieldValue, paramters are  normal:", test_GetFieldValue_normal},
     {"Testing GetFieldValue,sin is null:", test_GetFieldValue_sin_is_null},

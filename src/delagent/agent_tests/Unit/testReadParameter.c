@@ -25,8 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * \brief testing for the function ReadParameter
  */
 
-extern int ReadParameter(char *Parm);
-
 /* test functions */
 
 /**

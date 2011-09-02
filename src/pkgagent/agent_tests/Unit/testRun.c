@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "CUnit/CUnit.h"
 #include "CUnit/Automated.h"
 
+/* test case sets */
 extern CU_TestInfo testcases_GetFieldValue[];
 extern CU_TestInfo testcases_GetMetadata[];
 extern CU_TestInfo testcases_Trim[];
@@ -30,6 +31,7 @@ extern CU_TestInfo testcases_RecordMetadataDEB[];
 extern CU_TestInfo testcases_GetMetadataDebSource[];
 extern CU_TestInfo testcases_GetMetadataDebBinary[];
 
+/* create test suite */
 CU_SuiteInfo suites[] = {
     {"Testing the function trim:", NULL, NULL, testcases_Trim},
     {"Testing the function GetFieldValue:", NULL, NULL, testcases_GetFieldValue},

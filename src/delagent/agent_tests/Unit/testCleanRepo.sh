@@ -25,8 +25,8 @@ fi
 
 #echo $UID
 
-rm -rf /srv/fossology/repository/localhost/gold/*
-rm -rf /srv/fossology/repository/localhost/files/*
+#rm -rf /srv/fossology/repository/localhost/gold/*
+#rm -rf /srv/fossology/repository/localhost/files/*
 
 if [ $? -ne 0 ];
 then

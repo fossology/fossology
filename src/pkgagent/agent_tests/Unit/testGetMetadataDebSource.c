@@ -19,14 +19,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include "CUnit/CUnit.h"
 
-extern int GetMetadataDebSource(char *repFile, struct debpkginfo *pi);
+/**
+ * \file testGetMetadataDebSource.c
+ * \brief unit test for GetMetadataDebSource function
+ */
 
 /**
- * \brief test_GetMetadataDebSource()
- *
- * Test pkgagent.c Function GetMetadataDebSource()
+ * \brief Test pkgagent.c Function GetMetadataDebSource()
  * get debian source package info from .dsc file
- *
  */
 void test_GetMetadataDebSource()
 {
@@ -57,6 +57,9 @@ void test_GetMetadataDebSource()
   CU_ASSERT_EQUAL(Result, predictValue);
 }
 
+/**
+ * \brief testcases for function GetMetadataDebSource
+ */
 CU_TestInfo testcases_GetMetadataDebSource[] = {
     {"Testing the function GetMetadataDebSource", test_GetMetadataDebSource},
     CU_TEST_INFO_NULL

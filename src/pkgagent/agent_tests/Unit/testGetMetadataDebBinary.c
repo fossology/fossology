@@ -21,8 +21,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MAXSQL  4096
 
-/* Test pkgagent.c GetMetadataDebBinary function */
-extern int GetMetadataDebBinary(long upload_pk, struct debpkginfo *pi);
+/**
+ * \file testGetMetadataDebBinary.c
+ * \brief unit test for GetMetadataDebBinary function
+ */
 
 /**
  * \brief Prepare database
@@ -274,9 +276,7 @@ int remove_Repository()
 }
 
 /**
- * \brief test_GetMetadataDebBinary()
- *
- * Test pkgagent.c GetMetadataDebBinary function 
+ * \brief Test pkgagent.c GetMetadataDebBinary function 
  * get debian binary package info
  */
 void test_GetMetadataDebBinary()
@@ -331,6 +331,9 @@ void test_GetMetadataDebBinary()
   free(pi);
 }
 
+/**
+ * \brief testcases for function GetMetadataDebBinary
+ */
 CU_TestInfo testcases_GetMetadataDebBinary[] = {
     {"Testing the function GetMetadataDebBinary", test_GetMetadataDebBinary},
     CU_TEST_INFO_NULL

@@ -49,7 +49,7 @@ coverage: delagent_cov.o
 	$(MAKE) -C $(TESTDIRS) coverage
 
 delagent_cov.o: util.c $(HDRS)
-	$(CC) -C $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
 clean:
 	@echo "make delagent agent clean"
