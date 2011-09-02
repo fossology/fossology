@@ -25,9 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * \brief testing for the function DBFindMime
  */
 
-extern int	DBFindMime	(char *Mimetype);
-
-
 /**
  * \brief initialize
  */
