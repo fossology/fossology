@@ -39,7 +39,9 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
   public $pfile_child = 0;
   public $agent_pk = 0;
  
-  /* initialization */
+  /**
+   * \brief initialization
+   */
   protected function setUp() 
   {
     global $PG_CONN;
@@ -50,22 +52,6 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     global $pfile_pk_child;
     global $agent_pk;
 
-    /** require PHPUnit/Framework.php */
-    print "Start unit test for common-license-file.php\n";
-    $php_lib1 = "/usr/share/php/PHPUnit/Framework.php";
-    $php_lib2 = "/usr/share/pear/PHPUnit/Framework.php";
-    if(file_exists($php_lib1))
-    {
-      require_once($php_lib1);
-    }
-    else if(file_exists($php_lib2)) 
-    {
-      require_once($php_lib2);
-    }
-    else
-    {
-      die("Could not find PHPUnit/Framework.php\n");
-    }
     $PG_CONN = DBconnect();
 
 
@@ -154,6 +140,8 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
    */
   function testGetFileLicenses()
   {
+    print "Start unit test for common-license-file.php\n";
+    print "test function GetFileLicenses()\n";
     global $PG_CONN;
     global $upload_pk;
     global $uploadtree_pk_parent;
@@ -178,6 +166,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
    */
   function testGetFileLicenses_string()
   {
+    print "test function GetFileLicenses_tring()\n";
     global $PG_CONN;
     global $uploadtree_pk_parent;
     global $pfile_pk_parent;
@@ -200,6 +189,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
    */
   function testGetFilesWithLicense()
   {
+    print "test function GetFilesWithLicense()\n";
     global $PG_CONN;
     global $uploadtree_pk_parent;
     global $pfile_pk_parent;
@@ -225,6 +215,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
    */
   function testCountFilesWithLicense()
   {
+    print "test function CountFilesWithLicense()\n";
     global $PG_CONN;
     global $uploadtree_pk_parent;
     global $agent_pk;
@@ -247,6 +238,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
    */
   function testLevel1WithLicense()
   {
+    print "test function Level1WithLicense()\n";
     global $PG_CONN;
     global $uploadtree_pk_parent;
     global $uploadtree_pk_child;
@@ -264,6 +256,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
 
     $file_name = Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk_parent);
     $this->assertEquals("license_test.file.child", $file_name[$uploadtree_pk_child]);
+    print "unit test for common-license-file.php end\n";
   }
 
 
@@ -301,7 +294,6 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     pg_free_result($result);
     
     pg_close($PG_CONN);
-    print "unit test for common-license-file.php end\n";
   }
 }
 
