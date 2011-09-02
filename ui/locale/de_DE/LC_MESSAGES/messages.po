@@ -2230,19 +2230,19 @@ msgstr "Cache leeren"
 
 #: plugins/core-debug-flush-cache.php:52
 msgid "All cached pages have been removed.\n"
-msgstr ""
+msgstr "Alle gecachten Seiten wurden entfernt.\n"
 
 #: plugins/ui-licgroup.php:27 plugins/ui-licgroup.php:565
 msgid "License Groups"
-msgstr ""
+msgstr "Lizenz-Gruppen"
 
 #: plugins/ui-licgroup.php:263
 msgid "GrpGroups"
-msgstr ""
+msgstr "GrpGroups"
 
 #: plugins/ui-licgroup.php:592
 msgid "License not part of any group"
-msgstr ""
+msgstr "Lizenzen geh&ouml;ren zu keiner Gruppe"
 
 #: plugins/ui-licgroup.php:733
 msgid ""
@@ -2250,23 +2250,28 @@ msgid ""
 "use the results from licterm.  This functionality has been superceded in v "
 "1.2 by 'buckets' based on the nomos license scanner."
 msgstr ""
+"WARNUNG: Lizenzgruppen funktionieren nur wenn der bsam-Lizenz-Scanner "
+"verwendet wird und nicht die Ergebnisse von licterm genutzt werden. Diese "
+"Funktionalit&auml;t wird in V1.2 von 'Buckets' bereitgestellt (basierend "
+"auf dem Nomos-Lizenz-Scanner)." 
 
 #: plugins/agent-license-once.php:28
 msgid "Bsam One-Shot License Analysis"
-msgstr ""
+msgstr "Bsam One-Shot Lizenz-Analyse"
 
 #: plugins/agent-license-once.php:244 plugins/agent-license-once.php:247
 msgid "bsam One-shot, real-time license analysis"
-msgstr ""
+msgstr "Bsam One-Shot Echtzeit-Lizenz-Analyse"
 
 #: plugins/agent-license-once.php:306 plugins/agent-nomos-once.php:188
 msgid ""
 "This analyzer allows you to upload a single file for license analysis.\n"
 msgstr ""
+"Diese Analyse erlaubt den Upload einer einzelnen Datei zur Lizenzanalyse.\n"
 
 #: plugins/agent-license-once.php:307 plugins/agent-nomos-once.php:189
 msgid "The limitations:\n"
-msgstr ""
+msgstr "Beschr&auml;nkungen:\n"
 
 #: plugins/agent-license-once.php:309
 #: plugins/agent-license-once-compare.php:230
