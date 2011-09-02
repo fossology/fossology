@@ -36,7 +36,6 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
 
   /* initialization */
   protected function setUp() {
-    print "Starting test functional wget agent \n";
     global $WGET_PATH;
     $WGET_PATH = '../../agent/wget_agent';
     $usage= "";
@@ -64,6 +63,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
    * level is 0, accept rpm, reject fossology-1.2.1-1.fc10.src.rpm,fossology-1.2.0-1.fc10.src.rpm
    */
   function test1(){
+    print "Starting test functional wget agent \n";
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
     
@@ -166,6 +166,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     exec($command);
     $this->assertFileExists("$TEST_RESULT_PATH/fossology.org/debian/1.3.0/fossology-scheduler-single_1.3.0~3780_amd64.deb");
     $this->assertFileNotExists("$TEST_RESULT_PATH/fossology.org/debian/1.3.0/fossology-scheduler-single_1.3.0~3780_i386.deb");
+    print "ending test functional wget agent \n";
   }
 
   /**
@@ -173,7 +174,6 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
 	 */
   protected function tearDown() {
     global $TEST_RESULT_PATH;
-    print "ending test functional wget agent \n";
     // delete the directory ./test_result
     exec("/bin/rm -rf $TEST_RESULT_PATH");
   }
