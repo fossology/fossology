@@ -40,15 +40,13 @@ class menu {
 $MenuList = array();
 $MenuMaxDepth = 0; // how deep is the tree (for UI display)
 /**
- * \brief Create a "next" page menu.
- * This function assumes the end number is known.
- * Returns string containing menu.
+ * \brief Create a "First Prev 1 2 ... Next Last" page links for paged output.
  *
- * \param $Page
- * \param $TotalPage
- * \param $Uri
+ * \param $Page       Page number of the current page
+ * \param $TotalPage  Last page number
+ * \param $Uri        URL of the page being displayed. "&page=" will be appended to the URL
  *
- * \return string containing menu
+ * \return string containing menu html
  */
 function MenuPage($Page, $TotalPage, $Uri = '') {
   $V = "<font class='text'><center>";
@@ -91,15 +89,13 @@ function MenuPage($Page, $TotalPage, $Uri = '') {
   return ($V);
 } // MenuPage
 /**
- * \brief Create a "next" page menu.
- * This function assumes the end number is unknown.  (Hence, "endless".)
- * Returns string containing menu.
+ * \brief Create a "First Prev 1 2 ... Next" page links for paged output. 
  *
- * \param $Page
- * \param $Next
- * \param $Uri
+ * \param $Page  Page number of the current page
+ * \param $Next  true display "Next" and false don't display
+ * \param $Uri   URL of the page being displayed. "&page=" will be appended to the URL
  *
- * \return string containing menu
+ * \return string containing menu html
  */
 function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
   $V = "<font class='text'><center>";
@@ -141,7 +137,9 @@ function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
  * \param $a menu a
  * \param $b menu b
  *
- * \return -1 a>b 1 a<b
+ * \return -1 a > b
+ *         1  a < b
+ *         0  a->Order = b->Order and a->Name = b->Name
  */
 function menu_cmp(&$a, &$b) {
   if ($a->Order > $b->Order) {
@@ -159,15 +157,17 @@ function menu_cmp(&$a, &$b) {
  * This is VERY recursive and returns the new menu.
  * If $URI is blank, nothing is added.
  *
- * \param $Menu
- * \param $Path
+ * \param &$Menu     menu list needed to add to
+ * \param $Path      path of the new menu item
  * \param $LastOrder is used for grouping items in order.
- * \param $Target
- * \param $URI
- * \param $HTML
- * \param $Depth
- * \param $FullName
- * \param $Title
+ * \param $Target    target of the new menu item
+ * \param $URI       URL link of the new menu item
+ * \param $HTML      HTML of the new menu item
+ * \param $Depth     depth of the submenu
+ * \param $FullName  FullName of the menu item e.g. (Help::About)
+ * \param $Title     Title of the new menu item
+ *
+ * \return the max depth of menu
  */
 function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, &$FullName, &$Title) {
   $AddNew = 0;
@@ -254,6 +254,13 @@ function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, 
 /**
  * \brief menu_insert(): Given a Path, order level for the last
  * item, and optional plugin name, insert the menu item.
+ *
+ * \param $Path      path of the new menu item
+ * \param $LastOrder is used for grouping items in order.
+ * \param $Target    target of the new menu item
+ * \param $URI       URL link of the new menu item
+ * \param $HTML      HTML of the new menu item
+ * \param $Title     Title of the new menu item
  */
 function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target = NULL, $HTML = NULL) {
   global $MenuList;
@@ -261,13 +268,13 @@ function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target 
   menu_insert_r($MenuList, $Path, $LastOrder, $Target, $URI, $HTML, 0, $FullName, $Title);
 } // menu_insert()
 /**
- * \brief Given a top-level menu name, return
+ * \brief Given a top-level menu name, find
  * the list of sub-menus below it and max depth of menu.
  * $Name may be a "::" separated list.
  *
- * \param $Name top-level menu name
- * \param $MaxDepth
- * \param $Menu
+ * \param $Name      top-level menu name
+ * \param $MaxDepth  max depth of menu 
+ * \param $Menu      menu list of the menu name
  *
  * \return list of sub-menus
  */
@@ -296,13 +303,12 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL) {
 /**
  * \brief Take a menu and render it as
  * one HTML line.  This ignores submenus!
- * If $ShowAll==0, then items without hyperlinks are hidden.
  * This is commonly called the "micro-menu".
  *
- * \param $Menu
- * \param $ShowRefresh
- * \param $ShowTraceback
- * \param $ShowAll
+ * \param $Menu          menu list need to show as HTML
+ * \param $ShowRefresh   If $ShowRefresh==1, show Refresh
+ * \param $ShowTraceback If $ShowTraceback==1, show Tracback
+ * \param $ShowAll       If $ShowAll==0, then items without hyperlinks are hidden.
  *
  * \return HTML string
  */
@@ -386,14 +392,12 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
  * \brief Take a menu and render it as
  * one HTML line with items in a "[name]" list.
  * This ignores submenus!
- * $Parm is a list of parameters to add to the URL.
- * If $ShowAll==0, then items without hyperlinks are hidden.
  *
- * \param $Menu
- * \param $Parm
- * \param $Pre
- * \param $Post
- * \param $ShowAll
+ * \param $Menu     menu list need to show as list
+ * \param $Parm     a list of parameters to add to the URL.
+ * \param $Pre      string before "[name]"
+ * \param $Post     string after "[name]"
+ * \param $ShowAll  If $ShowAll==0, then items without hyperlinks are hidden.
  * 
  * \return one HTML line with items in a "[name]" list
  */
@@ -443,8 +447,8 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1) {
  * \brief Debugging code for printing the menu.
  * This is recursive.
  *
- * \param $Menu
- * \param $Indent
+ * \param $Menu    menu list to be printed
+ * \param $Indent  indent char
  */
 function menu_print(&$Menu, $Indent) {
   if (!isset($Menu)) {
@@ -488,7 +492,7 @@ function menu_print(&$Menu, $Indent) {
  *   $mymenu = menu_find("Browse-Pfile", $MenuDepth);
  *   $myNewMenu = menu_remove($mymenu, "Compare");
  *
- * \param $Menu
+ * \param $Menu   menu list the menu item remove from
  * \param $RmName remove name of menu
  *
  * \return a new menu list without $RmName

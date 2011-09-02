@@ -388,7 +388,7 @@ function FolderListScript()
  * NOTE: If there is a recursive loop in the folder table, then
  * this will loop INFINITELY.
  *
- * \param $ParentFolder  folder_pk
+ * \param $ParentFolder  parent folder_pk
  * \param $Depth         folder depth to display, -1 to use users root folder
  * \param $HighLight     Optional, folder_pk of folder to highlight.
  * \param $ShowParent    Optional default is false. true if parent should be in shown in the tree.

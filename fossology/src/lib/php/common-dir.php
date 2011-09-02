@@ -549,7 +549,7 @@ function GetNonArtifactChildren($uploadtree_pk)
  * \brief Get string representation of uploadtree path.
  *  Use Dir2Path to get $PathArray.
  *
- * \param $PathArry
+ * \param $PathArry an array containing the path
  *
  * \return string representation of uploadtree path
  */
