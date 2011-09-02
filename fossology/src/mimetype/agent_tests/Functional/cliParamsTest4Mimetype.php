@@ -33,7 +33,6 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
  
   /* initialization */
   protected function setUp() {
-    print "Starting test functional mimetype agent \n";
     global $EXE_PATH;
     global $PG_CONN;
     $EXE_PATH = '../../agent/mimetype';
@@ -63,6 +62,7 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
    * \brief test mimetype name is not in table mimetype 
    */
   function testMimetypeNotInDB(){
+    print "Starting test functional mimetype agent \n";
     global $EXE_PATH;
     global $PG_CONN;
     $mimeType1 = "application/x-executable";
@@ -117,6 +117,7 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
     $result = pg_query($PG_CONN, $sql);
     pg_free_result($result);
+    print "ending test functional mimetype agent \n";
   }
 
   /**
@@ -125,7 +126,6 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
   protected function tearDown() {
     global $PG_CONN;
     pg_close($PG_CONN);
-    print "ending test functional mimetype agent \n";
   }
 }
 

@@ -67,3 +67,8 @@ int ReadLine(FILE *Fin, char *Line, int MaxLine);
  */
 void  Usage (char *Name);
 
+/**
+ * \brief find a mime type in the DBMime table.
+ */
+int DBFindMime (char *Mimetype);
+
