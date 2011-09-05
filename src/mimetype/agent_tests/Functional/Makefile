@@ -33,6 +33,6 @@ coverage:
 
 
 clean:
-	$(call dirloop,clean)
+	rm -f *.xml
 
 .PHONY: all test coverage clean
