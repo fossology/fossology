@@ -94,11 +94,23 @@ int  DBLoadGoldInit()
  */
 int DBLoadGoldClean()
 {
-  GlobalUploadKey = -1;
   memset(GlobalTempFile, 0, MAXCMD);
   memset(GlobalURL, 0, MAXCMD);
   memset(GlobalParam, 0, MAXCMD);
+  long pfile_id = 0;
   char TempFileDir[MAXCMD];
+  /** get pfile_pk about this upload, for this upload, only one file */
+  memset(SQL,'\0',MAXCMD);
+  snprintf(SQL,MAXCMD, "select pfile_fk from upload where upload_pk = %ld;", GlobalUploadKey);
+  result =  PQexec(pgConn, SQL);
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__))
+  {
+    printf("get pfile id ERROR!\n");
+    if (pgConn) PQfinish(pgConn);
+    exit(-1);
+  }
+  pfile_id = atoi(PQgetvalue(result,0,0)); 
+  PQclear(result);
   /** delete the record that upload_filename is wget.tar, post testing */
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD, "DELETE FROM upload where upload_filename = 'wget.tar';");
@@ -111,12 +123,25 @@ int DBLoadGoldClean()
   }
   PQclear(result);
 
-  if (pgConn) PQfinish(pgConn);
   strcpy(TempFileDir, "./test_result");
   if (file_dir_existed(TempFileDir))
   {
     RemoveDir(TempFileDir);
   }
+
+  /** delete the pfile record during this test */
+  memset(SQL,'\0',MAXCMD);
+  snprintf(SQL, MAXCMD-1, "DELETE FROM pfile where pfile_pk = %ld ", pfile_id);
+  result =  PQexec(pgConn, SQL);
+  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
+  {
+    if (pgConn) PQfinish(pgConn);
+    SafeExit(-1);
+  }
+  PQclear(result);
+
+  if (pgConn) PQfinish(pgConn);
+  GlobalUploadKey = -1;
   return 0;
 }
 
@@ -154,6 +179,7 @@ void testDBLoadGold()
   result =  PQexec(pgConn, SQL); /* SELECT */
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
   {
+    if (pgConn) PQfinish(pgConn);
     SafeExit(-1);
   }
   pfile_sha1 = PQgetvalue(result,0,0);
