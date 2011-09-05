@@ -210,7 +210,7 @@ Magic: "application/x-cab"
 
 Magic: "application/x-7z-compressed"
   Cmd: "7zr"
-  CmdPre: "x -y -p"
+  CmdPre: "x -y"
   CmdPost: ">/dev/null 2>&1"
   MetaCmd: ""
   Type: CMD_ARC
