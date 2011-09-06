@@ -5,10 +5,11 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 LOCALAGENTDIR=../../agent
+CUNIT_LIB_DIR=$(TOP)/src/testing/lib/c
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lmagic -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ -lcunit
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lmagic -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ -I$(CUNIT_LIB_DIR) -lcunit
 EXE=test_mimetype
-TEST_OBJ_RUN=testRun.o
+TEST_OBJ_RUN=$(CUNIT_LIB_DIR)/libcunit.o testRun.o
 TEST_OBJ= ./finder/testDBCheckMime.o \
           ./finder/testDBLoadMime.o \
           ./finder/testDBFindMime.o \
@@ -20,8 +21,8 @@ $(EXE): libmimetype.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS)
 	@echo "make mimetype agent unit test"
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype.a $(CFLAGS_LOCAL) -o $@
 
-$(TEST_OBJ_RUN): %.o: %.c 
-	$(CC) -c $(CFLAGS_LOCAL) $<
+$(TEST_OBJ_RUN): %.o: %.c
+	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
 
 $(TEST_OBJ): %.o: %.c 
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
@@ -47,3 +48,5 @@ clean:
 	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt  *.gc* results test_result 
 
 include $(DEPS)
+
+.PHONY: all install uninstall clean test
