@@ -25,6 +25,7 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 global $WEBDIR;
+require_once("$WEBDIR/common/common.php");
 /*
  * myJobs plugin
  */
@@ -137,7 +138,7 @@ $text = _("Fatal internal ERROR! Cannot connect to the DataBase");
 		
 		$SqlUploadList = "SELECT  DISTINCT ON (job_upload_fk) job_upload_fk," .
                      "upload_filename from job,upload " .
-                    "WHERE user_fk='$_SESSION[UserId]' " .
+                    "WHERE upload_userid='$_SESSION[UserId]' " .
                     "AND upload_pk=job_upload_fk order by job_upload_fk;\n";
 		$JobPhase = array('total' => 'bgcolor="#FFFFCC"',
                       'completed' => 'bgcolor="#D3D3D3"',

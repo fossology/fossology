@@ -49,7 +49,7 @@ class upload_instructions extends FO_Plugin
 	break;
       case "HTML":
 	/* Display instructions */
-	$Uri = Traceback_uri();
+	$Url = Traceback_uri();
 	$V .= _("FOSSology has many options for importing and uploading files for analysis.\n");
 	$V .= _("The options vary based on <i>where</i> the data to upload is located.\n");
 	$V .= _("The data may be located:\n");
