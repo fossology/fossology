@@ -36,7 +36,7 @@ int  TraverseChildInit()
 void testTraverseChild4IsoFile()
 {
   deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/");
+  exists = file_dir_exists("./test-result/");
   
   Filename = "./test-data/testdata4unpack/imagefile.iso";
   MkDirs("./test-result/imagefile.iso.dir/");
@@ -75,15 +75,15 @@ void testTraverseChild4IsoFile()
     rc = system(commands);
     if (0 != rc)
     {
-      existed = file_dir_existed("./test-result/imagefile.iso.dir/test.jar");
-      CU_ASSERT_EQUAL(existed, 1); // existing  
-      existed = file_dir_existed("./test-result/imagefile.iso.dir/test.jar.dir");
-      CU_ASSERT_EQUAL(existed, 0); // not existing
+      exists = file_dir_exists("./test-result/imagefile.iso.dir/test.jar");
+      FO_ASSERT_EQUAL(exists, 1); // existing  
+      exists = file_dir_exists("./test-result/imagefile.iso.dir/test.jar.dir");
+      FO_ASSERT_EQUAL(exists, 0); // not existing
     }
     else
     {
-      existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.JAR;1");
-      CU_ASSERT_EQUAL(existed, 1); // existing  
+      exists = file_dir_exists("./test-result/imagefile.iso.dir/TEST.JAR;1");
+      FO_ASSERT_EQUAL(exists, 1); // existing  
     }
   }
 }
@@ -94,7 +94,7 @@ void testTraverseChild4IsoFile()
 void testTraverseChild4DebianSourceFile()
 {
   deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/");
+  exists = file_dir_exists("./test-result/");
 
   Filename = "./test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
   //  MkDirs("./test-result/fcitx_3.6.2-1.dsc.dir/");
@@ -125,8 +125,8 @@ void testTraverseChild4DebianSourceFile()
   } else
   {
     ParentWait();
-    existed = file_dir_existed("./test-result/fcitx_3.6.2-1.dsc.dir/debian/README.Debian");
-    CU_ASSERT_EQUAL(existed, 1); // existing
+    exists = file_dir_exists("./test-result/fcitx_3.6.2-1.dsc.dir/debian/README.Debian");
+    FO_ASSERT_EQUAL(exists, 1); // existing
   }
 }
 
@@ -136,7 +136,7 @@ void testTraverseChild4DebianSourceFile()
 void testTraverseChild4PartitionFile()
 {
   deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/");
+  exists = file_dir_exists("./test-result/");
 
   Filename = "./test-data/testdata4unpack/vmlinuz-2.6.26-2-686";
   MkDirs("./test-result/vmlinuz-2.6.26-2-686.dir/");
@@ -160,8 +160,8 @@ void testTraverseChild4PartitionFile()
   } else
   {
     ParentWait();
-    existed = file_dir_existed("./test-result/vmlinuz-2.6.26-2-686.dir/Partition_0000");
-    CU_ASSERT_EQUAL(existed, 1); // existing
+    exists = file_dir_exists("./test-result/vmlinuz-2.6.26-2-686.dir/Partition_0000");
+    FO_ASSERT_EQUAL(exists, 1); // existing
   }
 }
 

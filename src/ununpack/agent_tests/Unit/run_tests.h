@@ -24,15 +24,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "CUnit/Automated.h"
 
 #include "../agent/ununpack.h"
+#include "libfocunit.h"
 
 extern char *Filename;
 extern char *NewDir;
 extern int Recurse;
-extern int existed;
+extern int exists;
 extern magic_t MagicCookie;
 
 /* run_tests.c */
-extern int file_dir_existed(char *path_name);
+extern int file_dir_exists(char *path_name);
 
 /* FindCmd */
 extern int FindCmdInit();

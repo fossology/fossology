@@ -57,12 +57,9 @@ void testTraverseNormal4Package()
   ParentInfo PITest = {0, 1287725739, 1287725739, 0, 0};
   PI = &PITest;
   Result = Traverse(Filename,Basename,Label,NewDir,Recurse,PI);
-  #ifdef DEBUG
-  printf("in testTraverseNormal4Package result is :%d\n", Result);
-  #endif
-  existed = file_dir_existed("./test-result/threezip.zip.dir/Desktop.zip.dir/record.txt");
-  CU_ASSERT_EQUAL(existed, 1); // is existing
-  CU_ASSERT_EQUAL(Result, 1); // Filename is one containter
+  exists = file_dir_exists("./test-result/threezip.zip.dir/Desktop.zip.dir/record.txt");
+  FO_ASSERT_EQUAL(exists, 1); // is existing
+  FO_ASSERT_EQUAL(Result, 1); // Filename is one containter
 }
 
 /**
@@ -76,12 +73,9 @@ void testTraverseNormal4Package2()
   ParentInfo PITest = {0, 1287725739, 1287725739, 0, 0};
   PI = &PITest;
   Result = Traverse(Filename,Basename,Label,NewDir,Recurse,PI);
-  #ifdef DEBUG
-  printf("in testTraverseNormal4Package2 result is :%d\n", Result);
-  #endif
-  existed = file_dir_existed("./test-result/libfossagent.a.dir/libfossagent.o");
-  CU_ASSERT_EQUAL(existed, 1); //  is existing
-  CU_ASSERT_EQUAL(Result, 1); // Filename is one containter
+  exists = file_dir_exists("./test-result/libfossagent.a.dir/libfossagent.o");
+  FO_ASSERT_EQUAL(exists, 1); //  is existing
+  FO_ASSERT_EQUAL(Result, 1); // Filename is one containter
 }
 
 /**
@@ -99,12 +93,9 @@ void testTraverseNormal4Dir()
   PI = &PITest;
   Label = "Called by dir/wait";
   Result = Traverse(Filename,Basename,Label,NewDir,Recurse,PI);
-  #ifdef DEBUG
-  printf("in testTraverseNormal4Dir result is :%d\n", Result);
-  #endif
-  existed = file_dir_existed("./test-result/test-data/testdata4unpack/testdir/test.jar.dir/ununpack");
-  CU_ASSERT_EQUAL(existed, 1); // is existing
-  CU_ASSERT_EQUAL(Result, 1); // Filename is one containter
+  exists = file_dir_exists("./test-result/test-data/testdata4unpack/testdir/test.jar.dir/ununpack");
+  FO_ASSERT_EQUAL(exists, 1); // is existing
+  FO_ASSERT_EQUAL(Result, 1); // Filename is one containter
 }
 
 /**
@@ -118,12 +109,9 @@ void testTraverseNullParams()
   ParentInfo PITest = {0, 1287725739, 1287725739, 0, 0};
   PI = &PITest;
   Result = Traverse(Filename,Basename,Label,NewDir,Recurse,PI);
-  #ifdef DEBUG
-  printf("in testTraverseNullParams result is :%d\n", Result);
-  #endif
-  existed = file_dir_existed("./test-result");
-  CU_ASSERT_EQUAL(existed, 0); //  not  existing
-  CU_ASSERT_EQUAL(Result, 0); // Filename is not one containter
+  exists = file_dir_exists("./test-result");
+  FO_ASSERT_EQUAL(exists, 0); //  not  existing
+  FO_ASSERT_EQUAL(Result, 0); // Filename is not one containter
 }
 
 
