@@ -185,9 +185,12 @@ $text1 = _("Value");
 		  }
 		break;
     case 'jq_log':
-        $V .= "<pre>";
-        $V .= file_get_contents($Row[$F]);
-        $V .= "</pre>";
+        if (!empty($Row[$F]))
+        {
+          $V .= "<pre>";
+          $V .= file_get_contents($Row[$F]);
+          $V .= "</pre>";
+        }
 		break;
 	default:
         if (array_key_exists($F, $Row))
