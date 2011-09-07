@@ -15,11 +15,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
-#include "libcunit.h"
+#include "libfocunit.h"
 
 
 /**
- * \brief cunit main test function
+ * \brief fossology cunit main test function
  *        This function standardizes how CUnit tests are reported.
  *
  *  There are three parts to the test output.
@@ -35,7 +35,7 @@
  *
  * \return 0 on sucess, not 1 on failure
  */
-int cunit_main(char *test_name, CU_SuiteInfo *suites)
+int focunit_main(char *test_name, CU_SuiteInfo *suites)
 {
   /** test name is empty? */
   if (!test_name)

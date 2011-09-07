@@ -14,13 +14,16 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
+#ifndef LIBFOCUNIT_H
+#define LIBFOCUNIT_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "CUnit/CUnit.h"
 #include "CUnit/Automated.h"
 
-int cunit_main(char *test_name, CU_SuiteInfo *suites);
+int focunit_main(char *test_name, CU_SuiteInfo *suites);
 
 /** 
  * @file libcunit.h
@@ -311,3 +314,5 @@ int cunit_main(char *test_name, CU_SuiteInfo *suites);
       printf("FATAL: %s(%d) Expected %d, got %d\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_DOUBLE_NOT_EQUAL_FATAL(actual, expected, granularity)\
   }
+
+#endif
