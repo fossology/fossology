@@ -18,16 +18,18 @@
 
 /*************************************************
  Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
+at the very beginning.
+This prevents hacking attempts.
+*************************************************/
 global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+if (!isset($GlobalReady)) {
+  exit;
+}
 
 define("TITLE_core_debug", _("Debug Plugins"));
 
 class core_debug extends FO_Plugin
-  {
+{
   var $Name       = "debug";
   var $Title      = TITLE_core_debug;
   var $Version    = "1.0";
@@ -36,42 +38,46 @@ class core_debug extends FO_Plugin
 
   /***********************************************************
    Output(): Display the loaded menu and plugins.
-   ***********************************************************/
+  ***********************************************************/
   function Output()
-    {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+  {
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
     $V="";
     global $Plugins;
     switch($this->OutputType)
-      {
+    {
       case "XML":
         break;
       case "HTML":
-$text = _("Plugin Summary");
-	$V .= "<H2>$text</H2>";
-	foreach ($Plugins as $key => $val)
-	  {
-	  $V .=  "$key : $val->Name (state=$val->State)<br>\n";
-	  }
-$text = _("Plugin State Details");
-	$V .= "<H2>$text</H2>";
-	$V .= "<pre>";
-	$V .= print_r($Plugins,1);
-	$V .= "</pre>";
+        $text = _("Plugin Summary");
+        $V .= "<H2>$text</H2>";
+        foreach ($Plugins as $key => $val)
+        {
+          $V .=  "$key : $val->Name (state=$val->State)<br>\n";
+        }
+        $text = _("Plugin State Details");
+        $V .= "<H2>$text</H2>";
+        $V .= "<pre>";
+        $V .= print_r($Plugins,1);
+        $V .= "</pre>";
         break;
       case "Text":
-	print_r($Plugins);
+        print_r($Plugins);
         break;
       default:
         break;
-      }
-    if (!$this->OutputToStdout) { return($V); }
+    }
+    if (!$this->OutputToStdout) {
+      return($V);
+    }
     print("$V");
     return;
-    } // Output()
+  } // Output()
 
 
-  };
+};
 $NewPlugin = new core_debug;
 $NewPlugin->Initialize();
 
