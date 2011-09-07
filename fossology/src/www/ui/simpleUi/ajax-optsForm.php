@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+*/
 
 global $GlobalReady;
 if (!isset($GlobalReady)) {
@@ -43,7 +43,7 @@ class ajax_optsForm extends FO_Plugin
 
   /*
    Output(): Generate the text for this plugin.
-   */
+  */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
