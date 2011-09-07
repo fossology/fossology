@@ -146,7 +146,7 @@ $text = _("Show only active jobs");
 	'jq_elapsedtime','jq_processedtime','jq_itemsprocessed',
 	'job_submitter','job_queued',
 	'job_email_notify',
-	'job_upload_fk');
+	'job_upload_fk', 'jq_log');
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&show=job&job=";
 
     global $DB;
@@ -183,6 +183,11 @@ $text1 = _("Value");
 		  $Browse = Traceback_uri() . "?mod=browse&upload=" . htmlentities($Row[$F]);
 		  $V .= "<a href='$Browse'>" . htmlentities($Row[$F]) . "</a>";
 		  }
+		break;
+    case 'jq_log':
+        $V .= "<pre>";
+        $V .= file_get_contents($Row[$F]);
+        $V .= "</pre>";
 		break;
 	default:
         if (array_key_exists($F, $Row))
