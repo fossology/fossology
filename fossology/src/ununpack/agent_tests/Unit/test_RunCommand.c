@@ -37,9 +37,9 @@ void testRunCommand4ZcatTesting()
   Out = 0x0;
   Where = 0x0;
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  existed = file_dir_existed("./test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
-  CU_ASSERT_EQUAL(Result, 0); // command could run
+  exists = file_dir_exists("./test-result/");
+  FO_ASSERT_EQUAL(exists, 0); // ./test-result/ is not existing
+  FO_ASSERT_EQUAL(Result, 0); // command could run
 }
 
 /**
@@ -55,9 +55,9 @@ void testRunCommand4Zcat()
   Out = "FileName.tar.Z.unpacked";
   Where = "./test-result";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  existed = file_dir_existed("./test-result/FileName.tar.Z.unpacked");
-  CU_ASSERT_EQUAL(existed, 1); // the file is existing
-  CU_ASSERT_EQUAL(Result, 0); // command could run
+  exists = file_dir_exists("./test-result/FileName.tar.Z.unpacked");
+  FO_ASSERT_EQUAL(exists, 1); // the file is existing
+  FO_ASSERT_EQUAL(Result, 0); // command could run
 }
 
 /**
@@ -73,9 +73,9 @@ void testRunCommand4Pdf()
   Out = "israel.pdf.text";
   Where = "./test-result";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  existed = file_dir_existed("./test-result/israel.pdf.text");
-  CU_ASSERT_EQUAL(existed, 1); // the file is existing
-  CU_ASSERT_EQUAL(Result, 0); // command could run
+  exists = file_dir_exists("./test-result/israel.pdf.text");
+  FO_ASSERT_EQUAL(exists, 1); // the file is existing
+  FO_ASSERT_EQUAL(Result, 0); // command could run
 }
 
 /**
@@ -91,9 +91,9 @@ void testRunCommand4Rpm1()
   Out = "fossology-1.2.0-1.el5.i386.rpm.unpacked";
   Where = "./test-result";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  existed = file_dir_existed("./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked");
-  CU_ASSERT_EQUAL(existed, 1); //  existing
-  CU_ASSERT_EQUAL(Result, 0); // command could run
+  exists = file_dir_exists("./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked");
+  FO_ASSERT_EQUAL(exists, 1); //  existing
+  FO_ASSERT_EQUAL(Result, 0); // command could run
 }
 
 /**
@@ -110,9 +110,9 @@ void testRunCommand4Rpm2()
   Out = "fossology-1.2.0-1.el5.i386.rpm.unpacked.dir";
   Where = "./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked.dir";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  existed = file_dir_existed("./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked.dir/etc/fossology/RepPath.conf");
-  CU_ASSERT_EQUAL(existed, 1); //  existing
-  CU_ASSERT_EQUAL(Result, 0); // command could run
+  exists = file_dir_exists("./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked.dir/etc/fossology/RepPath.conf");
+  FO_ASSERT_EQUAL(exists, 1); //  existing
+  FO_ASSERT_EQUAL(Result, 0); // command could run
 }
 
 

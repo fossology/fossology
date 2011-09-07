@@ -4,8 +4,10 @@ TOP=../../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 AGENTDIR=../../agent
+TESTDIR=$(TOP)/src/testing/lib/c
+TESTLIB= -L $(TESTDIR) -l focunit -I $(TESTDIR)
 
-CFLAGS_LOCAL=-lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ -lcunit
+CFLAGS_LOCAL=-lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ -lcunit $(TESTLIB)
 EXE=run_tests
 OBJS=	run_tests.o \
 		test_CopyFile.o \

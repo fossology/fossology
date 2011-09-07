@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 char *Filename = "";
 char *NewDir = "./test-result";
 int Recurse = -1;
-int existed = 0; // default not existed
+int exists = 0; // default not exists
 magic_t MagicCookie;
 
 
@@ -67,39 +67,19 @@ CU_SuiteInfo suites[] =
 
 
 /**
- * @brief juge if the file or directory is existed not
- * @param path_name, the file or directory name including path
- * @return existed or not, 0: not existed, 1: existed
+ * @brief test if a file or directory exists
+ * @param path_name, the pathname of a file or directory to test
+ * @return 0=path_name does not exist, 1=exists
  */
-int file_dir_existed(char *path_name)
+int file_dir_exists(char *path_name)
 {
   struct stat sts;
-  int existed = 1; // 0: not existed, 1: existed, default existed
-  if ((stat (path_name, &sts)) == -1)
-  {
-    //printf ("The file or dir %s doesn't exist...\n", path_name);
-    existed = 0;
-  }
-  return existed;
+  int exists = 1; // 0: not exists, 1: exists, default exists
+
+  if ((stat (path_name, &sts)) == -1) exists = 0;
+  return exists;
 }
 
-
-/* ************************************************************************** */
-/* **** test failure function *********************************************** */
-/* ************************************************************************** */
-
-void test_failure_function()
-{
-  static int num_failed = 0;
-  if(CU_get_number_of_tests_failed() != num_failed)
-  {
-    printf(" FAILED");
-    num_failed++;
-  }
-}
-
-/* external function to test if a particular test failed */
-void (*test_failure)(void) = test_failure_function;
 
 /* ************************************************************************** */
 /* **** main test functions ************************************************* */
@@ -107,38 +87,7 @@ void (*test_failure)(void) = test_failure_function;
 
 int main(int argc, char** argv)
 {
-  if(CU_initialize_registry())
-  {
-    fprintf(stderr, "Initialization of Test Registry failed.'n");
-    return -1;
-  }
-  else
-  {
-    assert(CU_get_registry());
-    assert(!CU_is_test_running());
-
-    if(CU_register_suites(suites) != CUE_SUCCESS)
-    {
-      fprintf(stderr, "Register suites failed - %s\n", CU_get_error_msg());
-      return -1;
-    }
-
-    CU_set_output_filename("ununpack_Tests");
-    CU_list_tests_to_file();
-    CU_automated_run_tests();
-
-    printf("Results:\n");
-    printf("  Number of suites run: %d\n", CU_get_number_of_suites_run());
-    printf("  Number of tests run: %d\n", CU_get_number_of_tests_run());
-    printf("  Number of tests failed: %d\n", CU_get_number_of_tests_failed());
-    printf("  Number of asserts: %d\n", CU_get_number_of_asserts());
-    printf("  Number of successes: %d\n", CU_get_number_of_successes());
-    printf("  Number of failures: %d\n", CU_get_number_of_failures());
-
-    CU_cleanup_registry();
-  }
-
-  return 0;
+  return focunit_main("ununpack_Tests", suites);
 }
 
 

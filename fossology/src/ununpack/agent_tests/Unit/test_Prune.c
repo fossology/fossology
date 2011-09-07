@@ -54,9 +54,9 @@ void testPruneFileFileSzieIs0()
   stat(Fname, &Stat);
   CopyFile(Fname, Dst);
   Result = Prune(Dst, Stat);
-  existed = file_dir_existed(Dst);
-  CU_ASSERT_EQUAL(existed, 0); //  not  existing
-  CU_ASSERT_EQUAL(Result, 1); // pruned
+  exists = file_dir_exists(Dst);
+  FO_ASSERT_EQUAL(exists, 0); //  not  existing
+  FO_ASSERT_EQUAL(Result, 1); // pruned
 }
 
 /**
@@ -70,9 +70,9 @@ void testPruneRegFile()
   stat(Fname, &Stat);
   CopyFile(Fname, Dst);
   Result = Prune(Dst, Stat);
-  existed = file_dir_existed(Dst);
-  CU_ASSERT_EQUAL(existed, 1); // existing
-  CU_ASSERT_EQUAL(Result, 0); // not pruned
+  exists = file_dir_exists(Dst);
+  FO_ASSERT_EQUAL(exists, 1); // existing
+  FO_ASSERT_EQUAL(Result, 0); // not pruned
 }
 
 #if 0
@@ -84,9 +84,9 @@ void testPruneCharFile()
   Fname = "./test-data/testdata4unpack/cfile";
   stat(Fname, &Stat);
   Result = Prune(Fname, Stat);
-  existed = file_dir_existed(Fname);
-  CU_ASSERT_EQUAL(existed, 0); //  not  existing
-  CU_ASSERT_EQUAL(Result, 1); // pruned
+  exists = file_dir_exists(Fname);
+  FO_ASSERT_EQUAL(exists, 0); //  not  existing
+  FO_ASSERT_EQUAL(Result, 1); // pruned
 }
 #endif
 

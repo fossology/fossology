@@ -47,11 +47,11 @@ void testTraverseStartNormal()
 {
   Filename = "./test-data/testdata4unpack/threezip.zip";
   deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/threezip.zip.dir/twozip.zip.dir/Desktop.zip.dir/record.txt");
-  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
+  exists = file_dir_exists("./test-result/threezip.zip.dir/twozip.zip.dir/Desktop.zip.dir/record.txt");
+  FO_ASSERT_EQUAL(exists, 0); // ./test-result/ is not existing
   TraverseStart(Filename, Label, NewDir, Recurse);
-  existed = file_dir_existed("./test-result/threezip.zip.dir/twozip.zip.dir/Desktop.zip.dir/record.txt");
-  CU_ASSERT_EQUAL(existed, 1); // ./test-result/ is existing
+  exists = file_dir_exists("./test-result/threezip.zip.dir/twozip.zip.dir/Desktop.zip.dir/record.txt");
+  FO_ASSERT_EQUAL(exists, 1); // ./test-result/ is existing
 }
 
 

@@ -25,12 +25,12 @@ static int Result = 0;
 void testExtractISO1()
 {
   deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // not existing
+  exists = file_dir_exists("./test-result/");
+  FO_ASSERT_EQUAL(exists, 0); // not existing
   Filename = "./test-data/testdata4unpack/imagefile.iso";
   MkDirs("./test-result/imagefile.iso.dir");
   Result = ExtractISO(Filename, "./test-result/imagefile.iso.dir");
-  CU_ASSERT_EQUAL(Result, 0); 
+  FO_ASSERT_EQUAL(Result, 0); 
 
   int rc = 0;
   char commands[250];
@@ -38,13 +38,13 @@ void testExtractISO1()
   rc = system(commands);
   if (0 != rc)
   {
-    existed = file_dir_existed("./test-result/imagefile.iso.dir/test.cpi");
-    CU_ASSERT_EQUAL(existed, 1); 
+    exists = file_dir_exists("./test-result/imagefile.iso.dir/test.cpi");
+    FO_ASSERT_EQUAL(exists, 1); 
   }
   else
   {
-    existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.CPI;1");
-    CU_ASSERT_EQUAL(existed, 1); // existing
+    exists = file_dir_exists("./test-result/imagefile.iso.dir/TEST.CPI;1");
+    FO_ASSERT_EQUAL(exists, 1); // existing
   }
 }
 
@@ -54,16 +54,16 @@ void testExtractISO1()
 void testExtractISO2()
 {
   deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // not existing
+  exists = file_dir_exists("./test-result/");
+  FO_ASSERT_EQUAL(exists, 0); // not existing
   Filename = "./test-data/testdata4unpack/523.iso";
   MkDirs("./test-result/523.iso.dir");
   Result = ExtractISO(Filename, "./test-result/523.iso.dir"); // 
-  existed = file_dir_existed("./test-result/523.iso.dir/523sfp/DOS4GW.EXE");
-  CU_ASSERT_EQUAL(Result, 0);
-  CU_ASSERT_EQUAL(existed, 1); 
-  existed = file_dir_existed("./test-result/523.iso.dir/523sfp/p3p10131.bin");
-  CU_ASSERT_EQUAL(existed, 1); 
+  exists = file_dir_exists("./test-result/523.iso.dir/523sfp/DOS4GW.EXE");
+  FO_ASSERT_EQUAL(Result, 0);
+  FO_ASSERT_EQUAL(exists, 1); 
+  exists = file_dir_exists("./test-result/523.iso.dir/523sfp/p3p10131.bin");
+  FO_ASSERT_EQUAL(exists, 1); 
 
 }
 
@@ -73,10 +73,10 @@ void testExtractISO2()
 void testExtractISO4EmptyParameters()
 {
   deleteTmpFiles("./test-result/");
-  existed = file_dir_existed("./test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // not existing
+  exists = file_dir_exists("./test-result/");
+  FO_ASSERT_EQUAL(exists, 0); // not existing
   Result = ExtractISO("", ""); // empty parameters
-  CU_ASSERT_EQUAL(Result, 1); // fail to Extract  
+  FO_ASSERT_EQUAL(Result, 1); // fail to Extract  
 }
 
 /* ************************************************************************** */
