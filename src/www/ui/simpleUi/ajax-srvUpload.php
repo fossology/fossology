@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 
 global $GlobalReady;
 if (!isset($GlobalReady)) {
@@ -43,7 +43,7 @@ class ajax_srvUpload extends FO_Plugin
 
   /*
    Output(): Generate the text for this plugin.
-  */
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
@@ -55,14 +55,14 @@ class ajax_srvUpload extends FO_Plugin
       case "XML":
         break;
       case "HTML":
-
+        
         $topText = _("This option only uploads files located on the FOSSology
         web server. Use this option if you have large source directories to
         analyze. If your file is located elsewhere, then use one of the other
         upload options.");
         /* Display instructions */
         $V .= $topText;
-
+        
         /* Display the form */
         $V.= "<form name='uploadsrv' method='post'>\n"; // no url = this url
         $V .= "<input type='hidden' name='uploadform' value='srvupload'>\n";
@@ -92,7 +92,7 @@ class ajax_srvUpload extends FO_Plugin
         }
         $V.= " />Enable alphabetized sub-folders";
         $text = _("(Optional) Enter a viewable name for this Upload. ");
-
+        
         $Note = _("NOTE: ");
         $text1 = _("If no name is provided, then the uploaded file name will be used.");
         $V.= "<p><li>$text<b>$Note</b>$text1<br />\n";

@@ -14,12 +14,12 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 /*
  Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*/
+ at the very beginning.
+ This prevents hacking attempts.
+ */
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
@@ -43,14 +43,14 @@ class ajax_fileUpload extends FO_Plugin {
   public $DBaccess = PLUGIN_DB_UPLOAD;
   public $NoHTML     = 1; /* This plugin needs no HTML content help */
   public $LoginFlag = 0;
-
+ 
   /*
    Output(): Generate the text for this plugin.
   */
   function Output()
   {
     $Name = NULL;
-
+      
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
@@ -66,7 +66,7 @@ class ajax_fileUpload extends FO_Plugin {
         }
 
         /* Display the form */
-
+        
         $usageFile = _("Your FOSSology server has imposed a maximum file size of");
         $usageFile .= " ".  ini_get('post_max_size') . " ";
         $usageFile .= _("bytes.");

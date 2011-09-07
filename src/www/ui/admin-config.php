@@ -14,17 +14,15 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
+ at the very beginning.
+ This prevents hacking attempts.
+ *************************************************/
 global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
+if (!isset($GlobalReady)) { exit; }
 
 define("TITLE_foconfig", _("Configuration Variables"));
 
@@ -42,10 +40,10 @@ class foconfig extends FO_Plugin
 
   /***********************************************************
    Install(): Create and configure database tables
-  If the sysconfig table doesn't exist then
-  create it
-  create records for the core variables.
-  ***********************************************************/
+   If the sysconfig table doesn't exist then
+   create it
+   create records for the core variables.
+   ***********************************************************/
   function Install()
   {
     ConfigInit();
@@ -55,7 +53,7 @@ class foconfig extends FO_Plugin
 
   /************************************************
    HTMLout(): Generate HTML output.
-  ************************************************/
+   ************************************************/
   function HTMLout()
   {
     global $PG_CONN;
@@ -110,15 +108,13 @@ class foconfig extends FO_Plugin
 
   /************************************************
    Output(): Generate output.
-  ************************************************/
+   ************************************************/
   function Output()
   {
     global $PG_CONN;
     global $Plugins;
 
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
+    if ($this->State != PLUGIN_STATE_READY) { return; }
     if (empty($PG_CONN)) return;
 
     $newarray = GetParm("new", PARM_RAW);
@@ -162,9 +158,7 @@ class foconfig extends FO_Plugin
       default:
         break;
     }
-    if (!$this->OutputToStdout) {
-      return($OutBuf);
-    }
+    if (!$this->OutputToStdout) { return($OutBuf); }
     print($OutBuf);
     return;
   } // Output()

@@ -18,26 +18,24 @@
 
 /*************************************************
  Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
+ at the very beginning.
+ This prevents hacking attempts.
+ *************************************************/
 global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
+if (!isset($GlobalReady)) { exit; }
 
 /*************************************************
  This plugin is used to list all uploads associated
-with a folder.  This is NOT intended to be a user-UI
-plugin.
-This is intended as an active plugin to provide support
-data to the UI.
-*************************************************/
+ with a folder.  This is NOT intended to be a user-UI
+ plugin.
+ This is intended as an active plugin to provide support
+ data to the UI.
+ *************************************************/
 
 define("TITLE_core_uploads", _("List Uploads as Options"));
 
 class core_uploads extends FO_Plugin
-{
+  {
   var $Name       = "upload_options";
   var $Title      = TITLE_core_uploads;
   var $Version    = "1.0";
@@ -47,53 +45,47 @@ class core_uploads extends FO_Plugin
 
   /***********************************************************
    Output(): Display the loaded menu and plugins.
-  ***********************************************************/
+   ***********************************************************/
   function Output()
-  {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
+    {
+    if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     global $Plugins;
     switch($this->OutputType)
-    {
+      {
       case "XML":
-        break;
+	break;
       case "HTML":
-        $FolderId = GetParm("folder",PARM_INTEGER);
-        if (empty($FolderId)) {
-          $FolderId = FolderGetTop();
-        }
-        $List = FolderListUploads($FolderId);
-        foreach($List as $L)
-        {
-          $V .= "<option value='" . $L['upload_pk'] . "'>";
-          $V .= htmlentities($L['name']);
-          if (!empty($L['upload_desc']))
-          {
-            $V .= " (" . htmlentities($L['upload_desc']) . ")";
-          }
-          if (!empty($L['upload_ts']))
-          {
-            $V .= " :: " . htmlentities($L['upload_ts']);
-          }
-          $V .= "</option>\n";
-        }
-        break;
+	$FolderId = GetParm("folder",PARM_INTEGER);
+	if (empty($FolderId)) { $FolderId = FolderGetTop(); }
+	$List = FolderListUploads($FolderId);
+	foreach($List as $L)
+	  {
+	  $V .= "<option value='" . $L['upload_pk'] . "'>";
+	  $V .= htmlentities($L['name']);
+	  if (!empty($L['upload_desc']))
+		{
+		$V .= " (" . htmlentities($L['upload_desc']) . ")";
+		}
+	  if (!empty($L['upload_ts']))
+		{
+		$V .= " :: " . htmlentities($L['upload_ts']);
+		}
+	  $V .= "</option>\n";
+	  }
+	break;
       case "Text":
-        break;
+	break;
       default:
-        break;
-    }
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
+	break;
+      }
+    if (!$this->OutputToStdout) { return($V); }
     print("$V");
     return;
-  } // Output()
+    } // Output()
 
 
-};
+  };
 $NewPlugin = new core_uploads;
 $NewPlugin->Initialize();
 

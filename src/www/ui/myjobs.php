@@ -14,22 +14,20 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
+ at the very beginning.
+ This prevents hacking attempts.
+ *************************************************/
 global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
+if (!isset($GlobalReady)) { exit; }
 
 global $WEBDIR;
 /*
  * myJobs plugin
-*/
+ */
 
 global $DB;
 /**
@@ -52,37 +50,37 @@ global $DB;
 define("TITLE_myJobs", _("My Jobs Status"));
 
 class myJobs extends FO_Plugin {
-  public $Name       = "myjobs";
-  public $Title      = TITLE_myJobs;
-  public $MenuList   = "Jobs::My Jobs";
-  public $LoginFlag  = 1;    // Must be logged in
-  public $Dependency = array('db');
-  public $DBaccess = PLUGIN_DB_UPLOAD;
-  private $Interval  = 7;    // default refresh time
+	public $Name       = "myjobs";
+	public $Title      = TITLE_myJobs;
+	public $MenuList   = "Jobs::My Jobs";
+	public $LoginFlag  = 1;    // Must be logged in
+	public $Dependency = array('db');
+	public $DBaccess = PLUGIN_DB_UPLOAD;
+	private $Interval  = 7;    // default refresh time
 
-  /**
-   * displayJob
-   *
-   *  Display the jobs the user has running, update the screen every xx seconds
-   *
-   * @param int $uploadId (upload_pk).
-   *
-   */
-  public function displayJob($uploadId=NULL) {
-
-    // Create the style and heading
-    $text = _("Click Job Name:Id to see the job details");
-    $text1 = _("Page updates every");
-    $text2 = _("seconds");
-    $text3 = _("Running Jobs");
-    $text4 = _("Job Name:Id");
-    $text5 = _("Total");
-    $text6 = _("Tasks");
-    $text7 = _("Completed");
-    $text8 = _("Active");
-    $text9 = _("Pending");
-    $text10 = _("Failed");
-    $Heading = "<table border=2 align='center' cellspacing=1 cellpadding=5>\n" .
+	/**
+	 * displayJob
+	 *
+	 *  Display the jobs the user has running, update the screen every xx seconds
+	 *
+	 * @param int $uploadId (upload_pk).
+	 *
+	 */
+	public function displayJob($uploadId=NULL) {
+		
+		// Create the style and heading
+$text = _("Click Job Name:Id to see the job details");
+$text1 = _("Page updates every");
+$text2 = _("seconds");
+$text3 = _("Running Jobs");
+$text4 = _("Job Name:Id");
+$text5 = _("Total");
+$text6 = _("Tasks");
+$text7 = _("Completed");
+$text8 = _("Active");
+$text9 = _("Pending");
+$text10 = _("Failed");
+		$Heading = "<table border=2 align='center' cellspacing=1 cellpadding=5>\n" .
 		    "<caption align='top'>$text<br>".
 		    "$text1 $this->Interval $text2</caption>\n" .
         "   <tr>\n" .
@@ -97,114 +95,111 @@ class myJobs extends FO_Plugin {
         "     <th align='center'>$text10<br>$text6</th>\n" .
         "   </tr>\n";
 
-    $Tbl = $this->MakeJobTblRow();
+		$Tbl = $this->MakeJobTblRow();
+		
+		
+		$Refresh = "<META HTTP-EQUIV='refresh' CONTENT=$this->Interval name='refresher'/>\n";
 
+		/*
+		$Refresh = "\n\n<script type=\"text/javascript\">
 
-    $Refresh = "<META HTTP-EQUIV='refresh' CONTENT=$this->Interval name='refresher'/>\n";
+							function brefreshed() {
+  							self.location.reload();
+							}
+							</script>";
+		*/
 
-    /*
-     $Refresh = "\n\n<script type=\"text/javascript\">
+		print $Heading . $Tbl . $Refresh;
+		
+		/*
+		$setTimer = "\n\n<script type=\"text/javascript\">
+		self.setTimeout(brefreshed(),700000000);
+		alert('After setTimeout!');
+		</script>";
+		print $setTimer;
+		*/
+	}
 
-    function brefreshed() {
-    self.location.reload();
-    }
-    </script>";
-    */
+	protected function MakeJobTblRow() {
 
-    print $Heading . $Tbl . $Refresh;
+		global $DB;
+		global $CompletedJobs;
 
-    /*
-     $setTimer = "\n\n<script type=\"text/javascript\">
-    self.setTimeout(brefreshed(),700000000);
-    alert('After setTimeout!');
-    </script>";
-    print $setTimer;
-    */
-  }
-
-  protected function MakeJobTblRow() {
-
-    global $DB;
-    global $CompletedJobs;
-
-    if(empty($DB)) {
-      $text = _("Fatal internal ERROR! Cannot connect to the DataBase");
-      print "<h3 color='red'>$text</h3>\n";
-      return(FALSE);
-    }
-
-    $uri = Traceback_uri();
-    $params = "?mod=showjobs&show=detail&history=1&upload=";
-    $jobDetails =  $uri . $params;
-
-    $SqlUploadList = "SELECT  DISTINCT ON (job_upload_fk) job_upload_fk," .
+		if(empty($DB)) {
+$text = _("Fatal internal ERROR! Cannot connect to the DataBase");
+			print "<h3 color='red'>$text</h3>\n";
+			return(FALSE);
+		}
+		
+		$uri = Traceback_uri();
+		$params = "?mod=showjobs&show=detail&history=1&upload=";
+		$jobDetails =  $uri . $params;
+		
+		$SqlUploadList = "SELECT  DISTINCT ON (job_upload_fk) job_upload_fk," .
                      "upload_filename from job,upload " .
                     "WHERE user_fk='$_SESSION[UserId]' " .
                     "AND upload_pk=job_upload_fk order by job_upload_fk;\n";
-    $JobPhase = array('total' => 'bgcolor="#FFFFCC"',
+		$JobPhase = array('total' => 'bgcolor="#FFFFCC"',
                       'completed' => 'bgcolor="#D3D3D3"',
                       'active' => 'bgcolor="#99FF99"',
                       'pending' => 'bgcolor="#99FFFF"',
                       'failed' => 'bgcolor="#FF6666"');
 
-    $UploadList = $DB->Action($SqlUploadList);
-    $CompletedJobs = array();
-    $T = '';
-    if(empty($UploadList))
-    {
-      echo "<h3>No Jobs!?</h3>";
-    }
-    foreach($UploadList as $upload) {
-      $status = JobListSummary($upload['job_upload_fk']);
+		$UploadList = $DB->Action($SqlUploadList);
+		$CompletedJobs = array();
+		$T = '';
+		if(empty($UploadList))
+		{
+		  echo "<h3>No Jobs!?</h3>";
+		}
+		foreach($UploadList as $upload) {
+			$status = JobListSummary($upload['job_upload_fk']);
 
-      if ($status['total'] == $status['completed']) {
-        array_push($CompletedJobs,$upload);
-        continue;
-      }
-      // build the table entry
-      $T .= "   <tr>\n";
-      $T .= "     <td><a href=\"$jobDetails$upload[job_upload_fk]\">".
+			if ($status['total'] == $status['completed']) {
+				array_push($CompletedJobs,$upload);
+				continue;
+			}
+			// build the table entry
+			$T .= "   <tr>\n";
+			$T .= "     <td><a href=\"$jobDetails$upload[job_upload_fk]\">".
 			      "$upload[upload_filename]:$upload[job_upload_fk]</a></td>\n";
-      $color = "";
-      foreach($JobPhase as $phase => $color) {
-        /* Only cells with something going on get a color */
-        if($status[$phase] == 0){
-          $T .= "     <td align='center'>$status[$phase]</td>\n";
-        }
-        else {
-          $T .= "     <td align='center' $color>$status[$phase]</td>\n";
-        }
-      }
-      $T .= "   </tr>\n";      // close the row and table
+			$color = "";
+			foreach($JobPhase as $phase => $color) {
+				/* Only cells with something going on get a color */
+				if($status[$phase] == 0){
+					$T .= "     <td align='center'>$status[$phase]</td>\n";
+				}
+				else {
+					$T .= "     <td align='center' $color>$status[$phase]</td>\n";
+				}
+			}
+			$T .= "   </tr>\n";      // close the row and table
 
-    }
-    $T .= "</table>\n";
-    return($T);
-  } // makeTbl4Job
+		}
+		$T .= "</table>\n";
+		return($T);
+	} // makeTbl4Job
 
-  function Output() {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }   /* State is set by FO_Plugin */
-    $V="";
-    switch($this->OutputType) {
-      /* OutputType is set by FO_Plugin */
-      case "XML":
-        break;
-      case "HTML":
-        $this->displayJob();
-        break;
-      case "Text":
-        break;
-      default:
-        break;
-    }
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
-    print($V);
-    return;
-  }
+	function Output() {
+		if ($this->State != PLUGIN_STATE_READY) { return; }   /* State is set by FO_Plugin */
+		$V="";
+		switch($this->OutputType) {                             /* OutputType is set by FO_Plugin */
+			case "XML":
+				break;
+			case "HTML":
+				$this->displayJob();
+				break;
+			case "Text":
+				break;
+			default:
+				break;
+		}
+		if (!$this->OutputToStdout) {
+			return($V);
+		}
+		print($V);
+		return;
+	}
 };
 $NewPlugin = new myJobs;
 ?>
