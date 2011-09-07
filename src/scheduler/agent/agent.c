@@ -44,7 +44,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_ARGS 32       ///< the maximum number arguments passed to children  (arbitrary)
 #define TILL_DEATH 180    ///< how long to wait before agent is dead            (3 minutes)
 #define NUM_UPDATES 5     ///< the number of updates before agent is dead       (arbitrary)
-#define MAX_GENERATION 0  ///< the most agents that a piece of data can survive (arbitrary)
 
 #ifndef AGENT_DIR
 #define AGENT_DIR ""      ///< the location of the agent executables for localhost
@@ -102,10 +101,10 @@ struct agent_internal
     /* data management */
     job owner;            ///< the job that this agent is assigned to
     char* data;           ///< the data that has been sent to the agent for analysis
-    int generation;       ///< the generation of the data (i.e. how many agents has it survived)
     int updated;          ///< boolean flag to indicate if the scheduler has updated the data
     int check_analyzed;   ///< the number that were analyzed between last heartbeats
     int total_analyzed;   ///< the total number that this agent has analyzed
+    int return_code;      ///< what was returned by the agent when it disconnected
 };
 
 /**
@@ -276,7 +275,7 @@ int agent_test(char* name, meta_agent ma, host h)
 
   VERBOSE3("META_AGENT[%s] testing\n", ma->name);
   job j = job_init(ma->name, id_gen--, 0);
-  agent_init(h, j, 0);
+  agent_init(h, j);
   return 0;
 }
 
@@ -351,12 +350,16 @@ void agent_listen(agent a)
   g_static_mutex_unlock(&version_lock);
 
   /* enter listening loop */
-  while(a->status == AG_CREATED || a->status == AG_SPAWNED || a->status == AG_RUNNING)
+  while(1)
   {
     /* get message from agent */
     if(fgets(buffer, sizeof(buffer), a->read) == NULL)
       g_thread_exit(NULL);
+
     buffer[strlen(buffer) - 1] = '\0';
+
+    if(strlen(buffer) == 0)
+      continue;
 
     if(TVERBOSE3)
       alprintf(job_log(a->owner),
@@ -366,21 +369,21 @@ void agent_listen(agent a)
     /* check for messages from scheduler or clean agent death */
     if(strncmp(buffer, "BYE", 3) == 0)
     {
-      if((i = atoi(&(buffer[4]))) == 0)
+      if((a->return_code = atoi(&(buffer[4]))) != 0)
       {
-        agent_transition(a, AG_CLOSING);
-        break;
+        alprintf(job_log(a->owner),
+            "JOB[%d].%s[%d]: agent failed with error code %d\n",
+            job_id(a->owner), a->meta_data->name, a->pid, a->return_code);
+        agent_fail(a);
       }
-
-      alprintf(job_log(a->owner),
-          "JOB[%d].%s[%d]: agent failed with error code %d\n",
-          job_id(a->owner), a->meta_data->name, a->pid, i);
-      agent_fail(a);
       break;
     }
 
     if(strncmp(buffer, "@@@1", 4) == 0)
+    {
+      printf("WHAT THE FUCK\n");
       break;
+    }
     if(strncmp(buffer, "@@@0", 4) == 0 && a->updated)
     {
       aprintf(a, "%s\n", a->data);
@@ -645,7 +648,7 @@ void meta_agent_destroy(meta_agent ma)
  * @param owner the job that this agent belongs to
  * @param gen the generation of the data associated with this agent
  */
-agent agent_init(host host_machine, job owner, int gen)
+agent agent_init(host host_machine, job owner)
 {
   /* local variables */
   agent a;
@@ -665,6 +668,8 @@ agent agent_init(host host_machine, job owner, int gen)
   {
     lprintf("ERROR %s.%d: jq_pk %d jq_type %s does not match any module in mods-enabled\n",
         __FILE__, __LINE__, job_id(owner), job_type(owner));
+    job_fail(owner);
+    job_remove_agent(owner, NULL);
     return NULL;
   }
 
@@ -710,8 +715,8 @@ agent agent_init(host host_machine, job owner, int gen)
   a->owner = owner;
   a->updated = 0;
   a->n_updates = 0;
-  a->generation = gen;
   a->data = NULL;
+  a->return_code = -1;
 
   /* open the relevant file pointers */
   if((a->read = fdopen(a->from_child, "r")) == NULL)
@@ -728,29 +733,6 @@ agent agent_init(host host_machine, job owner, int gen)
   /* spawn the listen thread */
   a->thread = g_thread_create(agent_spawn, a, 1, NULL);
   return a;
-}
-
-/**
- * Allocate and spawn a new agent based upon an old agent. This will spawn the
- * new agent and set it up to analyze the same data that the old agent was
- * working on. This is used when an agent fails but the job hasn't finished.
- *
- * @param a the agent that will be copied
- * @return the new agent
- */
-agent agent_copy(agent a)
-{
-  TEST_NULL(a, NULL);
-  if(a->generation >= MAX_GENERATION)
-    return NULL;
-
-  VERBOSE3("JOB[%d].%s[%d]: creating copy of agent\n",
-      job_id(a->owner), a->meta_data->name, a->pid);
-
-  agent cpy = agent_init(a->host_machine, a->owner, a->generation + 1);
-  cpy->data = a->data;
-
-  return cpy;
 }
 
 /**
@@ -785,47 +767,49 @@ void agent_destroy(agent a)
 /* ************************************************************************** */
 
 /**
- * Event created when any number of agents die. This takes a NULL terminated
- * list of pid's that will be iterated across. An agent_death_event should only
- * be created for agents that have been moved to status AG_CLOSING and to get an
- * agent in any other status is an error and will result in the agent being
- * failed.
+ * Event created when a SIGCHLD is received for an agent. If one SIGCHILD is
+ * received for several process deaths, there will be seperate events for each
+ * pid.
  *
- * @param pids NULL terminated list of pids
+ * @param pid the pid of the process that died
  */
-void agent_death_event(void* pids)
+void agent_death_event(pid_t* pid)
 {
-  /* locals */
-  pid_t* curr;      // the current pid being manipulated
-  int  db = 0;    // flag to run a database update
-  agent a;        // agent to be accessed
+  agent a;
 
-  TEST_NULV(pids);
+  a = g_tree_lookup(agents, pid);
 
-  /* for each agent, check its status and change accordingly */
-  for(curr = (int*)pids; *curr; curr++)
+  if(job_id(a->owner) >= 0)
+    database_update_event(NULL);
+
+  if(write(a->to_parent, "@@@1\n", 5) != 5)
+    VERBOSE2("JOB[%d].%s[%d]: write to agent unsuccessful: %s\n",
+        job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
+  g_thread_join(a->thread);
+
+  if(a->return_code != 0)
   {
-    a = g_tree_lookup(agents, curr);
-
-    if(job_id(a->owner) >= 0)
-      db = 1;
-
-    if(a->status != AG_CLOSING)
-    {
-      alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent failed\n",
-          job_id(a->owner), a->meta_data->name, a->pid);
-      ERROR("JOB[%d].%s[%d]: agent closed unexpectedly, agent status was %s",
-          job_id(a->owner), a->meta_data->name, a->pid, status_strings[a->status]);
-      agent_fail(a);
-      job_update(a->owner);
-    }
-    agent_close(a);
+    alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent failed\n",
+        job_id(a->owner), a->meta_data->name, a->pid);
+    ERROR("JOB[%d].%s[%d]: agent closed unexpectedly, agent status was %s",
+        job_id(a->owner), a->meta_data->name, a->pid, status_strings[a->status]);
+    agent_fail(a);
+    job_update(a->owner);
   }
 
-  if(db) database_update_event(NULL);
+  VERBOSE2("JOB[%d].%s[%d]: successfully removed from the system\n",
+      job_id(a->owner), a->meta_data->name, a->pid);
 
-  /* clean up the passed params */
-  g_free(pids);
+  job_remove_agent(a->owner, a);
+  if(a->status == AG_FAILED && job_id(a->owner) < 0)
+  {
+    lprintf("ERROR %s.%d: agent %s has failed scheduler startup test\n",
+        __FILE__, __LINE__, a->meta_data->name);
+    g_tree_remove(meta_agents, a->meta_data->name);
+  }
+  g_tree_remove(agents, &a->pid);
+
+  g_free(pid);
 }
 
 /**
@@ -866,11 +850,7 @@ void agent_ready_event(agent a)
         job_id(a->owner), a->meta_data->name, a->pid);
   }
 
-  if(a->generation != 0)
-  {
-    a->updated = 1;
-  }
-  else if(!job_is_open(a->owner))
+  if(!job_is_open(a->owner))
   {
     agent_transition(a, AG_PAUSED);
     job_finish_agent(a->owner, a);
@@ -902,67 +882,6 @@ void agent_ready_event(agent a)
 void agent_update_event(void* unused)
 {
   g_tree_foreach(agents, (GTraverseFunc)update, NULL);
-}
-
-/**
- * Used when trying to run the data that another copy of this agent failed on.
- * This will be called by the job when updating and will only be called on an
- * agent that already successfully completed.
- *
- * @param a the agent that will be restarted
- * @param ref the agent to get the data from
- */
-void agent_restart(agent a, agent ref)
-{
-  TEST_NULV(a);
-  TEST_NULV(ref);
-  VERBOSE3("JOB[%d].%s[%d]: restarting agent to finish data from %s[%d]\n",
-      job_id(a->owner), a->meta_data->name, a->pid, ref->meta_data->name, ref->pid);
-
-  a->data = ref->data;
-  a->updated = 1;
-  a->generation = ref->generation + 1;
-  if(write(a->to_parent, "@@@0\n", 5) != 5)
-  {
-    ERROR("JOB[%d].%s[%d]: failed to restart agent with new data",
-        job_id(a->owner), a->meta_data->name, a->pid);
-    kill(a->pid, SIGKILL);
-  }
-}
-
-/**
- * Closes an agent. This function should be called twice for every agent that
- * completes execution correctly. The first time this will move the agent status
- * to AG_CLOSING and tell the agent to close by printing "CLOSE" to the agent's
- * pipe. The second time this will be called from within an agent_death_event.
- * It will remove the agent from the job and join on it communication thread.
- *
- * @param a
- */
-void agent_close(agent a)
-{
-  if(a->status != AG_CLOSING && a->status != AG_FAILED)
-  {
-    aprintf(a, "CLOSE\n");
-    return;
-  }
-
-  if(write(a->to_parent, "@@@1\n", 5) != 5)
-    VERBOSE2("JOB[%d].%s[%d]: write to agent unsuccessful: %s\n",
-        job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
-  g_thread_join(a->thread);
-
-  VERBOSE2("JOB[%d].%s[%d]: successfully removed from the system\n",
-      job_id(a->owner), a->meta_data->name, a->pid);
-
-  job_remove_agent(a->owner, a);
-  if(a->status == AG_FAILED && job_id(a->owner) < 0)
-  {
-    lprintf("ERROR %s.%d: agent %s has failed scheduler startup test\n",
-        __FILE__, __LINE__, a->meta_data->name);
-    g_tree_remove(meta_agents, a->meta_data->name);
-  }
-  g_tree_remove(agents, &a->pid);
 }
 
 /**
@@ -1022,6 +941,17 @@ void agent_print_status(agent a, GOutputStream* ostr)
   g_output_stream_write(ostr, status_str, strlen(status_str), NULL, NULL);
   g_free(status_str);
   return;
+}
+
+/**
+ * Gets the status field for the agent
+ *
+ * @param a an agent
+ * @return the status
+ */
+agent_status agent_gstatus(agent a)
+{
+  return a->status;
 }
 
 /**
@@ -1118,7 +1048,7 @@ void kill_agents()
 void list_agents(GOutputStream* ostr)
 {
   g_tree_foreach(meta_agents, (GTraverseFunc)agent_list, ostr);
-  g_output_stream_write(ostr, "end\n", 4, NULL, NULL);
+  g_output_stream_write(ostr, "\nend\n", 4, NULL, NULL);
 }
 
 /**

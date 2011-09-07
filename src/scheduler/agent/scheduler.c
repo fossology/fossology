@@ -85,24 +85,19 @@ int s_port;
  */
 void chld_sig(int signo)
 {
-  int idx;          // index of the next empty location in the pid list
-  pid_t* pid_list;  // list of dead agent pid's
   pid_t n;          // the next pid that has died
+  pid_t* pass;
   int status;       // status returned by waitpit()
-
-  /* initialize memory */
-  pid_list = g_new0(pid_t, num_agents() + 1);
-  idx = 0;
 
   /* get all of the dead children's pids */
   while((n = waitpid(-1, &status, WNOHANG)) > 0)
   {
     if(TVERBOSE2)
       clprintf("SIGNALS: received sigchld for pid %d\n", n);
-    pid_list[idx++] = n;
+    pass = g_new0(pid_t, 1);
+    *pass = n;
+    event_signal(agent_death_event, pass);
   }
-
-  event_signal(agent_death_event, pid_list);
 }
 
 /**
@@ -194,13 +189,13 @@ void update_scheduler()
       //if((h = get_host(1)) == NULL)
       //  continue;
 
-      agent_init(get_host(1), j, 0);
+      agent_init(get_host(1), j);
     }
   }
 
   if(j != NULL && n_agents == 0 && n_jobs == 0)
   {
-    agent_init(get_host(1), j, 0);
+    agent_init(get_host(1), j);
     lockout = 1;
     j = NULL;
   }
@@ -314,7 +309,7 @@ void set_usr_grp()
   /* set the project group */
   setgroups(1, &(grp->gr_gid));
   if((setgid(grp->gr_gid) != 0) || (setegid(grp->gr_gid) != 0))
-  {event_signal(database_update_event, NULL);
+  {
     fprintf(stderr, "FATAL %s.%d: %s must be run as root or %s\n", __FILE__, __LINE__, PROCESS_NAME, PROJECT_USER);
     fprintf(stderr, "FATAL Set group '%s' aborting due to error: %s\n", PROJECT_GROUP, strerror(errno));
     exit(-1);
@@ -676,7 +671,7 @@ int main(int argc, char** argv)
   /* *************************************** */
   /* *** enter the scheduler event loop **** */
   /* *************************************** */
-  event_signal(database_update_event, NULL);
+  //event_signal(database_update_event, NULL);
   alarm(CHECK_TIME);
   event_loop_enter(update_scheduler);
 
