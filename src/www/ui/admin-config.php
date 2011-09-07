@@ -14,15 +14,17 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
+at the very beginning.
+This prevents hacking attempts.
+*************************************************/
 global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+if (!isset($GlobalReady)) {
+  exit;
+}
 
 define("TITLE_foconfig", _("Configuration Variables"));
 
@@ -40,10 +42,10 @@ class foconfig extends FO_Plugin
 
   /***********************************************************
    Install(): Create and configure database tables
-   If the sysconfig table doesn't exist then
-   create it
-   create records for the core variables.
-   ***********************************************************/
+  If the sysconfig table doesn't exist then
+  create it
+  create records for the core variables.
+  ***********************************************************/
   function Install()
   {
     ConfigInit();
@@ -53,7 +55,7 @@ class foconfig extends FO_Plugin
 
   /************************************************
    HTMLout(): Generate HTML output.
-   ************************************************/
+  ************************************************/
   function HTMLout()
   {
     global $PG_CONN;
@@ -108,13 +110,15 @@ class foconfig extends FO_Plugin
 
   /************************************************
    Output(): Generate output.
-   ************************************************/
+  ************************************************/
   function Output()
   {
     global $PG_CONN;
     global $Plugins;
 
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
     if (empty($PG_CONN)) return;
 
     $newarray = GetParm("new", PARM_RAW);
@@ -132,44 +136,13 @@ class foconfig extends FO_Plugin
       {
         if ($VarValue != $oldarray[$VarName])
         {
-          /* get validation_function row from sysconfig table */
-          $sql = "select validation_function, ui_label from sysconfig where variablename='".pg_escape_string($VarName)."';";
+          $sql = "update sysconfig set conf_value='" .
+          pg_escape_string($VarValue) .
+                    "' where variablename='$VarName'";
           $result = pg_query($PG_CONN, $sql);
           DBCheckResult($result, $sql, __FILE__, __LINE__);
-          $sys_array = pg_fetch_assoc($result);
-          $validation_function = $sys_array['validation_function'];
-          $ui_label = $sys_array['ui_label'];
-          pg_free_result($result);
-          $is_empty = empty($validation_function);
-          /* 1. the validation_function is empty
-             2. the validation_function is not empty, and after checking, the value is valid
-             update sysconfig table
-          */
-          if ($is_empty || (!$is_empty && (1 == $validation_function($VarValue))))
-          {
-            $sql = "update sysconfig set conf_value='" .
-            pg_escape_string($VarValue) .
-              "' where variablename='$VarName'";
-            $result = pg_query($PG_CONN, $sql);
-            DBCheckResult($result, $sql, __FILE__, __LINE__);
-            pg_free_result($result);
-            if (!empty($UpdateMsg)) $UpdateMsg .= ", ";
-            $UpdateMsg .= "$VarName";
-          }
-          /* the validation_function is not empty, but after checking, the value is invalid */
-          else if (!$is_empty && (0 == $validation_function($VarValue)))
-          {
-            if (!strcmp($validation_function, 'check_boolean'))
-            {
-              $warning_msg = _("Error: You set $ui_label to $VarValue. Valid  values are \'true\' and \'false\'.");
-              echo "<script>alert('$warning_msg');</script>";
-            }
-            else if  (strpos($validation_function, "url"))
-            {
-              $warning_msg = _("Error: $ui_label $VarValue, is not a reachable URL.");
-              echo "<script>alert('$warning_msg');</script>";
-            }
-          }
+          if (!empty($UpdateMsg)) $UpdateMsg .= ", ";
+          $UpdateMsg .= "$VarName";
         }
       }
       if (!empty($UpdateMsg)) $UpdateMsg .= " updated.";
@@ -189,7 +162,9 @@ class foconfig extends FO_Plugin
       default:
         break;
     }
-    if (!$this->OutputToStdout) { return($OutBuf); }
+    if (!$this->OutputToStdout) {
+      return($OutBuf);
+    }
     print($OutBuf);
     return;
   } // Output()

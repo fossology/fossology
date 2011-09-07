@@ -14,12 +14,12 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+*/
 /*
  Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- */
+at the very beginning.
+This prevents hacking attempts.
+*/
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
@@ -43,9 +43,9 @@ class ajax_oneShotCopyright extends FO_Plugin {
 
   /*********************************************
    RegisterMenus(): Change the type of output
-   based on user-supplied parameters.
-   Returns 1 on success.
-   *********************************************/
+  based on user-supplied parameters.
+  Returns 1 on success.
+  *********************************************/
   function RegisterMenus()
   {
     if ($this->State != PLUGIN_STATE_READY)
@@ -99,10 +99,35 @@ class ajax_oneShotCopyright extends FO_Plugin {
       $this->NoHTML = 1;
       /* default header is plain text */
     }
+    /*
+     // Only register with the menu system if the user is logged in.
+    if (!empty($_SESSION['User']))
+    {
+    // Debugging changes to license analysis NOTE: this comment doesn't make sense.
+    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+    {
+    menu_insert("Main::Upload::One-Shot Copyright/Email/URL", $this->MenuOrder, $this->Name, $this->MenuTarget);
+    }
+    // Debugging changes to license analysis
+    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG)
+    {
+    $URI = $this->Name . Traceback_parm_keep(array(
+    "format",
+    "upload",
+    "item"
+    ));
+
+    $text = _("Copyright/Email/URL One-shot, real-time analysis");
+    menu_insert("View::[BREAK]", 100);
+    menu_insert("View::One-Shot Copyright/Email/URL", 101, $URI, $text);
+    menu_insert("View-Meta::[BREAK]", 100);
+    menu_insert("View-Meta::One-Shot Copyright/Email/URL", 101, $URI, $text);
+    }
+    }
+    */
   } // RegisterMenus()
-  
   /*********************************************
-  Output(): Generate the text for this plugin.
+   Output(): Generate the text for this plugin.
   *********************************************/
   function Output() {
 
@@ -121,15 +146,20 @@ class ajax_oneShotCopyright extends FO_Plugin {
         $V .= _("The analysis is done in real-time. Large files may take a
         while to upload.  Due to the time it takes to upload large files, this
         method is not recommended for files larger than a few hundred kilobytes.\n");
-        
+
         /* Display the form */
         $V .= "<form name='oscopyright' enctype='multipart/form-data' method='post'>\n";
         $V .= "<input type='hidden' name='uploadform' value='oneShotCopyright'>\n";
-        $selText .= _("Select the file to upload:");
-        $V .= "<br />$selText<br />\n";
+        $V .= "<ol>\n";
+        $V .= _("<li>Select the file to upload:<br />\n");
         $V .= "<input name='licfile' size='60' type='file' /><br /><br>\n";
+        $text = _("Check if you want to see the highlighted text");
+        $V .= "<li><input type='checkbox' name='highlight' value='1'>$text.\n";
+        $V .= _("Unchecked returns a simple list that summarizes the identified types.");
+        $V .= "<P />\n";
+        $V .= "</ol>\n";
         $V .= "<input type='hidden' name='showheader' value='1'>";
-        $text = _("Upload and scan");
+        $text = _("Analyze");
         $V .= "<input type='submit' value='$text!'>\n";
         $V .= "</form>\n";
         break;
