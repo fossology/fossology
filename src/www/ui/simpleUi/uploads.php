@@ -435,7 +435,16 @@ class uploads extends FO_Plugin
 
     /* Prepare the job: job "wget" has jobqueue item "wget" */
     /** 2nd parameter is obsolete **/
-    $jq_args = "$uploadpk - $GetURL --accept=$Accept --reject=$Reject -l $Level";
+    $jq_args = "$uploadpk - $GetURL -l $Level ";
+    if (!empty($Accept)) {
+      $jq_args .= "-A $Accept ";
+    }
+    if (!empty($Reject)) { // reject the files index.html*
+      $jq_args .= "-R $Reject,index.html* ";
+    } else // reject the files index.html*
+    {
+      $jq_args .= "-R index.html* ";
+    }
     $jobqueuepk = JobQueueAdd($jobpk, "wget", $jq_args, "no", NULL, NULL);
     if (empty($jobqueuepk))
     {
@@ -490,8 +499,15 @@ class uploads extends FO_Plugin
             else
             {
               $text = _("Upload failed for file");
-              $V.= displayMessage("$text {$_FILES[getfile][name]}: $rc");
+              //$V.= displayMessage("$text {$_FILES[getfile][name]}: $rc");
+              echo displayMessage("$text {$_FILES[getfile][name]}: $rc");
             }
+          }
+          else
+          {
+            $text = _("Upload failed for file");
+            $text1 = _("The file is missing!");
+            echo displayMessage("$text {$_FILES[getfile][name]}: $text1");
           }
         }
         else if($formName == 'urlupload')
@@ -546,7 +562,8 @@ class uploads extends FO_Plugin
             else
             {
               $text = _("Upload failed for");
-              $results .= displayMessage("$text $SourceFiles: $rc");
+              //$results .= displayMessage("$text $SourceFiles: $rc");
+              echo displayMessage("$text $SourceFiles: $rc");
             }
           }
         }
@@ -588,6 +605,16 @@ class uploads extends FO_Plugin
             }
             return;
           }
+          else {
+            $text = _("The file is missing!");
+            $keep = "<strong>$text</strong> <br>";
+            print displayMessage(NULL,$keep);
+            $uri = Traceback_uri();
+            $toUploads = "<a href='$uri?mod=uploads'>Back to Uploads</a>\n";
+            $_FILES['licfile'] = NULL;
+            echo $toUploads;
+            return; 
+          }
         }
 
         else if($formName == 'oneShotCopyright')
@@ -611,6 +638,16 @@ class uploads extends FO_Plugin
               unlink($_FILES['licfile']['tmp_name']);
             }
             return;
+          }
+          else {
+            $text = _("The file is missing!");
+            $keep = "<strong>$text</strong> <br>";
+            print displayMessage(NULL,$keep);
+            $uri = Traceback_uri();
+            $toUploads = "<a href='$uri?mod=uploads'>Back to Uploads</a>\n";
+            $_FILES['licfile'] = NULL;
+            echo $toUploads;
+            return; 
           }
         }
 

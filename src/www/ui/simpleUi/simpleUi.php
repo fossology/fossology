@@ -17,12 +17,12 @@
  */
 
 /**
- * \brief simpleUi, create few menus for users with DBacess <= 5.
+ * \brief simpleUi, create new menus for users with DBacess <= 5.
  *
- * This code depends on symlinks existing between the direcotry this code is in
+ * This code depends on symlinks existing between the directory this code is in
  * and the plugins directory.
  *
- * @version "$Id: simpleUi.php 4037 2011-04-11 19:05:35Z bobgo $"
+ * @version "$Id: simpleUi.php 4404 2011-06-14 21:46:47Z rrando $"
  */
 
 global $GlobalReady;
@@ -53,8 +53,6 @@ class simpleUi extends FO_Plugin
    */
   function adjustMenus()
   {
-    //global $MenuList;
-
     // change the user-edit-self menu
     $userEditSelf = plugin_find_any('user_edit_self');  // can be null
     if(!empty($userEditSelf))
@@ -64,81 +62,6 @@ class simpleUi extends FO_Plugin
       $userEditSelf->Name,$userEditSelf->MenuTarget);
     }
   }
-
-  /**
-   * \brief adjust the dependencies of selected plugins so they work with the
-   * simplified UI.
-   *
-   * @return void
-   */
-  function adjustDependencies()
-  {
-    /*
-     * List of plugins that need dependencies adjusted
-     */
-    $newDependencies = array(
-      'upload_instructions' => array("upload_file", "upload_url"),
-      'upload_file' => array("db", "agent_unpack"),
-    //'myjobs' => array('db'),
-    );
-    $upmenus = array(
-      'upload_instructions' => 'Main::Upload::Instructions',
-      'upload_file' => 'Main::Upload::From File',
-    //'myjobs' => 'Main::Jobs::My Jobs',
-    );
-
-    foreach($newDependencies as $plugin => $depends)
-    {
-      $pluginRef = plugin_find_any($plugin);  // can be null
-      if(!empty($pluginRef))
-      {
-        $pluginRef->Dependency = $depends;
-        if($this->setState($pluginRef))
-        {
-          if($pluginRef->State == PLUGIN_STATE_READY)
-          {
-            $md = menu_insert($upmenus[$pluginRef->Name],$pluginRef->MenuOrder,
-            $pluginRef->Name,$pluginRef->MenuTarget);
-          }
-        }
-      }
-    }
-  } // adjustDependencies
-
-  /**
-   *  \brief Change the DBaccess attribute to PLUGIN_DB_DELETE for selected
-   *  plugins. This makes the plugin only available to user with permissions
-   *  > 5.
-   *
-   *  @$plugin mixed, either a scalar or an array
-   */
-  function changeDBaccess($plugins)
-  {
-    if(empty($plugins))
-    {
-      return(0);
-    }
-    if(is_array($plugins))
-    {
-      foreach($plugins as $plugin)
-      {
-        $pluginRef = plugin_find_any($plugin);  // can be null
-        if(!empty($pluginRef))
-        {
-          $pluginRef->DBaccess = PLUGIN_DB_DELETE;
-        }
-      }
-    }
-    else
-    {
-      $pluginRef = plugin_find_any($plugins);  // can be null
-      if(!empty($pluginRef))
-      {
-        $pluginRef->DBaccess = PLUGIN_DB_DELETE;
-      }
-    }
-  } //changeDBaccess
-
 
   /**
    * \brief disable plugins not needed for simple UI, when users with perms
@@ -176,58 +99,28 @@ class simpleUi extends FO_Plugin
     }
   } //disablePlugins
 
-  /**
-   * \brief check and set the state of the plugin
-   *
-   * @param $pluginRef object reference to the plugin
-   * @return boolean
-   */
-  function setState($pluginRef)
-  {
-    if(!is_object($pluginRef)) { return(FALSE); }
-
-    if($pluginRef->State == PLUGIN_STATE_INVALID)
-    {
-      //echo "<pre>";
-      //echo "SUI: Plugin state is $pluginRef->State for $pluginRef->Name\n";
-      $pluginRef->State = PLUGIN_STATE_VALID;
-      //echo "<pre>SUI: State after setting is:$pluginRef->State\n";
-      $pluginRef->PostInitialize();
-      //echo "<pre>SUI: State after PostInit is:$pluginRef->State\n";
-      if ($pluginRef->State == PLUGIN_STATE_READY) { $pluginRef->RegisterMenus(); }
-    }
-    //echo "</pre>";
-    return(TRUE);
-  } // setState($pluginRef)
-
   function PostInitialize()
   {
     global $Plugins;
-    //echo "<pre>SIMP: State is:$this->State for $this->Name\n</pre>";
     if ($this->State != PLUGIN_STATE_VALID) {
       return(0);
     } // don't run
 
     if (empty($_SESSION['User']) && $this->LoginFlag) {
-      //echo "<pre>SIMP: Didn't pass session/LoginFlag check\n</pre>";
       return(0);
     }
     // Make sure dependencies are met
     foreach($this->Dependency as $key => $val) {
       $id = plugin_find_id($val);
       if ($id < 0) {
-        //echo "<pre>SIMP: depdendencies not met! for $this->Name\n</pre>";
         $this->Destroy();
         return(0);
       }
     }
 
-    // echo "<pre>SIMP: uipref is:{$_SESSION['UiPref']}\n</pre>";
-    
     // if user wants simple ui, make adjustments
     if($_SESSION['UiPref'] == 'simple')
     {
-      //$this->adjustDependencies();
       $this->adjustMenus();
       plugin_disable(@$_SESSION['UserLevel']);
       $this->disablePlugins(array('agent_nomos_once','agent_copyright_once',
