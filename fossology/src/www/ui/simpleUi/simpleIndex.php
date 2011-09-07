@@ -18,23 +18,23 @@
 
 /***************************************************************
  $GlobalReady is only set here.
-This flag tells all other PHP code that it is running from this system.
-If other PHP code does not see this flag, then the code is not being
-executed correctly and should exit immediately (without taking further
-action).
-***************************************************************/
+ This flag tells all other PHP code that it is running from this system.
+ If other PHP code does not see this flag, then the code is not being
+ executed correctly and should exit immediately (without taking further
+ action).
+ ***************************************************************/
 $GlobalReady=1;
 $SysConf = array();
 $PG_CONN = 0;   // Database connection
 
 /****************************************************
  This is the main guts of the UI: Find the plugin and run it.
-****************************************************/
+ ****************************************************/
 //$_SERVER['HTTP_SMUNIVERSALID'] = "dong.ma@hp.com";
 
 /* Connect to the database.  If the connection fails,
  * DBconnect() will print a failure message and exit.
-*/
+ */
 DBconnect();
 
 /* Initialize global system configuration variables $SysConfig[] */
@@ -43,20 +43,18 @@ $SysConf = ConfigInit();
 plugin_load("plugins/simpleUi");
 
 $Mod = GetParm("mod",PARM_STRING);
-if (!isset($Mod)) {
-  $Mod = "Default";
-}
+if (!isset($Mod)) { $Mod = "Default"; }
 $PluginId = plugin_find_id($Mod);
 if ($PluginId >= 0)
-{
+  {
   /* Found a plugin, so call it! */
   $Plugins[$PluginId]->OutputOpen("HTML",1);
   // error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
   $Plugins[$PluginId]->Output();
   $Plugins[$PluginId]->OutputClose();
-}
+  }
 else
-{
+  {
   $Uri = Traceback_uri() . "?mod=auth";
   $text = _("Module unavailable or your login session timed out.");
   print "$text <P />";
@@ -70,7 +68,7 @@ else
   /* Redirect in 5 seconds. */
   print "window.setTimeout('Redirect()',5000);\n";
   print "</script>\n";
-}
+  }
 plugin_unload();
 return(0);
 ?>

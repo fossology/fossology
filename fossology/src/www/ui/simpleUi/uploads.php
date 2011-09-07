@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 
 /**
  * \brief
@@ -348,8 +348,8 @@ class uploads extends FO_Plugin
       }
       /*
        * Put -w webServer -e <addr> in the front as the upload is last
-      * part of jq_args.
-      */
+       * part of jq_args.
+       */
       $jq_args = " -W {$_SERVER['SERVER_NAME']} -e $Email " . "$jq_args";
     }
     // put the job in the jobqueue
@@ -560,7 +560,7 @@ class uploads extends FO_Plugin
 
           /* For REST API:
            wget -qO - --post-file=myfile.c http://myserv.com/?mod=agent_nomos_once
-          */
+           */
           if ($this->NoHTML && file_exists($tmp_name))
           {
             echo "<pre>ajax-oneShotNomos: in NoHTML\n</pre>";
@@ -659,8 +659,8 @@ class uploads extends FO_Plugin
 
         /* Create the AJAX (Active HTTP) javascript for doing the replys
          * and showing the response.
-        */
-
+         */
+        
         $choice .= "<script language='javascript'>\n
           function rmUpText()\n
           {\n
@@ -669,7 +669,7 @@ class uploads extends FO_Plugin
             parent.removeChild(div);\n
           }\n
           </script>\n";
-
+        
         $choice .= ActiveHTTPscript("UploadFile");
         $choice .= "<script language='javascript'>\n
         function UploadFile_Reply()\n

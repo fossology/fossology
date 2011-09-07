@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 
 global $GlobalReady;
 if (!isset($GlobalReady)) {
@@ -43,7 +43,7 @@ class ajax_urlUpload extends FO_Plugin
 
   /*
    Output(): Generate the text for this plugin.
-  */
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
@@ -64,9 +64,9 @@ class ajax_urlUpload extends FO_Plugin
         if (empty($Level)) {
           $Level = 1;
         }
-
+        
         $Name = $Accept = $Reject = NULL;
-
+        
         /* Display instructions */
         $intro = _("Uploading from a URL or FTP site is the most flexible
          option.  The URL must denote a publicly accessible HTTP, HTTPS,
@@ -124,7 +124,7 @@ class ajax_urlUpload extends FO_Plugin
         patterns to exclude: the same rules for wildcards apply to this list.");
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='reject' size=60 value='" . htmlentities($Reject) . "'/><P />\n";
-        $text = _("Maximum recursion depth: ");
+$text = _("Maximum recursion depth: ");
         $V.= "<li>$text";
         $V.= "<INPUT type='text' name='level' size=1 value='" . htmlentities($Level) . "'/><P />\n";
         $V .= "</ol>\n";

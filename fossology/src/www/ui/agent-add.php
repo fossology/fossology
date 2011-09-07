@@ -14,17 +14,15 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
+ at the very beginning.
+ This prevents hacking attempts.
+ *************************************************/
 global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
+if (!isset($GlobalReady)) { exit; }
 
 define("TITLE_agent_add", _("Schedule an Analysis"));
 
@@ -39,7 +37,7 @@ class agent_add extends FO_Plugin
 
   /*********************************************
    AgentsAdd(): Add an upload to multiple agents.
-  *********************************************/
+   *********************************************/
   function AgentsAdd	($uploadpk, $agentlist)
   {
     $rc="";
@@ -52,7 +50,7 @@ class agent_add extends FO_Plugin
     $Results = $DB->Action("SELECT upload_pk FROM upload WHERE upload_pk = '$uploadpk';");
     if ($Results[0]['upload_pk'] != $uploadpk)
     {
-      $text = _("Upload not found.");
+$text = _("Upload not found.");
       return($text);
     }
 
@@ -88,12 +86,10 @@ class agent_add extends FO_Plugin
 
   /*********************************************
    Output(): Generate the text for this plugin.
-  *********************************************/
+   *********************************************/
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
+    if ($this->State != PLUGIN_STATE_READY) { return; }
     global $DB;
     $V="";
     switch($this->OutputType)
@@ -103,27 +99,25 @@ class agent_add extends FO_Plugin
       case "HTML":
         /* If this is a POST, then process the request. */
         $Folder = GetParm('folder',PARM_INTEGER);
-        if (empty($Folder)) {
-          $Folder = FolderGetTop();
-        }
+        if (empty($Folder)) { $Folder = FolderGetTop(); }
         $uploadpk = GetParm('upload',PARM_INTEGER);
         if (array_key_exists('agents', $_REQUEST))
-        $agents = $_POST['agents'];
+          $agents = $_POST['agents'];
         else
-        $agents = '';
-
+          $agents = '';
+  
         if (!empty($uploadpk) && !empty($agents) && is_array($agents))
         {
           $rc = $this->AgentsAdd($uploadpk,$agents);
           if (empty($rc))
           {
             /* Need to refresh the screen */
-            $text = _("Agent Analysis added to job queue");
+$text = _("Agent Analysis added to job queue");
             $V .= displayMessage($text);
           }
           else
           {
-            $text = _("Scheduling of Agent(s) failed: ");
+$text = _("Scheduling of Agent(s) failed: ");
             $V .= displayMessage($text.$rc);
           }
         }
@@ -164,7 +158,7 @@ class agent_add extends FO_Plugin
         $V .= _("Select an uploaded file for additional analysis.\n");
 
         $V .= "<ol>\n";
-        $text = _("Select the folder containing the upload you wish to analyze:");
+$text = _("Select the folder containing the upload you wish to analyze:");
         $V .= "<li>$text<br>\n";
         $V .= "<select name='folder'\n";
         $V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=$Folder' ";
@@ -172,7 +166,7 @@ class agent_add extends FO_Plugin
         $V .= FolderListOption(-1,0,1,$Folder);
         $V .= "</select><P />\n";
 
-        $text = _("Select the upload to analyze:");
+$text = _("Select the upload to analyze:");
         $V .= "<li>$text<br>";
         $V .= "<select size='10' name='upload' onChange='Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=\" + this.value)'>\n";
         $List = FolderListUploads($Folder);
@@ -187,11 +181,11 @@ class agent_add extends FO_Plugin
           $V .= "</option>\n";
         }
         $V .= "</select><P />\n";
-        $text = _("Select additional analysis.");
+$text = _("Select additional analysis.");
         $V .= "<li>$text<br>\n";
         $V .= "<select multiple size='10' id='agents' name='agents[]'></select>\n";
         $V .= "</ol>\n";
-        $text = _("Analyze");
+$text = _("Analyze");
         $V .= "<input type='submit' value='$text!'>\n";
         $V .= "</form>\n";
         break;
@@ -200,9 +194,7 @@ class agent_add extends FO_Plugin
       default:
         break;
     }
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
+    if (!$this->OutputToStdout) { return($V); }
     print("$V");
     return;
   }

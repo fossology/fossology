@@ -1,25 +1,25 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 /**
  * @Version "$Id: admin-folder-move.php 231 2008-02-28 22:58:10Z nealk2 $"
  */
 /*************************************************
- Restrict usage: Every PHP file should have this
+Restrict usage: Every PHP file should have this
 at the very beginning.
 This prevents hacking attempts.
 *************************************************/
@@ -36,7 +36,7 @@ class upload_move extends FO_Plugin {
   );
   var $DBaccess = PLUGIN_DB_WRITE;
   /*********************************************
-   Move(): Given an uploadID, it's parent folder and a Target folder Id, move
+  Move(): Given an uploadID, it's parent folder and a Target folder Id, move
   the upload from the old folder to the NewParentID (new folder)!
   Includes idiot checking since the input comes from stdin.
   Returns: 1 if renamed, 0 if failed.
@@ -73,7 +73,7 @@ class upload_move extends FO_Plugin {
     return (1);
   } // Move()
   /*********************************************
-   Output(): Generate the text for this plugin.
+  Output(): Generate the text for this plugin.
   *********************************************/
   function Output() {
     global $Plugins;
@@ -84,9 +84,9 @@ class upload_move extends FO_Plugin {
     $V = "";
     switch ($this->OutputType) {
       case "XML":
-        break;
+      break;
       case "HTML":
-        $text = _("Move upload to different folder.");
+$text = _("Move upload to different folder.");
         $V.= "<H2>$text</H1>\n";
         /* If this is a POST, then process the request. */
         $OldFolderId = GetParm('oldfolderid', PARM_INTEGER);
@@ -107,15 +107,15 @@ class upload_move extends FO_Plugin {
             $base = basename($Uploads[0]['ufile_name']);
             $OldFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$OldFolderId';");
             $ORow = $OldFolder[0];
-            $text = _("Moved");
-            $text1 = _("from folder");
-            $text2 = _("to folder");
+$text = _("Moved");
+$text1 = _("from folder");
+$text2 = _("to folder");
             $success = "$text $base $text1 $ORow[folder_name] $text2 $NRow[folder_name]";
             $V.= displayMessage($success);
           }
         }
         /* Create the AJAX (Active HTTP) javascript for doing the reply
-         and showing the response. */
+        and showing the response. */
         $V.= ActiveHTTPscript("Uploads");
         $V.= "<script language='javascript'>\n";
         $V.= "function Uploads_Reply()\n";
@@ -133,14 +133,14 @@ class upload_move extends FO_Plugin {
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-        $text = _("Select the folder containing the upload you wish to move:  \n");
+$text = _("Select the folder containing the upload you wish to move:  \n");
         $V.= "<li>$text";
         $V.= "<select name='oldfolderid'\n";
         $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
         $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
-        $text = _("Select the upload you wish to move:  \n");
+$text = _("Select the upload you wish to move:  \n");
         $V.= "<li>$text";
         $V.= "<select name='uploadid'>\n";
         $List = FolderListUploads(-1);
@@ -156,20 +156,20 @@ class upload_move extends FO_Plugin {
           $V.= "</option>\n";
         }
         $V.= "</select><P />\n";
-        $text = _("Select the destination folder:  \n");
+$text = _("Select the destination folder:  \n");
         $V.= "<li>$text";
         $V.= "<select name='targetfolderid'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
         $V.= "</ol>\n";
-        $text = ("Move");
+$text = ("Move");
         $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
-        break;
+      break;
       case "Text":
-        break;
+      break;
       default:
-        break;
+      break;
     }
     if (!$this->OutputToStdout) {
       return ($V);
