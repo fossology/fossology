@@ -63,7 +63,7 @@ int focunit_main(char *test_name, CU_SuiteInfo *suites)
   CU_list_tests_to_file();
   CU_automated_run_tests();
 
-  printf("%s results:\n", test_name);
+  printf("%s summary:\n", test_name);
   printf("  Number of suites run: %d\n", CU_get_number_of_suites_run());
   printf("  Number of tests run: %d\n", CU_get_number_of_tests_run());
   printf("  Number of tests failed: %d\n", CU_get_number_of_tests_failed());
