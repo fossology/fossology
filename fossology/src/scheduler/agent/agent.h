@@ -87,27 +87,27 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc);
 void meta_agent_destroy(meta_agent ma);
 
 /* agent */
-agent agent_init(host host_machine, job owner, int gen);
-agent agent_copy(agent a);
+agent agent_init(host host_machine, job owner);
 void  agent_destroy(agent a);
 
 /* ************************************************************************** */
 /* **** Modifier Functions and events *************************************** */
 /* ************************************************************************** */
 
-void agent_death_event(void* pids);
+void agent_death_event(pid_t* pids);
 void agent_create_event(agent a);
 void agent_ready_event(agent a);
 void agent_update_event(void* unused);
 
-void agent_restart(agent a, agent ref);
-void agent_close(agent a);
+void agent_transition(agent a, agent_status new_status);
 void agent_pause(agent a);
 void agent_unpause(agent a);
 void agent_print_status(agent a, GOutputStream* ostr);
 int  aprintf(agent a, const char* fmt, ...);
 int  agent_pid(agent a);
 ssize_t agent_write(agent a, const void* buf, size_t count);
+
+agent_status agent_gstatus(agent a);
 
 /* ************************************************************************** */
 /* **** static functions and meta agents ************************************ */

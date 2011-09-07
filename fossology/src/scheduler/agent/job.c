@@ -52,7 +52,7 @@ struct job_internal
     /* associated agent information */
     char*  agent_type;      ///< the type of agent used to analyze the data
     GList* running_agents;  ///< the list of agents assigned to this job that are still working
-    GList* finished_agents; ///< the list of agents that have successfully finish their task
+    GList* finished_agents; ///< the list of agents that have completed their tasks
     GList* failed_agents;   ///< the list of agents that failed while working
     FILE*  log;             ///< the log to print any agent logging messages to
     /* information for data manipluation */
@@ -97,7 +97,7 @@ GSequence* job_queue = NULL;
  */
 int is_active(int* job_id, job j, int* counter)
 {
-  if((j->running_agents != NULL || j->finished_agents != NULL || j->failed_agents != NULL) || j->id < 0)
+  if((j->running_agents != NULL || j->failed_agents != NULL) || j->id < 0)
     ++(*counter);
   return 0;
 }
@@ -131,7 +131,6 @@ int job_sstatus(int* job_id, job j, GOutputStream* ostr)
   if(*job_id == 0)
   {
     g_list_foreach(j->running_agents, (GFunc)agent_print_status, ostr);
-    g_list_foreach(j->finished_agents, (GFunc)agent_print_status, ostr);
     g_list_foreach(j->failed_agents, (GFunc)agent_print_status, ostr);
   }
 
@@ -418,7 +417,7 @@ void job_add_agent(job j, void* a)
 }
 
 /**
- * Removes an agent fr  om a jobs list of agents, if a job no longer has any agents
+ * Removes an agent from a jobs list of agents, if a job no longer has any agents
  * in any of it lists, this will then remove the job from the system.
  *
  * @param j the job to remove the agent from
@@ -427,8 +426,8 @@ void job_add_agent(job j, void* a)
 void job_remove_agent(job j, void* a)
 {
   TEST_NULV(j);
-  TEST_NULV(a);
-  j->finished_agents = g_list_remove(j->finished_agents, a);
+  if(j->finished_agents && a)
+    j->finished_agents = g_list_remove(j->finished_agents, a);
 
   if(j->finished_agents == NULL && (j->status == JB_COMPLETE || j->status == JB_FAILED))
   {
@@ -438,15 +437,16 @@ void job_remove_agent(job j, void* a)
 }
 
 /**
- * Moves a job from the running agent list to the finished agent list.
+ * Moves an agent from the running agent list to the finished agent list.
  *
- * @param j the job that the agent belongs to
- * @param a the agent to move to the finished list
+ * @param j the job to change
+ * @param a the agent to move
  */
 void job_finish_agent(job j, void* a)
 {
   TEST_NULV(j);
   TEST_NULV(a);
+
   j->running_agents  = g_list_remove(j->running_agents,  a);
   j->finished_agents = g_list_append(j->finished_agents, a);
 }
@@ -493,44 +493,30 @@ void job_set_data(job j, char* data, int sql)
 void job_update(job j)
 {
   GList* iter;
-  //agent a;
-  int restart = 0;
+  int finished = 1;
 
   TEST_NULV(j)
-  if(j->status != JB_SCH_PAUSED && j->status != JB_CLI_PAUSED && j->running_agents == NULL)
+
+  for(iter = j->running_agents; iter != NULL; iter = iter->next)
+    if(agent_gstatus(iter->data) != AG_PAUSED)
+      finished = 0;
+
+  if(j->status != JB_SCH_PAUSED && j->status != JB_CLI_PAUSED && finished)
   {
     if(j->failed_agents == NULL)
     {
       job_transition(j, JB_COMPLETE);
       for(iter = j->finished_agents; iter != NULL; iter = iter->next)
-        agent_close(iter->data);
+      {
+        aprintf(iter->data, "CLOSE\n");
+      }
     }
-    /* this indicates a failed agent, attempt to recover */
+    /* this indicates a failed agent */
     else
     {
-      // This code will try the data again if that is desired
-      // TODO determine if this should be kept or removed
-      /*for(iter = j->failed_agents; iter != NULL; iter = iter->next)
-      {
-        if(j->finished_agents != NULL)
-        {
-          a = (agent)g_list_first(j->finished_agents);
-          j->finished_agents = g_list_remove(j->finished_agents, a);
-          j->running_agents  = g_list_append(j->running_agents,  a);
-          agent_restart(a, (agent)iter->data);
-          restart++;
-        }
-        else if(!closing && agent_copy((agent)iter->data) != NULL)
-        {
-          restart++;
-        }
-      }*/
-
       g_list_free(j->failed_agents);
       j->failed_agents = NULL;
-
-      if(restart == 0 || closing)
-        job_fail(j);
+      job_fail(j);
     }
   }
 }
@@ -593,7 +579,7 @@ int job_is_open(job j)
   int retval = 0;
   TEST_NULL(j, 0);
 
-  /* check to make sure tha the job status is correct */
+  /* check to make sure that the job status is correct */
   if(j->status == JB_CHECKEDOUT)
     job_transition(j, JB_STARTED);
 

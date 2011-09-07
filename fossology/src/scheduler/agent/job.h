@@ -33,7 +33,8 @@ typedef struct job_internal* job;
 /**
  * TODO
  */
-typedef enum {
+typedef enum
+{
   JB_CHECKEDOUT = 0,    ///< JB_CHECKEDOUT
   JB_STARTED = 1,       ///< JB_STARTED
   JB_COMPLETE = 2,      ///< JB_COMPLETE
@@ -62,10 +63,10 @@ void job_pause_event(void* param);
 void job_restart_event(void* param);
 void job_priority_event(arg_int* params);
 
-void job_add_agent(job j, void* age);
+void job_add_agent(job j, void* a);
 void job_remove_agent(job j, void* a);
-void job_finish_agent(job j, void* age);
-void job_fail_agent(job j, void* age);
+void job_finish_agent(job j, void* a);
+void job_fail_agent(job j, void* a);
 void job_set_data(job j, char* data, int sql);
 void job_update(job j);
 void job_fail(job j);

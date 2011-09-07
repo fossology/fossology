@@ -99,8 +99,7 @@ const char* jobsql_paused = "\
 
 const char* jobsql_log = "\
     UPDATE jobqueue \
-      SET jq_log = '%s', \
-          jq_end_bits = jq_end_bits | 4 \
+      SET jq_log = '%s' \
       WHERE jq_pk = '%d';";
 
 /* ************************************************************************** */
@@ -372,9 +371,10 @@ void database_job_log(int j_id, char* log_name) {
 
   sql = g_strdup_printf(jobsql_log, log_name, j_id);
   db_result = PQexec(db_conn, sql);
-  if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK) {
+  if(PQresultStatus(db_result) != PGRES_COMMAND_OK) {
     lprintf("ERROR %s.%d: failed to set the log file to \"%s\" for job %d\n", __FILE__, __LINE__, log_name, j_id);
     lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
+    lprintf("ERROR after\n");
   }
   PQclear(db_result);
   g_free(sql);
