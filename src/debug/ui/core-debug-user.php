@@ -18,16 +18,18 @@
 
 /*************************************************
  Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
+at the very beginning.
+This prevents hacking attempts.
+*************************************************/
 global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+if (!isset($GlobalReady)) {
+  exit;
+}
 
 define("TITLE_debug_user", _("Debug User"));
 
 class debug_user extends FO_Plugin
-  {
+{
   var $Name       = "debug_user";
   var $Version    = "1.0";
   var $Title      = TITLE_debug_user;
@@ -37,43 +39,49 @@ class debug_user extends FO_Plugin
 
   /************************************************
    Output(): Generate output.
-   ************************************************/
+  ************************************************/
   function Output()
-    {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+  {
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
     $V="";
     global $DB;
     switch($this->OutputType)
-      {
+    {
       case "XML":
-	break;
+        break;
       case "HTML":
-	$Results = $DB->Action("SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';");
-	$R = &$Results[0];
-$text = _("User Information");
-	$V .= "<H2>$text</H2>\n";
-	$V .= "<table border=1>\n";
-$text = _("Field");
-$text1 = _("Value");
-	$V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
-	foreach($R as $Key => $Val)
-	  {
-	  if (empty($Key)) { continue; }
-	  $V .= "<tr><td>" . htmlentities($Key) . "</td><td>" . htmlentities($Val) . "</td></tr>\n";
-	  }
-	$V .= "</table>\n";
-	break;
+        $Results = $DB->Action("SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';");
+        $R = &$Results[0];
+        $text = _("User Information");
+        $V .= "<H2>$text</H2>\n";
+        $V .= "<table border=1>\n";
+        $text = _("Field");
+        $text1 = _("Value");
+        $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
+        foreach($R as $Key => $Val)
+        {
+          if (empty($Key)) {
+            continue;
+          }
+          $V .= "<tr><td>" . htmlentities($Key) . "</td><td>" . htmlentities($Val) . "</td></tr>\n";
+        }
+        $V .= "</table>\n";
+        break;
       case "Text":
-	break;
+        break;
       default:
-	break;
-      }
-    if (!$this->OutputToStdout) { return($V); }
+        break;
+    }
+    if (!$this->OutputToStdout) {
+      return($V);
+    }
     print($V);
     return;
-    } // Output()
+  } // Output()
 
-  };
+};
 $NewPlugin = new debug_user;
 $NewPlugin->Initialize();
 ?>

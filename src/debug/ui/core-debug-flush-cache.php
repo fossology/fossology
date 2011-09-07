@@ -18,16 +18,18 @@
 
 /*************************************************
  Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
+at the very beginning.
+This prevents hacking attempts.
+*************************************************/
 global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+if (!isset($GlobalReady)) {
+  exit;
+}
 
 define("TITLE_debug_flush_cache", _("Flush Cache"));
 
 class debug_flush_cache extends FO_Plugin
-  {
+{
   var $Name       = "debug_flush_cache";
   var $Version    = "1.0";
   var $Title      = TITLE_debug_flush_cache;
@@ -37,31 +39,35 @@ class debug_flush_cache extends FO_Plugin
 
   /************************************************
    Output(): Generate output.
-   ************************************************/
+  ************************************************/
   function Output()
-    {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+  {
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
     $V="";
     global $DB;
     switch($this->OutputType)
-      {
+    {
       case "XML":
-	break;
+        break;
       case "HTML":
-	ReportCachePurgeAll();
-	$V .= _("All cached pages have been removed.\n");
-	break;
+        ReportCachePurgeAll();
+        $V .= _("All cached pages have been removed.\n");
+        break;
       case "Text":
-	break;
+        break;
       default:
-	break;
-      }
-    if (!$this->OutputToStdout) { return($V); }
+        break;
+    }
+    if (!$this->OutputToStdout) {
+      return($V);
+    }
     print($V);
     return;
-    } // Output()
+  } // Output()
 
-  };
+};
 $NewPlugin = new debug_flush_cache;
 $NewPlugin->Initialize();
 ?>
