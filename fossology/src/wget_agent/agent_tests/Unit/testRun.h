@@ -15,11 +15,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include "CUnit/CUnit.h"
-#include "CUnit/Automated.h"
+#ifndef RUN_TESTS_H
+#define RUN_TESTS_H
+
+#include "libfocunit.h"
 
 /* for wget_agent.c, start */
 extern CU_TestInfo testcases_GetURL[];
@@ -41,17 +40,4 @@ extern int DBLoadGoldClean();
 
 /* for wget_agent.c, end */
 
-/**
- * \brief all test suites for wget agent
- */
-CU_SuiteInfo suites[] = {
-    // for wget_agent.c
-#if 0
 #endif
-    {"Testing the function GetURL:", GetURLInit, GetURLClean, testcases_GetURL},
-    {"Testing the function SetEnv:", SetEnvInit, SetEnvClean, testcases_SetEnv},
-    {"Testing the utility function:", NULL, NULL, testcases_Utiliies},
-    {"Testing the function DBLoadGold:", DBLoadGoldInit, DBLoadGoldClean, testcases_DBLoadGold},
-    CU_SUITE_INFO_NULL
-};
-

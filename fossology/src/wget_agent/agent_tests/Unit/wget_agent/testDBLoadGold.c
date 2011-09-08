@@ -167,9 +167,9 @@ void string_tolower(char *string)
  */
 void testDBLoadGold()
 {
-  printf("db start\n");
+  //printf("db start\n");
   DBLoadGold();
-  printf("db end\n");
+  //printf("db end\n");
   char SQL[MAXCMD];
   char *pfile_sha1;
   char *pfile_md5;
@@ -184,10 +184,10 @@ void testDBLoadGold()
   }
   pfile_sha1 = PQgetvalue(result,0,0);
   pfile_md5 = PQgetvalue(result,0,1);
-  printf("pfile_sha1, pfile_md5 are:%s, %s\n", pfile_sha1, pfile_md5 );
+  //printf("pfile_sha1, pfile_md5 are:%s, %s\n", pfile_sha1, pfile_md5 );
   string_tolower(pfile_sha1);
   string_tolower(pfile_md5);
-  printf("pfile_sha1, pfile_md5 are:%s, %s\n", pfile_sha1, pfile_md5 );
+  //printf("pfile_sha1, pfile_md5 are:%s, %s\n", pfile_sha1, pfile_md5 );
   char file_name_file[MAXCMD] = {0};
   char file_name_gold[MAXCMD] = {0};
   char string0[3] = {0};
@@ -197,7 +197,7 @@ void testDBLoadGold()
   strncpy(string0, pfile_sha1, 2);
   strncpy(string1, pfile_sha1 + 2, 2);
   strncpy(string2, pfile_sha1 + 4, 2);
-  printf("string0, string1, string2 are:%s, %s, %s\n", string0, string1, string2);
+  //printf("string0, string1, string2 are:%s, %s, %s\n", string0, string1, string2);
   sprintf(file_name_file, "%s/files/%s/%s/%s/%s.%s.10240", string4, string0, string1, string2, pfile_sha1, pfile_md5);
   sprintf(file_name_gold, "%s/gold/%s/%s/%s/%s.%s.10240", string4, string0, string1, string2, pfile_sha1, pfile_md5);
   int existed = file_dir_existed(file_name_file);
@@ -209,13 +209,13 @@ void testDBLoadGold()
   existed = 0;
   existed = file_dir_existed(file_name_gold);
   CU_ASSERT_EQUAL(existed, 1); /* the file into repo? */
-  printf("file_name_file, file_name_gold are:%s,%s\n", file_name_file, file_name_gold);
+  //printf("file_name_file, file_name_gold are:%s,%s\n", file_name_file, file_name_gold);
   if (existed)
   {
     RemoveDir(file_name_gold);
   }
   PQclear(result);
-  printf("testDBLoadGold end\n");
+  //printf("testDBLoadGold end\n");
 }
 
 /**
