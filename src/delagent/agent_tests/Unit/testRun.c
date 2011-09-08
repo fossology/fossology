@@ -38,7 +38,7 @@ int DelagentDBInit()
   int rc;
    
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "su fossy -c 'sh testInitDB.sh'");
+  sprintf(CMD, "sh testInitDB.sh");
   rc = system(CMD); 
   if (rc != 0)
   {
@@ -58,7 +58,7 @@ int DelagentDBClean()
   int rc;
 
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "su fossy -c 'sh testCleanDB.sh'");
+  sprintf(CMD, "sh testCleanDB.sh");
   rc = system(CMD);
   if (rc != 0)
   {
@@ -80,7 +80,7 @@ int DelagentInit()
   if (DelagentDBInit()!=0) return -1;
 
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "su fossy -c 'sh testInitRepo.sh'");
+  sprintf(CMD, "sh testInitRepo.sh");
   rc = system(CMD);
   if (rc != 0)
   {
@@ -103,7 +103,7 @@ int DelagentClean()
   if (DelagentDBClean()!=0) return -1;
 
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "su fossy -c 'sh testCleanRepo.sh'");
+  sprintf(CMD, "sh testCleanRepo.sh");
   rc = system(CMD);
   if (rc != 0)
   {
