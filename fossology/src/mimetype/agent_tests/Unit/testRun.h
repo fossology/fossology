@@ -15,7 +15,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
-#include "libcunit.h"
+#ifndef RUN_TESTS_H
+#define RUN_TESTS_H
+
+#include "libfocunit.h"
 
 /* for finder.c, start */
 extern CU_TestInfo testcases_DBCheckMime[];
@@ -42,19 +45,4 @@ extern int DBClean();
 
 /* for finder.c, end */
 
-/**
- * \brief all test suites for mimetype
- */
-CU_SuiteInfo suites[] = {
-    // for finder.c 
-    {"Testing the function DBCheckMime:", DBCheckMimeInit, DBCheckMimeClean, testcases_DBCheckMime},
-#if 0
 #endif
-    {"Testing the function DBLoadMime:", DBLoadMimeInit, DBLoadMimeClean, testcases_DBLoadMime},
-    {"Testing the function DBFindMime:", DBFindMimeInit, DBFindMimeClean, testcases_DBFindMime},
-    {"Testing the function CheckMimeType:", DBInit, DBClean, testcases_CheckMimeTypes},
-    {"Testing the function DBCheckFileExtention:", DBInit, DBClean, testcases_DBCheckFileExtention},
-    {"Testing Utilities:", NULL, NULL, testcases_Utilities},
-    CU_SUITE_INFO_NULL
-};
-
