@@ -16,9 +16,9 @@
 #51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #*********************************************************************/
 
-
-FOSSYUID=`id -un`
-if [ "$FOSSYUID" != "fossy" ];then
+FOSSYGID=`id -Gn`
+FOSSYUID=`echo $FOSSYGID |grep -c 'fossy'`
+if [ $FOSSYUID -ne 1 ];then
   echo "Must be fossy to run this script."
   exit 1
 fi

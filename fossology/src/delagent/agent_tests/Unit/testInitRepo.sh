@@ -16,15 +16,16 @@
 #51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #*********************************************************************/
 
-FOSSYUID=`id -un`
-if [ "$FOSSYUID" != "fossy" ];then
+FOSSYGID=`id -Gn`
+FOSSYUID=`echo $FOSSYGID |grep -c 'fossy'`
+if [ $FOSSYUID -ne 1 ];then
   echo "Must be fossy to run this script."
   exit 1
 fi
 
 #echo $UID
 
-tar -xf $HOME/testdata/testrepo_gold.tar -C /srv/fossology/repository/localhost/
-tar -xf $HOME/testdata/testrepo_files.tar -C /srv/fossology/repository/localhost/
+tar -xf ../testdata/testrepo_gold.tar -C /srv/fossology/repository/localhost/
+tar -xf ../testdata/testrepo_files.tar -C /srv/fossology/repository/localhost/
 
 echo "Create Test Repository success!"

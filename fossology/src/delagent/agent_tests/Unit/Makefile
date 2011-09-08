@@ -25,6 +25,9 @@ $(TEST_OBJ): %.o: %.c
 	
 test: all $(EXE)
 	@echo "execute delagent test"
+	@if test ! -e ../testdata/testdb_all.tar ; then \
+	rsync -a fossology.org:/var/www/fossology.org/testing/testFiles/delagent/ ../testdata/;\
+	fi; 
 	./$(EXE)
 
 coverage: delagent_cov.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS) 

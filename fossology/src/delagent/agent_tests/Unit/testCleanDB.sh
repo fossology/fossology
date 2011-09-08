@@ -18,8 +18,9 @@
 
 VARS=../../../../Makefile.conf
 
-FOSSYUID=`id -un`
-if [ "$FOSSYUID" != "fossy" ];then
+FOSSYGID=`id -Gn`
+FOSSYUID=`echo $FOSSYGID |grep -c 'fossy'`
+if [ $FOSSYUID -ne 1 ];then
   echo "Must be fossy to run this script."
   exit 1
 fi
@@ -28,7 +29,7 @@ fi
 touch $HOME/connectdb.exp
 echo '#!/usr/bin/expect' > $HOME/connectdb.exp
 echo 'set timeout 30' >> $HOME/connectdb.exp
-echo 'spawn dropdb fossologytest' >> $HOME/connectdb.exp
+echo 'spawn dropdb -U fossy fossologytest' >> $HOME/connectdb.exp
 echo 'expect "Password:"' >> $HOME/connectdb.exp
 echo 'send "fossy\r"' >> $HOME/connectdb.exp
 echo 'interact' >> $HOME/connectdb.exp

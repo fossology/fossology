@@ -18,9 +18,10 @@
 
 VARS=../../../../Makefile.conf
 
-FOSSYUID=`id -un`
-if [ "$FOSSYUID" != "fossy" ];then
-  echo "Must be fossy to run this script."
+FOSSYGID=`id -Gn`
+FOSSYUID=`echo $FOSSYGID |grep -c 'fossy'`
+if [ $FOSSYUID -ne 1 ];then
+  echo "Must be fossy group to run this script."
   exit 1
 fi
 
@@ -29,7 +30,7 @@ fi
 touch $HOME/connectdb.exp
 echo '#!/usr/bin/expect' > $HOME/connectdb.exp
 echo 'set timeout 30' >> $HOME/connectdb.exp
-echo 'spawn createdb fossologytest' >> $HOME/connectdb.exp
+echo 'spawn createdb -U fossy fossologytest' >> $HOME/connectdb.exp
 echo 'expect "Password:"' >> $HOME/connectdb.exp
 echo 'send "fossy\r"' >> $HOME/connectdb.exp
 echo 'interact' >> $HOME/connectdb.exp
@@ -47,7 +48,7 @@ rm -f $HOME/connectdb.exp
 touch $HOME/connectdb.exp
 echo '#!/usr/bin/expect' > $HOME/connectdb.exp
 echo 'set timeout 30' >> $HOME/connectdb.exp
-echo 'spawn pg_restore -d fossologytest '$HOME'/testdata/testdb_all.tar' >> $HOME/connectdb.exp
+echo 'spawn pg_restore -U fossy -d fossologytest ../testdata/testdb_all.tar' >> $HOME/connectdb.exp
 echo 'expect "Password:"' >> $HOME/connectdb.exp
 echo 'send "fossy\r"' >> $HOME/connectdb.exp
 echo 'interact' >> $HOME/connectdb.exp
