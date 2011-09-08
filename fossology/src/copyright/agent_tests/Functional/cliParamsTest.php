@@ -42,37 +42,18 @@ class cliParamsTest extends PHPUnit_Framework_TestCase {
 
 	function setUp() {
 		global $GlobalReady;
-
-    $AGENTDIR = NULL;
-		// determine where the agents are installed
-		$upStream = '/usr/local/share/fossology/php/pathinclude.php';
-		$pkg = '/usr/share/fossology/php/pathinclude.php';
-
-		if (file_exists($upStream)) {
-			require $upStream;
-			//print "agentdir is:$AGENTDIR\n";
-			$this->agentDir = $AGENTDIR;
-			$this->copyright = $this->agentDir . '/copyright';
-		} else
-			if (file_exists($pkg)) {
-				require $pkg;
-				//print "agentdir is:$AGENTDIR\n";
-				$this->agentDir = $AGENTDIR;
-				$this->copyright = $this->agentDir . '/copyright';
-			} else {
-				$this->assertFileExists($upStream, $message = 'FATAL: cannot find pathinclude.php file, stopping test\n');
-			}
-		//print "agent:$this->agentDir\ncopy:$this->copyright\n";
+        $this->agentDir = '../../agent';
+        $this->copyright = $this->agentDir .'/copyright';
 		return;
 	} // setUP
 
 	function testHelp() {
 		// copyright -h
-		$last = exec("$this->copyright -h 2>&1", $usageOut=array(), $rtn=NULL);
+		$last = exec("$this->copyright -h 2>&1", $usageOut, $rtn=NULL);
 		//print "testHelp: last is:$last\nusageout is:\n";
 		//print_r($usageOut) . "\n";
     // Check a couple of options for sanity
-		$usage = 'Usage: /usr/local/lib/fossology/agents/copyright [options]';
+		$usage = 'Usage: ../../agent/copyright [options]';
     $dashD = '-d  :: Turns verbose on, matches printed to Matches file.';
     $this->assertEquals($usage, $usageOut[1]);
     $this->assertEquals($dashD, trim($usageOut[3]));
@@ -115,10 +96,12 @@ class cliParamsTest extends PHPUnit_Framework_TestCase {
         'False Positives: 78',
         'False Negatives: 0');
 
-		if (!chdir('../../agents/copyright')) {
-			$this->fail("FATAL! could not cd to ../../agents/copyright\n");
+        // make agent_tests the working directory.
+        // -t requires the working dir to contain testdata/
+		if (!chdir("..")) {
+			$this->fail("FATAL! could not cd to agent_tests\n");
 		}
-		$last = exec("$this->copyright -t 2>&1", $accuracy=array(), $rtn=NULL);
+		$last = exec("../agent/copyright -t 2>&1", $accuracy, $rtn=NULL);
 		//print "testT: last is:$last\naccuracy is:\n";
 		//print_r($accuracy) . "\n";
     $size = count($accuracy);
