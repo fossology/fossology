@@ -26,7 +26,7 @@ all:
 
 test: all
 	@echo "copyright agent functional test"
-	phpunit --log-junit mimetype-Xunit.xml $(TESTFILE)
+	phpunit --log-junit copyright-Xunit.xml $(TESTFILE)
 
 coverage:
 	@echo "no coverage for copyright/agent_test/Functional"
