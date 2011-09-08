@@ -362,22 +362,22 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
   {
     /* Delete the temp file if it exists */
     unlink(TempFile);
-    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s -P '%s' '%s' %s 2>&1",
+    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget -q %s -P '%s' '%s' %s 2>&1",
         PROXYFILE,WgetArgs,TempFileDir,TaintedURL,GlobalParam);
   }
   else if(TempFileDir && TempFileDir[0])
   {
-    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s -P '%s' '%s' %s 2>&1",
+    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget -q %s -P '%s' '%s' %s 2>&1",
         PROXYFILE,WgetArgs, TempFileDir, TaintedURL, GlobalParam);
   }
   else 
   {
-    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget %s '%s' %s 2>&1",
+    snprintf(CMD,MAXCMD-1,". %s ; /usr/bin/wget -q %s '%s' %s 2>&1",
         PROXYFILE,WgetArgs,TaintedURL, GlobalParam);
   }
   /* the command is like
 	   ". /usr/local/etc/fossology/Proxy.conf; 
-	   /usr/bin/wget --no-check-certificate --progress=dot -rc -np -e robots=off -k -P '/var/local/lib/fossology/agents/wget'
+	   /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -k -P '/var/local/lib/fossology/agents/wget'
 		 'http://a.org/file' -l 1 -R index.html*  2>&1"
    */
   rc = system(CMD); 
@@ -408,7 +408,7 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
         snprintf(CMD,MAXCMD-1, "find '%s' -mindepth 1 -type d -empty -exec rmdir {} \\; > /dev/null 2>&1", TempFilePath);
         system(CMD); // delete all empty directories downloaded
         memset(CMD,'\0',MAXCMD);
-        snprintf(CMD,MAXCMD-1, "tar -cvvf '%s' -C '%s' ./ 2>&1", TempFile, TempFilePath);
+        snprintf(CMD,MAXCMD-1, "tar -cvvf '%s' -C '%s' ./ >/dev/null 2>&1", TempFile, TempFilePath);
       }
       else
       {
@@ -427,7 +427,7 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
     SafeExit(15);
   }
 
-  printf("LOG upload %ld Downloaded %s to %s\n",GlobalUploadKey,URL,TempFile);
+  if (Debug) printf("LOG upload %ld Downloaded %s to %s\n",GlobalUploadKey,URL,TempFile);
   return(0);
 } /* GetURL() */
 
@@ -493,10 +493,8 @@ void    SetEnv  (char *S, char *TempFileDir)
 
   while(S[0] && isspace(S[0])) S++; /* skip spaces */
   strncpy(GlobalParam, S, sizeof(GlobalParam)); // get the parameters, kind of " -A rpm -R fosso -l 1* "
-#if 1
-  printf("  LOG upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s\n  URL=%s  GlobalParam=%s\n",GlobalUploadKey,
+  if (Debug) printf("  LOG upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s\n  URL=%s  GlobalParam=%s\n",GlobalUploadKey,
       GlobalUploadKey,GlobalTempFile,GlobalURL,GlobalParam);
-#endif
 } /* SetEnv() */
 
 /**
