@@ -22,11 +22,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * \brief main function for in this testing module
  */
 
+/**
+ * \brief all test suites for mimetype
+ */
+CU_SuiteInfo suites[] = {
+    // for finder.c
+    {"Testing the function DBCheckMime:", DBCheckMimeInit, DBCheckMimeClean, testcases_DBCheckMime},
+#if 0
+#endif
+    {"Testing the function DBLoadMime:", DBLoadMimeInit, DBLoadMimeClean, testcases_DBLoadMime},
+    {"Testing the function DBFindMime:", DBFindMimeInit, DBFindMimeClean, testcases_DBFindMime},
+    {"Testing the function CheckMimeType:", DBInit, DBClean, testcases_CheckMimeTypes},
+    {"Testing the function DBCheckFileExtention:", DBInit, DBClean, testcases_DBCheckFileExtention},
+    {"Testing Utilities:", NULL, NULL, testcases_Utilities},
+    CU_SUITE_INFO_NULL
+};
+
 /*
  * \brief  main test function
  */
 int main( int argc, char *argv[] )
 {
-  return cunit_main("mimetype_test");
+  return focunit_main("mimetype_Tests", suites) ;
 }
 

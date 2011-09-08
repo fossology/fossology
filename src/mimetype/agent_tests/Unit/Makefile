@@ -6,10 +6,12 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 LOCALAGENTDIR=../../agent
 CUNIT_LIB_DIR=$(TOP)/src/testing/lib/c
+CUNIT_LIB= -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lmagic -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ -I$(CUNIT_LIB_DIR) -lcunit
+
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lmagic -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ $(CUNIT_LIB) -lcunit
 EXE=test_mimetype
-TEST_OBJ_RUN=$(CUNIT_LIB_DIR)/libcunit.o testRun.o
+TEST_OBJ_RUN=testRun.o
 TEST_OBJ= ./finder/testDBCheckMime.o \
           ./finder/testDBLoadMime.o \
           ./finder/testDBFindMime.o \
@@ -17,7 +19,7 @@ TEST_OBJ= ./finder/testDBCheckMime.o \
 
 all: $(EXE)
 
-$(EXE): libmimetype.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS)
+$(EXE): libmimetype.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) cunit_lib
 	@echo "make mimetype agent unit test"
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype.a $(CFLAGS_LOCAL) -o $@
 
@@ -26,12 +28,15 @@ $(TEST_OBJ_RUN): %.o: %.c
 
 $(TEST_OBJ): %.o: %.c 
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
+
+cunit_lib:
+	$(MAKE) -C $(CUNIT_LIB_DIR)
 	
 test: all $(EXE)
 	@echo "execute mimetype test"
 	./$(EXE)
 
-coverage: libmimetype_cov.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) 
+coverage: libmimetype_cov.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) cunit_lib
 	@echo "execute mimetype test and code coverage"
 	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
