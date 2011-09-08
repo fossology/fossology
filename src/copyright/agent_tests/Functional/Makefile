@@ -14,13 +14,25 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+TOP = ../../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+TESTFILE = cliParamsTest.php 
+EXE_DIR = ../../agent/
+
 all:
-	@echo "No copyright Functional agent_tests"
-test:
-	@echo "No copyright Functional agent_tests"
+	$(MAKE) -C $(EXE_DIR)
+
+test: all
+	@echo "copyright agent functional test"
+	phpunit --log-junit mimetype-Xunit.xml $(TESTFILE)
+
+coverage:
+	@echo "no coverage for copyright/agent_test/Functional"
+
+
 clean:
-	@echo "copyright Functional agent_tests clean"
-install:
-	@echo "copyright Functional agent_tests install"
-uninstall:
-	@echo "copyright Functional agent_tests uninstall"
+	rm -f *.xml
+
+.PHONY: all test coverage clean
