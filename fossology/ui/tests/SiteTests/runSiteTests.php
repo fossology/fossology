@@ -24,8 +24,6 @@ $path = '/usr/share/php' . PATH_SEPARATOR;
 set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
 /* simpletest includes */
-require_once '/usr/local/simpletest/unit_tester.php';
-require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
 require_once('../../../tests/TestEnvironment.php');
@@ -41,21 +39,21 @@ $date = date('Y-m-d');
 $time = date('h:i:s-a');
 print "\nStarting Site Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
-$test = &new TestSuite('Fossology Repo Site UI tests');
-$test->addTestFile('AboutMenuTest.php');
-$test->addTestFile('loginTest.php');
-$test->addTestFile('SearchMenuTest.php');
-$test->addTestFile('OrgFoldersMenuCreate-Test.php');
-$test->addTestFile('OrgFoldersMenuDelete-Test.php');
-$test->addTestFile('OrgFoldersMenuEdit-Test.php');
-$test->addTestFile('OrgFoldersMenuMove-Test.php');
-$test->addTestFile('OrgUploadsMenuDelete-Test.php');
-$test->addTestFile('OrgUploadsMenuMove-Test.php');
-$test->addTestFile('UploadInstructMenuTest.php');
-$test->addTestFile('UploadFileMenuTest.php');
-$test->addTestFile('UploadServerMenuTest.php');
-$test->addTestFile('UploadUrlMenuTest.php');
-$test->addTestFile('UploadOne-ShotMenuTest.php');
+$test = new TestSuite('Fossology Repo Site UI tests');
+$test->addFile('AboutMenuTest.php');
+$test->addFile('loginTest.php');
+$test->addFile('SearchMenuTest.php');
+$test->addFile('OrgFoldersMenuCreate-Test.php');
+$test->addFile('OrgFoldersMenuDelete-Test.php');
+$test->addFile('OrgFoldersMenuEdit-Test.php');
+$test->addFile('OrgFoldersMenuMove-Test.php');
+$test->addFile('OrgUploadsMenuDelete-Test.php');
+$test->addFile('OrgUploadsMenuMove-Test.php');
+$test->addFile('UploadInstructMenuTest.php');
+$test->addFile('UploadFileMenuTest.php');
+$test->addFile('UploadServerMenuTest.php');
+$test->addFile('UploadUrlMenuTest.php');
+$test->addFile('UploadOne-ShotMenuTest.php');
 if (TextReporter::inCli())
 {
   $results = $test->run(new TextReporter()) ? 0 : 1;
