@@ -47,14 +47,12 @@ if (!defined('SIMPLE_TEST'))
 define('SIMPLE_TEST', '/usr/local/simpletest/');
 
 /* simpletest includes */
-require_once SIMPLE_TEST . 'unit_tester.php';
 require_once SIMPLE_TEST . 'reporter.php';
-require_once SIMPLE_TEST . 'web_tester.php';
 
 require_once ('TestEnvironment.php');
 if(defined('TESTROOT'))
 {
-  echo TESTROOT . "\n";
+  //echo TESTROOT . "\n";
   require_once(TESTROOT . '/testClasses/timer.php');
 }
 else
@@ -91,8 +89,6 @@ $RunList = array();
 $aTest   = NULL;
 $suite   = NULL;
 
-//print "argc,argv is:$argc\n";print_r($argv) . "\n";
-//print "argc is:$argc\n";
 if (empty($options)) {
   if ($argc < 2){
     print $Usage;
@@ -139,13 +135,11 @@ if (array_key_exists("t",$options)) {
   //print "DB: Title is:$Title\n";
 }
 
-//$Svn = `svnversion`;
 $start = new timer();
 $date = date('Y-m-d');
 $time = date('h:i:s-a');
 print "Starting $suite on: " . $date . " at " . $time . "\n";
-//print "Using Svn Version:$Svn\n";
-$Runtest = & new TestSuite("Fossology tests $Title");
+$Runtest = new TestSuite("Fossology tests $Title");
 /*
  * tests will run serially...
  *
@@ -159,7 +153,8 @@ foreach($RunList as $ptest) {
   else {
     $test = $ptest . ".php";
   }
-  $Runtest->addTestFile("$test");
+  echo "DB: in fo-runTests running test $test\n";
+  $Runtest->addFile("$test");
 }
 
 /*

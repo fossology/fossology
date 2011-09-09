@@ -27,30 +27,33 @@
  * Created on Dec. 10, 2008
  */
 
-require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 require_once ('TestEnvironment.php');
 require_once('testClasses/timer.php');
 
+
 global $URL;
+
 $start = new timer();
 $Svn = `svnversion`;
 $date = date('Y-m-d');
 $time = date('h.i.s-a');
 print "Starting Cleanup Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
-$test = &new TestSuite('Fossology Test Clean Up');
-$test->addTestFile('testCleanUp.php');
+
+$cleanUp = new TestSuite('Fossology Test Clean Up');
+$cleanUp->addFile('testCleanUp.php');
 
 if (TextReporter::inCli())
 {
-  $results = $test->run(new TextReporter()) ? 0 : 1;
+  $results = $cleanUp->run(new TextReporter()) ? 0 : 1;
   print "Ending Clean Up Tests at: " . date('r') . "\n";
   $elapseTime = $start->TimeAgo($start->getStartTime());
   print "The Clean Up Tests took {$elapseTime}to run\n";
   exit ($results);
 }
-$test->run(new HtmlReporter());
+
+$cleanUp->run(new HtmlReporter());
 print "<pre>Ending Clean Up at: " . date('r') . "</pre>\n";
 $elapseTime = $start->TimeAgo($start->getStartTime());
 print "<pre>The Clean Up Tests took {$elapseTime}to run</pre>\n";
