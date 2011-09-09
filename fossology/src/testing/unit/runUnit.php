@@ -176,7 +176,7 @@ function processCUnit($unitTest)
 
   foreach(glob("$unitTest*.xml") as $fName)
   {
-    $fileName = strtolower($fName);
+    $fileName = lcfirst($fName);
     //echo "DBPROCR: fileName is:$fileName\n";
     if(!tweakCUnit($fileName))
     {
@@ -197,8 +197,7 @@ function processCUnit($unitTest)
     {
       // if we can't even check the file, then skip making the report
       $failures++;
-      return("Failure: Could not check file $fileName for failures\n");
-      //echo $errors[0] . "\n";
+      return("Failure: Could not check file $fileName for failures is the file corrupt?\n");
       //backToParent('../../..');   // back to ..fossology/src
     }
 
