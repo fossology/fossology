@@ -31,9 +31,6 @@ test: all
 coverage:
 	@echo "no coverage for copyright/agent_test/Functional"
 
-
-coverage:
-	@echo "No copyright Functional agent_tests"
 clean:
 	rm -f *.xml
 
