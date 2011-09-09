@@ -95,6 +95,10 @@ function check4CUnitFail($xmlFile=NULL)
   if(file_exists($xmlFile))
   {
     $sx = @simplexml_load_file($xmlFile);
+    if($sx === FALSE)
+    {
+      throw new Exception("Cannot load $xmlFile\n");
+    }
     //echo "cunit looks like:\n";print_r($sx) . "\n";
   }
   else
