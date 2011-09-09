@@ -47,8 +47,7 @@ typedef enum
   AG_SPAWNED = 2, ///< AG_SPAWNED  The agent has finished allocation but has registered work yet
   AG_RUNNING = 3, ///< AG_RUNNING  The agent has received a set of files to work on and is running
   AG_PAUSED = 4,  ///< AG_PAUSED   The agent is waiting either for new data or for processor time
-  AG_CLOSING = 5, ///< AG_CLOSING  The agent has been told to shut down but is still in the process
-  AG_CLOSED = 6   ///< AG_CLOSED   The agent has shut down, is no longer part of the system and should be destroyed
+  AG_CLOSED = 5   ///< AG_CLOSED   The agent has shut down, is no longer part of the system and should be destroyed
 } agent_status;
 
 /**
@@ -105,7 +104,7 @@ void agent_unpause(agent a);
 void agent_print_status(agent a, GOutputStream* ostr);
 int  aprintf(agent a, const char* fmt, ...);
 int  agent_pid(agent a);
-ssize_t agent_write(agent a, const void* buf, size_t count);
+ssize_t agent_write(agent a, const void* buf, int count);
 
 agent_status agent_gstatus(agent a);
 
