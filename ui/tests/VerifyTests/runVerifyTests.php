@@ -24,7 +24,6 @@ $path = '/usr/share/php' . PATH_SEPARATOR;
 set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
 /* simpletest includes */
-require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
 //require_once ('../../../tests/fossologyTestCase.php');
@@ -37,13 +36,13 @@ $date = date('Y-m-d');
 $time = date('h:i:s-a');
 print "\nStarting Verify Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
-$test = &new TestSuite('Fossology Repo UI Verification Functional tests');
-//$test->addTestFile('browseUploadedTest.php');
-$test->addTestFile('OneShot-lgpl2.1Test.php');
-$test->addTestFile('fossVerifyLicCntTest.php');
-$test->addTestFile('foss23dirs1File1LicTest.php');
-$test->addTestFile('fossDirsOnlyTest.php');
-$test->addTestFile('browseUploadedTest.php');
+$test = new TestSuite('Fossology Repo UI Verification Functional tests');
+//$test->addFile('browseUploadedTest.php');
+$test->addFile('OneShot-lgpl2.1Test.php');
+$test->addFile('fossVerifyLicCntTest.php');
+$test->addFile('foss23dirs1File1LicTest.php');
+$test->addFile('fossDirsOnlyTest.php');
+$test->addFile('browseUploadedTest.php');
 
 
 if (TextReporter::inCli())

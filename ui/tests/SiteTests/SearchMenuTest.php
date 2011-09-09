@@ -50,7 +50,7 @@ class SearchMenuTest extends fossologyTestCase
   {
     global $URL;
     print "starting SearchMenuTest\n";
-    $browser = & new SimpleBrowser();
+    $browser = new SimpleBrowser();
     $this->setBrowser($browser);
     $page = $this->mybrowser->get($URL);
     $this->assertTrue($page);

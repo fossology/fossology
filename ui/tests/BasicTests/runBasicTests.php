@@ -24,8 +24,6 @@ $path = '/usr/share/php' . PATH_SEPARATOR;
 set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
 /* simpletest includes */
-require_once '/usr/local/simpletest/unit_tester.php';
-require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
 require_once ('../../../tests/TestEnvironment.php');
@@ -37,23 +35,23 @@ $date = date('Y-m-d');
 $time = date('h:i:s-a');
 print "\nStarting Basic Functional Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
-$test = &new TestSuite('Fossology Repo UI Basic Functional tests');
+$test = new TestSuite('Fossology Repo UI Basic Functional tests');
 // Must run BasicSetup first, it creates the folder the other tests need.
-$test->addTestFile('BasicSetup.php');
-$test->addTestFile('UploadFileTest.php');
-$test->addTestFile('UploadUrlTest.php');
-$test->addTestFile('UploadSrvArchiveTest.php');
-$test->addTestFile('uploadSrvDirTest.php');
-$test->addTestFile('uploadSrvFileTest.php');
-$test->addTestFile('CreateFolderTest.php');
-$test->addTestFile('DeleteFolderTest.php');
-$test->addTestFile('editFolderTest.php');
-$test->addTestFile('editFolderNameOnlyTest.php');
-$test->addTestFile('editFolderDescriptionOnlyTest.php');
-$test->addTestFile('moveFolderTest.php');
-$test->addTestFile('DupFolderTest.php');
-$test->addTestFile('DupUploadTest.php');
-$test->addTestFile('createFldrDeleteItTest.php');
+$test->addFile('BasicSetup.php');
+$test->addFile('UploadFileTest.php');
+$test->addFile('UploadUrlTest.php');
+$test->addFile('UploadSrvArchiveTest.php');
+$test->addFile('uploadSrvDirTest.php');
+$test->addFile('uploadSrvFileTest.php');
+$test->addFile('CreateFolderTest.php');
+$test->addFile('DeleteFolderTest.php');
+$test->addFile('editFolderTest.php');
+$test->addFile('editFolderNameOnlyTest.php');
+$test->addFile('editFolderDescriptionOnlyTest.php');
+$test->addFile('moveFolderTest.php');
+$test->addFile('DupFolderTest.php');
+$test->addFile('DupUploadTest.php');
+$test->addFile('createFldrDeleteItTest.php');
 
 if (TextReporter::inCli())
 {
