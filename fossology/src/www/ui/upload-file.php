@@ -14,19 +14,19 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+***********************************************************/
 /*************************************************
  Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
+at the very beginning.
+This prevents hacking attempts.
+*************************************************/
 
 /**
  * upload-file
- * \brief Upload a file from the users computer using the UI.
- * 
- * @version "$Id: upload-file.php 3979 2011-03-24 19:16:20Z bobgo $"
- */
+* \brief Upload a file from the users computer using the UI.
+*
+* @version "$Id: upload-file.php 3979 2011-03-24 19:16:20Z bobgo $"
+*/
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
@@ -35,7 +35,7 @@ if (!isset($GlobalReady)) {
 define("TITLE_upload_file", _("Upload a New File"));
 
 class upload_file extends FO_Plugin {
-	
+
   public $Name = "upload_file";
   public $Title = TITLE_upload_file;
   public $Version = "1.0";
@@ -43,12 +43,12 @@ class upload_file extends FO_Plugin {
   public $Dependency = array("db", "agent_unpack", "showjobs");
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
-  /** Upload 
+  /** Upload
    * \brief Process the upload request.
-   * 
+   *
    * @return NULL on success, string on failure.
    */
-  
+
   function Upload($Folder, $TempFile, $Desc, $Name) {
     /* See if the URL looks valid */
     if (empty($Folder)) {
@@ -84,15 +84,15 @@ class upload_file extends FO_Plugin {
     }
 
     /* Run wget_agent locally to import the file. */
-    
+
     global $LIBEXECDIR;
-    
+
     $Prog = "$LIBEXECDIR/agents/wget_agent -g fossy -k $uploadpk '$UploadedFile'";
     $wgetLast = exec($Prog,$wgetOut,$wgetRtn);
     unlink($UploadedFile);
 
     global $Plugins;
-    
+
     $Unpack = &$Plugins[plugin_find_id("agent_unpack") ];
 
     $jobqueuepk = NULL;
@@ -113,9 +113,9 @@ class upload_file extends FO_Plugin {
     }
     return(NULL);
   } // Upload()
-  
+
   /*********************************************
-  Output(): Generate the text for this plugin.
+   Output(): Generate the text for this plugin.
   *********************************************/
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
@@ -173,7 +173,7 @@ class upload_file extends FO_Plugin {
         $text1 = _("If no name is provided, then the uploaded file name will be used.");
         $V.= "$text1<P />\n";
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
-        $text = _("Select optional analysis");
+          $text = _("Select optional analysis");
           $V.= "<li>$text<br />\n";
           $V.= AgentCheckBoxMake(-1, "agent_unpack");
         }

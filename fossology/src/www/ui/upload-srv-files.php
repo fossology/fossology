@@ -14,12 +14,12 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+***********************************************************/
 /*************************************************
  Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
+at the very beginning.
+This prevents hacking attempts.
+*************************************************/
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
@@ -132,15 +132,15 @@ class upload_srv_files extends FO_Plugin {
       }
       /*
        * Put -w webServer -e <addr> in the front as the upload is last
-       * part of jq_args.
-       */
+      * part of jq_args.
+      */
       $jq_args = " -W {$_SERVER['SERVER_NAME']} -e $Email " . "$jq_args";
     }
     // put the job in the jobqueue
     $jq_type = 'fosscp_agent';
     $jobqueue_pk = JobQueueAdd($jobq, $jq_type, $jq_args, "no", NULL, NULL, 0);
     if (empty($jobqueue_pk)) {
-$text = _("Failed to place fosscp_agent in job queue");
+      $text = _("Failed to place fosscp_agent in job queue");
       return ($text);
     }
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
@@ -180,7 +180,7 @@ $text = _("Failed to place fosscp_agent in job queue");
             $Name        = NULL;
           }
           else {
-$text = _("Upload failed for");
+            $text = _("Upload failed for");
             $V.= displayMessage("$text $SourceFiles: $rc");
           }
         }
@@ -192,20 +192,20 @@ $text = _("Upload failed for");
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-$text = _("Select the folder for storing the upload:");
+        $text = _("Select the folder for storing the upload:");
         $V.= "<li>$text\n";
         $V.= "<select name='folder'>\n";
         //$V .= FolderListOption($FolderPk,0);
         $V.= FolderListOption(-1, 0);
         $V.= "</select>\n";
-$text = _("Select the directory or file(s) on the server to upload:");
+        $text = _("Select the directory or file(s) on the server to upload:");
         $V.= "<p><li>$text<br />\n";
         $V.= "<input type='text' name='sourcefiles' size='60' value='" . htmlentities($SourceFiles, ENT_QUOTES) . "'/><br />\n";
-$text = _("NOTE");
-$text1 = _(": Contents under a directory will be recursively included.");
+        $text = _("NOTE");
+        $text1 = _(": Contents under a directory will be recursively included.");
         $V.= "<strong>$text</strong>$text1\n";
         $V.= _("If you specify a regular expression for the filename, then multiple filenames will be selected.\n");
-$text = _("Files can be placed in alphabetized sub-folders for organization.");
+        $text = _("Files can be placed in alphabetized sub-folders for organization.");
         $V.= "<p><li>$text\n";
         $V.= "<br /><input type='radio' name='groupnames' value='0'";
         if ($GroupNames != '1') {
@@ -217,22 +217,22 @@ $text = _("Files can be placed in alphabetized sub-folders for organization.");
           $V.= " checked";
         }
         $V.= " />Enable alphabetized sub-folders";
-$text = _("(Optional) Enter a description for this Upload:");
+        $text = _("(Optional) Enter a description for this Upload:");
         $V.= "<p><li>$text<br />\n";
         $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc, ENT_QUOTES) . "'/>\n";
-$text = _("(Optional) Enter a viewable name for this Upload:");
+        $text = _("(Optional) Enter a viewable name for this Upload:");
         $V.= "<p><li>$text<br />\n";
         $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name, ENT_QUOTES) . "' /><br />\n";
-$text = _("NOTE");
-$text1 = _(": If no name is provided, then the uploaded file name will be used.");
+        $text = _("NOTE");
+        $text1 = _(": If no name is provided, then the uploaded file name will be used.");
         $V.= "<b>$text</b>$text1<P />\n";
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
-$text = _("Select optional analysis");
+          $text = _("Select optional analysis");
           $V.= "<li>$text<br />\n";
           $V.= AgentCheckBoxMake(-1, "agent_unpack");
         }
         $V.= "</ol>\n";
-$text = _("Upload");
+        $text = _("Upload");
         $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
         break;
