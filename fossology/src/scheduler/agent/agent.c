@@ -34,6 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* unix library includes */
 #include <fcntl.h>
 #include <limits.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -118,7 +119,6 @@ const char* status_strings[] = {
     "AG_SPAWNED",
     "AG_RUNNING",
     "AG_PAUSED",
-    "AG_CLOSING",
     "AG_CLOSED"};
 
 /* ************************************************************************** */
@@ -381,7 +381,6 @@ void agent_listen(agent a)
 
     if(strncmp(buffer, "@@@1", 4) == 0)
     {
-      printf("WHAT THE FUCK\n");
       break;
     }
     if(strncmp(buffer, "@@@0", 4) == 0 && a->updated)
@@ -794,12 +793,15 @@ void agent_death_event(pid_t* pid)
     ERROR("JOB[%d].%s[%d]: agent closed unexpectedly, agent status was %s",
         job_id(a->owner), a->meta_data->name, a->pid, status_strings[a->status]);
     agent_fail(a);
-    job_update(a->owner);
   }
+
+  if(a->status != AG_PAUSED && a->status != AG_FAILED)
+    agent_transition(a, AG_PAUSED);
 
   VERBOSE2("JOB[%d].%s[%d]: successfully removed from the system\n",
       job_id(a->owner), a->meta_data->name, a->pid);
 
+  job_update(a->owner);
   job_remove_agent(a->owner, a);
   if(a->status == AG_FAILED && job_id(a->owner) < 0)
   {
@@ -807,8 +809,8 @@ void agent_death_event(pid_t* pid)
         __FILE__, __LINE__, a->meta_data->name);
     g_tree_remove(meta_agents, a->meta_data->name);
   }
-  g_tree_remove(agents, &a->pid);
 
+  g_tree_remove(agents, &a->pid);
   g_free(pid);
 }
 
@@ -1010,7 +1012,7 @@ int agent_pid(agent a)
  * @param count the number of bytes to write to the agent
  * @return returns if the write was successful
  */
-ssize_t agent_write(agent a, const void* buf, size_t count)
+ssize_t agent_write(agent a, const void* buf, int count)
 {
   return write(a->to_parent, buf, count);
 }

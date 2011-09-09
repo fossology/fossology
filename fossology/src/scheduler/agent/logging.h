@@ -76,10 +76,10 @@ extern char  log_name[FILENAME_MAX];
 /* change these the the TVERBOSE# macro when a test of verbose is needed, */
 /* this happpens when printing from another thread. The other verbose     */
 /* macro makes the syntax better everywhere else                          */
-#define TVERBOSE1 verbose & 1
-#define TVERBOSE2 verbose & 2
-#define TVERBOSE3 verbose & 4
-#define TVERBOSE4 verbose & 8
+#define TVERBOSE1 (verbose & 1)
+#define TVERBOSE2 (verbose & 2)
+#define TVERBOSE3 (verbose & 4)
+#define TVERBOSE4 (verbose & 8)
 #define VERBOSE1(...) if(TVERBOSE1) lprintf(__VA_ARGS__);
 #define VERBOSE2(...) if(TVERBOSE2) lprintf(__VA_ARGS__);
 #define VERBOSE3(...) if(TVERBOSE3) lprintf(__VA_ARGS__);
