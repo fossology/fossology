@@ -19,6 +19,7 @@ include $(TOP)/Makefile.conf
 LOCALAGENTDIR=../../agent
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lpcre -lcunit
+DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_copyright
 
 OBJECTS = test_cvector.o \
@@ -39,9 +40,9 @@ test: $(EXE)
 
 coverage: $(OBJECTS) libcopyright_cov.a run_tests.c
 	@echo "make copyright agent_tests coverage"
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
 	./$(EXE)
-	lcov --directory  $(LOCALAGENTDIR)/   --capture --output-file cov.txt; \
+	lcov --directory . --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
 $(EXE): $(OBJECTS) libcopyright.a run_tests.c
@@ -73,7 +74,7 @@ pair_cov.o:  $(LOCALAGENTDIR)/pair.c $(LOCALAGENTDIR)/pair.h $(LOCALAGENTDIR)/cv
 
 clean:
 	@echo "make copyright agent_tests clean"
-	rm -rf $(EXE) *.o *.g *.xml *.txt *.gcda *.gcno results
+	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno results
 
 install:
 	@echo "make copyright agent_tests nothing to install"
