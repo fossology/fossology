@@ -116,10 +116,7 @@ void	InitCmd	()
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT mimetype_pk FROM mimetype WHERE mimetype_name = '%s';",CMD[i].Magic);
     result =  PQexec(pgConn, SQL); /* SELECT */
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) 
-    {
-      SafeExit(4);
-    }
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(4);
     else if (PQntuples(result) > 0) /* if there is a value */
     {  
       CMD[i].DBindex = atol(PQgetvalue(result,0,0));
@@ -131,10 +128,7 @@ void	InitCmd	()
       memset(SQL,'\0',MAXSQL);
       snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('%s');",CMD[i].Magic);
       result =  PQexec(pgConn, SQL); /* INSERT INTO mimetype */
-      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
-      {
-        SafeExit(5);
-      }
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(5);
       else 
       {
         PQclear(result);
@@ -1089,10 +1083,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
       Fuid,Fuid+41,Fuid+74);
   result =  PQexec(pgConn, SQL); /* SELECT */
-  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
-  {
-    SafeExit(33);
-  }
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(33);
 
   /* add it if it was not found */
   if (PQntuples(result) == 0)
@@ -1113,10 +1104,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
           Fuid,Fuid+41,Fuid+74);
     }
     result =  PQexec(pgConn, SQL); /* INSERT INTO pfile */
-    if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
-    {
-      SafeExit(34);
-    }
+    if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(34);
     PQclear(result);
 
     /* Now find the pfile_pk.  Since it might be a dup, we cannot rely
@@ -1125,10 +1113,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
     snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
         Fuid,Fuid+41,Fuid+74);
     result =  PQexec(pgConn, SQL);  /* SELECT */
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
-    {
-      SafeExit(15);
-    }
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(15);
   }
 
   /* Now *DB contains the pfile_pk information */
@@ -1141,49 +1126,14 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
     if ((CMD[CI->PI.Cmd].DBindex > 0) &&
         (atol(PQgetvalue(result,0,1)) != CMD[CI->PI.Cmd].DBindex))
     {
-#if 0
-      PQclear(result);
-      memset(SQL,'\0',MAXSQL);
-      snprintf(SQL,MAXSQL,"BEGIN;");
-      result = PQexec(pgConn, SQL);
-      if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
-      {
-        SafeExit(45);
-      }
-      PQclear(result);
-      memset(SQL,'\0',MAXSQL);
-      snprintf(SQL,MAXSQL,"SELECT * FROM pfile WHERE pfile_pk = '%ld' FOR UPDATE;", CI->pfile_pk);
-      result =  PQexec(pgConn, SQL); /* lock pfile */
-      if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
-      {
-        SafeExit(35);
-      }
-#endif
       PQclear(result);
       memset(SQL,'\0',MAXSQL);
       snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld' WHERE pfile_pk = '%ld';",
           CMD[CI->PI.Cmd].DBindex, CI->pfile_pk);
       result =  PQexec(pgConn, SQL); /* UPDATE pfile */
-      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
-      {
-        SafeExit(36);
-      }
-      PQclear(result);
-#if 0
-      memset(SQL,'\0',MAXSQL);
-      snprintf(SQL,MAXSQL,"COMMIT;");
-      result = PQexec(pgConn, SQL);      
-      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
-      {
-        SafeExit(37);
-      }
-      PQclear(result);      
-#endif
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(36);
     }
-    else
-    {
-      PQclear(result);
-    }
+    PQclear(result);
   }
   else
   {
@@ -1224,10 +1174,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     char *ufile_name;
     snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
     result =  PQexec(pgConn, UfileName);
-    if (fo_checkPQresult(pgConn, result, UfileName, __FILE__, __LINE__))
-    {
-      SafeExit(38);
-    }
+    if (fo_checkPQresult(pgConn, result, UfileName, __FILE__, __LINE__)) SafeExit(38);
     memset(UfileName,'\0',sizeof(UfileName));
     ufile_name = PQgetvalue(result,0,0);
     PQclear(result);
@@ -1250,14 +1197,13 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   }
   else /* not an artifact -- use the name */
   {
-    char *S = 0;
-    int   error;
-    PQescapeStringConn(pgConn, S, CI->Partname, strlen(CI->Partname), &error);
+    char EscBuf[1024];
+    int  error;
+    PQescapeStringConn(pgConn, EscBuf, CI->Partname, strlen(CI->Partname), &error);
     if (error)
         WARNING("Error escaping filename with multibype character set (%s).", CI->Partname)
 
-    strncpy(UfileName,S,sizeof(UfileName));
-    free(S);
+    strncpy(UfileName,EscBuf,sizeof(UfileName));
   }
 
   // Begin add by vincent
@@ -1284,26 +1230,16 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
       snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (upload_fk,pfile_fk,ufile_mode,ufile_name) VALUES (%s,%ld,%ld,E'%s');",
           Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
       result =  PQexec(pgConn, SQL); /* INSERT INTO uploadtree */
-      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
-      {
-        SafeExit(41);
-      }
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(41);
       PQclear(result);
     }
     /* Find the inserted child */
     memset(SQL,'\0',MAXSQL);
-    /* snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name=E'%s';",
-    Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName); */
     snprintf(SQL,MAXSQL,"SELECT currval('uploadtree_uploadtree_pk_seq');");
     result =  PQexec(pgConn, SQL);
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
-    {
-      SafeExit(42);
-    }
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(42);
     CI->uploadtree_pk = atol(PQgetvalue(result,0,0));
     PQclear(result);
-    //TotalItems++;
-    // printf("=========== AFTER ==========\n"); DebugContainerInfo(CI);
   } 
   //End add by Vincent
   TotalItems++;
