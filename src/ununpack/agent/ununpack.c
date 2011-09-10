@@ -64,21 +64,15 @@ int	main(int argc, char *argv[])
           FATAL("Unable to access database")
           SafeExit(20);
         }
-        PQfinish(pgConn);
         if (!IsExe("dpkg-source",Quiet))
           WARNING("dpkg-source is not available on this system.  This means that debian source packages will NOT be unpacked.")
-        return(0);
+        SafeExit(0);
         break; /* never reached */
       case 'Q':
         UseRepository=1;
 
         /* Get the upload_pk from the scheduler */
-        if((Upload_Pk = fo_scheduler_next()) == NULL)
-        {
-          fo_scheduler_disconnect(0);
-          SafeExit(0);
-        }
-        DEBUG("Upload_Pk is %s", Upload_Pk)
+        if((Upload_Pk = fo_scheduler_next()) == NULL) SafeExit(0);
         break;
       case 'q':	Quiet=1; break;
       case 'T':
@@ -135,7 +129,7 @@ int	main(int argc, char *argv[])
     if (!rv)
     {
       rv = fo_CreateARSTable(pgConn, AgentARSName);
-      if (!rv) return(0);
+      if (!rv) SafeExit(0);
     }
 
     /* Has this user previously unpacked this upload_pk successfully?
@@ -154,9 +148,7 @@ int	main(int argc, char *argv[])
       PQclear(result);
       WARNING("Upload_pk %s, has already been unpacked.  No further action required", 
               Upload_Pk)
-      while(fo_scheduler_next() != NULL);
-      fo_scheduler_disconnect(0);
-      return(0);
+      SafeExit(0);
     }
     PQclear(result);
 
@@ -215,19 +207,13 @@ int	main(int argc, char *argv[])
   {
     snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s limit 1;",Upload_Pk);
     result =  PQexec(pgConn, SQL);
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
-    {
-      SafeExit(14);
-    }
-    if (PQntuples(result) == 0)
-    {
-      ReunpackSwitch=1;
-    }
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(14);
+    if (PQntuples(result) == 0) ReunpackSwitch=1;
     PQclear(result);
   }
   //End add by vincent
 
-  /*** process files ***/
+  /*** process files from command line ***/
   for( ; optind<argc; optind++)
   {
     CksumFile *CF=NULL;
@@ -381,15 +367,11 @@ int	main(int argc, char *argv[])
       memset(SQL,'\0',MAXSQL);
       snprintf(SQL,MAXSQL,"UPDATE upload SET upload_mode = upload_mode | (1<<5) WHERE upload_pk = '%s';",Upload_Pk);
       result =  PQexec(pgConn, SQL); /* UPDATE upload */
-      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
-      {
-        SafeExit(44);
-      }
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(44);
       PQclear(result);
     }
 
     if (ars_pk) fo_WriteARS(pgConn, ars_pk, atoi(Upload_Pk), agent_pk, AgentARSName, 0, 1);
-    PQfinish(pgConn);
   }
   if (ListOutFile && (ListOutFile != stdout))
   {
@@ -402,8 +384,6 @@ int	main(int argc, char *argv[])
     if (strcmp(NewDir, ".")) RemoveDir(NewDir);
   }
  
-  while(fo_scheduler_next() != NULL);
-  fo_scheduler_disconnect(0);
-
-  return(0);
+  SafeExit(0);
+  return(0);  // never executed but makes the compiler happy
 } 
