@@ -24,18 +24,21 @@
  * Created on Jul 31, 2008
  */
 
-$where = dirname(__FILE__);
-if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
+$WORKSPACE = NULL;
+if(array_key_exists('WORKSPACE', $_ENV))
 {
-  //echo "running from jenkins....fossology/tests\n";
-  require_once('../../tests/fossologyTestCase.php');
-  require_once ('../../tests/TestEnvironment.php');
+  $WORKSPACE = $_ENV['WORKSPACE'];
+}
+
+if($WORKSPACE)
+{
+  require_once $WORKSPACE . '/fossology/tests/TestEnvironment.php';
+  require_once $WORKSPACE . '/fossology/tests/fossologyTestCase.php';
 }
 else
 {
-  //echo "using requires for running outside of jenkins\n";
-  require_once('../../../tests/fossologyTestCase.php');
-  require_once ('../../../tests/TestEnvironment.php');
+  require_once '../../tests/TestEnvironment.php';
+  require_once '../../tests/fossologyTestCase.php';
 }
 
 global $URL;
