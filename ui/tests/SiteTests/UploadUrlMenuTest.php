@@ -24,8 +24,6 @@
  * Created on Jul 31, 2008
  */
 
-$dn = __DIR__;
-echo "DB: Dir name where the script lives is:\n$dn\n";
 $WORKSPACE = NULL;
 if(array_key_exists('WORKSPACE', $_ENV))
 {
