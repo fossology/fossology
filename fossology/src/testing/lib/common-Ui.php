@@ -80,6 +80,7 @@ function getMailSubjects() {
    * in /var/mail.
    */
   $MailFile = "/var/mail/";
+  $Sujects = array();
 
   //$user = get_current_user();
   $user = exec('id -un', $out, $rtn);
