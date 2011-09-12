@@ -22,13 +22,12 @@
  *
  * change the test environment file.
  *
- * @param string -s $subject the subject string to change
  * @param string -c $change the string to change the subject to.
+ * @param string -t $testRoot, the path to the root of the tests, where test
+ * infrastructure files are.
  *
- * @return 0 for OK, 1 for failure
+ * @exit values 0 for OK, 1 for failure
  */
-
-global $TR;
 
 $argv = array();
 $opts = array();
@@ -81,7 +80,7 @@ if($argc < 3)
 }
 
 if(empty($TestRoot)){
-  echo "TestRoot is Empty!\n";
+  echo "Error! TestRoot is Empty!\n";
   exit(1);
 }
 

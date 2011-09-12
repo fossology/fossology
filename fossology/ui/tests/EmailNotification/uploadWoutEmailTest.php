@@ -53,9 +53,6 @@ class uploadWoutEMailTest extends fossologyTestCase {
   public function setUp() {
     global $URL;
 
-    $TR = TESTROOT;
-    $_ENV['TestRoot'] = $TR;
-
     if (array_key_exists('WORKSPACE', $_ENV))
     {
       //echo "WORKSPACE EXISTS:{$_ENV['WORKSPACE']}\n";
@@ -64,7 +61,7 @@ class uploadWoutEMailTest extends fossologyTestCase {
     }
     else
     {
-      $path = './changeENV.php';
+      $path = TESTROOT . './changeENV.php';
     }
     // change the user in TestEnvironment to noemail
     $last = exec("$path -c noemail -t $TR", $out, $rtn);
@@ -120,11 +117,7 @@ class uploadWoutEMailTest extends fossologyTestCase {
 
     global $WORKSPACE;
     
-    if(array_key_exists('TestRoot', $_ENV))
-    {
-      $GTR = $_ENV['TestRoot'];
-    }
-    else
+    if(!defined(TESTROOT))
     {
       $msg = "No TestRoot environment varilable defined." .
         "Cannot change TestEnvironment file back to fosstester\n";
@@ -139,9 +132,9 @@ class uploadWoutEMailTest extends fossologyTestCase {
     }
     else
     {
-      $path = './changeENV.php';
+      $path = TESTROOT . './changeENV.php';
     }
-    $last = exec("$path -c fosstester -t $GTR", $out, $rtn);
+    $last = exec("$path -c fosstester -t " . TESTROOT, $out, $rtn);
     if($rtn > 0) {
       $this->fail("Could not change the test environment file\n");
       print "Failure, output from changeENV is:\n";print_r($out) . "\n";
