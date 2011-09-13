@@ -65,9 +65,9 @@ class UploadUrlTest extends fossologyTestCase
 
     $FolderId = $this->getFolderId('Basic-Testing', $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
-    $simpletest = 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz';
+    $jenkins = 'http://mirrors.jenkins-ci.org/war/1.427/jenkins.war';
     $this->assertTrue($this->mybrowser->setField('geturl', $simpletest));
-    $desc = 'File uploaded by test UploadUrlTest';
+    $desc = 'File jenkins.war uploaded by test UploadUrlTest';
     $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     $pid = getmypid();
     $upload_name = 'TestUploadUrl-' . "$pid";
