@@ -45,8 +45,8 @@ class uploadsTest extends TestSuite
   function __construct($label=FALSE)
   {
     parent::__construct($label);
-    $this->addTestFile('uplTestData.php');
-    $this->addTestFile('uploadCopyrightData.php');
+    $this->addFile('uplTestData.php');
+    $this->addFile('uploadCopyrightData.php');
     // agent add data is not ready yet....due to javascript.
     //$this->addTestFile('AgentAddData.php');
     // do the uploads and output in text...
