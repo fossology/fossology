@@ -31,6 +31,7 @@
 /**#@+
  * include test files
  */
+require_once '/usr/local/simpletest/web_tester.php';
 require_once ('TestEnvironment.php');
 require_once ('commonTestFuncs.php');
 /**#@-*/
@@ -112,7 +113,7 @@ class fossologyTest extends WebTestCase
       return($this->mybrowser);
     }
     else {
-      $browser = & new SimpleBrowser();
+      $browser = new SimpleBrowser();
       if(is_object($browser)) {
         $this->setBrowser($browser);
       }
@@ -478,7 +479,7 @@ class fossologyTest extends WebTestCase
         continue;
       }
 
-      list($upId, $file) = split(' ', $upload);
+      list($upId, $file) = explode(' ', $upload);
       if($upId == '#') {
         continue;
       }
