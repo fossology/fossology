@@ -59,11 +59,10 @@ class uploadWoutEMailTest extends fossologyTestCase {
     {
       //echo "WORKSPACE EXISTS:{$_ENV['WORKSPACE']}\n";
       $path = $_ENV['WORKSPACE'] . "/fossology/ui/tests/EmailNotification/changeENV.php";
-      global $WORKSPACE;
     }
     else
     {
-      $path = $TESTROOT . './changeENV.php';
+      $path = './changeENV.php';
     }
     // change the user in TestEnvironment to noemail
     $last = exec("$path -c noemail -t $TESTROOT", $out, $rtn);
@@ -83,7 +82,6 @@ class uploadWoutEMailTest extends fossologyTestCase {
   public function testUploadWoutEmail() {
 
     global $URL;
-    global $WORKSPACE;
     global $TESTROOT;
 
     /* login noemail */
@@ -118,7 +116,6 @@ class uploadWoutEMailTest extends fossologyTestCase {
 
   public function tearDown() {
 
-    global $WORKSPACE;
     global $TESTROOT;
     
     if(empty($TESTROOT))
@@ -136,7 +133,7 @@ class uploadWoutEMailTest extends fossologyTestCase {
     }
     else
     {
-      $path = $TESTROOT . '/changeENV.php';
+      $path = '/changeENV.php';
     }
     $last = exec("$path -c fosstester -t $TESTROOT", $out, $rtn);
     if($rtn > 0) {
