@@ -278,6 +278,8 @@ function plugin_init()
 /**
  * \brief Load every module ui found in mods-enabled
  *
+ * \param $PlugDir - pludir, now now only for simpleUi
+ * load all plug-ins under ./ui/simpleUi
  * \param $CallInit 1 = call plugin_init(), else ignored.
  **/
 function plugin_load($CallInit=1)
@@ -299,13 +301,27 @@ function plugin_load($CallInit=1)
       {
         while (($File = readdir($Dir)) !== false)
         {
-          if (substr($File,-4) === ".php")
-	      {
+          /** File is ./www/ui/simpelUi ?*/
+          if ($File == 'simpleUi' and $ModDir == 'www' and is_dir("$ModDirPath/$File") and ($subDir = opendir("$ModDirPath/$File")))
+          {
+            while (($simFile = readdir($subDir)) !== false)
+            {
+              if (substr($simFile,-4) === ".php")
+              {
+                /* Load php found in the ui/simpleUi directory */
+                //echo "Loading: $ModDirPath/$File/$simFile<br>";
+                include_once("$ModDirPath/$File/$simFile");
+              }
+            }
+            closedir($subDir);
+          }
+          if (substr($File,-4) === ".php" and !strstr($File, 'ndex.php')) // ignore index.php and simpleIndex.php
+	        {
             /* Load php found in the ui directory */
-//  	        echo "Loading: $ModDirPath/$File<br>"; 
+  	        //echo "Loading: $ModDirPath/$File<br>"; 
   	        include_once("$ModDirPath/$File"); 
           }
-	    }
+  	    }
       }
     }
   }
