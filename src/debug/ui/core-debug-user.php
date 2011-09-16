@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,16 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 define("TITLE_debug_user", _("Debug User"));
 
 class debug_user extends FO_Plugin
@@ -37,23 +27,26 @@ class debug_user extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_DEBUG;
 
-  /************************************************
-   Output(): Generate output.
-  ************************************************/
+  /**
+   * \brief Generate output.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
     $V="";
-    global $DB;
+    global $PG_CONN;
     switch($this->OutputType)
     {
       case "XML":
         break;
       case "HTML":
-        $Results = $DB->Action("SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';");
-        $R = &$Results[0];
+        $sql = "SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $R = pg_fetch_assoc($result);
+        pg_free_result($result);
         $text = _("User Information");
         $V .= "<H2>$text</H2>\n";
         $V .= "<table border=1>\n";

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,16 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 define("TITLE_core_debug_fileloc", _("Global Variables"));
 
 class core_debug_fileloc extends FO_Plugin
@@ -36,10 +26,10 @@ class core_debug_fileloc extends FO_Plugin
   var $MenuList   = "Help::Debug::Global Variables";
   var $DBaccess   = PLUGIN_DB_DEBUG;
 
-  /******************************************
-   PostInitialize(): This is where we check for
-  changes to the full-debug setting.
-  ******************************************/
+  /**
+   * \brief This is where we check for
+   * changes to the full-debug setting.
+   */
   function PostInitialize()
   {
     if ($this->State != PLUGIN_STATE_VALID) {
@@ -57,9 +47,9 @@ class core_debug_fileloc extends FO_Plugin
   } // PostInitialize()
 
 
-  /***********************************************************
-   Output(): Display the loaded menu and plugins.
-  ***********************************************************/
+  /**
+   * \brief Display the loaded menu and plugins.
+   */
   function Output()
   {
     global $BINDIR, $LIBDIR, $LIBEXECDIR, $INCLUDEDIR, $MAN1DIR,
