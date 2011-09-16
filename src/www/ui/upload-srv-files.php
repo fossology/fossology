@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,18 +15,13 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_upload_srv_files", _("Upload from Server"));
 
+/**
+ * \class upload_srv_files extend from FO_Plugin
+ * \brief upload files(directory) from server
+ */
 class upload_srv_files extends FO_Plugin {
   public $Name = "upload_srv_files";
   public $Title = TITLE_upload_srv_files;
@@ -34,25 +29,22 @@ class upload_srv_files extends FO_Plugin {
   public $MenuList = "Upload::From Server";
   public $Dependency = array("db", "agent_unpack");
   public $DBaccess = PLUGIN_DB_UPLOAD;
+
   /**
-   *
-   * Function: Upload()
-   *
-   * Process the upload request.  Call the upload by the Name passed in or by
+   * \brief Process the upload request.  Call the upload by the Name passed in or by
    * the filename if no name is supplied.
    *
-   * @param int $FolderPk folder fk to load into
-   * @param string $SourceFiles files to upload, file, tar, directory, etc...
-   * @param string $GroupNames flag for indicating if group names were requested.
+   * \param $FolderPk - folder fk to load into
+   * \param $SourceFiles - files to upload, file, tar, directory, etc...
+   * \param $GroupNames - flag for indicating if group names were requested.
    *        passed on as -A option to cp2foss.
-   * @param string $Desc optional description for the upload
-   * @param string $Name optional Name for the upload
+   * \param $Desc - optional description for the upload
+   * \param $Name - optional Name for the upload
    *
-   * @return NULL on success, string on failure.
+   * \return NULL on success, string on failure.
    */
   function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name) {
     global $LIBEXECDIR;
-    global $DB;
     global $Plugins;
     $FolderPath = FolderGetName($FolderPk);
     $CMD = "";
@@ -151,9 +143,7 @@ class upload_srv_files extends FO_Plugin {
   } // Upload()
 
   /**
-   * function: Output
-   *
-   * Generate the text for this plugin.
+   * \brief Generate the text for this plugin.
    */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {

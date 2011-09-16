@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,18 +15,13 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_upload_url", _("Upload from URL"));
 
+/**
+ * \class upload_url extend from FO_Plugin
+ * \brief upload from url
+ */
 class upload_url extends FO_Plugin {
   public $Name = "upload_url";
   public $Title = TITLE_upload_url;
@@ -35,11 +30,10 @@ class upload_url extends FO_Plugin {
   public $Dependency = array("db", "agent_unpack");
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
-  /*********************************************
-   Upload(): Process the upload request.
-  Returns NULL on success, string on failure.
-  *********************************************/
-
+  /**
+   * \brief Process the upload request.
+   * Returns NULL on success, string on failure.
+   */
   function Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level) {
     /* See if the URL looks valid */
     if (empty($Folder)) {
@@ -117,9 +111,10 @@ class upload_url extends FO_Plugin {
     print displayMessage($msg,$keep);
     return (NULL);
   } // Upload()
-  /*********************************************
-   Output(): Generate the text for this plugin.
-  *********************************************/
+
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;

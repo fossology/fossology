@@ -16,18 +16,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 define("TITLE_foconfig", _("Configuration Variables"));
 
+/**
+ * \class foconfig extend from FO_Plugin
+ * \brief display and set FOSSology configuration
+ */
 class foconfig extends FO_Plugin
 {
   var $Name       = "foconfig";
@@ -40,12 +34,11 @@ class foconfig extends FO_Plugin
   public $PluginLevel = 50;    // run before 'regular' plugins
 
 
-  /***********************************************************
-   Install(): Create and configure database tables
-  If the sysconfig table doesn't exist then
-  create it
-  create records for the core variables.
-  ***********************************************************/
+  /**
+   * \brief Create and configure database tables
+   * If the sysconfig table doesn't exist then
+   * create it, create records for the core variables.
+   */
   function Install()
   {
     ConfigInit();
@@ -53,9 +46,9 @@ class foconfig extends FO_Plugin
   } // Install()
 
 
-  /************************************************
-   HTMLout(): Generate HTML output.
-  ************************************************/
+  /**
+   * \brief Generate HTML output.
+   */
   function HTMLout()
   {
     global $PG_CONN;
@@ -108,9 +101,9 @@ class foconfig extends FO_Plugin
     return $OutBuf;
   }
 
-  /************************************************
-   Output(): Generate output.
-  ************************************************/
+  /**
+   * \brief Generate output.
+   */
   function Output()
   {
     global $PG_CONN;

@@ -15,25 +15,13 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-
-/**
- * upload-file
-* \brief Upload a file from the users computer using the UI.
-*
-* @version "$Id: upload-file.php 3979 2011-03-24 19:16:20Z bobgo $"
-*/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_upload_file", _("Upload a New File"));
 
+/**
+ * \class upload_file extends from FO_Plugin
+ * \brief Upload a file from the users computer using the UI.
+ */
 class upload_file extends FO_Plugin {
 
   public $Name = "upload_file";
@@ -43,12 +31,11 @@ class upload_file extends FO_Plugin {
   public $Dependency = array("db", "agent_unpack", "showjobs");
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
-  /** Upload
+  /**
    * \brief Process the upload request.
    *
-   * @return NULL on success, string on failure.
+   * \return NULL on success, string on failure.
    */
-
   function Upload($Folder, $TempFile, $Desc, $Name) {
     /* See if the URL looks valid */
     if (empty($Folder)) {
@@ -114,9 +101,9 @@ class upload_file extends FO_Plugin {
     return(NULL);
   } // Upload()
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-  *********************************************/
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;

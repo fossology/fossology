@@ -16,31 +16,30 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/***************************************************************
- $GlobalReady is only set here.
-This flag tells all other PHP code that it is running from this system.
-If other PHP code does not see this flag, then the code is not being
-executed correctly and should exit immediately (without taking further
-action).
-***************************************************************/
+/**
+ * \file simpleIndex.php
+ *
+ * \brief This is the main guts of the UI: Find the plugin and run it.
+ */
+
 $GlobalReady=1;
 $SysConf = array();
 $PG_CONN = 0;   // Database connection
 
-/****************************************************
- This is the main guts of the UI: Find the plugin and run it.
-****************************************************/
-//$_SERVER['HTTP_SMUNIVERSALID'] = "dong.ma@hp.com";
+//require("i18n.php"); DISABLED until i18n infrastructure is set-up.
+require_once("pathinclude.php");
+require_once("$FOSRCDIR/lib/php/common.php");
 
-/* Connect to the database.  If the connection fails,
+/**
+ * Connect to the database.  If the connection fails,
  * DBconnect() will print a failure message and exit.
-*/
+ */
 DBconnect();
 
-/* Initialize global system configuration variables $SysConfig[] */
+/** Initialize global system configuration variables $SysConfig[] */
 $SysConf = ConfigInit();
 
-plugin_load("plugins/simpleUi");
+plugin_load();
 
 $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) {

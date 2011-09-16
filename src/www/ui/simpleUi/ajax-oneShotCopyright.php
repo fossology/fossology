@@ -15,18 +15,18 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-/*
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
+
+/**
+ * \file ajax_oneShotCopyright.php
+ * \brief oneshot copyright analysis form
+ */
 
 define("TITLE_ajax_oneShotCopyright", _("One-Shot Copyright/Email/URL Analysis"));
 
+/**
+ * \class ajax_oneShotCopyright extend from FO_Plugin
+ * \brief display oneshot copyright analysis form
+ */ 
 class ajax_oneShotCopyright extends FO_Plugin {
   public $Name = "ajax_oneShotCopyright";
   public $Title = TITLE_ajax_oneShotCopyright;
@@ -41,11 +41,11 @@ class ajax_oneShotCopyright extends FO_Plugin {
   public $DBaccess = PLUGIN_DB_ANALYZE;
   public $LoginFlag = 1;
 
-  /*********************************************
-   RegisterMenus(): Change the type of output
-  based on user-supplied parameters.
-  Returns 1 on success.
-  *********************************************/
+  /**
+   * \brief Change the type of output based on user-supplied parameters.
+   *
+   * \return 1 on success, 0 on failure
+   */
   function RegisterMenus()
   {
     if ($this->State != PLUGIN_STATE_READY)
@@ -101,9 +101,9 @@ class ajax_oneShotCopyright extends FO_Plugin {
     }
   } // RegisterMenus()
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-  *********************************************/
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
 
     if ($this->State != PLUGIN_STATE_READY) {

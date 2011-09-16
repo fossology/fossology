@@ -17,29 +17,36 @@
 */
 
 /**
- * \brief
+ * \file uploads.php
  *
- * @version "$Id $"
+ * \version "$Id $"
  * Created on Feb 11, 2011 by Mark Donohoe
  */
 
 define("TITLE_uploads", _("Upload Files for Analysis"));
 
+/**
+ * \class  uploads extend from FO_Plugin
+ * 
+ * \brief Process the upload request, 
+ * upload from a file, upload from a rul, Analyze a single file for licenses
+ * or Analyze a single file for Copyrights, Email and URL's, etc
+ */
 class uploads extends FO_Plugin
 {
   public $Name = "uploads";
   public $Title = TITLE_uploads;
   public $version = "1.0";
   public $MenuList = "Upload";
-  public $Dependency = array("db", "agent_unpack");
+  //public $Dependency = array("db", "agent_unpack");
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
   /**
-   * AnalyzFile(): Analyze one uploaded file.
+   * \brief Analyze one uploaded file.
    *
-   * @param string $FilePath the filepath to the file to analyze.
-   * @return string $V, html to display the results.
+   * \param $FilePath - the filepath to the file to analyze.
    *
+   * \return string $V, html to display the results.
    */
   function AnalyzeFile($FilePath) {
 
@@ -57,8 +64,10 @@ class uploads extends FO_Plugin
   } // AnalyzeFile()
 
   /**
-   * AnalyzeOne(): Analyze for copyrights, emails and url's in one uploaded file.
+   * \brief Analyze for copyrights, emails and url's in one uploaded file.
    *
+   * \param $Highlight - Highlight or not, if $Highlight is not empty, 
+   * will display text of the analyzed file, and highlight the copyright statement.
    */
   function AnalyzeOne($Highlight)
   {
@@ -175,6 +184,15 @@ class uploads extends FO_Plugin
     return ($V);
   } // AnalyzeOne()
 
+  /**
+   * \brief Process the upload from URL request.
+   * 
+   * \param $Folder - folder for storing the uploaded file 
+   * \prarm $TempFile - a viewable name for this file
+   * \prarm $Name - the uploaded file path
+   *
+   * \return NULL on success, string on failure.
+   */
   function uploadFile($Folder, $TempFile, $Name)
   {
     //echo "<pre>AUP: in upload\n</pre>";
@@ -244,32 +262,24 @@ class uploads extends FO_Plugin
     return(NULL);
   } // uploadFile
 
-
   /**
-   * \brief uploadSrv: process the upload from server request, scheduling
-   * agents as needed.
-   */
-
-  /**
-   *
-   * Function: uploadSrv()
-   *
-   * \brief Process the upload from server request.  Call the upload by the
+   * \brief Process the upload from server request, scheduling
+   * agents as needed.  Call the upload by the
    * Name passed in or by the filename if no name is supplied.
    *
-   * @param int $FolderPk folder fk to load into
-   * @param string $SourceFiles files to upload, file, tar, directory, etc...
-   * @param string $GroupNames flag for indicating if group names were requested.
+   * \param $FolderPk - folder fk to load into
+   * \param $SourceFiles - files to upload, file, tar, directory, etc...
+   * \param $GroupNames - flag for indicating if group names were requested.
    *        passed on as -A option to cp2foss.
-   * @param string $Name optional Name for the upload
+   * \param $Name - optional Name for the upload
    *
-   * @return NULL on success, string on failure.
+   * \return NULL on success, string on failure.
    */
   function uploadSrv($FolderPk, $SourceFiles, $GroupNames, $Name)
   {
 
     global $LIBEXECDIR;
-    global $DB;
+    global $PG_CONN;
     global $Plugins;
 
     $FolderPath = FolderGetName($FolderPk);
@@ -297,16 +307,13 @@ class uploads extends FO_Plugin
     $userName = $_SESSION['User'];
     $SQL = "SELECT user_name, user_agent_list FROM users WHERE
             user_name='$userName';";
-    $uList = $DB->Action($SQL);
-
+    $result = pg_query($PG_CONN, $SQL);
     // Ulist can be empty if the user does not have the correct permissions
     // or has not selected any default/preferred agents or sql failed.
-    if(empty($uList))
-    {
-      return;       // nothing to schedule or sql failed....
-
-    }
-    $alist = $uList[0]['user_agent_list'];
+    DBCheckResult($result, $SQL, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    $alist = $row['user_agent_list'];
     $agentList = " -q " . $alist;
     $CMD .= $agentList;
 
@@ -369,11 +376,18 @@ class uploads extends FO_Plugin
   } // uploadSrv()
 
   /**
-   * \brief uploadUrl(): Process the upload from URL request.
+   * \brief Process the upload from URL request.
    *
-   * @return NULL on success, string on failure.
+   * \param $Folder - folder for storing the uploaded file
+   * \param $GetURL - the url of the file that will be uploaded
+   * \param $Desc - descripion ofr this upload
+   * \param $Name - a viewable name for the uploaded file
+   * \param $Accept - which files will be uploaded
+   * \param $Reject - which files will not be uploaded
+   * \param $Level -  Recursion level (depth)
+   *
+   * \return NULL on success, string on failure.
    */
-
   function uploadUrl($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level)
   {
 
@@ -467,6 +481,9 @@ class uploads extends FO_Plugin
     return (NULL);
   } // uploadUrl()
 
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY)
@@ -690,8 +707,6 @@ class uploads extends FO_Plugin
         $choice .= $Text;
         $choice .= "<input type='radio' name='uploads' id='oneshot' value='osn' onclick='UploadOsN_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotNomos\")' />Analyze a single file for licenses<br />\n";
         $choice .= "<input type='radio' name='uploads' id='oneshotcopy' value='copy' onclick='UploadCopyR_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotCopyright\")' />Analyze a single file for Copyrights, Email and URL's<br />\n";
-
-        //$choice .= "<input type='radio' name='uploadfurl' value='opts' onclick='UploadOpts_Get(\"" .Traceback_uri() . "?mod=ajax_optsForm\")' />More Options<br />\n";
 
         $choice .= "\n<div id='hozrow'>\n<hr>\n</div>\n";
 

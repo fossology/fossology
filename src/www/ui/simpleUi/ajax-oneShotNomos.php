@@ -16,21 +16,21 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 /**
- * ajax-oneShotNomos
- * \brief display to upload from url form
+ * \file ajax-oneShotNomos.php
+ * \brief display one shot nomos form
  *
- * @version "$Id: ajax-oneShotNomos.php 3942 2011-03-17 23:24:33Z rrando $"
+ * \version "$Id: ajax-oneShotNomos.php 3942 2011-03-17 23:24:33Z rrando $"
  * Created on Feb 15, 2011 by Mark Donohoe
  */
 
 define("TITLE_ajax_oneShotNomos", _("Upload from a URL"));
 
+/**
+ * \class ajax_oneShotNomos extend from FO_Plugin
+ * 
+ * \brief display one shot nomos form
+ */
 class ajax_oneShotNomos extends FO_Plugin
 {
   public $Name = "ajax_oneShotNomos";
@@ -41,18 +41,14 @@ class ajax_oneShotNomos extends FO_Plugin
   public $NoHTML     = 1; /* This plugin needs no HTML content help */
   public $LoginFlag = 0;
 
-  /*
-   Output(): Generate the text for this plugin.
-  */
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-
-    global $DB;
-    global $DATADIR;
-    global $PROJECTSTATEDIR;
 
     $V = "";
     switch ($this->OutputType)

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,18 +15,11 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+
 /**
- * @Version "$Id: admin-folder-move.php 231 2008-02-28 22:58:10Z nealk2 $"
+ * \class upload_move extend from FO_Plugin
+ * \brief move a upload from a place to another one
  */
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 class upload_move extends FO_Plugin {
   var $Name = "upload_move";
   var $Version = "1.0";
@@ -35,15 +28,17 @@ class upload_move extends FO_Plugin {
     "db"
   );
   var $DBaccess = PLUGIN_DB_WRITE;
-  /*********************************************
-   Move(): Given an uploadID, it's parent folder and a Target folder Id, move
-  the upload from the old folder to the NewParentID (new folder)!
-  Includes idiot checking since the input comes from stdin.
-  Returns: 1 if renamed, 0 if failed.
-  *********************************************/
+
+  /**
+   * \brief Given an uploadID, it's parent folder and a Target folder Id, move
+   * the upload from the old folder to the NewParentID (new folder)!
+   * Includes idiot checking since the input comes from stdin.
+   *
+   * \return 1 if renamed, 0 if failed.
+   */
   function Move($UploadId, $NewParentId, $OldParentId) {
     global $Plugins;
-    global $DB;
+    global $PG_CONN;
     /* Check the name */
     if (empty($NewParentId)) {
       return (0);
@@ -56,28 +51,37 @@ class upload_move extends FO_Plugin {
     } // cannot move folder root
     /* New folder must exist? */
     /* Old folder and uploadId will be checked by select from foldercontents */
-    $Results = $DB->Action("SELECT * FROM folder where folder_pk = '$NewParentId' limit 1;");
-    $Row = $Results[0];
-    if ($Row['folder_pk'] != $NewParentId) {
+    $sql = "SELECT * FROM folder where folder_pk = '$NewParentId' limit 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if ($row['folder_pk'] != $NewParentId) {
       return (0);
     }
     /* Do the move */
     /* get the foldercontents record for the old folder and this upload */
-    $Sql = "SELECT * from foldercontents WHERE child_id = '$UploadId' AND parent_fk=$OldParentId AND foldercontents_mode = '2' limit 1;";
-    $FContents = $DB->Action($Sql);
-    $Row = $FContents[0];
-    $fc_pk = $Row['foldercontents_pk'];
+    $sql = "SELECT * from foldercontents WHERE child_id = '$UploadId' AND parent_fk=$OldParentId AND foldercontents_mode = '2' limit 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    $fc_pk = $row['foldercontents_pk'];
     /* Now change the parent folder in this rec */
-    $Sql = "UPDATE foldercontents SET parent_fk = '$NewParentId' WHERE foldercontents_pk=$fc_pk";
-    $Results = $DB->Action($Sql);
+    $sql = "UPDATE foldercontents SET parent_fk = '$NewParentId' WHERE foldercontents_pk=$fc_pk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
     return (1);
   } // Move()
-  /*********************************************
-   Output(): Generate the text for this plugin.
-  *********************************************/
+
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
     global $Plugins;
-    global $DB;
+    global $PG_CONN;
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
@@ -96,17 +100,29 @@ class upload_move extends FO_Plugin {
           $rc = $this->Move($UploadId, $TargetFolderId, $OldFolderId);
           if ($rc == 1) {
             /* Need to refresh the screen */
-            $NewFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$TargetFolderId';");
-            $NRow = $NewFolder[0];
-            $Sql = "SELECT pfile_fk FROM upload WHERE upload_pk='$UploadId';";
-            $uploadData = $DB->Action($Sql);
-            $pfileNum  = $uploadData[0]['pfile_fk'];
-            $Sql = "SELECT ufile_name FROM uploadtree WHERE " .
+            $sql =  "SELECT * FROM folder where folder_pk = '$TargetFolderId';";
+            $result = pg_query($PG_CONN, $sql);
+            DBCheckResult($result, $sql, __FILE__, __LINE__);
+            $NRow = pg_fetch_assoc($result);
+            pg_free_result($result);
+            $sql = "SELECT pfile_fk FROM upload WHERE upload_pk='$UploadId';";
+            $result = pg_query($PG_CONN, $sql);
+            DBCheckResult($result, $sql, __FILE__, __LINE__);
+            $row= pg_fetch_assoc($result);
+            pg_free_result($result);
+            $pfileNum  = $row['pfile_fk'];
+            $sql = "SELECT ufile_name FROM uploadtree WHERE " .
                    "upload_fk='$UploadId' and pfile_fk=$pfileNum;";
-            $Uploads = $DB->Action($Sql);
-            $base = basename($Uploads[0]['ufile_name']);
-            $OldFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$OldFolderId';");
-            $ORow = $OldFolder[0];
+            $result = pg_query($PG_CONN, $sql);
+            DBCheckResult($result, $sql, __FILE__, __LINE__);
+            $row= pg_fetch_assoc($result);
+            pg_free_result($result);
+            $base = basename($row['ufile_name']);
+            $sql = "SELECT * FROM folder where folder_pk = '$OldFolderId';";
+            $result = pg_query($PG_CONN, $sql);
+            DBCheckResult($result, $sql, __FILE__, __LINE__);
+            $ORow = pg_fetch_assoc($result);
+            pg_free_result($result);
             $text = _("Moved");
             $text1 = _("from folder");
             $text2 = _("to folder");

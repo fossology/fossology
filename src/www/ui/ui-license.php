@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,18 +16,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 define("TITLE_ui_license", _("bSAM License Browser (deprecated)"));
 
+/**
+ * \class ui_license extend from FO_Plugin
+ * \brief 
+ */
 class ui_license extends FO_Plugin
 {
   var $Name       = "license";
@@ -39,13 +33,13 @@ class ui_license extends FO_Plugin
   var $LoginFlag  = 0;
   var $UpdCache   = 0;
 
-  /***********************************************************
-   Install(): Create and configure database tables
-  ***********************************************************/
+  /**
+   * \brief Create and configure database tables
+   */
   function Install()
   {
-    global $DB;
-    if (empty($DB)) {
+    global $PG_CONN;
+    if (empty($PG_CONN)) {
       return(1);
     } /* No DB */
 
@@ -70,9 +64,9 @@ class ui_license extends FO_Plugin
     return(0);
   } // Install()
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-  ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     // For all other menus, permit coming back here.
@@ -97,14 +91,14 @@ class ui_license extends FO_Plugin
     }
   } // RegisterMenus()
 
-  /***********************************************************
-   Initialize(): This is called before the plugin is used.
-  It should assume that Install() was already run one time
-  (possibly years ago and not during this object's creation).
-  Returns true on success, false on failure.
-  A failed initialize is not used by the system.
-  NOTE: This function must NOT assume that other plugins are installed.
-  ***********************************************************/
+  /**
+   * \brief This is called before the plugin is used.
+   * It should assume that Install() was already run one time
+   * (possibly years ago and not during this object's creation).
+   * Returns true on success, false on failure.
+   * A failed initialize is not used by the system.
+   * NOTE: This function must NOT assume that other plugins are installed.
+   */
   function Initialize()
   {
     global $_GET;
@@ -136,10 +130,10 @@ class ui_license extends FO_Plugin
   } // Initialize()
 
 
-  /***********************************************************
-   SortName(): Given two elements sort them by name.
-  Callback Used for sorting the histogram.
-  **********************************************************/
+  /**
+   * \brief Given two elements sort them by name.
+   * Callback Used for sorting the histogram.
+   */
   function SortName ($a,$b)
   {
     list($A0,$A1,$A2) = split("\|",$a,3);
@@ -197,11 +191,11 @@ class ui_license extends FO_Plugin
     return(strcmp($A1,$B1));
   } // SortName()
 
-  /***********************************************************
-   ShowUploadHist(): Given an Upload and UploadtreePk item, display:
-  (1) The histogram for the directory BY LICENSE.
-  (2) The file listing for the directory, with license navigation.
-  ***********************************************************/
+  /**
+   * \brief Given an Upload and UploadtreePk item, display:
+   * (1) The histogram for the directory BY LICENSE.
+   * (2) The file listing for the directory, with license navigation.
+   */
   function ShowUploadHist($Upload,$Item,$Uri)
   {
     /*****
@@ -216,7 +210,7 @@ class ui_license extends FO_Plugin
     $VH=""; // return values for license histogram
     $V=""; // total return value
     global $Plugins;
-    global $DB;
+    global $PG_CONN;
     $Lics = array(); // license summary for an item in the directory
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
 
@@ -340,8 +334,12 @@ class ui_license extends FO_Plugin
     ***************************************/
     if ($ChildCount == 0)
     {
-      $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$Item';");
-      if (IsDir($Results[0]['ufile_mode'])) {
+      $sql = "SELECT * FROM uploadtree WHERE uploadtree_pk = '$Item';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      pg_free_result($result);
+      if (IsDir($row['ufile_mode'])) {
         return;
       }
       $ModLicView = &$Plugins[plugin_find_id("view-license")];
@@ -460,9 +458,9 @@ class ui_license extends FO_Plugin
     return($V);
   } // ShowUploadHist()
 
-  /***********************************************************
-   Output(): This function returns the scheduler status.
-  ***********************************************************/
+  /**
+   * \brief his function returns the scheduler status.
+   */
   function Output()
   {
     $uTime = microtime(true);

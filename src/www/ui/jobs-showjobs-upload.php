@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,18 +16,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 define("TITLE_jobs_showjobs_upload", _("View Jobs By Upload"));
 
+/**
+ * \class jobs_showjobs_upload extend from FO_Plugin
+ * \brief select the uploaded project to view
+ */
 class jobs_showjobs_upload extends FO_Plugin
 {
   var $Name       = "jobs_showjobs_upload";
@@ -37,9 +31,9 @@ class jobs_showjobs_upload extends FO_Plugin
   var $Dependency = array("db","showjobs");
   var $DBaccess   = PLUGIN_DB_UPLOAD;
 
-  /***********************************************************
-   RegisterMenus(): Register additional menus.
-  ***********************************************************/
+  /**
+   * \brief Register additional menus.
+   */
   function RegisterMenus()
   {
     if ($this->State != PLUGIN_STATE_READY) {
@@ -47,15 +41,14 @@ class jobs_showjobs_upload extends FO_Plugin
     } // don't run
   }
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-  *********************************************/
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    global $DB;
     $V="";
     switch($this->OutputType)
     {

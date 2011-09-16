@@ -17,22 +17,21 @@
 */
 
 /**
+ * \file simpleUi.php
+ *
  * \brief simpleUi, create new menus for users with DBacess <= 5.
  *
  * This code depends on symlinks existing between the directory this code is in
  * and the plugins directory.
  *
- * @version "$Id: simpleUi.php 4404 2011-06-14 21:46:47Z rrando $"
+ * \version "$Id: simpleUi.php 4404 2011-06-14 21:46:47Z rrando $"
  */
-
-global $GlobalReady;
-if (!isset($GlobalReady))
-{
-  exit;
-}
 
 define("TITLE_SimpleUi", _("Simplified UI"));
 
+/**
+ * \class simpleUi extend from FO_Plugin
+ */
 class simpleUi extends FO_Plugin
 {
   public $Name = "simple_UI";
@@ -67,8 +66,7 @@ class simpleUi extends FO_Plugin
    * \brief disable plugins not needed for simple UI, when users with perms
    * > 5 login, these disabled plugins should get enabled.
    *
-   * @param mixed $plugins either a scalar or an array
-   *
+   * \param mixed $plugins either a scalar or an array
    */
   function disablePlugins($plugins)
   {

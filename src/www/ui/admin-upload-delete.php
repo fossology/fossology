@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,21 +15,13 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
-/**
- * @Version "$Id: $"
- */
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_admin_upload_delete", _("Delete Uploaded File"));
 
+/**
+ * \class admin_upload_delete extend from FO_Plugin
+ * \brief delete a upload, certainly, you need the permission 
+ */
 class admin_upload_delete extends FO_Plugin {
   var $Name = "admin_upload_delete";
   var $Title = TITLE_admin_upload_delete;
@@ -39,19 +31,21 @@ class admin_upload_delete extends FO_Plugin {
     "db"
   );
   var $DBaccess = PLUGIN_DB_DELETE;
-  /***********************************************************
-   RegisterMenus(): Register additional menus.
-  ***********************************************************/
+
+  /**
+   * \brief Register additional menus.
+   */
   function RegisterMenus() {
     if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     } // don't run
 
   }
-  /*********************************************
-   Delete(): Given a folder_pk, add a job.
-  Returns NULL on success, string on failure.
-  *********************************************/
+
+  /**
+   * \brief Given a folder_pk, add a job.
+   * Returns NULL on success, string on failure.
+   */
   function Delete($uploadpk, $Depends = NULL) {
     /* Prepare the job: job "Delete" */
     $jobpk = JobAddJob($uploadpk, "Delete");
@@ -68,14 +62,14 @@ class admin_upload_delete extends FO_Plugin {
     }
     return (NULL);
   } // Delete()
-  /*********************************************
-   Output(): Generate the text for this plugin.
-  *********************************************/
+
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    global $DB;
     $V = "";
     switch ($this->OutputType) {
       case "XML":
