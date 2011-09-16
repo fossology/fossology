@@ -19,7 +19,12 @@
 /*****************************************************************
  These are common functions to be used by anyone.
  *****************************************************************/
-require_once("template/template-plugin.php");
+
+$ModsEnabledDir = "$SYSCONFDIR/$PROJECT/mods-enabled/www/ui";
+if (is_dir($ModsEnabledDir))
+{
+  require_once("$ModsEnabledDir/template/template-plugin.php");
+}
 
 require_once("common-sysconfig.php");
 require_once("common-scheduler.php");
