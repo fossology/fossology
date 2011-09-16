@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,16 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 class debian_lics extends FO_Plugin
 {
   public $Name       = "debian_lics";
@@ -35,15 +25,15 @@ class debian_lics extends FO_Plugin
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_READ;
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-  *********************************************/
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    global $DB;
+    global $PG_CONN;
     $V="";
     switch($this->OutputType)
     {
@@ -51,9 +41,11 @@ class debian_lics extends FO_Plugin
         break;
       case "HTML":
         /* Get uploadtree_pk's for all debian uploads */
-        $SQL = "SELECT uploadtree_pk, upload_pk, upload_filename FROM upload INNER JOIN uploadtree ON upload_fk=upload_pk AND parent IS NULL WHERE upload_filename LIKE '%debian%';";
-        $Results = $DB->Action($SQL);
-        if (empty($Results[0]['upload_pk']))
+        $sql = "SELECT uploadtree_pk, upload_pk, upload_filename FROM upload INNER JOIN uploadtree ON upload_fk=upload_pk AND parent IS NULL WHERE upload_filename LIKE '%debian%';";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        if (empty($row['upload_pk']))
         {
           $V .= "There are no uploads with 'debian' in the description.";
         }
@@ -61,7 +53,7 @@ class debian_lics extends FO_Plugin
         {
           /* Loop thru results to obtain all licenses in their uploadtree recs*/
           $Lics = array();
-          foreach($Results as $Row)
+          while (Row = pg_fetch_array($result))
           {
             if (empty($Row['upload_pk'])) {
               continue;
@@ -89,6 +81,7 @@ class debian_lics extends FO_Plugin
           $V .= "</table>\n";
           //	  print "<pre>"; print_r($Lics); print "</pre>";
         }
+        pg_free_result($result);
         break;
       case "Text":
         break;
