@@ -99,7 +99,7 @@ function SetRepo($repoPath=NULL)
     echo "DB: found pathinclude at pkg location\n";
     require_once('/usr/share/fossology/php/pathinclude.php');
   }
-  else if(file_exists('/usr/local/share/fossology/php/pathinclude.php')
+  else if(file_exists('/usr/local/share/fossology/php/pathinclude.php'))
   {
     echo "DB: found pathinclude at upstream location\n";
     require_once('/usr/local/share/fossology/php/pathinclude.php');
@@ -117,7 +117,7 @@ function SetRepo($repoPath=NULL)
       echo "DB: ERROR! could not read\n$SYSCONFDIR/fossology.conf\n";
       $pat = '#/srv/fossology/repository#';
       $replace = '#/srv/fossology/testrepo#';
-      $newRepo = preg_replace($pat, $replace, $fossConf, );
+      $newRepo = preg_replace($pat, $replace, $fossConf);
       $stat = file_put_contents("$SYSCONFDIR/fossology.conf",$fossConf);
       if($stat === FALSE)
       {
@@ -147,7 +147,7 @@ require_once(__DIR__ . '../../cli/libschema.php');
 
 function TestDBInit($path=NULL)
 {
-  if(empty($path)
+  if(empty($path))
   {
     $path = __DIR__ . '../../www/ui/core-schema.dat';
   }
