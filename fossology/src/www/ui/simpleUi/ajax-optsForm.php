@@ -16,21 +16,22 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 /**
- * ajax-optsForm
- * \brief display to upload from url form
+ * \file ajax-optsForm.php
+ * \brief display additional upload options form
  *
- * @version "$Id: ajax-optsForm.php 3848 2011-02-17 02:30:24Z rrando $"
+ * \version "$Id: ajax-optsForm.php 3848 2011-02-17 02:30:24Z rrando $"
  * Created on Feb 14, 2011 by Mark Donohoe
+ * \todo is this file obsolete?
  */
 
 define("TITLE_ajax_optsForm", _("Upload from a URL"));
 
+/**
+ * \class ajax_optsForm extend from FO_Plugin
+ *
+ * \brief display additional upload options form 
+ */
 class ajax_optsForm extends FO_Plugin
 {
   public $Name = "ajax_optsForm";
@@ -41,9 +42,9 @@ class ajax_optsForm extends FO_Plugin
   public $NoHTML     = 1; /* This plugin needs no HTML content help */
   public $LoginFlag = 0;
 
-  /*
-   Output(): Generate the text for this plugin.
-  */
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {

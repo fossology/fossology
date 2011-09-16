@@ -16,21 +16,21 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 /**
- * ajax-urlUpload
+ * \file ajax-urlUpload.php
  * \brief display to upload from url form
  *
- * @version "$Id: ajax-urlUpload.php 3942 2011-03-17 23:24:33Z rrando $"
+ * \version "$Id: ajax-urlUpload.php 3942 2011-03-17 23:24:33Z rrando $"
  * Created on Feb 14, 2011 by Mark Donohoe
  */
 
 define("TITLE_ajax_urlUpload", _("Upload from a URL"));
 
+/**
+ * \class ajax_urlUpload extend from FO_Plugin
+ *
+ * \brief display to upload from url form
+ */
 class ajax_urlUpload extends FO_Plugin
 {
   public $Name = "ajax_urlUpload";
@@ -41,9 +41,9 @@ class ajax_urlUpload extends FO_Plugin
   public $NoHTML     = 1; /* This plugin needs no HTML content help */
   public $LoginFlag = 0;
 
-  /*
-   Output(): Generate the text for this plugin.
-  */
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {

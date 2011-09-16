@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,18 +16,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 define("TITLE_agent_add", _("Schedule an Analysis"));
 
+/**
+ * \class agent_add extend from FO_Plugin
+ * \brief 
+ */
 class agent_add extends FO_Plugin
 {
   public $Name       = "agent_add";
@@ -37,9 +31,12 @@ class agent_add extends FO_Plugin
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_ANALYZE;
 
-  /*********************************************
-   AgentsAdd(): Add an upload to multiple agents.
-  *********************************************/
+  /**
+   * \brief Add an upload to multiple agents.
+   *
+   * \param $uploadpk - uplpad id
+   * \param $agentlist - list of agents
+   */
   function AgentsAdd($uploadpk, $agentlist)
   {
     $rc="";
@@ -47,10 +44,14 @@ class agent_add extends FO_Plugin
 
     /* Make sure the uploadpk is valid */
     global $Plugins;
-    global $DB;
+    global $PG_CONN;
     if (!$uploadpk) return "agent-add.php AgentsAdd(): No upload_pk specified";
-    $Results = $DB->Action("SELECT upload_pk FROM upload WHERE upload_pk = '$uploadpk';");
-    if ($Results[0]['upload_pk'] != $uploadpk)
+    $sql = "SELECT upload_pk FROM upload WHERE upload_pk = '$uploadpk';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if ($row['upload_pk'] != $uploadpk)
     {
       $text = _("Upload not found.");
       return($text);
@@ -86,9 +87,9 @@ class agent_add extends FO_Plugin
     return($rc);
   } // AgentsAdd()
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-  *********************************************/
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
@@ -128,9 +129,10 @@ class agent_add extends FO_Plugin
           }
         }
 
-        /*************************************************************/
-        /* Create the AJAX (Active HTTP) javascript for doing the reply
-         and showing the response. */
+        /**
+         * Create the AJAX (Active HTTP) javascript for doing the reply
+         * and showing the response. 
+         */
         $V .= ActiveHTTPscript("Uploads");
         $V .= "<script language='javascript'>\n";
         $V .= "function Uploads_Reply()\n";

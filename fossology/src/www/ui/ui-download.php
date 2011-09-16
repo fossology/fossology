@@ -81,7 +81,7 @@ class ui_download extends FO_Plugin
           in a <head>...</head>block.
        **/
       if (!empty($this->Title)) $V .= "<title>" . htmlentities($this->Title) . "</title>\n"; 
-      $V .= "<link rel='stylesheet' href='fossology.css'>\n";
+      $V .= "<link rel='stylesheet' href='css/fossology.css'>\n";
       if (!empty($Menu)) print $Menu->OutputCSS();
       $V .= "</head>\n";
       $V .= "<body class='text'>\n";

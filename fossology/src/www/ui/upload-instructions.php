@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,18 +16,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 define("TITLE_upload_instructions", _("Upload Instructions"));
 
+/**
+ * \class upload_instructions extend from FO_Plugin
+ * \brief Instructions for upload function
+ */
 class upload_instructions extends FO_Plugin
 {
   public $Name       = "upload_instructions";
@@ -38,9 +32,9 @@ class upload_instructions extends FO_Plugin
   public $Dependency = array();
   public $DBaccess   = PLUGIN_DB_UPLOAD;
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-  *********************************************/
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
@@ -174,19 +168,19 @@ class upload_instructions extends FO_Plugin
           $V .= "<td bgcolor='white'>&nbsp;</td>";
           $V .= "</tr>";
           $V .= "</table>\n";
-}
-break;
-case "Text":
-  break;
-default:
-  break;
-}
-if (!$this->OutputToStdout) {
-  return($V);
-}
-print("$V");
-return;
-}
+        }
+        break;
+      case "Text":
+        break;
+      default:
+        break;
+    }
+    if (!$this->OutputToStdout) {
+      return($V);
+    }
+    print("$V");
+    return;
+  }
 };
 $NewPlugin = new upload_instructions;
 $NewPlugin->Initialize();

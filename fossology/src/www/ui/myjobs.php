@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,41 +16,34 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 global $WEBDIR;
 /*
  * myJobs plugin
 */
 
-global $DB;
 /**
- * myJobs
+ * \file myJobs.php
+ * \brief Display the jobs the user has running, update the screen every x seconds
  *
- * Display the jobs the user has running, update the screen every x seconds
+ * \param takes an upload id (for now)
  *
- * @param takes an upload id (for now)
+ * \author markd
  *
- * @author markd
- *
- * @todo Fix this defect: This code only uses upload_pk's it needs to find all
+ * \todo Fix this defect: This code only uses upload_pk's it needs to find all
  * running jobs by the user (that should get default jobs like removing folders).
  *
- * @todo investigate how to tie cp2foss uploads to the user, is it possible?
+ * \todo investigate how to tie cp2foss uploads to the user, is it possible?
  *
- * @version "Id: $"
+ * \version "Id: $"
  */
 
 define("TITLE_myJobs", _("My Jobs Status"));
 
+/**
+ * \class myJobs extend from FO_Plugin
+ * \brief Display the jobs the user has running, update the screen every x seconds
+ */
 class myJobs extends FO_Plugin {
   public $Name       = "myjobs";
   public $Title      = TITLE_myJobs;
@@ -61,12 +54,9 @@ class myJobs extends FO_Plugin {
   private $Interval  = 7;    // default refresh time
 
   /**
-   * displayJob
+   * \brief Display the jobs the user has running, update the screen every xx seconds
    *
-   *  Display the jobs the user has running, update the screen every xx seconds
-   *
-   * @param int $uploadId (upload_pk).
-   *
+   * \param $uploadId - upload_pk
    */
   public function displayJob($uploadId=NULL) {
 
@@ -122,12 +112,16 @@ class myJobs extends FO_Plugin {
     */
   }
 
+  /**
+   * \brief make job table which contains all ruuning jobs status
+   * include: Total Tasks, Completed Tasks, Active Tasks, Pending Tasks, Failed Task
+   */
   protected function MakeJobTblRow() {
 
-    global $DB;
+    global $PG_CONN;
     global $CompletedJobs;
 
-    if(empty($DB)) {
+    if(empty($PG_CONN)) {
       $text = _("Fatal internal ERROR! Cannot connect to the DataBase");
       print "<h3 color='red'>$text</h3>\n";
       return(FALSE);
@@ -147,14 +141,15 @@ class myJobs extends FO_Plugin {
                       'pending' => 'bgcolor="#99FFFF"',
                       'failed' => 'bgcolor="#FF6666"');
 
-    $UploadList = $DB->Action($SqlUploadList);
+    $UploadList = pg_query($PG_CONN, $SqlUploadList);
+    DBCheckResult($UploadList, $SqlUploadList, __FILE__, __LINE__);
     $CompletedJobs = array();
     $T = '';
     if(empty($UploadList))
     {
       echo "<h3>No Jobs!?</h3>";
     }
-    foreach($UploadList as $upload) {
+    while ($upload = pg_fetch_row($UploadList)) {
       $status = JobListSummary($upload['job_upload_fk']);
 
       if ($status['total'] == $status['completed']) {
@@ -178,10 +173,14 @@ class myJobs extends FO_Plugin {
       $T .= "   </tr>\n";      // close the row and table
 
     }
+    pg_free_result($UploadList);
     $T .= "</table>\n";
     return($T);
   } // makeTbl4Job
 
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;

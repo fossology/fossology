@@ -15,25 +15,20 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-/*
- Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 /**
- * ajax-fileUpload
+ * \file ajax-fileUpload
  * \brief display to upload from file form
  *
- * @version "$Id: ajax-fileUpload.php 3989 2011-03-26 02:54:38Z rrando $"
+ * \version "$Id: ajax-fileUpload.php 3989 2011-03-26 02:54:38Z rrando $"
  */
 
 define("TITLE_ajax_fileUpload", _("Upload a New File"));
 
+/**
+ * \class ajax_fileUpload extend from FO_Plugin
+ * \brief display to upload from file form
+ */
 class ajax_fileUpload extends FO_Plugin {
 
   public $Name = "ajax_fileUpload";
@@ -44,9 +39,9 @@ class ajax_fileUpload extends FO_Plugin {
   public $NoHTML     = 1; /* This plugin needs no HTML content help */
   public $LoginFlag = 0;
 
-  /*
-   Output(): Generate the text for this plugin.
-  */
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     $Name = NULL;

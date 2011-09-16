@@ -318,7 +318,8 @@ class ui_menu extends FO_Plugin
         else
         {
           $LogoLink = 'http://fossology.org';
-          $LogoImg = Traceback_uri() ."images/fossology-logo.gif";
+          //$LogoImg = Traceback_uri() ."images/fossology-logo.gif";
+          $LogoImg = "images/fossology-logo.gif";
         }
 
         $V .= "<td width='150' rowspan='2'><a href='$LogoLink' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . "$LogoImg' border=0></a></td>";

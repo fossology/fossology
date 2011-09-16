@@ -16,21 +16,21 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
-
 /**
- * ajax-srvUpload
+ * \file ajax-srvUpload.php
  * \brief display to upload from srv form
  *
- * @version "$Id: ajax-srvUpload.php 3942 2011-03-17 23:24:33Z rrando $"
+ * \version "$Id: ajax-srvUpload.php 3942 2011-03-17 23:24:33Z rrando $"
  * Created on Feb 14, 2011 by Mark Donohoe
  */
 
 define("TITLE_ajax_srvUpload", _("Upload from a srv"));
 
+/**
+ * \class ajax_srvUpload extend from FO_Plugin
+ *
+ * \brief display to upload from srv form
+ */
 class ajax_srvUpload extends FO_Plugin
 {
   public $Name = "ajax_srvUpload";
@@ -41,9 +41,9 @@ class ajax_srvUpload extends FO_Plugin
   public $NoHTML     = 1; /* This plugin needs no HTML content help */
   public $LoginFlag = 0;
 
-  /*
-   Output(): Generate the text for this plugin.
-  */
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
