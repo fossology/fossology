@@ -24,6 +24,32 @@
  * Created on Sep 15, 2011 by Mark Donohoe
  */
 
+// get globals....
+if(file_exists('/usr/share/fossology/php/pathinclude.php'))
+{
+  echo "DB: found pathinclude at pkg location\n";
+  require_once('/usr/share/fossology/php/pathinclude.php');
+}
+else if(file_exists('/usr/local/share/fossology/php/pathinclude.php'))
+{
+  echo "DB: found pathinclude at upstream location\n";
+  require_once('/usr/local/share/fossology/php/pathinclude.php');
+}
+else
+{
+  echo "DB: ERROR! could not find pathinclude!\n";
+  exit(1);
+}
+
+global $WEBDIR;
+global $SYSCONFDIR;
+global $LIBEXECDIR;
+
+require_once("$LIBEXECDIR/libschema.php");
+require_once("$WEBDIR/common/common-db.php");
+require_once("$WEBDIR/common/common-cache.php");
+
+
 /**
  * \brief Create an empty database with the supplied name.  Create user fossy
  * with password fossy.  If no datbase name is supplied the default name of
@@ -42,7 +68,6 @@ function CreateTestDB($name=NULL)
   {
     $name = fosstest;
   }
-
   // figure out TESTROOT and export it to the environment
   $dirList = explode('/', __DIR__);
   // remove 1st entry which is empty
@@ -60,14 +85,12 @@ function CreateTestDB($name=NULL)
       break;
     }
   }
-  //echo "after loop tr is:$TESTROOT\n";
   $_ENV['TESTROOT'] = $TESTROOT;
 
   if(chdir($TESTROOT . '/db') === FALSE)
   {
     return("FATAL! could no cd to $TESTROOT/db\n");
   }
-
   $cmd = "sudo ./ftdbcreate.sh $name 2>&1";
   $last = exec($cmd, $cmdOut, $cmdRtn);
   if($cmdRtn != 0)
@@ -78,56 +101,48 @@ function CreateTestDB($name=NULL)
 }
 
 /**
-* \brief change the default repo location to one to use for testing.  If no path is supplied,
-* then the default path of /srv/fossology/testRepo will be used.  This will change the path in
-* the installed fossology.conf file.
-*
-* @param string $repoPath, the optional fully qualified path to the test repo.
-*
-* @return boolean
-*/
+ * \brief change the default repo location to one to use for testing.  If no path is supplied,
+ * then the default path of /srv/fossology/testRepo will be used.  This will change the path in
+ * the installed fossology.conf file.
+ *
+ * @param string $repoPath, the optional fully qualified path to the test repo.
+ *
+ * @return boolean
+ */
 
 function SetRepo($repoPath=NULL)
 {
+  global $SYSCONFDIR;
+
   if(empty($repoPath))
   {
     $repoPath = '/srv/fossology/testRepo';
   }
-  // get globals....
-  if(file_exists('/usr/share/fossology/php/pathinclude.php'))
+  if(file_exists("$SYSCONFDIR/fossology/fossology.conf"))
   {
-    echo "DB: found pathinclude at pkg location\n";
-    require_once('/usr/share/fossology/php/pathinclude.php');
-  }
-  else if(file_exists('/usr/local/share/fossology/php/pathinclude.php'))
-  {
-    echo "DB: found pathinclude at upstream location\n";
-    require_once('/usr/local/share/fossology/php/pathinclude.php');
-  }
-  else
-  {
-    echo "DB: ERROR! could not find pathinclude!\n";
-    return(FALSE);
-  }
-  echo "global sysconfdir is:\n$SYSCONFDIR\n";
-  if(file_exists("$SYSCONFDIR/fossology.conf"))
-  {
-    if($fossConf = file_get_contents("$SYSCONFDIR/fossology.conf") === FALSE)
+    $pa = "$SYSCONFDIR/fossology/fossology.conf";
+    $fossConf = file_get_contents("$SYSCONFDIR/fossology/fossology.conf");
+    if($fossConf === FALSE)
     {
-      echo "DB: ERROR! could not read\n$SYSCONFDIR/fossology.conf\n";
-      $pat = '#/srv/fossology/repository#';
-      $replace = '#/srv/fossology/testrepo#';
-      $newRepo = preg_replace($pat, $replace, $fossConf);
-      $stat = file_put_contents("$SYSCONFDIR/fossology.conf",$fossConf);
-      if($stat === FALSE)
-      {
-        echo "DB: ERROR! could not write\n$SYSCONFDIR/fossology.conf\n";
-      }
+      echo "ERROR! could not read\n$SYSCONFDIR/fossology/fossology.conf\n";
+      return(FALSE);
+    }
+    $pat = '!/srv/fossology/repository!';
+    $replace = '/srv/fossology/testrepo';
+    $testConf = preg_replace($pat, $replace, $fossConf);
+    //echo "testConf is:$testConf\n";
+
+    $stat = file_put_contents("$SYSCONFDIR/fossology/fossology.conf",$testConf);
+    if($stat === FALSE)
+    {
+      echo "ERROR! could not write\n$SYSCONFDIR/fossology/fossology.conf\n";
+      return(FALSE);
     }
   }
   else
   {
-    echo "DB: Error! can't find fossology.conf at:\n$SYSCONFDIR/fossology.conf\n";
+    echo "ERROR! can't find fossology.conf at:\n$SYSCONFDIR/fossology.conf\n";
+    return(FALSE);
   }
   return(TRUE);
 }
@@ -143,13 +158,13 @@ function SetRepo($repoPath=NULL)
  * Created on Sep 15, 2011 by Mark Donohoe
  */
 
-require_once(__DIR__ . '../../cli/libschema.php');
+
 
 function TestDBInit($path=NULL)
 {
   if(empty($path))
   {
-    $path = __DIR__ . '../../www/ui/core-schema.dat';
+    $path = __DIR__ . '/../../www/ui/core-schema.dat';
   }
   if (!file_exists($path))
   {
@@ -160,10 +175,10 @@ function TestDBInit($path=NULL)
   // run schema-update
   $result = NULL;
 
-  $schemaUp = __DIR__ . '../../cli/schema-update.php';
+  $schemaUp = __DIR__ . '/../../cli/schema-update.php';
 
-  system("$scheamUp -f $datFile",$result);
-  echo "DB: result of schema update is:\n";print_r($result) . "\n";
+  system("$schemaUp -f $path",$result);
+  //echo "DB: result of schema update is:$result\n";
 
   if($result == 0)
   {
@@ -174,5 +189,4 @@ function TestDBInit($path=NULL)
     return(FALSE);
   }
 }
-
 ?>

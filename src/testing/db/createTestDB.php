@@ -20,10 +20,14 @@
 
 /**
  * \brief create an empty database with the supplied name.  Create user fossy
- * with password fossy.  If no datbase name is supplied the default name of fosstest will
- * be used.
+ * with password fossy.
+ *
+ * If no datbase name is supplied the default name of fosstest will
+ * be used.  If no repo path is supplied the path will be
+ * /srv/fossology/testrepo.
  *
  * @param string -n $name optional name of data base to create
+ * @param string -r $repoPath, optional path to the test repo.
  *
  * @return boolean
  *
@@ -31,16 +35,24 @@
  * Created on Sep 14, 2011 by Mark Donohoe
  */
 
-$usage = __FILE__ . ": [-h] [-n name]";
-$name = 'fosstest';           // default db name
+require_once(__DIR__ . '/../lib/libTestDB.php');
 
-$Options = getopt('hn:');
-if (array_key_exists('h',$Options))
+$usage = __FILE__ . ": [-h] [-d] [-n name] [-r repoPath]\n" .
+  "-d: drop the named data base, if no name given data base fosstest will be dropped\n" .
+  "name: optional name of data base, default name is fosstest.\n" .
+  "repoPath: optional path to the test repository, default path is " .
+  "/srv/fossology/testrepo\n";
+
+$name = 'fosstest';           // default db name
+$repoPath = NULL;
+
+$Options = getopt('dhn:r:');
+if(array_key_exists('h',$Options))
 {
   print "$usage\n";
   exit(0);
 }
-if (array_key_exists('n',$Options))
+if(array_key_exists('n',$Options))
 {
   $name = $Options['n'];
   if(empty($name))
@@ -49,39 +61,56 @@ if (array_key_exists('n',$Options))
     exit(1);
   }
 }
-
-// figure out TESTROOT and export it to the environment
-$dirList = explode('/', __DIR__);
-// remove 1st entry which is empty
-unset($dirList[0]);
-$TESTROOT = NULL;
-foreach($dirList as $dir)
+if(array_key_exists('r', $Options))
 {
-  if($dir != 'testing')
-  {
-    $TESTROOT .= '/' .  $dir;
-  }
-  else if($dir == 'testing')
-  {
-    $TESTROOT .= '/' . $dir;
-    break;
-  }
+  $repoPath = $Options['r'];
+  // check to see if path exists?
 }
-//echo "after loop tr is:$TESTROOT\n";
-$_ENV['TESTROOT'] = $TESTROOT;
-// do I need to shell export?
-if(chdir($TESTROOT . '/db') === FALSE)
+if(array_key_exists('d', $Options))
 {
-  echo "FATAL! could no cd to $TESTROOT/db\n";
+  echo "droping db....\n";
+  $last = exec("dropdb $name -U fossy -W", $out, $rtn);
+  echo "DB: results of dropdb are:\n";print_r($out) . "\n";
+  if($rtn != 0)
+  {
+    echo "ERROR! could not drop database $name, drop by hand.\n";
+    exit(1);
+  }
+  exit(0);
+}
+
+// create the db
+echo "DB: creating db\n";
+if($newDB = CreateTestDB($name) != NULL)
+{
+  echo "newdb is:$newDB\n";
+  exit(1);
+}
+// load the schema
+echo "DB: loading schema\n";
+if(TestDBInit() === FALSE)
+{
+  echo "ERROR, could not load schema\n";
   exit(1);
 }
 
-$cmd = "./ftdbcreate.sh $name 2>&1";
-$last = exec($cmd, $cmdOut, $cmdRtn);
-if($cmdRtn != 0)
+// change repo location
+echo "DB: changing repo\n";
+if(empty($repoPath))
 {
-  echo "Error could not create Data Base $name\n";
-  exit(1);
+  if(!SetRepo())
+  {
+    echo "ERROR!, could not change fossology.conf, please change by hand before running tests\n";
+    exit(1);
+  }
+}
+else
+{
+  if(!SetRepo($repoPath))
+  {
+    echo "ERROR!, could not change fossology.conf, please change by hand before running tests\n";
+    exit(1);
+  }
 }
 exit(0);
 ?>
