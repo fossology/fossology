@@ -37,11 +37,15 @@ $GlobalReady = 1;
 
 require_once (dirname(__FILE__)) . '/../../share/fossology/php/pathinclude.php';
 //require_once '/usr/local/share/fossology/php/pathinclude.php';
-global $LIBEXECDIR;
-require_once("$LIBEXECDIR/libschema.php");
-//require_once "./libschema.php";
 
-global $PGCONN;
+global $LIBEXECDIR;
+global $WEBDIR;
+
+require_once("$LIBEXECDIR/libschema.php");
+require_once ("$WEBDIR/common/common-db.php");
+require_once ("$WEBDIR/common/common-cache.php");
+
+global $PG_CONN;
 
 $usage = "Usage: " . basename($argv[0]) . " [options]
   -f <filepath> pathname to schema data file
@@ -69,15 +73,7 @@ if((strlen($Filename)) == 0)
 	print "Error, no filename supplied\n$usage\n";
 	exit(1);
 }
-
-// get db params and open connection to db.
-
-// Debug bebug stuff below
-//$Filename = "./testcore-schema-noserver.dat";
-//echo "connecting to db randodb\n";
-//$dbOptions = 'dbname=randodb user=rando password=rando';
-//$PGCONN = dbConnect($dbOptions);
-$PGCONN = dbConnect(NULL);
+$PG_CONN = DBconnect();
 
 ApplySchema($Filename, 0);
 
