@@ -25,15 +25,15 @@
  ApplySchema(): Apply the current schema from a file.
  NOTE: The order for add/delete is important!
  ***********************************************************/
-function ApplySchema($Filename = NULL, $Debug, $Verbose = 1) 
+function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 {
-  global $PGCONN;
+  global $PG_CONN;
   print "Applying database schema\n";
   flush();
   /**************************************/
   /** BEGIN: Term list from ExportTerms() **/
   /**************************************/
-  if (!file_exists($Filename)) 
+  if (!file_exists($Filename))
   {
     echo $Filename, " does not exist\n";
   }
@@ -44,14 +44,14 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   /** END: Term list from ExportTerms() **/
   /**************************************/
   /* Very basic sanity check (so we don't delete everything!) */
-  if ((count($Schema['TABLE']) < 5) || (count($Schema['VIEW']) < 1) || (count($Schema['SEQUENCE']) < 5) || (count($Schema['INDEX']) < 5) || (count($Schema['CONSTRAINT']) < 5)) 
+  if ((count($Schema['TABLE']) < 5) || (count($Schema['VIEW']) < 1) || (count($Schema['SEQUENCE']) < 5) || (count($Schema['INDEX']) < 5) || (count($Schema['CONSTRAINT']) < 5))
   {
     print "FATAL: Schema from '$Filename' appears invalid.\n";
     flush();
     exit(1);
   }
-  pg_query($PGCONN, "SET statement_timeout = 0;"); /* turn off DB timeouts */
-  pg_query($PGCONN, "BEGIN;");
+  pg_query($PG_CONN, "SET statement_timeout = 0;"); /* turn off DB timeouts */
+  pg_query($PG_CONN, "BEGIN;");
   $Curr = GetSchema();
   //print "DBG: ApplySchema: Current Schema returned by GetSchema:\n"; print_r($Curr) . "\n";
   //print "DBG: ApplySchema: Schema to compare with:\n"; print_r($Schema) . "\n";
@@ -63,75 +63,75 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   /************************************/
   /* Add sequences */
   /************************************/
-  if (!empty($Schema['SEQUENCE'])) foreach ($Schema['SEQUENCE'] as $Name => $SQL) 
+  if (!empty($Schema['SEQUENCE'])) foreach ($Schema['SEQUENCE'] as $Name => $SQL)
   {
-    if (empty($Name)) 
+    if (empty($Name))
     {
       echo "warning empty sequence in .dat\n";
       continue;
     }
-    if ($Curr['SEQUENCE'][$Name] == $SQL) 
+    if ($Curr['SEQUENCE'][$Name] == $SQL)
     {
       continue;
     }
-    if ($Debug) 
+    if ($Debug)
     {
       print "$SQL\n";
     }
     else
     {
-      $result = pg_query($PGCONN, $SQL);
-      checkresult($result, $SQL, __LINE__);
+      $result = pg_query($PG_CONN, $SQL);
+      DBCheckResult($result, $SQL, __FILE__,__LINE__);
     }
   }
   /************************************/
   /* Add tables/columns (dependent on sequences for default values) */
   /************************************/
-  if (!empty($Schema['TABLE'])) foreach ($Schema['TABLE'] as $Table => $Columns) 
+  if (!empty($Schema['TABLE'])) foreach ($Schema['TABLE'] as $Table => $Columns)
   {
-    if (empty($Table)) 
+    if (empty($Table))
     {
       continue;
     }
-    if (!TblExist($Table)) 
+    if (!TblExist($Table))
     {
       $SQL = "CREATE TABLE \"$Table\" ();";
-      if ($Debug) 
+      if ($Debug)
       {
         print "$SQL\n";
       }
       else
       {
-        $result = pg_query($PGCONN, $SQL);
-        checkresult($result, $SQL, __LINE__);
+        $result = pg_query($PG_CONN, $SQL);
+        DBCheckResult($result, $SQL, __FILE__,__LINE__);
       }
     }
-    foreach ($Columns as $Column => $Val) 
+    foreach ($Columns as $Column => $Val)
     {
       //print "DBG: foreach Colunm => Val\n";
       //print "DBG: VAL is:\n"; print_r($Val) . "\n";
-      if ($Curr['TABLE'][$Table][$Column]['ADD'] != $Val['ADD']) 
+      if ($Curr['TABLE'][$Table][$Column]['ADD'] != $Val['ADD'])
       {
         $Rename = "";
-        if (ColExist($Table, $Column)) 
+        if (ColExist($Table, $Column))
         {
           //print "DBG: column exists, renaming\n";
           /* The column exists, but it looks different!
            Solution: Delete the column! */
           $Rename = $Column . "_old";
           $SQL = "ALTER TABLE \"$Table\" RENAME COLUMN \"$Column\" TO \"$Rename\";";
-          if ($Debug) 
+          if ($Debug)
           {
             print "$SQL\n";
           }
           else
           {
             //print "DBG: column DOES NOT Exist, SQL is:\n$SQL\n";
-            $result = pg_query($PGCONN, $SQL);
-            checkresult($result, $SQL, __LINE__);
+            $result = pg_query($PG_CONN, $SQL);
+            DBCheckResult($result, $SQL, __FILE__,__LINE__);
           }
         }
-        if ($Debug) 
+        if ($Debug)
         {
           print $Val['ADD'] . "\n";
         }
@@ -140,50 +140,50 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
           // Add the new column, then set the default value with update
           $SQL = $Val['ADD'];
           //print "DBG: ['ADD'] == val[add] Adding column, SQL is:\n$SQL\n";
-          $result = pg_query($PGCONN, $SQL);
-          checkresult($result, $SQL, __LINE__);
+          $result = pg_query($PG_CONN, $SQL);
+          DBCheckResult($result, $SQL, __FILE__,__LINE__);
           //print "DBG: ADD: updating $Table:$Column\n";
           $SQL = $Val['UPDATE'];
           //print "DBG: In ADD: UPDATE SQL is:\n$SQL\n";
-          if (!empty($Val['UPDATE'])) 
+          if (!empty($Val['UPDATE']))
           {
             //print "DBG: ADD: updating $Table:$Column\n";
             $SQL = $Val['UPDATE'];
-            $result = pg_query($PGCONN, $SQL);
-            checkresult($result, $SQL, __LINE__);
+            $result = pg_query($PG_CONN, $SQL);
+            DBCheckResult($result, $SQL, __FILE__,__LINE__);
           }
         }
-        if (!empty($Rename)) 
+        if (!empty($Rename))
         {
           /* copy over the old data */
           $SQL = "UPDATE \"$Table\" SET \"$Column\" = \"$Rename\";";
-          if ($Debug) 
+          if ($Debug)
           {
             print "$SQL\n";
           }
           else
           {
             //print "DBG: copying old data back to: $Table:$Column\n";
-            $result = pg_query($PGCONN, $SQL);
-            checkresult($result, $SQL, __LINE__);
+            $result = pg_query($PG_CONN, $SQL);
+            DBCheckResult($result, $SQL, __FILE__,__LINE__);
           }
           $SQL = "ALTER TABLE \"$Table\" DROP COLUMN \"$Rename\";";
-          if ($Debug) 
+          if ($Debug)
           {
             print "$SQL\n";
           }
           else
           {
             //print "DBG: Droping column, SQL is:\n$SQL\n";
-            $result = pg_query($PGCONN, $SQL);
-            checkresult($result, $SQL, __LINE__);
+            $result = pg_query($PG_CONN, $SQL);
+            DBCheckResult($result, $SQL, __FILE__,__LINE__);
           }
         }
       }
-      if ($Curr['TABLE'][$Table][$Column]['ALTER'] != $Val['ALTER']) 
+      if ($Curr['TABLE'][$Table][$Column]['ALTER'] != $Val['ALTER'])
       {
         //print "DBG: != VAL['ALTER'], VAL is:\n"; print_r($Val) . "\n";
-        if ($Debug) 
+        if ($Debug)
         {
           print $Val['ALTER'] . "\n";
         }
@@ -192,23 +192,23 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
           //print "DBG: In != Val['ALTER'] altering $Table:$Column\n";
           $SQL = $Val['ALTER'];
           //print "DBG: In != Val['ALTER'] SQL is:\n$SQL\n";
-          $result = pg_query($PGCONN, $SQL);
-          checkresult($result, $SQL, __LINE__);
+          $result = pg_query($PG_CONN, $SQL);
+          DBCheckResult($result, $SQL, __FILE__,__LINE__);
           $SQL = $Val['UPDATE'];
           //print "DBG: In != Val['ALTER'] UPDATE SQL is:\n$SQL\n";
-          if (!empty($Val['UPDATE'])) 
+          if (!empty($Val['UPDATE']))
           {
             //print "DBG: In != Val['ALTER':updating $Table:$Column\n";
             $SQL = $Val['UPDATE'];
             //print "DBG: In != Val['ALTER'] UPDATE SQL is:\n$SQL\n";
-            $result = pg_query($PGCONN, $SQL);
-            checkresult($result, $SQL, __LINE__);
+            $result = pg_query($PG_CONN, $SQL);
+            DBCheckResult($result, $SQL, __FILE__,__LINE__);
           }
         }
       }
-      if ($Curr['TABLE'][$Table][$Column]['DESC'] != $Val['DESC']) 
+      if ($Curr['TABLE'][$Table][$Column]['DESC'] != $Val['DESC'])
       {
-        if (empty($Val['DESC'])) 
+        if (empty($Val['DESC']))
         {
           $SQL = "COMMENT ON COLUMN \"$Table\".\"$Column\" IS '';";
         }
@@ -216,14 +216,14 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
         {
           $SQL = $Val['DESC'];
         }
-        if ($Debug) 
+        if ($Debug)
         {
           print "$SQL\n";
         }
         else
         {
-          $result = pg_query($PGCONN, $SQL);
-          checkresult($result, $SQL, __LINE__);
+          $result = pg_query($PG_CONN, $SQL);
+          DBCheckResult($result, $SQL, __FILE__,__LINE__);
         }
       }
     }
@@ -231,77 +231,77 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   /************************************/
   /* Add views (dependent on columns) */
   /************************************/
-  if (!empty($Schema['VIEW'])) foreach ($Schema['VIEW'] as $Name => $SQL) 
+  if (!empty($Schema['VIEW'])) foreach ($Schema['VIEW'] as $Name => $SQL)
   {
-    if (empty($Name)) 
+    if (empty($Name))
     {
       continue;
     }
-    if ($Curr['VIEW'][$Name] == $SQL) 
+    if ($Curr['VIEW'][$Name] == $SQL)
     {
       continue;
     }
-    if (!empty($Curr['VIEW'][$Name])) 
+    if (!empty($Curr['VIEW'][$Name]))
     {
       /* Delete it if it exists and looks different */
       $SQL1 = "DROP VIEW $Name;";
-      if ($Debug) 
+      if ($Debug)
       {
         print "$SQL1\n";
       }
       else
       {
-        $result = pg_query($PGCONN, $SQL1);
-        checkresult($result, $SQL1, __LINE__);
+        $result = pg_query($PG_CONN, $SQL1);
+        DBCheckResult($result, $SQL1, __FILE__,__LINE__);
       }
     }
     /* Create the view */
-    if ($Debug) 
+    if ($Debug)
     {
       print "$SQL\n";
     }
     else
     {
-      $result = pg_query($PGCONN, $SQL);
-      checkresult($result, $SQL, __LINE__);
+      $result = pg_query($PG_CONN, $SQL);
+      DBCheckResult($result, $SQL, __FILE__,__LINE__);
     }
   }
   /************************************/
   /* Delete constraints */
   /* Delete now, so they won't interfere with migrations. */
   /************************************/
-  if (!empty($Curr['CONSTRAINT'])) foreach ($Curr['CONSTRAINT'] as $Name => $SQL) 
+  if (!empty($Curr['CONSTRAINT'])) foreach ($Curr['CONSTRAINT'] as $Name => $SQL)
   {
-    if (empty($Name)) 
+    if (empty($Name))
     {
       continue;
     }
     /* Only process tables that I know about */
     $Table = preg_replace("/^ALTER TABLE \"(.*)\" ADD CONSTRAINT.*/", '${1}', $SQL);
     $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES \"(.*)\" \(.*/", '${1}', $SQL);
-    if ($TableFk == $SQL) 
+    if ($TableFk == $SQL)
     {
       $TableFk = $Table;
     }
     /* If I don't know the primary or foreign table... */
-    if (empty($Schema['TABLE'][$Table]) && empty($Schema['TABLE'][$TableFk])) 
+    if (empty($Schema['TABLE'][$Table]) && empty($Schema['TABLE'][$TableFk]))
     {
       continue;
     }
     /* If it is already set correctly, then skip it. */
-    if ($Schema['CONSTRAINT'][$Name] == $SQL) 
+    if ($Schema['CONSTRAINT'][$Name] == $SQL)
     {
       continue;
     }
     $SQL = "ALTER TABLE \"$Table\" DROP CONSTRAINT \"$Name\" CASCADE;";
-    if ($Debug) 
+    if ($Debug)
     {
       print "$SQL\n";
     }
     else
     {
-      $result = pg_query($PGCONN, $SQL);
-      checkresult($result, $SQL, __LINE__);
+      $result = pg_query($PG_CONN, $SQL);
+      DBCheckResult($result, $SQL, __FILE__,__LINE__);
     }
   }
   /* Reload current since the CASCADE may have changed things */
@@ -309,87 +309,87 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   /* Delete indexes */
   /************************************/
   $Curr = GetSchema(); /* constraints and indexes are linked, recheck */
-  if (!empty($Curr['INDEX'])) foreach ($Curr['INDEX'] as $Table => $IndexInfo) 
+  if (!empty($Curr['INDEX'])) foreach ($Curr['INDEX'] as $Table => $IndexInfo)
   {
-    if (empty($Table)) 
+    if (empty($Table))
     {
       continue;
     }
     /* Only delete indexes on known tables */
-    if (empty($Schema['TABLE'][$Table])) 
+    if (empty($Schema['TABLE'][$Table]))
     {
       continue;
     }
-    foreach ($IndexInfo as $Name => $SQL) 
+    foreach ($IndexInfo as $Name => $SQL)
     {
-      if (empty($Name)) 
+      if (empty($Name))
       {
         continue;
       }
       /* Only delete indexes that are different */
       //print "DBG: RMINDEX: sql of schema is:{$Schema['INDEX'][$Table][$Name]}\n";
       //print "DBG: RMINDEX: sql of Current is:$SQL\n";
-      if ($Schema['INDEX'][$Table][$Name] == $SQL) 
+      if ($Schema['INDEX'][$Table][$Name] == $SQL)
       {
         continue;
       }
       $SQL = "DROP INDEX \"$Name\";";
-      if ($Debug) 
+      if ($Debug)
       {
         print "$SQL\n";
       }
       else
       {
-        $result = pg_query($PGCONN, $SQL);
-        checkresult($result, $SQL, __LINE__);
+        $result = pg_query($PG_CONN, $SQL);
+        DBCheckResult($result, $SQL, __FILE__,__LINE__);
       }
     }
   }
   /************************************/
   /* Add indexes (dependent on columns) */
   /************************************/
-  if (!empty($Schema['INDEX'])) foreach ($Schema['INDEX'] as $Table => $IndexInfo) 
+  if (!empty($Schema['INDEX'])) foreach ($Schema['INDEX'] as $Table => $IndexInfo)
   {
-    if (empty($Table)) 
+    if (empty($Table))
     {
       continue;
     }
     // bobg
-    if (!array_key_exists($Table, $Schema["TABLE"])) 
+    if (!array_key_exists($Table, $Schema["TABLE"]))
     {
       echo "skipping orphan table: $Table\n";
       continue;
     }
-    foreach ($IndexInfo as $Name => $SQL) 
+    foreach ($IndexInfo as $Name => $SQL)
     {
-      if (empty($Name)) 
+      if (empty($Name))
       {
         continue;
       }
       //print "DBG: ADDINDEX: sql of schema is:$SQL}\n";
       //print "DBG: ADDINDEX: sql of Currnt is:{$Curr['INDEX'][$Table][$Name]}\n";
-      if ($Curr['INDEX'][$Table][$Name] == $SQL) 
+      if ($Curr['INDEX'][$Table][$Name] == $SQL)
       {
         continue;
       }
-      if ($Debug) 
+      if ($Debug)
       {
         print "$SQL\n";
       }
       else
       {
-        $result = pg_query($PGCONN, $SQL);
-        checkresult($result, $SQL, __LINE__);
+        $result = pg_query($PG_CONN, $SQL);
+        DBCheckResult($result, $SQL, __FILE__,__LINE__);
       }
       $SQL = "REINDEX INDEX \"$Name\";";
-      if ($Debug) 
+      if ($Debug)
       {
         print "$SQL\n";
       }
       else
       {
-        $result = pg_query($PGCONN, $SQL);
-        checkresult($result, $SQL, __LINE__);
+        $result = pg_query($PG_CONN, $SQL);
+        DBCheckResult($result, $SQL, __FILE__,__LINE__);
       }
     }
   }
@@ -397,115 +397,115 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   /* Add constraints (dependent on columns, views, and indexes) */
   /************************************/
   $Curr = GetSchema(); /* constraints and indexes are linked, recheck */
-  if (!empty($Schema['CONSTRAINT'])) 
+  if (!empty($Schema['CONSTRAINT']))
   {
     /* Constraints must be added in the correct order! */
     /* CONSTRAINT: PRIMARY KEY */
-    foreach ($Schema['CONSTRAINT'] as $Name => $SQL) 
+    foreach ($Schema['CONSTRAINT'] as $Name => $SQL)
     {
-      if (empty($Name)) 
+      if (empty($Name))
       {
         continue;
       }
-      if ($Curr['CONSTRAINT'][$Name] == $SQL) 
+      if ($Curr['CONSTRAINT'][$Name] == $SQL)
       {
         continue;
       }
-      if (!preg_match("/PRIMARY KEY/", $SQL)) 
+      if (!preg_match("/PRIMARY KEY/", $SQL))
       {
         continue;
       }
-      if ($Debug) 
+      if ($Debug)
       {
         print "$SQL\n";
       }
       else
       {
-        $result = pg_query($PGCONN, $SQL);
-        checkresult($result, $SQL, __LINE__);
+        $result = pg_query($PG_CONN, $SQL);
+        DBCheckResult($result, $SQL, __FILE__,__LINE__);
       }
     }
     /* CONSTRAINT: UNIQUE */
-    foreach ($Schema['CONSTRAINT'] as $Name => $SQL) 
+    foreach ($Schema['CONSTRAINT'] as $Name => $SQL)
     {
-      if (empty($Name)) 
+      if (empty($Name))
       {
         continue;
       }
-      if ($Curr['CONSTRAINT'][$Name] == $SQL) 
+      if ($Curr['CONSTRAINT'][$Name] == $SQL)
       {
         continue;
       }
-      if (!preg_match("/UNIQUE/", $SQL)) 
+      if (!preg_match("/UNIQUE/", $SQL))
       {
         continue;
       }
-      if ($Debug) 
+      if ($Debug)
       {
         print "$SQL\n";
       }
       else
       {
-        $result = pg_query($PGCONN, $SQL);
-        checkresult($result, $SQL, __LINE__);
+        $result = pg_query($PG_CONN, $SQL);
+        DBCheckResult($result, $SQL, __FILE__,__LINE__);
       }
     }
     /* CONSTRAINT: FOREIGN KEY */
-    foreach ($Schema['CONSTRAINT'] as $Name => $SQL) 
+    foreach ($Schema['CONSTRAINT'] as $Name => $SQL)
     {
-      if (empty($Name)) 
+      if (empty($Name))
       {
         continue;
       }
-      if ($Curr['CONSTRAINT'][$Name] == $SQL) 
+      if ($Curr['CONSTRAINT'][$Name] == $SQL)
       {
         continue;
       }
-      if (!preg_match("/FOREIGN KEY/", $SQL)) 
+      if (!preg_match("/FOREIGN KEY/", $SQL))
       {
         continue;
       }
-      if ($Debug) 
+      if ($Debug)
       {
         print "$SQL\n";
       }
       else
       {
-        $result = pg_query($PGCONN, $SQL);
-        checkresult($result, $SQL, __LINE__);
+        $result = pg_query($PG_CONN, $SQL);
+        DBCheckResult($result, $SQL, __FILE__,__LINE__);
       }
     }
     /* All other constraints */
-    foreach ($Schema['CONSTRAINT'] as $Name => $SQL) 
+    foreach ($Schema['CONSTRAINT'] as $Name => $SQL)
     {
-      if (empty($Name)) 
+      if (empty($Name))
       {
         continue;
       }
-      if ($Curr['CONSTRAINT'][$Name] == $SQL) 
+      if ($Curr['CONSTRAINT'][$Name] == $SQL)
       {
         continue;
       }
-      if (preg_match("/PRIMARY KEY/", $SQL)) 
+      if (preg_match("/PRIMARY KEY/", $SQL))
       {
         continue;
       }
-      if (preg_match("/UNIQUE/", $SQL)) 
+      if (preg_match("/UNIQUE/", $SQL))
       {
         continue;
       }
-      if (preg_match("/FOREIGN KEY/", $SQL)) 
+      if (preg_match("/FOREIGN KEY/", $SQL))
       {
         continue;
       }
-      if ($Debug) 
+      if ($Debug)
       {
         print "$SQL\n";
       }
       else
       {
-        $result = pg_query($PGCONN, $SQL);
-        checkresult($result, $SQL, __LINE__);
+        $result = pg_query($PG_CONN, $SQL);
+        DBCheckResult($result, $SQL, __FILE__,__LINE__);
       }
     }
   } /* Add constraints */
@@ -528,29 +528,29 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   FROM information_schema.view_column_usage
   WHERE table_catalog='fossology'
   ORDER BY view_name,table_name,column_name;";
-  $result = pg_query($PGCONN, $SQL);
-  checkresult($result, $SQL, __LINE__);
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__,__LINE__);
   $Results = pg_fetch_all($result);
-  for ($i = 0;!empty($Results[$i]['view_name']);$i++) 
+  for ($i = 0;!empty($Results[$i]['view_name']);$i++)
   {
     $View = $Results[$i]['view_name'];
     $Table = $Results[$i]['table_name'];
-    if (empty($Schema['TABLE'][$Table])) 
+    if (empty($Schema['TABLE'][$Table]))
     {
       continue;
     }
     $Column = $Results[$i]['column_name'];
-    if (empty($Schema['TABLE'][$Table][$Column])) 
+    if (empty($Schema['TABLE'][$Table][$Column]))
     {
       $SQL = "DROP VIEW \"$View\";";
-      if ($Debug) 
+      if ($Debug)
       {
         print "$SQL\n";
       }
       else
       {
-        $results = pg_query($PGCONN, $SQL);
-        checkresult($results, $SQL, __LINE__);
+        $results = pg_query($PG_CONN, $SQL);
+        DBCheckResult($results, $SQL, __FILE__,__LINE__);
       }
     }
   }
@@ -559,34 +559,34 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   /************************************/
   print "  Removing obsolete columns\n";
   flush();
-  if (!empty($Curr['TABLE'])) foreach ($Curr['TABLE'] as $Table => $Columns) 
+  if (!empty($Curr['TABLE'])) foreach ($Curr['TABLE'] as $Table => $Columns)
   {
-    if (empty($Table)) 
+    if (empty($Table))
     {
       continue;
     }
     /* only delete from tables I know */
-    if (empty($Schema['TABLE'][$Table])) 
+    if (empty($Schema['TABLE'][$Table]))
     {
       continue;
     }
-    foreach ($Columns as $Column => $Val) 
+    foreach ($Columns as $Column => $Val)
     {
-      if (empty($Column)) 
+      if (empty($Column))
       {
         continue;
       }
-      if (empty($Schema['TABLE'][$Table][$Column])) 
+      if (empty($Schema['TABLE'][$Table][$Column]))
       {
         $SQL = "ALTER TABLE \"$Table\" DROP COLUMN \"$Column\";";
-        if ($Debug) 
+        if ($Debug)
         {
           print "$SQL\n";
         }
         else
         {
-          $results = pg_query($PGCONN, $SQL);
-          checkresult($results, $SQL, __LINE__);
+          $results = pg_query($PG_CONN, $SQL);
+          DBCheckResult($results, $SQL, __FILE__,__LINE__);
         }
       }
     }
@@ -596,8 +596,8 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   /************************************/
   print "  Committing changes...\n";
   flush();
-  $results = pg_query($PGCONN, "COMMIT;");
-  checkresult($results, $SQL, __LINE__);
+  $results = pg_query($PG_CONN, "COMMIT;");
+  DBCheckResult($results, $SQL, __FILE__,__LINE__);
   echo "Success!\n";
   /************************************/
   /* Flush any cached data. */
@@ -609,17 +609,17 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   /* Initialize all remaining plugins. */
   /************************************/
   $initFail = FALSE;
-  if (initPlugins($Verbose, $Debug) != 0) 
+  if (initPlugins($Verbose, $Debug) != 0)
   {
     print "FATAL! cannot initialize UI Plugins\n";
     $initFail = TRUE;
   }
-  if (initAgents($Debug) != 0) 
+  if (initAgents($Debug) != 0)
   {
     print "FATAL! cannot initialize Agents\n";
     $initFail = TRUE;
   }
-  if ($initFail !== FALSE) 
+  if ($initFail !== FALSE)
   {
     print "One or more steps in the system initialization failed\n";
     return (1);
@@ -628,21 +628,21 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   {
     print "Initialization completed.\n";
     /* reset DB timeouts */
-    $results = pg_query($PGCONN, "SET statement_timeout = 120000;");
-    checkresult($results, $SQL, __LINE__);
+    $results = pg_query($PG_CONN, "SET statement_timeout = 120000;");
+    DBCheckResult($results, $SQL, __FILE__,__LINE__);
     return;
   }
 } // ApplySchema()
-function ColExist($Table, $Col) 
+function ColExist($Table, $Col)
 {
-  global $PGCONN;
-  $result = pg_query($PGCONN, "SELECT count(*) FROM pg_attribute, pg_type
+  global $PG_CONN;
+  $result = pg_query($PG_CONN, "SELECT count(*) FROM pg_attribute, pg_type
               WHERE typrelid=attrelid AND typname = '$Table'
           AND attname='$Col' LIMIT 1");
-  if ($result) 
+  if ($result)
   {
     $count = pg_fetch_result($result, 0, 0);
-    if ($count > 0) 
+    if ($count > 0)
     {
       return (1);
     }
@@ -650,52 +650,31 @@ function ColExist($Table, $Col)
   return (0);
 }
 // check if a table exists, if not then create it
-function CheckCreateTable($Table) 
+function CheckCreateTable($Table)
 {
-  global $PGCONN;
-  if (!TblExist($Table)) 
+  global $PG_CONN;
+  if (!TblExist($Table))
   {
     $SQL = "CREATE TABLE \"$Table\" ();";
-    if ($Debug) 
+    if ($Debug)
     {
       print "$SQL\n";
     }
     else
     {
-      $result = pg_query($PGCONN, $SQL);
-      checkresult($result, $SQL, __LINE__);
+      $result = pg_query($PG_CONN, $SQL);
+      DBCheckResult($result, $SQL, __FILE__,__LINE__);
     }
   }
 }
-/**
- * checkresult
- * \brief check the result of a query, on error (on result) echo the line number
- * pg last errro and optionally the sql that caused the error.
- *
- * @param array $result
- * @param string $sql
- * @param string $lineno
- * @return true if the result is ok.
- */
-function checkresult($result, $sql = "", $lineno) 
-{
-  global $PGCONN;
-  if (!$result) 
-  {
-    echo "Line number: $lineno\n";
-    echo pg_last_error($PGCONN);
-    echo "\nSQL:\n$sql\n";
-    exit(1);
-  }
-  return (TRUE);
-}
+
 /*
  * GetSchema
  * \brief Load the schema from the db into an array.
 */
-function GetSchema() 
+function GetSchema()
 {
-  global $PGCONN;
+  global $PG_CONN;
   $Schema = array();
   /***************************/
   /* Get the tables */
@@ -719,30 +698,30 @@ function GetSchema()
   AND adnum = attnum
   ORDER BY class.relname,attr.attnum;
   ";
-  $result = pg_query($PGCONN, $SQL);
-  checkresult($result, $SQL, __LINE__);
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__,__LINE__);
   $Results = pg_fetch_all($result);
-  for ($i = 0;!empty($Results[$i]['table']);$i++) 
+  for ($i = 0;!empty($Results[$i]['table']);$i++)
   {
     $R = & $Results[$i];
     $Table = $R['table'];
-    if (preg_match('/[0-9]/', $Table)) 
+    if (preg_match('/[0-9]/', $Table))
     {
       continue;
     }
     $Column = $R['column_name'];
     $Type = $R['type'];
-    if ($Type == 'bpchar') 
+    if ($Type == 'bpchar')
     {
       $Type = "char";
     }
-    if ($R['modifier'] > 0) 
+    if ($R['modifier'] > 0)
     {
       $Type.= '(' . $R['modifier'] . ')';
     }
     $Desc = str_replace("'", "''", $R['description']);
     $Schema['TABLEID'][$Table][$R['ordinal']] = $Column;
-    if (!empty($Desc)) 
+    if (!empty($Desc))
     {
       $Schema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN \"$Table\".\"$Column\" IS '$Desc';";
     }
@@ -756,7 +735,7 @@ function GetSchema()
     // create the index UPDATE to get rid of php notice
     $Schema['TABLE'][$Table][$Column]['UPDATE'] = "";
     // $Schema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter TYPE $Type";
-    if ($R['notnull'] == 't') 
+    if ($R['notnull'] == 't')
     {
       $Schema['TABLE'][$Table][$Column]['ALTER'].= " $Alter SET NOT NULL";
     }
@@ -764,7 +743,7 @@ function GetSchema()
     {
       $Schema['TABLE'][$Table][$Column]['ALTER'].= " $Alter DROP NOT NULL";
     }
-    if ($R['default'] != '') 
+    if ($R['default'] != '')
     {
       // $R['default'] = preg_replace("/::.*/","",$R['default']);
       $R['default'] = preg_replace("/::bpchar/", "::char", $R['default']);
@@ -779,10 +758,10 @@ function GetSchema()
   /***************************/
   $SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'fossy';";
   //$SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'rando';";
-  $result = pg_query($PGCONN, $SQL);
-  checkresult($result, $SQL, __LINE__);
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__,__LINE__);
   $Results = pg_fetch_all($result);
-  for ($i = 0;!empty($Results[$i]['viewname']);$i++) 
+  for ($i = 0;!empty($Results[$i]['viewname']);$i++)
   {
     $SQL = "CREATE VIEW \"" . $Results[$i]['viewname'] . "\" AS " . $Results[$i]['definition'];
     $Schema['VIEW'][$Results[$i]['viewname']] = $SQL;
@@ -799,10 +778,10 @@ function GetSchema()
   WHERE nspname NOT LIKE 'pg_%'
   AND nspname != 'information_schema'
   );";
-  $result = pg_query($PGCONN, $SQL);
-  checkresult($result, $SQL, __LINE__);
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__,__LINE__);
   $Results = pg_fetch_all($result);
-  for ($i = 0;!empty($Results[$i]['relname']);$i++) 
+  for ($i = 0;!empty($Results[$i]['relname']);$i++)
   {
     $SQL = "CREATE SEQUENCE \"" . $Results[$i]['relname'] . "\" START 1;";
     $Schema['SEQUENCE'][$Results[$i]['relname']] = $SQL;
@@ -845,21 +824,21 @@ function GetSchema()
   LEFT JOIN pg_class AS t2 ON c.confrelid = t2.oid
   ORDER BY constraint_name,table_name;
   ";
-  $result = pg_query($PGCONN, $SQL);
-  checkresult($result, $SQL, __LINE__);
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__,__LINE__);
   $Results = pg_fetch_all($result);
   /* Constraints use indexes into columns.  Covert those to column names. */
-  for ($i = 0;!empty($Results[$i]['constraint_name']);$i++) 
+  for ($i = 0;!empty($Results[$i]['constraint_name']);$i++)
   {
     $Key = "";
     $Keys = split(" ", $Results[$i]['constraint_key']);
-    foreach ($Keys as $K) 
+    foreach ($Keys as $K)
     {
-      if (empty($K)) 
+      if (empty($K))
       {
         continue;
       }
-      if (!empty($Key)) 
+      if (!empty($Key))
       {
         $Key.= ",";
       }
@@ -868,13 +847,13 @@ function GetSchema()
     $Results[$i]['constraint_key'] = $Key;
     $Key = "";
     $Keys = split(" ", $Results[$i]['fk_constraint_key']);
-    foreach ($Keys as $K) 
+    foreach ($Keys as $K)
     {
-      if (empty($K)) 
+      if (empty($K))
       {
         continue;
       }
-      if (!empty($Key)) 
+      if (!empty($Key))
       {
         $Key.= ",";
       }
@@ -885,9 +864,9 @@ function GetSchema()
   /* Save the constraint */
   /** There are different types of constraints that must be stored in order **/
   /** CONSTRAINT: PRIMARY KEY **/
-  for ($i = 0;!empty($Results[$i]['constraint_name']);$i++) 
+  for ($i = 0;!empty($Results[$i]['constraint_name']);$i++)
   {
-    if ($Results[$i]['type'] != 'PRIMARY KEY') 
+    if ($Results[$i]['type'] != 'PRIMARY KEY')
     {
       continue;
     }
@@ -895,7 +874,7 @@ function GetSchema()
     $SQL.= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
     $SQL.= " " . $Results[$i]['type'];
     $SQL.= " (" . $Results[$i]['constraint_key'] . ")";
-    if (!empty($Results[$i]['references_table'])) 
+    if (!empty($Results[$i]['references_table']))
     {
       $SQL.= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
       $SQL.= " (" . $Results[$i]['fk_constraint_key'] . ")";
@@ -905,9 +884,9 @@ function GetSchema()
     $Results[$i]['processed'] = 1;
   }
   /** CONSTRAINT: UNIQUE **/
-  for ($i = 0;!empty($Results[$i]['constraint_name']);$i++) 
+  for ($i = 0;!empty($Results[$i]['constraint_name']);$i++)
   {
-    if ($Results[$i]['type'] != 'UNIQUE') 
+    if ($Results[$i]['type'] != 'UNIQUE')
     {
       continue;
     }
@@ -915,7 +894,7 @@ function GetSchema()
     $SQL.= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
     $SQL.= " " . $Results[$i]['type'];
     $SQL.= " (" . $Results[$i]['constraint_key'] . ")";
-    if (!empty($Results[$i]['references_table'])) 
+    if (!empty($Results[$i]['references_table']))
     {
       $SQL.= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
       $SQL.= " (" . $Results[$i]['fk_constraint_key'] . ")";
@@ -927,9 +906,9 @@ function GetSchema()
   //print "GetSchema: Schema after CONSTRAINT: UNIQUE is:\n";print_r($Schema) . "\n";
   
   /** CONSTRAINT: FOREIGN KEY **/
-  for ($i = 0;!empty($Results[$i]['constraint_name']);$i++) 
+  for ($i = 0;!empty($Results[$i]['constraint_name']);$i++)
   {
-    if ($Results[$i]['type'] != 'FOREIGN KEY') 
+    if ($Results[$i]['type'] != 'FOREIGN KEY')
     {
       continue;
     }
@@ -937,7 +916,7 @@ function GetSchema()
     $SQL.= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
     $SQL.= " " . $Results[$i]['type'];
     $SQL.= " (" . $Results[$i]['constraint_key'] . ")";
-    if (!empty($Results[$i]['references_table'])) 
+    if (!empty($Results[$i]['references_table']))
     {
       $SQL.= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
       $SQL.= " (" . $Results[$i]['fk_constraint_key'] . ")";
@@ -949,9 +928,9 @@ function GetSchema()
   //print "GetSchema: Schema after Foreign Key is:\n";print_r($Schema) . "\n";
   
   /** CONSTRAINT: ALL OTHERS **/
-  for ($i = 0;!empty($Results[$i]['constraint_name']);$i++) 
+  for ($i = 0;!empty($Results[$i]['constraint_name']);$i++)
   {
-    if ($Results[$i]['processed'] != 1) 
+    if ($Results[$i]['processed'] != 1)
     {
       continue;
     }
@@ -959,7 +938,7 @@ function GetSchema()
     $SQL.= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
     $SQL.= " " . $Results[$i]['type'];
     $SQL.= " (" . $Results[$i]['constraint_key'] . ")";
-    if (!empty($Results[$i]['references_table'])) 
+    if (!empty($Results[$i]['references_table']))
     {
       $SQL.= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
       $SQL.= " (" . $Results[$i]['fk_constraint_key'] . ")";
@@ -981,18 +960,18 @@ function GetSchema()
   AND schemaname = 'public'
   ORDER BY tablename,indexname;
   ";
-  $result = pg_query($PGCONN, $SQL);
-  checkresult($result, $SQL, __LINE__);
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__,__LINE__);
   $Results = pg_fetch_all($result);
-  for ($i = 0;!empty($Results[$i]['table']);$i++) 
+  for ($i = 0;!empty($Results[$i]['table']);$i++)
   {
     /* UNIQUE constraints also include indexes. */
-    if (empty($Schema['CONSTRAINT'][$Results[$i]['index']])) 
+    if (empty($Schema['CONSTRAINT'][$Results[$i]['index']]))
     {
       $Schema['INDEX'][$Results[$i]['table']][$Results[$i]['index']] = $Results[$i]['define'] . ";";
     }
   }
-  if (0) 
+  if (0)
   {
     /***************************/
     /* Get Functions */
@@ -1010,10 +989,10 @@ function GetSchema()
   INNER JOIN pg_language AS lang ON proc.prolang = lang.oid
   WHERE lang.lanname = 'plpgsql'
   ORDER BY proname;";
-    $result = pg_query($PGCONN, $SQL);
-    checkresult($result, $SQL, __LINE__);
+    $result = pg_query($PG_CONN, $SQL);
+    DBCheckResult($result, $SQL, __FILE__,__LINE__);
     $Results = pg_fetch_all($result);
-    for ($i = 0;!empty($Results[$i]['proname']);$i++) 
+    for ($i = 0;!empty($Results[$i]['proname']);$i++)
     {
       $SQL = "CREATE or REPLACE function " . $Results[$i]['proname'] . "()";
       $SQL.= ' RETURNS ' . "TBD" . ' AS $$';
@@ -1037,34 +1016,34 @@ function GetSchema()
  * @return 0 on success, dies upon failure!
  *
  */
-function initAgents($Debug = 1) 
+function initAgents($Debug = 1)
 {
   global $AGENTDIR;
-  global $PGCONN;
+  global $PG_CONN;
   print "  Initializing agents.\n";
   flush();
-  if (!is_dir($AGENTDIR)) 
+  if (!is_dir($AGENTDIR))
   {
     die("FATAL: Directory '$AGENTDIR' does not exist.\n");
   }
   $Dir = opendir($AGENTDIR);
-  if (!$Dir) 
+  if (!$Dir)
   {
     die("FATAL: Unable to access '$AGENTDIR'.\n");
   }
-  while (($File = readdir($Dir)) !== false) 
+  while (($File = readdir($Dir)) !== false)
   {
     $File = "$AGENTDIR/$File";
     /* skip directories; only process files */
-    if (is_file($File)) 
+    if (is_file($File))
     {
-      if ($Debug) 
+      if ($Debug)
       {
         print "    Initializing agent: $File\n";
         flush();
       }
       system("'$File' -i", $Status);
-      if ($Status != 0) 
+      if ($Status != 0)
       {
         die("FATAL: '$File -i' failed to initialize\n");
       }
@@ -1079,26 +1058,26 @@ function initAgents($Debug = 1)
  *
  * @return 0 on success,1 on failure
  */
-function initPlugins($Verbose, $Debug) 
+function initPlugins($Verbose, $Debug)
 {
   global $Plugins;
   $Max = count($Plugins);
   $FailFlag = 0;
-  if ($Verbose) 
+  if ($Verbose)
   {
     print "  Initializing plugins\n";
     flush();
   }
-  for ($i = 0;$i < $Max;$i++) 
+  for ($i = 0;$i < $Max;$i++)
   {
     $P = & $Plugins[$i];
     /* Init ALL plugins */
-    if ($Debug) 
+    if ($Debug)
     {
       print "    Initializing plugin '" . $P->Name . "'\n";
     }
     $State = $P->Install();
-    if ($State != 0) 
+    if ($State != 0)
     {
       $FailFlag = 1;
       print "FAILED: " . $P->Name . " failed to install.\n";
@@ -1113,9 +1092,9 @@ function initPlugins($Verbose, $Debug)
  * MakeFunctions
  * \brief Create any required DB functions.
  */
-function MakeFunctions($Debug) 
+function MakeFunctions($Debug)
 {
-  global $PGCONN;
+  global $PG_CONN;
   print "  Applying database functions\n";
   flush();
   /********************************************
@@ -1165,14 +1144,14 @@ END;
 $$
 LANGUAGE plpgsql;
     ';
-  if ($Debug) 
+  if ($Debug)
   {
     print "$SQL;\n";
   }
   else
   {
-    $result = pg_query($PGCONN, $SQL);
-    checkresult($result, $SQL, __LINE__);
+    $result = pg_query($PG_CONN, $SQL);
+    DBCheckResult($result, $SQL, __FILE__,__LINE__);
   }
   /********************************************
    * uploadtree2path(uploadtree_pk integer) is a DB function that returns
@@ -1200,26 +1179,26 @@ END;
 $$
 LANGUAGE plpgsql;
     ';
-  if ($Debug) 
+  if ($Debug)
   {
     print "$SQL;\n";
   }
   else
   {
-    $result = pg_query($PGCONN, $SQL);
-    checkresult($result, $SQL, __LINE__);
+    $result = pg_query($PG_CONN, $SQL);
+    DBCheckResult($result, $SQL, __FILE__,__LINE__);
   }
   return;
 } // MakeFunctions()
-function TblExist($Table) 
+function TblExist($Table)
 {
-  global $PGCONN;
-  $result = pg_query($PGCONN, "SELECT count(*) AS count FROM pg_type
+  global $PG_CONN;
+  $result = pg_query($PG_CONN, "SELECT count(*) AS count FROM pg_type
                 WHERE typname = '$Table'");
-  if ($result) 
+  if ($result)
   {
     $count = pg_fetch_result($result, 0, 0);
-    if ($count > 0) 
+    if ($count > 0)
     {
       return (1);
     }
