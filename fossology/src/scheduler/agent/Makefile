@@ -39,7 +39,8 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
 # objects and headers #
 #######################
 
-OBJS = agent.o \
+OBJS = scheduler.o \
+       agent.o \
        database.o \
        event.o \
        host.o \
@@ -61,8 +62,8 @@ HEAD = agent.h \
 
 all: $(EXE) $(CLI) defconf/init.d/fossology
 
-$(EXE): scheduler.c $(OBJS) $(VARS) $(HEAD) $(DEPEN)
-	$(CC) scheduler.c $(OBJS) $(DEF) $(FODEF) $(CFLAGS_LOCAL) -o $@
+$(EXE): $(OBJS) $(VARS) $(HEAD) $(DEPEN)
+	$(CC) $(OBJS) $(DEF) $(CFLAGS_LOCAL) -o $@
 
 $(CLI): schedulerCLI.c Makefile
 	$(CC) schedulerCLI.c $(CFLAGS_LOCAL) $(DEF) -o $@
@@ -84,6 +85,9 @@ defconf/init.d/fossology: defconf/init.d/fossology-process
 ######################
 # object build rules #
 ######################
+
+scheduler.o: %.o: %.c %.h $(HEAD)  $(DEPEN)
+	$(CC) -c $(CFLAGS_LOCAL)  $(FODEF) $(DEF) $<
 
 agent.o: %.o: %.c %.h job.h database.h scheduler.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
