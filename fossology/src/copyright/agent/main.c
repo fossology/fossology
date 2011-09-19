@@ -41,7 +41,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TESTFILE_NUMBER 140          ///< the number of files pairs used in tests
 #define AGENT_NAME "copyright"       ///< the name of the agent, used to get agent key
 #define AGENT_DESC "copyright agent" ///< what program this is
+#define AGENT_ARS  "copyright_ars"   ///< name used for the ars table
 
+psqlCopy_t sqlcpy;                    ///< the sql copy struct used for insertion
 FILE* cout;                           ///< the file to print information to
 FILE* cerr;                           ///< the file to print errors to
 FILE* cin;                            ///< the file to read from
@@ -379,7 +381,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   char* file_name;              // holds the name of the file to open
   copyright_iterator finds;     // an iterator to access the copyrights
   FILE* input_fp;               // the file that will be analyzed
-  PGresult* pgResult;           // the result of database quiers
 
   /* initialize memory */
   memset(sql, 0, sizeof(sql));
@@ -450,23 +451,16 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
 
         /* place the copyright in the table */
         memset(sql, '\0', sizeof(sql));
-        snprintf(sql, sizeof(sql), insert_copyright,
-            agent_pk,                           // agent pk
-            *(int*)pair_second(current_file),   // file fk
-            copy_entry_start(entry),            // start byte
-            copy_entry_end(entry),              // end byte
-            buf,                                // text found for copyright
-            hash,                               // Hash for the txt of the string being entered into the db
-            copy_entry_type(entry));            // the type of entry that this is i.e. 'statement', 'email' or 'url
-        pgResult = PQexec(pgConn, sql);
+        snprintf(sql, sizeof(sql), "%ld\t%d\t%d\t%d\tE'%s'\tE'%s'\t%s\n",
+            agent_pk,
+            *(int*)pair_second(current_file),
+            copy_entry_start(entry),
+            copy_entry_end(entry),
+            buf,
+            hash,
+            copy_entry_type(entry));
 
-        if (PQresultStatus(pgResult) != PGRES_COMMAND_OK)
-        {
-          fprintf(cerr, "ERROR %s.%d: failed to insert copyright\n", __FILE__, __LINE__);
-          fprintf(cerr, "ERROR PQ error message: %s\n", PQresultErrorMessage(pgResult));
-          fprintf(cerr, "ERROR sql statement: %s", sql);
-          PQclear(pgResult);
-        }
+        fo_sqlCopyAdd(sqlcpy, sql);
       }
       else
       {
@@ -478,19 +472,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
           fprintf(cout, "\n");
         }
       }
-    }
-  }
-  else if(*(int*)pair_second(current_file) >= 0)
-  {
-    snprintf(sql, sizeof(sql), insert_no_copyright, agent_pk, *(int*)pair_second(current_file));
-    pgResult = PQexec(pgConn, sql);
-
-    if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
-    {
-      fprintf(cerr, "ERROR %s.%d: failed to insert null copyright\n", __FILE__, __LINE__);
-      fprintf(cerr, "ERROR PQ error message: %s\n", PQresultErrorMessage(pgResult));
-      fprintf(cerr, "ERROR sql statement: %s", sql);
-      PQclear(pgResult);
     }
   }
 
@@ -666,6 +647,13 @@ int check_copyright_table(PGconn* pgConn)
     free(str);
   }
 
+  /* check if the copyright exsits */
+  pgResult = PQexec(pgConn, check_copyright_ars);
+  if(PQresultStatus(pgResult) != PGRES_TUPLES_OK && PQntuples(pgResult) != 1)
+  {
+    fo_CreateARSTable(pgConn, AGENT_ARS);
+  }
+
   /* clean up memory and return */
   PQclear(pgResult);
   return ret;
@@ -760,6 +748,7 @@ int main(int argc, char** argv)
   char sql[512];                // buffer for database access
   int c, i = -1;                // temporary int containers
   int num_files = 0;            // the number of rows in a job
+  int ars_pk = 0;               // the args primary key
   long upload_pk = 0;           // the upload primary key
   long agent_pk = 0;            // the agents primary key
 
@@ -850,6 +839,10 @@ int main(int argc, char** argv)
       exit(-1);
     }
 
+    /* create the sql copy structure */
+    sqlcpy = fo_sqlCopyCreate(pgConn, "copyright", 32768, 7,
+        "agent_fk", "pfile_fk", "copy_startbyte", "copy_endbyte", "content", "hash", "type");
+
     /* book keeping */
     pair_init(&curr, string_function_registry(), int_function_registry());
     db_connected = 1;
@@ -865,6 +858,7 @@ int main(int argc, char** argv)
     while(fo_scheduler_next())
     {
       upload_pk = atol(fo_scheduler_current());
+      ars_pk = fo_WriteARS(pgConn, 0, upload_pk, agent_pk, AGENT_ARS, NULL, 0);
 
       sprintf(sql, fetch_pfile, upload_pk, agent_pk);
       pgResult = PQexec(pgConn, sql);
@@ -878,6 +872,7 @@ int main(int argc, char** argv)
         perform_analysis(pgConn, copy, curr, agent_pk, mout);
       }
 
+      fo_WriteARS(pgConn, ars_pk, upload_pk, agent_pk, AGENT_ARS, NULL, 1);
       PQclear(pgResult);
     }
 
@@ -886,6 +881,7 @@ int main(int argc, char** argv)
 
   if(db_connected)
   {
+    fo_sqlCopyDestroy(sqlcpy, 1);
     PQfinish(pgConn);
   }
 
