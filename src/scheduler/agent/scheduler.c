@@ -67,6 +67,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* global flags */
 int verbose = 0;
 int closing = 0;
+int startup = 0;
+int pause_f = 1;
 int s_pid;
 int s_daemon;
 int s_port;
@@ -169,6 +171,12 @@ void update_scheduler()
   int n_agents = num_agents();
   int n_jobs   = active_jobs();
 
+  if(startup && n_agents == 0)
+  {
+    event_signal(database_update_event, NULL);
+    startup = 0;
+  }
+
   if(closing && n_agents == 0 && n_jobs == 0)
   {
     event_loop_terminate();
@@ -198,6 +206,12 @@ void update_scheduler()
     agent_init(get_host(1), j);
     lockout = 1;
     j = NULL;
+  }
+
+  if(pause_f)
+  {
+    startup = 1;
+    pause_f = 0;
   }
 }
 
@@ -657,7 +671,7 @@ int main(int argc, char** argv)
   signal(SIGALRM, prnt_sig);
   signal(SIGTERM, prnt_sig);
   signal(SIGQUIT, prnt_sig);
-  signal(SIGINT,  prnt_sig);
+  //signal(SIGINT,  prnt_sig);
   signal(SIGHUP,  prnt_sig);
 
   /* *********************************** */
@@ -671,7 +685,6 @@ int main(int argc, char** argv)
   /* *************************************** */
   /* *** enter the scheduler event loop **** */
   /* *************************************** */
-  //event_signal(database_update_event, NULL);
   alarm(CHECK_TIME);
   event_loop_enter(update_scheduler);
 
