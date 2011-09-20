@@ -66,7 +66,7 @@ class admin_folder_delete extends FO_Plugin {
     function Delete($folderpk, $Depends = NULL) {
       /* Can't remove top folder */
       if ($folderpk == FolderGetTop()) {
-$text = _("Can Not Delete Root Folder");
+        $text = _("Can Not Delete Root Folder");
         return ($text);
       }
       /* Get the folder's name */
@@ -74,14 +74,14 @@ $text = _("Can Not Delete Root Folder");
       /* Prepare the job: job "Delete" */
       $jobpk = JobAddJob(NULL, "Delete Folder: $FolderName");
       if (empty($jobpk) || ($jobpk < 0)) {
-$text = _("Failed to create job record");
+        $text = _("Failed to create job record");
         return ($text);
       }
       /* Add job: job "Delete" has jobqueue item "delagent" */
       $jqargs = "DELETE FOLDER $folderpk";
       $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, "no", NULL, NULL);
       if (empty($jobqueuepk)) {
-$text = _("Failed to place delete in job queue");
+        $text = _("Failed to place delete in job queue");
         return ($text);
       }
       return (NULL);
@@ -110,41 +110,41 @@ $text = _("Failed to place delete in job queue");
               $Folderprop = $DB->Action("SELECT * FROM folder where folder_pk = '$folder';");
               $Folder = $Folderprop[0];
               /* Need to refresh the screen */
-$text = _("Deletion of folder ");
-$text1 = _(" added to job queue");
+              $text = _("Deletion of folder ");
+              $text1 = _(" added to job queue");
               $R.= displayMessage($text . $Folder['folder_name'] . $text1);
             }
             else {
-$text = _("Deletion of ");
-$text1 = _(" failed: ");
+              $text = _("Deletion of ");
+              $text1 = _(" failed: ");
               $R.= displayMessage($text . $Folder['folder_name'] . $text1 . $rc);
             }
           }
           $V.= "$R\n";
           $V.= "<form method='post'>\n"; // no url = this url
-$text  =  _("Select the folder to");
-$text1 = _("delete");
+          $text  =  _("Select the folder to");
+          $text1 = _("delete");
           $V.= "$text <em>$text1</em>.\n";
           $V.= "<ul>\n";
-$text = _("This will");
-$text1 = _("delete");
-$text2 = _("the folder, all subfolders, and all uploaded files stored within the folder!");
+          $text = _("This will");
+          $text1 = _("delete");
+          $text2 = _("the folder, all subfolders, and all uploaded files stored within the folder!");
           $V.= "<li>$text <em>$text1</em> $text2\n";
-$text = _("Be very careful with your selection since you can delete a lot of work!");
+          $text = _("Be very careful with your selection since you can delete a lot of work!");
           $V.= "<li>$text\n";
-$text = _("All analysis only associated with the deleted uploads will also be deleted.");
+          $text = _("All analysis only associated with the deleted uploads will also be deleted.");
           $V.= "<li>$text\n";
-$text = _("THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.");
+          $text = _("THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.");
           $V.= "<li>$text\n";
           $V.= "</ul>\n";
-$text = _("Select the folder to delete:  ");
+          $text = _("Select the folder to delete:  ");
           $V.= "<P>$text\n";
           $V.= "<select name='folder'>\n";
-$text = _("select folder");
+          $text = _("select folder");
           $V.= "<option value=''>[$text]</option>\n";
           $V.= FolderListOption(-1, 0);
           $V.= "</select><P />\n";
-$text = _("Delete");
+          $text = _("Delete");
           $V.= "<input type='submit' value='$text!'>\n";
           $V.= "</form>\n";
           break;

@@ -42,7 +42,7 @@ class ui_browse extends FO_Plugin {
 
   function PostInitialize()
   {
-    /* Keep the Browse main menu item from appearing if there are 
+    /* Keep the Browse main menu item from appearing if there are
      * browse restrictions and the user isn't logged in.
      * Technically, this PostInitialize() is incorrect, but it implements
      * the above expected behavior, which for practical purposes is reasonable
@@ -50,9 +50,9 @@ class ui_browse extends FO_Plugin {
      * they should turn on GlobalBrowse (i.e. no browse restrictions).
      */
     if (IsRestrictedTo() and empty($_SESSION["User"]))
-      $this->State = PLUGIN_STATE_INVALID;
+    $this->State = PLUGIN_STATE_INVALID;
     else
-      $this->State = PLUGIN_STATE_READY;
+    $this->State = PLUGIN_STATE_READY;
     return $this->State;
   }
 
@@ -97,7 +97,7 @@ class ui_browse extends FO_Plugin {
   /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
-  function RegisterMenus() 
+  function RegisterMenus()
   {
     menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
 
@@ -110,12 +110,12 @@ class ui_browse extends FO_Plugin {
       "upload",
       "item"
       ));
-    if (GetParm("mod", PARM_STRING) == $this->Name) 
+      if (GetParm("mod", PARM_STRING) == $this->Name)
       menu_insert("Browse::Browse", 1);
-    else 
+      else
       menu_insert("Browse::Browse", 1, $URI);
 
-    return($this->State == PLUGIN_STATE_READY);
+      return($this->State == PLUGIN_STATE_READY);
   } // RegisterMenus()
 
   /***********************************************************
@@ -242,14 +242,14 @@ class ui_browse extends FO_Plugin {
     global $DB;
 
     $V = "";
-    /* Get list of uploads in this folder 
+    /* Get list of uploads in this folder
      * If the user is browse restricted, then restrict the list.
      */
     $UserId = IsRestrictedTo();
     if ($UserId === false)
-      $UserCondition = "";  // no browse restriction
+    $UserCondition = "";  // no browse restriction
     else
-      $UserCondition = " and upload_userid='$UserId'";  // browse restriction
+    $UserCondition = " and upload_userid='$UserId'";  // browse restriction
     $Sql = "SELECT * FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
@@ -383,12 +383,12 @@ class ui_browse extends FO_Plugin {
     return ($V);
   } /* ShowFolder() */
 
- 
+
 
   /***********************************************************
    Output(): This function returns the scheduler status.
    ***********************************************************/
-  function Output() 
+  function Output()
   {
     global $PG_CONN;
     global $Plugins;
@@ -406,44 +406,44 @@ class ui_browse extends FO_Plugin {
      */
     if (empty($Folder_URL))
     {
-      if (empty($Upload)) 
-        $Folder_URL = GetUserRootFolder();
+      if (empty($Upload))
+      $Folder_URL = GetUserRootFolder();
       else
       {
-      $sql = "select parent_fk from foldercontents where child_id=$Upload and foldercontents_mode=2";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      if ( pg_num_rows($result) > 1)
+        $sql = "select parent_fk from foldercontents where child_id=$Upload and foldercontents_mode=2";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        if ( pg_num_rows($result) > 1)
         Fatal("Upload $Upload found in multiple folders.",__FILE__, __LINE__);
-      
-      $row = pg_fetch_assoc($result);
-      $Folder_URL = $row['parent_fk'];
-      pg_free_result($result);
+
+        $row = pg_fetch_assoc($result);
+        $Folder_URL = $row['parent_fk'];
+        pg_free_result($result);
       }
     }
 
     $Folder = GetValidFolder($Folder_URL);
     if ($Folder != $Folder_URL)
     {
-      /* user is trying to access folder without permission.  Redirect to their 
+      /* user is trying to access folder without permission.  Redirect to their
        * root folder.
        */
       $NewURL = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
       echo "<script type=\"text/javascript\"> window.location.replace(\"$NewURL\"); </script>";
     }
 
-    if (HaveUploadPerm($Upload) === false) 
+    if (HaveUploadPerm($Upload) === false)
     {
-      /* user trying to access upload without permission.  Redirect to their 
+      /* user trying to access upload without permission.  Redirect to their
        * specified folder.
        */
       $NewURL = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
       echo "<script type=\"text/javascript\"> window.location.replace(\"$NewURL\"); </script>";
     }
 
-    if (HaveItemPerm($Item) === false) 
+    if (HaveItemPerm($Item) === false)
     {
-      /* user trying to access item without permission.  Redirect to their 
+      /* user trying to access item without permission.  Redirect to their
        * specified folder.
        */
       $NewURL = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
@@ -505,9 +505,9 @@ class ui_browse extends FO_Plugin {
           }
           $V.= $this->ShowItem($Upload, $Item, $Show, $Folder);
         }
-        else 
-          $V.= $this->ShowFolder($Folder, $Show);
-        
+        else
+        $V.= $this->ShowFolder($Folder, $Show);
+
         $V.= "</font>\n";
         break;
       case "Text":

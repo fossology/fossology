@@ -194,7 +194,7 @@ class search extends FO_Plugin
     if ($nomosagent_pk)
     {
       /* add licenses to results */
-      foreach ($Results as &$utprec) 
+      foreach ($Results as &$utprec)
       {
         $utprec['licenses'] = GetFileLicenses_string($nomosagent_pk, $utprec['pfile_fk'], 0);
       }

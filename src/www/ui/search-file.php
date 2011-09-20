@@ -40,9 +40,9 @@ class search_file extends FO_Plugin
   {
     /* This plugin is only valid if the system allows global searching */
     if (IsRestrictedTo())
-      $this->State = PLUGIN_STATE_INVALID; 
+    $this->State = PLUGIN_STATE_INVALID;
     else
-      $this->State = PLUGIN_STATE_READY;
+    $this->State = PLUGIN_STATE_READY;
     return $this->State;
   }
 

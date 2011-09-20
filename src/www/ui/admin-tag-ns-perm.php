@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 define("TITLE_admin_tag_ns_perm", _("Assign Tag Namespace Permission"));
 
 class admin_tag_ns_perm extends FO_Plugin
-  {
+{
   var $Name       = "admin_tag_ns_perm";
   var $Title      = TITLE_admin_tag_ns_perm;
   var $MenuList = "Admin::Tag::Assign TagNS Permission";
@@ -41,14 +41,14 @@ class admin_tag_ns_perm extends FO_Plugin
   function DeleteTagPerms()
   {
     global $PG_CONN;
-    
+
     $tag_ns_group_pk = GetParm('tag_ns_group_pk', PARM_INTEGER);
     if (empty($tag_ns_group_pk))
     {
       $text = _("Can't find tag_ns_group_pk!");
       return ($text);
     }
-    
+
     $sql = "DELETE FROM tag_ns_group WHERE tag_ns_group_pk = $tag_ns_group_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -110,7 +110,7 @@ class admin_tag_ns_perm extends FO_Plugin
     $sql = "SELECT * FROM tag_ns;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    
+
     $V.= "<h4>\n";
     $V.= _("Select the tag namespace to assign permission: ");
     $V.= "</h4>\n";
@@ -140,12 +140,12 @@ class admin_tag_ns_perm extends FO_Plugin
    and used by other plugins.)
    ***********************************************************/
   function Output()
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     $action = GetParm('action', PARM_TEXT);
     switch($this->OutputType)
-      {
+    {
       case "XML":
         break;
       case "HTML":
@@ -179,14 +179,14 @@ class admin_tag_ns_perm extends FO_Plugin
       case "Text":
         break;
       default:
-	break;
-      }
+        break;
+    }
     if (!$this->OutputToStdout) { return($V); }
     print("$V");
     return;
-    } // Output()
+  } // Output()
 
-  };
+};
 $NewPlugin = new admin_tag_ns_perm;
 $NewPlugin->Initialize();
 ?>

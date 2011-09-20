@@ -180,9 +180,9 @@ class user_add extends FO_Plugin {
             $V.= displayMessage($rc);
           }
         }
-        
+
         $default_bucketpool_fk =0;
-                
+
         /* Build HTML form */
         $V.= "<form name='formy' method='POST'>\n"; // no url = this url
         $V.= _("To create a new user, enter the following information:<P />\n");

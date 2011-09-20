@@ -59,9 +59,9 @@ class group_manage_self extends FO_Plugin {
         return(0);
       }
     }
-  
+
     if (!empty($_SESSION['UserId'])){
-      $UserId = $_SESSION['UserId']; 
+      $UserId = $_SESSION['UserId'];
       $sql = "SELECT * FROM group_user_member WHERE user_fk = $UserId and group_perm=1;";
       $result = $DB->Action($sql);
       if (empty($result) || count($result) < 1){
@@ -76,7 +76,7 @@ class group_manage_self extends FO_Plugin {
     }
     return($this->State == PLUGIN_STATE_READY);
   }
- 
+
   /***********************************************************
    ShowExistOwnGroups(): Show all groups owned by $UserId
    ***********************************************************/
@@ -108,7 +108,7 @@ class group_manage_self extends FO_Plugin {
             $perm = ($row1['group_perm']==1)?"Admin":"User";
             $V .= "<tr><td align='center'>" . $row1['user_name'] . "</td><td>||</td><td align='center'>$perm</td></tr>";
           }
-            $V .= "</table>\n";
+          $V .= "</table>\n";
         }
         pg_free_result($result1);
         $V .= "<td align='center'><a href='" .  Traceback_uri() . "?mod=group_manage_self&action=edit&group_pk=" . $row['group_pk'] . "&groupname=" . $row['group_name'] . "'>Edit Group Name</a></td><td align='center'><a href='" . Traceback_uri() . "?mod=group_manage_self&action=add&group_pk=" . $row['group_pk'] . "&groupname=" . $row['group_name'] . "'>Add User to this Group</a></td></tr>\n";
@@ -118,10 +118,10 @@ class group_manage_self extends FO_Plugin {
     pg_free_result($result);
     return ($V);
   }
-  
+
   /*********************************************
-  EditGroupNamePage(): Edit group name.
-  *********************************************/
+   EditGroupNamePage(): Edit group name.
+   *********************************************/
   function EditGroupNamePage()
   {
     $group_pk = GetParm('group_pk', PARM_INTEGER);
@@ -140,8 +140,8 @@ class group_manage_self extends FO_Plugin {
   }
 
   /*********************************************
-  EditGroupName(): Edit group name.
-  *********************************************/
+   EditGroupName(): Edit group name.
+   *********************************************/
   function EditGroupName()
   {
     global $PG_CONN;
@@ -156,8 +156,8 @@ class group_manage_self extends FO_Plugin {
   }
 
   /*********************************************
-  AddUserPage(): add user to this group.
-  *********************************************/
+   AddUserPage(): add user to this group.
+   *********************************************/
   function AddUserPage()
   {
     global $PG_CONN;
@@ -174,7 +174,7 @@ class group_manage_self extends FO_Plugin {
     $VA.= "<h4>$text '$group_name':</h4>\n";
     $VA.= "<form name='form' method='POST' action='" . Traceback_uri() . "?mod=group_manage_self&action=user&group_pk=$group_pk'>\n";
     $VA.= _("Select the user to add this group: ");
-    $VA.= "<select name='userid'>\n"; 
+    $VA.= "<select name='userid'>\n";
     while ($row = pg_fetch_assoc($result)){
       $VA.= "<option value='" . $row['user_pk'] . "'>";
       $VA.= htmlentities($row['user_name']);
@@ -194,8 +194,8 @@ class group_manage_self extends FO_Plugin {
   }
 
   /*********************************************
-  AddUser(): add user to this group.
-  *********************************************/
+   AddUser(): add user to this group.
+   *********************************************/
   function AddUser()
   {
     global $PG_CONN;
@@ -222,8 +222,8 @@ class group_manage_self extends FO_Plugin {
   }
 
   /*********************************************
-  Output(): Generate the text for this plugin.
-  *********************************************/
+   Output(): Generate the text for this plugin.
+   *********************************************/
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
@@ -231,33 +231,33 @@ class group_manage_self extends FO_Plugin {
     $V = "";
     switch ($this->OutputType) {
       case "XML":
-             break;
+        break;
       case "HTML":
-	     /* If this is a POST, then process the request. */
-             $UserId = $_SESSION['UserId'];
-             $action = GetParm('action', PARM_TEXT);
-             if ($action == 'update'){
-               $this->EditGroupName();
-             }
-             if ($action == 'user'){
-               $rc = $this->AddUser();
-               if (!empty($rc)){
-                 $V.= displayMessage($rc);
-               }
-             }
-             $V .= $this->ShowExistOwnGroups($UserId);
- 
-             if ($action == 'edit'){
-               $V .= $this->EditGroupNamePage();
-             }
-             if ($action == 'add'){
-               $V .= $this->AddUserPage();
-             }
-             break;
+        /* If this is a POST, then process the request. */
+        $UserId = $_SESSION['UserId'];
+        $action = GetParm('action', PARM_TEXT);
+        if ($action == 'update'){
+          $this->EditGroupName();
+        }
+        if ($action == 'user'){
+          $rc = $this->AddUser();
+          if (!empty($rc)){
+            $V.= displayMessage($rc);
+          }
+        }
+        $V .= $this->ShowExistOwnGroups($UserId);
+
+        if ($action == 'edit'){
+          $V .= $this->EditGroupNamePage();
+        }
+        if ($action == 'add'){
+          $V .= $this->AddUserPage();
+        }
+        break;
       case "Text":
-             break;
+        break;
       default:
-             break;
+        break;
     }
     if (!$this->OutputToStdout) {
       return ($V);

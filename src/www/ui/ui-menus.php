@@ -160,7 +160,7 @@ class ui_menu extends FO_Plugin
     // <li><a href=\"#\"><font color='#C0C0C0'></font></a>
     $NewV = preg_replace("|<li><a href=\"#\"><font color(.*)*?$|m", '', $V);
     return($NewV);
-    } // menu_html()
+  } // menu_html()
 
   /********************************************
    OutputCSS(): Create the output CSS.

@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
@@ -35,7 +35,7 @@ if (!isset($GlobalReady)) { exit; }
 define("TITLE_ajax_tags", _("List Tags"));
 
 class ajax_tags extends FO_Plugin
-  {
+{
   var $Name       = "tag_get";
   var $Title      = TITLE_ajax_tags;
   var $Version    = "1.0";
@@ -47,34 +47,34 @@ class ajax_tags extends FO_Plugin
    Output(): Display the loaded menu and plugins.
    ***********************************************************/
   function Output()
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     global $Plugins;
     switch($this->OutputType)
-      {
+    {
       case "XML":
-	break;
+        break;
       case "HTML":
-	$Item = GetParm("uploadtree_pk",PARM_INTEGER);
-	$List = GetAllTags($Item);
-	foreach($List as $L)
-	  {
-	  $V .= $L['tag_name'] . ",";
-	  }
-	break;
+        $Item = GetParm("uploadtree_pk",PARM_INTEGER);
+        $List = GetAllTags($Item);
+        foreach($List as $L)
+        {
+          $V .= $L['tag_name'] . ",";
+        }
+        break;
       case "Text":
-	break;
+        break;
       default:
-	break;
-      }
+        break;
+    }
     if (!$this->OutputToStdout) { return($V); }
     print("$V");
     return;
-    } // Output()
+  } // Output()
 
 
-  };
+};
 $NewPlugin = new ajax_tags;
 $NewPlugin->Initialize();
 
