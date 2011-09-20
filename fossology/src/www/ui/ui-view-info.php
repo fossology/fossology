@@ -617,7 +617,7 @@ $text = _("Total package info records");
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
-    $sql = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file,tag,tag_ns WHERE tag_pk = tag_fk AND tag_ns_fk = tag_ns_pk) T ON uploadtree.pfile_fk = T.pfile_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt ORDER BY ufile_name";
+    $sql = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file,tag,tag_ns WHERE tag_pk = tag_fk AND tag_ns_fk = tag_ns_pk) T ON uploadtree.pfile_fk = T.pfile_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt UNION SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_uploadtree,tag,tag_ns WHERE tag_pk = tag_fk AND tag_ns_fk = tag_ns_pk) T ON uploadtree.uploadtree_pk = T.uploadtree_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt ORDER BY ufile_name";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 0)
