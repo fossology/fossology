@@ -14,14 +14,14 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 $locale = "";
 
 // We're interested only in language, not country.
 // I do not bother to do a meticulous parsing of the
 // accepted languages (RFC 2616), therefore we simply rip of the first
-// two characters and hope that this is a known language 
+// two characters and hope that this is a known language
 // according to ISO 639-1.  If not: Bad luck.
 $browser_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 $lang = substr($browser_lang,  0, 2);

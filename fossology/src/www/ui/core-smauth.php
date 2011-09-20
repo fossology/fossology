@@ -73,37 +73,37 @@ class core_smauth extends FO_Plugin {
     /* Enable or disable plugins based on login status */
     $Level = PLUGIN_DB_NONE;
     if (@$_SESSION['User']) {  //TODO: also need to check SiteMinder session
-      /* If you are logged in, then the default level is "Download". */
-      if ("X" . $_SESSION['UserLevel'] == "X") {
-        $Level = PLUGIN_DB_DOWNLOAD;
-      } else {
-        $Level = @$_SESSION['UserLevel'];
+    /* If you are logged in, then the default level is "Download". */
+    if ("X" . $_SESSION['UserLevel'] == "X") {
+      $Level = PLUGIN_DB_DOWNLOAD;
+    } else {
+      $Level = @$_SESSION['UserLevel'];
+    }
+    /* Recheck the user in case he is suddenly blocked or changed. */
+    if (empty($_SESSION['time_check'])) {
+      $_SESSION['time_check'] = time() + (480 * 60);
+    }
+    if (time() >= @$_SESSION['time_check']) {
+      $sql = "SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';";
+      $results = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $R = pg_fetch_assoc($result);
+      $_SESSION['User'] = $R['user_name'];
+      $_SESSION['Folder'] = $R['root_folder_fk'];
+      $_SESSION['UserLevel'] = $R['user_perm'];
+      $_SESSION['UserEmail'] = $R['user_email'];
+      $_SESSION['UserEnote'] = $R['email_notify'];
+      if(empty($R['ui_preference']))
+      {
+        $_SESSION['UiPref'] = 'simple';
       }
-      /* Recheck the user in case he is suddenly blocked or changed. */
-      if (empty($_SESSION['time_check'])) {
-        $_SESSION['time_check'] = time() + (480 * 60);
+      else
+      {
+        $_SESSION['UiPref'] = $R['ui_preference'];
       }
-      if (time() >= @$_SESSION['time_check']) {
-        $sql = "SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';";
-        $results = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $R = pg_fetch_assoc($result);
-        $_SESSION['User'] = $R['user_name'];
-        $_SESSION['Folder'] = $R['root_folder_fk'];
-        $_SESSION['UserLevel'] = $R['user_perm'];
-        $_SESSION['UserEmail'] = $R['user_email'];
-        $_SESSION['UserEnote'] = $R['email_notify'];
-        if(empty($R['ui_preference']))
-        {
-          $_SESSION['UiPref'] = 'simple';
-        }
-        else
-        {
-          $_SESSION['UiPref'] = $R['ui_preference'];
-        }
-        $Level = @$_SESSION['UserLevel'];
-        pg_free_result($result);
-      }
+      $Level = @$_SESSION['UserLevel'];
+      pg_free_result($result);
+    }
     } else {
       $this->CheckUser($UID);
       $Level = @$_SESSION['UserLevel'];
@@ -126,7 +126,7 @@ class core_smauth extends FO_Plugin {
       return;
     }
     $Email = str_replace("'", "''", $Email); /* protect DB */
-    $FolderName = substr($Email, 0, strpos($Email,'@')); 
+    $FolderName = substr($Email, 0, strpos($Email,'@'));
     $FolderName = trim($FolderName);
     if (empty($FolderName)) {
       return;
@@ -148,8 +148,8 @@ class core_smauth extends FO_Plugin {
       $R = pg_fetch_assoc($result);
       pg_free_result($result);
       if (!empty($R['conf_value']))
-        $UserDesc = "'".$R['conf_value']."'";
-      
+      $UserDesc = "'".$R['conf_value']."'";
+
       // Get BucketPool from sysconfig
       $sql = "SELECT conf_value FROM sysconfig WHERE variablename = 'BucketPool';";
       $result = pg_query($PG_CONN, $sql);
@@ -175,7 +175,7 @@ class core_smauth extends FO_Plugin {
           $R = pg_fetch_assoc($result);
           pg_free_result($result);
           if (!empty($R['bucketpool_pk']))
-            $BucketPool = $R['bucketpool_pk'];
+          $BucketPool = $R['bucketpool_pk'];
         } else {
           $BucketPool = 'null';
         }
@@ -207,7 +207,7 @@ class core_smauth extends FO_Plugin {
         $row = pg_fetch_assoc($result);
         //print_r($row);
         if (empty($row['folder_pk']))
-          return;
+        return;
         $FolderPk = $row['folder_pk'];
         //echo $FolderPk;
         pg_free_result($result);
@@ -223,7 +223,7 @@ class core_smauth extends FO_Plugin {
         $row = pg_fetch_assoc($result);
         //print_r($row);
         if (empty($row['folder_pk']))
-          return;
+        return;
         $FolderPk = $row['folder_pk'];
         //echo $FolderPk;
         pg_free_result($result);
@@ -279,8 +279,8 @@ class core_smauth extends FO_Plugin {
     }
   } // CheckUser()
   /******************************************
-   Output():
-   ******************************************/
+  Output():
+  ******************************************/
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;

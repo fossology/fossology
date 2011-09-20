@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
@@ -76,11 +76,11 @@ class ui_download extends FO_Plugin
     if ($this->NoHeader == 0)
     {
       /** Known bug: DOCTYPE "should" be in the HEADER
-          and the HEAD tags should come first.
-          Also, IE will ignore <style>...</style> tags that are NOT
-          in a <head>...</head>block.
+       and the HEAD tags should come first.
+       Also, IE will ignore <style>...</style> tags that are NOT
+       in a <head>...</head>block.
        **/
-      if (!empty($this->Title)) $V .= "<title>" . htmlentities($this->Title) . "</title>\n"; 
+      if (!empty($this->Title)) $V .= "<title>" . htmlentities($this->Title) . "</title>\n";
       $V .= "<link rel='stylesheet' href='css/fossology.css'>\n";
       if (!empty($Menu)) print $Menu->OutputCSS();
       $V .= "</head>\n";
@@ -91,7 +91,7 @@ class ui_download extends FO_Plugin
      
     $P = &$Plugins[plugin_find_id("view")];
     $P->ShowView(NULL,"browse");
-	exit;
+    exit;
   } // CheckRestore()
 
 
@@ -105,9 +105,9 @@ class ui_download extends FO_Plugin
     global $Plugins;
     global $DB, $PG_CONN;
 
-    if (!$PG_CONN) 
-    { 
-      $dbok = $DB->db_init(); 
+    if (!$PG_CONN)
+    {
+      $dbok = $DB->db_init();
       if (!$dbok)
       {
         $text = _("Missing database connection.");
@@ -119,14 +119,14 @@ class ui_download extends FO_Plugin
     $Item = GetParm("item",PARM_INTEGER);
 
     $text = _("Invalid item parameter");
-    if (empty($Item)) 
+    if (empty($Item))
     {
       echo "<h2>$text</h2>";
       return;
     }
 
-	$Filename = RepPathItem($Item);
-	if (empty($Filename))
+    $Filename = RepPathItem($Item);
+    if (empty($Filename))
     {
       echo "<h2>$text: $Filename</h2>";
       return;

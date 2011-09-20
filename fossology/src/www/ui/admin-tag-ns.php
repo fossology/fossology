@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 define("TITLE_admin_tag_ns", _("Manage Tag Namespace"));
 
 class admin_tag_ns extends FO_Plugin
-  {
+{
   var $Name       = "admin_tag_ns";
   var $Title      = TITLE_admin_tag_ns;
   var $MenuList = "Admin::Tag::Manage TagNS";
@@ -40,7 +40,7 @@ class admin_tag_ns extends FO_Plugin
    ***********************************************************/
   function CreateTagNS()
   {
-    global $PG_CONN; 
+    global $PG_CONN;
 
     $tag_ns_name = str_replace("'", "''", GetParm('tag_ns_name', PARM_TEXT));
 
@@ -64,7 +64,7 @@ class admin_tag_ns extends FO_Plugin
     /* Make sure it was added */
     $sql = "SELECT * FROM tag_ns WHERE tag_ns_name = '$tag_ns_name';";
     $result = pg_query($PG_CONN, $sql);
-    if (pg_num_rows($result) < 1) 
+    if (pg_num_rows($result) < 1)
     {
       pg_free_result($result);
       $text = _("Failed to create tag.");
@@ -72,7 +72,7 @@ class admin_tag_ns extends FO_Plugin
     }
     return (NULL);
   }
-  
+
   /***********************************************************
    EditTagNS(): Edit exsit Tag Namespace.
    ***********************************************************/
@@ -110,7 +110,7 @@ class admin_tag_ns extends FO_Plugin
     {
       pg_free_result($result);
       $text = _("As there are group permissions related to this tag namespace, if you want to delete this tag namespace you should first delete permissions about this tag namespace! ");
-      return ($text);  
+      return ($text);
     }
 
     pg_exec("BEGIN;");
@@ -155,7 +155,7 @@ class admin_tag_ns extends FO_Plugin
       $VE .= "</table><p>\n";
     }
     pg_free_result($result);
-  
+
     return $VE;
   }
 
@@ -191,7 +191,7 @@ class admin_tag_ns extends FO_Plugin
     $VEd .= "<h4><a href='" . Traceback_uri() . "?mod=admin_tag_ns'>$text</a><h4>";
 
     $VEd .= _("<h3>Edit Tag Namespace:</h3>\n");
-    $tag_ns_pk = GetParm("tag_ns_pk",PARM_INTEGER); 
+    $tag_ns_pk = GetParm("tag_ns_pk",PARM_INTEGER);
     $tag_ns_name = GetParm('tag_ns_name', PARM_TEXT);
 
     $VEd.= "<form name='form' method='POST' action='" . Traceback_uri() ."?mod=admin_tag_ns'>\n";
@@ -215,7 +215,7 @@ class admin_tag_ns extends FO_Plugin
     $V = "";
 
     $V .=  $this->ShowExistTagNS();
-    if ($action == 'edit') 
+    if ($action == 'edit')
     {
       $V .= $this->ShowEditTagNSPage();
     } else {
@@ -235,12 +235,12 @@ class admin_tag_ns extends FO_Plugin
    and used by other plugins.)
    ***********************************************************/
   function Output()
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     $action = GetParm('action', PARM_TEXT);
     switch($this->OutputType)
-      {
+    {
       case "XML":
         break;
       case "HTML":
@@ -285,14 +285,14 @@ class admin_tag_ns extends FO_Plugin
       case "Text":
         break;
       default:
-	break;
-      }
+        break;
+    }
     if (!$this->OutputToStdout) { return($V); }
     print("$V");
     return;
-    } // Output()
+  } // Output()
 
-  };
+};
 $NewPlugin = new admin_tag_ns;
 $NewPlugin->Initialize();
 ?>

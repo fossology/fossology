@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
@@ -25,32 +25,32 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 class ui_treenav extends FO_Plugin
-  {
+{
   var $Name       = "treenav";
   var $Version    = "1.0";
   var $MenuList   = "";
 
   function Output()
-    {
+  {
     $V="";
     if ($this->State != PLUGIN_STATE_READY) { return; }
     switch($this->OutputType)
-      {
+    {
       case "XML":
-	break;
+        break;
       case "HTML":
-	break;
+        break;
       case "Text":
-	break;
+        break;
       default:
-	break;
-      }
+        break;
+    }
     if (!$this->OutputToStdout) { return($V); }
     print("$V");
     return;
-    }
+  }
 
-  };
+};
 $NewPlugin = new ui_treenav;
 $NewPlugin->Initialize();
 ?>

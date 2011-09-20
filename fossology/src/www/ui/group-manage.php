@@ -37,14 +37,14 @@ class group_manage extends FO_Plugin {
 
 
   /*********************************************
-    Delete(): Delete a group.
-    Returns NULL on success, string on failure.
-  *********************************************/
+   Delete(): Delete a group.
+   Returns NULL on success, string on failure.
+   *********************************************/
   function Delete() {
     global $PG_CONN;
-    
+
     $group_pk = GetParm('group_pk', PARM_INTEGER);
-  
+
     $sql = "SELECT * FROM tag_ns_group WHERE group_fk = $group_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -54,13 +54,13 @@ class group_manage extends FO_Plugin {
       $text = _("Group Delete Failed:As there are group permissions related to this group, if you want to delete this group you should first delete permissions about this group! ");
       return ($text);
     }
- 
+
     pg_exec("BEGIN;");
     $sql = "DELETE FROM group_user_member WHERE group_fk = $group_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
- 
+
     $sql = "DELETE FROM groups WHERE group_pk = $group_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -69,12 +69,12 @@ class group_manage extends FO_Plugin {
 
     return (NULL);
   }
- 
+
   /*********************************************
-    Add(): Add a group.
-    Returns NULL on success, string on failure.
-  *********************************************/
-  function Add() {		
+   Add(): Add a group.
+   Returns NULL on success, string on failure.
+   *********************************************/
+  function Add() {
     global $PG_CONN;
 
     /* Get the parameters */
@@ -87,7 +87,7 @@ class group_manage extends FO_Plugin {
       return ($text);
     }
     /* Make sure groupname not exceed the length */
-  
+
     pg_exec("BEGIN;");
     /* See if the group already exists */
     $sql = "SELECT * FROM groups WHERE group_name = '$Group' LIMIT 1;";
@@ -124,9 +124,9 @@ class group_manage extends FO_Plugin {
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
-  
+
     pg_exec("COMMIT;");
- 
+
     return (NULL);
   } // Add()
 
@@ -174,8 +174,8 @@ class group_manage extends FO_Plugin {
   }
 
   /*********************************************
-  Output(): Generate the text for this plugin.
-  *********************************************/
+   Output(): Generate the text for this plugin.
+   *********************************************/
   function Output() {
     global $PG_CONN;
     if ($this->State != PLUGIN_STATE_READY) {
@@ -184,68 +184,68 @@ class group_manage extends FO_Plugin {
     $V = "";
     switch ($this->OutputType) {
       case "XML":
-             break;
+        break;
       case "HTML":
-	     /* If this is a POST, then process the request. */
-	     $Group = GetParm('groupname', PARM_TEXT);
-             $UserId = GetParm('userid', PARM_INTEGER);
-             $action = GetParm('action', PARM_TEXT);
-	     if (!empty($Group)) {
-	       $rc = $this->Add();
-	       if (empty($rc)) {
-                 /* Need to refresh the screen */
-                 $text = _("Group");
-                 $text1 = _("added");
-		 $V.= displayMessage("$text $Group $text1.");
-               } else {
-                 $V.= displayMessage($rc);
-               }
-             }
-             if ($action == 'delete'){
-               $rc = $this->Delete();
-               if (empty($rc)) {
-                 $text = _("Group Delete Successful");
-                 $V.= displayMessage("$text!");
-               } else {
-                 $V.= displayMessage($rc);
-               }
-             }
-             /* Get the list of users */
-             $sql = "SELECT user_pk,user_name FROM users ORDER BY user_name;";
-             $result = pg_query($PG_CONN, $sql);
-             DBCheckResult($result, $sql, __FILE__, __LINE__);
+        /* If this is a POST, then process the request. */
+        $Group = GetParm('groupname', PARM_TEXT);
+        $UserId = GetParm('userid', PARM_INTEGER);
+        $action = GetParm('action', PARM_TEXT);
+        if (!empty($Group)) {
+          $rc = $this->Add();
+          if (empty($rc)) {
+            /* Need to refresh the screen */
+            $text = _("Group");
+            $text1 = _("added");
+            $V.= displayMessage("$text $Group $text1.");
+          } else {
+            $V.= displayMessage($rc);
+          }
+        }
+        if ($action == 'delete'){
+          $rc = $this->Delete();
+          if (empty($rc)) {
+            $text = _("Group Delete Successful");
+            $V.= displayMessage("$text!");
+          } else {
+            $V.= displayMessage($rc);
+          }
+        }
+        /* Get the list of users */
+        $sql = "SELECT user_pk,user_name FROM users ORDER BY user_name;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-             /* Build HTML form */
-             $text = _("Add a Group");
-             $V.= "<h4>$text</h4>\n";
-             $V.= "<form name='formy' method='POST' action=" . Traceback_uri() ."?mod=group_manage>\n"; 
-	     $Val = htmlentities(GetParm('groupname', PARM_TEXT), ENT_QUOTES);
-             $text = _("Enter the groupname:");
-             $V.= "$text\n";
-	     $V.= "<input type='text' value='$Val' name='groupname' size=20>\n";
-             $V.= _("Select the user as this group admin: ");
-             $V.= "<select name='userid'>\n";
-             while ($row = pg_fetch_assoc($result)){
-               $Selected = "";
-               if ($UserId == $row['user_pk']) {
-                 $Selected = "selected";
-               }
-               $V.= "<option $Selected value='" . $row['user_pk'] . "'>";
-               $V.= htmlentities($row['user_name']);
-               $V.= "</option>\n";
-             }
-             $V.= "</select>\n";
-             pg_free_result($result);
-             $text = _("Add");
-             $V.= "<input type='submit' value='$text!'>\n";
-             $V.= "</form>\n";
+        /* Build HTML form */
+        $text = _("Add a Group");
+        $V.= "<h4>$text</h4>\n";
+        $V.= "<form name='formy' method='POST' action=" . Traceback_uri() ."?mod=group_manage>\n";
+        $Val = htmlentities(GetParm('groupname', PARM_TEXT), ENT_QUOTES);
+        $text = _("Enter the groupname:");
+        $V.= "$text\n";
+        $V.= "<input type='text' value='$Val' name='groupname' size=20>\n";
+        $V.= _("Select the user as this group admin: ");
+        $V.= "<select name='userid'>\n";
+        while ($row = pg_fetch_assoc($result)){
+          $Selected = "";
+          if ($UserId == $row['user_pk']) {
+            $Selected = "selected";
+          }
+          $V.= "<option $Selected value='" . $row['user_pk'] . "'>";
+          $V.= htmlentities($row['user_name']);
+          $V.= "</option>\n";
+        }
+        $V.= "</select>\n";
+        pg_free_result($result);
+        $text = _("Add");
+        $V.= "<input type='submit' value='$text!'>\n";
+        $V.= "</form>\n";
 
-             $V.= $this->ShowExistGroups();
-             break;
+        $V.= $this->ShowExistGroups();
+        break;
       case "Text":
-             break;
+        break;
       default:
-             break;
+        break;
     }
     if (!$this->OutputToStdout) {
       return ($V);

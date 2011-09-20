@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
@@ -35,7 +35,7 @@ if (!isset($GlobalReady)) { exit; }
 define("TITLE_search_file_by_license", _("List Files based on License"));
 
 class search_file_by_license extends FO_Plugin
-  {
+{
   var $Name       = "search_file_by_license";
   var $Title      = TITLE_search_file_by_license;
   var $Version    = "1.0";
@@ -47,7 +47,7 @@ class search_file_by_license extends FO_Plugin
    Output(): Display the loaded menu and plugins.
    ***********************************************************/
   function Output()
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     global $Plugins;
@@ -58,66 +58,66 @@ class search_file_by_license extends FO_Plugin
     switch($this->OutputType)
     {
       case "XML":
-	break;
+        break;
       case "HTML":
-	$UploadTreePk = GetParm("item",PARM_INTEGER);
-	$Page = GetParm("page",PARM_INTEGER);
-	$WantLic = GetParm("lic",PARM_RAW);
-	$WantLic = str_replace("\\'","'",$WantLic);
-	if (empty($UploadTreePk) || empty($WantLic))
-	{
-	  return;
-	}
-	    if (empty($Page)) { $Page=0; }
-	$Offset = $Page * $Max;
+        $UploadTreePk = GetParm("item",PARM_INTEGER);
+        $Page = GetParm("page",PARM_INTEGER);
+        $WantLic = GetParm("lic",PARM_RAW);
+        $WantLic = str_replace("\\'","'",$WantLic);
+        if (empty($UploadTreePk) || empty($WantLic))
+        {
+          return;
+        }
+        if (empty($Page)) { $Page=0; }
+        $Offset = $Page * $Max;
 
-	/* Get License Name */
-$text = _("The following files contain the license");
-	$V .= "$text '<b>";
-	$V .= htmlentities($WantLic);
-	$V .= "</b>'.\n";
+        /* Get License Name */
+        $text = _("The following files contain the license");
+        $V .= "$text '<b>";
+        $V .= htmlentities($WantLic);
+        $V .= "</b>'.\n";
 
-	/* Load licenses */
-	$Lics = array();
-	$Offset = $Page*$Max;
-	$Lics = LicenseSearch($UploadTreePk,$WantLic,$Offset,$Max);
+        /* Load licenses */
+        $Lics = array();
+        $Offset = $Page*$Max;
+        $Lics = LicenseSearch($UploadTreePk,$WantLic,$Offset,$Max);
 
-	/* Save the license results */
-	$Count = count($Lics);
+        /* Save the license results */
+        $Count = count($Lics);
 
-	/* Get the page menu */
-	if (($Count >= $Max) || ($Page > 0))
-	{
-	  $VM = "<P />\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
-	  $V .= $VM;
-	}
-	else
-	{
-	  $VM = "";
-	}
+        /* Get the page menu */
+        if (($Count >= $Max) || ($Page > 0))
+        {
+          $VM = "<P />\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
+          $V .= $VM;
+        }
+        else
+        {
+          $VM = "";
+        }
 
-	/* Offset is +1 to start numbering from 1 instead of zero */
-	$V .= Dir2FileList($Lics,"browse","view-license",$Offset + 1,1);
+        /* Offset is +1 to start numbering from 1 instead of zero */
+        $V .= Dir2FileList($Lics,"browse","view-license",$Offset + 1,1);
 
-	if (!empty($VM)) { $V .= $VM . "\n"; }
-	$V .= "<hr>\n";
-	$Time = time() - $Time;
-$text = _("Elaspsed time:");
-$text1 = _("seconds");
-	$V .= "<small>$text $Time $text1</small>\n";
-	break;
+        if (!empty($VM)) { $V .= $VM . "\n"; }
+        $V .= "<hr>\n";
+        $Time = time() - $Time;
+        $text = _("Elaspsed time:");
+        $text1 = _("seconds");
+        $V .= "<small>$text $Time $text1</small>\n";
+        break;
       case "Text":
-	break;
+        break;
       default:
-	break;
-      }
+        break;
+    }
     if (!$this->OutputToStdout) { return($V); }
     print($V);
     return;
-    } // Output()
+  } // Output()
 
 
-  };
+};
 $NewPlugin = new search_file_by_license;
 $NewPlugin->Initialize();
 

@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /***************************************************************
  $GlobalReady is only set here.
@@ -37,7 +37,7 @@ require_once("$FOSRCDIR/lib/php/common.php");
 
 /* Connect to the database.  If the connection fails,
  * DBconnect() will print a failure message and exit.
- * The global $PG_CONN is set inside of DBconnect().  
+ * The global $PG_CONN is set inside of DBconnect().
  * DBconnect uses this side effect for backward compatibility.
  */
 DBconnect();
