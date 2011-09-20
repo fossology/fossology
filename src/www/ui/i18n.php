@@ -40,5 +40,5 @@ putenv("LC_ALL=$locale");
 setlocale(LC_ALL, $locale);
 bindtextdomain("messages", "./locale");
 textdomain("messages");
-//print("Browser says: $browser_lang, Your language is $lang, your locale is $locale");
+print("Browser says: $browser_lang, Your language is $lang, your locale is $locale");
 ?>
