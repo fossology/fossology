@@ -108,6 +108,8 @@ function genCunitRep($fileName)
   $outFile = basename($fileName, '.xml');
   $outPath = TESTROOT . "/reports/unit/$outFile.html";
   $xslPath = "/usr/share/CUnit/$xslFile";
+  // remove the old HTML file before creating a new one.
+  $rmLast = exec("rm -rf $outPath", $rmOut, $rmRtn);
   //echo "DB: Starting to generate html report for $fileName\n";
   $report = genHtml($fileName, $outPath, $xslPath);
   if(!empty($report))
@@ -143,6 +145,8 @@ function processXunit($unitTest)
     // remove .xml from name
     $outFile = basename($fileName, '.xml');
     $outPath = TESTROOT . "/reports/functional/$outFile.html";
+    // remove the old HTML file before creating a new one.
+    $rmLast = exec("rm -rf $outPath", $rmOut, $rmRtn);
     $xslPath = TESTROOT . "/reports/junit-noframes.xsl";
     //echo "DB: Starting to generate html report for $fileName\n";
     $report = genHtml($fileName, $outPath, $xslPath);
@@ -177,7 +181,11 @@ function processCUnit($unitTest)
   foreach(glob("$unitTest*.xml") as $fName)
   {
     $fileName = lcfirst($fName);
-    //echo "DBPROCR: fileName is:$fileName\n";
+    // Skip Listing files
+    if(preg_grep("/Listing/", array($fileName)))
+    {
+      continue;
+    }
     if(!tweakCUnit($fileName))
     {
       return("Error! could not save processed xml file, they may not display properly\n");
@@ -322,7 +330,6 @@ foreach($unitList as $unitTest)
   $makeOut = array();
   $makeRtn = -777;
   $makeCover = array();
-  $makeRtn = -777;
 
   if(@chdir($unitTest . '/agent_tests/') === FALSE)
   {
