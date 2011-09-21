@@ -39,18 +39,18 @@ class groupFuncTests extends TestSuite
   {
     parent::__construct($label);
     // run createUIUsers first
-    $this->addTestFile('createUIUsers.php');
+    $this->addFile('createUIUsers.php');
     if(chdir( '../ui/tests') === FALSE )
     {
       echo "FATAL! Cannot cd to the ui/tests directory\n";
     }
     $testPath = getcwd();
-    //echo "RFTCLASS: testPath is:$testPath\n";
 
     $this->collect($testPath . '/SiteTests',
-    new SimplePatternCollector('/Test.php/'));
+      new SimplePatternCollector('/Test.php/'));
+
     // BasicSetup Must be run before any of the BasicTests, they depend on it.
-    $this->addTestFile('BasicTests/BasicSetup.php');
+    $this->addFile('BasicTests/BasicSetup.php');
     $this->collect($testPath . '/BasicTests',
     new SimplePatternCollector('/Test.php/'));
     $this->collect($testPath . '/Users',
@@ -68,5 +68,7 @@ class groupFuncTests extends TestSuite
 $testRun = new groupFuncTests('Fossology UI Functional Tests');
 
 // run the collected tests
+
 $testRun->run(new JUnitXMLReporter());
+//exit($testRun->run(new TextReporter()) ? 0 : 1);
 ?>
