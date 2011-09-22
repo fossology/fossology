@@ -27,17 +27,15 @@
 // get globals....
 if(file_exists('/usr/share/fossology/php/pathinclude.php'))
 {
-  echo "DB: found pathinclude at pkg location\n";
   require_once('/usr/share/fossology/php/pathinclude.php');
 }
 else if(file_exists('/usr/local/share/fossology/php/pathinclude.php'))
 {
-  echo "DB: found pathinclude at upstream location\n";
   require_once('/usr/local/share/fossology/php/pathinclude.php');
 }
 else
 {
-  echo "DB: ERROR! could not find pathinclude!\n";
+  echo "ERROR! libTestDB could not find pathinclude.php\n";
   exit(1);
 }
 
@@ -160,7 +158,7 @@ function SetRepo($repoPath=NULL)
 
 
 
-function TestDBInit($path=NULL)
+function TestDBInit($path=NULL, $catalog='fosstest')
 {
   if(empty($path))
   {
@@ -177,7 +175,8 @@ function TestDBInit($path=NULL)
 
   $schemaUp = __DIR__ . '/../../cli/schema-update.php';
 
-  system("$schemaUp -f $path",$result);
+  echo "DB: libTDB: calling schema update with:PATH:\n$path\nCATLOG:$catalog\n";
+  system("$schemaUp -f $path -c $catalog",$result);
   //echo "DB: result of schema update is:$result\n";
 
   if($result == 0)
