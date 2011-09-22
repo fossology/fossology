@@ -25,9 +25,6 @@ if (!isset($GlobalReady)) {
   exit;
 }
 
-global $WEBDIR;
-require_once("$WEBDIR/common/common.php");
-
 define("TITLE_ui_browse", _("Browse"));
 
 class ui_browse extends FO_Plugin {
