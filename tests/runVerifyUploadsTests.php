@@ -62,9 +62,9 @@ class verifyUploadsTest extends TestSuite
     }
     // nomos, only 2 major tests right now, just add them.
     // @todo when there are more nomos tests, change to pattern expectation.
-    $this->addTestFile('nomos/ckZendTest.php');
-    $this->addTestFile('nomos/verifyRedHatTest.php');
-    $this->addTestFile('copyright/verify3filesTest.php');
+    $this->addFile('nomos/ckZendTest.php');
+    $this->addFile('nomos/verifyRedHatTest.php');
+    $this->addFile('copyright/verify3filesTest.php');
   }
 }
 
