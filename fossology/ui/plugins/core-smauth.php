@@ -94,7 +94,7 @@ class core_smauth extends FO_Plugin {
       }
       if (time() >= @$_SESSION['time_check']) {
         $sql = "SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';";
-        $results = pg_query($PG_CONN, $sql);
+        $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         $R = pg_fetch_assoc($result);
         $_SESSION['User'] = $R['user_name'];
@@ -310,7 +310,7 @@ class core_smauth extends FO_Plugin {
         $_SESSION['UserEmail'] = NULL;
         $_SESSION['Folder'] = NULL;
         $_SESSION['UiPref'] = NULL;
-        $Uri = Traceback_uri() . "logout.html";
+        $Uri = Traceback_uri() . "logout.html?" . rand();
         //$Uri = Traceback_uri() . "?mod=refresh&remod=default";
         $V.= "<script language='javascript'>\n";
         $V.= "window.open('$Uri','_top');\n";
