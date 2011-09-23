@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 /**
  * libschema
  * \brief utility functions needed by the schema* programs
@@ -25,11 +25,12 @@
  ApplySchema(): Apply the current schema from a file.
  NOTE: The order for add/delete is important!
  ***********************************************************/
-function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
+function ApplySchema($Filename = NULL, $Debug, $Verbose = 1, $Catalog='fossology')
 {
   global $PG_CONN;
   print "Applying database schema\n";
   flush();
+
   /**************************************/
   /** BEGIN: Term list from ExportTerms() **/
   /**************************************/
@@ -53,9 +54,6 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   pg_query($PG_CONN, "SET statement_timeout = 0;"); /* turn off DB timeouts */
   pg_query($PG_CONN, "BEGIN;");
   $Curr = GetSchema();
-  //print "DBG: ApplySchema: Current Schema returned by GetSchema:\n"; print_r($Curr) . "\n";
-  //print "DBG: ApplySchema: Schema to compare with:\n"; print_r($Schema) . "\n";
-  //print "DBG: ApplySchema: ******* START *******\n";
   /* The gameplan: Make $Curr look like $Schema. */
   // print "<pre>"; print_r($Schema); print "</pre>";
   /* turn off E_NOTICE so this stops reporting undefined index */
@@ -108,14 +106,11 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
     }
     foreach ($Columns as $Column => $Val)
     {
-      //print "DBG: foreach Colunm => Val\n";
-      //print "DBG: VAL is:\n"; print_r($Val) . "\n";
       if ($Curr['TABLE'][$Table][$Column]['ADD'] != $Val['ADD'])
       {
         $Rename = "";
         if (ColExist($Table, $Column))
         {
-          //print "DBG: column exists, renaming\n";
           /* The column exists, but it looks different!
            Solution: Delete the column! */
           $Rename = $Column . "_old";
@@ -126,28 +121,22 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
           }
           else
           {
-            //print "DBG: column DOES NOT Exist, SQL is:\n$SQL\n";
             $result = pg_query($PG_CONN, $SQL);
             DBCheckResult($result, $SQL, __FILE__,__LINE__);
           }
         }
         if ($Debug)
         {
-          print $Val['ADD'] . "\n";
+          print "Val[ADD] is" . $Val['ADD'] . "\n";
         }
         else
         {
           // Add the new column, then set the default value with update
           $SQL = $Val['ADD'];
-          //print "DBG: ['ADD'] == val[add] Adding column, SQL is:\n$SQL\n";
           $result = pg_query($PG_CONN, $SQL);
           DBCheckResult($result, $SQL, __FILE__,__LINE__);
-          //print "DBG: ADD: updating $Table:$Column\n";
-          $SQL = $Val['UPDATE'];
-          //print "DBG: In ADD: UPDATE SQL is:\n$SQL\n";
           if (!empty($Val['UPDATE']))
           {
-            //print "DBG: ADD: updating $Table:$Column\n";
             $SQL = $Val['UPDATE'];
             $result = pg_query($PG_CONN, $SQL);
             DBCheckResult($result, $SQL, __FILE__,__LINE__);
@@ -163,7 +152,6 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
           }
           else
           {
-            //print "DBG: copying old data back to: $Table:$Column\n";
             $result = pg_query($PG_CONN, $SQL);
             DBCheckResult($result, $SQL, __FILE__,__LINE__);
           }
@@ -174,33 +162,26 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
           }
           else
           {
-            //print "DBG: Droping column, SQL is:\n$SQL\n";
             $result = pg_query($PG_CONN, $SQL);
             DBCheckResult($result, $SQL, __FILE__,__LINE__);
           }
         }
-      }
+      } // if
       if ($Curr['TABLE'][$Table][$Column]['ALTER'] != $Val['ALTER'])
       {
-        //print "DBG: != VAL['ALTER'], VAL is:\n"; print_r($Val) . "\n";
         if ($Debug)
         {
           print $Val['ALTER'] . "\n";
         }
         else
         {
-          //print "DBG: In != Val['ALTER'] altering $Table:$Column\n";
           $SQL = $Val['ALTER'];
-          //print "DBG: In != Val['ALTER'] SQL is:\n$SQL\n";
           $result = pg_query($PG_CONN, $SQL);
           DBCheckResult($result, $SQL, __FILE__,__LINE__);
           $SQL = $Val['UPDATE'];
-          //print "DBG: In != Val['ALTER'] UPDATE SQL is:\n$SQL\n";
           if (!empty($Val['UPDATE']))
           {
-            //print "DBG: In != Val['ALTER':updating $Table:$Column\n";
             $SQL = $Val['UPDATE'];
-            //print "DBG: In != Val['ALTER'] UPDATE SQL is:\n$SQL\n";
             $result = pg_query($PG_CONN, $SQL);
             DBCheckResult($result, $SQL, __FILE__,__LINE__);
           }
@@ -327,8 +308,6 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
         continue;
       }
       /* Only delete indexes that are different */
-      //print "DBG: RMINDEX: sql of schema is:{$Schema['INDEX'][$Table][$Name]}\n";
-      //print "DBG: RMINDEX: sql of Current is:$SQL\n";
       if ($Schema['INDEX'][$Table][$Name] == $SQL)
       {
         continue;
@@ -366,8 +345,6 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
       {
         continue;
       }
-      //print "DBG: ADDINDEX: sql of schema is:$SQL}\n";
-      //print "DBG: ADDINDEX: sql of Currnt is:{$Curr['INDEX'][$Table][$Name]}\n";
       if ($Curr['INDEX'][$Table][$Name] == $SQL)
       {
         continue;
@@ -526,7 +503,7 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   /* Without this delete, we won't be able to drop columns. */
   $SQL = "SELECT view_name,table_name,column_name
   FROM information_schema.view_column_usage
-  WHERE table_catalog='fossology'
+  WHERE table_catalog='$Catalog'
   ORDER BY view_name,table_name,column_name;";
   $result = pg_query($PG_CONN, $SQL);
   DBCheckResult($result, $SQL, __FILE__,__LINE__);
@@ -596,6 +573,7 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
   /************************************/
   print "  Committing changes...\n";
   flush();
+  //echo "DB: commiting changes, sql is:\n$SQL\n";
   $results = pg_query($PG_CONN, "COMMIT;");
   DBCheckResult($results, $SQL, __FILE__,__LINE__);
   echo "Success!\n";
@@ -671,7 +649,7 @@ function CheckCreateTable($Table)
 /*
  * GetSchema
  * \brief Load the schema from the db into an array.
-*/
+ */
 function GetSchema()
 {
   global $PG_CONN;
@@ -701,10 +679,12 @@ function GetSchema()
   $result = pg_query($PG_CONN, $SQL);
   DBCheckResult($result, $SQL, __FILE__,__LINE__);
   $Results = pg_fetch_all($result);
+  //echo "DB: GetSchema, after query, results are:"; print_r($Results[0]['table']) . "\n";
   for ($i = 0;!empty($Results[$i]['table']);$i++)
   {
     $R = & $Results[$i];
     $Table = $R['table'];
+    //echo "processing tabel $Table\n";
     if (preg_match('/[0-9]/', $Table))
     {
       continue;
@@ -734,7 +714,6 @@ function GetSchema()
     $Alter = "ALTER COLUMN \"$Column\"";
     // create the index UPDATE to get rid of php notice
     $Schema['TABLE'][$Table][$Column]['UPDATE'] = "";
-    // $Schema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter TYPE $Type";
     if ($R['notnull'] == 't')
     {
       $Schema['TABLE'][$Table][$Column]['ALTER'].= " $Alter SET NOT NULL";
@@ -745,19 +724,16 @@ function GetSchema()
     }
     if ($R['default'] != '')
     {
-      // $R['default'] = preg_replace("/::.*/","",$R['default']);
       $R['default'] = preg_replace("/::bpchar/", "::char", $R['default']);
       $Schema['TABLE'][$Table][$Column]['ALTER'].= ", $Alter SET DEFAULT " . $R['default'];
       $Schema['TABLE'][$Table][$Column]['UPDATE'].= "UPDATE $Table SET $Column=" . $R['default'];
     }
     $Schema['TABLE'][$Table][$Column]['ALTER'].= ";";
   }
-  //print "GetSchema: Schema after TABLES is:\n";print_r($Schema) . "\n";
   /***************************/
   /* Get Views */
   /***************************/
   $SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'fossy';";
-  //$SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'rando';";
   $result = pg_query($PG_CONN, $SQL);
   DBCheckResult($result, $SQL, __FILE__,__LINE__);
   $Results = pg_fetch_all($result);
@@ -903,8 +879,7 @@ function GetSchema()
     $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
     $Results[$i]['processed'] = 1;
   }
-  //print "GetSchema: Schema after CONSTRAINT: UNIQUE is:\n";print_r($Schema) . "\n";
-  
+
   /** CONSTRAINT: FOREIGN KEY **/
   for ($i = 0;!empty($Results[$i]['constraint_name']);$i++)
   {
@@ -925,8 +900,7 @@ function GetSchema()
     $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
     $Results[$i]['processed'] = 1;
   }
-  //print "GetSchema: Schema after Foreign Key is:\n";print_r($Schema) . "\n";
-  
+
   /** CONSTRAINT: ALL OTHERS **/
   for ($i = 0;!empty($Results[$i]['constraint_name']);$i++)
   {
@@ -947,8 +921,6 @@ function GetSchema()
     $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
     $Results[$i]['processed'] = 1;
   }
-  //print "GetSchema: Schema at this point is:\n";print_r($Schema) . "\n";
-  //print "GetSchemaDB: before Get Index Results are:\n";print_r($Results) . "\n";
   /***************************/
   /* Get Index */
   /***************************/
@@ -1002,7 +974,6 @@ function GetSchema()
     }
   }
   unset($Schema['TABLEID']);
-  //print "GetSchema: schema returned is:\n";print_r($Schema) . "\n";
   return ($Schema);
 } // GetSchema()
 
@@ -1098,9 +1069,9 @@ function MakeFunctions($Debug)
   print "  Applying database functions\n";
   flush();
   /********************************************
-  GetRunnable() is a DB function for listing the runnable items
-  in the jobqueue. This is used by the scheduler.
-  ********************************************/
+   GetRunnable() is a DB function for listing the runnable items
+   in the jobqueue. This is used by the scheduler.
+   ********************************************/
   $SQL = '
 CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
 DECLARE
