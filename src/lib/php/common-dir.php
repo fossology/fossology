@@ -446,9 +446,8 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
 {
   $LastPfilePk = -1;
   $V = "";
-  for($i=0; !empty($Listing[$i]['uploadtree_pk']); $i++)
+  while (($R = pg_fetch_assoc($Listing)) and !empty($R['uploadtree_pk']))
   {
-    $R = &$Listing[$i];
     if (array_key_exists("licenses", $R))
       $Licenses = $R["licenses"];
     else

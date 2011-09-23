@@ -116,6 +116,7 @@ CREATE TABLE sysconfig (
 
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
 
   /* Document columns */
   $sql = "
@@ -130,7 +131,9 @@ COMMENT ON COLUMN sysconfig.validation_function IS 'Name of function to validate
 COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textarea';
     ";
   /* this is a non critical update */
-  $result = @pg_query($PG_CONN, $sql);
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
   return 1;
 }
 
@@ -228,6 +231,7 @@ function Populate_sysconfig()
       $sql = "insert into sysconfig ({$Columns}) values ($Values);";
       $result = @pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
     unset($VarRec);
   }
