@@ -48,10 +48,11 @@ require_once ("$WEBDIR/common/common-cache.php");
 global $PG_CONN;
 
 $usage = "Usage: " . basename($argv[0]) . " [options]
+  -c <catalog>  the optional database catalog to use, e.g. fossology, fosstest
   -f <filepath> pathname to schema data file
   -h this help usage";
 
-$Options = getopt('f:h');
+$Options = getopt('c:f:h');
 if (empty($Options))
 {
 	print "$usage\n";
@@ -64,9 +65,18 @@ if (array_key_exists('h',$Options))
 	exit(0);
 }
 
+if (array_key_exists('c', $Options))
+{
+  $Catalog = $Options['c'];
+  //echo "DB: schemaUP: will read from catalog:$Catalog\n";
+}
+if(empty($Catalog))
+{
+  $Catalog = 'fossology';
+}
 if (array_key_exists('f', $Options))
 {
-	$Filename = $Options['f'];
+  $Filename = $Options['f'];
 }
 if((strlen($Filename)) == 0)
 {
@@ -75,6 +85,8 @@ if((strlen($Filename)) == 0)
 }
 $PG_CONN = DBconnect();
 
-ApplySchema($Filename, 0);
+//ApplySchema($Filename, 1, 1, $Catalog);
+// no debug below
+ApplySchema($Filename, 0, 1, $Catalog);
 
 ?>
