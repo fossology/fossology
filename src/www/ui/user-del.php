@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,16 +16,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_user_del", _("Delete A User"));
 
+/**
+ * \class user_del extends FO_Plugin
+ * \brief delete a user
+ */
 class user_del extends FO_Plugin
 {
   var $Name       = "user_del";
@@ -35,30 +31,39 @@ class user_del extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
-  /*********************************************
-   Delete(): Delete a user.
-   Returns NULL on success, string on failure.
-   *********************************************/
-  function Delete	($UserId)
+  /**
+   * \brief Delete a user.
+   * 
+   * \return NULL on success, string on failure.
+   */
+  function Delete($UserId)
   {
-    global $DB;
-
+    global $PG_CONN;
     /* See if the user already exists (better not!) */
-    $SQL = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
-    $Results = $DB->Action($SQL);
-    if (empty($Results[0]['user_name']))
+    $sql = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (empty($row['user_name']))
     {
       $text = _("User does not exist.");
       return($text);
     }
 
     /* Delete the user */
-    $SQL = "DELETE FROM users WHERE user_pk = '$UserId';";
-    $Results = $DB->Action($SQL);
+    $sql = "DELETE FROM users WHERE user_pk = '$UserId';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
     /* Make sure it was deleted */
-    $SQL = "SELECT * FROM users WHERE user_name = '$UserId' LIMIT 1;";
-    $Results = $DB->Action($SQL);
-    if (!empty($Results[0]['user_name']))
+    $sql = "SELECT * FROM users WHERE user_name = '$UserId' LIMIT 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (!empty($row['user_name']))
     {
       $text = _("Failed to delete user.");
       return($text);
@@ -67,13 +72,13 @@ class user_del extends FO_Plugin
     return(NULL);
   } // Delete()
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-   *********************************************/
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
-    global $DB;
+    global $PG_CONN;
     $V="";
     switch($this->OutputType)
     {
@@ -100,8 +105,11 @@ class user_del extends FO_Plugin
         }
 
         /* Get the user list */
-        $Results = $DB->Action("SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' AND user_pk != '1' ORDER BY user_name;");
-        if (empty($Results[0]['user_name']))
+        $sql = "SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' AND user_pk != '1' ORDER BY user_name;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        if (empty($row['user_name']))
         {
           $V .= _("No users to delete.");
         }
@@ -116,10 +124,10 @@ class user_del extends FO_Plugin
           $V .= "<ol>\n";
           $V .= _("<li>Select the user to delete.<br />");
           $V .= "<select name='userid'>\n";
-          for($i=0; !empty($Results[$i]['user_name']); $i++)
+          for($i=0; $row = pg_fetch_assoc($result, $i) and !empty($row['user_name']); $i++)
           {
-            $V .= "<option value='" . $Results[$i]['user_pk'] . "'>";
-            $V .= $Results[$i]['user_name'];
+            $V .= "<option value='" . $row['user_pk'] . "'>";
+            $V .= $row['user_name'];
             $V .= "</option>\n";
           }
           $V .= "</select>\n";
@@ -132,6 +140,7 @@ class user_del extends FO_Plugin
           $V .= "<input type='submit' value='$text!'>\n";
           $V .= "</form>\n";
         }
+        pg_free_result($result);
         break;
       case "Text":
         break;

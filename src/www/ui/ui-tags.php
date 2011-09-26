@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_ui_tag", _("Tag"));
 
 class ui_tag extends FO_Plugin
@@ -32,9 +24,10 @@ class ui_tag extends FO_Plugin
   var $Title      = TITLE_ui_tag;
   var $Version    = "1.0";
   var $Dependency = array("db");
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     /****** Permission comments: if user don't have read or high permission, can't see tag menu. ******/
@@ -50,9 +43,9 @@ class ui_tag extends FO_Plugin
     }
   } // RegisterMenus()
 
-  /***********************************************************
-   CreateTag(): Add a new Tag.
-   ***********************************************************/
+  /**
+   * \brief Add a new Tag.
+   */
   function CreateTag($tag_array)
   {
     global $PG_CONN;
@@ -134,6 +127,7 @@ class ui_tag extends FO_Plugin
     /* Make sure it was added */
     $sql = "SELECT * FROM tag WHERE tag = '$tag_name' AND tag_ns_fk = $tag_ns_pk LIMIT 1;";
     $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1)
     {
       pg_free_result($result);
@@ -245,9 +239,9 @@ class ui_tag extends FO_Plugin
     return (NULL);
   }
 
-  /***********************************************************
-   EditTag(): Edit exsit Tag.
-   ***********************************************************/
+  /**
+   * \brief Edit exsit Tag.
+   */
   function EditTag()
   {
     global $PG_CONN;
@@ -316,6 +310,7 @@ class ui_tag extends FO_Plugin
           $this->CreateTag($tag_data);
           return (NULL);
         }
+        else pg_free_result($result);
       }
     }
     pg_exec("BEGIN;");
@@ -340,9 +335,9 @@ class ui_tag extends FO_Plugin
     return (NULL);
   }
 
-  /***********************************************************
-   DeleteTag(): Delete exsit Tag.
-   ***********************************************************/
+  /**
+   * \brief Delete exsit Tag.
+   */
   function DeleteTag()
   {
     global $PG_CONN;
@@ -398,10 +393,12 @@ class ui_tag extends FO_Plugin
      */
     return (NULL);
   }
-  /***********************************************************
-   ShowExistTags($Uploadtree_pk): Show all tags about
-   $Uploadtree_pk
-   ***********************************************************/
+
+  /**
+   * \brief Show all tags about
+   *
+   * \param  $Uploadtree_pk - uploadtree id
+   */
   function ShowExistTags($Upload,$Uploadtree_pk)
   {
     global $PG_CONN;
@@ -435,9 +432,9 @@ class ui_tag extends FO_Plugin
     return $VE;
   }
 
-  /***********************************************************
-   ShowAjaxPage(): Display the ajax page.
-   ***********************************************************/
+  /**
+   * \brief Display the ajax page.
+   */
   function ShowAjaxPage()
   {
     $VA = "";
@@ -511,9 +508,9 @@ class ui_tag extends FO_Plugin
     return $VA;
   }
 
-  /***********************************************************
-   ShowCreateTagPage(): Display the create tag page.
-   ***********************************************************/
+  /**
+   * \brief Display the create tag page.
+   */
   function ShowCreateTagPage($Upload,$Item)
   {
     global $PG_CONN;
@@ -582,9 +579,9 @@ class ui_tag extends FO_Plugin
     return $VC;
   }
 
-  /***********************************************************
-   ShowEditTagPage(): Display the edit tag page.
-   ***********************************************************/
+  /**
+   * \brief Display the edit tag page.
+   */
   function ShowEditTagPage($Upload,$Item)
   {
     global $PG_CONN;
@@ -666,9 +663,9 @@ class ui_tag extends FO_Plugin
     return $VEd;
   }
 
-  /***********************************************************
-   ShowDeleteTagPage(): Display the delete tag page.
-   ***********************************************************/
+  /**
+   * \brief Display the delete tag page.
+   */
   function ShowDeleteTagPage($Upload,$Item)
   {
     global $PG_CONN;
@@ -718,12 +715,11 @@ class ui_tag extends FO_Plugin
     return ($VD);
   }
 
-  /***********************************************************
-   ShowTaggingPage(): Display the tagging page.
-   ***********************************************************/
+  /**
+   * \brief Display the tagging page.
+   */
   function ShowTaggingPage($ShowMenu=0,$ShowHeader=0,$action)
   {
-    global $PG_CONN;
     $V = "";
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
@@ -760,16 +756,17 @@ class ui_tag extends FO_Plugin
     }
     return($V);
   }
-  /***********************************************************
-   Output(): This function is called when user output is
-   requested.  This function is responsible for content.
-   (OutputOpen and Output are separated so one plugin
-   can call another plugin's Output.)
-   This uses $OutputType.
-   The $ToStdout flag is "1" if output should go to stdout, and
-   0 if it should be returned as a string.  (Strings may be parsed
-   and used by other plugins.)
-   ***********************************************************/
+
+  /**
+   * \brief This function is called when user output is
+   * requested.  This function is responsible for content.
+   * (OutputOpen and Output are separated so one plugin
+   * can call another plugin's Output.)
+   * This uses $OutputType.
+   * The $ToStdout flag is "1" if output should go to stdout, and
+   * 0 if it should be returned as a string.  (Strings may be parsed
+   * and used by other plugins.)
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }

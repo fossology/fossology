@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,18 +15,13 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_group_manage", _("Manage Group"));
 
+/**
+ * \class group_manage extends FO_Plugin
+ * \brief manage group, such as add, delete, show, etc
+ */
 class group_manage extends FO_Plugin {
   var $Name = "group_manage";
   var $Title = TITLE_group_manage;
@@ -36,10 +31,10 @@ class group_manage extends FO_Plugin {
   var $DBaccess = PLUGIN_DB_USERADMIN;
 
 
-  /*********************************************
-   Delete(): Delete a group.
-   Returns NULL on success, string on failure.
-   *********************************************/
+  /**
+   * \brief Delete a group.
+   * Returns NULL on success, string on failure.
+   */
   function Delete() {
     global $PG_CONN;
 
@@ -54,6 +49,8 @@ class group_manage extends FO_Plugin {
       $text = _("Group Delete Failed:As there are group permissions related to this group, if you want to delete this group you should first delete permissions about this group! ");
       return ($text);
     }
+
+    pg_free_result($result);
 
     pg_exec("BEGIN;");
     $sql = "DELETE FROM group_user_member WHERE group_fk = $group_pk;";
@@ -70,10 +67,10 @@ class group_manage extends FO_Plugin {
     return (NULL);
   }
 
-  /*********************************************
-   Add(): Add a group.
-   Returns NULL on success, string on failure.
-   *********************************************/
+  /**
+   * \biref Add a group.
+   * Returns NULL on success, string on failure.
+   */
   function Add() {
     global $PG_CONN;
 
@@ -130,9 +127,9 @@ class group_manage extends FO_Plugin {
     return (NULL);
   } // Add()
 
-  /***********************************************************
-   ShowExistGroups(): Show all groups
-   ***********************************************************/
+  /**
+   * \brief Show all groups
+   */
   function ShowExistGroups()
   {
     global $PG_CONN;
@@ -173,9 +170,9 @@ class group_manage extends FO_Plugin {
     return $VE;
   }
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-   *********************************************/
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
     global $PG_CONN;
     if ($this->State != PLUGIN_STATE_READY) {

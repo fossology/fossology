@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,23 +16,15 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 class ui_refresh extends FO_Plugin
 {
   var $Name       = "refresh";
   var $Version    = "1.0";
   var $LoginFlag  =  0;
 
-  /***********************************************************
-   GetRefresh(): Generate a Refresh URL.
-   ***********************************************************/
+  /**
+   * \brief Generate a Refresh URL.
+   */
   function GetRefresh()
   {
     $Mod = GetParm("mod",PARM_STRING);
@@ -42,10 +34,10 @@ class ui_refresh extends FO_Plugin
     return($V);
   } // GetRefresh()
 
-  /***********************************************************
-   OutputOpen(): This function is called when user output is
-   requested.  This function is responsible for assigning headers.
-   ***********************************************************/
+  /**
+   * \brief This function is called when user output is
+   * requested.  This function is responsible for assigning headers.
+   */
   function OutputOpen($Type,$ToStdout)
   {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
@@ -54,10 +46,10 @@ class ui_refresh extends FO_Plugin
     return($P->OutputOpen($Type,$ToStdout));
   } // OutputOpen()
 
-  /***********************************************************
-   Output(): This function is called when user output is
-   requested.  This function is responsible for content.
-   ***********************************************************/
+  /**
+   * \brief This function is called when user output is
+   * requested.  This function is responsible for content.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
@@ -70,10 +62,10 @@ class ui_refresh extends FO_Plugin
     return($P->Output($GoMod,$GoOpt));
   } // Output()
 
-  /***********************************************************
-   OutputClose(): This function is called when user output is
-   finished.
-   ***********************************************************/
+  /**
+   * \brief This function is called when user output is
+   * finished.
+   */
   function OutputClose()
   {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }

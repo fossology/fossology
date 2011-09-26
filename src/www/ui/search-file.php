@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_search_file", _("Search for File"));
 
 class search_file extends FO_Plugin
@@ -46,9 +38,9 @@ class search_file extends FO_Plugin
     return $this->State;
   }
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */ 
   function RegisterMenus()
   {
     global $SysConf;
@@ -56,18 +48,17 @@ class search_file extends FO_Plugin
     menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
   } // RegisterMenus()
 
-  /***********************************************************
-   GetUploadtreeFromName(): Given a name, return all records.
-   ***********************************************************/
+  /**
+   * \brief Given a name, return all records.
+   */
   function GetUploadtreeFromName($Filename,$Page, $ContainerOnly=1)
   {
-    global $DB;
-
+    global $PG_CONN;
     $Max = 50;
     $Filename = str_replace("'","''",$Filename); // protect DB
     $Terms = split("[[:space:]][[:space:]]*",$Filename);
     $SQL = "SELECT * FROM uploadtree
-	INNER JOIN pfile ON pfile_fk = pfile_pk";
+      INNER JOIN pfile ON pfile_fk = pfile_pk";
     if ($ContainerOnly) $SQL .= " AND ((uploadtree.ufile_mode & (1<<29)) != 0) ";
     foreach($Terms as $Key => $T)
     {
@@ -75,9 +66,10 @@ class search_file extends FO_Plugin
     }
     $Offset = $Page * $Max;
     $SQL .= " ORDER BY pfile_pk,ufile_name DESC LIMIT $Max OFFSET $Offset;";
-    $Results = $DB->Action($SQL);
+    $result = pg_query($PG_CONN, $SQL);
+    DBCheckResult($result, $SQL, __FILE__, __LINE__);
     $V = "";
-    $Count = count($Results);
+    $Count = pg_num_rows($result);
 
     if (($Page > 0) || ($Count >= $Max))
     {
@@ -95,19 +87,21 @@ class search_file extends FO_Plugin
     if ($Count == 0)
     {
       $V .= _("No results.\n");
+      pg_free_result($result);
       return($V);
     }
 
-    $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
+    $V .= Dir2FileList($result,"browse","view",$Page*$Max + 1);
+    pg_free_result($result);
 
     /* put page menu at the bottom, too */
     if (!empty($VM)) { $V .= "<P />\n" . $VM; }
     return($V);
   } // GetUploadtreeFromName()
 
-  /***********************************************************
-   Output(): Display the loaded menu and plugins.
-   ***********************************************************/
+  /**
+   * \brief Display the loaded menu and plugins.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }

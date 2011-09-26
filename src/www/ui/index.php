@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/***************************************************************
- $GlobalReady is only set here.
- This flag tells all other PHP code that it is running from this system.
- If other PHP code does not see this flag, then the code is not being
- executed correctly and should exit immediately (without taking further
- action).
- ***************************************************************/
-$GlobalReady=1;
 $SysConf = array();
 $PG_CONN = 0;   // Database connection
 
@@ -31,11 +23,13 @@ $PG_CONN = 0;   // Database connection
 require_once("pathinclude.php");
 require_once("$FOSRCDIR/lib/php/common.php");
 
-/****************************************************
- This is the main guts of the UI: Find the plugin and run it.
- ****************************************************/
+/**
+ * \file index.php
+ * \ brief This is the main guts of the UI: Find the plugin and run it.
+ */
 
-/* Connect to the database.  If the connection fails,
+/**
+ * Connect to the database.  If the connection fails,
  * DBconnect() will print a failure message and exit.
  * The global $PG_CONN is set inside of DBconnect().
  * DBconnect uses this side effect for backward compatibility.

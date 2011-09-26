@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_admin_tag_ns_perm", _("Assign Tag Namespace Permission"));
 
 class admin_tag_ns_perm extends FO_Plugin
@@ -35,9 +27,9 @@ class admin_tag_ns_perm extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess = PLUGIN_DB_USERADMIN;
 
-  /***********************************************************
-   DeleteTagPerms(): Delete exsit Tag Namespace Permission.
-   ***********************************************************/
+  /**
+   * \brief Delete exsit Tag Namespace Permission.
+   */
   function DeleteTagPerms()
   {
     global $PG_CONN;
@@ -56,9 +48,9 @@ class admin_tag_ns_perm extends FO_Plugin
     return (NULL);
   }
 
-  /***********************************************************
-   AddTagPerms(): Add Tag Namespace Permission.
-   ***********************************************************/
+  /**
+   * \brief Add Tag Namespace Permission.
+   */
   function AddTagPerms()
   {
     global $PG_CONN;
@@ -76,9 +68,9 @@ class admin_tag_ns_perm extends FO_Plugin
 
 
 
-  /***********************************************************
-   ShowAjaxPage(): Display the ajax page.
-   ***********************************************************/
+  /**
+   * \brief Display the ajax page.
+   */
   function ShowAjaxPage()
   {
     $VA = "";
@@ -96,9 +88,9 @@ class admin_tag_ns_perm extends FO_Plugin
     return $VA;
   }
 
-  /***********************************************************
-   ShowAssignPermPage(): Display the page.
-   ***********************************************************/
+  /**
+   * \brief Display the page.
+   */
   function ShowAssignPermPage()
   {
     global $PG_CONN;
@@ -124,21 +116,22 @@ class admin_tag_ns_perm extends FO_Plugin
       $V.= htmlentities($row['tag_ns_name']);
       $V.= "</option>\n";
     }
+    pg_free_result($result);
     $V.= "</select>\n";
     $V.= "<div id='perms'></div>\n";
 
     return($V);
   }
-  /***********************************************************
-   Output(): This function is called when user output is
-   requested.  This function is responsible for content.
-   (OutputOpen and Output are separated so one plugin
-   can call another plugin's Output.)
-   This uses $OutputType.
-   The $ToStdout flag is "1" if output should go to stdout, and
-   0 if it should be returned as a string.  (Strings may be parsed
-   and used by other plugins.)
-   ***********************************************************/
+  /**
+   * \brief This function is called when user output is
+   * requested.  This function is responsible for content.
+   * (OutputOpen and Output are separated so one plugin
+   * can call another plugin's Output.)
+   * This uses $OutputType.
+   * The $ToStdout flag is "1" if output should go to stdout, and
+   * 0 if it should be returned as a string.  (Strings may be parsed
+   * and used by other plugins.)
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }

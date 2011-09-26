@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_dashboard", _("Dashboard"));
 
 class dashboard extends FO_Plugin
@@ -35,9 +27,9 @@ class dashboard extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
-  /************************************************
-   DiskFree(): Determine amount of free disk space.
-   ************************************************/
+  /**
+   * \brief Determine amount of free disk space.
+   */
   function DiskFree()
   {
     global $SYSCONFDIR;
@@ -85,12 +77,12 @@ class dashboard extends FO_Plugin
     return($V);
   } // DiskFree()
 
-  /************************************************
-   Output(): Generate output.
-   ************************************************/
+  /**
+   * \brief Generate output.
+   */
   function Output() {
 
-    global $DB;
+    global $PG_CONN;
     global $Plugins;
 
     if ($this->State != PLUGIN_STATE_READY) { return; }
@@ -116,7 +108,13 @@ class dashboard extends FO_Plugin
         $uri_showjobs = Traceback_uri() . "?mod=showjobs";
         $showjobs_exists = &$Plugins[plugin_find_id("showjobs")]; /* may be null */
 
-        $Results = $DB->Action("SELECT COUNT(DISTINCT jq_job_fk) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
+        $sql = "SELECT COUNT(DISTINCT jq_job_fk) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $item_count = '';
+        $item_count = $row['val'];
+        pg_free_result($result);
         if ($showjobs_exists) {
           $text = _("Pending Analysis Jobs");
           $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
@@ -125,8 +123,14 @@ class dashboard extends FO_Plugin
           $text = _("Pending Analysis Jobs");
           $V .= "<tr><td>$text</td>";
         }
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-        $Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
+        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+        $sql = "SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $item_count = '';
+        $item_count = $row['val'];
+        pg_free_result($result);
         if ($showjobs_exists) {
           $text = _("Tasks in the Job Queue");
           $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
@@ -135,8 +139,14 @@ class dashboard extends FO_Plugin
           $text = _("Tasks in the Job Queue");
           $V .= "<tr><td>$text</td>";
         }
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
-        $Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL AND jq_starttime IS NOT NULL;");
+        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";
+        $sql = "SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL AND jq_starttime IS NOT NULL;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $item_count = '';
+        $item_count = $row['val'];
+        pg_free_result($result);
         if ($showjobs_exists) {
           $text = _("Running Tasks");
           $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
@@ -145,8 +155,14 @@ class dashboard extends FO_Plugin
           $text = _("Running Tasks");
           $V .= "<tr><td>$text</td>";
         }
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
-        $Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NOT NULL AND jq_end_bits=2;");
+        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";
+        $sql = "SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NOT NULL AND jq_end_bits=2;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $item_count = '';
+        $item_count = $row['val'];
+        pg_free_result($result);
         if ($showjobs_exists) {
           $text = _("Failed Tasks");
           $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
@@ -155,7 +171,7 @@ class dashboard extends FO_Plugin
           $text = _("Failed Tasks");
           $V .= "<tr><td>$text</td>";
         }
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
+        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";
         $V .= "</table>\n";
         $V .= "</td>";
 
@@ -167,26 +183,56 @@ class dashboard extends FO_Plugin
         $text = _("Metric");
         $text1 = _("Total");
         $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
-        $Results = $DB->Action("SELECT count(*) AS val FROM upload;");
+        $sql = "SELECT count(*) AS val FROM upload;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $item_count = '';
+        $item_count = $row['val'];
+        pg_free_result($result);
         $text = _("Unique Uploads");
         $V .= "<tr><td>$text</td>";
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-        $Results = $DB->Action("SELECT count(*) AS val FROM pfile;");
+        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+        $sql = "SELECT count(*) AS val FROM pfile;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $item_count = '';
+        $item_count = $row['val'];
+        pg_free_result($result);
         $text = _("Unique Extracted Files");
         $V .= "<tr><td>$text</td>";
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-        $Results = $DB->Action("SELECT count(*) AS val FROM uploadtree;");
+        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+        $sql = "SELECT count(*) AS val FROM uploadtree;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $item_count = '';
+        $item_count = $row['val'];
+        pg_free_result($result);
         $text = _("Extracted Names");
         $V .= "<tr><td>$text</td>";
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-        $Results = $DB->Action("SELECT count(*) AS val FROM agent_lic_raw;");
+        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+        $sql = "SELECT count(*) AS val FROM agent_lic_raw;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $item_count = '';
+        $item_count = $row['val'];
+        pg_free_result($result);
         $text = _("Known License Templates");
         $V .= "<tr><td>$text</td>";
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-        $Results = $DB->Action("SELECT count(*) AS val FROM agent_lic_meta;");
+        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+        $sql = "SELECT count(*) AS val FROM agent_lic_meta;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $item_count = '';
+        $item_count = $row['val'];
+        pg_free_result($result);
         $text = _("Identified Licenses");
         $V .= "<tr><td>$text</td>";
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
         $V .= "</table>\n";
 
         /**************************************************/
@@ -197,30 +243,49 @@ class dashboard extends FO_Plugin
         $text = _("Metric");
         $text1 = _("Total");
         $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
-        $Results = $DB->Action("SELECT pg_size_pretty(pg_database_size('fossology')) as val");
+        $sql = "SELECT pg_size_pretty(pg_database_size('fossology')) as val;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $Size = $row['val'];
+        pg_free_result($result);
         $text = _("FOSSology database size");
         $V .= "<tr><td>$text</td>";
-        $Size = $Results[0]['val'];
         $V .= "<td align='right'>  $Size </td></tr>\n";;
 
-        $Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity;");
-        if (!empty($Results[0]['val']))
+        $sql = "SELECT count(*) AS val FROM pg_stat_activity;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $item_count = '';
+        $item_count = $row['val'];
+        pg_free_result($result);
+        if (!empty($item_count))
         {
           $text = _("Active database connections");
           $V .= "<tr><td>$text</td>";
-          $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-          $Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology';");
+          $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+          $sql = "SELECT count(*) AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology';";
+          $result = pg_query($PG_CONN, $sql);
+          DBCheckResult($result, $sql, __FILE__, __LINE__);
+          $row = pg_fetch_assoc($result);
+          $item_count = '';
+          $item_count = $row['val'];
+          pg_free_result($result);
           $text = _("Active FOSSology queries");
           $V .= "<tr><td>$text</td>";
-          $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-          $Results = $DB->Action("SELECT datname,now()-query_start AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology' ORDER BY val;");
-          for($i=0; !empty($Results['datname']); $i++)
+          $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+          $sql = "SELECT datname,now()-query_start AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology' ORDER BY val;"; 
+          $result = pg_query($PG_CONN, $sql);
+          DBCheckResult($result, $sql, __FILE__, __LINE__);
+          for ($i = 0; ($row = pg_fetch_assoc($result)) and !empty($row['datname']); $i++)
           {
             $text = _("Duration query #");
             $text1 = _(" has been active");
             $V .= "<tr><td>$text . $i . $text1</td>";
-            $V .= "<td align='right'>" . $Results[$i]['val'] . "</td></tr>\n";
+            $V .= "<td align='right'>" . $row['val'] . "</td></tr>\n";
           }
+          pg_free_result($result);
         }
         $V .= "</table>\n";
 

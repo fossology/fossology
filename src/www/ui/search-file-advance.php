@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,16 +16,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_search_file_advance", _("Advanced Search for File"));
 
+/**
+ * \class search_file_advance extends FO_Plugin
+ * \brief seach file advanced page
+ */
 class search_file_advance extends FO_Plugin
 {
   var $Name       = "search_file_advance";
@@ -36,20 +32,21 @@ class search_file_advance extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
 
-  /***********************************************************
-   GetUploadtreeFromTag(): Given a tag, return all uploadtree.
-   ***********************************************************/
+  /**
+   * \brief Given a tag, return all uploadtree.
+   */
   function GetUploadtreeFromTag($tag,$Page)
   {
-    global $DB;
+    global $PG_CONN;
     $Max = 50;
     $SQL = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file INNER JOIN tag ON tag_pk = tag_fk AND (tag = '$tag' OR tag LIKE '$tag')) T ON uploadtree.pfile_fk = T.pfile_fk UNION SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_uploadtree INNER JOIN tag ON tag_pk = tag_fk AND (tag = '$tag' OR tag LIKE '$tag')) T ON uploadtree.uploadtree_pk = T.uploadtree_fk";
     $Offset = $Page * $Max;
     $SQL .= " ORDER BY ufile_name LIMIT $Max OFFSET $Offset;";
-    $Results = $DB->Action($SQL);
+    $result = pg_query($PG_CONN, $SQL);
+    DBCheckResult($result, $SQL, __FILE__, __LINE__);
 
     $V = "";
-    $Count = count($Results);
+    $Count = pg_num_rows($result); 
     //$V .= "<pre>" . htmlentities($SQL) . "</pre>\n";
 
     if (($Page > 0) || ($Count >= $Max))
@@ -67,6 +64,7 @@ class search_file_advance extends FO_Plugin
     if ($Count == 0)
     {
       $V .= _("No results.\n");
+      pg_free_result($result);
       return($V);
     }
 
@@ -74,24 +72,28 @@ class search_file_advance extends FO_Plugin
     {
       $SQL = preg_replace('/\*/','COUNT(*) AS count',$SQL,1);
       $SQL = preg_replace('/ ORDER BY .*;/',';',$SQL);
-      $Count = $DB->Action($SQL);
+      $CountR = pg_query($PG_CONN, $SQL);
+      DBCheckResult($CountR, $SQL, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($CountR);
+      pg_free_result($CountR);
       $text = _("Total matched:");
-      $V .= "$text " . number_format($Count[0]['count'],0,"",",") . "<br>\n";
+      $V .= "$text " . number_format($row['count'],0,"",",") . "<br>\n";
     }
 
-    $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
+    $V .= Dir2FileList($result,"browse","view",$Page*$Max + 1);
+    pg_free_result($result);
 
     /* put page menu at the bottom, too */
     if (!empty($VM)) { $V .= "<P />\n" . $VM; }
     return($V);
   }
 
-  /***********************************************************
-   GetUploadtreeFromName(): Given a filename, return all uploadtree.
-   ***********************************************************/
+  /**
+   * \brief Given a filename, return all uploadtree.
+   */
   function GetUploadtreeFromName($Filename,$tag,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax)
   {
-    global $DB;
+    global $PG_CONN;
     $Max = 50;
     $Filename = str_replace("'","''",$Filename); // protect DB
     $Terms = split("[[:space:]][[:space:]]*",$Filename);
@@ -135,10 +137,11 @@ class search_file_advance extends FO_Plugin
       $SQL = $TagSQL;
     }
 
-    $Results = $DB->Action($SQL);
+    $result = pg_query($PG_CONN, $SQL);
+    DBCheckResult($result, $SQL, __FILE__, __LINE__);
 
     $V = "";
-    $Count = count($Results);
+    $Count = pg_num_rows($result); 
     //$V .= "<pre>" . htmlentities($SQL) . "</pre>\n";
 
     if (($Page > 0) || ($Count >= $Max))
@@ -161,6 +164,7 @@ class search_file_advance extends FO_Plugin
     if ($Count == 0)
     {
       $V .= _("No results.\n");
+      pg_free_result($result);
       return($V);
     }
 
@@ -168,21 +172,25 @@ class search_file_advance extends FO_Plugin
     {
       $SQL = preg_replace('/\*/','COUNT(*) AS count',$SQL,1);
       $SQL = preg_replace('/ ORDER BY .*;/',';',$SQL);
-      $Count = $DB->Action($SQL);
+      $CountR = pg_query($PG_CONN, $SQL);
+      DBCheckResult($CountR, $SQL, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($CountR);
+      pg_free_result($CountR);
       $text = _("Total matched:");
-      $V .= "$text " . number_format($Count[0]['count'],0,"",",") . "<br>\n";
+      $V .= "$text " . number_format($row['count'],0,"",",") . "<br>\n";
     }
 
-    $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
+    $V .= Dir2FileList($result,"browse","view",$Page*$Max + 1);
+    pg_free_result($result);
 
     /* put page menu at the bottom, too */
     if (!empty($VM)) { $V .= "<P />\n" . $VM; }
     return($V);
   } // GetUploadtreeFromName()
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     $URI = $this->Name;
@@ -190,15 +198,15 @@ class search_file_advance extends FO_Plugin
     menu_insert("Search::Advanced",0,$URI,$text);
   } // RegisterMenus()
 
-  /***********************************************************
-   Output(): Display the loaded menu and plugins.
-   ***********************************************************/
+  /**
+   * \brief Display the loaded menu and plugins.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     global $Plugins;
-    global $DB;
+    global $PG_CONN;
     switch($this->OutputType)
     {
       case "XML":
@@ -249,22 +257,26 @@ class search_file_advance extends FO_Plugin
         }
         $V .= "</select>\n";
         $V .= "<select name='mimetype'>\n";
-        $Results = $DB->Action("SELECT * FROM mimetype ORDER BY mimetype_name;");
+        $sql = "SELECT * FROM mimetype ORDER BY mimetype_name;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
         $text = _("Select mimetype...");
         $V .= "<option value='-1'>$text</option>\n";
-        for($i=0; !empty($Results[$i]['mimetype_pk']); $i++)
+        while (($row = pg_fetch_assoc($result)) and !empty($row['mimetype_pk']))
         {
-          if ($Results[$i]['mimetype_pk'] == $Mimetype)
+          if ($row['mimetype_pk'] == $Mimetype)
           {
-            $V .= "<option value='" . $Results[$i]['mimetype_pk'] . "' selected>";
+            $V .= "<option value='" . $row['mimetype_pk'] . "' selected>";
           }
           else
           {
-            $V .= "<option value='" . $Results[$i]['mimetype_pk'] . "'>";
+            $V .= "<option value='" . $row['mimetype_pk'] . "'>";
           }
-          $V .= $Results[$i]['mimetype_name'];
+          $V .= $row['mimetype_name'];
           $V .= "</option>\n";
         }
+        pg_free_result($result);
+
         $V .= "</select>\n";
         $Value=$SizeMin; if ($Value < 0) { $Value=''; }
         $text = _("File size is");

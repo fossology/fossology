@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,15 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_user_add", _("Add A User"));
 
@@ -35,20 +26,22 @@ class user_add extends FO_Plugin {
   var $Dependency = array("db");
   var $DBaccess = PLUGIN_DB_USERADMIN;
 
-  /*********************************************
-   Add(): Add a user.
-   Returns NULL on success, string on failure.
-   *********************************************/
+  /**
+   * \brief Add a user.
+   * 
+   * \return NULL on success, string on failure.
+   */
   function Add() {
      
-    global $DB;
     global $PG_CONN;
 
     if (!$PG_CONN) {
-      $dbok = $DB->db_init();
-      if (!$dbok)
-      $text = _("NO DB connection!");
-      echo "<pre>$text\n</pre>";
+      DBconnect();
+      if (!$PG_CONN)
+      {
+        $text = _("NO DB connection!");
+        echo "<pre>$text\n</pre>";
+      }
     }
 
     /* Get the parameters */
@@ -103,9 +96,12 @@ class user_add extends FO_Plugin {
       return ($text);
     }
     /* See if the user already exists (better not!) */
-    $SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
-    $Results = $DB->Action($SQL);
-    if (!empty($Results[0]['user_name'])) {
+    $sql = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (!empty($row['user_name'])) {
       $text = _("User already exists.  Not added.");
       return ($text);
     }
@@ -127,8 +123,8 @@ class user_add extends FO_Plugin {
     }
     if($default_bucketpool_fk === NULL) {
       $VALUES = " VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
-	             '$Email_notify','$agentList',$Folder, NULL,
-	             '$uiChoice');";
+      '$Email_notify','$agentList',$Folder, NULL,
+      '$uiChoice');";
     }
     else {
       $VALUES = " VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
@@ -141,27 +137,31 @@ class user_add extends FO_Plugin {
        email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk,
        ui_preference)
        $VALUES";
-       //print "<pre>SQL is:\n$SQL\n</pre>";
+     //print "<pre>SQL is:\n$SQL\n</pre>";
 
-       $Results = pg_query($PG_CONN, $SQL);
-       DBCheckResult($Results, $SQL, __FILE__, __LINE__);
-       /* Make sure it was added */
-       $SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
-       $Results = $DB->Action($SQL);
-       if (empty($Results[0]['user_name'])) {
-         $text = _("Failed to insert user.");
-         return ($text);
-       }
-       return (NULL);
+     $result = pg_query($PG_CONN, $SQL);
+     DBCheckResult($result, $SQL, __FILE__, __LINE__);
+     pg_free_result($result);
+     /* Make sure it was added */
+     $SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
+     $result = pg_query($PG_CONN, $SQL);
+     DBCheckResult($result, $SQL, __FILE__, __LINE__);
+     $row = pg_fetch_assoc($result);
+     pg_free_result($result);
+     if (empty($row['user_name'])) {
+       $text = _("Failed to insert user.");
+       return ($text);
+     }
+     return (NULL);
   } // Add()
-  /*********************************************
-  Output(): Generate the text for this plugin.
-  *********************************************/
+
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    global $DB;
     $V = "";
     switch ($this->OutputType) {
       case "XML":

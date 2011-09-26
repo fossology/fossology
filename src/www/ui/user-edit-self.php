@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,16 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady))
-{
-  exit;
-}
 
 define("TITLE_user_edit_self", _("Edit Your Account Settings"));
 
@@ -37,13 +27,14 @@ class user_edit_self extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess = PLUGIN_DB_DOWNLOAD;
 
-  /***********************************************************
-   PostInitialize(): This function is called before the plugin
-   is used and after all plugins have been initialized.
-   Returns true on success, false on failure.
-   NOTE: Do not assume that the plugin exists!  Actually check it!
-   Purpose: Only allow people who are logged in to edit their own properties.
-   ***********************************************************/
+  /**
+   * \brief This function is called before the plugin
+   * is used and after all plugins have been initialized.
+   * 
+   * \return on success, false on failure.
+   * \note Do not assume that the plugin exists!  Actually check it!
+   * Purpose: Only allow people who are logged in to edit their own properties.
+   */
   function PostInitialize()
   {
     global $Plugins;
@@ -76,9 +67,10 @@ class user_edit_self extends FO_Plugin
     }
     return ($this->State == PLUGIN_STATE_READY);
   } // PostInitialize()
-  /***********************************************************
-  RegisterMenus(): Register additional menus.
-  ***********************************************************/
+
+  /**
+   * \brief Register additional menus.
+   */
   function RegisterMenus()
   {
     if ($this->State != PLUGIN_STATE_READY)
@@ -89,11 +81,12 @@ class user_edit_self extends FO_Plugin
   } // RegisterMenus()
 
   /**
-   Edit(): Alter a user.
-   Returns NULL on success, string on failure.
+   * \brief Alter a user.
+   * 
+   * \return NULL on success, string on failure.
    */
   function Edit() {
-    global $DB;
+    global $PG_CONN;
 
     /* Get the parameters */
     $UserId = @$_SESSION['UserId'];
@@ -134,17 +127,22 @@ class user_edit_self extends FO_Plugin
       return ($text);
     }
     /* See if the user already exists (better not!) */
-    $SQL = "SELECT * FROM users WHERE user_name = '$User' AND user_pk != '$UserId' LIMIT 1;";
-    $Results = $DB->Action($SQL);
-    if (!empty($Results[0]['user_name']))
+    $sql = "SELECT * FROM users WHERE user_name = '$User' AND user_pk != '$UserId' LIMIT 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (!empty($row['user_name']))
     {
       $text = _("User already exists.  Not added.");
       return ($text);
     }
     /* Load current user */
-    $SQL = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
-    $Results = $DB->Action($SQL);
-    $R = & $Results[0];
+    $sql = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $R = pg_fetch_assoc($result);
+    pg_free_result($result);
     /* Make sure old password matched */
     /* if login by siteminder, didn't check old password just get old password*/
     if (siteminder_check() == -1)
@@ -249,14 +247,16 @@ class user_edit_self extends FO_Plugin
     $SQL.= " WHERE user_pk = '$UserId';";
     if ($GotUpdate)
     {
-      $Results = $DB->Action($SQL);
+      $result = pg_query($PG_CONN, $SQL);
+      DBCheckResult($result, $SQL, __FILE__, __LINE__);
+      pg_free_result($result);
     }
     $_SESSION['timeout_check'] = 1; /* force a recheck */
     return (NULL);
   } // Edit()
 
   /**
-   Output(): Generate the text for this plugin.
+   * \brief Generate the text for this plugin.
    */
   function Output()
   {
@@ -264,7 +264,7 @@ class user_edit_self extends FO_Plugin
     {
       return;
     }
-    global $DB;
+    global $PG_CONN;
     $V = "";
     switch ($this->OutputType)
     {
@@ -289,8 +289,11 @@ class user_edit_self extends FO_Plugin
         }
 
         // Get the user data
-        $Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';");
-        $R = $Results[0];
+        $sql = "SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';"; 
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $R = pg_fetch_assoc($result);
+        pg_free_result($result);
 
         /* Build HTML form */
         $V.= "<form name='formy' method='POST'>\n"; // no url = this url

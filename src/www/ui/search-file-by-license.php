@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,21 +16,14 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
-/*************************************************
- This plugin is used to list all files associated
- with a specific license.
- This is NOT intended to be a user-UI plugin.
- This is intended as an active plugin to provide support
- data to the UI.
- *************************************************/
+/**
+ * \file search-file-by-license.php
+ * \brief This plugin is used to list all files associated
+ * with a specific license.
+ * This is NOT intended to be a user-UI plugin.
+ * This is intended as an active plugin to provide support
+ * data to the UI.
+ */
 
 define("TITLE_search_file_by_license", _("List Files based on License"));
 
@@ -43,15 +36,14 @@ class search_file_by_license extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
 
-  /***********************************************************
-   Output(): Display the loaded menu and plugins.
-   ***********************************************************/
+  /**
+   * \brief Display the loaded menu and plugins.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     global $Plugins;
-    global $DB;
     $Time = time();
     $Max = 50;
 

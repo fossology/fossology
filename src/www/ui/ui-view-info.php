@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_ui_view_info", _("View File Information"));
 
 class ui_view_info extends FO_Plugin
@@ -35,9 +27,9 @@ class ui_view_info extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     $text = _("View file information");
@@ -60,12 +52,12 @@ class ui_view_info extends FO_Plugin
     }
   } // RegisterMenus()
 
-  /***********************************************************
-   ShowView(): Display the info data associated with the file.
-   ***********************************************************/
+  /**
+   * \brief Display the info data associated with the file.
+   */
   function ShowView($ShowMenu=0,$ShowHeader=0)
   {
-    global $DB;
+    global $PG_CONN;
     $V = "";
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
@@ -92,12 +84,14 @@ class ui_view_info extends FO_Plugin
     {
       $text = _("Repository Locator");
       $V .= "<H2>$text</H2>\n";
-      $SQL = "SELECT * FROM uploadtree
-	INNER JOIN pfile ON uploadtree_pk = $Item
-	AND pfile_fk = pfile_pk
-	LIMIT 1;";
-      $Results = $DB->Action($SQL);
-      $R = &$Results[0];
+      $sql = "SELECT * FROM uploadtree
+        INNER JOIN pfile ON uploadtree_pk = $Item
+        AND pfile_fk = pfile_pk
+        LIMIT 1;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $R = pg_fetch_assoc($result);
+      pg_free_result($result);
       $V .= "<table border=1>\n";
       $text = _("Attribute");
       $text1 = _("Value");
@@ -122,12 +116,12 @@ class ui_view_info extends FO_Plugin
     return($V);
   } // ShowView()
 
-  /***********************************************************
-   Show Sightings, List the directory locations where this pfile is found
-   ***********************************************************/
+  /**
+   * \brief Show Sightings, List the directory locations where this pfile is found
+   */
   function ShowSightings()
   {
-    global $DB;
+    global $PG_CONN;
     $V = "";
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
@@ -144,13 +138,14 @@ class ui_view_info extends FO_Plugin
      **********************************/
     $text = _("Sightings");
     $V .= "<H2>$text</H2>\n";
-    $SQL = "SELECT * FROM pfile,uploadtree
+    $sql = "SELECT * FROM pfile,uploadtree
         WHERE pfile_pk=pfile_fk
         AND pfile_pk IN
         (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $Item)
         LIMIT $Max OFFSET $Offset";
-    $Results = $DB->Action($SQL);
-    $Count = count($Results);
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $Count = pg_num_rows($result);
     if (($Page > 0) || ($Count >= $Max))
     {
       $VM = "<P />\n" . MenuEndlessPage($Page, ($Count >= $Max)) . "<P />\n";
@@ -161,7 +156,7 @@ class ui_view_info extends FO_Plugin
       $V .= _("This exact file appears in the following locations:\n");
       $V .= $VM;
       $Offset++;
-      $V .= Dir2FileList($Results,"browse","view",$Offset);
+      $V .= Dir2FileList($result,"browse","view",$Offset);
       $V .= $VM;
     }
     else if ($Page > 0)
@@ -172,15 +167,16 @@ class ui_view_info extends FO_Plugin
     {
       $V .= _("This file does not appear in any other known location.\n");
     }
+    pg_free_result($result);
     return($V);
   }//ShowSightings()
 
-  /***********************************************************
-   ShowMetaView(): Display the meta data associated with the file.
-   ***********************************************************/
+  /**
+   * \brief Display the meta data associated with the file.
+   */
   function ShowMetaView()
   {
-    global $DB;
+    global $PG_CONN;
     $V = "";
     $Upload = GetParm("upload",PARM_INTEGER);
     $Folder = GetParm("folder",PARM_INTEGER);
@@ -192,12 +188,13 @@ class ui_view_info extends FO_Plugin
      Display meta data
      **********************************/
 
-    $SQL = "SELECT *
+    $sql = "SELECT *
         FROM uploadtree
         INNER JOIN pfile ON uploadtree_pk = $Item
         AND pfile_fk = pfile_pk
         INNER JOIN mimetype ON pfile_mimetypefk = mimetype_pk;";
-    $Results = $DB->Action($SQL);
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
     $Count=1;
 
     $text = _("Meta Data");
@@ -207,59 +204,28 @@ class ui_view_info extends FO_Plugin
     $text1 = _("Meta Data");
     $text2 = _("Value");
     $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
-    foreach($Results as $R)
-    for($i=0; !empty($Results[$i]['mimetype_pk']); $i++)
+    while ($row = pg_fetch_assoc($result) and !empty($row['mimetype_pk']))
     {
-      $R = &$Results[$i];
       $V .= "<tr><td align='right'>$Count</td><td>Unpacked file type";
-      $V .= "</td><td>" . htmlentities($R['mimetype_name']) . "</td></tr>\n";
+      $V .= "</td><td>" . htmlentities($row['mimetype_name']) . "</td></tr>\n";
       $Count++;
     }
+    pg_free_result($result);
+
     $V .= "</table>\n";
-    /*  Display meta-data get from  pkgmetagetta agent disabled by vincent*/
-    /*
-     $text = _("Meta Data From PkgMetaGetta Agent");
-     $V .= "<H4>$text</H4>\n";
-     $V .= "<table border='1'>\n";
-     $text = _("Item");
-     $text1 = _("Meta Data");
-     $text2 = _("Value");
-     $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
-     $SQL = "SELECT DISTINCT key_name,attrib_value FROM attrib
-     INNER JOIN key ON key_pk = attrib_key_fk
-     AND key_parent_fk IN
-     (SELECT key_pk FROM key WHERE key_parent_fk=0 AND
-     (key_name = 'pkgmeta') )
-     INNER JOIN uploadtree ON uploadtree_pk = $Item
-     AND uploadtree.pfile_fk = attrib.pfile_fk
-     AND key_name != 'Processed' ORDER BY key_name;";
-     $Results = $DB->Action($SQL);
-
-     for($i=0; !empty($Results[$i]['key_name']); $i++)
-     {
-     $R = &$Results[$i];
-     $V .= "<tr><td align='right'>$Count</td><td>" . htmlentities($R['key_name']);
-     $Val = htmlentities($R['attrib_value']);
-     $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
-     $V .= "</td><td>$Val</td></tr>\n";
-     $Count++;
-     }
-
-     $V .= "</table>\n";
-     */
     $Count--;
     $text = _("Total meta data records");
     $V .= "<P />$text: " . number_format($Count,0,"",",") . "<br />\n";
     return($V);
   } // ShowMetaView()
 
-  /***********************************************************
-   ShowPackageInfo(): Display the package info associated with
-   the rpm/debian package.
-   ***********************************************************/
+  /**
+   * \brief Display the package info associated with
+   * the rpm/debian package.
+   */
   function ShowPackageInfo($ShowMenu=0,$ShowHeader=0)
   {
-    global $DB;
+    global $PG_CONN;
     $V = "";
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
@@ -281,9 +247,12 @@ class ui_view_info extends FO_Plugin
     /**********************************
      Check if pkgagent disabled
      ***********************************/
-    $SQL = "SELECT agent_enabled FROM agent WHERE agent_name ='pkgagent' order by agent_ts LIMIT 1;";
-    $Results = $DB->Action($SQL);
-    if (isset($Results[0]) && ($Results[0]['agent_enabled']== 'f')){return;}
+    $sql = "SELECT agent_enabled FROM agent WHERE agent_name ='pkgagent' order by agent_ts LIMIT 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (isset($row) && ($row['agent_enabled']== 'f')){return;}
 
     /**********************************
      Display package info
@@ -291,30 +260,34 @@ class ui_view_info extends FO_Plugin
     $text = _("Package Info");
     $V .= "<H2>$text</H2>\n";
 
-    $SQL = "SELECT mimetype_name
+    $sql = "SELECT mimetype_name
         FROM uploadtree
         INNER JOIN pfile ON uploadtree_pk = $Item
         AND pfile_fk = pfile_pk
         INNER JOIN mimetype ON pfile_mimetypefk = mimetype_pk;";
-    $Results = $DB->Action($SQL);
-    foreach($Results as $R)
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    while ($row = pg_fetch_assoc($result))
     {
-      if (!empty($R['mimetype_name']))
+      if (!empty($row['mimetype_name']))
       {
-        $MIMETYPE = $R['mimetype_name'];
+        $MIMETYPE = $row['mimetype_name'];
       }
     }
+    pg_free_result($result);
+
     /** RPM Package Info **/
     if ($MIMETYPE == "application/x-rpm")
     {
-      $SQL = "SELECT *
+      $sql = "SELECT *
                 FROM pkg_rpm
                 INNER JOIN uploadtree ON uploadtree_pk = $Item
                 AND uploadtree.pfile_fk = pkg_rpm.pfile_fk;";
-      $Results = $DB->Action($SQL);
-      foreach($Results as $R)
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      while ($row = pg_fetch_assoc($result))
       {
-        if((!empty($R['source_rpm']))and(trim($R['source_rpm']) != "(none)"))
+        if((!empty($row['source_rpm']))and(trim($row['source_rpm']) != "(none)"))
         {
           $V .= _("RPM Binary Package");
         }
@@ -331,9 +304,8 @@ class ui_view_info extends FO_Plugin
       $text2 = _("Value");
       $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
 
-      for($i=0; !empty($Results[$i]['pkg_pk']); $i++)
+      while ($R = pg_fetch_assoc($result) and !empty($R['pkg_pk']))
       {
-        $R = &$Results[$i];
         $Require = $R['pkg_pk'];
 
         $text = _("Package");
@@ -395,13 +367,14 @@ class ui_view_info extends FO_Plugin
         $V .= "</td><td>" . htmlentities($R['source_rpm']) . "</td></tr>\n";
         $Count++;
       }
+      pg_free_result($result);
 
-      $SQL = "SELECT * FROM pkg_rpm_req WHERE pkg_fk = $Require;";
-      $Results = $DB->Action($SQL);
+      $sql = "SELECT * FROM pkg_rpm_req WHERE pkg_fk = $Require;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-      for($i=0; !empty($Results[$i]['req_pk']); $i++)
+      while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
       {
-        $R = &$Results[$i];
         $text = _("Requires");
         $V .= "<tr><td align='right'>$Count</td><td>$text";
         $Val = htmlentities($R['req_value']);
@@ -409,6 +382,7 @@ class ui_view_info extends FO_Plugin
         $V .= "</td><td>$Val</td></tr>\n";
         $Count++;
       }
+      pg_free_result($result);
 
       $V .= "</table>\n";
       $Count--;
@@ -418,11 +392,12 @@ class ui_view_info extends FO_Plugin
     {
       $V .= _("Debian Binary Package\n");
 
-      $SQL = "SELECT *
+      $sql = "SELECT *
                 FROM pkg_deb
                 INNER JOIN uploadtree ON uploadtree_pk = $Item
                 AND uploadtree.pfile_fk = pkg_deb.pfile_fk;";
-      $Results = $DB->Action($SQL);
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
       $Count=1;
 
       $V .= "<table border='1'>\n";
@@ -431,9 +406,8 @@ class ui_view_info extends FO_Plugin
       $text2 = _("Value");
       $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
 
-      for($i=0; !empty($Results[$i]['pkg_pk']); $i++)
+      while ($R = pg_fetch_assoc($result) and !empty($R['pkg_pk']))
       {
-        $R = &$Results[$i];
         $Require = $R['pkg_pk'];
 
         $text = _("Package");
@@ -483,13 +457,14 @@ class ui_view_info extends FO_Plugin
         $Count++;
 
       }
+      pg_free_result($result);
 
-      $SQL = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
-      $Results = $DB->Action($SQL);
+      $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-      for($i=0; !empty($Results[$i]['req_pk']); $i++)
+      while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
       {
-        $R = &$Results[$i];
         $text = _("Depends");
         $V .= "<tr><td align='right'>$Count</td><td>$text";
         $Val = htmlentities($R['req_value']);
@@ -497,6 +472,7 @@ class ui_view_info extends FO_Plugin
         $V .= "</td><td>$Val</td></tr>\n";
         $Count++;
       }
+      pg_free_result($result);
 
       $V .= "</table>\n";
       $Count--;
@@ -506,11 +482,12 @@ class ui_view_info extends FO_Plugin
     {
       $V .= _("Debian Source Package\n");
 
-      $SQL = "SELECT *
+      $sql = "SELECT *
                 FROM pkg_deb
                 INNER JOIN uploadtree ON uploadtree_pk = $Item
                 AND uploadtree.pfile_fk = pkg_deb.pfile_fk;";
-      $Results = $DB->Action($SQL);
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
       $Count=1;
 
       $V .= "<table border='1'>\n";
@@ -519,9 +496,8 @@ class ui_view_info extends FO_Plugin
       $text2 = _("Value");
       $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
 
-      for($i=0; !empty($Results[$i]['pkg_pk']); $i++)
+      while ($R = pg_fetch_assoc($result) and !empty($R['pkg_pk']))
       {
-        $R = &$Results[$i];
         $Require = $R['pkg_pk'];
 
         $text = _("Format");
@@ -558,13 +534,14 @@ class ui_view_info extends FO_Plugin
         $V .= "</td><td>" . htmlentities($R['standards_version']) . "</td></tr>\n";
         $Count++;
       }
+      pg_free_result($result);
 
-      $SQL = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
-      $Results = $DB->Action($SQL);
+      $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-      for($i=0; !empty($Results[$i]['req_pk']); $i++)
+      while ($R = pg_fetch_assoc($result) and !empty($R['rep_pk']))
       {
-        $R = &$Results[$i];
         $text = _("Build-Depends");
         $V .= "<tr><td align='right'>$Count</td><td>$text";
         $Val = htmlentities($R['req_value']);
@@ -572,6 +549,7 @@ class ui_view_info extends FO_Plugin
         $V .= "</td><td>$Val</td></tr>\n";
         $Count++;
       }
+      pg_free_result($result);
 
       $V .= "</table>\n";
       $Count--;
@@ -587,12 +565,11 @@ class ui_view_info extends FO_Plugin
   } // ShowPackageInfo()
 
 
-  /***********************************************************
-   ShowTagInfo(): Display the tag info data associated with the file.
-   ***********************************************************/
+  /**
+   * \brief Display the tag info data associated with the file.
+   */
   function ShowTagInfo()
   {
-    global $DB;
     $VT = "";
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
@@ -611,6 +588,7 @@ class ui_view_info extends FO_Plugin
       $text = _("Invalid URL, nonexistant item");
       return "<h2>$text $Uploadtree_pk</h2>";
     }
+
     $row = pg_fetch_assoc($result);
     $lft = $row["lft"];
     $rgt = $row["rgt"];
@@ -644,16 +622,16 @@ class ui_view_info extends FO_Plugin
     return $VT;
   }
 
-  /***********************************************************
-   Output(): This function is called when user output is
-   requested.  This function is responsible for content.
-   (OutputOpen and Output are separated so one plugin
-   can call another plugin's Output.)
-   This uses $OutputType.
-   The $ToStdout flag is "1" if output should go to stdout, and
-   0 if it should be returned as a string.  (Strings may be parsed
-   and used by other plugins.)
-   ***********************************************************/
+  /**
+   * \brief This function is called when user output is
+   * requested.  This function is responsible for content.
+   * (OutputOpen and Output are separated so one plugin
+   * can call another plugin's Output.)
+   * This uses $OutputType.
+   * The $ToStdout flag is "1" if output should go to stdout, and
+   * 0 if it should be returned as a string.  (Strings may be parsed
+   * and used by other plugins.)
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }

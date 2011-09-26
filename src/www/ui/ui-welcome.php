@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_ui_welcome", _("Getting Started with FOSSology"));
 
 class ui_welcome extends FO_Plugin
@@ -35,6 +27,9 @@ class ui_welcome extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_NONE;
   var $LoginFlag  = 0;
 
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output()
   {
     $SiteURI = Traceback_uri();

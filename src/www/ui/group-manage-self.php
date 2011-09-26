@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,15 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_group_manage_self", _("Manage Own Group"));
 
@@ -38,12 +29,11 @@ class group_manage_self extends FO_Plugin {
 
   function PostInitialize()
   {
-    global $DB;
+    global $PG_CONN;
     //$UserId = $_SESSION['UserId'];
     global $Plugins;
 
-    //if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
-    if (empty($DB)) { return(1); } /* No DB */
+    if (empty($PG_CONN)) { return(1); } /* No DB */
 
     if ($this->State != PLUGIN_STATE_VALID) {
       return(0);
@@ -63,10 +53,13 @@ class group_manage_self extends FO_Plugin {
     if (!empty($_SESSION['UserId'])){
       $UserId = $_SESSION['UserId'];
       $sql = "SELECT * FROM group_user_member WHERE user_fk = $UserId and group_perm=1;";
-      $result = $DB->Action($sql);
-      if (empty($result) || count($result) < 1){
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (empty($result) || pg_num_rows($result) < 1){
+        pg_free_result($result);
         return(0);
       }
+      pg_free_result($result);
     }
 
     $this->State = PLUGIN_STATE_READY;
@@ -77,9 +70,9 @@ class group_manage_self extends FO_Plugin {
     return($this->State == PLUGIN_STATE_READY);
   }
 
-  /***********************************************************
-   ShowExistOwnGroups(): Show all groups owned by $UserId
-   ***********************************************************/
+  /**
+   * \brief Show all groups owned by $UserId
+   */
   function ShowExistOwnGroups($UserId)
   {
     global $PG_CONN;
@@ -119,9 +112,9 @@ class group_manage_self extends FO_Plugin {
     return ($V);
   }
 
-  /*********************************************
-   EditGroupNamePage(): Edit group name.
-   *********************************************/
+  /**
+   * \brief Edit group name.
+   */
   function EditGroupNamePage()
   {
     $group_pk = GetParm('group_pk', PARM_INTEGER);
@@ -139,9 +132,9 @@ class group_manage_self extends FO_Plugin {
     return ($VE);
   }
 
-  /*********************************************
-   EditGroupName(): Edit group name.
-   *********************************************/
+  /**
+   * \brief Edit group name.
+   */
   function EditGroupName()
   {
     global $PG_CONN;
@@ -155,9 +148,9 @@ class group_manage_self extends FO_Plugin {
     return (NULL);
   }
 
-  /*********************************************
-   AddUserPage(): add user to this group.
-   *********************************************/
+  /**
+   * \brief add user to this group.
+   */
   function AddUserPage()
   {
     global $PG_CONN;
@@ -193,9 +186,9 @@ class group_manage_self extends FO_Plugin {
     return ($VA);
   }
 
-  /*********************************************
-   AddUser(): add user to this group.
-   *********************************************/
+  /**
+   * \brief add user to this group.
+   */
   function AddUser()
   {
     global $PG_CONN;
@@ -221,9 +214,9 @@ class group_manage_self extends FO_Plugin {
     return (NULL);
   }
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-   *********************************************/
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;

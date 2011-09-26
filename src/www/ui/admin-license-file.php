@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_admin_license_file", _("License Administration"));
 
 class admin_license_file extends FO_Plugin
@@ -35,9 +27,9 @@ class admin_license_file extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
@@ -52,11 +44,11 @@ class admin_license_file extends FO_Plugin
   }
 
 
-  /************************************************
-   Inputfm(): Build the input form
-
-   Return: The input form as a string
-   ************************************************/
+  /**
+   * \brief Build the input form
+   *
+   * \return The input form as a string
+   */
   function Inputfm()
   {
     $V = "";
@@ -99,14 +91,14 @@ class admin_license_file extends FO_Plugin
   }
 
 
-  /************************************************
-   LicenseList(): Build the input form
-
-   Parms:
-   $namestr license family name
-   $filter  marydone value requested
-   Return: The input form as a string
-   ************************************************/
+  /**
+   * \brief Build the input form
+   * 
+   * \param $namestr - license family name
+   * \param $filter - marydone value requested
+   *
+   * \return The input form as a string
+   */
   function LicenseList($namestr, $filter)
   {
     global $PG_CONN;
@@ -142,6 +134,7 @@ class admin_license_file extends FO_Plugin
       $text1 = _("and name pattern");
       $text2 = _("were found");
       $ob .= "<br>$text ($filter) $text1 ($namestr) $text2.<br>";
+      pg_free_result($result);
       return $ob;
     }
 
@@ -197,19 +190,19 @@ class admin_license_file extends FO_Plugin
       $ob .= "<td>$row[rf_url]</td>";
       $ob .= "</tr>";
     }
+    pg_free_result($result);
     $ob .= "</table>";
     return $ob;
   }
 
 
-  /************************************************
-   Updatefm(): Update forms
-
-   Params:
-   $rf_pk for the license to update, empty to add
-
-   Return: The input form as a string
-   ************************************************/
+  /**
+   * \brief Update forms
+   *
+   * \param $rf_pk - for the license to update, empty to add
+   *
+   * \return The input form as a string
+   */
   function Updatefm($rf_pk)
   {
     global $PG_CONN;
@@ -234,6 +227,7 @@ class admin_license_file extends FO_Plugin
         $text = _("No licenses matching this key");
         $text1 = _("was found");
         $ob .= "<br>$text ($rf_pk) $text1.<br>";
+        pg_free_result($result);
         return $ob;
       }
       $ob .= "<input type=hidden name=updateit value=true>";
@@ -244,7 +238,7 @@ class admin_license_file extends FO_Plugin
       $ob .= "<input type=hidden name=addit value=true>";
       $row = array();
     }
-
+    pg_free_result($result);
 
     $ob .= "<tr>";
     $active = ($row['rf_active'] == 't') ? "Yes" : "No";
@@ -336,11 +330,11 @@ class admin_license_file extends FO_Plugin
   }
 
 
-  /************************************************
-   Updatedb(): Update the database
-
-   Return: An update status string
-   ************************************************/
+  /**
+   * \brief Update the database
+   *
+   * \return An update status string
+   */
   function Updatedb()
   {
     global $PG_CONN;
@@ -364,17 +358,18 @@ class admin_license_file extends FO_Plugin
             WHERE rf_pk='$_POST[rf_pk]'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
 
     $ob = "License $_POST[rf_shortname] updated.<p>";
     return $ob;
   }
 
 
-  /************************************************
-   Adddb(): Add a new license_ref to the database
-
-   Return: An add status string
-   ************************************************/
+  /**
+   * \brief Add a new license_ref to the database
+   *
+   * \return An add status string
+   */
   function Adddb()
   {
     global $PG_CONN;
@@ -399,6 +394,7 @@ class admin_license_file extends FO_Plugin
                  '$_POST[rf_detector_type]')";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
 
     $ob = "License $_POST[rf_shortname] added.<p>";
     return $ob;
@@ -423,16 +419,20 @@ class admin_license_file extends FO_Plugin
    */
 
 
-  /************************************************
-   Output(): Generate output.
-   ************************************************/
+  /**
+   * \brief Generate output.
+   */
   function Output()
   {
-    global $DB, $PG_CONN;
+    global $PG_CONN;
     global $Plugins;
 
     // make sure there is a db connection since I've pierced the core-db abstraction
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    if (!$PG_CONN) 
+    { 
+      DBconnect(); 
+      if (!$PG_CONN) echo "NO DB connection"; 
+    }
 
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
@@ -498,13 +498,15 @@ class admin_license_file extends FO_Plugin
   } // Output()
 
 
-  /************************************************
-   FamilyNames()
-   Return an array of family names based on the
-   license_ref.shortname.
-   A family name is the name before most punctuation.
-   For example, the family name of "GPL V2" is "GPL"
-   ************************************************/
+  /**
+   * \brief get an array of family names based on the
+   *
+   * \return an array of family names based on the
+   * license_ref.shortname.
+   * A family name is the name before most punctuation.
+   * 
+   * \example the family name of "GPL V2" is "GPL"
+   */
   function FamilyNames()
   {
     $familynamearray = array();

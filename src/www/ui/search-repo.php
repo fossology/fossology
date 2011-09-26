@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_search_repo", _("Search the Repository"));
 
 class search_repo extends FO_Plugin
@@ -35,30 +27,30 @@ class search_repo extends FO_Plugin
   var $Dependency = array("db","view","browse");
   var $DBaccess   = PLUGIN_DB_READ;
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     $text = _("Search based on repository keys");
     menu_insert("Search::Repository",0,$this->Name,$text);
   } // RegisterMenus()
 
-  /***********************************************************
-   GetUploadtreeFromPfile(): Given a pfile_pk, return all uploadtree.
-   ***********************************************************/
+  /**
+   * \brief Given a pfile_pk, return all uploadtree.
+   */
   function GetUploadtreeFromPfile($Pfilepk,$Page)
   {
-    global $DB;
+    global $PG_CONN;
     $Max = 50;
     $Offset = $Max * $Page;
-    $SQL = "SELECT * FROM pfile
-	INNER JOIN uploadtree ON pfile_pk = '$Pfilepk'
-	AND pfile_fk = pfile_pk
-	ORDER BY pfile_fk,ufile_name LIMIT $Max OFFSET $Offset
-	;";
-    $Results = $DB->Action($SQL);
-    $Count = count($Results);
+    $sql = "SELECT * FROM pfile
+      INNER JOIN uploadtree ON pfile_pk = '$Pfilepk'
+      AND pfile_fk = pfile_pk
+      ORDER BY pfile_fk,ufile_name LIMIT $Max OFFSET $Offset;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $Count = pg_num_rows($result);
     $V = "";
     if (($Page > 0) || ($Count >= $Max))
     {
@@ -71,14 +63,15 @@ class search_repo extends FO_Plugin
     {
       $VM = "";
     }
-    $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
+    $V .= Dir2FileList($result,"browse","view",$Page*$Max + 1);
+    pg_free_result($result);
     if (!empty($VM)) { $V .= "<P />\n" . $VM; }
     return($V);
   } // GetUploadtreeFromPfile()
 
-  /***********************************************************
-   GetUploadtreeFromRepo(): Given a sha1.md5.len, return all uploadtree.
-   ***********************************************************/
+  /**
+   * \brief Given a sha1.md5.len, return all uploadtree.
+   */
   function GetUploadtreeFromRepo($Repo,$Page)
   {
     /* Split repo into Sha1, Md5, and Len */
@@ -92,22 +85,26 @@ class search_repo extends FO_Plugin
     if (strlen($Len) < 1) { return; }
 
     /* Get the pfile */
-    global $DB;
-    $SQL = "SELECT pfile_pk FROM pfile
-	WHERE pfile_sha1 = '$Sha1'
-	AND pfile_md5 = '$Md5'
-	AND pfile_size = '$Len';";
-    $Results = $DB->Action($SQL);
-    if (empty($Results[0]['pfile_pk'])) { return; }
-    return($this->GetUploadtreeFromPfile($Results[0]['pfile_pk'],$Page));
+    global $PG_CONN;
+    $sql = "SELECT pfile_pk FROM pfile
+      WHERE pfile_sha1 = '$Sha1'
+      AND pfile_md5 = '$Md5'
+      AND pfile_size = '$Len';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (empty($row['pfile_pk'])) { return; }
+    return($this->GetUploadtreeFromPfile($row['pfile_pk'],$Page));
   } // GetUploadtreeFromRepo()
 
-  /***********************************************************
-   Search(): Given a string to search for, search for it!
-   This identifies whether the string is a pfile_pk or sha1.md5.len.
-   Returns all uploadtree, or null if none found.
-   ***********************************************************/
-  function Search	($String,$Page=0)
+  /**
+   * \brief Given a string to search for, search for it!
+   * This identifies whether the string is a pfile_pk or sha1.md5.len.
+   *
+   * \return all uploadtree, or null if none found.
+   */
+  function Search($String,$Page=0)
   {
     if (preg_match("/^[0-9]+$/",$String) > 0)
     {
@@ -121,9 +118,9 @@ class search_repo extends FO_Plugin
     return($V);
   } // Search()
 
-  /***********************************************************
-   Output(): Display the loaded menu and plugins.
-   ***********************************************************/
+  /**
+   * \brief Display the loaded menu and plugins.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }

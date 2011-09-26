@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,15 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_core_auth", _("Login"));
 
@@ -36,39 +27,52 @@ class core_auth extends FO_Plugin {
   var $LoginFlag = 0;
   public static $origReferer;
 
-  /*
-   * getter to retreive value of static var
+  /**
+   * \brief getter to retreive value of static var
    */
   public function staticValue()
   {
     return self::$origReferer;
   }
 
-  /***********************************************************
-   Install(): Only used during installation.
-   This may be called multiple times.
-   Used to ensure the DB has the right default columns.
-   Returns 0 on success, non-zero on failure.
-   ***********************************************************/
+  /**
+   * \brief Only used during installation.
+   * This may be called multiple times.
+   * Used to ensure the DB has the right default columns.
+   * 
+   * \return 0 on success, non-zero on failure.
+   */
   function Install() {
-    global $DB;
-    if (empty($DB)) {
+    global $PG_CONN;
+    if (empty($PG_CONN)) {
       return (1);
     } /* No DB */
     /* No users with no seed and no pass */
-    $DB->Action("UPDATE users SET user_seed = " . rand() . " WHERE user_seed IS NULL;");
+    $sql = "UPDATE users SET user_seed = " . rand() . " WHERE user_seed IS NULL;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
     /* No users with no seed and no perm -- make them read-only */
-    $DB->Action("UPDATE users SET user_perm = " . PLUGIN_DB_READ . " WHERE user_perm IS NULL;");
+    $sql = "UPDATE users SET user_perm = " . PLUGIN_DB_READ . " WHERE user_perm IS NULL;"; 
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
 
     /* There must always be at least one default user. */
-    $Results = $DB->Action("SELECT * FROM users WHERE user_name = 'Default User';");
-    if (empty($Results[0]['user_name'])) {
+    $sql = "SELECT * FROM users WHERE user_name = 'Default User';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (empty($row['user_name'])) {
       /* User "fossy" does not exist.  Create it. */
       /* No valid username/password */
       $Level = PLUGIN_DB_NONE;
-      $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
-	VALUES ('Default User','Default User when nobody is logged in','Seed','Pass',$Level,NULL,1);";
-      $DB->Action($SQL);
+      $sql = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
+        VALUES ('Default User','Default User when nobody is logged in','Seed','Pass',$Level,NULL,1);";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
       $text = _("*** Created default user: 'Default User'.");
       print "$text\n";
     }
@@ -76,17 +80,25 @@ class core_auth extends FO_Plugin {
      If he does not exist, make it user "fossy".
      If user "fossy" does not exist, add him with the default password 'fossy'. */
     $Perm = PLUGIN_DB_USERADMIN;
-    $Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Perm;");
-    if (empty($Results[0]['user_name'])) {
+    $sql = "SELECT * FROM users WHERE user_perm = $Perm;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (empty($row['user_name'])) {
       /* No user with PLUGIN_DB_USERADMIN access. */
       $Seed = rand() . rand();
       $Hash = sha1($Seed . "fossy");
-      $Results = $DB->Action("SELECT * FROM users WHERE user_name = 'fossy';");
-      if (empty($Results[0]['user_name'])) {
+      $sql = "SELECT * FROM users WHERE user_name = 'fossy';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row0 = pg_fetch_assoc($result);
+      pg_free_result($result);
+      if (empty($row0['user_name'])) {
         /* User "fossy" does not exist.  Create it. */
         $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass," .
                "user_perm,user_email,email_notify,root_folder_fk)
-		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,'fossy','y',1);";
+      VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,'fossy','y',1);";
         $text = _("*** Created default administrator: 'fossy' with password 'fossy'.");
         print "$text\n";
       }
@@ -97,21 +109,28 @@ class core_auth extends FO_Plugin {
         $text = _("*** Existing user 'fossy' promoted to default administrator.");
         print "$text\n";
       }
-      $DB->Action($SQL);
-      $Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Perm;");
+      $result = pg_query($PG_CONN, $SQL);
+      DBCheckResult($result, $SQL, __FILE__, __LINE__);
+      pg_free_result($result);
+
+      $sql = "SELECT * FROM users WHERE user_perm = $Perm;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      pg_free_result($result);
     }
-    if (empty($Results[0]['user_name'])) {
+    if (empty($row[0]['user_name'])) {
       return (1);
     } /* Failed to insert */
     return (0);
   } // Install()
 
-  /******************************************
-   GetIP(): Retrieve the user's IP address.
-   Some proxy systems pass forwarded IP address info.
-   This ensures that someone who steals the cookie won't
-   gain access unless they come from the same IP.
-   ******************************************/
+  /**
+   * \brief Retrieve the user's IP address.
+   * Some proxy systems pass forwarded IP address info.
+   * This ensures that someone who steals the cookie won't
+   * gain access unless they come from the same IP.
+   */
   function GetIP() {
     /* NOTE: This can be easily defeated wtih fake HTTP headers. */
     $Vars = array('HTTP_CLIENT_IP', 'HTTP_X_COMING_FROM', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED');
@@ -123,14 +142,14 @@ class core_auth extends FO_Plugin {
     return (@$_SERVER['REMOTE_ADDR']);
   } // GetIP()
 
-  /******************************************
-   PostInitialize(): This is where the magic for
-   Authentication happens.
-   ******************************************/
+  /**
+   * \brief This is where the magic for
+   * Authentication happens.
+   */
   function PostInitialize() {
     global $Plugins;
-    global $DB;
-    if (empty($DB)) {
+    global $PG_CONN;
+    if (empty($PG_CONN)) {
       return (0);
     }
 
@@ -180,8 +199,11 @@ class core_auth extends FO_Plugin {
         $_SESSION['time_check'] = time() + (480 * 60);
       }
       if (time() >= @$_SESSION['time_check']) {
-        $Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';");
-        $R = $Results[0];
+        $sql = "SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $R = pg_fetch_assoc($result);
+        pg_free_result($result);
         $_SESSION['User'] = $R['user_name'];
         $_SESSION['Folder'] = $R['root_folder_fk'];
         $_SESSION['UserLevel'] = $R['user_perm'];
@@ -203,12 +225,16 @@ class core_auth extends FO_Plugin {
           $_SESSION['UserLevel'] = NULL;
           $_SESSION['UserEmail'] = NULL;
           $_SESSION['Folder'] = NULL;
-          $Results = $DB->Action("SELECT * FROM users WHERE user_name='Default User';");
-          if (empty($Results)) {
+          $sql = "SELECT * FROM users WHERE user_name='Default User';";
+          $result = pg_query($PG_CONN, $sql);
+          DBCheckResult($result, $sql, __FILE__, __LINE__);
+          $row = pg_fetch_assoc($result);
+          pg_free_result($result);
+          if (empty($result)) {
             $Level = PLUGIN_DB_NONE;
           } else {
-            $Level = $Results[0]['user_perm'];
-            $R = $Results[0];
+            $Level = $row['user_perm'];
+            $R = $row;
             $_SESSION['UserId'] = $R['user_pk'];
             $_SESSION['Folder'] = $R['root_folder_fk'];
             $_SESSION['UserLevel'] = $R['user_perm'];
@@ -227,11 +253,15 @@ class core_auth extends FO_Plugin {
       }
     } else {
       /* Default to permissions for "Default User" */
-      $Results = $DB->Action("SELECT * FROM users WHERE user_name='Default User';");
-      if (empty($Results)) {
+      $sql = "SELECT * FROM users WHERE user_name='Default User';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      pg_free_result($result);
+      if (empty($result)) {
         $Level = PLUGIN_DB_NONE;
       } else {
-        $R = $Results[0];
+        $R = $row;
         $Level = $R['user_perm'];
         $_SESSION['UserId'] = $R['user_pk'];
         $_SESSION['Folder'] = $R['root_folder_fk'];
@@ -254,14 +284,13 @@ class core_auth extends FO_Plugin {
     $this->State = PLUGIN_STATE_READY;
   } // PostInitialize()
 
-  /******************************************
-   CheckUser(): See if a username/password is valid.
-   Returns string on match, or null on no-match.
-   ******************************************/
+  /**
+   * \brief See if a username/password is valid.
+   * 
+   * \return string on match, or null on no-match.
+   */
   function CheckUser($User, $Pass, $Referer) {
-
-    global $DB;
-
+    global $PG_CONN; 
     $V = "";
     if (empty($User)) {
       return;
@@ -272,8 +301,11 @@ class core_auth extends FO_Plugin {
     $User = str_replace("'", "''", $User); /* protect DB */
 
     /* See if the user exists */
-    $Results = $DB->Action("SELECT * FROM users WHERE user_name = '$User';");
-    $R = $Results[0];
+    $sql = "SELECT * FROM users WHERE user_name = '$User';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $R = pg_fetch_assoc($result);
+    pg_free_result($result);
     if (empty($R['user_name'])) {
       return;
     } /* no user */
@@ -359,9 +391,9 @@ class core_auth extends FO_Plugin {
     return ($V);
   } // CheckUser()
 
-  /******************************************
-   Output(): This is only called when the user logs out.
-   ******************************************/
+  /**
+   * \brief This is only called when the user logs out.
+   */
   function Output() {
 
     if ($this->State != PLUGIN_STATE_READY) {
@@ -391,18 +423,24 @@ class core_auth extends FO_Plugin {
               $V.= "<b>$text</b>";
               $V.= "<P />\n";
               /* Check for a default user */
-              global $DB;
+              global $PG_CONN;
               $Level = PLUGIN_DB_USERADMIN;
-              $Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Level LIMIT 1;");
-              $R = & $Results[0];
-              if (!is_array($R)) {
-                $Results[0] = array();
-              } else if (array_key_exists("user_seed", $R) && array_key_exists("user_pass", $R)) {
-                $Results = $DB->Action("SELECT user_name FROM users WHERE user_seed IS NULL AND user_pass IS NULL;");
+              $sql = "SELECT * FROM users WHERE user_perm = $Level LIMIT 1;";
+              $result = pg_query($PG_CONN, $sql);
+              DBCheckResult($result, $sql, __FILE__, __LINE__);
+              $R = pg_fetch_assoc($result);
+              pg_free_result($result);
+              if (array_key_exists("user_seed", $R) && array_key_exists("user_pass", $R)) {
+                $sql = "SELECT user_name FROM users WHERE user_seed IS NULL AND user_pass IS NULL;";
+                $result = pg_query($PG_CONN, $sql);
+                DBCheckResult($result, $sql, __FILE__, __LINE__);
               } else {
-                $Results = $DB->Action("SELECT user_name FROM users;");
+                $sql = "SELECT user_name FROM users;";
+                $result = pg_query($PG_CONN, $sql);
+                DBCheckResult($result, $sql, __FILE__, __LINE__);
               }
-              $R = & $Results[0];
+              $R = pg_fetch_assoc($result);
+              pg_free_result($result);
               if (!empty($R['user_name'])) {
                 $V.= _("If you need an account, use '" . $R['user_name'] . "' with no password.\n");
                 $V.= "<P />\n";

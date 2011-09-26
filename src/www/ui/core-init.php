@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_core_init", _("Initialize"));
 
 class core_init extends FO_Plugin
@@ -37,12 +29,12 @@ class core_init extends FO_Plugin
   var $LoginFlag  = 0;
   var $PluginLevel= 100; /* make this run first! */
 
-  /******************************************
-   PostInitialize(): This is where the magic for
-   mod=init happens.
-   This plugin only runs when the special file
-   "..../www/init.ui" exists!
-   ******************************************/
+  /**
+   * \brief This is where the magic for
+   * mod=init happens.
+   * This plugin only runs when the special file
+   * "..../www/init.ui" exists!
+   */
   function PostInitialize()
   {
     if ($this->State != PLUGIN_STATE_VALID) { return(1); } // don't re-run
@@ -83,9 +75,9 @@ class core_init extends FO_Plugin
     return($this->State == PLUGIN_STATE_READY);
   } // PostInitialize()
 
-  /******************************************
-   Output(): This is only called when the user logs out.
-   ******************************************/
+  /**
+   * \brief This is only called when the user logs out.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }

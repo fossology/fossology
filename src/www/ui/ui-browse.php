@@ -20,10 +20,6 @@
  at the very beginning.
  This prevents hacking attempts.
  *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_ui_browse", _("Browse"));
 
@@ -54,14 +50,12 @@ class ui_browse extends FO_Plugin {
   }
 
 
-  /***********************************************************
-   Install(): Create and configure database tables
-   ***********************************************************/
+  /**
+   * \brief Create and configure database tables
+   */
   function Install() {
-
-    global $DB;
-
-    if (empty($DB)) {
+    global $PG_CONN;
+    if (empty($PG_CONN)) {
       return(1);
     } /* No DB */
 
@@ -69,31 +63,45 @@ class ui_browse extends FO_Plugin {
      The top-level folder must exist.
      ****************/
     /* check if the table needs population */
-    $SQL = "SELECT * FROM folder WHERE folder_pk=1;";
-    $Results = $DB->Action($SQL);
-    if ($Results[0]['folder_pk'] != "1") {
-      $SQL = "INSERT INTO folder (folder_pk,folder_name,folder_desc) VALUES (1,'Software Repository','Top Folder');";
-      $DB->Action($SQL);
-      $SQL = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES (1,0,0);";
-      $DB->Action($SQL);
+    $sql = "SELECT * FROM folder WHERE folder_pk=1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if ($row['folder_pk'] != "1") {
+      $sql = "INSERT INTO folder (folder_pk,folder_name,folder_desc) VALUES (1,'Software Repository','Top Folder');";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+      $sql = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES (1,0,0);";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
       /* Now fix the sequence number so the first insert does not fail */
-      $Results = $DB->Action("SELECT max(folder_pk) AS max FROM folder LIMIT 1;");
-      $Max = intval($Results[0]['max']);
+      $sql = "SELECT max(folder_pk) AS max FROM folder LIMIT 1;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      pg_free_result($result);
+      $Max = intval($row['max']);
       if (empty($Max) || ($Max < 1)) {
         $Max = 1;
       }
       else {
         $Max++;
       }
-      $DB->Action("SELECT setval('folder_folder_pk_seq',$Max);");
+      $sql = "SELECT setval('folder_folder_pk_seq',$Max);";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
     return (0);
   } // Install()
 
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
@@ -115,10 +123,10 @@ class ui_browse extends FO_Plugin {
       return($this->State == PLUGIN_STATE_READY);
   } // RegisterMenus()
 
-  /***********************************************************
-   ShowItem(): Given a upload_pk, list every item in it.
-   If it is an individual file, then list the file contents.
-   ***********************************************************/
+  /**
+   * \brief Given a upload_pk, list every item in it.
+   * If it is an individual file, then list the file contents.
+   */
   function ShowItem($Upload, $Item, $Show, $Folder)
   {
     global $PG_CONN;
@@ -231,12 +239,12 @@ class ui_browse extends FO_Plugin {
     return ($V);
   } // ShowItem()
 
-  /***********************************************************
-   ShowFolder(): Given a Folder_pk, list every upload in the folder.
-   ***********************************************************/
+  /**
+   * \brief Given a Folder_pk, list every upload in the folder.
+   */
   function ShowFolder($Folder, $Show) {
     global $Plugins;
-    global $DB;
+    global $PG_CONN;
 
     $V = "";
     /* Get list of uploads in this folder
@@ -247,7 +255,7 @@ class ui_browse extends FO_Plugin {
     $UserCondition = "";  // no browse restriction
     else
     $UserCondition = " and upload_userid='$UserId'";  // browse restriction
-    $Sql = "SELECT * FROM upload
+    $sql = "SELECT * FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
         AND parent IS NULL
@@ -255,7 +263,8 @@ class ui_browse extends FO_Plugin {
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
         ORDER BY upload_filename,upload_desc,upload_pk,upload_origin;";
-    $Results = $DB->Action($Sql);
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
 
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     $V.= "<table border=1 width='100%'>";
@@ -293,7 +302,7 @@ class ui_browse extends FO_Plugin {
     /* Browse-Pfile menu without the compare menu item */
     $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
 
-    foreach($Results as $Row) {
+    while ($Row = pg_fetch_assoc($result)) {
       if (empty($Row['upload_pk'])) {
         continue;
       }
@@ -374,6 +383,7 @@ class ui_browse extends FO_Plugin {
 
       $V.= "<tr><td colspan=2>&nbsp;</td></tr>\n";
     }
+    pg_free_result($result);
     $V.= "</table>\n";
     $V.= "</td></tr>\n";
     $V.= "</table>\n";
@@ -382,14 +392,13 @@ class ui_browse extends FO_Plugin {
 
 
 
-  /***********************************************************
-   Output(): This function returns the scheduler status.
-   ***********************************************************/
+  /**
+   * \brief This function returns the scheduler status.
+   */
   function Output()
   {
     global $PG_CONN;
     global $Plugins;
-    global $DB;
 
     if ($this->State != PLUGIN_STATE_READY)  return (0);
 
@@ -459,8 +468,12 @@ class ui_browse extends FO_Plugin {
         /************************/
         if (!empty($Item)) {
           /* Make sure the item is not a file */
-          $Results = $DB->Action("SELECT ufile_mode FROM uploadtree WHERE uploadtree_pk = '$Item';");
-          if (!Iscontainer($Results[0]['ufile_mode'])) {
+          $sql = "SELECT ufile_mode FROM uploadtree WHERE uploadtree_pk = '$Item';";
+          $result = pg_query($PG_CONN, $sql);
+          DBCheckResult($result, $sql, __FILE__, __LINE__);
+          $row = pg_fetch_assoc($result);
+          pg_free_result($result);
+          if (!Iscontainer($row['ufile_mode'])) {
             /* Not a container! */
             $View = & $Plugins[plugin_find_id("view") ];
             if (!empty($View)) {

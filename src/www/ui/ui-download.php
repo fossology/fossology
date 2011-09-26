@@ -16,16 +16,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_ui_download", _("Download File"));
 
+/**
+ * \class ui_download extends FO_Plugin
+ * \brief downlad file(s)
+ */
 class ui_download extends FO_Plugin
 {
   var $Name       = "download";
@@ -35,24 +31,22 @@ class ui_download extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_DOWNLOAD;
   var $NoHTML     = 1;
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     $text = _("Download this file");
     menu_insert("Browse-Pfile::Download",0,$this->Name,$text);
   } // RegisterMenus()
 
-  /***********************************************************
-   CheckRestore()
-   Called if there is no file.  User is queried if they want
-   to reunpack.
-   ***********************************************************/
+  /**
+   * \brief Called if there is no file.  User is queried if they want
+   * to reunpack.
+   */
   function CheckRestore($Item, $Filename)
   {
     global $Plugins;
-    global $DB;
 
     $this->NoHeader = 0;
     header('Content-type: text/html');
@@ -95,20 +89,20 @@ class ui_download extends FO_Plugin
   } // CheckRestore()
 
 
-  /***********************************************************
-   Output(): This function is called when user output is
-   requested.  This function is responsible for content.
-   ***********************************************************/
+  /**
+   * \brief This function is called when user output is
+   * requested.  This function is responsible for content.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     global $Plugins;
-    global $DB, $PG_CONN;
+    global $PG_CONN;
 
     if (!$PG_CONN)
     {
-      $dbok = $DB->db_init();
-      if (!$dbok)
+      DBconnect();
+      if (!$PG_CONN)
       {
         $text = _("Missing database connection.");
         echo "<h2>$text</h2>";
@@ -144,6 +138,7 @@ class ui_download extends FO_Plugin
     {
       $text = _("Missing item");
       echo "<h2>$text: $Item</h2>";
+      pg_free_result($result);
       return;
     }
     $Name = $row['ufile_name'];

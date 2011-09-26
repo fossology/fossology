@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_admin_check_template", _("License Template Check"));
 
 class admin_check_template extends FO_Plugin
@@ -35,11 +27,11 @@ class admin_check_template extends FO_Plugin
   var $Dependency = array("db","agent_license");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
-  /************************************************
-   ReadBsamUnique(): Load every "Unique" value from the
-   License.bsam file.  Return them in an array.
-   ************************************************/
-  function ReadBsamUnique	($Verbose=0)
+  /**
+   * \brief Load every "Unique" value from the
+   * License.bsam file.  Return them in an array.
+   */
+  function ReadBsamUnique($Verbose=0)
   {
     global $PROJECTSTATEDIR;
     $Fin = @fopen("$PROJECTSTATEDIR/agents/License.bsam","rb");
@@ -85,33 +77,35 @@ class admin_check_template extends FO_Plugin
     return($Hash);
   } // ReadBsamUnique()
 
-  /************************************************
-   ReadDBUnique(): Load every "Unique" value from the
-   License.bsam file.  Flag every one of them that
-   does not exist in License.bsam.
-   Return the array of lic_pk values that no longer exist.
-   ************************************************/
-  function ReadDBUnique	($Bsam,$Verbose=0)
+  /**
+   * \brief Load every "Unique" value from the
+   * License.bsam file.  Flag every one of them that
+   * does not exist in License.bsam.
+   *
+   * \return the array of lic_pk values that no longer exist.
+   */
+  function ReadDBUnique($Bsam,$Verbose=0)
   {
-    global $DB;
-    $SQL = "SELECT lic_pk,lic_id,lic_unique,lic_name,lic_section FROM agent_lic_raw ORDER BY lic_name;";
-    $Results = $DB->Action($SQL);
+    global $PG_CONN;
+    $sql = "SELECT lic_pk,lic_id,lic_unique,lic_name,lic_section FROM agent_lic_raw ORDER BY lic_name;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
     $text = _("Checking for obsolete license templates");
     if ($Verbose) { print "<H3>$text</H3>\n"; }
     $BadList = array();
     if ($Verbose) { print "<ol>\n"; }
-    for($i=0; !empty($Results[$i]['lic_pk']); $i++)
+    while ($row = pg_fetch_assoc($result) and !empty($row['lic_pk']))
     {
-      $Uniq = trim($Results[$i]['lic_unique']);
-      if (empty($Bsam[$Uniq]) && ($Results[$i]['lic_unique'] != "1"))
+      $Uniq = trim($row['lic_unique']);
+      if (empty($Bsam[$Uniq]) && ($row['lic_unique'] != "1"))
       {
         if ($Verbose)
         {
           $text = _("Obsolete: ");
-          print "<li>" . $text . $Results[$i]['lic_pk'] . ": ";
-          print $Results[$i]['lic_name'] . " (" . $Results[$i]['lic_section'] . ")<br>\n";
+          print "<li>" . $text . $row['lic_pk'] . ": ";
+          print $row['lic_name'] . " (" . $row['lic_section'] . ")<br>\n";
         }
-        $BadList[] = $Results[$i]['lic_pk'];
+        $BadList[] = $row['lic_pk'];
       }
     }
     if ($Verbose) { print "</ol>\n"; }
@@ -119,17 +113,22 @@ class admin_check_template extends FO_Plugin
     /* Check for any other licenses found in the same obsolete template. */
     /** This should not be the case if new templates are created. **/
     $OldCount=count($BadList);
-    for($i=0; !empty($Results[$i]['lic_pk']); $i++)
+    while ($row = pg_fetch_assoc($result) and !empty($row['lic_pk']))
     {
-      $Bad = $DB->Action("SELECT lic_pk FROM agent_lic_raw WHERE lic_id = '" . $Results[$i]['lic_id'] . "' AND lic_pk != lic_pk;");
-      for($j=0; !empty($Bad[$j]['lic_pk']); $j++)
+      $sql = "SELECT lic_pk FROM agent_lic_raw WHERE lic_id = '" . $row['lic_id'] . "' AND lic_pk != lic_pk;";
+      $Bad = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      while ($Brow = pg_fetch_assoc($Bad) and !empty($Brow['lic_pk']))
       {
-        if (!in_array($Bad[$j]['lic_pk'],$BadList))
+        if (!in_array($Brow['lic_pk'],$BadList))
         {
-          $BadList[] = $Bad[$j]['lic_pk'];
+          $BadList[] = $Brow['lic_pk'];
         }
       }
     }
+    pg_free_result($Bad);
+    pg_free_result($result);
+
     $NewCount=count($BadList);
 
     if ($Verbose)
@@ -145,14 +144,15 @@ class admin_check_template extends FO_Plugin
     return($BadList);
   } // ReadDBUnique()
 
-  /************************************************
-   FindPfiles(): Given a list of lic_pk, identify
-   the pfiles that need to be re-analyzed.
-   Returns the list of pfiles.
-   ************************************************/
-  function FindPfiles	($List, $Verbose=0)
+  /**
+   * \brief Given a list of lic_pk, identify
+   * the pfiles that need to be re-analyzed.
+   *
+   * \return the list of pfiles.
+   */
+  function FindPfiles($List, $Verbose=0)
   {
-    global $DB;
+    global $PG_CONN;
 
     $PfileList=array();
 
@@ -171,12 +171,14 @@ class admin_check_template extends FO_Plugin
       }
       $end = $i;
       $SQL .= ";";
-      $Pfiles = $DB->Action($SQL);
+      $result = pg_query($PG_CONN, $SQL);
+      DBCheckResult($result, $SQL, __FILE__, __LINE__);
 
-      for($j=0; !empty($Pfiles[$j]); $j++)
+      while ($row = pg_fetch_assoc($result))
       {
-        $PfileList[] = $Pfiles[$j]['pfile_fk'];
+        $PfileList[] = $row['pfile_fk'];
       }
+      pg_free_result($result);
 
       $i++;
 
@@ -185,16 +187,16 @@ class admin_check_template extends FO_Plugin
     return($PfileList);
   } // FindPfiles()
 
-  /************************************************
-   FindUploads(): Given a list of lic_pk, count
-   the number of pfiles and projects that need to
-   be re-analyzed.
-   Returns the upload_pk values impacted.
-   ************************************************/
-  function FindUploads	($List, $Verbose=0)
+  /**
+   * \brief Given a list of lic_pk, count
+   * the number of pfiles and projects that need to
+   * be re-analyzed.
+   *
+   * \return the upload_pk values impacted.
+   */
+  function FindUploads($List, $Verbose=0)
   {
-    global $DB;
-
+    global $PG_CONN;
     $VerboseInit = 1;
     $UploadList=array();
     /* Loop through sql so that the max sql stmt size isn't reached */
@@ -217,11 +219,12 @@ class admin_check_template extends FO_Plugin
       $end = $i;
       $SQL .= " ORDER BY upload_filename";
       $SQL .= ";";
-      $Uploads = $DB->Action($SQL);
+      $result = pg_query($PG_CONN, $SQL);
+      DBCheckResult($result, $SQL, __FILE__, __LINE__);
 
-      for($j=0; !empty($Uploads[$j]); $j++)
+      while ($row = pg_fetch_assoc($result))
       {
-        $UploadList[] = $Uploads[$j]['upload_fk'];
+        $UploadList[] = $row['upload_fk'];
         if ($Verbose)
         {
           if ($VerboseInit)
@@ -233,10 +236,12 @@ class admin_check_template extends FO_Plugin
             print "<ul>\n";
             $VerboseInit = 0;
           }
-          if (!empty($Uploads[$j]['upload_filename']))
-          print "<li>" . htmlentities($Uploads[$j]['upload_filename']) . "\n";
+          if (!empty($row['upload_filename']))
+          print "<li>" . htmlentities($row['upload_filename']) . "\n";
         }
       }
+      pg_free_result($result);
+
       $i++;
     } while (!empty($List[$i]));
 
@@ -245,16 +250,16 @@ class admin_check_template extends FO_Plugin
     return($UploadList);
   } // FindUploads()
 
-  /************************************************
-   Cleanup(): Remove obsolete templates, reset files
-   for analysis, and reschedule jobs.
-   ************************************************/
-  function Cleanup	($OldTemplates, $PfileList, $UploadList)
+  /**
+   * \brief Remove obsolete templates, reset files
+   * for analysis, and reschedule jobs.
+   */
+  function Cleanup($OldTemplates, $PfileList, $UploadList)
   {
-    global $DB;
+    global $PG_CONN;
     global $Plugins;
 
-    $DB->Action("BEGIN;");
+    pg_exec("BEGIN;");
 
     /* Delete the metadata for the licenses, in batches */
     $text = _("Resetting license analysis for");
@@ -265,9 +270,18 @@ class admin_check_template extends FO_Plugin
     {
       if (!empty($SQL) && ($i % 40 == 0))
       {
-        $DB->Action("DELETE FROM licterm_name WHERE $SQL;");
-        $DB->Action("DELETE FROM agent_lic_meta WHERE $SQL;");
-        $DB->Action("DELETE FROM agent_lic_status WHERE $SQL;");
+        $sql = "DELETE FROM licterm_name WHERE $SQL;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
+        $sql = "DELETE FROM agent_lic_meta WHERE $SQL;"; 
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
+        $sql = "DELETE FROM agent_lic_status WHERE $SQL;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
         $SQL="";
       }
       if (!empty($SQL)) { $SQL .= " OR"; }
@@ -275,9 +289,18 @@ class admin_check_template extends FO_Plugin
     }
     if (!empty($SQL))
     {
-      $DB->Action("DELETE FROM licterm_name WHERE $SQL;");
-      $DB->Action("DELETE FROM agent_lic_meta WHERE $SQL;");
-      $DB->Action("DELETE FROM agent_lic_status WHERE $SQL;");
+      $sql = "DELETE FROM licterm_name WHERE $SQL;"; 
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+      $sql = "DELETE FROM agent_lic_meta WHERE $SQL;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+      $sql = "DELETE FROM agent_lic_status WHERE $SQL;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
 
     /* Delete the licenses */
@@ -290,9 +313,18 @@ class admin_check_template extends FO_Plugin
     {
       if (!empty($SQL) && ($i % 40 == 0))
       {
-        $DB->Action("DELETE FROM agent_lic_raw WHERE $SQL;");
-        $DB->Action("DELETE FROM licgroup_lics WHERE $SQL2;");
-        $DB->Action("DELETE FROM licterm_maplic WHERE $SQL2;");
+        $sql = "DELETE FROM agent_lic_raw WHERE $SQL;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
+        $sql = "DELETE FROM licgroup_lics WHERE $SQL2;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
+        $sql = "DELETE FROM licterm_maplic WHERE $SQL2;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
         $SQL="";
         $SQL2="";
       }
@@ -303,11 +335,20 @@ class admin_check_template extends FO_Plugin
     }
     if (!empty($SQL))
     {
-      $DB->Action("DELETE FROM agent_lic_raw WHERE $SQL;");
-      $DB->Action("DELETE FROM licgroup_lics WHERE $SQL2;");
-      $DB->Action("DELETE FROM licterm_maplic WHERE $SQL2;");
+      $sql = "DELETE FROM agent_lic_raw WHERE $SQL;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+      $sql = "DELETE FROM licgroup_lics WHERE $SQL2;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+      $sql = "DELETE FROM licterm_maplic WHERE $SQL2;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
-    $DB->Action("COMMIT;");
+    pg_exec("COMMIT;");
 
     /* Reset the jobs */
     $text = _("Resetting");
@@ -327,14 +368,13 @@ class admin_check_template extends FO_Plugin
     }
   } // Cleanup()
 
-  /************************************************
-   Output(): Generate output.
-   ************************************************/
+  /**
+   * \brief Generate output.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
-    global $DB;
     switch($this->OutputType)
     {
       case "XML":

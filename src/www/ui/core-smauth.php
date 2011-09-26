@@ -25,12 +25,14 @@ class core_smauth extends FO_Plugin {
   var $Dependency = array("db");
   var $PluginLevel = 1000; /* make this run first! */
   var $LoginFlag = 0;
-  /***********************************************************
-   Install(): Only used during installation.
-   This may be called multiple times.
-   Used to ensure the DB has the right default columns.
-   Returns 0 on success, non-zero on failure.
-   ***********************************************************/
+
+  /**
+   * \brief Only used during installation.
+   * This may be called multiple times.
+   * Used to ensure the DB has the right default columns.
+   * 
+   * \return 0 on success, non-zero on failure.
+   */
   function Install() {
     global $PG_CONN;
     if (empty($PG_CONN)) {
@@ -39,10 +41,10 @@ class core_smauth extends FO_Plugin {
     return (0);
   } // Install()
 
-  /******************************************
-   PostInitialize(): This is where the magic for
-   Authentication happens.
-   ******************************************/
+  /**
+   * \brief This is where the magic for
+   * Authentication happens.
+   */
   function PostInitialize() {
     global $Plugins;
     global $PG_CONN;
@@ -68,7 +70,11 @@ class core_smauth extends FO_Plugin {
     }
 
     /* check db connection */
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    if (!$PG_CONN)
+    { 
+      DBconnect();
+      if (!$PG_CONN) echo "NO DB connection"; 
+    }
 
     /* Enable or disable plugins based on login status */
     $Level = PLUGIN_DB_NONE;
@@ -85,7 +91,7 @@ class core_smauth extends FO_Plugin {
     }
     if (time() >= @$_SESSION['time_check']) {
       $sql = "SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';";
-      $results = pg_query($PG_CONN, $sql);
+      $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $R = pg_fetch_assoc($result);
       $_SESSION['User'] = $R['user_name'];
@@ -115,10 +121,10 @@ class core_smauth extends FO_Plugin {
     $this->State = PLUGIN_STATE_READY;
   } // PostInitialize()
 
-  /******************************************
-   CheckUser(): See if a username is valid.
-   Returns string on match, or null on no-match.
-   ******************************************/
+  /**
+   * \brief See if a username is valid.
+   * \return string on match, or null on no-match.
+   */
   function CheckUser($Email) {
     global $PG_CONN;
 
@@ -163,9 +169,9 @@ class core_smauth extends FO_Plugin {
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         if (pg_num_rows($result) < 1) {
-          pg_free_result($result);
           $BucketPool = 'null';       //didn't exist in bucketpool table, set it 'null'
         }
+        pg_free_result($result);
       } else {
         /* if didn't define bucketpool from sycconf.And only a single bucketpool record, get bucketpool from bucketpool table. If more than one, set it null*/
         $sql = "SELECT bucketpool_pk FROM bucketpool;";
@@ -173,14 +179,16 @@ class core_smauth extends FO_Plugin {
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         if (pg_num_rows($result) == 1) {
           $R = pg_fetch_assoc($result);
-          pg_free_result($result);
           if (!empty($R['bucketpool_pk']))
           $BucketPool = $R['bucketpool_pk'];
         } else {
           $BucketPool = 'null';
         }
+        pg_free_result($result);
       }
     }
+    else pg_free_result($result);
+
     /* See if the user exists */
     $sql = "SELECT * FROM users WHERE user_email = '$Email';";
     $result = pg_query($PG_CONN, $sql);
@@ -205,12 +213,12 @@ class core_smauth extends FO_Plugin {
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         $row = pg_fetch_assoc($result);
+        pg_free_result($result);
         //print_r($row);
         if (empty($row['folder_pk']))
         return;
         $FolderPk = $row['folder_pk'];
         //echo $FolderPk;
-        pg_free_result($result);
 
         $sql = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('1','1','$FolderPk');";
         $result = pg_query($PG_CONN, $sql);
@@ -221,12 +229,12 @@ class core_smauth extends FO_Plugin {
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         $row = pg_fetch_assoc($result);
+        pg_free_result($result);
         //print_r($row);
         if (empty($row['folder_pk']))
         return;
         $FolderPk = $row['folder_pk'];
         //echo $FolderPk;
-        pg_free_result($result);
       }
       //create user
       $sql = "INSERT INTO users
@@ -278,9 +286,10 @@ class core_smauth extends FO_Plugin {
       $_SESSION['NoPopup'] = 0;
     }
   } // CheckUser()
-  /******************************************
-  Output():
-  ******************************************/
+
+  /**
+   * \brief generate the output for this plug-in
+   */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
@@ -301,7 +310,7 @@ class core_smauth extends FO_Plugin {
         $_SESSION['UserEmail'] = NULL;
         $_SESSION['Folder'] = NULL;
         $_SESSION['UiPref'] = NULL;
-        $Uri = Traceback_uri() . "logout.html";
+        $Uri = Traceback_uri() . "logout.html?" . rand();
         //$Uri = Traceback_uri() . "?mod=refresh&remod=default";
         $V.= "<script language='javascript'>\n";
         $V.= "window.open('$Uri','_top');\n";
