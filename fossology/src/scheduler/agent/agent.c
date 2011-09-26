@@ -522,7 +522,7 @@ void* agent_spawn(void* passed)
     close(a->to_child);
 
     /* set the priority of the process to the job's priority */
-    if(nice(job_priority(a->owner)) < 0)
+    if(nice(job_priority(a->owner)) == -1)
       ERROR("unable to correctly set priority of agent process %d", a->pid);
 
     /* if host is null, the agent will run locally to */
