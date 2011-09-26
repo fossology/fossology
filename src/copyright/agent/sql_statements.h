@@ -65,6 +65,12 @@ SELECT ct_pk \
   FROM copyright \
   LIMIT 1";
 
+/*** Checks if the copyright_ars table exists */
+char* check_copyright_ars = " \
+SELECT schemaname \
+  FROM pg_tables \
+    WHERE tablename='copyright_ars';";
+
 /** This will create the copyright sequence in the database */
 char* create_database_sequence = "\
 CREATE SEQUENCE copyright_ct_pk_seq \
