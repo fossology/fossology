@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_admin_db_vacuum", _("Database Vacuum and Analyze"));
 
 class admin_db_vacuum extends FO_Plugin
@@ -35,27 +27,30 @@ class admin_db_vacuum extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
-  /************************************************
-   FixDB(): Fix the DB by deleting offending records.
-   ************************************************/
+  /**
+   * \brief Fix the DB by deleting offending records.
+   */
   function FixDB	($CheckType)
   {
-    global $DB;
+    global $PG_CONN;
     $text = _("Deleting");
     print $text . $CheckType['label'] . "...";
-    $DB->Action("DELETE ". $CheckType['sql']);
+    $sql = "DELETE ". $CheckType['sql'];
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
     $text=_("cleaned.");
-    print $DB->GetAffectedRows . "$text<br>";
+    print   pg_affected_rows($result) . "$text<br>";
+    pg_free_result($result);
   } // FixDB()
 
-  /************************************************
-   Output(): Generate output.
-   ************************************************/
+  /**
+   * \brief Generate output.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
-    global $DB;
+    global $PG_CONN;
     switch($this->OutputType)
     {
       case "XML":
@@ -70,20 +65,25 @@ class admin_db_vacuum extends FO_Plugin
 		AND table_schema = 'public'
 		ORDER BY table_name
 		;";
-        $Tables = $DB->Action($SQL);
-        if (!empty($Action))
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        if (!empty($result))
         {
           $text = _("Cleaning: Vacuum and Analyze");
           print "<b>$text</b><br>\n";
           flush();
-          for($i=0; !empty($Tables[$i]['table']); $i++)
+          while (($row = pg_fetch_assoc($result)) and !empty($row['table']))
           {
-            print "$Action for " . $Tables[$i]['table'] . "<br>\n";
+            print "$Action for " . $row['table'] . "<br>\n";
             flush();
-            $DB->Action($Action . " " . $Tables[$i]['table'] . ";");
+            $sql = $Action . " " . $row['table'] . ";"; 
+            $result1 = pg_query($PG_CONN, $sql);
+            DBCheckResult($result1, $sql, __FILE__, __LINE__);
+            pg_free_result($result1);
           }
           print "<P>\n";
         }
+        pg_free_result($result);
 
         /***************************************/
         $V .= _("Database performance can be improved by optimizing table memory allocation.");

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_admin_tag_ns", _("Manage Tag Namespace"));
 
 class admin_tag_ns extends FO_Plugin
@@ -35,9 +27,9 @@ class admin_tag_ns extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess = PLUGIN_DB_USERADMIN;
 
-  /***********************************************************
-   CreateTagNS(): Add a new Tag Namespace.
-   ***********************************************************/
+  /**
+   * \brief Add a new Tag Namespace.
+   */
   function CreateTagNS()
   {
     global $PG_CONN;
@@ -57,6 +49,7 @@ class admin_tag_ns extends FO_Plugin
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
     }else{
+      pg_free_result($result);
       $text = _("Tag Namespace already exists. Tag Namespace Not created.");
       return ($text);
     }
@@ -64,18 +57,20 @@ class admin_tag_ns extends FO_Plugin
     /* Make sure it was added */
     $sql = "SELECT * FROM tag_ns WHERE tag_ns_name = '$tag_ns_name';";
     $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1)
     {
       pg_free_result($result);
       $text = _("Failed to create tag.");
       return ($text);
     }
+    pg_free_result($result);
     return (NULL);
   }
 
-  /***********************************************************
-   EditTagNS(): Edit exsit Tag Namespace.
-   ***********************************************************/
+  /**
+   * \brief Edit exsit Tag Namespace.
+   */
   function EditTagNS()
   {
     global $PG_CONN;
@@ -94,9 +89,9 @@ class admin_tag_ns extends FO_Plugin
     return (NULL);
   }
 
-  /***********************************************************
-   DeleteTagNS(): Delete exsit Tag Namespace.
-   ***********************************************************/
+  /**
+   * \brief Delete exsit Tag Namespace.
+   */
   function DeleteTagNS()
   {
     global $PG_CONN;
@@ -112,6 +107,7 @@ class admin_tag_ns extends FO_Plugin
       $text = _("As there are group permissions related to this tag namespace, if you want to delete this tag namespace you should first delete permissions about this tag namespace! ");
       return ($text);
     }
+    pg_free_result($result);
 
     pg_exec("BEGIN;");
     $sql = "DELETE FROM tag_file USING tag WHERE tag_pk = tag_fk AND tag_ns_fk = $tag_ns_pk;";
@@ -132,9 +128,9 @@ class admin_tag_ns extends FO_Plugin
 
     return (NULL);
   }
-  /***********************************************************
-   ShowExistTagNS(): Show all tag namespace about
-   ***********************************************************/
+  /**
+   * \brief Show all tag namespace about
+   */
   function ShowExistTagNS()
   {
     global $PG_CONN;
@@ -159,12 +155,11 @@ class admin_tag_ns extends FO_Plugin
     return $VE;
   }
 
-  /***********************************************************
-   ShowCreateTagNSPage(): Display the create tag namespace page.
-   ***********************************************************/
+  /**
+   * \brief Display the create tag namespace page.
+   */
   function ShowCreateTagNSPage()
   {
-    global $PG_CONN;
     $VC = "";
     $VC .= _("<h3>Create Tag Namespace:</h3>\n");
 
@@ -180,12 +175,11 @@ class admin_tag_ns extends FO_Plugin
     return $VC;
   }
 
-  /***********************************************************
-   ShowEditTagNSPage(): Display the edit tag namespace page.
-   ***********************************************************/
+  /**
+   * \brief Display the edit tag namespace page.
+   */
   function ShowEditTagNSPage()
   {
-    global $PG_CONN;
     $VEd = "";
     $text = _("Create New Tag Namespace");
     $VEd .= "<h4><a href='" . Traceback_uri() . "?mod=admin_tag_ns'>$text</a><h4>";
@@ -206,12 +200,11 @@ class admin_tag_ns extends FO_Plugin
     return $VEd;
   }
 
-  /***********************************************************
-   ShowTagNSPage(): Display the tag namespace page.
-   ***********************************************************/
+  /**
+   * \brief Display the tag namespace page.
+   */
   function ShowTagNSPage($action)
   {
-    global $PG_CONN;
     $V = "";
 
     $V .=  $this->ShowExistTagNS();
@@ -224,16 +217,17 @@ class admin_tag_ns extends FO_Plugin
     }
     return($V);
   }
-  /***********************************************************
-   Output(): This function is called when user output is
-   requested.  This function is responsible for content.
-   (OutputOpen and Output are separated so one plugin
-   can call another plugin's Output.)
-   This uses $OutputType.
-   The $ToStdout flag is "1" if output should go to stdout, and
-   0 if it should be returned as a string.  (Strings may be parsed
-   and used by other plugins.)
-   ***********************************************************/
+
+  /**
+   * \brief This function is called when user output is
+   * requested.  This function is responsible for content.
+   * (OutputOpen and Output are separated so one plugin
+   * can call another plugin's Output.)
+   * This uses $OutputType.
+   * The $ToStdout flag is "1" if output should go to stdout, and
+   * 0 if it should be returned as a string.  (Strings may be parsed
+   * and used by other plugins.)
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }

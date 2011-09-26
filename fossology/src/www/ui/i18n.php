@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Stefan Schroeder as a part of the FOSSOLOGY project.
+ Copyright (C) 2010-2011 Stefan Schroeder as a part of the FOSSOLOGY project.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License

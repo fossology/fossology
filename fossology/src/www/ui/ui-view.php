@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,14 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
 
 define("VIEW_BLOCK_HEX",8192);
 define("VIEW_BLOCK_TEXT",20*VIEW_BLOCK_HEX);
@@ -41,9 +33,9 @@ class ui_view extends FO_Plugin
   var $HighlightColors = array("yellow","lightgreen","aqua","mediumslateblue","darkkhaki","orange","lightsteelblue","yellowgreen");
   var $Highlight=NULL;
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     $text = _("View file contents");
@@ -125,9 +117,9 @@ class ui_view extends FO_Plugin
     }
   } // RegisterMenus()
 
-  /***********************************************************
-   _cmp_highlight(): Use for sorting the highlight list.
-   ***********************************************************/
+  /**
+   * \brief Use for sorting the highlight list.
+   */
   static function _cmp_highlight($a,$b)
   {
     if ($a['Start'] != $b['Start'])
@@ -141,10 +133,10 @@ class ui_view extends FO_Plugin
     return(0);
   } // _cmp_highlight()
 
-  /***********************************************************
-   SortHighlightMenu() Sort highlighting.
-   The list of highlights were probably not inserted in order...
-   ***********************************************************/
+  /**
+   * \brief Sort highlighting.
+   * The list of highlights were probably not inserted in order...
+   */
   function SortHighlightMenu	()
   {
     if (!empty($this->Highlight))
@@ -161,15 +153,15 @@ class ui_view extends FO_Plugin
     }
   } // SortHighlightMenu()
 
-  /***********************************************************
-   AddHighlight(): Text can be highlighted!
-   Start, End, and Color are required.
-   If Color is -1, then uses last color.
-   If Color is -2, then uses color AFTER last color.
-   Name is only needed if you want to have it listed in the
-   top menu with a hyperlink jump.
-   Index is auto-assigned to Name, if not specified.
-   ***********************************************************/
+  /**
+   * \brief Text can be highlighted!
+   * Start, End, and Color are required.
+   * If Color is -1, then uses last color.
+   * If Color is -2, then uses color AFTER last color.
+   * Name is only needed if you want to have it listed in the
+   * top menu with a hyperlink jump.
+   * Index is auto-assigned to Name, if not specified.
+   */
   function AddHighlight($ByteStart,$ByteEnd,$Color,
   $Match=NULL,$Name=NULL,$Index=-1,$RefURL=NULL)
   {
@@ -204,9 +196,9 @@ class ui_view extends FO_Plugin
     else { array_push($this->Highlight,$H); }
   } // AddHighlight()
 
-  /***********************************************************
-   GetHighlightMenu(): If there is a highlight menu, create it.
-   ***********************************************************/
+  /**
+   * \brief if there is a highlight menu, create it.
+   */
   function GetHighlightMenu($PageBlockSize, $ViewOnly=False)
   {
     if (empty($this->Highlight)) { return; }
@@ -278,11 +270,11 @@ class ui_view extends FO_Plugin
     return($V);
   } // GetHighlightMenu()
 
-  /***********************************************************
-   GetFileJumpMenu(): Given a file handle and current page,
-   generate the "Next" and "Prev" menu options.
-   Returns String.
-   ***********************************************************/
+  /**
+   * \brief Given a file handle and current page,
+   * generate the "Next" and "Prev" menu options.
+   * Returns String.
+   */
   function GetFileJumpMenu($Fin,$CurrPage,$PageSize,$Uri)
   {
     if (!$Fin) return;
@@ -331,18 +323,19 @@ class ui_view extends FO_Plugin
     return($V);
   } // GetFileJumpMenu()
 
-  /***********************************************************
-   FindHighlight(): REMOVE items from the Highlight array.
-   This shifts items off of the highlight array based on the
-   current position in the file.
-   The top of the array ($Highlight[0]) identifies the current
-   item to highlight.
-   Returns: flags
-   0 if no highlight
-   0x01 if at start
-   0x02 if highlighting
-   0x04 if at end
-   ***********************************************************/
+  /**
+   * \brief REMOVE items from the Highlight array.
+   * This shifts items off of the highlight array based on the
+   * current position in the file.
+   * The top of the array ($Highlight[0]) identifies the current
+   * item to highlight.
+   * 
+   * \return flags
+   * 0 if no highlight
+   * 0x01 if at start
+   * 0x02 if highlighting
+   * 0x04 if at end
+   */
   function FindHighlight($Pos)
   {
     while(!empty($this->Highlight) && ($Pos > $this->Highlight[0]['End']))
@@ -360,12 +353,13 @@ class ui_view extends FO_Plugin
     return($rc);
   } // FindHighlight()
 
-  /***********************************************************
-   ReadHighlight(): Given a file handle, read up to the next
-   highlight boundary (start or end).
-   Returns: String read.
-   NOTE: if strlen of return is < $MaxRead, then it hit a highlight.
-   ***********************************************************/
+  /**
+   * \brief Given a file handle, read up to the next
+   * highlight boundary (start or end).
+   * 
+   * \return String read.
+   * \note if strlen of return is < $MaxRead, then it hit a highlight.
+   */
   function ReadHighlight($Fin, $Pos, $MaxRead)
   {
     $this->FindHighlight($Pos);
@@ -386,10 +380,10 @@ class ui_view extends FO_Plugin
     return(fread($Fin,$Len));
   } // ReadHighlight()
 
-  /***********************************************************
-   ShowText(): Given a file handle, display "strings" of the file.
-   Output goes to stdout!
-   ***********************************************************/
+  /**
+   * \brief Given a file handle, display "strings" of the file.
+   * Output goes to stdout!
+   */
   function ShowText($Fin,$Start,$Flowed,$FullLength=-1)
   {
     if (!$Fin) return;
@@ -483,12 +477,13 @@ class ui_view extends FO_Plugin
     print "</div>\n";
   } // ShowText()
 
-  /***********************************************************
-   ReadHex(): Read bytes from a file (or stop at EOF).
-   This populates two strings: Hex and Text -- these represent
-   the bytes.  This function also handles highlighting.
-   Returns number of bytes read.
-   ***********************************************************/
+  /**
+   * \brief Read bytes from a file (or stop at EOF).
+   * This populates two strings: Hex and Text -- these represent
+   * the bytes.  This function also handles highlighting.
+   * 
+   * \return number of bytes read.
+   */
   function ReadHex($Fin,$Start,$Length, &$Text, &$Hex)
   {
     $Text = "<font class='mono'>";
@@ -578,10 +573,10 @@ class ui_view extends FO_Plugin
     return($ReadCount);
   } // ReadHex()
 
-  /***********************************************************
-   ShowHex(): Given a file handle, display a "hex dump" of the file.
-   Output goes to stdout!
-   ***********************************************************/
+  /**
+   * \brief Given a file handle, display a "hex dump" of the file.
+   * Output goes to stdout!
+   */
   function ShowHex($Fin,$Start=0,$Length=-1)
   {
     if (!$Fin) return;
@@ -631,12 +626,14 @@ class ui_view extends FO_Plugin
     print "</div>\n";
   } // ShowHex()
 
-  /***********************************************************
-   ShowView(): Generate the view contents in HTML and sends it
-   to stdout.
-   $Name is the name for this plugin.
-   This function is intended to be called from other plugins.
-   ***********************************************************/
+  /**
+   * \brief Generate the view contents in HTML and sends it
+   *  to stdout.
+   *
+   * \param $Name - the name for this plugin.
+   * 
+   * \note This function is intended to be called from other plugins.
+   */
   function ShowView($Fin=NULL, $BackMod="browse",
   $ShowMenu=1, $ShowHeader=1, $ShowText=NULL, $ViewOnly=False)
   {
@@ -806,23 +803,32 @@ class ui_view extends FO_Plugin
     return;
   } // ShowView()
 
-  /***********************************************************
-   Output(): This function is called when user output is
-   requested.  This function is responsible for content.
-   (OutputOpen and Output are separated so one plugin
-   can call another plugin's Output.)
-   This uses $OutputType.
-   The $ToStdout flag is "1" if output should go to stdout, and
-   0 if it should be returned as a string.  (Strings may be parsed
-   and used by other plugins.)
-   ***********************************************************/
+  /**
+   * \brief This function is called when user output is
+   * requested.  This function is responsible for content.
+   * (OutputOpen and Output are separated so one plugin
+   * can call another plugin's Output.)
+   * This uses $OutputType.
+   * The $ToStdout flag is "1" if output should go to stdout, and
+   * 0 if it should be returned as a string.  (Strings may be parsed
+   * and used by other plugins.)
+   */
   function Output()
   {
-    global $DB, $PG_CONN;
+    global $PG_CONN;
 
-    if ($this->State != PLUGIN_STATE_READY) { return; }
-
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    if ($this->State != PLUGIN_STATE_READY) 
+    { 
+      return;
+    }
+    if (!$PG_CONN)
+    {
+      DBconnect();
+      if (!$PG_CONN)
+      {
+         echo "NO DB connection";
+      }
+    }
 
     $V="";
     switch($this->OutputType)

@@ -22,7 +22,6 @@
  * \brief This is the main guts of the UI: Find the plugin and run it.
  */
 
-$GlobalReady=1;
 $SysConf = array();
 $PG_CONN = 0;   // Database connection
 

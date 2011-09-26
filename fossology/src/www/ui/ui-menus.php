@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_ui_menu", _("Menus"));
 
 class ui_menu extends FO_Plugin
@@ -34,7 +26,7 @@ class ui_menu extends FO_Plugin
   var $MenuTarget = "treenav";
   var $LoginFlag  = 0;
 
-  var $_CSSdone   = 0;	/* has the CSS been displayed? */
+  var $_CSSdone   = 0; /* has the CSS been displayed? */
 
   function PostInitialize()
   {
@@ -63,9 +55,9 @@ class ui_menu extends FO_Plugin
     return($this->State == PLUGIN_STATE_READY);
   }
 
-  /********************************************
-   menu_html(): Recursively generate the menu in HTML.
-   ********************************************/
+  /**
+   * \brief Recursively generate the menu in HTML.
+   */
   function menu_html(&$Menu,$Indent)
   {
     if (empty($Menu)) { return; }
@@ -162,10 +154,10 @@ class ui_menu extends FO_Plugin
     return($NewV);
   } // menu_html()
 
-  /********************************************
-   OutputCSS(): Create the output CSS.
-   ********************************************/
-  function OutputCSS	()
+  /**
+   * \brief Create the output CSS.
+   */
+  function OutputCSS()
   {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $V = "";
@@ -282,9 +274,9 @@ class ui_menu extends FO_Plugin
     return($V);
   } // OutputCSS()
 
-  /********************************************
-   Output(): Create the output.
-   ********************************************/
+  /**
+   * \brief Create the output.
+   */
   function Output($Title=NULL)
   {
     global $SysConf;

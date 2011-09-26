@@ -27,7 +27,7 @@ class upload_srv_files extends FO_Plugin {
   public $Title = TITLE_upload_srv_files;
   public $Version = "1.0";
   public $MenuList = "Upload::From Server";
-  public $Dependency = array("db", "agent_unpack");
+  public $Dependency = array("db", "agent_unpack"); // TODO may be comment out
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
   /**

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,14 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_admin_db_cleanup", _("Database Check"));
 
 class admin_db_cleanup extends FO_Plugin
@@ -35,36 +27,38 @@ class admin_db_cleanup extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
-  /************************************************
-   FixDB(): Fix the DB by deleting offending records.
-   ************************************************/
-  function FixDB	($CheckType)
+  /**
+   * \brief Fix the DB by deleting offending records.
+   */
+  function FixDB($CheckType)
   {
-    global $DB;
+    global $PG_CONN;
     $text = _("Deleting");
     print $text . $CheckType['label'] . "...";
-    $DB->Debug=1;
     print "<pre>";
-    $DB->Action("DELETE " . $CheckType['sql']);
+    $sql = "DELETE " . $CheckType['sql'];
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    print "db command is:$sql\n";
     print "</pre>";
-    $DB->Debug=0;
-    if ($DB->GetAffectedRows() > 0)
+    if (pg_affected_rows($result) > 0)
     {
       $text = _("Deleted");
       $text1 = _("from");
-      print $text . $DB->GetAffectedRows() . $text1 ;
+      print $text .  pg_affected_rows($result) . $text1 ;
       print $CheckType['label'] . ".<br>\n";
     }
+    pg_free_result($result);
   } // FixDB()
 
-  /************************************************
-   Output(): Generate output.
-   ************************************************/
+  /**
+   * \brief Generate output.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
-    global $DB;
+    global $PG_CONN;
     switch($this->OutputType)
     {
       case "XML":
@@ -167,8 +161,12 @@ class admin_db_cleanup extends FO_Plugin
         $V .= "// -->\n";
         $V .= "</script>\n";
 
-        $Results = $DB->Action("SELECT COUNT(*) AS count FROM jobqueue WHERE (jq_type = 'unpack' OR jq_type = 'delagent' OR jq_type = 'license' OR jq_type = 'pkgmetagetta') AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;");
-        $Count = $Results[0]['count'];
+        $sql = "SELECT COUNT(*) AS count FROM jobqueue WHERE (jq_type = 'unpack' OR jq_type = 'delagent' OR jq_type = 'license' OR jq_type = 'pkgmetagetta') AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        $Count = $row['count'];
+        pg_free_result($result);
         if ($Count == 1) { $Verb = "is"; $String = "task"; }
         else { $Verb = "are"; $String = "tasks"; }
         $text = _("Temporary inconsistencies may exist when a file is uploaded, being unpacked, or being deleted.\n");
@@ -202,8 +200,12 @@ class admin_db_cleanup extends FO_Plugin
         $FixCount=0;
         for($i=0; !empty($Checks[$i]['tag']); $i++)
         {
-          $Results = $DB->Action("SELECT COUNT(*) AS count " . $Checks[$i]['sql']);
-          $Count = $Results[0]['count'];
+          $sql = "SELECT COUNT(*) AS count " . $Checks[$i]['sql'];
+          $result = pg_query($PG_CONN, $sql);
+          DBCheckResult($result, $sql, __FILE__, __LINE__);
+          $row = pg_fetch_assoc($result);
+          $Count = $row['count'];
+          pg_free_result($result);
           $V .= "<tr>";
           if ($Count > 0)
           {
@@ -217,12 +219,16 @@ class admin_db_cleanup extends FO_Plugin
             $text = _("Details");
             $V .= " (<a href=\"javascript:ShowHideDBDetails('Details_$i')\">$text</a>)<br>\n";
             $V .= "<div id='Details_$i' style='display:none;'>";
-            $Results = $DB->Action($Checks[$i]['list']);
-            for($j=0; !empty($Results[$j]['list']); $j++)
+            $sql = $Checks[$i]['list'];
+            $result = pg_query($PG_CONN, $sql);
+            DBCheckResult($result, $sql, __FILE__, __LINE__);
+            for($j=0; ($row = pg_fetch_assoc($result)) and !empty($row['list']); $j++)
             {
               if ($j > 0) { $V .= "<br>\n"; }
-              $V .= ($j+1) . ": " . htmlentities($Results[$j]['list']);
+              $V .= ($j+1) . ": " . htmlentities($row['list']);
             }
+            pg_free_result($result);
+
             if ($j < $Count) { $V .= "<br>\n..."; }
             $V .= "</div>\n";
           }

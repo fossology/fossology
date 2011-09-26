@@ -29,16 +29,15 @@ class ui_folders extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_READ;
   var $NoMenu     = 1;
 
-  /***********************************************************
-   Output(): This function returns the FOSSology logo and
-   Folder Navigation bar
-   ***********************************************************/
+  /**
+   * \brief This function returns the FOSSology logo and
+   * Folder Navigation bar
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $V="";
     global $Plugins;
-    global $DB;
     switch($this->OutputType)
     {
       case "XML":

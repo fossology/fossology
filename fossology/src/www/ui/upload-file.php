@@ -28,7 +28,7 @@ class upload_file extends FO_Plugin {
   public $Title = TITLE_upload_file;
   public $Version = "1.0";
   public $MenuList = "Upload::From File";
-  public $Dependency = array("db", "agent_unpack", "showjobs");
+  public $Dependency = array("db", "agent_unpack", "showjobs"); // TODO may be comment out
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
   /**

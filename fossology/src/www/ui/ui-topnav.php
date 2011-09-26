@@ -16,14 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
+/**
+ * \class ui_topnav extends FO_Plugin
+ * \brief top navigater logo on UI
+ */
 class ui_topnav extends FO_Plugin
 {
   var $Name       = "topnav";
@@ -31,6 +27,9 @@ class ui_topnav extends FO_Plugin
   var $MenuList   = "";
   var $Dependency = array("menus");
 
+  /**
+   * \brief Generate output for this plug-in.
+   */
   function Output()
   {
     global $Plugins;

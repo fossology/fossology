@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,15 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_user_edit_any", _("Edit A User"));
 
@@ -34,12 +25,14 @@ class user_edit_any extends FO_Plugin {
   var $Version = "1.0";
   var $Dependency = array("db");
   var $DBaccess = PLUGIN_DB_USERADMIN;
-  /*********************************************
-   Edit(): Edit a user.
-   Returns NULL on success, string on failure.
-   *********************************************/
+
+  /**
+   * \brief Edit a user.
+   * 
+   * \return NULL on success, string on failure.
+   */
   function Edit() {
-    global $DB;
+    global $PG_CONN;
     /* Get the parameters */
     $UserId = GetParm('userid', PARM_INTEGER);
     if (empty($UserId)) {
@@ -82,32 +75,48 @@ class user_edit_any extends FO_Plugin {
     //echo "<pre>session is:{$_SESSION['UiPref']}\n</pre>";
 
     /* Get existing user info for updating */
-    $SQL = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
-    $Results = $DB->Action($SQL);
-    $R = $Results[0];
+    $sql = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $R = pg_fetch_assoc($result);
+    pg_free_result($result);
     if (empty($R['user_pk'])) {
       $text = _("User does not exist.  No change.");
       return ($text);
     }
+
     /* Edit the user */
     if (strcmp($User, $R['user_name'])) {
       /* See if the user already exists (better not!) */
       $Val = str_replace("'", "''", $User);
-      $SQL = "SELECT * FROM users WHERE user_name = '$Val' LIMIT 1;";
-      $Results = $DB->Action($SQL);
-      if (!empty($Results[0]['user_name'])) {
+      $sql = "SELECT * FROM users WHERE user_name = '$Val' LIMIT 1;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      pg_free_result($result);
+      if (!empty($row['user_name'])) {
         $text = _("User already exists.  Not edited.");
         return ($text);
       }
-      $DB->Action("UPDATE users SET user_name = '$Val' WHERE user_pk = '$UserId';");
+
+      $sql = "UPDATE users SET user_name = '$Val' WHERE user_pk = '$UserId';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
     if (strcmp($Desc, $R['user_desc'])) {
       $Val = str_replace("'", "''", $Desc);
-      $DB->Action("UPDATE users SET user_desc = '$Val' WHERE user_pk = '$UserId';");
+      $sql = "UPDATE users SET user_desc = '$Val' WHERE user_pk = '$UserId';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
     if (strcmp($Email, $R['user_email'])) {
       $Val = str_replace("'", "''", $Email);
-      $DB->Action("UPDATE users SET user_email = '$Val' WHERE user_pk = '$UserId';");
+      $sql = "UPDATE users SET user_email = '$Val' WHERE user_pk = '$UserId';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
     /* check email notification, if empty (box not checked), or if no email
      * specified for the user set to ''. (default value for field is 'y').
@@ -116,34 +125,55 @@ class user_edit_any extends FO_Plugin {
       if ($Email_notify == 'on') {
         $Email_notify = 'y';
       }
-      $DB->Action("UPDATE users SET email_notify = '$Email_notify' WHERE user_pk = '$UserId';");
+      $sql = "UPDATE users SET email_notify = '$Email_notify' WHERE user_pk = '$UserId';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
       $_SESSION['UserEnote'] = $Email_notify;
     }
     elseif (empty($Email)) {
-      $DB->Action("UPDATE users SET email_notify = '' WHERE user_pk = '$UserId';");
+      $sql = "UPDATE users SET email_notify = '' WHERE user_pk = '$UserId';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
       $_SESSION['UserEnote'] = '';
     }
     if($uiChoice != $R['ui_preference'])
     {
-      $DB->Action("UPDATE users SET ui_preference='$uiChoice' WHERE user_pk = '$UserId';");
+      $sql = "UPDATE users SET ui_preference='$uiChoice' WHERE user_pk = '$UserId';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
     if ($Folder != $R['root_folder_fk']) {
-      $DB->Action("UPDATE users SET root_folder_fk = '$Folder' WHERE user_pk = '$UserId';");
+      $sql = "UPDATE users SET root_folder_fk = '$Folder' WHERE user_pk = '$UserId';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
     if ($Perm != $R['user_perm']) {
-      $DB->Action("UPDATE users SET user_perm = '$Perm' WHERE user_pk = '$UserId';");
+      $sql = "UPDATE users SET user_perm = '$Perm' WHERE user_pk = '$UserId';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
     if ($Blank == 1) {
       $Seed = rand() . rand();
       $Hash = sha1($Seed . "");
-      $DB->Action("UPDATE users SET user_seed = '$Seed', user_pass = '$Hash' WHERE user_pk = '$UserId';");
+      $sql = "UPDATE users SET user_seed = '$Seed', user_pass = '$Hash' WHERE user_pk = '$UserId';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
       $R['user_seed'] = $Seed;
       $R['user_pass'] = $Hash;
     }
     if (!empty($Pass1)) {
       $Seed = rand() . rand();
       $Hash = sha1($Seed . $Pass1);
-      $DB->Action("UPDATE users SET user_seed = '$Seed', user_pass = '$Hash' WHERE user_pk = '$UserId';");
+      $sql = "UPDATE users SET user_seed = '$Seed', user_pass = '$Hash' WHERE user_pk = '$UserId';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
       $R['user_seed'] = $Seed;
       $R['user_pass'] = $Hash;
     }
@@ -158,34 +188,46 @@ class user_edit_any extends FO_Plugin {
     }
     if ($Block != $OldBlock) {
       if ($Block) {
-        $DB->Action("UPDATE users SET user_pass = ' " . $R['user_pass'] . "' WHERE user_pk = '$UserId';");
+        $sql = "UPDATE users SET user_pass = ' " . $R['user_pass'] . "' WHERE user_pk = '$UserId';";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
       }
       else {
-        $DB->Action("UPDATE users SET user_pass = '" . trim($R['user_pass']) . "' WHERE user_pk = '$UserId';");
+        $sql = "UPDATE users SET user_pass = '" . trim($R['user_pass']) . "' WHERE user_pk = '$UserId';";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
       }
     }
     // update user_agent_list
     if (strcmp($agentList, $R['user_agent_list'])) {
       $Val = str_replace("'", "''", $agentList);
-      $DB->Action("UPDATE users SET user_agent_list = '$Val' WHERE user_pk = '$UserId';");
+      $sql = "UPDATE users SET user_agent_list = '$Val' WHERE user_pk = '$UserId';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
     if ($default_bucketpool_fk != $R['default_bucketpool_fk']) {
       if ($default_bucketpool_fk == 0) $default_bucketpool_fk='NULL';
-      $DB->Action("UPDATE users SET default_bucketpool_fk = $default_bucketpool_fk WHERE user_pk = '$UserId'");
+      $sql = "UPDATE users SET default_bucketpool_fk = $default_bucketpool_fk WHERE user_pk = '$UserId'";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
 
-    $Results = $DB->Action($SQL);
     return (NULL);
   } // Edit()
-  /*********************************************
-  Output(): Generate the text for this plugin.
-  *********************************************/
+
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
 
-    global $DB;
+    global $PG_CONN;
     $V = "";
 
     switch($this->OutputType) {
@@ -197,9 +239,12 @@ class user_edit_any extends FO_Plugin {
         if (!empty($UserId)) {
           $rc = $this->Edit();
           if (empty($rc)) {
-            $SQL = "SELECT user_pk, user_name FROM users WHERE user_pk=$UserId;";
-            $qResults = $DB->Action($SQL);
-            $userName = $qResults[0]['user_name'];
+            $sql = "SELECT user_pk, user_name FROM users WHERE user_pk=$UserId;";
+            $result = pg_query($PG_CONN, $sql);
+            DBCheckResult($result, $sql, __FILE__, __LINE__);
+            $row = pg_fetch_assoc($result);
+            pg_free_result($result);
+            $userName = $row['user_name'];
             // display status
             $V.= displayMessage("User $userName updated.");
           }
@@ -208,15 +253,17 @@ class user_edit_any extends FO_Plugin {
           }
         }
         /* Get the list of users */
-        $SQL = "SELECT user_pk,user_name,user_desc,user_pass,
+        $sql = "SELECT user_pk,user_name,user_desc,user_pass,
                                 root_folder_fk,user_perm,user_email,email_notify,
                                 user_agent_list,default_bucketpool_fk,ui_preference FROM users WHERE
                                 user_pk != '" . @$_SESSION['UserId'] . "' ORDER BY user_name;";
-        $Results = $DB->Action($SQL);
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row0 = pg_fetch_assoc($result);
         /* Create JavaScript for updating users */
         $V.= "\n<script language='javascript'>\n";
         $V.= "document.onreadystatechange = function(){
-        if(document.readyState=='complete'){SetInfo(" . $Results[0]['user_pk'] . ");}
+        if(document.readyState=='complete'){SetInfo(" . $row0['user_pk'] . ");}
       }";
         $V.= "</script>\n";
         $V.= "\n<script language='javascript'>\n";
@@ -230,8 +277,8 @@ class user_edit_any extends FO_Plugin {
         $V.= "var Userfolder = new Array();\n";
         $V.= "var default_bucketpool_fk = new Array();\n";
         $V.= "var UiPref = new Array();\n";
-        for ($i = 0;!empty($Results[$i]['user_pk']);$i++) {
-          $R = & $Results[$i];
+        for ($i = 0; ($row = pg_fetch_assoc($result, $i)) and !empty($row['user_pk']); $i++) {
+          $R = $row;
           //echo "<pre>Users are:\n";
           //print_r($R) . "\n</pre>";
           $Id = $R['user_pk'];
@@ -355,7 +402,7 @@ class user_edit_any extends FO_Plugin {
         $V.= "<form name='userEditAny' method='POST'>\n"; // no url = this url
 
         if (empty($UserId)) {
-          $UserId = $Results[0]['user_pk'];
+          $UserId = $row0['user_pk'];
         }
         $Uri = Traceback_uri();
         $V.= "<P />\n";
@@ -375,15 +422,16 @@ class user_edit_any extends FO_Plugin {
         $V.= "<select name='userid' onClick='SetInfo(this.value);' onchange='SetInfo(this.value);'>\n";
 
         //$V .= "<option selected value='0'>--select user--</option>\n";
-        for ($i = 0;!empty($Results[$i]['user_pk']);$i++) {
+        for ($i = 0; ($row = pg_fetch_assoc($result, $i)) and !empty($row['user_pk']); $i++) {
           $Selected = "";
-          if ($UserId == $Results[$i]['user_pk']) {
+          if ($UserId == $row['user_pk']) {
             $Selected = "selected";
           }
-          $V.= "<option $Selected value='" . $Results[$i]['user_pk'] . "'>";
-          $V.= htmlentities($Results[$i]['user_name']);
+          $V.= "<option $Selected value='" . $row['user_pk'] . "'>";
+          $V.= htmlentities($row['user_name']);
           $V.= "</option>\n";
         }
+        pg_free_result($result);
         $V.= "</select>\n";
         $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
         $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
