@@ -92,6 +92,11 @@ const char* jobsql_failed = "\
           jq_endtext = 'Failed' \
       WHERE jq_pk = '%d';";
 
+const char* jobsql_processed = "\
+    Update jobqueue \
+      SET jq_itemsprocessed = %d \
+      WHERE jq_pk = '%d';";
+
 const char* jobsql_paused = "\
     UPDATE jobqueue \
       SET jq_endtext = 'Paused' \
@@ -360,6 +365,28 @@ void database_update_job(int j_id, job_status status)
 }
 
 /**
+ * Updates teh number of items that a job queue entry has processed.
+ *
+ * @param j_id the id number of the job queue entry
+ * @param num the number of items processed in total
+ */
+void database_job_processed(int j_id, int num)
+{
+  gchar* sql = NULL;
+  PGresult* db_result;
+
+  sql = g_strdup_printf(jobsql_processed, j_id, num);
+  db_result = PQexec(db_conn, sql);
+  if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
+  {
+    lprintf("ERROR %s.%d: failed to update job items processed in job queue\n", __FILE__, __LINE__);
+    lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
+  }
+  PQclear(db_result);
+  g_free(sql);
+}
+
+/**
  * enters the name of the log file for a job into the database
  *
  * @param j_id the id number for the relevant job
@@ -374,7 +401,6 @@ void database_job_log(int j_id, char* log_name) {
   if(PQresultStatus(db_result) != PGRES_COMMAND_OK) {
     lprintf("ERROR %s.%d: failed to set the log file to \"%s\" for job %d\n", __FILE__, __LINE__, log_name, j_id);
     lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
-    lprintf("ERROR after\n");
   }
   PQclear(db_result);
   g_free(sql);

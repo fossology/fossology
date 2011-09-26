@@ -15,6 +15,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ************************************************************** */
 
+/*
+ * TODO change agent logging to only include JOB[job_id].name[pid] only when usefull
+ * TODO change the "<date> <time> scheduler ::" to "<date> <time> agent ::" for some
+ *      log messages
+ */
+
 /* local includes */
 #include <agent.h>
 #include <database.h>
@@ -407,6 +413,7 @@ void agent_listen(agent a)
       i = atoi(&buffer[7]);
       a->check_analyzed = i - a->total_analyzed;
       a->total_analyzed = i;
+      database_job_processed(job_id(a->owner), a->total_analyzed);
     }
     /* we aren't quite sure what the agent sent, log it */
     else if(!(TVERBOSE3))
