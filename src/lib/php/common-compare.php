@@ -20,14 +20,6 @@
  * the diff tools.
  */
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 /*****************************************
  PickGarbage: 
    Do garbage collection on table file_picker.
