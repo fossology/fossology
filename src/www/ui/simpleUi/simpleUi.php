@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 
 /**
  * \file simpleUi.php
@@ -117,15 +117,18 @@ class simpleUi extends FO_Plugin
     }
 
     // if user wants simple ui, make adjustments
-    if($_SESSION['UiPref'] == 'simple')
+    if(array_key_exists('UiPref', $_SESSION))
     {
-      $this->adjustMenus();
-      plugin_disable(@$_SESSION['UserLevel']);
-      $this->disablePlugins(array('agent_nomos_once','agent_copyright_once',
+      if($_SESSION['UiPref'] == 'simple')
+      {
+        $this->adjustMenus();
+        plugin_disable(@$_SESSION['UserLevel']);
+        $this->disablePlugins(array('agent_nomos_once','agent_copyright_once',
         'upload_file', 'upload_url', 'upload_srv_files',
         'upload_instructions','admin_license_file','Admin_License','license'));
+      }
     }
-    else        // original ui, disable simple ui plugins
+    else        // no UiPref or original ui, disable simple ui plugins
     {
       $this->disablePlugins(array('uploads'));
     }
