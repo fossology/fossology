@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -15,52 +15,51 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
-/*************************************************
-Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
 
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
+/**
+ * \file agent.php
+ * \brief Interface copyright agent to job queue
+ **/
 
 define("TITLE_agent_copyright", _("Copyright/Email/URL Analysis"));
 
-class agent_copyright extends FO_Plugin {
-
+class agent_copyright extends FO_Plugin 
+{
   public $Name = "agent_copyright";
   public $Title = TITLE_agent_copyright;
   public $Version = "1.0";
   public $Dependency = array("db");
   public $DBaccess = PLUGIN_DB_ANALYZE;
 
-  /***********************************************************
-  RegisterMenus(): Register additional menus.
-  ***********************************************************/
-  function RegisterMenus() {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return (0);
-    } // don't run
+  /**
+   * \brief Register copyright agent in "Agents" menu
+   **/
+  function RegisterMenus() 
+  {
+    if ($this->State != PLUGIN_STATE_READY)  return (0);
     menu_insert("Agents::" . $this->Title, 0, $this->Name);
   }
-  /*********************************************
-  AgentCheck(): Check if the job is already in the
-  queue.  Returns:
-  0 = not scheduled
-  1 = scheduled but not completed
-  2 = scheduled and completed
-  *********************************************/
-  function AgentCheck($uploadpk) {
-    global $DB;
-    $SQL = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job" .
+
+  /**
+   * \brief Check if the job is already in the queue.  
+   *
+   * \return
+   * - 0 = not scheduled
+   * - 1 = scheduled but not completed
+   * - 2 = scheduled and completed
+  **/
+  function AgentCheck($uploadpk) 
+  {
+    global $PG_CONN;
+    $sql = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job" .
             " ON job_upload_fk = '$uploadpk'" .
             " AND job_pk = jq_job_fk AND jq_type = 'copyright';";
-    $Results = $DB->Action($SQL);
-    if (empty($Results[0]['jq_pk'])) {
-      return (0);
-    }
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+
+    if (empty($row)) return (0);
     if (empty($Results[0]['jq_endtime'])) {
       return (1);
     }
