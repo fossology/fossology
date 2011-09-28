@@ -81,6 +81,7 @@ class ui_topnav extends FO_Plugin
   }
 
 };
+
 $NewPlugin = new ui_topnav;
 $NewPlugin->Initialize();
 ?>
