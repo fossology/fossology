@@ -19,7 +19,7 @@
 /**
  * \class ui_topnav extends FO_Plugin
  * \brief top navigater logo on UI
- */
+ **/
 class ui_topnav extends FO_Plugin
 {
   var $Name       = "topnav";
