@@ -22,6 +22,7 @@ $PG_CONN = 0;   // Database connection
 //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
 require_once("pathinclude.php");
 require_once("$FOSRCDIR/lib/php/common.php");
+require_once("template/template-plugin.php");
 
 /**
  * \file index.php

@@ -16,15 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*****************************************************************
- These are common functions to be used by anyone.
- *****************************************************************/
-
-$ModsEnabledDir = "$SYSCONFDIR/$PROJECT/mods-enabled/www/ui";
-if (is_dir($ModsEnabledDir))
-{
-  require_once("$ModsEnabledDir/template/template-plugin.php");
-}
+/**
+ * \file common.php
+ * \brief These are common functions to be used by anyone.
+ */
 
 require_once("common-sysconfig.php");
 require_once("common-scheduler.php");
