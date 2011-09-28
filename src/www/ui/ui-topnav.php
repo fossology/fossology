@@ -79,7 +79,6 @@ class ui_topnav extends FO_Plugin
     print("$V");
     return;
   }
-
 };
 
 $NewPlugin = new ui_topnav;
