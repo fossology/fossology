@@ -512,7 +512,7 @@ class user_edit_any extends FO_Plugin {
         $text = _("User Interface Options");
         $text1 = _("Use the simplified UI (Default)");
         $text2 = _("Use the original UI");
-        $V .= "$Style<th>$text</th><td><input type='radio'" .
+        //$V .= "$Style<th>$text</th><td><input type='radio'" .
                 "name='whichui' id='simple' value='simple' checked='checked'>" .
                 "$text1<br><input type='radio'" .
                 "name='whichui' id='original' value='original'>" .
