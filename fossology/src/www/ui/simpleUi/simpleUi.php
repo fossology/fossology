@@ -125,7 +125,7 @@ class simpleUi extends FO_Plugin
         plugin_disable(@$_SESSION['UserLevel']);
         $this->disablePlugins(array('agent_nomos_once','agent_copyright_once',
         'upload_file', 'upload_url', 'upload_srv_files',
-        'upload_instructions','admin_license_file','Admin_License','license'));
+        'upload_instructions','admin_license_file','Admin_License'));
       }
     }
     else        // no UiPref or original ui, disable simple ui plugins
