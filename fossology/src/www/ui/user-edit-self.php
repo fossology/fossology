@@ -306,26 +306,26 @@ class user_edit_self extends FO_Plugin
           $V.= "<hr>\n";
         }
         $V.= _("To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n");
-        $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
+        $Style = "<tr><td colspan=2 style='background:black;'></td></tr><tr>";
         $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
         $Val = htmlentities($R['user_name'], ENT_QUOTES);
-        $text = _("Change your username. This will be checked to ensure that it is unique among all users.");
-        $V.= "$Style<th width='5%'>1.</th><th width='25%'>$text</th>";
+        $text = _("Username");
+        $V.= "$Style<th width='25%'>$text</th>";
         $V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
         $V.= "</tr>\n";
         $Val = htmlentities($R['user_desc'], ENT_QUOTES);
-        $text = _("Change your description (name, contact, or other information).  This may be blank.");
-        $V.= "$Style<th>2.</th><th>$text</th>\n";
+        $text = _("Description, full name, contact, etc. (optional) ");
+        $V.= "$Style<th>$text</th>\n";
         $V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
         $V.= "</tr>\n";
         $Val = htmlentities($R['user_email'], ENT_QUOTES);
-        $text = _("Change your email address. This may be blank.");
-        $V.= "$Style<th>3.</th><th>$text</th>\n";
+        $text = _("Email address (optional)");
+        $V.= "$Style<th>$text</th>\n";
         $V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
         $V.= "</tr>\n";
-        $text = _("Change your password.");
-        $text1 = _("Re-enter your password.");
-        $V.= "$Style<th>4.</th><th>$text<br>$text1</th><td>";
+        $text = _("Password");
+        $text1 = _("Re-enter password");
+        $V.= "$Style<th>$text<br>$text1</th><td>";
         $V.= "<input type='password' name='pass1' size=20><br />\n";
         $V.= "<input type='password' name='pass2' size=20></td>\n";
         $V.= "</tr>\n";
@@ -338,12 +338,12 @@ class user_edit_self extends FO_Plugin
           $Checked = "checked='checked'";
         }
         $text = _("E-mail Notification");
-        $V .= "$Style<th>5.</th><th>$text</th><td>\n";
+        $V .= "$Style<th>$text</th><td>\n";
         $V .= "<input name='emailnotify' type='checkbox' $Checked>";
         $V.= "</tr>\n";
         $V.= "</tr>\n";
-        $text = _("Default scans.");
-        $V .= "$Style<th>6.</th><th>$text\n</th><td>\n";
+        $text = _("Default scans");
+        $V .= "$Style<th>$text\n</th><td>\n";
         /*
          * added this code so the form makes sense.  You can have an admin define default agents
          * but if you don't have Analyze or better permissions, then those agents are not available to
@@ -369,13 +369,15 @@ class user_edit_self extends FO_Plugin
           }
         }
         $V .= "</td>\n";
-        $text = _("Default bucketpool.");
-        $V.= "$Style<th>7.</th><th>$text</th>";
+        $text = _("Default bucketpool");
+        $V.= "$Style<th>$text</th>";
         $V.= "<td>";
         $Val = htmlentities($R['default_bucketpool_fk'], ENT_QUOTES);
         $V.= SelectBucketPool($Val);
         $V.= "</td>";
         $V .= "</tr>\n";
+
+/* remove simple UI option to expedite 2.0 release
         $text = _("User Interface Options");
         $text1 = _("Use the simplified UI");
         $text2 = _("Use the original UI");
@@ -396,7 +398,8 @@ class user_edit_self extends FO_Plugin
                 "$text1<br><input type='radio'" .
                 " name='whichui' value='original' $oCheck>" .
                 "$text2</td>\n";
-        //$V .= $P;
+        $V .= $P;
+*/
         $V.= "</table><P />";
         $text = _("Update Account");
         $V.= "<input type='submit' value='$text'>\n";
