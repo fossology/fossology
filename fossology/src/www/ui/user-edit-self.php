@@ -396,7 +396,7 @@ class user_edit_self extends FO_Plugin
                 "$text1<br><input type='radio'" .
                 " name='whichui' value='original' $oCheck>" .
                 "$text2</td>\n";
-        $V .= $P;
+        //$V .= $P;
         $V.= "</table><P />";
         $text = _("Update Account");
         $V.= "<input type='submit' value='$text'>\n";
