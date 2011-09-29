@@ -186,25 +186,25 @@ class user_add extends FO_Plugin {
         /* Build HTML form */
         $V.= "<form name='formy' method='POST'>\n"; // no url = this url
         $V.= _("To create a new user, enter the following information:<P />\n");
-        $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
+        $Style = "<tr><td colspan=2 style='background:black;'></td></tr><tr>";
         $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='75%'>";
         $Val = htmlentities(GetParm('username', PARM_TEXT), ENT_QUOTES);
-        $text = _("Enter the username.");
-        $V.= "$Style<th width='5%'>1.</th><th width='25%'>$text</th>";
+        $text = _("Username");
+        $V.= "$Style<th width='25%' >$text</th>";
         $V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
         $V.= "</tr>\n";
         $Val = htmlentities(GetParm('description', PARM_TEXT), ENT_QUOTES);
-        $text = _("Enter a description for the user (name, contact, or other information).  This may be blank.");
-        $V.= "$Style<th>2.</th><th>$text</th>\n";
+        $text = _("Description, full name, contact, etc. (optional)");
+        $V.= "$Style<th>$text</th>\n";
         $V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
         $V.= "</tr>\n";
         $Val = htmlentities(GetParm('email', PARM_TEXT), ENT_QUOTES);
-        $text = _("Enter an email address for the user, see step 8. This field may be left blank.");
-        $V .= "$Style<th>3.</th><th>$text</th>\n";
+        $text = _("Email address (optional)");
+        $V .= "$Style<th>$text</th>\n";
         $V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
         $V.= "</tr>\n";
-        $text = _("Select the user's access level.");
-        $V.= "$Style<th>4.</th><th>$text</th>";
+        $text = _("Access level");
+        $V.= "$Style<th>$text</th>";
         $V.= "<td><select name='permission'>\n";
         $text = _("None (very basic, no database access)");
         $V.= "<option value='" . PLUGIN_DB_NONE . "'>$text</option>\n";
@@ -226,32 +226,31 @@ class user_add extends FO_Plugin {
         $V.= "<option value='" . PLUGIN_DB_USERADMIN . "'>$text</option>\n";
         $V.= "</select></td>\n";
         $V.= "</tr>\n";
-        $text = _("Select the user's top-level folder. Access is restricted to this folder.");
-        $V.= "$Style<th>5.</th><th>$text";
-        $V.= _(" (NOTE: This is only partially implemented right now. Current users can escape the top of tree limitation.)");
+        $text = _("User root folder");
+        $V.= "$Style<th>$text";
         $V.= "</th>";
         $V.= "<td><select name='folder'>";
         $V.= FolderListOption(-1, 0);
         $V.= "</select></td>\n";
         $V.= "</tr>\n";
-        $text = _("Enter the user's password.  It may be blank.");
-        $V.= "$Style<th>6.</th><th>$text</th><td><input type='password' name='pass1' size=20></td>\n";
+        $text = _("Password (optional)");
+        $V.= "$Style<th>$text</th><td><input type='password' name='pass1' size=20></td>\n";
         $V.= "</tr>\n";
-        $text = _("Re-enter the user's password.");
-        $V.= "$Style<th>7.</th><th>$text</th><td><input type='password' name='pass2' size=20></td>\n";
+        $text = _("Re-enter password");
+        $V.= "$Style<th>$text</th><td><input type='password' name='pass2' size=20></td>\n";
         $V.= "</tr>\n";
         $text = _("E-mail Notification");
-        $text1 = _("Check to enable email notification of completed analysis.");
-        $V .= "$Style<th>8.</th><th>$text</th><td><input type='checkbox'" .
+        $text1 = _("Check to enable email notification when upload scan completes .");
+        $V .= "$Style<th>$text</th><td><input type='checkbox'" .
                 "name='enote' value='y' checked='checked'>" .
                 "$text1</td>\n";
         $V.= "</tr>\n";
-        $text = _("Default Agents: Select the agent(s) to automatically run when uploading data. These selections can be changed on the upload screens.");
-        $V .= "$Style<th>9.</th><th>$text\n</th><td> ";
+        $text = _("Agents selected by default when uploading");
+        $V .= "$Style<th>$text\n</th><td> ";
         $V.= AgentCheckBoxMake(-1, "agent_unpack");
         $V .= "</td>\n";
-        $text = _("Default bucketpool.");
-        $V.= "$Style<th>10.</th><th>$text</th>";
+        $text = _("Default bucketpool");
+        $V.= "$Style<th>$text</th>";
         $V.= "<td>";
         $V.= SelectBucketPool($default_bucketpool_fk);
         $V.= "</td>";
@@ -267,8 +266,8 @@ class user_add extends FO_Plugin {
         $V.= "</table border=0><P />";
 
 
-        $text = _("Add");
-        $V.= "<input type='submit' value='$text!'>\n";
+        $text = _("Add User");
+        $V.= "<input type='submit' value='$text'>\n";
         $V.= "</form>\n";
         break;
       case "Text":
