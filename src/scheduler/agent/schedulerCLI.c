@@ -298,7 +298,7 @@ int main(int argc, char** argv)
   if((db = fo_dbconnect()) == NULL)
   {
     fprintf(stderr, "ERROR: unable to connect to the fossology database\n");
-    fprintf(stderr, "ERROR: make sure the database config is set correctly");
+    fprintf(stderr, "ERROR: make sure the database config is set correctly\n");
     return -1;
   }
 
