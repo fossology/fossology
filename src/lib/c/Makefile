@@ -11,7 +11,7 @@ EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck sq
 LIB=libfossology.a
 OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o
 
-all: $(LIB) $(EXE) $(VARS)
+all: $(LIB) $(VARS)
 	echo "make $(LIB)"
 
 $(LIB): $(OBJS) $(VARS)

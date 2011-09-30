@@ -14,13 +14,25 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+TOP = ../../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+TESTFILE = cliParamsTest.php 
+EXE_DIR = ../../agent/
+
 all:
-	@echo "No unpack Functional agent_tests"
-test:
-	@echo "No unpack Functional agent_tests"
+	$(MAKE) -C $(EXE_DIR)
+
+test: all
+	@echo "ununpack agent functional test"
+	phpunit --log-junit ununpack-Xunit.xml $(TESTFILE)
+
+coverage:
+	@echo "no coverage for ununpack/agent_test/Functional"
+
+
 clean:
-	@echo "unpack Functional agent_tests clean"
-install:
-	@echo "unpack Functional agent_tests install"
-uninstall:
-	@echo "unpack Functional agent_tests uninstall"
+	rm -f *.xml
+
+.PHONY: all test coverage clean
