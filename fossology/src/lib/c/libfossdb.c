@@ -20,41 +20,51 @@
  \brief Common libpq database functions.
  */
 
+#define ERRBUFSIZE 1024
+
 #include "libfossdb.h"
 
 /*!
  fo_dbconnect()
 
- \brief Open the database with the parameters in
-        file FOSSDB_CONF.  For debugging you can
-        override the config file with the file specified
-        by the environment variable FOSSDBCONF.
+ \brief Connect to a database.  The default is Db.conf.
 
- \return PGconn*, or NULL on failure to process the config file.
+ \param DBConfFile File path of the Db.conf file to use.  If NULL, use the default Db.conf
+ \param ErrorBuf   Address of pointer to error buffer.  fo_dbconnect will allocate this
+                   if needed.  The caller should free it.
 
- \warning If the config file is processed but the PQ connect
-  function fails, this function will write an error message to stdout.
+ \return PGconn*, or NULL on failure to process the config file.  If NULL, ErrorBuff will 
+         contain the error message.  If NULL is returned and ErrorBuf is NULL, then 
+         there was insufficient memory to allocate ErrorBuf.
 ****************************************************/
-PGconn *fo_dbconnect()
+PGconn *fo_dbconnect(char *DBConfFile, char **ErrorBuf)
 {
   FILE *Fconf;
   PGconn *pgConn;
-  char *Env;
   char Line[1024];
   char CMD[10240];
   int i,CMDlen;
   int C;
   int PosEqual; /* index of "=" in Line */
   int PosSemi;  /* index of ";" in Line */
+  int BufLen;
 
-  /* Env FOSSDBCONF = debugging override for the config file */
-  Env = getenv("FOSSDBCONF");
-
-  if (Env)
-    Fconf = fopen(Env,"r");
+  if (DBConfFile)
+    Fconf = fopen(DBConfFile,"r");
   else 
     Fconf = fopen(FOSSDB_CONF,"r");
-  if (!Fconf) return(NULL);
+  if (!Fconf) 
+  {
+    *ErrorBuf = malloc(ERRBUFSIZE);
+    if (*ErrorBuf) 
+    {
+      snprintf(*ErrorBuf, ERRBUFSIZE, "Database conf file: %s, ", 
+                (DBConfFile ? DBConfFile:"FOSSDB_CONF"));
+      BufLen = strlen(*ErrorBuf);
+      strerror_r(errno, *ErrorBuf+BufLen, ERRBUFSIZE-BufLen);
+    }
+    return(NULL);
+  }
 
   /* read the configuration file */
   memset(CMD,'\0',sizeof(CMD));
@@ -83,39 +93,48 @@ PGconn *fo_dbconnect()
       if (CMD[0] != '\0')
       {
         CMD[CMDlen++] = ' ';
-        if (CMDlen >= sizeof(CMD)) { fclose(Fconf); return(NULL); }
+        if (CMDlen >= sizeof(CMD)) { fclose(Fconf); goto BadConf; }
 	    }
       Line[PosSemi] = '\0';
       for(i=0; i < PosEqual; i++)
       {
         if (!isspace(Line[i])) CMD[CMDlen++] = Line[i];
-        if (CMDlen >= sizeof(CMD)) { fclose(Fconf); return(NULL); }
+        if (CMDlen >= sizeof(CMD)) { fclose(Fconf); goto BadConf; }
 	    }
       CMD[CMDlen++] = '=';
-      if (CMDlen >= sizeof(CMD)) { fclose(Fconf); return(NULL); }
+      if (CMDlen >= sizeof(CMD)) { fclose(Fconf); goto BadConf; }
       for(i=PosEqual+1; Line[i] != '\0'; i++)
       {
         if (!isspace(Line[i])) CMD[CMDlen++] = Line[i];
-        if (CMDlen >= sizeof(CMD)) { fclose(Fconf); return(NULL); }
+        if (CMDlen >= sizeof(CMD)) { fclose(Fconf); goto BadConf; }
       }
     }
   }
 
   /* done reading file */
   fclose(Fconf);
-  if (CMD[0] == '\0') return(NULL);
+  if (CMD[0] == '\0') goto BadConf;
 
   /* Perform the connection */
   pgConn = PQconnectdb(CMD);
   if (PQstatus(pgConn) != CONNECTION_OK)
   {
-    printf("ERROR: Unable to connect to the database\n");
-    printf("  Connection string: '%s'\n",CMD);
-    printf("  Connection status: '%d'\n",PQstatus(pgConn));
+    *ErrorBuf = malloc(ERRBUFSIZE);
+    if (*ErrorBuf) 
+    {
+      snprintf(*ErrorBuf, ERRBUFSIZE, 
+            "ERROR: Unable to connect to the database\n   Connection string: '%s'\n   Connection status: '%d'\n", CMD, PQstatus(pgConn));
+    }
     return(NULL);
   }
 
   return(pgConn);
+
+BadConf:
+  *ErrorBuf = malloc(ERRBUFSIZE);
+  snprintf(*ErrorBuf, ERRBUFSIZE, "Invalid Database conf file: %s, ", 
+        (DBConfFile ? DBConfFile:"FOSSDB_CONF"));
+  return(NULL);
 } /* fo_dbconnect() */
  
 

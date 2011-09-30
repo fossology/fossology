@@ -127,9 +127,11 @@ message by the FOSSolgy system.\n\n";
 void database_init()
 {
   PGresult* db_result;
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
 
   /* create the connection to the database */
-  db_conn = fo_dbconnect();
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   memset(fossy_url, '\0', sizeof(fossy_url));
 
   /* get the url for the fossology instance */

@@ -251,6 +251,7 @@ int main(int argc, char** argv)
   char host[FILENAME_MAX];    // string to hold the name of the host
   char buffer[1024];          // string buffer used to read
   char db_conf[FILENAME_MAX]; // the file to use for the database configuration
+  char *ErrBuf;               // Error buffer
   GOptionContext* options;    // the command line options parser
   char* poss;                 // used to split incoming string on '\n'
   GError* error = NULL;
@@ -262,7 +263,7 @@ int main(int argc, char** argv)
   verbose = 0;
 
   /* set the fossology database config */
-  snprintf(db_conf, FILENAME_MAX, "%s/%s", getenv("HOME"), FOSS_CONF);
+  snprintf(db_conf, FILENAME_MAX, "%s", FOSSDB_CONF);
 
   GOptionEntry entries[] =
   {
@@ -294,11 +295,10 @@ int main(int argc, char** argv)
   }
 
   /* set up the connection to the database */
-  setenv("FOSSDBCONF", db_conf, 1);
-  if((db = fo_dbconnect()) == NULL)
+  if((db = fo_dbconnect(db_conf, &ErrBuf)) == NULL)
   {
-    fprintf(stderr, "ERROR: unable to connect to the fossology database\n");
-    fprintf(stderr, "ERROR: make sure the database config is set correctly\n");
+    fprintf(stderr, "ERROR: Unable to connect to the fossology database\n");
+    fprintf(stderr, "ERROR: %s\n", ErrBuf);
     return -1;
   }
 
@@ -317,7 +317,7 @@ int main(int argc, char** argv)
     fprintf(stderr, "ERROR: could not connect to host\n");
     fprintf(stderr, "ERROR: attempted to connect to \"%s:%d\"\n",
         host, port_number);
-    fprintf(stderr, "ERROR: the scheduler make not be running\n");
+    fprintf(stderr, "ERROR: the scheduler may not be running\n");
     return 0;
   }
 

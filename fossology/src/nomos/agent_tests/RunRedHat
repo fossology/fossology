@@ -2,5 +2,5 @@
 for file in $(find RedHat -type f)
 do
 #echo "$file"
-../nomos "$file"
+../agent/nomos "$file"
 done

@@ -24,7 +24,7 @@ include $(VARS)
 GLIB_FLAGS =  -lgthread-2.0 -lgio-2.0
 CFLAGS_LOCAL = $(GLIB_FLAGS) $(ALL_CFLAGS) -I. -lpq -lpthread
 DEF   = -DAGENT_DIR='"$(SYSCONFDIR)"' -DLOG_DIR='"$(LOGDIR)"' \
-        -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"' -DCLI_DIR='"$(DESTDIR)$(BINDIR)"'
+        -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"' -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"'
 DEPEN = Makefile logging.h
 
 EXE = fo_scheduler
@@ -60,12 +60,12 @@ HEAD = agent.h \
 # executable build rules #
 ##########################
 
-all: $(EXE) $(CLI) defconf/init.d/fossology
+all: $(FOLIB) $(EXE) $(CLI) defconf/init.d/fossology 
 
 $(EXE): $(OBJS) $(VARS) $(HEAD) $(DEPEN)
 	$(CC) $(OBJS) $(DEF) $(CFLAGS_LOCAL) -o $@
 
-$(CLI): schedulerCLI.c Makefile
+$(CLI): schedulerCLI.c Makefile $(FOLIB)
 	$(CC) schedulerCLI.c $(CFLAGS_LOCAL) $(DEF) -o $@
 
 #######################
@@ -74,6 +74,10 @@ $(CLI): schedulerCLI.c Makefile
 
 libscheduler.a: $(OBJS) $(DEPEN)
 	ar cvr $@ $(OBJS)
+
+$(FOLIB):
+	$(MAKE) -C $(FOLIBDIR)
+
 
 ##################
 # init.d scripts #
@@ -148,6 +152,4 @@ coverage:
 
 include $(DEPS)
 
-.PHONE: all install uninstall clean test coverage
-
-
+.PHONY: all install uninstall clean test coverage $(FOLIB)
