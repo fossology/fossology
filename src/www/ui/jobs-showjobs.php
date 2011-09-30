@@ -181,7 +181,7 @@ $text1 = _("Value");
         if (!empty($Row[$F]))
         {
           $V .= "<pre>";
-          $V .= file_get_contents($Row[$F]);
+          if (file_exists($Row[$F])) $V .= file_get_contents($Row[$F]);
           $V .= "</pre>";
         }
 		break;
