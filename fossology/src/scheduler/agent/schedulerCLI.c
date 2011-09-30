@@ -296,7 +296,11 @@ int main(int argc, char** argv)
   /* set up the connection to the database */
   setenv("FOSSDBCONF", db_conf, 1);
   if((db = fo_dbconnect()) == NULL)
+  {
+    fprintf(stderr, "ERROR: unable to connect to the fossology database\n");
+    fprintf(stderr, "ERROR: make sure the database config is set correctly");
     return -1;
+  }
 
   /* open the connection to the scheduler */
   s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -313,6 +317,7 @@ int main(int argc, char** argv)
     fprintf(stderr, "ERROR: could not connect to host\n");
     fprintf(stderr, "ERROR: attempted to connect to \"%s:%d\"\n",
         host, port_number);
+    fprintf(stderr, "ERROR: the scheduler make not be running\n");
     return 0;
   }
 
