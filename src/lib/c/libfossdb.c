@@ -22,11 +22,6 @@
 
 #include "libfossdb.h"
 
-#ifndef FOSSDB_CONF
-#define FOSSDB_CONF "/etc/fossology/Db.conf"
-#endif
-
-
 /*!
  fo_dbconnect()
 
