@@ -30,7 +30,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 void testListFolders()
 {
-  db_conn = fo_dbconnect();
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
   ListFolders();
   PQfinish(db_conn);
@@ -41,7 +44,10 @@ void testListFolders()
  */
 void testListUploads()
 {
-  db_conn = fo_dbconnect();
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
   ListUploads();
 

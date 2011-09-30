@@ -33,6 +33,8 @@ int	main(int argc, char *argv[])
   int   ars_pk = 0;
   char *ListOutName=NULL;
   char *Fname = NULL;
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv);
@@ -58,7 +60,8 @@ int	main(int argc, char *argv[])
       case 'R':	Recurse=-1; break;
       case 'r':	Recurse=atoi(optarg); break;
       case 'i':
-        pgConn = fo_dbconnect();
+        pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
+
         if (!pgConn)
         {
           FATAL("Unable to access database")
@@ -109,7 +112,7 @@ int	main(int argc, char *argv[])
   /* Open DB and Initialize CMD table */
   if (UseRepository) 
   {
-    pgConn = fo_dbconnect();
+    pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
     if (!pgConn)
     {
       FATAL("Unable to access database")

@@ -482,10 +482,13 @@ int	main	(int argc, char *argv[])
   int c;
   long UploadPk=-1;
   PGresult *pgResult;
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
 //  char *agent_desc = "Convert adjacency list to nested set (data retrieval optimization)";
 
   /* open the database */
-  pgConn = fo_dbconnect();
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
+
   if(!pgConn)
   {
     printf("FATAL: %s.%d: Copyright agent unable to connect to database.\n", 

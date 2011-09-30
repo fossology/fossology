@@ -80,13 +80,15 @@ int	main	(int argc, char *argv[])
   int rv;
   PGresult *ars_result;
   char sqlbuf[1024]; 
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
 
   fo_scheduler_connect(&argc, argv);
 
   //glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   //glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
 
-  db_conn = fo_dbconnect();
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!db_conn)
   {
     FATAL("Unable to connect to database");

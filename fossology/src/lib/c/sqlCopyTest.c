@@ -58,6 +58,8 @@ int main(int argc, char **argv)
   int         RowNum;
   int         rv;  /* return status value */
   clock_t     StartTime, EndTime;
+  char       *DBConfFile = NULL;  /* use default Db.conf */
+  char       *ErrorBuf;
 
   if (argc != 4)
   {
@@ -83,7 +85,7 @@ int main(int argc, char **argv)
     exit(-2);
   }
 
-  pgConn = fo_dbconnect();
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
 
   /* Create a test table to populate */
   snprintf(sql, sizeof(sql), "create table %s (col_int integer, col_text text, col_vc varchar(40))", TestTable);

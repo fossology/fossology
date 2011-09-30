@@ -71,6 +71,8 @@ int main (int argc, char *argv[])
   int GotArg=0;
   char *agent_desc = "Deletes upload.  Other list/delete options available from the command line.";
   char *Parm = NULL;
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
 
   fo_scheduler_connect(&argc, argv);
 
@@ -79,7 +81,7 @@ int main (int argc, char *argv[])
     switch(c)
     {
       case 'i':
-        db_conn = fo_dbconnect();
+        db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
         if (!db_conn)
         {
           FATAL("Unable to open DB");
@@ -107,7 +109,7 @@ int main (int argc, char *argv[])
     exit(-1);
   }
 
-  db_conn = fo_dbconnect();
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!db_conn)
   {
     FATAL("Unable to open DB");

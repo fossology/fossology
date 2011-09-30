@@ -39,8 +39,10 @@ static long pfile_pk = -1;
  */
 int  DBInit()
 {
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
 
-  pgConn = fo_dbconnect();
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
     FATAL("Unable to connect to database");
@@ -219,8 +221,10 @@ void testCheckMimeTypes()
 {
   /** for the file, if the extension is bin, the mime type is application/octet-stream */
   char Ext[] = "bin";
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
 
-  pgConn = fo_dbconnect();
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
     FATAL("Unable to connect to database");

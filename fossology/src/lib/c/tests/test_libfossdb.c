@@ -47,8 +47,10 @@ void test_fo_tableExists()
   PGconn *pgConn;
   int     nonexistant_table;
   int     existing_table;
+  char   *DBConfFile = NULL;  /* use default Db.conf */
+  char   *ErrorBuf;
 
-  pgConn = fo_dbconnect();
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
 
   CU_ASSERT_PTR_NOT_NULL(pgConn);
 

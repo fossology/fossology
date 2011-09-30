@@ -32,7 +32,10 @@ extern void	DBLoadMime	();
  */
 int  DBLoadMimeInit()
 {
-  pgConn = fo_dbconnect();
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
     FATAL("Unable to connect to database");
