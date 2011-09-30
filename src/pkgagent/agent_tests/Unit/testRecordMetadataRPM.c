@@ -36,6 +36,8 @@ void test_RecordMetadataRPM()
   char SQL[MAXSQL];
   PGresult *result;
   char Fuid[1024];
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
 
   for(i=0; i<20; i++) { sprintf(Fuid+0+i*2,"%02X",'s'); }
   Fuid[40]='.';
@@ -47,7 +49,7 @@ void test_RecordMetadataRPM()
   int predictValue = 0;
 
   /* perpare testing data in database */
-  db_conn = fo_dbconnect();
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size) VALUES ('%.40s','%.32s','%s');",
           Fuid,Fuid+41,Fuid+74);
   result =  PQexec(db_conn, SQL);

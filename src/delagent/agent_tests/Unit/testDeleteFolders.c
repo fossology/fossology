@@ -31,7 +31,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 void testDeleteFolders()
 {
   long FolderId = 5;
-  db_conn = fo_dbconnect();
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
   DeleteFolder(FolderId);
 
@@ -45,7 +48,10 @@ void testDeleteFolders()
 void testDeleteUploads()
 {
   long UploadId = 85;
-  db_conn = fo_dbconnect();
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
   DeleteUpload(UploadId);
 

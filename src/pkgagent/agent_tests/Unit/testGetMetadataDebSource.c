@@ -32,9 +32,12 @@ void test_GetMetadataDebSource()
 {
   char *repFile = "../testdata/fossology_1.4.1.dsc";
   struct debpkginfo *pi;
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
   int predictValue = 0;
-  db_conn = fo_dbconnect();
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   strcpy(pi->version, "");
   int Result = GetMetadataDebSource(repFile, pi);
   printf("GetMetadataDebSource Result is:%d\n", Result);

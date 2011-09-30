@@ -64,6 +64,9 @@ int main(int argc, char **argv)
   int rv;
   int hasPrules;
   char *bucketpool_name;
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
 //  int *bucketList;
   pbucketdef_t bucketDefArray = 0;
   pbucketdef_t tmpbucketDefArray = 0;
@@ -71,7 +74,7 @@ int main(int argc, char **argv)
   uploadtree_t  uploadtree;
 
   /* Connect to the database */
-  pgConn = fo_dbconnect();
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn) 
   {
     printf("FATAL: Bucket agent unable to connect to database, exiting...\n");

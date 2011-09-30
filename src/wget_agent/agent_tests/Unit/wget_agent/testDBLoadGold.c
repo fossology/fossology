@@ -38,6 +38,9 @@ int  DBLoadGoldInit()
   char URL[MAXCMD];
   char TempFileDir[MAXCMD];
   char TempFile[MAXCMD];
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
   strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");
   strcpy(URL, "http://fossology.org/debian/1.0.0/");
   strcpy(TempFileDir, "./test_result/");
@@ -45,7 +48,8 @@ int  DBLoadGoldInit()
   GetURL(TempFile, URL, TempFileDir);
   strcpy(GlobalTempFile,"./test_result/wget.tar");
   strcpy(GlobalURL, "http://fossology.org/debian/1.0.0/");
-  pgConn = fo_dbconnect();
+
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
     FATAL("Unable to connect to database");

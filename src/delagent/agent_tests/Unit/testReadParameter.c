@@ -34,7 +34,10 @@ void testReadParameter()
 {
   char *Parm = "LIST UPLOAD 85";
   int result;
-  db_conn = fo_dbconnect();
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
   result = ReadParameter(Parm);
   PQfinish(db_conn);

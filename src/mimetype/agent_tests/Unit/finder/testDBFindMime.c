@@ -30,7 +30,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 int  DBFindMimeInit()
 {
-  pgConn = fo_dbconnect();
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
     FATAL("Unable to connect to database");

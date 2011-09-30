@@ -751,6 +751,8 @@ int main(int argc, char** argv)
   int ars_pk = 0;               // the args primary key
   long upload_pk = 0;           // the upload primary key
   long agent_pk = 0;            // the agents primary key
+  char *DBConfFile = NULL;      /* use default Db.conf */
+  char *ErrorBuf;
 
   /* Database structs */
   PGconn* pgConn = NULL;        // the connection to Database
@@ -813,7 +815,7 @@ int main(int argc, char** argv)
         copyright_destroy(copy);
         return 0;
       case 'i': /* initialize database connections */
-        pgConn = fo_dbconnect();
+        pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
         if(!pgConn) {
           fprintf(cerr, "FATAL %s.%d: Copyright agent unable to connect to database.\n", __FILE__, __LINE__);
           exit(-1);
@@ -832,7 +834,7 @@ int main(int argc, char** argv)
   if(num_files == 0)
   {
     /* open the database */
-    pgConn = fo_dbconnect();
+    pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
     if(!pgConn)
     {
       fprintf(cerr, "FATAL: %s.%d: Copyright agent unable to connect to database.\n", __FILE__, __LINE__);

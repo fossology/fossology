@@ -31,10 +31,13 @@ void test_GetMetadata_normal()
 {
   char *pkg = "../testdata/fossology-1.2.0-1.el5.i386.rpm";
   struct rpmpkginfo *pi;
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   int predictValue = 0;
   rpmReadConfigFiles(NULL, NULL);
-  db_conn = fo_dbconnect();
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   int Result = GetMetadata(pkg, pi);
   printf("test_GetMetadata Result is:%d\n", Result);
   //printf("test_GetMetadata Result is:%s\n", pi->buildDate); 
@@ -71,8 +74,11 @@ void test_GetMetadata_no_testfile()
   struct rpmpkginfo *pi;
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   int predictValue = -1;
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
   rpmReadConfigFiles(NULL, NULL);
-  db_conn = fo_dbconnect();
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   int Result = GetMetadata(pkg, pi);
   printf("test_GetMetadata Result is:%d\n", Result);
   PQfinish(db_conn);

@@ -86,6 +86,9 @@ int main  (int argc, char *argv[])
   int rv;
   char sqlbuf[1024]; 
   PGresult *ars_result;
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
 
   fo_scheduler_connect(&argc, argv);
 
@@ -134,7 +137,7 @@ int main  (int argc, char *argv[])
     Usage(argv[0]);
     SafeExit(-1);
   }
-  pgConn = fo_dbconnect();
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
     FATAL("Unable to connect to database");

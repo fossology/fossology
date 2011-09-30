@@ -283,12 +283,14 @@ void test_GetMetadataDebBinary()
 {
   struct debpkginfo *pi;
   long upload_pk;
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
 
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
   int predictValue = 0;
 
   /* perpare testing data in database */
-  db_conn = fo_dbconnect();
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   
   upload_pk = prepare_Database(db_conn, pi);
   if (upload_pk == -1)

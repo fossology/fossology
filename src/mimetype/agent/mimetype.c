@@ -59,12 +59,14 @@ int main(int argc, char *argv[])
   int rv;
   PGresult *result;
   char sqlbuf[1024]; 
+  char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
 
   /** initialize the scheduler connection */
   fo_scheduler_connect(&argc, argv);
 
   /* Init */
-  pgConn = fo_dbconnect();
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
     FATAL("Unable to connect to database");
