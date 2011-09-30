@@ -118,7 +118,7 @@ void fo_scheduler_connect(int* argc, char** argv)
   /* send "OK" to the scheduler */
   if(found) 
   {
-    fprintf(stdout, "OK\n");
+    fprintf(stdout, "\nOK\n");
     fflush(stdout);
 
     /* \todo check the nfs mounts for the agent */
@@ -141,7 +141,7 @@ void fo_scheduler_disconnect(int retcode)
   /* send "CLOSED" to the scheduler */
   if(found) 
   {
-    fprintf(stdout, "BYE %d\n", retcode);
+    fprintf(stdout, "\nBYE %d\n", retcode);
     fflush(stdout);
 
     valid = 0;
@@ -176,12 +176,12 @@ char* fo_scheduler_next()
   while(fgets(buffer, sizeof(buffer), stdin) != NULL)
   {
     if(verbose)
-      printf("NOTE: received %s\n", buffer);
+      printf("\nNOTE: received %s\n", buffer);
     if(strncmp(buffer, "CLOSE", 5) == 0)
       break;
     if(strncmp(buffer, "END", 3) == 0)
     {
-      fprintf(stdout, "OK\n");
+      fprintf(stdout, "\nOK\n");
       fflush(stdout);
       valid = 0;
       continue;
@@ -194,12 +194,13 @@ char* fo_scheduler_next()
     }
     else if(strncmp(buffer, "VERSION", 7) == 0)
     {
-      fprintf(stdout, "%s\n", SVN_REV);
+      fprintf(stdout, "\nVERSION: %s\n", SVN_REV);
       fflush(stdout);
       valid = 0;
       continue;
     }
 
+    buffer[strlen(buffer) - 1] = '\0';
     valid = 1;
     return buffer;
   }
