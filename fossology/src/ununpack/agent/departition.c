@@ -378,6 +378,7 @@ int	ReadMBR	(int Fin, uint64_t MBRStart)
 
 /**
  * \brief Usage
+ * \param Filename (executable argv[0] name)
  **/
 void	Usage	(char *Filename)
 {

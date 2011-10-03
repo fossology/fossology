@@ -124,4 +124,3 @@ int	ExtractAR	(char *Source, char *Destination)
   }
   return(rc);
 } /* ExtractAR() */
-
