@@ -32,7 +32,7 @@
 
 /**
  * \brief Open and mmap a file.
- * \parapm Fname File pathname
+ * \param Fname File pathname
  * \return CksmFile ptr, or NULL on failure.
  **/
 CksumFile *	SumOpenFile	(char *Fname)
@@ -219,6 +219,7 @@ Cksum *	SumComputeBuff	(CksumFile *CF)
 /**
  * \brief Return string representing a Cksum.
  *  NOTE: The calling function must free() the string!
+ * \param Sum Cksum ptr
  * \return "sha1.md5.size" string, or NULL on error.
  **/
 char *	SumToString	(Cksum *Sum)
