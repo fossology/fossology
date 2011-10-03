@@ -38,10 +38,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define P_WIDTH 30
 #define F_WIDTH 10
 
-#ifndef FOSS_CONF
-#define FOSS_CONF ".fossology.conf"
-#endif
-
 #define vprintf(...) if(verbose) printf(__VA_ARGS__);
 
 int s;          ///< the socket that the CLI will use to communicate
@@ -256,6 +252,14 @@ int main(int argc, char** argv)
   char* poss;                 // used to split incoming string on '\n'
   GError* error = NULL;
 
+  /* command bool and info */
+  int c_stop     = 0;
+  int c_pause    = 0;
+  int c_reload   = 0;
+  int c_restart  = 0;
+  int c_verbose  = 0;
+  int c_database = 0;
+
   /* initialize memory */
   strcpy(host, "localhost");
   memset(buffer, '\0', sizeof(buffer));
@@ -267,14 +271,26 @@ int main(int argc, char** argv)
 
   GOptionEntry entries[] =
   {
-      {"conf",  'c', 0, G_OPTION_ARG_STRING, &db_conf,
+      {"conf",     'c', 0, G_OPTION_ARG_STRING, &db_conf,
           "Set the file that will be used for the database configuration"},
-      {"host",  'h', 0, G_OPTION_ARG_STRING, &host,
+      {"host",     'h', 0, G_OPTION_ARG_STRING, &host,
           "Set the host that the scheduler is on"},
-      {"port",  'p', 0, G_OPTION_ARG_INT,    &port_number,
+      {"port",     'p', 0, G_OPTION_ARG_INT,    &port_number,
           "Set the port that the scheduler is listening on"},
-      {"quiet", 'q', 0, G_OPTION_ARG_NONE,   &verbose,
+      {"quiet",    'q', 0, G_OPTION_ARG_NONE,   &verbose,
           "Cause the CLI to not print usage hints"},
+      {"stop",     's', 0, G_OPTION_ARG_NONE,   &c_stop,
+          "CLI will send stop command and close"},
+      {"pause",    'P', 0, G_OPTION_ARG_INT,    &c_pause,
+          "CLI will send a pause command and close"},
+      {"reload",   'r', 0, G_OPTION_ARG_NONE,   &c_reload,
+          "CLI will send a reload command and close"},
+      {"restart",  'R', 0, G_OPTION_ARG_INT,    &c_restart,
+          "CLI will send a restart command and close"},
+      {"verbose",  'v', 0, G_OPTION_ARG_INT,    &c_verbose,
+          "CLI will send a verbose command to scheduler"},
+      {"database", 'd', 0, G_OPTION_ARG_NONE, &c_database,
+          "CLI will send a database command to scheduler"},
       {NULL}
   };
 
@@ -321,6 +337,37 @@ int main(int argc, char** argv)
     return 0;
   }
 
+  /* check specific command instructions */
+  if(c_stop || c_pause || c_reload || c_restart || c_verbose || c_database) {
+    if(c_verbose)
+    {
+      snprintf(buffer, sizeof(buffer) - 1, "verbose %d", c_verbose);
+      bytes = write(s, buffer, strlen(buffer));
+    }
+
+    if(c_reload)
+      bytes = write(s, "reload", 6);
+    if(c_database)
+      bytes = write(s, "database", 8);
+
+    if(c_pause)
+    {
+      snprintf(buffer, sizeof(buffer) - 1, "pause %d", c_pause);
+      bytes = write(s, buffer, strlen(buffer));
+    }
+
+    if(c_restart)
+    {
+      snprintf(buffer, sizeof(buffer) - 1, "restart %d", c_restart);
+      bytes = write(s, buffer, strlen(buffer));
+    }
+
+    if(c_stop)
+      bytes = write(s, "stop", 5);
+
+    return 0;
+  }
+
   /* listen to the scheulder */
   if(verbose) interface_usage();
   while(!closing)
@@ -356,7 +403,9 @@ int main(int argc, char** argv)
     /* check stdin */
     if(FD_ISSET(fileno(stdin), &fds))
     {
-      bytes = read(fileno(stdin), buffer, sizeof(buffer));
+      if(read(fileno(stdin), buffer, sizeof(buffer)) == 0)
+        break;
+
       if(strcmp(buffer, "help\n") == 0)
       {
         interface_usage();
