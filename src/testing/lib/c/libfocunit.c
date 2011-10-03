@@ -30,13 +30,23 @@
  *
  *  The caller also needs to use the FO_ macros in libcunit.h instead of the CU_ macros.
  *
+ * \param argc - number of command line arguments
+ * \param argv - command line arguments
  * \param test_name - the test name
  * \param suites - the test suite array
  *
  * \return 0 on sucess, not 1 on failure
  */
-int focunit_main(char *test_name, CU_SuiteInfo *suites)
+int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites)
 {
+  int   iopt;
+  char *SuiteName = 0;
+  char *TestName = 0;
+  CU_pTestRegistry pRegistry;
+  CU_pSuite        pSuite;
+  CU_pTest         pTest;
+  CU_ErrorCode     ErrCode;
+
   /** test name is empty? */
   if (!test_name)
   {
@@ -58,6 +68,65 @@ int focunit_main(char *test_name, CU_SuiteInfo *suites)
     fprintf(stderr, "FATAL: Register suites failed - %s\n", CU_get_error_msg());
     exit(1);
   }
+  pRegistry = CU_get_registry();
+
+  /* option -s suitename to run
+   *        -t testname to run
+   */
+  while((iopt = getopt(argc,argv,"s:t:")) != -1)
+  {
+    switch(iopt)
+    {
+      case 's':
+          SuiteName = optarg;
+          break;
+      case 't':
+          TestName = optarg;
+          break;
+      default:
+          fprintf(stderr, "Invalid argument for %s\n", argv[0]);
+          exit(-1);
+    }
+  }
+
+  /* If TestName is specified, SuiteName is required */
+  if (TestName && !SuiteName)
+  {
+    fprintf(stderr, "A Suite name (-s) is required if you specify a test name.\n");
+    exit(-1);
+  }
+
+  if (SuiteName)
+  {
+    pSuite = CU_get_suite_by_name(SuiteName, pRegistry);
+    if (!pSuite)
+    {
+      fprintf(stderr, "Suite %s not found.\n", SuiteName);
+      exit(-1);
+    }
+
+    if (TestName)
+    {
+      pTest = CU_get_test_by_name(TestName, pSuite);
+      if (!pTest)
+      {
+        fprintf(stderr, "Test %s not found in suite %s.\n", TestName, SuiteName);
+        exit(-1);
+      }
+      ErrCode = CU_run_test(pSuite, pTest);
+    }
+    else
+    {
+      ErrCode = CU_run_suite(pSuite);
+    }
+
+    if (ErrCode)
+    {
+      fprintf(stderr, "Error: %s\n", CU_get_error_msg());
+      exit(-1);
+    }
+    exit(0);
+  }
 
   CU_set_output_filename(test_name);
   CU_list_tests_to_file();
@@ -74,4 +143,3 @@ int focunit_main(char *test_name, CU_SuiteInfo *suites)
 
   return 0;
 }
-
