@@ -34,10 +34,13 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 test: all $(EXE)
+	MYDIR=@pwd
+	@cd ..
 	@if test ! -e unpack-test-data.tar.bz2 ; then \
 	rsync -a fossology.org:/var/www/fossology.org/testing/testFiles/unpack-test-data.tar.bz2 .;\
 	tar xjf unpack-test-data.tar.bz2;\
 	fi;
+	@cd $(MYDIR)
 	./$(EXE)
 
 coverage: $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)

@@ -27,7 +27,7 @@ void testExtractISO1()
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  Filename = "./test-data/testdata4unpack/imagefile.iso";
+  Filename = "../test-data/testdata4unpack/imagefile.iso";
   MkDirs("./test-result/imagefile.iso.dir");
   Result = ExtractISO(Filename, "./test-result/imagefile.iso.dir");
   FO_ASSERT_EQUAL(Result, 0); 
@@ -56,7 +56,7 @@ void testExtractISO2()
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  Filename = "./test-data/testdata4unpack/523.iso";
+  Filename = "../test-data/testdata4unpack/523.iso";
   MkDirs("./test-result/523.iso.dir");
   Result = ExtractISO(Filename, "./test-result/523.iso.dir"); // 
   exists = file_dir_exists("./test-result/523.iso.dir/523sfp/DOS4GW.EXE");

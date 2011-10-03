@@ -28,7 +28,7 @@ void testExtractAR4ArchiveLibraryFile()
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
   MkDirs("./test-result/libfossagent.a.dir/");
-  Filename = "./test-data/testdata4unpack/libfossagent.a";
+  Filename = "../test-data/testdata4unpack/libfossagent.a";
   Result = ExtractAR(Filename, "./test-result/libfossagent.a.dir");
   exists = file_dir_exists("./test-result/libfossagent.a.dir/libfossagent.o");
   FO_ASSERT_EQUAL(exists, 1); // existing
@@ -44,7 +44,7 @@ void testExtractAR4DebFile()
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
   MkDirs("./test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir/");
-  Filename = "./test-data/testdata4unpack/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb";
+  Filename = "../test-data/testdata4unpack/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb";
   Result = ExtractAR(Filename, "./test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir");
   exists = file_dir_exists("./test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir/data.tar.gz");
   FO_ASSERT_EQUAL(exists, 1); // existing

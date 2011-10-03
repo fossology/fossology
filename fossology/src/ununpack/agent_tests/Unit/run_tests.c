@@ -87,7 +87,7 @@ int file_dir_exists(char *path_name)
 
 int main(int argc, char** argv)
 {
-  return focunit_main("ununpack_Tests", suites);
+  return focunit_main(argc, argv, "ununpack_Tests", suites);
 }
 
 

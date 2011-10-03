@@ -38,7 +38,7 @@ void testTraverseChild4IsoFile()
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   
-  Filename = "./test-data/testdata4unpack/imagefile.iso";
+  Filename = "../test-data/testdata4unpack/imagefile.iso";
   MkDirs("./test-result/imagefile.iso.dir/");
   lstat(Filename, &Stat);
   ContainerInfo CITemp;
@@ -96,7 +96,7 @@ void testTraverseChild4DebianSourceFile()
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
 
-  Filename = "./test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
+  Filename = "../test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
   //  MkDirs("./test-result/fcitx_3.6.2-1.dsc.dir/");
   lstat(Filename, &Stat);
   ContainerInfo CITemp;
@@ -138,7 +138,7 @@ void testTraverseChild4PartitionFile()
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
 
-  Filename = "./test-data/testdata4unpack/vmlinuz-2.6.26-2-686";
+  Filename = "../test-data/testdata4unpack/vmlinuz-2.6.26-2-686";
   MkDirs("./test-result/vmlinuz-2.6.26-2-686.dir/");
   strcpy(Queue[0].ChildRecurse, "./test-result/vmlinuz-2.6.26-2-686.dir/");
   lstat(Filename, &Stat);
