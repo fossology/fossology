@@ -43,6 +43,6 @@ CU_SuiteInfo suites[] = {
  */
 int main( int argc, char *argv[] )
 {
-  return focunit_main("mimetype_Tests", suites) ;
+  return focunit_main(argc, argv, "mimetype_Tests", suites) ;
 }
 

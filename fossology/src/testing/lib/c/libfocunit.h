@@ -20,10 +20,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <getopt.h>
 #include "CUnit/CUnit.h"
 #include "CUnit/Automated.h"
 
-int focunit_main(char *test_name, CU_SuiteInfo *suites);
+int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
 
 /** 
  * @file libcunit.h
