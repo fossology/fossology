@@ -1,8 +1,7 @@
 # FOSSology Makefile - agent/nomos
 # Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
-TOP=../..
+TOP=../../..
 VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 SPEC=STRINGS.in
