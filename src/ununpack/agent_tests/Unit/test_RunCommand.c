@@ -32,7 +32,7 @@ void testRunCommand4ZcatTesting()
   deleteTmpFiles("./test-result/");
   Cmd = "zcat";
   CmdPre = "-q -l";
-  File = "./test-data/testdata4unpack/FileName.tar.Z";
+  File = "../test-data/testdata4unpack/FileName.tar.Z";
   CmdPost = ">/dev/null 2>&1";
   Out = 0x0;
   Where = 0x0;
@@ -50,7 +50,7 @@ void testRunCommand4Zcat()
   deleteTmpFiles("./test-result/");
   Cmd = "zcat";
   CmdPre = "";
-  File = "./test-data/testdata4unpack/FileName.tar.Z";
+  File = "../test-data/testdata4unpack/FileName.tar.Z";
   CmdPost = "> '%s' 2>/dev/null";
   Out = "FileName.tar.Z.unpacked";
   Where = "./test-result";
@@ -68,7 +68,7 @@ void testRunCommand4Pdf()
   deleteTmpFiles("./test-result/");
   Cmd = "pdftotext";
   CmdPre = "-htmlmeta";
-  File = "./test-data/testdata4unpack/israel.pdf";
+  File = "../test-data/testdata4unpack/israel.pdf";
   CmdPost = "> '%s' 2>/dev/null";
   Out = "israel.pdf.text";
   Where = "./test-result";
@@ -86,7 +86,7 @@ void testRunCommand4Rpm1()
   deleteTmpFiles("./test-result/");
   Cmd = "rpm2cpio";
   CmdPre = "";
-  File = "./test-data/testdata4unpack/fossology-1.2.0-1.el5.i386.rpm";
+  File = "../test-data/testdata4unpack/fossology-1.2.0-1.el5.i386.rpm";
   CmdPost = "> '%s' 2> /dev/null";
   Out = "fossology-1.2.0-1.el5.i386.rpm.unpacked";
   Where = "./test-result";

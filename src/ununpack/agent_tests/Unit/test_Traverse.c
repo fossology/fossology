@@ -51,7 +51,7 @@ int TraverseClean()
  */
 void testTraverseNormal4Package()
 {
-  Filename = "./test-data/testdata4unpack/threezip.zip"; 
+  Filename = "../test-data/testdata4unpack/threezip.zip"; 
   Basename = "threezip.zip";
   deleteTmpFiles(NewDir);
   ParentInfo PITest = {0, 1287725739, 1287725739, 0, 0};
@@ -67,7 +67,7 @@ void testTraverseNormal4Package()
  */
 void testTraverseNormal4Package2()
 {
-  Filename = "./test-data/testdata4unpack/libfossagent.a";
+  Filename = "../test-data/testdata4unpack/libfossagent.a";
   Basename = "libfossagent.a";
   deleteTmpFiles(NewDir);
   ParentInfo PITest = {0, 1287725739, 1287725739, 0, 0};
@@ -83,12 +83,12 @@ void testTraverseNormal4Package2()
  */
 void testTraverseNormal4Dir()
 {
-  Filename = "./test-data/testdata4unpack/testdir";
+  Filename = "../test-data/testdata4unpack/testdir";
   Basename = "";
   deleteTmpFiles(NewDir);
   MkDirs("./test-result/test-data/testdata4unpack/testdir");
-  char *cmdline = "/bin/cp -r ./test-data/testdata4unpack/testdir/* ./test-result/test-data/testdata4unpack/testdir";
-  system(cmdline); // cp ./test-data/testdata4unpack/testdir to ./test-result/
+  char *cmdline = "/bin/cp -r ../test-data/testdata4unpack/testdir/* ./test-result/test-data/testdata4unpack/testdir";
+  system(cmdline); // cp ../test-data/testdata4unpack/testdir to ./test-result/
   ParentInfo PITest = {0, 1287725739, 1287725739, 0, 0};
   PI = &PITest;
   Label = "Called by dir/wait";

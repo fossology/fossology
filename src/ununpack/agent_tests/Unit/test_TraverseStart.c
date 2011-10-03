@@ -45,7 +45,7 @@ int TraverseStartClean()
 
 void testTraverseStartNormal()
 {
-  Filename = "./test-data/testdata4unpack/threezip.zip";
+  Filename = "../test-data/testdata4unpack/threezip.zip";
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/threezip.zip.dir/twozip.zip.dir/Desktop.zip.dir/record.txt");
   FO_ASSERT_EQUAL(exists, 0); // ./test-result/ is not existing
