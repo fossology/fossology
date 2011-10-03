@@ -169,14 +169,14 @@ function genHtml($inFile=NULL, $outFile=NULL, $xslFile=NULL)
   // else running from fossology/tests
   $cmdLine = "Reports/hudson/xml2html.php -f $inFile -o $outFile -x $xslFile";
   }
-  $last = exec("$cmdLine", $out, $rtn);
+  $last = exec("$cmdLine 2>&1", $out, $rtn);
   //echo "Last line of output from xml2:\n$last\n";
   //echo "output from xml2 is:\n";
   //print_r($out) . "\n";
 
   if($rtn != 0)
   {
-    $errorString = 'Error: xml2html had errors, see below\n';
+    $errorString = "Error: xml2html had errors, see below\n";
     $errorString .= implode(' ', $out);
     return($errorString);
   }
