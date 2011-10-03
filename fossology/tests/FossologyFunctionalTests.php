@@ -44,13 +44,16 @@ require_once('common-Report.php');
 global $testSuite;
 global $home;
 
-// The tests are run inside of jenkins the workspace level, so you have to cd
-// into the sources.
-// @todo, fix this to work in both jenkins and non-jenkins runs.
+// Figure out where we are
 
-if(chdir('fossology/tests') === FALSE)
+if(!defined('TESTROOT'))
 {
-  echo "FATAL! cannot cd to fossology/tests\n";
+  $trPath = __DIR__;
+  define('TESTROOT',$trPath);
+}
+if(chdir(TESTROOT) === FALSE)
+{
+  echo "FATAL! cannot cd to:\n" . TESTROOT . "\n";
   exit(1);
 }
 $home = getcwd();
@@ -63,7 +66,14 @@ if(array_key_exists('WORKSPACE', $_ENV))
 }
 
 // this file is used for all reports
-$xslFile = $WORKSPACE . '/fossology/tests/Reports/hudson/junit-noframes.xsl';
+if(is_NULL($WORKSPACE))
+{
+  $xslFile = TESTROOT . '/Reports/junit-noframes.xsl';
+}
+else
+{
+  $xslFile = $WORKSPACE . '/fossology/tests/Reports/junit-noframes.xsl';
+}
 
 // check that test config file exists and that test data exists
 $ckConfig = exec('./checkConfig.php', $configOut, $configRtn);
@@ -82,21 +92,22 @@ if($tdRtn != 0)
 }
 
 // run the functional tests
-$cmdLine = "$WORKSPACE" . '/fossology/tests/runFunctionalTests.php > '.
- "$WORKSPACE" . '/fossology/tests/Functional-Test-Results.xml';
+$cmdLine = TESTROOT . '/runFunctionalTests.php > '. TESTROOT .
+  '/Functional-Test-Results.xml 2>&1';
 $lastFunc = exec($cmdLine, $output, $rtn);
 
 // Generate an html report from the junit report produced by the test run
 
 //echo "Generating html report\n";
-$inFile = $WORKSPACE . '/fossology/tests/Functional-Test-Results.xml';
-$outFile = $WORKSPACE . '/fossology/tests/Reports/FunctionalTestResults.html';
+$inFile = TESTROOT . '/Functional-Test-Results.xml';
+$outFile = TESTROOT . '/Reports/FunctionalTestResults.html';
 
 $report = genHtml($inFile, $outFile, $xslFile);
 if(!empty($report))
 {
-  echo "Error: Could not generate an Upload Test HTML report." .
+  echo "Error: Could not generate an Functinoal Test HTML report: " .
  "FunctionalTestResults.html.\n";
+  echo "Errors were:$report\n";
 }
 // check for failures in the report
 else
@@ -106,14 +117,11 @@ else
     if(!is_null($upFail))
     {
       echo "There were errors in $inFile\n";
-      //print_r($upFail) . "\n";
-      exit(1);
     }
   }
   catch (Exception $e)
   {
     echo "Failure: Could not check file $inFile for failures\n";
-    exit(1);
   }
 }
 
@@ -123,8 +131,9 @@ if(chdir($home) === FALSE)
   exit(1);
 }
 // Run the uploads (which are a set of tests in themselves)
-$cmdLine = "$WORKSPACE" . '/fossology/tests/runUploadsTest.php > ' .
-  "$WORKSPACE" . '/fossology/tests/Uploads-Results.xml';
+
+$cmdLine = TESTROOT . '/runUploadsTest.php > ' .
+TESTROOT . '/Uploads-Results.xml';
 $lastFunc = exec($cmdLine, $output, $rtn);
 if($rtn != 0)
 {
@@ -133,15 +142,17 @@ if($rtn != 0)
 }
 // Generate an upload test html report from the junit report
 //echo "Generating html report\n";
-$inFile = $WORKSPACE . '/fossology/tests/Uploads-Results.xml';
-$outFile = $WORKSPACE . '/fossology/tests/Reports/UploadsTestResults.html';
+$inFile = TESTROOT . '/Uploads-Results.xml';
+$outFile = TESTROOT . '/Reports/UploadsTestResults.html';
 $upFail = array();
 
+$report = NULL;
 $report = genHtml($inFile, $outFile, $xslFile);
 if(!empty($report))
 {
   echo "Error: Could not generate an Upload Test HTML report " .
     "Uploads-Results.xml.\n";
+  echo "Errors were:$report\n";
 }
 // check for failures in the report
 else
@@ -151,27 +162,24 @@ else
     if(!is_null($urFail))
     {
       echo "There were errors in the $inFile\n";
-      //print_r($urFail) . "\n";
-      exit(1);
     }
   }
   catch (Exception $e)
   {
     echo "Failure: Could not check file $inFile for failures\n";
-    exit(1);
   }
 }
 
 // Run the upload verification tests
-$xmlFile = "$WORKSPACE" . '/fossology/tests/Uploads-Test-Results.xml';
-$cmdLine = "$WORKSPACE" . '/fossology/tests/runVerifyUploadsTests.php > ' .
+$xmlFile = TESTROOT . '/Uploads-Test-Results.xml';
+$cmdLine = TESTROOT . '/runVerifyUploadsTests.php > ' .
   "$xmlFile";
 $lastFunc = exec($cmdLine, $output, $rtn);
 
 // remove the blank line at the top of the file
 // @todo find out how the blank line is being generated and fix.
-$inFile = $WORKSPACE . '/fossology/tests/Uploads-Test-Results.xml';
-$outFile = $WORKSPACE . '/fossology/tests/Reports/VerifyTestResults.html';
+$inFile = TESTROOT . '/Uploads-Test-Results.xml';
+$outFile = TESTROOT . '/Reports/VerifyTestResults.html';
 
 $fileString = file_get_contents($inFile,FALSE ,NULL, 1);
 $bytes = 0;
@@ -180,12 +188,13 @@ if($bytes > 0)
 {
   // Generate an upload test html report from the junit report
   //echo "Generating html report\n";
-
+  $report = NULL;
   $report = genHtml($inFile, $outFile, $xslFile);
   if(!empty($report))
   {
     echo "Error: Could not generate an Upload Test HTML report " .
     "VerifyTestResults.html.";
+    echo "Errors were:$report\n";
   }
   // check for failures in the report
   else
@@ -195,19 +204,17 @@ if($bytes > 0)
       if(!is_null($verFail))
       {
         echo "There were errors in the $inFile\n";
-        //print_r($verFail) . "\n";
-        exit(1);
       }
     }
     catch (Exception $e)
     {
       echo "Failure: Could not check file $inFile for failures\n";
-      exit(1);
     }
   }
 }
 else
 {
-  echo "ERROR: No data written to file:\n$file\n";
+  echo "ERROR: No data written to file:\n$inFile\n";
+  echo "bytes written is:$bytes\n";
 }
 ?>
