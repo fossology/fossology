@@ -675,38 +675,47 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
   return(rc);
 } /* RunCommand() */
 
+
 /**
- * @brief Given a file name, determine the type of
- *        extraction command.  This uses Magic.
- * @returns index to command-type, or -1 on error.
+ * @brief Open and load Magic file
+ * Initializes global MagicCookie
+ * @returns 0 on success
  **/
-int	FindCmd	(char *Filename)
+int InitMagic()
 {
-  char *Type;
-  char Static[256];
-  int Match;
-  int i;
-  int rc;
+  MagicCookie = magic_open(MAGIC_MIME);
+  if (MagicCookie == NULL)
+  {
+    FATAL("Failed to initialize magic cookie")
+    SafeExit(-1);
+  }
+  return magic_load(MagicCookie,NULL);
+}
 
-  Type = (char *)magic_file(MagicCookie,Filename);
-  if (Type == NULL) return(-1);
-
+/**
+ * @brief Read file to see if it is a Debian source file
+ * Assumes that all Debian source files have a .dsc filename extension.
+ * @param Filename File to open
+ * @returns 1 if Filename is a Debian source file, else 0
+ **/
+int IsDebianSourceFile(char *Filename)
+{
   /* Set .dsc file magic as application/x-debian-source */
   char *pExt;
   FILE *fp;
   char line[500];
   int j;
   char c;
+
   pExt = strrchr(Filename, '.');
   if ( pExt != NULL)
   {
     if (strcmp(pExt, ".dsc")==0)
     {
-      //check .dsc file contect to verify if is debian source file
-      if ((fp = fopen(Filename, "r")) == NULL){
-        DEBUG("Unable to open .dsc file %s",Filename)
-        return(-1);
-      }
+      /* read the first 500 characters of the file to verify that 
+      * it really is a debian source file
+      */
+      if ((fp = fopen(Filename, "r")) == NULL) return 0;
       j=0;	
       while ((c = fgetc(fp)) != EOF && j < 500 ){
         line[j]=c;
@@ -716,156 +725,124 @@ int	FindCmd	(char *Filename)
       if ((strstr(line, "-----BEGIN PGP SIGNED MESSAGE-----") && strstr(line,"Source:")) || 
           (strstr(line, "Format:") && strstr(line, "Source:") && strstr(line, "Version:")))
       {
-        if (Verbose > 0) DEBUG("First bytes of .dsc file %s\n",line)
-        memset(Static,0,sizeof(Static));
-        strcpy(Static,"application/x-debian-source");
-        Type=Static;
+        return 1;
       }
     }	
   }
+  return 0;
+}
 
-  /* sometimes Magic is wrong... */
-  if (strstr(Type, "application/x-iso")) strcpy(Type, "application/x-iso");
-  /* for xx.deb and xx.udeb package in centos os */
-  if(strstr(Type, " application/x-debian-package"))
-    strcpy(Type,"application/x-debian-package");
+/**
+ * @brief Figure out the real type of "octet" files in case we can unarchive them.
+ * @param Filename
+ * @param Static buffer to return with new Type
+ **/
+void OctetType(char *Filename, char *TypeBuf)
+{
+  int rc;
+  char *Type;
 
-  /* for ms file, maybe the Magic contains 'msword', or the Magic contains 'vnd.ms', all unpack via 7z */
-  if(strstr(Type, "msword") || strstr(Type, "vnd.ms"))
-    strcpy(Type, "application/x-7z-w-compressed");
-
-  if (strstr(Type, "octet" ))
+  /* 7zr can handle many formats (including isos), so try this first */
+  rc = RunCommand("7z","l -y ",Filename,">/dev/null 2>&1",NULL,NULL);
+  if (rc==0)
   {
-    rc = RunCommand("zcat","-q -l",Filename,">/dev/null 2>&1",NULL,NULL);
-    if (rc==0)
-    {
-      memset(Static,0,sizeof(Static));
-      strcpy(Static,"application/x-gzip");
-      Type=Static;
-    }
-    else  // zcat failed so try cpio (possibly from rpm2cpio)
-    {
-      rc = RunCommand("cpio","-t<",Filename,">/dev/null 2>&1",NULL,NULL);
-      if (rc==0)
-      {
-        memset(Static,0,sizeof(Static));
-        strcpy(Static,"application/x-cpio");
-        Type=Static;
-      }
-      else  // cpio failed so try 7zr (possibly from p7zip)
-      {
-        rc = RunCommand("7zr","l -y -p",Filename,">/dev/null 2>&1",NULL,NULL);
-        if (rc==0)
-        {
-          memset(Static,0,sizeof(Static));
-          strcpy(Static,"application/x-7z-compressed");
-          Type=Static;
-        }
-        else
-        {
-          /* .deb and .udeb as application/x-debian-package*/
-          char CMDTemp[FILENAME_MAX];
-          sprintf(CMDTemp, "file '%s' |grep \'Debian binary package\'", Filename);
-          rc = system(CMDTemp);
-          if (rc==0) // is one debian package
-          {
-            memset(Static,0,sizeof(Static));
-            strcpy(Static,"application/x-debian-package");
-            Type=Static;
-          }
-          else /* for ms(.msi, .cab) file in debian os */
-          {
-            rc = RunCommand("7z","l -y -p",Filename,">/dev/null 2>&1",NULL,NULL);
-            if (rc==0)
-            {
-              memset(Static,0,sizeof(Static));
-              strcpy(Static,"application/x-7z-w-compressed");
-              Type=Static;
-            }
-            else
-            {
-              memset(CMDTemp, 0, FILENAME_MAX);
-              /* get the file type */
-              sprintf(CMDTemp, "file '%s'", Filename);
-              FILE *fp;
-              char Output[FILENAME_MAX];
-              /* Open the command for reading. */
-              fp = popen(CMDTemp, "r");
-              if (fp == NULL)
-              {
-                printf("Failed to run command");
-                SafeExit(50);
-              }
-
-              /* Read the output the first line */
-              if(fgets(Output, sizeof(Output) - 1, fp) == NULL)
-                ERROR("Failed read")
-
-              /* close */
-              pclose(fp);
-              /* the file type is ext2 */
-              if (strstr(Output, "ext2"))
-              {
-                memset(Static,0,sizeof(Static));
-                strcpy(Static,"application/x-ext2");
-                Type=Static;
-              }
-              else if (strstr(Output, "ext3")) /* the file type is ext3 */
-              {
-                memset(Static,0,sizeof(Static));
-                strcpy(Static,"application/x-ext3");
-                Type=Static;
-              }
-              else if (strstr(Output, "x86 boot sector, mkdosfs")) /* the file type is FAT */
-              {
-                memset(Static,0,sizeof(Static));
-                strcpy(Static,"application/x-fat");
-                Type=Static;
-              }
-              else if (strstr(Output, "x86 boot sector")) /* the file type is NTFS */
-              {
-                memset(Static,0,sizeof(Static));
-                strcpy(Static,"application/x-ntfs");
-                Type=Static;
-              }
-              else if (strstr(Output, "x86 boot")) /* the file type is boot partition */
-              {
-                memset(Static,0,sizeof(Static));
-                strcpy(Static,"application/x-x86_boot");
-                Type=Static;
-              }
-              else
-              {
-                // only here to validate other octet file types
-                if (Verbose > 0) DEBUG("octet mime type, file: %s", Filename)
-              }
-            }
-          }
-        }
-      }
-    }
+    strcpy(TypeBuf,"application/x-7z-w-compressed");
+    return;
   }
 
+  /* Get more information from magic */
+  magic_setflags(MagicCookie, MAGIC_NONE);
+  Type = (char *)magic_file(MagicCookie, Filename);
+  /* reset magic flags */
+  magic_setflags(MagicCookie, MAGIC_MIME);
+
+  if (strstr(Type, " ext2 "))
+  {
+    strcpy(TypeBuf,"application/x-ext2");
+    return;
+  }
+
+  if (strstr(Type, " ext3 "))
+  {
+    strcpy(TypeBuf,"application/x-ext3");
+    return;
+  }
+
+  if (strstr(Type, "x86 boot sector, mkdosfs")) /* the file type is FAT */
+  {
+    strcpy(TypeBuf,"application/x-fat");
+    return;
+  }
+
+  if (strstr(Type, "NTFS")) /* the file type is NTFS */
+  {
+    strcpy(TypeBuf,"application/x-ntfs");
+    return;
+  }
+
+  if (strstr(Type, "x86 boot")) /* the file type is boot partition */
+  {
+    strcpy(TypeBuf,"application/x-x86_boot");
+    return;
+  }
+
+  if (strstr(Type, "ISO 9660"))
+  {
+    strcpy(TypeBuf,"application/x-iso9660-image");
+    return;
+  }
+
+  /* .deb and .udeb as application/x-debian-package*/
+  if (strstr(Type, "Debian binary package"))
+  {
+    strcpy(TypeBuf,"application/x-debian-package");
+    return;
+  }
+}
+
+/**
+ * @brief Given a file name, determine the type of
+ *        extraction command.  This uses Magic.
+ * @returns index to command-type, or -1 on error.
+ **/
+int	FindCmd	(char *Filename)
+{
+  char *Type;
+  char TypeBuf[256];
+  int Match;
+  int i;
+  int rc;
+
+  if (!MagicCookie) InitMagic();
+  TypeBuf[0] = 0;
+
+  Type = (char *)magic_file(MagicCookie,Filename);
+  if (Type == NULL) return(-1);
+
+  /* The Type returned by magic_file needs to be verified and possibly rewritten.
+   * So save it in a static buffer.
+   */
+  strncpy(TypeBuf, Type, sizeof(TypeBuf));
+  TypeBuf[255] = 0;  /* make sure TypeBuf is null terminated */
+
+  if (strstr(Type, "octet" )) 
+  {
+    OctetType(Filename, TypeBuf);
+  }
+  else
+  if (IsDebianSourceFile(Filename)) strcpy(TypeBuf,"application/x-debian-source");
+  else 
+  if (strstr(Type, "msword") || strstr(Type, "vnd.ms"))
+     strcpy(TypeBuf, "application/x-7z-w-compressed");
+  else
+  /* some files you just have to try to verify their type */
   if (strstr(Type, "application/x-exe") ||
       strstr(Type, "application/x-shellscript"))
   {
-    int rc;
     rc = RunCommand("unzip","-q -l",Filename,">/dev/null 2>&1",NULL,NULL);
     if ((rc==0) || (rc==1) || (rc==2) || (rc==51))
     {
-      memset(Static,0,sizeof(Static));
-      strcpy(Static,"application/x-zip");
-      Type=Static;
-    }
-    else
-    {
-      rc = RunCommand("cabextract","-l",Filename,">/dev/null 2>&1",NULL,NULL);
-      if (rc==0)
-      {
-        memset(Static,0,sizeof(Static));
-        strcpy(Static,"application/x-cab");
-        Type=Static;
-      }
+      strcpy(TypeBuf,"application/x-zip");
     }
   } /* if was x-exe */
   else if (strstr(Type, "application/x-tar"))
@@ -874,7 +851,10 @@ int	FindCmd	(char *Filename)
       return(-1); /* bad tar! (Yes, they do happen) */
   } /* if was x-tar */
 
-  /* determine command for file */
+
+  /* Match Type (mimetype from magic or from special processing above to determine 
+   * the command for Filename 
+   */
   Match=-1;
   for(i=0; (CMD[i].Cmd != NULL) && (Match == -1); i++)
   {
@@ -884,14 +864,17 @@ int	FindCmd	(char *Filename)
       Match=i; /* done! */
     }
     else
-      if (!strstr(Type, CMD[i].Magic)) continue; /* not a match */
+      if (!strstr(TypeBuf, CMD[i].Magic)) 
+      {
+        continue; /* not a match */
+      }
     Match=i;
   }
 
   if (Verbose > 0)
   {
     /* no match */
-    if (Match == -1) DEBUG("MISS: Type=%s  %s",Type,Filename)
+    if (Match == -1) DEBUG("MISS: Type=%s  %s",TypeBuf,Filename)
     else DEBUG("MATCH: Type=%d  %s %s %s %s",CMD[Match].Type,CMD[Match].Cmd,CMD[Match].CmdPre,Filename,CMD[Match].CmdPost)
   }
 

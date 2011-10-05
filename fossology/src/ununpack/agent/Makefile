@@ -12,7 +12,7 @@ EXE=departition ununpack
 
 CHKHDR= checksum.h md5.h sha1.h
 CHKSRC=$(CHKHDR:%.h=%.c) traverse.c utils.c
-UUHDR= ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h $(CHKHDR)
+UUHDR= ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h $(CHKHDR) ununpack_globals.h
 UUSRC=$(UUHDR:%.h=%.c)
 
 TESTDIR=tests
@@ -24,7 +24,7 @@ all: $(FOLIB) $(EXE)
 departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
 
-ununpack: ununpack.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB)
+ununpack: ununpack.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
 	$(CC) ununpack.c libununpack.a $(CFLAGS_LOCAL) -o $@
 
 $(FOLIB):
@@ -50,7 +50,7 @@ uninstall: $(VARS)
 	rm -f $(CONFDIR)/mods-enabled/ununpack
 
 
-$(OBJECTS): %.o: %.c 
+$(OBJECTS): %.o: %.c  $(UUHDR)
 	$(CC) -c $< $(CFLAGS_LOCAL) 
 
 

@@ -100,15 +100,6 @@ int	main(int argc, char *argv[])
     }
   }
 
-  MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
-  if (MagicCookie == NULL)
-  {
-    FATAL("Failed to initialize magic cookie")
-    SafeExit(-1);
-  }
-
-  magic_load(MagicCookie,NULL);
-
   /* Open DB and Initialize CMD table */
   if (UseRepository) 
   {
