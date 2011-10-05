@@ -53,7 +53,7 @@ CU_SuiteInfo suites[] =
 
   // utils.c
   {"CopyFile", CopyFileInit, CopyFileClean, CopyFile_testcases},
-  {"FindCmd", FindCmdInit, FindCmdClean, FindCmd_testcases},
+  {"FindCmd", NULL, FindCmdClean, FindCmd_testcases},
   {"Prune", PruneInit, PruneClean, Prune_testcases},
   {"RunCommand", NULL, NULL, RunCommand_testcases},
 

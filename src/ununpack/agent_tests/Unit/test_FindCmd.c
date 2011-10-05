@@ -104,10 +104,10 @@ void testFindCmd4RpmFile()
  */
 void testFindCmd4IsoFile()
 {
-  char *Filename = "test-data/testdata4unpack/imagefile.iso";
+  char *Filename = "../test-data/testdata4unpack/imagefile.iso";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 20);
+  FO_ASSERT_EQUAL(result, 16);  // let 7z handle the isos
 }
 
 /**
@@ -152,7 +152,7 @@ void testFindCmd4DebFile()
   char *Filename = "../test-data/testdata4unpack/libpango1.0-udeb_1.28.1-1_i386.udeb";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 19);
+  FO_ASSERT_EQUAL(result, 16);  /* let 7zip handle udeb */
 }
 
 /**
@@ -198,7 +198,7 @@ void testFindCmd4ExeFile()
   char *Filename = "../test-data/testdata4unpack/PUTTY.EXE";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 28);
+  FO_ASSERT_EQUAL(result, 16);  /* this can be unpacked by 7z */
 }
 
 /**

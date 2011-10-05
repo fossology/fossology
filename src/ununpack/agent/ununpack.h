@@ -168,6 +168,7 @@ int	 CopyFile	(char *Src, char *Dst);
 int  ParentWait();
 void CheckCommands (int Show);
 int  RunCommand  (char *Cmd, char *CmdPre, char *File, char *CmdPost, char *Out, char *Where);
+int  InitMagic();
 int  FindCmd (char *Filename);
 void FreeDirList (dirlist *DL);
 dirlist * MakeDirList (char *Fullname);
