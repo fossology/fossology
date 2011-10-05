@@ -32,6 +32,10 @@ test:
 coverage:
 	$(MAKE) -C $(COVDIR) coverage
 
+testdata:
+	rsync -a fossology.org:/var/www/fossology.org/testing/testFiles/unpack-test-data.tar.bz2 .
+	tar xjf unpack-test-data.tar.bz2
+
 clean:
 	$(call dirloop,clean)
 
