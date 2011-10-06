@@ -330,10 +330,7 @@ int main(int argc, char** argv)
 
   if(connect(s, (struct sockaddr*)&addr, sizeof(addr)) == -1)
   {
-    fprintf(stderr, "ERROR: could not connect to host\n");
-    fprintf(stderr, "ERROR: attempted to connect to \"%s:%d\"\n",
-        host, port_number);
-    fprintf(stderr, "ERROR: the scheduler may not be running\n");
+    fprintf(stderr, "ERROR: Could not connect to scheduler at %s:%d.  Is the scheduler running?\n", host, port_number);
     return 0;
   }
 
