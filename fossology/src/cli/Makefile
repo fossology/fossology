@@ -5,8 +5,8 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-EXE=cp2foss.php fossinit.php fossjobs.php fo_notify.php fosslic.php
-DOCS=cp2foss.pod fossjobs.pod fosslic.pod fo_notify.pod
+EXE=cp2foss.php fossinit.php fossjobs.php fosslic.php
+DOCS=cp2foss.pod fossjobs.pod fosslic.pod 
 MAN1FILES=$(DOCS:%.pod=%.1)
 HTMLFILES=$(DOCS:%.pod=%.html)
 TEXTFILES=$(DOCS:%.pod=%.txt)
