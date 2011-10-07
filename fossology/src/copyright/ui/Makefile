@@ -24,7 +24,6 @@ install:
 	echo "make copyright install"
 	mkdir -p $(DESTDIR)$(WEBDIR)/plugins/
 	mkdir -p $(DESTDIR)$(WEBDIR)/plugins/copyright/
-	$(INSTALL_DATA) copyright.php $(DESTDIR)$(WEBDIR)/plugins/copyright.php
 	$(INSTALL_DATA) library.php $(DESTDIR)$(WEBDIR)/plugins/copyright/library.php
 	$(INSTALL_DATA) hist.php $(DESTDIR)$(WEBDIR)/plugins/copyright/hist.php
 	$(INSTALL_DATA) list.php $(DESTDIR)$(WEBDIR)/plugins/copyright/list.php
