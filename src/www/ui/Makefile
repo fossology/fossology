@@ -26,6 +26,8 @@ iPATHFILE=pathinclude.php
 
 DIRS=images locale
 
+FILES=`find . -type f | grep -v svn |grep -v tests | grep -v simpleUi | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$" |grep -v $(iPATHFILE)`
+
 all: $(iPATHFILE)
 
 $(iPATHFILE): $(VARS)
@@ -62,8 +64,6 @@ install: all $(iPATHFILE)
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
 	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
 
-	
-	
 uninstall:
 	for file in $(FILES); do \
 		rm -f $(DESTDIR)$(WEBDIR)/$$file; \
