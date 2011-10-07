@@ -118,5 +118,6 @@ char* fo_scheduler_next();
 /* ************************************************************************** */
 
 char* fo_scheduler_current();
+char* fo_sysconfig(char* sectionname, char* variablename);
 
 #endif /* LIBFOSSSCHEDULER_H_INCLUDE */

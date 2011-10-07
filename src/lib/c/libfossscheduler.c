@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* local includes */
 #include "libfossscheduler.h"
+#include "fossconfig.h"
 
 #ifndef SVN_REV
 #define SVN_REV "SVN_REV Unknown"
@@ -98,6 +99,7 @@ void  fo_scheduler_heart(int i)
  */
 void fo_scheduler_connect(int* argc, char** argv)
 {
+  GError* error = NULL;
   found = 0;
 
   /* check for --scheduler command line option */
@@ -127,6 +129,8 @@ void fo_scheduler_connect(int* argc, char** argv)
     signal(SIGALRM, fo_heartbeat);
     alarm(ALARM_SECS);
   }
+
+  fo_config_load_default(&error);
 }
 
 /**
@@ -220,4 +224,26 @@ char* fo_scheduler_next()
 char* fo_scheduler_current()
 {
   return valid ? buffer : NULL;
+}
+
+/**
+ * @brief gets a system configuration variable from the configuration data.
+ *
+ * This function should be called after fo_scheduler_connect has been called.
+ * This is because the configuration data it not loaded until after that.
+ *
+ * @param sectionname the group of the variable
+ * @param variablename the name of the variable
+ * @return the value of the variable
+ */
+char* fo_sysconfig(char* sectionname, char* variablename) {
+  GError* error = NULL;
+  char* ret;
+
+  ret = fo_config_get(
+      sectionname,
+      variablename,
+      &error);
+
+  return error != NULL ? NULL : ret;
 }
