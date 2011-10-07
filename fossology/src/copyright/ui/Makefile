@@ -21,48 +21,42 @@ all:
 	@echo "make copyright ui"
 
 install:
-	echo "make copyright install"
-	mkdir -p $(DESTDIR)$(WEBDIR)/plugins/
-	mkdir -p $(DESTDIR)$(WEBDIR)/plugins/copyright/
-	$(INSTALL_DATA) library.php $(DESTDIR)$(WEBDIR)/plugins/copyright/library.php
-	$(INSTALL_DATA) hist.php $(DESTDIR)$(WEBDIR)/plugins/copyright/hist.php
-	$(INSTALL_DATA) list.php $(DESTDIR)$(WEBDIR)/plugins/copyright/list.php
-	$(INSTALL_DATA) view.php $(DESTDIR)$(WEBDIR)/plugins/copyright/view.php
-	$(INSTALL_DATA) agent.php $(DESTDIR)$(WEBDIR)/plugins/copyright/agent.php
-	$(INSTALL_DATA) oneshot.php $(DESTDIR)$(WEBDIR)/plugins/copyright/oneshot.php
+	echo "make copyright ui install"
+	mkdir -p $(DESTDIR)$(WEBDIR)/copyright/
+	$(INSTALL_DATA) library.php $(DESTDIR)$(WEBDIR)/copyright/library.php
+	$(INSTALL_DATA) hist.php $(DESTDIR)$(WEBDIR)/copyright/hist.php
+	$(INSTALL_DATA) list.php $(DESTDIR)$(WEBDIR)/copyright/list.php
+	$(INSTALL_DATA) view.php $(DESTDIR)$(WEBDIR)/copyright/view.php
+	$(INSTALL_DATA) agent.php $(DESTDIR)$(WEBDIR)/copyright/agent.php
+	$(INSTALL_DATA) oneshot.php $(DESTDIR)$(WEBDIR)/copyright/oneshot.php
 
-	if [ ! -d $(DESTDIR)$(WEBDIR)/plugins/simpleUi ] ; \
-		then \
-         mkdir -p $(DESTDIR)$(WEBDIR)/plugins/simpleUi; \
-         cd $(DESTDIR)$(WEBDIR)/plugins/simpleUi; \
-      if [ ! -h 'copyright.php' ] ; \
-      then \
-         ln -s ../copyright.php copyright.php; \
-         echo "Copyright link created"; \
-      fi \
-   else \
-         echo "Did not find $(DESTDIR)$(WEBDIR)/plugins/simpleUi"; \
-         echo "Could not create symlink in plugins/simpleUi"; \
-         echo "As root, create the symlink by hand."; \
-   fi
-	
-srcinstall:
-	mkdir ../../../ui/plugins/copyright
+
 # have to create a version of copyright.php to include from the source
-	sed -e "1,\$$s/\$$WEBDIR\.'\/plugins\//'/" copyright.php > ../../../ui/plugins/copyright.php
-#	cp copyright.php ../../../ui/plugins/copyright.php
-	cp library.php ../../../ui/plugins/copyright/library.php
-	cp hist.php ../../../ui/plugins/copyright/hist.php
-	cp list.php ../../../ui/plugins/copyright/list.php
-	cp view.php ../../../ui/plugins/copyright/view.php
-	cp agent.php ../../../ui/plugins/copyright/agent.php
-	cp oneshot.php ../../../ui/plugins/copyright/oneshot.php
+	#sed -e "1,\$$s/\$$WEBDIR\.'\/plugins\//'/" copyright.php > ../../../ui/plugins/copyright.php$
+	echo "copying to ../../www/ui/copyright"
+	if [ -d ../../www/ui/copyright ]; then \
+		cp library.php ../../www/ui/copyright/library.php; \
+		cp hist.php ../../www/ui/copyright/hist.php; \
+		cp list.php ../../www/ui/copyright/list.php; \
+		cp view.php ../../www/ui/copyright/view.php; \
+		cp agent.php ../../www/ui/copyright/agent.php; \
+		cp oneshot.php ../../www/ui/copyright/oneshot.php; \
+	else \
+		@mkdir ../../www/ui/copyright; \
+		cp library.php ../../www/ui/copyright/library.php; \
+		cp hist.php ../../www/ui/copyright/hist.php; \
+		cp list.php ../../www/ui/copyright/list.php; \
+		cp view.php ../../www/ui/copyright/view.php; \
+		cp agent.php ../../www/ui/copyright/agent.php; \
+		cp oneshot.php ../../www/ui/copyright/oneshot.php; \
+	fi
 
 uninstall:
 	echo "make copyright uninstall"
-	rm -f $(DESTDIR)$(WEBDIR)/plugins/copyright.php
-	rm -rf $(DESTDIR)$(WEBDIR)/plugins/copyright/
-	@if [ -d $(DESTDIR)$(WEBDIR)/plugins ]; then \
+#	rm -f $(DESTDIR)$(WEBDIR)/copyright.php
+	rm -rf $(DESTDIR)$(WEBDIR)/copyright/
+	@rm -rf ../../www/ui/copyright
+#	@if [ -d $(DESTDIR)$(WEBDIR)/plugins ]; then \
    	   if [ "`ls -A $(DESTDIR)$(WEBDIR)/plugins`" ]; then \
 	      echo "WARNING: $(DESTDIR)$(WEBDIR)/plugins not empty, not removing";\
            else \
@@ -71,9 +65,9 @@ uninstall:
         fi
 
 srcuninstall:
-	rm -f ../../../ui/plugins/copyright.php
-	rm -rf ../../../ui/plugins/copyright/
-	@if [ -d ../../../ui/plugins ]; then \
+#	rm -f ../../../ui/plugins/copyright.php
+	rm -rf ../../www/ui/copyright/
+#	@if [ -d ../../../ui/gins ]; then \
    	   if [ "`ls -A ../../../ui/plugins`" ]; then \
 	      echo "WARNING: ../../../ui/plugins not empty, not removing";\
            else \
