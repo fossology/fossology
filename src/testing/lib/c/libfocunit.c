@@ -125,12 +125,14 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites)
       fprintf(stderr, "Error: %s\n", CU_get_error_msg());
       exit(-1);
     }
-    exit(0);
   }
+  else // generate xml test report via Automated mode only when run all suits in pRegistrAy, or not
 
-  CU_set_output_filename(test_name);
-  CU_list_tests_to_file();
-  CU_automated_run_tests();
+  {
+    CU_set_output_filename(test_name);
+    CU_list_tests_to_file();
+    CU_automated_run_tests();
+  }
 
   printf("%s summary:\n", test_name);
   printf("  Number of suites run: %d\n", CU_get_number_of_suites_run());
