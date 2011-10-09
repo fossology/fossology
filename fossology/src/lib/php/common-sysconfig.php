@@ -31,7 +31,7 @@ define("CONFIG_TYPE_TEXTAREA", 3);
 /**
  * \brief Read fossology.conf
  *
- * \param $ConfPath optional pathname to fossology configuration file.
+ * \param $ConfPath - optional pathname to fossology configuration file.
  * The standard conf file name is 'fossology.conf'.
  *
  * \return array with variable/value pair from fossology.conf
@@ -242,6 +242,8 @@ function Populate_sysconfig()
  * check if the value format is valid,
  * only true/false is valid
  *
+ * \param $value - the value which will be checked 
+ *
  * \return 1, if the value is valid, or 0
  */
 function check_boolean($value)
@@ -259,6 +261,8 @@ function check_boolean($value)
 /**
  * \brief validation function check_fossology_url().
  * check if the url is valid,
+ *
+ * \param $url - the url which will be checked 
  *
  * \return  1: valid, 0: invalid
  */
@@ -289,6 +293,8 @@ function check_fossology_url($url)
  * \brief validation function check_logo_url().
  * check if the url is available,
  *
+ * \param $url - the url which will be checked 
+ *
  * \return 1: available, 0: unavailable
  */
 function check_logo_url($url)
@@ -307,6 +313,8 @@ function check_logo_url($url)
 /**
  * \brief validation function check_logo_image_url().
  * check if the url is available,
+ *
+ * \param $url - the url which will be checked 
  *
  * \return 1: the url is available, 0: unavailable
  */
@@ -330,6 +338,8 @@ function check_logo_image_url($url)
  * implement this function if needed in the future
  * check if the email address is valid
  *
+ * \param $email_address - the email address which will be checked 
+ *
  * \return 1: valid, 0: invalid
  */
 function check_email_address($email_address)
@@ -339,6 +349,10 @@ function check_email_address($email_address)
 
 /**
  * \brief check if the url is available
+ *
+ * \param $url - url
+ * \param $timeout - timeout interval, default 2 seconds
+ * \param $tries - if unavailable, will try several times, default 2 times
  *
  * \return 1: available, 0: unavailable
  */
@@ -357,6 +371,8 @@ function is_available($url, $timeout = 2, $tries = 2)
 
 /**
  * \brief check if the url is valid
+ *
+ * \param $url - the url which will be checked 
  * 
  * \return 1: the url is valid, 0: invalid
  */
@@ -371,6 +387,8 @@ function check_url($url)
 
 /**
  * \brief check if the ip address is valid
+ *
+ * \param $ip - IP address
  *
  * \return 1: yes, 0: not
  */

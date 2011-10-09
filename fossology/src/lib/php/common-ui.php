@@ -133,6 +133,9 @@ function GetArrayVal($Key, $Arr)
 
 /**
  * \brief send the download file to the user
+ *
+ * \param $path - file path
+ * \param $name - file name
  * 
  * \return True on success, error message on failure.
  */

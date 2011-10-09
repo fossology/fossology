@@ -203,6 +203,8 @@ function ReportCachePurgeByUpload($UploadPK)
  * record with $CacheKey
  *
  * \param $CacheKey  can get cashevalue throuth cashedkey
+ * 
+ * \return error msg
  */
 function ReportCachePurgeByKey($CacheKey)
 {
