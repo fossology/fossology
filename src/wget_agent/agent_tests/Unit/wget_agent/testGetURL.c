@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /**
  * \file testGetURL.c
  * \brief testing for the function GetURL()
- * int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
+ * int GetURL(char *TempFile, char *URL, char *TempFileDir)
  * char *TempFile - used when upload from URL by the scheduler, the downloaded file(directory) will be archived as this file
  *               when running from command, this parameter is null, e.g. /var/local/lib/fossology/agents/wget.32732
  * char *URL - the url you want to download
@@ -48,10 +48,10 @@ int  GetURLInit()
  */
 int GetURLClean()
 {
-	if (file_dir_existed(TempFileDir))
-	{
-		RemoveDir(TempFileDir);
-	}
+  if (file_dir_existed(TempFileDir))
+  {
+    RemoveDir(TempFileDir);
+  }
   return 0;
 }
 
@@ -64,11 +64,11 @@ int GetURLClean()
  */
 void testGetURLNormal_URLIsOneFile()
 {
-	strcpy(URL, "http://fossology.org/debian/mkpackages");
-	strcpy(TempFileDir, "./test_result");
-	GetURL(TempFile, URL, TempFileDir); /* download the file mkpackages into ./test_result/fossology.org/debian/ */
-	int existed = file_dir_existed("./test_result/fossology.org/debian/mkpackages");
-	CU_ASSERT_EQUAL(existed, 1); /* the file downloaded? */
+  strcpy(URL, "http://fossology.org/debian/mkpackages");
+  strcpy(TempFileDir, "./test_result");
+  GetURL(TempFile, URL, TempFileDir); /* download the file mkpackages into ./test_result/fossology.org/debian/ */
+  int existed = file_dir_existed("./test_result/fossology.org/debian/mkpackages");
+  CU_ASSERT_EQUAL(existed, 1); /* the file downloaded? */
 }
 
 /**
@@ -77,14 +77,14 @@ void testGetURLNormal_URLIsOneFile()
  * TempFile is not empty
  */
 void testGetURLAbnormal_URLIsOneDir()
-{	
-	strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");
+{
+  strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");
   strcpy(URL, "http://fossology.org/debian/1.0.0/");
   strcpy(TempFileDir, "./test_result/");
   strcpy(TempFile, "./test_result/wget.tar");
-	GetURL(TempFile, URL, TempFileDir); 
-	int existed = file_dir_existed("./test_result/wget.tar");
-	CU_ASSERT_EQUAL(existed, 1); /* the file downloaded? */
+  GetURL(TempFile, URL, TempFileDir); 
+  int existed = file_dir_existed("./test_result/wget.tar");
+  CU_ASSERT_EQUAL(existed, 1); /* the file downloaded? */
 }
 
 /**
@@ -94,8 +94,8 @@ CU_TestInfo testcases_GetURL[] =
 {
 #if 0
 #endif
-  {"Testing the function GetURL, the URL is a normal file:", testGetURLNormal_URLIsOneFile},
-  {"Testing the function GetURL, the URL is a dir:", testGetURLAbnormal_URLIsOneDir},
+  {"GetURL:File", testGetURLNormal_URLIsOneFile},
+  {"GetURL:Dir", testGetURLAbnormal_URLIsOneDir},
   CU_TEST_INFO_NULL
 };
 
