@@ -273,13 +273,13 @@ void testDBCheckMime()
 }
 
 /**
- * \brief testcases for function DBLoadGold
+ * \brief testcases for function DBCheckMime 
  */
 CU_TestInfo testcases_DBCheckMime[] =
 {
 #if 0
 #endif
-{"Testing the function DBCheckMime:", testDBCheckMime},
+{"DBCheckMime:C", testDBCheckMime},
   CU_TEST_INFO_NULL
 };
 

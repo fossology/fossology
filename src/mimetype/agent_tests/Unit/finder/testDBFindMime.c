@@ -39,7 +39,7 @@ int  DBFindMimeInit()
     FATAL("Unable to connect to database");
     exit(-1);
   }
-	MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
+  MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
   DBMime = NULL;
 
   return 0;
@@ -148,7 +148,7 @@ CU_TestInfo testcases_DBFindMime[] =
 {
 #if 0
 #endif
-{"Testing the function DBFindMime:", testDBFindMime},
+{"DBFindMime:ExistAndNot", testDBFindMime},
   CU_TEST_INFO_NULL
 };
 

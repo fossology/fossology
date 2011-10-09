@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * \brief testing for the function DBLoadMime
  */
 
-extern void	DBLoadMime	();
+extern void DBLoadMime();
 
 /**
  * \brief initialize
@@ -52,7 +52,7 @@ int  DBLoadMimeInit()
 int DBLoadMimeClean()
 {
   if (pgConn) PQfinish(pgConn);
-	DBMime = NULL;
+  DBMime = NULL;
   return 0;
 }
 
@@ -122,7 +122,7 @@ CU_TestInfo testcases_DBLoadMime[] =
 {
 #if 0
 #endif
-{"Testing the function DBLoadMime:", testDBLoadMime},
+{"DBLoadMime:InsertOctet", testDBLoadMime},
   CU_TEST_INFO_NULL
 };
 

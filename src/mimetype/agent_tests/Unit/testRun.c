@@ -27,14 +27,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 CU_SuiteInfo suites[] = {
     // for finder.c
-    {"Testing the function DBCheckMime:", DBCheckMimeInit, DBCheckMimeClean, testcases_DBCheckMime},
+    {"DBCheckMime", DBCheckMimeInit, DBCheckMimeClean, testcases_DBCheckMime},
 #if 0
 #endif
-    {"Testing the function DBLoadMime:", DBLoadMimeInit, DBLoadMimeClean, testcases_DBLoadMime},
-    {"Testing the function DBFindMime:", DBFindMimeInit, DBFindMimeClean, testcases_DBFindMime},
-    {"Testing the function CheckMimeType:", DBInit, DBClean, testcases_CheckMimeTypes},
-    {"Testing the function DBCheckFileExtention:", DBInit, DBClean, testcases_DBCheckFileExtention},
-    {"Testing Utilities:", NULL, NULL, testcases_Utilities},
+    {"DBLoadMime", DBLoadMimeInit, DBLoadMimeClean, testcases_DBLoadMime},
+    {"DBFindMime", DBFindMimeInit, DBFindMimeClean, testcases_DBFindMime},
+    {"CheckMimeType", DBInit, DBClean, testcases_CheckMimeTypes},
+    {"DBCheckFileExtention", DBInit, DBClean, testcases_DBCheckFileExtention},
+    {"Utilities", NULL, NULL, testcases_Utilities},
     CU_SUITE_INFO_NULL
 };
 

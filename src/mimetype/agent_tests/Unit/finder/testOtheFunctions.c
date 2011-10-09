@@ -368,7 +368,7 @@ CU_TestInfo testcases_CheckMimeTypes[] =
 {
 #if 0
 #endif
-{"Testing the function CheckMimeTypes:", testCheckMimeTypes},
+{"CheckMimeTypes:C", testCheckMimeTypes},
   CU_TEST_INFO_NULL
 };
 
@@ -379,7 +379,7 @@ CU_TestInfo testcases_DBCheckFileExtention[] =
 {
 #if 0
 #endif
-{"Testing the function DBCheckFileExtention:", testDBCheckFileExtention},
+{"DBCheckFileExtention:C", testDBCheckFileExtention},
   CU_TEST_INFO_NULL
 };
 
@@ -390,7 +390,7 @@ CU_TestInfo testcases_Utilities[] =
 {
 #if 0
 #endif
-{"Testing the function GetFieldValue:", testGetFieldValue},
+{"GetFieldValue:Exist", testGetFieldValue},
   CU_TEST_INFO_NULL
 };
 
