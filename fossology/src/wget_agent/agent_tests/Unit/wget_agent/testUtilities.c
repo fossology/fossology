@@ -33,11 +33,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 void testIsFileNormal_RegulerFile()
 {
-	system("echo 'hello world' > ./test.file");
-	char Fname[] = "./test.file";
-	int isFile = IsFile(Fname, 1);
-	CU_ASSERT_EQUAL(isFile, 1);
-	RemoveDir(Fname);
+  system("echo 'hello world' > ./test.file");
+  char Fname[] = "./test.file";
+  int isFile = IsFile(Fname, 1);
+  CU_ASSERT_EQUAL(isFile, 1);
+  RemoveDir(Fname);
 }
 
 /**
@@ -51,7 +51,7 @@ void testIsFileNormal_SymLink()
   int isFile = IsFile(Fname, 0);
   CU_ASSERT_EQUAL(isFile, 1);
   char NewFname[] = "./link.file";
-	symlink(Fname, NewFname);
+  symlink(Fname, NewFname);
   isFile = IsFile(NewFname, 1);
   CU_ASSERT_EQUAL(isFile, 1);
 #if 0
@@ -66,16 +66,16 @@ void testIsFileNormal_SymLink()
 void testGetPositionNormal()
 {
   char URL[MAX_LENGTH];
-	strcpy(URL, "http://fossology.org");
-	int pos = GetPosition(URL);
+  strcpy(URL, "http://fossology.org");
+  int pos = GetPosition(URL);
   CU_ASSERT_EQUAL(pos, 7);
-	memset(URL, 0, MAX_LENGTH);
-	strcpy(URL, "https://encrypted.google.com/");
-	pos = GetPosition(URL);
+  memset(URL, 0, MAX_LENGTH);
+  strcpy(URL, "https://encrypted.google.com/");
+  pos = GetPosition(URL);
   CU_ASSERT_EQUAL(pos, 8);
-	memset(URL, 0, MAX_LENGTH);
-	strcpy(URL, "ftp://osms.chn.hp.com/pub/fossology/");
-	pos = GetPosition(URL);
+  memset(URL, 0, MAX_LENGTH);
+  strcpy(URL, "ftp://osms.chn.hp.com/pub/fossology/");
+  pos = GetPosition(URL);
   CU_ASSERT_EQUAL(pos, 6);
 }
 
@@ -85,9 +85,9 @@ void testGetPositionNormal()
  */
 void testTaintURL()
 {
-	char Sin[MAX_LENGTH];
-	char Sout[MAX_LENGTH];
-	int SoutSize = MAX_LENGTH;
+  char Sin[MAX_LENGTH];
+  char Sout[MAX_LENGTH];
+  int SoutSize = MAX_LENGTH;
   /* the URL is failed to taint*/
   strcpy(Sin, "http://fossology.org #");
   int result = TaintURL(Sin, Sout, SoutSize);
@@ -107,10 +107,10 @@ CU_TestInfo testcases_Utiliies[] =
 {
 #if 0
 #endif
-{"Testing the function IsFile, reguler file:", testIsFileNormal_RegulerFile},
-{"Testing the function IsFile, link:", testIsFileNormal_SymLink},
-{"Testing the function GetPosition:", testGetPositionNormal},
-{"Testing the function TaintURL:", testTaintURL},
+{"Utiliies:IsFile_file", testIsFileNormal_RegulerFile},
+{"Utiliies:IsFile_link", testIsFileNormal_SymLink},
+{"Utiliies:GetPosition_normal", testGetPositionNormal},
+{"Utiliies:TaintURL_normal", testTaintURL},
   CU_TEST_INFO_NULL
 };
 

@@ -29,10 +29,10 @@ CU_SuiteInfo suites[] = {
     // for wget_agent.c
 #if 0
 #endif
-    {"Testing the function GetURL:", GetURLInit, GetURLClean, testcases_GetURL},
-    {"Testing the function SetEnv:", SetEnvInit, SetEnvClean, testcases_SetEnv},
-    {"Testing the utility function:", NULL, NULL, testcases_Utiliies},
-    {"Testing the function DBLoadGold:", DBLoadGoldInit, DBLoadGoldClean, testcases_DBLoadGold},
+    {"GetURL", GetURLInit, GetURLClean, testcases_GetURL},
+    {"SetEnv", SetEnvInit, SetEnvClean, testcases_SetEnv},
+    {"Utiliies", NULL, NULL, testcases_Utiliies},
+    {"DBLoadGold", DBLoadGoldInit, DBLoadGoldClean, testcases_DBLoadGold},
     CU_SUITE_INFO_NULL
 };
 

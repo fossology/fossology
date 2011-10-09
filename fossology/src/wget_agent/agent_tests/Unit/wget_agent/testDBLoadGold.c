@@ -229,7 +229,7 @@ CU_TestInfo testcases_DBLoadGold[] =
 {
 #if 0
 #endif
-{"Testing the function DBLoadGold:", testDBLoadGold},
+{"DBLoadGold:Insert", testDBLoadGold},
   CU_TEST_INFO_NULL
 };
 

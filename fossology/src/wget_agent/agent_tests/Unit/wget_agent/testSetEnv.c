@@ -35,10 +35,10 @@ static char TempFileDir[MAX_LENGTH];
  */
 int  SetEnvInit()
 {
-	GlobalUploadKey = -1;
-	memset(GlobalTempFile, 0, MAXCMD);
-	memset(GlobalURL, 0, MAXCMD);
-	memset(GlobalParam, 0, MAXCMD);
+  GlobalUploadKey = -1;
+  memset(GlobalTempFile, 0, MAXCMD);
+  memset(GlobalURL, 0, MAXCMD);
+  memset(GlobalParam, 0, MAXCMD);
   return 0;
 }
 
@@ -58,14 +58,14 @@ int  SetEnvClean()
  */
 void testSetEnvNormal()
 {
-	strcpy(Source, "38 - http://fossology.org/debian/mkpackages -l 1 -R index.html*");
-	strcpy(TempFileDir, "./test_result");
-	SetEnv(Source, TempFileDir);
-	CU_ASSERT_EQUAL(GlobalUploadKey, 38);
-	char *cptr = strstr(GlobalTempFile, "./test_result/wget."); /* is like ./test_result/wget.29923 */
-	CU_ASSERT_PTR_NOT_NULL(cptr);
-	CU_ASSERT_STRING_EQUAL(GlobalURL, "http://fossology.org/debian/mkpackages");
-	CU_ASSERT_STRING_EQUAL(GlobalParam, "-l 1 -R index.html*");
+  strcpy(Source, "38 - http://fossology.org/debian/mkpackages -l 1 -R index.html*");
+  strcpy(TempFileDir, "./test_result");
+  SetEnv(Source, TempFileDir);
+  CU_ASSERT_EQUAL(GlobalUploadKey, 38);
+  char *cptr = strstr(GlobalTempFile, "./test_result/wget."); /* is like ./test_result/wget.29923 */
+  CU_ASSERT_PTR_NOT_NULL(cptr);
+  CU_ASSERT_STRING_EQUAL(GlobalURL, "http://fossology.org/debian/mkpackages");
+  CU_ASSERT_STRING_EQUAL(GlobalParam, "-l 1 -R index.html*");
 }
 
 /**
@@ -75,7 +75,7 @@ CU_TestInfo testcases_SetEnv[] =
 {
 #if 0
 #endif
-{"Testing the function SetEnv, set the env:", testSetEnvNormal},
+{"SetEnv:Normal", testSetEnvNormal},
   CU_TEST_INFO_NULL
 };
 
