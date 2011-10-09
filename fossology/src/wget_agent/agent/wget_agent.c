@@ -66,7 +66,7 @@ int IsFile(char *Fname, int Link)
  *
  * \param int rc - exit value
  */ 
-void  SafeExit  (int rc)
+void  SafeExit(int rc)
 {
   if (pgConn) PQfinish(pgConn);
   exit(rc);
@@ -92,7 +92,7 @@ int GetPosition(char *URL)
  * \brief Insert a file into the database and repository.
  *        This mimicks the old webgoldimport.
  */
-void	DBLoadGold	()
+void DBLoadGold()
 {
   Cksum *Sum;
   char *Unique=NULL;
@@ -178,13 +178,13 @@ void	DBLoadGold	()
   }
   if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
   if (Path != GlobalTempFile) 
-	{
-		if(Path)
-		{
-		  free(Path);
-		  Path = NULL;
-		}
-	}
+  {
+    if(Path)
+    {
+      free(Path);
+      Path = NULL;
+    }
+  }
 
   /* Now update the DB */
   /** Break out the sha1, md5, len components **/
@@ -260,17 +260,17 @@ void	DBLoadGold	()
 
   PQclear(result);
   /* Clean up */
-	if (Sum)
-	{
+  if (Sum)
+  {
     free(Sum);
-	  Sum = NULL;
-	}
-	if (Unique)
-	{
-	  free(Unique);
-	  Unique = NULL;
-	}
-	fo_config_free();
+    Sum = NULL;
+  }
+  if (Unique)
+  {
+    free(Unique);
+    Unique = NULL;
+  }
+  fo_config_free();
 } /* DBLoadGold() */
 
 
@@ -282,7 +282,7 @@ void	DBLoadGold	()
  *
  * \return 1=tainted, 0=failed to taint
  */
-int	TaintURL	(char *Sin, char *Sout, int SoutSize)
+int TaintURL(char *Sin, char *Sout, int SoutSize)
 {
   int i;
   int si;
@@ -312,7 +312,7 @@ int	TaintURL	(char *Sin, char *Sout, int SoutSize)
  *
  * \return int, 0 on success, non-zero on failure.
  */
-int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
+int GetURL(char *TempFile, char *URL, char *TempFileDir)
 {
   char CMD[MAXCMD];
   char TaintedURL[MAXCMD];
@@ -376,9 +376,9 @@ int	GetURL	(char *TempFile, char *URL, char *TempFileDir)
         PROXYFILE,WgetArgs,TaintedURL, GlobalParam);
   }
   /* the command is like
-	   ". /usr/local/etc/fossology/Proxy.conf; 
-	   /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -k -P '/var/local/lib/fossology/agents/wget'
-		 'http://a.org/file' -l 1 -R index.html*  2>&1"
+  ". /usr/local/etc/fossology/Proxy.conf; 
+     /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -k -P '/var/local/lib/fossology/agents/wget'
+     'http://a.org/file' -l 1 -R index.html*  2>&1"
    */
   rc = system(CMD); 
 
@@ -502,7 +502,7 @@ void    SetEnv  (char *S, char *TempFileDir)
  *
  * \param char *Name - the name of the executable, ususlly it is wget_agent
  */
-void	Usage	(char *Name)
+void Usage(char *Name)
 {
   printf("Usage: %s [options] [OBJ]\n",Name);
   printf("  -i  :: Initialize the DB connection then exit (nothing downloaded)\n");
