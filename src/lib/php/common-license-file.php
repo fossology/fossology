@@ -85,7 +85,11 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk)
 
 /**
  * \brief  Same as GetFileLicenses() but returns license list as a single string
+ * \param $agent_pk - agent id
+ * \param $pfile_pk - pfile id, (if empty, $uploadtree_pk must be given)
+ * \param $uploadtree_pk - (used only if $pfile_pk is empty)
  *
+ * \return Licenses string for specified file
  * \see GetFileLicenses() 
  */
 function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk)
