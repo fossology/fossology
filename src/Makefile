@@ -7,7 +7,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # the directories we do things in by default
-DIRS = adj2nest buckets cli copyright lib scheduler pkgagent wget_agent mimetype
+DIRS = adj2nest buckets cli copyright lib scheduler pkgagent wget_agent mimetype www
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
