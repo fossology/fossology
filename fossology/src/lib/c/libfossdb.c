@@ -215,6 +215,7 @@ int fo_checkPQcommand(PGconn *pgConn, PGresult *result, char *sql, char *FileID,
  @param pgConn database connection
  @param tableName
 
+ @todo REMOVE hardcoded catalog name "fossology"
  @return 1 if table exists, 0 on error (which is logged) or if table does not exist.
 ****************************************************/
 int fo_tableExists(PGconn *pgConn, char *tableName)
