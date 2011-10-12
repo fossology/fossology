@@ -333,12 +333,12 @@ char *	fo_RepMkPath	(char *Type, char *Filename)
 {
   char *Path, *AltPath;
   int i;
-  struct stat64 Stat;
+  struct stat Stat;
 
   Path = fo_RepMkPathTmp(Type,Filename,NULL,1);
   if (!Path) return(NULL);
   /* if something exists, then return it! */
-  if (!stat64(Path,&Stat)) { return(Path); }
+  if (!stat(Path,&Stat)) { return(Path); }
 
   /* Check if it exists in an alternate path */
   i=2;
@@ -347,7 +347,7 @@ char *	fo_RepMkPath	(char *Type, char *Filename)
     AltPath = fo_RepMkPathTmp(Type,Filename,NULL,i);
     if (!AltPath) return(Path); /* No alternate */
     /* If there is an alternate, return it. */
-    if (!stat64(AltPath,&Stat)) { free(Path); return(AltPath); }
+    if (!stat(AltPath,&Stat)) { free(Path); return(AltPath); }
     i++;
   }
 
@@ -457,7 +457,7 @@ int	fo_RepRenameTmp	(char *Type, char *Filename, char *Ext)
 int	fo_RepExist	(char *Type, char *Filename)
 {
   char *Fname;
-  struct stat64 Stat;
+  struct stat Stat;
   int rc=0;
 
   if (!_RepCheckType(Type))
@@ -477,7 +477,7 @@ int	fo_RepExist	(char *Type, char *Filename)
     fprintf(stderr,"ERROR: Unable to allocate path for '%s/%s'\n",Type,Filename);
     return(-1);
   }
-  if (!stat64(Fname,&Stat)) rc=1;
+  if (!stat(Fname,&Stat)) rc=1;
   free(Fname);
   return(rc);
 } /* fo_RepExist() */
@@ -494,7 +494,7 @@ int	fo_RepExist	(char *Type, char *Filename)
 int	fo_RepRemove	(char *Type, char *Filename)
 {
   char *Fname;
-  struct stat64 Stat;
+  struct stat Stat;
   int rc=0;
 
   if (!_RepCheckType(Type))
@@ -514,7 +514,7 @@ int	fo_RepRemove	(char *Type, char *Filename)
     fprintf(stderr,"ERROR: Unable to allocate path for '%s/%s'\n",Type,Filename);
     return(0);
   }
-  if (!stat64(Fname,&Stat)) rc=unlink(Fname);
+  if (!stat(Fname,&Stat)) rc=unlink(Fname);
   free(Fname);
   return(rc);
 } /* fo_RepRemove() */
@@ -658,7 +658,7 @@ void	fo_RepMunmap	(RepMmapStruct *M)
 RepMmapStruct *	fo_RepMmapFile	(char *Fname)
 {
   RepMmapStruct *M;
-  struct stat64 Stat;
+  struct stat Stat;
   int PageSize;
 
   M = (RepMmapStruct *)calloc(1,sizeof(RepMmapStruct));
@@ -674,7 +674,7 @@ RepMmapStruct *	fo_RepMmapFile	(char *Fname)
   }
 
   /* find how big the file is (to allocate it) */
-  if (fstat64(M->FileHandle,&Stat) == -1)
+  if (fstat(M->FileHandle,&Stat) == -1)
   {
     fprintf(stderr,"ERROR: Unable to stat file (%s)\n",Fname);
     close(M->FileHandle);
