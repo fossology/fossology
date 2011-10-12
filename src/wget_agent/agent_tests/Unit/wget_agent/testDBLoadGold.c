@@ -52,7 +52,7 @@ int  DBLoadGoldInit()
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
-    FATAL("Unable to connect to database");
+    LOG_FATAL("Unable to connect to database");
     SafeExit(20);
   }
   /** delete the record that upload_filename is wget.tar, pre testing */
