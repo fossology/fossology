@@ -45,7 +45,7 @@ int  DBInit()
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
-    FATAL("Unable to connect to database");
+    LOG_FATAL("Unable to connect to database");
     exit(-1);
   }
   memset(SQL,'\0',MAXCMD);
@@ -142,7 +142,7 @@ int  DBInit()
   FMimetype = fopen("/etc/mime.types","rb");
   if (!FMimetype)
   {
-    printf("WARNING: Unable to open /etc/mime.types\n");
+    LOG_WARNING("Unable to open /etc/mime.types\n");
   }
 
   return 0;
@@ -227,7 +227,7 @@ void testCheckMimeTypes()
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
-    FATAL("Unable to connect to database");
+    LOG_FATAL("Unable to connect to database");
     exit(-1);
   }
   MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
