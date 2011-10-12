@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
-    FATAL("Unable to connect to database");
+    LOG_FATAL("Unable to connect to database");
     exit(-1);
   }
   Agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), 0, SVN_REV, agent_desc);
@@ -77,19 +77,19 @@ int main(int argc, char *argv[])
   FMimetype = fopen("/etc/mime.types","rb");
   if (!FMimetype)
   {
-    printf("WARNING: Unable to open /etc/mime.types\n");
+    LOG_WARNING("Unable to open /etc/mime.types\n");
   }
 
   MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
   if (MagicCookie == NULL)
   {
-    FATAL("Failed to initialize magic cookie\n");
+    LOG_FATAL("Failed to initialize magic cookie\n");
     PQfinish(pgConn);
     exit(-1);
   }
   if (magic_load(MagicCookie,NULL) != 0)
   {
-    FATAL("Failed to load magic file: UnMagic\n");
+    LOG_FATAL("Failed to load magic file: UnMagic\n");
     PQfinish(pgConn);
     exit(-1);
   }
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
         if (PQntuples(result) > 0)
         {
           PQclear(result);
-          WARNING("Ignoring requested mimetype analysis of upload %d - Results are already in database.\n",upload_pk);
+          LOG_WARNING("Ignoring requested mimetype analysis of upload %d - Results are already in database.\n",upload_pk);
           continue;
         }
         PQclear(result);
