@@ -18,15 +18,18 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 # also set in Makefile.conf, but we override with a shorter version
 iPATHFILE=pathinclude.php
 
-DIRS=images locale
+DIRS=css images locale
 
-FILES=`find . -type f | grep -v svn |grep -v tests | grep -v simpleUi | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$" |grep -v $(iPATHFILE)`
+UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -v simpleUi | grep -E "(php|dat|dtd)$$" | grep -v $(iPATHFILE)`
+
+OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -v simpleUi | grep -E "(css|htc|gif|png)$$" | grep -v $(iPATHFILE)`
+
+RMFILES=FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$"`
 
 all: $(iPATHFILE)
 
@@ -52,38 +55,36 @@ $(iPATHFILE): $(VARS)
 
 install: all $(iPATHFILE)
 
+	mkdir -p $(DESTDIR)$(WEBDIR)/ui; \
 	for dir in $(DIRS); do \
-		mkdir -p $(DESTDIR)$(WEBDIR)/$$dir; \
+		mkdir -p $(DESTDIR)$(WEBDIR)/ui/$$dir; \
 	done
 
-	for file in $(FILES); do \
-		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/$$file; \
+	for file in $(UIFILES); do \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
+	done
+	for file in $(OTHERFILES); do \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
 
 	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
-	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODDIR) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
-	for file in $(FILES); do \
-		rm -f $(DESTDIR)$(WEBDIR)/$$file; \
+	for file in $(RMFILES); do \
+		rm -f $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
 	
 	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 	
-	cd $(DESTDIR)$(WEBDIR)/plugins/simpleUi; \
-	for link in $(RMLINKS); do \
-		rm -f $$link; \
-	done
-	
 	for dir in $(DIRS); do \
-		rmdir $(DESTDIR)$(WEBDIR)/$$dir; \
+		rmdir $(DESTDIR)$(WEBDIR)/ui/$$dir; \
 	done
 
+	@rm -f $(DESTDIR)$(WEBDIR)/ui
 	@rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
-
-	
 
 clean:
 	rm -f *.o core $(iPATHFILE)

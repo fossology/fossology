@@ -20,8 +20,7 @@ include $(VARS)
 
 CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpcre
 DEF = -DDATADIR='"$(DATADIR)"'
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 EXE = copyright
 TESTDIR = ../agent_tests
@@ -79,7 +78,7 @@ install: $(EXE)
 	$(INSTALL_DATA) copyright.dic $(DESTDIR)$(DATADIR)/
 	$(INSTALL_DATA) names.dic $(DESTDIR)$(DATADIR)/
 	@if test ! -e $(CONFDIR)/mods-enabled/copyright; then \
-	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODDIR) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make copyright agent uninstall"

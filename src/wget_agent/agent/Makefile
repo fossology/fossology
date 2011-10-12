@@ -28,8 +28,7 @@ CHKSRC=$(CHKHDR:%.h=%.c)
 OBJECTS=wget_agent.o
 HDIR=$(OBJS:.o=.h)
 COVERAGE=$(OBJECTS:%.o=%_cov.o)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 all: $(EXE)
 
@@ -47,7 +46,7 @@ install: all
 	@echo "make wget_agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 	@if test ! -e $(CONFDIR)/mods-enabled/wget_agent; then \
-	ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled/wget_agent ; fi;
+	ln -s $(MODDIR) $(CONFDIR)/mods-enabled/wget_agent ; fi;
 
 
 uninstall:

@@ -12,8 +12,7 @@ HDIR=$(OBJS:.o=.h)
 TESTDIR=../agent_tests
 
 COVERAGE=$(OBJECTS:%.o=%_cov.o)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 all: $(EXE)
 
@@ -31,7 +30,7 @@ install: all
 	@echo "make $(EXE) install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 	@if test ! -e $(CONFDIR)/mods-enabled/mimetype; then \
-	ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled/mimetype ; fi;
+	ln -s $(MODDIR) $(CONFDIR)/mods-enabled/mimetype ; fi;
 
 
 uninstall:
