@@ -19,11 +19,6 @@
 #ifndef CHECKSUM_H
 #define CHECKSUM_H
 
-/* specify support for files > 2G */
-#define __USE_LARGEFILE64
-#define __USE_FILE_OFFSET64
-#define _LARGEFILE64_SOURCE
-
 #include <stdint.h> /* for uint8_t */
 #include <stdlib.h>
 #include <stdio.h>
@@ -35,6 +30,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
+
+#include "libfossology.h"
 
 struct Cksum
   {
