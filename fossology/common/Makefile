@@ -27,11 +27,6 @@ install: all
 		mkdir -p $(DESTDIR)$(CONFPATH); \
 	fi
 	
-	if [ ! -e $(DESTDIR)$(CONFPATH)/agents.d ] ; then \
-		mkdir -p $(DESTDIR)$(CONFPATH)/agents.d; \
-		/bin/chmod 775 $(DESTDIR)$(CONFPATH)/agents.d; \
-	fi
-	
 	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ] ; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/Db.conf"; \
 	 	$(INSTALL) -m 640 defconf/Db.conf $(DESTDIR)$(CONFPATH)/Db.conf; \
