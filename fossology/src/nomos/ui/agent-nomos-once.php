@@ -27,10 +27,6 @@
  *
  * @version "$Id: agent-nomos-once.php 3959 2011-03-22 22:37:02Z bobgo $"
  */
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_agent_nomos_once", _("One-Shot License Analysis"));
 

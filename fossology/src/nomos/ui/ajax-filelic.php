@@ -32,14 +32,6 @@
  Returns the rf_shortname, and comma delimited string of uploadtree_pks: "FSF,123,456"
  *************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
-
 define("TITLE_ajax_filelic", _("ajax find items by license"));
 
 class ajax_filelic extends FO_Plugin
