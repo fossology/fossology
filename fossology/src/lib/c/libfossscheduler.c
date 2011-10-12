@@ -45,7 +45,7 @@ int  found;             ///< if the agent is even connected to the scheduler
  * the on_verbose function will be called. If nothing needs to be done when
  * verbose is turned on, simply pass NULL to scheduler_connect
  */
-int verbose;
+int agent_verbose;
 
 /**
  * @brief Internal function to send a heartbeat to the 
@@ -115,7 +115,7 @@ void fo_scheduler_connect(int* argc, char** argv)
   items_processed = 0;
   memset(buffer, 0, sizeof(buffer));
   valid = 0;
-  verbose = 0;
+  agent_verbose = 0;
 
   /* send "OK" to the scheduler */
   if(found) 
@@ -179,7 +179,7 @@ char* fo_scheduler_next()
   /* get the next line from the scheduler and possibly WAIT */
   while(fgets(buffer, sizeof(buffer), stdin) != NULL)
   {
-    if(verbose)
+    if(agent_verbose)
       printf("\nNOTE: received %s\n", buffer);
     if(strncmp(buffer, "CLOSE", 5) == 0)
       break;
@@ -192,7 +192,7 @@ char* fo_scheduler_next()
     }
     else if(strncmp(buffer, "VERBOSE", 7) == 0)
     {
-      verbose = atoi(&buffer[8]);
+      agent_verbose = atoi(&buffer[8]);
       valid = 0;
       continue;
     }
