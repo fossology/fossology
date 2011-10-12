@@ -58,56 +58,68 @@ enum job_status {
 extern int verbose;
 
 /* ************************************************************************** */
-/* **** Error and Verbose Functions ***************************************** */
+/* **** Logging functions *************************************************** */
 /* ************************************************************************** */
 
-#define FATAL(...) { \
+#define LOG_FATAL(...) { \
             fprintf(stderr, "FATAL %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
 
-#define PQ_FATAL(pg_r, ...) { \
+#define LOG_PQ_FATAL(pg_r, ...) { \
             fprintf(stderr, "FATAL %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "FATAL postgresql error: %s\n", PQresultErrorMessage(pg_r)); }
 
-#define ERROR(...) { \
+#define LOG_ERROR(...) { \
             fprintf(stderr, "ERROR %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
 
-#define PQ_ERROR(pg_r, ...) { \
+#define LOG_PQ_ERROR(pg_r, ...) { \
             fprintf(stderr, "ERROR %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); }
 
-#define WARNING(...) { \
+#define LOG_WARNING(...) { \
             fprintf(stderr, "WARNING %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
 
-#define DEBUG(...) { \
+#define LOG_DEBUG(...) { \
             fprintf(stderr, "DEBUG %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
 
-#define NOTICE(...) { \
+#define LOG_NOTICE(...) { \
             fprintf(stderr, "NOTICE %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
 
-/* a set of verbose macros that can be used to tso auto testing on verbose   */
-/* for example, to print "this is a verbose test at line <line>" at verbose */
-/* level 2 simply call:                                                     */
-/*    VERBOSE2("this is a verbose test at line %d", __LINE__);              */
-#define TVERBOSE1 verbose & 1
-#define TVERBOSE2 verbose & 2
-#define TVERBOSE3 verbose & 4
-#define TVERBOSE4 verbose & 8
-#define VERBOSE1(...) if(TVERBOSE1) fprintf(stdout, __VA_ARGS__);
-#define VERBOSE2(...) if(TVERBOSE2) fprintf(stdout, __VA_ARGS__);
-#define VERBOSE3(...) if(TVERBOSE3) fprintf(stdout, __VA_ARGS__);
-#define VERBOSE4(...) if(TVERBOSE4) fprintf(stdout, __VA_ARGS__);
+/* By using these macros the verbosity level of an agent can be changed   
+ * dynamically through the scheduler.
+ * For example, to print "this is a verbose test at line <line>" at verbose 
+ * level 2 simply call:
+ *    LOG_VERBOSE2("this is a verbose test at line %d", __LINE__);
+ * Though you never have to put the caller's filename or line number
+ * in a message since they are added by LOG_NOTICE.
+ */
+#define TVERBOSE0 agent_verbose & 1
+#define TVERBOSE1 agent_verbose & 2
+#define TVERBOSE2 agent_verbose & 4
+#define TVERBOSE3 agent_verbose & 8
+#define TVERBOSE4 agent_verbose & 16
+#define TVERBOSE5 agent_verbose & 32
+#define TVERBOSE6 agent_verbose & 64
+#define TVERBOSE7 agent_verbose & 128
+#define LOG_VERBOSE0(...) if(TVERBOSE0) LOG_NOTICE(__VA_ARGS__);
+#define LOG_VERBOSE1(...) if(TVERBOSE1) LOG_NOTICE(__VA_ARGS__);
+#define LOG_VERBOSE2(...) if(TVERBOSE2) LOG_NOTICE(__VA_ARGS__);
+#define LOG_VERBOSE3(...) if(TVERBOSE3) LOG_NOTICE(__VA_ARGS__);
+#define LOG_VERBOSE4(...) if(TVERBOSE4) LOG_NOTICE(__VA_ARGS__);
+#define LOG_VERBOSE5(...) if(TVERBOSE5) LOG_NOTICE(__VA_ARGS__);
+#define LOG_VERBOSE6(...) if(TVERBOSE6) LOG_NOTICE(__VA_ARGS__);
+#define LOG_VERBOSE7(...) if(TVERBOSE7) LOG_NOTICE(__VA_ARGS__);
 
 /* ************************************************************************** */
 /* **** Agent api *********************************************************** */
