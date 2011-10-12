@@ -43,7 +43,7 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 
-#include <libfossdb.h>
+#include <libfossology.h>
 
 /*
  * TO use our local version of debug-malloc(), compile -DMEMORY_TRACING
@@ -105,8 +105,6 @@ size_t hashEntries;
  */
 #define	NO	0
 #define	YES	1
-#define TRUE YES
-#define FALSE NO
 
 /* List-sorting flags */
 #define	UNSORTED		0
@@ -290,7 +288,6 @@ struct globals {
     int agentPk;
     long uploadFk;
     int arsPk;
-    void *DB;
     PGconn *pgConn;
 };
 

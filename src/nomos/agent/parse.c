@@ -110,7 +110,7 @@ void checkCornerCases(char *, int, int, int, int, int, int, int);
 void checkFileReferences(char *, int, int, int, int, int);
 void  addRef(char *, int);
 #ifdef DOCTOR_DEBUG
-static void dumpMatch(char *, char *);
+void dumpMatch(char *, char *);
 #endif /* DOCTOR_DEBUG */
 void locateRegex(char *, item_t *, int, int, int, int);
 void saveRegexLocation(int, int, int, int);
@@ -231,7 +231,7 @@ static int fileHasPatt(int licTextIdx, char *filetext, int size,
     if (qType < 0) {
 	ret = idxGrep(licTextIdx, filetext, REG_ICASE|REG_EXTENDED|show);
 	if (lDiags && ret) {
-#ifdef  DEBUG
+#ifdef  DOCTOR_DEBUG
 	    dumpMatch(filetext, "RAW-Text");
 #endif  /* DEBUG */
 	    printRegexMatch(licTextIdx, NO);
@@ -254,8 +254,8 @@ static int fileHasPatt(int licTextIdx, char *filetext, int size,
 	    ip = listGetItem(&whCacheList, name);
 	    if (ip->bIndex != licTextIdx) {
 		listDump(&whCacheList, NO);
-		Fatal("Offset-cache (\"%s\") == %d, not %d!",
-		      name, ip->bIndex, licTextIdx);
+		LOG_FATAL("Offset-cache (\"%s\") == %d, not %d!", name, ip->bIndex, licTextIdx)
+    Bail(-__LINE__);
 	    }
 	    saveRegexLocation(licTextIdx, ip->bStart, ip->bLen, NO);
 	}
@@ -342,7 +342,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     gl.flags &= ~FL_NOCOPYRIGHT;
 #endif /* FLAG_NO_COPYRIGHT */
 	if (scp->dataOffset && lDiags) {
-		Note("%s-generated link, ignore header (%d bytes)!",
+		LOG_NOTICE("%s-generated link, ignore header (%d bytes)!",
 		    gl.progName, scp->dataOffset);
 	}
 
@@ -6012,7 +6012,8 @@ int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 
     ltp = licText + index;                    /* &licText[index] */
     if (ltp->tseed == NULL_STR) {
-	Fatal("Regex #%d not suitable for findPhrase()", index);
+	LOG_FATAL("Regex #%d not suitable for findPhrase()", index)
+  Bail(-__LINE__);
     }
     *q |= LTSR_SMASK;                       /* init: tested, no match */
 #ifdef  PARSE_STOPWATCH
@@ -6031,7 +6032,8 @@ int findPhrase(int index, char *filetext, int size, int isML, int isPS,
      *      >0 if we have doctored-text results cached
      */
     if ((sp = listGetItem(&searchList, ltp->tseed)) == NULL_ITEM) {
-	Fatal("search cache");
+	LOG_FATAL("search cache")
+  Bail(-__LINE__);
     }
     if (sp->refCount < 0) {         /* tseed not found in text */
 	sp->refCount--;
@@ -6107,7 +6109,8 @@ int findPhrase(int index, char *filetext, int size, int isML, int isPS,
      */
     op = listGetItem(&cur.offList, sp->str);
     if (op->nMatch <= 0) {
-	Fatal("File-offset list, nMatch(%s): bad entry", sp->str);
+	LOG_FATAL("File-offset list, nMatch(%s): bad entry", sp->str)
+  Bail(-__LINE__);
     }
 #if     DEBUG>5
     printf("matches for key \"%s\": %d\n", sp->str, op->nMatch);
@@ -6169,7 +6172,8 @@ int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 	 */
 	if ((qType > 0) && !wordMatch) {
 	    if ((qType > 4) || (qType < 0)) {
-		Fatal("Unknown string-search kludge %d", qType);
+		LOG_FATAL("Unknown string-search kludge %d", qType)
+    Bail(-__LINE__);
 	    }
 	    /*
 	     * Special filter #1: over-write matched text with commas -- this choice is
@@ -6185,7 +6189,7 @@ int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 #ifdef  DEBUG
 		if (lDiags) {
 		    printf("Now, buf %p contains:\n%s\n",
-			   sp->buf, sp->buf);
+			   sp->buf, (char *)sp->buf);
 		}
 #endif  /* DEBUG */
 		/*
@@ -6489,7 +6493,7 @@ void locateRegex(char *text, item_t *op, int index, int size, int sso, int seo)
     printf("Doc-buffer match @ %d:%d\n", sso, seo);
     printf("Possible \"%s\" entries to search: %d (%d)\n", op->str,
            op->nMatch, lp->used);
-    for (n = i = 0; sp = listIterate(lp); i++) {
+    for (n = i = 0; (sp=listIterate(lp)); i++) {
 	printf("Ent[%d]: bDocLen %d (len %d) == file %d+%d (%d)\n",
 	       i, sp->bDocLen, (sp->bDocLen)-n, sp->bStart, sp->bLen,
 	       sp->bStart+sp->bLen);
@@ -6522,8 +6526,8 @@ void locateRegex(char *text, item_t *op, int index, int size, int sso, int seo)
 	break;
     }
     if (i < 0) {    /* something is wrong... */
-	Fatal("Cannot map reduced-text to raw file contents (#%d)",
-	      index);
+	LOG_FATAL("Cannot map reduced-text to raw file contents (#%d)", index)
+  Bail(-__LINE__);
     }
     /*
      * Remember, the length of text matched in the doctored-buffer will likely
@@ -6583,7 +6587,7 @@ void locateRegex(char *text, item_t *op, int index, int size, int sso, int seo)
 	    cp--;
 	}
 #ifdef  DEBUG
-	printf("_END_@%d '%c'\n", cp-_REGEX(index), *cp);
+	printf("_END_@%ld '%c'\n", cp-_REGEX(index), *cp);
 #endif  /* DEBUG */
     }
     if (cp != start) {
@@ -6685,8 +6689,7 @@ void locateRegex(char *text, item_t *op, int index, int size, int sso, int seo)
 		len -= cur.regm.rm_so;
 		off += cur.regm.rm_so;
 	    } else {
-		Note("Regex \"%s\" (foot-start) not in raw text",
-		     _REGEX(index));
+		LOG_NOTICE("Regex \"%s\" (foot-start) not in raw text", _REGEX(index));
 	    }
 	    *cp = save;     /* restore to original text */
 	}
@@ -6720,8 +6723,8 @@ void locateRegex(char *text, item_t *op, int index, int size, int sso, int seo)
      * manipulated -- see the very bottom of "addRef()".
      */
     if ((off + len) > size) {
-	Fatal("off %d + len %d (== %d) exceeds filesize %d!",
-	      off, len, off + len, size);
+	LOG_FATAL("off %d + len %d (== %d) exceeds filesize %d!", off, len, off + len, size);
+  Bail(-__LINE__);
     }
     return;
 }
@@ -7440,7 +7443,8 @@ int checkUnclassified(char *filetext, int size, int score,
 	 */
 	*cp++ = '=';    /* reset line */
 	if ((cp = findEol(cp)) == NULL_STR) {
-	    Fatal("Cannot find delimeter!");
+	    LOG_FATAL("Cannot find delimeter!")
+      Bail(-__LINE__);
 	}
 	curptr = cp+1;
     }

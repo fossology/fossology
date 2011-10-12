@@ -20,7 +20,6 @@
 #define _UTIL_H
 
 int isDIR(char *dpath);
-void unbufferFile(FILE *fp);
 int isEMPTYDIR(char *dpath);
 int isEMPTYFILE(char *fpath);
 int isBLOCK(char *bpath);

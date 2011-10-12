@@ -70,13 +70,16 @@ void listInit(list_t *l, int size, char *label) {
 #endif	/* PROC_TRACE */
 
 	if (l == NULL_LIST) {
-		Fatal("listInit: List @ %p is NULL", l);
+		LOG_FATAL("listInit: List @ %p is NULL", l)
+    Bail(-__LINE__);
 	}
 	if (label == NULL_STR) {
-		Fatal("no name for list @ %p", l);
+		LOG_FATAL("no name for list @ %p", l)
+    Bail(-__LINE__);
 	}
 	if (strlen(label) > sizeof(l->name)) {
-		Fatal("List name \"%s\" too long", label);
+		LOG_FATAL("List name \"%s\" too long", label)
+    Bail(-__LINE__);
 	}
   if (l->name != label) (void) strcpy(l->name, label);
 	if (size == 0) {
@@ -205,7 +208,8 @@ void listClear(list_t *l, int deallocFlag) {
 
 void listValidate(list_t *l, int appendFlag) {
 	if (l == NULL_LIST) {
-		Fatal("listValidate: null list!");
+		LOG_FATAL("listValidate: null list!")
+    Bail(-__LINE__);
 	}
 	/*
 	 * Question: do we want to initialize the list here, instead of aborting?
@@ -213,7 +217,8 @@ void listValidate(list_t *l, int appendFlag) {
 	 * could just set the size to zero and start adding/inserting.
 	 */
 	if (l->size == 0) {
-		Fatal("List (%s) @ %p not initialized", l->name, l);
+		LOG_FATAL("List (%s) @ %p not initialized", l->name, l)
+    Bail(-__LINE__);
 	}
 	if (l->items == NULL_ITEM) {
 		Assert(NO, "List (%s) @ %p has no data", l->name, l);
@@ -256,7 +261,8 @@ item_t *listGetItem(list_t *l, char *s) {
 		Assert(NO, "listGetItem: Null string to insert!");
 	}
 	if (l->sorted && l->sorted != SORT_BY_NAME) {
-		Fatal("%s is sorted other than by-name (%d)", l->name, l->sorted);
+		LOG_FATAL("%s is sorted other than by-name (%d)", l->name, l->sorted)
+    Bail(-__LINE__);
 	}
 	else if (l->used == 0) {
 		l->sorted = SORT_BY_NAME;
@@ -377,8 +383,8 @@ item_t *listLookupName(list_t *l, char *s)
 	 * and get outta Dodge.
 	 */
 	if (l->sorted != SORT_BY_NAME && l->sorted != 0) {
-		Fatal("Improper sort-type %d for %s name-lookup",
-				l->sorted, l->name);
+		LOG_FATAL("Improper sort-type %d for %s name-lookup", l->sorted, l->name)
+    Bail(-__LINE__);
 	}
 	/*
 	 * Walk through the sorted-by-name list and exit when we're done.
@@ -440,8 +446,8 @@ item_t *listLookupAlias(list_t *l, char *s)
 	 * and get outta Dodge.
 	 */
 	if (l->sorted != SORT_BY_ALIAS) {
-		Fatal("Improper sort-type %d for %s alias-lookup",
-				l->sorted, l->name);
+		LOG_FATAL("Improper sort-type %d for %s alias-lookup", l->sorted, l->name)
+    Bail(-__LINE__);
 	}
 	/*
 	 * Walk through the sorted-by-alias list and exit when we're done.
@@ -499,7 +505,8 @@ item_t *listIterate(list_t *l) {
 		l->ix = -1;
 		return (NULL_ITEM);
 	} else if ((l->ix > l->used) || (l->ix < 0)) {
-		Fatal("Index %d out of bounds (%d) on %s", l->ix, l->used, l->name);
+		LOG_FATAL("Index %d out of bounds (%d) on %s", l->ix, l->used, l->name)
+    Bail(-__LINE__);
 	}
 	p = l->items+(l->ix);
 	return (p);
@@ -650,7 +657,8 @@ void listSort(list_t *l, int sortType) {
 	switch (sortType) {
 #ifdef	QA_CHECKS
 	case UNSORTED:
-	Fatal("Sort-spec == UNSORTED");
+	LOG_FATAL("Sort-spec == UNSORTED")
+  Bail(-__LINE__);
 	break;
 #endif	/* QA_CHECKS */
 	case SORT_BY_NAME_ICASE:
@@ -691,7 +699,8 @@ void listSort(list_t *l, int sortType) {
 		sortType = SORT_BY_NAME;
 		break;
 	default:
-		Fatal("Invalid sort-spec %d", sortType);
+		LOG_FATAL("Invalid sort-spec %d", sortType)
+    Bail(-__LINE__);
 	}
 
 #ifdef	PROC_TRACE
@@ -806,7 +815,8 @@ void listDump(list_t *l, int verbose) {
 
 	/*MD: why should an empty list be fatal?  Just return....? */
 	if (l == NULL_LIST) {
-		Fatal("NULL list passed to listDump()");
+		LOG_FATAL("NULL list passed to listDump()")
+    Bail(-__LINE__);
 	}
 	if (l->used == 0) {
 #if	defined(LIST_DEBUG) || defined(UNPACK_DEBUG) || defined(REPORT_DEBUG)

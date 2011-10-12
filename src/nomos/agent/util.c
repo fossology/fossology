@@ -29,9 +29,6 @@
 #include "util.h"
 #include "list.h"
 #include "nomos_regex.h"
-/* CDB do we need this?
-#include "_autodefs.h"
-*/
 
 #define	MM_CACHESIZE	20
 
@@ -63,13 +60,6 @@ int isDIR(char *dpath)
 #endif	/* PROC_TRACE */
 
     return(isINODE(dpath, S_IFDIR));
-}
-
-
-void unbufferFile(FILE *fp)
-{
-    (void) setbuf(fp, NULL);
-    return;
 }
 
 
@@ -129,6 +119,7 @@ int isSYMLINK(char *spath)
 int isINODE(char *ipath, int typ)
 {
     int ret;
+    char sErrorBuf[1024];
 
 #ifdef	PROC_TRACE
 	traceFunc("== isINODE(%s, 0x%x)\n", ipath, typ);
@@ -143,9 +134,8 @@ int isINODE(char *ipath, int typ)
 	if (errno == ENOENT) {
 	    return 0;
 	}
-	perror(ipath);
-	mySystem("ls -l '%s'", ipath);
-	Bail(10);
+  strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
+  LOG_ERROR("Error: %s getting stat on file: %s", sErrorBuf, ipath)
     }
     if (typ == 0) {
 	return(1);
@@ -170,7 +160,8 @@ char *newReloTarget(char *basename)
 	}
     }
     if (i == MAX_RENAME) {
-	Fatal("%s: no suitable relocation target (%d tries)", basename, i);
+	LOG_FATAL("%s: no suitable relocation target (%d tries)", basename, i)
+  Bail(-__LINE__);
     }
     return(newpath);
 }
@@ -186,6 +177,8 @@ char *newReloTarget(char *basename)
 char *memAllocTagged(int size, char *name)
 {
     void *ptr;
+    sErrorBuf[1024];
+
     /*
      * we don't track memory allocated; we front-end for errors and return
      * the pointer we were given.
@@ -196,20 +189,24 @@ char *memAllocTagged(int size, char *name)
 #endif	/* PROC_TRACE || MEM_ACCT */
 
     if (size < 1) {
-	Fatal("Bombs away, cannot alloc %d bytes!", size);
+	LOG_FATAL("Cannot alloc %d bytes!", size)
+  Bail(-__LINE__);
     }
     if (++memlast == MEMCACHESIZ) {
-	Fatal("*** memAllocTagged: out of memcache entries");
+	LOG_FATAL("*** memAllocTagged: out of memcache entries")
+  Bail(-__LINE__);
     }
 #ifdef	USE_CALLOC
     if ((ptr = calloc((size_t) 1, (size_t) size)) == (void *) NULL) {
-	perror("calloc");
-	Fatal("Calloc error for %s", name);
+  strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
+	LOG_FATAL("calloc for %s, error: %s", name, sErrorBuf)
+  Bail(-__LINE__);
     }
 #else	/* not USE_CALLOC */
     if ((ptr = malloc((size_t) size)) == (void *) NULL) {
-	perror("malloc");
-	Fatal("Malloc error for %s", name);
+  strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
+	LOG_FATAL("malloc for %s, error: %s", name, sErrorBuf)
+  Bail(-__LINE__);
     }
     (void) memset(ptr, 0, (size_t) size);
 #endif	/* not USE_CALLOC */
@@ -238,7 +235,7 @@ void memFreeTagged(void *ptr, char *note)
 #endif	/* PROC_TRACE || MEM_ACCT */
 
 #ifdef	MEMORY_TRACING
-    printf("DEBUG: mprobe(%p)\n", ptr);
+    DEBUG("mprobe(%p)\n", ptr)
     mprobe(ptr);	/* see if glibc still likes this memory */
 #endif	/* MEMORY_TRACING */
     for (mmp = memcache, i = 0; i <= memlast; mmp++, i++) {
@@ -251,7 +248,8 @@ void memFreeTagged(void *ptr, char *note)
 	}
     }
     if (i > memlast) {
-	Fatal("Could not locate %p to free!", ptr);
+	LOG_FATAL("Could not locate %p to free!", ptr)
+  Bail(-__LINE__);
     }
     free(ptr);
 #if	DEBUG > 3 || defined(MEM_ACCT)
@@ -314,18 +312,18 @@ char *findBol(char *s, char *upperLimit)
     }
     for (cp = s; cp > upperLimit; cp--) {
 #ifdef	DEBUG
-	printf("DEBUG: cp %p upperLimit %p\n", cp, upperLimit);
+	DEBUG("cp %p upperLimit %p\n", cp, upperLimit)
 #endif	/* DEBUG */
 	if (isEOL(*cp)) {
 #ifdef	DEBUG
-	    printf("DEBUG: Got it!  BOL == %p\n", cp);
+	    DEBUG("Got it!  BOL == %p\n", cp)
 #endif	/* DEBUG */
 	    return((char*)(cp+1));
 	}
     }
     if (cp == upperLimit) {
 #ifdef	DEBUG
-	printf("DEBUG: AT upperLimit %p\n", upperLimit);
+	DEBUG("AT upperLimit %p\n", upperLimit);
 #endif	/* DEBUG */
 	return(upperLimit);
     }
@@ -359,6 +357,7 @@ char *findEol(char *s)
 void renameInode(char *oldpath, char *newpath)
 {
     int err = 0;
+    char sErrorBuf[1024];
     /*
      * we die here if the unlink() fails.
      */
@@ -378,8 +377,9 @@ void renameInode(char *oldpath, char *newpath)
 	    err = 1;
 	}
 	if (err) {
-	    perror(oldpath);
-	    Fatal("rename(%s, %s) fails", oldpath, newpath);
+      strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
+	    LOG_FATAL("rename(%s, %s) error: %s", oldpath, newpath, sErrorBuf)
+      Bail(-__LINE__);
 	}
     }
 #ifdef	DEBUG
@@ -391,6 +391,7 @@ void renameInode(char *oldpath, char *newpath)
 
 void chmodInode(char *pathname, int mode)
 {
+    char sErrorBuf[1024];
 /*
  * we die here if the chmod() fails.
  */
@@ -400,8 +401,9 @@ void chmodInode(char *pathname, int mode)
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
     if (chmod(pathname, mode) < 0) {
-	perror(pathname);
-	Fatal("chmod(\"%s\", 0%o) fails", pathname, mode);
+      strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
+	LOG_FATAL("chmod(\"%s\", 0%o) error: %s", pathname, mode, sErrorBuf)
+  Bail(-__LINE__);
     }
     return;
 }
@@ -410,6 +412,7 @@ void chmodInode(char *pathname, int mode)
 FILE *fopenFile(char *pathname, char *mode)
 {
     FILE *fp;
+    char sErrorBuf[1024];
 /*
  * we don't track directories opened; we front-end and return what's
  * given to us.  we die here if the fopen() fails.
@@ -420,8 +423,9 @@ FILE *fopenFile(char *pathname, char *mode)
 #endif	/* PROC_TRACE */
 
     if ((fp = fopen(pathname, mode)) == (FILE *) NULL) {
-	perror(pathname);
-	Fatal("fopen(%s) fails", pathname);
+      strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
+	LOG_FATAL("fopen(%s) error: %s", pathname, sErrorBuf);
+  Bail(-__LINE__);
     }
     return(fp);
 }
@@ -446,6 +450,7 @@ static void printListToFile(list_t *l, char *filename, char *mode) {
 FILE *popenProc(char *command, char *mode)
 {
     FILE *pp;
+    char sErrorBuf[1024];
 /*
  * we don't track directories opened; we front-end and return what's
  * given to us.  we die here if the popen() fails.
@@ -456,11 +461,12 @@ FILE *popenProc(char *command, char *mode)
 #endif	/* PROC_TRACE */
 
     if ((pp = popen(command, mode)) == (FILE *) NULL) {
-	perror("popen");
 #ifdef	MEMORY_TRACING
 	memCacheDump("Post-popen-failure:");
 #endif	/* MEMORY_TRACING */
-	Fatal("popen(\"%s\") fails", command);
+  strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
+	LOG_FATAL("popen(\"%s\") error: %s", command, sErrorBuf)
+  Bail(-__LINE__);
     }
     return(pp);
 }
@@ -590,8 +596,8 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 #ifdef	QA_CHECKS
 	p->val3++;	/* sanity-check -- should never be >1 ! */
 	if (p->val3 > 1) {
-	    Fatal("Called getInstances(%s) more than once",
-		  regex);
+	    LOG_FATAL("Called getInstances(%s) more than once", regex)
+      Bail(-__LINE__);
 	}
 #endif	/* QA_CHECKS */
     }
@@ -657,7 +663,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 		    start = findBol(start, textp);
 		}
 #ifdef	PHRASE_DEBUG
-		printf("DEBUG: start = %p\n", start);
+		DEBUG("start = %p\n", start)
 #endif	/* PHRASE_DEBUG */
 	    }
 	}
@@ -692,7 +698,8 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 		    }
 		    end = findEol(end);
 		    if (end == NULL_STR) {
-			Fatal("lost the end-of-line");
+			LOG_FATAL("lost the end-of-line")
+      Bail(-__LINE__);
 		    }
 		    if (*end == NULL_CHAR) {
 			break;	/* EOF == done */
@@ -760,9 +767,6 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 #ifdef	MEMSTATS
 	    printf("... DOUBLE search-pattern buffer (%d -> %d)\n",
 		   bufmax/2, bufmax);
-#if	0
-	    memStats("before buffer-double");
-#endif
 #endif	/* MEMSTATS */
 	    new = memAlloc(bufmax, MTAG_DOUBLED);
 	    (void) memcpy(new, ibuf, buflen);
@@ -778,11 +782,6 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 	    memFree(ibuf, MTAG_TOOSMALL);
 #endif	/* not REUSE_STATIC_MEMORY */
 	    ibuf = new;
-#if	0
-#ifdef	MEMSTATS
-	    memStats("after buffer-double");
-#endif	/* MEMSTATS */
-#endif
 	}
 	cp = bufmark = ibuf+buflen-1;	/* where the NULL is _now_ */
 	buflen += newDataLen;		/* new end-of-data ptr */
@@ -831,7 +830,8 @@ char *curDate()
     (void) time(&thyme);
     (void) ctime_r(&thyme, datebuf);
     if ((cp = strrchr(datebuf, '\n')) == NULL_STR) {
-	Fatal("Unexpected time format from ctime_r()!");
+	LOG_FATAL("Unexpected time format from ctime_r()!")
+      Bail(-__LINE__);
     }
     *cp = NULL_CHAR;
     return(datebuf);
@@ -873,7 +873,8 @@ void makeSymlink(char *path)
     (void) sprintf(cmdBuf, ".%s", strrchr(path, '/'));
     if (symlink(path, cmdBuf) < 0) {
 	perror(cmdBuf);
-	Fatal("Failed: symlink(%s, %s)", path, cmdBuf);
+	LOG_FATAL("Failed: symlink(%s, %s)", path, cmdBuf)
+      Bail(-__LINE__);
     }
     return;
 }
@@ -973,7 +974,8 @@ void printRegexMatch(int n, int cached)
 	    *x = NULL_CHAR;
 	    while (*--x != '[') {
 		if (x == textp) {
-		    Fatal("Cannot locate debug symbol");
+		    LOG_FATAL("Cannot locate debug symbol")
+      Bail(-__LINE__);
 		}
 	    }
 	    ++x; /* CDB - Moved from line below. Hope this is what was intended.*/
@@ -1049,7 +1051,8 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	}
 	perror(pathname);
 	(void) mySystem("ls -l %s", pathname);
-	Fatal("%s: open failure!", pathname);
+	LOG_FATAL("%s: open failure!", pathname)
+      Bail(-__LINE__);
     }
 
     if (fstat(mmp->fd, &cur.stbuf) < 0) {
@@ -1081,7 +1084,7 @@ char *mmapFile(char *pathname)	/* read-only for now */
       /* log error and move on.  This way error will be logged
        * but job will continue
        */
-      printf("WARNING nomos read error: %s, file: %s, read size: %d, pfile_pk: %ld\n", strerror(errno), pathname, rem, cur.pFileFk);
+      LOG_WARNING("nomos read error: %s, file: %s, read size: %d, pfile_pk: %ld\n", strerror(errno), pathname, rem, cur.pFileFk);
       break;
     }
 	    rem -= n;
@@ -1227,17 +1230,17 @@ int mySystem(const char *fmt, ...)
 	ret = WEXITSTATUS(ret);
 #ifdef	DEBUG
 	if (ret) {
-	    Error("system(%s) returns %d", cmdBuf, ret);
+	    LOG_ERROR("system(%s) returns %d", cmdBuf, ret)
 	}
 #endif	/* DEBUG */
     }
     else if (WIFSIGNALED(ret)) {
 	ret = WTERMSIG(ret);
-	Error("system(%s) died from signal %d", cmdBuf, ret);
+	LOG_ERROR("system(%s) died from signal %d", cmdBuf, ret)
     }
     else if (WIFSTOPPED(ret)) {
 	ret = WSTOPSIG(ret);
-	Error("system(%s) stopped, signal %d", cmdBuf, ret);
+	LOG_ERROR("system(%s) stopped, signal %d", cmdBuf, ret)
     }
     return(ret);
 }
@@ -1292,40 +1295,6 @@ void Msg(const char *fmt, ...)
 }
 
 
-void Note(const char *fmt, ...)
-{
-    va_start(ap, fmt);
-    (void) sprintf(utilbuf, "NOTE: ");
-    (void) vsprintf(utilbuf+strlen(utilbuf), fmt, ap);
-    va_end(ap);
-
-#ifdef  PROC_TRACE
-	traceFunc("== Warn(\"%s\")\n", utilbuf);
-#endif  /* PROC_TRACE */
-
-    (void) strcat(utilbuf, "\n");
-    Msg("%s", utilbuf);
-    return;
-}
-
-
-void Warn(const char *fmt, ...)
-{
-    va_start(ap, fmt);
-    (void) sprintf(utilbuf, "WARNING: ");
-    (void) vsprintf(utilbuf+strlen(utilbuf), fmt, ap);
-    va_end(ap);
-
-#ifdef  PROC_TRACE
-	traceFunc("== Warn(\"%s\")\n", utilbuf);
-#endif  /* PROC_TRACE */
-
-    (void) strcat(utilbuf, "\n");
-    Msg("%s", utilbuf);
-    return;
-}
-
-
 void Assert(int fatalFlag, const char *fmt, ...)
 {
     va_start(ap, fmt);
@@ -1345,40 +1314,6 @@ void Assert(int fatalFlag, const char *fmt, ...)
     return;
 }
 
-
-void Error(const char *fmt, ...)
-{
-    va_start(ap, fmt);
-    (void) sprintf(utilbuf, "ERROR: ");
-    (void) vsprintf(utilbuf+strlen(utilbuf), fmt, ap);
-    va_end(ap);
-
-#ifdef  PROC_TRACE
-	traceFunc("== Error(\"%s\")\n");
-#endif  /* PROC_TRACE */
-
-    (void) strcat(utilbuf, "\n");
-    Msg("%s", utilbuf);
-    return;
-}
-
-
-void Fatal(const char *fmt, ...) {
-
-    va_start(ap, fmt);
-    (void) sprintf(utilbuf, "%s: FATAL: ", gl.progName);
-    (void) vsprintf(utilbuf+strlen(utilbuf), fmt, ap);
-    va_end(ap);
-
-#ifdef  PROC_TRACE
-	traceFunc("!! Fatal(\"%s\")\n", utilbuf + strlen(gl.progName) + 9);
-#endif  /* PROC_TRACE */
-
-    (void) strcat(utilbuf, "\n");
-    Msg("%s", utilbuf);
-    freeAndClearScan(&cur);
-    Bail(18);
-}
 
 void traceFunc(char *fmtStr, ...)
 {

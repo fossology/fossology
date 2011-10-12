@@ -37,10 +37,6 @@
 #include "nomos_regex.h"
 #include "_autodefs.h"
 
-#include "libfossrepo.h"
-#include "libfossdb.h"
-#include "libfossagent.h"
-
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif /* SVN_REV */
@@ -115,12 +111,12 @@ FUNCTION long add2license_ref(char *licenseName) {
     len = strlen(licenseName);
     PQescapeStringConn(gl.pgConn, escLicName, licenseName, len, &error);
     if (error)
-      printf("WARNING: %s(%d): Does license name have multibyte encoding?", __FILE__, __LINE__);
+      LOG_WARNING("Does license name %s have multibyte encoding?", licenseName)
 
     /* verify the license is not already in the table */
     sprintf(query, "SELECT rf_pk FROM license_ref where rf_shortname='%s' and rf_detector_type=2", escLicName);
     result = PQexec(gl.pgConn, query);
-    if (checkPQresult(gl.pgConn, result, query, "add2license_ref", __LINE__)) return 0;
+    if (fo_checkPQresult(gl.pgConn, result, query, __FILE__, __LINE__)) return 0;
     numRows = PQntuples(result);
     if (numRows)
     {
@@ -145,7 +141,7 @@ FUNCTION long add2license_ref(char *licenseName) {
 
     /* retrieve the new rf_pk */
     result = PQexec(gl.pgConn, query);
-    if (checkPQresult(gl.pgConn, result, query, "add2license_ref", __LINE__)) return 0;
+    if (fo_checkPQresult(gl.pgConn, result, query, __FILE__, __LINE__)) return 0;
     numRows = PQntuples(result);
     if (numRows)
       rf_pk = atol(PQgetvalue(result, 0, 0));
@@ -342,7 +338,7 @@ FUNCTION int initLicRefCache(cacheroot_t *pcroot) {
 
     sprintf(query, "SELECT rf_pk, rf_shortname FROM license_ref where rf_detector_type=2;");
     result = PQexec(gl.pgConn, query);
-    if (checkPQresult(gl.pgConn, result, query, "initLicRefCache", __LINE__)) return 0;
+    if (fo_checkPQresult(gl.pgConn, result, query, __FILE__, __LINE__)) return 0;
 
     numLics = PQntuples(result);
     /* populate the cache  */
@@ -572,13 +568,9 @@ FUNCTION void Bail(int exitval) {
     }
 #endif	/* MEMORY_TRACING && MEM_ACCT */
 
-    if (!cur.cliMode) {
-        printf("   LOG: Nomos agent is exiting, exit %d\n", exitval);
-        fflush(stdout);
-    }
-
-    DBclose(gl.DB);
-
+    /* close database and scheduler connections */
+    if (gl.pgConn) PQfinish(gl.pgConn);
+    fo_scheduler_disconnect(exitval);
     exit(exitval);
 }
 
@@ -711,7 +703,8 @@ FUNCTION void processFile(char *fileToScan) {
     cur.targetLen = strlen(cur.targetDir);
 
     if (!isFILE(fileToScan)) {
-      Fatal("\"%s\" is not a plain file", fileToScan);
+      LOG_FATAL("\"%s\" is not a plain file", fileToScan)
+      Bail(-__LINE__);
     }
 
     getFileLists(cur.targetDir);
@@ -775,85 +768,83 @@ FUNCTION int recordScanToDB(cacheroot_t *pcroot, struct curScan *scanRecord) {
     return (0);
 } /* recordScanToDb */
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) 
+{
+  int i;
+  int c;
+  int file_count = 0;
+  int upload_pk = 0;
+  int numrows;
+  int ars_pk = 0;
 
-    int i;
-    int c;
-    int file_count = 0;
-    int upload_pk = 0;
-    int numrows;
-    int ars_pk = 0;
+  char *cp;
+  char *pErrorBuf;
+  char sErrorBuf[1024];
+  char *agent_desc = "License Scanner";
+  char **files_to_be_scanned; /**< The list of files to scan */
+  char sqlbuf[1024];
+  PGresult *result;
+  PGresult *ars_result;
 
-    extern int AlarmSecs;
-    extern long HBItemsProcessed;
+  cacheroot_t cacheroot;
 
-    char *cp;
-    char *agent_desc = "Nomos License Detection Agency";
-    char parm[myBUFSIZ];
-    char **files_to_be_scanned; /**< The list of files to scan */
-    char sqlbuf[1024];
-    PGresult *result;
-    PGresult *ars_result;
-
-    cacheroot_t cacheroot;
+  /* connect to the scheduler */
+  fo_scheduler_connect(&argc, argv);
 
 #ifdef	PROC_TRACE
-    traceFunc("== main(%d, %p)\n", argc, argv);
+  traceFunc("== main(%d, %p)\n", argc, argv);
 #endif	/* PROC_TRACE */
 
 #ifdef	MEMORY_TRACING
-    mcheck(0);
+  mcheck(0);
 #endif	/* MEMORY_TRACING */
 #ifdef	GLOBAL_DEBUG
-    gl.DEEBUG = gl.MEM_DEEBUG = 0;
+  gl.DEEBUG = gl.MEM_DEEBUG = 0;
 #endif	/* GLOBAL_DEBUG */
 
-    files_to_be_scanned = calloc(argc, sizeof(char *));
+  files_to_be_scanned = calloc(argc, sizeof(char *));
 
-    /*
-     Set up variables global to the agent. Ones that are the
-     same for all scans.
-     */
-    gl.DB = DBopen();
-    if (!gl.DB) {
-        printf("FATAL: Nomos agent unable to connect to database, exiting...\n");
-        fflush(stdout);
-        exit(-1);
+  /*
+    Set up variables global to the agent. Ones that are the
+    same for all scans.
+   */
+    gl.pgConn = fo_dbconnect(NULL, &pErrorBuf);
+    if (!gl.pgConn) 
+    {
+        LOG_FATAL("Nomos unable to connect to database.  Error: %s. Exiting...\n", pErrorBuf)
+        Bail(-__LINE__);
     }
 
-    /* MD: move the call the GetAgentKey to the -i code? does that cause other
-     * issues?
-     */
-
-    gl.agentPk = GetAgentKey(gl.DB, basename(argv[0]), 0, SVN_REV, agent_desc);
-    gl.pgConn = DBgetconn(gl.DB);
+    gl.agentPk = fo_GetAgentKey(gl.pgConn, basename(argv[0]), 0, SVN_REV, agent_desc);
 
     /* Record the progname name */
-    if ((cp = strrchr(*argv, '/')) == NULL_STR) {
-        (void) strcpy(gl.progName, *argv);
+    if ((cp = strrchr(*argv, '/')) == NULL_STR) 
+    {
+        strncpy(gl.progName, *argv, sizeof(gl.progName));
     }
-    else {
-        while (*cp == '.' || *cp == '/') {
-            cp++;
-        }
-        (void) strcpy(gl.progName, cp);
+    else 
+    {
+        while (*cp == '.' || *cp == '/') cp++;
+        strncpy(gl.progName, cp, sizeof(gl.progName));
     }
 
-    if (putenv("LANG=C") < 0) {
-        perror("putenv");
-        Fatal("Cannot set LANG=C in environment");
+    if (putenv("LANG=C") < 0) 
+    {
+        strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
+        LOG_FATAL("Cannot set LANG=C in environment.  Error: %s", sErrorBuf)
+        Bail(-__LINE__);
     }
-    unbufferFile(stdout);
-    (void) umask(022);
 
-    /* Grab miscellaneous things from the environent */
-    if (getcwd(gl.initwd, sizeof(gl.initwd)) == NULL_STR) {
-        perror("getcwd");
-        Fatal("Cannot obtain starting directory");
+    /* Save the current directory */
+    if (getcwd(gl.initwd, sizeof(gl.initwd)) == NULL_STR) 
+    {
+        strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
+        LOG_FATAL("Cannot obtain starting directory.  Error: %s", sErrorBuf)
+        Bail(-__LINE__);
     }
-    /* DBug: printf("After getcwd in main, starting dir is:\n%s\n", gl.initwd); */
 
-    gl.uPsize = 6;
+    /* default paragraph size (# of lines to scan above and below the pattern) */
+    gl.uPsize = 6;  
 
     /* Build the license ref cache to hold 2**11 (2048) licenses.
        This MUST be a power of 2.
@@ -862,44 +853,30 @@ int main(int argc, char **argv) {
     cacheroot.nodes = calloc(cacheroot.maxnodes, sizeof(cachenode_t));
     if (!initLicRefCache(&cacheroot))
     {
-      printf("Nomos could not allocate cacheroot nodes\n");
-      exit(1);
+      LOG_FATAL("Nomos could not allocate %d cacheroot nodes.", cacheroot.maxnodes)
+      Bail(-__LINE__);
     }
 
-    /*
-     Deal with command line options
-     */
-
-    while ((c = getopt(argc, argv, "hi")) != -1) {
-
-        /* printf("start of while; argc is:%d\n", argc); */
-        /* for(i=0; i<argc; i++){
-         printf("args passed in:%s\n",argv[i]);
-         }
-         */
+    /* Process command line options */
+    while ((c = getopt(argc, argv, "hi")) != -1) 
+    {
         switch (c) {
         case 'i':
             /* "Initialize" */
-            DBclose(gl.DB); /* DB was opened above, now close it and exit */
-            exit(0);
+            Bail(0); /* DB was opened above, now close it and exit */
         case 'h':
         default:
             Usage(argv[0]);
-            DBclose(gl.DB);
-            exit(-1);
+            Bail(-__LINE__);
         }
     }
 
-    /*
-     Copy filename args (if any) into array
-     */
-
-    for (i = 1; i < argc; i++) {
-        /* printf("argv's are:%s\n", argv[i]); */
+    /* Copy filename args (if any) into array */
+    for (i = 1; i < argc; i++) 
+    {
         files_to_be_scanned[i - 1] = argv[i];
         file_count++;
     }
-    /* printf("after parse args, argc is:%d\n", argc); DEBUG */
 
     licenseInit();
     gl.flags = 0;
@@ -911,15 +888,11 @@ int main(int argc, char **argv) {
         /* We're being run from the scheduler */
         /* DEBUG printf("   LOG: nomos agent starting up in scheduler mode....\n"); */
         schedulerMode = 1;
-        signal(SIGALRM, ShowHeartbeat);
-        alarm(AlarmSecs);
 
-        printf("OK\n");
-        fflush(stdout);
         /* read upload_pk from scheduler */
-        while (ReadLine(stdin, parm, myBUFSIZ) >= 0) 
+        while (fo_scheduler_next())
         {
-          upload_pk = atoi(parm);
+          upload_pk = atoi(fo_scheduler_current());
           if (upload_pk == 0) continue; 
 
           /* Is this a duplicate request (same upload_pk, sameagent_fk)?
@@ -931,13 +904,11 @@ int main(int argc, char **argv) {
                     and upload_fk='%d' and agent_fk='%d'",
                    upload_pk, gl.agentPk);
           result = PQexec(gl.pgConn, sqlbuf);
-          if (checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+          if (fo_checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__)) Bail(-__LINE__);
           if (PQntuples(result) != 0) 
           {
-            printf("LOG: Ignoring requested nomos analysis of upload %d - Results are already in database.\n",
+            LOG_NOTICE("Ignoring requested nomos analysis of upload %d - Results are already in database.",
                   upload_pk);
-            printf("OK\n");
-            fflush(stdout);
             continue;
           }
           PQclear(result);
@@ -947,7 +918,7 @@ int main(int argc, char **argv) {
                   "insert into nomos_ars (agent_fk, upload_fk, ars_success) values(%d,%d,'%s');",
                     gl.agentPk, upload_pk, "false");
           ars_result = PQexec(gl.pgConn, sqlbuf);
-          if (checkPQcommand(gl.pgConn, ars_result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+          if (fo_checkPQcommand(gl.pgConn, ars_result, sqlbuf, __FILE__ ,__LINE__)) Bail(-__LINE__);
 
           /* retrieve the ars_pk of the newly inserted record */
           sprintf(sqlbuf, "select ars_pk from nomos_ars \
@@ -956,11 +927,11 @@ int main(int argc, char **argv) {
                             order by ars_starttime desc limit 1",
                             gl.agentPk, upload_pk, "false");
           ars_result = PQexec(gl.pgConn, sqlbuf);
-          if (checkPQresult(gl.pgConn, ars_result, sqlbuf, __FILE__, __LINE__)) return -1;
+          if (fo_checkPQresult(gl.pgConn, ars_result, sqlbuf, __FILE__, __LINE__)) Bail(-__LINE__);
           if (PQntuples(ars_result) == 0)
           {
-            printf("FATAL: (%s.%d) Missing nomos_ars record.\n%s\n",__FILE__,__LINE__,sqlbuf);
-            return -1;
+            LOG_FATAL("Missing nomos_ars record: %s",sqlbuf)
+            Bail(-__LINE__);
           }
           ars_pk = atol(PQgetvalue(ars_result, 0, 0));
           PQclear(ars_result);
@@ -970,7 +941,7 @@ int main(int argc, char **argv) {
                    "SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS left outer join license_file on (PF=pfile_fk and agent_fk='%d') inner join pfile on (PF=pfile_pk) WHERE fl_pk IS null",
                    upload_pk, gl.agentPk);
           result = PQexec(gl.pgConn, sqlbuf);
-          if (checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+          if (fo_checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__)) Bail(-__LINE__);
           numrows = PQntuples(result);
 
           /* process all files in this upload */
@@ -979,13 +950,11 @@ int main(int argc, char **argv) {
             strcpy(cur.pFile, PQgetvalue(result, i, 1));
             cur.pFileFk = atoi(PQgetvalue(result, i, 0));
         
-            repFile = RepMkPath("files", cur.pFile);
+            repFile = fo_RepMkPath("files", cur.pFile);
             if (!repFile) 
             {
-              printf("FATAL: pfile %ld Nomos unable to open file %s\n", cur.pFileFk, cur.pFile);
-              fflush(stdout);
-              DBclose(gl.DB);
-              exit(-1);
+              LOG_FATAL("Nomos unable to open pfile_pk: %ld, file: %s", cur.pFileFk, cur.pFile);
+              Bail(-__LINE__);
             }
 
             /* make sure this is a regular file, ignore if not */
@@ -994,13 +963,11 @@ int main(int argc, char **argv) {
             processFile(repFile);
             if (recordScanToDB(&cacheroot, &cur))
             {
-              printf("FATAL: nomos terminating on upload %d due to previous errors.",
+              LOG_FATAL("nomos terminating upload %d scan due to previous errors.",
                      upload_pk);
-              exit(-99);
+              Bail(-__LINE__);
             }
             freeAndClearScan(&cur);
-
-            Heartbeat(++HBItemsProcessed);
           }
           PQclear(result);
 
@@ -1009,16 +976,11 @@ int main(int argc, char **argv) {
                   "update nomos_ars set ars_endtime=now(), ars_success=true where ars_pk='%d'",
                    ars_pk);
           result = PQexec(gl.pgConn, sqlbuf);
-          if (checkPQcommand(gl.pgConn, result, sqlbuf, __FILE__ ,__LINE__)) return -1;
-          printf("OK\n"); /* tell scheduler ready for more data */
-          fflush(stdout);
+          if (fo_checkPQcommand(gl.pgConn, result, sqlbuf, __FILE__ ,__LINE__)) Bail(-__LINE__);
         }
     }
-    else {
-        /*
-         Files on the command line
-         */
-        /* printf("Main: running in cli mode, processing file(s)\n"); */
+    else 
+    { /******** Files on the command line ********/
         cur.cliMode = 1;
         for (i = 0; i < file_count; i++) {
             processFile(files_to_be_scanned[i]);
@@ -1026,11 +988,13 @@ int main(int argc, char **argv) {
             freeAndClearScan(&cur);
         }
     }
+
     lrcache_free(&cacheroot);  // for valgrind
-    Bail(100);
+
+    /* Normal Exit */
+    Bail(0);
 
     /* this will never execute but prevents a compiler warning about reaching 
      the end of a non-void function */
     return (0);
 }
-
