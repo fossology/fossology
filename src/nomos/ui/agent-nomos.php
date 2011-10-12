@@ -27,10 +27,6 @@ This prevents hacking attempts.
  * 
  * @version "$Id: agent-nomos.php 3444 2010-09-10 03:52:55Z madong $"
  */
-global $GlobalReady;
-if (!isset($GlobalReady)) {
-  exit;
-}
 
 define("TITLE_agent_fonomos", _("Nomos License Analysis"));
 
