@@ -36,7 +36,7 @@ int  DBFindMimeInit()
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
-    FATAL("Unable to connect to database");
+    LOG_FATAL("Unable to connect to database");
     exit(-1);
   }
   MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
