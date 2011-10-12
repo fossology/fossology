@@ -516,8 +516,6 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
  * this will loop INFINITELY.
  * \todo DEPRECATED!  USE Folder2Path() and GetFolderFromItem()
  */
-$FolderGetFromUpload_1_Prepared=0;
-$FolderGetFromUpload_2_Prepared=0;
 function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
 {
   global $PG_CONN;
@@ -531,30 +529,20 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
   if ($Folder < 0)
   {
     /* Mode 2 means child_id is an upload_pk */
-    global $FolderGetFromUpload_1_Prepared;
     $Parm = $Uploadpk;
-    if (!$FolderGetFromUpload_1_Prepared)
-    {
-      $sql = "SELECT parent_fk,folder_name FROM foldercontents
-			  INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
+    $sql = "SELECT parent_fk,folder_name FROM foldercontents
+              INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
 			  AND foldercontents.foldercontents_mode = 2
 			  WHERE foldercontents.child_id = $Parm LIMIT 1;";
-      $FolderGetFromUpload_1_Prepared=1;
-    }
   }
   else
   {
     /* Mode 1 means child_id is a folder_pk */
-    global $FolderGetFromUpload_2_Prepared;
     $Parm = $Folder;
-    if (!$FolderGetFromUpload_2_Prepared)
-    {
-      $sql = "SELECT parent_fk,folder_name FROM foldercontents
+    $sql = "SELECT parent_fk,folder_name FROM foldercontents
 			  INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
 			  AND foldercontents.foldercontents_mode = 1
 			  WHERE foldercontents.child_id = $Parm LIMIT 1;";
-      $FolderGetFromUpload_2_Prepared=1;
-    }
   }
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
