@@ -52,13 +52,13 @@ CksumFile *	SumOpenFile	(char *Fname)
 #endif
   if (CF->FileHandle == -1)
 	{
-	fprintf(stderr,"ERROR: Unable to open file (%s)\n",Fname);
+	LOG_ERROR("Unable to open file (%s)\n",Fname);
 	free(CF);
 	return(NULL);
 	}
   if (fstat(CF->FileHandle,&Stat) == -1)
 	{
-	fprintf(stderr,"ERROR: Unable to stat file (%s)\n",Fname);
+	LOG_ERROR("Unable to stat file (%s)\n",Fname);
 	close(CF->FileHandle);
 	free(CF);
 	return(NULL);
@@ -79,7 +79,7 @@ CksumFile *	SumOpenFile	(char *Fname)
     CF->Mmap = mmap(0,CF->MmapSize,PROT_READ,MAP_PRIVATE,CF->FileHandle,0);
     if (CF->Mmap == MAP_FAILED)
 	{
-	fprintf(stderr,"ERROR: Unable to mmap file (%s)\n",Fname);
+	LOG_ERROR("Unable to mmap file (%s)\n",Fname);
 	close(CF->FileHandle);
 	free(CF);
 	return(NULL);
@@ -142,7 +142,7 @@ Cksum *	SumComputeFile	(FILE *Fin)
   rc = SHA1Reset(&sha1);
   if (rc)
     {
-    fprintf(stderr,"ERROR: Unable to initialize sha1\n");
+    LOG_ERROR("Unable to initialize sha1\n");
     free(Sum);
     return(NULL);
     }
@@ -155,7 +155,7 @@ Cksum *	SumComputeFile	(FILE *Fin)
 	MyMD5_Update(&md5,Buffer,ReadLen);
 	if (SHA1Input(&sha1,(uint8_t *)Buffer,ReadLen) != shaSuccess)
 	  {
-	  fprintf(stderr,"ERROR: Failed to compute sha1 (intermediate compute)\n");
+	  LOG_ERROR("Failed to compute sha1 (intermediate compute)\n");
 	  free(Sum);
 	  return(NULL);
 	  }
@@ -168,7 +168,7 @@ Cksum *	SumComputeFile	(FILE *Fin)
   rc = SHA1Result(&sha1,Sum->SHA1digest);
   if (rc != shaSuccess)
     {
-    fprintf(stderr,"ERROR: Failed to compute sha1\n");
+    LOG_ERROR("Failed to compute sha1\n");
     free(Sum);
     return(NULL);
     }
@@ -197,7 +197,7 @@ Cksum *	SumComputeBuff	(CksumFile *CF)
   rc = SHA1Reset(&sha1);
   if (rc)
     {
-    fprintf(stderr,"ERROR: Unable to initialize sha1\n");
+    LOG_ERROR("Unable to initialize sha1\n");
     free(Sum);
     return(NULL);
     }
@@ -208,7 +208,7 @@ Cksum *	SumComputeBuff	(CksumFile *CF)
   rc = SHA1Result(&sha1,Sum->SHA1digest);
   if (rc)
     {
-    fprintf(stderr,"ERROR: Failed to compute sha1\n");
+    LOG_ERROR("Failed to compute sha1\n");
     free(Sum);
     return(NULL);
     }

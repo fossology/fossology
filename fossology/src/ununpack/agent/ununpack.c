@@ -64,11 +64,11 @@ int	main(int argc, char *argv[])
 
         if (!pgConn)
         {
-          FATAL("Unable to access database")
+          LOG_FATAL("Unable to access database")
           SafeExit(20);
         }
         if (!IsExe("dpkg-source",Quiet))
-          WARNING("dpkg-source is not available on this system.  This means that debian source packages will NOT be unpacked.")
+          LOG_WARNING("dpkg-source is not available on this system.  This means that debian source packages will NOT be unpacked.")
         SafeExit(0);
         break; /* never reached */
       case 'Q':
@@ -106,7 +106,7 @@ int	main(int argc, char *argv[])
     pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
     if (!pgConn)
     {
-      FATAL("Unable to access database")
+      LOG_FATAL("Unable to access database")
       SafeExit(21);
     }
 
@@ -140,7 +140,7 @@ int	main(int argc, char *argv[])
     if (PQntuples(result) > 0) /* if there is a value */
     {  
       PQclear(result);
-      WARNING("Upload_pk %s, has already been unpacked.  No further action required", 
+      LOG_WARNING("Upload_pk %s, has already been unpacked.  No further action required", 
               Upload_Pk)
       SafeExit(0);
     }
@@ -174,7 +174,7 @@ int	main(int argc, char *argv[])
     else ListOutFile = fopen(ListOutName,"w");
     if (!ListOutFile)
     {
-      ERROR("pfile %s Unable to write to %s\n",Pfile_Pk,ListOutName)
+      LOG_ERROR("pfile %s Unable to write to %s\n",Pfile_Pk,ListOutName)
       SafeExit(27);
     }
     else
@@ -222,7 +222,7 @@ int	main(int argc, char *argv[])
         /* make sure the source exists in the src repository */
         if (fo_RepImport(argv[optind],REP_FILES,argv[optind],1) != 0)
         {
-          ERROR("Failed to import '%s' as '%s' into the repository",argv[optind],argv[optind])
+          LOG_ERROR("Failed to import '%s' as '%s' into the repository",argv[optind],argv[optind])
           SafeExit(28);
         }
       }
@@ -239,7 +239,7 @@ int	main(int argc, char *argv[])
         Fname=fo_RepMkPath(REP_GOLD,argv[optind]);
         if (fo_RepImport(Fname,REP_FILES,argv[optind],1) != 0)
         {
-          ERROR("Failed to import '%s' as '%s' into the repository",Fname,argv[optind])
+          LOG_ERROR("Failed to import '%s' as '%s' into the repository",Fname,argv[optind])
           SafeExit(29);
         }
       }
@@ -315,7 +315,7 @@ int	main(int argc, char *argv[])
       Fname=fo_RepMkPath(REP_GOLD,Pfile);
       if (fo_RepImport(Fname,REP_FILES,Pfile,1) != 0)
       {
-        ERROR("Failed to import '%s' as '%s' into the repository",Fname,Pfile)
+        LOG_ERROR("Failed to import '%s' as '%s' into the repository",Fname,Pfile)
         SafeExit(30);
       }
     }

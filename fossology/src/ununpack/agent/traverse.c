@@ -161,7 +161,7 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
       if (!strcmp(CMD[CI->PI.Cmd].Magic,"application/x-zip") &&
           ((rc==1) || (rc==2) || (rc==51)) )
       {
-        WARNING("pfile %s Minor zip error(%d)... ignoring error.",Pfile_Pk,rc)
+        LOG_WARNING("pfile %s Minor zip error(%d)... ignoring error.",Pfile_Pk,rc)
         rc=0;	/* lots of zip return codes */
       }
       break;
@@ -205,7 +205,7 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
   {
     /* if command failed but we want to continue anyway */
     /** Note: CMD_DEFAULT will never get here because rc==0 **/
-    ERROR("pfile %s Command %s failed on: %s",
+    LOG_ERROR("pfile %s Command %s failed on: %s",
         Pfile_Pk, CMD[CI->PI.Cmd].Cmd, CI->Source)
     if (ForceContinue) rc=-1;
   }
@@ -237,7 +237,7 @@ int	Traverse	(char *Filename, char *Basename,
   int RecurseOk=1;	/* should it recurse? (only on unique inserts) */
 
   if (!Filename || (Filename[0]=='\0')) return(IsContainer);
-  if (Verbose > 0) DEBUG("Traverse(%s) -- %s",Filename,Label)
+  if (Verbose > 0) LOG_DEBUG("Traverse(%s) -- %s",Filename,Label)
 
   /* clear the container */
   memset(&CI,0,sizeof(ContainerInfo));
@@ -285,7 +285,7 @@ int	Traverse	(char *Filename, char *Basename,
   if (rc != 0)
   {
     /* this should never happen... */
-    ERROR("pfile %s \"%s\" DOES NOT EXIST!!!",Pfile_Pk,Filename)
+    LOG_ERROR("pfile %s \"%s\" DOES NOT EXIST!!!",Pfile_Pk,Filename)
     /* goto TraverseEnd; */
     return(0);
   }
@@ -411,8 +411,7 @@ int	Traverse	(char *Filename, char *Basename,
         /* make the directory */
         if (MkDir(Queue[Index].ChildRecurse))
         {
-          FATAL("Unable to mkdir(%s) in Traverse",
-              Queue[Index].ChildRecurse)
+          LOG_FATAL("Unable to mkdir(%s) in Traverse", Queue[Index].ChildRecurse)
           if (!ForceContinue)
           {
             SafeExit(17);
@@ -495,12 +494,12 @@ int	Traverse	(char *Filename, char *Basename,
       rc = system(Cmd);
       if (WIFSIGNALED(rc))
       {
-        ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd)
+        LOG_ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd)
         SafeExit(18);
       }
       if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
       else rc=-1;
-      if (rc != 0) ERROR("Unable to run command '%s'",Cmd)
+      if (rc != 0) LOG_ERROR("Unable to run command '%s'",Cmd)
       /* add it to the list of files */
       RecurseOk = DisplayContainerInfo(&CImeta,PI->Cmd);
       if (UnlinkAll) unlink(CImeta.Source);
@@ -524,7 +523,7 @@ int	Traverse	(char *Filename, char *Basename,
         /* Parent: Save child info */
         if (Pid == -1)
         {
-          FATAL("Unable to fork child.")
+          LOG_FATAL("Unable to fork child.")
           SafeExit(19);
         }
         Queue[Index].ChildPid = Pid;
@@ -580,7 +579,7 @@ int	Traverse	(char *Filename, char *Basename,
       CI.HasChild = 0;
       DisplayContainerInfo(&CI,PI->Cmd);
     }
-    DEBUG("Skipping (not a file or directory): %s",CI.Source)
+    LOG_DEBUG("Skipping (not a file or directory): %s",CI.Source)
   }
 
   TraverseEnd:
