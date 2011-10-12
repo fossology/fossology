@@ -7,8 +7,7 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 TESTDIRS=../agent_tests
 CFLAGS_LOCAL=$(ALL_CFLAGS) -I/usr/include/rpm -lpq -lrpm -lrpmio
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 EXE=pkgagent
 HDRS=pkgagent.h
@@ -39,7 +38,7 @@ install: all
 	@echo "make pkgagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 	@if test ! -e $(CONFDIR)/mods-enabled/pkgagent; then \
-	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled/pkgagent ; fi;
+	  ln -s $(MODDIR) $(CONFDIR)/mods-enabled/pkgagent ; fi;
 
 
 uninstall:
