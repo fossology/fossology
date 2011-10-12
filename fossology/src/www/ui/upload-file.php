@@ -71,10 +71,7 @@ class upload_file extends FO_Plugin {
     }
 
     /* Run wget_agent locally to import the file. */
-
-    global $LIBEXECDIR;
-
-    $Prog = "$LIBEXECDIR/agents/wget_agent -g fossy -k $uploadpk '$UploadedFile'";
+    $Prog = "../../wget_agent/agent/wget_agent -g fossy -k $uploadpk '$UploadedFile'";
     $wgetLast = exec($Prog,$wgetOut,$wgetRtn);
     unlink($UploadedFile);
 
@@ -127,7 +124,7 @@ class upload_file extends FO_Plugin {
           }
           else {
             $text = _("Upload failed for file");
-            $V.= displayMessage("$text {$_FILES[getfile][name]}: $rc");
+            $V.= displayMessage("$text {$_FILES['getfile']['name']}: $rc");
           }
         }
 
