@@ -248,7 +248,7 @@ int ProcessUpload (long upload_pk)
     PQclear(result);
     if ( mimetypepk == 0 )
     {
-      ERROR("pkgagent rpm mimetype not installed!");
+      LOG_ERROR("pkgagent rpm mimetype not installed!");
       return (-1);
     }
   }
@@ -269,7 +269,7 @@ int ProcessUpload (long upload_pk)
     PQclear(result);
     if ( debmimetypepk == 0 )
     {
-      ERROR("pkgagent deb mimetype not installed!");
+      LOG_ERROR("pkgagent deb mimetype not installed!");
       return (-1);
     }
   }
@@ -290,7 +290,7 @@ int ProcessUpload (long upload_pk)
     PQclear(result);
     if ( debsrcmimetypepk == 0 )
     {
-      ERROR("pkgagent deb source mimetype not installed!");
+      LOG_ERROR("pkgagent deb source mimetype not installed!");
       return (-1);
     }
   }
@@ -320,7 +320,7 @@ int ProcessUpload (long upload_pk)
       strncpy(pi->pFile, PQgetvalue(result, i, 1), sizeof(pi->pFile));
       repFile = fo_RepMkPath("files", pi->pFile);
       if (!repFile) {
-        FATAL("pfile %ld PkgAgent unable to open file %s",
+        LOG_FATAL("pfile %ld PkgAgent unable to open file %s",
             pi->pFileFk, pi->pFile);
         return (-1);
       }
@@ -352,7 +352,7 @@ int ProcessUpload (long upload_pk)
       strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
       repFile = fo_RepMkPath("files", dpi->pFile);
       if (!repFile) {
-        FATAL("pfile %ld PkgAgent unable to open file %s\n",
+        LOG_FATAL("pfile %ld PkgAgent unable to open file %s\n",
             dpi->pFileFk, dpi->pFile);
         return (-1);
       }
@@ -706,7 +706,7 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
   if (PQntuples(result) == 0)
   {
-    ERROR("Missing debian package (internal data inconsistancy). SQL: %s\n", SQL);
+    LOG_ERROR("Missing debian package (internal data inconsistancy). SQL: %s\n", SQL);
     return (-1);
   } 
   lft = strtoul(PQgetvalue(result,0,0), NULL, 10);	
@@ -722,7 +722,7 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
     filename = PQgetvalue(result,0,0);	
     repfile = fo_RepMkPath("files", filename);
     if (!repfile) {
-      FATAL("PkgAgent unable to open file %s\n",filename);
+      LOG_FATAL("PkgAgent unable to open file %s\n",filename);
       return (-1);
     }
     PQclear(result);
@@ -741,7 +741,7 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
 
   /* Parse the debian/control file to get every Field and Value */
   if ((fp = fopen(repfile, "r")) == NULL){
-    FATAL("Unable to open debian/control file %s\n",repfile);
+    LOG_FATAL("Unable to open debian/control file %s\n",repfile);
     return (-1);
   }
 
@@ -901,7 +901,7 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
 
   /*  Parse the debian .dsc file to get every Field and Value */
   if ((fp = fopen(repFile, "r")) == NULL){
-    FATAL("Unable to open .dsc file %s\n",repFile);
+    LOG_FATAL("Unable to open .dsc file %s\n",repFile);
     return (-1);
   }
 

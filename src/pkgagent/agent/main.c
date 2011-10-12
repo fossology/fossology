@@ -91,7 +91,7 @@ int	main	(int argc, char *argv[])
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!db_conn)
   {
-    FATAL("Unable to connect to database");
+    LOG_FATAL("Unable to connect to database");
     exit(-1);
   }
 
@@ -146,7 +146,7 @@ int	main	(int argc, char *argv[])
       if (PQntuples(ars_result) > 0)
       {
         PQclear(ars_result);
-        WARNING("Ignoring requested pkgagent analysis of upload %d - Results are already in database.\n",upload_pk);
+        LOG_WARNING("Ignoring requested pkgagent analysis of upload %d - Results are already in database.\n",upload_pk);
         continue;
       }
       PQclear(ars_result);
