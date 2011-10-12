@@ -91,6 +91,11 @@ extern int verbose;
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
 
+#define NOTICE(...) { \
+            fprintf(stderr, "NOTICE %s.%d: ", __FILE__, __LINE__); \
+            fprintf(stderr, __VA_ARGS__); \
+            fprintf(stderr, "\n"); }
+
 /* a set of verbose macros that can be used to tso auto testing on verbose   */
 /* for example, to print "this is a verbose test at line <line>" at verbose */
 /* level 2 simply call:                                                     */
