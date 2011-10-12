@@ -43,7 +43,8 @@ void regexError(int ret, regex_t *regc, char *regex)
 
     (void) regerror(ret, regc, regexErrbuf, sizeof(regexErrbuf));
     Msg("regex = \"%s\"\n", regex);
-    Fatal("regcomp failure: %s", regexErrbuf);
+    LOG_FATAL("regcomp failure: %s", regexErrbuf)
+    Bail(-__LINE__);
 }
 
 
@@ -191,7 +192,8 @@ int idxGrep(int index, char *data, int flags)
 #endif	/* PROC_TRACE || PHRASE_DEBUG */
 
     if (index > NFOOTPRINTS) {
-	Fatal("idxGrep: index %d out of range", index);
+	LOG_FATAL("idxGrep: index %d out of range", index)
+  Bail(-__LINE__);
     }
     if (data == NULL_STR) {
 #ifdef	PHRASE_DEBUG
@@ -306,7 +308,8 @@ int strNbuf(char *data, char *str)
 #endif	/* STRSTR_DEBUG */
 #ifdef	QA_CHECKS
 	if (firstx == NULL_CHAR) {
-	    Fatal("Unexpected initialization");
+	    LOG_FATAL("Unexpected initialization")
+      Bail(-__LINE__);
 	}
 #endif	/* QA_CHECKS */
     }

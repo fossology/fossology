@@ -67,8 +67,10 @@ int timerBytes;
 char timerName[64];
 #endif	/* STOPWATCH */
 
+#ifndef MAX
 #define	MAX(a, b)	((a) > (b) ? a : b)
 #define	MIN(a, b)	((a) < (b) ? a : b)
+#endif
 
 void licenseInit() {
 
@@ -130,7 +132,8 @@ void licenseInit() {
          * Step 2, add the search-seed to the search-cache
          */
         if ((p = listGetItem(&gl.sHash, licText[i].tseed)) == NULL_ITEM) {
-            Fatal("Cannot enqueue search-cache item \"%s\"", licText[i].tseed);
+            LOG_FATAL("Cannot enqueue search-cache item \"%s\"", licText[i].tseed)
+            Bail(-__LINE__);
         }
         p->refCount++;
 
@@ -193,13 +196,13 @@ void licenseInit() {
     for (i = 0; i < NFOOTPRINTS; i++) {
         if (licText[i].tseed == NULL_STR) {
 #ifdef	LICENSE_DEBUG
-            Note("License[%d] configured with NULL seed", i);
+            LOG_NOTICE("License[%d] configured with NULL seed", i)
 #endif	/* LICENSE_DEBUG */
             continue;
         }
         if (licText[i].tseed == licText[i].regex) {
 #ifdef	LICENSE_DEBUG
-            Note("License[%d] seed == regex", i);
+            LOG_NOTICE("License[%d] seed == regex", i)
 #endif	/* LICENSE_DEBUG */
             continue;
         }
@@ -289,7 +292,7 @@ static int searchStrategy(int index, char *regex, int aboveCalc) {
     s = _SEED(index);
     if (s == NULL_STR || strlen(s) == 0) {
 #ifdef	LICENSE_DEBUG
-        Note("Lic[%d] has NULL seed", index);
+        LOG_NOTICE("Lic[%d] has NULL seed", index)
 #endif	/* LICENSE_DEBUG */
         return (0);
     }
@@ -407,7 +410,8 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
             strncmp(cp, some, sizeof(some)-1) == 0 ||
             strncmp(cp, few, sizeof(few)-1) == 0) {
         printf("string %d == \"%s\"\n", i, cp);
-        Fatal("Text-spec %d begins with a wild-card", i);
+        LOG_FATAL("Text-spec %d begins with a wild-card", i)
+        Bail(-__LINE__);
     }
     /*
      * We'll replace the string " =ANY=" (6 chars) with ".*" (2 chars).
@@ -417,10 +421,12 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
     len = strlen(wildCard);
     for (cp = s; strGrep(wildCard, cp, 0); ) {
         if (wildcardBad) {
-            Fatal("OOPS, regex %d, wild-card not allowed here", i);
+            LOG_FATAL("OOPS, regex %d, wild-card not allowed here", i)
+            Bail(-__LINE__);
         }
         if (*(cp+cur.regm.rm_eo) == NULL_CHAR) {
-            Fatal("String %d ends in a wild-card", i);
+            LOG_FATAL("String %d ends in a wild-card", i)
+            Bail(-__LINE__);
         }
         else if (*(cp+cur.regm.rm_eo) == ' ') {
 #ifdef	DEBUG
@@ -435,7 +441,7 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
 #endif	/* DEBUG */
         }
         else {
-            Note("Wild-card \"%s\" sub-string, phrase %d", wildCard, i);
+            LOG_NOTICE("Wild-card \"%s\" sub-string, phrase %d", wildCard, i)
             cp += cur.regm.rm_eo;
         }
     }
@@ -446,10 +452,12 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
     len = strlen(wildCard);
     for (cp = s; strGrep(wildCard, cp, 0); ) {
         if (wildcardBad) {
-            Fatal("OOPS, regex %d, wild-card not allowed here", i);
+            LOG_FATAL("OOPS, regex %d, wild-card not allowed here", i)
+            Bail(-__LINE__);
         }
         if (*(cp+cur.regm.rm_eo) == NULL_CHAR) {
-            Fatal("String %d ends in a wild-card", i);
+            LOG_FATAL("String %d ends in a wild-card", i)
+            Bail(-__LINE__);
         }
         else if (*(cp+cur.regm.rm_eo) == ' ') {
 #ifdef	DEBUG
@@ -469,7 +477,7 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
 #endif	/* DEBUG */
         }
         else {
-            Note("Wild-card \"%s\" sub-string, phrase %d", wildCard, i);
+            LOG_NOTICE("Wild-card \"%s\" sub-string, phrase %d", wildCard, i)
             cp += cur.regm.rm_eo;
         }
     }
@@ -480,10 +488,12 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
     len = strlen(wildCard);
     for (cp = s; strGrep(wildCard, cp, 0); ) {
         if (wildcardBad) {
-            Fatal("OOPS, regex %d, wild-card not allowed here", i);
+            LOG_FATAL("OOPS, regex %d, wild-card not allowed here", i)
+            Bail(-__LINE__);
         }
         if (*(cp+cur.regm.rm_eo) == NULL_CHAR) {
-            Fatal("String %d ends in a wild-card", i);
+            LOG_FATAL("String %d ends in a wild-card", i)
+            Bail(-__LINE__);
         }
         else if (*(cp+cur.regm.rm_eo) == ' ') {
 #ifdef	DEBUG
@@ -503,7 +513,7 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
 #endif	/* DEBUG */
         }
         else {
-            Note("Wild-card \"%s\" sub-string, phrase %d", wildCard, i);
+            LOG_NOTICE("Wild-card \"%s\" sub-string, phrase %d", wildCard, i)
             cp += cur.regm.rm_eo;
         }
     }
@@ -515,7 +525,8 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
     len = strlen(year);
     while (strGrep(year, s, 0)) {
         if (strlen(s)+25 >= size) { /* 24 plus 1(NULL) */
-            Fatal("buffer overflow, text-spec %d", i);
+            LOG_FATAL("buffer overflow, text-spec %d", i)
+            Bail(-__LINE__);
         }
         cp = (char *)(s+cur.regm.rm_so);
 #ifdef	DEBUG
@@ -1100,7 +1111,8 @@ static void makeLicenseSummary(list_t *l, int highScore, char *target, int size)
         printCount++;
         new = sprintf(target + len, "%s", p->str);
         if ((len += new) > size) {
-            Fatal("Buffer-overwrite, marginal license components");
+            LOG_FATAL("Buffer-overwrite, marginal license components")
+            Bail(-__LINE__);
         }
         new = 0;
     }
