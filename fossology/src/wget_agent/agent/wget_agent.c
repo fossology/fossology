@@ -326,7 +326,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 
   if (!TaintURL(URL,TaintedURL,MAXCMD))
   {
-    FATAL("Failed to parse the URL\n");
+    LOG_FATAL("Failed to parse the URL\n");
     printf("LOG: Failed to taint the URL '%s'\n",URL);
     fflush(stdout);
     SafeExit(10);

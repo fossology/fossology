@@ -140,7 +140,7 @@ int main  (int argc, char *argv[])
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
-    FATAL("Unable to connect to database");
+    LOG_FATAL("Unable to connect to database");
     SafeExit(20);
   }
 
@@ -216,7 +216,7 @@ int main  (int argc, char *argv[])
         if (PQntuples(ars_result) > 0)
         {
           PQclear(ars_result);
-          WARNING("Ignoring requested wget_agent analysis of upload %d - Results are already in database.\n",upload_pk);
+          LOG_WARNING("Ignoring requested wget_agent analysis of upload %d - Results are already in database.\n",upload_pk);
           continue;
         }
         PQclear(ars_result);
@@ -247,7 +247,7 @@ int main  (int argc, char *argv[])
         }
         else
         {
-          FATAL("upload %ld File retrieval failed.\n",GlobalUploadKey);
+          LOG_FATAL("upload %ld File retrieval failed.\n",GlobalUploadKey);
           printf("LOG upload %ld File retrieval failed: uploadpk=%ld tempfile=%s URL=%s\n",GlobalUploadKey,GlobalUploadKey,GlobalTempFile,GlobalURL);
           fflush(stdout);
           if (pgConn) PQfinish(pgConn);
