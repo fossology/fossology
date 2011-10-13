@@ -704,7 +704,7 @@ int ReadParameter (char *Parm)
   else if ((Type==2) && (Target==3))	{ ListFolders(); rc=1; }
   else
   {
-    FATAL("Unknown command: '%s'\n",Parm);
+    LOG_FATAL("Unknown command: '%s'\n",Parm);
   }
 
   return(rc);
