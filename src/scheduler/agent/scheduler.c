@@ -601,6 +601,7 @@ int main(int argc, char** argv)
   gboolean db_init  = FALSE;  // flag indicating a database test
   gboolean test_die = FALSE;  // flag to run the tests then die
   char* log = NULL;           // used when a different log from the default is used
+  char* sysconfdir = NULL;    // system configuration directory (SYSCONFDIR)
   GOptionContext* options;    // option context used for command line parsing
   GError* error = NULL;       // error object used during parsing
   int rc;                     // used for return values of
@@ -616,6 +617,7 @@ int main(int argc, char** argv)
       { "reset",    'R', 0, G_OPTION_ARG_NONE,   &db_reset, "Reset the job queue upon startup"            },
       { "test",     't', 0, G_OPTION_ARG_NONE,   &test_die, "Close the scheduler after running tests"     },
       { "verbose",  'v', 0, G_OPTION_ARG_INT,    &verbose,  "Set the scheduler verbose level"             },
+      { "sysconfdir",     'c', 0, G_OPTION_ARG_STRING, &sysconfdir,"Directory containing fossology.conf"             },
       {NULL}
   };
 
