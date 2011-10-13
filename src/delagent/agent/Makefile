@@ -9,8 +9,7 @@ include $(VARS)
 TESTDIRS=../agent_tests
 
 CFLAGS_LOCAL=$(ALL_CFLAGS) -lpq
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 EXE=delagent
 HDRS=delagent.h
@@ -33,13 +32,16 @@ $(FOLIB):
 
 install: all
 	@echo "make delagent agent install"
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	if test ! -e $(MODDIR)/$(EXE); then \
+		mkdir -p $(MODDIR)/$(EXE)/agent; \
+	fi
+	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/	
 	@if test ! -e $(CONFDIR)/mods-enabled/delagent; then \
-          ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled/delagent ; fi;
+          ln -s $(MODDIR)/$(EXE)/agent/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make delagent agent uninstall"
-	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
 	rm -f $(CONFDIR)/mods-enabled/delagent
 
 test: all
