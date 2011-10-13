@@ -19,7 +19,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpcre
-DEF = -DDATADIR='"$(DATADIR)"'
+DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 EXE = copyright
@@ -73,18 +73,22 @@ pair.o: %.o: %.c %.h cvector.h
 
 install: $(EXE)
 	@echo "make copyright agent install"
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/
+	if test ! -e $(MODDIR)/$(EXE); then \
+		mkdir -p $(MODDIR)/$(EXE)/agent; \
+	fi
+	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/
 	$(MAKE) -C ../ui install
-	$(INSTALL_DATA) copyright.dic $(DESTDIR)$(DATADIR)/
-	$(INSTALL_DATA) names.dic $(DESTDIR)$(DATADIR)/
+	$(INSTALL_DATA) copyright.dic $(MODDIR)/
+	$(INSTALL_DATA) names.dic $(DESTDIR)$(MODDIR)/
 	@if test ! -e $(CONFDIR)/mods-enabled/copyright; then \
-	  ln -s $(MODDIR) $(CONFDIR)/mods-enabled ; fi;
+	  echo "Symlinking Copyright:moddir,confdir:$(MODDIR),$(CONFDIR)"; \
+	  ln -s $(MODDIR)/$(EXE)/agent/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make copyright agent uninstall"
-	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)/$(EXE)
-	rm -f $(DESTDIR)$(DATADIR)/copyright.dic
-	rm -f $(DESTDIR)$(DATADIR)/names.dic
+	rm -f $(MODDIR)/$(EXE)/agent/$(EXE)
+	rm -f $(DESTDIR)$(MODDIR)/copyright.dic
+	rm -f $(DESTDIR)$(MODDIR)/names.dic
 	rm -f $(CONFDIR)/mods-enabled/copyright
 
 #####################
