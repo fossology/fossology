@@ -62,14 +62,9 @@ _autodefs.h _autodata.c:	$(SPEC) $(LICFIX)
 
 install: all
 	@echo "make nomos agent install"
-	if test ! -e $(MODDIR)/$(EXE); then \
-		mkdir -p $(MODDIR)/$(EXE)/agent; \
-	fi
-	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/
+	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
 	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  echo "Symlinking Copyright:moddir,confdir:$(MODDIR),$(CONFDIR)"; \
-	  ln -s $(MODDIR)/$(EXE)/agent/$(EXE) $(CONFDIR)/mods-enabled ; fi;	
-#	$(INSTALL_PROGRAM) nomos $(DESTDIR)$(AGENTDIR)/nomos
+	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;	
 #	$(INSTALL_PROGRAM) encode  $(DESTDIR)$(AGENTDIR)/encode
 
 uninstall:

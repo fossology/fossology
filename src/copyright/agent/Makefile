@@ -73,22 +73,16 @@ pair.o: %.o: %.c %.h cvector.h
 
 install: $(EXE)
 	@echo "make copyright agent install"
-	if test ! -e $(MODDIR)/$(EXE); then \
-		mkdir -p $(MODDIR)/$(EXE)/agent; \
-	fi
-	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/
+	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
 	$(MAKE) -C ../ui install
-	$(INSTALL_DATA) copyright.dic $(MODDIR)/
-	$(INSTALL_DATA) names.dic $(DESTDIR)$(MODDIR)/
+	$(INSTALL_DATA) copyright.dic $(MODDIR)/$(EXE)/agent/
+	$(INSTALL_DATA) names.dic $(DESTDIR)$(MODDIR)/$(EXE)/agent/
 	@if test ! -e $(CONFDIR)/mods-enabled/copyright; then \
-	  echo "Symlinking Copyright:moddir,confdir:$(MODDIR),$(CONFDIR)"; \
-	  ln -s $(MODDIR)/$(EXE)/agent/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make copyright agent uninstall"
-	rm -f $(MODDIR)/$(EXE)/agent/$(EXE)
-	rm -f $(DESTDIR)$(MODDIR)/copyright.dic
-	rm -f $(DESTDIR)$(MODDIR)/names.dic
+	rm -rf $(MODDIR)/$(EXE)
 	rm -f $(CONFDIR)/mods-enabled/copyright
 
 #####################

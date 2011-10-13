@@ -35,10 +35,7 @@ install: all $(VARS)
 	fi
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(BINDIR)/departition
 	
-	if test ! -e $(MODDIR)/ununpack; then \
-		mkdir -p $(MODDIR)/ununpack/agent; \
-	fi
-	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/
+	$(INSTALL_PROGRAM) -D ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
 	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
 	  ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;	
 

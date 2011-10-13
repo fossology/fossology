@@ -32,12 +32,9 @@ $(FOLIB):
 
 install: all
 	@echo "make delagent agent install"
-	if test ! -e $(MODDIR)/$(EXE); then \
-		mkdir -p $(MODDIR)/$(EXE)/agent; \
-	fi
-	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/	
+	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)	
 	@if test ! -e $(CONFDIR)/mods-enabled/delagent; then \
-          ln -s $(MODDIR)/$(EXE)/agent/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+          ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make delagent agent uninstall"
