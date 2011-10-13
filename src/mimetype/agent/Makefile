@@ -28,10 +28,12 @@ $(FOLIB):
 
 install: all
 	@echo "make $(EXE) install"
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
-	@if test ! -e $(CONFDIR)/mods-enabled/mimetype; then \
-	ln -s $(MODDIR) $(CONFDIR)/mods-enabled/mimetype ; fi;
-
+	if test ! -e $(MODDIR)/$(EXE); then \
+		mkdir -p $(MODDIR)/$(EXE)/agent; \
+	fi
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/
+	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
+	 ln -s $(MODDIR)/$(EXE)/agent/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make $(EXE) uninstall"

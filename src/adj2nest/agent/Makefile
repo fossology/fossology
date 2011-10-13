@@ -34,9 +34,12 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	if test ! -e $(MODDIR)/$(EXE); then \
+		mkdir -p $(MODDIR)/$(EXE)/agent; \
+	fi
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/
 	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR) $(CONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODDIR)/$(EXE)/agent/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
