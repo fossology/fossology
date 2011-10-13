@@ -37,11 +37,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 /**
- * The status that a job has.
+ * @brief The status that a job has.
  *
- * RUNNING: all agents will continue to work normally
- * KILLED:  all agent associated with the job will die
- * PAUSED:  all agents will stop and wait for instructions
+ *  - RUNNING: all agents will continue to work normally
+ *  - KILLED:  all agent associated with the job will die
+ *  - PAUSED:  all agents will stop and wait for instructions
  */
 enum job_status {
   RUNNING, ///< RUNNING
@@ -50,17 +50,15 @@ enum job_status {
 };
 
 /**
- * Common verbose flags for the agents, this is used so that the scheduler can
+ * @brief Common verbose flags for the agents, this is used so that the scheduler can
  * change the verbose level for a particular agent. All agents should use this
  * flag for verbose instead of one declared within the agent. This can be set
  * by the scheduler to enable different levels of verbose.
  */
-extern int verbose;
+extern int agent_verbose;
 
-/* ************************************************************************** */
-/* **** Logging functions *************************************************** */
-/* ************************************************************************** */
-
+/** @brief Logging functions
+ */
 #define LOG_FATAL(...) { \
             fprintf(stderr, "FATAL %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
@@ -96,14 +94,6 @@ extern int verbose;
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
 
-/* By using these macros the verbosity level of an agent can be changed   
- * dynamically through the scheduler.
- * For example, to print "this is a verbose test at line <line>" at verbose 
- * level 2 simply call:
- *    LOG_VERBOSE2("this is a verbose test at line %d", __LINE__);
- * Though you never have to put the caller's filename or line number
- * in a message since they are added by LOG_NOTICE.
- */
 #define TVERBOSE0 agent_verbose & 1
 #define TVERBOSE1 agent_verbose & 2
 #define TVERBOSE2 agent_verbose & 4
@@ -112,6 +102,15 @@ extern int verbose;
 #define TVERBOSE5 agent_verbose & 32
 #define TVERBOSE6 agent_verbose & 64
 #define TVERBOSE7 agent_verbose & 128
+
+/** @brief By using these macros the verbosity level of an agent can be changed   
+ * dynamically through the scheduler.
+ * For example, to print "this is a verbose test at line <line>" at verbose 
+ * level 2 simply call:
+ *    LOG_VERBOSE2("this is a verbose test at line %d", __LINE__);
+ * Though you never have to put the caller's filename or line number
+ * in a message since they are added by LOG_NOTICE.
+ */
 #define LOG_VERBOSE0(...) if(TVERBOSE0) LOG_NOTICE(__VA_ARGS__);
 #define LOG_VERBOSE1(...) if(TVERBOSE1) LOG_NOTICE(__VA_ARGS__);
 #define LOG_VERBOSE2(...) if(TVERBOSE2) LOG_NOTICE(__VA_ARGS__);
