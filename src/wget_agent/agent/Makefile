@@ -46,7 +46,7 @@ install: all
 	@echo "make wget_agent install"
 	$(INSTALL_PROGRAM) -D $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE)/agent/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 
 
 uninstall:
