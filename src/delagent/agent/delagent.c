@@ -84,7 +84,7 @@ int main (int argc, char *argv[])
         db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
         if (!db_conn)
         {
-          FATAL("Unable to open DB");
+          LOG_FATAL("Unable to open DB");
           exit(-1);
         }
         fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
@@ -112,7 +112,7 @@ int main (int argc, char *argv[])
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!db_conn)
   {
-    FATAL("Unable to open DB");
+    LOG_FATAL("Unable to open DB");
     exit(-1);
   }
   fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
