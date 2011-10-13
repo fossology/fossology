@@ -4,6 +4,8 @@ TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
+EXE = nomos
+
 SPEC=STRINGS.in
 CHECK=CHECKSTR
 PRE=PRECHECK
@@ -59,12 +61,20 @@ _autodefs.h _autodata.c:	$(SPEC) $(LICFIX)
 #
 
 install: all
-	$(INSTALL_PROGRAM) nomos $(DESTDIR)$(AGENTDIR)/nomos
+	@echo "make nomos agent install"
+	if test ! -e $(MODDIR)/$(EXE); then \
+		mkdir -p $(MODDIR)/$(EXE)/agent; \
+	fi
+	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/
+	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
+	  echo "Symlinking Copyright:moddir,confdir:$(MODDIR),$(CONFDIR)"; \
+	  ln -s $(MODDIR)/$(EXE)/agent/$(EXE) $(CONFDIR)/mods-enabled ; fi;	
+#	$(INSTALL_PROGRAM) nomos $(DESTDIR)$(AGENTDIR)/nomos
 #	$(INSTALL_PROGRAM) encode  $(DESTDIR)$(AGENTDIR)/encode
 
 uninstall:
 #	rm -f $(DESTDIR)$(AGENTDIR)/encode
-	rm -f $(DESTDIR)$(AGENTDIR)/nomos
+	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
 
 test: all
 	@echo "*** No tests available for agent/$(EXE) ***"
