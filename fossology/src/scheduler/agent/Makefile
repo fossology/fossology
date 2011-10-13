@@ -33,7 +33,7 @@ FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' -DPROJECT_GROUP='"$(PROJECTGROUP)"' -D
 
 INITFILE=init.d/fossology
 CONFFILE=fossology.conf
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 #######################
 # objects and headers #
