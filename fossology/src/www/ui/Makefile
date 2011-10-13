@@ -69,7 +69,7 @@ install: all $(iPATHFILE)
 
 	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
-	  ln -s $(MODDIR)/www/ui $(CONFDIR)/mods-enabled/www ; fi;
+	  ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled/ ; fi;
 
 uninstall:
 	for file in $(RMFILES); do \
@@ -82,7 +82,7 @@ uninstall:
 		rmdir $(DESTDIR)$(WEBDIR)/ui/$$dir; \
 	done
 
-	@rm -f $(DESTDIR)$(WEBDIR)/ui
+	@rm -f $(DESTDIR)$(WEBDIR)
 	@rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 	@rm -f $(CONFDIR)/mods-enabled/www
 
