@@ -4,8 +4,7 @@ TOP=../../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
 EXE=departition ununpack
@@ -35,18 +34,17 @@ install: all $(VARS)
 	   rm -f $(DESTDIR)$(BINDIR)/departition; \
 	fi
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(BINDIR)/departition
-	if [ -e $(DESTDIR)$(AGENTDIR)/ununpack ] ; then \
-	   rm -f $(DESTDIR)$(AGENTDIR)/ununpack; \
+	
+	if test ! -e $(MODDIR)/ununpack; then \
+		mkdir -p $(MODDIR)/ununpack/agent; \
 	fi
-	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(AGENTDIR)/ununpack
+	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/
 	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
-	  ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
-
-
+	  ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;	
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
-	rm -f $(DESTDIR)$(AGENTDIR)/ununpack
+	rm -rf $(DESTDIR)$(MODDIR)/ununpack
 	rm -f $(CONFDIR)/mods-enabled/ununpack
 
 
