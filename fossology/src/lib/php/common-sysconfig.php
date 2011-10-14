@@ -32,7 +32,6 @@ define("CONFIG_TYPE_TEXTAREA", 3);
  * \brief Determine SYSCONFDIR
  * 
  * The following precedence is used to resolve SYSCONFDIR:
- *  - $sysconfdir 
  *  - environment variable SYSCONFDIR
  *  - ./fossology.rc
  *
@@ -139,7 +138,7 @@ function ConfigInit($sysconfdir)
     {
       $toeval = "\$$var = \"$assign\";";
       eval($toeval);
-      $SysConf[$GroupName][$var] = $var;
+      $SysConf[$GroupName][$var] = ${$var};
       $GLOBALS[$var] = ${$var};
     }
   unset($VersionConf);
