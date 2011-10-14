@@ -286,9 +286,8 @@ function plugin_load($CallInit=1)
 {
   global $Plugins;
   global $SYSCONFDIR;
-  global $PROJECT;
 
-  $ModsEnabledDir = "$SYSCONFDIR/$PROJECT/mods-enabled";
+  $ModsEnabledDir = "$SYSCONFDIR/mods-enabled";
 
   /* Open $ModsEnabledDir and include all the php files found in the ui/ subdirectory */
 
