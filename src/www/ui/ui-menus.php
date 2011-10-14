@@ -292,7 +292,7 @@ class ui_menu extends FO_Plugin
         /* Banner Message? */
         if (@$SysConf['SYSCONFIG']['BannerMsg'])
         {
-          $V .= "<h4 style='background-color:#ffbbbb'>$SysConf['SYSCONFIG'][BannerMsg]</h4>";
+          $V .= "<h4 style='background-color:#ffbbbb'>$SysConf[SYSCONFIG][BannerMsg]</h4>";
         }
 
         if (! $this->_CSSdone) { $V .= $this->OutputCSS(); }
@@ -347,7 +347,7 @@ class ui_menu extends FO_Plugin
           if (@$SysConf['SYSCONFIG']['SupportEmailLabel'] and @$SysConf['SYSCONFIG']['SupportEmailAddr'])
           {
             $V .= " | ";
-            $V .= "<small><a href='mailto:$SysConf['SYSCONFIG'][SupportEmailAddr]?subject=$SysConf['SYSCONFIG'][SupportEmailSubject]'>$SysConf['SYSCONFIG'][SupportEmailLabel]</a>";
+            $V .= "<small><a href='mailto:$SysConf[SYSCONFIG][SupportEmailAddr]?subject=$SysConf[SYSCONFIG][SupportEmailSubject]'>$SysConf[SYSCONFIG][SupportEmailLabel]</a>";
           }
         }
         $V .= "</td>";
