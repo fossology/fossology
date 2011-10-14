@@ -29,38 +29,135 @@ define("CONFIG_TYPE_TEXTAREA", 3);
 //}@
 
 /**
- * \brief Read fossology.conf
+ * \brief Determine SYSCONFDIR
+ * 
+ * The following precedence is used to resolve SYSCONFDIR:
+ *  - $sysconfdir 
+ *  - environment variable SYSCONFDIR
+ *  - ./fossology.rc
  *
- * \param $ConfPath - optional pathname to fossology configuration file.
- * The standard conf file name is 'fossology.conf'.
- *
- * \return array with variable/value pair from fossology.conf
+ * \return the the SYSCONFDIR path, and set global SYSCONFDIR (for
+ * backward compatibility).
  */
-function fo_conf_read($ConfPath='')
+function GetSYSCONFDIR()
 {
-  global $SYSCONFDIR;
+  $rcfile = "fossology.rc";
 
-  if (empty($ConfPath)) $ConfPath = "$SYSCONFDIR/fossology/fossology.conf";
-  $ConfArray = parse_ini_file($ConfPath, true);
-  return $ConfArray;
-} // fo_conf_read()
+  $sysconfdir = getenv('SYSCONFDIR');
+  if ($sysconfdir === false)
+  {
+    if (file_exists($rcfile)) $sysconfdir = file_get_contents($rcfile);
+    if ($sysconfdir === false)
+    {
+      /* NO SYSCONFDIR specified */
+      $text = _("FATAL: System Configuration Error, no SYSCONFDIR.");
+      echo "<hr><h3>$text</h3><hr>";
+      exit(1);
+    }
+  }
+
+  $sysconfdir = trim($sysconfdir);
+  $GLOBALS['SYSCONFDIR'] = $sysconfdir;
+  return $sysconfdir;
+}
 
 
 /**
- * \brief Initialize the system with anything that
- * must happen before plugins are loaded.
+ * \brief Read in all the system configuration variables.
+ *
+ * System configuration variables are in four places:
+ *  - Database sysconfig table
+ *  - SYSCONFDIR/fossology.conf
+ *  - SYSCONFDIR/VERSION
+ *  - SYSCONFDIR/Db.conf
+ *
+ * VERSION and fossology.conf variables are organized by group.  For example,
+ * [DIRECTORIES] 
+ *   REPODIR=/srv/mydir
+ *
+ * but the sysconfig table and Db.conf are not.  So all the table values will be put in
+ * a made up "SYSCONFIG" group.  And all the Db.conf values will be put in a
+ * "DBCONF" group.
+ *
+ * \param $sysconfdir - path to SYSCONFDIR (optional)
+ * 
+ * The following precedence is used to resolve SYSCONFDIR:
+ *  - $sysconfdir 
+ *  - environment variable SYSCONFDIR
+ *  - ./fossology.rc
+ *
  * If the sysconfig table doesn't exist then create it.
  * Write records for the core variables into sysconfig table.
  *
- * \return the $SysConf array of values (for global $SysConf).
+ * \return the $SysConf array of values.  The first array dimension
+ * is the group, the second is the variable name.
+ * For example:
+ *  -  $SysConf[SYSCONFIG][LogoLink] => "http://my/logo.gif"
+ *  -  $SysConf[SYSCONFIG][GlobalBrowse] => "true"
+ *  -  $SysConf[DIRECTORIES][MODDIR] => "/mymoduledir/
+ *  -  $SysConf[VERSION][SVN_REV] => "4467M"
+ *
+ * \Note Since so many files expect directory paths that used to be in pathinclude.php
+ * to be global, this function will define the same globals (everything in the 
+ * DIRECTORIES section of fossology.conf).
  */
-function ConfigInit()
+function ConfigInit($sysconfdir)
 {
   global $PG_CONN;
 
-  $SysConf = array();
+  /*************  Parse fossology.conf *******************/
+  $ConfFile = "{$sysconfdir}/fossology.conf";
+  $SysConf = parse_ini_file($ConfFile, true);
 
-  /* create if it doesn't exist */
+  /* evaluate all the DIRECTORIES group for variable substitutions.
+   * For example, if PREFIX=/usr/local and BINDIR=$PREFIX/bin, we
+   * want BINDIR=/usr/local/bin
+   */
+  foreach($SysConf['DIRECTORIES'] as $var=>$assign)
+  {
+    /* Evaluate the individual variables because they may be referenced
+     * in subsequent assignments. 
+     */
+    $toeval = "\$$var = \"$assign\";";
+    eval($toeval);
+
+    /* now reassign the array value with the evaluated result */
+    $SysConf['DIRECTORIES'][$var] = ${$var};
+    $GLOBALS[$var] = ${$var};
+  }
+
+
+  /*************  Parse VERSION *******************/
+  $VersionFile = "{$sysconfdir}/VERSION";
+  $VersionConf = parse_ini_file($VersionFile, true);
+
+  /* Add this file contents to $SysConf, then destroy $VersionConf 
+   * This file can define its own groups and is eval'd.
+   */
+  foreach($VersionConf as $GroupName=>$GroupArray)
+    foreach($GroupArray as $var=>$assign)
+    {
+      $toeval = "\$$var = \"$assign\";";
+      eval($toeval);
+      $SysConf[$GroupName][$var] = $var;
+      $GLOBALS[$var] = ${$var};
+    }
+  unset($VersionConf);
+
+
+  /*************  Parse Db.conf *******************/
+  $dbPath = "{$sysconfdir}/Db.conf";
+  $dbConf = parse_ini_file($dbPath, true);
+
+  /* Add this file contents to $SysConf, then destroy $dbConf 
+   * This file can define its own groups and is eval'd.
+   */
+  foreach($dbConf as $var=>$val) $SysConf['DBCONF'][$var] = $val;
+  unset($dbConf);
+
+
+  /**************** read/create/populate the sysconfig table *********/
+  /* create if sysconfig table if it doesn't exist */
   $NewTable = Create_sysconfig();
 
   /* populate it with core variables */
@@ -73,7 +170,7 @@ function ConfigInit()
 
   while($row = pg_fetch_assoc($result))
   {
-    $SysConf[$row['variablename']] = $row['conf_value'];
+    $SysConf['SYSCONFIG'][$row['variablename']] = $row['conf_value'];
   }
   pg_free_result($result);
 
@@ -358,9 +455,12 @@ function check_email_address($email_address)
  */
 function is_available($url, $timeout = 2, $tries = 2)
 {
-  global $SYSCONFDIR, $PROJECT;
-  $path = "$SYSCONFDIR/$PROJECT/Proxy.conf"; /* with proxy */
-  $commands = ". $path; wget --spider '$url' --tries=$tries --timeout=$timeout";
+  global $SysConf;
+
+  $ProxyStmts = "";
+  foreach($SysConf['PROXY'] as $var=>$val) $ProxyStmts .= "$var=$val;";
+
+  $commands = ". $ProxyStmts; wget --spider '$url' --tries=$tries --timeout=$timeout";
   system($commands, $return_var);
   if (0 == $return_var)
   {

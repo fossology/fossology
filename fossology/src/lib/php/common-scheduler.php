@@ -114,9 +114,10 @@ function fo_scheduler_close($SchedObj)
  **/
 function fo_communicate_with_scheduler($input, &$output, &$error_msg)
 {
-  $ConfArray = fo_conf_read(); /* read $SYSCONFDIR/$PROJECT/fossology.conf */
-  $address = $ConfArray['FOSSOLOGY']['address'];
-  $port =  $ConfArray['FOSSOLOGY']['port'];
+  global $SysConf;
+
+  $address = $SysConf['FOSSOLOGY']['address'];
+  $port =  $SysConf['FOSSOLOGY']['port'];
   $response_from_scheduler;
   $sock = fo_scheduler_connect($address, $port, $error_msg); /* Connect to the scheduler */
   if ($sock)

@@ -35,17 +35,15 @@
 
  \return 
    Success: $PG_CONN, the postgres connection object
-            Also, the global $PG_CONN is set.
    Failure: Error message is printed and exit
  **/
-function DBconnect($Options="")
+function DBconnect($sysconfdir, $Options="")
 {
-  global $DATADIR, $PROJECT, $SYSCONFDIR;
   global $PG_CONN;
 
   if (!empty($PG_CONN)) return $PG_CONN;
 
-  $path="$SYSCONFDIR/$PROJECT/Db.conf";
+  $path="$sysconfdir/Db.conf";
   if (empty($Options))
     $PG_CONN = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
   else
@@ -157,7 +155,6 @@ function DBCheckResult($result, $sql="", $filenm, $lineno)
 
 /**
  * \brief Check if table exists.
- *        Note, this assumes the database name is 'fossology'.
  *
  * \param $tableName
  *
@@ -166,8 +163,9 @@ function DBCheckResult($result, $sql="", $filenm, $lineno)
 function DB_TableExists($tableName)
 {
   global $PG_CONN;
+  global $SysConf;
 
-  $sql = "select count(*) as count from information_schema.tables where table_catalog='fossology' and table_name='$tableName'";
+  $sql = "select count(*) as count from information_schema.tables where table_catalog='{$SysConf[DBCONF][dbname]}' and table_name='$tableName'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);

@@ -16,29 +16,30 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-$SysConf = array();
-$PG_CONN = 0;   // Database connection
-
-//require("i18n.php"); DISABLED until i18n infrastructure is set-up.
-require_once("pathinclude.php");
-require_once("$FOSRCDIR/lib/php/common.php");
-require_once("template/template-plugin.php");
-
 /**
  * \file index.php
  * \ brief This is the main guts of the UI: Find the plugin and run it.
  */
 
+//require("i18n.php"); DISABLED until i18n infrastructure is set-up.
+require_once("../../lib/php/common.php");
+require_once("template/template-plugin.php");
+
+$SysConf = array();  // fo system configuration variables
+$PG_CONN = 0;   // Database connection
+
+/* Get SYSCONFDIR and set global (for backward compatibility) */
+$SYSCONFDIR = GetSYSCONFDIR();
+
 /**
  * Connect to the database.  If the connection fails,
  * DBconnect() will print a failure message and exit.
- * The global $PG_CONN is set inside of DBconnect().
- * DBconnect uses this side effect for backward compatibility.
  */
-DBconnect();
+$PG_CONN = DBconnect($SYSCONFDIR);
 
 /* Initialize global system configuration variables $SysConfig[] */
-$SysConf = ConfigInit();
+$SysConf = ConfigInit($SYSCONFDIR);
+//debugprint($SysConf, "SysConf");
 
 plugin_load();
 
@@ -67,7 +68,7 @@ else
   print "window.location.href = '$Uri';\n";
   print "}\n";
   /* Redirect in 5 seconds. */
-  print "window.setTimeout('Redirect()',5000);\n";
+//  print "window.setTimeout('Redirect()',5000);\n";
   print "</script>\n";
 }
 plugin_unload();
