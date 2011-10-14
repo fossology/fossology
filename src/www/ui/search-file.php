@@ -43,8 +43,6 @@ class search_file extends FO_Plugin
    */ 
   function RegisterMenus()
   {
-    global $SysConf;
-
     menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
   } // RegisterMenus()
 

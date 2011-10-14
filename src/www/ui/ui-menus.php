@@ -290,9 +290,9 @@ class ui_menu extends FO_Plugin
         break;
       case "HTML":
         /* Banner Message? */
-        if (@$SysConf['BannerMsg'])
+        if (@$SysConf['SYSCONFIG']['BannerMsg'])
         {
-          $V .= "<h4 style='background-color:#ffbbbb'>$SysConf[BannerMsg]</h4>";
+          $V .= "<h4 style='background-color:#ffbbbb'>$SysConf['SYSCONFIG'][BannerMsg]</h4>";
         }
 
         if (! $this->_CSSdone) { $V .= $this->OutputCSS(); }
@@ -302,10 +302,10 @@ class ui_menu extends FO_Plugin
         $V .= "<table border=0 width='100%'>";
         $V .= "<tr>";
         /* custom or default logo? */
-        if (@$SysConf['LogoImage'] and @$SysConf['LogoLink'])
+        if (@$SysConf['SYSCONFIG']['LogoImage'] and @$SysConf['SYSCONFIG']['LogoLink'])
         {
-          $LogoLink = $SysConf['LogoLink'];
-          $LogoImg = $SysConf['LogoImage'];
+          $LogoLink = $SysConf['SYSCONFIG']['LogoLink'];
+          $LogoImg = $SysConf['SYSCONFIG']['LogoImage'];
         }
         else
         {
@@ -344,10 +344,10 @@ class ui_menu extends FO_Plugin
           }
 
           /* Use global system SupportEmail variables, if addr and label are set */
-          if (@$SysConf['SupportEmailLabel'] and @$SysConf['SupportEmailAddr'])
+          if (@$SysConf['SYSCONFIG']['SupportEmailLabel'] and @$SysConf['SYSCONFIG']['SupportEmailAddr'])
           {
             $V .= " | ";
-            $V .= "<small><a href='mailto:$SysConf[SupportEmailAddr]?subject=$SysConf[SupportEmailSubject]'>$SysConf[SupportEmailLabel]</a>";
+            $V .= "<small><a href='mailto:$SysConf['SYSCONFIG'][SupportEmailAddr]?subject=$SysConf['SYSCONFIG'][SupportEmailSubject]'>$SysConf['SYSCONFIG'][SupportEmailLabel]</a>";
           }
         }
         $V .= "</td>";

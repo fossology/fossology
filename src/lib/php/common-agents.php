@@ -519,7 +519,7 @@ $UserName=NULL,$Depends) {
   /* FOSSology_URL, e.g. fossolog.org/repo/ */
   /* Initialize global system configuration variables $SysConfig[] */
   $SysConf = ConfigInit();
-  $FOSSology_URL = @$SysConf["FOSSologyURL"];
+  $FOSSology_URL = @$SysConf["SYSCONFIG"]["FOSSologyURL"];
   $Nparams .= "-p $FOSSology_URL ";
   /* If email is passed in, favor that over the session */
   if(!empty($Email)) {
