@@ -39,7 +39,7 @@ $PG_CONN = DBconnect($SYSCONFDIR);
 
 /* Initialize global system configuration variables $SysConfig[] */
 $SysConf = ConfigInit($SYSCONFDIR);
-//debugprint($SysConf, "SysConf");
+debugprint($SysConf, "SysConf");
 
 plugin_load();
 

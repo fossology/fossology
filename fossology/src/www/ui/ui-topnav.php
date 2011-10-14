@@ -47,10 +47,10 @@ class ui_topnav extends FO_Plugin
         $V .= "  <tr>\n";
 
         /* custom or default logo? */
-        if (@$SysConf['LogoImage'] and @$SysConf['LogoLink'])
+        if (@$SysConf['SYSCONFIG']['LogoImage'] and @$SysConf['SYSCONFIG']['LogoLink'])
         {
-          $LogoLink = $SysConf['LogoLink'];
-          $LogoImg = $SysConf['LogoImage'];
+          $LogoLink = $SysConf['SYSCONFIG']['LogoLink'];
+          $LogoImg = $SysConf['SYSCONFIG']['LogoImage'];
         }
         else
         {
