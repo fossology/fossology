@@ -44,7 +44,7 @@ $(iPATHFILE): $(VARS)
 	@echo "\$$PHPDIR=\"$(PHPDIR)\";" >> $(iPATHFILE)
 	@echo "\$$PROJECTSTATEDIR=\"$(PROJECTSTATEDIR)\";" >> $(iPATHFILE)
 	@echo "\$$PROJECT=\"$(PROJECT)\";" >> $(iPATHFILE)
-	@echo "\$$DATADIR=\"$(DATADIR)\";" >> $(iPATHFILE)
+	@echo "\$$MODDIR=\"$(MODDIR)\";" >> $(iPATHFILE)
 	@echo "\$$VERSION=\"$(VERSION)\";" >> $(iPATHFILE)
 	@echo "\$$SVN_REV=\"$(SVN_REV)\";" >> $(iPATHFILE)
 	@echo "\$$FOSRCDIR=\"$(FOSRCDIR)\";" >> $(iPATHFILE)
@@ -53,22 +53,22 @@ $(iPATHFILE): $(VARS)
 install: all $(iPATHFILE)
 
 	
-	mkdir -p $(DATADIR)/lib/php; \
+	mkdir -p $(MODDIR)/lib/php; \
 	
 	for file in $(FILES); do \
-		$(INSTALL_DATA) $$file $(DATADIR)/lib/php/$$file; \
+		$(INSTALL_DATA) $$file $(MODDIR)/lib/php/$$file; \
 	done
 
 uninstall:
 	echo "Removing php libs"; \
 	for file in $(FILES); do \
 		echo "Removing php file$$file"; \
-		rm -f $(DATADIR)/lib/php/$$file; \
+		rm -f $(MODDIR)/lib/php/$$file; \
 	done
 	
-	$(INSTALL_DATA) $(iPATHFILE) $(DATADIR)$(PHPDIR)/$(iPATHFILE)
+	$(INSTALL_DATA) $(iPATHFILE) $(MODDIR)$(PHPDIR)/$(iPATHFILE)
 	
-	rmdir $(DATADIR)lib/php; \
+	rmdir $(MODDIR)lib/php; \
 
 	@rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 
