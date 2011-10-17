@@ -25,14 +25,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <glib.h>
 
-/* ************************************0,0,120,120,32376,32376,8064,8064,8064,8064,32376,32376,120,120,0,0************************************** */
+/* ************************************************************************** */
 /* *** utility ************************************************************** */
 /* ************************************************************************** */
 
-GTree* group_map;
-GTree* current_group;
-char** group_set;
-GTree* key_sets;
+fo_conf* dest;
+GTree*   current_group;
 
 /**
  * A wrapper function for the strcmp function that allows it to mascarade as a
@@ -43,7 +41,7 @@ GTree* key_sets;
  * @param user_data not used
  * @return an integral value indicating the relationship between strings
  */
-gint str_comp(gconstpointer a, gconstpointer b, gpointer user_data)
+static gint str_comp(gconstpointer a, gconstpointer b, gpointer user_data)
 {
   return strcmp((char*)a, (char*)b);
 }
@@ -58,7 +56,7 @@ gint str_comp(gconstpointer a, gconstpointer b, gpointer user_data)
  * @param data not used
  * @return always return 0 so that the traversal continues
  */
-gboolean collect_keys(char* key, gpointer* value, char** data)
+static gboolean collect_keys(char* key, gpointer* value, char** data)
 {
   int idx = 0;
 
@@ -74,17 +72,17 @@ gboolean collect_keys(char* key, gpointer* value, char** data)
 /* *** private functions **************************************************** */
 /* ************************************************************************** */
 
-FILE* yyin;
-char lex[1024];
-int lex_idx;
-int yyline, yyposs;
-char fname[FILENAME_MAX];
-
-#define FOSS_CONF "fossology.conf"
+#define BUFFER_SIZE 4096
 #define yynext() (c = next()) != EOF
 #define throw_error(error, domain, code, ...) \
     { g_set_error(error, domain, code, __VA_ARGS__); \
     return 0; }
+
+FILE* yyin;
+int   lex_idx;
+char  lex[BUFFER_SIZE];
+int   yyline, yyposs;
+char  fname[FILENAME_MAX];
 
 /**
  * Gets the next character from the input file. This function maintains yyline
@@ -92,7 +90,7 @@ char fname[FILENAME_MAX];
  *
  * @return the character
  */
-int next()
+static int next()
 {
   static int c = '\0';
 
@@ -114,7 +112,7 @@ int next()
  *
  * @param c the character to put back into the stream
  */
-int replace(int c)
+static int replace(int c)
 {
   lex[--lex_idx] = '\0';
   if(ungetc(c, yyin) == EOF)
@@ -135,7 +133,7 @@ int replace(int c)
  * @param dst the location for storing the string
  * @return 0 for invalid data in dst, 1 for valid data
  */
-int next_nl()
+static int next_nl()
 {
   int c;
 
@@ -146,12 +144,12 @@ int next_nl()
 }
 
 /**
- * gets all characters between the current location and the next non-white sapce
+ * gets all characters between the current location and the next non-white space
  * character.
  *
  * @return the next non-whitespace character
  */
-int next_nws()
+static int next_nws()
 {
   int c;
 
@@ -171,7 +169,7 @@ int next_nws()
  * @param error object that allows errors to be passed out of the parser
  * @return 1 if the parse was successful, 0 otherwise
  */
-int group(GError** error)
+static int group(GError** error)
 {
   gchar* key;
 
@@ -192,9 +190,18 @@ int group(GError** error)
   key = g_strdup(lex);
 
   current_group = g_tree_new_full(str_comp, NULL, g_free, g_free);
-  g_tree_insert(group_map, key, current_group);
+  g_tree_insert(dest->group_map, key, current_group);
 
   return 1;
+}
+
+/**
+ *
+ * TODO
+ *
+ */
+static void sub() {
+  // TODO
 }
 
 /**
@@ -206,7 +213,7 @@ int group(GError** error)
  * @param error GError object allowing errors to be created
  * @return 0 of fail, 1 of success
  */
-int key(GError** error) {
+static int key(GError** error) {
   int c;
   gchar* key;
   gchar* tmp;
@@ -275,38 +282,6 @@ int key(GError** error) {
 /* ************************************************************************** */
 
 /**
- * tests if the configuration file has been opened
- *
- * @return 1 if open, 0 if not
- */
-int fo_config_is_open()
-{
-  return group_map != NULL;
-}
-
-/**
- * loads the default configuration file (fossology.conf). same as calling
- * fo_config_load but the filename argument is not necessary
- *
- * @param error object that allows errors to propagate up the stack
- * @return 0 for failure, 1 for success
- */
-int fo_config_load_default(GError** error)
-{
-  char name[FILENAME_MAX];
-  char* Env;
-
-  memset(name, '\0', sizeof(name));
-  Env = getenv("FOSSCONF");
-  if(Env && Env[0] != '\0')
-    strcpy(name, Env);
-  else
-    g_snprintf(name, sizeof(name), "%s/%s", DEFAULT_SETUP, FOSS_CONF);
-
-  return fo_config_load(name, error);
-}
-
-/**
  * load the configuration information from the provided file. If the user has
  * not done a fo_config_free since the last fo_config_load, this will make sure
  * to call that first. In other words, it is assumed that if this is called the
@@ -316,7 +291,8 @@ int fo_config_load_default(GError** error)
  * @param error object that allows errors to propagate up the stack
  * @return 0 for failure, 1 for success
  */
-int fo_config_load(char* rawname, GError** error) {
+fo_conf* fo_config_load(char* rawname, GError** error) {
+  fo_conf* ret;
   int c;
 
   memset(fname, '\0', sizeof(fname));
@@ -329,11 +305,13 @@ int fo_config_load(char* rawname, GError** error) {
         "unable to open config file \"%s\"",
         fname);
 
-  if(group_map)
-    fo_config_free();
-
-  group_map = g_tree_new_full(str_comp, NULL, g_free,
-      (GDestroyNotify)g_tree_destroy);
+  dest = g_new0(fo_conf, 1);
+  dest->group_map = NULL;
+  dest->key_sets = NULL;
+  dest->group_set = NULL;
+  dest->n_groups = 0;
+  dest->group_map = g_tree_new_full(str_comp, NULL, g_free,
+      (GDestroyNotify)g_tree_unref);
   yyline = 1;
   yyposs = 0;
   current_group = NULL;
@@ -351,13 +329,24 @@ int fo_config_load(char* rawname, GError** error) {
         if(isalpha(c))
           c = key(error);
         else
+        {
+          fo_config_free(dest);
+          dest = NULL;
           throw_error(
               error,
               PARSE_ERROR,
               fo_invalid_file,
               "%s[line %d]: invalid char '%c', keys must start with alpha char",
               fname, yyline, c);
+        }
         break;
+    }
+
+    if(*error)
+    {
+      fo_config_free(dest);
+      dest = NULL;
+      return NULL;
     }
 
     if(!c || c == EOF)
@@ -366,8 +355,11 @@ int fo_config_load(char* rawname, GError** error) {
     memset(lex, '\0', sizeof(lex));
   }
 
+  ret = dest;
+  current_group = NULL;
+  dest = NULL;
   fclose(yyin);
-  return 1;
+  return ret;
 }
 
 /**
@@ -378,19 +370,19 @@ int fo_config_load(char* rawname, GError** error) {
  * @param key c string that is the name of the key for the key/value pair
  * @return the c string representation of the value
  */
-char* fo_config_get(char* group, char* key, GError** error)
+char* fo_config_get(fo_conf* conf, char* group, char* key, GError** error)
 {
   GTree* tree;
   char* ret = NULL;
 
-  if(group_map == NULL)
+  if(conf->group_map == NULL)
     throw_error(
         error,
         RETRIEVE_ERROR,
         fo_load_config,
-        "ERROR: you must call fo_config_load before any other calls");
+        "ERROR: invalid fo_conf object passed to fo_config_get");
 
-  if((tree = g_tree_lookup(group_map, group)) == NULL)
+  if((tree = g_tree_lookup(conf->group_map, group)) == NULL)
     throw_error(
         error,
         RETRIEVE_ERROR,
@@ -421,21 +413,21 @@ char* fo_config_get(char* group, char* key, GError** error)
  * @return c string representation of the value, once returned the caller owns
  *         this pointer. make sure to call g_free on it
  */
-char* fo_config_get_list(char* group, char* key, int idx, GError** error)
+char* fo_config_get_list(fo_conf* conf, char* group, char* key, int idx, GError** error)
 {
   char* val;
   int depth;
   char* curr;
 
 
-  if(group_map == NULL)
+  if(conf->group_map == NULL)
     throw_error(
         error,
         RETRIEVE_ERROR,
         fo_load_config,
-        "ERROR: you must call fo_config_load before any other calls\n");
+        "ERROR: invalid fo_conf object passed to fo_config_get_list");
 
-  if(!fo_config_is_list(group, key, error))
+  if(!fo_config_is_list(conf, group, key, error))
     if(!(*error))
       throw_error(
           error,
@@ -443,7 +435,7 @@ char* fo_config_get_list(char* group, char* key, int idx, GError** error)
           fo_invalid_key,
           "ERROR: %s[%s] must be of type list to get list element", group, key);
 
-  if(idx < 0 || idx >= fo_config_list_length(group, key, error))
+  if(idx < 0 || idx >= fo_config_list_length(conf, group, key, error))
     throw_error(
         error,
         RETRIEVE_ERROR,
@@ -454,7 +446,7 @@ char* fo_config_get_list(char* group, char* key, int idx, GError** error)
     return NULL;
 
   val = g_tree_lookup(
-      g_tree_lookup(group_map, group), key);
+      g_tree_lookup(conf->group_map, group), key);
 
   curr = val;
   for(depth = 0; depth < idx;)
@@ -477,19 +469,19 @@ char* fo_config_get_list(char* group, char* key, int idx, GError** error)
  * @param key c string name of the key
  * @return 0 if it isn't a list, 1 if it is
  */
-int fo_config_is_list(char* group, char* key, GError** error)
+int fo_config_is_list(fo_conf* conf, char* group, char* key, GError** error)
 {
   GTree* tree;
   char* val;
 
-  if(group_map == NULL)
+  if(conf->group_map == NULL)
     throw_error(
         error,
         RETRIEVE_ERROR,
         fo_load_config,
-        "ERROR: you must call fo_config_load before any other calls");
+        "ERROR: invalid fo_conf object passed to fo_config_is_list");
 
-  if((tree = g_tree_lookup(group_map, group)) == NULL)
+  if((tree = g_tree_lookup(conf->group_map, group)) == NULL)
     throw_error(
         error,
         RETRIEVE_ERROR,
@@ -513,13 +505,13 @@ int fo_config_is_list(char* group, char* key, GError** error)
  * @param key c string name of the key
  * @return the number of elements in the list, on error returns 0
  */
-int fo_config_list_length(char* group, char* key, GError** error)
+int fo_config_list_length(fo_conf* conf, char* group, char* key, GError** error)
 {
   char* val;
   char* curr;
   int count = 0;
 
-  if(!fo_config_is_list(group, key, error))
+  if(!fo_config_is_list(conf, group, key, error))
     throw_error(
         error,
         RETRIEVE_ERROR,
@@ -529,7 +521,7 @@ int fo_config_list_length(char* group, char* key, GError** error)
     return 0;
 
   val = g_tree_lookup(
-      g_tree_lookup(group_map, group), key);
+      g_tree_lookup(conf->group_map, group), key);
 
   for(curr = val; *curr; curr++)
     if(*curr == '[')
@@ -541,16 +533,17 @@ int fo_config_list_length(char* group, char* key, GError** error)
 /**
  * Frees the memory associated with the internal configuration data structures.
  */
-void fo_config_free()
+void fo_config_free(fo_conf* conf)
 {
-  if(group_map) g_tree_destroy(group_map);
-  if(key_sets)  g_tree_destroy(key_sets);
-  if(group_set) g_free(group_set);
+  if(conf->group_map) g_tree_unref(conf->group_map);
+  if(conf->key_sets)  g_tree_unref(conf->key_sets);
+  if(conf->group_set) g_free(conf->group_set);
 
-  group_map = NULL;
-  key_sets = NULL;
-  group_set = NULL;
-  current_group = NULL;
+  conf->group_map = NULL;
+  conf->key_sets = NULL;
+  conf->group_set = NULL;
+
+  g_free(conf);
 }
 
 /* ************************************************************************** */
@@ -565,22 +558,26 @@ void fo_config_free()
  * @param length pointer allowing the number of groups to be returned
  * @return array of strings containing all the group names
  */
-char** fo_config_group_set(int* length)
+char** fo_config_group_set(fo_conf* conf, int* length)
 {
-  if(group_set)
-    return group_set;
+  if(conf->group_set)
+  {
+    *length = conf->n_groups;
+    return conf->group_set;
+  }
 
-  if(group_map == NULL)
+  if(conf->group_map == NULL)
   {
     *length = 0;
     return NULL;
   }
 
-  *length = g_tree_nnodes(group_map);
-  group_set = g_new0(char*, *length);
-  g_tree_foreach(group_map, (GTraverseFunc)collect_keys, group_set);
+  *length = g_tree_nnodes(conf->group_map);
+  conf->n_groups = *length;
+  conf->group_set = g_new0(char*, *length);
+  g_tree_foreach(conf->group_map, (GTraverseFunc)collect_keys, conf->group_set);
 
-  return group_set;
+  return conf->group_set;
 }
 
 /**
@@ -594,28 +591,28 @@ char** fo_config_group_set(int* length)
  * @param length pointer allowing the number of keys to be returned
  * @return array of string containing all the key names for a group
  */
-char** fo_config_key_set(char* group, int* length)
+char** fo_config_key_set(fo_conf* conf, char* group, int* length)
 {
   GTree* tree;
   char** ret;
   *length = 0;
 
-  if(!key_sets)
-    key_sets = g_tree_new_full(str_comp, NULL, g_free, g_free);
+  if(!conf->key_sets)
+    conf->key_sets = g_tree_new_full(str_comp, NULL, g_free, g_free);
 
-  if(group_map == NULL)
+  if(conf->group_map == NULL)
     return NULL;
 
-  if((tree = g_tree_lookup(group_map, group)) == NULL)
+  if((tree = g_tree_lookup(conf->group_map, group)) == NULL)
       return NULL;
   *length = g_tree_nnodes(tree);
 
-  if((ret = g_tree_lookup(key_sets, group)))
+  if((ret = g_tree_lookup(conf->key_sets, group)))
     return ret;
 
   ret = g_new0(char*, *length);
   g_tree_foreach(tree, (GTraverseFunc)collect_keys, ret);
-  g_tree_insert(key_sets, g_strdup(group), ret);
+  g_tree_insert(conf->key_sets, g_strdup(group), ret);
 
   return ret;
 }
@@ -626,11 +623,11 @@ char** fo_config_key_set(char* group, int* length)
  * @param group the name of the group to check for
  * @return 1 if the group exists, 0 if it does not
  */
-int fo_config_has_group(char* group)
+int fo_config_has_group(fo_conf* conf, char* group)
 {
-  if(!group_map)
+  if(!conf->group_map)
     return 0;
-  return g_tree_lookup(group_map, group) != NULL;
+  return g_tree_lookup(conf->group_map, group) != NULL;
 }
 
 /**
@@ -641,13 +638,13 @@ int fo_config_has_group(char* group)
  * @param key the key to check for
  * @return 1 if the group has the key, 0 if it does not
  */
-int fo_config_has_key(char* group, char* key)
+int fo_config_has_key(fo_conf* conf, char* group, char* key)
 {
   GTree* tree;
 
-  if(!group_map)
+  if(!conf->group_map)
     return 0;
-  if((tree = g_tree_lookup(group_map, group)) == NULL)
+  if((tree = g_tree_lookup(conf->group_map, group)) == NULL)
     return 0;
   return g_tree_lookup(tree, key) != NULL;
 }

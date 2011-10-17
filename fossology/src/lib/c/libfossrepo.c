@@ -24,6 +24,7 @@
  */
 
 #include "libfossrepo.h"
+#include "libfossscheduler.h"
 #include "fossconfig.h"
 
 #include <sys/stat.h>
@@ -134,7 +135,7 @@ int	fo_RepHostExist	(char *Type, char *Host)
   REPCONFCHECK();
   if (!_RepCheckType(Type)) return(-1);
 
-  length = fo_config_list_length("REPOSITORY", Host, &error);
+  length = fo_config_list_length(sysconfig, "REPOSITORY", Host, &error);
   if(error)
   {
     fprintf(stderr, "ERROR: %s\n", error->message);
@@ -143,7 +144,7 @@ int	fo_RepHostExist	(char *Type, char *Host)
 
   for(i = 0; i < length; i++)
   {
-    entry = fo_config_get_list("REPOSITORY", Host, i, &error);
+    entry = fo_config_get_list(sysconfig, "REPOSITORY", Host, i, &error);
     if(entry[0] == '*' || strncmp(Type, entry, strlen(Type)) == 0)
       return 1;
   }
@@ -178,13 +179,13 @@ char *	_RepGetHost	(char *Type, char *Filename, int MatchNum)
   if (!_RepCheckType(Type) || !_RepCheckString(Filename))
     return(NULL);
 
-  hosts = fo_config_key_set(REPONAME, &kl);
+  hosts = fo_config_key_set(sysconfig, REPONAME, &kl);
   for(i = 0; i < kl; i++)
   {
-    hl = fo_config_list_length(REPONAME, hosts[i], &error);
+    hl = fo_config_list_length(sysconfig, REPONAME, hosts[i], &error);
     for(j = 0; j < hl; j++)
     {
-      entry = fo_config_get_list(REPONAME, hosts[i], j, &error);
+      entry = fo_config_get_list(sysconfig, REPONAME, hosts[i], j, &error);
       strtok(entry, " ");
       start = strtok(NULL, " ");
       end   = strtok(NULL, " ");
@@ -837,7 +838,6 @@ int	fo_RepOpen	()
 #endif
 
   fo_RepClose(); /* reset everything */
-  fo_config_load_default(&error);
   if(error)
   {
     fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error->message);
@@ -859,7 +859,7 @@ int	fo_RepOpen	()
 #endif
 
   /* Load the depth configuration */
-  RepDepth = atoi(fo_config_get("FOSSOLOGY", "depth", &error));
+  RepDepth = atoi(fo_config_get(sysconfig, "FOSSOLOGY", "depth", &error));
   if(error)
   {
     fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error->message);
@@ -867,7 +867,7 @@ int	fo_RepOpen	()
   }
 
   /* Load the path configuration */
-  path = fo_config_get("FOSSOLOGY", "path", &error);
+  path = fo_config_get(sysconfig, "FOSSOLOGY", "path", &error);
   if(error)
   {
     fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error->message);

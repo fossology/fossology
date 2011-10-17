@@ -37,18 +37,24 @@ typedef enum
   fo_load_config
 } fo_error_codes;
 
-int   fo_config_is_open();
-int   fo_config_load_default(GError** error);
-int   fo_config_load(char* fname, GError** error);
-char* fo_config_get(char* group, char* key, GError** error);
-char* fo_config_get_list(char* group, char* key, int idx, GError** error);
-int   fo_config_is_list(char* group, char* key, GError** error);
-int   fo_config_list_length(char* group, char* key, GError** error);
-void  fo_config_free(void);
+typedef struct {
+    GTree* group_map;
+    GTree* key_sets;
+    char** group_set;
+    int n_groups;
+} fo_conf;
 
-char** fo_config_group_set(int* length);
-char** fo_config_key_set(char* group, int* length);
-int    fo_config_has_group(char* group);
-int    fo_config_has_key(char* group, char* key);
+fo_conf* fo_config_load(char* fname, GError** error);
+void     fo_config_free(fo_conf* conf);
+
+char* fo_config_get(fo_conf* conf, char* group, char* key, GError** error);
+char* fo_config_get_list(fo_conf* conf, char* group, char* key, int idx, GError** error);
+int   fo_config_is_list(fo_conf* conf, char* group, char* key, GError** error);
+int   fo_config_list_length(fo_conf* conf, char* group, char* key, GError** error);
+
+char** fo_config_group_set(fo_conf* conf, int* length);
+char** fo_config_key_set(fo_conf* conf, char* group, int* length);
+int    fo_config_has_group(fo_conf* conf, char* group);
+int    fo_config_has_key(fo_conf* conf, char* group, char* key);
 
 #endif /* FOSSCONFIG_H_INCLUDE */

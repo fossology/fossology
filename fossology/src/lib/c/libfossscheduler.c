@@ -25,6 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "libfossscheduler.h"
 #include "fossconfig.h"
 
+/* unix includes */
+#include <stdio.h>
+#include <getopt.h>
+
 #ifndef SVN_REV
 #define SVN_REV "SVN_REV Unknown"
 #endif
@@ -33,10 +37,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
 
-int  items_processed;   ///< the number of items processed by the agent
-char buffer[2048];      ///< the last thing received from the scheduler
-int  valid;             ///< if the information stored in buffer is valid
-int  found;             ///< if the agent is even connected to the scheduler
+int      items_processed;   ///< the number of items processed by the agent
+char     buffer[2048];      ///< the last thing received from the scheduler
+int      valid;             ///< if the information stored in buffer is valid
+int      found;             ///< if the agent is even connected to the scheduler
+fo_conf* sysconfig;
 
 /**
  * Global verbose flags that agents should use instead of specific verbose
@@ -100,15 +105,39 @@ void  fo_scheduler_heart(int i)
 void fo_scheduler_connect(int* argc, char** argv)
 {
   GError* error = NULL;
+  GTree* keys;
+  fo_conf* version;
   found = 0;
+  int c, optidx;
+  char* sysconfdir = NULL;
+  char  fname[FILENAME_MAX + 1];
+
+  /* location for long options */
+  struct option longopts[] =
+  {
+      {"scheduler_start", 0, 0, 0},
+      {"config",          1, 0, 0},
+      {0, 0, 0, 0}
+  };
+
+  while((c = getopt_long(*argc, argv, "c:", longopts, &optidx)) != -1) {
+    switch(c) {
+      case 0:
+        switch(optidx) {
+          case 0: found = 1; break;
+          case 1: sysconfdir = optarg; break;
+        }
+        break;
+      case 'c': sysconfdir = optarg; break;
+    }
+  }
 
   /* check for --scheduler command line option */
-  if(strcmp(argv[(*argc) - 1], "--scheduler_start") == 0)
+  if(found)
   {
     fprintf(stdout, "VERSION: %s\n", SVN_REV);
     (*argc)--;
     argv[*argc] = NULL;
-    found = 1;
   }
 
   /* initialize memory associated with agent connection */
@@ -130,7 +159,16 @@ void fo_scheduler_connect(int* argc, char** argv)
     alarm(ALARM_SECS);
   }
 
-  fo_config_load_default(&error);
+  if(sysconfdir) {
+    snprintf(fname, FILENAME_MAX, "%s/%s", sysconfdir, "fossology.conf");
+    sysconfig = fo_config_load(fname, &error);
+    snprintf(fname, FILENAME_MAX, "%s/%s", sysconfdir, "VERSION");
+    version = fo_config_load(fname, &error);
+
+    keys = g_tree_ref(g_tree_lookup(version->group_map, "VERSION"));
+    g_tree_insert(sysconfig->group_map, "VERSION", keys);
+    fo_config_free(version);
+  }
 }
 
 /**
@@ -241,6 +279,7 @@ char* fo_sysconfig(char* sectionname, char* variablename) {
   char* ret;
 
   ret = fo_config_get(
+      sysconfig,
       sectionname,
       variablename,
       &error);
