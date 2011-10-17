@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define LIBFOSSSCHEDULER_H_INCLUDE
 
 /* local includes */
+#include <fossconfig.h>
 
 /* library includes */
 #include <stdio.h>
@@ -56,6 +57,8 @@ enum job_status {
  * by the scheduler to enable different levels of verbose.
  */
 extern int agent_verbose;
+
+extern fo_conf* sysconfig;
 
 /** @brief Logging functions
  */
