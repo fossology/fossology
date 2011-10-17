@@ -592,11 +592,6 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1, $Catalog='fossology
     print "FATAL! cannot initialize UI Plugins\n";
     $initFail = TRUE;
   }
-  if (initAgents($Debug) != 0)
-  {
-    print "FATAL! cannot initialize Agents\n";
-    $initFail = TRUE;
-  }
   if ($initFail !== FALSE)
   {
     print "One or more steps in the system initialization failed\n";
@@ -976,52 +971,6 @@ function GetSchema()
   unset($Schema['TABLEID']);
   return ($Schema);
 } // GetSchema()
-
-/**
- * initAgents()
- * \brief Every agent program must be run one time with a "-i" before
- * being used.  This allows them to configure the DB or insert any required
- * DB fields.
- *
- * @param string $Debug, debug flag
- * @return 0 on success, dies upon failure!
- *
- */
-function initAgents($Debug = 1)
-{
-  global $AGENTDIR;
-  global $PG_CONN;
-  print "  Initializing agents.\n";
-  flush();
-  if (!is_dir($AGENTDIR))
-  {
-    die("FATAL: Directory '$AGENTDIR' does not exist.\n");
-  }
-  $Dir = opendir($AGENTDIR);
-  if (!$Dir)
-  {
-    die("FATAL: Unable to access '$AGENTDIR'.\n");
-  }
-  while (($File = readdir($Dir)) !== false)
-  {
-    $File = "$AGENTDIR/$File";
-    /* skip directories; only process files */
-    if (is_file($File))
-    {
-      if ($Debug)
-      {
-        print "    Initializing agent: $File\n";
-        flush();
-      }
-      system("'$File' -i", $Status);
-      if ($Status != 0)
-      {
-        die("FATAL: '$File -i' failed to initialize\n");
-      }
-    }
-  }
-  return (0);
-} // InitAgents()
 
 /**
  * initPlugins
