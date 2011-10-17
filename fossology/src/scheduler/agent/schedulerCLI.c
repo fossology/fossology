@@ -42,78 +42,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 int s;          ///< the socket that the CLI will use to communicate
 int verbose;    ///< the verbose flag for the cli
-PGconn* db;     ///< connection to the fossology database
+fo_conf* conf;  ///< the loaded configuration data
 
 /* ************************************************************************** */
 /* **** utility functions *************************************************** */
 /* ************************************************************************** */
 
-void print_sql_table(PGresult* db_result)
-{
-  char sepl[1024];
-  char line[1024];
-  char temp[32];
-  char* curr;
-  int i, j, n_fields, n_tuples;
-  int* field_w;
-
-  n_fields = PQnfields(db_result);
-  n_tuples = PQntuples(db_result);
-  field_w = g_new0(int, n_fields);
-  sprintf(line, "results: [%d,%d]", n_tuples, n_fields);
-  printf("%s\n", line);
-  strcpy(line, "| ");
-  strcpy(sepl, "+");
-  for(i = 0; i < n_fields; i++)
-  {
-    curr = PQfname(db_result, i);
-    field_w[i] = strlen(curr) < F_WIDTH ? F_WIDTH : strlen(curr);
-    sprintf(temp, "%-*s", field_w[i], curr);
-    strcat(line, temp);
-    strcat(line, " | ");
-    strcat(sepl, "-");
-    for(j = 0; j < field_w[i]; j++)
-      strcat(sepl, "-");
-    strcat(sepl, "-+");
-  }
-
-  printf("%s\n%s\n%s\n", sepl, line, sepl);
-  for(i = 0; i < n_tuples; i++)
-  {
-    strcpy(line, "| ");
-
-    for(j = 0; j < n_fields; j++)
-    {
-      curr = PQgetvalue(db_result, i, j);
-      if(strlen(curr) > field_w[j])
-      {
-        curr[field_w[j]    ] = '\0';
-        curr[field_w[j] - 1] = '*';
-        curr[field_w[j] - 2] = '*';
-        //curr[field_w[j] - 3] = '*';
-      }
-
-      sprintf(temp, "%-*s", field_w[j], curr);
-      strcat(line, temp);
-      strcat(line, " | ");
-    }
-
-    printf("%s\n%s\n", line, sepl);
-  }
-
-  g_free(field_w);
-}
-
 void interface_usage()
 {
   /* print cli usage */
   printf("FOSSology scheduler command line interface\n");
-  printf("for all options any prefix will work when sending command\n");
   printf("+-------------------------------------------------------------------------------+\n");
   printf("|%*s:   EFFECT                                       |\n", P_WIDTH, "COMMAND [optional] <required>");
   printf("+-------------------------------------------------------------------------------+\n");
   printf("|%*s:   prints this usage statement                  |\n", P_WIDTH, "help");
-  printf("|%*s:   close the connection to scheduler            |\n", P_WIDTH, "close");
+  printf("|%*s:   close the connection and exit cli            |\n", P_WIDTH, "close");
   printf("|%*s:   shutdown the scheduler gracefully            |\n", P_WIDTH, "stop");
   printf("|%*s:   pauses a job indefinitely                    |\n", P_WIDTH, "pause <job id>");
   printf("|%*s:   reload the configuration information         |\n", P_WIDTH, "reload");
@@ -131,106 +74,6 @@ void interface_usage()
 }
 
 /* ************************************************************************** */
-/* **** commands ************************************************************ */
-/* ************************************************************************** */
-
-void sql_cmd()
-{
-  /* locals */
-  PGresult* db_result;
-  char* curr;
-  char buffer[1024];
-  char cmd[1024];
-
-  memset(buffer, '\0', sizeof(buffer));
-  memset(cmd,    '\0', sizeof(cmd));
-  vprintf("Please enter the SQL select statement that you would like to run\n");
-  vprintf("Multiline SQL can be achieved using the '\\' character\n");
-  fflush(stdout);
-
-  buffer[0] = '\\'; buffer[1] = '\n';
-  while(buffer[strlen(buffer) - 2] == '\\')
-  {
-    vprintf("#: ");
-    fflush(stdout);
-
-    memset(buffer, '\0', sizeof(buffer));
-    if(fgets(buffer, sizeof(buffer), stdin) == NULL)
-    {
-      fprintf(stderr, "ERROR: %s.%d: could not read SQL statement",
-          __FILE__, __LINE__);
-      fprintf(stderr, "ERROR: errno: %s\n", strerror(errno));
-      return;
-    }
-
-    /* choosing how many meta characters are at the end of buffer and then */
-    /* concatinates the result onto cmd                                    */
-    strncat(cmd, buffer, strlen(buffer) -
-        (buffer[strlen(buffer) - 2] == '\\' ? 2 : 1));
-  }
-
-  strcpy(buffer, cmd);
-  for(curr = buffer; *curr; curr++) *curr = g_ascii_tolower(*curr);
-  if(!g_str_has_prefix(buffer, "select") ||
-      (strchr(cmd, ';') != cmd + strlen(cmd) - 1))
-  {
-    fprintf(stderr, "ERROR: Invalid SQL: %s\n", cmd);
-    fprintf(stderr, "ERROR: SQL must be SELECT statement and end in ';'\n");
-    return;
-  }
-
-  db_result = PQexec(db, cmd);
-  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
-  {
-    fprintf(stderr, "ERROR %s.%d: fail to execute SQL command from CLI\n",
-        __FILE__, __LINE__);
-    fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
-  }
-  else if(verbose)
-  {
-    print_sql_table(db_result);
-  }
-  else
-  {
-    printf("[%d,%d]\n", PQntuples(db_result), PQnfields(db_result));
-  }
-
-  PQclear(db_result);
-}
-
-void upload_cmd()
-{
-  char file[FILENAME_MAX];
-  char agts[1024];
-  char path[1024];
-  char exec_call[4096];
-
-  /* get the file */
-  memset(file, '\0', sizeof(file));
-  vprintf("file: ");
-  if(fgets(file, sizeof(file), stdin) == NULL) return;
-  file[strlen(file) - 1] = '\0';
-
-  /* get agents list */
-  memset(agts, '\0', sizeof(agts));
-  vprintf("agents: ");
-  if(fgets(agts, sizeof(agts), stdin) == NULL) return;
-  agts[strlen(agts) - 1] = '\0';
-
-  /* get repo path for file */
-  memset(path, '\0', sizeof(path));
-  vprintf("repo path: ");
-  if(fgets(path, sizeof(path), stdin) == NULL) return;
-  path[strlen(path) - 1] = '\0';
-
-  /* compile call to shell */
-  snprintf(exec_call, sizeof(exec_call), "%s/cp2foss -f %s -q %s %s",
-      CLI_DIR, path, agts, file);
-
-  if(system(exec_call) != 0); // TODO
-}
-
-/* ************************************************************************** */
 /* **** main **************************************************************** */
 /* ************************************************************************** */
 
@@ -244,10 +87,9 @@ int main(int argc, char** argv)
   long host_addr;             // the address of the host
   int c, closing;             // flags and loop variables
   size_t bytes;               // variable to capture return of read
-  char host[FILENAME_MAX];    // string to hold the name of the host
+  char* host;                 // string to hold the name of the host
   char buffer[1024];          // string buffer used to read
-  char db_conf[FILENAME_MAX]; // the file to use for the database configuration
-  char *ErrBuf;               // Error buffer
+  char* config;               // fossology configuration directory
   GOptionContext* options;    // the command line options parser
   char* poss;                 // used to split incoming string on '\n'
   GError* error = NULL;
@@ -261,61 +103,66 @@ int main(int argc, char** argv)
   int c_database = 0;
 
   /* initialize memory */
-  strcpy(host, "localhost");
+  host = "localhost";
+  config = DEFAULT_SETUP;
   memset(buffer, '\0', sizeof(buffer));
   closing = 0;
   verbose = 0;
 
-  /* set the fossology database config */
-  snprintf(db_conf, FILENAME_MAX, "%s", FOSSDB_CONF);
-
   GOptionEntry entries[] =
   {
-      {"conf",     'c', 0, G_OPTION_ARG_STRING, &db_conf,
-          "Set the file that will be used for the database configuration"},
-      {"host",     'h', 0, G_OPTION_ARG_STRING, &host,
-          "Set the host that the scheduler is on"},
+      {"config",   'c', 0, G_OPTION_ARG_STRING, config,
+          "Set the directory for the system configuration", "string"},
+      {"host",     'H', 0, G_OPTION_ARG_STRING, host,
+          "Set the host that the scheduler is on", "string"},
       {"port",     'p', 0, G_OPTION_ARG_INT,    &port_number,
-          "Set the port that the scheduler is listening on"},
+          "Set the port that the scheduler is listening on", "integer"},
       {"quiet",    'q', 0, G_OPTION_ARG_NONE,   &verbose,
-          "Cause the CLI to not print usage hints"},
+          "Cause the CLI to not print usage hints", NULL},
       {"stop",     's', 0, G_OPTION_ARG_NONE,   &c_stop,
-          "CLI will send stop command and close"},
+          "CLI will send stop command and close", NULL},
       {"pause",    'P', 0, G_OPTION_ARG_INT,    &c_pause,
-          "CLI will send a pause command and close"},
+          "CLI will send a pause command and close", "integer"},
       {"reload",   'r', 0, G_OPTION_ARG_NONE,   &c_reload,
-          "CLI will send a reload command and close"},
+          "CLI will send a reload command and close", NULL},
       {"restart",  'R', 0, G_OPTION_ARG_INT,    &c_restart,
-          "CLI will send a restart command and close"},
+          "CLI will send a restart command and close", "integer"},
       {"verbose",  'v', 0, G_OPTION_ARG_INT,    &c_verbose,
-          "CLI will send a verbose command to scheduler"},
-      {"database", 'd', 0, G_OPTION_ARG_NONE, &c_database,
-          "CLI will send a database command to scheduler"},
+          "CLI will change the scheduler's verbose level", "integer"},
+      {"database", 'd', 0, G_OPTION_ARG_NONE,   &c_database,
+          "CLI will send a database command to scheduler", NULL},
       {NULL}
   };
 
   options = g_option_context_new("- command line tool for FOSSology scheduler");
   g_option_context_add_main_entries(options, entries, NULL);
   g_option_context_set_ignore_unknown_options(options, TRUE);
-  g_option_context_parse(options, &argc, &argv, NULL);
+  g_option_context_parse(options, &argc, &argv, &error);
   g_option_context_free(options);
 
+  if(error)
+  {
+    fprintf(stderr, "ERROR %s.%d: error parsing command line options: %s\n",
+        __FILE__, __LINE__, error->message);
+    return -1;
+  }
+  /* set the basic configuration */
   /* change the verbose to conform to quite option */
   verbose = !verbose;
+
+  snprintf(buffer, sizeof(buffer), "%s/fossology.conf", config);
+  conf = fo_config_load(buffer, &error);
+  if(error)
+  {
+    fprintf(stderr, "ERROR %s.%d: error loading config: %s\n",
+        __FILE__, __LINE__, error->message);
+    return -1;
+  }
 
   /* check the scheduler config for port number */
   if(port_number < 0)
   {
-    fo_config_load_default(&error);
-    port_number = atoi(fo_config_get("FOSSOLOGY", "port", &error));
-  }
-
-  /* set up the connection to the database */
-  if((db = fo_dbconnect(db_conf, &ErrBuf)) == NULL)
-  {
-    fprintf(stderr, "ERROR: Unable to connect to the fossology database\n");
-    fprintf(stderr, "ERROR: %s\n", ErrBuf);
-    return -1;
+    port_number = atoi(fo_config_get(conf, "FOSSOLOGY", "port", &error));
   }
 
   /* open the connection to the scheduler */
@@ -409,22 +256,9 @@ int main(int argc, char** argv)
         continue;
       }
 
-      if(strcmp(buffer, "sql\n") == 0)
-      {
-        sql_cmd();
-        continue;
-      }
-
-      if(strcmp(buffer, "upload\n") == 0)
-      {
-        upload_cmd();
-        continue;
-      }
-
       bytes = write(s, buffer, strlen(buffer) - 1);
     }
   }
 
-  PQfinish(db);
   return 0;
 }
