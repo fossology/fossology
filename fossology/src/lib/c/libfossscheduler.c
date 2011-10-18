@@ -108,36 +108,25 @@ void fo_scheduler_connect(int* argc, char** argv)
   GTree* keys;
   fo_conf* version;
   found = 0;
-  int c, optidx;
-  char* sysconfdir = NULL;
+  int i;
+  char* sysconfdir = DEFAULT_SETUP;
   char  fname[FILENAME_MAX + 1];
 
-  /* location for long options */
-  struct option longopts[] =
-  {
-      {"scheduler_start", 0, 0, 0},
-      {"config",          1, 0, 0},
-      {0, 0, 0, 0}
-  };
-
-  while((c = getopt_long(*argc, argv, "c:", longopts, &optidx)) != -1) {
-    switch(c) {
-      case 0:
-        switch(optidx) {
-          case 0: found = 1; break;
-          case 1: sysconfdir = optarg; break;
-        }
-        break;
-      case 'c': sysconfdir = optarg; break;
+  /* check for the system configuration directory */
+  for(i = 1; i < *argc; i++) {
+    if(argv[i][0] == '-' && argv[i][1] == 'c' && strlen(argv[i]) == 2) {
+      sysconfdir = argv[i + 1];
+      break;
     }
   }
 
   /* check for --scheduler command line option */
-  if(found)
+  if(strcmp(argv[*argc - 1], "--scheduler_start") == 0)
   {
     fprintf(stdout, "VERSION: %s\n", SVN_REV);
     (*argc)--;
     argv[*argc] = NULL;
+    found = 1;
   }
 
   /* initialize memory associated with agent connection */
@@ -162,8 +151,21 @@ void fo_scheduler_connect(int* argc, char** argv)
   if(sysconfdir) {
     snprintf(fname, FILENAME_MAX, "%s/%s", sysconfdir, "fossology.conf");
     sysconfig = fo_config_load(fname, &error);
+    if(error)
+    {
+      fprintf(stderr, "ERROR %s.%d: unable to open system configuration: %s\n",
+          __FILE__, __LINE__, error->message);
+      exit(-1);
+    }
+
     snprintf(fname, FILENAME_MAX, "%s/%s", sysconfdir, "VERSION");
     version = fo_config_load(fname, &error);
+    if(error)
+    {
+      fprintf(stderr, "ERROR %s.%d: unable to open VERSION configuration: %s\n",
+          __FILE__, __LINE__, error->message);
+      exit(-1);
+    }
 
     keys = g_tree_ref(g_tree_lookup(version->group_map, "VERSION"));
     g_tree_insert(sysconfig->group_map, "VERSION", keys);
