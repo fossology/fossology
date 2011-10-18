@@ -197,11 +197,19 @@ static int group(GError** error)
 
 /**
  *
- * TODO
- *
+ * @return
  */
-static void sub() {
-  // TODO
+static char* sub() {
+
+
+
+
+
+
+
+
+
+
 }
 
 /**

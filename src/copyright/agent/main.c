@@ -674,7 +674,7 @@ void copyright_usage(char* arg)
   fprintf(cout, "  Options are:\n");
   fprintf(cout, "  -d  :: Turns verbose on, matches printed to Matches file.\n");
   fprintf(cout, "  -i  :: Initialize the database, the exit.\n");
-  fprintf(cout, "  -c {filename} :: Scan {filename} from command line. Does not write to database.\n");
+  fprintf(cout, "  -C {filename} :: Scan {filename} from command line. Does not write to database.\n");
   fprintf(cout, "  -t  :: Run the accuracy tests, nothing written to database.\n");
   fprintf(cout, "NOTE: -i, -c, and -t cause the agent to perform the request\n");
   fprintf(cout, "       and then exit without waiting for scheduler input\n");
@@ -783,7 +783,7 @@ int main(int argc, char** argv)
   fo_scheduler_connect(&argc, argv);
 
   /* parse the command line options */
-  while((c = getopt(argc, argv, "dc:ti")) != -1)
+  while((c = getopt(argc, argv, "dcC:ti")) != -1)
   {
     switch(c)
     {
@@ -800,7 +800,7 @@ int main(int argc, char** argv)
           verbose = 1;
         }
         break;
-      case 'c': /* run from command line */
+      case 'C': /* run from command line */
         pair_init(&curr, string_function_registry(), int_function_registry());
 
         pair_set_first(curr, optarg);
@@ -810,6 +810,7 @@ int main(int argc, char** argv)
 
         pair_destroy(curr);
         break;
+      case 'c': /* copyright doesn't set this */ break;
       case 't': /* run accuracy testing */
         run_test_files(copy);
         copyright_destroy(copy);
