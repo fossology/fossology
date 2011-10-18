@@ -1,19 +1,19 @@
 <?php
 /***********************************************************
-Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
 define("TITLE_ui_license_list", _("Nomos License List"));
@@ -33,10 +33,9 @@ class ui_license_list extends FO_Plugin {
   var $NoHeader = 0;
 
 
-  /***********************************************************
-  RegisterMenus(): Customize submenus.
-  ***********************************************************/
-
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus() {
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array(
@@ -59,27 +58,28 @@ class ui_license_list extends FO_Plugin {
         menu_insert("Browse::$MenuDisplayString", 1, $URI, $MenuDisplayString);
         menu_insert("Browse::$MenuDisplayStringDL", 1, $URI . "&output=dltext", $MenuDisplayStringDL);
 
-/* bobg - This is to use a select list in the micro menu to replace the above List 
-          and Download, but put this select list in a form
-$LicChoices = array("Lic Download" => "Download", "Lic display" => "Display");
-$LicChoice = Array2SingleSelect($LicChoices, $SLName="LicDL");
+        /* bobg - This is to use a select list in the micro menu to replace the above List
+         and Download, but put this select list in a form
+        $LicChoices = array("Lic Download" => "Download", "Lic display" => "Display");
+        $LicChoice = Array2SingleSelect($LicChoices, $SLName="LicDL");
         menu_insert("Browse::Nomos License List Download2", 1, $URI . "&output=dltext", NULL,NULL, $LicChoice);
-*/
+        */
       }
     }
   } // RegisterMenus()
 
 
-  /***********************************************************
-  OutputOpen(): This function is called when user output is
-  requested.  This function is responsible for assigning headers.
-  If $Type is "HTML" then generate an HTTP header.
-  If $Type is "XML" then begin an XML header.
-  If $Type is "Text" then generate a text header as needed.
-  The $ToStdout flag is "1" if output should go to stdout, and
-  0 if it should be returned as a string.  (Strings may be parsed
-  and used by other plugins.)
-  ***********************************************************/
+  /**
+   * \brief This function is called when user output is
+   * requested.  This function is responsible for assigning headers.
+   * If $Type is "HTML" then generate an HTTP header.
+   * If $Type is "XML" then begin an XML header.
+   * If $Type is "Text" then generate a text header as needed.
+   * The $ToStdout flag is "1" if output should go to stdout, and
+   * 
+   * \return 0 if it should be returned as a string.  (Strings may be parsed
+   * and used by other plugins.)
+   */
   function OutputOpen($Type, $ToStdout) {
     global $Plugins;
     if ($this->State != PLUGIN_STATE_READY) {
@@ -102,10 +102,10 @@ $LicChoice = Array2SingleSelect($LicChoices, $SLName="LicDL");
         header("Content-Type: text");
         header('Content-Disposition: attachment; filename="' . $Name . '"');
         $V = "";
-      break;
+        break;
       case "XML":
         $V = "<xml>\n";
-      break;
+        break;
       case "HTML":
         header('Content-type: text/html');
         if ($this->NoHTML) {
@@ -150,11 +150,11 @@ $LicChoice = Array2SingleSelect($LicChoices, $SLName="LicDL");
             $Menu->Output($this->Title);
           }
         }
-      break;
+        break;
       case "Text":
-      break;
+        break;
       default:
-      break;
+        break;
     }
     if (!$this->OutputToStdout) {
       return ($V);
@@ -163,14 +163,15 @@ $LicChoice = Array2SingleSelect($LicChoices, $SLName="LicDL");
     return;
   } // OutputOpen()
 
-  /***********************************************************
-  Output(): This function returns the scheduler status.
-  ***********************************************************/
-
-  function Output() 
+  /**
+   * \brief This function returns the scheduler status.
+   */
+  function Output()
   {
-    global $PG_CONN, $DB;
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo _("NO DB connection"); }
+    global $PG_CONN;
+    if (!$PG_CONN) {
+      echo _("NO DB connection");
+    }
 
     if ($this->State != PLUGIN_STATE_READY)  return (0);
     $V = "";
@@ -178,9 +179,9 @@ $LicChoice = Array2SingleSelect($LicChoices, $SLName="LicDL");
     if (empty($uploadtree_pk)) return;
     $upload_pk = GetParm("upload", PARM_INTEGER);
     if (GetParm("output", PARM_STRING) == 'dltext')
-      $dltext = true;
+    $dltext = true;
     else
-      $dltext = false;
+    $dltext = false;
 
     /* get last nomos agent_pk that has data for this upload */
     $Agent_name = "nomos";
@@ -197,10 +198,10 @@ $LicChoice = Array2SingleSelect($LicChoices, $SLName="LicDL");
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $toprow = pg_fetch_assoc($result);
-    pg_free_result($result); 
-  
+    pg_free_result($result);
+
     /* loop through all the records in this tree */
-    $sql = "select uploadtree_pk, ufile_name, lft, rgt from uploadtree 
+    $sql = "select uploadtree_pk, ufile_name, lft, rgt from uploadtree
               where upload_fk='$toprow[upload_fk]' 
                     and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
                     and ((ufile_mode & (1<<28)) = 0)";
@@ -209,10 +210,10 @@ $LicChoice = Array2SingleSelect($LicChoices, $SLName="LicDL");
 
     /* Select each uploadtree row in this tree, write out text:
      * filepath : license list
-     * e.g. Pound-2.4.tgz/Pound-2.4/svc.c: GPL_v3+, Indemnity
-     */
+    * e.g. Pound-2.4.tgz/Pound-2.4/svc.c: GPL_v3+, Indemnity
+    */
     while ($row = pg_fetch_assoc($outerresult))
-    { 
+    {
       $filepatharray = Dir2Path($row['uploadtree_pk']);
       $filepath = "";
       foreach($filepatharray as $uploadtreeRow)
@@ -222,12 +223,12 @@ $LicChoice = Array2SingleSelect($LicChoices, $SLName="LicDL");
       }
       $V .= $filepath . ": ". GetFileLicenses_string($agent_pk, 0, $row['uploadtree_pk']) ;
       if ($dltext)
-        $V .= "\n";
-      else 
-        $V .= "<br>";
-    } 
+      $V .= "\n";
+      else
+      $V .= "<br>";
+    }
     pg_free_result($outerresult);
-    
+
     if (!$this->OutputToStdout) return ($V);
     print "$V";
     return;

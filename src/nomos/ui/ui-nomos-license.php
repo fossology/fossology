@@ -30,32 +30,34 @@ class ui_nomos_license extends FO_Plugin
   var $UpdCache   = 0;
   var $HighlightColor = '#4bfe78';
 
-  /***********************************************************
-   Install(): Only used during installation.
-   Return 0 on success, non-zero on failure.
-   ***********************************************************/
+  /**
+   * \brief  Only used during installation.
+   * \return 0 on success, non-zero on failure.
+   */
   function Install()
   {
-    global $DB, $PG_CONN;
+    global $PG_CONN;
 
-    if (empty($DB)) { return(1); } /* No DB */
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) return(1); }
+    if (!$PG_CONN) {
+      return(1);
+    }
 
     /* The license "No License Found" was changed to "No_license_found"
      * in v1.4 because one shot depends on license names that are one
-     * string (no spaces).  So make sure the users db is updated.
-     */
+    * string (no spaces).  So make sure the users db is updated.
+    */
     $sql = "update license_ref set rf_shortname='No_license_found'
                where rf_shortname='No License Found'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
 
     return(0);
   } // Install()
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     // For all other menus, permit coming back here.
@@ -69,7 +71,7 @@ class ui_nomos_license extends FO_Plugin
       $nomosURI = "view-license&napk=$nomosAgentpk" . Traceback_parm_keep(array("show","format","page","upload","item"));
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-       menu_insert("Browse::License Browser",100);
+        menu_insert("Browse::License Browser",100);
       }
       else
       {
@@ -82,19 +84,23 @@ class ui_nomos_license extends FO_Plugin
   } // RegisterMenus()
 
 
-  /***********************************************************
-   Initialize(): This is called before the plugin is used.
-   It should assume that Install() was already run one time
-   (possibly years ago and not during this object's creation).
-   Returns true on success, false on failure.
-   A failed initialize is not used by the system.
-   NOTE: This function must NOT assume that other plugins are installed.
-   ***********************************************************/
+  /**
+   * \brief This is called before the plugin is used.
+   * It should assume that Install() was already run one time
+   * (possibly years ago and not during this object's creation).
+   *
+   * \return true on success, false on failure.
+   * A failed initialize is not used by the system.
+   *
+   * \note This function must NOT assume that other plugins are installed.
+   */
   function Initialize()
   {
     global $_GET;
 
-    if ($this->State != PLUGIN_STATE_INVALID) { return(1); } // don't re-run
+    if ($this->State != PLUGIN_STATE_INVALID) {
+      return(1);
+    } // don't re-run
     if ($this->Name !== "") // Name must be defined
     {
       global $Plugins;
@@ -104,8 +110,8 @@ class ui_nomos_license extends FO_Plugin
 
     /* Remove "updcache" from the GET args and set $this->UpdCache
      * This way all the url's based on the input args won't be
-     * polluted with updcache
-     */
+    * polluted with updcache
+    */
     if ($_GET['updcache'])
     {
       $this->UpdCache = $_GET['updcache'];
@@ -120,11 +126,11 @@ class ui_nomos_license extends FO_Plugin
   } // Initialize()
 
 
-  /***********************************************************
-   ShowUploadHist(): Given an $Uploadtree_pk, display:
-   (1) The histogram for the directory BY LICENSE.
-   (2) The file listing for the directory.
-   ***********************************************************/
+  /**
+   * \brief Given an $Uploadtree_pk, display:
+   * (1) The histogram for the directory BY LICENSE.
+   * (2) The file listing for the directory.
+   */
   function ShowUploadHist($Uploadtree_pk,$Uri)
   {
     global $PG_CONN;
@@ -133,13 +139,12 @@ class ui_nomos_license extends FO_Plugin
     $VLic=""; // return values for license histogram
     $V=""; // total return value
     global $Plugins;
-    global $DB;
 
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
 
     /*******  Get license names and counts  ******/
     /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree 
+    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree
               WHERE uploadtree_pk = $Uploadtree_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -149,10 +154,10 @@ class ui_nomos_license extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
-    /* Find total number of files for this $Uploadtree_pk  
+    /* Find total number of files for this $Uploadtree_pk
      * Exclude artifacts and directories.
-     */
-    $sql = "SELECT count(*) as count FROM uploadtree 
+    */
+    $sql = "SELECT count(*) as count FROM uploadtree
               WHERE upload_fk = $upload_pk 
                     and uploadtree.lft BETWEEN $lft and $rgt
                     and ((ufile_mode & (1<<28))=0) 
@@ -166,13 +171,13 @@ class ui_nomos_license extends FO_Plugin
     $Agent_pk = LatestNomosAgentpk($upload_pk);
     if ($Agent_pk == 0)
     {
-$text = _("No data available.  Use Jobs > Agents to schedule a license scan.");
+      $text = _("No data available.  Use Jobs > Agents to schedule a license scan.");
       $VLic = "<b>$text</b><p>";
       return $VLic;
     }
 
     /*  Get the counts for each license under this UploadtreePk*/
-    $sql = "SELECT distinct(rf_shortname) as licname, 
+    $sql = "SELECT distinct(rf_shortname) as licname,
                    count(rf_shortname) as liccount, rf_shortname
               from license_ref,license_file,
                   (SELECT distinct(pfile_fk) as PF from uploadtree 
@@ -187,23 +192,23 @@ $text = _("No data available.  Use Jobs > Agents to schedule a license scan.");
     /* Get agent list */
     $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
 
-/*
-FUTURE advanced interface allowing user to select dataset (agent version)
+    /*
+     FUTURE advanced interface allowing user to select dataset (agent version)
     $AgentSelect = AgentSelect($Agent_name, $upload_pk, "license_file", true, "agent_pk", $Agent_pk);
     $VLic .= $AgentSelect;
     $VLic .= "<input type='submit' value='Go'>";
-*/
+    */
 
     /* Write license histogram to $VLic  */
     $LicCount = 0;
     $UniqueLicCount = 0;
     $NoLicFound = 0;
     $VLic .= "<table border=1 width='100%' id='lichistogram'>\n";
-$text = _("Count");
+    $text = _("Count");
     $VLic .= "<tr><th width='10%'>$text</th>";
-$text = _("Files");
+    $text = _("Files");
     $VLic .= "<th width='10%'>$text</th>";
-$text = _("License Name");
+    $text = _("License Name");
     $VLic .= "<th align=left>$text</th></tr>\n";
 
     while ($row = pg_fetch_assoc($result))
@@ -217,7 +222,7 @@ $text = _("License Name");
       /*  Show  */
       $VLic .= "<td align='center'><a href='";
       $VLic .= Traceback_uri();
-$text = _("Show");
+      $text = _("Show");
       $VLic .= "?mod=list_lic_files&napk=$Agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']) . "'>$text</a></td>";
 
       /*  License name  */
@@ -232,18 +237,18 @@ $text = _("Show");
     $VLic .= "</table>\n";
     $VLic .= "<p>\n";
     $VLic .= _("Hint: Click on the license name to ");
-$text = _("highlight");
+    $text = _("highlight");
     $VLic .= "<span style='background-color:$this->HighlightColor'>$text </span>";
     $VLic .= _("where the license is found in the file listing.<br>\n");
     $VLic .= "<table border=0 id='licsummary'>";
-$text = _("Unique licenses");
+    $text = _("Unique licenses");
     $VLic .= "<tr><td align=right>$UniqueLicCount</td><td>$text</td></tr>";
     $NetLic = $LicCount - $NoLicFound;
-$text = _("Licenses found");
+    $text = _("Licenses found");
     $VLic .= "<tr><td align=right>$NetLic</td><td>$text</td></tr>";
-$text = _("Files with no licenses");
+    $text = _("Files with no licenses");
     $VLic .= "<tr><td align=right>$NoLicFound</td><td>$text</td></tr>";
-$text = _("Files");
+    $text = _("Files");
     $VLic .= "<tr><td align=right>$FileCount</td><td>$text</td></tr>";
     $VLic .= "</table>";
     pg_free_result($result);
@@ -260,7 +265,9 @@ $text = _("Files");
       $VF .= "<table border=0 id='dirlist'>";
       foreach($Children as $C)
       {
-        if (empty($C)) { continue; }
+        if (empty($C)) {
+          continue;
+        }
 
         $IsDir = Isdir($C['ufile_mode']);
         $IsContainer = Iscontainer($C['ufile_mode']);
@@ -286,7 +293,7 @@ $text = _("Files");
         {
           $LicUri = NULL;
         }
-  
+
         /* Populate the output ($VF) - file list */
         /* id of each element is its uploadtree_pk */
 
@@ -298,15 +305,21 @@ $text = _("Files");
           $VF .= "<a href='$LicUri'>"; $HasHref=1;
           $VF .= "<b>"; $HasBold=1;
         }
-        else if (!empty($LinkUri)) 
+        else if (!empty($LinkUri))
         {
           $VF .= "<a href='$LinkUri'>"; $HasHref=1;
         }
         $VF .= $C['ufile_name'];
-        if ($IsDir) { $VF .= "/"; };
-        if ($HasBold) { $VF .= "</b>"; }
-        if ($HasHref) { $VF .= "</a>"; }
-  
+        if ($IsDir) {
+          $VF .= "/";
+        };
+        if ($HasBold) {
+          $VF .= "</b>";
+        }
+        if ($HasHref) {
+          $VF .= "</a>";
+        }
+
         /* show licenses under file name */
         $VF .= "<br>";
         $VF .= "<span style='position:relative;left:1em'>";
@@ -316,10 +329,10 @@ $text = _("Files");
 
         /* display file links if this is really a file */
         if (!empty($C['pfile_fk']))
-          $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $Agent_pk);
+        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $Agent_pk);
         $VF .= "</td>";
         $VF .= "</tr>\n";
-  
+
         $ChildCount++;
       }
       $VF .= "</table>\n";
@@ -327,27 +340,33 @@ $text = _("Files");
 
     /***************************************
      Problem: $ChildCount can be zero!
-     This happens if you have a container that does not
-     unpack to a directory.  For example:
-     file.gz extracts to archive.txt that contains a license.
-     Same problem seen with .pdf and .Z files.
-     Solution: if $ChildCount == 0, then just view the license!
+    This happens if you have a container that does not
+    unpack to a directory.  For example:
+    file.gz extracts to archive.txt that contains a license.
+    Same problem seen with .pdf and .Z files.
+    Solution: if $ChildCount == 0, then just view the license!
 
-     $ChildCount can also be zero if the directory is empty.
-     ***************************************/
+    $ChildCount can also be zero if the directory is empty.
+    ***************************************/
     if ($ChildCount == 0)
     {
-      $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$Uploadtree_pk';");
-      if (IsDir($Results[0]['ufile_mode'])) { return; }
+      $sql = "SELECT * FROM uploadtree WHERE uploadtree_pk = '$Uploadtree_pk';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      pg_free_result($result);
+      if (IsDir($row['ufile_mode'])) {
+        return;
+      }
       $ModLicView = &$Plugins[plugin_find_id("view-license")];
       return($ModLicView->Output() );
     }
 
     $V .= ActiveHTTPscript("FileColor");
 
-    /* Add javascript for color highlighting 
-       This is the response script needed by ActiveHTTPscript 
-       responseText is license name',' followed by a comma seperated list of uploadtree_pk's */
+    /* Add javascript for color highlighting
+     This is the response script needed by ActiveHTTPscript
+    responseText is license name',' followed by a comma seperated list of uploadtree_pk's */
     $script = "
       <script type=\"text/javascript\" charset=\"utf-8\">
         var Lastutpks='';   /* save last list of uploadtree_pk's */
@@ -393,31 +412,32 @@ $text = _("Files");
     return($V);
   } // ShowUploadHist()
 
-  /***********************************************************
-   Output(): This function returns the scheduler status.
-   ***********************************************************/
+  /**
+   * \brief This function returns the scheduler status.
+   */
   function Output()
   {
     $uTime = microtime(true);
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    if ($this->State != PLUGIN_STATE_READY) {
+      return(0);
+    }
     $V="";
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
-    $updcache = GetParm("updcache",PARM_INTEGER);
     if ($updcache)
-      $this->UpdCache = $_GET['updcache'];
+    $this->UpdCache = $_GET['updcache'];
     else
-      $this->UpdCache = 0;
+    $this->UpdCache = 0;
 
     switch(GetParm("show",PARM_STRING))
     {
-    case 'detail':
-      $Show='detail';
-      break;
-    case 'summary':
-    default:
-      $Show='summary';
+      case 'detail':
+        $Show='detail';
+        break;
+      case 'summary':
+      default:
+        $Show='summary';
     }
 
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
@@ -428,51 +448,53 @@ $text = _("Files");
       $Err = ReportCachePurgeByKey($CacheKey);
     }
     else
-      $V = ReportCacheGet($CacheKey);
+    $V = ReportCacheGet($CacheKey);
 
     if (empty($V) )  // no cache exists
     {
       switch($this->OutputType)
       {
-      case "XML":
-        break;
-      case "HTML":
-        $V .= "<font class='text'>\n";
+        case "XML":
+          break;
+        case "HTML":
+          $V .= "<font class='text'>\n";
 
-        /************************/
-        /* Show the folder path */
-        /************************/
-        $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
+          /************************/
+          /* Show the folder path */
+          /************************/
+          $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
 
-        if (!empty($Upload))
-        {
-          $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
-          $V .= $this->ShowUploadHist($Item,$Uri);
-        }
-        $V .= "</font>\n";
-$text = _("Loading...");
-/*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>$text</div>"; */
-        break;
-      case "Text":
-        break;
-      default:
+          if (!empty($Upload))
+          {
+            $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
+            $V .= $this->ShowUploadHist($Item,$Uri);
+          }
+          $V .= "</font>\n";
+          $text = _("Loading...");
+          /*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>$text</div>"; */
+          break;
+        case "Text":
+          break;
+        default:
       }
 
       $Cached = false;
     }
     else
-      $Cached = true;
+    $Cached = true;
 
-    if (!$this->OutputToStdout) { return($V); }
+    if (!$this->OutputToStdout) {
+      return($V);
+    }
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
-$text = _("Elapsed time: %.2f seconds");
+    $text = _("Elapsed time: %.2f seconds");
     printf( "<small>$text</small>", $Time);
 
-    if ($Cached) 
+    if ($Cached)
     {
-$text = _("cached");
-$text1 = _("Update");
+      $text = _("cached");
+      $text1 = _("Update");
       echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     }
     else

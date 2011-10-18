@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -14,18 +14,11 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
+***********************************************************/
 
 /**
- * agent-nomos-once
+ * \file agent-nomos-once.php
  * \brief Run an analysis for a single file, do not store results in the DB.
- *
- * @version "$Id: agent-nomos-once.php 3959 2011-03-22 22:37:02Z bobgo $"
  */
 
 define("TITLE_agent_nomos_once", _("One-Shot License Analysis"));
@@ -43,37 +36,37 @@ class agent_nomos_once extends FO_Plugin {
   public $LoginFlag  = 0;
 
   /** To require login access, use: **/
-//  public $DBaccess = PLUGIN_DB_ANALYZE;
-//  public $LoginFlag = 1;
+  //  public $DBaccess = PLUGIN_DB_ANALYZE;
+  //  public $LoginFlag = 1;
 
   /**
-   * AnalyzFile(): Analyze one uploaded file.
+   * \biref Analyze one uploaded file.
    *
-   * @param string $FilePath the filepath to the file to analyze.
-   * @return string $V, html to display the results.
+   * \param string $FilePath the filepath to the file to analyze.
    *
+   * \return string $V, html to display the results.
    */
   function AnalyzeFile($FilePath) {
-  	
+     
     global $Plugins;
-    global $AGENTDIR;
-    
+
     $licenses = array();
 
     $licenseResult = "";
     /* move the temp file */
-    $licenseResult = exec("$AGENTDIR/nomos $FilePath",$out,$rtn);
+    $licenseResult = exec("../agent/nomos $FilePath",$out,$rtn);
     $licenses = explode(' ',$out[0]);
     $last = end($licenses);
     return ($last);
-    
+
   } // AnalyzeFile()
 
-  /*********************************************
-   RegisterMenus(): Change the type of output
-   based on user-supplied parameters.
-   Returns 1 on success.
-   *********************************************/
+  /**
+   * \brief Change the type of output
+   * based on user-supplied parameters.
+   *
+   * \return 1 on success.
+   */
   function RegisterMenus() {
     if ($this->State != PLUGIN_STATE_READY) {
       return (0);
@@ -138,26 +131,24 @@ class agent_nomos_once extends FO_Plugin {
         $URI = $this->Name . Traceback_parm_keep(array(
           "format",
           "item"
-          ));
-          menu_insert("View::[BREAK]", 100);
-$text = _("One-shot License, real-time license analysis");
-          menu_insert("View::One-Shot License", 101, $URI, $text);
-          menu_insert("View-Meta::[BREAK]", 100);
-$text = _("Nomos One-shot, real-time license analysis");
-          menu_insert("View-Meta::One-Shot License", 101, $URI, $text);
+        ));
+        menu_insert("View::[BREAK]", 100);
+        $text = _("One-shot License, real-time license analysis");
+        menu_insert("View::One-Shot License", 101, $URI, $text);
+        menu_insert("View-Meta::[BREAK]", 100);
+        $text = _("Nomos One-shot, real-time license analysis");
+        menu_insert("View-Meta::One-Shot License", 101, $URI, $text);
       }
     }
   } // RegisterMenus()
-  /*********************************************
-  Output(): Generate the text for this plugin.
-  *********************************************/
+
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    global $DB;
-    global $DATADIR;
-    global $PROJECTSTATEDIR;
 
     /* Ignore php Notice is array keys don't exist */
     $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
@@ -165,14 +156,14 @@ $text = _("Nomos One-shot, real-time license analysis");
     error_reporting($errlev);
 
     /* For REST API:
-       wget -qO - --post-file=myfile.c http://myserv.com/?mod=agent_nomos_once
-     */
+     wget -qO - --post-file=myfile.c http://myserv.com/?mod=agent_nomos_once
+    */
     if ($this->NoHTML && file_exists($tmp_name))
     {
-       echo $this->AnalyzeFile($tmp_name);
-       echo "\n";
-       unlink($tmp_name);
-       return;
+      echo $this->AnalyzeFile($tmp_name);
+      echo "\n";
+      unlink($tmp_name);
+      return;
     }
 
     $V = "";
@@ -186,13 +177,13 @@ $text = _("Nomos One-shot, real-time license analysis");
         $V.= "<ul>\n";
         $V.= _("<li>The analysis is done in real-time. Large files may take a while." .
              " This method is not recommended for files larger than a few hundred kilobytes.\n");
-$text = _("Files that contain files are");
-$text1 = _("not");
-$text2 = _("unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.");
+        $text = _("Files that contain files are");
+        $text1 = _("not");
+        $text2 = _("unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.");
         $V.= "<li>$text <b>$text1</b> $text2\n";
-$text = _("Results are");
-$text1 = _("not");
-$text2 = _("stored. As soon as you get your results, your uploaded file is removed from the system. ");
+        $text = _("Results are");
+        $text1 = _("not");
+        $text2 = _("stored. As soon as you get your results, your uploaded file is removed from the system. ");
         $V.= "<li>$text <b>$text1</b> $text2\n";
         $V.= "</ul>\n";
         /* Display the form */
@@ -202,13 +193,13 @@ $text2 = _("stored. As soon as you get your results, your uploaded file is remov
         $V.= "<input name='licfile' size='60' type='file' /><br />\n";
         $V.= "</ul>\n";
         $V.= "<input type='hidden' name='showheader' value='1'>";
-$text = _("Analyze");
+        $text = _("Analyze");
         $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
 
 
         if (file_exists($tmp_name)) {
-$text = _("A one shot license analysis shows the following license(s) in file");
+          $text = _("A one shot license analysis shows the following license(s) in file");
           $keep = "<strong>$text </strong><em>{$_FILES['licfile']['name']}:</em> ";
           $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
           print displayMessage(NULL,$keep);
@@ -221,30 +212,6 @@ $text = _("A one shot license analysis shows the following license(s) in file");
           return;
         }
 
-        $Item = GetParm('item', PARM_INTEGER); // may be null
-        if (!empty($Item) && !empty($DB) && !empty($_FILES)) {
-          /* Get the pfile info */
-          $Results = $DB->Action("SELECT * FROM pfile
-		        INNER JOIN uploadtree ON uploadtree_pk = $Item
-		        AND pfile_pk = pfile_fk;");
-          if (!empty($Results[0]['pfile_pk'])) {
-            global $LIBEXECDIR;
-            $Highlight = 1; /* processing a pfile? Always highlight. */
-            $Repo = $Results[0]['pfile_sha1'] . "." . $Results[0]['pfile_md5'] . "." . $Results[0]['pfile_size'];
-            $Repo = trim(shell_exec("$LIBEXECDIR/reppath files '$Repo'"));
-            $tmp_name = $Repo;
-            $text = _("A one shot license analysis shows the following license(s) in file");
-            $keep = "<strong>$text </strong><em>{$_FILES['licfile']['name']}:</em> ";
-            $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
-            print displayMessage(NULL, $keep);
-            print $V;
-            /* Do not unlink the or it will delete the repo file! */
-            if (!empty($_FILES['licfile']['unlink_flag'])) {
-              unlink($tmp_name);
-            }
-            return;
-          }
-        }
         break;
       case "Text":
         break;

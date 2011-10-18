@@ -1,31 +1,29 @@
 <?php
 /***********************************************************
-Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 /*************************************************
-Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
+ Restrict usage: Every PHP file should have this
+ at the very beginning.
+ This prevents hacking attempts.
 *************************************************/
 
 /**
- * agent-nomos
+ * \file agent-nomos.php
  * \brief run the nomos license agent
- * 
- * @version "$Id: agent-nomos.php 3444 2010-09-10 03:52:55Z madong $"
  */
 
 define("TITLE_agent_fonomos", _("Nomos License Analysis"));
@@ -39,56 +37,65 @@ class agent_fonomos extends FO_Plugin {
   public $Dependency = array("db");
   public $DBaccess = PLUGIN_DB_ANALYZE;
 
-  /***********************************************************
-  RegisterMenus(): Register additional menus.
-  ***********************************************************/
+  /**
+   * \brief  Register additional menus.
+   */
   function RegisterMenus() {
     if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     } // don't run
     menu_insert("Agents::" . $this->Title, 0, $this->Name);
   }
-  /*********************************************
-  AgentCheck(): Check if the job is already in the
-  queue.  Returns:
-  0 = not scheduled
-  1 = scheduled but not completed
-  2 = scheduled and completed
-  *********************************************/
+
+  /**
+   * \brief Check if the job is already in the queue.
+   *
+   * \param $uploadpk - the upload will be checked
+   * \return 
+   * 0 = not scheduled
+   * 1 = scheduled but not completed
+   * 2 = scheduled and completed
+   */
   function AgentCheck($uploadpk) {
-    global $DB;
-    $SQL = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job" .
+    global $PG_CONN;
+    $sql = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job" .
             " ON job_upload_fk = '$uploadpk'" .
             " AND job_pk = jq_job_fk AND jq_type = 'nomos';";
-    $Results = $DB->Action($SQL);
-    if (empty($Results[0]['jq_pk'])) {
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (empty($row['jq_pk'])) {
       return (0);
     }
-    if (empty($Results[0]['jq_endtime'])) {
+    if (empty($row['jq_endtime'])) {
       return (1);
     }
     return (2);
   } // AgentCheck()
 
-  /*********************************************
-  AgentAdd(): Given an uploadpk, add a job.
-  $Depends is for specifying other dependencies.
-  $Depends can be a jq_pk, or an array of jq_pks, or NULL.
-  Returns NULL on success, string on failure.
-  *********************************************/
+  /**
+   * \brief Given an uploadpk, add a job.
+   * \param $Depends - is for specifying other dependencies.
+   * $Depends can be a jq_pk, or an array of jq_pks, or NULL.
+   * \return NULL on success, string on failure.
+   */
   function AgentAdd($uploadpk, $Depends = NULL, $Priority = 0) {
 
-    global $DB;
+    global $PG_CONN;
     global $SVN_REV;
 
     /* Get dependency: "nomos" require "adj2nest".
      * clean this comment up, what is being checked?
-     * */
-    $SQL = "SELECT jq_pk FROM jobqueue INNER JOIN job ON
+    * */
+    $sql = "SELECT jq_pk FROM jobqueue INNER JOIN job ON
       job.job_upload_fk = $uploadpk AND job.job_pk = jobqueue.jq_job_fk
-	    WHERE jobqueue.jq_type = 'adj2nest';";
-    $Results = $DB->Action($SQL);
-    $Dep = $Results[0]['jq_pk'];
+      WHERE jobqueue.jq_type = 'adj2nest';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    $Dep = $row['jq_pk'];
     if (empty($Dep)) {
 
       global $Plugins;
@@ -99,10 +106,13 @@ class agent_fonomos extends FO_Plugin {
       if (!empty($rc)) {
         return ($rc);
       }
-      $Results = $DB->Action($SQL);
-      $Dep = $Results[0]['jq_pk'];
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      pg_free_result($result);
+      $Dep = $row['jq_pk'];
       if (empty($Dep)) {
-$text = _("Unable to find dependent job: unpack");
+        $text = _("Unable to find dependent job: unpack");
         return ($text);
       }
     }
@@ -118,26 +128,26 @@ $text = _("Unable to find dependent job: unpack");
     /* Prepare the job: job "nomos" */
     $jobpk = JobAddJob($uploadpk, "Nomos License Analysis", $Priority);
     if (empty($jobpk) || ($jobpk < 0)) {
-$text = _("Failed to insert job record for nomos");
+      $text = _("Failed to insert job record for nomos");
       return ($text);
     }
 
     /*
-       Using the latest agent revision, find all the records still needing processing
-       this requires knowing the agents fk.
-     */
+     Using the latest agent revision, find all the records still needing processing
+    this requires knowing the agents fk.
+    */
     $agent_pk = GetAgentKey("nomos", "nomos license agent");
 
     /* Add job: job "Fo-Nomos License Analysis" has jobqueue item "nomos" */
     $jqargs = $uploadpk;
     $jobqueuepk = JobQueueAdd($jobpk, "nomos", $jqargs, "no", "", $Dep);
     if (empty($jobqueuepk)) {
-$text = _("Failed to insert agent nomos into job queue");
+      $text = _("Failed to insert agent nomos into job queue");
       return ($text);
     }
     if (CheckEnotification()) {
       $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
-      				 NULL,NULL,array($jobqueuepk));
+      NULL,NULL,array($jobqueuepk));
       if ($sched !== NULL) {
         return($sched);
       }
@@ -145,20 +155,19 @@ $text = _("Failed to insert agent nomos into job queue");
     return (NULL);
   } // AgentAdd()
 
-  /*********************************************
-  Output(): Generate the text for this plugin.
-  *********************************************/
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
-      if ($this->State != PLUGIN_STATE_READY) {
+    if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-
-    global $DB;
+    global $PG_CONN;
 
     $Page = "";
     switch ($this->OutputType) {
       case "XML":
-      break;
+        break;
       case "HTML":
         /* If this is a POST, then process the request. */
         $uploadpk = GetParm('upload', PARM_INTEGER);
@@ -166,16 +175,16 @@ $text = _("Failed to insert agent nomos into job queue");
           $rc = $this->AgentAdd($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-$text = _("fo_nomos analysis added to the job queue");
+            $text = _("fo_nomos analysis added to the job queue");
             $Page.= displayMessage($text);
           }
           else {
-$text = _("Scheduling of fo_nomos failed:");
+            $text = _("Scheduling of fo_nomos failed:");
             $Page.= displayMessage($text.$rc);
           }
         }
         /* Get list of projects that are not scheduled for uploads */
-        $SQL = "SELECT upload_pk,upload_desc,upload_filename
+        $sql = "SELECT upload_pk,upload_desc,upload_filename
                 FROM upload
                  WHERE upload_pk NOT IN
                 (SELECT upload_pk FROM upload
@@ -185,8 +194,10 @@ $text = _("Scheduling of fo_nomos failed:");
                 AND jobqueue.jq_type = 'filter_clean'
                 ORDER BY upload_pk)
                 ORDER BY upload_desc,upload_filename;";
-        $Results = $DB->Action($SQL);
-        if (empty($Results[0]['upload_pk'])) {
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result, 0);
+        if (empty($row['upload_pk'])) {
           $Page.= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
         }
         else {
@@ -194,9 +205,9 @@ $text = _("Scheduling of fo_nomos failed:");
           $Page.= "<form method='post'>\n"; // no url = this url
           $Page.= _("Select an uploaded file for license analysis.\n");
           $Page.= _("Only uploads that are not already scheduled can be scheduled.\n");
-$text = _("Analyze:");
+          $text = _("Analyze:");
           $Page.= "<p />\n$text <select name='upload'>\n";
-          foreach($Results as $Row) {
+          while ($Row = pg_fetch_assoc($result)) {
             if (empty($Row['upload_pk'])) {
               continue;
             }
@@ -208,16 +219,17 @@ $text = _("Analyze:");
             }
             $Page.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
+          pg_free_result($result);
           $Page.= "</select><P />\n";
-$text = _("Analyze");
+          $text = _("Analyze");
           $Page.= "<input type='submit' value='$text!'>\n";
           $Page.= "</form>\n";
         }
-      break;
+        break;
       case "Text":
-      break;
+        break;
       default:
-      break;
+        break;
     }
     if (!$this->OutputToStdout) {
       return ($Page);
