@@ -276,8 +276,18 @@ function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk)
     $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=download&upload=$upload_fk&item=$uploadtree_pk' >$text2</a>]";
   }
 
+  /********  Tag ********/
+  /* Build string of tags for this item */
+  $TagArray = GetAllTags($uploadtree_pk);
+  $TagStr = "";
+  foreach($TagArray as $TagPair) 
+  {
+    if (!empty($TagStr)) $TagStr .= ",";
+    $TagStr .= " " . $TagPair['tag_name'];
+  }
+
   $text3 = _("Tag");
-  $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=tag&upload=$upload_fk&item=$uploadtree_pk' >$text3</a>]";
+  $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=tag&upload=$upload_fk&item=$uploadtree_pk' >$text3</a>$TagStr]";
 
   return $LinkStr;
 }
