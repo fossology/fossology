@@ -302,8 +302,7 @@ return;
 
     /* display file links if this is a real file */
     $ColStr .= "<td valign='top'>";
-    if ($Child['pfile_fk'])
-      $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk);
+    $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk, $Child['pfile_fk']);
     $ColStr .= "</td>";
     return $ColStr;
   }

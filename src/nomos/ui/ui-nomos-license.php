@@ -331,9 +331,8 @@ class ui_nomos_license extends FO_Plugin
         $VF .= "</span>";
         $VF .= "</td><td valign='top'>";
 
-        /* display file links if this is really a file */
-        if (!empty($C['pfile_fk']))
-        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $Agent_pk);
+        /* display file links */
+        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $Agent_pk, $C['pfile_fk']);
         $VF .= "</td>";
         $VF .= "</tr>\n";
 
@@ -409,7 +408,7 @@ class ui_nomos_license extends FO_Plugin
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VLic</td><td valign='top'>$VF</td></tr>\n";
+    $V .= "<tr><td valign='top' >$VLic</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
 

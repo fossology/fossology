@@ -399,9 +399,8 @@ $text = _("Unique buckets");
       $VF .= "</span>";
       $VF .= "</td><td valign='top'>";
 
-      /* display file links if this is really a file */
-      if (!empty($C['pfile_fk']))
-        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $nomosagent_pk);
+      /* display item links */
+      $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $nomosagent_pk, $C['pfile_fk']);
       $VF .= "</td>";
       $VF .= "</tr>\n";
 
