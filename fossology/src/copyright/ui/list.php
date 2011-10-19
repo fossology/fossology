@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 - 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,11 +16,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- This plugin is used to:
-   List files for a given copyright statement/email/url in a given
-   uploadtree.
- *************************************************/
+/**
+ * \file list.php
+ * \brief This plugin is used to:
+ * List files for a given copyright statement/email/url in a given
+ * uploadtree.
+ */
 
 define("TITLE_copyright_list", _("List Files for Copyright/Email/URL"));
 
@@ -33,20 +34,22 @@ class copyright_list extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
-  { 
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+  {
+    if ($this->State != PLUGIN_STATE_READY) {
+      return(0);
+    }
 
     // micro-menu
-	$agent_pk = GetParm("agent",PARM_INTEGER);
-	$uploadtree_pk = GetParm("item",PARM_INTEGER);
-	$hash = GetParm("hash",PARM_RAW);
-	$type = GetParm("type",PARM_RAW);
-	$Page = GetParm("page",PARM_INTEGER);
-	$Excl = GetParm("excl",PARM_RAW);
+    $agent_pk = GetParm("agent",PARM_INTEGER);
+    $uploadtree_pk = GetParm("item",PARM_INTEGER);
+    $hash = GetParm("hash",PARM_RAW);
+    $type = GetParm("type",PARM_RAW);
+    $Page = GetParm("page",PARM_INTEGER);
+    $Excl = GetParm("excl",PARM_RAW);
 
     $URL = $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
     if (!empty($Excl)) $URL .= "&excl=$Excl";
@@ -56,19 +59,18 @@ class copyright_list extends FO_Plugin
   } // RegisterMenus()
 
 
-  /*************************************************
-   * GetRows()
-   * Return rows to process, and $upload_pk
+  /**
+   * \return return rows to process, and $upload_pk
    * If there are too many rows (see $MaxTreeRecs)
-   *  then a text error message is returned, not an array.
-   ************************************************/
+   * then a text error message is returned, not an array.
+   */
   function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk )
   {
     global $PG_CONN;
 
     /*******  Get license names and counts  ******/
     /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree 
+    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree
               WHERE uploadtree_pk = $Uploadtree_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -112,15 +114,14 @@ class copyright_list extends FO_Plugin
 
     return $rows;
   }
-      
 
-  /*************************************************
-   * GetRequestedRows()
-   * Remove unwanted rows by hash and type and
+
+  /**
+   * \brief Remove unwanted rows by hash and type and
    * exclusions
-   * Returns new array and $NumRows
-   * $NumRows is the number of instances.
-   ************************************************/
+   * \param $NumRows - the number of instances.
+   * \return new array and $NumRows
+   */
   function GetRequestedRows($rows, $hash, $type, $excl, &$NumRows)
   {
     $NumRows = count($rows);
@@ -137,7 +138,7 @@ class copyright_list extends FO_Plugin
       }
 
       /* remove excluded files */
-      if ($excl) 
+      if ($excl)
       {
         $FileExt = GetFileExt($rows[$RowIdx]['ufile_name']);
         if (in_array($FileExt, $ExclArray))
@@ -149,7 +150,7 @@ class copyright_list extends FO_Plugin
 
       /* rewrite content for easier human assimilation */
       if (MassageContent($rows[$RowIdx], $hash))
-        unset($rows[$RowIdx]);
+      unset($rows[$RowIdx]);
     }
 
     /* reset array keys, keep order (uploadtree_pk) */
@@ -169,7 +170,7 @@ class copyright_list extends FO_Plugin
          * are multiple same copyrights in one file.
          */
         if ($rows2[$RowIdx-1]['uploadtree_pk'] == $rows2[$RowIdx]['uploadtree_pk'])
-          unset($rows2[$RowIdx-1]);
+        unset($rows2[$RowIdx-1]);
       }
     }
 
@@ -179,17 +180,21 @@ class copyright_list extends FO_Plugin
     return $rows2;
   }
 
-  /***********************************************************
-   Output(): Display the loaded menu and plugins.
-   ***********************************************************/
+  /**
+   * \brief Display the loaded menu and plugins.
+   */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
     global $Plugins;
-    global $DB, $PG_CONN;
+    global $PG_CONN;
 
-    // make sure there is a db connection since I've pierced the core-db abstraction
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo _("NO DB connection"); }
+    // make sure there is a db connection
+    if (!$PG_CONN) {
+      echo _("NO DB connection");
+    }
 
     $OutBuf = "";
     $Time = microtime(true);
@@ -197,19 +202,21 @@ class copyright_list extends FO_Plugin
     $Max = 50;
 
     /*  Input parameters */
-	$agent_pk = GetParm("agent",PARM_INTEGER);
-	$uploadtree_pk = GetParm("item",PARM_INTEGER);
-	$hash = GetParm("hash",PARM_RAW);
-	$type = GetParm("type",PARM_RAW);
-	$excl = GetParm("excl",PARM_RAW);
-	if (empty($uploadtree_pk) || empty($hash) || empty($type) || empty($agent_pk)) 
+    $agent_pk = GetParm("agent",PARM_INTEGER);
+    $uploadtree_pk = GetParm("item",PARM_INTEGER);
+    $hash = GetParm("hash",PARM_RAW);
+    $type = GetParm("type",PARM_RAW);
+    $excl = GetParm("excl",PARM_RAW);
+    if (empty($uploadtree_pk) || empty($hash) || empty($type) || empty($agent_pk))
     {
       $text = _("is missing required parameters");
       echo $this->Name . " $text.";
       return;
     }
-	$Page = GetParm("page",PARM_INTEGER);
-	if (empty($Page)) { $Page=0; }
+    $Page = GetParm("page",PARM_INTEGER);
+    if (empty($Page)) {
+      $Page=0;
+    }
 
     /* get all rows */
     $rows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk);
@@ -218,110 +225,114 @@ class copyright_list extends FO_Plugin
     $NumInstances = 0;
     $rows = $this->GetRequestedRows($rows, $hash, $type, $excl, $NumInstances);
 
-//debugprint($rows, "rows");
+    //debugprint($rows, "rows");
 
     switch($this->OutputType)
     {
       case "XML":
-	  break;
+        break;
 
       case "HTML":
-      // micro menus
-      $OutBuf .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
+        // micro menus
+        $OutBuf .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
-      $RowCount = count($rows);
-      if ($RowCount)
-      {
-        $Content = htmlentities($rows[0]['content']);
-        $Offset = ($Page < 0) ? 0 : $Page*$Max;
-        $PkgsOnly = false;
-        $text = _("files");
-        $text1 = _("unique");
-        $text3 = _("copyright");
-        $text4 = _("email");
-        $text5 = _("url");
-        switch ($type) 
+        $RowCount = count($rows);
+        if ($RowCount)
         {
-          case "statement":
-            $TypeStr = "$text3";
-            break;
-          case "email":
-            $TypeStr = "$text4";
-            break;
-          case "url":
-            $TypeStr = "$text5";
-            break;
-        }
-        $OutBuf .= "$NumInstances $TypeStr instances found in $RowCount  $text";
+          $Content = htmlentities($rows[0]['content']);
+          $Offset = ($Page < 0) ? 0 : $Page*$Max;
+          $PkgsOnly = false;
+          $text = _("files");
+          $text1 = _("unique");
+          $text3 = _("copyright");
+          $text4 = _("email");
+          $text5 = _("url");
+          switch ($type)
+          {
+            case "statement":
+              $TypeStr = "$text3";
+              break;
+            case "email":
+              $TypeStr = "$text4";
+              break;
+            case "url":
+              $TypeStr = "$text5";
+              break;
+          }
+          $OutBuf .= "$NumInstances $TypeStr instances found in $RowCount  $text";
 
-        $OutBuf .= ": <b>$Content</b>";
+          $OutBuf .= ": <b>$Content</b>";
 
-        $text = _("Display excludes files with these extensions");
-        if (!empty($excl)) $OutBuf .= "<br>$text: $excl";
+          $text = _("Display excludes files with these extensions");
+          if (!empty($excl)) $OutBuf .= "<br>$text: $excl";
 
-        /* Get the page menu */
-        if (($RowCount >= $Max) && ($Page >= 0))
-        {
-          $PagingMenu = "<P />\n" . MenuEndlessPage($Page,intval((($RowCount+$Offset)/$Max))) . "<P />\n";
-          $OutBuf .= $PagingMenu;
+          /* Get the page menu */
+          if (($RowCount >= $Max) && ($Page >= 0))
+          {
+            $PagingMenu = "<P />\n" . MenuEndlessPage($Page,intval((($RowCount+$Offset)/$Max))) . "<P />\n";
+            $OutBuf .= $PagingMenu;
+          }
+          else
+          {
+            $PagingMenu = "";
+          }
+
+          /* Offset is +1 to start numbering from 1 instead of zero */
+          $RowNum = $Offset;
+          $LinkLast = "copyrightview&agent=$agent_pk";
+          $ShowBox = 1;
+          $ShowMicro=NULL;
+
+          // base url
+          $ucontent = rawurlencode($Content);
+          $baseURL = "?mod=" . $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
+
+          // display rows
+          foreach($rows as $row)
+          {
+            // Allow user to exclude files with this extension
+            $FileExt = GetFileExt($row['ufile_name']);
+            if (empty($excl))
+            $URL = $baseURL . "&excl=$FileExt";
+            else
+            $URL = $baseURL . "&excl=$excl:$FileExt";
+
+            $text = _("Exclude this file type");
+            $Header = "<a href=$URL>$text.</a>";
+
+            $ok = true;
+            if ($excl)
+            {
+              $ExclArray = explode(":", $excl);
+              if (in_array($FileExt, $ExclArray)) $ok = false;
+            }
+
+            if ($ok) $OutBuf .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, ++$RowNum, $Header);
+          }
+
         }
         else
         {
-          $PagingMenu = "";
+          $OutBuf .= _("No files found");
         }
 
-        /* Offset is +1 to start numbering from 1 instead of zero */
-        $RowNum = $Offset;
-        $LinkLast = "copyrightview&agent=$agent_pk";
-        $ShowBox = 1;
-        $ShowMicro=NULL;
-
-        // base url
-        $ucontent = rawurlencode($Content);
-        $baseURL = "?mod=" . $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
-
-        // display rows
-        foreach($rows as $row)
-        {
-          // Allow user to exclude files with this extension
-          $FileExt = GetFileExt($row['ufile_name']);
-          if (empty($excl)) 
-            $URL = $baseURL . "&excl=$FileExt";
-          else
-            $URL = $baseURL . "&excl=$excl:$FileExt";
-
-          $text = _("Exclude this file type");
-          $Header = "<a href=$URL>$text.</a>";
-
-          $ok = true;
-          if ($excl)
-          {
-            $ExclArray = explode(":", $excl);
-            if (in_array($FileExt, $ExclArray)) $ok = false;
-          }
-
-          if ($ok) $OutBuf .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, ++$RowNum, $Header);
+        if (!empty($PagingMenu)) {
+          $OutBuf .= $PagingMenu . "\n";
         }
-
-      }
-      else
-      {
-        $OutBuf .= _("No files found");
-      }
-
-      if (!empty($PagingMenu)) { $OutBuf .= $PagingMenu . "\n"; }
-      $OutBuf .= "<hr>\n";
-      $Time = microtime(true) - $Time;
-      $text = _("Elapsed time");
-      $text1 = _("seconds");
-      $OutBuf .= sprintf("<small>$text: %.2f $text1</small>\n", $Time);
-      break;
-    case "Text":
-      break;
-    default:
-      break;
+        $OutBuf .= "<hr>\n";
+        $Time = microtime(true) - $Time;
+        $text = _("Elapsed time");
+        $text1 = _("seconds");
+        $OutBuf .= sprintf("<small>$text: %.2f $text1</small>\n", $Time);
+        break;
+      case "Text":
+        break;
+      default:
+        break;
     }
-    if (!$this->OutputToStdout) { return($OutBuf); }
+    if (!$this->OutputToStdout) {
+      return($OutBuf);
+    }
     print($OutBuf);
     return;
   } // Output()

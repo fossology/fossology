@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010, 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,53 +16,52 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/************************************************************
-  This file contains common functions for the
-  copyright ui plugin.
- ************************************************************/
+/**
+ * \file library.php
+ * \brief This file contains common functions for the
+ * copyright ui plugin.
+ */
 
-/***********************************************************
- Sort query histogram results (by content)
- ***********************************************************/
+/**
+ * \brief Sort query histogram results (by content)
+ */
 function hist_rowcmp($rowa, $rowb)
 {
   return (strnatcasecmp($rowa['content'], $rowb['content']));
 }
 
-/***********************************************************
- Sort rows by filename
- ***********************************************************/
+/**
+ * \brief Sort rows by filename\
+ */
 function copyright_namecmp($rowa, $rowb)
 {
   return (strnatcasecmp($rowa['ufile_name'], $rowb['ufile_name']));
 }
 
 
-/*
- * Return files with a given copyright.
- * Inputs:
- *   $agent_pk
- *   $hash            content hash
- *   $type            content type (statement, url, email)
- *   $uploadtree_pk   sets scope of request
- *   $PkgsOnly        if true, only list packages, default is false (all files are listed)
+/**
+ * \brief get files with a given copyright.
+ * \param $agent_pk - agentpk
+ * \param $hash - content hash
+ * \param $type - content type (statement, url, email)
+ * \param $uploadtree_pk - sets scope of request
+ * \param $PkgsOnly - if true, only list packages, default is false (all files are listed)
  *                    $PkgsOnly is not yet implemented.
- *   $offset          select offset, default is 0
- *   $limit           select limit (num rows returned), default is no limit
- *   $order           sql order by clause, default is blank
+ * \param $offset -  select offset, default is 0
+ * \param $limit - select limit (num rows returned), default is no limit
+ * \param $order - sql order by clause, default is blank
  *                      e.g. "order by ufile_name asc"
- * Returns:
- *   pg_query result.  See $sql for fields returned.
- *   Caller should use pg_free_result to free.
+ * \return pg_query result.  See $sql for fields returned.
+ * \note Caller should use pg_free_result to free.
  */
-function GetFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk, 
-                             $PkgsOnly=false, $offset=0, $limit="ALL",
-                             $order="")
+function GetFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
+$PkgsOnly=false, $offset=0, $limit="ALL",
+$order="")
 {
   global $PG_CONN;
-  
+
   /* Find lft and rgt bounds for this $uploadtree_pk  */
-  $sql = "SELECT lft, rgt, upload_fk FROM uploadtree 
+  $sql = "SELECT lft, rgt, upload_fk FROM uploadtree
                  WHERE uploadtree_pk = $uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -80,35 +79,34 @@ function GetFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
           where PF=pfile_fk and agent_fk=$agent_pk
                 and hash='$hash' and type='$type'
           group by uploadtree_pk, pfile_fk, ufile_name 
-          $order limit $limit offset $offset";
+  $order limit $limit offset $offset";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-//echo "<br>$sql<br>";
+  //echo "<br>$sql<br>";
   return $result;
 }
 
-/*
- * Count files (pfiles) with a given copyright string.
- * Inputs:
- *   $agent_pk
- *   $hash            content hash
- *   $type            content type (statement, url, email)
- *   $uploadtree_pk   sets scope of request
- *   $PkgsOnly        if true, only list packages, default is false (all files are listed)
+/**
+ * \biref Count files (pfiles) with a given copyright string.
+ *
+ * \param $agent_pk - agentpk
+ * \param $hash - content hash
+ * \param $type - content type (statement, url, email)
+ * \param $uploadtree_pk -  sets scope of request
+ * \param $PkgsOnly - if true, only list packages, default is false (all files are listed)
  *                    $PkgsOnly is not yet implemented.  Default is false.
- *   $CheckOnly       if true, sets LIMIT 1 to check if uploadtree_pk has 
+ * \param $CheckOnly - if true, sets LIMIT 1 to check if uploadtree_pk has
  *                    any of the given copyrights.  Default is false.
- * Returns:
- *   Number of unique pfiles with $hash
+ * \return Number of unique pfiles with $hash
  */
-function CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk, 
-                             $PkgsOnly=false, $CheckOnly=false)
+function CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
+$PkgsOnly=false, $CheckOnly=false)
 {
   global $PG_CONN;
-  
+
   /* Find lft and rgt bounds for this $uploadtree_pk  */
-  $sql = "SELECT lft, rgt, upload_fk FROM uploadtree 
+  $sql = "SELECT lft, rgt, upload_fk FROM uploadtree
                  WHERE uploadtree_pk = $uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -124,11 +122,11 @@ function CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
             (SELECT pfile_fk as PF from uploadtree 
                 where upload_fk=$upload_pk and uploadtree.lft BETWEEN $lft and $rgt) as SS
             where PF=pfile_fk and agent_fk=$agent_pk and hash='$hash' and type='$type' 
-            $chkonly";
+  $chkonly";
 
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  
+
   $row = pg_fetch_assoc($result);
   $FileCount = $row['unique'];
   pg_free_result($result);
@@ -136,86 +134,84 @@ function CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
 }
 
 
-  /***********************************************************
-   StmtReorder(): 
-   rearrange copyright statment to try and put the holder first,
-   followed by the rest of the statement.
-   For example,
-     copyright (c) aaron seigo <aseigo kde.org>
-   would reorder to
-     aaron seigo <aseigo kde.org> | copyright (c)
-   this way the output will be better grouped by author.
-   ***********************************************************/
-  function StmtReorder($content)
+/**
+ * \brief rearrange copyright statment to try and put the holder first,
+ * followed by the rest of the statement.
+ * \example 
+ * copyright (c) aaron seigo <aseigo kde.org> <br>
+ * would reorder to <br>
+ * aaron seigo <aseigo kde.org> | copyright (c) <br>
+ * this way the output will be better grouped by author. <br>
+ */
+function StmtReorder($content)
+{
+  // NOT YET IMPLEMENTED
+  return $content;
+}
+
+
+/**
+ * \brief Input row array contains: pfile, content and type <br>
+ * Output records: massaged content, type, hash <br>
+ * where content has been simplified from
+ * the raw records and hash is the md5 of this
+ * new content. <br>
+ * If $hash non zero, only rows with that hash will
+ * be returned. 
+ * \return On empty row, return true, else false
+ */
+function MassageContent(&$row, $hash)
+{
+  /* Step 1: Clean up content
+   */
+  $OriginalContent = $row['content'];
+
+  /* remove control characters */
+  $content = preg_replace('/[\x0-\x1f]/', ' ', $OriginalContent);
+
+  if ($row['type'] == 'statement')
   {
-    // NOT YET IMPLEMENTED
-    return $content;
+    /* !"#$%&' */
+    $content = preg_replace('/([\x21-\x27])|([*@])/', ' ', $content);
+
+    /*  numbers-numbers, two or more digits, ', ' */
+    $content = preg_replace('/(([0-9]+)-([0-9]+))|([0-9]{2,})|(,)/', ' ', $content);
+    $content = preg_replace('/ : /', ' ', $content);  // free :, probably followed a date
+  }
+  else
+  if ($row['type'] == 'email')
+  {
+    $content = str_replace(":;<=>()", " ", $content);
   }
 
+  /* remove double spaces */
+  $content = preg_replace('/\s\s+/', ' ', $content);
 
-  /***********************************************************
-   MassageContent(): 
-   Input row array contains: pfile, content and type
-   Output records: massaged content, type, hash
-                   where content has been simplified from
-                   the raw records and hash is the md5 of this
-                   new content.
-   If $hash non zero, only rows with that hash will
-   be returned.
-   On empty row, return true, else false
-   ***********************************************************/
-  function MassageContent(&$row, $hash)
-  {
-    /* Step 1: Clean up content
-     */
-    $OriginalContent = $row['content'];
+  /* remove leading/trailing whitespace and some punctuation */
+  $content = trim($content, "\t \n\r<>./\"\'");
 
-    /* remove control characters */
-    $content = preg_replace('/[\x0-\x1f]/', ' ', $OriginalContent);   
+  /* remove leading "dnl " */
+  if ((strlen($content) > 4) &&
+  (substr_compare($content, "dnl ", 0, 4, true) == 0))
+  $content = substr($content, 4);
 
-    if ($row['type'] == 'statement')
-    {
-      /* !"#$%&' */
-      $content = preg_replace('/([\x21-\x27])|([*@])/', ' ', $content);   
+  /* skip empty content */
+  if (empty($content)) return true;
 
-      /*  numbers-numbers, two or more digits, ', ' */
-      $content = preg_replace('/(([0-9]+)-([0-9]+))|([0-9]{2,})|(,)/', ' ', $content);  
-      $content = preg_replace('/ : /', ' ', $content);  // free :, probably followed a date
-    }
-    else
-    if ($row['type'] == 'email')
-    {
-      $content = str_replace(":;<=>()", " ", $content);
-    }
+  /* Step 1B: rearrange copyright statments to try and put the holder first,
+   * followed by the rest of the statement, less copyright years.
+  */
+  /* Not yet implemented
+   if ($row['type'] == 'statement') $content = $this->StmtReorder($content);
+  */
 
-    /* remove double spaces */
-    $content = preg_replace('/\s\s+/', ' ', $content);
+  //  $row['original'] = $OriginalContent;   // to compare original to new content
+  $row['content'] = $content;
+  $row['copyright_count'] = 1;
+  $row['hash'] = md5($row['content']);
+  if ($hash && ($row['hash'] != $hash)) return true;
 
-    /* remove leading/trailing whitespace and some punctuation */
-    $content = trim($content, "\t \n\r<>./\"\'");
-
-    /* remove leading "dnl " */
-    if ((strlen($content) > 4) &&
-        (substr_compare($content, "dnl ", 0, 4, true) == 0))
-      $content = substr($content, 4);
-
-    /* skip empty content */
-    if (empty($content)) return true;
-
-    /* Step 1B: rearrange copyright statments to try and put the holder first,
-     * followed by the rest of the statement, less copyright years.
-     */
-/* Not yet implemented
-      if ($row['type'] == 'statement') $content = $this->StmtReorder($content);
-*/
-
-    //  $row['original'] = $OriginalContent;   // to compare original to new content
-    $row['content'] = $content; 
-    $row['copyright_count'] = 1;
-    $row['hash'] = md5($row['content']);
-    if ($hash && ($row['hash'] != $hash)) return true;
-
-    return false;
-  }  /* End of MassageContent() */
+  return false;
+}  /* End of MassageContent() */
 
 ?>
