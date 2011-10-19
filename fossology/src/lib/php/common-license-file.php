@@ -259,20 +259,27 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
  * \param $upload_fk - upload id
  * \param $uploadtree_pk - uploadtree id
  * \param $napk - nomos agent pk
+ * \param $pfile_pk
  *
- * \returns String containing the links [View][Info][Download]
+ * \returns String containing the links [View][Info][Download][Tag]
  */
-function FileListLinks($upload_fk, $uploadtree_pk, $napk)
+function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk)
 {
-  $text = _("View");
-  $text1 = _("Info");
-  $text2 = _("Download");
-  $out = "";
-  $out .= "[<a href='" . Traceback_uri() . "?mod=view-license&upload=$upload_fk&item=$uploadtree_pk&napk=$napk' >$text</a>]";
-  $out .= "[<a href='" . Traceback_uri() . "?mod=view_info&upload=$upload_fk&item=$uploadtree_pk&show=detail' >$text1</a>]";
-  $out .= "[<a href='" . Traceback_uri() . "?mod=download&upload=$upload_fk&item=$uploadtree_pk' >$text2</a>]";
+  $LinkStr = "";
+  if ($pfile_pk)
+  {
+    $text = _("View");
+    $text1 = _("Info");
+    $text2 = _("Download");
+    $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=view-license&upload=$upload_fk&item=$uploadtree_pk&napk=$napk' >$text</a>]";
+    $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=view_info&upload=$upload_fk&item=$uploadtree_pk&show=detail' >$text1</a>]";
+    $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=download&upload=$upload_fk&item=$uploadtree_pk' >$text2</a>]";
+  }
 
-  return $out;
+  $text3 = _("Tag");
+  $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=tag&upload=$upload_fk&item=$uploadtree_pk' >$text3</a>]";
+
+  return $LinkStr;
 }
 
 
