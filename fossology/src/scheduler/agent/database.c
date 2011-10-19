@@ -267,6 +267,7 @@ void database_update_event(void* unused)
   }
 
   /* make the database query */
+
   db_result = PQexec(db_conn, basic_checkout);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {

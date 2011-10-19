@@ -100,6 +100,7 @@ void* interface_thread(void* param)
   char* cmd, * tmp;
   unsigned long size;
   arg_int* params;
+  int i;
 
   memset(buffer, '\0', sizeof(buffer));
 
@@ -168,7 +169,18 @@ void* interface_thread(void* param)
 
     /* restart a paused job, simply create the apropriate event */
     else if(strcmp(cmd, "restart") == 0)
+    {
+      tmp = strtok(NULL, " ");
+      i = atoi(tmp);
+      if(i == 0 && tmp[0] != '0')
+      {
+        snprintf(buffer, sizeof(buffer) - 1,
+            "ERROR: invalid argument for \"restart\" command: %s\n", tmp);
+        g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+        continue;
+      }
       event_signal(job_restart_event, get_job(atoi(strtok(NULL, " "))));
+    }
 
     /* change the verbose level of the scheudler or a job */
     else if(strcmp(cmd, "verbose") == 0)

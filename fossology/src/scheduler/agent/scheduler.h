@@ -35,6 +35,7 @@ extern int closing;
 extern int s_pid;
 extern int s_daemon;
 extern int s_port;
+extern char* sysconfig;
 
 /* ************************************************************************** */
 /* **** Utility Functions *************************************************** */

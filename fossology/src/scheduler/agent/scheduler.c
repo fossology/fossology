@@ -72,6 +72,7 @@ int pause_f = 1;
 int s_pid;
 int s_daemon;
 int s_port;
+char* sysconfig;
 
 /* ************************************************************************** */
 /* **** signals and events ************************************************** */
@@ -377,7 +378,7 @@ void load_agent_config()
 {
   DIR* dp;                  // directory pointer used to load meta agents;
   struct dirent* ep;        // information about directory
-  char addbuf[256];         // standard string buffer
+  char addbuf[512];         // standard string buffer
   int max = -1;             // the number of agents to a host or number of one type running
   int special = 0;          // anything that is special about the agent (EXCLUSIVE)
   int i;
@@ -404,6 +405,7 @@ void load_agent_config()
       sprintf(addbuf, "%s/%s/%s/%s.conf",
           DEFAULT_SETUP, AGENT_CONF, ep->d_name, ep->d_name);
 
+      fo_config_free();
       fo_config_load(addbuf, &error);
       if(error && error->code == fo_missing_file)
       {
@@ -470,8 +472,8 @@ void load_foss_config()
   char** keys;
   int max = -1;             // the number of agents to a host or number of one type running
   int special = 0;          // anything that is special about the agent (EXCLUSIVE)
-  char addbuf[256];         // standard string buffer
-  char dirbuf[256];         // standard string buffer
+  char addbuf[512];         // standard string buffer
+  char dirbuf[512];         // standard string buffer
   GError* error = NULL;
   int i;
 
@@ -479,7 +481,8 @@ void load_foss_config()
   host_list_clean();
 
   /* parse the config file */
-  fo_config_load_default(&error);
+  sprintf(addbuf, "%s/fossology.conf", sysconfig)
+  fo_config_load(addbuf, &error);
   if(error)
     FATAL("%s", error->message);
 
@@ -609,14 +612,15 @@ int main(int argc, char** argv)
   /* the options for the command line parser */
   GOptionEntry entries[] =
   {
-      { "daemon",   'd', 0, G_OPTION_ARG_NONE,   &s_daemon, "Run scheduler as daemon"                     },
-      { "database", 'i', 0, G_OPTION_ARG_NONE,   &db_init,  "Initialize database connection and exit"     },
-      { "kill",     'k', 0, G_OPTION_ARG_NONE,   &ki_sched, "Kills all running schedulers and exit"       },
-      { "log",      'L', 0, G_OPTION_ARG_STRING, &log,      "Prints log here instead of default log file" },
-      { "port",     'p', 0, G_OPTION_ARG_INT,    &s_port,   "Set the port the interface listens on"       },
-      { "reset",    'R', 0, G_OPTION_ARG_NONE,   &db_reset, "Reset the job queue upon startup"            },
-      { "test",     't', 0, G_OPTION_ARG_NONE,   &test_die, "Close the scheduler after running tests"     },
-      { "verbose",  'v', 0, G_OPTION_ARG_INT,    &verbose,  "Set the scheduler verbose level"             },
+      { "daemon",   'd', 0, G_OPTION_ARG_NONE,   &s_daemon,  "Run scheduler as daemon"                     },
+      { "database", 'i', 0, G_OPTION_ARG_NONE,   &db_init,   "Initialize database connection and exit"     },
+      { "kill",     'k', 0, G_OPTION_ARG_NONE,   &ki_sched,  "Kills all running schedulers and exit"       },
+      { "log",      'L', 0, G_OPTION_ARG_STRING, &log,       "Prints log here instead of default log file" },
+      { "port",     'p', 0, G_OPTION_ARG_INT,    &s_port,    "Set the port the interface listens on"       },
+      { "reset",    'R', 0, G_OPTION_ARG_NONE,   &db_reset,  "Reset the job queue upon startup"            },
+      { "test",     't', 0, G_OPTION_ARG_NONE,   &test_die,  "Close the scheduler after running tests"     },
+      { "verbose",  'v', 0, G_OPTION_ARG_INT,    &verbose,   "Set the scheduler verbose level"             },
+      { "config",   'c', 0, G_OPTION_ARG_STRING, &sysconfig, "Set the system configuration directory"      },
       { "sysconfdir",     'c', 0, G_OPTION_ARG_STRING, &sysconfdir,"Directory containing fossology.conf"             },
       {NULL}
   };
