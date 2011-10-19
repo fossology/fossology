@@ -476,6 +476,8 @@ void shell_parse(char* input, int* argc, char*** argv)
     }
   }
 
+  (*argv)[idx++] = "-c";
+  (*argv)[idx++] = sysconfig;
   (*argv)[idx++] = "--scheduler_start";
   (*argc) = idx;
 }
@@ -514,7 +516,7 @@ void* agent_spawn(void* passed)
     /* set the child's stdin and stdout to use the pipes */
     dup2(a->from_parent, fileno(stdin));
     dup2(a->to_parent, fileno(stdout));
-    //dup2(a->to_parent, fileno(stderr));
+    dup2(a->to_parent, fileno(stderr));
 
     /* close all the unnecessary file descriptors */
     g_tree_foreach(agents, (GTraverseFunc)agent_close_fd, a);
@@ -536,7 +538,6 @@ void* agent_spawn(void* passed)
       args[0] = g_strdup_printf(AGENT_BINARY,
           AGENT_DIR, a->meta_data->name, tmp);
 
-      dup2(a->to_parent, fileno(stderr));
       execv(args[0], args);
     }
     /* otherwise the agent willprintf("HELLO\n");l be started using ssh   */
@@ -786,7 +787,7 @@ void agent_death_event(pid_t* pid)
   a = g_tree_lookup(agents, pid);
 
   if(job_id(a->owner) >= 0)
-    database_update_event(NULL);
+    event_signal(database_update_event, NULL);
 
   if(write(a->to_parent, "@@@1\n", 5) != 5)
     VERBOSE2("JOB[%d].%s[%d]: write to agent unsuccessful: %s\n",
