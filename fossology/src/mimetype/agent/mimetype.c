@@ -95,16 +95,13 @@ int main(int argc, char *argv[])
   }
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"iv")) != -1)
+  while((c = getopt(argc,argv,"i")) != -1)
   {
     switch(c)
     {
       case 'i':
         PQfinish(pgConn);
         return(0);
-      case 'v':
-        Verbose++;
-        break;
       default:
         Usage(argv[0]);
         PQfinish(pgConn);

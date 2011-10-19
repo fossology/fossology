@@ -26,7 +26,6 @@
 
 #include "libfossology.h"
 
-extern int Verbose;
 #define MAXCMD 256
 extern char SQL[MAXCMD];
 
