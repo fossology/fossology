@@ -15,6 +15,10 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+/**
+ * \file ui-nomos-license-list.php
+ * \brief list nomos licese for files/directories
+ */
 
 define("TITLE_ui_license_list", _("Nomos License List"));
 
@@ -71,11 +75,11 @@ class ui_license_list extends FO_Plugin {
 
   /**
    * \brief This function is called when user output is
-   * requested.  This function is responsible for assigning headers.
-   * If $Type is "HTML" then generate an HTTP header.
-   * If $Type is "XML" then begin an XML header.
-   * If $Type is "Text" then generate a text header as needed.
-   * The $ToStdout flag is "1" if output should go to stdout, and
+   * requested.  This function is responsible for assigning headers. <br>
+   * If $Type is "HTML" then generate an HTTP header. <br>
+   * If $Type is "XML" then begin an XML header. <br>
+   * If $Type is "Text" then generate a text header as needed. <br>
+   * The $ToStdout flag is "1" if output should go to stdout
    * 
    * \return 0 if it should be returned as a string.  (Strings may be parsed
    * and used by other plugins.)

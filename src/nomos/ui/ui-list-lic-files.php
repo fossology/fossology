@@ -18,6 +18,7 @@
 
 
 /**
+ * \file ui-list-lic-files.php
  * \brief This plugin is used to:
  * List files for a given license shortname in a given
  * uploadtree.
