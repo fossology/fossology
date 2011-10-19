@@ -26,7 +26,6 @@
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif
 
-int Verbose=0;
 char SQL[MAXCMD];
 
 /** for the DB */
@@ -152,7 +151,7 @@ int CheckMimeTypes(char *Ext)
   if (!Ext || (Ext[0] == '\0')) return(-1);
   ExtLen = strlen(Ext);
   rewind(FMimetype);
-  if (Verbose > 1) printf("DEBUG: Looking for mimetype based on extension: '%s'\n",Ext);
+  LOG_VERBOSE0("Looking for mimetype based on extension: '%s'",Ext);
 
   while(ReadLine(FMimetype,Line,MAXCMD) > 0)
   {
@@ -181,7 +180,7 @@ int CheckMimeTypes(char *Ext)
       )
       {
         /* it matched! */
-        if (Verbose) printf("DEBUG: Found mimetype by extension: '%s' = '%s'\n",Ext,Line);
+        LOG_VERBOSE0("Found mimetype by extension: '%s' = '%s'",Ext,Line);
         return(DBFindMime(Line)); /* return metatype id */
       }
     }
@@ -325,7 +324,7 @@ void DBCheckMime(char *Filename)
   memset(MimeType,'\0',MAXCMD);
   if (MagicType)
   {
-    if (Verbose) printf("DEBUG: Found mimetype by magic: '%s'\n",MagicType);
+    LOG_VERBOSE0("Found mimetype by magic: '%s'",MagicType);
     /* Magic contains additional data after a ';' */
     for(i=0;
         (i<MAXCMD) && (MagicType[i] != '\0') &&
