@@ -1,29 +1,29 @@
 <?php
 /***********************************************************
-Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
 /**
  * \file agent.php
  * \brief Interface copyright agent to job queue
- **/
+ */
 
 define("TITLE_agent_copyright", _("Copyright/Email/URL Analysis"));
 
-class agent_copyright extends FO_Plugin 
+class agent_copyright extends FO_Plugin
 {
   public $Name = "agent_copyright";
   public $Title = TITLE_agent_copyright;
@@ -33,22 +33,24 @@ class agent_copyright extends FO_Plugin
 
   /**
    * \brief Register copyright agent in "Agents" menu
-   **/
-  function RegisterMenus() 
+   */
+  function RegisterMenus()
   {
     if ($this->State != PLUGIN_STATE_READY)  return (0);
     menu_insert("Agents::" . $this->Title, 0, $this->Name);
   }
 
   /**
-   * \brief Check if the job is already in the queue.  
+   * \brief Check if the job is already in the queue.
+   *
+   * \param $uploadpk - upload id
    *
    * \return
    * - 0 = not scheduled
    * - 1 = scheduled but not completed
    * - 2 = scheduled and completed
-  **/
-  function AgentCheck($uploadpk) 
+   */
+  function AgentCheck($uploadpk)
   {
     global $PG_CONN;
     $sql = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job" .
@@ -66,25 +68,32 @@ class agent_copyright extends FO_Plugin
     return (2);
   } // AgentCheck()
 
-  /*********************************************
-  AgentAdd(): Given an uploadpk, add a job.
-  $Depends is for specifying other dependencies.
-  $Depends can be a jq_pk, or an array of jq_pks, or NULL.
-  Returns NULL on success, string on failure.
-  *********************************************/
+  /**
+   * \brief  Given an uploadpk, add a job.
+   *
+   * \param $uploadpk - the uploadpk, add agent on this uploadpk
+   * \param $Depends - is for specifying other dependencies.
+   * $Depends can be a jq_pk, or an array of jq_pks, or NULL.
+   * \param $Priority - job priority for this upload, default 0
+   *
+   * \return NULL on success, string on failure.
+   */
   function AgentAdd($uploadpk, $Depends = NULL, $Priority = 0) {
 
-    global $DB;
+    global $PG_CONN;
     global $SVN_REV;
 
     /* Get dependency: "nomos" require "adj2nest".
      * clean this comment up, what is being checked?
-     * */
-    $SQL = "SELECT jq_pk FROM jobqueue INNER JOIN job ON
+    * */
+    $sql = "SELECT jq_pk FROM jobqueue INNER JOIN job ON
       job.job_upload_fk = $uploadpk AND job.job_pk = jobqueue.jq_job_fk
-	    WHERE jobqueue.jq_type = 'adj2nest';";
-    $Results = $DB->Action($SQL);
-    $Dep = $Results[0]['jq_pk'];
+      WHERE jobqueue.jq_type = 'adj2nest';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    $Dep = $row['jq_pk'];
     if (empty($Dep)) {
 
       global $Plugins;
@@ -95,10 +104,13 @@ class agent_copyright extends FO_Plugin
       if (!empty($rc)) {
         return ($rc);
       }
-      $Results = $DB->Action($SQL);
-      $Dep = $Results[0]['jq_pk'];
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      pg_free_result($result);
+      $Dep = $row['jq_pk'];
       if (empty($Dep)) {
-$text = _("Unable to find dependent job: unpack");
+        $text = _("Unable to find dependent job: unpack");
         return ($text);
       }
     }
@@ -114,30 +126,30 @@ $text = _("Unable to find dependent job: unpack");
     /* Prepare the job: job "nomos" */
     $jobpk = JobAddJob($uploadpk, "Copyright Analysis", $Priority);
     if (empty($jobpk) || ($jobpk < 0)) {
-$text = _("Failed to insert job record for copyright agent.");
+      $text = _("Failed to insert job record for copyright agent.");
       return ($text);
     }
 
     /*
-       Using the latest agent revision, find all the records still needing processing
-       this requires knowing the agents fk.
-     */
+     Using the latest agent revision, find all the records still needing processing
+    this requires knowing the agents fk.
+    */
     $agent_pk = GetAgentKey("copyright", "copyright agent");
     $jqargs = $uploadpk;
     /*
-      Hand of the SQL  to the scheduler
-     */
+     Hand of the SQL  to the scheduler
+    */
 
-  /* Add job: job "Copyright Analysis" has jobqueue item "copyright" */
+    /* Add job: job "Copyright Analysis" has jobqueue item "copyright" */
     $jobqueuepk = JobQueueAdd($jobpk, "copyright", $jqargs, "no", "", $Dep);
     if (empty($jobqueuepk)) {
-$text = _("Failed to insert agent copyright into job queue.");
+      $text = _("Failed to insert agent copyright into job queue.");
       return ($text);
     }
-    
+
     if (CheckEnotification()) {
       $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
-      				 NULL,NULL,array($jobqueuepk));
+      NULL,NULL,array($jobqueuepk));
       if ($sched !== NULL) {
         return($sched);
       }
@@ -145,20 +157,20 @@ $text = _("Failed to insert agent copyright into job queue.");
     return (NULL);
   } // AgentAdd()
 
-  /*********************************************
-  Output(): Generate the text for this plugin.
-  *********************************************/
+  /**
+   * \brief Generate the text for this plugin.
+   */
   function Output() {
-      if ($this->State != PLUGIN_STATE_READY) {
+    if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
 
-    global $DB;
+    global $PG_CONN;
 
     $Page = "";
     switch ($this->OutputType) {
       case "XML":
-      break;
+        break;
       case "HTML":
         /* If this is a POST, then process the request. */
         $uploadpk = GetParm('upload', PARM_INTEGER);
@@ -166,16 +178,16 @@ $text = _("Failed to insert agent copyright into job queue.");
           $rc = $this->AgentAdd($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-$text = _("copyright/email/url analysis added to the job queue");
+            $text = _("copyright/email/url analysis added to the job queue");
             $Page.= displayMessage($text);
           }
           else {
-$text = _("Scheduling of copyright/email/url analysis failed");
+            $text = _("Scheduling of copyright/email/url analysis failed");
             $Page.= displayMessage("$text: $rc");
           }
         }
         /* Get list of projects that are not scheduled for uploads */
-        $SQL = "SELECT upload_pk,upload_desc,upload_filename
+        $sql = "SELECT upload_pk,upload_desc,upload_filename
                 FROM upload
                  WHERE upload_pk NOT IN
                 (SELECT upload_pk FROM upload
@@ -185,8 +197,10 @@ $text = _("Scheduling of copyright/email/url analysis failed");
                 AND jobqueue.jq_type = 'copyright'
                 ORDER BY upload_pk)
                 ORDER BY upload_desc,upload_filename;";
-        $Results = $DB->Action($SQL);
-        if (empty($Results[0]['upload_pk'])) {
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result, 0);
+        if (empty($row['upload_pk'])) {
           $Page.= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
         }
         else {
@@ -194,9 +208,9 @@ $text = _("Scheduling of copyright/email/url analysis failed");
           $Page.= "<form method='post'>\n"; // no url = this url
           $Page.= _("Select an uploaded file for copyright analysis.\n");
           $Page.= _("Only uploads that are not already scheduled can be scheduled.\n");
-$text = _("Analyze");
+          $text = _("Analyze");
           $Page.= "<p />\n$text: <select name='upload'>\n";
-          foreach($Results as $Row) {
+          while ($Row = pg_fetch_assoc($result)) {
             if (empty($Row['upload_pk'])) {
               continue;
             }
@@ -209,15 +223,16 @@ $text = _("Analyze");
             $Page.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
           $Page.= "</select><P />\n";
-$text = _("Analyze");
+          $text = _("Analyze");
           $Page.= "<input type='submit' value='$text!'>\n";
           $Page.= "</form>\n";
         }
-      break;
+        pg_free_result($result);
+        break;
       case "Text":
-      break;
+        break;
       default:
-      break;
+        break;
     }
     if (!$this->OutputToStdout) {
       return ($Page);
