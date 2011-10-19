@@ -7,7 +7,7 @@ CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
 
 CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
         -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"'
-EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck sqlCopyTest fossconfigTest
+EXE=sqlCopyTest fossconfigTest reppath
 LIB=libfossology.a
 OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o
 
@@ -29,7 +29,7 @@ install: install-dev install-lib install-exe
 	echo "make $(LIB) install"
 
 install-dev: $(LIB)
-	$(INSTALL_DATA) libfossology.a $(DESTDIR)$(LIBDIR)/libfossology.a
+	$(INSTALL_DATA) libfossology.a $(DESTDIR)$(LIBEXECDIR)/libfossology.a
 	$(INSTALL_DATA) libfossology.h $(DESTDIR)$(INCLUDEDIR)/libfossology.h
 
 install-exe: $(EXE)
@@ -46,7 +46,7 @@ uninstall: uninstall-dev uninstall-lib uninstall-exe
 	echo "make $(LIB) uninstall"
 
 uninstall-dev:
-	rm -f $(DESTDIR)$(LIBDIR)/libfossology.a
+	rm -f $(DESTDIR)$(LIBEXECDIR)/libfossology.a
 	rm -f $(DESTDIR)$(INCLUDEDIR)/libfossology.h
 
 uninstall-exe:
