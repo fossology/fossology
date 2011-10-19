@@ -57,8 +57,6 @@ global $PGCONN;
 
 $usage = "Usage: " . basename($argv[0]) . " [options]
   -v  = enable verbose mode (lists each module being processed)
-  -d  = enable debug database (lists every DB error)
-  -D  = enable debug database (lists EVERY DB call)
   -h  = this help usage";
 
 /* Load command-line options */
@@ -71,16 +69,6 @@ if (array_key_exists('h',$Options))
 }
 $Verbose = array_key_exists("v",$Options);
 if ($Verbose == "") { $Verbose=0; }
-
-global $DB;
-if (array_key_exists('d',$Options))
-{
-  $DB->Debug=1;
-}
-if (array_key_exists('D',$Options))
-{
-  $DB->Debug=2;
-}
 
 /* Initialize the system! */
 $Schema = &$Plugins[plugin_find_any_id("schema")];
@@ -99,14 +87,21 @@ if (!file_exists($Filename))
 }
 
 $PGCONN = dbConnect(NULL);
-$Debug=0;
-$FailFlag = ApplySchema($Filename,$Debug,$Verbose);
+$FailFlag = ApplySchema($Filename,0,$Verbose);
 
 /* Remove the "Need to initialize" flag */
+global $PG_CONN;
+
 if (!$FailFlag)
 {
-  $Filename = "$WEBDIR/init.ui";
+  $Connect = 1;
   $State = 1;
+  $PG_CONN = DBconnect($SYSCONFDIR);
+  if(!is_resource($PG_CONN))
+  {
+    $Connect = 0;
+  }
+  $Filename = "$WEBDIR/init.ui";
   if (file_exists($Filename))
   {
     if ($Verbose) { print "Removing flag '$Filename'\n"; }
@@ -121,6 +116,11 @@ if (!$FailFlag)
   else
   {
     print "Initialization completed successfully.\n";
+  }
+  if(!$Connect)
+  {
+    echo "FATAL! could not connect to the DataBase\n";
+    exit(2);
   }
 }
 else
