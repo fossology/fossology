@@ -6,7 +6,7 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 CONFFILES=fossology.conf
-CONFPATH=$(SYSCONFDIR)/fossology
+CONFPATH=$(SYSCONFDIR)
 
 all: fo-postinstall defconf/Db.conf
 
@@ -22,11 +22,16 @@ defconf/Db.conf: defconf/Db.conf-process
 install: all
 	$(INSTALL_PROGRAM) fo-postinstall $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
 
-	@ echo "Installing configuration files..."
+	echo "Making configuration directories"; \
 	if [ ! -e $(DESTDIR)$(CONFPATH) ] ; then \
 		mkdir -p $(DESTDIR)$(CONFPATH); \
 	fi
-	
+	if [ ! -e $(DESTDIR)$(CONFPATH)/mods-enabled ] ; then \
+                mkdir -p $(DESTDIR)$(CONFPATH)/mods-enabled; \
+                /bin/chmod 775 $(DESTDIR)$(CONFPATH)/mods-enabled; \
+        fi
+        
+	echo "Installing configuration files..."
 	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ] ; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/Db.conf"; \
 	 	$(INSTALL) -m 640 defconf/Db.conf $(DESTDIR)$(CONFPATH)/Db.conf; \
