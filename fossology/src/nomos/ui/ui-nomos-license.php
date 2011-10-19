@@ -15,6 +15,10 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+/**
+ * \file ui-nomos-license.php
+ * \brief browse a directory to disply all licenses in this directory
+ */
 
 define("TITLE_ui_nomos_license", _("License Browser"));
 
@@ -127,8 +131,8 @@ class ui_nomos_license extends FO_Plugin
 
 
   /**
-   * \brief Given an $Uploadtree_pk, display:
-   * (1) The histogram for the directory BY LICENSE.
+   * \brief Given an $Uploadtree_pk, display: <br>
+   * (1) The histogram for the directory BY LICENSE. <br>
    * (2) The file listing for the directory.
    */
   function ShowUploadHist($Uploadtree_pk,$Uri)

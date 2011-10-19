@@ -15,6 +15,10 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+/**
+ * \file nomos-diff.php 
+ * \brief Compare License Browser, list license histogram
+ */
 
 define("TITLE_ui_nomos_diff", _("Compare License Browser"));
 
@@ -232,7 +236,7 @@ class ui_nomos_diff extends FO_Plugin
 
 
   /**
-   * \brief get a string with the html table rows comparing the two file lists.
+   * \brief get a string with the html table rows comparing the two file lists. <br>
    * Each row contains 5 table fields.
    * The third field is just for a column separator.
    * If files match their fuzzyname then put on the same row.
@@ -564,12 +568,12 @@ class ui_nomos_diff extends FO_Plugin
 
 
   /**
-   * \brief generate output information
-   * filter: optional filter to apply
-   * item1:  uploadtree_pk of the column 1 tree
-   * item2:  uploadtree_pk of the column 2 tree
-   * newitem1:  uploadtree_pk of the new column 1 tree
-   * newitem2:  uploadtree_pk of the new column 2 tree
+   * \brief generate output information <br>
+   * filter: optional filter to apply <br>
+   * item1:  uploadtree_pk of the column 1 tree <br>
+   * item2:  uploadtree_pk of the column 2 tree <br>
+   * newitem1:  uploadtree_pk of the new column 1 tree <br>
+   * newitem2:  uploadtree_pk of the new column 2 tree <br>
    * freeze: column number (1 or 2) to freeze
    */
   function Output()
