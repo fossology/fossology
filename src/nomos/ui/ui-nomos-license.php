@@ -429,7 +429,7 @@ class ui_nomos_license extends FO_Plugin
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
-    if ($updcache)
+    if (!empty($updcache))
     $this->UpdCache = $_GET['updcache'];
     else
     $this->UpdCache = 0;
