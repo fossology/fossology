@@ -5,8 +5,8 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
 
-CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
-        -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"'
+CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
+        -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
 EXE=sqlCopyTest fossconfigTest reppath
 LIB=libfossology.a
 OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o
