@@ -208,7 +208,6 @@ int main(int argc, char *argv[])
   } /* if run from scheduler */
 
   /* Clean up */
-  fo_config_free();
   if (FMimetype) fclose(FMimetype);
   magic_close(MagicCookie);
   if (DBMime) PQclear(DBMime);
