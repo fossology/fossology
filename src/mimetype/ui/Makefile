@@ -18,18 +18,20 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
+MOD_NAME=mimetype
+MOD_SUBDIR=ui
 
 all:
-	@echo "no build rule for 'all' in mimetype_ui"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) all"
 
-install:
-	@echo "no build rule for 'install' in mimetype_ui"
+install: all
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) install"
+	$(INSTALL_PROGRAM) -D agent-mimetype.php $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/agent-mimetype.php
 
 uninstall:
-	@echo "no build rule for 'uninstall' in mimetype_ui"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
+	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
-	@echo "no build rule for 'clean' in mimetype_ui"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clann"
 

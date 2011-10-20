@@ -12,7 +12,6 @@ HDIR=$(OBJS:.o=.h)
 TESTDIR=../agent_tests
 
 COVERAGE=$(OBJECTS:%.o=%_cov.o)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 all: $(EXE)
 
@@ -28,14 +27,14 @@ $(FOLIB):
 
 install: all
 	@echo "make $(EXE) install"
-	$(INSTALL_PROGRAM) -D $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(EXE); then \
+	  ln -s $(MODDIR)/$(EXE) $(SYSCONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make $(EXE) uninstall"
-	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
-	rm -f $(CONFDIR)/mods-enabled/mimetype
+	rm -rf $(MODDIR)/$(EXE)/agent
+	rm -f $(SYSCONFDIR)/mods-enabled/$(EXE)
 
 test: all
 	@echo "make test $(EXE)"
