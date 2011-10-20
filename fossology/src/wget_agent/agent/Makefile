@@ -21,7 +21,6 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 TESTDIR=../agent_tests
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
-PROXYDEF=-DPROXYFILE='"$(SYSCONFDIR)/fossology/Proxy.conf"'
 EXE=wget_agent
 CHKHDR=../../ununpack/agent/checksum.h ../../ununpack/agent/md5.h ../../ununpack/agent/sha1.h
 CHKSRC=$(CHKHDR:%.h=%.c)
@@ -33,7 +32,7 @@ all: $(EXE)
 
 $(EXE): main.c $(FOLIB) libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS)
 	@echo "make wget_agent"
-	$(CC) main.c libwget_agent.a $(CHKSRC) $(PROXYDEF) $(CFLAGS_LOCAL) -o $@
+	$(CC) main.c libwget_agent.a $(CHKSRC) $(CFLAGS_LOCAL) -o $@
 
 #######################
 # library build rules #
@@ -54,10 +53,10 @@ uninstall:
 	rm -f $(SYSCONFDIR)/mods-enabled/$(EXE) 
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c $< $(CFLAGS_LOCAL) $(PROXYDEF)
+	$(CC) -c $< $(CFLAGS_LOCAL)
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(CFLAGS_LOCAL) $(PROXYDEF) $(FLAG_COV) -o $@
+	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
 
 libwget_agent.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
