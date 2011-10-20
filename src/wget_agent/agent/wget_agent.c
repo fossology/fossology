@@ -270,7 +270,6 @@ void DBLoadGold()
     free(Unique);
     Unique = NULL;
   }
-  fo_config_free();
 } /* DBLoadGold() */
 
 
@@ -351,7 +350,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   char proxy[MAXCMD];
   GError* error = NULL;
 
-  http_proxy = fo_config_get("FOSSOLOGY", "http_proxy", &error);
+  http_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "http_proxy", &error);
   if(error) LOG_FATAL("%s", error->message);
   /** set proxy */
   if (http_proxy && http_proxy[0])
