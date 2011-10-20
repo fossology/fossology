@@ -235,7 +235,7 @@ class ui_nomos_diff extends FO_Plugin
 
 
   /**
-   * \brief get a string with the html table rows comparing the two file lists. <br>
+   * \brief get a string with the html table rows comparing the two file lists. \n 
    * Each row contains 5 table fields.
    * The third field is just for a column separator.
    * If files match their fuzzyname then put on the same row.
@@ -567,12 +567,12 @@ class ui_nomos_diff extends FO_Plugin
 
 
   /**
-   * \brief generate output information <br>
-   * filter: optional filter to apply <br>
-   * item1:  uploadtree_pk of the column 1 tree <br>
-   * item2:  uploadtree_pk of the column 2 tree <br>
-   * newitem1:  uploadtree_pk of the new column 1 tree <br>
-   * newitem2:  uploadtree_pk of the new column 2 tree <br>
+   * \brief generate output information \n 
+   * filter: optional filter to apply \n
+   * item1:  uploadtree_pk of the column 1 tree \n
+   * item2:  uploadtree_pk of the column 2 tree \n
+   * newitem1:  uploadtree_pk of the new column 1 tree \n
+   * newitem2:  uploadtree_pk of the new column 2 tree \n
    * freeze: column number (1 or 2) to freeze
    */
   function Output()

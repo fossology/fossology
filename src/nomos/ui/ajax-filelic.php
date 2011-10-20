@@ -19,13 +19,13 @@
 /**
  * \file ajax-filelic.php
  * \brief This plugin finds all the uploadtree_pk's in the first directory
- * level under a parent, that contain a given license. <br>
- * GET args: napk, lic, item, (optional debug) <br>
- * item   is the parent uploadtree_pk <br>
- * napk   is the nomosagent_pk whos results you are looking for <br>
- * lic    is the shortname of the license <br>
- * ajax usage: <br>
- * http://...?mod=ajax_filelic&napk=123&item=123456&lic=FSF <br>
+ * level under a parent, that contain a given license. \n 
+ * GET args: napk, lic, item, (optional debug) \n 
+ * item   is the parent uploadtree_pk \n 
+ * napk   is the nomosagent_pk whos results you are looking for \n 
+ * lic    is the shortname of the license \n 
+ * ajax usage: \n 
+ * http://...?mod=ajax_filelic&napk=123&item=123456&lic=FSF \n 
  *
  * \return the rf_shortname, and comma delimited string of uploadtree_pks: "FSF,123,456"
  */
