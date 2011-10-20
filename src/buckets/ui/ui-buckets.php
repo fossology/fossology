@@ -257,11 +257,12 @@ return;
       $VLic .= "</form>";
     }
 
-    $sql = "select bucketpool_name from bucketpool where bucketpool_pk=$bucketpool_pk";
+    $sql = "select bucketpool_name, version from bucketpool where bucketpool_pk=$bucketpool_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
     $bucketpool_name = $row['bucketpool_name'];
+    $bucketpool_version = $row['version'];
     pg_free_result($result);
 
     /* Write bucket histogram to $VLic  */
@@ -271,7 +272,7 @@ return;
     if (is_array($historows))
     {
 $text = _("Bucket Pool");
-      $VLic .= "$text: $bucketpool_name<br>";
+      $VLic .= "$text: $bucketpool_name v$bucketpool_version<br>";
       $VLic .= "<table border=1 width='100%'>\n";
 $text = _("Count");
       $VLic .= "<tr><th width='10%'>$text</th>";

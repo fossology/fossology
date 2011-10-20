@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -117,6 +117,7 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
   function Output()
   {
     global $DB;
+    global $PROJECTSTATEDIR;
 
     if ($this->State != PLUGIN_STATE_READY) { return; }
 
@@ -147,6 +148,8 @@ echo "<li>";
 echo _("Create a baseline with your current bucketpool.  In other words, run a bucket scan on something.  If you do this before creating a new modified bucketpool, you can compare the old results with the new to verify it is working as you expect.");
 echo "<li>";
 echo _("Duplicate the bucketpool (this will increment the bucketpool version and its bucketdef records).  You should also check 'Update my default bucketpool' since new bucket jobs only use your default bucketpool.");
+echo "<li>";
+echo _("Duplicate any bucket scripts that you defined in $PROJECTSTATEDIR.");
 echo "<li>";
 echo _("Manually edit the new bucketpool record, if desired.");
 echo "<li>";
