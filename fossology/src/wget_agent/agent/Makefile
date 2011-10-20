@@ -28,7 +28,6 @@ CHKSRC=$(CHKHDR:%.h=%.c)
 OBJECTS=wget_agent.o
 HDIR=$(OBJS:.o=.h)
 COVERAGE=$(OBJECTS:%.o=%_cov.o)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 all: $(EXE)
 
@@ -44,15 +43,15 @@ $(FOLIB):
 
 install: all
 	@echo "make wget_agent install"
-	$(INSTALL_PROGRAM) -D $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(EXE); then \
+	  ln -s $(MODDIR)/$(EXE) $(SYSCONFDIR)/mods-enabled/$(EXE) ; fi;
 
 
 uninstall:
 	@echo "make wget_agent uninstall"
-	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
-	rm -f $(CONFDIR)/mods-enabled/wget_agent
+	rm -rf $(MODDIR)/$(EXE)/agent
+	rm -f $(SYSCONFDIR)/mods-enabled/$(EXE) 
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL) $(PROXYDEF)
