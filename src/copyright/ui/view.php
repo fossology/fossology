@@ -63,7 +63,7 @@ class copyright_view extends FO_Plugin
 
   /**
    * \brief This function is called when user output is
-   * requested.  This function is responsible for content. <br>
+   * requested.  This function is responsible for content. \n
    * The $ToStdout flag is "1" if output should go to stdout, and
    * 0 if it should be returned as a string.  (Strings may be parsed
    * and used by other plugins.)

@@ -138,10 +138,10 @@ $PkgsOnly=false, $CheckOnly=false)
  * \brief rearrange copyright statment to try and put the holder first,
  * followed by the rest of the statement.
  * \example 
- * copyright (c) aaron seigo <aseigo kde.org> <br>
- * would reorder to <br>
- * aaron seigo <aseigo kde.org> | copyright (c) <br>
- * this way the output will be better grouped by author. <br>
+ * copyright (c) aaron seigo <aseigo kde.org> \n
+ * would reorder to \n
+ * aaron seigo <aseigo kde.org> | copyright (c) \n
+ * this way the output will be better grouped by author. \n
  */
 function StmtReorder($content)
 {
@@ -151,11 +151,11 @@ function StmtReorder($content)
 
 
 /**
- * \brief Input row array contains: pfile, content and type <br>
- * Output records: massaged content, type, hash <br>
+ * \brief Input row array contains: pfile, content and type  \n
+ * Output records: massaged content, type, hash \n
  * where content has been simplified from
  * the raw records and hash is the md5 of this
- * new content. <br>
+ * new content. \n
  * If $hash non zero, only rows with that hash will
  * be returned. 
  * \return On empty row, return true, else false

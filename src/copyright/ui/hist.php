@@ -58,9 +58,9 @@ class copyright_hist extends FO_Plugin
 
 
   /**
-   * \brief Combine copyright holders by name <br>
-   * Input records contain: content and type <br>
-   * Output records: copyright_count, content, type, hash <br>
+   * \brief Combine copyright holders by name  \n
+   * Input records contain: content and type \n
+   * Output records: copyright_count, content, type, hash \n
    * where content has been simplified from
    * the raw records and hash is the md5 of this
    * new content.
@@ -198,8 +198,8 @@ class copyright_hist extends FO_Plugin
 
 
   /**
-   * \brief Given an $Uploadtree_pk, display: <br>
-   * (1) The histogram for the directory BY LICENSE. <br>
+   * \brief Given an $Uploadtree_pk, display: \n
+   * (1) The histogram for the directory BY LICENSE. \n
    * (2) The file listing for the directory.
    */
   function ShowUploadHist($Uploadtree_pk, $Uri, $filter)
