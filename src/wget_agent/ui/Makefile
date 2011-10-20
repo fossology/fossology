@@ -18,18 +18,18 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
+MOD_NAME=wget_agent
+MOD_SUBDIR=ui
 
 all:
-	@echo "no build rule for 'all' in src/wget_agent/ui"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) all"
 
-install:
-	@echo "no build rule for 'install' in src/wget_agent/ui"
+install: all
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) install"
 
 uninstall:
-	@echo "no build rule for 'uninstall' in src/wget_agent/ui"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
 
 clean:
-	@echo "no build rule for 'clean' in src/wget_agent/ui"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clann"
 
