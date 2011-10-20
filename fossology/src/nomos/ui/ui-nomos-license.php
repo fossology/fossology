@@ -1,138 +1,138 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 /**
- * \file ui-nomos-license.php
- * \brief browse a directory to disply all licenses in this directory
- */
+* \file ui-nomos-license.php
+* \brief browse a directory to disply all licenses in this directory
+*/
 
 define("TITLE_ui_nomos_license", _("License Browser"));
 
 class ui_nomos_license extends FO_Plugin
 {
-  var $Name       = "nomoslicense";
-  var $Title      = TITLE_ui_nomos_license;
-  var $Version    = "1.0";
-  // var $MenuList= "Jobs::License";
-  var $Dependency = array("db","browse","view");
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $LoginFlag  = 0;
-  var $UpdCache   = 0;
-  var $HighlightColor = '#4bfe78';
+var $Name       = "nomoslicense";
+var $Title      = TITLE_ui_nomos_license;
+var $Version    = "1.0";
+// var $MenuList= "Jobs::License";
+var $Dependency = array("db","browse","view");
+var $DBaccess   = PLUGIN_DB_READ;
+var $LoginFlag  = 0;
+var $UpdCache   = 0;
+var $HighlightColor = '#4bfe78';
 
-  /**
-   * \brief  Only used during installation.
-   * \return 0 on success, non-zero on failure.
-   */
-  function Install()
+/**
+ * \brief  Only used during installation.
+ * \return 0 on success, non-zero on failure.
+ */
+function Install()
+{
+  global $PG_CONN;
+
+  if (!$PG_CONN) {
+    return(1);
+  }
+
+  /* The license "No License Found" was changed to "No_license_found"
+   * in v1.4 because one shot depends on license names that are one
+  * string (no spaces).  So make sure the users db is updated.
+  */
+  $sql = "update license_ref set rf_shortname='No_license_found'
+             where rf_shortname='No License Found'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+
+  return(0);
+} // Install()
+
+/**
+ * \brief Customize submenus.
+ */
+function RegisterMenus()
+{
+  // For all other menus, permit coming back here.
+  $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
+
+  $Item = GetParm("item",PARM_INTEGER);
+  $Upload = GetParm("upload",PARM_INTEGER);
+  if (!empty($Item) && !empty($Upload))
   {
-    global $PG_CONN;
-
-    if (!$PG_CONN) {
-      return(1);
-    }
-
-    /* The license "No License Found" was changed to "No_license_found"
-     * in v1.4 because one shot depends on license names that are one
-    * string (no spaces).  So make sure the users db is updated.
-    */
-    $sql = "update license_ref set rf_shortname='No_license_found'
-               where rf_shortname='No License Found'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    return(0);
-  } // Install()
-
-  /**
-   * \brief Customize submenus.
-   */
-  function RegisterMenus()
-  {
-    // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
-
-    $Item = GetParm("item",PARM_INTEGER);
-    $Upload = GetParm("upload",PARM_INTEGER);
-    if (!empty($Item) && !empty($Upload))
+    $nomosAgentpk = LatestNomosAgentpk($Upload);
+    $nomosURI = "view-license&napk=$nomosAgentpk" . Traceback_parm_keep(array("show","format","page","upload","item"));
+    if (GetParm("mod",PARM_STRING) == $this->Name)
     {
-      $nomosAgentpk = LatestNomosAgentpk($Upload);
-      $nomosURI = "view-license&napk=$nomosAgentpk" . Traceback_parm_keep(array("show","format","page","upload","item"));
-      if (GetParm("mod",PARM_STRING) == $this->Name)
-      {
-        menu_insert("Browse::License Browser",100);
-      }
-      else
-      {
-        $text = _("license histogram");
-        $MenuName = "License Browser";
-        menu_insert("Browse::$MenuName",100,$URI,$text);
-        menu_insert("View::$MenuName",100,$nomosURI,$text);
-      }
-    }
-  } // RegisterMenus()
-
-
-  /**
-   * \brief This is called before the plugin is used.
-   * It should assume that Install() was already run one time
-   * (possibly years ago and not during this object's creation).
-   *
-   * \return true on success, false on failure.
-   * A failed initialize is not used by the system.
-   *
-   * \note This function must NOT assume that other plugins are installed.
-   */
-  function Initialize()
-  {
-    global $_GET;
-
-    if ($this->State != PLUGIN_STATE_INVALID) {
-      return(1);
-    } // don't re-run
-    if ($this->Name !== "") // Name must be defined
-    {
-      global $Plugins;
-      $this->State=PLUGIN_STATE_VALID;
-      array_push($Plugins,$this);
-    }
-
-    /* Remove "updcache" from the GET args and set $this->UpdCache
-     * This way all the url's based on the input args won't be
-    * polluted with updcache
-    */
-    if ($_GET['updcache'])
-    {
-      $this->UpdCache = $_GET['updcache'];
-      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
-      unset($_GET['updcache']);
+      menu_insert("Browse::License Browser",100);
     }
     else
     {
-      $this->UpdCache = 0;
+      $text = _("license histogram");
+      $MenuName = "License Browser";
+      menu_insert("Browse::$MenuName",100,$URI,$text);
+      menu_insert("View::$MenuName",100,$nomosURI,$text);
     }
-    return($this->State == PLUGIN_STATE_VALID);
-  } // Initialize()
+  }
+} // RegisterMenus()
 
 
-  /**
-   * \brief Given an $Uploadtree_pk, display: <br>
-   * (1) The histogram for the directory BY LICENSE. <br>
+/**
+ * \brief This is called before the plugin is used.
+ * It should assume that Install() was already run one time
+ * (possibly years ago and not during this object's creation).
+ *
+ * \return true on success, false on failure.
+ * A failed initialize is not used by the system.
+ *
+ * \note This function must NOT assume that other plugins are installed.
+ */
+function Initialize()
+{
+  global $_GET;
+
+  if ($this->State != PLUGIN_STATE_INVALID) {
+    return(1);
+  } // don't re-run
+  if ($this->Name !== "") // Name must be defined
+  {
+    global $Plugins;
+    $this->State=PLUGIN_STATE_VALID;
+    array_push($Plugins,$this);
+  }
+
+  /* Remove "updcache" from the GET args and set $this->UpdCache
+   * This way all the url's based on the input args won't be
+  * polluted with updcache
+  */
+  if ($_GET['updcache'])
+  {
+    $this->UpdCache = $_GET['updcache'];
+    $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
+    unset($_GET['updcache']);
+  }
+  else
+  {
+    $this->UpdCache = 0;
+  }
+  return($this->State == PLUGIN_STATE_VALID);
+} // Initialize()
+
+
+/**
+ * \brief Given an $Uploadtree_pk, display: \n 
+   * (1) The histogram for the directory BY LICENSE. \n 
    * (2) The file listing for the directory.
    */
   function ShowUploadHist($Uploadtree_pk,$Uri)

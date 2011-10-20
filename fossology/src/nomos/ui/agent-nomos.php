@@ -52,8 +52,8 @@ class agent_fonomos extends FO_Plugin {
    *
    * \param $uploadpk - the upload will be checked
    * \return 
-   * 0 = not scheduled <br>
-   * 1 = scheduled but not completed <br>
+   * 0 = not scheduled \n
+   * 1 = scheduled but not completed \n 
    * 2 = scheduled and completed
    */
   function AgentCheck($uploadpk) {
