@@ -85,8 +85,8 @@ int   yyline, yyposs;
 char  fname[FILENAME_MAX];
 
 /**
- * Gets the next character from the input file. This function maintains yyline
- * and yyposs.
+ * @brief Gets the next character from the input file. This function maintains
+ *        yyline and yyposs.
  *
  * @return the character
  */
@@ -108,7 +108,7 @@ static int next()
 }
 
 /**
- * Returns a character to the input file.
+ * @brief Returns a character to the input file.
  *
  * @param c the character to put back into the stream
  */
@@ -127,8 +127,8 @@ static int replace(int c)
 }
 
 /**
- * gets the string from the current location in file to the end of the line or
- * the end of file is reached.
+ * @brief gets the string from the current location in file to the end of the
+ *        line or the end of file is reached.
  *
  * @param dst the location for storing the string
  * @return 0 for invalid data in dst, 1 for valid data
@@ -144,8 +144,8 @@ static int next_nl()
 }
 
 /**
- * gets all characters between the current location and the next non-white space
- * character.
+ * @brief gets all characters between the current location and the next
+ *        non-white space character.
  *
  * @return the next non-whitespace character
  */
@@ -162,9 +162,10 @@ static int next_nws()
 }
 
 /**
- * Parses a group from the input file. This will be called when a '[' appears at
- * the start of a line. The line is then parsed and it expects to find a ']' at
- * the end of the line. If the line does not end in a ']' then it is an error.
+ * @brief Parses a group from the input file. This will be called when a '['
+ *        appears at the start of a line. The line is then parsed and it expects
+ *        to find a ']' at the end of the line. If the line does not end in a
+ *        ']' then it is an error.
  *
  * @param error object that allows errors to be passed out of the parser
  * @return 1 if the parse was successful, 0 otherwise
@@ -196,27 +197,84 @@ static int group(GError** error)
 }
 
 /**
+ * @brief Takes the value associated with a key and substitues any other variables
+ *        for the ones in the value string.
  *
- * @return
+ * i.e.
+ * if:
+ *   DUMMY = something
+ * then:
+ *   ECHO = something $DUMMY
+ * becomes:
+ *   ECHO = something something
+ *
+ * @param src the value to do the replacement for
+ * @return a new string that the caller must free
  */
-static char* sub() {
+static char* sub(char* src) {
+  int src_idx;
+  int dst_idx;
+  int dst_size;
+  int src_size;
+  char* dst;
+  char* sub;
+  char buf[256];
 
+  src_size = strlen(src);
+  dst_size = 0;
 
+  for(src_idx = 0; src_idx < src_size; src_idx++) {
+    if(src[src_idx] == '$') {
+      dst_idx = 0;
+      sub = NULL;
 
+      memset(buf, '\0', sizeof(buf));
+      while(src[src_idx]) {
+        buf[dst_idx++] = src[++src_idx];
 
+        if((sub = g_tree_lookup(current_group, buf)) != NULL) {
+          dst_size += strlen(sub);
+          break;
+        }
+      }
+      continue;
+    }
 
+    dst_size++;
+  }
 
+  dst = g_new0(char, dst_size + 1);
+  dst_idx = 0;
+  for(src_idx = 0; src_idx < src_size; src_idx++) {
+    if(src[src_idx] == '$') {
+      dst_size = 0;
+      sub = NULL;
 
+      memset(buf, '\0', sizeof(buf));
+      while(src[src_idx]) {
+        buf[dst_size++] = src[++src_idx];
 
+        if((sub = g_tree_lookup(current_group, buf)) != NULL) {
+          strcpy(dst + strlen(dst), sub);
+          dst_idx = strlen(dst);
+          break;
+        }
+      }
 
+      continue;
+    }
 
+    dst[dst_idx++] = src[src_idx];
+  }
+
+  return dst;
 }
 
 /**
- * reads a key from the input file. This will first read the name of the key,
- * then check for the '=' delimiter and finally read to a new line and record
- * the key/value pair. If the key is an array key (i.e. key ends with []) then
- * the value string will be appended to.
+ * @brief reads a key from the input file. This will first read the name of the
+ *        key, then check for the '=' delimiter and finally read to a new line
+ *        and record the key/value pair. If the key is an array key (i.e. key
+ *        ends with []) then the value string will be appended to.
  *
  * @param error GError object allowing errors to be created
  * @return 0 of fail, 1 of success
@@ -267,18 +325,22 @@ static int key(GError** error) {
     val = g_tree_lookup(current_group, key);
     if(val)
     {
-      tmp = g_strdup_printf("%s[%s]", val, lex);
+      tmp = sub(lex);
+      val = g_strdup_printf("%s[%s]", val, tmp);
       g_tree_insert(current_group, key, tmp);
+      g_free(tmp);
     }
     else
     {
-      tmp = g_strdup_printf("[%s]", lex);
+      val = sub(lex);
+      tmp = g_strdup_printf("[%s]", val);
       g_tree_insert(current_group, key, tmp);
+      g_free(val);
     }
   }
   else
   {
-    val = g_strdup(lex);
+    val = sub(lex);
     g_tree_insert(current_group, key, val);
   }
 
@@ -290,10 +352,11 @@ static int key(GError** error) {
 /* ************************************************************************** */
 
 /**
- * load the configuration information from the provided file. If the user has
- * not done a fo_config_free since the last fo_config_load, this will make sure
- * to call that first. In other words, it is assumed that if this is called the
- * configuration file has changed and the user would like to use the new copy.
+ * @brief load the configuration information from the provided file. If the user
+ *        has not done a fo_config_free since the last fo_config_load, this will
+ *        make sure to call that first. In other words, it is assumed that if
+ *        this is called the configuration file has changed and the user would
+ *        like to use the new copy.
  *
  * @param fname the name of the configuration file
  * @param error object that allows errors to propagate up the stack
@@ -304,7 +367,7 @@ fo_conf* fo_config_load(char* rawname, GError** error) {
   int c;
 
   memset(fname, '\0', sizeof(fname));
-  strcpy(fname, rawname);
+  strncpy(fname, rawname, sizeof(fname));
   if((yyin = fopen(fname, "r")) == NULL)
     throw_error(
         error,
@@ -371,8 +434,8 @@ fo_conf* fo_config_load(char* rawname, GError** error) {
 }
 
 /**
- * Gets an element based on its group name and key name. If the group or key is
- * not found, the error object is set and NULL is returned.
+ * @brief Gets an element based on its group name and key name. If the group or
+ *        key is not found, the error object is set and NULL is returned.
  *
  * @param group c string that is the name of the group
  * @param key c string that is the name of the key for the key/value pair
@@ -408,11 +471,12 @@ char* fo_config_get(fo_conf* conf, char* group, char* key, GError** error)
 }
 
 /**
- * Keys can be associated with multiple values. If this is the case for a
- * particular key, use this function instead of fo_config_get. This also takes
- * the index of the element in the list. Index work identically to standard
- * c-array indices. It is important to note event though keys will appear as
- * "key[]" in the config file this function just takes "key" as the key
+ * @brief Keys can be associated with multiple values. If this is the case for a
+ *        particular key, use this function instead of fo_config_get. This also
+ *        takes the index of the element in the list. Index work identically to
+ *        standard c-array indices. It is important to note event though keys
+ *        will appear as "key[]" in the config file this function just takes
+ *        "key" as the key
  *
  * @param group c string that is the name of the group
  * @param key c string that is the name of the key for the key/value pair
@@ -471,7 +535,7 @@ char* fo_config_get_list(fo_conf* conf, char* group, char* key, int idx, GError*
 }
 
 /**
- * Checks if a particular value is a list or just a normal value.
+ * @brief Checks if a particular value is a list or just a normal value.
  *
  * @param group c string name of the group
  * @param key c string name of the key
@@ -507,7 +571,7 @@ int fo_config_is_list(fo_conf* conf, char* group, char* key, GError** error)
 }
 
 /**
- * gets the length of the list associated with a particular list key
+ * @brief gets the length of the list associated with a particular list key
  *
  * @param group c string name of the group
  * @param key c string name of the key
@@ -539,7 +603,10 @@ int fo_config_list_length(fo_conf* conf, char* group, char* key, GError** error)
 }
 
 /**
- * Frees the memory associated with the internal configuration data structures.
+ * @brief Frees the memory associated with the internal configuration data
+ *        structures.
+ *
+ * @param conf the fo_conf struct to free
  */
 void fo_config_free(fo_conf* conf)
 {
@@ -559,9 +626,10 @@ void fo_config_free(fo_conf* conf)
 /* ************************************************************************** */
 
 /**
- * Gets the set of group names. This returns an array of strings that the user
- * can iterate to get all group names. The user does not own the return of this
- * function and should not free any of the memory associated with it.
+ * @brief Gets the set of group names. This returns an array of strings that the
+ *        user can iterate to get all group names. The user does not own the
+ *        return of this function and should not free any of the memory
+ *        associated with it.
  *
  * @param length pointer allowing the number of groups to be returned
  * @return array of strings containing all the group names
@@ -589,11 +657,11 @@ char** fo_config_group_set(fo_conf* conf, int* length)
 }
 
 /**
- * Gets the set of key names for a particular group. This returns an array of
- * strings that the user can iterate to get all of the key's for a particular
- * group. This is useful if the keys are not known for a particular group. The
- * array returned by this is owned by the config library and should not be freed
- * by the caller.
+ * @brief Gets the set of key names for a particular group. This returns an
+ *        array of strings that the user can iterate to get all of the key's for
+ *        a particular group. This is useful if the keys are not known for a
+ *        particular group. The array returned by this is owned by the config
+ *        library and should not be freed by the caller.
  *
  * @param group c string name of the group
  * @param length pointer allowing the number of keys to be returned
@@ -626,7 +694,7 @@ char** fo_config_key_set(fo_conf* conf, char* group, int* length)
 }
 
 /**
- * Checks if the currently parsed configuration file has a specific group
+ * @brief Checks if the currently parsed configuration file has a specific group
  *
  * @param group the name of the group to check for
  * @return 1 if the group exists, 0 if it does not
@@ -639,8 +707,8 @@ int fo_config_has_group(fo_conf* conf, char* group)
 }
 
 /**
- * Checks if the a specific group in the currrently parsed configuration file
- * has a specific key
+ * @brief Checks if the a specific group in the currrently parsed configuration
+ *        file has a specific key
  *
  * @param group the group to check for the key
  * @param key the key to check for

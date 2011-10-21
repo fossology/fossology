@@ -30,9 +30,10 @@ int main(int argc, char** argv)
   int i, ngrps;
   int j, nkeys;
   int k, nlist;
+  fo_conf* config;
 
-  if(argc != 1) fo_config_load(argv[1], &error);
-  else fo_config_load_default(&error);
+  config = fo_config_load(argv[1], &error);
+
   if(error)
   {
     fprintf(stderr, "ERROR: %s\n", error->message);
@@ -41,33 +42,33 @@ int main(int argc, char** argv)
   }
 
 
-  groups = fo_config_group_set(&ngrps);
+  groups = fo_config_group_set(config, &ngrps);
   for(i = 0; i < ngrps; i++)
   {
     printf("[%s]\n", groups[i]);
 
-    keys = fo_config_key_set(groups[i], &nkeys);
+    keys = fo_config_key_set(config, groups[i], &nkeys);
     for(j = 0; j < nkeys; j++)
     {
-      if(fo_config_is_list(groups[i], keys[j], &error))
+      if(fo_config_is_list(config, groups[i], keys[j], &error))
       {
-        nlist = fo_config_list_length(groups[i], keys[j], &error);
+        nlist = fo_config_list_length(config, groups[i], keys[j], &error);
         printf("  %s:\n", keys[j]);
         for(k = 0; k < nlist; k++)
         {
           printf("    [%d] = %s\n", k,
-              (temp = fo_config_get_list(groups[i], keys[j], k, &error)));
+              (temp = fo_config_get_list(config, groups[i], keys[j], k, &error)));
           g_free(temp);
         }
       }
       else
       {
         printf("  %s = %s\n", keys[j],
-            fo_config_get(groups[i], keys[j], &error));
+            fo_config_get(config, groups[i], keys[j], &error));
       }
     }
   }
 
-  fo_config_free();
+  fo_config_free(config);
   return 0;
 }
