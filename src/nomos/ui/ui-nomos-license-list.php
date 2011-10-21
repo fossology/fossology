@@ -75,10 +75,10 @@ class ui_license_list extends FO_Plugin {
 
   /**
    * \brief This function is called when user output is
-   * requested.  This function is responsible for assigning headers. <br>
-   * If $Type is "HTML" then generate an HTTP header. <br>
-   * If $Type is "XML" then begin an XML header. <br>
-   * If $Type is "Text" then generate a text header as needed. <br>
+   * requested.  This function is responsible for assigning headers. \n 
+   * If $Type is "HTML" then generate an HTTP header. \n
+   * If $Type is "XML" then begin an XML header. \n
+   * If $Type is "Text" then generate a text header as needed. \n
    * The $ToStdout flag is "1" if output should go to stdout
    * 
    * \return 0 if it should be returned as a string.  (Strings may be parsed

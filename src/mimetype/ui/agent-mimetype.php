@@ -101,8 +101,11 @@ class agent_mimetype extends FO_Plugin {
       if (!empty($rc)) {
         return ($rc);
       }
-      $Results = $DB->Action($SQL);
-      $Dep = $Results[0]['jq_pk'];
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      pg_free_result($result);
+      $Dep = $row['jq_pk'];
       if (empty($Dep)) {
 $text = _("Unable to find dependent job: unpack");
         return ($text);
