@@ -386,6 +386,7 @@ void load_agent_config()
   char* cmd;
   char* tmp;
   GError* error = NULL;
+  fo_conf* config;
 
   /* clear previous configurations */
   agent_list_clean();
@@ -402,11 +403,10 @@ void load_agent_config()
   {
     if(ep->d_name[0] != '.')
     {
-      sprintf(addbuf, "%s/%s/%s/%s.conf",
+      snprintf(addbuf, sizeof(addbuf), "%s/%s/%s/%s.conf",
           DEFAULT_SETUP, AGENT_CONF, ep->d_name, ep->d_name);
 
-      fo_config_free();
-      fo_config_load(addbuf, &error);
+      config = fo_config_load(addbuf, &error);
       if(error && error->code == fo_missing_file)
       {
         VERBOSE3("CONFIG: Could not find %s\n", addbuf);
@@ -417,7 +417,7 @@ void load_agent_config()
       TEST_ERROR("no additional info");
       VERBOSE2("CONFIG: loading config file %s\n", addbuf);
 
-      if(!fo_config_has_group("default"))
+      if(!fo_config_has_group(config, "default"))
       {
         lprintf("ERROR: %s must have a \"default\" group\n", addbuf);
         lprintf("ERROR: cause by %s.%d\n", __FILE__, __LINE__);
@@ -426,20 +426,20 @@ void load_agent_config()
       }
 
       special = 0;
-      max = fo_config_list_length("default", "special", &error);
+      max = fo_config_list_length(config, "default", "special", &error);
       TEST_ERROR("the special key should be of type list");
       for(i = 0; i < max; i++)
       {
-        cmd = fo_config_get_list("default", "special", i, &error);
+        cmd = fo_config_get_list(config, "default", "special", i, &error);
         TEST_ERROR("failed to load element %d of special list", i)
         if(strcmp(cmd, "EXCLUSIVE") == 0)
           special |= SAG_EXCLUSIVE;
       }
 
       name = ep->d_name;
-      cmd  = fo_config_get("default", "command", &error);
+      cmd  = fo_config_get(config, "default", "command", &error);
       TEST_ERROR("the default group must have a command key");
-      tmp  = fo_config_get("default", "max", &error);
+      tmp  = fo_config_get(config, "default", "max", &error);
       TEST_ERROR("the default group must have a max key");
 
       if(!add_meta_agent(name, cmd, atoi(tmp), special))
@@ -457,6 +457,8 @@ void load_agent_config()
         lprintf(AGENT_BINARY, AGENT_DIR, name, cmd);
         lprintf("\"\n");
       }
+
+      fo_config_free(config);
     }
   }
   closedir(dp);
@@ -474,6 +476,7 @@ void load_foss_config()
   int special = 0;          // anything that is special about the agent (EXCLUSIVE)
   char addbuf[512];         // standard string buffer
   char dirbuf[512];         // standard string buffer
+  fo_conf* config;
   GError* error = NULL;
   int i;
 
@@ -481,21 +484,21 @@ void load_foss_config()
   host_list_clean();
 
   /* parse the config file */
-  sprintf(addbuf, "%s/fossology.conf", sysconfig)
-  fo_config_load(addbuf, &error);
+  snprintf(addbuf, sizeof(addbuf), "%s/fossology.conf", sysconfig);
+  config = fo_config_load(addbuf, &error);
   if(error)
     FATAL("%s", error->message);
 
   /* load the port setting */
   if(s_port < 0)
-    s_port = atoi(fo_config_get("FOSSOLOGY", "port", &error));
+    s_port = atoi(fo_config_get(config, "FOSSOLOGY", "port", &error));
   set_port(s_port);
 
   /* load the host settings */
-  keys = fo_config_key_set("HOSTS", &special);
+  keys = fo_config_key_set(config, "HOSTS", &special);
   for(i = 0; i < special; i++)
   {
-    tmp = fo_config_get("HOSTS", keys[i], &error);
+    tmp = fo_config_get(config, "HOSTS", keys[i], &error);
     if(error)
     {
       lprintf(error->message);
@@ -516,6 +519,8 @@ void load_foss_config()
       lprintf("       max = %d\n", max);
     }
   }
+
+  fo_config_free(config);
 }
 
 /**
