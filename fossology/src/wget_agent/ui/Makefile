@@ -31,5 +31,5 @@ uninstall:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
 
 clean:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clann"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clean"
 

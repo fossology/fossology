@@ -33,5 +33,5 @@ uninstall:
 	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clann"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clean"
 
