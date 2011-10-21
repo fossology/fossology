@@ -7,7 +7,6 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 TESTDIRS=../agent_tests
 CFLAGS_LOCAL=$(ALL_CFLAGS) -I/usr/include/rpm -lpq -lrpm -lrpmio
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 EXE=pkgagent
 HDRS=pkgagent.h
@@ -36,14 +35,14 @@ $(FOLIB):
 
 install: all
 	@echo "make pkgagent agent install"
-	$(INSTALL_PROGRAM) -D $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(EXE); then \
+	  ln -s $(MODDIR)/$(EXE) $(SYSCONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make pkgagent agent uninstall"
-	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
-	rm -f $(CONFDIR)/mods-enabled/pkgagent
+	rm -rf $(MODDIR)/$(EXE)/agent
+	rm -f $(SYSCONFDIR)/mods-enabled/$(EXE)
 
 test: all 
 	$(MAKE) -C $(TESTDIRS) test

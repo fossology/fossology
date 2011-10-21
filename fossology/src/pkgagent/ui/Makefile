@@ -18,15 +18,20 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
+MOD_NAME=pkgagent
+MOD_SUBDIR=ui
 
 all:
-	@echo "no build rule for 'all' in src/pkgagent/ui"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) all"
 
 install:
-	@echo "no build rule for 'install' in src/pkgagent/ui"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) install"
+	$(INSTALL_PROGRAM) -D agent-pkgagent.php $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/agent-pkgagent.php
+
+uninstall:
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
+	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
-	@echo "no build rule for 'clean' in src/pkgagent/ui"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clean"
 
