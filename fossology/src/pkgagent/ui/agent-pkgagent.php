@@ -16,12 +16,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-
 /**
  * \brief pkgagent agent ui
  * \class agent_pkgagent
@@ -54,13 +48,13 @@ class agent_pkgagent extends FO_Plugin
   }
 
   /**
-   * \brief Check if the job is already in the
-   * queue.  Returns:
-   *  0 = not scheduled
-   *  1 = scheduled but not completed
-   *  2 = scheduled and completed
+   * \brief Check if the job is already in the queue.
    *
    * \param $uploadpk - upload id
+   *
+   * \return 0 = not scheduled \n
+   *         1 = scheduled but not completed \n
+   *         2 = scheduled and completed
    */
   function AgentCheck($uploadpk)
   {
@@ -79,11 +73,12 @@ class agent_pkgagent extends FO_Plugin
    * \brief Given an uploadpk, add a job.
    *
    * \param $uploadpk - upload id
-   * \param $Depends - for specifying other dependencies.
+   * \param $Depends - for specifying other dependencies. \n
    * $Depends can be a jq_pk, or an array of jq_pks, or NULL.
    * \param $Priority - Priority number
    *
-   * \return NULL on success, string on failure.
+   * \return NULL on success \n
+   *         An error message string on failure.
    */
   function AgentAdd ($uploadpk,$Depends=NULL,$Priority=0)
   {
@@ -123,7 +118,7 @@ class agent_pkgagent extends FO_Plugin
       $text = _("Failed to insert job record");
       return($text); }
 
-      /** jqargs wants EVERY RPM and DEBIAN pfile in this upload **/
+      /* jqargs wants EVERY RPM and DEBIAN pfile in this upload */
       $jqargs = $uploadpk;
 
       /* Add job: job "Package Scan" has jobqueue item "pkgagent" */
@@ -136,7 +131,7 @@ class agent_pkgagent extends FO_Plugin
   } // AgentAdd()
 
   /**
-   * \brief generate the text for this plugin.
+   * \brief Generate the text for this plugin.
    */
   function Output()
   {
