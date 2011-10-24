@@ -135,13 +135,14 @@ class ui_nomos_license extends FO_Plugin
    * (1) The histogram for the directory BY LICENSE. <br>
    * (2) The file listing for the directory.
    */
-  function ShowUploadHist($Uploadtree_pk,$Uri)
+  function ShowUploadHist($Uploadtree_pk,$Uri, $tag_pk)
   {
     global $PG_CONN;
 
     $VF=""; // return values for file listing
     $VLic=""; // return values for license histogram
     $V=""; // total return value
+    $UniqueTagArray = array();
     global $Plugins;
 
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
@@ -181,13 +182,24 @@ class ui_nomos_license extends FO_Plugin
     }
 
     /*  Get the counts for each license under this UploadtreePk*/
+    if (empty($tag_pk))
+    {
+      $TagTable = "";
+      $TagClause = "";
+    }
+    else
+    {
+      $TagTable = "tag_file,";
+      $TagClause = "and PF=tag_file.pfile_fk and tag_fk=$tag_pk";
+    }
     $sql = "SELECT distinct(rf_shortname) as licname,
                    count(rf_shortname) as liccount, rf_shortname
-              from license_ref,license_file,
+              from license_ref,license_file, $TagTable
                   (SELECT distinct(pfile_fk) as PF from uploadtree 
                      where upload_fk=$upload_pk 
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
-              where PF=pfile_fk and agent_fk=$Agent_pk and rf_fk=rf_pk
+              where PF=license_file.pfile_fk and agent_fk=$Agent_pk and rf_fk=rf_pk
+                   $TagClause
               group by rf_shortname 
               order by liccount desc";
     $result = pg_query($PG_CONN, $sql);
@@ -261,11 +273,21 @@ class ui_nomos_license extends FO_Plugin
     /*******    File Listing     ************/
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($Uploadtree_pk);
+
+    /* Filter out Children that don't have tag */
+    if (!empty($tag_pk)) TagFilter($Children, $tag_pk);
+
     $ChildCount=0;
     $ChildLicCount=0;
 
     if (!empty($Children))
     {
+      /* For alternating row background colors */
+      $RowStyle1 = "style='background-color:#ecfaff'";  // pale blue
+      $RowStyle2 = "style='background-color:#ffffe3'";  // pale yellow
+      $ColorSpanRows = 1;  // Alternate background color every $ColorSpanRows
+      $RowNum = 0;
+
       $VF .= "<table border=0 id='dirlist'>";
       foreach($Children as $C)
       {
@@ -301,7 +323,11 @@ class ui_nomos_license extends FO_Plugin
         /* Populate the output ($VF) - file list */
         /* id of each element is its uploadtree_pk */
 
-        $VF .= "<tr><td id='$C[uploadtree_pk]' align='left'>";
+        /* Set alternating row background color - repeats every $ColorSpanRows rows */
+        $RowStyle = (($RowNum++ % (2*$ColorSpanRows))<$ColorSpanRows) ? $RowStyle1 : $RowStyle2;
+        $VF .= "<tr $RowStyle>";
+
+        $VF .= "<td id='$C[uploadtree_pk]' align='left'>";
         $HasHref=0;
         $HasBold=0;
         if ($IsContainer)
@@ -313,7 +339,7 @@ class ui_nomos_license extends FO_Plugin
         {
           $VF .= "<a href='$LinkUri'>"; $HasHref=1;
         }
-        $VF .= $C['ufile_name'];
+        $VF .= "<b>" . $C['ufile_name'] . "</b>";
         if ($IsDir) {
           $VF .= "/";
         };
@@ -326,13 +352,11 @@ class ui_nomos_license extends FO_Plugin
 
         /* show licenses under file name */
         $VF .= "<br>";
-        $VF .= "<span style='position:relative;left:1em'>";
         $VF .= GetFileLicenses_string($Agent_pk, $C['pfile_fk'], $C['uploadtree_pk']);
-        $VF .= "</span>";
         $VF .= "</td><td valign='top'>";
 
         /* display file links */
-        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $Agent_pk, $C['pfile_fk']);
+        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $Agent_pk, $C['pfile_fk'], true, $UniqueTagArray);
         $VF .= "</td>";
         $VF .= "</tr>\n";
 
@@ -406,7 +430,24 @@ class ui_nomos_license extends FO_Plugin
     ";
     $V .= $script;
 
-    /* Combine VF and VLic */
+    /******  Filters  *******/
+    /* Only display the filter pulldown if there are filters available 
+     * Currently, this is only tags.
+     */
+    /** @todo qualify with tag namespace to avoid tag name collisions.  **/
+    /* turn $UniqueTagArray into key value pairs ($SelectData) for select list */
+    $SelectData = array();  
+    if (count($UniqueTagArray))
+    {
+      foreach ($UniqueTagArray as $UTA_row) $SelectData[$UTA_row['tag_pk']] = $UTA_row['tag_name'];
+      $V .= "Tag filter";
+      $myurl = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder"));
+      $Options = " id='filterselect' onchange=\"js_url(this.value, '$myurl&tag=')\"";
+      $V .= Array2SingleSelectTag($SelectData, "tag_ns_pk",$tag_pk,true,false, $Options);
+    }
+
+
+    /****** Combine VF and VLic ********/
     $V .= "<table border=0 width='100%'>\n";
     $V .= "<tr><td valign='top' >$VLic</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
@@ -428,6 +469,7 @@ class ui_nomos_license extends FO_Plugin
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
+    $tag_pk = GetParm("tag",PARM_INTEGER);
     if (!empty($updcache))
     $this->UpdCache = $_GET['updcache'];
     else
@@ -444,7 +486,7 @@ class ui_nomos_license extends FO_Plugin
     }
 
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
-    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder")) . "&show=$Show";
+    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder","tag")) . "&show=$Show";
     if ($this->UpdCache != 0)
     {
       $V = "";
@@ -470,7 +512,8 @@ class ui_nomos_license extends FO_Plugin
           if (!empty($Upload))
           {
             $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
-            $V .= $this->ShowUploadHist($Item,$Uri);
+            $V .= js_url();
+            $V .= $this->ShowUploadHist($Item,$Uri, $tag_pk);
           }
           $V .= "</font>\n";
           $text = _("Loading...");

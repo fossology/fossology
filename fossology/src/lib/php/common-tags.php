@@ -23,31 +23,67 @@
 
 
 /**
- * \brief Get all Tags of this unploadtree_pk
+ * \brief Get all Tags of this unploadtree_pk.
  *
  * \param $Item the uploadtree_pk
+ * \param $Recurse boolean, to recurse or not
  *
  * \return an array of: ag_pk and tag_name
  */
-function GetAllTags($Item)
+function GetAllTags($Item, $Recurse=true)
 {
   global $PG_CONN;
   if (empty($PG_CONN)) { return; }
   if (empty($Item)) { return; }
   $List=array();
 
-  /* Get list of tags */
-  $sql = "SELECT tag_pk, tag FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Item UNION SELECT tag_pk, tag FROM tag, tag_uploadtree WHERE tag.tag_pk = tag_uploadtree.tag_fk AND tag_uploadtree.uploadtree_fk = $Item;";
+  if ($Recurse)
+  {
+    /* Get tree boundaries */
+    $sql = "select lft,rgt from uploadtree where uploadtree_pk=$Item";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $uploadtree_row = pg_fetch_assoc($result);
+
+    $Condition = " lft>=$uploadtree_row[lft] and rgt<=$uploadtree_row[rgt] ";
+    pg_free_result($result);
+  }
+  else
+  {
+    $Condition = "  uploadtree.uploadtree_pk=$Item ";
+  }
+
+  /* Get list of unique tag_pk's for this item */
+  $sql = "SELECT distinct(tag_fk) as tag_pk FROM tag_file, uploadtree WHERE tag_file.pfile_fk = uploadtree.pfile_fk AND $Condition UNION SELECT tag_fk as tag_pk FROM tag_uploadtree WHERE tag_uploadtree.uploadtree_fk = $Item";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  while ($R = pg_fetch_assoc($result))
+  $SeenTag = array();
+  while ($TagRow = pg_fetch_assoc($result))
   {
-    if (empty($R['tag_pk'])) { continue; }
-    $New['tag_pk'] = $R['tag_pk'];
-    $New['tag_name'] = $R['tag'];
-    array_push($List,$New);
+    $tag_pk = $TagRow['tag_pk'];
+    if (array_key_exists($tag_pk, $SeenTag)) continue;
+    $SeenTag[$tag_pk] = 1;  
   }
   pg_free_result($result);
+
+  /* get the tag names */
+  foreach ($SeenTag as $tag_pk=>$One)
+  {
+    $sql = "select tag from tag where tag_pk=$tag_pk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $TagRow = pg_fetch_assoc($result);
+
+    /** @todo   Ignore any tags the user doesn't have permission to see 
+     **/
+
+    $New['tag_pk'] = $tag_pk;
+    $New['tag_name'] = $TagRow['tag'];
+    array_push($List,$New);
+
+    pg_free_result($result);
+  }
+
   return($List);
 } // GetAllTags()
 
@@ -58,17 +94,16 @@ function GetAllTags($Item)
  * \param $tag_ns_pk the tag namespace pk
  *
  * \return integer of:
- *  0  None
- *  1  Read Only
- *  2  Read/Write
- *  3  Admin
+ *  - 0  None
+ *  - 1  Read Only
+ *  - 2  Read/Write
+ *  - 3  Admin
  */
 function GetTaggingPerms($user_pk, $tag_ns_pk)
 {
   global $PG_CONN;
   $perm = 0;
 
-  //if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
   if (empty($PG_CONN)) { return(0); } /* No DB */
   if(empty($user_pk)){
     return (0);
@@ -111,6 +146,7 @@ function GetTaggingPerms($user_pk, $tag_ns_pk)
   }
 }
 
+
 /**
  * \brief Build a single choice select pulldown for tagging
  *
@@ -119,12 +155,53 @@ function GetTaggingPerms($user_pk, $tag_ns_pk)
  * \param $SelectedVal   Initially selected value or key, depends on $SelElt
  * \param $FirstEmpty    True if the list starts off with an empty choice (default is false)
  * \param $SelElt        True (default) if $SelectedVal is a value False if $SelectedVal is a key
+ * \param $Options       Optional select element options
  *
  *\return string of html select
  */
 function Array2SingleSelectTag($KeyValArray, $SLName="unnamed", $SelectedVal= "",
-$FirstEmpty=false, $SelElt=true)
+$FirstEmpty=false, $SelElt=true, $Options="")
 {
+  $str ="\n<select name='$SLName' $Options>\n";
+  if ($FirstEmpty) $str .= "<option value='' > \n";
+  foreach ($KeyValArray as $key => $val)
+  {
+    if ($SelElt == true)
+      $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
+    else
+      $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
+/** @todo GetTaggingPerms is commented out due to bug in it **/
+//    $perm = GetTaggingPerms($_SESSION['UserId'],$key);
+//    if ($perm > 1) {
+      $str .= "<option value='$key' $SELECTED>$val\n";
+//    }
+  }
+  $str .= "</select>";
+  return $str;
+}
+
+/**
+ * \brief Build a single choice select pulldown for the user to select
+ *        both a tag.
+ *
+ * \param $SL_Name       Select list name (default is "unnamed")
+ * \param $SL_ID         Select list ID (default is $SL_Name)
+ * \param $SelectedVal   Initially selected value or key, depends on $SelElt
+ * \param $FirstEmpty    True if the list starts off with an empty choice (default is false)
+ *
+ *\return string of html select
+ */
+function TagSelect($SLName="unnamed", $SelectedVal= "", 
+                   $FirstEmpty=false, $SelElt=true)
+{
+  /* Find all the tag namespaces for this user */
+  $sql = "select lft,rgt from uploadtree where uploadtree_pk=$Item";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $uploadtree_row = pg_fetch_assoc($result);
+
+  /* Find all the tags for this namespace */
+
   $str ="\n<select name='$SLName'>\n";
   if ($FirstEmpty) $str .= "<option value='' > \n";
   foreach ($KeyValArray as $key => $val)
@@ -140,5 +217,32 @@ $FirstEmpty=false, $SelElt=true)
   }
   $str .= "</select>";
   return $str;
+}
+
+/**
+ * \brief Given a list of uploadtree recs, remove recs that do not have $tag_pk.
+ *
+ * \param $UploadtreeRows This array may be modified by this function.
+ * \param $tag_pk
+ *
+ *\return none
+ */
+function TagFilter(&$UploadtreeRows, $tag_pk)
+{
+  foreach ($UploadtreeRows as $key=>$UploadtreeRow)
+  {
+    $found = false;
+    $tags = GetAllTags($UploadtreeRow["uploadtree_pk"], true);
+    foreach($tags as $tagArray)
+    {
+      if ($tagArray['tag_pk'] == $tag_pk) 
+      {
+        $found = true;
+        break;
+      }
+      if ($found) break;
+    }
+    if ($found == false) unset($UploadtreeRows[$key]);
+  }
 }
 ?>

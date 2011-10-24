@@ -260,35 +260,67 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
  * \param $uploadtree_pk - uploadtree id
  * \param $napk - nomos agent pk
  * \param $pfile_pk
+ * \param $Recurse true if links should propapagate recursion.  Currently,
+ *        this means that the displayed tags will be displayed for directory contents.
+ * \param $UniqueTagArray - cumulative array of unique tags
+ *        For example:
+ * \verbatim  Array
+ *        (
+ *          [0] => Array
+ *            (
+ *                [tag_pk] => 5
+ *                [tag_name] => GPL false positive
+ *            )
+ *        )
+ * \endverbatim
  *
- * \returns String containing the links [View][Info][Download][Tag]
+ * \returns String containing the links [View][Info][Download][Tag {tags}]
  */
-function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk)
+function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=True, &$UniqueTagArray)
 {
   $LinkStr = "";
+
   if ($pfile_pk)
   {
     $text = _("View");
     $text1 = _("Info");
     $text2 = _("Download");
+
+
     $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=view-license&upload=$upload_fk&item=$uploadtree_pk&napk=$napk' >$text</a>]";
     $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=view_info&upload=$upload_fk&item=$uploadtree_pk&show=detail' >$text1</a>]";
     $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=download&upload=$upload_fk&item=$uploadtree_pk' >$text2</a>]";
   }
 
   /********  Tag ********/
-  /* Build string of tags for this item */
-  $TagArray = GetAllTags($uploadtree_pk);
+  $TagArray = GetAllTags($uploadtree_pk, $Recurse);
   $TagStr = "";
   foreach($TagArray as $TagPair) 
   {
+    /* Build string of tags for this item */
     if (!empty($TagStr)) $TagStr .= ",";
     $TagStr .= " " . $TagPair['tag_name'];
+
+    /* Update $UniqueTagArray */
+    $found = false;
+    foreach($UniqueTagArray as $UTA_key => $UTA_row)
+    {
+      if ($TagPair['tag_pk'] == $UTA_row['tag_pk'])
+      {
+        $found = true;
+        break;
+      }
+    }
+    if (!$found) $UniqueTagArray[] = $TagPair;
   }
 
   $text3 = _("Tag");
-  $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=tag&upload=$upload_fk&item=$uploadtree_pk' >$text3</a>$TagStr]";
+  $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=tag&upload=$upload_fk&item=$uploadtree_pk' >$text3</a>";
 
+  $LinkStr .= "<span style='color:#2897B7'>";
+  $LinkStr .= $TagStr;
+  $LinkStr .= "</span>";
+  $LinkStr .= "]";
   return $LinkStr;
 }
 

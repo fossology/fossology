@@ -22,6 +22,25 @@
  * (Used in place of AJAX or ActiveX.)
  */
 
+/** \brief Load a new url
+ * The new url is url+val
+ * e.g. js_url(this.value, "http:me?val=")
+ **/
+function js_url()
+{
+  $script = "
+    <script type=\"text/javascript\">
+      function js_url(val, url)
+      {
+        window.location.assign(url+val);
+      }
+    </script>
+  ";
+
+  return $script;
+}
+
+
 /**
  * \brief Generate a popup alert window.
  *
