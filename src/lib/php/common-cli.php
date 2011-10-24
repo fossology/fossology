@@ -85,29 +85,4 @@ function cli_logger($handle, $message, $mode='a')
   fclose($FR);
   return(Null);
 }
-
-/**
- * \brief print a debug message and optionally dump a structure
- * prints the message prepended with a DBG-> as the prefix.   The string
- * will have a new-line added to the end so that the caller does not have
- * to supply it.
- *
- * \param $message - the debug message to display
- * \param $dump - default null, if not null, will be printed using print_r.
- *
- * \return Null
- */
-function cli_PrintDebugMessage($message, $dump=''){
-
-  $dbg_msg = 'DBG->' . $message . "\n";
-
-  echo $dbg_msg;
-
-  if(isset($dump)){
-    //    echo "\$dump is:\n";
-    print_r($dump);
-    echo "\n";
-  }
-  return;
-} // cli_PrintDebugMessage()
 ?>
