@@ -252,4 +252,130 @@
       or (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN)) return false;
     return @$_SESSION['UserId'];
   }
+
+
+  /**
+   *  @brief Get all users in a group
+   *  @param $group_pk
+   *  @return array of user_pk's and their permission (group_perm)
+   *  @todo currently this function is not implemented
+   **/
+  function GetUsersInGroup($group_pk)
+  {
+  }
+
+  /**
+   *  @brief Check if User is already in the $GroupArray.
+   *  If not, add them.  If they are, update their record with the
+   *  highest permission granted to them.
+   *  
+   *  @param $GroupRow
+   *  @param $GroupArray
+   *  @return $GroupArray is updated.
+   **/
+  function AddUserToGroupArray($GroupRow, &$GroupArray)
+  {
+    /* loop throught $GroupArray to see if the user is already present */
+    $found = false;
+    foreach($GroupArray as &$Grec)
+    {
+      if ($Grec['user_pk'] == $GroupRow['user_fk'])
+      {
+        /* user already exists in $GroupArray, so make sure they have the highest
+         * permission granted to them.
+         */
+        if ($Grec['group_perm'] < $GroupRow['group_perm'])
+          $Grec['group_perm'] = $GroupRow['group_perm'];
+        $found = true;
+        break;
+      }
+    }
+
+    if (!$found)
+    {
+      $NewGroup['user_pk'] = $GroupRow['user_fk'];
+      $NewGroup['group_pk'] = $GroupRow['group_pk'];
+      $NewGroup['group_name'] = $GroupRow['group_name'];
+      $NewGroup['group_perm'] = $GroupRow['group_perm'];
+      $GroupArray[] = $NewGroup;
+    }
+  }
+
+  /**
+   *  @brief Get all the users users of this group.
+   *  @param $user_pk optional, if specified limit to single user
+   *  @param $group_pk
+   *  @return array of groups the and the user's permission (group_perm) in each group
+   *  -  [user_pk]
+   *  -  [group_pk]
+   *  -  [group_name]
+   *  -  [group_perm]
+   **/
+  function GetGroupUsers($user_pk, $group_pk, &$GroupArray)
+  {
+    global $PG_CONN;
+    $GroupArray = array();
+
+    $user_pk = GetArrayVal("UserId", $_SESSION);
+    if (empty($user_pk)) return $GroupArray;
+
+    /****** For this group, get its users ******/
+    if (empty($user_pk))
+      $UserCondition = "";
+    else
+      $UserCondition = " and user_fk=$user_pk ";
+
+    $sql = "select group_pk, group_name, group_perm, user_fk from group_user_member, groups where group_pk=$group_pk and group_pk=group_fk $UserCondition";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    while ($row = pg_fetch_assoc($result)) 
+    {
+      /* Add the user(s) to $GroupArray */
+      AddUserToGroupArray($row, $GroupArray);
+    }
+
+    /****** Find all the groups that are a member of this group ******/
+    $sql = "select member_group_fk from group_group_member where group_fk=$group_pk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    while ($row = pg_fetch_assoc($result)) 
+    {
+      /* Now recurse on all the groups that contain this group */
+      GetGroupUsers($user_pk, $row['member_group_fk'], $GroupArray);
+    }
+    pg_free_result($result);
+  }
+
+  /**
+   *  @brief Find all the groups a user belongs to.
+   *  @param $user_pk optional, defaults to current user
+   *  @return array of groups 
+   *  each group is itself an array with the following elements
+   *  -  [user_pk]
+   *  -  [group_pk]
+   *  -  [group_name]
+   *  -  [group_perm]
+   **/
+  function GetUsersGroups($user_pk='')
+  {
+    global $PG_CONN;
+
+    $GroupArray = array();
+
+    if (empty($user_pk)) $user_pk = GetArrayVal("UserId", $_SESSION);
+    if (empty($user_pk)) return $GroupArray;  /* user has no groups */
+
+    /* find all groups with this user */
+    $sql = "select group_fk as group_pk from group_user_member where user_fk=$user_pk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    while ($row = pg_fetch_assoc($result)) 
+    {
+      /* Now find all the groups that contain this group */
+      GetGroupUsers($user_pk, $row['group_pk'], $GroupArray);
+    }
+    pg_free_result($result);
+    return $GroupArray;
+  }
+
 ?>

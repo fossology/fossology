@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -20,6 +20,26 @@
  These are common functions for performing active HTTP requests.
  (Used in place of AJAX or ActiveX.)
  ************************************************************/
+
+
+/** \brief Load a new url
+ * The new url is url+val
+ * e.g. js_url(this.value, "http:me?val=")
+ **/
+function js_url()
+{
+  $script = "
+    <script type=\"text/javascript\">
+      function js_url(val, url)
+      {
+        window.location.assign(url+val);
+      }
+    </script>
+  ";
+
+  return $script;
+}
+
 
 /*************************************************
  PopupAlert(): Generate a popup alert window.
