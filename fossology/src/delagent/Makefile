@@ -20,6 +20,7 @@ include $(VARS)
 
 DIRS = agent agent_tests ui ui_tests
 TESTDIR = agent_tests
+MOD_NAME=delagent
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
@@ -34,9 +35,11 @@ coverage:
 
 install: all
 	$(call dirloop,install)
+	$(INSTALL_PROGRAM) -D $(MOD_NAME).conf $(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 
 uninstall:
 	$(call dirloop,uninstall)
+	rm -rf $(MODDIR)/$(MOD_NAME)
 
 clean:
 	$(call dirloop,clean)
