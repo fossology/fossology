@@ -24,7 +24,6 @@
 require_once('../common-license-file.php');
 require_once('../common-db.php');
 require_once('../common-dir.php');
-require_once('../../../www/ui/pathinclude.php');
 
 /**
  * \class test_common_license_file
@@ -51,8 +50,9 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     global $pfile_pk_parent;
     global $pfile_pk_child;
     global $agent_pk;
+    $sysconfig = './sysconfigDirTest';
 
-    $PG_CONN = DBconnect();
+    $PG_CONN = DBconnect($sysconfig);
 
 
     /** preparation, add uploadtree, upload, pfile, license_file record */

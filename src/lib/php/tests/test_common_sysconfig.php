@@ -23,7 +23,6 @@
 
 require_once('../common-sysconfig.php');
 require_once('../common-db.php');
-require_once('../../../www/ui/pathinclude.php');
 
 /**
  * \class test_common_sysconfig
@@ -38,7 +37,8 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
   protected function setUp() 
   {
     global $PG_CONN;
-    $PG_CONN = DBconnect();
+    $sysconfig = './sysconfigDirTest';
+    $PG_CONN = DBconnect($sysconfig);
   }
 
   /**
@@ -51,13 +51,14 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
   {
     print "Start unit test for common-sysconfig.php\n";
     print "test function ConfigInit()\n";
-    $SysConf = ConfigInit();
-    $this->assertEquals("FOSSology Support",  $SysConf['SupportEmailSubject']);
-    $this->assertEquals("false",  $SysConf['GlobalBrowse']);
+    $sysconfig = './sysconfigDirTest';
+    $SysConf = ConfigInit($sysconfig);
+    $this->assertEquals("FOSSology Support",  $SysConf['SYSCONFIG']['SupportEmailSubject']);
+    $this->assertEquals("false",  $SysConf['SYSCONFIG']['GlobalBrowse']);
     $hostname = exec("hostname -f");
     if (empty($hostname)) $hostname = "localhost";
     $FOSSologyURL = $hostname."/repo/";
-    $this->assertEquals($FOSSologyURL,  $SysConf['FOSSologyURL']);
+    $this->assertEquals($FOSSologyURL,  $SysConf['SYSCONFIG']['FOSSologyURL']);
     print "unit test for common-sysconfig.php end\n";
   }
 

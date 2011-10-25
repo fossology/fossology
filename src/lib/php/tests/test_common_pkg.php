@@ -23,8 +23,8 @@
 
 require_once('../common-pkg.php');
 require_once('../common-db.php');
-require_once('../../../www/ui/pathinclude.php');
 require_once '/usr/share/php/PHPUnit/Framework.php';
+
 /**
  * \class test_common_pkg
  */
@@ -36,7 +36,8 @@ class test_common_pkg extends PHPUnit_Framework_TestCase
   {
     global $PG_CONN;
     print "Starting unit test for common-pkg.php\n";
-    $PG_CONN = DBconnect();
+    $sysconfig = './sysconfigDirTest';
+    $PG_CONN = DBconnect($sysconfig);
   }
 
   /**
