@@ -28,14 +28,14 @@
  *        which data they wish to view.
  *        The most recent results are the default selection.
  *
- * @param string $upload_pk
- * @param string &$ars_pk    return ars_pk of the selected element, may be zero
+ * \param string $upload_pk
+ * \param string &$ars_pk    return ars_pk of the selected element, may be zero
  *                           if there are no data.  This is also used to pass in
  *                           the selected ars_pk.
- * @param string $id         HTML element id
- * @param string $extra      Extra info for the select element, e.g. "onclick=..."
+ * \param string $id         HTML element id
+ * \param string $extra      Extra info for the select element, e.g. "onclick=..."
  *
- * @return select string, select value is $ars_pk
+ * \return select string, select value is $ars_pk
  *         If there are no rows to select, $ars_pk is returned 0
  *         and a simple string $NoData is returned;
  *         If there are only 1 row, an empty string is returned, and $ars_pk is
@@ -110,9 +110,9 @@ function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $e
  * SelectBucketpool
  * \brief Return a select list containing all the active bucketpool's.
  *
- * @param string $selected, selected bucketpool_pk
+ * \param string $selected, selected bucketpool_pk
  *
- * @return string select list
+ * \return string select list
  * Note: list uses static element id="default_bucketpool_fk"
  *       the element name is the same as the id.
  */
@@ -140,15 +140,15 @@ function SelectBucketPool($selected)
   return $select;
 }
 
-/*
- * Return all the unique bucket_pk's for a given uploadtree_pk and
+/**
+ * \brief Get all the unique bucket_pk's for a given uploadtree_pk and
  * for a given nomos and bucket agent.
- * Inputs:
- *   $nomosagent_pk
- *   $bucketagent_pk
- *   $uploadtree_pk  
- * Returns:
- *   array of unique bucket_pk's, may be empty if no buckets.
+ * 
+ * \param $nomosagent_pk
+ * \param $bucketagent_pk
+ * \param $uploadtree_pk
+ * 
+ * \return  array of unique bucket_pk's, may be empty if no buckets.
  *   FATAL if any input is missing
  */
 function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucketpool_pk)
@@ -196,13 +196,20 @@ function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucket
 }
 
 
-/* Returns string of $delimiter delimited bucket names for the given inputs.
+/**
+ * \brief Get string of $delimiter delimited bucket names for the given inputs.
  * Args are same as GetFileBuckets().
- * $bucketDefArray is array of bucket_def records indexed by bucket_pk
+ * 
+ * \param $nomosagent_pk
+ * \param $bucketagent_pk
+ * \param $uploadtree_pk
+ * \param $bucketDefArray is array of bucket_def records indexed by bucket_pk
  *        see initBucketDefArray().
- * $delimiter is delimiter string to use to seperate bucket names.
- * $color if True, the string is returned as html with bucket names
-          color coded.
+ * \param $delimiter is delimiter string to use to seperate bucket names.
+ * \param $color if True, the string is returned as html with bucket names
+ *         color coded.
+ *
+ * \return string of $delimiter delimited bucket names for the given inputs.
  */
 function GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, 
                                $bucketDefArray, $delimiter, $color)
@@ -247,14 +254,14 @@ function GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $uploadtree_pk,
 }
 
 
-/*
- * Return true if a bucket_pk is found in a tree 
+/**
+ * \brief Check if a bucket_pk is found in a tree 
  * for a given nomos and bucket agent.
- * Inputs:
- *   $bucket_pk
- *   $uploadtree_pk  
- * Returns:
- *   True if bucket_pk is found in the tree
+ * 
+ * \param  $bucket_pk
+ * \param  $uploadtree_pk  
+ * 
+ * \return True if bucket_pk is found in the tree
  *   False if not
  */
 function BucketInTree($bucket_pk, $uploadtree_pk)
@@ -298,7 +305,12 @@ function BucketInTree($bucket_pk, $uploadtree_pk)
 }
 
 
-/* Initializes array of bucket_def records.
+/**
+ * \brief Initializes array of bucket_def records.
+ *
+ * \param $bucketpool_pk - bucketpool id
+ *
+ * \return list of bucket def records.
  */
 function initBucketDefArray($bucketpool_pk)
 {
