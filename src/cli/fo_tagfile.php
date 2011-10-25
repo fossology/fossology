@@ -32,14 +32,15 @@
 
 $GlobalReady = 1;
 /* Load all code */
-require_once "/home/bobg/fossology/trunk/fossology/ui/pathinclude.php";
+require_once "/usr/share/fossology/php/pathinclude.php";
 global $WEBDIR;
 $UI_CLI = 1; /* this is a command-line program */
 require_once ("$WEBDIR/common/common.php");
 
 function Usage($argc, $argv)
 {
-  echo "$argv[0] -f {file of pathnames}  -u {original upload_pk} -t {tag_pk}\n";
+  echo "$argv[0] -m -f {file of pathnames}  -u {original upload_pk} -t {tag_pk}\n";
+  echo "         -m means to only print out missing files.  Do not update the db.\n";
 }
 
 /**
@@ -89,7 +90,6 @@ function Path2Uploadtree($upload_pk, $FilePath)
     if (empty($name)) continue;
     $FilePathStr .= $name;
   }
-
 
   $sql = "SELECT * from uploadtree where upload_fk='$upload_pk' and ufile_name='$FileName'";
   $result = pg_query($PG_CONN, $sql);
@@ -181,12 +181,13 @@ if (!$dbok)
 }
 
 /*  -f {file of pathnames}  -u {original upload_pk} -t {tag_pk} */
-$Options = getopt("f:t:u:");
+$Options = getopt("mf:t:u:");
 if (array_key_exists('f', $Options) 
      and array_key_exists('t', $Options)
      and array_key_exists('u', $Options)
    )
 {
+  $Missing = array_key_exists('m', $Options) ? true : false;
   $PathFile = $Options['f'];
   $tag_pk = $Options['t'];
   $upload_pk = $Options['u'];
@@ -198,6 +199,7 @@ else
   exit -1;
 }
 
+if ($Missing) "Missing: $Missing\n";
 
 /* read $PathFile a line at a time */
 $fhandle  = @fopen($PathFile, "r");
@@ -211,12 +213,12 @@ if ($fhandle )
      $UploadtreeRow = Path2Uploadtree($upload_pk, $fpath);
      if ($UploadtreeRow === false)
      {
-//       echo "Missing $fpath\n";
+       echo "Missing $fpath\n";
        $MissCount++;
      }
      else
      {
-       TagPath($UploadtreeRow, $tag_pk);
+       if ($Missing === false) TagPath($UploadtreeRow, $tag_pk);
        $FileCount++;
      }
   }
