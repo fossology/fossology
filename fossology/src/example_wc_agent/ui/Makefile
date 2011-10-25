@@ -15,13 +15,25 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-AGENT_NAME = example_wc_agent
+MOD_NAME=example_wc_agent
+MOD_SUBDIR=ui
 
-all:
-	@echo "No $(AGENT_NAME) ui_test"
+all: 
+	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR)"
+
+test: 
+	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR) test"
+
+coverage:
+	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR) coverage"
+
 clean:
-	@echo "No $(AGENT_NAME) ui_test clean"
+	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR) clean"
+
 install:
-	@echo "No $(AGENT_NAME) ui_test install"
+	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR) install"
+
 uninstall:
-	@echo "No $(AGENT_NAME) ui_test uninstall"
+	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
+
+.PHONY: all test coverage clean install uninstall

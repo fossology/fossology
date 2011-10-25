@@ -14,13 +14,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP = ../../..
-VARS = $(TOP)/Makefile.conf
-include $(VARS)
 
-DIRS = Unit Functional 
-COVDIR = Unit
-
+DIRS = Unit Functional
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
 all: 
@@ -30,9 +25,9 @@ test:
 	$(call dirloop, test)
 
 coverage:
-	$(MAKE) -C $(COVDIR) coverage
+	$(call dirloop, coverage)
 
 clean:
-	$(call dirloop,clean)
+	$(call dirloop, clean)
 
 .PHONY: all test coverage clean

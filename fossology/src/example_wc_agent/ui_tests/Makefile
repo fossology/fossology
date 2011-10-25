@@ -15,13 +15,19 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-AGENT_NAME = example_wc_agent
+DIRS = Unit Functional
+dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-all:
-	@echo "No $(AGENT_NAME) ui_test"
+all: 
+	$(call dirloop, )
+
+test: 
+	$(call dirloop, test)
+
+coverage:
+	$(call dirloop, coverage)
+
 clean:
-	@echo "No $(AGENT_NAME) ui_test clean"
-install:
-	@echo "No $(AGENT_NAME) ui_test install"
-uninstall:
-	@echo "No $(AGENT_NAME) ui_test uninstall"
+	$(call dirloop, clean)
+
+.PHONY: all test coverage clean
