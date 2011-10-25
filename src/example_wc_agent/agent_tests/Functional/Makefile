@@ -14,25 +14,21 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP = ../../../..
-VARS = $(TOP)/Makefile.conf
-include $(VARS)
-AGENT_NAME = example_wc_agent
 
-TESTFILE = 
-EXE_DIR = ../../agent/
+MOD_NAME=example_wc_agent
+MOD_SUBDIR=agent_tests
+MOD_TEST_DIR=Functional
 
 all:
-	$(MAKE) -C $(EXE_DIR)
-
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR)"
+  
 test: all
-	@echo "no $(AGENT_NAME) functional test"
-#	phpunit $(TESTFILE)
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR) test"
 
-coverage:
-	@echo "no coverage in $(AGENT_NAME) functional test"
-
+coverage: test
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR) coverage"
 
 clean:
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR) clean"
 
 .PHONY: all test coverage clean

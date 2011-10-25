@@ -17,13 +17,14 @@
 
  ***************************************************************/
 
- /**
-  * /brief the word count agent, count the word count for one file
-  *  This should be used directly from the scheduler, do not support running from command line.
-  *  wc_agent get upload_id from the scheduler, then get all pfiles (the pfiles are belonging to this upload) 
-  *  which are not in the table agent_wc. if one pfile already in the table, it means that we arleady counted the word count
-  *  for this pfile, ignore it
-  */
+/**
+ * \file 
+ * \brief the word count agent, count the word count for one file
+ *  This should be used directly from the scheduler, do not support running from command line.
+ *  wc_agent get upload_id from the scheduler, then get all pfiles (the pfiles are belonging to this upload) 
+ *  which are not in the table agent_wc. if one pfile already in the table, it means that we arleady counted the word count
+ *  for this pfile, ignore it
+ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -92,7 +93,7 @@ int ProcessData(long PfileFk, char *Pfile)
   RepFile = fo_RepMkPath("files",Pfile);
   if (!RepFile)
   {
-    FATAL("pfile %ld Word count unable to open file.\n",GlobalPfileFk);
+    LOG_FATAL("pfile %ld Word count unable to open file.\n",GlobalPfileFk);
     printf("LOG pfile %ld Word count unable to open file: pfile_fk=%ld pfile=%s\n",GlobalPfileFk,GlobalPfileFk,GlobalPfile);
     PQfinish(pgConn);
     exit(-1);
@@ -106,7 +107,7 @@ int ProcessData(long PfileFk, char *Pfile)
   Fin = popen(Cmd,"r");
   if (!Fin)
   {
-    FATAL("pfile %ld Word count unable to count words.\n",GlobalPfileFk);
+    LOG_FATAL("pfile %ld Word count unable to count words.\n",GlobalPfileFk);
     printf("LOG pfile %ld Word count unable to run command: %s\n",GlobalPfileFk,Cmd);
     PQfinish(pgConn);
     exit(-1);
@@ -129,7 +130,7 @@ int ProcessData(long PfileFk, char *Pfile)
     result =  PQexec(pgConn, SQL);
     if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
     {
-      FATAL("pfile %ld Database insert failed.\n",GlobalPfileFk);
+      LOG_FATAL("pfile %ld Database insert failed.\n",GlobalPfileFk);
       printf("LOG pfile %ld Database insert failed: %s\n",GlobalPfileFk,SQL);
       PQfinish(pgConn);
       exit(-1);
@@ -159,9 +160,10 @@ void Usage(char *Name)
   printf("  -i  :: Initialize the DB connection then exit (nothing downloaded)\n");
 } /* Usage() */
 
-/*********************************************************/
-/*********************************************************/
-/*********************************************************/
+/**
+ * \brief main function
+ * \return 0 on success, exit(-1) on failure.
+ */
 int main(int argc, char *argv[])
 {
   int c;
@@ -202,7 +204,7 @@ int main(int argc, char *argv[])
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn )
   {
-    FATAL("Unable to connect to database\n");
+    LOG_FATAL("Unable to connect to database\n");
     exit(-1);
   }
   fo_GetAgentKey(pgConn , basename(argv[0]), 0, SVN_REV, agent_desc);
@@ -252,7 +254,7 @@ int main(int argc, char *argv[])
         if (PQntuples(result) > 0)
         {
           PQclear(result);
-          WARNING("Ignoring requested wc_agent analysis of upload %d - Results are already in database.\n",upload_pk);
+          LOG_WARNING("Ignoring requested wc_agent analysis of upload %d - Results are already in database.\n",upload_pk);
           continue;
         }
         PQclear(result);
@@ -280,7 +282,7 @@ int main(int argc, char *argv[])
             strncpy(GlobalPfile, PQgetvalue(result, i, 1), sizeof(GlobalPfile));
             if (ProcessData(GlobalPfileFk,GlobalPfile) != 0)
             {
-              FATAL("pfile %ld Word count failed.\n",GlobalPfileFk);
+              LOG_FATAL("pfile %ld Word count failed.\n",GlobalPfileFk);
               printf("LOG pfile %ld Word count failed: pfile_fk=%ld pfile=%s\n",GlobalPfileFk,GlobalPfileFk,GlobalPfile);
               PQfinish(pgConn);
               PQclear(result);
@@ -294,7 +296,6 @@ int main(int argc, char *argv[])
   } /* if run from scheduler */
 
   /* Clean up */
-  fo_config_free();
   PQfinish(pgConn);
   fo_scheduler_disconnect(0);
   return(0);

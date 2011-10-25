@@ -15,17 +15,20 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-AGENT_NAME = example_wc_agent
+MOD_NAME=example_wc_agent
+MOD_SUBDIR=agent_tests
+MOD_TEST_DIR=Unit
 
 all:
-	@echo "No $(AGENT_NAME) agent unit test"
-test:
-	@echo "No $(AGENT_NAME) agent unit test"
-coverage:
-	@echo "No $(AGENT_NAME) agent unit coverage"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR)"
+  
+test: all
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR) test"
+
+coverage: test
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR) coverage"
+
 clean:
-	@echo "No $(AGENT_NAME) agent unit clean"
-install:
-	@echo "No $(AGENT_NAME) agent unit install"
-uninstall:
-	@echo "No $(AGENT_NAME) agent unit uninstall"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR) clean"
+
+.PHONY: all test coverage clean

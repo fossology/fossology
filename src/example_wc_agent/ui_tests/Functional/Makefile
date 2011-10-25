@@ -14,38 +14,21 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP = ../..
-VARS = $(TOP)/Makefile.conf
-include $(VARS)
+
 MOD_NAME=example_wc_agent
+MOD_SUBDIR=ui_tests
+MOD_TEST_DIR=Functional
 
-DIRS = agent ui
-TESTDIR = agent_tests ui_tests
+all:
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR)"
+  
+test: all
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR) test"
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
-
-all: 
-	$(call dirloop, )
-
-test: 
-	$(MAKE) -C $(TESTDIR) test
-
-coverage:
-	$(MAKE) -C $(TESTDIR) coverage
-
-install: all
-	$(call dirloop,install)
-	mkdir -p $(MODDIR)/$(MOD_NAME)
-	$(INSTALL_PROGRAM) -D $(MOD_NAME).conf $(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
-	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
-	  ln -s $(MODDIR)/$(MOD_NAME) $(SYSCONFDIR)/mods-enabled ; fi;
-
-uninstall:
-	$(call dirloop,uninstall)
-	rm -rf $(MODDIR)/$(MOD_NAME)
-	rm -f $(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
+coverage: test
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR) coverage"
 
 clean:
-	$(call dirloop,clean)
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR) clean"
 
-.PHONY: all install uninstall clean test coverage
+.PHONY: all test coverage clean
