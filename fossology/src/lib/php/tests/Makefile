@@ -26,7 +26,7 @@ TESTFILES = test_common_sysconfig.php \
 						test_common_dir.php \
 						test_common_license_file.php \
 
-all: pathinclude
+all: 
 
 test: all
 	@echo "make unit test for commom php files"
@@ -39,8 +39,4 @@ coverage: all
 clean:
 	rm -rf *.xml results
 
-pathinclude:
-	make -C ../../../www/ui/
-
-
-.PHONY: all test coverage clean pathinclude
+.PHONY: all test coverage clean 

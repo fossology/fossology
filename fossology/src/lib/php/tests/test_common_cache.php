@@ -23,7 +23,6 @@
 
 require_once('../common-cache.php');
 require_once('../common-db.php');
-require_once('../../../www/ui/pathinclude.php');
 
 /**
  * \class test_common_cache
@@ -41,7 +40,8 @@ class test_common_cached extends PHPUnit_Framework_TestCase
   protected function setUp() 
   {
     global $PG_CONN;
-    $PG_CONN = DBconnect();
+    $sysconfig = './sysconfigDirTest';
+    $PG_CONN = DBconnect($sysconfig);
   }
 
   /**
