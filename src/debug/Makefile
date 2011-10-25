@@ -15,9 +15,14 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-DIRS = agent agent_tests ui ui_tests
-TESTDIR = ui_tests
+TOP=../../
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
+MOD_NAME=debug
 
+#DIRS = agent agent_tests ui ui_tests
+DIRS = ui
+TESTDIR = ui_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
@@ -32,9 +37,17 @@ coverage:
 
 install: all
 	$(call dirloop,install)
+	mkdir -p $(MODDIR)/$(MOD_NAME)
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+	  ln -s $(MODDIR)/$(MOD_NAME) $(SYSCONFDIR)/mods-enabled ; fi;
+
 
 uninstall:
+	echo "make $(MOD_NAME) uninstall"
 	$(call dirloop,uninstall)
+	rm -rf $(MODDIR)/$(MOD_NAME) 
+	rm -f $(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
+
 
 clean:
 	$(call dirloop,clean)
