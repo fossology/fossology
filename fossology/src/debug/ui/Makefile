@@ -21,10 +21,9 @@ DEPS=$(TOP)/Makefile.deps
 
 include $(VARS)
 
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-
 DIR = $(realpath .)
-MODULEDIR = $(shell dirname `pwd`)
+MOD_NAME=debug
+MOD_SUBDIR=ui
 
 all: 
 	@echo "make nothing in $(DIR)"
@@ -36,13 +35,13 @@ coverage:
 	@echo "make coverage nothing in $(DIR)"
 
 install:
-	@echo "make debug install in $(DIR)"
-	@if test ! -e $(CONFDIR)/mods-enabled/debug; then \
-	ln -s $(MODULEDIR) $(CONFDIR)/mods-enabled ; fi;
+	@echo "make install in $(DIR)"
+	$(INSTALL_PROGRAM) -d $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	$(INSTALL_PROGRAM) ./*.php $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 uninstall:
-	@echo "make debug uninstall in $(DIR)"
-	rm -f $(CONFDIR)/mods-enabled/debug
+	@echo "make uninstall in $(DIR)"
+	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
 	@echo "make clean nothing in $(DIR)"
