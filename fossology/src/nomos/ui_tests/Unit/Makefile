@@ -18,16 +18,13 @@
 #
 # Makefile for nomos agent Unit tests
 
-TOP = ../../..
+TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-EXE=test_nomos
+#EXE=test_nomos
 
-all: $(EXE)
-	@echo "make nomos Unit agent_tests"
-
-test: $(EXE)
+test:
 	@echo "make nomos Unit agent_tests"
 	echo "No Unit Tests for Nomos"
 	
