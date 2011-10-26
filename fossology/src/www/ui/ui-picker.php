@@ -15,20 +15,25 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+/**
+ * \file ui-picker.php
+ * \brief permit people to positively pick a pair of paths, 
+ * Path pairs are used by reports that do file comparisons and differences between 
+ * files (like isos, packages, directories, etc.).
+ */
 
-
-/***********************************************************
- Sort folder and upload names
- ***********************************************************/
+/**
+ * \brief Sort folder and upload names
+ */
 function picker_name_cmp($rowa, $rowb)
 {
   return (strnatcasecmp($rowa['name'], $rowb['name']));
 }
 
 
-/***********************************************************
- Sort filenames
- ***********************************************************/
+/**
+ * \brief Sort filenames
+ */
 function picker_ufile_name_cmp($rowa, $rowb)
 {
   return (strnatcasecmp($rowa['ufile_name'], $rowb['ufile_name']));
@@ -48,13 +53,15 @@ class ui_picker extends FO_Plugin
   var $LoginFlag  = 0;
   var $HighlightColor = '#4bfe78';
 
-  /***********************************************************
-   Install(): Create and configure database tables
-   ***********************************************************/
+  /**
+   * \brief Create and configure database tables
+   */
   function Install()
   {
-    global $DB;
-    if (empty($DB)) { return(1); } /* No DB */
+    global $PG_CONN;
+    if (empty($PG_CONN)) {
+      return(1);
+    } /* No DB */
 
     /* create it if it doesn't exist */
     $this->Create_file_picker();
@@ -62,9 +69,9 @@ class ui_picker extends FO_Plugin
     return(0);
   } // Install()
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     $text = _("Compare this file to another.");
@@ -74,17 +81,21 @@ class ui_picker extends FO_Plugin
   } // RegisterMenus()
 
 
-  /***********************************************************
-   Initialize(): This is called before the plugin is used.
-   Returns true on success, false on failure.
-   A failed initialize is not used by the system.
-   NOTE: This function must NOT assume that other plugins are installed.
-   ***********************************************************/
+  /**
+   * \brief This is called before the plugin is used.
+   *
+   * \return true on success, false on failure.
+   * A failed initialize is not used by the system.
+   *
+   * \note This function must NOT assume that other plugins are installed.
+   */
   function Initialize()
   {
     global $_GET;
 
-    if ($this->State != PLUGIN_STATE_INVALID) { return(1); } // don't re-run
+    if ($this->State != PLUGIN_STATE_INVALID) {
+      return(1);
+    } // don't re-run
     if ($this->Name !== "") // Name must be defined
     {
       global $Plugins;
@@ -95,45 +106,48 @@ class ui_picker extends FO_Plugin
   } // Initialize()
 
 
-  /***********************************************************
-   Create_file_picker()
-     Create file_picker table.
-   ***********************************************************/
+  /**
+   * \brief Create file_picker table.
+   */
   function Create_file_picker()
   {
-     global $PG_CONN;
+    global $PG_CONN;
 
-     /* If table exists, then we are done */
-     $sql = "SELECT typlen  FROM pg_type where typname='file_picker' limit 1";
-     $result = pg_query($PG_CONN, $sql);
-     DBCheckResult($result, $sql, __FILE__, __LINE__);
-     if (pg_num_rows($result) > 0) return 0;
-     pg_free_result($result);
+    /* If table exists, then we are done */
+    $sql = "SELECT typlen  FROM pg_type where typname='file_picker' limit 1";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) > 0) 
+    {
+      pg_free_result($result);
+      return 0;
+    }
+    pg_free_result($result);
 
-     /* Create table */
-     $sql =
-"CREATE TABLE file_picker (
+    /* Create table */
+    $sql = "CREATE TABLE file_picker (
     file_picker_pk serial NOT NULL PRIMARY KEY,
     user_fk integer NOT NULL,
     uploadtree_fk1 integer NOT NULL,
     uploadtree_fk2 integer NOT NULL,
     last_access_date date NOT NULL
-);
-ALTER TABLE ONLY file_picker
+    );
+    ALTER TABLE ONLY file_picker
     ADD CONSTRAINT file_picker_user_fk_key UNIQUE (user_fk, uploadtree_fk1, uploadtree_fk2);";
 
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
   }
 
 
-  /***********************************************************
-   HTMLFileList(): Given an $File1uploadtree_pk, 
-    $Children are non artifact children of $File1uploadtree_pk
-   
-    return a string with the html table, file listing (the browse tree),
-    for these children.
-   ***********************************************************/
+  /**
+   * \brief Given an $File1uploadtree_pk,
+   * $Children are non artifact children of $File1uploadtree_pk
+   *
+   * \return a string with the html table, file listing (the browse tree),
+   * for these children.
+   */
   function HTMLFileList($File1uploadtree_pk, $Children, $FolderContents)
   {
     global $PG_CONN;
@@ -192,7 +206,9 @@ ALTER TABLE ONLY file_picker
         usort($Children, 'picker_ufile_name_cmp');
         foreach($Children as $Child)
         {
-          if (empty($Child)) { continue; }
+          if (empty($Child)) {
+            continue;
+          }
           $OutBuf .= "<tr>";
 
           $IsDir = Isdir($Child['ufile_mode']);
@@ -205,17 +221,19 @@ ALTER TABLE ONLY file_picker
           $Options = "id=filepick onclick='AppJump($Child[uploadtree_pk])')";
           $OutBuf .= "<button type='button' $Options> $text </button>\n";
           $OutBuf .= "</td>";
-  
+
           $OutBuf .= "<td>";
           if ($IsContainer)
           {
-            $OutBuf .= "<a href='$LinkUri'> $Child[ufile_name]</a>"; 
+            $OutBuf .= "<a href='$LinkUri'> $Child[ufile_name]</a>";
           }
           else
           {
             $OutBuf .= $Child['ufile_name'];
           }
-          if ($IsDir) { $OutBuf .= "/"; };
+          if ($IsDir) {
+            $OutBuf .= "/";
+          };
           $OutBuf .= "</td>";
           $OutBuf .= "</tr>";
         }
@@ -226,88 +244,94 @@ ALTER TABLE ONLY file_picker
   } // HTMLFileList()
 
 
-/************************************************************
- * HTMLPath()
- * Return a string which is a linked path to a file.
- * The path includes folders and files.
- * This is the stuff in the yellow box
- * 
- *  $File1uploadtree_pk - pk of file1
- *  $FolderList - folder path for the file (or folder).
- *  $DirectoryList - directory path to the file.  May be empty.
- *
- *  $FolderList array example:
- *  [0] => Array
- *          [folder_pk] => 1
- *          [folder_name] => Software Repository
- *  [1] => Array
- *          [folder_pk] => 5
- *          [folder_name] => cpio
- *
- *  $DirectoryList array example:
- *  [0] => Array
-            [uploadtree_pk] => 897121
-            [parent] => 
-            [upload_fk] => 11
-            [pfile_fk] => 691036
-            [ufile_mode] => 536904704
-            [lft] => 1
-            [rgt] => 1048
-            [ufile_name] => cpio-2.10-9.el6.src.rpm
- ************************************************************/
-function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
-{
-  if (empty($FolderList)) return "__FILE__ __LINE__ No folder list specified";
-
-  $OutBuf = "";
-  $Uri2 = Traceback_uri() . "?mod=$this->Name";
-  
-  /* Box decorations */
-  $OutBuf .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
-
-  /* write the FolderList */
-  $text = _("Folder");
-  $OutBuf .= "<b>$text</b>: ";
-
-  foreach ($FolderList as $Folder)
+  /**
+   * \brief get a a path to a file
+   *
+   * \param $File1uploadtree_pk - pk of file1
+   * \param $FolderList - folder path for the file (or folder).
+   * \param $DirectoryList - directory path to the file.  May be empty. \n
+   *
+   * \example
+   * $FolderList array example: \n
+   *  [0] => Array \n
+   *          [folder_pk] => 1 \n
+   *          [folder_name] => Software Repository \n
+   *  [1] => Array \n
+   *          [folder_pk] => 5 \n
+   *          [folder_name] => cpio \n
+   * \n
+   * $DirectoryList array example: \n
+   * [0] => Array \n
+   * [uploadtree_pk] => 897121 \n
+   * [parent] => \n
+   * [upload_fk] => 11 \n
+   * [pfile_fk] => 691036 \n
+   * [ufile_mode] => 536904704 \n
+   * [lft] => 1 \n
+   * [rgt] => 1048 \n
+   * [ufile_name] => cpio-2.10-9.el6.src.rpm \n
+   *
+   * \return string which is a linked path to a file.
+   * The path includes folders and files.
+   * This is the stuff in the yellow box
+   */
+  function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
   {
-    $folder_pk = $Folder['folder_pk'];
-    $folder_name = htmlentities($Folder['folder_name']);
-    $OutBuf .= "<a href='$Uri2&folder=$folder_pk&item=$File1uploadtree_pk'><b>$folder_name</b></a>/";
-  }
+    if (empty($FolderList)) return "__FILE__ __LINE__ No folder list specified";
 
-  /* write the DirectoryList */
-  if (!empty($DirectoryList))
-  {
-    $OutBuf .= "<br>";
-    $First = true; /* If $First is true, directory path starts a new line */
+    $OutBuf = "";
+    $Uri2 = Traceback_uri() . "?mod=$this->Name";
 
-    /* Show the path within the upload */
-    foreach($DirectoryList as $uploadtree_rec)
+    /* Box decorations */
+    $OutBuf .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
+
+    /* write the FolderList */
+    $text = _("Folder");
+    $OutBuf .= "<b>$text</b>: ";
+
+    foreach ($FolderList as $Folder)
     {
-      if (!$First) { $OutBuf .= "/ "; }
+      $folder_pk = $Folder['folder_pk'];
+      $folder_name = htmlentities($Folder['folder_name']);
+      $OutBuf .= "<a href='$Uri2&folder=$folder_pk&item=$File1uploadtree_pk'><b>$folder_name</b></a>/";
+    }
 
-      $href = "$Uri2&bitem=$uploadtree_rec[uploadtree_pk]&item=$File1uploadtree_pk";
-      $OutBuf .= "<a href='$href'>";
+    /* write the DirectoryList */
+    if (!empty($DirectoryList))
+    {
+      $OutBuf .= "<br>";
+      $First = true; /* If $First is true, directory path starts a new line */
 
-      if (!$First && Iscontainer($uploadtree_rec['ufile_mode']))
+      /* Show the path within the upload */
+      foreach($DirectoryList as $uploadtree_rec)
+      {
+        if (!$First) {
+          $OutBuf .= "/ ";
+        }
+
+        $href = "$Uri2&bitem=$uploadtree_rec[uploadtree_pk]&item=$File1uploadtree_pk";
+        $OutBuf .= "<a href='$href'>";
+
+        if (!$First && Iscontainer($uploadtree_rec['ufile_mode']))
         $OutBuf .= "<br>&nbsp;&nbsp;";
 
-      $OutBuf .= "<b>" . $uploadtree_rec['ufile_name'] . "</b>";
-      $OutBuf .= "</a>";
-      $First = false;
+        $OutBuf .= "<b>" . $uploadtree_rec['ufile_name'] . "</b>";
+        $OutBuf .= "</a>";
+        $First = false;
+      }
     }
-  }
 
-  $OutBuf .= "</div>\n";  //  box
-  return($OutBuf);
-} // HTMLPath()
+    $OutBuf .= "</div>\n";  //  box
+    return($OutBuf);
+  } // HTMLPath()
 
 
-  /************************************************************
-   * HistoryPick
-   * $uploadtree_pk   is for File 1 (aka item1)
-   * Return html for the history pick, may be empty array if no history.
+  /** 
+   * \brief pick history
+   * 
+   * \param $uploadtree_pk - for File 1 (aka item1)
+   *
+   * return html for the history pick, may be empty array if no history.
    */
   function HistoryPick($uploadtree_pk, &$rtncount)
   {
@@ -319,7 +343,7 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     $user_pk = $_SESSION['UserId'];
     if (empty($user_pk)) return $PickerRows;
 
-    $sql = "select file_picker_pk, uploadtree_fk1, uploadtree_fk2 from file_picker 
+    $sql = "select file_picker_pk, uploadtree_fk1, uploadtree_fk2 from file_picker
               where user_fk= '$user_pk' and ($uploadtree_pk=uploadtree_fk1 or $uploadtree_pk=uploadtree_fk2)";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -332,34 +356,36 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     else
     {
       /* No rows in history for this item and user */
+      pg_free_result($result);
       return "";
-    } 
+    }
 
     /* reformat $PickHistRecs for select list */
     $PickSelectArray = array();
     foreach($PickerRows as $PickRec)
     {
       if ($PickRec['uploadtree_fk1'] == $uploadtree_pk)
-        $item2 = $PickRec["uploadtree_fk2"];
+      $item2 = $PickRec["uploadtree_fk2"];
       else
-        $item2 = $PickRec["uploadtree_fk1"];
+      $item2 = $PickRec["uploadtree_fk1"];
       $PathArray = Dir2Path($item2);
       $Path = Uploadtree2PathStr($PathArray);
       $PickSelectArray[$item2] = $Path;
-    } 
+    }
     $Options = "id=HistoryPick onchange='AppJump(this.value)')";
     $SelectList  = Array2SingleSelect($PickSelectArray, "HistoryPick", "",
-                                      true, true, $Options);
+    true, true, $Options);
     return $SelectList;
   } /* End HistoryPick() */
 
 
-  /************************************************************
-   * SuggestionsPick()
-   * Search the whole repository for containers with names
+  /**
+   * \brief Search the whole repository for containers with names
    * similar to $FileName (based on the beggining text of $FileName)
-   * $uploadtree_pk is the pk of $FileName.
-   * Return html (select list) for picking suggestions.
+   *
+   * \param $uploadtree_pk - the pk of $FileName.
+   *
+   * \return html (select list) for picking suggestions.
    */
   function SuggestionsPick($FileName, $uploadtree_pk, &$rtncount)
   {
@@ -370,7 +396,7 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     $delims= "/-.0123456789 \t\n\r\0\0xb";
     $NameRoot = ltrim($BaseFN, $delims);
     $NameRoot = strtok($NameRoot, $delims);
- 
+
     /* Only make suggestions with matching file extensions */
     $ext = GetFileExt($FileName);
     $tail = ".$ext";
@@ -400,45 +426,46 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
 
     $Options = "id=SuggestPick onchange='AppJump(this.value)')";
     $SelectList  = Array2SingleSelect($SuggestionsArray, "SuggestionsPick", "",
-                                      true, true, $Options);
+    true, true, $Options);
     return $SelectList;
   } /* End SuggestionsPick */
 
 
-  /************************************************************
-   * BrowsePick()
-   * Return the HTML for the File browser.
+  /**
+   * \brief file browser
+   *
+   * \return the HTML for the File browser.
    */
   function BrowsePick($uploadtree_pk, $inBrowseuploadtree_pk, $infolder_pk, $PathArray)
   {
     $OutBuf = "";
     if (empty($inBrowseuploadtree_pk))
-      $Browseuploadtree_pk = $uploadtree_pk;
+    $Browseuploadtree_pk = $uploadtree_pk;
     else
-      $Browseuploadtree_pk = $inBrowseuploadtree_pk;
+    $Browseuploadtree_pk = $inBrowseuploadtree_pk;
 
-    if (empty($infolder_pk)) 
-      $folder_pk = GetFolderFromItem("", $Browseuploadtree_pk);
+    if (empty($infolder_pk))
+    $folder_pk = GetFolderFromItem("", $Browseuploadtree_pk);
     else
-      $folder_pk = $infolder_pk;
-    
+    $folder_pk = $infolder_pk;
+
     // Get list of folders that this $Browseuploadtree_pk is in
     $FolderList = Folder2Path($folder_pk);
 
     // If you aren't browsing folders,
     //   Get list of directories that this $Browseuploadtree_pk is in
     if (empty($infolder_pk))
-      $DirectoryList = Dir2Path($Browseuploadtree_pk);
+    $DirectoryList = Dir2Path($Browseuploadtree_pk);
     else
-      $DirectoryList = '';
+    $DirectoryList = '';
 
     // Get HTML for folder/directory list.
     // This is the stuff in the yellow bar.
     $OutBuf .= $this->HTMLPath($uploadtree_pk, $FolderList, $DirectoryList);
 
-    /* Get list of folders in this folder 
-     * That is, $DirectoryList is empty 
-     */
+    /* Get list of folders in this folder
+     * That is, $DirectoryList is empty
+    */
     if (empty($infolder_pk))
     {
       $FolderContents = array();
@@ -455,22 +482,24 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
   } /* End BrowsePick */
 
 
-/************************************************************
- *  GetFolderContents()
- *  This includes subfolders and uploads.
- *  Return $FolderContents array:
- *  $FolderContents array example:
- *  [0] => Array
- *          [folder_pk] => 1
- *          [folder_name] => Software Repository
- *  [1] => Array
- *          [folder_pk] => 5
- *          [folder_name] => cpio
- *  [2] => Array
- *          [upload_pk] => 123
- *          [upload_filename] => cpio-1.2.3.rpm
- *          [uploadtree_pk] => 987653   (top level uploadtree_pk for this upload)
- */
+  /**
+   * \brief get the contents for the folder, 
+   *  This includes subfolders and uploads.
+   *
+   *  \example $FolderContents array example: \n
+   *  [0] => Array \n
+   *          [folder_pk] => 1 \n
+   *          [folder_name] => Software Repository \n
+   *  [1] => Array \n
+   *          [folder_pk] => 5 \n
+   *          [folder_name] => cpio \n
+   *  [2] => Array \n
+   *          [upload_pk] => 123 \n
+   *          [upload_filename] =>cpio-1.2.3.rpm \n
+   *          [uploadtree_pk] => 987653   (top level uploadtree_pk for this upload) \n
+   *
+   * \return $FolderContents array:
+   */
   function GetFolderContents($folder_pk)
   {
     global $PG_CONN;
@@ -494,9 +523,9 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
           DBCheckResult($FolderResult, $sql, __FILE__, __LINE__);
           $FolderRow = pg_fetch_assoc($FolderResult);
           pg_free_result($FolderResult);
-          
+
           $FolderContents[] = $FolderRow;
-        break;
+          break;
         case 2:  /*******   child is upload   *******/
           $sql = "select upload_pk, upload_filename as name from upload where upload_pk=$FCrow[child_id] and ((upload_mode & (1<<5))!=0)";
           $UpResult = pg_query($PG_CONN, $sql);
@@ -521,7 +550,7 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
           pg_free_result($UtreeResult);
           $UpRow['uploadtree_pk'] = $UtreeRow['uploadtree_pk'];
           $FolderContents[] = $UpRow;
-        break;
+          break;
         case 4:  /******* child_id is uploadtree_pk (unused)   *******/
         default:
           $OutBuf .= __FILE__ . "(" . __LINE__ . ") folder: $folder_pk, nonimplemented mode: $row[foldercontents_mode]<br>";
@@ -532,21 +561,22 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
   } /* End GetFolderContents */
 
 
-  /************************************************************
-   * HTML output 
+  /**
+   * \brief the  html format out info
    *
-   * $RtnMod - module to run after a file is picked
-   * $uploadtree_pk - of file1
-   * $Browseuploadtree_pk - uploadtree_pk selected in file browser (may be empty)
-   * $folder_pk - folder_pk selected in file browser (may be empty)
-   * $PathArray - path to uploadtree_pk (array of uploadtree recs)
+   * \param $RtnMod - module to run after a file is picked
+   * \param $uploadtree_pk - of file1
+   * \param $Browseuploadtree_pk - uploadtree_pk selected in file browser (may be empty)
+   * \param $folder_pk - folder_pk selected in file browser (may be empty)
+   * \param $PathArray - path to uploadtree_pk (array of uploadtree recs)
    */
   function HTMLout($RtnMod, $uploadtree_pk, $Browseuploadtree_pk, $folder_pk, $PathArray)
   {
     $OutBuf = '';
     $uri = Traceback_uri() . "?mod=$this->Name";
-   
-    /* Script to run when item2 is selected
+     
+    /**
+     * Script to run when item2 is selected
      * Compare app is id=apick
      * arg: "rtnmod" is the compare app
      * arg: "item" is uploadtree_pk
@@ -591,10 +621,11 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
       $OutBuf .= "$HistPick";
     }
 
-    /* Suggestions.  
+    /**
+     *  Suggestions.
      * Suggestions are restricted to the same file type (rpm, bz2, etc)
      * to keep the user from being overwhelmed with choices.
-     * So if they want to compare a .bz2 with a .gz, they will have to 
+     * So if they want to compare a .bz2 with a .gz, they will have to
      * use the Browse Window.
      */
     $SuggestionsHTML = $this->SuggestionsPick($PathStr, $uploadtree_pk, $rtncount);
@@ -613,15 +644,18 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
   }
 
 
-  /***********************************************************
-   Output(): The Picker page
-   ***********************************************************/
+  /**
+   * \brief The Picker page
+   */
   function Output()
   {
     global $PG_CONN;
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    if ($this->State != PLUGIN_STATE_READY) {
+      return(0);
+    }
 
-    /* create table if it doesn't exist (not assuming Install() was run. 
+    /**
+     * create table if it doesn't exist (not assuming Install() was run.
      * eg. source update
      */
     $this->Create_file_picker();
@@ -634,9 +668,10 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     $user_pk = $_SESSION['UserId'];
 
     /* Item to start Browse window on */
-    $Browseuploadtree_pk = GetParm("bitem",PARM_INTEGER); 
+    $Browseuploadtree_pk = GetParm("bitem",PARM_INTEGER);
 
-    /* After picking an item2, this logic will record the pick in 
+    /**
+     * After picking an item2, this logic will record the pick in
      * the picker history, and then redirect both item1 and item2 to the
      * comparison app.
      */
@@ -662,12 +697,12 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
         break;
       case "HTML":
         if (empty($uploadtree_pk))
-          $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
+        $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
         else
         {
           $PathArray = Dir2Path($uploadtree_pk);
           $OutBuf .= $this->HTMLout($RtnMod, $uploadtree_pk, $Browseuploadtree_pk, $folder_pk,
-                            $PathArray);
+          $PathArray);
         }
         break;
       case "Text":
@@ -676,7 +711,9 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     }
 
 
-    if (!$this->OutputToStdout) { return($OutBuf); }
+    if (!$this->OutputToStdout) {
+      return($OutBuf);
+    }
     print "$OutBuf";
 
     return;
