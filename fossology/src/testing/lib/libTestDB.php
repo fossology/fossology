@@ -24,29 +24,51 @@
  * Created on Sep 15, 2011 by Mark Donohoe
  */
 
-// get globals....
-if(file_exists('/usr/share/fossology/php/pathinclude.php'))
+// Why are the below needed?
+//require_once(__DIR__ . '/../../lib/php/common-db.php');
+//require_once(__DIR__ . '/../../lib/php/common-cache.php');
+//require_once(__DIR__ . '/../../lib/php/common-sysconfig.php');
+
+$SYSCONFDIR = NULL;
+$SYSCONFDIR = getenv('SYSCONFDIR');
+if(empty($SYSCONFDIR))
 {
-  require_once('/usr/share/fossology/php/pathinclude.php');
-}
-else if(file_exists('/usr/local/share/fossology/php/pathinclude.php'))
-{
-  require_once('/usr/local/share/fossology/php/pathinclude.php');
-}
-else
-{
-  echo "ERROR! libTestDB could not find pathinclude.php\n";
+  echo "FATAL!, no SYSCONFDIR defined\n";
   exit(1);
 }
+//echo "DB: SYSconf is:$SYSCONFDIR\n";
 
-global $WEBDIR;
 global $SYSCONFDIR;
-global $LIBEXECDIR;
 
-require_once("$LIBEXECDIR/libschema.php");
-require_once("$WEBDIR/common/common-db.php");
-require_once("$WEBDIR/common/common-cache.php");
+function _ModFossConf($sysConfPath, $repoPath)
+{
 
+  if(file_exists($sysConfPath . '/fossology.conf'))
+  {
+    $fossConf = file_get_contents($sysConfPath . '/fossology.conf');
+    if($fossConf === FALSE)
+    {
+      echo "ERROR! could not read\n$sysConfPath/fossology.conf\n";
+      return(FALSE);
+    }
+    $pat = '!/srv/fossology/repository!';
+    $testConf = preg_replace($pat, $repoPath, $fossConf);
+    //echo "DB: testConf is:$testConf\n";
+
+    $stat = file_put_contents("$sysConfPath/fossology.conf",$testConf);
+    if($stat === FALSE)
+    {
+      echo "ERROR! could not write\n$sysConfPath/fossology.conf\n";
+      return(FALSE);
+    }
+  }
+  else
+  {
+    echo "ERROR! can't find fossology.conf at:\n$sysConfPath/fossology.conf\n";
+    return(FALSE);
+  }
+  return(TRUE);
+}
 
 /**
  * \brief Create an empty database with the supplied name.  Create user fossy
@@ -60,30 +82,21 @@ require_once("$WEBDIR/common/common-cache.php");
  * Created on Sep 14, 2011 by Mark Donohoe
  */
 
-function CreateTestDB($name=NULL)
+function CreateTestDB($name)
 {
   if(empty($name))
   {
-    $name = fosstest;
+    return("Error, no DB name supplied\n");
   }
-  // figure out TESTROOT and export it to the environment
-  $dirList = explode('/', __DIR__);
-  // remove 1st entry which is empty
-  unset($dirList[0]);
-  $TESTROOT = NULL;
-  foreach($dirList as $dir)
-  {
-    if($dir != 'testing')
-    {
-      $TESTROOT .= '/' .  $dir;
-    }
-    else if($dir == 'testing')
-    {
-      $TESTROOT .= '/' . $dir;
-      break;
-    }
-  }
+  // figure out TESTROOT and export it to the environment so the shell scripts
+  // can use it.  We live in testing/lib, so just remove /lib.
+
+  $path = __DIR__;
+  $plenth = strlen($path);
+  $TESTROOT = substr($path, 0, $plenth-4);
+  //echo "DB TR is:$TESTROOT\n";
   $_ENV['TESTROOT'] = $TESTROOT;
+  putenv("TESTROOT=$TESTROOT");
 
   if(chdir($TESTROOT . '/db') === FALSE)
   {
@@ -91,11 +104,50 @@ function CreateTestDB($name=NULL)
   }
   $cmd = "sudo ./ftdbcreate.sh $name 2>&1";
   $last = exec($cmd, $cmdOut, $cmdRtn);
+  //echo "results of dbcreate are:\n"; print_r($cmdOut) . "\n";
   if($cmdRtn != 0)
   {
-    return("Error could not create Data Base $name\n");
+    $err = "Error could not create Data Base $name\n";
+    //    echo "DB: returning Error, ftdbcreate.sh did not succeed\n";
+    return($err);
   }
   return(NULL);
+} // CreateTestDB
+
+/**
+ * \brief restore either Db.conf or fossology.conf files by copying orig.<file>
+ *
+ * @param string $filename the file to restore, e.g. Db.conf or fossology.conf
+ *
+ * @return boolean
+ *
+ * @todo complete this routine and remove other restore functions
+ */
+function RestoreFile($filename)
+{
+  global $SYSCONFDIR;
+
+
+  if(empty($filename))
+  {
+    return(FALSE);
+  }
+  // cp is used instead of copy so the caller doesn't have to run as sudo
+  $lastCp = system("sudo cp $SYSCONFDIR/orig.$filename " .
+      "$SYSCONFDIR/$filename", $rtn);
+  if($lastCp === FALSE)
+  {
+    return(FALSE);
+  }
+  // clean up the orig file
+  $lasRm = exec("sudo rm $SYSCONFDIR/orig.$filename", $rmOut, $rmRtn);
+  if($rmRtn != 0)
+  {
+    echo "Trouble removing $SYSCONFDIR/orig.$filename, please " .
+      "investigate and remove by hand\n";
+    return(FALSE);
+  }
+  return(TRUE);
 }
 
 /**
@@ -108,41 +160,18 @@ function CreateTestDB($name=NULL)
  * @return boolean
  */
 
-function SetRepo($repoPath=NULL)
+function SetRepo($sysConfPath,$repoPath)
 {
-  global $SYSCONFDIR;
 
   if(empty($repoPath))
   {
-    $repoPath = '/srv/fossology/testRepo';
-  }
-  if(file_exists("$SYSCONFDIR/fossology/fossology.conf"))
-  {
-    $pa = "$SYSCONFDIR/fossology/fossology.conf";
-    $fossConf = file_get_contents("$SYSCONFDIR/fossology/fossology.conf");
-    if($fossConf === FALSE)
-    {
-      echo "ERROR! could not read\n$SYSCONFDIR/fossology/fossology.conf\n";
-      return(FALSE);
-    }
-    $pat = '!/srv/fossology/repository!';
-    $replace = '/srv/fossology/testrepo';
-    $testConf = preg_replace($pat, $replace, $fossConf);
-    //echo "testConf is:$testConf\n";
-
-    $stat = file_put_contents("$SYSCONFDIR/fossology/fossology.conf",$testConf);
-    if($stat === FALSE)
-    {
-      echo "ERROR! could not write\n$SYSCONFDIR/fossology/fossology.conf\n";
-      return(FALSE);
-    }
-  }
-  else
-  {
-    echo "ERROR! can't find fossology.conf at:\n$SYSCONFDIR/fossology.conf\n";
     return(FALSE);
   }
-  return(TRUE);
+  if(empty($sysConfPath))
+  {
+    return(FALSE);
+  }
+  return(_modFossConf($sysConfPath,$repoPath));
 }
 
 /**
@@ -156,9 +185,7 @@ function SetRepo($repoPath=NULL)
  * Created on Sep 15, 2011 by Mark Donohoe
  */
 
-
-
-function TestDBInit($path=NULL, $catalog='fosstest')
+function TestDBInit($path=NULL, $catalog)
 {
   if(empty($path))
   {
@@ -169,23 +196,27 @@ function TestDBInit($path=NULL, $catalog='fosstest')
     print "FAILED: Schema data file ($path) not found.\n";
     return(FALSE);
   }
+  if(empty($catalog))
+  {
+    return(FALSE);
+  }
 
   // run schema-update
   $result = NULL;
+  $lastUp = NULL;
 
   $schemaUp = __DIR__ . '/../../cli/schema-update.php';
 
-  echo "DB: libTDB: calling schema update with:PATH:\n$path\nCATLOG:$catalog\n";
-  system("$schemaUp -f $path -c $catalog",$result);
-  //echo "DB: result of schema update is:$result\n";
+  $last = exec("$schemaUp -f $path -c $catalog", $upOut, $upRtn);
+  //$lastUp = system("$schemaUp -f $path -c $catalog",$result);
 
-  if($result == 0)
+  if($upRtn != 0)
   {
-    return(TRUE);
+    return(FALSE);
   }
   else
   {
-    return(FALSE);
+    return(TRUE);
   }
 }
 ?>

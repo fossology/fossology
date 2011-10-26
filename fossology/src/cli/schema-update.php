@@ -35,17 +35,17 @@
 global $GlobalReady;
 $GlobalReady = 1;
 
-require_once (dirname(__FILE__)) . '/../../share/fossology/php/pathinclude.php';
-//require_once '/usr/local/share/fossology/php/pathinclude.php';
+global $PG_CONN;
+
+//require_once (dirname(__FILE__)) . '/../../share/fossology/php/pathinclude.php';
+require_once '/usr/local/etc/fossology/mods-enabled/www/ui/pathinclude.php';
 
 global $LIBEXECDIR;
-global $WEBDIR;
+global $MODDIR;
 
 require_once("$LIBEXECDIR/libschema.php");
-require_once ("$WEBDIR/common/common-db.php");
-require_once ("$WEBDIR/common/common-cache.php");
-
-global $PG_CONN;
+require_once ("$MODDIR/lib/php/common-db.php");
+require_once ("$MODDIR/lib/php/common-cache.php");
 
 $usage = "Usage: " . basename($argv[0]) . " [options]
   -c <catalog>  the optional database catalog to use, e.g. fossology, fosstest
@@ -83,10 +83,20 @@ if((strlen($Filename)) == 0)
 	print "Error, no filename supplied\n$usage\n";
 	exit(1);
 }
-$PG_CONN = DBconnect();
+
+$currentSysConf = getenv('SYSCONFDIR');
+
+$PG_CONN = DBconnect($currentSysConf);
 
 //ApplySchema($Filename, 1, 1, $Catalog);
 // no debug below
-ApplySchema($Filename, 0, 1, $Catalog);
-
+$worked = ApplySchema($Filename, 0, 1, $Catalog);
+if($worked != 0)
+{
+  exit(1);
+}
+else
+{
+  exit(0);
+}
 ?>

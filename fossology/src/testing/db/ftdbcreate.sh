@@ -16,7 +16,8 @@ if [ -n "$1" ]
 then
   dbname=$1
 else
-  dbname='fosstest';
+  echo "Error! No DataBase Name supplied"
+  exit 1
 fi
 
 # first check that postgres is running
@@ -46,9 +47,9 @@ else
    if [ -z $TESTROOT ]
    then 
      TESTROOT=`pwd`;
-#     echo "TESTROOT IS:$TESTROOT";
-   else
-     echo "TestRoot from env is:{$TESTROOT}";
+     #echo "TESTROOT IS:$TESTROOT";
+   #else
+   #  echo "TestRoot from env is:{$TESTROOT}";
    fi
 # change the name of the db in the sql file if a name was passed in
 # or use the default name.
