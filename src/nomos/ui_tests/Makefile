@@ -16,33 +16,26 @@
 ######################################################################
 
 #
-# Makefile for nomos agent Unit tests
+# nomos/ui_tests Makefile
 
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-EXE=test_nomos
+DIRS = Unit Functional 
 
-all: $(EXE)
-	@echo "make nomos Unit agent_tests"
+dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-test: $(EXE)
-	@echo "make nomos Unit agent_tests"
-	echo "No Unit Tests for Nomos"
-	
+all: 
+	$(call dirloop, )
+
+test: 
+	$(call dirloop, test)
+
 coverage:
-	@echo "make copyright agent_tests coverage"
-	echo "No Coverage tests for Nomos"
-	
+	$(call dirloop, coverage)
+
 clean:
-	echo "Make nomos clean"
-	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno results
-
-install:
-	@echo "No installs for nomos ui_tests/Unit"
-
-uninstall:
-	@echo "No uninstalls for nomos ui_tests/Unit"
+	$(call dirloop, clean)
 
 .PHONY: all test coverage clean
