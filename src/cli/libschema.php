@@ -587,11 +587,6 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1, $Catalog='fossology
   /* Initialize all remaining plugins. */
   /************************************/
   $initFail = FALSE;
-  if (initPlugins($Verbose, $Debug) != 0)
-  {
-    print "FATAL! cannot initialize UI Plugins\n";
-    $initFail = TRUE;
-  }
   if ($initFail !== FALSE)
   {
     print "One or more steps in the system initialization failed\n";
@@ -606,6 +601,7 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1, $Catalog='fossology
     return;
   }
 } // ApplySchema()
+
 function ColExist($Table, $Col)
 {
   global $PG_CONN;
@@ -971,42 +967,6 @@ function GetSchema()
   unset($Schema['TABLEID']);
   return ($Schema);
 } // GetSchema()
-
-/**
- * initPlugins
- * \brief Initialize the UI plugins
- *
- * @return 0 on success,1 on failure
- */
-function initPlugins($Verbose, $Debug)
-{
-  global $Plugins;
-  $Max = count($Plugins);
-  $FailFlag = 0;
-  if ($Verbose)
-  {
-    print "  Initializing plugins\n";
-    flush();
-  }
-  for ($i = 0;$i < $Max;$i++)
-  {
-    $P = & $Plugins[$i];
-    /* Init ALL plugins */
-    if ($Debug)
-    {
-      print "    Initializing plugin '" . $P->Name . "'\n";
-    }
-    $State = $P->Install();
-    if ($State != 0)
-    {
-      $FailFlag = 1;
-      print "FAILED: " . $P->Name . " failed to install.\n";
-      flush();
-      return (1);
-    }
-  }
-  return (0);
-} // initPlugins()
 
 /**
  * MakeFunctions
