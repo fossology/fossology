@@ -16,13 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+/**
+ * \file admin-bucket-pool.php
+ * \brief The purpose of this is to facilitate editing an existing bucketpool
+ */
 
 define("TITLE_admin_bucket_pool", _("Duplicate Bucketpool"));
 
@@ -35,12 +32,12 @@ class admin_bucket_pool extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
-  /*
+  /**
    * @brief Clone a bucketpool and its bucketdef records.
    *        Increment the bucketpool version.
    *
-   * @param $bucketpool_pk  pk to clone.
-   * @param $UpdateDefault  'on' if true,  or empty if false
+   * @param $bucketpool_pk - pk to clone.
+   * @param $UpdateDefault - 'on' if true,  or empty if false
    *
    * @return the new bucketpool_pk
    *         A message suitable to display to the user is returned in $msg.
@@ -57,7 +54,8 @@ class admin_bucket_pool extends FO_Plugin
     $row = pg_fetch_assoc($result);
     pg_free_result($result);
 
-    /* Get the last version for this bucketpool name.
+    /**
+     * Get the last version for this bucketpool name.
      * There could be a race condition between getting the last version and
      * inserting the new version, but this is an admin only function and it
      * would be pretty odd if two admins were modifying the same bucketpool
@@ -71,11 +69,11 @@ class admin_bucket_pool extends FO_Plugin
     pg_free_result($result);
     $newversion = $vrow['version'] + 1;
 
-    /* Insert the new bucketpool record 
-     */
+    /** Insert the new bucketpool record  */
     $sql = "insert into bucketpool (bucketpool_name, version, active, description) select bucketpool_name, '$newversion', active, description from bucketpool where bucketpool_pk=$bucketpool_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
 
     /* Retrieve the new bucketpool_pk */
     $sql = "select bucketpool_pk from bucketpool where bucketpool_name='$row[bucketpool_name]' and version='$newversion'";
@@ -86,10 +84,11 @@ class admin_bucket_pool extends FO_Plugin
     $newbucketpool_pk = $row['bucketpool_pk'];
 
     /* duplicate all the bucketdef records for the new bucketpool_pk */
-    $sql = "insert into bucket_def (bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to) 
+    $sql = "insert into bucket_def (bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to)
 select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbucketpool_pk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to from bucket_def where bucketpool_fk=$bucketpool_pk";
     $insertresult = pg_query($PG_CONN, $sql);
     DBCheckResult($insertresult, $sql, __FILE__, __LINE__);
+    pg_free_result($insertresult);
 
     /* Update default bucket pool in user table for this user only */
     if ($UpdateDefault == 'on')
@@ -97,29 +96,30 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
       $sql = "update users set default_bucketpool_fk='$newbucketpool_pk' where user_pk='$_SESSION[UserId]'";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
 
     return $newbucketpool_pk;
   }
- 
-  /************************************************
-   * Output()
-   * User chooses a bucketpool to duplicate from a select list.
-   * The new bucketpool and bucket_def records will be identical 
+
+  /**
+   * \brief User chooses a bucketpool to duplicate from a select list.
+   * The new bucketpool and bucket_def records will be identical
    * to the originals except for the primary keys and bucketpool version
-   * (which will be bumped).
-   * The user can optionally also set their default bucketpool to the 
-   * new one.  This is the default.
+   * (which will be bumped). \n
+   * The user can optionally also set their default bucketpool to the
+   * new one.  This is the default. \n
    *
    * The user must then manually modify the bucketpool and/or bucketdef
    * records to create their new (modified) bucketpool.
-   ************************************************/
+   */
   function Output()
   {
-    global $DB;
     global $PROJECTSTATEDIR;
 
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
 
     /* get the bucketpool_pk to clone */
     $bucketpool_pk = GetParm("default_bucketpool_fk",PARM_INTEGER);
@@ -129,57 +129,57 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
     {
       $msg = "";
       $newbucketpool_pk = $this->CloneBucketpool($bucketpool_pk, $UpdateDefault, $msg);
-$text = _("Your new bucketpool_pk is");
+      $text = _("Your new bucketpool_pk is");
       echo "$text $newbucketpool_pk<hr>";
     }
 
-echo "<p>";
-echo _("The purpose of this is to facilitate editing an existing bucketpool.  Make sure you
+    echo "<p>";
+    echo _("The purpose of this is to facilitate editing an existing bucketpool.  Make sure you
 understand");
-echo " <a href='http://fossology.org/buckets'>";
-echo _("Creating Bucket Pools");
-echo "</a> ";
-echo _("before continuing.");
-echo _(" It will explain why you should create a new bucketpool rather than edit an old one that has already recorded results.");
-echo "<p>";
-echo _("Steps to modify a bucketpool:");
-echo "<ol>";
-echo "<li>";
-echo _("Create a baseline with your current bucketpool.  In other words, run a bucket scan on something.  If you do this before creating a new modified bucketpool, you can compare the old results with the new to verify it is working as you expect.");
-echo "<li>";
-echo _("Duplicate the bucketpool (this will increment the bucketpool version and its bucketdef records).  You should also check 'Update my default bucketpool' since new bucket jobs only use your default bucketpool.");
-echo "<li>";
-echo _("Duplicate any bucket scripts that you defined in $PROJECTSTATEDIR.");
-echo "<li>";
-echo _("Manually edit the new bucketpool record, if desired.");
-echo "<li>";
-echo _("Manually insert/update/delete the new bucketdef records.");
-echo "<li>";
-echo _("Delete your old bucket job from the job queue (from Show Jobs).  You must delete the old completed bucket job from the queue rather than reset it because a reset will use the previous bucketpool (the one you originally queued).");
-echo "<li>";
-echo _("Queue up the new bucket job in Jobs > Agents.");
-echo "<li>";
-echo _("Use Buckets > Compare to compare the new and old runs.  Verify the results.");
-echo "<li>";
-echo _("If you still need to edit the buckets, use Buckets > Remove Bucket Results to remove the previous runs results and repeat starting with editing the bucketpool or def records.");
-echo "<li>";
-echo _("When the bucket results are what you want, then you can reset all the users of the old bucketpool to the new one with Buckets > New Bucketpool.");
-echo "</ol>";
-echo "<hr>";
+    echo " <a href='http://fossology.org/buckets'>";
+    echo _("Creating Bucket Pools");
+    echo "</a> ";
+    echo _("before continuing.");
+    echo _(" It will explain why you should create a new bucketpool rather than edit an old one that has already recorded results.");
+    echo "<p>";
+    echo _("Steps to modify a bucketpool:");
+    echo "<ol>";
+    echo "<li>";
+    echo _("Create a baseline with your current bucketpool.  In other words, run a bucket scan on something.  If you do this before creating a new modified bucketpool, you can compare the old results with the new to verify it is working as you expect.");
+    echo "<li>";
+    echo _("Duplicate the bucketpool (this will increment the bucketpool version and its bucketdef records).  You should also check 'Update my default bucketpool' since new bucket jobs only use your default bucketpool.");
+    echo "<li>";
+    echo _("Duplicate any bucket scripts that you defined in $PROJECTSTATEDIR.");
+    echo "<li>";
+    echo _("Manually edit the new bucketpool record, if desired.");
+    echo "<li>";
+    echo _("Manually insert/update/delete the new bucketdef records.");
+    echo "<li>";
+    echo _("Delete your old bucket job from the job queue (from Show Jobs).  You must delete the old completed bucket job from the queue rather than reset it because a reset will use the previous bucketpool (the one you originally queued).");
+    echo "<li>";
+    echo _("Queue up the new bucket job in Jobs > Agents.");
+    echo "<li>";
+    echo _("Use Buckets > Compare to compare the new and old runs.  Verify the results.");
+    echo "<li>";
+    echo _("If you still need to edit the buckets, use Buckets > Remove Bucket Results to remove the previous runs results and repeat starting with editing the bucketpool or def records.");
+    echo "<li>";
+    echo _("When the bucket results are what you want, then you can reset all the users of the old bucketpool to the new one with Buckets > New Bucketpool.");
+    echo "</ol>";
+    echo "<hr>";
 
-	echo "<form method='POST'>";
+    echo "<form method='POST'>";
     $Val = "";
-$text = _("Choose the bucketpool to duplicate");
+    $text = _("Choose the bucketpool to duplicate");
     echo "$text ";
     echo SelectBucketPool($Val);
 
     echo "<p>";
-$text = _("Update my default bucketpool");
+    $text = _("Update my default bucketpool");
     echo "<input type='checkbox' name='updatedefault' checked> $text.";
     echo "<p>";
-$text = _("Submit");
+    $text = _("Submit");
     echo "<input type='submit' value='$text'>";
-	echo "</form>";
+    echo "</form>";
 
     return;
   } // Output()

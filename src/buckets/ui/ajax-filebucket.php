@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,28 +16,20 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- This plugin finds all the uploadtree_pk's in the first directory
- level under a parent, that contains a given bucket.
-
- GET args: 
-   item        parent uploadtree_pk
-   bucket_pk   bucket_pk
-
- ajax usage:
-   http://...?mod=ajax_filebucket&item=23456&bucket_pk=27
- 
- Returns a comma delimited string of bucket_pk followed by uploadtree_pks: 
-  "12,999,123,456"
- *************************************************/
-
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+/**
+ * \file ajax-filebucket.php
+ * \brief  This plugin finds all the uploadtree_pk's in the first directory
+ * level under a parent, that contains a given bucket.
+ * GET args: \n
+ *  item        parent uploadtree_pk \n
+ *  bucket_pk   bucket_pk \n
+ *
+ * ajax usage: \n
+ *  http://...?mod=ajax_filebucket&item=23456&bucket_pk=27
+ *
+ * \return a comma delimited string of bucket_pk followed by uploadtree_pks:
+ * "12,999,123,456"
+ */
 
 define("TITLE_ajax_filebucket", _("List Uploads as Options"));
 
@@ -51,19 +43,23 @@ class ajax_filebucket extends FO_Plugin
   var $NoHTML     = 1; /* This plugin needs no HTML content help */
   var $LoginFlag = 0;
 
-  /***********************************************************
-   Output(): Display the loaded menu and plugins.
-   ***********************************************************/
+  /**
+   * \brief Display the loaded menu and plugins.
+   */
   function Output()
-  {  
-    global $DB, $PG_CONN;
+  {
+    global $PG_CONN;
     global $Plugins;
 
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
     //$uTime = microtime(true);
 
-    // make sure there is a db connection since I've pierced the core-db abstraction
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    // make sure there is a db connection
+    if (!$PG_CONN) {
+      echo "NO DB connection";
+    }
 
     $bucket_pk = GetParm("bucket_pk",PARM_RAW);
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
@@ -76,10 +72,12 @@ class ajax_filebucket extends FO_Plugin
     foreach ($children as $child)
     {
       if (BucketInTree($bucket_pk, $child['uploadtree_pk']))
-        $outstr .= ",$child[uploadtree_pk]";
+      $outstr .= ",$child[uploadtree_pk]";
     }
 
-    if (!$this->OutputToStdout) { return($outstr); }
+    if (!$this->OutputToStdout) {
+      return($outstr);
+    }
     print("$outstr");
     return;
   } // Output()
