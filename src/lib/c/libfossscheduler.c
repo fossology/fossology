@@ -191,6 +191,8 @@ void fo_scheduler_disconnect(int retcode)
     valid = 0;
     found = 0;
   }
+
+  fo_config_free(sysconfig);
 }
 
 /**
