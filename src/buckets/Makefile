@@ -17,6 +17,7 @@
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
+MOD_NAME=buckets
 
 DIRS = agent agent_tests ui ui_tests
 TESTDIR = agent_tests
@@ -33,10 +34,18 @@ coverage:
 	$(call dirloop,coverage)
 
 install: all
+	echo "make $(MOD_NAME) install"
+	mkdir -p $(MODDIR)/$(MOD_NAME)
 	$(call dirloop,install)
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+	  ln -s $(MODDIR)/$(MOD_NAME) $(SYSCONFDIR)/mods-enabled ; fi;
+
 
 uninstall:
+	echo "make $(MOD_NAME) uninstall"
 	$(call dirloop,uninstall)
+	rm -rf $(MODDIR)/$(MOD_NAME)
+	rm -f $(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
 clean:
 	$(call dirloop,clean)
