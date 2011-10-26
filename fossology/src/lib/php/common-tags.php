@@ -40,12 +40,13 @@ function GetAllTags($Item, $Recurse=true)
   if ($Recurse)
   {
     /* Get tree boundaries */
-    $sql = "select lft,rgt from uploadtree where uploadtree_pk=$Item";
+    $sql = "select lft,rgt, upload_fk from uploadtree where uploadtree_pk=$Item";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $uploadtree_row = pg_fetch_assoc($result);
 
     $Condition = " lft>=$uploadtree_row[lft] and rgt<=$uploadtree_row[rgt] ";
+    $upload_pk = $uploadtree_row['upload_fk'];
     pg_free_result($result);
   }
   else
@@ -54,7 +55,7 @@ function GetAllTags($Item, $Recurse=true)
   }
 
   /* Get list of unique tag_pk's for this item */
-  $sql = "SELECT distinct(tag_fk) as tag_pk FROM tag_file, uploadtree WHERE tag_file.pfile_fk = uploadtree.pfile_fk AND $Condition UNION SELECT tag_fk as tag_pk FROM tag_uploadtree WHERE tag_uploadtree.uploadtree_fk = $Item";
+  $sql = "SELECT distinct(tag_fk) as tag_pk FROM tag_file, uploadtree WHERE tag_file.pfile_fk = uploadtree.pfile_fk and upload_fk=$upload_pk AND $Condition UNION SELECT tag_fk as tag_pk FROM tag_uploadtree WHERE tag_uploadtree.uploadtree_fk = $Item";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $SeenTag = array();
