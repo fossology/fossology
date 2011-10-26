@@ -119,9 +119,14 @@ logging.o: %.o: %.c $(DEPEN)
 #######################
 
 install: all install-conf
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(LIBEXECDIR)/$(EXE)
-	$(INSTALL_PROGRAM  $(CLI) $(DESTDIR)$(LIBEXECDIR)/$(CLI)
+	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/scheduler/agent/$(EXE)
+	$(INSTALL_PROGRAM) $(CLI) $(MODDIR)/schedulerCLI/agent/$(EXE)
 	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
+	
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/scheduler; then \
+	  ln -s $(MODDIR)/scheduler $(SYSCONFDIR)/mods-enabled ; fi;
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/schedulerCLI; then \
+	  ln -s $(MODDIR)/schedulerCLI $(SYSCONFDIR)/mods-enabled ; fi;
 
 install-conf:
 	@mkdir -p $(CONFDIR)/mods-enabled
@@ -141,8 +146,12 @@ install-conf:
 #####################
 
 clean:
+uninstall:
 	rm -f $(OBJS) *.a
-	rm -f $(EXE) $(CLI) defconf/init.d/fossology
+	rm -rf $(MODDIR)/scheduler defconf/init.d/fossology
+	rm -rf $(MODDIR)/schedulerCLI
+	rm -f $(SYSCONFDIR)/mods-enabled/scheduler
+	rm -f $(SYSCONFDIR)/mods-enabled/schedulerCLI
 
 test: all
 	@echo "NOTICE: no tests available for 2.0 scheduler"
