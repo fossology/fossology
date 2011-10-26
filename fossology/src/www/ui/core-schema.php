@@ -17,8 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 ***********************************************************/
 
 // now uses the functions GetSchema and ApplySchema from libschema.php
-global $LIBEXECDIR;
-require_once "$LIBEXECDIR/libschema.php";
+require_once "../../cli/libschema.php";
 
 define("TITLE_core_schema", _("Database Schema"));
 
