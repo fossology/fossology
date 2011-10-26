@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,13 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+/**
+ * \file ui-buckets.php
+ * \brief Bucket Browser
+ */
 
 define("TITLE_ui_buckets", _("Bucket Browser"));
 
@@ -36,42 +33,49 @@ class ui_buckets extends FO_Plugin
   var $LoginFlag  = 0;
   var $UpdCache   = 0;
 
-  /***********************************************************
-   Install(): Create and configure database tables
-   ***********************************************************/
+  /**
+   * \brief Create and configure database tables
+   */
   function Install()
   {
-    global $DB;
     global $PG_CONN;
 
-    if (empty($DB)) { return(1); } /* No DB */
+    if (empty($PG_CONN)) {
+      return(1);
+    } /* No DB */
 
-    /* If there are no bucket pools defined, 
+    /**
+     * If there are no bucket pools defined,
      * then create a simple demo.
      * Note: that the bucketpool and two simple bucket definitions
      * are created but no user default bucket pools are set.
-     * We don't want to automatically set this to be the 
-     * default bucket pool because this may not be appropiate for 
-     * the installation.  The user or system administrator will 
+     * We don't want to automatically set this to be the
+     * default bucket pool because this may not be appropiate for
+     * the installation.  The user or system administrator will
      * have to set the default bucket pool in their account settings.
      */
 
-    /* Check if there is already a bucket pool, if there is 
+    /* Check if there is already a bucket pool, if there is
      * then return because there is nothing to do.
-     */
+    */
     $sql = "SELECT bucketpool_pk  FROM bucketpool limit 1";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) > 0) return;
+    if (pg_num_rows($result) > 0)
+    {
+      pg_free_result($result);
+      return;
+    }
 
     /* none exist so create the demo */
     $DemoPoolName = "GPL Demo bucket pool";
     $sql = "INSERT INTO bucketpool (bucketpool_name, version, active, description) VALUES ('$DemoPoolName', 1, 'Y', 'Demonstration of a very simple GPL/non-gpl bucket pool')";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
 
     /* get the bucketpool_pk of the newly inserted record */
-    $sql = "select bucketpool_pk from bucketpool 
+    $sql = "select bucketpool_pk from bucketpool
               where bucketpool_name='$DemoPoolName' limit 1";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -86,13 +90,14 @@ class ui_buckets extends FO_Plugin
             INSERT INTO bucket_def ($Columns) VALUES ('non-gpl (Demo)', 'yellow', 50, 1000, $bucketpool_pk, 99, NULL, 'N', 'f')";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
 
     return(0);
   } // Install()
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  /**
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     // For all other menus, permit coming back here.
@@ -104,33 +109,36 @@ class ui_buckets extends FO_Plugin
     {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-       menu_insert("Browse::Bucket Browser",1);
-       //menu_insert("Browse::[BREAK]",100);
-$text = _("Clear");
-       //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>$text</a>");
+        menu_insert("Browse::Bucket Browser",1);
+        //menu_insert("Browse::[BREAK]",100);
+        $text = _("Clear");
+        //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>$text</a>");
       }
       else
       {
-$text = _("Browse by buckets (categories)");
-       menu_insert("Browse::Bucket Browser",10,$URI,$text);
+        $text = _("Browse by buckets (categories)");
+        menu_insert("Browse::Bucket Browser",10,$URI,$text);
       }
     }
   } // RegisterMenus()
 
 
-  /***********************************************************
-   Initialize(): This is called before the plugin is used.
-   It should assume that Install() was already run one time
-   (possibly years ago and not during this object's creation).
-   Returns true on success, false on failure.
-   A failed initialize is not used by the system.
-   NOTE: This function must NOT assume that other plugins are installed.
-   ***********************************************************/
+  /**
+   * \brief This is called before the plugin is used.
+   * It should assume that Install() was already run one time
+   * (possibly years ago and not during this object's creation).
+   *
+   * \return true on success, false on failure.
+   * A failed initialize is not used by the system.
+   * \note This function must NOT assume that other plugins are installed.
+   */
   function Initialize()
   {
     global $_GET;
 
-    if ($this->State != PLUGIN_STATE_INVALID) { return(1); } // don't re-run
+    if ($this->State != PLUGIN_STATE_INVALID) {
+      return(1);
+    } // don't re-run
     if ($this->Name !== "") // Name must be defined
     {
       global $Plugins;
@@ -140,8 +148,8 @@ $text = _("Browse by buckets (categories)");
 
     /* Remove "updcache" from the GET args and set $this->UpdCache
      * This way all the url's based on the input args won't be
-     * polluted with updcache
-     */
+    * polluted with updcache
+    */
     if ($_GET['updcache'])
     {
       $this->UpdCache = $_GET['updcache'];
@@ -156,11 +164,11 @@ $text = _("Browse by buckets (categories)");
   } // Initialize()
 
 
-  /***********************************************************
-   ShowUploadHist(): Given an $Uploadtree_pk, display:
-   (1) The histogram for the directory BY bucket.
-   (2) The file listing for the directory.
-   ***********************************************************/
+  /**
+   * \brief Given an $Uploadtree_pk, display: \n
+   * (1) The histogram for the directory BY bucket. \n
+   * (2) The file listing for the directory.
+   */
   function ShowUploadHist($Uploadtree_pk,$Uri)
   {
     global $PG_CONN;
@@ -169,20 +177,19 @@ $text = _("Browse by buckets (categories)");
     $VLic=""; // return values for output
     $V=""; // total return value
     global $Plugins;
-    global $DB;
 
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
 
     /*******  Get Bucket names and counts  ******/
     /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree 
+    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree
               WHERE uploadtree_pk = $Uploadtree_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1)
     {
       pg_free_result($result);
-$text = _("Invalid URL, nonexistant item");
+      $text = _("Invalid URL, nonexistant item");
       return "<h2>$text $Uploadtree_pk</h2>";
     }
     $row = pg_fetch_assoc($result);
@@ -193,14 +200,14 @@ $text = _("Invalid URL, nonexistant item");
 
     /* Get the ars_pk of the scan to display, also the select list  */
     $ars_pk = GetArrayVal("ars", $_GET);
-    $BucketSelect = SelectBucketDataset($upload_pk, $ars_pk, "selectbdata", 
+    $BucketSelect = SelectBucketDataset($upload_pk, $ars_pk, "selectbdata",
                                         "onchange=\"addArsGo('newds','selectbdata');\"");
-    if ($ars_pk == 0) 
+    if ($ars_pk == 0)
     {
       /* No bucket data for this upload */
       return $BucketSelect;
     }
-    
+
     /* Get scan keys */
     $sql = "select agent_fk, nomosagent_fk, bucketpool_fk from bucket_ars where ars_pk=$ars_pk";
     $result = pg_query($PG_CONN, $sql);
@@ -212,12 +219,12 @@ $text = _("Invalid URL, nonexistant item");
     pg_free_result($result);
 
     /* Create bucketDefArray as individual query this is MUCH faster
-       than incorporating it with a join in the following queries.
-     */
+     than incorporating it with a join in the following queries.
+    */
     $bucketDefArray = initBucketDefArray($bucketpool_pk);
 
     /*select all the buckets for entire tree for this bucketpool */
-    $sql = "SELECT distinct(bucket_fk) as bucket_pk, 
+    $sql = "SELECT distinct(bucket_fk) as bucket_pk,
                    count(bucket_fk) as bucketcount, bucket_reportorder
               from bucket_file, bucket_def,
                   (SELECT distinct(pfile_fk) as PF from uploadtree 
@@ -230,10 +237,10 @@ $text = _("Invalid URL, nonexistant item");
                     and bucketpool_fk=$bucketpool_pk
               group by bucket_fk,bucket_reportorder
               order by bucket_reportorder asc"; 
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $historows = pg_fetch_all($result);
-      pg_free_result($result);
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $historows = pg_fetch_all($result);
+    pg_free_result($result);
 
     /* Show dataset list */
     if (!empty($BucketSelect))
@@ -271,16 +278,16 @@ return;
     $NoLicFound = 0;
     if (is_array($historows))
     {
-$text = _("Bucket Pool");
+      $text = _("Bucket Pool");
       $VLic .= "$text: $bucketpool_name v$bucketpool_version<br>";
       $VLic .= "<table border=1 width='100%'>\n";
-$text = _("Count");
+      $text = _("Count");
       $VLic .= "<tr><th width='10%'>$text</th>";
-$text = _("Files");
+      $text = _("Files");
       $VLic .= "<th width='10%'>$text</th>";
-$text = _("Bucket");
+      $text = _("Bucket");
       $VLic .= "<th align='left'>$text</th></tr>\n";
-  
+
       foreach($historows as $bucketrow)
       {
         $Uniquebucketcount++;
@@ -288,14 +295,14 @@ $text = _("Bucket");
         $bucketcount = $bucketrow['bucketcount'];
         $bucket_name = $bucketDefArray[$bucket_pk]['bucket_name'];
         $bucket_color = $bucketDefArray[$bucket_pk]['bucket_color'];
-  
+
         /*  Count  */
         $VLic .= "<tr><td align='right' style='background-color:$bucket_color'>$bucketcount</td>";
 
         /*  Show  */
         $VLic .= "<td align='center'><a href='";
         $VLic .= Traceback_uri();
-$text = _("Show");
+        $text = _("Show");
         $VLic .= "?mod=list_bucket_files&bapk=$bucketagent_pk&item=$Uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk" . "'>$text</a></td>";
 
         /*  Bucket name  */
@@ -304,11 +311,11 @@ $text = _("Show");
         $VLic .= ">$bucket_name </a>";
         $VLic .= "</td>";
         $VLic .= "</tr>\n";
-//      if ($row['bucket_name'] == "No Buckets Found") $NoLicFound =  $row['bucketcount'];
+        //      if ($row['bucket_name'] == "No Buckets Found") $NoLicFound =  $row['bucketcount'];
       }
       $VLic .= "</table>\n";
       $VLic .= "<p>\n";
-$text = _("Unique buckets");
+      $text = _("Unique buckets");
       $VLic .= "$text: $Uniquebucketcount<br>\n";
     }
 
@@ -319,32 +326,40 @@ $text = _("Unique buckets");
 
     if (count($Children) == 0)
     {
-      $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$Uploadtree_pk'");
-      if (empty($Results) || (IsDir($Results[0]['ufile_mode']))) { return; }
+      $sql = "SELECT * FROM uploadtree WHERE uploadtree_pk = '$Uploadtree_pk'";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      pg_free_result($result);
+      if (empty($row) || (IsDir($row['ufile_mode']))) {
+        return;
+      }
       $ModLicView = &$Plugins[plugin_find_id("view-license")];
       return($ModLicView->Output() );
     }
     $ChildCount=0;
     $Childbucketcount=0;
 
-/* Countd disabled until we know we need them
-    $NumSrcPackages = 0;
+    /* Countd disabled until we know we need them
+     $NumSrcPackages = 0;
     $NumBinPackages = 0;
     $NumBinNoSrcPackages = 0;
-*/
+    */
 
     /* get mimetypes for packages */
-    $MimetypeArray = GetPkgMimetypes(); 
+    $MimetypeArray = GetPkgMimetypes();
 
     $VF .= "<table border=0>";
     foreach($Children as $C)
     {
-      if (empty($C)) { continue; }
+      if (empty($C)) {
+        continue;
+      }
 
       /* update package counts */
-/* This is an expensive count.  Comment out until we know we really need it
-      IncrSrcBinCounts($C, $MimetypeArray, $NumSrcPackages, $NumBinPackages, $NumBinNoSrcPackages);
-*/
+      /* This is an expensive count.  Comment out until we know we really need it
+       IncrSrcBinCounts($C, $MimetypeArray, $NumSrcPackages, $NumBinPackages, $NumBinNoSrcPackages);
+      */
 
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
@@ -382,21 +397,27 @@ $text = _("Unique buckets");
         $VF .= "<a href='$LicUri'>"; $HasHref=1;
         $VF .= "<b>"; $HasBold=1;
       }
-      else if (!empty($LinkUri)) 
+      else if (!empty($LinkUri))
       {
         $VF .= "<a href='$LinkUri'>"; $HasHref=1;
       }
       $VF .= $C['ufile_name'];
-      if ($IsDir) { $VF .= "/"; };
-      if ($HasBold) { $VF .= "</b>"; }
-      if ($HasHref) { $VF .= "</a>"; }
+      if ($IsDir) {
+        $VF .= "/";
+      };
+      if ($HasBold) {
+        $VF .= "</b>";
+      }
+      if ($HasHref) {
+        $VF .= "</a>";
+      }
 
       /* print buckets */
       $VF .= "<br>";
       $VF .= "<span style='position:relative;left:1em'>";
       /* get color coded string of bucket names */
       $VF .= GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $C['uploadtree_pk'],
-                 $bucketDefArray, ",", True);
+      $bucketDefArray, ",", True);
       $VF .= "</span>";
       $VF .= "</td><td valign='top'>";
 
@@ -411,9 +432,9 @@ $text = _("Unique buckets");
 
     $V .= ActiveHTTPscript("FileColor");
 
-    /* Add javascript for color highlighting 
-       This is the response script needed by ActiveHTTPscript 
-       responseText is bucket_pk',' followed by a comma seperated list of uploadtree_pk's */
+    /* Add javascript for color highlighting
+     This is the response script needed by ActiveHTTPscript
+    responseText is bucket_pk',' followed by a comma seperated list of uploadtree_pk's */
     $script = "
       <script type=\"text/javascript\" charset=\"utf-8\">
         var Lastutpks='';   /* save last list of uploadtree_pk's */
@@ -451,16 +472,16 @@ $text = _("Unique buckets");
     $V .= $script;
 
     /* Display source, binary, and binary missing source package counts */
-/* Counts disabled above until we know we need these
-    $VLic .= "<ul>";
-$text = _("source packages");
+    /* Counts disabled above until we know we need these
+     $VLic .= "<ul>";
+    $text = _("source packages");
     $VLic .= "<li> $NumSrcPackages $text";
-$text = _("binary packages");
+    $text = _("binary packages");
     $VLic .= "<li> $NumBinPackages $text";
-$text = _("binary packages with no source package");
+    $text = _("binary packages with no source package");
     $VLic .= "<li> $NumBinNoSrcPackages $text";
     $VLic .= "</ul>";
-*/
+    */
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
@@ -471,13 +492,15 @@ $text = _("binary packages with no source package");
     return($V);
   } // ShowUploadHist()
 
-  /***********************************************************
-   Output(): This function returns the scheduler status.
-   ***********************************************************/
+  /**
+   * \brief This function returns the scheduler status.
+   */
   function Output()
   {
     $uTime = microtime(true);
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    if ($this->State != PLUGIN_STATE_READY) {
+      return(0);
+    }
     $V="";
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
@@ -494,12 +517,12 @@ $text = _("binary packages with no source package");
 
     switch(GetParm("show",PARM_STRING))
     {
-    case 'detail':
-      $Show='detail';
-      break;
-    case 'summary':
-    default:
-      $Show='summary';
+      case 'detail':
+        $Show='detail';
+        break;
+      case 'summary':
+      default:
+        $Show='summary';
     }
 
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
@@ -518,44 +541,46 @@ $text = _("binary packages with no source package");
     {
       switch($this->OutputType)
       {
-      case "XML":
-        break;
-      case "HTML":
-        $V .= "<font class='text'>\n";
+        case "XML":
+          break;
+        case "HTML":
+          $V .= "<font class='text'>\n";
 
-        /************************/
-        /* Show the folder path */
-        /************************/
-        $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
+          /************************/
+          /* Show the folder path */
+          /************************/
+          $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
 
-        if (!empty($Upload))
-        {
-          $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
-          $V .= $this->ShowUploadHist($Item,$Uri);
-        }
-        $V .= "</font>\n";
-$text = _("Loading...");
-/*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>$text</div>"; */
-        break;
-      case "Text":
-        break;
-      default:
+          if (!empty($Upload))
+          {
+            $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
+            $V .= $this->ShowUploadHist($Item,$Uri);
+          }
+          $V .= "</font>\n";
+          $text = _("Loading...");
+          /*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>$text</div>"; */
+          break;
+        case "Text":
+          break;
+        default:
       }
 
       $Cached = false;
     }
     else
-      $Cached = true;
+    $Cached = true;
 
-    if (!$this->OutputToStdout) { return($V); }
+    if (!$this->OutputToStdout) {
+      return($V);
+    }
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
-$text = _("Elapsed time: %.2f seconds");
+    $text = _("Elapsed time: %.2f seconds");
     printf( "<p><small>$text</small>", $Time);
 
-    if ($Cached){ 
-$text = _("cached");
-$text1 = _("Update");
+    if ($Cached){
+      $text = _("cached");
+      $text1 = _("Update");
       echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     }else
     {
