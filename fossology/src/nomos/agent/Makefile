@@ -5,13 +5,13 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 EXE = nomos
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 SPEC=STRINGS.in
 CHECK=CHECKSTR
 PRE=PRECHECK
 PDATA=_split_words
 LICFIX=GENSEARCHDATA
-
 
 OBJS=licenses.o list.o parse.o process.o nomos_regex.o util.o # sources.o DMalloc.o
 GENOBJS=_precheck.o _autodata.o
