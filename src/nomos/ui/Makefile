@@ -26,16 +26,10 @@ all:
 install:
 	echo "make nomos ui install"
 	mkdir -p $(DESTDIR)$(MODDIR)/nomos/ui
-	$(INSTALL_DATA) agent-nomos-once.php $(DESTDIR)$(MODDIR)/nomos/ui/agent-nomos-once.php
-	$(INSTALL_DATA) agent-nomos.php $(DESTDIR)$(MODDIR)/nomos/ui/agent-nomos.php
-	$(INSTALL_DATA) ajax-filelic.php $(DESTDIR)$(MODDIR)/nomos/ui/ajax-filelic.php
-	$(INSTALL_DATA) nomos-diff.php $(DESTDIR)$(MODDIR)/nomos/ui/nomos-diff.php
-	$(INSTALL_DATA) ui-list-lic-files.php $(DESTDIR)$(MODDIR)/nomos/ui/ui-list-lic-files.php
-	$(INSTALL_DATA) ui-nomos-license-list.php $(DESTDIR)$(MODDIR)/nomos/ui/ui-nomos-license-list.php
-	$(INSTALL_DATA) ui-nomos-license.php $(DESTDIR)$(MODDIR)/nomos/ui/ui-nomos-license.php
+	$(INSTALL_DATA) ./*.php $(MODDIR)/nomos/ui/
 
 uninstall:
 	echo "make nomos uninstall"
-	rm -rf $(MODDIR)/nomos
+	rm -rf $(MODDIR)/nomos/ui
 
 .PHONY: install uninstall srcinstall srcuninstall
