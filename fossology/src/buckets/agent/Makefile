@@ -62,10 +62,15 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	@echo "make buckets agent install"
+	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(EXE); then \
+          ln -s $(MODDIR)/$(EXE) $(SYSCONFDIR)/mods-enabled ; fi;
 
 uninstall:
-	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+	@echo "make buckets agent uninstall"
+	rm -rf $(MODDIR)/$(EXE)/agent
+	rm -f $(SYSCONFDIR)/mods-enabled/$(EXE)
 
 clean:
 	rm -f $(EXE) *.o core
