@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ***************************************************************/
-/*
+/**
  \file buckets.c
  \brief Bucket agent
 
@@ -72,6 +72,9 @@ int main(int argc, char **argv)
   pbucketdef_t tmpbucketDefArray = 0;
   cacheroot_t  cacheroot;
   uploadtree_t  uploadtree;
+
+  /* connect to the scheduler */
+  fo_scheduler_connect(&argc, argv);
 
   /* Connect to the database */
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
