@@ -19,20 +19,18 @@
 
 extern int debug;
 
-/****************************************************
- writeBuckets
-
- Write bucket results to either db (bucket_file, bucket_container) or stdout.
-
- @param PGconn *pgConn  postgresql connection
- @param int pfile_pk  
- @param int uploadtree_pk  
- @param int *bucketList   null terminated array of bucket_pks 
-                          that match this pfile
- @param int agent_pk  
-
- @return 0=success, -1 failure
-****************************************************/
+/**
+ * \brief Write bucket results to either db (bucket_file, bucket_container) or stdout.
+ *
+ * \param PGconn $pgConn  postgresql connection
+ * \param int $pfile_pk  
+ * \param int $uploadtree_pk  
+ * \param int $bucketList   null terminated array of bucket_pks 
+ *                         that match this pfile
+ * \param int $agent_pk  
+ *
+ * \return 0=success, -1 failure
+ */
 FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
                           int *bucketList, int agent_pk, int nomosagent_pk)
 {

@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -20,27 +20,26 @@
 extern int debug;
 
 
-/****************************************************
- getContainerBuckets
-
- given a container uploadtree_pk and bucketdef, determine what buckets 
- the container is in.
- A container is in all the buckets of its children (recursive).
- 
- This function is also called for no-pfile artifacts to simplify the
- recursion in walkTree().
-
- @param PGconn      *pgConn  postgresql connection
- @param pbucketdef_t bucketDefArray  
- @param int          uploadtree_pk
-
- @return zero terminated array of bucket_pk's for this uploadtree_pk (may contain 
-         no elements).  This must be free'd by the caller.
-
- Note: It's tempting to just have walkTree() remember all the child buckets.
-       but, due to pfile reuse, some of the tree might have been
-       processed before walkTree() was called.
-****************************************************/
+/**
+ * \brief given a container uploadtree_pk and bucketdef, determine what buckets 
+ * the container is in.
+ *
+ * A container is in all the buckets of its children (recursive).
+ *
+ * This function is also called for no-pfile artifacts to simplify the
+ * recursion in walkTree().
+ *
+ * \param PGconn $pgConn  postgresql connection
+ * \param pbucketdef_t $bucketDefArray  
+ * \param int $uploadtree_pk
+ *
+ * \return zero terminated array of bucket_pk's for this uploadtree_pk (may contain 
+ *        no elements).  This must be free'd by the caller.
+ *
+ * Note: It's tempting to just have walkTree() remember all the child buckets.
+ *      but, due to pfile reuse, some of the tree might have been
+ *     processed before walkTree() was called.
+ */
 FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray,
                                   int uploadtree_pk)
 {

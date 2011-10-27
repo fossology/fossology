@@ -15,25 +15,23 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ***************************************************************/
-/*
- \file validate.c
- \brief Bucket agent validation, and usage functions
+/**
+ * \file validate.c
+ * \brief Bucket agent validation, and usage functions
  */
 
 #include "buckets.h"
 extern int debug;
 
-/****************************************************
- arrayAinB
-
- Verify that all the values in array A are also in B
-
- @param int *arrayA   null terminated array of ints
- @param int *arrayB   null terminated array of ints
-
- @return true (!0) if all the elements in A are also in B
- else return false (0)
-****************************************************/
+/**
+ * \brief Verify that all the values in array A are also in B
+ *
+ * \param int *arrayA   null terminated array of ints
+ * \param int *arrayB   null terminated array of ints
+ *
+ * \return true (!0) if all the elements in A are also in B
+ * else return false (0)
+ */
 FUNCTION int arrayAinB(int *arrayA, int *arrayB)
 {
   int *arrayBHead;
@@ -55,17 +53,15 @@ FUNCTION int arrayAinB(int *arrayA, int *arrayB)
   return 1;
 }
 
-/****************************************************
- intAinB
-
- Verify that all the value A is a member of array B
-
- @param int  intA     int to match
- @param int *arrayB   null terminated array of ints
-
- @return true (!0) if intA is in B
- else return false (0)
-****************************************************/
+/**
+ * \brief Verify that all the value A is a member of array B
+ *
+ * \param int  intA     int to match
+ * \param int *arrayB   null terminated array of ints
+ *
+ * \return true (!0) if intA is in B
+ * else return false (0)
+ */
 FUNCTION int intAinB(int intA, int *arrayB)
 {
 
@@ -80,22 +76,22 @@ FUNCTION int intAinB(int intA, int *arrayB)
 }
 
 
-/****************************************************
- validate_pk
-
- Verify a primary key exists.
- This works by running the sql (must be select) and
- returning the first column of the first row.
- The sql should make this the primary key.
- This could be used to simply return the first column 
- of the first result for any query.
-
- @param PGconn *pgConn  Database connection object
- @param char *sql   sql must select a single column, value in first row is returned.
-
- @return primary key, or 0 if it doesn't exist
- NOTE: This function writes error to stdout
-****************************************************/
+/**
+ * \brief Verify a primary key exists.
+ *
+ * This works by running the sql (must be select) and
+ * returning the first column of the first row. \n
+ * The sql should make this the primary key. \n
+ * This could be used to simply return the first column 
+ * of the first result for any query.
+ *
+ * \param PGconn $pgConn  Database connection object
+ * \param char $sql   sql must select a single column, value in first row is returned.
+ *
+ * \return primary key, or 0 if it doesn't exist
+ *
+ * NOTE: This function writes error to stdout
+ */
 FUNCTION int validate_pk(PGconn *pgConn, char *sql)
 {
   char *fcnName = "validate_pk";
@@ -129,21 +125,19 @@ FUNCTION void Usage(char *Name)
 } /* Usage() */
 
 
-/****************************************************
- processed
-
- Has this pfile or uploadtree_pk already been bucket processed?
- This only works if the bucket has been recorded in table 
- bucket_file, or bucket_container.
-
- @param PGconn *pgConn  postgresql connection
- @param int *agent_pk   agent ID
- @param int pfile_pk  
- @param int uploadtree_pk  
- @param int bucketpool_pk  
-
- @return 1=yes, 0=no
-****************************************************/
+/**
+ * \brief Has this pfile or uploadtree_pk already been bucket processed?
+ * This only works if the bucket has been recorded in table 
+ * bucket_file, or bucket_container.
+ *
+ * \param PGconn $pgConn  postgresql connection
+ * \param int $agent_pk   agent ID
+ * \param int $pfile_pk  
+ * \param int $uploadtree_pk  
+ * \param int $bucketpool_pk  
+ *
+ * \return 1=yes, 0=no
+ */
 FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk,
                        int bucketpool_pk)
 {
@@ -173,27 +167,25 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtre
 }
 
 
-/****************************************************
- UploadProcessed
-
- Has this upload already been bucket processed?
- This function checkes buckets_ars to see if the upload has
- been processed.  
- 
- @param PGconn *pgConn  postgresql connection
- @param int bucketagent_pk   bucket agent ID
- @param int nomosagent_pk    nomos agent ID
- @param int pfile_pk  
- @param int uploadtree_pk  
- @param int bucketpool_pk  
-
- @return 1=yes upload has been processed, 
-         0=upload has not been processed
- 
- Note: This could also cross check with the bucket_file
- and bucket_container recs but doesn't at this time.  
- This is the reason for the unused function args.
-****************************************************/
+/**
+ * \brief Has this upload already been bucket processed?
+ * This function checkes buckets_ars to see if the upload has
+ * been processed.  
+ * 
+ * \param PGconn $pgConn  postgresql connection
+ * \param int $bucketagent_pk   bucket agent ID
+ * \param int $nomosagent_pk    nomos agent ID
+ * \param int $pfile_pk  
+ * \param int $uploadtree_pk  
+ * \param int $bucketpool_pk  
+ *
+ * \return 1=yes upload has been processed \n
+ *        0=upload has not been processed
+ *
+ * Note: This could also cross check with the bucket_file
+ * and bucket_container recs but doesn't at this time.  
+ * This is the reason for the unused function args.
+ */
 FUNCTION int UploadProcessed(PGconn *pgConn, int bucketagent_pk, int nomosagent_pk, 
                              int pfile_pk, int uploadtree_pk,
                              int upload_pk, int bucketpool_pk)

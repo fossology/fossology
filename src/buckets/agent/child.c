@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,20 +19,18 @@
 
 extern int debug;
 
-/****************************************************
- childInBucket
-
- given a container uploadtree_pk and bucketdef, determine 
- if any child is in this bucket.
- 
- @param PGconn      *pgConn  postgresql connection
- @param pbucketdef_t bucketDef
- @param puploadtree_t puploadtree
-
- @return 1 if child is in this bucket
-         0 not in bucket
-        -1 error
-****************************************************/
+/**
+ * \brief given a container uploadtree_pk and bucketdef, determine 
+ * if any child is in this bucket.
+ *
+ * \param PGconn $pgConn postgresql connection
+ * \param pbucketdef_t $bucketDef
+ * \param puploadtree_t $puploadtree
+ *
+ * \return 1 if child is in this bucket \n
+ *        0 not in bucket \n
+ *       -1 error \n
+ */
 FUNCTION int childInBucket(PGconn *pgConn, pbucketdef_t bucketDef, puploadtree_t puploadtree)
 {
   char *fcnName = "childInBucket";

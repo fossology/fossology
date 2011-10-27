@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,25 +19,24 @@
 
 extern int debug;
 
-/****************************************************
- walkTree
-
- This function does a recursive depth first walk through a file tree (uploadtree).
- 
- @param PGconn pgConn   The database connection object.
- @param pbucketdef_t    bucketDefArray  Bucket Definitions
- @param int  agent_pk   The agent_pk
- @param int  uploadtree_pk
- @param int  skipProcessedCheck true if it is ok to skip the initial 
-                        processed() call.  The call is unnecessary during 
-                        recursion and it's an DB query, so best to avoid
-                        doing an unnecessary call.
- @param int  hasPrules  1=bucketDefArray contains at least one rule that only 
-                        apply to packages.  0=No package rules.
-
- @return 0 on OK, -1 on failure.
- Errors are written to stdout.
-****************************************************/
+/**
+ * \brief This function does a recursive depth first walk through a file tree (uploadtree).
+ *
+ * \param PGconn $pgConn   The database connection object.
+ * \param pbucketdef_t    $bucketDefArray  Bucket Definitions
+ * \param int  $agent_pk   The agent_pk
+ * \param int  $uploadtree_pk
+ * \param int  $skipProcessedCheck true if it is ok to skip the initial 
+ *                       processed() call.  The call is unnecessary during 
+ *                       recursion and it's an DB query, so best to avoid
+ *                       doing an unnecessary call.
+ * \param int  $hasPrules  1=bucketDefArray contains at least one rule that only 
+ *                       apply to packages.  0=No package rules.
+ *
+ * \return 0 on OK, -1 on failure.
+ *
+ * Errors are written to stdout.
+ */
 FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, 
                       int  uploadtree_pk, int skipProcessedCheck,
                       int hasPrules)
@@ -149,29 +148,30 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
 } /* walkTree */
 
 
-/****************************************************
- processFile
-
- Process a file.  The file might be a single file, a container,
- an artifact, a package, ..., in other words, an uploadtree record.
- Need to process container artifacts as a regular directory so that buckets cascade
- up without interruption.
- There is one small caveat.  If the container is a package AND
- the bucketDefArray has rules that apply to packages (applies_to='p')
- THEN process the package as both a leaf since the bucket pool has its own 
- rules for packages, and as a container (the pkg is in each of its childrens
- buckets).
- 
- @param PGconn pgConn   The database connection object.
- @param pbucketdef_t    bucketDefArray  Bucket Definitions
- @param pupuploadtree_t Uploadtree record
- @param int  agent_pk   The agent_pk
- @param int  hasPrules  1=bucketDefArray contains at least one rule that only 
-                        apply to packages.  0=No package rules.
-
- @return 0 on OK, -1 on failure.
- Errors are written to stdout.
-****************************************************/
+/**
+ * \brief Process a file.  
+ *
+ * The file might be a single file, a container,
+ * an artifact, a package, ..., in other words, an uploadtree record. \n
+ * Need to process container artifacts as a regular directory so that buckets cascade
+ * up without interruption. \n
+ * There is one small caveat.  If the container is a package AND
+ * the bucketDefArray has rules that apply to packages (applies_to='p')
+ * THEN process the package as both a leaf since the bucket pool has its own 
+ * rules for packages, and as a container (the pkg is in each of its childrens
+ * buckets).
+ *
+ * \param PGconn $pgConn   The database connection object.
+ * \param pbucketdef_t    $bucketDefArray  Bucket Definitions
+ * \param pupuploadtree_t $puoloadtree Uploadtree record
+ * \param int  $agent_pk   The agent_pk
+ * \param int  $hasPrules  1=bucketDefArray contains at least one rule that only 
+ *                       apply to packages.  0=No package rules.
+ *
+ * \return 0 on OK, -1 on failure.
+ *
+ * Errors are written to stdout.
+ */
 FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray, 
                       puploadtree_t puploadtree, int agent_pk, int hasPrules)
 {

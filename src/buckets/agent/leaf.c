@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -22,20 +22,18 @@ extern int DEB_SOURCE;
 extern int DEB_BINARY;
 
 
-/****************************************************
- processLeaf
-
- determine which bucket(s) a leaf node is in and write results
-
- @param PGconn      *pgConn          postgresql connection
- @param pbucketdef_t bucketDefArray  Bucket Definitions
- @param puploadtree_t puploadtree    uploadtree record
- @param ppackage_t    ppackage       package record
- @param int          agent_pk
- @param int          hasPrules       
-
- @return 0=success, else error
-****************************************************/
+/**
+ * \brief determine which bucket(s) a leaf node is in and write results
+ * 
+ * \param PGconn      $pgConn          postgresql connection
+ * \param pbucketdef_t $bucketDefArray  Bucket Definitions
+ * \param puploadtree_t $puploadtree    uploadtree record
+ * \param ppackage_t    $ppackage       package record
+ * \param int          $agent_pk
+ * \param int          $hasPrules       
+ *
+ * \return 0=success, else error
+ */
 FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, 
                          puploadtree_t puploadtree, ppackage_t ppackage,
                          int agent_pk, int hasPrules)
@@ -64,18 +62,16 @@ FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray,
 }
 
 
-/****************************************************
- getLeafBuckets
-
- Determine what buckets the pfile is in
-
- @param PGconn *pgConn  postgresql connection
- @param pbucketdef_t bucketDefArray
- @param puploadtree_t puploadtree
- @param int hasPrules  
-
- @return array of bucket_pk's, or 0 if error
-****************************************************/
+/**
+ * \brief Determine what buckets the pfile is in
+ *
+ * \param PGconn $pgConn  postgresql connection
+ * \param pbucketdef_t $bucketDefArray
+ * \param puploadtree_t $puploadtree
+ * \param int $hasPrules  
+ *
+ * \return array of bucket_pk's, or 0 if error
+ */
 FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, 
                              puploadtree_t puploadtree, ppackage_t ppackage,
                              int hasPrules)

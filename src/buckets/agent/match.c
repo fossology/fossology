@@ -18,17 +18,15 @@
 #include "buckets.h"
 
 
-/****************************************************
- matchAnyLic
-
- Does this regex match any license name for this pfile?
-
- @param PGresult result    results from select of lic names for this pfile
- @param int      numLics   number of lics in result
- @param regex_t *compRegex ptr to compiled regex to check
-
- @return 1=true, 0=false
-****************************************************/
+/**
+ * \brief Does this regex match any license name for this pfile?
+ *
+ * \param PGresult $result    results from select of lic names for this pfile
+ * \param int      $numLics   number of lics in result
+ * \param regex_t $compRegex ptr to compiled regex to check
+ *
+ * \return 1=true, 0=false
+ */
 FUNCTION int matchAnyLic(PGresult *result, int numLics, regex_t *compRegex)
 {
   int   licNumb;
