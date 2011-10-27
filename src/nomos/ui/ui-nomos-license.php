@@ -131,8 +131,8 @@ class ui_nomos_license extends FO_Plugin
 
 
   /**
-   * \brief Given an $Uploadtree_pk, display: <br>
-   * (1) The histogram for the directory BY LICENSE. <br>
+   * \brief Given an $Uploadtree_pk, display: \n 
+   * (1) The histogram for the directory BY LICENSE. \n
    * (2) The file listing for the directory.
    */
   function ShowUploadHist($Uploadtree_pk,$Uri, $tag_pk)
