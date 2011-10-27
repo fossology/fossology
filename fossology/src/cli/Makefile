@@ -34,7 +34,7 @@ docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 
 install: all
 	for file in $(EXE); do \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(BINDIR)/$${file%.php}; \
+		$(INSTALL_PROGRAM) -D $$file $(DESTDIR)$(MODDIR)/cli/$${file%.php}; \
 	done
 
 	for file in $(MAN1FILES); do \
