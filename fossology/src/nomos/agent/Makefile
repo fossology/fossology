@@ -5,7 +5,6 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 EXE = nomos
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 SPEC=STRINGS.in
 CHECK=CHECKSTR
@@ -63,13 +62,14 @@ _autodefs.h _autodata.c:	$(SPEC) $(LICFIX)
 install: all
 	@echo "make nomos agent install"
 	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
-	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;	
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(EXE); then \
+	  ln -s $(MODDIR)/$(EXE) $(SYSCONFDIR)/mods-enabled ; fi;	
 #	$(INSTALL_PROGRAM) encode  $(DESTDIR)$(AGENTDIR)/encode
 
 uninstall:
 #	rm -f $(DESTDIR)$(AGENTDIR)/encode
-	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
+	rm -rf $(MODDIR)/$(EXE)
+	rm -f $(SYSCONFDIR)/mods-enabled/$(EXE) 
 
 test: all
 	@echo "*** No tests available for agent/$(EXE) ***"
