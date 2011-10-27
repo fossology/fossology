@@ -120,13 +120,13 @@ logging.o: %.o: %.c $(DEPEN)
 
 install: all install-conf
 	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/scheduler/agent/$(EXE)
-	$(INSTALL_PROGRAM) $(CLI) $(MODDIR)/$(CLI)/agent/$(CLI)
+	$(INSTALL_PROGRAM) $(CLI) $(MODDIR)/scheduler/agent/$(CLI)
 	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
 	
 	@if test ! -e $(SYSCONFDIR)/mods-enabled/scheduler; then \
 	  ln -s $(MODDIR)/scheduler $(SYSCONFDIR)/mods-enabled ; fi;
-	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(CLI); then \
-	  ln -s $(MODDIR)/$(CLI) $(SYSCONFDIR)/mods-enabled ; fi;
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/scheduler; then \
+	  ln -s $(MODDIR)/scheduler $(SYSCONFDIR)/mods-enabled ; fi;
 
 install-conf:
 	@mkdir -p $(CONFDIR)/mods-enabled
