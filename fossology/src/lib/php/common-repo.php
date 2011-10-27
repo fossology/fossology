@@ -16,12 +16,21 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/************************************************************
- GetMimeTypeItem(): Given an uploadtree_pk, return a string that describes
- the mime type.  Note this only looks in the pfile rec.  For some mimetypes
- unpack initializes the pfile mimetype.  Others require the mimetype agent.
- (This is in common-repo since mimetypes apply to repo contents.)
- ************************************************************/
+/**
+ * \file common-repo.php
+ * \brief This file contains common repository functions.
+ */
+
+/**
+ * \brief Given an uploadtree_pk, return a string that describes
+ * the mime type.  Note this only looks in the pfile rec.  For some mimetypes
+ * unpack initializes the pfile mimetype.  Others require the mimetype agent.
+ * (This is in common-repo since mimetypes apply to repo contents.)
+ *
+ * \param $Item - uploadtree pk
+ *
+ * \return string that describes the mime type.
+ */
 function GetMimeType($Item)
 {
   global $PG_CONN;
@@ -45,45 +54,59 @@ function GetMimeType($Item)
   return($Meta);
 } /* GetMimeType() */
 
-/************************************************************
- RepPath(): Given a pfile id, retrieve the pfile path.
- NOTE: The filename at the path may not exist.
- In fact, the entire path may not exist!
- Returns the path, or NULL if the pfile record does not exist.
- ************************************************************/
+/**
+ * \brief Given a pfile id, retrieve the pfile path.
+ * 
+ * NOTE: The filename at the path may not exist.
+ * In fact, the entire path may not exist!
+ *
+ * \param $PfilePk - pfile pk
+ * \param $Repo - repository type
+ *
+ * \return the path, or NULL if the pfile record does not exist.
+ */
 function RepPath($PfilePk, $Repo="files")
 {
   global $Plugins;
   global $LIBEXECDIR;
-  global $DB;
-  if (empty($DB)) { return; }
+  global $PG_CONN;
+  if (empty($PG_CONN)) { return; }
 
-  $Sql = "SELECT * FROM pfile WHERE pfile_pk = $PfilePk LIMIT 1;";
-  $Results = $DB->Action($Sql);
-  $Row = $Results[0];
+  $sql = "SELECT * FROM pfile WHERE pfile_pk = $PfilePk LIMIT 1;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $Row = pg_fetch_assoc($result);
+  pg_free_result($result);
   if (empty($Row['pfile_sha1'])) { return(NULL); }
   $Hash = $Row['pfile_sha1'] . "." . $Row['pfile_md5'] . "." . $Row['pfile_size'];
   exec("$LIBEXECDIR/reppath $Repo $Hash", $Path);
   return($Path[0]);
 } // RepPath()
 
-/************************************************************
- RepPathItem(): Given an uploadtree_pk, retrieve the pfile path.
- NOTE: The filename at the path may not exist.
- In fact, the entire path may not exist!
- Returns the path, or NULL if the pfile record does not exist.
- ************************************************************/
+/**
+ * \brief Given an uploadtree_pk, retrieve the pfile path.
+ *
+ * NOTE: The filename at the path may not exist.
+ * In fact, the entire path may not exist!
+ *
+ * \param $Item - uploadtree pk
+ * \param $Repo - repository type
+ *
+ * \return the path, or NULL if the pfile record does not exist.
+ */
 function RepPathItem($Item, $Repo="files")
 {
   global $Plugins;
   global $LIBEXECDIR;
-  global $DB;
-  if (empty($DB)) { return; }
+  global $PG_CONN;
+  if (empty($PG_CONN)) { return; }
 
-  $Sql = "SELECT * FROM pfile INNER JOIN uploadtree ON pfile_fk = pfile_pk
+  $sql = "SELECT * FROM pfile INNER JOIN uploadtree ON pfile_fk = pfile_pk
 	  WHERE uploadtree_pk = $Item LIMIT 1;";
-  $Results = $DB->Action($Sql);
-  $Row = $Results[0];
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $Row = pg_fetch_assoc($result);
+  pg_free_result($result);
   if (empty($Row['pfile_sha1'])) { return(NULL); }
   $Hash = $Row['pfile_sha1'] . "." . $Row['pfile_md5'] . "." . $Row['pfile_size'];
   exec("$LIBEXECDIR/reppath $Repo $Hash", $Path);
