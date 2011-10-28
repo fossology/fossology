@@ -16,22 +16,19 @@
 ######################################################################
 TOP=../../..
 include $(TOP)/Makefile.conf
+MOD_NAME=copyright
+MOD_SUBDIR=ui
 
 all:
 	@echo "make copyright ui"
 
 install:
 	echo "make copyright ui install"
-	mkdir -p $(DESTDIR)$(WEBDIR)/ui/copyright/
-	$(INSTALL_DATA) library.php $(DESTDIR)$(WEBDIR)/ui/copyright/library.php
-	$(INSTALL_DATA) hist.php $(DESTDIR)$(WEBDIR)/ui/copyright/hist.php
-	$(INSTALL_DATA) list.php $(DESTDIR)$(WEBDIR)/ui/copyright/list.php
-	$(INSTALL_DATA) view.php $(DESTDIR)$(WEBDIR)/ui/copyright/view.php
-	$(INSTALL_DATA) agent.php $(DESTDIR)$(WEBDIR)/ui/copyright/agent.php
-	$(INSTALL_DATA) oneshot.php $(DESTDIR)$(WEBDIR)/ui/copyright/oneshot.php
+	mkdir -p $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	$(INSTALL_DATA) ./*.php $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 uninstall:
-	echo "make copyright uninstall"
-	rm -rf $(DESTDIR)$(WEBDIR)/ui/copyright/
+	echo "make copyright ui uninstall"
+	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
-.PHONY: install uninstall srcinstall srcuninstall
+.PHONY: install uninstall  all

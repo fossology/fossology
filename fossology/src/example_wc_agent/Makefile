@@ -35,8 +35,7 @@ coverage:
 
 install: all
 	$(call dirloop,install)
-	mkdir -p $(MODDIR)/$(MOD_NAME)
-	$(INSTALL_PROGRAM) -D $(MOD_NAME).conf $(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+	$(INSTALL_PROGRAM) $(MOD_NAME).conf $(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
 	  ln -s $(MODDIR)/$(MOD_NAME) $(SYSCONFDIR)/mods-enabled ; fi;
 
