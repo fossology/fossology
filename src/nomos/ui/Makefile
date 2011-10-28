@@ -24,12 +24,12 @@ all:
 	@echo "make nomos ui"
 
 install:
-	echo "make nomos ui install"
+	@echo "make nomos ui install"
 	mkdir -p $(DESTDIR)$(MODDIR)/nomos/ui
 	$(INSTALL_DATA) ./*.php $(MODDIR)/nomos/ui/
 
 uninstall:
-	echo "make nomos uninstall"
+	@echo "make nomos uninstall"
 	rm -rf $(MODDIR)/nomos/ui
 
-.PHONY: install uninstall srcinstall srcuninstall
+.PHONY: allinstall uninstall

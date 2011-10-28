@@ -62,14 +62,11 @@ _autodefs.h _autodata.c:	$(SPEC) $(LICFIX)
 install: all
 	@echo "make nomos agent install"
 	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
-	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(SYSCONFDIR)/mods-enabled ; fi;	
 #	$(INSTALL_PROGRAM) encode  $(DESTDIR)$(AGENTDIR)/encode
 
 uninstall:
 #	rm -f $(DESTDIR)$(AGENTDIR)/encode
-	rm -rf $(MODDIR)/$(EXE)
-	rm -f $(SYSCONFDIR)/mods-enabled/$(EXE) 
+	rm -rf $(MODDIR)/$(EXE)/agent
 
 test: all
 	@echo "*** No tests available for agent/$(EXE) ***"

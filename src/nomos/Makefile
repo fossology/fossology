@@ -37,12 +37,17 @@ coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
+	@echo "make $(MOD_NAME) install"
 	$(call dirloop,install)
 	$(INSTALL_PROGRAM) -D $(MOD_NAME).conf $(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+	ln -s $(MODDIR)/$(MOD_NAME) $(SYSCONFDIR)/mods-enabled ; fi;
 
 uninstall:
+	@echo "make $(MOD_NAME) uninstall"
 	$(call dirloop,uninstall)
 	rm -rf $(MODDIR)/$(MOD_NAME)
+	rm -f $(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
 clean:
 	$(call dirloop,clean)
