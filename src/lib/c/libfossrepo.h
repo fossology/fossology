@@ -39,6 +39,8 @@
 #ifndef LIBFOSSREPO_H
 #define LIBFOSSREPO_H
 
+#include <fossconfig.h>
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -66,6 +68,7 @@
 /* General Repository usage */
 int	fo_RepOpen	();	/* call before using any other function */
 void fo_RepClose	();	/* call after using all other functions */
+int fo_RepOpenFull (fo_conf* config); /* agents should call fo_RepOpen() */
 
 /* Get info -- caller must free() returned string. */
 char * fo_RepGetRepPath	(); /* path to mounted repository */

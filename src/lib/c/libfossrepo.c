@@ -821,13 +821,25 @@ void	fo_RepClose	()
 } /* fo_RepClose() */
 
 /*!
- \brief Every other function uses the repository
- configuration files.  Why open them 100,000 times when
- it can be opened once and stored in RAM?
- This sets global structures.
- \return 1 on opened, 0 on failed.
+ * \brief wrapper function for agents. Simply call
+ *        fo_RepOpenFull passing in the default system
+ *        configuration
+ *
+ * @return 1 on opened, 0 on failed.
  */
-int	fo_RepOpen	()
+int fo_RepOpen  ()
+{
+  return fo_RepOpenFull(sysconfig);
+}
+
+/*!
+ * \brief Loads common inforamtion from configuration
+ *        files into ram.
+ *
+ * \param the configuration to use
+ * \return 1 on opened, 0 on failed.
+ */
+int	fo_RepOpenFull	(fo_conf* config)
 {
   GError* error = NULL;
   char* path;
@@ -838,11 +850,6 @@ int	fo_RepOpen	()
 #endif
 
   fo_RepClose(); /* reset everything */
-  if(error)
-  {
-    fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error->message);
-    return 0;
-  }
 
 #if GROUP
   /* Make sure we can use group */
@@ -859,7 +866,7 @@ int	fo_RepOpen	()
 #endif
 
   /* Load the depth configuration */
-  RepDepth = atoi(fo_config_get(sysconfig, "FOSSOLOGY", "depth", &error));
+  RepDepth = atoi(fo_config_get(config, "FOSSOLOGY", "depth", &error));
   if(error)
   {
     fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error->message);
@@ -867,7 +874,7 @@ int	fo_RepOpen	()
   }
 
   /* Load the path configuration */
-  path = fo_config_get(sysconfig, "FOSSOLOGY", "path", &error);
+  path = fo_config_get(config, "FOSSOLOGY", "path", &error);
   if(error)
   {
     fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error->message);

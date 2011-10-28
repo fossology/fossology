@@ -59,6 +59,7 @@ enum job_status {
 extern int agent_verbose;
 
 extern fo_conf* sysconfig;
+extern char*    sysconfigdir;
 
 /** @brief Logging functions
  */

@@ -52,10 +52,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TILL_DEATH 180    ///< how long to wait before agent is dead            (3 minutes)
 #define NUM_UPDATES 5     ///< the number of updates before agent is dead       (arbitrary)
 
-#ifndef AGENT_DIR
-#define AGENT_DIR ""      ///< the location of the agent executables for localhost
-#endif
-
 #define TEST_NULV(a) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
 #define TEST_NULL(a, ret) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
 
@@ -137,7 +133,7 @@ const char* status_strings[] = {
  * so that correct printing of the verbose message is guaranteed
  *
  * @param a the agent to change the status for
- * @param new_status the new status of the agent
+ * @param new_status the new status of the agentchar* sysconfdir = NULL;    // system configuration directory (SYSCONFDIR)
  */
 void agent_transition(agent a, agent_status new_status)
 {
@@ -477,7 +473,7 @@ void shell_parse(char* input, int* argc, char*** argv)
   }
 
   (*argv)[idx++] = "-c";
-  (*argv)[idx++] = sysconfig;
+  (*argv)[idx++] = sysconfigdir;
   (*argv)[idx++] = "--scheduler_start";
   (*argc) = idx;
 }
@@ -536,7 +532,9 @@ void* agent_spawn(void* passed)
 
       tmp = args[0];
       args[0] = g_strdup_printf(AGENT_BINARY,
-          AGENT_DIR, a->meta_data->name, tmp);
+          sysconfigdir,
+          a->meta_data->name,
+          tmp);
 
       execv(args[0], args);
     }

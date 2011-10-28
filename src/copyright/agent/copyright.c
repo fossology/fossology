@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* other library includes */
 #include <pcre.h>
+#include <libfossology.h>
 
 /* local includes */
 #include <copyright.h>
@@ -33,7 +34,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MAXBUF 1024*1024  ///< max bytes to scan
 #define LINE_LENGTH 256   ///< the max length of a line in a file
-#define MAX(a,b) ((a>b)?a:b)
 
 
 /** regular expression to find email statements in natural language */
@@ -384,8 +384,8 @@ int copyright_callout(pcre_callout_block* info)
 int copyright_init(copyright* copy)
 {
   /* local variables */
-  char copy_dir[FILENAME_MAX];  // the location of the copyright data
-  char name_dir[FILENAME_MAX];  // the location of the dictionary data
+  char* copy_dir;  // the location of the copyright data
+  char* name_dir;  // the location of the dictionary data
 
   /* call constructor for all sub objects */
   (*copy) = (copyright)calloc(1,sizeof(struct copyright_internal));
@@ -394,10 +394,8 @@ int copyright_init(copyright* copy)
   cvector_init(&((*copy)->entries), copy_entry_function_registry());
 
   /* setup the copy_dir and name_dir variables */
-  memset(copy_dir, '\0', sizeof(copy_dir));
-  memset(name_dir, '\0', sizeof(name_dir));
-  sprintf(copy_dir, "%s/copyright.dic", DATADIR);
-  sprintf(name_dir, "%s/names.dic", DATADIR);
+  copy_dir = "copyright.dic";
+  name_dir = "names.dic";
 
   /* load the dictionaries */
   if(!load_dictionary((*copy)->dict, copy_dir) ||
