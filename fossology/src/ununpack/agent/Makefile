@@ -44,7 +44,7 @@ install: all $(VARS)
 	@echo "#!/bin/bash" > $(BINDIR)/departition
 	@echo "MODDIR=$(MODDIR)" >> $(BINDIR)/departition
 	@echo "SYSCONFDIR=$(SYSCONFDIR)" >> $(BINDIR)/departition
-	@echo "\$$MODDIR/ununpack/agent/departition -c \$$SYSCONFDIR $@" >> $(BINDIR)/departition
+	@echo "\$$MODDIR/ununpack/agent/departition -c \$$SYSCONFDIR \$$@" >> $(BINDIR)/departition
 	chmod a+x $(BINDIR)/departition
 
 uninstall: $(VARS)
