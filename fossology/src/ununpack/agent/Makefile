@@ -37,7 +37,15 @@ install: all $(VARS)
 	
 	$(INSTALL_PROGRAM) -D ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
 	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
-	  ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;	
+	  ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;
+	  
+# create wrapper for departition in BINDIR
+
+	@echo "#!/bin/bash" > $(BINDIR)/departition
+	@echo "MODDIR=$(MODDIR)" >> $(BINDIR)/departition
+	@echo "SYSCONFDIR=$(SYSCONFDIR)" >> $(BINDIR)/departition
+	@echo "\$$MODDIR/ununpack/agent/departition -c \$$SYSCONFDIR $@" >> $(BINDIR)/departition
+	chmod a+x $(BINDIR)/departition
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
