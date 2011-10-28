@@ -5,19 +5,22 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CONFFILES=fossology.conf
 CONFPATH=$(SYSCONFDIR)
 
-all: fo-postinstall defconf/Db.conf
+all:	fo-postinstall defconf/Db.conf defconf/fossology.conf
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
+
 # generate the postinstall script
-fo-postinstall: fo-postinstall-process
+fo-postinstall:	fo-postinstall-process
 	chmod +x fo-postinstall
 
 # generate the default Db.conf file
 defconf/Db.conf: defconf/Db.conf-process
+
+# generate fossology.conf
+defconf/fossology.conf:	defconf/fossology.conf-process
 
 install: all
 	$(INSTALL_PROGRAM) fo-postinstall $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
