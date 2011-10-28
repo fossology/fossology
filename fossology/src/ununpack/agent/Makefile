@@ -30,10 +30,10 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all $(VARS)
-	if [ -e $(DESTDIR)$(BINDIR)/departition ] ; then \
-	   rm -f $(DESTDIR)$(BINDIR)/departition; \
+	if [ -e $(DESTDIR)$(MODDIR)/ununpack/agent/departition ] ; then \
+	   rm -f $(DESTDIR)$(MODDIR)/ununpack/agent/departition; \
 	fi
-	$(INSTALL_PROGRAM) departition $(DESTDIR)$(BINDIR)/departition
+	$(INSTALL_PROGRAM) -D departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition
 	
 	$(INSTALL_PROGRAM) -D ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
 	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
@@ -42,8 +42,6 @@ install: all $(VARS)
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
 	rm -rf $(DESTDIR)$(MODDIR)/ununpack
-	rm -f $(CONFDIR)/mods-enabled/ununpack
-
 
 $(OBJECTS): %.o: %.c  $(UUHDR)
 	$(CC) -c $< $(CFLAGS_LOCAL) 

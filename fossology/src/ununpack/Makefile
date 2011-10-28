@@ -37,6 +37,7 @@ install: all
 
 uninstall:
 	$(call dirloop,uninstall)
+	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/ununpack
 
 clean:
 	$(call dirloop,clean)
