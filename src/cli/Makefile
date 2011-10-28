@@ -6,6 +6,7 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 EXE=cp2foss.php fossinit.php fossjobs.php fosslic.php
+WRAP=cp2foss fossinit fossjobs fosslic
 DOCS=cp2foss.pod fossjobs.pod fosslic.pod 
 MAN1FILES=$(DOCS:%.pod=%.1)
 HTMLFILES=$(DOCS:%.pod=%.html)
@@ -42,11 +43,23 @@ install: all
 	done
 	
 	$(INSTALL_DATA) libschema.php $(DESTDIR)$(LIBEXECDIR)/libschema.php
+	
+# create wrappers in BINDIR
+	for file in $(WRAP); do \
+		echo "Making wrapper for $$file"; \
+		echo "#!/bin/bash" > $(BINDIR)/$$file; \
+		echo "MODDIR=$(MODDIR)" >> $(BINDIR)/$$file; \
+		echo "SYSCONFDIR=$(SYSCONFDIR)" >> $(BINDIR)/$$file; \
+		echo "\$$MODDIR/cli/$$file -c \$$SYSCONFDIR \$$@" >> $(BINDIR)/$$file; \
+		chmod a+x $(BINDIR)/$$file; \
+	done
 
 uninstall:
 	for file in $(EXE); do \
-		rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
+		rm -f $(DESTDIR)$(BINDIR)/$${file%}; \
 	done
+	
+	rm -rf $(DESTDIR)$(MODDIR)/cli
 
 	for file in $(MAN1FILES); do \
 		rm -f $(DESTDIR)$(MAN1DIR)/$$file; \
