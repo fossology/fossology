@@ -27,14 +27,11 @@ $(FOLIB):
 
 install: all
 	@echo "make $(EXE) install"
-	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
-	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(SYSCONFDIR)/mods-enabled ; fi;
+	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
 	@echo "make $(EXE) uninstall"
 	rm -rf $(MODDIR)/$(EXE)/agent
-	rm -f $(SYSCONFDIR)/mods-enabled/$(EXE)
 
 test: all
 	@echo "make test $(EXE)"

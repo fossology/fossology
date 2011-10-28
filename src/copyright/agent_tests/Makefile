@@ -34,4 +34,10 @@ coverage:
 clean:
 	$(call dirloop, clean)
 
-.PHONY: all test coverage clean
+install:
+	echo "no make copyright ui install"
+
+uninstall:
+	echo "no make copyright ui uninstall"
+
+PHONY: all test coverage clean install uninstall

@@ -73,17 +73,14 @@ pair.o: %.o: %.c %.h cvector.h
 
 install: $(EXE)
 	@echo "make copyright agent install"
-	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
-	$(MAKE) -C ../ui install
+	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
 	$(INSTALL_DATA) copyright.dic $(MODDIR)/$(EXE)/agent/
 	$(INSTALL_DATA) names.dic $(DESTDIR)$(MODDIR)/$(EXE)/agent/
-	@if test ! -e $(CONFDIR)/mods-enabled/copyright; then \
-	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+  
 
 uninstall:
 	@echo "make copyright agent uninstall"
-	rm -rf $(MODDIR)/$(EXE)
-	rm -f $(CONFDIR)/mods-enabled/copyright
+	rm -rf $(MODDIR)/$(EXE)/agent
 
 #####################
 # other build rules #

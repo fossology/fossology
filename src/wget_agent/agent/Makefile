@@ -42,15 +42,12 @@ $(FOLIB):
 
 install: all
 	@echo "make wget_agent install"
-	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
-	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(SYSCONFDIR)/mods-enabled/$(EXE) ; fi;
+	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
 
 
 uninstall:
 	@echo "make wget_agent uninstall"
 	rm -rf $(MODDIR)/$(EXE)/agent
-	rm -f $(SYSCONFDIR)/mods-enabled/$(EXE) 
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL)

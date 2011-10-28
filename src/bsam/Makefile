@@ -14,25 +14,39 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
-MOD_NAME=mimetype
-MOD_SUBDIR=ui
+MOD_NAME=bsam
 
-all:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) all"
+DIRS = ui
+dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+
+all: 
+	@echo "make $(MOD_NAME)"
+
+test: 
+	@echo "make $(MOD_NAME) test"
+
+coverage:
+	@echo "make $(MOD_NAME) coverage"
 
 install: all
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) install"
-	mkdir -p $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/
-	$(INSTALL_DATA) ./*.php $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/
+	@echo "make $(MOD_NAME) install"
+	$(call dirloop,install)
+	mkdir -p $(MODDIR)/$(MOD_NAME)
+	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+	  ln -s $(MODDIR)/$(MOD_NAME) $(SYSCONFDIR)/mods-enabled ; fi;
+
 
 uninstall:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
-	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	@echo "make $(MOD_NAME) uninstall"
+	$(call dirloop,uninstall)
+	rm -rf $(MODDIR)/$(MOD_NAME)
+	rm -f $(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
+
 
 clean:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clean"
+	@echo "make $(MOD_NAME) clean"
 
+.PHONY: all install uninstall clean test 

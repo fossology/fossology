@@ -29,7 +29,7 @@ install: all
 
 uninstall:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
-	rm -f $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$(EXE)
+	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 test: all
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) test"
