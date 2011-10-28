@@ -18,7 +18,7 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpcre
+CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpcre -Werror
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 

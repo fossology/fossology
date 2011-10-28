@@ -42,6 +42,7 @@ char     buffer[2048];      ///< the last thing received from the scheduler
 int      valid;             ///< if the information stored in buffer is valid
 int      found;             ///< if the agent is even connected to the scheduler
 fo_conf* sysconfig;
+char* sysconfigdir;
 
 /**
  * Global verbose flags that agents should use instead of specific verbose
@@ -109,13 +110,13 @@ void fo_scheduler_connect(int* argc, char** argv)
   fo_conf* version;
   found = 0;
   int i;
-  char* sysconfdir = DEFAULT_SETUP;
   char  fname[FILENAME_MAX + 1];
 
   /* check for the system configuration directory */
+  sysconfigdir = DEFAULT_SETUP;
   for(i = 1; i < *argc; i++) {
     if(argv[i][0] == '-' && argv[i][1] == 'c' && strlen(argv[i]) == 2) {
-      sysconfdir = argv[i + 1];
+      sysconfigdir = argv[i + 1];
       break;
     }
   }
@@ -148,8 +149,8 @@ void fo_scheduler_connect(int* argc, char** argv)
     alarm(ALARM_SECS);
   }
 
-  if(sysconfdir) {
-    snprintf(fname, FILENAME_MAX, "%s/%s", sysconfdir, "fossology.conf");
+  if(sysconfigdir) {
+    snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir, "fossology.conf");
     sysconfig = fo_config_load(fname, &error);
     if(error)
     {
@@ -158,7 +159,7 @@ void fo_scheduler_connect(int* argc, char** argv)
       exit(-1);
     }
 
-    snprintf(fname, FILENAME_MAX, "%s/%s", sysconfdir, "VERSION");
+    snprintf(fname, FILENAME_MAX, "%s%s", sysconfigdir, "VERSION");
     version = fo_config_load(fname, &error);
     if(error)
     {
@@ -170,6 +171,14 @@ void fo_scheduler_connect(int* argc, char** argv)
     keys = g_tree_ref(g_tree_lookup(version->group_map, "VERSION"));
     g_tree_insert(sysconfig->group_map, "VERSION", keys);
     fo_config_free(version);
+  }
+
+  strncpy(fname, argv[0], sizeof(fname));
+  *strrchr(fname, '/') = '\0';
+  if(chdir(fname) != 0)
+  {
+    fprintf(stderr, "ERROR %s.%d: unable to change agent's directory\n",
+        __FILE__, __LINE__);
   }
 }
 
@@ -191,8 +200,6 @@ void fo_scheduler_disconnect(int retcode)
     valid = 0;
     found = 0;
   }
-
-  fo_config_free(sysconfig);
 }
 
 /**

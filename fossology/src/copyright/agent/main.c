@@ -763,7 +763,6 @@ int main(int argc, char** argv)
   pair curr;                    // pair to push into the file list
 
   /* verbose data */
-  char mdir[FILENAME_MAX];
   FILE* mout = NULL;
 
   /* set the output streams */
@@ -771,16 +770,17 @@ int main(int argc, char** argv)
   cerr = stdout;
   cin = stdin;
 
+  /* connect to the scheduler */
+  fo_scheduler_connect(&argc, argv);
+
   /* initialize complex data strcutres */
-  if(!copyright_init(&copy)) {
+  if(!copyright_init(&copy))
+  {
     fprintf(cerr, "FATAL %s.%d: copyright initialization failed\n", __FILE__, __LINE__);
     fprintf(cerr, "FATAL %s\n", strerror(errno));
     fflush(cerr);
     return -1;
   }
-
-  /* connect to the scheduler */
-  fo_scheduler_connect(&argc, argv);
 
   /* parse the command line options */
   while((c = getopt(argc, argv, "dcC:ti")) != -1)
@@ -788,7 +788,6 @@ int main(int argc, char** argv)
     switch(c)
     {
       case 'd': /* debugging */
-        sprintf(mdir, "%s/Matches", DATADIR);
         mout = fopen("Matches", "w");
         if(!mout)
         {
