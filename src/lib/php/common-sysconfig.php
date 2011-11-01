@@ -28,47 +28,16 @@ define("CONFIG_TYPE_TEXT", 2);
 define("CONFIG_TYPE_TEXTAREA", 3);
 //}@
 
-/**
- * \brief Determine SYSCONFDIR
- * 
- * The following precedence is used to resolve SYSCONFDIR:
- *  - environment variable SYSCONFDIR
- *  - ./fossology.rc
- *
- * \return the the SYSCONFDIR path, and set global SYSCONFDIR (for
- * backward compatibility).
- */
-function GetSYSCONFDIR()
-{
-  $rcfile = "fossology.rc";
-
-  $sysconfdir = getenv('SYSCONFDIR');
-  if ($sysconfdir === false)
-  {
-    if (file_exists($rcfile)) $sysconfdir = file_get_contents($rcfile);
-    if ($sysconfdir === false)
-    {
-      /* NO SYSCONFDIR specified */
-      $text = _("FATAL: System Configuration Error, no SYSCONFDIR.");
-      echo "<hr><h3>$text</h3><hr>";
-      exit(1);
-    }
-  }
-
-  $sysconfdir = trim($sysconfdir);
-  $GLOBALS['SYSCONFDIR'] = $sysconfdir;
-  return $sysconfdir;
-}
-
 
 /**
- * \brief Read in all the system configuration variables.
+ * \brief Initialize the fossology system after bootstrap().  
+ * This function also opens a database connection (global PG_CONN).
  *
  * System configuration variables are in four places:
- *  - Database sysconfig table
- *  - SYSCONFDIR/fossology.conf
+ *  - SYSCONFDIR/fossology.conf (parsed by bootstrap())
  *  - SYSCONFDIR/VERSION
  *  - SYSCONFDIR/Db.conf
+ *  - Database sysconfig table
  *
  * VERSION and fossology.conf variables are organized by group.  For example,
  * [DIRECTORIES] 
@@ -78,18 +47,13 @@ function GetSYSCONFDIR()
  * a made up "SYSCONFIG" group.  And all the Db.conf values will be put in a
  * "DBCONF" group.
  *
- * \param $sysconfdir - path to SYSCONFDIR (optional)
+ * \param $sysconfdir - path to SYSCONFDIR
+ * \param $SysConf - configuration variable array (updated by this function)
  * 
- * The following precedence is used to resolve SYSCONFDIR:
- *  - $sysconfdir 
- *  - environment variable SYSCONFDIR
- *  - ./fossology.rc
- *
  * If the sysconfig table doesn't exist then create it.
  * Write records for the core variables into sysconfig table.
  *
- * \return the $SysConf array of values.  The first array dimension
- * is the group, the second is the variable name.
+ * The first array dimension of $SysConf is the group, the second is the variable name.
  * For example:
  *  -  $SysConf[SYSCONFIG][LogoLink] => "http://my/logo.gif"
  *  -  $SysConf[SYSCONFIG][GlobalBrowse] => "true"
@@ -100,31 +64,9 @@ function GetSYSCONFDIR()
  * to be global, this function will define the same globals (everything in the 
  * DIRECTORIES section of fossology.conf).
  */
-function ConfigInit($sysconfdir)
+function ConfigInit($sysconfdir, &$SysConf)
 {
   global $PG_CONN;
-
-  /*************  Parse fossology.conf *******************/
-  $ConfFile = "{$sysconfdir}/fossology.conf";
-  $SysConf = parse_ini_file($ConfFile, true);
-
-  /* evaluate all the DIRECTORIES group for variable substitutions.
-   * For example, if PREFIX=/usr/local and BINDIR=$PREFIX/bin, we
-   * want BINDIR=/usr/local/bin
-   */
-  foreach($SysConf['DIRECTORIES'] as $var=>$assign)
-  {
-    /* Evaluate the individual variables because they may be referenced
-     * in subsequent assignments. 
-     */
-    $toeval = "\$$var = \"$assign\";";
-    eval($toeval);
-
-    /* now reassign the array value with the evaluated result */
-    $SysConf['DIRECTORIES'][$var] = ${$var};
-    $GLOBALS[$var] = ${$var};
-  }
-
 
   /*************  Parse VERSION *******************/
   $VersionFile = "{$sysconfdir}/VERSION";
@@ -154,6 +96,11 @@ function ConfigInit($sysconfdir)
   foreach($dbConf as $var=>$val) $SysConf['DBCONF'][$var] = $val;
   unset($dbConf);
 
+  /**
+   * Connect to the database.  If the connection fails,
+   * DBconnect() will print a failure message and exit.
+   */
+  $PG_CONN = DBconnect($sysconfdir);
 
   /**************** read/create/populate the sysconfig table *********/
   /* create if sysconfig table if it doesn't exist */
@@ -173,7 +120,7 @@ function ConfigInit($sysconfdir)
   }
   pg_free_result($result);
 
-  return($SysConf);
+  return;
 } // ConfigInit()
 
 

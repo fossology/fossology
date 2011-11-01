@@ -21,24 +21,17 @@
  * \ brief This is the main guts of the UI: Find the plugin and run it.
  */
 
-//require("i18n.php"); DISABLED until i18n infrastructure is set-up.
-require_once("../../lib/php/common.php");
-require_once("template/template-plugin.php");
+require_once("../../lib/php/bootstrap.php");
 
 $SysConf = array();  // fo system configuration variables
 $PG_CONN = 0;   // Database connection
+$Plugins = array();
 
-/* Get SYSCONFDIR and set global (for backward compatibility) */
-$SYSCONFDIR = GetSYSCONFDIR();
-
-/**
- * Connect to the database.  If the connection fails,
- * DBconnect() will print a failure message and exit.
- */
-$PG_CONN = DBconnect($SYSCONFDIR);
+/* Set SYSCONFDIR and set global (for backward compatibility) */
+$SysConf = bootstrap();
 
 /* Initialize global system configuration variables $SysConfig[] */
-$SysConf = ConfigInit($SYSCONFDIR);
+ConfigInit($SYSCONFDIR, $SysConf);
 //debugprint($SysConf, "SysConf");
 
 plugin_load();
