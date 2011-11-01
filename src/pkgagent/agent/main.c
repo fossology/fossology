@@ -82,6 +82,7 @@ int	main	(int argc, char *argv[])
   char sqlbuf[1024]; 
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  int CmdlineFlag = 0; /* run from command line flag, 1 yes, 0 not */
 
   fo_scheduler_connect(&argc, argv);
 
@@ -91,14 +92,14 @@ int	main	(int argc, char *argv[])
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!db_conn)
   {
-    LOG_FATAL("Unable to connect to database");
+    LOG_FATAL("Unable to connect to database. Error: %s.\n", ErrorBuf);
     exit(-1);
   }
 
   Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"ivh")) != -1)
+  while((c = getopt(argc,argv,"icCvh")) != -1)
   {
     switch(c)
     {
@@ -108,15 +109,19 @@ int	main	(int argc, char *argv[])
       case 'v':
         Verbose++;
         break;
+      case 'c':
+        break; /* add -c parameter for sysconfig*/
+      case 'C':
+        CmdlineFlag = 1; 
+        break;        
       default:
         Usage(argv[0]);
         PQfinish(db_conn);
         exit(-1);
     }
   }
-
   /* If no args, run from scheduler! */
-  if (argc == 1)
+  if (CmdlineFlag == 0)
   {
     while(fo_scheduler_next())
     {

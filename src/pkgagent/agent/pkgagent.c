@@ -985,7 +985,9 @@ void Usage (char *Name)
   printf("Usage: %s [options] [file [file [...]]\n",Name);
   printf("  -i   :: initialize the database, then exit.\n");
   printf("  -v   :: verbose (-vv = more verbose)\n");
-  printf("  file :: if files are rpm package listed, display their meta data.\n");
+  printf("  -c   :: Specify the directory for the system configuration.\n");
+  printf("  -C   :: run from command line.\n");
+  printf("  file :: if files are rpm package listed, display their package information.\n");
   printf("  no file :: process data from the scheduler.\n");
 } /* Usage() */
 
