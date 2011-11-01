@@ -116,7 +116,9 @@ void fo_scheduler_connect(int* argc, char** argv)
   sysconfigdir = DEFAULT_SETUP;
   for(i = 1; i < *argc; i++) {
     if(argv[i][0] == '-' && argv[i][1] == 'c' && strlen(argv[i]) == 2) {
-      sysconfigdir = argv[i + 1];
+      /** if no value for -c option, skip it, use the default sysconfigdir */
+      if (!argv[i+1] || argv[i+1][0] == '-') break; 
+      sysconfigdir = argv[i + 1]; 
       break;
     }
   }
