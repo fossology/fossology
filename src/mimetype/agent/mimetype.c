@@ -61,7 +61,8 @@ int main(int argc, char *argv[])
   char sqlbuf[1024]; 
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
-
+  int CmdlineFlag = 0; /** run from command line flag, 1 yes, 0 not */
+                           
   /** initialize the scheduler connection */
   fo_scheduler_connect(&argc, argv);
 
@@ -95,13 +96,17 @@ int main(int argc, char *argv[])
   }
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"i")) != -1)
+  while((c = getopt(argc,argv,"iCc:")) != -1)
   {
     switch(c)
     {
       case 'i':
         PQfinish(pgConn);
         return(0);
+      case 'c': /* doesn't set this */ break;
+      case 'C':
+        CmdlineFlag = 1;
+        break;
       default:
         Usage(argv[0]);
         PQfinish(pgConn);
@@ -119,7 +124,7 @@ int main(int argc, char *argv[])
   }
 
   /* Run from scheduler! */
-  if (argc == 1)
+  if (0 == CmdlineFlag)
   {
     while(fo_scheduler_next())
     {
