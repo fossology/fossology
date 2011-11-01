@@ -159,7 +159,7 @@ void fo_scheduler_connect(int* argc, char** argv)
       exit(-1);
     }
 
-    snprintf(fname, FILENAME_MAX, "%s%s", sysconfigdir, "VERSION");
+    snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir, "VERSION");
     version = fo_config_load(fname, &error);
     if(error)
     {
