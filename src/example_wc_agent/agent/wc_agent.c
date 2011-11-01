@@ -158,6 +158,8 @@ void Usage(char *Name)
 {
   printf("Usage: %s [options]\n",Name);
   printf("  -i  :: Initialize the DB connection then exit (nothing downloaded)\n");
+  printf("  -c  :: Specify the directory for the system configuration.\n");
+  printf("  -C  :: Run from command line.\n");
 } /* Usage() */
 
 /**
@@ -168,6 +170,7 @@ int main(int argc, char *argv[])
 {
   int c;
   int InitFlag=0; /* is the system just going to initialize? */
+  int CmdlineFlag = 0; /** run from command line flag, 1 yes, 0 not */
   char *Parm = NULL;
   char *agent_desc = "File character, line, word count.";
   int pfile_count = 0;
@@ -187,12 +190,16 @@ int main(int argc, char *argv[])
   fo_scheduler_connect(&argc, argv);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"i")) != -1)
+  while((c = getopt(argc,argv,"iCc:")) != -1)
   {
     switch(c)
     {
       case 'i':
         InitFlag=1;
+        break;
+      case 'c': /* doesn't set this */ break;
+      case 'C':
+        CmdlineFlag = 1;
         break;
       default:
         Usage(argv[0]);
@@ -217,7 +224,7 @@ int main(int argc, char *argv[])
   }
 
   /* Run from scheduler! */
-  if (optind == argc)
+  if (0 == CmdlineFlag)
   {
     while(fo_scheduler_next())
     {
