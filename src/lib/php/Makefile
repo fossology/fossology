@@ -68,7 +68,7 @@ uninstall:
 	
 	$(INSTALL_DATA) $(iPATHFILE) $(MODDIR)$(PHPDIR)/$(iPATHFILE)
 	
-	rmdir $(MODDIR)lib/php; \
+	rmdir $(MODDIR)/lib/php; \
 
 	@rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 
