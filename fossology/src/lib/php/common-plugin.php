@@ -300,21 +300,7 @@ function plugin_load($CallInit=1)
       {
         while (($File = readdir($Dir)) !== false)
         {
-          /** File is ./www/ui/simpelUi ?*/
-          if ($File == 'simpleUi' and $ModDir == 'www' and is_dir("$ModDirPath/$File") and ($subDir = opendir("$ModDirPath/$File")))
-          {
-            while (($simFile = readdir($subDir)) !== false)
-            {
-              if (substr($simFile,-4) === ".php")
-              {
-                /* Load php found in the ui/simpleUi directory */
-                //echo "Loading: $ModDirPath/$File/$simFile<br>";
-                include_once("$ModDirPath/$File/$simFile");
-              }
-            }
-            closedir($subDir);
-          }
-          if (substr($File,-4) === ".php" and !strstr($File, 'ndex.php')) // ignore index.php and simpleIndex.php
+          if (substr($File,-4) === ".php" and !strstr($File, 'ndex.php')) // ignore index.php 
 	        {
             /* Load php found in the ui directory */
   	        //echo "Loading: $ModDirPath/$File<br>"; 
