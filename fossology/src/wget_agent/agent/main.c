@@ -73,6 +73,7 @@ int main  (int argc, char *argv[])
   char *TempFileDir=NULL;
   int c;
   int InitFlag=0;
+  int CmdlineFlag = 0; /** run from command line flag, 1 yes, 0 not */
   char *agent_desc = "Network downloader.  Uses wget(1).";
 
   memset(GlobalTempFile,'\0',MAXCMD);
@@ -93,7 +94,7 @@ int main  (int argc, char *argv[])
   fo_scheduler_connect(&argc, argv);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:")) != -1)
+  while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:Cc:")) != -1)
   {
     switch(c)
     {
@@ -126,6 +127,10 @@ int main  (int argc, char *argv[])
         break;
       case 'l':
         sprintf(GlobalParam, "%s -l %s ",GlobalParam, optarg);
+        break;
+      case 'c': /* doesn't set this */ break;
+      case 'C':
+        CmdlineFlag = 1;
         break;
       default:
         Usage(argv[0]);
@@ -188,7 +193,7 @@ int main  (int argc, char *argv[])
   }
 
   /* Run from scheduler! */
-  if (optind == argc)
+  if (0 == CmdlineFlag)
   {
     while(fo_scheduler_next())
     {

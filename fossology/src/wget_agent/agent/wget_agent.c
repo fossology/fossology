@@ -523,6 +523,8 @@ void Usage(char *Name)
   printf("  -A acclist :: Specify comma-separated lists of file name suffixes or patterns to accept.\n");
   printf("  -R rejlist :: Specify comma-separated lists of file name suffixes or patterns to reject.\n");
   printf("  -l depth :: Specify recursion maximum depth level depth.  The default maximum depth is 5.\n");
+  printf("  -c configdir :: Specify the directory for the system configuration.\n");
+  printf("  -C :: run from command line.\n");
   printf("  OBJ :: if a URL is listed, then it is retrieved.\n");
   printf("         if a file is listed, then it used.\n");
   printf("         if OBJ and Key are provided, then it is inserted into\n");
