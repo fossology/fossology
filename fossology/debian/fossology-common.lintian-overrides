@@ -1,2 +1,0 @@
-# we need to provide the detailed instructions in INSTALL and INSTALL.multi so the user can setup the things the package does not automate
-fossology-common binary: package-contains-upstream-install-documentation
