@@ -16,18 +16,18 @@
 
  ***************************************************************/
 /**
- \file nomos.c
- \brief Main for the nomos agent
-
- Nomos detects licenses and copyrights in a file.  Depending on how it is
- invoked, it either stores it's findings in the FOSSology data base or
- reports them to standard out.
-
+ * \file nomos.c
+ * \brief Main for the nomos agent
+ *
+ * Nomos detects licenses and copyrights in a file.  Depending on how it is
+ * invoked, it either stores it's findings in the FOSSology data base or
+ * reports them to standard out.
+ *
  */
 /* CDB - What is this define for??? */
-#ifndef	_GNU_SOURCE
-#define	_GNU_SOURCE
-#endif	/* not defined _GNU_SOURCE */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif /* not defined _GNU_SOURCE */
 
 #include "nomos.h"
 #include "util.h"
@@ -47,7 +47,7 @@ struct curScan cur;
 int schedulerMode = 0; /**< Non-zero when being run from scheduler */
 
 
-/* shortname cache very simple nonresizing hash table */
+/** shortname cache very simple nonresizing hash table */
 struct cachenode 
 {
   char *rf_shortname;
@@ -121,8 +121,10 @@ FUNCTION long add2license_ref(char *licenseName) {
   if (numRows)
   {
     rf_pk = atol(PQgetvalue(result, 0, 0));
+    PQclear(result);
     return rf_pk;
   }
+  PQclear(result);
 
   /* Insert the new license */
   specialLicenseText = "License by Nomos.";
@@ -148,6 +150,7 @@ FUNCTION long add2license_ref(char *licenseName) {
   else
   {
     printf("ERROR: %s:%s:%d Just inserted value is missing. On: %s", __FILE__, "add2license_ref()", __LINE__, query);
+    PQclear(result);
     return(0);
   }
   PQclear(result);
@@ -404,10 +407,10 @@ FUNCTION char *getFieldValue(char *inStr, char *field, int fieldMax, char *value
   int v;
   int gotQuote;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== getFieldValue(inStr= %s fieldMax= %d separator= '%c'\n",
       inStr, fieldMax, separator);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   memset(field, 0, fieldMax);
   memset(value, 0, valueMax);
@@ -559,15 +562,15 @@ FUNCTION void Usage(char *Name) {
 } /* Usage() */
 
 FUNCTION void Bail(int exitval) {
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== Bail(%d)\n", exitval);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
 #if defined(MEMORY_TRACING) && defined(MEM_ACCT)
   if (exitval) {
     memCacheDump("Mem-cache @ Bail() time:");
   }
-#endif	/* MEMORY_TRACING && MEM_ACCT */
+#endif /* MEMORY_TRACING && MEM_ACCT */
 
   /* close database and scheduler connections */
   if (gl.pgConn) PQfinish(gl.pgConn);
@@ -577,9 +580,9 @@ FUNCTION void Bail(int exitval) {
 
 
 FUNCTION int optionIsSet(int val) {
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== optionIsSet(%x)\n", val);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   return (gl.progOpts & val);
 } /* optionIsSet */
@@ -597,16 +600,16 @@ FUNCTION int optionIsSet(int val) {
  */
 
 FUNCTION static void getFileLists(char *dirpath) {
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== getFileLists(%s)\n", dirpath);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   /*    listInit(&gl.sarchList, 0, "source-archives list & md5sum map"); */
   listInit(&cur.regfList, 0, "regular-files list");
   listInit(&cur.offList, 0, "buffer-offset list");
-#ifdef	FLAG_NO_COPYRIGHT
+#ifdef FLAG_NO_COPYRIGHT
   listInit(&gl.nocpyrtList, 0, "no-copyright list");
-#endif	/* FLAG_NO_COPYRIGHT */
+#endif /* FLAG_NO_COPYRIGHT */
 
   listGetItem(&cur.regfList, cur.targetFile);
   return;
@@ -688,9 +691,9 @@ FUNCTION void freeAndClearScan(struct curScan *thisScan) {
 FUNCTION void processFile(char *fileToScan) {
 
   char *pathcopy;
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== processFile(%s)\n", fileToScan);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   /* printf("   LOG: nomos scanning file %s.\n", fileToScan);  DEBUG */
 
@@ -777,6 +780,7 @@ int main(int argc, char **argv)
   int upload_pk = 0;
   int numrows;
   int ars_pk = 0;
+  char *AgentARSName = "nomos_ars";
 
   char *cp;
   char *pErrorBuf;
@@ -785,23 +789,22 @@ int main(int argc, char **argv)
   char **files_to_be_scanned; /**< The list of files to scan */
   char sqlbuf[1024];
   PGresult *result;
-  PGresult *ars_result;
 
   cacheroot_t cacheroot;
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv);
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== main(%d, %p)\n", argc, argv);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
-#ifdef	MEMORY_TRACING
+#ifdef MEMORY_TRACING
   mcheck(0);
-#endif	/* MEMORY_TRACING */
-#ifdef	GLOBAL_DEBUG
+#endif /* MEMORY_TRACING */
+#ifdef GLOBAL_DEBUG
   gl.DEEBUG = gl.MEM_DEEBUG = 0;
-#endif	/* GLOBAL_DEBUG */
+#endif /* GLOBAL_DEBUG */
 
   files_to_be_scanned = calloc(argc, sizeof(char *));
 
@@ -911,32 +914,13 @@ int main(int argc, char **argv)
       {
         LOG_NOTICE("Ignoring requested nomos analysis of upload %d - Results are already in database.",
             upload_pk);
+        PQclear(result);
         continue;
       }
       PQclear(result);
 
       /* Record analysis start in nomos_ars, the nomos audit trail. */
-      snprintf(sqlbuf, sizeof(sqlbuf),
-          "insert into nomos_ars (agent_fk, upload_fk, ars_success) values(%d,%d,'%s');",
-          gl.agentPk, upload_pk, "false");
-      ars_result = PQexec(gl.pgConn, sqlbuf);
-      if (fo_checkPQcommand(gl.pgConn, ars_result, sqlbuf, __FILE__ ,__LINE__)) Bail(-__LINE__);
-
-      /* retrieve the ars_pk of the newly inserted record */
-      sprintf(sqlbuf, "select ars_pk from nomos_ars \
-                            where agent_fk='%d' and upload_fk='%d' \
-                            and ars_success='%s' and ars_endtime is null \
-                            order by ars_starttime desc limit 1",
-                            gl.agentPk, upload_pk, "false");
-      ars_result = PQexec(gl.pgConn, sqlbuf);
-      if (fo_checkPQresult(gl.pgConn, ars_result, sqlbuf, __FILE__, __LINE__)) Bail(-__LINE__);
-      if (PQntuples(ars_result) == 0)
-      {
-        LOG_FATAL("Missing nomos_ars record: %s",sqlbuf)
-                                Bail(-__LINE__);
-      }
-      ars_pk = atol(PQgetvalue(ars_result, 0, 0));
-      PQclear(ars_result);
+      ars_pk = fo_WriteARS(gl.pgConn, ars_pk, upload_pk, gl.agentPk, AgentARSName, 0, 0);
 
       /* retrieve the records to process */
       snprintf(sqlbuf, sizeof(sqlbuf),
@@ -974,11 +958,7 @@ int main(int argc, char **argv)
       PQclear(result);
 
       /* Record analysis success in nomos_ars. */
-      snprintf(sqlbuf, sizeof(sqlbuf),
-          "update nomos_ars set ars_endtime=now(), ars_success=true where ars_pk='%d'",
-          ars_pk);
-      result = PQexec(gl.pgConn, sqlbuf);
-      if (fo_checkPQcommand(gl.pgConn, result, sqlbuf, __FILE__ ,__LINE__)) Bail(-__LINE__);
+      fo_WriteARS(gl.pgConn, ars_pk, upload_pk, gl.agentPk, AgentARSName, 0, 1);
     }
   }
   else
