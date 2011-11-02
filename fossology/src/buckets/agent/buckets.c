@@ -85,7 +85,7 @@ int main(int argc, char **argv)
   }
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "in:p:t:u:v")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "in:p:t:u:vc")) != -1) 
   {
     switch (cmdopt) 
     {
@@ -141,6 +141,8 @@ int main(int argc, char **argv)
             break;
       case 'v': /* verbose output for debugging  */
             verbose++;
+            break;
+      case 'c': /* buckets doesn't set this*/
             break;
       default:
             Usage(argv[0]);
