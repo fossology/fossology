@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -17,18 +17,15 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/**************************************************************
- fossinit
+/**
+ @file fossinit.php
+ @brief This program applies core-schema.dat to the database.
 
- Initialize the FOSSology system (no UI required).
  This should be used immediately after an install, and before
  starting up the scheduler.
 
  @return 0 for success, 1 for failure.
- *************************************************************/
-
-/* Have to set this or else plugins will not load. */
-$GlobalReady = 1;
+ **/
 
 /* Must run as group fossy! */
 $GID = posix_getgrnam("fossy");
