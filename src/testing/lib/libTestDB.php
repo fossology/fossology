@@ -24,22 +24,6 @@
  * Created on Sep 15, 2011 by Mark Donohoe
  */
 
-// Why are the below needed?
-//require_once(__DIR__ . '/../../lib/php/common-db.php');
-//require_once(__DIR__ . '/../../lib/php/common-cache.php');
-//require_once(__DIR__ . '/../../lib/php/common-sysconfig.php');
-
-$SYSCONFDIR = NULL;
-$SYSCONFDIR = getenv('SYSCONFDIR');
-if(empty($SYSCONFDIR))
-{
-  echo "FATAL!, no SYSCONFDIR defined\n";
-  exit(1);
-}
-//echo "DB: SYSconf is:$SYSCONFDIR\n";
-
-global $SYSCONFDIR;
-
 function _ModFossConf($sysConfPath, $repoPath)
 {
 
@@ -180,12 +164,12 @@ function SetRepo($sysConfPath,$repoPath)
  * @param string $path Optional fully qualified path to the schema file to use
  * if no path is supplied, the standard schema will be used.
  *
- * @return boolean
+ * @return Null on success, string on error.
  *
  * Created on Sep 15, 2011 by Mark Donohoe
  */
 
-function TestDBInit($path=NULL, $catalog)
+function TestDBInit($path=NULL, $catalog, $sysconfig)
 {
   if(empty($path))
   {
@@ -193,30 +177,33 @@ function TestDBInit($path=NULL, $catalog)
   }
   if (!file_exists($path))
   {
-    print "FAILED: Schema data file ($path) not found.\n";
-    return(FALSE);
+    return("FAILED: Schema data file ($path) not found.\n");
   }
   if(empty($catalog))
   {
-    return(FALSE);
+    return("Error!, no catalog supplied\n");
   }
-
+  if(empty($sysconfig))
+  {
+    return("Error!, no sysconf path supplied\n");
+  }
+  
   // run schema-update
   $result = NULL;
   $lastUp = NULL;
-
+  putenv("SYSCONFDI=$sysconfig");
   $schemaUp = __DIR__ . '/../../cli/schema-update.php';
 
-  $last = exec("$schemaUp -f $path -c $catalog", $upOut, $upRtn);
-  //$lastUp = system("$schemaUp -f $path -c $catalog",$result);
+  $last = exec("$schemaUp -f $path -C $catalog -c $sysconfig", $upOut, $upRtn);
+  //echo "DB: schema up output is:\n" . implode("\n",$upOut) . "\n";
 
   if($upRtn != 0)
   {
-    return(FALSE);
+    return(implode("\n", $upOut . "\n"));
   }
   else
   {
-    return(TRUE);
+    return(NULL);
   }
 }
 ?>

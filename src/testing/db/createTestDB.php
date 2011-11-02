@@ -36,22 +36,34 @@
  * Created on Sep 14, 2011 by Mark Donohoe
  */
 
-require_once(__DIR__ . '/../lib/libTestDB.php');
-require_once(__DIR__ . '/../../lib/php/common.php');
 
-$Options = getopt('d:sh');
-$usage = $argv[0] . ": [-h] [-d name]\n" .
-  "-d name:     Drop the named data base.\n" .
-  "-h:          This message (Usage)\n" .
-  "-s:          Start the scheduler with the new sysconfig directory"
-  "Examples: create testdb (fosstestUID): createTestDb.php \n" .
-  "          Drop the database fosstestUID: createTestDb.php -d fosstestUID\n" .
-  "          Where UID is a unique identifier that createTestDb uses.";
+require_once(__DIR__ . '/../../lib/php/bootstrap.php');
+require_once(__DIR__ . '/../lib/libTestDB.php');
+
+$Options = getopt('c:d:sh');
+$usage = $argv[0] . ": [-h] -c path [-d name] [-s]\n" .
+  "-c path:  The path to the fossology system configuration directory\n" .
+  "-d name:  Drop the named data base.\n" .
+  "-h:       This message (Usage)\n" .
+  "-s:       Start the scheduler with the new sysconfig directory\n" .
+  "Examples: create a test DB: createTestDb.php \n" .
+  "          Drop the database fosstest1537938: createTestDb.php -d fosstest1537938\n";
 
 if(array_key_exists('h',$Options))
 {
   print "$usage\n";
   exit(0);
+}
+$sysconfig = NULL;
+// use the passed in sysconfdir to start with
+if(array_key_exists('c', $Options))
+{
+  $sysconfig = $Options['c'];
+  if(empty($sysconfig))
+  {
+    echo $usage;
+    exit(1);
+  }
 }
 /*
  * Drop DataBase
@@ -101,26 +113,24 @@ if(array_key_exists('s', $Options))
   $startSched = TRUE;
 }
 
-/*
- *
- * NOTE: Don't forget about fossology.rc, which goes in webroot, e.g. www/ui
- * that is where you drop where the sysconf is.... or see bob's email.
- * But don't use it, it will change things for everyone.
- *
- */
-
-// The real sysconf dir should be available as a environment variable if not
-// stop.
-
-$sysConf = NULL;
-$sysConf = getenv('SYSCONFDIR');
-if(empty($sysConf))
+// If not passed in, in see if we can get SYSCONFDIR from the environment,
+// if not, stop
+if(empty($sysconfig))
 {
-  echo "FATAL!, no SYSCONFDIR defined\n";
-  echo "export SYSCONFDIR path and rerun\n";
-  exit(1);
+  $sysconfig = getenv('SYSCONFDIR');
+  if(empty($sysconfig))
+  {
+    echo "FATAL!, no SYSCONFDIR defined\n";
+    echo "either export SYSCONFDIR path and rerun or use -c <sysconfdirpath>\n";
+    flush();
+    exit(1);
+  }
 }
-//echo "DB: sysConf is:$sysConf\n";
+//echo "DB: sysconfig is:$sysconfig\n";
+
+putenv("SYSCONFDIR=$sysconfig");
+$SysConf = bootstrap();
+//echo "DB: Sys Config vars are:\n";print_r($SysConf) . "\n";
 
 $unique = mt_rand();
 $DbName = 'fosstest' . $unique;
@@ -178,7 +188,7 @@ if(file_put_contents($confPath . "/Db.conf", $conf) === FALSE)
 }
 
 // copy and modify fossology.conf
-$fossConf = $sysConf . '/fossology.conf';
+$fossConf = $sysconfig . '/fossology.conf';
 $myConf  = $confPath . '/fossology.conf';
 
 if(file_exists($fossConf))
@@ -191,17 +201,26 @@ if(file_exists($fossConf))
 }
 if(setRepo($confPath, $repoPath) === FALSE)
 {
-  echo "ERROR!, could not change $sysConf/fossology.conf, please change by " .
+  echo "ERROR!, could not change $sysconfig/fossology.conf, please change by " .
     "hand before running tests\n";
   exit(1);
 }
 
 // copy mods-enabled from real sysconf.
-$modConf = $sysConf . '/mods-enabled';
+$modConf = $sysconfig . '/mods-enabled';
 $cmd = "cp -RP $modConf $confPath";
 if(system($cmd) === FALSE)
 {
   echo "DB: Cannot copy diretory $modConf to $confPath\n";
+  exit(1);
+}
+
+// load the schema
+$loaded = TestDBInit(NULL, $DbName, $confPath);
+if($loaded !== NULL)
+{
+  echo "ERROR, could not load schema\n";
+  echo $loaded;
   exit(1);
 }
 
@@ -211,22 +230,13 @@ if(system($cmd) === FALSE)
 
 putenv("SYSCONFDIR=$confPath");
 $_ENV['SYSCONFDIR'] = $confPath;
-
-// load the schema
-if(TestDBInit(NULL, $DbName) === FALSE)
-{
-  echo "ERROR, could not load schema\n";
-  exit(1);
-}
-
 $GLOBALS['SYSCONFDIR'] = $confPath;
 
 // scheduler should be in $MODDIR/scheduler/agent/fo_scheduler
-// yuk, how do I get $MODDIR....
 if($startSched)
 {
   $skedOut = array();
-  $cmd = "sudo $MODDIR/scheduler/agent/fo_scheduler -d -c $confPath"
+  $cmd = "sudo $MODDIR/scheduler/agent/fo_scheduler -d -c $confPath";
   $skedLast = exec($cmd, $skedOut, $skedRtn);
   if($skedRtn != 0)
   {
