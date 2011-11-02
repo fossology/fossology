@@ -1,4 +1,0 @@
-dbname={$PROJECT};
-host=localhost;
-user={$PROJECTUSER};
-password={$PROJECTUSER};
