@@ -14,7 +14,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-***************************************************************/
+ ***************************************************************/
 #ifndef _NOMOS_H
 #define _NOMOS_H 1
 #ifndef	_GNU_SOURCE
@@ -86,7 +86,7 @@ size_t hashEntries;
 
 /*
   Flags for program control
-*/
+ */
 #define	FL_SAVEBASE	0x20
 #define	FL_FRAGMENT	0x40
 #define	FL_SHOWMATCH	0x80
@@ -180,13 +180,13 @@ size_t hashEntries;
 
 /*
   Caches memory-mapped files
-*/
+ */
 struct mm_cache {
-    int inUse;
-    int fd;
-    int size;
-    void *mmPtr;
-    char label[myBUFSIZ];
+  int inUse;
+  int fd;
+  int size;
+  void *mmPtr;
+  char label[myBUFSIZ];
 };
 
 
@@ -194,7 +194,7 @@ struct mm_cache {
   CDB - This is kind of tricky, the way it uses the same fields for
   different meanings. If we had objects, we could subclass. It works
   okay, but is just a PITA for debugging.
-*/
+ */
 
 /**
    listitem item_t
@@ -202,20 +202,20 @@ struct mm_cache {
 
    Meanings of val fields are dependent on the particular list --
    See #defines below for examples.
-*/
+ */
 struct listitem {
-    int val;
-    int val2;
-    int val3;
-    char *str;		/**< primary key for list-element */
-    void *buf;		/**< alias, extra data, whatever */
+  int val;
+  int val2;
+  int val3;
+  char *str;		/**< primary key for list-element */
+  void *buf;		/**< alias, extra data, whatever */
 };
 typedef	struct listitem item_t;
 
 
 /**
    Defines for the list val fields
-*/
+ */
 #define	seqNo		val
 #define	foundTool	val
 #define	refCount	val
@@ -238,29 +238,29 @@ typedef	struct listitem item_t;
 
  */
 struct list {
-    char name[64];  /**< name of the list */
-    int used;       /**< number of items found, 0 is empty list */
-    int size;       /**< what size is this? (MD) */
-    int ix;         /**< the index for the items below */
-    int sorted;     /**< flag to indicate how ?? (the list or the items in the
+  char name[64];  /**< name of the list */
+  int used;       /**< number of items found, 0 is empty list */
+  int size;       /**< what size is this? (MD) */
+  int ix;         /**< the index for the items below */
+  int sorted;     /**< flag to indicate how ?? (the list or the items in the
                          list?) things are sorted: SORT_BY_NAME or
                          SORT_BY_NAME_ICASE */
-    int desc;
-    item_t *items;
+  int desc;
+  item_t *items;
 };
 typedef	struct list list_t;
 
 
 struct searchString {
-    int csLen;
-    char *csData;
+  int csLen;
+  char *csData;
 };
 typedef struct searchString searchString_t;
 
 
 struct licenseSpec {
-    searchString_t seed;
-    searchString_t text;
+  searchString_t seed;
+  searchString_t text;
 };
 typedef struct licenseSpec licSpec_t;
 
@@ -268,73 +268,73 @@ typedef struct licenseSpec licSpec_t;
 /**
   \brief Structure holding data truly global in that it remains consistent
   for each file scanned.
-*/
+ */
 struct globals {
-    char initwd[myBUFSIZ]; /* CDB, would like to workaround/eliminate. */
-    char progName[64];
-    int progOpts;
-    int flags;
-    int uPsize;
+  char initwd[myBUFSIZ]; /* CDB, would like to workaround/eliminate. */
+  char progName[64];
+  int progOpts;
+  int flags;
+  int uPsize;
 #ifdef	GLOBAL_DEBUG
-    int DEEBUG;
-    int MEM_DEEBUG;
+  int DEEBUG;
+  int MEM_DEEBUG;
 #endif	/* GLOBAL_DEBUG */
 #ifdef	PROC_TRACE_SWITCH
-    int ptswitch;
+  int ptswitch;
 #endif	/* PROC_TRACE_SWITCH */
-    magic_t mcookie;
-    list_t sHash;
-    /** Agent-specific Things */
-    int agentPk;
-    long uploadFk;
-    int arsPk;
-    PGconn *pgConn;
+  magic_t mcookie;
+  list_t sHash;
+  /** Agent-specific Things */
+  int agentPk;
+  long uploadFk;
+  int arsPk;
+  PGconn *pgConn;
 };
 
 
 /**
   curScan
   \brief Struct that tracks state related to current file being scanned.
-*/
+ */
 struct curScan {
-    char cwd[myBUFSIZ]; 		/**< CDB, Would like to workaround and eliminate. */
-    char targetDir[myBUFSIZ]; 	/**< Directory where file is */ /* check */
-    char targetFile[myBUFSIZ]; 	/**< File we're scanning (tmp file)*/ /* check */
-    char filePath[myBUFSIZ];    /**< the original file path passed in */
-    long pFileFk;				/**< [in] pfile_fk from scheduler */
-    char pFile[myBUFSIZ];       /**< [in] pfilename from scheduler */
-    char *licPara;
-    char *matchBase;
-    size_t targetLen;
-    size_t cwdLen;
-    struct stat stbuf;
-    regmatch_t regm;
-    list_t regfList;
-    list_t fLicFoundMap;
-    list_t parseList;
-    list_t offList;
-    list_t lList;
-    char compLic[myBUFSIZ];  	/**< the license(s) found, None or NotLikely.
+  char cwd[myBUFSIZ]; 		/**< CDB, Would like to workaround and eliminate. */
+  char targetDir[myBUFSIZ]; 	/**< Directory where file is */ /* check */
+  char targetFile[myBUFSIZ]; 	/**< File we're scanning (tmp file)*/ /* check */
+  char filePath[myBUFSIZ];    /**< the original file path passed in */
+  long pFileFk;				/**< [in] pfile_fk from scheduler */
+  char pFile[myBUFSIZ];       /**< [in] pfilename from scheduler */
+  char *licPara;
+  char *matchBase;
+  size_t targetLen;
+  size_t cwdLen;
+  struct stat stbuf;
+  regmatch_t regm;
+  list_t regfList;
+  list_t fLicFoundMap;
+  list_t parseList;
+  list_t offList;
+  list_t lList;
+  char compLic[myBUFSIZ];  	/**< the license(s) found, None or NotLikely.
     							     comma separated if multiple names are found.
-     							*/
-    int nLines;
-    int cliMode;                /**< boolean to indicate running from command line */
-    char *tmpLics;              /**< pointer to storage for parsed names */
-    char *licenseList[512];     /**< list of license names found, can be a single name */
+   */
+  int nLines;
+  int cliMode;                /**< boolean to indicate running from command line */
+  char *tmpLics;              /**< pointer to storage for parsed names */
+  char *licenseList[512];     /**< list of license names found, can be a single name */
 };
 
 struct license {
-    int len;
-    char *patt;
+  int len;
+  char *patt;
 };
 
 struct licensetext {
-    char *regex;
-    char *tseed;	/**< unencrypted license text */
-    int nAbove;
-    int nBelow;
-    int compiled;
-    int plain;
+  char *regex;
+  char *tseed;	/**< unencrypted license text */
+  int nAbove;
+  int nBelow;
+  int compiled;
+  int plain;
 };
 typedef struct licensetext licText_t;
 
@@ -342,16 +342,16 @@ typedef struct licensetext licText_t;
 #define	_SEED(x)	licText[x].tseed
 
 struct scanResults {
-    int score;
-    int kwbm;
-    int size;
-    int flag;
-    int dataOffset;
-    char fullpath[myBUFSIZ];
-    char linkname[16];
-    char *licenses;
-    char *relpath;
-    size_t nameOffset;
+  int score;
+  int kwbm;
+  int size;
+  int flag;
+  int dataOffset;
+  char fullpath[myBUFSIZ];
+  char linkname[16];
+  char *licenses;
+  char *relpath;
+  size_t nameOffset;
 };
 typedef	struct scanResults scanres_t;
 
@@ -394,13 +394,13 @@ typedef	struct scanResults scanres_t;
 
 /**
    Functions defined in nomos.c, used in other files
-*/
+ */
 void Bail(int exitval);
 int optionIsSet(int val);
 
 /**
   Global Declarations
-*/
+ */
 extern struct globals gl;
 extern struct curScan cur;
 extern licText_t licText[];
@@ -409,7 +409,7 @@ extern int schedulerMode; /* Non-zero if being run by scheduler */
 
 /**
   Declarations for using the memory debug stuff
-*/
+ */
 #ifdef	MEMORY_TRACING
 char *memAllocTagged();
 void memFreeTagged();
@@ -429,13 +429,13 @@ void memFreeTagged();
 #define	RESET_TIMER	END_TIMER; ZERO_TIMER
 #define	START_TIMER	RECORD_TIMER(bTV)
 #define	END_TIMER 	RECORD_TIMER(eTV) ; \
-			proctime = (float) (eTV.tv_sec - bTV.tv_sec) + \
-			    ((float) (eTV.tv_usec - bTV.tv_usec) * 0.000001)
+    proctime = (float) (eTV.tv_sec - bTV.tv_sec) + \
+    ((float) (eTV.tv_usec - bTV.tv_usec) * 0.000001)
 #define	RECORD_TIMER(x)	(void) gettimeofday(&x, (struct timezone *) NULL)
 #define	PRINT_TIMER(x,y)	printf("%11.6f seconds: %s\n", proctime, x); \
-			if (y) { DUMP_TIMERS; }
+    if (y) { DUMP_TIMERS; }
 #define	DUMP_TIMERS	printf("[1]: %d.%06d\n", bTV.tv_sec, bTV.tv_usec); \
-			printf("[2]: %d.%06d\n", eTV.tv_sec, eTV.tv_usec)
+    printf("[2]: %d.%06d\n", eTV.tv_sec, eTV.tv_usec)
 
 
 /*
@@ -443,17 +443,17 @@ void memFreeTagged();
  */
 #if	0
 #ifdef	TIMING
-	DECL_TIMER;	/* timer declaration */
+DECL_TIMER;	/* timer declaration */
 #endif
 /* */
 #ifdef	TIMING
-	START_TIMER;	/* turn on the timer */
+START_TIMER;	/* turn on the timer */
 #endif	/* TIMING */
 /* */
 #ifdef	TIMING
-	END_TIMER;	/* stop the timer */
-	PRINT_TIMER("unpack", 0);	/* ... and report */
-	START_TIMER;	/* optionally re-start timer */
+END_TIMER;	/* stop the timer */
+PRINT_TIMER("unpack", 0);	/* ... and report */
+START_TIMER;	/* optionally re-start timer */
 #endif	/* TIMING */
 #endif
 
