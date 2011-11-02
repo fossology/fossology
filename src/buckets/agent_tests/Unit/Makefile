@@ -15,7 +15,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 test:
-	@echo "buckets: NO UNIT TESTS HAVE BEEN WRITTEN"
+	@echo "buckets: NO TESTS HAVE BEEN WRITTEN"
 clean:
 	@echo "buckets: NO TESTS HAVE BEEN WRITTEN. Nothing to Clean."
 install:
