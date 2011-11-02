@@ -551,6 +551,7 @@ FUNCTION void Usage(char *Name) {
   printf("Usage: %s [options] [file [file [...]]\n", Name);
   printf("  -h   :: help (print this message), then exit.\n");
   printf("  -i   :: initialize the database, then exit.\n");
+  printf("  -c   :: specify the directory for the system configuration.\n");
   /*    printf("  -v   :: verbose (-vv = more verbose)\n"); */
   printf(
       "  file :: if files are listed, print the licenses detected within them.\n");
@@ -858,9 +859,10 @@ int main(int argc, char **argv)
   }
 
   /* Process command line options */
-  while ((c = getopt(argc, argv, "hi")) != -1)
+  while ((c = getopt(argc, argv, "hic:")) != -1)
   {
     switch (c) {
+      case 'c': /* doesn't set this */ break;
       case 'i':
         /* "Initialize" */
         Bail(0); /* DB was opened above, now close it and exit */
@@ -872,9 +874,9 @@ int main(int argc, char **argv)
   }
 
   /* Copy filename args (if any) into array */
-  for (i = 1; i < argc; i++)
+  for (i = optind; i < argc; i++)
   {
-    files_to_be_scanned[i - 1] = argv[i];
+    files_to_be_scanned[file_count] = argv[i];
     file_count++;
   }
 

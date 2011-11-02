@@ -61,10 +61,11 @@ _autodefs.h _autodata.c:	$(SPEC) $(LICFIX)
 
 install: all
 	@echo "make nomos agent install"
-	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
+	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
 #	$(INSTALL_PROGRAM) encode  $(DESTDIR)$(AGENTDIR)/encode
 
 uninstall:
+	@echo "make nomos agent uninstall"
 #	rm -f $(DESTDIR)$(AGENTDIR)/encode
 	rm -rf $(MODDIR)/$(EXE)/agent
 
