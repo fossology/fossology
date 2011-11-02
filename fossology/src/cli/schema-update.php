@@ -21,58 +21,53 @@
  * schema-update
  * \brief apply the schema to the fossology db using the supplied data file
  *
+ * Note: this program is meant to be run from the source at this point.  It
+ * is not installed as part of fossology.  It is an internal team tool used
+ * to update the offical fossology schema.
+ *
  * @param string $filePath
  * @return 0 for success, 1 for failure
  *
  * @version "$Id: schema-update.php 2791 2010-02-10 21:27:48Z rrando $"
  */
 
-/*
- Note: can't use the UI plugins, they may not be initialized.  On install, the are
- initialized AFTER this script is run.  Well we could init them, cheaper to just
- open the db.
- */
+require_once(__DIR__ . '/../lib/php/bootstrap.php');
+
 global $GlobalReady;
 $GlobalReady = 1;
 
-global $PG_CONN;
-
-//require_once (dirname(__FILE__)) . '/../../share/fossology/php/pathinclude.php';
-require_once '/usr/local/etc/fossology/mods-enabled/www/ui/pathinclude.php';
-
-global $LIBEXECDIR;
-global $MODDIR;
-
-require_once("$LIBEXECDIR/libschema.php");
-require_once ("$MODDIR/lib/php/common-db.php");
-require_once ("$MODDIR/lib/php/common-cache.php");
-
-$usage = "Usage: " . basename($argv[0]) . " [options]
-  -c <catalog>  the optional database catalog to use, e.g. fossology, fosstest
+$usage = "Usage: " . basename($argv[0]) . " -c path-to-fossology-config [options]
+  -C <catalog>  the optional database catalog to use, e.g. fossology
+  -c the path-to-fossology-config, e.g. /etc/fossology
   -f <filepath> pathname to schema data file
   -h this help usage";
 
-$Options = getopt('c:f:h');
+$sysConfig = NULL;
+
+$Options = getopt('C:c:f:h');
 if (empty($Options))
 {
-	print "$usage\n";
-	exit(1);
+  print "$usage\n";
+  exit(1);
 }
 
 if (array_key_exists('h',$Options))
 {
-	print "$usage\n";
-	exit(0);
+  print "$usage\n";
+  exit(0);
 }
 
-if (array_key_exists('c', $Options))
+if (array_key_exists('C', $Options))
 {
-  $Catalog = $Options['c'];
-  //echo "DB: schemaUP: will read from catalog:$Catalog\n";
+  $Catalog = $Options['C'];
 }
 if(empty($Catalog))
 {
   $Catalog = 'fossology';
+}
+if (array_key_exists('c', $Options))
+{
+  $sysConfig = $Options['c'];
 }
 if (array_key_exists('f', $Options))
 {
@@ -80,13 +75,33 @@ if (array_key_exists('f', $Options))
 }
 if((strlen($Filename)) == 0)
 {
-	print "Error, no filename supplied\n$usage\n";
-	exit(1);
+  print "Error, no filename supplied\n$usage\n";
+  exit(1);
 }
+// No sysconfig path passed in? try the environment
+if(empty($sysConfig))
+{
+  $sysConfig = getenv('SYSCONFDIR');
+  if(empty($sysConfig))
+  {
+    echo "FATAL!, no SYSCONFDIR defined\n";
+    echo "either export SYSCONFDIR path and rerun or use -c <sysconfdirpath>\n";
+    flush();
+    exit(1);
+  }
+}
+// get global vars:
+putenv("SYSCONFDIR=$sysConfig");
+$configVars = array();
+$configVars = bootstrap();
 
-$currentSysConf = getenv('SYSCONFDIR');
+global $PG_CONN;
 
-$PG_CONN = DBconnect($currentSysConf);
+require_once("$LIBEXECDIR/libschema.php");
+require_once ("$MODDIR/lib/php/common-db.php");
+require_once ("$MODDIR/lib/php/common-cache.php");
+
+$PG_CONN = DBconnect($sysConfig);
 
 //ApplySchema($Filename, 1, 1, $Catalog);
 // no debug below
