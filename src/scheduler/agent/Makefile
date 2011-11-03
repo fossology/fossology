@@ -75,10 +75,6 @@ $(CLI): schedulerCLI.c Makefile $(FOLIB)
 libscheduler.a: $(OBJS) $(DEPEN)
 	ar cvr $@ $(OBJS)
 
-$(FOLIB):
-	$(MAKE) -C $(FOLIBDIR)
-
-
 ##################
 # init.d scripts #
 ##################
@@ -161,4 +157,4 @@ coverage:
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test coverage $(FOLIB)
+.PHONY: all install uninstall clean test coverage 
