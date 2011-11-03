@@ -471,6 +471,7 @@ void    Usage   (char *Name)
   printf("Usage: %s [options] [id [id ...]]\n",Name);
   printf("  -i        :: initialize the database, then exit.\n");
   printf("  -a        :: run on ALL uploads that have no nested set records.\n");
+  printf("  -c SYSCONFDIR :: FOSSology configuration directory.\n");
   printf("  -u        :: list all upload ids, then exit.\n");
   printf("  no file   :: process upload ids from the scheduler.\n");
   printf("  id        :: process upload ids from the command-line.\n");
@@ -501,13 +502,15 @@ int	main	(int argc, char *argv[])
   fo_scheduler_connect(&argc, argv);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"aiuv")) != -1)
+  while((c = getopt(argc,argv,"aciuv")) != -1)
   {
     switch(c)
     {
       case 'a': /* run on ALL */
       RunAllNew();
       break;
+    case 'c':
+      break;  /* handled by fo_scheduler_connect()  */
     case 'i':
       PQfinish(pgConn);
       return(0);
