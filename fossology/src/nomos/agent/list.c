@@ -792,7 +792,6 @@ int listCount(list_t *l) {
 }
 
 /**
- * listDump
  * \brief print the passed in list
  *
  * @param *l the list to dump
