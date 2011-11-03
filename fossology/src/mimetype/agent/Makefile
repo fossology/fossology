@@ -15,15 +15,9 @@ COVERAGE=$(OBJECTS:%.o=%_cov.o)
 
 all: $(EXE)
 
-$(EXE): mimetype.c $(FOLIB) libmimetype.a $(DB) $(REPO) $(VARS)
+$(EXE): mimetype.c libmimetype.a $(DB) $(REPO) $(VARS)
 	@echo "make $(EXE)"
 	$(CC) mimetype.c libmimetype.a $(CFLAGS_LOCAL) -o $@
-
-#######################
-# library build rules #
-#######################
-$(FOLIB):
-	$(MAKE) -C $(FOLIBDIR)
 
 install: all
 	@echo "make $(EXE) install"
