@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include "CUnit/CUnit.h"
 
+extern char *DBConfFile;
 /**
  * \file testGetMetadata.c
  * \brief unit test for GetMetadata function
@@ -74,7 +75,7 @@ void test_GetMetadata_no_testfile()
   struct rpmpkginfo *pi;
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   int predictValue = -1;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   rpmReadConfigFiles(NULL, NULL);

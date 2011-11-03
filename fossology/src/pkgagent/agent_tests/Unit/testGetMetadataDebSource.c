@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include "CUnit/CUnit.h"
 
+extern char *DBConfFile;
 /**
  * \file testGetMetadataDebSource.c
  * \brief unit test for GetMetadataDebSource function
@@ -32,7 +33,7 @@ void test_GetMetadataDebSource()
 {
   char *repFile = "../testdata/fossology_1.4.1.dsc";
   struct debpkginfo *pi;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));

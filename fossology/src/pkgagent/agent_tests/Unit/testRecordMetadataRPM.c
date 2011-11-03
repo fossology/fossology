@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "CUnit/CUnit.h"
 
 #define MAXSQL  4096
-
+extern char *DBConfFile;
 /**
  * \file testRecordMetadataRPM.c
  * \brief unit test for RecordMetadataRPM function
@@ -36,7 +36,7 @@ void test_RecordMetadataRPM()
   char SQL[MAXSQL];
   PGresult *result;
   char Fuid[1024];
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   for(i=0; i<20; i++) { sprintf(Fuid+0+i*2,"%02X",'s'); }
