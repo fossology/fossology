@@ -192,6 +192,7 @@ class ui_nomos_diff extends FO_Plugin
    */
   function ChildElt($Child, $agent_pk, $OtherChild)
   {
+    $UniqueTagArray = array();
     $licstr = $Child['licstr'];
 
     /* If both $Child and $OtherChild are specified,
@@ -228,7 +229,7 @@ class ui_nomos_diff extends FO_Plugin
 
     /* display item links */
     $ColStr .= "<td valign='top'>";
-    $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk, $Child['pfile_fk']);
+    $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk, $Child['pfile_fk'], True, $UniqueTagArray);
     $ColStr .= "</td>";
     return $ColStr;
   }  /* ChildElt() */
