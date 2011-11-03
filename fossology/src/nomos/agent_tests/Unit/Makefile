@@ -17,8 +17,6 @@ all: $(EXE)
 
 $(EXE): 
 	@echo "make nomos agent unit test"
-	@echo "No unit tests for nomos"
-	
 
 $(TEST_OBJ_RUN):
 
@@ -28,9 +26,10 @@ cunit_lib:
 	
 test: all 
 	@echo "execute nomos unit test"
-
+	@echo "NO TESTS (unit) for nomos"
 coverage: 
 	@echo "execute nomos test and code coverage"
+	@echo "NO TESTS (unit) for nomos"
 
 libmimetype_cov.a:
 
