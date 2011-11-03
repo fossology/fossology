@@ -268,6 +268,7 @@ return;
    */
   function ChildElt($Child, $agent_pk, $OtherChild, $BucketDefArray)
   {
+    $UniqueTagArray = array();
     $bucketstr = $Child['bucketstr'];
 
     /* If both $Child and $OtherChild are specified,
@@ -309,7 +310,7 @@ return;
 
     /* display file links if this is a real file */
     $ColStr .= "<td valign='top'>";
-    $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk, $Child['pfile_fk']);
+    $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk, $Child['pfile_fk'], True, $UniqueTagArray);
     $ColStr .= "</td>";
     return $ColStr;
   }
