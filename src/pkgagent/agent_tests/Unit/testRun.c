@@ -31,16 +31,104 @@ extern CU_TestInfo testcases_RecordMetadataDEB[];
 extern CU_TestInfo testcases_GetMetadataDebSource[];
 extern CU_TestInfo testcases_GetMetadataDebBinary[];
 
+char *DBConfFile = NULL;
+char *TestSysconf = NULL;
+char *TestName = NULL;
+
+/**
+ * brief get command output
+ */
+void command_output(char *command)
+{
+  FILE *stream;
+  char tmp[256];
+  int i=0;
+ 
+  stream = popen(command, "r");
+  memset(tmp, '\0', sizeof(tmp));
+  if (fgets(tmp, 256, stream) != NULL)
+  {
+    while(tmp[i] != '\n')
+      i++; 
+    TestSysconf = malloc(i);
+    memcpy(TestSysconf, tmp, i);
+  }
+  pclose(stream);
+  return;
+}
+/**
+ * \brief initialize db
+ */
+int PkgagentDBInit()
+{
+  char CMD[256];
+
+  memset(CMD, '\0', sizeof(CMD));
+  sprintf(CMD, "../../../testing/db/createTestDB.php -c /usr/local/etc/fossology");
+  command_output(CMD);
+  TestName = strstr(TestSysconf, "Conf") + 4;
+
+  if ( TestSysconf != NULL)
+  {
+    DBConfFile = malloc(256);
+    sprintf(DBConfFile, "%s/Db.conf", TestSysconf);
+    printf("EE:%s:FF\n", DBConfFile);
+  }
+  free(TestSysconf);
+  return 0;
+}
+/**
+ * \brief clean db
+ */
+int PkgagentDBClean()
+{
+  char CMD[256];
+  int rc;
+
+  // remove test database 
+  memset(CMD, '\0', sizeof(CMD));
+  sprintf(CMD, "../../../testing/db/createTestDB.php -d fosstest%s", TestName);
+  rc = system(CMD);
+  if (rc != 0)
+  {
+    printf("Test Database clean ERROR!\n");
+    return -1;
+  }
+  // remove test config files
+  memset(CMD, '\0', sizeof(CMD));
+  sprintf(CMD, "rm -rf /srv/fossology/testDbConf%s", TestName);
+  rc = system(CMD);
+  if (rc != 0)
+  {
+    printf("Test Database Conf files clean ERROR!\n");
+    return -1;
+  }
+  // remove test repo
+  memset(CMD, '\0', sizeof(CMD));
+  sprintf(CMD, "rm -rf /srv/fossology/testDbRepo%s", TestName);
+  rc = system(CMD);
+  if (rc != 0)
+  {
+    printf("Test Repo clean ERROR!\n");
+    return -1;
+  }
+  TestName = NULL;
+  TestSysconf = NULL;
+  DBConfFile = NULL;
+
+  return 0;
+}
+
 /* create test suite */
 CU_SuiteInfo suites[] = {
     {"Testing the function trim:", NULL, NULL, testcases_Trim},
     {"Testing the function GetFieldValue:", NULL, NULL, testcases_GetFieldValue},
     //{"Testing the function ProcessUpload:", NULL, NULL, testcases_ProcessUpload},
-    {"Testing the function RecordMetadataDEB:", NULL, NULL, testcases_RecordMetadataDEB},
-    {"Testing the function GetMetadataDebSource:", NULL, NULL, testcases_GetMetadataDebSource},
-    {"Testing the function RecordMetadataRPM:", NULL, NULL, testcases_RecordMetadataRPM},
-    {"Testing the function GetMetadataDebBinary:", NULL, NULL, testcases_GetMetadataDebBinary},
-    {"Testing the function GetMetadata:", NULL, NULL, testcases_GetMetadata},
+    {"Testing the function RecordMetadataDEB:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataDEB},
+    {"Testing the function GetMetadataDebSource:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadataDebSource},
+    {"Testing the function RecordMetadataRPM:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataRPM},
+    {"Testing the function GetMetadataDebBinary:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadataDebBinary},
+    {"Testing the function GetMetadata:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadata},
     CU_SUITE_INFO_NULL
 };
 

@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "CUnit/CUnit.h"
 
 #define MAXSQL  4096
-
+extern char *DBConfFile;
 /**
  * \file testGetMetadataDebBinary.c
  * \brief unit test for GetMetadataDebBinary function
@@ -283,7 +283,7 @@ void test_GetMetadataDebBinary()
 {
   struct debpkginfo *pi;
   long upload_pk;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
