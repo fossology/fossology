@@ -176,6 +176,7 @@ class ui_buckets extends FO_Plugin
     $VF=""; // return values for file listing
     $VLic=""; // return values for output
     $V=""; // total return value
+    $UniqueTagArray = array();
     global $Plugins;
 
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
@@ -422,7 +423,7 @@ return;
       $VF .= "</td><td valign='top'>";
 
       /* display item links */
-      $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $nomosagent_pk, $C['pfile_fk']);
+        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $nomosagent_pk, $C['pfile_fk'], True, $UniqueTagArray);
       $VF .= "</td>";
       $VF .= "</tr>\n";
 
