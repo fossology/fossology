@@ -26,9 +26,6 @@ departition: %: %.c $(VARS)
 ununpack: ununpack.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
 	$(CC) ununpack.c libununpack.a $(CFLAGS_LOCAL) -o $@
 
-$(FOLIB):
-	$(MAKE) -C $(FOLIBDIR)
-
 install: all $(VARS)
 	if [ -e $(DESTDIR)$(MODDIR)/ununpack/agent/departition ] ; then \
 	   rm -f $(DESTDIR)$(MODDIR)/ununpack/agent/departition; \
@@ -76,4 +73,4 @@ clean:
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test $(FOLIB)
+.PHONY: all install uninstall clean test
