@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,6 +15,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ***************************************************************/
+/**
+ * \file process.c
+ * \brief some common functions that process the files for scanning
+ */
 
 #include "nomos.h"
 #include "process.h"
@@ -34,7 +38,6 @@ extern void memStats();
  *
  * \callgraph
  */
-
 static void processNonPackagedFiles()
 {
   /* item_t *p;  doesn't look like this is used */
@@ -72,8 +75,8 @@ static void processNonPackagedFiles()
 
 
 #ifdef notdef
-/*
- * Remove the line at textp+offset from the buffer
+/**
+ * \brief Remove the line at textp+offset from the buffer
  */
 void stripLine(char *textp, int offset, int size)
 {

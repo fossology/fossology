@@ -30,11 +30,12 @@
 #include "list.h"
 #include "nomos_regex.h"
 
-#define	MM_CACHESIZE	20
+#define MM_CACHESIZE 20
+#define MAXLENGTH     100 
 
-#ifdef	REUSE_STATIC_MEMORY
-static char grepzone[10485760];	/* 10M for now, adjust if needed */
-#endif	/* REUSE_STATIC_MEMORY */
+#ifdef REUSE_STATIC_MEMORY
+static char grepzone[10485760]; /* 10M for now, adjust if needed */
+#endif /* REUSE_STATIC_MEMORY */
 
 /*
   File local variables
@@ -45,19 +46,19 @@ static struct mm_cache mmap_data[MM_CACHESIZE];
 static char cmdBuf[512];
 
 
-#ifdef	MEMORY_TRACING
-#define	MEMCACHESIZ	200000
+#ifdef MEMORY_TRACING
+#define MEMCACHESIZ 200000
 static int memlast = -1;
 static struct mm_cache memcache[MEMCACHESIZ];
 void memCacheDump();
-#endif	/* MEMORY_TRACING */
+#endif /* MEMORY_TRACING */
 
 
 int isDIR(char *dpath)
 {
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== isDIR(%s)\n", dpath);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   return(isINODE(dpath, S_IFDIR));
 }
@@ -65,9 +66,9 @@ int isDIR(char *dpath)
 
 int isEMPTYFILE(char *fpath)
 {
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== isEMPTYFILE(%s)\n", fpath);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   if (!isFILE(fpath)) {
     return(0);
@@ -78,9 +79,9 @@ int isEMPTYFILE(char *fpath)
 
 int isBLOCK(char *bpath)
 {
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== isBLOCK(%s)\n", bpath);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   return(isINODE(bpath, S_IFBLK));
 }
@@ -88,9 +89,9 @@ int isBLOCK(char *bpath)
 
 int isCHAR(char *cpath)
 {
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== isCHAR(%s)\n", cpath);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   return(isINODE(cpath, S_IFCHR));
 }
@@ -98,9 +99,9 @@ int isCHAR(char *cpath)
 
 int isPIPE(char *ppath)
 {
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== isPIPE(%s)\n", ppath);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   return(isINODE(ppath, S_IFIFO));
 }
@@ -108,9 +109,9 @@ int isPIPE(char *ppath)
 
 int isSYMLINK(char *spath)
 {
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== isSYMLINK(%s)\n", spath);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   return(isINODE(spath, S_IFLNK));
 }
@@ -121,15 +122,15 @@ int isINODE(char *ipath, int typ)
   int ret;
   char sErrorBuf[1024];
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== isINODE(%s, 0x%x)\n", ipath, typ);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   if ((ret = stat(ipath, &cur.stbuf)) < 0) {
     /*
-	  IF we're trying to stat() a file that doesn't exist, 
-	  that's no biggie.
-	  Any other error, however, is fatal.
+   IF we're trying to stat() a file that doesn't exist, 
+   that's no biggie.
+   Any other error, however, is fatal.
      */
     if (errno == ENOENT) {
       return 0;
@@ -149,9 +150,9 @@ char *newReloTarget(char *basename)
   static char newpath[myBUFSIZ];
   int i;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== newReloTarget(%s)\n", basename);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   for (i = 0; i < MAX_RENAME; i++) {
     (void) sprintf(newpath, "%s_%s-renamed.%03d", basename, gl.progName, i);
@@ -168,9 +169,9 @@ char *newReloTarget(char *basename)
 
 
 
-#ifdef	MEMORY_TRACING
-/*
- * memAlloc is a front-end to calloc() that dies on allocation-failure
+#ifdef MEMORY_TRACING
+/**
+ * \brief memAlloc is a front-end to calloc() that dies on allocation-failure
  * thus, we don't have to always check the return value from calloc()
  * in the guts of the application code; we die here if alloc fails.
  */
@@ -184,9 +185,9 @@ char *memAllocTagged(int size, char *name)
    * the pointer we were given.
    */
 
-#if	defined(PROC_TRACE) || defined(MEM_ACCT)
+#if defined(PROC_TRACE) || defined(MEM_ACCT)
   traceFunc("== memAllocTagged(%d, \"%s\")\n", size, name);
-#endif	/* PROC_TRACE || MEM_ACCT */
+#endif /* PROC_TRACE || MEM_ACCT */
 
   if (size < 1) {
     LOG_FATAL("Cannot alloc %d bytes!", size)
@@ -196,31 +197,31 @@ char *memAllocTagged(int size, char *name)
     LOG_FATAL("*** memAllocTagged: out of memcache entries")
                                   Bail(-__LINE__);
   }
-#ifdef	USE_CALLOC
+#ifdef USE_CALLOC
   if ((ptr = calloc((size_t) 1, (size_t) size)) == (void *) NULL) {
     strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
     LOG_FATAL("calloc for %s, error: %s", name, sErrorBuf)
     Bail(-__LINE__);
   }
-#else	/* not USE_CALLOC */
+#else /* not USE_CALLOC */
   if ((ptr = malloc((size_t) size)) == (void *) NULL) {
     strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
     LOG_FATAL("malloc for %s, error: %s", name, sErrorBuf)
     Bail(-__LINE__);
   }
   (void) memset(ptr, 0, (size_t) size);
-#endif	/* not USE_CALLOC */
-#if	DEBUG > 3 || defined(MEM_ACCT)
+#endif /* not USE_CALLOC */
+#if DEBUG > 3 || defined(MEM_ACCT)
   printf("+%p:%p=(%d)\n", ptr, ptr+size-1, size);
-#endif	/* DEBUG > 3 || MEM_ACCT */
+#endif /* DEBUG > 3 || MEM_ACCT */
   memcache[memlast].mmPtr = ptr;
   memcache[memlast].size = size;
   (void) strcpy(memcache[memlast].label, name);
-#ifdef	MEM_ACCT
+#ifdef MEM_ACCT
   printf("memAllocTagged(%d, \"%s\") == %p [entry %04d]\n", size, name, ptr,
       memlast);
   /* memCacheDump("post-memAllocTagged:"); */
-#endif	/* MEM_ACCT */
+#endif /* MEM_ACCT */
   return(ptr);
 }
 
@@ -230,20 +231,20 @@ void memFreeTagged(void *ptr, char *note)
   struct mm_cache *mmp;
   int i;
 
-#if	defined(PROC_TRACE) || defined(MEM_ACCT)
+#if defined(PROC_TRACE) || defined(MEM_ACCT)
   traceFunc("== memFree(%p, \"%s\")\n", ptr, note);
-#endif	/* PROC_TRACE || MEM_ACCT */
+#endif /* PROC_TRACE || MEM_ACCT */
 
-#ifdef	MEMORY_TRACING
+#ifdef MEMORY_TRACING
   DEBUG("mprobe(%p)\n", ptr)
-  mprobe(ptr);	/* see if glibc still likes this memory */
-#endif	/* MEMORY_TRACING */
+  mprobe(ptr); /* see if glibc still likes this memory */
+#endif /* MEMORY_TRACING */
   for (mmp = memcache, i = 0; i <= memlast; mmp++, i++) {
     if (mmp->mmPtr == ptr) {
-#ifdef	MEM_ACCT
+#ifdef MEM_ACCT
       printf("memFree(%p, \"%s\") is entry %04d (%d bytes)\n", ptr, note, i,
           mmp->size);
-#endif	/* MEM_ACCT */
+#endif /* MEM_ACCT */
       break;
     }
   }
@@ -252,18 +253,18 @@ void memFreeTagged(void *ptr, char *note)
                                   Bail(-__LINE__);
   }
   free(ptr);
-#if	DEBUG > 3 || defined(MEM_ACCT)
+#if DEBUG > 3 || defined(MEM_ACCT)
   printf("-%p=(%d)\n", ptr, mmp->size);
-#endif	/* DEBUG > 3 || MEM_ACCT */
+#endif /* DEBUG > 3 || MEM_ACCT */
   if (i != memlast) {
     (void) memmove(&memcache[i], &memcache[i+1],
         (memlast-i)*sizeof(struct mm_cache));
   }
   memset(&memcache[memlast], 0, sizeof(struct mm_cache));
   memlast--;
-#ifdef	MEM_ACCT
+#ifdef MEM_ACCT
   memCacheDump("post-memFree:");
-#endif	/* MEM_ACCT */
+#endif /* MEM_ACCT */
   return;
 }
 
@@ -296,35 +297,35 @@ void memCacheDump(char *s)
   }
   return;
 }
-#endif	/* MEMORY_TRACING */
+#endif /* MEMORY_TRACING */
 
 
 char *findBol(char *s, char *upperLimit)
 {
   char *cp;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== findBol(%p, %p)\n", s, upperLimit);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   if (s == NULL_STR || upperLimit == NULL_STR) {
     return(NULL_STR);
   }
   for (cp = s; cp > upperLimit; cp--) {
-#ifdef	DEBUG
+#ifdef DEBUG
     DEBUG("cp %p upperLimit %p\n", cp, upperLimit)
-#endif	/* DEBUG */
-	                                if (isEOL(*cp)) {
-#ifdef	DEBUG
-	                                  DEBUG("Got it!  BOL == %p\n", cp)
-#endif	/* DEBUG */
-	                                    return((char*)(cp+1));
-	                                }
+#endif /* DEBUG */
+                                 if (isEOL(*cp)) {
+#ifdef DEBUG
+                                   DEBUG("Got it!  BOL == %p\n", cp)
+#endif /* DEBUG */
+                                     return((char*)(cp+1));
+                                 }
   }
   if (cp == upperLimit) {
-#ifdef	DEBUG
+#ifdef DEBUG
     DEBUG("AT upperLimit %p\n", upperLimit);
-#endif	/* DEBUG */
+#endif /* DEBUG */
     return(upperLimit);
   }
   return(NULL_STR);
@@ -335,16 +336,16 @@ char *findEol(char *s)
 {
   char *cp;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== findEol(%p)\n", s);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   if (s == NULL_STR) {
     return(NULL_STR);
   }
   for (cp = s; *cp != NULL_CHAR; cp++) {
     if (isEOL(*cp)) {
-      return(cp);	/* return ptr to EOL or NULL */
+      return(cp); /* return ptr to EOL or NULL */
     }
   }
   if (*cp == NULL_CHAR) {
@@ -364,11 +365,11 @@ void renameInode(char *oldpath, char *newpath)
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
   traceFunc("== renameInode(%s, %s)\n", oldpath, newpath);
-#endif	/* PROC_TRACE || UNPACK_DEBUG */
+#endif /* PROC_TRACE || UNPACK_DEBUG */
 
-#ifdef	DEBUG
+#ifdef DEBUG
   (void) mySystem("ls -ldi '%s'", oldpath);
-#endif	/* DEBUG */
+#endif /* DEBUG */
   if (rename(oldpath, newpath) < 0) {
     if (errno == EXDEV) {
       err = mySystem("mv '%s' %s", oldpath, newpath);
@@ -382,9 +383,9 @@ void renameInode(char *oldpath, char *newpath)
       Bail(-__LINE__);
     }
   }
-#ifdef	DEBUG
+#ifdef DEBUG
   (void) mySystem("ls -ldi %s", newpath);
-#endif	/* DEBUG */
+#endif /* DEBUG */
   return;
 }
 
@@ -398,7 +399,7 @@ void chmodInode(char *pathname, int mode)
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
   traceFunc("== chmodInode(%s, 0%o)\n", pathname, mode);
-#endif	/* PROC_TRACE || UNPACK_DEBUG */
+#endif /* PROC_TRACE || UNPACK_DEBUG */
 
   if (chmod(pathname, mode) < 0) {
     strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
@@ -418,9 +419,9 @@ FILE *fopenFile(char *pathname, char *mode)
    * given to us.  we die here if the fopen() fails.
    */
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== fopenFile(%s, \"%s\")\n", pathname, mode);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   if ((fp = fopen(pathname, mode)) == (FILE *) NULL) {
     strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
@@ -456,14 +457,14 @@ FILE *popenProc(char *command, char *mode)
    * given to us.  we die here if the popen() fails.
    */
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== popenProc(\"%s\", %s)\n", command, mode);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   if ((pp = popen(command, mode)) == (FILE *) NULL) {
-#ifdef	MEMORY_TRACING
+#ifdef MEMORY_TRACING
     memCacheDump("Post-popen-failure:");
-#endif	/* MEMORY_TRACING */
+#endif /* MEMORY_TRACING */
     strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
     LOG_FATAL("popen(\"%s\") error: %s", command, sErrorBuf)
     Bail(-__LINE__);
@@ -472,8 +473,8 @@ FILE *popenProc(char *command, char *mode)
 }
 
 
-/*
- * VERY simple line count, does NOT have to be perfect!
+/**
+ * \brief VERY simple line count, does NOT have to be perfect!
  */
 char *wordCount(char *textp)
 {
@@ -481,9 +482,9 @@ char *wordCount(char *textp)
   int lines;
   char *cp;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== wordCount(%p)\n", textp);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   lines = 0;
   for (cp = textp; *cp; cp++) {
@@ -516,14 +517,14 @@ char *copyString(char *s, char *label)
   char *cp;
   int len;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== copyString(%p, \"%s\")\n", s, label);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   cp = memAlloc(len=(strlen(s)+1), label);
-#ifdef	DEBUG
+#ifdef DEBUG
   printf("+CS: %d @ %p\n", len, cp);
-#endif	/* DEBUG */
+#endif /* DEBUG */
   (void) strcpy(cp, s);
   return(cp);
 }
@@ -533,9 +534,9 @@ char *pathBasename(char *path)
 {
   char *cp;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== pathBasename(\"%s\")\n", path);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   cp = strrchr(path, '/');
   return(cp == NULL_STR ? path : (char *)(cp+1));
@@ -566,12 +567,12 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG) || defined(DOCTOR_DEBUG)
   traceFunc("== getInstances(%p, %d, %d, %d, \"%s\", %d)\n", textp, size,
       nBefore, nAfter, regex, recordOffsets);
-#endif	/* PROC_TRACE || PHRASE_DEBUG || DOCTOR_DEBUG */
+#endif /* PROC_TRACE || PHRASE_DEBUG || DOCTOR_DEBUG */
 
   if ((notDone = strGrep(regex, textp, regexFlags)) == 0) {
-#ifdef	PHRASE_DEBUG
+#ifdef PHRASE_DEBUG
     printf("... no match: 1st strGrep()\n");
-#endif	/* PHRASE_DEBUG */
+#endif /* PHRASE_DEBUG */
     return(NULL_STR);
   }
   /*
@@ -589,40 +590,40 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     (void) sprintf(utilbuf, "\"%c%c%c%c%c%c%c%c%c%c\" match-list",
         *regex, *(regex+1), *(regex+2), *(regex+3), *(regex+4),
         *(regex+5), *(regex+6), *(regex+7), *(regex+8), *(regex+9));
-#ifdef	PHRASE_DEBUG
+#ifdef PHRASE_DEBUG
     printf("Creating %s\n", utilbuf);
-#endif	/* PHRASE_DEBUG */
+#endif /* PHRASE_DEBUG */
     listInit(p->bList, 0, utilbuf); /*  <- MEMORY LEAK from p->bList->items not freed */
-#ifdef	QA_CHECKS
-    p->val3++;	/* sanity-check -- should never be >1 ! */
+#ifdef QA_CHECKS
+    p->val3++; /* sanity-check -- should never be >1 ! */
     if (p->val3 > 1) {
       LOG_FATAL("Called getInstances(%s) more than once", regex)
                                       Bail(-__LINE__);
     }
-#endif	/* QA_CHECKS */
+#endif /* QA_CHECKS */
   }
-#ifdef	REUSE_STATIC_MEMORY
-  if (ibuf == NULL_STR) {		/* first time, uninitialized */
+#ifdef REUSE_STATIC_MEMORY
+  if (ibuf == NULL_STR) {  /* first time, uninitialized */
     ibuf = grepzone;
     bufmax = sizeof(grepzone);
   }
   else if (ibuf != grepzone) {
-    memFree(ibuf, MTAG_DOUBLED);	/* free the memory... */
-    ibuf = grepzone;			/* ... and reset */
+    memFree(ibuf, MTAG_DOUBLED); /* free the memory... */
+    ibuf = grepzone;   /* ... and reset */
     bufmax = sizeof(grepzone);
   }
-#else	/* not REUSE_STATIC_MEMORY */
+#else /* not REUSE_STATIC_MEMORY */
   if (ibuf == NULL_STR) {
     ibuf = memAlloc((bufmax = 1024*1024), MTAG_SEARCHBUF);
   }
-#endif	/* not REUSE_STATIC_MEMORY */
+#endif /* not REUSE_STATIC_MEMORY */
   *ibuf = NULL_CHAR;
   bufmark = ibuf;
   end = NULL_STR;
   /*
    * At this point, we know the string we're looking for is IN the file.
    */
-#ifdef	PHRASE_DEBUG
+#ifdef PHRASE_DEBUG
   printf("getInstances: \"%s\" [#1] in buf [%d-%d]\n", regex,
       cur.regm.rm_so, cur.regm.rm_eo-1);
   printf("Really in the buffer: [");
@@ -630,7 +631,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     printf("%c", *cp);
   }
   printf("]\n");
-#endif	/* PHRASE_DEBUG */
+#endif /* PHRASE_DEBUG */
   /*
    * Find the start of the text line containing the "first" match.
    * locate start of "$nBefore lines above pattern match"; go up to the
@@ -638,11 +639,11 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
    */
   curptr = textp;
   fileeof = (char *) (textp+size);
-  while (notDone) {	/* curptr is the 'current block' ptr */
+  while (notDone) { /* curptr is the 'current block' ptr */
     p->nMatch++;
-#ifdef	PHRASE_DEBUG
+#ifdef PHRASE_DEBUG
     printf("... found Match #%d\n", p->nMatch);
-#endif	/* PHRASE_DEBUG */
+#endif /* PHRASE_DEBUG */
     if (recordOffsets) {
       (void) sprintf(utilbuf, "buf%05d", p->nMatch);
       bp = listGetItem(p->bList, utilbuf);
@@ -662,9 +663,9 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
         if (start > textp) {
           start = findBol(start, textp);
         }
-#ifdef	PHRASE_DEBUG
+#ifdef PHRASE_DEBUG
         DEBUG("start = %p\n", start)
-#endif	/* PHRASE_DEBUG */
+#endif /* PHRASE_DEBUG */
       }
     }
     if (recordOffsets) {
@@ -689,12 +690,12 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
       curptr += cur.regm.rm_eo;
       end = findEol(curptr);
       if (end < fileeof) {
-        end++;	/* first char past end-of-line */
+        end++; /* first char past end-of-line */
       }
       if (nAfter > 0) {
         for (i = 0; end < fileeof; end++) {
-          if (isEOL(*end)) {	/* double-EOL */
-            end++;		/* <CR><LF>? */
+          if (isEOL(*end)) { /* double-EOL */
+            end++;  /* <CR><LF>? */
           }
           end = findEol(end);
           if (end == NULL_STR) {
@@ -702,35 +703,35 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
                                       Bail(-__LINE__);
           }
           if (*end == NULL_CHAR) {
-            break;	/* EOF == done */
+            break; /* EOF == done */
           }
           if (++i == nAfter) {
             break;
           }
         }
         if ((end < fileeof) && *end) {
-          end++;	/* past newline-char */
+          end++; /* past newline-char */
         }
       }
-#ifdef	PHRASE_DEBUG
+#ifdef PHRASE_DEBUG
       printf("Snippet, with %d lines below:\n----\n", nAfter);
       for (cp = start; cp < end; cp++) {
         printf("%c", *cp);
       }
       printf("====\n");
-#endif	/* PHRASE_DEBUG */
+#endif /* PHRASE_DEBUG */
       notDone = strGrep(regex, curptr, regexFlags);
-      if (notDone) {	/* another match? */
-#ifdef	PHRASE_DEBUG
+      if (notDone) { /* another match? */
+#ifdef PHRASE_DEBUG
         printf("... next match @ %d:%d (end=%d)\n",
             curptr - textp + cur.regm.rm_so,
             curptr - textp + cur.regm.rm_eo - 1, end - textp);
-#endif	/* PHRASE_DEBUG */
-#ifdef	QA_CHECKS
+#endif /* PHRASE_DEBUG */
+#ifdef QA_CHECKS
         if ((curptr + cur.regm.rm_eo) > fileeof) {
           Assert(YES, "Too far into file!");
         }
-#endif	/* QA_CHECKS */
+#endif /* QA_CHECKS */
         /* next match OUTSIDE the text we've already saved? */
         if ((curptr + cur.regm.rm_eo) > end) {
           break;
@@ -745,46 +746,46 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
      * buffer (BEFORE we modify it); we don't KNOW how much text to expect!
      */
     save = *end;
-    *end = NULL_CHAR;	/* char PAST the newline! */
+    *end = NULL_CHAR; /* char PAST the newline! */
     if (recordOffsets) {
       bp->bLen = end-start;
       bp->buf = copyString(start, MTAG_TEXTPARA);
       bp->bDocLen = 0;
-#ifdef	PHRASE_DEBUG
+#ifdef PHRASE_DEBUG
       printf("%s starts @%d, len %d ends [%c%c%c%c%c%c%c]\n",
           utilbuf, bp->bStart, bp->bLen, *(end-8), *(end-7),
           *(end-6), *(end-5), *(end-4), *(end-3), *(end-2));
-#endif	/* PHRASE_DEBUG */
+#endif /* PHRASE_DEBUG */
     }
     newDataLen = end-start+(notDone ? strlen(sep)+1 : 0);
     while (buflen+newDataLen > bufmax) {
       char *new;
-#ifdef	QA_CHECKS
+#ifdef QA_CHECKS
       Assert(NO, "data(%d) > bufmax(%d)", buflen+newDataLen,
           bufmax);
-#endif	/* QA_CHECKS */
+#endif /* QA_CHECKS */
       bufmax *= 2;
-#ifdef	MEMSTATS
+#ifdef MEMSTATS
       printf("... DOUBLE search-pattern buffer (%d -> %d)\n",
           bufmax/2, bufmax);
-#endif	/* MEMSTATS */
+#endif /* MEMSTATS */
       new = memAlloc(bufmax, MTAG_DOUBLED);
       (void) memcpy(new, ibuf, buflen);
-#if	0
+#if 0
       printf("REPLACING buf %p(%d) with %p(%d)\n", ibuf,
           bufmax/2, new, bufmax);
 #endif
-#ifdef	REUSE_STATIC_MEMORY
+#ifdef REUSE_STATIC_MEMORY
       if (ibuf != grepzone) {
         memFree(ibuf, MTAG_TOOSMALL);
       }
-#else	/* not REUSE_STATIC_MEMORY */
+#else /* not REUSE_STATIC_MEMORY */
       memFree(ibuf, MTAG_TOOSMALL);
-#endif	/* not REUSE_STATIC_MEMORY */
+#endif /* not REUSE_STATIC_MEMORY */
       ibuf = new;
     }
-    cp = bufmark = ibuf+buflen-1;	/* where the NULL is _now_ */
-    buflen += newDataLen;		/* new end-of-data ptr */
+    cp = bufmark = ibuf+buflen-1; /* where the NULL is _now_ */
+    buflen += newDataLen;  /* new end-of-data ptr */
     bufmark += sprintf(bufmark, "%s", start);
     if (notDone) {
       bufmark += sprintf(bufmark, "%s\n", sep);
@@ -796,26 +797,26 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
      * flag for interpretting ^M as end-of-line character.
      */
     while (*cp) {
-      if (*cp == '\r') {		/* '\015'? */
-        *cp = '\n';		/* '\012'! */
+      if (*cp == '\r') {  /* '\015'? */
+        *cp = '\n';  /* '\012'! */
       }
       cp++;
     }
     *end = save;
-#ifdef	PHRASE_DEBUG
+#ifdef PHRASE_DEBUG
     printf("Loop end, BUF IS NOW: [\"%s\":%d]\n----\n%s====\n",
         regex, strlen(ibuf), ibuf);
-#endif	/* PHRASE_DEBUG */
+#endif /* PHRASE_DEBUG */
   }
 
 #if defined(PHRASE_DEBUG) || defined(DOCTOR_DEBUG)
   printf("getInstances(\"%s\"): Found %d bytes of data...\n", regex,
       buflen-1);
-#endif	/* PHRASE_DEBUG || DOCTOR_DEBUG */
-#ifdef	PHRASE_DEBUG
+#endif /* PHRASE_DEBUG || DOCTOR_DEBUG */
+#ifdef PHRASE_DEBUG
   printf("getInstances(\"%s\"): buffer %p --------\n%s\n========\n",
       regex, ibuf, ibuf);
-#endif	/* PHRASE_DEBUG */
+#endif /* PHRASE_DEBUG */
 
   return(ibuf);
 }
@@ -838,7 +839,7 @@ char *curDate()
 }
 
 
-#ifdef	MEMSTATS
+#ifdef MEMSTATS
 void memStats(char *s)
 {
   static int first = 1;
@@ -856,19 +857,19 @@ void memStats(char *s)
     }
   }
   (void) mySystem(mbuf);
-#if	0
+#if 0
   system("grep Vm /proc/self/status");
   system("grep Brk /proc/self/status");
 #endif
 }
-#endif	/* MEMSTATS */
+#endif /* MEMSTATS */
 
 
 void makeSymlink(char *path)
 {
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
   traceFunc("== makeSymlink(%s)\n", path);
-#endif	/* PROC_TRACE || UNPACK_DEBUG */
+#endif /* PROC_TRACE || UNPACK_DEBUG */
 
   (void) sprintf(cmdBuf, ".%s", strrchr(path, '/'));
   if (symlink(path, cmdBuf) < 0) {
@@ -894,13 +895,13 @@ int fileIsShar(char *textp, char *magicData)
 {
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
+#ifdef PROC_TRACE_SWITCH
   if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
+#endif /* PROC_TRACE_SWITCH */
     printf("== fileIsShar(%p, \"%s\")\n", textp, magicData);
-#endif	/* PROC_TRACE || UNPACK_DEBUG */
+#endif /* PROC_TRACE || UNPACK_DEBUG */
 
-#ifdef	DEBUG
+#ifdef DEBUG
   if (!idxGrep(_UTIL_SHARTYPE, magicData, REG_ICASE|REG_EXTENDED)) {
     printf("DEBUG: NOT _UTIL_SHARTYPE\n");
     return(0);
@@ -911,26 +912,26 @@ int fileIsShar(char *textp, char *magicData)
   }
   printf("DEBUG: Hey, a shar file!\n");
   return(1);
-#else	/* not DEBUG */
+#else /* not DEBUG */
   if (idxGrep(_UTIL_SHARTYPE, magicData, REG_ICASE|REG_EXTENDED) &&
       idxGrep(_UTIL_SHAR, textp, REG_ICASE|REG_NEWLINE)) {
     return(1);
   }
   return(0);
-#endif	/* not DEBUG */
+#endif /* not DEBUG */
 }
 #endif /* notdef */
 
 
-/*
-   CDB -- Need to review this code, particularly for the use of an
-   external file (Nomos.strings.txt). Despite the fact that variable 
-   is named debugStr, the file appears to be used for more than just
-   debugging.
-
-   Although it might be the case that it only gets called from debug
-   code. It does not appear to be called during a few test runs of
-   normal file scans that I tried.
+/**
+ * \brief CDB -- Need to review this code, particularly for the use of an
+ * external file (Nomos.strings.txt). Despite the fact that variable 
+ * is named debugStr, the file appears to be used for more than just
+ * debugging.
+ *
+ * Although it might be the case that it only gets called from debug
+ * code. It does not appear to be called during a few test runs of
+ * normal file scans that I tried.
  */
 void printRegexMatch(int n, int cached)
 {
@@ -943,15 +944,15 @@ void printRegexMatch(int n, int cached)
   char *x = NULL;
   char *textp;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== printRegexMatch(%d, %d)\n", n, cached);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   if (*debugStr == NULL_CHAR) {
     (void) sprintf(debugStr, "%s/Nomos.strings.txt", gl.initwd);
-#ifdef	DEBUG
+#ifdef DEBUG
     printf("File: %s\n", debugStr);
-#endif	/* DEBUG */
+#endif /* DEBUG */
   }
   save_so = cur.regm.rm_so;
   save_eo = cur.regm.rm_eo;
@@ -959,16 +960,16 @@ void printRegexMatch(int n, int cached)
     if ((match = (gl.flags & FL_SAVEBASE))) { /* assignment is deliberate */
       gl.flags &= ~FL_SAVEBASE;
     }
-#ifdef	DEBUG
+#ifdef DEBUG
     printf("Match [%d:%d]\n", save_so, save_eo);
-#endif	/* DEBUG */
+#endif /* DEBUG */
     textp = mmapFile(debugStr);
     (void) sprintf(misc, "=#%03d", n);
     if (strGrep(misc, textp, REG_EXTENDED)) {
-#ifdef	DEBUG
+#ifdef DEBUG
       printf("Patt: %s\nMatch: %d:%d\n", misc,
           cur.regm.rm_so, cur.regm.rm_eo);
-#endif	/* DEBUG */
+#endif /* DEBUG */
       x = textp + cur.regm.rm_so;
       cp = textp + cur.regm.rm_so;
       *x = NULL_CHAR;
@@ -988,9 +989,9 @@ void printRegexMatch(int n, int cached)
     if (match) {
       gl.flags |= FL_SAVEBASE;
     }
-#ifdef	DEBUG
+#ifdef DEBUG
     printf("RESTR [%d:%d]\n", cur.regm.rm_so, cur.regm.rm_eo);
-#endif	/* DEBUG */
+#endif /* DEBUG */
   }
   cur.regm.rm_so = save_so;
   cur.regm.rm_eo = save_eo;
@@ -1002,20 +1003,32 @@ void printRegexMatch(int n, int cached)
     printf("\"%s\"", _REGEX(n));
   }
   printf("\n");
-#ifdef	DEBUG
+#ifdef DEBUG
   printf("Seed: \"%s\"\n", _SEED(n));
-#endif	/* DEBUG */
+#endif /* DEBUG */
   return;
 }
 
+/**
+ * \brief Replace all nulls in Buffer with blanks.
+ * \param Buffer: The data having its nulls replaced.
+ * \param BufferSize: Buffer size
+ */
+void ReplaceNulls(char *Buffer, int BufferSize)
+{
+  char *pBuf;
 
-/*
- * Blarg.  Files that are EXACTLY a multiple of the system pagesize do
+  for (pBuf = Buffer; BufferSize--; pBuf++)
+    if (*pBuf == 0) *pBuf = ' ';
+}
+
+/**
+ * \brief Blarg.  Files that are EXACTLY a multiple of the system pagesize do
  * not get a NULL on the end of the buffer.  We need something
  * creative, else we'll need to just calloc() the size of the file (plus
  * one) and read() the whole thing into memory.
  */
-char *mmapFile(char *pathname)	/* read-only for now */
+char *mmapFile(char *pathname) /* read-only for now */
 {
   struct mm_cache *mmp;
   int i;
@@ -1023,9 +1036,9 @@ char *mmapFile(char *pathname)	/* read-only for now */
   int rem;
   char *cp;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== mmapFile(%s)\n", pathname);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   for (mmp = mmap_data, i = 0; i < MM_CACHESIZE; i++, mmp++) {
     if (mmp->inUse == 0) {
@@ -1041,12 +1054,12 @@ char *mmapFile(char *pathname)	/* read-only for now */
 
   if ((mmp->fd = open(pathname, O_RDONLY)) < 0) {
     if (errno == ENOENT) {
-      mmp->inUse = 0;		/* overkill? */
-      mmp->size = -1;		/* overkill? */
+      mmp->inUse = 0;  /* overkill? */
+      mmp->size = -1;  /* overkill? */
       mmp->mmPtr = (void *) NULL;
-#if	(DEBUG > 3)
+#if (DEBUG > 3)
       printf("mmapFile: ENOENT %s\n", pathname);
-#endif	/* DEBUG > 3 */
+#endif /* DEBUG > 3 */
       return(NULL_STR);
     }
     perror(pathname);
@@ -1068,9 +1081,9 @@ char *mmapFile(char *pathname)	/* read-only for now */
   if (cur.stbuf.st_size) {
     mmp->size = cur.stbuf.st_size + 1;
     mmp->mmPtr = memAlloc(mmp->size, MTAG_MMAPFILE);
-#ifdef	DEBUG
+#ifdef DEBUG
     printf("+MM: %d @ %p\n", mmp->size, mmp->mmPtr);
-#endif	/* DEBUG */
+#endif /* DEBUG */
 
     /* Limit scan to first MAX_SCANBYTES
      * We have never found a license more than 64k into a file.
@@ -1091,15 +1104,17 @@ char *mmapFile(char *pathname)	/* read-only for now */
       cp += n;
     }
     mmp->inUse = 1;
+    /* Replace nulls with blanks so binary files can be scanned */
+    ReplaceNulls(mmp->mmPtr,  mmp->size-1); 
     return((char *) mmp->mmPtr);
   }
   /*
    * If we're here, we hit some sort of error.
    */
   (void) close(mmp->fd);
-#ifdef	QA_CHECKS
+#ifdef QA_CHECKS
   Assert(NO, "mmapFile: returning NULL");
-#endif	/* QA_CHECKS */
+#endif /* QA_CHECKS */
   return(NULL_STR);
 }
 
@@ -1120,9 +1135,8 @@ void mmapOpenListing()
   return;
 }
 
-/*
- * WARNING: do NOT use a string/buffer AFTER calling munmapFile()!!!
- *****
+/**
+ * \warning do NOT use a string/buffer AFTER calling munmapFile()!!! \n
  * We don't explicitly zero out the memory, but apparently glibc DOES.
  */
 void munmapFile(void *ptr)
@@ -1130,14 +1144,14 @@ void munmapFile(void *ptr)
   struct mm_cache *mmp;
   int i;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== munmapFile(%p)\n", ptr);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   if (ptr == (void *) NULL) {
-#ifdef	QA_CHECKS
+#ifdef QA_CHECKS
     Assert(NO, "NULL sent to munmapFile()!");
-#endif	/* QA_CHECKS */
+#endif /* QA_CHECKS */
     return;
   }
   for (mmp = mmap_data, i = 0; i < MM_CACHESIZE; i++, mmp++) {
@@ -1145,10 +1159,10 @@ void munmapFile(void *ptr)
       continue;
     }
     if (mmp->mmPtr == ptr) {
-#if	DEBUG > 4
+#if DEBUG > 4
       printf("munmapFile: clearing entry %d\n", i);
-#endif	/* DEBUG > 4 */
-#if	0
+#endif /* DEBUG > 4 */
+#if 0
       if (mmp->size) {
         (void) munmap((void *) ptr, (size_t) mmp->size);
       }
@@ -1157,14 +1171,14 @@ void munmapFile(void *ptr)
         perror("close");
         Bail(16);
       }
-#ifdef	PARANOID
+#ifdef PARANOID
       mmp->buf = (void *) NULL;
-#endif	/* PARANOID */
+#endif /* PARANOID */
       mmp->inUse = 0;
-#ifdef	DEBUG
+#ifdef DEBUG
       printf("DEBUG: munmapFile: freeing %d bytes\n",
           mmp->size);
-#endif	/* DEBUG */
+#endif /* DEBUG */
       memFree(mmp->mmPtr, MTAG_MMAPFILE);
       break;
     }
@@ -1179,9 +1193,9 @@ int bufferLineCount(char *p, int len)
   char *eofaddr = NULL;
   int i;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== bufferLineCount(%p, %d)\n", p, len);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   if (eofaddr == p) {
     return(0);
@@ -1192,9 +1206,9 @@ int bufferLineCount(char *p, int len)
       break;
     }
   }
-#if	(DEBUG > 3)
+#if (DEBUG > 3)
   printf("bufferLineCount == %d\n", i);
-#endif	/* DEBUG > 3 */
+#endif /* DEBUG > 3 */
   return(i ? i : 1);
 }
 
@@ -1203,9 +1217,9 @@ void appendFile(char *pathname, char *str)
 {
   FILE *fp;
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== appendFile(%s, \"%s\")\n", pathname, str);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   fp = fopenFile(pathname, "a+");
   fprintf(fp, "%s\n", str);
@@ -1228,11 +1242,11 @@ int mySystem(const char *fmt, ...)
   ret = system(cmdBuf);
   if (WIFEXITED(ret)) {
     ret = WEXITSTATUS(ret);
-#ifdef	DEBUG
+#ifdef DEBUG
     if (ret) {
       LOG_ERROR("system(%s) returns %d", cmdBuf, ret)
     }
-#endif	/* DEBUG */
+#endif /* DEBUG */
   }
   else if (WIFSIGNALED(ret)) {
     ret = WTERMSIG(ret);
@@ -1249,18 +1263,18 @@ int mySystem(const char *fmt, ...)
 int isFILE(char *pathname)
 {
 
-#ifdef	PROC_TRACE
+#ifdef PROC_TRACE
   traceFunc("== isFILE(%s)\n", pathname);
-#endif	/* PROC_TRACE */
+#endif /* PROC_TRACE */
 
   return(isINODE(pathname, S_IFREG));
 }
 
 
-/*
- * addEntry() adds a line to the specified pathname if either:
- *	(a) the line does NOT already exist in the line, or
- *	(b) the variable 'forceFlag' is set to non-zero
+/**
+ * \brief adds a line to the specified pathname if either:
+ * - the line does NOT already exist in the line, or
+ * - the variable 'forceFlag' is set to non-zero
  */
 int addEntry(char *pathname, int forceFlag, const char *fmt, ...)
 {
@@ -1282,8 +1296,8 @@ int addEntry(char *pathname, int forceFlag, const char *fmt, ...)
   return(0);
 }
 
-/*
- * DO NOT automatically add \n to a string passed to Msg(); in
+/**
+ * \brief DO NOT automatically add \n to a string passed to Msg(); in
  * parseDistro, we sometimes want to dump a partial line.
  */
 void Msg(const char *fmt, ...)
@@ -1332,7 +1346,7 @@ void traceFunc(char *fmtStr, ...)
 }
 
 
-#ifdef	MEM_DEBUG
+#ifdef MEM_DEBUG
 char *memAllocLogged(int size)
 {
   register void *ptr;
@@ -1348,4 +1362,4 @@ void memFreeLogged(void *ptr)
   free(ptr);
   return;
 }
-#endif	/* MEM_DEBUG */
+#endif /* MEM_DEBUG */

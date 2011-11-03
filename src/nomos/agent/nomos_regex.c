@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -238,11 +238,11 @@ int idxGrep(int index, char *data, int flags)
   return(1);
 }
 
-/*
- * This is our own internal, case-insensitive version of strstr().  No
+#define	_XC(q)	((char) xascii[q])
+/**
+ * \brief This is our own internal, case-insensitive version of strstr().  No
  * open-source code was consulted/used in the construction of this function.
  */
-#define	_XC(q)	((char) xascii[q])
 int strNbuf(char *data, char *str)
 {
   static int firstFlag = 1;
