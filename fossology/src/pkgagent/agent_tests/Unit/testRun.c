@@ -48,10 +48,11 @@ void command_output(char *command)
   memset(tmp, '\0', sizeof(tmp));
   if (fgets(tmp, 256, stream) != NULL)
   {
-    while(tmp[i] != '\n')
+    while((tmp[i] != '\n') && (tmp[i] != ' ') && (tmp[i] != EOF))
       i++; 
     TestSysconf = malloc(i);
     memcpy(TestSysconf, tmp, i);
+    TestSysconf[i] = '\0';
   }
   pclose(stream);
   return;
@@ -121,14 +122,14 @@ int PkgagentDBClean()
 
 /* create test suite */
 CU_SuiteInfo suites[] = {
-    {"Testing the function trim:", NULL, NULL, testcases_Trim},
-    {"Testing the function GetFieldValue:", NULL, NULL, testcases_GetFieldValue},
+    //{"Testing the function trim:", NULL, NULL, testcases_Trim},
+    //{"Testing the function GetFieldValue:", NULL, NULL, testcases_GetFieldValue},
     //{"Testing the function ProcessUpload:", NULL, NULL, testcases_ProcessUpload},
-    {"Testing the function RecordMetadataDEB:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataDEB},
-    {"Testing the function GetMetadataDebSource:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadataDebSource},
-    {"Testing the function RecordMetadataRPM:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataRPM},
+    //{"Testing the function RecordMetadataDEB:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataDEB},
+    //{"Testing the function GetMetadataDebSource:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadataDebSource},
+    //{"Testing the function RecordMetadataRPM:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataRPM},
     {"Testing the function GetMetadataDebBinary:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadataDebBinary},
-    {"Testing the function GetMetadata:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadata},
+    //{"Testing the function GetMetadata:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadata},
     CU_SUITE_INFO_NULL
 };
 
