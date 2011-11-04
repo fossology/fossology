@@ -21,6 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "CUnit/CUnit.h"
 #include "CUnit/Automated.h"
 
+#include "libfossology.h"
+
 /* test case sets */
 extern CU_TestInfo testcases_GetFieldValue[];
 extern CU_TestInfo testcases_GetMetadata[];
@@ -73,9 +75,12 @@ int PkgagentDBInit()
   {
     DBConfFile = malloc(256);
     sprintf(DBConfFile, "%s/Db.conf", TestSysconf);
-    printf("EE:%s:FF\n", DBConfFile);
+    //printf("EE:%s:FF\n", DBConfFile);
   }
-  free(TestSysconf);
+
+  int argc = 3;
+  char* argv[] = {"./test_pkgagent", "-c", TestSysconf};
+  fo_scheduler_connect(&argc, argv);
   return 0;
 }
 /**
@@ -113,23 +118,25 @@ int PkgagentDBClean()
     printf("Test Repo clean ERROR!\n");
     return -1;
   }
+  free(TestSysconf);
   TestName = NULL;
   TestSysconf = NULL;
   DBConfFile = NULL;
 
+  fo_scheduler_disconnect(0);
   return 0;
 }
 
 /* create test suite */
 CU_SuiteInfo suites[] = {
-    //{"Testing the function trim:", NULL, NULL, testcases_Trim},
-    //{"Testing the function GetFieldValue:", NULL, NULL, testcases_GetFieldValue},
+    {"Testing the function trim:", NULL, NULL, testcases_Trim},
+    {"Testing the function GetFieldValue:", NULL, NULL, testcases_GetFieldValue},
     //{"Testing the function ProcessUpload:", NULL, NULL, testcases_ProcessUpload},
-    //{"Testing the function RecordMetadataDEB:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataDEB},
-    //{"Testing the function GetMetadataDebSource:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadataDebSource},
-    //{"Testing the function RecordMetadataRPM:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataRPM},
+    {"Testing the function RecordMetadataDEB:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataDEB},
+    {"Testing the function GetMetadataDebSource:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadataDebSource},
+    {"Testing the function RecordMetadataRPM:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataRPM},
     {"Testing the function GetMetadataDebBinary:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadataDebBinary},
-    //{"Testing the function GetMetadata:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadata},
+    {"Testing the function GetMetadata:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadata},
     CU_SUITE_INFO_NULL
 };
 
@@ -154,7 +161,6 @@ int main( int argc, char *argv[] )
     exit(EXIT_FAILURE);
   }else{
     AddTests();
-
     CU_set_output_filename("pkgagent_Test");
     CU_list_tests_to_file();
     CU_automated_run_tests();
