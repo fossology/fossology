@@ -39,12 +39,13 @@ int	main(int argc, char *argv[])
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv);
 
-  while((c = getopt(argc,argv,"ACd:FfHL:m:PQiqRr:T:t:U:vXx")) != -1)
+  while((c = getopt(argc,argv,"ACc:d:FfHL:m:PQiqRr:T:t:U:vXx")) != -1)
   {
     switch(c)
     {
       case 'A':	SetContainerArtifact=0; break;
       case 'C':	ForceContinue=1; break;
+      case 'c':	break;  /* handled by fo_scheduler_connect() */
       case 'd':	
         /* if there is a %U in the path, substitute a unique ID */
         NewDir=PathCheck(optarg); 
