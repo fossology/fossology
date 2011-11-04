@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 #define PQget(db_result, row, col) \
-  PQgetvalue(db_result, row, PQfnumber(db_result, col))                                              \
+  PQgetvalue(db_result, row, PQfnumber(db_result, col))
 
 /* ************************************************************************** */
 /* **** constructor destructor ********************************************** */

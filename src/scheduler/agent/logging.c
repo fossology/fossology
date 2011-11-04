@@ -37,10 +37,6 @@ FILE* log_file = NULL;
 char  log_name[FILENAME_MAX];
 int   log_name_set = 0;
 
-#ifndef LOG_DIR
-#define LOG_DIR "/var/log/fossology/fossology.log"
-#endif
-
 /* ************************************************************************** */
 /* **** local functions ***************************************************** */
 /* ************************************************************************** */
@@ -48,23 +44,23 @@ int   log_name_set = 0;
 /**
  * Utility function that will open the log file using whatever name is stored
  * in log_name. If the log name hasn't been set when this method is called
- * it will attempt to open the default that is stored in LOG_DIR.
+ * it will attempt to open the default that is stored in logdir.
  */
 void log_open()
 {
   if(!log_name_set)
   {
-    set_log(LOG_DIR);
+    set_log(logdir);
   }
 
   if((log_file = fopen(log_name, "a")) == NULL)
   {
     log_file = stderr;
-    sprintf(log_name, "%s", LOG_DIR);
+    sprintf(log_name, "%s", logdir);
     if((log_file = fopen(log_name, "a")) == NULL)
     {
       log_file = stderr;
-      FATAL("could not open %s for logging and %s failed", log_name, LOG_DIR)
+      FATAL("could not open %s for logging and %s failed", log_name, logdir)
       log_file = NULL;
     }
     else
@@ -139,8 +135,8 @@ void set_log(const char* name)
   {
     log_file = stderr;
     errno = EINVAL;
-    ERROR("invalid file name provided to set_log(), using default: %s", LOG_DIR);
-    sprintf(log_name, "%s", LOG_DIR);
+    ERROR("invalid file name provided to set_log(), using default: %s", logdir);
+    sprintf(log_name, "%s", logdir);
     log_file = NULL;
   }
 
