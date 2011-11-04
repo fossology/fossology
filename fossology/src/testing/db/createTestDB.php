@@ -215,6 +215,15 @@ if(system($cmd) === FALSE)
   exit(1);
 }
 
+// copy VERSION from real sysconf.
+$VERSION = $sysconfig . '/VERSION';
+$myVERSION = $confPath . '/VERSION';
+if(copy($VERSION, $myVERSION) === FALSE)
+{
+  echo "FATAL! Cannot copy $VERSION to $myVERSION\n";
+  exit(1);
+}
+
 // load the schema
 $loaded = TestDBInit(NULL, $DbName, $confPath);
 if($loaded !== NULL)
