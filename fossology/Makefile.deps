@@ -9,5 +9,5 @@
 
 # targets to ensure that the libraries are up to date before building with them
 $(FOLIB):
-	$(MAKE) -C $(FOLIBDIR) libfossdb.a
+	$(MAKE) -C $(FOLIBDIR)
 
