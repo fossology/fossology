@@ -18,7 +18,10 @@
  */
 
 /**
- * \brief debug diff env/path when running with exec
+ * \brief Run the unit tests in module/agent_tests/Unit for all modules in
+ * the input data file.
+ *
+ * The input is a php ini style file with each name as a section [modname].
  *
  * @version "$Id$"
  * Created on Aug 24, 2011 by Mark Donohoe
@@ -55,30 +58,6 @@ function checkCUnit($fileName)
     return(array("Error! $e\n"));
   }
 } // checkCUnit
-
-/**
- * \brief check the output of make for errors
- *
- * @param string $makeOut the output of make
- *
- * @return boolean
- */
-function checkMakeErrors($makeOut)
-{
-  if(empty($makeOut))
-  {
-    return(FALSE);
-  }
-  $matched = 0;
-  $matches = array();
-
-  $pat = '/make.*?Error\s[0-9]+/';
-  $matched = preg_match($pat, $makeOut, $matches);
-
-  //echo "DB: matched is:$matched\n";
-  //echo "DB: makeOut is:$makeOut\n";
-  return($matched);
-}
 
 /**
  * \brief transform the xml to html for CUnit style reports
@@ -123,45 +102,6 @@ function genCunitRep($fileName)
 }
 
 /**
- * \brief gather and transform the xunit xml results files to html for
- * XUnit style reports
- *
- * NOTE: this function assumes that it is running in
- * ...fossology/src/<module-name>/agent_tests/Functional
- *
- * @param string $unitTest the name of the module to process
- *
- * @return boolean
- */
-function processXunit($unitTest)
-{
-  if(empty($unitTest))
-  {
-    return(FALSE);
-  }
-  foreach(glob("$unitTest*.xml") as $fileName)
-  {
-    //echo "DB: functional test file name is:$fileName\n";
-    // remove .xml from name
-    $outFile = basename($fileName, '.xml');
-    $outPath = TESTROOT . "/reports/functional/$outFile.html";
-    // remove the old HTML file before creating a new one.
-    $rmLast = exec("rm -rf $outPath", $rmOut, $rmRtn);
-    $xslPath = TESTROOT . "/reports/junit-noframes.xsl";
-    //echo "DB: Starting to generate html report for $fileName\n";
-    $report = genHtml($fileName, $outPath, $xslPath);
-    if(!empty($report))
-    {
-      echo "Error: Could not generate a HTML Test report from $fileName.\n";
-      echo "DB: report is:\n$report\n";
-      return(FALSE);
-    }
-    //echo "DB: Generated html file:$outFile" . ".html\n";
-  }
-  return(TRUE);
-}
-
-/**
  * \brief meta function to process cunit reports
  *
  * @param string $unitTest the unit test to process
@@ -174,7 +114,7 @@ function processCUnit($unitTest)
 
   if(empty($unitTest))
   {
-    return("Error! no valid in put at line " . __FILE__ . " at line " .
+    return("Error! no valid input at line " . __FILE__ . " at line " .
     __LINE__ . "\n");
   }
 
@@ -263,20 +203,13 @@ function tweakCUnit($fileName)
 
 if(!defined('TESTROOT'))
 {
-  $here = getcwd();
-  // set to ...fossology/src/testing
-  $fossology = 'fossology';
-  $startLen = strlen($fossology);
-  $startPos = strpos($here, $fossology);
-  if($startPos === FALSE)
-  {
-    echo "FATAL! did not find fossology, are you cd'd into the sources?\n";
-    exit(1);
-  }
-
-  $path = substr($here, 0, $startPos+$startLen);
-  $trPath = $path . '/src/testing';
-  define('TESTROOT',$trPath);
+  $path = __DIR__;
+  $plenth = strlen($path);
+  // remove /unit from the end.
+  $TESTROOT = substr($path, 0, $plenth-5);
+  $_ENV['TESTROOT'] = $TESTROOT;
+  putenv("TESTROOT=$TESTROOT");
+  define('TESTROOT',$TESTROOT);
 }
 
 $WORKSPACE = NULL;
@@ -299,7 +232,7 @@ require_once('../lib/common-Test.php');
 $modules = array();
 $unitList = array();
 
-// get the list of unit tests to run
+// get the list of unit tests to run and flatten the array
 $modules = parse_ini_file('../dataFiles/unitTests.ini',1);
 foreach($modules as $key => $value)
 {
@@ -325,151 +258,57 @@ $failures = 0;
 foreach($unitList as $unitTest)
 {
   echo "\n";
-  //echo "\n***** Next Test *****\n";
   //echo "DB: we are at:\n" . getcwd() . "\n";
-  $makeOut = array();
-  $makeRtn = -777;
-  $makeCover = array();
-
-  if(@chdir($unitTest . '/agent_tests/') === FALSE)
+  echo "$unitTest:\n";
+  $other = substr($unitTest, 0, 3);
+  if($other == 'lib' || $other == 'cli')
   {
-    echo "Error! cannot cd to " . $unitTest . "/agent_tests, skipping test\n";
-    $failures++;
-    continue;
-  }
-  //echo "DB: Before makes we are at:\n" . getcwd() . "\n";
-  $cleanMake = exec('make clean 2>&1', $cleanOut, $cleanRtn);
-  if($cleanRtn != 0)
-  {
-    echo "Make clean of $unitTest did not succeed, return code:$cleanRtn\n";
-  }
-  $lastMake = exec('make test 2>&1', $makeOut, $makeRtn);
-  //echo "DB: Exit status of 'make test' of $unitTest is:$makeRtn\n";
-  if($makeRtn != 0)
-  {
-    $found = array();
-    $found = preg_grep('/No rule to make target/', $makeOut);
-    if($found)
+    if(@chdir($unitTest . '/tests') === FALSE)
     {
-      echo "No Unit Tests for module $unitTest\n";
-      backToParent('../..');
+      echo "Error! cannot cd to " . $unitTest . "/tests, skipping test\n";
+      $failures++;
       continue;
     }
-    else
+    $Make = new RunTest($unitTest);
+    $runResults = $Make->MakeTest();
+    printResults($runResults);
+    if(MakeCover($unitTest) != NULL)
     {
-      // check for real make errors rather than test errors.
-      if(checkMakeErrors(implode("\n", $makeOut)))
-      {
-        echo "Error! There were make errors for unit test $unitTest\n";
-        $makeOut = array();
-        $failures++;
-      }
-    }
-    // make coverage
-    $lastCovr = exec('make coverage 2>&1', $covrOut, $covrRtn);
-    //echo "DB: Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
-    if($covrRtn != 0)
-    {
-      if(checkMakeErrors(implode("\n", $covrOut)))
-      {
-        echo "Error! 'make coverage; of $unitTest did not succeed, " .
-          "return code:$covrRtn\n";
-        $covrOut = array();
-        $failures++;
-      }
-    }
-    // some makefiles/tests are written to report a make 'failure' when a test
-    // fails, so process the reports, as there should be a xml file.
-    $unitDir = getcwd() . '/Unit';
-    if(@chdir($unitDir) === FALSE)
-    {
-      echo "Error! Could not cd to " . getcwd() . "/unit, skipping reports\n";
-      backToParent('../..');
-      continue;
-    }
-    if(!is_NULL($error = processCUnit($unitTest)))
-    {
-      echo $error;
-    }
-    // process PHPUnit tests in agent_tests/Functional
-    // cd back to ../agent_tests from Unit
-    backToParent('..');
-    if(@chdir('Functional') === FALSE)
-    {
-      echo "Error! Could not cd to " . getcwd() . "/Functional, skipping reports\n";
-      backToParent('../../..');
-      continue;
-    }
-    if(!processXUnit($unitTest))
-    {
-      echo "Error! could not create html report for $unitTest at\n" .
-      __FILE__ . " on " . __LINE__ . "\n";
+      //echo "Error: there were errors for make coverage for $unitTest\n";
+      $failures++;
     }
     backToParent('../../..');
-    continue;
   }
   else
   {
-    // no tests for is module?  Skip report processing
-    $nothing = array();
-    $nothing= preg_grep('/Nothing to be done for/', $makeOut);
-    $noTests = array();
-    $noTests= preg_grep('/NO TESTS/', $makeOut);
-    if($nothing or $noTests)
+    if(@chdir($unitTest . '/agent_tests/Unit') === FALSE)
     {
-      echo "No Unit Tests for module $unitTest\n";
-      backToParent('../..');
+      echo "Error! cannot cd to " . $unitTest . "/agent_tests/Unit, skipping test\n";
+      $failures++;
       continue;
     }
-
-    // make coverage
-    $lastCovr = exec('make coverage 2>&1', $covrOut, $covrRtn);
-    //echo "Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
-    if($covrRtn != 0)
+    $Make = new RunTest($unitTest);
+    $runResults = $Make->MakeTest();
+    printResults($runResults);
+    if(MakeCover($unitTest) != NULL)
     {
-      //$makeErrors =  implode("\n", $makeOut);
-      if(checkMakeErrors(implode("\n", $covrOut)))
-      {
-        echo "Error! 'make coverage; of $unitTest did not succeed, " .
-          "return code:$covrRtn\n";
-        $failures++;
-        $covrOut = array();
-      }
+      //echo "Error: there were errors for make coverage for $unitTest\n";
+      $failures++;
     }
-    // at this point there should be a .xm file to process
-    $unitDir = getcwd() . '/Unit';
-    if(@chdir($unitDir) === FALSE)
-    {
-      echo "Error! Could not cd to " . getcwd() . "/Unit, skipping reports\n";
-      backToParent('../../..');
-      continue;
-    }
-    if(!is_NULL($error = processCUnit($unitTest)))
-    {
-      echo $error;
-    }
-    // process PHPUnit tests in agent_tests/Functional
-    // cd back to ../agent_tests from Unit
-    backToParent('..');
-    if(@chdir('Functional') === FALSE)
-    {
-      echo "Error! Could not cd to " . getcwd() . "/Functional, skipping reports\n";
-      backToParent('../../..');
-      continue;
-    }
-    if(!processXUnit($unitTest))
-    {
-      echo "Error! could not create html report for $unitTest at\n" .
-      __FILE__ . " on " . __LINE__ . "\n";
-    }
-
     backToParent('../../..');
-  } // else no make errors
-} // for
+  } // else
+}// foreach
+
+if(!is_NULL($error = processCUnit($unitTest)))
+{
+  echo $error;
+}
+backToParent('../../..');
 if($failures)
 {
   exit(1);
 }
+echo "All Unit Tests passed\n";
 exit(0);
 
 ?>

@@ -97,6 +97,7 @@ function backToParent($howFar)
 } // backToParent
 
 /**
+ * DEPRICATED: now done in makefiles with rsync.
  * \brief Check if the test data files exist, if not downloads and installs them.
  *
  * Large test data files are kept outside of source control.  The data needs to
@@ -329,4 +330,313 @@ function filesByDir($dir) {
     return(array());
   }
 } // fileByDir
+
+/**
+ * \brief class for making an agent unit or functional test
+ *
+ * @author markd
+ *
+ */
+class RunTest
+{
+  protected $makeOutput = array();
+  protected $unitTest;
+  protected $makeErrors;
+  protected $cunitErrors;
+  protected $phpunitErrors;
+
+  function __construct($unitTest)
+  {
+    $this->unitTest = $unitTest;
+    $this->makeErrors = FALSE;
+    $this->cunitErrors = FALSE;
+    $this->phpunitErrors = FALSE;
+  }
+
+  /**
+   * \brief make tests in a directory and check output for errors and no
+   * tests.
+   *
+   * This function assumes that the caller is cd'ed into the appropriate
+   * directory before being called.
+   *
+   * @param string $unitTest the name of the module being tested, e.g. nomos
+   *
+   * @return array
+   * The array has the folowing format:
+   * 'name'=> $unitTest
+   * 'make' => boolean, true for make errors false for none
+   * 'cunit' => boolean, true for cunit failures false for none
+   * 'phpunit' => boolean, true for phpunit failures false for none
+   * 'notest' => boolean, false for no tests for that module, true for tests
+   */
+  function MakeTest()
+  {
+
+    $results = array(
+      'name'=> $this->unitTest,
+      'make' => FALSE,
+      'cunit' => FALSE,
+      'phpunit' => FALSE,
+      'notest' => FALSE,
+      'other' => NULL,
+    );
+
+    $cleanMake = exec('make clean 2>&1', $cleanOut, $cleanRtn);
+    if($cleanRtn != 0)
+    {
+      echo "Make clean of $unitTest did not succeed, return code:$cleanRtn\n";
+      // right now this is not reported as an error
+      // @todo figure out how to handle this.  Make clean failures should not
+      // cause make to not be done.
+    }
+    $lastMake = exec('make test 2>&1', $this->makeOutput, $makeRtn);
+    //echo "DB: Exit status of 'make test' of $unitTest is:$makeRtn\n";
+    if($makeRtn != 0)
+    {
+      $found = array();
+      $found = preg_grep('/No rule to make target/', $this->makeOutput);
+      if($found)
+      {
+        $results['notest'] = TRUE;
+        //echo "No Unit Tests for module $unitTest\n";
+      }
+      else
+      {
+        // check for real make errors and test errors.
+        if($this->checkMakeErrors(implode("\n", $this->makeOutput)))
+        {
+          //echo "Error! There were make errors for unit test $unitTest\n";
+          $results['make'] = TRUE;
+        }
+        if($this->checkCunitTestErrors(implode("\n", $this->makeOutput)))
+        {
+          $results['cunit'] = TRUE;
+        }
+        if($this->checkPHPTestErrors(implode("\n", $this->makeOutput)))
+        {
+          $results['phpunit'] = TRUE;
+        }
+        $other = $this->checkOtherErrors(implode("\n", $this->makeOutput));
+        if($other)
+        {
+          $results['other'] = $other;
+        }
+      }
+      return($results);
+    }
+    // Make returned zero
+    else
+    {
+      // no tests for is module?  Skip report processing
+      $nothing = array();
+      $nothing= preg_grep('/Nothing to be done for/', $this->makeOutput);
+      $noTests = array();
+      $noTests= preg_grep('/NO TESTS/', $this->makeOutput);
+      if($nothing or $noTests)
+      {
+        //echo "No Unit Tests for module $unitTest\n";
+        $results['notest'] = TRUE;
+      }
+      // There can be Cunit failures, check for them
+      if($this->checkCunitTestErrors(implode("\n", $this->makeOutput)))
+      {
+        $results['cunit'] = TRUE;
+      }
+      return($results);
+    }
+  }// MakeTest
+
+  /*
+   * @todo see if checkMake and check Test Error functions can be combined into
+   * a single routine, checkPattern($string, $pat), returns boolean.
+   */
+  /**
+   * \brief check the output of make for errors
+   *
+   * @return boolean
+   */
+  function checkMakeErrors($makeString)
+  {
+    $matched = 0;
+    $matches = array();
+
+    $pat = '/make.*?Error\s[0-9]+/';
+    $matched = preg_match($pat, $makeString, $matches);
+
+    //echo "DB: matched is:$matched\n";
+    //echo "DB: this->makeOutput is:$this->makeOutput\n";
+    return($matched);
+  } // checkMakeErrors
+
+  /**
+   * \brief check the test output for cunit style failures
+   *
+   * @param string $this->makeOutput the test output
+   *
+   * @return boolean
+   */
+  function CheckCunitTestErrors($makeString)
+  {
+    $matched = 0;
+    $matches = array();
+
+    $pat = '/Number of failures:.*/';
+    $matched = preg_match($pat, $makeString, $matches);
+    if($matched == 0)
+    {
+      return(FALSE);
+    }
+    $number = explode(':', $matches[0]);
+    $value = trim($number[1]);
+    if($value > 0)
+    {
+      return(TRUE);
+    }
+    return(FALSE);
+  } // CheckCunitTestErrors
+
+  /**
+   * \brief check for the word FAILURES in the output, this is what PHPUnit
+   * prints when there are any failures in the tests run.
+   *
+   * @param string $makeString, the make output
+   * @return boolean
+   */
+  function CheckPHPTestErrors($makeString)
+  {
+    $matched = 0;
+    $matches = array();
+
+    $pat = '/FAILURES/';
+    $matched = preg_match($pat, $makeString, $matches);
+    return($matched);
+
+  } // CheckPHPTestErrors
+
+  /**
+   * \brief Check for other common error strings
+   *
+   * This is an attempt to give the developer more information about what failed
+   * rather than the generic message 'some other error occured'  Only the first
+   * pattern found will be reported.
+   *
+   * @param string $makeString
+   */
+  function CheckOtherErrors($makeString)
+  {
+    $matched = 0;
+    $matches = array();
+
+    $patterns = array('/.*\serror\s.*/', '/.*\sfault.*/');
+    foreach ($patterns as $pattern)
+    {
+      $matched = 0;
+      $matches = array();
+      $matched = preg_match($pattern, $makeString, $matches);
+      if($matched)
+      {
+        //debugprint($matches, "Found one: matches is:\n");
+        return($matches[0]);
+      }
+    }
+    return(implode("\n",$matches));
+  }
+} // class RunTest
+
+function debugprint($val, $title)
+{
+  echo $title . "\n";
+  print_r($val);
+  echo "\n";
+}
+
+/**
+ * \brief make coverage for a test
+ *
+ * @return void
+ */
+function MakeCover($unitTest)
+{
+  if(empty($unitTest))
+  {
+    return(NULL);
+  }
+
+  // make coverage
+  $lastCovr = exec('make coverage 2>&1', $covrOut, $covrRtn);
+  //echo "DB: Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
+  $Cover = new RunTest($unitTest);
+  if($covrRtn != 0)
+  {
+    if($Cover->checkMakeErrors(implode("\n", $covrOut)))
+    {
+      echo "Error: 'make coverage' of $unitTest did not succeed, " .
+          "return code:$covrRtn\n";
+      $covrOut = array();
+      return($unitTest);
+    }
+  }
+  return(NULL);
+}
+
+/**
+ * \brief print the result array.  This will print any informative messages
+ * including erorrs that may have occured.
+ *
+ * @param array $runResults
+ * @return volid
+ *
+ * The array has the format has described in  MakeTest method.
+ */
+function printResults($runResults)
+{
+  global $failures;
+  $unitTest = $runResults['name'];
+
+  foreach($runResults as $key => $value)
+  {
+    switch($key)
+    {
+      case 'make':
+        if($value === TRUE)
+        {
+          echo "Error: there were $key errors for $unitTest\n";
+          $failures++;
+          break;
+        }
+      case 'cunit':
+        if($value === TRUE)
+        {
+          echo "Error: there were $key errors for $unitTest\n";
+          $failures++;
+          break;
+        }
+      case 'phpunit':
+        if($value === TRUE)
+        {
+          echo "Error: there were $key errors for $unitTest\n";
+          $failures++;
+          break;
+        }
+      case 'notest':
+        if($value === TRUE)
+        {
+          echo "No Unit tests for $unitTest\n";
+          $failures++;
+          break;
+        }
+      case 'other':
+        if(empty($value))
+        {
+          break;
+        }
+        echo "Other errors for $unitTest:\n";
+        echo $value . "\n";
+        $failures++;
+        break;
+    }
+  } //foreach $runResults
+  return ;
+}
 ?>
