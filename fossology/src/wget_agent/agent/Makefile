@@ -34,12 +34,6 @@ $(EXE): main.c $(FOLIB) libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS
 	@echo "make wget_agent"
 	$(CC) main.c libwget_agent.a $(CHKSRC) $(CFLAGS_LOCAL) -o $@
 
-#######################
-# library build rules #
-#######################
-$(FOLIB):
-	$(MAKE) -C $(FOLIBDIR)
-
 install: all
 	@echo "make wget_agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
