@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define CHECKOUT_SIZE 100
 
-#define AGENT_BINARY "%smods-enabled/%s/agent/%s"
+#define AGENT_BINARY "%s/mods-enabled/%s/agent/%s"
 
 extern int verbose;
 extern int closing;
@@ -40,6 +40,7 @@ extern int s_daemon;
 extern int s_port;
 extern char* sysconfigdir;
 extern fo_conf* sysconfig;
+extern char* logdir;
 
 /* ************************************************************************** */
 /* **** Utility Functions *************************************************** */

@@ -333,6 +333,7 @@ void job_verbose_event(job j)
 void job_status_event(void* param)
 {
   const char end[] = "end\n";
+  GError* error;
 
   int tmp = 0;
   arg_int* params = param;
@@ -342,7 +343,8 @@ void job_status_event(void* param)
   {
     memset(buf, '\0', sizeof(buf));
     sprintf(buf, "scheduler:%d revision:%s daemon:%d jobs:%d log:%s port:%d verbose:%d\n",
-        s_pid, SVN_REV, num_jobs(), s_daemon, log_name, s_port, verbose);
+        s_pid, fo_config_get(sysconfig, "VERSION", "SVN_REV", &error),
+        num_jobs(), s_daemon, log_name, s_port, verbose);
 
     g_output_stream_write(params->first, buf, strlen(buf), NULL, NULL);
     g_tree_foreach(job_list, (GTraverseFunc)job_sstatus, params->first);

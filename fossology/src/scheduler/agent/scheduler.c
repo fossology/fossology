@@ -74,6 +74,7 @@ int s_daemon;
 int s_port;
 char* sysconfigdir;
 fo_conf* sysconfig;
+char* logdir;
 
 /* ************************************************************************** */
 /* **** signals and events ************************************************** */
@@ -392,7 +393,7 @@ void load_agent_config()
   /* clear previous configurations */
   agent_list_clean();
 
-  snprintf(addbuf, sizeof(addbuf), "%s/%s/", DEFAULT_SETUP, AGENT_CONF);
+  snprintf(addbuf, sizeof(addbuf), "%s/%s/", sysconfigdir, AGENT_CONF);
   if((dp = opendir(addbuf)) == NULL)
   {
     FATAL("Could not open agent config directory: %s", addbuf);
@@ -405,7 +406,7 @@ void load_agent_config()
     if(ep->d_name[0] != '.')
     {
       snprintf(addbuf, sizeof(addbuf), "%s/%s/%s/%s.conf",
-          DEFAULT_SETUP, AGENT_CONF, ep->d_name, ep->d_name);
+          sysconfigdir, AGENT_CONF, ep->d_name, ep->d_name);
 
       config = fo_config_load(addbuf, &error);
       if(error && error->code == fo_missing_file)
@@ -507,7 +508,7 @@ void load_foss_config()
     }
 
     sscanf(tmp, "%s %s %d", addbuf, dirbuf, &max);
-    if(strcmp(addbuf, "localhost") == 0) strcpy(dirbuf, AGENT_DIR);
+    if(strcmp(addbuf, "localhost") == 0) strcpy(dirbuf, sysconfigdir);
 
     host_init(keys[i], addbuf, dirbuf, max);
     if(TVERBOSE2)
@@ -611,6 +612,9 @@ int main(int argc, char** argv)
   GError* error = NULL;       // error object used during parsing
   int rc;                     // used for return values of
 
+  sysconfigdir = DEFAULT_SETUP;
+  logdir = LOG_DIR;
+
   /* the options for the command line parser */
   GOptionEntry entries[] =
   {
@@ -652,14 +656,6 @@ int main(int argc, char** argv)
   set_usr_grp();
 
   /* perform pre-initialization checks */
-  if(sysconfigdir == NULL)
-  {
-    fprintf(stderr, "ERROR %s.%d: a system configuration directory must be provided\n",
-        __FILE__, __LINE__);
-    fflush(stderr);
-    return -1;
-  }
-
   if(s_daemon) { rc = daemon(0, 0); }
   if(db_init) { database_init(); return 0; }
   if(ki_sched) { kill_scheduler(); return 0; }
@@ -692,6 +688,8 @@ int main(int argc, char** argv)
   /* *********************************** */
   /* *** post initialization checks **** */
   /* *********************************** */
+  if(fo_config_has_key(sysconfig, "DIRECTORIES", "LOG_DIR"))
+    logdir = fo_config_get(sysconfig, "DIRECTORIES", "LOG_DIR", &error);
   if(db_reset)
     database_reset_queue();
   if(test_die)
