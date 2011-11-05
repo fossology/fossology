@@ -15,26 +15,15 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TESTFILES = test_common_sysconfig.php \
-						test_common_active.php \
-						test_common_cli.php \
-						test_common_cache.php \
-						test_common_auth.php \
-						test_common_parm.php \
-						test_common_menu.php \
-						test_common_pkg.php \
-						test_common_dir.php \
-						test_common_license_file.php \
-
 all: 
 
 test: all
 	@echo "make unit test for commom php files"
-	for TESTFILE  in $(TESTFILES); do (phpunit --log-junit $$TESTFILE-Xunit.xml $$TESTFILE); done
+	phpunit --log-junit Lib-PHP-Xunit.xml -c tests.xml
 
 coverage: all
 	@echo "make unit coverage for commom php files"
-	for TESTFILE  in $(TESTFILES); do (phpunit --coverage-html ./results $$TESTFILE); done
+	phpunit --coverage-html ./results -c tests.xml
 
 clean:
 	rm -rf *.xml results
