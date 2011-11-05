@@ -26,6 +26,7 @@ coverage: all
 	phpunit --coverage-html ./results -c tests.xml
 
 clean:
-	rm -rf *.xml results
+# note do not remove *.xml, it remove the php unit config file tests.xml
+	rm -rf Lib-PHP-Xunit.xml results
 
 .PHONY: all test coverage clean 
