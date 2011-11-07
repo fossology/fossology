@@ -76,7 +76,7 @@ int main (int argc, char *argv[])
 
   fo_scheduler_connect(&argc, argv);
 
-  while((c = getopt(argc,argv,"ifF:lL:sTuU:vc")) != -1)
+  while((c = getopt(argc,argv,"ifF:lL:sTuU:vc:")) != -1)
   {
     switch(c)
     {
@@ -99,7 +99,7 @@ int main (int argc, char *argv[])
       case 'u': ListProj=1; GotArg=1; break;
       case 'U': DelUpload=atol(optarg); GotArg=1; break;
       case 'v': Verbose++; break;
-      case 'c': GotArg=1; break;
+      case 'c': GotArg=1; break; /* handled by fo_scheduler_connect() */
       default:	Usage(argv[0]); exit(-1);
     }
   }

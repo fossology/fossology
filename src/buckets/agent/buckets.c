@@ -85,7 +85,7 @@ int main(int argc, char **argv)
   }
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "in:p:t:u:vc")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "in:p:t:u:vc:")) != -1) 
   {
     switch (cmdopt) 
     {
