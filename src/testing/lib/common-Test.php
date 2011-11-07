@@ -392,6 +392,7 @@ class RunTest
     }
     $lastMake = exec('make test 2>&1', $this->makeOutput, $makeRtn);
     //echo "DB: Exit status of 'make test' of $unitTest is:$makeRtn\n";
+    //debugprint($this->makeOutput, "make output\n");
     if($makeRtn != 0)
     {
       $found = array();
@@ -404,7 +405,7 @@ class RunTest
       else
       {
         // check for real make errors and test errors.
-        if($this->checkMakeErrors(implode("\n", $this->makeOutput)))
+        if($this->CheckMakeErrors(implode("\n", $this->makeOutput)))
         {
           //echo "Error! There were make errors for unit test $unitTest\n";
           $results['make'] = TRUE;
@@ -417,7 +418,7 @@ class RunTest
         {
           $results['phpunit'] = TRUE;
         }
-        $other = $this->checkOtherErrors(implode("\n", $this->makeOutput));
+        $other = $this->CheckOtherErrors(implode("\n", $this->makeOutput));
         if($other)
         {
           $results['other'] = $other;
@@ -456,7 +457,7 @@ class RunTest
    *
    * @return boolean
    */
-  function checkMakeErrors($makeString)
+  function CheckMakeErrors($makeString)
   {
     $matched = 0;
     $matches = array();
