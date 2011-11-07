@@ -346,7 +346,7 @@ int	main(int argc, char *argv[])
     }
   } while(Pid >= 0);
 
-  magic_close(MagicCookie);
+  if (MagicCookie) magic_close(MagicCookie);
   if (ListOutFile)
   {
     fprintf(ListOutFile,"<summary files_regular=\"%d\" files_compressed=\"%d\" artifacts=\"%d\" directories=\"%d\" containers=\"%d\" />\n",
