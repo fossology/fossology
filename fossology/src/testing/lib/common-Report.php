@@ -199,4 +199,45 @@ function genHtml($inFile=NULL, $outFile=NULL, $xslFile=NULL)
   return(NULL);
 } // genHtml
 
+/**
+ * \brief gather and transform the xunit xml results files to html for
+ * XUnit style reports
+ *
+ * NOTE: this function assumes that it is running in
+ * ...fossology/src/<module-name>/agent_tests/Functional
+ *
+ * @param string $unitTest the name of the module to process
+ *
+ * @return boolean
+ *
+ * @todo add a second param to indicate unit or functional test, this allows the
+ * report to copy results to the correct directory.
+ */
+function processXunit($unitTest)
+{
+  if(empty($unitTest))
+  {
+    return(FALSE);
+  }
+  foreach(glob("$unitTest*.xml") as $fileName)
+  {
+    // remove .xml from name
+    $outFile = basename($fileName, '.xml');
+    $outPath = TESTROOT . "/reports/functional/$outFile.html";
+    // remove the old HTML file before creating a new one.
+    $rmLast = exec("rm -rf $outPath", $rmOut, $rmRtn);
+    $xslPath = TESTROOT . "/reports/junit-noframes.xsl";
+    //echo "DB: Starting to generate html report for $fileName\n";
+    $report = genHtml($fileName, $outPath, $xslPath);
+    if(!empty($report))
+    {
+      echo "Error: Could not generate a HTML Test report from $fileName.\n";
+      echo "DB: report is:\n$report\n";
+      return(FALSE);
+    }
+    //echo "DB: Generated html file:$outFile" . ".html\n";
+  }
+  return(TRUE);
+}
+
 ?>
