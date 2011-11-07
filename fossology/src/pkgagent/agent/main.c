@@ -99,7 +99,7 @@ int	main	(int argc, char *argv[])
   Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"icCvh")) != -1)
+  while((c = getopt(argc,argv,"ic:Cvh")) != -1)
   {
     switch(c)
     {
@@ -110,7 +110,7 @@ int	main	(int argc, char *argv[])
         Verbose++;
         break;
       case 'c':
-        break; /* add -c parameter for sysconfig*/
+        break; /* handled by fo_scheduler_connect() */
       case 'C':
         CmdlineFlag = 1; 
         break;        
