@@ -94,7 +94,7 @@ int main  (int argc, char *argv[])
   fo_scheduler_connect(&argc, argv);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:Cc")) != -1)
+  while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:Cc:")) != -1)
   {
     switch(c)
     {
