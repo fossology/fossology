@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
       case 'i':
         PQfinish(pgConn);
         return(0);
-      case 'c': /* doesn't set this */ break;
+      case 'c': break; /* handled by fo_scheduler_connect() */
       case 'C':
         CmdlineFlag = 1;
         break;

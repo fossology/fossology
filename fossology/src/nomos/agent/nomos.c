@@ -865,7 +865,7 @@ int main(int argc, char **argv)
   while ((c = getopt(argc, argv, "hic:")) != -1)
   {
     switch (c) {
-      case 'c': /* doesn't set this */ break;
+      case 'c': break; /* handled by fo_scheduler_connect() */
       case 'i':
         /* "Initialize" */
         Bail(0); /* DB was opened above, now close it and exit */

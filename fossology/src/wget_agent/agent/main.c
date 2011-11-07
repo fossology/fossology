@@ -94,7 +94,7 @@ int main  (int argc, char *argv[])
   fo_scheduler_connect(&argc, argv);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:Cc:")) != -1)
+  while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:Cc")) != -1)
   {
     switch(c)
     {
@@ -128,7 +128,7 @@ int main  (int argc, char *argv[])
       case 'l':
         sprintf(GlobalParam, "%s -l %s ",GlobalParam, optarg);
         break;
-      case 'c': /* doesn't set this */ break;
+      case 'c': break; /* handled by fo_scheduler_connect() */
       case 'C':
         CmdlineFlag = 1;
         break;

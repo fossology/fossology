@@ -142,8 +142,7 @@ int main(int argc, char **argv)
       case 'v': /* verbose output for debugging  */
             verbose++;
             break;
-      case 'c': /* buckets doesn't set this*/
-            break;
+      case 'c': break; /* handled by fo_scheduler_connect() */
       default:
             Usage(argv[0]);
             PQfinish(pgConn);
