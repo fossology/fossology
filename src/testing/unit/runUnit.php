@@ -269,98 +269,38 @@ foreach($unitList as $unitTest)
       $failures++;
       continue;
     }
-    $Make = new RunTest($unitTest);
-    $runResults = $Make->MakeTest();
-    if(empty($runResults['make']))
-    {
-      echo "All Unit tests passed for $unitTest\n";
-    }
-    //debugprint("run results for $unitTest\n",$runResults);
-    printResults($runResults);
-    if(MakeCover($unitTest) != NULL)
-    {
-      //echo "Error: there were errors for make coverage for $unitTest\n";
-      $failures++;
-    }
-    // lib has phpunit tests
-    if($other == 'lib')
-    {
-      // change lib/php to lib-php
-      $chgUnit = preg_replace('#/#', '-', $unitTest);
-      if(processXunit($chgUnit) === FALSE)
-      {
-        echo "Error: Could not process lib-php-Xunit.xml file\n";
-      }
-    }
-    backToParent('../../..');
   }
   else
   {
-    if($other == 'lib' || $other == 'cli')
-    {
-      echo "DB: no make err, in lib code\n";
-      if(@chdir($unitTest . '/tests') === FALSE)
-      {
-        echo "Error! cannot cd to " . $unitTest . "/tests, skipping test\n";
-        $failures++;
-        continue;
-      }
-      $Make = new RunTest($unitTest);
-      $runResults = $Make->MakeTest();
-      if(empty($runResults['make']))
-      {
-        echo "All Unit tests passed for $unitTest\n";
-      }
-      //debugprint($runResults,"run results for $unitTest\n");
-      printResults($runResults);
-      if(MakeCover($unitTest) != NULL)
-      {
-        //echo "Error: there were errors for make coverage for $unitTest\n";
-        $failures++;
-      }
-      // lib has phpunit tests
-      if($other == 'lib')
-      {
-        // change lib/php to lib-php
-        $chgUnit = preg_replace('#/#', '-', $unitTest);
-        if(processXunit($chgUnit) === FALSE)
-        {
-          echo "Error: Could not process lib-php-Xunit.xml file\n";
-        }
-        if(@chdir($unitTest . '/agent_tests/Unit') === FALSE)
-        {
-          echo "Error! cannot cd to " . $unitTest . "/agent_tests/Unit, skipping test\n";
-          $failures++;
-          continue;
-        }
-        backToParent('../../..');
-        continue;
-      }
-    } // if(lib....)
     if(@chdir($unitTest . '/agent_tests/Unit') === FALSE)
     {
       echo "Error! cannot cd to " . $unitTest . "/agent_tests/Unit, skipping test\n";
       $failures++;
       continue;
     }
-    $Make = new RunTest($unitTest);
-    $runResults = $Make->MakeTest();
-    //debugprint($runResults, "run results for $unitTest\n");
-    printResults($runResults);
-    if(MakeCover($unitTest) != NULL)
+  }
+  $Make = new RunTest($unitTest);
+  $runResults = $Make->MakeTest();
+  //debugprint($runResults, "run results for $unitTest\n");
+  printResults($runResults);
+  if(MakeCover($unitTest) != NULL)
+  {
+    //echo "Error: there were errors for make coverage for $unitTest\n";
+    $failures++;
+  }
+  // lib has phpunit tests
+  if($other == 'lib')
+  {
+    // change lib/php to lib-php
+    $chgUnit = preg_replace('#/#', '-', $unitTest);
+    if(processXunit($chgUnit) === FALSE)
     {
-      //echo "Error: there were errors for make coverage for $unitTest\n";
-      $failures++;
+      echo "Error: Could not process lib-php-Xunit.xml file\n";
     }
-    backToParent('../../..');
-  } // else
-}// foreach
+  }
+  backToParent('../../..');
+} // foreach
 
-if(!is_NULL($error = processCUnit($unitTest)))
-{
-  echo $error;
-}
-backToParent('../../..');
 if($failures)
 {
   exit(1);

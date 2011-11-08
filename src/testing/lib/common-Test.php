@@ -593,8 +593,11 @@ function MakeCover($unitTest)
 function printResults($runResults)
 {
   global $failures;
-  
+
+  $failures = 0;
+
   $test = $runResults['name'];
+  unset($runResults['name']);
 
   foreach($runResults as $key => $value)
   {
@@ -639,6 +642,10 @@ function printResults($runResults)
         break;
     }
   } //foreach $runResults
+  if($failures == 0)
+  {
+    echo "All tests passed for $test\n";
+  }
   return ;
 }
 ?>
