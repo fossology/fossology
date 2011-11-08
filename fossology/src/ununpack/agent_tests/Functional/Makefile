@@ -18,11 +18,11 @@ TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-TESTFILE = cliParamsTest.php 
-EXE_DIR = ../../agent/
+TESTFILE = unpackTest.php 
+AGENTDIR = ../../agent/
 
 all:
-	$(MAKE) -C $(EXE_DIR)
+	$(MAKE) -C $(AGENTDIR)/ $@
 
 test: all
 	@echo "ununpack agent functional test"
