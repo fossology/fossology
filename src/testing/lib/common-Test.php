@@ -433,7 +433,7 @@ class RunTest
       $nothing = array();
       $nothing= preg_grep('/Nothing to be done for/', $this->makeOutput);
       $noTests = array();
-      $noTests= preg_grep('/NO TESTS/', $this->makeOutput);
+      $noTests= preg_grep('/NO.*TESTS/', $this->makeOutput);
       if($nothing or $noTests)
       {
         //echo "No Unit Tests for module $unitTest\n";
@@ -593,7 +593,8 @@ function MakeCover($unitTest)
 function printResults($runResults)
 {
   global $failures;
-  $unitTest = $runResults['name'];
+  
+  $test = $runResults['name'];
 
   foreach($runResults as $key => $value)
   {
@@ -602,28 +603,28 @@ function printResults($runResults)
       case 'make':
         if($value === TRUE)
         {
-          echo "Error: there were $key errors for $unitTest\n";
+          echo "Error: there were $key errors for $test\n";
           $failures++;
           break;
         }
       case 'cunit':
         if($value === TRUE)
         {
-          echo "Error: there were $key errors for $unitTest\n";
+          echo "Error: there were $key errors for $test\n";
           $failures++;
           break;
         }
       case 'phpunit':
         if($value === TRUE)
         {
-          echo "Error: there were $key errors for $unitTest\n";
+          echo "Error: there were $key errors for $test\n";
           $failures++;
           break;
         }
       case 'notest':
         if($value === TRUE)
         {
-          echo "No Unit tests for $unitTest\n";
+          echo "No tests for $test\n";
           $failures++;
           break;
         }
@@ -632,7 +633,7 @@ function printResults($runResults)
         {
           break;
         }
-        echo "Other errors for $unitTest:\n";
+        echo "Other errors for $test:\n";
         echo $value . "\n";
         $failures++;
         break;
