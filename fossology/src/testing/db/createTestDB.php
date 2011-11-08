@@ -40,7 +40,7 @@
 require_once(__DIR__ . '/../../lib/php/bootstrap.php');
 require_once(__DIR__ . '/../lib/libTestDB.php');
 
-$Options = getopt('c:d:sh');
+$Options = getopt('c:d:esh');
 $usage = $argv[0] . ": [-h] -c path [-d name] [-s]\n" .
   "-c path:  The path to the fossology system configuration directory\n" .
   "-d name:  Drop the named data base.\n" .
@@ -106,6 +106,11 @@ if(array_key_exists('d', $Options))
     echo "NOTE: database $dropName does not exist, nothing to delete\n";
   }
   exit(0);
+}
+$createEmpty = FALSE;
+if(array_key_exists('e', $Options))
+{
+  $createEmpty = TRUE;
 }
 $startSched = FALSE;
 if(array_key_exists('s', $Options))
@@ -223,7 +228,16 @@ if(copy($VERSION, $myVERSION) === FALSE)
   echo "FATAL! Cannot copy $VERSION to $myVERSION\n";
   exit(1);
 }
-
+// create an empty db?  if so, still need to export and print
+if($createEmpty)
+{
+  putenv("SYSCONFDIR=$confPath");
+  $_ENV['SYSCONFDIR'] = $confPath;
+  $GLOBALS['SYSCONFDIR'] = $confPath;
+  
+  echo $confPath . "\n";
+  exit(0);
+}
 // load the schema
 $loaded = TestDBInit(NULL, $DbName, $confPath);
 if($loaded !== NULL)
@@ -242,6 +256,8 @@ $_ENV['SYSCONFDIR'] = $confPath;
 $GLOBALS['SYSCONFDIR'] = $confPath;
 
 // scheduler should be in $MODDIR/scheduler/agent/fo_scheduler
+// no need to check if it's running, as a new one is started with a new
+// SYSCONFDIR.
 if($startSched)
 {
   $skedOut = array();
