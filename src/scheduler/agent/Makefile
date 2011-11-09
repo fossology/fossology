@@ -23,8 +23,8 @@ include $(VARS)
 #GLIB_FLAGS =  -lgthread-2.0 -lgio-2.0 -I/usr/include/libgtop-2.0/ -lgtop-2.0
 GLIB_FLAGS =  -lgthread-2.0 -lgio-2.0
 CFLAGS_LOCAL = $(GLIB_FLAGS) $(ALL_CFLAGS) -I. -lpq -lpthread -Werror
-DEF   = -DAGENT_DIR='"$(SYSCONFDIR)"' -DLOG_DIR='"$(LOGDIR)"' \
-        -DDEFAULT_SETUP='"$(SYSCONFDIR)"' -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"'
+DEF   = -DLOG_DIR='"$(LOGDIR)"' -DDEFAULT_SETUP='"$(SYSCONFDIR)"' -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' \
+        -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"'
 DEPEN = Makefile logging.h
 
 EXE = fo_scheduler
@@ -142,6 +142,8 @@ install-conf:
 #####################
 
 clean:
+	rm -f $(OBJS) $(EXE) $(CLI)
+
 uninstall:
 	rm -f $(OBJS) *.a
 	rm -rf $(MODDIR)/scheduler defconf/init.d/fossology

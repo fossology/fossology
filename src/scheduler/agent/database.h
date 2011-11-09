@@ -44,6 +44,7 @@ void database_destroy();
 /* **** event and functions ************************************************* */
 /* ************************************************************************** */
 
+void database_exec_event(char* sql);
 void database_reset_queue();
 void database_update_event(void* unused);
 void database_update_job(int j_id, job_status status);
