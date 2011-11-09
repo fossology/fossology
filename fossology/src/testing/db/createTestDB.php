@@ -44,10 +44,17 @@ $Options = getopt('c:d:esh');
 $usage = $argv[0] . ": [-h] -c path [-d name] [-s]\n" .
   "-c path:  The path to the fossology system configuration directory\n" .
   "-d name:  Drop the named data base.\n" .
+  "-e:       create ONLY an empty db, sysconf dir and repository\n" .
   "-h:       This message (Usage)\n" .
   "-s:       Start the scheduler with the new sysconfig directory\n" .
-  "Examples: create a test DB: createTestDb.php \n" .
-  "          Drop the database fosstest1537938: createTestDb.php -d fosstest1537938\n";
+  "Examples:\n".
+  "  Create a test DB: 'createTestDb.php' \n" .
+  "  Drop the database fosstest1537938: 'createTestDb.php -d fosstest1537938'\n" .
+  "  Create test DB, start scheduler: 'createTestDb.php -s'\n" .
+  "  Create empty DB, sysconf and repo: 'createTestDb.php -e'\n";
+
+$pathPrefix = '/srv/fossology';
+$dbPrefix = 'fosstest';
 
 if(array_key_exists('h',$Options))
 {
@@ -105,6 +112,13 @@ if(array_key_exists('d', $Options))
   {
     echo "NOTE: database $dropName does not exist, nothing to delete\n";
   }
+  // remove sysconf and repository
+  // remove name from string
+  $len = strlen($dbPrefix);
+  $uni = substr($dropName,$len);
+  $rmRepo = $pathPrefix . '/testDbRepo' .$uni;
+  $rmConf = $pathPrefix . '/testDbConf' .$uni;
+  $last = system("rm -rf $rmConf $rmRepo", $rmRtn);
   exit(0);
 }
 $createEmpty = FALSE;
@@ -138,8 +152,7 @@ $SysConf = bootstrap();
 //echo "DB: Sys Config vars are:\n";print_r($SysConf) . "\n";
 
 $unique = mt_rand();
-$DbName = 'fosstest' . $unique;
-//echo "DbName is:$DbName\n";
+$DbName = $dbPrefix . $unique;
 
 // create the db
 $newDB = CreateTestDB($DbName);
@@ -151,9 +164,9 @@ if($newDB != NULL)
 }
 
 $confName = 'testDbConf' . $unique;
-$confPath = "/srv/fossology/$confName";
+$confPath = "$pathPrefix/$confName";
 $repoName = 'testDbRepo' . $unique;
-$repoPath = "/srv/fossology/$repoName";
+$repoPath = "$pathPrefix/$repoName";
 
 // sysconf and repo's always go in /srv/fossology to ensure enough room.
 // perms are 755
