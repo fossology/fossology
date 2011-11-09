@@ -164,25 +164,20 @@ function genHtml($inFile=NULL, $outFile=NULL, $xslFile=NULL)
   }
   if(!defined('TESTROOT'))
   {
-    $here = getcwd();
-    // set to ...fossology/src/testing
-    $fossology = 'fossology';
-    $startLen = strlen($fossology);
-    $startPos = strpos($here, $fossology);
-    if($startPos === FALSE)
-    {
-      return("FATAL! did not find fossology, are you cd'd into the sources?\n");
-    }
-
-    $path = substr($here, 0, $startPos+$startLen);
-    $trPath = $path . '/src/testing';
-    define('TESTROOT',$trPath);
+    $path = __DIR__;
+    $plenth = strlen($path);
+    // remove /lib from the end.
+    $TESTROOT = substr($path, 0, $plenth-4);
+    echo "DBCOMREP: TESTROOT is:$TESTROOT\n";
+    $_ENV['TESTROOT'] = $TESTROOT;
+    putenv("TESTROOT=$TESTROOT");
+    define('TESTROOT',$TESTROOT);
   }
   // figure out where we are running in Jenkins so we can find xml2html
   // @todo fix where utils like fo-runTests and xml2html.php go and install them
   // as part of test setup.
 
-    $cmdLine = TESTROOT . "/reports/xml2html.php " .
+  $cmdLine = TESTROOT . "/reports/xml2html.php " .
       " -f $inFile -o $outFile -x $xslFile";
 
   $last = exec("$cmdLine", $out, $rtn);
