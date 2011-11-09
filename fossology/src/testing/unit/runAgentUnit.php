@@ -94,7 +94,6 @@ function genCunitRep($fileName)
   if(!empty($report))
   {
     echo "Error: Could not generate a HTML Test report from $fileName.\n";
-    echo "DB: report is:\n$report\n";
     return(FALSE);
   }
   //echo "DB: Generated html file:$outFile" . ".html\n";
@@ -283,6 +282,7 @@ foreach($unitList as $unitTest)
   $runResults = $Make->MakeTest();
   //debugprint($runResults, "run results for $unitTest\n");
   printResults($runResults);
+  processCUnit($unitTest);
   if(MakeCover($unitTest) != NULL)
   {
     //echo "Error: there were errors for make coverage for $unitTest\n";
