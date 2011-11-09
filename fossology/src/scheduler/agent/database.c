@@ -222,6 +222,21 @@ void email_notification(int job_id, int failed)
 /* **** event and functions ************************************************* */
 /* ************************************************************************** */
 
+void database_exec_event(char* sql)
+{
+  PGresult* db_result = PQexec(db_conn, sql);
+
+  if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
+  {
+    lprintf("ERROR %s.%d: failed to perform database exec\n");
+    lprintf("ERROR sql: \"%s\"\n", sql);
+    lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
+  }
+
+  PQclear(db_result);
+  g_free(sql);
+}
+
 /**
  * Resets the any jobs in the job queue that are not completed. This is to make
  * sure that any jobs that were running with the scheduler shutdown are run correctly
@@ -376,17 +391,9 @@ void database_update_job(int j_id, job_status status)
 void database_job_processed(int j_id, int num)
 {
   gchar* sql = NULL;
-  PGresult* db_result;
 
   sql = g_strdup_printf(jobsql_processed, j_id, num);
-  db_result = PQexec(db_conn, sql);
-  if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
-  {
-    lprintf("ERROR %s.%d: failed to update job items processed in job queue\n", __FILE__, __LINE__);
-    lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
-  }
-  PQclear(db_result);
-  g_free(sql);
+  event_signal(database_exec_event, sql);
 }
 
 /**
@@ -395,18 +402,12 @@ void database_job_processed(int j_id, int num)
  * @param j_id the id number for the relevant job
  * @param log_name the name of the log file
  */
-void database_job_log(int j_id, char* log_name) {
+void database_job_log(int j_id, char* log_name)
+{
   gchar* sql = NULL;
-  PGresult* db_result;
 
   sql = g_strdup_printf(jobsql_log, log_name, j_id);
-  db_result = PQexec(db_conn, sql);
-  if(PQresultStatus(db_result) != PGRES_COMMAND_OK) {
-    lprintf("ERROR %s.%d: failed to set the log file to \"%s\" for job %d\n", __FILE__, __LINE__, log_name, j_id);
-    lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
-  }
-  PQclear(db_result);
-  g_free(sql);
+  event_signal(database_exec_event, sql);
 }
 
 
