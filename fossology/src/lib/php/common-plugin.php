@@ -278,8 +278,6 @@ function plugin_init()
 /**
  * \brief Load every module ui found in mods-enabled
  *
- * \param $PlugDir - pludir, now now only for simpleUi
- * load all plug-ins under ./ui/simpleUi
  * \param $CallInit 1 = call plugin_init(), else ignored.
  **/
 function plugin_load($CallInit=1)
@@ -301,9 +299,8 @@ function plugin_load($CallInit=1)
         while (($File = readdir($Dir)) !== false)
         {
           if (substr($File,-4) === ".php" and !strstr($File, 'ndex.php')) // ignore index.php 
-	        {
+	      {
             /* Load php found in the ui directory */
-  	        //echo "Loading: $ModDirPath/$File<br>"; 
   	        include_once("$ModDirPath/$File"); 
           }
   	    }
