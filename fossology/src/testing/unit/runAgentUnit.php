@@ -23,6 +23,9 @@
  *
  * The input is a php ini style file with each name as a section [modname].
  *
+ * @todo add parameter processing.  Add in -k option to keep xml files.  This
+ * could be useful for debugging.
+ *
  * @version "$Id$"
  * Created on Aug 24, 2011 by Mark Donohoe
  */
@@ -48,8 +51,10 @@ function checkCUnit($fileName)
     $verFail = check4CUnitFail($fileName);
     if(!is_null($verFail))
     {
-      return($verFail);
+      //echo "DB: failues in check4CUnitFail\n";
       //print_r($verFail) . "\n";
+      return($verFail);
+
       //$failures++;
     }
   }
@@ -123,6 +128,7 @@ function processCUnit($unitTest)
     // Skip Listing files
     if(preg_grep("/Listing/", array($fileName)))
     {
+      $rmlast = exec("rm $fileName", $rmOut, $rmRtn);
       continue;
     }
     if(!tweakCUnit($fileName))
@@ -130,8 +136,8 @@ function processCUnit($unitTest)
       return("Error! could not save processed xml file, they may not display properly\n");
     }
 
-    //echo "DB: after tweak, we are at:\n" . getcwd() . "\n";
     $errors = array();
+    // defect: if the report is corrupt, checkCUnit will say everything is OK.
     $errors = checkCUnit($fileName);
     //echo "DB: after checkCUnit, errors for $unitTest are\n";print_r($errors) .  "\n";
     if(is_object($errors[0]))
@@ -145,12 +151,10 @@ function processCUnit($unitTest)
       // if we can't even check the file, then skip making the report
       $failures++;
       return("Failure: Could not check file $fileName for failures is the file corrupt?\n");
-      //backToParent('../../..');   // back to ..fossology/src
     }
 
     if(!genCunitRep($fileName))
     {
-      //$failures++;
       return("Error!, could not generate html report for $unitTest\n");
     }
   } // foreach
@@ -174,9 +178,7 @@ function tweakCUnit($fileName)
   }
 
   //echo "DB: tweaking xml file:$fileName\n";
-  //echo "DB: we are at:\n" . getcwd() . "\n";
   $rFile = file_get_contents($fileName);
-  //echo "DB: rFile after read:\n$rFile\n";
   // fix the Ref to xsl file
   $pat = '#href="#';
   $replace = 'href="http://fossology.usa.hp.com/~fossology/dtds/';
@@ -189,7 +191,6 @@ function tweakCUnit($fileName)
   $rFile =  preg_replace($runPat, $rReplace, $rFile);
   $rFile =  preg_replace($listPat, $lReplace, $rFile);
   //echo "DB: rFile after preg_replace is:\n$rFile\n";
-  //echo "DB: file name to write is:$fileName\n";
   if(!file_put_contents($fileName, $rFile))
   {
     return(FALSE);
@@ -216,6 +217,7 @@ $WORKSPACE = NULL;
 if(array_key_exists('WORKSPACE', $_ENV))
 {
   $WORKSPACE = $_ENV['WORKSPACE'];
+  define('WORKSPACE', $WORKSPACE);
 }
 
 $unit = TESTROOT . "/unit";
@@ -238,6 +240,8 @@ foreach($modules as $key => $value)
   $unitList[] = $key;
 }
 
+global $unitList;
+
 // @todo fix this, I don't think you need to check for workspace.
 if(is_null($WORKSPACE))
 {
@@ -257,7 +261,6 @@ $failures = 0;
 foreach($unitList as $unitTest)
 {
   echo "\n";
-  //echo "DB: we are at:\n" . getcwd() . "\n";
   echo "$unitTest:\n";
   $other = substr($unitTest, 0, 3);
   if($other == 'lib' || $other == 'cli')
@@ -282,7 +285,10 @@ foreach($unitList as $unitTest)
   $runResults = $Make->MakeTest();
   //debugprint($runResults, "run results for $unitTest\n");
   printResults($runResults);
-  processCUnit($unitTest);
+  if(processCUnit($unitTest) != NULL)
+  {
+    echo "Error: could not process cunit results file for $unitTest\n";
+  }
   if(MakeCover($unitTest) != NULL)
   {
     //echo "Error: there were errors for make coverage for $unitTest\n";
@@ -301,6 +307,8 @@ foreach($unitList as $unitTest)
   backToParent('../../..');
 } // foreach
 
+// clean up xml files left behind.
+cleanXMLFiles();
 if($failures)
 {
   exit(1);
