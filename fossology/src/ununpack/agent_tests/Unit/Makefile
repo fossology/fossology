@@ -34,7 +34,6 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 test: all $(EXE)
-	@echo "rsync"; \
         rsync -au fonightly.usa.hp.com:/var/www/testfiles/unpack-test-data.tar.bz2 ..; \
 	cd ..; \
 	tar -xf unpack-test-data.tar.bz2; \
