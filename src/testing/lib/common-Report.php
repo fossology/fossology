@@ -91,7 +91,6 @@ function check4Failures($xmlFile=NULL)
 function check4CUnitFail($xmlFile=NULL)
 {
   $failures = array();
-
   if(file_exists($xmlFile))
   {
     $sx = @simplexml_load_file($xmlFile);
@@ -105,7 +104,6 @@ function check4CUnitFail($xmlFile=NULL)
   {
     throw new Exception("can't find file $xmlFile");
   }
-
   // dive deep to get the data we need.
   // @todo, test for an object and if not one, then report that xml file is
   // corrupt.
@@ -127,6 +125,10 @@ function check4CUnitFail($xmlFile=NULL)
       }
     } // foreach($cuResutList->CUNIT_RUN_SUITE
   } // foreach($sx->CUNIT_RESULT_LISTING
+  if(($fileContents = file_get_contents($xmlFile)) === FALSE)
+  {
+    throw new Exception("Can not read file $xmlFile");
+  }
   if(empty($failures))
   {
     return(NULL);  // success

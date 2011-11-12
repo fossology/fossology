@@ -219,6 +219,52 @@ function checkTestData()
 } // checkTestData
 
 /**
+ * \brief remove xml files from the test run, so jenkins doesn't try to process them
+ *
+ * @return void
+ */
+function cleanXMLFiles()
+{
+  global $unitList;
+  reset($unitList);
+  foreach($unitList as $unitTest)
+  {
+    $other = substr($unitTest, 0, 3);
+    if($other == 'lib' || $other == 'cli')
+    {
+      if(@chdir($unitTest . '/tests') === FALSE)
+      {
+        echo "Error! cannot cd to " . $unitTest . "/tests, skipping test\n";
+        $failures++;
+        continue;
+      }
+    }
+    else
+    {
+      if(@chdir($unitTest . '/agent_tests/Unit') === FALSE)
+      {
+        echo "Error! cannot cd to " . $unitTest . "/agent_tests/Unit, skipping test\n";
+        $failures++;
+        continue;
+      }
+    }
+    foreach(glob("$unitTest*.xml") as $fName)
+    {
+      $lsOut = array();
+      $rmOut = array();
+      $fileName = lcfirst($fName);
+      $last = exec("rm $fileName", $rmOut, $rmRtn);
+      if($rmRtn != 0)
+      {
+        echo "Notice: could not remove $filename, please remove by hand\n";
+      }
+    } // foreach
+    backToParent('../../..');
+  } // foreach
+  return;
+}
+
+/**
  * escapeDots($string)
  *
  * Escape '.' in a string by replacing '.' with '\.'
@@ -555,7 +601,7 @@ function debugprint($val, $title)
 /**
  * \brief make coverage for a test
  *
- * @return void
+ * @return null on success, string on failure.
  */
 function MakeCover($unitTest)
 {
