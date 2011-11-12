@@ -35,7 +35,7 @@ $(FOLIB):
 
 test: all $(EXE)
 	@echo "rsync"; \
-        rsync -auv fonightly.usa.hp.com:/var/www/testfiles/unpack-test-data.tar.bz2 ..; \
+        rsync -au fonightly.usa.hp.com:/var/www/testfiles/unpack-test-data.tar.bz2 ..; \
 	cd ..; \
 	tar -xf unpack-test-data.tar.bz2; \
 	cd Unit; \
