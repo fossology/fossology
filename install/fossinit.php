@@ -33,39 +33,30 @@ posix_setgid($GID['gid']);
 $Group = `groups`;
 if (!preg_match("/\sfossy\s/",$Group) && (posix_getgid() != $GID['gid']))
 {
-  print "ERROR: Unable to run as group 'fossy'\n";
+  print "FATAL: You must be in group 'fossy' to update the FOSSology database.\n";
   exit(1);
 }
 
-/* Load all code */
-require_once(dirname(__FILE__) . '/../share/fossology/php/pathinclude.php');
-
-$UI_CLI = 1; /* this is a command-line program */
-
-global $WEBDIR;
-require_once("$WEBDIR/common/common.php");
-cli_Init();
-
-global $Plugins;
-global $LIBEXECDIR;
-require_once("$LIBEXECDIR/libschema.php");
-
-global $PGCONN;
-
-$usage = "Usage: " . basename($argv[0]) . " [options]
-  -v  = enable verbose mode (lists each module being processed)
-  -h  = this help usage";
-
-/* Load command-line options */
-/*** -v  = verbose ***/
+/* command-line options */
 $Options = getopt('vh');
-if (array_key_exists('h',$Options))
-{
-  print "$usage\n";
-  exit(0);
-}
+if (array_key_exists('h',$Options)) Usage();
 $Verbose = array_key_exists("v",$Options);
-if ($Verbose == "") { $Verbose=0; }
+if ($Verbose == "")  $Verbose=0;
+
+/* Initialize the program configuration variables */
+$SysConf = array();  // fo system configuration variables
+$PG_CONN = 0;   // Database connection
+$Plugins = array();
+
+/* Set SYSCONFDIR and set global (for backward compatibility) */
+$SysConf = bootstrap();
+
+/* Initialize global system configuration variables $SysConfig[] */
+ConfigInit($SYSCONFDIR, $SysConf);
+
+//debugprint($SysConf, "SysConf");
+/* Load plugins */
+plugin_load();
 
 /* Initialize the system! */
 $Schema = &$Plugins[plugin_find_any_id("schema")];
@@ -75,29 +66,17 @@ if (empty($Schema))
   exit(1);
 }
 
-global $WEBDIR;
-$Filename = "$WEBDIR/plugins/core-schema.dat";
+$Filename = "$MODDIR/www/ui/core-schema.dat";
 if (!file_exists($Filename))
 {
   print "FAILED: Schema data file ($Filename) not found.\n";
   exit(1);
 }
 
-$PGCONN = dbConnect(NULL);
 $FailFlag = ApplySchema($Filename,0,$Verbose);
-
-/* Remove the "Need to initialize" flag */
-global $PG_CONN;
-
 if (!$FailFlag)
 {
-  $Connect = 1;
   $State = 1;
-  $PG_CONN = DBconnect($SYSCONFDIR);
-  if(!is_resource($PG_CONN))
-  {
-    $Connect = 0;
-  }
   $Filename = "$WEBDIR/init.ui";
   if (file_exists($Filename))
   {
@@ -114,11 +93,6 @@ if (!$FailFlag)
   {
     print "Initialization completed successfully.\n";
   }
-  if(!$Connect)
-  {
-    echo "FATAL! could not connect to the DataBase\n";
-    exit(2);
-  }
 }
 else
 {
@@ -126,4 +100,104 @@ else
   exit(1);
 }
 exit(0);
+
+/** \brief Print Usage statement.
+ *  \return No return, this calls exit.
+ **/
+function Usage()
+{
+   $usage = "Usage: " . basename($argv[0]) . " [options]
+  Initialize database schema\n
+  -v  = enable verbose mode (lists each module being processed)
+  -h  = this help usage";
+  print "$usage\n";
+  exit(0);
+}
+
+/************************************************/
+/******  From src/lib/php/bootstrap.php  ********/
+/** Included here so that fossinit can run from any directory **/
+/**
+ * \file bootstrap.php
+ * \brief Fossology system bootstrap
+ * This file may be DUPLICATED in any php utility that needs to 
+ * bootstrap itself.
+ */
+
+/**
+ * \brief Bootstrap the fossology php library.
+ *  - Determine SYSCONFDIR
+ *  - parse fossology.conf
+ *  - source template (require_once template-plugin.php)
+ *  - source common files (require_once common.php)
+ * 
+ * The following precedence is used to resolve SYSCONFDIR:
+ *  - $SYSCONFDIR path passed in
+ *  - environment variable SYSCONFDIR
+ *  - ./fossology.rc
+ *
+ * \return the $SysConf array of values.  The first array dimension
+ * is the group, the second is the variable name.
+ * For example:
+ *  -  $SysConf[DIRECTORIES][MODDIR] => "/mymoduledir/
+ *
+ * The global $SYSCONFDIR is also set for backward compatibility.
+ *
+ * \Note Since so many files expect directory paths that used to be in pathinclude.php
+ * to be global, this function will define the same globals (everything in the 
+ * DIRECTORIES section of fossology.conf).
+ */
+function bootstrap()
+{
+  $rcfile = "fossology.rc";
+
+  $sysconfdir = getenv('SYSCONFDIR');
+  if ($sysconfdir === false)
+  {
+    if (file_exists($rcfile)) $sysconfdir = file_get_contents($rcfile);
+    if ($sysconfdir === false)
+    {
+      /* NO SYSCONFDIR specified */
+      $text = _("FATAL: System Configuration Error, no SYSCONFDIR.");
+      echo "<hr><h3>$text</h3><hr>";
+      exit(1);
+    }
+  }
+
+  $sysconfdir = trim($sysconfdir);
+  $GLOBALS['SYSCONFDIR'] = $sysconfdir;
+
+  /*************  Parse fossology.conf *******************/
+  $ConfFile = "{$sysconfdir}/fossology.conf";
+  $SysConf = parse_ini_file($ConfFile, true);
+
+  /* evaluate all the DIRECTORIES group for variable substitutions.
+   * For example, if PREFIX=/usr/local and BINDIR=$PREFIX/bin, we
+   * want BINDIR=/usr/local/bin
+   */
+  foreach($SysConf['DIRECTORIES'] as $var=>$assign)
+  {
+    /* Evaluate the individual variables because they may be referenced
+     * in subsequent assignments. 
+     */
+    $toeval = "\$$var = \"$assign\";";
+    eval($toeval);
+
+    /* now reassign the array value with the evaluated result */
+    $SysConf['DIRECTORIES'][$var] = ${$var};
+    $GLOBALS[$var] = ${$var};
+  }
+
+  if (empty($MODDIR))
+  {
+    $text = _("FATAL: System initialization failure: MODDIR not defined in fossology.conf");
+    echo $text. "\n"; 
+    exit;
+  }
+
+  //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
+  require_once("$MODDIR/www/ui/template/template-plugin.php");
+  require_once("$MODDIR/lib/php/common.php");
+  return $SysConf;
+}
 ?>
