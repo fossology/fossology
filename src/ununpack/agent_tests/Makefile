@@ -14,6 +14,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+#
+# ununpack/agent_tests makefile
+#
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
@@ -31,10 +34,6 @@ test:
 
 coverage:
 	$(MAKE) -C $(COVDIR) coverage
-
-testdata:
-	rsync -a fossology.org:/var/www/fossology.org/testing/testFiles/unpack-test-data.tar.bz2 .
-	tar xjf unpack-test-data.tar.bz2
 
 clean:
 	$(call dirloop,clean)

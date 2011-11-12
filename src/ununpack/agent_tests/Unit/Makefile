@@ -34,6 +34,11 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 test: all $(EXE)
+	@echo "rsync"; \
+        rsync -auv fonightly.usa.hp.com:/var/www/testfiles/unpack-test-data.tar.bz2 ..; \
+	cd ..; \
+	tar -xf unpack-test-data.tar.bz2; \
+	cd Unit; \
 	./$(EXE)
 
 coverage: $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
