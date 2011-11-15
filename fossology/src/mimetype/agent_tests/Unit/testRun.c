@@ -22,6 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * \brief main function for in this testing module
  */
 
+char *DBConfFile = NULL;
+
 /**
  * \brief all test suites for mimetype
  */
@@ -43,6 +45,11 @@ CU_SuiteInfo suites[] = {
  */
 int main( int argc, char *argv[] )
 {
-  return focunit_main(argc, argv, "mimetype_Tests", suites) ;
+  create_db_repo_sysconf(1);
+  DBConfFile = get_dbconf();
+
+  int rc = focunit_main(argc, argv, "mimetype_Tests", suites) ;
+  drop_db_repo_sysconf(get_db_name());
+  return rc;
 }
 

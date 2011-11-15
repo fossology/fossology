@@ -28,13 +28,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 static PGresult *result = NULL;
 static long upload_pk = -1;
 static long pfile_pk = -1;
+extern char *DBConfFile;
 
 /**
  * \brief initialize
  */
 int  DBCheckMimeInit()
 {
-  char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);

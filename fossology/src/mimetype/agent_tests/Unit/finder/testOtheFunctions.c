@@ -29,6 +29,7 @@ extern int CheckMimeTypes  (char *Ext);
 extern int DBCheckFileExtention();
 extern char * GetFieldValue (char *Sin, char *Field, int FieldMax,
       char *Value, int ValueMax);
+extern char *DBConfFile;
 
 static PGresult *result = NULL;
 static long upload_pk = -1;
@@ -39,7 +40,6 @@ static long pfile_pk = -1;
  */
 int  DBInit()
 {
-  char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
@@ -195,7 +195,6 @@ int DBClean()
   }
   PQclear(result);
 
-
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"COMMIT;");
   result =  PQexec(pgConn, SQL);
@@ -221,15 +220,6 @@ void testCheckMimeTypes()
 {
   /** for the file, if the extension is bin, the mime type is application/octet-stream */
   char Ext[] = "bin";
-  char *DBConfFile = NULL;  /* use default Db.conf */
-  char *ErrorBuf;
-
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  if (!pgConn)
-  {
-    LOG_FATAL("Unable to connect to database");
-    exit(-1);
-  }
   MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
   /** extension is bin */
   /** delete the record the mimetype_name is application/octet-stream in mimetype, before testing */
