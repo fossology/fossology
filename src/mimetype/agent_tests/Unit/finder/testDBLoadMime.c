@@ -26,13 +26,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 
 extern void DBLoadMime();
+extern char *DBConfFile;
 
 /**
  * \brief initialize
  */
 int  DBLoadMimeInit()
 {
-  char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);

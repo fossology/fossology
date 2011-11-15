@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define RUN_TESTS_H
 
 #include "libfocunit.h"
+#include "libfodbreposysconf.h"
 
 /* for finder.c, start */
 extern CU_TestInfo testcases_DBCheckMime[];

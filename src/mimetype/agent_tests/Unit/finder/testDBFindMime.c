@@ -25,12 +25,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * \brief testing for the function DBFindMime
  */
 
+extern char *DBConfFile;
+
 /**
  * \brief initialize
  */
 int  DBFindMimeInit()
 {
-  char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
