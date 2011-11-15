@@ -6,6 +6,7 @@ include $(VARS)
 AGENTDIR=../../agent
 TESTDIR=$(TOP)/src/testing/lib/c
 TESTLIB= -L $(TESTDIR) -l focunit -I $(TESTDIR)
+DATA=../unpack-test-data.tar.bz2
 
 CFLAGS_LOCAL=-lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ -lcunit $(TESTLIB)
 EXE=run_tests
@@ -33,11 +34,18 @@ $(OBJS): %.o: %.c
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
-test: all $(EXE)
-        rsync -au fonightly.usa.hp.com:/var/www/testfiles/unpack-test-data.tar.bz2 ..; \
+$(DATA):
+	@echo "Downloading ununpack data"
+	rsync -acv fonightly.usa.hp.com:/var/www/testfiles/unpack-test-data.tar.bz2 ..		
+	
+download: ../unpack-test-data.tar.bz2
+	@echo "untaring ununpack data"
 	cd ..; \
 	tar -xf unpack-test-data.tar.bz2; \
-	cd Unit; \
+	cd Unit
+	
+test: all download $(EXE)
+	@echo "Make test ununpack"
 	./$(EXE)
 
 coverage: $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
@@ -56,3 +64,5 @@ clean:
 	rm -fr $(EXE) *.o core *.xml *.txt results test-result unpack-test-data.tar.bz2 test-data
 
 include $(DEPS)
+
+.PHONY: all install uninstall clean test download libununpack_cov.a libununpack.a $(DATA)
