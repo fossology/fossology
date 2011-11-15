@@ -227,8 +227,15 @@ if(@chdir($unit) === FALSE)
   echo "FATAL!, could not cd to:\n$unit\n";
   exit(1);
 }
+require_once('../lib/bootstrap.php');
 require_once('../lib/common-Report.php');
 require_once('../lib/common-Test.php');
+
+$sysConf = array();
+$sysConf = bootstrap();
+// export for other tests to use
+putenv("SYSCONFDIR={$GLOBALS['SYSCONFDIR']}");
+$_ENV['SYSCONFDIR'] = $GLOBALS['SYSCONFDIR'];
 
 $modules = array();
 $unitList = array();
@@ -308,7 +315,7 @@ foreach($unitList as $unitTest)
 } // foreach
 
 // clean up xml files left behind.
-cleanXMLFiles();
+//cleanXMLFiles();
 if($failures)
 {
   exit(1);
