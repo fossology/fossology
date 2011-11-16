@@ -85,7 +85,7 @@ int main(int argc, char** argv)
   fd_set fds;                 // file descriptor set used in select statement
   int port_number = -1;       // the port that the CLI will connect on
   long host_addr;             // the address of the host
-  int c, closing;             // flags and loop variables
+  int closing;                // flags and loop variables
   size_t bytes;               // variable to capture return of read
   char* host;                 // string to hold the name of the host
   char buffer[1024];          // string buffer used to read
@@ -221,7 +221,7 @@ int main(int argc, char** argv)
     FD_SET(s, &fds);
     FD_SET(fileno(stdin), &fds);
     memset(buffer, '\0', sizeof(buffer));
-    c = select(s + 1, &fds, NULL, NULL, NULL);
+    select(s + 1, &fds, NULL, NULL, NULL);
 
     /* check the socket */
     if(FD_ISSET(s, &fds))

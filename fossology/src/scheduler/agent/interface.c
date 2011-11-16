@@ -98,7 +98,6 @@ void* interface_thread(void* param)
   char buffer[BUFFER_SIZE];
   char org[sizeof(buffer)];
   char* cmd, * tmp;
-  unsigned long size;
   arg_int* params;
   int i;
 
@@ -112,7 +111,6 @@ void* interface_thread(void* param)
     for(cmd = buffer; *cmd; cmd++)
       *cmd = g_ascii_tolower(*cmd);
     cmd = strtok(buffer, " ");
-    size = 0;
 
     /* ??? this shouldn't be able to happen */
     if(cmd == NULL)
