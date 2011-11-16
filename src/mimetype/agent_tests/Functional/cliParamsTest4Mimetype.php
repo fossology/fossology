@@ -30,11 +30,28 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
    
   public $EXE_PATH = "";
   public $PG_CONN;
+  public $DB_COMMAND =  "";
+  public $DB_NAME =  "";
  
   /* initialization */
   protected function setUp() {
     global $EXE_PATH;
     global $PG_CONN;
+    global $DB_COMMAND;
+    global $DB_NAME;
+
+    $db_conf = "";
+
+    $DB_COMMAND  = "../../../testing/db/createTestDB.php";
+
+    exec($DB_COMMAND, $dbout, $rc);
+    preg_match("/(\d+)/", $dbout[0], $matches);
+    $test_name = $matches[1];
+    $db_conf = $dbout[0];
+    $DB_NAME = "fosstest".$test_name;
+    $PG_CONN = pg_connect("host=localhost port=5432 dbname=$DB_NAME user=fossy password=fossy")
+               or die("Could not connect");
+
     $EXE_PATH = '../../agent/mimetype';
     $usage= "";
     if(file_exists($EXE_PATH))
@@ -49,14 +66,8 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     // run it
     $last = exec("$EXE_PATH -h 2>&1", $out, $rtn);
     $this->assertEquals($usage, $out[1]); // check if executable file mimetype is exited
-    $PG_CONN = pg_connect("host=localhost port=5432 dbname=fossology user=fossy password=fossy")
-               or die("Could not connect");
+    $EXE_PATH = $EXE_PATH." -C -c $db_conf";
   }
-
-  function testDebug() // test debug start
-  { 
-    return 0;
-  } //test debug end
 
   /**
    * \brief test mimetype name is not in table mimetype 
@@ -65,6 +76,7 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     print "Starting test functional mimetype agent \n";
     global $EXE_PATH;
     global $PG_CONN;
+
     $mimeType1 = "application/x-executable";
     $mimeType2 = "text/plain";
     /** delete test data pre testing */
@@ -97,6 +109,7 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
   function testMimetypeInDB(){
     global $EXE_PATH;
     global $PG_CONN;
+
     $mimeType = "text/x-pascal";
     /** delete test data pre testing */
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
@@ -117,6 +130,7 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
     $result = pg_query($PG_CONN, $sql);
     pg_free_result($result);
+
     print "ending test functional mimetype agent \n";
   }
 
@@ -125,6 +139,10 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
    */
   protected function tearDown() {
     global $PG_CONN;
+    global $DB_COMMAND;
+    global $DB_NAME;
+
+    exec("$DB_COMMAND -d $DB_NAME");
     pg_close($PG_CONN);
   }
 }
