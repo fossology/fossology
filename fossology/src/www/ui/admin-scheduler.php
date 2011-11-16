@@ -265,4 +265,3 @@ $NewPlugin = new admin_scheduler;
 $NewPlugin->Initialize();
 
 ?>
-
