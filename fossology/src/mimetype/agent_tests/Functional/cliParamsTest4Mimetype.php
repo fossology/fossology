@@ -142,8 +142,8 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     global $DB_COMMAND;
     global $DB_NAME;
 
-    exec("$DB_COMMAND -d $DB_NAME");
     pg_close($PG_CONN);
+    exec("$DB_COMMAND -d $DB_NAME");
   }
 }
 
