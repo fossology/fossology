@@ -15,6 +15,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
+/* local includes */
+#include <libfocunit.h>
+
 /* std library includes */
 #include <stdio.h>
 #include <assert.h>
@@ -46,60 +49,12 @@ CU_SuiteInfo suites[] =
 };
 
 /* ************************************************************************** */
-/* **** test failure function *********************************************** */
-/* ************************************************************************** */
-
-void test_failure_function()
-{
-  static int num_failed = 0;
-  if(CU_get_number_of_tests_failed() != num_failed)
-  {
-    printf(" FAILED");
-    num_failed++;
-  }
-}
-
-/* external function to test if a particular test failed */
-void (*test_failure)(void) = test_failure_function;
-
-/* ************************************************************************** */
 /* **** main test functions ************************************************* */
 /* ************************************************************************** */
 
 int main(int argc, char** argv)
 {
-  if(CU_initialize_registry())
-  {
-    fprintf(stderr, "Initialization of Test Registry failed.'n");
-    return -1;
-  }
-  else
-  {
-    assert(CU_get_registry());
-    assert(!CU_is_test_running());
-
-    if(CU_register_suites(suites) != CUE_SUCCESS)
-    {
-      fprintf(stderr, "Register suites failed - %s\n", CU_get_error_msg());
-      return -1;
-    }
-
-    CU_set_output_filename("copyright_Tests");
-    CU_list_tests_to_file();
-    CU_automated_run_tests();
-
-    printf("Results:\n");
-    printf("  Number of suites run: %d\n", CU_get_number_of_suites_run());
-    printf("  Number of tests run: %d\n", CU_get_number_of_tests_run());
-    printf("  Number of tests failed: %d\n", CU_get_number_of_tests_failed());
-    printf("  Number of asserts: %d\n", CU_get_number_of_asserts());
-    printf("  Number of successes: %d\n", CU_get_number_of_successes());
-    printf("  Number of failures: %d\n", CU_get_number_of_failures());
-
-    CU_cleanup_registry();
-  }
-
-  return 0;
+  return focunit_main(argc, argv, "copyright_Tests", suites);
 }
 
 

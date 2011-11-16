@@ -18,7 +18,9 @@ TOP = ../../../..
 include $(TOP)/Makefile.conf
 LOCALAGENTDIR=../../agent
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lpcre -lcunit
+TESTDIR = $(TOP)/src/testing/lib/c
+TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
+CFLAGS_LOCAL= $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lpcre -lcunit
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_copyright
 
@@ -46,7 +48,7 @@ coverage: $(OBJECTS) libcopyright_cov.a run_tests.c
 	genhtml  -o  results cov.txt
 
 $(EXE): $(OBJECTS) libcopyright.a run_tests.c
-	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(CFLAGS_LOCAL)
+	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(CFLAGS_LOCAL) $(TESTLIB)
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<

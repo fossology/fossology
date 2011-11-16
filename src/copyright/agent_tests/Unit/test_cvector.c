@@ -24,9 +24,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* cunit includes */
 #include <CUnit/CUnit.h>
 
-/* external function to test if a particular test failed */
-extern void (*test_failure)(void);
-
 /* ************************************************************************** */
 /* **** cvector locals ****************************************************** */
 /* ************************************************************************** */
@@ -39,8 +36,6 @@ struct cvector_internal
   function_registry* memory;  // the memory management functions employed by cvector
 };
 
-void cvector_resize(cvector vec);
-
 /* ************************************************************************** */
 /* **** function registry tests ********************************************* */
 /* ************************************************************************** */
@@ -51,7 +46,6 @@ void test_int_function_registry()
   int tester = 1;
 
   /* start the tests */
-  printf("Test int_function_registry: ");
   CU_ASSERT_TRUE(!strcmp(fr->name, "integer"));
 
   /* test the copy function */
@@ -67,8 +61,6 @@ void test_int_function_registry()
   free(fr);
 
   /* finish the test */
-  test_failure();
-  printf("\n");
 }
 
 void test_char_function_registry()
@@ -77,7 +69,6 @@ void test_char_function_registry()
   char tester = 'a';
 
   /* start the tests */
-  printf("Test char_function_registry: ");
   CU_ASSERT_TRUE(!strcmp(fr->name, "character"));
 
   /* test the copy function */
@@ -93,8 +84,6 @@ void test_char_function_registry()
   free(fr);
 
   /* finish the test */
-  test_failure();
-  printf("\n");
 }
 
 void test_double_function_registry()
@@ -103,7 +92,6 @@ void test_double_function_registry()
   double tester = 1.11;
 
   /* start the tests */
-  printf("Test double_function_registry: ");
   CU_ASSERT_TRUE(!strcmp(fr->name, "float"));
 
   /* test the copy function */
@@ -116,11 +104,9 @@ void test_double_function_registry()
 
   /* free memory */
   fr->destroy(cpy);
-  test_failure();
   free(fr);
 
   /* finish the test */
-  printf("\n");
 }
 
 void test_pointer_function_registry()
@@ -129,7 +115,6 @@ void test_pointer_function_registry()
   int* tester = (int*)&fr;
 
   /* start the tests */
-  printf("Test pointer_function_registry: ");
   CU_ASSERT_TRUE(!strcmp(fr->name, "pointer"));
 
   /* test the copy function */
@@ -145,8 +130,6 @@ void test_pointer_function_registry()
   free(fr);
 
   /* finish the test */
-  test_failure();
-  printf("\n");
 }
 
 void test_string_function_registry()
@@ -155,7 +138,6 @@ void test_string_function_registry()
   char* tester = "hello";
 
   /* start the tests */
-  printf("Test string_function_registry: ");
   CU_ASSERT_TRUE(!strcmp(fr->name, "string"));
 
   /* test the copy function */
@@ -171,8 +153,6 @@ void test_string_function_registry()
   free(fr);
 
   /* finish the test */
-  test_failure();
-  printf("\n");
 }
 
 /* ************************************************************************** */
@@ -184,7 +164,6 @@ void test_cvector_init()
   cvector vec;
 
   /* start the test */
-  printf("Test cvector_init: ");
 
   /* start the tests */
   cvector_init(&vec, NULL);
@@ -194,8 +173,6 @@ void test_cvector_init()
   CU_ASSERT_NOT_EQUAL(vec->data, NULL);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_push_back()
@@ -204,7 +181,6 @@ void test_cvector_push_back()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_push_back: ");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -219,8 +195,6 @@ void test_cvector_push_back()
   CU_ASSERT_EQUAL(vec->data[1], NULL);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_insert()
@@ -229,7 +203,6 @@ void test_cvector_insert()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_insert:");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -243,8 +216,6 @@ void test_cvector_insert()
   CU_ASSERT_NOT_EQUAL(*(int*)vec->data[0], tester);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_clear()
@@ -253,7 +224,6 @@ void test_cvector_clear()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_clear:");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -267,8 +237,6 @@ void test_cvector_clear()
   CU_ASSERT_EQUAL(vec->data[0], NULL);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_pop_back()
@@ -277,7 +245,6 @@ void test_cvector_pop_back()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_pop_back:");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -289,8 +256,6 @@ void test_cvector_pop_back()
   CU_ASSERT_EQUAL(vec->data[0], NULL);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_remove()
@@ -299,7 +264,6 @@ void test_cvector_remove()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_remove:");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -311,8 +275,6 @@ void test_cvector_remove()
   CU_ASSERT_EQUAL(vec->data[0], NULL);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_get()
@@ -321,7 +283,6 @@ void test_cvector_get()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_get:");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -331,8 +292,6 @@ void test_cvector_get()
   CU_ASSERT_EQUAL(*(int*)cvector_get(vec, 0), tester);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_at()
@@ -341,7 +300,6 @@ void test_cvector_at()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_at:");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -351,8 +309,6 @@ void test_cvector_at()
   CU_ASSERT_EQUAL(*(int*)cvector_at(vec, 0), tester);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_begin()
@@ -361,7 +317,6 @@ void test_cvector_begin()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_begin:");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -371,8 +326,6 @@ void test_cvector_begin()
   CU_ASSERT_EQUAL(cvector_begin(vec), vec->data);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_end()
@@ -381,7 +334,6 @@ void test_cvector_end()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_end:");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -391,8 +343,6 @@ void test_cvector_end()
   CU_ASSERT_EQUAL(cvector_end(vec), vec->data+vec->size);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_size()
@@ -401,7 +351,6 @@ void test_cvector_size()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_size:");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -414,8 +363,6 @@ void test_cvector_size()
   CU_ASSERT_EQUAL(cvector_size(vec), 2);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_capacity()
@@ -424,7 +371,6 @@ void test_cvector_capacity()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_capacity:");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -439,8 +385,6 @@ void test_cvector_capacity()
   CU_ASSERT_EQUAL(cvector_capacity(vec), 4);
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 /* ************************************************************************** */
@@ -453,7 +397,6 @@ void test_cvector_at_error()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_at_error: NOT IMPLEMENTED");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -463,8 +406,6 @@ void test_cvector_at_error()
 
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_insert_error()
@@ -473,7 +414,6 @@ void test_cvector_insert_error()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_insert_error: NOT IMPLEMENTED");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -483,8 +423,6 @@ void test_cvector_insert_error()
 
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 void test_cvector_remove_error()
@@ -493,7 +431,6 @@ void test_cvector_remove_error()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_remove_error: NOT IMPLEMENTED");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -502,8 +439,6 @@ void test_cvector_remove_error()
   /* test the results */;
 
   cvector_destroy(vec);
-  test_failure();
-  printf("\n");
 }
 
 /* ************************************************************************** */

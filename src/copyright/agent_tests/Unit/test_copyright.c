@@ -32,9 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* are a very expensive object to create                                      */
 copyright copy;
 
-/* external function to test if a particular test failed */
-extern void (*test_failure)(void);
-
 /* ************************************************************************** */
 /* **** copyright local declarations **************************************** */
 /* ************************************************************************** */
@@ -67,9 +64,6 @@ void strip_empty_entries(copyright copy);
 int contains_copyright(radix_tree tree, char* string, char* buf);
 int load_dictionary(radix_tree dict, char* filename);
 void* copy_entry_copy(void* to_copy);
-void  copy_entry_destroy();
-void  copy_entry_print(void* to_print, FILE* ostr);
-function_registry* copy_entry_function_registry();
 int copyright_callout(pcre_callout_block* info);
 
 /* ************************************************************************** */
@@ -81,18 +75,12 @@ void test_find_beginning()
   /* set up the test params */
   char* text = "hello this is a test, hello this is a test, hello this is a test,\nhello this is a test, hello this is a test";
 
-  /* start the test */
-  printf("Test find_beginning: ");
-
   /* run some tests, these numbers index to specific locations in the above */
   /* string, i.e. they are magic numbers, only change them if you know the  */
   /* correct indices in the above string                                    */
   CU_ASSERT_EQUAL(find_beginning(text, 10), 5);
   CU_ASSERT_EQUAL(find_beginning(text, 60), 59);
   CU_ASSERT_EQUAL(find_beginning(text, 70), 65);
-
-  test_failure();
-  printf("\n");
 }
 
 void test_find_end()
@@ -100,25 +88,16 @@ void test_find_end()
   /* set up the test params */
   char* text = "hello this is a test, hello this is a test, hello this is a test,\nhello this is a test, hello this is a test";
 
-  /* start the test */
-  printf("Test find_end: ");
-
   /* run some tests, these numbers index to specific locations in the above */
   /* string, i.e. they are magic numbers, only change them if you know the  */
   /* correct indices in the above string                                    */
   CU_ASSERT_EQUAL(find_end(text, 0, strlen(text)), 64);
   CU_ASSERT_EQUAL(find_end(text, 70, strlen(text)), 108);
-
-  test_failure();
-  printf("\n");
 }
 
 void test_strip_empty_entries()
 {
   struct copy_entry_internal entry;
-
-  /* start the test */
-  printf("Test string_empty_entries: ");
 
   /* create a copy_entry to copy */
   copy_entry_init(&entry);
@@ -134,8 +113,6 @@ void test_strip_empty_entries()
   CU_ASSERT_EQUAL(cvector_size(copy->entries), 1);
 
   cvector_clear(copy->entries);
-  test_failure();
-  printf("\n");
 }
 
 void test_contains_copyright()
@@ -143,8 +120,6 @@ void test_contains_copyright()
   char buffer[256];
 
   /* start the test */
-  printf("Test contains_copyright: ");
-
   /* run the tests */
   CU_ASSERT_EQUAL(
       contains_copyright(copy->dict, "This does contain a copyright", buffer), 20);
@@ -152,18 +127,13 @@ void test_contains_copyright()
   CU_ASSERT_EQUAL(
       contains_copyright(copy->dict, "This does not contain one", buffer), 25);
   CU_ASSERT_EQUAL(strlen(buffer), 0);
-
-  test_failure();
-  printf("\n");
 }
 
 void test_load_dictionary()
 {
   radix_tree tree;
 
-  /* start the test */
-  printf("Test load_dictionary: ");
-  radix_init(&tree);
+  /* start the test */  radix_init(&tree);
 
   /* do the asserts */
   CU_ASSERT_TRUE(load_dictionary(tree, "../../agent/copyright.dic"));
@@ -174,8 +144,6 @@ void test_load_dictionary()
   CU_ASSERT_FALSE(load_dictionary(tree, "bad filename"));
 
   radix_destroy(tree);
-  test_failure();
-  printf("\n");
 }
 
 void test_copy_entry_init()
@@ -183,9 +151,7 @@ void test_copy_entry_init()
   /* set up the test params */
   struct copy_entry_internal entry;
 
-  /* start the test */
-  printf("Test copy_entry_init: ");
-  copy_entry_init(&entry);
+  /* start the test */  copy_entry_init(&entry);
 
   /* check the results */
   CU_ASSERT_EQUAL(entry.text[0], '\0');
@@ -194,9 +160,6 @@ void test_copy_entry_init()
   CU_ASSERT_EQUAL(entry.start_byte, 0);
   CU_ASSERT_EQUAL(entry.end_byte, 0);
   CU_ASSERT_EQUAL(entry.type, NULL);
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copy_entry_copy()
@@ -204,8 +167,6 @@ void test_copy_entry_copy()
   struct copy_entry_internal entry;
 
   /* start the test */
-  printf("Test copy_entry_copy: ");
-
   /* create a copy_entry to copy */
   copy_entry_init(&entry);
   strcpy(entry.text, "hello");
@@ -227,17 +188,13 @@ void test_copy_entry_copy()
   CU_ASSERT_TRUE(!strcmp(cpy->dict_match, "copyright"));
 
   free(cpy);
-  test_failure();
-  printf("\n");
 }
 
 void test_copyright_callout()
 {
   pcre_callout_block info;
 
-  /* start the test */
-  printf("Test test_copyright_callout: ");
-  info.callout_data = copy->entries;
+  /* start the test */  info.callout_data = copy->entries;
   info.subject = "This is just a testing string";
   info.start_match = 0;
   info.current_position = 10;
@@ -268,8 +225,6 @@ void test_copyright_callout()
   CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->text, "his is jus"));
 
   cvector_clear(copy->entries);
-  test_failure();
-  printf("\n");
 }
 
 /* ************************************************************************** */
@@ -279,25 +234,15 @@ void test_copyright_callout()
 void test_copyright_init()
 {
   /* start the test */
-  printf("Test copyright_init:");
-
   /* start the tests */
   CU_ASSERT_TRUE(copyright_init(&copy));
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copyright_destroy()
 {
   /* start the test */
-  printf("Test copyright_destroy:");
-
   /* start the tests */
   copyright_destroy(copy);
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copyright_clear()
@@ -305,8 +250,6 @@ void test_copyright_clear()
   struct copy_entry_internal entry;
 
   /* start the test */
-  printf("Test copyright_clear: ");
-
   /* create a copy_entry to copy */
   copy_entry_init(&entry);
 
@@ -318,9 +261,6 @@ void test_copyright_clear()
   CU_ASSERT_EQUAL(cvector_size(copy->entries), 2);
   copyright_clear(copy);
   CU_ASSERT_EQUAL(cvector_size(copy->entries), 0);
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copyright_analyze()
@@ -328,15 +268,13 @@ void test_copyright_analyze()
   FILE* istr;
 
   /* start the test */
-  printf("Test copyright_analyze: ");
-
   istr = fopen("testcase", "r");
   if(!istr) {
     return;
   }
 
   copyright_analyze(copy, istr);
-  CU_ASSERT_EQUAL(cvector_size(copy->entries), 5);
+  CU_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 5);
   CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->text,
       "copyright (c) 2010 john not_a_person smith"));
   CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 1))->text,
@@ -347,49 +285,32 @@ void test_copyright_analyze()
       "<smith.not.john@not.a.url>"));
   CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 4))->text,
       "http://www.not.a.url/index.html"));
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copyright_email_url()
 {
   /* start the test */
-  printf("Test copyright_email_url: ");
-
   /* run the tests */
   copyright_email_url(copy, "test.email@url.com http://www.testurl.com not_a_url");
-  CU_ASSERT_EQUAL(cvector_size(copy->entries), 2);
+  CU_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 2);
   CU_ASSERT_TRUE(!strcmp(cvector_get(copy->entries, 0), "test.email@url.com"));
   CU_ASSERT_TRUE(!strcmp(cvector_get(copy->entries, 1), "http://www.testurl.com"));
 
   cvector_clear(copy->entries);
-  test_failure();
-  printf("\n");
 }
 
 void test_copyright_begin()
 {
   /* start the test */
-  printf("Test copy_copyright_begin: ");
-
   /* make sure that the correct location is returned */
   CU_ASSERT_EQUAL((cvector_iterator)copyright_begin(copy), cvector_begin(copy->entries));
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copyright_end()
 {
   /* start the test */
-  printf("Test copy_copyright_end: ");
-
   /* make sure that the correct location is returned */
   CU_ASSERT_EQUAL((cvector_iterator)copyright_end(copy), cvector_end(copy->entries));
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copyright_at()
@@ -397,8 +318,6 @@ void test_copyright_at()
   struct copy_entry_internal entry;
 
   /* star the test */
-  printf("Test copyright_at: ");
-
   /* create a copy_entry for use during function */
   copy_entry_init(&entry);
   strcpy(entry.text, "words");
@@ -408,8 +327,6 @@ void test_copyright_at()
   CU_ASSERT_TRUE(!strcmp(copyright_at(copy, 0)->text, "words"));
 
   cvector_clear(copy->entries);
-  test_failure();
-  printf("\n");
 }
 
 void test_copyright_get()
@@ -417,8 +334,6 @@ void test_copyright_get()
   struct copy_entry_internal entry;
 
   /* star the test */
-  printf("Test copyright_get: ");
-
   /* create a copy_entry for use during function */
   copy_entry_init(&entry);
   strcpy(entry.text, "words");
@@ -428,8 +343,6 @@ void test_copyright_get()
   CU_ASSERT_TRUE(!strcmp(copyright_get(copy, 0)->text, "words"));
 
   cvector_clear(copy->entries);
-  test_failure();
-  printf("\n");
 }
 
 void test_copyright_size()
@@ -437,8 +350,6 @@ void test_copyright_size()
   struct copy_entry_internal entry;
 
   /* star the test */
-  printf("Test copyright_size: ");
-
   /* create a copy_entry for use during function */
   copy_entry_init(&entry);
   cvector_push_back(copy->entries, &entry);
@@ -447,8 +358,6 @@ void test_copyright_size()
   CU_ASSERT_EQUAL(copyright_size(copy), 1);
 
   cvector_clear(copy->entries);
-  test_failure();
-  printf("\n");
 }
 
 void test_copy_entry_text()
@@ -456,14 +365,9 @@ void test_copy_entry_text()
   struct copy_entry_internal entry;
 
   /* star the test */
-  printf("Test copy_entry_text: ");
-
   /* perform the tests */
   strcpy(entry.text, "This is simple text");
   CU_ASSERT_TRUE(!strcmp(copy_entry_text(&entry), "This is simple text"));
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copy_entry_name()
@@ -471,14 +375,9 @@ void test_copy_entry_name()
   struct copy_entry_internal entry;
 
   /* star the test */
-  printf("Test copy_entry_name: ");
-
   /* perform the tests */
   strcpy(entry.name_match, "Alex");
   CU_ASSERT_TRUE(!strcmp(copy_entry_name(&entry), "Alex"));
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copy_entry_dict()
@@ -486,14 +385,9 @@ void test_copy_entry_dict()
   struct copy_entry_internal entry;
 
   /* star the test */
-  printf("Test copy_entry_dict: ");
-
   /* perform the tests */
   strcpy(entry.dict_match, "copyright");
   CU_ASSERT_TRUE(!strcmp(copy_entry_dict(&entry), "copyright"));
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copy_entry_type()
@@ -501,14 +395,9 @@ void test_copy_entry_type()
   struct copy_entry_internal entry;
 
   /* star the test */
-  printf("Test copy_entry_type: ");
-
   /* perform the tests */
   entry.type = "statement";
   CU_ASSERT_TRUE(!strcmp(copy_entry_type(&entry), "statement"));
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copy_entry_start()
@@ -516,14 +405,9 @@ void test_copy_entry_start()
   struct copy_entry_internal entry;
 
   /* star the test */
-  printf("Test copy_entry_start: ");
-
   /* perform the tests */
   entry.start_byte = 100;
   CU_ASSERT_EQUAL(copy_entry_start(&entry), 100);
-
-  test_failure();
-  printf("\n");
 }
 
 void test_copy_entry_end()
@@ -531,14 +415,9 @@ void test_copy_entry_end()
   struct copy_entry_internal entry;
 
   /* star the test */
-  printf("Test copy_entry_end: ");
-
   /* perform the tests */
   entry.end_byte = 100;
   CU_ASSERT_EQUAL(copy_entry_end(&entry), 100);
-
-  test_failure();
-  printf("\n");
 }
 
 /* ************************************************************************** */
