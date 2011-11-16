@@ -278,7 +278,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_DOUBLE_EQUAL(actual, expected, granularity) \
   { \
-    if (fabs((double)(actual) - (expected)) <= fabs((double)(granularity))) \
+    if (fabs((double)(actual) - (expected)) >= fabs((double)(granularity))) \
       printf("%s(%d) Expected %f, got %f\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_DOUBLE_EQUAL(actual, expected, granularity)\
   }
@@ -289,7 +289,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_DOUBLE_EQUAL_FATAL(actual, expected, granularity) \
   { \
-    if (fabs((double)(actual) - (expected)) <= fabs((double)(granularity))) \
+    if (fabs((double)(actual) - (expected)) >= fabs((double)(granularity))) \
       printf("FATAL: %s(%d) Expected %f, got %f\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_DOUBLE_EQUAL_FATAL(actual, expected, granularity)\
   }
@@ -300,7 +300,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_DOUBLE_NOT_EQUAL(actual, expected, granularity) \
   { \
-    if (fabs((double)(actual) - (expected)) > fabs((double)(granularity)))\
+    if (fabs((double)(actual) - (expected)) <= fabs((double)(granularity)))\
       printf("%s(%d) Expected %f, got %f\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_DOUBLE_NOT_EQUAL(actual, expected, granularity)\
   }
@@ -311,7 +311,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_DOUBLE_NOT_EQUAL_FATAL(actual, expected, granularity) \
   { \
-    if (fabs((double)(actual) - (expected)) > fabs((double)(granularity))) \
+    if (fabs((double)(actual) - (expected)) <= fabs((double)(granularity))) \
       printf("FATAL: %s(%d) Expected %f, got %f\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_DOUBLE_NOT_EQUAL_FATAL(actual, expected, granularity)\
   }
