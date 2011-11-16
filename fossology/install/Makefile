@@ -1,5 +1,10 @@
 # FOSSology Makefile - install/
 # Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+
+# Create and install:
+#  fo-postinstall
+#  SYSCONFDIR/db.conf
+
 TOP=..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
@@ -61,20 +66,19 @@ uninstall:
 		fi; \
 	fi
 
-	@echo "WARNING: Cowardly refusing to remove the following"
-	@echo "      $(DESTDIR)$(CONFPATH)/agents.d"
+	@echo "Configuration files will not be removed:"
 	@echo "      $(DESTDIR)$(CONFPATH)/fossology.conf"
 	@echo "      $(DESTDIR)$(CONFPATH)/Db.conf"
 	@echo "  Remove by hand if you desire."
 
 
 clean:
-	rm -f fo-postinstall defconf/Db.conf
+	rm -f fo-postinstall defconf/Db.conf defconf/fossology.conf
 
 test: all
-	@echo "NOTICE: no tests available for common"
+	@echo "NOTICE: no tests available for install"
 
 coverage:
-        @echo "NOTICE: no coverage available for common""
+        @echo "NOTICE: no coverage available for install"
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean test coverage
