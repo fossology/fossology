@@ -23,8 +23,13 @@ $locale = "";
 // accepted languages (RFC 2616), therefore we simply rip of the first
 // two characters and hope that this is a known language
 // according to ISO 639-1.  If not: Bad luck.
-$browser_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
-$lang = substr($browser_lang,  0, 2);
+if (array_key_exists('HTTP_ACCEPT_LANGUAGE', $_SERVER))
+{
+  $browser_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+  $lang = substr($browser_lang,  0, 2);
+}
+else
+  $lang = '';
 
 // Set locale depending on language.
 switch ($lang)
