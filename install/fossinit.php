@@ -99,7 +99,10 @@ else
   print "Initialization had errors.\n";
   exit(1);
 }
+
+initLicenseRefTable(false);
 exit(0);
+
 
 /** \brief Print Usage statement.
  *  \return No return, this calls exit.
@@ -200,4 +203,76 @@ function bootstrap()
   require_once("$MODDIR/lib/php/common.php");
   return $SysConf;
 }
+
+/**
+ * \brief Load the license_ref table with licenses.
+ *
+ * \param $Verbose display database load progress information.  If $Verbose is false,
+ * this function only prints errors.
+ *
+ * \return 0 on success, 1 on failure
+ **/
+function initLicenseRefTable($Verbose)
+{
+  global $LIBEXECDIR;
+  global $PGCONN;
+
+  if (!is_dir($LIBEXECDIR)) {
+    print "FATAL: Directory '$LIBEXECDIR' does not exist.\n";
+    return (1);
+  }
+  $dir = opendir($LIBEXECDIR);
+  if (!$dir) {
+    print "FATAL: Unable to access '$LIBEXECDIR'.\n";
+    return (1);
+  }
+  $file = "$LIBEXECDIR/licenseref.sql";
+  
+  if (is_file($file)) {
+    $handle = fopen($file, "r");
+    $pattern = '/^INSERT INTO/';
+    $sql = "";
+    $flag = 0;
+    while(!feof($handle))
+    {
+      $buffer = fgets($handle, 4096);
+      if ( preg_match($pattern, $buffer) == 0)
+      {
+        $sql .= $buffer;
+        continue;
+      } else {
+        if ($flag)
+        {
+          @$result = pg_query($PGCONN, $sql);
+          if ($result == FALSE)
+          {
+            $PGError = pg_last_error($PGCONN);
+            if ($Debug)
+            {
+              print "SQL failed: $PGError\n";
+            }
+          }
+          @pg_free_result($result);
+        }
+        $sql = $buffer;
+        $flag = 1;
+      }
+    }
+    @$result = pg_query($PGCONN, $sql);
+    if ($result == FALSE)
+    {
+      $PGError = pg_last_error($PGCONN);
+      if ($Debug)
+      {
+        print "SQL failed: $PGError\n";
+      }
+    }
+    @pg_free_result($result);
+    fclose($handle);
+  } else {
+    print "FATAL: Unable to access '$file'.\n";
+    return (1);
+  }
+  return (0);
+} // initLicenseRefTable()
 ?>
