@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <copyright.h>
 #include <radixtree.h>
 #include <cvector.h>
+#include <libfocunit.h>
 
 /* library includes */
 #include <stdio.h>
@@ -78,9 +79,9 @@ void test_find_beginning()
   /* run some tests, these numbers index to specific locations in the above */
   /* string, i.e. they are magic numbers, only change them if you know the  */
   /* correct indices in the above string                                    */
-  CU_ASSERT_EQUAL(find_beginning(text, 10), 5);
-  CU_ASSERT_EQUAL(find_beginning(text, 60), 59);
-  CU_ASSERT_EQUAL(find_beginning(text, 70), 65);
+  FO_ASSERT_EQUAL(find_beginning(text, 10), 5);
+  FO_ASSERT_EQUAL(find_beginning(text, 60), 59);
+  FO_ASSERT_EQUAL(find_beginning(text, 70), 65);
 }
 
 void test_find_end()
@@ -91,8 +92,8 @@ void test_find_end()
   /* run some tests, these numbers index to specific locations in the above */
   /* string, i.e. they are magic numbers, only change them if you know the  */
   /* correct indices in the above string                                    */
-  CU_ASSERT_EQUAL(find_end(text, 0, strlen(text)), 64);
-  CU_ASSERT_EQUAL(find_end(text, 70, strlen(text)), 108);
+  FO_ASSERT_EQUAL(find_end(text, 0, strlen(text)), 64);
+  FO_ASSERT_EQUAL(find_end(text, 70, strlen(text)), 108);
 }
 
 void test_strip_empty_entries()
@@ -110,7 +111,7 @@ void test_strip_empty_entries()
   strip_empty_entries(copy);
 
   /* do the asserts */
-  CU_ASSERT_EQUAL(cvector_size(copy->entries), 1);
+  FO_ASSERT_EQUAL(cvector_size(copy->entries), 1);
 
   cvector_clear(copy->entries);
 }
@@ -121,12 +122,12 @@ void test_contains_copyright()
 
   /* start the test */
   /* run the tests */
-  CU_ASSERT_EQUAL(
+  FO_ASSERT_EQUAL(
       contains_copyright(copy->dict, "This does contain a copyright", buffer), 20);
-  CU_ASSERT_TRUE(!strcmp(buffer, "copyright"));
-  CU_ASSERT_EQUAL(
+  FO_ASSERT_TRUE(!strcmp(buffer, "copyright"));
+  FO_ASSERT_EQUAL(
       contains_copyright(copy->dict, "This does not contain one", buffer), 25);
-  CU_ASSERT_EQUAL(strlen(buffer), 0);
+  FO_ASSERT_EQUAL((int)strlen(buffer), 0);
 }
 
 void test_load_dictionary()
@@ -136,12 +137,12 @@ void test_load_dictionary()
   /* start the test */  radix_init(&tree);
 
   /* do the asserts */
-  CU_ASSERT_TRUE(load_dictionary(tree, "../../agent/copyright.dic"));
-  CU_ASSERT_TRUE(radix_contains(tree, "copyright"));
-  CU_ASSERT_TRUE(radix_contains(tree, "(c)"));
-  CU_ASSERT_TRUE(radix_contains(tree, "author"));
-  CU_ASSERT_FALSE(radix_contains(tree, "hello"));
-  CU_ASSERT_FALSE(load_dictionary(tree, "bad filename"));
+  FO_ASSERT_TRUE(load_dictionary(tree, "../../agent/copyright.dic"));
+  FO_ASSERT_TRUE(radix_contains(tree, "copyright"));
+  FO_ASSERT_TRUE(radix_contains(tree, "(c)"));
+  FO_ASSERT_TRUE(radix_contains(tree, "author"));
+  FO_ASSERT_FALSE(radix_contains(tree, "hello"));
+  FO_ASSERT_FALSE(load_dictionary(tree, "bad filename"));
 
   radix_destroy(tree);
 }
@@ -154,12 +155,12 @@ void test_copy_entry_init()
   /* start the test */  copy_entry_init(&entry);
 
   /* check the results */
-  CU_ASSERT_EQUAL(entry.text[0], '\0');
-  CU_ASSERT_EQUAL(entry.name_match[0], '\0');
-  CU_ASSERT_EQUAL(entry.dict_match[0], '\0');
-  CU_ASSERT_EQUAL(entry.start_byte, 0);
-  CU_ASSERT_EQUAL(entry.end_byte, 0);
-  CU_ASSERT_EQUAL(entry.type, NULL);
+  FO_ASSERT_EQUAL(entry.text[0], '\0');
+  FO_ASSERT_EQUAL(entry.name_match[0], '\0');
+  FO_ASSERT_EQUAL(entry.dict_match[0], '\0');
+  FO_ASSERT_EQUAL(entry.start_byte, 0);
+  FO_ASSERT_EQUAL(entry.end_byte, 0);
+  FO_ASSERT_PTR_EQUAL(entry.type, NULL);
 }
 
 void test_copy_entry_copy()
@@ -177,15 +178,15 @@ void test_copy_entry_copy()
   copy_entry cpy = copy_entry_copy(&entry);
 
   /* run the asserts */
-  CU_ASSERT_TRUE(!strcmp(cpy->text, "hello"));
-  CU_ASSERT_TRUE(!strcmp(cpy->name_match, "Alex"));
-  CU_ASSERT_TRUE(!strcmp(cpy->dict_match, "copyright"));
+  FO_ASSERT_TRUE(!strcmp(cpy->text, "hello"));
+  FO_ASSERT_TRUE(!strcmp(cpy->name_match, "Alex"));
+  FO_ASSERT_TRUE(!strcmp(cpy->dict_match, "copyright"));
   strcpy(entry.text, "not hello");
   strcpy(entry.name_match, "Zach");
   strcpy(entry.dict_match, "(c)");
-  CU_ASSERT_TRUE(!strcmp(cpy->text, "hello"));
-  CU_ASSERT_TRUE(!strcmp(cpy->name_match, "Alex"));
-  CU_ASSERT_TRUE(!strcmp(cpy->dict_match, "copyright"));
+  FO_ASSERT_TRUE(!strcmp(cpy->text, "hello"));
+  FO_ASSERT_TRUE(!strcmp(cpy->name_match, "Alex"));
+  FO_ASSERT_TRUE(!strcmp(cpy->dict_match, "copyright"));
 
   free(cpy);
 }
@@ -201,28 +202,28 @@ void test_copyright_callout()
   info.callout_number = 1;
 
   /* call the test methods */
-  CU_ASSERT_EQUAL(copyright_callout(&info), 1);
+  FO_ASSERT_EQUAL(copyright_callout(&info), 1);
   info.start_match = 1;
   info.current_position = 9;
-  CU_ASSERT_EQUAL(copyright_callout(&info), 1);
+  FO_ASSERT_EQUAL(copyright_callout(&info), 1);
   info.start_match = 11;
   info.current_position = 15;
-  CU_ASSERT_EQUAL(copyright_callout(&info), 1);
+  FO_ASSERT_EQUAL(copyright_callout(&info), 1);
   info.start_match = 1;
   info.current_position = 11;
   info.callout_number = 2;
-  CU_ASSERT_EQUAL(copyright_callout(&info), 1);
+  FO_ASSERT_EQUAL(copyright_callout(&info), 1);
   info.callout_number = 3;
-  CU_ASSERT_EQUAL(copyright_callout(&info), 1);
+  FO_ASSERT_EQUAL(copyright_callout(&info), 1);
 
   /* do the asserts */
-  CU_ASSERT_EQUAL(cvector_size(copy->entries), 3);
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->name_match, "email"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->dict_match, "email"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->name_match, "url"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->dict_match, "url"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->text, "This is ju"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->text, "his is jus"));
+  FO_ASSERT_EQUAL(cvector_size(copy->entries), 3);
+  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->name_match, "email"));
+  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->dict_match, "email"));
+  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->name_match, "url"));
+  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->dict_match, "url"));
+  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->text, "This is ju"));
+  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->text, "his is jus"));
 
   cvector_clear(copy->entries);
 }
@@ -235,7 +236,7 @@ void test_copyright_init()
 {
   /* start the test */
   /* start the tests */
-  CU_ASSERT_TRUE(copyright_init(&copy));
+  FO_ASSERT_TRUE(copyright_init(&copy));
 }
 
 void test_copyright_destroy()
@@ -258,9 +259,9 @@ void test_copyright_clear()
   cvector_push_back(copy->entries, &entry);
 
   /* do the asserts */
-  CU_ASSERT_EQUAL(cvector_size(copy->entries), 2);
+  FO_ASSERT_EQUAL(cvector_size(copy->entries), 2);
   copyright_clear(copy);
-  CU_ASSERT_EQUAL(cvector_size(copy->entries), 0);
+  FO_ASSERT_EQUAL(cvector_size(copy->entries), 0);
 }
 
 void test_copyright_analyze()
@@ -274,16 +275,16 @@ void test_copyright_analyze()
   }
 
   copyright_analyze(copy, istr);
-  CU_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 5);
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->text,
+  FO_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 5);
+  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->text,
       "copyright (c) 2010 john not_a_person smith"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 1))->text,
+  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 1))->text,
       "written by john not_a_person smith"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->text,
+  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->text,
       "copyright (c) 2009, 2010"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 3))->text,
+  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 3))->text,
       "<smith.not.john@not.a.url>"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 4))->text,
+  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 4))->text,
       "http://www.not.a.url/index.html"));
 }
 
@@ -292,9 +293,9 @@ void test_copyright_email_url()
   /* start the test */
   /* run the tests */
   copyright_email_url(copy, "test.email@url.com http://www.testurl.com not_a_url");
-  CU_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 2);
-  CU_ASSERT_TRUE(!strcmp(cvector_get(copy->entries, 0), "test.email@url.com"));
-  CU_ASSERT_TRUE(!strcmp(cvector_get(copy->entries, 1), "http://www.testurl.com"));
+  FO_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 2);
+  FO_ASSERT_TRUE(!strcmp(cvector_get(copy->entries, 0), "test.email@url.com"));
+  FO_ASSERT_TRUE(!strcmp(cvector_get(copy->entries, 1), "http://www.testurl.com"));
 
   cvector_clear(copy->entries);
 }
@@ -303,14 +304,14 @@ void test_copyright_begin()
 {
   /* start the test */
   /* make sure that the correct location is returned */
-  CU_ASSERT_EQUAL((cvector_iterator)copyright_begin(copy), cvector_begin(copy->entries));
+  FO_ASSERT_PTR_EQUAL((cvector_iterator)copyright_begin(copy), cvector_begin(copy->entries));
 }
 
 void test_copyright_end()
 {
   /* start the test */
   /* make sure that the correct location is returned */
-  CU_ASSERT_EQUAL((cvector_iterator)copyright_end(copy), cvector_end(copy->entries));
+  FO_ASSERT_PTR_EQUAL((cvector_iterator)copyright_end(copy), cvector_end(copy->entries));
 }
 
 void test_copyright_at()
@@ -324,7 +325,7 @@ void test_copyright_at()
   cvector_push_back(copy->entries, &entry);
 
   /* run the asserts */
-  CU_ASSERT_TRUE(!strcmp(copyright_at(copy, 0)->text, "words"));
+  FO_ASSERT_TRUE(!strcmp(copyright_at(copy, 0)->text, "words"));
 
   cvector_clear(copy->entries);
 }
@@ -340,7 +341,7 @@ void test_copyright_get()
   cvector_push_back(copy->entries, &entry);
 
   /* run the asserts */
-  CU_ASSERT_TRUE(!strcmp(copyright_get(copy, 0)->text, "words"));
+  FO_ASSERT_TRUE(!strcmp(copyright_get(copy, 0)->text, "words"));
 
   cvector_clear(copy->entries);
 }
@@ -355,7 +356,7 @@ void test_copyright_size()
   cvector_push_back(copy->entries, &entry);
 
   /* run the asserts */
-  CU_ASSERT_EQUAL(copyright_size(copy), 1);
+  FO_ASSERT_EQUAL(copyright_size(copy), 1);
 
   cvector_clear(copy->entries);
 }
@@ -367,7 +368,7 @@ void test_copy_entry_text()
   /* star the test */
   /* perform the tests */
   strcpy(entry.text, "This is simple text");
-  CU_ASSERT_TRUE(!strcmp(copy_entry_text(&entry), "This is simple text"));
+  FO_ASSERT_TRUE(!strcmp(copy_entry_text(&entry), "This is simple text"));
 }
 
 void test_copy_entry_name()
@@ -377,7 +378,7 @@ void test_copy_entry_name()
   /* star the test */
   /* perform the tests */
   strcpy(entry.name_match, "Alex");
-  CU_ASSERT_TRUE(!strcmp(copy_entry_name(&entry), "Alex"));
+  FO_ASSERT_TRUE(!strcmp(copy_entry_name(&entry), "Alex"));
 }
 
 void test_copy_entry_dict()
@@ -387,7 +388,7 @@ void test_copy_entry_dict()
   /* star the test */
   /* perform the tests */
   strcpy(entry.dict_match, "copyright");
-  CU_ASSERT_TRUE(!strcmp(copy_entry_dict(&entry), "copyright"));
+  FO_ASSERT_TRUE(!strcmp(copy_entry_dict(&entry), "copyright"));
 }
 
 void test_copy_entry_type()
@@ -397,7 +398,7 @@ void test_copy_entry_type()
   /* star the test */
   /* perform the tests */
   entry.type = "statement";
-  CU_ASSERT_TRUE(!strcmp(copy_entry_type(&entry), "statement"));
+  FO_ASSERT_TRUE(!strcmp(copy_entry_type(&entry), "statement"));
 }
 
 void test_copy_entry_start()
@@ -407,7 +408,7 @@ void test_copy_entry_start()
   /* star the test */
   /* perform the tests */
   entry.start_byte = 100;
-  CU_ASSERT_EQUAL(copy_entry_start(&entry), 100);
+  FO_ASSERT_EQUAL(copy_entry_start(&entry), 100);
 }
 
 void test_copy_entry_end()
@@ -417,7 +418,7 @@ void test_copy_entry_end()
   /* star the test */
   /* perform the tests */
   entry.end_byte = 100;
-  CU_ASSERT_EQUAL(copy_entry_end(&entry), 100);
+  FO_ASSERT_EQUAL(copy_entry_end(&entry), 100);
 }
 
 /* ************************************************************************** */

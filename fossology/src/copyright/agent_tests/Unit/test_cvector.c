@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* includes for files that will be tested */
 #include <cvector.h>
+#include <libfocunit.h>
 
 /* std library includes */
 #include <stdio.h>
@@ -46,15 +47,15 @@ void test_int_function_registry()
   int tester = 1;
 
   /* start the tests */
-  CU_ASSERT_TRUE(!strcmp(fr->name, "integer"));
+  FO_ASSERT_TRUE(!strcmp(fr->name, "integer"));
 
   /* test the copy function */
   int* cpy = (int*)fr->copy(&tester);
-  CU_ASSERT_EQUAL(*cpy, tester);
+  FO_ASSERT_EQUAL(*cpy, tester);
 
   /* test to be sure that it is actually a copy */
   tester = 2;
-  CU_ASSERT_NOT_EQUAL(*cpy, tester);
+  FO_ASSERT_NOT_EQUAL(*cpy, tester);
 
   /* free memory */
   fr->destroy(cpy);
@@ -69,15 +70,15 @@ void test_char_function_registry()
   char tester = 'a';
 
   /* start the tests */
-  CU_ASSERT_TRUE(!strcmp(fr->name, "character"));
+  FO_ASSERT_TRUE(!strcmp(fr->name, "character"));
 
   /* test the copy function */
   char* cpy = (char*)fr->copy(&tester);
-  CU_ASSERT_EQUAL(*cpy, tester);
+  FO_ASSERT_EQUAL(*cpy, tester);
 
   /* test to be sure that it is actually a copy */
   tester = 'b';
-  CU_ASSERT_NOT_EQUAL(*cpy, tester);
+  FO_ASSERT_NOT_EQUAL(*cpy, tester);
 
   /* free memory */
   fr->destroy(cpy);
@@ -92,15 +93,15 @@ void test_double_function_registry()
   double tester = 1.11;
 
   /* start the tests */
-  CU_ASSERT_TRUE(!strcmp(fr->name, "float"));
+  FO_ASSERT_TRUE(!strcmp(fr->name, "float"));
 
   /* test the copy function */
   double* cpy = (double*)fr->copy(&tester);
-  CU_ASSERT_EQUAL(*cpy, tester);
+  FO_ASSERT_DOUBLE_EQUAL(*cpy, tester, 0.0001);
 
   /* test to be sure that it is actually a copy */
   tester = 2.11;
-  CU_ASSERT_NOT_EQUAL(*cpy, tester);
+  FO_ASSERT_DOUBLE_NOT_EQUAL(*cpy, tester, 0.0001);
 
   /* free memory */
   fr->destroy(cpy);
@@ -115,15 +116,15 @@ void test_pointer_function_registry()
   int* tester = (int*)&fr;
 
   /* start the tests */
-  CU_ASSERT_TRUE(!strcmp(fr->name, "pointer"));
+  FO_ASSERT_TRUE(!strcmp(fr->name, "pointer"));
 
   /* test the copy function */
   void** cpy = (void**)fr->copy(&tester);
-  CU_ASSERT_PTR_EQUAL(*cpy, tester);
+  FO_ASSERT_PTR_EQUAL(*cpy, tester);
 
   /* test to be sure that it is actually a copy */
   tester = (int*)&tester;
-  CU_ASSERT_PTR_NOT_EQUAL(*cpy, tester);
+  FO_ASSERT_PTR_NOT_EQUAL(*cpy, tester);
 
   /* free memory */
   fr->destroy(cpy);
@@ -138,15 +139,15 @@ void test_string_function_registry()
   char* tester = "hello";
 
   /* start the tests */
-  CU_ASSERT_TRUE(!strcmp(fr->name, "string"));
+  FO_ASSERT_TRUE(!strcmp(fr->name, "string"));
 
   /* test the copy function */
   char* cpy = (char*)fr->copy(tester);
-  CU_ASSERT_TRUE(!strcmp(cpy, tester));
+  FO_ASSERT_TRUE(!strcmp(cpy, tester));
 
   /* test to be sure that it is actually a copy */
   tester = "world";
-  CU_ASSERT_FALSE(!strcmp(cpy, tester));
+  FO_ASSERT_FALSE(!strcmp(cpy, tester));
 
   /* free memory */
   fr->destroy(cpy);
@@ -167,10 +168,10 @@ void test_cvector_init()
 
   /* start the tests */
   cvector_init(&vec, NULL);
-  CU_ASSERT_EQUAL(vec->size, 0);
-  CU_ASSERT_EQUAL(vec->capacity, 1);
-  CU_ASSERT_EQUAL(vec->memory, NULL);
-  CU_ASSERT_NOT_EQUAL(vec->data, NULL);
+  FO_ASSERT_EQUAL(vec->size, 0);
+  FO_ASSERT_EQUAL(vec->capacity, 1);
+  FO_ASSERT_PTR_NULL(vec->memory);
+  FO_ASSERT_PTR_NOT_NULL(vec->data);
 
   cvector_destroy(vec);
 }
@@ -188,11 +189,11 @@ void test_cvector_push_back()
   cvector_push_back(vec, NULL);
 
   /* test the results */
-  CU_ASSERT_EQUAL(*(int*)vec->data[0], tester);
+  FO_ASSERT_EQUAL(*(int*)vec->data[0], tester);
   tester = 2;
-  CU_ASSERT_NOT_EQUAL(*(int*)vec->data[0], tester);
-  CU_ASSERT_EQUAL(vec->size, 2);
-  CU_ASSERT_EQUAL(vec->data[1], NULL);
+  FO_ASSERT_NOT_EQUAL(*(int*)vec->data[0], tester);
+  FO_ASSERT_EQUAL(vec->size, 2);
+  FO_ASSERT_PTR_EQUAL(vec->data[1], NULL);
 
   cvector_destroy(vec);
 }
@@ -211,9 +212,9 @@ void test_cvector_insert()
   cvector_insert(vec, vec->data, &tester);
 
   /* test the results */
-  CU_ASSERT_EQUAL(*(int*)vec->data[0], tester);
+  FO_ASSERT_EQUAL(*(int*)vec->data[0], tester);
   tester = 2;
-  CU_ASSERT_NOT_EQUAL(*(int*)vec->data[0], tester);
+  FO_ASSERT_NOT_EQUAL(*(int*)vec->data[0], tester);
 
   cvector_destroy(vec);
 }
@@ -233,8 +234,8 @@ void test_cvector_clear()
   cvector_clear(vec);
 
   /* test the results */
-  CU_ASSERT_EQUAL(vec->size, 0);
-  CU_ASSERT_EQUAL(vec->data[0], NULL);
+  FO_ASSERT_EQUAL(vec->size, 0);
+  FO_ASSERT_PTR_EQUAL(vec->data[0], NULL);
 
   cvector_destroy(vec);
 }
@@ -252,8 +253,8 @@ void test_cvector_pop_back()
   cvector_pop_back(vec);
 
   /* test the results */
-  CU_ASSERT_EQUAL(vec->size, 0);
-  CU_ASSERT_EQUAL(vec->data[0], NULL);
+  FO_ASSERT_EQUAL(vec->size, 0);
+  FO_ASSERT_PTR_EQUAL(vec->data[0], NULL);
 
   cvector_destroy(vec);
 }
@@ -271,8 +272,8 @@ void test_cvector_remove()
   cvector_remove(vec, vec->data);
 
   /* test the results */
-  CU_ASSERT_EQUAL(vec->size, 0);
-  CU_ASSERT_EQUAL(vec->data[0], NULL);
+  FO_ASSERT_EQUAL(vec->size, 0);
+  FO_ASSERT_PTR_EQUAL(vec->data[0], NULL);
 
   cvector_destroy(vec);
 }
@@ -289,7 +290,7 @@ void test_cvector_get()
   cvector_push_back(vec, &tester);
 
   /* test the results */;
-  CU_ASSERT_EQUAL(*(int*)cvector_get(vec, 0), tester);
+  FO_ASSERT_EQUAL(*(int*)cvector_get(vec, 0), tester);
 
   cvector_destroy(vec);
 }
@@ -306,7 +307,7 @@ void test_cvector_at()
   cvector_push_back(vec, &tester);
 
   /* test the results */;
-  CU_ASSERT_EQUAL(*(int*)cvector_at(vec, 0), tester);
+  FO_ASSERT_EQUAL(*(int*)cvector_at(vec, 0), tester);
 
   cvector_destroy(vec);
 }
@@ -323,7 +324,7 @@ void test_cvector_begin()
   cvector_push_back(vec, &tester);
 
   /* test the results */;
-  CU_ASSERT_EQUAL(cvector_begin(vec), vec->data);
+  FO_ASSERT_PTR_EQUAL(cvector_begin(vec), vec->data);
 
   cvector_destroy(vec);
 }
@@ -340,7 +341,7 @@ void test_cvector_end()
   cvector_push_back(vec, &tester);
 
   /* test the results */;
-  CU_ASSERT_EQUAL(cvector_end(vec), vec->data+vec->size);
+  FO_ASSERT_PTR_EQUAL(cvector_end(vec), vec->data+vec->size);
 
   cvector_destroy(vec);
 }
@@ -356,11 +357,11 @@ void test_cvector_size()
   cvector_init(&vec, int_function_registry());
 
   /* test the results */;
-  CU_ASSERT_EQUAL(cvector_size(vec), 0);
+  FO_ASSERT_EQUAL(cvector_size(vec), 0);
   cvector_push_back(vec, &tester);
-  CU_ASSERT_EQUAL(cvector_size(vec), 1);
+  FO_ASSERT_EQUAL(cvector_size(vec), 1);
   cvector_push_back(vec, &tester);
-  CU_ASSERT_EQUAL(cvector_size(vec), 2);
+  FO_ASSERT_EQUAL(cvector_size(vec), 2);
 
   cvector_destroy(vec);
 }
@@ -376,13 +377,13 @@ void test_cvector_capacity()
   cvector_init(&vec, int_function_registry());
 
   /* test the results */;
-  CU_ASSERT_EQUAL(cvector_capacity(vec), 1);
+  FO_ASSERT_EQUAL(cvector_capacity(vec), 1);
   cvector_push_back(vec, &tester);
-  CU_ASSERT_EQUAL(cvector_capacity(vec), 1);
+  FO_ASSERT_EQUAL(cvector_capacity(vec), 1);
   cvector_push_back(vec, &tester);
-  CU_ASSERT_EQUAL(cvector_capacity(vec), 2);
+  FO_ASSERT_EQUAL(cvector_capacity(vec), 2);
   cvector_push_back(vec, &tester);
-  CU_ASSERT_EQUAL(cvector_capacity(vec), 4);
+  FO_ASSERT_EQUAL(cvector_capacity(vec), 4);
 
   cvector_destroy(vec);
 }

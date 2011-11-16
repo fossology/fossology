@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* includes for files that will be tested */
 #include <radixtree.h>
 #include <cvector.h>
+#include <libfocunit.h>
 
 /* library includes */
 #include <stdio.h>
@@ -41,7 +42,6 @@ struct tree_internal
 
 void radix_init_local(radix_tree* tree_ptr, char value);
 int radix_match_local(radix_tree tree, char* dst, char* src);
-void radix_append(radix_tree tree, cvector vec, char* string);
 
 /* ************************************************************************** */
 /* **** cunit tests ********************************************************* */
@@ -57,9 +57,9 @@ void test_radix_init_local()
   radix_init_local(&tree, 'a');
 
   /* do the asserts */
-  CU_ASSERT_EQUAL(tree->character, 'a');
-  CU_ASSERT_FALSE(tree->terminal);
-  CU_ASSERT_EQUAL(tree->children[10], NULL);
+  FO_ASSERT_EQUAL(tree->character, 'a');
+  FO_ASSERT_FALSE(tree->terminal);
+  FO_ASSERT_PTR_EQUAL(tree->children[10], NULL);
 
   radix_destroy(tree);
 }
@@ -74,9 +74,9 @@ void test_radix_init()
   radix_init(&tree);
 
   /* do the asserts */
-  CU_ASSERT_EQUAL(tree->character, '\0');
-  CU_ASSERT_FALSE(tree->terminal);
-  CU_ASSERT_EQUAL(tree->children[10], NULL);
+  FO_ASSERT_EQUAL(tree->character, '\0');
+  FO_ASSERT_FALSE(tree->terminal);
+  FO_ASSERT_PTR_EQUAL(tree->children[10], NULL);
 
   radix_destroy(tree);
 }
@@ -92,12 +92,12 @@ void test_radix_insert()
   radix_insert(tree, "hi");
 
   /* do the asserts */
-  CU_ASSERT_NOT_EQUAL(tree->children['h'], NULL);
-  CU_ASSERT_EQUAL(tree->children['h']->character, 'h');
-  CU_ASSERT_NOT_EQUAL(tree->children['h']->children['i'], NULL);
-  CU_ASSERT_EQUAL(tree->children['h']->children['i']->character, 'i');
-  CU_ASSERT_EQUAL(tree->children['h']->children['j'], NULL);
-  CU_ASSERT_EQUAL(tree->children['h']->children['k'], NULL);
+  FO_ASSERT_PTR_NOT_NULL(tree->children['h']);
+  FO_ASSERT_EQUAL(tree->children['h']->character, 'h');
+  FO_ASSERT_PTR_NOT_NULL(tree->children['h']->children['i']);
+  FO_ASSERT_EQUAL(tree->children['h']->children['i']->character, 'i');
+  FO_ASSERT_PTR_NULL(tree->children['h']->children['j']);
+  FO_ASSERT_PTR_NULL(tree->children['h']->children['k']);
 
   radix_destroy(tree);
 }
@@ -114,12 +114,12 @@ void test_radix_insert_all()
   radix_insert_all(tree, Dict, Dict + 3);
 
   /* do the asserts */
-  CU_ASSERT_NOT_EQUAL(tree->children['h'], NULL);
-  CU_ASSERT_NOT_EQUAL(tree->children['w'], NULL);
-  CU_ASSERT_NOT_EQUAL(tree->children['!'], NULL);
-  CU_ASSERT_EQUAL(tree->children['h']->character, 'h');
-  CU_ASSERT_EQUAL(tree->children['w']->character, 'w');
-  CU_ASSERT_EQUAL(tree->children['!']->character, '!');
+  FO_ASSERT_PTR_NOT_NULL(tree->children['h']);
+  FO_ASSERT_PTR_NOT_NULL(tree->children['w']);
+  FO_ASSERT_PTR_NOT_NULL(tree->children['!']);
+  FO_ASSERT_EQUAL(tree->children['h']->character, 'h');
+  FO_ASSERT_EQUAL(tree->children['w']->character, 'w');
+  FO_ASSERT_EQUAL(tree->children['!']->character, '!');
 
   radix_destroy(tree);
 }
@@ -136,10 +136,10 @@ void test_radix_contains()
   radix_insert(tree, "world");
 
   /* do the asserts */
-  CU_ASSERT_TRUE(radix_contains(tree, "hello"));
-  CU_ASSERT_FALSE(radix_contains(tree, "hello "));
-  CU_ASSERT_TRUE(radix_contains(tree, "world"));
-  CU_ASSERT_FALSE(radix_contains(tree, "worl"));
+  FO_ASSERT_TRUE(radix_contains(tree, "hello"));
+  FO_ASSERT_FALSE(radix_contains(tree, "hello "));
+  FO_ASSERT_TRUE(radix_contains(tree, "world"));
+  FO_ASSERT_FALSE(radix_contains(tree, "worl"));
 
   radix_destroy(tree);
 }
@@ -157,11 +157,11 @@ void test_radix_match_local()
   memset(buf, '\0', sizeof(buf));
 
   /* do the asserts */
-  CU_ASSERT_EQUAL(radix_match_local(tree, buf, "hello "), 6);
-  CU_ASSERT_EQUAL(radix_match_local(tree, buf, "hello"), 5);
-  CU_ASSERT_EQUAL(radix_match_local(tree, buf, "world "), 0);
-  CU_ASSERT_EQUAL(radix_match_local(tree, buf, "help"), 3);
-  CU_ASSERT_TRUE(!strcmp(buf, "hello hellohel"));
+  FO_ASSERT_EQUAL(radix_match_local(tree, buf, "hello "), 6);
+  FO_ASSERT_EQUAL(radix_match_local(tree, buf, "hello"), 5);
+  FO_ASSERT_EQUAL(radix_match_local(tree, buf, "world "), 0);
+  FO_ASSERT_EQUAL(radix_match_local(tree, buf, "help"), 3);
+  FO_ASSERT_TRUE(!strcmp(buf, "hello hellohel"));
 
   radix_destroy(tree);
 }
@@ -179,14 +179,14 @@ void test_radix_match()
   memset(buf, '\0', sizeof(buf));
 
   /* do the asserts */
-  CU_ASSERT_EQUAL(radix_match(tree, buf, "hello "), 6);
-  CU_ASSERT_TRUE(!strcmp(buf, "hello "));
-  CU_ASSERT_EQUAL(radix_match(tree, buf, "hello"), 5);
-  CU_ASSERT_TRUE(!strcmp(buf, "hello"));
-  CU_ASSERT_EQUAL(radix_match(tree, buf, "world "), 0);
-  CU_ASSERT_TRUE(!strcmp(buf, ""));
-  CU_ASSERT_EQUAL(radix_match(tree, buf, "help"), 3);
-  CU_ASSERT_TRUE(!strcmp(buf, "hel"));
+  FO_ASSERT_EQUAL(radix_match(tree, buf, "hello "), 6);
+  FO_ASSERT_TRUE(!strcmp(buf, "hello "));
+  FO_ASSERT_EQUAL(radix_match(tree, buf, "hello"), 5);
+  FO_ASSERT_TRUE(!strcmp(buf, "hello"));
+  FO_ASSERT_EQUAL(radix_match(tree, buf, "world "), 0);
+  FO_ASSERT_TRUE(!strcmp(buf, ""));
+  FO_ASSERT_EQUAL(radix_match(tree, buf, "help"), 3);
+  FO_ASSERT_TRUE(!strcmp(buf, "hel"));
 
   radix_destroy(tree);
 }
