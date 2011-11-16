@@ -20,11 +20,14 @@
  *        you can create/drop a DB/sysconfig/repo
  */
 
+#define TEST
+
 #include "libfodbreposysconf.h"
 
 static char *Sysconf = NULL;
 static char DBName[ARRAY_LENGTH];
 static char DBConf[ARRAY_LENGTH];
+static char RepoDir[ARRAY_LENGTH];
 
 /**
  * \brief get command output
@@ -158,6 +161,22 @@ char *get_dbconf()
   memset(DBConf, '\0', sizeof(DBConf));
   sprintf(DBConf, "%s/Db.conf", Sysconf);
   return DBConf;
+}
+
+/**
+ * \brief get repo path just created by  create_db_repo_sysconf()
+ *
+ * \return repo path
+ */
+char *get_repodir()
+{
+  memset(RepoDir, '\0', sizeof(RepoDir));
+  strcpy(RepoDir, Sysconf);
+  char *test_name_tmp = strstr(RepoDir, "testDbConf");
+  *test_name_tmp = 0;
+  sprintf(RepoDir, "%stestDbRepo%s", RepoDir, get_test_name()); 
+  printf("RepoDir is:%s\n", RepoDir);
+  return RepoDir;
 }
 
 #if 0

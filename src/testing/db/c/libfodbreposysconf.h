@@ -35,3 +35,5 @@ char *get_test_name();
 char *get_dbconf();
 
 char *get_db_name();
+
+char *get_repodir();
