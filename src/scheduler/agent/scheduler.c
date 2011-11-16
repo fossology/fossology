@@ -223,89 +223,6 @@ void update_scheduler()
 /* ************************************************************************** */
 
 /**
- * TODO
- *
- * @return
- */
-int unlock_scheduler()
-{
-  return shm_unlink(PROCESS_NAME);
-}
-
-/**
- * TODO
- *
- * @return
- */
-pid_t get_locked_pid()
-{
-  pid_t pid = 0;
-  ssize_t bytes;
-  int handle, rc;
-  char buf[10];
-
-  /* Initialize memory */
-  handle = rc = 0;
-  memset(buf, '\0', sizeof(buf));
-
-  /* open the shared memory */
-  if((handle = shm_open(PROCESS_NAME, O_RDONLY, 0444)) < 0)
-  {
-    if(errno != ENOENT)
-      ERROR("failed to acquire shared memory", PROCESS_NAME);
-    return 0;
-  }
-
-  /* find out who owns the shared memory */
-  bytes = read(handle, buf, sizeof(buf));
-  if((pid = atoi(buf)) < 2)
-  {
-    if(shm_unlink(PROCESS_NAME) == -1)
-      ERROR("failed to remove invalid lock");
-    return 0;
-  }
-
-  /* check to see if the pid is a valid process */
-  if(kill(pid, 0) == 0)
-    return pid;
-
-  unlock_scheduler();
-  return 0;
-}
-
-/**
- * TODO
- *
- * @return
- */
-pid_t lock_scheduler()
-{
-  pid_t pid;
-  int handle;
-  char buf[10];
-
-  /* return if lock already exists */
-  if((pid = get_locked_pid()))
-    return pid;
-
-  /* no lock, create a new lock file */
-  if((handle = shm_open(PROCESS_NAME, O_RDWR|O_CREAT|O_EXCL, 0744)) == -1)
-  {
-    ERROR("failed to open shared memory");
-    return -1;event_signal(database_update_event, NULL);
-  }
-
-  sprintf(buf, "%-9.9d", getpid());
-  if(write(handle, buf, sizeof(buf)) < 1)
-  {
-    ERROR("failed to write pid to lock file");
-    return -1;
-  }
-
-  return 0;
-}
-
-/**
  * Correctly set the project user and group. The fossology scheduler must run as
  * the user specified by PROJECT_USER and PROJECT_GROUP since the agents must be
  * able to connect to the database. This ensures that that happens correctly.
@@ -610,7 +527,6 @@ int main(int argc, char** argv)
   char* log = NULL;           // used when a different log from the default is used
   GOptionContext* options;    // option context used for command line parsing
   GError* error = NULL;       // error object used during parsing
-  int rc;                     // used for return values of
 
   sysconfigdir = DEFAULT_SETUP;
   logdir = LOG_DIR;
@@ -656,13 +572,10 @@ int main(int argc, char** argv)
   set_usr_grp();
 
   /* perform pre-initialization checks */
-  if(s_daemon) { rc = daemon(0, 0); }
+  if(s_daemon && daemon(0, 0) == -1) { return -1; }
   if(db_init) { database_init(); return 0; }
   if(ki_sched) { kill_scheduler(); return 0; }
   if(log != NULL) {set_log(log); }
-
-  if(lock_scheduler() <= 0 && !get_locked_pid())
-    FATAL("scheduler lock error");
 
   /* ********************************** */
   /* *** do all the initializations *** */
