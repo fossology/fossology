@@ -113,7 +113,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_NOT_EQUAL(actual, expected) \
   { \
-    if (actual != expected) printf("%s(%d) Expected != %d got %d\n",\
+    if (actual == expected) printf("%s(%d) Expected != %d got %d\n",\
                  __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_NOT_EQUAL(actual, expected)\
   }
@@ -123,7 +123,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_NOT_EQUAL_FATAL(actual, expected) \
   { \
-    if (actual != expected) printf("FATAL: %s(%d) Expected != %d, got %d\n",\
+    if (actual == expected) printf("FATAL: %s(%d) Expected != %d, got %d\n",\
                  __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_NOT_EQUAL_FATAL(actual, expected)\
   }
@@ -153,7 +153,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_PTR_NOT_EQUAL(actual, expected) \
   { \
-    if (actual != expected) printf("%s(%d) Expected != %p got %p\n",\
+    if (actual == expected) printf("%s(%d) Expected != %p got %p\n",\
                  __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_PTR_NOT_EQUAL(actual, expected)\
   }
@@ -163,7 +163,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_PTR_NOT_EQUAL_FATAL(actual, expected) \
   { \
-    if (actual != expected) printf("FATAL: %s(%d) Expected != %p, got %p\n",\
+    if (actual == expected) printf("FATAL: %s(%d) Expected != %p, got %p\n",\
                  __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_PTR_NOT_EQUAL_FATAL(actual, expected)\
   }
@@ -193,7 +193,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_STRING_EQUAL(actual, expected) \
   { \
-    if (!(strcmp((const char*)(actual), (const char*)(expected)))) \
+    if (0 != (strcmp((const char*)(actual), (const char*)(expected)))) \
       printf("%s(%d) Expected (%s), got (%s)\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_STRING_EQUAL(actual, expected)\
   }
@@ -203,7 +203,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_STRING_EQUAL_FATAL(actual, expected) \
   { \
-    if (!(strcmp((const char*)(actual), (const char*)(expected)))) \
+    if (0 != (strcmp((const char*)(actual), (const char*)(expected)))) \
        printf("FATAL: %s(%d) Expected (%s), got (%s)\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_STRING_EQUAL_FATAL(actual, expected)\
   }
@@ -213,7 +213,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_STRING_NOT_EQUAL(actual, expected) \
   { \
-    if (strcmp((const char*)(actual), (const char*)(expected))) \
+    if (0 == strcmp((const char*)(actual), (const char*)(expected))) \
        printf("%s(%d) Expected != (%s), got (%s)\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_STRING_NOT_EQUAL(actual, expected)\
   }
@@ -223,7 +223,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_STRING_NOT_EQUAL_FATAL(actual, expected) \
   { \
-    if (strcmp((const char*)(actual), (const char*)(expected))) \
+    if (0 == strcmp((const char*)(actual), (const char*)(expected))) \
        printf("FATAL: %s(%d) Expected != (%s), got (%s)\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_STRING_NOT_EQUAL_FATAL(actual, expected)\
   }
@@ -234,7 +234,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_NSTRING_EQUAL(actual, expected, count) \
   { \
-    if (!strcmp((const char*)(actual), (const char*)(expected), (size_t)(count))) \
+    if (0 != strcmp((const char*)(actual), (const char*)(expected), (size_t)(count))) \
       printf("%s(%d) Expected (%s), got (%s)\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_NSTRING_EQUAL(actual, expected, count)\
   }
@@ -245,7 +245,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_NSTRING_EQUAL_FATAL(actual, expected, count) \
   { \
-    if (!strcmp((const char*)(actual), (const char*)(expected), (size_t)(count))) \
+    if (0 != strcmp((const char*)(actual), (const char*)(expected), (size_t)(count))) \
       printf("FATAL: %s(%d) Expected (%s), got (%s)\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_NSTRING_EQUAL_FATAL(actual, expected, count)\
   }
@@ -256,7 +256,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_NSTRING_NOT_EQUAL(actual, expected, count) \
   { \
-    if (strcmp((const char*)(actual), (const char*)(expected), (size_t)(count))) \
+    if (0 == strcmp((const char*)(actual), (const char*)(expected), (size_t)(count))) \
       printf("%s(%d) Expected (%s), got (%s)\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_NSTRING_NOT_EQUAL(actual, expected, count)\
   }
@@ -267,7 +267,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_NSTRING_NOT_EQUAL_FATAL(actual, expected, count) \
   { \
-    if (strcmp((const char*)(actual), (const char*)(expected), (size_t)(count))) \
+    if (0 == strcmp((const char*)(actual), (const char*)(expected), (size_t)(count))) \
       printf("FATAL: %s(%d) Expected (%s), got (%s)\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_NSTRING_NOT_EQUAL_FATAL(actual, expected, count)\
   }
