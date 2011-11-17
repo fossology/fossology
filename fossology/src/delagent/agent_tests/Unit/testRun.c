@@ -27,6 +27,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * \brief main function for in this testing module
  */
 
+char *DBConfFile = NULL;
+
 extern CU_SuiteInfo suites[];
 
 /**
@@ -36,14 +38,23 @@ int DelagentDBInit()
 {
   char CMD[256];
   int rc;
-   
+ 
+  rc = create_db_repo_sysconf(0);
+  if (rc != 0)
+  {
+    printf("Database initialize ERROR!\n");
+    DelagentClean();
+    return -1;
+  }
+  DBConfFile = get_dbconf();
+
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "sh testInitDB.sh");
+  sprintf(CMD, "sh testInitDB.sh %s", get_db_name());
   rc = system(CMD); 
   if (rc != 0)
   {
     printf("Database initialize ERROR!\n");
-    DelagentDBClean();
+    DelagentClean();
     return -1; 
   }
 
@@ -52,20 +63,9 @@ int DelagentDBInit()
 /**
  * \brief clean db
  */
-int DelagentDBClean()
+int DelagentClean()
 {
-  char CMD[256];
-  int rc;
-
-  memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "sh testCleanDB.sh");
-  rc = system(CMD);
-  if (rc != 0)
-  {
-    printf("Database clean ERROR!\n");
-    return -1;
-  }
-
+  drop_db_repo_sysconf(get_db_name());
   return 0;
 }
 
@@ -80,52 +80,17 @@ int DelagentInit()
   if (DelagentDBInit()!=0) return -1;
 
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "sh testInitRepo.sh");
+  sprintf(CMD, "sh testInitRepo.sh %s", get_repodir());
+printf("DDDDDDDDDDDd%s\n", CMD);
   rc = system(CMD);
   if (rc != 0)
   {
     printf("Repository Init ERROR!\n");
-    DelagentDBClean();
+    DelagentClean();
     return -1;
   }
 
   return 0;
-}
-
-/**
- * \brief clean db and repo
- */
-int DelagentClean()
-{
-  char CMD[256];
-  int rc;
-
-  if (DelagentDBClean()!=0) return -1;
-
-  memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "sh testCleanRepo.sh");
-  rc = system(CMD);
-  if (rc != 0)
-  {
-    printf("Repository Clean ERROR!\n");
-    return -1;
-  }
-
-  return 0;
-}
-
-
-void AddTests(void)
-{
-  assert(NULL != CU_get_registry());
-  assert(!CU_is_test_running());
-
-
-  if (CUE_SUCCESS != CU_register_suites(suites))
-  {
-    fprintf(stderr, "Register suites failed - %s ", CU_get_error_msg());
-    exit(EXIT_FAILURE);
-  }
 }
 
 /**
@@ -133,30 +98,6 @@ void AddTests(void)
  */
 int main( int argc, char *argv[] )
 {
-  printf("Test Start\n");
-  if (CU_initialize_registry())
-  {
-
-    fprintf(stderr, "\nInitialization of Test Registry failed.\n");
-    exit(EXIT_FAILURE);
-  } else
-  {
-    AddTests();
-    /** delagent */
-    CU_set_output_filename("delagent");
-    CU_list_tests_to_file();
-    CU_automated_run_tests();
-    //CU_cleanup_registry();
-  }
-  printf("Test End\n");
-  printf("Results:\n");
-  printf("  Number of suites run: %d\n", CU_get_number_of_suites_run());
-  printf("  Number of tests run: %d\n", CU_get_number_of_tests_run());
-  printf("  Number of tests failed: %d\n", CU_get_number_of_tests_failed());
-  printf("  Number of asserts: %d\n", CU_get_number_of_asserts());
-  printf("  Number of successes: %d\n", CU_get_number_of_successes());
-  printf("  Number of failures: %d\n", CU_get_number_of_failures());
-  CU_cleanup_registry();
-  return 0;
+  return focunit_main(argc, argv, "delagent_Tests", suites);
 }
 

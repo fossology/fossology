@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "delagent.h"
 #include <string.h>
 
+extern char *DBConfFile;
+
 /**
  * \file testReadParameter.c
  * \brief testing for the function ReadParameter
@@ -34,7 +36,7 @@ void testReadParameter()
 {
   char *Parm = "LIST UPLOAD 85";
   int result;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
