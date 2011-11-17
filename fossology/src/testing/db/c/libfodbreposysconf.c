@@ -20,8 +20,6 @@
  *        you can create/drop a DB/sysconfig/repo
  */
 
-#define TEST
-
 #include "libfodbreposysconf.h"
 
 static char *Sysconf = NULL;
@@ -74,8 +72,8 @@ int create_db_repo_sysconf(int type)
     return 1;
   }
 #endif
-  char CMD[] = "../../../testing/db/createTestDB.php";
-  if (1 ==type)
+  char CMD[ARRAY_LENGTH] = "../../../testing/db/createTestDB.php";
+  if (1 == type)
   {
     command_output(CMD);
   }
