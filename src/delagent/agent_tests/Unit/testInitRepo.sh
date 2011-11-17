@@ -16,6 +16,8 @@
 #51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #*********************************************************************/
 
+REPODIR=$1
+
 FOSSYGID=`id -Gn`
 FOSSYUID=`echo $FOSSYGID |grep -c 'fossy'`
 if [ $FOSSYUID -ne 1 ];then
@@ -24,8 +26,13 @@ if [ $FOSSYUID -ne 1 ];then
 fi
 
 #echo $UID
+#echo $REPODIR
 
-tar -xf ../testdata/testrepo_gold.tar -C /srv/fossology/repository/localhost/
-tar -xf ../testdata/testrepo_files.tar -C /srv/fossology/repository/localhost/
+if [ ! -d $REPODIR/localhost/ ]; then
+  mkdir -p $REPODIR/localhost/
+fi
+
+tar -xf ../testdata/testrepo_gold.tar -C $REPODIR/localhost/
+tar -xf ../testdata/testrepo_files.tar -C $REPODIR/localhost/
 
 echo "Create Test Repository success!"

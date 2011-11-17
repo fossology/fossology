@@ -14,12 +14,17 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+#ifndef RUN_TESTS_H
+#define RUN_TESTS_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "CUnit/CUnit.h"
 #include "CUnit/Automated.h"
+
+#include "libfocunit.h"
+#include "libfodbreposysconf.h"
 
 /* for util.c, start */
 extern CU_TestInfo testcases_ListFolders[];
@@ -39,9 +44,10 @@ int DelagentClean();
  * \brief all test suites for delagent
  */
 CU_SuiteInfo suites[] = {
-    {"Testing the function ListFolders:", DelagentDBInit, DelagentDBClean, testcases_ListFolders},
+    {"Testing the function ListFolders:", DelagentDBInit, DelagentClean, testcases_ListFolders},
     {"Testing the function DeleteFolders:", DelagentInit, DelagentClean, testcases_DeleteFolders},
-    {"Testing the function ReadParameter:", DelagentDBInit, DelagentDBClean, testcases_ReadParameter},
+    {"Testing the function ReadParameter:", DelagentDBInit, DelagentClean, testcases_ReadParameter},
     CU_SUITE_INFO_NULL
 };
 
+#endif

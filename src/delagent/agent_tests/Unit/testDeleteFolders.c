@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "delagent.h"
 #include <string.h>
 
+extern char *DBConfFile;
+
 /**
  * \file testDeleteFolders.c
  * \brief testing for the function DeleteFolders and DeleteUploads
@@ -31,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 void testDeleteFolders()
 {
   long FolderId = 5;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
@@ -48,7 +50,7 @@ void testDeleteFolders()
 void testDeleteUploads()
 {
   long UploadId = 85;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);

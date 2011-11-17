@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "delagent.h"
 #include <string.h>
 
+extern char *DBConfFile;
 /**
  * \file testListFolders.c
  * \brief testing for the function ListFolders and ListUploads
@@ -30,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 void testListFolders()
 {
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
@@ -44,7 +45,7 @@ void testListFolders()
  */
 void testListUploads()
 {
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);

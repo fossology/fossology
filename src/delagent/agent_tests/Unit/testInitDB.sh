@@ -16,7 +16,7 @@
 #51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #*********************************************************************/
 
-VARS=../../../../Makefile.conf
+DBName=$1
 
 FOSSYGID=`id -Gn`
 FOSSYUID=`echo $FOSSYGID |grep -c 'fossy'`
@@ -26,29 +26,12 @@ if [ $FOSSYUID -ne 1 ];then
 fi
 
 #echo $UID
+#echo $DBName
 
 touch $HOME/connectdb.exp
 echo '#!/usr/bin/expect' > $HOME/connectdb.exp
 echo 'set timeout 30' >> $HOME/connectdb.exp
-echo 'spawn createdb -U fossy fossologytest' >> $HOME/connectdb.exp
-echo 'expect "Password:"' >> $HOME/connectdb.exp
-echo 'send "fossy\r"' >> $HOME/connectdb.exp
-echo 'interact' >> $HOME/connectdb.exp
-
-expect $HOME/connectdb.exp
-
-if [ $? -ne 0 ];
-then
-  echo "Create Test database Error!"
-  exit 1
-fi
-rm -f $HOME/connectdb.exp
-
-
-touch $HOME/connectdb.exp
-echo '#!/usr/bin/expect' > $HOME/connectdb.exp
-echo 'set timeout 30' >> $HOME/connectdb.exp
-echo 'spawn pg_restore -U fossy -d fossologytest ../testdata/testdb_all.tar' >> $HOME/connectdb.exp
+echo 'spawn pg_restore -U fossy -d '$DBName' ../testdata/testdb_all.tar' >> $HOME/connectdb.exp
 echo 'expect "Password:"' >> $HOME/connectdb.exp
 echo 'send "fossy\r"' >> $HOME/connectdb.exp
 echo 'interact' >> $HOME/connectdb.exp
@@ -56,15 +39,9 @@ echo 'interact' >> $HOME/connectdb.exp
 expect $HOME/connectdb.exp
 if [ $? -ne 0 ];
 then
-  echo "Create Test database Error!"
+  echo "Create Test database data Error!"
   exit 1
 fi
-rm -f $HOME/connectdb.exp
+#rm -f $HOME/connectdb.exp
 
-PREFIX=`cat $VARS|grep -i '^PREFIX'|awk -F = '{print $2}'`
-cp $PREFIX/etc/fossology/Db.conf ~/
-sed -i 's/fossology;/fossologytest;/' ~/Db.conf
-cp ~/Db.conf $PREFIX/etc/fossology/Db.conf
-rm -f ~/Db.conf
-
-echo "Create Test database success!"
+echo "Create Test database data success!"
