@@ -59,14 +59,38 @@ int main(int argc, char *argv[])
   int rv;
   PGresult *result;
   char sqlbuf[1024]; 
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  char DBConfFile[1024];
+  char *DBConf = NULL;
   char *ErrorBuf;
   int CmdlineFlag = 0; /** run from command line flag, 1 yes, 0 not */
                            
   /** initialize the scheduler connection */
   fo_scheduler_connect(&argc, argv);
 
+  /* Process command-line */
+  while((c = getopt(argc,argv,"iCc:")) != -1)
+  {
+    switch(c)
+    {
+      case 'i':
+        PQfinish(pgConn);
+        return(0);
+      case 'c':
+        DBConf = optarg;
+        break; /* handled by fo_scheduler_connect() */
+      case 'C':
+        CmdlineFlag = 1;
+        break;
+      default:
+        Usage(argv[0]);
+        PQfinish(pgConn);
+        exit(-1);
+    }
+  }
+
   /* Init */
+  memset(DBConfFile, 0, sizeof(DBConfFile));
+  sprintf(DBConfFile, "%s/Db.conf", DBConf);
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
@@ -93,25 +117,6 @@ int main(int argc, char *argv[])
     LOG_FATAL("Failed to load magic file: UnMagic\n");
     PQfinish(pgConn);
     exit(-1);
-  }
-
-  /* Process command-line */
-  while((c = getopt(argc,argv,"iCc:")) != -1)
-  {
-    switch(c)
-    {
-      case 'i':
-        PQfinish(pgConn);
-        return(0);
-      case 'c': break; /* handled by fo_scheduler_connect() */
-      case 'C':
-        CmdlineFlag = 1;
-        break;
-      default:
-        Usage(argv[0]);
-        PQfinish(pgConn);
-        exit(-1);
-    }
   }
 
   /* Run from the command-line (for testing) */

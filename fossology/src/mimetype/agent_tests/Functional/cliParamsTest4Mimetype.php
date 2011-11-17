@@ -21,7 +21,6 @@
  * \brief test the mimetype agent thu command line.
  * @group mimetype agent 
  */
-require_once '/usr/share/php/PHPUnit/Framework.php';
 
 /**
  * \class cliParamsTest4Mimetype - test mimetype agent from cli
@@ -51,7 +50,6 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     $DB_NAME = "fosstest".$test_name;
     $PG_CONN = pg_connect("host=localhost port=5432 dbname=$DB_NAME user=fossy password=fossy")
                or die("Could not connect");
-
     $EXE_PATH = '../../agent/mimetype';
     $usage= "";
     if(file_exists($EXE_PATH))
@@ -77,10 +75,9 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     global $EXE_PATH;
     global $PG_CONN;
 
-    $mimeType1 = "application/x-executable";
-    $mimeType2 = "text/plain";
+    $mimeType1 = "application/octet-stream";
     /** delete test data pre testing */
-    $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType1', '$mimeType2');";
+    $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType1');";
     $result = pg_query($PG_CONN, $sql);
     pg_free_result($result);
 
@@ -95,9 +92,9 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     $command = "$EXE_PATH $filePath";
     $out = "";
     exec($command, $out, $rtn);
-    $this->assertStringStartsWith($mimeType2, $out[0]);
+    $this->assertStringStartsWith($mimeType1, $out[0]);
     /** delete test data post testing */
-    $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType1', '$mimeType2');";
+    $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType1');";
     $result = pg_query($PG_CONN, $sql);
     pg_free_result($result);
   }
@@ -110,7 +107,7 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     global $EXE_PATH;
     global $PG_CONN;
 
-    $mimeType = "text/x-pascal";
+    $mimeType = "text/x-csrc";
     /** delete test data pre testing */
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
     $result = pg_query($PG_CONN, $sql);
@@ -123,7 +120,7 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     $filePath = "../../agent/mimetype.c";
     $command = "$EXE_PATH $filePath";
     exec($command, $out, $rtn);
-    $expected_string = "text/x-pascal : mimetype_pk=10000";
+    $expected_string = "text/x-csrc : mimetype_pk=10000";
     $this->assertStringStartsWith($expected_string, $out[0]);
     
     /** delete test data post testing */
