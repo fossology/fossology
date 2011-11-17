@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "utility.h"
 #include <string.h>
 #include <ctype.h>
+#include "libfodbreposysconf.h"
 
 /**
  * \file testDBLoadGold.c
@@ -28,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 
 static PGresult *result = NULL;
+static fo_conf* config;
 
 /**
  * \brief initialize
@@ -40,6 +42,11 @@ int  DBLoadGoldInit()
   char TempFile[MAXCMD];
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  GError* error = NULL;
+
+  /** create db */
+  create_db_repo_sysconf(1);
+  DBConfFile = get_dbconf();
 
   strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");
   strcpy(URL, "http://fossology.org/debian/1.0.0/");
@@ -90,6 +97,7 @@ int  DBLoadGoldInit()
   }
   GlobalUploadKey = atoi(PQgetvalue(result,0,0));
   PQclear(result);
+  config = fo_config_load(DBConfFile, &error);
 
   return 0;
 }
@@ -145,7 +153,11 @@ int DBLoadGoldClean()
   PQclear(result);
 
   if (pgConn) PQfinish(pgConn);
+  if (config)  fo_config_free(config);
+
+  drop_db_repo_sysconf(get_db_name());
   GlobalUploadKey = -1;
+
   return 0;
 }
 
@@ -197,13 +209,13 @@ void testDBLoadGold()
   char string0[3] = {0};
   char string1[3] = {0};
   char string2[3] = {0};
-  char string4[] = "/srv/fossology/repository/localhost";
+  char *string4 = get_repodir();
   strncpy(string0, pfile_sha1, 2);
   strncpy(string1, pfile_sha1 + 2, 2);
   strncpy(string2, pfile_sha1 + 4, 2);
   //printf("string0, string1, string2 are:%s, %s, %s\n", string0, string1, string2);
-  sprintf(file_name_file, "%s/files/%s/%s/%s/%s.%s.10240", string4, string0, string1, string2, pfile_sha1, pfile_md5);
-  sprintf(file_name_gold, "%s/gold/%s/%s/%s/%s.%s.10240", string4, string0, string1, string2, pfile_sha1, pfile_md5);
+  sprintf(file_name_file, "%s/localhost/files/%s/%s/%s/%s.%s.10240", string4, string0, string1, string2, pfile_sha1, pfile_md5);
+  sprintf(file_name_gold, "%s/localhost/gold/%s/%s/%s/%s.%s.10240", string4, string0, string1, string2, pfile_sha1, pfile_md5);
   int existed = file_dir_existed(file_name_file);
   CU_ASSERT_EQUAL(existed, 1); /* the file into repo? */
   if (existed)
