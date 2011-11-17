@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <CUnit/CUnit.h>
 #include "wget_agent.h"
 #include "utility.h"
+#include "libfodbreposysconf.h"
 
 /**
  * \file testGetURL.c
@@ -35,12 +36,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 static char TempFile[MAX_LENGTH];
 static char URL[MAX_LENGTH];
 static char TempFileDir[MAX_LENGTH];
+static fo_conf* config;
 
 /**
  * \brief initialize
  */
 int  GetURLInit()
 {
+  GError* error = NULL;
+  create_db_repo_sysconf(0);
+  config = fo_config_load(get_dbconf(), &error);
+  
   return 0;
 }
 /**
@@ -52,6 +58,9 @@ int GetURLClean()
   {
     RemoveDir(TempFileDir);
   }
+  if (config)  fo_config_free(config);
+  drop_db_repo_sysconf(get_db_name());
+
   return 0;
 }
 
