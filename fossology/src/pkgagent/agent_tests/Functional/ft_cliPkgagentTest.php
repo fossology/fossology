@@ -29,7 +29,7 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
 
   public $agentDir;
   public $pkgagent;
-  protected $testfile = '../testdata/fossology-1.2.0-1.el5.i386.rpm';
+  protected $testfile = '../agent_tests/testdata/fossology-1.2.0-1.el5.i386.rpm';
 
   function setUp() {
 /*
@@ -94,7 +94,7 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
 
     $expected = array(
         'OK');
-    $last = exec("$this->pkgagent $this->testfile 2>&1", $got, $rtn=NULL);
+    $last = exec("$this->pkgagent -C $this->testfile 2>&1", $got, $rtn=NULL);
     //print "testOneRpm: last is:$last\ngot is:\n";
     //print_r($got) . "\n";
     $this->assertEquals($expected[0],$got[0]);
@@ -105,7 +105,7 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
   {
     // pkgagent -v rpmfile
 
-    $last = exec("$this->pkgagent -v $this->testfile 2>&1", $got, $rtn=NULL);
+    $last = exec("$this->pkgagent -C -v $this->testfile 2>&1", $got, $rtn=NULL);
     //print "testOneRpm: last is:$last\ngot is:\n";
     //print_r($got) . "\n";
     // check the output
