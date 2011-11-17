@@ -798,7 +798,7 @@ function GetSchema()
   for ($i = 0;!empty($Results[$i]['constraint_name']);$i++)
   {
     $Key = "";
-    $Keys = split(" ", $Results[$i]['constraint_key']);
+    $Keys = exolode(" ", $Results[$i]['constraint_key']);
     foreach ($Keys as $K)
     {
       if (empty($K))
@@ -813,7 +813,7 @@ function GetSchema()
     }
     $Results[$i]['constraint_key'] = $Key;
     $Key = "";
-    $Keys = split(" ", $Results[$i]['fk_constraint_key']);
+    $Keys = explode(" ", $Results[$i]['fk_constraint_key']);
     foreach ($Keys as $K)
     {
       if (empty($K))
