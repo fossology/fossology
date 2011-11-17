@@ -75,7 +75,15 @@ int create_db_repo_sysconf(int type)
   }
 #endif
   char CMD[] = "../../../testing/db/createTestDB.php";
-  command_output(CMD);
+  if (1 ==type)
+  {
+    command_output(CMD);
+  }
+  else if (0 == type)
+  {
+    sprintf(CMD, "%s -e", CMD);
+    command_output(CMD);
+  }
   int argc = 3;
   char* argv[] = {"./unit_test", "-c", Sysconf};
   fo_scheduler_connect(&argc, argv);
