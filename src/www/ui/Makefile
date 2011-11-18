@@ -21,7 +21,6 @@ include $(VARS)
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 # also set in Makefile.conf, but we override with a shorter version
-iPATHFILE=pathinclude.php
 
 DIRS=css images locale
 
@@ -31,29 +30,9 @@ OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -v simpleUi | gre
 
 RMFILES=FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$"`
 
-all: $(iPATHFILE)
+all:
 
-$(iPATHFILE): $(VARS)
-	@echo "Building $(iPATHFILE)"
-	@echo "<?php" > $(iPATHFILE)
-	@echo "\$$BINDIR=\"$(BINDIR)\";" >> $(iPATHFILE)
-	@echo "\$$LIBDIR=\"$(LIBDIR)\";" >> $(iPATHFILE)
-	@echo "\$$LIBEXECDIR=\"$(LIBEXECDIR)\";" >> $(iPATHFILE)
-	@echo "\$$INCLUDEDIR=\"$(INCLUDEDIR)\";" >> $(iPATHFILE)
-	@echo "\$$MAN1DIR=\"$(MAN1DIR)\";" >> $(iPATHFILE)
-	@echo "\$$AGENTDIR=\"$(AGENTDIR)\";" >> $(iPATHFILE)
-	@echo "\$$SYSCONFDIR=\"$(SYSCONFDIR)\";" >> $(iPATHFILE)
-	@echo "\$$WEBDIR=\"$(WEBDIR)\";" >> $(iPATHFILE)
-	@echo "\$$PHPDIR=\"$(PHPDIR)\";" >> $(iPATHFILE)
-	@echo "\$$PROJECTSTATEDIR=\"$(PROJECTSTATEDIR)\";" >> $(iPATHFILE)
-	@echo "\$$PROJECT=\"$(PROJECT)\";" >> $(iPATHFILE)
-	@echo "\$$DATADIR=\"$(DATADIR)\";" >> $(iPATHFILE)
-	@echo "\$$VERSION=\"$(VERSION)\";" >> $(iPATHFILE)
-	@echo "\$$SVN_REV=\"$(SVN_REV)\";" >> $(iPATHFILE)
-	@echo "\$$FOSRCDIR=\"$(FOSRCDIR)\";" >> $(iPATHFILE)
-	@echo "?>" >> $(iPATHFILE)
-
-install: all $(iPATHFILE)
+install: all
 
 	mkdir -p $(DESTDIR)$(WEBDIR)/ui; \
 	for dir in $(DIRS); do \
@@ -89,4 +68,4 @@ uninstall:
 clean:
 	rm -f *.o core $(iPATHFILE)
 
-.PHONY: all install uninstall srcinstall srcuninstall clean test
+.PHONY: all install uninstall clean test
