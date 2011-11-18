@@ -25,6 +25,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* other library includes */
 #include <libfossdb.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 
 /* ************************************************************************** */
 /* **** data and sql statements ********************************************* */
@@ -108,12 +111,62 @@ const char* jobsql_log = "\
       WHERE jq_pk = '%d';";
 
 /* ************************************************************************** */
-/* **** email format ******************************************************** */
+/* **** email notification ************************************************** */
 /* ************************************************************************** */
 
-const char* email_fmt = "\
-Dear %s,\nDo not reply to this message. This is an automatically generated \
-message by the FOSSolgy system.\n\n";
+char* subject;
+char* header;
+GList* header_parsed;
+GList* header_variables;
+
+char* footer;
+GList* footer_parsed;
+GList* footer_variables;
+
+
+/**
+ * TODO
+ */
+void email_init()
+{
+	char* fname;
+	int fd;
+	struct stat sb;
+	GError* error;
+
+	/* load the header */
+	fname = fo_config_get(sysconfig, "EMAILNOTIFY", "header", &error);
+	if(error)
+	  FATAL("email notification settings must be in config file");
+	if((fd = open(fname, O_RDONLY)) == -1)
+	  FATAL("unable to file for email header: %s", fname);
+	if(fstat(fd, &sb) == -1)
+	  FATAL("unable to fstat email header: %s", fname);
+	if((header = mmap(NULL, sb.st_size, PROT_READ, MAP_SHARED, fd, 0)) == MAP_FAILED)
+	  FATAL("unable to mmap email header: %s", fname);
+
+	/* load the footer */
+	fname = fo_config_get(sysconfig, "EMAILNOTIFY", "footer", &error);
+	if(error)
+	  FATAL("email notification settings must be in config file");
+	if((fd = open(fname, O_RDONLY)) == -1)
+	  FATAL("unable to file for email footer: %s", fname);
+	if(fstat(fd, &sb) == -1)
+	  FATAL("unable to fstat email footer: %s", fname);
+	if((header = mmap(NULL, sb.st_size, PROT_READ, MAP_SHARED, fd, 0)) == MAP_FAILED)
+	  FATAL("unable to mmap email footer: %s", fname);
+
+	/* load the subject */
+	subject = fo_config_get(sysconfig, "EMAILNOTIFY", "subject", &error);
+	if(error)
+	  FATAL("email notification settings must be in config file");
+
+	/* initialize memory */
+	header_parsed = NULL;
+	header_variables = NULL;
+	footer_parsed = NULL;
+	footer_variables = NULL;
+}
 
 /* ************************************************************************** */
 /* **** local functions ***************************************************** */
@@ -139,6 +192,8 @@ void database_init()
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK && PQntuples(db_result) != 0)
     strcpy(fossy_url, PQgetvalue(db_result, 0, 0));
   PQclear(db_result);
+
+  //email_init();
 }
 
 /**
@@ -209,7 +264,7 @@ void email_notification(int job_id, int failed)
 
   if(PQget(db_result, 0, "email_notify")[0] == 'y')
   {
-    sprintf(sql, email_fmt, PQget(db_result, 0, "user_name"));
+    //sprintf(sql, email_fmt, PQget(db_result, 0, "user_name"));
 
 
 
