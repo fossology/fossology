@@ -181,7 +181,9 @@ char *get_repodir()
   char *test_name_tmp = strstr(RepoDir, "testDbConf");
   *test_name_tmp = 0;
   sprintf(RepoDir, "%stestDbRepo%s", RepoDir, get_test_name()); 
+#ifdef TEST
   printf("RepoDir is:%s\n", RepoDir);
+#endif
   return RepoDir;
 }
 
