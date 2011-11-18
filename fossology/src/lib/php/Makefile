@@ -23,34 +23,11 @@ include $(VARS)
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
 MODULEDIR = $(shell dirname `pwd`)
 
-# also set in Makefile.conf, but we override with a shorter version
-iPATHFILE=pathinclude.php
-
 FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php)$$" |grep -v $(iPATHFILE)`
 
-all: $(iPATHFILE)
+all:
 
-$(iPATHFILE): $(VARS)
-	@echo "Building $(iPATHFILE)"
-	@echo "<?php" > $(iPATHFILE)
-	@echo "\$$BINDIR=\"$(BINDIR)\";" >> $(iPATHFILE)
-	@echo "\$$LIBDIR=\"$(LIBDIR)\";" >> $(iPATHFILE)
-	@echo "\$$LIBEXECDIR=\"$(LIBEXECDIR)\";" >> $(iPATHFILE)
-	@echo "\$$INCLUDEDIR=\"$(INCLUDEDIR)\";" >> $(iPATHFILE)
-	@echo "\$$MAN1DIR=\"$(MAN1DIR)\";" >> $(iPATHFILE)
-	@echo "\$$AGENTDIR=\"$(AGENTDIR)\";" >> $(iPATHFILE)
-	@echo "\$$SYSCONFDIR=\"$(SYSCONFDIR)\";" >> $(iPATHFILE)
-	@echo "\$$WEBDIR=\"$(WEBDIR)\";" >> $(iPATHFILE)
-	@echo "\$$PHPDIR=\"$(PHPDIR)\";" >> $(iPATHFILE)
-	@echo "\$$PROJECTSTATEDIR=\"$(PROJECTSTATEDIR)\";" >> $(iPATHFILE)
-	@echo "\$$PROJECT=\"$(PROJECT)\";" >> $(iPATHFILE)
-	@echo "\$$MODDIR=\"$(MODDIR)\";" >> $(iPATHFILE)
-	@echo "\$$VERSION=\"$(VERSION)\";" >> $(iPATHFILE)
-	@echo "\$$SVN_REV=\"$(SVN_REV)\";" >> $(iPATHFILE)
-	@echo "\$$FOSRCDIR=\"$(FOSRCDIR)\";" >> $(iPATHFILE)
-	@echo "?>" >> $(iPATHFILE)
-
-install: all $(iPATHFILE)
+install: all
 
 	
 	mkdir -p $(MODDIR)/lib/php; \
@@ -70,9 +47,7 @@ uninstall:
 	
 	rmdir $(MODDIR)/lib/php; \
 
-	@rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
-
 clean:
-	rm -f *.o core $(iPATHFILE)
+	rm -f *.o core
 
-.PHONY: all install uninstall srcinstall srcuninstall clean test
+.PHONY: all install uninstall clean test
