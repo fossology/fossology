@@ -23,7 +23,7 @@ include $(VARS)
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
 MODULEDIR = $(shell dirname `pwd`)
 
-FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php)$$" |grep -v $(iPATHFILE)`
+FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php)$$" `
 
 all:
 
@@ -42,8 +42,6 @@ uninstall:
 		echo "Removing php file$$file"; \
 		rm -f $(MODDIR)/lib/php/$$file; \
 	done
-	
-	$(INSTALL_DATA) $(iPATHFILE) $(MODDIR)$(PHPDIR)/$(iPATHFILE)
 	
 	rmdir $(MODDIR)/lib/php; \
 
