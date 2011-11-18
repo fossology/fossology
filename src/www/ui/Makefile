@@ -15,18 +15,19 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
+#
+# www/ui makefile
+#
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
-# also set in Makefile.conf, but we override with a shorter version
-
 DIRS=css images locale
 
-UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -v simpleUi | grep -E "(php|dat|dtd)$$" | grep -v $(iPATHFILE)`
+UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -v simpleUi | grep -E "(php|dat|dtd)$$" `
 
-OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -v simpleUi | grep -E "(css|htc|gif|png)$$" | grep -v $(iPATHFILE)`
+OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -v simpleUi | grep -E "(css|htc|gif|png)$$" `
 
 RMFILES=FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$"`
 
@@ -46,7 +47,6 @@ install: all
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
 
-	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
 	  ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled/ ; fi;
 
@@ -54,8 +54,6 @@ uninstall:
 	for file in $(RMFILES); do \
 		rm -f $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
-	
-	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 	
 	for dir in $(DIRS); do \
 		rmdir $(DESTDIR)$(WEBDIR)/ui/$$dir; \
