@@ -271,23 +271,7 @@ void set_usr_grp()
  */
 void kill_scheduler()
 {
-  pid_t pid;
-
-  if((pid = get_locked_pid()))
-  {
-    if(kill(pid, SIGQUIT) == -1)
-    {
-      ERROR("Unable to send SIGQUIT to PID %d", pid);
-      return;
-    }
-    else
-    {
-      fprintf(stderr, "Exiting %s PID %d\n", PROCESS_NAME, pid);
-      lprintf(        "Exiting %s PID %d\n", PROCESS_NAME, pid);
-    }
-
-    unlock_scheduler();
-  }
+  /* TODO */
 }
 
 /**
@@ -579,6 +563,7 @@ int main(int argc, char** argv)
 
   /* ********************************** */
   /* *** do all the initializations *** */
+  /* ******* order matters here ******* */
   /* ********************************** */
   g_thread_init(NULL);
   g_type_init();
