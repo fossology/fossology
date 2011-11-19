@@ -170,7 +170,7 @@ $repoPath = "$pathPrefix/$repoName";
 
 // sysconf and repo's always go in /srv/fossology to ensure enough room.
 // perms are 755
-if(mkdir($confPath) === FALSE)
+if(mkdir($confPath,0755,TRUE) === FALSE)
 {
   echo "FATAL! Cannot create test sysconf at:$confPath\n" .
   __FILE__ . " at line " . __LINE__ . "\n";
@@ -181,7 +181,7 @@ if(chmod($confPath, 0755) === FALSE )
   echo "ERROR: Cannot set mode to 755 on $confPath\n" .
   __FILE__ . " at line " . __LINE__ . "\n";
 }
-if(mkdir($repoPath) === FALSE)
+if(mkdir($repoPath,0755,TRUE) === FALSE)
 {
   echo "FATAL! Cannot create test repository at:$repoPath\n" .
   __FILE__ . " at line " . __LINE__ . "\n";
