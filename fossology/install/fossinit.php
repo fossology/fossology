@@ -37,28 +37,6 @@ if (!preg_match("/\sfossy\s/",$Group) && (posix_getgid() != $GID['gid']))
   exit(1);
 }
 
-/* command-line options 
- * Note: php 5 getopt() ignores options not specified in the function call, so add
- * dummy variables in order to catch invalid options.
- */
-$AllPossibleOpts = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-$Verbose = false;
-$Options = getopt($AllPossibleOpts);
-foreach($Options as $Option => $OptVal)
-{
-  switch($Option)
-  {
-    case 'h': 
-      Usage();
-    case 'v':
-      $Verbose = true;
-      break;
-    default:
-      echo "Invalid Option \"$Option\".\n";
-      Usage();
-  }
-}
-
 /* Initialize the program configuration variables */
 $SysConf = array();  // fo system configuration variables
 $PG_CONN = 0;   // Database connection
@@ -83,14 +61,50 @@ if (empty($Schema))
   exit(1);
 }
 
-$Filename = "$MODDIR/www/ui/core-schema.dat";
-if (!file_exists($Filename))
+/* Note: php 5 getopt() ignores options not specified in the function call, so add
+ * dummy options in order to catch invalid options.
+ */
+$AllPossibleOpts = "abcd:ef:ghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+/* defaults */
+$Verbose = false;
+$DatabaseName = "fossology";
+$UpdateLiceneseRef = false;
+$SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
+
+/* command-line options */
+$Options = getopt($AllPossibleOpts);
+foreach($Options as $Option => $OptVal)
 {
-  print "FAILED: Schema data file ($Filename) not found.\n";
+  switch($Option)
+  {
+    case 'd': /* optional database name */
+      $DatabaseName = $OptVal;
+      break;
+    case 'f': /* schema file */
+      $SchemaFilePath = $OptVal;
+      break;
+    case 'h': /* help */
+      Usage();
+    case 'l': /* update the license_ref table */
+      $UpdateLiceneseRef = true;
+      break;
+    case 'v': /* verbose */
+      $Verbose = true;
+      break;
+    default:
+      echo "Invalid Option \"$Option\".\n";
+      Usage();
+  }
+}
+
+if (!file_exists($SchemaFilePath))
+{
+  print "FAILED: Schema data file ($SchemaFilePath) not found.\n";
   exit(1);
 }
 
-$FailMsg = ApplySchema($Filename, $Verbose);
+$FailMsg = ApplySchema($SchemaFilePath, $Verbose, $DatabaseName);
 if ($FailMsg)
 {
   print "ApplySchema failed: $FailMsg\n";
@@ -118,7 +132,9 @@ else
   }
 }
 
-initLicenseRefTable(false);
+/* initialize the license_ref table */
+if ($UpdateLiceneseRef) initLicenseRefTable(false);
+
 exit(0);
 
 
@@ -131,8 +147,11 @@ function Usage()
 
   $usage = "Usage: " . basename($argv[0]) . " [options]
   Update FOSSology database.  Options are:
-  -v  = enable verbose mode (lists each module being processed)
-  -h  = this help usage";
+  -d  {database name} default is 'fossology'
+  -f  {file} update the schema with file generaged by schema-export.php
+  -l  update the license_ref table with fossology supplied licenses
+  -v  enable verbose mode (lists each module being processed)
+  -h  this help usage";
   print "$usage\n";
   exit(0);
 }
