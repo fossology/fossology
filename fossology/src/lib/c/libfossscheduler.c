@@ -175,13 +175,6 @@ void fo_scheduler_connect(int* argc, char** argv)
     fo_config_free(version);
   }
 
-  strncpy(fname, argv[0], sizeof(fname));
-  *strrchr(fname, '/') = '\0';
-  if(chdir(fname) != 0)
-  {
-    fprintf(stderr, "ERROR %s.%d: unable to change agent's directory\n",
-        __FILE__, __LINE__);
-  }
 }
 
 /**
