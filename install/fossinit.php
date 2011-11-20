@@ -19,15 +19,15 @@
 
 /**
  @file fossinit.php
- @brief This program applies core-schema.dat to the database.
+ @brief This program applies core-schema.dat to the database and updates
+        the license_ref table.
 
- This should be used immediately after an install, and before
- starting up the scheduler.
+ This should be used immediately after an install or update.
 
  @return 0 for success, 1 for failure.
  **/
 
-/* Must run as group fossy! */
+/* User must be in group fossy! */
 $GID = posix_getgrnam("fossy");
 posix_setgid($GID['gid']);
 $Group = `groups`;
@@ -37,11 +37,27 @@ if (!preg_match("/\sfossy\s/",$Group) && (posix_getgid() != $GID['gid']))
   exit(1);
 }
 
-/* command-line options */
-$Options = getopt('vh');
-if (array_key_exists('h',$Options)) Usage();
-$Verbose = array_key_exists("v",$Options);
-if ($Verbose == "")  $Verbose=0;
+/* command-line options 
+ * Note: php 5 getopt() ignores options not specified in the function call, so add
+ * dummy variables in order to catch invalid options.
+ */
+$AllPossibleOpts = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+$Verbose = false;
+$Options = getopt($AllPossibleOpts);
+foreach($Options as $Option => $OptVal)
+{
+  switch($Option)
+  {
+    case 'h': 
+      Usage();
+    case 'v':
+      $Verbose = true;
+      break;
+    default:
+      echo "Invalid Option \"$Option\".\n";
+      Usage();
+  }
+}
 
 /* Initialize the program configuration variables */
 $SysConf = array();  // fo system configuration variables
@@ -50,6 +66,7 @@ $Plugins = array();
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap();
+require_once("$MODDIR/lib/php/libschema.php");
 
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
@@ -73,9 +90,15 @@ if (!file_exists($Filename))
   exit(1);
 }
 
-$FailFlag = ApplySchema($Filename,0,$Verbose);
-if (!$FailFlag)
+$FailMsg = ApplySchema($Filename, $Verbose);
+if ($FailMsg)
 {
+  print "ApplySchema failed: $FailMsg\n";
+  exit(1);
+}
+else
+{
+  if ($Verbose) { print "DB schema has been updated.\n"; }
   $State = 1;
   $Filename = "$WEBDIR/init.ui";
   if (file_exists($Filename))
@@ -94,11 +117,6 @@ if (!$FailFlag)
     print "Initialization completed successfully.\n";
   }
 }
-else
-{
-  print "Initialization had errors.\n";
-  exit(1);
-}
 
 initLicenseRefTable(false);
 exit(0);
@@ -109,8 +127,10 @@ exit(0);
  **/
 function Usage()
 {
-   $usage = "Usage: " . basename($argv[0]) . " [options]
-  Initialize database schema\n
+  global $argv;
+
+  $usage = "Usage: " . basename($argv[0]) . " [options]
+  Update FOSSology database.  Options are:
   -v  = enable verbose mode (lists each module being processed)
   -h  = this help usage";
   print "$usage\n";
