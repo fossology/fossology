@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 global $SysConf;
 global $MODDIR;
+require_once("$MODDIR/lib/php/libschema.php");
 
 define("TITLE_core_schema", _("Database Schema"));
 
