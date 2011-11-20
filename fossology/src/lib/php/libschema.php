@@ -95,7 +95,7 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
     {
       continue;
     }
-    if (!TblExist($Table))
+    if (!DB_TableExists($Table))
     {
       $SQL = "CREATE TABLE \"$Table\" ();";
       if ($Debug)
@@ -1022,19 +1022,4 @@ LANGUAGE plpgsql;
   return;
 } // MakeFunctions()
 
-function TblExist($Table)
-{
-  global $PG_CONN;
-  $result = pg_query($PG_CONN, "SELECT count(*) AS count FROM pg_type
-                WHERE typname = '$Table'");
-  if ($result)
-  {
-    $count = pg_fetch_result($result, 0, 0);
-    if ($count > 0)
-    {
-      return (1);
-    }
-  }
-  return (0);
-}
 ?>
