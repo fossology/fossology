@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,42 +15,46 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
 /**
- * libschema
- * \brief utility functions needed by the schema* programs
+ * @file libschema.php
+ * @brief Functions to bring database schema to a known state.
  *
- * @version "$Id: libschema.php 4058 2011-04-12 23:41:09Z rrando $"
- */
-/***********************************************************
- ApplySchema(): Apply the current schema from a file.
- NOTE: The order for add/delete is important!
- ***********************************************************/
-function ApplySchema($Filename = NULL, $Debug, $Verbose = 1, $Catalog='fossology')
+ **/
+
+/**
+ * @brief Make schema match $Filename.  This is a single transaction.
+ * @param $Filename Schema file written by schema-export.php
+ * @param $Debug Turn on debugging (echo sql as it is being executed)
+ * @param $Catalog Optional database name
+ * @return false=success, on error return string with error message.
+ **/
+function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
 {
   global $PG_CONN;
-  print "Applying database schema\n";
-  flush();
 
-  /**************************************/
-  /** BEGIN: Term list from ExportTerms() **/
-  /**************************************/
   if (!file_exists($Filename))
   {
-    echo $Filename, " does not exist\n";
+    $ErrMsg = $Filename . " does not exist.";
+    return $ErrMsg;
   }
-  //echo "require $Filename\n";
   require_once ($Filename); /* this will DIE if the file does not exist. */
-  //echo "got  $Filename\n";
-  /**************************************/
-  /** END: Term list from ExportTerms() **/
-  /**************************************/
+
   /* Very basic sanity check (so we don't delete everything!) */
   if ((count($Schema['TABLE']) < 5) || (count($Schema['VIEW']) < 1) || (count($Schema['SEQUENCE']) < 5) || (count($Schema['INDEX']) < 5) || (count($Schema['CONSTRAINT']) < 5))
   {
-    print "FATAL: Schema from '$Filename' appears invalid.\n";
-    flush();
-    exit(1);
+    $ErrMsg = "Schema from '$Filename' appears invalid.";
+    return $ErrMsg;
   }
+
+  /* get the current statement timeout */
+  $SQL = "show statement_timeout"; 
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__,__LINE__);
+  $Results = pg_fetch_all($result);
+  $Statement_Timeout = $Results[0]['statement_timeout'];
+  pg_free_result($result);
+
   pg_query($PG_CONN, "SET statement_timeout = 0;"); /* turn off DB timeouts */
   pg_query($PG_CONN, "BEGIN;");
   $Curr = GetSchema();
@@ -109,7 +113,7 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1, $Catalog='fossology
       if ($Curr['TABLE'][$Table][$Column]['ADD'] != $Val['ADD'])
       {
         $Rename = "";
-        if (ColExist($Table, $Column))
+        if (DB_ColExists($Table, $Column))
         {
           /* The column exists, but it looks different!
            Solution: Delete the column! */
@@ -568,79 +572,26 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1, $Catalog='fossology
       }
     }
   }
+
   /************************************/
   /* Commit changes */
   /************************************/
-  print "  Committing changes...\n";
-  flush();
-  //echo "DB: commiting changes, sql is:\n$SQL\n";
   $results = pg_query($PG_CONN, "COMMIT;");
   DBCheckResult($results, $SQL, __FILE__,__LINE__);
-  echo "Success!\n";
+
   /************************************/
   /* Flush any cached data. */
   /************************************/
-  print "  Purging cached results\n";
-  flush();
   ReportCachePurgeAll();
-  /************************************/
-  /* Initialize all remaining plugins. */
-  /************************************/
-  $initFail = FALSE;
-  if ($initFail !== FALSE)
-  {
-    print "One or more steps in the system initialization failed\n";
-    return (1);
-  }
-  else
-  {
-    print "Initialization completed.\n";
-    /* reset DB timeouts */
-    $results = pg_query($PG_CONN, "SET statement_timeout = 120000;");
-    DBCheckResult($results, $SQL, __FILE__,__LINE__);
-    return;
-  }
+
+  /* restore DB timeouts */
+  pg_query($PG_CONN, "SET statement_timeout = $Statement_timeout;");
+  return false;
 } // ApplySchema()
 
-function ColExist($Table, $Col)
-{
-  global $PG_CONN;
-  $result = pg_query($PG_CONN, "SELECT count(*) FROM pg_attribute, pg_type
-              WHERE typrelid=attrelid AND typname = '$Table'
-          AND attname='$Col' LIMIT 1");
-  if ($result)
-  {
-    $count = pg_fetch_result($result, 0, 0);
-    if ($count > 0)
-    {
-      return (1);
-    }
-  }
-  return (0);
-}
-// check if a table exists, if not then create it
-function CheckCreateTable($Table)
-{
-  global $PG_CONN;
-  if (!TblExist($Table))
-  {
-    $SQL = "CREATE TABLE \"$Table\" ();";
-    if ($Debug)
-    {
-      print "$SQL\n";
-    }
-    else
-    {
-      $result = pg_query($PG_CONN, $SQL);
-      DBCheckResult($result, $SQL, __FILE__,__LINE__);
-    }
-  }
-}
-
-/*
- * GetSchema
+/**
  * \brief Load the schema from the db into an array.
- */
+ **/
 function GetSchema()
 {
   global $PG_CONN;
@@ -1070,6 +1021,7 @@ LANGUAGE plpgsql;
   }
   return;
 } // MakeFunctions()
+
 function TblExist($Table)
 {
   global $PG_CONN;
