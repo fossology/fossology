@@ -16,10 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-// now uses the functions GetSchema and ApplySchema from libschema.php
 global $SysConf;
 global $MODDIR;
-require_once "$MODDIR/cli/libschema.php";
 
 define("TITLE_core_schema", _("Database Schema"));
 
