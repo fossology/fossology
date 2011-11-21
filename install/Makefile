@@ -11,7 +11,7 @@ include $(VARS)
 
 CONFPATH=$(SYSCONFDIR)
 
-all:	fo-postinstall defconf/Db.conf defconf/fossology.conf defconf/VERSION
+all:	fo-postinstall defconf/Db.conf defconf/fossology.conf
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
@@ -25,9 +25,6 @@ defconf/Db.conf: defconf/Db.conf-process
 
 # generate fossology.conf
 defconf/fossology.conf:	defconf/fossology.conf-process
-
-# generate the VERSION file
-defconf/VERSION: defconf/VERSION-process
 
 install: all
 	$(INSTALL_PROGRAM) fo-postinstall $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
