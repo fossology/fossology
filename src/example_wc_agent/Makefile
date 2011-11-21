@@ -35,7 +35,7 @@ coverage:
 
 # generate the VERSION file
 VERSIONFILE:
-        $(call WriteVERSIONFile,"example_wc_agent")
+	$(call WriteVERSIONFile,"example_wc_agent")
 
 install: all
 	$(call dirloop,install)

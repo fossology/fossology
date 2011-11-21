@@ -24,7 +24,7 @@ TESTDIR = agent_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 		 
-all: 
+all: VERSIONFILE
 	@echo "make scheduler"
 	$(call dirloop, )
 
@@ -33,7 +33,7 @@ test:
 
 # generate the VERSION file
 VERSIONFILE:
-        $(call WriteVERSIONFile,"scheduler")
+	$(call WriteVERSIONFile,"scheduler")
 
 install: all
 	@echo "make scheduler install"

@@ -22,7 +22,7 @@ MOD_NAME=bsam
 DIRS = ui
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-all: 
+all: VERSIONFILE
 	@echo "make $(MOD_NAME)"
 
 test: 
@@ -30,7 +30,7 @@ test:
 
 # generate the VERSION file
 VERSIONFILE:
-        $(call WriteVERSIONFile,"bsam")
+	$(call WriteVERSIONFile,"bsam")
 
 coverage:
 	@echo "make $(MOD_NAME) coverage"
