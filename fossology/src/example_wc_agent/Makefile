@@ -31,7 +31,11 @@ test:
 	$(MAKE) -C $(TESTDIR) test
 
 coverage:
-	$(MAKE) -C $(TESTDIR) coverage
+	$(MAKE) -C $(TESTDIR) coveraga
+
+# generate the VERSION file
+VERSIONFILE:
+        $(call WriteVERSIONFile,"example_wc_agent")
 
 install: all
 	$(call dirloop,install)

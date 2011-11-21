@@ -28,6 +28,10 @@ all:
 test: 
 	@echo "make $(MOD_NAME) test"
 
+# generate the VERSION file
+VERSIONFILE:
+        $(call WriteVERSIONFile,"bsam")
+
 coverage:
 	@echo "make $(MOD_NAME) coverage"
 
