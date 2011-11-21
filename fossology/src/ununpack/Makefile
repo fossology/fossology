@@ -23,7 +23,7 @@ TESTDIR = agent_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-all: 
+all: VERSIONFILE
 	$(call dirloop, )
 
 test: 
@@ -31,7 +31,7 @@ test:
 
 # generate the VERSION file
 VERSIONFILE:
-        $(call WriteVERSIONFile,"ununpack")
+	$(call WriteVERSIONFile,"ununpack")
 
 coverage:
 	$(MAKE) -C $(TESTDIR) coverage
