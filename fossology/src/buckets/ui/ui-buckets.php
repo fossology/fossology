@@ -310,6 +310,7 @@ return;
         $VLic .= "<td align='left'>";
         $VLic .= "<a id='$bucket_pk' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filebucket&bapk=$bucketagent_pk&item=$Uploadtree_pk&bucket_pk=$bucket_pk\")'";
         $VLic .= ">$bucket_name </a>";
+$VLic .= " [Tag]";
         $VLic .= "</td>";
         $VLic .= "</tr>\n";
         //      if ($row['bucket_name'] == "No Buckets Found") $NoLicFound =  $row['bucketcount'];

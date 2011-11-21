@@ -61,7 +61,7 @@ $(COVDIRS):
 	$(MAKE) -C $(@:cov-%=%) coverage
 
 clean: $(CLEANDIRS)
-	rm -f variable.list fo-postinstall
+	rm -f variable.list VERSION
 
 $(CLEANDIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
