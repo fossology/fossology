@@ -20,7 +20,7 @@ COVDIRS = $(DIRS:%=cov-%)
 
 ## Targets
 # build
-all: $(BUILDDIRS)
+all: $(BUILDDIRS) BUILDVERSION
 $(DIRS): $(BUILDDIRS)
 $(BUILDDIRS):
 	$(MAKE) -C $(@:build-%=%)
@@ -35,6 +35,13 @@ build-cli: build-ui
 
 # utils is a separate target, since it isn't built by default yet
 utils: build-utils
+
+# generate the VERSION file
+VERSION: 
+	@echo "[BUILD]" > VERSION; \
+	echo "VERSION=`cat VERSIONSTRING`" >> VERSION;\
+	echo "SVN_REV=`svnversion `" >> VERSION;\
+	echo BUILD_DATE=`date +"%Y/%m/%d %R %Z"` >> VERSION
 
 # install depends on everything being built first
 install: all $(INSTALLDIRS)
