@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
       case 'i':
         InitFlag=1;
         break;
-      case 'c': /* doesn't set this */ break;
+      case 'c': break; /* handled by fo_scheduler_connect() */
       case 'C':
         CmdlineFlag = 1;
         break;
