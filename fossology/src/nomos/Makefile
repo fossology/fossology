@@ -38,7 +38,7 @@ coverage:
 
 # generate the VERSION file
 VERSIONFILE: 
-	@echo "[NOMOS]" > VERSION; \
+	@echo "[nomos]" > VERSION; \
 	echo "VERSION=`cat $(TOP)/VERSIONSTRING`" >> VERSION;\
 	echo "SVN_REV=`svnversion `" >> VERSION;\
 	echo BUILD_DATE=`date +"%Y/%m/%d %R %Z"` >> VERSION
