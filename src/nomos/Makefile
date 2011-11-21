@@ -27,7 +27,7 @@ MOD_NAME=nomos
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-all: VERSION
+all: VERSIONFILE
 	$(call dirloop, )
 
 test: 
@@ -37,7 +37,7 @@ coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 
 # generate the VERSION file
-VERSION: 
+VERSIONFILE: 
 	@echo "[NOMOS]" > VERSION; \
 	echo "VERSION=`cat $(TOP)/VERSIONSTRING`" >> VERSION;\
 	echo "SVN_REV=`svnversion `" >> VERSION;\
