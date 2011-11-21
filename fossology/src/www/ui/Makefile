@@ -51,16 +51,7 @@ install: all
 	  ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled/ ; fi;
 
 uninstall:
-	for file in $(RMFILES); do \
-		rm -f $(DESTDIR)$(WEBDIR)/ui/$$file; \
-	done
-	
-	for dir in $(DIRS); do \
-		rmdir $(DESTDIR)$(WEBDIR)/ui/$$dir; \
-	done
-
-	@rm -f $(DESTDIR)$(WEBDIR)
-	@rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
+	@rm -rf $(DESTDIR)$(WEBDIR)
 	@rm -f $(CONFDIR)/mods-enabled/www
 
 clean:
