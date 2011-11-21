@@ -20,8 +20,6 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
 
 FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php)$$" `
 
@@ -37,13 +35,8 @@ install: all
 	done
 
 uninstall:
-	echo "Removing php libs"; \
-	for file in $(FILES); do \
-		echo "Removing php file$$file"; \
-		rm -f $(MODDIR)/lib/php/$$file; \
-	done
-	
-	rmdir $(MODDIR)/lib/php; \
+	@echo "Removing php libs"; \
+	rm -rf $(MODDIR)/lib/php
 
 clean:
 	rm -f *.o core
