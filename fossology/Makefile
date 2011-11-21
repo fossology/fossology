@@ -37,11 +37,9 @@ build-cli: build-ui
 utils: build-utils
 
 # generate the VERSION file
+TOP = .
 VERSIONFILE: 
-	@echo "[BUILD]" > VERSION; \
-	echo "VERSION=`cat VERSIONSTRING`" >> VERSION;\
-	echo "SVN_REV=`svnversion `" >> VERSION;\
-	echo BUILD_DATE=`date +"%Y/%m/%d %R %Z"` >> VERSION
+	$(call WriteVERSIONFile,"BUILD")
 
 # install depends on everything being built first
 install: all $(INSTALLDIRS)

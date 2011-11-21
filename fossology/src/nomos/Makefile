@@ -38,10 +38,7 @@ coverage:
 
 # generate the VERSION file
 VERSIONFILE: 
-	@echo "[nomos]" > VERSION; \
-	echo "VERSION=`cat $(TOP)/VERSIONSTRING`" >> VERSION;\
-	echo "SVN_REV=`svnversion `" >> VERSION;\
-	echo BUILD_DATE=`date +"%Y/%m/%d %R %Z"` >> VERSION
+	$(call WriteVERSIONFile,"nomos")
 
 install: all
 	@echo "make $(MOD_NAME) install"
@@ -60,4 +57,4 @@ clean:
 	rm -rf VERSION
 	$(call dirloop,clean)
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test VERSIONFILE
