@@ -31,6 +31,10 @@ all:
 test: 
 	$(MAKE) -C $(TESTDIR) test
 
+# generate the VERSION file
+VERSIONFILE:
+        $(call WriteVERSIONFile,"scheduler")
+
 install: all
 	@echo "make scheduler install"
 	$(call dirloop,install)

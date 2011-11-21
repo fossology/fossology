@@ -29,6 +29,10 @@ all:
 test: 
 	$(MAKE) -C $(TESTDIR) test
 
+# generate the VERSION file
+VERSIONFILE:
+        $(call WriteVERSIONFile,"ununpack")
+
 coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 

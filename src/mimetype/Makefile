@@ -30,6 +30,10 @@ all:
 test: 
 	$(MAKE) -C $(TESTDIR) test
 
+# generate the VERSION file
+VERSIONFILE:
+        $(call WriteVERSIONFile,"mimetype")
+
 coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 
