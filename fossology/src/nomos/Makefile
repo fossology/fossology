@@ -27,7 +27,7 @@ MOD_NAME=nomos
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-all: 
+all: VERSION
 	$(call dirloop, )
 
 test: 
@@ -35,6 +35,13 @@ test:
 
 coverage:
 	$(MAKE) -C $(TESTDIR) coverage
+
+# generate the VERSION file
+VERSION: 
+	@echo "[NOMOS]" > VERSION; \
+	echo "VERSION=`cat $(TOP)/VERSIONSTRING`" >> VERSION;\
+	echo "SVN_REV=`svnversion `" >> VERSION;\
+	echo BUILD_DATE=`date +"%Y/%m/%d %R %Z"` >> VERSION
 
 install: all
 	@echo "make $(MOD_NAME) install"
@@ -50,6 +57,7 @@ uninstall:
 	rm -f $(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
 clean:
+	rm -rf VERSION
 	$(call dirloop,clean)
 
 .PHONY: all install uninstall clean test 
