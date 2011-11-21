@@ -28,10 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* unix includes */
 #include <stdio.h>
 #include <getopt.h>
-
-#ifndef SVN_REV
-#define SVN_REV "SVN_REV Unknown"
-#endif
+#include <libgen.h>
 
 /* ************************************************************************** */
 /* **** Locals ************************************************************** */
@@ -43,6 +40,7 @@ int      valid;             ///< if the information stored in buffer is valid
 int      found;             ///< if the agent is even connected to the scheduler
 fo_conf* sysconfig;
 char* sysconfigdir;
+char* module_name;
 
 /**
  * Global verbose flags that agents should use instead of specific verbose
@@ -112,6 +110,9 @@ void fo_scheduler_connect(int* argc, char** argv)
   int i;
   char  fname[FILENAME_MAX + 1];
 
+  /* get the module name */
+  module_name = g_strdup(basename(argv[0]));
+
   /* check for the system configuration directory */
   sysconfigdir = DEFAULT_SETUP;
   for(i = 1; i < *argc; i++) {
@@ -126,7 +127,6 @@ void fo_scheduler_connect(int* argc, char** argv)
   /* check for --scheduler command line option */
   if(strcmp(argv[*argc - 1], "--scheduler_start") == 0)
   {
-    fprintf(stdout, "VERSION: %s\n", SVN_REV);
     (*argc)--;
     argv[*argc] = NULL;
     found = 1;
@@ -161,7 +161,8 @@ void fo_scheduler_connect(int* argc, char** argv)
       exit(-1);
     }
 
-    snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir, "VERSION");
+    snprintf(fname, FILENAME_MAX, "%s/mods-enabled/%s/VERSION",
+        sysconfigdir, module_name);
     version = fo_config_load(fname, &error);
     if(error)
     {
@@ -170,11 +171,22 @@ void fo_scheduler_connect(int* argc, char** argv)
       exit(-1);
     }
 
-    keys = g_tree_ref(g_tree_lookup(version->group_map, "VERSION"));
-    g_tree_insert(sysconfig->group_map, "VERSION", keys);
+    if((keys = g_tree_lookup(version->group_map, module_name)) != NULL)
+    {
+      keys = g_tree_ref(keys);
+      g_tree_insert(sysconfig->group_map, module_name, keys);
+    }
     fo_config_free(version);
   }
 
+  if(found)
+  {
+    if(fo_config_has_key(sysconfig, module_name, "VERSION"))
+      fprintf(stdout, "VERSION: %s\n",
+           fo_config_get(sysconfig, module_name, "VERSION", &error));
+    else fprintf(stdout, "VERSION: unknown\n");
+    fflush(stdout);
+  }
 }
 
 /**
@@ -194,6 +206,8 @@ void fo_scheduler_disconnect(int retcode)
 
     valid = 0;
     found = 0;
+
+    g_free(module_name);
   }
 }
 
@@ -242,7 +256,11 @@ char* fo_scheduler_next()
     }
     else if(strncmp(buffer, "VERSION", 7) == 0)
     {
-      fprintf(stdout, "\nVERSION: %s\n", SVN_REV);
+      if(fo_config_has_key(sysconfig, module_name, "VERSION"))
+        fprintf(stdout, "VERSION: %s\n",
+             fo_config_get(sysconfig, module_name, "VERSION", NULL));
+      else fprintf(stdout, "VERSION: unknown\n");
+      fflush(stdout);
       fflush(stdout);
       valid = 0;
       continue;
