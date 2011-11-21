@@ -81,7 +81,6 @@ int DelagentInit()
 
   memset(CMD, '\0', sizeof(CMD));
   sprintf(CMD, "sh testInitRepo.sh %s", get_repodir());
-printf("DDDDDDDDDDDd%s\n", CMD);
   rc = system(CMD);
   if (rc != 0)
   {
