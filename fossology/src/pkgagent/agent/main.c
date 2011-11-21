@@ -30,9 +30,6 @@
  */
 #include "pkgagent.h"
 
-#ifdef SVN_REV
-#endif /* SVN_REV */
-
 /**
  * \brief main function for the pkgagent
  *
@@ -82,6 +79,7 @@ int	main	(int argc, char *argv[])
   char sqlbuf[1024]; 
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  char *SVN_REV;
   int CmdlineFlag = 0; /* run from command line flag, 1 yes, 0 not */
 
   fo_scheduler_connect(&argc, argv);
@@ -96,6 +94,7 @@ int	main	(int argc, char *argv[])
     exit(-1);
   }
 
+  SVN_REV = fo_sysconfig("pkgagent", "SVN_REV");
   Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   /* Process command-line */
