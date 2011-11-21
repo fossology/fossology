@@ -27,6 +27,9 @@ all:
 install:
 	@echo "no build rule for 'install' in src/delagent/ui"
 
+uninstall:
+	@echo "no build rule for 'uninstall' in src/delagent/ui"
+
 clean:
 	@echo "no build rule for 'clean' in src/delagent/ui"
 

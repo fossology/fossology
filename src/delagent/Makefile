@@ -18,7 +18,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = agent agent_tests ui ui_tests
+DIRS = agent ui
 TESTDIR = agent_tests
 MOD_NAME=delagent
 
