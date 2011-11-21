@@ -31,4 +31,7 @@ uninstall:
 	echo "make copyright ui uninstall"
 	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
-.PHONY: install uninstall  all
+clean:
+	echo "make copyright ui clean"
+
+.PHONY: install uninstall  all clean
