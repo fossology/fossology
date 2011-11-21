@@ -29,7 +29,10 @@ install:
 	$(INSTALL_DATA) ./*.php $(MODDIR)/nomos/ui/
 
 uninstall:
-	@echo "make nomos uninstall"
+	@echo "make nomos ui uninstall"
 	rm -rf $(MODDIR)/nomos/ui
 
-.PHONY: allinstall uninstall
+clean:
+	@echo "make nomos ui clean"
+
+.PHONY: all install uninstall clean
