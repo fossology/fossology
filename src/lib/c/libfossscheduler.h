@@ -128,6 +128,18 @@ extern char*    sysconfigdir;
 /* **** Agent api *********************************************************** */
 /* ************************************************************************** */
 
+/**
+ * Used to set the message that will be sent with the notification email for the
+ * job that this agent is working on
+ *
+ * @param ... standard printf-style function call
+ */
+#define NOTIFY_EMAIL(...)         \
+    fprintf(stdout, "EMAIL ");    \
+    fprintf(stdout, __VA_ARGS__); \
+    fprintf(stdout, "\n");        \
+    fflush(stdout)
+
 void  fo_scheduler_heart(int i);
 void  fo_scheduler_connect(int* argc, char** argv);
 void  fo_scheduler_disconnect(int retcode);
