@@ -20,7 +20,7 @@ COVDIRS = $(DIRS:%=cov-%)
 
 ## Targets
 # build
-all: $(BUILDDIRS) VERSION
+all: $(BUILDDIRS) VERSIONFILE
 $(DIRS): $(BUILDDIRS)
 $(BUILDDIRS):
 	$(MAKE) -C $(@:build-%=%)
@@ -37,7 +37,7 @@ build-cli: build-ui
 utils: build-utils
 
 # generate the VERSION file
-VERSION: 
+VERSIONFILE: 
 	@echo "[BUILD]" > VERSION; \
 	echo "VERSION=`cat VERSIONSTRING`" >> VERSION;\
 	echo "SVN_REV=`svnversion `" >> VERSION;\
