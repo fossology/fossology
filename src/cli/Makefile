@@ -42,7 +42,7 @@ install: all
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MAN1DIR)/$$file; \
 	done
 	
-	$(INSTALL_DATA) libschema.php $(DESTDIR)$(LIBEXECDIR)/libschema.php
+#$(INSTALL_DATA) libschema.php $(DESTDIR)$(LIBEXECDIR)/libschema.php
 	
 # create wrappers in BINDIR
 	for file in $(WRAP); do \
