@@ -33,6 +33,10 @@ test:
 coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 
+# generate the VERSION file
+VERSIONFILE: 
+	$(call WriteVERSIONFile,"pkgagent")
+
 install: all
 	$(call dirloop,install)
 	$(INSTALL_PROGRAM) -D $(MOD_NAME).conf $(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
