@@ -29,7 +29,7 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
 
   public $agentDir;
   public $pkgagent;
-  protected $testfile = '../agent_tests/testdata/fossology-1.2.0-1.el5.i386.rpm';
+  protected $testfile = '../testdata/fossology-1.2.0-1.el5.i386.rpm';
 
   function setUp() {
 /*
