@@ -31,9 +31,13 @@
  *  - source common files (require_once common.php)
  * 
  * The following precedence is used to resolve SYSCONFDIR:
- *  - $SYSCONFDIR path passed in
+ *  - $SYSCONFDIR path passed in ($sysconfdir)
  *  - environment variable SYSCONFDIR
  *  - ./fossology.rc
+ *
+ * Any errors are fatal.  A text message will be printed followed by an exit(1)
+ *
+ * \param $sysconfdir Typically from the caller's -c command line parameter
  *
  * \return the $SysConf array of values.  The first array dimension
  * is the group, the second is the variable name.
@@ -46,20 +50,23 @@
  * to be global, this function will define the same globals (everything in the 
  * DIRECTORIES section of fossology.conf).
  */
-function bootstrap()
+function bootstrap($sysconfdir="")
 {
   $rcfile = "fossology.rc";
 
-  $sysconfdir = getenv('SYSCONFDIR');
-  if ($sysconfdir === false)
+  if (empty($sysconfdir))
   {
-    if (file_exists($rcfile)) $sysconfdir = file_get_contents($rcfile);
+    $sysconfdir = getenv('SYSCONFDIR');
     if ($sysconfdir === false)
     {
-      /* NO SYSCONFDIR specified */
-      $text = _("FATAL: System Configuration Error, no SYSCONFDIR.");
-      echo "<hr><h3>$text</h3><hr>";
-      exit(1);
+      if (file_exists($rcfile)) $sysconfdir = file_get_contents($rcfile);
+      if ($sysconfdir === false)
+      {
+        /* NO SYSCONFDIR specified */
+        $text = _("FATAL! System Configuration Error, no SYSCONFDIR.");
+        echo "$text\n";
+        exit(1);
+      }
     }
   }
 
@@ -68,7 +75,19 @@ function bootstrap()
 
   /*************  Parse fossology.conf *******************/
   $ConfFile = "{$sysconfdir}/fossology.conf";
+  if (!file_exists($ConfFile))
+  {
+    $text = _("FATAL! Missing configuration file: $ConfFile");
+    echo "$text\n";
+    exit(1);
+  }
   $SysConf = parse_ini_file($ConfFile, true);
+  if ($SysConf === false)
+  {
+    $text = _("FATAL! Invalid configuration file: $ConfFile");
+    echo "$text\n";
+    exit(1);
+  }
 
   /* evaluate all the DIRECTORIES group for variable substitutions.
    * For example, if PREFIX=/usr/local and BINDIR=$PREFIX/bin, we
@@ -89,9 +108,9 @@ function bootstrap()
 
   if (empty($MODDIR))
   {
-    $text = _("FATAL: System initialization failure: MODDIR not defined in fossology.conf");
+    $text = _("FATAL! System initialization failure: MODDIR not defined in $SysConf");
     echo $text. "\n"; 
-    exit;
+    exit(1);
   }
 
   //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
