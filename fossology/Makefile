@@ -20,7 +20,7 @@ COVDIRS = $(DIRS:%=cov-%)
 
 ## Targets
 # build
-all: $(BUILDDIRS) BUILDVERSION
+all: $(BUILDDIRS) VERSION
 $(DIRS): $(BUILDDIRS)
 $(BUILDDIRS):
 	$(MAKE) -C $(@:build-%=%)
