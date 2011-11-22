@@ -4,12 +4,15 @@
 # Create and install:
 #  fo-postinstall
 #  SYSCONFDIR/db.conf
+#  SYSCONFDIR/VERSION
 
 TOP=..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 CONFPATH=$(SYSCONFDIR)
+# default version is the scm revision number
+-DVERSION=$(SCM_REV)
 
 all:	fo-postinstall defconf/Db.conf defconf/fossology.conf
 
@@ -55,14 +58,6 @@ install: all
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
 
-	if [ ! -f $(DESTDIR)$(CONFPATH)/VERSION -o "$(OVERWRITE)"]; then \
-		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/VERSION"; \
-	 	$(INSTALL) -m 666 defconf/VERSION $(DESTDIR)$(CONFPATH)/VERSION; \
-	else \
-		echo "WARNING: $(DESTDIR)$(CONFPATH)/VERSION already exists."; \
-		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
-	fi \
-
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
 
@@ -77,12 +72,11 @@ uninstall:
 	@echo "Configuration files will not be removed:"
 	@echo "      $(DESTDIR)$(CONFPATH)/fossology.conf"
 	@echo "      $(DESTDIR)$(CONFPATH)/Db.conf"
-	@echo "      $(DESTDIR)$(CONFPATH)/VERSION"
 	@echo "  Remove by hand if you desire."
 
 
 clean:
-	rm -f fo-postinstall defconf/Db.conf defconf/fossology.conf defconf/VERSION
+	rm -f fo-postinstall defconf/Db.conf defconf/fossology.conf 
 
 test: all
 	@echo "NOTICE: no tests available for install"

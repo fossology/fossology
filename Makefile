@@ -17,6 +17,8 @@ UNINSTALLDIRS = $(DIRS:%=uninstall-%)
 CLEANDIRS = $(DIRS:%=clean-%)
 TESTDIRS = $(DIRS:%=test-%)
 COVDIRS = $(DIRS:%=cov-%)
+CONFPATH=$(SYSCONFDIR)
+
 
 ## Targets
 # build
@@ -45,10 +47,21 @@ VERSIONFILE:
 install: all $(INSTALLDIRS)
 $(INSTALLDIRS):
 	$(MAKE) -C $(@:install-%=%) install
+	if [ ! -f $(DESTDIR)$(CONFPATH)/VERSION -o "$(OVERWRITE)"]; then \
+		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/VERSION"; \
+	 	$(INSTALL) -m 666 VERSION $(DESTDIR)$(CONFPATH)/VERSION; \
+	else \
+		echo "WARNING: $(DESTDIR)$(CONFPATH)/VERSION already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+	fi \
 
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
 	$(MAKE) -C $(@:uninstall-%=%) uninstall
+	
+	@echo "Configuration files will not be removed:"
+	@echo "      $(DESTDIR)$(CONFPATH)/VERSION"
+	@echo "  Remove by hand if you desire."
 
 # test depends on everything being built first
 test: all $(TESTDIRS)
