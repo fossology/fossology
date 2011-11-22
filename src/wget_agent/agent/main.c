@@ -162,9 +162,8 @@ int main  (int argc, char *argv[])
   SVN_REV = fo_sysconfig("wget_agent", "SVN_REV");
   VERSION = fo_sysconfig("wget_agent", "VERSION");
   sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
-  Agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
   /* Get the Agent Key from the DB */
-  fo_GetAgentKey(pgConn, basename(argv[0]), GlobalUploadKey, SVN_REV, agent_desc);
+  Agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), GlobalUploadKey, agent_rev, agent_desc);
 
   /* Run from the command-line (for testing) */
   for(arg=optind; arg < argc; arg++)
