@@ -90,7 +90,10 @@ int main  (int argc, char *argv[])
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
   char *SVN_REV;
-  
+  char *VERSION;
+  char agent_rev[MAXCMD];
+
+
   fo_scheduler_connect(&argc, argv);
 
   /* Process command-line */
@@ -157,7 +160,9 @@ int main  (int argc, char *argv[])
   }
   
   SVN_REV = fo_sysconfig("wget_agent", "SVN_REV");
-  Agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), 0, SVN_REV, agent_desc);
+  VERSION = fo_sysconfig("wget_agent", "VERSION");
+  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  Agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
   /* Get the Agent Key from the DB */
   fo_GetAgentKey(pgConn, basename(argv[0]), GlobalUploadKey, SVN_REV, agent_desc);
 
