@@ -753,6 +753,7 @@ int main(int argc, char** argv)
   long agent_pk = 0;            // the agents primary key
   char *DBConfFile = NULL;      /* use default Db.conf */
   char *ErrorBuf;
+  char *SVN_REV;
 
   /* Database structs */
   PGconn* pgConn = NULL;        // the connection to Database
@@ -848,6 +849,7 @@ int main(int argc, char** argv)
     /* book keeping */
     pair_init(&curr, string_function_registry(), int_function_registry());
     db_connected = 1;
+    SVN_REV = fo_sysconfig("copyright", "SVN_REV");
     agent_pk = fo_GetAgentKey(pgConn, AGENT_NAME, 0, SVN_REV, AGENT_DESC);
 
     /* make sure that we are connected to the database */

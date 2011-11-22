@@ -37,10 +37,6 @@ int debug = 0;
 int DEB_SOURCE;
 int DEB_BINARY;
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
-#endif /* SVN_REV */
-
 
 /****************************************************/
 int main(int argc, char **argv) 
@@ -66,6 +62,7 @@ int main(int argc, char **argv)
   char *bucketpool_name;
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  char *SVN_REV;
 
 //  int *bucketList;
   pbucketdef_t bucketDefArray = 0;
@@ -168,6 +165,7 @@ int main(int argc, char **argv)
   /* get agent pk 
    * Note, if GetAgentKey fails, this process will exit.
    */
+  SVN_REV = fo_sysconfig("buckets", "SVN_REV");
   agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), 0, SVN_REV, agentDesc);
 
   /*** Initialize the license_ref table cache ***/
