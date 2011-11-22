@@ -40,8 +40,9 @@ VERSIONFILE:
 install: all
 	echo "make $(MOD_NAME) install"
 	$(call dirloop,install)
-	$(INSTALL_PROGRAM) $(MOD_NAME).conf $(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 	$(INSTALL_PROGRAM) VERSION $(MODDIR)/$(MOD_NAME)/VERSION
+	$(INSTALL_PROGRAM) mod_deps $(MODDIR)/$(MOD_NAME)/mod_deps
+	$(INSTALL_PROGRAM) $(MOD_NAME).conf $(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
 	  ln -s $(MODDIR)/$(MOD_NAME) $(SYSCONFDIR)/mods-enabled ; fi;
 
