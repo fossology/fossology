@@ -49,18 +49,6 @@ require_once("$MODDIR/lib/php/libschema.php");
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
 
-//debugprint($SysConf, "SysConf");
-/* Load plugins */
-plugin_load();
-
-/* Initialize the system! */
-$Schema = &$Plugins[plugin_find_any_id("schema")];
-if (empty($Schema))
-{
-  print "FAILED: Unable to find the schema plugin.\n";
-  exit(1);
-}
-
 /* Note: php 5 getopt() ignores options not specified in the function call, so add
  * dummy options in order to catch invalid options.
  */
