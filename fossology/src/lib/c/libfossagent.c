@@ -59,8 +59,8 @@ FUNCTION int fo_GetAgentKey(PGconn *pgConn, char * agent_name, long Upload_pk, c
   {
     PQclear(result);
     /* no match, so add an agent rec */
-    sprintf(sql, "INSERT INTO agent (agent_name,agent_desc,agent_enabled) VALUES ('%s',E'%s','%d')",
-            agent_name, agent_desc, 1);
+    sprintf(sql, "INSERT INTO agent (agent_name,agent_desc,agent_enabled,agent_rev) VALUES ('%s',E'%s','%d', '%s')",
+            agent_name, agent_desc, 1, rev);
     result = PQexec(pgConn, sql);
     if (fo_checkPQcommand(pgConn, result, sqlselect, __FILE__, __LINE__)) return 0;
 
