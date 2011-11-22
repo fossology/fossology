@@ -24,7 +24,7 @@ TESTDIR = agent_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-all: 
+all: VERSIONFILE
 	$(call dirloop, )
 
 test: 
@@ -32,10 +32,14 @@ test:
 
 coverage:
 	$(MAKE) -C $(TESTDIR) coverage
+# generate the VERSION file
+VERSIONFILE:
+	$(call WriteVERSIONFile,"copyright")
 
 install: all
 	echo "make $(MOD_NAME) install"
 	$(call dirloop,install)
+	$(INSTALL_PROGRAM) VERSION $(MODDIR)/$(MOD_NAME)/VERSION
 	$(INSTALL_PROGRAM) $(MOD_NAME).conf $(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
 	  ln -s $(MODDIR)/$(MOD_NAME) $(SYSCONFDIR)/mods-enabled ; fi;
@@ -49,6 +53,7 @@ uninstall:
 
 
 clean:
+	rm -f VERSION
 	$(call dirloop,clean)
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test VERSIONFILE
