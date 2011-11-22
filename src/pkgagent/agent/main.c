@@ -80,6 +80,8 @@ int	main	(int argc, char *argv[])
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
   char *SVN_REV;
+  char *VERSION;
+  char agent_rev[MAXCMD];
   int CmdlineFlag = 0; /* run from command line flag, 1 yes, 0 not */
 
   fo_scheduler_connect(&argc, argv);
@@ -95,7 +97,9 @@ int	main	(int argc, char *argv[])
   }
 
   SVN_REV = fo_sysconfig("pkgagent", "SVN_REV");
-  Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
+  VERSION = fo_sysconfig("pkgagent", "VERSION");
+  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"ic:Cvh")) != -1)
