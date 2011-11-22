@@ -77,6 +77,7 @@ class list_lic_files extends FO_Plugin
     $nomosagent_pk = GetParm("napk",PARM_INTEGER);
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
     $rf_shortname = GetParm("lic",PARM_RAW);
+    $tag_pk = GetParm("tag",PARM_INTEGER);
     $Excl = GetParm("excl",PARM_RAW);
     $rf_shortname = rawurldecode($rf_shortname);
     if (empty($uploadtree_pk) || empty($rf_shortname))
@@ -102,9 +103,10 @@ class list_lic_files extends FO_Plugin
         $Offset = ($Page < 0) ? 0 : $Page*$Max;
         $order = "";
         $PkgsOnly = false;
+        $CheckOnly = false;
 
         // Count is uploadtree recs, not pfiles
-        $CountArray = CountFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly);
+        $CountArray = CountFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly, $CheckOnly, $tag_pk);
         $Count = $CountArray['count'];
         $Unique = $CountArray['unique'];
 
@@ -117,7 +119,7 @@ class list_lic_files extends FO_Plugin
         $order = " order by ufile_name asc";
         /** should delete $filesresult yourself */
         $filesresult = GetFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk,
-        $PkgsOnly, $Offset, $limit, $order);
+                                           $PkgsOnly, $Offset, $limit, $order, $tag_pk);
         $NumFiles = pg_num_rows($filesresult);
         $text = _("Display");
         $text1 = _("excludes");
