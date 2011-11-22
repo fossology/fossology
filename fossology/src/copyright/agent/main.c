@@ -754,6 +754,8 @@ int main(int argc, char** argv)
   char *DBConfFile = NULL;      /* use default Db.conf */
   char *ErrorBuf;
   char *SVN_REV;
+  char *VERSION;
+  char agent_rev[MAXCMD];
 
   /* Database structs */
   PGconn* pgConn = NULL;        // the connection to Database
@@ -850,7 +852,9 @@ int main(int argc, char** argv)
     pair_init(&curr, string_function_registry(), int_function_registry());
     db_connected = 1;
     SVN_REV = fo_sysconfig("copyright", "SVN_REV");
-    agent_pk = fo_GetAgentKey(pgConn, AGENT_NAME, 0, SVN_REV, AGENT_DESC);
+    VERSION = fo_sysconfig("copyright", "VERSION");
+    sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+    agent_pk = fo_GetAgentKey(pgConn, AGENT_NAME, 0, agent_rev, AGENT_DESC);
 
     /* make sure that we are connected to the database */
     if(!check_copyright_table(pgConn))

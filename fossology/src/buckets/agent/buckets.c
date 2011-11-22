@@ -63,6 +63,9 @@ int main(int argc, char **argv)
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
   char *SVN_REV;
+  char *VERSION;
+  char agent_rev[MAXCMD];
+
 
 //  int *bucketList;
   pbucketdef_t bucketDefArray = 0;
@@ -166,7 +169,9 @@ int main(int argc, char **argv)
    * Note, if GetAgentKey fails, this process will exit.
    */
   SVN_REV = fo_sysconfig("buckets", "SVN_REV");
-  agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), 0, SVN_REV, agentDesc);
+  VERSION = fo_sysconfig("buckets", "VERSION");
+  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), uploadtree.upload_fk, agent_rev, agentDesc);
 
   /*** Initialize the license_ref table cache ***/
   /* Build the license ref cache to hold 2**11 (2048) licenses.

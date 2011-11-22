@@ -24,7 +24,7 @@ MOD_NAME=pkgagent
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-all: 
+all: VERSIONFILE
 	$(call dirloop, )
 
 test: 
@@ -39,6 +39,7 @@ VERSIONFILE:
 
 install: all
 	$(call dirloop,install)
+	$(INSTALL_PROGRAM) VERSION $(MODDIR)/$(MOD_NAME)/VERSION
 	$(INSTALL_PROGRAM) -D $(MOD_NAME).conf $(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 
 uninstall:
@@ -46,6 +47,7 @@ uninstall:
 	rm -rf $(MODDIR)/$(MOD_NAME)
 
 clean:
+	rm -f VERSION
 	$(call dirloop,clean)
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test VERSIONFILE
