@@ -239,7 +239,8 @@ class ui_nomos_license extends FO_Plugin
       $VLic .= "<td align='center'><a href='";
       $VLic .= Traceback_uri();
       $text = _("Show");
-      $VLic .= "?mod=list_lic_files&napk=$Agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']) . "'>$text</a></td>";
+      $tagClause = ($tag_pk) ? "&tag=$tag_pk" : "";
+      $VLic .= "?mod=list_lic_files&napk=$Agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']).$tagClause . "'>$text</a></td>";
 
       /*  License name  */
       $VLic .= "<td align='left'>";

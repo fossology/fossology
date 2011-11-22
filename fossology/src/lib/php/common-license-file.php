@@ -121,14 +121,15 @@ function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk)
  * \param $limit - select limit (num rows returned), default is no limit
  * \param $order - sql order by clause, default is blank
  *                 e.g. "order by ufile_name asc"
+ * \param $tag_pk - optional tag_pk.  Restrict results to files that have this tag.
  *                 
  * \return pg_query result.  See $sql for fields returned.
  *
  * \note Caller should use pg_free_result to free.
  */
 function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
-$PkgsOnly=false, $offset=0, $limit="ALL",
-$order="")
+                             $PkgsOnly=false, $offset=0, $limit="ALL",
+                             $order="", $tag_pk)
 {
   global $PG_CONN;
 
@@ -145,13 +146,25 @@ $order="")
 
   $shortname = pg_escape_string($rf_shortname);
 
-  $sql = "select uploadtree_pk, pfile_fk, ufile_name
-          from license_ref,license_file,
+  /* Optional tag restriction */
+  if (empty($tag_pk))
+  {
+    $TagTable = "";
+    $TagClause = "";
+  }
+  else
+  {
+    $TagTable = "tag_file,";
+    $TagClause = "and PF=tag_file.pfile_fk and tag_fk=$tag_pk";
+  }
+
+  $sql = "select uploadtree_pk, license_file.pfile_fk, ufile_name
+          from license_ref,license_file, $TagTable
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
                  where upload_fk=$upload_pk
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
-          where PF=pfile_fk and agent_fk=$agent_pk and rf_fk=rf_pk
-                and rf_shortname='$shortname'
+          where PF=license_file.pfile_fk and agent_fk=$agent_pk and rf_fk=rf_pk
+                and rf_shortname='$shortname' $TagClause
   $order limit $limit offset $offset";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -174,7 +187,7 @@ $order="")
  * \return Array "count"=>{total number of pfiles}, "unique"=>{number of unique pfiles}
  */
 function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
-$PkgsOnly=false, $CheckOnly=false)
+                               $PkgsOnly=false, $CheckOnly=false, $tag_pk=0)
 {
   global $PG_CONN;
 
@@ -192,13 +205,25 @@ $PkgsOnly=false, $CheckOnly=false)
   $shortname = pg_escape_string($rf_shortname);
   $chkonly = ($CheckOnly) ? " LIMIT 1" : "";
 
-  $sql = "select count(pfile_fk) as count, count(distinct pfile_fk) as unique
-          from license_ref,license_file,
+  /* Optional tag restriction */
+  if (empty($tag_pk))
+  {
+    $TagTable = "";
+    $TagClause = "";
+  }
+  else
+  {
+    $TagTable = "tag_file,";
+    $TagClause = "and PF=tag_file.pfile_fk and tag_fk=$tag_pk";
+  }
+
+  $sql = "select count(license_file.pfile_fk) as count, count(distinct license_file.pfile_fk) as unique
+          from license_ref,license_file, $TagTable
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
                  where upload_fk=$upload_pk
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
-          where PF=pfile_fk and agent_fk=$agent_pk and rf_fk=rf_pk
-                and rf_shortname='$shortname' $chkonly";
+          where PF=license_file.pfile_fk and agent_fk=$agent_pk and rf_fk=rf_pk
+                and rf_shortname='$shortname' $TagClause $chkonly";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
