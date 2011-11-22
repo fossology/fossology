@@ -37,10 +37,6 @@
 #include "nomos_regex.h"
 #include "_autodefs.h"
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
-#endif /* SVN_REV */
-
 extern licText_t licText[]; /* Defined in _autodata.c */
 struct globals gl;
 struct curScan cur;
@@ -789,6 +785,7 @@ int main(int argc, char **argv)
   char **files_to_be_scanned; /**< The list of files to scan */
   char sqlbuf[1024];
   PGresult *result;
+  char *SVN_REV;
 
   cacheroot_t cacheroot;
 
@@ -819,6 +816,7 @@ int main(int argc, char **argv)
                             Bail(-__LINE__);
   }
 
+  SVN_REV = fo_sysconfig("nomos", "SVN_REV");
   gl.agentPk = fo_GetAgentKey(gl.pgConn, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   /* Record the progname name */
