@@ -18,13 +18,13 @@
  ***********************************************************/
 
 /**
- @file fossinit.php
- @brief This program applies core-schema.dat to the database and updates
- the license_ref table.
-
- This should be used immediately after an install or update.
-
- @return 0 for success, 1 for failure.
+ * @file fossinit.php
+ * @brief This program applies core-schema.dat to the database (which
+ *        must exist) and updates the license_ref table.
+ *
+ * This should be used immediately after an install or update.
+ * 
+ * @return 0 for success, 1 for failure.
  **/
 
 /* User must be in group fossy! */
