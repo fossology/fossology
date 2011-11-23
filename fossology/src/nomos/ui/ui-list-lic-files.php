@@ -150,6 +150,7 @@ class list_lic_files extends FO_Plugin
         $V .= "<table>";
         $text = _("File");
         $V .= "<tr><th>$text</th><th>&nbsp";
+        $LastPfilePk = -1;
         while ($row = pg_fetch_assoc($filesresult))
         {
           // Allow user to exclude files with this extension
@@ -173,7 +174,19 @@ class list_lic_files extends FO_Plugin
             /* Tack on pfile to url - information only */
             $pfile_pk = $row['pfile_fk'];
             $LinkLastpfile = $LinkLast . "&pfile=$pfile_pk";
+            if ($LastPfilePk == $pfile_pk)
+            {
+              $indent = "<div style='margin-left:2em;'>";
+              $outdent = "</div>";
+            }
+            else
+            {
+              $indent = "";
+              $outdent = "";
+            }
+            $V .= $indent;
             $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLastpfile, $ShowBox, $ShowMicro, ++$RowNum, $Header);
+            $V .= $outdent;
             $V .= "</td>";
             $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
 
@@ -184,6 +197,7 @@ class list_lic_files extends FO_Plugin
             $V .= "<td>$licstring</td></tr>";
             $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
           }
+          $LastPfilePk = $pfile_pk;
         }
         pg_free_result($filesresult);
         $V .= "</table>";
