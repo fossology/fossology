@@ -169,7 +169,7 @@ function SetRepo($sysConfPath,$repoPath)
  * Created on Sep 15, 2011 by Mark Donohoe
  */
 
-function TestDBInit($path=NULL, $catalog, $sysconfig)
+function TestDBInit($path=NULL, $dbName)
 {
   if(empty($path))
   {
@@ -179,27 +179,23 @@ function TestDBInit($path=NULL, $catalog, $sysconfig)
   {
     return("FAILED: Schema data file ($path) not found.\n");
   }
-  if(empty($catalog))
+  if(empty($dbName))
   {
     return("Error!, no catalog supplied\n");
   }
-  if(empty($sysconfig))
-  {
-    return("Error!, no sysconf path supplied\n");
-  }
   
-  // run schema-update
+  // run ApplySchema via fossinit
   $result = NULL;
   $lastUp = NULL;
-  putenv("SYSCONFDI=$sysconfig");
-  $schemaUp = __DIR__ . '/../../cli/schema-update.php';
-
-  $last = exec("$schemaUp -f $path -C $catalog -c $sysconfig", $upOut, $upRtn);
+  $sysc = getenv('SYSCONFDIR');
+  $fossInit = __DIR__ . '/../../../install/fossinit.php';
+  $upOut = array();
+  $last = exec("$fossInit -d $dbName -f $path", $upOut, $upRtn);
   //echo "DB: schema up output is:\n" . implode("\n",$upOut) . "\n";
 
   if($upRtn != 0)
   {
-    return(implode("\n", $upOut . "\n"));
+    return(implode("\n", $upOut) . "\n");
   }
   else
   {
