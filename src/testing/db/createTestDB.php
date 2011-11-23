@@ -217,6 +217,7 @@ if(file_exists($fossConf))
     exit(1);
   }
 }
+
 if(setRepo($confPath, $repoPath) === FALSE)
 {
   echo "ERROR!, could not change $sysconfig/fossology.conf, please change by " .
@@ -233,6 +234,18 @@ if(system($cmd) === FALSE)
   exit(1);
 }
 
+// copy version file
+// copy and modify fossology.conf
+$version = $sysconfig . '/VERSION';
+$myVersion  = $confPath . '/VERSION';
+if(file_exists($fossConf))
+{
+  if(copy($version, $myVersion) === FALSE)
+  {
+    echo "FATAL! cannot copy $version to $myVersion\n";
+    exit(1);
+  }
+}
 // create an empty db?  if so, still need to export and print
 if($createEmpty)
 {
@@ -243,8 +256,17 @@ if($createEmpty)
   echo $confPath . "\n";
   exit(0);
 }
+// export to environment the new sysconf dir
+// The update has to happen before schema-update gets called or schema-update
+// will not end up with the correct sysconf
+
+putenv("SYSCONFDIR=$confPath");
+$_ENV['SYSCONFDIR'] = $confPath;
+$GLOBALS['SYSCONFDIR'] = $confPath;
+
 // load the schema
-$loaded = TestDBInit(NULL, $DbName, $confPath);
+$loaded = TestDBInit(NULL, $DbName);
+//echo "DB: return from TestDBinit is:\n";print_r($loaded) . "\n";
 if($loaded !== NULL)
 {
   echo "ERROR, could not load schema\n";
