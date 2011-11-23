@@ -46,7 +46,7 @@ install: all
 	echo "Installing configuration files..."
 	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ] ; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/Db.conf"; \
-	 	$(INSTALL) -m 640 defconf/Db.conf $(DESTDIR)$(CONFPATH)/Db.conf; \
+	 	$(INSTALL) -m 666 defconf/Db.conf $(DESTDIR)$(CONFPATH)/Db.conf; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/Db.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
