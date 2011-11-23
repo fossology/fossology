@@ -4,7 +4,6 @@
 # Create and install:
 #  fo-postinstall
 #  SYSCONFDIR/db.conf
-#  SYSCONFDIR/VERSION
 
 TOP=..
 VARS=$(TOP)/Makefile.conf
@@ -14,7 +13,7 @@ CONFPATH=$(SYSCONFDIR)
 # default version is the scm revision number
 -DVERSION=$(SCM_REV)
 
-all:	fo-postinstall defconf/Db.conf defconf/fossology.conf
+all:	fo-postinstall defconf/Db.conf defconf/fossology.conf db/dbcreate
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
@@ -29,9 +28,12 @@ defconf/Db.conf: defconf/Db.conf-process
 # generate fossology.conf
 defconf/fossology.conf:	defconf/fossology.conf-process
 
+# create dbcreate
+	$(MAKE) -s -C db
+
 install: all
 	$(INSTALL_PROGRAM) fo-postinstall $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
-
+	$(MAKE) -s -C db install
 	echo "Making configuration directories"; \
 	if [ ! -e $(DESTDIR)$(CONFPATH) ] ; then \
 		mkdir -p $(DESTDIR)$(CONFPATH); \
