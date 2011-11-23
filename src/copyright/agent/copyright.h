@@ -18,6 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef COPYRIGHT_H_INCLUDE
 #define COPYRIGHT_H_INCLUDE
 
+#define myBUFSIZ        2048
+
 #include <stdio.h>
 
 /* ************************************************************************** */

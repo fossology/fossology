@@ -64,7 +64,7 @@ int main(int argc, char **argv)
   char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
-  char agent_rev[MAXCMD];
+  char agent_rev[myBUFSIZ];
 
 
 //  int *bucketList;
