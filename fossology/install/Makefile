@@ -75,10 +75,11 @@ uninstall:
 	@echo "      $(DESTDIR)$(CONFPATH)/fossology.conf"
 	@echo "      $(DESTDIR)$(CONFPATH)/Db.conf"
 	@echo "  Remove by hand if you desire."
-
+	$(MAKE) -s -C db uninstall
 
 clean:
-	rm -f fo-postinstall defconf/Db.conf defconf/fossology.conf 
+	rm -f fo-postinstall defconf/Db.conf defconf/fossology.conf
+	$(MAKE) -s -C db clean
 
 test: all
 	@echo "NOTICE: no tests available for install"
