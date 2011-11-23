@@ -755,7 +755,7 @@ int main(int argc, char** argv)
   char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
-  char agent_rev[MAXCMD];
+  char agent_rev[myBUFSIZ];
 
   /* Database structs */
   PGconn* pgConn = NULL;        // the connection to Database
