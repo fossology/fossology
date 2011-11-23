@@ -48,7 +48,7 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
   }
 
   /* get the current statement timeout */
-  $SQL = "show statement_timeout"; 
+  $SQL = "show statement_timeout";
   $result = pg_query($PG_CONN, $SQL);
   DBCheckResult($result, $SQL, __FILE__,__LINE__);
   $Results = pg_fetch_all($result);
@@ -585,7 +585,7 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
   ReportCachePurgeAll();
 
   /* restore DB timeouts */
-  pg_query($PG_CONN, "SET statement_timeout = $Statement_timeout;");
+  pg_query($PG_CONN, "SET statement_timeout = $Statement_Timeout;");
   return false;
 } // ApplySchema()
 
@@ -921,14 +921,14 @@ function GetSchema()
 
 
 /**
- * \brief Export the schema of the connected ($PG_CONN) database to a 
+ * \brief Export the schema of the connected ($PG_CONN) database to a
  *        file in the format readable by GetSchema().
- * 
+ *
  * @param string $Filename path to the file to store the schema in.
- * 
+ *
  * @return false=success, on error return string with error message.
 **/
-function ExportSchema($Filename = NULL) 
+function ExportSchema($Filename = NULL)
 {
 	global $Name;
 	
