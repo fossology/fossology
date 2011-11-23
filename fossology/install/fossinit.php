@@ -20,7 +20,7 @@
 /**
  @file fossinit.php
  @brief This program applies core-schema.dat to the database and updates
-        the license_ref table.
+ the license_ref table.
 
  This should be used immediately after an install or update.
 
@@ -102,11 +102,11 @@ else
 {
   if ($Verbose) { print "DB schema has been updated.\n"; }
   $State = 1;
-  $Filename = "$WEBDIR/init.ui";
+  $Filename = "$MODDIR/www/ui/init.ui";
   if (file_exists($Filename))
   {
     if ($Verbose) { print "Removing flag '$Filename'\n"; }
-    if (is_writable($WEBDIR)) { $State = unlink($Filename); }
+    if (is_writable("$MODDIR/www/ui/")) { $State = unlink($Filename); }
     else { $State = 0; }
   }
   if (!$State)
@@ -150,7 +150,7 @@ function Usage()
 /**
  * \file bootstrap.php
  * \brief Fossology system bootstrap
- * This file may be DUPLICATED in any php utility that needs to 
+ * This file may be DUPLICATED in any php utility that needs to
  * bootstrap itself.
  */
 
@@ -160,7 +160,7 @@ function Usage()
  *  - parse fossology.conf
  *  - source template (require_once template-plugin.php)
  *  - source common files (require_once common.php)
- * 
+ *
  * The following precedence is used to resolve SYSCONFDIR:
  *  - $SYSCONFDIR path passed in
  *  - environment variable SYSCONFDIR
@@ -174,7 +174,7 @@ function Usage()
  * The global $SYSCONFDIR is also set for backward compatibility.
  *
  * \Note Since so many files expect directory paths that used to be in pathinclude.php
- * to be global, this function will define the same globals (everything in the 
+ * to be global, this function will define the same globals (everything in the
  * DIRECTORIES section of fossology.conf).
  */
 function bootstrap()
@@ -208,7 +208,7 @@ function bootstrap()
   foreach($SysConf['DIRECTORIES'] as $var=>$assign)
   {
     /* Evaluate the individual variables because they may be referenced
-     * in subsequent assignments. 
+     * in subsequent assignments.
      */
     $toeval = "\$$var = \"$assign\";";
     eval($toeval);
@@ -221,7 +221,7 @@ function bootstrap()
   if (empty($MODDIR))
   {
     $text = _("FATAL: System initialization failure: MODDIR not defined in fossology.conf");
-    echo $text. "\n"; 
+    echo $text. "\n";
     exit;
   }
 
@@ -254,7 +254,7 @@ function initLicenseRefTable($Verbose)
     return (1);
   }
   $file = "$LIBEXECDIR/licenseref.sql";
-  
+
   if (is_file($file)) {
     $handle = fopen($file, "r");
     $pattern = '/^INSERT INTO/';
