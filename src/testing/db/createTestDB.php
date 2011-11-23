@@ -233,14 +233,6 @@ if(system($cmd) === FALSE)
   exit(1);
 }
 
-// copy VERSION from real sysconf.
-$VERSION = $sysconfig . '/VERSION';
-$myVERSION = $confPath . '/VERSION';
-if(copy($VERSION, $myVERSION) === FALSE)
-{
-  echo "FATAL! Cannot copy $VERSION to $myVERSION\n";
-  exit(1);
-}
 // create an empty db?  if so, still need to export and print
 if($createEmpty)
 {

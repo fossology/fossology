@@ -68,24 +68,6 @@ function ConfigInit($sysconfdir, &$SysConf)
 {
   global $PG_CONN;
 
-  /*************  Parse VERSION *******************/
-  $VersionFile = "{$sysconfdir}/VERSION";
-  $VersionConf = parse_ini_file($VersionFile, true);
-
-  /* Add this file contents to $SysConf, then destroy $VersionConf 
-   * This file can define its own groups and is eval'd.
-   */
-  foreach($VersionConf as $GroupName=>$GroupArray)
-    foreach($GroupArray as $var=>$assign)
-    {
-      $toeval = "\$$var = \"$assign\";";
-      eval($toeval);
-      $SysConf[$GroupName][$var] = ${$var};
-      $GLOBALS[$var] = ${$var};
-    }
-  unset($VersionConf);
-
-
   /*************  Parse Db.conf *******************/
   $dbPath = "{$sysconfdir}/Db.conf";
   $dbConf = parse_ini_file($dbPath, true);
