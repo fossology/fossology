@@ -32,7 +32,7 @@ CLI = fo_cli
 FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' -DPROJECT_GROUP='"$(PROJECTGROUP)"' -DPROCESS_NAME='"$(EXE)"'
 
 INITFILE=init.d/fossology
-CONFFILE=fossology.conf
+#CONFFILE=fossology.conf
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 #######################
@@ -115,22 +115,22 @@ logging.o: %.o: %.c $(DEPEN)
 #######################
 
 install: all install-conf
-	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/scheduler/agent/$(EXE)
-	$(INSTALL_PROGRAM) $(CLI) $(MODDIR)/scheduler/agent/$(CLI)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/scheduler/agent/$(EXE)
+	$(INSTALL_PROGRAM) $(CLI) $(DESTDIR)$(MODDIR)/scheduler/agent/$(CLI)
 	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
 	
-	@if test ! -e $(SYSCONFDIR)/mods-enabled/scheduler; then \
-	  ln -s $(MODDIR)/scheduler $(SYSCONFDIR)/mods-enabled ; fi;
-	@if test ! -e $(SYSCONFDIR)/mods-enabled/scheduler; then \
-	  ln -s $(MODDIR)/scheduler $(SYSCONFDIR)/mods-enabled ; fi;
+	@if test ! -e $(CONFDIR)/mods-enabled/scheduler; then \
+	  ln -s $(DESTDIR)$(MODDIR)/scheduler $(CONFDIR)/mods-enabled ; fi;
+	@if test ! -e $(CONFDIR)/mods-enabled/scheduler; then \
+	  ln -s $(DESTDIR)$(MODDIR)/scheduler $(CONFDIR)/mods-enabled ; fi;
 
 install-conf:
 	@mkdir -p $(CONFDIR)/mods-enabled
-	@ echo "Installing config files in $(CONFDIR)/"
-	@if [ ! -f $(CONFDIR)/$(CONFFILE) -o "$(OVERWRITE)" ] ; then \
-	  mkdir -p $(CONFDIR)/$(dir $(CONFFILE)); \
-	  cp $(CONFFILE) $(CONFDIR)/; \
-	fi
+	#@ echo "Installing config files in $(CONFDIR)/"
+	#@if [ ! -f $(CONFDIR)/$(CONFFILE) -o "$(OVERWRITE)" ] ; then \
+	#  mkdir -p $(CONFDIR)/$(dir $(CONFFILE)); \
+	#  cp $(CONFFILE) $(CONFDIR)/; \
+	#fi
 	@ echo "Installing init script in $(DESTDIR)$(INITDIR)/"
 	@if [ ! -f $(DESTDIR)$(INITDIR)/$(INITFILE) ] ; then \
 	  mkdir -p $(DESTDIR)$(INITDIR)/$(dir $(INITFILE)); \
@@ -146,10 +146,10 @@ clean:
 
 uninstall:
 	rm -f $(OBJS) *.a
-	rm -rf $(MODDIR)/scheduler defconf/init.d/fossology
-	rm -rf $(MODDIR)/schedulerCLI
-	rm -f $(SYSCONFDIR)/mods-enabled/scheduler
-	rm -f $(SYSCONFDIR)/mods-enabled/fo_cli
+	rm -rf $(DESTDIR)$(MODDIR)/scheduler defconf/init.d/fossology
+	rm -rf $(DESTDIR)$(MODDIR)/schedulerCLI
+	rm -f $(CONFDIR)/mods-enabled/scheduler
+	rm -f $(CONFDIR)/mods-enabled/fo_cli
 
 test: all
 	@echo "NOTICE: no tests available for 2.0 scheduler"

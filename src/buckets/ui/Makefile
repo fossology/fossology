@@ -36,12 +36,12 @@ coverage:
 
 install:
 	@echo "make install in $(DIR)"
-	mkdir -p $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
-	$(INSTALL_DATA) ./*.php $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 uninstall:
 	@echo "make uninstall in $(DIR)"
-	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
 	@echo "make clean nothing in $(DIR)"

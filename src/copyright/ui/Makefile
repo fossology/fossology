@@ -24,12 +24,12 @@ all:
 
 install:
 	echo "make copyright ui install"
-	mkdir -p $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
-	$(INSTALL_DATA) ./*.php $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 uninstall:
 	echo "make copyright ui uninstall"
-	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
 	echo "make copyright ui clean"

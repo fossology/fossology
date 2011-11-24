@@ -25,12 +25,12 @@ all:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) all"
 
 install:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) install"
-	$(INSTALL_PROGRAM) -D agent-pkgagent.php $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/agent-pkgagent.php
+	@echo "make $(DESTDIR)$(MOD_NAME)/$(MOD_SUBDIR) install"
+	$(INSTALL_PROGRAM) agent-pkgagent.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/agent-pkgagent.php
 
 uninstall:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
-	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clean"

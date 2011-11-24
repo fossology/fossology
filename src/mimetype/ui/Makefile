@@ -26,12 +26,12 @@ all:
 
 install: all
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) install"
-	mkdir -p $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/
-	$(INSTALL_DATA) ./*.php $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/
 
 uninstall:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
-	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clean"

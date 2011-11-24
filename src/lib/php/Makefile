@@ -28,15 +28,15 @@ all:
 install: all
 
 	
-	mkdir -p $(MODDIR)/lib/php; \
+	mkdir -p $(DESTDIR)$(MODDIR)/lib/php; \
 	
 	for file in $(FILES); do \
-		$(INSTALL_DATA) $$file $(MODDIR)/lib/php/$$file; \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/lib/php/$$file; \
 	done
 
 uninstall:
 	@echo "Removing php libs"; \
-	rm -rf $(MODDIR)/lib/php
+	rm -rf $(DESTDIR)$(MODDIR)/lib/php
 
 clean:
 	rm -f *.o core
