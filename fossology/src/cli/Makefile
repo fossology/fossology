@@ -35,7 +35,7 @@ docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 
 install: all
 	for file in $(EXE); do \
-		$(INSTALL_PROGRAM) -D $$file $(DESTDIR)$(MODDIR)/cli/$${file%.php}; \
+		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/cli/$${file%.php}; \
 	done
 
 	for file in $(MAN1FILES); do \
@@ -43,20 +43,23 @@ install: all
 	done
 	
 #$(INSTALL_DATA) libschema.php $(DESTDIR)$(LIBEXECDIR)/libschema.php
-	
+# create BINDIR if not exsit
+	if [ ! -e $(DESTDIR)$(BINDIR) ] ; then \
+		mkdir -p $(DESTDIR)$(BINDIR); \
+	fi	
 # create wrappers in BINDIR
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \
-		echo "#!/bin/bash" > $(BINDIR)/$$file; \
-		echo "MODDIR=$(MODDIR)" >> $(BINDIR)/$$file; \
-		echo "SYSCONFDIR=$(SYSCONFDIR)" >> $(BINDIR)/$$file; \
-		echo "\$$MODDIR/cli/$$file -c \$$SYSCONFDIR \$$@" >> $(BINDIR)/$$file; \
-		chmod a+x $(BINDIR)/$$file; \
+		echo "#!/bin/bash" > $(DESTDIR)$(BINDIR)/$$file; \
+		echo "MODDIR=$(DESTDIR)$(MODDIR)" >> $(DESTDIR)$(BINDIR)/$$file; \
+		echo "SYSCONFDIR=$(DESTDIR)$(SYSCONFDIR)" >> $(DESTDIR)$(BINDIR)/$$file; \
+		echo "\$$MODDIR/cli/$$file -c \$$SYSCONFDIR \$$@" >> $(DESTDIR)$(BINDIR)/$$file; \
+		chmod a+x $(DESTDIR)$(BINDIR)/$$file; \
 	done
 
 uninstall:
 	for file in $(EXE); do \
-		rm -f $(DESTDIR)$(BINDIR)/$${file%}; \
+		rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
 	done
 	
 	rm -rf $(DESTDIR)$(MODDIR)/cli

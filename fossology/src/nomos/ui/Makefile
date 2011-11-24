@@ -26,11 +26,11 @@ all:
 install:
 	@echo "make nomos ui install"
 	mkdir -p $(DESTDIR)$(MODDIR)/nomos/ui
-	$(INSTALL_DATA) ./*.php $(MODDIR)/nomos/ui/
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/nomos/ui/
 
 uninstall:
 	@echo "make nomos ui uninstall"
-	rm -rf $(MODDIR)/nomos/ui
+	rm -rf $(DESTDIR)$(MODDIR)/nomos/ui
 
 clean:
 	@echo "make nomos ui clean"

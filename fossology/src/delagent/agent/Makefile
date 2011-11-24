@@ -40,14 +40,15 @@ delagent.o: util.c $(HDRS)
 
 install: all
 	@echo "make delagent agent install"
-	$(INSTALL_PROGRAM) -D $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)	
-	@if test ! -e $(SYSCONFDIR)/mods-enabled/$(EXE); then \
-          ln -s $(MODDIR)/$(EXE) $(SYSCONFDIR)/mods-enabled ; fi;
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)	
+	@mkdir -[ $(CONFDIR)/mods-enabled
+	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
+          ln -s $(DESTDIR)$(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make delagent agent uninstall"
-	rm -rf $(MODDIR)/$(EXE)/agent
-	rm -f $(SYSCONFDIR)/mods-enabled/$(EXE)
+	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
+	rm -f $(CONFDIR)/mods-enabled/$(EXE)
 
 test: all
 	$(MAKE) -C $(TESTDIRS) test

@@ -39,12 +39,12 @@ VERSIONFILE:
 
 install: all
 	$(call dirloop,install)
-	$(INSTALL_PROGRAM) VERSION $(MODDIR)/$(MOD_NAME)/VERSION
-	$(INSTALL_PROGRAM) -D $(MOD_NAME).conf $(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+	$(INSTALL_PROGRAM) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
+	$(INSTALL_PROGRAM) -D $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 
 uninstall:
 	$(call dirloop,uninstall)
-	rm -rf $(MODDIR)/$(MOD_NAME)
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 
 clean:
 	rm -f VERSION

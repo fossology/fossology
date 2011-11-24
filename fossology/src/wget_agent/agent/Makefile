@@ -36,12 +36,12 @@ $(EXE): main.c $(FOLIB) libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS
 
 install: all
 	@echo "make wget_agent install"
-	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 
 uninstall:
 	@echo "make wget_agent uninstall"
-	rm -rf $(MODDIR)/$(EXE)/agent
+	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL)

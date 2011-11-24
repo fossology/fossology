@@ -63,11 +63,11 @@ $(FOLIB):
 
 install: all
 	@echo "make buckets agent install"
-	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(EXE)/agent/$(EXE)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
 	@echo "make buckets agent uninstall"
-	rm -rf $(MODDIR)/$(EXE)/agent
+	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:
 	rm -f $(EXE) *.o core

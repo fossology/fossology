@@ -30,19 +30,20 @@ install: all $(VARS)
 	if [ -e $(DESTDIR)$(MODDIR)/ununpack/agent/departition ] ; then \
 	   rm -f $(DESTDIR)$(MODDIR)/ununpack/agent/departition; \
 	fi
-	$(INSTALL_PROGRAM) -D departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition
+	@mkdir -p $(CONFDIR)/mods-enabled
+	$(INSTALL_PROGRAM) departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition
 	
-	$(INSTALL_PROGRAM) -D ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
+	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
 	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
-	  ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;
+	  ln -s $(DESTDIR)$(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;
 	  
 # create wrapper for departition in BINDIR
-
-	@echo "#!/bin/bash" > $(BINDIR)/departition
-	@echo "MODDIR=$(MODDIR)" >> $(BINDIR)/departition
-	@echo "SYSCONFDIR=$(SYSCONFDIR)" >> $(BINDIR)/departition
-	@echo "\$$MODDIR/ununpack/agent/departition -c \$$SYSCONFDIR \$$@" >> $(BINDIR)/departition
-	chmod a+x $(BINDIR)/departition
+	@mkdir -p $(DESTDIR)$(BINDIR)
+	@echo "#!/bin/bash" > $(DESTDIR)$(BINDIR)/departition
+	@echo "MODDIR=$(DESTDIR)$(MODDIR)" >> $(DESTDIR)$(BINDIR)/departition
+	@echo "SYSCONFDIR=$(CONFDIR)" >> $(DESTDIR)$(BINDIR)/departition
+	@echo "\$$MODDIR/ununpack/agent/departition -c \$$SYSCONFDIR \$$@" >> $(DESTDIR)$(BINDIR)/departition
+	chmod a+x $(DESTDIR)$(BINDIR)/departition
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
