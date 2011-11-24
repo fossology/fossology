@@ -216,19 +216,14 @@ if [ $RUNTIME ]; then
 fi
 
 ########################################################################
-# install dependencies in $mods_enabled_dir/$mod_name/mod_deps
+# install dependencies of modules via running $mods_enabled_dir/$mod_name/mod_deps
 install_mod_deps()
 {
   mods_enabled_dir=$1
-  install_type=$2
   for mod_deps in `find -L $mods_enabled_dir -name mod_deps`;
   do
     if [ -f $mod_deps ]; then
-      mod_deps_content=`cat $mod_deps`
-      case $install_type in
-        Debian|Ubuntu|LinuxMint) echo "`apt-get install $mod_deps_content`" ;;
-        Fedora|RedHatEnterprise*|CentOS) echo "`yum install $mod_deps_content`" ;;
-      esac
+      $mod_deps
     fi
   done
 }
@@ -239,6 +234,6 @@ if [ -z $mods_enabled_dir ]; then
   mods_enabled_dir=$SYSCONFDIR
 fi
 mods_enabled_dir=$mods_enabled_dir/mods-enabled/
-install_mod_deps $mods_enabled_dir $DISTRO
+install_mod_deps $mods_enabled_dir 
  
 ########################################################################

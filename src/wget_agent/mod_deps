@@ -1,1 +1,39 @@
-wget
+#!/bin/bash
+# FOSSology mod_deps script
+#
+# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# This script helps you install dependencies on a system. for a module
+
+# This must run as root.
+if [ `id -u` != "0" ] ; then
+  echo "ERROR: fo-installdeps must run as root."
+  echo "Aborting."
+  exit 1
+fi
+
+# figure out what distro we're on
+DISTRO=`lsb_release -is`
+CODENAME=`lsb_release -cs`
+
+if [ "$?" != "0" ]; then
+  echo "ERROR: this program requires the lsb_release command. On Debian based"
+  echo "  systems this is probably in the lsb-release package, on"
+  echo "  Fedora/RedHat systems it is probably the redhat-lsb package."
+  exit 1
+fi
+
+########################################################################
+
+case "$DISTRO" in
+  Debian|Ubuntu|LinuxMint)
+    apt-get install \
+      wget;;
+  RedHatEnterprise*|CentOS)
+    yum install \
+      wget;;
+  Fedora)
+    yum install \
+      wget;;
+esac
+
+#######################################################################
