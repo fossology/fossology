@@ -31,14 +31,14 @@ build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp  
 
 	# Add here commands to compile the arch part of the package.
-	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var
+	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var
 	touch $@
 
 build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp  
 
 	@# this currently doesn't do anything, but in case it does someday
-	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var build-db
+	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var install/db/
 	touch $@
 
 clean: 
@@ -57,8 +57,9 @@ install-indep:
 	dh_clean -k -i 
 	dh_installdirs -i
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-db \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-db
+	#$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-db \
+        #   PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+        #   -C install/db install
 
 	dh_install -i
 
@@ -68,63 +69,78 @@ install-arch:
 	dh_clean -k -s 
 	dh_installdirs -s
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
-           install-common install-ui install-cli
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
-           -C devel install-runtime
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-core \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var install-install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-core \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/lib install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-core \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/www install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-core \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/cli install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-core \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/wget_agent install
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-scheduler
-	@# install the optional defaults file
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
-	   -C scheduler install-default
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler-single \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-scheduler
-	@# install the optional defaults file
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler-single \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
-	   -C scheduler install-default
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/scheduler install
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-agents \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-agents
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-agents-single \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-agents
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ununpack \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/ununpack install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ununpack \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/adj2nest install
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-dev \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
-           -C devel install-dev
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-copyright \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/copyright install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-buckets \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/buckets install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-mimetype \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/mimetype install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-nomos \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/nomos install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-pkgagent \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/pkgagent install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-delagent \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/delagent install
 
 	dh_install -s
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep
 # in another 'make' thread.
-binary-common:
+binary-core:
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs 
-	dh_installdocs -A -Nfossology-common -Nfossology-dev debian/README.Debian
-	dh_installdocs -pfossology-dev -pfossology-common
+	dh_installdocs -A -Nfossology-core debian/README.Debian
+	dh_installdocs -pfossology-core
 	dh_installexamples
 #	dh_installdebconf	
 	dh_installlogrotate	
 #	dh_installmime
 	DH_OPTIONS= dh_installinit -o -pfossology-scheduler --name=fossology
-	DH_OPTIONS= dh_installinit -o -pfossology-scheduler-single --name=fossology
 #	dh_installcron -pfossology-db
 	dh_installman
 
 # Do the lintian stuff by hand for now so we can depend on older debhelper to
 # make backports easier, switch when etch support dropped
 #	dh_lintian
-	mkdir -p debian/fossology-common/usr/share/lintian/overrides
-	cp debian/fossology-common.lintian-overrides debian/fossology-common/usr/share/lintian/overrides/fossology-common
-	mkdir -p debian/fossology-agents/usr/share/lintian/overrides
-	cp debian/fossology-agents.lintian-overrides debian/fossology-agents/usr/share/lintian/overrides/fossology-agents
-	mkdir -p debian/fossology-agents-single/usr/share/lintian/overrides
-	cp debian/fossology-agents-single.lintian-overrides debian/fossology-agents-single/usr/share/lintian/overrides/fossology-agents-single
+	mkdir -p debian/fossology-core/usr/share/lintian/overrides
+	cp debian/fossology-core.lintian-overrides debian/fossology-core/usr/share/lintian/overrides/fossology-core
+	#mkdir -p debian/fossology-agents/usr/share/lintian/overrides
+	#cp debian/fossology-agents.lintian-overrides debian/fossology-agents/usr/share/lintian/overrides/fossology-agents
+	#mkdir -p debian/fossology-agents-single/usr/share/lintian/overrides
+	#cp debian/fossology-agents-single.lintian-overrides debian/fossology-agents-single/usr/share/lintian/overrides/fossology-agents-single
 
 	dh_link
 	dh_strip
@@ -136,13 +152,13 @@ binary-common:
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
-# Build architecture independant packages using the common target.
+# Build architecture independant packages using the core target.
 binary-indep: build-indep install-indep
-	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
+	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-core
 
-# Build architecture dependant packages using the common target.
+# Build architecture dependant packages using the core target.
 binary-arch: build-arch install-arch
-	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-common
+	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-core
 
 binary: binary-arch binary-indep
 .PHONY: build clean binary-indep binary-arch binary install install-indep install-arch configure
