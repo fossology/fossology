@@ -1,10 +1,11 @@
-fossology (1.4.0~rc1+1) unstable; urgency=low
+fossology (2.0.0~devel+1) unstable; urgency=low
 
+  [ Build User ]
   * Non-maintainer upload.
   * 
-  * 
+  *
 
- -- Build User <build@cranky.manage>  Mon, 18 Apr 2011 13:33:22 -0700
+ -- madong <madong@bl480c-1>  Wed, 23 Nov 2011 15:22:47 +0800
 
 fossology (1.4.0~20110401+2) unstable; urgency=low
 
