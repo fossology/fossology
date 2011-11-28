@@ -176,6 +176,9 @@ int main(int argc, char *argv[])
   int pfile_count = 0;
   int Agent_pk = 0;
   int ars_pk = 0;
+  char *SVN_REV;
+  char *VERSION;
+  char agent_rev[MAXCMD];
 
   int upload_pk = 0;           // the upload primary key
   char *AgentARSName = "wc_agent_ars";
@@ -214,7 +217,12 @@ int main(int argc, char *argv[])
     LOG_FATAL("Unable to connect to database\n");
     exit(-1);
   }
-  fo_GetAgentKey(pgConn , basename(argv[0]), 0, SVN_REV, agent_desc);
+
+  SVN_REV = fo_sysconfig("wc_agent", "SVN_REV");
+  VERSION = fo_sysconfig("wc_agent", "VERSION");
+  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+
+  Agent_pk = fo_GetAgentKey(pgConn , basename(argv[0]), 0, agent_rev, agent_desc);
 
   /* When initializing the DB, don't do anything else */
   if (InitFlag)

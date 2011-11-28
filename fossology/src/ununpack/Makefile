@@ -18,8 +18,9 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = agent 
+DIRS = agent ui
 TESTDIR = agent_tests
+MOD_NAME = ununpack
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
@@ -37,13 +38,21 @@ coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
+	@echo "make $(MOD_NAME) install"
 	$(call dirloop,install)
+	$(INSTALL_PROGRAM) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
+	$(INSTALL_PROGRAM) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+	  ln -s $(DESTDIR)$(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
 
 uninstall:
+	@echo "make $(MOD_NAME) uninstall"
 	$(call dirloop,uninstall)
-	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/ununpack
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
+	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
 clean:
 	$(call dirloop,clean)
+	rm -rf VERSION
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test VERSIONFILE

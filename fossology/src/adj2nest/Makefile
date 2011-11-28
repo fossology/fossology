@@ -18,7 +18,9 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = agent agent_tests 
+MOD_NAME=adj2nest
+
+DIRS = agent
 TESTDIR = agent_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
@@ -34,12 +36,23 @@ VERSIONFILE:
 	$(call WriteVERSIONFile,"adj2nest")
 
 install: all
+	@echo "make $(MOD_NAME) install"
 	$(call dirloop,install)
+	$(INSTALL_PROGRAM) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
+	$(INSTALL_PROGRAM) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+	  ln -s $(DESTDIR)$(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
+
 
 uninstall:
+	@echo "make $(MOD_NAME) uninstall"
 	$(call dirloop,uninstall)
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
+	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
+
 
 clean:
 	$(call dirloop,clean)
+	rm -f VERSION
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test VERSIONFILE
