@@ -23,21 +23,24 @@
 
 
 /**
-   \brief Connect to database engine.
-          This is a no-op if $PG_CONN already has a value.
-
-   \param $Options an optional list of attributes for
-               connecting to the database. E.g.:
-     "dbname=text host=text user=text password=text"
-
- If $Options is null, then connection parameters 
- will be read from Db.conf.
-
- \return 
-   Success: $PG_CONN, the postgres connection object
-   Failure: Error message is printed and exit
+ * \brief Connect to database engine.
+ *        This is a no-op if $PG_CONN already has a value.
+ *
+ * \param $sysconfdir fossology configuration directory (location of Db.conf)
+ * \param $Options an optional list of attributes for
+ *             connecting to the database. E.g.:
+ *   "dbname=text host=text user=text password=text"
+ * \param $FailExit true (default) to print error, backtrace and call exit on failure
+ *                  false to return $PG_CONN === false on failure
+ *
+ * If $Options is null, then connection parameters 
+ * will be read from Db.conf.
+ *
+ * \return 
+ *   Success: $PG_CONN, the postgres connection object
+ *   Failure: Error message is printed and exit
  **/
-function DBconnect($sysconfdir, $Options="")
+function DBconnect($sysconfdir, $Options="", $FailExit=true)
 {
   global $PG_CONN;
 
@@ -49,14 +52,20 @@ function DBconnect($sysconfdir, $Options="")
   else
     $PG_CONN = pg_pconnect(str_replace(";", " ", $Options));
 
-  if (empty($PG_CONN))
+  if (!empty($PG_CONN)) return($PG_CONN); /* success */
+
+  if ($FailExit)
   {
     $text = _("Could not connect to FOSSology database.");
     echo "<h2>$text</h2>";
     debugbacktrace();
     exit;
   }
-  return($PG_CONN);
+  else
+  {
+    $PG_CONN = false;
+    return;
+  }
 } /* End DBconnect() */
 
 
