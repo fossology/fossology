@@ -39,6 +39,7 @@ extern PGconn* db_conn;
 
 #define MAXSQL  1024
 #define MAXLINE 1024
+#define myBUFSIZ 2048
 
 void DeleteLicense(long UploadId);
 void DeleteUpload(long UploadId);

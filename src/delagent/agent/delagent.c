@@ -24,10 +24,6 @@
  */
 #include "delagent.h"
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
-#endif
-
 /**
  * \brief main function for the delagent
  *
@@ -73,6 +69,11 @@ int main (int argc, char *argv[])
   char *Parm = NULL;
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  int Agent_pk = 0;
+  char *SVN_REV;
+  char *VERSION;
+  char agent_rev[myBUFSIZ];
+
 
   fo_scheduler_connect(&argc, argv);
 
@@ -87,7 +88,6 @@ int main (int argc, char *argv[])
           LOG_FATAL("Unable to open DB");
           exit(-1);
         }
-        fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
         PQfinish(db_conn);
         return(0);
       case 'f': ListFolder=1; GotArg=1; break;
@@ -116,7 +116,12 @@ int main (int argc, char *argv[])
     LOG_FATAL("Unable to open DB");
     exit(-1);
   }
-  fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
+
+  SVN_REV = fo_sysconfig("delagent", "SVN_REV");
+  VERSION = fo_sysconfig("delagent", "VERSION");
+  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  /* Get the Agent Key from the DB */
+  Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   if (ListProj) ListUploads();
   if (ListFolder) ListFolders();
