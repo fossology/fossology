@@ -347,7 +347,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   struct stat sb;
   int rc_system =0;
   char* http_proxy;
-  char proxy[MAXCMD];
+  char proxy[MAXCMD] = {0};
   GError* error = NULL;
 
   http_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "http_proxy", &error);
@@ -355,7 +355,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   /** set proxy */
   if (http_proxy && http_proxy[0])
   {
-    snprintf(proxy, MAXCMD-1, " export http_proxy='%s' ", http_proxy);
+    snprintf(proxy, MAXCMD-1, " export http_proxy='%s' ;", http_proxy);
   }
 
   /* Run from scheduler! delete the temp directory, /var/local/lib/fossology/agents/wget */
@@ -372,17 +372,17 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   {
     /* Delete the temp file if it exists */
     unlink(TempFile);
-    snprintf(CMD,MAXCMD-1," %s; /usr/bin/wget -q %s -P '%s' '%s' %s 2>&1",
+    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s 2>&1",
         proxy, WgetArgs,TempFileDir,TaintedURL,GlobalParam);
   }
   else if(TempFileDir && TempFileDir[0])
   {
-    snprintf(CMD,MAXCMD-1," %s; /usr/bin/wget -q %s -P '%s' '%s' %s 2>&1",
+    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s 2>&1",
         proxy, WgetArgs, TempFileDir, TaintedURL, GlobalParam);
   }
   else 
   {
-    snprintf(CMD,MAXCMD-1," %s ; /usr/bin/wget -q %s '%s' %s 2>&1",
+    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s '%s' %s 2>&1",
         proxy, WgetArgs,TaintedURL, GlobalParam);
   }
   /* the command is like
