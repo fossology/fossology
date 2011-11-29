@@ -35,6 +35,9 @@ int	main(int argc, char *argv[])
   char *Fname = NULL;
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  char *SVN_REV;
+  char *VERSION;
+  char agent_rev[PATH_MAX];
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv);
@@ -111,8 +114,11 @@ int	main(int argc, char *argv[])
       SafeExit(21);
     }
 
+    SVN_REV = fo_sysconfig(AgentName, "SVN_REV");
+    VERSION = fo_sysconfig(AgentName, "VERSION");
+    sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
     /* Get the unpack agent key */
-    agent_pk = fo_GetAgentKey(pgConn, AgentName, atoi(Upload_Pk), 0,
+    agent_pk = fo_GetAgentKey(pgConn, AgentName, atoi(Upload_Pk), agent_rev,
                               "Unpacks archives (iso, tar, etc)");
 
     InitCmd();

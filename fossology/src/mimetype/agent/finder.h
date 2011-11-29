@@ -26,7 +26,7 @@
 
 #include "libfossology.h"
 
-#define MAXCMD 256
+#define MAXCMD 1024
 extern char SQL[MAXCMD];
 
 /** for the DB */
