@@ -57,9 +57,9 @@ install-indep:
 	dh_clean -k -i 
 	dh_installdirs -i
 
-	#$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-db \
-        #   PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-        #   -C install/db install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-db \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C install/db install
 
 	dh_install -i
 
@@ -69,18 +69,20 @@ install-arch:
 	dh_clean -k -s 
 	dh_installdirs -s
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-core \
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var install-install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-core \
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/lib install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-core \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/www install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-core \
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/cli install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-core \
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/www install
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-wgetagent \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/wget_agent install
 
@@ -118,12 +120,12 @@ install-arch:
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep
 # in another 'make' thread.
-binary-core:
+binary-common:
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs 
-	dh_installdocs -A -Nfossology-core debian/README.Debian
-	dh_installdocs -pfossology-core
+	dh_installdocs -A -Nfossology-common debian/README.Debian
+	dh_installdocs -pfossology-common
 	dh_installexamples
 #	dh_installdebconf	
 	dh_installlogrotate	
@@ -135,8 +137,8 @@ binary-core:
 # Do the lintian stuff by hand for now so we can depend on older debhelper to
 # make backports easier, switch when etch support dropped
 #	dh_lintian
-	mkdir -p debian/fossology-core/usr/share/lintian/overrides
-	cp debian/fossology-core.lintian-overrides debian/fossology-core/usr/share/lintian/overrides/fossology-core
+	mkdir -p debian/fossology-common/usr/share/lintian/overrides
+	cp debian/fossology-common.lintian-overrides debian/fossology-common/usr/share/lintian/overrides/fossology-common
 	#mkdir -p debian/fossology-agents/usr/share/lintian/overrides
 	#cp debian/fossology-agents.lintian-overrides debian/fossology-agents/usr/share/lintian/overrides/fossology-agents
 	#mkdir -p debian/fossology-agents-single/usr/share/lintian/overrides
@@ -152,13 +154,13 @@ binary-core:
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
-# Build architecture independant packages using the core target.
+# Build architecture independant packages using the common target.
 binary-indep: build-indep install-indep
-	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-core
+	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
 
-# Build architecture dependant packages using the core target.
+# Build architecture dependant packages using the common target.
 binary-arch: build-arch install-arch
-	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-core
+	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-common
 
 binary: binary-arch binary-indep
 .PHONY: build clean binary-indep binary-arch binary install install-indep install-arch configure
