@@ -21,22 +21,6 @@ set -e
 
 case "$1" in
     purge)
-       # get rid of the database, this is a clone of upstream's
-       # fo-cleanold -d
-       # it might be interesting to use dbconfig-common, but it might be
-       # overkill
-
-       #first check that the db is running
-       su postgres -c 'echo \\q|psql' || (echo "WARNING: postgresql not running, not dropping database"; exit 0)
-
-       # and next that the db exists
-       su postgres -c 'psql -l' |grep -q fossology || (echo "NOTE: database already cleaned up";exit 0)
-
-       echo "*** Removing database ***"
-       # kill anybody using the database
-       pkill -f -u postgres fossy || true
-       su postgres -c 'echo "drop database fossology"|psql' || echo "WARNING: failed to drop database, please clean up by hand"
-
        # the users are created by the fossology-* packages, but we remove
        # them here since this package will be the last to be purged
        echo "removing FOSSology user..."
