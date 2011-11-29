@@ -25,9 +25,9 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 DIRS=css images locale
 
-UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -v simpleUi | grep -E "(php|dat|dtd)$$" `
+UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd)$$" `
 
-OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -v simpleUi | grep -E "(css|htc|gif|png)$$" `
+OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png)$$" `
 
 RMFILES=FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$"`
 
@@ -46,6 +46,8 @@ install: all
 	for file in $(OTHERFILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
+  
+	@echo $(CONFDIR) > $(DESTDIR)$(WEBDIR)/ui/fossology.rc
 
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
 	  ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled/ ; fi;
