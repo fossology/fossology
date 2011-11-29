@@ -64,6 +64,8 @@ int main(int argc, char *argv[])
   char *ErrorBuf;
   int CmdlineFlag = 0; /** run from command line flag, 1 yes, 0 not */
   char *SVN_REV;
+  char *VERSION;
+  char agent_rev[MAXCMD];
                            
   /** initialize the scheduler connection */
   fo_scheduler_connect(&argc, argv);
@@ -98,8 +100,12 @@ int main(int argc, char *argv[])
     LOG_FATAL("Unable to connect to database");
     exit(-1);
   }
+
   SVN_REV = fo_sysconfig("mimetype", "SVN_REV");
-  Agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), 0, SVN_REV, agent_desc);
+  VERSION = fo_sysconfig("mimetype", "VERSION");
+  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  /* Get the Agent Key from the DB */
+  Agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
 
   FMimetype = fopen("/etc/mime.types","rb");
   if (!FMimetype)

@@ -121,7 +121,7 @@ int main (int argc, char *argv[])
   VERSION = fo_sysconfig("delagent", "VERSION");
   sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
   /* Get the Agent Key from the DB */
-  Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, SVN_REV, agent_desc);
+  Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
 
   if (ListProj) ListUploads();
   if (ListFolder) ListFolders();
