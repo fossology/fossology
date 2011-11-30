@@ -42,11 +42,11 @@ utils: build-utils
 TOP = .
 VERSIONFILE: 
 	$(call WriteVERSIONFile,"BUILD")
-	$(INSTALL) -m 666 VERSION $(DESTDIR)$(CONFPATH)/VERSION
 
 # install depends on everything being built first
 install: all $(INSTALLDIRS)
 $(INSTALLDIRS):
+	$(INSTALL) -m 666 VERSION $(DESTDIR)$(CONFPATH)/VERSION
 	$(MAKE) -C $(@:install-%=%) install
 
 uninstall: $(UNINSTALLDIRS)
