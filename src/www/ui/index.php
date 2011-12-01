@@ -36,6 +36,10 @@ ConfigInit($SYSCONFDIR, $SysConf);
 
 plugin_load();
 
+// call install method of every plugin, core-auth creates the default user and
+// the fossy user
+plugin_install(FALSE);
+
 $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) { $Mod = "Default"; }
 $PluginId = plugin_find_id($Mod);
