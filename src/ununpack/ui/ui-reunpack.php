@@ -16,6 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+/**
+ * \note this file is deprecated
+ */
+
 define("TITLE_ui_reunpack", _("Schedule an Reunpack"));
 
 class ui_reunpack extends FO_Plugin
