@@ -58,13 +58,15 @@ int  SetEnvClean()
  */
 void testSetEnvNormal()
 {
-  strcpy(Source, "38 - http://fossology.org/debian/mkpackages -l 1 -R index.html*");
+/*  strcpy(Source, "38 - http://fossology.org/debian/mkpackages -l 1 -R index.html*"); */
+  strcpy(Source, "38 - http://fonightly.usa.hp.com/debian/mkpackages -l 1 -R index.html*");
   strcpy(TempFileDir, "./test_result");
   SetEnv(Source, TempFileDir);
   CU_ASSERT_EQUAL(GlobalUploadKey, 38);
   char *cptr = strstr(GlobalTempFile, "./test_result/wget."); /* is like ./test_result/wget.29923 */
   CU_ASSERT_PTR_NOT_NULL(cptr);
-  CU_ASSERT_STRING_EQUAL(GlobalURL, "http://fossology.org/debian/mkpackages");
+/*  CU_ASSERT_STRING_EQUAL(GlobalURL, "http://fossology.org/debian/mkpackages"); */
+  CU_ASSERT_STRING_EQUAL(GlobalURL, "http://fonightly.usa.hp.com/debian/mkpackages");
   CU_ASSERT_STRING_EQUAL(GlobalParam, "-l 1 -R index.html*");
 }
 
