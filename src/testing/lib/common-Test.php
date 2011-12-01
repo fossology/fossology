@@ -439,6 +439,7 @@ class RunTest
     $lastMake = exec('make test 2>&1', $this->makeOutput, $makeRtn);
     //echo "DB: Exit status of 'make test' of $unitTest is:$makeRtn\n";
     //debugprint($this->makeOutput, "make output\n");
+
     if($makeRtn != 0)
     {
       $found = array();
@@ -459,6 +460,14 @@ class RunTest
         if($this->checkCunitTestErrors(implode("\n", $this->makeOutput)))
         {
           $results['cunit'] = TRUE;
+          /*
+           $pattern = $this->unitTest . "_Tests summary:";
+           $found = array_search($pattern, $this->makeOutput);
+           if($found !== FALSE)
+           {
+           echo implode("\n", array_slice($this->makeOutput, -7)) . "\n";
+           }
+           */
         }
         if($this->checkPHPTestErrors(implode("\n", $this->makeOutput)))
         {
@@ -489,6 +498,14 @@ class RunTest
       if($this->checkCunitTestErrors(implode("\n", $this->makeOutput)))
       {
         $results['cunit'] = TRUE;
+        /*
+         $pattern = $this->unitTest . "_Tests summary:";
+         $found = array_search($pattern, $this->makeOutput);
+         if($found !== FALSE)
+         {
+         echo implode("\n", array_slice($this->makeOutput, -7)) . "\n";
+         }
+         */
       }
       return($results);
     }
@@ -589,6 +606,99 @@ class RunTest
     }
     return(implode("\n",$matches));
   }
+
+  /**
+   * \brief print the result array.  This will print any informative messages
+   * including erorrs that may have occured.
+   *
+   * @param array $runResults
+   * @return volid
+   *
+   * The array has the format has described in  MakeTest method.
+   */
+  function printResults($runResults)
+  {
+    global $failures;
+
+    $failures = 0;
+    $cunitMake = FALSE;
+    $phpunitMake = FALSE;
+
+    $test = $runResults['name'];
+    unset($runResults['name']);
+
+    if($runResults['make'] === TRUE && $runResults['cunit'] === TRUE)
+    {
+      $cunitMake = TRUE;
+      //echo "DB: both make and cunit are true, both has been set\n";
+    }
+    if($runResults['make'] === TRUE && $runResults['phpunit'] === TRUE)
+    {
+      $phpunitMake = TRUE;
+      //echo "DB: both make and phpunit are true, both has been set\n";
+    }
+
+    foreach($runResults as $key => $value)
+    {
+      switch($key)
+      {
+        case 'make':
+          if($value === TRUE)
+          {
+            if($cunitMake || $phpunitMake)
+            {
+              break;
+            }
+            echo "Error: there were $key errors for $test\n";
+            echo implode("\n", array_slice($this->makeOutput, -7)) . "\n";
+            $failures++;
+            break;
+          }
+        case 'cunit':
+          if($value === TRUE)
+          {
+            echo "There were $key errors for $test\n";
+            $pattern = $this->unitTest . "_Tests summary:";
+            $found = array_search($pattern, $this->makeOutput);
+            if($found !== FALSE)
+            {
+              echo implode("\n", array_slice($this->makeOutput, -7)) . "\n";
+            }
+            $failures++;
+            break;
+          }
+        case 'phpunit':
+          if($value === TRUE)
+          {
+            echo "Error: there were $key errors for $test\n";
+            echo implode("\n", array_slice($this->makeOutput, -7)) . "\n";
+            $failures++;
+            break;
+          }
+        case 'notest':
+          if($value === TRUE)
+          {
+            echo "No tests for $test\n";
+            $failures++;
+            break;
+          }
+        case 'other':
+          if(empty($value))
+          {
+            break;
+          }
+          echo "Other errors for $test:\n";
+          echo $value . "\n";
+          $failures++;
+          break;
+      }
+    } //foreach $runResults
+    if($failures == 0)
+    {
+      echo "All tests passed for $test\n";
+    }
+    return ;
+  }
 } // class RunTest
 
 function debugprint($val, $title)
@@ -625,73 +735,5 @@ function MakeCover($unitTest)
     }
   }
   return(NULL);
-}
-
-/**
- * \brief print the result array.  This will print any informative messages
- * including erorrs that may have occured.
- *
- * @param array $runResults
- * @return volid
- *
- * The array has the format has described in  MakeTest method.
- */
-function printResults($runResults)
-{
-  global $failures;
-
-  $failures = 0;
-
-  $test = $runResults['name'];
-  unset($runResults['name']);
-
-  foreach($runResults as $key => $value)
-  {
-    switch($key)
-    {
-      case 'make':
-        if($value === TRUE)
-        {
-          echo "Error: there were $key errors for $test\n";
-          $failures++;
-          break;
-        }
-      case 'cunit':
-        if($value === TRUE)
-        {
-          echo "Error: there were $key errors for $test\n";
-          $failures++;
-          break;
-        }
-      case 'phpunit':
-        if($value === TRUE)
-        {
-          echo "Error: there were $key errors for $test\n";
-          $failures++;
-          break;
-        }
-      case 'notest':
-        if($value === TRUE)
-        {
-          echo "No tests for $test\n";
-          $failures++;
-          break;
-        }
-      case 'other':
-        if(empty($value))
-        {
-          break;
-        }
-        echo "Other errors for $test:\n";
-        echo $value . "\n";
-        $failures++;
-        break;
-    }
-  } //foreach $runResults
-  if($failures == 0)
-  {
-    echo "All tests passed for $test\n";
-  }
-  return ;
 }
 ?>
