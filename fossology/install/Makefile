@@ -33,6 +33,8 @@ defconf/fossology.conf:	defconf/fossology.conf-process
 
 install: all
 	$(INSTALL_PROGRAM) fo-postinstall $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
+	$(INSTALL_PROGRAM) fo_dbcheck.php $(DESTDIR)$(LIBEXECDIR)/fo_dbcheck.php
+	$(INSTALL_PROGRAM) fossinit.php $(DESTDIR)$(LIBEXECDIR)/fossinit.php
 	$(MAKE) -s -C db install
 	echo "Making configuration directories"; \
 	if [ ! -e $(DESTDIR)$(CONFPATH) ] ; then \

@@ -1,6 +1,6 @@
 #!/bin/bash
 # FOSSology postinstall script
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 #
 # This script is for things that need to be done on the runtime system
 # after we've installed the bits on the filesystem. It needs to be
@@ -35,17 +35,17 @@ while true; do
       -o|--overwrite) OVERWRITE=1; shift;;
       -h|--help)
          echo "Usage: fo-postinstall [options]";
-	 echo "  -a or --agent      : agent specific actions"
-	 echo "  -d or --database   : database specific actions"
-	 echo "  -w or --web        : web interface specific actions"
-	 echo "  -s or --scheduler  : scheduler specific actions"
-	 echo "  -e or --everything : all actions (default)"
-	 echo "  -o or --overwrite  : overwrite config files with new versions"
-	 echo "  -h or --help       : this help text"
+         echo "  -a or --agent      : agent specific actions"
+         echo "  -d or --database   : Create the FOSSology database"
+         echo "  -w or --web        : web interface specific actions"
+         echo "  -s or --scheduler  : scheduler specific actions"
+         echo "  -e or --everything : all actions, default"
+         echo "  -o or --overwrite  : overwrite config files with new versions"
+         echo "  -h or --help       : this help text"
          echo " Special options"
          echo "  --web-only         : web, but exclude normal agent actions"
          echo "  --scheduler-only   : scheduler, but exclude normal agent actions"
-	 exit;;
+         exit;;
       --) shift; break;;
       *) echo "Error: option $1 not recognised"; exit 1;;
    esac
@@ -80,6 +80,9 @@ fi
 
 if [ $DATABASE ]; then
    {$LIBEXECDIR}/dbcreate
+
+   echo "*** Initializing database tables ***"
+   {$LIBEXECDIR}/fossinit.php -c {$SYSCONFDIR}
 fi # end of DATABASE
 
 ########################################################################
@@ -87,14 +90,14 @@ fi # end of DATABASE
 if [ $AGENT ]; then
 
    ## get path to repo
-   if [ -e "{$SYSCONFDIR}/fossology/fossology.conf" ] ; then
+   if [ -e "{$SYSCONFDIR}/fossology.conf" ] ; then
       while read line; do
       if [[ $line =~ "path = " ]]; then
           REPO=$\{line//'path = '/\}
       fi
-      done < '{$SYSCONFDIR}/fossology/fossology.conf'
+      done < '{$SYSCONFDIR}/fossology.conf'
    else
-      echo "ERROR: Cannot find {$SYSCONFDIR}/fossology/fossology.conf"
+      echo "ERROR: Cannot find {$SYSCONFDIR}/fossology.conf"
       exit 1
    fi
 
@@ -179,60 +182,16 @@ if [ $AGENT ]; then
       echo "NOTE: Repository already exists at $REPO"
    fi
 
-   # ununpack before svn 1715 created it's directory with wrong permissions
-   # if the directory already exists ensure that it's permissions are correct
-   # this can be removed in the next release after 1.0.0, assuming we will
-   # require pre-1.0.0 users to upgrade to 1.0.0 first
-   if [ -d "$REPO/ununpack" ]; then
-      chmod 2770 $REPO/ununpack
-   fi
-
-   if [ -e "{$SYSCONFDIR}/fossology/Hosts.conf" ] ; then
-      # if we have a default Hosts.conf file, check if $REPO/localhost
-      # exists and if not then create it
-      grep -q "^localhost" {$SYSCONFDIR}/fossology/Hosts.conf
-      if [ $? == 0 ] ; then
-         if [ ! -d "$REPO/localhost" ] ; then
-            echo "NOTE: creating new $REPO/localhost directory"
-            mkdir $REPO/localhost
-            chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO/localhost
-            chmod 2770 $REPO/localhost
-         else
-            echo "NOTE: $REPO/localhost directory already exists"
-         fi
-      fi
-   else
-      # if we don't have a default Hosts.conf file then it's a
-      # multi-machine install and the end user needs to setup
-      echo "NOTE: Hosts.conf indicates a multi-machine install. Please"
-      echo "  make sure that the corresponding agents directories exist"
-      echo "  in $REPO and are {$PROJECTUSER}:{$PROJECTGROUP} and 2770."
-   fi
-
-   ## check that the db is accessable
-   echo "*** Checking database connectivity ***"
-   DBCONF="{$SYSCONFDIR}/fossology/Db.conf"
-   if [ ! -f $DBCONF ]; then
-      echo "ERROR: missing $DBCONF, cannot proceed."
-   fi
-
    # make install sets Db.conf's mode to 660, but can't chgrp it because
    # the group doesn't exist until we create it above. So chgrp now
-   chgrp {$PROJECTGROUP} $DBCONF || echo "ERROR: failed to chgrp $DBCONF"
+   chgrp {$PROJECTGROUP} {$SYSCONFDIR}/Db.conf || echo "ERROR: failed to chgrp {$SYSCONFDIR}/Db.conf"
 
-   ## Check DataBase Connectivity, initialize the tables, License.bsam, and other 
-   ## setup done by fossinit
-   # In multi-system installs the database machine must be installed first
-   # in order for this to work on other machines.
-   echo "*** Initializing database tables ***"
-   {$BINDIR}/fossinit
+   {$LIBEXECDIR}/fo_dbcheck.php -c {$SYSCONFDIR}
    if [ $? != 0 ] ; then
-     if [ $? = 2 ] ; then
-       echo "ERROR: unable to connect to database, please check {$SYSCONFDIR}/Db.conf"
-     fi
-     echo "ERROR: Unable to initialize."
+     echo "FATAL: unable to connect to database, please check {$SYSCONFDIR}/Db.conf"
      exit 1
    fi
+   echo "Database connectivity is good."
 
 fi # end of AGENT
 
@@ -240,23 +199,6 @@ fi # end of AGENT
 
 if [ $SCHEDULERONLY ]; then
    echo "*** Setting up scheduler ***"
-
-   # scheduler config file
-   # this has to be done after the database is setup
-   # BTW- mkschedconf seems to be hardcoded to use localhost, if that
-   # is ever fixed this code might need to be too
-   #echo "*** Checking Scheduler.conf ***"
-   #SCHEDCONF={$SYSCONFDIR}/fossology/Scheduler.conf
-   #if [ ! -f "$SCHEDCONF" -o "$OVERWRITE" ] ; then
-   #   mkdir -p `dirname $SCHEDCONF`
-   #   {$LIBEXECDIR}/mkschedconf -o $SCHEDCONF -L
-   #   echo "NOTE: default $SCHEDCONF created."
-   #   echo "  Please check that is it correct for your environment or"
-   #   echo "  create a different one with mkschedconf."
-   #else
-   #   echo "NOTE: $SCHEDCONF already exists,"
-   #   echo "  consider checking it or recreating with mkschedconf."
-   #fi
 
    # Create the scheduler log directory.
    if [ -f {$LOGDIR} ] ; then

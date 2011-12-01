@@ -36,10 +36,12 @@ localhost[] = * 00 ff
 
 [DIRECTORIES]
 
-; Project Name.  
-; Do not change after installation since PROJECT is used in installation directory names.
+; Project Name and Group 
+; Do not change after installation since PROJECT and PROJECTGROUP is used in installation 
+; directory names and ownership.
 ; Use PREFIX to install multiple copies of FOSSology.
 PROJECT={$PROJECT}
+PROJECTGROUP={$PROJECTGROUP}
 
 ; base of the program data tree
 PREFIX={$PREFIX}
