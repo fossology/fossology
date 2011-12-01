@@ -73,10 +73,12 @@ int GetURLClean()
  */
 void testGetURLNormal_URLIsOneFile()
 {
-  strcpy(URL, "http://fossology.org/debian/mkpackages");
+/*  strcpy(URL, "http://fossology.org/debian/mkpackages"); */
+  strcpy(URL, "http://fonightly.usa.hp.com/debian/mkpackages");
   strcpy(TempFileDir, "./test_result");
   GetURL(TempFile, URL, TempFileDir); /* download the file mkpackages into ./test_result/fossology.org/debian/ */
-  int existed = file_dir_existed("./test_result/fossology.org/debian/mkpackages");
+/*  int existed = file_dir_existed("./test_result/fossology.org/debian/mkpackages"); */
+  int existed = file_dir_existed("./test_result/fonightly.usa.hp.com/debian/mkpackages");
   CU_ASSERT_EQUAL(existed, 1); /* the file downloaded? */
 }
 
@@ -88,7 +90,8 @@ void testGetURLNormal_URLIsOneFile()
 void testGetURLAbnormal_URLIsOneDir()
 {
   strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");
-  strcpy(URL, "http://fossology.org/debian/1.0.0/");
+/*  strcpy(URL, "http://fossology.org/debian/1.0.0/"); */
+  strcpy(URL, "http://fonightly.usa.hp.com/debian/1.0.0/");
   strcpy(TempFileDir, "./test_result/");
   strcpy(TempFile, "./test_result/wget.tar");
   GetURL(TempFile, URL, TempFileDir); 
