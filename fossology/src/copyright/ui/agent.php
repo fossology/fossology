@@ -62,7 +62,7 @@ class agent_copyright extends FO_Plugin
     pg_free_result($result);
 
     if (empty($row)) return (0);
-    if (empty($Results[0]['jq_endtime'])) {
+    if (empty($row['jq_endtime'])) {
       return (1);
     }
     return (2);
