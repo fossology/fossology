@@ -291,7 +291,7 @@ foreach($unitList as $unitTest)
   $Make = new RunTest($unitTest);
   $runResults = $Make->MakeTest();
   //debugprint($runResults, "run results for $unitTest\n");
-  printResults($runResults);
+  $Make->printResults($runResults);
   if(processCUnit($unitTest) != NULL)
   {
     echo "Error: could not process cunit results file for $unitTest\n";
