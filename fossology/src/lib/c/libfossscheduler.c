@@ -138,19 +138,6 @@ void fo_scheduler_connect(int* argc, char** argv)
   valid = 0;
   agent_verbose = 0;
 
-  /* send "OK" to the scheduler */
-  if(found) 
-  {
-    fprintf(stdout, "\nOK\n");
-    fflush(stdout);
-
-    /* \todo check the nfs mounts for the agent */
-
-    /* set up the heartbeat() */
-    signal(SIGALRM, fo_heartbeat);
-    alarm(ALARM_SECS);
-  }
-
   if(sysconfigdir) {
     snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir, "fossology.conf");
     sysconfig = fo_config_load(fname, &error);
@@ -185,13 +172,21 @@ void fo_scheduler_connect(int* argc, char** argv)
     }
   }
 
+  /* send "OK" to the scheduler */
   if(found)
   {
     if(fo_config_has_key(sysconfig, module_name, "VERSION"))
       fprintf(stdout, "VERSION: %s\n",
-           fo_config_get(sysconfig, module_name, "VERSION", &error));
+          fo_config_get(sysconfig, module_name, "VERSION", &error));
     else fprintf(stdout, "VERSION: unknown\n");
+    fprintf(stdout, "\nOK\n");
     fflush(stdout);
+
+    /* TODO check the nfs mounts for the agent */
+
+    /* set up the heartbeat() */
+    signal(SIGALRM, fo_heartbeat);
+    alarm(ALARM_SECS);
   }
 }
 
