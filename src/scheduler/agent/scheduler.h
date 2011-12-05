@@ -55,7 +55,16 @@ gint string_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 gint int_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 
 /* ************************************************************************** */
-/* **** SQL strings ********************************************************* */
+/* **** Scheduler Functions ************************************************* */
 /* ************************************************************************** */
+
+void chld_sig(int signo);
+void prnt_sig(int signo);
+void update_scheduler();
+void set_usr_grp();
+void kill_scheduler();
+void load_agent_config();
+void load_foss_config();
+int  close_scheduler();
 
 #endif /* SCHEDULER_H_INCLUDE */
