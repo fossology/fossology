@@ -122,200 +122,200 @@ function JobAddUpload($job_name, $filename, $desc, $UploadMode, $FolderPk)
 /**
  * \brief Find the job_pk given the upload_pk and job_name
  *
- * \param int    $UploadPk
- * \parm  string $JobName
+ * \param int    $UploadPk (optional)
+ * \param string $JobName
  *
- * \return  the job_pk, or -1 if it does not exist.
- * \todo this might return multiple records in v2.0
+ * \return the last job_pk, or -1 if it does not exist.
  ************************************************************/
-function JobFindKey($UploadPk, $JobName) {
-  global $DB;
-  if (empty($DB)) {
-    return;
-  }
+function JobFindKey($UploadPk, $JobName) 
+{
+  global $PG_CONN;
   $JobName = str_replace("'", "''", $JobName);
+
   if (empty($UploadPk)) {
-    $SQL = "SELECT job_pk FROM job WHERE job_upload_fk IS NULL AND job_name = '$JobName';";
+    $sql = "SELECT max(job_pk) as job_pk FROM job WHERE job_upload_fk IS NULL AND job_name = '$JobName'";
   } else {
-    $SQL = "SELECT job_pk FROM job WHERE job_upload_fk = '$UploadPk' AND job_name = '$JobName';";
+    $sql = "SELECT max(job_pk) as job_pk FROM job WHERE job_upload_fk = '$UploadPk' AND job_name = '$JobName'";
   }
-  $Results = $DB->Action($SQL);
-  if(empty($Results)) {
-    return(-1);
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+  if (pg_num_rows($result) == 0)
+    $job_pk = -1;
+  else
+  {
+    $row = pg_fetch_assoc($result);
+    $job_pk = $row['job_pk'];
   }
-  else {
-    return($Results[0]['job_pk']);
-  }
+  pg_free_result($result);
+
+  return($job_pk);
 } // JobFindKey()
 
 
 /**
- * function: JobAddJob
+ * @brief Insert a new job record.
  *
- * Insert a new job type (not a jobqueue item). NOTE: If the Job already
- * exists, then it will not be added again.
- *
- * @param int $upload_pk upload record primary key, see JobAddUpload
+ * @param int $upload_pk (optional)
  * @param string $job_name
  * @param int $priority the job priority, default 0
  *
- * @return int $jobpk the job primary key
- *
+ * @return int $jobpk the job primary key, or -1 on error
  */
-function JobAddJob($upload_pk, $job_name, $priority = 0) {
-  global $DB;
-  if (empty($DB)) {
-    return;
-  }
-  if (!empty($_SESSION['UserEmail'])) {
-    $job_user_fk = $_SESSION['UserId'];
-  }
-  else {
-    $Sql = "SELECT user_pk FROM users WHERE user_name = 'fossy';";
-    $Results = $DB->Action($Sql);
-    $job_user_fk = $Results[0]['user_pk'];
-  }
+function JobAddJob($upload_pk, $job_name, $priority = 0) 
+{
+  global $PG_CONN;
 
-  if (!empty($_SESSION['UserEmail'])) {
-    $job_email_notify = $_SESSION['UserEmail'];
-  } else {
-    $job_email_notify = 'fossy@localhost';
-  }
-  $Job_email_notify = str_replace("'", "''", $job_email_notify);
+  $job_user_fk = GetArrayVal("UserId", $_SESSION);
+  if (empty($job_user_fk)) return -1;
+
   $Job_name = str_replace("'", "''", $job_name);
-  if (empty($upload_pk)) {
-    $SQLInsert = "INSERT INTO job
-    	(job_user_fk,job_queued,job_priority,job_email_notify,job_name) VALUES
-    	('$job_user_fk',now(),'$priority','$Job_email_notify','$Job_name');";
-  }
-  else {
-    $SQLInsert = "INSERT INTO job
-    	(job_user_fk,job_queued,job_priority,job_email_notify,job_name,job_upload_fk) VALUES
-     	('$job_user_fk',now(),'$priority','$Job_email_notify','$Job_name','$upload_pk');";
-  }
-  $jobpk = JobFindKey($upload_pk, $Job_name);
-  /*
-     If the job already exists, just return the jobpk, don't insert
-   */
-  if ($jobpk >= 0) {
-    return ($jobpk);
-  }
-  $DB->Action($SQLInsert);
+  if (empty($upload_pk))
+    $upload_pk_val = "null";
+  else
+    $upload_pk_val = $upload_pk;
+
+  $sql = "INSERT INTO job
+    	(job_user_fk,job_queued,job_priority,job_name,job_upload_fk) VALUES
+     	('$job_user_fk',now(),'$priority','$Job_name',$upload_pk_val)";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+
   $jobpk = JobFindKey($upload_pk, $job_name);
   return ($jobpk);
 } // JobAddJob()
 
 /**
- * function: JobQueueAdd
- *
- * Insert a jobqueue item.
+ * @brief Insert a jobqueue + jobdepends records.
  *
  * @param int    $job_pk the job primary key (returned by JobAddJob)
- * @param string $jq_type name of agent (should match a string in Scheduler.conf
+ * @param string $jq_type name of agent (should match the name in agent.conf
  * @param string $jq_args arguments to pass to the agent in the form of
  * $jq_args="folder_pk='$Folder' name='$Name' description='$Desc' ...";
- * @param string $jq_repeat values: yes or no
- * @param string $jq_runonpfile the column name
+ * @param string $jq_repeat obsolete
+ * @param string $jq_runonpfile column name
  * @param array  $Depends lists on or more jobqueue_pk's this job is
  * dependent on.
  * @param int    $Reschedule, default 0, 1 to reschedule.
  *
- * @return new jobqueue key ($jqpk)
+ * @return new jobqueue key (jobqueue.jq_pk), or null on failure
  *
  */
-function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $Depends, $Reschedule = 0) {
-  global $DB;
-  if (empty($DB)) {
+function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $Depends, $Reschedule = 0) 
+{
+  global $PG_CONN;
+  $jq_args = str_replace("'", "''", $jq_args); // protect variables
+
+  /* Make sure all dependencies exist */
+  if (is_array($Depends)) 
+  {
+    foreach($Depends as $D) 
+    {
+      if (empty($D)) continue;
+
+      $sql = "SELECT jq_pk FROM jobqueue WHERE jq_pk = '$D'";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $MissingDep =  (pg_num_rows($result) == 0) ? true : false;
+      pg_free_result($result);
+
+      if ($MissingDep) return;
+    }
+  }
+
+  $sql = "BEGIN";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+
+  /* Add the job */
+  $sql = "INSERT INTO jobqueue ";
+  $sql.= "(jq_job_fk,jq_type,jq_args,jq_runonpfile,jq_starttime,jq_endtime,jq_end_bits) VALUES ";
+  $sql.= "('$job_pk','$jq_type','$jq_args',";
+  if (empty($jq_runonpfile))
+    $sql.= "NULL";
+  else 
+    $sql.= "'$jq_runonpfile'";
+  $sql.= ",NULL,NULL,0);";
+
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+   
+  /* Find the job that was just added */
+  $sql = "SELECT currval('jobqueue_jq_pk_seq') as jq_pk FROM jobqueue";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  pg_free_result($result);
+
+  $jq_pk = $row['jq_pk'];
+  if (empty($jq_pk))
+  {
+    $sql = "ROLLBACK";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
     return;
   }
-  $jq_args = str_replace("'", "''", $jq_args); // protect variables
-  $DB->Action("BEGIN");
-  /* Make sure all dependencies exist */
-  if (is_array($Depends)) {
-    foreach($Depends as $D) {
-      if (empty($D)) {
-        continue;
-      }
-      $Results = $DB->Action("SELECT jq_pk FROM jobqueue WHERE jq_pk = '$D';");
-      if (empty($Results[0]['jq_pk'])) {
-        $DB->Action("ROLLBACK;");
-        return;
-      }
-    }
-  }
-  /* Check if the job exists */
-  $Results = $DB->Action("SELECT jq_pk FROM jobqueue
-  	WHERE jq_job_fk = '$job_pk' AND jq_type = '$jq_type' AND jq_args = '$jq_args';");
-  if (!empty($Results)) {
-    $jqpk = $Results[0]['jq_pk'];
-  }
-  else if (empty($Results)) {
-    /* Add the job */
-    $SQL = "INSERT INTO jobqueue ";
-    $SQL.= "(jq_job_fk,jq_type,jq_args,jq_repeat,jq_runonpfile,jq_starttime,jq_endtime,jq_end_bits) VALUES ";
-    $SQL.= "('$job_pk','$jq_type','$jq_args','$jq_repeat',";
-    if (empty($jq_runonpfile)) {
-      $SQL.= "NULL";
-    } else {
-      $SQL.= "'$jq_runonpfile'";
-    }
-    $SQL.= ",NULL,NULL,0);";
-    $DB->Action($SQL);
-    /* Find the job that was just added */
-    $Results = $DB->Action("SELECT jq_pk FROM jobqueue
-    	WHERE jq_job_fk = '$job_pk' AND jq_type = '$jq_type' AND jq_args = '$jq_args';");
-    $jqpk = $Results[0]['jq_pk'];
-    if (empty($jqpk)) {
-      $DB->Action("ROLLBACK;");
-      return;
-    }
-  }
+
   /* Add dependencies */
-  if (is_array($Depends)) {
-    foreach($Depends as $D) {
-      if (empty($D)) {
-        continue;
-      }
-      $Results = $DB->Action("SELECT * FROM jobdepends
-      		WHERE jdep_jq_fk = '$jqpk'
-      		AND jdep_jq_depends_fk = '$D'");
-      if (empty($Results[0]['jdep_jq_fk'])) {
-        $DB->Action("INSERT INTO jobdepends
+  if (is_array($Depends)) 
+  {
+    foreach($Depends as $D) 
+    {
+      if (empty($D)) continue;
+
+      $sql = "INSERT INTO jobdepends
         		(jdep_jq_fk,jdep_jq_depends_fk) VALUES
-        		('$jqpk','$D');");
-        $Results = $DB->Action("SELECT * FROM jobdepends
-        		WHERE jdep_jq_fk = '$jqpk'
-        		AND jdep_jq_depends_fk = '$D';");
-      }
-      if (empty($Results[0]['jdep_jq_fk'])) {
-        $DB->Action("ROLLBACK;");
-        return;
-      }
+        		('$jq_pk','$D')";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
   }
-  $DB->Action("COMMIT;");
-  if ($Reschedule) {
-    JobQueueChangeStatus($jqpk, "reset");
+
+  /* Commit the jobqueue and jobdepends changes */
+  $sql = "COMMIT";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+
+  if ($Reschedule) 
+  {
+    JobQueueChangeStatus($jq_pk, "reset");
   }
-  return ($jqpk);
+  return $jq_pk;
 } // JobQueueAdd()
-/************************************************************
- JobChangeStatus(): Mark the entire job with a state.
- Returns 0 on success, non-0 on failure.
+
+
+/**
+ * @brief Change Job Status
+ *
+ * @param int    $job_pk (job.job_pk)
+ * @param string $Status
+ *   - reset
+ *   - fail
+ *   - succeed
+ *   - delete
+ * @return 0 on success, non-0 on failure.
  ************************************************************/
-function JobChangeStatus($jobpk, $Status) {
-  if (empty($jobpk) || ($jobpk < 0)) {
-    return (-1);
-  }
-  global $DB;
-  switch ($Status) {
+function JobChangeStatus($jobpk, $Status) 
+{
+  global $PG_CONN;
+
+  if (empty($jobpk) || ($jobpk < 0)) return (-1);
+
+  switch ($Status) 
+  {
     case "reset":
-      $SQL = "UPDATE jobqueue
+      $sql = "UPDATE jobqueue
       	SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
       		WHERE jq_job_fk = '$jobpk'";
       break;
     case "fail":
-      $SQL = "UPDATE jobqueue
+      $sql = "UPDATE jobqueue
       		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2
       		WHERE jq_job_fk = '$jobpk'
       		AND jq_starttime IS NULL;
@@ -325,7 +325,7 @@ function JobChangeStatus($jobpk, $Status) {
       		AND jq_endtime IS NULL;";
       break;
     case "succeed":
-      $SQL = "UPDATE jobqueue
+      $sql = "UPDATE jobqueue
       		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1
       		WHERE jq_job_fk = '$jobpk'
       		AND jq_starttime IS NULL;
@@ -337,7 +337,7 @@ function JobChangeStatus($jobpk, $Status) {
       break;
     case "delete":
       /* Blow away the jobqueue items and the job */
-      $SQL = "DELETE FROM jobdepends WHERE
+      $sql = "DELETE FROM jobdepends WHERE
       		jdep_jq_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$jobpk')
       		OR
       		jdep_jq_depends_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$jobpk');
@@ -347,43 +347,55 @@ function JobChangeStatus($jobpk, $Status) {
     default:
       return (-1);
   }
-  $DB->Action($SQL);
+
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
   return (0);
 } // JobChangeStatus()
 
+
 /**
- * function: JobQueueChangeStatus
- *
- * Change the jobqueue item status.
+ * @brief Change the jobqueue item status.
  *
  * @param int $jqpk the job Queue primary key
  * @param string $Status the new status
- *        Valid status key words are:
- *          reset
- *          fail
- *          succeed
- *          delete (no real delete for job Q item)
+ *  - reset
+ *  - reset_completed
+ *  - fail
+ *  - succeed
+ *
+ *  There is no "Delete" for a jobqueue item.
+ *  "Why not?"
+ *  The jobdepends table creates complexity.  If a deleted job was
+ *  a dependency, then all intermediate dependencies need to be
+ *  deleted or rewritten.  In general, jobqueue dependencies are
+ *  there for a reason.  Deleting a middle step destroys the flow
+ *  and will likely lead to a failed analysis.
+ *  If you need to delete, use delete job.
  *
  * @return 0 on success, non-0 on failure.
  */
-function JobQueueChangeStatus($jqpk, $Status) {
-  if (empty($jqpk) || ($jqpk < 0)) {
-    return (-1);
-  }
-  global $DB;
-  switch ($Status) {
+function JobQueueChangeStatus($jqpk, $Status) 
+{
+  global $PG_CONN;
+
+  if (empty($jqpk) || ($jqpk < 0)) return (-1);
+ 
+  switch ($Status) 
+  {
     case "reset":
-      $SQL = "UPDATE jobqueue
+      $sql = "UPDATE jobqueue
       		SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
       		WHERE jq_pk = '$jqpk'";
       break;
     case "reset_completed": /* reset the job if it is done */
-      $SQL = "UPDATE jobqueue
+      $sql = "UPDATE jobqueue
       		SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
       		WHERE jq_pk = '$jqpk' AND jq_endtime IS NOT NULL";
       break;
     case "fail":
-      $SQL = "UPDATE jobqueue
+      $sql = "UPDATE jobqueue
       		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2
       		WHERE jq_pk = '$jqpk' AND jq_starttime IS NULL;
       		UPDATE jobqueue
@@ -393,7 +405,7 @@ function JobQueueChangeStatus($jqpk, $Status) {
       		AND jq_endtime IS NULL;";
       break;
     case "succeed":
-      $SQL = "UPDATE jobqueue
+      $sql = "UPDATE jobqueue
       		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1
       		WHERE jq_pk = '$jqpk'
       		AND jq_starttime IS NULL;
@@ -403,102 +415,28 @@ function JobQueueChangeStatus($jqpk, $Status) {
       		AND jq_starttime IS NOT NULL
       		AND jq_endtime IS NULL;";
       break;
-    case "delete":
-      /****
-       There is no "Delete" for a jobqueue item.
-       "Why not?"
-       The jobdepends table creates complexity.  If a deleted job was
-       a dependency, then all intermediate dependencies need to be
-       deleted or rewritten.  In general, jobqueue dependencies are
-       there for a reason.  Deleting a middle step destroys the flow
-       and will likely lead to a failed analysis.
-       If you need to delete, use delete job.
-       ****/
     default:
       return (-1);
   }
-  $R = $DB->Action($SQL);
+  
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
   return (0);
 } // JobQueueChangeStatus()
-/************************************************************
- JobListSummary(): Given an upload_pk, return a list of
- the number of items in the jobqueue.
- The returned array:
- ['failed'] = 0x01 number of failed jobs (not jobqueue items)
- ['completed'] = 0x02 number of completed jobs (not jobqueue items)
- ['pending'] = 0x04 number of pending (not active) jobs (not jobqueue items)
- ['active'] = 0x08 number of active jobs (not jobqueue items)
- ['total'] = number of total jobs (not jobqueue items)
- ************************************************************/
-function JobListSummary($upload_pk) {
-  global $DB;
-  if (empty($DB)) {
-    return;
-  }
-  $Status = array();
-  $Status['total'] = 0;
-  $Status['completed'] = 0;
-  $Status['pending'] = 0;
-  $Status['active'] = 0;
-  $Status['failed'] = 0;
-  $SQL = "SELECT job_pk,jq_starttime,jq_endtime,jq_end_bits FROM jobqueue
-  	INNER JOIN job ON jq_job_fk = job_pk
-  	AND job_upload_fk = '$upload_pk'
-  	ORDER BY job_pk;";
-  $Results = $DB->Action($SQL);
-  if (empty($Results)) return $Status;
-  /* Scan and track the results */
-  $JobId = $Results[0]['job_pk'];
-  $i = 0;
-  $State = 0;
-  while (!empty($Results[$i]['job_pk'])) {
-    if ($Results[$i]['jq_end_bits'] == 2) {
-      $State|= 0x01;
-    }
-    if (!empty($Results[$i]['jq_starttime'])) {
-      if (!empty($Results[$i]['jq_endtime'])) {
-        $State|= 0x02;
-      } else {
-        $State|= 0x08;
-      }
-    } else {
-      $State|= 0x04;
-    }
-    if(count($Results) >= 1) {
-      $i++;
-    }
-    if (array_key_exists($i, $Results) && array_key_exists('job_pk',$Results[$i]))
-    {
-    if ($Results[$i]['job_pk'] != $JobId) {
-      $Status['total']++;
-      if ($State & 0x01) {
-        $Status['failed']++;
-      } else if ($State & 0x08) {
-        $Status['active']++;
-      } else if ($State & 0x04) {
-        $Status['pending']++;
-      } else if ($State & 0x02) {
-        $Status['completed']++;
-      }
-      $State = 0;
-      $JobId = $Results[$i]['job_pk'];
-    }
-    }
-  }
-  return ($Status);
-} // JobListSummary()
+
 
 /**
  * \brief Gets the list of jobqueue records with the requested $status 
-
+ *
  * \param string $status - the status might be:
-          Started, Completed, Restart, Failed, Paused, etc
-          the status 'Started' and 'Restart', you can call them as running status
-          to get all the running job list, you can set the $status as 'tart'
-
+ *        Started, Completed, Restart, Failed, Paused, etc
+ *        the status 'Started' and 'Restart', you can call them as running status
+ *        to get all the running job list, you can set the $status as 'tart'
+ *
  * \return job list related to the jobstatus,
-           the result is like: Array(1, 2, 3, .., i), sorted
- */
+ *         the result is like: Array(1, 2, 3, .., i), sorted
+ **/
 function GetJobList($status)
 {
   /* Gets the list of jobqueue records with the requested $status */
