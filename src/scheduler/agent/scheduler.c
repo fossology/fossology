@@ -222,6 +222,10 @@ void update_scheduler()
 /* **** main utility functions ********************************************** */
 /* ************************************************************************** */
 
+#define GU_HEADER "DIRECTORIES"
+#define GU_GROUP  "PROJECTGROUP"
+#define GU_USER   "PROJECTUSER"
+
 /**
  * Correctly set the project user and group. The fossology scheduler must run as
  * the user specified by PROJECT_USER and PROJECT_GROUP since the agents must be
@@ -233,8 +237,15 @@ void set_usr_grp()
   struct group*  grp;
   struct passwd* pwd;
 
+  char* group =
+      fo_config_has_key(sysconfig, GU_HEADER, GU_GROUP) ?
+      fo_config_get    (sysconfig, GU_HEADER, GU_GROUP, NULL) : PROJECT_GROUP;
+  char* user  =
+      fo_config_has_key(sysconfig, GU_HEADER, GU_USER)  ?
+      fo_config_get    (sysconfig, GU_HEADER, GU_USER, NULL)  : PROJECT_USER;
+
   /* make sure group exists */
-  grp = getgrnam(PROJECT_GROUP);
+  grp = getgrnam(group);
   if(!grp)
   {
     // TODO error message
@@ -244,24 +255,29 @@ void set_usr_grp()
   setgroups(1, &(grp->gr_gid));
   if((setgid(grp->gr_gid) != 0) || (setegid(grp->gr_gid) != 0))
   {
-    fprintf(stderr, "FATAL %s.%d: %s must be run as root or %s\n", __FILE__, __LINE__, PROCESS_NAME, PROJECT_USER);
-    fprintf(stderr, "FATAL Set group '%s' aborting due to error: %s\n", PROJECT_GROUP, strerror(errno));
+    fprintf(stderr, "FATAL %s.%d: %s must be run as root or %s\n",
+        __FILE__, __LINE__, PROCESS_NAME, user);
+    fprintf(stderr, "FATAL Set group '%s' aborting due to error: %s\n",
+        group, strerror(errno));
     exit(-1);
   }
 
   /* run as project user */
-  pwd = getpwnam(PROJECT_USER);
+  pwd = getpwnam(user);
   if(!pwd)
   {
-    fprintf(stderr, "FATAL %s.%d: user '%s' not found\n", __FILE__, __LINE__, PROJECT_USER);
+    fprintf(stderr, "FATAL %s.%d: user '%s' not found\n",
+        __FILE__, __LINE__, user);
     exit(-1);
   }
 
   /* run as correct user, not as root or any other user */
   if((setuid(pwd->pw_uid) != 0) || (seteuid(pwd->pw_uid) != 0))
   {
-    fprintf(stderr, "FATAL %s.%d: %s must run this as %s\n", __FILE__, __LINE__, PROCESS_NAME, PROJECT_USER);
-    fprintf(stderr, "FATAL SETUID aborting due to error: %s\n", strerror(errno));
+    fprintf(stderr, "FATAL %s.%d: %s must run this as %s\n",
+        __FILE__, __LINE__, PROCESS_NAME, user);
+    fprintf(stderr, "FATAL SETUID aborting due to error: %s\n",
+        strerror(errno));
     exit(-1);
   }
 }
@@ -432,7 +448,6 @@ void load_config(void* unused)
 {
   load_foss_config();
   load_agent_config();
-  email_load();
 }
 
 /**
