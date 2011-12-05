@@ -115,7 +115,7 @@ struct agent_internal
  * which is just an integer, so this provides the status in a human readable
  * format.
  */
-const char* status_strings[] = {
+const char* agent_status_strings[] = {
     "AG_FAILED",
     "AG_CREATED",
     "AG_SPAWNED",
@@ -140,7 +140,7 @@ void agent_transition(agent a, agent_status new_status)
   if(TVERBOSE3)
     clprintf("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
         job_id(a->owner), a->meta_data->name, a->pid,
-        status_strings[a->status], status_strings[new_status]);
+        agent_status_strings[a->status], agent_status_strings[new_status]);
   a->status = new_status;
 }
 
@@ -411,6 +411,10 @@ void agent_listen(agent a)
       a->total_analyzed = i;
       database_job_processed(job_id(a->owner), a->total_analyzed);
     }
+    else if(strncmp(buffer, "EMAIL", 5) == 0)
+    {
+      job_set_message(a->owner, g_strdup(buffer + 6));
+    }
     /* we aren't quite sure what the agent sent, log it */
     else if(!(TVERBOSE3))
     {
@@ -535,6 +539,12 @@ void* agent_spawn(void* passed)
           sysconfigdir,
           a->meta_data->name,
           tmp);
+
+      strcpy(buffer, args[0]);
+      *strrchr(buffer, '/') = '\0';
+      if(chdir(buffer) != 0) {
+        ERROR("unable to change working directory: %s\n", strerror(errno));
+      }
 
       execv(args[0], args);
     }
@@ -782,7 +792,8 @@ void agent_death_event(pid_t* pid)
 {
   agent a;
 
-  a = g_tree_lookup(agents, pid);
+  if((a = g_tree_lookup(agents, pid)) == NULL)
+    return;
 
   if(job_id(a->owner) >= 0)
     event_signal(database_update_event, NULL);
@@ -797,7 +808,7 @@ void agent_death_event(pid_t* pid)
     alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent failed\n",
         job_id(a->owner), a->meta_data->name, a->pid);
     ERROR("JOB[%d].%s[%d]: agent closed unexpectedly, agent status was %s",
-        job_id(a->owner), a->meta_data->name, a->pid, status_strings[a->status]);
+        job_id(a->owner), a->meta_data->name, a->pid, agent_status_strings[a->status]);
     agent_fail(a);
   }
 
@@ -942,7 +953,7 @@ void agent_print_status(agent a, GOutputStream* ostr)
       a->pid,
       host_name(a->host_machine),
       a->meta_data->name,
-      status_strings[a->status],
+      agent_status_strings[a->status],
       time_buf);
 
   VERBOSE2("AGENT_STATUS: %s", status_str);
