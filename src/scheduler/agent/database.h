@@ -40,6 +40,8 @@ extern PGconn* db_conn;
 void database_init();
 void database_destroy();
 
+void email_load();
+
 /* ************************************************************************** */
 /* **** event and functions ************************************************* */
 /* ************************************************************************** */
@@ -47,7 +49,7 @@ void database_destroy();
 void database_exec_event(char* sql);
 void database_reset_queue();
 void database_update_event(void* unused);
-void database_update_job(int j_id, job_status status);
+void database_update_job(job j, job_status status);
 void database_job_processed(int j_id, int number);
 void database_job_log(int j_id, char* log_name);
 

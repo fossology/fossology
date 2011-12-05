@@ -432,6 +432,7 @@ void load_config(void* unused)
 {
   load_foss_config();
   load_agent_config();
+  email_load();
 }
 
 /**

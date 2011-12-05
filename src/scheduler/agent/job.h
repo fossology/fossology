@@ -41,8 +41,10 @@ typedef enum
   JB_RESTART = 3,       ///< JB_RESTART
   JB_FAILED = 4,        ///< JB_FAILED
   JB_SCH_PAUSED = 5,    ///< JB_SCH_PAUSED
-  JB_CLI_PAUSED = 6     ///< JB_CLI_PAUSED
+  JB_CLI_PAUSED = 6,    ///< JB_CLI_PAUSED
+  JB_ERROR = 7          ///< JB_ERROR
 } job_status;
+extern const char* job_status_strings[];
 
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
@@ -70,14 +72,18 @@ void job_fail_agent(job j, void* a);
 void job_set_data(job j, char* data, int sql);
 void job_update(job j);
 void job_fail(job j);
+void job_set_message(job j, char* message);
 int  job_id(job j);
 int  job_priority(job j);
 int  job_is_paused(job j);
 int  job_is_open(job j);
 job  job_verbose(job j, int level);
+char* job_message(job j);
 char* job_type(job j);
 char* job_next(job j);
 FILE* job_log(job j);
+
+job_status job_get_status(job j);
 
 /* ************************************************************************** */
 /* **** Job list Functions ************************************************** */

@@ -116,44 +116,48 @@ const char* jobsql_log = "\
 
 char* subject;
 char* header;
-GList* header_parsed;
-GList* header_variables;
-
 char* footer;
-GList* footer_parsed;
-GList* footer_variables;
-
+struct stat header_sb;
+struct stat footer_sb;
+GRegex* email_regex;
 
 /**
  * TODO
  */
-void email_init()
+void email_load()
 {
-	char* fname;
+	char fname[FILENAME_MAX];
 	int fd;
-	struct stat sb;
 	GError* error;
 
+	if(header) munmap(header, header_sb.st_size);
+	if(footer) munmap(footer, footer_sb.st_size);
+	if(email_regex) g_regex_unref(email_regex);
+
 	/* load the header */
-	fname = fo_config_get(sysconfig, "EMAILNOTIFY", "header", &error);
+	snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir,
+	    fo_config_get(sysconfig, "EMAILNOTIFY", "header", &error));
 	if(error)
 	  FATAL("email notification settings must be in config file");
 	if((fd = open(fname, O_RDONLY)) == -1)
 	  FATAL("unable to file for email header: %s", fname);
-	if(fstat(fd, &sb) == -1)
+	if(fstat(fd, &header_sb) == -1)
 	  FATAL("unable to fstat email header: %s", fname);
-	if((header = mmap(NULL, sb.st_size, PROT_READ, MAP_SHARED, fd, 0)) == MAP_FAILED)
+	if((header = mmap(NULL, header_sb.st_size, PROT_READ, MAP_SHARED, fd, 0))
+	    == MAP_FAILED)
 	  FATAL("unable to mmap email header: %s", fname);
 
 	/* load the footer */
-	fname = fo_config_get(sysconfig, "EMAILNOTIFY", "footer", &error);
+	snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir,
+	      fo_config_get(sysconfig, "EMAILNOTIFY", "footer", &error));
 	if(error)
 	  FATAL("email notification settings must be in config file");
 	if((fd = open(fname, O_RDONLY)) == -1)
 	  FATAL("unable to file for email footer: %s", fname);
-	if(fstat(fd, &sb) == -1)
+	if(fstat(fd, &footer_sb) == -1)
 	  FATAL("unable to fstat email footer: %s", fname);
-	if((header = mmap(NULL, sb.st_size, PROT_READ, MAP_SHARED, fd, 0)) == MAP_FAILED)
+	if((header = mmap(NULL, footer_sb.st_size, PROT_READ, MAP_SHARED, fd, 0))
+	    == MAP_FAILED)
 	  FATAL("unable to mmap email footer: %s", fname);
 
 	/* load the subject */
@@ -161,11 +165,158 @@ void email_init()
 	if(error)
 	  FATAL("email notification settings must be in config file");
 
-	/* initialize memory */
-	header_parsed = NULL;
-	header_variables = NULL;
-	footer_parsed = NULL;
-	footer_variables = NULL;
+	/* create the regex for the email
+	 * This regex should find:
+	 *   1. A '$' followed by any combination of capital letters or underscore
+	 *   2. A '$' followed by any combination of capital letters or underscore,
+	 *      followed by a '.' followed by alphabetic characters or underscore,
+	 *      followed by a '.' followed by alphabetic characters or underscore
+	 *
+	 * Examples:
+	 *   $HELLO           -> matches
+	 *   $SIMPLE_NAME     -> matches
+	 *   $DB.table.column -> matches
+	 *   $bad             -> does not match
+	 *   $DB.table        -> does not match
+	 */
+	email_regex = g_regex_new("\\$([A-Z_]*)(\\.([a-zA-Z_]*)\\.([a-zA-Z_]*))?",
+	    0, 0, &error);
+	if(error)
+	  FATAL("unable to build email regular expression");
+}
+
+/**
+ * TODO
+ *
+ * @param match
+ * @param ret
+ * @param j
+ * @return
+ */
+gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
+{
+  gchar* m_str = g_match_info_fetch(match, 1);
+  PGresult* db_result;
+
+  if(strcmp(m_str, "BROWSELINK"))
+  {
+    // TODO
+  }
+  else if(strcmp(m_str, "SCHEDULERLOG"))
+  {
+    // TODO
+  }
+  else if(strcmp(m_str, "UPLOADFOLDERNAME"))
+  {
+    // TODO
+  }
+  else if(strcmp(m_str, "JOBRESULT"))
+  {
+    switch(job_get_status(j))
+    {
+      case JB_COMPLETE: g_string_append(ret, "COMPLETE"); break;
+      case JB_FAILED:   g_string_append(ret, "FAILED");   break;
+      default:
+        g_string_append_printf(ret, "ERROR: illegal job status \"%s\"",
+            job_status_strings[job_get_status(j)]);
+        break;
+    }
+  }
+  else if(strcmp(m_str, "DB"))
+  {
+    m_str = g_strdup_printf("SELECT %s FROM %s;",
+        g_match_info_fetch(match, 4), g_match_info_fetch(match, 3));
+    db_result = PQexec(db_conn, m_str);
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+    {
+      g_string_append_printf(ret, "ERROR: unable to select %s.%s",
+          g_match_info_fetch(match, 3), g_match_info_fetch(match, 4));
+      return FALSE;
+    }
+
+    g_string_append(ret, PQgetvalue(db_result, 0, 0));
+    PQclear(db_result);
+    g_free(m_str);
+  }
+
+  return FALSE;
+}
+
+/**
+ * TODO, unfinished function, needs the email construction
+ *
+ * @param job_id
+ * @param failed
+ */
+void email_notification(job j, int failed)
+{
+  PGresult* db_result;
+  int tuples;
+  int i, j_id = job_id(j);;
+  int col;
+  int upload_id;
+  char* val;
+  char sql[1024];
+  GString* email_txt;
+
+  sprintf(sql, select_upload_fk, j_id);
+  db_result = PQexec(db_conn, sql);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+  {
+    PQ_ERROR(db_result, "unable to select the upload id for job %d", j_id);
+    return;
+  }
+  upload_id = atoi(PQgetvalue(db_result, 0, 0));
+  PQclear(db_result);
+
+  sprintf(sql, upload_common, upload_id);
+  db_result = PQexec(db_conn, sql);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+  {
+    PQ_ERROR(db_result, "unable to check common uploads to job %d", j_id);
+    return;
+  }
+
+  tuples = PQntuples(db_result);
+  col = PQfnumber(db_result, "jq_endtext");
+  for(i = 0; i < tuples; i++)
+  {
+    val = PQgetvalue(db_result, i, col);
+    if(strcmp(val, "Started") == 0 ||
+       strcmp(val, "Paused")  == 0 ||
+       strcmp(val, "Restart") == 0 )
+    {
+      PQclear(db_result);
+      return;
+    }
+  }
+  PQclear(db_result);
+
+  sprintf(sql, jobsql_email, upload_id);
+  db_result = PQexec(db_conn, sql);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+  {
+    PQ_ERROR(db_result, "unable to access email info for job %d", j_id);
+    return;
+  }
+
+  if(PQget(db_result, 0, "email_notify")[0] == 'y')
+  {
+    email_txt = g_string_new("");
+    g_string_append(email_txt, header);
+    g_string_append(email_txt, job_message(j));
+    g_string_append(email_txt, footer);
+
+    val = g_regex_replace_eval(email_regex, email_txt->str, email_txt->len,
+        0, 0, (GRegexEvalCallback)email_replace, j, NULL);
+
+    lprintf("email: %s\n", email_txt->str);
+
+    g_string_free(email_txt, TRUE);
+    g_free(val);
+  }
+
+  PQclear(db_result);
 }
 
 /* ************************************************************************** */
@@ -193,7 +344,12 @@ void database_init()
     strcpy(fossy_url, PQgetvalue(db_result, 0, 0));
   PQclear(db_result);
 
-  //email_init();
+  header = NULL;
+  footer = NULL;
+  subject = NULL;
+  email_regex = NULL;
+
+  //email_load();
 }
 
 /**
@@ -203,74 +359,6 @@ void database_destroy()
 {
   PQfinish(db_conn);
   db_conn = NULL;
-}
-
-/**
- * TODO, unfinished function, needs the email construction
- *
- * @param job_id
- * @param failed
- */
-void email_notification(int job_id, int failed)
-{
-  PGresult* db_result;
-  int tuples;
-  int i;
-  int col;
-  int upload_id;
-  char* val;
-  char sql[1024];
-
-  sprintf(sql, select_upload_fk, job_id);
-  db_result = PQexec(db_conn, sql);
-  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
-  {
-    PQ_ERROR(db_result, "unable to select the upload id for job %d", job_id);
-    return;
-  }
-  upload_id = atoi(PQgetvalue(db_result, 0, 0));
-  PQclear(db_result);
-
-  sprintf(sql, upload_common, upload_id);
-  db_result = PQexec(db_conn, sql);
-  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
-  {
-    PQ_ERROR(db_result, "unable to check common uploads to job %d", job_id);
-    return;
-  }
-
-  tuples = PQntuples(db_result);
-  col = PQfnumber(db_result, "jq_endtext");
-  for(i = 0; i < tuples; i++)
-  {
-    val = PQgetvalue(db_result, i, col);
-    if(strcmp(val, "Started") == 0 ||
-       strcmp(val, "Paused")  == 0 ||
-       strcmp(val, "Restart") == 0 )
-    {
-      PQclear(db_result);
-      return;
-    }
-  }
-  PQclear(db_result);
-
-  sprintf(sql, jobsql_email, upload_id);
-  db_result = PQexec(db_conn, sql);
-  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
-  {
-    PQ_ERROR(db_result, "unable to access email info for job %d", job_id);
-    return;
-  }
-
-  if(PQget(db_result, 0, "email_notify")[0] == 'y')
-  {
-    //sprintf(sql, email_fmt, PQget(db_result, 0, "user_name"));
-
-
-
-  }
-
-  PQclear(db_result);
 }
 
 /* ************************************************************************** */
@@ -325,7 +413,7 @@ void database_update_event(void* unused)
   /* locals */
   PGresult* db_result;
   PGresult* pri_result;
-  int i, job_id;
+  int i, j_id;
   char sql[512];
   char* value, * type, * pfile, * parent;
   job j;
@@ -351,7 +439,7 @@ void database_update_event(void* unused)
   for(i = 0; i < PQntuples(db_result); i++)
   {
     /* start by checking that the job hasn't already been grabed */
-    if(get_job(job_id = atoi(PQget(db_result, i, "jq_pk"))) != NULL)
+    if(get_job(j_id = atoi(PQget(db_result, i, "jq_pk"))) != NULL)
       continue;
 
     /* get relevant values out of the job queue */
@@ -361,7 +449,7 @@ void database_update_event(void* unused)
     value  =      PQget(db_result, i, "jq_args");
 
     VERBOSE2("DB: jq_pk[%d] added:\n   jq_type = %s\n   jq_runonpfile = %d\n   jq_args = %s\n",
-        job_id, type, (pfile != NULL && pfile[0] != '\0'), value);
+        j_id, type, (pfile != NULL && pfile[0] != '\0'), value);
 
     /* check if this is a command */
     if(strcmp(type, "command") == 0)
@@ -381,7 +469,7 @@ void database_update_event(void* unused)
       continue;
     }
 
-    j = job_init(type, job_id, atoi(PQgetvalue(pri_result, 0, 0)));
+    j = job_init(type, j_id, atoi(PQgetvalue(pri_result, 0, 0)));
     job_set_data(j, value, (pfile && pfile[0] != '\0'));
 
     PQclear(pri_result);
@@ -396,11 +484,12 @@ void database_update_event(void* unused)
  * @param j_id id number of the relevant job
  * @param status the new status of the job
  */
-void database_update_job(int j_id, job_status status)
+void database_update_job(job j, job_status status)
 {
   /* locals */
   gchar* sql = NULL;
   PGresult* db_result;
+  int j_id = job_id(j);
 
   /* check how to update database */
   switch(status)
@@ -411,18 +500,22 @@ void database_update_job(int j_id, job_status status)
       sql = g_strdup_printf(jobsql_started, "localhost", getpid(), j_id);
       break;
     case JB_COMPLETE:
-      //email_notification(j_id, 0);
+      //email_notification(j, 0);
       sql = g_strdup_printf(jobsql_complete, j_id);
       break;
     case JB_RESTART:
       sql = g_strdup_printf(jobsql_restart, j_id);
       break;
     case JB_FAILED:
-      //email_notification(j_id, 1);
+      //email_notification(j, 1);
       sql = g_strdup_printf(jobsql_failed, j_id);
       break;
     case JB_SCH_PAUSED: case JB_CLI_PAUSED:
       sql = g_strdup_printf(jobsql_paused, j_id);
+      break;
+    case JB_ERROR:
+      //email_notification(j, 1);
+      sql = g_strdup_printf(jobsql_failed, j_id);
       break;
   }
 

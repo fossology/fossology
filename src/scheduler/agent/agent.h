@@ -49,6 +49,7 @@ typedef enum
   AG_PAUSED = 4,  ///< AG_PAUSED   The agent is waiting either for new data or for processor time
   AG_CLOSED = 5   ///< AG_CLOSED   The agent has shut down, is no longer part of the system and should be destroyed
 } agent_status;
+extern const char* agent_status_strings[];
 
 /**
  * Class to hold all of the information associated with creating a specific
