@@ -36,7 +36,10 @@ class upload_file extends FO_Plugin {
    *
    * \return NULL on success, string on failure.
    */
-  function Upload($Folder, $TempFile, $Desc, $Name) {
+  function Upload($Folder, $TempFile, $Desc, $Name) 
+  {
+    global $MODDIR;
+
     /* See if the URL looks valid */
     if (empty($Folder)) {
       $text = _("Invalid folder");
@@ -58,25 +61,22 @@ class upload_file extends FO_Plugin {
       return ($text);
     }
     /* move the temp file */
-    //echo "<pre>uploadfile: renaming uploaded file\n</pre>";
-    if (!move_uploaded_file($TempFile, "$TempFile-uploaded")) {
+    $UploadedFile = "$TempFile" . "-uploaded";
+    if (!move_uploaded_file($TempFile, "$UploadedFile")) {
       $text = _("Could not save uploaded file");
       return ($text);
     }
-    $UploadedFile = "$TempFile" . "-uploaded";
-    //echo "<pre>uploadfile: \$UploadedFile is:$UploadedFile\n</pre>";
     if (!chmod($UploadedFile, 0660)) {
       $text = _("ERROR! could not update permissions on downloaded file");
       return ($text);
     }
 
     /* Run wget_agent locally to import the file. */
-    $Prog = "../../wget_agent/agent/wget_agent -g fossy -k $uploadpk '$UploadedFile'";
+    $Prog = "$MODDIR/wget_agent/agent/wget_agent -g fossy -k $uploadpk '$UploadedFile'";
     $wgetLast = exec($Prog,$wgetOut,$wgetRtn);
     unlink($UploadedFile);
 
     global $Plugins;
-
     $Unpack = &$Plugins[plugin_find_id("agent_unpack") ];
 
     $jobqueuepk = NULL;

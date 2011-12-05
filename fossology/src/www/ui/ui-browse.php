@@ -308,10 +308,6 @@ class ui_browse extends FO_Plugin {
       }
       $Desc = htmlentities($Row['upload_desc']);
       $UploadPk = $Row['upload_pk'];
-      if (empty($Desc)) {
-        $text = _("No description");
-        $Desc = "<i>$text</i>";
-      }
       $Name = $Row['ufile_name'];
       if (empty($Name)) {
         $Name = $Row['upload_filename'];
@@ -354,33 +350,16 @@ class ui_browse extends FO_Plugin {
       $V.= menu_to_1list($MenuPfile, $Parm, " ", " ");
       else
       $V.= menu_to_1list($MenuPfileNoCompare, $Parm, " ", " ");
-      $V.= "<br>" . $Desc;
-      //          $V .= "<br>Contains $ItemCount ";
-      //          if ($ItemCount != "1") { $V .= "items."; }
-      //          else { $V .= "item."; }
-      $V.= "</td>\n";
-      $V.= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td></tr>\n";
-      /* Check job status */
-      $Status = JobListSummary($UploadPk);
-      $text = _("Scheduled ");
-      $V.= "<td>$text";
-      if (plugin_find_id('showjobs') >= 0) {
-        $text = _("jobs");
-        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>$text</a>: ";
-      }
-      else {
-        $V.= _("jobs: ");
-      }
-      $V.= $Status['total'] . _(" total; ");
-      $V.= $Status['completed'] . _(" completed; ");
-      if (!empty($Status['pending'])) {
-        $V.= $Status['pending'] . _(" pending; ");
-      }
-      if (!empty($Status['pending'])) {
-        $V.= $Status['active'] . _(" active; ");
-      }
-      $V.= $Status['failed'] . _(" failed.");
 
+      /* Job queue link */
+      $text = _("Scan queue");
+      if (plugin_find_id('showjobs') >= 0) {
+        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>[$text]</a>";
+
+      $V.= "<i>" . $Desc . "</i>";
+      $V.= "</td>\n";
+      $V.= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
+      }
       $V.= "<tr><td colspan=2>&nbsp;</td></tr>\n";
     }
     pg_free_result($result);
