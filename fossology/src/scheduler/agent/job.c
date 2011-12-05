@@ -62,6 +62,7 @@ struct job_internal
     GMutex* lock;           ///< lock to maintain data integrity
     int idx;                ///< the current index into the sql results
     /* information about job status */
+    char* message;          ///< message that will be sent with job notification email
     int priority;           ///< importance of the job, maps directory to unix priority
     int verbose;            ///< the verbose level for all of the agents in this job
     int id;                 ///< the identifier for this job
@@ -70,14 +71,15 @@ struct job_internal
 /**
  * TODO
  */
-const char* status_string[] = {
+const char* job_status_strings[] = {
     "JOB_CHECKEDOUT",
     "JOB_STARTED",
     "JOB_COMPLETE",
     "JOB_RESTART",
     "JOB_FAILED",
     "JOB_SCH_PAUSED",
-    "JOB_CLI_PAUSED"};
+    "JOB_CLI_PAUSED",
+    "\"ERROR: unknown status\""};
 
 /**
  * TODO
@@ -118,7 +120,7 @@ int job_sstatus(int* job_id, job j, GOutputStream* ostr)
 {
   gchar* status_str = g_strdup_printf("job:%d status:%s type:%s, priority:%d running:%d finished:%d failed:%d\n",
       j->id,
-      status_string[j->status],
+      job_status_strings[j->status],
       j->agent_type,
       j->priority,
       g_list_length(j->running_agents),
@@ -149,14 +151,14 @@ void job_transition(job j, job_status new_status)
   /* book keeping */
   TEST_NULV(j);
   VERBOSE2("JOB[%d]: job status changed: %s => %s\n",
-      j->id, status_string[j->status], status_string[new_status]);
+      j->id, job_status_strings[j->status], job_status_strings[new_status]);
 
   /* change the job status */
   j->status = new_status;
 
   /* only update database for real jobs */
   if(j->id >= 0)
-    database_update_job(j->id, new_status);
+    database_update_job(j, new_status);
 }
 
 /**
@@ -191,7 +193,7 @@ void job_restart(job j)
   TEST_NULV(j);
   if(j->status != JB_SCH_PAUSED && j->status != JB_CLI_PAUSED)
   {
-    ERROR("attempt to restart job %d failed, job status was %s", j->id, status_string[j->status]);
+    ERROR("attempt to restart job %d failed, job status was %s", j->id, job_status_strings[j->status]);
     return;
   }
 
@@ -267,6 +269,7 @@ job job_init(char* type, int id, int priority)
   j->db_result       = NULL;
   j->lock            = NULL;
   j->idx             = 0;
+  j->message         = NULL;
   j->priority        = priority;
   j->verbose         = 0;
   j->id              = id;
@@ -301,6 +304,7 @@ void job_destroy(job j)
   g_list_free(j->running_agents);
   g_list_free(j->finished_agents);
   g_list_free(j->failed_agents);
+  g_free(j->message);
   g_free(j->agent_type);
   g_free(j->data);
   g_free(j);
@@ -534,6 +538,18 @@ void job_fail(job j)
 }
 
 /**
+ * Sets the message that will be sent with the job notification email.
+ *
+ * @param j the job to the set the message for
+ * @param message the message
+ */
+void job_set_message(job j, char* message)
+{
+  TEST_NULV(j);
+  j->message = message;
+}
+
+/**
  * Gets the id number for the job.
  *
  * @param j relevant job
@@ -622,6 +638,18 @@ job job_verbose(job j, int level)
 }
 
 /**
+ * Gets the message that will be sent with the job notification email
+ *
+ * @param j the job to get the message for
+ * @return the message
+ */
+char* job_message(job j)
+{
+  TEST_NULL(j, NULL);
+  return j->message;
+}
+
+/**
  * Gets the type of agent associated with this job. This is used by the constructor
  * for agent since it must decide what type of agent to create.
  *
@@ -630,6 +658,7 @@ job job_verbose(job j, int level)
  */
 char* job_type(job j)
 {
+  TEST_NULL(j, NULL);
   return j->agent_type;
 }
 
@@ -686,6 +715,18 @@ FILE* job_log(job j)
   j->log = fo_RepFwrite("logs", file_name);
   free(file_path);
   return j->log;
+}
+
+/**
+ * gets the status of a job
+ *
+ * @param j the job
+ * @return the status
+ */
+job_status job_get_status(job j)
+{
+  TEST_NULL(j, JB_ERROR);
+  return j->status;
 }
 
 /* ************************************************************************** */
