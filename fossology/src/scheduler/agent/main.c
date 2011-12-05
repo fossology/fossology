@@ -86,7 +86,11 @@ int main(int argc, char** argv)
 
   g_option_context_free(options);
 
-  /* make sure we are running as fossy */
+  /* create data structs, load config and set the user groups */
+  agent_list_init();
+  host_list_init();
+  job_list_init();
+  load_foss_config();
   set_usr_grp();
 
   /* perform pre-initialization checks */
@@ -101,10 +105,6 @@ int main(int argc, char** argv)
   /* ********************************** */
   g_thread_init(NULL);
   g_type_init();
-  agent_list_init();
-  host_list_init();
-  job_list_init();
-  load_foss_config();
   interface_init();
   database_init();
   load_agent_config();

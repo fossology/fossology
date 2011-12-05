@@ -701,6 +701,8 @@ char** fo_config_key_set(fo_conf* conf, char* group, int* length)
  */
 int fo_config_has_group(fo_conf* conf, char* group)
 {
+  if(conf == NULL)
+    return 0;
   if(!conf->group_map)
     return 0;
   return g_tree_lookup(conf->group_map, group) != NULL;
@@ -718,6 +720,8 @@ int fo_config_has_key(fo_conf* conf, char* group, char* key)
 {
   GTree* tree;
 
+  if(conf == NULL)
+    return 0;
   if(!conf->group_map)
     return 0;
   if((tree = g_tree_lookup(conf->group_map, group)) == NULL)
