@@ -16,7 +16,7 @@
 ### END INIT INFO
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON={$LIBEXECDIR}/fo_scheduler
+DAEMON={$MODDIR}/scheduler/agent/fo_scheduler
 NAME=scheduler
 DESC="FOSSology job scheduler"
 
