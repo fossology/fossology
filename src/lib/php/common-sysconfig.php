@@ -362,9 +362,10 @@ function check_logo_url($url)
  */
 function check_logo_image_url($url)
 {
+  global $SysConf;
+
   if (empty($url)) return 1; /* logo url can be null, with the default */
 
-  $SysConf = ConfigInit();
   $LogoLink = @$SysConf["LogoLink"];
   $new_url = $LogoLink.$url;
   if (is_available($url) || is_available($new_url))
