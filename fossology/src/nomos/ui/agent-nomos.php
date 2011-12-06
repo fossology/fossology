@@ -145,13 +145,6 @@ class agent_fonomos extends FO_Plugin {
       $text = _("Failed to insert agent nomos into job queue");
       return ($text);
     }
-    if (CheckEnotification()) {
-      $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
-      NULL,NULL,array($jobqueuepk));
-      if ($sched !== NULL) {
-        return($sched);
-      }
-    }
     return (NULL);
   } // AgentAdd()
 
