@@ -35,18 +35,6 @@ class foconfig extends FO_Plugin
 
 
   /**
-   * \brief Create and configure database tables
-   * If the sysconfig table doesn't exist then
-   * create it, create records for the core variables.
-   */
-  function Install()
-  {
-    ConfigInit();
-    return(0);
-  } // Install()
-
-
-  /**
    * \brief Generate HTML output.
    */
   function HTMLout()
