@@ -34,6 +34,7 @@ install: all
 
 uninstall:
 	$(call dirloop,uninstall)
+	rm -rf $(DESTDIR)$(MODDIR)/lib/
 
 clean:
 	$(call dirloop,clean)
