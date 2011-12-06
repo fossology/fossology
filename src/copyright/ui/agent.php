@@ -147,13 +147,6 @@ class agent_copyright extends FO_Plugin
       return ($text);
     }
 
-    if (CheckEnotification()) {
-      $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
-      NULL,NULL,array($jobqueuepk));
-      if ($sched !== NULL) {
-        return($sched);
-      }
-    }
     return (NULL);
   } // AgentAdd()
 
