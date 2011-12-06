@@ -45,7 +45,7 @@ $(TEST_OBJ): %.o: %.c
 test: all $(EXE)
 	@echo "execute delagent test"
 	@if test ! -e ../testdata/testdb_all.tar ; then \
-	rsync -acv fonightly.usa.hp.com:/var/www/fossology.org/testing/testFiles/delagent/ ../testdata/;\
+	rsync -acv fonightly.usa.hp.com:/var/www/testfiles/delagent/ ../testdata/;\
 	fi; 
 	./$(EXE)
 
