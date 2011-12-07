@@ -89,7 +89,7 @@ if [ $BUILDTIME ]; then
       Debian|Ubuntu|LinuxMint)
          apt-get install \
             libxml2-dev libextractor-dev \
-            build-essential libtext-template-perl subversion rpm librpm-dev \
+            build-essential libtext-template-perl subversion rpm \
             python python-dev python-pyrex libpcre3-dev
          case "$CODENAME" in
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
@@ -106,21 +106,21 @@ if [ $BUILDTIME ]; then
          yum install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
-            libxml2 libextractor-devel rpm-devel Pyrex \
+            libxml2 libextractor-devel Pyrex \
             python python-devel pcre-devel
          ;;
       Mandriva)
          # 2008.1 tested
          urpmi \
             postgresql-devel \
-            libextractor-devel libxml2 rpm-devel \
+            libextractor-devel libxml2 \
             perl-Text-Template subversion gcc make perl
          ;;
       RedHatEnterprise*|CentOS)
          # 4=Nahant* 5=Tikanga*
          yum install \
             postgresql-devel \
-            gcc make file libxml2 rpm-devel \
+            gcc make file libxml2 \
             perl-Text-Template subversion \
             Pyrex libextractor-devel pcre-devel
          ;;
