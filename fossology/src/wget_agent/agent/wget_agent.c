@@ -354,7 +354,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   /* it is not an error if no proxy is defined */
   if(error) 
   {
-    if (strstr((char *)error, "unknown key") == NULL)
+    if (strstr(error->message, "unknown key") == NULL)
     {
       LOG_FATAL("%s", error->message);
       exit(-1);
