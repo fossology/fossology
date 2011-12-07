@@ -93,9 +93,9 @@ class upload_url extends FO_Plugin {
     {
       $jq_args .= "-R index.html* ";
     }
-    $jobqueuepk = JobQueueAdd($jobpk, "wget", $jq_args, "no", NULL, NULL);
+    $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL, NULL);
     if (empty($jobqueuepk)) {
-      $text = _("Failed to insert task 'wget' into job queue");
+      $text = _("Failed to insert task 'wget_agent' into job queue");
       return ($text);
     }
     global $Plugins;
