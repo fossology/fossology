@@ -363,6 +363,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
      /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -k -P '/var/local/lib/fossology/agents/wget'
      'http://a.org/file' -l 1 -R index.html*  2>&1"
    */
+   LOG_VERBOSE0("CMD: %s", CMD);
   rc = system(CMD); 
 
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
