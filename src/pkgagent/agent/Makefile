@@ -44,14 +44,10 @@ pkgagent.o: pkgagent.c pkgagent.h
 install: all
 	@echo "make pkgagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
-	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(DESTDIR)$(MODDIR)/$(EXE) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make pkgagent agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
-	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(EXE)
 
 test: all 
 	$(MAKE) -C $(TESTDIRS) test
