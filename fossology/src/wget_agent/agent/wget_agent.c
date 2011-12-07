@@ -40,9 +40,6 @@ char GlobalParam[MAXCMD];
 int GlobalImportGold=1; /* set to 0 to not store file in gold repository */
 gid_t ForceGroup=-1;
 
-/* for debugging */
-int Debug=0;
-
 /**
  * \brief Given a filename, is it a file?
  *
@@ -62,13 +59,14 @@ int IsFile(char *Fname, int Link)
 } /* IsFile() */
 
 /**
- * \brief Closes the connection to the server. Also frees memory used by the PGconn object;then exit.
+ * \brief Closes the connection to the server, free the database connection, and exit.
  *
  * \param int rc - exit value
  */ 
 void  SafeExit(int rc)
 {
   if (pgConn) PQfinish(pgConn);
+  fo_scheduler_disconnect(rc);
   exit(rc);
 } /* SafeExit() */
 
@@ -90,7 +88,6 @@ int GetPosition(char *URL)
 
 /**
  * \brief Insert a file into the database and repository.
- *        This mimicks the old webgoldimport.
  */
 void DBLoadGold()
 {
@@ -104,14 +101,12 @@ void DBLoadGold()
   int rc;
   PGresult *result;
 
-  if (Debug) printf("Processing %s\n",GlobalTempFile);
+  LOG_VERBOSE0("Processing %s",GlobalTempFile);
   Fin = fopen(GlobalTempFile,"rb");
   if (!Fin)
   {
-    printf("ERROR upload %ld Unable to open temp file.\n",GlobalUploadKey);
-    printf("LOG upload %ld Unable to open temp file %s from %s\n",
+    LOG_FATAL("upload %ld Unable to open temp file %s from %s",
         GlobalUploadKey,GlobalTempFile,GlobalURL);
-    fflush(stdout);
     SafeExit(1);
   }
   Sum = SumComputeFile(Fin);
@@ -120,33 +115,27 @@ void DBLoadGold()
 
   if (!Sum)
   {
-    printf("ERROR upload %ld Unable to compute checksum.\n",GlobalUploadKey);
-    printf("LOG upload %ld Unable to compute checksum for %s from %s\n",
+    LOG_FATAL("upload %ld Unable to compute checksum for %s from %s",
         GlobalUploadKey,GlobalTempFile,GlobalURL);
-    fflush(stdout);
     SafeExit(2);
   }
   if (Sum->DataLen <= 0)
   {
-    printf("ERROR upload %ld No bytes downloaded from %s.\n",GlobalUploadKey,GlobalURL);
-    printf("LOG upload %ld No bytes downloaded from %s to %s.\n",
+    LOG_FATAL("upload %ld No bytes downloaded from %s to %s.",
         GlobalUploadKey,GlobalURL,GlobalTempFile);
-    fflush(stdout);
     SafeExit(3);
   }
   Unique = SumToString(Sum);
-  if (Debug) printf("Unique %s\n",Unique);
+  LOG_VERBOSE0("Unique %s",Unique);
 
   if (GlobalImportGold)
   {
-    if (Debug) printf("Import Gold %s\n",Unique);
+    LOG_VERBOSE0("Import Gold %s",Unique);
     rc = fo_RepImport(GlobalTempFile,"gold",Unique,1);
     if (rc != 0)
     {
-      printf("ERROR upload %ld Failed to import file into the repository (RepImport=%d).\n",GlobalUploadKey,rc);
-      printf("LOG upload %ld Failed to import %s from %s into gold %s\n",
+      LOG_FATAL("upload %ld Failed to import %s from %s into repository gold %s",
           GlobalUploadKey,GlobalTempFile,GlobalURL,Unique);
-      fflush(stdout);
       SafeExit(4);
     }
     /* Put the file in the "files" repository too */
@@ -157,23 +146,19 @@ void DBLoadGold()
   {
     Path = GlobalTempFile;
   } /* else if !GlobalImportGold */
-  if (Debug) printf("Path is %s\n",Path);
+  LOG_VERBOSE0("Path is %s",Path);
 
   if (!Path)
   {
-    printf("ERROR upload %ld Failed to determine repository location.\n",GlobalUploadKey);
-    printf("LOG upload %ld Failed to determine repository location for %s in gold\n",
+    LOG_FATAL("upload %ld Failed to determine repository location for %s in gold",
         GlobalUploadKey,Unique);
-    fflush(stdout);
     SafeExit(5);
   }
-  if (Debug) printf("Import files %s\n",Path);
+  LOG_VERBOSE0("Import files %s",Path);
   if (fo_RepImport(Path,"files",Unique,1) != 0)
   {
-    printf("ERROR upload %ld Failed to import file into the repository.\n",GlobalUploadKey);
-    printf("LOG upload %ld Failed to import %s from %s into files\n",
+    LOG_FATAL("upload %ld Failed to import %s from %s into files",
         GlobalUploadKey,Unique,Path);
-    fflush(stdout);
     SafeExit(6);
   }
   if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
@@ -196,69 +181,48 @@ void DBLoadGold()
   snprintf(SQL,MAXCMD-1,"SELECT pfile_pk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = %s;",
       SHA1,MD5,Len);
   result =  PQexec(pgConn, SQL); /* SELECT */
-  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
-  {
-    SafeExit(7);
-  }
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(7);
 
   /* See if pfile needs to be added */
   if (PQntuples(result) <=0)
   {
     /* Insert it */
     memset(SQL,'\0',MAXCMD);
-    snprintf(SQL,MAXCMD-1,"INSERT INTO pfile (pfile_sha1, pfile_md5, pfile_size) VALUES ('%.40s','%.32s',%s);",
+    snprintf(SQL,MAXCMD-1,"INSERT INTO pfile (pfile_sha1, pfile_md5, pfile_size) VALUES ('%.40s','%.32s',%s)",
         SHA1,MD5,Len);
     PQclear(result);
     result = PQexec(pgConn, SQL);
-    if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
-    {
-      SafeExit(8);
-    }
+    if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(8);
     PQclear(result);
-    result = PQexec(pgConn, "SELECT currval('pfile_pfile_pk_seq');");
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
-    {
-      SafeExit(-1);
-    }
+    result = PQexec(pgConn, "SELECT currval('pfile_pfile_pk_seq')");
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(182);
   }
   PfileKey = atol(PQgetvalue(result,0,0));
-  if (Debug) printf("pfile_pk = %ld\n",PfileKey);
+  LOG_VERBOSE0("pfile_pk = %ld",PfileKey);
 
-  /* Upload the DB so the pfile is linked to the upload record */
+  /* Update the DB so the pfile is linked to the upload record */
   PQclear(result);
-  result = PQexec(pgConn, "BEGIN;");
-  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
-  {
-    SafeExit(-1);
-  }
+  result = PQexec(pgConn, "BEGIN");
+  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(-1);
 
   memset(SQL,0,MAXCMD);
   snprintf(SQL,MAXCMD-1,"SELECT * FROM upload WHERE upload_pk=%ld FOR UPDATE;",GlobalUploadKey);
   PQclear(result);
   result = PQexec(pgConn, SQL);
-  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
-  {
-    SafeExit(-1);
-  }
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(-1);
 
   memset(SQL,0,MAXCMD);
-  snprintf(SQL,MAXCMD-1,"UPDATE upload SET pfile_fk=%ld WHERE upload_pk=%ld;",
+  snprintf(SQL,MAXCMD-1,"UPDATE upload SET pfile_fk=%ld WHERE upload_pk=%ld",
       PfileKey,GlobalUploadKey);
-  if (Debug) printf("SQL=%s\n",SQL);
+  LOG_VERBOSE0("SQL=%s\n",SQL);
   PQclear(result);
   result = PQexec(pgConn, SQL);
-  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) 
-  {
-    SafeExit(9);
-  }
+  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(9);
   PQclear(result);
   result = PQexec(pgConn, "COMMIT;");
-  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
-  {
-    SafeExit(-1);
-  }
-
+  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(92);
   PQclear(result);
+
   /* Clean up */
   if (Sum)
   {
@@ -325,9 +289,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 
   if (!TaintURL(URL,TaintedURL,MAXCMD))
   {
-    LOG_FATAL("Failed to parse the URL\n");
-    printf("LOG: Failed to taint the URL '%s'\n",URL);
-    fflush(stdout);
+    LOG_FATAL("Failed to taint the URL '%s'",URL);
     SafeExit(10);
   }
 
@@ -351,13 +313,13 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   GError* error = NULL;
 
   http_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "http_proxy", &error);
-  /* it is not an error if no proxy is defined */
+  /* http_proxy is optional so don't error if it doesn't exist */
   if(error) 
   {
     if (strstr(error->message, "unknown key") == NULL)
     {
       LOG_FATAL("%s", error->message);
-      exit(-1);
+      SafeExit(-1);
     }
   }
   else
@@ -375,7 +337,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     memset(CMD,'\0',MAXCMD);
     snprintf(CMD,MAXCMD-1, "rm -rf '%s' 2>&1", TempFileDir);
     rc_system = system(CMD);
-    if (rc_system != 0) exit(23); // failed to delete the temperary directory
+    if (rc_system != 0) SafeExit(23); // failed to delete the temperary directory
 
   }
 
@@ -405,9 +367,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
   {
-    printf("ERROR upload %ld Download failed\n",GlobalUploadKey);
-    printf("LOG upload %ld Download failed; Return code %d from: %s\n",GlobalUploadKey,WEXITSTATUS(rc),CMD);
-    fflush(stdout);
+    LOG_FATAL("upload %ld Download failed; Return code %d from: %s",GlobalUploadKey,WEXITSTATUS(rc),CMD);
     unlink(GlobalTempFile);
     SafeExit(12);
   }
@@ -442,13 +402,11 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 
   if (TempFile && TempFile[0] && !IsFile(TempFile,1))
   {
-    printf("ERROR upload %ld File %s not created from %s\n",GlobalUploadKey,TempFile,URL);
-    printf("LOG upload %ld File not created from command: %s\n",GlobalUploadKey,CMD);
-    fflush(stdout);
+    LOG_FATAL("upload %ld File %s not created from URL: %s, CMD: %s",GlobalUploadKey,TempFile,URL, CMD);
     SafeExit(15);
   }
 
-  if (Debug) printf("LOG upload %ld Downloaded %s to %s\n",GlobalUploadKey,URL,TempFile);
+  LOG_VERBOSE0("upload %ld Downloaded %s to %s",GlobalUploadKey,URL,TempFile);
   return(0);
 } /* GetURL() */
 
@@ -514,8 +472,7 @@ void    SetEnv  (char *S, char *TempFileDir)
 
   while(S[0] && isspace(S[0])) S++; /* skip spaces */
   strncpy(GlobalParam, S, sizeof(GlobalParam)); // get the parameters, kind of " -A rpm -R fosso -l 1* "
-  if (Debug) printf("  LOG upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s\n  URL=%s  GlobalParam=%s\n",GlobalUploadKey,
-      GlobalUploadKey,GlobalTempFile,GlobalURL,GlobalParam);
+  LOG_VERBOSE0("  upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s  URL=%s  GlobalParam=%s\n",GlobalUploadKey, GlobalUploadKey,GlobalTempFile,GlobalURL,GlobalParam);
 } /* SetEnv() */
 
 /**
