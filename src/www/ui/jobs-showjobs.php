@@ -136,7 +136,6 @@ $text = _("Show only active jobs");
 	'jq_args','jq_runonpfile',
 	'jq_starttime','jq_endtime','jq_end_bits',
 	'jq_endtext',
-	'jq_elapsedtime','jq_processedtime','jq_itemsprocessed',
 	'job_submitter','job_queued',
 	'job_email_notify',
 	'job_upload_fk', 'jq_log');
@@ -158,17 +157,6 @@ $text1 = _("Value");
 	{
 	case 'jq_pk':
 		$V .= "<a href='$Uri" . $Row[$F] . "'>" . htmlentities($Row[$F]) . "</a>";
-		break;
-	case 'jq_itemsprocessed':
-		$V .= number_format($Row[$F]);
-		break;
-	case 'jq_elapsedtime':
-	case 'jq_processedtime':
-		$t = floor($Row[$F] / (60*60*24));
-		if ($t == 0) { $V .= ""; }
-		else if ($t == 1) { $V .= "$t day "; }
-		else { $V .= "$t days "; }
-		$V .= gmdate("H:i:s",$Row[$F]);
 		break;
 	case 'job_upload_fk':
 		if (!empty($Row[$F]))
@@ -510,25 +498,6 @@ $text = _("completed");
 	      }
 	    }
 
-$text = _("Elapsed scheduled:");
-	  $V .= "$text<br />\n";
-$text = _("Elapsed running:");
-	  $V .= "$text</td>\n";
-
-	  $V .= "    <td bgcolor='$Color'align='right'><br />";
-	  $t = floor($Row['jq_elapsedtime'] / (60*60*24));
-	  if ($t == 0) { $Time = ""; }
-	  else if ($t == 1) { $Time = "$t day "; }
-	  else { $Time = "$t days "; }
-	  $Time .= gmdate("H:i:s",$Row['jq_elapsedtime']);
-	  $V .= $Time . "<br />\n";
-
-	  $t = floor($Row['jq_processedtime'] / (60*60*24));
-	  if ($t == 0) { $Time = ""; }
-	  else if ($t == 1) { $Time = "$t day "; }
-	  else { $Time = "$t days "; }
-	  $Time .= gmdate("H:i:s",$Row['jq_processedtime']);
-	  $V .= $Time . "</td>\n";
 	  $V .= "  </tr></table>\n";
 	  }
 	} /* if show details */
