@@ -351,11 +351,22 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   GError* error = NULL;
 
   http_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "http_proxy", &error);
-  if(error) LOG_FATAL("%s", error->message);
-  /** set proxy */
-  if (http_proxy && http_proxy[0])
+  /* it is not an error if no proxy is defined */
+  if(error) 
   {
-    snprintf(proxy, MAXCMD-1, " export http_proxy='%s' ;", http_proxy);
+    if (strstr((char *)error, "unknown key") == NULL)
+    {
+      LOG_FATAL("%s", error->message);
+      exit(-1);
+    }
+  }
+  else
+  {
+    /** set proxy */
+    if (http_proxy && http_proxy[0])
+    {
+      snprintf(proxy, MAXCMD-1, " export http_proxy='%s' ;", http_proxy);
+    }
   }
 
   /* Run from scheduler! delete the temp directory, /var/local/lib/fossology/agents/wget */
