@@ -82,11 +82,6 @@ int main  (int argc, char *argv[])
   GlobalUploadKey = -1;
   int upload_pk = 0;           // the upload primary key
   int Agent_pk;
-  int ars_pk = 0;
-  char *AgentARSName = "wget_agent_ars";
-  int rv;
-  char sqlbuf[1024]; 
-  PGresult *ars_result;
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
   char *SVN_REV;
@@ -156,7 +151,7 @@ int main  (int argc, char *argv[])
   if (InitFlag)
   {
     if (pgConn) PQfinish(pgConn);
-    return(0);
+    SafeExit(0);
   }
   
   SVN_REV = fo_sysconfig("wget_agent", "SVN_REV");
@@ -172,15 +167,14 @@ int main  (int argc, char *argv[])
     strncpy(GlobalURL,argv[arg],sizeof(GlobalURL));
     /* If the file contains "://" then assume it is a URL.
        Else, assume it is a file. */
-    if (Debug) printf("Command-line: %s\n",GlobalURL);
+    LOG_VERBOSE0("Command-line: %s",GlobalURL);
     if (strstr(GlobalURL,"://"))
     {
       fo_scheduler_heart(1);
-      if (Debug) printf("It's a URL\n");
+      LOG_VERBOSE0("It's a URL");
       if (GetURL(GlobalTempFile,GlobalURL,TempFileDir) != 0)
       {
-        printf("ERROR: Download of %s failed.\n",GlobalURL);
-        fflush(stdout);
+        LOG_FATAL("Download of %s failed.",GlobalURL);
         SafeExit(21);
       }
       if (GlobalUploadKey != -1) { DBLoadGold(); }
@@ -188,7 +182,7 @@ int main  (int argc, char *argv[])
     }
     else /* must be a file */
     {
-      if (Debug) printf("It's a file -- GlobalUploadKey = %ld\n",GlobalUploadKey);
+      LOG_VERBOSE0("It's a file -- GlobalUploadKey = %ld",GlobalUploadKey);
       if (GlobalUploadKey != -1)
       {
         memcpy(GlobalTempFile,GlobalURL,MAXCMD);
@@ -205,34 +199,6 @@ int main  (int argc, char *argv[])
       Parm = fo_scheduler_current(); /* get piece of information, including upload_pk, downloadfile url, and parameters */
       if (Parm && Parm[0])
       {
-        /* does ars table exist?
-         * If not, create it.
-         */
-        rv = fo_tableExists(pgConn, AgentARSName);
-        if (!rv)
-        {
-          rv = fo_CreateARSTable(pgConn, AgentARSName);
-          if (!rv) return(0);
-        }  
-
-        /* check ars table if this is duplicate request*/
-        snprintf(sqlbuf, sizeof(sqlbuf),
-          "select ars_pk from wget_agent_ars,agent \
-          where agent_pk=agent_fk and ars_success=true \
-          and upload_fk='%d' and agent_fk='%d'",
-          upload_pk, Agent_pk);
-        ars_result = PQexec(pgConn, sqlbuf);
-        if (fo_checkPQresult(pgConn, ars_result, sqlbuf, __FILE__, __LINE__)) exit(-1);
-        if (PQntuples(ars_result) > 0)
-        {
-          PQclear(ars_result);
-          LOG_WARNING("Ignoring requested wget_agent analysis of upload %d - Results are already in database.\n",upload_pk);
-          continue;
-        }
-        PQclear(ars_result);
-        /* Record analysis start in wget_agent_ars, the wget_agent audit trail. */
-        ars_pk = fo_WriteARS(pgConn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 0);
-
         fo_scheduler_heart(1);
         /* set globals: uploadpk, downloadfile url, parameters */
         SetEnv(Parm,TempFileDir);
@@ -252,26 +218,23 @@ int main  (int argc, char *argv[])
             memset(CMD,'\0',MAXCMD);
             snprintf(CMD,MAXCMD-1, "rm -rf '%s' 2>&1", TempDir);
             int rc_system = system(CMD);
-            if (rc_system != 0) SafeExit(25); // failed to delete the temperary directory
+            if (rc_system != 0) 
+            {
+              LOG_FATAL("%s failed to delete temporary directory", CMD);
+              SafeExit(25); // failed to delete the temperary directory
+            }
           }
         }
         else
         {
-          LOG_FATAL("upload %ld File retrieval failed.\n",GlobalUploadKey);
-          printf("LOG upload %ld File retrieval failed: uploadpk=%ld tempfile=%s URL=%s\n",GlobalUploadKey,GlobalUploadKey,GlobalTempFile,GlobalURL);
-          fflush(stdout);
-          if (pgConn) PQfinish(pgConn);
+          LOG_FATAL("upload %ld File retrieval failed: uploadpk=%ld tempfile=%s URL=%s",GlobalUploadKey,GlobalUploadKey,GlobalTempFile,GlobalURL);
           SafeExit(22);
         }
-        /* Record analysis success in wget_agent_ars. */
-        if (ars_pk) fo_WriteARS(pgConn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 1);
       }
     }
   } /* if run from scheduler */
 
-  /* Clean up */
-  if (pgConn) PQfinish(pgConn);
-  fo_scheduler_disconnect(0);
-  return(0);
+  SafeExit(0);
+  exit(0);  /* to prevent compiler warning */
 } /* main() */
 
