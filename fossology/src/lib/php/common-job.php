@@ -311,7 +311,7 @@ function JobChangeStatus($jobpk, $Status)
   {
     case "reset":
       $sql = "UPDATE jobqueue
-      	SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
+      	SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0, jq_endtext=null
       		WHERE jq_job_fk = '$jobpk'";
       break;
     case "fail":
