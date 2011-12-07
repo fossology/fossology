@@ -135,7 +135,7 @@ $text = _("Show only active jobs");
     $Fields=array('jq_pk','jq_job_fk','job_name','jq_type','job_priority',
 	'jq_args','jq_runonpfile',
 	'jq_starttime','jq_endtime','jq_end_bits',
-	'jq_endtext',
+	'jq_endtext', 'jq_itemsprocessed',
 	'job_submitter','job_queued',
 	'job_email_notify',
 	'job_upload_fk', 'jq_log');
@@ -155,6 +155,9 @@ $text1 = _("Value");
       $V .= "  <tr><th align='left'>$F</th><td>";
       switch($F)
 	{
+	case 'jq_itemsprocessed':
+        $V .= number_format($Row[$F]);
+        break;
 	case 'jq_pk':
 		$V .= "<a href='$Uri" . $Row[$F] . "'>" . htmlentities($Row[$F]) . "</a>";
 		break;
