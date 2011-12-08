@@ -25,11 +25,11 @@ $(FOLIB):
 
 install: all
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) install"
-	$(INSTALL_PROGRAM) $(EXE) $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$(EXE)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$(EXE)
 
 uninstall:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
-	rm -rf $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 test: all
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) test"
