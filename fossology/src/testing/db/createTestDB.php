@@ -56,6 +56,15 @@ $usage = $argv[0] . ": [-h] -c path [-d name] [-s]\n" .
 $pathPrefix = '/srv/fossology';
 $dbPrefix = 'fosstest';
 
+// check if the test where the user is int th fossy group
+$check_group_cmd = "id -G -n|grep 'fossy\|root'";
+$lastCmd = exec($check_group_cmd, $ckOut, $ckRtn);
+if ($ckRtn != 0)
+{
+  echo "FATAL: the test where the user should be in the fossy group.\n";
+  exit(1);
+}
+
 if(array_key_exists('h',$Options))
 {
   print "$usage\n";
