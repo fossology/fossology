@@ -43,7 +43,7 @@ install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)	
 	@mkdir -p $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-          ln -s $(DESTDIR)$(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+          ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	@echo "make delagent agent uninstall"

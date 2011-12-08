@@ -35,7 +35,7 @@ install: all $(VARS)
 	
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
 	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
-	  ln -s $(DESTDIR)$(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;
 	  
 # create wrapper for departition in BINDIR
 	@mkdir -p $(DESTDIR)$(BINDIR)

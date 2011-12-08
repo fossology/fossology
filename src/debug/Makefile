@@ -39,7 +39,7 @@ install: all
 	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	$(call dirloop,install)
 	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
-	  ln -s $(DESTDIR)$(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
 
 
 uninstall:

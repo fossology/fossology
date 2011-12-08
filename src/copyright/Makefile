@@ -43,7 +43,7 @@ install: all
 	$(INSTALL_PROGRAM) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
 	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
-	  ln -s $(DESTDIR)$(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
 
 
 uninstall:
