@@ -127,9 +127,9 @@ install: all install-conf
 	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
 	
 	@if test ! -e $(CONFDIR)/mods-enabled/scheduler; then \
-	  ln -s $(DESTDIR)$(MODDIR)/scheduler $(CONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODDIR)/scheduler $(CONFDIR)/mods-enabled ; fi;
 	@if test ! -e $(CONFDIR)/mods-enabled/scheduler; then \
-	  ln -s $(DESTDIR)$(MODDIR)/scheduler $(CONFDIR)/mods-enabled ; fi;
+	  ln -s $(MODDIR)/scheduler $(CONFDIR)/mods-enabled ; fi;
 
 install-conf:
 	@mkdir -p $(CONFDIR)/mods-enabled
