@@ -56,13 +56,32 @@ $usage = $argv[0] . ": [-h] -c path [-d name] [-s]\n" .
 $pathPrefix = '/srv/fossology';
 $dbPrefix = 'fosstest';
 
-// check if the test where the user is int th fossy group
+// check if the test where the user is in the fossy group
+$gid_array = posix_getgroups();
+$gflag = 0; // 0: in the fossy group, 1: not in the fossy group
+foreach($gid_array as $gid)
+{
+  $gid_info = posix_getgrgid ($gid);
+  if ($gid_info['name'] === 'fossy')
+  {
+    $gflag = 1; // the user is in fossy group
+    break;
+  }
+}
+$uid = posix_getuid();
+$uid_info = posix_getpwuid($uid);
+if ($uid_info['name'] === 'root') $gflag = 1; // user is root
+
+if (0 == $gflag)
+{
+    echo "FATAL: the test where the user should be in the fossy group.\n";
+    exit(1);
+}
+
 $check_group_cmd = "id -G -n|grep 'fossy\|root'";
 $lastCmd = exec($check_group_cmd, $ckOut, $ckRtn);
 if ($ckRtn != 0)
 {
-  echo "FATAL: the test where the user should be in the fossy group.\n";
-  exit(1);
 }
 
 if(array_key_exists('h',$Options))
