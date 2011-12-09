@@ -52,6 +52,7 @@
  */
 function bootstrap($sysconfdir="")
 {
+  $GLOBALS["PG_CONN"] = NULL;
   $rcfile = "fossology.rc";
 
   if (empty($sysconfdir))
