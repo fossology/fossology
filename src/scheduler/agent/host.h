@@ -31,6 +31,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 typedef struct host_internal* host;
 
+/**
+ * declaration of private members for the host type.
+ */
+struct host_internal {
+  char* name;         ///< the name of the host, used to store host internally to scheduler
+  char* address;      ///< the address of the host, used by ssh when starting a new agent
+  char* agent_dir;    ///< the location on the host machine where the executables are
+  int max;            ///< the max number of agents that can run on this host
+  int running;        ///< the number of agents currently running on this host
+};
+
 /* ************************************************************************** */
 /* **** Contructor Destructor *********************************************** */
 /* ************************************************************************** */
