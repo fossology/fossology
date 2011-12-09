@@ -22,7 +22,7 @@ class core_smauth extends FO_Plugin {
   var $Name = "smauth";
   var $Title = TITLE_core_smauth;
   var $Version = "1.0";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $PluginLevel = 1000; /* make this run first! */
   var $LoginFlag = 0;
 

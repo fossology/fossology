@@ -24,7 +24,7 @@ class user_edit_self extends FO_Plugin
   var $Title = TITLE_user_edit_self;
   var $MenuList = "Admin::Users::Account Settings";
   var $Version = "1.0";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess = PLUGIN_DB_DOWNLOAD;
 
   /**

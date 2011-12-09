@@ -24,9 +24,7 @@ class upload_move extends FO_Plugin {
   var $Name = "upload_move";
   var $Version = "1.0";
   var $MenuList = "Organize::Uploads::Move";
-  var $Dependency = array(
-    "db"
-  );
+  var $Dependency = array();
   var $DBaccess = PLUGIN_DB_WRITE;
 
   /**

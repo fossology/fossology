@@ -23,7 +23,7 @@ class user_edit_any extends FO_Plugin {
   var $Title = TITLE_user_edit_any;
   var $MenuList = "Admin::Users::Edit Users";
   var $Version = "1.0";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess = PLUGIN_DB_USERADMIN;
 
   /**

@@ -28,7 +28,7 @@ class search_file_advance extends FO_Plugin
   var $Title      = TITLE_search_file_advance;
   var $Version    = "1.0";
   var $MenuList   = "";
-  var $Dependency = array("db","view","browse");
+  var $Dependency = array("view","browse");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
 

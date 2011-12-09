@@ -26,9 +26,7 @@ class core_schema extends FO_Plugin {
   var $Name = "schema";
   var $Title = TITLE_core_schema;
   var $Version = "1.0";
-  var $Dependency = array(
-    "db"
-  );
+  var $Dependency = array();
   var $DBaccess = PLUGIN_DB_USERADMIN;
   var $PluginLevel = 100;
   var $MenuList = "Admin::Database::Schema";

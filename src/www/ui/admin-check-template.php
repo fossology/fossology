@@ -24,7 +24,7 @@ class admin_check_template extends FO_Plugin
   var $Version    = "1.0";
   var $Title      = TITLE_admin_check_template;
   var $MenuList   = "Admin::Database::Check Templates";
-  var $Dependency = array("db","agent_license");
+  var $Dependency = array("agent_license");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
   /**

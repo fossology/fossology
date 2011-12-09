@@ -24,9 +24,7 @@ class folder_create extends FO_Plugin
   var $Title = TITLE_folder_create;
   var $Version = "1.0";
   var $MenuList = "Organize::Folders::Create";
-  var $Dependency = array (
-    "db"
-    );
+  var $Dependency = array ();
   var $DBaccess = PLUGIN_DB_WRITE;
 
   /**

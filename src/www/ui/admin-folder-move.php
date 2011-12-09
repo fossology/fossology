@@ -23,9 +23,7 @@ class folder_move extends FO_Plugin {
   var $Title = TITLE_folder_move;
   var $Version = "1.0";
   var $MenuList = "Organize::Folders::Move";
-  var $Dependency = array(
-    "db"
-  );
+  var $Dependency = array();
   var $DBaccess = PLUGIN_DB_WRITE;
 
   /**

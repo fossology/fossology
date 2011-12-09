@@ -23,9 +23,7 @@ class folder_properties extends FO_Plugin {
   var $Title = TITLE_folder_properties;
   var $Version = "1.0";
   var $MenuList = "Organize::Folders::Edit Properties";
-  var $Dependency = array(
-    "db"
-    );
+  var $Dependency = array();
   var $DBaccess = PLUGIN_DB_WRITE;
 
   /**

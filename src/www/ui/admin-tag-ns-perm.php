@@ -24,7 +24,7 @@ class admin_tag_ns_perm extends FO_Plugin
   var $Title      = TITLE_admin_tag_ns_perm;
   var $MenuList = "Admin::Tag::Assign TagNS Permission";
   var $Version = "1.3";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess = PLUGIN_DB_USERADMIN;
 
   /**

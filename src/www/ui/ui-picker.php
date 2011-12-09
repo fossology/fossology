@@ -48,7 +48,7 @@ class ui_picker extends FO_Plugin
   var $Title      = TITLE_ui_picker;
   var $Version    = "1.0";
   // var $MenuList= "Jobs::License";
-  var $Dependency = array("db","browse","view");
+  var $Dependency = array("browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
   var $HighlightColor = '#4bfe78';

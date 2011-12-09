@@ -24,7 +24,7 @@ class admin_license_file extends FO_Plugin
   var $Version    = "1.0";
   var $Title      = TITLE_admin_license_file;
   var $MenuList   = "Admin::License Admin";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
   /**

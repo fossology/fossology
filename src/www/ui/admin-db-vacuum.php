@@ -24,7 +24,7 @@ class admin_db_vacuum extends FO_Plugin
   var $Version    = "1.0";
   var $Title      = TITLE_admin_db_vacuum;
   var $MenuList   = "Admin::Database::Vacuum and Analyze";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
   /**

@@ -27,7 +27,7 @@ class group_manage extends FO_Plugin {
   var $Title = TITLE_group_manage;
   var $MenuList = "Admin::Groups::Manage Group";
   var $Version = "1.3";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess = PLUGIN_DB_USERADMIN;
 
 

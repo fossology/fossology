@@ -27,7 +27,7 @@ class ui_download extends FO_Plugin
   var $Name       = "download";
   var $Title      = TITLE_ui_download;
   var $Version    = "1.0";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_DOWNLOAD;
   var $NoHTML     = 1;
 

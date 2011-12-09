@@ -24,7 +24,7 @@ class core_init extends FO_Plugin
   var $Title      = TITLE_core_init;
   var $Version    = "1.0";
   var $MenuList   = "Admin::Initialize";
-  var $Dependency = array("db","auth","refresh","menus","Default");
+  var $Dependency = array("auth","refresh","menus","Default");
   var $DBaccess   = PLUGIN_DB_NONE;
   var $LoginFlag  = 0;
   var $PluginLevel= 100; /* make this run first! */

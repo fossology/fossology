@@ -33,7 +33,7 @@ class admin_scheduler extends FO_Plugin
   var $Title      = TITLE_admin_scheduler;
   var $Version    = "1.0";
   var $MenuList   = "Admin::Scheduler";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_DELETE;
   var $error_info = "";
   var $operation_array;

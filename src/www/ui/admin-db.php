@@ -24,7 +24,7 @@ class admin_db_cleanup extends FO_Plugin
   var $Version    = "1.0";
   var $Title      = TITLE_admin_db_cleanup;
   var $MenuList   = "Admin::Database::Check";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
   /**
