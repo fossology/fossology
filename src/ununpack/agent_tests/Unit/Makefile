@@ -51,7 +51,7 @@ test: all download $(EXE)
 coverage: $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
 	$(CC) -o $(EXE) $(OBJS) $(AGENTDIR)/libununpack_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
-	lcov --directory ../   --capture --output-file cov.txt; \
+	lcov --directory $(AGENTDIR) --capture --output-file cov.txt; \
 	genhtml  -o results cov.txt
 
 libununpack_cov.a:
