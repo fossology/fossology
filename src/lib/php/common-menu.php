@@ -267,18 +267,24 @@ function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target 
   $FullName = $Path;
   menu_insert_r($MenuList, $Path, $LastOrder, $Target, $URI, $HTML, 0, $FullName, $Title);
 } // menu_insert()
+
+
 /**
  * \brief Given a top-level menu name, find
  * the list of sub-menus below it and max depth of menu.
- * $Name may be a "::" separated list.
+ * NOTICE this this function returns the sub menus of $Name, NOT the menu specified
+ * by $Name.
  *
- * \param $Name      top-level menu name
- * \param $MaxDepth  max depth of menu 
- * \param $Menu      menu list of the menu name
+ * \todo rename this function to menu_find_submenus.
  *
- * \return list of sub-menus
+ * \param $Name      top-level menu name, may be a "::" separated list.
+ * \param $MaxDepth  max depth of menu, returned value
+ * \param $Menu      menu object array (default is global $MenuList)
+ *
+ * \return array of sub-menus.  $MaxDepth is also returned
  */
-function menu_find($Name, &$MaxDepth, $Menu = NULL) {
+function menu_find($Name, &$MaxDepth, $Menu = NULL) 
+{
   global $MenuList;
   if (empty($Menu)) {
     $Menu = $MenuList;
@@ -294,12 +300,14 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL) {
         return ($Val->SubMenu);
       }
       else {
-        return (menu_find($Val->SubMenu, $PathParts[1], $MaxDepth));
+        return (menu_find($PathParts[1], $MaxDepth, $Val->SubMenu));
       }
     }
   }
   return (NULL);
 } // menu_find()
+
+
 /**
  * \brief Take a menu and render it as
  * one HTML line.  This ignores submenus!
