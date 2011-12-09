@@ -49,14 +49,16 @@ int DelagentDBInit()
   DBConfFile = get_dbconf();
 
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "sh testInitDB.sh %s", get_db_name());
+  //sprintf(CMD, "sh testInitDB.sh %s", get_db_name());
+  sprintf(CMD, "sudo su postgres -c 'pg_restore -d %s ../testdata/testdb_all.tar'", get_db_name());
+  printf("restore database command: %s\n", CMD);
   rc = system(CMD); 
-  if (rc != 0)
-  {
-    printf("Database initialize ERROR!\n");
-    DelagentClean();
-    return -1; 
-  }
+  //if (rc != 0)
+  //{
+  //  printf("Database initialize ERROR!\n");
+  //  DelagentClean();
+  //  return -1; 
+  //}
 
   return 0;
 }
