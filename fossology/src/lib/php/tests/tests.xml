@@ -8,9 +8,10 @@
       <file>test_common_dir.php</file>
       <file>test_common_license_file.php</file>
       <file>test_common_menu.php</file>
+      <file>test_common_parm.php</file>
       <file>test_common_pkg.php</file>
-      <file>test_common_dir.php</file>
-      <file>test_common_license_file.php</file>
+      <file>test_common_sysconfig.php</file>
+      <file></file>
     </testsuite>
   </testsuites>
 </phpunit>
