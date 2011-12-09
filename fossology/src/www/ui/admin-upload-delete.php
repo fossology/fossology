@@ -27,9 +27,7 @@ class admin_upload_delete extends FO_Plugin {
   var $Title = TITLE_admin_upload_delete;
   var $MenuList = "Organize::Uploads::Delete Uploaded File";
   var $Version = "1.0";
-  var $Dependency = array(
-    "db"
-  );
+  var $Dependency = array();
   var $DBaccess = PLUGIN_DB_DELETE;
 
   /**

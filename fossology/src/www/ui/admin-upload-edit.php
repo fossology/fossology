@@ -34,9 +34,7 @@ class upload_properties extends FO_Plugin {
   public $Title = TITLE_upload_properties;
   var $Version = "1.0";
   var $MenuList = "Organize::Uploads::Edit Properties";
-  var $Dependency = array(
-    "db"
-    );
+  var $Dependency = array();
     var $DBaccess = PLUGIN_DB_WRITE;
     /**
      * function EditUploadProperites

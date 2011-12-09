@@ -47,7 +47,7 @@ class myJobs extends FO_Plugin {
   public $Title      = TITLE_myJobs;
   public $MenuList   = "Jobs::My Jobs";
   public $LoginFlag  = 1;    // Must be logged in
-  public $Dependency = array('db');
+  public $Dependency = array();
   public $DBaccess = PLUGIN_DB_UPLOAD;
   private $Interval  = 7;    // default refresh time
 

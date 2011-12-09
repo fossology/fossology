@@ -32,7 +32,7 @@ class search_file_by_license extends FO_Plugin
   var $Name       = "search_file_by_license";
   var $Title      = TITLE_search_file_by_license;
   var $Version    = "1.0";
-  var $Dependency = array("db","license");
+  var $Dependency = array("license");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
 

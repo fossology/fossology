@@ -23,7 +23,7 @@ class user_add extends FO_Plugin {
   var $Title = TITLE_user_add;
   var $MenuList = "Admin::Users::Add";
   var $Version = "1.0";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess = PLUGIN_DB_USERADMIN;
 
   /**

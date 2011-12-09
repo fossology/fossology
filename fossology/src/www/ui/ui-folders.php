@@ -25,7 +25,7 @@ class ui_folders extends FO_Plugin
   var $Version    = "1.0";
   // var $MenuList   = "Jobs::Folders (refresh)";
   var $MenuTarget = "treenav";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_READ;
   var $NoMenu     = 1;
 

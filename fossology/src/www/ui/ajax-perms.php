@@ -32,7 +32,7 @@ class ajax_perms extends FO_Plugin
   var $Name       = "perm_get";
   var $Title      = TITLE_ajax_perms;
   var $Version    = "1.3";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_READ;
   var $NoHTML     = 1; /* This plugin needs no HTML content help */
 

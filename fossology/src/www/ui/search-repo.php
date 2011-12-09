@@ -24,7 +24,7 @@ class search_repo extends FO_Plugin
   var $Title      = TITLE_search_repo;
   var $Version    = "1.0";
   // var $MenuList   = "Help::Debug::Debug Repository";
-  var $Dependency = array("db","view","browse");
+  var $Dependency = array("view","browse");
   var $DBaccess   = PLUGIN_DB_READ;
 
   /**

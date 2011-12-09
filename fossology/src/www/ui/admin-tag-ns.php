@@ -24,7 +24,7 @@ class admin_tag_ns extends FO_Plugin
   var $Title      = TITLE_admin_tag_ns;
   var $MenuList = "Admin::Tag::Manage TagNS";
   var $Version = "1.3";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess = PLUGIN_DB_USERADMIN;
 
   /**

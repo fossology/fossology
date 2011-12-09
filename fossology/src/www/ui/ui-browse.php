@@ -28,7 +28,7 @@ class ui_browse extends FO_Plugin {
   var $Title = TITLE_ui_browse;
   var $Version = "1.0";
   var $MenuList = "Browse";
-  var $Dependency = array("db");
+  var $Dependency = array();
   public $DBaccess = PLUGIN_DB_READ;
   public $LoginFlag = 0;
 

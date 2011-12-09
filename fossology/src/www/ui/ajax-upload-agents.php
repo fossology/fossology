@@ -36,7 +36,7 @@ class ajax_upload_agents extends FO_Plugin
   var $Name       = "upload_agent_options";
   var $Title      = TITLE_ajax_upload_agents;
   var $Version    = "1.0";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_READ;
   var $NoHTML     = 1; /* This plugin needs no HTML content help */
 

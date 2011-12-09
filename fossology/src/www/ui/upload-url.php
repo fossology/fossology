@@ -27,7 +27,7 @@ class upload_url extends FO_Plugin {
   public $Title = TITLE_upload_url;
   public $Version = "1.0";
   public $MenuList = "Upload::From URL";
-  //public $Dependency = array("db", "agent_unpack"); // TODO to display, temporarily comment out
+  //public $Dependency = array("agent_unpack"); // TODO to display, temporarily comment out
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
   /**

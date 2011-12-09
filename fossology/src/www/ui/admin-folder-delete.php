@@ -23,9 +23,7 @@ class admin_folder_delete extends FO_Plugin {
   public $Title = TITLE_admin_folder_delete;
   public $MenuList = "Organize::Folders::Delete Folder";
   public $Version = "1.0";
-  public $Dependency = array(
-    "db"
-    );
+  public $Dependency = array();
   public $DBaccess = PLUGIN_DB_DELETE;
 
   /**

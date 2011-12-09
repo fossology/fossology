@@ -28,7 +28,7 @@ class foconfig extends FO_Plugin
   var $Version    = "1.0";
   var $Title      = TITLE_foconfig;
   var $MenuList   = "Admin::Customize";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_USERADMIN;
   var $CreateAttempts = 0;
   public $PluginLevel = 50;    // run before 'regular' plugins

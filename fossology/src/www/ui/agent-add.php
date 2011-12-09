@@ -28,7 +28,7 @@ class agent_add extends FO_Plugin
   public $Title      = TITLE_agent_add;
   public $MenuList   = "Jobs::Schedule Agents";
   public $Version    = "1.1";
-  public $Dependency = array("db");
+  public $Dependency = array();
   public $DBaccess   = PLUGIN_DB_ANALYZE;
 
   /**

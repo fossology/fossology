@@ -24,7 +24,7 @@ class dashboard extends FO_Plugin
   var $Version    = "1.0";
   var $Title      = TITLE_dashboard;
   var $MenuList   = "Admin::Dashboard";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
   /**

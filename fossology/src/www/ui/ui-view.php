@@ -26,7 +26,7 @@ class ui_view extends FO_Plugin
   var $Name       = "view";
   var $Title      = TITLE_ui_view;
   var $Version    = "1.0";
-  var $Dependency = array("db","browse");
+  var $Dependency = array("browse");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
 

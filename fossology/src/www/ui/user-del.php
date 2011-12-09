@@ -28,7 +28,7 @@ class user_del extends FO_Plugin
   var $Title      = TITLE_user_del;
   var $MenuList   = "Admin::Users::Delete";
   var $Version    = "1.0";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
   /**
