@@ -1,0 +1,5 @@
+When adding a new test you MUST update the file tests.xml.  That file describes
+all the tests to be run when phpunit is run.  If the test is not in tests.xml it
+will not be run by the Makefile.
+
+Please keep tests.xml up to date.  Thanks.
