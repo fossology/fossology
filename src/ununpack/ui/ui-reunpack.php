@@ -99,10 +99,10 @@ class ui_reunpack extends FO_Plugin
       AND jobqueue.jq_type = '$jobqueue_type';";
     $result = pg_query($PG_CONN, $SQLcheck);
     DBCheckResult($result, $SQLcheck, __FILE__, __LINE__);
-    pg_free_result($result);
     $row_count = pg_num_rows($result);
     if($row_count) {
       print $SQLcheck;
+      pg_free_result($result);
       return(0);
     }
     else {
@@ -128,6 +128,7 @@ class ui_reunpack extends FO_Plugin
       }
       return ($State);
     }
+    pg_free_result($result);
   }
 
   /**
