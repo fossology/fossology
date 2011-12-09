@@ -63,54 +63,6 @@ GTree* agents      = NULL;   ///< The master list of all of the agents
 /* ************************************************************************** */
 
 /**
- * Internal declaration of private members for the meta_agent type. Meta agents
- * are used to store the information necessary to create a new agent of the same
- * type as the meta_agent.
- */
-struct meta_agent_internal
-{
-    char name[256];             ///< the name associated with this agent i.e. nomos, copyright...
-    char raw_cmd[MAX_CMD + 1];  ///< the raw command that will start the agent, used for ssh
-    int max_run;                ///< the maximum number that can run at once -1 if no limit
-    int special;                ///< any special condition associated with the agent
-    char* version;              ///< the version of the agent that is running on all hosts
-    int valid;                  ///< flag indicating if the meta_agent is valid
-};
-
-/**
- * Internal declaration of private members for the agent type. The agent type is
- * used to communicate with other the associated agent process. Holds host,
- * threading, status, pipes and data information relevant to what the process is
- * doing.
- */
-struct agent_internal
-{
-    /* we need all the information on creating the agent */
-    meta_agent meta_data; ///< the type of agent this is i.e. bucket, copyright...
-    host host_machine;    ///< the host that this agent will start on
-    /* thread management */
-    agent_status status;  ///< the state of execution the agent is currently in
-    GThread* thread;      ///< the thread that communicates with this agent
-    time_t check_in;      ///< the time that the agent last generated anything
-    int n_updates;        ///< keeps track of the number of times the agent has updated
-    pid_t pid;            ///< the pid of the process this agent is running in
-    /* pipes connecting to the child */
-    int from_parent;      ///< file identifier to read from the parent (child stdin)
-    int to_child;         ///< file identifier to print to the child
-    int from_child;       ///< file identifier to read from child
-    int to_parent;        ///< file identifier to print to the parent  (child stdout)
-    FILE* read;           ///< FILE* that abstracts the use of the from_child socket
-    FILE* write;          ///< FILE* that abstracts the use of the to_child socket
-    /* data management */
-    job owner;            ///< the job that this agent is assigned to
-    char* data;           ///< the data that has been sent to the agent for analysis
-    int updated;          ///< boolean flag to indicate if the scheduler has updated the data
-    int check_analyzed;   ///< the number that were analyzed between last heartbeats
-    int total_analyzed;   ///< the total number that this agent has analyzed
-    int return_code;      ///< what was returned by the agent when it disconnected
-};
-
-/**
  * strings used to print the status of an agent. The status is actually an enum,
  * which is just an integer, so this provides the status in a human readable
  * format.
@@ -614,7 +566,6 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc)
   /* test inputs */
   if(!name || !cmd)
   {
-    errno = EINVAL;
     ERROR("invalid arguments passed to meta_agent_init()");
     return NULL;
   }
@@ -1105,7 +1056,6 @@ int add_meta_agent(char* name, char* cmd, int max, int spc)
 
   if(!name || !cmd)
   {
-    errno = EINVAL;
     ERROR("couldn't add new meta agent");
     return 0;
   }

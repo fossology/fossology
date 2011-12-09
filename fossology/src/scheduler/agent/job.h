@@ -46,6 +46,30 @@ typedef enum
 } job_status;
 extern const char* job_status_strings[];
 
+/**
+ * Internal declaraction of private members of the job strucutre.
+ */
+struct job_internal
+{
+    /* associated agent information */
+    char*  agent_type;      ///< the type of agent used to analyze the data
+    GList* running_agents;  ///< the list of agents assigned to this job that are still working
+    GList* finished_agents; ///< the list of agents that have completed their tasks
+    GList* failed_agents;   ///< the list of agents that failed while working
+    FILE*  log;             ///< the log to print any agent logging messages to
+    /* information for data manipluation */
+    job_status status;      ///< the current status for the job
+    char* data;             ///< the data associated with this job
+    PGresult* db_result;    ///< results from the sql query (if any)
+    GMutex* lock;           ///< lock to maintain data integrity
+    int idx;                ///< the current index into the sql results
+    /* information about job status */
+    char* message;          ///< message that will be sent with job notification email
+    int priority;           ///< importance of the job, maps directory to unix priority
+    int verbose;            ///< the verbose level for all of the agents in this job
+    int id;                 ///< the identifier for this job
+};
+
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
