@@ -14,8 +14,35 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-all:
-	echo "No scheduler tests"
+#
+# scheduler/agent_tests makefile
+#
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+DIRS = Unit 
+COVDIR = Unit
+
+dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+
+all: 
+	$(call dirloop, )
+
+test: 
+	$(call dirloop, test)
+
+coverage:
+	$(MAKE) -C $(COVDIR) coverage
+
 clean:
+	$(call dirloop,clean)
+
 install:
+	@echo "No mimetype agent_tests install"
+
 uninstall:
+	@echo "No mimetype agent_tests uninstall"
+
+
+.PHONY: all test coverage clean
