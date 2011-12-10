@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* glib includes */
 #include <gio/gio.h>
+#include <glib.h>
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */

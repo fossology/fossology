@@ -14,10 +14,73 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-all:
-	@echo "NO TESTS (Unit) for scheduler"
-test:
-	@echo "NO TESTS (Unit) for scheduler"
+TOP = ../../../..
+include $(TOP)/Makefile.conf
+LOCALAGENTDIR=../../agent
+
+TESTDIR = $(TOP)/src/testing/lib/c
+TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR) -lgio-2.0
+CFLAGS_LOCAL= $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lpcre -lcunit $(TESTLIB)
+DEF   = -DLOG_DIR='"$(LOGDIR)"' \
+        -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
+        -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' \
+        -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' \
+        -DPROJECT_USER='"$(PROJECTUSER)"' \
+        -DPROJECT_GROUP='"$(PROJECTGROUP)"' \
+        -DPROCESS_NAME='"$(EXE)"'
+
+LIB = libscheduler.a
+EXE = test_scheduler
+COV = libscheduler_cov.a
+
+OBJECTS = testAgent.o \
+
+COVERAGE = scheduler_cov.o \
+           agent_cov.o \
+           database_cov.o \
+           event_cov.o \
+           host_cov.o \
+           interface_cov.o \
+           job_cov.o \
+           logging_cov.o \
+
+all: $(EXE)
+	@echo "make scheduler Unit agent_tests"
+
+test: $(EXE)
+	@echo "make scheduler Unit agent_tests"
+	./$(EXE)
+	
+$(EXE): testRun.c $(OBJECTS) $(LIB)
+	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
+
+coverage: testRun.c $(OBJECTS) $(COV)
+	@echo "make scheduler test coverage"
+	$(CC) $< -o $(EXE) $(OBJECTS) $(COV) $(CFLAGS_LOCAL) $(FLAG_COV)
+	./$(EXE)
+	lcov --directory . --capture --output-file cov.txt; \
+	genhtml  -o  results cov.txt
+
+$(LIB):
+	$(MAKE) -C $(LOCALAGENTDIR) $@
+
+$(COV): $(COVERAGE)
+	ar cvr $@ $(COVERAGE)
+
+######################
+# object build rules #
+######################
+
+$(OBJECTS): %.o: %.c
+	$(CC) -c $(CFLAGS_LOCAL) $<
+
 clean:
+	@echo "make copyright agent_tests clean"
+	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno results
+
 install:
+	@echo "make copyright agent_tests nothing to install"
 uninstall:
+	@echo "make copyright agent_tests nothing to uninstall"
+
+.PHONY: all install uninstall clean test 

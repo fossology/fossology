@@ -561,7 +561,6 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc)
 {
   /* locals */
   meta_agent ma;
-  char cpy[MAX_CMD + 1];
 
   /* test inputs */
   if(!name || !cmd)
@@ -580,7 +579,6 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc)
   /* inputs are valid, create the meta_agent */
   ma = g_new0(struct meta_agent_internal, 1);
 
-  strcpy(cpy, cmd);
   strcpy(ma->name, name);
   strcpy(ma->raw_cmd, cmd);
   strcat(ma->raw_cmd, " --scheduler_start");
@@ -1054,18 +1052,13 @@ int add_meta_agent(char* name, char* cmd, int max, int spc)
 {
   meta_agent ma;
 
-  if(!name || !cmd)
-  {
-    ERROR("couldn't add new meta agent");
-    return 0;
-  }
-
   if(meta_agents == NULL)
     agent_list_init();
 
   if(g_tree_lookup(meta_agents, name) == NULL)
   {
-    ma = meta_agent_init(name, cmd, max, spc);
+    if((ma = meta_agent_init(name, cmd, max, spc)) == NULL)
+      return 0;
     g_tree_insert(meta_agents, ma->name, ma);
     return 1;
   }

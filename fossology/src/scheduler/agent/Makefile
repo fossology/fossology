@@ -21,6 +21,7 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 #GLIB_FLAGS =  -lgthread-2.0 -lgio-2.0 -I/usr/include/libgtop-2.0/ -lgtop-2.0
+AR = ar
 GLIB_FLAGS =  -lgthread-2.0 -lgio-2.0
 CFLAGS_LOCAL = $(GLIB_FLAGS) $(ALL_CFLAGS) -I. -lpq -lpthread -Werror
 DEPEN = Makefile logging.h
@@ -29,6 +30,7 @@ DEF   = -DLOG_DIR='"$(LOGDIR)"' \
         -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' \
         -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"'
 
+LIB = libscheduler.a
 EXE = fo_scheduler
 CLI = fo_cli
 FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' \
@@ -42,8 +44,9 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 # objects and headers #
 #######################
 
-OBJS = main.o \
-       scheduler.o \
+MAIN = main.o \
+
+OBJS = scheduler.o \
        agent.o \
        database.o \
        event.o \
@@ -66,18 +69,14 @@ HEAD = agent.h \
 
 all: $(FOLIB) $(EXE) $(CLI) defconf/init.d/fossology 
 
-$(EXE): $(OBJS) $(VARS) $(HEAD) $(DEPEN)
-	$(CC) $(OBJS) $(DEF) $(CFLAGS_LOCAL) -o $@
+$(EXE): $(MAIN) $(LIB) $(VARS) $(HEAD) $(DEPEN)
+	$(CC) $(MAIN) $(LIB) $(DEF) $(CFLAGS_LOCAL) -o $@
 
 $(CLI): schedulerCLI.c Makefile $(FOLIB)
 	$(CC) schedulerCLI.c $(CFLAGS_LOCAL) $(DEF) -o $@
 
-#######################
-# library build rules #
-#######################
-
-libscheduler.a: $(OBJS) $(DEPEN)
-	ar cvr $@ $(OBJS)
+$(LIB): $(OBJS) $(VARS) $(HEAD) $(DEPEN)
+	$(AR) cr $@ $(OBJS)
 
 ##################
 # init.d scripts #
@@ -149,7 +148,7 @@ install-conf:
 #####################
 
 clean:
-	rm -f $(OBJS) $(EXE) $(CLI)
+	rm -f $(OBJS) $(MAIN) $(EXE) $(CLI) $(LIB)
 
 uninstall:
 	rm -f $(OBJS) *.a
