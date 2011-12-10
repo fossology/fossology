@@ -17,7 +17,7 @@
  ***********************************************************/
 /**
  * \file common-menu.php
- * \brief common function of menu
+ * \brief common menu functions
  */
 
 /**
@@ -169,7 +169,8 @@ function menu_cmp(&$a, &$b) {
  *
  * \return the max depth of menu
  */
-function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, &$FullName, &$Title) {
+function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, &$FullName, &$Title) 
+{
   $AddNew = 0;
   $NeedSort = 0;
   $PathParts = explode("::", $Path, 2);
@@ -251,6 +252,8 @@ function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, 
   }
   return ($M->MaxDepth);
 } // menu_insert_r()
+
+
 /**
  * \brief menu_insert(): Given a Path, order level for the last
  * item, and optional plugin name, insert the menu item.
@@ -262,7 +265,8 @@ function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, 
  * \param $HTML      HTML of the new menu item
  * \param $Title     Title of the new menu item
  */
-function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target = NULL, $HTML = NULL) {
+function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target = NULL, $HTML = NULL) 
+{
   global $MenuList;
   $FullName = $Path;
   menu_insert_r($MenuList, $Path, $LastOrder, $Target, $URI, $HTML, 0, $FullName, $Title);
@@ -321,7 +325,8 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL)
  * \return HTML string
  */
 $menu_to_1html_counter = 0;
-function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1) {
+function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1) 
+{
   $V = "";
   $Std = "";
   global $menu_to_1html_counter;
@@ -396,6 +401,8 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
   $menu_to_1html_counter++;
   return ("<div id='menu1html-$menu_to_1html_counter' align='right' style='padding:0px 5px 0px 5px'><small>$V</small></div>");
 } // menu_to_1html()
+
+
 /**
  * \brief Take a menu and render it as
  * one HTML line with items in a "[name]" list.
@@ -409,7 +416,8 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
  * 
  * \return one HTML line with items in a "[name]" list
  */
-function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1) {
+function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1) 
+{
   $V = "";
   $Std = "";
   if (!empty($Menu)) {
@@ -451,6 +459,8 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1) {
   }
   return ($V);
 } // menu_to_1list()
+
+
 /**
  * \brief Debugging code for printing the menu.
  * This is recursive.
@@ -458,7 +468,8 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1) {
  * \param $Menu    menu list to be printed
  * \param $Indent  indent char
  */
-function menu_print(&$Menu, $Indent) {
+function menu_print(&$Menu, $Indent) 
+{
   if (!isset($Menu)) {
     return;
   }
@@ -470,6 +481,7 @@ function menu_print(&$Menu, $Indent) {
     menu_print($Val->SubMenu, $Indent + 1);
   }
 } // menu_print()
+
 // DEBUG CODE
 /**********
  if (0)
@@ -514,5 +526,4 @@ function menu_remove($Menu, $RmName)
   }
   return $NewArray;
 }
-
 ?>
