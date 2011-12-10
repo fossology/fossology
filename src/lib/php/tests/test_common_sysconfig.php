@@ -32,9 +32,9 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
   public $PG_CONN;
  
   /**
-   * \brief initialization 
+   * \brief initialization
    */
-  protected function setUp() 
+  protected function setUp()
   {
     global $PG_CONN;
     $sysconfig = './sysconfigDirTest';
@@ -43,16 +43,16 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
 
   /**
    * \brief test for ConfigInit()
-   * after ConfigInit() is executed, we can get some sysconfig information, 
-   * include: SupportEmailLabel, SupportEmailAddr, SupportEmailSubject, 
+   * after ConfigInit() is executed, we can get some sysconfig information,
+   * include: SupportEmailLabel, SupportEmailAddr, SupportEmailSubject,
    * BannerMsg, LogoImage, LogoLink, GlobalBrowse, FOSSologyURL
    */
   function testConfigInit()
   {
-    print "Start unit test for common-sysconfig.php\n";
+    print "\nStart unit test for common-sysconfig.php\n";
     print "test function ConfigInit()\n";
     $sysconfig = './sysconfigDirTest';
-    $SysConf = ConfigInit($sysconfig);
+    ConfigInit($sysconfig, &$SysConf);
     $this->assertEquals("FOSSology Support",  $SysConf['SYSCONFIG']['SupportEmailSubject']);
     $this->assertEquals("false",  $SysConf['SYSCONFIG']['GlobalBrowse']);
     $hostname = exec("hostname -f");
