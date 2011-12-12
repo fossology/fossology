@@ -33,9 +33,7 @@ class agent_mimetype extends FO_Plugin {
   public $Title = TITLE_agent_mimetype;
   // public $MenuList   = "Jobs::Agents::MIME-type Analysis";
   public $Version = "1.0";
-  public $Dependency = array(
-    "db"
-  );
+  public $Dependency = array();
   public $DBaccess = PLUGIN_DB_ANALYZE;
   /**
    * \brief Register additional menus.

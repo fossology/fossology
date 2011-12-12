@@ -30,7 +30,7 @@ class copyright_list extends FO_Plugin
   var $Name       = "copyrightlist";
   var $Title      = TITLE_copyright_list;
   var $Version    = "1.0";
-  var $Dependency = array("db","copyrighthist");
+  var $Dependency = array("copyrighthist");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
 

@@ -29,7 +29,7 @@ class agent_nomos_once extends FO_Plugin {
   public $Title = TITLE_agent_nomos_once;
   public $Version = "1.0";
   /* note: no menulist needed, it's insterted in the code below */
-  //public $Dependency = array();
+  public $Dependency = array();
   public $NoHTML = 0;  // always print text output for now
   /** For anyone to access, without login, use: **/
   public $DBaccess   = PLUGIN_DB_NONE;

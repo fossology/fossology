@@ -31,7 +31,7 @@ class ui_view_license extends FO_Plugin
   var $Name       = "view-license";
   var $Title      = TITLE_ui_view_license;
   var $Version    = "1.0";
-  var $Dependency = array("db","view");
+  var $Dependency = array("view");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
   var $NoMenu     = 0;

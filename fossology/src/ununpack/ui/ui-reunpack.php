@@ -29,7 +29,7 @@ class ui_reunpack extends FO_Plugin
   public $Title      = TITLE_ui_reunpack;
   //public $MenuList   = "Jobs::Agents::Reunpack";
   public $Version    = "1.2";
-  public $Dependency = array("db");
+  public $Dependency = array();
   public $DBaccess   = PLUGIN_DB_UPLOAD;
 
   /**

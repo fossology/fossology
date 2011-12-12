@@ -22,7 +22,7 @@ class debian_lics extends FO_Plugin
   public $Title      = "License Histogram For All Debian Uploads";
   public $MenuList   = "Jobs::Analyze::License Histogram for Debian Uploads";
   public $Version    = "2.0";
-  public $Dependency = array("db");
+  public $Dependency = array();
   public $DBaccess   = PLUGIN_DB_READ;
 
   /**
@@ -53,7 +53,7 @@ class debian_lics extends FO_Plugin
         {
           /* Loop thru results to obtain all licenses in their uploadtree recs*/
           $Lics = array();
-          while (Row = pg_fetch_array($result))
+          while ($Row = pg_fetch_array($result))
           {
             if (empty($Row['upload_pk'])) {
               continue;

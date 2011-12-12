@@ -24,7 +24,7 @@ class debug_user extends FO_Plugin
   var $Version    = "1.0";
   var $Title      = TITLE_debug_user;
   var $MenuList   = "Help::Debug::Debug User";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_DEBUG;
 
   /**

@@ -22,7 +22,7 @@ class debian_lics extends FO_Plugin
   public $Title      = "License Histogram For All Debian Uploads";
   public $MenuList   = "Jobs::Analyze::License Histogram for Debian Uploads";
   public $Version    = "1.0";
-  public $Dependency = array("db");
+  public $Dependency = array();
   public $DBaccess   = PLUGIN_DB_READ;
 
   /**
