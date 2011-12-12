@@ -28,7 +28,7 @@ class agent_copyright extends FO_Plugin
   public $Name = "agent_copyright";
   public $Title = TITLE_agent_copyright;
   public $Version = "1.0";
-  public $Dependency = array("db");
+  public $Dependency = array();
   public $DBaccess = PLUGIN_DB_ANALYZE;
 
   /**

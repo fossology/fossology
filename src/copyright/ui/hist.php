@@ -27,7 +27,7 @@ class copyright_hist extends FO_Plugin
   var $Name       = "copyrighthist";
   var $Title      = TITLE_copyright_hist;
   var $Version    = "1.0";
-  var $Dependency = array("db","browse","view");
+  var $Dependency = array("browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
   var $UpdCache   = 0;

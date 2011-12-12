@@ -34,7 +34,7 @@ class agent_fonomos extends FO_Plugin {
   public $Title = TITLE_agent_fonomos;
   // public $MenuList   = "Jobs::Agents::Nomos License Analysis";
   public $Version = "1.0";
-  public $Dependency = array("db");
+  public $Dependency = array();
   public $DBaccess = PLUGIN_DB_ANALYZE;
 
   /**

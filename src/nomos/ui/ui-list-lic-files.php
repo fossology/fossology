@@ -31,7 +31,7 @@ class list_lic_files extends FO_Plugin
   var $Name       = "list_lic_files";
   var $Title      = TITLE_list_lic_files;
   var $Version    = "1.0";
-  var $Dependency = array("db","nomoslicense");
+  var $Dependency = array("nomoslicense");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
 

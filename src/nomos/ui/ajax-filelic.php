@@ -37,7 +37,7 @@ class ajax_filelic extends FO_Plugin
   var $Name       = "ajax_filelic";
   var $Title      = TITLE_ajax_filelic;
   var $Version    = "1.0";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_READ;
   var $NoHTML     = 1; /* This plugin needs no HTML content help */
   var $LoginFlag = 0;

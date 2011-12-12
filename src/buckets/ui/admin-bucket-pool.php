@@ -29,7 +29,7 @@ class admin_bucket_pool extends FO_Plugin
   var $Version    = "1.0";
   var $Title      = TITLE_admin_bucket_pool;
   var $MenuList   = "Admin::Buckets::Duplicate Bucketpool";
-  var $Dependency = array("db");
+  var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
   /**

@@ -28,7 +28,7 @@ class ui_buckets extends FO_Plugin
   var $Name       = "bucketbrowser";
   var $Title      = TITLE_ui_buckets;
   var $Version    = "1.0";
-  var $Dependency = array("db","browse","view");
+  var $Dependency = array("browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
   var $UpdCache   = 0;

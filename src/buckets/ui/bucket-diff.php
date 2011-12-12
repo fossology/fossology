@@ -28,7 +28,7 @@ class ui_diff_buckets extends FO_Plugin
   var $Name       = "bucketsdiff";
   var $Title      = TITLE_ui_diff_buckets;
   var $Version    = "1.0";
-  var $Dependency = array("db","browse","view");
+  var $Dependency = array("browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
   var $UpdCache   = 0;
