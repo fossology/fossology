@@ -210,6 +210,14 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   $upload_pk = $row["upload_fk"];
   pg_free_result($result);
 
+  /* Find rf_pk for rf_shortname.  This will speed up the main query tremendously */
+  $sql = "SELECT rf_pk FROM license_ref WHERE rf_shortname='$rf_shortname'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  $rf_pk = $row["rf_pk"];
+  pg_free_result($result);
+
   $shortname = pg_escape_string($rf_shortname);
   $chkonly = ($CheckOnly) ? " LIMIT 1" : "";
 
@@ -226,12 +234,12 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   }
 
   $sql = "select count(license_file.pfile_fk) as count, count(distinct license_file.pfile_fk) as unique
-          from license_ref,license_file, $TagTable
+          from license_file, $TagTable
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
                  where upload_fk=$upload_pk
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
-          where PF=license_file.pfile_fk and agent_fk=$agent_pk and rf_fk=rf_pk
-                and rf_shortname='$shortname' $TagClause $chkonly";
+          where PF=license_file.pfile_fk and agent_fk=$agent_pk and rf_fk='$rf_pk'
+                $TagClause $chkonly";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
