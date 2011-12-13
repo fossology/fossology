@@ -1,24 +1,24 @@
-#!/usr/bin/php
 <?php
 /***********************************************************
-Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 /**
- * fossjobs
- *
+ * \file fossjobs.php
+ * 
+ * \brief fossjobs
  * list fossology agents that are configured in the ui or
  * run the default configured in the ui.
  *
@@ -34,18 +34,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  *
  * @version "$Id: fossjobs.php 3140 2010-05-04 21:37:56Z rrando $"
  *
- * note: there is a user interface issue here in that the user has no
+ * \note there is a user interface issue here in that the user has no
  * easy way to discover and specify what the upload_pk is.
  */
-// Have to set this or else plugins will not load.
-$GlobalReady = 1;
 /**********************************************************************
-**********************************************************************
+ **********************************************************************
 SUPPORT FUNCTIONS
 **********************************************************************
 **********************************************************************/
 /**
- * function: list agents
+ * \brief list agents
  *
  * lists the agents that are registered with the system.
  * Assumes that the agent plugins have been configured.
@@ -56,13 +54,15 @@ function list_agents() {
   $agent_list = menu_find("Agents", $depth);
   return ($agent_list);
 }
-require_once (dirname(__FILE__) . '/../share/fossology/php/pathinclude.php');
-global $WEBDIR;
-$UI_CLI = 1;
-require_once ("$WEBDIR/common/common.php");
+
+/**
+ * include common-cli.php directly, common.php can not include common-cli.php
+ * becuase common.php is included before UI_CLI is set
+ */
+require_once("$MODDIR/lib/php/common-cli.php");
 cli_Init();
 /**********************************************************************
-**********************************************************************
+ **********************************************************************
 INITIALIZE THIS INTERFACE
 **********************************************************************
 **********************************************************************/
@@ -72,11 +72,11 @@ $usage = basename($argv[0]) . " [options]
   -v        :: verbose output
   -a        :: list available agent tasks
   -A string :: specify agent to schedule (default is everything from -a)
-	       The string can be a comma-separated list of agent tasks.
+               The string can be a comma-separated list of agent tasks.
   -u        :: list available upload ids
   -U upload :: the upload identifier for scheduling agent tasks
-	       The string can be a comma-separated list of upload ids.
-	       Or, use 'ALL' to specify all upload ids.
+               The string can be a comma-separated list of upload ids.
+               Or, use 'ALL' to specify all upload ids.
   -P num    :: priority for the jobs (higher = more important, default:0)
 ";
 //process parameters, see usage above
@@ -91,13 +91,8 @@ if (array_key_exists("h", $options)) {
   exit(0);
 }
 global $Plugins;
-global $DB;
-if (empty($DB)) {
-  print "ERROR: Unable to connect to the database.\n";
-  exit(1);
-}
 /**********************************************************************
-**********************************************************************
+ **********************************************************************
 PROCESS COMMAND LINE SELECTION
 **********************************************************************
 **********************************************************************/
@@ -146,35 +141,47 @@ if (array_key_exists("a", $options)) {
     }
   }
 }
+global $PG_CONN;
 /* List available uploads */
 if (array_key_exists("u", $options)) {
   $SQL = "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;";
-  $Results = $DB->Action($SQL);
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__, __LINE__);
   print "# The following uploads are available (upload id: name)\n";
-  for ($i = 0;!empty($Results[$i]['upload_pk']);$i++) {
-    $Label = $Results[$i]['upload_filename'];
-    if (!empty($Results[$i]['upload_desc'])) {
-      $Label.= " (" . $Results[$i]['upload_desc'] . ')';
+  $upload_count = pg_num_rows($result);
+  $AllUploadPk = "";
+  while ($row = pg_fetch_assoc($result) and !empty($row['upload_pk'])) {
+    $Label = $row['upload_filename'];
+    if (!empty($row['upload_desc'])) {
+      $Label.= " (" . $row['upload_desc'] . ')';
     }
-    print $Results[$i]['upload_pk'] . ": $Label\n";
-    if ($i == 0) {
-      $AllUploadPk = $Results[$i]['upload_pk'];
+    print $row['upload_pk'] . ": $Label\n";
+    if ($upload_count == 1) {
+      $AllUploadPk = $row['upload_pk'];
     } else {
-      $AllUploadPk.= "," . $Results[$i]['upload_pk'];
+      $AllUploadPk.= "," . $row['upload_pk'];
     }
   }
+  pg_free_result($result);
 }
-$upload_pk_list = $options['U'];
-if ($upload_pk_list == 'ALL') {
-  $upload_pk_list = "";
-  $SQL = "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;";
-  $Results = $DB->Action($SQL);
-  for ($i = 0;!empty($Results[$i]['upload_pk']);$i++) {
-    if ($i == 0) {
-      $upload_pk_list = $Results[$i]['upload_pk'];
-    } else {
-      $upload_pk_list.= "," . $Results[$i]['upload_pk'];
+
+if (array_key_exists("U", $options)) {
+  $upload_pk_list = $options['U'];
+  if ($upload_pk_list == 'ALL') {
+    $upload_pk_list = "";
+    $SQL = "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;";
+    $result = pg_query($PG_CONN, $SQL);
+    DBCheckResult($result, $SQL, __FILE__, __LINE__);
+    $i = 0;
+    while ($row = pg_fetch_assoc($result) and !empty($row['upload_pk'])) {
+      if ($i == 0) {
+        $upload_pk_list = $row['upload_pk'];
+      } else {
+        $upload_pk_list.= "," . $row['upload_pk'];
+      }
+      $i++;
     }
+    pg_free_result($result);
   }
 }
 if (!empty($upload_pk_list)) {

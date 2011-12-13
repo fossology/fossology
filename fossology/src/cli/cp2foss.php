@@ -1,7 +1,6 @@
-#!/usr/bin/php
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,22 +14,21 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
-/**************************************************************
- cp2foss
+***********************************************************/
+/**
+ * \file cp2foss.php
+ * \brief cp2foss
+ * Import a file (or directory) into FOSSology for processing.
+ * \return 0 for success, 1 for failure.
+ */
 
- Import a file (or directory) into FOSSology for processing.
-
- @return 0 for success, 1 for failure.
- *************************************************************/
-/* Have to set this or else plugins will not load. */
-$GlobalReady = 1;
-/* Load all code */
-require_once (dirname(__FILE__) . '/../share/fossology/php/pathinclude.php');
-global $WEBDIR;
-$UI_CLI = 1; /* this is a command-line program */
-require_once ("$WEBDIR/common/common.php");
+/**
+ * include common-cli.php directly, common.php can not include common-cli.php
+ * becuase common.php is included before UI_CLI is set
+ */
+require_once("$MODDIR/lib/php/common-cli.php");
 cli_Init();
+
 global $Plugins;
 error_reporting(E_NOTICE & E_STRICT);
 
@@ -91,17 +89,17 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -w         = (depricated and ignored)
   ";
 /* Load command-line options */
-global $DB;
-$Verbose = 0;
+global $PG_CONN;
+$Verbose = 1;
 $Test = 0;
 /************************************************************************/
 /************************************************************************/
 /************************************************************************/
 
-/****************************************************
- GetBucketFolder(): Given an upload name and the number
- of letters per bucket, return the bucket folder name.
- ****************************************************/
+/**
+ * \brief Given an upload name and the number
+ * of letters per bucket, return the bucket folder name.
+ */
 function GetBucketFolder($UploadName, $BucketGroupSize) {
   $Letters = "abcdefghijklmnopqrstuvwxyz";
   $Numbers = "0123456789";
@@ -131,14 +129,15 @@ function GetBucketFolder($UploadName, $BucketGroupSize) {
   /* Not a letter. */
   return ("Other");
 } /* GetBucketFolder() */
-/****************************************************
- GetFolder(): Given a folder path, return the folder_pk.
- NOTE: If any part of the folder path does not exist, thenscp cp2foss will
- create it.
- NOTE: This is recursive!
- ****************************************************/
+
+/**
+ * \brief Given a folder path, return the folder_pk.
+ * 
+ * \note If any part of the folder path does not exist, thenscp cp2foss will create it.
+ * This is recursive!
+ */
 function GetFolder($FolderPath, $Parent = NULL) {
-  global $DB;
+  global $PG_CONN;
   global $Verbose;
   global $Test;
   if (empty($Parent)) {
@@ -158,14 +157,18 @@ function GetFolder($FolderPath, $Parent = NULL) {
   /* See if it exists */
   $SQLFolder = str_replace("'", "''", $Folder);
   $SQL = "SELECT * FROM folder
-	INNER JOIN foldercontents ON child_id = folder_pk
-	AND foldercontents_mode = '1'
-	WHERE parent_fk = '$Parent' AND folder_name='$SQLFolder';";
+  INNER JOIN foldercontents ON child_id = folder_pk
+  AND foldercontents_mode = '1'
+  WHERE parent_fk = '$Parent' AND folder_name='$SQLFolder';";
   if ($Verbose > 1) {
     print "SQL=\n$SQL\n";
   }
-  $Results = $DB->Action($SQL);
-  if (count($Results) <= 0) {
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  $row_count = pg_num_rows($result);
+
+  if (row_count <= 0) {
     /* Need to create folder */
     global $Plugins;
     $P = & $Plugins[plugin_find_id("folder_create") ];
@@ -179,25 +182,27 @@ function GetFolder($FolderPath, $Parent = NULL) {
     if (!$Test) {
       $P->Create($Parent, $Folder, "");
     }
-    $Results = $DB->Action($SQL);
+    pg_free_result($result);
+    DBCheckResult($result, $SQL, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
   }
-  $Parent = $Results[0]['folder_pk'];
+  $row = pg_fetch_assoc($result);
+  $Parent = $row['folder_pk'];
+  pg_free_result($result);
   return (GetFolder($FolderPath, $Parent));
 } /* GetFolder() */
 
 /**
- * process email notifciation
- *
+ * \brief the process email notifciation
  * If being run as an agent, get the user name from the previous upload
  *
  * @param int $UploadPk the upload pk
  * @return NULL on success, String on failure.
- *
  */
 function ProcEnote($UploadPk) {
 
   global $Email;
-  global $DB;
+  global $PG_CONN;
   global $ME;
   global $webServer;
 
@@ -205,36 +210,45 @@ function ProcEnote($UploadPk) {
   $previous = $UploadPk-1;
   $Sql = "SELECT upload_pk,user_fk,job_upload_fk,job_user_fk FROM upload,job WHERE " .
            "job_upload_fk=$previous and upload_pk=$previous order by upload_pk desc;";
-  $Users = $DB->Action($Sql);
-  $UserPk = $Users[0]['job_user_fk'];
-  $UserId = $Users[0]['user_fk'];
+  $result = pg_query($PG_CONN, $Sql);
+  DBCheckResult($result, $Sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  pg_free_result($result);
+  $UserPk = $row['job_user_fk'];
+  $UserId = $row['user_fk'];
   $Sql = "SELECT user_pk, user_name, user_email, email_notify FROM users WHERE " .
              "user_pk=$UserPk; ";
-  $Uname= $DB->Action($Sql);
-  $UserName = $Uname[0]['user_name'];
-  $UserEmail = $Uname[0]['user_email'];
+  $result = pg_query($PG_CONN, $Sql);
+  DBCheckResult($result, $Sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  pg_free_result($result);
+  $UserName = $row['user_name'];
+  $UserEmail = $row['user_email'];
 
-  /*
+  /**
    * If called as agent, current upload user name will be fossy with a user_fk of NULL.
    * Get the information to check that condition
    */
   $Sql = "SELECT upload_pk,user_fk,job_upload_fk,job_user_fk FROM upload,job WHERE " .
            "job_upload_fk=$UploadPk and upload_pk=$UploadPk order by upload_pk desc;";
-  $Users = $DB->Action($Sql);
-  $UserPk = $Users[0]['job_user_fk'];
-  $UserId = $Users[0]['user_fk'];
+  $result = pg_query($PG_CONN, $Sql);
+  DBCheckResult($result, $Sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  pg_free_result($result);
+  $UserPk = $row['job_user_fk'];
+  $UserId = $row['user_fk'];
 
-  // need to find the jq_pk's of bucket, copyright, nomos and package 
+  // need to find the jq_pk's of bucket, copyright, nomos and package
   // agents to use as dependencies.
-  
+
   $Depends = FindDependent($UploadPk);
   /* are we being run as fossy?, either as agent or from command line */
   if($UserId === NULL && $ME == 'fossy') {
     /*
      * When run as agent or fossy, pass in the UserEmail and UserName.  This
-     * ensures the email address is correct, the UserName is used for the
-     * salutation.
-     */
+    * ensures the email address is correct, the UserName is used for the
+    * salutation.
+    */
     $sched = scheduleEmailNotification($UploadPk,$webServer,$UserEmail,$UserName,$Depends);
   }
   else {
@@ -248,10 +262,10 @@ function ProcEnote($UploadPk) {
   return(NULL);
 } // ProcEnote
 
-/****************************************************
- UploadOne(): Given one object (file or URL), upload it.
- This is a function because it is can also be recursive!
- ****************************************************/
+/**
+ * \brief Given one object (file or URL), upload it.
+ * This is a function because it is can also be recursive!
+ */
 function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription, $TarSource = NULL) {
   global $Verbose;
   global $Test;
@@ -268,7 +282,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     global $LIBEXECDIR;
     global $TarExcludeList;
 
-    /*
+    /**
      * User reppath to get a path in the repository for temp storage.  Only
      * use the part up to repository, as the path returned may not exist.
      */
@@ -296,7 +310,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     unlink($Filename);
     /* email notification will be scheduled below, above we just handed UploadOne
      * a tar'ed up file.
-     */
+    */
     return;
   }
   else if (file_exists($UploadArchive)) {
@@ -340,7 +354,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
   /* Tell wget_agent to actually grab the upload */
   global $AGENTDIR;
-  $Cmd = "$AGENTDIR/wget_agent -k '$UploadPk' '$UploadArchive'";
+  $Cmd = "$SYSCONFDIR/mods-enabled/wget_agent/agent/wget_agent -k '$UploadPk' '$UploadArchive'";
   if ($Verbose) {
     print "CMD=$Cmd\n";
   }
@@ -367,7 +381,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
         break;
       default:
         $Cmd = "fossjobs -U '$UploadPk' -A '$QueueList'";
-        break;
+      break;
     }
     if ($Verbose) {
       print "CMD=$Cmd\n";
@@ -375,7 +389,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     if (!$Test) {
       system($Cmd);
     }
-    /*
+    /**
      * this is gross: by the time you get here, the uploadPk is one more than the
      * uploadPk reported to the user.  That's because the first upload pk is for
      * the fosscp_agent, then the second (created in cp2foss) is for the rest
@@ -397,145 +411,145 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
       }
     }
   }
-    } /* UploadOne() */
+} /* UploadOne() */
 
 
-    /************************************************************************/
-    /************************************************************************/
-    /************************************************************************/
-    /* Process each parameter */
-    $FolderPath = "/";
-    $UploadDescription = "";
-    $UploadName = "";
-    $QueueList = "";
-    $TarExcludeList = "";
-    $bucket_size = 3;
-    $ME = exec('id -un',$toss,$rtn);
+/************************************************************************/
+/************************************************************************/
+/************************************************************************/
+/* Process each parameter */
+$FolderPath = "/";
+$UploadDescription = "";
+$UploadName = "";
+$QueueList = "";
+$TarExcludeList = "";
+$bucket_size = 3;
+$ME = exec('id -un',$toss,$rtn);
 
-    for ($i = 1;$i < $argc;$i++) {
-      switch ($argv[$i]) {
-        case '-A': /* use alphabet buckets */
-          $OptionA = true;
-          break;
-        case '-AA': /* use alphabet buckets */
-          $OptionA = true;
-          $i++;
-          $bucket_size = intval($argv[$i]);
-          if ($bucket_size < 1) {
-            $bucket_size = 1;
-          }
-          break;
-        case '-f': /* folder path */
-        case '-p': /* depricated 'path' to folder */
-          $i++;
-          $FolderPath = $argv[$i];
-          /* idiot check for absolute paths */
-          //print "  Before Idiot Checks: '$FolderPath'\n";
-          /* remove starting and ending / */
-          $FolderPath = preg_replace('@^/*@', "", $FolderPath);
-          $FolderPath = preg_replace('@/*$@', "", $FolderPath);
-          /* Note: the pattern below should probably be generalized to remove everything
-           * up to and including the 1st /, This pattern works in what I've
-           * tested: @^.*\/@ ( I had to escape the / so the comment works!)
-           */
-          $FolderPath = preg_replace("@^S.*? Repository@", "", $FolderPath);
-          $FolderPath = preg_replace('@//*@', "/", $FolderPath);
-          $FolderPath = '/' . $FolderPath;
-          //print "  AFTER Idiot Checks: '$FolderPath'\n";
+for ($i = 1;$i < $argc;$i++) {
+  switch ($argv[$i]) {
+    case '-A': /* use alphabet buckets */
+      $OptionA = true;
+      break;
+    case '-AA': /* use alphabet buckets */
+      $OptionA = true;
+      $i++;
+      $bucket_size = intval($argv[$i]);
+      if ($bucket_size < 1) {
+        $bucket_size = 1;
+      }
+      break;
+    case '-f': /* folder path */
+    case '-p': /* depricated 'path' to folder */
+      $i++;
+      $FolderPath = $argv[$i];
+      /* idiot check for absolute paths */
+      //print "  Before Idiot Checks: '$FolderPath'\n";
+      /* remove starting and ending / */
+      $FolderPath = preg_replace('@^/*@', "", $FolderPath);
+      $FolderPath = preg_replace('@/*$@', "", $FolderPath);
+      /* Note: the pattern below should probably be generalized to remove everything
+       * up to and including the 1st /, This pattern works in what I've
+      * tested: @^.*\/@ ( I had to escape the / so the comment works!)
+      */
+      $FolderPath = preg_replace("@^S.*? Repository@", "", $FolderPath);
+      $FolderPath = preg_replace('@//*@', "/", $FolderPath);
+      $FolderPath = '/' . $FolderPath;
+      //print "  AFTER Idiot Checks: '$FolderPath'\n";
 
-          break;
-        case '-R': /* obsolete: recurse directories */
-        case '-W': /* webserver */
-        	$i++;
-        	$webServer = $argv[$i];
-        	//print "DBG: setting webServer to $webServer\n";
-        	break;
-        case '-w': /* obsolete: URL switch to use wget */
-          break;
-        case '-d': /* specify upload description */
-          $i++;
-          $UploadDescription = $argv[$i];
-          break;
-        case '-e': /* email notification wanted */
-          $i++;
-          $Email = $argv[$i];
-          // Make sure email looks valid
-          $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
-          if ($Check != $Email) {
-            print "Invalid email address. $Email\n";
-            print $Usage;
-            exit(1);
-          }
-          $Enotification = TRUE;
-          break;
-        case '-n': /* specify upload name */
-          $i++;
-          $UploadName = $argv[$i];
-          break;
-        case '-Q':
-          system("fossjobs -a");
-          return (0);
-        case '-q':
-          $i++;
-          $QueueList = $argv[$i];
-          break;
-        case '-T': /* Test mode */
-          $Test = 1;
-          if (!$Verbose) {
-            $Verbose++;
-          }
-          break;
-        case '-v':
-          $Verbose++;
-          break;
-        case '-X':
-          if (!empty($TarExcludeList)) {
-            $TarExcludeList.= " ";
-          }
-          $i++;
-          $TarExcludeList.= "--exclude '" . $argv[$i] . "'";
-          break;
-        case '-h':
-        case '-?':
-          print $Usage . "\n";
-          return (0);
-        case '-a': /* it's an archive! */
-          /* ignore -a since the next name is a file. */
-          break;
-        case '-': /* it's an archive list from stdin! */
-          $Fin = fopen("php://stdin", "r");
-          while (!feof($Fin)) {
-            $UploadArchive = trim(fgets($Fin));
-            if (strlen($UploadArchive) > 0) {
-              print "Loading $UploadArchive\n";
-              if (empty($UploadName)) {
-                $UploadName = basename($UploadArchive);
-              }
-              UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
-              /* prepare for next parameter */
-              $UploadName = "";
-            }
-          }
-          fclose($Fin);
-          break;
-        default:
-          if (substr($argv[$i], 0, 1) == '-') {
-            print "Unknown parameter: '" . $argv[$i] . "'\n";
-            print $Usage . "\n";
-            exit(1);
-          }
-          /* No break! No hyphen means it is a file! */
-          $UploadArchive = $argv[$i];
+      break;
+    case '-R': /* obsolete: recurse directories */
+    case '-W': /* webserver */
+      $i++;
+      $webServer = $argv[$i];
+      //print "DBG: setting webServer to $webServer\n";
+      break;
+    case '-w': /* obsolete: URL switch to use wget */
+      break;
+    case '-d': /* specify upload description */
+      $i++;
+      $UploadDescription = $argv[$i];
+      break;
+    case '-e': /* email notification wanted */
+      $i++;
+      $Email = $argv[$i];
+      // Make sure email looks valid
+      $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
+      if ($Check != $Email) {
+        print "Invalid email address. $Email\n";
+        print $Usage;
+        exit(1);
+      }
+      $Enotification = TRUE;
+      break;
+    case '-n': /* specify upload name */
+      $i++;
+      $UploadName = $argv[$i];
+      break;
+    case '-Q':
+      system("fossjobs -a");
+      return (0);
+    case '-q':
+      $i++;
+      $QueueList = $argv[$i];
+      break;
+    case '-T': /* Test mode */
+      $Test = 1;
+      if (!$Verbose) {
+        $Verbose++;
+      }
+      break;
+    case '-v':
+      $Verbose++;
+      break;
+    case '-X':
+      if (!empty($TarExcludeList)) {
+        $TarExcludeList.= " ";
+      }
+      $i++;
+      $TarExcludeList.= "--exclude '" . $argv[$i] . "'";
+      break;
+    case '-h':
+    case '-?':
+      print $Usage . "\n";
+      return (0);
+    case '-a': /* it's an archive! */
+      /* ignore -a since the next name is a file. */
+      break;
+    case '-': /* it's an archive list from stdin! */
+      $Fin = fopen("php://stdin", "r");
+      while (!feof($Fin)) {
+        $UploadArchive = trim(fgets($Fin));
+        if (strlen($UploadArchive) > 0) {
           print "Loading $UploadArchive\n";
           if (empty($UploadName)) {
             $UploadName = basename($UploadArchive);
           }
-          //print "  CAlling UploadOne in 'main': '$FolderPath'\n";
           UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
           /* prepare for next parameter */
           $UploadName = "";
-          break;
-      } /* switch */
-    } /* for each parameter */
-    return (0);
-    ?>
+        }
+      }
+      fclose($Fin);
+      break;
+    default:
+      if (substr($argv[$i], 0, 1) == '-') {
+      print "Unknown parameter: '" . $argv[$i] . "'\n";
+      print $Usage . "\n";
+      exit(1);
+    }
+    /* No break! No hyphen means it is a file! */
+    $UploadArchive = $argv[$i];
+    print "Loading $UploadArchive\n";
+    if (empty($UploadName)) {
+      $UploadName = basename($UploadArchive);
+    }
+    //print "  CAlling UploadOne in 'main': '$FolderPath'\n";
+    UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
+    /* prepare for next parameter */
+    $UploadName = "";
+    break;
+  } /* switch */
+} /* for each parameter */
+return (0);
+?>
