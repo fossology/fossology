@@ -35,11 +35,10 @@
 function cli_Init()
 {
   // every cli must perform these steps
-  global $WEBDIR;
   global $Plugins;
 
   /* Load the plugins */
-  plugin_load("$WEBDIR/plugins",0); /* load but do not initialize */
+  plugin_load(0); /* load but do not initialize */
 
   /* Turn off authentication */
   /** The auth module hijacks and disables plugins, so turn it off. **/
