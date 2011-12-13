@@ -51,6 +51,11 @@ require_once("$MODDIR/lib/php/libschema.php");
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
 
+/* Locations where the target .php file might exist */
+$FO_phpLocations = "$BINDIR" 
+                    . PATH_SEPARATOR . "$SBINDIR" 
+                    . PATH_SEPARATOR . "$MODDIR/cli" ;
+$IncludePath = set_include_path(get_include_path() . PATH_SEPARATOR . $FO_phpLocations);
 require($argv[0] . ".php");
 exit(0);
 
