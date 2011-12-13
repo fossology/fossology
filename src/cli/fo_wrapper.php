@@ -56,7 +56,8 @@ $FO_phpLocations = "$BINDIR"
                     . PATH_SEPARATOR . "$SBINDIR" 
                     . PATH_SEPARATOR . "$LIBEXECDIR" ;
 $IncludePath = set_include_path(get_include_path() . PATH_SEPARATOR . $FO_phpLocations);
-require($argv[0] . ".php");
+$basename = basename($argv[0]);
+require("$basename" . ".php");
 exit(0);
 
 /**
