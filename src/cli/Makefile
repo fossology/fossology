@@ -35,8 +35,9 @@ docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 
 install: all
 	for file in $(EXE); do \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/cli/$${file%.php}; \
+		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(LIBEXECDIR)/$$file; \
 	done
+	$(INSTALL_PROGRAM) fo_wrapper.php $(DESTDIR)$(LIBEXECDIR)/fo_wrapper
 
 	for file in $(MAN1FILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MAN1DIR)/$$file; \
@@ -50,17 +51,16 @@ install: all
 # create wrappers in BINDIR
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \
-		echo "#!/bin/bash" > $(DESTDIR)$(BINDIR)/$$file; \
-		echo "MODDIR=$(DESTDIR)$(MODDIR)" >> $(DESTDIR)$(BINDIR)/$$file; \
-		echo "SYSCONFDIR=$(DESTDIR)$(SYSCONFDIR)" >> $(DESTDIR)$(BINDIR)/$$file; \
-		echo "\$$MODDIR/cli/$$file -c \$$SYSCONFDIR \$$@" >> $(DESTDIR)$(BINDIR)/$$file; \
+	  ln -sf $(DESTDIR)$(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(BINDIR)/$$file; \
 		chmod a+x $(DESTDIR)$(BINDIR)/$$file; \
 	done
 
 uninstall:
 	for file in $(EXE); do \
 		rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
+	  rm -f $(DESTDIR)$(LIBEXECDIR)/$$file; \
 	done
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fo_wrapper
 	
 	rm -rf $(DESTDIR)$(MODDIR)/cli
 
