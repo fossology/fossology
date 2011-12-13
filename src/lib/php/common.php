@@ -46,8 +46,8 @@ require_once("common-perms.php");
 /* Only include the command-line interface functions if it is required. */
 global $UI_CLI;
 if (!empty($UI_CLI) && ($UI_CLI == 1))
-  {
+{
   require_once("common-cli.php");
-  }
+}
 
 ?>
