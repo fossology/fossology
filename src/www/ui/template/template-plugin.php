@@ -145,8 +145,6 @@ class FO_Plugin
    * changes are needed BEFORE doing any changes.
    * Also, it must check for partial installs in case the user is
    * recovering from an installation failure.
-   * The only dependency that can be assumed to work is "global $DB",
-   * and even then, be sure to check if $DB is NULL before using it.
    */
   function Install()
   {
@@ -486,27 +484,5 @@ class FO_Plugin
     print $V;
     return;
   } // Output()
-
-  /**
-   * General actions.
-   * These functions will likely be called by other plugins.
-   */
-
-  /**
-   * \brief This function is used to perform a specific action.
-   * The $Command is a string containing the command.
-   * Unlike ActionArg(), this does not separate the Command from the Target.
-   * 
-   * \param $Command - command
-   * 
-   * \return value are plugin specific.
-   */
-  function Action($Command)
-  {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    // Put your code here
-    return;
-  } // Action()
-
 };
 ?>
