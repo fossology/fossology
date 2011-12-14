@@ -50,7 +50,7 @@ class ui_default extends FO_Plugin
         $text = _("Upload files into the fossology repository.");
         $V .= "<li>$text\n";
 
-        $text = _("Unpack files (tar, bz2, iso's, and many others) into its component files.");
+        $text = _("Unpack files (zip, tar, bz2, iso's, and many others) into its component files.");
         $V .= "<li>$text\n";
 
         $text = _("Browse upload file trees.");
@@ -65,10 +65,13 @@ class ui_default extends FO_Plugin
         $text = _("Scan for copyrights and other author information.");
         $V .= "<li>$text\n";
 
-        $text = _("Tag files and attach notes.");
+        $text = _("View side-by-side license and bucket differences between file trees.");
         $V .= "<li>$text\n";
 
-        $text = _("Report files with your a custom classification scheme.");
+        $text = _("Tag and attach notes to files.");
+        $V .= "<li>$text\n";
+
+        $text = _("Report files based on your own custom classification scheme.");
         $V .= "<li>$text\n";
 
         $V .= "</ul>\n";
