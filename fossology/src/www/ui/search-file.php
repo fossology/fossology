@@ -24,6 +24,7 @@ class search_file extends FO_Plugin
   var $Title      = TITLE_search_file;
   var $Version    = "1.0";
   var $MenuList   = "Search";
+  var $MenuOrder  = 90;
   var $Dependency = array("view","browse");
   var $DBaccess   = PLUGIN_DB_READ;
   public $LoginFlag  = 0;

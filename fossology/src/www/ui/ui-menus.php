@@ -40,7 +40,9 @@ class ui_menu extends FO_Plugin
     }
      
     // Add default menus (with no actions linked to plugins)
-    menu_insert("Main::Home",18,"Default",NULL,"_top");
+    menu_insert("Main::Upload",70);
+    menu_insert("Main::Jobs",60);
+    menu_insert("Main::Organize",50);
     menu_insert("Main::Help",-1);
     menu_insert("Main::Help::Documentation",0,NULL,NULL,NULL,"<a href='http://fossology.org/user_documentation'>Documentation</a>");
 
