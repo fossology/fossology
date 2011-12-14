@@ -10,6 +10,7 @@ DATA=../unpack-test-data.tar.bz2
 
 CFLAGS_LOCAL=-lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ -lcunit $(TESTLIB)
 EXE=run_tests
+
 OBJS=	run_tests.o \
 		test_CopyFile.o \
 		test_FindCmd.o \
@@ -23,9 +24,11 @@ OBJS=	run_tests.o \
 		test_ununpack-iso.o
 #		test_TraverseUnunpackEntry.o \
 
+FOCUNIT = libfocunit.a
+
 all: $(EXE)
 
-$(EXE): libununpack.a $(FOLIB) $(OBJS) $(VARS)
+$(EXE): libununpack.a $(FOLIB) $(OBJS) $(VARS) $(FOCUNIT)
 	$(CC) $(OBJS) $(AGENTDIR)/libununpack.a $(CFLAGS_LOCAL) -o $@
 
 $(OBJS): %.o: %.c 
@@ -36,7 +39,10 @@ $(FOLIB):
 
 $(DATA):
 	@echo "Downloading ununpack data"
-	rsync -acv fonightly.usa.hp.com:/var/www/testfiles/unpack-test-data.tar.bz2 ..		
+	rsync -acv fonightly.usa.hp.com:/var/www/testfiles/unpack-test-data.tar.bz2 ..	
+	
+$(FOCUNIT):
+	$(MAKE) -C $(TESTDIR) $@
 	
 download: ../unpack-test-data.tar.bz2
 	@echo "untaring ununpack data"
