@@ -95,7 +95,6 @@ class agent_add extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    global $DB;
     $V="";
     switch($this->OutputType)
     {
