@@ -42,7 +42,7 @@ class jobs_showjobs extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
   {
-    menu_insert("Main::Jobs::Show Queue",$this->MenuOrder -1,$this->Name . "&show=detail",$this->MenuTarget);
+    menu_insert("Main::Jobs::Jobs in Queue",$this->MenuOrder -1,$this->Name . "&show=detail",$this->MenuTarget);
 
     // For the Browse menu, permit switching between detail and summary.
     $Show = GetParm("show",PARM_STRING);
