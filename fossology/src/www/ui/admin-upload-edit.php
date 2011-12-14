@@ -15,200 +15,212 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
 /**
- * edit upload file properties
- *
- * @param
- *
- * @return
- *
- * @version "$Id: admin-upload-edit.php 3993 2011-03-26 21:11:18Z rrando $"
- *
- * Created on Jul 16, 2008
- */
+ * @file admin-upload-edit.php
+ * @brief edit upload file properties
+ **/
 
-define("TITLE_upload_properties", _("Edit Upload Properties"));
+define("TITLE_upload_properties", _("Edit Uploaded File Properties"));
 
-class upload_properties extends FO_Plugin {
+class upload_properties extends FO_Plugin 
+{
   var $Name = "upload_properties";
   public $Title = TITLE_upload_properties;
   var $Version = "1.0";
   var $MenuList = "Organize::Uploads::Edit Properties";
   var $Dependency = array();
-    var $DBaccess = PLUGIN_DB_WRITE;
-    /**
-     * function EditUploadProperites
-     *
-     */
-    function EditUploadProperties($FolderId, $uploadId, $NewName, $NewDesc) {
-      global $Plugins;
-      global $DB;
-      /*
-       * No need to check $FolderId, as it's checked in Output, uploadId
-       * is set in the select, so no need to check it.  Check for NewName
-       * and NewDesc being empty, set if not empty.
+  var $DBaccess = PLUGIN_DB_WRITE;
+
+  /**
+   * @brief Update upload properties (name and description)
+   *
+   * @param $uploadId upload.upload_pk of record to update
+   * @param $NewName New upload.upload_filename, and uploadtree.ufle_name
+   *        If null, old value is not changed.
+   * @param $NewDesc New upload description (upload.upload_desc)
+   *        If null, old value is not changed.
+   *
+   * @return 1 if the upload record is updated, 0 if not, 2 if no inputs
+   **/
+  function UpdateUploadProperties($uploadId, $NewName, $NewDesc) 
+  {
+    global $PG_CONN;
+
+    if (empty($NewName) and empty($NewDesc)) return 2; // nothing to do 
+
+    if (!empty($NewName)) 
+    {
+      $NewName = pg_escape_string(trim($NewName));
+      /* Use pfile_fk to select the correct entry in the upload tree, artifacts
+       * (e.g. directories of the upload do not have pfiles).
        */
-      $set = 0;
-      if (!empty($NewName)) {
-        /*
-         Use pfile_fk to select the correct entry in the upload tree, artifacts
-         (e.g. directories of the upload do not have pfiles).
-         */
-        $Sql = "SELECT pfile_fk FROM upload WHERE upload_pk=$uploadId;";
-        $pfile = $DB->Action($Sql);
-        $pfileFk = $pfile[0]['pfile_fk'];
-        $Sql = "SELECT ufile_name FROM uploadtree WHERE upload_fk=$uploadId
-        AND pfile_fk=$pfileFk;";
-        $oFN = $DB->Action($Sql);
-        $oldFileName = basename($oFN[0]['ufile_name']);
-
-        /* Always keep ufile_name and upload_filename in sync */
-        if (!empty($NewName))
-        {
-          $Sql = "UPDATE uploadtree SET ufile_name='$NewName' ".
-              "WHERE upload_fk=$uploadId AND pfile_fk=$pfileFk;";
-          $Results = $DB->Action($Sql);
-          $Row = $Results[0];
-
-          $Sql = "UPDATE upload SET upload_filename='$NewName' ".
-              "WHERE upload_pk=$uploadId AND pfile_fk=$pfileFk;";
-          $Results = $DB->Action($Sql);
-          $Row = $Results[0];
-
-          $set = 1;
-        }
+      $sql = "SELECT pfile_fk FROM upload WHERE upload_pk=$uploadId";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result) == 0)
+      {
+        pg_free_result($result);
+        return 0;
       }
-      /* Note using this method, there is no way for the user to create a
-       * 'blank' i.e. empty description, they can set it to "" or '' but
-       * not 'nothing' (NULL).
-       */
-      if (!empty($NewDesc)) {
-        $Sql = "UPDATE upload SET upload_desc='$NewDesc' WHERE upload_pk=$uploadId;";
-        $Results = $DB->Action($Sql);
-        $Row = $Results[0];
-        $set = 1;
-      }
-      return ($set);
+
+      $row = pg_fetch_assoc($result);
+      $pfileFk = $row['pfile_fk'];
+      pg_free_result($result);
+
+      /* Always keep uploadtree.ufile_name and upload.upload_filename in sync */
+      $sql = "UPDATE uploadtree SET ufile_name='$NewName' WHERE upload_fk=$uploadId AND pfile_fk=$pfileFk";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+
+      $sql = "UPDATE upload SET upload_filename='$NewName' WHERE upload_pk=$uploadId AND pfile_fk=$pfileFk";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
-    /*********************************************
-     Output(): Generate the text for this plugin.
-     *********************************************/
-    function Output() {
-      if ($this->State != PLUGIN_STATE_READY) {
-        return;
-      }
-      $V = "";
-      global $DB;
-      switch ($this->OutputType) {
-        case "XML":
-          break;
-        case "HTML":
-          /* If this is a POST, then process the request. */
-          $FolderSelectId = GetParm('oldfolderid', PARM_INTEGER);
-          if (empty($FolderSelectId)) {
-            $FolderSelectId = FolderGetTop();
-          }
-          $uploadId = GetParm('uploadid', PARM_INTEGER);
-          $NewName = GetParm('newname', PARM_TEXT);
-          $NewDesc = GetParm('newdesc', PARM_TEXT);
-          $rc = $this->EditUploadProperties($FolderSelectId, $uploadId, $NewName, $NewDesc);
-          if($rc == 0)
-          {
-            $text = _("Nothing to Change");
-            $V.= displayMessage($text);
-          }
-          if ($rc == 1) {
-            $text = _("Upload Properties changed");
-            $V.= displayMessage($text);
-          }
 
-          /* Get the folder info */
-          $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$FolderSelectId';");
-          $Folder = & $Results[0];
-
-          $text =_("The upload properties that can be changed are the upload name and
-                 description.  First select the folder that the upload is stored in.  " . "Then select the upload to edit. Then enter the new values. If no " . "value is entered, then the corresponding field will not be changed.");
-          $V.= "<p>$text</p>";
-
-          /* Create the AJAX (Active HTTP) javascript for doing the reply
-           and showing the response. */
-          $V.= ActiveHTTPscript("Uploads");
-          $V.= "<script language='javascript'>\n";
-          $V.= "function Uploads_Reply()\n";
-          $V.= "  {\n";
-          $V.= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
-          $V.= "    {\n";
-          /* Remove all options */
-          $V.= "    document.formy.uploadid.innerHTML = Uploads.responseText;\n";
-          /* Add new options */
-          $V.= "    }\n";
-          $V.= "  }\n";
-          $V.= "</script>\n";
-          /* Build the HTML form */
-          $V.= "<form name='formy' method='post'>\n"; // no url = this url
-          $V.= "<ol>\n";
-          $text = _("Select the folder that contains the upload:  \n");
-          $V.= "<li>$text";
-          $V.= "<select name='oldfolderid'\n";
-          $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
-          $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
-          $V.= FolderListOption(-1, 0);
-          $V.= "</select><P />\n";
-          $text = _("Select the upload you wish to edit:  \n");
-          $V.= "<li>$text";
-          $V.= "<select name='uploadid'>\n";
-          $List = FolderListUploads(-1);
-          foreach($List as $L) {
-            $V.= "<option value='" . $L['upload_pk'] . "'>";
-            $V.= htmlentities($L['name']);
-            if (!empty($L['upload_desc'])) {
-              $V.= " (" . htmlentities($L['upload_desc']) . ")";
-            }
-            if (!empty($L['upload_ts'])) {
-              $V.= " :: " . substr($L['upload_ts'], 0, 19);
-            }
-            $V.= "</option>\n";
-          }
-          $V.= "</select><P />\n";
-          $text = _("Change upload name:  \n");
-          $V.= "<li>$text";
-          if(!(empty($Folder['upload_filename'])))
-          {
-            $V.= "<INPUT type='text' name='newname' size=40 value=\"" . htmlentities($Folder['upload_filename'], ENT_COMPAT) . "\" />\n";
-
-          }
-          else
-          {
-            $V.= "<INPUT type='text' name='newname' size=40 />\n";
-          }
-          $text = _("Change upload description:  \n");
-          $V.= "<P /><li>$text";
-          if(!(empty($Folder['upload_desc'])))
-          {
-            $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['upload_desc'], ENT_COMPAT) . "\" />\n";
-          }
-          else
-          {
-            $V.= "<INPUT type='text' name='newdesc' size=60 />\n";
-          }
-          //$V .= "<P /><li>Change Upload Source Location:  \n";
-          //$V .= "<INPUT type='text' name='newsrc' size=60 value=\"" . htmlentities($Folder['folder_src'],ENT_COMPAT) . "\" />\n";
-          $V.= "</ol>\n";
-          $text = _("Edit");
-          $V.= "<input type='submit' value='$text!'>\n";
-          $V.= "</form>\n";
-          break;
-        case "Text":
-          break;
-        default:
-          break;
-      }
-      if (!$this->OutputToStdout) {
-        return ($V);
-      }
-      print ("$V");
-      return;
+    if (!empty($NewDesc)) 
+    {
+      $NewDesc = pg_escape_string(trim($NewDesc));
+      $sql = "UPDATE upload SET upload_desc='$NewDesc' WHERE upload_pk=$uploadId";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
+    return 1;
+  }
+
+  /*********************************************
+   Output(): Generate the text for this plugin.
+   *********************************************/
+  function Output() 
+  {
+    global $PG_CONN;
+    if ($this->State != PLUGIN_STATE_READY)  return;
+
+    $V = "";
+    $folder_pk = GetParm('folder', PARM_TEXT);
+    if (empty($folder_pk)) $folder_pk = FolderGetTop();
+
+    $NewName = GetArrayVal("newname", $_POST);
+    $NewDesc = GetArrayVal("newdesc", $_POST);
+    $upload_pk = GetArrayVal("upload_pk", $_POST);
+    if (empty($upload_pk)) $upload_pk = GetParm('upload', PARM_INTEGER);
+
+    $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc);
+    if($rc == 0)
+    {
+      $text = _("Nothing to Change");
+      $V.= displayMessage($text);
+    }
+    else if($rc == 1)
+    {
+      $text = _("Upload Properties successfully changed");
+      $V.= displayMessage($text);
+    }
+
+    /* define js_url */
+    $V .= js_url(); 
+
+    /* Build the HTML form */
+    $V.= "<form name='formy' method='post'>\n"; // no url = this url
+    $V.= "<ol>\n";
+    $text = _("Select the folder that contains the upload:  \n");
+    $V.= "<li>$text";
+
+    // Get folder array folder_pk => folder_name
+    $FolderArray = array();
+    GetFolderArray(-1, $FolderArray);
+
+    /*** Display folder select list, on change request new page with folder= in url ***/
+    $url = Traceback_uri() . "?mod=upload_properties&folder=";
+    $onchange = "onchange=\"js_url(this.value, '$url')\"";
+    $V .= Array2SingleSelect($FolderArray, "folderselect", $folder_pk, false, false, $onchange);
+
+    /*** Display upload select list, on change, request new page with new upload= in url ***/
+    $text = _("Select the upload you wish to edit:  \n");
+    $V.= "<li>$text";
+
+    // Get list of all upload records in this folder
+    $UploadList = FolderListUploads($folder_pk);
+
+    // Make data array for upload select list.  Key is upload_pk, value is a composite
+    // of the upload_filename and upload_ts.
+    $UploadArray = array();
+    foreach($UploadList as $UploadRec) 
+    {
+      $SelectText = htmlentities($UploadRec['name']);
+      if (!empty($UploadRec['upload_ts'])) 
+        $SelectText .= ", " . substr($UploadRec['upload_ts'], 0, 19);
+      $UploadArray[$UploadRec['upload_pk']] = $SelectText;
+    }
+
+    /* Get selected upload info to display*/
+    if (empty($upload_pk))
+    {
+      // no upload selected, so use the top one in the select list
+      reset($UploadArray);
+      $upload_pk = key($UploadArray);
+    }
+
+    if ($upload_pk)
+    {
+      // case where upload is set in the URL
+      $sql = "SELECT * FROM upload WHERE upload_pk = '$upload_pk'";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result) == 0)
+      {
+        /* Bad upload_pk */
+        $text = _("Missing upload.");
+        $V.= displayMessage($text);
+        pg_free_result($result);
+        return 0;
+      }
+      $UploadRec = pg_fetch_assoc($result);
+      pg_free_result($result);
+      $V.= "<INPUT type='hidden' name='upload_pk' value='$upload_pk' />\n";
+    }
+    else
+    {
+      // no uploads in the folder
+      $UploadRec = array();
+    }
+
+    $url = Traceback_uri() . "?mod=upload_properties&folder=$folder_pk&upload=";
+    $onchange = "onchange=\"js_url(this.value, '$url')\"";
+    $V .= Array2SingleSelect($UploadArray, "uploadselect", $upload_pk, false, false, $onchange);
+
+    /* Input upload_filename */
+    $text = _("Upload name:  \n");
+    $V.= "<li>$text";
+    if(empty($UploadRec['upload_filename']))
+      $upload_filename = "";
+    else
+      $upload_filename = htmlentities($UploadRec['upload_filename']);
+    
+    $V.= "<INPUT type='text' name='newname' size=40 value='$upload_filename' />\n";
+
+    /* Input upload_desc */
+    $text = _("Upload description:  \n");
+    $V.= "<li>$text";
+    if(empty($UploadRec['upload_desc']))
+      $upload_desc = "";
+    else
+      $upload_desc = htmlentities($UploadRec['upload_desc'], ENT_QUOTES);
+    
+    $V.= "<INPUT type='text' name='newdesc' size=60 value='$upload_desc' />\n";
+
+    $V.= "</ol>\n";
+    $text = _("Edit");
+    $V.= "<input type='submit' value='$text!'>\n";
+    $V.= "</form>\n";
+
+    if (!$this->OutputToStdout) return ($V);
+    print ("$V");
+    return;
+  }
 }
 $NewPlugin = new upload_properties;
 ?>

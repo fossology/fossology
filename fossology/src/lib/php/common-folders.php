@@ -674,4 +674,58 @@ pload
   /* Return findings */
   return($List);
 } // FolderListUploadsRecurse()
+
+
+/**
+ * \brief Get an array of all the folders from a $RootFolder on down.
+ * Recursive.  This is typically used to build a select list of folder names.
+ *
+ * \param $RootFolder default is entire software repository
+ * \param $FolderArray returned array of folder_pk=>folder_name's
+ *
+ * \return $FolderArray of {folder_pk=>folder_name, folder_pk=>folder_name, ...}
+ * in folder order.
+ * If no folders are in the list, an empty array is returned.
+ *
+ * \todo Possibly this could be a common function and FolderListOption() could 
+ *       use this for its data.  In general data collection and data formatting
+ *       should be separate functions.
+ */
+function GetFolderArray($RootFolder=-1, &$FolderArray)
+{
+  global $PG_CONN;
+
+  if ($RootFolder == "-1") { $RootFolder = FolderGetTop(); }
+  if (empty($RootFolder)) { return $FolderArray; }
+
+  /* Load this folder's name */
+  $sql = "SELECT folder_name, folder_pk FROM folder WHERE folder_pk=$RootFolder LIMIT 1;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  pg_free_result($result);
+
+  $Name = trim($row['folder_name']);
+  $FolderArray[$row['folder_pk']] = $row['folder_name'];
+
+  /* Load any subfolders */
+  $sql = "SELECT folder.folder_pk, folder.folder_name,
+            foldercontents.parent_fk
+            FROM folder, foldercontents
+            WHERE foldercontents.foldercontents_mode = 1
+            AND foldercontents.parent_fk =$RootFolder
+            AND foldercontents.child_id = folder.folder_pk
+            AND folder.folder_pk is not null
+            ORDER BY folder_name";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) > 0)
+  {
+    while($row = pg_fetch_assoc($result))
+    {
+      GetFolderArray($row['folder_pk'], $FolderArray);
+    }
+  }
+  pg_free_result($result);
+}
 ?>
