@@ -24,7 +24,13 @@ class ui_default extends FO_Plugin
   var $Title      = TITLE_ui_default;
   var $Version    = "2.0";
   var $MenuList   = "";
+  var $MenuOrder  = 100;
   var $LoginFlag  = 0;
+
+  function RegisterMenus()
+  {
+    menu_insert("Main::Home", $this->MenuOrder, "Default", NULL, "_top");
+  }
 
   function Output()
   {
