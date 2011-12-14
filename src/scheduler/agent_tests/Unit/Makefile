@@ -32,6 +32,7 @@ DEF   = -DLOG_DIR='"$(LOGDIR)"' \
 LIB = libscheduler.a
 EXE = test_scheduler
 COV = libscheduler_cov.a
+FOCUNIT = libfocunit.a
 
 OBJECTS = testAgent.o \
 
@@ -44,14 +45,14 @@ COVERAGE = scheduler_cov.o \
            job_cov.o \
            logging_cov.o \
 
-all: $(EXE)
+all: $(EXE) 
 	@echo "make scheduler Unit agent_tests"
 
 test: $(EXE)
 	@echo "make scheduler Unit agent_tests"
 	./$(EXE)
 	
-$(EXE): testRun.c $(OBJECTS) $(LIB)
+$(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
 
 coverage: testRun.c $(OBJECTS) $(COV)
@@ -66,6 +67,10 @@ $(LIB):
 
 $(COV): $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
+
+$(FOCUNIT):
+	$(MAKE) -C $(TESTDIR) $@
+
 
 ######################
 # object build rules #
