@@ -89,11 +89,10 @@ if [ $BUILDTIME ]; then
       Debian|Ubuntu|LinuxMint)
          apt-get install \
             libxml2-dev libextractor-dev \
-            build-essential libtext-template-perl subversion rpm \
-            python python-dev python-pyrex libpcre3-dev
+            build-essential libtext-template-perl subversion rpm
          case "$CODENAME" in
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
-            squeeze) apt-get install postgresql-server-dev-8.4;;
+            squeeze|oneiric) apt-get install postgresql-server-dev-8.4;;
             sid) apt-get install postgresql-server-dev-8.4;;
             karmic|lucid|maverick) apt-get install postgresql-server-dev-8.4;;
             isadora) apt-get install postgresql-server-dev-8.4;;
@@ -106,8 +105,7 @@ if [ $BUILDTIME ]; then
          yum install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
-            libxml2 libextractor-devel Pyrex \
-            python python-devel pcre-devel
+            libxml2 libextractor-devel
          ;;
       Mandriva)
          # 2008.1 tested
@@ -122,7 +120,7 @@ if [ $BUILDTIME ]; then
             postgresql-devel \
             gcc make file libxml2 \
             perl-Text-Template subversion \
-            Pyrex libextractor-devel pcre-devel
+            libextractor-devel
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
@@ -141,14 +139,14 @@ if [ $RUNTIME ]; then
          apt-get install \
             php5 php5-pgsql php-pear php5-cli \
             libxml2 libextractor1c2a \
-            binutils libpcre3 \
-               php-gettext libextractor-plugins
+            binutils php-gettext \
+            libextractor-plugins
          case "$CODENAME" in
             dapper) 
                apt-get install postgresql-8.1;;
             lenny|hardy)
                apt-get install postgresql-8.3;;
-            squeeze)
+            squeeze|oneiric)
                apt-get install postgresql-8.4;;
             sid)
                apt-get install postgresql-8.4;;
@@ -175,7 +173,7 @@ if [ $RUNTIME ]; then
             php php-pear php-pgsql \
             smtpdaemon \
             libxml2 libextractor libextractor-plugins \
-            binutils pcre
+            binutils
 
          # enable, possible init, and start postgresql
          /sbin/chkconfig postgresql on
@@ -209,7 +207,7 @@ if [ $RUNTIME ]; then
             php php-pear php-pgsql \
             smtpdaemon \
             file libxml2 \
-            binutils pcre
+            binutils
          echo "NOTE: libextractor, cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources.";;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
