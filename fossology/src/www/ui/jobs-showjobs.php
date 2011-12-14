@@ -20,7 +20,7 @@
 define("TITLE_jobs_showjobs", _("Show Job Queue"));
 
 class jobs_showjobs extends FO_Plugin
-  {
+{
   var $Name       = "showjobs";
   var $Title      = TITLE_jobs_showjobs;
   var $Version    = "1.0";
@@ -42,8 +42,8 @@ class jobs_showjobs extends FO_Plugin
    RegisterMenus(): Customize submenus.
    ***********************************************************/
   function RegisterMenus()
-    {
-    menu_insert("Main::Jobs::Queue::Details",$this->MenuOrder -1,$this->Name . "&show=detail",$this->MenuTarget);
+  {
+    menu_insert("Main::Jobs::Show Queue",$this->MenuOrder -1,$this->Name . "&show=detail",$this->MenuTarget);
 
     // For the Browse menu, permit switching between detail and summary.
     $Show = GetParm("show",PARM_STRING);
@@ -107,129 +107,137 @@ $text = _("Show only active jobs");
 	  break;
 	}
       }
-    } // RegisterMenus()
+  } // RegisterMenus()
 
-  /***********************************************************
-   DrawColors(): Display colors and labels.
-   ***********************************************************/
+  /**
+   * @brief Display color legend
+   * @return Color legend in a string.
+   **/
   function DrawColors()
-    {
-    $V = "";
-    $V .= "<table border=1 padding=0><tr>\n";
-    foreach($this->Colors as $Key => $Val)
-      {
-      $V .= "  <td bgcolor='$Val'>$Key</td>\n";
-      }
+  {
+    $V = "<table border=1 padding=0><tr>\n";
+    foreach($this->Colors as $Key => $Val) $V .= "  <td bgcolor='$Val'>$Key</td>\n";
     $V .= "</tr></table>\n";
     return($V);
-    } // DrawColors()
+  } // DrawColors()
 
-  /***********************************************************
-   ShowJob(): This function returns the full job information.
-   TBD: Allow the user to clear hung jobs, alter priority.
-   ***********************************************************/
-  function ShowJob($Job)
-    {
+  /**
+   * @brief Returns the full job information table in a string.
+   * @param $job_pk
+   * @return Return job and jobqueue record data in an html table.
+   **/
+  function ShowJob($job_pk)
+  {
+    global $PG_CONN;
     $V = "";
-    global $Plugins;
     $Fields=array('jq_pk','jq_job_fk','job_name','jq_type','job_priority',
 	'jq_args','jq_runonpfile',
 	'jq_starttime','jq_endtime','jq_end_bits',
 	'jq_endtext', 'jq_itemsprocessed',
 	'job_submitter','job_queued',
-	'job_email_notify',
 	'job_upload_fk', 'jq_log');
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&show=job&job=";
 
-    global $DB;
-    $Sql = "SELECT * FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk = $Job LIMIT 1;";
-    $Results = $DB->Action($Sql);
-    $Row = $Results[0];
+    $sql = "SELECT * FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk = $job_pk LIMIT 1";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $Row = pg_fetch_assoc($result);
+    pg_free_result($result);
+
     if (empty($Row['jq_pk'])) { return; }
     $V .= "<table class='text' border=1 name='jobtable1'>\n";
-$text = _("Field");
-$text1 = _("Value");
+    $text = _("Field");
+    $text1 = _("Value");
     $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
     foreach($Fields as $F)
-      {
+    {
       $V .= "  <tr><th align='left'>$F</th><td>";
       switch($F)
-	{
-	case 'jq_itemsprocessed':
-        $V .= number_format($Row[$F]);
-        break;
-	case 'jq_pk':
-		$V .= "<a href='$Uri" . $Row[$F] . "'>" . htmlentities($Row[$F]) . "</a>";
-		break;
-	case 'job_upload_fk':
-		if (!empty($Row[$F]))
-		  {
-		  $Browse = Traceback_uri() . "?mod=browse&upload=" . htmlentities($Row[$F]);
-		  $V .= "<a href='$Browse'>" . htmlentities($Row[$F]) . "</a>";
-		  }
-		break;
-    case 'jq_log':
-        if (!empty($Row[$F]))
-        {
-          $V .= "<pre>";
-          if (file_exists($Row[$F])) $V .= file_get_contents($Row[$F]);
-          $V .= "</pre>";
-        }
-		break;
-	default:
-        if (array_key_exists($F, $Row))
-  		  $V .= htmlentities($Row[$F]);
-		break;
-	}
-      $V .= "</td></tr>\n";
+	  {
+	    case 'jq_itemsprocessed':
+            $V .= number_format($Row[$F]);
+            break;
+    	case 'jq_pk':
+    		$V .= "<a href='$Uri" . $Row[$F] . "'>" . htmlentities($Row[$F]) . "</a>";
+    		break;
+    	case 'job_upload_fk':
+    		if (!empty($Row[$F]))
+            {
+		      $Browse = Traceback_uri() . "?mod=browse&upload=" . htmlentities($Row[$F]);
+		      $V .= "<a href='$Browse'>" . htmlentities($Row[$F]) . "</a>";
+            }
+            break;
+        case 'jq_log':
+            if (!empty($Row[$F]))
+            {
+              $V .= "<pre>";
+              if (file_exists($Row[$F])) $V .= file_get_contents($Row[$F]);
+              $V .= "</pre>";
+            }
+            break;
+	    default:
+            if (array_key_exists($F, $Row)) $V .= htmlentities($Row[$F]);
+            break;
       }
+      $V .= "</td></tr>\n";
+    }
 
     /* List who this depends on */
-    $Sql = "SELECT * FROM jobdepends WHERE jdep_jq_fk = " . $Row['jq_pk'] . ";";
-    $Results = $DB->Action($Sql);
-    if (count($Results) > 0)
-      {
-$text = _("depends on");
+    $sql = "SELECT * FROM jobdepends WHERE jdep_jq_fk = " . $Row['jq_pk'] . ";";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) > 0)
+    {
+      $text = _("depends on");
       $V .= "  <tr><th align='left'>$text</th><td>";
       $First=1;
-      foreach($Results as $R)
-	{
-	if ($First) { $First=0; }
-	else { $V .= ", "; }
-	$V .= "<a href='$Uri" . $R['jdep_jq_depends_fk'] . "'>" . $R['jdep_jq_depends_fk'] . "</a>";
-	}
-      $V .= "</td></tr>\n";
+      while ($JobDepsRow = pg_fetch_assoc($result));
+      {
+        if ($First)  
+          $First=0; 
+        else 
+          $V .= ", "; 
+        $V .= "<a href='$Uri" . $JobDepsRow['jdep_jq_depends_fk'] . "'>" 
+               . $JobDepsRow['jdep_jq_depends_fk'] . "</a>";
       }
+      $V .= "</td></tr>\n";
+    }
+    pg_free_result($result);
 
     /* List depends on this */
     $Sql = "SELECT * FROM jobdepends WHERE jdep_jq_depends_fk = " . $Row['jq_pk'] . ";";
-    $Results = $DB->Action($Sql);
-    if (count($Results) > 0)
-      {
-$text = _("required by");
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $Row = pg_fetch_assoc($result);
+    if (pg_num_rows($result) > 0)
+    {
+      $text = _("required by");
       $V .= "  <tr><th align='left'>$text</th><td>";
       $First=1;
-      foreach($Results as $R)
-	{
-	if ($First) { $First=0; }
-	else { $V .= ", "; }
-	$V .= "<a href='$Uri" . $R['jdep_jq_fk'] . "'>" . $R['jdep_jq_fk'] . "</a>";
-	}
-      $V .= "</td></tr>\n";
+      while ($JobDepsRow = pg_fetch_assoc($result));
+      {
+        if ($First) 
+          $First=0; 
+        else  
+          $V .= ", "; 
+        $V .= "<a href='$Uri" . $JobDepsRow['jdep_jq_fk'] . "'>" 
+              . $JobDepsRow['jdep_jq_fk'] . "</a>";
       }
+      $V .= "</td></tr>\n";
+    }
+    pg_free_result($result);
 
     /* Close the table */
     $V .= "</table>\n";
     return($V);
-    } // ShowJob()
+  } // ShowJob()
 
   /***********************************************************
    Show(): This function returns the full job queue status.
    ***********************************************************/
   function Show	($History,$UploadPk=-1,$Detail=0)
-    {
-    global $Plugins;
-    global $DB, $PG_CONN;
+  {
+    global $PG_CONN;
     $V = '';
 
     if ($History == 1) { $Where = ""; }
@@ -263,7 +271,7 @@ $text = _("required by");
     /** NOTE: Results are NOT in alphabetical order.  They are in
         LC_COLLATE order.  Changing LC_COLLATE requires re-running
 	postgresql's initdb. **/
-    $Sql = "
+    $sql = "
     SELECT *
     FROM jobqueue
     INNER JOIN job ON jobqueue.jq_job_fk = job.job_pk
@@ -272,8 +280,10 @@ $text = _("required by");
     $Where $WherePage
     ORDER BY upload_filename,upload.upload_pk,job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk;
     ";
-    $Results = $DB->Action($Sql);
-    // print "<pre>" . htmlentities($Sql); print_r($Results); print "</pre>";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $Results = pg_fetch_all($result);
+    pg_free_result($result);
 
     /*****************************************************************/
     /* Get Jobs that are NOT associated with uploads (e.g., folder delete). */
@@ -282,37 +292,36 @@ $text = _("required by");
     /* turn off E_NOTICE kludge so this stops reporting undefined index */
     $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
     for($i=1; !empty($Results[$i]['upload_pk']); $i++)
-      {
+    {
       if ($Results[$i]['upload_pk'] != $Results[$i+1]['upload_pk'])
 	$Count++;
-      }
+    }
     error_reporting($errlev); /* return to previous error reporting level */
 
     if (($UploadPk < 0) && (!is_array($Results) || ($Count < 10)))
-	{
-	if ($History == 1) { $Where = ""; }
-	else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
+    {
+      if ($History == 1) { $Where = ""; }
+      else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
 
-	$Sql = "
-    SELECT jobqueue.*,jobdepends.*,job.*, '-1' AS upload_pk, '' AS ufile_name
-    FROM jobqueue
-    LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk
-    LEFT JOIN jobqueue AS depends
-      ON depends.jq_pk = jobdepends.jdep_jq_depends_fk
-    INNER JOIN job ON jobqueue.jq_job_fk = job.job_pk
-      AND job.job_upload_fk IS NULL
-    $Where
-    ORDER BY job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk
-    ";
-	if (!is_array($Results) || ($Count <= 0))
-	  {
-	  $Results = $DB->Action($Sql);
-	  }
-	else
-	  {
-	  $Results = array_merge($Results,$DB->Action($Sql));
-	  }
-	}
+      $sql = "SELECT jobqueue.*,jobdepends.*,job.*, '-1' AS upload_pk, '' AS ufile_name
+              FROM jobqueue
+              LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk
+              LEFT JOIN jobqueue AS depends
+              ON depends.jq_pk = jobdepends.jdep_jq_depends_fk
+              INNER JOIN job ON jobqueue.jq_job_fk = job.job_pk
+              AND job.job_upload_fk IS NULL
+              $Where
+              ORDER BY job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk ";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $Results2 = pg_fetch_all($result);
+      pg_free_result($result);
+
+      if (!is_array($Results) || ($Count <= 0))
+        $Results = $Results2;
+      else
+         if (is_array($Results2)) $Results = array_merge($Results, $Results2);
+    }
 
     /* Only show menu paging if we're viewing history. */
     if (! $History) { $VM = ""; }
@@ -481,26 +490,6 @@ $text = _("Delete");
 	  if ($t == "1") { $V .= "  <td>$t item<br />\n"; }
 	  else { $V .= "  <td>$t items<br />\n"; }
 
-	  /* If it is a license analysis, show % completed */
-	  if (($Row['jq_type'] == 'license') && !empty($Row['jq_starttime']) && empty($Row['jq_endtime']))
-	    {
-	    $SQL = "SELECT SUM(size) FROM license_" . $Row['upload_pk'] . "
-		UNION
-		SELECT SUM(size) FROM license_" . $Row['upload_pk'] . "
-		INNER JOIN agent_lic_status
-		ON agent_lic_status.pfile_fk = Akey
-		WHERE agent_lic_status.inrepository IS TRUE
-		AND agent_lic_status.processed IS TRUE
-		ORDER BY sum;"; /* processed size / total size */
-	    $Res = $DB->action($SQL);
-	    if (intval($Res[1]['sum']) > 0)
-	      {
-	      $Percent = intval($Res[0]['sum']*10000.0 / $Res[1]['sum'])/100.0;
-$text = _("completed");
-	      $V .= $Percent . "% $text<br />\n";
-	      }
-	    }
-
 	  $V .= "  </tr></table>\n";
 	  }
 	} /* if show details */
@@ -512,7 +501,7 @@ $text = _("completed");
     $V .= "</table>\n";
     $V .= "<P />$VM<P />";
     return($V);
-    } // Show()
+  } // Show()
 
   /***********************************************************
    Output(): This function returns the job queue status.
@@ -594,7 +583,7 @@ $text = _("completed");
     return;
     }
 
-  };
+};
 $NewPlugin = new jobs_showjobs;
 $NewPlugin->Initialize();
 
