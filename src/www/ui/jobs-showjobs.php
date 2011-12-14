@@ -24,7 +24,6 @@ class jobs_showjobs extends FO_Plugin
   var $Name       = "showjobs";
   var $Title      = TITLE_jobs_showjobs;
   var $Version    = "1.0";
-  var $MenuList   = "Jobs::Queue::Summary";
   var $MenuOrder  = 5;
   var $Dependency = array("browse");
   var $DBaccess   = PLUGIN_DB_UPLOAD;
