@@ -26,7 +26,7 @@ class jobs_showjobs_upload extends FO_Plugin
 {
   var $Name       = "jobs_showjobs_upload";
   var $Title      = TITLE_jobs_showjobs_upload;
-  var $MenuList   = "Jobs::Queue::By Upload";
+  var $MenuList   = "Jobs::Job History";
   var $Version    = "1.0";
   var $Dependency = array("showjobs");
   var $DBaccess   = PLUGIN_DB_UPLOAD;
