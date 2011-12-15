@@ -181,11 +181,7 @@ class ui_view_info extends FO_Plugin
     $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
 
     /* display mimetype */
-    $sql = "SELECT *
-        FROM uploadtree
-        INNER JOIN pfile ON uploadtree_pk = $Item
-        AND pfile_fk = pfile_pk
-        INNER JOIN mimetype ON pfile_mimetypefk = mimetype_pk";
+    $sql = "SELECT * FROM uploadtree where uploadtree_pk = $Item";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result))
@@ -198,7 +194,29 @@ class ui_view_info extends FO_Plugin
         $V .= "</td><td>" . htmlentities($row['mimetype_name']) . "</td></tr>\n";
       }
     }
+    else
+    {
+      // bad uploadtree_pk
+      pg_free_result($result);
+      $text = _("File does not exist in database");
+      return $text;
+    }
     pg_free_result($result);
+
+    /* get mimetype */
+    if (!empty($row['pfile_fk']))
+    {
+      $sql = "select mimetype_name from pfile, mimetype where pfile_pk = $row[pfile_fk] and pfile_mimetypefk=mimetype_pk";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result))
+      {
+        $pmRow = pg_fetch_assoc($result);
+        $V .= "<tr><td align='right'>" . $Count++ . "</td><td>Unpacked file type";
+        $V .= "</td><td>" . htmlentities($pmRow['mimetype_name']) . "</td></tr>\n";
+      }
+    pg_free_result($result);
+    }
 
     /* display upload origin */
     $sql = "select * from upload where upload_pk='$row[upload_fk]'";
