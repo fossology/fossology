@@ -8,7 +8,7 @@ Homepage: http://fossology.org
 
 Package: fossology
 Architecture: all
-Depends: fossology-web, fossology-db, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, ${misc:Depends}
+Depends: fossology-web, fossology-db, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, fossology-wgetagent, ${misc:Depends}
 Description: open and modular architecture for analyzing software
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
