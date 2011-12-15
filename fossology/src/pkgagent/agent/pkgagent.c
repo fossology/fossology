@@ -297,7 +297,8 @@ int ProcessUpload (long upload_pk)
 
   /*  retrieve the records to process */
   snprintf(sqlbuf, sizeof(sqlbuf),
-      "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name AS mimetype FROM uploadtree INNER JOIN pfile ON upload_fk = '%ld' INNER JOIN mimetype ON (mimetype_pk = '%d' OR mimetype_pk = '%d' OR mimetype_pk = '%d') AND uploadtree.pfile_fk = pfile_pk AND pfile.pfile_mimetypefk = mimetype.mimetype_pk AND pfile_pk NOT IN (SELECT pkg_rpm.pfile_fk FROM pkg_rpm) AND pfile_pk NOT IN (SELECT pkg_deb.pfile_fk FROM pkg_deb);", upload_pk, mimetypepk, debmimetypepk, debsrcmimetypepk);
+      "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name as mimetype from pfile, mimetype, (SELECT distinct(pfile_fk) as PF from uploadtree where upload_fk='%ld') as SS where PF=pfile_pk and (pfile_mimetypefk='%d' or pfile_mimetypefk='%d' OR pfile_mimetypefk='%d') and mimetype_pk=pfile_mimetypefk and pfile_pk NOT IN (SELECT pkg_rpm.pfile_fk FROM pkg_rpm) AND pfile_pk NOT IN (SELECT pkg_deb.pfile_fk FROM pkg_deb)", 
+      upload_pk, mimetypepk, debmimetypepk, debsrcmimetypepk);
   result = PQexec(db_conn, sqlbuf);
   if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
 
@@ -327,7 +328,7 @@ int ProcessUpload (long upload_pk)
       if (GetMetadata(repFile,pi) != -1){
         RecordMetadataRPM(pi);
       }
-      /* free memroy */
+      /* free memory */
 #ifdef _RPM_4_4_COMPAT
       int i;
       for(i=0; i< pi->req_size;i++)
@@ -341,7 +342,7 @@ int ProcessUpload (long upload_pk)
       if (GetMetadataDebBinary(upload_pk, dpi) != -1){
         if (RecordMetadataDEB(dpi) != 0) return (-1);
       }
-      /* free memroy */
+      /* free memory */
       int i;
       for(i=0; i< dpi->dep_size;i++)
         free(dpi->depends[i]);
@@ -359,7 +360,7 @@ int ProcessUpload (long upload_pk)
       if (GetMetadataDebSource(repFile,dpi) != -1){
         RecordMetadataDEB(dpi);
       }
-      /* free memroy */
+      /* free memory */
       int i;
       for(i=0; i< dpi->dep_size;i++)
         free(dpi->depends[i]);
