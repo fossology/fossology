@@ -51,7 +51,7 @@ install: all
 # create wrappers in BINDIR
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \
-	  ln -sf $(DESTDIR)$(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(BINDIR)/$$file; \
+	  ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(BINDIR)/$$file; \
 		chmod a+x $(DESTDIR)$(BINDIR)/$$file; \
 	done
 
