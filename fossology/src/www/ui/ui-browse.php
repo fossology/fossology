@@ -314,7 +314,6 @@ class ui_browse extends FO_Plugin {
       if (empty($Name)) {
         $Name = $Row['upload_filename'];
       }
-      $uploadOrigin = $Row['upload_origin'];
 
       /* If UploadtreePk is not an artifact, then use it as the root.
        Else get the first non artifact under it.
@@ -333,19 +332,8 @@ class ui_browse extends FO_Plugin {
       else {
         $V.= "<b>" . $Name . "</b>";
       }
-      if ($Row['upload_mode'] & 1 << 2) {
-        $text = _("Added by URL: ");
-        $V.= "<br>$text" . htmlentities($uploadOrigin);
-      }
-      if ($Row['upload_mode'] & 1 << 3) {
-        $text = _("Added by file upload: ");
-        $V.= "<br>$text" . htmlentities($uploadOrigin);
-      }
-      if ($Row['upload_mode'] & 1 << 4) {
-        $text = _("Added from filesystem: ");
-        $V.= "<br>$text" . htmlentities($uploadOrigin);
-      }
       $V.= "<br>";
+      if (!empty($Desc)) $V.= "<i>" . $Desc . "</i><br>";
       $Upload = $Row['upload_pk'];
       $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
       if (Iscontainer($Row['ufile_mode']))
@@ -358,7 +346,6 @@ class ui_browse extends FO_Plugin {
       if (plugin_find_id('showjobs') >= 0) {
         $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>[$text]</a>";
 
-      $V.= "<i>" . $Desc . "</i>";
       $V.= "</td>\n";
       $V.= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
       }

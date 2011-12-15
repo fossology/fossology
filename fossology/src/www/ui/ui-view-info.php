@@ -55,27 +55,16 @@ class ui_view_info extends FO_Plugin
   /**
    * \brief Display the info data associated with the file.
    */
-  function ShowView($ShowMenu=0,$ShowHeader=0)
+  function ShowView($Upload, $Item, $ShowMenu=0)
   {
     global $PG_CONN;
     $V = "";
-    $Folder = GetParm("folder",PARM_INTEGER);
-    $Upload = GetParm("upload",PARM_INTEGER);
-    $Item = GetParm("item",PARM_INTEGER);
     if (empty($Upload) || empty($Item)) { return; }
 
     $Page = GetParm("page",PARM_INTEGER);
     if (empty($Page)) { $Page=0; }
     $Max = 50;
     $Offset = $Page * $Max;
-
-    /**********************************
-     Display micro header
-     **********************************/
-    if ($ShowHeader)
-    {
-      $V .= Dir2Browse("browse",$Item,NULL,1,"View-Meta");
-    } // if ShowHeader
 
     /**********************************
      List File Info
@@ -119,13 +108,10 @@ class ui_view_info extends FO_Plugin
   /**
    * \brief Show Sightings, List the directory locations where this pfile is found
    */
-  function ShowSightings()
+  function ShowSightings($Upload, $Item)
   {
     global $PG_CONN;
     $V = "";
-    $Folder = GetParm("folder",PARM_INTEGER);
-    $Upload = GetParm("upload",PARM_INTEGER);
-    $Item = GetParm("item",PARM_INTEGER);
     if (empty($Upload) || empty($Item)) { return; }
 
     $Page = GetParm("page",PARM_INTEGER);
@@ -174,13 +160,11 @@ class ui_view_info extends FO_Plugin
   /**
    * \brief Display the meta data associated with the file.
    */
-  function ShowMetaView()
+  function ShowMetaView($Upload, $Item)
   {
     global $PG_CONN;
     $V = "";
-    $Upload = GetParm("upload",PARM_INTEGER);
-    $Folder = GetParm("folder",PARM_INTEGER);
-    $Item = GetParm("item",PARM_INTEGER);
+    $Count = 1;
     if (empty($Item) || empty($Upload))
     { return; }
 
@@ -188,34 +172,59 @@ class ui_view_info extends FO_Plugin
      Display meta data
      **********************************/
 
-    $sql = "SELECT *
-        FROM uploadtree
-        INNER JOIN pfile ON uploadtree_pk = $Item
-        AND pfile_fk = pfile_pk
-        INNER JOIN mimetype ON pfile_mimetypefk = mimetype_pk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $Count=1;
-
-    $text = _("Meta Data");
+    $text = _("File Info");
     $V .= "<H2>$text</H2>\n";
     $V .= "<table border='1'>\n";
     $text = _("Item");
     $text1 = _("Meta Data");
     $text2 = _("Value");
     $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
-    while ($row = pg_fetch_assoc($result) and !empty($row['mimetype_pk']))
+
+    /* display mimetype */
+    $sql = "SELECT *
+        FROM uploadtree
+        INNER JOIN pfile ON uploadtree_pk = $Item
+        AND pfile_fk = pfile_pk
+        INNER JOIN mimetype ON pfile_mimetypefk = mimetype_pk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result))
     {
-      $V .= "<tr><td align='right'>$Count</td><td>Unpacked file type";
-      $V .= "</td><td>" . htmlentities($row['mimetype_name']) . "</td></tr>\n";
-      $Count++;
+      $row = pg_fetch_assoc($result);
+
+      if (!empty($row['mimetype_pk']))
+      {
+        $V .= "<tr><td align='right'>" . $Count++ . "</td><td>Unpacked file type";
+        $V .= "</td><td>" . htmlentities($row['mimetype_name']) . "</td></tr>\n";
+      }
     }
     pg_free_result($result);
 
-    $V .= "</table>\n";
-    $Count--;
-    $text = _("Total meta data records");
-    $V .= "<P />$text: " . number_format($Count,0,"",",") . "<br />\n";
+    /* display upload origin */
+    $sql = "select * from upload where upload_pk='$row[upload_fk]'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result))
+    {
+      $row = pg_fetch_assoc($result);
+
+      /* upload source */
+      if ($row['upload_mode'] & 1 << 2) $text = _("Added by URL: ");
+      else if ($row['upload_mode'] & 1 << 3) $text = _("Added by file upload: ");
+      else if ($row['upload_mode'] & 1 << 4) $text = _("Added from filesystem: ");
+      $V .= "<tr><td align='right'>" . $Count++ . "</td><td>$text</td>";
+      $V .= "<td>" . htmlentities($row['upload_origin']) . "</td></tr>\n";
+
+      /* upload time */
+      $text = _("Added to repo");
+      $V .= "<tr><td align='right'>" . $Count++ . "</td><td>$text</td>";
+      $ts = $row['upload_ts'];
+      $V .= "<td>" . substr($ts, 0, strrpos($ts, '.')) . "</td></tr>\n";
+    }
+    pg_free_result($result);
+      /* display where it was uploaded from */
+
+    $V .= "</table><br>\n";
     return($V);
   } // ShowMetaView()
 
@@ -223,26 +232,15 @@ class ui_view_info extends FO_Plugin
    * \brief Display the package info associated with
    * the rpm/debian package.
    */
-  function ShowPackageInfo($ShowMenu=0,$ShowHeader=0)
+  function ShowPackageInfo($Upload, $Item, $ShowMenu=0)
   {
     global $PG_CONN;
     $V = "";
-    $Upload = GetParm("upload",PARM_INTEGER);
-    $Item = GetParm("item",PARM_INTEGER);
     $Require = "";
     $MIMETYPE = "";
     $Count = 0;
 
-    if (empty($Item) || empty($Upload))
-    { return; }
-
-    /**********************************
-     Display micro header
-     **********************************/
-    if ($ShowHeader)
-    {
-      $V .= Dir2Browse("browse",$Item,NULL,1,"Browse");
-    } // if ShowHeader
+    if (empty($Item) || empty($Upload)) { return; }
 
     /**********************************
      Check if pkgagent disabled
@@ -477,7 +475,6 @@ class ui_view_info extends FO_Plugin
       $V .= "</table>\n";
       $Count--;
     }
-
     else if ($MIMETYPE == "application/x-debian-source")
     {
       $V .= _("Debian Source Package\n");
@@ -554,13 +551,11 @@ class ui_view_info extends FO_Plugin
       $V .= "</table>\n";
       $Count--;
     }
-
     else
     {
-      $V .= _("NOT RPM/DEBIAN Package.");
+       /* Not a package */
+       return "";
     }
-    $text = _("Total package info records");
-    $V .= "<P />$text: " . number_format($Count,0,"",",") . "<br />\n";
     return($V);
   } // ShowPackageInfo()
 
@@ -568,12 +563,9 @@ class ui_view_info extends FO_Plugin
   /**
    * \brief Display the tag info data associated with the file.
    */
-  function ShowTagInfo()
+  function ShowTagInfo($Upload, $Item)
   {
     $VT = "";
-    $Upload = GetParm("upload",PARM_INTEGER);
-    $Item = GetParm("item",PARM_INTEGER);
-
     $text = _("Tag Info");
     $VT .= "<H2>$text</H2>\n";
 
@@ -635,17 +627,23 @@ class ui_view_info extends FO_Plugin
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
+
+    $Folder = GetParm("folder",PARM_INTEGER);
+    $Upload = GetParm("upload",PARM_INTEGER);
+    $Item = GetParm("item",PARM_INTEGER);
+
     $V="";
     switch($this->OutputType)
     {
       case "XML":
         break;
       case "HTML":
-        $V .= $this->ShowPackageinfo(1,1);
-        $V .= $this->ShowSightings();
-        $V .= $this->ShowView(0,0);
-        $V .= $this->ShowTagInfo();
-        $V .= $this->ShowMetaView();
+        $V .= Dir2Browse("browse", $Item, NULL, 1, "View-Meta");  
+        $V .= $this->ShowTagInfo($Upload, $Item);
+        $V .= $this->ShowPackageinfo($Upload, $Item, 1);
+        $V .= $this->ShowMetaView($Upload, $Item);
+        $V .= $this->ShowSightings($Upload, $Item);
+        $V .= $this->ShowView($Upload, $Item);
         break;
       case "Text":
         break;
