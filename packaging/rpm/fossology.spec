@@ -11,12 +11,12 @@ Url:            http://www.fossology.org
 Source:         http://sourceforge.net/projects/fossology/files/fossology/%{name}-%{version}.tar.gz
 #PBPATCHSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
-Requires:       fossology-web fossology-db fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent which php-process
+Requires:       fossology-web fossology-db fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent
 BuildRequires:  postgresql-devel >= 8.1.11 libxml2 gcc make perl rpm-devel pcre-devel perl-Text-Template subversion file
 Summary:        FOSSology is a licenses exploration tool
 
 %package common
-Requires:       php >= 5.1.6 php-pear >= 5.16 php-pgsql >= 5.1.6
+Requires:       php >= 5.1.6 php-pear >= 5.16 php-pgsql >= 5.1.6 php-process
 Summary:        Architecture for analyzing software, common files 
 Group:          Applications/Engineering
 
@@ -31,7 +31,7 @@ Summary:        Architecture for analyzing software, database
 Group:          Applications/Engineering
 
 %package ununpack
-Requires:       libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip p7zip-plugins perl file
+Requires:       libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip p7zip-plugins perl file which
 Summary:        Architecture for analyzing software, ununpack and adj2nest
 Group:          Applications/Engineering
 
@@ -79,40 +79,46 @@ Group:          Applications/Engineering
 An open and modular architecture for analyzing software. Currently specializing on license detection.
 
 %description common
-common
+This package contains the resources needed by all of the other
+fossology components.
 
 %description db
-db
+This package contains the database resources and will create a
+fossology database on the system (and requires that postgresql is
+running at install time). If you prefer to use a remote database,
+or want to create the database yourself, do not install this package
+and consult the README.Debian file included in the fossology-common
+package.
 
 %description web
-web
+This package depends on the packages for the web interface.
 
 %description scheduler
-scheduler
+This package contains the scheduler daemon.
 
 %description ununpack
-ununpack
+This package contains the ununpack and adj2nest agent programs and their resources.
 
 %description wgetagent
-wgetagent
+This package contains the wget agent agent programs and their resources.
 
 %description buckets
-buckets
+This package contains the buckets agent programs and their resources.
 
 %description nomos
-nomos
+This package contains the nomos agent programs and their resources.
 
 %description copyright
-copyright
+This package contains the copyright agent programs and their resources.
 
 %description mimetype
-mimetype
+This package contains the mimetype agent programs and their resources.
 
 %description pkgagent
-pkgagent
+This package contains the pkgagent agent programs and their resources.
 
 %description delagent
-delagent
+This package contains the delagent agent programs and their resources.
 
 %prep
 %setup -q
@@ -144,7 +150,6 @@ make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology 
 %{_sysconfdir}/fossology/mods-enabled/debug
 %{_usr}/lib/fossology/*
 %{_datadir}/fossology/lib/*
-%{_datadir}/fossology/cli/*
 %{_datadir}/fossology/debug/*
 %{_bindir}/*
 %{_includedir}/*
