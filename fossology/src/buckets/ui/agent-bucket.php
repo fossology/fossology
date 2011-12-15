@@ -142,12 +142,13 @@ class agent_bucket extends FO_Plugin {
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
-    pg_free_result($result);
     if (pg_num_rows($result) < 1){
       $text = _("Unable to find dependent job: unpack");
+      pg_free_result($result);
       return ($text);
     }
     $NomosDep[] = $row['jq_pk'];
+    pg_free_result($result);
 
     /* queue pkgagent.  If it's been previously run on this upload, it will
      run again but not insert duplicate pkgagent records.  */
@@ -162,12 +163,13 @@ class agent_bucket extends FO_Plugin {
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
-    pg_free_result($result);
     if (pg_num_rows($result) < 1){
       $text = _("Unable to find dependent job: pkgagent");
+      pg_free_result($result);
       return ($text);
     }
     $NomosDep[] = $row['jq_pk'];
+    pg_free_result($result);
 
     /* create the bucket job  */
     $jobpk = JobAddJob($uploadpk, "Bucket Analysis", $Priority);
