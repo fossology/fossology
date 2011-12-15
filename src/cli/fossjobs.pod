@@ -11,7 +11,7 @@ fossology agents on an upload id.
 
 =head1 SYNOPSIS
 
-fossjobs [-a] [-h] [-u] [-v] [-A <string>] [-U <upload-id>] [-P priority]
+fossjobs [-a] [-h] [-u] [-v] [-A <string>] [-U <upload-id>] [-P priority] [--user <string>] [--passwd <string>]
 
 =head1 DESCRIPTION
 

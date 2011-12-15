@@ -60,6 +60,8 @@ function list_agents() {
  * becuase common.php is included before UI_CLI is set
  */
 require_once("$MODDIR/lib/php/common-cli.php");
+
+$_SESSION['UserId'] = 2;
 cli_Init();
 /**********************************************************************
  **********************************************************************
@@ -78,9 +80,12 @@ $usage = basename($argv[0]) . " [options]
                The string can be a comma-separated list of upload ids.
                Or, use 'ALL' to specify all upload ids.
   -P num    :: priority for the jobs (higher = more important, default:0)
+  --user string :: user name
+  --passwd string :: password
 ";
 //process parameters, see usage above
-$options = getopt("haA:P:uU:v");
+$longopts = array("user:", "passwd:");
+$options = getopt("haA:P:uU:v", $longopts);
 //print_r($options);
 if (empty($options)) {
   echo $usage;
@@ -96,6 +101,48 @@ global $Plugins;
 PROCESS COMMAND LINE SELECTION
 **********************************************************************
 **********************************************************************/
+$user = "";
+$passwd = "";
+if (array_key_exists("user", $options)) {
+  $user = $options["user"];
+}
+
+if (array_key_exists("passwd", $options)) {
+  $passwd = $options["passwd"];
+}
+
+/* check if the user name/passwd is valid */
+if (empty($user)) {
+  $uid_arr = posix_getpwuid(posix_getuid());
+  $user = $uid_arr['name'];
+}
+if (empty($passwd)) {
+  echo "The user is: $user, please enter the passwd:\n";
+  $passwd = trim(fgets(STDIN));
+}
+
+if (!empty($user) and !empty($passwd)) {
+  $SQL = "SELECT * from users where user_name = '$user';";
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  if(empty($row)) {
+    echo "user name or passwd is invalid\n";
+    echo $usage;
+    exit(0);
+  }
+  $_SESSION['UserId'] = $row['user_pk'];
+  pg_free_result($result);
+  if (!empty($row['user_seed']) && !empty($row['user_pass'])) {
+    $passwd_hash = sha1($row['user_seed'] . $passwd);
+    if (strcmp($passwd_hash, $row['user_pass']) != 0) {
+      echo "user name or passwd is invalid\n";
+      echo $usage;
+      exit(0);
+    }
+  }
+}
+
 $Verbose = 0;
 if (array_key_exists("v", $options)) {
   $Verbose = 1;
