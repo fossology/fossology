@@ -47,10 +47,12 @@ extern char* logdir;
 /* ************************************************************************** */
 
 /* scheduler utility functions */
+void kill_scheduler();
 void load_config(void*);
 void scheduler_close_event(void*);
 
 /* glib related functions */
+gint string_is_num(gchar* str);
 gint string_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 gint int_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 

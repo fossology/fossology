@@ -86,18 +86,18 @@ int main(int argc, char** argv)
 
   g_option_context_free(options);
 
+  /* perform pre-initialization checks */
+  if(s_daemon && daemon(0, 0) == -1) { return -1; }
+  if(db_init) { database_init(); return 0; }
+  if(ki_sched) { kill_scheduler(); return 0; }
+  if(log != NULL) {set_log(log); }
+
   /* create data structs, load config and set the user groups */
   agent_list_init();
   host_list_init();
   job_list_init();
   load_foss_config();
   set_usr_grp();
-
-  /* perform pre-initialization checks */
-  if(s_daemon && daemon(0, 0) == -1) { return -1; }
-  if(db_init) { database_init(); return 0; }
-  if(ki_sched) { kill_scheduler(); return 0; }
-  if(log != NULL) {set_log(log); }
 
   /* ********************************** */
   /* *** do all the initializations *** */
