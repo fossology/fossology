@@ -19,7 +19,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "libfossrepo.h"
+#include "libfossology.h"
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
@@ -30,11 +30,13 @@ int	main	(int argc, char *argv[])
   char *Path;
   int i;
 
+  fo_scheduler_connect(&argc, argv);
+
   if ((argc%2) != 1)
-    {
+  {
     fprintf(stderr,"Usage: %s type filename [type filename [...]]\n",argv[0]);
     exit(-1);
-    }
+  }
 
   for(i=1; i<argc; i+=2)
     {
@@ -52,4 +54,3 @@ int	main	(int argc, char *argv[])
     }
   return(0);
 } /* main() */
-
