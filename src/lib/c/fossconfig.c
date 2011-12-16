@@ -366,6 +366,9 @@ fo_conf* fo_config_load(char* rawname, GError** error) {
   fo_conf* ret;
   int c;
 
+  if(rawname == NULL)
+    return NULL;
+
   memset(fname, '\0', sizeof(fname));
   strncpy(fname, rawname, sizeof(fname));
   if((yyin = fopen(fname, "r")) == NULL)
@@ -446,7 +449,7 @@ char* fo_config_get(fo_conf* conf, char* group, char* key, GError** error)
   GTree* tree;
   char* ret = NULL;
 
-  if(conf->group_map == NULL)
+  if(!conf || conf->group_map == NULL)
     throw_error(
         error,
         RETRIEVE_ERROR,
@@ -492,7 +495,7 @@ char* fo_config_get_list(fo_conf* conf, char* group, char* key, int idx, GError*
   char* curr;
 
 
-  if(conf->group_map == NULL)
+  if(!conf || conf->group_map == NULL)
     throw_error(
         error,
         RETRIEVE_ERROR,
@@ -546,7 +549,7 @@ int fo_config_is_list(fo_conf* conf, char* group, char* key, GError** error)
   GTree* tree;
   char* val;
 
-  if(conf->group_map == NULL)
+  if(!conf || conf->group_map == NULL)
     throw_error(
         error,
         RETRIEVE_ERROR,
@@ -610,6 +613,7 @@ int fo_config_list_length(fo_conf* conf, char* group, char* key, GError** error)
  */
 void fo_config_free(fo_conf* conf)
 {
+  if(!conf) return;
   if(conf->group_map) g_tree_unref(conf->group_map);
   if(conf->key_sets)  g_tree_unref(conf->key_sets);
   if(conf->group_set) g_free(conf->group_set);
@@ -636,6 +640,12 @@ void fo_config_free(fo_conf* conf)
  */
 char** fo_config_group_set(fo_conf* conf, int* length)
 {
+  if(!conf)
+  {
+    *length = 0;
+    return NULL;
+  }
+
   if(conf->group_set)
   {
     *length = conf->n_groups;
@@ -672,6 +682,9 @@ char** fo_config_key_set(fo_conf* conf, char* group, int* length)
   GTree* tree;
   char** ret;
   *length = 0;
+
+  if(!conf)
+    return NULL;
 
   if(!conf->key_sets)
     conf->key_sets = g_tree_new_full(str_comp, NULL, g_free, g_free);
