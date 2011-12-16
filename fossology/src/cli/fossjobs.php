@@ -118,7 +118,9 @@ if (empty($user)) {
 }
 if (empty($passwd)) {
   echo "The user is: $user, please enter the passwd:\n";
+  system('stty -echo');
   $passwd = trim(fgets(STDIN));
+  system('stty echo');
 }
 
 if (!empty($user) and !empty($passwd)) {
