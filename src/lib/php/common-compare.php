@@ -465,7 +465,6 @@ function CompareDir($Child1, $Child2)
 function Dir2BrowseDiff ($Path, $filter, $Column, $plugin, $Master)
 {
   global $Plugins;
-  global $DB;
 
   /* data input assertions */
   $text = _("Dir2BrowseDiff(): Missing inputs");
