@@ -41,6 +41,8 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
   Options:
     -h       = this help message
     -v       = enable verbose debugging
+    --user string = user name
+    --passwd string = password
 
   FOSSology storage options:
     -f path  = folder path for placing files (e.g., -f 'Fedora/ISOs/Disk 1')
@@ -90,8 +92,9 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
   ";
 /* Load command-line options */
 global $PG_CONN;
-$Verbose = 1;
+$Verbose = 0;
 $Test = 0;
+$fossjobs_command = "";
 /************************************************************************/
 /************************************************************************/
 /************************************************************************/
@@ -272,6 +275,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $QueueList;
   global $Enotification;
   global $Email;
+  global $fossjobs_command;
 
   /* $Mode determines where it came from */
   if (preg_match("@^[a-zA-Z0-9_]+://@", $UploadArchive)) {
@@ -353,8 +357,8 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     $UploadPk = JobAddUpload($UploadName, $Src, $UploadDescription, $Mode, $FolderPk);
   }
   /* Tell wget_agent to actually grab the upload */
-  global $AGENTDIR;
-  $Cmd = "$SYSCONFDIR/mods-enabled/wget_agent/agent/wget_agent -k '$UploadPk' '$UploadArchive'";
+  global $SYSCONFDIR;
+  $Cmd = "$SYSCONFDIR/mods-enabled/wget_agent/agent/wget_agent -k '$UploadPk' -C '$UploadArchive' -c $SYSCONFDIR";
   if ($Verbose) {
     print "CMD=$Cmd\n";
   }
@@ -362,7 +366,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     system($Cmd);
   }
   /* Schedule the unpack */
-  $Cmd = "fossjobs -U '$UploadPk' -A agent_unpack";
+  $Cmd = "$fossjobs_command -U '$UploadPk' -A agent_unpack";
   if ($Verbose) {
     print "CMD=$Cmd\n";
   }
@@ -377,10 +381,10 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
         break; /* already scheduled */
       case 'ALL':
       case 'all':
-        $Cmd = "fossjobs -U '$UploadPk'";
+        $Cmd = "$fossjobs_command -U '$UploadPk'";
         break;
       default:
-        $Cmd = "fossjobs -U '$UploadPk' -A '$QueueList'";
+        $Cmd = "$fossjobs_command -U '$UploadPk' -A '$QueueList'";
       break;
     }
     if ($Verbose) {
@@ -426,8 +430,24 @@ $TarExcludeList = "";
 $bucket_size = 3;
 $ME = exec('id -un',$toss,$rtn);
 
+
+$user = "";
+$passwd = "";
+
 for ($i = 1;$i < $argc;$i++) {
   switch ($argv[$i]) {
+    case '-h':
+    case '-?':
+      print $Usage . "\n";
+      return (0);
+    case '--user':
+      $i++;
+      $user = $argv[$i];
+      break;
+    case '--passwd':
+      $i++;
+      $passwd = $argv[$i];
+      break;
     case '-A': /* use alphabet buckets */
       $OptionA = true;
       break;
@@ -487,11 +507,12 @@ for ($i = 1;$i < $argc;$i++) {
       $UploadName = $argv[$i];
       break;
     case '-Q':
-      system("fossjobs -a");
+      system("$fossjobs_command -a");
       return (0);
     case '-q':
       $i++;
       $QueueList = $argv[$i];
+      print "QueueList is:$QueueList\n";
       break;
     case '-T': /* Test mode */
       $Test = 1;
@@ -509,10 +530,6 @@ for ($i = 1;$i < $argc;$i++) {
       $i++;
       $TarExcludeList.= "--exclude '" . $argv[$i] . "'";
       break;
-    case '-h':
-    case '-?':
-      print $Usage . "\n";
-      return (0);
     case '-a': /* it's an archive! */
       /* ignore -a since the next name is a file. */
       break;
@@ -534,21 +551,59 @@ for ($i = 1;$i < $argc;$i++) {
       break;
     default:
       if (substr($argv[$i], 0, 1) == '-') {
-      print "Unknown parameter: '" . $argv[$i] . "'\n";
-      print $Usage . "\n";
-      exit(1);
-    }
-    /* No break! No hyphen means it is a file! */
-    $UploadArchive = $argv[$i];
-    print "Loading $UploadArchive\n";
-    if (empty($UploadName)) {
-      $UploadName = basename($UploadArchive);
-    }
-    //print "  CAlling UploadOne in 'main': '$FolderPath'\n";
-    UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
-    /* prepare for next parameter */
-    $UploadName = "";
-    break;
+        print "Unknown parameter: '" . $argv[$i] . "'\n";
+        print $Usage . "\n";
+        exit(1);
+      }
+
+      /* check if the user name/passwd is valid */
+      if (empty($user)) {
+        $uid_arr = posix_getpwuid(posix_getuid());
+        $user = $uid_arr['name'];
+      }
+      if (empty($passwd)) {
+        echo "The user is: $user, please enter the passwd:\n";
+        system('stty -echo');
+        $passwd = trim(fgets(STDIN));
+        system('stty echo');
+      }
+
+      if (!empty($user) and !empty($passwd)) {
+        $SQL = "SELECT * from users where user_name = '$user';";
+        $result = pg_query($PG_CONN, $SQL);
+        DBCheckResult($result, $SQL, __FILE__, __LINE__);
+        $row = pg_fetch_assoc($result);
+        if(empty($row)) {
+          echo "user name or passwd is invalid\n";
+          echo "passwd is:$passwd\n";
+          echo $usage;
+          exit(0);
+        }
+        $_SESSION['UserId'] = $row['user_pk'];
+        pg_free_result($result);
+        if (!empty($row['user_seed']) && !empty($row['user_pass'])) {
+          $passwd_hash = sha1($row['user_seed'] . $passwd);
+          if (strcmp($passwd_hash, $row['user_pass']) != 0) {
+            echo "user name or passwd is invalid\n";
+            echo $usage;
+            exit(0);
+          }
+        }
+      }
+
+      $fossjobs_command = "fossjobs --user $user --passwd $passwd ";
+
+      /* No break! No hyphen means it is a file! */
+      $UploadArchive = $argv[$i];
+      print "Loading $UploadArchive\n";
+      if (empty($UploadName)) {
+        $UploadName = basename($UploadArchive);
+      }
+      //print "  CAlling UploadOne in 'main': '$FolderPath'\n";
+      UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
+      /* prepare for next parameter */
+      $UploadName = "";
+      break;
   } /* switch */
 } /* for each parameter */
 return (0);
