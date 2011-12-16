@@ -512,7 +512,6 @@ for ($i = 1;$i < $argc;$i++) {
     case '-q':
       $i++;
       $QueueList = $argv[$i];
-      print "QueueList is:$QueueList\n";
       break;
     case '-T': /* Test mode */
       $Test = 1;
