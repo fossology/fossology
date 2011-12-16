@@ -283,11 +283,36 @@ void set_usr_grp()
 }
 
 /**
- * TODO
+ * kills all other running schedulers. This is accomplished by reading from the
+ * /proc/ file system provided by the linux kernel.
  */
 void kill_scheduler()
 {
-  /* TODO */
+  char f_name[FILENAME_MAX];
+  struct dirent* ep;
+  DIR* dp;
+  FILE* file;
+
+  if((dp = opendir("/proc/")) == NULL)
+  {
+    fprintf(stderr, "ERROR %s.%d: Could not open /proc/ file system\n",
+        __FILE__, __LINE__);
+    exit(-1);
+  }
+
+  while((ep = readdir(dp)) != NULL)
+  {
+    if(string_is_num(ep->d_name))
+    {
+      snprintf(f_name, sizeof(f_name), "/proc/%s/cmdline", ep->d_name);
+      if((file = fopen(f_name, "rt")))
+      {
+        if(fgets(f_name, sizeof(f_name), file) != NULL &&
+            strstr(f_name, "fo_scheduler"))
+          kill(atoi(ep->d_name), SIGKILL);
+      }
+    }
+  }
 }
 
 /**
@@ -476,6 +501,23 @@ int close_scheduler()
   event_loop_destroy();
   fo_RepClose();
   return 0;
+}
+
+/**
+ * Checks if a string is entirely composed of numeric characters
+ *
+ * @param str the string to test
+ * @return TRUE if the string is entirely numeric, FALSE otherwise
+ */
+gint string_is_num(gchar* str)
+{
+  int len = strlen(str);
+  int i;
+
+  for(i = 0; i < len; i++)
+    if(!isdigit(str[i]))
+      return FALSE;
+  return TRUE;
 }
 
 /**
