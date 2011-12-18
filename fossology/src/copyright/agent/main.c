@@ -455,7 +455,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
 
         /* place the copyright in the table */
         memset(sql, '\0', sizeof(sql));
-        snprintf(sql, sizeof(sql), "%ld\t%d\t%d\t%d\tE'%s'\tE'%s'\t%s\n",
+        snprintf(sql, sizeof(sql), "%ld\t%d\t%d\t%d\t%s\t%s\t%s\n",
             agent_pk,
             *(int*)pair_second(current_file),
             copy_entry_start(entry),
