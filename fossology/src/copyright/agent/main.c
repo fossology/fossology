@@ -127,6 +127,10 @@ unsigned long hash_string(char* str) {
  * the postgresql escape function has a bug when it tries to escape string that
  * contain a '/'. This function accounts for that bug and then calls the escape
  * function for postgresql.
+ * This function also substitutes a space for a tab so that the data can be
+ * used with the sql copy functions.  It would be more acurate to substitute
+ * a tab for the string "\t" to preserve the data, but a space is simpler
+ * and probably good enough.
  *
  * @param pgConn the connection to the database
  * @param dst the destination of the escaped string
@@ -144,7 +148,7 @@ void  escape_string(PGconn* pgConn, char *dst, const char *src, int esclen)
   char *cp = (char *)src;
   while(*cp)
   {
-    if (*cp == '\\')
+    if ((*cp == '\\') || (*cp == '\t'))
     {
       *cp = ' ';
     }
