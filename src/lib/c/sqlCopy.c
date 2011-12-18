@@ -141,6 +141,50 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int Nu
 int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
 {
   int NewRowLen;
+  int rncount = 0;
+  char *dptr = DataRow;
+  char *NewRow=0, *nptr;
+
+  /* As of Postgresql 8.4, COPY will not accept literal carriage returns
+   * or line feeds.  Use \r and \n instead.
+   * Count how many we need to get rid of (and make space for).
+   */
+  while(*dptr) 
+  {
+    if (((*dptr == '\n') || (*dptr == '\r')) && (*(dptr+1))) rncount++;
+    dptr++;
+  }
+
+  /* Substitute any literal '\n' or '\r' for string "\n", "\r" 
+   * except for any trailing \n or \r.
+   */
+  if (rncount)
+  {
+    NewRowLen = strlen(DataRow) + rncount +2;
+    NewRow = malloc(NewRowLen);
+    if (!NewRow) ERROR_RETURN("fo_sqlCopyAdd: out of memory");
+    nptr = NewRow;
+    dptr = DataRow;
+    while (*dptr && *(dptr+1))
+    {
+      if (*dptr == '\n')
+      {
+        *nptr++ = '\\';
+        *nptr = 'n';
+      }
+      else
+      if (*dptr == '\r')
+      {
+        *nptr++ = '\\';
+        *nptr = 'r';
+      }
+      else
+        *nptr = *dptr;
+      ++dptr;
+      ++nptr;
+    }
+    DataRow = NewRow;
+  }
 
   /* Does new record fit in DataBuf? 
    * For the purpose if calculating if DataRow will fit in DataBuf,
@@ -171,6 +215,7 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
   /* If the DataRow was missing a newline, add one */
   if (DataRow[NewRowLen-1] != '\n') pCopy->DataBuf[pCopy->DataIdx++] = '\n';
 
+  if (NewRow) free(NewRow);
   return(1);
 }
 
@@ -200,13 +245,13 @@ int fo_sqlCopyExecute(psqlCopy_t pCopy)
   result = PQexec(pCopy->PGconn, copystmt);
   if (PGRES_COPY_IN == PQresultStatus(result)) 
   {
+    PQclear(result);
     if (PQputCopyData(pCopy->PGconn, pCopy->DataBuf, pCopy->DataIdx) != 1)
       ERROR_RETURN(PQresultErrorMessage(result))
   }
   else
-    if (!fo_checkPQresult(pCopy->PGconn, result, copystmt, __FILE__, __LINE__)) return 0;
+    if (fo_checkPQresult(pCopy->PGconn, result, copystmt, __FILE__, __LINE__)) return 0;
 
-  PQclear(result);
 
   /* End copy  */
   if (PQputCopyEnd(pCopy->PGconn, NULL) == 1) 
@@ -214,6 +259,7 @@ int fo_sqlCopyExecute(psqlCopy_t pCopy)
     result = PQgetResult(pCopy->PGconn);
     if (fo_checkPQcommand(pCopy->PGconn, result, "copy end", __FILE__, __LINE__)) return 0;
   }
+  PQclear(result);
 
   /* reset DataBuf */
   pCopy->DataIdx = 0;

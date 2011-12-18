@@ -46,7 +46,7 @@ int main(int argc, char **argv)
   PGresult   *result;
   psqlCopy_t  pCopy;
   char       *TestTable = "TestsqlCopy";
-  char        col_vc[40] = "This is column vc[40] 1234567890";
+  char        col_vc[40] = "This is \n\r column vc[40] 1234567890";
   char       *col_text;
   char       *DataBuf;
   int         datasize;
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
   /* Add data */
   for(RowNum = 0; RowNum < RowsToTest; RowNum++)
   {
-    snprintf(DataBuf, datasize, "%d\t%s\t%s", RowNum, col_text, col_vc);
+    snprintf(DataBuf, datasize, "%d\t%s\t%s\n", RowNum, col_text, col_vc);
     rv = fo_sqlCopyAdd(pCopy, DataBuf);
   }
 
