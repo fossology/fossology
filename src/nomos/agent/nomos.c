@@ -950,6 +950,7 @@ int main(int argc, char **argv)
         if (0 == isFILE(repFile)) continue;
 
         processFile(repFile);
+        fo_scheduler_heart(1);
         if (recordScanToDB(&cacheroot, &cur))
         {
           LOG_FATAL("nomos terminating upload %d scan due to previous errors.",
