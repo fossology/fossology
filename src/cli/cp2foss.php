@@ -587,8 +587,10 @@ for ($i = 1;$i < $argc;$i++) {
           }
         }
       }
-
-      $fossjobs_command = "fossjobs --user $user --password $passwd ";
+      if($Verbose)
+        $fossjobs_command = "fossjobs --user $user --password $passwd -v ";
+      else 
+        $fossjobs_command = "fossjobs --user $user --password $passwd ";
 
       /* No break! No hyphen means it is a file! */
       $UploadArchive = $argv[$i];
