@@ -42,7 +42,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -h       = this help message
     -v       = enable verbose debugging
     --user string = user name
-    --passwd string = password
+    --password string = password
 
   FOSSology storage options:
     -f path  = folder path for placing files (e.g., -f 'Fedora/ISOs/Disk 1')
@@ -444,7 +444,7 @@ for ($i = 1;$i < $argc;$i++) {
       $i++;
       $user = $argv[$i];
       break;
-    case '--passwd':
+    case '--password':
       $i++;
       $passwd = $argv[$i];
       break;
@@ -561,7 +561,7 @@ for ($i = 1;$i < $argc;$i++) {
         $user = $uid_arr['name'];
       }
       if (empty($passwd)) {
-        echo "The user is: $user, please enter the passwd:\n";
+        echo "The user is: $user, please enter the password:\n";
         system('stty -echo');
         $passwd = trim(fgets(STDIN));
         system('stty echo');
@@ -573,24 +573,22 @@ for ($i = 1;$i < $argc;$i++) {
         DBCheckResult($result, $SQL, __FILE__, __LINE__);
         $row = pg_fetch_assoc($result);
         if(empty($row)) {
-          echo "user name or passwd is invalid\n";
-          echo "passwd is:$passwd\n";
-          echo $usage;
+          echo "User name or password is invalid.\n";
+          pg_free_result($result);
           exit(0);
         }
-        $_SESSION['UserId'] = $row['user_pk'];
+        $SysConf['auth']['UserId'] = $row['user_pk'];
         pg_free_result($result);
         if (!empty($row['user_seed']) && !empty($row['user_pass'])) {
           $passwd_hash = sha1($row['user_seed'] . $passwd);
           if (strcmp($passwd_hash, $row['user_pass']) != 0) {
-            echo "user name or passwd is invalid\n";
-            echo $usage;
+            echo "User name or password is invalid.\n";
             exit(0);
           }
         }
       }
 
-      $fossjobs_command = "fossjobs --user $user --passwd $passwd ";
+      $fossjobs_command = "fossjobs --user $user --password $passwd ";
 
       /* No break! No hyphen means it is a file! */
       $UploadArchive = $argv[$i];
