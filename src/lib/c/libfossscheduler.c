@@ -202,6 +202,7 @@ void fo_scheduler_disconnect(int retcode)
   /* send "CLOSED" to the scheduler */
   if(found) 
   {
+    fo_heartbeat();
     fprintf(stdout, "\nBYE %d\n", retcode);
     fflush(stdout);
 
