@@ -555,6 +555,17 @@ for ($i = 1;$i < $argc;$i++) {
         exit(1);
       }
 
+      /** get username/passwd from ~/.fossology.rc */
+      $user_passwd_file = getenv("HOME") . "/.fossology.rc";
+      if (file_exists($user_passwd_file)) {
+        $user_passwd_array = file($user_passwd_file, FILE_SKIP_EMPTY_LINES|FILE_IGNORE_NEW_LINES);
+
+        if(!empty($user_passwd_array) && !empty($user_passwd_array[0]))
+          $user = $user_passwd_array[0];
+        if(!empty($user_passwd_array) && !empty($user_passwd_array[1]))
+              $passwd = $user_passwd_array[1];
+      }
+
       /* check if the user name/passwd is valid */
       if (empty($user)) {
         $uid_arr = posix_getpwuid(posix_getuid());

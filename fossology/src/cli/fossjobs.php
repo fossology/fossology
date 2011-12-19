@@ -115,9 +115,9 @@ $user_passwd_file = getenv("HOME") . "/.fossology.rc";
 if (file_exists($user_passwd_file)) {
   $user_passwd_array = file($user_passwd_file, FILE_SKIP_EMPTY_LINES|FILE_IGNORE_NEW_LINES);
 
-  if($user_passwd_array && $user_passwd_array[0])
+  if(!empty($user_passwd_array) && !empty($user_passwd_array[0]))
     $user = $user_passwd_array[0];
-  if($user_passwd_array && $user_passwd_array[1])
+  if(!empty($user_passwd_array) && !empty($user_passwd_array[1]))
     $passwd = $user_passwd_array[1];
 }
 /* check if the user name/passwd is valid */
