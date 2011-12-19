@@ -256,7 +256,7 @@ if (!empty($upload_pk_list)) {
           DBCheckResult($result, $SQL, __FILE__, __LINE__);
           $row = pg_fetch_assoc($result);
           pg_free_result($result);
-          print "Scheduled: $row[upload_filename](upload_id:$upload_pk) -> $agentname\n";
+          print "$agentname is queued to run on $upload_pk:$row[upload_filename].\n";
         }
       }
     } /* for $ac */
