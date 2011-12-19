@@ -307,6 +307,7 @@ void kill_scheduler()
       snprintf(f_name, sizeof(f_name), "/proc/%s/cmdline", ep->d_name);
       if((file = fopen(f_name, "rt")))
       {
+        VERBOSE2("KILL: found \"%s\" in cmdline file\n", f_name);
         if(fgets(f_name, sizeof(f_name), file) != NULL &&
             strstr(f_name, "fo_scheduler"))
         {

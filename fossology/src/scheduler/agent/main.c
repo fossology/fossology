@@ -64,7 +64,6 @@ int main(int argc, char** argv)
       {NULL}
   };
 
-  /* make sure port is correctly initialized */
   s_pid = getpid();
   s_daemon = FALSE;
   s_port = -1;
@@ -91,6 +90,9 @@ int main(int argc, char** argv)
   if(db_init) { database_init(); return 0; }
   if(ki_sched) { kill_scheduler(); return 0; }
   if(log != NULL) {set_log(log); }
+
+  /* the proces's pid could have change */
+  s_pid = getpid();
 
   /* create data structs, load config and set the user groups */
   agent_list_init();
