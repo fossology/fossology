@@ -288,7 +288,7 @@ class ui_menu extends FO_Plugin
         /* Banner Message? */
         if (@$SysConf['SYSCONFIG']['BannerMsg'])
         {
-          $V .= "<h4 style='background-color:#ffbbbb'>$SysConf[SYSCONFIG][BannerMsg]</h4>";
+          $V .= "<h4 style='background-color:#ffbbbb'>" . $SysConf['SYSCONFIG']['BannerMsg'] . "</h4>";
         }
 
         if (! $this->_CSSdone) { $V .= $this->OutputCSS(); }
