@@ -92,13 +92,14 @@ class agent_bucket extends FO_Plugin {
   {
     global $PG_CONN;
     global $Plugins;
+    global $SysConf;
     $Dep = array();
     $NomosDep = array();
 
     /* Is the user authenticated?  If not, then fail
      * because we won't know which bucketpool to use.
-    */
-    if (!array_key_exists('UserId', $_SESSION)){
+     */ 
+    if (!array_key_exists('UserId', $_SESSION) and empty($SysConf['auth']['UserId'])) {
       $text = _("Session is unauthenticated, bucket agent cannot run without knowing who the user is.");
       return($text);
     }

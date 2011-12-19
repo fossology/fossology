@@ -82,8 +82,10 @@ function JobSetPriority($jobpk, $priority) {
 function JobAddUpload($job_name, $filename, $desc, $UploadMode, $FolderPk) 
 {
   global $PG_CONN;
+  global $SysConf;
 
   $UserId = $_SESSION['UserId'];
+  if (empty($UserId)) $UserId = $SysConf['auth']['UserId'];
 
   /* check all required inputs */
   if (empty($UserId) or empty($job_name) or empty($filename) or 
@@ -165,8 +167,10 @@ function JobFindKey($UploadPk, $JobName)
 function JobAddJob($upload_pk, $job_name, $priority = 0) 
 {
   global $PG_CONN;
+  global $SysConf;
 
   $job_user_fk = GetArrayVal("UserId", $_SESSION);
+  if (empty($job_user_fk)) $job_user_fk = $SysConf['auth']['UserId'];
   if (empty($job_user_fk)) return -1;
 
   $Job_name = str_replace("'", "''", $job_name);
