@@ -80,10 +80,10 @@ $usage = basename($argv[0]) . " [options]
                Or, use 'ALL' to specify all upload ids.
   -P num    :: priority for the jobs (higher = more important, default:0)
   --user string :: user name
-  --passwd string :: password
+  --password string :: password
 ";
 //process parameters, see usage above
-$longopts = array("user:", "passwd:");
+$longopts = array("user:", "password:");
 $options = getopt("haA:P:uU:v", $longopts);
 //print_r($options);
 if (empty($options)) {
@@ -106,8 +106,8 @@ if (array_key_exists("user", $options)) {
   $user = $options["user"];
 }
 
-if (array_key_exists("passwd", $options)) {
-  $passwd = $options["passwd"];
+if (array_key_exists("password", $options)) {
+  $passwd = $options["password"];
 }
 
 /* check if the user name/passwd is valid */
@@ -116,7 +116,7 @@ if (empty($user)) {
   $user = $uid_arr['name'];
 }
 if (empty($passwd)) {
-  echo "The user is: $user, please enter the passwd:\n";
+  echo "The user is: $user, please enter the password:\n";
   system('stty -echo');
   $passwd = trim(fgets(STDIN));
   system('stty echo');
@@ -128,17 +128,16 @@ if (!empty($user) and !empty($passwd)) {
   DBCheckResult($result, $SQL, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
   if(empty($row)) {
-    echo "user name or passwd is invalid\n";
-    echo $usage;
+    echo "User name or password is invalid.\n";
+    pg_free_result($result);
     exit(0);
   }
-  $_SESSION['UserId'] = $row['user_pk'];
+  $SysConf['auth']['UserId'] = $row['user_pk'];
   pg_free_result($result);
   if (!empty($row['user_seed']) && !empty($row['user_pass'])) {
     $passwd_hash = sha1($row['user_seed'] . $passwd);
     if (strcmp($passwd_hash, $row['user_pass']) != 0) {
-      echo "user name or passwd is invalid\n";
-      echo $usage;
+      echo "User name or password is invalid.\n";
       exit(0);
     }
   }
@@ -252,7 +251,12 @@ if (!empty($upload_pk_list)) {
           echo "ERROR: Scheduling failed for Agent $agentname\n";
           echo "ERROR message: $results\n";
         } else if ($Verbose) {
-          print "Scheduled: $upload_pk -> $agentname\n";
+          $SQL = "SELECT upload_filename FROM upload where upload_pk = $upload_pk;";
+          $result = pg_query($PG_CONN, $SQL);
+          DBCheckResult($result, $SQL, __FILE__, __LINE__);
+          $row = pg_fetch_assoc($result);
+          pg_free_result($result);
+          print "Scheduled: $row[upload_filename](upload_id:$upload_pk) -> $agentname\n";
         }
       }
     } /* for $ac */
