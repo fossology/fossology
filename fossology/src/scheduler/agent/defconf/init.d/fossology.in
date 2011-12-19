@@ -17,6 +17,7 @@
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON={$MODDIR}/scheduler/agent/fo_scheduler
+CLI={$MODDIR}/scheduler/agent/fo_cli
 NAME=scheduler
 DESC="FOSSology job scheduler"
 
@@ -28,9 +29,9 @@ ENABLED=1
 # Include scheduler defaults if available
 SCHEDULEROPT="--daemon --reset --verbose=7" 
 if [ -f {$SYSCONFDIR}/default/fossology ] ; then
-	# This can override SCHEDULEROPT.
-	# Be sure to keep "-d" for daemon mode
-	. {$SYSCONFDIR}/default/fossology
+    # This can override SCHEDULEROPT.
+    # Be sure to keep "-d" for daemon mode
+    . {$SYSCONFDIR}/default/fossology
 fi
 
 # Quit quietly, if $ENABLED is 0.
@@ -43,46 +44,35 @@ case "$1" in
     echo -n "Starting $DESC: "
     $DAEMON $SCHEDULEROPT
     echo "$NAME."
-	;;
+    ;;
   stop)
     echo -n "Stopping $DESC: "
     # we don't really care about the exit code as long as it's stopped
     $DAEMON --kill || true
     echo "$NAME."
-	;;
-  #reload)
-	#
-	#	If the daemon can reload its config files on the fly
-	#	for example by sending it SIGHUP, do it here.
-	#
-	#	If the daemon responds to changes in its config file
-	#	directly anyway, make this a do-nothing entry.
-	#
-	# echo "Reloading $DESC configuration files."
-	# start-stop-daemon --stop --signal 1 --quiet --pidfile \
-	#	/var/run/$NAME.pid --exec $DAEMON
-    #;;
-  force-reload)
-	#
-	#	If the "reload" option is implemented, move the "force-reload"
-	#	option to the "reload" entry above. If not, "force-reload" is
-	#	just the same as "restart" except that it does nothing if the
-	#   daemon isn't already running.
-	# check wether $DAEMON is running. If so, restart
-	$DAEMON --kill
-	$DAEMON $SCHEDULEROPT
-	;;
+    ;;
+  reload)
+    #
+    #	If the daemon can reload its config files on the fly
+    #	for example by sending it SIGHUP, do it here.
+    #
+    #	If the daemon responds to changes in its config file
+    #	directly anyway, make this a do-nothing entry.
+    #
+    $CLI --reload
+    ;;
   restart)
     echo -n "Restarting $DESC: "
-	$DAEMON --kill
-	$DAEMON $SCHEDULEROPT
-	echo "$NAME."
-	;;
+    $DAEMON --kill || true
+    sleep 1
+    $DAEMON $SCHEDULEROPT
+    echo "$NAME."
+    ;;
   *)
-	N={$INITDIR}/init.d/$NAME
-	# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
-	echo "Usage: $N \{start|stop|restart|force-reload\}" >&2
-	exit 1
+    N={$INITDIR}/init.d/$NAME
+    # echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
+    echo "Usage: $N \{start|stop|restart|reload\}" >&2
+    exit 1
 	;;
 esac
 

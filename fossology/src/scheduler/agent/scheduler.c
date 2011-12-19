@@ -309,7 +309,10 @@ void kill_scheduler()
       {
         if(fgets(f_name, sizeof(f_name), file) != NULL &&
             strstr(f_name, "fo_scheduler"))
+        {
+          lprintf("KILL: sending kill signal to pid %s\n", ep->d_name);
           kill(atoi(ep->d_name), SIGKILL);
+        }
       }
     }
   }
