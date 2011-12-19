@@ -343,7 +343,7 @@ class ui_menu extends FO_Plugin
           if (@$SysConf['SYSCONFIG']['SupportEmailLabel'] and @$SysConf['SYSCONFIG']['SupportEmailAddr'])
           {
             $V .= " | ";
-            $V .= "<small><a href='mailto:$SysConf[SYSCONFIG][SupportEmailAddr]?subject=$SysConf[SYSCONFIG][SupportEmailSubject]'>$SysConf[SYSCONFIG][SupportEmailLabel]</a>";
+            $V .= "<small><a href='mailto:" . $SysConf['SYSCONFIG']['SupportEmailAddr'] . "?subject=" . $SysConf['SYSCONFIG']['SupportEmailSubject'] . "'>" . $SysConf['SYSCONFIG']['SupportEmailLabel'] . "</a>";
           }
         }
         $V .= "</td>";
