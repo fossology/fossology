@@ -166,7 +166,7 @@ FUNCTION int fo_CreateARSTable(PGconn *pgConn, char *tableName)
 
   snprintf(sql, sizeof(sql), "create table %s() inherits(ars_master);\
   ALTER TABLE ONLY %s ADD CONSTRAINT %s_agent_fk_fkc FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);\
-  ALTER TABLE ONLY %s ADD CONSTRAINT %s_upload_fk_fkc FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk);", 
+  ALTER TABLE ONLY %s ADD CONSTRAINT %s_upload_fk_fkc FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk) ON DELETE CASCADE;", 
   tableName, tableName, tableName, tableName, tableName);
 /*  ALTER TABLE ONLY %s ADD CONSTRAINT %s_pkey1 PRIMARY KEY (ars_pk); \  */
 
