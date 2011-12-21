@@ -371,7 +371,7 @@ void database_exec_event(char* sql)
 
   if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
   {
-    lprintf("ERROR %s.%d: failed to perform database exec\n");
+    lprintf("ERROR %s.%d: failed to perform database exec\n", __FILE__, __LINE__);
     lprintf("ERROR sql: \"%s\"\n", sql);
     lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
   }
@@ -540,7 +540,7 @@ void database_job_processed(int j_id, int num)
 {
   gchar* sql = NULL;
 
-  sql = g_strdup_printf(jobsql_processed, j_id, num);
+  sql = g_strdup_printf(jobsql_processed, num, j_id);
   event_signal(database_exec_event, sql);
 }
 

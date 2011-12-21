@@ -67,7 +67,7 @@ void log_open()
       ERROR("cout not open %s for logging, using default", log_name)
   }
 
-  lprintf("log openned\n");
+  lprintf("log opened\n");
 }
 
 /**
