@@ -222,6 +222,7 @@ if (array_key_exists("u", $options)) {
   pg_free_result($result);
 }
 
+$upload_pk_list = "";
 if (array_key_exists("U", $options)) {
   $upload_pk_list = $options['U'];
   if ($upload_pk_list == 'ALL') {
@@ -241,36 +242,8 @@ if (array_key_exists("U", $options)) {
     pg_free_result($result);
   }
 }
-if (!empty($upload_pk_list)) {
-  $reg_agents = array();
-  $results = array();
-  // Schedule them
-  $agent_count = count($agent_list);
-  foreach(split(",", $upload_pk_list) as $upload_pk) {
-    if (empty($upload_pk)) {
-      continue;
-    }
-    // don't exit on AgentAdd failure, or all the agents requested will
-    // not get scheduled.
-    for ($ac = 0;$ac < $agent_count;$ac++) {
-      $agentname = $agent_list[$ac]->URI;
-      if (!empty($agentname)) {
-        $Agent = & $Plugins[plugin_find_id($agentname) ];
-        $results = $Agent->AgentAdd($upload_pk, NULL, $Priority);
-        if (!empty($results)) {
-          echo "ERROR: Scheduling failed for Agent $agentname\n";
-          echo "ERROR message: $results\n";
-        } else if ($Verbose) {
-          $SQL = "SELECT upload_filename FROM upload where upload_pk = $upload_pk;";
-          $result = pg_query($PG_CONN, $SQL);
-          DBCheckResult($result, $SQL, __FILE__, __LINE__);
-          $row = pg_fetch_assoc($result);
-          pg_free_result($result);
-          print "$agentname is queued to run on $upload_pk:$row[upload_filename].\n";
-        }
-      }
-    } /* for $ac */
-  } /* for each $upload_pk */
-} // if $upload_pk is defined
+/** scheduling agent tasks on upload ids */
+QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose, $Priority);
+
 exit(0);
 ?>
