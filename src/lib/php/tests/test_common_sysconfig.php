@@ -30,15 +30,30 @@ require_once('../common-db.php');
 class test_common_sysconfig extends PHPUnit_Framework_TestCase
 {
   public $PG_CONN;
- 
+  public $DB_COMMAND =  "";
+  public $DB_NAME =  "";  
+  public $sys_conf = ""; 
+
   /**
    * \brief initialization
    */
   protected function setUp()
   {
     global $PG_CONN;
-    $sysconfig = './sysconfigDirTest';
-    $PG_CONN = DBconnect($sysconfig);
+    global $DB_COMMAND;
+    global $DB_NAME;
+    global $sys_conf;
+    
+    #$sysconfig = './sysconfigDirTest';
+    #$PG_CONN = DBconnect($sysconfig);
+    $DB_COMMAND  = "../../../testing/db/createTestDB.php";
+    exec($DB_COMMAND, $dbout, $rc);
+    preg_match("/(\d+)/", $dbout[0], $matches);
+    $test_name = $matches[1];
+    $sys_conf = $dbout[0];
+    $DB_NAME = "fosstest".$test_name;
+    #$sysconfig = './sysconfigDirTest';
+    $PG_CONN = DBconnect($sys_conf);
   }
 
   /**
@@ -49,10 +64,11 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
    */
   function testConfigInit()
   {
+    global $sys_conf;
     print "\nStart unit test for common-sysconfig.php\n";
     print "test function ConfigInit()\n";
-    $sysconfig = './sysconfigDirTest';
-    ConfigInit($sysconfig, &$SysConf);
+    #$sysconfig = './sysconfigDirTest';
+    ConfigInit($sys_conf, &$SysConf);
     $this->assertEquals("FOSSology Support",  $SysConf['SYSCONFIG']['SupportEmailSubject']);
     $this->assertEquals("false",  $SysConf['SYSCONFIG']['GlobalBrowse']);
     $hostname = exec("hostname -f");
@@ -68,7 +84,11 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
    */
   protected function tearDown() {
     global $PG_CONN;
+    global $DB_COMMAND;
+    global $DB_NAME;
+
     pg_close($PG_CONN);
+    exec("$DB_COMMAND -d $DB_NAME");
   }
 
 }

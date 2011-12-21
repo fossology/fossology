@@ -129,7 +129,7 @@ function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk)
  */
 function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
                              $PkgsOnly=false, $offset=0, $limit="ALL",
-                             $order="", $tag_pk)
+                             $order="", $tag_pk=null)
 {
   global $PG_CONN;
 
