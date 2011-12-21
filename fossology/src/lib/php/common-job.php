@@ -456,4 +456,51 @@ function GetJobList($status)
 	return $job_array;
 }
 
+/**
+ * \brief scheduling agent tasks on upload ids
+ *
+ * \param $upload_pk_list -  upload ids, The string can be a comma-separated list of upload ids.
+ * Or, use 'ALL' to specify all upload ids.
+ * \param $agent_list - agent list, specify agent to schedule (default is everything from fossjobs -a)
+ * The string can be a comma-separated list of agent tasks, 
+ * \param $Verbose - verbose output, not empty: output, empty: does not output
+ * \param $Priority - priority for the jobs (higher = more important, default:0)
+ */
+function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose, $Priority=0)
+{
+  global $Plugins;
+  global $PG_CONN;
+ 
+  if (!empty($upload_pk_list)) {
+    $reg_agents = array();
+    $results = array();
+    // Schedule them
+    $agent_count = count($agent_list);
+    foreach(split(",", $upload_pk_list) as $upload_pk) {
+      if (empty($upload_pk)) {
+        continue;
+      }
+      // don't exit on AgentAdd failure, or all the agents requested will
+      // not get scheduled.
+      for ($ac = 0;$ac < $agent_count;$ac++) {
+        $agentname = $agent_list[$ac]->URI;
+        if (!empty($agentname)) {
+          $Agent = & $Plugins[plugin_find_id($agentname) ];
+          $results = $Agent->AgentAdd($upload_pk, NULL, $Priority);
+          if (!empty($results)) {
+            echo "ERROR: Scheduling failed for Agent $agentname\n";
+            echo "ERROR message: $results\n";
+          } else if ($Verbose) {
+            $SQL = "SELECT upload_filename FROM upload where upload_pk = $upload_pk;";
+            $result = pg_query($PG_CONN, $SQL);
+            DBCheckResult($result, $SQL, __FILE__, __LINE__);
+            $row = pg_fetch_assoc($result);
+            pg_free_result($result);
+            print "$agentname is queued to run on $upload_pk:$row[upload_filename].\n";
+          }
+        }
+      } /* for $ac */
+    } /* for each $upload_pk */
+  } // if $upload_pk is defined
+}
 ?>
