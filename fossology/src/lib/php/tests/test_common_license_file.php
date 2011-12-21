@@ -37,6 +37,9 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
   public $pfile_parent = 0;
   public $pfile_child = 0;
   public $agent_pk = 0;
+
+  public $DB_COMMAND =  "";
+  public $DB_NAME =  "";
  
   /**
    * \brief initialization
@@ -50,9 +53,19 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     global $pfile_pk_parent;
     global $pfile_pk_child;
     global $agent_pk;
-    $sysconfig = './sysconfigDirTest';
 
-    $PG_CONN = DBconnect($sysconfig);
+    global $DB_COMMAND;
+    global $DB_NAME;
+    #$sysconfig = './sysconfigDirTest';
+
+    $DB_COMMAND  = "../../../testing/db/createTestDB.php";
+    exec($DB_COMMAND, $dbout, $rc);
+    preg_match("/(\d+)/", $dbout[0], $matches);
+    $test_name = $matches[1];
+    $db_conf = $dbout[0];
+    $DB_NAME = "fosstest".$test_name;
+
+    $PG_CONN = DBconnect($db_conf);
 
 
     /** preparation, add uploadtree, upload, pfile, license_file record */
@@ -65,7 +78,27 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
+   
+    /** add nomos agent record **/
+    $sql = "INSERT INTO agent (agent_name) VALUES('nomos');";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
 
+    /** if didn't have license_ref record, add it */
+    $sql = "SELECT rf_shortname FROM license_ref where rf_pk = 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) <= 0)
+    {
+      $sql = "INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, marydone, rf_active, rf_text_updatable, rf_detector_type) VALUES(1, 'test_ref', 'test_ref', false, true, false, 1);";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+    }
+    pg_free_result($result);
+
+
+ 
     /** get pfile id */
     $sql = "SELECT pfile_pk from pfile where pfile_sha1 IN ('AF1DF2C4B32E4115DB5F272D9EFD0E674CF2A0BC', 'B1938B14B9A573D59ABCBD3BF0F9200CE6E79FB6');";
     $result = pg_query($PG_CONN, $sql);
@@ -268,6 +301,8 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     global $pfile_pk_parent;
     global $pfile_pk_child;
     global $upload_pk;
+    global $DB_COMMAND;
+    global $DB_NAME;
 
     /** delte the uploadtree record */
     $sql = "DELETE FROM uploadtree where upload_fk = $upload_pk;";
@@ -292,8 +327,17 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
-    
+   
+    /** delete the agent record */
+    $sql = "DELETE FROM agent where agent_name = 'nomos';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+ 
     pg_close($PG_CONN);
+    exec("$DB_COMMAND -d $DB_NAME");
+    print "Ending unit test for common-license_file.php\n";
   }
 }
 

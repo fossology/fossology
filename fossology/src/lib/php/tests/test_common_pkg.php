@@ -31,13 +31,25 @@ require_once '/usr/share/php/PHPUnit/Framework.php';
 class test_common_pkg extends PHPUnit_Framework_TestCase
 {
   public $PG_CONN;
+  public $DB_COMMAND =  "";
+  public $DB_NAME =  "";
+
   /* initialization */
   protected function setUp() 
   {
     global $PG_CONN;
+    global $DB_COMMAND;
+    global $DB_NAME;
     print "Starting unit test for common-pkg.php\n";
-    $sysconfig = './sysconfigDirTest';
-    $PG_CONN = DBconnect($sysconfig);
+    
+    $DB_COMMAND  = "../../../testing/db/createTestDB.php";
+    exec($DB_COMMAND, $dbout, $rc);
+    preg_match("/(\d+)/", $dbout[0], $matches);
+    $test_name = $matches[1];
+    $db_conf = $dbout[0];
+    $DB_NAME = "fosstest".$test_name;
+    #$sysconfig = './sysconfigDirTest';
+    $PG_CONN = DBconnect($db_conf);
   }
 
   /**
@@ -46,7 +58,20 @@ class test_common_pkg extends PHPUnit_Framework_TestCase
   function test_GetPkgMimetypes()
   {
     print "test function GetPkgMimetypes()\n";
-    global $PG_CONN; 
+    global $PG_CONN;
+    
+    #prepare database testdata
+    $mimeType = "application/x-rpm";
+    /** delete test data pre testing */
+    $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
+    $result = pg_query($PG_CONN, $sql);
+    pg_free_result($result);
+    /** insert on record */
+    $sql = "INSERT INTO mimetype(mimetype_pk, mimetype_name) VALUES(10000, '$mimeType');";
+    $result = pg_query($PG_CONN, $sql);
+    pg_free_result($result);  
+ 
+    #begin test GetPkgMimetypes()
     $sql = "select * from mimetype where
              mimetype_name='application/x-rpm'";
     $result = pg_query($PG_CONN, $sql);
@@ -57,6 +82,11 @@ class test_common_pkg extends PHPUnit_Framework_TestCase
 
     $result = GetPkgMimetypes();
     $this->assertContains($expected, $result);
+
+    /** delete test data post testing */
+    $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
+    $result = pg_query($PG_CONN, $sql);
+    pg_free_result($result);
   }
 
   /**
@@ -64,7 +94,11 @@ class test_common_pkg extends PHPUnit_Framework_TestCase
    */
   protected function tearDown() {
     global $PG_CONN;
+    global $DB_COMMAND;
+    global $DB_NAME;
+
     pg_close($PG_CONN);
+    exec("$DB_COMMAND -d $DB_NAME");
     print "Ending unit test for common-pkg.php\n";
   }
 }
