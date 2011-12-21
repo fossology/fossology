@@ -126,7 +126,7 @@ if(array_key_exists('d', $Options))
   {
     // drop the db
     # stop all users of the fossology db
-    $pkillCmd ="pkill -f -u postgres fossy || true";
+    $pkillCmd ="sudo pkill -f -u postgres fossy || true";
     $lKill = exec($pkillCmd, $killOut, $killRtn);
     $dropCmd = "sudo su postgres -c 'echo \"drop database $dropName;\"|psql'";
     $lastDrop = exec($dropCmd, $dropOut, $dropRtn);
