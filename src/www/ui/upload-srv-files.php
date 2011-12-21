@@ -44,51 +44,54 @@ class upload_srv_files extends FO_Plugin {
    * \return NULL on success, string on failure.
    */
   function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name) {
-    global $LIBEXECDIR;
     global $Plugins;
     $FolderPath = FolderGetName($FolderPk);
-    $CMD = "";
-    if ($GroupNames == "1") {
-      $CMD.= " -A";
-    }
     // $FolderPath = str_replace('\\','\\\\',$FolderPath);
     // $FolderPath = str_replace('"','\"',$FolderPath);
     $FolderPath = str_replace('`', '\`', $FolderPath);
     $FolderPath = str_replace('$', '\$', $FolderPath);
-    $CMD.= " -f \"$FolderPath\"";
     if (!empty($Desc)) {
       // $Desc = str_replace('\\','\\\\',$Desc);
       // $Desc = str_replace('"','\"',$Desc);
       $Desc = str_replace('`', '\`', $Desc);
       $Desc = str_replace('$', '\$', $Desc);
-      $CMD.= " -d \"$Desc\"";
     }
     if (!empty($Name)) {
       // $Name = str_replace('\\','\\\\',$Name);
       // $Name = str_replace('"','\"',$Name);
       $Name = str_replace('`', '\`', $Name);
       $Name = str_replace('$', '\$', $Name);
-      $CMD.= " -n \"$Name\"";
     }
     else {
       $Name = $SourceFiles;
     }
     /* Check for specified agent analysis */
     $AgentList = menu_find("Agents", $Depth);
-    $First = 1;
+    $finder = 0; // if have agent are selected, 1:yes, 0: no
     foreach($AgentList as $A) {
       if (empty($A)) {
         continue;
       }
-      if (GetParm("Check_" . $A->URI, PARM_INTEGER) == 1) {
-        if ($First) {
-          $CMD.= " -q " . $A->URI;
-          $First = 0;
-        } else {
-          $CMD.= "," . $A->URI;
+      if (GetParm("Check_" . $A->URI, PARM_INTEGER) != 1 && $A->URI != "agent_unpack") {
+        $A->URI = NULL;
+      }
+      else 
+      {
+        $finder = 1;
+      }
+    }
+    /** if no agent are selected, so add unpack agent, if has selected agents, remove agent_unpack */
+    if ($finder) {
+      foreach($AgentList as $A) {
+        if (empty($A)) {
+          continue;
+        }
+        if ("agent_unpack" === $A->Name) {
+          $A->URI = NULL;
         }
       }
     }
+
     // $SourceFiles = str_replace('\\','\\\\',$SourceFiles);
     // $SourceFiles = str_replace('"','\"',$SourceFiles);
     $SourceFiles = str_replace('`', '\`', $SourceFiles);
@@ -96,8 +99,6 @@ class upload_srv_files extends FO_Plugin {
     $SourceFiles = str_replace('|', '\|', $SourceFiles);
     $SourceFiles = str_replace(' ', '\ ', $SourceFiles);
     $SourceFiles = str_replace("\t", "\\\t", $SourceFiles);
-    $CMD.= " $SourceFiles";
-    $jq_args = trim($CMD);
     /* Add the job to the queue */
     // create the job
     $ShortName = basename($Name);
@@ -108,33 +109,8 @@ class upload_srv_files extends FO_Plugin {
     $jobq = NULL;
     $Mode = (1 << 3); // code for "it came from web upload"
     $uploadpk = JobAddUpload($ShortName, $SourceFiles, $Desc, $Mode, $FolderPk);
-    $jobq = JobAddJob($uploadpk, 'fosscp_agent', 0);
-    if (empty($jobq))
-    {
-      $text = _("Failed to create job record");
-      return ($text);
-    }
-    /* Check for email notification and adjust jq_args as needed */
-    if (CheckEnotification()) {
-      if(empty($_SESSION['UserEmail'])) {
-        $Email = 'fossy@localhost';
-      }
-      else {
-        $Email = $_SESSION['UserEmail'];
-      }
-      /*
-       * Put -w webServer -e <addr> in the front as the upload is last
-      * part of jq_args.
-      */
-      $jq_args = " -W {$_SERVER['SERVER_NAME']} -e $Email " . "$jq_args";
-    }
-    // put the job in the jobqueue
-    $jq_type = 'fosscp_agent';
-    $jobqueue_pk = JobQueueAdd($jobq, $jq_type, $jq_args, "no", NULL, NULL, 0);
-    if (empty($jobqueue_pk)) {
-      $text = _("Failed to place fosscp_agent in job queue");
-      return ($text);
-    }
+    /** scheduling agent tasks on upload id */
+    QueueUploadsOnAgents($uploadpk, &$AgentList, 0);
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
     $msg = "The upload for $SourceFiles has been scheduled. ";
     $keep = "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
