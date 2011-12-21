@@ -778,6 +778,11 @@
   $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_schedinfo\" DROP NOT NULL;";
   $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["UPDATE"] = "";
   
+  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_itemsprocessed\" IS 'sum of files processed by all agents';";
+  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_itemsprocessed\" int4;";
+  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_itemsprocessed\" DROP NOT NULL, ALTER COLUMN \"jq_itemsprocessed\" SET DEFAULT 0;";
+  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["UPDATE"] = "UPDATE jobqueue SET jq_itemsprocessed=0";
+  
   $Schema["TABLE"]["jobqueue"]["jq_log"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_log\" IS 'Field that holds the name of the optional log file';";
   $Schema["TABLE"]["jobqueue"]["jq_log"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_log\" text;";
   $Schema["TABLE"]["jobqueue"]["jq_log"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_log\" DROP NOT NULL;";
