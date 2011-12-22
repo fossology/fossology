@@ -466,7 +466,7 @@ function GetJobList($status)
  * \param $Verbose - verbose output, not empty: output, empty: does not output
  * \param $Priority - priority for the jobs (higher = more important, default:0)
  */
-function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose, $Priority=0)
+function QueueUploadsOnAgents($upload_pk_list, &$agent_list, $Verbose, $Priority=0)
 {
   global $Plugins;
   global $PG_CONN;

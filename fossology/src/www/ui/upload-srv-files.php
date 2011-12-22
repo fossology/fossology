@@ -110,7 +110,7 @@ class upload_srv_files extends FO_Plugin {
     $Mode = (1 << 3); // code for "it came from web upload"
     $uploadpk = JobAddUpload($ShortName, $SourceFiles, $Desc, $Mode, $FolderPk);
     /** scheduling agent tasks on upload id */
-    QueueUploadsOnAgents($uploadpk, &$AgentList, 0);
+    QueueUploadsOnAgents($uploadpk, $AgentList, 0);
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
     $msg = "The upload for $SourceFiles has been scheduled. ";
     $keep = "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
