@@ -121,7 +121,7 @@ class core_auth extends FO_Plugin {
 			$row = pg_fetch_assoc($result);
 			pg_free_result($result);
 		}
-		if (empty($row[0]['user_name'])) {
+		if (empty($row['user_name'])) {
 			return (1);
 		} /* Failed to insert */
 		return (0);
