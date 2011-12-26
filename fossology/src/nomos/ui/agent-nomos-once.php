@@ -49,12 +49,13 @@ class agent_nomos_once extends FO_Plugin {
   function AnalyzeFile($FilePath) {
      
     global $Plugins;
+    global $SYSCONFDIR;
 
     $licenses = array();
 
     $licenseResult = "";
     /* move the temp file */
-    $licenseResult = exec("../agent/nomos $FilePath",$out,$rtn);
+    $licenseResult = exec("$SYSCONFDIR/mods-enabled/nomos/agent/nomos $FilePath",$out,$rtn);
     $licenses = explode(' ',$out[0]);
     $last = end($licenses);
     return ($last);
