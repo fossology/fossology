@@ -48,12 +48,13 @@ class agent_copyright_once extends FO_Plugin {
    */
   function AnalyzeOne($Highlight) {
     global $Plugins;
+    global $SYSCONFDIR;
     $ModBack = GetParm("modback",PARM_STRING);
 
     $V = "";
     $View = & $Plugins[plugin_find_id("view") ];
     $TempFile = $_FILES['licfile']['tmp_name'];
-    $Sys = "../agent/copyright -c $TempFile";
+    $Sys = "$SYSCONFDIR/mods-enabled/wget_agent/agent/copyright -C $TempFile -c $SYSCONFDIR";
     $Fin = popen($Sys, "r");
     $colors = Array();
     $colors['statement'] = 0;
