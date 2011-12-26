@@ -790,7 +790,7 @@ int main(int argc, char** argv)
   }
 
   /* parse the command line options */
-  while((c = getopt(argc, argv, "dcC:ti")) != -1)
+  while((c = getopt(argc, argv, "dc:C:ti")) != -1)
   {
     switch(c)
     {
@@ -816,7 +816,8 @@ int main(int argc, char** argv)
 
         pair_destroy(curr);
         break;
-      case 'c': /* copyright doesn't set this */ break;
+      case 'c':
+        break; /* handled by fo_scheduler_connect() */
       case 't': /* run accuracy testing */
         run_test_files(copy);
         copyright_destroy(copy);
