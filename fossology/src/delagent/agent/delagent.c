@@ -138,7 +138,7 @@ int main (int argc, char *argv[])
     {
       Parm = fo_scheduler_current();
       
-      if (ReadParameter(Parm) != 0)
+      if (ReadParameter(Parm) < 0)
         exit(-1);
     }
   }
