@@ -54,7 +54,7 @@ class agent_copyright_once extends FO_Plugin {
     $V = "";
     $View = & $Plugins[plugin_find_id("view") ];
     $TempFile = $_FILES['licfile']['tmp_name'];
-    $Sys = "$SYSCONFDIR/mods-enabled/wget_agent/agent/copyright -C $TempFile -c $SYSCONFDIR";
+    $Sys = "$SYSCONFDIR/mods-enabled/copyright/agent/copyright -C $TempFile -c $SYSCONFDIR";
     $Fin = popen($Sys, "r");
     $colors = Array();
     $colors['statement'] = 0;
