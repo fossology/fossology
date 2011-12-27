@@ -54,7 +54,13 @@ class agent_copyright_once extends FO_Plugin {
     $V = "";
     $View = & $Plugins[plugin_find_id("view") ];
     $TempFile = $_FILES['licfile']['tmp_name'];
-    $Sys = "$SYSCONFDIR/mods-enabled/copyright/agent/copyright -C $TempFile -c $SYSCONFDIR";
+    $ui_dir = getcwd();
+    $copyright_dir =  "$SYSCONFDIR/mods-enabled/copyright/agent/";
+    if(!chdir($copyright_dir)) {
+      $errmsg = _("unable to change working directory to $copyright_dir\n");
+      return $errmsg;
+    }
+    $Sys = "./copyright -C $TempFile -c $SYSCONFDIR";
     $Fin = popen($Sys, "r");
     $colors = Array();
     $colors['statement'] = 0;
@@ -83,6 +89,10 @@ class agent_copyright_once extends FO_Plugin {
       $View->SortHighlightMenu();
       $View->ShowView($Fin,$ModBack, 1,1,NULL,True);
       fclose($Fin);
+    }
+    if(!chdir($ui_dir)) {
+      $errmsg = _("unable to change back to working directory $ui_dir\n");
+      return $errmsg;
     }
     /* Clean up */
     return ($V);
