@@ -384,8 +384,8 @@ int copyright_callout(pcre_callout_block* info)
 int copyright_init(copyright* copy)
 {
   /* local variables */
-  char copy_dir[FILENAME_MAX];  // the location of the copyright data
-  char name_dir[FILENAME_MAX];  // the location of the dictionary data
+  char* copy_dir;  // the location of the copyright data
+  char* name_dir;  // the location of the dictionary data
 
   /* call constructor for all sub objects */
   (*copy) = (copyright)calloc(1,sizeof(struct copyright_internal));
@@ -394,10 +394,8 @@ int copyright_init(copyright* copy)
   cvector_init(&((*copy)->entries), copy_entry_function_registry());
 
   /* setup the copy_dir and name_dir variables */
-  memset(copy_dir, '\0', sizeof(copy_dir));
-  memset(name_dir, '\0', sizeof(name_dir));
-  sprintf(copy_dir, "%s/copyright/agent/copyright.dic", DATADIR);
-  sprintf(name_dir, "%s/copyright/agent/names.dic", DATADIR);
+  copy_dir = "copyright.dic";
+  name_dir = "names.dic";
 
   /* load the dictionaries */
   if(!load_dictionary((*copy)->dict, copy_dir) ||
