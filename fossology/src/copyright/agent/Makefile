@@ -19,7 +19,8 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpcre -Werror
-DEF = -DDATADIR='"$(DESTDIR)$(MODDIR)"'
+DEF = -DDATADIR='"$(MODDIR)"'
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 EXE = copyright
 TESTDIR = ../agent_tests
@@ -29,9 +30,9 @@ OBJECTS  = copyright.o cvector.o radixtree.o  pair.o
 ##########################
 # executable build rules #
 ##########################
-$(EXE): main.c $(FOLIB) $(VARS) $(OBJECTS) libcopyright.a
+$(EXE): main.c $(FOLIB) $(VARS) $(OBJECTS)
 	@echo "make copyright agent"
-	$(CC) main.c libcopyright.a $(DEF) $(CFLAGS_LOCAL) -o $@
+	$(CC) main.c $(OBJECTS) $(DEF) $(CFLAGS_LOCAL) -o $@
 
 all: $(EXE) test
 	@echo "make copyright agent and test"
@@ -75,6 +76,7 @@ install: $(EXE)
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 	$(INSTALL_DATA) copyright.dic $(DESTDIR)$(MODDIR)/$(EXE)/agent/
 	$(INSTALL_DATA) names.dic $(DESTDIR)$(MODDIR)/$(EXE)/agent/
+  
 
 uninstall:
 	@echo "make copyright agent uninstall"
