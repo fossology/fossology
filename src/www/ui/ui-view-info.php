@@ -276,6 +276,12 @@ class ui_view_info extends FO_Plugin
     $text = _("Package Info");
     $V .= "<H2>$text</H2>\n";
 
+    $agent_status = AgentARSList('pkgagent_ars', $Upload);
+    if (empty($agent_status))
+    {
+      $V .= _("No data available. Use Jobs > Agents to schedule a pkgagent scan.");
+      return($V);
+    }
     $sql = "SELECT mimetype_name
         FROM uploadtree
         INNER JOIN pfile ON uploadtree_pk = $Item
@@ -301,16 +307,15 @@ class ui_view_info extends FO_Plugin
                 AND uploadtree.pfile_fk = pkg_rpm.pfile_fk;";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
-      while ($row = pg_fetch_assoc($result))
+
+      $R = pg_fetch_assoc($result);
+      if((!empty($R['source_rpm']))and(trim($R['source_rpm']) != "(none)"))
       {
-        if((!empty($row['source_rpm']))and(trim($row['source_rpm']) != "(none)"))
-        {
-          $V .= _("RPM Binary Package");
-        }
-        else
-        {
-          $V .= _("RPM Source Package");
-        }
+        $V .= _("RPM Binary Package");
+      }
+      else
+      {
+        $V .= _("RPM Source Package");
       }
       $Count=1;
 
@@ -320,7 +325,7 @@ class ui_view_info extends FO_Plugin
       $text2 = _("Value");
       $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
 
-      while ($R = pg_fetch_assoc($result) and !empty($R['pkg_pk']))
+      if (!empty($R['pkg_pk']))
       {
         $Require = $R['pkg_pk'];
 
@@ -382,24 +387,24 @@ class ui_view_info extends FO_Plugin
         $V .= "<tr><td align='right'>$Count</td><td>$text";
         $V .= "</td><td>" . htmlentities($R['source_rpm']) . "</td></tr>\n";
         $Count++;
+      
+        pg_free_result($result);
+
+        $sql = "SELECT * FROM pkg_rpm_req WHERE pkg_fk = $Require;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+        while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
+        {
+          $text = _("Requires");
+          $V .= "<tr><td align='right'>$Count</td><td>$text";
+          $Val = htmlentities($R['req_value']);
+          $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
+          $V .= "</td><td>$Val</td></tr>\n";
+          $Count++;
+        }
+        pg_free_result($result);
       }
-      pg_free_result($result);
-
-      $sql = "SELECT * FROM pkg_rpm_req WHERE pkg_fk = $Require;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-      while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
-      {
-        $text = _("Requires");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $Val = htmlentities($R['req_value']);
-        $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
-        $V .= "</td><td>$Val</td></tr>\n";
-        $Count++;
-      }
-      pg_free_result($result);
-
       $V .= "</table>\n";
       $Count--;
 
@@ -472,24 +477,23 @@ class ui_view_info extends FO_Plugin
         $V .= "</td><td>" . htmlentities($R['description']) . "</td></tr>\n";
         $Count++;
 
+        pg_free_result($result);
+
+        $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+        while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
+        {
+          $text = _("Depends");
+          $V .= "<tr><td align='right'>$Count</td><td>$text";
+          $Val = htmlentities($R['req_value']);
+          $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
+          $V .= "</td><td>$Val</td></tr>\n";
+          $Count++;
+        }
+        pg_free_result($result);
       }
-      pg_free_result($result);
-
-      $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-      while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
-      {
-        $text = _("Depends");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $Val = htmlentities($R['req_value']);
-        $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
-        $V .= "</td><td>$Val</td></tr>\n";
-        $Count++;
-      }
-      pg_free_result($result);
-
       $V .= "</table>\n";
       $Count--;
     }
@@ -548,24 +552,24 @@ class ui_view_info extends FO_Plugin
         $V .= "<tr><td align='right'>$Count</td><td>$text";
         $V .= "</td><td>" . htmlentities($R['standards_version']) . "</td></tr>\n";
         $Count++;
+      
+        pg_free_result($result);
+
+        $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+        while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
+        {
+          $text = _("Build-Depends");
+          $V .= "<tr><td align='right'>$Count</td><td>$text";
+          $Val = htmlentities($R['req_value']);
+          $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
+          $V .= "</td><td>$Val</td></tr>\n";
+          $Count++;
+        }
+        pg_free_result($result);
       }
-      pg_free_result($result);
-
-      $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-      while ($R = pg_fetch_assoc($result) and !empty($R['rep_pk']))
-      {
-        $text = _("Build-Depends");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $Val = htmlentities($R['req_value']);
-        $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
-        $V .= "</td><td>$Val</td></tr>\n";
-        $Count++;
-      }
-      pg_free_result($result);
-
       $V .= "</table>\n";
       $Count--;
     }
