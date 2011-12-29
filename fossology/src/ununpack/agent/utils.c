@@ -805,44 +805,192 @@ void OctetType(char *Filename, char *TypeBuf)
  *        extraction command.  This uses Magic.
  * @returns index to command-type, or -1 on error.
  **/
-int	FindCmd	(char *Filename)
+int FindCmd (char *Filename)
 {
   char *Type;
-  char TypeBuf[256];
+  char Static[256];
   int Match;
   int i;
   int rc;
 
   if (!MagicCookie) InitMagic();
-  TypeBuf[0] = 0;
-
   Type = (char *)magic_file(MagicCookie,Filename);
   if (Type == NULL) return(-1);
 
-  /* The Type returned by magic_file needs to be verified and possibly rewritten.
-   * So save it in a static buffer.
-   */
-  strncpy(TypeBuf, Type, sizeof(TypeBuf));
-  TypeBuf[255] = 0;  /* make sure TypeBuf is null terminated */
-
-  if (strstr(Type, "octet" )) 
+  /* Set .dsc file magic as application/x-debian-source */
+  char *pExt;
+  FILE *fp;
+  char line[500];
+  int j;
+  char c;
+  pExt = strrchr(Filename, '.');
+  if ( pExt != NULL)
   {
-    OctetType(Filename, TypeBuf);
+    if (strcmp(pExt, ".dsc")==0)
+    {
+      //check .dsc file contect to verify if is debian source file
+      if ((fp = fopen(Filename, "r")) == NULL){
+        printf("DEBUG: Unable to open .dsc file %s\n",Filename);
+        return(-1);
+      }
+      j=0;  
+      while ((c = fgetc(fp)) != EOF && j < 500 ){
+        line[j]=c;
+        j++; 
+      }
+      fclose(fp);
+      if ((strstr(line, "-----BEGIN PGP SIGNED MESSAGE-----") && strstr(line,"Source:")) || 
+          (strstr(line, "Format:") && strstr(line, "Source:") && strstr(line, "Version:")))
+      {
+        if (Verbose > 0) {printf("First bytes of .dsc file %s\n",line);}
+        memset(Static,0,sizeof(Static));
+        strcpy(Static,"application/x-debian-source");
+        Type=Static;
+      }
+    } 
   }
-  else
-  if (IsDebianSourceFile(Filename)) strcpy(TypeBuf,"application/x-debian-source");
-  else 
-  if (strstr(Type, "msword") || strstr(Type, "vnd.ms"))
-     strcpy(TypeBuf, "application/x-7z-w-compressed");
-  else
-  /* some files you just have to try to verify their type */
+
+  /* sometimes Magic is wrong... */
+  if (strstr(Type, "application/x-iso")) strcpy(Type, "application/x-iso");
+  /* for xx.deb and xx.udeb package in centos os */
+  if(strstr(Type, " application/x-debian-package"))
+    strcpy(Type,"application/x-debian-package");
+
+  /* for ms file, maybe the Magic contains 'msword', or the Magic contains 'vnd.ms', all unpack via 7z */
+  if(strstr(Type, "msword") || strstr(Type, "vnd.ms"))
+    strcpy(Type, "application/x-7z-w-compressed");
+
+  if (strstr(Type, "octet" ))
+  {
+    rc = RunCommand("zcat","-q -l",Filename,">/dev/null 2>&1",NULL,NULL);
+    if (rc==0)
+    {
+      memset(Static,0,sizeof(Static));
+      strcpy(Static,"application/x-gzip");
+      Type=Static;
+    }
+    else  // zcat failed so try cpio (possibly from rpm2cpio)
+    {
+      rc = RunCommand("cpio","-t<",Filename,">/dev/null 2>&1",NULL,NULL);
+      if (rc==0)
+      {
+        memset(Static,0,sizeof(Static));
+        strcpy(Static,"application/x-cpio");
+        Type=Static;
+      }
+      else  // cpio failed so try 7zr (possibly from p7zip)
+      {
+        rc = RunCommand("7zr","l -y",Filename,">/dev/null 2>&1",NULL,NULL);
+        if (rc==0)
+        {
+          memset(Static,0,sizeof(Static));
+          strcpy(Static,"application/x-7z-compressed");
+          Type=Static;
+        } 
+        else
+        { 
+          /* .deb and .udeb as application/x-debian-package*/
+          char CMDTemp[FILENAME_MAX];
+          sprintf(CMDTemp, "file '%s' |grep \'Debian binary package\'", Filename);
+          rc = system(CMDTemp);
+          if (rc==0) // is one debian package
+          {
+            memset(Static,0,sizeof(Static));
+            strcpy(Static,"application/x-debian-package");
+            Type=Static;
+          } 
+          else /* for ms(.msi, .cab) file in debian os */
+          {   
+            rc = RunCommand("7z","l -y -p",Filename,">/dev/null 2>&1",NULL,NULL);
+            if (rc==0)
+            {
+              memset(Static,0,sizeof(Static));
+              strcpy(Static,"application/x-7z-w-compressed");
+              Type=Static;
+            }
+            else
+            {    
+              memset(CMDTemp, 0, FILENAME_MAX);
+              /* get the file type */
+              sprintf(CMDTemp, "file '%s'", Filename);
+              FILE *fp;
+              char Output[FILENAME_MAX];
+              /* Open the command for reading. */
+              fp = popen(CMDTemp, "r");
+              if (fp == NULL) 
+              {
+                printf("Failed to run command\n" );
+                SafeExit(50);
+              }
+
+              /* Read the output the first line */
+              fgets(Output, sizeof(Output) - 1, fp);
+
+              /* close */
+              pclose(fp);
+              /* the file type is ext2 */
+              if (strstr(Output, "ext2"))
+              {
+                memset(Static,0,sizeof(Static));
+                strcpy(Static,"application/x-ext2");
+                Type=Static;
+              } 
+              else if (strstr(Output, "ext3")) /* the file type is ext3 */
+              {
+                memset(Static,0,sizeof(Static));
+                strcpy(Static,"application/x-ext3");
+                Type=Static;
+              }
+              else if (strstr(Output, "x86 boot sector, mkdosfs")) /* the file type is FAT */
+              {
+                memset(Static,0,sizeof(Static));
+                strcpy(Static,"application/x-fat");
+                Type=Static;
+              }
+              else if (strstr(Output, "x86 boot sector")) /* the file type is NTFS */
+              {
+                memset(Static,0,sizeof(Static));
+                strcpy(Static,"application/x-ntfs");
+                Type=Static;
+              }
+              else if (strstr(Output, "x86 boot")) /* the file type is boot partition */
+              {
+                memset(Static,0,sizeof(Static));
+                strcpy(Static,"application/x-x86_boot");
+                Type=Static;
+              }
+              else 
+              {
+                // only here to validate other octet file types
+                if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
+              }  
+            }
+          }
+        }
+      }
+    }
+  }
+
   if (strstr(Type, "application/x-exe") ||
       strstr(Type, "application/x-shellscript"))
   {
+    int rc;
     rc = RunCommand("unzip","-q -l",Filename,">/dev/null 2>&1",NULL,NULL);
     if ((rc==0) || (rc==1) || (rc==2) || (rc==51))
     {
-      strcpy(TypeBuf,"application/x-zip");
+      memset(Static,0,sizeof(Static));
+      strcpy(Static,"application/x-zip");
+      Type=Static;
+    }
+    else
+    {
+      rc = RunCommand("cabextract","-l",Filename,">/dev/null 2>&1",NULL,NULL);
+      if (rc==0)
+      {
+        memset(Static,0,sizeof(Static));
+        strcpy(Static,"application/x-cab");
+        Type=Static;
+      }
     }
   } /* if was x-exe */
   else if (strstr(Type, "application/x-tar"))
@@ -851,35 +999,30 @@ int	FindCmd	(char *Filename)
       return(-1); /* bad tar! (Yes, they do happen) */
   } /* if was x-tar */
 
-
-  /* Match Type (mimetype from magic or from special processing above to determine 
-   * the command for Filename 
-   */
+  /* determine command for file */
   Match=-1;
   for(i=0; (CMD[i].Cmd != NULL) && (Match == -1); i++)
   {
     if (CMD[i].Status == 0) continue; /* cannot check */
     if (CMD[i].Type == CMD_DEFAULT)
-    {
+    { 
       Match=i; /* done! */
     }
     else
-      if (!strstr(TypeBuf, CMD[i].Magic)) 
-      {
-        continue; /* not a match */
-      }
+      if (!strstr(Type, CMD[i].Magic)) continue; /* not a match */
     Match=i;
   }
 
   if (Verbose > 0)
   {
     /* no match */
-    if (Match == -1) LOG_DEBUG("MISS: Type=%s  %s",TypeBuf,Filename)
-    else LOG_DEBUG("MATCH: Type=%d  %s %s %s %s",CMD[Match].Type,CMD[Match].Cmd,CMD[Match].CmdPre,Filename,CMD[Match].CmdPost)
+    if (Match == -1) printf("MISS: Type=%s  %s\n",Type,Filename);
+    else printf("MATCH: Type=%d  %s %s %s %s\n",CMD[Match].Type,CMD[Match].Cmd,CMD[Match].CmdPre,Filename,CMD[Match].CmdPost);
   }
 
   return(Match);
 } /* FindCmd() */
+
 
 /***************************************************************************/
 /***************************************************************************/
