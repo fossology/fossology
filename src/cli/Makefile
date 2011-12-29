@@ -52,7 +52,6 @@ install: all
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \
 	  ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(BINDIR)/$$file; \
-		chmod a+x $(DESTDIR)$(BINDIR)/$$file; \
 	done
 
 uninstall:
