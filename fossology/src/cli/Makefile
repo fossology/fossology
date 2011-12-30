@@ -35,7 +35,7 @@ docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 
 install: all
 	for file in $(EXE); do \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(LIBEXECDIR)/$$file; \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(LIBEXECDIR)/$$file; \
 	done
 	$(INSTALL_PROGRAM) fo_wrapper.php $(DESTDIR)$(LIBEXECDIR)/fo_wrapper
 
