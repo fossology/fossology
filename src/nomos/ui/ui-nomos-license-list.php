@@ -27,9 +27,7 @@ class ui_license_list extends FO_Plugin {
   var $Title = TITLE_ui_license_list;
   var $Version = "1.0";
   var $Dependency = array(
-    "browse",
-    "license",
-    "view-license"
+    "browse"
   );
   var $DBaccess = PLUGIN_DB_READ;
   var $LoginFlag = 0;
