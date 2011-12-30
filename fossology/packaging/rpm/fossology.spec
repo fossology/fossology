@@ -3,16 +3,15 @@
 #
 
 Name:           fossology
-Version:        2.0.0-devel
+Version:        2.0.1
 Release:        1.el6
 License:        GPLv2
 Group:          Applications/Engineering
 Url:            http://www.fossology.org
 Source:         http://sourceforge.net/projects/fossology/files/fossology/%{name}-%{version}.tar.gz
-#PBPATCHSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
-Requires:       fossology-web fossology-db fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent
-BuildRequires:  postgresql-devel >= 8.1.11 libxml2 gcc make perl rpm-devel pcre-devel perl-Text-Template subversion file
+Requires:       fossology-db fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent
+BuildRequires:  postgresql-devel >= 8.1.11 glib2-devel libxml2 gcc make perl rpm-devel pcre-devel perl-Text-Template subversion file
 Summary:        FOSSology is a licenses exploration tool
 
 %package common
@@ -26,12 +25,12 @@ Summary:        Architecture for analyzing software, web interface
 Group:          Applications/Engineering
 
 %package db
-Requires:       postgresql >= 8.1.11 postgresql-server >= 8.1.11
+Requires:       fossology-web postgresql >= 8.1.11 postgresql-server >= 8.1.11
 Summary:        Architecture for analyzing software, database
 Group:          Applications/Engineering
 
 %package ununpack
-Requires:       libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip p7zip-plugins perl file which
+Requires:       fossology-common libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip p7zip-plugins perl file which
 Summary:        Architecture for analyzing software, ununpack and adj2nest
 Group:          Applications/Engineering
 
@@ -74,6 +73,12 @@ Group:          Applications/Engineering
 Requires:       fossology-common wget
 Summary:        Architecture for analyzing software, wget_agent
 Group:          Applications/Engineering
+
+%package debug
+Requires:       fossology-web
+Summary:        Architecture for analyzing software, debug
+Group:          Applications/Engineering
+
 
 %description
 An open and modular architecture for analyzing software. Currently specializing on license detection.
@@ -120,6 +125,9 @@ This package contains the pkgagent agent programs and their resources.
 %description delagent
 This package contains the delagent agent programs and their resources.
 
+%description debug
+This package contains the debug UI.
+
 %prep
 %setup -q
 
@@ -147,10 +155,8 @@ make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology 
 %dir %{_sysconfdir}/fossology/mods-enabled
 %dir %{_usr}/lib/fossology
 %dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/debug
 %{_usr}/lib/fossology/*
 %{_datadir}/fossology/lib/*
-%{_datadir}/fossology/debug/*
 %{_bindir}/*
 %{_includedir}/*
 %{_mandir}/man1/*
@@ -234,6 +240,13 @@ make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology 
 %{_sysconfdir}/fossology/mods-enabled/delagent
 %{_datadir}/fossology/delagent/*
 
+%files debug
+%defattr(-,root,root)
+%dir %{_sysconfdir}/fossology/mods-enabled
+%dir %{_datadir}/fossology
+%{_sysconfdir}/fossology/mods-enabled/debug
+%{_datadir}/fossology/debug/*
+
 %post db
 # Check postgresql is running
 LANGUAGE=C /etc/init.d/postgresql status 2>&1 | grep -q stop
@@ -262,7 +275,7 @@ fi
 # We have do it here in order to let postgresql configure itself correctly
 # in case it wasn't already installed
 /etc/init.d/postgresql restart
-%{_usr}/lib/fossology/dbcreate
+/usr/lib/fossology/fo-postinstall --database
 
 %post web
 # Adjust PHP config (described in detail in section 2.1.5)
@@ -293,6 +306,34 @@ chkconfig --add httpd
 %post scheduler
 # Run the postinstall script
 /usr/lib/fossology/fo-postinstall --scheduler
+
+%post ununpack
+# Run the postinstall script
+/usr/lib/fossology/fo-postinstall --agent
+
+%post wgetagent
+# Run the postinstall script
+/usr/lib/fossology/fo-postinstall --agent
+
+%post copyright
+# Run the postinstall script
+/usr/lib/fossology/fo-postinstall --agent
+
+%post nomos
+# Run the postinstall script
+/usr/lib/fossology/fo-postinstall --agent
+
+%post pkgagent
+# Run the postinstall script
+/usr/lib/fossology/fo-postinstall --agent
+
+%post mimetype
+# Run the postinstall script
+/usr/lib/fossology/fo-postinstall --agent
+
+%post delagent
+# Run the postinstall script
+/usr/lib/fossology/fo-postinstall --agent
 
 %post
 chkconfig --add fossology
