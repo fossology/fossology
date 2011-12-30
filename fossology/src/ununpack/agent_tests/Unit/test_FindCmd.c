@@ -107,7 +107,8 @@ void testFindCmd4IsoFile()
   char *Filename = "../test-data/testdata4unpack/imagefile.iso";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 16);  // let 7z handle the isos
+  printf("testFindCmd4IsoFile is:%d\n", result);
+  FO_ASSERT_EQUAL(result, 12);  // let cpio handle the isos
 }
 
 /**
@@ -152,7 +153,8 @@ void testFindCmd4DebFile()
   char *Filename = "../test-data/testdata4unpack/libpango1.0-udeb_1.28.1-1_i386.udeb";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 16);  /* let 7zip handle udeb */
+  printf("testFindCmd4DebFile is:%d\n", result);
+  FO_ASSERT_EQUAL(result, 19);  /* let ar handle udeb, mimetype is: application/x-debian-package */
 }
 
 /**
