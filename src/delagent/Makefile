@@ -35,7 +35,7 @@ coverage:
 
 install: all
 	$(call dirloop,install)
-	$(INSTALL_PROGRAM) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 
 uninstall:
 	$(call dirloop,uninstall)

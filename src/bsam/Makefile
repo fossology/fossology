@@ -38,7 +38,7 @@ coverage:
 install: all
 	@echo "make $(MOD_NAME) install"
 	$(call dirloop,install)
-	$(INSTALL_PROGRAM) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
+	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
 	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
 	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
 	  ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;

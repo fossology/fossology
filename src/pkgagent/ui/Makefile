@@ -26,7 +26,7 @@ all:
 
 install:
 	@echo "make $(DESTDIR)$(MOD_NAME)/$(MOD_SUBDIR) install"
-	$(INSTALL_PROGRAM) agent-pkgagent.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/agent-pkgagent.php
+	$(INSTALL_DATA) agent-pkgagent.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/agent-pkgagent.php
 
 uninstall:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"

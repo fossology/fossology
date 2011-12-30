@@ -18,7 +18,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = agent agent_tests ui ui_tests
+DIRS = agent ui
 TESTDIR = agent_tests
 MOD_NAME=pkgagent
 
@@ -39,9 +39,9 @@ VERSIONFILE:
 
 install: all
 	$(call dirloop,install)
-	$(INSTALL_PROGRAM) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
+	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
 	$(INSTALL_PROGRAM) mod_deps $(DESTDIR)$(MODDIR)/$(MOD_NAME)/mod_deps
-	$(INSTALL_PROGRAM) -D $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+	$(INSTALL_DATA) -D $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
 	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
 	  ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
