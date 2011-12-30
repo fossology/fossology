@@ -8,7 +8,7 @@ Homepage: http://fossology.org
 
 Package: fossology
 Architecture: all
-Depends: fossology-web, fossology-db, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, fossology-wgetagent, ${misc:Depends}
+Depends: fossology-db, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, fossology-wgetagent, ${misc:Depends}
 Description: open and modular architecture for analyzing software
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -60,7 +60,7 @@ Description: architecture for analyzing software, scheduler
 
 Package: fossology-db
 Architecture: all
-Depends: postgresql-8.4 | postgresql-8.3, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-web, postgresql-8.4 | postgresql-8.3, ${misc:Depends}
 Description: architecture for analyzing software, database
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -170,3 +170,15 @@ Description: architecture for analyzing software, wget_agent
  type identification.
  .
  This package contains the wget agent programs and their resources.
+
+Package: fossology-debug
+Architecture: any
+Depends: fossology-common, ${misc:Depends}
+Description: architecture for analyzing software, debug UI
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the debug UI.
