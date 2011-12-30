@@ -19,19 +19,19 @@ INSTALL.multi document and then
 2) On each of the agents machine(s):
  a) install fossology-common
  b) edit /etc/fossology/Db.conf and point it at the database machine
- c) if you like, edit /etc/fossology/Repo.conf to point at a non-default
+ c) if you like, edit /etc/fossology/fossology.conf to point at a non-default
     repository location
- d) edit /etc/fossology/Hosts.conf and list the agent machines
+ d) edit /etc/fossology/fossology.conf and list the agent machines
     according to the format explained in the upstream documentation
     and to how you want to split the repository.
  e) create the directory $REPO/<hostname> where that hostname is the
-   name of the machine as listed in Hosts.conf. This directory should
+   name of the machine as listed in fossology.conf. This directory should
    be root:fossy 2770.
  f) setup nfs so that each agent's $REPO/<hostname> directory is exported
     to all of the other agent/scheduler/web machines.
  g) on all the agent machines mount each of the other agents at
     $REPO/<hostname>
- i) install fossology-agents
+ i) install agent pacakges (e.g.fossology-ununpack)
 3) On each of the web machine(s):
  a) install fossology-common
  b) edit /etc/fossology/Db.conf and point it at the database machine
@@ -50,9 +50,7 @@ INSTALL.multi document and then
  b) make sure all nfs mounts are working and as fossy you can write to the
    repository
 6) On the scheduler:
- a) run '/usr/lib/fossology/fossology-scheduler -t' to test that
-   everything works
- b) restart the scheduler '/etc/init.d/fossology restart'
+ a) restart the scheduler '/etc/init.d/fossology restart'
 
 
 Additional Setup:
@@ -73,23 +71,6 @@ you can point your web browser at at the new install
   http://yourhostname/repo/
 and start using FOSSology!
 
-
-Differences between the single and multi packages:
-If you are using the 'fossology' meta-package, which depends on the
-right *-single packages to give you a working single system install, the
-packages make certain assumptions to make things 'just work'. One
-of these is that each time the fossology-scheduler-single package is
-upgraded, it automatically generates a new /etc/fossology/Scheduler.conf
-optimized for your system and the new version of fossology. If you have
-made any changes to your Scheduler.conf, they will be overwritten.
-
-If you are using the non *-single packages, because you have a multi
-system install (or just prefer them), your
-/etc/fossology/Scheduler.conf will NOT automatically be updated, because
-you have local edits and updating would break them. This means that
-after an upgrade, if there are new agents installed (or agents
-removed) your Scheduler.conf will need to be updated by hand to
-account for the changes.
 NOTE: Upstream is planning on eventually moving the things specified in
 this config file into the database and be managed via the web
 interface, which will allow for more seamless upgrades.

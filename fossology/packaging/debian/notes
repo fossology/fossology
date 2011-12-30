@@ -18,22 +18,34 @@ building the package (e.g. "debuild -rfakeroot").
 but it changed a lot as whole fossology instructure changed. Here is an explanation of the situation...
 
 Things need to happen in a certain order:
-  * fossology-core package is the core component in v2.0, it provided all
+  * All packages call the upstream provided fo-postinstall (provided
+      by fossology-common) in their postinst scripts
+  * The agents need to be configured before the scheduler can be started
+  * The agents need the database to exist before they can be configured
+  * fossology-common package is the common component in v2.0, it provided all
     the common resources needed by other components. It provide lib/db/web/cli components
-  * fossology-core needs to be installed before another packages
+  * fossology-common needs to be installed before another packages
   * All the v2.0 agents seperate into different component packages, it can
     be installed/uninstalled easily
   * The default fossology package installs all the components
+So therefore
+  * fossology-common needs to be installed before fossology-*
+  * fossology-web and fossology-db needs to installed before fossology-*
+But....
+  * For the single-system case we want dependencies to ensure that
+      everything is installed and in the right order
+  * For the multi-system case we don't want dependencies tying things
+      together
 
 So that that results in the following packages and relationships:
   * fossology Depends on all the components
-  * fossology-scheduler Depends on fossology-core
-  * fossology-ununpack Depends on fossology-core
-  * fossology-copyright Depends on fossology-core
-  * fossology-nomos Depends on fossology-core
-  * fossology-pkgagent Depends on fossology-core
+  * fossology-web Depends on fossology-common
+  * fossology-db Depends on fossology-common
+  * fossology-scheduler Depends on fossology-common
+  * fossology-ununpack Depends on fossology-common
+  * fossology-copyright Depends on fossology-common
+  * fossology-nomos Depends on fossology-common
+  * fossology-pkgagent Depends on fossology-common
   * fossology-buckets Depends on fossology-nomos and fossology-pkgagent
-  * fossology-mimetype Depends on fossology-core
-  * fossology-delagent Depends on fossology-core
-
-4.) The first FOSSology v2.0 packages don't support multi-system
+  * fossology-mimetype Depends on fossology-common
+  * fossology-delagent Depends on fossology-common
