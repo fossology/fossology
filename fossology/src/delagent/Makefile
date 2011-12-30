@@ -24,24 +24,36 @@ MOD_NAME=delagent
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-all: 
+all: VERSIONFILE 
 	$(call dirloop, )
 
 test: 
 	$(MAKE) -C $(TESTDIR) test
+
+# generate the VERSION file
+VERSIONFILE:
+	$(call WriteVERSIONFile, $(MOD_NAME))
 
 coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
 	$(call dirloop,install)
+	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
+	$(INSTALL_PROGRAM) mod_deps $(DESTDIR)$(MODDIR)/$(MOD_NAME)/mod_deps
 	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
+	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+	  ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
 
 uninstall:
 	$(call dirloop,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
+	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
+
 
 clean:
+	rm -f VERSION
 	$(call dirloop,clean)
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test VERSIONFILE
