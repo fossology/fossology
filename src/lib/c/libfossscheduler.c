@@ -105,39 +105,35 @@ void fo_scheduler_connect(int* argc, char** argv)
 {
   GError* error = NULL;
   GTree* keys;
+  GOptionContext* parsed;
   fo_conf* version;
-  found = 0;
-  int i;
   char  fname[FILENAME_MAX + 1];
+  char** argtmp;
 
-  /* get the module name */
-  module_name = g_strdup(basename(argv[0]));
-
-  /* check for the system configuration directory */
-  sysconfigdir = DEFAULT_SETUP;
-  for(i = 1; i < *argc; i++) {
-    if(argv[i][0] == '-' && argv[i][1] == 'c' && strlen(argv[i]) == 2) {
-      /** if no value for -c option, skip it, use the default sysconfigdir */
-      if (!argv[i+1] || argv[i+1][0] == '-') break; 
-      sysconfigdir = argv[i + 1]; 
-      break;
-    }
-  }
-
-  /* check for --scheduler command line option */
-  if(strcmp(argv[*argc - 1], "--scheduler_start") == 0)
+  GOptionEntry options[] =
   {
-    (*argc)--;
-    argv[*argc] = NULL;
-    found = 1;
-  }
+      {"config",          'c', 0, G_OPTION_ARG_STRING, &sysconfigdir, ""},
+      {"scheduler_start",   0, 0, G_OPTION_ARG_NONE,   &found,        ""},
+      {NULL}
+  };
 
   /* initialize memory associated with agent connection */
+  sysconfigdir = DEFAULT_SETUP;
+  module_name = g_strdup(basename(argv[0]));
   items_processed = 0;
   memset(buffer, 0, sizeof(buffer));
   valid = 0;
+  found = 0;
   agent_verbose = 0;
 
+  /* parse command line options */
+  parsed = g_option_context_new("");
+  g_option_context_add_main_entries(parsed, options, NULL);
+  g_option_context_set_ignore_unknown_options(parsed, TRUE);
+  g_option_context_parse(parsed, argc, &argv, NULL);
+  g_option_context_free(parsed);
+
+  /* load system configuration */
   if(sysconfigdir) {
     snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir, "fossology.conf");
     sysconfig = fo_config_load(fname, &error);
