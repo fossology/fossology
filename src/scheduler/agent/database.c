@@ -162,7 +162,7 @@ void email_load()
 	      fo_config_get(sysconfig, "EMAILNOTIFY", "footer", &error));
 	if(error)
 	  EMAIL_FATAL("email notification settings must be in config file",
-        error->message););
+        error->message);
 	if((fd = open(fname, O_RDONLY)) == -1)
 	  EMAIL_FATAL("unable to file for email footer: %s", fname);
 	if(fstat(fd, &footer_sb) == -1)
@@ -175,7 +175,7 @@ void email_load()
 	subject = fo_config_get(sysconfig, "EMAILNOTIFY", "subject", &error);
 	if(error)
 	  EMAIL_FATAL("email notification settings must be in config file",
-        error->message););
+        error->message);
 	if(subject[strlen(subject)] != '\n')
 	  subject = g_strdup_printf("%s\n", subject);
 
@@ -184,7 +184,7 @@ void email_load()
 	mail_argv[2] = NULL;
 	if(error)
 	  EMAIL_FATAL("email notification settings must be in config file",
-        error->message););
+        error->message);
 
 	/* create the regex for the email
 	 * This regex should find:
