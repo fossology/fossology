@@ -742,6 +742,19 @@ void OctetType(char *Filename, char *TypeBuf)
   int rc;
   char *Type;
 
+  /* Get more information from magic */
+  magic_setflags(MagicCookie, MAGIC_NONE);
+  Type = (char *)magic_file(MagicCookie, Filename);
+  /* reset magic flags */
+  magic_setflags(MagicCookie, MAGIC_MIME);
+
+  /* .deb and .udeb as application/x-debian-package*/
+  if (strstr(Type, "Debian binary package"))
+  {
+    strcpy(TypeBuf,"application/x-debian-package");
+    return;
+  }
+
   /* 7zr can handle many formats (including isos), so try this first */
   rc = RunCommand("7z","l -y ",Filename,">/dev/null 2>&1",NULL,NULL);
   if (rc==0)
@@ -749,12 +762,6 @@ void OctetType(char *Filename, char *TypeBuf)
     strcpy(TypeBuf,"application/x-7z-w-compressed");
     return;
   }
-
-  /* Get more information from magic */
-  magic_setflags(MagicCookie, MAGIC_NONE);
-  Type = (char *)magic_file(MagicCookie, Filename);
-  /* reset magic flags */
-  magic_setflags(MagicCookie, MAGIC_MIME);
 
   if (strstr(Type, " ext2 "))
   {
@@ -789,13 +796,6 @@ void OctetType(char *Filename, char *TypeBuf)
   if (strstr(Type, "ISO 9660"))
   {
     strcpy(TypeBuf,"application/x-iso9660-image");
-    return;
-  }
-
-  /* .deb and .udeb as application/x-debian-package*/
-  if (strstr(Type, "Debian binary package"))
-  {
-    strcpy(TypeBuf,"application/x-debian-package");
     return;
   }
 }
