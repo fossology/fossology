@@ -147,7 +147,8 @@ void email_load()
 	snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir,
 	    fo_config_get(sysconfig, "EMAILNOTIFY", "header", &error));
 	if(error)
-	  EMAIL_FATAL("email notification settings must be in config file");
+	  EMAIL_FATAL("email notification settings must be in config file: %s",
+	      error->message);
 	if((fd = open(fname, O_RDONLY)) == -1)
 	  EMAIL_FATAL("unable to file for email header: %s", fname);
 	if(fstat(fd, &header_sb) == -1)
@@ -160,7 +161,8 @@ void email_load()
 	snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir,
 	      fo_config_get(sysconfig, "EMAILNOTIFY", "footer", &error));
 	if(error)
-	  EMAIL_FATAL("email notification settings must be in config file");
+	  EMAIL_FATAL("email notification settings must be in config file",
+        error->message););
 	if((fd = open(fname, O_RDONLY)) == -1)
 	  EMAIL_FATAL("unable to file for email footer: %s", fname);
 	if(fstat(fd, &footer_sb) == -1)
@@ -172,7 +174,8 @@ void email_load()
 	/* load the subject */
 	subject = fo_config_get(sysconfig, "EMAILNOTIFY", "subject", &error);
 	if(error)
-	  EMAIL_FATAL("email notification settings must be in config file");
+	  EMAIL_FATAL("email notification settings must be in config file",
+        error->message););
 	if(subject[strlen(subject)] != '\n')
 	  subject = g_strdup_printf("%s\n", subject);
 
@@ -180,7 +183,8 @@ void email_load()
 	mail_argv[1] = NULL;
 	mail_argv[2] = NULL;
 	if(error)
-	  EMAIL_FATAL("email notification settings must be in config file");
+	  EMAIL_FATAL("email notification settings must be in config file",
+        error->message););
 
 	/* create the regex for the email
 	 * This regex should find:
@@ -199,7 +203,7 @@ void email_load()
 	email_regex = g_regex_new("\\$([A-Z_]*)(\\.([a-zA-Z_]*)\\.([a-zA-Z_]*))?",
 	    0, 0, &error);
 	if(error)
-	  EMAIL_FATAL("unable to build email regular expression");
+	  EMAIL_FATAL("unable to build email regular expression: %s", error->message);
 }
 
 /**
