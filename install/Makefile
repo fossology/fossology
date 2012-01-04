@@ -61,9 +61,27 @@ install: all
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/fossology.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
+	
+	if [ ! -f $(DESTDIR)$(CONFPATH)/sampleheader.txt -o "$(OVERWRITE)" ] ; then \
+		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/sampleheader.txt"; \
+	 	$(INSTALL) -m 666 defconf/sampleheader.txt $(DESTDIR)$(CONFPATH)/sampleheader.txt; \
+	else \
+		echo "WARNING: $(DESTDIR)$(CONFPATH)/sampleheader.txt already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+	fi \
+	
+	if [ ! -f $(DESTDIR)$(CONFPATH)/samplefooter.txt -o "$(OVERWRITE)" ] ; then \
+		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/samplefooter.txt"; \
+	 	$(INSTALL) -m 666 defconf/samplefooter.txt $(DESTDIR)$(CONFPATH)/samplefooter.txt; \
+	else \
+		echo "WARNING: $(DESTDIR)$(CONFPATH)/samplefooter.txt already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+	fi \
 
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
+	rm -f $(DESTDIR)$(CONFPATH)/sampleheader.txt
+	rm -f $(DESTDIR)$(CONFPATH)/samplefooter.txt
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 		if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \
