@@ -114,77 +114,94 @@ const char* jobsql_log = "\
 /* **** email notification ************************************************** */
 /* ************************************************************************** */
 
-int email_notify;
 char*  subject;
-char*  header;
-char*  footer;
+char*  header = NULL;
+char*  footer = NULL;
 char* mail_argv[3];
 struct stat header_sb;
 struct stat footer_sb;
-GRegex* email_regex;
+GRegex* email_regex = NULL;
 
-#define EMAIL_FATAL(...) { \
-  ERROR(__VA_ARGS__);      \
-  email_notify = 0;        \
-  return ; }
+#define EMAIL_ERROR(...) {                       \
+  WARNING(__VA_ARGS__);                          \
+  email_notify = 0;                              \
+  error = NULL; }
+
+#define DEFAULT_HEADER "FOSSology scan complete\nmessage:\""
+#define DEFAULT_FOOTER "\""
+#define DEFAULT_SUBJECT "FOSSology scan complete\n"
 
 /**
  * TODO
  */
 void email_load()
 {
+  int email_notify, fd;
 	char fname[FILENAME_MAX];
-	int fd;
 	GError* error = NULL;
 
-	if(header) munmap(header, header_sb.st_size);
-	if(footer) munmap(footer, footer_sb.st_size);
-	if(email_regex) g_regex_unref(email_regex);
-
-	email_notify = 1;
+	if(header && strcmp(header, DEFAULT_HEADER) != 0)
+	  munmap(header, header_sb.st_size);
+	if(footer && strcmp(footer, DEFAULT_FOOTER) != 0)
+	  munmap(footer, footer_sb.st_size);
 
 	/* load the header */
+	email_notify = 1;
 	snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir,
 	    fo_config_get(sysconfig, "EMAILNOTIFY", "header", &error));
-	if(error)
-	  EMAIL_FATAL("email notification settings must be in config file: %s",
-	      error->message);
-	if((fd = open(fname, O_RDONLY)) == -1)
-	  EMAIL_FATAL("unable to file for email header: %s", fname);
-	if(fstat(fd, &header_sb) == -1)
-	  EMAIL_FATAL("unable to fstat email header: %s", fname);
-	if((header = mmap(NULL, header_sb.st_size, PROT_READ, MAP_SHARED, fd, 0))
-	    == MAP_FAILED)
-	  EMAIL_FATAL("unable to mmap email header: %s", fname);
+	if(error && error->code == fo_missing_group)
+	  EMAIL_ERROR("email notification setting group \"[EMAILNOTIFY]\" missing. Using defaults");
+	if(error && error->code == fo_missing_key)
+	  EMAIL_ERROR("email notification setting key \"header\" missing. Using default header");
+	if(email_notify && (fd = open(fname, O_RDONLY)) == -1)
+	  EMAIL_ERROR("unable to open file for email header: %s", fname);
+	if(email_notify && fstat(fd, &header_sb) == -1)
+	  EMAIL_ERROR("unable to fstat email header: %s", fname);
+	if(email_notify && (header = mmap(NULL, header_sb.st_size, PROT_READ,
+	    MAP_SHARED, fd, 0)) == MAP_FAILED)
+	  EMAIL_ERROR("unable to mmap email header: %s", fname);
+	if(!email_notify)
+	  header = DEFAULT_HEADER;
 
 	/* load the footer */
+	email_notify = 1;
 	snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir,
 	      fo_config_get(sysconfig, "EMAILNOTIFY", "footer", &error));
 	if(error)
-	  EMAIL_FATAL("email notification settings must be in config file",
-        error->message);
-	if((fd = open(fname, O_RDONLY)) == -1)
-	  EMAIL_FATAL("unable to file for email footer: %s", fname);
-	if(fstat(fd, &footer_sb) == -1)
-	  EMAIL_FATAL("unable to fstat email footer: %s", fname);
-	if((footer = mmap(NULL, footer_sb.st_size, PROT_READ, MAP_SHARED, fd, 0))
-	    == MAP_FAILED)
-	  EMAIL_FATAL("unable to mmap email footer: %s", fname);
+	  email_notify = 0;
+	if(error && error->code == fo_missing_key)
+	  EMAIL_ERROR("email notification setting key \"footer\" missing. Using default footer");
+	if(email_notify && (fd = open(fname, O_RDONLY)) == -1)
+	  EMAIL_ERROR("unable to open file for email footer: %s", fname);
+	if(email_notify && fstat(fd, &footer_sb) == -1)
+	  EMAIL_ERROR("unable to fstat email footer: %s", fname);
+	if(email_notify && (footer = mmap(NULL, footer_sb.st_size, PROT_READ,
+	    MAP_SHARED, fd, 0)) == MAP_FAILED)
+	  EMAIL_ERROR("unable to mmap email footer: %s", fname);
+	if(!email_notify)
+	  footer = DEFAULT_FOOTER;
+	error = NULL;
 
 	/* load the subject */
 	subject = fo_config_get(sysconfig, "EMAILNOTIFY", "subject", &error);
 	if(error)
-	  EMAIL_FATAL("email notification settings must be in config file",
-        error->message);
+	  subject = DEFAULT_SUBJECT;
+	if(error && error->code == fo_missing_key)
+	  EMAIL_ERROR("email notification setting key \"subject\" missing. Using default subject");
 	if(subject[strlen(subject)] != '\n')
 	  subject = g_strdup_printf("%s\n", subject);
+	error = NULL;
 
+	/* load the client */
+	email_notify = 1;
 	mail_argv[0] = fo_config_get(sysconfig, "EMAILNOTIFY", "client", &error);
 	mail_argv[1] = NULL;
 	mail_argv[2] = NULL;
 	if(error)
-	  EMAIL_FATAL("email notification settings must be in config file",
-        error->message);
+	  mail_argv[0] = "/usr/bin/mail";
+	if(error && error->code == fo_missing_key)
+	  EMAIL_ERROR("email notification setting key \"client\" missing. Using default client");
+	error = NULL;
 
 	/* create the regex for the email
 	 * This regex should find:
@@ -200,10 +217,14 @@ void email_load()
 	 *   $bad             -> does not match
 	 *   $DB.table        -> does not match
 	 */
-	email_regex = g_regex_new("\\$([A-Z_]*)(\\.([a-zA-Z_]*)\\.([a-zA-Z_]*))?",
-	    0, 0, &error);
+	if(email_regex == NULL)
+	  email_regex = g_regex_new("\\$([A-Z_]*)(\\.([a-zA-Z_]*)\\.([a-zA-Z_]*))?",
+	      0, 0, &error);
 	if(error)
-	  EMAIL_FATAL("unable to build email regular expression: %s", error->message);
+	{
+	  EMAIL_ERROR("unable to build email regular expression: %s", error->message);
+	  email_regex = NULL;
+	}
 }
 
 /**
@@ -293,12 +314,6 @@ void email_notification(job j)
   gint mail_stdin;
   gint msg_len;
 
-  if(!email_notify)
-  {
-    WARNING("There was an error in the email configuration, notification disabled");
-    return;
-  }
-
   sprintf(sql, select_upload_fk, j_id);
   db_result = PQexec(db_conn, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
@@ -354,8 +369,14 @@ void email_notification(job j)
       g_string_append(email_txt, job_message(j));
       g_string_append(email_txt, footer);
 
-      val = g_regex_replace_eval(email_regex, email_txt->str, email_txt->len,
-          0, 0, (GRegexEvalCallback)email_replace, j, NULL);
+      if(email_regex != NULL)
+      {
+        val = g_regex_replace_eval(email_regex, email_txt->str, email_txt->len,
+            0, 0, (GRegexEvalCallback)email_replace, j, NULL);
+      }
+      else
+        val = email_txt->str;
+
       finished = g_strdup_printf("%s%s \n", subject, val);
       msg_len = strlen(finished);
 
@@ -367,8 +388,9 @@ void email_notification(job j)
         ERROR("write of message to mailx failed");
       fsync(mail_stdin);
 
+      if(email_regex != NULL)
+        g_free(val);
       g_string_free(email_txt, TRUE);
-      g_free(val);
       g_free(finished);
     }
     else
