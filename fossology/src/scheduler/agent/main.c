@@ -96,8 +96,9 @@ int main(int argc, char** argv)
 
   NOTIFY("*****************************************************************");
   NOTIFY("***                FOSSology scheduler started                ***");
-  NOTIFY("***                  pid:    %8d                         ***", s_pid);
-  NOTIFY("***                  verbose:%8d                         ***", verbose);
+  NOTIFY("***        pid:     %-34d        ***", s_pid);
+  NOTIFY("***        verbose: %-34d        ***", verbose);
+  NOTIFY("***        config:  %-34s        ***", sysconfigdir);
   NOTIFY("*****************************************************************");
 
   /* create data structs, load config and set the user groups */
@@ -144,7 +145,7 @@ int main(int argc, char** argv)
 
   NOTIFY("*****************************************************************");
   NOTIFY("***                FOSSology scheduler closed                 ***");
-  NOTIFY("***                  pid:    %8d                         ***", s_pid);
+  NOTIFY("***        pid:     %-34d        ***", s_pid);
   NOTIFY("*****************************************************************\n");
 
   return close_scheduler();
