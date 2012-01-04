@@ -1,0 +1,7 @@
+FOSSology scan has completed.
+
+$BROWSELINK
+$JOBQUEUELINK
+$SCHEDULERLOG
+$UPLOADFOLDERNAME
+$DB.upload.upload_pk

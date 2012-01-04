@@ -76,3 +76,16 @@ PROJECTSTATEDIR=$LOCALSTATEDIR/lib/$PROJECT
 ; project logdir
 LOGDIR=/var/log/$PROJECT
 
+; section that allows fossology to send email notifications to users when their
+; job has successfully finished. Both the header and footer for the email are
+; in text files in the fossology system configuration directory (the same
+; directory that contains this file). The subject is simply the subject that
+; will be used in the email notification.
+[EMAILNOTIFY]
+header  = sampleheader.txt
+footer  = samplefooter.txt
+subject = FOSSology scan complete
+client  = /usr/bin/mailx
+
+
+
