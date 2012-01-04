@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
         PQfinish(pgConn);
         return(0);
       case 'c':
-        DBConf = optarg;
-        break; /* handled by fo_scheduler_connect() */
+        /* do nothing with this option */
+        break;
       case 'C':
         CmdlineFlag = 1;
         break;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
   /* Init */
   memset(DBConfFile, 0, sizeof(DBConfFile));
-  sprintf(DBConfFile, "%s/Db.conf", DBConf);
+  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn)
   {
