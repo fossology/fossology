@@ -169,7 +169,7 @@ char* host_agent_dir(host h)
 void host_increase_load(host h)
 {
   h->running++;
-  VERBOSE3("HOST[%s] load increased to %d\n", h->name, h->running);
+  V_HOST("HOST[%s] load increased to %d\n", h->name, h->running);
 }
 
 /**
@@ -180,7 +180,7 @@ void host_increase_load(host h)
 void host_decrease_load(host h)
 {
   h->running--;
-  VERBOSE3("HOST[%s] load decreased to %d\n", h->name, h->running);
+  V_HOST("HOST[%s] load decreased to %d\n", h->name, h->running);
 }
 
 /**

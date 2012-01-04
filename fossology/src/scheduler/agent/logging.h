@@ -65,25 +65,35 @@ extern char  log_name[FILENAME_MAX];
             fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); } \
             PQclear(pg_r);
 
+#define NOTIFY(...) if(verbose > 0) { \
+            lprintf("NOTIFY: "); \
+            lprintf(__VA_ARGS__); \
+            lprintf("\n"); }
+
 /** Macro that is called when any type of warning is generated */
-#define WARNING(...) { \
+#define WARNING(...) if(verbose > 1) { \
             lprintf("WARNING %s.%d: ", __FILE__, __LINE__); \
             lprintf(__VA_ARGS__); \
-            lprintf("\n"); \
-            lprintf("WARNING errno is: %s\n", strerror(errno)); }
+            lprintf("\n"); }
 
 /* verbose macros, if changing from greater than scheme to bit mask, just */
 /* change these the the TVERBOSE# macro when a test of verbose is needed, */
 /* this happpens when printing from another thread. The other verbose     */
 /* macro makes the syntax better everywhere else                          */
-#define TVERBOSE1 (verbose & 1)
-#define TVERBOSE2 (verbose & 2)
-#define TVERBOSE3 (verbose & 4)
-#define TVERBOSE4 (verbose & 8)
-#define VERBOSE1(...) if(TVERBOSE1) lprintf(__VA_ARGS__);
-#define VERBOSE2(...) if(TVERBOSE2) lprintf(__VA_ARGS__);
-#define VERBOSE3(...) if(TVERBOSE3) lprintf(__VA_ARGS__);
-#define VERBOSE4(...) if(TVERBOSE4) lprintf(__VA_ARGS__);
+#define TVERB_JOB   (verbose & 0x8)
+#define TVERB_AGENT (verbose & 0x10)
+#define TVERB_SCHED (verbose & 0x20)
+#define TVERB_EVENT (verbose & 0x40)
+#define TVERB_INTER (verbose & 0x80)
+#define TVERB_DATAB (verbose & 0x100)
+#define TVERB_HOST  (verbose & 0x200)
+#define V_JOB(...)       if(TVERB_JOB)    lprintf(__VA_ARGS__);
+#define V_AGENT(...)     if(TVERB_AGENT)  lprintf(__VA_ARGS__);
+#define V_SCHED(...)     if(TVERB_SCHED)  lprintf(__VA_ARGS__);
+#define V_EVENT(...)     if(TVERB_EVENT)  lprintf(__VA_ARGS__);
+#define V_INTERFACE(...) if(TVERB_INTER) clprintf(__VA_ARGS__);
+#define V_DATABASE(...)  if(TVERB_DATAB)  lprintf(__VA_ARGS__);
+#define V_HOST(...)      if(TVERB_HOST)   lprintf(__VA_ARGS__);
 
 /* ************************************************************************** */
 /* **** logging functions *************************************************** */

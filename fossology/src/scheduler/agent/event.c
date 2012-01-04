@@ -218,11 +218,11 @@ int event_loop_enter(void(*call_back)(void))
   /* from here on out, this is the only thread in this event loop     */
   /* the loop to execute events is very simple, grab event, run event */
   while((e = event_loop_take(vl)) != NULL) {
-    if(TVERBOSE4 && strcmp(e->name, "log_event") != 0)
+    if(TVERB_EVENT && strcmp(e->name, "log_event") != 0)
       lprintf("EVENT: calling %s \n", e->name);
     e->func(e->argument);
 
-    if(TVERBOSE4 && strcmp(e->name, "log_event") != 0)
+    if(TVERB_EVENT && strcmp(e->name, "log_event") != 0)
       lprintf("EVENT: finished %s \n", e->name);
 
     event_destroy(e);

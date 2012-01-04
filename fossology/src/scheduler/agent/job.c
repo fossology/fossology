@@ -103,7 +103,7 @@ int job_sstatus(int* job_id, job j, GOutputStream* ostr)
       g_list_length(j->finished_agents),
       g_list_length(j->failed_agents));
 
-  VERBOSE2("JOB_STATUS: %s", status_str);
+  V_JOB("JOB_STATUS: %s", status_str);
   g_output_stream_write(ostr, status_str, strlen(status_str), NULL, NULL);
 
   if(*job_id == 0)
@@ -126,7 +126,7 @@ void job_transition(job j, job_status new_status)
 {
   /* book keeping */
   TEST_NULV(j);
-  VERBOSE2("JOB[%d]: job status changed: %s => %s\n",
+  V_JOB("JOB[%d]: job status changed: %s => %s\n",
       j->id, job_status_strings[j->status], job_status_strings[new_status]);
 
   /* change the job status */
@@ -407,13 +407,23 @@ void job_add_agent(job j, void* a)
  */
 void job_remove_agent(job j, void* a)
 {
+  GList* curr;
   TEST_NULV(j);
+
   if(j->finished_agents && a)
     j->finished_agents = g_list_remove(j->finished_agents, a);
 
   if(j->finished_agents == NULL && (j->status == JB_COMPLETE || j->status == JB_FAILED))
   {
-    VERBOSE2("JOB[%d]: job removed from system\n", j->id);
+    V_JOB("JOB[%d]: job removed from system\n", j->id);
+
+    for(curr = j->running_agents; curr != NULL; curr = curr->next)
+      ((agent)curr->data)->owner = NULL;
+    for(curr = j->failed_agents; curr != NULL; curr = curr->next)
+      ((agent)curr->data)->owner = NULL;
+    for(curr = j->finished_agents; curr != NULL; curr = curr->next)
+          ((agent)curr->data)->owner = NULL;
+
     g_tree_remove(job_list, &j->id);
   }
 }
@@ -571,7 +581,9 @@ int job_is_open(job j)
 {
   /* local */
   int retval = 0;
-  TEST_NULL(j, 0);
+
+  if(j == NULL)
+    return -1;
 
   /* check to make sure that the job status is correct */
   if(j->status == JB_CHECKEDOUT)
@@ -621,8 +633,8 @@ job job_verbose(job j, int level)
  */
 char* job_message(job j)
 {
-  TEST_NULL(j, NULL);
-  return j->message;
+  TEST_NULL(j, "");
+  return j->message == NULL ? "" : j->message;
 }
 
 /**
@@ -685,7 +697,7 @@ FILE* job_log(job j)
 
   snprintf(file_name, sizeof(file_name), "%06d", j->id);
   file_path = fo_RepMkPath("logs", file_name);
-  VERBOSE2("JOB[%d]: job created log file:\n    %s\n", j->id, file_path);
+  V_JOB("JOB[%d]: job created log file:\n    %s\n", j->id, file_path);
 
   database_job_log(j->id, file_path);
   j->log = fo_RepFwrite("logs", file_name);
