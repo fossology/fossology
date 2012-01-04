@@ -152,7 +152,7 @@ void testFindCmd4DebFile()
   char *Filename = "../test-data/testdata4unpack/libpango1.0-udeb_1.28.1-1_i386.udeb";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 16);  /* let 7zip handle udeb */
+  FO_ASSERT_EQUAL(result, 19);  /* let ar handle udeb */
 }
 
 /**
