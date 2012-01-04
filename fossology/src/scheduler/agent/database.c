@@ -135,7 +135,7 @@ void email_load()
 {
 	char fname[FILENAME_MAX];
 	int fd;
-	GError* error;
+	GError* error = NULL;
 
 	if(header) munmap(header, header_sb.st_size);
 	if(footer) munmap(footer, footer_sb.st_size);
