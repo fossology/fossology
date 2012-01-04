@@ -87,12 +87,18 @@ int main(int argc, char** argv)
 
   /* perform pre-initialization checks */
   if(s_daemon && daemon(0, 0) == -1) { return -1; }
-  if(db_init) { database_init(); return 0; }
-  if(ki_sched) { kill_scheduler(); return 0; }
-  if(log != NULL) {set_log(log); }
+  if(db_init)     { database_init();  return 0; }
+  if(ki_sched)    { kill_scheduler(); return 0; }
+  if(log != NULL) { set_log(log); }
 
   /* the proces's pid could have change */
   s_pid = getpid();
+
+  NOTIFY("*****************************************************************");
+  NOTIFY("***                FOSSology scheduler started                ***");
+  NOTIFY("***                  pid:    %8d                         ***", s_pid);
+  NOTIFY("***                  verbose:%8d                         ***", verbose);
+  NOTIFY("*****************************************************************");
 
   /* create data structs, load config and set the user groups */
   agent_list_init();
@@ -116,7 +122,7 @@ int main(int argc, char** argv)
   signal(SIGALRM, prnt_sig);
   signal(SIGTERM, prnt_sig);
   signal(SIGQUIT, prnt_sig);
-  //signal(SIGINT,  prnt_sig);
+  signal(SIGSEGV, prnt_sig);
   signal(SIGHUP,  prnt_sig);
 
   /* *********************************** */
@@ -132,8 +138,14 @@ int main(int argc, char** argv)
   /* *************************************** */
   /* *** enter the scheduler event loop **** */
   /* *************************************** */
+
   alarm(CHECK_TIME);
   event_loop_enter(update_scheduler);
+
+  NOTIFY("*****************************************************************");
+  NOTIFY("***                FOSSology scheduler closed                 ***");
+  NOTIFY("***                  pid:    %8d                         ***", s_pid);
+  NOTIFY("*****************************************************************\n");
 
   return close_scheduler();
 }

@@ -97,7 +97,7 @@ void chld_sig(int signo)
   /* get all of the dead children's pids */
   while((n = waitpid(-1, &status, WNOHANG)) > 0)
   {
-    if(TVERBOSE2)
+    if(TVERB_SCHED)
       clprintf("SIGNALS: received sigchld for pid %d\n", n);
     pass = g_new0(pid_t, 1);
     *pass = n;
@@ -122,26 +122,29 @@ void prnt_sig(int signo)
   switch(signo)
   {
     case SIGALRM:
-      VERBOSE2("SIGNALS: Scheduler received alarm signal, checking job states\n");
+      V_SCHED("SIGNALS: Scheduler received alarm signal, checking job states\n");
       event_signal(agent_update_event, NULL);
       event_signal(database_update_event, NULL);
       alarm(CHECK_TIME);
       break;
     case SIGTERM:
-      VERBOSE2("SIGNALS: Scheduler received terminate signal, shutting down scheduler\n");
+      V_SCHED("SIGNALS: Scheduler received terminate signal, shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
       break;
     case SIGQUIT:
-      VERBOSE2("SIGNALS: Scheduler received quit signal, shutting down scheduler\n");
+      V_SCHED("SIGNALS: Scheduler received quit signal, shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
       break;
     case SIGINT:
-      VERBOSE2("SIGNALS: Scheduler received interrupt signal, shutting down scheduler\n");
+      V_SCHED("SIGNALS: Scheduler received interrupt signal, shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
       break;
     case SIGHUP:
-      VERBOSE2("SIGNALS: Scheduler received SGIHUP, reloading configuration data\n");
+      V_SCHED("SIGNALS: Scheduler received SGIHUP, reloading configuration data\n");
       load_config(NULL);
+      break;
+    case SIGSEGV:
+      FATAL("scheduler received a segmentation fault (i.e. the scheduler crashed");
       break;
   }
 }
@@ -307,9 +310,9 @@ void kill_scheduler()
       snprintf(f_name, sizeof(f_name), "/proc/%s/cmdline", ep->d_name);
       if((file = fopen(f_name, "rt")))
       {
-        VERBOSE2("KILL: found \"%s\" in cmdline file\n", f_name);
+        V_SCHED("KILL: found \"%s\" in cmdline file\n", f_name);
         if(fgets(f_name, sizeof(f_name), file) != NULL &&
-            strstr(f_name, "fo_scheduler"))
+            strstr(f_name, "fo_scheduler") && s_pid != atoi(ep->d_name))
         {
           lprintf("KILL: sending kill signal to pid %s\n", ep->d_name);
           kill(atoi(ep->d_name), SIGKILL);
@@ -357,13 +360,13 @@ void load_agent_config()
       config = fo_config_load(addbuf, &error);
       if(error && error->code == fo_missing_file)
       {
-        VERBOSE3("CONFIG: Could not find %s\n", addbuf);
+        V_SCHED("CONFIG: Could not find %s\n", addbuf);
         g_error_free(error);
         error = NULL;
         continue;
       }
       TEST_ERROR("no additional info");
-      VERBOSE2("CONFIG: loading config file %s\n", addbuf);
+      V_SCHED("CONFIG: loading config file %s\n", addbuf);
 
       if(!fo_config_has_group(config, "default"))
       {
@@ -392,17 +395,15 @@ void load_agent_config()
 
       if(!add_meta_agent(name, cmd, atoi(tmp), special))
       {
-        VERBOSE2("CONFIG: could not create meta agent using %s\n", ep->d_name);
+        V_SCHED("CONFIG: could not create meta agent using %s\n", ep->d_name);
       }
-      else if(TVERBOSE2)
+      else if(TVERB_SCHED)
       {
         lprintf("CONFIG: added new agent\n");
         lprintf("    name = %s\n", name);
         lprintf(" command = %s\n", cmd);
         lprintf("     max = %d\n", max);
         lprintf(" special = %d\n", special);
-        lprintf("CONFIG: will use \"");
-        lprintf(AGENT_BINARY, sysconfigdir, name, cmd);
         lprintf("\"\n");
       }
 
@@ -457,7 +458,7 @@ void load_foss_config()
     if(strcmp(addbuf, "localhost") == 0) strcpy(dirbuf, sysconfigdir);
 
     host_init(keys[i], addbuf, dirbuf, max);
-    if(TVERBOSE2)
+    if(TVERB_SCHED)
     {
       lprintf("CONFIG: added new host\n");
       lprintf("      name = %s\n", keys[i]);

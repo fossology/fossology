@@ -89,7 +89,7 @@ const char* agent_status_strings[] = {
  */
 void agent_transition(agent a, agent_status new_status)
 {
-  if(TVERBOSE3)
+  if(TVERB_AGENT)
     clprintf("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
         job_id(a->owner), a->meta_data->name, a->pid,
         agent_status_strings[a->status], agent_status_strings[new_status]);
@@ -174,7 +174,7 @@ int update(int* pid_ptr, agent a, gpointer unused)
 
     a->check_analyzed = a->total_analyzed;
 
-    VERBOSE3("JOB[%d].%s[%d]: agent updated correctly, processed %d items\n",
+    V_AGENT("JOB[%d].%s[%d]: agent updated correctly, processed %d items\n",
         job_id(a->owner), a->meta_data->name, a->pid, a->check_analyzed);
   }
 
@@ -227,7 +227,7 @@ int agent_test(char* name, meta_agent ma, host h)
 {
   static int id_gen = -1;
 
-  VERBOSE3("META_AGENT[%s] testing\n", ma->name);
+  V_AGENT("META_AGENT[%s] testing\n", ma->name);
   job j = job_init(ma->name, id_gen--, 0);
   agent_init(h, j);
   return 0;
@@ -284,7 +284,7 @@ void agent_listen(agent a)
   if(a->meta_data->version == NULL && a->meta_data->valid)
   {
     a->meta_data->version = g_strdup(buffer);
-    if(TVERBOSE2)
+    if(TVERB_AGENT)
       clprintf("META_AGENT[%s] version is: \"%s\"\n",
           a->meta_data->name, a->meta_data->version);
   }
@@ -315,7 +315,7 @@ void agent_listen(agent a)
     if(strlen(buffer) == 0)
       continue;
 
-    if(TVERBOSE3)
+    if(TVERB_AGENT)
       alprintf(job_log(a->owner),
           "JOB[%d].%s[%d]: received: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, buffer);
@@ -368,7 +368,7 @@ void agent_listen(agent a)
       job_set_message(a->owner, g_strdup(buffer + 6));
     }
     /* we aren't quite sure what the agent sent, log it */
-    else if(!(TVERBOSE3))
+    else if(!(TVERB_AGENT))
     {
       alprintf(job_log(a->owner),
           "JOB[%d].%s[%d]: \"%s\"\n",
@@ -376,7 +376,7 @@ void agent_listen(agent a)
     }
   }
 
-  if(TVERBOSE3)
+  if(TVERB_AGENT)
   {
     alprintf(job_log(a->owner),
         "JOB[%d].%s[%d]: communication thread closing\n",
@@ -748,7 +748,7 @@ void agent_death_event(pid_t* pid)
     event_signal(database_update_event, NULL);
 
   if(write(a->to_parent, "@@@1\n", 5) != 5)
-    VERBOSE2("JOB[%d].%s[%d]: write to agent unsuccessful: %s\n",
+    V_AGENT("JOB[%d].%s[%d]: write to agent unsuccessful: %s\n",
         job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
   g_thread_join(a->thread);
 
@@ -764,7 +764,7 @@ void agent_death_event(pid_t* pid)
   if(a->status != AG_PAUSED && a->status != AG_FAILED)
     agent_transition(a, AG_PAUSED);
 
-  VERBOSE2("JOB[%d].%s[%d]: successfully removed from the system\n",
+  V_AGENT("JOB[%d].%s[%d]: successfully removed from the system\n",
       job_id(a->owner), a->meta_data->name, a->pid);
 
   job_update(a->owner);
@@ -792,7 +792,7 @@ void agent_create_event(agent a)
 {
   TEST_NULV(a);
 
-  VERBOSE3("JOB[%d].%s[%d]: agent successfully spawned\n",
+  V_AGENT("JOB[%d].%s[%d]: agent successfully spawned\n",
       job_id(a->owner), a->meta_data->name, a->pid);
 
   g_tree_insert(agents, &a->pid, a);
@@ -810,19 +810,26 @@ void agent_create_event(agent a)
  */
 void agent_ready_event(agent a)
 {
+  int ret;
+
   TEST_NULV(a);
   if(a->status == AG_SPAWNED)
   {
     agent_transition(a, AG_RUNNING);
-    VERBOSE2("JOB[%d].%s[%d]: agent successfully created\n",
+    V_AGENT("JOB[%d].%s[%d]: agent successfully created\n",
         job_id(a->owner), a->meta_data->name, a->pid);
   }
 
-  if(!job_is_open(a->owner))
+  if((ret = job_is_open(a->owner)) == 0)
   {
     agent_transition(a, AG_PAUSED);
     job_finish_agent(a->owner, a);
     job_update(a->owner);
+    return;
+  }
+  else if(ret < 0)
+  {
+    agent_transition(a, AG_FAILED);
     return;
   }
   else
@@ -905,7 +912,7 @@ void agent_print_status(agent a, GOutputStream* ostr)
       agent_status_strings[a->status],
       time_buf);
 
-  VERBOSE2("AGENT_STATUS: %s", status_str);
+  V_AGENT("AGENT_STATUS: %s", status_str);
   g_output_stream_write(ostr, status_str, strlen(status_str), NULL, NULL);
   g_free(status_str);
   return;
@@ -937,7 +944,7 @@ int aprintf(agent a, const char* fmt, ...)
   char* tmp;
 
   va_start(args, fmt);
-  if(TVERBOSE3)
+  if(TVERB_AGENT)
   {
     tmp = g_strdup_vprintf(fmt, args);
     tmp[strlen(tmp) - 1] = '\0';

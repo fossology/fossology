@@ -105,7 +105,7 @@ void* interface_thread(void* param)
 
   while(g_input_stream_read(conn->istr, buffer, sizeof(buffer), cancel, NULL))
   {
-    if(TVERBOSE2) clprintf("INTERFACE: received \"%s\"\n", buffer);
+    V_INTERFACE("INTERFACE: received \"%s\"\n", buffer);
     /* convert all characters before first ' ' to lower case */
     memcpy(org, buffer, sizeof(buffer));
     for(cmd = buffer; *cmd; cmd++)
@@ -123,7 +123,7 @@ void* interface_thread(void* param)
     if(strcmp(cmd, "close") == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE\n", 6, NULL, NULL);
-      if(TVERBOSE2) clprintf("INTERFACE: closing connection to user interface\n");
+      V_INTERFACE("INTERFACE: closing connection to user interface\n");
       return NULL;
     }
 
@@ -131,7 +131,7 @@ void* interface_thread(void* param)
     else if(strcmp(cmd, "stop") == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE\n", 6, NULL, NULL);
-      if(TVERBOSE2) clprintf("INTERFACE: shutting down scheduler\n");
+      V_INTERFACE("INTERFACE: shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
       return NULL;
     }
@@ -278,8 +278,7 @@ void* listen_thread(void* unused)
   if(error)
     FATAL("%s", error->message);
 
-  if(TVERBOSE2)
-    clprintf("INTERFACE: listening port is %d\n", i_port);
+  V_INTERFACE("INTERFACE: listening port is %d\n", i_port);
 
   /* wait for new connections */
   for(;;)
@@ -288,8 +287,7 @@ void* listen_thread(void* unused)
 
     if(i_terminate)
       break;
-    if(TVERBOSE2)
-      clprintf("INTERFACE: new interface connection\n");
+    V_INTERFACE("INTERFACE: new interface connection\n");
     if(error)
       FATAL("INTERFACE closing for %s", error->message);
 
@@ -297,7 +295,7 @@ void* listen_thread(void* unused)
         interface_conn_init(new_connection));
   }
 
-  VERBOSE2("INTERFACE: socket listening thread closing\n");
+  V_INTERFACE("INTERFACE: socket listening thread closing\n");
   g_socket_listener_close(server_socket);
   g_object_unref(server_socket);
   return NULL;
