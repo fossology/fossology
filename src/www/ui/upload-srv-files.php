@@ -27,7 +27,7 @@ class upload_srv_files extends FO_Plugin {
   public $Title = TITLE_upload_srv_files;
   public $Version = "1.0";
   public $MenuList = "Upload::From Server";
-  //public $Dependency = array("agent_unpack"); // TODO to display, temporarily comment out
+  public $Dependency = array("agent_unpack");
   public $DBaccess = PLUGIN_DB_USERADMIN;
 
   /**
@@ -67,28 +67,12 @@ class upload_srv_files extends FO_Plugin {
     }
     /* Check for specified agent analysis */
     $AgentList = menu_find("Agents", $Depth);
-    $finder = 0; // if have agent are selected, 1:yes, 0: no
     foreach($AgentList as $A) {
       if (empty($A)) {
         continue;
       }
-      if (GetParm("Check_" . $A->URI, PARM_INTEGER) != 1 && $A->URI != "agent_unpack") {
+      if (GetParm("Check_" . $A->URI, PARM_INTEGER) != 1) {
         $A->URI = NULL;
-      }
-      else 
-      {
-        $finder = 1;
-      }
-    }
-    /** if no agent are selected, so add unpack agent, if has selected agents, remove agent_unpack */
-    if ($finder) {
-      foreach($AgentList as $A) {
-        if (empty($A)) {
-          continue;
-        }
-        if ("agent_unpack" === $A->Name) {
-          $A->URI = NULL;
-        }
       }
     }
 
@@ -105,10 +89,23 @@ class upload_srv_files extends FO_Plugin {
     if (empty($ShortName)) {
       $ShortName = $Name;
     }
+    if (!file_exists($SourceFiles)) {
+      $text = _("'$SourceFiles' does not exist.\n");
+      return $text;
+    }
     // Create an upload record.
     $jobq = NULL;
     $Mode = (1 << 3); // code for "it came from web upload"
     $uploadpk = JobAddUpload($ShortName, $SourceFiles, $Desc, $Mode, $FolderPk);
+    /* Tell wget_agent to actually grab the upload */
+    global $SYSCONFDIR;
+    $Cmd = "$SYSCONFDIR/mods-enabled/wget_agent/agent/wget_agent -k '$uploadpk' -C '$SourceFiles' -c $SYSCONFDIR";
+    system($Cmd, $retval);
+    if ($retval) {
+      $text =_("Failed to insert $SourceFiles into repo.\n");
+      return $text;
+    }
+
     /** scheduling agent tasks on upload id */
     QueueUploadsOnAgents($uploadpk, $AgentList, 0);
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
