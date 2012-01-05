@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
   PGresult *result;
   char sqlbuf[1024]; 
   char DBConfFile[1024];
-  char *DBConf = NULL;
   char *ErrorBuf;
   int CmdlineFlag = 0; /** run from command line flag, 1 yes, 0 not */
   char *SVN_REV;
