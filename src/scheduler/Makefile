@@ -18,7 +18,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = agent agent_tests
+DIRS = agent
 
 TESTDIR = agent_tests
 
