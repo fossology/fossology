@@ -476,7 +476,7 @@ function QueueUploadsOnAgents($upload_pk_list, &$agent_list, $Verbose, $Priority
     $results = array();
     // Schedule them
     $agent_count = count($agent_list);
-    foreach(split(",", $upload_pk_list) as $upload_pk) {
+    foreach(explode(",", $upload_pk_list) as $upload_pk) {
       if (empty($upload_pk)) {
         continue;
       }
