@@ -486,7 +486,8 @@ function QueueUploadsOnAgents($upload_pk_list, &$agent_list, $Verbose, $Priority
         $agentname = $agent_list[$ac]->URI;
         if (!empty($agentname)) {
           $Agent = & $Plugins[plugin_find_id($agentname) ];
-          $results = $Agent->AgentAdd($upload_pk, NULL, $Priority);
+          $rc = $Agent->AgentCheck($upload_pk);
+          if (0 == $rc) $results = $Agent->AgentAdd($upload_pk, NULL, $Priority);
           if (!empty($results)) {
             echo "ERROR: Scheduling failed for Agent $agentname\n";
             echo "ERROR message: $results\n";
