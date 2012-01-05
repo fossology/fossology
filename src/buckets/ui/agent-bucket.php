@@ -180,7 +180,9 @@ class agent_bucket extends FO_Plugin {
     }
 
     /* get the default_bucketpool_fk from the users record */
-    $sql = "select default_bucketpool_fk from users where user_pk='$_SESSION[UserId]' limit 1";
+    $UserId = $SysConf['auth']['UserId'];
+    if (empty($UserId)) $UserId = $_SESSION['UserId'];
+    $sql = "select default_bucketpool_fk from users where user_pk='$UserId' limit 1";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
