@@ -108,7 +108,6 @@ void fo_scheduler_connect(int* argc, char** argv)
   GOptionContext* parsed;
   fo_conf* version;
   char  fname[FILENAME_MAX + 1];
-  char** argtmp;
 
   GOptionEntry options[] =
   {
