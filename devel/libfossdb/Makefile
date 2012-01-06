@@ -15,7 +15,7 @@ $(LIB): %.a: %.c %.h $(VARS)
 	$(AR) cr $@ libfossdb.o
 
 $(EXE): %: %.c $(LIB) $(VARS)
-	$(CC) $< -lpq $(CFLAGS_DB) -I`pg_config --includedir` -o $@
+	$(CC) $< $(CFLAGS_DB) -I`pg_config --includedir` -lpq -o $@
 
 install: install-dev install-lib install-exe
 

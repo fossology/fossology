@@ -88,7 +88,7 @@ if [ $BUILDTIME ]; then
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
             squeeze) apt-get install postgresql-server-dev-8.4;;
             sid) apt-get install postgresql-server-dev-8.4;;
-            karmic|lucid|maverick) apt-get install postgresql-server-dev-8.4;;
+            karmic|lucid|maverick|oneiric) apt-get install postgresql-server-dev-8.4;;
             isadora) apt-get install postgresql-server-dev-8.4;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
          esac
@@ -148,7 +148,7 @@ if [ $RUNTIME ]; then
             sid)
                [ $AGENT ] || apt-get install postgresql-8.4
                apt-get install libextractor-plugins;;
-            karmic|lucid|maverick)
+            karmic|lucid|maverick|oneiric)
                [ $AGENT ] || apt-get install postgresql-8.4
                apt-get install libextractor-plugins;;
             isadora)
