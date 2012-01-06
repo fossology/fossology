@@ -89,10 +89,18 @@ class upload_srv_files extends FO_Plugin {
     if (empty($ShortName)) {
       $ShortName = $Name;
     }
+    /** check if the file/directory is existed */
     if (!file_exists($SourceFiles)) {
       $text = _("'$SourceFiles' does not exist.\n");
       return $text;
     }
+
+    /** check if has the read permission */
+    if (!fopen($SourceFiles, "r")) {
+      $text = _("Have no READ permission on '$SourceFiles'.\n");
+      return $text;
+    }
+
     // Create an upload record.
     $jobq = NULL;
     $Mode = (1 << 3); // code for "it came from web upload"
