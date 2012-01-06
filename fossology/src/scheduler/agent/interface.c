@@ -274,6 +274,9 @@ void* listen_thread(void* unused)
 
   /* create the server socket to listen for connections on */
   server_socket = g_socket_listener_new();
+  if(server_socket == NULL)
+    FATAL("could not create the server socket");
+
   g_socket_listener_add_inet_port(server_socket, i_port, NULL, &error);
   if(error)
     FATAL("%s", error->message);
