@@ -136,7 +136,7 @@ int main(int argc, char** argv)
 
   options = g_option_context_new("- command line tool for FOSSology scheduler");
   g_option_context_add_main_entries(options, entries, NULL);
-  g_option_context_set_ignore_unknown_options(options, TRUE);
+  g_option_context_set_ignore_unknown_options(options, FALSE);
   g_option_context_parse(options, &argc, &argv, &error);
   g_option_context_free(options);
 

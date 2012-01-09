@@ -123,7 +123,7 @@ int main(int argc, char** argv)
   signal(SIGALRM, prnt_sig);
   signal(SIGTERM, prnt_sig);
   signal(SIGQUIT, prnt_sig);
-  signal(SIGSEGV, prnt_sig);
+  //signal(SIGSEGV, prnt_sig);
   signal(SIGHUP,  prnt_sig);
 
   /* *********************************** */

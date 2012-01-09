@@ -60,11 +60,11 @@ void log_open()
     if((log_file = fopen(log_name, "a")) == NULL)
     {
       log_file = stderr;
-      FATAL("could not open %s for logging and %s failed", log_name, logdir)
+      FATAL("could not open %s for logging and %s failed", log_name, logdir);
       log_file = NULL;
     }
     else
-      ERROR("cout not open %s for logging, using default", log_name)
+      ERROR("cout not open %s for logging, using default", log_name);
   }
 }
 
