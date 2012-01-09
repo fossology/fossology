@@ -432,9 +432,10 @@ $text = _("Job/Dependency");
 	  {
 	  $Style = "style='font:normal 8pt verdana, arial, helvetica;'";
 	  $JobId = $Row['job_pk'];
+	  $JqType = $Row['jq_type'];
 	  $V .= "<th $Style>";
 $text = _("Reset");
-	  $V .= "<a href='$UriFull&action=reset&jobid=$JobId' title='Reset this specific job'>$text</a>";
+	  $V .= "<a href='$UriFull&action=reset&jqtype=$JqType' title='Reset this specific job'>$text</a>"; 
 	  $V .= " | ";
 $text = _("Delete");
 	  $V .= "<a href='$UriFull&action=delete&jobid=$JobId' title='Delete this specific job'>$text</a>";
@@ -522,10 +523,12 @@ $text = _("Delete");
 	  {
 	  $JobPk = GetParm("jobid",PARM_INTEGER);
 	  $Action = GetParm("action",PARM_STRING);
+	  $uploadid = GetParm("upload",PARM_INTEGER);
+    $jqtype = GetParm("jqtype",PARM_STRING);
 	  switch($Action)
 	      {
 	      case 'reset':
-		JobChangeStatus($JobPk,"reset");
+		JobReset($uploadid, $jqtype);
 		break;
 	      case 'delete':
 		JobChangeStatus($JobPk,"delete");
