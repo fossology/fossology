@@ -358,6 +358,32 @@ function JobChangeStatus($jobpk, $Status)
   return (0);
 } // JobChangeStatus()
 
+/**
+ * \brief reset one job which is already queued one time
+ *
+ * \param $uploadid - upload_pk
+ * \param $agentname - agent type, for example:unpack, nomos, etc
+ *
+ * \return 0 on Scheduling failed for agent; 1 on sucess
+ */
+function JobReset($uploadid, $agentname) {
+  global $Plugins;
+
+  if (!empty($agentname)) {
+    /** the agent name of unpack is agent_unpack, but jq_type of unpack is ununpack */
+    if ('ununpack' === $agentname) $agentname = "unpack"; 
+    $agentname = "agent_".$agentname; // assemble the jq_type to a plugin name
+    $Agent = & $Plugins[plugin_find_id($agentname) ];
+    /** do not need checking if this jobqueque is alread existing */
+    $results = $Agent->AgentAdd($uploadid, NULL, 0);
+    if (!empty($results)) {
+      echo "ERROR: Scheduling failed for Agent $agentname\n";
+      echo "ERROR message: $results\n";
+      return 1;
+    }
+  }
+  return 0;
+}
 
 /**
  * @brief Change the jobqueue item status.
