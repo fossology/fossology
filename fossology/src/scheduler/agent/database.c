@@ -316,11 +316,12 @@ void email_notification(job j)
 
   sprintf(sql, select_upload_fk, j_id);
   db_result = PQexec(db_conn, sql);
-  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
   {
     PQ_ERROR(db_result, "unable to select the upload id for job %d", j_id);
     return;
   }
+
   upload_id = atoi(PQgetvalue(db_result, 0, 0));
   PQclear(db_result);
 
