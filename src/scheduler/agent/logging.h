@@ -71,9 +71,10 @@ extern char  log_name[FILENAME_MAX];
 
 /** Macro that is called when any type of postgresql error is generated */
 #define PQ_ERROR(pg_r, ...) { \
-            fprintf(stderr, "ERROR %s.%d: ", __FILE__, __LINE__); \
-            fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); } \
+            lprintf("ERROR %s.%d: ", __FILE__, __LINE__); \
+            lprintf(__VA_ARGS__); \
+            lprintf("\n"); \
+            lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); } \
             PQclear(pg_r)
 
 #define NOTIFY(...) if(verbose > 0) do { \
