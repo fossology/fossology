@@ -364,7 +364,7 @@ function JobChangeStatus($jobpk, $Status)
  * \param $uploadid - upload_pk
  * \param $agentname - agent type, for example:unpack, nomos, etc
  *
- * \return 0 on Scheduling failed for agent; 1 on sucess
+ * \return 1 on Scheduling failed for agent; 0 on sucess
  */
 function JobReset($uploadid, $agentname) {
   global $Plugins;
