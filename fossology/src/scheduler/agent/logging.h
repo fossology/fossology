@@ -36,45 +36,56 @@ extern char  log_name[FILENAME_MAX];
 /* **** ERROR MACROS ******************************************************** */
 /* ************************************************************************** */
 
+/*
+ * The following macro definitions are meant to act as their own statement in
+ * the c language. To acomplish this, they needed to not only be able to be used
+ * in the situation of an "if" statement with no body, but also require that
+ * they are followed by a ";".
+ *
+ * To do this the "do {} while(0)" loop is used, the loop will not appear in
+ * result flow control since it does not modify the flow of control, but it is
+ * a single statement that requires a ";" at the end to be syntatically correct
+ */
+
 /** Macro that is called when the scheduler hits a fatal error */
-#define FATAL(...)  { \
+#define FATAL(...)  do { \
             lprintf("FATAL %s.%d: ", __FILE__, __LINE__); \
             lprintf(__VA_ARGS__); \
             lprintf("\n"); \
             lprintf("FATAL errno is: %s\n", strerror(errno)); \
-            exit(-1); }
+            exit(-1); } while(0)
 
 /** Macro that is called when a thread generated a fatal error */
-#define THREAD_FATAL(...) { \
+#define THREAD_FATAL(...) do { \
             lprintf("THREAD_FATAL %s.%d: ", __FILE__, __LINE__); \
             lprintf(__VA_ARGS__); \
             lprintf("\n"); \
             lprintf("THREAD_FATAL errno is: %s\n", strerror(errno)); \
-            pthread_exit(NULL); }
+            pthread_exit(NULL); } while(0)
 
 /** Macro that is called when any type of error is generated */
-#define ERROR(...) { \
+#define ERROR(...) do { \
             lprintf("ERROR %s.%d: ", __FILE__, __LINE__); \
             lprintf(__VA_ARGS__); \
-            lprintf("\n"); }
+            lprintf("\n"); } while(0)
 
 /** Macro that is called when any type of postgresql error is generated */
 #define PQ_ERROR(pg_r, ...) { \
             fprintf(stderr, "ERROR %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); } \
-            PQclear(pg_r);
+            PQclear(pg_r)
 
-#define NOTIFY(...) if(verbose > 0) { \
+#define NOTIFY(...) if(verbose > 0) do { \
             lprintf("NOTIFY: "); \
             lprintf(__VA_ARGS__); \
-            lprintf("\n"); }
+            lprintf("\n"); } while(0)
 
 /** Macro that is called when any type of warning is generated */
-#define WARNING(...) if(verbose > 1) { \
+#define WARNING(...) if(verbose > 1) do { \
             lprintf("WARNING %s.%d: ", __FILE__, __LINE__); \
             lprintf(__VA_ARGS__); \
-            lprintf("\n"); }
+            lprintf("\n"); } while(0)
 
 /* verbose macros, if changing from greater than scheme to bit mask, just */
 /* change these the the TVERBOSE# macro when a test of verbose is needed, */
