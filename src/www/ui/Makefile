@@ -47,7 +47,7 @@ install: all
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
   
-	@echo $(CONFDIR) > $(DESTDIR)$(WEBDIR)/ui/fossology.rc
+	@echo $(SYSCONFDIR) > $(DESTDIR)$(WEBDIR)/ui/fossology.rc
 
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
 	  ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled/ ; fi;
