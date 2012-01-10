@@ -56,12 +56,12 @@ extern char  log_name[FILENAME_MAX];
             exit(-1); } while(0)
 
 /** Macro that is called when a thread generated a fatal error */
-#define THREAD_FATAL(...) do { \
-            lprintf("THREAD_FATAL %s.%d: ", __FILE__, __LINE__); \
-            lprintf(__VA_ARGS__); \
-            lprintf("\n"); \
-            lprintf("THREAD_FATAL errno is: %s\n", strerror(errno)); \
-            pthread_exit(NULL); } while(0)
+#define THREAD_FATAL(file, ...) do { \
+            alprintf(file, "THREAD_FATAL %s.%d: ", __FILE__, __LINE__); \
+            alprintf(file, __VA_ARGS__); \
+            alprintf(file, "\n"); \
+            alprintf(file, "THREAD_FATAL errno is: %s\n", strerror(errno)); \
+            g_thread_exit(NULL); } while(0)
 
 /** Macro that is called when any type of error is generated */
 #define ERROR(...) do { \

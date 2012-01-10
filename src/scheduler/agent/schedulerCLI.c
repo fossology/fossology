@@ -86,10 +86,11 @@ int main(int argc, char** argv)
   int port_number = -1;       // the port that the CLI will connect on
   long host_addr;             // the address of the host
   int closing;                // flags and loop variables
+  int response = 1;           // flag to indicate if a response is expected
   size_t bytes;               // variable to capture return of read
   char* host;                 // string to hold the name of the host
   char buffer[1024];          // string buffer used to read
-  char* config;               // fossology configuration directory
+  char* config;               // FOSSology configuration directory
   GOptionContext* options;    // the command line options parser
   char* poss;                 // used to split incoming string on '\n'
   GError* error = NULL;
@@ -227,19 +228,32 @@ int main(int argc, char** argv)
     if(FD_ISSET(s, &fds))
     {
       memset(buffer, '\0', sizeof(buffer));
-      bytes = read(s, buffer, sizeof(buffer));
+      bytes = 0;
 
-      if(bytes == 0)
-        closing = 1;
+      while(buffer[bytes - 1] != '\n')
+      {
+        bytes = read(s, buffer + bytes, sizeof(buffer) - bytes);
+
+        if(bytes == 0)
+          closing = 1;
+        bytes = strlen(buffer);
+      }
 
       for(poss = strtok(buffer, "\n"); poss != NULL; poss = strtok(NULL, "\n"))
       {
         if(strncmp(poss, "received", 8) == 0)
-          continue;
+        {
+          if(response)
+            printf("Command received\n");
+        }
         else if(strncmp(poss, "CLOSE", 5) == 0)
+        {
           closing = 1;
+        }
         else if(strcmp(poss, "end") != 0)
+        {
           printf("%s\n", poss);
+        }
       }
       fflush(stdout);
     }
@@ -255,6 +269,11 @@ int main(int argc, char** argv)
         interface_usage();
         continue;
       }
+
+      response = (strncmp(buffer, "agents",  6) == 0 ||
+                  strncmp(buffer, "status",  6) == 0 ||
+                  strcmp (buffer, "verbose\n" ) == 0) ?
+                      FALSE : TRUE;
 
       bytes = write(s, buffer, strlen(buffer) - 1);
     }

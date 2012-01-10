@@ -116,7 +116,7 @@ void* interface_thread(void* param)
     if(cmd == NULL)
       break;
 
-    /* send recieved message */
+    /* acknowledge that you have received the command */
     g_output_stream_write(conn->ostr, "received\n", 9, NULL, NULL);
 
     /* the interface has chosen to close, acknowledge and end the thread */
@@ -180,12 +180,20 @@ void* interface_thread(void* param)
       event_signal(job_restart_event, get_job(atoi(strtok(NULL, " "))));
     }
 
-    /* change the verbose level of the scheudler or a job */
+    /* change the verbose level of the scheduler or a job */
     else if(strcmp(cmd, "verbose") == 0)
     {
       if((tmp = strtok(NULL, " ")) == NULL)
       {
-        sprintf(buffer, "verbose %d\n", verbose);
+        if(verbose < 8)
+          sprintf(buffer, "level: %d\n", verbose);
+        else
+        {
+          strcpy(buffer, "mask:       h d i e s a j\nmask: ");
+          for(i = 1; i < 0x10000; i <<= 1)
+            strcat(buffer, i & verbose ? "1 " : "0 ");
+          strcat(buffer, "\n");
+        }
         g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
       }
       else if((cmd = strtok(NULL, " ")) == NULL) verbose = atoi(tmp);
@@ -212,7 +220,12 @@ void* interface_thread(void* param)
 
     /* scheudler recieved an unknown command from interface */
     else
+    {
+      g_output_stream_write(conn->ostr, "Invalid command: \"", 18, NULL, NULL);
+      g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+      g_output_stream_write(conn->ostr, "\"\n", 2, NULL, NULL);
       clprintf("ERROR %s.%d: Interface received invalid command: %s\n", __FILE__, __LINE__, cmd);
+    }
 
     memset(buffer, '\0', sizeof(buffer));
   }

@@ -1084,7 +1084,7 @@ void kill_agents()
 void list_agents(GOutputStream* ostr)
 {
   g_tree_foreach(meta_agents, (GTraverseFunc)agent_list, ostr);
-  g_output_stream_write(ostr, "\nend\n", 4, NULL, NULL);
+  g_output_stream_write(ostr, "\nend\n", 5, NULL, NULL);
 }
 
 /**
