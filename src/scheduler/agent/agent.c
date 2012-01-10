@@ -234,27 +234,32 @@ int agent_test(char* name, meta_agent ma, host h)
 }
 
 /**
- * Listens for information from the agent. Starts by waiting for the agent to
- * send SPAWNED, then it will wait for any other information from the agent.
- * Information that it can receive includes:
- *
- * TODO list things that can be received
+ * Main function used for agent communication. This is where the communication
+ * thread will spend the majority of its time.
  *
  * @param a the agent that will be listened on
  */
 void agent_listen(agent a)
 {
-  /* status locals */
+  /* static locals */
   static GStaticMutex version_lock = G_STATIC_MUTEX_INIT;
 
   /* locals */
-  char buffer[1024];          // buffer to store c strings read from agent, size is arbitraryssed
-  int i;                      // simple indexing variable
+  char buffer[1024]; // buffer to store c strings read from agent
+  int i;             // simple indexing variable
 
   TEST_NULV(a);
 
 
-  /* validate the agent version */
+  /* Start by getting the version information from the agent. The agent should
+   * send "VERSION: <string>" where the string is the version information. there
+   * are five things that can happen here.
+   *   1. the agent sends correct version information   => continue
+   *   2. this is the first agent to send version info  => save version and continue
+   *   3. the agent sends incorrect version information => invalidate the agent
+   *   4. the agent doesn't send version information    => invalidate the agent
+   *   5. the agent crashed before sending information  => close the thread
+   */
   if(fgets(buffer, sizeof(buffer), a->read) == NULL)
   {
     alprintf(job_log(a->owner),
@@ -263,22 +268,28 @@ void agent_listen(agent a)
     g_thread_exit(NULL);
   }
 
+  /* check to make sure "VERSION" was sent */
   buffer[strlen(buffer) - 1] = '\0';
   if(strncmp(buffer, "VERSION: ", 9) != 0)
   {
-    alprintf(job_log(a->owner),
-        "T_FATAL %s.%d: JOB[%d].%s[%d] agent didn't send version information\n",
-        __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid);
-    alprintf(job_log(a->owner),
-        "T_FATAL: received \"%s\" and expecting \"VERSION: <version>\"\n",
-        buffer);
-    clprintf("ERROR %s.%d: agent %s has been invalidated, removing from agents\n",
-        __FILE__, __LINE__, a->meta_data->name);
-    if(job_id(a->owner) >= 0)
-      g_tree_remove(meta_agents, a->meta_data->name);
-    g_thread_exit(NULL);
+    if(strncmp(buffer, "@@@1", 4) == 0)
+    {
+      THREAD_FATAL(job_log(a->owner),
+          "agent crashed before sending version information");
+    }
+    else
+    {
+      if(job_id(a->owner) >= 0)
+        g_tree_remove(meta_agents, a->meta_data->name);
+      clprintf("ERROR %s.%d: agent %s has been invalidated, removing from agents\n",
+          __FILE__, __LINE__, a->meta_data->name);
+      THREAD_FATAL(job_log(a->owner),
+          "JOB[%d].%s[%d] agent didn't send version information\nreceived \"%s\"",
+          job_id(a->owner), a->meta_data->name, a->pid, buffer);
+    }
   }
 
+  /* check that the VERSION information is correct */
   g_static_mutex_lock(&version_lock);
   strcpy(buffer, &buffer[9]);
   if(a->meta_data->version == NULL && a->meta_data->valid)
@@ -303,7 +314,14 @@ void agent_listen(agent a)
   }
   g_static_mutex_unlock(&version_lock);
 
-  /* enter listening loop */
+  /* If we reach here the agent has correctly sent VERION information to the
+   * scheduler. The agent now enters a listening loop. The communication thread
+   * will wait for input from the agent, and act according to the agents current
+   * state and what was sent
+   *
+   * NOTE: any command prepended by "@@@" is a message from the scheduler to the
+   *       communication thread, not from the agent.
+   */
   while(1)
   {
     /* get message from agent */
@@ -320,7 +338,13 @@ void agent_listen(agent a)
           "JOB[%d].%s[%d]: received: \"%s\"\n",
           job_id(a->owner), a->meta_data->name, a->pid, buffer);
 
-    /* check for messages from scheduler or clean agent death */
+    /* command: "BYE"
+     *
+     * The agent has finished processing all of the data from the relevant job.
+     * This command is follow by a return code. 0 indicates that it completed
+     * correctly, anything else can be used as an error code. Regardless of
+     * whether the agent completed, the communication thread will shutdown.
+     */
     if(strncmp(buffer, "BYE", 3) == 0)
     {
       if((a->return_code = atoi(&(buffer[4]))) != 0)
@@ -333,10 +357,21 @@ void agent_listen(agent a)
       break;
     }
 
+    /* command "@@@1"
+     *
+     * The scheduler needs the communication thread to shutdown. This will
+     * normally only happen if the agent crashes and the scheduler receives a
+     * SIGCHLD for it before it sends "BYE #".
+     */
     if(strncmp(buffer, "@@@1", 4) == 0)
-    {
       break;
-    }
+
+    /* command "@@@0"
+     *
+     * The scheduler has updated the data that the agent should be processing.
+     * This is sent after an agent sends the "OK" command, and the scheduler has
+     * processed the resulting agent_ready_event().
+     */
     if(strncmp(buffer, "@@@0", 4) == 0 && a->updated)
     {
       aprintf(a, "%s\n", a->data);
@@ -346,15 +381,29 @@ void agent_listen(agent a)
       continue;
     }
 
-    /* if we get here it is an actual message from the agent */
+    /* agent just checked in */
     a->check_in = time(NULL);
 
-    /* the agent has indicated that it is ready for data */
+    /* command: "OK"
+     *
+     * The agent is ready for data. This is sent it 2 situations:
+     *   1. the agent has completed startup and is ready for the first part of
+     *      the data that needs to be analyzed for the job
+     *   2. the agent has finished the last piece of the job it was working on
+     *      and is ready for the next piece or to be shutdown
+     */
     if(strncmp(buffer, "OK", 2) == 0)
     {
       event_signal(agent_ready_event, a);
     }
-    /* heart beat received from agent */
+
+    /* command: "HEART"
+     *
+     * Given the size of jobs that can be processed by FOSSology, agents can
+     * take an extremely long period of time to finish. To make sure that an
+     * agent is still working it must periodically update the scheduler with
+     * how much of the job it has processed.
+     */
     else if(strncmp(buffer, "HEART", 5) == 0)
     {
       a->n_updates++;
@@ -363,11 +412,23 @@ void agent_listen(agent a)
       a->total_analyzed = i;
       database_job_processed(job_id(a->owner), a->total_analyzed);
     }
+
+    /* command: "EMAIL"
+     *
+     * Agents have the ability to set the message that will be sent with the
+     * notification email. This grabs the message and sets inside the job that
+     * the agent is running under.
+     */
     else if(strncmp(buffer, "EMAIL", 5) == 0)
     {
       job_set_message(a->owner, g_strdup(buffer + 6));
     }
-    /* we aren't quite sure what the agent sent, log it */
+
+    /* command: unknown
+     *
+     * The agent didn't use a legal command. This will simply put what the agent
+     * printed into the log and move on.
+     */
     else if(!(TVERB_AGENT))
     {
       alprintf(job_log(a->owner),
