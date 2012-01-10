@@ -179,7 +179,7 @@ function bootstrap($sysconfdir="")
   }
 
   //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
-  require_once("$MODDIR/www/ui/template/template-plugin.php");
+  //require_once("$MODDIR/www/ui/template/template-plugin.php"); DISABLED as don't needed
   require_once("$MODDIR/lib/php/common.php");
   return $SysConf;
 }
