@@ -433,6 +433,8 @@ function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMic
  *  pfile, list all of the breadcrumbs for each file.
  *  If the pfile is a duplicate, then indent it.
  *
+ * DEPRECATED - convert your code to UploadtreeFileList()
+ *
  * \param $Listing = array from a database selection.  The SQL query should
  *	use "ORDER BY pfile_fk" so that the listing can indent duplicate pfiles
  * \param $IfDirPlugin = string containing plugin name to use if this is a directory or any other container
@@ -484,6 +486,63 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
   }
   return($V);
 } // Dir2FileList()
+
+/**
+ * \brief Given an array of pfiles/uploadtree, sorted by
+ *  pfile, list all of the breadcrumbs for each file.
+ *  If the pfile is a duplicate, then indent it.
+ *
+ * \param $Listing = array from a database selection.  The SQL query should
+ *	use "ORDER BY pfile_fk" so that the listing can indent duplicate pfiles
+ * \param $IfDirPlugin = string containing plugin name to use if this is a directory or any other container
+ * \param $IfFilePlugin = string containing plugin name to use if this is a file
+ * \param $Count = first number for indexing the entries (may be -1 for no count)
+ * \param $ShowPhrase Obsolete from bsam
+ *
+ * \return string containing the listing.
+ */
+function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowPhrase=0)
+{
+  $LastPfilePk = -1;
+  $V = "";
+  foreach($Listing as $R)
+  {
+    if (array_key_exists("licenses", $R))
+      $Licenses = $R["licenses"];
+    else
+      $Licenses = '';
+
+    $Phrase='';
+    if ($ShowPhrase && !empty($R['phrase_text']))
+    {
+      $text = _("Phrase");
+      $Phrase = "<b>$text:</b> " . htmlentities($R['phrase_text']);
+    }
+
+    if ((IsDir($R['ufile_mode'])) || (Iscontainer($R['ufile_mode'])))
+    {
+      $V .= "<P />\n";
+      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfDirPlugin,1,
+      NULL,$Count,$Phrase, $Licenses) . "\n";
+    }
+    else if ($R['pfile_fk'] != $LastPfilePk)
+    {
+      $V .= "<P />\n";
+      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
+      NULL,$Count,$Phrase, $Licenses) . "\n";
+      $LastPfilePk = $R['pfile_fk'];
+    }
+    else
+    {
+      $V .= "<div style='margin-left:2em;'>";
+      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
+      NULL,$Count,$Phrase, $Licenses) . "\n";
+      $V .= "</div>";
+    }
+    $Count++;
+  }
+  return($V);
+} // UploadtreeFileList()
 
 
 /**
