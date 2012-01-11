@@ -342,7 +342,7 @@ class ui_browse extends FO_Plugin {
       $V.= menu_to_1list($MenuPfileNoCompare, $Parm, " ", " ");
 
       /* Job queue link */
-      $text = _("Scan queue");
+      $text = _("Scan history");
       if (plugin_find_id('showjobs') >= 0) {
         $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>[$text]</a>";
 
