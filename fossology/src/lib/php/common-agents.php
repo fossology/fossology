@@ -304,7 +304,7 @@ function GetAgentKey($agentName, $agentDesc)
  *
  * \param string  $TableName - name of the ars table (e.g. nomos_ars)
  * \param int     $upload_pk
- * \param int     $limit - limit number of rows returned.  0=No limit
+ * \param int     $limit - limit number of rows returned.  0=No limit, default=1
  * \param int     $agent_fk - ARS table agent_fk, optional
  * \param string  $ExtraWhere - Optional, added to where clause.
  *                   eg: "and bucketpool_fk=2"
@@ -312,7 +312,7 @@ function GetAgentKey($agentName, $agentDesc)
  * \return assoc array of _ars records.
  *         or FALSE on error, or no rows
  */
-function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0, $ExtraWhere="")
+function AgentARSList($TableName, $upload_pk, $limit=1, $agent_fk=0, $ExtraWhere="")
 {
   global $PG_CONN;
 
