@@ -43,6 +43,7 @@ class admin_scheduler extends FO_Plugin
    **/
   function OperationListOption()
   {
+    $V = "";
     foreach ($this->operation_array as $key => $value)
     {
       $V.= "<option value='$key'>$value[0]</option>";
@@ -57,7 +58,7 @@ class admin_scheduler extends FO_Plugin
    **/
   function JobListOption()
   {
-    $job_list_option .= "<option value='0'>scheduler</option>";
+    $job_list_option = "<option value='0'>scheduler</option>";
     $job_array = GetRunnableJobList(); /* get all job list */
     $size = sizeof($job_array);
     for($i = 0; $i < sizeof($job_array); $i++)
