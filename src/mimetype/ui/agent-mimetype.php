@@ -80,7 +80,8 @@ class agent_mimetype extends FO_Plugin {
    * 
    * \return NULL on success, string on failure.
    */
-  function AgentAdd($uploadpk, $Depends = NULL, $Priority = 0) {
+  function AgentAdd($uploadpk, $Depends = NULL, $Priority = 0) 
+  {
     global $PG_CONN;
     /* Get dependency: "mimetype" require "adj2nest". */
     $sql = "SELECT jq_pk FROM jobqueue
@@ -131,6 +132,11 @@ $text = _("Failed to insert job record");
 $text = _("Failed to insert mimetype into job queue");
       return ($text);
     }
+
+    /* Tell the scheduler to check the queue. */
+    $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
+    if (!$success) return $error_msg . "\n" . $output;
+
     return (NULL);
   } // AgentAdd()
 
