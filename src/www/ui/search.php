@@ -269,7 +269,7 @@ class search extends FO_Plugin
         /* Show path if searching an item tree  (don't show on global searches) */
         if ($Item) 
         {
-          $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
+          $V .= Dir2Browse($this->Name,$Item,NULL,1,NULL) . "<P />\n";
           $GETvars .= "&item=$Item";
         }
 
