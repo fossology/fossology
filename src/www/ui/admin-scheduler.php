@@ -164,6 +164,8 @@ class admin_scheduler extends FO_Plugin
     }
     $V="";
     global $Plugins;
+    $status_msg = "";
+
     switch($this->OutputType)
     {
       case "XML":
