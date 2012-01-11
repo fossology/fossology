@@ -140,6 +140,79 @@ class ui_view_license extends FO_Plugin
   } // ViewLicenseText()
 
   /**
+   * \brief Given an uploadtree_pk, return each
+   * license record and canonical name.
+   */
+  function LicenseGetForFile(&$UploadtreePk)
+  {
+    global $PG_CONN;
+
+    /* Get every real item */
+    $SQL = "SELECT
+      CASE
+      WHEN lic_tokens IS NULL THEN licterm_name
+      WHEN tok_match = lic_tokens THEN licterm_name
+      ELSE '''' || licterm_name || '''-style'
+      END AS licterm_name,
+          agent_lic_meta.*,
+          lic_tokens
+            FROM uploadtree AS UT1,
+          licterm_name, licterm, agent_lic_meta, agent_lic_raw
+            WHERE
+            uploadtree_pk = $UploadtreePk
+            AND licterm_name.pfile_fk = UT1.pfile_fk
+            AND licterm_pk=licterm_name.licterm_fk
+            AND agent_lic_meta_pk = licterm_name.agent_lic_meta_fk
+            AND agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
+            AND (lic_tokens IS NULL OR
+                CAST(tok_match AS numeric)/CAST(lic_tokens AS numeric) > 0.5)
+            AND licterm_name_confidence != 3
+            ORDER BY agent_lic_meta_pk,licterm_name
+            ;";
+    $Results = pg_query($PG_CONN, $SQL);
+    DBCheckResult($Results, $SQL, __FILE__, __LINE__);
+    $Results_arr = pg_fetch_all($Results);
+
+    /* Get every item found by term */
+    $SQL = "SELECT
+      licterm_name,
+      agent_lic_meta.*,
+      lic_tokens
+        FROM uploadtree AS UT1,
+      licterm_name, licterm, agent_lic_meta, agent_lic_raw
+        WHERE
+        uploadtree_pk = $UploadtreePk
+        AND licterm_name.pfile_fk = UT1.pfile_fk
+        AND licterm_pk=licterm_name.licterm_fk
+        AND agent_lic_meta_pk = licterm_name.agent_lic_meta_fk
+        AND agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
+        AND (lic_tokens IS NULL OR
+            CAST(tok_match AS numeric)/CAST(lic_tokens AS numeric) > 0.5)
+        AND licterm_name_confidence = 3
+        ORDER BY agent_lic_meta_pk,licterm_name
+        ;";
+    $R2= pg_query($PG_CONN, $SQL);
+    DBCheckResult($R2, $SQL, __FILE__, __LINE__);
+    $R2_arr = pg_fetch_all($R2);
+
+    /* Combine terms by name */
+    for($i=0; !empty($R2_arr[$i]['licterm_name']); $i++)
+    {
+      if ($R2_arr[$i]['agent_lic_meta_pk'] == $R2_arr[$i+1]['agent_lic_meta_pk'])
+      {
+        $R2_arr[$i+1]['licterm_name'] = $R2_arr[$i]['licterm_name'] . ', ' . $R2_arr[$i+1]['licterm_name'];
+      }
+      else
+      {
+        $Results_arr[] = $R2_arr[$i];
+      }
+    }
+    pg_free_result($Results);
+    pg_free_result($R2);
+    return($Results_arr);
+  } // LicenseGetForFile()
+
+  /**
    * This function is called when user output is
    * requested.  This function is responsible for content.
    * The $ToStdout flag is "1" if output should go to stdout, and
@@ -210,7 +283,7 @@ class ui_view_license extends FO_Plugin
     if (empty($ModBack) && (!empty($nomos_out)))  $ModBack = "nomoslicense";
 
     /* Load bSAM licenses for this file */
-    $Results = LicenseGetForFile($Item);
+    $Results = $this->LicenseGetForFile($Item);
 
     /* Show bSAM licenses  */
     if (count($Results) <= 0)
