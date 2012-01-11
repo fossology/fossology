@@ -44,6 +44,9 @@ class ajax_admin_scheduler extends FO_Plugin
    **/
   function JobListOption($type)
   {
+    $job_list_option = "";
+    $job_array = array();
+
     if (empty($type))
     {
       return '';
