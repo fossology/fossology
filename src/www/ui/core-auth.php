@@ -151,6 +151,7 @@ class core_auth extends FO_Plugin {
 	function PostInitialize() {
 		global $Plugins;
 		global $PG_CONN;
+		global $SysConf;
 		
 		if (empty($PG_CONN)) {
 			return (0);
@@ -170,6 +171,7 @@ class core_auth extends FO_Plugin {
 			if (@$_SESSION['time'] + (60 * 480) < $Now) {
 				$_SESSION['User'] = NULL;
 				$_SESSION['UserId'] = NULL;
+                $SysConf['auth']['UserId'] = NULL;
 				$_SESSION['UserLevel'] = NULL;
 				$_SESSION['UserEmail'] = NULL;
 				$_SESSION['Folder'] = NULL;
@@ -182,6 +184,7 @@ class core_auth extends FO_Plugin {
 			/* Sessions are not transferable. */
 			$_SESSION['User'] = NULL;
 			$_SESSION['UserId'] = NULL;
+            $SysConf['auth']['UserId'] = NULL;
 			$_SESSION['UserLevel'] = NULL;
 			$_SESSION['UserEmail'] = NULL;
 			$_SESSION['Folder'] = NULL;
@@ -221,6 +224,7 @@ class core_auth extends FO_Plugin {
 				if (empty($R['user_pass'])) {
 					$_SESSION['User'] = NULL;
 					$_SESSION['UserId'] = NULL;
+                    $SysConf['auth']['UserId'] = NULL;
 					$_SESSION['UserLevel'] = NULL;
 					$_SESSION['UserEmail'] = NULL;
 					$_SESSION['Folder'] = NULL;
@@ -235,6 +239,7 @@ class core_auth extends FO_Plugin {
 						$Level = $row['user_perm'];
 						$R = $row;
 						$_SESSION['UserId'] = $R['user_pk'];
+                        $SysConf['auth']['UserId'] = $R['user_pk'];
 						$_SESSION['Folder'] = $R['root_folder_fk'];
 						$_SESSION['UserLevel'] = $R['user_perm'];
 						$_SESSION['UserEmail'] = $R['user_email'];
@@ -259,6 +264,7 @@ class core_auth extends FO_Plugin {
 				$R = $row;
 				$Level = $R['user_perm'];
 				$_SESSION['UserId'] = $R['user_pk'];
+                $SysConf['auth']['UserId'] = $R['user_pk'];
 				$_SESSION['Folder'] = $R['root_folder_fk'];
 				$_SESSION['UserLevel'] = $R['user_perm'];
 				$_SESSION['UserEmail'] = $R['user_email'];
@@ -284,8 +290,11 @@ class core_auth extends FO_Plugin {
 	 *
 	 * \return string on match, or null on no-match.
 	 */
-	function CheckUser($User, $Pass, $Referer) {
+	function CheckUser($User, $Pass, $Referer) 
+    {
 		global $PG_CONN;
+		global $SysConf;
+
 		$V = "";
 		if (empty($User)) {
 			return;
@@ -321,6 +330,7 @@ class core_auth extends FO_Plugin {
 		/* If you make it here, then username and password were good! */
 		$_SESSION['User'] = $R['user_name'];
 		$_SESSION['UserId'] = $R['user_pk'];
+        $SysConf['auth']['UserId'] = $R['user_pk'];
 		$_SESSION['UserEmail'] = $R['user_email'];
 		$_SESSION['UserEnote'] = $R['email_notify'];
 		if(empty($R['ui_preference']))
@@ -369,7 +379,9 @@ class core_auth extends FO_Plugin {
 	/**
 	 * \brief This is only called when the user logs out.
 	 */
-	function Output() {
+	function Output() 
+    {
+		global $SysConf;
 
 		if ($this->State != PLUGIN_STATE_READY) {
 			return;
@@ -457,6 +469,7 @@ class core_auth extends FO_Plugin {
 				//echo "<pre>Output:It's a logout\n</pre>";
 				$_SESSION['User'] = NULL;
 				$_SESSION['UserId'] = NULL;
+                $SysConf['auth']['UserId'] = NULL;
 				$_SESSION['UserLevel'] = NULL;
 				$_SESSION['UserEmail'] = NULL;
 				$_SESSION['Folder'] = NULL;
