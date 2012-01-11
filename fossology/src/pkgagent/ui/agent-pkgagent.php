@@ -114,20 +114,29 @@ class agent_pkgagent extends FO_Plugin
 
     /* Prepare the job: job "Package Agent" */
     $jobpk = JobAddJob($uploadpk,"Package Scan",$Priority=0);
-    if (empty($jobpk) || ($jobpk < 0)) {
+    if (empty($jobpk) || ($jobpk < 0)) 
+    {
       $text = _("Failed to insert job record");
-      return($text); }
+      return($text); 
+    }
 
-      /* jqargs wants EVERY RPM and DEBIAN pfile in this upload */
-      $jqargs = $uploadpk;
+    /* jqargs wants EVERY RPM and DEBIAN pfile in this upload */
+    $jqargs = $uploadpk;
 
-      /* Add job: job "Package Scan" has jobqueue item "pkgagent" */
-      $jobqueuepk = JobQueueAdd($jobpk,"pkgagent",$jqargs,"no","",$Dep);
-      if (empty($jobqueuepk)) {
-        $text = _("Failed to insert pkgagent into job queue");
-        return($text); }
+    /* Add job: job "Package Scan" has jobqueue item "pkgagent" */
+    $jobqueuepk = JobQueueAdd($jobpk,"pkgagent",$jqargs,"no","",$Dep);
+    if (empty($jobqueuepk)) 
+    {
+      $text = _("Failed to insert pkgagent into job queue");
+      return($text); 
+    }
 
-        return(NULL);
+    /* Tell the scheduler to check the queue. */
+    $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
+    if (!$success) return $error_msg . "\n" . $output;
+
+    return(NULL);
+
   } // AgentAdd()
 
   /**
