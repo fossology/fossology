@@ -228,7 +228,7 @@ int main(int argc, char** argv)
     if(FD_ISSET(s, &fds))
     {
       memset(buffer, '\0', sizeof(buffer));
-      bytes = 0;
+      bytes = 1;
 
       while(buffer[bytes - 1] != '\n')
       {
