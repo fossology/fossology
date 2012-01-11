@@ -427,8 +427,9 @@ class ui_view_info extends FO_Plugin
       $text2 = _("Value");
       $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
 
-      while ($R = pg_fetch_assoc($result) and !empty($R['pkg_pk']))
+      if (pg_num_rows($result))
       {
+        $R = pg_fetch_assoc($result);
         $Require = $R['pkg_pk'];
 
         $text = _("Package");
