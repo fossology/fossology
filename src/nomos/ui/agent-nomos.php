@@ -145,6 +145,11 @@ class agent_fonomos extends FO_Plugin {
       $text = _("Failed to insert agent nomos into job queue");
       return ($text);
     }
+
+    /* Tell the scheduler to check the queue. */
+    $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
+    if (!$success) return $error_msg . "\n" . $output;
+    
     return (NULL);
   } // AgentAdd()
 
