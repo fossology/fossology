@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -23,247 +23,25 @@ class search extends FO_Plugin
   var $Name       = "search";
   var $Title      = TITLE_search;
   var $Version    = "1.0";
-  var $MenuList   = "";
-  var $Dependency = array("view","browse");
+  var $MenuList   = "Search";
+  var $MenuOrder  = 90;
+  var $Dependency = array("browse");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
-
-  /**
-   * \brief Given a tag, return all uploadtree.
-   */
-  function GetUploadtreeFromTag($Item,$tag,$Page,$searchtype)
-  {
-    global $PG_CONN;
-    $Max = 50;
-
-    /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree WHERE uploadtree_pk = $Item;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1)
-    {
-      pg_free_result($result);
-      $text = _("Invalid URL, nonexistant item");
-      return "<h2>$text $Uploadtree_pk</h2>";
-    }
-    $row = pg_fetch_assoc($result);
-    $lft = $row["lft"];
-    $rgt = $row["rgt"];
-    $upload_pk = $row["upload_fk"];
-    pg_free_result($result);
-
-    $SQL = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file INNER JOIN tag ON tag_pk = tag_fk AND (tag = '$tag' OR tag LIKE '$tag')) T ON uploadtree.pfile_fk = T.pfile_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt UNION SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_uploadtree INNER JOIN tag ON tag_pk = tag_fk AND (tag = '$tag' OR tag LIKE '$tag')) T ON uploadtree.uploadtree_pk = T.uploadtree_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt";
-    $Offset = $Page * $Max;
-
-    /* search only containers of all files */
-    if ($searchtype == 'package')
-    {
-      $SQL .= " AND ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0)";
-    }
-    $SQL .= " ORDER BY ufile_name LIMIT $Max OFFSET $Offset;";
-    $result = pg_query($PG_CONN, $SQL);
-    DBCheckResult($result, $SQL, __FILE__, __LINE__);
-
-    $V = "";
-    $Count = pg_num_rows($result);
-    //$V .= "<pre>" . htmlentities($SQL) . "</pre>\n";
-
-    if (($Page > 0) || ($Count >= $Max))
-    {
-      $Uri = Traceback_uri() . "?mod=" . $this->Name;
-      $Uri .= "&upload=$upload_pk";
-      $Uri .= "&item=$Item";
-      $Uri .= "&tag=" . urlencode($tag);
-      $Uri .= "&searchtype=" . urlencode($searchtype);
-      $VM = MenuEndlessPage($Page, ($Count >= $Max),$Uri) . "<P />\n";
-      $V .= $VM;
-    }
-    else
-    {
-      $VM = "";
-    }
-
-    if ($Count == 0)
-    {
-      pg_free_result($result);
-      $V .= _("No results.\n");
-      return($V);
-    }
-
-    if ($Page==0)
-    {
-      $SQL = preg_replace('/\*/','COUNT(*) AS count',$SQL,1);
-      $SQL = preg_replace('/ ORDER BY .*;/',';',$SQL);
-      $CountR = pg_query($PG_CONN, $SQL);
-      DBCheckResult($CountR, $SQL, __FILE__, __LINE__);
-      $text = _("Total matched:");
-      $row = pg_fetch_assoc($CountR);
-      pg_free_result($CountR);
-      $V .= "$text " . number_format($row['count'],0,"",",") . "<br>\n";
-    }
-
-    $V .= Dir2FileList($result,"browse","view",$Page*$Max + 1);
-    pg_free_result($result);
-
-    /* put page menu at the bottom, too */
-    if (!empty($VM)) { $V .= "<P />\n" . $VM; }
-    return($V);
-  }
-
-  /**
-   * \brief Given a filename, return all uploadtree.
-   */
-  function GetUploadtreeFromName($Item,$Filename,$tag,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax,$searchtype)
-  {
-    $Max = 50;
-    global $PG_CONN;
-
-    /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk, pfile_fk FROM uploadtree WHERE uploadtree_pk = $Item;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1)
-    {
-      pg_free_result($result);
-      $text = _("Invalid URL, nonexistant item");
-      return "<h2>$text $Uploadtree_pk</h2>";
-    }
-    $row = pg_fetch_assoc($result);
-    $lft = $row["lft"];
-    $rgt = $row["rgt"];
-    $upload_pk = $row["upload_fk"];
-    $pfile_pk = $row["pfile_fk"];
-    pg_free_result($result);
-
-    $Filename = str_replace("'","''",$Filename); // protect DB
-    $SQL = "SELECT * FROM uploadtree INNER JOIN pfile ON pfile_pk = pfile_fk AND ufile_name like '$Filename'";
-    $NeedAnd=0;
-    if (!empty($Mimetype) && ($Mimetype >= 0))
-    {
-      if ($NeedAnd) { $SQL .= " AND"; }
-      else { $SQL .= " WHERE"; }
-      $SQL .= " (pfile.pfile_mimetypefk ";
-      if ($MimetypeNot != 0) { $SQL .= "!"; }
-      $SQL .= "= $Mimetype";
-      if ($MimetypeNot != 0) { $SQL .= " OR pfile.pfile_mimetypefk IS NULL)"; }
-      $NeedAnd=1;
-    }
-    if (!empty($SizeMin) && ($SizeMin >= 0))
-    {
-      if ($NeedAnd) { $SQL .= " AND"; }
-      else { $SQL .= " WHERE"; }
-      $SQL .= " pfile.pfile_size > $SizeMin";
-      $NeedAnd=1;
-    }
-    if (!empty($SizeMax) && ($SizeMax >= 0))
-    {
-      if ($NeedAnd) { $SQL .= " AND"; }
-      else { $SQL .= " WHERE"; }
-      $SQL .= " pfile.pfile_size < $SizeMax";
-      $NeedAnd=1;
-    }
-    $Offset = $Page * $Max;
-
-    $SQL .= "  AND upload_fk = $upload_pk AND lft >= $lft AND rgt <= $rgt";
-    /* search only containers of all files */
-    if ($searchtype == 'package')
-    {
-      $SQL .= " AND ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0)";
-    }
-
-    $SQL .= " ORDER BY pfile_fk,ufile_name LIMIT $Max OFFSET $Offset;";
-
-    if (!empty($tag))
-    {
-      $TagSQL = "SELECT * FROM (";
-      $TagSQL .= substr($SQL,0,-1);
-      $TagSQL .= ") U INNER JOIN (SELECT * FROM tag_file INNER JOIN tag ON tag_pk = tag_fk AND (tag = '$tag' OR tag LIKE '$tag')) T ON U.pfile_fk = T.pfile_fk";
-      $SQL = $TagSQL;
-    }
-
-    $result = pg_query($PG_CONN, $SQL);
-    DBCheckResult($result, $SQL, __FILE__, __LINE__);
-
-    /* get last nomos agent_pk that has data for this upload */
-    $Agent_name = "nomos";
-    $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
-    $nomosagent_pk = $AgentRec[0]["agent_fk"];
-    if ($nomosagent_pk)
-    {
-      /* add licenses to results */
-      while ($utprec = pg_fetch_assoc($result))
-      {
-        $utprec['licenses'] = GetFileLicenses_string($nomosagent_pk, $utprec['pfile_fk'], 0);
-      }
-    }
-
-    $V = "";
-    $Count = pg_num_rows($result);
-    //$V .= "<pre>" . htmlentities($SQL) . "</pre>\n";
-
-    if (($Page > 0) || ($Count >= $Max))
-    {
-      $Uri = Traceback_uri() . "?mod=" . $this->Name;
-      $Uri .= "&upload=$upload_pk";
-      $Uri .= "&item=$Item";
-      $Uri .= "&filename=" . urlencode($Filename);
-      $Uri .= "&tag=" . urlencode($tag);
-      $Uri .= "&searchtype=" . urlencode($searchtype);
-      $Uri .= "&sizemin=$SizeMin";
-      $Uri .= "&sizemax=$SizeMax";
-      $Uri .= "&notmimetype=$MimetypeNot";
-      $Uri .= "&mimetype=$Mimetype";
-      $VM = MenuEndlessPage($Page, ($Count >= $Max),$Uri) . "<P />\n";
-      $V .= $VM;
-    }
-    else
-    {
-      $VM = "";
-    }
-
-    if ($Count == 0)
-    {
-      $V .= _("No results.\n");
-      pg_free_result($result);
-      return($V);
-    }
-
-    if ($Page==0)
-    {
-      $SQL = preg_replace('/\*/','COUNT(*) AS count',$SQL,1);
-      $SQL = preg_replace('/ ORDER BY .*;/',';',$SQL);
-      $CountR = pg_query($PG_CONN, $SQL);
-      DBCheckResult($CountR, $SQL, __FILE__, __LINE__);
-      $row = pg_fetch_assoc($CountR);
-      pg_free_result($CountR);
-      $text = _("Total matched:");
-      $V .= "$text " . number_format($row['count'],0,"",",") . "<br>\n";
-    }
-
-    $V .= Dir2FileList($result,"browse","view",$Page*$Max + 1);
-    pg_free_result($result);
-
-    /* put page menu at the bottom, too */
-    if (!empty($VM)) { $V .= "<P />\n" . $VM; }
-    return($V);
-  } // GetUploadtreeFromName()
+  var $MaxPerPage  = 100;  /* maximum number of result items per page */
 
   /**
    * \brief Customize submenus.
    */
   function RegisterMenus()
   {
+    if (!IsRestrictedTo())
+      menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array(
-      "show",
-      "format",
-      "page",
-      "upload",
-      "item",
-    ));
+    $URI = $this->Name . Traceback_parm_keep(array( "page", "item",));
     $Item = GetParm("item", PARM_INTEGER);
-    $Upload = GetParm("upload", PARM_INTEGER);
-    if (!empty($Item) && !empty($Upload)) {
+    if (!empty($Item)) {
       if (GetParm("mod", PARM_STRING) == $this->Name) {
         menu_insert("Browse::Search", 1);
       }
@@ -274,143 +52,319 @@ class search extends FO_Plugin
     }
   } // RegisterMenus()
 
+
+  /**
+   * \brief Given a filename, return all uploadtree.
+   * \param $Item     uploadtree_pk of tree to search, if empty, do global search
+   * \param $Filename filename or pattern to search for, false if unused
+   * \param $tag      tag (or tag pattern mytag%) to search for, false if unused
+   * \param $Page     display page number
+   * \param $SizeMin  Minimum file size, -1 if unused
+   * \param $SizeMax  Maximum file size, -1 if unused
+   * \param $searchtype "containers" or "allfiles"
+   * \return array of uploadtree recs.  Each record contains uploadtree_pk, parent, 
+   *         upload_fk, pfile_fk, ufile_mode, and ufile_name
+   */
+  function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchtype)
+  {
+    global $PG_CONN;
+    $UploadtreeRecs = array();  // uploadtree record array to return
+
+    if ($Item)
+    {
+      /* Find lft and rgt bounds for this $Uploadtree_pk  */
+      $sql = "SELECT lft,rgt,upload_fk, pfile_fk FROM uploadtree WHERE uploadtree_pk = $Item;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result) < 1)
+      {
+        pg_free_result($result);
+        $text = _("Invalid URL, nonexistant item");
+        return "<h2>$text $Uploadtree_pk</h2>";
+      }
+      $row = pg_fetch_assoc($result);
+      $lft = $row["lft"];
+      $rgt = $row["rgt"];
+      $upload_pk = $row["upload_fk"];
+      pg_free_result($result);
+    }
+
+    /* Start the result select stmt */
+    $SQL = "SELECT uploadtree_pk, parent, upload_fk, uploadtree.pfile_fk, ufile_mode, ufile_name FROM uploadtree";
+
+    /* Figure out the tag_pk's of interest */
+    if (!empty($tag))
+    {
+      $sql = "select tag_pk from tag where tag ilike '$tag'";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result) < 1)
+      {
+        /* tag doesn't match anything, so no results are possible */
+        pg_free_result($result);
+        return $UploadtreeRecs;
+      }
+
+      /* Make a list of the tag_pk's that satisfy the criteria */
+      $tag_pk_array = pg_fetch_all($result);
+      pg_free_result($result);
+
+      /* add the tables needed for the tag query */
+      $SQL .= ", tag_file, tag_uploadtree";
+    }
+
+
+/*
+    if (!empty($tag))
+    {
+      $TagSQL = "SELECT * FROM (";
+      $TagSQL .= substr($SQL,0,-1);
+      $TagSQL .= ") U INNER JOIN (SELECT * FROM tag_file INNER JOIN tag ON tag_pk = tag_fk AND (tag = '$tag' OR tag LIKE '$tag')) T ON U.pfile_fk = T.pfile_fk";
+      $SQL = $TagSQL;
+    }
+*/
+    
+
+    /* do we need the pfile table? Yes, if any of these are a search critieria.  */
+    if (!empty($SizeMin) or !empty($SizeMax))
+    {
+      $SQL .= ", pfile where pfile_pk=uploadtree.pfile_fk ";
+      $NeedAnd = true;
+    }
+    else
+    {
+      $SQL .= " where ";
+      $NeedAnd = false;
+    }
+
+    /* add the tag conditions */
+    if (!empty($tag))
+    {
+      if ($NeedAnd) $SQL .= " AND"; 
+      $SQL .= "(";
+      foreach ($tag_pk_array as $tagRec)
+      {
+        $tag_pk = $tagRec['tag_pk'];
+        $SQL .= "(uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk) or (uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk) ";
+        $NeedAnd=1;
+      }
+      $SQL .= ")";
+    }
+
+    if ($Filename) 
+    {
+      $Filename = str_replace("'","''",$Filename); // protect DB
+      if ($NeedAnd) $SQL .= " AND"; 
+      $SQL .= " ufile_name ilike '$Filename'";
+      $NeedAnd=1;
+    }
+
+    if (!empty($SizeMin))
+    {
+      if ($NeedAnd)  $SQL .= " AND";
+      $SQL .= " pfile.pfile_size >= $SizeMin";
+      $NeedAnd=1;
+    }
+
+    if (!empty($SizeMax))
+    {
+      if ($NeedAnd)  $SQL .= " AND"; 
+      $SQL .= " pfile.pfile_size <= $SizeMax";
+      $NeedAnd=1;
+    }
+
+    if ($Item) 
+    {
+      if ($NeedAnd) $SQL .= " AND"; 
+      $SQL .= "  upload_fk = $upload_pk AND lft >= $lft AND rgt <= $rgt";
+      $NeedAnd=1;
+    }
+
+    /* search only containers */
+    if ($searchtype == 'containers') $SQL .= " AND ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0)";
+
+    $Offset = $Page * $this->MaxPerPage;
+    $SQL .= " ORDER BY ufile_name, uploadtree.pfile_fk LIMIT $this->MaxPerPage OFFSET $Offset;";
+
+    $result = pg_query($PG_CONN, $SQL);
+    DBCheckResult($result, $SQL, __FILE__, __LINE__);
+    if (pg_num_rows($result)) $UploadtreeRecs = pg_fetch_all($result);
+    pg_free_result($result);
+
+    return($UploadtreeRecs);
+  } // GetResults()
+
+
+  /** 
+   * \brief print search results to stdout
+   * \param $UploadtreeRecs Array of search results (uploadtree recs)
+   * \param $Page page number being displayed.
+   * \param $GETvars GET variables
+   * \return HTML to display record results
+   */
+  function HTMLResults($UploadtreeRecs, $Page, $GETvars)
+  {
+    $Outbuf = "";
+    $Count = count($UploadtreeRecs);
+    if ($Count == 0)
+    {
+      $Outbuf .=  _("No matching files.\n");
+      return $Outbuf;
+    }
+
+//debugprint($UploadtreeRecs, "UploadtreeRecs");
+    /* get last nomos agent_pk that has data for this upload */
+    $Agent_name = "nomos";
+    $upload_pk = $UploadtreeRecs[0]["upload_fk"];
+    $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
+    $nomosagent_pk = $AgentRec[0]["agent_fk"];
+    /* add license string to record */
+    if ($nomosagent_pk)
+    {
+      foreach($UploadtreeRecs as &$UploadtreeRec)
+      {
+        if ($UploadtreeRec['pfile_fk'])
+          $UploadtreeRec['licenses'] = GetFileLicenses_string($nomosagent_pk, $UploadtreeRec['pfile_fk'], 0);
+      }
+    }
+
+    if (($Page > 0) || ($Count >= $this->MaxPerPage))
+    {
+      $Uri = Traceback_uri() . "?mod=" . $this->Name . $GETvars;
+      $PageChoices = MenuEndlessPage($Page, ($Count >= $this->MaxPerPage),$Uri) . "<P />\n";
+      $Outbuf .= $PageChoices;
+    }
+    else
+      $PageChoices = "";
+
+    $Outbuf .= UploadtreeFileList($UploadtreeRecs, "browse","view",$Page*$this->MaxPerPage + 1);
+
+    /* put page menu at the bottom, too */
+    $Outbuf .= $PageChoices;
+    
+    return $Outbuf;
+  }
+
+
   /**
    * \brief Display the loaded menu and plugins.
    */
   function Output()
   {
-    $uTime = microtime(true);
     if ($this->State != PLUGIN_STATE_READY) { return; }
-    $V="";
-    $Upload = GetParm("upload",PARM_INTEGER);
-    $Item = GetParm("item",PARM_INTEGER);
     global $Plugins;
     global $PG_CONN;
+
+    $uTime = microtime(true);
+    $CriteriaCount = 0;
+    $V="";
+    $GETvars="";
+    $Item = GetParm("item",PARM_INTEGER);
+    
     switch($this->OutputType)
     {
       case "XML":
         break;
       case "HTML":
-        /************************/
-        /* Show the folder path */
-        /************************/
-        $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
+        /* Show path if searching an item tree  (don't show on global searches) */
+        if ($Item) 
+        {
+          $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
+          $GETvars .= "&item=$Item";
+        }
 
         $searchtype = GetParm("searchtype",PARM_STRING);
+        $GETvars .= "&searchtype=" . urlencode($searchtype);
+
         $Filename = GetParm("filename",PARM_STRING);
+        if (!empty($Filename)) 
+        {
+          $CriteriaCount++;
+          $GETvars .= "&filename=" . urlencode($Filename);
+        }
+
         $tag = GetParm("tag",PARM_STRING);
-        $SizeMin = GetParm("sizemin",PARM_TEXT) . 'x';
-        if ($SizeMin != 'x') { $SizeMin=intval($SizeMin); }
-        else { $SizeMin = -1; }
-        if ($SizeMin < 0) { $SizeMin=-1; }
-        $SizeMax = GetParm("sizemax",PARM_TEXT) . 'x';
-        if ($SizeMax != 'x') { $SizeMax=intval($SizeMax); }
-        else { $SizeMax = -1; }
-        if ($SizeMax < 0) { $SizeMax=-1; }
-        $MimetypeNot = GetParm("notmimetype",PARM_INTEGER);
-        $Mimetype = GetParm("mimetype",PARM_INTEGER);
+        if (!empty($tag))
+        {
+          $CriteriaCount++;
+          $GETvars .= "&tag=" . urlencode($tag);
+        }
+
+        $SizeMin = GetParm("sizemin",PARM_TEXT);
+        if (!empty($SizeMin) && ($SizeMin >= 0))
+        { 
+          $SizeMin=intval($SizeMin); 
+          $CriteriaCount++;
+          $GETvars .= "&sizemin=$SizeMin";
+        }
+
+        $SizeMax = GetParm("sizemax",PARM_TEXT);
+        if (!empty($SizeMax) && ($SizeMax >= 0))
+        { 
+          $SizeMax=intval($SizeMax); 
+          $CriteriaCount++;
+          $GETvars .= "&sizemax=$SizeMax";
+        }
+
         $Page = GetParm("page",PARM_INTEGER);
 
+        /*******  Input form  *******/
         $V .= "<form action='" . Traceback_uri() . "?mod=" . $this->Name . "' method='POST'>\n";
-        $V .= "<ul>\n";
-        $text = _("Search for");
-        $text1 = _("Containers only(rpms,tars,isos,etc).");
-        $text2 = _("All Files");
 
-        if ($searchtype == 'package')
-        {
-          $SelectedP = " checked ";
-        }else{
-          $SelectedP = "";
-        }
-        $V .= "<li>$text: <input type='radio' name='searchtype' value='package' $SelectedP>$text1 \n";
-        if ($searchtype == 'file')
-        {
-          $Selected = " checked ";
-        }else{
-          $Selected = "";
-        }
-        $V .= "<input type='radio' name='searchtype' value='file' $Selected>$text2\n";
-        $text = _("Enter the filename to find: ");
-        $V .= "<li>$text";
-        $V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
-        $V .= _("You can use '%' as a wild-card.\n");
-
-        $text = _("Tag to find");
-        $V .= "<li>$text:  <input name='tag' size='30' value='" . htmlentities($tag) . "'>\n";
-
-        $text = _("Mimetype ");
-        $V .= "<li>$text";
-        $V .= "<select name='notmimetype'>\n";
-        if ($MimetypeNot == 0)
-        {
-          $text = _("IS");
-          $V .= "<option value='0' selected>$text</option>\n";
-          $text = _("IS NOT");
-          $V .= "<option value='1'>$text</option>\n";
-        }
+        /* searchtype:  'allfiles' or 'containers' */
+        $ContainersChecked = "";
+        $AllFilesChecked = "";
+        if ($searchtype == 'containers') 
+          $ContainersChecked = "checked=\"checked\"";
         else
-        {
-          $text = _("IS");
-          $V .= "<option value='0'>$text</option>\n";
-          $text = _("IS NOT");
-          $V .= "<option value='1' selected>$text</option>\n";
-        }
-        $V .= "</select>\n";
-        $V .= "<select name='mimetype'>\n";
-        $sql = "SELECT * FROM mimetype ORDER BY mimetype_name;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $text = _("Select mimetype...");
-        $V .= "<option value='-1'>$text</option>\n";
-        while(($row = pg_fetch_assoc($result)) and !empty($row['mimetype_pk']))
-        {
-          if ($row['mimetype_pk'] == $Mimetype)
-          {
-            $V .= "<option value='" . $row['mimetype_pk'] . "' selected>";
-          }
-          else
-          {
-            $V .= "<option value='" . $row['mimetype_pk'] . "'>";
-          }
-          $V .= $row['mimetype_name'];
-          $V .= "</option>\n";
-        }
-        pg_free_result($result);
-        $V .= "</select>\n";
-        $Value=$SizeMin; if ($Value < 0) { $Value=''; }
+          $AllFilesChecked = "checked=\"checked\"";
+        $text = _("Limit search to");
+        $text1 = _("Containers only (rpms, tars, isos, etc)");
+        $V .= "<u><i><b>$text:</b></i></u><br> <input type='radio' name='searchtype' value='containers' $ContainersChecked><b>$text1</b>\n";
+        $text2 = _("All Files");
+        $V .= "<br> <input type='radio' name='searchtype' value='allfiles' $AllFilesChecked><b>$text2</b>\n";
+
+        $V .= "<p><u><i><b>" . _("Choose one or more search criteria.") . "</b></i></u>";
+        $V .= "<ul>\n";
+
+        /* filename */
+        $text = _("Enter the filename to find: ");
+        $V .= "<li><b>$text</b>";
+        $V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
+        $V .= "<br>" . _("You can use '%' as a wild-card. ");
+        $V .= _("For example, '%v3.war', or 'mypkg%.tar'.");
+        $V .= " &nbsp;" . _("Filename search is not case sensitive.");
+
+        /* tag  */
+        $text = _("Tag to find");
+        $V .= "<li><b>$text:</b>  <input name='tag' size='30' value='" . htmlentities($tag) . "'>\n";
+
+        /* file size >= */
         $text = _("File size is");
         $text1 = _(" bytes\n");
-        $V .= "<li>$text &gt; <input name='sizemin' size=10 value='$Value'>$text1";
-        $Value=$SizeMax; if ($Value < 0) { $Value=''; }
+        $V .= "<li><b>$text &ge; </b><input name='sizemin' size=10 value='$SizeMin'>$text1";
+
+        /* file size <= */
         $text = _("File size is");
         $text1 = _(" bytes\n");
-        $V .= "<li>$text &lt; <input name='sizemax' size=10 value='$Value'>$text1";
+        $V .= "<li><b>$text &le; </b><input name='sizemax' size=10 value='$SizeMax'>$text1";
 
         $V .= "</ul>\n";
         $V .= "<input type='hidden' name='item' value='$Item'>\n";
-        $V .= "<input type='hidden' name='upload' value='$Upload'>\n";
         $text = _("Search");
-        $V .= "<input type='submit' value='$text!'>\n";
+        $V .= "<input type='submit' value='$text'>\n";
         $V .= "</form>\n";
+        /*******  END Input form  *******/
 
-        if (!empty($Filename))
+        if ($CriteriaCount)
         {
           if (empty($Page)) { $Page = 0; }
           $V .= "<hr>\n";
           $text = _("Files matching");
           $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
-          $V .= $this->GetUploadtreeFromName($Item,$Filename,$tag,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax,$searchtype);
-        } else {
-          if (!empty($tag))
-          {
-            if (empty($Page)) { $Page = 0; }
-            $V .= "<hr>\n";
-            $text = _("Files matching");
-            $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
-            $V .= $this->GetUploadtreeFromTag($Item,$tag,$Page,$searchtype);
-          }
-        }
+          $UploadtreeRecs = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype);
+          $V .= $this->HTMLResults($UploadtreeRecs, $Page, $GETvars);
+        } 
         break;
       case "Text":
         break;
