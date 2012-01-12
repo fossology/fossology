@@ -2994,7 +2994,7 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_MPLref2
 %NOCHECK%
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"(distribute|develop|offere?d?|licen[cs]ed|available|protected|covered|provided|subject|comes) =SOME= (\<mpl\>|mozilla public licen[cs]e)"
+%STR%	"(distribute|develop|offere?d?|licen[cs]ed|available|protected|covered|provided|subject|comes) =SOME= (\<[:space:]mpl[:space:]\>|mozilla public licen[cs]e)"
 #
 %ENTRY%	_LT_MPL_OR
 %NOCHECK%
