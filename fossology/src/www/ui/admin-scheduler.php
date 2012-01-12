@@ -91,15 +91,15 @@ class admin_scheduler extends FO_Plugin
     switch ($operation)
     {
       case 'status':
-        $text = _("Get status of the");
+        $text = _("Got status of the");
         $operation_text = "$text $job_type";
         break;
       case 'database':
-        $text = "Force the scheduler to check the job queue";
+        $text = "Scheduler checked the job queue";
         $operation_text = $text;
         break;
       case 'reload':
-        $text =_("Reload the configuration information for the agents and hosts");
+        $text =_("Configuration information for the agents and hosts reloaded");
         $operation_text = $text;
         break;
       case 'agents':
@@ -159,11 +159,11 @@ class admin_scheduler extends FO_Plugin
    **/
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return(0);
-    }
-    $V="";
     global $Plugins;
+
+    if ($this->State != PLUGIN_STATE_READY)  return(0);
+
+    $V="";
     $status_msg = "";
 
     switch($this->OutputType)
@@ -174,13 +174,13 @@ class admin_scheduler extends FO_Plugin
         $this->operation_array = array
         (
         "status" => array(_("Status"), _("Display job or scheduler status.")), 
-        "database" => array(_("Check job queue"),_("Force the scheduler to check the job queue.")), 
-        "reload" => array(_("Reload"), _("Reload the configuration information for the agents and hosts.")), 
-        "agents" => array(_("Agents"), _("Get list of valid agents.")), 
+        "database" => array(_("Check job queue"),_("Check for new jobs.")), 
+        "reload" => array(_("Reload"), _("Reload fossology.conf.")), 
+        "agents" => array(_("Agents"), _("Show a list of enabled agents.")), 
         "verbose" => array(_("Verbose"), _("Change the verbosity level of the scheduler or a job.")), 
-        "stop" => array(_("Shutdown Scheduler"), _("Shutdown the scheduler gracefully.  This will stop all background processing, but the user interface will still be available.  Depending on what is currently running, this could take some time.")), 
-        "restart" => array(_("Restart paused job"), _("Restart a job that has been paused.")), 
-        "pause" => array(_("Pause started job"), _("Pause a job that has been started.")), 
+        "stop" => array(_("Shutdown Scheduler"), _("Shutdown the scheduler gracefully and stop all background processing.  This can take awhile for all the agents to quit.")), 
+        "restart" => array(_("Restart paused job"), _("Restart a paused job.")), 
+        "pause" => array(_("Pause started job"), _("Pause a running job.")), 
         "priority" => array(_("Priority"), _("Change the priority of a job."))
         );
 

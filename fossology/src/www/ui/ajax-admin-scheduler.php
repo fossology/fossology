@@ -80,6 +80,7 @@ class ajax_admin_scheduler extends FO_Plugin
    **/
   function VerboseListOption()
   {
+    $verbose_list_option = "";
     $min = 1;
     $max = 3;
     for ($i = $min; $i <= $max; $i++)
