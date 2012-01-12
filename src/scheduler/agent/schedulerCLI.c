@@ -228,16 +228,16 @@ int main(int argc, char** argv)
     if(FD_ISSET(s, &fds))
     {
       memset(buffer, '\0', sizeof(buffer));
-      bytes = 1;
+      bytes = 0;
 
-      while(buffer[bytes - 1] != '\n')
+      do
       {
         bytes = read(s, buffer + bytes, sizeof(buffer) - bytes);
 
         if(bytes == 0)
           closing = 1;
         bytes = strlen(buffer);
-      }
+      } while(buffer[bytes - 1] != '\n');
 
       for(poss = strtok(buffer, "\n"); poss != NULL; poss = strtok(NULL, "\n"))
       {
