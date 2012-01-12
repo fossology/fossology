@@ -283,37 +283,44 @@ class ui_view_license extends FO_Plugin
     if (empty($ModBack) && (!empty($nomos_out)))  $ModBack = "nomoslicense";
 
     /* Load bSAM licenses for this file */
-    $Results = $this->LicenseGetForFile($Item);
+    global $SYSCONFDIR;
+    $bsam_plugin_dir = "$SYSCONFDIR/mods-enabled/bsam";
+    $rc = file_exists($bsam_plugin_dir);
+    /** if the bsam plugin does exist, get and show bSAM licenses */
+    if ($rc)
+    {
+      $Results = $this->LicenseGetForFile($Item);
 
-    /* Show bSAM licenses  */
-    if (count($Results) <= 0)
-    {
-      /*
-         Since LicenseGetForFile() doesn't distinguish between files that
-         bSAM ran on and found no licenses, and files that bSAM was never
-         run on (both cases return no $Results rows), don't tell the
-         user a misleading "No licenses found".
-       */
-      // $View->AddHighlight(-1,-1,'white',NULL,"No licenses found");
-      if (empty($ModBack)) $ModBack = "browse";
-    }
-    else
-    {
-      foreach($Results as $R)
+      /* Show bSAM licenses  */
+      if (count($Results) <= 0)
       {
-        if (empty($R['pfile_path'])) { continue; }
-        if (!empty($R['phrase_text']))
-        {
-          $RefURL = NULL;
-          if ($R['licterm_name'] != 'Phrase') { $R['phrase_text'] = ''; }
-        }
-        else
-        {
-          $RefURL=Traceback() . "&lic=" . $R['lic_fk'] . "&licset=" . $R['tok_pfile_start'];
-        }
-        $this->ConvertLicPathToHighlighting($R,$R['licterm_name'],$RefURL);
+        /*
+           Since LicenseGetForFile() doesn't distinguish between files that
+           bSAM ran on and found no licenses, and files that bSAM was never
+           run on (both cases return no $Results rows), don't tell the
+           user a misleading "No licenses found".
+         */
+        // $View->AddHighlight(-1,-1,'white',NULL,"No licenses found");
+        if (empty($ModBack)) $ModBack = "browse";
       }
-      if (empty($ModBack)) $ModBack = "license";
+      else
+      {
+        foreach($Results as $R)
+        {
+          if (empty($R['pfile_path'])) { continue; }
+          if (!empty($R['phrase_text']))
+          {
+            $RefURL = NULL;
+            if ($R['licterm_name'] != 'Phrase') { $R['phrase_text'] = ''; }
+          }
+          else
+          {
+            $RefURL=Traceback() . "&lic=" . $R['lic_fk'] . "&licset=" . $R['tok_pfile_start'];
+          }
+          $this->ConvertLicPathToHighlighting($R,$R['licterm_name'],$RefURL);
+        }
+        if (empty($ModBack)) $ModBack = "license";
+      }
     }
 
     $View->ShowView(NULL,$ModBack, 1, 1, $nomos_out);
