@@ -1147,15 +1147,16 @@ int is_meta_agent(char* name)
 }
 
 /**
- * tests if a particular meta agent is exclusive.
+ * tests if a particular meta agent has any of the special flags set.
  *
- * @param name the name of the meta agent
+ * @param name          the name of the meta agent
+ * @param special_type  is what way is the agent special
  * @return 1 if it is exclusive
  */
-int is_exclusive(char* name)
+int is_special(char* name, int special_type)
 {
   meta_agent ma = (meta_agent)g_tree_lookup(meta_agents, name);
-  return ma == NULL || ma->special == SAG_EXCLUSIVE;
+  return (ma != NULL) && ((ma->special | special_type) != 0);
 }
 
 /**

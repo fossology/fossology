@@ -37,8 +37,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_NAME 255    ///< the maximum length for an agent's name           (arbitrary)
 #define CHECK_TIME 120  ///< wait time between agent updates                  (arbitrary)
 
-#define SAG_NONE 1        ///< There is nothing special about this agent
-#define SAG_EXCLUSIVE 2   ///< This agent must not run at the same time as any other agent
+#define SAG_NONE      0x1   ///< There is nothing special about this agent
+#define SAG_EXCLUSIVE 0x2   ///< This agent must not run at the same time as any other agent
+#define SAG_NOEMAIL   0x4   ///< This agent should not send notification emails
 
 /** Enum to keep track of the state of an agent */
 typedef enum
@@ -167,7 +168,7 @@ void kill_agents(void);
 void list_agents(GOutputStream* ostr);
 int  add_meta_agent(char* name, char* cmd, int max, int spc);
 int  is_meta_agent(char* name);
-int  is_exclusive(char* name);
+int  is_special(char* name, int special_type);
 int  num_agents(void);
 
 #endif /* AGENT_H_INCLUDE */
