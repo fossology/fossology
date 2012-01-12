@@ -84,7 +84,7 @@ $usage = basename($argv[0]) . " [options]
 ";
 //process parameters, see usage above
 $longopts = array("user:", "password:");
-$options = getopt("haA:P:uU:v", $longopts);
+$options = getopt("c:haA:P:uU:v", $longopts);
 //print_r($options);
 if (empty($options)) {
   echo $usage;
