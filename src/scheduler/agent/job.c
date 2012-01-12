@@ -742,6 +742,21 @@ job next_job()
 }
 
 /**
+ * Gets the job that is at the top of the queue if there is one
+ *
+ * @return the job at the top of the job queue, NULL if queue is empty
+ */
+job peek_job()
+{
+  GSequenceIter* beg = g_sequence_get_begin_iter(job_queue);
+
+  if(g_sequence_get_length(job_queue) == 0)
+    return NULL;
+
+  return g_sequence_get(beg);
+}
+
+/**
  * get a job based upon the job's id number.
  *
  * @param id

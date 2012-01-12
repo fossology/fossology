@@ -118,6 +118,7 @@ job_status job_get_status(job j);
 /* ************************************************************************** */
 
 job  next_job();
+job  peek_job();
 job  get_job(int id);
 int  num_jobs();
 int  active_jobs();

@@ -396,7 +396,7 @@ void email_notification(job j)
     }
     else
     {
-      ERROR("unable to spawn mailx process: %s\n", error->message);
+      WARNING("unable to spawn mailx process: %s", error->message);
     }
 
     mail_argv[1] = NULL;
