@@ -48,7 +48,7 @@ function fo_scheduler_connect($IPaddr='', $Port='', &$ErrorMsg)
     return false;
   }
 
-  $result = socket_connect($sock, $IPaddr, $Port);
+  $result = @socket_connect($sock, $IPaddr, $Port);
   if ($result === false) 
   {
     $ErrorMsg = "<h2>Connection to the scheduler failed.  Is the scheduler running?</h2>";
@@ -152,9 +152,9 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
     {
       $error_msg = socket_strerror(socket_last_error($sock));
     }
+    fo_scheduler_close($sock);
   }
 
-  fo_scheduler_close($sock);
   /* failed to communicate with the scheduler */
   if (empty($error_msg))
   {
