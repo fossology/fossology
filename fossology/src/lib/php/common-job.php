@@ -371,7 +371,9 @@ function JobReset($uploadid, $agentname) {
 
   if (!empty($agentname)) {
     /** the agent name of unpack is agent_unpack, but jq_type of unpack is ununpack */
+    /** the agent name of bucket is agent_bucket, but jq_type of unpack is buckets */
     if ('ununpack' === $agentname) $agentname = "unpack"; 
+    else if ('buckets' === $agentname) $agentname = "bucket"; 
     $agentname = "agent_".$agentname; // assemble the jq_type to a plugin name
     $Agent = & $Plugins[plugin_find_id($agentname) ];
     /** do not need checking if this jobqueque is alread existing */
