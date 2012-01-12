@@ -69,20 +69,8 @@ $distros = explode(' ', $dist[0]);
 
 //list($distro, , , , ,) = explode(' ', $dist[0]);
 echo "DB: distros[0] is:{$distros[0]}\n";
+//echo "DB: all of destros is:\n";print_r($distros) . "\n";
 
-/*
- #cat /etc/passwd | grep "$find_user" | cut -c":" -f6
- if(array_key_exists('HOME', $_ENV))
- {
- $home = $_ENV['HOME'];
- }
- else
- {
- // look in /etc/passwd
- $cmd = ''
- $home = exec
- }
- */
 // configure for fossology and install fossology packages.
 // Note that after this point, you could just stop if one could rely on the install
 // process to give a valid exit code... but it would still be good to bring up
@@ -126,6 +114,7 @@ switch ($distros[0]) {
     if(!installFossology($Debian))
     {
       echo "FATAL! Could not install fossology on {$distros[0]} version $debianVersion\n";
+      exit(1);
     }
     echo "DB: stopping scheduler\n";
     // Stop scheduler so system files can be configured.
@@ -168,18 +157,66 @@ switch ($distros[0]) {
       break;
     }
     $RedHat->printAttr();
-    if(!configYum())
+    if(!configYum($RedHat))
     {
       echo "FATAL! could not install fossology.conf yum configuration file\n";
+      exit(1);
       break;
     }
+    tuneKernel();
     if(!installFossology($RedHat))
     {
       echo "FATAL! Could not install fossology on $redHat version $rhVersion\n";
+      exit(1);
     }
+    if(!configRhel($redHat, $rhVersion))
+    {
+      echo "FATAL! could not install php and postgress configuration files\n";
+    }
+    echo "DB: checking apache config\n";
+    if(!configApache2($distros[0]))
+    {
+      echo "Fatal, could not configure apache2 to use fossology\n";
+    }
+
     break;
   case 'Fedora':
+    echo "DB: in Fedora\n";
     $fedora = 'Fedora';
+    $fedVersion = $distros[2];
+    try
+    {
+      $Fedora = new ConfigSys($fedora, $fedVersion);
+    }
+    catch (Exception $e)
+    {
+      echo "FATAL! could not process ini file for Fedora $fedVersion system\n";
+      echo $e;
+      break;
+    }
+    $Fedora->printAttr();
+    if(!configYum($Fedora))
+    {
+      echo "FATAL! could not install fossology.repo yum configuration file\n";
+      break;
+    }
+    //echo "DB: tunning fedora kernel\n";
+    //tuneKernel();
+    if(!installFossology($Fedora))
+    {
+      echo "FATAL! Could not install fossology on $fedora version $fedVersion\n";
+      exit(1);
+    }
+    if(!configRhel($fedora, $fedVersion))
+    {
+      echo "FATAL! could not install php and postgress configuration files\n";
+    }
+    echo "DB:Fedora checking apache config\n";
+    if(!configApache2($distros[0]))
+    {
+      echo "Fatal, could not configure apache2 to use fossology\n";
+    }
+
     break;
   case 'Ubuntu':
     $distro = 'Ubuntu';
@@ -196,23 +233,23 @@ switch ($distros[0]) {
       echo $e . "\n";
       break;
     }
-    echo "DB: inserting deb\n";
+    echo "DB: Ubuntu inserting deb\n";
     if(insertDeb($Ubuntu) === FALSE)
     {
       echo "FATAL! cannot insert deb line into /etc/apt/sources.list\n";
       break;
     }
+    tuneKernel();
     // install fossology
-    echo "DB: installing fossology\n";
+    echo "DB: ubuntu installing fossology\n";
     if(!installFossology($Ubuntu))
     {
       echo "FATAL! Could not install fossology on {$distros[0]} version $ubunVersion\n";
+      exit(1);
     }
     echo "DB: stopping scheduler\n";
     // Stop scheduler so system files can be configured.
     $testUtils->stopScheduler();
-    echo "DB: calling tuning kernel\n";
-    tuneKernel();
     echo "DB: config files\n";
     if(configDebian($distros[0], $ubunVersion) === FALSE)
     {
@@ -228,7 +265,7 @@ switch ($distros[0]) {
     // mini test
     break;
   default:
-    echo "Fatal! unrecognized distrobution! {$distros[0]}\n" ;
+    echo "Fatal! unrecognized distribution! {$distros[0]}\n" ;
     exit(1);
     break;
 }
@@ -372,6 +409,7 @@ function installFossology($objRef)
   $yumInstall = 'sudo yum -y install fossology > fossinstall.log 2>&1';
   //$yumInstall = 'sudo yum -y install fossology';
 
+  echo "DB: IFOSS: osFlavor is:$objRef->osFlavor\n";
   switch ($objRef->osFlavor) {
     case 'Ubuntu':
     case 'Debian':
@@ -471,6 +509,7 @@ function copyFiles($files, $dest)
     {
       $to = $dest;
     }
+    echo "DB: files: to is:$to\n";
     if(!copy($files,$to))
     {
       throw new Exception("Could not copy $file to $to");
@@ -517,7 +556,7 @@ function tuneKernel()
   $last = exec($grepCmd, $out, $rtn);
   if($rtn == 0)   // kernel already configured
   {
-    echo "DB: already configured, returning\n";
+    echo "DB: kernle already configured, returning\n";
     return;
   }
   $cmd1 = "echo 512000000 > /proc/sys/kernel/shmmax";
@@ -572,20 +611,31 @@ function configApache2($osType)
           echo "FATAL! Could not create symlink in /etc/apache2/conf.d/ for fossology\n";
           return(FALSE);
         }
+        // restart apache so changes take effect
+        if(!restart('apache2'))
+        {
+          echo "Erorr! Could not restart apache2, please restart by hand\n";
+          return(FALSE);
+        }
       }
       break;
     case 'Red':
-      ;
+      // copy config file, no symlink needed for redhat
+      if(!copy('../dataFiles/pkginstall/fo-apache.conf', '/etc/httpd/conf.d/fossology.conf'))
+      {
+        echo "FATAL!, Cannot configure fossology into apache2\n";
+        return(FALSE);
+      }
+      // restart apapche so changes take effect
+      if(!restart('httpd'))
+      {
+        echo "Erorr! Could not restart httpd, please restart by hand\n";
+        return(FALSE);
+      }
       break;
     default:
       ;
       break;
-  }
-  // restart apapche so changes take effect
-  if(!restart('apache2'))
-  {
-    echo "Erorr! Could not restart apache2, please restart by hand\n";
-    return(FALSE);
   }
   return(TRUE);
 } // configApache2
@@ -615,27 +665,17 @@ function configDebian($osType, $osVersion)
 
   echo "DB:configD: osType is:$osType\n";
   echo "DB:configD: osversion is:$osVersion\n";
-  
+
   // can't check in pg_hba.conf as it shows HP's firewall settings, get it
   // internally
-  
-  $wcmd = "wget -q -O ../dataFiles/pkginstall/debian/6/pg_hba.conf " .
-    "http://fonightly.usa.hp.com/testfiles/pg_hba.conf ";
-  
-  //echo "DB: wcmd is:\n$wcmd\n";
 
-  $last = exec($wcmd, $wOut, $wRtn);
-  if($wRtn != 0)
-  {
-    echo "Error, could not download pg_hba.conf file, pleases configure by hand\n";
-    echo "wgetoutput is:\n";print_r($wOut) . "\n";
-  }
-  
+  getPGhba('../dataFiles/pkginstall/debian/6/pg_hba.conf');
+
   $debPath = '../dataFiles/pkginstall/debian/6/';
 
   $psqlFiles = array(
-          $debPath . 'pg_hba.conf',
-          $debPath . 'postgresql.conf');
+  $debPath . 'pg_hba.conf',
+  $debPath . 'postgresql.conf');
 
   switch ($osVersion)
   {
@@ -674,6 +714,7 @@ function configDebian($osType, $osVersion)
       }
       break;
     case '10.04.3':
+    case '11.04':
       echo "DB: in 10.04.3\n";
       try
       {
@@ -700,6 +741,8 @@ function configDebian($osType, $osVersion)
         return(FALSE);
       }
       break;
+    case '11.10':
+      break;
     default:
       return(FALSE);     // unsupported debian version
       break;
@@ -724,22 +767,76 @@ function configDebian($osType, $osVersion)
 }  // configDebian
 
 /**
+ * \brief copy configuration files and restart apache and postgres
+ *
+ * @param string $osType
+ * @param string $osVersion
+ * @return boolean
+ */
+function configRhel($osType, $osVersion)
+{
+  if(empty($osType))
+  {
+    return(FALSE);
+  }
+  if(empty($osVersion))
+  {
+    return(FALSE);
+  }
+
+  $rpmPath = '../dataFiles/pkginstall/redhat/6.x';
+  // getPGhba($rpmPath . '/pg_hba.conf');
+  $psqlFiles = array(
+  $rpmPath . '/pg_hba.conf',
+  $rpmPath . '/postgresql.conf');
+  // fossology tweaks the postgres files so the packages work....  don't copy
+  /*
+  try
+  {
+    copyFiles($psqlFiles, "/var/lib/pgsql/data/");
+  }
+  catch (Exception $e)
+  {
+    echo "Failure: Could not copy postgres 8.4 config files\n";
+  }
+  */
+  try
+  {
+    copyFiles($rpmPath . '/php.ini', '/etc/php.ini');
+  } catch (Exception $e)
+  {
+    echo "Failure: Could not copy php.ini to /etc/php.ini\n";
+    return(FALSE);
+  }
+  // restart postgres
+  $pName = 'postgresql';
+  if(!restart($pName))
+  {
+    echo "Erorr! Could not restart $pName, please restart by hand\n";
+    return(FALSE);
+  }
+  return(TRUE);
+} // configRhel
+
+/**
  * \brief config yum on a redhat based system to install fossology.
  *
  * Copies the Yum configuration file for fossology to
  *
- * @param string $osType the type of redhat system, e.g. RedHat or Fedora
- * @param string $osVersion
+ * @param object $objRef, a reference to the ConfigSys object
  *
  * @return boolean
  */
-function configYum()
+function configYum($objRef)
 {
-  global $RedHat;
+  if(!is_object($objRef))
+  {
+    return(FALSE);
+  }
 
-  echo "DB: configYUM: yum line is:$RedHat->yum\n";
+  echo "DB: configYUM: yum line is:$objRef->yum\n";
 
-  if(empty($RedHat->yum))
+  if(empty($objRef->yum))
   {
     echo "FATAL, no yum config file to install\n";
     return(FALSE);
@@ -748,7 +845,7 @@ function configYum()
   // coe plays with yum stuff, check if yum.repos.d exists and if not create it.
   if(is_dir('/etc/yum.repos.d'))
   {
-    copyFiles("../dataFiles/pkginstall/$RedHat->yum", '/etc/yum.repos.d/fossology.conf');
+    copyFiles("../dataFiles/pkginstall/$objRef->yum", '/etc/yum.repos.d/fossology.repo');
   }
   else
   {
@@ -758,7 +855,7 @@ function configYum()
       echo "FATAL! could not create yum.repos.d\n";
       return(FALSE);
     }
-    copyFiles($RedHat->yum, '/etc/yum.repos.d/fossology.conf');
+    copyFiles($objRef->yum, '/etc/yum.repos.d/fossology.repo');
   }
   return(TRUE);
 }  // configYum
@@ -789,4 +886,33 @@ function restart($application)
   }
   return(TRUE);
 } // restart
+
+/**
+ * \brief wget the pg_hba.conf file and place it in $destPath
+ *
+ * @param string $destPath the full path to the destination
+ * @return boolean, TRUE on success, FALSE otherwise.
+ *
+ */
+function getPGhba($destPath)
+{
+  if(empty($destPath))
+  {
+    return(FALSE);
+  }
+  echo "DB: getPG: destpath is:$destPath\n";
+  $wcmd = "wget -q -O $destPath " .
+    "http://fonightly.usa.hp.com/testfiles/pg_hba.conf ";
+
+  echo "DB: wcmd is:\n$wcmd\n";
+
+  $last = exec($wcmd, $wOut, $wRtn);
+  if($wRtn != 0)
+  {
+    echo "Error, could not download pg_hba.conf file, pleases configure by hand\n";
+    echo "wget output is:\n" . implode("\n",$wOut) . "\n";
+    return(FALSE);
+  }
+  return(TRUE);
+}
 ?>
