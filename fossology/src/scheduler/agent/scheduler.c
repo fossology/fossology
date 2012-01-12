@@ -174,6 +174,7 @@ void update_scheduler()
   static int lockout = 0;
 
   /* locals */
+  host machine = NULL;
   int n_agents = num_agents();
   int n_jobs   = active_jobs();
 
@@ -194,16 +195,16 @@ void update_scheduler()
 
   if(j == NULL && !lockout)
   {
-    while((j = next_job()) != NULL)
+    while(peek_job() != NULL)
     {
+      if((machine = get_host(1)) == NULL)
+        break;
+
+      j = next_job();
       if(is_exclusive(job_type(j)))
         break;
 
-      // TODO handle no available host
-      //if((h = get_host(1)) == NULL)
-      //  continue;
-
-      agent_init(get_host(1), j);
+      agent_init(machine, j);
     }
   }
 

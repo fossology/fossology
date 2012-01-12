@@ -117,6 +117,7 @@ void* interface_thread(void* param)
       break;
 
     /* acknowledge that you have received the command */
+    V_INTERFACE("INTERFACE: send \"received\"\n");
     g_output_stream_write(conn->ostr, "received\n", 9, NULL, NULL);
 
     /* the interface has chosen to close, acknowledge and end the thread */
