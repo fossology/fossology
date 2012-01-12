@@ -314,6 +314,9 @@ void email_notification(job j)
   gint mail_stdin;
   gint msg_len;
 
+  if(is_special(job_type(j), SAG_NOEMAIL))
+    return;
+
   sprintf(sql, select_upload_fk, j_id);
   db_result = PQexec(db_conn, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)

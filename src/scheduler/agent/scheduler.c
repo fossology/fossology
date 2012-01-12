@@ -201,7 +201,7 @@ void update_scheduler()
         break;
 
       j = next_job();
-      if(is_exclusive(job_type(j)))
+      if(is_special(job_type(j), SAG_EXCLUSIVE))
         break;
 
       agent_init(machine, j);
@@ -378,17 +378,21 @@ void load_agent_config()
       }
 
       special = 0;
+      name = ep->d_name;
       max = fo_config_list_length(config, "default", "special", &error);
       TEST_ERROR("the special key should be of type list");
       for(i = 0; i < max; i++)
       {
         cmd = fo_config_get_list(config, "default", "special", i, &error);
         TEST_ERROR("failed to load element %d of special list", i)
-        if(strcmp(cmd, "EXCLUSIVE") == 0)
+        if(strncmp(cmd, "EXCLUSIVE", 9) == 0)
           special |= SAG_EXCLUSIVE;
+        else if(strncmp(cmd, "NOEMAIL", 7) == 0)
+          special |= SAG_NOEMAIL;
+        else if(strlen(cmd) != 0)
+          WARNING("Invalid special type for agent %s: %s", name, cmd);
       }
 
-      name = ep->d_name;
       cmd  = fo_config_get(config, "default", "command", &error);
       TEST_ERROR("the default group must have a command key");
       tmp  = fo_config_get(config, "default", "max", &error);

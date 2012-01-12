@@ -156,7 +156,9 @@ static int next_nws()
   while(yynext() && isspace(c));
   lex_idx = 0;
   memset(lex, '\0', sizeof(lex));
-  lex[lex_idx++] = c;
+
+  if(isprint(c))
+    lex[lex_idx++] = c;
 
   return c;
 }
@@ -316,6 +318,7 @@ static int key(GError** error) {
         "%s[line %d]: invalid key/value expression \"%s\"",
         fname, yyline, key);
 
+  lex[0] = '\0';
   next_nws();
   next_nl();
 
@@ -327,7 +330,7 @@ static int key(GError** error) {
     {
       tmp = sub(lex);
       val = g_strdup_printf("%s[%s]", val, tmp);
-      g_tree_insert(current_group, key, tmp);
+      g_tree_insert(current_group, key, val);
       g_free(tmp);
     }
     else
