@@ -91,7 +91,7 @@ class admin_scheduler extends FO_Plugin
     switch ($operation)
     {
       case 'status':
-        $text = _("Got status of the");
+        $text = _("Status of the");
         $operation_text = "$text $job_type";
         break;
       case 'database':
@@ -151,7 +151,7 @@ class admin_scheduler extends FO_Plugin
     if (!empty($level_id)) $commands .= " $level_id";
     $commands = trim($commands);
     $commu_status = fo_communicate_with_scheduler($commands, $response_from_scheduler, $this->error_info);
-    return $response_from_scheduler;
+    return $response_from_scheduler . $this->error_info;
   } // OperationSubmit()
 
   /**
