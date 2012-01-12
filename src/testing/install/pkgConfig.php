@@ -403,11 +403,10 @@ function installFossology($objRef)
   {
     return(FALSE);
   }
-  $aptUpdate = 'sudo apt-get update 2>&1';
-  $aptInstall = 'sudo apt-get -y --force-yes install fossology 2>&1';
-  $yumUpdate = 'sudo yum -y update 2>&1';
-  $yumInstall = 'sudo yum -y install fossology > fossinstall.log 2>&1';
-  //$yumInstall = 'sudo yum -y install fossology';
+  $aptUpdate = 'apt-get update 2>&1';
+  $aptInstall = 'apt-get -y --force-yes install fossology 2>&1';
+  $yumUpdate = 'yum -y update 2>&1';
+  $yumInstall = 'yum -y install fossology > fossinstall.log 2>&1';
 
   echo "DB: IFOSS: osFlavor is:$objRef->osFlavor\n";
   switch ($objRef->osFlavor) {
