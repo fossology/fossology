@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,20 +16,22 @@
 ######################################################################
 
 TOP=../../..
-VARS=$(TOP)/Makefile.conf
-include $(VARS)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)/fossology
-MODULEDIR = $(shell dirname `pwd`)
+include $(TOP)/Makefile.conf
 
 all:
-	@echo "no build rule for 'all' in src/delagent/ui"
+	@echo "make delagent ui"
 
 install:
-	@echo "no build rule for 'install' in src/delagent/ui"
+	@echo "make delagent ui install"
+	mkdir -p $(DESTDIR)$(MODDIR)/delagent/ui
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/delagent/ui/
 
 uninstall:
-	@echo "no build rule for 'uninstall' in src/delagent/ui"
+	@echo "make delagent ui uninstall"
+	rm -rf $(DESTDIR)$(MODDIR)/delagent/ui
 
 clean:
-	@echo "no build rule for 'clean' in src/delagent/ui"
+	@echo "make delagent ui clean"
+
+.PHONY: all install uninstall clean
 
