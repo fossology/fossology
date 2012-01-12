@@ -113,18 +113,6 @@ class search extends FO_Plugin
       $SQL .= ", tag_file, tag_uploadtree";
     }
 
-
-/*
-    if (!empty($tag))
-    {
-      $TagSQL = "SELECT * FROM (";
-      $TagSQL .= substr($SQL,0,-1);
-      $TagSQL .= ") U INNER JOIN (SELECT * FROM tag_file INNER JOIN tag ON tag_pk = tag_fk AND (tag = '$tag' OR tag LIKE '$tag')) T ON U.pfile_fk = T.pfile_fk";
-      $SQL = $TagSQL;
-    }
-*/
-    
-
     /* do we need the pfile table? Yes, if any of these are a search critieria.  */
     if (!empty($SizeMin) or !empty($SizeMax))
     {
@@ -212,7 +200,6 @@ class search extends FO_Plugin
       return $Outbuf;
     }
 
-//debugprint($UploadtreeRecs, "UploadtreeRecs");
     /* get last nomos agent_pk that has data for this upload */
     $Agent_name = "nomos";
     $upload_pk = $UploadtreeRecs[0]["upload_fk"];
@@ -382,5 +369,4 @@ class search extends FO_Plugin
 };
 $NewPlugin = new search;
 $NewPlugin->Initialize();
-
 ?>
