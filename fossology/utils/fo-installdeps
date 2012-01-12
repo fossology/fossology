@@ -237,7 +237,8 @@ fi
 if [ $RUNTIME ]; then
   options="$options -r"
 fi
-mods_dir="../src/"
+BASEDIR=$(dirname $0) 
+mods_dir=$BASEDIR"/../src/" ## get the directory where fo-installdeps resides
 install_mod_deps $mods_dir 
  
 ########################################################################
