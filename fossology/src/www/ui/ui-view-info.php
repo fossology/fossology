@@ -258,6 +258,42 @@ class ui_view_info extends FO_Plugin
     $MIMETYPE = "";
     $Count = 0;
 
+    $rpm_info = array("Package"=>"pkg_name",
+                      "Alias"=>"pkg_alias",
+                      "Architecture"=>"pkg_arch",
+                      "Version"=>"version",
+                      "License"=>"license",
+                      "Group"=>"pkg_group",
+                      "Packager"=>"packager",
+                      "Release"=>"release",
+                      "BuildDate"=>"build_date",
+                      "Vendor"=>"vendor",
+                      "URL"=>"url",
+                      "Summary"=>"summary",
+                      "Description"=>"description",
+                      "Source"=>"source_rpm");    
+
+    $deb_binary_info = array("Package"=>"pkg_name",
+                             "Architecture"=>"pkg_arch",
+                             "Version"=>"version",
+                             "Section"=>"section",
+                             "Priority"=>"priority",
+                             "Installed Size"=>"installed_size",
+                             "Maintainer"=>"maintainer",
+                             "Homepage"=>"homepage",
+                             "Source"=>"source",
+                             "Summary"=>"summary",
+                             "Description"=>"description");
+
+    $deb_source_info = array("Format"=>"format",
+                             "Source"=>"source",
+                             "Binary"=>"pkg_name",
+                             "Architecture"=>"pkg_arch",
+                             "Version"=>"version",
+                             "Maintainer"=>"maintainer",
+                             "Uploaders"=>"uploaders",
+                             "Standards-Version"=>"standards_version");
+
     if (empty($Item) || empty($Upload)) { return; }
 
     /**********************************
@@ -328,66 +364,13 @@ class ui_view_info extends FO_Plugin
       if (!empty($R['pkg_pk']))
       {
         $Require = $R['pkg_pk'];
-
-        $text = _("Package");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['pkg_name']) . "</td></tr>\n";
-        $Count++;
-
-        $text = _("Alias");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['pkg_alias']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Architecture");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['pkg_arch']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Version");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['version']) . "</td></tr>\n";
-        $Count++;
-
-        $text = _("License");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['license']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Group");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['pkg_group']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Packager");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['packager']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Release");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['release']) . "</td></tr>\n";
-        $Count++;
-        $text = _("BuildDate");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['build_date']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Vendor");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['vendor']) . "</td></tr>\n";
-        $Count++;
-        $text = _("URL");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['url']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Summary");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['summary']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Description");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['description']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Source");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['source_rpm']) . "</td></tr>\n";
-        $Count++;
-      
+        foreach ($rpm_info as $key=>$value)
+        {
+          $text = _($key);
+          $V .= "<tr><td align='right'>$Count</td><td>$text";
+          $V .= "</td><td>" . htmlentities($R["$value"]) . "</td></tr>\n";
+          $Count++;
+        } 
         pg_free_result($result);
 
         $sql = "SELECT * FROM pkg_rpm_req WHERE pkg_fk = $Require;";
@@ -431,53 +414,13 @@ class ui_view_info extends FO_Plugin
       {
         $R = pg_fetch_assoc($result);
         $Require = $R['pkg_pk'];
-
-        $text = _("Package");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['pkg_name']) . "</td></tr>\n";
-        $Count++;
-
-        $text = _("Architecture");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['pkg_arch']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Version");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['version']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Section");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['section']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Priority");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['priority']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Installed Size");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['installed_size']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Maintainer");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['maintainer']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Homepage");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['homepage']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Source");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['source']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Summary");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['summary']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Description");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['description']) . "</td></tr>\n";
-        $Count++;
-
+        foreach ($deb_binary_info as $key=>$value)
+        {
+          $text = _($key);
+          $V .= "<tr><td align='right'>$Count</td><td>$text";
+          $V .= "</td><td>" . htmlentities($R["$value"]) . "</td></tr>\n";
+          $Count++;
+        }
         pg_free_result($result);
 
         $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
@@ -516,44 +459,17 @@ class ui_view_info extends FO_Plugin
       $text2 = _("Value");
       $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
 
-      while ($R = pg_fetch_assoc($result) and !empty($R['pkg_pk']))
+      if (pg_num_rows($result))
       {
+        $R = pg_fetch_assoc($result);
         $Require = $R['pkg_pk'];
-
-        $text = _("Format");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['format']) . "</td></tr>\n";
-        $Count++;
-
-        $text = _("Source");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['source']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Binary");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['pkg_name']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Architecture");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['pkg_arch']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Version");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['version']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Maintainer");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['maintainer']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Uploaders");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['uploaders']) . "</td></tr>\n";
-        $Count++;
-        $text = _("Standards-Version");
-        $V .= "<tr><td align='right'>$Count</td><td>$text";
-        $V .= "</td><td>" . htmlentities($R['standards_version']) . "</td></tr>\n";
-        $Count++;
-      
+        foreach ($deb_source_info as $key=>$value)
+        {
+          $text = _($key);
+          $V .= "<tr><td align='right'>$Count</td><td>$text";
+          $V .= "</td><td>" . htmlentities($R["$value"]) . "</td></tr>\n";
+          $Count++;
+        }
         pg_free_result($result);
 
         $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
