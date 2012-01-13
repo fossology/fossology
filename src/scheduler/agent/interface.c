@@ -137,6 +137,9 @@ void* interface_thread(void* param)
       return NULL;
     }
 
+    else if(strcmp(cmd, "load") == 0)
+      print_host_load(conn->ostr);
+
     /* scheduler instructed to pause a job, create a job pause event */
     else if(strcmp(cmd, "pause") == 0)
     {
