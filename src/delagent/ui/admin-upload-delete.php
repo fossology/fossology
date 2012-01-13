@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,6 +15,10 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+/**
+ * \file admin_upload_delete.php
+ * \brief delete a upload
+ */
 
 define("TITLE_admin_upload_delete", _("Delete Uploaded File"));
 
@@ -42,7 +46,7 @@ class admin_upload_delete extends FO_Plugin {
 
   /**
    * \brief Given a folder_pk, add a job.
-   * Returns NULL on success, string on failure.
+   * \return NULL on success, string on failure.
    */
   function Delete($uploadpk, $Depends = NULL) {
     /* Prepare the job: job "Delete" */
