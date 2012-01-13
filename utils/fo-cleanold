@@ -1,6 +1,6 @@
 #!/bin/sh
 # fo-cleanold - a utility to clean up old fossology installs
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 #
 # This utility is designed to clean fossology installs off a system. By
 # default it
@@ -19,7 +19,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o h --long delete-conffiles,delete-database,delete-repository,delete-user,delete-everything,help -n 'fo-cleanold' -- "$@"`
+OPTS=`getopt -o h --long delete-agent,delete-config,delete-database,delete-repository,delete-user,delete-everything,help -n 'fo-cleanold' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -30,6 +30,7 @@ eval set -- "$OPTS"
 
 while true; do
 case "$1" in
+      --delete-agent) AGENT_NAME=$3; RMAGENT=1; shift;;
       --delete-config) RMCONF=1; shift;;
       --delete-database) RMDB=1; shift;;
       --delete-repository) RMREPO=1; shift;;
@@ -39,7 +40,8 @@ case "$1" in
          echo "Usage: fo-cleanold [options]";
          echo " By default fo-cleanold does not delete any data, but you can specify"
          echo " additional options that WILL DELETE DATA, please use with caution."
-         echo "  --delete-conffiles  : delete configuration files"
+         echo "  --delete-agent      : delete agent"
+         echo "  --delete-config     : delete configuration files"
          echo "  --delete-database   : delete database"
          echo "  --delete-repository : delete repository"
          echo "  --delete-user       : delete user and group"
@@ -53,10 +55,13 @@ done
 
 if [ $EVERYTHING ]; then
    echo "*** Deleting everything ***"
+   RMAGENT=1
+   AGENT_NAME=all
    RMCONF=1
    RMDB=1
    RMREPO=1
    RMUSER=1
+   RMOTHERS=1
 fi
 
 
@@ -67,138 +72,66 @@ if [ `id -u` != "0" ] ; then
    exit 1
 fi
 
-# BUCKET DATA EXCEPTION
-# NOTE: for a little while the buckets agent instructed users to install
-# bucket data and scripts in $DATADIR/bucketpools/ which was not the right
-# FHS location and was later fixed. If we encounter anything in this dir
-# we don't want to delete it (unless we're deleting everything anyway).
-# This check can be removed once a fossology release no longer supports 
-# upgrading from v1.3
-if [ ! $EVERYTHING ]; then
-  for BUCKET in /usr/share/fossology/bucketpools/ /usr/local/share/fossology/bucketpools/; do
-    if [ -d $BUCKET ] && [ $(ls -A $BUCKET) ]; then
-        echo "ERROR: you have bucket data in $BUCKET,"
-        echo " please migrate it to the new location and ensure this directory"
-        echo " is empty before re-running fo-cleanold. See"
-        echo " http://fossology.org/buckets for more info." 
-        exit 1
-    fi
-  done  
-fi
-# END BUCKET DATA EXCEPTION
 
-## Files
-# config files from 0.9.0 and older installs
-# NOTE: we don't bother to look for nomos3 conffiles
-OLDSAVE="/usr/local/share/fossology/agents/proxy.conf
-/usr/local/share/fossology/agents/scheduler.conf
-/usr/local/share/fossology/dbconnect/fossology
-/usr/local/share/fossology/repository/Depth.conf
-/usr/local/share/fossology/repository/Hosts.conf
-/usr/local/share/fossology/repository/RepPath.conf
-/etc/default/fossology
-"
-# config files from 1.0.0 and newer installs
-NEWSAVE="
+# config files 
+CONFFILES="
 /etc/cron.d/fossology
 /etc/init.d/fossology
-/usr/local/etc/default/fossology
-/usr/local/etc/fossology/Db.conf
-/usr/local/etc/fossology/Depth.conf
-/usr/local/etc/fossology/Hosts.conf
-/usr/local/etc/fossology/Proxy.conf
-/usr/local/etc/fossology/RepPath.conf
-/usr/local/etc/fossology/Scheduler.conf
+/usr/local/etc/fossology/
 "
 
 FILES="
+/usr/local/lib/fossology/
 /usr/local/bin/cp2foss
-/usr/local/bin/cp2foss.php
 /usr/local/bin/departition
-/usr/local/bin/diffm
-/usr/local/bin/fossinit
-/usr/local/bin/fossinit.php
 /usr/local/bin/fossjobs
-/usr/local/bin/fossjobs.php
 /usr/local/bin/fosslic
-/usr/local/bin/fosslic.php
-/usr/local/bin/fo_notify
-/usr/local/bin/fo_notify.php
-/usr/local/bin/GetFM
-/usr/local/bin/get-projects
-/usr/local/bin/mktop1k
-/usr/local/bin/p.sh
-/usr/local/bin/unrar
-/usr/local/bin/unrar-free
-/usr/local/bin/ununpack
-/usr/local/bin/wrapGFM
-/usr/local/include/FMDir
-/usr/local/include/fm-paths.php
 /usr/local/include/libfossagent.h
-/usr/local/include/libfossdb.h
-/usr/local/include/libfossrepo.h
-/usr/local/lib/libcp2foss.h.php
-/usr/local/lib/libfossagent.a
-/usr/local/lib/libfossdb.a
-/usr/local/lib/libfossrepo.a
-/usr/local/lib/lib_projxml.h.php
-/usr/local/lib/fossology/agents/checksum
-/usr/local/lib/fossology/agents/departition
-/usr/local/lib/fossology/agents/mkbsamcache
 /usr/local/share/man/man1/cp2foss.1
-/usr/local/share/man/man1/fo_notify.1
 /usr/local/share/man/man1/fossjobs.1
 /usr/local/share/man/man1/fosslic.1
 "
 
-DIRS="/usr/local/fossology/
-/usr/local/lib/fossology/
+AGENTDIRS="
+/usr/local/etc/fossology/mods-enabled/
 /usr/local/share/fossology/
-/usr/local/share/nomos3/"
+"
 
-TMPDIR=`mktemp -d /tmp/fossology-configs.XXXXXX` || exit 1
-echo "*** Searching for old fossology config files ***"
-for conffile in $OLDSAVE; do
-   if [ -e "$conffile" -o -L "$conffile" ]; then
-      echo "NOTE: found old $conffile saving to $TMPDIR/ and deleting"
-      cp $conffile $TMPDIR/
-      rm -f $conffile
-   fi
-done
-
-echo "*** Searching for new fossology config files ***"
-for conffile in $NEWSAVE; do
-   if [ -f "$conffile" -o -L "$conffile" ]; then
-      if [ $RMCONF ]; then
-         echo "NOTE: found $conffile saving to $TMPDIR/ and deleting as requested"
-         cp $conffile $TMPDIR/
-         rm -f $conffile
-      else
-         echo "WARNING: found $conffile but not deleting"
-      fi
-   fi
-done
+## configfile
 if [ $RMCONF ]; then
-   if [ -d /usr/local/etc/fossology ]; then
-      rmdir /usr/local/etc/fossology
-   fi
+echo "*** Deleling config files ***"
+  for file in $CONFFILES; do
+    if [ -f $file ] || [ -d $file ]; then
+      rm -rf $file
+    fi
+  done
 fi
 
-echo "*** Cleaning up old fossology files ***"
-for file in $FILES; do
-   if [ -f "$file" -o -L "$file" ]; then
+if [ $RMOTHERS ]; then
+echo "*** Deleting other old fossology files ***"
+  for file in $FILES; do
+    if [ -f "$file" -o -L "$file" ]; then
       rm -f $file
-   fi
-done
+    fi
+  done
+fi
 
-for dir in $DIRS; do
-   if [ -d "$dir" -o -L "$dir" ]; then
+## Agent, if AGENT_NAME is all, delete all agents
+if [ $RMAGENT ]; then
+  echo "*** Deleting agent $AGENT_NAME ***"
+  AGENT_NAME=`echo $AGENT_NAME  | tr '[A-Z]' '[a-z]'`
+  for dir in $AGENTDIRS; do
+    if [ $AGENT_NAME = 'all' ]; then
       rm -rf $dir
-   fi
-done
+    else
+      rm -rf "$dir/$AGENT_NAME"
+    fi
+  done
+fi
 
 ## Database
 if [ $RMDB ]; then
+   echo "*** Deleting DB ***"
    # first check that the db is running
    su postgres -c 'echo \\q|psql'
    if [ $? != 0 ]; then
