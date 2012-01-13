@@ -283,11 +283,9 @@ class ui_view_license extends FO_Plugin
     if (empty($ModBack) && (!empty($nomos_out)))  $ModBack = "nomoslicense";
 
     /* Load bSAM licenses for this file */
-    global $SYSCONFDIR;
-    $bsam_plugin_dir = "$SYSCONFDIR/mods-enabled/bsam";
-    $rc = file_exists($bsam_plugin_dir);
+    $bsam_plugin_key = plugin_find_id("license"); /** -1, can not find bsam plugin, or find */
     /** if the bsam plugin does exist, get and show bSAM licenses */
-    if ($rc)
+    if (-1 != $bsam_plugin_key)
     {
       $Results = $this->LicenseGetForFile($Item);
 
