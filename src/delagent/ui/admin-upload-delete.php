@@ -46,6 +46,9 @@ class admin_upload_delete extends FO_Plugin {
 
   /**
    * \brief Given a folder_pk, add a job.
+   * \param $uploadpk - the upload(upload_id) you want to delete
+   * \param $Depends - Depends is not used for now
+   *
    * \return NULL on success, string on failure.
    */
   function Delete($uploadpk, $Depends = NULL) {
