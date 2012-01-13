@@ -18,7 +18,7 @@
 
 /**
  * \file ajax_admin_scheduler
- * \brief reaction when selecting one operation, different operation has different parameters to can be set
+ * \brief ajax operations for admin-scheduler.php
  **/
 
 define("TITLE_ajax_admin_scheduler", _("URL"));
@@ -38,9 +38,9 @@ class ajax_admin_scheduler extends FO_Plugin
 
   /**
    * \brief get the job list for the specified operation
-   * \param $type operation type, the job list is different
-   according to the type of the operation
-   * \return job list
+   * \param $type operation type, the job list is different 
+   *        according to the type of the operation
+   * \return job list as array of <option> elements
    **/
   function JobListOption($type)
   {
@@ -76,7 +76,7 @@ class ajax_admin_scheduler extends FO_Plugin
   /**
    * \brief get the verbose list
    *        if the value of verbose is 1, set verbose as 1
-   * \return verbose list
+   * \return array of verbosity values as <option> elements
    **/
   function VerboseListOption()
   {
@@ -93,35 +93,32 @@ class ajax_admin_scheduler extends FO_Plugin
 
   /**
    * \brief get the priority list for setting, -20-20
-   * \return priority list
+   * \return array of priority levels from -20 ($min) to +20 ($max) as 
+   *         <option> elements
    **/
   function PriorityListOption()
   {
+    $priority_list_option = "";
     $min = -20;
     $max = 20;
     for ($i = $min; $i <= $max; $i++)
     {
       if (0 == $i)
-      {
         $priority_list_option .= "<option SELECTED value='$i'>$i</option>";
-      }
       else
-      {
         $priority_list_option .= "<option value='$i'>$i</option>";
-      }
     }
     return $priority_list_option ;
   }
 
 
   /**
-   * \brief Generate the text for this plugin, when selecting one operation, return related html fragment to oprerate.
+   * \brief Generate the output for this plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
+    if ($this->State != PLUGIN_STATE_READY) return;
+
     $V = "";
     switch ($this->OutputType)
     {
