@@ -93,6 +93,15 @@ void agent_transition(agent a, agent_status new_status)
     clprintf("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
         job_id(a->owner), a->meta_data->name, a->pid,
         agent_status_strings[a->status], agent_status_strings[new_status]);
+
+  if(job_id(a->owner) > 0)
+  {
+    if(a->status == AG_PAUSED)
+      host_increase_load(a->host_machine);
+    if(new_status == AG_PAUSED)
+      host_decrease_load(a->host_machine);
+  }
+
   a->status = new_status;
 }
 
@@ -929,7 +938,6 @@ void agent_update_event(void* unused)
 void agent_pause(agent a)
 {
   kill(a->pid, SIGSTOP);
-  host_decrease_load(a->host_machine);
 }
 
 /**
@@ -1156,7 +1164,7 @@ int is_meta_agent(char* name)
 int is_special(char* name, int special_type)
 {
   meta_agent ma = (meta_agent)g_tree_lookup(meta_agents, name);
-  return (ma != NULL) && ((ma->special | special_type) != 0);
+  return (ma != NULL) && ((ma->special & special_type) != 0);
 }
 
 /**

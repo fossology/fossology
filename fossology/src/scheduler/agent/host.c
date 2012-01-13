@@ -196,7 +196,7 @@ host get_host(int num)
   fs.h = NULL;
   fs.req = num;
   g_tree_foreach(host_list, (GTraverseFunc)find_host, &fs);
-  if(fs.h != NULL) fs.h->running++;
+  host_increase_load(fs.h);
   return fs.h;
 }
 

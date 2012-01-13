@@ -204,6 +204,7 @@ void update_scheduler()
       if(is_special(job_type(j), SAG_EXCLUSIVE))
         break;
 
+      V_SCHED("Starting JOB[%d].%s", job_id(j), job_type(j));
       agent_init(machine, j);
     }
   }
