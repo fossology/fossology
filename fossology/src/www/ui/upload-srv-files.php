@@ -71,7 +71,7 @@ class upload_srv_files extends FO_Plugin {
       if (empty($A)) {
         continue;
       }
-      if (GetParm("Check_" . $A->URI, PARM_INTEGER) != 1) {
+      if (GetParm("Check_" . $A->URI, PARM_INTEGER) != 1 && 'agent_unpack' != $A->URI) {
         $A->URI = NULL;
       }
     }
