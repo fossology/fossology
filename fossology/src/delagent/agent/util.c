@@ -736,4 +736,5 @@ void Usage (char *Name)
   fprintf(stderr,"  -s   :: Run from the scheduler.\n");
   fprintf(stderr,"  -T   :: TEST -- do not update the DB or delete any files (just pretend)\n");
   fprintf(stderr,"  -v   :: Verbose (-vv for more verbose)\n");
+  fprintf(stderr,"  -c # :: Specify the directory for the system configuration\n");
 } /* Usage() */
