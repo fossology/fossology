@@ -272,7 +272,8 @@ int main(int argc, char** argv)
 
       response = (strncmp(buffer, "agents",  6) == 0 ||
                   strncmp(buffer, "status",  6) == 0 ||
-                  strcmp (buffer, "verbose\n" ) == 0) ?
+                  strcmp (buffer, "verbose\n" ) == 0 ||
+                  strcmp (buffer, "load\n"    ) == 0) ?
                       FALSE : TRUE;
 
       bytes = write(s, buffer, strlen(buffer) - 1);

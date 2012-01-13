@@ -22,6 +22,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* std includes */
 #include <stdio.h>
 
+/* other library includes */
+#include <gio/gio.h>
+
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
@@ -60,10 +63,12 @@ char* host_address(host h);
 char* host_agent_dir(host h);
 void host_increase_load(host h);
 void host_decrease_load(host h);
+void host_print(host h, GOutputStream* ostr);
 
 host get_host(int num);
 host name_host(char* name);
 void for_each_host(void(*callback)(host));
+void print_host_load(GOutputStream* ostr);
 int  num_hosts();
 void host_list_init();
 

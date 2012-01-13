@@ -422,7 +422,7 @@ void job_remove_agent(job j, void* a)
     for(curr = j->failed_agents; curr != NULL; curr = curr->next)
       ((agent)curr->data)->owner = NULL;
     for(curr = j->finished_agents; curr != NULL; curr = curr->next)
-          ((agent)curr->data)->owner = NULL;
+      ((agent)curr->data)->owner = NULL;
 
     g_tree_remove(job_list, &j->id);
   }
@@ -493,7 +493,8 @@ void job_update(job j)
     if(agent_gstatus(iter->data) != AG_PAUSED)
       finished = 0;
 
-  if(j->status != JB_SCH_PAUSED && j->status != JB_CLI_PAUSED && finished)
+  if(j->status != JB_SCH_PAUSED && j->status != JB_CLI_PAUSED &&
+     j->status != JB_COMPLETE && finished)
   {
     if(j->failed_agents == NULL)
     {

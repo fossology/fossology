@@ -21,9 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <logging.h>
 #include <scheduler.h>
 
-/* other library includes */
-#include <glib.h>
-
 /* ************************************************************************** */
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
@@ -71,6 +68,20 @@ int find_host(char* host_name, host h, struct find_struct* fs)
 int for_host(char* host_name, host h, void(*func)(host))
 {
   func(h);
+  return 0;
+}
+
+/**
+ * GTraversFunction that allows the information for all hosts to be printed
+ *
+ * @param host_name  the string name of the host
+ * @param h          the host struct paired with the name
+ * @param ostr       the output stream that the info will be printed to
+ * @return 0 to cause the traversal to continue
+ */
+int print_host_all(char* host_name, host h, GOutputStream* ostr)
+{
+  host_print(h, ostr);
   return 0;
 }
 
@@ -184,6 +195,23 @@ void host_decrease_load(host h)
 }
 
 /**
+ * Prints the information about a host to the output stream
+ *
+ * @param h     the relevant host
+ * @param ostr  the output stream to write to
+ */
+void host_print(host h, GOutputStream* ostr)
+{
+  char* buf;
+
+  buf = g_strdup_printf("host:%s address:%s max:%d running:%d\n",
+      h->name, h->address, h->max, h->running);
+  g_output_stream_write(ostr, buf, strlen(buf), NULL, NULL);
+
+  g_free(buf);
+}
+
+/**
  * Gets a host for which there are at least num agents available to start
  * new agents on.
  *
@@ -196,7 +224,6 @@ host get_host(int num)
   fs.h = NULL;
   fs.req = num;
   g_tree_foreach(host_list, (GTraverseFunc)find_host, &fs);
-  host_increase_load(fs.h);
   return fs.h;
 }
 
@@ -221,6 +248,16 @@ host name_host(char* name)
 void for_each_host(void(*callback)(host))
 {
   g_tree_foreach(host_list, (GTraverseFunc)for_host, callback);
+}
+
+/**
+ *
+ *
+ * @param ostr
+ */
+void print_host_load(GOutputStream* ostr)
+{
+  g_tree_foreach(host_list, (GTraverseFunc)print_host_all, ostr);
 }
 
 /**

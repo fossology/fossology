@@ -90,7 +90,7 @@ const char* agent_status_strings[] = {
 void agent_transition(agent a, agent_status new_status)
 {
   if(TVERB_AGENT)
-    clprintf("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
+    lprintf("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
         job_id(a->owner), a->meta_data->name, a->pid,
         agent_status_strings[a->status], agent_status_strings[new_status]);
 
@@ -361,7 +361,7 @@ void agent_listen(agent a)
         alprintf(job_log(a->owner),
             "JOB[%d].%s[%d]: agent failed with error code %d\n",
             job_id(a->owner), a->meta_data->name, a->pid, a->return_code);
-        agent_fail(a);
+        event_signal(agent_fail, a);
       }
       break;
     }
@@ -403,7 +403,8 @@ void agent_listen(agent a)
      */
     if(strncmp(buffer, "OK", 2) == 0)
     {
-      event_signal(agent_ready_event, a);
+      if(a->status != AG_PAUSED)
+        event_signal(agent_ready_event, a);
     }
 
     /* command: "HEART"
@@ -764,6 +765,10 @@ agent agent_init(host host_machine, job owner)
     return NULL;
   }
 
+  /* increase the load on the host */
+  if(job_id(a->owner) > 0)
+    host_increase_load(a->host_machine);
+
   /* spawn the listen thread */
   a->thread = g_thread_create(agent_spawn, a, 1, NULL);
   return a;
@@ -834,11 +839,7 @@ void agent_death_event(pid_t* pid)
   if(a->status != AG_PAUSED && a->status != AG_FAILED)
     agent_transition(a, AG_PAUSED);
 
-  V_AGENT("JOB[%d].%s[%d]: successfully removed from the system\n",
-      job_id(a->owner), a->meta_data->name, a->pid);
-
   job_update(a->owner);
-  job_remove_agent(a->owner, a);
   if(a->status == AG_FAILED && job_id(a->owner) < 0)
   {
     lprintf("ERROR %s.%d: agent %s has failed scheduler startup test\n",
@@ -846,6 +847,9 @@ void agent_death_event(pid_t* pid)
     g_tree_remove(meta_agents, a->meta_data->name);
   }
 
+  V_AGENT("JOB[%d].%s[%d]: successfully removed from the system\n",
+      job_id(a->owner), a->meta_data->name, a->pid);
+  job_remove_agent(a->owner, a);
   g_tree_remove(agents, &a->pid);
   g_free(pid);
 }
