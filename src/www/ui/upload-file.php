@@ -53,9 +53,9 @@ class upload_file extends FO_Plugin {
     if (empty($ShortName)) {
       $ShortName = $Name;
     }
-    print_r($_FILES);
+    /** check if the file size is 0, why the file size is 0, the truth, or the file is unreadable */
     if (0 == @$_FILES['getfile']['size']) {
-      $text = _("Failed to upload, the file size is 0.\n");
+      $text = _("the size of $originName is 0, or the file is unreadable!");
       return ($text);
     }
     /* Create an upload record. */
