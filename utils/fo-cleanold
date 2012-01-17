@@ -97,13 +97,23 @@ AGENTDIRS="
 /usr/local/share/fossology/
 "
 
-## configfile
+## configfile, save the conf files to /tmp/fossology-configs.XXXXXX
 if [ $RMCONF ]; then
+TMPDIR=`mktemp -d /tmp/fossology-configs.XXXXXX` || exit 1
 echo "*** Deleling config files ***"
   for file in $CONFFILES; do
-    if [ -f $file ] || [ -d $file ]; then
-      rm -rf $file
+    if [ -f $file -o -L $file ]; then
+      echo "NOTE: found old $file saving to $TMPDIR/ and deleting"
+      cp $file $TMPDIR
+    elif [ -d $file ]; then
+      for conffile in $( ls $file ); do
+        if [ -f $file/$conffile -o -L $file/$conffile ]; then
+          echo "NOTE: found old $file/$conffile saving to $TMPDIR/ and deleting"
+          cp $file/$conffile $TMPDIR/
+        fi
+      done
     fi
+    rm -rf $file
   done
 fi
 
