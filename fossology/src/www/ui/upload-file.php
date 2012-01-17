@@ -53,6 +53,11 @@ class upload_file extends FO_Plugin {
     if (empty($ShortName)) {
       $ShortName = $Name;
     }
+    print_r($_FILES);
+    if (0 == @$_FILES['getfile']['size']) {
+      $text = _("Failed to upload, the file size is 0.\n");
+      return ($text);
+    }
     /* Create an upload record. */
     $Mode = (1 << 3); // code for "it came from web upload"
     $uploadpk = JobAddUpload($ShortName, $originName, $Desc, $Mode, $Folder);
