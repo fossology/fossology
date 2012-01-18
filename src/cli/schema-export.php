@@ -31,7 +31,7 @@
 /* Note: php 5 getopt() ignores options not specified in the function call, so add
  * dummy options in order to catch invalid options.
  */
-$AllPossibleOpts = "abcd:ef:ghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+$AllPossibleOpts = "abc:d:ef:ghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 /* defaults */
 $Verbose = false;
@@ -47,6 +47,8 @@ foreach($Options as $Option => $OptVal)
 {
   switch($Option)
   {
+    case 'c': /* used by fo_wrapper */
+      break;
     case 'd': /* optional database name */
       $DatabaseName = $OptVal;
       break;
