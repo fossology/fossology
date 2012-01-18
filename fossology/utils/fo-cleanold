@@ -1,6 +1,6 @@
 #!/bin/sh
 # fo-cleanold - a utility to clean up old fossology installs
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 #
 # This utility is designed to clean fossology installs off a system. By
 # default it
@@ -30,7 +30,7 @@ eval set -- "$OPTS"
 
 while true; do
 case "$1" in
-      --delete-config) RMCONF=1; shift;;
+      --delete-conffiles) RMCONF=1; shift;;
       --delete-database) RMDB=1; shift;;
       --delete-repository) RMREPO=1; shift;;
       --delete-user) RMUSER=1; shift;;
@@ -104,6 +104,10 @@ NEWSAVE="
 /etc/init.d/fossology
 /usr/local/etc/default/fossology
 /usr/local/etc/fossology/Db.conf
+/usr/local/etc/fossology/fossology.conf
+/usr/local/etc/fossology/VERSION
+/usr/local/etc/fossology/samplefooter.txt
+/usr/local/etc/fossology/sampleheader.txt
 /usr/local/etc/fossology/Depth.conf
 /usr/local/etc/fossology/Hosts.conf
 /usr/local/etc/fossology/Proxy.conf
@@ -154,6 +158,7 @@ FILES="
 DIRS="/usr/local/fossology/
 /usr/local/lib/fossology/
 /usr/local/share/fossology/
+/usr/local/etc/fossology/mods-enabled
 /usr/local/share/nomos3/"
 
 TMPDIR=`mktemp -d /tmp/fossology-configs.XXXXXX` || exit 1
@@ -172,7 +177,6 @@ for conffile in $NEWSAVE; do
       if [ $RMCONF ]; then
          echo "NOTE: found $conffile saving to $TMPDIR/ and deleting as requested"
          cp $conffile $TMPDIR/
-         rm -f $conffile
       else
          echo "WARNING: found $conffile but not deleting"
       fi
@@ -180,7 +184,7 @@ for conffile in $NEWSAVE; do
 done
 if [ $RMCONF ]; then
    if [ -d /usr/local/etc/fossology ]; then
-      rmdir /usr/local/etc/fossology
+      rm -rf /usr/local/etc/fossology
    fi
 fi
 
