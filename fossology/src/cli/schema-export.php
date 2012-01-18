@@ -37,6 +37,8 @@ $AllPossibleOpts = "abcd:ef:ghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345
 $Verbose = false;
 $DatabaseName = "fossology";
 $UpdateLiceneseRef = false;
+
+/* default location of core-schema.dat.  This file is checked into svn */
 $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
 
 /* command-line options */
@@ -70,7 +72,13 @@ if (file_exists($SchemaFilePath))
 }
 
 $FailMsg = ExportSchema($SchemaFilePath);
+if ($FailMsg !== false)
+{
+  print "ERROR: $FailMsg \n";
+  exit(1);
+}
 
+/* success */
 exit(0);
 
 
