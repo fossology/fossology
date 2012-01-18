@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -59,13 +59,17 @@ foreach($Options as $Option => $OptVal)
   }
 }
 
-if (!file_exists($SchemaFilePath))
+if (file_exists($SchemaFilePath))
 {
-  print "FAILED: Schema data file ($SchemaFilePath) not found.\n";
-  exit(1);
+  $success = unlink($SchemaFilePath);
+  if (!$success)
+  {
+    print "ERROR: Existing schema data file ($SchemaFilePath) could not be removed.\n";
+    exit(1);
+  }
 }
 
-$FailMsg = ExportSchema($OutputFilePath);
+$FailMsg = ExportSchema($SchemaFilePath);
 
 exit(0);
 
