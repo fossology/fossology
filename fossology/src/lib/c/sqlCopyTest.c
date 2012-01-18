@@ -46,7 +46,7 @@ int main(int argc, char **argv)
   PGresult   *result;
   psqlCopy_t  pCopy;
   char       *TestTable = "TestsqlCopy";
-  char        col_vc[40] = "This is \n\r column vc[40] 1234567890";
+  char        col_vc[40] = "This is \n\r column vc[40] 123456789\r";
   char       *col_text;
   char       *DataBuf;
   int         datasize;
