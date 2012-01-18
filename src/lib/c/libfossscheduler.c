@@ -129,6 +129,7 @@ void fo_scheduler_connect(int* argc, char** argv)
   parsed = g_option_context_new("");
   g_option_context_add_main_entries(parsed, options, NULL);
   g_option_context_set_ignore_unknown_options(parsed, TRUE);
+  g_option_context_set_help_enabled(parsed, FALSE);
   g_option_context_parse(parsed, argc, &argv, NULL);
   g_option_context_free(parsed);
 
