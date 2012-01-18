@@ -5,8 +5,8 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-EXE=cp2foss.php fossjobs.php fosslic.php
-WRAP=cp2foss fossjobs fosslic
+EXE=cp2foss.php fossjobs.php fosslic.php schema-export.php
+WRAP=cp2foss fossjobs fosslic schema-export
 DOCS=cp2foss.pod fossjobs.pod fosslic.pod 
 MAN1FILES=$(DOCS:%.pod=%.1)
 HTMLFILES=$(DOCS:%.pod=%.html)
