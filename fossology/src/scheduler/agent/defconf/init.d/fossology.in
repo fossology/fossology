@@ -27,7 +27,7 @@ test -x $DAEMON || exit 0
 ENABLED=1
 
 # Include scheduler defaults if available
-SCHEDULEROPT="--daemon --reset --verbose=952" 
+SCHEDULEROPT="--daemon --reset --verbose=1" 
 if [ -f {$SYSCONFDIR}/default/fossology ] ; then
     # This can override SCHEDULEROPT.
     # Be sure to keep "-d" for daemon mode
