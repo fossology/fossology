@@ -119,6 +119,14 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int Nu
 }  /* End fo_sqlCopyCreate()  */
 
 
+#ifdef DEBUG
+int tmp_printhex(char * str)
+{
+  while(*str) printf("%02x", *str++);
+  return(0);
+}
+#endif
+
 /*!
  \brief Add a data row to an sqlCopy 
  Use '\N' to pass in a null
@@ -138,6 +146,7 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int Nu
 \endverbatim
  \return 0 if failure
 */
+#define growby  128  //Grow DataBuf by this number of bytes.
 int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
 {
   int NewRowLen;
@@ -145,8 +154,8 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
   char *dptr = DataRow;
   char *NewRow=0, *nptr;
 
-  /* As of Postgresql 8.4, COPY will not accept literal carriage returns
-   * or line feeds.  Use \r and \n instead.
+  /* As of Postgresql 8.4, COPY will not accept embedded literal carriage returns
+   * or line feeds.  Use "\r" and "\n" instead.
    * Count how many we need to get rid of (and make space for).
    */
   while(*dptr) 
@@ -156,12 +165,12 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
   }
 
   /* Substitute any literal '\n' or '\r' for string "\n", "\r" 
-   * except for any trailing \n or \r.
+   * (except for trailing \n which is required)
    */
   if (rncount)
   {
-    NewRowLen = strlen(DataRow) + rncount +2;
-    NewRow = malloc(NewRowLen);
+    NewRowLen = strlen(DataRow) + rncount ;
+    NewRow = malloc(NewRowLen + 1);  // plus 1 for potential required \n at end
     if (!NewRow) ERROR_RETURN("fo_sqlCopyAdd: out of memory");
     nptr = NewRow;
     dptr = DataRow;
@@ -183,13 +192,11 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
       ++dptr;
       ++nptr;
     }
+    *nptr = 0;  // null terminator
     DataRow = NewRow;
   }
 
-  /* Does new record fit in DataBuf? 
-   * For the purpose if calculating if DataRow will fit in DataBuf,
-   * assume the new DataRow does not have a newline at the end.
-   */
+  /* Does new record fit in DataBuf?  */
   NewRowLen = strlen(DataRow);
   if ((pCopy->BufSize - pCopy->DataIdx) < (NewRowLen+1))
   {
@@ -198,8 +205,9 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
      */
     if (pCopy->DataIdx == 0)
     {
-      pCopy->DataBuf = realloc(pCopy->DataBuf, NewRowLen+2);
+      pCopy->DataBuf = realloc(pCopy->DataBuf, NewRowLen+growby);
       if (!pCopy->DataBuf) ERROR_RETURN("fo_sqlCopyAdd: Realloc for DataBuf failed");
+      pCopy->BufSize = NewRowLen+growby;
     }
     else
     {
@@ -212,13 +220,16 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
   strcpy(pCopy->DataBuf+pCopy->DataIdx, DataRow);
   pCopy->DataIdx += NewRowLen;
 
-  /* If the DataRow was missing a newline, add one */
-  if (DataRow[NewRowLen-1] != '\n') pCopy->DataBuf[pCopy->DataIdx++] = '\n';
+  /* If the DataRow was missing a terminating newline, add one */
+  if (DataRow[NewRowLen-1] != '\n') 
+  {
+    pCopy->DataBuf[pCopy->DataIdx++] = '\n';
+    pCopy->DataBuf[pCopy->DataIdx] = 0;  // new null terminator
+  }
 
   if (NewRow) free(NewRow);
   return(1);
 }
-
 
 /*!
  \brief Execute the copy (ie insert the buffered records into the
