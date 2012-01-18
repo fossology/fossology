@@ -27,7 +27,7 @@ test -x $DAEMON || exit 0
 ENABLED=1
 
 # Include scheduler defaults if available
-SCHEDULEROPT="--daemon --reset --verbose=1" 
+SCHEDULEROPT="--daemon --reset --verbose=952" 
 if [ -f {$SYSCONFDIR}/default/fossology ] ; then
     # This can override SCHEDULEROPT.
     # Be sure to keep "-d" for daemon mode
@@ -48,8 +48,8 @@ case "$1" in
   stop)
     echo -n "Stopping $DESC: "
     # we don't really care about the exit code as long as it's stopped
-    $DAEMON --kill || true
-    echo "$NAME."
+    $DAEMON --kill || echo -n "no "
+    echo "$NAME killed."
     ;;
   reload)
     #

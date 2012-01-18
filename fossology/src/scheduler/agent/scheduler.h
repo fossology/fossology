@@ -47,7 +47,6 @@ extern char* logdir;
 /* ************************************************************************** */
 
 /* scheduler utility functions */
-void kill_scheduler();
 void load_config(void*);
 void scheduler_close_event(void*);
 
@@ -64,9 +63,9 @@ void chld_sig(int signo);
 void prnt_sig(int signo);
 void update_scheduler();
 void set_usr_grp();
-void kill_scheduler();
 void load_agent_config();
 void load_foss_config();
 int  close_scheduler();
+int  kill_scheduler();
 
 #endif /* SCHEDULER_H_INCLUDE */

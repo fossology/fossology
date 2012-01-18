@@ -289,15 +289,19 @@ void set_usr_grp()
 }
 
 /**
- * kills all other running schedulers. This is accomplished by reading from the
- * /proc/ file system provided by the linux kernel.
+ * @brief Kills all other running scheduler
+ * @return 0 for success (i.e. a scheduler was killed), -1 for failure.
+ *
+ * This uses the /proc file system to find all processes that have fo_scheduler
+ * in the name and sends a kill signal to them.
  */
-void kill_scheduler()
+int kill_scheduler()
 {
   char f_name[FILENAME_MAX];
   struct dirent* ep;
   DIR* dp;
   FILE* file;
+  int num_killed = 0;
 
   if((dp = opendir("/proc/")) == NULL)
   {
@@ -319,10 +323,15 @@ void kill_scheduler()
         {
           lprintf("KILL: sending kill signal to pid %s\n", ep->d_name);
           kill(atoi(ep->d_name), SIGKILL);
+          num_killed++;
         }
       }
     }
   }
+
+  if(num_killed == 0)
+    return -1;
+  return 0;
 }
 
 /**
