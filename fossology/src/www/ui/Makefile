@@ -48,7 +48,7 @@ install: all
 	done
   
 	@echo $(SYSCONFDIR) > $(DESTDIR)$(WEBDIR)/ui/fossology.rc
-
+	@mkdir -p $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
 	  ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled/ ; fi;
 
