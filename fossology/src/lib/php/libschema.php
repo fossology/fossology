@@ -41,7 +41,7 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
   require_once ($Filename); /* this will DIE if the file does not exist. */
 
   /* Very basic sanity check (so we don't delete everything!) */
-  if ((count($Schema['TABLE']) < 5) || (count($Schema['VIEW']) < 1) || (count($Schema['SEQUENCE']) < 5) || (count($Schema['INDEX']) < 5) || (count($Schema['CONSTRAINT']) < 5))
+  if ((count($Schema['TABLE']) < 5) || (count($Schema['SEQUENCE']) < 5) || (count($Schema['INDEX']) < 5) || (count($Schema['CONSTRAINT']) < 5))
   {
     $ErrMsg = "Schema from '$Filename' appears invalid.";
     return $ErrMsg;
