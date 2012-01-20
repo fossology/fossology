@@ -536,8 +536,6 @@ int	main	(int argc, char *argv[])
     if (Tree) free(Tree);
     Tree=NULL;
     TreeSize=0;
-    printf("OK\n"); /* inform scheduler that we are ready */
-    fflush(stdout);
   } /* while() */
 
   /* update upload.upload_mode to say that adj2nest was successful */
