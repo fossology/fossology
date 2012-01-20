@@ -49,6 +49,7 @@ int i_port = -1;        ///< the port that the scheduler is listening on
 GThread* socket_thread; ///< thread that will create new connections
 GList* client_threads;  ///< threads that are currently running some form of scheduler interface
 GCancellable* cancel;   ///< used to shut down all interfaces when closing the scheudler
+GRegex* cmd_parse;      ///< regex to make parsing command more reliable
 
 #define netw g_output_stream_write
 
@@ -80,6 +81,8 @@ typedef struct interface_connection
  *
  * handle commands:
  *     exit: close connection with scheduler
+ *     kill: kill a particular job
+ *     load: get the host status
  *    close: shutdown the scheduler
  *    pause: pause a job that is currently running
  *   reload: reload configuration information
@@ -94,10 +97,14 @@ typedef struct interface_connection
  */
 void* interface_thread(void* param)
 {
+  GMatchInfo* regex_match;
   interface_connection* conn = param;
+  //job to_kill;
   char buffer[BUFFER_SIZE];
   char org[sizeof(buffer)];
-  char* cmd, * tmp;
+  char* cmd;
+  char* arg1;
+  char* arg2;
   arg_int* params;
   int i;
 
@@ -110,87 +117,201 @@ void* interface_thread(void* param)
     memcpy(org, buffer, sizeof(buffer));
     for(cmd = buffer; *cmd; cmd++)
       *cmd = g_ascii_tolower(*cmd);
-    cmd = strtok(buffer, " ");
+    g_regex_match(cmd_parse, buffer, 0, &regex_match);
+    cmd = g_match_info_fetch(regex_match, 1);
 
-    /* ??? this shouldn't be able to happen */
     if(cmd == NULL)
-      break;
+    {
+      g_match_info_free(regex_match);
+      WARNING("INTERFACE: invalid command: %s", buffer);
+      continue;
+    }
 
     /* acknowledge that you have received the command */
     V_INTERFACE("INTERFACE: send \"received\"\n");
     g_output_stream_write(conn->ostr, "received\n", 9, NULL, NULL);
 
-    /* the interface has chosen to close, acknowledge and end the thread */
+    /* command: "close"
+     *
+     * The interface has chosen to close the connection. Return the command
+     * in acknowledgment of the command and end this thread.
+     */
     if(strcmp(cmd, "close") == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE\n", 6, NULL, NULL);
       V_INTERFACE("INTERFACE: closing connection to user interface\n");
+
+      g_match_info_free(regex_match);
+      g_free(cmd);
       return NULL;
     }
 
-    /* scheduler instructed to shutdown, acknowledge and create close event */
+    /* command: "stop"
+     *
+     * The interface has instructed the scheduler to shut down. The scheduler
+     * should acknowledge with the command and proceed to kill and agents and
+     * exit the event loop
+     */
     else if(strcmp(cmd, "stop") == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE\n", 6, NULL, NULL);
       V_INTERFACE("INTERFACE: shutting down scheduler\n");
       event_signal(scheduler_close_event, NULL);
+
+      g_match_info_free(regex_match);
+      g_free(cmd);
       return NULL;
     }
 
+    /* command: "load"
+     *
+     * The interface has requested information about the load that the different
+     * hosts are under. The scheduler should respond with the status of all the
+     * hosts.
+     */
     else if(strcmp(cmd, "load") == 0)
+    {
       print_host_load(conn->ostr);
+    }
 
-    /* scheduler instructed to pause a job, create a job pause event */
+    /* command: "kill <job_id> <"message">"
+     *
+     * The interface has instructed the scheduler to kill and fail a particular
+     * job. Both arguments are required for this command.
+     *
+     * job_id: The jq_pk for the job that needs to be killed
+     * message: A message that will be in the email notification and the
+     *          jq_endtext field of the job queue
+     */
+    else if(strcmp(cmd, "kill") == 0)
+    {
+      arg1 = g_match_info_fetch(regex_match, 3);
+      arg2 = g_match_info_fetch(regex_match, 8);
+
+      lprintf("KILL: %s \"%s\"\n", arg1, arg2);
+
+      /*if((to_kill = get_job(atoi(g_match_info_fetch(regex_match, 3)))) == NULL)
+      {
+        snprintf(buffer, sizeof(buffer),
+            "Invalid kill command: job %d does not exist\n", atoi(cmd));
+        g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+      }
+      else
+      {
+        to_kill->message = arg2;
+        event_signal(job_fail_event, to_kill);
+      }*/
+
+      g_free(arg1);
+    }
+
+    /* command: "pause <job_id>"
+     *
+     * The interface has instructed the scheduler to pause a job. This is used
+     * to free up resources on a particular host. The argument is required and
+     * is teh jq_pk for the job that needs to be paused.
+     */
     else if(strcmp(cmd, "pause") == 0)
     {
+      arg1 = g_match_info_fetch(regex_match, 3);
+
       params = g_new0(arg_int, 1);
-      params->first = get_job(atoi(strtok(NULL, " ")));
+      params->first = get_job(atoi(arg1));
       params->second = 1;
       event_signal(job_pause_event, params);
+
+      g_free(arg1);
     }
 
-    /* scheduler instructed to reload it configuration data */
+    /* command: "reload"
+     *
+     * The scheduler should reload its configuration information. This should
+     * be used if a change to an agent or fossology.conf has been made since
+     * the scheduler started running.
+     */
     else if(strcmp(cmd, "reload") == 0)
+    {
       event_signal(load_config, NULL);
+    }
 
+    /* command: "agents"
+     *
+     * The interface has requested a list of agents that the scheduler is able
+     * to run correctly.
+     */
     else if(strcmp(cmd, "agents") == 0)
+    {
       event_signal(list_agents, conn->ostr);
+    }
 
-    /* a status request has been made for scheduler or job      */
-    /* * if scheduler request, print scheduler status followed  */
-    /*     by simple status for each job                        */
-    /* * if a job request, print simple status for job followed */
-    /*     by the status of every agent belonging to the job    */
+    /* command: "status [job_id]"
+     *
+     * fetches the status of the a particular job or the scheduler. The
+     * argument is not required for this command.
+     *
+     * with job_id:
+     *   print job status followed by status of agent belonging to the job
+     * without job_id:
+     *   print scheduler statsu followed by status of every job
+     */
     else if(strcmp(cmd, "status") == 0)
     {
+      arg1 = g_match_info_fetch(regex_match, 3);
+
       params = g_new0(arg_int, 1);
       params->first = conn->ostr;
-      params->second = (cmd = strtok(NULL, " ")) == NULL ? 0 : atoi(cmd);
+      params->second = (arg1 == NULL) ? 0 : atoi(arg1);
       event_signal(job_status_event, params);
+
+      g_free(arg1);
     }
 
-    /* restart a paused job, simply create the apropriate event */
+    /* command: "restart <job_id>"
+     *
+     * The interface has instructed the scheduler to restart a job that has been
+     * paused. The argument for this command is required and is the jq_pk for
+     * the job that should be restarted.
+     */
     else if(strcmp(cmd, "restart") == 0)
     {
-      tmp = strtok(NULL, " ");
-      i = atoi(tmp);
-      if(i == 0 && tmp[0] != '0')
+      arg1 = g_match_info_fetch(regex_match, 3);
+
+      if(arg1 == NULL)
       {
+        WARNING("received invalid restart command: %s", buffer);
         snprintf(buffer, sizeof(buffer) - 1,
-            "ERROR: invalid argument for \"restart\" command: %s\n", tmp);
+                    "ERROR: Invalid restart command: %s\n", buffer);
         g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
-        continue;
       }
-      event_signal(job_restart_event, get_job(atoi(strtok(NULL, " "))));
+      else
+      {
+        event_signal(job_restart_event, get_job(atoi(arg1)));
+        g_free(arg1);
+      }
     }
 
-    /* change the verbose level of the scheduler or a job */
+    /* command: "verbose [job_id|level] [level]"
+     *
+     * The interface has either requested a change in a verbose level, or it
+     * has requested the current verbose level. This command can have no
+     * arguments, 1 argument or 2 arguments.
+     *
+     * no arguments: respond with the verbose level of the scheduler
+     *  1 argument:  change the verbose level of the scheduler to the argument
+     *  2 arguments: change the verbose level of the job with the jq_pk of the
+     *               first arguement to the second argument
+     */
     else if(strcmp(cmd, "verbose") == 0)
     {
-      if((tmp = strtok(NULL, " ")) == NULL)
+      arg1 = g_match_info_fetch(regex_match, 3);
+      arg2 = g_match_info_fetch(regex_match, 5);
+
+      if(arg1 == NULL)
       {
         if(verbose < 8)
+        {
           sprintf(buffer, "level: %d\n", verbose);
+        }
         else
         {
           strcpy(buffer, "mask:       h d i e s a j\nmask: ");
@@ -200,29 +321,66 @@ void* interface_thread(void* param)
         }
         g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
       }
-      else if((cmd = strtok(NULL, " ")) == NULL) verbose = atoi(tmp);
-      else job_verbose_event(job_verbose(get_job(atoi(tmp)), atoi(cmd)));
-    }
-
-    /* changes the priority of a job */
-    else if(strcmp(cmd, "priority") == 0)
-    {
-      if((cmd = strtok(NULL, " ")) && ((tmp = strtok(NULL, " "))))
+      else if(arg2 == NULL)
       {
-        params = g_new0(arg_int, 1);
-        params->first = get_job(atoi(cmd));
-        params->second = atoi(tmp);
-        event_signal(job_priority_event, params);
+        verbose = atoi(arg1);
+        g_free(arg1);
       }
       else
-        ERROR("invalid priority cmd sent to scheduler");
+      {
+        job_verbose_event(
+            job_verbose(get_job(atoi(arg1)), atoi(arg2)));
+        g_free(arg1);
+        g_free(arg2);
+      }
     }
 
-    /* check the job queue for any newly queued jobs */
-    else if(strcmp(cmd, "database") == 0)
-      event_signal(database_update_event, NULL);
+    /* command: "priority <job_id> <level>"
+     *
+     * Scheduler should change the priority of a job. This will change the
+     * systems priority of the relevant job and change the priority of the job
+     * in the database to match. Both arguments are required for this command.
+     */
+    else if(strcmp(cmd, "priority") == 0)
+    {
+      arg1 = g_match_info_fetch(regex_match, 3);
+      arg2 = g_match_info_fetch(regex_match, 5);
 
-    /* scheudler recieved an unknown command from interface */
+      if(arg1 != NULL && arg2 != NULL)
+      {
+        params = g_new0(arg_int, 1);
+        params->first = get_job(atoi(arg1));
+        params->second = atoi(arg2);
+        event_signal(job_priority_event, params);
+        g_free(arg1);
+        g_free(arg2);
+      }
+      else
+      {
+        if(arg1) g_free(arg1);
+        if(arg2) g_free(arg2);
+        WARNING("Invalid priority command: %s\n", buffer);
+        snprintf(buffer, sizeof(buffer) - 1,
+            "ERROR: Invalid priority command: %s\n", buffer);
+        g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+      }
+    }
+
+    /* command: "database"
+     *
+     * The scheduler should check the database. This will normaly be sent by
+     * the ui when a new job has been queue and must be run.
+     */
+    else if(strcmp(cmd, "database") == 0)
+    {
+      event_signal(database_update_event, NULL);
+    }
+
+    /* command: unknown
+     *
+     * The command sent does not match any of the known commands, log an error
+     * and inform the interface that this wasn't a command.
+     */
     else
     {
       g_output_stream_write(conn->ostr, "Invalid command: \"", 18, NULL, NULL);
@@ -231,6 +389,8 @@ void* interface_thread(void* param)
       clprintf("ERROR %s.%d: Interface received invalid command: %s\n", __FILE__, __LINE__, cmd);
     }
 
+    g_match_info_free(regex_match);
+    g_free(cmd);
     memset(buffer, '\0', sizeof(buffer));
   }
 
@@ -339,6 +499,9 @@ void interface_init()
   }
 
   cancel = g_cancellable_new();
+  cmd_parse = g_regex_new(
+      "([a-z]+)(\\s(\\d+))?(\\s((\\d+)|(\"(.*)\")))?",
+      0, G_REGEX_MATCH_NEWLINE_LF, NULL);
 }
 
 /**

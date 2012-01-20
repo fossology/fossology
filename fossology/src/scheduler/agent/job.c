@@ -381,6 +381,7 @@ void job_priority_event(arg_int* params)
   ((job)params->first)->priority = params->second;
   for(iter = ((job)params->first)->running_agents; iter; iter = iter->next)
     setpriority(PRIO_PROCESS, agent_pid(iter->data), params->second);
+  g_free(params);
 }
 
 /**
@@ -509,7 +510,8 @@ void job_update(job j)
     {
       g_list_free(j->failed_agents);
       j->failed_agents = NULL;
-      job_fail(j);
+      j->message = NULL;
+      job_fail_event(j);
     }
   }
 }
@@ -519,7 +521,7 @@ void job_update(job j)
  *
  * @param j
  */
-void job_fail(job j)
+void job_fail_event(job j)
 {
   job_transition(j, JB_FAILED);
 }

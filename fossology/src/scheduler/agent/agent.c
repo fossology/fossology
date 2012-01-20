@@ -200,9 +200,9 @@ int update(int* pid_ptr, agent a, gpointer unused)
  * @param unused
  * @return always returns 0 to indicate that the traversal should continue
  */
-int agent_kill(int* pid, agent a, gpointer unused)
+int agent_kill_traverse(int* pid, agent a, gpointer unused)
 {
-  kill(a->pid, SIGKILL);
+  agent_kill(a);
   return 0;
 }
 
@@ -703,7 +703,8 @@ agent agent_init(host host_machine, job owner)
   {
     lprintf("ERROR %s.%d: jq_pk %d jq_type %s does not match any module in mods-enabled\n",
         __FILE__, __LINE__, job_id(owner), job_type(owner));
-    job_fail(owner);
+    owner->message = NULL;
+    job_fail_event(owner);
     job_remove_agent(owner, NULL);
     return NULL;
   }
@@ -992,6 +993,17 @@ void agent_print_status(agent a, GOutputStream* ostr)
 }
 
 /**
+ * unclean kill of an agent. This simply sends a SIGKILL to the agent and lets
+ * everything else get cleaned up normally.
+ *
+ * @param a the agent to kill
+ */
+void agent_kill(agent a)
+{
+  kill(a->pid, SIGKILL);
+}
+
+/**
  * Gets the status field for the agent
  *
  * @param a an agent
@@ -1085,7 +1097,7 @@ void test_agents(host h)
  */
 void kill_agents()
 {
-  g_tree_foreach(agents, (GTraverseFunc)agent_kill, NULL);
+  g_tree_foreach(agents, (GTraverseFunc)agent_kill_traverse, NULL);
 }
 
 /**

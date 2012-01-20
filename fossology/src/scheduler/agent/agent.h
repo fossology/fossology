@@ -153,6 +153,7 @@ void agent_transition(agent a, agent_status new_status);
 void agent_pause(agent a);
 void agent_unpause(agent a);
 void agent_print_status(agent a, GOutputStream* ostr);
+void agent_kill(agent a);
 int  aprintf(agent a, const char* fmt, ...);
 int  agent_pid(agent a);
 ssize_t agent_write(agent a, const void* buf, int count);

@@ -92,7 +92,7 @@ const char* jobsql_failed = "\
       SET jq_endtime = now(), \
           jq_end_bits = jq_end_bits | 2, \
           jq_schedinfo = null, \
-          jq_endtext = 'Failed' \
+          jq_endtext = '%s' \
       WHERE jq_pk = '%d';";
 
 const char* jobsql_processed = "\
@@ -565,6 +565,7 @@ void database_update_job(job j, job_status status)
   gchar* sql = NULL;
   PGresult* db_result;
   int j_id = job_id(j);
+  char* message = (j->message == NULL) ? "Failed": j->message;
 
   /* check how to update database */
   switch(status)
@@ -583,7 +584,7 @@ void database_update_job(job j, job_status status)
       break;
     case JB_FAILED:
       email_notification(j);
-      sql = g_strdup_printf(jobsql_failed, j_id);
+      sql = g_strdup_printf(jobsql_failed, message, j_id);
       break;
     case JB_SCH_PAUSED: case JB_CLI_PAUSED:
       sql = g_strdup_printf(jobsql_paused, j_id);
