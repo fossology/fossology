@@ -99,7 +99,7 @@ void job_finish_agent(job j, void* a);
 void job_fail_agent(job j, void* a);
 void job_set_data(job j, char* data, int sql);
 void job_update(job j);
-void job_fail(job j);
+void job_fail_event(job j);
 void job_set_message(job j, char* message);
 int  job_id(job j);
 int  job_priority(job j);

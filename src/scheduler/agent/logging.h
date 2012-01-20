@@ -77,6 +77,7 @@ extern char  log_name[FILENAME_MAX];
             lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); } \
             PQclear(pg_r)
 
+/** Macro that is called when a notification is generated */
 #define NOTIFY(...) if(verbose > 0) do { \
             lprintf("NOTIFY: "); \
             lprintf(__VA_ARGS__); \

@@ -35,7 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossology.h>
 #include <glib.h>
 
-#define P_WIDTH 30
+#define P_WIDTH 27
 #define F_WIDTH 10
 
 #define vprintf(...) if(verbose) printf(__VA_ARGS__);
@@ -52,12 +52,14 @@ void interface_usage()
 {
   /* print cli usage */
   printf("FOSSology scheduler command line interface\n");
-  printf("+-------------------------------------------------------------------------------+\n");
-  printf("|%*s:   EFFECT                                       |\n", P_WIDTH, "COMMAND [optional] <required>");
-  printf("+-------------------------------------------------------------------------------+\n");
+  printf("+----------------------------------------------------------------------------+\n");
+  printf("|%*s:   EFFECT                                       |\n", P_WIDTH, "CMD [optional] <required>");
+  printf("+----------------------------------------------------------------------------+\n");
   printf("|%*s:   prints this usage statement                  |\n", P_WIDTH, "help");
   printf("|%*s:   close the connection and exit cli            |\n", P_WIDTH, "close");
   printf("|%*s:   shutdown the scheduler gracefully            |\n", P_WIDTH, "stop");
+  printf("|%*s:   get load information for host machines       |\n", P_WIDTH, "load");
+  printf("|%*s:   kills a currently running job (ungraceful)   |\n", P_WIDTH, "kill <job id> <\"message\">");
   printf("|%*s:   pauses a job indefinitely                    |\n", P_WIDTH, "pause <job id>");
   printf("|%*s:   reload the configuration information         |\n", P_WIDTH, "reload");
   printf("|%*s:   prints a list of valid agents                |\n", P_WIDTH, "agents");
@@ -66,10 +68,10 @@ void interface_usage()
   printf("|%*s:   query/change the scheduler/job verbosity     |\n", P_WIDTH, "verbose [job id] [level]");
   printf("|%*s:   change the priority of a particular job      |\n", P_WIDTH, "priority <job id> <level>");
   printf("|%*s:   causes the scheduler to check the job queue  |\n", P_WIDTH, "database");
-  printf("+-------------------------------------------------------------------------------+\n");
+  printf("+----------------------------------------------------------------------------+\n");
   printf("|%*s:   goes into the schedule dialog                |\n", P_WIDTH, "sql");
   printf("|%*s:   uploads a file and schedulers a set of jobs  |\n", P_WIDTH, "upload");
-  printf("+-------------------------------------------------------------------------------+\n");
+  printf("+----------------------------------------------------------------------------+\n");
   fflush(stdout);
 }
 
@@ -183,17 +185,20 @@ int main(int argc, char** argv)
   }
 
   /* check specific command instructions */
-  if(c_stop || c_pause || c_reload || c_restart || c_verbose || c_database) {
+  if(c_stop || c_pause || c_reload || c_restart || c_verbose || c_database)
+  {
+    if(c_reload)
+      bytes = write(s, "reload", 6);
+    if(c_database)
+      bytes = write(s, "database", 8);
+    if(c_stop)
+      bytes = write(s, "stop", 4);
+
     if(c_verbose)
     {
       snprintf(buffer, sizeof(buffer) - 1, "verbose %d", c_verbose);
       bytes = write(s, buffer, strlen(buffer));
     }
-
-    if(c_reload)
-      bytes = write(s, "reload", 6);
-    if(c_database)
-      bytes = write(s, "database", 8);
 
     if(c_pause)
     {
@@ -207,14 +212,12 @@ int main(int argc, char** argv)
       bytes = write(s, buffer, strlen(buffer));
     }
 
-    if(c_stop)
-      bytes = write(s, "stop", 5);
-
     return 0;
   }
 
   /* listen to the scheulder */
-  if(verbose) interface_usage();
+  if(verbose)
+    interface_usage();
   while(!closing)
   {
     /* prepare for read */
