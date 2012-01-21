@@ -41,10 +41,12 @@ install: all
 		mkdir -p $(DESTDIR)$(CONFPATH); \
 	fi
 	if [ ! -e $(DESTDIR)$(CONFPATH)/mods-enabled ] ; then \
-                mkdir -p $(DESTDIR)$(CONFPATH)/mods-enabled; \
-                /bin/chmod 775 $(DESTDIR)$(CONFPATH)/mods-enabled; \
-        fi
-        
+		mkdir -p $(DESTDIR)$(CONFPATH)/mods-enabled; \
+			/bin/chmod 775 $(DESTDIR)$(CONFPATH)/mods-enabled; \
+	fi
+	if [ ! -e $(DESTDIR)$(CONFPATH)/conf ] ; then \
+		mkdir -p $(DESTDIR)$(CONFPATH)/conf; \
+	fi
 	echo "Installing configuration files..."
 	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ] ; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/Db.conf"; \
@@ -75,6 +77,22 @@ install: all
 	 	$(INSTALL) -m 666 defconf/samplefooter.txt $(DESTDIR)$(CONFPATH)/samplefooter.txt; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/samplefooter.txt already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+	fi \
+	
+	if [ ! -f $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf -o "$(OVERWRITE)" ] ; then \
+		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf"; \
+	 	$(INSTALL) -m 666 fo-apache.conf $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf; \
+	else \
+		echo "WARNING: $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+	fi \
+
+	if [ ! -f $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf -o "$(OVERWRITE)" ] ; then \
+		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf"; \
+	 	$(INSTALL) -m 666 src-install-apache-example.conf $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf; \
+	else \
+		echo "WARNING: $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
 
