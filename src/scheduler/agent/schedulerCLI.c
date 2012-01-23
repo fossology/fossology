@@ -52,26 +52,26 @@ void interface_usage()
 {
   /* print cli usage */
   printf("FOSSology scheduler command line interface\n");
-  printf("+----------------------------------------------------------------------------+\n");
-  printf("|%*s:   EFFECT                                       |\n", P_WIDTH, "CMD [optional] <required>");
-  printf("+----------------------------------------------------------------------------+\n");
-  printf("|%*s:   prints this usage statement                  |\n", P_WIDTH, "help");
-  printf("|%*s:   close the connection and exit cli            |\n", P_WIDTH, "close");
-  printf("|%*s:   shutdown the scheduler gracefully            |\n", P_WIDTH, "stop");
-  printf("|%*s:   get load information for host machines       |\n", P_WIDTH, "load");
-  printf("|%*s:   kills a currently running job (ungraceful)   |\n", P_WIDTH, "kill <job id> <\"message\">");
-  printf("|%*s:   pauses a job indefinitely                    |\n", P_WIDTH, "pause <job id>");
-  printf("|%*s:   reload the configuration information         |\n", P_WIDTH, "reload");
-  printf("|%*s:   prints a list of valid agents                |\n", P_WIDTH, "agents");
-  printf("|%*s:   scheduler responds with status information   |\n", P_WIDTH, "status [job id]");
-  printf("|%*s:   restart a paused job                         |\n", P_WIDTH, "restart <job id>");
-  printf("|%*s:   query/change the scheduler/job verbosity     |\n", P_WIDTH, "verbose [job id] [level]");
-  printf("|%*s:   change the priority of a particular job      |\n", P_WIDTH, "priority <job id> <level>");
-  printf("|%*s:   causes the scheduler to check the job queue  |\n", P_WIDTH, "database");
-  printf("+----------------------------------------------------------------------------+\n");
-  printf("|%*s:   goes into the schedule dialog                |\n", P_WIDTH, "sql");
-  printf("|%*s:   uploads a file and schedulers a set of jobs  |\n", P_WIDTH, "upload");
-  printf("+----------------------------------------------------------------------------+\n");
+  printf("+-----------------------------------------------------------------------------+\n");
+  printf("|%*s:   EFFECT                                        |\n", P_WIDTH, "CMD [optional] <required>");
+  printf("+-----------------------------------------------------------------------------+\n");
+  printf("|%*s:   prints this usage statement                   |\n", P_WIDTH, "help");
+  printf("|%*s:   close the connection and exit cli             |\n", P_WIDTH, "close");
+  printf("|%*s:   shutdown the scheduler gracefully             |\n", P_WIDTH, "stop");
+  printf("|%*s:   get load information for host machines        |\n", P_WIDTH, "load");
+  printf("|%*s:   kills a currently running job (ungraceful)    |\n", P_WIDTH, "kill <jq_pk> <\"message\">");
+  printf("|%*s:   pauses a job indefinitely                     |\n", P_WIDTH, "pause <jq_pk>");
+  printf("|%*s:   reload the configuration information          |\n", P_WIDTH, "reload");
+  printf("|%*s:   prints a list of valid agents                 |\n", P_WIDTH, "agents");
+  printf("|%*s:   scheduler responds with status information    |\n", P_WIDTH, "status [jq_pk]");
+  printf("|%*s:   restart a paused job                          |\n", P_WIDTH, "restart <jq_pk>");
+  printf("|%*s:   query/change the scheduler/job verbosity      |\n", P_WIDTH, "verbose [jq_pk] [level]");
+  printf("|%*s:   change priority for job that this jq_pk is in |\n", P_WIDTH, "priority <jq_pk> <level>");
+  printf("|%*s:   causes the scheduler to check the job queue   |\n", P_WIDTH, "database");
+  printf("+-----------------------------------------------------------------------------+\n");
+  printf("|%*s:   goes into the schedule dialog                 |\n", P_WIDTH, "sql");
+  printf("|%*s:   uploads a file and schedulers a set of jobs   |\n", P_WIDTH, "upload");
+  printf("+-----------------------------------------------------------------------------+\n");
   fflush(stdout);
 }
 

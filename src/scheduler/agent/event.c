@@ -13,7 +13,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-************************************************************** */
+ ************************************************************** */
 
 /* local includes */
 #include <event.h>
@@ -36,16 +36,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /** interanl structure for an event */
 struct event_internal {
-  void(*func)(void*);           ///< the function that will be executed for this event
-  void* argument;               ///< the arguments for the function
-  char* name;                   ///< name of the event, used for debugging
+    void(*func)(void*);           ///< the function that will be executed for this event
+    void* argument;               ///< the arguments for the function
+    char* name;                   ///< name of the event, used for debugging
 };
 
 /** internal structure for the event loop */
 struct event_loop_internal {
-  GAsyncQueue* queue;           ///< the queue that is the core of the event loop
-  int terminated;               ///< flag that signals the end of the event loop
-  int occupied;                 ///< flag that determines if there is already a thread in this loop
+    GAsyncQueue* queue;           ///< the queue that is the core of the event loop
+    int terminated;               ///< flag that signals the end of the event loop
+    int occupied;                 ///< flag that determines if there is already a thread in this loop
 };
 
 /* ************************************************************************** */
@@ -71,7 +71,8 @@ event_loop event_loop_get()
 {
 
   /* if the event loop has already been created, return it */
-  if(el_created) {
+  if(el_created)
+  {
     return &vl_singleton;
   }
 
@@ -184,7 +185,8 @@ void event_destroy(event e)
  * @param func
  * @param args
  */
-void event_signal_ext(void* func, void* args, char* name) {
+void event_signal_ext(void* func, void* args, char* name)
+{
   event_loop_put(event_loop_get(), event_init((event_function)func, args, name));
 }
 
@@ -217,7 +219,8 @@ int event_loop_enter(void(*call_back)(void))
 
   /* from here on out, this is the only thread in this event loop     */
   /* the loop to execute events is very simple, grab event, run event */
-  while((e = event_loop_take(vl)) != NULL) {
+  while((e = event_loop_take(vl)) != NULL)
+  {
     if(TVERB_EVENT && strcmp(e->name, "log_event") != 0)
       lprintf("EVENT: calling %s \n", e->name);
     e->func(e->argument);

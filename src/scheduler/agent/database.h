@@ -52,5 +52,6 @@ void database_update_event(void* unused);
 void database_update_job(job j, job_status status);
 void database_job_processed(int j_id, int number);
 void database_job_log(int j_id, char* log_name);
+void database_job_priority(job j, int priority);
 
 #endif /* DATABASE_H_INCLUDE */

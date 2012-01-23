@@ -201,10 +201,10 @@ void update_scheduler()
         break;
 
       j = next_job();
-      if(is_special(job_type(j), SAG_EXCLUSIVE))
+      if(is_special(j->agent_type, SAG_EXCLUSIVE))
         break;
 
-      V_SCHED("Starting JOB[%d].%s\n", job_id(j), job_type(j));
+      V_SCHED("Starting JOB[%d].%s\n", j->id, j->agent_type);
       agent_init(machine, j);
       j = NULL;
     }

@@ -155,10 +155,7 @@ void agent_unpause(agent a);
 void agent_print_status(agent a, GOutputStream* ostr);
 void agent_kill(agent a);
 int  aprintf(agent a, const char* fmt, ...);
-int  agent_pid(agent a);
 ssize_t agent_write(agent a, const void* buf, int count);
-
-agent_status agent_gstatus(agent a);
 
 /* ************************************************************************** */
 /* **** static functions and meta agents ************************************ */
