@@ -38,8 +38,8 @@ char fossy_url[FILENAME_MAX];
 
 /* email related sql */
 const char* url_checkout = "\
-    SELECT conf_value FROM sysconfig\
-      WHERE variablename = 'FOSSology_URL';";
+    SELECT conf_value FROM sysconfig \
+      WHERE variablename = 'FOSSologyURL';";
 
 const char* select_upload_fk =" \
     SELECT job_upload_fk FROM job, jobqueue \
@@ -429,8 +429,10 @@ void database_init()
 
   /* get the url for the fossology instance */
   db_result = PQexec(db_conn, url_checkout);
-  if(PQresultStatus(db_result) != PGRES_TUPLES_OK && PQntuples(db_result) != 0)
+  if(PQresultStatus(db_result) == PGRES_TUPLES_OK && PQntuples(db_result) != 0)
+  {
     strcpy(fossy_url, PQgetvalue(db_result, 0, 0));
+  }
   PQclear(db_result);
 
   header = NULL;
