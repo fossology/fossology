@@ -143,9 +143,6 @@ void prnt_sig(int signo)
       V_SCHED("SIGNALS: Scheduler received SGIHUP, reloading configuration data\n");
       load_config(NULL);
       break;
-    case SIGSEGV:
-      FATAL("scheduler received a segmentation fault (i.e. the scheduler crashed");
-      break;
   }
 }
 
@@ -322,7 +319,7 @@ int kill_scheduler()
             strstr(f_name, "fo_scheduler") && s_pid != atoi(ep->d_name))
         {
           lprintf("KILL: sending kill signal to pid %s\n", ep->d_name);
-          kill(atoi(ep->d_name), SIGKILL);
+          kill(atoi(ep->d_name), SIGQUIT);
           num_killed++;
         }
       }
