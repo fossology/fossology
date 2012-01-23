@@ -99,7 +99,7 @@ void* interface_thread(void* param)
 {
   GMatchInfo* regex_match;
   interface_connection* conn = param;
-  //job to_kill;
+  job to_kill;
   char buffer[BUFFER_SIZE];
   char org[sizeof(buffer)];
   char* cmd;
@@ -188,9 +188,7 @@ void* interface_thread(void* param)
       arg1 = g_match_info_fetch(regex_match, 3);
       arg2 = g_match_info_fetch(regex_match, 8);
 
-      lprintf("KILL: %s \"%s\"\n", arg1, arg2);
-
-      /*if((to_kill = get_job(atoi(g_match_info_fetch(regex_match, 3)))) == NULL)
+      if((to_kill = get_job(atoi(arg1))) == NULL)
       {
         snprintf(buffer, sizeof(buffer),
             "Invalid kill command: job %d does not exist\n", atoi(cmd));
@@ -200,9 +198,10 @@ void* interface_thread(void* param)
       {
         to_kill->message = arg2;
         event_signal(job_fail_event, to_kill);
-      }*/
+      }
 
       g_free(arg1);
+      g_free(arg2);
     }
 
     /* command: "pause <job_id>"
@@ -500,7 +499,7 @@ void interface_init()
 
   cancel = g_cancellable_new();
   cmd_parse = g_regex_new(
-      "([a-z]+)(\\s(\\d+))?(\\s((\\d+)|(\"(.*)\")))?",
+      "(\\w+)(\\s+(\\d+))?(\\s+((\\d+)|(\"(.*)\")))?",
       0, G_REGEX_MATCH_NEWLINE_LF, NULL);
 }
 

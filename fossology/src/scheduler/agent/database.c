@@ -110,6 +110,13 @@ const char* jobsql_log = "\
       SET jq_log = '%s' \
       WHERE jq_pk = '%d';";
 
+const char* jobsql_priority = "\
+    UPDATE job \
+      SET job_priority = '%d' \
+      WHERE job_pk in ( \
+        SELECT jq_job_fk FROM jobqueue \
+        WHERE jq_pk = '%d');";
+
 /* ************************************************************************** */
 /* **** email notification ************************************************** */
 /* ************************************************************************** */
@@ -132,7 +139,12 @@ GRegex* email_regex = NULL;
 #define DEFAULT_SUBJECT "FOSSology scan complete\n"
 
 /**
- * TODO
+ * Loads information about the email that will be sent for job notifications.
+ * This loads the header and footer configuration files, loads the subject and
+ * client info, and compiles the regex that is used to replace variables in the
+ * header and footer files.
+ *
+ * @return void, no return
  */
 void email_load()
 {
@@ -228,12 +240,22 @@ void email_load()
 }
 
 /**
- * TODO
+ * Replaces the variables that are in the header and footer files. This is a
+ * callback function that is passed to the glib function g_regex_replace_eval().
+ * This reads what was matched by the regex and then appends the correct
+ * information onto the GString that is passed to the function.
  *
- * @param match
- * @param ret
- * @param j
- * @return
+ * Variables:
+ *   $BROESELINK
+ *   $SHCEDULERLOG
+ *   $UPLOADFOLDERNAME [not implemented]
+ *   $JOBRESULT
+ *   $DB.table.column
+ *
+ * @param match  the regex match that glib found
+ * @param ret    the GString* that results should be appended to.
+ * @param j      the job that this email relates to
+ * @return       always FALSE so that g_regex_replace_eval() will continue
  */
 gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
 {
@@ -245,12 +267,12 @@ gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
   if(strcmp(m_str, "BROWSELINK"))
   {
     g_string_append_printf(ret, "http://%s?mod=browse&upload=%d&show=detail",
-        fossy_url, job_id(j));
+        fossy_url, j->id);
   }
   else if(strcmp(m_str, "SCHEDULERLOG"))
   {
     g_string_append_printf(ret, "http://%s?mod=showjobs&show=job&job=%d",
-        fossy_url, job_id(j));
+        fossy_url, j->id);
   }
   else if(strcmp(m_str, "UPLOADFOLDERNAME"))
   {
@@ -258,13 +280,13 @@ gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
   }
   else if(strcmp(m_str, "JOBRESULT"))
   {
-    switch(job_get_status(j))
+    switch(j->status)
     {
       case JB_COMPLETE: g_string_append(ret, "COMPLETE"); break;
       case JB_FAILED:   g_string_append(ret, "FAILED");   break;
       default:
         g_string_append_printf(ret, "[ERROR: illegal job status \"%s\"]",
-            job_status_strings[job_get_status(j)]);
+            job_status_strings[j->status]);
         break;
     }
   }
@@ -294,16 +316,18 @@ gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
 }
 
 /**
- * TODO, unfinished function, needs the email construction
+ * Sends an email notification that a particular job has completed correctly.
+ * This compiles the email based upon the header file, footer file, and the job
+ * that just completed.
  *
- * @param job_id
- * @param failed
+ * @param job  the job that just finished
+ * @return void, no return
  */
 void email_notification(job j)
 {
   PGresult* db_result;
   int tuples;
-  int i, j_id = job_id(j);;
+  int i, j_id = j->id;;
   int col;
   int upload_id;
   char* val, * finished;
@@ -314,7 +338,7 @@ void email_notification(job j)
   gint mail_stdin;
   gint msg_len;
 
-  if(is_special(job_type(j), SAG_NOEMAIL))
+  if(is_special(j->agent_type, SAG_NOEMAIL))
     return;
 
   sprintf(sql, select_upload_fk, j_id);
@@ -533,8 +557,7 @@ void database_update_event(void* unused)
     /* check if this is a command */
     if(strcmp(type, "command") == 0)
     {
-      lprintf("DB: got a command from job queue\n");
-      // TODO handle command
+      WARNING("DB: commands in the job queue not implemented, using the interface api instead");
       continue;
     }
 
@@ -566,7 +589,7 @@ void database_update_job(job j, job_status status)
   /* locals */
   gchar* sql = NULL;
   PGresult* db_result;
-  int j_id = job_id(j);
+  int j_id = j->id;
   char* message = (j->message == NULL) ? "Failed": j->message;
 
   /* check how to update database */
@@ -633,4 +656,22 @@ void database_job_log(int j_id, char* log_name)
   event_signal(database_exec_event, sql);
 }
 
+/**
+ * Changes the priority of a job queue entry in the database.
+ *
+ * @param j         the job to change the priority for
+ * @param priority  the new priority of the job
+ */
+void database_job_priority(job j, int priority)
+{
+  gchar* sql = NULL;
+  PGresult* db_result;
+
+  sql = g_strdup_printf(jobsql_priority, priority, j->id);
+  db_result = PQexec(db_conn, sql);
+  if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
+    PQ_ERROR(db_result, "failed to change job queue entry priority");
+
+  g_free(sql);
+}
 

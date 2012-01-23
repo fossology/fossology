@@ -88,9 +88,9 @@ void job_destroy(job j);
 /* ************************************************************************** */
 
 void job_verbose_event(job j);
-void job_status_event(void* param);
-void job_pause_event(void* param);
-void job_restart_event(void* param);
+void job_status_event(arg_int* param);
+void job_pause_event(arg_int* param);
+void job_restart_event(job j);
 void job_priority_event(arg_int* params);
 
 void job_add_agent(job j, void* a);
@@ -100,18 +100,12 @@ void job_fail_agent(job j, void* a);
 void job_set_data(job j, char* data, int sql);
 void job_update(job j);
 void job_fail_event(job j);
-void job_set_message(job j, char* message);
-int  job_id(job j);
-int  job_priority(job j);
 int  job_is_paused(job j);
 int  job_is_open(job j);
 job  job_verbose(job j, int level);
 char* job_message(job j);
-char* job_type(job j);
 char* job_next(job j);
 FILE* job_log(job j);
-
-job_status job_get_status(job j);
 
 /* ************************************************************************** */
 /* **** Job list Functions ************************************************** */

@@ -260,10 +260,13 @@ int vlprintf(FILE* dst, const char* fmt, va_list args)
 }
 
 /**
- * TODO
+ * Function that allows for printing to the log file concurrently. This will
+ * create an event that prints the log file instead of printing it itself. This
+ * does have the disadvantage that two call of clprintf right next to each other
+ * will not necessarily fall next to each other in the log.
  *
- * @param fmt
- * @return
+ * @param fmt  the format string like any normal printf function
+ * @return  if the printf was successful.
  */
 int clprintf(const char* fmt, ...)
 {
