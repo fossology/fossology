@@ -296,7 +296,8 @@ gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
     column = g_match_info_fetch(match, 4);
     sql = g_strdup_printf("SELECT %s FROM %s;", column, table);
     db_result = PQexec(db_conn, sql);
-    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK ||
+        PQntuples(db_result) == 0 || PQnfields(db_result) == 0)
     {
       g_string_append_printf(ret, "[ERROR: unable to select %s.%s]",
           g_match_info_fetch(match, 3), g_match_info_fetch(match, 4));
@@ -377,7 +378,7 @@ void email_notification(job j)
 
   sprintf(sql, jobsql_email, upload_id);
   db_result = PQexec(db_conn, sql);
-  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
   {
     PQ_ERROR(db_result, "unable to access email info for job %d", j_id);
     return;
