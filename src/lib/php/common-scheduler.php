@@ -51,7 +51,7 @@ function fo_scheduler_connect($IPaddr='', $Port='', &$ErrorMsg)
   $result = @socket_connect($sock, $IPaddr, $Port);
   if ($result === false) 
   {
-    $ErrorMsg = "<h2>Connection to the scheduler failed.  Is the scheduler running?</h2>";
+    $ErrorMsg = "Connection to the scheduler failed.  Is the scheduler running?<br>";
     $ErrorMsg .= "socket_connect() failed.\nReason: ($result) " . socket_strerror(socket_last_error($sock)) . "<br>\n";
     return false;
   } 
