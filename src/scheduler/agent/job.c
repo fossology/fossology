@@ -537,7 +537,8 @@ void job_fail_event(job j)
 {
   GList* iter;
 
-  job_transition(j, JB_FAILED);
+  if(j->status != JB_FAILED)
+    job_transition(j, JB_FAILED);
 
   for(iter = j->running_agents; iter != NULL; iter = iter->next)
   {

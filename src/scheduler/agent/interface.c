@@ -191,12 +191,14 @@ void* interface_thread(void* param)
       if((to_kill = get_job(atoi(arg1))) == NULL)
       {
         snprintf(buffer, sizeof(buffer),
-            "Invalid kill command: job %d does not exist\n", atoi(cmd));
+            "Invalid kill command: job %d does not exist\n", atoi(arg1));
         g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
       }
       else
       {
-        to_kill->message = arg2;
+        if(to_kill->message)
+          g_free(to_kill->message);
+        to_kill->message = strdup(((arg2 == NULL) ? "no message" : arg2));
         event_signal(job_fail_event, to_kill);
       }
 
@@ -208,7 +210,7 @@ void* interface_thread(void* param)
      *
      * The interface has instructed the scheduler to pause a job. This is used
      * to free up resources on a particular host. The argument is required and
-     * is teh jq_pk for the job that needs to be paused.
+     * is the jq_pk for the job that needs to be paused.
      */
     else if(strcmp(cmd, "pause") == 0)
     {
