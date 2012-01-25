@@ -238,9 +238,13 @@ int main(int argc, char** argv)
         bytes = read(s, buffer + bytes, sizeof(buffer) - bytes);
 
         if(bytes == 0)
+        {
+          printf("ERROR: connection to scheduler closed\nERROR: closing cli\n");
           closing = 1;
+        }
+
         bytes = strlen(buffer);
-      } while(buffer[bytes - 1] != '\n');
+      } while(!closing && buffer[bytes - 1] != '\n');
 
       for(poss = strtok(buffer, "\n"); poss != NULL; poss = strtok(NULL, "\n"))
       {
