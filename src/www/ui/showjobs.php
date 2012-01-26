@@ -28,7 +28,7 @@ class showjobs extends FO_Plugin
   var $Dependency = array("browse");
   var $DBaccess   = PLUGIN_DB_UPLOAD;
   var $MaxUploadsPerPage = 10;  /* max number of uploads to display on a page */
-  var $ndays = 10;  /* What is considered a recent number of days */
+  var $nhours = 24;  /* What is considered a recent number of hours for "My Recent Jobs" */
 
   var $Colors=array(
 	"Queued" => "#FFFFCC",	// "white-ish",
@@ -225,17 +225,17 @@ class showjobs extends FO_Plugin
   /**
    * @brief Find all of my jobs submitted within the last n days.
    *
-   * @param $ndays Number of days in job report
+   * @param $nhours Number of days in job report
    *
    * @return array of job_pk's 
    **/
-  function MyJobs($ndays)
+  function MyJobs($nhours)
   {
     global $PG_CONN;
 
     $JobArray = array();
 
-    $sql = "select job_pk from job where job_user_fk='$_SESSION[UserId]' and job_queued >= (now() - interval '$ndays days') order by job_queued asc";
+    $sql = "select job_pk from job where job_user_fk='$_SESSION[UserId]' and job_queued >= (now() - interval '$nhours hours') order by job_queued desc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     while($Row = pg_fetch_assoc($result)) $JobArray[] = $Row['job_pk'];
@@ -644,7 +644,7 @@ se&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
           }
           else
           {
-            $Jobs = $this->MyJobs($this->ndays);
+            $Jobs = $this->MyJobs($this->nhours);
           } 
           $JobsInfo = $this->GetJobInfo($Jobs,  $Page);
     	  $V .= $this->Show($JobsInfo, $Page);
