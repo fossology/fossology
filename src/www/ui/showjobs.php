@@ -28,6 +28,7 @@ class showjobs extends FO_Plugin
   var $Dependency = array("browse");
   var $DBaccess   = PLUGIN_DB_UPLOAD;
   var $MaxUploadsPerPage = 10;  /* max number of uploads to display on a page */
+  var $ndays = 10;  /* What is considered a recent number of days */
 
   var $Colors=array(
 	"Queued" => "#FFFFCC",	// "white-ish",
@@ -43,7 +44,7 @@ class showjobs extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
   {
-    menu_insert("Main::Jobs::Job Queue",$this->MenuOrder -1,$this->Name, $this->MenuTarget);
+    menu_insert("Main::Jobs::My Recent Jobs",$this->MenuOrder -1,$this->Name, $this->MenuTarget);
   } // RegisterMenus()
 
   /**
@@ -222,6 +223,29 @@ class showjobs extends FO_Plugin
 
 
   /**
+   * @brief Find all of my jobs submitted within the last n days.
+   *
+   * @param $ndays Number of days in job report
+   *
+   * @return array of job_pk's 
+   **/
+  function MyJobs($ndays)
+  {
+    global $PG_CONN;
+
+    $JobArray = array();
+
+    $sql = "select job_pk from job where job_user_fk='$_SESSION[UserId]' and job_queued >= (now() - interval '$ndays days') order by job_queued asc";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    while($Row = pg_fetch_assoc($result)) $JobArray[] = $Row['job_pk'];
+    pg_free_result($result);
+
+    return $JobArray;
+  }
+
+
+  /**
    * @brief Get job queue data from db.
    *
    * @param $job_pks Array of $job_pk's to display.
@@ -258,6 +282,9 @@ class showjobs extends FO_Plugin
     {
       /* Get job table data */
       $JobRec = GetSingleRec("job", "where job_pk='$job_pk'");
+
+      /* If unpack failed, the upload_pk may be missing.  If so, ignore. */
+      if (empty($JobRec["job_upload_fk"])) continue;
 
       $JobData[$job_pk]["job"] = $JobRec;
       $upload_pk = $JobRec["job_upload_fk"];
@@ -306,7 +333,11 @@ class showjobs extends FO_Plugin
     global $PG_CONN;
     $OutBuf = '';
     $NumJobs = count($JobData);
-
+    if ($NumJobs == 0)
+    {
+      return _("There are no jobs to display");
+    }
+    
     /* Next/Prev menu */
     if ($NumJobs >= $this->MaxUploadsPerPage) $OutBuf = MenuEndlessPage($Page,1); 
 
@@ -321,7 +352,7 @@ class showjobs extends FO_Plugin
     $UriFull = $Uri . Traceback_parm_keep(array("upload"));
     $uploadStyle = "style='font:bold 10pt verdana, arial, helvetica; background:gold; color:white;'";
     $jobStyle = "style='font:bold 8pt verdana, arial, helvetica; background:lavender; color:black;'";
-    $prevUploadName = "";
+    $prevpfile = "";
 
     $OutBuf .= "<table class='text' border=1 width='100%' name='jobtable'>\n";
     foreach ($JobData as $job_pk => $Job)
@@ -329,11 +360,15 @@ class showjobs extends FO_Plugin
       /* Upload  */
       $UploadName = $Job["upload"]["upload_filename"];
       $UploadDesc = $Job["upload"]["upload_desc"];
-      if ( $prevUploadName != $UploadName)
+      $pfile_pk = $Job["upload"]["pfile_fk"];
+      if ( $prevpfile != $pfile_pk)
       {
+        /* blank line separator between pfiles */
+        $OutBuf .= "<tr><td colspan=7> </td></tr>";
+
         $OutBuf .= "<tr>";
         $OutBuf .= "<th $uploadStyle></th>";
-        $OutBuf .= "<th colspan=3 $uploadStyle>";
+        $OutBuf .= "<th colspan=4 $uploadStyle>";
         $uploadtree_pk = $Job['uploadtree']['uploadtree_pk'];
         $OutBuf .= "<a title='Click to browse' href='" . Traceback_uri() . "?mod=brow
 se&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
@@ -341,7 +376,7 @@ se&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
         if (!empty($UploadDesc)) $OutBuf .= " (" . $UploadDesc . ")";
         $OutBuf .= "</a>";
         $OutBuf .= "</th>";
-        $prevUploadName = $UploadName;
+        $prevpfile = $pfile_pk;
         $OutBuf .= "<th $uploadStyle></th>";
         $OutBuf .= "</tr>";
       }
@@ -440,11 +475,10 @@ se&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
          $OutBuf .= "<th>";
         $OutBuf .= "</th></tr>";
       }
-
     }
     $OutBuf .= "</table>\n";
 
-    if ($NumJobs >= $this->MaxUploadsPerPage) $OutBuf = "<p>" . MenuEndlessPage($Page,1); 
+    if ($NumJobs >= $this->MaxUploadsPerPage) $OutBuf .= "<p>" . MenuEndlessPage($Page,1); 
     return($OutBuf);
   } // Show()
 
@@ -551,78 +585,81 @@ se&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
     if (empty($UploadPk)) { $UploadPk = -1; }
 
     switch($this->OutputType)
-      {
+    {
       case "XML":
-	break;
+	    break;
       case "HTML":
-	/* Process any actions */
-	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
-	{
-	  $jq_pk = GetParm("jobid",PARM_INTEGER);
-	  $Action = GetParm("action",PARM_STRING);
-	  $UploadPk = GetParm("upload",PARM_INTEGER);
-      $Page=getparm('page',PARM_INTEGER);
-      $jqtype = GetParm("jqtype",PARM_STRING);
-      $ThisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$UploadPk";
-      $Job = GetParm('job',PARM_INTEGER);
-	  switch($Action)
-	  {
-	    case 'pause':
-          if (empty($jq_pk)) break;
-          $Command = "pause $jq_pk";
-          $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
-          if ($rv == false) $V .= _("Unable to pause job.") . " " . $response_from_scheduler . $error_info;
-          echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
-		  break;
-	    case 'restart':
-          if (empty($jq_pk)) break;
-          $Command = "restart $jq_pk";
-          $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
-          if ($rv == false) $V .= _("Unable to restart job.") . " " . $response_from_scheduler . $error_info;
-          echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
-		  break;
-	    case 'cancel':
-          if (empty($jq_pk)) break;
-          $Msg = "\"" . _("Killed by") . " " . @$_SESSION['User'] . "\"";
-          $Command = "kill $jq_pk $Msg";
-          $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
-          if ($rv == false) $V .= _("Unable to cancel job.") . $response_from_scheduler . $error_info;
-          echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
-		  break;
-	    case 'priority':
-          if (empty($jq_pk)) break;
-		  JobSetPriority($jq_pk,GetParm("priority",PARM_INTEGER));
-          echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
-		  break;
-	    default:
-		  break;
-	  }
-	}
+        /* Process any actions */
+        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+        {
+          $jq_pk = GetParm("jobid",PARM_INTEGER);
+          $Action = GetParm("action",PARM_STRING);
+          $UploadPk = GetParm("upload",PARM_INTEGER);
+          $Page=getparm('page',PARM_INTEGER);
+          $jqtype = GetParm("jqtype",PARM_STRING);
+          $ThisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$UploadPk";
+          $Job = GetParm('job',PARM_INTEGER);
+          switch($Action)
+          {
+            case 'pause':
+              if (empty($jq_pk)) break;
+              $Command = "pause $jq_pk";
+              $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
+              if ($rv == false) $V .= _("Unable to pause job.") . " " . $response_from_scheduler . $error_info;
+              echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
+    		  break;
+    	    case 'restart':
+              if (empty($jq_pk)) break;
+              $Command = "restart $jq_pk";
+              $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
+              if ($rv == false) $V .= _("Unable to restart job.") . " " . $response_from_scheduler . $error_info;
+              echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
+	    	  break;
+            case 'cancel':
+              if (empty($jq_pk)) break;
+              $Msg = "\"" . _("Killed by") . " " . @$_SESSION['User'] . "\"";
+              $Command = "kill $jq_pk $Msg";
+              $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
+              if ($rv == false) $V .= _("Unable to cancel job.") . $response_from_scheduler . $error_info;
+              echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
+              break;
+            case 'priority':
+              if (empty($jq_pk)) break;
+    		  JobSetPriority($jq_pk,GetParm("priority",PARM_INTEGER));
+              echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
+	    	  break;
+	        default:
+		      break;
+	      }
+	    }
 
+        if (!empty($Job))
+    	  $V .= $this->ShowJobDB($Job);
+        else 
+        {
+          if ($UploadPk) 
+          {
+            $upload_pks = array($UploadPk);
+            $Jobs = $this->Uploads2Jobs($upload_pks, $Page);
+          }
+          else
+          {
+            $Jobs = $this->MyJobs($this->ndays);
+          } 
+          $JobsInfo = $this->GetJobInfo($Jobs,  $Page);
+    	  $V .= $this->Show($JobsInfo, $Page);
+        }
 
-    if ($UploadPk)
-      $upload_pks = array($UploadPk);
-    else
-      $upload_pks = array();
-
-    $Jobs = $this->Uploads2Jobs($upload_pks, $Page);
-    $JobsInfo = $this->GetJobInfo($Jobs,  $Page);
-
-    if (!empty($Job))
-	  $V .= $this->ShowJobDB($Job);
-    else
-	  $V .= $this->Show($JobsInfo,$Page);
-
-	break;
+    	break;
       case "Text":
-	break;
+    	break;
       default:
-	break;
-      }
+    	break;
+    }
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     return;
-    }
+  }
 
 };
 $NewPlugin = new showjobs;
