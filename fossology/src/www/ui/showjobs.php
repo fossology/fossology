@@ -364,7 +364,7 @@ class showjobs extends FO_Plugin
       if ( $prevpfile != $pfile_pk)
       {
         /* blank line separator between pfiles */
-        $OutBuf .= "<tr><td colspan=7> </td></tr>";
+	  $OutBuf .= "<tr><td colspan=7> <hr> </td></tr>";
 
         $OutBuf .= "<tr>";
         $OutBuf .= "<th $uploadStyle></th>";
