@@ -28,7 +28,7 @@ class showjobs extends FO_Plugin
   var $Dependency = array("browse");
   var $DBaccess   = PLUGIN_DB_UPLOAD;
   var $MaxUploadsPerPage = 10;  /* max number of uploads to display on a page */
-  var $nhours = 24;  /* What is considered a recent number of hours for "My Recent Jobs" */
+  var $nhours = 168;  /* 168=24*7 What is considered a recent number of hours for "My Recent Jobs" */
 
   var $Colors=array(
 	"Queued" => "#FFFFCC",	// "white-ish",
