@@ -523,14 +523,19 @@ se&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
     $error_info;
 
     /* check the jobqueue status.  If the job is finished, return the status. */
-    if ($jobqueueRec["jq_end_bits"] && 0x1)
-      $status .= _("Success");
-    else if ($jobqueueRec["jq_end_bits"] && 0x2)
-      $status .= _("Failure");
-    else if ($jobqueueRec["jq_end_bits"] && 0x4)
-      $status .= _("Nonfatal");
-    if (!empty($status)) $status .= "<br>";
-    if (!empty($jobqueueRec['jq_endtext'])) $status .= "$jobqueueRec[jq_endtext]";
+    if (!empty($jobqueueRec['jq_endtext'])) 
+      $status .= "$jobqueueRec[jq_endtext]";
+
+    if (!strstr($status, "Success") and !strstr($status, "Fail") and $jobqueueRec["jq_end_bits"])
+    {
+      $status .= "<br>";
+      if ($jobqueueRec["jq_end_bits"] == 0x1)
+        $status .= _("Success");
+      else if ($jobqueueRec["jq_end_bits"] == 0x2)
+        $status .= _("Failure");
+      else if ($jobqueueRec["jq_end_bits"] == 0x4)
+        $status .= _("Nonfatal");
+    }
 
     /* if the job is incomplete, check the scheduler status */
 //    $Command = "status " . $jobqueueRec['jq_pk'];
