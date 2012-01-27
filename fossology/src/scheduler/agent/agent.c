@@ -164,7 +164,7 @@ int update(int* pid_ptr, agent a, gpointer unused)
     /* check last checkin time */
     if(time(NULL) - a->check_in > TILL_DEATH && !job_is_paused(a->owner))
     {
-      ERROR("JOB[%d].%s[%d] no heartbeat for %d seconds",
+      alprintf(job_log(a->owner), "JOB[%d].%s[%d] no heartbeat for %d seconds",
           a->owner->id, a->owner->agent_type, a->pid, time(NULL) - a->check_in);
       kill(a->pid, SIGKILL);
       return 0;
@@ -177,6 +177,9 @@ int update(int* pid_ptr, agent a, gpointer unused)
       a->n_updates = 0;
     if(a->n_updates > NUM_UPDATES)
     {
+      alprintf(job_log(a->owner),
+          "JOB[%d].%s[%d] no new items processed in 10 mintues, killing\n",
+          a->owner->id, a->owner->agent_type, a->pid);
       kill(a->pid, SIGKILL);
       return 0;
     }
@@ -837,8 +840,8 @@ void agent_death_event(pid_t* pid)
           a->owner->id, a->meta_data->name, a->pid, a->return_code);
     else if(WIFSIGNALED(status))
     {
-      alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent was killed by signal: %s\n",
-          a->owner->id, a->meta_data->name, a->pid, strsignal(WTERMSIG(status)));
+      alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent was killed by signal: %d.%s\n",
+          a->owner->id, a->meta_data->name, a->pid, WTERMSIG(status), strsignal(WTERMSIG(status)));
       if(WCOREDUMP(status))
         alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent did produce core dump\n",
             a->owner->id, a->meta_data->name, a->pid, strsignal(WTERMSIG(status)));
