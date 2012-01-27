@@ -232,6 +232,9 @@ void	LoadAdj	(long UploadPk)
     Child = atol(PQgetvalue(pgRootResult, i, 0));
     Tree[TreeSet].UploadtreePk = Child;
     TreeSet++;
+    
+    /* dummy heart to make sure the scheduler knows we are still alive */
+    if ((i % 100000) == 0) fo_scheduler_heart(1);
   }
 
   /* Load all non-roots */
@@ -240,6 +243,9 @@ void	LoadAdj	(long UploadPk)
     Child = atol(PQgetvalue(pgNonRootResult,i,0));
     Parent = atol(PQgetvalue(pgNonRootResult,i,1));
     SetParent(Parent,Child);
+    
+    /* dummy heart to make sure the scheduler knows we are still alive */
+    if ((i % 100000) == 0) fo_scheduler_heart(1);
   }
 
   /* Free up DB memory */
