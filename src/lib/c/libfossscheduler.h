@@ -66,37 +66,44 @@ extern char*    sysconfigdir;
 #define LOG_FATAL(...) { \
             fprintf(stderr, "FATAL %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "\n"); }
+            fprintf(stderr, "\n"); \
+            fflush(stderr); }
 
 #define LOG_PQ_FATAL(pg_r, ...) { \
             fprintf(stderr, "FATAL %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "FATAL postgresql error: %s\n", PQresultErrorMessage(pg_r)); }
+            fprintf(stderr, "FATAL postgresql error: %s\n", PQresultErrorMessage(pg_r)); \
+            fflush(stderr); }
 
 #define LOG_ERROR(...) { \
             fprintf(stderr, "ERROR %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "\n"); }
+            fprintf(stderr, "\n"); \
+            fflush(stderr); }
 
 #define LOG_PQ_ERROR(pg_r, ...) { \
             fprintf(stderr, "ERROR %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); }
+            fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); \
+            fflush(stderr); }
 
 #define LOG_WARNING(...) { \
             fprintf(stderr, "WARNING %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "\n"); }
+            fprintf(stderr, "\n"); \
+            fflush(stderr); }
 
 #define LOG_DEBUG(...) { \
             fprintf(stderr, "DEBUG %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "\n"); }
+            fprintf(stderr, "\n"); \
+            fflush(stderr); }
 
 #define LOG_NOTICE(...) { \
             fprintf(stderr, "NOTICE %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "\n"); }
+            fprintf(stderr, "\n"); \
+            fflush(stderr); }
 
 #define TVERBOSE  agent_verbose
 #define TVERBOSE0 agent_verbose & 1
