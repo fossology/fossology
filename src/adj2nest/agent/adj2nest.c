@@ -1,7 +1,7 @@
 /***************************************************************
  adj2nest: Convert adjacency list to nested sets.
 
- Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -480,26 +480,30 @@ void    Usage   (char *Name)
 /*********************************************************/
 int	main	(int argc, char *argv[])
 {
-  int c;
+  int c, i;
   long UploadPk=-1;
   PGresult *pgResult;
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
-//  char *agent_desc = "Convert adjacency list to nested set (data retrieval optimization)";
+  long *uploads_to_scan;
+  int  upload_count = 0;
+
+  /* connect to scheduler.  Noop if not run from scheduler.  */
+  fo_scheduler_connect(&argc, argv);
+
+  /* for list of upload_pk's from the command line */
+  uploads_to_scan = calloc(argc, sizeof(long));
 
   /* open the database */
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
 
   if(!pgConn)
   {
-    printf("FATAL: %s.%d: Copyright agent unable to connect to database.\n", 
+    printf("FATAL: %s.%d: adj2nest agent unable to connect to database.\n", 
             __FILE__, __LINE__);
 	  fflush(stdout);
     exit(-1);
   }
-
-  /* connect to scheduler.  Noop if not run from scheduler.  */
-  fo_scheduler_connect(&argc, argv);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"aciuv")) != -1)
@@ -528,15 +532,38 @@ int	main	(int argc, char *argv[])
     }
   }
 
-  while(fo_scheduler_next())
+  /* Copy filename args (if any) into array */
+  for (i = optind; i < argc; i++)
   {
-    UploadPk = atol(fo_scheduler_current());
-    LoadAdj(UploadPk);
-    if (Tree) WalkTree(0,0); 
-    if (Tree) free(Tree);
-    Tree=NULL;
-    TreeSize=0;
-  } /* while() */
+    uploads_to_scan[upload_count] = atol(argv[i]);
+    upload_count++;
+  }
+
+  if (upload_count == 0)
+  {
+    while(fo_scheduler_next())
+    {
+      UploadPk = atol(fo_scheduler_current());
+      LoadAdj(UploadPk);
+      if (Tree) WalkTree(0,0); 
+      if (Tree) free(Tree);
+      Tree=NULL;
+      TreeSize=0;
+    } /* while() */
+  }
+  else
+  {
+    for (i = 0; i < upload_count; i++) 
+    {
+      UploadPk = uploads_to_scan[i];
+      LoadAdj(UploadPk);
+      if (Tree) WalkTree(0,0); 
+      if (Tree) free(Tree);
+      Tree=NULL;
+      TreeSize=0;
+    }
+    free(uploads_to_scan);
+  }
 
   /* update upload.upload_mode to say that adj2nest was successful */
   snprintf(SQL, sizeof(SQL), "UPDATE upload SET upload_mode = upload_mode | (1<<6) WHERE upload_pk='%ld'",
