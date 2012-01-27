@@ -98,6 +98,7 @@ extern char*    sysconfigdir;
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
 
+#define TVERBOSE  agent_verbose
 #define TVERBOSE0 agent_verbose & 1
 #define TVERBOSE1 agent_verbose & 2
 #define TVERBOSE2 agent_verbose & 4
@@ -115,6 +116,7 @@ extern char*    sysconfigdir;
  * Though you never have to put the caller's filename or line number
  * in a message since they are added by LOG_NOTICE.
  */
+#define LOG_VERBOSE(...)  if(TVERBOSE) LOG_NOTICE(__VA_ARGS__);
 #define LOG_VERBOSE0(...) if(TVERBOSE0) LOG_NOTICE(__VA_ARGS__);
 #define LOG_VERBOSE1(...) if(TVERBOSE1) LOG_NOTICE(__VA_ARGS__);
 #define LOG_VERBOSE2(...) if(TVERBOSE2) LOG_NOTICE(__VA_ARGS__);
