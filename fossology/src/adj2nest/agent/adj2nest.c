@@ -66,7 +66,6 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif
 
 PGconn *pgConn = NULL;  // Database connection
-int Verbose=0;
 
 struct uploadtree
   {
@@ -92,11 +91,11 @@ void	WalkTree	(long Index, long Depth)
   long LeftSet;
   PGresult* pgResult;
 
-  if (Verbose)
+  if (agent_verbose)
     {
     int i;
     for(i=0; i<Depth; i++) printf(" ");
-    printf("%ld\n",Tree[Index].UploadtreePk);
+    LOG_VERBOSE("%ld\n",Tree[Index].UploadtreePk);
     }
 
   LeftSet = SetNum;
@@ -204,7 +203,7 @@ void	LoadAdj	(long UploadPk)
 
   NonRootRows = PQntuples(pgNonRootResult);
   TreeSize = NonRootRows;
-  if (Verbose) printf("# Upload %ld: %ld items\n",UploadPk,TreeSize);
+  LOG_VERBOSE("# Upload %ld: %ld items\n",UploadPk,TreeSize);
 
   snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM uploadtree WHERE upload_fk = %ld AND parent IS NULL;",UploadPk);
   pgRootResult = PQexec(pgConn, SQL);
@@ -518,7 +517,7 @@ int	main	(int argc, char *argv[])
     case 'i':
       PQfinish(pgConn);
       return(0);
-    case 'v':	Verbose++; break;
+    case 'v':	agent_verbose++; break;
     case 'u':
       /* list ids */
       ListUploads();
