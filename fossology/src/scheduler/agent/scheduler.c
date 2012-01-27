@@ -99,8 +99,9 @@ void chld_sig(int signo)
   {
     if(TVERB_SCHED)
       clprintf("SIGNALS: received sigchld for pid %d\n", n);
-    pass = g_new0(pid_t, 1);
-    *pass = n;
+    pass = g_new0(pid_t, 2);
+    pass[0] = n;
+    pass[1] = status;
     event_signal(agent_death_event, pass);
   }
 }

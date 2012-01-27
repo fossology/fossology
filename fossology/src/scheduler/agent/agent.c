@@ -51,6 +51,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_ARGS 32       ///< the maximum number arguments passed to children  (arbitrary)
 #define TILL_DEATH 180    ///< how long to wait before agent is dead            (3 minutes)
 #define NUM_UPDATES 5     ///< the number of updates before agent is dead       (arbitrary)
+#define DEFAULT_RET -1    ///< default return code                              (arbitrary)
 
 #define TEST_NULV(a) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
 #define TEST_NULL(a, ret) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
@@ -816,8 +817,9 @@ void agent_destroy(agent a)
 void agent_death_event(pid_t* pid)
 {
   agent a;
+  int status = pid[1];
 
-  if((a = g_tree_lookup(agents, pid)) == NULL)
+  if((a = g_tree_lookup(agents, &pid[0])) == NULL)
     return;
 
   if(a->owner->id >= 0)
@@ -830,9 +832,18 @@ void agent_death_event(pid_t* pid)
 
   if(a->return_code != 0)
   {
-    alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent failed\n",
-        a->owner->id, a->meta_data->name, a->pid);
-    ERROR("JOB[%d].%s[%d]: agent closed unexpectedly, agent status was %s",
+    if(WIFEXITED(status))
+      alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent failed, code: %d\n",
+          a->owner->id, a->meta_data->name, a->pid, a->return_code);
+    else if(WIFSIGNALED(status))
+    {
+      alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent was killed by signal: %s\n",
+          a->owner->id, a->meta_data->name, a->pid, strsignal(WTERMSIG(status)));
+      if(WCOREDUMP(status))
+        alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent did produce core dump\n",
+            a->owner->id, a->meta_data->name, a->pid, strsignal(WTERMSIG(status)));
+    }
+    WARNING("JOB[%d].%s[%d]: agent closed unexpectedly, agent status was %s",
         a->owner->id, a->meta_data->name, a->pid, agent_status_strings[a->status]);
     agent_fail(a);
   }
