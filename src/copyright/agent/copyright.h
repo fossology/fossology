@@ -66,7 +66,7 @@ typedef copy_entry* copyright_iterator;
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
-int  copyright_init(copyright* copy);
+int  copyright_init(copyright* copy, char* copy_dir, char* name_dir);
 void copyright_destroy(copyright copy);
 
 /* ************************************************************************** */

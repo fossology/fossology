@@ -32,7 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* local includes */
 #include <copyright.h>
 #include <cvector.h>
-#include <copyright.h>
 #include <pair.h>
 #include <sql_statements.h>
 
@@ -193,11 +192,23 @@ void run_test_files(copyright copy)
   FILE* istr, * m_out, * n_out, * p_out;
   char buffer[READMAX + 1];
   char file_name[FILENAME_MAX];
+  char copy_buf[FILENAME_MAX];
+  char name_buf[FILENAME_MAX];
   char* first, * last, * loc, tmp;
   int i, matches, correct = 0, falsep = 0, falsen = 0;
 
+  /* grab the copyright files */
+  memset(copy_buf, '\0', sizeof(copy_buf));
+  memset(name_buf, '\0', sizeof(copy_buf));
+  snprintf(copy_buf, sizeof(copy_buf),
+      "%s/mods-enabled/copyright/agent/copyright.dic",
+      sysconfigdir);
+  snprintf(name_buf, sizeof(name_buf),
+      "%s/mods-enabled/copyright/agent/names.dic",
+      sysconfigdir);
+
   /* create data structures */
-  copyright_init(&copy);
+  copyright_init(&copy, copy_buf, name_buf);
   cvector_init(&compare, string_function_registry());
 
   /* open the logging files */
@@ -760,6 +771,8 @@ int main(int argc, char** argv)
   char *SVN_REV;
   char *VERSION;
   char agent_rev[myBUFSIZ];
+  char copy_buf[FILENAME_MAX];
+  char name_buf[FILENAME_MAX];
 
   /* Database structs */
   PGconn* pgConn = NULL;        // the connection to Database
@@ -781,7 +794,16 @@ int main(int argc, char** argv)
   fo_scheduler_connect(&argc, argv);
 
   /* initialize complex data strcutres */
-  if(!copyright_init(&copy))
+  memset(copy_buf, '\0', sizeof(copy_buf));
+  memset(name_buf, '\0', sizeof(copy_buf));
+  snprintf(copy_buf, sizeof(copy_buf),
+      "%s/mods-enabled/copyright/agent/copyright.dic",
+      sysconfigdir);
+  snprintf(name_buf, sizeof(name_buf),
+      "%s/mods-enabled/copyright/agent/names.dic",
+      sysconfigdir);
+
+  if(!copyright_init(&copy, copy_buf, name_buf))
   {
     fprintf(cerr, "FATAL %s.%d: copyright initialization failed\n", __FILE__, __LINE__);
     fprintf(cerr, "FATAL %s\n", strerror(errno));
@@ -816,8 +838,6 @@ int main(int argc, char** argv)
 
         pair_destroy(curr);
         break;
-      case 'c':
-        break; /* handled by fo_scheduler_connect() */
       case 't': /* run accuracy testing */
         run_test_files(copy);
         copyright_destroy(copy);
