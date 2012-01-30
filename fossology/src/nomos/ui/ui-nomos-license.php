@@ -159,6 +159,12 @@ class ui_nomos_license extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
+    if (empty($lft))
+    {
+      $text = _("Job unpack/adj2nest hasn't completed.");
+      $VLic = "<b>$text</b><p>";
+      return $VLic;
+    }
     /* Find total number of files for this $Uploadtree_pk
      * Exclude artifacts and directories.
     */
