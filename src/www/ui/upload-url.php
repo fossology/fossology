@@ -103,7 +103,7 @@ class upload_url extends FO_Plugin {
     $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
     AgentCheckBoxDo($uploadpk);
 
-    $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
+    $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
     $text = _("The upload");
     $text1 = _("has been scheduled. It is");
     $msg = "$text $Name $text1 ";

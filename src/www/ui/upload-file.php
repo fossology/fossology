@@ -91,7 +91,7 @@ class upload_file extends FO_Plugin {
     if($wgetRtn == 0) {
       $text = _("The file");
       $text1 = _("has been uploaded. It is");
-      $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
+      $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
       $Msg = "$text $Name $text1 ";
       $keep = '<a href=' . $Url . '>upload #' . $uploadpk . "</a>.\n";
       print displayMessage($Msg,$keep);
