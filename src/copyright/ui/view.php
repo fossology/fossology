@@ -103,6 +103,12 @@ class copyright_view extends FO_Plugin
             and pfile_fk=".$pfile.";";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) < 1)
+    {
+      $text = _("No copyright data is available for this file.");
+      print $text;
+      return;
+    }
     $row = pg_fetch_assoc($result, 0);
     $colors = Array();
     $colors['statement'] = 0;
