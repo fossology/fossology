@@ -344,7 +344,7 @@ class ui_browse extends FO_Plugin {
       /* Job queue link */
       $text = _("History");
       if (plugin_find_id('showjobs') >= 0) {
-        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>[$text]</a>";
+        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>[$text]</a>";
 
       $V.= "</td>\n";
       $V.= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
