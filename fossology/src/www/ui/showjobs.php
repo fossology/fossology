@@ -339,7 +339,8 @@ class showjobs extends FO_Plugin
     }
     
     /* Next/Prev menu */
-    if ($NumJobs >= $this->MaxUploadsPerPage) $OutBuf = MenuEndlessPage($Page,1); 
+    $Next = $NumJobs > $this->MaxUploadsPerPage;
+    if ($NumJobs >= $this->MaxUploadsPerPage)  $OutBuf .= MenuEndlessPage($Page, $Next); 
 
     /*****************************************************************/
     /* Now display the summary */
@@ -355,6 +356,9 @@ class showjobs extends FO_Plugin
     $prevpfile = "";
 
     $OutBuf .= "<table class='text' border=1 width='100%' name='jobtable'>\n";
+    $FirstJob = $Page * $this->MaxUploadsPerPage;
+    $LastJob = ($Page * $this->MaxUploadsPerPage) + $this->MaxUploadsPerPage;
+    $JobNumber = -1;
     foreach ($JobData as $job_pk => $Job)
     {
       /* Upload  */
@@ -363,23 +367,29 @@ class showjobs extends FO_Plugin
       $pfile_pk = $Job["upload"]["pfile_fk"];
       if ( $prevpfile != $pfile_pk)
       {
+        $prevpfile = $pfile_pk;
+        $JobNumber++;
+
+        /* Only display the jobs for this page */
+        if ($JobNumber >= $LastJob) break;
+        if ($JobNumber < $FirstJob) continue;
+
         /* blank line separator between pfiles */
-	  $OutBuf .= "<tr><td colspan=7> <hr> </td></tr>";
+	    $OutBuf .= "<tr><td colspan=7> <hr> </td></tr>";
 
         $OutBuf .= "<tr>";
         $OutBuf .= "<th $uploadStyle></th>";
         $OutBuf .= "<th colspan=4 $uploadStyle>";
         $uploadtree_pk = $Job['uploadtree']['uploadtree_pk'];
-        $OutBuf .= "<a title='Click to browse' href='" . Traceback_uri() . "?mod=brow
-se&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
+        $OutBuf .= "<a title='Click to browse' href='" . Traceback_uri() . "?mod=browse&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
         $OutBuf .= $UploadName;
         if (!empty($UploadDesc)) $OutBuf .= " (" . $UploadDesc . ")";
         $OutBuf .= "</a>";
         $OutBuf .= "</th>";
-        $prevpfile = $pfile_pk;
         $OutBuf .= "<th $uploadStyle></th>";
         $OutBuf .= "</tr>";
       }
+      else  if ($JobNumber < $FirstJob) continue;
 
       /* Job data */
       $OutBuf .= "<tr>";
@@ -478,7 +488,7 @@ se&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
     }
     $OutBuf .= "</table>\n";
 
-    if ($NumJobs >= $this->MaxUploadsPerPage) $OutBuf .= "<p>" . MenuEndlessPage($Page,1); 
+    if ($NumJobs >= $this->MaxUploadsPerPage) $OutBuf .= "<p>" . MenuEndlessPage($Page, $Next); 
     return($OutBuf);
   } // Show()
 
@@ -601,6 +611,7 @@ se&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
           $Action = GetParm("action",PARM_STRING);
           $UploadPk = GetParm("upload",PARM_INTEGER);
           $Page=getparm('page',PARM_INTEGER);
+          if (empty($Page)) $Page = 0;
           $jqtype = GetParm("jqtype",PARM_STRING);
           $ThisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$UploadPk";
           $Job = GetParm('job',PARM_INTEGER);
