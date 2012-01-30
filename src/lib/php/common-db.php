@@ -174,7 +174,7 @@ function DB_TableExists($tableName)
   global $PG_CONN;
   global $SysConf;
 
-  $sql = "select count(*) as count from information_schema.tables where table_catalog='{$SysConf[DBCONF][dbname]}' and table_name='$tableName'";
+  $sql = "select count(*) as count from information_schema.tables where table_catalog='{$SysConf['DBCONF']['dbname']}' and table_name='$tableName'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
