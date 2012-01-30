@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -77,7 +77,8 @@ function displayMessage($Message,$keep=NULL) {
   $HTML .= "\n<div id='dmessage'>";
   $text = _("Close");
   $HTML .= "<button name='eraseme' value='close' onclick='rmMsg()'> $text</button>\n";
-  $HTML .= htmlentities($Message,ENT_QUOTES) . "\n";
+//  $HTML .= htmlentities($Message,ENT_QUOTES) . "\n";
+  $HTML .= $Message;
   $HTML .= $keep . "\n</p>";
   $HTML .= "  <hr>\n";
   $HTML .= "</div>\n";
