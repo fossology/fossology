@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -37,7 +37,8 @@
  * are all separate enteries in the jobqueue table.
  * The copyright jobqueue would be under the copyright job.
  * The ununpack and adj2nest are the two jobqueue entries
- * under the unpack job.
+ * under the unpack job.  "Task" or "JobTask" would probably
+ * have been a better name.
  * 
  * JobQueue tasks may have dependencies upon the completion of
  * other JobQueue tasks.  The jobdepends tables keep those

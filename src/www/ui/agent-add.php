@@ -34,27 +34,27 @@ class agent_add extends FO_Plugin
   /**
    * \brief Add an upload to multiple agents.
    *
-   * \param $uploadpk - uplpad id
+   * \param $uploadpk 
    * \param $agentlist - list of agents
+   * \return NULL on success, error message string on failure
    */
   function AgentsAdd($uploadpk, $agentlist)
   {
+    global $Plugins;
+    global $PG_CONN;
+
     $rc="";
     $Alist = array();
 
     /* Make sure the uploadpk is valid */
-    global $Plugins;
-    global $PG_CONN;
     if (!$uploadpk) return "agent-add.php AgentsAdd(): No upload_pk specified";
     $sql = "SELECT upload_pk FROM upload WHERE upload_pk = '$uploadpk';";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if ($row['upload_pk'] != $uploadpk)
+    if (pg_num_rows($result) < 1)
     {
-      $text = _("Upload not found.");
-      return($text);
+      $ErrMsg = __FILE__ . ":" . __LINE__ . " " . _("Upload") . " " . $uploadpk . " " .  _("not found");
+      return($ErrMsg);
     }
 
     /* Validate the agent list and add agents as needed. */
@@ -117,9 +117,12 @@ class agent_add extends FO_Plugin
           $rc = $this->AgentsAdd($uploadpk,$agents);
           if (empty($rc))
           {
+            $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
             /* Need to refresh the screen */
-            $text = _("Agent Analysis added to job queue");
-            $V .= displayMessage($text);
+            $text = _("Your jobs have been added to job queue.");
+            $LinkText = _("View Jobs");
+            $msg = "$text <a href=$URL>$LinkText</a>";
+            $V .= displayMessage($msg);
           }
           else
           {

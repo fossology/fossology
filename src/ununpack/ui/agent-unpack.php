@@ -43,17 +43,31 @@ class agent_unpack extends FO_Plugin
   }
 
   /**
-   * \brief Check if the job is already in the queue.  
+   * \brief Check if the job is already in the queue or already completed.  
    *
+   * \param upload_pk
+   )
 　 * \return 
    * - 0 = not scheduled \n
    * - 1 = scheduled but not completed \n
    * - 2 = scheduled and completed \n
    */
-  function AgentCheck($uploadpk)
+  function AgentCheck($upload_pk)
   {
     global $PG_CONN;
-    $sql = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job ON job_upload_fk = '$uploadpk' AND job_pk = jq_job_fk AND jq_type = 'ununpack';";
+
+    /* Check if ununpack has already been run successfully.
+       This check is independent of the ununpack version.
+     */
+    $sql = "select ars_pk from ununpack_ars where upload_fk='$upload_pk' and ars_success=true";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $success = pg_num_rows($result);
+    pg_free_result($result);
+    if ($success > 0) return 2;
+
+    /* Check if ununpack is queued */
+    $sql = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job ON job_upload_fk = '$upload_pk' AND job_pk = jq_job_fk AND jq_type = 'ununpack';";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
