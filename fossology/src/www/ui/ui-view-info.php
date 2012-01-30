@@ -509,7 +509,7 @@ class ui_view_info extends FO_Plugin
     $VT .= "<H2>$text</H2>\n";
 
     global $PG_CONN;
-    /* Find lft and rgt bounds for this $Uploadtree_pk  */
+    /* Find lft and rgt bounds for this uploadtree_pk  */
     $sql = "SELECT lft,rgt,upload_fk FROM uploadtree WHERE uploadtree_pk = $Item;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -517,14 +517,19 @@ class ui_view_info extends FO_Plugin
     {
       pg_free_result($result);
       $text = _("Invalid URL, nonexistant item");
-      return "<h2>$text $Uploadtree_pk</h2>";
+      return "<h2>$text $Item</h2>";
     }
-
     $row = pg_fetch_assoc($result);
     $lft = $row["lft"];
     $rgt = $row["rgt"];
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
+
+    if (empty($lft))
+    {
+      $text = _("Upload data is unavailable.  It needs to be unpacked.");
+      return "<h2>$text uploadtree_pk: $Item</h2>";
+    }
 
     $sql = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file,tag,tag_ns WHERE tag_pk = tag_fk AND tag_ns_fk = tag_ns_pk) T ON uploadtree.pfile_fk = T.pfile_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt UNION SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_uploadtree,tag,tag_ns WHERE tag_pk = tag_fk AND tag_ns_fk = tag_ns_pk) T ON uploadtree.uploadtree_pk = T.uploadtree_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt ORDER BY ufile_name";
     $result = pg_query($PG_CONN, $sql);
