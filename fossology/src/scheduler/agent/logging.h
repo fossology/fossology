@@ -77,16 +77,18 @@ extern char  log_name[FILENAME_MAX];
             lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); } \
             PQclear(pg_r)
 
-/** Macro that is called when a notification is generated */
-#define NOTIFY(...) if(verbose > 0) do { \
-            lprintf("NOTIFY: "); \
-            lprintf(__VA_ARGS__); \
+/** Macros that is called when a notification is generated */
+#define TEST_NOTIFY verbose > 0
+#define NOTIFY(...) if(TEST_NOTIFY) do { \
+            lprintf("NOTE: ");           \
+            lprintf(__VA_ARGS__);        \
             lprintf("\n"); } while(0)
 
-/** Macro that is called when any type of warning is generated */
-#define WARNING(...) if(verbose > 1) do { \
+/** Macros that is called when any type of warning is generated */
+#define TEST_WARNING verbose > 1
+#define WARNING(...) if(TEST_WARNING) do {                  \
             lprintf("WARNING %s.%d: ", __FILE__, __LINE__); \
-            lprintf(__VA_ARGS__); \
+            lprintf(__VA_ARGS__);                           \
             lprintf("\n"); } while(0)
 
 /* verbose macros, if changing from greater than scheme to bit mask, just */

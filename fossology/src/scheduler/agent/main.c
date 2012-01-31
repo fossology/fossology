@@ -88,8 +88,8 @@ int main(int argc, char** argv)
   /* perform pre-initialization checks */
   if(s_daemon && daemon(0, 0) == -1) { return -1; }
   if(db_init)     { database_init();  return 0; }
-  if(ki_sched)    { return kill_scheduler(); }
   if(log != NULL) { set_log(log); }
+  if(ki_sched)    { return kill_scheduler(); }
 
   /* the proces's pid could have change */
   s_pid = getpid();

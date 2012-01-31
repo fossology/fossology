@@ -315,7 +315,6 @@ int kill_scheduler()
       snprintf(f_name, sizeof(f_name), "/proc/%s/cmdline", ep->d_name);
       if((file = fopen(f_name, "rt")))
       {
-        V_SCHED("KILL: found \"%s\" in cmdline file\n", f_name);
         if(fgets(f_name, sizeof(f_name), file) != NULL &&
             strstr(f_name, "fo_scheduler") && s_pid != atoi(ep->d_name))
         {
@@ -438,7 +437,7 @@ void load_foss_config()
   int max = -1;             // the number of agents to a host or number of one type running
   int special = 0;          // anything that is special about the agent (EXCLUSIVE)
   char addbuf[512];         // standard string buffer
-  char dirbuf[512];         // standard string buffer
+  char dirbuf[512];
   GError* error = NULL;
   int i;
 
@@ -469,8 +468,6 @@ void load_foss_config()
     }
 
     sscanf(tmp, "%s %s %d", addbuf, dirbuf, &max);
-    if(strcmp(addbuf, "localhost") == 0) strcpy(dirbuf, sysconfigdir);
-
     host_init(keys[i], addbuf, dirbuf, max);
     if(TVERB_SCHED)
     {
