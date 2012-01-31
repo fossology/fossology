@@ -122,8 +122,11 @@ void* interface_thread(void* param)
 
     if(cmd == NULL)
     {
+      g_output_stream_write(conn->ostr, "Invalid command: \"", 18, NULL, NULL);
+      g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+      g_output_stream_write(conn->ostr, "\"\n", 2, NULL, NULL);
       g_match_info_free(regex_match);
-      WARNING("INTERFACE: invalid command: %s", buffer);
+      WARNING("INTERFACE: invalid command: \"%s\"", buffer);
       continue;
     }
 

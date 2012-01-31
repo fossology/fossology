@@ -59,6 +59,47 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 GTree* meta_agents = NULL;   ///< The master list of all meta agents
 GTree* agents      = NULL;   ///< The master list of all of the agents
 
+/** prints the credential of the agent */
+#define AGENT_CREDENTIAL                                               \
+  lprintf("JOB[%d].%s[%d.%s]: ", a->owner->id, a->meta_data->name,     \
+      a->pid, a->host_machine->name)
+
+/** prints the credential to the agent log */
+#define AGENT_LOG_CREDENTIAL                         \
+  alprintf(job_log(a->owner), "JOB[%d].%s[%d.%s]: ", \
+      a->owner->id, a->meta_data->name, a->pid, a->host_machine->name)
+
+/** ERROR macro specifically for agents */
+#define AGENT_ERROR(...) do { \
+  lprintf("ERROR: %s.%d: ", __FILE__, __LINE__); \
+  AGENT_CREDENTIAL;                              \
+  lprintf(__VA_ARGS__);                          \
+  lprintf("\n"); } while(0)
+
+/** NOTIFY macro specifically for agents */
+#define AGENT_NOTIFY(...) if(TEST_NOTIFY) do { \
+  lprintf("NOTE: ");                           \
+  AGENT_CREDENTIAL;                            \
+  lprintf(__VA_ARGS__);                        \
+  lprintf("\n"); } while(0)
+
+/** WARNING macro specifically for agents */
+#define AGENT_WARNING(...) if(TEST_WARNING) do {   \
+  lprintf("WARNING %s.%d: ", __FILE__, __LINE__);  \
+  AGENT_CREDENTIAL;                                \
+  lprintf(__VA_ARGS__);                            \
+  lprintf("\n"); } while(0)
+
+/** STANDARD verbose macro changed for agents */
+#define AGENT_VERB(...) if(TVERB_AGENT) do { \
+  AGENT_CREDENTIAL;                          \
+  lprintf(__VA_ARGS__); } while(0)
+
+/** send logging specifically to the agent log file */
+#define AGENT_LOG(...) do {                             \
+  AGENT_LOG_CREDENTIAL;                                 \
+  alprintf(job_log(a->owner), __VA_ARGS__); } while(0)
+
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
@@ -90,9 +131,8 @@ const char* agent_status_strings[] = {
  */
 void agent_transition(agent a, agent_status new_status)
 {
-  V_AGENT("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
-        a->owner->id, a->meta_data->name, a->pid,
-        agent_status_strings[a->status], agent_status_strings[new_status]);
+  AGENT_VERB("agent statsu change: %s -> %s\n",
+      agent_status_strings[a->status], agent_status_strings[new_status]);
 
   if(a->owner->id > 0)
   {
@@ -118,10 +158,7 @@ void agent_fail(agent a)
   agent_transition(a, AG_FAILED);
   job_fail_agent(a->owner, a);
   if(write(a->to_parent, "@@@1\n", 5) != 5)
-  {
-    ERROR("JOB[%d].%s[%d]: Failed to kill agent thread cleanly",
-        a->owner->id, a->meta_data->name, a->pid);
-  }
+    AGENT_ERROR("Failed to kill agent thread cleanly");
 }
 
 /**
@@ -164,9 +201,8 @@ int update(int* pid_ptr, agent a, gpointer unused)
     /* check last checkin time */
     if(time(NULL) - a->check_in > TILL_DEATH && !job_is_paused(a->owner))
     {
-      alprintf(job_log(a->owner), "JOB[%d].%s[%d] no heartbeat for %d seconds",
-          a->owner->id, a->owner->agent_type, a->pid, time(NULL) - a->check_in);
-      kill(a->pid, SIGKILL);
+      AGENT_LOG("no heartbeat for %d seconds\b", (time(NULL) - a->check_in));
+      agent_kill(a);
       return 0;
     }
 
@@ -177,17 +213,15 @@ int update(int* pid_ptr, agent a, gpointer unused)
       a->n_updates = 0;
     if(a->n_updates > NUM_UPDATES)
     {
-      alprintf(job_log(a->owner),
-          "JOB[%d].%s[%d] no new items processed in 10 mintues, killing\n",
-          a->owner->id, a->owner->agent_type, a->pid);
-      kill(a->pid, SIGKILL);
+      AGENT_LOG("no new items processed in 10 minutes, killing\n");
+      agent_kill(a);
       return 0;
     }
 
     a->check_analyzed = a->total_analyzed;
 
-    V_AGENT("JOB[%d].%s[%d]: agent updated correctly, processed %d items\n",
-        a->owner->id, a->meta_data->name, a->pid, a->check_analyzed);
+    AGENT_VERB("agent updated correctly, processed %d items\n",
+        a->check_analyzed);
   }
 
   return 0;
@@ -274,9 +308,7 @@ void agent_listen(agent a)
    */
   if(fgets(buffer, sizeof(buffer), a->read) == NULL)
   {
-    alprintf(job_log(a->owner),
-        "T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n",
-        __FILE__, __LINE__, a->owner->id, a->meta_data->name, a->pid, strerror(errno));
+    AGENT_LOG("pipe from child closed: %s\n", strerror(errno));
     g_thread_exit(NULL);
   }
 
@@ -295,9 +327,7 @@ void agent_listen(agent a)
         g_tree_remove(meta_agents, a->meta_data->name);
       clprintf("ERROR %s.%d: agent %s has been invalidated, removing from agents\n",
           __FILE__, __LINE__, a->meta_data->name);
-      THREAD_FATAL(job_log(a->owner),
-          "JOB[%d].%s[%d] agent didn't send version information\nreceived \"%s\"",
-          a->owner->id, a->meta_data->name, a->pid, buffer);
+      AGENT_LOG("agent didn't send version information: \"%s\"", buffer);
     }
   }
 
@@ -320,7 +350,7 @@ void agent_listen(agent a)
         "ERROR: version don't match: \"%s\" != received: \"%s\"\n",
         a->meta_data->version, buffer);
     a->meta_data->valid = 0;
-    kill(a->pid, SIGKILL);
+    agent_kill(a);
     g_static_mutex_unlock(&version_lock);
     return;
   }
@@ -346,9 +376,7 @@ void agent_listen(agent a)
       continue;
 
     if(TVERB_AGENT)
-      alprintf(job_log(a->owner),
-          "JOB[%d].%s[%d]: received: \"%s\"\n",
-          a->owner->id, a->meta_data->name, a->pid, buffer);
+      AGENT_LOG("received: \"%s\"\n", buffer);
 
     /* command: "BYE"
      *
@@ -361,9 +389,7 @@ void agent_listen(agent a)
     {
       if((a->return_code = atoi(&(buffer[4]))) != 0)
       {
-        alprintf(job_log(a->owner),
-            "JOB[%d].%s[%d]: agent failed with error code %d\n",
-            a->owner->id, a->meta_data->name, a->pid, a->return_code);
+        AGENT_LOG("agent failed with error code %d\n", a->return_code);
         event_signal(agent_fail, a);
       }
       break;
@@ -443,19 +469,11 @@ void agent_listen(agent a)
      * printed into the log and move on.
      */
     else if(!(TVERB_AGENT))
-    {
-      alprintf(job_log(a->owner),
-          "JOB[%d].%s[%d]: \"%s\"\n",
-          a->owner->id, a->meta_data->name, a->pid, buffer);
-    }
+      AGENT_LOG("\"%s\"\n", buffer);
   }
 
   if(TVERB_AGENT)
-  {
-    alprintf(job_log(a->owner),
-        "JOB[%d].%s[%d]: communication thread closing\n",
-        a->owner->id, a->meta_data->name, a->pid);
-  }
+    AGENT_LOG("communication thread closing\n");
 }
 
 /**
@@ -569,7 +587,7 @@ void* agent_spawn(void* passed)
       strcpy(buffer, args[0]);
       *strrchr(buffer, '/') = '\0';
       if(chdir(buffer) != 0)
-{
+      {
         ERROR("unable to change working directory: %s\n", strerror(errno));
       }
 
@@ -594,8 +612,8 @@ void* agent_spawn(void* passed)
     }
 
     /* we should never reach here */
-    lprintf("ERROR %s.%d: JOB[%d].%s[%d] exec failed\nERROR errno is: %s\n",
-        __FILE__, __LINE__, a->owner->id, a->meta_data->name, getpid(), strerror(errno));
+    lprintf("ERROR %s.%d: JOB[%d.%s]: exec failed: pid = %d, errno = \"%s\"",
+        __FILE__, __LINE__, a->owner->id, a->owner->agent_type, getpid(), strerror(errno));
   }
   /* we are in the parent */
   else if(a->pid > 0)
@@ -606,8 +624,8 @@ void* agent_spawn(void* passed)
   /* error case */
   else
   {
-    clprintf("ERROR %s.%d: JOB[%d].%s[%d] fork failed\nERROR errno is: %s\n",
-        __FILE__, __LINE__, a->owner->id, a->meta_data->name, getpid(), strerror(errno));
+    clprintf("ERROR %s.%d: JOB[%d.%s]: fork failed\nERROR errno is: %s\n",
+        __FILE__, __LINE__, a->owner->id, a->owner->agent_type, strerror(errno));
   }
 
   return NULL;
@@ -829,25 +847,24 @@ void agent_death_event(pid_t* pid)
     event_signal(database_update_event, NULL);
 
   if(write(a->to_parent, "@@@1\n", 5) != 5)
-    V_AGENT("JOB[%d].%s[%d]: write to agent unsuccessful: %s\n",
-        a->owner->id, a->meta_data->name, a->pid, strerror(errno));
+    AGENT_VERB("write to agent unsuccessful: %s\n", strerror(errno));
   g_thread_join(a->thread);
 
   if(a->return_code != 0)
   {
     if(WIFEXITED(status))
-      alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent failed, code: %d\n",
-          a->owner->id, a->meta_data->name, a->pid, a->return_code);
+    {
+      AGENT_VERB("agent failed, code: %d\n", a->return_code);
+    }
     else if(WIFSIGNALED(status))
     {
-      alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent was killed by signal: %d.%s\n",
-          a->owner->id, a->meta_data->name, a->pid, WTERMSIG(status), strsignal(WTERMSIG(status)));
+      AGENT_VERB("agent was killed by signal: %d.%s\n",
+          WTERMSIG(status), strsignal(WTERMSIG(status)));
       if(WCOREDUMP(status))
-        alprintf(job_log(a->owner), "JOB[%d].%s[%d]: agent did produce core dump\n",
-            a->owner->id, a->meta_data->name, a->pid, strsignal(WTERMSIG(status)));
+        AGENT_VERB("agent produced core dump\n");
     }
-    WARNING("JOB[%d].%s[%d]: agent closed unexpectedly, agent status was %s",
-        a->owner->id, a->meta_data->name, a->pid, agent_status_strings[a->status]);
+    AGENT_WARNING("agent closed unexpectedly, agent status was %s",
+        agent_status_strings[a->status]);
     agent_fail(a);
   }
 
@@ -862,8 +879,7 @@ void agent_death_event(pid_t* pid)
     g_tree_remove(meta_agents, a->meta_data->name);
   }
 
-  V_AGENT("JOB[%d].%s[%d]: successfully removed from the system\n",
-      a->owner->id, a->meta_data->name, a->pid);
+  AGENT_VERB("successfully remove from the system\n");
   job_remove_agent(a->owner, a);
   g_tree_remove(agents, &a->pid);
   g_free(pid);
@@ -881,9 +897,7 @@ void agent_create_event(agent a)
 {
   TEST_NULV(a);
 
-  V_AGENT("JOB[%d].%s[%d]: agent successfully spawned\n",
-      a->owner->id, a->meta_data->name, a->pid);
-
+  AGENT_VERB("agent successfully spawned\n");
   g_tree_insert(agents, &a->pid, a);
   agent_transition(a, AG_SPAWNED);
   job_add_agent(a->owner, a);
@@ -905,8 +919,7 @@ void agent_ready_event(agent a)
   if(a->status == AG_SPAWNED)
   {
     agent_transition(a, AG_RUNNING);
-    V_AGENT("JOB[%d].%s[%d]: agent successfully created\n",
-        a->owner->id, a->meta_data->name, a->pid);
+    AGENT_VERB("agent successfully created\n");
   }
 
   if((ret = job_is_open(a->owner)) == 0)
@@ -929,9 +942,8 @@ void agent_ready_event(agent a)
 
   if(write(a->to_parent, "@@@0\n", 5) != 5)
   {
-    ERROR("JOB[%d].%s[%d]: failed sending new data to agent",
-        a->owner->id, a->meta_data->name, a->pid);
-    kill(a->pid, SIGKILL);
+    AGENT_ERROR("failed sending new data to agent");
+    agent_kill(a);
   }
 }
 
@@ -1000,7 +1012,7 @@ void agent_print_status(agent a, GOutputStream* ostr)
       agent_status_strings[a->status],
       time_buf);
 
-  V_AGENT("AGENT_STATUS: %s", status_str);
+  AGENT_VERB("AGENT_STATUS: %s", status_str);
   g_output_stream_write(ostr, status_str, strlen(status_str), NULL, NULL);
   g_free(status_str);
   return;
@@ -1014,6 +1026,7 @@ void agent_print_status(agent a, GOutputStream* ostr)
  */
 void agent_kill(agent a)
 {
+  AGENT_VERB("KILL: sending SIGKILL to pid %d\n", a->pid);
   kill(a->pid, SIGKILL);
 }
 
@@ -1036,8 +1049,7 @@ int aprintf(agent a, const char* fmt, ...)
   {
     tmp = g_strdup_vprintf(fmt, args);
     tmp[strlen(tmp) - 1] = '\0';
-    alprintf(job_log(a->owner), "JOB[%d].%s[%d]: sent to agent \"%s\"\n",
-        a->owner->id, a->meta_data->name, a->pid, tmp);
+    AGENT_LOG("sent to agent \"%s\"\n", tmp);
     rc = fprintf(a->write, "%s\n", tmp);
     g_free(tmp);
   }
