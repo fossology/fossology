@@ -152,7 +152,7 @@ FUNCTION int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk
 
 
 /**
- \brief Create ars table
+ \brief Create ars table if it doesn't already exist.
   
  \param pgConn Database connection object pointer.
  \param tableName  ars table name
@@ -163,6 +163,8 @@ FUNCTION int fo_CreateARSTable(PGconn *pgConn, char *tableName)
 {
   char sql[1024];
   PGresult *result;
+
+  if (fo_tableExists(pgConn, tableName)) return 1;  // table already exists
 
   snprintf(sql, sizeof(sql), "create table %s() inherits(ars_master);\
   ALTER TABLE ONLY %s ADD CONSTRAINT %s_agent_fk_fkc FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);\
