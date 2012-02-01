@@ -364,24 +364,4 @@ function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=Tr
   $LinkStr .= "]";
   return $LinkStr;
 }
-
-
-/**
- * \brief Given an upload_pk, find the latest enabled nomos agent_pk with results.
- *
- * \param $upload_pk - upload id
- *
- * \returns nomos agent_pk or 0 if none
- */
-function LatestNomosAgentpk($upload_pk)
-{
-  $Agent_name = "nomos";
-  $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
-  if ($AgentRec === false)
-  return 0;
-  else
-  $Agent_pk = $AgentRec[0]['agent_fk'];
-  return $Agent_pk;
-}
-
 ?>

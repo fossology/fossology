@@ -71,7 +71,7 @@ class ui_nomos_license extends FO_Plugin
     $Upload = GetParm("upload",PARM_INTEGER);
     if (!empty($Item) && !empty($Upload))
     {
-      $nomosAgentpk = LatestNomosAgentpk($Upload);
+      $nomosAgentpk = LatestAgentpk($Upload, "nomos_ars");
       $nomosURI = "view-license&napk=$nomosAgentpk" . Traceback_parm_keep(array("show","format","page","upload","item"));
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
@@ -179,7 +179,7 @@ class ui_nomos_license extends FO_Plugin
     $FileCount = $row["count"];
     pg_free_result($result);
 
-    $Agent_pk = LatestNomosAgentpk($upload_pk);
+    $Agent_pk = LatestAgentpk($upload_pk, "nomos_ars");
     if ($Agent_pk == 0)
     {
       $text = _("No data available.  Use Jobs > Agents to schedule a license scan.");

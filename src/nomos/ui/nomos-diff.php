@@ -105,7 +105,7 @@ class ui_nomos_diff extends FO_Plugin
   function GetTreeInfo($Uploadtree_pk)
   {
     $TreeInfo = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $Uploadtree_pk");
-    $TreeInfo['agent_pk'] = LatestNomosAgentpk($TreeInfo['upload_fk']);
+    $TreeInfo['agent_pk'] = LatestAgentpk($TreeInfo['upload_fk'], "nomos_ars");
     return $TreeInfo;
   }
 
