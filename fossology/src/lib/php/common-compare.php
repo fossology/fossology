@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+***********************************************************/
 
 /**
  * \file common-compare.php
@@ -45,9 +45,7 @@ function PickGarbage()
   $sql = "delete from file_picker where last_access_date < (now() - interval '$ExpireDays days')";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
 }
-
 
 /**
  * \brief FuzzyName comparison function for diff tools
@@ -59,15 +57,15 @@ function PickGarbage()
  */
 function FuzzyCmp($Master1, $Master2)
 {
-  if (empty($Master1[1]))
-  $str1 = $Master1[2]['fuzzyname'];
-  else
-  $str1 = $Master1[1]['fuzzyname'];
+  if (empty($Master1[1])) 
+    $str1 = $Master1[2]['fuzzyname'];
+  else 
+    $str1 = $Master1[1]['fuzzyname'];
 
-  if (empty($Master2[1]))
-  $str2 = $Master2[2]['fuzzyname'];
-  else
-  $str2 = $Master2[1]['fuzzyname'];
+  if (empty($Master2[1])) 
+    $str2 = $Master2[2]['fuzzyname'];
+  else 
+    $str2 = $Master2[1]['fuzzyname'];
 
   return strcasecmp($str1, $str2);
 }
@@ -94,11 +92,11 @@ function ApplicationPick($SLName, $SelectedVal, $label)
    * hardcoded.
    */
   $AppList = array("nomosdiff" => "License Difference",
-                     "bucketsdiff" => "Bucket Difference");
+                   "bucketsdiff" => "Bucket Difference");
 
   $Options = "id=apick";
   $SelectList = Array2SingleSelect($AppList, $SLName, $SelectedVal,
-  false, true, $Options);
+                                   false, true, $Options);
   $StrOut = "$SelectList $label";
   return $StrOut;
 }
@@ -115,102 +113,87 @@ function ApplicationPick($SLName, $SelectedVal, $label)
  *
  * \param $Children1 - child 1 row
  * \param $Children2 - child 2 row
- * \param $Sort - if sorted
  *
  * \return master array with aligned children
  */
-function MakeMaster($Children1, $Children2, $Sort=true)
+function MakeMaster($Children1, $Children2)
 {
   $Master = array();
   $row =  -1;   // Master row number
 
   if (!empty($Children1) && (!empty($Children2)))
   {
-    foreach ($Children1 as $key1 => $Child1)
+    foreach ($Children1 as $Child1)
     {
+      $done = false;
+      $row++;
+
       /* find complete name match */
-      foreach ($Children2 as $key2 => $Child2)
+      foreach ($Children2 as $key => $Child2)
       {
         if ($Child1['ufile_name'] == $Child2['ufile_name'])
         {
-          $row++;
           $Master[$row][1] = $Child1;
           $Master[$row][2] = $Child2;
-          unset($Children1[$key1]);
-          unset($Children2[$key2]);
+          unset($Children2[$key]);
+          $done = true;
           break;
         }
       }
-    }
 
-    /* find fuzzy+extension match */
-    foreach ($Children1 as $key1 => $Child1)
-    {
-      foreach ($Children2 as $key2 => $Child2)
+      /* find fuzzy+extension match */
+      if (!$done) foreach ($Children2 as $key => $Child2)
       {
         if ($Child1['fuzzynameext'] == $Child2['fuzzynameext'])
         {
-          $row++;
           $Master[$row][1] = $Child1;
           $Master[$row][2] = $Child2;
-          unset($Children1[$key1]);
-          unset($Children2[$key2]);
+          unset($Children2[$key]);
+          $done = true;
           break;
         }
       }
-    }
 
-    /* find files that only differ by 1 character in fuzzyext
-     * names must be over 3 characters long
-     */
-    foreach ($Children1 as $key1 => $Child1)
-    {
-      foreach ($Children2 as $key2 => $Child2)
+      /* find files that only differ by 1 character in fuzzyext */
+      if (!$done) foreach ($Children2 as $key => $Child2)
       {
-        if (strlen($Child1['fuzzynameext']) <= 3) continue;
         if (levenshtein($Child1['fuzzynameext'], $Child2['fuzzynameext']) == 1)
         {
-          $row++;
           $Master[$row][1] = $Child1;
           $Master[$row][2] = $Child2;
-          unset($Children1[$key1]);
-          unset($Children2[$key2]);
+          unset($Children2[$key]);
+          $done = true;
           break;
         }
       }
-    }
 
-    /* Look for fuzzy match */
-    foreach ($Children1 as $key1 => $Child1)
-    {
-      foreach ($Children2 as $key2 => $Child2)
+      /* Look for fuzzy match */
+      if (!$done) foreach ($Children2 as $key => $Child2)
       {
         if ($Child1['fuzzyname'] == $Child2['fuzzyname'])
         {
-          $row++;
           $Master[$row][1] = $Child1;
           $Master[$row][2] = $Child2;
-          unset($Children1[$key1]);
-          unset($Children2[$key2]);
+          unset($Children2[$key]);
+          $done = true;
           break;
         }
       }
-    }
-  }
 
-  /* Add in nonmatching Child1 recs */
-  foreach ($Children1 as $Child)
-  {
-    $row++;
-    $Master[$row][1] = $Child;
-    $Master[$row][2] = array();
+      /* no match so add it in by itself */
+      if (!$done) 
+      {
+        $Master[$row][1] = $Child1;
+        $Master[$row][2] = array();
+      }
+    }
   }
 
   /* Remaining Child2 recs */
   foreach ($Children2 as $Child)
   {
     $row++;
-    $Master[$row][1] = array();
+    $Master[$row][1] = '';
     $Master[$row][2] = $Child;
   }
 
@@ -246,10 +229,10 @@ function FileList(&$Master, $agent_pk1, $agent_pk2, $filter, $plugin, $uploadtre
     foreach($Master as &$MasterRow)
     {
       if (!empty($MasterRow[1]))
-      $MasterRow[1]["linkurl"] = GetDiffLink($MasterRow, 1, $agent_pk1, $filter, $plugin, $ModLicView, $uploadtree_pk1, $uploadtree_pk2);
+        $MasterRow[1]["linkurl"] = GetDiffLink($MasterRow, 1, $agent_pk1, $filter, $plugin, $ModLicView, $uploadtree_pk1, $uploadtree_pk2);
 
       if (!empty($MasterRow[2]))
-      $MasterRow[2]["linkurl"] = GetDiffLink($MasterRow, 2, $agent_pk2, $filter, $plugin, $ModLicView, $uploadtree_pk1, $uploadtree_pk2);
+        $MasterRow[2]["linkurl"] = GetDiffLink($MasterRow, 2, $agent_pk2, $filter, $plugin, $ModLicView, $uploadtree_pk1, $uploadtree_pk2);
     }
   }
 } // FileList()
@@ -288,9 +271,9 @@ function GetDiffLink($MasterRow, $side, $agent_pk, $filter, $plugin, $ModLicView
 
   /* if the opposite column element is empty, then use the original uploadtree_pk */
   if (empty($OppositeChild))
-  $OppositeParm = "&item{$OppositeSide}=$OppositeItem";
+    $OppositeParm = "&item{$OppositeSide}=$OppositeItem";
   else
-  $OppositeParm = "&item{$OppositeSide}=$OppositeChild[uploadtree_pk]";
+    $OppositeParm = "&item{$OppositeSide}=$OppositeChild[uploadtree_pk]";
 
   $IsDir = Isdir($Child['ufile_mode']);
   $IsContainer = Iscontainer($Child['ufile_mode']);
@@ -326,7 +309,7 @@ function GetDiffLink($MasterRow, $side, $agent_pk, $filter, $plugin, $ModLicView
     $Flink = "<a href='$LicUri'>"; $HasHref=1;
     $Flink .= "<b>"; $HasBold=1;
   }
-  else if (!empty($LinkUri))
+  else if (!empty($LinkUri)) 
   {
     $Flink .= "<a href='$LinkUri'>"; $HasHref=1;
   }
@@ -339,13 +322,14 @@ function GetDiffLink($MasterRow, $side, $agent_pk, $filter, $plugin, $ModLicView
 
 
 /**
+ * NextUploadtree_pk()
  * \brief Given an uploadtree_pk in tree A ($A_pk), find the similarly named
  *        one that is immediately under the uploadtree_pk in tree B ($B_pk).
  *
- * \param int   $A_pk      Tree A uploadtree_pk
- * \param int   $B_pk      Tree B uploadtree_pk
+ * @param int   $A_pk      Tree A uploadtree_pk
+ * @param int   $B_pk      Tree B uploadtree_pk
  *
- * \return int  New uploadtree_pk in Tree B
+ * @return int  New uploadtree_pk in Tree B
  */
 function NextUploadtree_pk($A_pk, $B_pk)
 {
@@ -386,20 +370,18 @@ function NextUploadtree_pk($A_pk, $B_pk)
   return $BestPk;
 }
 
-
-
+    
 /**
  * \brief Add fuzzyname and fuzzynameext to $Children.
- *
- * The fuzzy name is used to do fuzzy matches. \n
- * In this implementation the fuzzyname is just the filename \n
- * with numbers, punctuation, and the file extension removed. \n
- * fuzzynameext is the same as fuzzyname but with the file extension. \n
- *
+ * The fuzzy name is used to do fuzzy matches.
+ * In this implementation the fuzzyname is just the filename
+ * with numbers, punctuation, and the file extension removed.
+ * fuzzynameext is the same as fuzzyname but with the file extension.
+ * 
  * \param $Children child list
  */
 function FuzzyName(&$Children)
-{
+{ 
   foreach($Children as $key1 => &$Child)
   {
     /* remove file extension */
@@ -410,7 +392,7 @@ function FuzzyName(&$Children)
       $NoExtName = substr($Child['ufile_name'], 0, -1*$ExtLen);
     }
     else
-    $NoExtName = $Child['ufile_name'];
+      $NoExtName = $Child['ufile_name'];
 
     $NoNumbName = preg_replace('/([0-9]|\.|-|_)/', "", $NoExtName);
     $NoNumbNameext = preg_replace('/([0-9]|\.|-|_)/', "", $Child['ufile_name']);
@@ -435,46 +417,43 @@ function CompareDir($Child1, $Child2)
 {
   global $PG_CONN;
 
-  $sql = "select pfile_fk from uploadtree where upload_fk=$Child1[upload_fk]
-                   and lft between $Child1[lft] and $Child1[rgt]
-            except
-            select pfile_fk from uploadtree where upload_fk=$Child2[upload_fk] 
-                   and lft between $Child2[lft] and $Child2[rgt]
-            limit 1";
+  $sql = "select pfile_fk from uploadtree where upload_fk=$Child1[upload_fk] 
+                 and lft between $Child1[lft] and $Child1[rgt]
+          except
+          select pfile_fk from uploadtree where upload_fk=$Child2[upload_fk] 
+                 and lft between $Child2[lft] and $Child2[rgt]
+          limit 1";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $numrows = pg_num_rows($result);
   pg_free_result($result);
   return ($numrows == 0) ? TRUE : FALSE;
-}
+}   
 
 
 /**
- * \brief Get a string which is a linked path to the file.
- *
- * This is a modified Dir2Browse() to support browsediff links.
- *
- * \param $Path   - path array for tree
- * \param $filter - filter portion of URL, optional
- * \param $Column - which path is being emitted, column 1 or 2
- * \param $Master - Master (from MakeMaster()) to be used for
- *            determining matched pairs.
- *
- * \return string which is a linked path to the file
- */
-function Dir2BrowseDiff ($Path, $filter, $Column, $plugin, $Master)
+ * \brief Return a string which is a linked path to the file.
+ *  This is a modified Dir2Browse() to support browsediff links.
+ *  \param $Path1 - path array for tree 1
+ *  \param $Path2 - path array for tree 2
+ *  \param $filter - filter portion of URL, optional
+ *  \param $Column - which path is being emitted, column 1 or 2
+ *  \param $plugin - plugin pointer of the caller ($this)
+ ************************************************************/
+function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin)
 {
   global $Plugins;
 
-  /* data input assertions */
-  $text = _("Dir2BrowseDiff(): Missing inputs");
-  if ((count($Path) < 1)
-  or (($Column != 1) and ($Column != 2))
-  or (empty($plugin)) or (empty($Master)))
-  Fatal($text, __FILE__, __LINE__);
+  if ((count($Path1) < 1) || (count($Path2) < 1)) return "No path specified";
 
   $V = "";
+  $Last1 = $Path1[count($Path1)-1];
+  $Last2 = $Path2[count($Path2)-1];
+  $item1 = $Last1['uploadtree_pk'];
+  $item2 = $Last2['uploadtree_pk'];
   $filter_clause = (empty($filter)) ? "" : "&filter=$filter";
+  $Path = ($Column == 1) ? $Path1 : $Path2;
+  $Last = $Path[count($Path)-1];
 
   /* Banner Box decorations */
   $V .= "<div style='border: double gray; background-color:lightyellow'>\n";
@@ -486,20 +465,11 @@ function Dir2BrowseDiff ($Path, $filter, $Column, $plugin, $Master)
   $Uri2 = Traceback_uri() . "?mod=$plugin->Name";
 
   /* Define Freeze button */
-  /* TEMPORARILY REMOVE Apr 27, 2011 - It's not clear that we need this and I broke it while
-   changing the Dir2PathDiff links.  Then new Dir2PathDiff links work so well
-   this doesn't seem to be necessary.
-   I don't want to fix this if we don't need
-   the freeze button (which is confusing UI element).
-   Remove all the freeze code (here and in the diff plugins) in v 1.4.1 after we see
-   how this goes in 1.4.
-
-   $text = _("Freeze path");
-   $id = "Freeze{$Column}";
-   $alt =  _("Freeze this path so that selecting a new directory in the other path will not change this one.");
-   $Options = "id='$id' onclick='Freeze(\"$Column\")' title='$alt'";
-   $FreezeBtn = "<button type='button' $Options> $text </button>\n";
-   */
+  $text = _("Freeze path");
+  $id = "Freeze{$Column}";
+  $alt =  _("Freeze this path so that selecting a new directory in the other path will not change this one.");
+  $Options = "id='$id' onclick='Freeze(\"$Column\")' title='$alt'";
+  $FreezeBtn = "<button type='button' $Options> $text </button>\n";
 
   for($i=0; $i < count($List); $i++)
   {
@@ -509,68 +479,31 @@ function Dir2BrowseDiff ($Path, $filter, $Column, $plugin, $Master)
   }
 
   $FirstPath=true; /* If firstpath is true, print FreezeBtn and starts a new line */
-  /* SEE above TEMP REMOVE
-   $V .= "&nbsp;&nbsp;&nbsp;$FreezeBtn";
-   */
+  $V .= "&nbsp;&nbsp;&nbsp;$FreezeBtn";
   $V .= "<br>";
 
   /* Show the path within the upload */
-  $LastItem = $Path[count($Path)-1]['uploadtree_pk'];
-  $OtherColumn = ($Column == 1) ? 2:1;
-  foreach($Path as $Pathrec)
+  for ($PathLev = 0; $PathLev < count($Path); $PathLev++)
   {
-    $Item = $Pathrec['uploadtree_pk'];
-    $OtherItem = FindMatchingItem($Pathrec['uploadtree_pk'], $Column, $OtherColumn, $Master);
-    if ($Column == 1)
-    {
-      $Item1 = $Item;
-      $Item2 = $OtherItem;
-    }
-    else
-    {
-      $Item1 = $OtherItem;
-      $Item2 = $Item;
-    }
-    $Name = "&nbsp;&nbsp;<b>" . $Pathrec['ufile_name'] . "/</b>";
-    if (($Item != $LastItem) and ($OtherItem))
-    {
-      $href = "$Uri2&item1=$Item1&item2=$Item2{$filter_clause}&col=$Column";
-      $V .= "<a href='$href'>$Name</a>";
-    }
-    else
-    $V .= $Name;
+    @$PathElt1 = $Path1[$PathLev];
+    @$PathElt2 = $Path2[$PathLev];  // temporarily ignore notice of missing Path2[PathLev]
+    $PathElt = ($Column == 1) ? $PathElt1: $PathElt2;
 
-    $V .= "<br>";
+    if ($PathElt != $Last)
+    {
+      $href = "$Uri2&item1=$PathElt1[uploadtree_pk]&item2=$PathElt2[uploadtree_pk]{$filter_clause}&col=$Column";
+//      $href = "$Uri2&item1=$item1&item2=$item2&newitem{$Column}=$PathElt[uploadtree_pk]{$filter_clause}&col=$Column";
+      $V .= "<a href='$href'>";
+    }
+
+    if (!$FirstPath) $V .= "<br>";
+    $V .= "&nbsp;&nbsp;<b>" . $PathElt['ufile_name'] . "/</b>";
+
+    if ($PathElt != $Last) $V .= "</a>";
+    $FirstPath = false;
   }
 
   $V .= "</div>\n";  // for box
   return($V);
 } // Dir2BrowseDiff()
-
-
-/**
- * \brief Find the item (uploadtree_pk) from $ItemColumn in $Master $SearchColumn
- * that matches $Item
- *
- * \param $Item - uploadtree_pk
- * \param $ItemColumn - $ItemColumn in $Master $SearchColumn
- * \param $SearchColumn - Search column
- * \param $Master
- *
- * \return the matched Item \n
- * No match returns an empty string
- */
-function FindMatchingItem($Item, $ItemColumn, $SearchColumn, $Master)
-{
-  foreach($Master as $Pair)
-  {
-    if (empty($Pair[1]) or empty($Pair[2])) continue;
-    if ($Pair[$ItemColumn]['uploadtree_pk'] == $Item)
-    {
-      return $Pair[$SearchColumn]['uploadtree_pk'];
-    }
-  }
-  return '';
-}
-
 ?>
