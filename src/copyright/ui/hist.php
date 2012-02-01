@@ -127,6 +127,14 @@ class copyright_hist extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
+    $Agent_pk = LatestAgentpk($upload_pk, "copyright_ars");
+    if ($Agent_pk == 0)
+    {
+      $text = _("No data available.  Use Jobs > Agents to schedule a copyright scan.");
+      $Msg = "<p><b>$text</b><p>";
+      return $Msg;
+    }
+
     /* Check for too many uploadtree rows to process.
      * This is arbitrarily set to 100000.  The copyright display
      * isn't very useful with more records and this check
@@ -223,6 +231,7 @@ class copyright_hist extends FO_Plugin
     $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
     $rows = $this->GetRows($Uploadtree_pk, $Agent_pk, $upload_pk, 0, $filter);
+    if (!is_array($rows)) return $rows;
 
     /* Write license histogram to $VLic  */
     $CopyrightCount = 0;
