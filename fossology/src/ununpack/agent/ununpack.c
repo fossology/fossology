@@ -150,7 +150,7 @@ int	main(int argc, char *argv[])
 
     /* Get Pfile path and Pfile_Pk, from Upload_Pk */
   snprintf(SQL,MAXSQL,
-        "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile, pfile_fk FROM upload INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk WHERE upload.upload_pk = '%s'", 
+        "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile, pfile_fk, pfile_size FROM upload INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk WHERE upload.upload_pk = '%s'", 
            Upload_Pk);
     result =  PQexec(pgConn, SQL);
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(51);
@@ -159,6 +159,14 @@ int	main(int argc, char *argv[])
     {  
       Pfile = strdup(PQgetvalue(result,0,0));
       Pfile_Pk = strdup(PQgetvalue(result,0,1));
+      if (atol(PQgetvalue(result, 0, 2)) == 0)
+      {  
+        PQclear(result);
+        LOG_WARNING("Uploaded file (Upload_pk %s), is zero length.  There is nothing to unpack.", 
+                      Upload_Pk)
+        SafeExit(0);
+      }
+
       PQclear(result);
     }
   }
