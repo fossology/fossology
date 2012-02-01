@@ -142,51 +142,6 @@ function AgentCheckBoxDo($upload_pk)
   return($V);
 } // AgentCheckBoxDo()
 
-/**
- * \brief make a checkbox list of bucket pools.  Only 1 box can be selected
- *
- * \return string containing html formatted checkboxes
- */
-function bucketPools()
-{
-
-  /*
-   * need a way to determine a bucket agent from other agents.....
-   */
-  global $PG_CONN;
-
-  $html = "";
-  $sql = "SELECT bucketpool_pk, bucketpool_name FROM bucketpool" .
-	        " ORDER BY bucketpool_pk;";
-  
-  $pools = pg_query($PG_CONN, $sql);
-  DBCheckResult($pools, $sql, __FILE__, __LINE__);
-  pg_free_result($pools);
-
-  return(TRUE);
-}
-
-/**
- * CheckEnotification
- * \brief Check if email notification is on for this user
- *
- * \return boolean, true or false.
- */
-
-function CheckEnotification() {
-  if(array_key_exists('UserEnote', $_SESSION))
-  {
-    if ($_SESSION['UserEnote'] == 'y')
-    {
-      return(TRUE);
-    }
-    else
-    {
-      return(FALSE);
-    }
-  }
-  return(FALSE);
-}
 
 /**
  * \brief find the jobs in the job and jobqueue table to be dependent on
@@ -196,7 +151,8 @@ function CheckEnotification() {
  *        associated with the upload
  * \return array of dependencies
  */
-function FindDependent($UploadPk, $list=NULL) {
+function FindDependent($UploadPk, $list=NULL) 
+{
   /*
    * Find the jobs that fo_notify should depend on. fo_notify is
    * dependent on the following agents:
@@ -264,7 +220,6 @@ function FindDependent($UploadPk, $list=NULL) {
  *
  * \return -1 or agent_pk
  */
-
 function GetAgentKey($agentName, $agentDesc)
 {
   global $PG_CONN;
@@ -336,6 +291,25 @@ function AgentARSList($TableName, $upload_pk, $limit=1, $agent_fk=0, $ExtraWhere
 
 
 /**
+ * \brief Given an upload_pk, find the latest enabled agent_pk with results.
+ *
+ * \param $upload_pk - upload id
+ * \param $arsTableName - name of ars table to check for the requested agent
+ *
+ * \returns nomos agent_pk or 0 if none
+ */
+function LatestAgentpk($upload_pk, $arsTableName)
+{
+  $AgentRec = AgentARSList($arsTableName, $upload_pk, 1);
+  if ($AgentRec === false)
+    $Agent_pk = 0;
+  else
+    $Agent_pk = $AgentRec[0]['agent_fk'];
+  return $Agent_pk;
+}
+
+
+/**
  * \brief
  *  The purpose of this function is to return a pulldown select list for users
  *  to be able to select the dataset results they want to see.
@@ -399,84 +373,6 @@ $SLName, $SLID, $SelectedKey="")
    */
 }
 
-/**
- *
- * \brief Find the largest jq_pk for the job or jobs.
- *
- * For a single job, returns the largest jobqueue_pk (jq_pk).  For multiple
- * jobs, returns the largest jq_pk of the set.
- *
- * \param $Jobs - either an int or an array of int's.
- *
- * \return the largest jq_pk
- */
-function Largestjq_pk($Jobs) {
-
-  global $PG_CONN;
-
-  if (is_array($Jobs)) {
-    $largest = 0;
-    foreach ($Jobs as $job) {
-      $sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
-             "jq_job_fk = $job order by jq_pk desc limit 1;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $JobQueue = pg_fetch_all($result);
-      pg_free_result($result);
-      if ($largest < $JobQueue[0]['jq_pk']) {
-        $largest = $JobQueue[0]['jq_pk'];
-      }
-    }
-    return($largest);
-  }
-  else {
-    $sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
-           "jq_job_fk = $Jobs order by jq_pk desc limit 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $JobQueue = pg_fetch_all($result);
-    pg_free_result($result);
-    return($JobQueue[0]['jq_pk']);
-  }
-}
-/**
- *
- * \brief Find the largest jq_pk for the job that has the most rows
- *
- * This routine is used to determine who the caller should be dependent on based
- * on the number of jobqueue items for the list of jobs supplied.  The job with
- * the largest number of jobqueue items, largest jq_pk is returned.
- *
- * \param $Jobs - an array of int's representing job_pk items
- *
- * \return the largest jq_pk with the most rows
- *
- */
-function MostRows($Jobs) {
-
-  global $PG_CONN;
-
-  if (is_array($Jobs)) {
-    $rows = 0;
-    $MostRows = 0;
-    $largest = 0;
-    foreach ($Jobs as $job) {
-      $sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
-             "jq_job_fk = $job order by jq_pk desc;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $JobQueue = pg_fetch_all($result);
-      pg_free_result($result);
-      $rows = count($JobQueue);
-      if ($MostRows < $rows) {
-        $MostRows = $rows;
-        $largest = $JobQueue[0]['jq_pk'];
-      }
-    }
-    //print "  MR: MostRows is:$MostRows\n<br>Largest Jq:$largest\n<br>";
-    return($largest);
-  }
-}
 
 /**
  * \brief read the UI form and format the user selected agents into a
@@ -484,7 +380,6 @@ function MostRows($Jobs) {
  *
  * \return string $agentsChecked list of checked agents
  */
-
 function userAgents()
 {
   global $Plugins;
@@ -517,60 +412,4 @@ function userAgents()
   return($agentsChecked);
 }
 
-/**
- * \brief get the default agents selected by the user.
- *        foreach agent in the list agentCheck on the upload_pk
- *        if OK: AgentAdd
- *
- * \param $upload_pk - upload id
- */
-function userDefaultAgents($upload_pk)
-{
-  global $Plugins;
-  global $PG_CONN;
-
-  //echo "<pre>UDA: upload pk is:$upload_pk\n</pre>";
-  if(empty($upload_pk))
-  {
-    return;
-  }
-
-  /*
-   * foreach agent in the list
-   *   agentCheck on the upload_pk
-   *    if OK: AgentAdd
-   */
-  // get the default agents selected by the user
-  $userName = $_SESSION['User'];
-  $sql = "SELECT user_name, user_agent_list FROM users WHERE
-            user_name='$userName';";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $uList = pg_fetch_all($result);
-  pg_free_result($result);
-  
-  // Ulist can be empty if the user does not have the correct permissions
-  // or has not selected any default/preferred agents or sql failed.
-  if(empty($uList))
-  {
-    return;       // nothing to schedule or sql failed....
-
-  }
-  $agentList = explode(',',$uList[0]['user_agent_list']);
-
-  foreach($agentList as $agent)
-  {
-    $agentRef = &$Plugins[plugin_find_id($agent)];
-    if (empty($agentRef))
-    {
-      continue;
-    }
-    $rc = $agentRef->AgentCheck($upload_pk);
-    if ($rc == 0)
-    {
-      $agentRef->AgentAdd($upload_pk);
-    }
-  }
-  return;
-} // userDefaultAgents
 ?>

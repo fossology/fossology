@@ -116,7 +116,7 @@ class ui_diff_buckets extends FO_Plugin
     global $PG_CONN;
 
     $TreeInfo = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $Uploadtree_pk");
-    $TreeInfo['agent_pk'] = LatestNomosAgentpk($TreeInfo['upload_fk']);
+    $TreeInfo['agent_pk'] = LatestAgentpk($TreeInfo['upload_fk'], "nomos_ars");
 
     /* Get the ars_pk of the scan to display, also the select list  */
     $ars_pk = GetArrayVal("ars", $_GET);
