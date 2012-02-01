@@ -24,7 +24,6 @@ int	main(int argc, char *argv[])
 {
   int Pid;
   int c;
-  int rv;
   PGresult *result;
   char *NewDir=".";
   char *AgentName = "ununpack";
@@ -123,15 +122,8 @@ int	main(int argc, char *argv[])
 
     InitCmd();
 
-    /* does ars table exist? 
-     * If not, create it.
-     */
-    rv = fo_tableExists(pgConn, AgentARSName);
-    if (!rv)
-    {
-      rv = fo_CreateARSTable(pgConn, AgentARSName);
-      if (!rv) SafeExit(0);
-    }
+    /* Make sure ars table exists */
+    if (!fo_CreateARSTable(pgConn, AgentARSName)) SafeExit(0);
 
     /* Has this user previously unpacked this upload_pk successfully?
      *    In this case we are done.  No new ars record is needed since no
