@@ -34,6 +34,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <libgen.h>
 
 #include <sys/mman.h>
 #include <sys/stat.h>

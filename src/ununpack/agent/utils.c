@@ -819,6 +819,17 @@ int	FindCmd	(char *Filename)
   Type = (char *)magic_file(MagicCookie,Filename);
   if (Type == NULL) return(-1);
 
+  /* Windows executables look like archives and 7z will attempt to unpack them.
+   * If that happens there will be a .bss file representing the .bss segment.
+   * 7z will try to unpack this further, potentially getting into an infinite
+   * unpack loop.  So if you see an octet type .bss file, consider it text
+   * to avoid this problem.  This problem was first noticed on papi-4.1.3-3.el6.src.rpm
+   */
+  if ((strcmp(basename(Filename), ".bss") == 0) && (strstr(Type, "octet")))
+  {
+    Type = strdup("text/plain");
+  }
+
   /* The Type returned by magic_file needs to be verified and possibly rewritten.
    * So save it in a static buffer.
    */
