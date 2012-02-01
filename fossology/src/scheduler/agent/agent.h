@@ -163,6 +163,7 @@ ssize_t agent_write(agent a, const void* buf, int count);
 
 void test_agents(host h);
 void kill_agents(void);
+void clean_meta_agents(void);
 void list_agents(GOutputStream* ostr);
 int  add_meta_agent(char* name, char* cmd, int max, int spc);
 int  is_meta_agent(char* name);
