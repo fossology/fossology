@@ -66,6 +66,6 @@ void set_usr_grp();
 void load_agent_config();
 void load_foss_config();
 int  close_scheduler();
-int  kill_scheduler();
+int  kill_scheduler(int force);
 
 #endif /* SCHEDULER_H_INCLUDE */

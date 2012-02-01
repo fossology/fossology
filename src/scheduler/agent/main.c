@@ -40,6 +40,7 @@ int main(int argc, char** argv)
   /* locals */
   gboolean db_reset = FALSE;  // flag to reset the job queue upon database connection
   gboolean ki_sched = FALSE;  // flag that indicates that the scheduler will be killed after start
+  gboolean ki_force = FALSE;  // flag that indicates that a kill option should force kill
   gboolean db_init  = FALSE;  // flag indicating a database test
   gboolean test_die = FALSE;  // flag to run the tests then die
   char* log = NULL;           // used when a different log from the default is used
@@ -54,7 +55,8 @@ int main(int argc, char** argv)
   {
       { "daemon",   'd', 0, G_OPTION_ARG_NONE,   &s_daemon,     "Run scheduler as daemon"                     },
       { "database", 'i', 0, G_OPTION_ARG_NONE,   &db_init,      "Initialize database connection and exit"     },
-      { "kill",     'k', 0, G_OPTION_ARG_NONE,   &ki_sched,     "Kills all running schedulers and exit"       },
+      { "kill",     'k', 0, G_OPTION_ARG_NONE,   &ki_sched,     "Kills running schedulers gracefully "        },
+      { "force",    'f', 0, G_OPTION_ARG_NONE,   &ki_force,     "Used with --kill to forcefully shutdown"     },
       { "log",      'L', 0, G_OPTION_ARG_STRING, &log,          "Prints log here instead of default log file" },
       { "port",     'p', 0, G_OPTION_ARG_INT,    &s_port,       "Set the port the interface listens on"       },
       { "reset",    'R', 0, G_OPTION_ARG_NONE,   &db_reset,     "Reset the job queue upon startup"            },
@@ -89,7 +91,7 @@ int main(int argc, char** argv)
   if(s_daemon && daemon(0, 0) == -1) { return -1; }
   if(db_init)     { database_init();  return 0; }
   if(log != NULL) { set_log(log); }
-  if(ki_sched)    { return kill_scheduler(); }
+  if(ki_sched)    { return kill_scheduler(ki_force); }
 
   /* the proces's pid could have change */
   s_pid = getpid();
