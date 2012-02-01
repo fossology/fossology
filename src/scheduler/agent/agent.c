@@ -240,7 +240,24 @@ int update(int* pid_ptr, agent a, gpointer unused)
 int agent_kill_traverse(int* pid, agent a, gpointer unused)
 {
   agent_kill(a);
-  return 0;
+  return FALSE;
+}
+
+/**
+ * GTraversFunction that removes any meta agents that have failed the scheduler
+ * startup test. This check should be performed after the scheduler startup test
+ * has finished runnning.
+ *
+ * @param name    the name of the meta agent
+ * @param ma      the meta agent struct
+ * @param unused  not currently used
+ * @return
+ */
+int clean_traverse(char* name, meta_agent ma, gpointer unused)
+{
+  if(!ma->valid)
+    g_tree_remove(meta_agents, ma);
+  return FALSE;
 }
 
 /**
@@ -678,7 +695,7 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc)
   ma->max_run = max;
   ma->special = spc;
   ma->version = NULL;
-  ma->valid = 1;
+  ma->valid   = TRUE;
 
   return ma;
 }
@@ -876,7 +893,7 @@ void agent_death_event(pid_t* pid)
   {
     lprintf("ERROR %s.%d: agent %s has failed scheduler startup test\n",
         __FILE__, __LINE__, a->meta_data->name);
-    g_tree_remove(meta_agents, a->meta_data->name);
+    a->meta_data->valid = 0;
   }
 
   AGENT_VERB("successfully remove from the system\n");
@@ -1102,6 +1119,15 @@ void test_agents(host h)
 void kill_agents()
 {
   g_tree_foreach(agents, (GTraverseFunc)agent_kill_traverse, NULL);
+}
+
+/**
+ * Traverses the list of possible meta agents, and removes any that have failed
+ * the scheduler startup test.
+ */
+void clean_meta_agents()
+{
+  g_tree_foreach(meta_agents, (GTraverseFunc)clean_traverse, NULL);
 }
 
 /**

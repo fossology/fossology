@@ -176,12 +176,15 @@ void update_scheduler()
   int n_agents = num_agents();
   int n_jobs   = active_jobs();
 
+  /* check to see if we are in and can exit the startup state */
   if(startup && n_agents == 0)
   {
+    clean_meta_agents();
     event_signal(database_update_event, NULL);
     startup = 0;
   }
 
+  /* check if we are able to close the scheduler */
   if(closing && n_agents == 0 && n_jobs == 0)
   {
     event_loop_terminate();
@@ -417,7 +420,6 @@ void load_agent_config()
         lprintf(" command = %s\n", cmd);
         lprintf("     max = %d\n", max);
         lprintf(" special = %d\n", special);
-        lprintf("\"\n");
       }
 
       fo_config_free(config);

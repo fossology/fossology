@@ -146,7 +146,7 @@ install-conf:
 #####################
 
 clean:
-	rm -f $(OBJS) $(MAIN) $(EXE) $(CLI) $(LIB)
+	rm -f $(OBJS) $(MAIN) $(EXE) $(CLI) $(LIB) defconf/init.d/fossology
 
 uninstall:
 	rm -f $(OBJS) *.a
