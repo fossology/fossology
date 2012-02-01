@@ -26,35 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 GTree* host_list = NULL;
-
-/**
- * used strictly by the find_host function. This is used so that two different
- * parameter can be passed to the find_host even though it is a GTraverFunction
- */
-struct find_struct {
-    host h;   ///< a pointer to the host so that the host can be set
-    int req;  ///< the number of agents that need to be run on the host
-};
-
-/**
- * Finds a host that will satisfy the given restrictions. Since this is a g_tree
- * traversal function, the key and value are passed.
- *
- * @param host_name unused in the function (key used in mapping)
- * @param h the current host structure
- * @param fs struct that has number of agents required and returns host
- * @return 1 if the current host is adequate, 0 otherwise
- */
-int find_host(char* host_name, host h, struct find_struct* fs)
-{
-  if(h->max - h->running > fs->req)
-  {
-    fs->h = h;
-    return 1;
-  }
-
-  return 0;
-}
+GList* host_queue = NULL;
 
 /**
  * allows a particular function to be called for every host. This is currently
@@ -120,6 +92,7 @@ void host_init(char* name, char* address, char* agent_dir, int max)
   h->running = 0;
 
   g_tree_insert(host_list, h->name, h);
+  host_queue = g_list_append(host_queue, h);
 }
 
 /**
@@ -129,6 +102,8 @@ void host_init(char* name, char* address, char* agent_dir, int max)
  */
 void host_destroy(host h)
 {
+  host_queue = g_list_remove(host_queue, h);
+  g_tree_remove(host_list, h);
   g_free(h->name);
   g_free(h->address);
   g_free(h->agent_dir);
@@ -138,39 +113,6 @@ void host_destroy(host h)
 /* ************************************************************************** */
 /* **** Functions and events ************************************************ */
 /* ************************************************************************** */
-
-/**
- * Gets the name associated with the given host
- *
- * @param h the host to get the address for
- * @return the name of the host
- */
-char* host_name(host h)
-{
-  return h->name;
-}
-
-/**
- * Gets the address associated with the given host
- *
- * @param h the host to get the address for
- * @return the address
- */
-char* host_address(host h)
-{
-  return h->address;
-}
-
-/**
- * Gets the directory that agents will be in on the host
- *
- * @param h the host to get the directory for
- * @return the location of the agents on the host
- */
-char* host_agent_dir(host h)
-{
-  return h->agent_dir;
-}
 
 /**
  * Increase the number of running agents on a host by 1
@@ -220,11 +162,22 @@ void host_print(host h, GOutputStream* ostr)
  */
 host get_host(int num)
 {
-  struct find_struct fs;
-  fs.h = NULL;
-  fs.req = num;
-  g_tree_foreach(host_list, (GTraverseFunc)find_host, &fs);
-  return fs.h;
+  GList* curr = NULL;
+  host ret    = NULL;
+
+  for(curr = host_queue; curr != NULL; curr = curr->next)
+  {
+    ret = curr->data;
+    if(ret->max - ret->running > num)
+      break;
+  }
+
+  if(curr == NULL)
+    return NULL;
+
+  host_queue = g_list_remove(host_queue, ret);
+  host_queue = g_list_append(host_queue, ret);
+  return ret;
 }
 
 /**

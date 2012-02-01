@@ -48,9 +48,47 @@ fo_conf* conf;  ///< the loaded configuration data
 /* **** utility functions *************************************************** */
 /* ************************************************************************** */
 
+int socket_connect(char* host, char* port)
+{
+  int fd;
+  struct addrinfo hints;
+  struct addrinfo* servs, * curr = NULL;
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family   = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  if(getaddrinfo(host, port, &hints, &servs) == -1)
+  {
+    fprintf(stderr, "ERROR %s.%d: unable to connect to %s port: %s\n",
+        __FILE__, __LINE__, host, port);
+    fprintf(stderr, "ERROR errno: %s\n", strerror(errno));
+    return -1;
+  }
+
+  for(curr = servs; curr != NULL; curr = curr->ai_next)
+  {
+    if((fd = socket(curr->ai_family, hints.ai_socktype, curr->ai_protocol)) < 0)
+      continue;
+
+    if(connect(fd, curr->ai_addr, curr->ai_addrlen) == -1)
+      continue;
+
+    break;
+  }
+
+  if(curr == NULL)
+  {
+    fprintf(stderr, "ERROR %s.%d: unable to connect to %s port: %s\n",
+        __FILE__, __LINE__, host, port);
+    return -1;
+  }
+
+  freeaddrinfo(servs);
+  return fd;
+}
+
 void interface_usage()
 {
-  /* print cli usage */
   printf("FOSSology scheduler command line interface\n");
   printf("+-----------------------------------------------------------------------------+\n");
   printf("|%*s:   EFFECT                                        |\n", P_WIDTH, "CMD [optional] <required>");
@@ -82,15 +120,12 @@ void interface_usage()
 int main(int argc, char** argv)
 {
   /* local variables */
-  struct sockaddr_in addr;    // used when creating socket to scheduler
-  struct hostent* host_info;  // information used to connect to correct host
   fd_set fds;                 // file descriptor set used in select statement
-  int port_number = -1;       // the port that the CLI will connect on
-  long host_addr;             // the address of the host
   int closing;                // flags and loop variables
   int response = 1;           // flag to indicate if a response is expected
   size_t bytes;               // variable to capture return of read
   char* host;                 // string to hold the name of the host
+  char* port;                 // string port number to connect to
   char buffer[1024];          // string buffer used to read
   char* config;               // FOSSology configuration directory
   GOptionContext* options;    // the command line options parser
@@ -106,7 +141,8 @@ int main(int argc, char** argv)
   int c_database = 0;
 
   /* initialize memory */
-  host = "localhost";
+  host = NULL;
+  port = NULL;
   config = DEFAULT_SETUP;
   memset(buffer, '\0', sizeof(buffer));
   closing = 0;
@@ -118,7 +154,7 @@ int main(int argc, char** argv)
           "Set the directory for the system configuration", "string"},
       {"host",     'H', 0, G_OPTION_ARG_STRING, host,
           "Set the host that the scheduler is on", "string"},
-      {"port",     'p', 0, G_OPTION_ARG_INT,    &port_number,
+      {"port",     'p', 0, G_OPTION_ARG_STRING, port,
           "Set the port that the scheduler is listening on", "integer"},
       {"quiet",    'q', 0, G_OPTION_ARG_NONE,   &verbose,
           "Cause the CLI to not print usage hints", NULL},
@@ -163,26 +199,14 @@ int main(int argc, char** argv)
   }
 
   /* check the scheduler config for port number */
-  if(port_number < 0)
-  {
-    port_number = atoi(fo_config_get(conf, "FOSSOLOGY", "port", &error));
-  }
+  if(port == NULL)
+    port = fo_config_get(conf, "FOSSOLOGY", "port", &error);
+  if(!error && host == NULL)
+    host = fo_config_get(conf, "FOSSOLOGY", "address", &error);
 
   /* open the connection to the scheduler */
-  s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-  host_info = gethostbyname(host);
-  memcpy(&host_addr, host_info->h_addr, host_info->h_length);
-
-  addr.sin_addr.s_addr = host_addr;
-  addr.sin_port = htons(port_number);
-  addr.sin_family = AF_INET;
-
-  if(connect(s, (struct sockaddr*)&addr, sizeof(addr)) == -1)
-  {
-    fprintf(stderr, "ERROR: Could not connect to scheduler at %s:%d.  Is the scheduler running?\n", host, port_number);
-    return 0;
-  }
+  if((s = socket_connect(host, port)) < 0)
+    return -1;
 
   /* check specific command instructions */
   if(c_stop || c_pause || c_reload || c_restart || c_verbose || c_database)

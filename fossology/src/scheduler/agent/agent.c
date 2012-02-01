@@ -201,7 +201,7 @@ int update(int* pid_ptr, agent a, gpointer unused)
     /* check last checkin time */
     if(time(NULL) - a->check_in > TILL_DEATH && !job_is_paused(a->owner))
     {
-      AGENT_LOG("no heartbeat for %d seconds\b", (time(NULL) - a->check_in));
+      AGENT_LOG("no heartbeat for %d seconds\n", (time(NULL) - a->check_in));
       agent_kill(a);
       return 0;
     }
@@ -591,7 +591,7 @@ void* agent_spawn(void* passed)
     /* if host is null, the agent will run locally to */
     /* run the agent localy, use the commands that    */
     /* were parsed when the meta_agent was created    */
-    if(strcmp(host_address(a->host_machine), "localhost") == 0)
+    if(strcmp(a->host_machine->address, "localhost") == 0)
     {
       shell_parse(a->meta_data->raw_cmd, &argc, &args);
 
@@ -610,7 +610,7 @@ void* agent_spawn(void* passed)
 
       execv(args[0], args);
     }
-    /* otherwise the agent willprintf("HELLO\n");l be started using ssh   */
+    /* otherwise the agent will be started using ssh   */
     /* if the agent is started using ssh we don't need */
     /* to fully parse the arguments, just pass the run */
     /* command as the last argument to the ssh command */
@@ -618,13 +618,13 @@ void* agent_spawn(void* passed)
     {
       args = g_new0(char*, 4);
       sprintf(buffer, AGENT_BINARY,
-          host_agent_dir(a->host_machine),
+          a->host_machine->agent_dir,
           a->meta_data->name,
           a->meta_data->raw_cmd);
       args[0] = "/usr/bin/ssh";
-      args[1] = host_address(a->host_machine);
+      args[1] = a->host_machine->address;
       args[2] = buffer;
-      args[3] = 0;
+      args[3] = NULL;
       execv(args[0], args);
     }
 
@@ -1024,7 +1024,7 @@ void agent_print_status(agent a, GOutputStream* ostr)
     strftime(time_buf, sizeof(time_buf), "%F %T", localtime(&a->check_in));
   status_str = g_strdup_printf("agent:%d host:%s type:%s status:%s time:%s\n",
       a->pid,
-      host_name(a->host_machine),
+      a->host_machine->name,
       a->meta_data->name,
       agent_status_strings[a->status],
       time_buf);

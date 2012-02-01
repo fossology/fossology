@@ -129,8 +129,8 @@ void prnt_sig(int signo)
       alarm(CHECK_TIME);
       break;
     case SIGTERM:
-      V_SCHED("SIGNALS: Scheduler received terminate signal, shutting down scheduler\n");
-      event_signal(scheduler_close_event, NULL);
+      V_SCHED("SIGNALS: Scheduler received terminate signal, shutting down gracefully\n");
+      closing = 1;
       break;
     case SIGQUIT:
       V_SCHED("SIGNALS: Scheduler received quit signal, shutting down scheduler\n");
@@ -291,12 +291,13 @@ void set_usr_grp()
 
 /**
  * @brief Kills all other running scheduler
+ * @param force  if the scheduler should shutdown gracefully
  * @return 0 for success (i.e. a scheduler was killed), -1 for failure.
  *
  * This uses the /proc file system to find all processes that have fo_scheduler
  * in the name and sends a kill signal to them.
  */
-int kill_scheduler()
+int kill_scheduler(int force)
 {
   char f_name[FILENAME_MAX];
   struct dirent* ep;
@@ -321,8 +322,11 @@ int kill_scheduler()
         if(fgets(f_name, sizeof(f_name), file) != NULL &&
             strstr(f_name, "fo_scheduler") && s_pid != atoi(ep->d_name))
         {
-          lprintf("KILL: sending kill signal to pid %s\n", ep->d_name);
-          kill(atoi(ep->d_name), SIGQUIT);
+          NOTIFY("KILL: send signal to process %s\n", ep->d_name);
+          if(force)
+            kill(atoi(ep->d_name), SIGQUIT);
+          else
+            kill(atoi(ep->d_name), SIGTERM);
           num_killed++;
         }
       }
