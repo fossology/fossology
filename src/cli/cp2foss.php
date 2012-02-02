@@ -153,7 +153,7 @@ function GetFolder($FolderPath, $Parent = NULL) {
   if (empty($FolderPath)) {
     return ($Parent);
   }
-  list($Folder, $FolderPath) = split('/', $FolderPath, 2);
+  list($Folder, $FolderPath) = explode('/', $FolderPath, 2);
   if (empty($Folder)) {
     return (GetFolder($FolderPath, $Parent));
   }
