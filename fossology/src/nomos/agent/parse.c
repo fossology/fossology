@@ -708,6 +708,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "BSD(ref5)" : "BSD");
     /* lmem[_fBSD] = 1; */
   }
+  else if (INFILE(_LT_BSDref6)) {
+    INTERESTING(lDebug ? "BSD(ref6)" : "BSD");
+    /* lmem[_fBSD] = 1; */
+  }
+  else if (INFILE(_LT_BSDref7)) {
+    INTERESTING(lDebug ? "BSD(ref7)" : "BSD");
+    /* lmem[_fBSD] = 1; */
+  }
   else if (URL_INFILE(_URL_BSD_1) || URL_INFILE(_URL_BSD_2)) {
     INTERESTING(lDebug ? "BSD(url)" : "BSD");
     lmem[_fBSD] = 1;
@@ -718,6 +726,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_LT_BSDSTYLEref2)) {
     INTERESTING(lDebug ? "BSD-st(2)" : "BSD-style");
+    lmem[_fBSD] = 1;
+  }
+  else if (INFILE(_LT_BSDSTYLEref4)) {
+      INTERESTING(lDebug ? "BSD-st(4)" : "BSD-style");
     lmem[_fBSD] = 1;
   }
   else if (INFILE(_FILE_BSD1) || INFILE(_FILE_BSD2)) {
@@ -1404,6 +1416,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     cp = LGPLVERS();
     INTERESTING(lDebug ? "LGPL(named)" : cp);
   }
+
+  
+  if (INFILE(_LT_WXWINDOWS)) {
+    INTERESTING("wxWindows-LGPL");
+  }
+
   /*
    * MIT, X11, Open Group, NEC -- text is very long, search in 2 parts
    */
@@ -1819,6 +1837,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_PNG_ZLIB_1)) {
     INTERESTING(lDebug ? "ZLIB(1)" : "zlib/libpng");
   }
+  else if (INFILE(_LT_PNG_ZLIBref4)) {
+    INTERESTING(lDebug ? "ZLIB(6)" : "zlib/libpng");
+  }
   else if (!lmem[_fW3C] && INFILE(_LT_PNG_ZLIB_2)) {
     INTERESTING(lDebug ? "ZLIB(2)" : "zlib/libpng");
   }
@@ -1834,6 +1855,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (!LVAL(_TEXT_GNU_LIC_INFO) && INFILE(_URL_ZLIB)) {
     INTERESTING(lDebug ? "ZLIB(url)" : "zlib/libpng");
   }
+
+  if (INFILE(_LT_INFO_ZIP) || INFILE(_URL_INFO_ZIP)) {
+    INTERESTING("info-zip");
+  }
+
   /*
    * IETF (primarily docs, RFCs, and protocol/standard proposals) .  This
    * one is a little strange as text-formatters that print this license
@@ -3783,6 +3809,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_UNICODE_3)) {
     INTERESTING(lDebug ? "Unicode(3)" : "Unicode");
   }
+  else if (INFILE(_URL_UNICODE)) {
+    INTERESTING(lDebug ? "Unicode(5)" : "Unicode");
+  }
+
   /*
    * Software Research Assoc
    */
@@ -5317,6 +5347,9 @@ char *mplNplVersion(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_TITLE_MPL11)) {
     lstr = "MPL_v1.1";
+  }
+  else if (INFILE(_TITLE_MPL20) || INFILE(_URL_MPL20)) {
+    lstr = "MPL_v2.0";
   }
   else if (INFILE(_TITLE_MPL10)) {
     lstr = "MPL_v1.0";
@@ -7383,6 +7416,7 @@ int checkUnclassified(char *filetext, int size, int score,
     INTERESTING("Debian-social-DFSG");
     return(0);
   }
+
   /*
    * A Generic EULA 'qualifies' as an UnclassifiedLicense, too... check this
    * one before trying the word-matching magic checks (below).
@@ -7622,6 +7656,12 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
   else if (INFILE(_LT_SEE_LICENSE_8)) {
     INTERESTING(lDebug ? "Gen-LIC-8" : "See-file(LICENSE)");
   }
+  else if (INFILE(_LT_SEE_LICENSE_9)) {
+    INTERESTING(lDebug ? "Gen-LIC-9" : "See-file(LICENSE)");
+  }
+  else if (INFILE(_LT_SEE_LICENSE_10)) {
+    INTERESTING(lDebug ? "Gen-LIC-10" : "See-file(LICENSE)");
+  }
   else if (INFILE(_LT_SEE_LICENSE_LAST1)) {
     INTERESTING(lDebug ? "Gen-LIC-L1" : "See-file(LICENSE)");
   }
@@ -7761,7 +7801,10 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
   } else if (INFILE(_LT_PUBDOM_7)) {
     INTERESTING(lDebug ? "Pubdom(7)" : LS_PD_CLM);
     ret = 1;
-  } else if (HASKW(kwbm, _KW_public_domain) && score < 3) {
+  } else if (INFILE(_LT_PUBDOM_8)) {
+    INTERESTING(lDebug ? "Pubdom(8)" : LS_PD_CLM);
+    ret = 1;
+  }else if (HASKW(kwbm, _KW_public_domain) && score < 3) {
     INTERESTING(LS_PD_ONLY);
     ret = 1;
   }
