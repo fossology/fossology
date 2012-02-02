@@ -159,8 +159,8 @@ class ui_license_tree extends FO_Plugin {
    * Used for sorting the histogram.
    */
   function SortName($a, $b) {
-    list($A0, $A1, $A2) = split("\|", $a, 3);
-    list($B0, $B1, $B2) = split("\|", $b, 3);
+    list($A0, $A1, $A2) = explode("\|", $a, 3);
+    list($B0, $B1, $B2) = explode("\|", $b, 3);
     /* Sort by count */
     if ($A0 < $B0) {
       return (1);

@@ -173,7 +173,7 @@ if (array_key_exists("A", $options)) {
   $agent_count = count($agent_list);
   for ($ac = 0;$ac < $agent_count;$ac++) {
     $Found = 0;
-    foreach(split(',', $options["A"]) as $Val) {
+    foreach(explode(',', $options["A"]) as $Val) {
       if (!strcmp($Val, $agent_list[$ac]->URI)) {
         $Found = 1;
       }

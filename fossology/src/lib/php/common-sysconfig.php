@@ -310,7 +310,7 @@ function check_boolean($value)
  */
 function check_fossology_url($url)
 {
-  $url_array = split("/", $url, 2);
+  $url_array = explode("/", $url, 2);
   $name = $url_array[0];
   if (!empty($name))
   {

@@ -132,8 +132,8 @@ class ui_license extends FO_Plugin
    */
   function SortName ($a,$b)
   {
-    list($A0,$A1,$A2) = split("\|",$a,3);
-    list($B0,$B1,$B2) = split("\|",$b,3);
+    list($A0,$A1,$A2) = explode("\|",$a,3);
+    list($B0,$B1,$B2) = explode("\|",$b,3);
     /* Sort by count */
     if ($A0 < $B0) { return(1); }
     if ($A0 > $B0) { return(-1); }
@@ -331,7 +331,7 @@ $ChildCount can also be zero if the directory is empty.
     foreach($SortOrder as $Key => $Val)
     {
       if (empty($Val)) { continue; }
-      list($x,$y,$z) = split("\|",$Val,3);
+      list($x,$y,$z) = explode("\|",$Val,3);
       $LicsTotal[$z]=$x;
     }
 

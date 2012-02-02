@@ -74,11 +74,11 @@ class ui_view_license extends FO_Plugin
     {
       $LicName .= ": " . $Row['phrase_text'];
     }
-    foreach(split(",",$Row['pfile_path']) as $Segment)
+    foreach(explode(",",$Row['pfile_path']) as $Segment)
     {
       if (!empty($Segment))
       {
-        $Parts = split("-",$Segment,2);
+        $Parts = explode("-",$Segment,2);
         if (empty($Parts[1])) { $Parts[1] = $Parts[0]; }
         if (empty($Row['lic_tokens'])) $Match = ""; /* No match for phrases */
         else $Match = (int)($Row['tok_match'] * 100 / ($Row['lic_tokens'])) . "%";

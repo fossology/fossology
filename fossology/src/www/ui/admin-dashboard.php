@@ -45,7 +45,7 @@ class dashboard extends FO_Plugin
     pclose($Fin);
 
     /* Separate lines */
-    $Lines = split("\n",$Buf);
+    $Lines = explode("\n",$Buf);
 
     /* Display results */
     $V = "";
@@ -60,7 +60,7 @@ class dashboard extends FO_Plugin
       if (empty($L)) { continue; }
       $L = trim($L);
       $L = preg_replace("/[[:space:]][[:space:]]*/"," ",$L);
-      $List = split(" ",$L);
+      $List = explode(" ",$L);
       $V .= "<tr><td>" . htmlentities($List[0]) . "</td>";
       $Used = $List[2] * 1024;
       $UsedH = Bytes2Human($Used);
