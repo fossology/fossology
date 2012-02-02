@@ -301,22 +301,27 @@ class showjobs extends FO_Plugin
       $sql = "select * from jobqueue where jq_job_fk='$job_pk' order by jq_pk asc";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $Rows = pg_fetch_all($result);
-      foreach($Rows as $JobQueueRec)
+      if (pg_num_rows($result))
       {
-        $jq_pk = $JobQueueRec["jq_pk"];
+        $Rows = pg_fetch_all($result);
+        foreach($Rows as $JobQueueRec)
+        {
+          $jq_pk = $JobQueueRec["jq_pk"];
 
-        /* Get dependencies */
-        $DepArray = array();
-        $sql = "select jdep_jq_depends_fk from jobdepends where jdep_jq_fk='$jq_pk' order by jdep_jq_depends_fk asc";
-        $DepResult = pg_query($PG_CONN, $sql);
-        DBCheckResult($DepResult, $sql, __FILE__, __LINE__);
-        while ($DepRow = pg_fetch_assoc($DepResult)) $DepArray[] = $DepRow["jdep_jq_depends_fk"];
-        $JobQueueRec["depends"] = $DepArray;
-        pg_free_result($DepResult);
-
-        $JobData[$job_pk]['jobqueue'][$jq_pk] = $JobQueueRec;
+          /* Get dependencies */
+          $DepArray = array();
+          $sql = "select jdep_jq_depends_fk from jobdepends where jdep_jq_fk='$jq_pk' order by jdep_jq_depends_fk asc";
+          $DepResult = pg_query($PG_CONN, $sql);
+          DBCheckResult($DepResult, $sql, __FILE__, __LINE__);
+          while ($DepRow = pg_fetch_assoc($DepResult)) $DepArray[] = $DepRow["jdep_jq_depends_fk"];
+          $JobQueueRec["depends"] = $DepArray;
+          pg_free_result($DepResult);
+  
+          $JobData[$job_pk]['jobqueue'][$jq_pk] = $JobQueueRec;
+        }
       }
+      else
+        unset($JobData[$job_pk]);
       pg_free_result($result);
     }
     return $JobData;
