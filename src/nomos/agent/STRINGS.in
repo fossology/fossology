@@ -783,6 +783,14 @@
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (bsd|berkeley software distribution) licen[cs]e"
 #
+%ENTRY%	_LT_BSDref6
+%KEY%	"distribut"
+%STR%	"r?e?-?distribution and/?o?r? use in source and binary forms with or without modification (are|is) permitted pursuant to =FEW= terms =FEW= BSD licen[cs]e"
+#
+%ENTRY%	_LT_BSDref7
+%KEY%	"licen[cs]"
+%STR%	"modified (berkeley|bsd) software (distribution|) license"
+#
 %ENTRY%	_LT_BSDSTYLEref1
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (BSD[ -]style|BSD[ -]type|BSD-?ish|BSD[ -]like) licen[cs]e"
@@ -790,6 +798,11 @@
 %ENTRY%	_LT_BSDSTYLEref2
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"copyright is =FEW= (BSD[ -]style|BSD[ -]type|BSD-?ish|BSD[ -]like) licen[cs]e"
+#
+#
+%ENTRY%	_LT_BSDSTYLEref4
+%KEY%	"licen[cs]"
+%STR%	"htmlArea license"
 #####
 # ORIGINAL with those EXPENSIVE wild-cards:
 # re-?distribution -and use in source and binary forms =ANY= (is|are)
@@ -1703,6 +1716,18 @@
 %STR%	"free to use as you see fit"
 %ALIAS%	_FREE_last_other
 %ALIAS%	_FREECLAIM_last
+#
+%ENTRY%	_LT_FREE_77
+%KEY%	"distribut"
+%STR%	"may be used for any purpose as long as this notice remains intact on all source code distributions"
+#
+%ENTRY%	_LT_FREE_78
+%KEY%	"permi[st]"
+%STR%	"permission is hereby granted to copy =FEW= for any purpose"
+#
+%ENTRY%	_LT_FREE_79
+%KEY%	"source"
+%STR%	"freedom to use these sources for whatever you want =SOME= is hereby granted"
 #
 %ENTRY%	_LT_FREEART_V10
 %KEY%	"licen[cs]"
@@ -3506,6 +3531,22 @@ e /* (INFILE(j)) */
 %KEY%	"distribut"
 %STR%	"for conditions of distribution and use see copyright notice in (zlib?h|blast?h)"
 #
+%ENTRY% _LT_PNG_ZLIBref4
+%KEY% "licen[cs]" 
+%STR% "licen[cs]e zlib" 
+#
+%ENTRY% _LT_WXWINDOWS
+%KEY% "licen[cs]" 
+%STR% "wxwindows licen[cs]e"
+#
+%ENTRY% _LT_INFO_ZIP
+%KEY% "licen[cs]" 
+%STR% "Info-ZIP licen[cs]e" 
+#
+%ENTRY% _URL_INFO_ZIP
+%KEY% "licen[cs]" 
+%STR% "ftp\.?info-zip\.?org/pub/infozip/licen[cs]e" 
+#
 %ENTRY%	_LT_POLYSERVE
 %KEY%	"licen[cs]"
 %STR%	"polyserve confidential =SOME= subject to a licen[cs]e agreement"
@@ -3558,6 +3599,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_PUBDOM_7
 %KEY%	"public"
 %STR%	"is =FEW= public domain"
+#
+%ENTRY% _LT_PUBDOM_8
+%KEY%	"copyright"
+%STR%	"given to opensource copyright(-| )free"
 #
 %ENTRY%	_LT_PUBDOMNOTcpyrt
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
@@ -4212,6 +4257,10 @@ e /* (INFILE(j)) */
 %KEY%	"\<files?\>"
 %STR%	"Unicode inc hereby grants the right to freely use the information supplied in this file in the creation of products supporting the unicode standard and to make copies"
 #
+%ENTRY%	_URL_UNICODE
+%KEY%	"\<terms\>"
+%STR%	"w?w?w?\.?unicode\.?org/terms_of_use\.?html"
+#
 %ENTRY%	_LT_USGOVT_1
 %KEY%	"licen[cs]"
 %STR%	"government retains a paid-up non-?exclusive irrevocable worldwide licen[cs]e"
@@ -4768,6 +4817,15 @@ k
 %ENTRY%	_LT_SEE_OTHER_9
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"maintains copyright as (list|mention|outline|contain|state|describe|set out) =SOME= (file|doc)"
+#
+%ENTRY%	_LT_SEE_OTHER_10
+%KEY%	"(Â©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"see copyright for the status of this software"
+#
+%ENTRY%	_LT_SEE_OTHER_11
+%KEY%	"(Â©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"see =FEW= for Copyright information"
+#
 #####
 # These MUST be the last 3 checks for license references in some "other" place
 #####
@@ -4821,6 +4879,10 @@ k
 %ENTRY%	_LT_SEE_LICENSE_9
 %KEY%	"licen[cs]"
 %STR%	"see license?qla =SOME= for copyright and licensing details"
+#
+%ENTRY% _LT_SEE_LICENSE_10
+%KEY% "licen[cs]" 
+%STR% "licen[cs]e see licen[cs]e?txt" 
 #####
 # These MUST be the last 2 checks for license references in the file "license"
 #####
@@ -6300,6 +6362,10 @@ k
 %ENTRY%	_TITLE_MPL11_OR_LATER
 %KEY%	"licen[cs]"
 %STR%	"mozilla public licen[cs]e (1\.?1|(\<mpl\> |v|version )1\.?1) =SOME= or =SOME= (newer|later|subsequent|more recent)"
+#
+%ENTRY%	_TITLE_MPL20
+%KEY%	"\<([mn]pl|mozilla|netscape)\>"
+%STR%	"mozilla public licen[cs]e (2\.?0|(\<mpl\> |v|version )2\.?0)"
 #
 %ENTRY%	_TITLE_MPL_EULA_20
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
@@ -7838,6 +7904,10 @@ k
 %ENTRY%	_URL_MPL11
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"w?w?w?\.?mozilla\.?org/[MN]PL/MPL-1\.?1"
+#
+%ENTRY%	_URL_MPL20
+%KEY%	"\<([mn]pl|mozilla|netscape)\>"
+%STR%	"w?w?w?\.?mozilla\.?org/[MN]PL/MPL-2\.?0"
 #
 %ENTRY%	_URL_NPL
 %KEY%	"licen[cs]"
