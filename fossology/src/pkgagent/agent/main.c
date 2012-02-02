@@ -74,7 +74,6 @@ int	main	(int argc, char *argv[])
 
   int upload_pk = 0;           // the upload primary key
   char *AgentARSName = "pkgagent_ars";
-  int rv;
   PGresult *ars_result;
   char sqlbuf[1024]; 
   char *DBConfFile = NULL;  /* use default Db.conf */
@@ -133,17 +132,7 @@ int	main	(int argc, char *argv[])
       if (Verbose) { printf("PKG: pkgagent read %d\n", upload_pk);}
       if (upload_pk ==0) continue;
 
-      /* does ars table exist?
-       * If not, create it.
-       */
-      rv = fo_tableExists(db_conn, AgentARSName);
-      if (!rv)
-      {
-        rv = fo_CreateARSTable(db_conn, AgentARSName);
-        if (!rv) return(0);
-      }
-
-      /* check ars table if this is duplicate request*/
+      /* check ars table to see if this is duplicate request*/
       snprintf(sqlbuf, sizeof(sqlbuf),
           "select ars_pk from pkgagent_ars,agent \
           where agent_pk=agent_fk and ars_success=true \

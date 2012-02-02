@@ -97,17 +97,9 @@ FUNCTION int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk
 {
   char sql[1024];
   PGresult *result;
-  int rv;
 
-  /* does ars table exist? 
-   * If not, create it.
-   */
-  rv = fo_tableExists(pgConn, tableName);
-  if (!rv) 
-  {
-    rv = fo_CreateARSTable(pgConn, tableName);
-    if (!rv) return(0);
-  }
+  /* does ars table exist?  If not, create it.  */
+    if (! fo_CreateARSTable(pgConn, tableName)) return(0);
 
   /* If ars_pk is null, 
    * write the ars_status=false record 
