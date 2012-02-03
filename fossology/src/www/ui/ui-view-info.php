@@ -312,6 +312,19 @@ class ui_view_info extends FO_Plugin
     $text = _("Package Info");
     $V .= "<H2>$text</H2>\n";
 
+    /* If pkgagent_ars table didn't exists, don't show the result. */
+    $sql = "SELECT typlen  FROM pg_type where typname='pkgagent_ars' limit 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $numrows = pg_num_rows($result);
+    pg_free_result($result);
+    if ($numrows <= 0)
+    {
+      $V .= _("No data available. Use Jobs > Agents to schedule a pkgagent scan.");
+      return($V);
+    }
+
+    /* If pkgagent_ars table didn't have record for this upload, don't show the result. */
     $agent_status = AgentARSList('pkgagent_ars', $Upload);
     if (empty($agent_status))
     {
