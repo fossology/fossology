@@ -91,7 +91,7 @@
      if (empty($upload_pkArray)) return array();
 
      /* get all the unique user_pks for these uploads */
-     $sql = "select distinct upload_userid as user_pk from upload where (upload_userid is not NULL) and (";
+     $sql = "select distinct user_fk as user_pk from upload where (user_fk is not NULL) and (";
      $uploadCount = 0;
      foreach($upload_pkArray as $upload_pk)
      {
@@ -192,7 +192,7 @@
     if (IsRestrictedTo() === false) return true;
 
     /* upload is permission controlled so make sure the owner is the requestor */
-    $sql = "select upload_userid from upload where upload_pk=$upload_pk and upload_userid='$_SESSION[UserId]'";
+    $sql = "select user_fk from upload where upload_pk=$upload_pk and user_fk='$_SESSION[UserId]'";
      $result = pg_query($PG_CONN, $sql);
      DBCheckResult($result, $sql, __FILE__, __LINE__);
      $found = pg_num_rows($result);
