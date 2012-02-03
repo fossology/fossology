@@ -45,18 +45,7 @@ $PG_CONN = 0;   // Database connection
 $Plugins = array();
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
-$sysconfdir = "";
-/** get sysconfdir */
-for ($i = 1;$i < $argc;$i++) 
-{
-  $arg = $argv[$i];
-  if ("-c" === $arg) {
-    $sysconfdir = $argv[$i + 1];
-    break;
-  }
-}
-
-$SysConf = bootstrap($sysconfdir);
+$SysConf = bootstrap();
 require_once("$MODDIR/lib/php/libschema.php");
 
 /* Initialize global system configuration variables $SysConfig[] */
@@ -101,7 +90,8 @@ exit(0);
 function bootstrap($sysconfdir="")
 {
   $rcfile = "fossology.rc";
-
+  $sysconfdirDefault4Pkg = "/etc/fossology/";
+  $sysconfdirDefault4Src = "/usr/local/etc/fossology/";
   if (empty($sysconfdir))
   {
     $sysconfdir = getenv('SYSCONFDIR');
@@ -110,10 +100,27 @@ function bootstrap($sysconfdir="")
       if (file_exists($rcfile)) $sysconfdir = file_get_contents($rcfile);
       if ($sysconfdir === false)
       {
-        /* NO SYSCONFDIR specified */
-        $text = _("FATAL! System Configuration Error, no SYSCONFDIR.");
-        echo "$text\n";
-        exit(1);
+        /** set the sysconfdir with default */
+        if (is_dir($sysconfdirDefault4Src)) $sysconfdir = $sysconfdirDefault4Src;
+        /**  both /etc/fossology/ and /usr/local/etc/fossology/ are existing ?*/
+        if (!empty($sysconfdir) && is_dir($sysconfdirDefault4Pkg))
+        {
+          $text = _("fatal! system configuration error, both /etc/fossology/ and /usr/local/etc/fossology/ are existing.");
+          echo "$text\n";
+          exit(1);
+        }
+        else if (is_dir($sysconfdirDefault4Pkg))
+        {
+          $sysconfdir = $sysconfdirDefault4Pkg;
+        }
+
+        if ($sysconfdir === false)
+        {
+          /* no sysconfdir specified */
+          $text = _("fatal! system configuration error, no sysconfdir.");
+          echo "$text\n";
+          exit(1);
+        }
       }
     }
   }

@@ -421,7 +421,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
 /************************************************************************/
 /************************************************************************/
 /************************************************************************/
-global $SYSCONFDIR;
 /* Process each parameter */
 $FolderPath = "/";
 $UploadDescription = "";
@@ -437,8 +436,6 @@ $passwd = "";
 
 for ($i = 1;$i < $argc;$i++) {
   switch ($argv[$i]) {
-    case '-c':
-      break; /* handled in fo_wrapper */
     case '-h':
     case '-?':
       print $Usage . "\n";
@@ -602,11 +599,11 @@ for ($i = 1;$i < $argc;$i++) {
         }
       }
       if($Verbose)
-        $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR -v ";
+        $fossjobs_command = "fossjobs --user $user --password $passwd -v ";
       else 
-        $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR ";
+        $fossjobs_command = "fossjobs --user $user --password $passwd ";
 
-      print "fossjobs_command is:$fossjobs_command\n";
+      //print "fossjobs_command is:$fossjobs_command\n";
       /* No break! No hyphen means it is a file! */
       $UploadArchive = $argv[$i];
       print "Loading $UploadArchive\n";
