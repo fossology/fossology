@@ -345,7 +345,7 @@ class showjobs extends FO_Plugin
     
     /* Next/Prev menu */
     $Next = $NumJobs > $this->MaxUploadsPerPage;
-    if ($NumJobs >= $this->MaxUploadsPerPage)  $OutBuf .= MenuEndlessPage($Page, $Next); 
+    if ($NumJobs > $this->MaxUploadsPerPage)  $OutBuf .= MenuEndlessPage($Page, $Next); 
 
     /*****************************************************************/
     /* Now display the summary */
@@ -493,7 +493,7 @@ class showjobs extends FO_Plugin
     }
     $OutBuf .= "</table>\n";
 
-    if ($NumJobs >= $this->MaxUploadsPerPage) $OutBuf .= "<p>" . MenuEndlessPage($Page, $Next); 
+    if ($NumJobs > $this->MaxUploadsPerPage) $OutBuf .= "<p>" . MenuEndlessPage($Page, $Next); 
     return($OutBuf);
   } // Show()
 
