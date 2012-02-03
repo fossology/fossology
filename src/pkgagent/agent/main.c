@@ -74,6 +74,7 @@ int	main	(int argc, char *argv[])
 
   int upload_pk = 0;           // the upload primary key
   char *AgentARSName = "pkgagent_ars";
+  int rv;
   PGresult *ars_result;
   char sqlbuf[1024]; 
   char *DBConfFile = NULL;  /* use default Db.conf */
@@ -132,22 +133,29 @@ int	main	(int argc, char *argv[])
       if (Verbose) { printf("PKG: pkgagent read %d\n", upload_pk);}
       if (upload_pk ==0) continue;
 
-      /* check ars table to see if this is duplicate request*/
-      snprintf(sqlbuf, sizeof(sqlbuf),
+      /* check if pkgagent ars table exist?
+       * if exist, check duplicate request
+       * if not exist, don't check duplicate request
+       */
+      rv = fo_tableExists(db_conn, AgentARSName);
+      if (rv)
+      {
+        /* check ars table to see if this is duplicate request*/
+        snprintf(sqlbuf, sizeof(sqlbuf),
           "select ars_pk from pkgagent_ars,agent \
           where agent_pk=agent_fk and ars_success=true \
           and upload_fk='%d' and agent_fk='%d'",
           upload_pk, Agent_pk);
-      ars_result = PQexec(db_conn, sqlbuf);
-      if (fo_checkPQresult(db_conn, ars_result, sqlbuf, __FILE__, __LINE__)) exit(-1);
-      if (PQntuples(ars_result) > 0)
-      {
+        ars_result = PQexec(db_conn, sqlbuf);
+        if (fo_checkPQresult(db_conn, ars_result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+        if (PQntuples(ars_result) > 0)
+        {
+          PQclear(ars_result);
+          LOG_WARNING("Ignoring requested pkgagent analysis of upload %d - Results are already in database.\n",upload_pk);
+          continue;
+        }
         PQclear(ars_result);
-        LOG_WARNING("Ignoring requested pkgagent analysis of upload %d - Results are already in database.\n",upload_pk);
-        continue;
       }
-      PQclear(ars_result);
-
       /* Record analysis start in pkgagent_ars, the pkgagent audit trail. */
       ars_pk = fo_WriteARS(db_conn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 0);
 
