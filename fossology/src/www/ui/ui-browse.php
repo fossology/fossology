@@ -256,7 +256,7 @@ class ui_browse extends FO_Plugin {
     if ($UserId === false)
     $UserCondition = "";  // no browse restriction
     else
-    $UserCondition = " and upload_userid='$UserId'";  // browse restriction
+    $UserCondition = " and user_fk='$UserId'";  // browse restriction
     $sql = "SELECT * FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
