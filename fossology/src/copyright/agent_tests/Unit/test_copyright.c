@@ -236,7 +236,7 @@ void test_copyright_init()
 {
   /* start the test */
   /* start the tests */
-  FO_ASSERT_TRUE(copyright_init(&copy));
+  FO_ASSERT_TRUE(copyright_init(&copy, "../../agent/copyright.dic", "../../agent/names.dic"));
 }
 
 void test_copyright_destroy()
