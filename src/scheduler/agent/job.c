@@ -107,10 +107,7 @@ int job_sstatus(int* job_id, job j, GOutputStream* ostr)
   g_output_stream_write(ostr, status_str, strlen(status_str), NULL, NULL);
 
   if(*job_id == 0)
-  {
     g_list_foreach(j->running_agents, (GFunc)agent_print_status, ostr);
-    g_list_foreach(j->failed_agents, (GFunc)agent_print_status, ostr);
-  }
 
   g_free(status_str);
   return 0;

@@ -986,6 +986,7 @@ void agent_update_event(void* unused)
 void agent_pause(agent a)
 {
   kill(a->pid, SIGSTOP);
+  agent_transition(a, AG_PAUSED);
 }
 
 /**
@@ -998,7 +999,7 @@ void agent_pause(agent a)
 void agent_unpause(agent a)
 {
   kill(a->pid, SIGCONT);
-  host_increase_load(a->host_machine);
+  agent_transition(a, AG_RUNNING);
 }
 
 /**
