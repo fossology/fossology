@@ -364,13 +364,16 @@ class showjobs extends FO_Plugin
     $FirstJob = $Page * $this->MaxUploadsPerPage;
     $LastJob = ($Page * $this->MaxUploadsPerPage) + $this->MaxUploadsPerPage;
     $JobNumber = -1;
+    /** if $single_browse is 1, represent alread has an upload browse link, if single_browse is 0, no upload browse link */
+    $single_browse = 0;
     foreach ($JobData as $job_pk => $Job)
     {
       /* Upload  */
       $UploadName = $Job["upload"]["upload_filename"];
       $UploadDesc = $Job["upload"]["upload_desc"];
       $pfile_pk = $Job["upload"]["pfile_fk"];
-      if ( $prevpfile != $pfile_pk)
+      /** the column pfile_fk of the record in the table(upload) is NULL when this record is inserted */
+      if ((0 == $single_browse) && ($prevpfile != $pfile_pk || empty($pfile_pk)))
       {
         $prevpfile = $pfile_pk;
         $JobNumber++;
@@ -393,6 +396,7 @@ class showjobs extends FO_Plugin
         $OutBuf .= "</th>";
         $OutBuf .= "<th $uploadStyle></th>";
         $OutBuf .= "</tr>";
+        $single_browse = 1;
       }
       else  if ($JobNumber < $FirstJob) continue;
 
