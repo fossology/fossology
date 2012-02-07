@@ -279,7 +279,16 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 {
   char CMD[MAXCMD];
   char TaintedURL[MAXCMD];
+  char TempFileDirectory[MAXCMD];
+  char DeleteTempDirCmd[MAXCMD];
   int rc;
+
+  memset(TempFileDirectory,'\0',MAXCMD);
+  memset(DeleteTempDirCmd,'\0',MAXCMD);
+  
+  /** save each upload files in /var/local/lib/fossology/agents/wget.xxx.dir/ */
+  sprintf(TempFileDirectory, "%s.dir", TempFile);
+  sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
 #if 1
   char WgetArgs[]="--no-check-certificate --progress=dot -rc -np -e robots=off -k";
 #else
@@ -331,27 +340,17 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     }
   }
 
-  /* Run from scheduler! delete the temp directory, /var/local/lib/fossology/agents/wget */
-  if (!stat(TempFileDir, &sb) && TempFile && TempFile[0])
-  {
-    memset(CMD,'\0',MAXCMD);
-    snprintf(CMD,MAXCMD-1, "rm -rf '%s' 2>&1", TempFileDir);
-    rc_system = system(CMD);
-    if (rc_system != 0) SafeExit(23); // failed to delete the temperary directory
-
-  }
-
   if (TempFile && TempFile[0])
   {
     /* Delete the temp file if it exists */
     unlink(TempFile);
     snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s 2>&1",
-        proxy, WgetArgs,TempFileDir,TaintedURL,GlobalParam);
+        proxy, WgetArgs,TempFileDirectory,TaintedURL,GlobalParam);
   }
   else if(TempFileDir && TempFileDir[0])
   {
     snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s 2>&1",
-        proxy, WgetArgs, TempFileDir, TaintedURL, GlobalParam);
+        proxy, WgetArgs, TempFileDirectory, TaintedURL, GlobalParam);
   }
   else 
   {
@@ -370,6 +369,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   {
     LOG_FATAL("upload %ld Download failed; Return code %d from: %s",GlobalUploadKey,WEXITSTATUS(rc),CMD);
     unlink(GlobalTempFile);
+    system(DeleteTempDirCmd);
     SafeExit(12);
   }
 
@@ -380,8 +380,14 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     memset(TempFilePath,'\0',MAXCMD);
     /* for one url http://a.org/test.deb, TempFilePath should be /var/local/lib/fossology/agents/wget/a.org/test.deb */
     int Position = GetPosition(TaintedURL);
-    if (0 == Position) SafeExit(26);
-    snprintf(TempFilePath, MAXCMD-1, "%s/%s", TempFileDir, TaintedURL + Position);
+    if (0 == Position)
+    {
+      unlink(GlobalTempFile);
+      system(DeleteTempDirCmd);
+      SafeExit(26);
+    }
+    snprintf(TempFilePath, MAXCMD-1, "%s/%s", TempFileDirectory, TaintedURL + Position);
+
     if (!stat(TempFilePath, &sb))
     {
       memset(CMD,'\0',MAXCMD);
@@ -390,23 +396,32 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         snprintf(CMD,MAXCMD-1, "find '%s' -mindepth 1 -type d -empty -exec rmdir {} \\; > /dev/null 2>&1", TempFilePath);
         system(CMD); // delete all empty directories downloaded
         memset(CMD,'\0',MAXCMD);
-        snprintf(CMD,MAXCMD-1, "tar -cvvf '%s' -C '%s' ./ >/dev/null 2>&1", TempFile, TempFilePath);
+        snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ >/dev/null 2>&1", TempFile, TempFilePath);
       }
       else
       {
         snprintf(CMD,MAXCMD-1, "mv '%s' '%s' 2>&1", TempFilePath, TempFile);
       }
       rc_system = system(CMD);
-      if (rc_system != 0) SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
+      if (rc_system != 0)
+      {
+        unlink(GlobalTempFile);
+        system(DeleteTempDirCmd);
+        SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
+      }
     }
   } 
 
   if (TempFile && TempFile[0] && !IsFile(TempFile,1))
   {
     LOG_FATAL("upload %ld File %s not created from URL: %s, CMD: %s",GlobalUploadKey,TempFile,URL, CMD);
+    unlink(GlobalTempFile);
+    system(DeleteTempDirCmd);
     SafeExit(15);
   }
 
+  /** remove the temp dir /var/local/lib/fossology/agents/wget.xxx.dir/ for this upload */
+  system(DeleteTempDirCmd);
   LOG_VERBOSE0("upload %ld Downloaded %s to %s",GlobalUploadKey,URL,TempFile);
   return(0);
 } /* GetURL() */
