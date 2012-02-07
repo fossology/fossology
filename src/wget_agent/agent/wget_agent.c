@@ -269,7 +269,7 @@ int TaintURL(char *Sin, char *Sout, int SoutSize)
  * \brief Do the wget.
  *
  * \param char *TempFile - used when upload from URL by the scheduler, the downloaded file(directory) will be archived as this file
- *                        when running from command, this parameter is null, e.g. /var/local/lib/fossology/agents/wget.32732
+ *                        when running from command, this parameter is null, e.g. //srv/fossology/repository/localhost/wget/wget.32732
  * \param char *URL - the url you want to download
  * \param char *TempFileDir - where you want to store your downloaded file(directory)
  *
@@ -286,7 +286,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   memset(TempFileDirectory,'\0',MAXCMD);
   memset(DeleteTempDirCmd,'\0',MAXCMD);
   
-  /** save each upload files in /var/local/lib/fossology/agents/wget.xxx.dir/ */
+  /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
   sprintf(TempFileDirectory, "%s.dir", TempFile);
   sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
 #if 1
@@ -359,7 +359,8 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   }
   /* the command is like
   ". /usr/local/etc/fossology/Proxy.conf; 
-     /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -k -P '/var/local/lib/fossology/agents/wget'
+     /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -k -P 
+     '/srv/fossology/repository/localhost/wget/wget.xxx.dir/'
      'http://a.org/file' -l 1 -R index.html*  2>&1"
    */
    LOG_VERBOSE0("CMD: %s", CMD);
@@ -373,12 +374,12 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     SafeExit(12);
   }
 
-  /* Run from scheduler! store /var/local/lib/fossology/agents/wget/../<files|directories> to one temp file */
+  /* Run from scheduler! store /srv/fossology/repository/localhost/wget/wget.xxx.dir/<files|directories> to one temp file */
   if (TempFile && TempFile[0])
   {
     char TempFilePath[MAXCMD];
     memset(TempFilePath,'\0',MAXCMD);
-    /* for one url http://a.org/test.deb, TempFilePath should be /var/local/lib/fossology/agents/wget/a.org/test.deb */
+    /* for one url http://a.org/test.deb, TempFilePath should be /srv/fossology/repository/localhost/wget/wget.xxx.dir/a.org/test.deb */
     int Position = GetPosition(TaintedURL);
     if (0 == Position)
     {
@@ -420,7 +421,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     SafeExit(15);
   }
 
-  /** remove the temp dir /var/local/lib/fossology/agents/wget.xxx.dir/ for this upload */
+  /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
   system(DeleteTempDirCmd);
   LOG_VERBOSE0("upload %ld Downloaded %s to %s",GlobalUploadKey,URL,TempFile);
   return(0);
