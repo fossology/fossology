@@ -210,20 +210,6 @@ int main  (int argc, char *argv[])
         {
           DBLoadGold();
           unlink(GlobalTempFile);
-          struct stat sb;
-          /* Run from scheduler! delete the temp directory, /var/local/lib/fossology/agents/wget */
-          if (!stat(TempDir, &sb))
-          {
-            char CMD[MAXCMD];
-            memset(CMD,'\0',MAXCMD);
-            snprintf(CMD,MAXCMD-1, "rm -rf '%s' 2>&1", TempDir);
-            int rc_system = system(CMD);
-            if (rc_system != 0) 
-            {
-              LOG_FATAL("%s failed to delete temporary directory", CMD);
-              SafeExit(25); // failed to delete the temperary directory
-            }
-          }
         }
         else
         {
