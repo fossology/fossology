@@ -754,8 +754,12 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
       EscapeString(value, pi->summary, sizeof(pi->summary));
       strcpy(temp, "");
     }
-    if ((s[0] != '\0') && (temp!=NULL))
-      strcat(temp,s);
+    if ((s[0] != '\0') && (temp!=NULL)) {
+      if ((strlen(temp) + strlen(s)) > MAXCMD )
+        continue;
+      else
+        strcat(temp,s);
+    }
     if (!strcasecmp(field, "Package")) {
       EscapeString(value, pi->pkgName, sizeof(pi->pkgName));
     }
