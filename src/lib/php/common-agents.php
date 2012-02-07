@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -212,11 +212,14 @@ function FindDependent($UploadPk, $list=NULL)
 } // FindDependent
 
 /**
- * \brief, get the agent_pk for a given agent,
+ * \brief, get the latest enabled agent_pk for a given agent,
  *  This needs to match the C version of same function in libfossagent
+ *  This will create an agent record if one doesn't already exist.
  *
  * \param string $agentName the name of the agent e.g. nomos
  * \param string $agentDesc the agent_desc colunm
+ *
+ * \todo When creating an agent record, set the agent_rev.
  *
  * \return -1 or agent_pk
  */
@@ -225,7 +228,7 @@ function GetAgentKey($agentName, $agentDesc)
   global $PG_CONN;
 
   /* get the exact agent rec requested */
-  $sqlselect = "SELECT agent_pk FROM agent WHERE agent_name ='$agentName' order by agent_ts desc limit 1";
+  $sqlselect = "SELECT agent_pk FROM agent WHERE agent_name ='$agentName' and agent_enabled='true' order by agent_ts desc limit 1";
   $result = pg_query($PG_CONN, $sqlselect);
   DBCheckResult($result, $sqlselect, __FILE__, __LINE__);
 
@@ -246,6 +249,7 @@ function GetAgentKey($agentName, $agentDesc)
   return $row["agent_pk"];
 
 } // GetAgentKey
+
 
 /**
  * \brief
@@ -411,5 +415,59 @@ function userAgents()
   }
   return($agentsChecked);
 }
+
+
+/**
+ * \brief Check if the agent can be scheduled.
+ * It can be scheduled if there is no successful run by the latest
+ * version of this agent.  
+ * It doesn't hurt to schedule an agent that has already run, but
+ * this list is used to show a user what hasn't run successfully yet.
+ *
+ * \param $upload_pk - the upload will be checked
+ * \param $AgentName - Agent name, eg "nomos"
+ * \param $AgentDesc - Agent description, eg "license scanner"
+ * \param $AgentARSTableName - Agent ars table name, eg "nomos_ars"
+ *
+ * \todo jobqueue.jq_type should be agent_pk, not text.  As text we don't
+ * know what version of the agent was scheduled.
+ *
+ * \return 
+ * 0 = not scheduled, or previously failed \n
+ * 1 = scheduled but not completed \n 
+ * 2 = scheduled and completed successfully
+ */
+function CommonAgentCheck($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName)
+{
+  global $PG_CONN;
+
+  /* get the latest agent_pk */
+  $Latest_agent_pk = GetAgentKey($AgentName, $AgentDesc);
+
+  /* get last agent pk with successful results */
+  $Last_successful_agent_pk = LatestAgentpk($upload_pk, $AgentARSTableName);
+
+  if (!empty($Latest_agent_pk) and !empty($Last_successful_agent_pk) and ($Latest_agent_pk == $Last_successful_agent_pk)) return 2;
+
+  /* check if the upload_pk is currently in the job queue being processed 
+   * Note, this isn't a great test because it doesn't take into account
+   * the version of the agent scheduled.
+   */
+  $sql = "SELECT jq_endtext FROM jobqueue, job where job_upload_fk='$upload_pk' 
+          AND job_pk=jq_job_fk AND jq_type='$AgentName'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) > 0)
+  {
+    $row = pg_fetch_assoc($result);
+    $jq_endtext = $row["jq_endtext"];
+    pg_free_result($result);
+    if (empty($jq_endtext)) return 1;
+    else if ($jq_endtext && 0x1) return 2;
+  }
+  else pg_free_result($result);
+  return (0);
+} // CommonAgentCheck()
+
 
 ?>
