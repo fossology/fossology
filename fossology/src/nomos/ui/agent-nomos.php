@@ -40,38 +40,29 @@ class agent_fonomos extends FO_Plugin {
   /**
    * \brief  Register additional menus.
    */
-  function RegisterMenus() {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return (0);
-    } // don't run
+  function RegisterMenus() 
+  {
+    if ($this->State != PLUGIN_STATE_READY)  return (0); // don't run
     menu_insert("Agents::" . $this->Title, 0, $this->Name);
   }
 
   /**
-   * \brief Check if the job is already in the queue.
+   * \brief Check if the agent can be scheduled.
+   * It can be scheduled if there is no successful run by the latest
+   * version of this agent.  
+   * It doesn't hurt to schedule an agent that has already run, but
+   * this list is used to show a user what hasn't run successfully yet.
    *
-   * \param $uploadpk - the upload will be checked
+   * \param $upload_pk - the upload will be checked
+   *
    * \return 
-   * 0 = not scheduled \n
+   * 0 = not scheduled, or previously failed \n
    * 1 = scheduled but not completed \n 
-   * 2 = scheduled and completed
+   * 2 = scheduled and completed successfully
    */
-  function AgentCheck($uploadpk) {
-    global $PG_CONN;
-    $sql = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job" .
-            " ON job_upload_fk = '$uploadpk'" .
-            " AND job_pk = jq_job_fk AND jq_type = 'nomos';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if (empty($row['jq_pk'])) {
-      return (0);
-    }
-    if (empty($row['jq_endtime'])) {
-      return (1);
-    }
-    return (2);
+  function AgentCheck($upload_pk) 
+  {
+    return CommonAgentCheck($upload_pk, "nomos", "license scanner", "nomos_ars");
   } // AgentCheck()
 
   /**

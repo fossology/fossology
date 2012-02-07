@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -45,8 +45,7 @@ class agent_unpack extends FO_Plugin
   /**
    * \brief Check if the job is already in the queue or already completed.  
    *
-   * \param upload_pk
-   )
+   * \param $upload_pk
 　 * \return 
    * - 0 = not scheduled \n
    * - 1 = scheduled but not completed \n
@@ -54,34 +53,7 @@ class agent_unpack extends FO_Plugin
    */
   function AgentCheck($upload_pk)
   {
-    global $PG_CONN;
-
-    /* Check if ununpack has already been run successfully.
-       This check is independent of the ununpack version.
-     */
-    if (DB_TableExists("ununpack_ars"))
-    {
-      $sql = "select ars_pk from ununpack_ars where upload_fk='$upload_pk' and ars_success=true";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $success = pg_num_rows($result);
-      pg_free_result($result);
-      if ($success > 0) return 2;
-    }
-
-    /* Check if ununpack is queued */
-    $sql = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job ON job_upload_fk = '$upload_pk' AND job_pk = jq_job_fk AND jq_type = 'ununpack';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if (empty($row['jq_pk'])) {
-      return(0);
-    }
-    if (empty($row['jq_endtime'])) {
-      return(1);
-    }
-    return(2);
+    return CommonAgentCheck($upload_pk, "unpack", "Universal file unpacker", "ununpack_ars");
   } // AgentCheck()
 
   /**

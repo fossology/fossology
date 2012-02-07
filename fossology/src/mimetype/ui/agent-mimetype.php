@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
-Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -46,28 +46,16 @@ class agent_mimetype extends FO_Plugin {
   }
 
   /**
-   * \brief check if the job is already in the
-   *  queue.  Returns:
-   * 0 = not scheduled
-   * 1 = scheduled but not completed
-   * 2 = scheduled and completed
-   * 
-   * \param $uploadpk - upload id
+   * \brief check if the job can be scheduled.
+   * \param $upload_pk
+   * \Return:
+   * - 0 = not scheduled
+   * - 1 = scheduled but not completed
+   * - 2 = scheduled and completed
    */
-  function AgentCheck($uploadpk) {
-    global $PG_CONN;
-    $sql = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job ON job_upload_fk = '$uploadpk' AND job_pk = jq_job_fk AND jq_type = 'mimetype';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if (empty($row['jq_pk'])) {
-      return (0);
-    }
-    if (empty($row['jq_endtime'])) {
-      return (1);
-    }
-    return (2);
+  function AgentCheck($upload_pk) 
+  {
+    return CommonAgentCheck($upload_pk, "mimetype", "mimetype scanner", "mimetype_ars");
   } // AgentCheck()
 
   /**
