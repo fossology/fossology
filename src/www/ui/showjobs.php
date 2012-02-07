@@ -373,7 +373,7 @@ class showjobs extends FO_Plugin
       $UploadDesc = $Job["upload"]["upload_desc"];
       $pfile_pk = $Job["upload"]["pfile_fk"];
       /** the column pfile_fk of the record in the table(upload) is NULL when this record is inserted */
-      if ((0 == $single_browse) && ($prevpfile != $pfile_pk || empty($pfile_pk)))
+      if ((!empty($pfile_pk) && $prevpfile != $pfile_pk) || (empty($pfile_pk) && 0 == $single_browse))
       {
         $prevpfile = $pfile_pk;
         $JobNumber++;
