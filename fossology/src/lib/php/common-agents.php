@@ -463,7 +463,7 @@ function CommonAgentCheck($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName
     $jq_endtext = $row["jq_endtext"];
     pg_free_result($result);
     if (empty($jq_endtext)) return 1;
-    else if ($jq_endtext && 0x1) return 2;
+    else if ($jq_endtext & 0x1) return 2;
   }
   else pg_free_result($result);
   return (0);
