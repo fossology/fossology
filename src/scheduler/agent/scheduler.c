@@ -404,6 +404,8 @@ void load_agent_config()
           special |= SAG_EXCLUSIVE;
         else if(strncmp(cmd, "NOEMAIL", 7) == 0)
           special |= SAG_NOEMAIL;
+        else if(strncmp(cmd, "NOKILL", 6) == 0)
+          special |= SAG_NOKILL;
         else if(strlen(cmd) != 0)
           WARNING("Invalid special type for agent %s: %s", name, cmd);
       }

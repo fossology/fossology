@@ -39,8 +39,8 @@ int main(int argc, char** argv)
 {
   /* locals */
   gboolean db_reset = FALSE;  // flag to reset the job queue upon database connection
-  gboolean ki_sched = FALSE;  // flag that indicates that the scheduler will be killed after start
-  gboolean ki_force = TRUE;   // flag that indicates that a kill option should force kill
+  gboolean ki_kill  = FALSE;  // flag that indicates all schedulers should be forcibly shutdown
+  gboolean ki_shut  = FALSE;  // flag that indicates all schedulers should be gracefully shutdown
   gboolean db_init  = FALSE;  // flag indicating a database test
   gboolean test_die = FALSE;  // flag to run the tests then die
   char* log = NULL;           // used when a different log from the default is used
@@ -53,15 +53,16 @@ int main(int argc, char** argv)
   /* the options for the command line parser */
   GOptionEntry entries[] =
   {
-      { "daemon",   'd', 0, G_OPTION_ARG_NONE,   &s_daemon,     "Run scheduler as daemon"                     },
-      { "database", 'i', 0, G_OPTION_ARG_NONE,   &db_init,      "Initialize database connection and exit"     },
-      { "kill",     'k', 0, G_OPTION_ARG_NONE,   &ki_sched,     "Kills running schedulers gracefully "        },
-      { "log",      'L', 0, G_OPTION_ARG_STRING, &log,          "Prints log here instead of default log file" },
-      { "port",     'p', 0, G_OPTION_ARG_INT,    &s_port,       "Set the port the interface listens on"       },
-      { "reset",    'R', 0, G_OPTION_ARG_NONE,   &db_reset,     "Reset the job queue upon startup"            },
-      { "test",     't', 0, G_OPTION_ARG_NONE,   &test_die,     "Close the scheduler after running tests"     },
-      { "verbose",  'v', 0, G_OPTION_ARG_INT,    &verbose,      "Set the scheduler verbose level"             },
-      { "config",   'c', 0, G_OPTION_ARG_STRING, &sysconfigdir, "Set the system configuration directory"      },
+      { "daemon",   'd', 0, G_OPTION_ARG_NONE,   &s_daemon,     "      Run scheduler as daemon"                       },
+      { "database", 'i', 0, G_OPTION_ARG_NONE,   &db_init,      "      Initialize database connection and exit"       },
+      { "kill",     'k', 0, G_OPTION_ARG_NONE,   &ki_kill,      "      Forcibly kills all running schedulers"         },
+      { "shutdown", 's', 0, G_OPTION_ARG_NONE,   &ki_shut,      "      Gracefully shutdown of all running schedulers" },
+      { "log",      'L', 0, G_OPTION_ARG_STRING, &log,          "[str] Specify location of log file"                  },
+      { "port",     'p', 0, G_OPTION_ARG_INT,    &s_port,       "[num] Set the interface port"                        },
+      { "reset",    'R', 0, G_OPTION_ARG_NONE,   &db_reset,     "      Reset the job queue upon startup"              },
+      { "test",     't', 0, G_OPTION_ARG_NONE,   &test_die,     "      Close the scheduler after running tests"       },
+      { "verbose",  'v', 0, G_OPTION_ARG_INT,    &verbose,      "[num] Set the scheduler verbose level"               },
+      { "config",   'c', 0, G_OPTION_ARG_STRING, &sysconfigdir, "[str] Specify system configuration directory"        },
       {NULL}
   };
 
@@ -95,9 +96,10 @@ int main(int argc, char** argv)
 
   /* perform pre-initialization checks */
   if(s_daemon && daemon(0, 0) == -1) { return -1; }
-  if(db_init)     { database_init();  return 0; }
+  if(db_init) { database_init();  return 0; }
   if(log != NULL) { set_log(log); }
-  if(ki_sched)    { return kill_scheduler(ki_force); }
+  if(ki_shut) { return kill_scheduler(FALSE); }
+  if(ki_kill) { return kill_scheduler(TRUE);  }
 
   /* the proces's pid could have change */
   s_pid = getpid();

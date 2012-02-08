@@ -200,7 +200,8 @@ int update(int* pid_ptr, agent a, gpointer unused)
   if(a->status == AG_SPAWNED || a->status == AG_RUNNING || a->status == AG_PAUSED)
   {
     /* check last checkin time */
-    if(time(NULL) - a->check_in > TILL_DEATH && !job_is_paused(a->owner))
+    if(time(NULL) - a->check_in > TILL_DEATH && !job_is_paused(a->owner) &&
+        !is_special(a->meta_data->name, SAG_NOKILL))
     {
       AGENT_LOG("no heartbeat for %d seconds\n", (time(NULL) - a->check_in));
       agent_kill(a);
@@ -212,7 +213,7 @@ int update(int* pid_ptr, agent a, gpointer unused)
       a->n_updates++;
     else
       a->n_updates = 0;
-    if(a->n_updates > NUM_UPDATES)
+    if(a->n_updates > NUM_UPDATES && !is_special(a->meta_data->name, SAG_NOKILL))
     {
       AGENT_LOG("no new items processed in 10 minutes, killing\n");
       agent_kill(a);
