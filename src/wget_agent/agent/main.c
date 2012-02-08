@@ -98,6 +98,7 @@ int main  (int argc, char *argv[])
     {
       case 'd':
         TempFileDir = optarg;
+        TempFileDir = PathCheck(TempFileDir);
         break;
       case 'g':
       {
