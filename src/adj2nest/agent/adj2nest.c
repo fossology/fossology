@@ -234,7 +234,7 @@ void	LoadAdj	(long UploadPk)
     TreeSet++;
     
     /* dummy heart to make sure the scheduler knows we are still alive */
-    if ((i % 100000) == 0) fo_scheduler_heart(1);
+    if ((i % 100000) == 0) fo_scheduler_heart(0);
   }
 
   /* Load all non-roots */
@@ -245,7 +245,7 @@ void	LoadAdj	(long UploadPk)
     SetParent(Parent,Child);
     
     /* dummy heart to make sure the scheduler knows we are still alive */
-    if ((i % 100000) == 0) fo_scheduler_heart(1);
+    if ((i % 100000) == 0) fo_scheduler_heart(0);
   }
 
   /* Free up DB memory */
