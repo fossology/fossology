@@ -275,6 +275,8 @@ function AgentARSList($TableName, $upload_pk, $limit=1, $agent_fk=0, $ExtraWhere
 {
   global $PG_CONN;
 
+  if (!DB_TableExists($TableName)) return false;
+
   $LimitClause = "";
   if ($limit > 0) $LimitClause = " limit $limit";
   if ($agent_fk)
