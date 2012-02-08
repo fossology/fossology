@@ -472,27 +472,33 @@ function QueueUploadsOnAgents($upload_pk_list, &$agent_list, $Verbose, $Priority
   global $Plugins;
   global $PG_CONN;
  
-  if (!empty($upload_pk_list)) {
+  if (!empty($upload_pk_list)) 
+  {
     $reg_agents = array();
     $results = array();
     // Schedule them
     $agent_count = count($agent_list);
-    foreach(explode(",", $upload_pk_list) as $upload_pk) {
-      if (empty($upload_pk)) {
-        continue;
-      }
+    foreach(explode(",", $upload_pk_list) as $upload_pk) 
+    {
+      if (empty($upload_pk))  continue;
+
       // don't exit on AgentAdd failure, or all the agents requested will
       // not get scheduled.
-      for ($ac = 0;$ac < $agent_count;$ac++) {
+      for ($ac = 0;$ac < $agent_count;$ac++) 
+      {
         $agentname = $agent_list[$ac]->URI;
-        if (!empty($agentname)) {
+        if (!empty($agentname)) 
+        {
           $Agent = & $Plugins[plugin_find_id($agentname) ];
           $rc = $Agent->AgentCheck($upload_pk);
           if (0 == $rc) $results = $Agent->AgentAdd($upload_pk, NULL, $Priority);
-          if (!empty($results)) {
+          if (!empty($results)) 
+          {
             echo "ERROR: Scheduling failed for Agent $agentname\n";
             echo "ERROR message: $results\n";
-          } else if ($Verbose) {
+          } 
+          else if ($Verbose) 
+          {
             $SQL = "SELECT upload_filename FROM upload where upload_pk = $upload_pk;";
             $result = pg_query($PG_CONN, $SQL);
             DBCheckResult($result, $SQL, __FILE__, __LINE__);
