@@ -1479,8 +1479,9 @@ int RemoveDir(char *dirpath)
 
 
 /**
- * @brief Check if path contains a "%U". If so, substitute a unique ID.
+ * @brief Check if path contains a "%U" or "%H". If so, substitute a unique ID for %U.
  * This substitution parameter must be at the end of the DirPath.
+ * Substitute hostname for %H.
  * @parm DirPath Directory path.
  * @returns new directory path
  **/
@@ -1488,10 +1489,13 @@ char *PathCheck(char *DirPath)
 {
   char *NewPath;
   char *subs;
-  char  TmpPath[512];
+  char  TmpPath[2048];
+  char  HostName[2048];
   struct timeval time_st;
 
-  if ((subs = strstr(DirPath,"%U")) )
+  NewPath = strdup(DirPath);
+
+  if ((subs = strstr(NewPath,"%U")) )
   {
     /* dir substitution */
     if (gettimeofday(&time_st, 0))
@@ -1502,14 +1506,22 @@ char *PathCheck(char *DirPath)
     }
 
     *subs = 0;
-    snprintf(TmpPath, sizeof(TmpPath), "%s/%ul", DirPath, (unsigned)time_st.tv_usec);
+    snprintf(TmpPath, sizeof(TmpPath), "%s/%ul", NewPath, (unsigned)time_st.tv_usec);
+    free(NewPath);
     NewPath = strdup(TmpPath);
   }
-  else
+
+  if ((subs = strstr(NewPath,"%H")) )
   {
-    /* no substitution */
-    NewPath = strdup(DirPath);
+    /* hostname substitution */
+    gethostname(HostName, sizeof(HostName));
+
+    *subs = 0;
+    snprintf(TmpPath, sizeof(TmpPath), "%s%s%s", NewPath, HostName, subs+2);
+    free(NewPath);
+    NewPath = strdup(TmpPath);
   }
+
   return(NewPath);
 }
 

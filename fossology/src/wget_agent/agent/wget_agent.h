@@ -102,6 +102,11 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir);
 void SetEnv(char *S, char *TempFileDir);
 
 /**
+ * \brief Substitute Hostname for %H in path
+ */
+char *PathCheck (char *DirPath);
+
+/**
  * \brief Here are some suggested options
  */
 void  Usage (char *Name);
