@@ -66,6 +66,13 @@ class agent_unpack extends FO_Plugin
    */
   function AgentAdd ($uploadpk,$Depends=NULL,$Priority=0)
   {
+    global $PG_CONN;
+
+
+    /* If this unpack has already been done or is already in the queue, ignore the request */
+    if (CommonAgentCheck($uploadpk, "unpack", "Universal file unpacker", "ununpack_ars"))
+      return NULL;
+
     /* Prepare the job: job "unpack" */
     $jobpk = JobAddJob($uploadpk,"unpack",$Priority);
     if (empty($jobpk) || ($jobpk < 0)) {
@@ -76,13 +83,6 @@ class agent_unpack extends FO_Plugin
       $Depends = array($Depends);
     }
 
-    /* job "unpack" has jobqueue item "unpack"
-     $jqargs = "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile,
-    upload_pk, pfile_fk
-    FROM upload
-    INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk
-    WHERE upload.upload_pk = '$uploadpk';";
-    */
     $jqargs = $uploadpk;
     $jobqueuepk = JobQueueAdd($jobpk,"ununpack",$jqargs,"no","",$Depends);
     if (empty($jobqueuepk)) {
