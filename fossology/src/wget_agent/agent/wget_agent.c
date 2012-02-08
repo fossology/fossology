@@ -350,7 +350,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   else if(TempFileDir && TempFileDir[0])
   {
     snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s 2>&1",
-        proxy, WgetArgs, TempFileDirectory, TaintedURL, GlobalParam);
+        proxy, WgetArgs, TempFileDir, TaintedURL, GlobalParam);
   }
   else 
   {
