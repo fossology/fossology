@@ -41,7 +41,7 @@ extern FILE* log_file;
  *
  * @return -1 on failure, 0 of success
  */
-int init_agent_suite()
+int init_agent_suite(void)
 {
   if(log_file && fclose(log_file) != 0)
     return -1;
@@ -57,7 +57,7 @@ int init_agent_suite()
  *
  * @return -1 of failure, 0 on success
  */
-int clean_agent_suite()
+int clean_agent_suite(void)
 {
   if(fclose(log_file) != 0)
     return -1;

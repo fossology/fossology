@@ -24,12 +24,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossology.h>
 #include <libfocunit.h>
 
+/* init and cleanup functions */
+int init_agent_suite(void);
+int clean_agent_suite(void);
+
 /* test case sets */
 extern CU_TestInfo tests_agent[];
 
 /* create test suite */
 CU_SuiteInfo suites[] = {
-    {"Testing agent.c:", NULL, NULL, tests_agent},
+    {"Testing agent.c:", init_agent_suite, clean_agent_suite, tests_agent},
     CU_SUITE_INFO_NULL
 };
 
