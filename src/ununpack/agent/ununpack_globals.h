@@ -81,7 +81,7 @@ cmdlist CMD[] =
 /* 12 */{ "application/x-cpio","cpio","--no-absolute-filenames -i -d <",">/dev/null 2>&1","",CMD_ARC,1,0177777,0177777, },
 /* 13 */{ "application/x-rar","unrar","x -o+ -p-",">/dev/null 2>&1","",CMD_ARC,1,0177000,0177000, },
 /* 14 */{ "application/x-cab","cabextract","",">/dev/null 2>&1","",CMD_ARC,1,0177000,0177000, },
-/* 15 */{ "application/x-7z-compressed","7zr","x -y -pjunk",">/dev/null 2>&1","",CMD_ARC,1,0177000,0177000, },
+/* 15 */{ "application/x-7z-compressed","7zr","x -y",">/dev/null 2>&1","",CMD_ARC,1,0177000,0177000, },
 /* 16 */{ "application/x-7z-w-compressed","7z","x -y -pjunk",">/dev/null 2>&1","",CMD_ARC,1,0177000,0177000, },
 /* 17 */{ "application/x-rpm","rpm2cpio","","> '%s' 2> /dev/null","rpm -qip '%s' > '%s' 2>&1",CMD_RPM,1,0177000,0177000, },
 /* 18 */{ "application/x-archive","ar","x",">/dev/null 2>&1","",CMD_AR,1,0177000,0177777, },
