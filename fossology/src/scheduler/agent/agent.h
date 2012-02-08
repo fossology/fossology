@@ -37,9 +37,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_NAME 255    ///< the maximum length for an agent's name           (arbitrary)
 #define CHECK_TIME 120  ///< wait time between agent updates                  (arbitrary)
 
-#define SAG_NONE      0x1   ///< There is nothing special about this agent
-#define SAG_EXCLUSIVE 0x2   ///< This agent must not run at the same time as any other agent
-#define SAG_NOEMAIL   0x4   ///< This agent should not send notification emails
+#define SAG_EXCLUSIVE 0x1   ///< This agent must not run at the same time as any other agent
+#define SAG_NOEMAIL   0x2   ///< This agent should not send notification emails
+#define SAG_NOKILL    0x4   ///< This agent should not be killed when updating the agent
 
 /** Enum to keep track of the state of an agent */
 typedef enum
