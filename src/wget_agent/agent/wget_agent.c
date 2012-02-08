@@ -492,6 +492,36 @@ void    SetEnv  (char *S, char *TempFileDir)
   LOG_VERBOSE0("  upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s  URL=%s  GlobalParam=%s\n",GlobalUploadKey, GlobalUploadKey,GlobalTempFile,GlobalURL,GlobalParam);
 } /* SetEnv() */
 
+
+/**
+ * @brief Check if path contains a "%H". If so, substitute the hostname.
+ * @parm DirPath Directory path.
+ * @returns new directory path
+ **/
+char *PathCheck(char *DirPath)
+{
+  char *NewPath;
+  char *subs;
+  char  TmpPath[2048];
+  char  HostName[2048];
+
+  NewPath = strdup(DirPath);
+
+  if ((subs = strstr(NewPath,"%H")) )
+  {
+    /* hostname substitution */
+    gethostname(HostName, sizeof(HostName));
+
+    *subs = 0;
+    snprintf(TmpPath, sizeof(TmpPath), "%s%s%s", NewPath, HostName, subs+2);
+    free(NewPath);
+    NewPath = strdup(TmpPath);
+  }
+
+  return(NewPath);
+}
+
+
 /**
  * \brief Here are some suggested options
  *
