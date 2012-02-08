@@ -61,6 +61,17 @@ extern int agent_verbose;
 extern fo_conf* sysconfig;
 extern char*    sysconfigdir;
 
+/*
+ * The following macro definitions are meant to act as their own statement in
+ * the c language. To acomplish this, they needed to not only be able to be used
+ * in the situation of an "if" statement with no body, but also require that
+ * they are followed by a ";".
+ *
+ * To do this the "do {} while(0)" loop is used, the loop will not appear in
+ * result flow control since it does not modify the flow of control, but it is
+ * a single statement that requires a ";" at the end to be syntatically correct
+ */
+
 /** @brief Logging functions
  */
 #define LOG_FATAL(...) { \
