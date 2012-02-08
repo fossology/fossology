@@ -56,8 +56,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TEST_NULV(a) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
 #define TEST_NULL(a, ret) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
 
-GTree* meta_agents = NULL;   ///< The master list of all meta agents
-GTree* agents      = NULL;   ///< The master list of all of the agents
+GTree* meta_agents  = NULL;  ///< The master list of all meta agents
+GTree* agents       = NULL;  ///< The master list of all of the agents
+GRegex* heart_regex = NULL;  ///< regex for parsing heart messages
 
 /** prints the credential of the agent */
 #define AGENT_CREDENTIAL                                               \
@@ -207,7 +208,7 @@ int update(int* pid_ptr, agent a, gpointer unused)
     }
 
     /* check items processed */
-    if(a->status != AG_PAUSED && a->check_analyzed == a->total_analyzed)
+    if(a->status != AG_PAUSED && !a->alive)
       a->n_updates++;
     else
       a->n_updates = 0;
@@ -218,10 +219,8 @@ int update(int* pid_ptr, agent a, gpointer unused)
       return 0;
     }
 
-    a->check_analyzed = a->total_analyzed;
-
-    AGENT_VERB("agent updated correctly, processed %d items\n",
-        a->check_analyzed);
+    AGENT_VERB("agent updated correctly, processed %d items: %d\n",
+        a->total_analyzed, a->n_updates);
   }
 
   return 0;
@@ -309,7 +308,8 @@ void agent_listen(agent a)
 
   /* locals */
   char buffer[1024]; // buffer to store c strings read from agent
-  int i;             // simple indexing variable
+  GMatchInfo* match; // regex match information
+  char* arg;         // used during regex retrievals
 
   TEST_NULV(a);
 
@@ -462,10 +462,16 @@ void agent_listen(agent a)
      */
     else if(strncmp(buffer, "HEART", 5) == 0)
     {
-      a->n_updates++;
-      i = atoi(&buffer[7]);
-      a->check_analyzed = i - a->total_analyzed;
-      a->total_analyzed = i;
+      g_regex_match(heart_regex, buffer, 0, &match);
+
+      arg = g_match_info_fetch(match, 2);
+      a->total_analyzed = atoi(arg);
+      g_free(arg);
+
+      arg = g_match_info_fetch(match, 4);
+      a->alive = arg[0] == '1' ? TRUE : FALSE;
+      g_free(arg);
+
       database_job_processed(a->owner->id, a->total_analyzed);
     }
 
@@ -1143,12 +1149,15 @@ void list_agents(GOutputStream* ostr)
 }
 
 /**
+ * HEART 120 1
+ *
  * Will create the meta_agents and agents maps
  */
 void agent_list_init(void)
 {
   meta_agents = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)meta_agent_destroy);
   agents      = g_tree_new_full(int_compare   , NULL, NULL, (GDestroyNotify)agent_destroy);
+  heart_regex = g_regex_new("HEART:(\\s*)(\\d*)(\\s*)(\\d)", 0, 0, NULL);
 }
 
 /**
@@ -1159,7 +1168,8 @@ void agent_list_init(void)
 void agent_list_clean()
 {
   if(meta_agents) g_tree_destroy(meta_agents);
-  if(agents) g_tree_destroy(agents);
+  if(agents)      g_tree_destroy(agents);
+  if(heart_regex) g_regex_unref(heart_regex);
   agent_list_init();
 }
 

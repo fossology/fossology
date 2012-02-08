@@ -121,8 +121,8 @@ struct agent_internal
     job owner;            ///< the job that this agent is assigned to
     char* data;           ///< the data that has been sent to the agent for analysis
     int updated;          ///< boolean flag to indicate if the scheduler has updated the data
-    int check_analyzed;   ///< the number that were analyzed between last heartbeats
     int total_analyzed;   ///< the total number that this agent has analyzed
+    int alive;            ///< flag to tell the scheduler if the agent is still alive
     int return_code;      ///< what was returned by the agent when it disconnected
 };
 

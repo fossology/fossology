@@ -36,6 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 int      items_processed;   ///< the number of items processed by the agent
 char     buffer[2048];      ///< the last thing received from the scheduler
+int      alive;
 int      valid;             ///< if the information stored in buffer is valid
 int      found;             ///< if the agent is even connected to the scheduler
 fo_conf* sysconfig;
@@ -61,9 +62,10 @@ int agent_verbose;
  */
 void fo_heartbeat()
 {
-  fprintf(stdout, "HEART: %d\n", items_processed);
+  fprintf(stdout, "HEART: %d %d\n", items_processed, alive);
   fflush(stdout);
   alarm(ALARM_SECS);
+  alive = FALSE;
 }
 
 /* ************************************************************************** */
@@ -82,6 +84,7 @@ void fo_heartbeat()
 void  fo_scheduler_heart(int i)
 {
   items_processed += i;
+  alive = TRUE;
 }
 
 /**

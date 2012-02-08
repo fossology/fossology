@@ -539,6 +539,7 @@ void job_fail_event(job j)
 
   for(iter = j->running_agents; iter != NULL; iter = iter->next)
   {
+    V_JOB("JOB[%d]: job failed, killing agents\n", j->id);
     agent_kill(iter->data);
   }
 }
