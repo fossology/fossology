@@ -75,34 +75,33 @@ class agent_fonomos extends FO_Plugin {
 
     global $PG_CONN;
     global $SVN_REV;
+    global $Plugins;
 
     /* Get dependency: "nomos" require "adj2nest".
      * clean this comment up, what is being checked?
     * */
     $sql = "SELECT jq_pk FROM jobqueue INNER JOIN job ON
       job.job_upload_fk = $uploadpk AND job.job_pk = jobqueue.jq_job_fk
-      WHERE jobqueue.jq_type = 'adj2nest';";
+      WHERE jobqueue.jq_type = 'adj2nest'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
     pg_free_result($result);
     $Dep = $row['jq_pk'];
-    if (empty($Dep)) {
-
-      global $Plugins;
-
+    if (empty($Dep)) 
+    {
       /* schedule unpack agent, it will also schedule adj2nest */
       $Unpack = & $Plugins[plugin_find_id("agent_unpack") ];
       $rc = $Unpack->AgentAdd($uploadpk);
-      if (!empty($rc)) {
-        return ($rc);
-      }
+      if (!empty($rc))  return ($rc);
+
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
       pg_free_result($result);
       $Dep = $row['jq_pk'];
-      if (empty($Dep)) {
+      if (empty($Dep)) 
+      {
         $text = _("Unable to find dependent job: unpack");
         return ($text);
       }
@@ -110,15 +109,19 @@ class agent_fonomos extends FO_Plugin {
 
     $Dep = array($Dep);
 
-    if (is_array($Depends)) {
+    if (is_array($Depends)) 
+    {
       $Dep = array_merge($Dep, $Depends);
     }
-    else if (!empty($Depends)) {
+    else if (!empty($Depends)) 
+    {
       $Dep[1] = $Depends;
     }
+
     /* Prepare the job: job "nomos" */
     $jobpk = JobAddJob($uploadpk, "Nomos License Analysis", $Priority);
-    if (empty($jobpk) || ($jobpk < 0)) {
+    if (empty($jobpk) || ($jobpk < 0)) 
+    {
       $text = _("Failed to insert job record for nomos");
       return ($text);
     }
@@ -132,7 +135,8 @@ class agent_fonomos extends FO_Plugin {
     /* Add job: job "Fo-Nomos License Analysis" has jobqueue item "nomos" */
     $jqargs = $uploadpk;
     $jobqueuepk = JobQueueAdd($jobpk, "nomos", $jqargs, "no", "", $Dep);
-    if (empty($jobqueuepk)) {
+    if (empty($jobqueuepk)) 
+    {
       $text = _("Failed to insert agent nomos into job queue");
       return ($text);
     }
