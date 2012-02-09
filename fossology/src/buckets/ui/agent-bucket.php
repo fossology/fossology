@@ -120,23 +120,27 @@ class agent_bucket extends FO_Plugin {
     /* queue nomos.  If it's been previously run on this upload, it will exit
      successfully and quickly */
     $nomos = & $Plugins[plugin_find_id("agent_nomos") ];
-    $rc = $nomos->AgentAdd($uploadpk);
-    if (!empty($rc)) return $rc;
+    if ($nomos->AgentCheck($uploadpk) == 0)
+    {
+      $rc = $nomos->AgentAdd($uploadpk);
+      if (!empty($rc)) return $rc;
 
-    /* To make the bucket agent dependent on nomos, we need it's jq_pk */
-    $sql = "SELECT jq_pk FROM jobqueue INNER JOIN job ON
-            job.job_upload_fk = $uploadpk AND job.job_pk = jobqueue.jq_job_fk
-            WHERE jobqueue.jq_type = 'nomos';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    if (pg_num_rows($result) < 1){
-      $text = _("Unable to find dependent job: unpack");
+      /* To make the bucket agent dependent on nomos, we need it's jq_pk */
+      $sql = "SELECT jq_pk FROM jobqueue INNER JOIN job ON
+              job.job_upload_fk = $uploadpk AND job.job_pk = jobqueue.jq_job_fk
+              WHERE jobqueue.jq_type = 'nomos';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      if (pg_num_rows($result) < 1)
+      {
+        $text = _("Unable to find dependent job: unpack");
+        pg_free_result($result);
+        return ($text);
+      }
+      $NomosDep[] = $row['jq_pk'];
       pg_free_result($result);
-      return ($text);
     }
-    $NomosDep[] = $row['jq_pk'];
-    pg_free_result($result);
 
     /* queue pkgagent.  If it's been previously run on this upload, it will
      run again but not insert duplicate pkgagent records.  */
