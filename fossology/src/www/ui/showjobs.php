@@ -415,16 +415,6 @@ class showjobs extends FO_Plugin
       $OutBuf .= "</th>";
 
       $OutBuf .= "<th $jobStyle>";
-      if ($this->isUnfinishedJob($Job) && $_SESSION["UserLevel"] == PLUGIN_DB_USERADMIN)
-      {
-        $Priority = $Job["job"]['job_priority'];
-        $OutBuf .= _("Priority: ");
-        $OutBuf .= "<a title='Decrease priority' href='$UriFull&action=priority&priority=" . ($Priority-1);
-        $OutBuf .= "&jobid=$job_pk'>&laquo;</a>";
-        $OutBuf .= " $Priority ";
-        $OutBuf .= "<a title='Increase priority' href='$UriFull&action=priority&priority=" . ($Priority+1);
-        $OutBuf .= "&jobid=$job_pk'>&raquo;</a>";
-      }
       $OutBuf .= "</th></tr>";
   
       /* Job queue */
@@ -648,11 +638,6 @@ class showjobs extends FO_Plugin
               if ($rv == false) $V .= _("Unable to cancel job.") . $response_from_scheduler . $error_info;
               echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
               break;
-            case 'priority':
-              if (empty($jq_pk)) break;
-    		  JobSetPriority($jq_pk,GetParm("priority",PARM_INTEGER));
-              echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
-	    	  break;
 	        default:
 		      break;
 	      }
