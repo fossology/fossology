@@ -114,8 +114,12 @@ class upload_srv_files extends FO_Plugin {
       return $text;
     }
 
-    /** scheduling agent tasks on upload id */
-    QueueUploadsOnAgents($uploadpk, $AgentList, 0);
+    /* schedule agents */
+    $Unpack = &$Plugins[plugin_find_id("agent_unpack") ];
+    $jobqueuepk = NULL;
+    $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
+    AgentCheckBoxDo($uploadpk);
+
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
     $msg = "The upload for $SourceFiles has been scheduled. ";
     $keep = "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
