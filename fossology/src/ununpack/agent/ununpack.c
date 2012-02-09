@@ -32,11 +32,13 @@ int	main(int argc, char *argv[])
   int   ars_pk = 0;
   char *ListOutName=NULL;
   char *Fname = NULL;
+  char *FnameCheck = NULL;
   char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
   char agent_rev[PATH_MAX];
+  struct stat Stat;
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv);
@@ -252,11 +254,30 @@ int	main(int argc, char *argv[])
       }
       if (Fname)
       {
+        FnameCheck = Fname;
         CF = SumOpenFile(Fname);
       }
       /* else: Fname is NULL and CF is NULL */
     }
-    else CF = SumOpenFile(argv[optind]);
+    else 
+    {
+      FnameCheck = argv[optind];
+      CF = SumOpenFile(argv[optind]);
+    }
+
+    /* Check file to unpack.  Does it exist?  Is it zero length? */
+    if (stat(FnameCheck,&Stat)) 
+    {
+      LOG_ERROR("File to unpack is unavailable: %s, error: %s", Fname, strerror(errno));
+      SafeExit(102);
+    }
+    else
+    if (Stat.st_size < 1)
+    {
+      LOG_WARNING("File to unpack is empty: %s", Fname);
+      SafeExit(103);
+    }
+
     if (ListOutFile)
     {
       if (CF)
