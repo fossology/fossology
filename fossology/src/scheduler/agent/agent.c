@@ -132,7 +132,7 @@ const char* agent_status_strings[] = {
  */
 void agent_transition(agent a, agent_status new_status)
 {
-  AGENT_VERB("agent statsu change: %s -> %s\n",
+  AGENT_VERB("agent status change: %s -> %s\n",
       agent_status_strings[a->status], agent_status_strings[new_status]);
 
   if(a->owner->id > 0)
@@ -477,8 +477,6 @@ void agent_listen(agent a)
       g_match_info_free(match);
       match = NULL;
 
-      AGENT_VERB("agent updated %d items processed, alive: %d\n",
-          a->total_analyzed, a->alive);
       database_job_processed(a->owner->id, a->total_analyzed);
     }
 
@@ -805,6 +803,7 @@ agent agent_init(host host_machine, job owner)
   a->n_updates = 0;
   a->data = NULL;
   a->return_code = -1;
+  a->total_analyzed = 0;
 
   /* open the relevant file pointers */
   if((a->read = fdopen(a->from_child, "r")) == NULL)
