@@ -20,10 +20,15 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
+# include the preprocessing stuff
+include $(TOP)/Makefile.process
 
 FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php)$$" `
 
-all:
+all: bootstrap
+
+# generate the postinstall script
+bootstrap: bootstrap-process_php
 
 install: all
 
