@@ -43,6 +43,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -v       = enable verbose debugging
     --user string = user name
     --password string = password
+    -c string = Specify the directory for the system configuration
 
   FOSSology storage options:
     -f path  = folder path for placing files (e.g., -f 'Fedora/ISOs/Disk 1')
@@ -436,6 +437,8 @@ $passwd = "";
 
 for ($i = 1;$i < $argc;$i++) {
   switch ($argv[$i]) {
+    case '-c':
+      break; /* handled in fo_wrapper */
     case '-h':
     case '-?':
       print $Usage . "\n";
@@ -599,9 +602,9 @@ for ($i = 1;$i < $argc;$i++) {
         }
       }
       if($Verbose)
-        $fossjobs_command = "fossjobs --user $user --password $passwd -v ";
+        $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR -v ";
       else 
-        $fossjobs_command = "fossjobs --user $user --password $passwd ";
+        $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR  ";
 
       //print "fossjobs_command is:$fossjobs_command\n";
       /* No break! No hyphen means it is a file! */

@@ -45,7 +45,17 @@ $PG_CONN = 0;   // Database connection
 $Plugins = array();
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
-$SysConf = bootstrap();
+/** get sysconfdir */
+$sysconfdir = "";
+for ($i = 1;$i < $argc;$i++)
+{
+  $arg = $argv[$i];
+  if ("-c" === $arg) {
+    $sysconfdir = $argv[$i + 1];
+    break;
+  }
+}
+$SysConf = bootstrap($sysconfdir);
 require_once("$MODDIR/lib/php/libschema.php");
 
 /* Initialize global system configuration variables $SysConfig[] */
