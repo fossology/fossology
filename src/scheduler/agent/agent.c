@@ -215,13 +215,14 @@ int update(int* pid_ptr, agent a, gpointer unused)
       a->n_updates = 0;
     if(a->n_updates > NUM_UPDATES && !is_special(a->meta_data->name, SAG_NOKILL))
     {
-      AGENT_LOG("no new items processed in 10 minutes, killing\n");
+      AGENT_LOG("agent has not set the alive flag in at least 10 minutes, killing\n");
       agent_kill(a);
       return 0;
     }
 
     AGENT_VERB("agent updated correctly, processed %d items: %d\n",
         a->total_analyzed, a->n_updates);
+    a->alive = 0;
   }
 
   return 0;
@@ -470,9 +471,14 @@ void agent_listen(agent a)
       g_free(arg);
 
       arg = g_match_info_fetch(match, 4);
-      a->alive = arg[0] == '1' ? TRUE : FALSE;
+      a->alive = (arg[0] == '1' || a->alive);
       g_free(arg);
 
+      g_match_info_free(match);
+      match = NULL;
+
+      AGENT_VERB("agent updated %d items processed, alive: %d\n",
+          a->total_analyzed, a->alive);
       database_job_processed(a->owner->id, a->total_analyzed);
     }
 
