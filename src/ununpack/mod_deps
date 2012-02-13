@@ -91,7 +91,7 @@ if [ $RUNTIME ]; then
     Debian|Ubuntu|LinuxMint)
       apt-get install \
         bzip2 cabextract cpio genisoimage p7zip \
-        poppler-utils rpm tar upx unzip gzip;;
+        poppler-utils rpm tar upx unzip gzip sleuthkit p7zip-full unrar-free;;
     RedHatEnterprise*|CentOS)
       yum install \
          bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip;;
