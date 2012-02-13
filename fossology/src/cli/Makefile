@@ -18,7 +18,10 @@ TEXTFILES=$(DOCS:%.pod=%.txt)
 $(iPATHFILE):
 	$(MAKE) -C $(FOWWWDIR)
 
-all: $(iPATHFILE) docs
+all: $(iPATHFILE) docs fo_wrapper
+
+# include the preprocessing stuff
+include $(TOP)/Makefile.process
 
 docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 
@@ -29,6 +32,9 @@ docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 	pod2html --infile=$< --outfile=$*.html
 	# pod2html leaves temporary files: see debian bug #378328
 	rm -f pod*.tmp
+
+# generate the postinstall script
+fo_wrapper: fo_wrapper-process_php
 
 %.txt: %.pod
 	pod2text $< $*.txt
@@ -75,7 +81,7 @@ coverage:
 
 clean:
 	# pod2html leaves temporary files: see debian bug #378328
-	rm -f *.o core $(MAN1FILES) $(HTMLFILES) $(TEXTFILES) pod*.tmp
+	rm -f *.o core $(MAN1FILES) $(HTMLFILES) $(TEXTFILES) pod*.tmp fo_wrapper.php
 
 include $(DEPS)
 
