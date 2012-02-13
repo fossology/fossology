@@ -151,5 +151,5 @@ Neal Krawetz/Mark Donohoe for the Hewlett-Packard Company
 
 =head1 SEE ALSO
 
-wget, fossjobs, fosslic
+wget, fossjobs 
 
