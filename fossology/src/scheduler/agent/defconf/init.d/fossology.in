@@ -51,6 +51,12 @@ case "$1" in
     $DAEMON --kill || echo -n "no "
     echo "$NAME killed."
     ;;
+  shutdown)
+    echo -n "Gracefully shutting down $DESC after all current jobs finish: "
+    # we don't really care about the exit code as long as it's stopped
+    $DAEMON --shutdown
+    echo "$NAME shutdown."
+    ;;
   reload)
     #
     #	If the daemon can reload its config files on the fly
