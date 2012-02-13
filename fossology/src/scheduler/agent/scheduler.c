@@ -463,6 +463,10 @@ void load_foss_config()
     s_port = atoi(fo_config_get(sysconfig, "FOSSOLOGY", "port", &error));
   set_port(s_port);
 
+  /* log the lod direcotry */
+  if(fo_config_has_key(sysconfig, "DIRECTORIES", "LOG_DIR"))
+    logdir = fo_config_get(sysconfig, "DIRECTORIES", "LOG_DIR", &error);
+
   /* load the host settings */
   keys = fo_config_key_set(sysconfig, "HOSTS", &special);
   for(i = 0; i < special; i++)

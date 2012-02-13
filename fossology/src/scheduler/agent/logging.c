@@ -56,15 +56,7 @@ void log_open()
   if((log_file = fopen(log_name, "a")) == NULL)
   {
     log_file = stderr;
-    sprintf(log_name, "%s", logdir);
-    if((log_file = fopen(log_name, "a")) == NULL)
-    {
-      log_file = stderr;
-      FATAL("could not open %s for logging and %s failed", log_name, logdir);
-      log_file = NULL;
-    }
-    else
-      ERROR("cout not open %s for logging, using default", log_name);
+    FATAL("could not open %s for logging", log_name);
   }
 }
 
@@ -123,10 +115,14 @@ void set_log(const char* name)
   log_file = NULL;
 
   memset(log_name, '\0', sizeof(log_name));
-  if ((stat(name,&stats) == 0) && S_ISDIR(stats.st_mode))
-    sprintf(log_name, "%s/fossology.log", name);
+  if((stat(name,&stats) == 0) && S_ISDIR(stats.st_mode))
+  {
+    snprintf(log_name, sizeof(log_name) - 1, "%s/fossology.log", name);
+  }
   else
-    sprintf(log_name, "%s", name);
+  {
+    snprintf(log_name, sizeof(log_name) - 1, "%s", name);
+  }
 
   /* make sure that the name provided is valid */
   if(log_name[0] == '\0')
