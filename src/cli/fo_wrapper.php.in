@@ -1,7 +1,7 @@
 #!/usr/bin/php -q
 <?php
 /***********************************************************
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -100,8 +100,6 @@ exit(0);
 function bootstrap($sysconfdir="")
 {
   $rcfile = "fossology.rc";
-  $sysconfdirDefault4Pkg = "/etc/fossology/";
-  $sysconfdirDefault4Src = "/usr/local/etc/fossology/";
   if (empty($sysconfdir))
   {
     $sysconfdir = getenv('SYSCONFDIR');
@@ -111,26 +109,7 @@ function bootstrap($sysconfdir="")
       if ($sysconfdir === false)
       {
         /** set the sysconfdir with default */
-        if (is_dir($sysconfdirDefault4Src)) $sysconfdir = $sysconfdirDefault4Src;
-        /**  both /etc/fossology/ and /usr/local/etc/fossology/ are existing ?*/
-        if (!empty($sysconfdir) && is_dir($sysconfdirDefault4Pkg))
-        {
-          $text = _("fatal! system configuration error, both /etc/fossology/ and /usr/local/etc/fossology/ are existing.");
-          echo "$text\n";
-          exit(1);
-        }
-        else if (is_dir($sysconfdirDefault4Pkg))
-        {
-          $sysconfdir = $sysconfdirDefault4Pkg;
-        }
-
-        if ($sysconfdir === false)
-        {
-          /* no sysconfdir specified */
-          $text = _("fatal! system configuration error, no sysconfdir.");
-          echo "$text\n";
-          exit(1);
-        }
+        $sysconfdir = "{$SYSCONFDIR}";
       }
     }
   }
