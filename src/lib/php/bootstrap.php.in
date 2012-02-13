@@ -64,7 +64,7 @@ function bootstrap($sysconfdir="")
       if (file_exists($rcfile)) $sysconfdir = file_get_contents($rcfile);
       if ($sysconfdir === false)
       {
-        $sysconfdir = "$SYSCONFDIR";
+        $sysconfdir = "{$SYSCONFDIR}";
       }
     }
   }

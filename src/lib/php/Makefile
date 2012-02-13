@@ -20,8 +20,6 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-# include the preprocessing stuff
-include $(TOP)/Makefile.process
 
 FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php)$$" `
 
@@ -29,6 +27,9 @@ all: bootstrap
 
 # generate the postinstall script
 bootstrap: bootstrap-process_php
+
+# include the preprocessing stuff
+include $(TOP)/Makefile.process
 
 install: all
 
@@ -44,6 +45,6 @@ uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/lib/php
 
 clean:
-	rm -f *.o core
+	rm -f *.o core bootstrap.php
 
 .PHONY: all install uninstall clean test
