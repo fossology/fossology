@@ -45,7 +45,7 @@ $filestr = file_get_contents($input_filename);
 /* replace each variable */
 foreach($vars as $var => $value)
 {
-  $filestr = str_replace('$'.$var, $value, $filestr);
+  $filestr = str_replace('{$'.$var.'}', $value, $filestr);
 }
 
 /* write output file:
