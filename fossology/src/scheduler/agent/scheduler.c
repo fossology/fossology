@@ -199,11 +199,17 @@ void update_scheduler()
     while(peek_job() != NULL)
     {
       if((machine = get_host(1)) == NULL)
+      {
+        V_SCHED("JOB_INIT: could not find host\n");
         break;
+      }
 
       j = next_job();
       if(is_special(j->agent_type, SAG_EXCLUSIVE))
+      {
+        V_SCHED("JOB_INIT: exclusive, postponing initialization\n")
         break;
+      }
 
       V_SCHED("Starting JOB[%d].%s\n", j->id, j->agent_type);
       agent_init(machine, j);
