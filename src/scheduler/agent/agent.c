@@ -883,14 +883,18 @@ void agent_death_event(pid_t* pid)
   {
     if(WIFEXITED(status))
     {
-      AGENT_VERB("agent failed, code: %d\n", a->return_code);
+      AGENT_LOG("agent failed, code: %d\n", (status >> 8));
     }
     else if(WIFSIGNALED(status))
     {
-      AGENT_VERB("agent was killed by signal: %d.%s\n",
+      AGENT_LOG("agent was killed by signal: %d.%s\n",
           WTERMSIG(status), strsignal(WTERMSIG(status)));
       if(WCOREDUMP(status))
-        AGENT_VERB("agent produced core dump\n");
+        AGENT_LOG("agent produced core dump\n");
+    }
+    else
+    {
+      AGENT_LOG("agent failed, code: %d\n", a->return_code);
     }
     AGENT_WARNING("agent closed unexpectedly, agent status was %s",
         agent_status_strings[a->status]);
