@@ -523,6 +523,18 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_TITLE_ZEND_V20)) {
       INTERESTING("Zend_v2.0");
     }
+    /*
+     * Discussion from Raino on why some BSD-style is better called Google-BSD: 
+     * WebM license page contains BSD-license with Google copyright.
+     * I think it should be detected as Google-BSD license rather than
+     * BSD-style. I think still that WebM reference should be recognized
+     * separately rather than as Google-BSD. The reason is that the project
+     * may change the license terms/license text. In that case interpretation
+     * of WebM as Google-BSD could be misleading.
+     */
+    else if (INFILE(_CR_GOOGLE)) {
+      INTERESTING("Google-BSD");
+    }
     else if (!lmem[_fOPENLDAP] && !TRYGROUP(famOPENLDAP)) {
       if (INFILE(_CR_BSDCAL)) {
         INTERESTING(lDebug ? "BSD(1)" : "BSD");
@@ -716,6 +728,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "BSD(ref7)" : "BSD");
     /* lmem[_fBSD] = 1; */
   }
+  else if (INFILE(_LT_BSDref8)) {
+    INTERESTING(lDebug ? "BSD(ref8)" : "BSD");
+    /* lmem[_fBSD] = 1; */
+  }
+  else if (INFILE(_LT_BSDref9)) {
+    INTERESTING(lDebug ? "BSD(ref9)" : "BSD");
+    /* lmem[_fBSD] = 1; */
+  }
   else if (URL_INFILE(_URL_BSD_1) || URL_INFILE(_URL_BSD_2)) {
     INTERESTING(lDebug ? "BSD(url)" : "BSD");
     lmem[_fBSD] = 1;
@@ -749,7 +769,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_LT_ASL20)) {
       INTERESTING(lDebug ? "Apache(2.0#2)" : "Apache_v2.0");
     }
-    else if (INFILE(_LT_ASL20ref)) {
+    else if (INFILE(_LT_ASL20ref) || INFILE(_LT_ASL20ref_2)) {
       INTERESTING(lDebug ? "Apache(2.0#3)" : "Apache_v2.0");
     }
     else if (INFILE(_TITLE_ASL20)) {
@@ -1762,6 +1782,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "MIT-style(10)" : "MIT-style");
       lmem[_mMIT] = 1;
     }
+  }
+  else if (INFILE(_LT_MIT_11)) {
+    INTERESTING(lDebug ? "MIT-style(11)" : "MIT-style");
+    lmem[_mMIT] = 1;
   }
   else if (!lmem[_mMIT] && INFILE(_LT_MITDOC)) {
     if (mCR_MIT()) {
@@ -3672,17 +3696,18 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Silicon Graphics
    */
-  if (INFILE(_LT_SGI_1) || INFILE(_LT_SGI_2)) {
+  if (INFILE(_TITLE_SGI_V10)) {
+    INTERESTING("SGI_v1.0");
+  }
+  else if (INFILE(_TITLE_SGI_V11)) {
+    INTERESTING("SGI_v1.1");
+  }
+  else if (INFILE(_TITLE_SGI_V20)) {
+    INTERESTING("SGI_v2.0");
+  }
+  else if (INFILE(_LT_SGI_1) || INFILE(_LT_SGI_2)) {
     if (INFILE(_CR_SGI) || URL_INFILE(_URL_SGI)) {
-      if (INFILE(_TITLE_SGI_V10)) {
-        INTERESTING("SGI_v1.0");
-      }
-      else if (INFILE(_TITLE_SGI_V11)) {
-        INTERESTING("SGI_v1.1");
-      }
-      else {
-        INTERESTING("SGI");
-      }
+      INTERESTING("SGI");
     }
     else {
       INTERESTING("SGI-style");
@@ -3710,6 +3735,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_SGI_PROPRIETARY) && INFILE(_CR_SGI)) {
     INTERESTING("SGI-Proprietary");
   }
+
   /*
    * 3DFX (Glide)
    */
@@ -3727,7 +3753,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_CR_NVIDIA) && INFILE(_LT_NVIDIA)) {
     INTERESTING(lDebug ? "Nvidia(1)" : "Nvidia");
   }
-  else if (INFILE(_LT_NVIDIA_EULA) || INFILE(_TITLE_NVIDIA)) {
+  else if (INFILE(_LT_NVIDIA_EULA) || INFILE(_LT_NVIDIA_EULA_2) || INFILE(_TITLE_NVIDIA)) {
     INTERESTING(lDebug ? "Nvidia(2)" : "Nvidia-EULA");
   }
   /*
@@ -4894,6 +4920,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Zend_v2.0");
   }
 
+  /* WebM */
+  if (INFILE(_URL_WEBM)) {
+    INTERESTING("WebM");
+  }
+
   /* Dyade Public License
    * http://old.koalateam.com/jackaroo/DYADE_PUBLIC_LICENSE.TXT
    */
@@ -6014,6 +6045,9 @@ char *ccVersion(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_TITLE_CCA_V30)) {
     lstr = "CCA_v3.0";
+  }
+  else if (INFILE(_LT_CCA_ND_ref)) {
+    lstr = "CCA-ND_v3.0";
   }
   else if (INFILE(_TITLE_CCA)) {
     lstr = lDebug ? "CCA(1)" : "CCA";
