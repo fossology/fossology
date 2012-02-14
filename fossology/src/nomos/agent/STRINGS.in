@@ -542,6 +542,10 @@
 %ENTRY%	_LT_ASL20ref
 %KEY%	"\<ap(ache|ple)\>"
 %STR%	"(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =SOME= apache licen[cs]e =SOME= (v|version )2\.?0"
+#
+%ENTRY%	_LT_ASL20ref_2
+%KEY%	"\<ap(ache|ple)\>"
+%STR%	"(distributed|modified) =FEW= under =FEW= apache 2\.?0 licen[cs]e"
 #####
 # DELETED: subject to the terms and conditions of this ... =ANY= patent
 # licen[cs]e to make have made use offer to sell sell import and otherwise
@@ -791,6 +795,14 @@
 %KEY%	"licen[cs]"
 %STR%	"modified (berkeley|bsd) software (distribution|) license"
 #
+%ENTRY%	_LT_BSDref8
+%KEY%	"licen[cs]"
+%STR%	"available via =SOME= modified bsd license"
+#
+%ENTRY%	_LT_BSDref9
+%KEY%	"licen[cs]"
+%STR%	"license\.? bsd"
+#
 %ENTRY%	_LT_BSDSTYLEref1
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (BSD[ -]style|BSD[ -]type|BSD-?ish|BSD[ -]like) licen[cs]e"
@@ -959,6 +971,10 @@
 %ENTRY%	_LT_CCA_ND_30
 %KEY%	"derogatory"
 %STR%	"You must not distort, mutilate, modify or take other derogatory"
+#
+%ENTRY%	_LT_CCA_ND_ref
+%KEY%	"licen[cs]"
+%STR%	"work is licensed under the creative commons attribution-noderivs 3\.?0"
 #####
 # DELETED: ... you a world-?wide royalty-free non-?exclusive perpetual
 # for the duration of the applicable copyright licen[cs]e to exercise
@@ -1728,6 +1744,18 @@
 %ENTRY%	_LT_FREE_79
 %KEY%	"source"
 %STR%	"freedom to use these sources for whatever you want =SOME= is hereby granted"
+#
+%ENTRY% _LT_FREE_80
+%KEY%	"distribut"
+%STR%	"you may (re|)distribute unmodified or modified versions of this source code provided =FEW= copyright notice =FEW= following conditions are retained"
+#
+%ENTRY%	_LT_FREE_81
+%KEY%	"distribut"
+%STR%	"you may use copy modify and distribute this code for any purpose =FEW=  and without fee"
+#
+%ENTRY%	_LT_FREE_82
+%KEY%	"restrict"
+%STR%	"you may use this program =SOME= as desired without restriction"
 #
 %ENTRY%	_LT_FREEART_V10
 %KEY%	"licen[cs]"
@@ -2947,6 +2975,10 @@ e /* (INFILE(j)) */
 %KEY%	"distribut"
 %STR%	"is r?e?-?distributed freely and may be used freely under the following conditions"
 #
+%ENTRY%	_LT_MIT_11
+%KEY%	"permi[st]"
+%STR%	"permission is granted =SOME= without restriction =FEW= to use publicly perform distribute sell modify merge give away or sublicence"
+#
 %ENTRY%	_LT_MITref1
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= \<mit\> =FEW= licen[cs]e"
@@ -3253,6 +3285,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_NVIDIA_EULA
 %KEY%	"so(ftware|urce)"
 %STR%	"NVIDIA hereby grants customer the following non-exclusive non-transferable right to use the software with the following limitations"
+#
+%ENTRY%	_LT_NVIDIA_EULA_2
+%KEY%	"so(ftware|urce)"
+%STR%	"NVIDIA Corporation =FEW= supplies this software to you in consideration of your agreement to the following terms"
 #####
 # DELETED: hereby grant you a non-?exclusive world-?wide no-charge
 # transferable licen[cs]e to ... and distribute internally and externally
@@ -4763,6 +4799,14 @@ k
 %ENTRY%	_LT_SEE_COPYING_10
 %KEY%	"licen[cs]"
 %STR%	"for licensing =SOME= see =SOME= copying"
+#
+%ENTRY%	_LT_SEE_COPYING_11
+%KEY%	"distribut"
+%STR%	"see copying for distribution information"
+#
+%ENTRY%	_LT_SEE_COPYING_12
+%KEY%	"\<files?\>"
+%STR%	"read the file copying"
 #####
 # These MUST be the last 2 checks for license references in the file "copying"
 #####
@@ -4883,6 +4927,14 @@ k
 %ENTRY% _LT_SEE_LICENSE_10
 %KEY% "licen[cs]" 
 %STR% "licen[cs]e see licen[cs]e?txt" 
+#
+%ENTRY%	_LT_SEE_LICENSE_11
+%KEY%	"licen[cs]"
+%STR%	"see the accompanying file license =SOME= for terms of use"
+#
+%ENTRY%	_LT_SEE_LICENSE_12
+%KEY%	"licen[cs]"
+%STR%	"for license =FEW= see accompanying license"
 #####
 # These MUST be the last 2 checks for license references in the file "license"
 #####
@@ -4947,6 +4999,10 @@ k
 %ENTRY%	_LT_SEE_README_8
 %KEY%	"(condit|vers)ion"
 %STR%	"you agree to the terms and conditions (set forth|listed|contained|presented|described) in the (file =FEW= \<readme\>|\<readme\> file)"
+#
+%ENTRY%	_LT_SEE_README_9
+%KEY%	"distribut"
+%STR%	"for conditions of distribution and use see =FEW= \<readme\> file"
 #####
 # These MUST be the last 2 checks for license references in the file "readme"
 #####
@@ -5255,6 +5311,10 @@ k
 %ENTRY%	_CR_FUJITSU
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= fujitsu (ltd|limited)"
+#
+%ENTRY%	_CR_GOOGLE
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= google inc"
 #
 %ENTRY%	_CR_GPL_1
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -6715,6 +6775,10 @@ k
 %KEY%	"so(ftware|urce)"
 %STR%	"sgi free software licen[cs]e b (v|version )1\.?1"
 #
+%ENTRY%	_TITLE_SGI_V20
+%KEY%	"so(ftware|urce)"
+%STR%	"sgi free software (b licen[cs]e|licen[cs]e b) (v|version )2\.?0"
+#
 %ENTRY%	_TITLE_SISSL
 %KEY%	"licen[cs]"
 %STR%	"su(n|n industry) standard(s|s source) licen[cs]e"
@@ -7965,6 +8029,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"sun\.?com/j2se/1\.?5\.?0/jdk-1_5_0_0\.?1-licen[cs]e"
 #
+%ENTRY%	_URL_WEBM
+%KEY%	"licen[cs]"
+%STR%	"w?w?w?\.?webmproject\.?org/licen[cs]e/software"
+#
 %ENTRY%	_URL_W3C
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/w3c"
@@ -8096,9 +8164,12 @@ k
 %KEY%	"licen[cs]"
 %STR%	"(OpenGroup lic-instance|open[ -]?group =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= open[ -]?group)"
 #
+#%ENTRY%	_MIN_PERL
+#%KEY%	"licen[cs]"
+#%STR%	"(Perl lic-instance|\<perl\> =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= \<perl\>)"
 %ENTRY%	_MIN_PERL
 %KEY%	"licen[cs]"
-%STR%	"(Perl lic-instance|\<perl\> =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= \<perl\>)"
+%STR%	"(Perl lic-instance|((^|[[:space:]])perl($|[[:space:]])) =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= ((^|[[:space:]])perl($|[[:space:]])))"
 #
 %ENTRY%	_MIN_PHP
 %KEY%	"licen[cs]"
@@ -8232,7 +8303,7 @@ k
 #
 %ENTRY%	_MIN2_PERL
 %KEY%	"so(ftware|urce)"
-%STR%	"(Perl src-instance|\<perl\> =FEW= \<source\>|\<source\> =FEW= \<perl\>)"
+%STR%	"(Perl src-instance|((^|[[:space:]])perl($|[[:space:]])) =FEW= ((^|[[:space:]])source($|[[:space:]]))|((^|[[:space:]])source($|[[:space:]])) =FEW= ((^|[[:space:]])perl($|[[:space:]])))"
 #
 %ENTRY%	_MIN2_PHP
 %KEY%	"so(ftware|urce)"
