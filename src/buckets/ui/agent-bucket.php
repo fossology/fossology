@@ -44,17 +44,59 @@ class agent_bucket extends FO_Plugin {
 
   /**
    * \brief Check if the job can be scheduled.
+   * Check if users.default_bucketpool_fk has been used in a successful scan
+   * by this user.  If it has, then return 2.  If it hasn't, check the job
+   * queue and make sure it isn't already scheduled.  If it is scheduled, then
+   * return 1.
+   *
    * \param $upload_pk
    *
    * \returns
    * 0 = not scheduled \n
    * 1 = scheduled but not completed \n
-   * 2 = scheduled and completed
+   * 2 = scheduled and completed successfully
    */
-  function AgentCheck($upload_pk) 
+function AgentCheck($upload_pk) 
+{
+  global $PG_CONN;
+
+  /* Get the users.default_bucketpool_fk */
+  $user_pk = GetArrayVal("UserId", $_SESSION);
+  $usersRec = GetSingleRec("users", "where user_pk='$user_pk'");
+  $default_bucketpool_fk = $usersRec['default_bucketpool_fk'];
+
+  /* get the latest nomos agent_pk */
+  $Latest_nomos_agent_pk = GetAgentKey("nomos", "Nomos license scanner");
+
+  /* see if this nomos/bucket combo has scanned the upload */
+  $bucket_arsRec = GetSingleRec("bucket_ars", "where bucketpool_fk='$default_bucketpool_fk' and upload_fk='$upload_pk' and nomosagent_fk='$Latest_nomos_agent_pk'");
+ 
+  if (!empty($bucket_arsRec))
   {
-    return CommonAgentCheck($upload_pk, "buckets", "custom report scanner", "bucket_ars");
-  } // AgentCheck()
+    /* did it complete successfully? */
+    if ($bucket_arsRec["ars_success"] == TRUE) return 2;
+  }
+
+  /* check if the upload_pk is currently in the job queue being processed 
+   * Note, this isn't a great test because it doesn't take into account
+   * the version of the agent scheduled.
+   */
+  $sql = "SELECT jq_endtext FROM jobqueue, job where job_upload_fk='$upload_pk' 
+          AND job_pk=jq_job_fk AND jq_type='$AgentName'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) > 0)
+  {
+    $row = pg_fetch_assoc($result);
+    $jq_endtext = $row["jq_endtext"];
+    pg_free_result($result);
+    if (empty($jq_endtext)) return 1;
+    else if ($jq_endtext & 0x1) return 2;
+  }
+  else pg_free_result($result);
+  return (0);
+
+} // AgentCheck()
 
   /**
    * \brief Queue the bucket agent.
