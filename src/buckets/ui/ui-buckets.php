@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -31,7 +31,6 @@ class ui_buckets extends FO_Plugin
   var $Dependency = array("browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
-  var $UpdCache   = 0;
 
   /**
    * \brief Create and configure database tables
@@ -101,7 +100,7 @@ class ui_buckets extends FO_Plugin
   function RegisterMenus()
   {
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item","bp"));
+    $URI = $this->Name . Traceback_parm_keep(array("format","page","upload","item","bp"));
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $bucketpool_pk = GetParm("bp",PARM_INTEGER);
@@ -146,20 +145,6 @@ class ui_buckets extends FO_Plugin
       array_push($Plugins,$this);
     }
 
-    /* Remove "updcache" from the GET args and set $this->UpdCache
-     * This way all the url's based on the input args won't be
-    * polluted with updcache
-    */
-    if ($_GET['updcache'])
-    {
-      $this->UpdCache = $_GET['updcache'];
-      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
-      unset($_GET['updcache']);
-    }
-    else
-    {
-      $this->UpdCache = 0;
-    }
     return($this->State == PLUGIN_STATE_VALID);
   } // Initialize()
 
@@ -508,31 +493,18 @@ $VLic .= " [Tag]";
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
     $updcache = GetParm("updcache",PARM_INTEGER);
+
+    /* Remove "updcache" from the GET args and set $this->UpdCache
+     * This way all the url's based on the input args won't be
+     * polluted with updcache
+     * Use Traceback_parm_keep to ensure that all parameters are in order 
+     */
+    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder","ars")) ;
     if ($updcache)
     {
-      $this->UpdCache = $_GET['updcache'];
-    }
-    else
-    {
-      $this->UpdCache = 0;
-    }
-
-    switch(GetParm("show",PARM_STRING))
-    {
-      case 'detail':
-        $Show='detail';
-        break;
-      case 'summary':
-      default:
-        $Show='summary';
-    }
-
-    /* Use Traceback_parm_keep to ensure that all parameters are in order */
-    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder","ars")) . "&show=$Show";
-    if ($this->UpdCache != 0)
-    {
-      $V = "";
-      $Err = ReportCachePurgeByKey($CacheKey);
+      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
+      unset($_GET['updcache']);
+      $V = ReportCachePurgeByKey($CacheKey);
     }
     else
     {
