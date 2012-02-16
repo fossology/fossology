@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -31,7 +31,6 @@ class ui_diff_buckets extends FO_Plugin
   var $Dependency = array("browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
-  var $UpdCache   = 0;
   var $ColumnSeparatorStyleL = "style='border:solid 0 #006600; border-left-width:2px;padding-left:1em'";
   var $threshold  = 150;  /* cut point for removing by eval order, hardcode for v1  */
 
@@ -85,20 +84,6 @@ class ui_diff_buckets extends FO_Plugin
       array_push($Plugins,$this);
     }
 
-    /* Remove "updcache" from the GET args and set $this->UpdCache
-     * This way all the url's based on the input args won't be
-    * polluted with updcache
-    */
-    if ($_GET['updcache'])
-    {
-      $this->UpdCache = $_GET['updcache'];
-      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
-      unset($_GET['updcache']);
-    }
-    else
-    {
-      $this->UpdCache = 0;
-    }
     return($this->State == PLUGIN_STATE_VALID);
   } // Initialize()
 
@@ -632,20 +617,24 @@ return;
     $V="";
     /**/
     $updcache = GetParm("updcache",PARM_INTEGER);
-    if ($updcache)
-    $this->UpdCache = $_GET['updcache'];
-    else
-    $this->UpdCache = 0;
 
-    /* Use Traceback_parm_keep to ensure that all parameters are in order */
+    /* Remove "updcache" from the GET args and set $this->UpdCache
+     * This way all the url's based on the input args won't be
+     * polluted with updcache
+     * Use Traceback_parm_keep to ensure that all parameters are in order
+    */
     $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("item1","item2", "filter"));
-    if ($this->UpdCache != 0)
+    if ($updcache)
     {
-      $Err = ReportCachePurgeByKey($CacheKey);
+      $this->UpdCache = $_GET['updcache'];
+      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
+      unset($_GET['updcache']);
+      $V = ReportCachePurgeByKey($CacheKey);
     }
     else
-    $V = ReportCacheGet($CacheKey);
-    /**/
+    {
+      $V = ReportCacheGet($CacheKey);
+    }
 
     if (empty($V))  // no cache exists
     {

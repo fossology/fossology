@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -31,7 +31,6 @@ class ui_nomos_license extends FO_Plugin
   var $Dependency = array("browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
-  var $UpdCache   = 0;
   var $HighlightColor = '#4bfe78';
 
   /**
@@ -65,7 +64,7 @@ class ui_nomos_license extends FO_Plugin
   function RegisterMenus()
   {
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
+    $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
 
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
@@ -100,11 +99,10 @@ class ui_nomos_license extends FO_Plugin
    */
   function Initialize()
   {
-    global $_GET;
-
     if ($this->State != PLUGIN_STATE_INVALID) {
       return(1);
     } // don't re-run
+
     if ($this->Name !== "") // Name must be defined
     {
       global $Plugins;
@@ -112,20 +110,6 @@ class ui_nomos_license extends FO_Plugin
       array_push($Plugins,$this);
     }
 
-    /* Remove "updcache" from the GET args and set $this->UpdCache
-     * This way all the url's based on the input args won't be
-    * polluted with updcache
-    */
-    if ($_GET['updcache'])
-    {
-      $this->UpdCache = $_GET['updcache'];
-      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
-      unset($_GET['updcache']);
-    }
-    else
-    {
-      $this->UpdCache = 0;
-    }
     return($this->State == PLUGIN_STATE_VALID);
   } // Initialize()
 
@@ -448,7 +432,7 @@ class ui_nomos_license extends FO_Plugin
     {
       foreach ($UniqueTagArray as $UTA_row) $SelectData[$UTA_row['tag_pk']] = $UTA_row['tag_name'];
       $V .= "Tag filter";
-      $myurl = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder"));
+      $myurl = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item"));
       $Options = " id='filterselect' onchange=\"js_url(this.value, '$myurl&tag=')\"";
       $V .= Array2SingleSelectTag($SelectData, "tag_ns_pk",$tag_pk,true,false, $Options);
     }
@@ -473,34 +457,26 @@ class ui_nomos_license extends FO_Plugin
       return(0);
     }
     $V="";
-    $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
     $tag_pk = GetParm("tag",PARM_INTEGER);
-    if (!empty($updcache))
-    $this->UpdCache = $_GET['updcache'];
-    else
-    $this->UpdCache = 0;
+    $updcache = GetParm("updcache",PARM_INTEGER);
 
-    switch(GetParm("show",PARM_STRING))
+    /* Remove "updcache" from the GET args.
+     * This way all the url's based on the input args won't be
+     * polluted with updcache
+     * Use Traceback_parm_keep to ensure that all parameters are in order */
+    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","tag"));
+    if ($updcache)
     {
-      case 'detail':
-        $Show='detail';
-        break;
-      case 'summary':
-      default:
-        $Show='summary';
-    }
-
-    /* Use Traceback_parm_keep to ensure that all parameters are in order */
-    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder","tag")) . "&show=$Show";
-    if ($this->UpdCache != 0)
-    {
-      $V = "";
-      $Err = ReportCachePurgeByKey($CacheKey);
+      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
+      unset($_GET['updcache']);
+      $V = ReportCachePurgeByKey($CacheKey);
     }
     else
-    $V = ReportCacheGet($CacheKey);
+    {
+      $V = ReportCacheGet($CacheKey);
+    }
 
     if (empty($V) )  // no cache exists
     {
