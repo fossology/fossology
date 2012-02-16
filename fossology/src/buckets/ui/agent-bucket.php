@@ -64,6 +64,7 @@ function AgentCheck($upload_pk)
   $user_pk = GetArrayVal("UserId", $_SESSION);
   $usersRec = GetSingleRec("users", "where user_pk='$user_pk'");
   $default_bucketpool_fk = $usersRec['default_bucketpool_fk'];
+  if (empty($default_bucketpool_fk)) return 0;
 
   /* get the latest nomos agent_pk */
   $Latest_nomos_agent_pk = GetAgentKey("nomos", "Nomos license scanner");
