@@ -82,7 +82,7 @@ function AgentCheck($upload_pk)
    * the version of the agent scheduled.
    */
   $sql = "SELECT jq_endtext FROM jobqueue, job where job_upload_fk='$upload_pk' 
-          AND job_pk=jq_job_fk AND jq_type='$AgentName'";
+          AND job_pk=jq_job_fk AND jq_type='buckets'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   if (pg_num_rows($result) > 0)
