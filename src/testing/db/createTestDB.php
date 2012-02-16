@@ -36,8 +36,6 @@
  * Created on Sep 14, 2011 by Mark Donohoe
  */
 
-
-require_once(__DIR__ . '/../../lib/php/bootstrap.php');
 require_once(__DIR__ . '/../lib/libTestDB.php');
 
 $Options = getopt('c:d:esh');
@@ -56,7 +54,7 @@ $usage = $argv[0] . ": [-h] -c path [-d name] [-s]\n" .
 $pathPrefix = '/srv/fossology';
 $dbPrefix = 'fosstest';
 
-// check if the test where the user is in the fossy group
+// check if the user is in the fossy group
 $gid_array = posix_getgroups();
 $gflag = 0; // 0: in the fossy group, 1: not in the fossy group
 foreach($gid_array as $gid)
@@ -72,16 +70,33 @@ $uid = posix_getuid();
 $uid_info = posix_getpwuid($uid);
 if ($uid_info['name'] === 'root') $gflag = 1; // user is root
 
-if (0 == $gflag)
+if ($gflag == 0)
 {
-    echo "FATAL: the test where the user should be in the fossy group.\n";
+    echo "FATAL: The user must be in the fossy group.\n";
     exit(1);
 }
 
-$check_group_cmd = "id -G -n|grep 'fossy\|root'";
-$lastCmd = exec($check_group_cmd, $ckOut, $ckRtn);
-if ($ckRtn != 0)
+// create .pgpass file and place in the users home dir who is running this
+// program.  This file will be needed later in the code.
+$user = getenv('USER');
+$userHome = getenv('HOME');
+$ipv4 = gethostbyname(gethostname());
+$fullHostName = gethostbyaddr(gethostbyname($ipv4));
+$contents = "$fullHostName:*:*:fossy:fossy\n";
+$pgpass = "$userHome/.pgpass";
+$FD = fopen($pgpass,'w+');
+$howmany = fwrite($FD, $contents);
+if($howmany === FALSE)
 {
+  echo "FATAL! Could not write .pgpass file to $pgpass\n";
+  exit(1);
+}
+fclose($FD);
+// chmod so only owner can read/write it, if not set this was postgres will
+// ignore the .pgpass file.
+if(!chmod($pgpass, 0600))
+{
+  echo "Warning! could not set $pgpass to 0600\n";
 }
 
 if(array_key_exists('h',$Options))
@@ -101,8 +116,7 @@ if(array_key_exists('c', $Options))
   }
 }
 /*
- * Drop DataBase
- * @todo make this code also clean up the conf dir and repo
+ * Drop DataBase and remove conf dir and repo dir.
  */
 if(array_key_exists('d', $Options))
 {
@@ -113,14 +127,15 @@ if(array_key_exists('d', $Options))
     exit(1);
   }
   // check that postgresql is running
-  $ckCmd = "sudo su postgres -c 'echo \\\q | psql'";
+  //$ckCmd = "sudo su postgres -c 'echo \\\q | psql'";
+  $ckCmd = "psql -c '\q' fossology -U fossy";
   $lastCmd = exec($ckCmd, $ckOut, $ckRtn);
   if($ckRtn != 0)
   {
     echo "ERROR: postgresql isn't running, not deleting database $name\n";
     exit(1);
   }
-  $existCmd = "sudo su postgres -c 'psql -l' |grep -q $dropName";
+  $existCmd = "psql -l  fossology -U fossy|grep -q $dropName";
   $lastExist = exec($existCmd, $existkOut, $existRtn);
   if($existRtn == 0)
   {
@@ -176,8 +191,6 @@ if(empty($sysconfig))
 //echo "DB: sysconfig is:$sysconfig\n";
 
 putenv("SYSCONFDIR=$sysconfig");
-$SysConf = bootstrap();
-//echo "DB: Sys Config vars are:\n";print_r($SysConf) . "\n";
 
 $unique = mt_rand();
 $DbName = $dbPrefix . $unique;
