@@ -97,9 +97,17 @@ class showjobs extends FO_Plugin
     $uploadsql = "select upload_filename, upload_desc from upload where upload_pk='$Row[job_upload_fk]'";
     $uploadresult = pg_query($PG_CONN, $uploadsql);
     DBCheckResult($uploadresult, $uploadsql, __FILE__, __LINE__);
-    $uploadRow = pg_fetch_assoc($uploadresult);
-    $upload_filename = $uploadRow['upload_filename'];
-    $upload_desc = $uploadRow['upload_desc'];
+    if (pg_num_rows($uploadresult) == 0)
+    {
+      $upload_filename = "Deleted " . $Row['job_upload_fk'];
+      $upload_desc = '';
+    }
+    else
+    {
+      $uploadRow = pg_fetch_assoc($uploadresult);
+      $upload_filename = $uploadRow['upload_filename'];
+      $upload_desc = $uploadRow['upload_desc'];
+    }
     pg_free_result($uploadresult);
 
     if (empty($Row['jq_pk'])) 
