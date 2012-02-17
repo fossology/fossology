@@ -299,8 +299,15 @@ class showjobs extends FO_Plugin
 
       /* Get Upload record for job */
       $UploadRec = GetSingleRec("upload", "where upload_pk='$upload_pk'");
-      $JobData[$job_pk]["upload"] = $UploadRec;
-
+      if (!empty($UploadRec))
+        $JobData[$job_pk]["upload"] = $UploadRec;
+      else
+      {
+        $UploadRec = array();
+        $UploadRec["upload_filename"] = "Deleted " . $upload_pk;
+        $UploadRec["pfile_fk"]  = "Deleted " . $upload_pk;
+        $JobData[$job_pk]["upload"] = $UploadRec;
+      }
       /* Get Upload record for uploadtree */
       $UploadtreeRec = GetSingleRec("uploadtree", "where upload_fk='$upload_pk' and parent is null");
       $JobData[$job_pk]["uploadtree"] = $UploadtreeRec;
