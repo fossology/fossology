@@ -1900,7 +1900,6 @@
   $Schema["CONSTRAINT"]["jdep_depends_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_depends_jq_fk\" FOREIGN KEY (\"jdep_jq_depends_fk\") REFERENCES \"jobqueue\" (\"jq_pk\") ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["jdep_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_jq_fk\" FOREIGN KEY (\"jdep_jq_fk\") REFERENCES \"jobqueue\" (\"jq_pk\") ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["job_job_folder_fk_fkey"] = "ALTER TABLE \"job\" ADD CONSTRAINT \"job_job_folder_fk_fkey\" FOREIGN KEY (\"job_folder_fk\") REFERENCES \"folder\" (\"folder_pk\");";
-  $Schema["CONSTRAINT"]["job_job_upload_fk_fkey"] = "ALTER TABLE \"job\" ADD CONSTRAINT \"job_job_upload_fk_fkey\" FOREIGN KEY (\"job_upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["jobqueue_job_fk"] = "ALTER TABLE \"jobqueue\" ADD CONSTRAINT \"jobqueue_job_fk\" FOREIGN KEY (\"jq_job_fk\") REFERENCES \"job\" (\"job_pk\") ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["key_key_agent_fk_fkey"] = "ALTER TABLE \"key\" ADD CONSTRAINT \"key_key_agent_fk_fkey\" FOREIGN KEY (\"key_agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
   $Schema["CONSTRAINT"]["licgroup_exist"] = "ALTER TABLE \"licgroup_lics\" ADD CONSTRAINT \"licgroup_exist\" FOREIGN KEY (\"licgroup_fk\") REFERENCES \"licgroup\" (\"licgroup_pk\");";
