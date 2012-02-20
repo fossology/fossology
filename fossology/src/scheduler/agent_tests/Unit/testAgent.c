@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern GTree* meta_agents;
 extern GTree* agents;
+extern GRegex* heart_regex;
 
 extern FILE* log_file;
 
@@ -117,19 +118,24 @@ void test_agent_list_init()
 {
   FO_ASSERT_PTR_NULL(meta_agents);
   FO_ASSERT_PTR_NULL(agents);
+  FO_ASSERT_PTR_NULL(heart_regex);
 
   agent_list_init();
 
   FO_ASSERT_PTR_NOT_NULL(meta_agents);
   FO_ASSERT_PTR_NOT_NULL(agents);
+  FO_ASSERT_PTR_NOT_NULL(heart_regex);
 }
 
 void test_agent_list_clear()
 {
   agent_list_clean();
 
-  FO_ASSERT_PTR_NULL(meta_agents);
-  FO_ASSERT_PTR_NULL(agents);
+  FO_ASSERT_PTR_NOT_NULL(meta_agents);
+  FO_ASSERT_PTR_NOT_NULL(agents);
+  FO_ASSERT_PTR_NOT_NULL(heart_regex);
+  FO_ASSERT_EQUAL(g_tree_nnodes(meta_agents), 0);
+  FO_ASSERT_EQUAL(g_tree_nnodes(agents), 0);
 }
 
 CU_TestInfo tests_agent[] =
