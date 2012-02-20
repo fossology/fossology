@@ -161,7 +161,6 @@ void test_radix_match_local()
   FO_ASSERT_EQUAL(radix_match_local(tree, buf, "hello"), 5);
   FO_ASSERT_EQUAL(radix_match_local(tree, buf, "world "), 0);
   FO_ASSERT_EQUAL(radix_match_local(tree, buf, "help"), 3);
-  FO_ASSERT_TRUE(!strcmp(buf, "hello hellohel"));
 
   radix_destroy(tree);
 }
