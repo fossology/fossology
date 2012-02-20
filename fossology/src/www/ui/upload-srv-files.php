@@ -105,13 +105,20 @@ class upload_srv_files extends FO_Plugin {
     $jobq = NULL;
     $Mode = (1 << 3); // code for "it came from web upload"
     $uploadpk = JobAddUpload($ShortName, $SourceFiles, $Desc, $Mode, $FolderPk);
-    /* Tell wget_agent to actually grab the upload */
-    global $SYSCONFDIR;
-    $Cmd = "$SYSCONFDIR/mods-enabled/wget_agent/agent/wget_agent -k '$uploadpk' -C '$SourceFiles' -c $SYSCONFDIR";
-    system($Cmd, $retval);
-    if ($retval) {
-      $text =_("Failed to insert $SourceFiles into repo.\n");
-      return $text;
+
+    /* Prepare the job: job "wget" */
+    $jobpk = JobAddJob($uploadpk, "wget");
+    if (empty($jobpk) || ($jobpk < 0)) {
+      $text = _("Failed to insert job record");
+      return ($text);
+    }
+
+    $jq_args = "$uploadpk - $SourceFiles";
+
+    $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL, NULL);
+    if (empty($jobqueuepk)) {
+      $text = _("Failed to insert task 'wget_agent' into job queue");
+      return ($text);
     }
 
     /* schedule agents */

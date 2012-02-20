@@ -521,6 +521,46 @@ char *PathCheck(char *DirPath)
   return(NewPath);
 }
 
+/**
+ * \brief suck up the the directory to one tar file or copy the file to the temporary directory
+ *
+ * \param char *Path - directory(file) you want to upload from server 
+ * \param char *TempFile - the tar(reguler) file name
+ * \param struct stat Status - the status of Path
+ *
+ * \return 1 on sucess, 0 on failure
+ */
+int Suckupfs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
+{
+  char CMD[MAXCMD] = {0};
+  int rc_system = 0;
+
+  snprintf(CMD,MAXCMD-1, "mkdir -p '%s' >/dev/null 2>&1", TempFileDir);
+  system(CMD);
+
+  if (S_ISDIR(Status.st_mode)) /** directory? */
+  {
+    memset(CMD, MAXCMD, 0);
+    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' '%s' >/dev/null 2>&1", TempFile, Path);
+    rc_system = system(CMD);
+    if (rc_system != 0)
+    {
+      return 0;
+    }
+  } else if(S_ISREG(Status.st_mode)) /** regular file? */
+  {
+    memset(CMD, MAXCMD, 0);
+    snprintf(CMD,MAXCMD-1, "cp '%s' '%s' >/dev/null 2>&1", Path, TempFile);
+    rc_system = system(CMD);
+    if (rc_system != 0)
+    {
+      return 0;
+    }
+  }
+  else return 0; /** neither a directory nor a regular file */
+
+  return 1;
+}
 
 /**
  * \brief Here are some suggested options
