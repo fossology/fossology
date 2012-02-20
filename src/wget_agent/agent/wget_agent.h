@@ -111,5 +111,7 @@ char *PathCheck (char *DirPath);
  */
 void  Usage (char *Name);
 
+int Suckupfs(char *Path, char *TempFile, char *TempFileDir, struct stat Status);
+
 #endif /* _WGET_AGENT_H */
 

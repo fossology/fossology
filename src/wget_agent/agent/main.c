@@ -206,15 +206,30 @@ int main  (int argc, char *argv[])
         char TempDir[MAXCMD];
         memset(TempDir,'\0',MAXCMD);
         snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
-        if (GetURL(GlobalTempFile,GlobalURL,TempDir) == 0)
+        struct stat Status;
+
+        if (stat(GlobalURL, &Status) == 0)
         {
+          if (!Suckupfs(GlobalURL, GlobalTempFile, TempFileDir, Status))
+          {
+            SafeExit(50);
+          }
           DBLoadGold();
           unlink(GlobalTempFile);
         }
-        else
+        else 
         {
-          LOG_FATAL("upload %ld File retrieval failed: uploadpk=%ld tempfile=%s URL=%s",GlobalUploadKey,GlobalUploadKey,GlobalTempFile,GlobalURL);
-          SafeExit(22);
+          if (GetURL(GlobalTempFile,GlobalURL,TempDir) == 0)
+          {
+            DBLoadGold();
+            unlink(GlobalTempFile);
+          }
+          else
+          {
+            LOG_FATAL("upload %ld File retrieval failed: uploadpk=%ld tempfile=%s URL=%s",
+                GlobalUploadKey,GlobalUploadKey,GlobalTempFile,GlobalURL);
+            SafeExit(22);
+          }
         }
       }
     }
