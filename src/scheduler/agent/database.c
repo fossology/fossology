@@ -327,9 +327,7 @@ gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
 void email_notification(job j)
 {
   PGresult* db_result;
-  int tuples;
-  int i, j_id = j->id;;
-  int col;
+  int j_id = j->id;;
   int upload_id;
   char* val, * finished;
   char sql[1024];
@@ -360,21 +358,6 @@ void email_notification(job j)
     PQ_ERROR(db_result, "unable to check common uploads to job %d", j_id);
     return;
   }
-
-  tuples = PQntuples(db_result);
-  col = PQfnumber(db_result, "jq_endtext");
-  for(i = 0; i < tuples; i++)
-  {
-    val = PQgetvalue(db_result, i, col);
-    if(strcmp(val, "Started") == 0 ||
-       strcmp(val, "Paused")  == 0 ||
-       strcmp(val, "Restart") == 0 )
-    {
-      PQclear(db_result);
-      return;
-    }
-  }
-  PQclear(db_result);
 
   sprintf(sql, jobsql_email, upload_id);
   db_result = PQexec(db_conn, sql);
