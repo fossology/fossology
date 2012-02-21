@@ -123,7 +123,6 @@ class upload_srv_files extends FO_Plugin {
 
     /* schedule agents */
     $Unpack = &$Plugins[plugin_find_id("agent_unpack") ];
-    $jobqueuepk = NULL;
     $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
     AgentCheckBoxDo($uploadpk);
 
