@@ -186,18 +186,6 @@ class upload_srv_files extends FO_Plugin {
         $text1 = _(": Contents under a directory will be recursively included.");
         $V.= "<strong>$text</strong>$text1\n";
         $V.= _("If you specify a regular expression for the filename, then multiple filenames will be selected.\n");
-        $text = _("Files can be placed in alphabetized sub-folders for organization.");
-        $V.= "<p><li>$text\n";
-        $V.= "<br /><input type='radio' name='groupnames' value='0'";
-        if ($GroupNames != '1') {
-          $V.= " checked";
-        }
-        $V.= " />Disable alphabetized sub-folders";
-        $V.= "<br /><input type='radio' name='groupnames' value='1'";
-        if ($GroupNames == '1') {
-          $V.= " checked";
-        }
-        $V.= " />Enable alphabetized sub-folders";
         $text = _("(Optional) Enter a description for this Upload:");
         $V.= "<p><li>$text<br />\n";
         $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc, ENT_QUOTES) . "'/>\n";
