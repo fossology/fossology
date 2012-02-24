@@ -44,7 +44,7 @@ class ui_menu extends FO_Plugin
     menu_insert("Main::Jobs",60);
     menu_insert("Main::Organize",50);
     menu_insert("Main::Help",-1);
-    menu_insert("Main::Help::Documentation",0,NULL,NULL,NULL,"<a href='http://fossology.org/user_documentation'>Documentation</a>");
+    menu_insert("Main::Help::Documentation",0,NULL,NULL,NULL,"<a href='http://www.fossology.org/projects/fossology/wiki/User_Documentation'>Documentation</a>");
 
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
