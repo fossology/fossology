@@ -383,6 +383,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     int Position = GetPosition(TaintedURL);
     if (0 == Position)
     {
+      LOG_FATAL("path %s is not http://, https://, or ftp://", TaintedURL);
       unlink(GlobalTempFile);
       system(DeleteTempDirCmd);
       SafeExit(26);
