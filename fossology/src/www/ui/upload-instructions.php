@@ -83,9 +83,9 @@ class upload_instructions extends FO_Plugin
         $V .= _("If your system is configured to use multiple agent servers, the data area must be\n");
         $V .= _("mounted and accessible to the FOSSology user (fossy) on every agent system.  See\n");
         $text = _("the section");
-        $text1 = _("Configuring the Scheduler");
+        $text1 = _("Configuring the Scheduler in the ");
         $text2 = _("Scheduler documentation");
-        $V .= "$text <em>$text1</em><a href='http://fossology.org/scheduler'>$text2</a>.\n";
+        $V .= "$text <em>$text1</em><a href='http://www.fossology.org/projects/fossology/wiki/Foss-scheduler'>$text2</a>.\n";
         $V .= "</ul>\n";
         if (0)
         {
