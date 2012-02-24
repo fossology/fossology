@@ -13,7 +13,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *********************************************************************/
+*********************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,18 +22,51 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <CUnit/Automated.h>
 
 #include <libfossology.h>
-#include <libfocunit.h>
+#include <testRun.h>
 
-/* init and cleanup functions */
-int init_agent_suite(void);
-int clean_agent_suite(void);
+/* ************************************************************************** */
+/* **** suite initializations *********************************************** */
+/* ************************************************************************** */
 
-/* test case sets */
-extern CU_TestInfo tests_agent[];
+/**
+ * We don't want to actually generate any error messages. To do this, the log
+ * file will be set to /dev/null.
+ *
+ * @return -1 on failure, 0 of success
+ */
+int init_suite(void)
+{
+  if(log_file && fclose(log_file) != 0)
+    return -1;
+  if((log_file = fopen("/dev/null", "w+")) == NULL)
+    return -1;
+  return 0;
+}
+
+/**
+ * Since we changed the log file in the initializations, we need to close it
+ * and set the pointer to NULL so that the logging system can reset it to the
+ * correct value.
+ *
+ * @return -1 of failure, 0 on success
+ */
+int clean_suite(void)
+{
+  if(fclose(log_file) != 0)
+    return -1;
+
+  log_file = NULL;
+  return 0;
+}
+
+/* ************************************************************************** */
+/* *** main and suite decl ************************************************** */
+/* ************************************************************************** */
 
 /* create test suite */
 CU_SuiteInfo suites[] = {
-    {"Testing agent.c:", init_agent_suite, clean_agent_suite, tests_agent},
+    {"Testing agent.c:", init_suite, clean_suite, tests_agent},
+    {"Testing host.c:",  init_suite, clean_suite, tests_host },
     CU_SUITE_INFO_NULL
 };
 

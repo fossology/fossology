@@ -49,6 +49,7 @@ struct host_internal {
 /* **** Contructor Destructor *********************************************** */
 /* ************************************************************************** */
 
+void host_list_init();
 void host_list_clean();
 
 void host_init(char* name, char* address, char* agent_dir, int max);
@@ -67,6 +68,5 @@ host name_host(char* name);
 void for_each_host(void(*callback)(host));
 void print_host_load(GOutputStream* ostr);
 int  num_hosts();
-void host_list_init();
 
 #endif /* HOST_H_INCLUDE */
