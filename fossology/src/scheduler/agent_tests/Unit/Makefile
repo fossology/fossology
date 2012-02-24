@@ -20,7 +20,7 @@ LOCALAGENTDIR=../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR) -lgio-2.0
-CFLAGS_LOCAL= $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lpcre -lcunit $(TESTLIB)
+CFLAGS_LOCAL= $(ALL_CFLAGS) -I. -I$(LOCALAGENTDIR) -lpcre -lcunit $(TESTLIB)
 DEF   = -DLOG_DIR='"$(LOGDIR)"' \
         -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
         -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' \
@@ -35,6 +35,7 @@ COV = libscheduler_cov.a
 FOCUNIT = libfocunit.a
 
 OBJECTS = testAgent.o \
+          testHost.o  \
 
 COVERAGE = scheduler_cov.o \
            agent_cov.o \

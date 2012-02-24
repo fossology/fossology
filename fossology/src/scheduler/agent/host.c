@@ -62,6 +62,17 @@ int print_host_all(char* host_name, host h, GOutputStream* ostr)
 /* ************************************************************************** */
 
 /**
+ * Create the host list. The host list should be created so that it destroys
+ * any hosts when it is cleaned up.
+ */
+void host_list_init()
+{
+  host_list = g_tree_new_full(string_compare, NULL, NULL,
+      (GDestroyNotify)host_destroy);
+  host_queue = NULL;
+}
+
+/**
  * removes all hosts from the host list, leaving a clean copy.
  */
 void host_list_clean()
@@ -69,6 +80,7 @@ void host_list_clean()
   if(host_list != NULL)
   {
     g_tree_destroy(host_list);
+    g_list_free(host_queue);
     host_list_init();
   }
 }
@@ -103,7 +115,7 @@ void host_init(char* name, char* address, char* agent_dir, int max)
 void host_destroy(host h)
 {
   host_queue = g_list_remove(host_queue, h);
-  g_tree_remove(host_list, h);
+  g_tree_steal(host_list, h->name);
   g_free(h->name);
   g_free(h->address);
   g_free(h->agent_dir);
@@ -178,6 +190,7 @@ host get_host(int num)
 
   host_queue = g_list_remove(host_queue, ret);
   host_queue = g_list_append(host_queue, ret);
+
   return ret;
 }
 
@@ -223,14 +236,4 @@ void print_host_load(GOutputStream* ostr)
 int num_hosts()
 {
   return g_tree_nnodes(host_list);
-}
-
-/**
- * Create the host list. The host list should be created so that it destroys
- * any hosts when it is cleaned up.
- */
-void host_list_init()
-{
-  host_list = g_tree_new_full(string_compare, NULL, NULL,
-      (GDestroyNotify)host_destroy);
 }

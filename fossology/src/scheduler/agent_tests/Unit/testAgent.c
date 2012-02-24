@@ -13,14 +13,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *********************************************************************/
+*********************************************************************/
 
 /* include functions to test */
+#include <testRun.h>
 #include <agent.h>
-#include <libfocunit.h>
-
-/* cunit include */
-#include <CUnit/CUnit.h>
 
 /* ************************************************************************** */
 /* **** local declarations ************************************************** */
@@ -30,45 +27,8 @@ extern GTree* meta_agents;
 extern GTree* agents;
 extern GRegex* heart_regex;
 
-extern FILE* log_file;
-
 /* ************************************************************************** */
-/* **** suite initializations *********************************************** */
-/* ************************************************************************** */
-
-/**
- * We don't want to actually generate any error messages. To do this, the log
- * file will be set to /dev/null.
- *
- * @return -1 on failure, 0 of success
- */
-int init_agent_suite(void)
-{
-  if(log_file && fclose(log_file) != 0)
-    return -1;
-  if((log_file = fopen("/dev/null", "w+")) == NULL)
-    return -1;
-  return 0;
-}
-
-/**
- * Since we changed the log file in the initializations, we need to close it
- * and set the pointer to NULL so that the logging system can reset it to the
- * correct value.
- *
- * @return -1 of failure, 0 on success
- */
-int clean_agent_suite(void)
-{
-  if(fclose(log_file) != 0)
-    return -1;
-
-  log_file = NULL;
-  return 0;
-}
-
-/* ************************************************************************** */
-/* **** standard function tests ********************************************* */
+/* **** meta agent function tests ******************************************* */
 /* ************************************************************************** */
 
 void test_meta_agent_init()
@@ -137,6 +97,10 @@ void test_agent_list_clear()
   FO_ASSERT_EQUAL(g_tree_nnodes(meta_agents), 0);
   FO_ASSERT_EQUAL(g_tree_nnodes(agents), 0);
 }
+
+/* ************************************************************************** */
+/* *** suite decl *********************************************************** */
+/* ************************************************************************** */
 
 CU_TestInfo tests_agent[] =
 {
