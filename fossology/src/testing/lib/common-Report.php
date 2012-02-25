@@ -125,6 +125,7 @@ function check4CUnitFail($xmlFile=NULL)
       }
     } // foreach($cuResutList->CUNIT_RUN_SUITE
   } // foreach($sx->CUNIT_RESULT_LISTING
+  echo "cunit failures are:\n";print_r($failures) ."\n";
   if(($fileContents = file_get_contents($xmlFile)) === FALSE)
   {
     throw new Exception("Can not read file $xmlFile");

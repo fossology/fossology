@@ -19,7 +19,7 @@
 
 /**
  * \brief determine where etc/fossology is and create a test rc file with the
- * location.
+ * location.  Export SYSCONDIR path to the environment as well.
  *
  * @version "$Id$"
  * Created on Nov 15, 2011 by Mark Donohoe
@@ -29,6 +29,9 @@
 // second look for a source install
 // third look for a package install
 // give up and error out.
+
+// @todo who uses the rc file?
+
 $sysconf = NULL;
 
 if(!defined('TESTROOT'))
@@ -59,12 +62,20 @@ if($sysconf === FALSE || $sysconf == NULL)
   echo "FATAL! cannot determine where the fossology sysconfigdir is located\n";
   exit(1);
 }
-$RC = fopen("$TESTROOT/fossologyTest.rc", 'w');
+$RC = fopen("fossology.rc", 'w');
 if($RC === FALSE)
 {
-  echo "FATAL! could not open $TESTROOT/fossologyTest.rc for writting\n";
+  echo "FATAL! could not open fossology.rc for writting\n";
   exit(1);
 }
 $many = fwrite($RC, $sysconf);
 fclose($RC);
+
+// put in globals and export to environment.
+echo "DBCRC: sysconf is:$sysconf\n";
+echo "DBCRC: exporting sysconf to env and globals.\n";
+$GLOBALS['SYSCONFDIR'] = $sysconf;
+putenv("SYSCONFDIR={$GLOBALS['SYSCONFDIR']}");
+$_ENV['SYSCONFDIR'] = $GLOBALS['SYSCONFDIR'];
+
 ?>
