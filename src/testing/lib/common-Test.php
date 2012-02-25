@@ -436,6 +436,9 @@ class RunTest
       // @todo figure out how to handle this.  Make clean failures should not
       // cause make to not be done.
     }
+    //echo "ComTest: sysconfdir from globals is:{$GLOBALS['SYSCONFDIR']}\n";
+    $s = getenv('SYSCONFDIR');
+    //echo "DB: sysconfdir from env before make of $this->unitTest is:$s\n";
     $lastMake = exec('make test 2>&1', $this->makeOutput, $makeRtn);
     //echo "DB: Exit status of 'make test' of $unitTest is:$makeRtn\n";
     //debugprint($this->makeOutput, "make output\n");

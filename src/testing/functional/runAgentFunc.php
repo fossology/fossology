@@ -18,20 +18,25 @@
  */
 
 /**
- * \brief debug diff env/path when running with exec
+ * \brief run the agent functional tests based on the inputfile funcTests.ini
+ *
+ * Note: this program relys on a utility call createRC.php found in testing/utils.
+ * That program is run before this to set up SYSCONFDIR.
  *
  * @version "$Id$"
  * Created on Nov. 4, 2011 by Mark Donohoe
  */
 
+
+require_once('../lib/bootstrap.php');
+require_once('../lib/common-Report.php');
+require_once('../lib/common-Test.php');
+
 global $failures;
 
 if(!defined('TESTROOT'))
 {
-  $path = __DIR__;
-  $plenth = strlen($path);
-  // remove /functional from the end.
-  $TESTROOT = substr($path, 0, $plenth-11);
+  $TESTROOT = dirname(getcwd());
   $_ENV['TESTROOT'] = $TESTROOT;
   putenv("TESTROOT=$TESTROOT");
   define('TESTROOT',$TESTROOT);
@@ -51,8 +56,12 @@ if(@chdir($func) === FALSE)
   echo "FATAL!, could not cd to:\n$func\n";
   exit(1);
 }
-require_once('../lib/common-Report.php');
-require_once('../lib/common-Test.php');
+
+$sysConf = array();
+echo "DB: calling bootstrap\n";
+$sysConf = bootstrap();
+putenv("SYSCONFDIR={$GLOBALS['SYSCONFDIR']}");
+$_ENV['SYSCONFDIR'] = $GLOBALS['SYSCONFDIR'];
 
 $modules = array();
 $funcList = array();
@@ -103,12 +112,13 @@ foreach($funcList as $funcTest)
       continue;
     }
   }
+  // why twice?
   $Make = new RunTest($funcTest);
   $runResults = $Make->MakeTest();
   $Make = new RunTest($funcTest);
   $runResults = $Make->MakeTest();
   //debugprint($runResults, "run results for $funcTest\n");
-  printResults($runResults);
+  $Make->printResults($runResults);
 
   if(!processXUnit($funcTest))
   {
