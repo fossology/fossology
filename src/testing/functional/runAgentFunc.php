@@ -58,6 +58,7 @@ if(@chdir($func) === FALSE)
   exit(1);
 }
 
+createRC();
 $sysConf = array();
 echo "DB: calling bootstrap\n";
 $sysConf = bootstrap();
