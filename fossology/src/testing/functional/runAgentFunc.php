@@ -31,6 +31,7 @@
 require_once('../lib/bootstrap.php');
 require_once('../lib/common-Report.php');
 require_once('../lib/common-Test.php');
+require_once('../lib/createRC.php');
 
 global $failures;
 
