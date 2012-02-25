@@ -23,6 +23,9 @@
  *
  * The input is a php ini style file with each name as a section [modname].
  *
+ * Note: this program relys on a utility call createRC.php found in testing/utils.
+ * That program is run before this to set up SYSCONFDIR.
+ *
  * @todo add parameter processing.  Add in -k option to keep xml files.  This
  * could be useful for debugging.
  *
@@ -230,9 +233,13 @@ if(@chdir($unit) === FALSE)
 require_once('../lib/bootstrap.php');
 require_once('../lib/common-Report.php');
 require_once('../lib/common-Test.php');
+require_once('../lib/createRC.php');
 
+$sc = getenv('SYSCONFDIR');
+echo "DBUNIT: sysconf from env is:$sc\n";
 $sysConf = array();
 $sysConf = bootstrap();
+//echo "sysConf after bootstrap is:\n";print_r($sysConf) . "\n";
 // export for other tests to use
 putenv("SYSCONFDIR={$GLOBALS['SYSCONFDIR']}");
 $_ENV['SYSCONFDIR'] = $GLOBALS['SYSCONFDIR'];
