@@ -235,6 +235,7 @@ require_once('../lib/common-Report.php');
 require_once('../lib/common-Test.php');
 require_once('../lib/createRC.php');
 
+createRC();
 $sc = getenv('SYSCONFDIR');
 echo "DBUNIT: sysconf from env is:$sc\n";
 $sysConf = array();
