@@ -1,7 +1,7 @@
 <?php
 
 /*
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -44,6 +44,11 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     $DB_COMMAND  = "../../../testing/db/createTestDB.php";
 
     exec($DB_COMMAND, $dbout, $rc);
+    if ($rc != 0) 
+    {
+      print "Can not create database for this testing sucessfully!\n";
+      exit;
+    }
     preg_match("/(\d+)/", $dbout[0], $matches);
     $test_name = $matches[1];
     $db_conf = $dbout[0];
