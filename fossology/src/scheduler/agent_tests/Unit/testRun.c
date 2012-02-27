@@ -67,10 +67,13 @@ int clean_suite(void)
 CU_SuiteInfo suites[] = {
     {"Testing agent.c:", init_suite, clean_suite, tests_agent},
     {"Testing host.c:",  init_suite, clean_suite, tests_host },
+    {"Testing event.c:", init_suite, clean_suite, tests_event},
     CU_SUITE_INFO_NULL
 };
 
 int main( int argc, char *argv[] )
 {
+  g_thread_init(NULL);
+
   return focunit_main(argc, argv, "scheduler_Tests", suites) ;
 }
