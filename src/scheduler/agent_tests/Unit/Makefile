@@ -36,6 +36,7 @@ FOCUNIT = libfocunit.a
 
 OBJECTS = testAgent.o \
           testHost.o  \
+          testEvent.o \
 
 COVERAGE = scheduler_cov.o \
            agent_cov.o \

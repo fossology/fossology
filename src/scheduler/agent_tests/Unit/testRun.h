@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <libfocunit.h>
 
+#include <glib.h>
+
 /* used to disable logging */
 extern FILE* log_file;
 
@@ -29,3 +31,4 @@ int clean_suite(void);
 /* test case sets */
 extern CU_TestInfo tests_agent[];
 extern CU_TestInfo tests_host[];
+extern CU_TestInfo tests_event[];
