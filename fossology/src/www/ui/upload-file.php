@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@ class upload_file extends FO_Plugin {
   public $Title = TITLE_upload_file;
   public $Version = "1.0";
   public $MenuList = "Upload::From File";
-  //public $Dependency = array("agent_unpack", "showjobs"); // TODO to display, temporarily comment out 
+  public $Dependency = array("agent_unpack", "showjobs"); 
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
   /**
@@ -39,6 +39,7 @@ class upload_file extends FO_Plugin {
   function Upload($Folder, $TempFile, $Desc, $Name) 
   {
     global $MODDIR;
+    global $SysConf;
 
     /* See if the URL looks valid */
     if (empty($Folder)) {
@@ -60,7 +61,8 @@ class upload_file extends FO_Plugin {
     }
     /* Create an upload record. */
     $Mode = (1 << 3); // code for "it came from web upload"
-    $uploadpk = JobAddUpload($ShortName, $originName, $Desc, $Mode, $Folder);
+    $user_pk = $SysConf['auth']['UserId'];
+    $uploadpk = JobAddUpload($user_pk, $ShortName, $originName, $Desc, $Mode, $Folder);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
       return ($text);
@@ -81,14 +83,17 @@ class upload_file extends FO_Plugin {
     $wgetLast = exec($Prog,$wgetOut,$wgetRtn);
     unlink($UploadedFile);
 
+    /* Create Job */
+    $job_pk = JobAddJob($user_pk, $ShortName, $uploadpk);
     global $Plugins;
-    $Unpack = &$Plugins[plugin_find_id("agent_unpack") ];
+    $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest") ];
 
-    $jobqueuepk = NULL;
-    $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
-    AgentCheckBoxDo($uploadpk);
+    $Dependencies = array();
+    $adj2nestplugin->AgentAdd($job_pk, $uploadpk, $ErrorMsg, $Dependencies);
+    AgentCheckBoxDo($job_pk, $uploadpk);
 
-    if($wgetRtn == 0) {
+    if($wgetRtn == 0) 
+    {
       $text = _("The file");
       $text1 = _("has been uploaded. It is");
       $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
@@ -97,8 +102,11 @@ class upload_file extends FO_Plugin {
       print displayMessage($Msg,$keep);
       return (NULL);
     }
-    else {
-      return($wgetOut[0]);
+    else 
+    {
+      $ErrMsg = GetArrayVal(0, $wgetOut);
+      if (empty($ErrMsg)) $ErrMsg = _("File upload failed.  Error:") . $wgetRtn;
+      return($ErrMsg);
     }
     return(NULL);
   } // Upload()
@@ -164,7 +172,8 @@ class upload_file extends FO_Plugin {
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
           $text = _("Select optional analysis");
           $V.= "<li>$text<br />\n";
-          $V.= AgentCheckBoxMake(-1, "agent_unpack");
+          $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+          $V.= AgentCheckBoxMake(-1, $Skip);
         }
         $V.= "</ol>\n";
         $text = _("After you press Upload, please be patient while your file is transferring.");

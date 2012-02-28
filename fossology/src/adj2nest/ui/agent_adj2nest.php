@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,37 +15,39 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+
 /**
- * \file agent_unpack.php
- * \brief the unpack ui, and add unpack job, joqueue
- */
+ * \file agent-adj2nest.php
+ * \brief schedule the adj2nest agent
+ **/
 
-define("TITLE_agent_unpack", _("Schedule an Unpack"));
+define("TITLE_agent_adj2nest", "adj2nest");
 
-class agent_unpack extends FO_Plugin
-{
-  public $Name       = "agent_unpack";
-  public $Title      = TITLE_agent_unpack;
-  // public $MenuList   = "Jobs::Agents::Unpack";
-  public $Version    = "1.0";
+class agent_adj2nest extends FO_Plugin {
+
+  public $Name = "agent_adj2nest";
+  public $Title = TITLE_agent_adj2nest;
+  public $Version = "1.0";
   public $Dependency = array();
-  public $DBaccess   = PLUGIN_DB_UPLOAD;
-  public $AgentName = "ununpack";   // agent.agent_name
-
+  public $DBaccess = PLUGIN_DB_ANALYZE;
+  public $AgentName = "adj2nest";   // agent.agent_name
 
   /**
-   * \brief register additional menus.
-   */
-  function RegisterMenus()
+   * \brief Register additional menus.
+   **/
+  function RegisterMenus() 
   {
     if ($this->State != PLUGIN_STATE_READY) {
-      return(0);
+      return (0);
     } // don't run
-    menu_insert("Agents::" . $this->Title,0,$this->Name);
+
+    /* fake menu item used to identify plugin agents */
+    menu_insert("Agents::" . $this->Title, 0, $this->Name);
   }
 
+
   /**
-   * \brief Check if the upload has already been successfully unpacked.
+   * \brief Check if the upload has results from this agent.
    *
    * \param $upload_pk
    *
@@ -54,14 +56,18 @@ class agent_unpack extends FO_Plugin
    * - 1 = yes, from latest agent version
    * - 2 = yes, from older agent version (does not apply to adj2nest)
    **/
-  function AgentHasResults($upload_pk)
+  function AgentHasResults($upload_pk) 
   {
-    return CheckARS($upload_pk, "unpack", "Archive unpacker", "ununpack_ars");
+    /* see if the latest nomos and bucket agents have scaned this upload for this bucketpool */
+    $uploadtreeRec = GetSingleRec("uploadtree", "where upload_fk='$upload_pk' and lft is not null");
+    if (empty($uploadtreeRec)) return 0;
+  
+    return (1);
   } // AgentHasResults()
 
 
   /**
-   * \brief Queue the unpack and adj2nest agents.
+   * \brief Queue the ars2nest agent.
    *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
    *  - It is already queued
    *  - It has already been run by the latest agent version
@@ -79,9 +85,10 @@ class agent_unpack extends FO_Plugin
    **/
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
   {
+    $Dependencies[] = "agent_unpack";
     return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
   } // AgentAdd()
 
 };
-$NewPlugin = new agent_unpack;
+$NewPlugin = new agent_adj2nest;
 ?>

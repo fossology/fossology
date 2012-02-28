@@ -61,10 +61,12 @@ class ajax_upload_agents extends FO_Plugin
         }
         $Depth=0;
         $agent_list = menu_find("Agents", $depth);
+        $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
         for($ac=0; !empty($agent_list[$ac]->URI); $ac++)
         {
+          if (array_search($agent_list[$ac]->URI, $Skip) !== false) continue;
           $P = &$Plugins[plugin_find_id($agent_list[$ac]->URI)];
-          if ($P->AgentCheck($UploadPk) == 0)
+          if ($P->AgentHasResults($UploadPk) != 1)
           {
             $V .= "<option value='" . $agent_list[$ac]->URI . "'>";
             $V .= htmlentities($agent_list[$ac]->Name);

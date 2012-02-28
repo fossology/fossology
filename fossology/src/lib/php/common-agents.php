@@ -26,8 +26,6 @@
  * Every analysis agent should have a function called "AgentAdd()" that takes
  * an Upload_pk and an optional array of dependent agents ids. \n
  *
- * Every analysis agent should also have a function called "AgentCheck($uploadpk)"
- * that determines if the agent has already been scheduled. \n
  * This function should return: \n
  * 0 = not scheduled \n
  * 1 = scheduled \n
@@ -43,11 +41,12 @@
  * checked as long as the agent is not already scheduled.
  *
  * \param $upload_pk - upload id
- * \param $SkipAgent - agent not generated in the checkbox list
+ * \param $SkipAgents - Array of agent names to omit from the checkboxes
  *
  * \return string containing formatted checkbox list HTML
  */
-function AgentCheckBoxMake($upload_pk,$SkipAgent=NULL) {
+function AgentCheckBoxMake($upload_pk,$SkipAgents=array()) 
+{
 
   global $Plugins;
   global $PG_CONN;
@@ -78,16 +77,24 @@ function AgentCheckBoxMake($upload_pk,$SkipAgent=NULL) {
       if (empty($Agent)) {
         continue;
       }
-      if ($Agent->Name == $SkipAgent) {
-        continue;
-      }
+
+      // ignore agents to skip from list
+      $FoundSkip = false;
+      foreach($SkipAgents as $SkipAgent)
+        if ($Agent->Name == $SkipAgent)  
+        {
+          $FoundSkip = true;
+          break;
+        }
+      if ($FoundSkip) continue;
+ 
       if ($upload_pk != -1) {
-        $rc = $Agent->AgentCheck($upload_pk);
+        $rc = $Agent->AgentHasResults($upload_pk);
       }
       else {
         $rc = 0;
       }
-      if ($rc == 0) {
+      if ($rc != 1) {
         $Name = htmlentities($Agent->Name);
         $Desc = htmlentities($AgentItem->Name);
 
@@ -109,13 +116,14 @@ function AgentCheckBoxMake($upload_pk,$SkipAgent=NULL) {
 } // AgentCheckBoxMake()
 
 /**
- * \brief  Assume someone called AgentCheckBoxMake() and submitted the HTML form. \n
- *         Run AgentAdd() for each of the checked agents. \n
+ * \brief  Assume someone called AgentCheckBoxMake() and submitted the HTML form.
+ *         Run AgentAdd() for each of the checked agents. 
  *         Because input comes from the user, validate that everything is legitimate.
  *
- * \param $upload_pk - upload id
+ * \param $job_pk
+ * \param $upload_pk
  */
-function AgentCheckBoxDo($upload_pk)
+function AgentCheckBoxDo($job_pk, $upload_pk)
 {
   global $Plugins;
   $AgentList = menu_find("Agents",$Depth);
@@ -128,15 +136,11 @@ function AgentCheckBoxDo($upload_pk)
        the Name attribute for agent_license is: Schedule License Analysis
        */
       $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
-      if (empty($Agent)) {
-        continue;
-      }
-      $rc = $Agent->AgentCheck($upload_pk);
+      if (empty($Agent)) continue;
       $Name = htmlentities($Agent->Name);
       $Parm = GetParm("Check_" . $Name,PARM_INTEGER);
-      if (($rc == 0) && ($Parm == 1)) {
-        $Agent->AgentAdd($upload_pk);
-      }
+      $Dependencies = array();
+      if ($Parm == 1) $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
     }
   }
   return($V);
@@ -420,26 +424,19 @@ function userAgents()
 
 
 /**
- * \brief Check if the agent can be scheduled.
- * It can be scheduled if there is no successful run by the latest
- * version of this agent.  
- * It doesn't hurt to schedule an agent that has already run, but
- * this list is used to show a user what hasn't run successfully yet.
+ * \brief Check the ARS table to see if an agent has successfully scanned an upload.
  *
  * \param $upload_pk - the upload will be checked
  * \param $AgentName - Agent name, eg "nomos"
  * \param $AgentDesc - Agent description, eg "license scanner"
  * \param $AgentARSTableName - Agent ars table name, eg "nomos_ars"
  *
- * \todo jobqueue.jq_type should be agent_pk, not text.  As text we don't
- * know what version of the agent was scheduled.
- *
- * \return 
- * 0 = not scheduled, or previously failed \n
- * 1 = scheduled but not completed \n 
- * 2 = scheduled and completed successfully
+ * \returns:
+ * - 0 = no
+ * - 1 = yes, from latest agent version
+ * - 2 = yes, from older agent version (does not apply to adj2nest)
  */
-function CommonAgentCheck($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName)
+function CheckARS($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName)
 {
   global $PG_CONN;
 
@@ -449,27 +446,10 @@ function CommonAgentCheck($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName
   /* get last agent pk with successful results */
   $Last_successful_agent_pk = LatestAgentpk($upload_pk, $AgentARSTableName);
 
-  if (!empty($Latest_agent_pk) and !empty($Last_successful_agent_pk) and ($Latest_agent_pk == $Last_successful_agent_pk)) return 2;
+  if (!empty($Latest_agent_pk) and !empty($Last_successful_agent_pk) and ($Latest_agent_pk == $Last_successful_agent_pk)) return 1;
 
-  /* check if the upload_pk is currently in the job queue being processed 
-   * Note, this isn't a great test because it doesn't take into account
-   * the version of the agent scheduled.
-   */
-  $sql = "SELECT jq_endtext FROM jobqueue, job where job_upload_fk='$upload_pk' 
-          AND job_pk=jq_job_fk AND jq_type='$AgentName'";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) > 0)
-  {
-    $row = pg_fetch_assoc($result);
-    $jq_endtext = $row["jq_endtext"];
-    pg_free_result($result);
-    if (empty($jq_endtext)) return 1;
-    else if ($jq_endtext & 0x1) return 2;
-  }
-  else pg_free_result($result);
-  return (0);
-} // CommonAgentCheck()
+  if (!empty($Latest_agent_pk) and !empty($Last_successful_agent_pk) ) return 2;
 
-
+  return 0;
+} // CheckARS()
 ?>

@@ -25,20 +25,14 @@
  * Scheduled jobs are divided into a specific heirarchy.
  * 
  * "Job"
- * This is the highest level and assigns a name to the type of
- * tasks that need to be performed.  For example, a copyright
- * job would only run the copyright agent.  But an unpack job
- * would run both ununpack and adj2nest agents since they are
- * both needed to complete the unpack task.
- * 
+ * This is the Job container and is saved in a database
+ * job record.  
+ *
  * "JobQueue"
- * Each job may require multiple "JobQueue" tasks.
- * In the above example, copyright, ununpack, and adj2nest
- * are all separate enteries in the jobqueue table.
- * The copyright jobqueue would be under the copyright job.
- * The ununpack and adj2nest are the two jobqueue entries
- * under the unpack job.  "Task" or "JobTask" would probably
- * have been a better name.
+ * There may be several tasks to perform for a job.  
+ * For example, a job may be composed of
+ * an unpack task, an adj2nest task, and a nomos task.
+ * Each job task is specified in a database jobqueue record.
  * 
  * JobQueue tasks may have dependencies upon the completion of
  * other JobQueue tasks.  The jobdepends tables keep those
@@ -46,135 +40,70 @@
  * 
  **/
 
-/**
- * \brief  Set a job priority.
- *
- * \param int $jobpk
- * \param int $priority - Numeric job priority.  May be negative.
- *
- * \return True if priority was updated, else False
- */
-function JobSetPriority($jobpk, $priority) {
-  global $PG_CONN;
-
-  if (empty($jobpk) or empty($priority)) return false;
-
-  $sql = "UPDATE job SET job_priority = '$priority' WHERE job_pk = '$jobpk'";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-  return true;
-} // JobSetPriority()
-
 
 /**
- * \brief Insert a new upload record, and update foldercontents table
+ * \brief Insert a new upload record, and update the foldercontents table.
  *
- * \param string $job_name   Job name
- * \param string $filename   For upload from URL, this is the URL
- *                           For uplaod from file, this is the filename
- *                           For upload from server, this is the file path
- * \param string $desc       Optional user file description.
- * \param int    $UploadMode e.g. 1<<2 = URL, 1<<3 = file upload, 1<<4 = filesystem
- * \param int    $FolderPk   The folder to contain this upload
+ * \param $user_pk
+ * \param $job_name   Job name
+ * \param $filename   For upload from URL, this is the URL.\n
+ *                    For upload from file, this is the filename.\n
+ *                    For upload from server, this is the file path.\n
+ * \param $desc       Optional user file description.
+ * \param $UploadMode 1<<2=URL, 1<<3=upload from server or file
+ * \param $folder_pk   The folder to contain this upload
  *
  * \return upload_pk or null (failure)
  */
-function JobAddUpload($job_name, $filename, $desc, $UploadMode, $FolderPk) 
+function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folder_pk) 
 {
   global $PG_CONN;
-  global $SysConf;
-
-  $UserId = $_SESSION['UserId'];
-  if (empty($UserId)) $UserId = $SysConf['auth']['UserId'];
 
   /* check all required inputs */
-  if (empty($UserId) or empty($job_name) or empty($filename) or 
-      empty($UploadMode) or empty($FolderPk)) return;
+  if (empty($user_pk) or empty($job_name) or empty($filename) or 
+      empty($UploadMode) or empty($folder_pk)) return;
 
-  $job_name = str_replace("'", "''", $job_name);
-  $filename = str_replace("'", "''", $filename);
-  $desc = str_replace("'", "''", $desc);
+  $job_name = pg_escape_string($job_name);
+  $filename = pg_escape_string($filename);
+  $desc = pg_escape_string($desc);
 
   $sql = "INSERT INTO upload
       (upload_desc,upload_filename,user_fk,upload_mode,upload_origin) VALUES
-      ('$desc','$job_name','$UserId','$UploadMode','$filename')";
+      ('$desc','$job_name','$user_pk','$UploadMode','$filename')";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 
   /* get upload_pk of just added upload */
-  $sql = "SELECT currval('upload_upload_pk_seq') as upload_pk FROM upload";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  $uploadpk = $row['upload_pk'];
-  pg_free_result($result);
+  $upload_pk = GetLastSeq("upload_upload_pk_seq", "upload");
 
   /* Add the upload record to the folder */
   /** Mode == 2 means child_id is upload_pk **/
   $sql = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) 
-               VALUES ('$FolderPk',2,'$uploadpk')";
+               VALUES ('$folder_pk',2,'$upload_pk')";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 
-  return ($uploadpk);
+  return ($upload_pk);
 } // JobAddUpload()
-
-/**
- * \brief Find the job_pk given the upload_pk and job_name
- *
- * \param int    $UploadPk (optional)
- * \param string $JobName
- *
- * \return the last job_pk, or -1 if it does not exist.
- ************************************************************/
-function JobFindKey($UploadPk, $JobName) 
-{
-  global $PG_CONN;
-  $JobName = str_replace("'", "''", $JobName);
-
-  if (empty($UploadPk)) {
-    $sql = "SELECT max(job_pk) as job_pk FROM job WHERE job_upload_fk IS NULL AND job_name = '$JobName'";
-  } else {
-    $sql = "SELECT max(job_pk) as job_pk FROM job WHERE job_upload_fk = '$UploadPk' AND job_name = '$JobName'";
-  }
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-  if (pg_num_rows($result) == 0)
-    $job_pk = -1;
-  else
-  {
-    $row = pg_fetch_assoc($result);
-    $job_pk = $row['job_pk'];
-  }
-  pg_free_result($result);
-
-  return($job_pk);
-} // JobFindKey()
 
 
 /**
  * @brief Insert a new job record.
  *
- * @param int $upload_pk (optional)
- * @param string $job_name
- * @param int $priority the job priority, default 0
+ * @param $user_pk
+ * @param $job_name
+ * @param $upload_pk (optional)
+ * @param $priority  (optional default 0)
  *
- * @return int $jobpk the job primary key, or -1 on error
+ * @return int $job_pk the job primary key
  */
-function JobAddJob($upload_pk, $job_name, $priority = 0) 
+function JobAddJob($user_pk, $job_name, $upload_pk=0, $priority=0)
 {
   global $PG_CONN;
-  global $SysConf;
 
-  $job_user_fk = GetArrayVal("UserId", $_SESSION);
-  if (empty($job_user_fk)) $job_user_fk = $SysConf['auth']['UserId'];
-  if (empty($job_user_fk)) return -1;
-
-  $Job_name = str_replace("'", "''", $job_name);
+  $job_name = pg_escape_string($job_name);
   if (empty($upload_pk))
     $upload_pk_val = "null";
   else
@@ -182,14 +111,15 @@ function JobAddJob($upload_pk, $job_name, $priority = 0)
 
   $sql = "INSERT INTO job
     	(job_user_fk,job_queued,job_priority,job_name,job_upload_fk) VALUES
-     	('$job_user_fk',now(),'$priority','$Job_name',$upload_pk_val)";
+     	('$user_pk',now(),'$priority','$job_name',$upload_pk_val)";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 
-  $jobpk = JobFindKey($upload_pk, $job_name);
-  return ($jobpk);
+  $job_pk = GetLastSeq("job_job_pk_seq", "job");
+  return ($job_pk);
 } // JobAddJob()
+
 
 /**
  * @brief Insert a jobqueue + jobdepends records.
@@ -198,28 +128,25 @@ function JobAddJob($upload_pk, $job_name, $priority = 0)
  * @param string $jq_type name of agent (should match the name in agent.conf
  * @param string $jq_args arguments to pass to the agent in the form of
  * $jq_args="folder_pk='$Folder' name='$Name' description='$Desc' ...";
- * @param string $jq_repeat obsolete
  * @param string $jq_runonpfile column name
- * @param array  $Depends lists on or more jobqueue_pk's this job is
- * dependent on.
- * @param int    $Reschedule, default 0, 1 to reschedule.
+ * @param array  $Depends array of jq_pk's this jobqueue is dependent on.
  *
  * @return new jobqueue key (jobqueue.jq_pk), or null on failure
  *
  */
-function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $Depends, $Reschedule = 0) 
+function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends)
 {
   global $PG_CONN;
-  $jq_args = str_replace("'", "''", $jq_args); // protect variables
+  $jq_args = pg_escape_string($jq_args);
 
   /* Make sure all dependencies exist */
   if (is_array($Depends)) 
   {
-    foreach($Depends as $D) 
+    foreach($Depends as $Dependency) 
     {
-      if (empty($D)) continue;
+      if (empty($Dependency)) continue;
 
-      $sql = "SELECT jq_pk FROM jobqueue WHERE jq_pk = '$D'";
+      $sql = "SELECT jq_pk FROM jobqueue WHERE jq_pk = '$Dependency'";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $MissingDep =  (pg_num_rows($result) == 0) ? true : false;
@@ -248,14 +175,8 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $D
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
    
-  /* Find the job that was just added */
-  $sql = "SELECT currval('jobqueue_jq_pk_seq') as jq_pk FROM jobqueue";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
-
-  $jq_pk = $row['jq_pk'];
+  /* Find the jobqueue that was just added */
+  $jq_pk = GetLastSeq("jobqueue_jq_pk_seq", "jobqueue");
   if (empty($jq_pk))
   {
     $sql = "ROLLBACK";
@@ -268,13 +189,13 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $D
   /* Add dependencies */
   if (is_array($Depends)) 
   {
-    foreach($Depends as $D) 
+    foreach($Depends as $Dependency) 
     {
-      if (empty($D)) continue;
+      if (empty($Dependency)) continue;
 
       $sql = "INSERT INTO jobdepends
         		(jdep_jq_fk,jdep_jq_depends_fk) VALUES
-        		('$jq_pk','$D')";
+        		('$jq_pk','$Dependency')";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
@@ -287,148 +208,8 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $D
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 
-  if ($Reschedule) 
-  {
-    JobQueueChangeStatus($jq_pk, "reset");
-  }
   return $jq_pk;
 } // JobQueueAdd()
-
-
-/**
- * @brief Change Job Status
- *
- * @param int    $job_pk (job.job_pk)
- * @param string $Status
- *   - reset
- *   - fail
- *   - succeed
- *   - delete
- * @return 0 on success, non-0 on failure.
- ************************************************************/
-function JobChangeStatus($jobpk, $Status) 
-{
-  global $PG_CONN;
-
-  if (empty($jobpk) || ($jobpk < 0)) return (-1);
-
-  switch ($Status) 
-  {
-    case "reset":
-      $sql = "UPDATE jobqueue
-      	SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0, jq_endtext=null
-      		WHERE jq_job_fk = '$jobpk'";
-      break;
-    case "fail":
-      $sql = "UPDATE jobqueue
-      		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2
-      		WHERE jq_job_fk = '$jobpk'
-      		AND jq_starttime IS NULL;
-      		UPDATE jobqueue
-      		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2
-      		WHERE jq_job_fk = '$jobpk' AND jq_starttime IS NOT NULL
-      		AND jq_endtime IS NULL;";
-      break;
-    case "succeed":
-      $sql = "UPDATE jobqueue
-      		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1
-      		WHERE jq_job_fk = '$jobpk'
-      		AND jq_starttime IS NULL;
-      		UPDATE jobqueue
-      		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1
-      		WHERE jq_job_fk = '$jobpk'
-      		AND jq_starttime IS NOT NULL
-      		AND jq_endtime IS NULL;";
-      break;
-    case "delete":
-      /* Blow away the jobqueue items and the job */
-      $sql = "DELETE FROM jobdepends WHERE
-      		jdep_jq_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$jobpk')
-      		OR
-      		jdep_jq_depends_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$jobpk');
-      		DELETE FROM jobqueue WHERE jq_job_fk = '$jobpk';
-      		DELETE FROM job WHERE job_pk = '$jobpk'; ";
-      break;
-    default:
-      return (-1);
-  }
-
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-  return (0);
-} // JobChangeStatus()
-
-
-/**
- * @brief Change the jobqueue item status.
- *
- * @param int $jqpk the job Queue primary key
- * @param string $Status the new status
- *  - reset
- *  - reset_completed
- *  - fail
- *  - succeed
- *
- *  There is no "Delete" for a jobqueue item.
- *  "Why not?"
- *  The jobdepends table creates complexity.  If a deleted job was
- *  a dependency, then all intermediate dependencies need to be
- *  deleted or rewritten.  In general, jobqueue dependencies are
- *  there for a reason.  Deleting a middle step destroys the flow
- *  and will likely lead to a failed analysis.
- *  If you need to delete, use delete job.
- *
- * @return 0 on success, non-0 on failure.
- */
-function JobQueueChangeStatus($jqpk, $Status) 
-{
-  global $PG_CONN;
-
-  if (empty($jqpk) || ($jqpk < 0)) return (-1);
- 
-  switch ($Status) 
-  {
-    case "reset":
-      $sql = "UPDATE jobqueue
-      		SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
-      		WHERE jq_pk = '$jqpk'";
-      break;
-    case "reset_completed": /* reset the job if it is done */
-      $sql = "UPDATE jobqueue
-      		SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
-      		WHERE jq_pk = '$jqpk' AND jq_endtime IS NOT NULL";
-      break;
-    case "fail":
-      $sql = "UPDATE jobqueue
-      		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2
-      		WHERE jq_pk = '$jqpk' AND jq_starttime IS NULL;
-      		UPDATE jobqueue
-      		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2
-      		WHERE jq_pk = '$jqpk'
-      		AND jq_starttime IS NOT NULL
-      		AND jq_endtime IS NULL;";
-      break;
-    case "succeed":
-      $sql = "UPDATE jobqueue
-      		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1
-      		WHERE jq_pk = '$jqpk'
-      		AND jq_starttime IS NULL;
-      		UPDATE jobqueue
-      		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1
-      		WHERE jq_pk = '$jqpk'
-      		AND jq_starttime IS NOT NULL
-      		AND jq_endtime IS NULL;";
-      break;
-    default:
-      return (-1);
-  }
-  
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-  return (0);
-} // JobQueueChangeStatus()
 
 
 /**
@@ -458,20 +239,22 @@ function GetJobList($status)
 }
 
 /**
- * \brief scheduling agent tasks on upload ids
+ * \brief Schedule agent tasks on upload ids
  *
  * \param $upload_pk_list -  upload ids, The string can be a comma-separated list of upload ids.
  * Or, use 'ALL' to specify all upload ids.
- * \param $agent_list - agent list, specify agent to schedule (default is everything from fossjobs -a)
- * The string can be a comma-separated list of agent tasks, 
+ * \param $agent_list - array of agent plugin objects to schedule.
  * \param $Verbose - verbose output, not empty: output, empty: does not output
- * \param $Priority - priority for the jobs (higher = more important, default:0)
  */
-function QueueUploadsOnAgents($upload_pk_list, &$agent_list, $Verbose, $Priority=0)
+function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
 {
   global $Plugins;
   global $PG_CONN;
- 
+  global $SysConf;
+
+  /* Get the users.default_bucketpool_fk */
+  $user_pk = $SysConf['auth']['UserId'];
+
   if (!empty($upload_pk_list)) 
   {
     $reg_agents = array();
@@ -480,7 +263,22 @@ function QueueUploadsOnAgents($upload_pk_list, &$agent_list, $Verbose, $Priority
     $agent_count = count($agent_list);
     foreach(explode(",", $upload_pk_list) as $upload_pk) 
     {
+echo "bobg processing $upload_pk\n";
       if (empty($upload_pk))  continue;
+
+      // Create a job for the upload
+      // Use the upload name for the job name
+      $where = "where upload_pk='$upload_pk'";
+      $UploadRec = GetSingleRec("upload", $where);
+      if (empty($UploadRec))
+      {
+        echo "ERROR: unknown upload_pk: $upload_pk\n";
+        continue;
+      }
+
+      $job_name = $UploadRec["upload_filename"];
+      $job_pk = JobAddJob($user_pk, $job_name, $upload_pk);
+echo "bobg new job_pk: $job_pk\n";
 
       // don't exit on AgentAdd failure, or all the agents requested will
       // not get scheduled.
@@ -490,12 +288,13 @@ function QueueUploadsOnAgents($upload_pk_list, &$agent_list, $Verbose, $Priority
         if (!empty($agentname)) 
         {
           $Agent = & $Plugins[plugin_find_id($agentname) ];
-          $rc = $Agent->AgentCheck($upload_pk);
-          if (0 == $rc) $results = $Agent->AgentAdd($upload_pk, NULL, $Priority);
-          if (!empty($results)) 
+          $Dependencies = "";
+          $agent_jq_pk = $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
+echo "bobg added agent $agentname\n";
+          if ($agent_jq_pk <= 0) 
           {
             echo "ERROR: Scheduling failed for Agent $agentname\n";
-            echo "ERROR message: $results\n";
+            echo "ERROR message: $ErrorMsg\n";
           } 
           else if ($Verbose) 
           {
@@ -510,5 +309,101 @@ function QueueUploadsOnAgents($upload_pk_list, &$agent_list, $Verbose, $Priority
       } /* for $ac */
     } /* for each $upload_pk */
   } // if $upload_pk is defined
-}
+} /* QueueUploadsOnAgents() */
+
+/**
+ * \brief Check if an agent is already scheduled in a job.
+ * This is used to make sure dependencies, like unpack
+ * don't get scheduled multiple times within a single job.
+ *
+ * \param $job_pk    - the job to be checked
+ * \param $AgentName - the agent name (from agent.agent_name)
+ *
+ * \return 
+ * jq_pk of scheduled jobqueue
+ * or 0 = not scheduled
+ */
+function IsAlreadyScheduled($job_pk, $AgentName)
+{
+  global $PG_CONN;
+
+  $jq_pk = 0;
+  /* check if the upload_pk is currently in the job queue being processed */
+  $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk AND jq_type='$AgentName' and job_pk=$job_pk";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) > 0)
+  {
+    $row = pg_fetch_assoc($result);
+    $jq_pk = $row["jq_pk"];
+  }
+  pg_free_result($result);
+  return $jq_pk;
+} // IsAlreadyScheduled()
+
+
+/**
+ * \brief Queue an agent.  This is a simple version of AgentAdd() that can be
+ *  used by multiple plugins that only use upload_pk as jqargs.
+ *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
+ *  - It is already queued
+ *  - It has already been run by the latest agent version
+ *
+ * \param $plugin caller plugin object
+ * \param $job_pk
+ * \param $upload_pk
+ * \param $ErrorMsg - error message on failure
+ * \param $Dependencies - array of named dependencies. Each array element is the plugin name.
+ *         For example,  array(agent_adj2nest, agent_pkgagent).  
+ *         Typically, this will just be array(agent_adj2nest).
+ *
+ * \returns
+ * - jq_pk Successfully queued
+ * -   0   Not queued, latest version of agent has previously run successfully
+ * -  -1   Not queued, error, error string in $ErrorMsg
+ **/
+function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
+{
+    global $PG_CONN;
+    global $Plugins;
+    $Deps = array();
+    $DependsEmpty = array();
+
+    /* check if the latest agent has already been run */
+    if ($plugin->AgentHasResults($upload_pk) == 1) return 0;
+
+    /* if it is already scheduled, then return success */
+    if (($jq_pk = IsAlreadyScheduled($job_pk, $plugin->AgentName)) != 0 ) return $jq_pk;
+
+    /* queue up dependencies */
+    foreach ($Dependencies as $PluginName)
+    {
+      $DepPlugin = &$Plugins[plugin_find_id($PluginName)];
+      if (!$DepPlugin)
+      {
+        $ErrorMsg = "Invalid plugin name: $PluginName, (CommonAgentAdd())";
+        return -1;
+      }
+      if (($Deps[] = $DepPlugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $DependsEmpty)) == -1)
+        return -1;
+    }
+
+    /* schedule AgentName */
+    $jqargs = $upload_pk;
+    $jq_pk = JobQueueAdd($job_pk, $plugin->AgentName, $jqargs, "", $Deps);
+    if (empty($jq_pk)){
+      $ErrorMsg = _("Failed to insert agent $plugin->AgentName into job queue. jqargs: $jqargs");
+      return (-1);
+    }
+
+    /* Tell the scheduler to check the queue. */
+    $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
+    if (!$success)
+    {
+      $ErrorMsg = $error_msg . "\n" . $output;
+      return -1;
+    }
+
+    return ($jq_pk);
+} // CommonAgentAdd()
 ?>

@@ -499,7 +499,8 @@ class user_edit_any extends FO_Plugin {
         $V.= "</tr>\n";
         $text = _("Default Agents: Select the agent(s) to automatically run when uploading data. These selections can be changed on the upload screens.");
         $V .= "$Style<th>$text\n</th><td> ";
-        $V.= AgentCheckBoxMake(-1, "agent_unpack");
+        $V.= AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest"));
+
         $V .= "</td>\n";
         $V .= "</tr>\n";
         $Val = GetParm('default_bucketpool_fk', PARM_INTEGER);

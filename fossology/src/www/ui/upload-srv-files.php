@@ -45,6 +45,8 @@ class upload_srv_files extends FO_Plugin {
    */
   function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name) {
     global $Plugins;
+    global $SysConf;
+
     $FolderPath = FolderGetName($FolderPk);
     // $FolderPath = str_replace('\\','\\\\',$FolderPath);
     // $FolderPath = str_replace('"','\"',$FolderPath);
@@ -104,10 +106,11 @@ class upload_srv_files extends FO_Plugin {
     // Create an upload record.
     $jobq = NULL;
     $Mode = (1 << 3); // code for "it came from web upload"
-    $uploadpk = JobAddUpload($ShortName, $SourceFiles, $Desc, $Mode, $FolderPk);
+    $user_pk = $SysConf['auth']['UserId'];
+    $uploadpk = JobAddUpload($user_pk, $ShortName, $SourceFiles, $Desc, $Mode, $FolderPk);
 
     /* Prepare the job: job "wget" */
-    $jobpk = JobAddJob($uploadpk, "wget");
+    $jobpk = JobAddJob($user_pk, "wget", $uploadpk);
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to insert job record");
       return ($text);
@@ -115,16 +118,22 @@ class upload_srv_files extends FO_Plugin {
 
     $jq_args = "$uploadpk - $SourceFiles";
 
-    $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL, NULL);
+    $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL);
     if (empty($jobqueuepk)) {
-      $text = _("Failed to insert task 'wget_agent' into job queue");
+      $text = _("Failed to insert task 'wget' into job queue");
       return ($text);
     }
 
     /* schedule agents */
-    $Unpack = &$Plugins[plugin_find_id("agent_unpack") ];
-    $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
-    AgentCheckBoxDo($uploadpk);
+    $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
+    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $uploadpk, $ErrorMsg, array("wget_agent"));
+    if ($ununpack_jq_pk < 0) return $ErrorMsg;
+    
+    $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest") ];
+    $adj2nest_jq_pk = $adj2nestplugin->AgentAdd($jobpk, $uploadpk, $ErrorMsg, array());
+    if ($adj2nest_jq_pk < 0) return $ErrorMsg;
+
+    AgentCheckBoxDo($jobpk, $uploadpk);
 
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
     $msg = "The upload for $SourceFiles has been scheduled. ";
@@ -198,7 +207,8 @@ class upload_srv_files extends FO_Plugin {
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
           $text = _("Select optional analysis");
           $V.= "<li>$text<br />\n";
-          $V.= AgentCheckBoxMake(-1, "agent_unpack");
+          $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+          $V.= AgentCheckBoxMake(-1, $Skip);
         }
         $V.= "</ol>\n";
         $text = _("Upload");

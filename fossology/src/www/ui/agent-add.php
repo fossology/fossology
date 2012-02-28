@@ -42,13 +42,14 @@ class agent_add extends FO_Plugin
   {
     global $Plugins;
     global $PG_CONN;
+    global $SysConf;
 
     $rc="";
     $Alist = array();
 
     /* Make sure the uploadpk is valid */
     if (!$uploadpk) return "agent-add.php AgentsAdd(): No upload_pk specified";
-    $sql = "SELECT upload_pk FROM upload WHERE upload_pk = '$uploadpk';";
+    $sql = "SELECT upload_pk, upload_filename FROM upload WHERE upload_pk = '$uploadpk';";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1)
@@ -56,6 +57,13 @@ class agent_add extends FO_Plugin
       $ErrMsg = __FILE__ . ":" . __LINE__ . " " . _("Upload") . " " . $uploadpk . " " .  _("not found");
       return($ErrMsg);
     }
+    $UploadRow = pg_fetch_assoc($result);
+    $ShortName = $UploadRow['upload_filename'];
+    pg_free_result($result);
+
+    /* Create Job */
+    $user_pk = $SysConf['auth']['UserId'];
+    $job_pk = JobAddJob($user_pk, $ShortName, $uploadpk);
 
     /* Validate the agent list and add agents as needed. */
     /** Don't worry about order or duplicates -- it will do the right thing. **/
@@ -76,8 +84,10 @@ class agent_add extends FO_Plugin
       if ($Found >= 0)
       {
         //print "Adding to " . $agentlist[$Found] . "<br>\n";
+        $Dependencies = array();
         $P = &$Plugins[plugin_find_id($agentlist[$Found])];
-        $rc .= $P->AgentAdd($uploadpk);
+        $rv = $P->AgentAdd($job_pk, $uploadpk, $ErrorMsg, $Dependencies);
+        if ($rv == -1) $rc .= $ErrorMsg;
       }
       else
       {

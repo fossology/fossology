@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -43,7 +43,10 @@ class admin_folder_delete extends FO_Plugin {
    * \param $folderpk - the folder_pk to remove
    * \return NULL on success, string on failure.
    */
-  function Delete($folderpk, $Depends = NULL) {
+  function Delete($folderpk, $Depends = NULL) 
+  {
+    global $SysConf;
+
     /* Can't remove top folder */
     if ($folderpk == FolderGetTop()) {
       $text = _("Can Not Delete Root Folder");
@@ -52,14 +55,15 @@ class admin_folder_delete extends FO_Plugin {
     /* Get the folder's name */
     $FolderName = FolderGetName($folderpk);
     /* Prepare the job: job "Delete" */
-    $jobpk = JobAddJob(NULL, "Delete Folder: $FolderName");
+    $user_pk = $SysConf['auth']['UserId'];
+    $jobpk = JobAddJob($user_pk, "Delete Folder: $FolderName");
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to create job record");
       return ($text);
     }
     /* Add job: job "Delete" has jobqueue item "delagent" */
     $jqargs = "DELETE FOLDER $folderpk";
-    $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, "no", NULL, NULL);
+    $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, NULL, NULL);
     if (empty($jobqueuepk)) {
       $text = _("Failed to place delete in job queue");
       return ($text);

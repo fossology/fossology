@@ -34,74 +34,85 @@ class upload_url extends FO_Plugin {
    * \brief Process the upload request.
    * Returns NULL on success, string on failure.
    */
-  function Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level) {
+  function Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level) 
+  {
+    global $SysConf;
+
     /* See if the URL looks valid */
-    if (empty($Folder)) {
+    if (empty($Folder)) 
+    {
       $text = _("Invalid folder");
       return ($text);
     }
-    if (empty($GetURL)) {
+    if (empty($GetURL)) 
+    {
       $text = _("Invalid URL");
       return ($text);
     }
-    if (preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $GetURL) != 1) {
+    if (preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $GetURL) != 1) 
+    {
       $text = _("Invalid URL");
       return ("$text: " . htmlentities($GetURL));
     }
-    if (preg_match("@[[:space:]]@", $GetURL) != 0) {
+    if (preg_match("@[[:space:]]@", $GetURL) != 0) 
+    {
       $text = _("Invalid URL (no spaces permitted)");
       return ("$text: " . htmlentities($GetURL));
     }
-    if (empty($Name)) {
-      $Name = basename($GetURL);
-    }
+    if (empty($Name)) $Name = basename($GetURL);
     $ShortName = basename($Name);
-    if (empty($ShortName)) {
-      $ShortName = $Name;
-    }
+    if (empty($ShortName))  $ShortName = $Name;
+
     /* Create an upload record. */
     $Mode = (1 << 2); // code for "it came from wget"
-    $uploadpk = JobAddUpload($ShortName, $GetURL, $Desc, $Mode, $Folder);
+    $user_pk = $SysConf['auth']['UserId'];
+    $uploadpk = JobAddUpload($user_pk, $ShortName, $GetURL, $Desc, $Mode, $Folder);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
       return ($text);
     }
-    /* Prepare the job: job "wget" */
-    $jobpk = JobAddJob($uploadpk, "wget");
-    if (empty($jobpk) || ($jobpk < 0)) {
-      $text = _("Failed to insert job record");
-      return ($text);
-    }
+
     /* Set default values */
     if (empty($Level) && !is_numeric($Level) || $Level < 0)
     {
       $Level = 1;
     }
-    /* Prepare the job: job "wget" has jobqueue item "wget" */
+
     /* first trim, then get rid of whitespaces before and after each comma letter */
     $Accept = preg_replace('/\s*,\s*/', ',', trim($Accept));
     $Reject = preg_replace('/\s*,\s*/', ',', trim($Reject));
+
+    /* Create the job: job "wget" */
+    $jobpk = JobAddJob($user_pk, "wget", $uploadpk);
+    if (empty($jobpk) || ($jobpk < 0)) {
+      $text = _("Failed to insert job record");
+      return ($text);
+    }
 
     $jq_args = "$uploadpk - $GetURL -l $Level ";
     if (!empty($Accept)) {
       $jq_args .= "-A $Accept ";
     }
-    if (!empty($Reject)) {
+    if (!empty($Reject)) 
+    {
       // reject the files index.html*
       $jq_args .= "-R $Reject,index.html* ";
-    } else // reject the files index.html*
+    } 
+    else // reject the files index.html*
     {
       $jq_args .= "-R index.html* ";
     }
-    $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL, NULL);
+
+    $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, NULL, NULL);
     if (empty($jobqueuepk)) {
       $text = _("Failed to insert task 'wget_agent' into job queue");
       return ($text);
     }
     global $Plugins;
-    $Unpack = & $Plugins[plugin_find_id("agent_unpack") ];
-    $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
-    AgentCheckBoxDo($uploadpk);
+    $adj2nestplugin = & $Plugins[plugin_find_id("agent_unpack") ];
+    $Dependencies = array("wget_agent");
+    $adj2nestplugin->AgentAdd($jobpk, $uploadpk, $ErrorMsg, $Dependencies);
+    AgentCheckBoxDo($jobpk, $uploadpk);
 
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
     $text = _("The upload");
@@ -203,7 +214,9 @@ class upload_url extends FO_Plugin {
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
           $text = _("Select optional analysis");
           $V.= "<li>$text<br />\n";
-          $V.= AgentCheckBoxMake(-1, "agent_unpack");
+          $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+          $V.= AgentCheckBoxMake(-1, $Skip);
+
         }
         $V.= "</ol>\n";
         $text = _("Upload");

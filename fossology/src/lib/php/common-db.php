@@ -206,4 +206,27 @@ function DB_ColExists($tableName, $colName)
   return($count);
 } /* DB_ColExists()  */
 
+
+/**
+ * \brief Get last sequence number.
+ *        This is typically used to get the primary key of a newly inserted record.
+ *        This must be called immediately after the insert.
+ *
+ * \param $seqname Sequence Name of key just added
+ * \param $tablename table containing $seqname
+ *
+ * \return current sequence number (i.e. the primary key of the rec just added)
+**/
+function GetLastSeq($seqname, $tablename)
+{
+  global $PG_CONN;
+
+  $sql = "SELECT currval('$seqname') as mykey FROM $tablename";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  $mykey = $row["mykey"];
+  pg_free_result($result);
+  return($mykey);
+} /* GetLastSeq()  */
 ?>

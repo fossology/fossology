@@ -18,7 +18,7 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-MOD_NAME=wget_agent
+MOD_NAME=adj2nest
 MOD_SUBDIR=ui
 
 all:
