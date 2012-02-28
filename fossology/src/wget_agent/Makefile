@@ -18,7 +18,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = agent
+DIRS = agent ui 
 TESTDIR = agent_tests
 MOD_NAME=wget_agent
 
