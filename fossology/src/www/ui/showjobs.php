@@ -28,7 +28,7 @@ class showjobs extends FO_Plugin
   var $Dependency = array("browse");
   var $DBaccess   = PLUGIN_DB_UPLOAD;
   var $MaxUploadsPerPage = 10;  /* max number of uploads to display on a page */
-  var $nhours = 168;  /* 168=24*7 What is considered a recent number of hours for "My Recent Jobs" */
+  var $nhours = 336;  /* 336=24*14 What is considered a recent number of hours for "My Recent Jobs" */
 
   var $Colors=array(
 	"Queued" => "#FFFFCC",	// "white-ish",
@@ -47,17 +47,6 @@ class showjobs extends FO_Plugin
     menu_insert("Main::Jobs::My Recent Jobs",$this->MenuOrder -1,$this->Name, $this->MenuTarget);
   } // RegisterMenus()
 
-  /**
-   * @brief Display color legend
-   * @return Color legend in a string.
-   **/
-  function DrawLegendColors()
-  {
-    $V = "<table border=1 padding=0><tr>\n";
-    foreach($this->Colors as $Key => $Val) $V .= "  <td bgcolor='$Val'>$Key</td>\n";
-    $V .= "</tr></table>\n";
-    return($V);
-  } // DrawLegendColors()
 
   /**
    * @brief Returns geeky scan details about the jobqueue item
@@ -227,13 +216,13 @@ class showjobs extends FO_Plugin
       pg_free_result($result);
     }
     return $JobArray;
-  }
+  }  /* Uploads2Jobs() */
 
 
   /**
-   * @brief Find all of my jobs submitted within the last n days.
+   * @brief Find all of my jobs submitted within the last n hours.
    *
-   * @param $nhours Number of days in job report
+   * @param $nhours Number of hours that the job report spans
    *
    * @return array of job_pk's 
    **/
@@ -250,7 +239,7 @@ class showjobs extends FO_Plugin
     pg_free_result($result);
 
     return $JobArray;
-  }
+  }  /* MyJobs() */
 
 
   /**
@@ -373,7 +362,7 @@ class showjobs extends FO_Plugin
     $UriFull = $Uri . Traceback_parm_keep(array("upload"));
     $uploadStyle = "style='font:bold 10pt verdana, arial, helvetica; background:gold; color:white;'";
     $jobStyle = "style='font:bold 8pt verdana, arial, helvetica; background:lavender; color:black;'";
-    $prevpfile = "";
+    $prevupload_pk = "";
 
     $OutBuf .= "<table class='text' border=1 width='100%' name='jobtable'>\n";
     $FirstJob = $Page * $this->MaxUploadsPerPage;
@@ -386,11 +375,11 @@ class showjobs extends FO_Plugin
       /* Upload  */
       $UploadName = $Job["upload"]["upload_filename"];
       $UploadDesc = $Job["upload"]["upload_desc"];
-      $pfile_pk = $Job["upload"]["pfile_fk"];
+      $upload_pk = $Job["upload"]["upload_pk"];
       /** the column pfile_fk of the record in the table(upload) is NULL when this record is inserted */
-      if ((!empty($pfile_pk) && $prevpfile != $pfile_pk) || (empty($pfile_pk) && 0 == $single_browse))
+      if ((!empty($upload_pk) && $prevupload_pk != $upload_pk) || (empty($upload_pk) && 0 == $single_browse))
       {
-        $prevpfile = $pfile_pk;
+        $prevupload_pk = $upload_pk;
         $JobNumber++;
 
         /* Only display the jobs for this page */
@@ -506,6 +495,7 @@ class showjobs extends FO_Plugin
     return($OutBuf);
   } // Show()
 
+
   /**
    * @brief Are there any unfinished jobqueues in this job?
    * @param $Job
@@ -518,7 +508,7 @@ class showjobs extends FO_Plugin
       if ($jobqueueRec['jq_end_bits'] == 0) return true;
     } 
     return false;
-  }
+  }  /* isUnfinishedJob()  */
 
   
   /**
@@ -531,7 +521,8 @@ class showjobs extends FO_Plugin
   {
     $jobqueueStyle = "style='font:normal 8pt verdana, arial, helvetica; background:$color; color:black;'";
     return $jobqueueStyle;
-  }
+  }  /* jobqueueStyle() */
+
 
   /**
    * @brief Get the status of a jobqueue item
@@ -569,7 +560,7 @@ class showjobs extends FO_Plugin
     return $status;
 
     /* The job is active, so ask the scheduler for the status */
-  }
+  }  /* jobqueueStatus() */
 
 
   /**
@@ -600,7 +591,7 @@ class showjobs extends FO_Plugin
       $Color=$this->Colors['Finished'];
     }
     return $Color;
-  }
+  }  /* GetColor()  */
 
   /***********************************************************
    Output(): This function returns the job queue status.
