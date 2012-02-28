@@ -373,9 +373,9 @@ class showjobs extends FO_Plugin
     foreach ($JobData as $job_pk => $Job)
     {
       /* Upload  */
-      $UploadName = $Job["upload"]["upload_filename"];
-      $UploadDesc = $Job["upload"]["upload_desc"];
-      $upload_pk = $Job["upload"]["upload_pk"];
+      $UploadName = GetArrayVal("upload_filename", $Job["upload"]);
+      $UploadDesc = GetArrayVal("upload_desc", $Job["upload"]);
+      $upload_pk = GetArrayVal("upload_pk", $Job["upload"]);
       /** the column pfile_fk of the record in the table(upload) is NULL when this record is inserted */
       if ((!empty($upload_pk) && $prevupload_pk != $upload_pk) || (empty($upload_pk) && 0 == $single_browse))
       {
