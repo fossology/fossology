@@ -51,16 +51,20 @@ class admin_upload_delete extends FO_Plugin {
    *
    * \return NULL on success, string on failure.
    */
-  function Delete($uploadpk, $Depends = NULL) {
+  function Delete($uploadpk, $Depends = NULL) 
+  {
+    global $SysConf;
+
     /* Prepare the job: job "Delete" */
-    $jobpk = JobAddJob($uploadpk, "Delete");
+    $user_pk = $SysConf['auth']['UserId'];
+    $jobpk = JobAddJob($user_pk, "Delete", $uploadpk);
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to create job record");
       return ($text);
     }
     /* Add job: job "Delete" has jobqueue item "delagent" */
     $jqargs = "DELETE UPLOAD $uploadpk";
-    $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, "no", NULL, NULL);
+    $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, NULL, NULL);
     if (empty($jobqueuepk)) {
       $text = _("Failed to place delete in job queue");
       return ($text);

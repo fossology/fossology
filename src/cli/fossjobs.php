@@ -61,7 +61,6 @@ function list_agents() {
  */
 require_once("$MODDIR/lib/php/common-cli.php");
 
-cli_Init();
 /**********************************************************************
  **********************************************************************
 INITIALIZE THIS INTERFACE
@@ -122,10 +121,12 @@ if (file_exists($user_passwd_file)) {
     $passwd = $user_passwd_array[1];
 }
 /* check if the user name/passwd is valid */
+/*
 if (empty($user)) {
   $uid_arr = posix_getpwuid(posix_getuid());
   $user = $uid_arr['name'];
 }
+*/
 if (empty($passwd)) {
   echo "The user is: $user, please enter the password:\n";
   system('stty -echo');
@@ -154,6 +155,9 @@ if (!empty($user) and !empty($passwd)) {
   }
 }
 
+/* init plugins */
+cli_Init();
+
 $Verbose = 0;
 if (array_key_exists("v", $options)) {
   $Verbose = 1;
@@ -162,6 +166,7 @@ $Priority = 0;
 if (array_key_exists("P", $options)) {
   $Priority = intval($options["P"]);
 }
+
 // Get the list of registered agents
 $agent_list = list_agents();
 if (empty($agent_list)) {
@@ -169,21 +174,31 @@ if (empty($agent_list)) {
   echo "Are Plugins configured?\n";
   exit(1);
 }
+
+/* Hide agents  that aren't related to data scans */
+$Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+for($ac=0; !empty($agent_list[$ac]->URI); $ac++)
+  if (array_search($agent_list[$ac]->URI, $Skip) !== false) 
+  {
+      unset($agent_list[$ac]);
+  }
+
 /* If the user specified a list, then disable every agent not in the list */
-if (array_key_exists("A", $options)) {
+$Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+if (array_key_exists("A", $options)) 
+{
   $agent_count = count($agent_list);
-  for ($ac = 0;$ac < $agent_count;$ac++) {
+  for ($ac = 0;$ac < $agent_count;$ac++) 
+  {
     $Found = 0;
-    foreach(explode(',', $options["A"]) as $Val) {
-      if (!strcmp($Val, $agent_list[$ac]->URI)) {
-        $Found = 1;
-      }
+    foreach(explode(',', $options["A"]) as $Val) 
+    {
+      if (!strcmp($Val, $agent_list[$ac]->URI))  $Found = 1; 
     }
-    if ($Found == 0) {
-      $agent_list[$ac]->URI = NULL;
-    }
+    if ($Found == 0) $agent_list[$ac]->URI = NULL;
   }
 }
+
 /* List available agents */
 if (array_key_exists("a", $options)) {
   if (empty($agent_list)) {

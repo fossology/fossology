@@ -184,18 +184,10 @@ class ui_reunpack extends FO_Plugin
         FROM upload
         INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk
         WHERE upload.upload_pk = '$uploadpk';";
-    $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"no","pfile",$Depends,1);
+echo "bobg fix this.  JobQueueAdd used to do a reschedule here<br>";
+    $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"pfile",$Depends);
     if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
 
-    /* job "unpack" has jobqueue item "adj2nest" */
-    //$jqargs = "$uploadpk";
-    //$jobqueuepk = JobQueueAdd($jobpk,"adj2nest",$jqargs,"no","",array($jobqueuepk));
-    //if (empty($jobqueuepk)) { return("Failed to insert adj2nest into job queue"); }
-
-    /* job "sqlagent" has jobqueue item "unpack" sqlagent to clean up reunpack jobqueue*/
-    //$jqargs = "DELETE FROM jobdepends WHERE jdep_jq_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$jobpk') OR jdep_jq_depends_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$jobpk');DELETE FROM jobqueue WHERE jq_job_fk = '$jobpk';DELETE FROM job WHERE job_pk = '$jobpk'; ";
-    //$jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",array($jobqueuepk));
-    //if (empty($jobqueuepk)) { return("Failed to insert delete sqlagent into job queue"); }
     return(NULL);
   } // AgentAdd()
 
