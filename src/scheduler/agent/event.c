@@ -25,29 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 #include <stdio.h>
 
-/* glib include */
-#include <glib.h>
-
-/* ************************************************************************** */
-/* **** Data Types ********************************************************** */
-/* ************************************************************************** */
-
-#define EVENT_LOOP_SIZE 1024
-
-/** interanl structure for an event */
-struct event_internal {
-    void(*func)(void*);           ///< the function that will be executed for this event
-    void* argument;               ///< the arguments for the function
-    char* name;                   ///< name of the event, used for debugging
-};
-
-/** internal structure for the event loop */
-struct event_loop_internal {
-    GAsyncQueue* queue;           ///< the queue that is the core of the event loop
-    int terminated;               ///< flag that signals the end of the event loop
-    int occupied;                 ///< flag that determines if there is already a thread in this loop
-};
-
 /* ************************************************************************** */
 /* **** Local(private) fields *********************************************** */
 /* ************************************************************************** */
@@ -77,6 +54,7 @@ event_loop event_loop_get()
   }
 
   vl_singleton.queue = g_async_queue_new_full((GDestroyNotify)event_destroy);
+  vl_singleton.occupied   = 0;
   vl_singleton.terminated = 0;
   el_created = 1;
 
@@ -170,6 +148,10 @@ event event_init(void(*func)(void*), void* arg, char* name)
  */
 void event_destroy(event e)
 {
+  e->func     = NULL;
+  e->argument = NULL;
+  e->name     = NULL;
+
   g_free(e);
 }
 
@@ -196,10 +178,10 @@ void event_signal_ext(void* func, void* args, char* name)
  * return until the program is ready to exit. There should also only be one
  * thread working on this part of the event loop.
  *
- * @param vl the event loop to start executing
+ * @param call_back a function that is called every time an event is processed
  * @return this function will return an error code:
  *          0x0:   successful execution
- *          0x01:  attempt to enter a loop that is occupied
+ *          0x1:   attempt to enter a loop that is occupied
  */
 int event_loop_enter(void(*call_back)(void))
 {
@@ -211,7 +193,7 @@ int event_loop_enter(void(*call_back)(void))
   if(vl->occupied)
   {
     g_async_queue_unlock(vl->queue);
-    return 0x01;
+    return 0x1;
   }
   vl->occupied = 1;
   vl->terminated = 0;
@@ -229,7 +211,9 @@ int event_loop_enter(void(*call_back)(void))
       lprintf("EVENT: finished %s \n", e->name);
 
     event_destroy(e);
-    call_back();
+
+    if(call_back)
+      call_back();
   }
 
   return 0x0;

@@ -18,9 +18,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef EVENT_H_INCLUDE
 #define EVENT_H_INCLUDE
 
+#include <glib.h>
+
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
+
+#define EVENT_LOOP_SIZE 1024
+
+/** interanl structure for an event */
+struct event_internal {
+    void(*func)(void*); ///< the function that will be executed for this event
+    void* argument;     ///< the arguments for the function
+    char* name;         ///< name of the event, used for debugging
+};
+
+/** internal structure for the event loop */
+struct event_loop_internal {
+    GAsyncQueue* queue; ///< the queue that is the core of the event loop
+    int terminated;     ///< flag that signals the end of the event loop
+    int occupied;       ///< does this loop already have a worker thread
+};
 
 /**
  * structure used to hold of the information associated with an event. This was
