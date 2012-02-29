@@ -421,7 +421,7 @@ void load_agent_config()
       tmp  = fo_config_get(config, "default", "max", &error);
       TEST_ERROR("the default group must have a max key");
 
-      if(!add_meta_agent(name, cmd, atoi(tmp), special))
+      if(!add_meta_agent(name, cmd, (max = atoi(tmp)), special))
       {
         V_SCHED("CONFIG: could not create meta agent using %s\n", ep->d_name);
       }
@@ -469,7 +469,7 @@ void load_foss_config()
     s_port = atoi(fo_config_get(sysconfig, "FOSSOLOGY", "port", &error));
   set_port(s_port);
 
-  /* log the lod direcotry */
+  /* load the log directory */
   if(fo_config_has_key(sysconfig, "DIRECTORIES", "LOG_DIR"))
     logdir = fo_config_get(sysconfig, "DIRECTORIES", "LOG_DIR", &error);
 
@@ -481,7 +481,7 @@ void load_foss_config()
     if(error)
     {
       lprintf(error->message);
-      error = NULL;
+      g_clear_error(&error);
       continue;
     }
 
