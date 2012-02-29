@@ -109,9 +109,15 @@ class upload_url extends FO_Plugin {
       return ($text);
     }
     global $Plugins;
-    $adj2nestplugin = & $Plugins[plugin_find_id("agent_unpack") ];
-    $Dependencies = array("wget_agent");
-    $adj2nestplugin->AgentAdd($jobpk, $uploadpk, $ErrorMsg, $Dependencies);
+    /* schedule agents */
+    $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
+    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $uploadpk, $ErrorMsg, array("wget_agent"));
+    if ($ununpack_jq_pk < 0) return $ErrorMsg;
+
+    $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest") ];
+    $adj2nest_jq_pk = $adj2nestplugin->AgentAdd($jobpk, $uploadpk, $ErrorMsg, array());
+    if ($adj2nest_jq_pk < 0) return $ErrorMsg;
+
     AgentCheckBoxDo($jobpk, $uploadpk);
 
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
