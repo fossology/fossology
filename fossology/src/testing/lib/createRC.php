@@ -1,4 +1,4 @@
-File Edit Options Buffers Tools Help                                            
+File Edit Options Buffers Tools Help
 <?php
 /*
  Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
@@ -63,8 +63,7 @@ $many = fwrite($RC, $sysconf);
 fclose($RC);
 
 // put in globals and export to environment.
-echo "DBCRC: sysconf is:$sysconf\n";
-echo "DBCRC: exporting sysconf to env and globals.\n";
+//echo "DBCRC: sysconf is:$sysconf\n";
 $GLOBALS['SYSCONFDIR'] = $sysconf;
 putenv("SYSCONFDIR={$GLOBALS['SYSCONFDIR']}");
 $_ENV['SYSCONFDIR'] = $GLOBALS['SYSCONFDIR'];
