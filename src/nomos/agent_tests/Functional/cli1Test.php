@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -21,40 +21,24 @@
  * \brief get usage message from nomos.
  *
  */
-require_once '/usr/share/php/PHPUnit/Framework.php';
 
-global $GlobalReady;
-$GlobalReady=TRUE;
-
+require_once('../../../testing/lib/createRC.php');
 class cli1Test extends PHPUnit_Framework_TestCase
 {
 	public function testHelp()
 	{
 		print "Starting testHelp\n";
 		// determine where nomos is installed
-		$upStream = '/usr/local/share/fossology/php/pathinclude.php';
-		$pkg = '/usr/share/fossology/php/pathinclude.php';
-		if(file_exists($upStream))
-		{
-			require_once($upStream);
-		}
-		else if(file_exists($pkg))
-		{
-			require_once($pkg);
-		}
-		else
-		{
-			$this->assertFileExists($upStream,
-			$message = 'FATAL: cannot find pathinclude.php file, stopping test\n');
-			$this->assertFileExists($pkg,
-			$message = 'FATAL: cannot find pathinclude.php file, stopping test\n');
-		}
-		$nomos = $AGENTDIR . '/nomos';
+    createRC();
+    $sysconf = getenv('SYSCONFDIR');
+    echo "DB: sysconf is:$sysconf\n";
+		$nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
+		echo "DB: nomos is:$nomos\n";
 		// run it
 		$last = exec("$nomos -h 2>&1", $out, $rtn);
 		//print "last is:$last\nout is:\n";print_r($out) . "\n";
 		$error = '/usr/local/lib/fossology/agents/nomos: invalid option -- h';
-		$usage = 'Usage: /usr/local/lib/fossology/agents/nomos [options] [file [file [...]]';
+		$usage = 'Usage: /usr/local/etc/fossology/mods-enabled/nomos/agent/nomos [options] [file [file [...]]';
 		//$this->assertEquals($error, $out[0]);
 		$this->assertEquals($usage, $out[0]);
 	}
