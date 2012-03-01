@@ -18,7 +18,7 @@ TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-TESTFILE = cli1Test.php
+TESTFILE = cli1Test.php OneShot-lgpl2.1.php
 EXE_DIR = ../../agent/
 
 all:
@@ -26,7 +26,14 @@ all:
 
 test: all
 	@echo "make nomos agent functional test"
-	phpunit --log-junit nomos-Xunit.xml $(TESTFILE)
+	@if test ! -e ../testdata/RedHat.tar.gz ; then \
+		rsync -acv fonightly.usa.hp.com:/var/www/testfiles/RedHat.tar.gz ../testdata/;\
+	fi;
+	cd ../testdata; \
+	tar -xf RedHat.tar.gz; \
+	cd ../Functional
+		
+	phpunit --log-junit nomos-Xunit.xml -c tests.xml
 
 coverage:
 	@echo "no code coverage for nomos in agent_test/Functional"

@@ -31,15 +31,10 @@ class cli1Test extends PHPUnit_Framework_TestCase
 		// determine where nomos is installed
     createRC();
     $sysconf = getenv('SYSCONFDIR');
-    echo "DB: sysconf is:$sysconf\n";
 		$nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-		echo "DB: nomos is:$nomos\n";
 		// run it
 		$last = exec("$nomos -h 2>&1", $out, $rtn);
-		//print "last is:$last\nout is:\n";print_r($out) . "\n";
-		$error = '/usr/local/lib/fossology/agents/nomos: invalid option -- h';
 		$usage = 'Usage: /usr/local/etc/fossology/mods-enabled/nomos/agent/nomos [options] [file [file [...]]';
-		//$this->assertEquals($error, $out[0]);
 		$this->assertEquals($usage, $out[0]);
 	}
 }
