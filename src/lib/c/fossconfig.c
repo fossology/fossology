@@ -403,7 +403,7 @@ fo_conf* fo_config_load(char* rawname, GError** error) {
       case ';': c = next_nl(); break;
       case '[': c = group(error); break;
       default:
-        if(isalpha(c))
+        if(isalnum(c))
           c = key(error);
         else
         {
@@ -413,7 +413,7 @@ fo_conf* fo_config_load(char* rawname, GError** error) {
               error,
               PARSE_ERROR,
               fo_invalid_file,
-              "%s[line %d]: invalid char '%c', keys must start with alpha char",
+              "%s[line %d]: invalid char '%c', keys must start with an alphanumeric character",
               fname, yyline, c);
         }
         break;
