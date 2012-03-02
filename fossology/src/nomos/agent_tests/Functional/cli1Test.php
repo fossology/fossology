@@ -27,7 +27,6 @@ class cli1Test extends PHPUnit_Framework_TestCase
 {
 	public function testHelp()
 	{
-		print "Starting testHelp\n";
 		// determine where nomos is installed
     createRC();
     $sysconf = getenv('SYSCONFDIR');
