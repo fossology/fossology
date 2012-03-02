@@ -595,6 +595,8 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
 function GetSchema()
 {
   global $PG_CONN;
+  global $SysConf;
+
   $Schema = array();
   /***************************/
   /* Get the tables */
@@ -675,7 +677,8 @@ function GetSchema()
   /***************************/
   /* Get Views */
   /***************************/
-  $SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'fossy';";
+  $user = $SysConf['DBCONF']['user'];
+  $SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = '$user'";
   $result = pg_query($PG_CONN, $SQL);
   DBCheckResult($result, $SQL, __FILE__,__LINE__);
   $Results = pg_fetch_all($result);
