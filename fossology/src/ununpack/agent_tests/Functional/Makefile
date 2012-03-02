@@ -18,7 +18,7 @@ TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-TESTFILE = unpackTest.php 
+TESTFILE = tests.xml 
 AGENTDIR = ../../agent/
 
 all:
@@ -26,13 +26,13 @@ all:
 
 test: all
 	@echo "ununpack agent functional test"
-	phpunit --log-junit ununpack-Xunit.xml $(TESTFILE)
+	phpunit --log-junit ununpack-Xunit.xml --configuration $(TESTFILE)
 
 coverage:
 	@echo "no coverage for ununpack/agent_test/Functional"
 
 
 clean:
-	rm -f *.xml
+	rm -f ununpack-Xunit.xml 
 
 .PHONY: all test coverage clean
