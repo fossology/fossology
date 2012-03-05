@@ -187,6 +187,7 @@ function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucket
                     and bucket_pk=bucket_fk
                     and bucketpool_fk=$bucketpool_pk";
 
+echo "$sql<br>";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   while ($row = pg_fetch_assoc($result)) $BuckArray[] = $row['bucket_pk'];
