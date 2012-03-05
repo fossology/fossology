@@ -179,19 +179,15 @@ class ui_nomos_license extends FO_Plugin
     }
     else
     {
-      $TagTable = "tag_file,";
-      $TagClause = "and PF=tag_file.pfile_fk and tag_fk=$tag_pk";
+      $TagTable = " right join tag_file on tag_file.pfile_fk=license_file_ref.pfile_fk ";
+      $TagClause = " and tag_fk=$tag_pk";
     }
-    $sql = "SELECT distinct(rf_shortname) as licname,
-                   count(rf_shortname) as liccount, rf_shortname
-              from license_ref,license_file, $TagTable
-                  (SELECT distinct(pfile_fk) as PF from uploadtree 
-                     where upload_fk=$upload_pk 
-                       and uploadtree.lft BETWEEN $lft and $rgt) as SS
-              where PF=license_file.pfile_fk and agent_fk=$Agent_pk and rf_fk=rf_pk
-                   $TagClause
-              group by rf_shortname 
-              order by liccount desc";
+    $sql = "SELECT distinct(rf_shortname) as licname, count(rf_shortname) as liccount, rf_shortname 
+            from license_file_ref $TagTable
+            right join uploadtree on license_file_ref.pfile_fk=uploadtree.pfile_fk 
+            where upload_fk='$upload_pk' and uploadtree.lft BETWEEN $lft and $rgt 
+              and agent_fk=$Agent_pk $TagClause
+            group by rf_shortname order by liccount desc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
