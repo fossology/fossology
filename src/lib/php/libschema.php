@@ -841,6 +841,12 @@ function GetSchema()
       $SQL.= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
       $SQL.= " (" . $Results[$i]['fk_constraint_key'] . ")";
     }
+
+    if (!empty($Results[$i]['on_update']))
+      $SQL.= " ON UPDATE " . $Results[$i]['on_update'];
+    if (!empty($Results[$i]['on_delete']))
+      $SQL.= " ON DELETE " . $Results[$i]['on_delete'];
+
     $SQL.= ";";
     $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
     $Results[$i]['processed'] = 1;
@@ -849,10 +855,8 @@ function GetSchema()
   /** CONSTRAINT: ALL OTHERS **/
   for ($i = 0;!empty($Results[$i]['constraint_name']);$i++)
   {
-    if ($Results[$i]['processed'] != 1)
-    {
-      continue;
-    }
+    if ($Results[$i]['processed'] == 1) continue;
+
     $SQL = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
     $SQL.= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
     $SQL.= " " . $Results[$i]['type'];
