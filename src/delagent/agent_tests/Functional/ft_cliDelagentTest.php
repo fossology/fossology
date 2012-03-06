@@ -1,7 +1,7 @@
 <?php
 
 /*
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -29,12 +29,32 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
    
   public $EXE_PATH = "";
   public $PG_CONN;
+  public $DB_COMMAND = "";
+  public $DB_NAME = "";
  
   /* initialization */
   protected function setUp() {
     print "Starting test functional delagent agent \n";
     global $EXE_PATH;
     global $PG_CONN;
+    global $DB_COMMAND;
+    global $DB_NAME;    
+    
+    $db_conf = "";
+
+    $DB_COMMAND  = "../../../testing/db/createTestDB.php -e";
+    exec($DB_COMMAND, $dbout, $rc);
+    if (0 != $rc)
+    {
+      print "Can not create database for this testing sucessfully!\n";
+      exit;
+    }
+    preg_match("/(\d+)/", $dbout[0], $matches);
+    $test_name = $matches[1];
+    $db_conf = $dbout[0];
+
+    $DB_NAME = "fosstest" . $test_name;
+
     $EXE_PATH = '../../agent/delagent';
     $usage= ""; 
     
@@ -50,8 +70,9 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
     // run it
     $last = exec("$EXE_PATH -h 2>&1", $out, $rtn);
     $this->assertEquals($usage, $out[1]); // check if executable file delagent is exited
-    $PG_CONN = pg_connect("host=localhost port=5432 dbname=fossology user=fossy password=fossy")
+    $PG_CONN = pg_connect("host=localhost port=5432 dbname=" . $DB_NAME . " user=fossy password=fossy")
                or die("Could not connect");
+    $EXE_PATH = $EXE_PATH." -c $db_conf";
   }
   /**
    * \brief test delagent -u 
@@ -59,8 +80,12 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
   function testDelagentu(){
     global $EXE_PATH;
     global $PG_CONN;
+    global $DB_NAME;
+
     $expected = "";
-  
+ 
+    exec("sudo su postgres -c 'pg_restore -d $DB_NAME ../testdata/testdb_all.tar'");
+
     $sql = "SELECT upload_pk, upload_filename FROM upload ORDER BY upload_pk;";
     $result = pg_query($PG_CONN, $sql);
     if (pg_num_rows($result) > 0){
@@ -81,7 +106,10 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
   function testDelagentf(){
     global $EXE_PATH;
     global $PG_CONN;
+    global $DB_NAME;
     $expected = "";
+
+    exec("sudo su postgres -c 'pg_restore -d $DB_NAME ../testdata/testdb_all.tar'");
 
     $sql = "SELECT folder_pk,parent,name,description,upload_pk FROM folderlist ORDER BY name,parent,folder_pk;";
     $result = pg_query($PG_CONN, $sql);
@@ -101,7 +129,11 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
    */
   protected function tearDown() {
     global $PG_CONN;
+    global $DB_COMMAND;
+    global $DB_NAME;
+
     pg_close($PG_CONN);
+    exec("$DB_COMMAND -d $DB_NAME");
     print "Ending test functional delagent agent \n";
   }
 }
