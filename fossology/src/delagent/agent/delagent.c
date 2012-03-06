@@ -67,7 +67,7 @@ int main (int argc, char *argv[])
   int GotArg=0;
   char *agent_desc = "Deletes upload.  Other list/delete options available from the command line.";
   char *Parm = NULL;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  char DBConfFile[1024];  /* use default Db.conf */
   char *ErrorBuf;
   int Agent_pk = 0;
   char *SVN_REV;
@@ -110,6 +110,8 @@ int main (int argc, char *argv[])
     exit(-1);
   }
 
+  memset(DBConfFile, 0, sizeof(DBConfFile));
+  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!db_conn)
   {

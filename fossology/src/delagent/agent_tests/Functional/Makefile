@@ -26,6 +26,9 @@ all:
 
 test: all
 	@echo "make delagent functional test"
+	@if test ! -e ../testdata/testdb_all.tar ; then \
+	rsync -acv fonightly.usa.hp.com:/var/www/testfiles/delagent/ ../testdata/;\
+	fi;
 	phpunit --log-junit delagent-Xunit.xml $(TESTFILE)
 
 coverage:
