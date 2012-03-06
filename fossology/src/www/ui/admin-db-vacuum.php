@@ -59,7 +59,7 @@ class admin_db_vacuum extends FO_Plugin
         $Action = "";
         if (GetParm('vacuum',PARM_INTEGER) == 1) { $Action .= "VACUUM"; }
         if (GetParm('analyze',PARM_INTEGER) == 1) { $Action .= " ANALYZE"; }
-        $SQL = "SELECT table_name AS table
+        $sql = "SELECT table_name AS table
 		FROM information_schema.tables
 		WHERE table_type = 'BASE TABLE'
 		AND table_schema = 'public'
@@ -67,7 +67,7 @@ class admin_db_vacuum extends FO_Plugin
 		;";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
-        if (!empty($result))
+        if (!empty($Action) && !empty($result))
         {
           $text = _("Cleaning: Vacuum and Analyze");
           print "<b>$text</b><br>\n";
