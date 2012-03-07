@@ -40,6 +40,8 @@ coverage:
 	@echo "no code coverage for nomos in agent_test/Functional"
 
 clean:
-	rm -f *.xml
+# note DO NOT put *.xml in the rule, it will remove the tests.xml file which is
+# needed to run the tests!
+	rm -f nomos-Xunit.xml
 
 .PHONY: all test coverage clean
