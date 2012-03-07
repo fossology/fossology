@@ -17,6 +17,7 @@
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
+DATA=../unpack-test-data.tar.bz2
 
 TESTFILE = tests.xml 
 AGENTDIR = ../../agent/
@@ -24,7 +25,17 @@ AGENTDIR = ../../agent/
 all:
 	$(MAKE) -C $(AGENTDIR)/ $@
 
-test: all
+$(DATA):
+	@echo "Downloading ununpack data"
+	rsync -acv fonightly.usa.hp.com:/var/www/testfiles/unpack-test-data.tar.bz2 ..
+
+download: ../unpack-test-data.tar.bz2
+	@echo "untaring ununpack data"
+	cd ..; \
+	tar -xf unpack-test-data.tar.bz2; \
+	cd Functional
+
+test: all download
 	@echo "ununpack agent functional test"
 	phpunit --log-junit ununpack-Xunit.xml --configuration $(TESTFILE)
 
@@ -33,6 +44,6 @@ coverage:
 
 
 clean:
-	rm -f ununpack-Xunit.xml 
+	rm -rf ununpack-Xunit.xml  ../unpack-test-data.tar.bz2 ../test-data
 
 .PHONY: all test coverage clean

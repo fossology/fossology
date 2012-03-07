@@ -67,7 +67,7 @@ libununpack.a:
 	$(MAKE) -C $(AGENTDIR) $@
 
 clean:
-	rm -fr $(EXE) *.o core *.xml *.txt results test-result unpack-test-data.tar.bz2 test-data
+	rm -fr $(EXE) *.o core *.xml *.txt results test-result ../unpack-test-data.tar.bz2 ../test-data
 
 include $(DEPS)
 
