@@ -18,7 +18,6 @@ TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-TESTFILE = cli1Test.php OneShot-lgpl2.1.php
 EXE_DIR = ../../agent/
 
 all:
@@ -31,7 +30,9 @@ test: all
 	fi;
 	cd ../testdata; \
 	tar -xf RedHat.tar.gz; \
-	cd ../Functional
+	cd ../Functional; \
+	pwd; \
+	ls -l
 		
 	phpunit --log-junit nomos-Xunit.xml -c tests.xml
 
