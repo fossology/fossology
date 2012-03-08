@@ -526,6 +526,14 @@ void ListFolders ()
 
   printf("# Folders\n");
   memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT folder_name from folder where folder_pk =1;");
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+
+  printf("%4d :: %s\n", 1, PQgetvalue(result,0,0));
+  PQclear(result);
+
+  memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT folder_pk,parent,name,description,upload_pk FROM folderlist ORDER BY name,parent,folder_pk;");
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
@@ -727,7 +735,6 @@ void Usage (char *Name)
   fprintf(stderr,"  -i   :: Initialize the DB, then exit.\n");
   fprintf(stderr,"  -u   :: List uploads IDs.\n");
   fprintf(stderr,"  -U # :: Delete upload ID.\n");
-  fprintf(stderr,"  -l   :: List uploads IDs. (same as -u, but goes with -L)\n");
   fprintf(stderr,"  -L # :: Delete ALL licenses associated with upload ID.\n");
   fprintf(stderr,"  -f   :: List folder IDs.\n");
   fprintf(stderr,"  -F # :: Delete folder ID and all uploads under this folder.\n");

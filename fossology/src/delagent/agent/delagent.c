@@ -39,7 +39,6 @@
  *   -i   :: Initialize the DB
  *   -u   :: List uploads IDs.
  *   -U # :: Delete upload ID.
- *   -l   :: List uploads IDs. (same as -u, but go with -L)
  *   -L # :: Delete ALL licenses associated with upload ID.
  *   -f   :: List folder IDs.
  *   -F # :: Delete folder ID and all uploads under this folder.
@@ -93,7 +92,6 @@ int main (int argc, char *argv[])
       case 'f': ListFolder=1; GotArg=1; break;
       case 'F': DelFolder=atol(optarg); GotArg=1; break;
       case 'L': DelLicense=atol(optarg); GotArg=1; break;
-      case 'l': ListProj=1; GotArg=1; break;
       case 's': Scheduler=1; GotArg=1; break;
       case 'T': Test++; break;
       case 'u': ListProj=1; GotArg=1; break;
