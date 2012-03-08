@@ -48,9 +48,9 @@ function DBconnect($sysconfdir, $Options="", $FailExit=true)
 
   $path="$sysconfdir/Db.conf";
   if (empty($Options))
-    $PG_CONN = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
+    $PG_CONN = pg_connect(str_replace(";", " ", file_get_contents($path)));
   else
-    $PG_CONN = pg_pconnect(str_replace(";", " ", $Options));
+    $PG_CONN = pg_connect(str_replace(";", " ", $Options));
 
   if (!empty($PG_CONN)) return($PG_CONN); /* success */
 
