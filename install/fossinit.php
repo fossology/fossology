@@ -146,7 +146,7 @@ function Usage()
   -d  {database name} default is 'fossology'
   -f  {file} update the schema with file generaged by schema-export.php
   -l  update the license_ref table with fossology supplied licenses
-  -v  enable verbose mode (lists each module being processed)
+  -v  enable verbose preview (prints sql that would happen, but does not execute it, DB is not updated)
   -h  this help usage";
   print "$usage\n";
   exit(0);
