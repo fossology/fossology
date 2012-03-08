@@ -60,7 +60,6 @@ if(@chdir($func) === FALSE)
 
 createRC();
 $sysConf = array();
-echo "DB: calling bootstrap\n";
 $sysConf = bootstrap();
 putenv("SYSCONFDIR={$GLOBALS['SYSCONFDIR']}");
 $_ENV['SYSCONFDIR'] = $GLOBALS['SYSCONFDIR'];
@@ -117,8 +116,8 @@ foreach($funcList as $funcTest)
   // why twice?
   $Make = new RunTest($funcTest);
   $runResults = $Make->MakeTest();
-  $Make = new RunTest($funcTest);
-  $runResults = $Make->MakeTest();
+  //$Make = new RunTest($funcTest);
+  //$runResults = $Make->MakeTest();
   //debugprint($runResults, "run results for $funcTest\n");
   $Make->printResults($runResults);
 

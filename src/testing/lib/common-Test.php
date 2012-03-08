@@ -431,7 +431,7 @@ class RunTest
     $cleanMake = exec('make clean 2>&1', $cleanOut, $cleanRtn);
     if($cleanRtn != 0)
     {
-      echo "Make clean of $unitTest did not succeed, return code:$cleanRtn\n";
+      echo "Make clean of $this->unitTest did not succeed, return code:$cleanRtn\n";
       // right now this is not reported as an error
       // @todo figure out how to handle this.  Make clean failures should not
       // cause make to not be done.
@@ -440,7 +440,7 @@ class RunTest
     $s = getenv('SYSCONFDIR');
     //echo "DB: sysconfdir from env before make of $this->unitTest is:$s\n";
     $lastMake = exec('make test 2>&1', $this->makeOutput, $makeRtn);
-    //echo "DB: Exit status of 'make test' of $unitTest is:$makeRtn\n";
+    //echo "DB: Exit status of 'make test' of $this->unitTest is:$makeRtn\n";
     //debugprint($this->makeOutput, "make output\n");
 
     if($makeRtn != 0)
@@ -489,9 +489,11 @@ class RunTest
     {
       // no tests for is module?  Skip report processing
       $nothing = array();
-      $nothing= preg_grep('/Nothing to be done for/', $this->makeOutput);
+      $nothing= preg_grep("/Nothing to be done for \`test\'/", $this->makeOutput);
+      //echo "grep for Nothing to... is:\n";print_r($nothing) . "\n";
       $noTests = array();
       $noTests= preg_grep('/NO.*TESTS/', $this->makeOutput);
+      //echo "grep for NoTests to... is:\n";print_r($noTests) . "\n";
       if($nothing or $noTests)
       {
         //echo "No Unit Tests for module $unitTest\n";
