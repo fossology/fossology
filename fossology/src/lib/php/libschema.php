@@ -129,14 +129,15 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
             DBCheckResult($result, $SQL, __FILE__,__LINE__);
           }
         }
+
+        $SQL = $Val['ADD'];
         if ($Debug)
         {
-          print "Val[ADD] is" . $Val['ADD'] . "\n";
+          print "$SQL\n";
         }
         else
         {
           // Add the new column, then set the default value with update
-          $SQL = $Val['ADD'];
           $result = pg_query($PG_CONN, $SQL);
           DBCheckResult($result, $SQL, __FILE__,__LINE__);
           if (!empty($Val['UPDATE']))
