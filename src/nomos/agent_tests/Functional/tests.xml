@@ -7,6 +7,7 @@
       <file>OneShot-affero.php</file>
       <file>OneShot-none.php</file>
       <file>OneShot-empty.php</file>
+      <file>OneShot-multiFile.php</file>
     </testsuite>
   </testsuites>
 </phpunit>
