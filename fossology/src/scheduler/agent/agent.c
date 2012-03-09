@@ -16,7 +16,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  ************************************************************** */
 
 /*
- * TODO change agent logging to only include JOB[job_id].name[pid] only when usefull
  * TODO change the "<date> <time> scheduler ::" to "<date> <time> agent ::" for some
  *      log messages
  */
@@ -346,7 +345,7 @@ void agent_listen(agent a)
         g_tree_remove(meta_agents, a->meta_data->name);
       clprintf("ERROR %s.%d: agent %s has been invalidated, removing from agents\n",
           __FILE__, __LINE__, a->meta_data->name);
-      AGENT_LOG("agent didn't send version information: \"%s\"", buffer);
+      AGENT_LOG("agent didn't send version information: \"%s\"\n", buffer);
     }
   }
 
@@ -792,9 +791,9 @@ agent agent_init(host host_machine, job owner)
 
   /* set file identifiers to correctly talk to children */
   a->from_parent = parent_to_child[0];
-  a->to_child = parent_to_child[1];
-  a->from_child = child_to_parent[0];
-  a->to_parent = child_to_parent[1];
+  a->to_child    = parent_to_child[1];
+  a->from_child  = child_to_parent[0];
+  a->to_parent   = child_to_parent[1];
 
   /* initialize other info */
   a->host_machine = host_machine;
@@ -1198,6 +1197,9 @@ int add_meta_agent(char* name, char* cmd, int max, int spc)
 
   if(meta_agents == NULL)
     agent_list_init();
+
+  if(name == NULL)
+    return 0;
 
   if(g_tree_lookup(meta_agents, name) == NULL)
   {

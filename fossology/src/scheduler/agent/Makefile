@@ -30,6 +30,7 @@ DEF   = -DLOG_DIR='"$(LOGDIR)"' \
         -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' \
         -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"'
 
+CC = clang
 LIB = libscheduler.a
 EXE = fo_scheduler
 CLI = fo_cli

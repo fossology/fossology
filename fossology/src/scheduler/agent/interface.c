@@ -43,15 +43,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define FIELD_WIDTH 10
 #define BUFFER_SIZE 1024
 
-int i_created = 0;      ///< flag indicating if the interface already been created
-int i_terminate = 0;    ///< flag indicating if the interface has been killed
-int i_port = -1;        ///< the port that the scheduler is listening on
-GThread* socket_thread; ///< thread that will create new connections
-GList* client_threads;  ///< threads that are currently running some form of scheduler interface
-GCancellable* cancel;   ///< used to shut down all interfaces when closing the scheudler
-GRegex* cmd_parse;      ///< regex to make parsing command more reliable
+int i_created = 0;       ///< flag indicating if the interface already been created
+int i_terminate = 0;     ///< flag indicating if the interface has been killed
+int i_port = -1;         ///< the port that the scheduler is listening on
+GThread* socket_thread;  ///< thread that will create new connections
+GList* client_threads;   ///< threads that are currently running some form of scheduler interface
+GCancellable* cancel;    ///< used to shut down all interfaces when closing the scheudler
+GRegex* cmd_parse;       ///< regex to make parsing command more reliable
+GRegex* pro_parse;       ///< regex to parse the proxy formatting
+GSocketClient* outgoing; ///< creates outgoing socket connections
+
+GRegex* rep_init_r;
+GRegex* get_host_r;
+GRegex* dot_repl_r;
+GRegex* cmd_recv_r;
 
 #define netw g_output_stream_write
+
+#define PROXY_PROTOCOL     "socks5"
+#define PROXY_DEFAULT_PORT 1080
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
@@ -493,6 +503,7 @@ void* listen_thread(void* unused)
  * Create all of the pieces of the interface between the scheduler and the different
  * user interfaces. The interface is how the scheduler knows that the database has
  * been updated and how it becomes aware of changes in debugging state.
+"Alex Norton" <norton@localhost>
  */
 void interface_init()
 {
@@ -502,15 +513,31 @@ void interface_init()
     socket_thread = g_thread_create(listen_thread, NULL, 1, NULL);
   }
 
+  outgoing = g_socket_client_new();
   cancel = g_cancellable_new();
+
   cmd_parse = g_regex_new(
       "(\\w+)(\\s+(\\d+))?(\\s+((\\d+)|(\"(.*)\")))?",
       0, G_REGEX_MATCH_NEWLINE_LF, NULL);
+  pro_parse = g_regex_new(
+      "(.*):(\\d+)?",
+      0, 0, NULL);
+
+  get_host_r  = g_regex_new(
+      "((\".+\")\\s)?(<.+@([^\\.]+(\\.[a-z]{2,})?)>)",
+      0, 0, NULL);
+  dot_repl_r  = g_regex_new(
+      "^\\.",
+      G_REGEX_MULTILINE, 0, NULL);
+  cmd_recv_r  = g_regex_new(
+      "^(\\d{3})\\s+(.*?)\\s+(.*)$",
+      G_REGEX_MULTILINE, 0, NULL);
 }
 
 /**
  * closes all interface threads and closes the listening thread. This will block
  * until all threads have closed correctly.
+ *
  */
 void interface_destroy()
 {
@@ -554,3 +581,289 @@ int is_port_set()
 {
   return i_port != -1;
 }
+
+/* ************************************************************************** */
+/* **** Networking Functions ************************************************ */
+/* ************************************************************************** */
+
+/**
+ * Create a socket connection to a remote host
+ *
+ * @param host  the host to connect to
+ * @param port  the port to connect on
+ * @return  a new GOIStream that allows communication over the connection
+ */
+GIOStream* connect_to(gchar* host, guint16 port, GError** in_error)
+{
+  GError* error = NULL;
+  GMatchInfo* info;
+
+  GSocketConnection* sock_conn = NULL;
+  GSocketAddress*    i_addr    = NULL;
+  GProxyAddress*     p_addr    = NULL;
+  GInetAddress*      address   = NULL;
+  GSocket*           sock      = NULL;
+  GList*             addr_list = NULL;
+  GList*             iter      = NULL;
+
+  GProxy*    proxy    = g_proxy_get_default_for_protocol(PROXY_PROTOCOL);
+  GResolver* resolver = g_resolver_get_default();
+  GIOStream* ret_val  = NULL;
+
+  gchar*   use_host = host;
+  gboolean use_proxy = FALSE;
+  guint16  use_port = port;
+
+  /* check to make sure we don't need to connect through a proxy */
+  if(fo_config_has_key(sysconfig, "FOSSOLOGY", "socks_proxy"))
+  {
+    use_proxy = TRUE;
+    use_host = fo_config_get(sysconfig, "FOSSOLOGY", "socks_proxy", NULL);
+
+    g_regex_match(pro_parse, use_host,  0, &info);
+    use_host = g_match_info_fetch(info, 2);
+    use_port = use_host == NULL ? PROXY_DEFAULT_PORT : atoi(use_host);
+
+    g_free(use_host);
+    use_host = g_match_info_fetch(info, 1);
+
+    g_match_info_free(info);
+  }
+
+  addr_list = g_resolver_lookup_by_name( resolver, host, NULL, in_error);
+  if(*in_error) return NULL;
+
+  for(iter = addr_list; iter; iter = iter->next)
+  {
+    address = (GInetAddress*)iter->data;
+    i_addr = g_inet_socket_address_new(address, use_port);
+
+    sock = g_socket_new(g_inet_address_get_family(address),
+        G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_TCP, &error);
+    if(error)
+    {
+      g_clear_error(&error);
+      g_object_unref(i_addr);
+      continue;
+    }
+
+    g_socket_connect(sock, i_addr, NULL, &error);
+    if(error)
+    {
+      g_clear_error(&error);
+      g_object_unref(i_addr);
+      g_object_unref(sock);
+      continue;
+    }
+
+    sock_conn = g_socket_connection_factory_create_connection(sock);
+    if(use_proxy)
+    {
+      p_addr = (GProxyAddress*)g_proxy_address_new(
+          (GInetAddress*)i_addr, use_port, PROXY_PROTOCOL, host, port,
+          NULL, NULL);
+      ret_val = g_proxy_connect(
+          proxy, (GIOStream*)sock_conn,
+          p_addr, NULL, &error);
+
+      if(error)
+      {
+        g_clear_error(&error);
+        WARNING("%s", error->message);
+      }
+      g_object_unref(p_addr);
+    }
+    else
+    {
+      ret_val = g_object_ref(sock_conn);
+    }
+
+    g_object_unref(i_addr);
+    g_object_unref(sock);
+    g_object_unref(ret_val);
+
+    if(ret_val != NULL)
+      break;
+  }
+
+  if(use_proxy)
+    g_free(use_host);
+  g_list_free(addr_list);
+
+  if(ret_val == NULL)
+    g_set_error( in_error, 0, 0, "ERROR: unable to connect to \"%s:%d\"",
+        host, port);
+
+  g_object_unref(proxy);
+
+  return ret_val;
+}
+
+/**
+ * Simple function to replace all '.' at the beginning of a line with a '..'.
+ * This is done because the smtp protocol uses the '.' character at the
+ * beginning of a line to mean that the message has ended.
+ *
+ * @param match   not used in this function
+ * @param ret     the string that the '..' should be appended to
+ * @param unsued  not used in this function
+ * @return  FALSE, indicating that the replace should continue
+ */
+gboolean dot_replace(const GMatchInfo* match, GString* ret, gpointer unsued)
+{
+  g_string_append(ret, "..");
+  return FALSE;
+}
+
+#define free_all()                        \
+    do {                                  \
+      g_free(to_url);                     \
+      g_free(to_email);                   \
+      g_free(from_url);                   \
+      g_free(from_email);                 \
+      g_free(msg);                        \
+      g_free(tmp);                        \
+      if(match) g_match_info_free(match); \
+      return;                             \
+    } while(0)
+
+#define valid_smtp(valid)                                                       \
+    do {                                                                        \
+      if((size = g_input_stream_read(istr, buf, sizeof(buf), NULL, error)) < 0) \
+        free_all();                                                             \
+      if(!g_regex_match_full(cmd_recv_r, buf, size, 0, 0, &match, error))       \
+        free_all();                                                             \
+      if(strcmp(tmp = g_match_info_fetch(match, 1), valid) != 0)                \
+        free_all();                                                             \
+      g_free(tmp);                                                              \
+      g_match_info_free(match);                                                 \
+      tmp = NULL;                                                               \
+      match = NULL;                                                             \
+    } while (0)
+
+/**
+ * TODO
+ *
+ * @param to
+ * @param from
+ * @param subject
+ * @param message
+ * @param error
+ */
+void send_email(gchar* to, gchar* from, gchar* subject, gchar* message,
+    GError** error)
+{
+  GMatchInfo* match;
+  gchar* to_email;
+  gchar* to_url;
+  gchar* from_email;
+  gchar* from_url;
+  gchar* tmp = NULL;
+  GIOStream* conn;
+  GInputStream*  istr;
+  GOutputStream* ostr;
+
+  gssize size = 0;
+  gchar buf[BUFFER_SIZE];
+
+  /* get the date/time */
+  time_t rawtime;
+  const struct tm* timeinfo;
+
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+
+  /* replace all '.' at the start of lines */
+  gchar* msg = g_regex_replace_eval(dot_repl_r, message, -1,
+      0, 0, (GRegexEvalCallback)dot_replace, NULL, error);
+  if(*error)
+    return;
+
+  /* get the information about to and from */
+  if(!g_regex_match_full(get_host_r, to, -1, 0, 0, &match, error))
+  {
+    g_free(msg);
+    return;
+  }
+  to_url   = g_match_info_fetch(match, 4);
+  to_email = g_match_info_fetch(match, 3);
+  g_match_info_free(match);
+
+  if(!g_regex_match_full(get_host_r, from, -1, 0, 0, &match, error))
+  {
+    g_free(to_url);
+    g_free(to_email);
+    g_free(msg);
+    return;
+  }
+  from_url   = g_match_info_fetch(match, 4);
+  from_email = g_match_info_fetch(match, 3);
+  g_match_info_free(match);
+
+  /* connect to the url specified in the email */
+  if((conn = connect_to(to_url, 25, error)) == NULL)
+    free_all();
+  istr = g_io_stream_get_input_stream(conn);
+  ostr = g_io_stream_get_output_stream(conn);
+  match = NULL;
+
+  /* get the reply from connecting to smtp server */
+  if((size = g_input_stream_read(istr, buf, sizeof(buf), NULL, error)) < 0)
+    free_all();
+  if(!g_regex_match_full(cmd_recv_r, buf, size, 0, 0, &match, error))
+    free_all();
+  if(strcmp(tmp = g_match_info_fetch(match, 1), "220") != 0)
+    free_all();
+  g_free(tmp);
+
+  /* say/recieve hello */
+  tmp = g_match_info_fetch(match, 2);
+  snprintf(buf, sizeof(buf), "HELO %s\n", tmp);
+  if(g_output_stream_write(ostr, buf, strlen(buf), NULL, error) < 0)
+    free_all();
+  g_free(tmp);
+  g_match_info_free(match);
+  tmp = NULL;
+  match = NULL;
+  valid_smtp("250");
+
+  /* say who is sending the mail */
+  snprintf(buf, sizeof(buf), "MAIL FROM:%s\n", from_email);
+  if(g_output_stream_write(ostr, buf, strlen(buf), NULL, error) < 0)
+    free_all();
+  valid_smtp("250");
+
+  /* say who is getting the mail */
+  snprintf(buf, sizeof(buf), "RCPT TO:%s\n", to_email);
+  if(g_output_stream_write(ostr, buf, strlen(buf), NULL, error) < 0)
+    free_all();
+  valid_smtp("250");
+
+  /* say that we are sending the data */
+  snprintf(buf, sizeof(buf), "DATA\n");
+  if(g_output_stream_write(ostr, buf, strlen(buf), NULL, error) < 0)
+    free_all();
+  valid_smtp("354");
+
+  /* send the email message itself */
+  snprintf(buf, sizeof(buf), "FROM: %s\nTO: %s\n", from, to);
+  if(g_output_stream_write(ostr, buf, strlen(buf), NULL, error) < 0)
+    free_all();
+  strftime(buf, sizeof(buf), "Date: %c\n", timeinfo);
+  if(g_output_stream_write(ostr, buf, strlen(buf), NULL, error) < 0)
+    free_all();
+  snprintf(buf, sizeof(buf), "Subject: %s\n%s\n.\n", subject, msg);
+  if(g_output_stream_write(ostr, buf, strlen(buf), NULL, error) < 0)
+    free_all();
+  valid_smtp("250");
+
+  /* close the connection */
+  snprintf(buf, sizeof(buf), "QUIT\n");
+  if(g_output_stream_write(ostr, buf, strlen(buf), NULL, error) < 0)
+    free_all();
+  valid_smtp("221");
+
+  g_object_unref(conn);
+}
+
+#undef free_all

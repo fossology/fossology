@@ -131,6 +131,7 @@ int main(int argc, char** argv)
   /* *********************************** */
   /* *** post initialization checks **** */
   /* *********************************** */
+
   if(fo_config_has_key(sysconfig, "DIRECTORIES", "LOG_DIR"))
     logdir = fo_config_get(sysconfig, "DIRECTORIES", "LOG_DIR", &error);
   if(db_reset)
