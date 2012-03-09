@@ -21,13 +21,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <libpq-fe.h>
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
 
 /* other library includes */
 #include <libfossology.h>
+#include <libpq-fe.h>
 
 /* local includes */
 #include <copyright.h>

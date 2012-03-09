@@ -110,13 +110,14 @@ int find_beginning(char* ptext, int idx)
 int find_end(char* ptext, int idx, int bufsize)
 {
   int maxchars = 200;
+  int start    = 50;
   int last = idx + maxchars;
 
-  for (; (idx < bufsize) && (idx < last); idx++)
+  for (idx = idx + start; (idx < bufsize) && (idx < last); idx++)
   {
     if (ptext[idx] == '\n') return idx - 1;
   }
-  return idx;
+  return last;
 }
 
 /**
