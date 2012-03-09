@@ -25,14 +25,14 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 EXE = copyright
 TESTDIR = ../agent_tests
 
-OBJECTS  = copyright.o cvector.o radixtree.o  pair.o
+OBJECTS  = copyright.o cvector.o radixtree.o  pair.o main.o
 
 ##########################
 # executable build rules #
 ##########################
-$(EXE): main.c $(FOLIB) $(VARS) $(OBJECTS)
+$(EXE): $(FOLIB) $(VARS) $(OBJECTS)
 	@echo "make copyright agent"
-	$(CC) main.c $(OBJECTS) $(DEF) $(CFLAGS_LOCAL) -o $@
+	$(CC) $(OBJECTS) $(DEF) $(CFLAGS_LOCAL) -o $@
 
 all: $(EXE) test
 	@echo "make copyright agent and test"
@@ -64,6 +64,9 @@ radixtree.o: %.o: %.c %.h
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
 pair.o: %.o: %.c %.h cvector.h
+	$(CC) -c $(CFLAGS_LOCAL) $<
+
+main.o: %.o: %.c copyright.h cvector.h pair.h sql_statements.h
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
 
