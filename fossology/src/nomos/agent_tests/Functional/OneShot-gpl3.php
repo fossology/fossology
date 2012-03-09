@@ -16,7 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * Perform a one-shot license analysis on a glpv3 license
+ * \brief Perform a one-shot license analysis on a glpv3 license
  *
  * License returned should be FSF,GPL_v3,Public-domain
  *
