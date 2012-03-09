@@ -3605,7 +3605,8 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_PUBDOM_1
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
-%STR%	"(licen[cs]e|under|in|is|are|to|withi?n?|contain) =SOME= \<public\>[ -]domain"
+#%STR%	"(licen[cs]e|under|in|is|are|to|withi?n?|contain) =SOME= \<public\>[ -]domain"
+%STR%	"(licen[cs]e|under|in|is|are|to|withi?n?|contain) =SOME= \<public\>[ -]\<domain\>"
 #
 %ENTRY%	_LT_PUBDOM_2
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
@@ -3647,7 +3648,9 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_PUBDOM_NOTclaim
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 #%STR%	"not =FEW= (under|in|is|are|to) =SOME= \<public\>[ -]domain"
-%STR%	"not =FEW= (under|in|to) =SOME= \<public\>[ -]domain"
+#%STR%	"not =FEW= (under|in|to) =SOME= \<public\>[ -]domain"
+%STR%	"\<not\> (covered|under|in|to) =SOME= \<public\>[ -]\<domain\>"
+
 #####
 # DELETED: the purpose of this document is to enable rightsholders to place
 # their work into the public domain unlike licen[cs]es for free and open
