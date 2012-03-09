@@ -16,7 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * Perform a one-shot license analysis on a glpv2.1 license
+ * \brief Perform a one-shot license analysis on a glpv2.1 license
  *
  * License returned should be LGPL_v2.1
  *

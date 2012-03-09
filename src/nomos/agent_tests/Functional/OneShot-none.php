@@ -16,7 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * Perform a one-shot license analysis on a file with no license
+ * \brief Perform a one-shot license analysis on a file with no license
  *
  * License returned should be: No_license_found
  *

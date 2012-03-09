@@ -16,9 +16,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * Perform a one-shot license analysis on multiple files
+ * \brief Perform a one-shot license analysis on multiple files
  *
- * License returned should be:
+ * License returned should be: See the array $Results below.
  *
  * @version "$Id$"
  *
