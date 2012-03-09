@@ -19,7 +19,7 @@
 /**
  * \file OneShot-empty.php
  * \brief Perform a one-shot license analysis on an empty file
- *    License returned should be: No_license_found
+ *       License returned should be: No_license_found
  *
  * @version "$Id$"
  *
