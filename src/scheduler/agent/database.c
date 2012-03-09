@@ -118,7 +118,14 @@ const char* jobsql_priority = "\
         WHERE jq_pk = '%d');";
 
 /* ************************************************************************** */
-/* **** email notification ************************************************** */
+/* *** email notification                                                 *** */
+/* ***                                                                    *** */
+/* ***    There is no good location to put the code that performs the     *** */
+/* ***    email notification. This is because it is one of the more       *** */
+/* ***    database intensive actions that the scheduler performs, but     *** */
+/* ***    also requires extensive network access. Since the database      *** */
+/* ***    access is limited to database.c, this is where email            *** */
+/* ***    notification lives.                                             *** */
 /* ************************************************************************** */
 
 char*  subject;

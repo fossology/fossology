@@ -34,4 +34,8 @@ void interface_destroy();
 void set_port(int port_n);
 int  is_port_set();
 
+GIOStream* connect_to(gchar* host, guint16 port, GError** in_error);
+void send_email(gchar* to, gchar* from, gchar* subject, gchar* message,
+    GError** error);
+
 #endif /* INTERFACE_H_INCLUDE */
