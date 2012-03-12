@@ -56,7 +56,11 @@ function GetAllTags($Item, $Recurse=true)
 
   /* Get list of unique tag_pk's for this item */
 //  $sql = "SELECT distinct(tag_fk) as tag_pk FROM tag_file, uploadtree WHERE tag_file.pfile_fk = uploadtree.pfile_fk and upload_fk=$upload_pk AND $Condition UNION SELECT tag_fk as tag_pk FROM tag_uploadtree WHERE tag_uploadtree.uploadtree_fk = $Item";
-  $sql = "select distinct(tag_fk) as tag_pk from uploadtree_tag_file_inner where upload_fk='$upload_pk' and $Condition UNION select tag_fk as tag_pk from tag_uploadtree where tag_uploadtree.uploadtree_fk='$Item'";
+  /* simplify (i.e. speed up) for special case of looking at a single file */
+  if (($uploadtree_row['rgt'] - $uploadtree_row['lft']) == 1)
+    $sql = "select distinct(tag_fk) as tag_pk from uploadtree_tag_file_inner where uploadtree_pk='$Item' UNION select tag_fk as tag_pk from tag_uploadtree where tag_uploadtree.uploadtree_fk='$Item'";
+  else
+    $sql = "select distinct(tag_fk) as tag_pk from uploadtree_tag_file_inner where upload_fk='$upload_pk' and $Condition UNION select tag_fk as tag_pk from tag_uploadtree where tag_uploadtree.uploadtree_fk='$Item'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $SeenTag = array();
