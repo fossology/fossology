@@ -753,9 +753,10 @@ function configDebian($osType, $osVersion)
     return(FALSE);
   }
   // Get the postrgres version so the correct file is used.
-  $ver = findVerPsql();
-  echo "DB: returned version is:$ver\n";
-  $pName = 'postgresql-' . $ver;
+  //$ver = findVerPsql();
+  //echo "DB: returned version is:$ver\n";
+  //$pName = 'postgresql-' . $ver;
+  $pName = 'postgresql';
   echo "DB pName is:$pName\n";
   if(!restart($pName))
   {
