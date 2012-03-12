@@ -120,8 +120,9 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
     pg_free_result($result);
     $command = "$EXE_PATH -f";
     exec($command, $out, $rtn);
-    print $expected;
-    $this->assertStringStartsWith($expected, $out[1]);
+    #print $expected . "\n";
+    #print $out[1] . "\n";
+    $this->assertStringStartsWith($expected, $out[2]);
   }
 
   /**
