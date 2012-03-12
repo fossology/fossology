@@ -844,7 +844,7 @@ function configYum($objRef)
   
   $RedFedRepo = 'redfed-fossology.repo';   // name of generic repo file.
   // replace the baseurl line with the current one.
-  if(!($fcont = file_get_contnets("../dataFiles/pkginstall/$RedFedRepo")));
+  if(!($fcont = file_get_contents("../dataFiles/pkginstall/$RedFedRepo")));
   {
     echo "FATAL! could not read repo file $RedFedRepo\n";
     exit(1);
