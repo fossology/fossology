@@ -79,6 +79,7 @@ class list_lic_files extends FO_Plugin
     $rf_shortname = GetParm("lic",PARM_RAW);
     $tag_pk = GetParm("tag",PARM_INTEGER);
     $Excl = GetParm("excl",PARM_RAW);
+    $Exclic = GetParm("exclic",PARM_RAW);
     $rf_shortname = rawurldecode($rf_shortname);
     if (empty($uploadtree_pk) || empty($rf_shortname))
     {
@@ -124,7 +125,11 @@ class list_lic_files extends FO_Plugin
         $text = _("Display");
         $text1 = _("excludes");
         $text2 = _("files with these extensions");
-        if (!empty($Excl)) $V .= "<br>$text <b>$text1</b> $text1: $Excl";
+        if (!empty($Excl)) $V .= "<br>$text <b>$text1</b> $text2: $Excl";
+
+        $text2 = _("files with these licenses");
+        if (!empty($Exclic)) $V .= "<br>$text <b>$text1</b> $text2: $Exclic";
+
 
         /* Get the page menu */
         if (($Count >= $Max) && ($Page >= 0))
@@ -151,28 +156,49 @@ class list_lic_files extends FO_Plugin
         $text = _("File");
         $V .= "<tr><th>$text</th><th>&nbsp";
         $LastPfilePk = -1;
+        $ExclArray = explode(":", $Excl);
+        $ExclicArray = explode(":", $Exclic);
         while ($row = pg_fetch_assoc($filesresult))
         {
+          $pfile_pk = $row['pfile_fk'];
+          $licstring = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $row['uploadtree_pk']);
+          $URLlicstring = urlencode($licstring);
+
           // Allow user to exclude files with this extension
           $FileExt = GetFileExt($row['ufile_name']);
+          $URL = $baseURL;
           if (!empty($Excl))
-          $URL = $baseURL . "&excl=$Excl:$FileExt";
+            $URL .= "&excl=$Excl:$FileExt";
           else
-          $URL = $baseURL . "&excl=$FileExt";
+            $URL .= "&excl=$FileExt";
+          if (!empty($Exclic)) $URL .= "&exclic=".urlencode($Exclic);
           $text = _("Exclude this file type.");
           $Header = "<a href=$URL>$text</a>";
 
+          /* Allow user to exclude files with this exact license list */
+          $URL = $baseURL;
+          if (!empty($Exclic))
+            $URL .= "&exclic=".urlencode($Exclic).":".$URLlicstring;
+          else
+            $URL .= "&exclic=$URLlicstring";
+          if (!empty($Excl)) $URL .= "&excl=$Excl";
+
+          $text = _("Exclude files with license");
+          $Header .= "<br><a href=$URL>$text: $licstring.</a>";
+
           $ok = true;
-          if ($Excl)
-          {
-            $ExclArray = explode(":", $Excl);
-            if (in_array($FileExt, $ExclArray)) $ok = false;
-          }
+          /* exclude by type */
+          if ($Excl) if (in_array($FileExt, $ExclArray)) $ok = false;
+
+          /* exclude by license */
+          if ($Exclic) if (in_array($licstring, $ExclicArray)) $ok = false;
+
+          if (empty($licstring)) $ok = false;
+
           if ($ok)
           {
             $V .= "<tr><td>";
             /* Tack on pfile to url - information only */
-            $pfile_pk = $row['pfile_fk'];
             $LinkLastpfile = $LinkLast . "&pfile=$pfile_pk";
             if ($LastPfilePk == $pfile_pk)
             {
@@ -189,8 +215,6 @@ class list_lic_files extends FO_Plugin
             $V .= $outdent;
             $V .= "</td>";
             $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
-
-            $licstring = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $row['uploadtree_pk']);
 
             // show the entire license list as a single string with links to the files
             // in this container with that license.
