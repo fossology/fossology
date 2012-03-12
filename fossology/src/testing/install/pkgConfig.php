@@ -838,14 +838,31 @@ function configYum($objRef)
 
   if(empty($objRef->yum))
   {
-    echo "FATAL, no yum config file to install\n";
+    echo "FATAL, no yum install line to install\n";
     return(FALSE);
+  }
+  
+  $RedFedRepo = 'redfed-fossology.repo';   // name of generic repo file.
+  // replace the baseurl line with the current one.
+  if(!($fcont = file_get_contnets("../dataFiles/pkginstall/$RedFedRepo")));
+  {
+    echo "FATAL! could not read repo file $RedFedRepo\n";
+    exit(1);
+  }
+  $newRepo = preg_replace("/baseurl=(.*)?/", $objRef->yum, $fcont,-1, $cnt);
+  echo "DB: matched count is:$cnt\n";
+  echo "DB: newRepo is:$newRepo\n";
+  // write the file, fix below to copy the correct thing...
+  if(!($written = file_put_contents("../dataFiles/pkginstall/$RedFedRepo", $fcont)))
+  {
+    echo "FATAL! could not write repo file $RedFedRepo\n";
+    exit(1);
   }
 
   // coe plays with yum stuff, check if yum.repos.d exists and if not create it.
   if(is_dir('/etc/yum.repos.d'))
   {
-    copyFiles("../dataFiles/pkginstall/$objRef->yum", '/etc/yum.repos.d/fossology.repo');
+    copyFiles("../dataFiles/pkginstall/$RedFedRepo", '/etc/yum.repos.d/fossology.repo');
   }
   else
   {
@@ -855,7 +872,7 @@ function configYum($objRef)
       echo "FATAL! could not create yum.repos.d\n";
       return(FALSE);
     }
-    copyFiles($objRef->yum, '/etc/yum.repos.d/fossology.repo');
+    copyFiles("../dataFiles/pkginstall/$RedFedRepo", '/etc/yum.repos.d/fossology.repo');
   }
   return(TRUE);
 }  // configYum
