@@ -846,9 +846,10 @@ function configYum($objRef)
   // replace the baseurl line with the current one.
   $n = "../dataFiles/pkginstall/" . $RedFedRepo;
   echo "DB: name is:$n\n";
-  if(!($fcont = file_get_contents($n)));
+  $fcont = file_get_contents($n);
+  if(!$fcont);
   {
-    echo "FATAL! could not read repo file $RedFedRepo\n";
+    echo "FATAL! could not read repo file $n\n";
     exit(1);
   }
   $newRepo = preg_replace("/baseurl=(.*)?/", $objRef->yum, $fcont,-1, $cnt);
