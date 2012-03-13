@@ -858,7 +858,7 @@ function configYum($objRef)
   echo "DB: matched count is:$cnt\n";
   echo "DB: newRepo is:\n$newRepo\n";
   // write the file, fix below to copy the correct thing...
-  if(!($written = file_put_contents("../dataFiles/pkginstall/" . $RedFedRepo, $fcont)))
+  if(!($written = file_put_contents("../dataFiles/pkginstall/" . $RedFedRepo, $newRepo)))
   {
     echo "FATAL! could not write repo file $RedFedRepo\n";
     exit(1);
