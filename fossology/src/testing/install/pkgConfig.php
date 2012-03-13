@@ -853,10 +853,10 @@ function configYum($objRef)
     //echo "FATAL! could not read repo file $n\n";
     //exit(1);
   //}
-  echo "DB: contents is:\n$fcont\n";
+  //echo "DB: contents is:\n$fcont\n";
   $newRepo = preg_replace("/baseurl=(.*)?/", $objRef->yum, $fcont,-1, $cnt);
   echo "DB: matched count is:$cnt\n";
-  echo "DB: newRepo is:$newRepo\n";
+  echo "DB: newRepo is:\n$newRepo\n";
   // write the file, fix below to copy the correct thing...
   if(!($written = file_put_contents("../dataFiles/pkginstall/" . $RedFedRepo, $fcont)))
   {
@@ -867,6 +867,7 @@ function configYum($objRef)
   // coe plays with yum stuff, check if yum.repos.d exists and if not create it.
   if(is_dir('/etc/yum.repos.d'))
   {
+    echo "DB: copying $RedFedRepo\n";
     copyFiles("../dataFiles/pkginstall/" . $RedFedRepo, '/etc/yum.repos.d/fossology.repo');
   }
   else
@@ -877,6 +878,7 @@ function configYum($objRef)
       echo "FATAL! could not create yum.repos.d\n";
       return(FALSE);
     }
+    echo "DB: copying $RedFedRepo\n";
     copyFiles("../dataFiles/pkginstall/" . $RedFedRepo, '/etc/yum.repos.d/fossology.repo');
   }
   return(TRUE);
