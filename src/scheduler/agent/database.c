@@ -341,10 +341,6 @@ void email_notification(job j)
   char sql[1024];
   FILE* mail_io;
   GString* email_txt;
-  GError* error = NULL;
-  gint mail_pid;
-  gint mail_stdin;
-  gint msg_len;
 
   if(is_special(j->agent_type, SAG_NOEMAIL))
     return;
@@ -407,7 +403,8 @@ void email_notification(job j)
     }
     else
     {
-      WARNING("Unable to spawn email notification process.\n");
+      WARNING("Unable to spawn email notification process: '%s'.\n",
+          email_command);
     }
 
     if(email_regex != NULL)
