@@ -1790,6 +1790,36 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
   exit(rc);
 } /* TraverseChild() */
 
+
+/**
+ * \brief Count the number of times Dirname appears in Pathname
+ *        This is used to limit recursion in test archives that infinitely recurse.
+ * \param Pathname Pathname of file to process
+ * \param Dirname  Directory name to search for
+ * \return number of occurances of Dirname in Pathname
+ **/
+ int CountFilename(char *Pathname, char *Dirname)
+ {
+   char *FullDirname;  /* full Dirname (includes forward and trailing slashes and null terminator) */
+   char *sp;
+   int   FoundCount = 0;
+   int   NameLen;
+
+   FullDirname = calloc(strlen(Dirname) + 3, sizeof(char));
+   sprintf(FullDirname, "/%s/", Dirname);
+   NameLen = strlen(FullDirname);
+
+   sp = Pathname;
+   while (((sp = strstr(sp, FullDirname)) != NULL))
+   {
+     FoundCount++;
+     sp += NameLen;
+   }
+   free(FullDirname);
+   return(FoundCount);
+ }
+
+
 /***************************************************
  Traverse(): Find all files, traverse all directories.
  This is a depth-first search, in inode order!
@@ -1810,9 +1840,19 @@ int	Traverse	(char *Filename, char *Basename,
   ContainerInfo CI,CImeta;
   int IsContainer=0;
   int RecurseOk=1;	/* should it recurse? (only on unique inserts) */
+  int MaxRepeatingName = 3;
 
   if (!Filename || (Filename[0]=='\0')) return(IsContainer);
   if (Verbose > 0) printf("Traverse(%s) -- %s\n",Filename,Label);
+
+  /* to prevent infinitely recursive test archives, count how many times the basename
+     occurs in Filename.  If over MaxRepeatingName, then return 0 
+   */
+  if (CountFilename(Filename, basename(Filename)) >= MaxRepeatingName)
+  {
+	  fprintf(stderr, "Traverse() recursion terminating due to max directory repetition: %s", Filename);
+    return 0;
+  }
 
   /* clear the container */
   memset(&CI,0,sizeof(ContainerInfo));
