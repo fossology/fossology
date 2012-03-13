@@ -854,7 +854,7 @@ function configYum($objRef)
     //exit(1);
   //}
   //echo "DB: contents is:\n$fcont\n";
-  $newRepo = preg_replace("/baseurl=(.*)?/", $objRef->yum, $fcont,-1, $cnt);
+  $newRepo = preg_replace("/baseurl=(.*)?/", 'baseurl=' . $objRef->yum, $fcont,-1, $cnt);
   echo "DB: matched count is:$cnt\n";
   echo "DB: newRepo is:\n$newRepo\n";
   // write the file, fix below to copy the correct thing...
