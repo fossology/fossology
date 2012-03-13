@@ -72,8 +72,8 @@ int pause_f = 1;
 int s_pid;
 int s_daemon;
 int s_port;
-char* sysconfigdir;
-fo_conf* sysconfig;
+char* sysconfigdir = NULL;
+fo_conf* sysconfig = NULL;
 char* logdir;
 
 /* ************************************************************************** */
@@ -457,6 +457,9 @@ void load_foss_config()
 
   /* clear all previous configurations */
   host_list_clean();
+
+  if(sysconfig != NULL)
+    fo_config_free(sysconfig);
 
   /* parse the config file */
   snprintf(addbuf, sizeof(addbuf), "%s/fossology.conf", sysconfigdir);
