@@ -128,10 +128,10 @@ const char* jobsql_priority = "\
 /* ***    notification lives.                                             *** */
 /* ************************************************************************** */
 
-char*  subject;
-char*  header = NULL;
-char*  footer = NULL;
-char* mail_argv[3];
+char*  email_subject = NULL;
+char*  email_header  = NULL;
+char*  email_footer  = NULL;
+char*  email_command = NULL;
 struct stat header_sb;
 struct stat footer_sb;
 GRegex* email_regex = NULL;
@@ -141,8 +141,9 @@ GRegex* email_regex = NULL;
   email_notify = 0;                              \
   error = NULL; }
 
-#define DEFAULT_HEADER "FOSSology scan complete\nmessage:\""
-#define DEFAULT_FOOTER "\""
+#define EMAIL_BUILD_CMD "%s -s '%s' %s"
+#define DEFAULT_HEADER  "FOSSology scan complete\nmessage:\""
+#define DEFAULT_FOOTER  "\""
 #define DEFAULT_SUBJECT "FOSSology scan complete\n"
 
 /**
@@ -159,10 +160,12 @@ void email_load()
 	char fname[FILENAME_MAX];
 	GError* error = NULL;
 
-	if(header && strcmp(header, DEFAULT_HEADER) != 0)
-	  munmap(header, header_sb.st_size);
-	if(footer && strcmp(footer, DEFAULT_FOOTER) != 0)
-	  munmap(footer, footer_sb.st_size);
+	if(email_header && strcmp(email_header, DEFAULT_HEADER) != 0)
+	  munmap(email_header, header_sb.st_size);
+	if(email_footer && strcmp(email_footer, DEFAULT_FOOTER) != 0)
+	  munmap(email_footer, footer_sb.st_size);
+	if(email_subject && strcmp(email_subject, DEFAULT_SUBJECT) != 0)
+	  g_free(email_subject);
 
 	/* load the header */
 	email_notify = 1;
@@ -176,11 +179,11 @@ void email_load()
 	  EMAIL_ERROR("unable to open file for email header: %s", fname);
 	if(email_notify && fstat(fd, &header_sb) == -1)
 	  EMAIL_ERROR("unable to fstat email header: %s", fname);
-	if(email_notify && (header = mmap(NULL, header_sb.st_size, PROT_READ,
+	if(email_notify && (email_header = mmap(NULL, header_sb.st_size, PROT_READ,
 	    MAP_SHARED, fd, 0)) == MAP_FAILED)
 	  EMAIL_ERROR("unable to mmap email header: %s", fname);
 	if(!email_notify)
-	  header = DEFAULT_HEADER;
+	  email_header = DEFAULT_HEADER;
 
 	/* load the footer */
 	email_notify = 1;
@@ -194,30 +197,27 @@ void email_load()
 	  EMAIL_ERROR("unable to open file for email footer: %s", fname);
 	if(email_notify && fstat(fd, &footer_sb) == -1)
 	  EMAIL_ERROR("unable to fstat email footer: %s", fname);
-	if(email_notify && (footer = mmap(NULL, footer_sb.st_size, PROT_READ,
+	if(email_notify && (email_footer = mmap(NULL, footer_sb.st_size, PROT_READ,
 	    MAP_SHARED, fd, 0)) == MAP_FAILED)
 	  EMAIL_ERROR("unable to mmap email footer: %s", fname);
 	if(!email_notify)
-	  footer = DEFAULT_FOOTER;
+	  email_footer = DEFAULT_FOOTER;
 	error = NULL;
 
-	/* load the subject */
-	subject = fo_config_get(sysconfig, "EMAILNOTIFY", "subject", &error);
+	/* load the email_subject */
+	email_subject = fo_config_get(sysconfig, "EMAILNOTIFY", "email_subject", &error);
 	if(error)
-	  subject = DEFAULT_SUBJECT;
+	  email_subject = DEFAULT_SUBJECT;
 	if(error && error->code == fo_missing_key)
-	  EMAIL_ERROR("email notification setting key \"subject\" missing. Using default subject");
-	if(subject[strlen(subject)] != '\n')
-	  subject = g_strdup_printf("%s\n", subject);
+	  EMAIL_ERROR("email notification setting key \"email_subject\" missing. Using default subject");
+	email_subject = g_strdup(email_subject);
 	error = NULL;
 
 	/* load the client */
 	email_notify = 1;
-	mail_argv[0] = fo_config_get(sysconfig, "EMAILNOTIFY", "client", &error);
-	mail_argv[1] = NULL;
-	mail_argv[2] = NULL;
+	email_command = fo_config_get(sysconfig, "EMAILNOTIFY", "client", &error);
 	if(error)
-	  mail_argv[0] = "/usr/bin/mail";
+	  email_command = "/usr/bin/mailx";
 	if(error && error->code == fo_missing_key)
 	  EMAIL_ERROR("email notification setting key \"client\" missing. Using default client");
 	error = NULL;
@@ -336,8 +336,10 @@ void email_notification(job j)
   PGresult* db_result;
   int j_id = j->id;;
   int upload_id;
-  char* val, * finished;
+  char* val;
+  char* final_cmd;
   char sql[1024];
+  FILE* mail_io;
   GString* email_txt;
   GError* error = NULL;
   gint mail_pid;
@@ -376,48 +378,42 @@ void email_notification(job j)
 
   if(PQget(db_result, 0, "email_notify")[0] == 'y')
   {
-    mail_argv[1] = PQget(db_result, 0, "user_email");
-    g_spawn_async_with_pipes(NULL, mail_argv, NULL,
-        G_SPAWN_STDOUT_TO_DEV_NULL | G_SPAWN_STDERR_TO_DEV_NULL,
-        NULL, NULL, &mail_pid, &mail_stdin, NULL, NULL, &error);
+    email_txt = g_string_new("");
+    g_string_append(email_txt, email_header);
+    g_string_append(email_txt, job_message(j));
+    g_string_append(email_txt, email_footer);
 
-    if(!error)
+    if(email_regex != NULL)
     {
-      email_txt = g_string_new("");
-      g_string_append(email_txt, header);
-      g_string_append(email_txt, job_message(j));
-      g_string_append(email_txt, footer);
-
-      if(email_regex != NULL)
-      {
-        val = g_regex_replace_eval(email_regex, email_txt->str, email_txt->len,
-            0, 0, (GRegexEvalCallback)email_replace, j, NULL);
-      }
-      else
-        val = email_txt->str;
-
-      finished = g_strdup_printf("%s%s \n", subject, val);
-      msg_len = strlen(finished);
-
-      // 0x03 is ascii for "End of Text"
-      // this is done so that mail knows when the end of the body is
-      finished[msg_len - 2] = 0x03;
-
-      if(write(mail_stdin, finished, msg_len) == -1)
-        ERROR("write of message to mailx failed");
-      fsync(mail_stdin);
-
-      if(email_regex != NULL)
-        g_free(val);
-      g_string_free(email_txt, TRUE);
-      g_free(finished);
+      val = g_regex_replace_eval(email_regex, email_txt->str, email_txt->len,
+          0, 0, (GRegexEvalCallback)email_replace, j, NULL);
     }
     else
     {
-      WARNING("unable to spawn mailx process: %s", error->message);
+      val = email_txt->str;
     }
 
-    mail_argv[1] = NULL;
+    final_cmd = g_strdup_printf(EMAIL_BUILD_CMD, email_command, email_subject,
+        PQget(db_result, 0, "user_email"));
+
+    if((mail_io = popen(final_cmd, "w")) != NULL)
+    {
+      fprintf(mail_io, "%s", val);
+
+      putc(-1,   mail_io);
+      putc('\n', mail_io);
+
+      pclose(mail_io);
+    }
+    else
+    {
+      WARNING("Unable to spawn email notification process.\n");
+    }
+
+    if(email_regex != NULL)
+      g_free(val);
+    g_free(final_cmd);
+    g_string_free(email_txt, TRUE);
   }
 
   PQclear(db_result);
@@ -450,9 +446,9 @@ void database_init()
   }
   PQclear(db_result);
 
-  header = NULL;
-  footer = NULL;
-  subject = NULL;
+  email_header = NULL;
+  email_footer = NULL;
+  email_subject = NULL;
   email_regex = NULL;
 
   email_load();
