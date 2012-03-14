@@ -93,7 +93,7 @@ void test_find_end()
   /* string, i.e. they are magic numbers, only change them if you know the  */
   /* correct indices in the above string                                    */
   FO_ASSERT_EQUAL(find_end(text, 0, strlen(text)), 64);
-  FO_ASSERT_EQUAL(find_end(text, 70, strlen(text)), 108);
+  FO_ASSERT_EQUAL(find_end(text, 70, strlen(text)), 270);
 }
 
 void test_strip_empty_entries()
@@ -276,16 +276,16 @@ void test_copyright_analyze()
 
   copyright_analyze(copy, istr);
   FO_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 5);
-  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->text,
-      "copyright (c) 2010 john not_a_person smith"));
-  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 1))->text,
-      "written by john not_a_person smith"));
-  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->text,
-      "copyright (c) 2009, 2010"));
-  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 3))->text,
-      "<smith.not.john@not.a.url>"));
-  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 4))->text,
-      "http://www.not.a.url/index.html"));
+  FO_ASSERT_STRING_EQUAL(((copy_entry)cvector_get(copy->entries, 0))->text,
+      "copyright (c) 2010 john not_a_person smith and this makes the line longer");
+  FO_ASSERT_STRING_EQUAL(((copy_entry)cvector_get(copy->entries, 1))->text,
+      "written by john not_a_person smith and this makes the line longer");
+  FO_ASSERT_STRING_EQUAL(((copy_entry)cvector_get(copy->entries, 2))->text,
+      "copyright (c) 2009, 2010 and this makes the line longer");
+  FO_ASSERT_STRING_EQUAL(((copy_entry)cvector_get(copy->entries, 3))->text,
+      "<smith.not.john@not.a.url>");
+  FO_ASSERT_STRING_EQUAL(((copy_entry)cvector_get(copy->entries, 4))->text,
+      "http://www.not.a.url/index.html");
 }
 
 void test_copyright_email_url()
