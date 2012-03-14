@@ -824,7 +824,7 @@
 #####
 %ENTRY%	_LT_BSD_1
 %KEY%	"distribut"
-%STR%	"r?e?-?distribution and/?o?r? use in source and binary form(s|s =SOME= with or without modificatio?ns?) (is|are) (permitted|permitted for any purpose) provided that"
+%STR%	"r?e?-?distribution and/?o?r? use in source and binary form(s|s =SOME= with or without modi(fi|.?)catio?ns?) (is|are) (permitted|permitted for any purpose) provided that"
 #####
 # There are a couple of different forms of this licen[cs]e, and some copies
 # of the licensing terms use "it's" in the text (which gets changed to
