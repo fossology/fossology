@@ -50,6 +50,10 @@ int main(int argc, char** argv)
   sysconfigdir = DEFAULT_SETUP;
   logdir = LOG_DIR;
 
+  /* get this done first */
+  g_thread_init(NULL);
+  g_type_init();
+
   /* the options for the command line parser */
   GOptionEntry entries[] =
   {
@@ -87,6 +91,9 @@ int main(int argc, char** argv)
 
   g_option_context_free(options);
 
+  /* first check where the log should be printed to */
+  if(log != NULL) { set_log(log); }
+
   /* create data structs, load config and set the user groups */
   agent_list_init();
   host_list_init();
@@ -97,7 +104,6 @@ int main(int argc, char** argv)
   /* perform pre-initialization checks */
   if(s_daemon && daemon(0, 0) == -1) { return -1; }
   if(db_init) { database_init();  return 0; }
-  if(log != NULL) { set_log(log); }
   if(ki_shut) { return kill_scheduler(FALSE); }
   if(ki_kill) { return kill_scheduler(TRUE);  }
 
@@ -115,8 +121,6 @@ int main(int argc, char** argv)
   /* *** do all the initializations *** */
   /* ******* order matters here ******* */
   /* ********************************** */
-  g_thread_init(NULL);
-  g_type_init();
   interface_init();
   database_init();
   load_agent_config();

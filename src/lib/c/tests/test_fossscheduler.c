@@ -43,7 +43,7 @@ extern int  items_processed;
 extern char buffer[];
 extern int  valid;
 extern int  found;
-extern int  verbose;
+extern int  agent_verbose;
 
 extern void fo_heartbeat();
 
@@ -135,9 +135,9 @@ void signal_connect_end()
 void signal_connect_verbose()
 {
   CU_ASSERT_FALSE(valid);
-  CU_ASSERT_EQUAL(verbose, VERBOSE_TEST);
+  CU_ASSERT_EQUAL(agent_verbose, VERBOSE_TEST);
 
-  verbose = 0;
+  agent_verbose = 0;
 
   write_con("CLOSE\n");
 }
@@ -172,7 +172,7 @@ void test_scheduler_no_connect()
   CU_ASSERT_FALSE(found);
   CU_ASSERT_EQUAL(items_processed, 0);
   CU_ASSERT_FALSE(valid);
-  CU_ASSERT_FALSE(verbose);
+  CU_ASSERT_FALSE(agent_verbose);
 
   /* make sure that fo_scheduler_connect didn't write anything to stdout */
   fprintf(stdout, FROM_UNIT);
@@ -201,7 +201,7 @@ void test_scheduler_connect()
   CU_ASSERT_TRUE(found);
   CU_ASSERT_EQUAL(items_processed, 0);
   CU_ASSERT_FALSE(valid);
-  CU_ASSERT_FALSE(verbose);
+  CU_ASSERT_FALSE(agent_verbose);
 
   /* check that the correct stuff was written to stdout */
   CU_ASSERT_PTR_NOT_NULL(fgets(buffer, sizeof(buffer), read_from));
@@ -315,8 +315,8 @@ void test_scheduler_disconnect()
 {
   found = 1;
 
-  fo_scheduler_disconnect();
-  CU_ASSERT_STRING_EQUAL(fgets(buffer, sizeof(buffer), read_from), "BYE\n");
+  fo_scheduler_disconnect(2);
+  CU_ASSERT_STRING_EQUAL(fgets(buffer, sizeof(buffer), read_from), "BYE 2\n");
   CU_ASSERT_FALSE(valid);
   CU_ASSERT_FALSE(found);
 }

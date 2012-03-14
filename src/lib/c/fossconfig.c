@@ -16,21 +16,46 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 ************************************************************** */
 
+/* local includes */
 #include <fossconfig.h>
 
+/* std library includes */
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
+/* glib includes */
 #include <glib.h>
 
 /* ************************************************************************** */
 /* *** utility ************************************************************** */
 /* ************************************************************************** */
 
-fo_conf* dest;
-GTree*   current_group;
+/**
+ * Complicated regular expression for parsing the different elements of the
+ * ini file format.
+ *
+ * The parts:
+ *   line 1: matches ini comments             : "; something \n"
+ *   line 2: matches ini groups               : "[group_name]\n"
+ *   line 3: matches ini key-value pairs      : "key = value\n"
+ *   line 4: matches ini key-value list pairs : "key[] = value\n"
+ *
+ * please refer to the glib regular expression syntax for more information about
+ * how the different parts of the regex work.
+ */
+static const gchar* fo_conf_pattern = "\
+    (?<comment>;.*)\n|\
+    (?<group>\\[(?<gname>[\\w\\d_]+)\\])\n|\
+    (?<key>  ([\\w\\d_]+))      (?:[ \t]*) = (?:[ \t]*)(?<value>.+)\n|\
+    (?<klist>([\\w\\d_]+))\\[\\](?:[ \t]*) = (?:[ \t]*)(?<vlist>.+)\n|\
+    (?:\\s*)\n";
+
+static const gchar* fo_conf_variable = "\\$(\\w*)";
+
+static GRegex* fo_conf_parse;
+static GRegex* fo_conf_replace;
 
 /**
  * A wrapper function for the strcmp function that allows it to mascarade as a
@@ -78,276 +103,132 @@ static gboolean collect_keys(char* key, gpointer* value, char** data)
     { g_set_error(error, domain, code, __VA_ARGS__); \
     return 0; }
 
-FILE* yyin;
-int   lex_idx;
-char  lex[BUFFER_SIZE];
-int   yyline, yyposs;
-char  fname[FILENAME_MAX];
-
 /**
- * @brief Gets the next character from the input file. This function maintains
- *        yyline and yyposs.
+ * TODO
  *
- * @return the character
+ * @param match
+ * @param ret
+ * @param data
+ * @return
  */
-static int next()
+static gboolean fo_config_sub(const GMatchInfo* match, GString* ret,
+    gpointer data)
 {
-  static int c = '\0';
+  GTree* group = (GTree*)data;
+  gchar* key = g_match_info_fetch(match, 1);
+  gchar* sub = g_tree_lookup(group, key);
 
-  if(c == '\n')
-  {
-    yyline++;
-    yyposs = 0;
-  }
+  g_string_append(ret, sub);
+  g_free(key);
 
-  c = fgetc(yyin);
-  lex[lex_idx++] = c;
-  yyposs++;
-
-  return c;
+  return FALSE;
 }
 
 /**
- * @brief Returns a character to the input file.
+ * TODO
  *
- * @param c the character to put back into the stream
+ * @param group
+ * @param key
+ * @param val
+ * @param list
+ * @param fname
+ * @param line
+ * @param error
+ * @return
  */
-static int replace(int c)
+static int fo_config_key(GTree* group, gchar* key, gchar* val, gboolean list,
+    gchar* fname, guint line, GError** error)
 {
-  lex[--lex_idx] = '\0';
-  if(ungetc(c, yyin) == EOF)
-    return 0;
+  gchar* tmp = g_regex_replace_eval(fo_conf_replace, val, -1, 0, 0,
+      fo_config_sub, group, NULL);
 
-  if(yyposs == 0)
-    yyline--;
-  else
-    yyposs--;
-
-  return 1;
-}
-
-/**
- * @brief gets the string from the current location in file to the end of the
- *        line or the end of file is reached.
- *
- * @param dst the location for storing the string
- * @return 0 for invalid data in dst, 1 for valid data
- */
-static int next_nl()
-{
-  int c;
-
-  while(yynext() && c != '\n');
-  lex[--lex_idx] = '\0';
-
-  return 1;
-}
-
-/**
- * @brief gets all characters between the current location and the next
- *        non-white space character.
- *
- * @return the next non-whitespace character
- */
-static int next_nws()
-{
-  int c;
-
-  while(yynext() && isspace(c));
-  lex_idx = 0;
-  memset(lex, '\0', sizeof(lex));
-
-  if(isprint(c))
-    lex[lex_idx++] = c;
-
-  return c;
-}
-
-/**
- * @brief Parses a group from the input file. This will be called when a '['
- *        appears at the start of a line. The line is then parsed and it expects
- *        to find a ']' at the end of the line. If the line does not end in a
- *        ']' then it is an error.
- *
- * @param error object that allows errors to be passed out of the parser
- * @return 1 if the parse was successful, 0 otherwise
- */
-static int group(GError** error)
-{
-  gchar* key;
-
-  lex[0] = '\0';
-  lex_idx = 0;
-
-  next_nl();
-
-  if(lex[lex_idx - 1] != ']')
-    throw_error(
-        error,
-        PARSE_ERROR,
-        fo_invalid_group,
-        "%s[line %d]: invalid group name",
-        fname, yyline);
-
-  lex[--lex_idx] = '\0';
-  key = g_strdup(lex);
-
-  current_group = g_tree_new_full(str_comp, NULL, g_free, g_free);
-  g_tree_insert(dest->group_map, key, current_group);
-
-  return 1;
-}
-
-/**
- * @brief Takes the value associated with a key and substitues any other variables
- *        for the ones in the value string.
- *
- * i.e.
- * if:
- *   DUMMY = something
- * then:
- *   ECHO = something $DUMMY
- * becomes:
- *   ECHO = something something
- *
- * @param src the value to do the replacement for
- * @return a new string that the caller must free
- */
-static char* sub(char* src) {
-  int src_idx;
-  int dst_idx;
-  int dst_size;
-  int src_size;
-  char* dst;
-  char* sub;
-  char buf[256];
-
-  src_size = strlen(src);
-  dst_size = 0;
-
-  for(src_idx = 0; src_idx < src_size; src_idx++) {
-    if(src[src_idx] == '$') {
-      dst_idx = 0;
-      sub = NULL;
-
-      memset(buf, '\0', sizeof(buf));
-      while(src[src_idx]) {
-        buf[dst_idx++] = src[++src_idx];
-
-        if((sub = g_tree_lookup(current_group, buf)) != NULL) {
-          dst_size += strlen(sub);
-          break;
-        }
-      }
-      continue;
-    }
-
-    dst_size++;
-  }
-
-  dst = g_new0(char, dst_size + 1);
-  dst_idx = 0;
-  for(src_idx = 0; src_idx < src_size; src_idx++) {
-    if(src[src_idx] == '$') {
-      dst_size = 0;
-      sub = NULL;
-
-      memset(buf, '\0', sizeof(buf));
-      while(src[src_idx]) {
-        buf[dst_size++] = src[++src_idx];
-
-        if((sub = g_tree_lookup(current_group, buf)) != NULL) {
-          strcpy(dst + strlen(dst), sub);
-          dst_idx = strlen(dst);
-          break;
-        }
-      }
-
-      continue;
-    }
-
-    dst[dst_idx++] = src[src_idx];
-  }
-
-  return dst;
-}
-
-/**
- * @brief reads a key from the input file. This will first read the name of the
- *        key, then check for the '=' delimiter and finally read to a new line
- *        and record the key/value pair. If the key is an array key (i.e. key
- *        ends with []) then the value string will be appended to.
- *
- * @param error GError object allowing errors to be created
- * @return 0 of fail, 1 of success
- */
-static int key(GError** error) {
-  int c;
-  gchar* key;
-  gchar* tmp;
-  gchar* val;
-  int    len;
-
-  while(yynext() && c != '=' && c != '\n' && !isspace(c));
-  replace(c);
-  key = g_strdup(lex);
-  len = strlen(key);
-  while(yynext() && c != '=' && c != '\n' && isspace(c));
-
-  if(current_group == NULL)
+  if(group == NULL)
     throw_error(
         error,
         PARSE_ERROR,
         fo_invalid_key,
         "%s[line %d]: key \"%s\" does not have an associated group",
-        fname, yyline, key);
+        fname, line, key);
 
-  if(c != '=')
-    throw_error(
-        error,
-        PARSE_ERROR,
-        fo_invalid_key,
-        "%s[line %d]: invalid key/value expression \"%s\"",
-        fname, yyline, key);
-
-  if(key[len - 1] == ']' && key[len - 2] != '[')
-    throw_error(
-        error,
-        PARSE_ERROR,
-        fo_invalid_key,
-        "%s[line %d]: invalid key/value expression \"%s\"",
-        fname, yyline, key);
-
-  lex[0] = '\0';
-  next_nws();
-  next_nl();
-
-  if(key[len - 1] == ']')
+  if(list)
   {
-    key[len - 2] = '\0';
-    val = g_tree_lookup(current_group, key);
-    if(val)
+    if((val = g_tree_lookup(group, key)))
     {
-      tmp = sub(lex);
       val = g_strdup_printf("%s[%s]", val, tmp);
-      g_tree_insert(current_group, key, val);
       g_free(tmp);
     }
     else
     {
-      val = sub(lex);
-      tmp = g_strdup_printf("[%s]", val);
-      g_tree_insert(current_group, key, tmp);
-      g_free(val);
+      val = g_strdup_printf("[%s]", tmp);
+      g_free(tmp);
     }
   }
   else
   {
-    val = sub(lex);
-    g_tree_insert(current_group, key, val);
+    val = tmp;
   }
 
+  g_tree_insert(group, g_strdup(key), val);
   return 1;
+}
+
+/**
+ * TODO
+ *
+ * @param match
+ * @param g_current
+ * @param dest
+ * @param yyfile
+ * @param yyline
+ * @param error
+ * @return
+ */
+static gboolean fo_config_eval(const GMatchInfo* match, GTree** g_current,
+    fo_conf* dest, gchar* yyfile, guint yyline, GError** error)
+{
+  gchar* error_t = NULL;
+
+  /* check to make sure we haven't hit an error */
+  if((error_t = g_match_info_fetch_named(match, "error")) != NULL)
+  {
+    g_set_error(error, PARSE_ERROR, fo_invalid_file,
+        "%s[line %d]: incorrectly formated line \"%s\".",
+        yyfile, yyline, error_t);
+    g_free(error_t);
+    return TRUE;
+  }
+
+  gchar* group = g_match_info_fetch_named(match, "group");
+  gchar* gname = g_match_info_fetch_named(match, "gname");
+  gchar* key   = g_match_info_fetch_named(match, "key");
+  gchar* value = g_match_info_fetch_named(match, "value");
+  gchar* klist = g_match_info_fetch_named(match, "klist");
+  gchar* vlist = g_match_info_fetch_named(match, "vlist");
+
+  if(group != NULL && group[0])
+  {
+    *g_current = g_tree_new_full(str_comp, NULL, g_free, g_free);
+    g_tree_insert(dest->group_map, g_strdup(gname), *g_current);
+  }
+  else if(key != NULL && key[0])
+  {
+    if(!fo_config_key(*g_current, key, value, FALSE, yyfile, yyline, error))
+      return TRUE;
+  }
+  else if(klist != NULL && klist[0])
+  {
+    if(!fo_config_key(*g_current, klist, vlist, TRUE, yyfile, yyline, error))
+      return TRUE;
+  }
+
+  g_free(group);
+  g_free(gname);
+  g_free(key);
+  g_free(value);
+  g_free(klist);
+  g_free(vlist);
+
+  return FALSE;
 }
 
 /* ************************************************************************** */
@@ -367,75 +248,53 @@ static int key(GError** error) {
  */
 fo_conf* fo_config_load(char* rawname, GError** error) {
   fo_conf* ret;
-  int c;
+  gchar text[BUFFER_SIZE];
+  guint yyline = 0;
+  FILE* fd;
+  GMatchInfo* match;
 
   if(rawname == NULL)
     return NULL;
 
-  memset(fname, '\0', sizeof(fname));
-  strncpy(fname, rawname, sizeof(fname));
-  if((yyin = fopen(fname, "r")) == NULL)
-    throw_error(
-        error,
-        PARSE_ERROR,
-        fo_missing_file,
-        "unable to open config file \"%s\"",
-        fname);
+  if(fo_conf_parse == NULL)
+    fo_conf_parse = g_regex_new(fo_conf_pattern,
+        G_REGEX_EXTENDED | G_REGEX_OPTIMIZE, 0, NULL);
+  if(fo_conf_replace == NULL)
+    fo_conf_replace = g_regex_new(fo_conf_variable,
+        G_REGEX_EXTENDED | G_REGEX_OPTIMIZE, 0, NULL);
 
-  dest = g_new0(fo_conf, 1);
-  dest->group_map = NULL;
-  dest->key_sets = NULL;
-  dest->group_set = NULL;
-  dest->n_groups = 0;
-  dest->group_map = g_tree_new_full(str_comp, NULL, g_free,
-      (GDestroyNotify)g_tree_unref);
-  yyline = 1;
-  yyposs = 0;
-  current_group = NULL;
+  if((fd = fopen(rawname, "r")) == NULL)
+    throw_error(error, PARSE_ERROR, fo_missing_file,
+        "unable to open configuration file \"%s\"", rawname);
 
-  while((c = next_nws()) != EOF)
+  ret = g_new0(fo_conf, 1);
+  ret->group_map = NULL;
+  ret->key_sets = NULL;
+  ret->group_set = NULL;
+  ret->n_groups = 0;
+  ret->group_map = g_tree_new_full(str_comp, NULL, g_free,
+      (GDestroyNotify)g_tree_destroy);
+
+  GTree* g_current = NULL;
+
+  while(fgets(text, sizeof(text), fd) != NULL)
   {
-    lex[0] = c;
-    lex_idx = 1;
-
-    switch(c)
+    if(g_regex_match(fo_conf_parse, text, 0, &match))
     {
-      case ';': c = next_nl(); break;
-      case '[': c = group(error); break;
-      default:
-        if(isalnum(c))
-          c = key(error);
-        else
-        {
-          fo_config_free(dest);
-          dest = NULL;
-          throw_error(
-              error,
-              PARSE_ERROR,
-              fo_invalid_file,
-              "%s[line %d]: invalid char '%c', keys must start with an alphanumeric character",
-              fname, yyline, c);
-        }
-        break;
+      fo_config_eval(match, &g_current, ret, rawname, yyline, error);
+
+      if(*error)
+        return NULL;
+
+      g_match_info_free(match);
+      match = NULL;
     }
 
-    if(*error)
-    {
-      fo_config_free(dest);
-      dest = NULL;
-      return NULL;
-    }
-
-    if(!c || c == EOF)
-      return 0;
-
-    memset(lex, '\0', sizeof(lex));
+    yyline++;
   }
 
-  ret = dest;
-  current_group = NULL;
-  dest = NULL;
-  fclose(yyin);
+  fclose(fd);
+
   return ret;
 }
 
@@ -617,8 +476,8 @@ int fo_config_list_length(fo_conf* conf, char* group, char* key, GError** error)
 void fo_config_free(fo_conf* conf)
 {
   if(!conf) return;
-  if(conf->group_map) g_tree_unref(conf->group_map);
-  if(conf->key_sets)  g_tree_unref(conf->key_sets);
+  if(conf->group_map) g_tree_destroy(conf->group_map);
+  if(conf->key_sets)  g_tree_destroy(conf->key_sets);
   if(conf->group_set) g_free(conf->group_set);
 
   conf->group_map = NULL;

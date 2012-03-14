@@ -38,11 +38,11 @@ typedef struct host_internal* host;
  * declaration of private members for the host type.
  */
 struct host_internal {
-  char* name;         ///< the name of the host, used to store host internally to scheduler
-  char* address;      ///< the address of the host, used by ssh when starting a new agent
-  char* agent_dir;    ///< the location on the host machine where the executables are
-  int max;            ///< the max number of agents that can run on this host
-  int running;        ///< the number of agents currently running on this host
+  char* name;       ///< the name of the host, used to store host internally to scheduler
+  char* address;    ///< the address of the host, used by ssh when starting a new agent
+  char* agent_dir;  ///< the location on the host machine where the executables are
+  int max;          ///< the max number of agents that can run on this host
+  int running;      ///< the number of agents currently running on this host
 };
 
 /* ************************************************************************** */
@@ -64,7 +64,6 @@ void host_decrease_load(host h);
 void host_print(host h, GOutputStream* ostr);
 
 host get_host(int num);
-host name_host(char* name);
 void for_each_host(void(*callback)(host));
 void print_host_load(GOutputStream* ostr);
 int  num_hosts();

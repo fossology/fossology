@@ -115,7 +115,7 @@ void host_init(char* name, char* address, char* agent_dir, int max)
 void host_destroy(host h)
 {
   host_queue = g_list_remove(host_queue, h);
-  g_tree_steal(host_list, h->name);
+
   g_free(h->name);
   g_free(h->address);
   g_free(h->agent_dir);
@@ -192,19 +192,6 @@ host get_host(int num)
   host_queue = g_list_append(host_queue, ret);
 
   return ret;
-}
-
-/**
- * Gets a host by name, This is provided if a job needs to be run on a specific
- * host instead of on any host. This is done when the location of the files is
- * to be analyzed is on the host in question.
- *
- * @param name the name of the host to get
- * @return the host named
- */
-host name_host(char* name)
-{
-  return g_tree_lookup(host_list, name);
 }
 
 /**
