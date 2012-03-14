@@ -247,7 +247,7 @@ class user_add extends FO_Plugin {
         $V.= "</tr>\n";
         $text = _("Agents selected by default when uploading");
         $V .= "$Style<th>$text\n</th><td> ";
-        $V.= AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest"));
+        $V.= AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest", "wget_agent"));
 
         $V .= "</td>\n";
         $text = _("Default bucketpool");
