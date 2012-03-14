@@ -201,7 +201,7 @@ void update_scheduler()
       if(is_special(j->agent_type, SAG_LOCAL))
       {
         machine = name_host(LOCAL_HOST);
-        if(!(machine.running < machine.max))
+        if(!(machine->running < machine->max))
           break;
       }
       else if((machine = get_host(1)) == NULL)
