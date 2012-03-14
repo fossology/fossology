@@ -64,6 +64,7 @@ void host_decrease_load(host h);
 void host_print(host h, GOutputStream* ostr);
 
 host get_host(int num);
+host name_host(char* name);
 void for_each_host(void(*callback)(host));
 void print_host_load(GOutputStream* ostr);
 int  num_hosts();

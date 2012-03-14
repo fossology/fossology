@@ -601,7 +601,7 @@ void* agent_spawn(void* passed)
     /* if host is null, the agent will run locally to */
     /* run the agent localy, use the commands that    */
     /* were parsed when the meta_agent was created    */
-    if(strcmp(a->host_machine->address, "localhost") == 0)
+    if(strcmp(a->host_machine->address, LOCAL_HOST) == 0)
     {
       shell_parse(a->meta_data->raw_cmd, &argc, &args);
 
