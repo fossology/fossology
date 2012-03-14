@@ -365,7 +365,7 @@ class user_edit_self extends FO_Plugin
           }
           else
           {
-            $V.= AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest"));
+            $V.= AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest", "wget_agent"));
           }
         }
         $V .= "</td>\n";
