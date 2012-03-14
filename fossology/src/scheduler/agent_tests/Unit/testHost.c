@@ -79,23 +79,9 @@ void test_host_init()
   FO_ASSERT_PTR_NOT_NULL(host_queue);
   FO_ASSERT_EQUAL(g_tree_nnodes(host_list), 1);
   FO_ASSERT_EQUAL(g_list_length(host_queue), 1);
-}
 
-void test_host_destroy()
-{
-  h = g_tree_lookup(host_list, "local");
-
-  FO_ASSERT_PTR_NOT_NULL(h);
-
-  host_destroy(h);
-
-  FO_ASSERT_PTR_NULL(host_queue);
-  FO_ASSERT_EQUAL(g_tree_nnodes(host_list), 0);
-
-  host_init("local", "localhost", "directory", 8);
   host_init("other", "localhost", "directory", 3);
   host_init("last", "localhost", "directory", 3);
-  h = g_tree_lookup(host_list, "local");
 }
 
 void test_host_increase_load()
@@ -126,13 +112,6 @@ void test_get_host()
   FO_ASSERT_PTR_EQUAL(got, h);
 }
 
-void test_name_host()
-{
-  FO_ASSERT_PTR_EQUAL(name_host("local"), h);
-  FO_ASSERT_PTR_EQUAL(name_host("other"), g_tree_lookup(host_list, "other"));
-  FO_ASSERT_PTR_EQUAL(name_host("last"),  g_tree_lookup(host_list, "last"));
-}
-
 void test_for_each_host()
 {
   visit = 0;
@@ -156,11 +135,9 @@ CU_TestInfo tests_host[] =
 
     {"Test host_list_init",     test_host_list_init     },
     {"Test host_init",          test_host_init          },
-    {"Test host_destroy",       test_host_destroy       },
     {"Test host_increase_load", test_host_increase_load },
     {"Test host_decrease_load", test_host_decrease_load },
     {"Test host_get_host",      test_get_host           },
-    {"Test name_host",          test_name_host          },
     {"Test for_each_host",      test_for_each_host      },
     {"Test num_hosts",          test_num_hosts          },
     {"Test host_list_clean",    test_host_list_clean    },

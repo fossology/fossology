@@ -52,7 +52,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PROCESS_NAME "fo_scheduler"
 #endif
 
-#define TEST_ERROR(...)                                            \
+#define TEST_ERROR(error, ...)                                     \
   if(error)                                                        \
   {                                                                \
     lprintf("ERROR %s.%d: %s\n",                                   \
@@ -60,7 +60,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     lprintf("ERROR %s.%d: ", __FILE__, __LINE__);                  \
     lprintf(__VA_ARGS__);                                          \
     lprintf("\n");                                                 \
-    error = NULL;                                                  \
+    g_clear_error(&error);                                         \
     continue;                                                      \
   }                                                                \
 
@@ -383,29 +383,27 @@ void load_agent_config()
       if(error && error->code == fo_missing_file)
       {
         V_SCHED("CONFIG: Could not find %s\n", addbuf);
-        g_error_free(error);
-        error = NULL;
+        g_clear_error(&error);
         continue;
       }
-      TEST_ERROR("no additional info");
+      TEST_ERROR(error, "no additional info");
       V_SCHED("CONFIG: loading config file %s\n", addbuf);
 
       if(!fo_config_has_group(config, "default"))
       {
         lprintf("ERROR: %s must have a \"default\" group\n", addbuf);
         lprintf("ERROR: cause by %s.%d\n", __FILE__, __LINE__);
-        error = NULL;
         continue;
       }
 
       special = 0;
       name = ep->d_name;
       max = fo_config_list_length(config, "default", "special", &error);
-      TEST_ERROR("the special key should be of type list");
+      TEST_ERROR(error, "the special key should be of type list");
       for(i = 0; i < max; i++)
       {
         cmd = fo_config_get_list(config, "default", "special", i, &error);
-        TEST_ERROR("failed to load element %d of special list", i)
+        TEST_ERROR(error, "failed to load element %d of special list", i)
         if(strncmp(cmd, "EXCLUSIVE", 9) == 0)
           special |= SAG_EXCLUSIVE;
         else if(strncmp(cmd, "NOEMAIL", 7) == 0)
@@ -417,9 +415,9 @@ void load_agent_config()
       }
 
       cmd  = fo_config_get(config, "default", "command", &error);
-      TEST_ERROR("the default group must have a command key");
+      TEST_ERROR(error, "the default group must have a command key");
       tmp  = fo_config_get(config, "default", "max", &error);
-      TEST_ERROR("the default group must have a max key");
+      TEST_ERROR(error, "the default group must have a max key");
 
       if(!add_meta_agent(name, cmd, (max = atoi(tmp)), special))
       {
@@ -446,12 +444,12 @@ void load_agent_config()
  */
 void load_foss_config()
 {
-  char* tmp;                // pointer into a string
-  char** keys;
-  int max = -1;             // the number of agents to a host or number of one type running
-  int special = 0;          // anything that is special about the agent (EXCLUSIVE)
-  char addbuf[512];         // standard string buffer
-  char dirbuf[512];
+  char* tmp;                  // pointer into a string
+  char** keys;                // list of host names grabbed from the config file
+  int max = -1;               // the number of agents to a host or number of one type running
+  int special = 0;            // anything that is special about the agent (EXCLUSIVE)
+  char addbuf[512];           // standard string buffer
+  char dirbuf[FILENAME_MAX];
   GError* error = NULL;
   int i;
 

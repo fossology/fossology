@@ -187,6 +187,8 @@ void fo_scheduler_connect(int* argc, char** argv)
     signal(SIGALRM, fo_heartbeat);
     alarm(ALARM_SECS);
   }
+
+  alive = TRUE;
 }
 
 /**
