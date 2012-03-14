@@ -62,7 +62,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     lprintf("\n");                                                 \
     g_clear_error(&error);                                         \
     continue;                                                      \
-  }                                                                \
+  }
 
 /* global flags */
 int verbose = 0;
@@ -198,7 +198,13 @@ void update_scheduler()
   {
     while(peek_job() != NULL)
     {
-      if((machine = get_host(1)) == NULL)
+      if(is_special(j->agent_type, SAG_LOCAL))
+      {
+        machine = name_host(LOCAL_HOST);
+        if(!(machine.running < machine.max))
+          break;
+      }
+      else if((machine = get_host(1)) == NULL)
       {
         V_SCHED("JOB_INIT: could not find host\n");
         break;
@@ -410,6 +416,8 @@ void load_agent_config()
           special |= SAG_NOEMAIL;
         else if(strncmp(cmd, "NOKILL", 6) == 0)
           special |= SAG_NOKILL;
+        else if(strncmp(cmd, "LOCAL", 6) == 0)
+          special |= SAG_LOCAL;
         else if(strlen(cmd) != 0)
           WARNING("Invalid special type for agent %s: %s", name, cmd);
       }

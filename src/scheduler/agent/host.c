@@ -195,6 +195,17 @@ host get_host(int num)
 }
 
 /**
+ * TODO
+ *
+ * @param name
+ * @return
+ */
+host name_host(char* name)
+{
+  return g_tree_lookup(host_list, name);
+}
+
+/**
  * Calls the given function, passing each host as an argument to the function
  *
  * @param callback the function to call on every host
