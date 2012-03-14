@@ -30,10 +30,6 @@
  *
  * Created on Oct 20, 2010
  */
-require_once '/usr/share/php/PHPUnit/Framework.php';
-
-global $GlobalReady;
-$GlobalReady = TRUE;
 
 class cliParamsTest extends PHPUnit_Framework_TestCase {
 
@@ -41,7 +37,6 @@ class cliParamsTest extends PHPUnit_Framework_TestCase {
 	public $copyright;
 
 	function setUp() {
-		global $GlobalReady;
         $this->agentDir = '../../agent';
         $this->copyright = $this->agentDir .'/copyright';
 		return;
@@ -91,10 +86,10 @@ class cliParamsTest extends PHPUnit_Framework_TestCase {
 		// has to run out of the source tree.
 
     $expected = array(
-        'Total Found:     1482',
-        'Correct:         1404',
-        'False Positives: 78',
-        'False Negatives: 0');
+      'Total Found:     1506',
+      'Correct:         1403',
+      'False Positives: 103',
+      'False Negatives: 0');
 
         // make agent_tests the working directory.
         // -t requires the working dir to contain testdata/
