@@ -132,7 +132,7 @@ class list_lic_files extends FO_Plugin
 
 
         /* Get the page menu */
-        if (($Count >= $Max) && ($Page >= 0))
+        if (($Max > 0) && ($Count >= $Max) && ($Page >= 0))
         {
           $VM = "<P />\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
           $V .= $VM;
