@@ -410,16 +410,18 @@ void load_agent_config()
       {
         cmd = fo_config_get_list(config, "default", "special", i, &error);
         TEST_ERROR(error, "failed to load element %d of special list", i)
-        if(strncmp(cmd, "EXCLUSIVE", 9) == 0)
-          special |= SAG_EXCLUSIVE;
-        else if(strncmp(cmd, "NOEMAIL", 7) == 0)
-          special |= SAG_NOEMAIL;
-        else if(strncmp(cmd, "NOKILL", 6) == 0)
-          special |= SAG_NOKILL;
-        else if(strncmp(cmd, "LOCAL", 6) == 0)
-          special |= SAG_LOCAL;
-        else if(strlen(cmd) != 0)
-          WARNING("Invalid special type for agent %s: %s", name, cmd);
+        if(cmd[0] != '\0') {
+          if(strncmp(cmd, "EXCLUSIVE", 9) == 0)
+            special |= SAG_EXCLUSIVE;
+          else if(strncmp(cmd, "NOEMAIL", 7) == 0)
+            special |= SAG_NOEMAIL;
+          else if(strncmp(cmd, "NOKILL", 6) == 0)
+            special |= SAG_NOKILL;
+          else if(strncmp(cmd, "LOCAL", 6) == 0)
+            special |= SAG_LOCAL;
+          else if(strlen(cmd) != 0)
+            WARNING("Invalid special type for agent %s: %s", name, cmd);
+        }
       }
 
       cmd  = fo_config_get(config, "default", "command", &error);
