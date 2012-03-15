@@ -196,7 +196,7 @@ void update_scheduler()
 
   if(j == NULL && !lockout)
   {
-    while(peek_job() != NULL)
+    while((j = peek_job()) != NULL)
     {
       if(is_special(j->agent_type, SAG_LOCAL))
       {
@@ -210,7 +210,7 @@ void update_scheduler()
         break;
       }
 
-      j = next_job();
+      next_job();
       if(is_special(j->agent_type, SAG_EXCLUSIVE))
       {
         V_SCHED("JOB_INIT: exclusive, postponing initialization\n")
@@ -357,7 +357,7 @@ void load_agent_config()
 {
   DIR* dp;                  // directory pointer used to load meta agents;
   struct dirent* ep;        // information about directory
-  char addbuf[512];         // standard string buffer
+  char namebuf[512];        // holds the name of the current configuration file
   int max = -1;             // the number of agents to a host or number of one type running
   int special = 0;          // anything that is special about the agent (EXCLUSIVE)
   int i;
@@ -370,10 +370,10 @@ void load_agent_config()
   /* clear previous configurations */
   agent_list_clean();
 
-  snprintf(addbuf, sizeof(addbuf), "%s/%s/", sysconfigdir, AGENT_CONF);
-  if((dp = opendir(addbuf)) == NULL)
+  snprintf(namebuf, sizeof(namebuf), "%s/%s/", sysconfigdir, AGENT_CONF);
+  if((dp = opendir(namebuf)) == NULL)
   {
-    FATAL("Could not open agent config directory: %s", addbuf);
+    FATAL("Could not open agent config directory: %s", namebuf);
     return;
   }
 
@@ -382,22 +382,22 @@ void load_agent_config()
   {
     if(ep->d_name[0] != '.')
     {
-      snprintf(addbuf, sizeof(addbuf), "%s/%s/%s/%s.conf",
+      snprintf(namebuf, sizeof(namebuf), "%s/%s/%s/%s.conf",
           sysconfigdir, AGENT_CONF, ep->d_name, ep->d_name);
 
-      config = fo_config_load(addbuf, &error);
+      config = fo_config_load(namebuf, &error);
       if(error && error->code == fo_missing_file)
       {
-        V_SCHED("CONFIG: Could not find %s\n", addbuf);
+        V_SCHED("CONFIG: Could not find %s\n", namebuf);
         g_clear_error(&error);
         continue;
       }
       TEST_ERROR(error, "no additional info");
-      V_SCHED("CONFIG: loading config file %s\n", addbuf);
+      V_SCHED("CONFIG: loading config file %s\n", namebuf);
 
       if(!fo_config_has_group(config, "default"))
       {
-        lprintf("ERROR: %s must have a \"default\" group\n", addbuf);
+        lprintf("ERROR: %s must have a \"default\" group\n", namebuf);
         lprintf("ERROR: cause by %s.%d\n", __FILE__, __LINE__);
         continue;
       }
@@ -405,11 +405,13 @@ void load_agent_config()
       special = 0;
       name = ep->d_name;
       max = fo_config_list_length(config, "default", "special", &error);
-      TEST_ERROR(error, "the special key should be of type list");
+      TEST_ERROR(error, "%s: the special key should be of type list", namebuf);
       for(i = 0; i < max; i++)
       {
         cmd = fo_config_get_list(config, "default", "special", i, &error);
-        TEST_ERROR(error, "failed to load element %d of special list", i)
+        TEST_ERROR(error, "%s: failed to load element %d of special list",
+            namebuf, i)
+
         if(cmd[0] != '\0') {
           if(strncmp(cmd, "EXCLUSIVE", 9) == 0)
             special |= SAG_EXCLUSIVE;
@@ -420,14 +422,15 @@ void load_agent_config()
           else if(strncmp(cmd, "LOCAL", 6) == 0)
             special |= SAG_LOCAL;
           else if(strlen(cmd) != 0)
-            WARNING("Invalid special type for agent %s: %s", name, cmd);
+            WARNING("%s: Invalid special type for agent %s: %s",
+                namebuf, name, cmd);
         }
       }
 
       cmd  = fo_config_get(config, "default", "command", &error);
-      TEST_ERROR(error, "the default group must have a command key");
+      TEST_ERROR(error, "%s: the default group must have a command key", namebuf);
       tmp  = fo_config_get(config, "default", "max", &error);
-      TEST_ERROR(error, "the default group must have a max key");
+      TEST_ERROR(error, "%s: the default group must have a max key", namebuf);
 
       if(!add_meta_agent(name, cmd, (max = atoi(tmp)), special))
       {
