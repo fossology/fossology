@@ -47,9 +47,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 static const gchar* fo_conf_pattern = "\
     (?<comment>;.*)\n|\
-    (?<group>\\[(?<gname>[\\w\\d_]+)\\])\n|\
-    (?<key>  ([\\w\\d_]+))      (?:[ \t]*) = (?:[ \t]*)(?<value>.*)\n|\
-    (?<klist>([\\w\\d_]+))\\[\\](?:[ \t]*) = (?:[ \t]*)(?<vlist>.*)\n|\
+    (?<group>  \\[ (?:[ \t]*) (?<gname>[\\w\\d_]+) (?:[ \t]*) \\]) \n|\
+    (?<key>    ([\\w\\d_]+))      (?:[ \t]*) = (?:[ \t]*)(?<value>.*)\n|\
+    (?<klist>  ([\\w\\d_]+))\\[\\](?:[ \t]*) = (?:[ \t]*)(?<vlist>.*)\n|\
     (?:\\s*)\n";
 
 static const gchar* fo_conf_variable = "\\$(\\w*)";
