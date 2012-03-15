@@ -142,7 +142,7 @@ void fo_scheduler_connect(int* argc, char** argv)
     sysconfig = fo_config_load(fname, &error);
     if(error)
     {
-      fprintf(stderr, "ERROR %s.%d: unable to open system configuration: %s\n",
+      fprintf(stderr, "FATAL %s.%d: unable to open system configuration: %s\n",
           __FILE__, __LINE__, error->message);
       exit(-1);
     }
@@ -150,24 +150,18 @@ void fo_scheduler_connect(int* argc, char** argv)
     snprintf(fname, FILENAME_MAX, "%s/mods-enabled/%s/VERSION",
         sysconfigdir, module_name);
 
-    FILE * file = fopen(fname, "r");
-    if (file)
+    version = fo_config_load(fname, &error);
+    if(error)
     {
-      version = fo_config_load(fname, &error);
-      if(error)
-      {
-        fprintf(stderr, "ERROR %s.%d: unable to open VERSION configuration: %s\n",
-            __FILE__, __LINE__, error->message);
-        exit(-1);
-      }
+      fprintf(stderr, "FATAL %s.%d: unable to open VERSION configuration: %s\n",
+          __FILE__, __LINE__, error->message);
+      exit(-1);
+    }
 
-      if((keys = g_tree_lookup(version->group_map, module_name)) != NULL)
-      {
-        keys = g_tree_ref(keys);
-        g_tree_insert(sysconfig->group_map, module_name, keys);
-      }
-      fo_config_free(version);
-      fclose(file);
+    if((keys = g_tree_lookup(version->group_map, module_name)) != NULL)
+    {
+      keys = g_tree_ref(keys);
+      g_tree_insert(sysconfig->group_map, module_name, keys);
     }
   }
 

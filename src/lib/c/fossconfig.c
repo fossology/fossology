@@ -476,8 +476,8 @@ int fo_config_list_length(fo_conf* conf, char* group, char* key, GError** error)
 void fo_config_free(fo_conf* conf)
 {
   if(!conf) return;
-  if(conf->group_map) g_tree_destroy(conf->group_map);
-  if(conf->key_sets)  g_tree_destroy(conf->key_sets);
+  if(conf->group_map) g_tree_unref(conf->group_map);
+  if(conf->key_sets)  g_tree_unref(conf->key_sets);
   if(conf->group_set) g_free(conf->group_set);
 
   conf->group_map = NULL;
