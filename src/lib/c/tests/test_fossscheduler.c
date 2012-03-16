@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <unistd.h>
 
 /* cunit includes */
-#include <CUnit/CUnit.h>
+#include <libfocunit.h>
 
 #ifndef SVN_REV
 #define SVN_REV "SVN_REV Unknown"
@@ -44,7 +44,6 @@ extern char buffer[];
 extern int  valid;
 extern int  found;
 extern int  agent_verbose;
-
 extern void fo_heartbeat();
 
 /* ************************************************************************** */
@@ -76,8 +75,8 @@ FILE* write_to;
  * @return void
  */
 void set_up(void) {
-  CU_ASSERT_TRUE_FATAL(!pipe(in_sub));
-  CU_ASSERT_TRUE_FATAL(!pipe(out_sub));
+  FO_ASSERT_TRUE_FATAL(!pipe(in_sub));
+  FO_ASSERT_TRUE_FATAL(!pipe(out_sub));
 
   stdin_t  = dup(fileno(stdin));
   stdout_t = dup(fileno(stdout));
@@ -121,8 +120,8 @@ void tear_down(void) {
  */
 void signal_connect_end()
 {
-  CU_ASSERT_FALSE(valid);
-  CU_ASSERT_STRING_EQUAL(fgets(buffer, sizeof(buffer), read_from), "OK\n");
+  FO_ASSERT_FALSE(valid);
+  FO_ASSERT_STRING_EQUAL(fgets(buffer, sizeof(buffer), read_from), "OK\n");
 
   write_con("CLOSE\n");
 }
@@ -134,8 +133,8 @@ void signal_connect_end()
  */
 void signal_connect_verbose()
 {
-  CU_ASSERT_FALSE(valid);
-  CU_ASSERT_EQUAL(agent_verbose, VERBOSE_TEST);
+  FO_ASSERT_FALSE(valid);
+  FO_ASSERT_EQUAL(agent_verbose, VERBOSE_TEST);
 
   agent_verbose = 0;
 
@@ -144,10 +143,10 @@ void signal_connect_verbose()
 
 void signal_connect_version()
 {
-  CU_ASSERT_FALSE(valid);
-  CU_ASSERT_PTR_NOT_NULL(fgets(buffer, sizeof(buffer), read_from));
+  FO_ASSERT_FALSE(valid);
+  FO_ASSERT_PTR_NOT_NULL(fgets(buffer, sizeof(buffer), read_from));
   buffer[strlen(buffer) - 1] = '\0';
-  CU_ASSERT_STRING_EQUAL(buffer, SVN_REV);
+  FO_ASSERT_STRING_EQUAL(buffer, SVN_REV);
 
   write_con("CLOSE\n");
 }
@@ -165,23 +164,23 @@ void signal_connect_version()
 void test_scheduler_no_connect()
 {
   int argc = 2;
-  char* argv[] = {"./testlibs", "no_arg"};
+  char* argv[] = {"./testlibs", "--config=./scheddata"};
 
   fo_scheduler_connect(&argc, argv);
 
-  CU_ASSERT_FALSE(found);
-  CU_ASSERT_EQUAL(items_processed, 0);
-  CU_ASSERT_FALSE(valid);
-  CU_ASSERT_FALSE(agent_verbose);
+  FO_ASSERT_FALSE(found);
+  FO_ASSERT_EQUAL(items_processed, 0);
+  FO_ASSERT_FALSE(valid);
+  FO_ASSERT_FALSE(agent_verbose);
 
   /* make sure that fo_scheduler_connect didn't write anything to stdout */
   fprintf(stdout, FROM_UNIT);
-  CU_ASSERT_PTR_NOT_NULL(fgets(buffer, sizeof(buffer), read_from));
-  CU_ASSERT_STRING_EQUAL(buffer, FROM_UNIT);
+  FO_ASSERT_PTR_NOT_NULL(fgets(buffer, sizeof(buffer), read_from));
+  FO_ASSERT_STRING_EQUAL(buffer, FROM_UNIT);
 
   /* reset stdout for the next test */
   while(strcmp(buffer, FROM_UNIT) != 0)
-    CU_ASSERT_PTR_NOT_NULL(fgets(buffer, sizeof(buffer), read_from));
+    FO_ASSERT_PTR_NOT_NULL(fgets(buffer, sizeof(buffer), read_from));
 }
 
 /**
@@ -194,25 +193,30 @@ void test_scheduler_no_connect()
 void test_scheduler_connect()
 {
   int argc = 2;
-  char* argv[] = {"./testlibs", "--scheduler_start"};
+  char* argv[] = {"./testlibs", "--config=./scheddata", "--scheduler_start"};
+  char* tmp;
 
   fo_scheduler_connect(&argc, argv);
 
-  CU_ASSERT_TRUE(found);
-  CU_ASSERT_EQUAL(items_processed, 0);
-  CU_ASSERT_FALSE(valid);
-  CU_ASSERT_FALSE(agent_verbose);
+  FO_ASSERT_TRUE(found);
+  FO_ASSERT_EQUAL(items_processed, 0);
+  FO_ASSERT_FALSE(valid);
+  FO_ASSERT_FALSE(agent_verbose);
 
   /* check that the correct stuff was written to stdout */
-  CU_ASSERT_PTR_NOT_NULL(fgets(buffer, sizeof(buffer), read_from));
-  buffer[strlen(buffer) - 1] = '\0';
-  CU_ASSERT_STRING_EQUAL(buffer, SVN_REV);
-  CU_ASSERT_STRING_EQUAL(fgets(buffer, sizeof(buffer), read_from), "OK\n");
+  memset(buffer, '\0', sizeof(buffer));
+  tmp = fgets(buffer, sizeof(buffer), read_from);
+  FO_ASSERT_PTR_NOT_NULL(tmp);
+  FO_ASSERT_STRING_EQUAL(buffer, SVN_REV);
+
+  tmp = fgets(buffer, sizeof(buffer), read_from);
+  FO_ASSERT_PTR_NOT_NULL(tmp);
+  FO_ASSERT_STRING_EQUAL(tmp, "OK\n");
 
   ualarm(10, 0);
   usleep(20);
 
-  CU_ASSERT_STRING_EQUAL(
+  FO_ASSERT_STRING_EQUAL(
       fgets(buffer, sizeof(buffer), read_from),
       "HEART: 0\n");
 }
@@ -225,8 +229,8 @@ void test_scheduler_next_close()
 {
   write_con("CLOSE\n");
 
-  CU_ASSERT_PTR_NULL(fo_scheduler_next());
-  CU_ASSERT_FALSE(valid);
+  FO_ASSERT_PTR_NULL(fo_scheduler_next());
+  FO_ASSERT_FALSE(valid);
 }
 
 /**
@@ -240,8 +244,8 @@ void test_scheduler_next_end()
   signal(SIGALRM, signal_connect_end);
   ualarm(10, 0);
 
-  CU_ASSERT_PTR_NULL(fo_scheduler_next());
-  CU_ASSERT_FALSE(valid);
+  FO_ASSERT_PTR_NULL(fo_scheduler_next());
+  FO_ASSERT_FALSE(valid);
 }
 
 /**
@@ -256,8 +260,8 @@ void test_scheduler_next_verbose()
   signal(SIGALRM, signal_connect_verbose);
   ualarm(10, 0);
 
-  CU_ASSERT_PTR_NULL(fo_scheduler_next());
-  CU_ASSERT_FALSE(valid);
+  FO_ASSERT_PTR_NULL(fo_scheduler_next());
+  FO_ASSERT_FALSE(valid);
 }
 
 /**
@@ -271,8 +275,8 @@ void test_scheduler_next_version()
   signal(SIGALRM, signal_connect_version);
   ualarm(10, 0);
 
-  CU_ASSERT_PTR_NULL(fo_scheduler_next());
-  CU_ASSERT_FALSE(valid);
+  FO_ASSERT_PTR_NULL(fo_scheduler_next());
+  FO_ASSERT_FALSE(valid);
 }
 
 /**
@@ -288,9 +292,9 @@ void test_scheduler_next_oth()
 
   write_con(NC_TEST);
 
-  CU_ASSERT_PTR_NOT_NULL((ret = fo_scheduler_next()));
-  CU_ASSERT_STRING_EQUAL(ret, NC_TEST);
-  CU_ASSERT_TRUE(valid);
+  FO_ASSERT_PTR_NOT_NULL((ret = fo_scheduler_next()));
+  FO_ASSERT_STRING_EQUAL(ret, NC_TEST);
+  FO_ASSERT_TRUE(valid);
 }
 
 /**
@@ -299,12 +303,12 @@ void test_scheduler_next_oth()
  */
 void test_scheduler_current()
 {
-  CU_ASSERT_STRING_EQUAL(fo_scheduler_current(), NC_TEST);
+  FO_ASSERT_STRING_EQUAL(fo_scheduler_current(), NC_TEST);
 
   write_con("CLOSE\n");
 
-  CU_ASSERT_PTR_NULL(fo_scheduler_next());
-  CU_ASSERT_PTR_NULL(fo_scheduler_current());
+  FO_ASSERT_PTR_NULL(fo_scheduler_next());
+  FO_ASSERT_PTR_NULL(fo_scheduler_current());
 }
 
 /**
@@ -316,9 +320,9 @@ void test_scheduler_disconnect()
   found = 1;
 
   fo_scheduler_disconnect(2);
-  CU_ASSERT_STRING_EQUAL(fgets(buffer, sizeof(buffer), read_from), "BYE 2\n");
-  CU_ASSERT_FALSE(valid);
-  CU_ASSERT_FALSE(found);
+  FO_ASSERT_STRING_EQUAL(fgets(buffer, sizeof(buffer), read_from), "BYE 2\n");
+  FO_ASSERT_FALSE(valid);
+  FO_ASSERT_FALSE(found);
 }
 
 /**
@@ -329,17 +333,17 @@ void test_scheduler_disconnect()
  */
 void test_scheduler_heart()
 {
-  CU_ASSERT_EQUAL(items_processed, 0);
+  FO_ASSERT_EQUAL(items_processed, 0);
   fo_scheduler_heart(1);
-  CU_ASSERT_EQUAL(items_processed, 1);
+  FO_ASSERT_EQUAL(items_processed, 1);
   fo_scheduler_heart(10);
-  CU_ASSERT_EQUAL(items_processed, 11);
+  FO_ASSERT_EQUAL(items_processed, 11);
 
   signal(SIGALRM, fo_heartbeat);
   ualarm(10, 0);
   usleep(20);
 
-  CU_ASSERT_STRING_EQUAL(
+  FO_ASSERT_STRING_EQUAL(
       fgets(buffer, sizeof(buffer), read_from),
       "HEART: 11\n");
 }

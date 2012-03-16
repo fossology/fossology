@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 
 /* cunit includes */
-#include <CUnit/CUnit.h>
+#include <libfocunit.h>
 
 /* ************************************************************************** */
 /* *** declaration of private members *************************************** */
@@ -115,45 +115,51 @@ void test_fo_config_load()
   GError* error = NULL;
 
   test_data = fo_config_load("dummy", &error);
-  CU_ASSERT_PTR_NULL(test_data);
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_missing_file);
+  FO_ASSERT_PTR_NULL(test_data);
+  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  FO_ASSERT_EQUAL(error->code,   fo_missing_file);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/invalid_group.conf", &error);
-  CU_ASSERT_PTR_NULL(test_data);
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_invalid_file);
+  FO_ASSERT_PTR_NULL(test_data);
+  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  FO_ASSERT_EQUAL(error->code,   fo_invalid_file);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/no_group.conf", &error);
-  CU_ASSERT_PTR_NULL(test_data);
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  FO_ASSERT_PTR_NULL(test_data);
+  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  FO_ASSERT_EQUAL(error->code,   fo_invalid_key);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/key_value.conf", &error);
-  CU_ASSERT_PTR_NULL(test_data);
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_invalid_file);
+  FO_ASSERT_PTR_NULL(test_data);
+  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  FO_ASSERT_EQUAL(error->code,   fo_invalid_file);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/bad_key.conf", &error);
-  CU_ASSERT_PTR_NULL(test_data);
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_invalid_file);
+  FO_ASSERT_PTR_NULL(test_data);
+  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  FO_ASSERT_EQUAL(error->code,   fo_invalid_file);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/key_name.conf", &error);
-  CU_ASSERT_PTR_NULL(test_data);
-  CU_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  CU_ASSERT_EQUAL(error->code, fo_invalid_file);
+  FO_ASSERT_PTR_NULL(test_data);
+  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
+  FO_ASSERT_EQUAL(error->code, fo_invalid_file);
   g_clear_error(&error);
 
   test_data = fo_config_load(CONF_FILE, &error);
   if(error)
   {
-    CU_FAIL_FATAL("can't load test configuration, aborting");
+    FO_FAIL_FATAL("can't load test configuration, aborting");
   }
 }
 
@@ -169,11 +175,11 @@ void test_fo_config_group_set()
   int length;
   char** names = fo_config_group_set(test_data, &length);
 
-  CU_ASSERT_EQUAL(length, 4);
-  CU_ASSERT_STRING_EQUAL(names[0], GROUP(3));
-  CU_ASSERT_STRING_EQUAL(names[1], GROUP(0));
-  CU_ASSERT_STRING_EQUAL(names[2], GROUP(2));
-  CU_ASSERT_STRING_EQUAL(names[3], GROUP(1));
+  FO_ASSERT_EQUAL(length, 4);
+  FO_ASSERT_STRING_EQUAL(names[0], GROUP(3));
+  FO_ASSERT_STRING_EQUAL(names[1], GROUP(0));
+  FO_ASSERT_STRING_EQUAL(names[2], GROUP(2));
+  FO_ASSERT_STRING_EQUAL(names[3], GROUP(1));
 }
 
 /**
@@ -188,28 +194,28 @@ void test_fo_config_key_set()
   char** names;
 
   names = fo_config_key_set(test_data, GROUP(0),   &length);
-  CU_ASSERT_EQUAL(length, 2);
-  CU_ASSERT_STRING_EQUAL(names[0], KEY(0, 0));
-  CU_ASSERT_STRING_EQUAL(names[1], KEY(0, 1));
+  FO_ASSERT_EQUAL(length, 2);
+  FO_ASSERT_STRING_EQUAL(names[0], KEY(0, 0));
+  FO_ASSERT_STRING_EQUAL(names[1], KEY(0, 1));
 
   names = fo_config_key_set(test_data, GROUP(1),   &length);
-  CU_ASSERT_EQUAL(length, 2);
-  CU_ASSERT_STRING_EQUAL(names[0], KEY(1, 0));
-  CU_ASSERT_STRING_EQUAL(names[1], KEY(1, 1));
+  FO_ASSERT_EQUAL(length, 2);
+  FO_ASSERT_STRING_EQUAL(names[0], KEY(1, 0));
+  FO_ASSERT_STRING_EQUAL(names[1], KEY(1, 1));
 
   names = fo_config_key_set(test_data, GROUP(2), &length);
-  CU_ASSERT_EQUAL(length, 3);
-  CU_ASSERT_STRING_EQUAL(names[0], KEY(2, 1));
-  CU_ASSERT_STRING_EQUAL(names[1], KEY(2, 2));
-  CU_ASSERT_STRING_EQUAL(names[2], KEY(2, 0));
+  FO_ASSERT_EQUAL(length, 3);
+  FO_ASSERT_STRING_EQUAL(names[0], KEY(2, 1));
+  FO_ASSERT_STRING_EQUAL(names[1], KEY(2, 2));
+  FO_ASSERT_STRING_EQUAL(names[2], KEY(2, 0));
 
   names = fo_config_key_set(test_data, GROUP(3), &length);
-  CU_ASSERT_EQUAL(length, 3);
-  CU_ASSERT_STRING_EQUAL(names[0], KEY(3, 0));
-  CU_ASSERT_STRING_EQUAL(names[1], KEY(3, 2));
-  CU_ASSERT_STRING_EQUAL(names[2], KEY(3, 1));
+  FO_ASSERT_EQUAL(length, 3);
+  FO_ASSERT_STRING_EQUAL(names[0], KEY(3, 0));
+  FO_ASSERT_STRING_EQUAL(names[1], KEY(3, 2));
+  FO_ASSERT_STRING_EQUAL(names[2], KEY(3, 1));
 
-  CU_ASSERT_PTR_NULL(fo_config_key_set(test_data, "none", &length));
+  FO_ASSERT_PTR_NULL(fo_config_key_set(test_data, "none", &length));
 }
 
 /**
@@ -218,8 +224,8 @@ void test_fo_config_key_set()
  */
 void test_fo_config_has_group()
 {
-  CU_ASSERT_TRUE (fo_config_has_group(test_data, GROUP(0)));
-  CU_ASSERT_FALSE(fo_config_has_group(test_data, NONE));
+  FO_ASSERT_TRUE (fo_config_has_group(test_data, GROUP(0)));
+  FO_ASSERT_FALSE(fo_config_has_group(test_data, NONE));
 }
 
 /**
@@ -231,9 +237,9 @@ void test_fo_config_has_group()
  */
 void test_fo_config_has_key()
 {
-  CU_ASSERT_TRUE (fo_config_has_key(test_data, GROUP(0), KEY(0, 0)));
-  CU_ASSERT_FALSE(fo_config_has_key(test_data, NONE, KEY(0, 0)));
-  CU_ASSERT_FALSE(fo_config_has_key(test_data, GROUP(0), NONE));
+  FO_ASSERT_TRUE (fo_config_has_key(test_data, GROUP(0), KEY(0, 0)));
+  FO_ASSERT_FALSE(fo_config_has_key(test_data, NONE, KEY(0, 0)));
+  FO_ASSERT_FALSE(fo_config_has_key(test_data, GROUP(0), NONE));
 }
 
 /**
@@ -246,42 +252,42 @@ void test_fo_config_get()
 {
   GError* error = NULL;
 
-  CU_ASSERT_STRING_EQUAL(
+  FO_ASSERT_STRING_EQUAL(
       fo_config_get(test_data, GROUP(0), KEY(0, 0), &error),
       VAL(0, 0));
-  CU_ASSERT_STRING_EQUAL(
+  FO_ASSERT_STRING_EQUAL(
       fo_config_get(test_data, GROUP(0), KEY(0, 1), &error),
       VAL(0, 1));
-  CU_ASSERT_STRING_EQUAL(
+  FO_ASSERT_STRING_EQUAL(
       fo_config_get(test_data, GROUP(1), KEY(1, 0), &error),
       VAL(1, 0));
-  CU_ASSERT_STRING_EQUAL(
+  FO_ASSERT_STRING_EQUAL(
       fo_config_get(test_data, GROUP(1), KEY(1, 1), &error),
       VAL(1, 1));
-  CU_ASSERT_STRING_EQUAL(
+  FO_ASSERT_STRING_EQUAL(
       fo_config_get(test_data, GROUP(2), KEY(2, 0), &error),
       VAL(2, 0));
-  CU_ASSERT_STRING_EQUAL(
+  FO_ASSERT_STRING_EQUAL(
       fo_config_get(test_data, GROUP(2), KEY(2, 1), &error),
       VAL(2, 1));
-  CU_ASSERT_STRING_EQUAL(
+  FO_ASSERT_STRING_EQUAL(
       fo_config_get(test_data, GROUP(2), KEY(2, 2), &error),
       VAL(2, 2));
-  CU_ASSERT_STRING_EQUAL(
+  FO_ASSERT_STRING_EQUAL(
       fo_config_get(test_data, GROUP(3), KEY(3, 2), &error),
       VAL(3, 2));
 
-  CU_ASSERT_PTR_NULL(fo_config_get(test_data, GROUP(0), NONE, &error));
-  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_missing_key);
-  CU_ASSERT_STRING_EQUAL(error->message,
+  FO_ASSERT_PTR_NULL(fo_config_get(test_data, GROUP(0), NONE, &error));
+  FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
+  FO_ASSERT_EQUAL(error->code,   fo_missing_key);
+  FO_ASSERT_STRING_EQUAL(error->message,
       "ERROR: unknown key=\"none\" for group=\"one\"");
   g_clear_error(&error);
 
-  CU_ASSERT_PTR_NULL(fo_config_get(test_data, NONE, KEY(0, 0), &error));
-  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_missing_group);
-  CU_ASSERT_STRING_EQUAL(error->message,
+  FO_ASSERT_PTR_NULL(fo_config_get(test_data, NONE, KEY(0, 0), &error));
+  FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
+  FO_ASSERT_EQUAL(error->code,   fo_missing_group);
+  FO_ASSERT_STRING_EQUAL(error->message,
       "ERROR: unknown group \"none\"");
   g_clear_error(&error);
 }
@@ -296,10 +302,10 @@ void test_fo_config_is_list()
 {
   GError* error = NULL;
 
-  CU_ASSERT_FALSE(fo_config_is_list(test_data, GROUP(3), KEY(0, 0), &error));
-  CU_ASSERT_TRUE (fo_config_is_list(test_data, GROUP(3), KEY(3, 0), &error));
-  CU_ASSERT_TRUE (fo_config_is_list(test_data, GROUP(3), KEY(3, 1), &error));
-  CU_ASSERT_FALSE(fo_config_is_list(test_data, GROUP(3), KEY(3, 2), &error));
+  FO_ASSERT_FALSE(fo_config_is_list(test_data, GROUP(3), KEY(0, 0), &error));
+  FO_ASSERT_TRUE (fo_config_is_list(test_data, GROUP(3), KEY(3, 0), &error));
+  FO_ASSERT_TRUE (fo_config_is_list(test_data, GROUP(3), KEY(3, 1), &error));
+  FO_ASSERT_FALSE(fo_config_is_list(test_data, GROUP(3), KEY(3, 2), &error));
 }
 
 /**
@@ -311,21 +317,25 @@ void test_fo_config_is_list()
 void test_fo_config_list_length()
 {
   GError* error = NULL;
+  int len = 0;
 
-  CU_ASSERT_EQUAL(
-      fo_config_list_length(test_data, GROUP(3), KEY(3, 0), &error),
-      4);
-  CU_ASSERT_EQUAL(
-      fo_config_list_length(test_data, GROUP(3), KEY(3, 1), &error),
-      7);
-  CU_ASSERT_EQUAL(
-      fo_config_list_length(test_data, GROUP(3), KEY(3, 2), &error),
-      0);
+  len = fo_config_list_length(test_data, GROUP(3), KEY(3, 0), &error);
+  FO_ASSERT_EQUAL(len, 4);
+  FO_ASSERT_PTR_NULL(error);
+  if(error) g_clear_error(&error);
 
-  CU_ASSERT_PTR_NOT_NULL(error);
-  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_invalid_group);
-  CU_ASSERT_STRING_EQUAL(error->message,
+  len = fo_config_list_length(test_data, GROUP(3), KEY(3, 1), &error);
+  FO_ASSERT_EQUAL(len,  7);
+  FO_ASSERT_PTR_NULL(error);
+  if(error) g_clear_error(&error);
+
+  len = fo_config_list_length(test_data, GROUP(3), KEY(3, 2), &error);
+  FO_ASSERT_EQUAL(len,  0);
+
+  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
+  FO_ASSERT_EQUAL(error->code,   fo_invalid_group);
+  FO_ASSERT_STRING_EQUAL(error->message,
       "ERROR: four[not] must be of type list to get length");
   g_clear_error(&error);
 }
@@ -339,10 +349,13 @@ void test_fo_config_list_length()
 void test_fo_config_get_list()
 {
   GError* error = NULL;
+  gchar* tmp;
 
 #define CONFIG_GET_LIST_ASSERT(g, k, i) \
-  CU_ASSERT_STRING_EQUAL(fo_config_get_list(test_data, \
-      GROUP(g), KEY(g, k), i, &error), VAL_IDX(g, k, i))
+  tmp = fo_config_get_list(test_data, GROUP(g), KEY(g, k), i, &error); \
+  FO_ASSERT_STRING_EQUAL(tmp, VAL_IDX(g, k, i)); \
+  FO_ASSERT_PTR_NULL(error); \
+  if(error) g_clear_error(&error)
 
   CONFIG_GET_LIST_ASSERT(3, 0, 0);
   CONFIG_GET_LIST_ASSERT(3, 0, 1);
@@ -359,27 +372,27 @@ void test_fo_config_get_list()
 
 #undef CONFIG_GET_LIST_ASSERT
 
-  CU_ASSERT_PTR_NULL(
+  FO_ASSERT_PTR_NULL(
       fo_config_get_list(test_data, GROUP(3), KEY(3, 2), 0, &error));
-  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
-  CU_ASSERT_STRING_EQUAL(error->message,
+  FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
+  FO_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  FO_ASSERT_STRING_EQUAL(error->message,
       "ERROR: four[not] must be of type list to get list element")
   g_clear_error(&error);
 
-  CU_ASSERT_PTR_NULL(
+  FO_ASSERT_PTR_NULL(
       fo_config_get_list(test_data, GROUP(3), KEY(3, 0), 4, &error));
-  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
-  CU_ASSERT_STRING_EQUAL(error->message,
+  FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
+  FO_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  FO_ASSERT_STRING_EQUAL(error->message,
       "ERROR: four[is] 4 is out of range");
   g_clear_error(&error);
 
-  CU_ASSERT_PTR_NULL(
+  FO_ASSERT_PTR_NULL(
       fo_config_get_list(test_data, GROUP(3), KEY(3, 0), -1, &error));
-  CU_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  CU_ASSERT_EQUAL(error->code,   fo_invalid_key);
-  CU_ASSERT_STRING_EQUAL(error->message,
+  FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
+  FO_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  FO_ASSERT_STRING_EQUAL(error->message,
       "ERROR: four[is] -1 is out of range");
   g_clear_error(&error);
 }
