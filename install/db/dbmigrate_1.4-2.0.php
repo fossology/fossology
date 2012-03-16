@@ -99,7 +99,7 @@ function Migrate_14_20($DryRun)
  **/
 function CreateARStable($ARStablename)
 {
-  global $PGCONN;
+  global $PG_CONN;
 
   if (DB_TableExists($ARStablename)) return;
 
