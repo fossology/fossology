@@ -23,7 +23,6 @@
  *
  * Test cli parameter i and v and rpm file and no parameters.
  */
-require_once '/usr/share/php/PHPUnit/Framework.php';
 
 class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
 
