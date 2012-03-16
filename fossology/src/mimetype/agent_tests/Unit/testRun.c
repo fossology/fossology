@@ -45,7 +45,7 @@ CU_SuiteInfo suites[] = {
  */
 int main( int argc, char *argv[] )
 {
-  create_db_repo_sysconf(1);
+  create_db_repo_sysconf(1, "mimetype");
   DBConfFile = get_dbconf();
 
   int rc = focunit_main(argc, argv, "mimetype_Tests", suites) ;

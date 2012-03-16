@@ -44,7 +44,7 @@ static fo_conf* config;
 int  GetURLInit()
 {
   GError* error = NULL;
-  create_db_repo_sysconf(0);
+  create_db_repo_sysconf(0, "wget_agent");
   config = fo_config_load(get_dbconf(), &error);
   
   return 0;
