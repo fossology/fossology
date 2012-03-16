@@ -416,7 +416,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
     msgstr = headerSprintf(header, fmt, rpmTagTable, rpmHeaderFormats, &errstr);
     if (msgstr != NULL){
       trim(msgstr);
-      if (Verbose) { printf("%s:%s\n",tagName(tag[i]),msgstr);}
+      printf("%s:%s\n",tagName(tag[i]),msgstr);
       switch (tag[i]) {
         case RPMTAG_NAME:
           EscapeString(msgstr, pi->pkgName, sizeof(pi->pkgName));
@@ -468,7 +468,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
     }
     free((void *)msgstr); 
   }      
-  if (Verbose) { printf("Name:%s\n",pi->buildDate);}
+  if (Verbose > 1) { printf("Name:%s\n",pi->pkgName);}
 #ifdef _RPM_4_4
   header_status = headerGetEntry(header,tag[14],&type,&pointer,&data_size);
   if (header_status) {
@@ -493,7 +493,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
   }
 #endif/* After RPM4.4 version*/
 
-  if (Verbose) { 
+  if (Verbose > 1) { 
     printf("Size:%d\n",pi->req_size);
     for (j=0; j<pi->req_size;j++){
       printf("REQ:%s\n",pi->requires[j]);
