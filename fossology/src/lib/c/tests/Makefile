@@ -18,12 +18,15 @@ TOP = ../../../..
 include $(TOP)/Makefile.conf
 SRCDIR = ..
 
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(ALL_CFLAGS) -I$(SRCDIR) -I../ -lcunit
+TESTDIR = $(TOP)/src/testing/lib/c
+TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(ALL_CFLAGS) \
+               $(TESTLIB) -I$(SRCDIR) -I../ -lcunit
 EXE = testlibs
 
 OBJS = test_fossconfig.o    \
        test_fossscheduler.o \
-       test_libfossdb.o \
+       test_libfossdb.o     \
 
 COVE = fossconfig_cov.o    \
        fossscheduler_cov.o \
