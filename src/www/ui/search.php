@@ -70,6 +70,7 @@ class search extends FO_Plugin
     global $PG_CONN;
     $UploadtreeRecs = array();  // uploadtree record array to return
     $NeedTagfileTable = true;
+    $NeedTaguploadtreeTable = true;
 
     if ($Item)
     {
@@ -111,19 +112,35 @@ class search extends FO_Plugin
       pg_free_result($result);
 
       /* add the tables needed for the tag query */
-      $sql = "select tag_file_pk from tag_file";
+      $sql = "select tag_file_pk from tag_file limit 1";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       if (pg_num_rows($result) < 1)
       {
         /* tag_file didn't have data, don't add the tag_file table for tag query */
-        $SQL .= ", tag_uploadtree";
         $NeedTagfileTable = false;
       }
       else {
-        $SQL .= ", tag_file, tag_uploadtree";
+        $SQL .= ", tag_file";
       }
       pg_free_result($result);
+
+      /* add the tables needed for the tag query */
+      $sql = "select tag_uploadtree_pk from tag_uploadtree limit 1";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result) < 1)
+      {
+        /* tag_uploadtree didn't have data, don't add the tag_uploadtree table for tag query */
+        $NeedTaguploadtreeTable = false;
+      }
+      else {
+        $SQL .= ", tag_uploadtree";
+      }
+      pg_free_result($result);
+
+      if (!$NeedTagfileTable && !$NeedTaguploadtreeTable)
+        $SQL .= ", tag_file, tag_uploadtree";
     }
 
     /* do we need the pfile table? Yes, if any of these are a search critieria.  */
@@ -149,10 +166,14 @@ class search extends FO_Plugin
         if ($NeedOr) $SQL .= " OR";
         $SQL .= "(";
         $tag_pk = $tagRec['tag_pk'];
-        if ($NeedTagfileTable)
+        if ($NeedTagfileTable && $NeedTaguploadtreeTable)
           $SQL .= "(uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk) or (uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk) ";
-        else
+        else if ($NeedTaguploadtreeTable)
           $SQL .= "uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk";
+        else if ($NeedTagfileTable)
+          $SQL .= "uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk";
+        else
+          $SQL .= "(uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk) or (uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk) ";
         $SQL .= ")";
         $NeedOr=1;
       }
