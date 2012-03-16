@@ -123,12 +123,21 @@ else
   }
   else
   {
-    print "Initialization completed successfully.\n";
+    print "Database schema update completed successfully.\n";
   }
 }
 
 /* initialize the license_ref table */
-if ($UpdateLiceneseRef) initLicenseRefTable(false);
+if ($UpdateLiceneseRef) 
+{
+  print "Update reference licenses\n";
+  initLicenseRefTable(false);
+}
+
+/* for the 1.4 -> 2.0 migration, create and populate the new ars tables */
+require_once("db/dbmigrate_1.4-2.0.php");
+print "Migrate data\n";
+Migrate_14_20($Verbose);
 
 exit(0);
 
