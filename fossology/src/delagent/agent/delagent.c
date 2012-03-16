@@ -81,7 +81,7 @@ int main (int argc, char *argv[])
     switch(c)
     {
       case 'i':
-        db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+        db_conn = fo_dbconnect(NULL, &ErrorBuf);
         if (!db_conn)
         {
           LOG_FATAL("Unable to open DB");
