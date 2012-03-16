@@ -45,7 +45,7 @@ int  DBLoadGoldInit()
   GError* error = NULL;
 
   /** create db */
-  create_db_repo_sysconf(1);
+  create_db_repo_sysconf(1, "wget_agent");
   DBConfFile = get_dbconf();
 
   strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");

@@ -42,7 +42,7 @@ char *DBConfFile = NULL;
  */
 int PkgagentDBInit()
 {
-  create_db_repo_sysconf(1);
+  create_db_repo_sysconf(1, "pkgagent");
   DBConfFile = get_dbconf();
   return 0;
 }

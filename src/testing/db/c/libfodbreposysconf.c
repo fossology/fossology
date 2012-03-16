@@ -60,7 +60,7 @@ static void command_output(char *command)
  *
  * \return 0 on sucess, other on failure
  */
-int create_db_repo_sysconf(int type)
+int create_db_repo_sysconf(int type, char *agent_name)
 {
 #if 0
   char *sysconfdir;
@@ -83,7 +83,8 @@ int create_db_repo_sysconf(int type)
     command_output(CMD);
   }
   int argc = 3;
-  char* argv[] = {"./unit_test", "-c", Sysconf};
+  char* argv[] = {agent_name, "-c", Sysconf};
+  
   fo_scheduler_connect(&argc, argv);
 
 #ifdef TEST

@@ -39,7 +39,7 @@ int DelagentDBInit()
   char CMD[256];
   int rc;
  
-  rc = create_db_repo_sysconf(0);
+  rc = create_db_repo_sysconf(0, "delagent");
   if (rc != 0)
   {
     printf("Database initialize ERROR!\n");

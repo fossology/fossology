@@ -24,7 +24,7 @@
 
 #define ARRAY_LENGTH 256
 
-int create_db_repo_sysconf(int type);
+int create_db_repo_sysconf(int type, char *agent_name);
 
 void drop_db_repo_sysconf(char *DBName);
 
