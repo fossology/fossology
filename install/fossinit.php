@@ -135,7 +135,7 @@ if ($UpdateLiceneseRef)
 }
 
 /* for the 1.4 -> 2.0 migration, create and populate the new ars tables */
-require_once("db/dbmigrate_1.4-2.0.php");
+require_once("dbmigrate_1.4-2.0.php");
 print "Migrate data\n";
 Migrate_14_20($Verbose);
 
