@@ -91,12 +91,27 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
   {
     // pkgagent rpmfile
 
-    $expected = array(
-        'OK');
+    $expected = array('Name:fossology',
+                      'Arch:i386',
+                      'License:GPLv2',
+                      'Summary:FOSSology is a licenses exploration tool',
+                      'OK'
+                     );
     $last = exec("$this->pkgagent -C $this->testfile 2>&1", $got, $rtn=NULL);
     //print "testOneRpm: last is:$last\ngot is:\n";
     //print_r($got) . "\n";
-    $this->assertEquals($expected[0],$got[0]);
+    //$this->assertEquals($expected[0],$got[0]);
+    if(empty($got)){
+      $this->fail("pkgagent FAILED!, no output for test, stopping test");
+      exit(1);
+    }
+    $size = count($got);
+    foreach($expected as $match) {
+      if(FALSE === in_array($match, $got)){
+        $this->fail("pkgagent FAILED! did not fine $match in output\n");
+      }
+    }
+    $this->assertEquals('OK',$got[$size-1]);
     return;
   }
   
@@ -104,12 +119,12 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
   {
     // pkgagent -v rpmfile
 
-    $last = exec("$this->pkgagent -C -v $this->testfile 2>&1", $got, $rtn=NULL);
+    $last = exec("$this->pkgagent -C -vv $this->testfile 2>&1", $got, $rtn=NULL);
     //print "testOneRpm: last is:$last\ngot is:\n";
     //print_r($got) . "\n";
     // check the output
     if(empty($got)){
-      $this->fail("pkgagent FAILED!, no output for -v test, stopping test");
+      $this->fail("pkgagent FAILED!, no output for -vv test, stopping test");
       exit(1);
     }
     // compare output to the standard
