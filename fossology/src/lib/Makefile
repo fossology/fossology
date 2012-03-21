@@ -19,7 +19,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DIRS = c php
-TESTDIR =
+TESTDIR = c
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 		 
@@ -27,7 +27,7 @@ all:
 	$(call dirloop, )
 
 test: 
-	$(MAKE) -C $(TESTDIR) test
+	$(call dirloop,test)
 
 install: all
 	$(call dirloop,install)

@@ -11,7 +11,7 @@ EXE=sqlCopyTest fossconfigTest reppath
 LIB=libfossology.a
 OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o
 
-all: $(LIB) $(VARS)
+all: $(LIB) $(VARS) $(EXE)
 	echo "make $(LIB)"
 
 $(LIB): $(OBJS) $(VARS)
@@ -57,7 +57,7 @@ uninstall-exe:
 uninstall-lib:
 
 test: all
-	echo "make $(LIB) no tests "
+	$(MAKE) -C tests
 
 clean:
 	echo "make $(LIB) clean "
