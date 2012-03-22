@@ -477,7 +477,8 @@ function copyFiles($files, $dest)
     throw new Exception('No destination for copy', 0);
   }
   echo "DB: copyFiles: we are at:" . getcwd() . "\n";
-  echo "DB: copyFiles: running as:" . posix_getlogin() . "\n";
+  $login = posix_getlogin();
+  echo "DB: copyFiles: running as:$login\n";
   echo "DB: copyFiles: uid is:" . posix_getuid() . "\n";
   if(is_array($files))
   {
