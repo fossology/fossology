@@ -491,6 +491,8 @@ function copyFiles($files, $dest)
       {
         $to = $dest;
       }
+      echo "DB: copyfiles: file copied is:$file\n";
+      echo "DB: copyfiles: to is:$to\n";
       if(!copy($file, $to))
       {
         throw new Exception("Could not copy $file to $to");
@@ -714,6 +716,7 @@ function configDebian($osType, $osVersion)
       break;
     case '10.04.3':
     case '11.04':
+    case '11.10':
       echo "DB: in 10.04.3\n";
       try
       {
@@ -740,8 +743,6 @@ function configDebian($osType, $osVersion)
         return(FALSE);
       }
       break;
-    case '11.10':
-      break;
     default:
       return(FALSE);     // unsupported debian version
       break;
@@ -753,10 +754,14 @@ function configDebian($osType, $osVersion)
     return(FALSE);
   }
   // Get the postrgres version so the correct file is used.
-  //$ver = findVerPsql();
-  //echo "DB: returned version is:$ver\n";
-  //$pName = 'postgresql-' . $ver;
   $pName = 'postgresql';
+  if($osVersion == '10.04.3')
+  {
+    echo "DB: changing postgresql to name with version\n";
+    $ver = findVerPsql();
+    echo "DB: returned version is:$ver\n";
+    $pName = 'postgresql-' . $ver;
+  }
   echo "DB pName is:$pName\n";
   if(!restart($pName))
   {
@@ -793,11 +798,11 @@ function configRhel($osType, $osVersion)
   /*
   try
   {
-    copyFiles($psqlFiles, "/var/lib/pgsql/data/");
+  copyFiles($psqlFiles, "/var/lib/pgsql/data/");
   }
   catch (Exception $e)
   {
-    echo "Failure: Could not copy postgres 8.4 config files\n";
+  echo "Failure: Could not copy postgres 8.4 config files\n";
   }
   */
   try
@@ -841,7 +846,7 @@ function configYum($objRef)
     echo "FATAL, no yum install line to install\n";
     return(FALSE);
   }
-  
+
   $RedFedRepo = 'redfed-fossology.repo';   // name of generic repo file.
   // replace the baseurl line with the current one.
   $n = "../dataFiles/pkginstall/" . $RedFedRepo;
@@ -850,8 +855,8 @@ function configYum($objRef)
   $fcont = file_get_contents($n);
   //if(!$fcont);
   //{
-    //echo "FATAL! could not read repo file $n\n";
-    //exit(1);
+  //echo "FATAL! could not read repo file $n\n";
+  //exit(1);
   //}
   //echo "DB: contents is:\n$fcont\n";
   $newRepo = preg_replace("/baseurl=(.*)?/", 'baseurl=' . $objRef->yum, $fcont,-1, $cnt);
