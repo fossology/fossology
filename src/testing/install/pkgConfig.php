@@ -478,6 +478,7 @@ function copyFiles($files, $dest)
   }
   echo "DB: copyFiles: we are at:" . getcwd() . "\n";
   echo "DB: copyFiles: running as:" . posix_getlogin() . "\n";
+  echo "DB: copyFiles: uid is:" . posix_getuid() . "\n";
   if(is_array($files))
   {
     foreach($files as $file)
