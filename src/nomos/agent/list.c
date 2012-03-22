@@ -823,7 +823,7 @@ void listDump(list_t *l, int verbose) {
   if (verbose < 0) {
     printf("** %s (size %d, used %d, ix %d, sort %d desc %d) == %lu\n",
         l->name, l->size, l->used, l->ix, l->sorted, l->desc,
-        sizeof(item_t));
+        (unsigned long)sizeof(item_t));
     return;
   }
   if (verbose || max) {
