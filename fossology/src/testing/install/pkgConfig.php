@@ -476,6 +476,7 @@ function copyFiles($files, $dest)
   {
     throw new Exception('No destination for copy', 0);
   }
+  echo "DB: copyFiles: we are at:" . getcwd() . "\n";
   if(is_array($files))
   {
     foreach($files as $file)
@@ -510,7 +511,8 @@ function copyFiles($files, $dest)
     {
       $to = $dest;
     }
-    echo "DB: files: to is:$to\n";
+    echo "DB: copyfiles-single: file copied is:$file\n";
+    echo "DB: copyfiles-single: to is:$to\n";
     if(!copy($files,$to))
     {
       throw new Exception("Could not copy $file to $to");
