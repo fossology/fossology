@@ -501,7 +501,7 @@ function copyFiles($files, $dest)
       {
         throw new Exception("Could not copy $file to $to");
       }
-      $lastcp = exec("cp $file $to", $cpout, $cprtn);
+      $lastcp = exec("cp -v $file $to", $cpout, $cprtn);
       echo "DB: copyfiles: cprtn is:$cprtn\n";
       echo "DB: copyfiles: lastcp is:$lastcp\n";
       echo "DB: copyfiles: out is:\n";print_r($cpout) . "\n";
