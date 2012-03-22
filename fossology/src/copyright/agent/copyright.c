@@ -528,7 +528,7 @@ void copyright_analyze(copyright copy, FILE* istr)
 
   copyright_email_url(copy, buf);
   strip_empty_entries(copy);
-  free(entry);
+  // FIXME free(entry);
 }
 
 /**
