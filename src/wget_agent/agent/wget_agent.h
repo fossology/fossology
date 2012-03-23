@@ -26,7 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* specify support for files > 2G */
 #define __USE_LARGEFILE64
-#define __USE_FILE_OFFSET64
 
 #include <stdio.h>
 #include <unistd.h>
