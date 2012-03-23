@@ -53,35 +53,27 @@ $hosts = array();
 $listOut = array();
 $vmList = array();
 
-//echo "DB: pkgVms is:\n";print_r($pkgVms) . "\n";
-
 // gather vm's on each server
-// determine what server each vm is on, build an array with [vm-name][vmhost] or
-// some other format.
+// determine what server each vm is on, build an array with [vmhost][vmname]
 
 foreach($vmServers as $host)
 {
   $host = trim($host);
   $cmd = "ssh $host  'vmware-cmd -l'";
   $last = exec($cmd, $listOut, $rtn);
-  //echo "listout for $host is:\n";print_r($listOut) . "\n";
   foreach($listOut as $vmMachine)
   {
-    //echo "DB: vmMachine is:$vmMachine\n";
     if(empty($vmMachine))
     {
       continue;
     }
     $parts = explode('/', $vmMachine);
-    //echo "DB: parts for host $host:\n";print_r($parts) . "\n";
-    //echo "DB: parts[4] for host $host is: {$parts[4]}\n";
     if(in_array(trim($parts[4]), $pkgVms))
     {
-      echo "DB: matched! {$parts[4]}\n";
+      //echo "DB: matched! {$parts[4]}\n";
       $vmList[] = $vmMachine;
     }
     $hosts[$host] = $vmList;
-    //echo "DB: vmlist is:\n";print_r($vmList) . "\n";
   } // foreach
   $vmList = array();
   $listOut = array();
@@ -94,8 +86,7 @@ foreach($vmServers as $host)
  */
 foreach($hosts as $host => $vms)
 {
-  echo "DB: host before vms is:$host\n";
-  echo "DB: vms is:\n"; print_r($vms) . "\n";
+  //echo "DB: vms is:\n"; print_r($vms) . "\n";
   if(empty($vms))
   {
     echo "DB: no vm's for host $host\n";
@@ -103,7 +94,7 @@ foreach($hosts as $host => $vms)
   }
   foreach($vms as $vm)
   {
-    echo "DB: vm to operate on:\n$vm\n";
+    //echo "DB: vm to operate on:\n$vm\n";
     if(!vmOps($host, $vm, 'start'))
     {
       echo "DB: start: would adjust list of vms\n";
@@ -114,9 +105,10 @@ foreach($hosts as $host => $vms)
     }
   }
 }
+exit(0);
 
 /**
- * \brief poweron one or more vm machines
+ * \brief execute a vmware cmd one or more vm machines
  *
  * @param string $host, the host to operate on.
  * @param mixed $vm either a string or an array.  The array should be a list of
