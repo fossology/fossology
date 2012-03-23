@@ -4,11 +4,12 @@ Introduction
 ============
 This document is designed to help you get FOSSology installed and ready
 to use. It's intended audience is the system administrator who wants to
-quickly get a local install up and running, or a distribution developer
-looking to create packages.
+quickly get a local FOSSology instance up and running, or a distribution
+developer looking to create packages.
 
 For extended discussion on how to use or tune the software, please see
-the User Documentation, available at http://fossology.org/user_documentation
+the User Documentation, available at 
+http://www.fossology.org/projects/fossology/wiki/User_Documentation. 
 
 This document is arranged  as follows:
 
@@ -45,7 +46,7 @@ Section 1 - Short Installation Instructions
 4. Adjust postgresql config (described in detail in section 2.1.4)
 5. Adjust PHP config (described in detail in section 2.1.5)
 6. Add apache config for FOSSology (described in detail in section 2.1.6)
-  There is an example config provided in ui/fo-apache-example.conf.
+  There is an example config provided in install/fo-apache-example.conf.
   After adding the config restart apache.
 7. Build FOSSology
    $ make
@@ -54,7 +55,7 @@ Section 1 - Short Installation Instructions
 9. Run the postinstall script
    # /usr/local/lib/fossology/fo-postinstall
 10. Test that things are installed correctly
-   # /usr/local/lib/fossology/fossology-scheduler -t
+   # /usr/local/etc/fossology/mods-enabled/scheduler/agent/fo_scheduler -t
 11. Start the fossology scheduler daemon
    # /etc/init.d/fossology start
 
@@ -95,9 +96,41 @@ FOSSology uses lots of different existing tools and software and
 expects to find it on the system.
 
 FOSSology depends on recent versions of the following software,
-dependencies needed when building fossology are labeled "build:" and
-dependencies needed at runtime are labeled "runtime:".
+dependencies needed when building fossology are:
+    Debian or Ubuntu or LinuxMint:
+	libxml2-dev libextractor-dev build-essential 
+	postgresql-server-dev
+	libtext-template-perl subversion rpm
+	libpcre3-dev libmagic-dev librpm-dev libglib2.0-dev
+    Fedora:
+	"Development Tools" perl-Text-Template subversion
+	postgresql-devel file-devel libxml2 libextractor-devel
+	pcre-devel rpm-devel glib2-devel
+    RedHatEnterprise or CentOS:
+	postgresql-devel gcc make file libxml2 perl-Text-Template 
+	subversion libextractor-devel
+        pcre-devel rpm-devel glib2-devel
+   
+dependencies needed at FOSSology runtime for the various distros are:
+    Debian or Ubuntu or LinuxMint:
+	apache2 libapache2-mod-php5 php5 php5-pgsql php-pear php5-cli 
+	libxml2 libextractor1c2a binutils php-gettext 
+	libextractor-plugins postgresql
+        bzip2 cabextract cpio genisoimage p7zip poppler-utils rpm
+        tar upx unzip gzip sleuthkit p7zip-full unrar-free libpcre3
+	libmagic1 libglib2.0-0 wget
+    RedHatEnterprise or CentOS:
+	postgresql-server httpd postgresql php php-pear php-pgsql
+	smtpdaemon file libxml2 binutils
+        bzip2 cpio mkisofs p8zip poppler-utils rpm tar file-libs
+        unzip gzip p7zip-plugins sleuthkit unrar pcre glib2 wget
+    Fedora:
+	postgresql-server httpd postgresql php php-pear php-pgsql
+	smtpdaemon libxml2 libextractor libextractor-plugins binutils
+        bzip2 cabextract cpio genisoimage p7zip p7zip-plugins file-libs
+        poppler-utils rpm tar upx unzip gzip sleuthkit unrar glib2 wget
 
+ 
 Where we know them, commands are listed for installing on various
 distributions.
 * For Debian nearly all packages can be found in main, unless you want
@@ -120,199 +153,8 @@ The fo-installdeps command provides output that can be helpful in
 figuring out what dependent packages you will have to install either 
 from your distro or some other location.
 
-2.1.2.1 - RHEL5 Dependencies
-----------------------------
-For RHEL5, the breakdown of dependencies for complete functionality
-(build, install, run) is as follows:
-
-Packages to install from distro media
--------------------------------------
-postgresql-8.1.11-1.el5_1.1
-postgresql-devel-8.1.11-1.el5_1.1
-postgresql-server-8.1.11-1.el5_1.1
-httpd-2.2.3-22.el5
-php-common-5.1.6-23.el5
-php-cli-5.1.6-23.el5
-php-5.1.6-23.el5
-php-pear-1.4.9-4.el5.1
-php-pdo-5.1.6-23.el5
-php-pgsql-5.1.6-23.el5
-poppler-utils-0.5.4-4.4.el5_1
-
-
-Packages mentioned by fo-installdeps available on EPEL or rpm.pbone.net
------------------------------------------------------------------------
-perl-Text-Template-1.44-4.el5
-libtool-ltdl-1.5.22-6.1   # Required by libextractor, not mentioned by fo-installdeps
-mpeg2dec-0.4.0-8b.el5   # Required by libextractor, not mentioned by fo-installdeps
-libextractor-0.5.19a-1.el5
-cabextract-1.2-1.el5
-perl-DateManip-5.43a-1_12.0.el5 # Required by sleuthkit, not mentioned by fo-installdeps
-sleuthkit-2.01-oss_fc2_1
-ucl-1.02-2.el5 # Required by upx, not mentioned by fo-installdeps
-upx-2.03-1.el5 
-unrar-3.8.4-1.el5
-
-
-Packages not mentioned by fo-installdeps that were needed and found on rpm.pbone.net
--------------------------------------
-libextractor-devel-05.19a-1.el5 
-
-
-
-2.1.2.2 Service Dependencies
-````````````````````````````
-Postgresql:
- 8.1 or newer
- On Debian (or a Debian derived distribution) you should be able to use 
- something like:
-  runtime: apt-get install postgresql-8.1
-  build: apt-get install postgresql-server-dev-8.1
- On Fedora/RHEL:
-  runtime: yum install postgresql postgresql-server
-  build: yum install postgresql-devel
- On Mandriva:
-  runtime: urpmi postgresql
-  build: urpmi postgresql-devel
-
-Apache2:
- FOSSology is currently developed using Apache2 version 2.2, but any
- version should work.
- On Debian (or a Debian derived distribution) you should be able to use 
- something like:
-   runtime: apt-get install apache2
- On Fedora/RHEL:
-   runtime: yum install httpd
- On Mandriva:
-  runtime: urpmi httpd
-
-PHP5:
- On Debian (or a Debian derived distribution) you should be able to use 
- something like:
-  runtime: apt-get install php5 php5-pgsql php-pear libapache2-mod-php5
- On Fedora:
-  runtime: yum install php php-pear php-pgsql
- On Mandriva:
-  runtime: urpmi php php-pear php-pgsql
-
-
-2.1.2.3  Library Dependencies
-`````````````````````````````
-* libmagic - for determining file types, from the "file" software
-   ftp://ftp.astron.com/pub/file/file-4.02.tar.gz 
-* libxml2 - GNOME XML library
-   http://gnome.org
-* libextractor - GNU file meta-data extractor
-   http://www.gnunet.org/libextractor/
-* librpm - for extracting software and metadata from rpm packages
-   http://www.rpm.org/
-
- On Debian (or a Debian derived distribution) you should be able to use
- something like:
-  runtime: apt-get install libmagic1 libxml2 libextractor1c2a \
-	libextractor-plugins librpm4.4
-  build: apt-get install libmagic-dev libxml2-dev libextractor-dev \
-        rpm librpm-dev
- On Fedora:
-  runtime: yum install file-libs libxml2 libextractor libextractor-plugins-base
-  build: file-libs libxml2 libextractor-devel rpm-devel
- On RHEL, install libextractor from upstream sources and:
-  runtime: yum install file-libs libxml2 
-  build: file-libs libxml2 rpm-devel
- On Mandriva:
-  runtime: urpmi libextractor libextractor-plugins libxml2 
-  build: urpmi libextractor-devel libmagic-devel libxml2 rpm-devel
-  
-
-2.1.2.4 External Commands
-`````````````````````````
-* ar - for extracting archives, from the binutils software
-   http://www.gnu.org/software/binutils/
-* bzcat - bz2 decompressor, from the bzip2 software
-   http://www.bzip.org/
-* cabextract - extractor for Microsoft Cabinet files
-   http://www.cabextract.org.uk/
-* cpio - for extracting cpio archives
-   http://www.gnu.org/software/cpio/
-* icat and fls - forensics tools from the sleuthkit software
-   http://sourceforge.net/projects/sleuthkit/
-* isoinfo - read metadata info from ISO9660 images, from the
-   mkisofs/cdrtools/cdrkit implementations
-   cdrkit implementation http://debburn.alioth.debian.org/
-* 7zr - for uncompressing 7zip files
-   p7zip implementation http://p7zip.sourceforge.net/
-* pdftotext - from the poppler software
-   http://poppler.freedesktop.org/
-* rpm and rpm2cpio - for extracting software and metadata from rpm packages
-   http://www.rpm.org/
-* sendmail - for sending notification emails (optional)
-   If you want to be able to receive notification emails about
-   fossology processing, you need an /usr/sbin/sendmail command that
-   fossology can use to send mail. All mail transport agents(MTA) (like
-   postfix, exim, sendmail, etc.) provide this command and you probably
-   already have it on your system, but you may need to configure the
-   MTA to be able to send the mail where you want it to go.
-* tar - tape archive decompressor
-   http://www.gnu.org/software/tar/
-* upx-ucl - an executable compressor/decompressor
-   http://upx.sourceforge.net
-* unrar-free - Unarchiver for .rar files
-   https://gna.org/projects/unrar/
-* unzip - De-archiver for .zip files
-   ftp://ftp.info-zip.org/pub/infozip/src/
-* zcat - for uncompressing .gz and .Z files, from the gzip software
-   http://www.gzip.org/
-
- On Debian (or a Debian derived distribution) you should be able to use 
-   something like:
-   runtime: apt-get install binutils bzip2 cabextract cpio sleuthkit \
-        mkisofs xpdf-utils rpm tar upx-ucl unrar unzip
-   NOTE: If you are on etch, if you use unrar-free instead of unrar you
-   will need to create a symlink from unrar to unrar-free. Post-etch
-   both unrar packages install as "unrar".
- 
- On Fedora, install sleuthkit and unrar from upstream sources and:
-   runtime: yum install binutils bzip2 cabextract cpio genisoimage \
-         p7zip poppler-utils p7zip rpm tar upx unzip gzip
- On RHEL, install cabextract, sleuthkit, upx, and unrar from upstream
-  sources and:
-   yum install binutils bzip2 cpio mkisofs p7zip poppler-utils rpm tar \
-         unzip gzip
- On Mandriva:
-  runtime: urpmi cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
-                 mkisofs p7zip poppler-utils rpm tar unzip gzip
-
-In order to unpack rar(>=RAR 3.x) file(s), you need to install rar(non-free)
-manually. In debian, you can install it through adding the non-free source,
-then apt-get install unrar. In centos and fedora, you can install it through
-adding the rpmfusion source, then yum install unrar.
-
-For those distributions where you can't get cabextract, unrar, or upx
-as prebuilt packages, you can choose to do without those, but if fossology
-encounters any of those container types it will be unable to scan them,
-possibly missing important results (especially in the case of important
-things like license scanning).
-
-
-2.1.2.5 -  Additional Build Dependencies
-````````````````````````````````````````
-The fossology build requires gcc, binutils, glibc headers, make, perl,
-and other tools you'd expect to find on a development system. In
-addition, the Text::Template perl module is needed for processing files
-in the build tree, and subversion is needed to embed version control
-numbers into the build.
-
- On Debian (or a Debian derived distribution) you should be able to use 
- something like:
-   build: apt-get install build-essential libtext-template-perl subversion
- On Fedora/RHEL the equivalent is:
-   build: yum groupinstall 'Development Tools'
-          yum install perl-Text-Template subversion
- On Mandriva:
-   build: urpmi perl-Text-Template subversion gcc make perl 
-   
-2.1.2.6 -  Optional Email Notifications
-```````````````````````````````````````
+2.1.2.1 -  Optional Email Notifications
+---------------------------------------
 Fossology can send email to users when their jobs finish.  To enable this 
 feature sendmail and a mail transport agent (MTA) must be installed.  The script
 fo-installdeps does NOT install a MTA as there is no easy way for fossology to
@@ -553,17 +395,17 @@ the alter command. Here are the steps:
 
 Check to see the database server is running
    A) Ensure that postgresql is running using this command:
-      /etc/init.d/postgresql-8.1 status
+      /etc/init.d/postgresql-8.4 status
       Version Cluster   Port Status Owner    Data directory            Log file
-      8.1     main      5432 online postgres /var/lib/postgresql/8.1/main \
-           /var/log/postgresql/postgresql-8.1-main.log
+      8.4     main      5432 online postgres /var/lib/postgresql/8.4/main \
+           /var/log/postgresql/postgresql-8.4-main.log
 
    If the status reported is "online", you can proceed to the next step.
    If the status is "down", use this command to start postgres:
-   /etc/init.d/postgresql-8.1 start
+   /etc/init.d/postgresql-8.4 start
 
    You should see the following message:
-      Starting PostgreSQL 8.1 database server: main.
+      Starting PostgreSQL 8.4 database server: main.
 
    B) The default database and owner is created by reading in the
    fossologyinit.sql file of sql statements to define the database schema.
@@ -574,9 +416,9 @@ Check to see the database server is running
       psql  < fossologyinit.sql
 
    C) If any steps fail, check the postgres log file for errors:
-      /var/log/postgresql/postgresql-8.1-main.log
+      /var/log/postgresql/postgresql-8.4-main.log
 
-   D) Make sure /etc/postgresql/8.1/main/pg_hba.conf is configured
+   D) Make sure /etc/postgresql/8.4/main/pg_hba.conf is configured
    correctly to allow your connection.  This file controls: which hosts
    are allowed to connect, how clients are authenticated, which
    PostgreSQL user names they can use, which databases they can access.
@@ -597,7 +439,7 @@ Check to see the database server is running
 
       use the default password "fossy".  You should connect and see the
       following:
-        Welcome to psql 8.1.9, the PostgreSQL interactive terminal.
+        Welcome to psql 8.4.11, the PostgreSQL interactive terminal.
 
         Type:  \copyright for distribution terms
                \h for help with SQL commands
@@ -609,7 +451,7 @@ Check to see the database server is running
       If so then you successfully connected. Type \q to quit.
 
    F) If any steps fail, check the postgres log file for errors:
-      /var/log/postgresql/postgresql-8.1-main.log
+      /var/log/postgresql/postgresql-8.4-main.log
 
 
 2.2.4   Checking the Default Configuration Files
