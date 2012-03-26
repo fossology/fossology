@@ -23,7 +23,8 @@ This prevents hacking attempts.
 *************************************************/
 print "BEGIN\n";
 $GlobalReady = 1;
-require_once('/usr/share/fossology/php/pathinclude.php');
+//require_once('/usr/share/fossology/php/pathinclude.php');  // install from package
+require_once('/usr/local/share/fossology/php/pathinclude.php'); // install from source code 
 global $WEBDIR;
 require_once("$WEBDIR/common/common.php");
 
