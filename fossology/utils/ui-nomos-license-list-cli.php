@@ -22,7 +22,8 @@ at the very beginning.
 This prevents hacking attempts.
 *************************************************/
 print "BEGIN\n";
-$WEBDIR = "/usr/local/share/fossology/";
+//$WEBDIR = "/usr/share/fossology/"; // install from package
+$WEBDIR = "/usr/local/share/fossology/"; // install from source code
 require_once("$WEBDIR/lib/php/common.php");
 
 $Usage = "Usage: " . basename($argv[0]) . " [upload] [item] ";
@@ -36,7 +37,8 @@ print "END\n";
 
 function GetLicenseList($uploadtree_pk, $upload_pk) 
 {
-  $PG_CONN =  DBconnect("/usr/local/etc/fossology/");
+  //$PG_CONN =  DBconnect("/etc/fossology/"); // install from package
+  $PG_CONN =  DBconnect("/usr/local/etc/fossology/"); // install from source code
   if (empty($uploadtree_pk)) return;
 
   /* get last nomos agent_pk that has data for this upload */
