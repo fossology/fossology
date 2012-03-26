@@ -19,6 +19,17 @@
 
 define("TITLE_showjobs", _("Show Jobs"));
 
+  /**
+   * @brief Sort compare function to order $JobsInfo by upload_pk
+   * @param $JobsInfo1 Result from GetJobInfo
+   * @param $JobsInfo2 Result from GetJobInfo
+   * @return <0,==0, >0 
+   */
+  function CompareJobsInfo($JobsInfo1, $JobsInfo2)
+  {
+    return $JobsInfo2['upload']['upload_pk'] - $JobsInfo1['upload']['upload_pk'];
+  }
+
 class showjobs extends FO_Plugin
 {
   var $Name       = "showjobs";
@@ -663,6 +674,10 @@ class showjobs extends FO_Plugin
             $Jobs = $this->MyJobs($this->nhours);
           } 
           $JobsInfo = $this->GetJobInfo($Jobs,  $Page);
+
+          /* Group Jobs by upload_pk within $JobsInfo */
+          usort($JobsInfo, "CompareJobsInfo");
+
     	  $V .= $this->Show($JobsInfo, $Page);
         }
 
