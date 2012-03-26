@@ -47,10 +47,21 @@ const char* select_upload_fk =" \
 
 const char* upload_common = "\
     SELECT * FROM jobqueue \
-      WHERE jq_job_fk in ( \
+      WHERE jq_job_fk IN ( \
         SELECT job_pk FROM job \
           WHERE job_upload_fk = %d \
       );";
+
+const char* folder_name = "\
+    SELECT folder_name FROM folder \
+      WHERE folder_pk IN ( \
+        SELECT parent_fk FROM foldercontents \
+          WHERE foldercontents_mode = 2 AND child_id = %d  \
+      );";
+
+const char* upload_name = "\
+    SELECT upload_filename FROM upload \
+      WHERE upload_pk = %d;";
 
 const char* jobsql_email = "\
     SELECT user_name, user_email, email_notify FROM users, upload \
@@ -253,6 +264,7 @@ void email_load()
  * information onto the GString that is passed to the function.
  *
  * Variables:
+ *   $UPLOADNAME
  *   $BROESELINK
  *   $SHCEDULERLOG
  *   $UPLOADFOLDERNAME [not implemented]
@@ -270,21 +282,80 @@ gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
   gchar* sql   = NULL;
   gchar* table, * column;
   PGresult* db_result;
+  guint i;
 
-  if(strcmp(m_str, "BROWSELINK"))
+  /* $UPLOADNAME
+   *
+   * Appends the name of the file that was uploaded and appends it to the output
+   * string. This uses the job id to find the upload name.
+   */
+  if(strcmp(m_str, "UPLOADNAME"))
+  {
+    sql = g_strdup_printf(upload_name, j->id);
+    db_result = PQexec(db_conn, sql);
+
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+    {
+      g_string_append_printf(ret,
+          "[ERROR: unable to select file name for upload %d]", j->id);
+    }
+    else
+    {
+      g_string_append(ret, PQgetvalue(db_result, 0, 0));
+    }
+
+    PQclear(db_result);
+    g_free(sql);
+  }
+
+  /* $BROWSELINK
+   *
+   * Appends the url that will link to the upload in the browse menue of the user
+   * interface.
+   */
+  else if(strcmp(m_str, "BROWSELINK"))
   {
     g_string_append_printf(ret, "http://%s?mod=browse&upload=%d&show=detail",
         fossy_url, j->id);
   }
+
+  /* $SCHEDULERLOG
+   *
+   * Appends the url that will link to the log file produced by the agent.
+   */
   else if(strcmp(m_str, "SCHEDULERLOG"))
   {
     g_string_append_printf(ret, "http://%s?mod=showjobs&show=job&job=%d",
         fossy_url, j->id);
   }
+
+  /* $UPLOADFOLDERNAME
+   *
+   * Appends the name of the folder that the upload was stored under.
+   */
   else if(strcmp(m_str, "UPLOADFOLDERNAME"))
   {
-    g_string_append(ret, "[NOT IMPLEMENTED]");
+    sql = g_strdup(folder_name, j->id);
+    db_result = PQexec(db_conn, sql);
+
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+    {
+      g_string_append_printf(ret,
+          "[ERROR: unable to select folder name for upload %d]", j->id);
+    }
+    else
+    {
+      g_string_append(ret, PQgetvalue(db_result, 0, 0));
+    }
+
+    PQclear(db_result);
+    g_free(sql);
   }
+
+  /* $JOBRESULT
+   *
+   * Appends if the job finished successfully or it it failed.
+   */
   else if(strcmp(m_str, "JOBRESULT"))
   {
     switch(j->status)
@@ -297,6 +368,11 @@ gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
         break;
     }
   }
+
+  /* $DB.table.column
+   *
+   * Appends a column of a table from the database to the resulting string.
+   */
   else if(strcmp(m_str, "DB"))
   {
     table  = g_match_info_fetch(match, 3);
@@ -306,12 +382,19 @@ gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK ||
         PQntuples(db_result) == 0 || PQnfields(db_result) == 0)
     {
-      g_string_append_printf(ret, "[ERROR: unable to select %s.%s]",
-          g_match_info_fetch(match, 3), g_match_info_fetch(match, 4));
-      return FALSE;
+      g_string_append_printf(ret, "[ERROR: unable to select %s.%s]", table, column);
     }
-
-    g_string_append(ret, PQgetvalue(db_result, 0, 0));
+    else
+    {
+      g_string_append_printf(ret, "%s.%s[", table, column);
+      for(i = 0; i < PQntuples(db_result); i++)
+      {
+        g_string_append(ret, PQgetvalue(db_result, 0, i));
+        if(i != PQntuples(db_result) - 1)
+          g_string_append(ret, " ");
+      }
+      g_string_append(ret, "]");
+    }
 
     PQclear(db_result);
     g_free(sql);
