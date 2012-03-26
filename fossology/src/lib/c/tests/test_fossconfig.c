@@ -123,35 +123,35 @@ void test_fo_config_load()
 
   test_data = fo_config_load("confdata/invalid_group.conf", &error);
   FO_ASSERT_PTR_NULL(test_data);
-  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(error);
   FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
   FO_ASSERT_EQUAL(error->code,   fo_invalid_file);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/no_group.conf", &error);
   FO_ASSERT_PTR_NULL(test_data);
-  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(error);
   FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
   FO_ASSERT_EQUAL(error->code,   fo_invalid_key);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/key_value.conf", &error);
   FO_ASSERT_PTR_NULL(test_data);
-  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(error);
   FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
   FO_ASSERT_EQUAL(error->code,   fo_invalid_file);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/bad_key.conf", &error);
   FO_ASSERT_PTR_NULL(test_data);
-  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(error);
   FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
   FO_ASSERT_EQUAL(error->code,   fo_invalid_file);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/key_name.conf", &error);
   FO_ASSERT_PTR_NULL(test_data);
-  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(error);
   FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
   FO_ASSERT_EQUAL(error->code, fo_invalid_file);
   g_clear_error(&error);
@@ -332,7 +332,7 @@ void test_fo_config_list_length()
   len = fo_config_list_length(test_data, GROUP(3), KEY(3, 2), &error);
   FO_ASSERT_EQUAL(len,  0);
 
-  FO_ASSERT_PTR_NOT_NULL(error);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(error);
   FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
   FO_ASSERT_EQUAL(error->code,   fo_invalid_group);
   FO_ASSERT_STRING_EQUAL(error->message,
