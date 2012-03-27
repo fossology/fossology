@@ -123,6 +123,7 @@ function SelectBucketPool($selected)
   $id = "default_bucketpool_fk";
   $name = $id;
   $select = "<select name='$name' id='$id'>";
+  $select .= "<option value=''></option>";
 
   /* get the bucketpool recs */
   $sql = "select * from bucketpool where active='Y'";
