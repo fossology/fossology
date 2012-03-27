@@ -26,16 +26,29 @@ print "BEGIN\n";
 $WEBDIR = "/usr/local/share/fossology/"; // install from source code
 require_once("$WEBDIR/lib/php/common.php");
 
-$Usage = "Usage: " . basename($argv[0]) . " [upload] [item] ";
+$Usage = "Usage: " . basename($argv[0]) . " [upload] [item] [type(statement/url/email)]";
+$upload = $item = $type = "";
+print "argc is:$argc\n";
+if ($argc ==  3) 
+{
+  $upload = $argv[1];
+  $item = $argv[2];
+} 
 
-$upload = $argv[1];
-$item = $argv[2];
+if ($argc == 4)
+{
+  $upload = $argv[1];
+  $item = $argv[2];
+  $type = $argv[3];
+}
+
+
 print "Upload:$upload;Item:$item\n";
 $SysConf['DBCONF']['dbname'] = "fossology";
-GetCopyrightList($item, $upload);
+GetCopyrightList($item, $upload, $type);
 print "END\n";
 
-function GetCopyrightList($uploadtree_pk, $upload_pk) 
+function GetCopyrightList($uploadtree_pk, $upload_pk, $type) 
 {
   //$PG_CONN =  DBconnect("/etc/fossology/"); // install from package
   $PG_CONN =  DBconnect("/usr/local/etc/fossology/"); // install from source
@@ -79,7 +92,7 @@ function GetCopyrightList($uploadtree_pk, $upload_pk)
       if (!empty($filepath)) $filepath .= "/";
       $filepath .= $uploadtreeRow['ufile_name'];
     }
-    $V = $filepath . ": ". GetFileCopyright_string($agent_pk, 0, $row['uploadtree_pk']) ;
+    $V = $filepath . ": ". GetFileCopyright_string($agent_pk, 0, $row['uploadtree_pk'], $type) ;
     #$V = $filepath;
     print "$V";
     print "\n";

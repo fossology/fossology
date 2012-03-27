@@ -89,11 +89,12 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk)
  * \param $agent_pk - agent id
  * \param $pfile_pk - pfile id, (if empty, $uploadtree_pk must be given)
  * \param $uploadtree_pk - (used only if $pfile_pk is empty)
+ * \param $type - copyright statement/url/email
  * 
  * \return Array of file copyright CopyrightArray[ct_pk] = copyright.content
  * FATAL if neither pfile_pk or uploadtree_pk were passed in
  */
-function GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk)
+function GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk, $type)
 {
   global $PG_CONN;
 
@@ -121,12 +122,15 @@ function GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk)
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
+    $typesql = '';
+    if ($type) $typesql = "and type = '$type'";
+
     /*  Get the copyright under this $uploadtree_pk*/
     $sql = "SELECT ct_pk, content from copyright ,
                   (SELECT distinct(pfile_fk) as PF from uploadtree
                      where upload_fk=$upload_pk
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
-              where PF=pfile_fk and agent_fk=$agent_pk;";
+              where PF=pfile_fk and agent_fk=$agent_pk $typesql;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
   }
@@ -146,13 +150,14 @@ function GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk)
  * \param $agent_pk - agent id
  * \param $pfile_pk - pfile id, (if empty, $uploadtree_pk must be given)
  * \param $uploadtree_pk - (used only if $pfile_pk is empty)
+ * \param $type - copyright statement/url/email
  *
  * \return copyright string for specified file
  */
-function GetFileCopyright_string($agent_pk, $pfile_pk, $uploadtree_pk)
+function GetFileCopyright_string($agent_pk, $pfile_pk, $uploadtree_pk, $type)
 {
   $CopyrightStr = "";
-  $CopyrightArray = GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk);
+  $CopyrightArray = GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk, $type);
   $first = true;
   foreach($CopyrightArray as $ct)
   {
