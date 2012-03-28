@@ -335,7 +335,7 @@ gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
    */
   else if(strcmp(m_str, "UPLOADFOLDERNAME"))
   {
-    sql = g_strdup(folder_name, j->id);
+    sql = g_strdup_printf(folder_name, j->id);
     db_result = PQexec(db_conn, sql);
 
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
