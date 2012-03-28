@@ -173,7 +173,7 @@ function Usage()
 function initLicenseRefTable($Verbose)
 {
   global $LIBEXECDIR;
-  global $PGCONN;
+  global $PG_CONN;
 
   if (!is_dir($LIBEXECDIR)) {
     print "FATAL: Directory '$LIBEXECDIR' does not exist.\n";
@@ -201,10 +201,10 @@ function initLicenseRefTable($Verbose)
       } else {
         if ($flag)
         {
-          @$result = pg_query($PGCONN, $sql);
+          @$result = pg_query($PG_CONN, $sql);
           if ($result == FALSE)
           {
-            $PGError = pg_last_error($PGCONN);
+            $PGError = pg_last_error($PG_CONN);
             if ($Debug)
             {
               print "SQL failed: $PGError\n";
@@ -216,10 +216,10 @@ function initLicenseRefTable($Verbose)
         $flag = 1;
       }
     }
-    @$result = pg_query($PGCONN, $sql);
+    @$result = pg_query($PG_CONN, $sql);
     if ($result == FALSE)
     {
-      $PGError = pg_last_error($PGCONN);
+      $PGError = pg_last_error($PG_CONN);
       if ($Debug)
       {
         print "SQL failed: $PGError\n";
