@@ -1098,7 +1098,13 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
           Fuid,Fuid+41,Fuid+74);
     }
     result =  PQexec(pgConn, SQL); /* INSERT INTO pfile */
-    if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(34);
+    // ignore duplicate constraint failure (23505), report others
+    if ((result==0) || ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
+        (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5))))
+    {
+      LOG_ERROR("Error inserting pfile, %s.", SQL);
+      SafeExit(34);
+    }
     PQclear(result);
 
     /* Now find the pfile_pk.  Since it might be a dup, we cannot rely
@@ -1472,7 +1478,7 @@ int RemoveDir(char *dirpath)
   char RMcmd[FILENAME_MAX];
   int rc;
   memset(RMcmd, '\0', sizeof(RMcmd));
-  snprintf(RMcmd, FILENAME_MAX -1, "rm -rf '%s'", dirpath);
+  snprintf(RMcmd, FILENAME_MAX -1, "nohup rm -rf '%s' &", dirpath);
   rc = system(RMcmd);
   return rc;
 } /* RemoveDir() */
