@@ -29,7 +29,7 @@ class agent_adj2nest extends FO_Plugin {
   public $Title = TITLE_agent_adj2nest;
   public $Version = "1.0";
   public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_ANALYZE;
+  public $DBaccess = PLUGIN_DB_UPLOAD;
   public $AgentName = "adj2nest";   // agent.agent_name
 
   /**
