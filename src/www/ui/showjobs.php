@@ -27,7 +27,9 @@ define("TITLE_showjobs", _("Show Jobs"));
    */
   function CompareJobsInfo($JobsInfo1, $JobsInfo2)
   {
-    return $JobsInfo2['upload']['upload_pk'] - $JobsInfo1['upload']['upload_pk'];
+    $upload_pk1 = GetArrayVal("upload_pk", $JobsInfo1["upload"]);
+    $upload_pk2 = GetArrayVal("upload_pk", $JobsInfo2["upload"]);
+    return $upload_pk2 - $upload_pk1;
   }
 
 class showjobs extends FO_Plugin
