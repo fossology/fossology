@@ -623,12 +623,12 @@ class showjobs extends FO_Plugin
 	    break;
       case "HTML":
         /* Process any actions */
-        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_UPLOAD)
         {
           $jq_pk = GetParm("jobid",PARM_INTEGER);
           $Action = GetParm("action",PARM_STRING);
           $UploadPk = GetParm("upload",PARM_INTEGER);
-          $Page=getparm('page',PARM_INTEGER);
+          $Page = GetParm('page',PARM_INTEGER);
           if (empty($Page)) $Page = 0;
           $jqtype = GetParm("jqtype",PARM_STRING);
           $ThisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$UploadPk";
