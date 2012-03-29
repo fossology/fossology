@@ -277,7 +277,9 @@ class user_edit_any extends FO_Plugin {
         $V.= "var Userfolder = new Array();\n";
         $V.= "var default_bucketpool_fk = new Array();\n";
         $V.= "var UiPref = new Array();\n";
-        for ($i = 0; ($row = pg_fetch_assoc($result, $i)) and !empty($row['user_pk']); $i++) {
+        pg_result_seek($result, 0);
+        while ($row = pg_fetch_assoc($result))
+        {
           $R = $row;
           //echo "<pre>Users are:\n";
           //print_r($R) . "\n</pre>";
@@ -422,7 +424,9 @@ class user_edit_any extends FO_Plugin {
         $V.= "<select name='userid' onClick='SetInfo(this.value);' onchange='SetInfo(this.value);'>\n";
 
         //$V .= "<option selected value='0'>--select user--</option>\n";
-        for ($i = 0; ($row = pg_fetch_assoc($result, $i)) and !empty($row['user_pk']); $i++) {
+        pg_result_seek($result, 0);
+        while ($row = pg_fetch_assoc($result))
+        {
           $Selected = "";
           if ($UserId == $row['user_pk']) {
             $Selected = "selected";
