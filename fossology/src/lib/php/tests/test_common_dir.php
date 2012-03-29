@@ -22,14 +22,14 @@
  */
 
 require_once('../common-dir.php');
-require_once '/usr/share/php/PHPUnit/Framework.php';
+
 /**
  * \class test_common_dir
  */
 class test_common_dir extends PHPUnit_Framework_TestCase
 {
   /* initialization */
-  protected function setUp() 
+  protected function setUp()
   {
     //print "Starting unit test for common-parm.php\n";
   }

@@ -22,14 +22,14 @@
  */
 
 require_once('../common-auth.php');
-require_once '/usr/share/php/PHPUnit/Framework.php';
+
 /**
  * \class test_common_auth
  */
 class test_common_auth extends PHPUnit_Framework_TestCase
 {
   /* initialization */
-  protected function setUp() 
+  protected function setUp()
   {
     print "Starting unit test for common-auth.php\n";
   }

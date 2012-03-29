@@ -23,14 +23,14 @@
 
 require_once('../common-menu.php');
 require_once('../common-parm.php');
-require_once '/usr/share/php/PHPUnit/Framework.php';
+
 /**
  * \class test_common_menu
  */
 class test_common_menu extends PHPUnit_Framework_TestCase
 {
   /* initialization */
-  protected function setUp() 
+  protected function setUp()
   {
   }
 
@@ -82,7 +82,7 @@ class test_common_menu extends PHPUnit_Framework_TestCase
     $menua->Order = 1;
     $menub->Order = 2;
     $result = menu_cmp($menua, $menub);
-    $this->assertEquals(1,$result);   
+    $this->assertEquals(1,$result);
   }
   /**
    * \brief test for menu_functions()
@@ -91,7 +91,7 @@ class test_common_menu extends PHPUnit_Framework_TestCase
   {
     print "test function menu_insert()\n";
 
-    global $MenuList;   
+    global $MenuList;
 
     $Path = "TestMenu::Test1::Test2";
     $LastOrder = 0;
@@ -99,7 +99,7 @@ class test_common_menu extends PHPUnit_Framework_TestCase
     $Title = "TestTitle";
     $Target = "TestTarget";
     $HTML = "TestHTML";
-    $result = menu_insert($Path, $LastOrder, $URI, $Title, $Target, $HTML);    
+    $result = menu_insert($Path, $LastOrder, $URI, $Title, $Target, $HTML);
     //print_r($MenuList);
     $this->assertEquals($Path,$MenuList[0]->FullName);
      
@@ -113,7 +113,7 @@ class test_common_menu extends PHPUnit_Framework_TestCase
     $this->assertRegExp("/TestMenu/", $result);
 
     print "test function menu_to_1list)\n";
-    $Parm = ""; 
+    $Parm = "";
     $result = menu_to_1list($MenuList, $Parm, "", "");
     $this->assertRegExp("/TestMenu/", $result);
     print "Ending unit test for common-menu.php\n";
