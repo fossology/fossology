@@ -22,22 +22,53 @@
  *
  * @version "$Id$"
  */
-
 /**
- *  allFilePaths
+ * \file addProxy
+ * \brief Add a proxy to fossology.conf
  *
- *  given a directory, iterate through it and all subdirectories returning
- *  the absolute path to the files.
+ * @parma string $sysConfPath the path the fossology configuration directory
+ * @param string $proxy the proxy to set, or use default
  *
- * created: May 22, 2009
+ * @return boolean
  */
 
-//ldir = '/home/markd/Eddy';
-//$ldir = '/home/fosstester/regression/license/eddy/GPL';
+function addProxy($sysConfPath, $proxy='lart.usa.hp.com:3128')
+{
+  if(file_exists($sysConfPath . '/fossology.conf'))
+  {
+    $fossConf = file_get_contents($sysConfPath . '/fossology.conf');
+    if($fossConf === FALSE)
+    {
+      echo "ERROR! could not read\n$sysConfPath/fossology.conf\n";
+      return(FALSE);
+    }
+    $count = 0;
+    $pat = ';no_proxy = localhost,10.1.2.3';
+    $replacepat = $pat . "\n" . 'http_proxy = ' . $proxy . "\n";
+    //echo "replacepat is:$replacepat\n";
+    $testConf = preg_replace("/.*?no_proxy = .*/", $replacepat, $fossConf,-1,&$count);
+    //echo "DB: matched pats is:$count\n";
+    //echo "DB: testConf is:$testConf\n";
+
+    $stat = file_put_contents("$sysConfPath/fossology.conf",$testConf);
+    if($stat === FALSE)
+    {
+      echo "ERROR! could not write\n$sysConfPath/fossology.conf\n";
+      return(FALSE);
+    }
+  }
+  else
+  {
+    echo "ERROR! can't find fossology.conf at:\n$sysConfPath/fossology.conf\n";
+    return(FALSE);
+  }
+  return(TRUE);
+}
+
 /**
- * allFilePaths
+ * \file allFilePaths
  *
- * given a directory, iterate through it and all subdirectories returning
+ * \brief given a directory, iterate through it and all subdirectories returning
  * the absolute path to the files.
  *
  * @param string $dir the directory to start from either an absolute path or
