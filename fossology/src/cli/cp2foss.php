@@ -348,14 +348,15 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
   /* Create the upload for the file */
   if ($Verbose > 1) {
-    print "JobAddUpload($UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk);\n";
+    print "JobAddUpload($SysConf[auth][UserId], $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk);\n";
   }
   if (!$Test) {
     $Src = $UploadArchive;
     if (!empty($TarSource)) {
       $Src = $TarSource;
     }
-    $UploadPk = JobAddUpload($UploadName, $Src, $UploadDescription, $Mode, $FolderPk);
+    global $SysConf;
+    $UploadPk = JobAddUpload($SysConf['auth']['UserId'], $UploadName, $Src, $UploadDescription, $Mode, $FolderPk);
   }
   /* Tell wget_agent to actually grab the upload */
   global $SYSCONFDIR;
