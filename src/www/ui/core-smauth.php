@@ -48,6 +48,7 @@ class core_smauth extends FO_Plugin {
   function PostInitialize() {
     global $Plugins;
     global $PG_CONN;
+    global $SysConf;
 
     if (siteminder_check() == -1) {return;}
 
@@ -55,6 +56,7 @@ class core_smauth extends FO_Plugin {
 
     session_name("Login");
     session_start();
+    if (array_key_exists('UserId', $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION['UserId'];
     $Now = time();
     if (!empty($_SESSION['time'])) {
       /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
@@ -62,6 +64,7 @@ class core_smauth extends FO_Plugin {
         $_SESSION['User'] = NULL;
         $_SESSION['UserId'] = NULL;
         $_SESSION['UserLevel'] = NULL;
+        $SysConf['auth']['UserId'] = NULL;
         $_SESSION['UserEmail'] = NULL;
         $_SESSION['Folder'] = NULL;
         $_SESSION['UiPref'] = NULL;
@@ -94,6 +97,7 @@ class core_smauth extends FO_Plugin {
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $R = pg_fetch_assoc($result);
+      pg_free_result($result);
       $_SESSION['User'] = $R['user_name'];
       $_SESSION['Folder'] = $R['root_folder_fk'];
       $_SESSION['UserLevel'] = $R['user_perm'];
@@ -127,6 +131,7 @@ class core_smauth extends FO_Plugin {
    */
   function CheckUser($Email) {
     global $PG_CONN;
+    global $SysConf;
 
     if (empty($Email)) {
       return;
@@ -261,6 +266,7 @@ class core_smauth extends FO_Plugin {
     /* If you make it here, then username and email were good! */
     $_SESSION['User'] = $R['user_name'];
     $_SESSION['UserId'] = $R['user_pk'];
+    $SysConf['auth']['UserId'] = $R['user_pk'];
     $_SESSION['UserEmail'] = $R['user_email'];
     $_SESSION['UserEnote'] = $R['email_notify'];
     if(empty($R['ui_preference']))
@@ -291,6 +297,7 @@ class core_smauth extends FO_Plugin {
    * \brief generate the output for this plug-in
    */
   function Output() {
+    global $SysConf;
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
@@ -306,6 +313,7 @@ class core_smauth extends FO_Plugin {
         /* TODO:logout need to clear SiteMinder session */
         $_SESSION['User'] = NULL;
         $_SESSION['UserId'] = NULL;
+        $SysConf['auth']['UserId'] = NULL;
         $_SESSION['UserLevel'] = NULL;
         $_SESSION['UserEmail'] = NULL;
         $_SESSION['Folder'] = NULL;
