@@ -263,7 +263,6 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
     $agent_count = count($agent_list);
     foreach(explode(",", $upload_pk_list) as $upload_pk) 
     {
-echo "bobg processing $upload_pk\n";
       if (empty($upload_pk))  continue;
 
       // Create a job for the upload
@@ -278,7 +277,6 @@ echo "bobg processing $upload_pk\n";
 
       $job_name = $UploadRec["upload_filename"];
       $job_pk = JobAddJob($user_pk, $job_name, $upload_pk);
-echo "bobg new job_pk: $job_pk\n";
 
       // don't exit on AgentAdd failure, or all the agents requested will
       // not get scheduled.
@@ -290,7 +288,6 @@ echo "bobg new job_pk: $job_pk\n";
           $Agent = & $Plugins[plugin_find_id($agentname) ];
           $Dependencies = "";
           $agent_jq_pk = $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
-echo "bobg added agent $agentname\n";
           if ($agent_jq_pk <= 0) 
           {
             echo "ERROR: Scheduling failed for Agent $agentname\n";
