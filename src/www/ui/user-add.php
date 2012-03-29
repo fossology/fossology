@@ -121,7 +121,7 @@ class user_add extends FO_Plugin {
     {
       $uiChoice = 'original';
     }
-    if($default_bucketpool_fk === NULL) {
+    if (empty($default_bucketpool_fk)) {
       $VALUES = " VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
       '$Email_notify','$agentList',$Folder, NULL,
       '$uiChoice');";
