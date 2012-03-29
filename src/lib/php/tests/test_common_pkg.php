@@ -23,7 +23,6 @@
 
 require_once('../common-pkg.php');
 require_once('../common-db.php');
-require_once '/usr/share/php/PHPUnit/Framework.php';
 
 /**
  * \class test_common_pkg
@@ -35,7 +34,7 @@ class test_common_pkg extends PHPUnit_Framework_TestCase
   public $DB_NAME =  "";
 
   /* initialization */
-  protected function setUp() 
+  protected function setUp()
   {
     global $PG_CONN;
     global $DB_COMMAND;
@@ -69,7 +68,7 @@ class test_common_pkg extends PHPUnit_Framework_TestCase
     /** insert on record */
     $sql = "INSERT INTO mimetype(mimetype_pk, mimetype_name) VALUES(10000, '$mimeType');";
     $result = pg_query($PG_CONN, $sql);
-    pg_free_result($result);  
+    pg_free_result($result);
  
     #begin test GetPkgMimetypes()
     $sql = "select * from mimetype where

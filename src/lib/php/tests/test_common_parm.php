@@ -22,14 +22,14 @@
  */
 
 require_once('../common-parm.php');
-require_once '/usr/share/php/PHPUnit/Framework.php';
+
 /**
  * \class test_common_parm
  */
 class test_common_parm extends PHPUnit_Framework_TestCase
 {
   /* initialization */
-  protected function setUp() 
+  protected function setUp()
   {
     //print "Starting unit test for common-parm.php\n";
   }
@@ -76,7 +76,7 @@ class test_common_parm extends PHPUnit_Framework_TestCase
     //Test Case 6: $Type = NULL
     $Type = NULL;
     $result = GetParm($Name, $Type);
-    $this->assertEquals("", $result); 
+    $this->assertEquals("", $result);
   }
 
   /**
