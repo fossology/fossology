@@ -1,6 +1,6 @@
 #!/bin/bash
 # FOSSology postinstall script
-# Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 #
 # This script is for things that need to be done on the runtime system
 # after we've installed the bits on the filesystem. It needs to be
@@ -9,7 +9,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o adwseoh --long agent,database,web,web-only,scheduler,scheduler-only,everything,overwrite,help -n 'fo-postinstall' -- "$@"`
+OPTS=`getopt -o adwseolh --long agent,database,web,web-only,scheduler,scheduler-only,everything,overwrite,licenseref,help -n 'fo-postinstall' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -33,6 +33,7 @@ while true; do
       --scheduler-only) SCHEDULERONLY=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
       -o|--overwrite) OVERWRITE=1; shift;;
+      -l|--licenseref) LICENSEREF=1; shift;;
       -h|--help)
          echo "Usage: fo-postinstall [options]";
          echo "  -a or --agent      : agent specific actions"
@@ -41,10 +42,12 @@ while true; do
          echo "  -s or --scheduler  : scheduler specific actions"
          echo "  -e or --everything : all actions, default"
          echo "  -o or --overwrite  : overwrite config files with new versions"
+         echo "  -l or --licenseref : update the license_ref table with fossology supplied licenses"
          echo "  -h or --help       : this help text"
          echo " Special options"
          echo "  --web-only         : web, but exclude normal agent actions"
          echo "  --scheduler-only   : scheduler, but exclude normal agent actions"
+
          exit;;
       --) shift; break;;
       *) echo "Error: option $1 not recognised"; exit 1;;
@@ -67,6 +70,7 @@ if [ $EVERYTHING ]; then
    AGENT=1
    DATABASE=1
    WEBONLY=1
+   LICENSEREF=1
 fi
 
 # This must run as root.
@@ -84,6 +88,11 @@ if [ $DATABASE ]; then
    echo "*** Initializing database tables ***"
    {$LIBEXECDIR}/fossinit.php -c {$SYSCONFDIR}
 fi # end of DATABASE
+
+if [ $LICENSEREF ]; then
+   echo "*** update the license_ref table ***"
+   {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR}
+fi # end of license reference
 
 ########################################################################
 

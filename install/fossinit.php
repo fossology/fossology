@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -174,6 +174,16 @@ function initLicenseRefTable($Verbose)
 {
   global $LIBEXECDIR;
   global $PG_CONN;
+
+  $sql = "SELECT count(rf_pk) from license_ref;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  pg_free_result($result);
+  if ($row && $row['count'] > 0) {
+    echo "NOTE: Probably license_ref table has already been updated, please check it.\n";
+    return;
+  }
 
   if (!is_dir($LIBEXECDIR)) {
     print "FATAL: Directory '$LIBEXECDIR' does not exist.\n";
