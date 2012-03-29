@@ -259,9 +259,6 @@ global $unitList;
 
 // @todo fix this, I don't think you need to check for workspace.
 
-echo "DB: runAunit: before check we are at:" . getcwd() . "\n";
-echo "DB: runAunit: workspace is:\n$WORKSPACE\n";
-
 if(is_null($WORKSPACE))
 {
   // back to fossology/src
@@ -269,7 +266,6 @@ if(is_null($WORKSPACE))
 }
 else
 {
-  echo "DB: runAunit: after check, before chdir we are at:" . getcwd() . "\n";
   if(@chdir($WORKSPACE . "/fossology2.0/src") === FALSE)
   {
     echo "FATAL! " . __FILE__ . " could not cd to " . $WORKSPACE . "/fossology2.0/src\n";
