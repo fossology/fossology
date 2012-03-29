@@ -270,9 +270,9 @@ if(is_null($WORKSPACE))
 else
 {
   echo "DB: runAunit: after check, before chdir we are at:" . getcwd() . "\n";
-  if(@chdir($WORKSPACE . "/fossology/src") === FALSE)
+  if(@chdir($WORKSPACE . "/fossology2.0/src") === FALSE)
   {
-    echo "FATAL! " . __FILE__ . " could not cd to " . $WORKSPACE . "/fossology/src\n";
+    echo "FATAL! " . __FILE__ . " could not cd to " . $WORKSPACE . "/fossology2.0/src\n";
     exit(1);
   }
 }
