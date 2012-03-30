@@ -354,12 +354,18 @@ int copyright_callout(pcre_callout_block* info)
   }
 
   /* only log the new entry if it wasn't already located by the regex */
-  prev = *(cvector_end(data) - 1);
-  if(cvector_size(data) != 0 &&
-      ((!strcmp(prev->dict_match, "email") && !strcmp(new_entry.dict_match, "email"))
-          ||  (!strcmp(prev->dict_match, "url") && !strcmp(new_entry.dict_match, "url"))))
+  if(cvector_size(data) != 0)
   {
-    if(!(prev->start_byte <= new_entry.start_byte && prev->end_byte >= new_entry.end_byte))
+    prev = *(cvector_end(data) - 1);
+    if(!strcmp(prev->dict_match, new_entry.dict_match)
+        || !strcmp(prev->dict_match, new_entry.dict_match))
+    {
+      if(!(prev->start_byte <= new_entry.start_byte && prev->end_byte >= new_entry.end_byte))
+      {
+        cvector_push_back(data, &new_entry);
+      }
+    }
+    else
     {
       cvector_push_back(data, &new_entry);
     }
@@ -528,7 +534,7 @@ void copyright_analyze(copyright copy, FILE* istr)
 
   copyright_email_url(copy, buf);
   strip_empty_entries(copy);
-  // FIXME free(entry);
+  free(entry);
 }
 
 /**
