@@ -64,6 +64,7 @@ else
        fossSql='fosstestinit.sql'
    fi
   
+   echo "DB: before su to postgres"
    su postgres -c "psql < $TESTROOT/$fossSql"
    if [ $? != 0 ] ; then
       echo "ERROR: Database failed during configuration."
