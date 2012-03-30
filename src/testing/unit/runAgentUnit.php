@@ -237,15 +237,18 @@ require_once('../lib/createRC.php');
 
 createRC();
 $sc = getenv('SYSCONFDIR');
-echo "DB: runUnit: sysconf from env is:$sc\n";
+echo "DB: runUnit: sysconf from getenv is:$sc\n";
 $sysConf = array();
 $sysConf = bootstrap();
 //echo "sysConf after bootstrap is:\n";print_r($sysConf) . "\n";
 // export for other tests to use
+
+echo "DB: runUnit: globals:sysconfdir:{$GLOBALS['SYSCONFDIR']}\n";
 putenv("SYSCONFDIR=$sc");
 $_ENV['SYSCONFDIR'] = $sc;
 
-echo "DB: runUnit: SYSCONFDIR from env is:" . getenv('SYSCONFDIR') . "\n";
+echo "DB: runUnit: after putenv SYSCONFDIR from env is:" . getenv('SYSCONFDIR') . "\n";
+echo "DB: runUnit: after _ENV set, SYSCONFDIR from _ENV is:{$_ENV['SYSCONFDIR']\n";
 
 $modules = array();
 $unitList = array();
