@@ -43,6 +43,7 @@ if [ $? = 0 ]; then
       fi
    fi
 else
+   echo "sysconfdir from env is -> $SYSCONFDIR"
    echo "*** Initializing database ***"
    echo "testroot is->$TESTROOT"
    if [ -z $TESTROOT ]
