@@ -191,6 +191,7 @@ if(empty($sysconfig))
 //echo "DB: sysconfig is:$sysconfig\n";
 
 putenv("SYSCONFDIR=$sysconfig");
+$_ENV['TESTROOT'] = $sysconfig;
 
 $unique = mt_rand();
 $DbName = $dbPrefix . $unique;
@@ -199,7 +200,7 @@ $DbName = $dbPrefix . $unique;
 $newDB = CreateTestDB($DbName);
 if($newDB != NULL)
 {
-  echo "ERROR, could not create database $Dbname\n";
+  echo "ERROR, could not create database $DbName\n";
   echo $newDB;
   exit(1);
 }
