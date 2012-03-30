@@ -808,7 +808,7 @@ int main(int argc, char** argv)
     fprintf(cerr, "FATAL %s.%d: copyright initialization failed\n", __FILE__, __LINE__);
     fprintf(cerr, "FATAL %s\n", strerror(errno));
     fflush(cerr);
-    return -1;
+    return 1;
   }
 
   /* parse the command line options */
@@ -846,14 +846,14 @@ int main(int argc, char** argv)
         pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
         if(!pgConn) {
           fprintf(cerr, "FATAL %s.%d: Copyright agent unable to connect to database.\n", __FILE__, __LINE__);
-          exit(-1);
+          return 2;
         }
         copyright_destroy(copy);
         PQfinish(pgConn);
         return 0;
       default: /* error, print usage */
         copyright_usage(argv[0]);
-        return -1;
+        return 3;
     }
   }
 
@@ -866,7 +866,7 @@ int main(int argc, char** argv)
     if(!pgConn)
     {
       fprintf(cerr, "FATAL: %s.%d: Copyright agent unable to connect to database.\n", __FILE__, __LINE__);
-      exit(-1);
+      return 4;
     }
 
     /* create the sql copy structure */
@@ -884,7 +884,7 @@ int main(int argc, char** argv)
     /* make sure that we are connected to the database */
     if(!check_copyright_table(pgConn))
     {
-      exit(-1);
+      return 5;
     }
 
     /* enter the main agent loop */
