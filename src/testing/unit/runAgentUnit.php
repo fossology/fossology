@@ -242,8 +242,8 @@ $sysConf = array();
 $sysConf = bootstrap();
 //echo "sysConf after bootstrap is:\n";print_r($sysConf) . "\n";
 // export for other tests to use
-putenv("SYSCONFDIR={$GLOBALS['SYSCONFDIR']}");
-$_ENV['SYSCONFDIR'] = $GLOBALS['SYSCONFDIR'];
+putenv("SYSCONFDIR=$sc");
+$_ENV['SYSCONFDIR'] = $sc;
 
 $modules = array();
 $unitList = array();
