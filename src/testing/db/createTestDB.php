@@ -180,6 +180,7 @@ if(array_key_exists('s', $Options))
 if(empty($sysconfig))
 {
   $sysconfig = getenv('SYSCONFDIR');
+  //echo "DB: ctdb: sysconfdir from env is:$sysconfig\n";
   if(empty($sysconfig))
   {
     echo "FATAL!, no SYSCONFDIR defined\n";
@@ -197,7 +198,7 @@ $unique = mt_rand();
 $DbName = $dbPrefix . $unique;
 
 // create the db
-$newDB = CreateTestDB($DbName);
+$newDB = createTestDB($DbName);
 if($newDB != NULL)
 {
   echo "ERROR, could not create database $DbName\n";
@@ -272,7 +273,7 @@ $modConf = $sysconfig . '/mods-enabled';
 $cmd = "cp -RP $modConf $confPath";
 if(system($cmd) === FALSE)
 {
-  echo "DB: Cannot copy diretory $modConf to $confPath\n";
+  //echo "DB: Cannot copy directory $modConf to $confPath\n";
   exit(1);
 }
 
