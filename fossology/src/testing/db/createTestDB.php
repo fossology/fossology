@@ -191,7 +191,7 @@ if(empty($sysconfig))
 //echo "DB: sysconfig is:$sysconfig\n";
 
 putenv("SYSCONFDIR=$sysconfig");
-$_ENV['TESTROOT'] = $sysconfig;
+$_ENV['SYSCONFDIR'] = $sysconfig;
 
 $unique = mt_rand();
 $DbName = $dbPrefix . $unique;
