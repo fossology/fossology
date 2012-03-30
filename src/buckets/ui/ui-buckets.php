@@ -295,7 +295,13 @@ return;
         $VLic .= "<td align='left'>";
         $VLic .= "<a id='$bucket_pk' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filebucket&bapk=$bucketagent_pk&item=$Uploadtree_pk&bucket_pk=$bucket_pk\")'";
         $VLic .= ">$bucket_name </a>";
-$VLic .= " [Tag]";
+
+        /* Allow users to tag an entire bucket */
+/* Future, maybe v 2.1 
+        $TagHref = "<a href=" . Traceback_uri() . "?mod=bucketbrowser&upload=$upload_pk&item=$Uploadtree_pk&bapk=$bucketagent_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk&tagbucket=1>Tag</a>";
+        $VLic .= " [$TagHref]";
+*/
+
         $VLic .= "</td>";
         $VLic .= "</tr>\n";
         //      if ($row['bucket_name'] == "No Buckets Found") $NoLicFound =  $row['bucketcount'];
@@ -479,6 +485,21 @@ $VLic .= " [Tag]";
     return($V);
   } // ShowUploadHist()
 
+
+  /**
+   * @brief tag a bucket
+   * @param $upload_pk
+   * @param $uploadtree_pk
+   * @param $bucketagent_pk
+   * @param $bucket_pk
+   * @param $bucketpool_pk
+   * @param $nomosagent_pk
+   **/
+  function TagBucket($upload_pk, $uploadtree_pk, $bucketagent_pk, $bucket_pk, $bucketpool_pk, $nomosagent_pk)
+  {
+  }  // TagBucket() 
+
+
   /**
    * \brief This function returns the scheduler status.
    */
@@ -493,6 +514,7 @@ $VLic .= " [Tag]";
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
     $updcache = GetParm("updcache",PARM_INTEGER);
+    $tagbucket = GetParm("tagbucket",PARM_INTEGER);
 
     /* Remove "updcache" from the GET args and set $this->UpdCache
      * This way all the url's based on the input args won't be
@@ -509,6 +531,15 @@ $VLic .= " [Tag]";
     else
     {
       $V = ReportCacheGet($CacheKey);
+    }
+
+    if (!empty($tagbucket)) 
+    {
+      $bucketagent_pk = GetParm("bapk",PARM_INTEGER);
+      $bucket_pk = GetParm("bpk",PARM_INTEGER);
+      $bucketpool_pk = GetParm("bp",PARM_INTEGER);
+      $nomosagent_pk = GetParm("napk",PARM_INTEGER);
+      $this->TagBucket($Upload, $Item, $bucketagent_pk, $bucket_pk, $bucketpool_pk, $nomosagent_pk);
     }
 
     if (empty($V) )  // no cache exists
