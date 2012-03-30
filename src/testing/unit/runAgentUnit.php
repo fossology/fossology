@@ -248,7 +248,7 @@ putenv("SYSCONFDIR=$sc");
 $_ENV['SYSCONFDIR'] = $sc;
 
 echo "DB: runUnit: after putenv SYSCONFDIR from env is:" . getenv('SYSCONFDIR') . "\n";
-echo "DB: runUnit: after _ENV set, SYSCONFDIR from _ENV is:{$_ENV['SYSCONFDIR']\n";
+echo "DB: runUnit: after _ENV set, SYSCONFDIR from _ENV is:{$_ENV['SYSCONFDIR']}\n";
 
 $modules = array();
 $unitList = array();
