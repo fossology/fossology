@@ -44,6 +44,7 @@ if [ $? = 0 ]; then
    fi
 else
    echo "*** Initializing database ***"
+   echo "testroot is->$TESTROOT"
    if [ -z $TESTROOT ]
    then 
      TESTROOT=`pwd`;
