@@ -88,7 +88,7 @@ function CreateTestDB($name)
   }
   $cmd = "sudo ./ftdbcreate.sh $name 2>&1";
   $last = exec($cmd, $cmdOut, $cmdRtn);
-  //echo "results of dbcreate are:\n"; print_r($cmdOut) . "\n";
+  echo "results of dbcreate are:\n"; print_r($cmdOut) . "\n";
   if($cmdRtn != 0)
   {
     $err = "Error could not create Data Base $name\n";
