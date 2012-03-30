@@ -199,7 +199,7 @@ $DbName = $dbPrefix . $unique;
 $newDB = CreateTestDB($DbName);
 if($newDB != NULL)
 {
-  echo "ERROR, could not create database $name\n";
+  echo "ERROR, could not create database $Dbname\n";
   echo $newDB;
   exit(1);
 }
