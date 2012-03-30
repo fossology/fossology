@@ -237,13 +237,15 @@ require_once('../lib/createRC.php');
 
 createRC();
 $sc = getenv('SYSCONFDIR');
-echo "DBUNIT: sysconf from env is:$sc\n";
+echo "DB: runUnit: sysconf from env is:$sc\n";
 $sysConf = array();
 $sysConf = bootstrap();
 //echo "sysConf after bootstrap is:\n";print_r($sysConf) . "\n";
 // export for other tests to use
 putenv("SYSCONFDIR=$sc");
 $_ENV['SYSCONFDIR'] = $sc;
+
+echo "DB: runUnit: SYSCONFDIR from env is:" . getenv('SYSCONFDIR') . "\n";
 
 $modules = array();
 $unitList = array();
