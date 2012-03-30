@@ -141,8 +141,7 @@ class list_bucket_files extends FO_Plugin
         $text2 = _("files with these licenses");
         if (!empty($Excl)) $V .= "<br>$text <b>$text1</b> $text2: $Excl";
 
-        $Offset = ($Page < 0) ? 0 : $Page*$Max;
-        $order = "";
+        $Offset = ($Page <= 0) ? 0 : $Page*$Max;
         $PkgsOnly = false;
 
         // Get bounds of subtree (lft, rgt) for this uploadtree_pk
@@ -189,7 +188,6 @@ class list_bucket_files extends FO_Plugin
 
         if ($Count < (1.25 * $Max)) $Max = $Count;
         if ($Max < 1) $Max = 1;  // prevent div by zero in corner case of no files
-        $order = " order by ufile_name asc";
 
         /* Get the page menu */
         if (($Count >= $Max) && ($Page >= 0))
@@ -226,6 +224,7 @@ class list_bucket_files extends FO_Plugin
           // get all the licenses in this subtree (bucket uploadtree_pk)
           $pfile_pk = $row['pfile_fk'];
           $licstring = GetFileLicenses_string($nomosagent_pk, $row['pfile_fk'], $row['uploadtree_pk']);
+          if (empty($licstring)) $licstring = '-';
           $URLlicstring = urlencode($licstring);
 
           /* Allow user to exclude files with this exact license list */
@@ -238,7 +237,6 @@ class list_bucket_files extends FO_Plugin
 
           $ok = true;
           if ($Excl) if (in_array($licstring, $ExclArray)) $ok = false;
-          if (empty($licstring)) $ok = false;
 
           if ($ok)
           {
