@@ -477,10 +477,7 @@ void copyright_analyze(copyright copy, FILE* istr)
   int i, bufidx, bufsize;
   int beg = 0, end = 0;
   char temp[1024];
-  copy_entry entry;
-
-  /* get memory for the copyright entry */
-  entry = (copy_entry)calloc(1, sizeof(struct copy_entry_internal));
+  struct copy_entry_internal entry;
 
   /* open the relevant file */
   fseek(istr, 0, SEEK_SET);
@@ -504,37 +501,36 @@ void copyright_analyze(copyright copy, FILE* istr)
   /* look through the whole file for something in the dictionary */
   for(bufidx = 0; bufidx < bufsize; bufidx = end+1)
   {
-    copy_entry_init(entry);
+    copy_entry_init(&entry);
     bufidx += contains_copyright(copy->dict, &buf[bufidx], temp);
     if(bufidx < bufsize)
     {
       /* copy the dictionary entry into the copyright entry */
-      strcpy(entry->dict_match, temp);
+      strcpy(entry.dict_match, temp);
 
       /* grab the begging and end of the match */
       beg = find_beginning(buf, bufidx);
       end = find_end(buf, bufidx, bufsize);
 
       /* copy the match into a new entry */
-      memcpy(entry->text, &buf[beg+1], end-beg);
-      entry->text[end-beg]=0;
-      entry->start_byte = beg;
-      entry->end_byte = end;
-      entry->type = "statement";
+      memcpy(entry.text, &buf[beg+1], end-beg);
+      entry.text[end-beg]=0;
+      entry.start_byte = beg;
+      entry.end_byte = end;
+      entry.type = "statement";
 
       /* push the string onto the list and increment bufidx */
-      contains_copyright(copy->name, entry->text, temp);
+      contains_copyright(copy->name, entry.text, temp);
       if(strlen(temp))
       {
-        strcpy(entry->name_match, temp);
-        cvector_push_back(copy->entries, entry);
+        strcpy(entry.name_match, temp);
+        cvector_push_back(copy->entries, &entry);
       }
     }
   }
 
   copyright_email_url(copy, buf);
   strip_empty_entries(copy);
-  free(entry);
 }
 
 /**
