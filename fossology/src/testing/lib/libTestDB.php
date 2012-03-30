@@ -78,7 +78,7 @@ function CreateTestDB($name)
   $path = __DIR__;
   $plenth = strlen($path);
   $TESTROOT = substr($path, 0, $plenth-4);
-  //echo "DB TR is:$TESTROOT\n";
+  echo "DB TR is:$TESTROOT\n";
   $_ENV['TESTROOT'] = $TESTROOT;
   putenv("TESTROOT=$TESTROOT");
 
