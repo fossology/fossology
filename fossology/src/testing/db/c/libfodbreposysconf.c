@@ -37,8 +37,10 @@ static void command_output(char *command)
   FILE *stream;
   char tmp[ARRAY_LENGTH];
   int i=0;
+  int status = 0;
 
   stream = popen(command, "r");
+  if (!stream) status = 1;
   memset(tmp, '\0', sizeof(tmp));
   if (fgets(tmp, ARRAY_LENGTH, stream) != NULL)
   {
@@ -48,8 +50,14 @@ static void command_output(char *command)
     memcpy(Sysconf, tmp, i);
     Sysconf[i] = '\0';
   }
-  pclose(stream);
-  return;
+  int rc = pclose(stream);
+  if (rc != 0) status = 1;
+  if (status == 1) 
+  {
+    printf("Failed to run %s, exit code is:%d .\n", command, rc>>8);
+    exit(1);
+  }
+  return ;
 }
 
 /** 
