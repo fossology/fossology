@@ -425,7 +425,7 @@ void email_notification(job j)
   FILE* mail_io;
   GString* email_txt;
 
-  if(is_special(j->agent_type, SAG_NOEMAIL))
+  if(is_meta_special(j->agent_type, SAG_NOEMAIL))
     return;
 
   sprintf(sql, select_upload_fk, j_id);

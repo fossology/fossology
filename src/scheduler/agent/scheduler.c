@@ -198,7 +198,7 @@ void update_scheduler()
   {
     while((j = peek_job()) != NULL)
     {
-      if(is_special(j->agent_type, SAG_LOCAL))
+      if(is_meta_special(j->agent_type, SAG_LOCAL))
       {
         machine = name_host(LOCAL_HOST);
         if(!(machine->running < machine->max))
@@ -211,7 +211,7 @@ void update_scheduler()
       }
 
       next_job();
-      if(is_special(j->agent_type, SAG_EXCLUSIVE))
+      if(is_meta_special(j->agent_type, SAG_EXCLUSIVE))
       {
         V_SCHED("JOB_INIT: exclusive, postponing initialization\n")
         break;

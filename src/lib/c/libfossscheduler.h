@@ -116,25 +116,26 @@ extern char*    sysconfigdir;
             fprintf(stderr, "\n"); \
             fflush(stderr); }
 
-#define TVERBOSE  agent_verbose
-#define TVERBOSE0 agent_verbose & 1
-#define TVERBOSE1 agent_verbose & 2
-#define TVERBOSE2 agent_verbose & 4
-#define TVERBOSE3 agent_verbose & 8
-#define TVERBOSE4 agent_verbose & 16
-#define TVERBOSE5 agent_verbose & 32
-#define TVERBOSE6 agent_verbose & 64
-#define TVERBOSE7 agent_verbose & 128
+#define TVERBOSE   agent_verbose
+#define TVERBOSE0 (agent_verbose & (1 << 0))
+#define TVERBOSE1 (agent_verbose & (1 << 1))
+#define TVERBOSE2 (agent_verbose & (1 << 2))
+#define TVERBOSE3 (agent_verbose & (1 << 3))
+#define TVERBOSE4 (agent_verbose & (1 << 4))
+#define TVERBOSE5 (agent_verbose & (1 << 5))
+#define TVERBOSE6 (agent_verbose & (1 << 6))
+#define TVERBOSE7 (agent_verbose & (1 << 7))
 
 /** @brief By using these macros the verbosity level of an agent can be changed   
- * dynamically through the scheduler.
+ *         dynamically through the scheduler.
+ *
  * For example, to print "this is a verbose test at line <line>" at verbose 
  * level 2 simply call:
  *    LOG_VERBOSE2("this is a verbose test at line %d", __LINE__);
  * Though you never have to put the caller's filename or line number
  * in a message since they are added by LOG_NOTICE.
  */
-#define LOG_VERBOSE(...)  if(TVERBOSE) LOG_NOTICE(__VA_ARGS__);
+#define LOG_VERBOSE(...)  if(TVERBOSE)  LOG_NOTICE(__VA_ARGS__);
 #define LOG_VERBOSE0(...) if(TVERBOSE0) LOG_NOTICE(__VA_ARGS__);
 #define LOG_VERBOSE1(...) if(TVERBOSE1) LOG_NOTICE(__VA_ARGS__);
 #define LOG_VERBOSE2(...) if(TVERBOSE2) LOG_NOTICE(__VA_ARGS__);
@@ -143,6 +144,14 @@ extern char*    sysconfigdir;
 #define LOG_VERBOSE5(...) if(TVERBOSE5) LOG_NOTICE(__VA_ARGS__);
 #define LOG_VERBOSE6(...) if(TVERBOSE6) LOG_NOTICE(__VA_ARGS__);
 #define LOG_VERBOSE7(...) if(TVERBOSE7) LOG_NOTICE(__VA_ARGS__);
+
+/**
+ * @brief Special conditions to set for an agent execution.
+ *
+ * Possible options:
+ *   SPECIAL_NOKILL: instruct the scheduler not to kill the agent
+ */
+#define SPECIAL_NOKILL (1 << 0)
 
 /* ************************************************************************** */
 /* **** Agent api *********************************************************** */
@@ -170,6 +179,7 @@ char* fo_scheduler_next();
 /* ************************************************************************** */
 
 char* fo_scheduler_current();
+void  fo_scheduler_set_special(int option, int value);
 char* fo_sysconfig(char* sectionname, char* variablename);
 
 #endif /* LIBFOSSSCHEDULER_H_INCLUDE */

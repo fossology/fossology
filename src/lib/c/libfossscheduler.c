@@ -286,6 +286,20 @@ char* fo_scheduler_current()
 }
 
 /**
+ * @brief Sets something special about the agent within the scheduler.
+ *
+ * Possible Options:
+ *   SPECIAL_NOKILL: instruct the scheduler to not kill the agent
+ *
+ * @param option  the option to set
+ * @param value   whether to set the option to true or false
+ */
+void fo_scheduler_set_special(int option, int value)
+{
+  fprintf("SPECIAL: %d %d", option, value);
+}
+
+/**
  * @brief gets a system configuration variable from the configuration data.
  *
  * This function should be called after fo_scheduler_connect has been called.
