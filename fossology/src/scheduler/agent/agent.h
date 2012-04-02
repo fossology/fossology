@@ -39,10 +39,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define LOCAL_HOST "localhost"
 
-#define SAG_EXCLUSIVE (1 << 0) ///< This agent must not run at the same time as any other agent
-#define SAG_NOEMAIL   (1 << 1) ///< This agent should not send notification emails
-#define SAG_NOKILL    (1 << 2) ///< This agent should not be killed when updating the agent
-#define SAG_LOCAL     (1 << 3) ///< This agent should only run on localhost
+#define SAG_EXCLUSIVE  (1 << 0) ///< This agent must not run at the same time as any other agent
+#define SAG_NOEMAIL    (1 << 1) ///< This agent should not send notification emails
+#define SAG_NOKILL     (1 << 2) ///< This agent should not be killed when updating the agent
+#define SAG_LOCAL      (1 << 3) ///< This agent should only run on localhost
 
 /** Enum to keep track of the state of an agent */
 typedef enum
@@ -127,6 +127,7 @@ struct agent_internal
     int total_analyzed;   ///< the total number that this agent has analyzed
     int alive;            ///< flag to tell the scheduler if the agent is still alive
     int return_code;      ///< what was returned by the agent when it disconnected
+    int special;          ///< any special flags that the agent has set
 };
 
 /* ************************************************************************** */
@@ -170,7 +171,8 @@ void clean_meta_agents(void);
 void list_agents(GOutputStream* ostr);
 int  add_meta_agent(char* name, char* cmd, int max, int spc);
 int  is_meta_agent(char* name);
-int  is_special(char* name, int special_type);
+int  is_meta_special(char* name, int special_type);
+int  is_agent_special(agent a, int special_type);
 int  num_agents(void);
 
 #endif /* AGENT_H_INCLUDE */

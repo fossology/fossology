@@ -50,7 +50,7 @@ static const gchar* fo_conf_pattern = "\
     (?<group>  \\[ (?:[ \t]*) (?<gname>[\\w\\d_]+) (?:[ \t]*) \\]) \n|\
     (?<key>    ([\\w\\d_]+))      (?:[ \t]*) = (?:[ \t]*)(?<value>.*)\n|\
     (?<klist>  ([\\w\\d_]+))\\[\\](?:[ \t]*) = (?:[ \t]*)(?<vlist>.*)\n|\
-    (?:\\s*)\n";
+    (?<error>  (?:\\S+)(?:[ \t]*))\n";
 
 static const gchar* fo_conf_variable = "\\$(\\w*)";
 
@@ -204,6 +204,7 @@ static gboolean fo_config_eval(const GMatchInfo* match, GTree** g_current,
   gchar* value = g_match_info_fetch_named(match, "value");
   gchar* klist = g_match_info_fetch_named(match, "klist");
   gchar* vlist = g_match_info_fetch_named(match, "vlist");
+  gchar* wrong = g_match_info_fetch_named(match, "error");
 
   if(group != NULL && group[0])
   {
@@ -227,6 +228,7 @@ static gboolean fo_config_eval(const GMatchInfo* match, GTree** g_current,
   g_free(value);
   g_free(klist);
   g_free(vlist);
+  g_free(wrong);
 
   return FALSE;
 }
@@ -249,7 +251,7 @@ static gboolean fo_config_eval(const GMatchInfo* match, GTree** g_current,
 fo_conf* fo_config_load(char* rawname, GError** error) {
   fo_conf* ret;
   gchar text[BUFFER_SIZE];
-  guint yyline = 0;
+  guint yyline = 1;
   FILE* fd;
   GMatchInfo* match;
 

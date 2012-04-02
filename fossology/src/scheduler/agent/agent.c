@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <scheduler.h>
 
 /* library includes */
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,9 +56,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TEST_NULV(a) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
 #define TEST_NULL(a, ret) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
 
-GTree* meta_agents  = NULL;  ///< The master list of all meta agents
-GTree* agents       = NULL;  ///< The master list of all of the agents
-GRegex* heart_regex = NULL;  ///< regex for parsing heart messages
+GTree* meta_agents    = NULL;  ///< The master list of all meta agents
+GTree* agents         = NULL;  ///< The master list of all of the agents
+GRegex* heart_regex   = NULL;  ///< regex for parsing heart messages
+GRegex* special_regex = NULL;  ///< regex for parsing special messages
 
 /** prints the credential of the agent */
 #define AGENT_CREDENTIAL                                               \
@@ -200,7 +202,8 @@ int update(int* pid_ptr, agent a, gpointer unused)
   {
     /* check last checkin time */
     if(time(NULL) - a->check_in > TILL_DEATH && !job_is_paused(a->owner) &&
-        !is_special(a->meta_data->name, SAG_NOKILL))
+        !(is_agent_special(a, SAG_NOKILL) ||
+          is_meta_special(a->meta_data->name, SAG_NOKILL)))
     {
       AGENT_LOG("no heartbeat for %d seconds\n", (time(NULL) - a->check_in));
       agent_kill(a);
@@ -212,7 +215,8 @@ int update(int* pid_ptr, agent a, gpointer unused)
       a->n_updates++;
     else
       a->n_updates = 0;
-    if(a->n_updates > NUM_UPDATES && !is_special(a->meta_data->name, SAG_NOKILL))
+    if(a->n_updates > NUM_UPDATES && !(is_agent_special(a, SAG_NOKILL) ||
+        is_meta_special(a->meta_data->name, SAG_NOKILL)))
     {
       AGENT_LOG("agent has not set the alive flag in at least 10 minutes, killing\n");
       agent_kill(a);
@@ -311,6 +315,7 @@ void agent_listen(agent a)
   char buffer[1024]; // buffer to store c strings read from agent
   GMatchInfo* match; // regex match information
   char* arg;         // used during regex retrievals
+  int relevant;      // used during special retrievals
 
   TEST_NULV(a);
 
@@ -488,6 +493,41 @@ void agent_listen(agent a)
     else if(strncmp(buffer, "EMAIL", 5) == 0)
     {
       a->owner->message = g_strdup(buffer + 6);
+    }
+
+    /* command: "SPECIAL"
+     *
+     * Agents can set special attributes that change how it is treated during
+     * execution. This grabs the command and whether it is being set to true
+     * or false. Agents use this by calling fo_scheduler_set_special() in the
+     * agent api.
+     */
+    else if(strncmp(buffer, "SPECIAL", 7) == 0)
+    {
+      relevant = INT_MAX;
+
+      g_regex_match(special_regex, buffer, 0, &match);
+
+      arg = g_match_info_fetch(match, 2);
+      relevant &= atoi(arg);
+      g_free(arg);
+
+      arg = g_match_info_fetch(match, 4);
+      if(atoi(arg))
+      {
+        if(a->special & relevant)
+          relevant = 0;
+      }
+      else
+      {
+        if(!(a->special & relevant))
+          relevant = 0;
+      }
+      g_free(arg);
+
+      g_match_info_free(match);
+
+      a->special ^= relevant;
     }
 
     /* command: unknown
@@ -803,6 +843,7 @@ agent agent_init(host host_machine, job owner)
   a->data = NULL;
   a->return_code = -1;
   a->total_analyzed = 0;
+  a->special = 0;
 
   /* open the relevant file pointers */
   if((a->read = fdopen(a->from_child, "r")) == NULL)
@@ -1164,9 +1205,10 @@ void list_agents(GOutputStream* ostr)
  */
 void agent_list_init(void)
 {
-  meta_agents = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)meta_agent_destroy);
-  agents      = g_tree_new_full(int_compare   , NULL, NULL, (GDestroyNotify)agent_destroy);
-  heart_regex = g_regex_new("HEART:(\\s*)(\\d*)(\\s*)(\\d)", 0, 0, NULL);
+  meta_agents   = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)meta_agent_destroy);
+  agents        = g_tree_new_full(int_compare   , NULL, NULL, (GDestroyNotify)agent_destroy);
+  heart_regex   = g_regex_new("HEART:([ \t]*)(\\d*)([ \t]*)(\\d)", 0, 0, NULL);
+  special_regex = g_regex_new("SPECIAL:([ \t]*)(\\d*)([ \t]*)(\\d)", 0, 0, NULL);
 }
 
 /**
@@ -1176,9 +1218,10 @@ void agent_list_init(void)
  */
 void agent_list_clean()
 {
-  if(meta_agents) g_tree_destroy(meta_agents);
-  if(agents)      g_tree_destroy(agents);
-  if(heart_regex) g_regex_unref(heart_regex);
+  if(meta_agents)   g_tree_destroy(meta_agents);
+  if(agents)        g_tree_destroy(agents);
+  if(heart_regex)   g_regex_unref(heart_regex);
+  if(special_regex) g_regex_unref(special_regex);
   agent_list_init();
 }
 
@@ -1228,13 +1271,25 @@ int is_meta_agent(char* name)
  * tests if a particular meta agent has any of the special flags set.
  *
  * @param name          the name of the meta agent
- * @param special_type  is what way is the agent special
- * @return 1 if it is exclusive
+ * @param special_type  in what way is the agent special
+ * @return true or false
  */
-int is_special(char* name, int special_type)
+int is_meta_special(char* name, int special_type)
 {
   meta_agent ma = (meta_agent)g_tree_lookup(meta_agents, name);
   return (ma != NULL) && ((ma->special & special_type) != 0);
+}
+
+/**
+ * tests if a particular agent has any of the special falgs sets
+ *
+ * @param a             the agent that should be tested
+ * @param special_type  in what way is the agent special
+ * @return true or false
+ */
+int is_agent_special(agent a, int special_type)
+{
+  return (a != NULL) && ((a->special & special_type) != 0);
 }
 
 /**
