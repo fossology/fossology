@@ -398,7 +398,7 @@ void agent_listen(agent a)
     if(strlen(buffer) == 0)
       continue;
 
-    if(TVERB_AGENT)
+    if(TVERB_AGENT && (TVERB_SPECIAL || strncmp(buffer, "SPECIAL", 7) != 0))
       AGENT_LOG("received: \"%s\"\n", buffer);
 
     /* command: "BYE"
