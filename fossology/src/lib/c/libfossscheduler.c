@@ -296,7 +296,7 @@ char* fo_scheduler_current()
  */
 void fo_scheduler_set_special(int option, int value)
 {
-  fprintf(stdout, "SPECIAL: %d %d", option, value);
+  fprintf(stdout, "SPECIAL: %d %d\n", option, value);
 }
 
 /**
