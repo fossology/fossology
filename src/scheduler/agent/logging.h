@@ -95,20 +95,22 @@ extern char  log_name[FILENAME_MAX];
 /* change these the the TVERBOSE# macro when a test of verbose is needed, */
 /* this happpens when printing from another thread. The other verbose     */
 /* macro makes the syntax better everywhere else                          */
-#define TVERB_JOB   (verbose & 0x8)
-#define TVERB_AGENT (verbose & 0x10)
-#define TVERB_SCHED (verbose & 0x20)
-#define TVERB_EVENT (verbose & 0x40)
-#define TVERB_INTER (verbose & 0x80)
-#define TVERB_DATAB (verbose & 0x100)
-#define TVERB_HOST  (verbose & 0x200)
-#define V_JOB(...)       if(TVERB_JOB)    lprintf(__VA_ARGS__);
-#define V_AGENT(...)     if(TVERB_AGENT)  lprintf(__VA_ARGS__);
-#define V_SCHED(...)     if(TVERB_SCHED)  lprintf(__VA_ARGS__);
-#define V_EVENT(...)     if(TVERB_EVENT)  lprintf(__VA_ARGS__);
-#define V_INTERFACE(...) if(TVERB_INTER) clprintf(__VA_ARGS__);
-#define V_DATABASE(...)  if(TVERB_DATAB)  lprintf(__VA_ARGS__);
-#define V_HOST(...)      if(TVERB_HOST)   lprintf(__VA_ARGS__);
+#define TVERB_JOB     (verbose & 0x8)
+#define TVERB_AGENT   (verbose & 0x10)
+#define TVERB_SCHED   (verbose & 0x20)
+#define TVERB_EVENT   (verbose & 0x40)
+#define TVERB_INTER   (verbose & 0x80)
+#define TVERB_DATAB   (verbose & 0x100)
+#define TVERB_HOST    (verbose & 0x200)
+#define TVERB_SPECIAL (verbose & 0x400)
+#define V_JOB(...)       if(TVERB_JOB)     lprintf(__VA_ARGS__);
+#define V_AGENT(...)     if(TVERB_AGENT)   lprintf(__VA_ARGS__);
+#define V_SCHED(...)     if(TVERB_SCHED)   lprintf(__VA_ARGS__);
+#define V_EVENT(...)     if(TVERB_EVENT)   lprintf(__VA_ARGS__);
+#define V_INTERFACE(...) if(TVERB_INTER)  clprintf(__VA_ARGS__);
+#define V_DATABASE(...)  if(TVERB_DATAB)   lprintf(__VA_ARGS__);
+#define V_HOST(...)      if(TVERB_HOST)    lprintf(__VA_ARGS__);
+#define V_SPECIAL(...)   if(TVERB_SPECIAL) lprintf(__VA_ARGS__);
 
 /* ************************************************************************** */
 /* **** logging functions *************************************************** */
