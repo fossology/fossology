@@ -132,7 +132,7 @@ if(array_key_exists('d', $Options))
   $lastCmd = exec($ckCmd, $ckOut, $ckRtn);
   if($ckRtn != 0)
   {
-    echo "ERROR: postgresql isn't running, not deleting database $name\n";
+    echo "ERROR: postgresql isn't running, not deleting database $dropName\n";
     exit(1);
   }
   $existCmd = "psql -l  fossology -U fossy|grep -q $dropName";
