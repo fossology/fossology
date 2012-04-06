@@ -215,7 +215,7 @@ class list_bucket_files extends FO_Plugin
         $text = _("File");
         $V .= "<tr><th>$text</th><th>&nbsp";
         $ExclArray = explode(":", $Excl);
-        $ItemNumb = 1;
+        $ItemNumb = 0;
         $PrevPfile_pk = 0;
 
         if ($Count > 0)
@@ -244,14 +244,17 @@ class list_bucket_files extends FO_Plugin
             $LinkLast = "view-license&bapk=$bucketagent_pk&napk=$nomosagent_pk";
             $V .= "<tr><td>";
             if ($PrevPfile_pk == $pfile_pk)
-            $V .= "<div style='margin-left:2em;'>";
+            {
+              $V .= "<div style='margin-left:2em;'>";
+            }
             else
             {
               $V .= "<div>";
               $PrevPfile_pk = $pfile_pk;
+              $ItemNumb++;
             }
             $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox,
-            $ShowMicro, $ItemNumb++, $Header);
+            $ShowMicro, $ItemNumb, $Header);
             $V .= "</div>";
 
             $V .= "</td>";
