@@ -19,7 +19,7 @@
 /**
 * \brief common functions used to manage vm's from the command line
 *
-* @version "$Id: $"
+* @version "$Id$"
 * Created on Apr 6, 2012 by Mark Donohoe
 */
 
