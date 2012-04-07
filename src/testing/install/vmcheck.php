@@ -99,12 +99,12 @@ foreach($hosts as $host => $vms)
   {
     if(!vmOps($host, $vm, 'start'))
     {
-      echo "Warning: $vm would not start, not not in this run.\n";
+      echo "Warning: $vm would not start, not in this test run.\n";
       continue;
     }
     if(!vmOps($host, $vm, 'hassnapshot'))
     {
-      echo "DB: hassnapshot: would adjusting list of vms\n";
+      echo "Warning: $vm does not have a snapshot!\n";
 
     }
     $machinesReady[$host][] = $vm;
