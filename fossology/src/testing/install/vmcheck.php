@@ -35,6 +35,7 @@ $vmServers = array(
 
 // vmware does not change the name of the initial vm, it just displays the new
 // name.
+/*
 $pkgVms = array(
     'squeze32',
     'squeze64',
@@ -48,6 +49,12 @@ $pkgVms = array(
     'ubun11.04.64',
     'u1110-32',
     'u1110-64',
+);
+*/
+$pkgVms = array(
+    'squeze64',
+    'fed15-32',
+    'rhel6-264_1',
 );
 
 
