@@ -38,7 +38,7 @@ foreach($toRevert as $host => $vms)
   {
     //echo "DB: vmName is:$vmName\n";
     //echo "DB: vm is:$vm\n";
-    echo "Reverting snapshot on host $host using $vmName on vm:\n$vm"
+    echo "Reverting snapshot on host $host using $vmName on vm:\n$vm\n";
     if(!vmOps($host, $vm, 'revertsnapshot'))
     {
       echo "FATAL! count not revert the current snapshot for $vmName on vm\n$vm\n";
