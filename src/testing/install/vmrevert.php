@@ -33,7 +33,6 @@ $toRevert = parse_ini_file('vm.ini', 1);
 foreach($toRevert as $host => $vms)
 {
   $host = trim($host);
-  echo "DB: host is:$host\n";
   foreach ($vms as $vmName => $vm)
   {
     //echo "DB: vmName is:$vmName\n";
