@@ -57,6 +57,8 @@ function vmOps($host,$vm, $command)
     {
       $turnOnVm = "ssh $host -l markd 'vmware-cmd " . "\"" . $vm . "\"" .  " $command' 2>&1";
       $laston = exec($turnOnVm, $inout, $inrtn);
+      echo "DB: Ops: inrtn is:$inrtn\n";
+      echo "DB: Ops: inout is:\n"; print_r($inout) . "\n";
       if($inrtn != 0)
       {
         echo "Error: could not $command on $vm on $host\n";
