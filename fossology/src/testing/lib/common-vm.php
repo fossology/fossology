@@ -55,7 +55,7 @@ function vmOps($host,$vm, $command)
   {
     foreach($vm as $machine)
     {
-      $turnOnVm = "ssh $host 'vmware-cmd " . "\"" . $vm . "\"" .  " $command' 2>&1";
+      $turnOnVm = "ssh $host -l markd 'vmware-cmd " . "\"" . $vm . "\"" .  " $command' 2>&1";
       $laston = exec($turnOnVm, $inout, $inrtn);
       if($inrtn != 0)
       {
