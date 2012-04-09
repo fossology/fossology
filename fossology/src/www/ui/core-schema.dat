@@ -1543,7 +1543,7 @@
   $Schema["TABLE"]["tag"]["tag_pk"]["UPDATE"] = "UPDATE tag SET tag_pk=nextval('tags_tag_pk_seq'::regclass)";
 
   $Schema["TABLE"]["tag"]["tag"]["DESC"] = "";
-  $Schema["TABLE"]["tag"]["tag"]["ADD"] = "ALTER TABLE \"tag\" ADD COLUMN \"tag\" char(32);";
+  $Schema["TABLE"]["tag"]["tag"]["ADD"] = "ALTER TABLE \"tag\" ADD COLUMN \"tag\" varchar(32);";
   $Schema["TABLE"]["tag"]["tag"]["ALTER"] = "ALTER TABLE \"tag\" ALTER COLUMN \"tag\" SET NOT NULL;";
   $Schema["TABLE"]["tag"]["tag"]["UPDATE"] = "";
 
