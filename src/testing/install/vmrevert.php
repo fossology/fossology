@@ -30,6 +30,23 @@ require_once('../lib/common-vm.php');
 // cycle through the arrays and revert each vm
 
 $toRevert = parse_ini_file('vm.ini', 1);
+// first shutdown then power off
+foreach($toRevert as $host => $vms)
+{
+  $host = trim($host);
+  foreach ($vms as $vmName => $vm)
+  {
+    //echo "DB: vmName is:$vmName\n";
+    //echo "DB: vm is:$vm\n";
+    echo "Performing a soft shutdown on host $host using $vmName on vm:\n$vm\n";
+    if(!vmOps($host, $vm, 'stop soft'))
+    {
+      echo "FATAL! count not revert the current snapshot for $vmName on vm\n$vm\n";
+    }
+  } // foreach
+} // foreach
+
+// now revert snapshot
 foreach($toRevert as $host => $vms)
 {
   $host = trim($host);
