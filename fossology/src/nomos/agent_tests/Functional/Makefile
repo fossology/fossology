@@ -34,7 +34,7 @@ test: all
 	pwd; \
 	ls -l
 		
-	phpunit --log-junit nomos-Xunit.xml -c tests.xml
+	phpunit --log-junit nomos-Xunit.xml --configuration tests.xml
 
 coverage:
 	@echo "no code coverage for nomos in agent_test/Functional"
