@@ -17,11 +17,11 @@
  */
 
 /**
-* \brief common functions used to manage vm's from the command line
-*
-* @version "$Id$"
-* Created on Apr 6, 2012 by Mark Donohoe
-*/
+ * \brief common functions used to manage vm's from the command line
+ *
+ * @version "$Id$"
+ * Created on Apr 6, 2012 by Mark Donohoe
+ */
 
 /**
  * \brief execute a vmware cmd on one or more vm machines
@@ -71,6 +71,8 @@ function vmOps($host,$vm, $command)
   {
     $turnOnVm = "ssh $host 'vmware-cmd " . "\"" . $vm . "\"" .  " start' 2>&1";
     $laston = exec($turnOnVm, $inout, $inrtn);
+    echo "DB: Ops: inrtn is:$inrtn\n";
+    echo "DB: Ops: inout is:\n"; print_r($inout) . "\n";
     if($inrtn != 0)
     {
       echo "Error: could not $command on $vm on $host\n";
