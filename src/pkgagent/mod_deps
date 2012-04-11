@@ -18,7 +18,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o rbeh --long runtime,buildtime,everything,,help -n 'mod_deps' -- "$@"`
+OPTS=`getopt -o rbehy --long runtime,buildtime,everything,,help -n 'mod_deps' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -37,6 +37,8 @@ while true; do
       -r|--runtime) RUNTIME=1; shift;;
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
+      -y) 
+         YesOpt=" -y --force-yes "; shift;;      
       -h|--help)
          echo "Usage: mod_deps [options]";
 	 echo "  -r or --runtime    : install runtime dependencies"
@@ -85,13 +87,19 @@ if [ $BUILDTIME ]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
-      apt-get install \
+      apt-get $YesOpt install \
       librpm-dev;;
     RedHatEnterprise*|CentOS)
-      yum install \
+      if [ $YesOpt ]; then
+        $YesOpt='-y'
+      fi
+      yum $YesOpt install \
         rpm-devel;;
     Fedora)
-      yum install \
+      if [ $YesOpt ]; then
+        $YesOpt='-y'
+      fi    
+      yum $YesOpt install \
         rpm-devel;;
   esac
 fi
@@ -100,13 +108,19 @@ if [ $RUNTIME ]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
-      apt-get install \
+      apt-get $YesOpt install \
         rpm;;
     RedHatEnterprise*|CentOS)
-      yum install \
+      if [ $YesOpt ]; then
+        $YesOpt='-y'
+      fi    
+      yum $YesOpt install \
         rpm;;
     Fedora)
-      yum install \
+      if [ $YesOpt ]; then
+        $YesOpt='-y'
+      fi        
+      yum $YesOpt install \
         rpm;;
   esac
 fi

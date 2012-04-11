@@ -18,7 +18,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o rbeh --long runtime,buildtime,everything,,help -n 'mod_deps' -- "$@"`
+OPTS=`getopt -o rbehy --long runtime,buildtime,everything,,help -n 'mod_deps' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -37,6 +37,8 @@ while true; do
       -r|--runtime) RUNTIME=1; shift;;
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
+      -y) 
+         YesOpt=" -y --force-yes "; shift;;          
       -h|--help)
          echo "Usage: mod_deps [options]";
 	 echo "  -r or --runtime    : install runtime dependencies"
@@ -89,14 +91,20 @@ if [ $RUNTIME ]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
-      apt-get install \
+      apt-get $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip \
         poppler-utils rpm tar upx unzip gzip sleuthkit p7zip-full unrar-free;;
     RedHatEnterprise*|CentOS)
-      yum install \
+      if [ $YesOpt ]; then
+        $YesOpt='-y'
+      fi    
+      yum $YesOpt install \
          bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip p7zip-plugins sleuthkit unrar;;
     Fedora)
-      yum install \
+      if [ $YesOpt ]; then
+        $YesOpt='-y'
+      fi    
+      yum $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip p7zip-plugins\
         poppler-utils rpm tar upx unzip gzip sleuthkit unrar
   esac
