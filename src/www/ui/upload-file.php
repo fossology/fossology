@@ -34,35 +34,49 @@ class upload_file extends FO_Plugin {
   /**
    * \brief Process the upload request.
    *
-   * \return NULL on success, string on failure.
+   * \param $folder_pk
+   * \param $TempFile path to temporary (upload) file
+   * \param $Desc optional upload description.
+   * \param $Name original name of the file on the client machine.
+   * \return NULL on success, error string on failure.
    */
-  function Upload($Folder, $TempFile, $Desc, $Name) 
+  function Upload($folder_pk, $TempFile, $Desc, $Name) 
   {
     global $MODDIR;
     global $SysConf;
 
-    /* See if the URL looks valid */
-    if (empty($Folder)) {
-      $text = _("Invalid folder");
-      return ($text);
-    }
-    if (empty($Name)) {
-      $Name = basename(@$_FILES['getfile']['name']);
-    }
-    $originName = @$_FILES['getfile']['name'];
+    define("UPLOAD_ERR_EMPTY",5);
+    define("UPLOAD_ERR_INVALID_FOLDER_PK",100);
+    $upload_errors = array(
+      UPLOAD_ERR_OK         => _("No errors."), 
+      UPLOAD_ERR_INI_SIZE   => _("Larger than upload_max_filesize ") . ini_get('upload_max_filesize'),
+      UPLOAD_ERR_FORM_SIZE  => _("Larger than form MAX_FILE_SIZE."),
+      UPLOAD_ERR_PARTIAL    => _("Partial upload."),
+      UPLOAD_ERR_NO_FILE    => _("No file."),
+      UPLOAD_ERR_NO_TMP_DIR => _("No temporary directory."),
+      UPLOAD_ERR_CANT_WRITE => _("Can't write to disk."),
+      UPLOAD_ERR_EXTENSION  => _("File upload stopped by extension."),
+      UPLOAD_ERR_EMPTY      => _("File is empty or you don't have permission to read the file."),
+      UPLOAD_ERR_INVALID_FOLDER_PK => _("Invalid Folder.")
+    );
+
+    $UploadFile = $_FILES['getfile'];
+    $UploadError = @$UploadFile['error'];
+
+    /* Additional error checks */
+    if($UploadFile['size'] == 0 && $UploadFile['error'] == 0) $UploadFile['error'] = UPLOAD_ERR_EMPTY;
+    if (empty($folder_pk)) $UploadFile['error'] = UPLOAD_ERR_INVALID_FOLDER_PK;
+    if ($UploadFile['error'] != UPLOAD_ERR_OK) return $upload_errors[$UploadFile['error']];
+
+    $originName = @$UploadFile['name'];
+    if (empty($Name)) $Name = basename($originName);
     $ShortName = basename($Name);
-    if (empty($ShortName)) {
-      $ShortName = $Name;
-    }
-    /** check if the file size is 0, why the file size is 0, the truth, or the file is unreadable */
-    if (0 == @$_FILES['getfile']['size']) {
-      $text = _("the size of $originName is 0, or the file is unreadable!");
-      return ($text);
-    }
+    if (empty($ShortName)) $ShortName = $Name;  // for odd case where $Name is '/'
+
     /* Create an upload record. */
     $Mode = (1 << 3); // code for "it came from web upload"
     $user_pk = $SysConf['auth']['UserId'];
-    $uploadpk = JobAddUpload($user_pk, $ShortName, $originName, $Desc, $Mode, $Folder);
+    $uploadpk = JobAddUpload($user_pk, $ShortName, $originName, $Desc, $Mode, $folder_pk);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
       return ($text);
@@ -79,7 +93,8 @@ class upload_file extends FO_Plugin {
     }
 
     /* Run wget_agent locally to import the file. */
-    $Prog = "$MODDIR/wget_agent/agent/wget_agent -g fossy -k $uploadpk '$UploadedFile'";
+    $Prog = "$MODDIR/wget_agent/agent/wget_agent -C -g fossy -k $uploadpk '$UploadedFile'";
+    $wgetOut = array();
     $wgetLast = exec($Prog,$wgetOut,$wgetRtn);
     unlink($UploadedFile);
 
@@ -124,11 +139,11 @@ class upload_file extends FO_Plugin {
         break;
       case "HTML":
         /* If this is a POST, then process the request. */
-        $Folder = GetParm('folder', PARM_INTEGER);
+        $folder_pk = GetParm('folder', PARM_INTEGER);
         $Desc = GetParm('description', PARM_TEXT); // may be null
         $Name = GetParm('name', PARM_TEXT); // may be null
-        if (file_exists(@$_FILES['getfile']['tmp_name']) && !empty($Folder)) {
-          $rc = $this->Upload($Folder, @$_FILES['getfile']['tmp_name'], $Desc, $Name);
+        if (file_exists(@$_FILES['getfile']['tmp_name']) && !empty($folder_pk)) {
+          $rc = $this->Upload($folder_pk, @$_FILES['getfile']['tmp_name'], $Desc, $Name);
           if (empty($rc)) {
             // reset form fields
             $GetURL = NULL;
