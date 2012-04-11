@@ -37,6 +37,8 @@ while true; do
       -r|--runtime) RUNTIME=1; shift;;
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
+      -y) 
+         YesOpt=" -y --force-yes "; shift;;         
       -h|--help)
          echo "Usage: mod_deps [options]";
 	 echo "  -r or --runtime    : install runtime dependencies"
@@ -89,13 +91,19 @@ if [ $RUNTIME ]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
-      apt-get install \
+      apt-get $YesOpt install \
       wget;;
     RedHatEnterprise*|CentOS)
-      yum install \
+      if [ $YesOpt ]; then
+        YesOpt='-y'
+      fi    
+      yum $YesOpt install \
       wget;;
     Fedora)
-      yum install \
+      if [ $YesOpt ]; then
+        YesOpt='-y'
+      fi    
+      yum $YesOpt install \
       wget;;
   esac
 fi
