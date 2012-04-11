@@ -18,7 +18,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o rbeh --long runtime,buildtime,everything,,help -n 'mod_deps' -- "$@"`
+OPTS=`getopt -o rbehy --long runtime,buildtime,everything,,help -n 'mod_deps' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
