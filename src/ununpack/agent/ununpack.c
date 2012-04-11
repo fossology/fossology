@@ -341,11 +341,11 @@ int	main(int argc, char *argv[])
   /* process pfile from scheduler */
   if (Pfile)
   {
-    if ((rvExist1 = fo_RepExist2(REP_FILES,Pfile)))
+    if (0 == (rvExist1 = fo_RepExist2(REP_FILES,Pfile)))
     {
       Fname=fo_RepMkPath(REP_FILES,Pfile);
     }
-    else if ((rvExist2 = fo_RepExist2(REP_GOLD,Pfile)))
+    else if (0 == (rvExist2 = fo_RepExist2(REP_GOLD,Pfile)))
     {
       Fname=fo_RepMkPath(REP_GOLD,Pfile);
       if (fo_RepImport(Fname,REP_FILES,Pfile,1) != 0)
