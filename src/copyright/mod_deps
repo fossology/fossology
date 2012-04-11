@@ -40,7 +40,6 @@ while true; do
       -y) 
          YesOpt=" -y --force-yes "; shift;;
       -h|--help)
-      -h|--help)
          echo "Usage: mod_deps [options]";
 	 echo "  -r or --runtime    : install runtime dependencies"
 	 echo "  -b or --buildtime  : install buildtime dependencies"
