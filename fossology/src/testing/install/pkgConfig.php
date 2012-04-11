@@ -421,6 +421,18 @@ function installFossology($objRef)
         echo implode("\n",$iOut) . "\n";
         return(FALSE);
       }
+      // check for php or other errors that don't make apt return 1
+      $installLog = implode("\n",$iOut);
+      $stack = '/PHP Stack trace:/';
+      $fatal = '/FATAL/';
+      $noConnect = '/Could not connect to FOSSology database/';
+      $traces = preg_match_all($stack, $installLog, $stackMatches);
+      $fates = preg_match_all($fatal, $installLog, $fatalMatches);
+      $connects =  preg_match_all($noConnect, $installLog, $noconMatches);
+      print "DB: number of PHP stack traces:$traces\n";
+      print "DB: number of FATAL's found:$fates\n";
+      print "DB: number of cannot connect found:$connects\n";
+      // if any of the above are non zero, return false
       break;
     case 'Fedora':
     case 'RedHat':
