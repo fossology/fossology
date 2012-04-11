@@ -24,6 +24,7 @@ int	main(int argc, char *argv[])
 {
   int Pid;
   int c;
+  int rvExist1=0, rvExist2=0;
   PGresult *result;
   char *NewDir=".";
   char *AgentName = "ununpack";
@@ -252,10 +253,16 @@ int	main(int argc, char *argv[])
           SafeExit(29);
         }
       }
+
       if (Fname)
       {
         FnameCheck = Fname;
         CF = SumOpenFile(Fname);
+      }
+      else
+      {
+        LOG_ERROR("NO file unpacked.  File %s does not exist either in GOLD or FILES", Pfile);
+        SafeExit(31);
       }
       /* else: Fname is NULL and CF is NULL */
     }
@@ -334,11 +341,11 @@ int	main(int argc, char *argv[])
   /* process pfile from scheduler */
   if (Pfile)
   {
-    if (fo_RepExist(REP_FILES,Pfile))
+    if ((rvExist1 = fo_RepExist2(REP_FILES,Pfile)))
     {
       Fname=fo_RepMkPath(REP_FILES,Pfile);
     }
-    else if (fo_RepExist(REP_GOLD,Pfile))
+    else if ((rvExist2 = fo_RepExist2(REP_GOLD,Pfile)))
     {
       Fname=fo_RepMkPath(REP_GOLD,Pfile);
       if (fo_RepImport(Fname,REP_FILES,Pfile,1) != 0)
@@ -352,6 +359,21 @@ int	main(int argc, char *argv[])
       TraverseStart(Fname,"called by main via env",NewDir,Recurse);
       free(Fname);
       Fname=NULL;
+    }
+    else
+    {
+      LOG_ERROR("NO file unpacked!");
+      if (rvExist1 > 0)
+      {
+        Fname=fo_RepMkPath(REP_FILES, Pfile);
+        LOG_ERROR("Error is %s for %s", strerror(rvExist1), Fname);
+      }
+      if (rvExist2 > 0)
+      {
+        Fname=fo_RepMkPath(REP_GOLD, Pfile);
+        LOG_ERROR("Error is %s for %s", strerror(rvExist2), Fname);
+      }
+      SafeExit(32);
     }
   }
 

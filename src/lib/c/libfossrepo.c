@@ -484,6 +484,47 @@ int	fo_RepExist	(char *Type, char *Filename)
 } /* fo_RepExist() */
 
 /*!
+ \brief Determine if a file exists.
+ If it does not exist, return an error code (errno).
+ This is a replacement for fo_RepExist().
+
+ Test with standalone:
+ \n ./repexist files 00000cb69c3c9c9fd15cadbf4652bd1552c349de.6caae94bdb579d7c9ada36726cf2e97f.776
+
+ \param Type is the type of data.
+ \param Filename 
+ \return 0=exists, errno=not exists, -1 = internal errors. 
+ A message is also written to stderr for internal errors (bad inputs, etc).
+ */
+int	fo_RepExist2(char *Type, char *Filename)
+{
+  char *Fname;
+  struct stat Stat;
+  int rc=0;
+
+  if (!_RepCheckType(Type))
+  {
+    fprintf(stderr,"ERROR: Invalid type '%s'\n",Type);
+    return(-1);
+  }
+  if (!_RepCheckString(Filename))
+  {
+    fprintf(stderr,"ERROR: Invalid filename '%s'\n",Filename);
+    return(-1);
+  }
+
+  Fname = fo_RepMkPath(Type,Filename);
+  if (!Fname)
+  {
+    fprintf(stderr,"ERROR: Unable to allocate path for '%s/%s'\n",Type,Filename);
+    return(-1);
+  }
+  if (stat(Fname,&Stat)) rc=errno;
+  free(Fname);
+  return(rc);
+} /* fo_RepExist2() */
+
+/*!
  \brief Delete a repository file.
 
  \param Type is the type of data.
