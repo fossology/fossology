@@ -24,7 +24,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o rbeh --long runtime,buildtime,everything,help -n 'fo-installdeps' -- "$@"`
+OPTS=`getopt -o rbehy --long runtime,buildtime,everything,help -n 'fo-installdeps' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -37,12 +37,18 @@ eval set -- "$OPTS"
 if [ "$OPTS" = " --" ]; then
    EVERYTHING=1
 fi
-
+#
+# Don't show the -y option.  Should only be used for install testing, as using
+# it without being careful can destroy your system.
+#
+YesOpt=
 while true; do
    case "$1" in
       -r|--runtime) RUNTIME=1; shift;;
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
+      -y) 
+         YesOpt=" -y --force-yes "; shift;;
       -h|--help)
          echo "Usage: fo-installdeps [options]";
 	 echo "  -r or --runtime    : install runtime dependencies"
@@ -87,15 +93,16 @@ if [ $BUILDTIME ]; then
    echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
       Debian|Ubuntu|LinuxMint)
-         apt-get install \
+      echo "DB: Installing build essiential....."
+         apt-get $YesOpt install \
             libxml2-dev libextractor-dev \
             build-essential libtext-template-perl subversion rpm
          case "$CODENAME" in
-            lenny|hardy) apt-get install postgresql-server-dev-8.3;;
-            squeeze|oneiric) apt-get install postgresql-server-dev-8.4;;
-            sid) apt-get install postgresql-server-dev-8.4;;
-            karmic|lucid|maverick) apt-get install postgresql-server-dev-8.4;;
-            isadora) apt-get install postgresql-server-dev-8.4;;
+            lenny|hardy) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.3;;
+            squeeze) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.4;;
+            sid) apt-get  $YesOpt install $YesOpt postgresql-server-dev-8.4;;
+            lucid|natty|oneiric) apt-get $YesOpt install postgresql-server-dev-8.4;;
+            isadora) apt-get $YesOpt install postgresql-server-dev-8.4;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
          esac
          ;;
@@ -135,25 +142,22 @@ if [ $RUNTIME ]; then
    echo "*** apt-get install mail-transport-agent, pick one and install it***";
    case "$DISTRO" in
       Debian|Ubuntu|LinuxMint)
-         apt-get install apache2 libapache2-mod-php5
-         apt-get install \
+        echo "doing runtime"
+         apt-get $YesOpt install apache2 libapache2-mod-php5
+         apt-get $YesOpt install  \
             php5 php5-pgsql php-pear php5-cli \
             libxml2 libextractor1c2a \
             binutils php-gettext \
             libextractor-plugins
          case "$CODENAME" in
-            dapper) 
-               apt-get install postgresql-8.1;;
-            lenny|hardy)
-               apt-get install postgresql-8.3;;
-            squeeze|oneiric)
-               apt-get install postgresql-8.4;;
+            squeeze)
+               apt-get $YesOpt install postgresql-8.4;;
             sid)
-               apt-get install postgresql-8.4;;
-            karmic|lucid|maverick)
-               apt-get install postgresql-8.4;;
+               apt-get $YesOpt install postgresql-8.4;;
+            lucid|natty|oneiric)
+               apt-get $YesOpt install postgresql-8.4;;
             isadora)
-               apt-get install postgresql-8.4;;
+               apt-get $YesOpt install postgresql-8.4;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
          esac
          ;;
