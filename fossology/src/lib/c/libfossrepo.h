@@ -80,6 +80,7 @@ int	_RepMkDirs	(char *Filename);
 
 /* Sanity checks */
 int fo_RepExist	(char *Type, char *Filename);
+int fo_RepExist2	(char *Type, char *Filename);
 int fo_RepHostExist	(char *Type, char *Host);
 
 /* Removal */
