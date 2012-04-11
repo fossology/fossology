@@ -86,7 +86,7 @@ if [ $BUILDTIME ]; then
       ;;
     Fedora)
       if [ $YesOpt ]; then
-        $YesOpt='-y'
+        YesOpt='-y'
       fi        
       yum $YesOpt install \
         glib2-devel
@@ -97,7 +97,7 @@ if [ $BUILDTIME ]; then
       ;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
-        $YesOpt='-y'
+        YesOpt='-y'
       fi        
       yum $YesOpt install \
         glib2-devel
@@ -115,7 +115,7 @@ if [ $RUNTIME ]; then
       ;;
     Fedora)
       if [ $YesOpt ]; then
-        $YesOpt='-y'
+        YesOpt='-y'
       fi    
       yum $YesOpt install \
         glib2
@@ -126,7 +126,7 @@ if [ $RUNTIME ]; then
       ;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
-        $YesOpt='-y'
+        YesOpt='-y'
       fi    
       yum $YesOpt install \
         glib2
