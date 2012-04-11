@@ -100,13 +100,13 @@ if [ $RUNTIME ]; then
       libmagic1;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
-        $YesOpt='-y'
+        YesOpt='-y'
       fi        
       yum $YesOpt install \
         file-libs;;
     Fedora)
       if [ $YesOpt ]; then
-        $YesOpt='-y'
+        YesOpt='-y'
       fi        
       yum $YesOpt install \
         file-libs;;

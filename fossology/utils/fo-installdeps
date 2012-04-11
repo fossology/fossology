@@ -108,8 +108,11 @@ if [ $BUILDTIME ]; then
          ;;
       Fedora)
          # F8=Werwolf F9=Sulphur F10=Cambridge F11=Leonidas F12=Constantine dev=Rawhide
-         yum groupinstall "Development Tools"
-         yum install \
+         if [ $YesOpt ]; then
+           YesOpt='-y'
+         fi                 
+         yum $YesOpt groupinstall "Development Tools"
+         yum $YesOpt install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
             libxml2 libextractor-devel
@@ -123,7 +126,10 @@ if [ $BUILDTIME ]; then
          ;;
       RedHatEnterprise*|CentOS)
          # 4=Nahant* 5=Tikanga*
-         yum install \
+         if [ $YesOpt ]; then
+           YesOpt='-y'
+         fi                     
+         yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
             perl-Text-Template subversion \
@@ -171,8 +177,11 @@ if [ $RUNTIME ]; then
          echo "   the repository is configured or from http://plf.zarb.org/packages.php"
          ;;
       Fedora)
-         yum install postgresql-server httpd
-         yum install \
+         if [ $YesOpt ]; then
+           YesOpt='-y'
+         fi                  
+         yum $YesOpt install postgresql-server httpd
+         yum $YesOpt install \
             postgresql \
             php php-pear php-pgsql \
             smtpdaemon \
@@ -192,7 +201,7 @@ if [ $RUNTIME ]; then
                echo "NOTE: sleuthkit and unrar is not available in Fedora release $CODENAME,";
                echo "   please install from upstream sources.";;
             Cambridge|Rawhide|Leonidas|Constantine)
-               yum install sleuthkit
+               yum $YesOpt install sleuthkit
                echo "NOTE: unrar is not available in Fedora release $CODENAME,"
                echo "   please install from upstream sources."
 	       ;;
@@ -205,8 +214,11 @@ if [ $RUNTIME ]; then
          ;;
       RedHatEnterprise*|CentOS)
          # 4=Nahant* 5=Tikanga*
-         yum install postgresql-server httpd
-         yum install \
+         if [ $YesOpt ]; then
+           YesOpt='-y'
+         fi                           
+         yum $YesOpt install postgresql-server httpd
+         yum $YesOpt install \
             postgresql \
             php php-pear php-pgsql \
             smtpdaemon \
@@ -240,6 +252,9 @@ fi
 
 if [ $RUNTIME ]; then
   options="$options -r"
+fi
+if [ $YesOpt ]; then
+  options="$options -y"
 fi
 BASEDIR=$(dirname $0) 
 mods_dir=$BASEDIR"/../src/" ## get the directory where fo-installdeps resides

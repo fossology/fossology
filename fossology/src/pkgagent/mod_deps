@@ -91,13 +91,13 @@ if [ $BUILDTIME ]; then
       librpm-dev;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
-        $YesOpt='-y'
+        YesOpt='-y'
       fi
       yum $YesOpt install \
         rpm-devel;;
     Fedora)
       if [ $YesOpt ]; then
-        $YesOpt='-y'
+        YesOpt='-y'
       fi    
       yum $YesOpt install \
         rpm-devel;;
@@ -112,13 +112,13 @@ if [ $RUNTIME ]; then
         rpm;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
-        $YesOpt='-y'
+        YesOpt='-y'
       fi    
       yum $YesOpt install \
         rpm;;
     Fedora)
       if [ $YesOpt ]; then
-        $YesOpt='-y'
+        YesOpt='-y'
       fi        
       yum $YesOpt install \
         rpm;;
