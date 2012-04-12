@@ -110,24 +110,24 @@ switch ($distros[0]) {
       break;
     }
     // install fossology
-    echo "DB: installing fossology\n";
+    echo "*** Installing fossology ***\n";
     if(!installFossology($Debian))
     {
       echo "FATAL! Could not install fossology on {$distros[0]} version $debianVersion\n";
       exit(1);
     }
-    echo "DB: stopping scheduler\n";
+    echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     $testUtils->stopScheduler();
-    echo "DB: calling tuning kernel\n";
+    echo "*** Tuning kernel ***\n";
     tuneKernel();
-    echo "DB: config files\n";
+    echo "*** Setting up config files ***\n";
     if(configDebian($distros[0], $debianVersion) === FALSE)
     {
       echo "FATAL! could not configure postgres or php config files\n";
       exit(1);
     }
-    echo "DB: checking apache config\n";
+    echo "*** Checking apache config ***\n";
     if(!configApache2($distros[0]))
     {
       echo "Fatal, could not configure apache2 to use fossology\n";
@@ -163,17 +163,23 @@ switch ($distros[0]) {
       exit(1);
       break;
     }
+    echo "*** Tuning kernel ***\n";
     tuneKernel();
+    echo "*** Installing fossology ***\n";
     if(!installFossology($RedHat))
     {
       echo "FATAL! Could not install fossology on $redHat version $rhVersion\n";
       exit(1);
     }
+    echo "*** stopping scheduler ***\n";
+    // Stop scheduler so system files can be configured.
+    $testUtils->stopScheduler();
+    echo "*** Setting up config files ***\n";
     if(!configRhel($redHat, $rhVersion))
     {
       echo "FATAL! could not install php and postgress configuration files\n";
     }
-    echo "DB: checking apache config\n";
+    echo "*** Checking apache config ***\n";
     if(!configApache2($distros[0]))
     {
       echo "Fatal, could not configure apache2 to use fossology\n";
@@ -194,24 +200,29 @@ switch ($distros[0]) {
       echo $e;
       break;
     }
-    $Fedora->printAttr();
+    //$Fedora->printAttr();
     if(!configYum($Fedora))
     {
       echo "FATAL! could not install fossology.repo yum configuration file\n";
       break;
     }
-    //echo "DB: tunning fedora kernel\n";
-    //tuneKernel();
+    echo "*** Installing fossology ***\n";
     if(!installFossology($Fedora))
     {
       echo "FATAL! Could not install fossology on $fedora version $fedVersion\n";
       exit(1);
     }
+    echo "*** stopping scheduler ***\n";
+    // Stop scheduler so system files can be configured.
+    $testUtils->stopScheduler();
+    echo "*** Tuning kernel ***\n";
+    tuneKernel();
+    echo "*** Setting up config files ***\n";
     if(!configRhel($fedora, $fedVersion))
     {
       echo "FATAL! could not install php and postgress configuration files\n";
     }
-    echo "DB:Fedora checking apache config\n";
+    echo "*** Checking apache config ***\n";
     if(!configApache2($distros[0]))
     {
       echo "Fatal, could not configure apache2 to use fossology\n";
@@ -222,7 +233,6 @@ switch ($distros[0]) {
     $distro = 'Ubuntu';
     $ubunVersion = $distros[1];
     echo "Ubuntu version is:$ubunVersion\n";
-    echo "DB: calling configsys\n";
     try
     {
       $Ubuntu = new ConfigSys($distros[0], $ubunVersion);
@@ -239,24 +249,25 @@ switch ($distros[0]) {
       echo "FATAL! cannot insert deb line into /etc/apt/sources.list\n";
       break;
     }
+    echo "*** Tuning kernel ***\n";
     tuneKernel();
-    // install fossology
-    echo "DB: ubuntu installing fossology\n";
+
+    echo "*** Installing fossology ***\n";
     if(!installFossology($Ubuntu))
     {
       echo "FATAL! Could not install fossology on {$distros[0]} version $ubunVersion\n";
       exit(1);
     }
-    echo "DB: stopping scheduler\n";
+    echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     $testUtils->stopScheduler();
-    echo "DB: config files\n";
+    echo "*** Setting up config files ***\n";
     if(configDebian($distros[0], $ubunVersion) === FALSE)
     {
       echo "FATAL! could not configure postgres or php config files\n";
       exit(1);
     }
-    echo "DB: checking apache config\n";
+    echo "*** Checking apache config ***\n";
     if(!configApache2($distros[0]))
     {
       echo "Fatal, could not configure apache2 to use fossology\n";
@@ -422,7 +433,7 @@ function installFossology($objRef)
         return(FALSE);
       }
       // check for php or other errors that don't make apt return 1
-      list($stack, $fatal, $noConnect, $noPG) = 0;
+      $stack = $fatal = $noConnect = $noPG = 0;
       $installLog = implode("\n",$iOut);
       $stack = '/PHP Stack trace:/';
       $fatal = '/FATAL/';
@@ -432,11 +443,11 @@ function installFossology($objRef)
       $fates = preg_match_all($fatal, $installLog, $fatalMatches);
       $connects =  preg_match_all($noConnect, $installLog, $noconMatches);
       $postgresFail =  preg_match_all($noPG, $installLog, $noPGMatches);
-      print "DB: number of PHP stack traces:$traces\n";
-      print "DB: number of FATAL's found:$fates\n";
-      print "DB: number of cannot connect found:$connects\n";
-      print "DB: number of cannot connect to postgres server:$postgresFail\n";
-      print "DB: install log is:\n$installLog\n";
+      echo "Number of PHP stack traces found:$traces\n";
+      echo "Number of FATAL's found:$fates\n";
+      echo "Number of 'cannot connect' found:$connects\n";
+      echo "Number of 'cannot connect to postgres server' found:$postgresFail\n";
+      //echo "DB: install log is:\n$installLog\n";
       if($stack ||
       $fatal ||
       $noConnect ||
@@ -481,10 +492,10 @@ function installFossology($objRef)
       $fates = preg_match_all($fatal, $installLog, $fatalMatches);
       $connects =  preg_match_all($noConnect, $installLog, $noconMatches);
       $postgresFail =  preg_match_all($noPG, $installLog, $noPGMatches);
-      print "DB: number of PHP stack traces:$traces\n";
-      print "DB: number of FATAL's found:$fates\n";
-      print "DB: number of cannot connect found:$connects\n";
-      print "DB: number of cannot connect to postgres server:$postgresFail\n";
+      echo "Number of PHP stack traces found:$traces\n";
+      echo "Number of FATAL's found:$fates\n";
+      echo "Number of 'cannot connect' found:$connects\n";
+      echo "Number of 'cannot connect to postgres server' found:$postgresFail\n";
       //print "DB: install log is:\n$installLog\n";
       if($stack ||
         $fatal ||
@@ -531,7 +542,7 @@ function copyFiles($files, $dest)
   {
     throw new Exception('No destination for copy', 0);
   }
-  echo "DB: copyFiles: we are at:" . getcwd() . "\n";
+  //echo "DB: copyFiles: we are at:" . getcwd() . "\n";
   $login = posix_getlogin();
   echo "DB: copyFiles: running as:$login\n";
   echo "DB: copyFiles: uid is:" . posix_getuid() . "\n";
@@ -550,8 +561,8 @@ function copyFiles($files, $dest)
       {
         $to = $dest;
       }
-      echo "DB: copyfiles: file copied is:$file\n";
-      echo "DB: copyfiles: to is:$to\n";
+      //echo "DB: copyfiles: file copied is:$file\n";
+      //echo "DB: copyfiles: to is:$to\n";
       if(!copy($file, $to))
       {
         throw new Exception("Could not copy $file to $to");
