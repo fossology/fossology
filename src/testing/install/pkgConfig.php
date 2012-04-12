@@ -422,17 +422,32 @@ function installFossology($objRef)
         return(FALSE);
       }
       // check for php or other errors that don't make apt return 1
+      list($stack, $fatal, $noConnect, $noPG) = 0;
       $installLog = implode("\n",$iOut);
       $stack = '/PHP Stack trace:/';
       $fatal = '/FATAL/';
-      $noConnect = '/Could not connect to FOSSology database/';
+      $noConnect = '/Could not connect to FOSSology database:/';
+      $noPG = '/Unable to connect to PostgreSQL server:/';
       $traces = preg_match_all($stack, $installLog, $stackMatches);
       $fates = preg_match_all($fatal, $installLog, $fatalMatches);
       $connects =  preg_match_all($noConnect, $installLog, $noconMatches);
+      $postgresFail =  preg_match_all($noPG, $installLog, $noPGMatches);
       print "DB: number of PHP stack traces:$traces\n";
       print "DB: number of FATAL's found:$fates\n";
       print "DB: number of cannot connect found:$connects\n";
+      print "DB: number of cannot connect to postgres server:$postgresFail\n";
       print "DB: install log is:\n$installLog\n";
+      if($stack ||
+          $fatal ||
+          $noConnect ||
+          $noPG)
+      {
+        echo "One or more of the phrases:\nPHP Stack trace:\nFATAL\n".
+          "Could not connect to FOSSology database:\n" .
+          "Unable to connect to PostgreSQL server:\n" .
+          "Was found in the install output. This install is suspect and is considered failed.\n";
+          return(FALSE);
+      }
       // if any of the above are non zero, return false
       break;
     case 'Fedora':
@@ -463,9 +478,11 @@ function installFossology($objRef)
       $traces = preg_match_all($stack, $installLog, $stackMatches);
       $fates = preg_match_all($fatal, $installLog, $fatalMatches);
       $connects =  preg_match_all($noConnect, $installLog, $noconMatches);
+      $postgresFail =  preg_match_all($noPG, $installLog, $noPGMatches);
       print "DB: number of PHP stack traces:$traces\n";
       print "DB: number of FATAL's found:$fates\n";
       print "DB: number of cannot connect found:$connects\n";
+      print "DB: number of cannot connect to postgres server:$postgresFail\n";
       print "DB: install log is:\n$installLog\n";
       // if any of the above are non zero, return false
       break;
