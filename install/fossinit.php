@@ -215,10 +215,7 @@ function initLicenseRefTable($Verbose)
           if ($result == FALSE)
           {
             $PGError = pg_last_error($PG_CONN);
-            if ($Debug)
-            {
-              print "SQL failed: $PGError\n";
-            }
+            print "SQL failed: $PGError\n";
           }
           @pg_free_result($result);
         }
@@ -230,10 +227,7 @@ function initLicenseRefTable($Verbose)
     if ($result == FALSE)
     {
       $PGError = pg_last_error($PG_CONN);
-      if ($Debug)
-      {
-        print "SQL failed: $PGError\n";
-      }
+      print "SQL failed: $PGError\n";
     }
     @pg_free_result($result);
     fclose($handle);
