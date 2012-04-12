@@ -169,7 +169,7 @@ class copyright_hist extends FO_Plugin
         }
 
         /* select copyright records that have No_license_found */
-        $sql = "SELECT content, type from copyright, license_file,
+        $sql = "SELECT substring(content from 1 for 150) as content, type from copyright, license_file,
                 (SELECT distinct(pfile_fk) as pf from uploadtree 
                   where upload_fk=$upload_pk and uploadtree.lft BETWEEN $lft and $rgt) as SS
                where copyright.pfile_fk=license_file.pfile_fk and ($rf_clause) 
@@ -180,7 +180,7 @@ class copyright_hist extends FO_Plugin
     if (empty($sql))
     {
       /* get all the copyright records for this uploadtree.  */
-      $sql = "SELECT content, type from copyright,
+      $sql = "SELECT substring(content from 1 for 150) as content, type from copyright,
               (SELECT distinct(pfile_fk) as PF from uploadtree 
                  where upload_fk=$upload_pk 
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
