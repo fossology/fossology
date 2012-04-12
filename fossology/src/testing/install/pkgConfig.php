@@ -432,6 +432,7 @@ function installFossology($objRef)
       print "DB: number of PHP stack traces:$traces\n";
       print "DB: number of FATAL's found:$fates\n";
       print "DB: number of cannot connect found:$connects\n";
+      print "DB: install log is:\n$installLog\n";
       // if any of the above are non zero, return false
       break;
     case 'Fedora':
