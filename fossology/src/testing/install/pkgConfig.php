@@ -438,15 +438,15 @@ function installFossology($objRef)
       print "DB: number of cannot connect to postgres server:$postgresFail\n";
       print "DB: install log is:\n$installLog\n";
       if($stack ||
-          $fatal ||
-          $noConnect ||
-          $noPG)
+      $fatal ||
+      $noConnect ||
+      $noPG)
       {
         echo "One or more of the phrases:\nPHP Stack trace:\nFATAL\n".
           "Could not connect to FOSSology database:\n" .
           "Unable to connect to PostgreSQL server:\n" .
           "Was found in the install output. This install is suspect and is considered failed.\n";
-          return(FALSE);
+        return(FALSE);
       }
       // if any of the above are non zero, return false
       break;
@@ -467,14 +467,16 @@ function installFossology($objRef)
       if($yumRtn != 0)
       {
         echo "Failed to install fossology!\nTranscript is:\n";
-        $clast = system('cat fossinstall.log');
+        system('cat fossinstall.log');
         return(FALSE);
       }
-            // check for php or other errors that don't make apt return 1
-      $installLog = system('cat fossinstall.log');
+      // check for php or other errors that don't make apt return 1
+      $installLog = file_get_contents('fossinstall.log');
       $stack = '/PHP Stack trace:/';
       $fatal = '/FATAL/';
       $noConnect = '/Could not connect to FOSSology database/';
+      $noPG = '/Unable to connect to PostgreSQL server:/';
+
       $traces = preg_match_all($stack, $installLog, $stackMatches);
       $fates = preg_match_all($fatal, $installLog, $fatalMatches);
       $connects =  preg_match_all($noConnect, $installLog, $noconMatches);
@@ -483,8 +485,18 @@ function installFossology($objRef)
       print "DB: number of FATAL's found:$fates\n";
       print "DB: number of cannot connect found:$connects\n";
       print "DB: number of cannot connect to postgres server:$postgresFail\n";
-      print "DB: install log is:\n$installLog\n";
-      // if any of the above are non zero, return false
+      //print "DB: install log is:\n$installLog\n";
+      if($stack ||
+        $fatal ||
+        $noConnect ||
+        $noPG)
+      {
+        echo "One or more of the phrases:\nPHP Stack trace:\nFATAL\n".
+          "Could not connect to FOSSology database:\n" .
+          "Unable to connect to PostgreSQL server:\n" .
+          "Was found in the install output. This install is suspect and is considered failed.\n";
+        return(FALSE);
+      }
       break;
 
     default:
