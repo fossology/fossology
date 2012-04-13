@@ -425,6 +425,8 @@ function installFossology($objRef)
   $aptInstall = 'apt-get -y --force-yes install fossology 2>&1';
   $yumUpdate = 'yum -y update 2>&1';
   $yumInstall = 'yum -y install fossology > fossinstall.log 2>&1';
+  $debLog = NULL;
+  $installLog = NULL;
 
   //echo "DB: IFOSS: osFlavor is:$objRef->osFlavor\n";
   switch ($objRef->osFlavor) {
@@ -440,8 +442,9 @@ function installFossology($objRef)
         return(FALSE);
       }
       // check for php or other errors that don't make apt return 1
-      $installLog = implode("\n",$iOut);
-      if(!ckInstallLog($installLog))
+      echo "DB: in ubun/deb case, before installLog implode\n";
+      $debLog = implode("\n",$iOut);
+      if(!ckInstallLog($debLog))
       {
         echo "One or more of the phrases:\nPHP Stack trace:\nFATAL\n".
           "Could not connect to FOSSology database:\n" .
@@ -511,7 +514,6 @@ function ckInstallLog($log) {
   }
   // check for php or other errors that don't make apt return 1
   $traces = $fates = $connects = $postgresFail = 0;
-  $installLog = file_get_contents('fossinstall.log');
   $stack = '/PHP Stack trace:/';
   $fatal = '/FATAL/';
   $noConnect = '/Could not connect to FOSSology database/';
