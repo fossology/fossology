@@ -135,7 +135,6 @@ switch ($distros[0]) {
       echo $e;
       break;
     }
-    $RedHat->printAttr();
     if(!configYum($RedHat))
     {
       echo "FATAL! could not install fossology.conf yum configuration file\n";
