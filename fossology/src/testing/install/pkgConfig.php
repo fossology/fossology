@@ -106,7 +106,7 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     $testUtils->stopScheduler();
-    
+
     echo "*** Tuning kernel ***\n";
     tuneKernel();
     echo "*** Setting up config files ***\n";
@@ -115,10 +115,17 @@ switch ($distros[0]) {
       echo "FATAL! could not configure postgres or php config files\n";
       exit(1);
     }
-    echo "*** Checking apache config ***\n";
-    if(!configApache2($distros[0]))
+    /*
+     echo "*** Checking apache config ***\n";
+     if(!configApache2($distros[0]))
+     {
+     echo "Fatal, could not configure apache2 to use fossology\n";
+     }
+     */
+    if(!restart('apache2'))
     {
-      echo "Fatal, could not configure apache2 to use fossology\n";
+      echo "Erorr! Could not restart apache2, please restart by hand\n";
+      return(FALSE);
     }
     break;
   case 'Red':
@@ -143,6 +150,7 @@ switch ($distros[0]) {
     }
     echo "*** Tuning kernel ***\n";
     tuneKernel();
+
     echo "*** Installing fossology ***\n";
     if(!installFossology($RedHat))
     {
@@ -152,15 +160,23 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     $testUtils->stopScheduler();
+
     echo "*** Setting up config files ***\n";
     if(!configRhel($redHat, $rhVersion))
     {
       echo "FATAL! could not install php and postgress configuration files\n";
     }
-    echo "*** Checking apache config ***\n";
-    if(!configApache2($distros[0]))
+    /*
+     echo "*** Checking apache config ***\n";
+     if(!configApache2($distros[0]))
+     {
+     echo "Fatal, could not configure apache2 to use fossology\n";
+     }
+     */
+    if(!restart('httpd'))
     {
-      echo "Fatal, could not configure apache2 to use fossology\n";
+      echo "Erorr! Could not restart httpd, please restart by hand\n";
+      return(FALSE);
     }
     break;
   case 'Fedora':
@@ -190,19 +206,26 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     $testUtils->stopScheduler();
-    
+
     echo "*** Tuning kernel ***\n";
     tuneKernel();
-    
+
     echo "*** Setting up config files ***\n";
     if(!configRhel($fedora, $fedVersion))
     {
       echo "FATAL! could not install php and postgress configuration files\n";
     }
-    echo "*** Checking apache config ***\n";
-    if(!configApache2($distros[0]))
+    /*
+     echo "*** Checking apache config ***\n";
+     if(!configApache2($distros[0]))
+     {
+     echo "Fatal, could not configure apache2 to use fossology\n";
+     }
+     */
+    if(!restart('httpd'))
     {
-      echo "Fatal, could not configure apache2 to use fossology\n";
+      echo "Erorr! Could not restart httpd, please restart by hand\n";
+      return(FALSE);
     }
     break;
   case 'Ubuntu':
@@ -236,16 +259,24 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     $testUtils->stopScheduler();
+
     echo "*** Setting up config files ***\n";
     if(configDebian($distros[0], $ubunVersion) === FALSE)
     {
       echo "FATAL! could not configure postgres or php config files\n";
       exit(1);
     }
-    echo "*** Checking apache config ***\n";
-    if(!configApache2($distros[0]))
+    /*
+     echo "*** Checking apache config ***\n";
+     if(!configApache2($distros[0]))
+     {
+     echo "Fatal, could not configure apache2 to use fossology\n";
+     }
+     */
+    if(!restart('apache2'))
     {
-      echo "Fatal, could not configure apache2 to use fossology\n";
+      echo "Erorr! Could not restart apache2, please restart by hand\n";
+      return(FALSE);
     }
     break;
   default:
@@ -406,7 +437,7 @@ function installFossology($objRef)
         return(FALSE);
       }
       // check for php or other errors that don't make apt return 1
-      $stack = $fatal = $noConnect = $noPG = 0;
+      $traces = $fates = $connects = $postgresFail = 0;
       $installLog = implode("\n",$iOut);
       $stack = '/PHP Stack trace:/';
       $fatal = '/FATAL/';
@@ -455,6 +486,7 @@ function installFossology($objRef)
         return(FALSE);
       }
       // check for php or other errors that don't make apt return 1
+      $traces = $fates = $connects = $postgresFail = 0;
       $installLog = file_get_contents('fossinstall.log');
       $stack = '/PHP Stack trace:/';
       $fatal = '/FATAL/';
@@ -471,9 +503,9 @@ function installFossology($objRef)
       echo "Number of 'cannot connect to postgres server' found:$postgresFail\n";
       //print "DB: install log is:\n$installLog\n";
       if($traces ||
-        $fatal ||
-        $noConnect ||
-        $postgresFail)
+      $fatal ||
+      $noConnect ||
+      $postgresFail)
       {
         echo "One or more of the phrases:\nPHP Stack trace:\nFATAL\n".
           "Could not connect to FOSSology database:\n" .
