@@ -89,13 +89,13 @@ switch ($distros[0]) {
     catch (Exception $e)
     {
       echo "FATAL! could not process ini file for Debian $debianVersion system\n";
-      break;
+      exit(1)
     }
 
     if(insertDeb($Debian) === FALSE)
     {
       echo "FATAL! cannot insert deb line into /etc/apt/sources.list\n";
-      break;
+      exit(1);
     }
     echo "*** Installing fossology ***\n";
     if(!installFossology($Debian))
@@ -109,6 +109,7 @@ switch ($distros[0]) {
 
     echo "*** Tuning kernel ***\n";
     tuneKernel();
+    
     echo "*** Setting up config files ***\n";
     if(configDebian($distros[0], $debianVersion) === FALSE)
     {
@@ -125,7 +126,7 @@ switch ($distros[0]) {
     if(!restart('apache2'))
     {
       echo "Erorr! Could not restart apache2, please restart by hand\n";
-      return(FALSE);
+      exit(1);
     }
     break;
   case 'Red':
@@ -140,13 +141,12 @@ switch ($distros[0]) {
     {
       echo "FATAL! could not process ini file for RedHat $rhVersion system\n";
       echo $e;
-      break;
+      exit(1);
     }
     if(!configYum($RedHat))
     {
       echo "FATAL! could not install fossology.conf yum configuration file\n";
       exit(1);
-      break;
     }
     echo "*** Tuning kernel ***\n";
     tuneKernel();
@@ -165,6 +165,7 @@ switch ($distros[0]) {
     if(!configRhel($redHat, $rhVersion))
     {
       echo "FATAL! could not install php and postgress configuration files\n";
+      exit(1);
     }
     /*
      echo "*** Checking apache config ***\n";
@@ -176,7 +177,7 @@ switch ($distros[0]) {
     if(!restart('httpd'))
     {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
-      return(FALSE);
+      exit(1);
     }
     break;
   case 'Fedora':
@@ -190,11 +191,12 @@ switch ($distros[0]) {
     {
       echo "FATAL! could not process ini file for Fedora $fedVersion system\n";
       echo $e;
-      break;
+      exit(1);
     }
     if(!configYum($Fedora))
     {
       echo "FATAL! could not install fossology.repo yum configuration file\n";
+      exit(1);
       break;
     }
     echo "*** Installing fossology ***\n";
@@ -214,6 +216,7 @@ switch ($distros[0]) {
     if(!configRhel($fedora, $fedVersion))
     {
       echo "FATAL! could not install php and postgress configuration files\n";
+      exit(1);
     }
     /*
      echo "*** Checking apache config ***\n";
@@ -225,7 +228,7 @@ switch ($distros[0]) {
     if(!restart('httpd'))
     {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
-      return(FALSE);
+      exit(1);
     }
     break;
   case 'Ubuntu':
@@ -240,12 +243,12 @@ switch ($distros[0]) {
     {
       echo "FATAL! could not process ini file for Ubuntu $ubunVersion system\n";
       echo $e . "\n";
-      break;
+      exit(1);
     }
     if(insertDeb($Ubuntu) === FALSE)
     {
       echo "FATAL! cannot insert deb line into /etc/apt/sources.list\n";
-      break;
+      exit(1);
     }
     echo "*** Tuning kernel ***\n";
     tuneKernel();
@@ -276,7 +279,7 @@ switch ($distros[0]) {
     if(!restart('apache2'))
     {
       echo "Erorr! Could not restart apache2, please restart by hand\n";
-      return(FALSE);
+      exit(1);
     }
     break;
   default:
