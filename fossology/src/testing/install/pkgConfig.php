@@ -67,24 +67,12 @@ $distros = array();
 $f = exec('cat /etc/issue', $dist, $dRtn);
 $distros = explode(' ', $dist[0]);
 
-//list($distro, , , , ,) = explode(' ', $dist[0]);
-echo "DB: distros[0] is:{$distros[0]}\n";
-//echo "DB: all of destros is:\n";print_r($distros) . "\n";
+//echo "DB: distros[0] is:{$distros[0]}\n";
 
 // configure for fossology and install fossology packages.
 // Note that after this point, you could just stop if one could rely on the install
-// process to give a valid exit code... but it would still be good to bring up
-// the system and do some small uploads.
-
-// stop scheduler
-// config the system
-/*
- * 1. tune kernel
- * 2. postgres files
- * 3. php ini files
- * 4. fossology.org apache file  (this should have been done by the install....)
- * 7. for RHEL what else?
- */
+// process to give a valid exit code... Another script will run the agent unit
+// and functional tests.
 
 // create this class which can be used by any release/os
 $testUtils = new TestRun();
@@ -109,7 +97,6 @@ switch ($distros[0]) {
       echo "FATAL! cannot insert deb line into /etc/apt/sources.list\n";
       break;
     }
-    // install fossology
     echo "*** Installing fossology ***\n";
     if(!installFossology($Debian))
     {
@@ -119,6 +106,7 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     $testUtils->stopScheduler();
+    
     echo "*** Tuning kernel ***\n";
     tuneKernel();
     echo "*** Setting up config files ***\n";
@@ -132,20 +120,11 @@ switch ($distros[0]) {
     {
       echo "Fatal, could not configure apache2 to use fossology\n";
     }
-
-    // mini test
     break;
   case 'Red':
     $redHat = 'RedHat';
     $rhVersion = $distros[6];
-    echo "rh version is:$rhVersion\n";
-    //echo "distros looks like:\n";print_r($distros) . "\n";
-    /*
-    * 1. process ini
-    * 2. configure yum
-    * 3. install fossology
-    * 4. configure rest of system.
-    */
+    //echo "rh version is:$rhVersion\n";
     try
     {
       $RedHat = new ConfigSys($redHat, $rhVersion);
@@ -184,10 +163,8 @@ switch ($distros[0]) {
     {
       echo "Fatal, could not configure apache2 to use fossology\n";
     }
-
     break;
   case 'Fedora':
-    echo "DB: in Fedora\n";
     $fedora = 'Fedora';
     $fedVersion = $distros[2];
     try
@@ -200,7 +177,6 @@ switch ($distros[0]) {
       echo $e;
       break;
     }
-    //$Fedora->printAttr();
     if(!configYum($Fedora))
     {
       echo "FATAL! could not install fossology.repo yum configuration file\n";
@@ -215,8 +191,10 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     $testUtils->stopScheduler();
+    
     echo "*** Tuning kernel ***\n";
     tuneKernel();
+    
     echo "*** Setting up config files ***\n";
     if(!configRhel($fedora, $fedVersion))
     {
@@ -227,7 +205,6 @@ switch ($distros[0]) {
     {
       echo "Fatal, could not configure apache2 to use fossology\n";
     }
-
     break;
   case 'Ubuntu':
     $distro = 'Ubuntu';
@@ -243,7 +220,6 @@ switch ($distros[0]) {
       echo $e . "\n";
       break;
     }
-    echo "DB: Ubuntu inserting deb\n";
     if(insertDeb($Ubuntu) === FALSE)
     {
       echo "FATAL! cannot insert deb line into /etc/apt/sources.list\n";
@@ -272,8 +248,6 @@ switch ($distros[0]) {
     {
       echo "Fatal, could not configure apache2 to use fossology\n";
     }
-
-    // mini test
     break;
   default:
     echo "Fatal! unrecognized distribution! {$distros[0]}\n" ;
@@ -419,7 +393,7 @@ function installFossology($objRef)
   $yumUpdate = 'yum -y update 2>&1';
   $yumInstall = 'yum -y install fossology > fossinstall.log 2>&1';
 
-  echo "DB: IFOSS: osFlavor is:$objRef->osFlavor\n";
+  //echo "DB: IFOSS: osFlavor is:$objRef->osFlavor\n";
   switch ($objRef->osFlavor) {
     case 'Ubuntu':
     case 'Debian':
@@ -544,8 +518,8 @@ function copyFiles($files, $dest)
   }
   //echo "DB: copyFiles: we are at:" . getcwd() . "\n";
   $login = posix_getlogin();
-  echo "DB: copyFiles: running as:$login\n";
-  echo "DB: copyFiles: uid is:" . posix_getuid() . "\n";
+  //echo "DB: copyFiles: running as:$login\n";
+  //echo "DB: copyFiles: uid is:" . posix_getuid() . "\n";
   if(is_array($files))
   {
     foreach($files as $file)
@@ -584,8 +558,8 @@ function copyFiles($files, $dest)
     {
       $to = $dest;
     }
-    echo "DB: copyfiles-single: file copied is:$files\n";
-    echo "DB: copyfiles-single: to is:$to\n";
+    //echo "DB: copyfiles-single: file copied is:$files\n";
+    //echo "DB: copyfiles-single: to is:$to\n";
     if(!copy($files,$to))
     {
       throw new Exception("Could not copy $file to $to");
@@ -632,7 +606,7 @@ function tuneKernel()
   $last = exec($grepCmd, $out, $rtn);
   if($rtn == 0)   // kernel already configured
   {
-    echo "DB: kernle already configured, returning\n";
+    echo "NOTE: kernel already configured.\n";
     return;
   }
   $cmd1 = "echo 512000000 > /proc/sys/kernel/shmmax";
@@ -739,8 +713,8 @@ function configDebian($osType, $osVersion)
 
   // based on type read the appropriate ini file.
 
-  echo "DB:configD: osType is:$osType\n";
-  echo "DB:configD: osversion is:$osVersion\n";
+  //echo "DB:configD: osType is:$osType\n";
+  //echo "DB:configD: osversion is:$osVersion\n";
 
   // can't check in pg_hba.conf as it shows HP's firewall settings, get it
   // internally
@@ -792,7 +766,6 @@ function configDebian($osType, $osVersion)
     case '10.04.3':
     case '11.04':
     case '11.10':
-      echo "DB: in 10.04.3\n";
       try
       {
         copyFiles($psqlFiles, "/etc/postgresql/8.4/main");
@@ -832,9 +805,8 @@ function configDebian($osType, $osVersion)
   $pName = 'postgresql';
   if($osVersion == '10.04.3')
   {
-    echo "DB: changing postgresql to name with version\n";
     $ver = findVerPsql();
-    echo "DB: returned version is:$ver\n";
+    //echo "DB: returned version is:$ver\n";
     $pName = 'postgresql-' . $ver;
   }
   echo "DB pName is:$pName\n";
@@ -913,9 +885,6 @@ function configYum($objRef)
   {
     return(FALSE);
   }
-
-  echo "DB: configYUM: yum line is:$objRef->yum\n";
-
   if(empty($objRef->yum))
   {
     echo "FATAL, no yum install line to install\n";
@@ -925,8 +894,6 @@ function configYum($objRef)
   $RedFedRepo = 'redfed-fossology.repo';   // name of generic repo file.
   // replace the baseurl line with the current one.
   $n = "../dataFiles/pkginstall/" . $RedFedRepo;
-  echo "DB: name is:$n\n";
-  echo "we are at:" . getcwd() . "\n";
   $fcont = file_get_contents($n);
   //if(!$fcont);
   //{
@@ -935,19 +902,15 @@ function configYum($objRef)
   //}
   //echo "DB: contents is:\n$fcont\n";
   $newRepo = preg_replace("/baseurl=(.*)?/", 'baseurl=' . $objRef->yum, $fcont,-1, $cnt);
-  echo "DB: matched count is:$cnt\n";
-  echo "DB: newRepo is:\n$newRepo\n";
   // write the file, fix below to copy the correct thing...
   if(!($written = file_put_contents("../dataFiles/pkginstall/" . $RedFedRepo, $newRepo)))
   {
     echo "FATAL! could not write repo file $RedFedRepo\n";
     exit(1);
   }
-
   // coe plays with yum stuff, check if yum.repos.d exists and if not create it.
   if(is_dir('/etc/yum.repos.d'))
   {
-    echo "DB: copying $RedFedRepo\n";
     copyFiles("../dataFiles/pkginstall/" . $RedFedRepo, '/etc/yum.repos.d/fossology.repo');
   }
   else
@@ -958,7 +921,6 @@ function configYum($objRef)
       echo "FATAL! could not create yum.repos.d\n";
       return(FALSE);
     }
-    echo "DB: copying $RedFedRepo\n";
     copyFiles("../dataFiles/pkginstall/" . $RedFedRepo, '/etc/yum.repos.d/fossology.repo');
   }
   return(TRUE);
@@ -1004,11 +966,8 @@ function getPGhba($destPath)
   {
     return(FALSE);
   }
-  echo "DB: getPG: destpath is:$destPath\n";
   $wcmd = "wget -q -O $destPath " .
     "http://fonightly.usa.hp.com/testfiles/pg_hba.conf ";
-
-  echo "DB: wcmd is:\n$wcmd\n";
 
   $last = exec($wcmd, $wOut, $wRtn);
   if($wRtn != 0)
