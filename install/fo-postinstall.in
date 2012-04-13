@@ -9,7 +9,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o adwseolh --long agent,database,web,web-only,scheduler,scheduler-only,everything,overwrite,licenseref,help -n 'fo-postinstall' -- "$@"`
+OPTS=`getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,help -n 'fo-postinstall' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -27,22 +27,22 @@ while true; do
    case "$1" in
       -a|--agent) AGENT=1; shift;;
       -d|--database) DATABASE=1; shift;;
-      -w|--web) WEB=1; shift;;
-      --web-only) WEBONLY=1; shift;;
-      -s|--scheduler) SCHEDULER=1; shift;;
-      --scheduler-only) SCHEDULERONLY=1; shift;;
+      -w|--web-only) WEBONLY=1; shift;;
+      -s|--scheduler-only) SCHEDULERONLY=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
       -o|--overwrite) OVERWRITE=1; shift;;
       -l|--licenseref) LICENSEREF=1; shift;;
+      -c|--common) COMMON=1; shift;;
       -h|--help)
          echo "Usage: fo-postinstall [options]";
          echo "  -a or --agent      : agent specific actions"
          echo "  -d or --database   : Create the FOSSology database"
-         echo "  -w or --web        : web interface specific actions"
-         echo "  -s or --scheduler  : scheduler specific actions"
+         echo "  -w or --web-only   : web interface specific actions"
+         echo "  -s or --scheduler-only  : scheduler specific actions"
          echo "  -e or --everything : all actions, default"
          echo "  -o or --overwrite  : overwrite config files with new versions"
          echo "  -l or --licenseref : update the license_ref table with fossology supplied licenses"
+         echo "  -c or --common     : common actions"
          echo "  -h or --help       : this help text"
          echo " Special options"
          echo "  --web-only         : web, but exclude normal agent actions"
@@ -57,11 +57,6 @@ done
 # the scheduler and web machines needs the agent stuff done too
 if [ $SCHEDULER ]; then
    SCHEDULERONLY=1
-   AGENT=1
-fi
-if [ $WEB ]; then
-   AGENT=1
-   WEBONLY=1
 fi
 
 if [ $EVERYTHING ]; then
@@ -80,23 +75,8 @@ if [ `id -u` != "0" ] ; then
    exit 1
 fi
 
-########################################################################
-
-if [ $DATABASE ]; then
-   {$LIBEXECDIR}/dbcreate
-
-   echo "*** Initializing database tables ***"
-   {$LIBEXECDIR}/fossinit.php -c {$SYSCONFDIR}
-fi # end of DATABASE
-
-if [ $LICENSEREF ]; then
-   echo "*** update the license_ref table ***"
-   {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR}
-fi # end of license reference
-
-########################################################################
-
-if [ $AGENT ]; then
+if [ $COMMON ]; then
+   echo "*** Running postinstall for common actions***"
 
    ## get path to repo
    if [ -e "{$SYSCONFDIR}/fossology.conf" ] ; then
@@ -195,6 +175,28 @@ if [ $AGENT ]; then
    # the group doesn't exist until we create it above. So chgrp now
    chgrp {$PROJECTGROUP} {$SYSCONFDIR}/Db.conf || echo "ERROR: failed to chgrp {$SYSCONFDIR}/Db.conf"
 
+fi
+
+if [ $WEBONLY ]; then
+   echo "*** Running postinstall for web-only actions***"
+   LICENSEREF=1
+fi
+
+########################################################################
+
+if [ $DATABASE ]; then
+   {$LIBEXECDIR}/dbcreate
+
+fi # end of DATABASE
+
+if [ $LICENSEREF ]; then
+   echo "*** update the license_ref table ***"
+   {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR}
+fi # end of license reference
+
+########################################################################
+
+if [ $AGENT ]; then
    {$LIBEXECDIR}/fo_dbcheck.php -c {$SYSCONFDIR}
    if [ $? != 0 ] ; then
      echo "FATAL: unable to connect to database, please check {$SYSCONFDIR}/Db.conf"
@@ -224,6 +226,9 @@ fi # end of SCHEDULERONLY
 
 ########################################################################
 if [ $WEBONLY ]; then
+   echo "*** Initializing database tables ***"
+   {$LIBEXECDIR}/fossinit.php -c {$SYSCONFDIR}
+
    echo "*** Setting up the web interface ***"
 
    # See if web server user exists, if so add to the group.
