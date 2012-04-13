@@ -89,7 +89,7 @@ switch ($distros[0]) {
     catch (Exception $e)
     {
       echo "FATAL! could not process ini file for Debian $debianVersion system\n";
-      exit(1)
+      exit(1);
     }
 
     if(insertDeb($Debian) === FALSE)
