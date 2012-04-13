@@ -109,7 +109,7 @@ switch ($distros[0]) {
 
     echo "*** Tuning kernel ***\n";
     tuneKernel();
-    
+
     echo "*** Setting up config files ***\n";
     if(configDebian($distros[0], $debianVersion) === FALSE)
     {
@@ -440,37 +440,20 @@ function installFossology($objRef)
         return(FALSE);
       }
       // check for php or other errors that don't make apt return 1
-      $traces = $fates = $connects = $postgresFail = 0;
       $installLog = implode("\n",$iOut);
-      $stack = '/PHP Stack trace:/';
-      $fatal = '/FATAL/';
-      $noConnect = '/Could not connect to FOSSology database:/';
-      $noPG = '/Unable to connect to PostgreSQL server:/';
-      $traces = preg_match_all($stack, $installLog, $stackMatches);
-      $fates = preg_match_all($fatal, $installLog, $fatalMatches);
-      $connects =  preg_match_all($noConnect, $installLog, $noconMatches);
-      $postgresFail =  preg_match_all($noPG, $installLog, $noPGMatches);
-      echo "Number of PHP stack traces found:$traces\n";
-      echo "Number of FATAL's found:$fates\n";
-      echo "Number of 'cannot connect' found:$connects\n";
-      echo "Number of 'cannot connect to postgres server' found:$postgresFail\n";
-      //echo "DB: install log is:\n$installLog\n";
-      if($traces ||
-      $fates ||
-      $connects ||
-      $postgresFail)
+      if(!ckInstallLog($installLog))
       {
         echo "One or more of the phrases:\nPHP Stack trace:\nFATAL\n".
           "Could not connect to FOSSology database:\n" .
           "Unable to connect to PostgreSQL server:\n" .
-          "Was found in the install output. This install is suspect and is considered failed.\n";
+          "Was found in the install output. This install is suspect and is considered FAILED.\n";
         return(FALSE);
       }
       // if any of the above are non zero, return false
       break;
     case 'Fedora':
     case 'RedHat':
-      echo "running yum update\n";
+      echo "** Running yum update **\n";
       $last = exec($yumUpdate, $out, $rtn);
       if($rtn != 0)
       {
@@ -478,7 +461,7 @@ function installFossology($objRef)
         echo implode("\n",$out) . "\n";
         return(FALSE);
       }
-      echo "running yum install fossology\n";
+      echo "** Running yum install fossology **\n";
       $last = exec($yumInstall, $yumOut, $yumRtn);
       //echo "install of fossology finished, yumRtn is:$yumRtn\nlast is:$last\n";
       //$clast = system('cat fossinstall.log');
@@ -488,27 +471,12 @@ function installFossology($objRef)
         system('cat fossinstall.log');
         return(FALSE);
       }
-      // check for php or other errors that don't make apt return 1
-      $traces = $fates = $connects = $postgresFail = 0;
-      $installLog = file_get_contents('fossinstall.log');
-      $stack = '/PHP Stack trace:/';
-      $fatal = '/FATAL/';
-      $noConnect = '/Could not connect to FOSSology database/';
-      $noPG = '/Unable to connect to PostgreSQL server:/';
-
-      $traces = preg_match_all($stack, $installLog, $stackMatches);
-      $fates = preg_match_all($fatal, $installLog, $fatalMatches);
-      $connects =  preg_match_all($noConnect, $installLog, $noconMatches);
-      $postgresFail =  preg_match_all($noPG, $installLog, $noPGMatches);
-      echo "Number of PHP stack traces found:$traces\n";
-      echo "Number of FATAL's found:$fates\n";
-      echo "Number of 'cannot connect' found:$connects\n";
-      echo "Number of 'cannot connect to postgres server' found:$postgresFail\n";
-      //print "DB: install log is:\n$installLog\n";
-      if($traces ||
-      $fates ||
-      $connects ||
-      $postgresFail)
+      if(!($installLog = file_get_contents('fossinstall.log')))
+      {
+        echo "FATAL! could not read 'fossinstall.log\n";
+        return(FALSE);
+      }
+      if(!ckInstallLog($installLog))
       {
         echo "One or more of the phrases:\nPHP Stack trace:\nFATAL\n".
           "Could not connect to FOSSology database:\n" .
@@ -527,6 +495,46 @@ function installFossology($objRef)
   return(TRUE);
 }
 
+/**
+ * \brief Check the fossology install output for errors in the install.
+ *
+ * These errors do not cause apt to think that the install failed, so the output
+ * should be checked for typical failures during an install of packages.  See
+ * the code for the specific checks.
+ *
+ * @param string $log the output from a fossology install with packages
+ */
+function ckInstallLog($log) {
+  if(empty($log))
+  {
+    return(FALSE);
+  }
+  // check for php or other errors that don't make apt return 1
+  $traces = $fates = $connects = $postgresFail = 0;
+  $installLog = file_get_contents('fossinstall.log');
+  $stack = '/PHP Stack trace:/';
+  $fatal = '/FATAL/';
+  $noConnect = '/Could not connect to FOSSology database/';
+  $noPG = '/Unable to connect to PostgreSQL server:/';
+
+  $traces = preg_match_all($stack, $installLog, $stackMatches);
+  $fates = preg_match_all($fatal, $installLog, $fatalMatches);
+  $connects =  preg_match_all($noConnect, $installLog, $noconMatches);
+  $postgresFail =  preg_match_all($noPG, $installLog, $noPGMatches);
+  echo "Number of PHP stack traces found:$traces\n";
+  echo "Number of FATAL's found:$fates\n";
+  echo "Number of 'cannot connect' found:$connects\n";
+  echo "Number of 'cannot connect to postgres server' found:$postgresFail\n";
+  //print "DB: install log is:\n$installLog\n";
+  if($traces ||
+  $fates ||
+  $connects ||
+  $postgresFail)
+  {
+    return(FALSE);
+  }
+  return(TRUE);
+}
 /**
  * \brief copyFiles, copy one or more files to the destination,
  * throws exception if file is not copied.
