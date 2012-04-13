@@ -453,8 +453,8 @@ function installFossology($objRef)
       echo "Number of 'cannot connect to postgres server' found:$postgresFail\n";
       //echo "DB: install log is:\n$installLog\n";
       if($traces ||
-      $fatal ||
-      $noConnect ||
+      $fates ||
+      $connects ||
       $postgresFail)
       {
         echo "One or more of the phrases:\nPHP Stack trace:\nFATAL\n".
@@ -503,8 +503,8 @@ function installFossology($objRef)
       echo "Number of 'cannot connect to postgres server' found:$postgresFail\n";
       //print "DB: install log is:\n$installLog\n";
       if($traces ||
-      $fatal ||
-      $noConnect ||
+      $fates ||
+      $connects ||
       $postgresFail)
       {
         echo "One or more of the phrases:\nPHP Stack trace:\nFATAL\n".
