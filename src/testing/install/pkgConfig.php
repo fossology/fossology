@@ -519,15 +519,15 @@ function ckInstallLog($log) {
   $noConnect = '/Could not connect to FOSSology database/';
   $noPG = '/Unable to connect to PostgreSQL server:/';
 
-  $traces = preg_match_all($stack, $installLog, $stackMatches);
-  $fates = preg_match_all($fatal, $installLog, $fatalMatches);
-  $connects =  preg_match_all($noConnect, $installLog, $noconMatches);
-  $postgresFail =  preg_match_all($noPG, $installLog, $noPGMatches);
+  $traces = preg_match_all($stack, $log, $stackMatches);
+  $fates = preg_match_all($fatal, $log, $fatalMatches);
+  $connects =  preg_match_all($noConnect, $log, $noconMatches);
+  $postgresFail =  preg_match_all($noPG, $log, $noPGMatches);
   echo "Number of PHP stack traces found:$traces\n";
   echo "Number of FATAL's found:$fates\n";
   echo "Number of 'cannot connect' found:$connects\n";
   echo "Number of 'cannot connect to postgres server' found:$postgresFail\n";
-  //print "DB: install log is:\n$installLog\n";
+  //print "DB: install log is:\n$log\n";
   if($traces ||
   $fates ||
   $connects ||
