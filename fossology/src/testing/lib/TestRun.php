@@ -140,7 +140,7 @@ class TestRun {
 		$psLast = exec($cmd, $results, $rtn);
 		//print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
 		$parts = split(' ', $psLast);
-		//print "parts is:\n"; print_r($parts) . "\n";
+		print "parts is:\n"; print_r($parts) . "\n";
 		return ($parts[5]);
 	}
 	public function foPostinstall() {
