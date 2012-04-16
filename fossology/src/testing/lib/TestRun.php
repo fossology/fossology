@@ -135,11 +135,18 @@ class TestRun {
 		}
 	}
 	private function getSchedPid() {
+	  
+	  $parts = array();
 		$psLast = NULL;
 		$cmd = 'ps -ef | grep fossology-scheduler | grep -v grep';
 		$psLast = exec($cmd, $results, $rtn);
 		//print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
 		$parts = split(' ', $psLast);
+		// scheduler is not running.
+		if(empty($parts))
+		{
+		  return(NULL);
+		}
 		print "parts is:\n"; print_r($parts) . "\n";
 		return ($parts[5]);
 	}
@@ -257,6 +264,11 @@ class TestRun {
 			// still running, kill with -9
 			if ($this->checkScheduler() === $this->Running) {
 				$this->schedulerPid = $this->getSchedPid();
+				// no pid? Must be stopped, not running
+				if($this->schdulerPid === NULL)
+				{
+				  return(TRUE);
+				}
 				$killLast = exec("sudo kill -9 $this->schedulerPid 2>&1", $results, $rtn);
 			}
 			return (TRUE);
