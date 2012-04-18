@@ -162,7 +162,6 @@ if [ $COMMON ]; then
    if [ ! -d "$REPO" ] ; then
       mkdir -p "$REPO"
       chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
-      # FIXME: which specific directories do we need setgid for?
       chmod 2770 $REPO
       # make sure the parent dir has the right permissions too
       chown {$PROJECTUSER}:{$PROJECTGROUP} $\{REPO%/*\}
