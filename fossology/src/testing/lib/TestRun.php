@@ -132,7 +132,7 @@ class TestRun {
 		}
 		else {
 			return ($this->Running);
-		}voluent.com
+		}
 	}
 	private function getSchedPid() {
 	  
