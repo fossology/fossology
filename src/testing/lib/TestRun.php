@@ -143,6 +143,7 @@ class TestRun {
     // scheduler is not running.
 		if($psLast === NULL)
 		{
+		  echo "DB: psLast is NULL\n";
 		  return(NULL);
 		}
 		print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
