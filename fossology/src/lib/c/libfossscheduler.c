@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* local includes */
 #include "libfossscheduler.h"
+#include "libfossdb.h"
 #include "fossconfig.h"
 
 /* unix includes */
@@ -30,18 +31,31 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <getopt.h>
 #include <libgen.h>
 
+/* other libraries */
+#include <libpq-fe.h>
+
 /* ************************************************************************** */
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
 
-int      items_processed;   ///< the number of items processed by the agent
-char     buffer[2048];      ///< the last thing received from the scheduler
-int      alive;
-int      valid;             ///< if the information stored in buffer is valid
-int      found;             ///< if the agent is even connected to the scheduler
+static int   items_processed; ///< the number of items processed by the agent
+static char  buffer[2048];    ///< the last thing received from the scheduler
+static int   alive;           ///< if the agent has updated with a hearbeat
+static int   valid;           ///< if the information stored in buffer is valid
+static int   sscheduler;      ///< whether the agent was started by the scheduler
+static char* module_name;     ///< the name of the agent
+
+const static char* sql_check = "\
+  SELECT * FROM agent \
+    WHERE agent_name = '%s' AND agent_rev='%s.%s'";
+
+const static char* sql_insert = "\
+  INSERT INTO agent (agent_name, agent_rev, agent_desc) \
+    VALUES ('%s', '%s.%s', '%s')";
+
+/* system configuration settings */
 fo_conf* sysconfig;
-char* sysconfigdir;
-char* module_name;
+char*    sysconfigdir;
 
 /**
  * Global verbose flags that agents should use instead of specific verbose
@@ -60,12 +74,74 @@ int agent_verbose;
  * This is the alarm SIGALRM function.
  * @return void
  */
-void fo_heartbeat()
+static void fo_heartbeat()
 {
   fprintf(stdout, "HEART: %d %d\n", items_processed, alive);
   fflush(stdout);
   alarm(ALARM_SECS);
   alive = FALSE;
+}
+
+/**
+ * @brief Checks that the agent is already in the agent table.
+ *
+ * This uses the VERSION and SVN_REV in the system configuration information to
+ * determine if a new agent record needs to be created for this agent in the
+ * database.
+ */
+static void fo_check_agentdb()
+{
+  PGconn*   db_conn   = NULL;
+  PGresult* db_result = NULL;
+  char*     db_error  = NULL;
+  char*     db_sql    = NULL;
+
+  db_conn = fo_dbconnect(NULL, &db_error);
+  if(db_error)
+  {
+    fprintf(stderr, "FATAL %s.%d: unable to open database connection: %s\n",
+        __FILE__, __LINE__, db_error);
+    exit(253);
+  }
+
+  db_sql = g_strdup_printf(sql_check, module_name,
+      fo_config_get(sysconfig, module_name, "VERSION", NULL),
+      fo_config_get(sysconfig, module_name, "SVN_REV", NULL));
+  db_result = PQexec(db_conn, db_sql);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+  {
+    fprintf(stderr, "FATAL %s.%d: unable to check agent table: %s",
+        __FILE__, __LINE__, PQresultErrorMessage(db_result));
+    PQfinish(db_conn);
+    PQclear(db_result);
+    g_free(db_sql);
+    exit(252);
+  }
+
+  if(PQntuples(db_result) != 1)
+  {
+    g_free(db_sql);
+    PQclear(db_result);
+
+    db_sql = g_strdup_printf(sql_insert, module_name,
+        fo_config_get(sysconfig, module_name, "VERSION",     NULL),
+        fo_config_get(sysconfig, module_name, "SVN_REV",     NULL),
+        fo_config_get(sysconfig, module_name, "DESCRIPTION", NULL));
+    db_result = PQexec(db_conn, db_sql);
+    if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
+    {
+      fprintf(stderr, "FATAL %s.%d: unable to insert into agent table: %s",
+          __FILE__, __LINE__, PQresultErrorMessage(db_result));
+      PQfinish(db_conn);
+      PQclear(db_result);
+      g_free(db_sql);
+      exit(251);
+    }
+  }
+
+  g_free(db_sql);
+  PQclear(db_result);
+  PQfinish(db_conn);
 }
 
 /* ************************************************************************** */
@@ -106,16 +182,18 @@ void  fo_scheduler_heart(int i)
  */
 void fo_scheduler_connect(int* argc, char** argv)
 {
+  /* locals */
   GError* error = NULL;
   GTree* keys;
   GOptionContext* parsed;
   fo_conf* version;
   char  fname[FILENAME_MAX + 1];
 
+  /* command line options */
   GOptionEntry options[] =
   {
       {"config",          'c', 0, G_OPTION_ARG_STRING, &sysconfigdir, ""},
-      {"scheduler_start",   0, 0, G_OPTION_ARG_NONE,   &found,        ""},
+      {"scheduler_start",   0, 0, G_OPTION_ARG_NONE,   &sscheduler,        ""},
       {NULL}
   };
 
@@ -125,7 +203,7 @@ void fo_scheduler_connect(int* argc, char** argv)
   items_processed = 0;
   memset(buffer, 0, sizeof(buffer));
   valid = 0;
-  found = 0;
+  sscheduler = 0;
   agent_verbose = 0;
 
   /* parse command line options */
@@ -144,7 +222,7 @@ void fo_scheduler_connect(int* argc, char** argv)
     {
       fprintf(stderr, "FATAL %s.%d: unable to open system configuration: %s\n",
           __FILE__, __LINE__, error->message);
-      exit(-1);
+      exit(255);
     }
 
     snprintf(fname, FILENAME_MAX, "%s/mods-enabled/%s/VERSION",
@@ -155,7 +233,7 @@ void fo_scheduler_connect(int* argc, char** argv)
     {
       fprintf(stderr, "FATAL %s.%d: unable to open VERSION configuration: %s\n",
           __FILE__, __LINE__, error->message);
-      exit(-1);
+      exit(254);
     }
 
     if((keys = g_tree_lookup(version->group_map, module_name)) != NULL)
@@ -166,16 +244,17 @@ void fo_scheduler_connect(int* argc, char** argv)
   }
 
   /* send "OK" to the scheduler */
-  if(found)
+  if(sscheduler)
   {
+    /* check that the agent record exists */
+    fo_check_agentdb();
+
     if(fo_config_has_key(sysconfig, module_name, "VERSION"))
       fprintf(stdout, "VERSION: %s\n",
           fo_config_get(sysconfig, module_name, "VERSION", &error));
     else fprintf(stdout, "VERSION: unknown\n");
     fprintf(stdout, "\nOK\n");
     fflush(stdout);
-
-    /* TODO check the nfs mounts for the agent */
 
     /* set up the heartbeat() */
     signal(SIGALRM, fo_heartbeat);
@@ -195,14 +274,14 @@ void fo_scheduler_connect(int* argc, char** argv)
 void fo_scheduler_disconnect(int retcode)
 {
   /* send "CLOSED" to the scheduler */
-  if(found) 
+  if(sscheduler)
   {
     fo_heartbeat();
     fprintf(stdout, "\nBYE %d\n", retcode);
     fflush(stdout);
 
     valid = 0;
-    found = 0;
+    sscheduler = 0;
 
     g_free(module_name);
   }
