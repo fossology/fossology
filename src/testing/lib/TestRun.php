@@ -142,9 +142,9 @@ class TestRun {
 		$psLast = exec($cmd, $results, $rtn);
     // scheduler is not running.
     echo "DB: var dump of psLast:\n"; var_dump($psLast) . "\n";
-		if($psLast === NULL)
+		if($psLast == "")
 		{
-		  echo "DB: psLast is NULL\n";
+		  echo "DB: psLast is \"\"\n";
 		  return(NULL);
 		}
 		print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
