@@ -141,6 +141,7 @@ class TestRun {
 		$cmd = 'ps -ef | grep fossology-scheduler | grep -v grep';
 		$psLast = exec($cmd, $results, $rtn);
     // scheduler is not running.
+    echo "DB: var dump of psLast:\n"; var_dump($psLast) . "\n";
 		if($psLast === NULL)
 		{
 		  echo "DB: psLast is NULL\n";
