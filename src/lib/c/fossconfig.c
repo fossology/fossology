@@ -48,8 +48,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 static const gchar* fo_conf_pattern = "\
     (?<comment>;.*)\n|\
     (?<group>  \\[ (?:[ \t]*) (?<gname>[\\w\\d_]+) (?:[ \t]*) \\]) \n|\
-    (?<key>    ([\\w\\d_]+))      (?:[ \t]*) = (?:[ \t]*)(?<value>.*)\n|\
-    (?<klist>  ([\\w\\d_]+))\\[\\](?:[ \t]*) = (?:[ \t]*)(?<vlist>.*)\n|\
+    (?<key>    ([\\.\\w\\d_-]+))      (?:[ \t]*) = (?:[ \t]*)(?<value>.*)\n|\
+    (?<klist>  ([\\.\\w\\d_-]+))\\[\\](?:[ \t]*) = (?:[ \t]*)(?<vlist>.*)\n|\
     (?<error>  (?:\\S+)(?:[ \t]*))\n";
 
 static const gchar* fo_conf_variable = "\\$(\\w*)";
@@ -74,7 +74,8 @@ static gint str_comp(gconstpointer a, gconstpointer b, gpointer user_data)
 /**
  * Function that collects all of the keys for a GTree into a single array of
  * strings. This is used to grab the sets of keys for the fo_config_key_set and
- * fo_config_group_set functions
+ * fo_config_group_set functions  printf("%s\n", (*error)->message);
+ *
  *
  * @param key the key for this particular key/value pair
  * @param value the value for this particular key/value pair
