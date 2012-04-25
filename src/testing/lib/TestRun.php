@@ -140,13 +140,15 @@ class TestRun {
 		$psLast = NULL;
 		$cmd = 'ps -ef | grep fossology-scheduler | grep -v grep';
 		$psLast = exec($cmd, $results, $rtn);
-		//print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
-		$parts = split(' ', $psLast);
-		// scheduler is not running.
-		if(empty($parts))
+    // scheduler is not running.
+    echo "DB: var dump of psLast:\n"; var_dump($psLast) . "\n";
+		if($psLast === NULL)
 		{
+		  echo "DB: psLast is NULL\n";
 		  return(NULL);
 		}
+		print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
+		$parts = split(' ', $psLast);
 		print "parts is:\n"; print_r($parts) . "\n";
 		return ($parts[5]);
 	}
@@ -163,7 +165,7 @@ class TestRun {
 		{
 			return (TRUE);
 		}
-		else {
+		else {$cmd = 'ps -ef | grep fossology-scheduler | grep -v grep';
 			return (FALSE);
 		}
 		}
