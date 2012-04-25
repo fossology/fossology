@@ -132,7 +132,7 @@ class TestRun {
 		}
 		else {
 			return ($this->Running);
-		}
+		}voluent.com
 	}
 	private function getSchedPid() {
 	  
@@ -140,7 +140,7 @@ class TestRun {
 		$psLast = NULL;
 		$cmd = 'ps -ef | grep fossology-scheduler | grep -v grep';
 		$psLast = exec($cmd, $results, $rtn);
-		//print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
+		print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
 		$parts = split(' ', $psLast);
 		// scheduler is not running.
 		if(empty($parts))
@@ -163,7 +163,7 @@ class TestRun {
 		{
 			return (TRUE);
 		}
-		else {
+		else {$cmd = 'ps -ef | grep fossology-scheduler | grep -v grep';
 			return (FALSE);
 		}
 		}
