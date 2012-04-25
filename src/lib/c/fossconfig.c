@@ -52,7 +52,11 @@ static const gchar* fo_conf_pattern = "\
     (?<klist>  ([\\.\\w\\d_-]+))\\[\\](?:[ \t]*) = (?:[ \t]*)(?<vlist>.*)\n|\
     (?<error>  (?:\\S+)(?:[ \t]*))\n";
 
-static const gchar* fo_conf_variable = "\\$(\\w*)";
+/**
+ * Regular expression that is used to match variables in the configuration file.
+ * THis simply matches a '$' followed by a set of alphabetic characters.
+ */
+static const gchar* fo_conf_variable = "\\$(\\w+)";
 
 static GRegex* fo_conf_parse;
 static GRegex* fo_conf_replace;
@@ -105,12 +109,13 @@ static gboolean collect_keys(char* key, gpointer* value, char** data)
     return 0; }
 
 /**
- * TODO
+ * A glib regex replace callback function. This will get called from the
+ * fo_config_key when it call g_regex_replace_evel().
  *
- * @param match
- * @param ret
- * @param data
- * @return
+ * @param match  The regex match that was found in the text i.e. '$HI'
+ * @param ret    A GString that is the return location for this function
+ * @param data   User data passed into the function, currently unused.
+ * @return  always return FALSE to continue the traversal
  */
 static gboolean fo_config_sub(const GMatchInfo* match, GString* ret,
     gpointer data)
@@ -126,16 +131,21 @@ static gboolean fo_config_sub(const GMatchInfo* match, GString* ret,
 }
 
 /**
- * TODO
+ * @brief Inserts a new Key/Value pair into the mapping of keys to values.
  *
- * @param group
- * @param key
- * @param val
- * @param list
- * @param fname
- * @param line
- * @param error
- * @return
+ * Since the values need to be strings, if the key that is being is inserted is
+ * a list then this uses a system of "[value1][value2]...[valueN]" to store the
+ * value. This is done under the assumption that lists are not going to be
+ * extremely long.
+ *
+ * @param group  The Group that this key belongs to
+ * @param key    The key that the value is associated with
+ * @param val    The value that the key maps to
+ * @param list   If the key/value pair is a list
+ * @param fname  The name of the file that this key was found in
+ * @param line   The line number in the file that this key was found on
+ * @param error  GError struct that is used to pass errors out of this function
+ * @return  always returns 1
  */
 static int fo_config_key(GTree* group, gchar* key, gchar* val, gboolean list,
     gchar* fname, guint line, GError** error)
@@ -174,15 +184,23 @@ static int fo_config_key(GTree* group, gchar* key, gchar* val, gboolean list,
 }
 
 /**
- * TODO
+ * @brief decides what to do with any one line of an input file
  *
- * @param match
- * @param g_current
- * @param dest
- * @param yyfile
- * @param yyline
- * @param error
- * @return
+ * Based upon what part of the regex matches, this chooses what to do with the
+ * line from the input file.
+ *
+ * portion/result:
+ *   group: create a new GTree* for the new group and move on
+ *   key:   call fo_config_key with the key/value pair and list set to FALSE
+ *   klist: call fo_config_key with the key/value pair and list set to TRUE
+ *
+ * @param match      The regex match that was found
+ * @param g_current  The current group that is being read from the file
+ * @param dest       The fo_conf struct that all this is being placed in
+ * @param yyfile     The name of the file that is being parsed
+ * @param yyline     The line of the file that is being parsed
+ * @param error      GError struct used to pass errors out
+ * @return  FALSE if succesfull.
  */
 static gboolean fo_config_eval(const GMatchInfo* match, GTree** g_current,
     fo_conf* dest, gchar* yyfile, guint yyline, GError** error)
