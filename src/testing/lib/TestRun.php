@@ -25,10 +25,12 @@
  *
  * Created on Dec 18, 2008
  */
-class TestRun {
+class TestRun
+{
 	public $srcPath;
 	private $NotRunning = FALSE;
 	private $Running = TRUE;
+	private $schdulerPid = -1;
 	
 	/**
 	 *  constructor
@@ -141,15 +143,12 @@ class TestRun {
 		$cmd = 'ps -ef | grep fossology-scheduler | grep -v grep';
 		$psLast = exec($cmd, $results, $rtn);
     // scheduler is not running.
-    echo "DB: var dump of psLast:\n"; var_dump($psLast) . "\n";
 		if($psLast == "")
 		{
-		  echo "DB: psLast is \"\"\n";
 		  return(NULL);
 		}
-		print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
 		$parts = split(' ', $psLast);
-		print "parts is:\n"; print_r($parts) . "\n";
+		//print "parts is:\n"; print_r($parts) . "\n";
 		return ($parts[5]);
 	}
 	public function foPostinstall() {
