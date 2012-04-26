@@ -30,7 +30,7 @@ class TestRun
 	public $srcPath;
 	private $NotRunning = FALSE;
 	private $Running = TRUE;
-	private $schdulerPid = -1;
+	private $schedulerPid = -1;
 	
 	/**
 	 *  constructor
