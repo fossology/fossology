@@ -38,12 +38,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
 
-static int   items_processed; ///< the number of items processed by the agent
-static char  buffer[2048];    ///< the last thing received from the scheduler
-static int   alive;           ///< if the agent has updated with a hearbeat
-static int   valid;           ///< if the information stored in buffer is valid
-static int   sscheduler;      ///< whether the agent was started by the scheduler
-static char* module_name;     ///< the name of the agent
+int   items_processed; ///< the number of items processed by the agent
+char  buffer[2048];    ///< the last thing received from the scheduler
+int   alive;           ///< if the agent has updated with a hearbeat
+int   valid;           ///< if the information stored in buffer is valid
+int   sscheduler;      ///< whether the agent was started by the scheduler
+char* module_name;     ///< the name of the agent
 
 const static char* sql_check = "\
   SELECT * FROM agent \
@@ -74,7 +74,7 @@ int agent_verbose;
  * This is the alarm SIGALRM function.
  * @return void
  */
-static void fo_heartbeat()
+void fo_heartbeat()
 {
   fprintf(stdout, "HEART: %d %d\n", items_processed, alive);
   fflush(stdout);
@@ -89,7 +89,7 @@ static void fo_heartbeat()
  * determine if a new agent record needs to be created for this agent in the
  * database.
  */
-static void fo_check_agentdb()
+void fo_check_agentdb()
 {
   PGconn*   db_conn   = NULL;
   PGresult* db_result = NULL;
