@@ -42,7 +42,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern int  items_processed;
 extern char buffer[];
 extern int  valid;
-extern int  found;
+extern int  sscheduler;
 extern int  agent_verbose;
 extern void fo_heartbeat();
 
@@ -168,7 +168,7 @@ void test_scheduler_no_connect()
 
   fo_scheduler_connect(&argc, argv);
 
-  FO_ASSERT_FALSE(found);
+  FO_ASSERT_FALSE(sscheduler);
   FO_ASSERT_EQUAL(items_processed, 0);
   FO_ASSERT_FALSE(valid);
   FO_ASSERT_FALSE(agent_verbose);
@@ -198,7 +198,7 @@ void test_scheduler_connect()
 
   fo_scheduler_connect(&argc, argv);
 
-  FO_ASSERT_TRUE(found);
+  FO_ASSERT_TRUE(sscheduler);
   FO_ASSERT_EQUAL(items_processed, 0);
   FO_ASSERT_FALSE(valid);
   FO_ASSERT_FALSE(agent_verbose);
@@ -317,12 +317,12 @@ void test_scheduler_current()
  */
 void test_scheduler_disconnect()
 {
-  found = 1;
+  sscheduler = 1;
 
   fo_scheduler_disconnect(2);
   FO_ASSERT_STRING_EQUAL(fgets(buffer, sizeof(buffer), read_from), "BYE 2\n");
   FO_ASSERT_FALSE(valid);
-  FO_ASSERT_FALSE(found);
+  FO_ASSERT_FALSE(sscheduler);
 }
 
 /**
