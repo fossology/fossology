@@ -123,7 +123,7 @@ void prnt_sig(int signo)
   switch(signo)
   {
     case SIGALRM:
-      V_SCHED("SIGNALS: Scheduler received alarm signal, checking job states\n");
+      V_SPECIAL("SIGNALS: Scheduler received alarm signal, checking job states\n");
       event_signal(agent_update_event, NULL);
       event_signal(database_update_event, NULL);
       alarm(CHECK_TIME);
@@ -341,9 +341,13 @@ int kill_scheduler(int force)
             kill(atoi(ep->d_name), SIGTERM);
           num_killed++;
         }
+
+        fclose(file);
       }
     }
   }
+
+  closedir(dp);
 
   if(num_killed == 0)
     return -1;

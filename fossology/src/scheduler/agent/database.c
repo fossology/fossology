@@ -43,7 +43,7 @@ const char* url_checkout = "\
 
 const char* select_upload_fk =" \
     SELECT job_upload_fk FROM job, jobqueue \
-      WHERE jq_job_fk = job_pk and jq_pk = %d;";
+      WHERE jq_job_fk = job_pk AND jq_pk = %d;";
 
 const char* upload_common = "\
     SELECT * FROM jobqueue \
@@ -56,12 +56,24 @@ const char* folder_name = "\
     SELECT folder_name FROM folder \
       WHERE folder_pk IN ( \
         SELECT parent_fk FROM foldercontents \
-          WHERE foldercontents_mode = 2 AND child_id = %d  \
+          WHERE foldercontents_mode = 2 AND child_id = ( \
+            SELECT job_upload_fk FROM job \
+              WHERE job_pk = ( \
+                SELECT jq_job_fk FROM jobqueue \
+                  WHERE jq_pk = %d \
+              ) \
+          ) \
       );";
 
 const char* upload_name = "\
     SELECT upload_filename FROM upload \
-      WHERE upload_pk = %d;";
+      WHERE upload_pk = ( \
+        SELECT job_upload_fk FROM job \
+          WHERE job_pk = ( \
+            SELECT jq_job_fk FROM jobqueue \
+              WHERE jq_pk = %d \
+          ) \
+      );";
 
 const char* jobsql_email = "\
     SELECT user_name, user_email, email_notify FROM users, upload \
@@ -139,13 +151,13 @@ const char* jobsql_priority = "\
 /* ***    notification lives.                                             *** */
 /* ************************************************************************** */
 
-char*  email_subject = NULL;
-char*  email_header  = NULL;
-char*  email_footer  = NULL;
-char*  email_command = NULL;
-struct stat header_sb;
-struct stat footer_sb;
-GRegex* email_regex = NULL;
+static char*  email_subject = NULL;
+static char*  email_header  = NULL;
+static char*  email_footer  = NULL;
+static char*  email_command = NULL;
+static struct stat header_sb;
+static struct stat footer_sb;
+static GRegex* email_regex = NULL;
 
 #define EMAIL_ERROR(...) {                       \
   WARNING(__VA_ARGS__);                          \
@@ -156,6 +168,248 @@ GRegex* email_regex = NULL;
 #define DEFAULT_HEADER  "FOSSology scan complete\nmessage:\""
 #define DEFAULT_FOOTER  "\""
 #define DEFAULT_SUBJECT "FOSSology scan complete\n"
+
+/**
+ * Replaces the variables that are in the header and footer files. This is a
+ * callback function that is passed to the glib function g_regex_replace_eval().
+ * This reads what was matched by the regex and then appends the correct
+ * information onto the GString that is passed to the function.
+ *
+ * Variables:
+ *   $UPLOADNAME
+ *   $BROESELINK
+ *   $SHCEDULERLOG
+ *   $UPLOADFOLDERNAME [not implemented]
+ *   $JOBRESULT
+ *   $DB.table.column
+ *
+ * @param match  the regex match that glib found
+ * @param ret    the GString* that results should be appended to.
+ * @param j      the job that this email relates to
+ * @return       always FALSE so that g_regex_replace_eval() will continue
+ */
+static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
+{
+  gchar* m_str = g_match_info_fetch(match, 1);
+  gchar* sql   = NULL;
+  gchar* table, * column;
+  PGresult* db_result;
+  guint i;
+
+  /* $UPLOADNAME
+   *
+   * Appends the name of the file that was uploaded and appends it to the output
+   * string. This uses the job id to find the upload name.
+   */
+  if(strcmp(m_str, "UPLOADNAME") == 0)
+  {
+    sql = g_strdup_printf(upload_name, j->id);
+    db_result = PQexec(db_conn, sql);
+
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+    {
+      g_string_append_printf(ret,
+          "[ERROR: unable to select file name for upload %d]", j->id);
+    }
+    else
+    {
+      g_string_append(ret, PQgetvalue(db_result, 0, 0));
+    }
+
+    PQclear(db_result);
+    g_free(sql);
+  }
+
+  /* $BROWSELINK
+   *
+   * Appends the url that will link to the upload in the browse menue of the user
+   * interface.
+   */
+  else if(strcmp(m_str, "BROWSELINK") == 0)
+  {
+    g_string_append_printf(ret, "http://%s?mod=browse&upload=%d&show=detail",
+        fossy_url, j->id);
+  }
+
+  /* $SCHEDULERLOG
+   *
+   * Appends the url that will link to the log file produced by the agent.
+   */
+  else if(strcmp(m_str, "SCHEDULERLOG") == 0)
+  {
+    g_string_append_printf(ret, "http://%s?mod=showjobs&show=job&job=%d",
+        fossy_url, j->id);
+  }
+
+  /* $UPLOADFOLDERNAME
+   *
+   * Appends the name of the folder that the upload was stored under.
+   */
+  else if(strcmp(m_str, "UPLOADFOLDERNAME") == 0)
+  {
+    sql = g_strdup_printf(folder_name, j->id);
+    db_result = PQexec(db_conn, sql);
+
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+    {
+      g_string_append_printf(ret,
+          "[ERROR: unable to select folder name for upload %d]", j->id);
+    }
+    else
+    {
+      g_string_append(ret, PQgetvalue(db_result, 0, 0));
+    }
+
+    PQclear(db_result);
+    g_free(sql);
+  }
+
+  /* $JOBRESULT
+   *
+   * Appends if the job finished successfully or it it failed.
+   */
+  else if(strcmp(m_str, "JOBRESULT") == 0)
+  {
+    switch(j->status)
+    {
+      case JB_COMPLETE: g_string_append(ret, "COMPLETE"); break;
+      case JB_FAILED:   g_string_append(ret, "FAILED");   break;
+      default:
+        g_string_append_printf(ret, "[ERROR: illegal job status \"%s\"]",
+            job_status_strings[j->status]);
+        break;
+    }
+  }
+
+  /* $DB.table.column
+   *
+   * Appends a column of a table from the database to the resulting string.
+   */
+  else if(strcmp(m_str, "DB") == 0)
+  {
+    table  = g_match_info_fetch(match, 3);
+    column = g_match_info_fetch(match, 4);
+    sql = g_strdup_printf("SELECT %s FROM %s;", column, table);
+    db_result = PQexec(db_conn, sql);
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK ||
+        PQntuples(db_result) == 0 || PQnfields(db_result) == 0)
+    {
+      g_string_append_printf(ret, "[ERROR: unable to select %s.%s]", table, column);
+    }
+    else
+    {
+      g_string_append_printf(ret, "%s.%s[", table, column);
+      for(i = 0; i < PQntuples(db_result); i++)
+      {
+        g_string_append(ret, PQgetvalue(db_result, i, 0));
+        if(i != PQntuples(db_result) - 1)
+          g_string_append(ret, " ");
+      }
+      g_string_append(ret, "]");
+    }
+
+    PQclear(db_result);
+    g_free(sql);
+    g_free(table);
+    g_free(column);
+  }
+
+  g_free(m_str);
+  return FALSE;
+}
+
+/**
+ * Sends an email notification that a particular job has completed correctly.
+ * This compiles the email based upon the header file, footer file, and the job
+ * that just completed.
+ *
+ * @param job  the job that just finished
+ * @return void, no return
+ */
+static void email_notification(job j)
+{
+  PGresult* db_result;
+  int j_id = j->id;;
+  int upload_id;
+  char* val;
+  char* final_cmd;
+  char sql[1024];
+  FILE* mail_io;
+  GString* email_txt;
+
+  if(is_meta_special(j->agent_type, SAG_NOEMAIL))
+    return;
+
+  sprintf(sql, select_upload_fk, j_id);
+  db_result = PQexec(db_conn, sql);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
+  {
+    PQ_ERROR(db_result, "unable to select the upload id for job %d", j_id);
+    return;
+  }
+
+  upload_id = atoi(PQgetvalue(db_result, 0, 0));
+  PQclear(db_result);
+
+  sprintf(sql, upload_common, upload_id);
+  db_result = PQexec(db_conn, sql);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+  {
+    PQ_ERROR(db_result, "unable to check common uploads to job %d", j_id);
+    return;
+  }
+
+  sprintf(sql, jobsql_email, upload_id);
+  db_result = PQexec(db_conn, sql);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
+  {
+    PQ_ERROR(db_result, "unable to access email info for job %d", j_id);
+    return;
+  }
+
+  if(PQget(db_result, 0, "email_notify")[0] == 'y')
+  {
+    email_txt = g_string_new("");
+    g_string_append(email_txt, email_header);
+    g_string_append(email_txt, job_message(j));
+    g_string_append(email_txt, email_footer);
+
+    if(email_regex != NULL)
+    {
+      val = g_regex_replace_eval(email_regex, email_txt->str, email_txt->len,
+          0, 0, (GRegexEvalCallback)email_replace, j, NULL);
+    }
+    else
+    {
+      val = email_txt->str;
+    }
+
+    final_cmd = g_strdup_printf(EMAIL_BUILD_CMD, email_command, email_subject,
+        PQget(db_result, 0, "user_email"));
+
+    if((mail_io = popen(final_cmd, "w")) != NULL)
+    {
+      fprintf(mail_io, "%s", val);
+
+      putc(-1,   mail_io);
+      putc('\n', mail_io);
+
+      pclose(mail_io);
+    }
+    else
+    {
+      WARNING("Unable to spawn email notification process: '%s'.\n",
+          email_command);
+    }
+
+    if(email_regex != NULL)
+      g_free(val);
+    g_free(final_cmd);
+    g_string_free(email_txt, TRUE);
+  }
+
+  PQclear(db_result);
+}
 
 /**
  * Loads information about the email that will be sent for job notifications.
@@ -255,248 +509,6 @@ void email_load()
 	  EMAIL_ERROR("unable to build email regular expression: %s", error->message);
 	  email_regex = NULL;
 	}
-}
-
-/**
- * Replaces the variables that are in the header and footer files. This is a
- * callback function that is passed to the glib function g_regex_replace_eval().
- * This reads what was matched by the regex and then appends the correct
- * information onto the GString that is passed to the function.
- *
- * Variables:
- *   $UPLOADNAME
- *   $BROESELINK
- *   $SHCEDULERLOG
- *   $UPLOADFOLDERNAME [not implemented]
- *   $JOBRESULT
- *   $DB.table.column
- *
- * @param match  the regex match that glib found
- * @param ret    the GString* that results should be appended to.
- * @param j      the job that this email relates to
- * @return       always FALSE so that g_regex_replace_eval() will continue
- */
-gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
-{
-  gchar* m_str = g_match_info_fetch(match, 1);
-  gchar* sql   = NULL;
-  gchar* table, * column;
-  PGresult* db_result;
-  guint i;
-
-  /* $UPLOADNAME
-   *
-   * Appends the name of the file that was uploaded and appends it to the output
-   * string. This uses the job id to find the upload name.
-   */
-  if(strcmp(m_str, "UPLOADNAME"))
-  {
-    sql = g_strdup_printf(upload_name, j->id);
-    db_result = PQexec(db_conn, sql);
-
-    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
-    {
-      g_string_append_printf(ret,
-          "[ERROR: unable to select file name for upload %d]", j->id);
-    }
-    else
-    {
-      g_string_append(ret, PQgetvalue(db_result, 0, 0));
-    }
-
-    PQclear(db_result);
-    g_free(sql);
-  }
-
-  /* $BROWSELINK
-   *
-   * Appends the url that will link to the upload in the browse menue of the user
-   * interface.
-   */
-  else if(strcmp(m_str, "BROWSELINK"))
-  {
-    g_string_append_printf(ret, "http://%s?mod=browse&upload=%d&show=detail",
-        fossy_url, j->id);
-  }
-
-  /* $SCHEDULERLOG
-   *
-   * Appends the url that will link to the log file produced by the agent.
-   */
-  else if(strcmp(m_str, "SCHEDULERLOG"))
-  {
-    g_string_append_printf(ret, "http://%s?mod=showjobs&show=job&job=%d",
-        fossy_url, j->id);
-  }
-
-  /* $UPLOADFOLDERNAME
-   *
-   * Appends the name of the folder that the upload was stored under.
-   */
-  else if(strcmp(m_str, "UPLOADFOLDERNAME"))
-  {
-    sql = g_strdup_printf(folder_name, j->id);
-    db_result = PQexec(db_conn, sql);
-
-    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
-    {
-      g_string_append_printf(ret,
-          "[ERROR: unable to select folder name for upload %d]", j->id);
-    }
-    else
-    {
-      g_string_append(ret, PQgetvalue(db_result, 0, 0));
-    }
-
-    PQclear(db_result);
-    g_free(sql);
-  }
-
-  /* $JOBRESULT
-   *
-   * Appends if the job finished successfully or it it failed.
-   */
-  else if(strcmp(m_str, "JOBRESULT"))
-  {
-    switch(j->status)
-    {
-      case JB_COMPLETE: g_string_append(ret, "COMPLETE"); break;
-      case JB_FAILED:   g_string_append(ret, "FAILED");   break;
-      default:
-        g_string_append_printf(ret, "[ERROR: illegal job status \"%s\"]",
-            job_status_strings[j->status]);
-        break;
-    }
-  }
-
-  /* $DB.table.column
-   *
-   * Appends a column of a table from the database to the resulting string.
-   */
-  else if(strcmp(m_str, "DB"))
-  {
-    table  = g_match_info_fetch(match, 3);
-    column = g_match_info_fetch(match, 4);
-    sql = g_strdup_printf("SELECT %s FROM %s;", column, table);
-    db_result = PQexec(db_conn, sql);
-    if(PQresultStatus(db_result) != PGRES_TUPLES_OK ||
-        PQntuples(db_result) == 0 || PQnfields(db_result) == 0)
-    {
-      g_string_append_printf(ret, "[ERROR: unable to select %s.%s]", table, column);
-    }
-    else
-    {
-      g_string_append_printf(ret, "%s.%s[", table, column);
-      for(i = 0; i < PQntuples(db_result); i++)
-      {
-        g_string_append(ret, PQgetvalue(db_result, 0, i));
-        if(i != PQntuples(db_result) - 1)
-          g_string_append(ret, " ");
-      }
-      g_string_append(ret, "]");
-    }
-
-    PQclear(db_result);
-    g_free(sql);
-    g_free(table);
-    g_free(column);
-  }
-
-  g_free(m_str);
-  return FALSE;
-}
-
-/**
- * Sends an email notification that a particular job has completed correctly.
- * This compiles the email based upon the header file, footer file, and the job
- * that just completed.
- *
- * @param job  the job that just finished
- * @return void, no return
- */
-void email_notification(job j)
-{
-  PGresult* db_result;
-  int j_id = j->id;;
-  int upload_id;
-  char* val;
-  char* final_cmd;
-  char sql[1024];
-  FILE* mail_io;
-  GString* email_txt;
-
-  if(is_meta_special(j->agent_type, SAG_NOEMAIL))
-    return;
-
-  sprintf(sql, select_upload_fk, j_id);
-  db_result = PQexec(db_conn, sql);
-  if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
-  {
-    PQ_ERROR(db_result, "unable to select the upload id for job %d", j_id);
-    return;
-  }
-
-  upload_id = atoi(PQgetvalue(db_result, 0, 0));
-  PQclear(db_result);
-
-  sprintf(sql, upload_common, upload_id);
-  db_result = PQexec(db_conn, sql);
-  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
-  {
-    PQ_ERROR(db_result, "unable to check common uploads to job %d", j_id);
-    return;
-  }
-
-  sprintf(sql, jobsql_email, upload_id);
-  db_result = PQexec(db_conn, sql);
-  if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
-  {
-    PQ_ERROR(db_result, "unable to access email info for job %d", j_id);
-    return;
-  }
-
-  if(PQget(db_result, 0, "email_notify")[0] == 'y')
-  {
-    email_txt = g_string_new("");
-    g_string_append(email_txt, email_header);
-    g_string_append(email_txt, job_message(j));
-    g_string_append(email_txt, email_footer);
-
-    if(email_regex != NULL)
-    {
-      val = g_regex_replace_eval(email_regex, email_txt->str, email_txt->len,
-          0, 0, (GRegexEvalCallback)email_replace, j, NULL);
-    }
-    else
-    {
-      val = email_txt->str;
-    }
-
-    final_cmd = g_strdup_printf(EMAIL_BUILD_CMD, email_command, email_subject,
-        PQget(db_result, 0, "user_email"));
-
-    if((mail_io = popen(final_cmd, "w")) != NULL)
-    {
-      fprintf(mail_io, "%s", val);
-
-      putc(-1,   mail_io);
-      putc('\n', mail_io);
-
-      pclose(mail_io);
-    }
-    else
-    {
-      WARNING("Unable to spawn email notification process: '%s'.\n",
-          email_command);
-    }
-
-    if(email_regex != NULL)
-      g_free(val);
-    g_free(final_cmd);
-    g_string_free(email_txt, TRUE);
-  }
-
-  PQclear(db_result);
 }
 
 /* ************************************************************************** */
@@ -605,7 +617,7 @@ void database_update_event(void* unused)
     return;
   }
 
-  V_DATABASE("DB: retrieved %d entries from the job queue\n", PQntuples(db_result));
+  V_SPECIAL("DB: retrieved %d entries from the job queue\n", PQntuples(db_result));
   for(i = 0; i < PQntuples(db_result); i++)
   {
     /* start by checking that the job hasn't already been grabed */
@@ -741,4 +753,3 @@ void database_job_priority(job j, int priority)
 
   g_free(sql);
 }
-

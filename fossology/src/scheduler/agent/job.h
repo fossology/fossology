@@ -34,24 +34,33 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 typedef struct job_internal* job;
 
-/**
- * TODO
- */
-typedef enum
-{
-  JB_CHECKEDOUT = 0,    ///< JB_CHECKEDOUT
-  JB_STARTED = 1,       ///< JB_STARTED
-  JB_COMPLETE = 2,      ///< JB_COMPLETE
-  JB_RESTART = 3,       ///< JB_RESTART
-  JB_FAILED = 4,        ///< JB_FAILED
-  JB_SCH_PAUSED = 5,    ///< JB_SCH_PAUSED
-  JB_CLI_PAUSED = 6,    ///< JB_CLI_PAUSED
-  JB_ERROR = 7          ///< JB_ERROR
-} job_status;
+
+#define JOB_STATUS_TYPES(apply)                        \
+  /** Checkout out from the db, but not started yet */ \
+  apply(CHECKEDOUT)                                    \
+  /** Agents have started analysis on the job */       \
+  apply(STARTED)                                       \
+  /** All the data for this job has been analyzed */   \
+  apply(COMPLETE)                                      \
+  /** FIXME NOT USED */                                \
+  apply(RESTART)                                       \
+  /** The job has failed, likely an agent failure */   \
+  apply(FAILED)                                        \
+  /** Paused by the scheduler, NOT USED CURRENTLY */   \
+  apply(SCH_PAUSED)                                    \
+  /** Paused by some user interface */                 \
+  apply(CLI_PAUSED)                                    \
+  /** Illegal state, should not happen */              \
+  apply(ERROR)
+
+#define SELECT_ENUM(passed) JB_##passed,
+typedef enum { JOB_STATUS_TYPES(SELECT_ENUM) } job_status;
+#undef SELECT_ENUM
+
 extern const char* job_status_strings[];
 
 /**
- * Internal declaraction of private members of the job strucutre.
+ * Internal declaration of private members of the job structure.
  */
 struct job_internal
 {

@@ -105,7 +105,7 @@ typedef struct interface_connection
  * @param  pointer to the interface_connection structure
  * @return not currently used
  */
-void* interface_thread(void* param)
+static void* interface_thread(void* param)
 {
   GMatchInfo* regex_match;
   interface_connection* conn = param;
@@ -204,7 +204,7 @@ void* interface_thread(void* param)
       if((to_kill = get_job(atoi(arg1))) == NULL)
       {
         snprintf(buffer, sizeof(buffer),
-            "Invalid kill command: job %d does not exist\n", atoi(arg1));
+            "Invalid kill command: job %s does not exist\n", arg1);
         g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
       }
       else
@@ -229,10 +229,19 @@ void* interface_thread(void* param)
     {
       arg1 = g_match_info_fetch(regex_match, 3);
 
-      params = g_new0(arg_int, 1);
-      params->first = get_job(atoi(arg1));
-      params->second = 1;
-      event_signal(job_pause_event, params);
+      if((to_kill = get_job(atoi(arg1))) == NULL)
+      {
+        snprintf(buffer, sizeof(buffer),
+            "Invalid pause command: job %s does not exist\n", arg1);
+        g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+      }
+      else
+      {
+        params = g_new0(arg_int, 1);
+        params->first = get_job(atoi(arg1));
+        params->second = 1;
+        event_signal(job_pause_event, params);
+      }
 
       g_free(arg1);
     }
@@ -292,10 +301,12 @@ void* interface_thread(void* param)
 
       if(arg1 == NULL)
       {
+        arg1 = g_strdup(buffer);
         WARNING("received invalid restart command: %s", buffer);
         snprintf(buffer, sizeof(buffer) - 1,
-                    "ERROR: Invalid restart command: %s\n", buffer);
+                    "ERROR: Invalid restart command: %s\n", arg1);
         g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+        g_free(arg1);
       }
       else
       {
@@ -373,10 +384,13 @@ void* interface_thread(void* param)
       {
         if(arg1) g_free(arg1);
         if(arg2) g_free(arg2);
+
+        arg1 = g_strdup(buffer);
         WARNING("Invalid priority command: %s\n", buffer);
         snprintf(buffer, sizeof(buffer) - 1,
-            "ERROR: Invalid priority command: %s\n", buffer);
+            "ERROR: Invalid priority command: %s\n", arg1);
         g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+        g_free(arg1);
       }
     }
 
@@ -417,7 +431,7 @@ void* interface_thread(void* param)
  * @param conn the socket that this interface is connected to
  * @return the newly allocated and populated interface connection
  */
-interface_connection* interface_conn_init(GSocketConnection* conn)
+static interface_connection* interface_conn_init(GSocketConnection* conn)
 {
   interface_connection* inter = g_new0(interface_connection, 1);
 
@@ -436,7 +450,7 @@ interface_connection* interface_conn_init(GSocketConnection* conn)
  *
  * @param inter the interface_connection that should be freed
  */
-void interface_conn_destroy(interface_connection* inter)
+static void interface_conn_destroy(interface_connection* inter)
 {
   g_object_unref(inter->conn);
   g_thread_join(inter->thread);
@@ -450,7 +464,7 @@ void interface_conn_destroy(interface_connection* inter)
  * @param  unused
  * @return unused
  */
-void* listen_thread(void* unused)
+static void* listen_thread(void* unused)
 {
   GSocketListener* server_socket;
   GSocketConnection* new_connection;

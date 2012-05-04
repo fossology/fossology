@@ -35,7 +35,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 FILE* log_file = NULL;
 char  log_name[FILENAME_MAX];
-int   log_name_set = 0;
+
+static int   log_name_set = 0;
 
 /* ************************************************************************** */
 /* **** local functions ***************************************************** */
@@ -46,7 +47,7 @@ int   log_name_set = 0;
  * in log_name. If the log name hasn't been set when this method is called
  * it will attempt to open the default that is stored in logdir.
  */
-void log_open()
+static void log_open()
 {
   if(!log_name_set)
   {
@@ -67,7 +68,7 @@ void log_open()
  *
  * @param str the string that will be printed to the log file
  */
-void log_event(char* str)
+static void log_event(char* str)
 {
   lprintf("%s", str);
   g_free(str);
@@ -80,7 +81,7 @@ void log_event(char* str)
  * @param fmt formatting string for the arguments
  * @param args variable argument list created by other functions
  */
-int concurent_log(const char* fmt, va_list args)
+static int concurent_log(const char* fmt, va_list args)
 {
   gchar* buf;
 
