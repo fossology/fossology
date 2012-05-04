@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  ************************************************************** */
 
 /*
- * TODO change the "<date> <time> scheduler ::" to "<date> <time> agent ::" for some
- *      log messages
+ * TODO change the "<date> <time> scheduler ::" to "<date> <time> agent ::" for
+ * some log messages
  */
 
 /* local includes */
@@ -56,10 +56,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TEST_NULV(a) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
 #define TEST_NULL(a, ret) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
 
-GTree* meta_agents    = NULL;  ///< The master list of all meta agents
-GTree* agents         = NULL;  ///< The master list of all of the agents
-GRegex* heart_regex   = NULL;  ///< regex for parsing heart messages
-GRegex* special_regex = NULL;  ///< regex for parsing special messages
+static GTree* meta_agents    = NULL;  ///< The master list of all meta agents
+static GTree* agents         = NULL;  ///< The master list of all of the agents
+static GRegex* heart_regex   = NULL;  ///< regex for parsing heart messages
+static GRegex* special_regex = NULL;  ///< regex for parsing special messages
 
 /** prints the credential of the agent */
 #define AGENT_CREDENTIAL                                               \
@@ -107,45 +107,18 @@ GRegex* special_regex = NULL;  ///< regex for parsing special messages
 /* ************************************************************************** */
 
 /**
- * strings used to print the status of an agent. The status is actually an enum,
- * which is just an integer, so this provides the status in a human readable
- * format.
+ * Array of C-Strings used to pretty-print the agent status in the log file.
+ * Uses the X-Macro defined in @link agent.h
  */
-const char* agent_status_strings[] = {
-    "AG_FAILED",
-    "AG_CREATED",
-    "AG_SPAWNED",
-    "AG_RUNNING",
-    "AG_PAUSED",
-    "AG_CLOSED"};
+#define AGENT_STRING(passed) #passed
+#define SELECT_STRING(passed) AGENT_STRING(AGENT_##passed),
+const char* agent_status_strings[] = { AGENT_STATUS_TYPES(SELECT_STRING) };
+#undef SELECT_STRING
+#undef AGENT_STRING
 
 /* ************************************************************************** */
 /* **** Local Functions ***************************************************** */
 /* ************************************************************************** */
-
-/**
- * Changes the status of the agent internal to the scheduler. This function
- * is used to transition between agent states instead of a raw set of the status
- * so that correct printing of the verbose message is guaranteed
- *
- * @param a the agent to change the status for
- * @param new_status the new status of the agentchar* sysconfdir = NULL;    // system configuration directory (SYSCONFDIR)
- */
-void agent_transition(agent a, agent_status new_status)
-{
-  AGENT_VERB("agent status change: %s -> %s\n",
-      agent_status_strings[a->status], agent_status_strings[new_status]);
-
-  if(a->owner->id > 0)
-  {
-    if(a->status == AG_PAUSED)
-      host_increase_load(a->host_machine);
-    if(new_status == AG_PAUSED)
-      host_decrease_load(a->host_machine);
-  }
-
-  a->status = new_status;
-}
 
 /**
  * Fails an agent. This will move the agent status to AG_FAILED and send a
@@ -154,7 +127,7 @@ void agent_transition(agent a, agent_status new_status)
  *
  * @param a the agent that is failing.
  */
-void agent_fail(agent a)
+static void agent_fail(agent a)
 {
   TEST_NULV(a);
   agent_transition(a, AG_FAILED);
@@ -172,7 +145,7 @@ void agent_fail(agent a)
  * @param excepted this is an agent we don't want to close, this is it
  * @return always returns 0 to indicate that the traversal should continue
  */
-int agent_close_fd(int* pid_ptr, agent a, agent excepted)
+static int agent_close_fd(int* pid_ptr, agent a, agent excepted)
 {
   TEST_NULL(a, 0);
   if(a != excepted)
@@ -195,7 +168,7 @@ int agent_close_fd(int* pid_ptr, agent a, agent excepted)
  * @param unused data that is also not used in this function
  * @return always returns 0 to indicate that the traversal should continue
  */
-int update(int* pid_ptr, agent a, gpointer unused)
+static int update(int* pid_ptr, agent a, gpointer unused)
 {
   TEST_NULL(a, 0);
   if(a->status == AG_SPAWNED || a->status == AG_RUNNING || a->status == AG_PAUSED)
@@ -241,7 +214,7 @@ int update(int* pid_ptr, agent a, gpointer unused)
  * @param unused
  * @return always returns 0 to indicate that the traversal should continue
  */
-int agent_kill_traverse(int* pid, agent a, gpointer unused)
+static int agent_kill_traverse(int* pid, agent a, gpointer unused)
 {
   agent_kill(a);
   return FALSE;
@@ -257,7 +230,7 @@ int agent_kill_traverse(int* pid, agent a, gpointer unused)
  * @param unused  not currently used
  * @return
  */
-int clean_traverse(char* name, meta_agent ma, gpointer unused)
+static int clean_traverse(char* name, meta_agent ma, gpointer unused)
 {
   if(!ma->valid)
     g_tree_remove(meta_agents, ma);
@@ -273,7 +246,7 @@ int clean_traverse(char* name, meta_agent ma, gpointer unused)
  * @param ostr the output stream to write the data to, socket in this case
  * @return always returns 0 to indicate that the traversal should continue
  */
-int agent_list(char* name, meta_agent ma, GOutputStream* ostr)
+static int agent_list(char* name, meta_agent ma, GOutputStream* ostr)
 {
   g_output_stream_write(ostr, name, strlen(name), NULL, NULL);
   g_output_stream_write(ostr, " ",  1,            NULL, NULL);
@@ -290,7 +263,7 @@ int agent_list(char* name, meta_agent ma, GOutputStream* ostr)
  * @param h the host to start the agent on
  * @return always returns 0 to indicate that the traversal should continue
  */
-int agent_test(char* name, meta_agent ma, host h)
+static int agent_test(char* name, meta_agent ma, host h)
 {
   static int id_gen = -1;
 
@@ -306,7 +279,7 @@ int agent_test(char* name, meta_agent ma, host h)
  *
  * @param a the agent that will be listened on
  */
-void agent_listen(agent a)
+static void agent_listen(agent a)
 {
   /* static locals */
   static GStaticMutex version_lock = G_STATIC_MUTEX_INIT;
@@ -550,7 +523,7 @@ void agent_listen(agent a)
  * @param argc
  * @param argv
  */
-void shell_parse(char* input, int* argc, char*** argv)
+static void shell_parse(char* input, int* argc, char*** argv)
 {
   char* begin;
   char* curr;
@@ -611,7 +584,7 @@ void shell_parse(char* input, int* argc, char*** argv)
  *
  * @param passed a pointer to the agent that is being spawned
  */
-void* agent_spawn(void* passed)
+static void* agent_spawn(void* passed)
 {
   /* locals */
   agent a = (agent)passed;    // the agent that is being spawned
@@ -821,11 +794,13 @@ agent agent_init(host host_machine, job owner)
   if(pipe(parent_to_child) != 0)
   {
     ERROR("JOB[%d.%s] failed to create parent to child pipe", owner->id, owner->agent_type);
+    g_free(a);
     return NULL;
   }
   if(pipe(child_to_parent) != 0)
   {
     ERROR("JOB[%d.%s] failed to create child to parent pipe", owner->id, owner->agent_type);
+    g_free(a);
     return NULL;
   }
 
@@ -1031,6 +1006,30 @@ void agent_ready_event(agent a)
 void agent_update_event(void* unused)
 {
   g_tree_foreach(agents, (GTraverseFunc)update, NULL);
+}
+
+/**
+ * Changes the status of the agent internal to the scheduler. This function
+ * is used to transition between agent states instead of a raw set of the status
+ * so that correct printing of the verbose message is guaranteed
+ *
+ * @param a the agent to change the status for
+ * @param new_status the new status of the agentchar* sysconfdir = NULL;    // system configuration directory (SYSCONFDIR)
+ */
+void agent_transition(agent a, agent_status new_status)
+{
+  AGENT_VERB("agent status change: %s -> %s\n",
+      agent_status_strings[a->status], agent_status_strings[new_status]);
+
+  if(a->owner->id > 0)
+  {
+    if(a->status == AG_PAUSED)
+      host_increase_load(a->host_machine);
+    if(new_status == AG_PAUSED)
+      host_decrease_load(a->host_machine);
+  }
+
+  a->status = new_status;
 }
 
 /**

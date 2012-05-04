@@ -44,16 +44,33 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SAG_NOKILL     (1 << 2) ///< This agent should not be killed when updating the agent
 #define SAG_LOCAL      (1 << 3) ///< This agent should only run on localhost
 
+/**
+ * Implementation of x macros used for the creation of the agent status enum.
+ * This is used so that if a new agent status is needed, it can be added here
+ * and all relevant declarations can be changed.
+ *
+ * If you are unfamiliar with X macros, this is a very simply implementation of
+ * them and I suggest you look them up online.
+ */
+#define AGENT_STATUS_TYPES(apply)                                   \
+  /** The agent failed during execution */                          \
+  apply(FAILED)                                                     \
+  /** The agent is allocated but not running yet */                 \
+  apply(CREATED)                                                    \
+  /** The agent has started running put not registered yet */       \
+  apply(SPAWNED)                                                    \
+  /** The agent is processing data */                               \
+  apply(RUNNING)                                                    \
+  /** The agent finished processing data and is waiting for more */ \
+  apply(PAUSED)                                                     \
+  /** The agent has shut down and is not longer in the system  */   \
+  apply(CLOSED)                                                     \
+
 /** Enum to keep track of the state of an agent */
-typedef enum
-{
-  AG_FAILED = 0,  ///< AG_FAILED   The agent has failed during execution
-  AG_CREATED = 1, ///< AG_CREATED  The agent has been allocated but is not running yet
-  AG_SPAWNED = 2, ///< AG_SPAWNED  The agent has finished allocation but has registered work yet
-  AG_RUNNING = 3, ///< AG_RUNNING  The agent has received a set of files to work on and is running
-  AG_PAUSED = 4,  ///< AG_PAUSED   The agent is waiting either for new data or for processor time
-  AG_CLOSED = 5   ///< AG_CLOSED   The agent has shut down, is no longer part of the system and should be destroyed
-} agent_status;
+#define SELECT_ENUM(passed) AG_##passed,
+typedef enum { AGENT_STATUS_TYPES(SELECT_ENUM) } agent_status;
+#undef SELECT_ENUM
+
 extern const char* agent_status_strings[];
 
 /**

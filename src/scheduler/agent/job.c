@@ -38,30 +38,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define TEST_NULV(j) if(!j) { errno = EINVAL; ERROR("job passed is NULL, cannot proceed"); return; }
 #define TEST_NULL(j, ret) if(!j) { errno = EINVAL; ERROR("job passed is NULL, cannot proceed"); return ret; }
-#define MAX_SQL 512;
+#define MAX_SQL 512;JOB_STATUS_TYPES
 
 /* ************************************************************************** */
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
 
 /**
- * An array of c-strings to make it clearer when a job status is printed
+ * Array of C-Strings used to pretty-print the job status in the log file.
+ * Uses the X-Macro defined in @link job.h
  */
-const char* job_status_strings[] = {
-    "JOB_CHECKEDOUT",
-    "JOB_STARTED",
-    "JOB_COMPLETE",
-    "JOB_RESTART",
-    "JOB_FAILED",
-    "JOB_SCH_PAUSED",
-    "JOB_CLI_PAUSED",
-    "\"ERROR: unknown status\""};
+#define JOB_STRING(passed) #passed
+#define SELECT_STRING(passed) JOB_STRING(JOB_##passed),
+const char* job_status_strings[] = { JOB_STATUS_TYPES(SELECT_STRING) };
+#undef SELECT_STRING
+#undef JOB_STRING
 
 /** Map of jobs that are currently running, maps jq_pk to job struct */
-GTree* job_list = NULL;
+static GTree* job_list = NULL;
 
 /** Heap of jobs that haven't been scheduled, heap is based on priority */
-GSequence* job_queue = NULL;
+static GSequence* job_queue = NULL;
 
 /**
  * Tests if a job is active, if it is, the integer pointed to by counter will be
@@ -73,7 +70,7 @@ GSequence* job_queue = NULL;
  * @param counter the count of the number of active jobs
  * @return always returns 0
  */
-int is_active(int* job_id, job j, int* counter)
+static int is_active(int* job_id, job j, int* counter)
 {
   if((j->running_agents != NULL || j->failed_agents != NULL) || j->id < 0)
     ++(*counter);
@@ -92,7 +89,7 @@ int is_active(int* job_id, job j, int* counter)
  * @param ostr the output stream to write everything to
  * @return always returns 0
  */
-int job_sstatus(int* job_id, job j, GOutputStream* ostr)
+static int job_sstatus(int* job_id, job j, GOutputStream* ostr)
 {
   gchar* status_str = g_strdup_printf("job:%d status:%s type:%s, priority:%d running:%d finished:%d failed:%d\n",
       j->id,
@@ -119,7 +116,7 @@ int job_sstatus(int* job_id, job j, GOutputStream* ostr)
  * @param j the job to update the status on
  * @param new_status the new status for the job
  */
-void job_transition(job j, job_status new_status)
+static void job_transition(job j, job_status new_status)
 {
   /* book keeping */
   TEST_NULV(j);
@@ -140,7 +137,7 @@ void job_transition(job j, job_status new_status)
  *
  * @param j the job to pause
  */
-void job_pause(job j, int cli)
+static void job_pause(job j, int cli)
 {
   GList* iter;
 
@@ -159,7 +156,7 @@ void job_pause(job j, int cli)
  *
  * @param j the job to restart
  */
-void job_restart(job j)
+static void job_restart(job j)
 {
   GList* iter;
 
@@ -188,7 +185,7 @@ void job_restart(job j)
  * @param user_data unused
  * @return the comparison of the two jobs
  */
-gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data)
+static gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data)
 {
   return ((job)a)->priority - ((job)b)->priority;
 }

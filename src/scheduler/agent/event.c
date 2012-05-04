@@ -30,9 +30,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 /* the event loop is a singleton, this is the only actual event loop */
-struct event_loop_internal vl_singleton;
+static struct event_loop_internal vl_singleton;
 /* flag used to check if the event loop has been created */
-int el_created = 0;
+static int el_created = 0;
 
 /**
  * There is only one instance of an event loop in any program. This function
@@ -44,7 +44,7 @@ int el_created = 0;
  *
  * @return
  */
-event_loop event_loop_get()
+static event_loop event_loop_get()
 {
 
   /* if the event loop has already been created, return it */
@@ -62,15 +62,6 @@ event_loop event_loop_get()
 }
 
 /**
- * frees any memeory associated with the event queue. Any events that are in the
- * queue when this gets called will be freed as well.
- */
-void event_loop_destroy()
-{
-  g_async_queue_unref(event_loop_get()->queue);
-}
-
-/**
  * puts a new item into the event queue. The event queue acts as a circular,
  * concurrent queue, and as a result this function must correct synchronize on
  * the queue to prevent race conditions. This will lock the queue, and wait if
@@ -80,7 +71,7 @@ void event_loop_destroy()
  * @param e the event to put into the event loop
  * @return true if the item was succesfully added, false otherwise
  */
-int event_loop_put(event_loop vl, event e)
+static int event_loop_put(event_loop vl, event e)
 {
   g_async_queue_push(vl->queue, e);
   return 1;
@@ -95,7 +86,7 @@ int event_loop_put(event_loop vl, event e)
  * @param vl the event loop to get the event out of
  * @return the next event in the event loop, NULL if the event loop has ended
  */
-event event_loop_take(event_loop vl)
+static event event_loop_take(event_loop vl)
 {
   event ret;
 
@@ -153,6 +144,15 @@ void event_destroy(event e)
   e->name     = NULL;
 
   g_free(e);
+}
+
+/**
+ * frees any memeory associated with the event queue. Any events that are in the
+ * queue when this gets called will be freed as well.
+ */
+void event_loop_destroy()
+{
+  g_async_queue_unref(event_loop_get()->queue);
 }
 
 /* ************************************************************************** */

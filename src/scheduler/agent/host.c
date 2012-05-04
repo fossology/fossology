@@ -25,8 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
 
-GTree* host_list = NULL;
-GList* host_queue = NULL;
+static GTree* host_list = NULL;
+static GList* host_queue = NULL;
 
 /**
  * allows a particular function to be called for every host. This is currently
@@ -37,7 +37,7 @@ GList* host_queue = NULL;
  * @param func the function to call for every host
  * @return always return 0 so that it happens for all hosts
  */
-int for_host(char* host_name, host h, void(*func)(host))
+static int for_host(char* host_name, host h, void(*func)(host))
 {
   func(h);
   return 0;
@@ -51,7 +51,7 @@ int for_host(char* host_name, host h, void(*func)(host))
  * @param ostr       the output stream that the info will be printed to
  * @return 0 to cause the traversal to continue
  */
-int print_host_all(char* host_name, host h, GOutputStream* ostr)
+static int print_host_all(char* host_name, host h, GOutputStream* ostr)
 {
   host_print(h, ostr);
   return 0;

@@ -72,6 +72,7 @@ typedef void(*event_function)(void*);
 
 event event_init(void(*func)(void*), void* arg, char* name);
 void event_destroy(event e);
+void event_loop_destroy();
 
 /* ************************************************************************** */
 /* **** EventLoop Functions ************************************************* */
@@ -80,8 +81,7 @@ void event_destroy(event e);
 #define event_signal(func, args) event_signal_ext(func, args, #func)
 
 void event_signal_ext(void* func, void* args, char* name);
-void event_loop_terminate();
 int  event_loop_enter(void(*)(void));
-void event_loop_destroy();
+void event_loop_terminate();
 
 #endif /* EVENT_H_INCLUDE */
