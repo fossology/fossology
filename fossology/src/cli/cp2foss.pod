@@ -11,7 +11,7 @@ cp2foss - load one or more files or archives into the FOSSology Database.
 
  Usage: cp2foss [options] [archives]
  Options: -AQThv [-f path] [-AA num] [-q {agent,agent.. | all}] [-X path]
- [-n name] [-d descritpion]
+ [-n name] [-d descritpion] [--user user name] [--password password]
 
 =head1 DESCRIPTION
 
@@ -67,6 +67,18 @@ other folders in the path under the top folder.
 =item B<-h>
 
 Help, prints a verbose usage message.
+
+=item B<--user> I<username>
+
+username, specify the username for a user who has the priviledge to execute cp2foss.
+Also you can add one file .fossology.rc in your current home directory, add user name and 
+password in 2 seperate line.
+
+=item B<--password> I<password>
+
+password, specify the password for a user who has the priviledge to execute cp2foss.
+Also you can add one file .fossology.rc in your current home directory, add user name and 
+password in 2 seperate line.
 
 =item B<-n> I<name>
 
@@ -127,18 +139,21 @@ Ignored.
 
 =head1 EXAMPLES
 
-C<cp2foss -f Folder1 -d 'the first file' /tmp/file1 \
+C<cp2foss --user USER --password PASSWORD
+-f Folder1 -d 'the first file' /tmp/file1 \
            -d 'the second file' /tmp/file2 \>
 
 Would load the archives I<file1> and I<file2> in the folder I<Folder> using the
 supplied descriptions for each upload.
 
-C<cp2foss -q all -p Ubuntu -n 'Gutsy Gibon' -d 'Ubuntu Gutsy 7.10' 'http://ubuntu.cs.utah.edu/releases/gutsy/ubuntu-7.10-desktop-i386.iso' >
+C<cp2foss --user USER --password PASSWORD
+-q all -p Ubuntu -n 'Gutsy Gibon' -d 'Ubuntu Gutsy 7.10' 'http://ubuntu.cs.utah.edu/releases/gutsy/ubuntu-7.10-desktop-i386.iso' >
 
 The above example, B<cp2foss> will first get the archive using wget.  It will
 then load the downloaded archive into the database calling the upload 'Gutsy Gibon'.
 
-C<cp2foss -A -f Fedora/Fedora8 -n Fedora8  -d 'Fedora 8 Sources' -X .svn -X .cvs /bigdisk/fedora>
+C<cp2foss --user USER --password PASSWORD
+-A -f Fedora/Fedora8 -n Fedora8  -d 'Fedora 8 Sources' -X .svn -X .cvs /bigdisk/fedora>
 
 Loads every file under the /bigdisk/fedora directory, except files in
 the Subversion and CVS directories.  The files are placed in the
