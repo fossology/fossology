@@ -81,6 +81,8 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
 
   NOTE: you may specify multiple parameters on the command-line.
   For example, to load three files into two different paths:
+  cp2foss \\
+    --user USER --password PASSWORD \\
     -f path1 -d 'the first file' /tmp/file1 \\
              -d 'the second file' /tmp/file2 \\
     -f path2 -d 'the third file' http://server/file3
@@ -187,10 +189,10 @@ function GetFolder($FolderPath, $Parent = NULL) {
       $P->Create($Parent, $Folder, "");
     }
     pg_free_result($result);
+    $result = pg_query($PG_CONN, $SQL);
     DBCheckResult($result, $SQL, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
   }
-  $row = pg_fetch_assoc($result);
   $Parent = $row['folder_pk'];
   pg_free_result($result);
   return (GetFolder($FolderPath, $Parent));
@@ -357,18 +359,12 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     }
     global $SysConf;
     $UploadPk = JobAddUpload($SysConf['auth']['UserId'], $UploadName, $Src, $UploadDescription, $Mode, $FolderPk);
+    print "  UploadPk is: '$UploadPk'\n";
   }
   /* Tell wget_agent to actually grab the upload */
+
   global $SYSCONFDIR;
   $Cmd = "$SYSCONFDIR/mods-enabled/wget_agent/agent/wget_agent -k '$UploadPk' -C '$UploadArchive' -c $SYSCONFDIR";
-  if ($Verbose) {
-    print "CMD=$Cmd\n";
-  }
-  if (!$Test) {
-    system($Cmd);
-  }
-  /* Schedule the unpack */
-  $Cmd = "$fossjobs_command -U '$UploadPk' -A agent_unpack";
   if ($Verbose) {
     print "CMD=$Cmd\n";
   }
@@ -378,9 +374,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
 
   if (!empty($QueueList)) {
     switch ($QueueList) {
-      case 'agent_unpack':
-        $Cmd = "";
-        break; /* already scheduled */
       case 'ALL':
       case 'all':
         $Cmd = "$fossjobs_command -U '$UploadPk'";
@@ -410,6 +403,14 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
   else {
     /* No other agents other than unpack scheduled, attach to unpack*/
+    $Cmd = "$fossjobs_command -U '$UploadPk' -A 'agent_unpack'";
+    if ($Verbose) {
+      print "CMD=$Cmd\n";
+    }
+    if (!$Test) {
+      system($Cmd);
+    }
+
     if($Enotification) {
       $res = ProcEnote($UploadPk);
       if(!is_null($res)) {
