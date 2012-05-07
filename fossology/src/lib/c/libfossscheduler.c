@@ -78,6 +78,7 @@ void fo_heartbeat()
 {
   fprintf(stdout, "HEART: %d %d\n", items_processed, alive);
   fflush(stdout);
+  fflush(stderr);
   alarm(ALARM_SECS);
   alive = FALSE;
 }
@@ -161,6 +162,9 @@ void  fo_scheduler_heart(int i)
 {
   items_processed += i;
   alive = TRUE;
+
+  fflush(stdout);
+  fflush(stderr);
 }
 
 /**
@@ -261,6 +265,9 @@ void fo_scheduler_connect(int* argc, char** argv)
     alarm(ALARM_SECS);
   }
 
+  fflush(stdout);
+  fflush(stderr);
+
   alive = TRUE;
 }
 
@@ -285,6 +292,9 @@ void fo_scheduler_disconnect(int retcode)
 
     g_free(module_name);
   }
+
+  fflush(stdout);
+  fflush(stderr);
 }
 
 /**
@@ -321,6 +331,7 @@ char* fo_scheduler_next()
     {
       fprintf(stdout, "\nOK\n");
       fflush(stdout);
+      fflush(stderr);
       valid = 0;
       continue;
     }
@@ -337,7 +348,7 @@ char* fo_scheduler_next()
              fo_config_get(sysconfig, module_name, "VERSION", NULL));
       else fprintf(stdout, "VERSION: unknown\n");
       fflush(stdout);
-      fflush(stdout);
+      fflush(stderr);
       valid = 0;
       continue;
     }
@@ -348,6 +359,10 @@ char* fo_scheduler_next()
   }
 
   valid = 0;
+
+  fflush(stdout);
+  fflush(stderr);
+
   return NULL;
 }
 
@@ -375,7 +390,10 @@ char* fo_scheduler_current()
  */
 void fo_scheduler_set_special(int option, int value)
 {
+  fflush(stdout);
+  fflush(stderr);
   fprintf(stdout, "SPECIAL: %d %d\n", option, value);
+  fflush(stdout);
 }
 
 /**
@@ -397,6 +415,9 @@ char* fo_sysconfig(char* sectionname, char* variablename) {
       sectionname,
       variablename,
       &error);
+
+  fflush(stdout);
+  fflush(stderr);
 
   return error != NULL ? NULL : ret;
 }
