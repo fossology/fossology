@@ -55,10 +55,10 @@ const char* job_status_strings[] = { JOB_STATUS_TYPES(SELECT_STRING) };
 #undef JOB_STRING
 
 /** Map of jobs that are currently running, maps jq_pk to job struct */
-static GTree* job_list = NULL;
+GTree* job_list = NULL;
 
 /** Heap of jobs that haven't been scheduled, heap is based on priority */
-static GSequence* job_queue = NULL;
+GSequence* job_queue = NULL;
 
 /**
  * Tests if a job is active, if it is, the integer pointed to by counter will be
