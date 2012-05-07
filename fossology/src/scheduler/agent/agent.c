@@ -56,10 +56,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TEST_NULV(a) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
 #define TEST_NULL(a, ret) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
 
-static GTree* meta_agents    = NULL;  ///< The master list of all meta agents
-static GTree* agents         = NULL;  ///< The master list of all of the agents
-static GRegex* heart_regex   = NULL;  ///< regex for parsing heart messages
-static GRegex* special_regex = NULL;  ///< regex for parsing special messages
+GTree* meta_agents    = NULL;  ///< The master list of all meta agents
+GTree* agents         = NULL;  ///< The master list of all of the agents
+GRegex* heart_regex   = NULL;  ///< regex for parsing heart messages
+GRegex* special_regex = NULL;  ///< regex for parsing special messages
 
 /** prints the credential of the agent */
 #define AGENT_CREDENTIAL                                               \

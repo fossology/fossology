@@ -25,8 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
 
-static GTree* host_list = NULL;
-static GList* host_queue = NULL;
+GTree* host_list = NULL;
+GList* host_queue = NULL;
 
 /**
  * allows a particular function to be called for every host. This is currently
