@@ -511,8 +511,20 @@ for ($i = 1;$i < $argc;$i++) {
       $i++;
       $UploadName = $argv[$i];
       break;
-    case '-Q':
-      system("$fossjobs_command -a");
+    case '-Q': /** list all available processing agents */
+      $agent_list = menu_find("Agents", $depth);
+      if (empty($agent_list)) {
+        echo "No agents configured\n";
+      } else {
+        echo "The available agents are:\n";
+        $agent_count = count($agent_list);
+        for ($ac = 0;$ac < $agent_count;$ac++) {
+          $agent = ($agent_list[$ac]->URI);
+          if (!empty($agent)) {
+            echo " $agent\n";
+          }
+        }
+      }
       return (0);
     case '-q':
       $i++;
