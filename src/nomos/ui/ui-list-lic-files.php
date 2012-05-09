@@ -51,7 +51,7 @@ class list_lic_files extends FO_Plugin
     $Page = GetParm("page",PARM_INTEGER);
     $Excl = GetParm("excl",PARM_RAW);
 
-    $rf_shortname = rawurldecode($rf_shortname);	
+    $rf_shortname = rawurlencode($rf_shortname);	
     $URL = $this->Name . "&napk=$nomosagent_pk&item=$uploadtree_pk&lic=$rf_shortname&page=-1";
     if (!empty($Excl)) $URL .= "&excl=$Excl";
     $text = _("Show All Files");
