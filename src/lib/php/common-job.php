@@ -288,6 +288,7 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
         {
           $Agent = & $Plugins[plugin_find_id($agentname) ];
           $Dependencies = "";
+          $ErrorMsg = "already queued!";
           $agent_jq_pk = $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
           if ($agent_jq_pk <= 0) 
           {
