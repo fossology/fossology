@@ -113,20 +113,20 @@ if (array_key_exists("password", $options)) {
 /** get username/passwd from ~/.fossology.rc */
 $user_passwd_file = getenv("HOME") . "/.fossology.rc";
 if (file_exists($user_passwd_file)) {
-  $user_passwd_array = file($user_passwd_file, FILE_SKIP_EMPTY_LINES|FILE_IGNORE_NEW_LINES);
+  $user_passwd_array = parse_ini_file($user_passwd_file, true);
 
-  if(!empty($user_passwd_array) && !empty($user_passwd_array[0]))
-    $user = $user_passwd_array[0];
-  if(!empty($user_passwd_array) && !empty($user_passwd_array[1]))
-    $passwd = $user_passwd_array[1];
+  if(!empty($user_passwd_array) && !empty($user_passwd_array['user']))
+    $user = $user_passwd_array['user'];
+  if(!empty($user_passwd_array) && !empty($user_passwd_array['password']))
+    $passwd = $user_passwd_array['password'];
 }
 /* check if the user name/passwd is valid */
-/*
+
 if (empty($user)) {
   $uid_arr = posix_getpwuid(posix_getuid());
   $user = $uid_arr['name'];
 }
-*/
+
 if (empty($passwd)) {
   echo "The user is: $user, please enter the password:\n";
   system('stty -echo');
@@ -175,6 +175,22 @@ if (empty($agent_list)) {
   exit(1);
 }
 
+/* List available agents */
+if (array_key_exists("a", $options)) {
+  if (empty($agent_list)) {
+    echo "No agents configured\n";
+  } else {
+    echo "The available agents are:\n";
+    $agent_count = count($agent_list);
+    for ($ac = 0;$ac < $agent_count;$ac++) {
+      $agent = ($agent_list[$ac]->URI);
+      if (!empty($agent)) {
+        echo " $agent\n";
+      }
+    }
+  }
+}
+
 /* Hide agents  that aren't related to data scans */
 $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
 for($ac=0; !empty($agent_list[$ac]->URI); $ac++)
@@ -199,21 +215,6 @@ if (array_key_exists("A", $options))
   }
 }
 
-/* List available agents */
-if (array_key_exists("a", $options)) {
-  if (empty($agent_list)) {
-    echo "No agents configured\n";
-  } else {
-    echo "The available agents are:\n";
-    $agent_count = count($agent_list);
-    for ($ac = 0;$ac < $agent_count;$ac++) {
-      $agent = ($agent_list[$ac]->URI);
-      if (!empty($agent)) {
-        echo " $agent\n";
-      }
-    }
-  }
-}
 global $PG_CONN;
 /* List available uploads */
 if (array_key_exists("u", $options)) {
