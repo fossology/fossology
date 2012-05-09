@@ -75,46 +75,46 @@ extern char*    sysconfigdir;
 /** @brief Logging functions
  */
 #define LOG_FATAL(...) { \
-            fprintf(stderr, "FATAL %s.%d: ", __FILE__, __LINE__); \
-            fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "\n"); \
-            fflush(stderr); }
+            fprintf(stdout, "FATAL %s.%d: ", __FILE__, __LINE__); \
+            fprintf(stdout, __VA_ARGS__); \
+            fprintf(stdout, "\n"); \
+            fflush(stdout); }
 
 #define LOG_PQ_FATAL(pg_r, ...) { \
-            fprintf(stderr, "FATAL %s.%d: ", __FILE__, __LINE__); \
-            fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "FATAL postgresql error: %s\n", PQresultErrorMessage(pg_r)); \
-            fflush(stderr); }
+            fprintf(stdout, "FATAL %s.%d: ", __FILE__, __LINE__); \
+            fprintf(stdout, __VA_ARGS__); \
+            fprintf(stdout, "FATAL postgresql error: %s\n", PQresultErrorMessage(pg_r)); \
+            fflush(stdout); }
 
 #define LOG_ERROR(...) { \
-            fprintf(stderr, "ERROR %s.%d: ", __FILE__, __LINE__); \
-            fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "\n"); \
-            fflush(stderr); }
+            fprintf(stdout, "ERROR %s.%d: ", __FILE__, __LINE__); \
+            fprintf(stdout, __VA_ARGS__); \
+            fprintf(stdout, "\n"); \
+            fflush(stdout); }
 
 #define LOG_PQ_ERROR(pg_r, ...) { \
-            fprintf(stderr, "ERROR %s.%d: ", __FILE__, __LINE__); \
-            fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); \
-            fflush(stderr); }
+            fprintf(stdout, "ERROR %s.%d: ", __FILE__, __LINE__); \
+            fprintf(stdout, __VA_ARGS__); \
+            fprintf(stdout, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); \
+            fflush(stdout); }
 
 #define LOG_WARNING(...) { \
-            fprintf(stderr, "WARNING %s.%d: ", __FILE__, __LINE__); \
-            fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "\n"); \
-            fflush(stderr); }
+            fprintf(stdout, "WARNING %s.%d: ", __FILE__, __LINE__); \
+            fprintf(stdout, __VA_ARGS__); \
+            fprintf(stdout, "\n"); \
+            fflush(stdout); }
 
 #define LOG_DEBUG(...) { \
-            fprintf(stderr, "DEBUG %s.%d: ", __FILE__, __LINE__); \
-            fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "\n"); \
-            fflush(stderr); }
+            fprintf(stdout, "DEBUG %s.%d: ", __FILE__, __LINE__); \
+            fprintf(stdout, __VA_ARGS__); \
+            fprintf(stdout, "\n"); \
+            fflush(stdout); }
 
 #define LOG_NOTICE(...) { \
-            fprintf(stderr, "NOTICE %s.%d: ", __FILE__, __LINE__); \
-            fprintf(stderr, __VA_ARGS__); \
-            fprintf(stderr, "\n"); \
-            fflush(stderr); }
+            fprintf(stdout, "NOTICE %s.%d: ", __FILE__, __LINE__); \
+            fprintf(stdout, __VA_ARGS__); \
+            fprintf(stdout, "\n"); \
+            fflush(stdout); }
 
 #define TVERBOSE   agent_verbose
 #define TVERBOSE0 (agent_verbose & (1 << 0))
