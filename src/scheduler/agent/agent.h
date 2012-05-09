@@ -110,6 +110,7 @@ struct meta_agent_internal
     char raw_cmd[MAX_CMD + 1];  ///< the raw command that will start the agent, used for ssh
     int max_run;                ///< the maximum number that can run at once -1 if no limit
     int special;                ///< any special condition associated with the agent
+    char* version_source;       ///< the machine that reported the version information
     char* version;              ///< the version of the agent that is running on all hosts
     int valid;                  ///< flag indicating if the meta_agent is valid
 };
