@@ -102,6 +102,7 @@ void fo_check_agentdb()
   {
     fprintf(stderr, "FATAL %s.%d: unable to open database connection: %s\n",
         __FILE__, __LINE__, db_error);
+    fflush(stderr);
     exit(253);
   }
 
@@ -113,6 +114,7 @@ void fo_check_agentdb()
   {
     fprintf(stderr, "FATAL %s.%d: unable to check agent table: %s",
         __FILE__, __LINE__, PQresultErrorMessage(db_result));
+    fflush(stderr);
     PQfinish(db_conn);
     PQclear(db_result);
     g_free(db_sql);
@@ -133,6 +135,7 @@ void fo_check_agentdb()
     {
       fprintf(stderr, "FATAL %s.%d: unable to insert into agent table: %s",
           __FILE__, __LINE__, PQresultErrorMessage(db_result));
+      fflush(stderr);
       PQfinish(db_conn);
       PQclear(db_result);
       g_free(db_sql);

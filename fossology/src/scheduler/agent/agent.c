@@ -292,7 +292,6 @@ static void agent_listen(agent a)
 
   TEST_NULV(a);
 
-
   /* Start by getting the version information from the agent. The agent should
    * send "VERSION: <string>" where the string is the version information. there
    * are five things that can happen here.
@@ -321,8 +320,8 @@ static void agent_listen(agent a)
     {
       if(a->owner->id >= 0)
         g_tree_remove(meta_agents, a->meta_data->name);
-      clprintf("ERROR %s.%d: agent %s has been invalidated, removing from agents\n",
-          __FILE__, __LINE__, a->meta_data->name);
+      clprintf("ERROR %s.%d: agent %s.%s has been invalidated, removing from agents\n",
+          __FILE__, __LINE__, a->host_machine->name, a->meta_data->name);
       AGENT_LOG("agent didn't send version information: \"%s\"\n", buffer);
     }
   }
@@ -332,10 +331,11 @@ static void agent_listen(agent a)
   strcpy(buffer, &buffer[9]);
   if(a->meta_data->version == NULL && a->meta_data->valid)
   {
+    a->meta_data->version_source = a->host_machine->name;
     a->meta_data->version = g_strdup(buffer);
     if(TVERB_AGENT)
-      clprintf("META_AGENT[%s] version is: \"%s\"\n",
-          a->meta_data->name, a->meta_data->version);
+      clprintf("META_AGENT[%s.%s] version is: \"%s\"\n",
+          a->host_machine->name, a->meta_data->name, a->meta_data->version);
   }
   else if(strcmp(a->meta_data->version, buffer) != 0)
   {
@@ -343,8 +343,9 @@ static void agent_listen(agent a)
         "ERROR %s.%d: META_DATA[%s] invalid agent spawn check\n",
         __FILE__, __LINE__, a->meta_data->name);
     alprintf(job_log(a->owner),
-        "ERROR: version don't match: \"%s\" != received: \"%s\"\n",
-        a->meta_data->version, buffer);
+        "ERROR: versions don't match: %s(%s) != received: %s(%s)\n",
+        a->meta_data->version_source, a->meta_data->version,
+        a->host_machine->name,        buffer);
     a->meta_data->valid = 0;
     agent_kill(a);
     g_static_mutex_unlock(&version_lock);
@@ -660,7 +661,7 @@ static void* agent_spawn(void* passed)
         __FILE__, __LINE__, a->owner->id, a->owner->agent_type, getpid(), strerror(errno));
   }
   /* we are in the parent */
-  else if(a->pid > 0)
+  else
   {
     event_signal(agent_create_event, a);
     agent_listen(a);
@@ -920,8 +921,8 @@ void agent_death_event(pid_t* pid)
   job_update(a->owner);
   if(a->status == AG_FAILED && a->owner->id < 0)
   {
-    lprintf("ERROR %s.%d: agent %s has failed scheduler startup test\n",
-        __FILE__, __LINE__, a->meta_data->name);
+    lprintf("ERROR %s.%d: agent %s.%s has failed scheduler startup test\n",
+        __FILE__, __LINE__, a->host_machine->name, a->meta_data->name);
     a->meta_data->valid = 0;
   }
 
