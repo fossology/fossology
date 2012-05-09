@@ -51,6 +51,7 @@ int main(int argc, char** argv)
   logdir = LOG_DIR;
 
   /* get this done first */
+  srand(time(NULL));
   g_thread_init(NULL);
   g_type_init();
 

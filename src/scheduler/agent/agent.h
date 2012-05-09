@@ -33,8 +33,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
 
-#define MAX_CMD  1023   ///< the maximum length for an agent's start command  (arbitrary)
-#define MAX_NAME 255    ///< the maximum length for an agent's name           (arbitrary)
+#define MAX_CMD    1023 ///< the maximum length for an agent's start command  (arbitrary)
+#define MAX_WAIT   5    ///< max time to wait after a failed fork() call      (arbitrary but small)
+#define MAX_NAME   255  ///< the maximum length for an agent's name           (arbitrary)
 #define CHECK_TIME 120  ///< wait time between agent updates                  (arbitrary)
 
 #define LOCAL_HOST "localhost"

@@ -531,7 +531,7 @@ void interface_init()
   cancel = g_cancellable_new();
 
   cmd_parse = g_regex_new(
-      "(\\w+)(\\s+(\\d+))?(\\s+((\\d+)|(\"(.*)\")))?",
+      "(\\w+)(\\s+(-?\\d+))?(\\s+((-?\\d+)|(\"(.*)\")))?",
       0, G_REGEX_MATCH_NEWLINE_LF, NULL);
   pro_parse = g_regex_new(
       "(.*):(\\d+)?",
