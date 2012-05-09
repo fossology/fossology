@@ -595,7 +595,11 @@ static void* agent_spawn(void* passed)
 
   TEST_NULL(a, NULL);
   /* we are in the child */
-  if((a->pid = fork()) == 0)
+
+  while((a->pid = fork()) < 0)
+    sleep(rand() % MAX_WAIT);
+
+  if(a->pid == 0)
   {
     /* set the child's stdin and stdout to use the pipes */
     dup2(a->from_parent, fileno(stdin));
@@ -660,12 +664,6 @@ static void* agent_spawn(void* passed)
   {
     event_signal(agent_create_event, a);
     agent_listen(a);
-  }
-  /* error case */
-  else
-  {
-    clprintf("ERROR %s.%d: JOB[%d.%s]: fork failed\nERROR errno is: %s\n",
-        __FILE__, __LINE__, a->owner->id, a->owner->agent_type, strerror(errno));
   }
 
   return NULL;

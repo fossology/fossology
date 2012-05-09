@@ -30,9 +30,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 /* the event loop is a singleton, this is the only actual event loop */
-static struct event_loop_internal vl_singleton;
+struct event_loop_internal vl_singleton;
 /* flag used to check if the event loop has been created */
-static int el_created = 0;
+int el_created = 0;
 
 /**
  * There is only one instance of an event loop in any program. This function
@@ -44,7 +44,7 @@ static int el_created = 0;
  *
  * @return
  */
-static event_loop event_loop_get()
+event_loop event_loop_get()
 {
 
   /* if the event loop has already been created, return it */
@@ -71,7 +71,7 @@ static event_loop event_loop_get()
  * @param e the event to put into the event loop
  * @return true if the item was succesfully added, false otherwise
  */
-static int event_loop_put(event_loop vl, event e)
+int event_loop_put(event_loop vl, event e)
 {
   g_async_queue_push(vl->queue, e);
   return 1;
@@ -86,7 +86,7 @@ static int event_loop_put(event_loop vl, event e)
  * @param vl the event loop to get the event out of
  * @return the next event in the event loop, NULL if the event loop has ended
  */
-static event event_loop_take(event_loop vl)
+event event_loop_take(event_loop vl)
 {
   event ret;
 
