@@ -140,11 +140,10 @@ Ignored.
 =head1 EXAMPLES
 
 C<cp2foss --user USER --password PASSWORD
--f Folder1 -d 'the first file' /tmp/file1 \
-           -d 'the second file' /tmp/file2 \>
+-f Folder -d 'the first file' /tmp/file  >
 
-Would load the archives I<file1> and I<file2> in the folder I<Folder> using the
-supplied descriptions for each upload.
+Would load the archive I<file> in the folder I<Folder> using the
+supplied descriptions for the upload.
 
 C<cp2foss --user USER --password PASSWORD
 -q all -p Ubuntu -n 'Gutsy Gibon' -d 'Ubuntu Gutsy 7.10' 'http://ubuntu.cs.utah.edu/releases/gutsy/ubuntu-7.10-desktop-i386.iso' >

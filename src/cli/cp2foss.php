@@ -76,13 +76,10 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
       If you specify a directory, then -n and -d are ignored.
       Multiple archives can be specified after each storage option.
 
-  NOTE: you may specify multiple parameters on the command-line.
-  For example, to load three files into two different paths:
+  One example, to load a file into one path:
   cp2foss \\
     --user USER --password PASSWORD \\
-    -f path1 -d 'the first file' /tmp/file1 \\
-             -d 'the second file' /tmp/file2 \\
-    -f path2 -d 'the third file' http://server/file3
+    -f path -d 'the file' /tmp/file
 
   Depricated options:
     -a archive = (depricated) see archive
