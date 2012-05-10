@@ -238,6 +238,10 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
   $rf_pk = $row["rf_pk"];
+  while ($row = pg_fetch_assoc($result))
+  {
+    $rf_pk .= "," . $row["rf_pk"];
+  }
   pg_free_result($result);
 
   $shortname = pg_escape_string($rf_shortname);
@@ -259,7 +263,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
                  where upload_fk=$upload_pk
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
-          where PF=license_file.pfile_fk and agent_fk=$agent_pk and rf_fk='$rf_pk'
+          where PF=license_file.pfile_fk and agent_fk=$agent_pk and rf_fk in ($rf_pk)
                 $TagClause
   $order limit $limit offset $offset";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
@@ -304,6 +308,10 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
   $rf_pk = $row["rf_pk"];
+  while ($row = pg_fetch_assoc($result))
+  {
+    $rf_pk .= "," . $row["rf_pk"];
+  }
   pg_free_result($result);
 
   $shortname = pg_escape_string($rf_shortname);
@@ -326,13 +334,14 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
                  where upload_fk=$upload_pk
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
-          where PF=license_file.pfile_fk and agent_fk=$agent_pk and rf_fk='$rf_pk'
+          where PF=license_file.pfile_fk and agent_fk=$agent_pk and rf_fk in ($rf_pk)
                 $TagClause $chkonly";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
   $RetArray = pg_fetch_assoc($result);
   pg_free_result($result);
+  //echo "<br>$sql<br>";
   return $RetArray;
 }
 
