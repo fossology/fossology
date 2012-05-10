@@ -32,9 +32,6 @@ cli_Init();
 global $Plugins;
 error_reporting(E_NOTICE & E_STRICT);
 
-global $Enotification;
-global $Email;
-global $ME;
 global $webServer;
 
 $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
@@ -166,7 +163,7 @@ function GetFolder($FolderPath, $Parent = NULL) {
   INNER JOIN foldercontents ON child_id = folder_pk
   AND foldercontents_mode = '1'
   WHERE parent_fk = '$Parent' AND folder_name='$SQLFolder';";
-  if ($Verbose > 1) {
+  if ($Verbose) {
     print "SQL=\n$SQL\n";
   }
   $result = pg_query($PG_CONN, $SQL);
@@ -199,76 +196,6 @@ function GetFolder($FolderPath, $Parent = NULL) {
 } /* GetFolder() */
 
 /**
- * \brief the process email notifciation
- * If being run as an agent, get the user name from the previous upload
- *
- * @param int $UploadPk the upload pk
- * @return NULL on success, String on failure.
- */
-function ProcEnote($UploadPk) {
-
-  global $Email;
-  global $PG_CONN;
-  global $ME;
-  global $webServer;
-
-  /* get the user name from the previous upload */
-  $previous = $UploadPk-1;
-  $Sql = "SELECT upload_pk,user_fk,job_upload_fk,job_user_fk FROM upload,job WHERE " .
-           "job_upload_fk=$previous and upload_pk=$previous order by upload_pk desc;";
-  $result = pg_query($PG_CONN, $Sql);
-  DBCheckResult($result, $Sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
-  $UserPk = $row['job_user_fk'];
-  $UserId = $row['user_fk'];
-  $Sql = "SELECT user_pk, user_name, user_email, email_notify FROM users WHERE " .
-             "user_pk=$UserPk; ";
-  $result = pg_query($PG_CONN, $Sql);
-  DBCheckResult($result, $Sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
-  $UserName = $row['user_name'];
-  $UserEmail = $row['user_email'];
-
-  /**
-   * If called as agent, current upload user name will be fossy with a user_fk of NULL.
-   * Get the information to check that condition
-   */
-  $Sql = "SELECT upload_pk,user_fk,job_upload_fk,job_user_fk FROM upload,job WHERE " .
-           "job_upload_fk=$UploadPk and upload_pk=$UploadPk order by upload_pk desc;";
-  $result = pg_query($PG_CONN, $Sql);
-  DBCheckResult($result, $Sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
-  $UserPk = $row['job_user_fk'];
-  $UserId = $row['user_fk'];
-
-  // need to find the jq_pk's of bucket, copyright, nomos and package
-  // agents to use as dependencies.
-
-  $Depends = FindDependent($UploadPk);
-  /* are we being run as fossy?, either as agent or from command line */
-  if($UserId === NULL && $ME == 'fossy') {
-    /*
-     * When run as agent or fossy, pass in the UserEmail and UserName.  This
-    * ensures the email address is correct, the UserName is used for the
-    * salutation.
-    */
-    $sched = scheduleEmailNotification($UploadPk,$webServer,$UserEmail,$UserName,$Depends);
-  }
-  else {
-    /* run as cli, use the email passed in and $ME */
-    $sched = scheduleEmailNotification($UploadPk,$webServer,$Email,$ME,$Depends);
-    print "  Scheduling email notification for $Email\n";
-  }
-  if ($sched !== NULL) {
-    return("Warning: Queueing email failed:\n$sched\n");
-  }
-  return(NULL);
-} // ProcEnote
-
-/**
  * \brief Given one object (file or URL), upload it.
  * This is a function because it is can also be recursive!
  */
@@ -276,58 +203,8 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $Verbose;
   global $Test;
   global $QueueList;
-  global $Enotification;
-  global $Email;
   global $fossjobs_command;
 
-  /* $Mode determines where it came from */
-  if (preg_match("@^[a-zA-Z0-9_]+://@", $UploadArchive)) {
-    $Mode = 1 << 2; /* Looks like a URL */
-  }
-  else if (is_dir($UploadArchive)) {
-    /* It's a directory, tar it! */
-    global $LIBEXECDIR;
-    global $TarExcludeList;
-
-    /**
-     * User reppath to get a path in the repository for temp storage.  Only
-     * use the part up to repository, as the path returned may not exist.
-     */
-    $FilePart = "cp2foss-" . uniqid() . ".tar";
-    exec("$LIBEXECDIR/reppath files $FilePart", $Path);
-    $FilePath = $Path[0];
-    $match = preg_match('/^(.*?repository)/', $FilePath, $matches);
-    $Filename = $matches[1] . '/' . $FilePart;
-
-
-    if (empty($UploadName)) {
-      $UploadName = basename($UploadArchive);
-    }
-    if ($Verbose > 1) {
-      $TarArg = "-cvf";
-    } else {
-      $TarArg = "-cf";
-    }
-    $Cmd = "tar $TarArg '$Filename' $TarExcludeList '$UploadArchive'";
-    if ($Verbose) {
-      print "CMD=$Cmd\n";
-    }
-    system($Cmd);
-    UploadOne($FolderPath, $Filename, $UploadName, $UploadDescription, $UploadArchive);
-    unlink($Filename);
-    /* email notification will be scheduled below, above we just handed UploadOne
-     * a tar'ed up file.
-    */
-    return;
-  }
-  else if (file_exists($UploadArchive)) {
-    $Mode = 1 << 4; /* Looks like a filesystem */
-  }
-  else {
-    /* Don't know what it is... */
-    print "FATAL: '$UploadArchive' does not exist.\n";
-    exit(1);
-  }
   if (empty($UploadName)) {
     return;
   }
@@ -339,7 +216,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
   $FolderPk = GetFolder($FolderPath);
   if ($FolderPk == 1) {
-    print "  Uploading to folder: Software Repository\n";
+    print "  Uploading to folder: 'Software Repository'\n";
   }
   else {
     print "  Uploading to folder: '$FolderPath'\n";
@@ -348,29 +225,48 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   if (!empty($UploadDescription)) {
     print "  Upload description: '$UploadDescription'\n";
   }
+
+  $Mode = (1 << 3); // code for "it came from web upload"
+  global $SysConf;
+  $user_pk = $SysConf['auth']['UserId'];
+
   /* Create the upload for the file */
-  if ($Verbose > 1) {
-    print "JobAddUpload($SysConf[auth][UserId], $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk);\n";
+  if ($Verbose) {
+    print "JobAddUpload($user_pk, $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk);\n";
   }
   if (!$Test) {
     $Src = $UploadArchive;
     if (!empty($TarSource)) {
       $Src = $TarSource;
     }
-    global $SysConf;
-    $UploadPk = JobAddUpload($SysConf['auth']['UserId'], $UploadName, $Src, $UploadDescription, $Mode, $FolderPk);
+    $UploadPk = JobAddUpload($user_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk);
     print "  UploadPk is: '$UploadPk'\n";
   }
-  /* Tell wget_agent to actually grab the upload */
 
-  global $SYSCONFDIR;
-  $Cmd = "$SYSCONFDIR/mods-enabled/wget_agent/agent/wget_agent -k '$UploadPk' -C '$UploadArchive' -c $SYSCONFDIR";
-  if ($Verbose) {
-    print "CMD=$Cmd\n";
+  /* Prepare the job: job "wget" */
+  $jobpk = JobAddJob($user_pk, "wget", $UploadPk);
+  if (empty($jobpk) || ($jobpk < 0)) {
+    $text = _("Failed to insert job record");
+    return ($text);
   }
-  if (!$Test) {
-    system($Cmd);
+
+  $jq_args = "$UploadPk - $Src";
+
+  $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL);
+  if (empty($jobqueuepk)) {
+    $text = _("Failed to insert task 'wget' into job queue");
+    return ($text);
   }
+
+  /* schedule agents */
+  global $Plugins;
+  $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
+  $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array("wget_agent"));
+  if ($ununpack_jq_pk < 0) return $ErrorMsg;
+
+  $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest") ];
+  $adj2nest_jq_pk = $adj2nestplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array());
+  if ($adj2nest_jq_pk < 0) return $ErrorMsg;
 
   if (!empty($QueueList)) {
     switch ($QueueList) {
@@ -388,35 +284,9 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     if (!$Test) {
       system($Cmd);
     }
-    /**
-     * this is gross: by the time you get here, the uploadPk is one more than the
-     * uploadPk reported to the user.  That's because the first upload pk is for
-     * the fosscp_agent, then the second (created in cp2foss) is for the rest
-     * of the processing.  Unless being run as a cli....  See ProcEnote.
-     */
-    if($Enotification) {
-      $res = ProcEnote($UploadPk);
-      if(!is_null($res)) {
-        print $res;
-      }
-    }
   }
   else {
     /* No other agents other than unpack scheduled, attach to unpack*/
-    $Cmd = "$fossjobs_command -U '$UploadPk' -A 'agent_unpack'";
-    if ($Verbose) {
-      print "CMD=$Cmd\n";
-    }
-    if (!$Test) {
-      system($Cmd);
-    }
-
-    if($Enotification) {
-      $res = ProcEnote($UploadPk);
-      if(!is_null($res)) {
-        print $res;
-      }
-    }
   }
 } /* UploadOne() */
 
@@ -431,8 +301,6 @@ $UploadName = "";
 $QueueList = "";
 $TarExcludeList = "";
 $bucket_size = 3;
-$ME = exec('id -un',$toss,$rtn);
-
 
 $user = "";
 $passwd = "";
@@ -495,37 +363,13 @@ for ($i = 1;$i < $argc;$i++) {
       $i++;
       $UploadDescription = $argv[$i];
       break;
-    case '-e': /* email notification wanted */
-      $i++;
-      $Email = $argv[$i];
-      // Make sure email looks valid
-      $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
-      if ($Check != $Email) {
-        print "Invalid email address. $Email\n";
-        print $Usage;
-        exit(1);
-      }
-      $Enotification = TRUE;
-      break;
     case '-n': /* specify upload name */
       $i++;
       $UploadName = $argv[$i];
       break;
     case '-Q': /** list all available processing agents */
-      $agent_list = menu_find("Agents", $depth);
-      if (empty($agent_list)) {
-        echo "No agents configured\n";
-      } else {
-        echo "The available agents are:\n";
-        $agent_count = count($agent_list);
-        for ($ac = 0;$ac < $agent_count;$ac++) {
-          $agent = ($agent_list[$ac]->URI);
-          if (!empty($agent)) {
-            echo " $agent\n";
-          }
-        }
-      }
-      return (0);
+      $OptionQ = 1;
+      break;
     case '-q':
       $i++;
       $QueueList = $argv[$i];
@@ -550,20 +394,7 @@ for ($i = 1;$i < $argc;$i++) {
       /* ignore -a since the next name is a file. */
       break;
     case '-': /* it's an archive list from stdin! */
-      $Fin = fopen("php://stdin", "r");
-      while (!feof($Fin)) {
-        $UploadArchive = trim(fgets($Fin));
-        if (strlen($UploadArchive) > 0) {
-          print "Loading $UploadArchive\n";
-          if (empty($UploadName)) {
-            $UploadName = basename($UploadArchive);
-          }
-          UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
-          /* prepare for next parameter */
-          $UploadName = "";
-        }
-      }
-      fclose($Fin);
+      $stdin_flag = 1;
       break;
     default:
       if (substr($argv[$i], 0, 1) == '-') {
@@ -571,68 +402,99 @@ for ($i = 1;$i < $argc;$i++) {
         print $Usage . "\n";
         exit(1);
       }
-
-      /** get username/passwd from ~/.fossology.rc */
-      $user_passwd_file = getenv("HOME") . "/.fossology.rc";
-      if (empty($user) && empty($passwd) && file_exists($user_passwd_file)) {
-        $user_passwd_array = parse_ini_file($user_passwd_file, true);
-
-        if(!empty($user_passwd_array) && !empty($user_passwd_array['user']))
-          $user = $user_passwd_array['user'];
-        if(!empty($user_passwd_array) && !empty($user_passwd_array['password']))
-              $passwd = $user_passwd_array['password'];
-      }
-
-      /* check if the user name/passwd is valid */
-      if (empty($user)) {
-        $uid_arr = posix_getpwuid(posix_getuid());
-        $user = $uid_arr['name'];
-      }
-      if (empty($passwd)) {
-        echo "The user is: $user, please enter the password:\n";
-        system('stty -echo');
-        $passwd = trim(fgets(STDIN));
-        system('stty echo');
-      }
-
-      if (!empty($user) and !empty($passwd)) {
-        $SQL = "SELECT * from users where user_name = '$user';";
-        $result = pg_query($PG_CONN, $SQL);
-        DBCheckResult($result, $SQL, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        if(empty($row)) {
-          echo "User name or password is invalid.\n";
-          pg_free_result($result);
-          exit(0);
-        }
-        $SysConf['auth']['UserId'] = $row['user_pk'];
-        pg_free_result($result);
-        if (!empty($row['user_seed']) && !empty($row['user_pass'])) {
-          $passwd_hash = sha1($row['user_seed'] . $passwd);
-          if (strcmp($passwd_hash, $row['user_pass']) != 0) {
-            echo "User name or password is invalid.\n";
-            exit(0);
-          }
-        }
-      }
-      if($Verbose)
-        $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR -v ";
-      else 
-        $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR  ";
-
-      //print "fossjobs_command is:$fossjobs_command\n";
-      /* No break! No hyphen means it is a file! */
-      $UploadArchive = $argv[$i];
-      print "Loading $UploadArchive\n";
-      if (empty($UploadName)) {
-        $UploadName = basename($UploadArchive);
-      }
-      //print "  CAlling UploadOne in 'main': '$FolderPath'\n";
-      UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
-      /* prepare for next parameter */
-      $UploadName = "";
-      break;
+    /* No hyphen means it is a file! */
+    $UploadArchive = $argv[$i];
   } /* switch */
 } /* for each parameter */
+
+/** get username/passwd from ~/.fossology.rc */
+$user_passwd_file = getenv("HOME") . "/.fossology.rc";
+if (empty($user) && empty($passwd) && file_exists($user_passwd_file)) {
+  $user_passwd_array = parse_ini_file($user_passwd_file, true);
+
+  if(!empty($user_passwd_array) && !empty($user_passwd_array['user']))
+    $user = $user_passwd_array['user'];
+  if(!empty($user_passwd_array) && !empty($user_passwd_array['password']))
+    $passwd = $user_passwd_array['password'];
+}
+
+/* check if the user name/passwd is valid */
+if (empty($user)) {
+  $uid_arr = posix_getpwuid(posix_getuid());
+  $user = $uid_arr['name'];
+}
+if (empty($passwd)) {
+  echo "The user is: $user, please enter the password:\n";
+  system('stty -echo');
+  $passwd = trim(fgets(STDIN));
+  system('stty echo');
+}
+
+if (!empty($user) and !empty($passwd)) {
+  $SQL = "SELECT * from users where user_name = '$user';";
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  if(empty($row)) {
+    echo "User name or password is invalid.\n";
+    pg_free_result($result);
+    exit(0);
+  }
+  $SysConf['auth']['UserId'] = $row['user_pk'];
+  pg_free_result($result);
+  if (!empty($row['user_seed']) && !empty($row['user_pass'])) {
+    $passwd_hash = sha1($row['user_seed'] . $passwd);
+    if (strcmp($passwd_hash, $row['user_pass']) != 0) {
+      echo "User name or password is invalid.\n";
+      exit(0);
+    }
+  }
+}
+
+/** list all available processing agents */
+if (!$Test && $OptionQ) {
+  $Cmd = "fossjobs --user $user --password $passwd -c $SYSCONFDIR -a";
+  system($Cmd);
+  return 0;
+}
+
+/** get archive from stdin */
+if ($stdin_flag)
+{
+  $Fin = fopen("php://stdin", "r");
+  if (!feof($Fin)) {
+    $UploadArchive = trim(fgets($Fin));
+  }
+  fclose($Fin);
+}
+
+/** compose fossjobs command */
+if($Verbose) {
+  $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR -v "; 
+} else {
+  $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR  ";
+}
+
+//print "fossjobs_command is:$fossjobs_command\n";
+
+/** get real path, and file name */
+$UploadArchiveTmp = realpath($UploadArchive);
+if ($UploadArchiveTmp)  { // not url?
+  $UploadArchive = $UploadArchiveTmp;
+  if (!IsDir($UploadArchive) && !file_exists($UploadArchive)) { // exist?
+    print "FATAL: '$UploadArchive' does not exist.\n";
+    return 1;
+  }
+}
+
+if (strlen($UploadArchive) > 0) {
+  if (empty($UploadName)) {
+    $UploadName = basename($UploadArchive);
+  }
+}
+
+print "Loading '$UploadArchive'\n";
+//print "  CAlling UploadOne in 'main': '$FolderPath'\n";
+UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
 return (0);
 ?>

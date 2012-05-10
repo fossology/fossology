@@ -267,20 +267,18 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
 
       // Create a job for the upload
       // Use the upload name for the job name
-      $where = "where upload_pk='$upload_pk'";
-      $UploadRec = GetSingleRec("upload", $where);
+      $where = "where job_upload_fk='$upload_pk'";
+      $UploadRec = GetSingleRec("job", $where);
       if (empty($UploadRec))
       {
         echo "ERROR: unknown upload_pk: $upload_pk\n";
         continue;
       }
 
-      $job_name = $UploadRec["upload_filename"];
-      $job_pk = JobAddJob($user_pk, $job_name, $upload_pk);
+      $job_pk = $UploadRec['job_pk'];
 
       // don't exit on AgentAdd failure, or all the agents requested will
       // not get scheduled.
-      $have_agents = 0; // 0: not agent, others: have agents
       for ($ac = 0;$ac < $agent_count;$ac++) 
       {
         $agentname = $agent_list[$ac]->URI;
@@ -304,27 +302,8 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
             pg_free_result($result);
             print "$agentname is queued to run on $upload_pk:$row[upload_filename].\n";
           }
-          $have_agents = 1; // besides ununpack and adj2nest, have other agents
         }
       } /* for $ac */
-
-      // if no agents are scheduled except ununpack and adj2nest 
-      if ($have_agents == 0) 
-      {
-        $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
-        $ununpack_jq_pk = $unpackplugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, array());
-        if ($ununpack_jq_pk < 0) 
-        {
-          echo "ERROR: $ErrorMsg\n";
-        }
-
-        $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest") ];
-        $adj2nest_jq_pk = $adj2nestplugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, array());
-        if ($adj2nest_jq_pk < 0) 
-        {
-          echo "ERROR: $ErrorMsg\n";
-        }
-      }
     } /* for each $upload_pk */
   } // if $upload_pk is defined
 } /* QueueUploadsOnAgents() */
