@@ -49,6 +49,12 @@ password, specify the password for a user who has the priviledge to execute cp2f
 Also you can add one file .fossology.rc in your current home directory, add user name and
 password in 2 seperate line.
 
+=item B<-c> I<configuration directory>
+
+Specify the directory for the system configuration, 
+when installation from src, default dir is /usr/local/etc/fossology/ ,
+when installation from package, default dir is /etc/fossology/.
+
 =item B<-u>
 
 List the available upload id's.
