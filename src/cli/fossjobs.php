@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -28,11 +28,12 @@
  * @param (optional) string -A specify agents
  * @param (optional) string -u list available uploads
  * @param (optional) string -P priority for the jobs (default: 0)
+ * @param (optional) string --user specify user name
+ * @param (optional) string --password specify password
+ * @param (optional) string -c Specify the directory for the system configuration
  * @param int -U $upload_pk upload primary key to run agents on....
  *
- * @return 0 for success, string for failure....
- *
- * @version "$Id: fossjobs.php 3140 2010-05-04 21:37:56Z rrando $"
+ * @exit 0 for success, others for failure....
  *
  * \note there is a user interface issue here in that the user has no
  * easy way to discover and specify what the upload_pk is.
@@ -112,7 +113,7 @@ if (array_key_exists("password", $options)) {
 
 /** get username/passwd from ~/.fossology.rc */
 $user_passwd_file = getenv("HOME") . "/.fossology.rc";
-if (file_exists($user_passwd_file)) {
+if (empty($user) && empty($passwd) && file_exists($user_passwd_file)) {
   $user_passwd_array = parse_ini_file($user_passwd_file, true);
 
   if(!empty($user_passwd_array) && !empty($user_passwd_array['user']))
@@ -132,6 +133,10 @@ if (empty($passwd)) {
   system('stty -echo');
   $passwd = trim(fgets(STDIN));
   system('stty echo');
+  if (empty($passwd)) {
+    echo "You entered an empty password.\n";
+    exit(1);
+  }
 }
 
 if (!empty($user) and !empty($passwd)) {
@@ -237,6 +242,7 @@ if (array_key_exists("u", $options)) {
     }
   }
   pg_free_result($result);
+  exit(0);
 }
 
 $upload_pk_list = "";

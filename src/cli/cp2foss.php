@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -18,8 +18,8 @@
 /**
  * \file cp2foss.php
  * \brief cp2foss
- * Import a file (or directory) into FOSSology for processing.
- * \return 0 for success, 1 for failure.
+ * Import a file (or director or url) into FOSSology for processing.
+ * \exit 0 for success, 1 for failure.
  */
 
 /**
@@ -31,8 +31,6 @@ cli_Init();
 
 global $Plugins;
 error_reporting(E_NOTICE & E_STRICT);
-
-global $webServer;
 
 $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
   Options:
@@ -86,6 +84,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -p path    = (depricated) see -f
     -R         = (depricated and ignored)
     -w         = (depricated and ignored)
+    -W         = (depricated and ignored)
   ";
 /* Load command-line options */
 global $PG_CONN;
@@ -133,6 +132,11 @@ function GetBucketFolder($UploadName, $BucketGroupSize) {
 /**
  * \brief Given a folder path, return the folder_pk.
  * 
+ * \param $FolderPath - path from -f
+ * \param $Parent - parent folder of $FolderPath
+ * 
+ * \return folder_pk, 1: 'Software Repository', others: specified folder 
+
  * \note If any part of the folder path does not exist, thenscp cp2foss will create it.
  * This is recursive!
  */
@@ -174,7 +178,7 @@ function GetFolder($FolderPath, $Parent = NULL) {
     $P = & $Plugins[plugin_find_id("folder_create") ];
     if (empty($P)) {
       print "FATAL: Unable to find folder_create plugin.\n";
-      exit(-1);
+      exit(1);
     }
     if ($Verbose) {
       print "Folder not found: Creating $Folder\n";
@@ -194,7 +198,13 @@ function GetFolder($FolderPath, $Parent = NULL) {
 
 /**
  * \brief Given one object (file or URL), upload it.
- * This is a function because it is can also be recursive!
+ *
+ * \param $FolderPath - folder path
+ * \param $UploadArchive - upload file(absolute path) or url
+ * \param $UploadName - uploaded file/dir name
+ * \param $UploadDescription - upload description
+ *
+ * \return 1: error, 0: success
  */
 function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription, $TarSource = NULL) {
   global $Verbose;
@@ -203,7 +213,9 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $fossjobs_command;
 
   if (empty($UploadName)) {
-    return;
+    $text = "UploadName is empty\n";
+    echo $text;
+    return 1;
   }
   /* Get the folder's primary key */
   global $OptionA; /* Should it use bucket names? */
@@ -244,7 +256,8 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   $jobpk = JobAddJob($user_pk, "wget", $UploadPk);
   if (empty($jobpk) || ($jobpk < 0)) {
     $text = _("Failed to insert job record");
-    return ($text);
+    echo $text;
+    return 1;
   }
 
   $jq_args = "$UploadPk - $Src";
@@ -252,18 +265,25 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL);
   if (empty($jobqueuepk)) {
     $text = _("Failed to insert task 'wget' into job queue");
-    return ($text);
+    echo $text;
+    return 1;
   }
 
   /* schedule agents */
   global $Plugins;
   $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
   $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array("wget_agent"));
-  if ($ununpack_jq_pk < 0) return $ErrorMsg;
+  if ($ununpack_jq_pk < 0) {
+    echo  $ErrorMsg;
+    return 1;
+  }
 
   $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest") ];
   $adj2nest_jq_pk = $adj2nestplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array());
-  if ($adj2nest_jq_pk < 0) return $ErrorMsg;
+  if ($adj2nest_jq_pk < 0) {
+    echo $ErrorMsg;
+    return 1;
+  }
 
   if (!empty($QueueList)) {
     switch ($QueueList) {
@@ -309,7 +329,7 @@ for ($i = 1;$i < $argc;$i++) {
     case '-h':
     case '-?':
       print $Usage . "\n";
-      return (0);
+      exit(0);
     case '--user':
       $i++;
       $user = $argv[$i];
@@ -349,10 +369,8 @@ for ($i = 1;$i < $argc;$i++) {
 
       break;
     case '-R': /* obsolete: recurse directories */
-    case '-W': /* webserver */
-      $i++;
-      $webServer = $argv[$i];
-      //print "DBG: setting webServer to $webServer\n";
+      break;
+    case '-W': /* obsolete: webserver */
       break;
     case '-w': /* obsolete: URL switch to use wget */
       break;
@@ -425,6 +443,10 @@ if (empty($passwd)) {
   system('stty -echo');
   $passwd = trim(fgets(STDIN));
   system('stty echo');
+  if (empty($passwd)) {
+    echo "You entered an empty password.\n";
+    exit(1);
+  }
 }
 
 if (!empty($user) and !empty($passwd)) {
@@ -435,7 +457,7 @@ if (!empty($user) and !empty($passwd)) {
   if(empty($row)) {
     echo "User name or password is invalid.\n";
     pg_free_result($result);
-    exit(0);
+    exit(1);
   }
   $SysConf['auth']['UserId'] = $row['user_pk'];
   pg_free_result($result);
@@ -443,7 +465,7 @@ if (!empty($user) and !empty($passwd)) {
     $passwd_hash = sha1($row['user_seed'] . $passwd);
     if (strcmp($passwd_hash, $row['user_pass']) != 0) {
       echo "User name or password is invalid.\n";
-      exit(0);
+      exit(1);
     }
   }
 }
@@ -452,7 +474,7 @@ if (!empty($user) and !empty($passwd)) {
 if (!$Test && $OptionQ) {
   $Cmd = "fossjobs --user $user --password $passwd -c $SYSCONFDIR -a";
   system($Cmd);
-  return 0;
+  exit(0);
 }
 
 /** get archive from stdin */
@@ -480,7 +502,7 @@ if ($UploadArchiveTmp)  { // not url?
   $UploadArchive = $UploadArchiveTmp;
   if (!IsDir($UploadArchive) && !file_exists($UploadArchive)) { // exist?
     print "FATAL: '$UploadArchive' does not exist.\n";
-    return 1;
+    exit(1);
   }
 }
 
@@ -492,6 +514,7 @@ if (strlen($UploadArchive) > 0) {
 
 print "Loading '$UploadArchive'\n";
 //print "  CAlling UploadOne in 'main': '$FolderPath'\n";
-UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
-return (0);
+$res = UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
+if ($res) exit(1); // fail to upload
+exit(0);
 ?>

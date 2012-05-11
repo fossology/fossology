@@ -290,8 +290,8 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
           $agent_jq_pk = $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
           if ($agent_jq_pk <= 0) 
           {
-            echo "ERROR: Scheduling failed for Agent $agentname\n";
-            echo "ERROR message: $ErrorMsg\n";
+            echo "WARNING: Scheduling failed for Agent $agentname\n";
+            echo "WARNING message: $ErrorMsg\n";
           } 
           else if ($Verbose) 
           {
