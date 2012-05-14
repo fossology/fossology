@@ -1479,9 +1479,9 @@ int RemoveDir(char *dirpath)
   int rc;
   memset(RMcmd, '\0', sizeof(RMcmd));
   snprintf(RMcmd, FILENAME_MAX -1, "rm -rf '%s' ", dirpath);
-  fo_scheduler_set_special(SPECIAL_NOKILL, TRUE);
+// nokill = fo_scheduler_get_special(SPECIAL_NOKILL);
   rc = system(RMcmd);
-  fo_scheduler_set_special(SPECIAL_NOKILL, FALSE);
+//  fo_scheduler_set_special(SPECIAL_NOKILL, nokill);
   return rc;
 } /* RemoveDir() */
 
