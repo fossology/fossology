@@ -88,6 +88,7 @@ int event_loop_put(event_loop vl, event e)
  */
 event event_loop_take(event_loop vl)
 {
+  GTimeVal timeout;
   event ret;
 
   if(vl->terminated)
@@ -95,7 +96,12 @@ event event_loop_take(event_loop vl)
     return NULL;
   }
 
-  ret = g_async_queue_pop(vl->queue);
+  /* wait for 1 second */
+  timeout.tv_sec  = 1;
+  timeout.tv_usec = 0;
+
+  if((ret = g_async_queue_timed_pop(vl->queue, &timeout)) == NULL)
+    return ret;
 
   if(ret->func == NULL)
   {
@@ -178,12 +184,13 @@ void event_signal_ext(void* func, void* args, char* name)
  * return until the program is ready to exit. There should also only be one
  * thread working on this part of the event loop.
  *
- * @param call_back a function that is called every time an event is processed
+ * @param update_call a function that is called every time an event is processed
+ * @param signal_call a function that is called once a second
  * @return this function will return an error code:
  *          0x0:   successful execution
  *          0x1:   attempt to enter a loop that is occupied
  */
-int event_loop_enter(void(*call_back)(void))
+int event_loop_enter(void(*update_call)(void), void(*signal_call)(void))
 {
   event e;
   event_loop vl = event_loop_get();
@@ -201,8 +208,15 @@ int event_loop_enter(void(*call_back)(void))
 
   /* from here on out, this is the only thread in this event loop     */
   /* the loop to execute events is very simple, grab event, run event */
-  while((e = event_loop_take(vl)) != NULL)
+  while(!vl->terminated)
   {
+    e = event_loop_take(vl);
+
+    if(signal_call)
+      signal_call();
+    if(e == NULL)
+      continue;
+
     if(TVERB_EVENT && strcmp(e->name, "log_event") != 0)
       lprintf("EVENT: calling %s \n", e->name);
     e->func(e->argument);
@@ -212,8 +226,8 @@ int event_loop_enter(void(*call_back)(void))
 
     event_destroy(e);
 
-    if(call_back)
-      call_back();
+    if(update_call)
+      update_call();
   }
 
   return 0x0;

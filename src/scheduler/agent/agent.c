@@ -50,11 +50,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* agent defines */
 #define MAX_ARGS 32       ///< the maximum number arguments passed to children  (arbitrary)
 #define TILL_DEATH 180    ///< how long to wait before agent is dead            (3 minutes)
-#define NUM_UPDATES 5     ///< the number of updates before agent is dead       (arbitrary)
+#define NUM_UPDATES 1     ///< the number of updates before agent is dead       (arbitrary)
 #define DEFAULT_RET -1    ///< default return code                              (arbitrary)
 
-#define TEST_NULV(a) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
-#define TEST_NULL(a, ret) if(!a) { errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
+#define TEST_NULV(a) if(!a) { \
+  errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
+#define TEST_NULL(a, ret) if(!a) { \
+  errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
 
 GTree* meta_agents    = NULL;  ///< The master list of all meta agents
 GTree* agents         = NULL;  ///< The master list of all of the agents

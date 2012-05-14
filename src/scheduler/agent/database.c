@@ -57,22 +57,23 @@ const char* folder_name = "\
       WHERE folder_pk IN ( \
         SELECT parent_fk FROM foldercontents \
           WHERE foldercontents_mode = 2 AND child_id = ( \
-            SELECT job_upload_fk FROM job \
-              WHERE job_pk = ( \
-                SELECT jq_job_fk FROM jobqueue \
-                  WHERE jq_pk = %d \
-              ) \
+            SELECT job_upload_fk FROM job, jobqueue \
+              WHERE jq_job_fk = job_pk AND jq_pk = %d; \
           ) \
       );";
 
 const char* upload_name = "\
     SELECT upload_filename FROM upload \
       WHERE upload_pk = ( \
-        SELECT job_upload_fk FROM job \
-          WHERE job_pk = ( \
-            SELECT jq_job_fk FROM jobqueue \
-              WHERE jq_pk = %d \
-          ) \
+        SELECT job_upload_fk FROM job, jobqueue \
+          WHERE jq_job_fk = job_pk AND jq_pk = %d; \
+      );";
+
+const char* upload_pk = "\
+    SELECT upload_pk FROM upload \
+      WHERE upload_pk = ( \
+        SELECT job_upload_fk FROM job, jobqueue \
+          WHERE jq_job_fk = job_pk AND jq_pk = %d; \
       );";
 
 const char* jobsql_email = "\
@@ -136,9 +137,23 @@ const char* jobsql_log = "\
 const char* jobsql_priority = "\
     UPDATE job \
       SET job_priority = '%d' \
-      WHERE job_pk in ( \
+      WHERE job_pk IN ( \
         SELECT jq_job_fk FROM jobqueue \
         WHERE jq_pk = '%d');";
+
+const char* jobsql_anyrunnable = "\
+    SELECT * FROM getrunnable() \
+      WHERE jq_job_fk = ( \
+        SELECT jq_job_fk FROM jobqueue \
+          WHERE jq_pk = %d \
+      );";
+
+const char* jobsql_jobendbits = "\
+    SELECT jq_end_bits FROM jobqueue \
+      WHERE jq_job_fk = ( \
+        SELECT jq_job_fk FROM jobqueue \
+          WHERE jq_pk = %d \
+      );";
 
 /* ************************************************************************** */
 /* *** email notification                                                 *** */
@@ -179,9 +194,9 @@ static GRegex* email_regex = NULL;
  *   $UPLOADNAME
  *   $BROESELINK
  *   $SHCEDULERLOG
- *   $UPLOADFOLDERNAME [not implemented]
+ *   $UPLOADFOLDERNAME
  *   $JOBRESULT
- *   $DB.table.column
+ *   $DB.table.column [not implemented]
  *
  * @param match  the regex match that glib found
  * @param ret    the GString* that results should be appended to.
@@ -192,9 +207,9 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
 {
   gchar* m_str = g_match_info_fetch(match, 1);
   gchar* sql   = NULL;
-  gchar* table, * column;
+  // TODO belongs to $DB if statement gchar* table, * column;
   PGresult* db_result;
-  guint i;
+  // TODO belongs to $DB if statement guint i;
 
   /* $UPLOADNAME
    *
@@ -227,8 +242,22 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
    */
   else if(strcmp(m_str, "BROWSELINK") == 0)
   {
-    g_string_append_printf(ret, "http://%s?mod=browse&upload=%d&show=detail",
-        fossy_url, j->id);
+    sql = g_strdup_printf(upload_pk, j->id);
+    db_result = PQexec(db_conn, sql);
+
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+    {
+      g_string_append_printf(ret,
+          "[ERROR: unable to select file name for upload %d]", j->id);
+    }
+    else
+    {
+      g_string_append_printf(ret, "http://%s?mod=browse&upload=%s&show=detail",
+          fossy_url, PQgetvalue(db_result, 0, 0));
+    }
+
+    PQclear(db_result);
+    g_free(sql);
   }
 
   /* $SCHEDULERLOG
@@ -287,6 +316,8 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
    */
   else if(strcmp(m_str, "DB") == 0)
   {
+    g_string_append(ret, "[NOT IMPLEMENTED]");
+    /* TODO reimplement $DB variable
     table  = g_match_info_fetch(match, 3);
     column = g_match_info_fetch(match, 4);
     sql = g_strdup_printf("SELECT %s FROM %s;", column, table);
@@ -311,11 +342,61 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
     PQclear(db_result);
     g_free(sql);
     g_free(table);
-    g_free(column);
+    g_free(column);*/
   }
 
   g_free(m_str);
   return FALSE;
+}
+
+/**
+ * @brief checks the database for the status of the job
+ *
+ * @param j  the job queue entry that will be checked for its job's status
+ * @return 0: job is not finished, 1: job has finished, 2: job has failed
+ */
+static gint email_checkjobstatus(job j)
+{
+  gchar* sql;
+  gint ret = 1;
+  PGresult* db_result;
+  int endbits, i;
+
+  sql = g_strdup_printf(jobsql_anyrunnable, j->id);
+  db_result = PQexec(db_conn, sql);
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+  {
+    PQ_ERROR(db_result, "unable to check job status for jq_pk %d", j->id);
+    g_free(sql);
+    PQclear(db_result);
+    return 0;
+  }
+
+  /* check if all runnable jobs have been run */
+  if(PQntuples(db_result) != 0)
+  {
+    ret = 0;
+  }
+
+  g_free(sql);
+  PQclear(db_result);
+
+  sql = g_strdup_printf(jobsql_jobendbits, j->id);
+  db_result = PQexec(db_conn, sql);
+
+  /* check for any failed jobs */
+  for(i = 0; i < PQntuples(db_result) && ret; i++)
+  {
+    if((endbits = atoi(PQgetvalue(db_result, i, 0))) & (1 << 1))
+    {
+      ret = 2;
+      break;
+    }
+  }
+
+  g_free(sql);
+  PQclear(db_result);
+  return ret;
 }
 
 /**
@@ -331,13 +412,16 @@ static void email_notification(job j)
   PGresult* db_result;
   int j_id = j->id;;
   int upload_id;
+  int status;
   char* val;
   char* final_cmd;
   char sql[1024];
-  FILE* mail_io;
+  //FILE* mail_io;
   GString* email_txt;
+  job_status curr_status = j->status;
 
-  if(is_meta_special(j->agent_type, SAG_NOEMAIL))
+  if(is_meta_special(j->agent_type, SAG_NOEMAIL) ||
+      !(status = email_checkjobstatus(j)))
     return;
 
   sprintf(sql, select_upload_fk, j_id);
@@ -369,6 +453,9 @@ static void email_notification(job j)
 
   if(PQget(db_result, 0, "email_notify")[0] == 'y')
   {
+    if(status == 2)
+      j->status = JB_FAILED;
+
     email_txt = g_string_new("");
     g_string_append(email_txt, email_header);
     g_string_append(email_txt, job_message(j));
@@ -387,7 +474,8 @@ static void email_notification(job j)
     final_cmd = g_strdup_printf(EMAIL_BUILD_CMD, email_command, email_subject,
         PQget(db_result, 0, "user_email"));
 
-    if((mail_io = popen(final_cmd, "w")) != NULL)
+    lprintf("EMAIL {\n%s\n}\n", val);
+    /*if((mail_io = popen(final_cmd, "w")) != NULL)
     {
       fprintf(mail_io, "%s", val);
 
@@ -400,8 +488,9 @@ static void email_notification(job j)
     {
       WARNING("Unable to spawn email notification process: '%s'.\n",
           email_command);
-    }
+    }*/
 
+    j->status = curr_status;
     if(email_regex != NULL)
       g_free(val);
     g_free(final_cmd);
@@ -680,21 +769,18 @@ void database_update_job(job j, job_status status)
       sql = g_strdup_printf(jobsql_started, "localhost", getpid(), j_id);
       break;
     case JB_COMPLETE:
-      email_notification(j);
       sql = g_strdup_printf(jobsql_complete, j_id);
       break;
     case JB_RESTART:
       sql = g_strdup_printf(jobsql_restart, j_id);
       break;
     case JB_FAILED:
-      email_notification(j);
       sql = g_strdup_printf(jobsql_failed, message, j_id);
       break;
     case JB_SCH_PAUSED: case JB_CLI_PAUSED:
       sql = g_strdup_printf(jobsql_paused, j_id);
       break;
     case JB_ERROR:
-      email_notification(j);
       sql = g_strdup_printf(jobsql_failed, j_id);
       break;
   }
@@ -703,6 +789,9 @@ void database_update_job(job j, job_status status)
   db_result = PQexec(db_conn, sql);
   if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
     PQ_ERROR(db_result, "failed to update job status in job queue");
+
+  if(status == JB_COMPLETE || status == JB_FAILED || status == JB_ERROR)
+    email_notification(j);
 
   g_free(sql);
 }
