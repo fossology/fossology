@@ -81,7 +81,7 @@ void event_loop_destroy();
 #define event_signal(func, args) event_signal_ext(func, args, #func)
 
 void event_signal_ext(void* func, void* args, char* name);
-int  event_loop_enter(void(*)(void));
+int  event_loop_enter(void(*)(void), void(*)(void));
 void event_loop_terminate();
 
 #endif /* EVENT_H_INCLUDE */

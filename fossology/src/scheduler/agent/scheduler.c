@@ -80,6 +80,14 @@ char* logdir;
 /* **** signals and events ************************************************** */
 /* ************************************************************************** */
 
+#define MASK_SIGCHLD (1 << 0)
+#define MASK_SIGALRM (1 << 1)
+#define MASK_SIGTERM (1 << 2)
+#define MASK_SIGQUIT (1 << 3)
+#define MASK_SIGHUP  (1 << 4)
+
+guint sigmask = 0;
+
 /**
  * handle signals from the child process. This will only be called on a SIGCHLD
  * and will handle the effects of the death of the child process.
@@ -90,20 +98,7 @@ char* logdir;
  */
 void chld_sig(int signo)
 {
-  pid_t n;          // the next pid that has died
-  pid_t* pass;
-  int status;       // status returned by waitpit()
-
-  /* get all of the dead children's pids */
-  while((n = waitpid(-1, &status, WNOHANG)) > 0)
-  {
-    if(TVERB_SCHED)
-      clprintf("SIGNALS: received sigchld for pid %d\n", n);
-    pass = g_new0(pid_t, 2);
-    pass[0] = n;
-    pass[1] = status;
-    event_signal(agent_death_event, pass);
-  }
+  g_atomic_int_or(&sigmask, MASK_SIGCHLD);
 }
 
 /**
@@ -112,8 +107,7 @@ void chld_sig(int signo)
  * Currently Handles:
  *   SIGALRM: scheduler will run agent updates and database updates
  *   SIGTERM: scheduler will gracefully shut down
- *   SIGQUIT: scheduler will gracefully shut down
- *   SIGINT:  scheduler will gracefully shut down
+ *   SIGQUIT: scheduler will forcefully shut down
  *   SIGHIP:  scheduler will reload configuration data
  *
  * @param signo the number of the signal that was sent
@@ -122,28 +116,10 @@ void prnt_sig(int signo)
 {
   switch(signo)
   {
-    case SIGALRM:
-      V_SPECIAL("SIGNALS: Scheduler received alarm signal, checking job states\n");
-      event_signal(agent_update_event, NULL);
-      event_signal(database_update_event, NULL);
-      alarm(CHECK_TIME);
-      break;
-    case SIGTERM:
-      V_SCHED("SIGNALS: Scheduler received terminate signal, shutting down gracefully\n");
-      closing = 1;
-      break;
-    case SIGQUIT:
-      V_SCHED("SIGNALS: Scheduler received quit signal, shutting down scheduler\n");
-      event_signal(scheduler_close_event, NULL);
-      break;
-    case SIGINT:
-      V_SCHED("SIGNALS: Scheduler received interrupt signal, shutting down scheduler\n");
-      event_signal(scheduler_close_event, NULL);
-      break;
-    case SIGHUP:
-      V_SCHED("SIGNALS: Scheduler received SGIHUP, reloading configuration data\n");
-      load_config(NULL);
-      break;
+    case SIGALRM: g_atomic_int_or(&sigmask, MASK_SIGALRM); break;
+    case SIGTERM: g_atomic_int_or(&sigmask, MASK_SIGTERM); break;
+    case SIGQUIT: g_atomic_int_or(&sigmask, MASK_SIGQUIT); break;
+    case SIGHUP:  g_atomic_int_or(&sigmask, MASK_SIGHUP ); break;
   }
 }
 
@@ -152,6 +128,8 @@ void prnt_sig(int signo)
 /* ************************************************************************** */
 
 /**
+ * @brief Update function called after every event
+ *
  * The heart of the scheduler, the actual scheduling algorithm. This will be
  * passed to the event loop as a call back and will be called every time an event
  * is executed. Therefore the code should be light weight since it will be run
@@ -234,6 +212,98 @@ void update_scheduler()
   {
     startup = 1;
     pause_f = 0;
+  }
+}
+
+/**
+ * @brief function that handles certain signals being delivered to the scheduler
+ *
+ * This function is called every time the event loop attempts to take something
+ * from the event queue. It will also get called once a second regardless of if
+ * a new event has been queued.
+ *
+ * This function checks the sigmask variable to check what signals have been
+ * received since the last time it was called. The sigmask variable should
+ * always be accessed atomically since it is accessed by the event loop thread
+ * as well as the signal handlers.
+ */
+void signal_scheduler()
+{
+  guint mask;
+
+  /* this will get sigmask and set it to 0 */
+  mask = g_atomic_int_and(&sigmask, 0);
+
+  /* signal: SIGCHLD
+   *
+   * A SIGCHLD has been received since the last time signal_scheduler() was
+   * called. Get all agents that have finished since last this happened and
+   * create an event for each.
+   */
+  if(mask & MASK_SIGCHLD)
+  {
+    pid_t n;          // the next pid that has died
+    pid_t* pass;
+    int status;       // status returned by waitpit()
+
+    /* get all of the dead children's pids */
+    while((n = waitpid(-1, &status, WNOHANG)) > 0)
+    {
+      if(TVERB_SCHED)
+        clprintf("SIGNALS: received sigchld for pid %d\n", n);
+      pass = g_new0(pid_t, 2);
+      pass[0] = n;
+      pass[1] = status;
+      event_signal(agent_death_event, pass);
+    }
+  }
+
+  /* signal: SIGALRM
+   *
+   * A SIGALRM has been received since the last time signal_scheduler() was
+   * called. Queue an agent_update_event and database_update_event. Set the
+   * alarm to be called again.
+   */
+  if(mask & MASK_SIGALRM)
+  {
+    V_SPECIAL("SIGNALS: Scheduler received alarm signal, checking job states\n");
+    event_signal(agent_update_event, NULL);
+    event_signal(database_update_event, NULL);
+    alarm(CHECK_TIME);
+  }
+
+  /* signal: SIGTERM
+   *
+   * A SIGTERM has been received. simply set the closing flag to 1 so that the
+   * scheduler will gracefully shutdown as all the agents finish running.
+   */
+  if(mask & MASK_SIGTERM)
+  {
+    V_SCHED("SIGNALS: Scheduler received terminate signal, shutting down gracefully\n");
+    closing = 1;
+  }
+
+  /* signal: SIGQUIT
+   *
+   * A SIGQUIT has been received. Queue a scheduler_close_event so that the
+   * scheduler will imediately stop running. This will cause all the agents to
+   * be forcefully killed.
+   */
+  if(mask & MASK_SIGQUIT)
+  {
+    V_SCHED("SIGNALS: Scheduler received quit signal, shutting down scheduler\n");
+    event_signal(scheduler_close_event, NULL);
+  }
+
+  /* signal: SIGHUP
+   *
+   * A SIGHUP has been received. reload the configuration files for the
+   * scheduler. This will run here instead of being queued as an event.
+   */
+  if(mask & MASK_SIGHUP)
+  {
+    V_SCHED("SIGNALS: Scheduler received SGIHUP, reloading configuration data\n");
+    load_config(NULL);
   }
 }
 

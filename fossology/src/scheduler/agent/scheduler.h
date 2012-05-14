@@ -62,6 +62,7 @@ gint int_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 void chld_sig(int signo);
 void prnt_sig(int signo);
 void update_scheduler();
+void signal_scheduler();
 void set_usr_grp();
 int  kill_scheduler(int force);
 void load_agent_config();

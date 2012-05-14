@@ -113,9 +113,9 @@ int main(int argc, char** argv)
 
   NOTIFY("*****************************************************************");
   NOTIFY("***                FOSSology scheduler started                ***");
-  NOTIFY("***        pid:     %-34d        ***", s_pid);
-  NOTIFY("***        verbose: %-34d        ***", verbose);
-  NOTIFY("***        config:  %-34s        ***", sysconfigdir);
+  NOTIFY("***        pid:      %-33d        ***", s_pid);
+  NOTIFY("***        verbose:  %-33d        ***", verbose);
+  NOTIFY("***        config:   %-33s        ***", sysconfigdir);
   NOTIFY("*****************************************************************");
 
   /* ********************************** */
@@ -149,7 +149,7 @@ int main(int argc, char** argv)
   /* *************************************** */
 
   alarm(CHECK_TIME);
-  event_loop_enter(update_scheduler);
+  event_loop_enter(update_scheduler, signal_scheduler);
 
   NOTIFY("*****************************************************************");
   NOTIFY("***                FOSSology scheduler closed                 ***");
