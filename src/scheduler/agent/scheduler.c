@@ -98,7 +98,7 @@ guint sigmask = 0;
  */
 void chld_sig(int signo)
 {
-  g_atomic_int_or(&sigmask, MASK_SIGCHLD);
+  sigmask |= MASK_SIGCHLD;
 }
 
 /**
@@ -116,10 +116,10 @@ void prnt_sig(int signo)
 {
   switch(signo)
   {
-    case SIGALRM: g_atomic_int_or(&sigmask, MASK_SIGALRM); break;
-    case SIGTERM: g_atomic_int_or(&sigmask, MASK_SIGTERM); break;
-    case SIGQUIT: g_atomic_int_or(&sigmask, MASK_SIGQUIT); break;
-    case SIGHUP:  g_atomic_int_or(&sigmask, MASK_SIGHUP ); break;
+    case SIGALRM: sigmask |= MASK_SIGALRM; break;
+    case SIGTERM: sigmask |= MASK_SIGTERM; break;
+    case SIGQUIT: sigmask |= MASK_SIGQUIT; break;
+    case SIGHUP:  sigmask |= MASK_SIGHUP ; break;
   }
 }
 
@@ -232,7 +232,8 @@ void signal_scheduler()
   guint mask;
 
   /* this will get sigmask and set it to 0 */
-  mask = g_atomic_int_and(&sigmask, 0);
+  mask = sigmask;
+  sigmask = 0;
 
   /* signal: SIGCHLD
    *
