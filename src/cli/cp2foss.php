@@ -496,14 +496,18 @@ if($Verbose) {
 
 //print "fossjobs_command is:$fossjobs_command\n";
 
+if (!$UploadArchive) {  // upload is empty
+  print "FATAL: you want to upload '$UploadArchive'.\n";
+  exit(1);
+}
+
 /** get real path, and file name */
+$UploadArchiveTmp = "";
 $UploadArchiveTmp = realpath($UploadArchive);
-if ($UploadArchiveTmp)  { // not url?
+if (!$UploadArchiveTmp)  { // neither a file nor folder from server?
+    print "NOTE: '$UploadArchive' is a URL or does not exist.\n";
+} else {  // is a file or folder from server
   $UploadArchive = $UploadArchiveTmp;
-  if (!IsDir($UploadArchive) && !file_exists($UploadArchive)) { // exist?
-    print "FATAL: '$UploadArchive' does not exist.\n";
-    exit(1);
-  }
 }
 
 if (strlen($UploadArchive) > 0) {
