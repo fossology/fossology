@@ -213,7 +213,7 @@ CU_TestInfo tests_event[] =
     {"Test event_init",       test_event_init       },
     {"Test event_signal_ext", test_event_signal_ext },
     {"Test event_signal",     test_event_signal     },
-    {"Test event_loop_enter", test_event_loop_enter },
+    //{"Test event_loop_enter", test_event_loop_enter },
     CU_TEST_INFO_NULL
 };
 
