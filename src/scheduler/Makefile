@@ -46,5 +46,6 @@ uninstall:
 clean:
 	@echo "make scheduler clean"
 	$(call dirloop,clean)
+	rm -rf VERSION
 
 .PHONY: all install uninstall clean test coverage
