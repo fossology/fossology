@@ -130,7 +130,7 @@ void test_event_loop_enter()
   samp_num = 0;
   event_signal(NULL, NULL);
 
-  retval = event_loop_enter(sample_callback);
+  retval = event_loop_enter(sample_callback, NULL);
   FO_ASSERT_EQUAL(retval, 0x0);
   FO_ASSERT_EQUAL(call_num, 0);
   FO_ASSERT_FALSE(vl->terminated);
@@ -139,7 +139,7 @@ void test_event_loop_enter()
   event_signal(sample_event, NULL);
   event_signal(NULL, NULL);
 
-  retval = event_loop_enter(sample_callback);
+  retval = event_loop_enter(sample_callback, NULL);
   FO_ASSERT_EQUAL(retval, 0x1);
   FO_ASSERT_EQUAL(samp_num, 0);
   FO_ASSERT_EQUAL(call_num, 0);
@@ -147,7 +147,7 @@ void test_event_loop_enter()
   vl->occupied = 0;
   vl->terminated = 0;
 
-  retval = event_loop_enter(sample_callback);
+  retval = event_loop_enter(sample_callback, NULL);
   FO_ASSERT_EQUAL(retval, 0x0);
   FO_ASSERT_EQUAL(samp_num, 1);
   FO_ASSERT_EQUAL(call_num, 1);
@@ -165,7 +165,7 @@ void test_event_loop_enter()
   event_signal(other_event, NULL);
   event_signal(NULL, NULL);
 
-  retval = event_loop_enter(sample_callback);
+  retval = event_loop_enter(sample_callback, NULL);
   FO_ASSERT_EQUAL(retval, 0x0);
   FO_ASSERT_EQUAL(samp_num, 2);
   FO_ASSERT_EQUAL(call_num, 6);
@@ -183,7 +183,7 @@ void test_event_loop_enter()
   event_signal(other_event, NULL);
   event_signal(NULL, NULL);
 
-  retval = event_loop_enter(NULL);
+  retval = event_loop_enter(NULL, NULL);
   FO_ASSERT_EQUAL(retval, 0x0);
   FO_ASSERT_EQUAL(samp_num, 2);
   FO_ASSERT_EQUAL(call_num, 0);
@@ -198,7 +198,7 @@ void test_event_loop_terminate()
   vl->occupied = 0;
   vl->terminated = 1;
 
-  FO_ASSERT_EQUAL(event_loop_enter(NULL), 0x0);
+  FO_ASSERT_EQUAL(event_loop_enter(NULL, NULL), 0x0);
   FO_ASSERT_FALSE(vl->occupied);
   FO_ASSERT_TRUE(vl->terminated);
 }
