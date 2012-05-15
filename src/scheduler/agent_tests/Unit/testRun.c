@@ -65,9 +65,10 @@ int clean_suite(void)
 
 /* create test suite */
 CU_SuiteInfo suites[] = {
-    {"Testing agent.c:", init_suite, clean_suite, tests_agent},
-    {"Testing host.c:",  init_suite, clean_suite, tests_host },
-    {"Testing event.c:", init_suite, clean_suite, tests_event},
+    {"agent.c: meta",       init_suite,       clean_suite, tests_meta_agent },
+    //{"agent.c:",      agent_init_suite, agent_clean_suite, tests_agent      },
+    {"host.c:",             init_suite,       clean_suite, tests_host       },
+    {"event.c:",            init_suite,       clean_suite, tests_event      },
     CU_SUITE_INFO_NULL
 };
 

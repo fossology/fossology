@@ -28,7 +28,12 @@ extern FILE* log_file;
 int init_suite(void);
 int clean_suite(void);
 
+/* agent suite init and clean */
+int agent_init_suite(void);
+int agent_clean_suite(void);
+
 /* test case sets */
+extern CU_TestInfo tests_meta_agent[];
 extern CU_TestInfo tests_agent[];
 extern CU_TestInfo tests_host[];
 extern CU_TestInfo tests_event[];
