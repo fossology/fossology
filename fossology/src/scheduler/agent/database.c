@@ -58,7 +58,7 @@ const char* folder_name = "\
         SELECT parent_fk FROM foldercontents \
           WHERE foldercontents_mode = 2 AND child_id = ( \
             SELECT job_upload_fk FROM job, jobqueue \
-              WHERE jq_job_fk = job_pk AND jq_pk = %d; \
+              WHERE jq_job_fk = job_pk AND jq_pk = %d \
           ) \
       );";
 
@@ -66,14 +66,14 @@ const char* upload_name = "\
     SELECT upload_filename FROM upload \
       WHERE upload_pk = ( \
         SELECT job_upload_fk FROM job, jobqueue \
-          WHERE jq_job_fk = job_pk AND jq_pk = %d; \
+          WHERE jq_job_fk = job_pk AND jq_pk = %d \
       );";
 
 const char* upload_pk = "\
     SELECT upload_pk FROM upload \
       WHERE upload_pk = ( \
         SELECT job_upload_fk FROM job, jobqueue \
-          WHERE jq_job_fk = job_pk AND jq_pk = %d; \
+          WHERE jq_job_fk = job_pk AND jq_pk = %d \
       );";
 
 const char* jobsql_email = "\
@@ -149,7 +149,7 @@ const char* jobsql_anyrunnable = "\
       );";
 
 const char* jobsql_jobendbits = "\
-    SELECT jq_end_bits FROM jobqueue \
+    SELECT jq_pk, jq_end_bits FROM jobqueue \
       WHERE jq_job_fk = ( \
         SELECT jq_job_fk FROM jobqueue \
           WHERE jq_pk = %d \
@@ -264,7 +264,8 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
    *
    * Appends the url that will link to the log file produced by the agent.
    */
-  else if(strcmp(m_str, "SCHEDULERLOG") == 0)
+  else if(strcmp(m_str, "SCHEDULERLOG") == 0 ||
+      strcmp(m_str, "JOBQUEUELINK") == 0)
   {
     g_string_append_printf(ret, "http://%s?mod=showjobs&show=job&job=%d",
         fossy_url, j->id);
@@ -360,7 +361,7 @@ static gint email_checkjobstatus(job j)
   gchar* sql;
   gint ret = 1;
   PGresult* db_result;
-  int endbits, i;
+  int id, i;
 
   sql = g_strdup_printf(jobsql_anyrunnable, j->id);
   db_result = PQexec(db_conn, sql);
@@ -384,10 +385,21 @@ static gint email_checkjobstatus(job j)
   sql = g_strdup_printf(jobsql_jobendbits, j->id);
   db_result = PQexec(db_conn, sql);
 
+  /* check for any jobs that are still running */
+  for(i = 0; i < PQntuples(db_result) && ret; i++)
+  {
+    id = atoi(PQget(db_result, i, "jq_pk"));
+    if(id != j->id && get_job(atoi(PQget(db_result, i, "jq_pk"))) != NULL)
+    {
+      ret = 0;
+      break;
+    }
+  }
+
   /* check for any failed jobs */
   for(i = 0; i < PQntuples(db_result) && ret; i++)
   {
-    if((endbits = atoi(PQgetvalue(db_result, i, 0))) & (1 << 1))
+    if(atoi(PQget(db_result, i, "jq_end_bits")) == (1 << 1))
     {
       ret = 2;
       break;
@@ -416,7 +428,7 @@ static void email_notification(job j)
   char* val;
   char* final_cmd;
   char sql[1024];
-  //FILE* mail_io;
+  FILE* mail_io;
   GString* email_txt;
   job_status curr_status = j->status;
 
@@ -474,8 +486,7 @@ static void email_notification(job j)
     final_cmd = g_strdup_printf(EMAIL_BUILD_CMD, email_command, email_subject,
         PQget(db_result, 0, "user_email"));
 
-    lprintf("EMAIL {\n%s\n}\n", val);
-    /*if((mail_io = popen(final_cmd, "w")) != NULL)
+    if((mail_io = popen(final_cmd, "w")) != NULL)
     {
       fprintf(mail_io, "%s", val);
 
@@ -488,7 +499,7 @@ static void email_notification(job j)
     {
       WARNING("Unable to spawn email notification process: '%s'.\n",
           email_command);
-    }*/
+    }
 
     j->status = curr_status;
     if(email_regex != NULL)
@@ -709,7 +720,7 @@ void database_update_event(void* unused)
   V_SPECIAL("DB: retrieved %d entries from the job queue\n", PQntuples(db_result));
   for(i = 0; i < PQntuples(db_result); i++)
   {
-    /* start by checking that the job hasn't already been grabed */
+    /* start by checking that the job hasn't already been grabbed */
     if(get_job(j_id = atoi(PQget(db_result, i, "jq_pk"))) != NULL)
       continue;
 
