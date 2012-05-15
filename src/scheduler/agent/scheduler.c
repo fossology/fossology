@@ -24,7 +24,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <interface.h>
 #include <logging.h>
 #include <scheduler.h>
-
 #include <fossconfig.h>
 
 /* std library includes */
@@ -86,19 +85,39 @@ char* logdir;
 #define MASK_SIGQUIT (1 << 3)
 #define MASK_SIGHUP  (1 << 4)
 
-guint sigmask = 0;
+
+int sigmask = 0;
 
 /**
  * handle signals from the child process. This will only be called on a SIGCHLD
  * and will handle the effects of the death of the child process.
  *
- * @param signo
- * @param INFO
- * @param context
+ * @param signo  the number of the signal that was sent
  */
 void chld_sig(int signo)
 {
+  /* Anywhere you see a "#if __GNUC__" the code is checking if gcc is the
+   * compiler. This is because the __sync... set of functions are the gcc
+   * version of atomics.
+   *
+   * This means that if you aren't compiling with gcc, you can have a race
+   * condition that results in a signal being lost during the
+   * signal_scheduler() function.
+   *
+   * What could happen:
+   *   1. signal_scheduler() reads value of sigmask
+   *   2. scheduler receives a SIG**** and sets the correct bit in sigmask
+   *   3. signal_scheduler() clears sigmask by setting it to 0
+   *
+   * In this set of events, a signal has been lost. If this is a sigchld this
+   * could be very bad as a job could never get marked as finsihed.
+   */
+#if __GNUC__
+  __sync_fetch_and_or(&sigmask, MASK_SIGCHLD);
+#else
+#warning Compiling without atomics, this could result in undefined beharvior
   sigmask |= MASK_SIGCHLD;
+#endif
 }
 
 /**
@@ -110,16 +129,23 @@ void chld_sig(int signo)
  *   SIGQUIT: scheduler will forcefully shut down
  *   SIGHIP:  scheduler will reload configuration data
  *
- * @param signo the number of the signal that was sent
+ * @param signo  the number of the signal that was sent
  */
 void prnt_sig(int signo)
 {
   switch(signo)
   {
+#if __GNUC__
+    case SIGALRM: __sync_fetch_and_or(&sigmask, MASK_SIGCHLD); break;
+    case SIGTERM: __sync_fetch_and_or(&sigmask, MASK_SIGTERM); break;
+    case SIGQUIT: __sync_fetch_and_or(&sigmask, MASK_SIGQUIT); break;
+    case SIGHUP:  __sync_fetch_and_or(&sigmask, MASK_SIGHUP);  break;
+#else
     case SIGALRM: sigmask |= MASK_SIGALRM; break;
     case SIGTERM: sigmask |= MASK_SIGTERM; break;
     case SIGQUIT: sigmask |= MASK_SIGQUIT; break;
     case SIGHUP:  sigmask |= MASK_SIGHUP ; break;
+#endif
   }
 }
 
@@ -232,8 +258,12 @@ void signal_scheduler()
   guint mask;
 
   /* this will get sigmask and set it to 0 */
+#if __GNUC__
+  mask = __sync_fetch_and_and(&sigmask, 0);
+#else
   mask = sigmask;
   sigmask = 0;
+#endif
 
   /* signal: SIGCHLD
    *
@@ -338,7 +368,11 @@ void set_usr_grp()
   grp = getgrnam(group);
   if(!grp)
   {
-    // TODO error message
+    fprintf(stderr, "FATAL %s.%d: could not find group \"%s\"\n",
+        __FILE__, __LINE__, group);
+    fprintf(stderr, "FATAL set_usr_grp() aborting due to error: %s\n",
+        strerror(errno));
+    exit(-1);
   }
 
   /* set the project group */
@@ -426,7 +460,13 @@ int kill_scheduler(int force)
 }
 
 /**
- * TODO
+ * @brief Loads a particular agents configuration file
+ *
+ * This loads and saves the results as a new meta_agent. This assumes that the
+ * configuration file for the agent includes the following key/value pairs:
+ *   1. command: the command that will be used to start the agent
+ *   2. max: the maximum number of this agent that can run at once
+ *   3. special: anything that is special about the agent
  */
 void load_agent_config()
 {
@@ -528,7 +568,15 @@ void load_agent_config()
 }
 
 /**
- * TODO
+ * @brief Loads the configuration data from fossology.conf
+ *
+ * This assumes that fossology.conf contains the following key/value pairs:
+ *   1. port: the port that the scheduler will listen on
+ *   2. LOG_DIR: the directory that the log should be in
+ *
+ * There should be a group named HOSTS with all of the hosts listed as
+ * key/value pairs under this category. For each of these hosts, the scheduler
+ * will create a new host as an internal representation.
  */
 void load_foss_config()
 {
@@ -588,9 +636,9 @@ void load_foss_config()
 }
 
 /**
- * TODO
+ * @brief Load both the fossology configuration and all the agent configurations
  *
- * @param unused
+ * @param unused  this can be called as an event
  */
 void load_config(void* unused)
 {
@@ -599,9 +647,11 @@ void load_config(void* unused)
 }
 
 /**
- * TODO
+ * @brief Sets the closing flag and kills all the agents
  *
- * @param unused
+ * This function is used to quickly and uncleanly kill the scheduler.
+ *
+ * @param unused  this is called as an event
  */
 void scheduler_close_event(void* unused)
 {
@@ -610,9 +660,9 @@ void scheduler_close_event(void* unused)
 }
 
 /**
- * TODO
+ * @brief cleanup any memory associated with the scheduler.
  *
- * @return
+ * @return always returns 0
  */
 int close_scheduler()
 {
