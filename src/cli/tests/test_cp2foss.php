@@ -141,6 +141,9 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     //print_r($out);
   }
 
+  /**
+   * \brief list agents and help msg, etc
+   */
   function test_list_agent_and_others(){
     /** help */
     $command = "cp2foss -h";
