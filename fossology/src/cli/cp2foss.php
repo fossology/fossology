@@ -435,8 +435,12 @@ if (empty($user) && empty($passwd) && file_exists($user_passwd_file)) {
 
 /* check if the user name/passwd is valid */
 if (empty($user)) {
+  /*
   $uid_arr = posix_getpwuid(posix_getuid());
   $user = $uid_arr['name'];
+  */
+  echo "FATAL: You should add '--user USERNAME' when running OR add 'user=USERNAME' in ~/.fossology.rc before running.\n";
+  exit(1);
 }
 if (empty($passwd)) {
   echo "The user is: $user, please enter the password:\n";
