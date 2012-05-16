@@ -187,26 +187,30 @@ particular see the section Secure TCP/IP Connections with SSL to set it up.
 Edit /etc/postgresql/<version>/main/postgresql.conf:
 The tuning and preferences in the config file will vary depending on your
 installation. We don't provide an automated way to do this because it
-is complicated and specific to your particular install goals. Here are
-the results of a diff between the default config file provided by
-Debian and the one used for the http://repo.fossology.org database:
+is complicated and specific to your particular install goals. A good 
+discussion of configuration settings can be found at 
+http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server. Here are a
+few of the more common settings you should consider changing. The integer 
+values below are based on hypothetical system with 4GB of RAM.
 
- #hba_file = 'ConfigDir/pg_hba.conf'	# host-based authentication file
- #ident_file = 'ConfigDir/pg_ident.conf'	# IDENT configuration file
- #external_pid_file = '(none)'		# write an extra pid file
- listen_addresses = '*'
- max_connections = 50
- #shared_buffers = 1000			# min 16 or max_connections*2, 8KB each
- shared_buffers = 32768
- work_mem = 102400 
- fsync = off   
- full_page_writes = off			#recover from partial page writes
- commit_delay = 1000 
- effective_cache_size = 25000
- log_min_duration_statement = -1	# -1 is disabled, 0 logs all statements
- log_line_prefix = '%t %h %c'		# prepend a time stamp to all log entries
+ #hba_file = 'ConfigDir/pg_hba.conf' # host-based authentication file
+ listen_addresses = '*'              # listen to connections from all IPs
+ max_connections = 50                # maximum number of client connections
+                                     # allowed
+ shared_buffers = 1GB                # If you have a system with 1GB or more
+                                     # of RAM, a reasonable starting value 
+                                     # for shared_buffers is 1/4 of the memory 
+                                     # in your system.
+ effective_cache_size = 2GB          # how much memory is available for disk 
+                                     # caching; 1/2-3/4 of memory
+ work_mem = 128MB                    # work_mem parameter allows PostgreSQL 
+                                     # to do larger in-memory sorts
+ maintenance_work_mem = 200MB        # roughly 50MB/GB of ram
+ fsync = on                          # turns forced synchronization on or off
+ full_page_writes = off	             # recover from partial page writes
+ log_line_prefix = '%t %h %c'        # prepend a time stamp to all log entries
  standard_conforming_strings = on
- autovacuum = on                 	# Enable autovacuum subprocess?  'on'
+ autovacuum = on                     # Enable autovacuum subprocess?  'on'
 
  
 2.1.5 Configuring PHP
