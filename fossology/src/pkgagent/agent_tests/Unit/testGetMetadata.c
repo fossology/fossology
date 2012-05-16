@@ -32,7 +32,7 @@ void test_GetMetadata_normal()
 {
   char *pkg = "../testdata/fossology-1.2.0-1.el5.i386.rpm";
   struct rpmpkginfo *pi;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
 
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
@@ -40,8 +40,8 @@ void test_GetMetadata_normal()
   rpmReadConfigFiles(NULL, NULL);
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   int Result = GetMetadata(pkg, pi);
-  printf("test_GetMetadata Result is:%d\n", Result);
-  //printf("test_GetMetadata Result is:%s\n", pi->buildDate); 
+  //printf("test_GetMetadata Result is:%d\n", Result);
+  //printf("test_GetMetadata Result is temp:%s\n", pi->pkgArch); 
   CU_ASSERT_STRING_EQUAL(pi->pkgName, "fossology");
   CU_ASSERT_STRING_EQUAL(pi->pkgArch, "i386");
   CU_ASSERT_STRING_EQUAL(pi->version, "1.2.0");
@@ -69,7 +69,7 @@ void test_GetMetadata_normal()
 /**
  * \brief Test pkgagent.c Function GetMetadata() Wrong test file
  */
-void test_GetMetadata_no_testfile()
+void test_GetMetadata_wrong_testfile()
 {
   char *pkg = "../testdata/fossology_1.4.1.dsc";
   struct rpmpkginfo *pi;
@@ -81,7 +81,7 @@ void test_GetMetadata_no_testfile()
   rpmReadConfigFiles(NULL, NULL);
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   int Result = GetMetadata(pkg, pi);
-  printf("test_GetMetadata Result is:%d\n", Result);
+  //printf("test_GetMetadata Result is:%d\n", Result);
   PQfinish(db_conn);
 #ifdef _RPM_4_4_COMPAT
   rpmFreeCrypto();
@@ -93,10 +93,41 @@ void test_GetMetadata_no_testfile()
 }
 
 /**
+ * \brief Test pkgagent.c Function GetMetadata() with No test file
+ */
+void test_GetMetadata_no_testfile()
+{
+  char *pkg = NULL;
+  struct rpmpkginfo *pi;
+  //char *DBConfFile = NULL;  /* use default Db.conf */
+  char *ErrorBuf;
+
+  pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+  int predictValue = -1;
+  rpmReadConfigFiles(NULL, NULL);
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  int Result = GetMetadata(pkg, pi);
+  //printf("test_GetMetadata Result is:%d\n", Result);
+  PQfinish(db_conn);
+#ifdef _RPM_4_4_COMPAT
+  rpmFreeCrypto();
+  /* free memroy */
+  int i;
+  for(i=0; i< pi->req_size;i++)
+    free(pi->requires[i]);
+#endif /* After RPM4.4 version*/
+  rpmFreeMacros(NULL);
+  free(pi->requires);
+  free(pi);
+  CU_ASSERT_EQUAL(Result, predictValue);
+}
+
+/**
  * \brief testcases for function GetMetadata
  */
 CU_TestInfo testcases_GetMetadata[] = {
     {"Testing the function GetMetadata, paramters are  normal", test_GetMetadata_normal},
+    {"Testing the function GetMetadata, test file is not rpm file", test_GetMetadata_wrong_testfile},
     {"Testing the function GetMetadata, test file doesn't exist", test_GetMetadata_no_testfile},
     CU_TEST_INFO_NULL
 };
