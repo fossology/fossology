@@ -41,7 +41,7 @@ void test_GetMetadataDebSource()
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   strcpy(pi->version, "");
   int Result = GetMetadataDebSource(repFile, pi);
-  printf("GetMetadataDebSource Result is:%d\n", Result);
+  //printf("GetMetadataDebSource Result is:%d\n", Result);
 
   //printf("GetMetadataDebSource Result is:%s\n", pi->version);
   CU_ASSERT_STRING_EQUAL(pi->pkgName, "fossology");
@@ -62,10 +62,37 @@ void test_GetMetadataDebSource()
 }
 
 /**
+ * \brief Test pkgagent.c Function GetMetadataDebSource()
+ * test get debian source info from wrong dsc file.
+ */
+void test_GetMetadataDebSource_wrong_testfile()
+{
+  char *repFile = "../testdata/fossology-1.2.0-1.el5.i386.rpm";
+  struct debpkginfo *pi;
+  char *ErrorBuf;
+
+  pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+  int predictValue = 0; /* FIXED: seems pkgagent have bug here. */
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  int Result = GetMetadataDebSource(repFile, pi);
+  //printf("GetMetadataDebSource Result is:%d\n", Result);
+ 
+  PQfinish(db_conn);
+  int i;
+  for(i=0; i< pi->dep_size;i++)
+    free(pi->depends[i]);
+  free(pi->depends);
+  memset(pi, 0, sizeof(struct debpkginfo));
+  free(pi);
+  CU_ASSERT_EQUAL(Result, predictValue);
+}
+
+/**
  * \brief testcases for function GetMetadataDebSource
  */
 CU_TestInfo testcases_GetMetadataDebSource[] = {
     {"Testing the function GetMetadataDebSource", test_GetMetadataDebSource},
+    {"Testing the function GetMetadataDebSource with wrong testfile", test_GetMetadataDebSource_wrong_testfile},
     CU_TEST_INFO_NULL
 };
 

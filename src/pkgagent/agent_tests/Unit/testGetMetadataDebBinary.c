@@ -304,7 +304,7 @@ void test_GetMetadataDebBinary()
      
   /* Test GetMetadataDebBinary function */
   int Result = GetMetadataDebBinary(upload_pk, pi);
-  printf("GetMetadataDebBinary Result is:%d\n", Result);
+  //printf("GetMetadataDebBinary Result is:%d\n", Result);
 
   /* Check data correction */
   CU_ASSERT_STRING_EQUAL(pi->pkgName, "fossology-web");
@@ -334,10 +334,40 @@ void test_GetMetadataDebBinary()
 }
 
 /**
+ * \brief Test pkgagent.c GetMetadataDebBinary function 
+ * with no upload_pk in database
+ */
+void test_GetMetadataDebBinary_no_uploadpk()
+{
+  struct debpkginfo *pi;
+  long upload_pk = 0;
+  char *ErrorBuf;  
+  
+  pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+  int predictValue = -1;
+  
+  /* perpare testing data in database */
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf); 
+ 
+  /* Test GetMetadataDebBinary function */
+  int Result = GetMetadataDebBinary(upload_pk, pi);
+  CU_ASSERT_EQUAL(Result, predictValue);
+
+  PQfinish(db_conn);
+  int i;
+  for(i=0; i< pi->dep_size;i++)
+    free(pi->depends[i]);
+  free(pi->depends);
+  memset(pi, 0, sizeof(struct debpkginfo));
+  free(pi);
+}
+
+/**
  * \brief testcases for function GetMetadataDebBinary
  */
 CU_TestInfo testcases_GetMetadataDebBinary[] = {
     {"Testing the function GetMetadataDebBinary", test_GetMetadataDebBinary},
+    {"Testing the function GetMetadataDebBinary with no uploadpk", test_GetMetadataDebBinary_no_uploadpk},
     CU_TEST_INFO_NULL
 };
 

@@ -32,7 +32,7 @@ void test_Trim_normal()
   char str[] = " test trim!   ";
   char *predictValue = "test trim!";
   char *Result = trim(str);
-  printf("test_Trim_normal Result is:%s\n", Result);
+  //printf("test_Trim_normal Result is:%s\n", Result);
   CU_ASSERT_TRUE(!strcmp(Result, predictValue));
 }
 
