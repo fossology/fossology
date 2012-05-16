@@ -260,12 +260,35 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
     g_free(sql);
   }
 
+  /* $JOBQUEUELINK
+   *
+   * Appends the url that will link to the job queue
+   */
+  else if(strcmp(m_str, "JOBQUEUELINK") == 0)
+  {
+    sql = g_strdup_printf(upload_pk, j->id);
+    db_result = PQexec(db_conn, sql);
+
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+    {
+      g_string_append_printf(ret,
+          "[ERROR: unable to select file name for upload %d]", j->id);
+    }
+    else
+    {
+      g_string_append_printf(ret, "http://%s?mod=showjobs&upload=%s",
+          fossy_url, PQgetvalue(db_result, 0, 0));
+    }
+
+    PQclear(db_result);
+    g_free(sql);
+  }
+
   /* $SCHEDULERLOG
    *
    * Appends the url that will link to the log file produced by the agent.
    */
-  else if(strcmp(m_str, "SCHEDULERLOG") == 0 ||
-      strcmp(m_str, "JOBQUEUELINK") == 0)
+  else if(strcmp(m_str, "SCHEDULERLOG") == 0)
   {
     g_string_append_printf(ret, "http://%s?mod=showjobs&show=job&job=%d",
         fossy_url, j->id);
