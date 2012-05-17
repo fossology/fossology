@@ -61,6 +61,7 @@ fi
 
 if [ $EVERYTHING ]; then
    echo "*** Running postinstall for everything ***"
+   COMMON=1
    SCHEDULERONLY=1
    AGENT=1
    DATABASE=1
