@@ -178,7 +178,7 @@ class admin_scheduler extends FO_Plugin
         "reload" => array(_("Reload"), _("Reload fossology.conf.")), 
         "agents" => array(_("Agents"), _("Show a list of enabled agents.")), 
         "verbose" => array(_("Verbose"), _("Change the verbosity level of the scheduler or a job.")), 
-        "stop" => array(_("Shutdown Scheduler"), _("Shutdown the scheduler gracefully and stop all background processing.  This can take awhile for all the agents to quit.")), 
+        "stop" => array(_("Shutdown Scheduler"), _("Shutdown the scheduler gracefully and stop all background processing.  This can take a while for all the agents to quit.")), 
         "restart" => array(_("Unpause a job"), _("Unpause a job.")), 
         "pause" => array(_("Pause a running job"), _("Pause a running job.")), 
         "priority" => array(_("Priority"), _("Change the priority of a job."))
