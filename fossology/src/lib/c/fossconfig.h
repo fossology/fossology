@@ -22,8 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <glib.h>
 
 /** the parser error domain */
-#define PARSE_ERROR    0
-#define RETRIEVE_ERROR 1
+#define PARSE_ERROR    1
+#define RETRIEVE_ERROR 2
 
 /** parser error codes */
 typedef enum
