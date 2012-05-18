@@ -200,6 +200,7 @@ char *	_RepGetHost	(char *Type, char *Filename, int MatchNum)
           {
             ret = (char*)calloc(strlen(hosts[i])+1, sizeof(char));
             strcpy(ret, hosts[i]);
+            g_free(entry);
             return ret;
           }
         }
