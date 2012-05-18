@@ -70,8 +70,8 @@ const char* upload_name = "\
       );";
 
 const char* upload_pk = "\
-    SELECT upload_pk FROM upload \
-      WHERE upload_pk = ( \
+    SELECT upload_fk, uploadtree_pk FROM uploadtree \
+      WHERE parent IS NULL AND upload_fk = ( \
         SELECT job_upload_fk FROM job, jobqueue \
           WHERE jq_job_fk = job_pk AND jq_pk = %d \
       );";
@@ -252,8 +252,9 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
     }
     else
     {
-      g_string_append_printf(ret, "http://%s?mod=browse&upload=%s&show=detail",
-          fossy_url, PQgetvalue(db_result, 0, 0));
+      g_string_append_printf(ret,
+          "http://%s?mod=browse&upload=%s&item=%s&show=detail",
+          fossy_url, PQgetvalue(db_result, 0, 0), PQgetvalue(db_result, 0, 1));
     }
 
     PQclear(db_result);
