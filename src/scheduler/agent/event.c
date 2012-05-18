@@ -100,8 +100,14 @@ event event_loop_take(event_loop vl)
   timeout.tv_sec  = 1;
   timeout.tv_usec = 0;
 
+#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+  if((ret = g_async_queue_timeout_pop(vl->queue,
+      timeout.tv_sec * 1000000 + timeout.tv_usec)) == NULL)
+    return ret;
+#else
   if((ret = g_async_queue_timed_pop(vl->queue, &timeout)) == NULL)
     return ret;
+#endif
 
   if(ret->func == NULL)
   {
