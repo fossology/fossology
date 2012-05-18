@@ -57,6 +57,10 @@ const static char* sql_insert = "\
 fo_conf* sysconfig;
 char*    sysconfigdir;
 
+/* these will be freed in fo_scheduler_disconnect */
+extern GRegex* fo_conf_parse;
+extern GRegex* fo_conf_replace;
+
 /**
  * Global verbose flags that agents should use instead of specific verbose
  * flags. This is used by the scheduler to turn verbose on a particular agent
@@ -200,7 +204,7 @@ void fo_scheduler_connect(int* argc, char** argv)
   GOptionEntry options[] =
   {
       {"config",          'c', 0, G_OPTION_ARG_STRING, &sysconfigdir, ""},
-      {"scheduler_start",   0, 0, G_OPTION_ARG_NONE,   &sscheduler,        ""},
+      {"scheduler_start",   0, 0, G_OPTION_ARG_NONE,   &sscheduler,   ""},
       {NULL}
   };
 
@@ -246,8 +250,10 @@ void fo_scheduler_connect(int* argc, char** argv)
     if((keys = g_tree_lookup(version->group_map, module_name)) != NULL)
     {
       keys = g_tree_ref(keys);
-      g_tree_insert(sysconfig->group_map, module_name, keys);
+      g_tree_insert(sysconfig->group_map, g_strdup(module_name), keys);
     }
+
+    fo_config_free(version);
   }
 
   /* send "OK" to the scheduler */
@@ -295,6 +301,13 @@ void fo_scheduler_disconnect(int retcode)
 
     g_free(module_name);
   }
+
+  if(strcmp(sysconfigdir, DEFAULT_SETUP))
+    g_free(sysconfigdir);
+
+  fo_config_free(sysconfig);
+  g_regex_unref(fo_conf_parse);
+  g_regex_unref(fo_conf_replace);
 
   fflush(stdout);
   fflush(stderr);
@@ -422,5 +435,11 @@ char* fo_sysconfig(char* sectionname, char* variablename) {
   fflush(stdout);
   fflush(stderr);
 
-  return error != NULL ? NULL : ret;
+  if(error)
+  {
+    g_clear_error(&error);
+    ret = NULL;
+  }
+
+  return ret;
 }
