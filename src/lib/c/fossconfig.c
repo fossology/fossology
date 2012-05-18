@@ -58,8 +58,8 @@ static const gchar* fo_conf_pattern = "\
  */
 static const gchar* fo_conf_variable = "\\$(\\w+)";
 
-static GRegex* fo_conf_parse;
-static GRegex* fo_conf_replace;
+GRegex* fo_conf_parse;
+GRegex* fo_conf_replace;
 
 /**
  * A wrapper function for the strcmp function that allows it to mascarade as a
@@ -306,11 +306,10 @@ fo_conf* fo_config_load(char* rawname, GError** error) {
 
       if(*error)
         return NULL;
-
-      g_match_info_free(match);
-      match = NULL;
     }
 
+    g_match_info_free(match);
+    match = NULL;
     yyline++;
   }
 
