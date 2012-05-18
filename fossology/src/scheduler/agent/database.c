@@ -640,16 +640,17 @@ void email_load()
 
 /**
  * Initializes any one-time attributes relating to the database. Currently this
- * includes creating the db connection and checking the URL of the fossology
+ * includes creating the db connection and checking the URL of the FOSSology
  * instance out of the db.
  */
 void database_init()
 {
   PGresult* db_result;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  gchar *DBConfFile = NULL;
   char *ErrorBuf;
 
   /* create the connection to the database */
+  DBConfFile = g_strdup_printf("%s/Db.conf", sysconfigdir);
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   memset(fossy_url, '\0', sizeof(fossy_url));
 
