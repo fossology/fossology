@@ -1157,6 +1157,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 {
   char UfileName[1024];
+  char *cp;
   PGresult *result;
 
   if (!Upload_Pk) return(-1); /* should never happen */
@@ -1209,6 +1210,11 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   // Begin add by vincent
   if(ReunpackSwitch)
   {
+    /* postgres 8.3 seems to have a problem escaping binary characters
+     * (it works in 8.4).  So manually substitute '~' for any unprintable chars.
+     */
+    for (cp=UfileName; *cp; cp++) if (!isprint(*cp)) *cp = '~';
+
     /* Get the parent ID */
     /* Two cases -- depending on if the parent exists */
     memset(SQL,'\0',MAXSQL);
