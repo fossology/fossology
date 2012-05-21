@@ -1159,6 +1159,8 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   char UfileName[1024];
   char *cp;
   PGresult *result;
+  char EscBuf[1024];
+  int  error;
 
   if (!Upload_Pk) return(-1); /* should never happen */
   // printf("=========== BEFORE ==========\n"); DebugContainerInfo(CI);
@@ -1196,16 +1198,12 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     else /* Don't know what it is */
       strcpy(UfileName,"artifact");
   }
-  else /* not an artifact -- use the name */
-  {
-    char EscBuf[1024];
-    int  error;
-    PQescapeStringConn(pgConn, EscBuf, CI->Partname, strlen(CI->Partname), &error);
-    if (error)
-        LOG_WARNING("Error escaping filename with multibype character set (%s).", CI->Partname)
 
-    strncpy(UfileName,EscBuf,sizeof(UfileName));
-  }
+  PQescapeStringConn(pgConn, EscBuf, CI->Partname, strlen(CI->Partname), &error);
+  if (error)
+      LOG_WARNING("Error escaping filename with multibyte character set (%s).", CI->Partname)
+  else
+    strncpy(UfileName, EscBuf, sizeof(UfileName));
 
   // Begin add by vincent
   if(ReunpackSwitch)
