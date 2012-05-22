@@ -23,19 +23,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * @date Dec. 15, 2011
  * @brief This is a simple test agent meant to be used by Unit and functional
  *        tests to confirm a correctly working scheduler. This particular agent
- *        is meant to simply work. It will start, call scheduler_connect,
- *        wait a few seconds and call scheduler_disconnect.
+ *        is meant connect correctly to the scheduler and then instantly die.
  */
 
 int main(int argc, char** argv) {
   fo_scheduler_connect(&argc, argv);
-  if(fo_scheduler_next() == NULL)
-    fo_scheduler_disconnect(0);
-  else
-    fo_scheduler_disconnect(-1);
 
   return 0;
 }
-
-
-

@@ -20,22 +20,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /**
  * @file simple.c
- * @date Dec. 15, 2011
+ * @date May 14, 2011
  * @brief This is a simple test agent meant to be used by Unit and functional
  *        tests to confirm a correctly working scheduler. This particular agent
- *        is meant to simply work. It will start, call scheduler_connect,
- *        wait a few seconds and call scheduler_disconnect.
+ *        will startup and then do nothing forever. This tests if the scheduler
+ *        will kill an agent that has NOKILL set.
  */
 
 int main(int argc, char** argv) {
   fo_scheduler_connect(&argc, argv);
-  if(fo_scheduler_next() == NULL)
-    fo_scheduler_disconnect(0);
-  else
-    fo_scheduler_disconnect(-1);
 
-  return 0;
+  fo_scheduler_set_special(SPECIAL_NOKILL, 1);
+
+  while(1) {
+    sleep(100);
+  }
 }
-
 
 

@@ -30,13 +30,16 @@ EXES = $(patsubst %.c, %, $(C_FILES))
 # executable build rules #
 ##########################
 
-all: $(EXES)
+all:  test    # the make all and make test are the same thing
+test: $(EXES) # for this directory since this creates the test agents
 $(EXES): %: %.c $(FOLIB) $(VARS)
 	@echo $@: 
 	@if [ ! -d $(MODDIR)/$@ ] ; then \
 	  mkdir -p $(MODDIR)/$@/agent/; fi;
-	@cp test.conf $(MODDIR)/$@/$@.conf
-	$(CC) $< -o $(MODDIR)/$@/agent/test_binary $(CFLAGS_LOCAL)
+	$(CC) $< -o $(MODDIR)/$@/agent/$@ $(CFLAGS_LOCAL)
+	@echo "[$@]\nVERSION=test\nSVN_REV=0M" > $(MODDIR)/$@/VERSION
+	@echo "[default]\ncommand=$@\nmax=-1\nspecial[]=\n" > $(MODDIR)/$@/$@.conf
+	
 
 #####################
 # other build rules #

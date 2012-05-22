@@ -19,7 +19,7 @@ include $(TOP)/Makefile.conf
 LOCALAGENTDIR=../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
-TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR) -lgio-2.0
+TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR) -lgthread-2.0 -lgio-2.0
 CFLAGS_LOCAL= $(ALL_CFLAGS) -I. -I$(LOCALAGENTDIR) -lpcre -lcunit $(TESTLIB)
 DEF   = -DLOG_DIR='"$(LOGDIR)"' \
         -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
