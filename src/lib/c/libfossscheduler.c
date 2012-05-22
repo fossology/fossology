@@ -306,8 +306,11 @@ void fo_scheduler_disconnect(int retcode)
     g_free(sysconfigdir);
 
   fo_config_free(sysconfig);
+  sysconfig = NULL;
   g_regex_unref(fo_conf_parse);
+  fo_conf_parse = NULL;
   g_regex_unref(fo_conf_replace);
+  fo_conf_replace = NULL;
 
   fflush(stdout);
   fflush(stderr);
