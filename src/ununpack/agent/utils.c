@@ -1182,7 +1182,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     ufile_name = PQgetvalue(result,0,0);
     PQclear(result);
     if (strchr(ufile_name,'/')) ufile_name = strrchr(ufile_name,'/')+1;
-    strncpy(UfileName,ufile_name,sizeof(UfileName)-1);
+    strncpy(CI->Partname,ufile_name,sizeof(CI->Partname)-1);
   }
   else if (CI->Artifact)
   {
@@ -1197,6 +1197,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
       strcpy(UfileName,"artifact.meta");
     else /* Don't know what it is */
       strcpy(UfileName,"artifact");
+    strncpy(CI->Partname,UfileName,sizeof(CI->Partname)-1);  
   }
 
   PQescapeStringConn(pgConn, EscBuf, CI->Partname, strlen(CI->Partname), &error);
