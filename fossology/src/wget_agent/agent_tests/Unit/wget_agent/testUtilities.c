@@ -81,7 +81,6 @@ void testGetPositionNormal()
 
 /**
  * \brief for function TaintURL 
- * 
  */
 void testTaintURL()
 {
@@ -101,6 +100,69 @@ void testTaintURL()
 }
 
 /**
+ * \brief for function PathCheck()
+ * 
+ * \note free the pointer from PathCheck()
+ */
+void test_PathCheck()
+{
+  char source_path[] = "/srv/fossology/testDbRepo12704556/%H/wget";
+  char des_path[1024] = {0};
+  char HostName[1024] = {0};
+  char *taint_path = PathCheck(source_path);
+  gethostname(HostName, sizeof(HostName));
+  snprintf(des_path, sizeof(des_path), "/srv/fossology/testDbRepo12704556/%s/wget", HostName);
+  CU_ASSERT_STRING_EQUAL(des_path, taint_path); /*  tainted */
+  free(taint_path);
+}
+
+/**
+ * \brief for function Suckupfs(), dir
+ */
+void test_Suckupfs_dir()
+{
+  char file_path[] = "./";
+  char tar_file[] = "/tmp/Suckupfs.tar.dir/test.tar";
+  char des_dir[] = "/tmp/Suckupfs.tar.dir/";
+  int tar_status = -1;
+  char commands[1024] = "";
+  struct stat Status;
+  if (stat(file_path, &Status) != 0) return; // file_path is not exist or can not access
+
+  int res = Suckupfs(file_path, tar_file, des_dir, Status);
+  CU_ASSERT_EQUAL(1, res);
+  tar_status = stat(file_path, &Status);
+  CU_ASSERT_EQUAL(0, tar_status);
+  snprintf(commands, sizeof(commands), "file %s |grep 'tar archive' >/dev/null 2>&1", tar_file);
+  int rc = system(commands);
+  CU_ASSERT_EQUAL(1, rc != -1 && (WEXITSTATUS(rc) == 0));
+  rmdir(des_dir);
+}
+
+/**
+ * \brief for function Suckupfs(), reguler file
+ */
+void test_Suckupfs_file()
+{
+  char file_path[] = "./Makefile";
+  char tar_file[] = "/tmp/Suckupfs.tar.dir/testfile";
+  char des_dir[] = "/tmp/Suckupfs.tar.dir/";
+  int tar_status = -1;
+  char commands[1024] = "";
+  struct stat Status;
+  if (stat(file_path, &Status) != 0) return; // file_path is not exist or can not access
+
+  int res = Suckupfs(file_path, tar_file, des_dir, Status);
+  CU_ASSERT_EQUAL(1, res);
+  tar_status = stat(file_path, &Status);
+  CU_ASSERT_EQUAL(0, tar_status);
+  snprintf(commands, sizeof(commands), "file %s |grep ASCII >/dev/null 2>&1", tar_file);
+  int rc = system(commands);
+  CU_ASSERT_EQUAL(1, rc != -1 && (WEXITSTATUS(rc) == 0));
+  rmdir(des_dir);
+}
+
+/**
  * \brief testcases for function SetEnv
  */
 CU_TestInfo testcases_Utiliies[] =
@@ -111,6 +173,9 @@ CU_TestInfo testcases_Utiliies[] =
 {"Utiliies:IsFile_link", testIsFileNormal_SymLink},
 {"Utiliies:GetPosition_normal", testGetPositionNormal},
 {"Utiliies:TaintURL_normal", testTaintURL},
+{"Utiliies:PathCheck", test_PathCheck},
+{"Utiliies:Suckupfs_dir", test_Suckupfs_dir},
+{"Utiliies:Suckupfs_file", test_Suckupfs_file},
   CU_TEST_INFO_NULL
 };
 
