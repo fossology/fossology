@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /*
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -204,6 +204,9 @@ function tweakCUnit($fileName)
   }
 } // tweakCUnit
 
+
+/* begin main program */
+
 if(!defined('TESTROOT'))
 {
   $path = __DIR__;
@@ -271,7 +274,9 @@ if(is_null($WORKSPACE))
 }
 else
 {
-  if(@chdir($WORKSPACE . "/fossology2.0/src") === FALSE)
+  // TODO:  this script should _NOT_ have Jenkins workspace paths hard-coded
+  // but I'm leaving it like this for now so it will work, will fix later
+  if(@chdir($WORKSPACE . "/branches/fossology2.0/fossology/src") === FALSE)
   {
     echo "FATAL! " . __FILE__ . " could not cd to " . $WORKSPACE . "/fossology2.0/src\n";
     exit(1);
