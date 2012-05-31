@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+require_once("./test_common.php");
+
 /**
  * \brief test cli cp2foss 
  */
@@ -23,38 +25,24 @@
 class test_cp2foss extends PHPUnit_Framework_TestCase {
 
   public $SYSCONF_DIR = "/usr/local/etc/fossology/";
-  public $DB_NAME = "";
+  public $DB_NAME;
+  public $PG_CONN;
+  public $DB_COMMAND;
 
-  /**
-   * \brief create DB 
-   */
-  function create_db() {
+  /* initialization */
+  protected function setUp() {
     global $SYSCONF_DIR;
+    global $DB_COMMAND;
     global $DB_NAME;
 
-    $DB_COMMAND  = "../../testing/db/createTestDB.php";
-    exec($DB_COMMAND, $dbout, $rc);
-    $this->assertEquals(0, $rc);
-    preg_match("/(\d+)/", $dbout[0], $matches);
-    $test_name = $matches[1];
-    $DB_NAME = "fosstest".$test_name;
-    $SYSCONF_DIR = $dbout[0];
-    //print "DB_NAME is:$DB_NAME, $SYSCONF_DIR\n";
-  }
-
-  /**
-   * \brief get upload id
-   * 
-   * \param $upload_info - The string to search in. 
-   *
-   * \return upload Id, false on failure.
-   */
-  function get_upload_id($upload_info) {
-    $upload_id = 0;
-    preg_match("/UploadPk is: '(\d+)'/", $upload_info, $matches);
-    $upload_id = $matches[1];
-    if (!$upload_id) return false;
-    else return $upload_id;
+    $SYSCONF_DIR = "/usr/local/etc/fossology/";
+    $DB_NAME = "fossology";
+    $DB_COMMAND = "../../testing/db/createTestDB.php";
+    print "Starting functional test for cp2foss. \n";
+    create_db();
+    add_user();
+    replace_repo();
+    scheduler_operation();
   }
 
   /** 
@@ -68,38 +56,57 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
    */
   function test_upload_from_server(){
     global $SYSCONF_DIR;
-    //$this->create_db();
-    print "Starting functional test for cp2foss \n";
-    $auth = "--user fossy --password fossy";
+    $auth = "--user fossy --password fossy -c $SYSCONF_DIR";
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
     $command = "cp2foss $auth ./test_cp2foss.php";
     $last = exec("$command 2>&1", $out, $rtn);
-    //print_r($out);
+    sleep(10);
+    // print_r($out);
     $repo_string = "Uploading to folder: 'Software Repository'";
     $repo_pos = strpos($out[1], $repo_string);
     $output_msg_count = count($out);
     $this->assertGreaterThan(0, $repo_pos);
     $this->assertEquals(4, $output_msg_count);
+    $upload_id = 0;
+    /** get upload id that you just upload for testing */
+    if ($out && $out[3]) {
+      $upload_id = get_upload_id($out[3]);
+    } else $this->assertFalse(TRUE);
+    $agent_status = 0;
+    $agent_status = check_agent_status("ununpack", $upload_id);
+    $this->assertEquals(1, $agent_status);
+
     /** upload a dir to Software Repository */
     $out = "";
     $pos = 0;
     $command = "cp2foss $auth ./";
     $last = exec("$command 2>&1", $out, $rtn);
-    //print_r($out);
+    sleep(10);
+    // print_r($out);
     $repo_string = "Uploading to folder: 'Software Repository'";
     $repo_pos = strpos($out[1], $repo_string);
     $output_msg_count = count($out);
     $this->assertGreaterThan(0, $repo_pos);
     $this->assertEquals(4, $output_msg_count);
+    $upload_id = 0;
+    /** get upload id that you just upload for testing */
+    if ($out && $out[3]) {
+      $upload_id = get_upload_id($out[3]);
+    } else $this->assertFalse(TRUE);
+    $agent_status = 0;
+    $agent_status = check_agent_status("ununpack", $upload_id);
+    $this->assertEquals(1, $agent_status);
+
     /**  upload a dir to one specified path */
     $out = "";
     $pos = 0;
     $upload_path = "upload_path";
     $command = "cp2foss $auth ./ -f $upload_path -d upload_des -q all -v";
     $last = exec("$command 2>&1", $out, $rtn);
-    //print_r($out);
+    sleep(10);
+    // print_r($out);
     $repo_string = "Uploading to folder: '/$upload_path'";
     $repo_pos = strpos($out[7], $repo_string);
     $output_msg_count = count($out);
@@ -120,66 +127,106 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $pos = false;
     $pos = strpos($out[$output_msg_count - 4], $scheduled_agent_info_4);
     $this->assertEquals(0, $pos);
+    $upload_id = 0;
+    /** get upload id that you just upload for testing */
+    if ($out && $out[11]) {
+      $upload_id = get_upload_id($out[11]);
+    } else $this->assertFalse(TRUE);
+    $agent_status = 0;
+    $agent_status = check_agent_status("ununpack", $upload_id);
+    $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status("copyright", $upload_id);
+    $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status("nomos", $upload_id);
+    $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status("mimetype", $upload_id);
+    $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status("pkgagent", $upload_id);
+    $this->assertEquals(1, $agent_status);
+
     /** cp2foss --user USER --password PASSWORD -q all -A -f test/exclude -n 'test exclue dir'  \ 
       -d 'test des exclude dir' -X .svn -X ./ -v */
     $out = "";
     $pos = 0;
     $command = "cp2foss $auth -q all -A -f test/exclude -n 'test exclue dir'  -d 'test des exclude dir' -X .svn ./ -v";
     $last = exec("$command 2>&1", $out, $rtn);
-    //print_r($out);
+    sleep(10);
+    // print_r($out);
+    $upload_id = 0;
+    /** get upload id that you just upload for testing */
+    if ($out && $out[23]) {
+      $upload_id = get_upload_id($out[23]);
+    } else $this->assertFalse(TRUE);
+    $agent_status = 0;
+    $agent_status = check_agent_status("ununpack", $upload_id);
+    $this->assertEquals(1, $agent_status);
   }
 
   /**
    * \brief upload from url
    */
   function test_upload_from_url(){
-    $auth = "--user fossy --password fossy";
+    global $SYSCONF_DIR;
+    $auth = "--user fossy --password fossy -c $SYSCONF_DIR";
+    /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
     $command = "cp2foss $auth http://www.fossology.org/rpms/fedora/10/SRPMS/fossology-1.1.0-1.fc10.src.rpm -d 'fossology des' -f 'fossology path' -n 'test package'";
     $last = exec("$command 2>&1", $out, $rtn);
-    //print_r($out);
+    // print_r($out);
+    sleep(10);
+    $upload_id = 0;
+    /** get upload id that you just upload for testing */
+    if ($out && $out[5]) {
+      $upload_id = get_upload_id($out[5]);
+    } else $this->assertFalse(TRUE);
+    $agent_status = 0;
+    $agent_status = check_agent_status("ununpack", $upload_id);
+    $this->assertEquals(1, $agent_status);
   }
 
   /**
    * \brief list agents and help msg, etc
    */
   function test_list_agent_and_others(){
+    global $SYSCONF_DIR;
+    $auth = "--user fossy --password fossy -c $SYSCONF_DIR";
     /** help */
     $command = "cp2foss -h";
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
     $this->assertEquals(54, $output_msg_count);
-    //print_r($out);
-    $auth = "--user fossy --password fossy";
+    // print_r($out);
     /** list agents */
     $out = "";
     $pos = 0;
     $command = "cp2foss $auth -Q";
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(9, $output_msg_count);
+    $this->assertEquals(8, $output_msg_count);
     /** uplaod NULL */
     $out = "";
     $pos = 0;
     $command = "cp2foss $auth ";
     $last = exec("$command 2>&1", $out, $rtn);
-    //print_r($out);
+    // print_r($out);
     $output_msg = "FATAL: you want to upload ''.";
     $this->assertEquals($output_msg, $out[0]);
-    print "End up functional test for cp2foss \n";
   }
 
   /**
-   * \brief drop db
+   * \brief clean the env
    */
-  protected function drop_db() {
-    global $DB_NAME;
-    $DB_COMMAND  = "../../testing/db/createTestDB.php -d $DB_NAME";
-    print "DB_COMMAND is:$DB_COMMAND\n";
-    exec($DB_COMMAND, $dbout, $rc);
-    $this->assertEquals(0, $rc);
+  protected function tearDown() {
+    rollback_repo(); // rollback the repo dir in ununpack.conf and wget_agent.conf to the default
+    drop_db();
+    print "End up functional test for cp2foss \n";
   }
+
 }
 
 ?>
