@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -47,6 +47,35 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare pfile information ERROR!\n");
+    return (-1);
+  }
+  PQclear(result);
+
+  /* insert mimetype */
+  memset(SQL,'\0',MAXSQL);
+  snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('application/x-rpm');");
+  result =  PQexec(db_conn, SQL);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
+  {
+    printf("Perpare mimetype information ERROR!\n");
+    return (-1);
+  }
+  PQclear(result);
+  memset(SQL,'\0',MAXSQL);
+  snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-package');");
+  result =  PQexec(db_conn, SQL);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
+  {
+    printf("Perpare mimetype information ERROR!\n");
+    return (-1);
+  }
+  PQclear(result);
+  memset(SQL,'\0',MAXSQL);
+  snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-source');");
+  result =  PQexec(db_conn, SQL);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
+  {
+    printf("Perpare mimetype information ERROR!\n");
     return (-1);
   }
   PQclear(result);
@@ -199,6 +228,16 @@ int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Remove pfile database information ERROR!\n");
+    return (-1);
+  }
+  PQclear(result);
+
+  memset(SQL,'\0',MAXSQL);
+  snprintf(SQL,MAXSQL,"DELETE FROM mimetype;");
+  result =  PQexec(db_conn, SQL);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
+  {
+    printf("Remove mimetype information ERROR!\n");
     return (-1);
   }
   PQclear(result);
@@ -363,11 +402,55 @@ void test_GetMetadataDebBinary_no_uploadpk()
 }
 
 /**
- * \brief testcases for function GetMetadataDebBinary
+ * \brief Test pkgagent.c ProcessUpload function
+ * give the upload_pk of debian binary package, 
+ * get the package information about this upload id
+ */
+void test_ProcessUpload()
+{
+  struct debpkginfo *pi;
+  long upload_pk;
+  char *ErrorBuf;
+
+  int predictValue = 0;
+  pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+ 
+  /* perpare testing data in database */
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+
+  upload_pk = prepare_Database(db_conn, pi);
+  if (upload_pk == -1)
+    CU_FAIL_FATAL("Prepare database data ERROR!");
+
+  if (prepare_Repository() == -1)
+  {
+    remove_Database(db_conn, pi, upload_pk);
+    CU_FAIL_FATAL("Prepare repository data ERROR!");
+  }
+  
+  /* Test ProcessUpload function */
+  int Result = ProcessUpload(upload_pk);
+  printf("ProcessUpload Result is:%d\n", Result);
+ 
+  CU_ASSERT_EQUAL(Result, predictValue);
+
+  /* Clear testing data in database */
+  if (remove_Database(db_conn, pi, upload_pk) == -1)
+    CU_FAIL_FATAL("Remove database data ERROR!");
+  if (remove_Repository() == -1)
+    CU_FAIL_FATAL("Remove repository data ERROR!");
+
+  PQfinish(db_conn); 
+  memset(pi, 0, sizeof(struct debpkginfo));
+  free(pi);
+}
+/**
+ * \brief testcases for function GetMetadataDebBinary and ProcessUpload
  */
 CU_TestInfo testcases_GetMetadataDebBinary[] = {
     {"Testing the function GetMetadataDebBinary", test_GetMetadataDebBinary},
     {"Testing the function GetMetadataDebBinary with no uploadpk", test_GetMetadataDebBinary_no_uploadpk},
+    {"Testing the function ProcessUpload for debian binary package", test_ProcessUpload},
     CU_TEST_INFO_NULL
 };
 
