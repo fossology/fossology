@@ -62,6 +62,22 @@ void testDeleteUploads()
 }
 
 /**
+ * \brief for function DeleteLicenses
+ */
+void testDeleteLicenses()
+{
+  long UploadId = 85;
+  char *ErrorBuf;
+  
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  /** exectue the tested function */
+  DeleteLicense(UploadId);
+  
+  PQfinish(db_conn);
+  CU_PASS("DeleteLicenses PASS!");
+}
+
+/**
  * \brief testcases for function Delete
  */
 CU_TestInfo testcases_DeleteFolders[] =
@@ -70,6 +86,7 @@ CU_TestInfo testcases_DeleteFolders[] =
 #endif
 {"Testing the function DeleteFolders:", testDeleteFolders},
 {"Testing the function DeleteUploads:", testDeleteUploads},
+{"Testing the function DeleteLicenses:", testDeleteLicenses}, 
   CU_TEST_INFO_NULL
 };
 
