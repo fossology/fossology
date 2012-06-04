@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2011, 2012 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -20,25 +20,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /**
  * @file simple.c
- * @date Dec. 15, 2011
+ * @date June 1, 2012
  * @brief This is a simple test agent meant to be used by Unit and functional
- *        tests to confirm a correctly working scheduler. This particular agent
- *        is meant to simply work. It will start, call scheduler_connect,
- *        wait a few seconds and call scheduler_disconnect.
+ *        tests to confirm a correctly working scheduler. This agent does not
+ *        check for the return of fo_scheduler_next() to be NULL, so will fail
+ *        the scheduler startup test since will never finish.
  *
- * This is a working agent
+ * This is a failing agent
  */
 
 int main(int argc, char** argv)
 {
   fo_scheduler_connect(&argc, argv);
-  if(fo_scheduler_next() == NULL)
-    fo_scheduler_disconnect(0);
-  else
-    fo_scheduler_disconnect(-1);
 
+  while(1)
+  {
+    fo_scheduler_next();
+  }
+
+  fo_scheduler_disconnect(0);
   return 0;
 }
+
 
 
 
