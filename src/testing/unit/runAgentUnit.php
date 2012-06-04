@@ -265,23 +265,11 @@ foreach($modules as $key => $value)
 
 global $unitList;
 
-// @todo fix this, I don't think you need to check for workspace.
-
-if(is_null($WORKSPACE))
-{
-  // back to fossology/src
-  backToParent('../..');
-}
-else
-{
-  // TODO:  this script should _NOT_ have Jenkins workspace paths hard-coded
-  // but I'm leaving it like this for now so it will work, will fix later
-  if(@chdir($WORKSPACE . "/branches/fossology2.0/fossology/src") === FALSE)
-  {
-    echo "FATAL! " . __FILE__ . " could not cd to " . $WORKSPACE . "/fossology2.0/src\n";
-    exit(1);
-  }
-}
+// TODO:  Uncertain, relative paths are BAD.  Fix this
+/* at this point we should be in the directory fossology/src/testing/unit/
+   So let's change directories back to fossology/src/ 
+   (i.e. one directory above fossology/src/testing/) */
+backToParent('../..');
 
 $failures = 0;
 foreach($unitList as $unitTest)
