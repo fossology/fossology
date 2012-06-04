@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011, 2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -24,9 +24,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * @brief This is a simple test agent meant to be used by Unit and functional
  *        tests to confirm a correctly working scheduler. This particular agent
  *        is meant connect correctly to the scheduler and then instantly die.
+ *
+ * This is a failing agent
  */
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   fo_scheduler_connect(&argc, argv);
 
   return 0;

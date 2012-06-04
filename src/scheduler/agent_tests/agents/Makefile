@@ -30,8 +30,8 @@ EXES = $(patsubst %.c, %, $(C_FILES))
 # executable build rules #
 ##########################
 
-all:  test    # the make all and make test are the same thing
-test: $(EXES) # for this directory since this creates the test agents
+all: clean test # the make all and make test are the same thing
+test: $(EXES)   # for this directory since this creates the test agents
 $(EXES): %: %.c $(FOLIB) $(VARS)
 	@echo $@: 
 	@if [ ! -d $(MODDIR)/$@ ] ; then \
