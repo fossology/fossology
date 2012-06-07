@@ -46,11 +46,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <glib.h>
 #include <gio/gio.h>
 
-#define AGENT_CONF "mods-enabled"
-#ifndef PROCESS_NAME
-#define PROCESS_NAME "fo_scheduler"
-#endif
-
 #define TEST_ERROR(error, ...)                                     \
   if(error)                                                        \
   {                                                                \
@@ -74,6 +69,11 @@ int s_port;
 char* sysconfigdir = NULL;
 fo_conf* sysconfig = NULL;
 char* logdir;
+char* process_name;
+
+#define SELECT_DECLS(type, name, l_op, w_op, val) type CONF_##name = val;
+CONF_VARIABLES_TYPES(SELECT_DECLS)
+#undef SELECT_DECLS
 
 /* ************************************************************************** */
 /* **** signals and events ************************************************** */
@@ -85,16 +85,21 @@ char* logdir;
 #define MASK_SIGQUIT (1 << 3)
 #define MASK_SIGHUP  (1 << 4)
 
-
 int sigmask = 0;
 
 /**
- * handle signals from the child process. This will only be called on a SIGCHLD
- * and will handle the effects of the death of the child process.
+ * Handles any signals sent to the scheduler that are not SIGCHLD.
+ *
+ * Currently Handles:
+ *   SIGCHLD: scheduler will handle to death of the child process or agent
+ *   SIGALRM: scheduler will run agent updates and database updates
+ *   SIGTERM: scheduler will gracefully shut down
+ *   SIGQUIT: scheduler will forcefully shut down
+ *   SIGHIP:  scheduler will reload configuration data
  *
  * @param signo  the number of the signal that was sent
  */
-void chld_sig(int signo)
+void sig_handle(int signo)
 {
   /* Anywhere you see a "#if __GNUC__" the code is checking if gcc is the
    * compiler. This is because the __sync... set of functions are the gcc
@@ -112,132 +117,21 @@ void chld_sig(int signo)
    * In this set of events, a signal has been lost. If this is a sigchld this
    * could be very bad as a job could never get marked as finsihed.
    */
-#if __GNUC__
-  __sync_fetch_and_or(&sigmask, MASK_SIGCHLD);
-#else
-#warning Compiling without atomics, this could result in undefined beharvior
-  sigmask |= MASK_SIGCHLD;
-#endif
-}
-
-/**
- * Handles any signals sent to the scheduler that are not SIGCHLD.
- *
- * Currently Handles:
- *   SIGALRM: scheduler will run agent updates and database updates
- *   SIGTERM: scheduler will gracefully shut down
- *   SIGQUIT: scheduler will forcefully shut down
- *   SIGHIP:  scheduler will reload configuration data
- *
- * @param signo  the number of the signal that was sent
- */
-void prnt_sig(int signo)
-{
   switch(signo)
   {
 #if __GNUC__
-    case SIGALRM: __sync_fetch_and_or(&sigmask, MASK_SIGCHLD); break;
+    case SIGCHLD: __sync_fetch_and_or(&sigmask, MASK_SIGCHLD); break;
+    case SIGALRM: __sync_fetch_and_or(&sigmask, MASK_SIGALRM); break;
     case SIGTERM: __sync_fetch_and_or(&sigmask, MASK_SIGTERM); break;
     case SIGQUIT: __sync_fetch_and_or(&sigmask, MASK_SIGQUIT); break;
     case SIGHUP:  __sync_fetch_and_or(&sigmask, MASK_SIGHUP);  break;
 #else
+    case SIGCHLD: sigmask |= MASK_SIGCHLD; break;
     case SIGALRM: sigmask |= MASK_SIGALRM; break;
     case SIGTERM: sigmask |= MASK_SIGTERM; break;
     case SIGQUIT: sigmask |= MASK_SIGQUIT; break;
     case SIGHUP:  sigmask |= MASK_SIGHUP ; break;
 #endif
-  }
-}
-
-/* ************************************************************************** */
-/* **** The actual scheduler ************************************************ */
-/* ************************************************************************** */
-
-/**
- * @brief Update function called after every event
- *
- * The heart of the scheduler, the actual scheduling algorithm. This will be
- * passed to the event loop as a call back and will be called every time an event
- * is executed. Therefore the code should be light weight since it will be run
- * very frequently.
- *
- * TODO:
- *   currently this will only grab a job and create a single agent to execute
- *   the job.
- *
- *   TODO: allow for runonpfile jobs to have multiple agents based on size
- *   TODO: allow for job preemption. The scheduler can pause jobs, allow it
- *   TODO: allow for specific hosts to be chossen.
- */
-void update_scheduler()
-{
-  /* queue used to hold jobs if an exclusive job enters the system */
-  static job j = NULL;
-  static int lockout = 0;
-
-  /* locals */
-  host machine = NULL;
-  int n_agents = num_agents();
-  int n_jobs   = active_jobs();
-
-  /* check to see if we are in and can exit the startup state */
-  if(startup && n_agents == 0)
-  {
-    clean_meta_agents();
-    event_signal(database_update_event, NULL);
-    startup = 0;
-  }
-
-  /* check if we are able to close the scheduler */
-  if(closing && n_agents == 0 && n_jobs == 0)
-  {
-    event_loop_terminate();
-    return;
-  }
-
-  if(lockout && n_agents == 0 && n_jobs == 0)
-    lockout = 0;
-
-  if(j == NULL && !lockout)
-  {
-    while((j = peek_job()) != NULL)
-    {
-      if(is_meta_special(j->agent_type, SAG_LOCAL))
-      {
-        machine = name_host(LOCAL_HOST);
-        if(!(machine->running < machine->max))
-          break;
-      }
-      else if((machine = get_host(1)) == NULL)
-      {
-        V_SCHED("JOB_INIT: could not find host\n");
-        break;
-      }
-
-      next_job();
-      if(is_meta_special(j->agent_type, SAG_EXCLUSIVE))
-      {
-        V_SCHED("JOB_INIT: exclusive, postponing initialization\n")
-        break;
-      }
-
-      V_SCHED("Starting JOB[%d].%s\n", j->id, j->agent_type);
-      agent_init(machine, j);
-      j = NULL;
-    }
-  }
-
-  if(j != NULL && n_agents == 0 && n_jobs == 0)
-  {
-    agent_init(get_host(1), j);
-    lockout = 1;
-    j = NULL;
-  }
-
-  if(pause_f)
-  {
-    startup = 1;
-    pause_f = 0;
   }
 }
 
@@ -300,7 +194,7 @@ void signal_scheduler()
     V_SPECIAL("SIGNALS: Scheduler received alarm signal, checking job states\n");
     event_signal(agent_update_event, NULL);
     event_signal(database_update_event, NULL);
-    alarm(CHECK_TIME);
+    alarm(CONF_agent_update_interval);
   }
 
   /* signal: SIGTERM
@@ -311,7 +205,7 @@ void signal_scheduler()
   if(mask & MASK_SIGTERM)
   {
     V_SCHED("SIGNALS: Scheduler received terminate signal, shutting down gracefully\n");
-    closing = 1;
+    event_signal(scheduler_close_event, (void*)0);
   }
 
   /* signal: SIGQUIT
@@ -323,7 +217,7 @@ void signal_scheduler()
   if(mask & MASK_SIGQUIT)
   {
     V_SCHED("SIGNALS: Scheduler received quit signal, shutting down scheduler\n");
-    event_signal(scheduler_close_event, NULL);
+    event_signal(scheduler_close_event, (void*)1);
   }
 
   /* signal: SIGHUP
@@ -335,6 +229,97 @@ void signal_scheduler()
   {
     V_SCHED("SIGNALS: Scheduler received SGIHUP, reloading configuration data\n");
     load_config(NULL);
+  }
+}
+
+/* ************************************************************************** */
+/* **** The actual scheduler ************************************************ */
+/* ************************************************************************** */
+
+/**
+ * @brief Update function called after every event
+ *
+ * The heart of the scheduler, the actual scheduling algorithm. This will be
+ * passed to the event loop as a call back and will be called every time an event
+ * is executed. Therefore the code should be light weight since it will be run
+ * very frequently.
+ *
+ * TODO:
+ *   currently this will only grab a job and create a single agent to execute
+ *   the job.
+ *
+ *   TODO: allow for runonpfile jobs to have multiple agents based on size
+ *   TODO: allow for job preemption. The scheduler can pause jobs, allow it
+ *   TODO: allow for specific hosts to be chossen.
+ */
+void update_scheduler()
+{
+  /* queue used to hold jobs if an exclusive job enters the system */
+  static job j = NULL;
+  static int lockout = 0;
+
+  /* locals */
+  host machine = NULL;
+  int n_agents = num_agents();
+  int n_jobs   = active_jobs();
+
+  /* check to see if we are in and can exit the startup state */
+  if(startup && n_agents == 0)
+  {
+    event_signal(database_update_event, NULL);
+    startup = 0;
+  }
+
+  /* check if we are able to close the scheduler */
+  if(closing && n_agents == 0 && n_jobs == 0)
+  {
+    event_loop_terminate();
+    return;
+  }
+
+  if(lockout && n_agents == 0 && n_jobs == 0)
+    lockout = 0;
+
+  if(j == NULL && !lockout)
+  {
+    while((j = peek_job()) != NULL)
+    {
+      if(is_meta_special(j->agent_type, SAG_LOCAL))
+      {
+        machine = name_host(LOCAL_HOST);
+        if(!(machine->running < machine->max))
+          break;
+      }
+      else if((machine = get_host(1)) == NULL)
+      {
+        V_SCHED("JOB_INIT: could not find host\n");
+        break;
+      }
+
+      next_job();
+      if(is_meta_special(j->agent_type, SAG_EXCLUSIVE))
+      {
+        V_SCHED("JOB_INIT: exclusive, postponing initialization\n");
+        break;
+      }
+
+      V_SCHED("Starting JOB[%d].%s\n", j->id, j->agent_type);
+      agent_init(machine, j);
+      j = NULL;
+    }
+  }
+
+  if(j != NULL && n_agents == 0 && n_jobs == 0)
+  {
+    agent_init(get_host(1), j);
+    lockout = 1;
+    j = NULL;
+  }
+
+  if(pause_f)
+  {
+    startup = 1;
+    pause_f = 0;
   }
 }
 
@@ -380,7 +365,7 @@ void set_usr_grp()
   if((setgid(grp->gr_gid) != 0) || (setegid(grp->gr_gid) != 0))
   {
     fprintf(stderr, "FATAL %s.%d: %s must be run as root or %s\n",
-        __FILE__, __LINE__, PROCESS_NAME, user);
+        __FILE__, __LINE__, process_name, user);
     fprintf(stderr, "FATAL Set group '%s' aborting due to error: %s\n",
         group, strerror(errno));
     exit(-1);
@@ -399,7 +384,7 @@ void set_usr_grp()
   if((setuid(pwd->pw_uid) != 0) || (seteuid(pwd->pw_uid) != 0))
   {
     fprintf(stderr, "FATAL %s.%d: %s must run this as %s\n",
-        __FILE__, __LINE__, PROCESS_NAME, user);
+        __FILE__, __LINE__, process_name, user);
     fprintf(stderr, "FATAL SETUID aborting due to error: %s\n",
         strerror(errno));
     exit(-1);
@@ -633,6 +618,30 @@ void load_foss_config()
       lprintf("       max = %d\n", max);
     }
   }
+
+  /* This will create the load and the print command for the special
+   * configuration variables. This uses the l_op operation to load the variable
+   * from the file and the w_op variable to write the variable to the log file.
+   *
+   * example:
+   *   if this is in the CONF_VARIABLES_TYPES():
+   *
+   *     apply(char*, test_variable, NOOP, %s, "hello")
+   *
+   *   this is generated:
+   *
+   *     if(fo_config_has_key(sysconfig, "SCHEDULER", "test_variable")
+   *       CONF_test_variable = fo_config_get(sysconfig, "SCHEDULER",
+   *           "test_variable", NULL);
+   *     V_SPECIAL("CONFIG: %s == %s\n", "test_variable", CONF_test_variable);
+   *
+   */
+#define SELECT_CONF_INIT(type, name, l_op, w_op, val)                          \
+  if(fo_config_has_key(sysconfig, "SCHEDULER", #name))                         \
+    CONF_##name = l_op(fo_config_get(sysconfig, "SCHEDULER", #name, NULL));    \
+  V_SPECIAL("CONFIG: %s == " MK_STRING_LIT(w_op) "\n", #name, CONF_##name );
+  CONF_VARIABLES_TYPES(SELECT_CONF_INIT)
+#undef SELECT_CONF_INIT
 }
 
 /**
@@ -647,16 +656,22 @@ void load_config(void* unused)
 }
 
 /**
- * @brief Sets the closing flag and kills all the agents
+ * @brief Sets the closing flag and possibly kills all currently running agents
  *
- * This function is used to quickly and uncleanly kill the scheduler.
+ * This function will cause the scheduler to slowly shutdown. If killed is true
+ * this is a quick, ungraceful shutdown.
  *
- * @param unused  this is called as an event
+ * @param killed  should the scheduler kill all currently executing agents
+ *                before exiting the event loop, or should it wait for them
+ *                to finished first.
  */
-void scheduler_close_event(void* unused)
+void scheduler_close_event(void* killed)
 {
   closing = 1;
-  kill_agents();
+
+  if(killed) {
+    kill_agents();
+  }
 }
 
 /**

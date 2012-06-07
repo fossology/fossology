@@ -36,6 +36,7 @@ typedef struct job_internal* job;
 
 
 #define JOB_STATUS_TYPES(apply)                        \
+  apply(NOT_AVAILABLE)                                 \
   /** Checkout out from the db, but not started yet */ \
   apply(CHECKEDOUT)                                    \
   /** Agents have started analysis on the job */       \
@@ -46,12 +47,8 @@ typedef struct job_internal* job;
   apply(RESTART)                                       \
   /** The job has failed, likely an agent failure */   \
   apply(FAILED)                                        \
-  /** Paused by the scheduler, NOT USED CURRENTLY */   \
-  apply(SCH_PAUSED)                                    \
   /** Paused by some user interface */                 \
-  apply(CLI_PAUSED)                                    \
-  /** Illegal state, should not happen */              \
-  apply(ERROR)
+  apply(PAUSED)
 
 #define SELECT_ENUM(passed) JB_##passed,
 typedef enum { JOB_STATUS_TYPES(SELECT_ENUM) } job_status;
@@ -97,9 +94,9 @@ void job_destroy(job j);
 /* ************************************************************************** */
 
 void job_verbose_event(job j);
-void job_status_event(arg_int* param);
-void job_pause_event(arg_int* param);
-void job_restart_event(job j);
+void job_status_event(arg_int* params);
+void job_pause_event(arg_int* params);
+void job_restart_event(arg_int* params);
 void job_priority_event(arg_int* params);
 
 void job_add_agent(job j, void* a);

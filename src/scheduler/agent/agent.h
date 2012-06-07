@@ -33,16 +33,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
 
-#define MAX_CMD    1023 ///< the maximum length for an agent's start command  (arbitrary)
-#define MAX_WAIT   5    ///< max time to wait after a failed fork() call      (arbitrary but small)
-#define MAX_NAME   255  ///< the maximum length for an agent's name           (arbitrary)
-#define CHECK_TIME 120  ///< wait time between agent updates                  (arbitrary)
+#define MAX_CMD     1023 ///< the size of the agent's command buffer (arbitrary)
+#define MAX_NAME    255  ///< the size of the agent's name buffer    (arbitrary)
+#define MAX_ARGS    32   ///< the size of the argument buffer        (arbitrary)
+#define DEFAULT_RET -1   ///< default return code                    (arbitrary)
 
 #define LOCAL_HOST "localhost"
 
-#define SAG_EXCLUSIVE  (1 << 0) ///< This agent must not run at the same time as any other agent
-#define SAG_NOEMAIL    (1 << 1) ///< This agent should not send notification emails
-#define SAG_NOKILL     (1 << 2) ///< This agent should not be killed when updating the agent
+#define SAG_NOKILL     (1 << 0) ///< This agent should not be killed when updating the agent
+#define SAG_EXCLUSIVE  (1 << 1) ///< This agent must not run at the same time as any other agent
+#define SAG_NOEMAIL    (1 << 2) ///< This agent should not send notification emails
 #define SAG_LOCAL      (1 << 3) ///< This agent should only run on localhost
 
 /**
@@ -186,7 +186,6 @@ ssize_t agent_write(agent a, const void* buf, int count);
 
 void test_agents(host h);
 void kill_agents(void);
-void clean_meta_agents(void);
 void list_agents(GOutputStream* ostr);
 int  add_meta_agent(char* name, char* cmd, int max, int spc);
 int  is_meta_agent(char* name);

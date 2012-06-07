@@ -31,7 +31,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* library includes */
 #include <limits.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,12 +45,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* other library includes */
 #include <glib.h>
-
-/* agent defines */
-#define MAX_ARGS 32       ///< the maximum number arguments passed to children  (arbitrary)
-#define TILL_DEATH 180    ///< how long to wait before agent is dead            (3 minutes)
-#define NUM_UPDATES 1     ///< the number of updates before agent is dead       (arbitrary)
-#define DEFAULT_RET -1    ///< default return code                              (arbitrary)
 
 #define TEST_NULV(a) if(!a) { \
   errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
@@ -112,11 +105,9 @@ GRegex* special_regex = NULL;  ///< regex for parsing special messages
  * Array of C-Strings used to pretty-print the agent status in the log file.
  * Uses the X-Macro defined in @link agent.h
  */
-#define AGENT_STRING(passed) #passed
-#define SELECT_STRING(passed) AGENT_STRING(AGENT_##passed),
+#define SELECT_STRING(passed) MK_STRING_LIT(AGENT_##passed),
 const char* agent_status_strings[] = { AGENT_STATUS_TYPES(SELECT_STRING) };
 #undef SELECT_STRING
-#undef AGENT_STRING
 
 /* ************************************************************************** */
 /* **** Local Functions ***************************************************** */
@@ -173,12 +164,14 @@ static int agent_close_fd(int* pid_ptr, agent a, agent excepted)
 static int update(int* pid_ptr, agent a, gpointer unused)
 {
   TEST_NULL(a, 0);
+  int nokill = is_agent_special(a, SAG_NOKILL) ||
+               is_meta_special(a->meta_data->name, SAG_NOKILL);
+
   if(a->status == AG_SPAWNED || a->status == AG_RUNNING || a->status == AG_PAUSED)
   {
     /* check last checkin time */
-    if(time(NULL) - a->check_in > TILL_DEATH && !job_is_paused(a->owner) &&
-        !(is_agent_special(a, SAG_NOKILL) ||
-          is_meta_special(a->meta_data->name, SAG_NOKILL)))
+    if(time(NULL) - a->check_in > CONF_agent_death_timer
+        && !job_is_paused(a->owner) && !nokill)
     {
       AGENT_LOG("no heartbeat for %d seconds\n", (time(NULL) - a->check_in));
       agent_kill(a);
@@ -190,8 +183,7 @@ static int update(int* pid_ptr, agent a, gpointer unused)
       a->n_updates++;
     else
       a->n_updates = 0;
-    if(a->n_updates > NUM_UPDATES && !(is_agent_special(a, SAG_NOKILL) ||
-        is_meta_special(a->meta_data->name, SAG_NOKILL)))
+    if(a->n_updates > CONF_agent_update_number && !nokill)
     {
       AGENT_LOG("agent has not set the alive flag in at least 10 minutes, killing\n");
       agent_kill(a);
@@ -223,23 +215,6 @@ static int agent_kill_traverse(int* pid, agent a, gpointer unused)
 }
 
 /**
- * GTraversFunction that removes any meta agents that have failed the scheduler
- * startup test. This check should be performed after the scheduler startup test
- * has finished runnning.
- *
- * @param name    the name of the meta agent
- * @param ma      the meta agent struct
- * @param unused  not currently used
- * @return
- */
-static int clean_traverse(char* name, meta_agent ma, gpointer unused)
-{
-  if(!ma->valid)
-    g_tree_remove(meta_agents, ma);
-  return FALSE;
-}
-
-/**
  * GTraverseFunction that will print he name of every agent in alphabetical
  * order separated by spaces.
  *
@@ -250,9 +225,12 @@ static int clean_traverse(char* name, meta_agent ma, gpointer unused)
  */
 static int agent_list(char* name, meta_agent ma, GOutputStream* ostr)
 {
-  g_output_stream_write(ostr, name, strlen(name), NULL, NULL);
-  g_output_stream_write(ostr, " ",  1,            NULL, NULL);
-  return 0;
+  if(ma->valid)
+  {
+    g_output_stream_write(ostr, name, strlen(name), NULL, NULL);
+    g_output_stream_write(ostr, " ",  1,            NULL, NULL);
+  }
+  return FALSE;
 }
 
 /**
@@ -320,11 +298,13 @@ static void agent_listen(agent a)
     }
     else
     {
-      if(a->owner->id >= 0)
-        g_tree_remove(meta_agents, a->meta_data->name);
+      a->meta_data->valid = 0;
+      agent_fail(a);
+      agent_kill(a);
       clprintf("ERROR %s.%d: agent %s.%s has been invalidated, removing from agents\n",
           __FILE__, __LINE__, a->host_machine->name, a->meta_data->name);
       AGENT_LOG("agent didn't send version information: \"%s\"\n", buffer);
+      return;
     }
   }
 
@@ -600,7 +580,7 @@ static void* agent_spawn(void* passed)
   /* we are in the child */
 
   while((a->pid = fork()) < 0)
-    sleep(rand() % MAX_WAIT);
+    sleep(rand() % CONF_fork_backoff_time);
 
   if(a->pid == 0)
   {
@@ -628,6 +608,7 @@ static void* agent_spawn(void* passed)
       tmp = args[0];
       args[0] = g_strdup_printf(AGENT_BINARY,
           sysconfigdir,
+          AGENT_CONF,
           a->meta_data->name,
           tmp);
 
@@ -649,6 +630,7 @@ static void* agent_spawn(void* passed)
       args = g_new0(char*, 4);
       sprintf(buffer, AGENT_BINARY,
           a->host_machine->agent_dir,
+          AGENT_CONF,
           a->meta_data->name,
           a->meta_data->raw_cmd);
       args[0] = "/usr/bin/ssh";
@@ -928,6 +910,9 @@ void agent_death_event(pid_t* pid)
     a->meta_data->valid = 0;
   }
 
+  if(a->owner->id < 0 && !a->meta_data->valid)
+    AGENT_VERB("agent failed startup test, removing from meta agents\n");
+
   AGENT_VERB("successfully remove from the system\n");
   job_remove_agent(a->owner, a);
   g_tree_remove(agents, &a->pid);
@@ -1176,15 +1161,6 @@ void test_agents(host h)
 void kill_agents()
 {
   g_tree_foreach(agents, (GTraverseFunc)agent_kill_traverse, NULL);
-}
-
-/**
- * Traverses the list of possible meta agents, and removes any that have failed
- * the scheduler startup test.
- */
-void clean_meta_agents()
-{
-  g_tree_foreach(meta_agents, (GTraverseFunc)clean_traverse, NULL);
 }
 
 /**

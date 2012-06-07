@@ -71,6 +71,7 @@ int main(int argc, char** argv)
       {NULL}
   };
 
+  process_name = argv[0];
   s_pid = getpid();
   s_daemon = FALSE;
   s_port = -1;
@@ -127,11 +128,11 @@ int main(int argc, char** argv)
   load_agent_config();
   fo_RepOpenFull(sysconfig);
 
-  signal(SIGCHLD, chld_sig);
-  signal(SIGALRM, prnt_sig);
-  signal(SIGTERM, prnt_sig);
-  signal(SIGQUIT, prnt_sig);
-  signal(SIGHUP,  prnt_sig);
+  signal(SIGCHLD, sig_handle);
+  signal(SIGALRM, sig_handle);
+  signal(SIGTERM, sig_handle);
+  signal(SIGQUIT, sig_handle);
+  signal(SIGHUP,  sig_handle);
 
   /* *********************************** */
   /* *** post initialization checks **** */
@@ -148,7 +149,7 @@ int main(int argc, char** argv)
   /* *** enter the scheduler event loop **** */
   /* *************************************** */
 
-  alarm(CHECK_TIME);
+  alarm(CONF_agent_update_interval);
   event_loop_enter(update_scheduler, signal_scheduler);
 
   NOTIFY("*****************************************************************");

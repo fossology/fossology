@@ -25,11 +25,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libpq-fe.h>
 
 /* ************************************************************************** */
-/* **** useful macros ******************************************************* */
+/* **** utility ************************************************************* */
 /* ************************************************************************** */
 
 #define PQget(db_result, row, col) \
   PQgetvalue(db_result, row, PQfnumber(db_result, col))
+
+extern const char* jobsql_failed;
 
 /* ************************************************************************** */
 /* **** constructor destructor ********************************************** */

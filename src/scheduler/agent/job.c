@@ -48,11 +48,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * Array of C-Strings used to pretty-print the job status in the log file.
  * Uses the X-Macro defined in @link job.h
  */
-#define JOB_STRING(passed) #passed
-#define SELECT_STRING(passed) JOB_STRING(JOB_##passed),
+#define SELECT_STRING(passed) MK_STRING_LIT(JOB_##passed),
 const char* job_status_strings[] = { JOB_STATUS_TYPES(SELECT_STRING) };
 #undef SELECT_STRING
-#undef JOB_STRING
 
 /** Map of jobs that are currently running, maps jq_pk to job struct */
 GTree* job_list = NULL;
@@ -129,50 +127,6 @@ static void job_transition(job j, job_status new_status)
   /* only update database for real jobs */
   if(j->id >= 0)
     database_update_job(j, new_status);
-}
-
-/**
- * Causes all agents that are working on the job to pause. This will simply cause
- * the scheduler to stop sending new information to the agents in question.
- *
- * @param j the job to pause
- */
-static void job_pause(job j, int cli)
-{
-  GList* iter;
-
-  TEST_NULV(j);
-
-  if(cli) job_transition(j, JB_CLI_PAUSED);
-  else job_transition(j, JB_SCH_PAUSED);
-
-  for(iter = j->running_agents; iter != NULL; iter = iter->next)
-    agent_pause(iter->data);
-}
-
-/**
- * Restart the agents that are working on this job. This will cause the scheduler
- * to start sending information to the agents again.
- *
- * @param j the job to restart
- */
-static void job_restart(job j)
-{
-  GList* iter;
-
-  TEST_NULV(j);
-  if(j->status != JB_SCH_PAUSED && j->status != JB_CLI_PAUSED)
-  {
-    ERROR("attempt to restart job %d failed, job status was %s", j->id, job_status_strings[j->status]);
-    return;
-  }
-
-  for(iter = j->running_agents; iter != NULL; iter = iter->next)
-  {
-    if(j->db_result != NULL) agent_write(iter->data, "OK\n", 3);
-    agent_unpause(iter->data);
-  }
-  job_transition(j, JB_STARTED);
 }
 
 /**
@@ -354,7 +308,25 @@ void job_status_event(arg_int* params)
  */
 void job_pause_event(arg_int* params)
 {
-  job_pause(params->first, params->second);
+  struct job_internal tmp_job;
+  job j = params->first;
+  GList* iter;
+
+  // if the job doesn't exist, create a fake
+  if(params->first == NULL)
+  {
+    tmp_job.id             = params->second;
+    tmp_job.status         = JB_NOT_AVAILABLE;
+    tmp_job.running_agents = NULL;
+    tmp_job.message        = NULL;
+
+    j = &tmp_job;
+  }
+
+  job_transition(j, JB_PAUSED);
+  for(iter = j->running_agents; iter != NULL; iter = iter->next)
+    agent_pause(iter->data);
+
   g_free(params);
 }
 
@@ -363,9 +335,39 @@ void job_pause_event(arg_int* params)
  *
  * @param j  the job that should be restarted.
  */
-void job_restart_event(job j)
+void job_restart_event(arg_int* params)
 {
-  job_restart(j);
+  struct job_internal tmp_job;
+  job j = params->first;
+  GList* iter;
+
+  // if the job doesn't exist, create a fake
+  if(j == NULL)
+  {
+    tmp_job.id             = params->second;
+    tmp_job.status         = JB_PAUSED;
+    tmp_job.running_agents = NULL;
+    tmp_job.message        = NULL;
+
+    event_signal(database_update_event, NULL);
+    j = &tmp_job;
+  }
+
+  if(j->status != JB_PAUSED)
+  {
+    ERROR("attempt to restart job %d failed, job status was %s", j->id, job_status_strings[j->status]);
+    g_free(params);
+    return;
+  }
+
+  for(iter = j->running_agents; iter != NULL; iter = iter->next)
+  {
+    if(j->db_result != NULL) agent_write(iter->data, "OK\n", 3);
+    agent_unpause(iter->data);
+  }
+
+  job_transition(j, JB_RESTART);
+  g_free(params);
 }
 
 /**
@@ -498,8 +500,7 @@ void job_update(job j)
     if(((agent)iter->data)->status != AG_PAUSED)
       finished = 0;
 
-  if(j->status != JB_SCH_PAUSED && j->status != JB_CLI_PAUSED &&
-     j->status != JB_COMPLETE && finished)
+  if(j->status != JB_PAUSED && j->status != JB_COMPLETE && finished)
   {
     if(j->failed_agents == NULL)
     {
@@ -550,7 +551,7 @@ void job_fail_event(job j)
 int job_is_paused(job j)
 {
   TEST_NULL(j, -1);
-  return j->status == JB_SCH_PAUSED || j->status == JB_CLI_PAUSED;
+  return j->status == JB_PAUSED;
 }
 
 /**

@@ -223,6 +223,7 @@ void for_each_host(void(*callback)(host))
 void print_host_load(GOutputStream* ostr)
 {
   g_tree_foreach(host_list, (GTraverseFunc)print_host_all, ostr);
+  g_output_stream_write(ostr, "\nend\n", 5, NULL, NULL);
 }
 
 /**
