@@ -1,0 +1,11 @@
+#
+# $Id$
+#
+# Filter for debian build
+#
+# PBDEBSTD is replaced by the Debian standard version
+filter PBDEBSTD = 3.8.0
+
+# PBDEBCOMP is replaced by the Debian Compatibility value
+filter PBDEBCOMP = 4
+

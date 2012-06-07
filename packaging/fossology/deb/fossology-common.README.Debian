@@ -1,0 +1,121 @@
+FOSSology for Debian
+--------------------
+FOSSology is a web based application. In addition to installing the
+fossology packages you need to configure some other services on your
+system like a webserver and database. Then you access FOSSology with
+your web browser.
+
+Single vs. Multi-system installs:
+The FOSSology software has been split into separate packages according
+to function in order to make it easy to split the work across machines.
+
+* If you want to run everything on a single system just install the
+"fossology" meta-package and it will do the right thing. See the
+Additional Setup section below.
+
+* If you want to do a multi-system install read the upstream
+INSTALL.multi document and then
+1) On the database machine: install fossology-db.
+2) On each of the agents machine(s):
+ a) install fossology-common
+ b) edit /etc/fossology/Db.conf and point it at the database machine
+ c) if you like, edit /etc/fossology/Repo.conf to point at a non-default
+    repository location
+ d) edit /etc/fossology/Hosts.conf and list the agent machines
+    according to the format explained in the upstream documentation
+    and to how you want to split the repository.
+ e) create the directory $REPO/<hostname> where that hostname is the
+   name of the machine as listed in Hosts.conf. This directory should
+   be root:fossy 2770.
+ f) setup nfs so that each agent's $REPO/<hostname> directory is exported
+    to all of the other agent/scheduler/web machines.
+ g) on all the agent machines mount each of the other agents at
+    $REPO/<hostname>
+ i) install fossology-agents
+3) On each of the web machine(s):
+ a) install fossology-common
+ b) edit /etc/fossology/Db.conf and point it at the database machine
+ c) mount each of all of the agent machines at $REPO/<hostname>
+ d) install fossology-web
+4) On the scheduler machine:
+ a) install fossology-common
+ b) edit /etc/fossology/Db.conf and point it at the database machine
+ c) mount each of all of the agent machines at $REPO/<hostname>
+ d) install fossology-scheduler
+ e) Use mkschedconf to generate a new Scheduler.conf with your
+   preferences for machines and CPU counts.
+5) On all machines:
+ a) ensure that the fossy UID/GIDs that were created on all machines
+   are the same
+ b) make sure all nfs mounts are working and as fossy you can write to the
+   repository
+6) On the scheduler:
+ a) run '/usr/lib/fossology/fossology-scheduler -t' to test that
+   everything works
+ b) restart the scheduler '/etc/init.d/fossology restart'
+
+
+Additional Setup:
+The Debian packages do most of what you need to install FOSSology. In
+addition to installing the packages you need to do the following steps
+from the upstream INSTALL document
+
+* Adjust the kernel shmmax (database)
+* Adjust the postgresql config (database)
+* Adjust the apache config (web)
+* Adjust the php config (web)
+
+All of these will be dependent on the goals of your local system and
+can't be reasonably automated, so you'll have to do them by hand.
+
+After you have installed the packages and done the above adjustments,
+you can point your web browser at at the new install
+  http://yourhostname/repo/
+and start using FOSSology!
+
+
+Differences between the single and multi packages:
+If you are using the 'fossology' meta-package, which depends on the
+right *-single packages to give you a working single system install, the
+packages make certain assumptions to make things 'just work'. One
+of these is that each time the fossology-scheduler-single package is
+upgraded, it automatically generates a new /etc/fossology/Scheduler.conf
+optimized for your system and the new version of fossology. If you have
+made any changes to your Scheduler.conf, they will be overwritten.
+
+If you are using the non *-single packages, because you have a multi
+system install (or just prefer them), your
+/etc/fossology/Scheduler.conf will NOT automatically be updated, because
+you have local edits and updating would break them. This means that
+after an upgrade, if there are new agents installed (or agents
+removed) your Scheduler.conf will need to be updated by hand to
+account for the changes.
+NOTE: Upstream is planning on eventually moving the things specified in
+this config file into the database and be managed via the web
+interface, which will allow for more seamless upgrades.
+
+The FOSSology database:
+The fossology-db package Depends on postgresql and will create the
+fossology database when installed. This requires that postgresql is
+running and accessible when the package is installed. If you want to
+have FOSSology use a remote database or you want to create the
+fossology by hand, do not install fossology-db. Instead setup the
+database as you want it, and edit /etc/fossology/Db.conf accordingly.
+
+Migrating from upstream:
+* If you are migrating from an upstream install, you will need to run
+the upstream utils/fo-cleanold utility in order to clean off old
+binaries that would be in the PATH and really confuse things. You
+should be able to run it with no options, which will save your config
+files and leave your database and repository intact. Then install the
+packages as described above and migrate any config file changes to the
+new config files.
+* If you are coming from a pre-1.0.0 install you have edits to php.ini
+that you will no longer need and should clean up. See the current
+upstream INSTALL document for what is still needed.
+* The upstream init script, default file, and apache config will be
+pointing at the upstream install locations. Because these are conffiles,
+you may still have the old versions after install and need to adjust
+them to point to the package locations.
+
+ -- Matt Taggart <taggart@debian.org>  Fri, 17 Oct 2008 01:24:09 -0700
