@@ -40,14 +40,16 @@ test: $(EXE)
 	@echo "make copyright Unit agent_tests"
 	./$(EXE)
 
-coverage: $(OBJECTS) libcopyright_cov.a run_tests.c
+coverage: $(OBJECTS) libcopyright_cov.a run_tests.c ${FOLIB}
 	@echo "make copyright agent_tests coverage"
+	${MAKE} -C ${TESTDIR}
 	$(CC) run_tests.c -o $(EXE) $(OBJECTS) libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
 	./$(EXE)
 	lcov --directory . --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
-$(EXE): $(OBJECTS) libcopyright.a run_tests.c
+$(EXE): $(OBJECTS) libcopyright.a run_tests.c ${FOLIB}
+	${MAKE} -C ${TESTDIR}
 	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(CFLAGS_LOCAL)
 
 $(OBJECTS): %.o: %.c
@@ -84,3 +86,4 @@ uninstall:
 	@echo "make copyright agent_tests nothing to uninstall"
 
 .PHONY: all install uninstall clean test 
+include ${TOP}/Makefile.deps
