@@ -1,0 +1,31 @@
+#
+# $Id$
+#
+# Filter for rpm build
+#
+
+# PBGRP is replaced by the RPM group of apps
+# Cf: http://fedoraproject.org/wiki/RPMGroups
+filter PBGRP = Applications/Engineering
+
+# PBLIC is replaced by the license of the application
+# Cf: http://fedoraproject.org/wiki/Licensing
+filter PBLIC = GPLv2
+
+# PBDEP is replaced by the list of dependencies
+filter PBDEP = file postgresql-server >= 8.1.11 smtpdaemon
+
+# PBBUILDDEP is replaced by the list of build dependencies
+filter PBBUILDDEP = perl-Text-Template subversion file libextractor-devel
+# libextractor and perl-Text-Template available as rpmforge packages
+
+# PBSUF is replaced by the package suffix ($pbsuf'} in code)
+filter PBSUF = .el5
+
+# PBOBS is replaced by the Obsolete line
+#filter PBOBS =
+
+filter PBPHPINI = /etc/php.ini
+
+#PBPGHBA is change pg_hba files
+filter PBPGHBA = perl -pi -e 's|(host\s+all\s+all\s+127.0.0.1/32\s+ident\s+sameuser)|#$1|' /var/lib/pgsql/data/pg_hba.conf
