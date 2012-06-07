@@ -1,0 +1,4416 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Jeroen Baten 2011-02-15
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: FOSSology 1.3pre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-10-01 20:53+0200\n"
+"PO-Revision-Date: 2011-02-15 11:09+0100\n"
+"Last-Translator: Jeroen Baten <jeroen@jeroenbaten.nl>\n"
+"Language-Team: None\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Dutch\n"
+"X-Poedit-Country: NETHERLANDS\n"
+
+#: index.php:51
+msgid "Module unavailable or your login session timed out."
+msgstr "Module niet beschikbaar of uw loginsessie is verlopen."
+
+#: index.php:53
+msgid "Click here to continue."
+msgstr "Klik hier om door tegaan."
+
+#: common/common-license-file.php:252
+#: plugins/ui-licgroup-manage.php:483
+#: plugins/ui-licterm-manage.php:470
+#: plugins/agent-license-once-compare.php:281
+#: plugins/core-schema.php:168
+#: plugins/core-schema.php:311
+msgid "View"
+msgstr "View"
+
+#: common/common-license-file.php:253
+msgid "Info"
+msgstr "Info"
+
+#: common/common-license-file.php:254
+msgid "Download"
+msgstr "Download"
+
+#: common/common-agents.php:76
+msgid "Fatal! Query Failed getting user_agent_list for user"
+msgstr "FATAAL: Query mislukte bij het ophalen van de user_agent_list voor de gebruiker"
+
+#: common/common-agents.php:504
+msgid "Invalid parameter (upload_pk)"
+msgstr "Ongeldige parameter (upload_pk)"
+
+#: common/common-agents.php:528
+msgid "FATAL: Email Notification: no email address supplied, cannot send mail, common-agents::scheduleEmailNotification Your job should be scheduled, you will not get email notifying you it is done"
+msgstr "FATAAL: Email notificatie: geen emailadres verstrekt, kan geen email verzenden, common-agents::scheduleEmailNotification Uw taak zou ingepland moeten zijn, u krijgt een emailbericht als het klaar is"
+
+#: common/common-agents.php:547
+msgid "Failed to insert job record, job fo_notify not created"
+msgstr "Invoeren van taak record mislukt, taak fo_notify niet aangemaakt"
+
+#: common/common-agents.php:555
+msgid "Failed to insert task 'fo_notify' into job queue"
+msgstr "Invoeren van taak 'fo_notify' in wachtrij mislukt"
+
+#: common/common-menu.php:58
+#: common/common-menu.php:103
+#: plugins/ui-view.php:300
+msgid "First"
+msgstr "Eerste"
+
+#: common/common-menu.php:59
+#: common/common-menu.php:104
+#: plugins/ui-view.php:302
+msgid "Prev"
+msgstr "Vorige"
+
+#: common/common-menu.php:82
+#: common/common-menu.php:121
+#: plugins/ui-view.php:319
+msgid "Next"
+msgstr "Volgende"
+
+#: common/common-menu.php:83
+#: plugins/ui-view.php:321
+msgid "Last"
+msgstr "Laatste"
+
+#: common/common-menu.php:281
+msgid "Traceback"
+msgstr "Tracering"
+
+#: common/common-menu.php:290
+#: plugins/ui-browse.php:223
+#: plugins/ui-folders.php:64
+msgid "Refresh"
+msgstr "Ververs"
+
+#: common/common-cli.php:85
+msgid "ERROR: could not write message to"
+msgstr "FOUT: kon geen boodschap schrijven naar"
+
+#: common/common-dir.php:269
+#: plugins/admin-folder-create.php:134
+#: plugins/admin-folder-create.php:139
+msgid "Folder"
+msgstr "Map"
+
+#: common/common-dir.php:391
+msgid "Phrase"
+msgstr "Zin"
+
+#: common/common-active.php:63
+msgid "Close"
+msgstr "Sluiten"
+
+#: common/common-buckets.php:56
+msgid "No data available.  Use Jobs > Agents to schedule a bucket scan."
+msgstr "Geen gegevens voorhanden. Gebruik Taken > Agents voor het inplannen van een bucket scan."
+
+#: plugins/ajax-filelic.php:43
+msgid "ajax find items by license"
+msgstr "ajax vind items in licentie"
+
+#: plugins/ui-license.php:27
+msgid "bSAM License Browser (deprecated)"
+msgstr "bSAM Lisentie-Browser (verouderd)"
+
+#: plugins/ui-license.php:84
+#: plugins/ui-buckets.php:109
+msgid "Clear"
+msgstr "Herstellen"
+
+#: plugins/ui-license.php:89
+msgid "View bsam license histogram"
+msgstr "Toon bSAM Lisentie Histogram"
+
+#: plugins/ui-license.php:313
+#: plugins/ui-buckets.php:276
+#: plugins/ui-licgroup.php:561
+#: plugins/ui-nomos-license.php:200
+msgid "Count"
+msgstr "Aantal"
+
+#: plugins/ui-license.php:315
+#: plugins/ui-buckets.php:278
+#: plugins/ui-licgroup.php:563
+#: plugins/ui-nomos-license.php:202
+#: plugins/ui-nomos-license.php:244
+msgid "Files"
+msgstr "Bestanden"
+
+#: plugins/ui-license.php:317
+#: plugins/ui-view-info.php:354
+#: plugins/ui-licgroup-debug.php:93
+msgid "License"
+msgstr "Licentie"
+
+#: plugins/ui-license.php:350
+#: plugins/ui-buckets.php:297
+#: plugins/ui-licgroup.php:329
+#: plugins/ui-licgroup.php:586
+#: plugins/ui-nomos-license.php:218
+msgid "Show"
+msgstr "Tonen"
+
+#: plugins/ui-license.php:364
+msgid "Total licenses"
+msgstr "Totaal aantal licenties"
+
+#: plugins/ui-license.php:492
+#: plugins/ui-buckets.php:543
+#: plugins/search.php:409
+#: plugins/ui-nomos-license.php:467
+#, php-format
+msgid "Elapsed time: %.2f seconds"
+msgstr "Verstreken tijd: %.2f Seconden"
+
+#: plugins/ui-license.php:494
+#: plugins/ui-buckets.php:547
+#: plugins/ui-nomos-license.php:472
+msgid "cached"
+msgstr "gecached"
+
+#: plugins/ui-license.php:495
+#: plugins/admin-license-file.php:328
+#: plugins/ui-buckets.php:548
+#: plugins/ui-nomos-license.php:473
+msgid "Update"
+msgstr "Actualiseren"
+
+#: plugins/jobs-runningjobs.php:27
+msgid "Show Agent Status"
+msgstr "Toon Agent Status"
+
+#: plugins/jobs-runningjobs.php:76
+msgid "The FOSSology job scheduler does not appear to be running."
+msgstr "De FOSSology-Scheduler lijkt niet te lopen niet."
+
+#: plugins/jobs-runningjobs.php:78
+msgid "If this is unexpected, look in the log file (typically /var/log/fossology/fossology.log) for errors. "
+msgstr "Als u dit niet verwacht kijk dan in het logbestand (normaal gesproken /var/log/fossology/fossology.log)  voor foutmeldingen."
+
+#: plugins/jobs-runningjobs.php:79
+msgid " Otherwise, you may want to restart the scheduler (typically sudo /etc/init.d/fossology start)"
+msgstr "Anders kunt u de scheduler herstarten (meestal via sudo /etc/init.d/fossology start)"
+
+#: plugins/jobs-runningjobs.php:91
+msgid "Update time"
+msgstr "Tijd actualiseren"
+
+#: plugins/jobs-runningjobs.php:95
+msgid "Status"
+msgstr "Status"
+
+#: plugins/jobs-runningjobs.php:99
+msgid "Agent Name"
+msgstr "Agentnaam"
+
+#: plugins/jobs-runningjobs.php:103
+msgid "Host"
+msgstr "Host"
+
+#: plugins/jobs-runningjobs.php:107
+msgid "Parameters"
+msgstr "Parameters"
+
+#: plugins/admin-license-file.php:27
+msgid "License Administration"
+msgstr "Licentie Administratie"
+
+#: plugins/admin-license-file.php:47
+msgid "Add new license"
+msgstr "Nieuwe licentie toevoegen"
+
+#: plugins/admin-license-file.php:50
+msgid "Select license family"
+msgstr "Selecteer Licentiefamilie"
+
+#: plugins/admin-license-file.php:65
+msgid "What license family do you wish to view:<br>"
+msgstr "Welke Licentiefamilie wilt u zien:<br>"
+
+#: plugins/admin-license-file.php:70
+msgid "Filter: "
+msgstr "Filter:"
+
+#: plugins/admin-license-file.php:73
+msgid "All"
+msgstr "Alle"
+
+#: plugins/admin-license-file.php:76
+#: plugins/admin-license-file.php:156
+#: plugins/admin-license-file.php:260
+msgid "Checked"
+msgstr "Aangevinkt"
+
+#: plugins/admin-license-file.php:79
+msgid "Not Checked"
+msgstr "Niet Aangevinkt"
+
+#: plugins/admin-license-file.php:85
+msgid "License family name: "
+msgstr "Licentie familienaam"
+
+#: plugins/admin-license-file.php:93
+#: plugins/search-repo.php:147
+msgid "Find"
+msgstr "Zoeken"
+
+#: plugins/admin-license-file.php:141
+msgid "No licenses matching the filter"
+msgstr "Geen licentie komt overeen met het filter"
+
+#: plugins/admin-license-file.php:142
+msgid "and name pattern"
+msgstr "en naam patroon"
+
+#: plugins/admin-license-file.php:143
+msgid "were found"
+msgstr "zijn gevonden"
+
+#: plugins/admin-license-file.php:154
+#: plugins/ui-tags.php:525
+#: plugins/admin-upload-edit.php:177
+#: plugins/admin-folder-edit.php:134
+msgid "Edit"
+msgstr "Wijzigen"
+
+#: plugins/admin-license-file.php:158
+msgid "Shortname"
+msgstr "Korte naam"
+
+#: plugins/admin-license-file.php:160
+msgid "Fullname"
+msgstr "Volledige naam"
+
+#: plugins/admin-license-file.php:162
+msgid "Text"
+msgstr "Tekst"
+
+#: plugins/admin-license-file.php:164
+#: plugins/admin-license-file.php:314
+#: plugins/ui-view-info.php:378
+msgid "URL"
+msgstr "URL"
+
+#: plugins/admin-license-file.php:234
+msgid "No licenses matching this key"
+msgstr "Geen licenties komen overeen met deze zoeksleutel"
+
+#: plugins/admin-license-file.php:235
+msgid "was found"
+msgstr "zijn gevonden"
+
+#: plugins/admin-license-file.php:252
+#: plugins/myjobs.php:82
+msgid "Active"
+msgstr "Aktief"
+
+#: plugins/admin-license-file.php:268
+msgid "Short name"
+msgstr "Korte naam"
+
+#: plugins/admin-license-file.php:274
+msgid "Full name"
+msgstr "Complete naam"
+
+#: plugins/admin-license-file.php:288
+msgid "(read only)"
+msgstr "(alleen lezen)"
+
+#: plugins/admin-license-file.php:292
+msgid "License Text"
+msgstr "Licentie tekst"
+
+#: plugins/admin-license-file.php:300
+msgid "Text Updatable"
+msgstr "Tekst kan gewijzigd worden"
+
+#: plugins/admin-license-file.php:308
+msgid "Detector Type"
+msgstr "Detector-Type"
+
+#: plugins/admin-license-file.php:321
+msgid "Public Notes"
+msgstr "Openbare Opmerkingen"
+
+#: plugins/admin-license-file.php:331
+msgid "Add License"
+msgstr "Licentie toevoegen"
+
+#: plugins/admin-dashboard.php:27
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: plugins/admin-dashboard.php:61
+msgid "Filesystem"
+msgstr "Bestandssysteem"
+
+#: plugins/admin-dashboard.php:62
+msgid "Used"
+msgstr "Gebruikt"
+
+#: plugins/admin-dashboard.php:63
+msgid "Capacity"
+msgstr "Capaciteit"
+
+#: plugins/admin-dashboard.php:64
+msgid "Percent Full"
+msgstr "Procent vol"
+
+#: plugins/admin-dashboard.php:109
+msgid "Job Queue"
+msgstr "Wachtrij"
+
+#: plugins/admin-dashboard.php:112
+msgid "Queue Information"
+msgstr "Wachtrij Informatie"
+
+#: plugins/admin-dashboard.php:113
+#: plugins/admin-dashboard.php:168
+#: plugins/admin-dashboard.php:198
+#: plugins/myjobs.php:79
+msgid "Total"
+msgstr "Totaal"
+
+#: plugins/admin-dashboard.php:121
+#: plugins/admin-dashboard.php:125
+msgid "Pending Analysis Jobs"
+msgstr "Wachtende analyse taken"
+
+#: plugins/admin-dashboard.php:131
+#: plugins/admin-dashboard.php:135
+msgid "Tasks in the Job Queue"
+msgstr "Taken in de wachtrij"
+
+#: plugins/admin-dashboard.php:141
+#: plugins/admin-dashboard.php:145
+msgid "Running Tasks"
+msgstr "Lopende Taken"
+
+#: plugins/admin-dashboard.php:151
+#: plugins/admin-dashboard.php:155
+msgid "Failed Tasks"
+msgstr "Mislukte Taken"
+
+#: plugins/admin-dashboard.php:164
+msgid "Database Contents"
+msgstr "Database Inhoud"
+
+#: plugins/admin-dashboard.php:167
+#: plugins/admin-dashboard.php:197
+msgid "Metric"
+msgstr "Kengetal"
+
+#: plugins/admin-dashboard.php:171
+msgid "Unique Uploads"
+msgstr "Unieke uploads"
+
+#: plugins/admin-dashboard.php:175
+msgid "Unique Extracted Files"
+msgstr "Unieke Uitgepakte Bestanden"
+
+#: plugins/admin-dashboard.php:179
+msgid "Extracted Names"
+msgstr "Uitgepakte Namen"
+
+#: plugins/admin-dashboard.php:183
+msgid "Known License Templates"
+msgstr "Bekende Licentie Sjablonen"
+
+#: plugins/admin-dashboard.php:187
+msgid "Identified Licenses"
+msgstr "Herkende Licenties"
+
+#: plugins/admin-dashboard.php:194
+msgid "Database Metrics"
+msgstr "Database Kengetallen"
+
+#: plugins/admin-dashboard.php:201
+msgid "FOSSology database size"
+msgstr "FOSSology database omvang"
+
+#: plugins/admin-dashboard.php:209
+msgid "Active database connections"
+msgstr "Actieve Verbindingen met de Database"
+
+#: plugins/admin-dashboard.php:213
+msgid "Active FOSSology queries"
+msgstr "Actieve FOSSology queries"
+
+#: plugins/admin-dashboard.php:219
+msgid "Duration query #"
+msgstr "Duur van query #"
+
+#: plugins/admin-dashboard.php:220
+msgid " has been active"
+msgstr "was actief"
+
+#: plugins/admin-dashboard.php:231
+msgid "Repository Disk Space"
+msgstr "Repositorie Omvang"
+
+#: plugins/user-add.php:28
+msgid "Add A User"
+msgstr "Gebruiker Toevoegen"
+
+#: plugins/user-add.php:50
+msgid "NO DB connection!"
+msgstr "Geen verbinding met de Database!"
+
+#: plugins/user-add.php:88
+msgid "Username must be specified. Not added."
+msgstr "Gebruikersnaam moet worden opgegeven. Niet toegevoegd."
+
+#: plugins/user-add.php:93
+msgid "Passwords did not match. Not added."
+msgstr "Wachtwoorden kwamen niet overeen. Niet toegevoegd."
+
+#: plugins/user-add.php:99
+#: plugins/user-edit-self.php:115
+msgid "Invalid email address.  Not added."
+msgstr "Het emailadres is ongeldig. Niet toegevoegd."
+
+#: plugins/user-add.php:106
+#: plugins/user-edit-self.php:122
+msgid "User already exists.  Not added."
+msgstr "Deze gebruiker bestaat reeds. Niet toegevoegd."
+
+#: plugins/user-add.php:141
+msgid "Failed to insert user."
+msgstr "Gebruiker kon niet toegevoegd worden."
+
+#: plugins/user-add.php:165
+#: plugins/ui-menus.php:303
+msgid "User"
+msgstr "Gebruiker"
+
+#: plugins/user-add.php:166
+msgid "added"
+msgstr "toegevoegd"
+
+#: plugins/user-add.php:174
+msgid "To create a new user, enter the following information:<P />\n"
+msgstr "Voer de volgende informatie in om een nieuwe gebruiker toe te voegen, :<P />\n"
+
+#: plugins/user-add.php:178
+msgid "Enter the username."
+msgstr "Voer de gebruikersnaam in."
+
+#: plugins/user-add.php:183
+msgid "Enter a description for the user (name, contact, or other information).  This may be blank."
+msgstr "Voer een omschrijving van de gebruiker in (naam, contactgegevens, of andere informatie). Dit mag blanco zijn."
+
+#: plugins/user-add.php:188
+msgid "Enter an email address for the user, see step 8. This field may be left blank."
+msgstr "Voer een emailadres voor de gebruiker in, zie stap 8. Dit veld mag blanco zijn."
+
+#: plugins/user-add.php:192
+#: plugins/user-edit-any.php:377
+msgid "Select the user's access level."
+msgstr "Selecteer het toegangsniveau van de gebruiker."
+
+#: plugins/user-add.php:195
+#: plugins/user-edit-any.php:380
+msgid "None (very basic, no database access)"
+msgstr "Geen (erg eenvoudig, geen database toegang)"
+
+#: plugins/user-add.php:197
+#: plugins/user-edit-any.php:381
+msgid "Read-only (read, but no writes or downloads)"
+msgstr "Alleen-lezen (lezen, maar niet schrijven en geen downloads)"
+
+#: plugins/user-add.php:199
+#: plugins/user-edit-any.php:382
+msgid "Download (Read-only, but can download files)"
+msgstr "Download (lezen en downloaden)"
+
+#: plugins/user-add.php:201
+#: plugins/user-edit-any.php:383
+msgid "Read-Write (read, download, or edit information)"
+msgstr "Lezen-Schrijven (lezen, downloaden en wijzigen van informatie)"
+
+#: plugins/user-add.php:203
+#: plugins/user-edit-any.php:384
+msgid "Upload (read-write, and permits uploading files)"
+msgstr "Upload (lezen-schrijven, en uploaden van bestanden)"
+
+#: plugins/user-add.php:205
+#: plugins/user-edit-any.php:385
+msgid "Analyze (... and permits scheduling analysis tasks)"
+msgstr "Analyse (... en het inplannen van analysetaken toestaan)"
+
+#: plugins/user-add.php:207
+#: plugins/user-edit-any.php:386
+msgid "Delete (... and permits deleting uploaded files and analysis)"
+msgstr "Verwijderen (... en het verwijderen van bestanden en analyses toestaan)"
+
+#: plugins/user-add.php:209
+#: plugins/user-edit-any.php:387
+msgid "Debug (... and allows access to debugging functions)"
+msgstr "Debug (... en toegang tot debug functies toestaan)"
+
+#: plugins/user-add.php:211
+#: plugins/user-edit-any.php:388
+msgid "Full Administrator (all access including adding and deleting users)"
+msgstr "Beheerder (volledige toegang)"
+
+#: plugins/user-add.php:215
+#: plugins/user-edit-any.php:401
+msgid "Select the user's top-level folder. Access is restricted to this folder."
+msgstr "Selecteer de hoofdmap voor de gebruiker. Toegang is beperkt tot deze map."
+
+#: plugins/user-add.php:217
+#: plugins/user-edit-any.php:403
+msgid " (NOTE: This is only partially implemented right now. Current users can escape the top of tree limitation.)"
+msgstr "(LET OP: Dit is op dit moment slechts deels geimplementeerd. Gebruikers kunnen de top van de boom beperking omzeilen.)"
+
+#: plugins/user-add.php:223
+msgid "Enter the user's password.  It may be blank."
+msgstr "Voer het wachtwoord van de gebruier in. Mag blanco zijn."
+
+#: plugins/user-add.php:226
+#: plugins/user-edit-any.php:416
+msgid "Re-enter the user's password."
+msgstr "Opnieuw invoeren van het wachtwoord van de gebruiker."
+
+#: plugins/user-add.php:229
+#: plugins/user-edit-self.php:262
+#: plugins/user-edit-any.php:419
+msgid "E-mail Notification"
+msgstr "Email berichtgeving"
+
+#: plugins/user-add.php:230
+msgid "Check to enable email notification of completed analysis."
+msgstr "Aanvinken om emailbericht over voltooide analyse mogelijk te maken."
+
+#: plugins/user-add.php:235
+#: plugins/user-edit-self.php:266
+#: plugins/user-edit-any.php:423
+msgid "Default Agents: Select the agent(s) to automatically run when uploading data. These selections can be changed on the upload screens."
+msgstr "Standaard-Agenten: Kies de agent(en) die automatisch worden gestart als u gegevens upload. Deze instelling kan in het upload scherm nog worden aangepast."
+
+#: plugins/user-add.php:239
+#: plugins/user-edit-self.php:287
+msgid "Default bucketpool."
+msgstr "Standaard bucketpool"
+
+#: plugins/user-add.php:246
+#: plugins/ui-licgroup-manage.php:487
+#: plugins/ui-licgroup-manage.php:542
+#: plugins/ui-licterm-manage.php:370
+#: plugins/ui-licterm-manage.php:472
+msgid "Add"
+msgstr "Toevoegen"
+
+#: plugins/ui-list-bucket-files.php:38
+msgid "List Files for Bucket"
+msgstr "Toon Bestanden voor Bucket"
+
+#: plugins/ui-list-bucket-files.php:65
+#: plugins/search-file.php:126
+#: plugins/ui-list-lic-files.php:60
+msgid "Show All Files"
+msgstr "Toon Alle Bestanden"
+
+#: plugins/ui-list-bucket-files.php:95
+#: plugins/ui-list-lic-files.php:90
+msgid "is missing required parameters."
+msgstr "ontbeert noodzakelijke parameters."
+
+#: plugins/ui-list-bucket-files.php:125
+msgid "The following files are in bucket: '<b>"
+msgstr "De volgende bestanden zijn in bucket: '<b>"
+
+#: plugins/ui-list-bucket-files.php:128
+#: plugins/ui-list-lic-files.php:125
+msgid "Display"
+msgstr "Tonen"
+
+#: plugins/ui-list-bucket-files.php:129
+#: plugins/ui-list-lic-files.php:126
+msgid "excludes"
+msgstr "uitzonderen"
+
+#: plugins/ui-list-bucket-files.php:130
+msgid "files with these licenses"
+msgstr "bestanden met deze licenties"
+
+#: plugins/ui-list-bucket-files.php:201
+#: plugins/ui-list-lic-files.php:152
+msgid "File"
+msgstr "Bestand"
+
+#: plugins/ui-list-bucket-files.php:217
+msgid "Exclude files with license"
+msgstr "Uitgezonderd bestanden met licentie"
+
+#: plugins/ui-list-bucket-files.php:248
+#: plugins/ui-licgroup.php:688
+#: plugins/ui-list-lic-files.php:194
+msgid "Elapsed time"
+msgstr "verstreken tijd"
+
+#: plugins/ui-list-bucket-files.php:249
+#: plugins/ui-licgroup.php:689
+#: plugins/myjobs.php:76
+#: plugins/search-file-by-license.php:106
+#: plugins/search-file-by-licgroup.php:235
+#: plugins/ui-list-lic-files.php:195
+msgid "seconds"
+msgstr "Seconden"
+
+#: plugins/search-file-advance.php:27
+msgid "Advanced Search for File"
+msgstr "Uitgebreid Zoeken naar Bestand"
+
+#: plugins/search-file-advance.php:69
+#: plugins/search-file-advance.php:163
+#: plugins/search-file.php:76
+#: plugins/search.php:96
+#: plugins/search.php:220
+msgid "No results.\n"
+msgstr "Geen resultaten.\n"
+
+#: plugins/search-file-advance.php:78
+#: plugins/search-file-advance.php:172
+#: plugins/search.php:105
+#: plugins/search.php:229
+msgid "Total matched:"
+msgstr "Aantal gevonden:"
+
+#: plugins/search-file-advance.php:189
+msgid "Additional search options"
+msgstr "Extra zoek opties"
+
+#: plugins/search-file-advance.php:223
+#: plugins/search-file.php:118
+#: plugins/search.php:326
+msgid "You can use '%' as a wild-card.\n"
+msgstr "U kunt de '%' gebruiken als wildcard.\n"
+
+#: plugins/search-file-advance.php:226
+#: plugins/search.php:323
+msgid "Enter the filename to find: "
+msgstr "Welke bestandsnaam zoekt u:"
+
+#: plugins/search-file-advance.php:230
+#: plugins/search.php:328
+msgid "Tag to find"
+msgstr "Welke Tag zoekt u"
+
+#: plugins/search-file-advance.php:233
+#: plugins/search.php:331
+msgid "Mimetype "
+msgstr "Mimetype"
+
+#: plugins/search-file-advance.php:238
+#: plugins/search-file-advance.php:245
+#: plugins/search.php:336
+#: plugins/search.php:343
+msgid "IS"
+msgstr "IS"
+
+#: plugins/search-file-advance.php:240
+#: plugins/search-file-advance.php:247
+#: plugins/search.php:338
+#: plugins/search.php:345
+msgid "IS NOT"
+msgstr "IS NIET"
+
+#: plugins/search-file-advance.php:253
+#: plugins/search.php:351
+msgid "Select mimetype..."
+msgstr "Kies mimetype"
+
+#: plugins/search-file-advance.php:270
+#: plugins/search-file-advance.php:274
+#: plugins/search.php:368
+#: plugins/search.php:372
+msgid "File size is"
+msgstr "Bestandsgrootte is"
+
+#: plugins/search-file-advance.php:271
+#: plugins/search-file-advance.php:275
+#: plugins/search.php:369
+#: plugins/search.php:373
+msgid " bytes\n"
+msgstr " Bytes\n"
+
+#: plugins/search-file-advance.php:279
+#: plugins/search-file.php:131
+#: plugins/search-file-by-licgroup.php:190
+#: plugins/ui-welcome.php:56
+#: plugins/ui-welcome.php:59
+#: plugins/search.php:27
+#: plugins/search.php:260
+#: plugins/search.php:379
+#: plugins/ui-default.php:100
+msgid "Search"
+msgstr "Zoeken"
+
+#: plugins/search-file-advance.php:287
+#: plugins/search-file-advance.php:295
+#: plugins/search-file.php:140
+#: plugins/search.php:387
+#: plugins/search.php:395
+msgid "Files matching"
+msgstr "Gevonden bestanden"
+
+#: plugins/ui-tags.php:27
+#: plugins/ui-tags.php:305
+#: plugins/ui-tags.php:428
+#: plugins/ui-tags.php:505
+msgid "Tag"
+msgstr "Tag"
+
+#: plugins/ui-tags.php:41
+msgid "Tag files or containers"
+msgstr "Tag bestanden of containers"
+
+#: plugins/ui-tags.php:81
+msgid "TagName must be specified. Tag Not created."
+msgstr "Tagnaam moet worden opgegeven. Tag niet gemaakt."
+
+#: plugins/ui-tags.php:87
+msgid "Need to select one option (file/package/container) to create tag."
+msgstr "Één optie moet worden geselecteerd (bestand/pakket/container) om tag te maken."
+
+#: plugins/ui-tags.php:108
+msgid "TagName already exists. Tag Not created."
+msgstr "Tagnaam bestaat reeds. Tag niet gemaakt."
+
+#: plugins/ui-tags.php:118
+msgid "Failed to create tag."
+msgstr "Tag maken mislukt."
+
+#: plugins/ui-tags.php:230
+msgid "TagName must be specified. Tag Not Updated."
+msgstr "Tagnaam moet worden opgegeven. Tag niet gewijzigd."
+
+#: plugins/ui-tags.php:268
+msgid "Can't find this tag, Tag Not deleted."
+msgstr "Kan Tag niet vinden, tag niet verwijderd."
+
+#: plugins/ui-tags.php:297
+msgid "<h3>Current Tags:</h3>\n"
+msgstr "<h3>Huidige Tags:</h3>\n"
+
+#: plugins/ui-tags.php:304
+msgid "Tag Namespace"
+msgstr "Tag Namespace"
+
+#: plugins/ui-tags.php:306
+msgid "Tag Description"
+msgstr "Tag Omschrijving"
+
+#: plugins/ui-tags.php:307
+msgid "Tag Date"
+msgstr "Tag Datum"
+
+#: plugins/ui-tags.php:403
+msgid "<h3>Create Tag:</h3>\n"
+msgstr "<h3>maak Tag:</h3>\n"
+
+#: plugins/ui-tags.php:425
+#: plugins/ui-tags.php:502
+msgid "Namespace"
+msgstr "Namespace"
+
+#: plugins/ui-tags.php:435
+#: plugins/ui-tags.php:507
+msgid "Tag description:"
+msgstr "Tag omschrijving:"
+
+#: plugins/ui-tags.php:437
+#: plugins/ui-tags.php:509
+msgid "<p>Notes:</p>"
+msgstr "<p>Notities:</p>"
+
+#: plugins/ui-tags.php:454
+#: plugins/ui-licgroup-default.php:618
+#: plugins/admin-folder-create.php:160
+msgid "Create"
+msgstr "Maken"
+
+#: plugins/ui-tags.php:469
+msgid "Create New Tag"
+msgstr "Maak nieuwe Tag"
+
+#: plugins/ui-tags.php:472
+msgid "<h3>Edit Tag:</h3>\n"
+msgstr "<h3>Wijzig Tag:</h3>\n"
+
+#: plugins/ui-tags.php:542
+msgid "<h3>Delete Tag:</h3>\n"
+msgstr "<h3>Verwijder Tag:</h3>\n"
+
+#: plugins/ui-tags.php:568
+msgid "Delete Tag only for this file."
+msgstr "Verwijder Tag alleen voor dit bestand."
+
+#: plugins/ui-tags.php:570
+msgid "Delete Tag for all packages (source and binary) in this container tree."
+msgstr "Verwijder Tag voor alle pakketten (broncode en binair) in deze container boomstructuur."
+
+#: plugins/ui-tags.php:577
+#: plugins/jobs-showjobs.php:439
+#: plugins/admin-folder-delete.php:147
+#: plugins/user-del.php:131
+#: plugins/admin-upload-delete.php:156
+msgid "Delete"
+msgstr "Verwijder"
+
+#: plugins/ui-tags.php:651
+msgid "Create Tag Failed"
+msgstr "Maken Tag mislukt"
+
+#: plugins/ui-tags.php:654
+msgid "Create Tag Successful!"
+msgstr "Maken Tag Gelukt!"
+
+#: plugins/ui-tags.php:663
+msgid "Edit Tag Failed"
+msgstr "Wijzigen Tag mislukt"
+
+#: plugins/ui-tags.php:666
+msgid "Edit Tag Successful!"
+msgstr "Wijzigen Tag Gelukt!"
+
+#: plugins/ui-tags.php:675
+msgid "Delete Tag Failed"
+msgstr "Verwijderen Tag Mislukt"
+
+#: plugins/ui-tags.php:678
+msgid "Delete Tag Successful!"
+msgstr "Verwijderen Tag Gelukt!"
+
+#: plugins/ui-licgroup-manage.php:37
+msgid "Manage License Groups"
+msgstr "Licentiegroepen beheren"
+
+#: plugins/ui-licgroup-manage.php:199
+msgid "New Group"
+msgstr "Nieuwe Groep"
+
+#: plugins/ui-licgroup-manage.php:405
+msgid "Select management action"
+msgstr "Selecteer beheeraktie"
+
+#: plugins/ui-licgroup-manage.php:412
+msgid "Check to delete this license group!"
+msgstr "Aanvinken om deze licentiegroep te verwijderen!"
+
+#: plugins/ui-licgroup-manage.php:418
+msgid "Group name"
+msgstr "Groepsnaam"
+
+#: plugins/ui-licgroup-manage.php:421
+msgid "Group description"
+msgstr "Groepsomschrijving"
+
+#: plugins/ui-licgroup-manage.php:425
+msgid "Group color"
+msgstr "Groepskleur"
+
+#: plugins/ui-licgroup-manage.php:444
+msgid "Select licenses to include in the group"
+msgstr "Selecteer licenties die in deze groep horen"
+
+#: plugins/ui-licgroup-manage.php:447
+msgid "Available licenses"
+msgstr "Beschikbare licenties"
+
+#: plugins/ui-licgroup-manage.php:448
+msgid "Licenses in this Group"
+msgstr "Licenties in deze groep"
+
+#: plugins/ui-licgroup-manage.php:491
+#: plugins/ui-licgroup-manage.php:546
+#: plugins/ui-licterm-manage.php:372
+#: plugins/ui-licterm-manage.php:474
+#: plugins/agent-remove-license.php:155
+msgid "Remove"
+msgstr "Verwijderen"
+
+#: plugins/ui-licgroup-manage.php:509
+msgid "Select subgroups to include in this group"
+msgstr "Selecteer subgroup om in deze groep op te nemen"
+
+#: plugins/ui-licgroup-manage.php:512
+msgid "Available subgroups"
+msgstr "Beschikbare subgroepen"
+
+#: plugins/ui-licgroup-manage.php:513
+msgid "Subgroups in this Group"
+msgstr "Subgroepen in deze groep"
+
+#: plugins/ui-licgroup-manage.php:606
+msgid "License group information updated."
+msgstr "Licentiegroepsinformatie geactualiseerd."
+
+#: plugins/ui-licgroup-manage.php:611
+msgid "Could not update License group information, error code is"
+msgstr "Kon Licentiegroepsinformatie niet actualiseren, foutcode is"
+
+#: plugins/upload-instructions.php:27
+msgid "Upload Instructions"
+msgstr "Upload instructies"
+
+#: plugins/upload-instructions.php:53
+msgid "FOSSology has many options for importing and uploading files for analysis.\n"
+msgstr "FOSSology kent vele opties voor het  importeren en uploaden van bestanden voor analyse.\n"
+
+#: plugins/upload-instructions.php:54
+msgid "The options vary based on <i>where</i> the data to upload is located.\n"
+msgstr "De opties variëren afhankelijk van <i>waar</i> de data voor het uploaden zich bevindt.\n"
+
+#: plugins/upload-instructions.php:55
+msgid "The data may be located:\n"
+msgstr "De data kan zich bevinden:\n"
+
+#: plugins/upload-instructions.php:57
+msgid "On your browser system"
+msgstr "Op uw eigen systeem"
+
+#: plugins/upload-instructions.php:59
+#: plugins/upload-instructions.php:69
+#: plugins/upload-instructions.php:78
+msgid "Benutzen Sie "
+msgstr "Gebruik"
+
+#: plugins/upload-instructions.php:60
+msgid "Upload File"
+msgstr "Bestand Uploaden"
+
+#: plugins/upload-instructions.php:61
+msgid "option to select and upload the file."
+msgstr "optie voor het selecteren en uploaden van het bestand"
+
+#: plugins/upload-instructions.php:63
+msgid "While this can be very convenient (particularly if the file is not readily accessible online),\n"
+msgstr "Hoewel dit erg makkelijk kan zijn (vooral als het bestand niet makkelijk online benaderbaar is).\n"
+
+#: plugins/upload-instructions.php:64
+msgid "uploading via your web browser can be slow for large files,\n"
+msgstr "kan het uploaden via uw webbrowser bij grotere bestanden zijn langzaam zijn,\n"
+
+#: plugins/upload-instructions.php:65
+msgid "and files larger than 650 Megabytes may not be uploadable.\n"
+msgstr "en bestanden groter dan 650 Megabytes kunnen niet geupload worden.\n"
+
+#: plugins/upload-instructions.php:67
+msgid "On a remote server"
+msgstr "Op een remote server"
+
+#: plugins/upload-instructions.php:70
+#: plugins/upload-url.php:28
+msgid "Upload from URL"
+msgstr "uploaden via URL"
+
+#: plugins/upload-instructions.php:71
+msgid "option to specify a remote server."
+msgstr "optie voor het specificeren van een server op afstand."
+
+#: plugins/upload-instructions.php:73
+msgid "This is the most flexible option, but the URL must denote a publicly accessible HTTP, HTTPS, or FTP location.\n"
+msgstr "Dit is de meest flexibele optie, maar de URL moet wel verwijzen naar een rechstreeks leesbare HTTP, HTTPS, of FTP locatie.\n"
+
+#: plugins/upload-instructions.php:74
+msgid "URLs that require authentication or human interactions cannot be downloaded through this automated system.\n"
+msgstr "URLS die authenticatie of menselijke interactie vereisen kunnen niet via deze optie gedownload worden.\n"
+
+#: plugins/upload-instructions.php:76
+msgid "On the FOSSology web server"
+msgstr "Op de FOSSology webserver"
+
+#: plugins/upload-instructions.php:79
+#: plugins/upload-srv-files.php:28
+msgid "Upload from Server"
+msgstr "Upload vanaf Server"
+
+#: plugins/upload-instructions.php:80
+msgid "option to specify a file or path on the server."
+msgstr "optie voor het specificeren van een pad op de server."
+
+#: plugins/upload-instructions.php:82
+msgid "This option is intended for developers who have mounted directories containing source trees.\n"
+msgstr "Deze optie is bedoeld voor ontwikkelaars die directories met bronbestanden hebben aangekoppeld.\n"
+
+#: plugins/upload-instructions.php:83
+msgid "The directory must be accessible via the web server's user.\n"
+msgstr "De directory moet benaderbaar zijn voor het gebruikersaccount van de webserver.\n"
+
+#: plugins/upload-instructions.php:85
+msgid "If your system is configured to use multiple agent servers, the data area must be\n"
+msgstr "Als uw systeem is geconfigureerd om meerdere agent servers te gebruiken moet het gegevens gebied\n"
+
+#: plugins/upload-instructions.php:86
+msgid "mounted and accessible to the FOSSology user (fossy) on every agent system.  See\n"
+msgstr "aangekoppeld en benaderbaar zijn voor de FOSSology gebruiker (fossy) om elk agent systeem. Zie\n"
+
+#: plugins/upload-instructions.php:87
+msgid "the section"
+msgstr "de sectie"
+
+#: plugins/upload-instructions.php:88
+msgid "Configuring the Scheduler"
+msgstr "Configuratie van de scheduler"
+
+#: plugins/upload-instructions.php:89
+msgid "Scheduler documentation"
+msgstr "Scheduler documentatie"
+
+#: plugins/upload-instructions.php:95
+msgid "Select the type of upload based on where the data is located:\n"
+msgstr "Kies het type upload gebaseerd op waar de gegevens zijn opgeslagen:\n"
+
+#: plugins/upload-instructions.php:111
+msgid "Your computer"
+msgstr "Uw computer"
+
+#: plugins/upload-instructions.php:116
+msgid "FOSSology web server"
+msgstr "FOSSology Web-Server"
+
+#: plugins/upload-instructions.php:157
+msgid "Remote web or FTP server"
+msgstr "Remote web of FTP server"
+
+#: plugins/core-init.php:27
+msgid "Initialize"
+msgstr "Initialisieren"
+
+#: plugins/core-init.php:114
+msgid "Failed to find schema plugin.\n"
+msgstr "Schema-Plugins niet gevonden.\n"
+
+#: plugins/core-init.php:125
+msgid "Initialization complete.  Click 'Home' in the top menu to proceed.<br />"
+msgstr "Klaar met Initialiseren. Klik op 'Home' in het top menu om verder te gaan.<br />"
+
+#: plugins/core-init.php:132
+msgid "Remove this file to complete the initialization.\n"
+msgstr "Verwijder dit bestand om het initialiseren af te ronden.\n"
+
+#: plugins/core-init.php:141
+msgid "Initialization complete with errors."
+msgstr "Initialisatie is met een foutcode geëindigd."
+
+#: plugins/ui-download.php:27
+msgid "Download File"
+msgstr "Download Bestand"
+
+#: plugins/ui-download.php:43
+msgid "Download this file"
+msgstr "Download dit bestand"
+
+#: plugins/agent-unpack.php:27
+msgid "Schedule an Unpack"
+msgstr "Inplannen van uitpakken"
+
+#: plugins/agent-unpack.php:75
+#: plugins/agent-license.php:109
+#: plugins/agent-pkgagent.php:103
+#: plugins/upload-url.php:78
+#: plugins/agent-mimetype.php:108
+msgid "Failed to insert job record"
+msgstr "Invoegen van job record mislukt"
+
+#: plugins/agent-unpack.php:87
+msgid "Failed to insert item into job queue"
+msgstr "Invoegen van item in de taken wachtrij mislukt"
+
+#: plugins/agent-unpack.php:94
+msgid "Failed to insert adj2nest into job queue"
+msgstr "Invoegen van 'adj2nest' in wachtrij mislukt"
+
+#: plugins/agent-unpack.php:121
+#: plugins/ui-reunpack.php:61
+#: plugins/ui-view.php:736
+msgid "Unpack added to job queue"
+msgstr "Uitpakken toegevoegd aan wachtrij"
+
+#: plugins/agent-unpack.php:126
+msgid "Unpack of Upload failed:"
+msgstr "Het uitpakken van de upload is mislukt:"
+
+#: plugins/agent-unpack.php:150
+msgid "All uploaded files are already unpacked, or scheduled to be unpacked."
+msgstr "Alle geuploade bestanden zijn reeds uitgepakt, of ingepland om uitgepakt te worden."
+
+#: plugins/agent-unpack.php:157
+msgid "Select an uploaded file to unpack.\n"
+msgstr "Kies een geupload bestand om uit te pakken.\n"
+
+#: plugins/agent-unpack.php:159
+msgid "Only uploads that are not already unpacked (and not already scheduled) can be scheduled.\n"
+msgstr "Alleen uploads die nog niet zijn uitgepakt (of nog niet zijn ingepland) kunnen ingepland worden.\n"
+
+#: plugins/agent-unpack.php:160
+msgid "Unpack:"
+msgstr "Uitpakken:"
+
+#: plugins/agent-unpack.php:170
+#: plugins/upload-file.php:182
+#: plugins/upload-url.php:163
+#: plugins/upload-srv-files.php:228
+msgid "Select optional analysis"
+msgstr "Kies optionele analyse"
+
+#: plugins/agent-unpack.php:174
+msgid "Unpack"
+msgstr "Uitpakken"
+
+#: plugins/jobs-showjobs.php:27
+msgid "Show Job Queue"
+msgstr "Toon takenwachtrij"
+
+#: plugins/jobs-showjobs.php:66
+msgid "Show all jobs (not just this one)"
+msgstr "Toon alle taken (niet alleen deze)"
+
+#: plugins/jobs-showjobs.php:76
+msgid "Show a summary of jobs"
+msgstr "Toon een samenvatting van de taken"
+
+#: plugins/jobs-showjobs.php:82
+msgid "Show detailed information about each job"
+msgstr "Toon detailinformatie van elke taak"
+
+#: plugins/jobs-showjobs.php:85
+#: plugins/jobs-showjobs.php:105
+msgid "Show all jobs (active and completed)"
+msgstr "Toon alle taken (actief en beëindigd)"
+
+#: plugins/jobs-showjobs.php:89
+msgid "Show the job queue"
+msgstr "Toon de takenwachtrij"
+
+#: plugins/jobs-showjobs.php:112
+msgid "Show only active jobs"
+msgstr "Toon alleen de actieve taken"
+
+#: plugins/jobs-showjobs.php:158
+#: plugins/core-debug-user.php:56
+msgid "Field"
+msgstr "Veld"
+
+#: plugins/jobs-showjobs.php:159
+#: plugins/ui-view-info.php:101
+#: plugins/ui-view-info.php:206
+#: plugins/ui-view-info.php:224
+#: plugins/ui-view-info.php:328
+#: plugins/ui-view-info.php:428
+#: plugins/ui-view-info.php:516
+#: plugins/core-debug-user.php:57
+msgid "Value"
+msgstr "Waarde"
+
+#: plugins/jobs-showjobs.php:200
+msgid "depends on"
+msgstr "afhankelijk van"
+
+#: plugins/jobs-showjobs.php:217
+msgid "required by"
+msgstr "benodigd door"
+
+#: plugins/jobs-showjobs.php:409
+#: plugins/jobs-showjobs.php:414
+msgid "History"
+msgstr "Geschiedenis"
+
+#: plugins/jobs-showjobs.php:428
+msgid "Job/Dependency"
+msgstr "Taak/Afhankelijkheid"
+
+#: plugins/jobs-showjobs.php:436
+msgid "Reset"
+msgstr "Reset"
+
+#: plugins/jobs-showjobs.php:443
+msgid "Priority: "
+msgstr "Prioriteit"
+
+#: plugins/jobs-showjobs.php:507
+msgid "completed"
+msgstr "afgesloten"
+
+#: plugins/jobs-showjobs.php:512
+msgid "Elapsed scheduled:"
+msgstr "Verstreken gepland:"
+
+#: plugins/jobs-showjobs.php:514
+msgid "Elapsed running:"
+msgstr "Verstreken uitgevoerd:"
+
+#: plugins/admin-folder-move.php:31
+msgid "Move Folder"
+msgstr "Map Verplaatsen"
+
+#: plugins/admin-folder-move.php:109
+msgid "Ordner verschoben von "
+msgstr "Map verplaatst van"
+
+#: plugins/admin-folder-move.php:110
+msgid " nach "
+msgstr "Na"
+
+#: plugins/admin-folder-move.php:115
+msgid "Could not move folder!: "
+msgstr "Map kon niet verplaatst worden!:"
+
+#: plugins/admin-folder-move.php:122
+msgid "Select the source folder to move:  \n"
+msgstr "Kies de bronmap die verplaatst moet worden: \n"
+
+#: plugins/admin-folder-move.php:127
+#: plugins/admin-upload-move.php:159
+msgid "Select the destination folder:  \n"
+msgstr "Selecteer de doelmap: \n"
+
+#: plugins/admin-folder-move.php:133
+msgid "Move"
+msgstr "Verplaatsen"
+
+#: plugins/ui-view-license.php:27
+msgid "View License"
+msgstr "Toon Licentie"
+
+#: plugins/ui-view-license.php:163
+#: plugins/ui-nomos-license-list.php:175
+msgid "NO DB connection"
+msgstr "Geen verbinding met de database"
+
+#: plugins/ui-view-license.php:183
+msgid "The Nomos license scanner found:"
+msgstr "De Nomos licentiescanner vond:"
+
+#: plugins/ui-view-info.php:27
+msgid "View File Information"
+msgstr "Toon bestandsinformatie"
+
+#: plugins/ui-view-info.php:43
+msgid "View file information"
+msgstr "Toon bestandsinformatie"
+
+#: plugins/ui-view-info.php:55
+msgid "View information about this file"
+msgstr "Toon informatie over dit bestand"
+
+#: plugins/ui-view-info.php:91
+msgid "Repository Locator"
+msgstr "Repositorie Plaats"
+
+#: plugins/ui-view-info.php:100
+msgid "Attribute"
+msgstr "Attribuut"
+
+#: plugins/ui-view-info.php:108
+msgid "File Size"
+msgstr "Bestandsgrootte"
+
+#: plugins/ui-view-info.php:110
+msgid "SHA1 Checksum"
+msgstr "SHA1-checksum"
+
+#: plugins/ui-view-info.php:112
+msgid "MD5 Checksum"
+msgstr "MD5-checksum"
+
+#: plugins/ui-view-info.php:114
+msgid "Repository ID"
+msgstr "Repositorie ID"
+
+# PFile FIXME XXX
+#: plugins/ui-view-info.php:116
+msgid "Pfile ID"
+msgstr "Pfile ID"
+
+#: plugins/ui-view-info.php:143
+msgid "Sightings"
+msgstr "Waarnemingen"
+
+#: plugins/ui-view-info.php:159
+msgid "This exact file appears in the following locations:\n"
+msgstr "Dit bestand komt voor op de volgende locaties:\n"
+
+#: plugins/ui-view-info.php:167
+msgid "End of listing.\n"
+msgstr "Einde van de lijst.\n"
+
+#: plugins/ui-view-info.php:171
+msgid "This file does not appear in any other known location.\n"
+msgstr "Dit bestand komt niet voor op een van de bekende locaties.\n"
+
+#: plugins/ui-view-info.php:201
+#: plugins/ui-view-info.php:205
+#: plugins/ui-view-info.php:223
+msgid "Meta Data"
+msgstr "Metadata"
+
+#: plugins/ui-view-info.php:204
+#: plugins/ui-view-info.php:222
+#: plugins/ui-view-info.php:326
+#: plugins/ui-view-info.php:426
+#: plugins/ui-view-info.php:514
+#: plugins/ui-view.php:228
+msgid "Item"
+msgstr "Item"
+
+#: plugins/ui-view-info.php:219
+msgid "Meta Data From PkgMetaGetta Agent"
+msgstr "Metadata van PkgMetaGetta Agent"
+
+#: plugins/ui-view-info.php:248
+msgid "Total meta data records"
+msgstr "Totaal metadata records"
+
+#: plugins/ui-view-info.php:288
+msgid "Package Info"
+msgstr "Pakket-Info"
+
+#: plugins/ui-view-info.php:316
+msgid "RPM Binary Package"
+msgstr "RPM-Binair pakket"
+
+#: plugins/ui-view-info.php:320
+msgid "RPM Source Package"
+msgstr "RPM-Bron-Pakket"
+
+#: plugins/ui-view-info.php:327
+#: plugins/ui-view-info.php:427
+#: plugins/ui-view-info.php:515
+msgid "Type"
+msgstr "Type"
+
+#: plugins/ui-view-info.php:336
+#: plugins/ui-view-info.php:436
+msgid "Package"
+msgstr "Pakket"
+
+#: plugins/ui-view-info.php:341
+msgid "Alias"
+msgstr "Alias"
+
+#: plugins/ui-view-info.php:345
+#: plugins/ui-view-info.php:441
+#: plugins/ui-view-info.php:537
+msgid "Architecture"
+msgstr "Architectuur"
+
+#: plugins/ui-view-info.php:349
+#: plugins/ui-view-info.php:445
+#: plugins/ui-view-info.php:541
+msgid "Version"
+msgstr "Versie"
+
+#: plugins/ui-view-info.php:358
+#: plugins/ui-licgroup-debug.php:51
+#: plugins/ui-licgroup-debug.php:84
+msgid "Group"
+msgstr "Groep"
+
+#: plugins/ui-view-info.php:362
+msgid "Packager"
+msgstr "Inpakker"
+
+#: plugins/ui-view-info.php:366
+msgid "Release"
+msgstr "Release"
+
+#: plugins/ui-view-info.php:370
+msgid "BuildDate"
+msgstr "BuildDate"
+
+#: plugins/ui-view-info.php:374
+msgid "Vendor"
+msgstr "Vendor"
+
+#: plugins/ui-view-info.php:382
+#: plugins/ui-view-info.php:473
+msgid "Summary"
+msgstr "Samenvatting"
+
+#: plugins/ui-view-info.php:386
+#: plugins/ui-view-info.php:477
+#: plugins/ui-licterm-manage.php:318
+#: plugins/core-schema.php:96
+#: plugins/core-schema.php:124
+#: plugins/core-schema.php:279
+msgid "Description"
+msgstr "Beschrijving"
+
+#: plugins/ui-view-info.php:390
+#: plugins/ui-view-info.php:469
+#: plugins/ui-view-info.php:529
+msgid "Source"
+msgstr "Bron"
+
+#: plugins/ui-view-info.php:402
+msgid "Requires"
+msgstr "Afhankelijkheden"
+
+#: plugins/ui-view-info.php:416
+msgid "Debian Binary Package\n"
+msgstr "Debian Binair-pakket\n"
+
+#: plugins/ui-view-info.php:449
+msgid "Section"
+msgstr "Sectie"
+
+#: plugins/ui-view-info.php:453
+msgid "Priority"
+msgstr "Prioriteit"
+
+#: plugins/ui-view-info.php:457
+msgid "Installed Size"
+msgstr "Omvang Installatie"
+
+#: plugins/ui-view-info.php:461
+#: plugins/ui-view-info.php:545
+msgid "Maintainer"
+msgstr "Onderhouder"
+
+#: plugins/ui-view-info.php:465
+msgid "Homepage"
+msgstr "Homepage"
+
+#: plugins/ui-view-info.php:490
+msgid "Depends"
+msgstr "Afhankelijk van"
+
+#: plugins/ui-view-info.php:504
+msgid "Debian Source Package\n"
+msgstr "Debian Bron-pakket\n"
+
+#: plugins/ui-view-info.php:524
+msgid "Format"
+msgstr "Formaat"
+
+#: plugins/ui-view-info.php:533
+msgid "Binary"
+msgstr "Binair"
+
+#: plugins/ui-view-info.php:549
+msgid "Uploaders"
+msgstr "Geupload door"
+
+#: plugins/ui-view-info.php:553
+msgid "Standards-Version"
+msgstr "Standaard-Versie"
+
+#: plugins/ui-view-info.php:565
+msgid "Build-Depends"
+msgstr "Build-Afhankelijkheden"
+
+#: plugins/ui-view-info.php:579
+msgid "NOT RPM/DEBIAN Package."
+msgstr "Geen RPM/Debian-Pakket"
+
+#: plugins/ui-view-info.php:581
+msgid "Total package info records"
+msgstr "Totaal pakket info records"
+
+#: plugins/ui-licterm-manage.php:37
+msgid "Manage License Terms"
+msgstr "Beheren Licentievoorwaarden"
+
+#: plugins/ui-licterm-manage.php:211
+msgid "New Term"
+msgstr "Nieuw Begrip"
+
+#: plugins/ui-licterm-manage.php:276
+msgid "Keyword terms and phrases are used during license analysis to better identify license names.\n"
+msgstr "Keyword termen en zinnen worden gebruikt gedurende de licentieanalyse voor het beter identificeren van licentie namen.\n"
+
+#: plugins/ui-licterm-manage.php:277
+msgid "Terms consist of two parts: a canonical name for the class of terms, and a list of words or phrases that are members of the class.\n"
+msgstr "Termen bestaan uit twee delen: Een canonieke naam voor de  classificatie van termen, en een lijst van woorden of zinnen die lid zijn van die klasse.\n"
+
+#: plugins/ui-licterm-manage.php:278
+msgid "For example, the phrases 'GNU General Public License version 2' and 'GPL version 2' may both be parts of the 'GPLv2' class.\n"
+msgstr "bijvoorbeeld, de zinnen 'GNU General Public License version 2' en 'GPL version 2' kunnen beiden behoren tot de 'GPLv2' klasse.\n"
+
+#: plugins/ui-licterm-manage.php:280
+msgid "Note #1"
+msgstr "Opmerking #1"
+
+#: plugins/ui-licterm-manage.php:281
+msgid ": Changes to this list will impact all new license analysis.\n"
+msgstr ": Wijzigingen in deze lijst beinvloeden alle volgende licentie analyses.\n"
+
+#: plugins/ui-licterm-manage.php:283
+msgid "However, all completed license analysis will be unchanged.\n"
+msgstr "Echter, alle reeds afgeronde licentie analyses blijven ongewijzigd.\n"
+
+#: plugins/ui-licterm-manage.php:284
+msgid "You may wish to clear the license analysis for an upload and reschedule the analysis in order to apply changes.\n"
+msgstr "Eventueel kunt u de licentie analyse weggooien van een upload en een nieuwe analyse inplannen om de wijzigingen door te voeren.\n"
+
+#: plugins/ui-licterm-manage.php:286
+msgid "Note #2"
+msgstr "Opmerking #2"
+
+#: plugins/ui-licterm-manage.php:287
+msgid ": There is one special case for spelling.\n"
+msgstr ": Er is een speciaal geval voor de spelling.\n"
+
+#: plugins/ui-licterm-manage.php:289
+msgid "Many licenses spell the word 'licen<b>c</b><b>s</b>e.\n"
+msgstr "Veel licenties spellen het woord 'licen<b>cs</b>e.\n"
+
+#: plugins/ui-licterm-manage.php:290
+msgid "If the term contains either spelling of 'license', 'licensing', 'licensed', etc., then it will be converted to 's' but will match both spellings.\n"
+msgstr "Als de voorwaarde de spelling 'license', 'licensing', 'licensed', etc., bevat zal deze geconverteerd worden naar 's' maar beide spellingen.\n"
+
+#: plugins/ui-licterm-manage.php:299
+msgid "Select canonical group to edit"
+msgstr "Selecteer de canonieke groep die gewijzigd moet worden"
+
+#: plugins/ui-licterm-manage.php:307
+msgid "Check to delete this canonical group!"
+msgstr "Selecteer om deze canonieke groep te verwijderen!"
+
+#: plugins/ui-licterm-manage.php:315
+msgid "Canonical name"
+msgstr "Canonieke naam"
+
+#: plugins/ui-licterm-manage.php:325
+msgid "Keywords, terms, and phrases specific to this group."
+msgstr "Sleutelwoorden, Voorwaarden, en zinnen specifiek voor deze groep."
+
+#: plugins/ui-licterm-manage.php:330
+msgid "Terms associated with this canonical group"
+msgstr "Voorwaarden geassocieerd met deze canonieke groep"
+
+#: plugins/ui-licterm-manage.php:331
+msgid "Known terms"
+msgstr "Bekende voorwaarden"
+
+#: plugins/ui-licterm-manage.php:397
+msgid "Add a new keyword, term, or phrase to this canonical group."
+msgstr "Voeg een nieuwe term, voorwaarden, of zin toe aan deze canonieke groep."
+
+#: plugins/ui-licterm-manage.php:404
+msgid "Only letters, numbers, and spaces are permitted. Text will be normalized to lowercase letters with no more than one space between words.\n"
+msgstr "Alleen letters, cijfers, en spaties zijn toegestaan. Tekst zal genormaliseerd worden naar  kleine letters met niet meer dan een spatie tussen woorden.\n"
+
+#: plugins/ui-licterm-manage.php:410
+msgid "Associate licenses with this canonical group."
+msgstr "Associeer licenties met deze canonieke groep."
+
+#: plugins/ui-licterm-manage.php:413
+msgid "Licenses that are associated will be referred by the canonical name.\n"
+msgstr "Licenties die geassocieerd worden/zijn zal naar verwezen worden via de canonieke naam.\n"
+
+#: plugins/ui-licterm-manage.php:414
+msgid "Unassociated licenses are referred by their license name."
+msgstr "Naar niet geassocieerde licenties wordt verwezen via hun licentienaam."
+
+#: plugins/ui-licterm-manage.php:419
+msgid "Licenses associated with this canonical group"
+msgstr "Licenties die geassocieerd worden met deze canonieke groep"
+
+#: plugins/ui-licterm-manage.php:420
+msgid "Unassociated Licenses"
+msgstr "Niet-geassocieerde licenties"
+
+#: plugins/ui-licterm-manage.php:493
+msgid "Delete a keyword from"
+msgstr "Verwijder een sleutelwoord van"
+
+#: plugins/ui-licterm-manage.php:494
+msgid "all"
+msgstr "alle"
+
+#: plugins/ui-licterm-manage.php:495
+msgid "canonical groups."
+msgstr "canonieke groepen."
+
+#: plugins/ui-licterm-manage.php:498
+msgid "Use this to remove typographical errors or completely unnecessary keywords or phrases.\n"
+msgstr "Gebruik deze voor het verwijderen van typefouten of volledig onnodige sleutelwoorden of zinnen.\n"
+
+#: plugins/ui-licterm-manage.php:711
+msgid "License term information updated."
+msgstr "Licentievoorwaardeninformatie geactualiseerd."
+
+#: plugins/ui-licterm-manage.php:716
+msgid "Could not add License term information, error code is"
+msgstr "Kon licentievoorwaardeinformatie niet toevoegen. Foutcode is"
+
+#: plugins/ui-menus.php:27
+msgid "Menus"
+msgstr "Menu's"
+
+#: plugins/ui-menus.php:271
+#: plugins/ui-default.php:27
+msgid "Welcome to FOSSology"
+msgstr "Welkom bij FOSSology"
+
+#: plugins/ui-menus.php:298
+msgid "login"
+msgstr "Aanmelden"
+
+#: plugins/core-debug-fileloc.php:27
+msgid "Global Variables"
+msgstr "Globale Variabelen"
+
+#: plugins/core-debug-fileloc.php:76
+msgid " Variable"
+msgstr "Variabele"
+
+#: plugins/search-repo.php:27
+msgid "Search the Repository"
+msgstr "Repositorie doorzoeken"
+
+#: plugins/search-repo.php:43
+msgid "Search based on repository keys"
+msgstr "Zoeken gebaseerd op repositorie sleutels"
+
+#: plugins/search-repo.php:120
+msgid "Search string is not a valid format."
+msgstr "Zoekbegrip is in een ongeldige opmaak"
+
+#: plugins/search-repo.php:143
+msgid "Given a file key (pfile_pk) or repository identifier (sha1.md5.length), return the list of files.\n"
+msgstr "Gegeven een bestandssleutel (pfile_pk)  of repositorie id (sha1.md5.length), retourneert een lijst met bestanden.\n"
+
+#: plugins/search-repo.php:145
+msgid "Enter the pfile key or repository identifier:<P />"
+msgstr "Voer de pfile sleutel of repositorie id in:<P />"
+
+#: plugins/search-repo.php:154
+msgid "Files associated with"
+msgstr "Bestanden geassocieerd met"
+
+#: plugins/agent-license-reanalyze.php:27
+msgid "Reanalyze License and Store Results"
+msgstr "Opnieuw analyseren van licentie en resultaten opslaan"
+
+#: plugins/agent-license-reanalyze.php:63
+msgid "Removing previous license information."
+msgstr "Verwijder vorige licentie informatie."
+
+#: plugins/agent-license-reanalyze.php:76
+msgid "Container not processed."
+msgstr "Container niet verwerkt."
+
+#: plugins/agent-license-reanalyze.php:86
+msgid "Creating license cache"
+msgstr "Maak een licentie cache"
+
+#: plugins/agent-license-reanalyze.php:94
+msgid "Finding licenses based on templates"
+msgstr "Vind licenties gebaseerd op sjablonen"
+
+#: plugins/agent-license-reanalyze.php:99
+msgid "Finding license names based on terms and keywords"
+msgstr "Vind licentienamen gebaseerd op voorwaarden en sleutelwoorden"
+
+#: plugins/agent-license-reanalyze.php:115
+msgid "No licenses found."
+msgstr "Geen licenties gevonden."
+
+#: plugins/agent-license-reanalyze.php:120
+msgid "Cleaning up"
+msgstr "Opruimen"
+
+#: plugins/agent-license-reanalyze.php:129
+msgid "Scheduling email"
+msgstr "Email inplannen"
+
+#: plugins/agent-license-reanalyze.php:133
+msgid "FAIL! Scheduling of email failed:"
+msgstr "FOUT: Inplannen van email mislukt:"
+
+#: plugins/agent-license-reanalyze.php:196
+#: plugins/agent-license-reanalyze.php:199
+msgid "Reanalyze license and store results"
+msgstr "Opnieuw analyseren van licentie en resultaten opslaan"
+
+#: plugins/agent-license-reanalyze.php:232
+msgid "Refreshing in 2 seconds..."
+msgstr "Verversen in 2 seconden..."
+
+#: plugins/admin-bucket-pool.php:27
+msgid "Duplicate Bucketpool"
+msgstr "Dupliceer Bucketpool"
+
+#: plugins/admin-bucket-pool.php:131
+msgid "Your new bucketpool_pk is"
+msgstr "Uw nieuwe bucketpool_ik is"
+
+#: plugins/admin-bucket-pool.php:136
+msgid ""
+"The purpose of this is to facilitate editing an existing bucketpool.  Make sure you\n"
+"understand"
+msgstr ""
+"Het doel hiervan is het faciliteren van het wijzigen van een bucketpool. Zorg dat u\n"
+"dit proces begrijpt."
+
+#: plugins/admin-bucket-pool.php:139
+msgid "Creating Bucket Pools"
+msgstr "Aanmaken van bucketpools"
+
+#: plugins/admin-bucket-pool.php:141
+msgid "before continuing."
+msgstr "voordat u doorgaat."
+
+#: plugins/admin-bucket-pool.php:142
+msgid " It will explain why you should create a new bucketpool rather than edit an old one that has already recorded results."
+msgstr "Het zal verklaren waarom u beter een nieuwe bucketpool kunt aanmaken dan een bestaande waarin al resultaten zijn opgeslagen te wijzigen"
+
+#: plugins/admin-bucket-pool.php:144
+msgid "Steps to modify a bucketpool:"
+msgstr "Stappen om een bucketpool te wijzigen"
+
+#: plugins/admin-bucket-pool.php:147
+msgid "Create a baseline with your current bucketpool.  In other words, run a bucket scan on something.  If you do this before creating a new modified bucketpool, you can compare the old results with the new to verify it is working as you expect."
+msgstr "Maak een baseline met uw actuele bucketpool. Anders gezegd, voer een bucketscan uit op iets. Als u dit doet voorafgaand aan het aanmaken van een nieuwe bucketpool kunt u de oudere resultaten vergelijken met de nieuwe om te controleren of het functioneert zoals u verwacht."
+
+#: plugins/admin-bucket-pool.php:149
+msgid "Duplicate the bucketpool (this will increment the bucketpool version and its bucketdef records).  You should also check 'Update my default bucketpool' since new bucket jobs only use your default bucketpool."
+msgstr "Dupliceer de bucketpool (de bucketpool versie en zijn bucketdef records zullen toenemen). U kunt het beste ook 'Actualiseer mijn standaard bucketpool' aanvinken omdat nieuwe bucket taken alleen uw standaard bucketpool gebruiken."
+
+#: plugins/admin-bucket-pool.php:151
+msgid "Manually edit the new bucketpool record, if desired."
+msgstr "Wijzig handmatig het nieuwe bucketpool record indien gewenst."
+
+#: plugins/admin-bucket-pool.php:153
+msgid "Manually insert/update/delete the new bucketdef records."
+msgstr "Handmatig invoegen/wijzigen/verwijder de nieuwe bucketdef records."
+
+#: plugins/admin-bucket-pool.php:155
+msgid "Delete your old bucket job from the job queue (from Show Jobs).  You must delete the old completed bucket job from the queue rather than reset it because a reset will use the previous bucketpool (the one you originally queued)."
+msgstr "Verwijder uw oude bucket taak uit de taken wachtij (via Toon Taken). U moet de oude reeds uitgevoerde bucket taken uit de wachtrij verwijderen in plaats van deze te resetten omdat een reset de vorige bucketpool zal gebruiken (degene die eerst in de wachtrij was geplaatst."
+
+#: plugins/admin-bucket-pool.php:157
+msgid "Queue up the new bucket job in Jobs > Agents."
+msgstr "Opnieuw inplannen van de bucket taak in Taken > Agents."
+
+#: plugins/admin-bucket-pool.php:159
+msgid "Use Buckets > Compare to compare the new and old runs.  Verify the results."
+msgstr "Gebruik Buckets > Vergelijken voor het vergelijken van nieuwe en oude runs. Vergelijk de resultaten."
+
+#: plugins/admin-bucket-pool.php:161
+msgid "If you still need to edit the buckets, use Buckets > Remove Bucket Results to remove the previous runs results and repeat starting with editing the bucketpool or def records."
+msgstr "Als u opnieuw de buckets wilt wijzigen, gebruik dan Buckets > Verwijder Bucket Resultaten voor het verwijderen van oude runs en begin opnieuw met het wijzigen van de bucketpool of def records."
+
+#: plugins/admin-bucket-pool.php:163
+msgid "When the bucket results are what you want, then you can reset all the users of the old bucketpool to the new one with Buckets > New Bucketpool."
+msgstr "Als de bucket resultaten zijn zoals gewenst, kunt u alle gebruikers van de oude bucketpool resetten naar de nieuwe via Buckets > Nieuwe Bucketpool."
+
+#: plugins/admin-bucket-pool.php:169
+msgid "Choose the bucketpool to duplicate"
+msgstr "Kies de bucketpool die u wilt dupliceren"
+
+#: plugins/admin-bucket-pool.php:174
+msgid "Update my default bucketpool"
+msgstr "Actualiseer mijn standaard bucketpool'"
+
+#: plugins/admin-bucket-pool.php:177
+msgid "Submit"
+msgstr "Verzenden"
+
+#: plugins/admin-check-template.php:27
+msgid "License Template Check"
+msgstr "Licentie Template Controle"
+
+#: plugins/admin-check-template.php:48
+msgid "Failed to read License.bsam"
+msgstr "Kon License.bsam niet lezen"
+
+#: plugins/admin-check-template.php:58
+msgid "Checking for duplicate errors within the license templates"
+msgstr "Controleren op duplicatiefouten in de licentiesjablonen"
+
+#: plugins/admin-check-template.php:74
+msgid "Duplicate:"
+msgstr "DupliceerL"
+
+#: plugins/admin-check-template.php:75
+msgid "is"
+msgstr "is"
+
+#: plugins/admin-check-template.php:83
+msgid "Total duplicate templates that need cleaning up:"
+msgstr "Aantal duplicaat sjablonen die opgeschoont dienen te worden:"
+
+#: plugins/admin-check-template.php:99
+msgid "Checking for obsolete license templates"
+msgstr "Controleer op overbodige licentie sjablonen"
+
+#: plugins/admin-check-template.php:110
+msgid "Obsolete: "
+msgstr "Verouderd:"
+
+#: plugins/admin-check-template.php:137
+msgid "Total obsolete template records that need cleaning up: "
+msgstr "Aantal verouderde sjabloon records die opgeschoond dienen te worden:"
+
+#: plugins/admin-check-template.php:141
+msgid "Reinstall licenses before doing the cleanup."
+msgstr "Herinstalleer licenties voorafgaand aan opschonen."
+
+#: plugins/admin-check-template.php:229
+msgid "Checking for Uploads to Re-analyze"
+msgstr "Controleren van upload voor heranalyse"
+
+#: plugins/admin-check-template.php:231
+msgid "The impacted uploads:"
+msgstr "De betreffende uploads:"
+
+#: plugins/admin-check-template.php:260
+msgid "Resetting license analysis for"
+msgstr "Reset licentieanalyse voor"
+
+#: plugins/admin-check-template.php:261
+msgid "files."
+msgstr "bestanden."
+
+#: plugins/admin-check-template.php:284
+msgid "Removing"
+msgstr "Verwijderen"
+
+#: plugins/admin-check-template.php:285
+msgid "obsolete license templates."
+msgstr "overbodige licentie sjablonen."
+
+#: plugins/admin-check-template.php:313
+msgid "Resetting"
+msgstr "Resetting"
+
+#: plugins/admin-check-template.php:314
+msgid "license analysis jobs."
+msgstr "licentie analyse taken."
+
+#: plugins/admin-check-template.php:357
+msgid "Clean-Up"
+msgstr "Opruimen"
+
+#: plugins/admin-check-template.php:359
+msgid "Total obsolete templates to remove: "
+msgstr "Aantal overbodige sjablonen om te verwijderen:"
+
+#: plugins/admin-check-template.php:361
+msgid "Total pfiles to re-analyze: "
+msgstr "Aantal pfiles voor heranalyse:"
+
+#: plugins/admin-check-template.php:363
+msgid "Total uploads to re-analyze: "
+msgstr "Totaal aantal uploads voor heranalyse:"
+
+#: plugins/admin-check-template.php:365
+msgid "Cleaning up obsolete analysis requires removing the old analysis and rescheduling the projects for license analysis.\n"
+msgstr "Opschonen van overbodige analyses vereist het verwijderen van de oude analyse en het opnieuw inplannen van projecten voor licentie analyse.\n"
+
+#: plugins/admin-check-template.php:366
+msgid "Only the files linked to the obsolete templates need to be analyzed.\n"
+msgstr "Alleen de bestanden verbonden met de overbodige sjablonen dienen geanalyseerd te worden.\n"
+
+#: plugins/admin-check-template.php:367
+msgid "This will not re-analyze every file in the uploaded package.\n"
+msgstr "Dit zal niet elk bestand in het geuploade pakket heranalyseren.\n"
+
+#: plugins/admin-check-template.php:369
+msgid " Check to cleanup and re-analyze.\n"
+msgstr "Selecteer voor opschonen en heranalyseren.\n"
+
+#: plugins/admin-check-template.php:371
+#: plugins/admin-db-vacuum.php:102
+msgid "Clean"
+msgstr "Opschonen"
+
+#: plugins/search-file.php:27
+msgid "Search for File"
+msgstr "Zoek Bestand"
+
+#: plugins/search-file.php:93
+msgid "Search based on filename"
+msgstr "Zoek bestandsnaam"
+
+#: plugins/search-file.php:121
+msgid "Enter the filename to find:"
+msgstr "Voer de te vinden bestandsnaam in:"
+
+#: plugins/search-file.php:124
+msgid "By default only containers (rpms, tars, isos, etc) are shown."
+msgstr "Standaard worden allen containers (rpms, tars, isos, etc) getoond."
+
+#: plugins/agent-pkgmetagetta.php:27
+msgid "Metadata Analysis (Slow.  Not needed for license analysis)"
+msgstr "Metadata analyse. (Traag. Niet nodig voor licentie analyse)"
+
+#: plugins/agent-pkgmetagetta.php:167
+#: plugins/agent-license.php:279
+#: plugins/agent-pkgagent.php:203
+#: plugins/agent-specagent.php:170
+#: plugins/agent-mimetype.php:144
+msgid "Analysis added to job queue"
+msgstr "Analyse toegevoegd aan takenwachtrij"
+
+#: plugins/agent-pkgmetagetta.php:172
+#: plugins/agent-license.php:283
+#: plugins/agent-specagent.php:175
+#: plugins/agent-mimetype.php:148
+msgid "Scheduling of Analysis failed: "
+msgstr "Inplannen van analyse mislukt:"
+
+#: plugins/agent-pkgmetagetta.php:193
+#: plugins/agent-license.php:302
+#: plugins/agent-pkgagent.php:229
+#: plugins/agent-specagent.php:196
+#: plugins/agent-mimetype.php:167
+#: plugins/agent-nomos.php:194
+msgid "All uploaded files are already analyzed, or scheduled to be analyzed."
+msgstr "Alle geuploade bestanden zijn reeds geanalyseerd, of ingepland voor analyse."
+
+#: plugins/agent-pkgmetagetta.php:198
+msgid "Metadata analysis extracts meta data from RPM and DEB files.<P />\n"
+msgstr "Metadata analyse onttrekt metadata uit RPM en DEB bestanden.<P />\n"
+
+#: plugins/agent-pkgmetagetta.php:200
+#: plugins/agent-pkgagent.php:236
+#: plugins/agent-specagent.php:204
+msgid "Select an uploaded file for analysis.\n"
+msgstr "Kies een geupload bestand voor analyse.\n"
+
+#: plugins/agent-pkgmetagetta.php:201
+#: plugins/agent-license.php:308
+#: plugins/agent-pkgagent.php:237
+#: plugins/agent-specagent.php:205
+#: plugins/agent-mimetype.php:174
+#: plugins/agent-nomos.php:200
+msgid "Only uploads that are not already scheduled can be scheduled.\n"
+msgstr "Alleen upload die nog niet zijn ingepland kunnen worden ingepland.\n"
+
+#: plugins/agent-pkgmetagetta.php:202
+#: plugins/agent-license.php:309
+#: plugins/agent-bucket.php:244
+#: plugins/agent-pkgagent.php:238
+#: plugins/agent-specagent.php:206
+#: plugins/agent-mimetype.php:175
+#: plugins/agent-nomos.php:201
+msgid "Analyze:"
+msgstr "Analyseren:"
+
+#: plugins/agent-pkgmetagetta.php:212
+#: plugins/agent-license.php:324
+#: plugins/agent-license-once.php:334
+#: plugins/agent-license-once-compare.php:287
+#: plugins/agent-nomos-once.php:209
+#: plugins/agent-bucket.php:259
+#: plugins/agent-pkgagent.php:248
+#: plugins/agent-add.php:188
+#: plugins/agent-specagent.php:216
+#: plugins/agent-mimetype.php:190
+#: plugins/agent-nomos.php:216
+msgid "Analyze"
+msgstr "Analyseren"
+
+#: plugins/ui-licgroup-debug.php:27
+msgid "License Groups Debug"
+msgstr "Debug Licentiegroepen"
+
+#: plugins/ui-licgroup-debug.php:55
+msgid "HEAD"
+msgstr "KOP"
+
+#: plugins/ui-licgroup-debug.php:73
+msgid "Inherited Group"
+msgstr "Geërfde Groep"
+
+#: plugins/ui-licgroup-debug.php:78
+msgid "Loop"
+msgstr "Lus"
+
+#: plugins/ui-licgroup-debug.php:79
+msgid "to Group"
+msgstr "naar Groep"
+
+#: plugins/ui-licgroup-debug.php:98
+msgid "Inherited License"
+msgstr "Geërfde Licentie"
+
+#: plugins/ui-licgroup-debug.php:148
+msgid "The current license group tree."
+msgstr "De huidige licentiegroep boom."
+
+#: plugins/ui-licgroup-debug.php:150
+msgid "Inherited groups are expanded and licenses are listed."
+msgstr "Geërfde groepen zijn uitgeklapt en licenties getoond."
+
+#: plugins/ui-licgroup-debug.php:152
+msgid "Loops in group inheritance are identified."
+msgstr "Lussen in groep overerving zijn geïdentificeerd."
+
+#: plugins/admin-folder-delete.php:38
+msgid "Delete Folder"
+msgstr "Verwijder Map"
+
+#: plugins/admin-folder-delete.php:69
+msgid "Can Not Delete Root Folder"
+msgstr "Kan de top Map niet verwijderen"
+
+#: plugins/admin-folder-delete.php:77
+#: plugins/agent-remove-license.php:77
+#: plugins/admin-upload-delete.php:59
+#: plugins/upload-srv-files.php:120
+msgid "Failed to create job record"
+msgstr "Aanmaken van taak record mislukt"
+
+#: plugins/admin-folder-delete.php:84
+#: plugins/agent-remove-license.php:84
+#: plugins/admin-upload-delete.php:66
+msgid "Failed to place delete in job queue"
+msgstr "Plaatsen van verwijdering in takenwachtrij mislukt"
+
+#: plugins/admin-folder-delete.php:113
+msgid "Deletion of folder "
+msgstr "Verwijdering van map"
+
+#: plugins/admin-folder-delete.php:114
+msgid " added to job queue"
+msgstr "toegevoegd aan takenwachtrij"
+
+#: plugins/admin-folder-delete.php:118
+msgid "Deletion of "
+msgstr "Verwijdering van"
+
+#: plugins/admin-folder-delete.php:119
+msgid " failed: "
+msgstr " mislukt:"
+
+#: plugins/admin-folder-delete.php:125
+msgid "Select the folder to"
+msgstr "Selecteer de map voor"
+
+#: plugins/admin-folder-delete.php:126
+#: plugins/admin-folder-delete.php:130
+#: plugins/admin-upload-delete.php:115
+#: plugins/admin-upload-delete.php:119
+msgid "delete"
+msgstr "verwijderen"
+
+#: plugins/admin-folder-delete.php:129
+#: plugins/agent-remove-license.php:159
+#: plugins/admin-upload-delete.php:118
+msgid "This will"
+msgstr "Dit zal"
+
+#: plugins/admin-folder-delete.php:131
+msgid "the folder, all subfolders, and all uploaded files stored within the folder!"
+msgstr "de map, de submappen, en alle geuploade bestanden in de map!"
+
+#: plugins/admin-folder-delete.php:133
+msgid "Be very careful with your selection since you can delete a lot of work!"
+msgstr "Wees voorzichtig met uw selectie want u kunt veel werk vernietigen!"
+
+#: plugins/admin-folder-delete.php:135
+msgid "All analysis only associated with the deleted uploads will also be deleted."
+msgstr "Alle analyses die alleen betrekking hebben op de verwijderden uploads zullen ook verwijderd worden."
+
+#: plugins/admin-folder-delete.php:137
+msgid "THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository."
+msgstr "ER IS GEEN UNDELETE: Als u iets selecteert voor verwijdering, zal het verwijderd worden uit de database en bestandsrepositorie."
+
+#: plugins/admin-folder-delete.php:140
+msgid "Select the folder to delete:  "
+msgstr "Selecteer de te verwijderen map:"
+
+#: plugins/admin-folder-delete.php:143
+msgid "select folder"
+msgstr "selecteer map"
+
+#: plugins/agent-license.php:28
+msgid "bSAM License Analysis (deprecated)"
+msgstr "bSAM Licentie Analyse (verouderd)"
+
+#: plugins/agent-license.php:93
+#: plugins/agent-bucket.php:128
+#: plugins/agent-bucket.php:148
+#: plugins/agent-pkgagent.php:93
+#: plugins/agent-mimetype.php:92
+#: plugins/agent-nomos.php:109
+msgid "Unable to find dependent job: unpack"
+msgstr "Onvindbare afhankelijke taak: unpack"
+
+#: plugins/agent-license.php:168
+msgid "Failed to insert first sqlagent into job queue"
+msgstr "Invoegen van eerste sqlagent in takenwachtrij mislukt"
+
+#: plugins/agent-license.php:184
+msgid "Failed to insert filter_license into job queue"
+msgstr "Invoegen van filter_license in takenwachtrij mislukt"
+
+#: plugins/agent-license.php:200
+msgid "Failed to insert license into job queue"
+msgstr "Invoegen van licentie in takenwachtrij mislukt"
+
+#: plugins/agent-license.php:215
+msgid "Failed to insert licinspect into job queue"
+msgstr "Invoegen van licinspect in takenwachtrij mislukt"
+
+#: plugins/agent-license.php:232
+msgid "Failed to insert filter_clean into job queue"
+msgstr "Invoegen van filter_clean in takenwachtrij mislukt"
+
+#: plugins/agent-license.php:244
+msgid "Failed to insert count-update sqlagent into job queue"
+msgstr "Invoegen van count-update sqlagent in takenwachtrij mislukt"
+
+#: plugins/agent-license.php:254
+msgid "Failed to insert final sqlagent into job queue"
+msgstr "Invoegen van laatste sqlagent in takenwachtrij mislukt"
+
+#: plugins/agent-license.php:307
+#: plugins/agent-nomos.php:199
+msgid "Select an uploaded file for license analysis.\n"
+msgstr "Selecteer een geupload bestand voor licentie analyse.\n"
+
+#: plugins/ui-buckets.php:27
+msgid "Bucket Browser"
+msgstr "Bucket Browser"
+
+#: plugins/ui-buckets.php:114
+msgid "Browse by buckets (categories)"
+msgstr "Blader door buckets (categorieën)"
+
+#: plugins/ui-buckets.php:185
+#: plugins/search.php:55
+#: plugins/search.php:132
+msgid "Invalid URL, nonexistant item"
+msgstr "Ongeldige URL, niet-bestaand item"
+
+#: plugins/ui-buckets.php:273
+msgid "Bucket Pool"
+msgstr "Bucket Pool"
+
+#: plugins/ui-buckets.php:280
+msgid "Bucket"
+msgstr "Bucket"
+
+#: plugins/ui-buckets.php:310
+msgid "Unique buckets"
+msgstr "Unieke buckets"
+
+#: plugins/ui-buckets.php:449
+msgid "source packages"
+msgstr "Bronpakketten"
+
+#: plugins/ui-buckets.php:451
+msgid "binary packages"
+msgstr "Binaire pakketten"
+
+#: plugins/ui-buckets.php:453
+msgid "binary packages with no source package"
+msgstr "Binaire pakketten zonder bronbestanden"
+
+#: plugins/ui-buckets.php:527
+#: plugins/ui-nomos-license.php:451
+msgid "Loading..."
+msgstr "Laden..."
+
+#: plugins/admin-upload-edit.php:34
+msgid "Edit Upload Properties"
+msgstr "Wijzig Upload Eigenschappen"
+
+#: plugins/admin-upload-edit.php:119
+msgid "Upload Properties changed"
+msgstr "Upload Eigenschappen gewijzigd"
+
+#: plugins/admin-upload-edit.php:122
+msgid ""
+"The upload properties that can be changed are the upload name and\n"
+"                 description.  First select the folder that the upload is stored in.  Then select the upload to edit. Then enter the new values. If no value is entered, then the corresponding field will not be changed."
+msgstr ""
+"De upload eigenschappen die gewijzigd kunnen worden zijn de upload naam en\n"
+"omschrijving. Kies eerst de map waar de upload zich in bevindt. Kies dan de te wijzigen upload. Voer dan de nieuwe waarden in. Als er geen waarde wordt ingevoerd, zal het betreffende veld niet gewijzigd worden."
+
+#: plugins/admin-upload-edit.php:145
+msgid "Select the folder that contains the upload:  \n"
+msgstr "Kies de map die de upload bevat: \n"
+
+#: plugins/admin-upload-edit.php:152
+msgid "Select the upload you wish to edit:  \n"
+msgstr "Kies de upload die u wilt wijzigen: \n"
+
+#: plugins/admin-upload-edit.php:168
+msgid "Change upload name:  \n"
+msgstr "Wijzig uploadnaam: \n"
+
+#: plugins/admin-upload-edit.php:171
+msgid "Change upload description:  \n"
+msgstr "Wijzig upload omschrijving: \n"
+
+#: plugins/core-debug-flush-cache.php:27
+msgid "Flush Cache"
+msgstr "Leeg Cache"
+
+#: plugins/core-debug-flush-cache.php:52
+msgid "All cached pages have been removed.\n"
+msgstr "Alle gecachete pagina's zijn verwijderd.\n"
+
+#: plugins/ui-licgroup.php:27
+#: plugins/ui-licgroup.php:565
+msgid "License Groups"
+msgstr "Licentiegroepen"
+
+#: plugins/ui-licgroup.php:263
+msgid "GrpGroups"
+msgstr "GrpGroups"
+
+#: plugins/ui-licgroup.php:592
+msgid "License not part of any group"
+msgstr "Licentie maakt geen deel uit van een groep"
+
+#: plugins/ui-licgroup.php:733
+msgid "WARNING: Licence groups only work for the bsam license scanner and do not use the results from licterm.  This functionality has been superceded in v 1.2 by 'buckets' based on the nomos license scanner."
+msgstr "WAARSCHUWING: Licentiegroepen werken alleen met de bsam licentie scanner en gebruiken geen resultaten van licterm. Deze functionaliteit is opgevolgd in v 1.2 door 'buckets' gebaseerd op de nomons licentie scanner."
+
+#: plugins/agent-license-once.php:28
+msgid "Bsam One-Shot License Analysis"
+msgstr "Bsam One-Shot  Licentie Analyse"
+
+#: plugins/agent-license-once.php:244
+#: plugins/agent-license-once.php:247
+msgid "bsam One-shot, real-time license analysis"
+msgstr "bsam One-shot, real-time licentie analyse"
+
+#: plugins/agent-license-once.php:306
+#: plugins/agent-nomos-once.php:188
+msgid "This analyzer allows you to upload a single file for license analysis.\n"
+msgstr "Deze analyzer maakt het mogelijk één bestand te uploaden voor licentie analyse.\n"
+
+#: plugins/agent-license-once.php:307
+#: plugins/agent-nomos-once.php:189
+msgid "The limitations:\n"
+msgstr "De beperkingen:\n"
+
+#: plugins/agent-license-once.php:309
+#: plugins/agent-license-once-compare.php:230
+msgid "The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n"
+msgstr "De analyse wordt in real-time uitgevoerd. Grote bestanden kunnen enige tijd nodig hebben. Deze methode wordt niet aanbevolen voor bestanden groter dan een paar honderd kilobytes.\n"
+
+#: plugins/agent-license-once.php:311
+#: plugins/agent-license-once-compare.php:234
+#: plugins/agent-nomos-once.php:193
+msgid "Files that contain files are"
+msgstr "Bestanden die bestanden kunnen bevatten zijn"
+
+#: plugins/agent-license-once.php:312
+#: plugins/agent-license-once.php:316
+#: plugins/agent-license-once-compare.php:235
+#: plugins/agent-license-once-compare.php:239
+#: plugins/core-debug-menus.php:133
+#: plugins/agent-nomos-once.php:194
+#: plugins/agent-nomos-once.php:198
+msgid "not"
+msgstr "niet"
+
+#: plugins/agent-license-once.php:313
+msgid "unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n"
+msgstr "uitgepakt. Als u een 'zip' of 'deb' bestand upload zal het binaire bestand gescanned worden op licenties en wordt er waarschijnlijk niks gevonden.\n"
+
+#: plugins/agent-license-once.php:315
+#: plugins/agent-license-once-compare.php:238
+#: plugins/agent-nomos-once.php:197
+msgid "Results are"
+msgstr "Resultaten zijn"
+
+#: plugins/agent-license-once.php:317
+msgid "stored. As soon as you get your results, your uploaded file is removed from the system.\n"
+msgstr "opgeslagen. Zodra de resultaten bekend zijn wordt het geuploade bestand verwijderd van het systeem.\n"
+
+#: plugins/agent-license-once.php:323
+#: plugins/agent-license-once-compare.php:249
+#: plugins/agent-nomos-once.php:205
+msgid "<li>Select the file to upload:<br />\n"
+msgstr "<li>Selecteer het bestand dat geupload moet worden:<br />\n"
+
+#: plugins/agent-license-once.php:325
+#: plugins/agent-license-once-compare.php:251
+#: plugins/upload-file.php:169
+#: plugins/upload-file.php:178
+#: plugins/upload-url.php:150
+#: plugins/upload-url.php:159
+#: plugins/upload-srv-files.php:202
+#: plugins/upload-srv-files.php:224
+msgid "NOTE"
+msgstr "NB"
+
+#: plugins/agent-license-once.php:326
+#: plugins/agent-license-once-compare.php:252
+msgid ": Files larger than 100K will be discarded and not analyzed."
+msgstr ": bestanden groter dan 100K zullen weggegooid en niet geanalyseerd worden."
+
+#: plugins/agent-license-once.php:328
+msgid "Check if you want to see the highlighted licenses.\n"
+msgstr "Controleer of u de gemarkeerde licenties wilt zien.\n"
+
+#: plugins/agent-license-once.php:330
+msgid "Unchecked returns a simple list that summarizes the identified license types."
+msgstr "Unchecked geeft een eenvoudige lijst die de gevonden licentie types samenvat."
+
+#: plugins/ui-licgroup-default.php:37
+msgid "Create Default License Groups"
+msgstr "Maak standaard licentiegroepen"
+
+#: plugins/ui-licgroup-default.php:270
+msgid "Default Fedora groups created."
+msgstr "Standaard Fedoragroepen gemaakt."
+
+#: plugins/ui-licgroup-default.php:447
+msgid "Default FSF groups created."
+msgstr "Standaard FSF groepen gemaakt."
+
+#: plugins/ui-licgroup-default.php:514
+#: plugins/admin-folder-create.php:135
+msgid "Created"
+msgstr "Gemaakt."
+
+#: plugins/ui-licgroup-default.php:515
+msgid "default license groups,"
+msgstr "standaard licentiegroepen,"
+
+#: plugins/ui-licgroup-default.php:516
+msgid "containing"
+msgstr "bevattend"
+
+#: plugins/ui-licgroup-default.php:517
+msgid "licenses."
+msgstr "licenties."
+
+#: plugins/ui-licgroup-default.php:518
+msgid "All default groups are stored under the license group"
+msgstr "Alle standaard groepen worden opgeslagen onder de licentiegroep."
+
+#: plugins/ui-licgroup-default.php:552
+msgid "Could not obtain default license groups, error code is"
+msgstr "Kon de standaard licentiegroepen niet vinden, foutcode is"
+
+#: plugins/ui-licgroup-default.php:563
+msgid "Could not obtain FSF license groups, error code is"
+msgstr "Kon de FSF licentiegroepen niet vinden, foutcode is"
+
+#: plugins/ui-licgroup-default.php:574
+msgid "Could not obtain Fedora license groups, error code is"
+msgstr "Kon de Fedora licentiegroepen niet vinden, foutcode is"
+
+#: plugins/ui-licgroup-default.php:580
+msgid "License groups provide organization for licenses.\n"
+msgstr "Licentiegroepen dienen voor het organiseren van licenties.\n"
+
+#: plugins/ui-licgroup-default.php:581
+msgid "By selecting the 'Create' button, you will initialize the license groups.\n"
+msgstr "Door het kiezen van de 'Aanmaken' knop initialiseert u de licentiegroepen.\n"
+
+#: plugins/ui-licgroup-default.php:582
+msgid "This initialization will create many default license groups."
+msgstr "Deze initialisatie zal een groot aantal standaard licentiegroepen aanmaken."
+
+#: plugins/ui-licgroup-default.php:584
+msgid "The default license groups are"
+msgstr "De standaard licentiegroepen zijn"
+
+#: plugins/ui-licgroup-default.php:585
+#: plugins/ui-licterm-default.php:277
+msgid "NOT"
+msgstr "NIET"
+
+#: plugins/ui-licgroup-default.php:586
+#: plugins/ui-licterm-default.php:278
+msgid "a recommendation or legal interpretation."
+msgstr "een aanbeveling or juridische interpretatie."
+
+#: plugins/ui-licgroup-default.php:588
+msgid "In particular, related licenses may have very different legal meanings.\n"
+msgstr "In het bijzonder, gerelateerde licenties kunnen zeer verschillende juridische betekenissen hebben.\n"
+
+#: plugins/ui-licgroup-default.php:589
+msgid "If you create these default groups twice, then any modification you made to the default groups"
+msgstr "Als u deze standaard groepen twee keer maakt, zal elke wijziging die u aan de standaardgroep maakt"
+
+#: plugins/ui-licgroup-default.php:590
+msgid "will be lost"
+msgstr "verloren gaan"
+
+#: plugins/ui-licgroup-default.php:592
+msgid "Creating default groups will not impact any new groups you created."
+msgstr "Het aanmaken van standaardgroepen heeft geen invloed op door u gemaakte nieuwe groepen."
+
+#: plugins/ui-licgroup-default.php:595
+msgid "After the default groups are created, you can modify, edit, or delete the default groups with the "
+msgstr "Nadat de standaard groepen zijn aangemaakt kunt u de standaard groepen wijzigen  of verwijderen met de"
+
+#: plugins/ui-licgroup-default.php:598
+#: plugins/ui-licterm-default.php:287
+msgid " menu option.\n"
+msgstr "menu optie.\n"
+
+#: plugins/ui-licgroup-default.php:599
+#: plugins/ui-licterm-default.php:288
+msgid "You can also use the "
+msgstr "U kunt ook gebruik maken van de"
+
+#: plugins/ui-licgroup-default.php:601
+msgid "to create new groups."
+msgstr "om nieuwe groepen aan te maken."
+
+#: plugins/ui-licgroup-default.php:604
+msgid "Select the default groups to create:\n"
+msgstr "Kies de standaard groep die aangemaakt moet worden:\n"
+
+#: plugins/ui-licgroup-default.php:607
+msgid "These are default license groups based on a heirarchy of similar license text."
+msgstr "Dit zijn standaard licentiegroepen gebaseerd op een hiërarchie van soortgelijke licentieteksten."
+
+#: plugins/ui-licgroup-default.php:609
+msgid "FSF"
+msgstr "FSF"
+
+#: plugins/ui-licgroup-default.php:610
+msgid "FSF Licensing"
+msgstr "FSF Licencering"
+
+#: plugins/ui-licgroup-default.php:611
+msgid "for the list of GPL-compatible, incompatible, and free licenses."
+msgstr "voor de lijst met GPL-compatibele, onverenigbare, en vrije licenties."
+
+#: plugins/ui-licgroup-default.php:613
+msgid "Fedora"
+msgstr "Fedora"
+
+#: plugins/ui-licgroup-default.php:614
+msgid "Fedora Licensing"
+msgstr "Fedora Licensering"
+
+#: plugins/ui-licgroup-default.php:615
+msgid "for the list of good, bad, and unknown licenses."
+msgstr "voor de lijst van de goede, slechte, en onbekende licenties."
+
+#: plugins/agent-license-once-compare.php:27
+msgid "One-Shot License Comparison"
+msgstr "One-Shot Licentie Vergelijking"
+
+#: plugins/agent-license-once-compare.php:74
+#: plugins/agent-license-once-compare.php:82
+msgid "No comparison licenses found."
+msgstr "Geen vergelijkende licentie gevonden."
+
+#: plugins/agent-license-once-compare.php:160
+#: plugins/agent-license-once-compare.php:163
+msgid "One-shot, real-time license recomparison"
+msgstr "One-shot, real-time licentie vergelijking"
+
+#: plugins/agent-license-once-compare.php:224
+msgid ""
+"This analyzer allows you to compare a single file to a set of licenses selectable by you without having the results saved in the database.\n"
+"<br>"
+msgstr ""
+"Deze analyzer maakt het mogelijk één bestand te vergelijken met een set licenties die door u zijn geselecteerd zonder dat de resultaten in een database worden opgeslagen.\n"
+"<br>"
+
+#: plugins/agent-license-once-compare.php:225
+msgid ""
+"Typical uses include comparing one license to other licenses to see their similarity, and to compare a file to a license to see how this particular license matches.\n"
+"<br>"
+msgstr ""
+"Typische toepassing is het vergelijken van een licentie met andere licenties om overeenkomsten te vinden, en om een bestand te vergelijken met een licentie om te zien hoe deze specifieke licentie overeenkomt.\n"
+"<br>"
+
+#: plugins/agent-license-once-compare.php:226
+msgid "The analysis is done in real-time.\n"
+msgstr "De analyse wordt in real-time uitgevoerd.\n"
+
+#: plugins/agent-license-once-compare.php:227
+msgid "Limitations:\n"
+msgstr "Beperkingen:\n"
+
+#: plugins/agent-license-once-compare.php:232
+msgid "The analysis is done in real-time. Selecting many licenses to compare against can take a long time.\n"
+msgstr "De analyse wordt in real-time uitgevoerd. Het selecteren van vele licenties om mee te vergelijken kan een flinke tijd duren.\n"
+
+#: plugins/agent-license-once-compare.php:236
+msgid " unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n"
+msgstr "uitgepakt. Als u een 'zip' of een 'deb' bestand upload zal het binaire bestand gecontroleerd worden op licenties en zal er waarschijnlijk niks worden gevonden.\n"
+
+#: plugins/agent-license-once-compare.php:240
+msgid " stored. As soon as you get your results, your analysis is removed from the system.\n"
+msgstr "opgeslagen. Zodra u uw resultaten krijgt zal de analyse van het systeem worden verwijderd.\n"
+
+#: plugins/agent-license-once-compare.php:258
+msgid "<li>This is the selected file to re-analyze:<br />\n"
+msgstr "<li>Dit is het geselecteerde bestand voor de heranalyse:<br />\n"
+
+#: plugins/agent-license-once-compare.php:262
+msgid "<li>Select one or more licenses to compare against:<br>\n"
+msgstr "<li>Kies één of meer licenties om mee te vergelijken:<br>\n"
+
+#: plugins/myjobs.php:51
+msgid "My Jobs Status"
+msgstr "Mijn Taken Status"
+
+#: plugins/myjobs.php:74
+msgid "Click Job Name:Id to see the job details"
+msgstr "Klik op Taaknaam:Id om de taak details te zien"
+
+#: plugins/myjobs.php:75
+msgid "Page updates every"
+msgstr "Pagina ververst elke"
+
+#: plugins/myjobs.php:77
+msgid "Running Jobs"
+msgstr "Taken die bezig zijn"
+
+#: plugins/myjobs.php:78
+msgid "Job Name:Id"
+msgstr "Taak Naam:Id"
+
+#: plugins/myjobs.php:80
+msgid "Tasks"
+msgstr "Taken"
+
+#: plugins/myjobs.php:81
+msgid "Completed"
+msgstr "Klaar"
+
+#: plugins/myjobs.php:83
+msgid "Pending"
+msgstr "Wachtend"
+
+#: plugins/myjobs.php:84
+msgid "Failed"
+msgstr "Gefaald"
+
+#: plugins/myjobs.php:131
+msgid "Fatal internal ERROR! Cannot connect to the DataBase"
+msgstr "Fatale interne FOUT! Kan geen verbinding maken met de Database"
+
+#: plugins/ajax-upload-agents.php:35
+msgid "List Agents for an Upload as Options"
+msgstr "Toon Agents voor een Upload als Opties"
+
+#: plugins/admin-upload-move.php:89
+msgid "Move upload to different folder."
+msgstr "Verplaats upload naar een andere map."
+
+#: plugins/admin-upload-move.php:110
+msgid "Moved"
+msgstr "Verplaatst"
+
+#: plugins/admin-upload-move.php:111
+msgid "from folder"
+msgstr "van map"
+
+#: plugins/admin-upload-move.php:112
+msgid "to folder"
+msgstr "naar map"
+
+#: plugins/admin-upload-move.php:136
+msgid "Select the folder containing the upload you wish to move:  \n"
+msgstr "Kies de map die de upload bevat die u wilt verplaatsen: \n"
+
+#: plugins/admin-upload-move.php:143
+msgid "Select the upload you wish to move:  \n"
+msgstr "Kies de upload die u wilt verplaatsten: \n"
+
+#: plugins/core-debug-menus.php:27
+msgid "Debug Menus"
+msgstr "Debug Menus"
+
+#: plugins/core-debug-menus.php:106
+msgid "Full debug ENABLED!"
+msgstr "Uitgebreide debug AANGEZET!"
+
+#: plugins/core-debug-menus.php:107
+#: plugins/core-debug-menus.php:113
+msgid "Now view any page."
+msgstr "Bekijk nu een willekeurige pagina."
+
+#: plugins/core-debug-menus.php:112
+msgid "Full debug disabled!"
+msgstr "Uitgebreide debug uitgezet!"
+
+#: plugins/core-debug-menus.php:116
+msgid "This developer tool lists all items in the menu structure."
+msgstr "Dit ontwikkelgereedschap toont alle items in de menu structuur."
+
+#: plugins/core-debug-menus.php:118
+msgid "Since some menu inserts are conditional, not everything may appear here (the conditions may not lead to the insertion)."
+msgstr "Omdat sommige menu opties voorwaardelijk zijn, zal misschien niet alles hier getoont worden (de voorwaarden voorkomen dit dan)."
+
+#: plugins/core-debug-menus.php:120
+msgid "Fully-debugged menus show the full menu path and order number"
+msgstr "Volledig gedebugde menu's tonen het volledige menupad en volgnummer"
+
+#: plugins/core-debug-menus.php:121
+msgid "in the menu"
+msgstr "in het menu"
+
+#: plugins/core-debug-menus.php:124
+msgid "The full debugging is restricted to"
+msgstr "De volledige debugging is beperkt tot"
+
+#: plugins/core-debug-menus.php:125
+#: plugins/user-edit-any.php:340
+msgid "your"
+msgstr "uw"
+
+#: plugins/core-debug-menus.php:126
+msgid " login session. (Nobody else will see it.)\n"
+msgstr "login sessie. (niemand anders zal dit zien.)\n"
+
+#: plugins/core-debug-menus.php:128
+msgid "Full debugging shows the full menu path for each menu\n"
+msgstr "Volledige debugging toont het volledige menupad voor elk menu\n"
+
+#: plugins/core-debug-menus.php:130
+msgid "and the order is included in parenthesis."
+msgstr "en de volgorde wordt getoond tussen haakjes."
+
+#: plugins/core-debug-menus.php:132
+msgid "However, menus that use HTML instead of text will"
+msgstr "Echter, menu's die HTML i.p.v. tekst gebruiken zullen"
+
+#: plugins/core-debug-menus.php:134
+msgid "show the full path.\n"
+msgstr "het volledige pad tonen.\n"
+
+#: plugins/core-debug-menus.php:136
+msgid "To disable full debugging, return here and unselect the option.\n"
+msgstr "Om volledige debugging uit te zetten kunt u hier terugkeren en de optie deselecteren.\n"
+
+#: plugins/core-debug-menus.php:144
+msgid "Disable Full Debug"
+msgstr "Volledige Debugging uitzetten"
+
+#: plugins/core-debug-menus.php:150
+msgid "Enable Full Debug"
+msgstr "Volledige Debugging aanzetten"
+
+#: plugins/agent-nomos-once.php:35
+msgid "One-Shot License Analysis"
+msgstr "One-Short Licentie Analyze"
+
+#: plugins/agent-nomos-once.php:130
+msgid "FATAL: your file did not get passed throught.  Make sure this page wasn't a result of a web server redirect, or that it didn't exceed your php POST limit."
+msgstr "FATAAL: uw bestand is niet doorgegeven. Controleer of deze pagina niet het resultaat is van een webserver redirect, of dat het uw php POST limiet overschreed."
+
+#: plugins/agent-nomos-once.php:147
+#: plugins/agent-nomos-once.php:150
+msgid "Nomos One-shot, real-time license analysis"
+msgstr "Nomos One-shot, real-time licentie analyze"
+
+#: plugins/agent-nomos-once.php:191
+msgid "<li>The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n"
+msgstr "<li>De analyze wordt real-time uitgevoerd. Grote bestanden kunnen enige tijd duren. Deze methode wordt niet aanbevolen voor bestanden die groter zijn dan een paar honderd kilobytes.\n"
+
+#: plugins/agent-nomos-once.php:195
+msgid "unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found."
+msgstr "uitgepakt. Als u een 'zip' of 'deb' bestand upload  zal het binaire bestand gecontroleerd worden op licenties en zal er waarschijnlijk niets gevonden worden."
+
+#: plugins/agent-nomos-once.php:199
+msgid "stored. As soon as you get your results, your uploaded file is removed from the system. "
+msgstr "opgeslagen. Zodra u uw resultaten krijgt zal het geuploade bestand van het systeem verwijderd worden."
+
+#: plugins/agent-nomos-once.php:215
+#: plugins/agent-nomos-once.php:240
+msgid "A one shot license analysis shows the following license(s) in file"
+msgstr "Een one shot licentie analyze vind de volgende licentie(s) in het bestand"
+
+#: plugins/user-del.php:27
+msgid "Delete A User"
+msgstr "Verwijder een gebruiker"
+
+#: plugins/user-del.php:51
+msgid "User does not exist."
+msgstr "Gebruiker bestaat niet."
+
+#: plugins/user-del.php:63
+msgid "Failed to delete user."
+msgstr "Gebruiker verwijderen mislukt."
+
+#: plugins/user-del.php:93
+msgid "User deleted."
+msgstr "Gebruiker verwijderd."
+
+#: plugins/user-del.php:106
+msgid "No users to delete."
+msgstr "Geen gebrukers te verwijderen."
+
+#: plugins/user-del.php:111
+msgid "Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>permanently</font> removed. (There is no 'undo' to this delete.)<P />\n"
+msgstr "Het verwijderen van een gebruiker verwijdert ook zijn gegevens van het FOSSology systeem. De gebruikersnaam, account informatie en wachtwoord zullen  <font color='red'>permanent</font> verwijderd worden. (Er bestaat geen 'undo' voor deze verwijdering.)<P />\n"
+
+#: plugins/user-del.php:113
+msgid "To delete a user, enter the following information:<P />\n"
+msgstr "Voer, m een gebruiker te verwijderen, de volgende informatie in:<P />\n"
+
+#: plugins/user-del.php:117
+msgid "<li>Select the user to delete.<br />"
+msgstr "<li>Kies de te verwijderen gebruiker.<br />"
+
+#: plugins/user-del.php:127
+msgid "Confirm user deletion"
+msgstr "Bevestig verwijdering gebruiker"
+
+#: plugins/ui-browse.php:31
+#: plugins/ui-welcome.php:50
+#: plugins/ui-welcome.php:53
+#: plugins/ui-default.php:92
+msgid "Browse"
+msgstr "Blader"
+
+#: plugins/ui-browse.php:171
+msgid "No files"
+msgstr "Geen bestanden"
+
+#: plugins/ui-browse.php:177
+msgid "1 item"
+msgstr "1 item"
+
+#: plugins/ui-browse.php:181
+msgid "items"
+msgstr "items"
+
+#: plugins/ui-browse.php:212
+msgid "Folder Navigation"
+msgstr "Map Navigatie"
+
+#: plugins/ui-browse.php:216
+msgid "Top"
+msgstr "Top"
+
+#: plugins/ui-browse.php:219
+#: plugins/ui-folders.php:60
+msgid "Expand"
+msgstr "Expand"
+
+#: plugins/ui-browse.php:221
+#: plugins/ui-folders.php:62
+msgid "Collapse"
+msgstr "Collapse"
+
+#: plugins/ui-browse.php:231
+msgid "Uploads"
+msgstr "Uploads"
+
+#: plugins/ui-browse.php:234
+msgid "Upload Name and Description"
+msgstr "Upload Naam en Omschrijving"
+
+#: plugins/ui-browse.php:235
+#, fuzzy
+msgid "Upload Date"
+msgstr "Upload Datum"
+
+#: plugins/ui-browse.php:244
+msgid "No description"
+msgstr "Geen omschrijving"
+
+#: plugins/ui-browse.php:271
+msgid "Added by URL: "
+msgstr "Toegevoegd via URL:"
+
+#: plugins/ui-browse.php:275
+msgid "Added by file upload: "
+msgstr "Toegevoegd via bestandsupload:"
+
+#: plugins/ui-browse.php:279
+msgid "Added from filesystem: "
+msgstr "Toegevoegd via bestandssysteem:"
+
+#: plugins/ui-browse.php:295
+msgid "Scheduled "
+msgstr "Gepland"
+
+#: plugins/ui-browse.php:298
+msgid "jobs"
+msgstr "taken"
+
+#: plugins/ui-browse.php:302
+msgid "jobs: "
+msgstr "taken:"
+
+#: plugins/ui-browse.php:304
+msgid " total; "
+msgstr "toaal;"
+
+#: plugins/ui-browse.php:305
+msgid " completed; "
+msgstr "afgerond;"
+
+#: plugins/ui-browse.php:307
+msgid " pending; "
+msgstr "wachtend;"
+
+#: plugins/ui-browse.php:310
+msgid " active; "
+msgstr "actief;"
+
+#: plugins/ui-browse.php:312
+msgid " failed."
+msgstr "gefaald."
+
+#: plugins/ui-browse.php:328
+#: plugins/ui-browse.php:335
+msgid "license analysis"
+msgstr "licentie analyze"
+
+#: plugins/ui-browse.php:329
+msgid "Schedule"
+msgstr "Planrooster"
+
+#: plugins/ui-browse.php:336
+msgid "Reschedule"
+msgstr "Herplan"
+
+#: plugins/ui-browse.php:379
+#: plugins/agent-remove-license.php:122
+msgid "License data re-analysis added to job queue"
+msgstr "Licentiegegevens her-analyze toegevoegd aan wachtrij"
+
+#: plugins/ui-browse.php:383
+#: plugins/ui-browse.php:395
+msgid "Scheduling of re-analysis failed, return code"
+msgstr "Plannen van her-analyse mislukt, foutcode"
+
+#: plugins/ui-browse.php:391
+msgid "License data analysis added to job queue"
+msgstr "Licentiegegevens analyze toegevoegd aan wachtrij"
+
+#: plugins/ui-browse.php:443
+msgid "Missing upload tree parent for upload"
+msgstr "Topmap voor upload ontbreekt"
+
+#: plugins/user-edit-self.php:28
+msgid "Edit Your Account Settings"
+msgstr "Wijzig uw gebruikersinstellingen"
+
+#: plugins/user-edit-self.php:102
+msgid "You must be logged in."
+msgstr "U dient ingelogd te zijn."
+
+#: plugins/user-edit-self.php:108
+msgid "New passwords did not match. No change."
+msgstr "De nieuwe wachtwoorden verschillen. Niet gewijzigd."
+
+#: plugins/user-edit-self.php:132
+msgid "Authentication password did not match. No change."
+msgstr "Het wachtwoord kwam niet overeen. Geen wijziging."
+
+#: plugins/user-edit-self.php:219
+msgid "User information updated."
+msgstr "Gebruikersinformatie geactualiseerd."
+
+#: plugins/user-edit-self.php:227
+msgid "You <font color='red'>must</font> provide your current password in order to make any changes.<br />\n"
+msgstr "U <font color='red'>moet</font> uw actuele wachtwoord ingeven ten einde wijzigingen door te voeren.<br />\n"
+
+#: plugins/user-edit-self.php:228
+msgid "Enter your password"
+msgstr "Voer uw wachtwoord in"
+
+#: plugins/user-edit-self.php:233
+msgid "To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n"
+msgstr "Om gebruikersinformatie te wijzigen, wijzig de volgende velden. U hoeft niet elk veld te wijzigen. Alleen gewijzigde velden worden doorgevoerd.<P />\n"
+
+#: plugins/user-edit-self.php:237
+msgid "Change your username. This will be checked to ensure that it is unique among all users."
+msgstr "Wijzig uw gebruikersnaam. Deze zal gecontroleerd worden om te zorgen dat hij nog steeds uniek is."
+
+#: plugins/user-edit-self.php:242
+msgid "Change your description (name, contact, or other information).  This may be blank."
+msgstr "Wijzig uw omschrijving (naam, contact, of andere informatie). Deze mogen ook leeg zijn."
+
+#: plugins/user-edit-self.php:247
+msgid "Change your email address. This may be blank."
+msgstr "Wijzig uw emailadres. Dit mag ook leeg zijn."
+
+#: plugins/user-edit-self.php:251
+msgid "Change your password."
+msgstr "Wijzig uw wachtwoord."
+
+#: plugins/user-edit-self.php:252
+msgid "Re-enter your password."
+msgstr "Voer nogmaals uw wachtwoord in."
+
+#: plugins/user-edit-self.php:280
+msgid "You do not have permission to change your default agents"
+msgstr "U heeft geen toestemming om de standaard agents te wijzigen"
+
+#: plugins/user-edit-self.php:295
+#: plugins/user-edit-any.php:436
+msgid "Update Account"
+msgstr "Actualiseer account"
+
+#: plugins/admin-db.php:27
+msgid "Database Check"
+msgstr "Database Controle"
+
+#: plugins/admin-db.php:44
+#: plugins/admin-db-vacuum.php:44
+msgid "Deleting"
+msgstr "Verwijderen"
+
+#: plugins/admin-db.php:53
+msgid "Deleted"
+msgstr "Verwijderd"
+
+#: plugins/admin-db.php:54
+msgid "from"
+msgstr "van"
+
+#: plugins/admin-db.php:136
+msgid "Fixing Records"
+msgstr "Repareren Records"
+
+#: plugins/admin-db.php:142
+msgid "Fix Records"
+msgstr "Repareer Records"
+
+#: plugins/admin-db.php:146
+msgid "On occasion, the database can become inconsistent."
+msgstr "Soms kan de inhoud van de database inconsistent raken."
+
+#: plugins/admin-db.php:147
+msgid " For example, there may be pfile records without uploadtree entries"
+msgstr "Er kunnen bijvoorbeeld pfile records zijn zonder uploadtree records."
+
+#: plugins/admin-db.php:148
+msgid " or uploadtree entries that are not linked by any upload records."
+msgstr "of uploadtree records die niet gekoppeld zijn via upload records."
+
+#: plugins/admin-db.php:149
+msgid " Inconsistencies usually arise due to failed unpacking, partial deletions, and testing.\n"
+msgstr "Inconsistenties ontstaan meestal door mislukt uitpakken, gedeeltelijke verwijdering, en testen.\n"
+
+#: plugins/admin-db.php:174
+msgid "Temporary inconsistencies may exist when a file is uploaded, being unpacked, or being deleted.\n"
+msgstr "Tijdelijke inconsistenties kunnen optreden als een bestand wordt geupload, uitgepakt, of verwijderd.\n"
+
+#: plugins/admin-db.php:177
+msgid "An uploaded file -- before being unpacked -- can appear inconsistent.\n"
+msgstr "Een geupload bestand -- voordat het wordt uitgepakt -- kan inconsistent lijken.\n"
+
+#: plugins/admin-db.php:179
+msgid "The unpack system creates pfiles first, then links them together when it completes.\n"
+msgstr "Het uitpaksysteem maakt eerst pfiles, en koppelt deze aan het einde aan elkaar.\n"
+
+#: plugins/admin-db.php:181
+msgid "The delete system removes records in series, so a partial delete (or delete in progress) can show inconsistencies.\n"
+msgstr "Het verwijdersysteem verwijdert records in blokken, dus een gedeeltelijke verwijdering (of in gang gezette verwijdering) kan inconsistenties geven.\n"
+
+#: plugins/admin-db.php:184
+msgid "There"
+msgstr "Er"
+
+#: plugins/admin-db.php:185
+msgid "currently"
+msgstr "huidig"
+
+#: plugins/admin-db.php:186
+msgid "running"
+msgstr "uitvoerend"
+
+#: plugins/admin-db.php:187
+msgid "in the job queue that may make records appear inconsistent.\n"
+msgstr "in de wachtrij waardoor records inconsistent lijken.\n"
+
+#: plugins/admin-db.php:189
+msgid "Fixing inconsistencies while any jobs are running could lead to job failures and further inconsistencies.\n"
+msgstr "Het repareren van inconsistenties terwijl er nog taken lopen kan leiden tot gefaalde taken en verdere inconsistenties.\n"
+
+#: plugins/admin-db.php:190
+msgid "NOTE: Some of these inconsistencies may not be resolvable from here due to table constraints.\n"
+msgstr "LET OP: Enkele inconsistenties kunnen vanaf hier niet repareerbaar zijn vanwegete tabel begrenzingen.\n"
+
+#: plugins/admin-db.php:194
+msgid "The following inconsistencies have been identified:\n"
+msgstr "De volgende inconsistenties zijn aangetroffen:\n"
+
+#: plugins/admin-db.php:198
+#: plugins/admin-db.php:235
+msgid "Fix"
+msgstr "Repareer"
+
+#: plugins/admin-db.php:199
+msgid "Type of Inconsistency"
+msgstr "Soort inconsistentie"
+
+#: plugins/admin-db.php:217
+msgid "Details"
+msgstr "Details"
+
+#: plugins/admin-db.php:237
+msgid "No database inconsistencies found.\n"
+msgstr "Geen database inconsistenties aangetroffen.\n"
+
+#: plugins/ui-about.php:27
+msgid "About FOSSology"
+msgstr "Over FOSSology"
+
+#: plugins/ui-about.php:28
+#: plugins/ui-default.php:46
+msgid "FOSSology"
+msgstr "FOSSology"
+
+#: plugins/ui-about.php:29
+msgid "Copyright (C) 2007-2010 Hewlett-Packard Development Company, L.P."
+msgstr "Copyright (C) 2007-2010 Hewlett-Packard Development Company, L.P."
+
+#: plugins/ui-about.php:30
+msgid ""
+"This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.\n"
+"This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\n"
+"You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA."
+msgstr "Dit Programma is vrije software; U kan het verspreiden en/of wijzigen onder de bepalingen van de GNU Algemene Publieke Licentie, zoals uitgegeven door de Free Software Foundation; oftewel versie 2 van de Licentie,of (naar vrije keuze) een latere versie.  Dit Programma is verspreid met de hoop dat het nuttig zal zijn maar  ZONDER EENDER WELKE GARANTIE; zelfs zonder de impliciete garantie van  VERKOOPBAARHEID of GESCHIKTHEID VOOR EEN BEPAALD DOEL. Zie de GNU Algemene Publieke Licentie voor meer details. U zou een kopie van de GNU Algemene Publieke Licentie ontvangen moeten hebben samen met dit Programma; indien dit niet zo is, schrijf naar de Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA."
+
+#: plugins/ui-about.php:59
+msgid "FOSSology version"
+msgstr "FOSSology versie"
+
+#: plugins/ui-about.php:60
+msgid "code revision"
+msgstr "code revisie"
+
+#: plugins/agent-remove-license.php:32
+msgid "Remove License Analysis"
+msgstr "Verwijder Licentie Analyze"
+
+#: plugins/agent-remove-license.php:91
+msgid "Could not reschedule License Analysis"
+msgstr "Kon de Licentie Analyze niet opnieuw inplannen"
+
+#: plugins/agent-remove-license.php:127
+msgid "License data removal added to job queue"
+msgstr "Licentie gegevens verwijdering toegevoegd aan wachtrij"
+
+#: plugins/agent-remove-license.php:156
+msgid "the license meta data from the selected upload.\n"
+msgstr "De licentie meta data van de geselecteerde upload.\n"
+
+#: plugins/agent-remove-license.php:160
+msgid "remove"
+msgstr "verwijder"
+
+#: plugins/agent-remove-license.php:161
+msgid "the license meta data associated with the selected upload file!\n"
+msgstr "de licentie meta data geassocieerd met het geselecteerde upload bestand!\n"
+
+#: plugins/agent-remove-license.php:163
+#: plugins/admin-upload-delete.php:122
+msgid "Be very careful with your selection since you can delete a lot of work!\n"
+msgstr "Wees erg voorzichtig met uw selectie want u kunt veel werk nu verwijderen!\n"
+
+#: plugins/agent-remove-license.php:165
+msgid "THERE IS NO UNREMOVE. The license meta data can be recreated by re-running the license analysis\n"
+msgstr "ER IS GEEN UNDELETE! De licentie meta data kan opnieuw gegenereerd worden door het opnieuw uitvoeren van een licentie analyse\n"
+
+#: plugins/agent-remove-license.php:168
+msgid "Select the uploaded file to remove license data:"
+msgstr "Kies het upload bestand om de licentie gegevens te verwijderen:"
+
+#: plugins/agent-remove-license.php:171
+msgid "Select the folder containing the upload file to use: "
+msgstr "Kies de map die het upload bestand bevat dat u wilt gebruiken:"
+
+#: plugins/agent-remove-license.php:173
+msgid "<select name='folder' "
+msgstr "<select name='map'"
+
+#: plugins/agent-remove-license.php:179
+msgid "Select the uploaded project to use:"
+msgstr "Kies het geuploade project dat u wilt gebruiken:"
+
+#: plugins/agent-remove-license.php:198
+msgid "After the license data is removed you can reschedule the License Analysis by checking the box below"
+msgstr "nadat de licentie gegevens zijn verwijdert kunt u opnieuw een Licentie Analyse inplannen door het onderstaande checkbox aan te vinken"
+
+#: plugins/agent-remove-license.php:201
+msgid "Reschedule License Analysis?"
+msgstr "Herplan Licentie Analyze?"
+
+#: plugins/agent-remove-license.php:204
+msgid "Commit"
+msgstr "Start"
+
+#: plugins/core-debug-user.php:27
+msgid "Debug User"
+msgstr "Debug Gebruiker"
+
+#: plugins/core-debug-user.php:53
+msgid "User Information"
+msgstr "Gebruiker Informatie"
+
+#: plugins/agent-bucket.php:35
+msgid "Bucket Analysis"
+msgstr "Bucket Analyse"
+
+#: plugins/agent-bucket.php:107
+msgid "Session is unauthenticated, bucket agent cannot run without knowing who the user is."
+msgstr "Sessie is niet geauthentiseerd, bucket agent kan niet worden uitgevoerd zonder te weten wie de gebruiker is."
+
+#: plugins/agent-bucket.php:168
+msgid "Unable to find dependent job: pkgagent"
+msgstr "Niet in staat afhankelijke taak te vinden: pkgagent"
+
+#: plugins/agent-bucket.php:177
+msgid "Failed to queue bucket agent."
+msgstr "In wachtrij plaatsen van bucket agent mislukt."
+
+#: plugins/agent-bucket.php:190
+msgid "User does not have a default bucketpool.  Bucket agent cannot be scheduled without this."
+msgstr "Gebruiker heeft geen standaard bucketpool. Bucket agent kan zonder dit niet ingepland worden."
+
+#: plugins/agent-bucket.php:196
+#: plugins/agent-nomos.php:139
+msgid "Failed to insert agent nomos into job queue"
+msgstr "Plaatsen van nomos agent in wachtrij mislukt"
+
+#: plugins/agent-bucket.php:231
+msgid "Bucket analysis added to the job queue"
+msgstr "Bucket analyse toegevoegd aan wachtrij"
+
+#: plugins/agent-bucket.php:235
+msgid "Scheduling Bucket agent failed: "
+msgstr "Inplannen van Bucket agent mislukt:"
+
+#: plugins/agent-bucket.php:241
+msgid "NOTE: this code was borrowed from nomos.  It needs to be updated for buckets.  If you see this message please tell bobg."
+msgstr "LET OP: Deze code is geleend van nomos. Het dient geupdate te worden tbv buckets. Als u deze boodschap ziet, meldt dit dan aan bobg."
+
+#: plugins/agent-bucket.php:243
+msgid "Select an uploaded file for bucket analysis.\n"
+msgstr "Kies een geupload bestand voor Bucket analyse.\n"
+
+#: plugins/upload-file.php:35
+msgid "Upload a New File"
+msgstr "Upload een nieuw bestand"
+
+#: plugins/upload-file.php:55
+#: plugins/upload-url.php:46
+msgid "Invalid folder"
+msgstr "Ongeldige map"
+
+#: plugins/upload-file.php:70
+#: plugins/upload-url.php:72
+msgid "Failed to insert upload record"
+msgstr "Invoegen van upload record mislukt"
+
+#: plugins/upload-file.php:76
+msgid "Could not save uploaded file"
+msgstr "Kon geupload bestand niet opslaan"
+
+#: plugins/upload-file.php:82
+msgid "ERROR! could not update permissions on downloaded file"
+msgstr "FOUT! Kon de toegangsrechten van gedownload bestand niet wijzigen"
+
+#: plugins/upload-file.php:103
+msgid "The file"
+msgstr "Het bestand"
+
+#: plugins/upload-file.php:104
+msgid "has been uploaded. It is"
+msgstr "is geupload. Het is"
+
+#: plugins/upload-file.php:142
+msgid "Upload failed for file"
+msgstr "Upload mislukt van bestand"
+
+#: plugins/upload-file.php:152
+msgid "This option permits uploading a file from your computer to FOSSology.\n"
+msgstr "Deze optie maakt het mogelijk een bestand te uploaden vanaf uw computer naar FOSSology.\n"
+
+#: plugins/upload-file.php:153
+msgid "The file to upload should be located on your computer.\n"
+msgstr "Het bestand dat u wilt uploaden dient op uw computer te staan.\n"
+
+#: plugins/upload-file.php:154
+msgid "Many browsers, including Microsoft's Internet Explorer, have trouble uploading "
+msgstr "Veel browsers, waaronder Microsoft's Internet Explorer, hebben moeite met uploaden"
+
+#: plugins/upload-file.php:155
+msgid "file larger than 650 Megabytes (a standard-size CD-ROM image).\n"
+msgstr "bestand groter dan 650 Megabytes (standaard CD-ROM capaciteit).\n"
+
+#: plugins/upload-file.php:156
+msgid "If your file is larger than 650 Megabytes, then choose one of the other upload options."
+msgstr "Als uw bestand groter is dan 650 Megabytes, kies dan een van de andere upload opties."
+
+#: plugins/upload-file.php:161
+#: plugins/upload-url.php:142
+msgid "Select the folder for storing the uploaded file:"
+msgstr "Selecteer de map waarin het geuploade bestand moet worden opgeslagen:"
+
+#: plugins/upload-file.php:166
+msgid "Select the file to upload:"
+msgstr "Kies het te uploaden bestand:"
+
+#: plugins/upload-file.php:170
+msgid ": If the file is larger than 650 Megs (one CD-ROM), then this method will not work with some browsers (e.g., Internet Explorer). Only attach files smaller than 650 Megs."
+msgstr ": Als het bestand groter is dan 650 megabytes (standaard CD-ROM capaciteit), zal deze methode met sommige browsers niet werken (met name Internet Explorer). Kies alleen bestanden die kleiner zijn dan 650 Megabytes."
+
+#: plugins/upload-file.php:172
+#: plugins/upload-url.php:153
+msgid "(Optional) Enter a description of this file:"
+msgstr "(Optioneel) Voer een omschrijving voor dit bestand in:"
+
+#: plugins/upload-file.php:175
+#: plugins/upload-url.php:156
+msgid "(Optional) Enter a viewable name for this file:"
+msgstr "(Optioneel) Voer een leesbare naam voor dit bestand in:"
+
+#: plugins/upload-file.php:179
+#: plugins/upload-url.php:160
+#: plugins/upload-srv-files.php:225
+msgid ": If no name is provided, then the uploaded file name will be used."
+msgstr ": Als geen naam is opgegeven zal de bestandsnaam van het geuploade bestand worden gebruikt."
+
+#: plugins/upload-file.php:187
+msgid "It may take time to transmit the file from your computer to this server. Please be patient."
+msgstr "Het kan enige tijd duren om het bestand over te bengen van uw computer naar de server. Even geduld aub."
+
+#: plugins/upload-file.php:189
+#: plugins/upload-url.php:168
+#: plugins/upload-srv-files.php:233
+msgid "Upload"
+msgstr "Upload"
+
+#: plugins/ui-folders.php:27
+msgid "Show Folders"
+msgstr "Toon Mappen"
+
+#: plugins/agent-pkgagent.php:27
+msgid "Package Analysis (Parse package headers)"
+msgstr "Pakket Analyse (onderzoek pakket kopteksten)"
+
+#: plugins/agent-pkgagent.php:121
+msgid "pkgagent rpm mimetype not installed."
+msgstr "pkgagent rpm mimetype niet geïnstalleerd. "
+
+#: plugins/agent-pkgagent.php:136
+msgid "pkgagent deb mimetype not installed."
+msgstr "pkgagent deb mimetype niet geinstalleerd."
+
+#: plugins/agent-pkgagent.php:151
+msgid "pkgagent deb source mimetype not installed."
+msgstr "pkgagent deb source mimetype niet geinstalleerd"
+
+#: plugins/agent-pkgagent.php:168
+msgid "Failed to insert pkgagent into job queue"
+msgstr "Invoegen van pkgagent in de wachtrij is mislukt"
+
+#: plugins/agent-pkgagent.php:208
+msgid "Scheduling of Analysis failed:"
+msgstr "Inplannen van analyse is mislukt:"
+
+#: plugins/ui-nomos-license-list.php:28
+msgid "Nomos License List"
+msgstr "Nomos Licentie Lijst"
+
+#: plugins/ui-nomos-license-list.php:67
+msgid "Nomos license listing"
+msgstr "Nomos licentie lijst"
+
+#: plugins/ui-nomos-license-list.php:193
+msgid "No data available"
+msgstr "Geen gegevens beschikbaar"
+
+#: plugins/ui-reunpack.php:27
+msgid "Schedule an Reunpack"
+msgstr "Plan een her-unpack in."
+
+#: plugins/ui-reunpack.php:66
+#: plugins/ui-view.php:745
+msgid "Unpack of Upload failed"
+msgstr "Uitpakken van upload mislukt"
+
+#: plugins/ui-reunpack.php:223
+msgid "The File's Gold file are not available in the repository."
+msgstr "(red: Geen idee wat een File's Gold bestand is), maar hij is niet beschikbaar in de repositorie."
+
+#: plugins/ui-reunpack.php:229
+msgid "This file is unpacked from"
+msgstr "Dit bestand is uitgepakt van"
+
+#: plugins/ui-reunpack.php:235
+msgid "Reunpack"
+msgstr "Her-uitpakken"
+
+#: plugins/ajax-uploads.php:35
+#: plugins/ajax-filebucket.php:42
+msgid "List Uploads as Options"
+msgstr "Toon Uploads als opties"
+
+#: plugins/upload-url.php:50
+#: plugins/upload-url.php:54
+msgid "Invalid URL"
+msgstr "Ongeldige URL"
+
+#: plugins/upload-url.php:58
+msgid "Invalid URL (no spaces permitted)"
+msgstr "Ongeldige URL (geen spaties toegestaan)"
+
+#: plugins/upload-url.php:85
+msgid "Failed to insert task 'wget' into job queue"
+msgstr "Het inplannen van taak 'wget' in de wachtrij is mislukt"
+
+#: plugins/upload-url.php:94
+msgid "The upload"
+msgstr "De upload"
+
+#: plugins/upload-url.php:95
+msgid "has been scheduled. It is"
+msgstr "is ingepland. Het is"
+
+#: plugins/upload-url.php:127
+#: plugins/upload-srv-files.php:181
+msgid "Upload failed for"
+msgstr "Upload mislukt voor"
+
+#: plugins/upload-url.php:136
+msgid "This option permits uploading a file from a remote web or FTP server to FOSSology.\n"
+msgstr "Deze optie maakt het mogelijk een bestand te uploaden van een web- of FTP-server naar FOSSology.\n"
+
+#: plugins/upload-url.php:137
+msgid "The file to upload must be accessible via a URL and must not require human interaction "
+msgstr "Het te uploaden bestand moet bereikbaar zijn via een URL en mag geen menselijke interactie behoeven"
+
+#: plugins/upload-url.php:138
+msgid "such as login credentials.\n"
+msgstr "zoals login gegevens.\n"
+
+#: plugins/upload-url.php:147
+msgid "Enter the URL to the file:"
+msgstr "Voer de URL van het bestand in:"
+
+#: plugins/upload-url.php:151
+msgid ": If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file. The URL can begin with HTTP://, HTTPS://, or FTP://."
+msgstr ": Als de URL om authenticatie of navigatie vraagt zal de upload mislukken. Voer alleen een URL in die rechtstreeks naar een bestand verwijst. De URL mag beginnen met HTTP://, HTTPS://, or FTP://."
+
+#: plugins/core-auth.php:28
+#: plugins/core-auth.php:377
+#: plugins/ui-welcome.php:62
+#: plugins/ui-welcome.php:65
+#: plugins/ui-default.php:110
+#: plugins/ui-default.php:115
+msgid "Login"
+msgstr "Login"
+
+#: plugins/core-auth.php:62
+msgid "*** Created default user: 'Default User'."
+msgstr "*** Standaard gebruiker 'Default User' aangemaakt."
+
+#: plugins/core-auth.php:80
+msgid "*** Created default administrator: 'fossy' with password 'fossy'."
+msgstr "*** Standaard beheerder 'fossy' aangemaakt met wachtwoord 'fossy'."
+
+#: plugins/core-auth.php:87
+msgid "*** Existing user 'fossy' promoted to default administrator."
+msgstr "*** Bestaande gebruiker 'fossy' gepromoveerd tot standaard beheerder."
+
+#: plugins/core-auth.php:329
+msgid "The system requires initialization. Please login and use the Initialize option under the Admin menu."
+msgstr "Het systeem dient geinitialiseerd te worden. Meld u aub aan en kies de Initialisatie optie in het Admin menu"
+
+#: plugins/core-auth.php:346
+msgid "If you need an account, use '"
+msgstr "Als u een account nodig heeft gebruik dan '"
+
+#: plugins/core-auth.php:358
+msgid "Username:"
+msgstr "Gebruikersnaam:"
+
+#: plugins/core-auth.php:360
+msgid "Password:"
+msgstr "Wachtwoord:"
+
+#: plugins/admin-upload-delete.php:31
+msgid "Delete Uploaded File"
+msgstr "Verwijder geupload bestand"
+
+#: plugins/admin-upload-delete.php:90
+msgid "Deletion added to job queue"
+msgstr "Verwijdering toegevoegd aan wachtrij"
+
+#: plugins/admin-upload-delete.php:94
+msgid "Deletion Scheduling failed: "
+msgstr "Inplannen verwijdering mislukt:"
+
+#: plugins/admin-upload-delete.php:114
+msgid "Select the uploaded file to"
+msgstr "Selecteer het geuploade bestand om"
+
+#: plugins/admin-upload-delete.php:120
+msgid "the upload file!"
+msgstr "het upload bestand!"
+
+#: plugins/admin-upload-delete.php:124
+msgid "All analysis only associated with the deleted upload file will also be deleted.\n"
+msgstr "Elke analyse die alleen gekoppeld is aan het geuploade bestand zal ook worden verwijderd.\n"
+
+#: plugins/admin-upload-delete.php:126
+msgid "THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.\n"
+msgstr "ER IS GEEN UNDELETE. Als u iets selecteert om te verwijderen, zal het verwijderd worden uit de database en bestandsrepositorie.\n"
+
+#: plugins/admin-upload-delete.php:129
+msgid "Select the uploaded file to delete:"
+msgstr "Selecteer het geuploade bestand dat verwijderd moet worden:"
+
+#: plugins/admin-upload-delete.php:132
+msgid "Select the folder containing the file to delete: "
+msgstr "Selecteer de map die het te verwijderen bestand bevat:"
+
+#: plugins/admin-upload-delete.php:139
+msgid "Select the uploaded project to delete:"
+msgstr "Selecteer het geuploade project dat verwijderd moet worden: "
+
+#: plugins/agent-add.php:27
+msgid "Schedule an Analysis"
+msgstr "Plan een analyse"
+
+#: plugins/agent-add.php:53
+msgid "Upload not found."
+msgstr "Upload niet gevonden."
+
+#: plugins/agent-add.php:115
+msgid "Agent Analysis added to job queue"
+msgstr "Agent Analyse toegevoegd aan wachtrij"
+
+#: plugins/agent-add.php:120
+msgid "Scheduling of Agent(s) failed: "
+msgstr "Inplannen van Agent(s) mislukt:"
+
+#: plugins/agent-add.php:158
+msgid "Select an uploaded file for additional analysis.\n"
+msgstr "Selecteer een geupload bestand voor additionele analyse.\n"
+
+#: plugins/agent-add.php:161
+msgid "Select the folder containing the upload you wish to analyze:"
+msgstr "Selecteer de map die de upload bevat die u wilt analyseren:"
+
+#: plugins/agent-add.php:169
+msgid "Select the upload to analyze:"
+msgstr "Selecteer de te analyseren upload :"
+
+#: plugins/agent-add.php:184
+msgid "Select additional analysis."
+msgstr "Selecteer additionele analyse."
+
+#: plugins/agent-specagent.php:27
+msgid "Spec File Analysis (deprecated. Replaced by Package analysis.)"
+msgstr "Spec File Analysis (wordt afgeraden. Is opgevolgd door Pakket analyse.)"
+
+#: plugins/agent-specagent.php:201
+msgid "Spec file analysis extracts meta data from RPM '.spec' files."
+msgstr "Spec bestandsanalyse onttrekt meta data vanuit RPM '.spec' bestanden."
+
+#: plugins/search-file-by-license.php:35
+msgid "List Files based on License"
+msgstr "Lijst van bestanden gebaseerd op licentie"
+
+#: plugins/search-file-by-license.php:75
+msgid "The following files contain the license"
+msgstr "De volgende bestanden bevatten de licentie"
+
+#: plugins/search-file-by-license.php:105
+#: plugins/search-file-by-licgroup.php:234
+msgid "Elaspsed time:"
+msgstr "Verstreken tijd:"
+
+#: plugins/search-file-by-licgroup.php:35
+msgid "List Files based on License Group"
+msgstr "Lijst van bestanden gebaseerd op Licentiegroep"
+
+#: plugins/search-file-by-licgroup.php:97
+msgid "The following files include licenses in the license group"
+msgstr "De volgende bestanden bevatten licenties uit de licentiegroep"
+
+#: plugins/search-file-by-licgroup.php:102
+msgid "The following files are not included in any license groups.\n"
+msgstr "De volgende bestanden zijn geen onderdeel van een licentiegroep.\n"
+
+#: plugins/search-file-by-licgroup.php:179
+msgid "Refine search by specific license: "
+msgstr "Zoekopdracht verfijnen naar specifieke licentie:"
+
+#: plugins/search-file-by-licgroup.php:219
+msgid "Phrase:"
+msgstr "Zin:"
+
+#: plugins/user-edit-any.php:28
+msgid "Edit A User"
+msgstr "Wijzig een gebruiker"
+
+#: plugins/user-edit-any.php:46
+msgid "No user selected. No change."
+msgstr "Geen gebruiker geselecteerd. Geen wijzigingen."
+
+#: plugins/user-edit-any.php:67
+msgid "Username must be specified. No change."
+msgstr "Gebruikersnaam moet worden gespecificeerd. Geen wijzigingen."
+
+#: plugins/user-edit-any.php:72
+msgid "Passwords did not match. No change."
+msgstr "Wachtwoorden kwamen niet overeen. Geen wijzigingen."
+
+#: plugins/user-edit-any.php:78
+msgid "Invalid email address.  Not edited."
+msgstr "Ongeldig email adres. Niet aangepast."
+
+#: plugins/user-edit-any.php:86
+msgid "User does not exist.  No change."
+msgstr "Gebruiker bestaat niet. Geen wijzigingen."
+
+#: plugins/user-edit-any.php:96
+msgid "User already exists.  Not edited."
+msgstr "Gebruiker bestaat reeds. Niet gewijzigd."
+
+#: plugins/user-edit-any.php:334
+#: plugins/user-edit-any.php:339
+msgid "To edit"
+msgstr "Te wijzigen"
+
+#: plugins/user-edit-any.php:335
+msgid "another"
+msgstr "een andere"
+
+#: plugins/user-edit-any.php:336
+msgid " user on this system, alter any of the following information."
+msgstr "gebruiker op dit systeem, wijzig een van de volgende informatie."
+
+#: plugins/user-edit-any.php:341
+msgid " account settings, use"
+msgstr "gebruikersinstellingen, gebruik"
+
+#: plugins/user-edit-any.php:342
+msgid "Account Settings."
+msgstr "Gebruikers Instellingen"
+
+#: plugins/user-edit-any.php:346
+msgid "Select the user to edit: "
+msgstr "Selecteer de te wijzigen gebruiker:"
+
+#: plugins/user-edit-any.php:363
+msgid "Change the username."
+msgstr "Wijzig de gebruikersnaam."
+
+#: plugins/user-edit-any.php:368
+msgid "Change the user's description (name, contact, or other information).  This may be blank."
+msgstr "Wijzig de gebruikersomschrijving (naam, contact, of andere informatie). Deze mag blanco zijn."
+
+#: plugins/user-edit-any.php:373
+msgid "Change the user's email address. This may be blank."
+msgstr "Wijzig het email adres van de gebruiker. Deze mag blanco zijn."
+
+#: plugins/user-edit-any.php:409
+msgid "Block the user's account. This will prevent logins."
+msgstr "Blokkeer het gebruikersaccount. Dit zal verdere logins voorkomen."
+
+#: plugins/user-edit-any.php:411
+msgid "Blank the user's account. This will will set the password to a blank password."
+msgstr "maak het gebruikersaccount blanco. Dit zal het wachtwoord instellen op een leeg wachtwoord."
+
+#: plugins/user-edit-any.php:413
+msgid "Change the user's password."
+msgstr "Wijzig het wachtwoord van de gebruiker."
+
+#: plugins/user-edit-any.php:429
+msgid "Default bucket pool"
+msgstr "Standaard bucket pool"
+
+#: plugins/admin-folder-edit.php:31
+msgid "Edit Folder Properties"
+msgstr "Wijzig map eigenschappen"
+
+#: plugins/admin-folder-edit.php:108
+msgid "Folder Properties changed"
+msgstr "Map eigenschappen gewijzigd"
+
+#: plugins/admin-folder-edit.php:112
+msgid ""
+"<p>The folder properties that can be changed are the folder name and\n"
+"\t\t\t description.  First select the folder to edit. Then enter the new values.\n"
+"\t\t\t If no value is entered, then the corresponding field will not be changed.</p>"
+msgstr ""
+"<p>De map eigenschappen die gewijzigd kunnen worden zijn de mapnaam en\n"
+"\t\t\t omschrijving. Selecteer eerst de te wijzigen map. Voer daarna nieuwe waardes in.\n"
+"\t\t\t Als geen waarde wordt ingevoerd, zal het overeenkomstige veld niet worden gewijzigd.</p>"
+
+#: plugins/admin-folder-edit.php:121
+msgid "Select the folder to edit:  \n"
+msgstr "Selecteer de te wijzigen map: \n"
+
+#: plugins/admin-folder-edit.php:127
+msgid "Change folder name:  \n"
+msgstr "Wijzig mapnaam: \n"
+
+#: plugins/admin-folder-edit.php:130
+msgid "Change folder description:  \n"
+msgstr "Wijzig map omschrijving: \n"
+
+#: plugins/ui-list-lic-files.php:33
+msgid "List Files for License"
+msgstr "Lijst van bestanden met Licentie"
+
+#: plugins/ui-list-lic-files.php:115
+msgid "files found"
+msgstr "bestanden gevonden"
+
+#: plugins/ui-list-lic-files.php:116
+msgid "unique"
+msgstr "uniek"
+
+#: plugins/ui-list-lic-files.php:117
+msgid "with license"
+msgstr "met licentie"
+
+#: plugins/ui-list-lic-files.php:127
+msgid "files with these extensions"
+msgstr "bestanden met deze extensie"
+
+#: plugins/ui-list-lic-files.php:162
+msgid "Exclude this file type."
+msgstr "Uitgezonderd dit type bestand."
+
+#: plugins/admin-folder-create.php:35
+msgid "Create a new Fossology folder"
+msgstr "Maak een nieuwe FOSSology map"
+
+#: plugins/admin-folder-create.php:140
+msgid "Exists"
+msgstr "Bestaat"
+
+#: plugins/admin-folder-create.php:148
+msgid "Select the parent folder:  \n"
+msgstr "Selecteer de eersthogere map: \n"
+
+#: plugins/admin-folder-create.php:153
+msgid "Enter the new folder name:  \n"
+msgstr "Invoeren nieuwe mapnaam: \n"
+
+#: plugins/admin-folder-create.php:156
+msgid "Enter a meaningful description:  \n"
+msgstr "Invoeren zinvolle omschrijving: \n"
+
+#: plugins/ui-welcome.php:27
+msgid "Getting Started with FOSSology"
+msgstr "Beginnen met FOSSology"
+
+#: plugins/ui-welcome.php:66
+msgid "The FOSSology Toolset"
+msgstr "De FOSSology gereedschapskist"
+
+#: plugins/ui-welcome.php:67
+msgid "FOSSology is a framework for software analysis tools. The current FOSSology tools can:"
+msgstr "FOSSology is een kader voor software analyse gereedschappen. De huidige FOSSology gereedschappen kunnen:"
+
+#: plugins/ui-welcome.php:68
+msgid "Identify licenses in software"
+msgstr "Licenties identificeren in software"
+
+#: plugins/ui-welcome.php:69
+msgid "Allow browsing uploaded file hierarchies"
+msgstr "Het bladeren door geuploade bestandshiërarchieën mogelijk maken"
+
+#: plugins/ui-welcome.php:70
+msgid "Extract MIME type and meta data information"
+msgstr "Onttrek MIME type en metadata informatie"
+
+#: plugins/ui-welcome.php:71
+msgid "FOSSology's Graphical User Interface"
+msgstr "FOSSology's Grafische Gebruikers Interface"
+
+#: plugins/ui-welcome.php:72
+msgid "This website is an interface into the FOSSology project. With it, you can:"
+msgstr "Deze website is een interface naar het FOSSology project. Hiermee kunt u:"
+
+#: plugins/ui-welcome.php:73
+#: plugins/ui-default.php:67
+msgid "Upload files to analyze."
+msgstr "Bestanden uploaden voor analyse."
+
+#: plugins/ui-welcome.php:74
+msgid "Unpack and store the data within the files for analysis. "
+msgstr "Uitpakken en opslaan van data in deze bestanden voor analyse."
+
+#: plugins/ui-welcome.php:75
+msgid "Invoke specialized agents to scan and analyze the files.  "
+msgstr "Starten van speciale agents om de bestanden te scannen en analyseren."
+
+#: plugins/ui-welcome.php:76
+msgid "Store and display the analyzed results. "
+msgstr "Opslaan en tonen van de analyseresultaten."
+
+#: plugins/ui-welcome.php:77
+msgid "How to Begin"
+msgstr "Hoe te beginnen"
+
+#: plugins/ui-welcome.php:78
+msgid "The menu at the top contains all the primary capabilities of FOSSology. Most functions require you to log in before they can be accessed. The following functions are available without logging in:"
+msgstr "Het menu aan de bovenkant van de pagina bevat alle primaire functies van FOSSology. De meeste functies vereisen dat u zich aanmeld voordat ze kunnen worden geselecteerd. De volgende functies zijn beschikbaar zonder aanmelden:"
+
+#: plugins/ui-welcome.php:79
+msgid "If you don't know where to start, try browsing the currently uploaded projects. "
+msgstr "Als u niet weet hoe te beginnen, prober dan door de reeds geuploade projecten te bladeren."
+
+#: plugins/ui-welcome.php:80
+msgid "Look through the uploaded projects for specific files. "
+msgstr "Zoek door de geuploade projecten voor specifieke bestanden."
+
+#: plugins/ui-welcome.php:81
+msgid "If you log in, you can access additional capabilities. Depending on your account's access rights,"
+msgstr "Als u zich aanmeld kunt u, afhankelijk van uw gebruikersrechten, extra mogelijkheden gebruiken. "
+
+#: plugins/ui-welcome.php:82
+msgid "you may be able to upload files, schedule analysis tasks, or even add new users."
+msgstr "u kunt in staat zijn bestanden te uploaden, analysetaken in te plannen, of zelfs nieuwe gebruikers toe te voegen."
+
+#: plugins/ui-welcome.php:83
+msgid "Inside FOSSology"
+msgstr "In FOSSology"
+
+#: plugins/ui-welcome.php:84
+msgid "Some parts of FOSSology helpful to know about are:"
+msgstr "Enkele delen van FOSSology waarvan het nuttig is deze te kennen zijn:"
+
+#: plugins/ui-welcome.php:85
+msgid "Software Repository"
+msgstr "Software Repositorie"
+
+#: plugins/ui-welcome.php:86
+msgid "- Stores files downloaded for analysis."
+msgstr "-Sla gedownloade bestanden op voor analyse."
+
+#: plugins/ui-welcome.php:87
+msgid "Database"
+msgstr "Database"
+
+#: plugins/ui-welcome.php:88
+msgid "- Stores user accounts, file information, and analysis results."
+msgstr "-Sla gebruikersaccounts op, bestandsinformatie, en analyseresultaten."
+
+#: plugins/ui-welcome.php:89
+msgid "Agents"
+msgstr "Agenten"
+
+#: plugins/ui-welcome.php:90
+msgid "- Perform analysis of files and data found in the Software Repository and Database."
+msgstr "-Verricht analyse van bestanden en data gevonden in de  Software Repositorie en Database."
+
+#: plugins/ui-welcome.php:91
+msgid "Scheduler"
+msgstr "Planner"
+
+#: plugins/ui-welcome.php:92
+msgid "- Runs the agents, making efficient  use of available resources."
+msgstr "-Start de agents, efficiënt gebruikmakend van de beschikbare resources."
+
+#: plugins/ui-welcome.php:93
+msgid "Web GUI"
+msgstr "Web GUI"
+
+#: plugins/ui-welcome.php:94
+msgid "- Provides user access to FOSSology."
+msgstr "-"
+
+#: plugins/ui-welcome.php:95
+msgid "Command line utilities"
+msgstr "Commandline gereedschappen"
+
+#: plugins/ui-welcome.php:96
+msgid "- Provides scripting access to FOSSology."
+msgstr "-Biedt scripting toegang tot FOSSology."
+
+#: plugins/ui-welcome.php:97
+msgid "Need Some Help?"
+msgstr "Hulp nodig?"
+
+#: plugins/ui-welcome.php:98
+msgid "Now that you've been introduced to Fossology, try exploring it!"
+msgstr "Nu u bent ingevoerd in FOSSology, probeer het te ontdekken!"
+
+#: plugins/ui-welcome.php:99
+msgid "The following resources will provide additional help and information:"
+msgstr "De volgende resources zullen extra hulp en informatie bieden:"
+
+#: plugins/ui-welcome.php:100
+msgid "Help tab"
+msgstr "Help"
+
+#: plugins/ui-welcome.php:101
+msgid "- Select this website's Help tab for software-related help and tips."
+msgstr "- Selecteer de Help tab van deze website voor hulp en tips over deze software."
+
+#: plugins/ui-welcome.php:102
+msgid "FOSSology web site"
+msgstr "FOSSology-Website"
+
+#: plugins/ui-welcome.php:103
+msgid "- Where you can find more information and get help on FOSSology."
+msgstr "- Waar u meer informatie en hulp kunt krijgen mbt FOSSology."
+
+#: plugins/ui-welcome.php:104
+msgid "FOSSbazaar web site"
+msgstr "FOSSbazaar-Website"
+
+#: plugins/ui-welcome.php:105
+msgid "- A community website with information on Open Source Governance."
+msgstr "- een communitywebsite met informatie over Open Source Governance."
+
+#: plugins/upload-srv-files.php:141
+msgid "Failed to place fosscp_agent in job queue"
+msgstr "Invoegen van fosscp_agent in takenwachtij mislukt"
+
+#: plugins/upload-srv-files.php:186
+msgid "This option permits uploading a file, set of files, or a directory from the web server to FOSSology.\n"
+msgstr "Deze optie maakt uploaden mogelijk van een bestand, een set bestanden, of een directory vanaf een webserver naar FOSSology.\n"
+
+#: plugins/upload-srv-files.php:187
+msgid "This option is designed for developers who have large source code directories that they wish to analyze (and the directories are already mounted on the web server's system).\n"
+msgstr "Deze optie is bedoeld voor ontwikkelaars die grote broncode directories hebben die zij wensen te analyseren (en de mappen zijn al aangekoppeld op het webserversysteem). \n"
+
+#: plugins/upload-srv-files.php:188
+msgid "This option only uploads files located on the FOSSology web server.\n"
+msgstr "Deze optie upload alleen bestanden die reeds aanwezig zijn op deze FOSSology webserver.\n"
+
+#: plugins/upload-srv-files.php:189
+msgid "If your file is located elsewhere, then use one of the other upload options.\n"
+msgstr "Als uw bestand zich ergens anders bevindt, gebruik dan een van de andere upload opties.\n"
+
+#: plugins/upload-srv-files.php:193
+msgid "Select the folder for storing the upload:"
+msgstr "Selecteer de map waar de upload moet worden opgeslagen:"
+
+#: plugins/upload-srv-files.php:199
+msgid "Select the directory or file(s) on the server to upload:"
+msgstr "Selecteer de map of bestand(en) op de server die geupload moeten worden:"
+
+#: plugins/upload-srv-files.php:203
+msgid ": Contents under a directory will be recursively included."
+msgstr ": Inhoud van een map zullen recursief worden opgenomen."
+
+#: plugins/upload-srv-files.php:205
+msgid "If you specify a regular expression for the filename, then multiple filenames will be selected.\n"
+msgstr "Als u een reguliere expressie specificeert voor een bestandsnaam, zullen meerdere bestanden geselecteerd worden.\n"
+
+#: plugins/upload-srv-files.php:206
+msgid "Files can be placed in alphabetized sub-folders for organization."
+msgstr "Bestanden kunnen overzichtelijk worden geplaatst in gealphabetiseerde submappen."
+
+#: plugins/upload-srv-files.php:218
+msgid "(Optional) Enter a description for this Upload:"
+msgstr "(Optie) Voor een omschrijving in voor deze upload:"
+
+#: plugins/upload-srv-files.php:221
+msgid "(Optional) Enter a viewable name for this Upload:"
+msgstr "(Optie) Voer een leesbare naam in voor deze upload:"
+
+#: plugins/agent-mimetype.php:28
+msgid "MIME-type Analysis (Determine mimetype of every file.  Not needed for licenses or buckets)"
+msgstr "MIME-type Analyse (Bepaal mimetype van elk bestand. Niet nodig voor licenties of buckets)"
+
+#: plugins/agent-mimetype.php:120
+msgid "Failed to insert mimetype into job queue"
+msgstr "Inplannen van mimetype in wachtrij mislukt."
+
+#: plugins/agent-mimetype.php:171
+msgid "MIME-type analysis identifies files based on their MIME type.<P />\n"
+msgstr "MIME-type analyse identificeerd bestanden gebaseerd op hun MIME type.<P />\n"
+
+#: plugins/agent-mimetype.php:173
+msgid "Select an uploaded file for MIME-type analysis.\n"
+msgstr "Selecteer een geupload bestand voor MIME-type analyse.\n"
+
+#: plugins/jobs-showjobs-upload.php:27
+msgid "View Jobs By Upload"
+msgstr "Toon Taken per Upload"
+
+#: plugins/jobs-showjobs-upload.php:86
+msgid "View the scheduled jobs associated with an uploaded file."
+msgstr "Toon de ingeplande taken geassocieerd met een geupload bestand."
+
+#: plugins/jobs-showjobs-upload.php:89
+msgid "Select the folder containing the file to view: "
+msgstr "Selecteer de map die het te tonen bestand bevat:"
+
+#: plugins/jobs-showjobs-upload.php:97
+msgid "Select the uploaded project to view:"
+msgstr "Selecteer het te tonen geuploade project:"
+
+#: plugins/ui-view.php:30
+msgid "View File"
+msgstr "Toon Bestand"
+
+#: plugins/ui-view.php:49
+#: plugins/ui-view.php:120
+msgid "View file contents"
+msgstr "Toon bestandsinhoud"
+
+#: plugins/ui-view.php:82
+#: plugins/ui-view.php:98
+#: plugins/ui-view.php:105
+msgid "View as unformatted text"
+msgstr "Toon als ongeformateerde tekst"
+
+#: plugins/ui-view.php:85
+#: plugins/ui-view.php:92
+#: plugins/ui-view.php:107
+msgid "View as formatted text"
+msgstr "Toon als geformateerde tekst"
+
+#: plugins/ui-view.php:89
+#: plugins/ui-view.php:96
+#: plugins/ui-view.php:103
+msgid "View as a hex dump"
+msgstr "Toon als hexdump"
+
+#: plugins/ui-view.php:224
+msgid "Match"
+msgstr "Overeenkomsten"
+
+#: plugins/ui-view.php:242
+#: plugins/ui-view.php:247
+msgid "view"
+msgstr "toon"
+
+#: plugins/ui-view.php:257
+msgid "ref"
+msgstr "ref"
+
+#: plugins/ui-view.php:739
+#: plugins/ui-view.php:753
+msgid "Reunpack job is running: you can see it in"
+msgstr "Heruitpak taak loopt: u kunt het zien in:"
+
+#: plugins/ui-view.php:740
+#: plugins/ui-view.php:754
+msgid "jobqueue"
+msgstr "wachtrij"
+
+#: plugins/ui-view.php:757
+msgid "File contents are not available in the repository."
+msgstr "Inhoud van bestand niet beschikbaar in de repositorie."
+
+#: plugins/core-debug-plugins.php:27
+msgid "Debug Plugins"
+msgstr "Debug Plugins"
+
+#: plugins/core-debug-plugins.php:50
+msgid "Plugin Summary"
+msgstr "Plugin Samenvatting"
+
+#: plugins/core-debug-plugins.php:56
+msgid "Plugin State Details"
+msgstr "Plugin Status Details"
+
+#: plugins/search.php:305
+msgid "Search for"
+msgstr "Zoek naar"
+
+#: plugins/search.php:306
+msgid "Containers only(rpms,tars,isos,etc)."
+msgstr "Alleen Containers (rpm-, tar-, iso-, etc bestanden)"
+
+#: plugins/search.php:307
+msgid "All Files"
+msgstr "Alle bestanden"
+
+#: plugins/ui-nomos-license.php:27
+msgid "Nomos License Browser"
+msgstr "Nomos Licentie Browser"
+
+#: plugins/ui-nomos-license.php:74
+msgid "View nomos license histogram"
+msgstr "Toon nomos licentie histogram"
+
+#: plugins/ui-nomos-license.php:76
+msgid "nomos license"
+msgstr "nomos licentie"
+
+#: plugins/ui-nomos-license.php:167
+msgid "No data available.  Use Jobs > Agents to schedule a license scan."
+msgstr "Geen gegevens beschikbaar. Gebruik Taken > Agents om een licentiescan in te plannen."
+
+#: plugins/ui-nomos-license.php:204
+msgid "License Name"
+msgstr "Licentienaam"
+
+#: plugins/ui-nomos-license.php:232
+msgid "Hint: Click on the license name to "
+msgstr "Hint: Klik op de licentienaam om"
+
+#: plugins/ui-nomos-license.php:233
+msgid "highlight"
+msgstr "highlight"
+
+#: plugins/ui-nomos-license.php:235
+msgid "where the license is found in the file listing.<br>\n"
+msgstr "waar de licentie is gevonden in het bestandsoverzicht.<br>\n"
+
+#: plugins/ui-nomos-license.php:237
+msgid "Unique licenses"
+msgstr "Unieke licenties"
+
+#: plugins/ui-nomos-license.php:240
+msgid "Licenses found"
+msgstr "Licenties gevonden"
+
+#: plugins/ui-nomos-license.php:242
+msgid "Files with no licenses"
+msgstr "Bestanden zonder licenties"
+
+#: plugins/ui-license-tree.php:28
+msgid "License Tree View"
+msgstr "Licentie boomstructuur"
+
+#: plugins/ui-license-tree.php:159
+msgid "View license tree"
+msgstr "Toon licentie boom"
+
+#: plugins/ui-license-tree.php:418
+msgid "License Count|License Summary|Path"
+msgstr "Licentie aantal|Licentie Samenvatting|Pad"
+
+#: plugins/ui-licterm-default.php:37
+msgid "Reset Default License Terms"
+msgstr "Reset standaard Licentie Voorwaarden"
+
+#: plugins/ui-licterm-default.php:87
+msgid "Export Data"
+msgstr "Exporteer Gegevens"
+
+#: plugins/ui-licterm-default.php:159
+msgid "Data written to"
+msgstr "Gegevens geschreven naar"
+
+#: plugins/ui-licterm-default.php:188
+msgid "Creating default canonical name"
+msgstr "creëren van standaard canonieke naam"
+
+#: plugins/ui-licterm-default.php:270
+msgid "License terms associate common license names with canonical license names.\n"
+msgstr "Licentievoorwaarden associëren gebruikelijke licentienamen met canonieke licentienamen. \n"
+
+#: plugins/ui-licterm-default.php:271
+msgid "For example, the terms 'GPL' and 'Gnu Public License' are both commonly used to describe the Free Software Foundation's GNU General Public License. These terms are all commonly referred to be the canonical name 'GPL'.\n"
+msgstr "Bijvoorbeeld: de termen 'GPL'en 'Gnu Public License' worden beiden vaak gebruikt om de Free Software Foundation GNU General Public License aan te duiden. Deze licentievoorwaarden worden gewoonlijk allebei aangeduid met de canonieke naam 'GPL'. \n"
+
+#: plugins/ui-licterm-default.php:273
+msgid "You shouldn't need to do this unless you have modified the default terms and want to reset them back to the way they were when you installed this software.  "
+msgstr "U zou dit niet hoeven doen tenzij u de standaard voorwaarden hebt gewijzigd en ze wil herstellen terug naar de situatie toen u deze software installeerde."
+
+#: plugins/ui-licterm-default.php:274
+msgid "This will reset the default license terms, canonical names, and associations between terms, license templates, and canonical names."
+msgstr "Dit zal de standaard licentie voorwaarden herstellen, canonieke namen, en koppelingen tussen voorwaarden, licentie sjablonen, en canonieke namen."
+
+#: plugins/ui-licterm-default.php:276
+msgid "The default license settings are"
+msgstr "De standaard licentie instellingen zijn"
+
+#: plugins/ui-licterm-default.php:280
+msgid "In particular, related terms, templates, and canonical names may have very different legal meanings.\n"
+msgstr "In het bijzonder gerelateerde voorwaarden, sjablonen en canonieke namen kunnen heel verschillende juridische betekenissen hebben.\n"
+
+#: plugins/ui-licterm-default.php:281
+msgid "Resetting the default terms will not impact any new terms you have created or their associations."
+msgstr "Herstellen van de standaard voorwaarden zal geen invloed hebben op nieuwe voorwaarden die u heeft gemaakt of hun associaties."
+
+#: plugins/ui-licterm-default.php:284
+msgid "You can modify, edit, or delete the default groups with the "
+msgstr "U kunt de standaard groepen wijzigen of verwijderen met de"
+
+#: plugins/ui-licterm-default.php:294
+msgid "Check to revert back to the original default terms, canonical names, and license template associations."
+msgstr "Aanvinken om terug te keren naar de originele standaard voorwaarden, canonieke namen, en geassocieerde licentie sjablonen"
+
+#: plugins/agent-nomos.php:35
+msgid "Nomos License Analysis"
+msgstr "Nomos Licentie Analyse"
+
+#: plugins/agent-nomos.php:125
+msgid "Failed to insert job record for nomos"
+msgstr "Invoegen van taakrecord voor nomos mislukt"
+
+#: plugins/agent-nomos.php:173
+msgid "fo_nomos analysis added to the job queue"
+msgstr "fo_nomos analyse toegevoegd aan wachtrij"
+
+#: plugins/agent-nomos.php:177
+msgid "Scheduling of fo_nomos failed:"
+msgstr "Inplannen van fo_nomos mislukt:"
+
+#: plugins/ui-default.php:47
+msgid "is a framework for software analysis tools. The current tools identify"
+msgstr "is een kader voor software analyse gereedschappen. De huidige gereedschappen identificeren"
+
+#: plugins/ui-default.php:49
+msgid "licenses in software, allow browsing of uploaded file hierarchies, and extract\n"
+msgstr "licenties in software, faciliteren bladeren door geuploade bestandshiërarchieën, en onttreken\n"
+
+#: plugins/ui-default.php:50
+msgid "MIME type and meta data information.\n"
+msgstr "MIME type en meta data informatie.\n"
+
+#: plugins/ui-default.php:52
+msgid "This website is an interface into the FOSSology project. With it, you can:\n"
+msgstr "Deze website is een interface naar het FOSSology project. Hiermee kunt u:\n"
+
+#: plugins/ui-default.php:54
+msgid "Browse uploaded files and content."
+msgstr "Bladeren door geuploade bestanden en hun inhoud"
+
+#: plugins/ui-default.php:56
+msgid "View file contents and meta data."
+msgstr "Afbeelden van bestandsinhoud en meta data."
+
+#: plugins/ui-default.php:58
+msgid "Display analysis results."
+msgstr "Afbeelden van analyse resultaten."
+
+#: plugins/ui-default.php:62
+msgid "Download files."
+msgstr "Downloaden van bestanden."
+
+#: plugins/ui-default.php:69
+msgid "Unpack and store the data within the files for analysis."
+msgstr "Uitpakken en opslaan van data uit deze bestanden tbv analyse."
+
+#: plugins/ui-default.php:74
+msgid "Invoke specialized agents to scan and analyze the files."
+msgstr "Opstarten van gespecialiseerde agents voor het scannen en analyseren van bestanden."
+
+#: plugins/ui-default.php:79
+msgid "Create and manage user accounts."
+msgstr "Aanmaken en beheren van gebruikersaccounts."
+
+#: plugins/ui-default.php:85
+msgid "Where to Begin..."
+msgstr "Waar te beginnen..."
+
+#: plugins/ui-default.php:87
+msgid "The menu at the top contains all the primary capabilities of FOSSology.\n"
+msgstr "Het menu aan de bovenkant van de pagina bevat alle primaire mogelijkheden van FOSSology.\n"
+
+#: plugins/ui-default.php:94
+msgid ": If you don't know where to start, try browsing the currently uploaded projects."
+msgstr "Als u niet weet hoe te starten, probeer dan te bladeren door de reeds geuploade projecten."
+
+#: plugins/ui-default.php:102
+msgid ": Look through the uploaded projects for specific files."
+msgstr ": Kijk in de geuploade projecten voor specifieke bestanden."
+
+#: plugins/ui-default.php:117
+msgid ": Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or even add new users."
+msgstr ": Afhankelijk van uw toegangsrechten kunt u bestanden uploaden, een analysetaak inplannen of zelfs nieuwe gebruikers toevoegen."
+
+#: plugins/ajax-tags.php:35
+msgid "List Tags"
+msgstr "Toon Labels"
+
+#: plugins/admin-db-vacuum.php:27
+msgid "Database Vacuum and Analyze"
+msgstr "Database opschonen en analyseren"
+
+#: plugins/admin-db-vacuum.php:47
+msgid "cleaned."
+msgstr "opgeschoont."
+
+#: plugins/admin-db-vacuum.php:76
+msgid "Cleaning: Vacuum and Analyze"
+msgstr "Opschonen: lege ruimtes claimen en opbouw analyseren"
+
+#: plugins/admin-db-vacuum.php:89
+msgid "Database performance can be improved by optimizing table memory allocation."
+msgstr "Database prestaties kunnen worden verbeterd door het optimaliseren van tabel geheugenallocatie."
+
+#: plugins/admin-db-vacuum.php:90
+msgid " The database supports 'vacuum' to free deleted rows"
+msgstr "De database ondersteund 'opschonen' voor het vrijgeven van verwijderde rijen"
+
+#: plugins/admin-db-vacuum.php:91
+msgid " and 'analyze' to precompute row counts.\n"
+msgstr "en 'analyseren' voor het voorrekenen van aantallen rijen.\n"
+
+#: plugins/admin-db-vacuum.php:92
+msgid " These two functions are called by most agents on an as-needed basis."
+msgstr "Deze twee functies worden aangeroepen door de meeste agents indien nodig."
+
+#: plugins/admin-db-vacuum.php:93
+msgid " However, you can start them yourself as needed."
+msgstr "Maar, u kunt ze ook handmatig starten."
+
+#: plugins/admin-db-vacuum.php:94
+msgid " Keep in mind:\n"
+msgstr "Bedenk wel:\n"
+
+#: plugins/admin-db-vacuum.php:95
+msgid " Running them too often can negatively impact database performance since the database will spend more time cleaning than doing real work."
+msgstr "Het te vaak uitvoeren kan een negatieve invloed hebben op de databaseprestaties omdat deze dan meer bezig is met opschonen dan met het daadwerkelijke werk."
+
+#: plugins/admin-db-vacuum.php:98
+msgid " Vacuum\n"
+msgstr "Opschonen\n"
+
+#: plugins/admin-db-vacuum.php:100
+msgid " Analyze\n"
+msgstr "Analyseren\n"
+
+#: plugins/core-schema.php:32
+msgid "Database Schema"
+msgstr "Database Schema"
+
+#: plugins/core-schema.php:62
+#: plugins/core-schema.php:254
+msgid "Tables"
+msgstr "Tabellen"
+
+#: plugins/core-schema.php:64
+#: plugins/core-schema.php:256
+msgid "Sequences"
+msgstr "Sequenties"
+
+#: plugins/core-schema.php:66
+#: plugins/core-schema.php:258
+msgid "Views"
+msgstr "Views"
+
+#: plugins/core-schema.php:68
+#: plugins/core-schema.php:260
+msgid "Indexes"
+msgstr "Indexen"
+
+#: plugins/core-schema.php:70
+#: plugins/core-schema.php:262
+msgid "Constraints"
+msgstr "Constraints"
+
+#: plugins/core-schema.php:73
+#: plugins/core-schema.php:265
+msgid "Functions"
+msgstr "Functies"
+
+#: plugins/core-schema.php:78
+msgid "This color indicates the current schema (items that should be removed)."
+msgstr "Deze kleur geeft het actuele schema aan (items die verwijderd dienen te zijn)."
+
+#: plugins/core-schema.php:80
+msgid "This color indicates the default schema (items that should be applied)."
+msgstr "Deze kleur geeft aan "
+
+#: plugins/core-schema.php:94
+#: plugins/core-schema.php:122
+#: plugins/core-schema.php:192
+#: plugins/core-schema.php:277
+#: plugins/core-schema.php:323
+msgid "Table"
+msgstr "Tabel"
+
+#: plugins/core-schema.php:95
+#: plugins/core-schema.php:123
+#: plugins/core-schema.php:278
+msgid "Column"
+msgstr "Kolom"
+
+#: plugins/core-schema.php:97
+#: plugins/core-schema.php:125
+#: plugins/core-schema.php:280
+msgid "Add SQL"
+msgstr "Toevoegen SQL "
+
+#: plugins/core-schema.php:98
+#: plugins/core-schema.php:126
+#: plugins/core-schema.php:281
+msgid "Alter SQL\n"
+msgstr "Wijzigen SQL\n"
+
+#: plugins/core-schema.php:144
+#: plugins/core-schema.php:299
+msgid "Sequence"
+msgstr "Sequentie "
+
+#: plugins/core-schema.php:145
+#: plugins/core-schema.php:169
+#: plugins/core-schema.php:194
+#: plugins/core-schema.php:226
+#: plugins/core-schema.php:300
+#: plugins/core-schema.php:312
+#: plugins/core-schema.php:325
+#: plugins/core-schema.php:341
+#: plugins/core-schema.php:354
+msgid "Definition\n"
+msgstr "Definitie\n"
+
+#: plugins/core-schema.php:193
+#: plugins/core-schema.php:324
+msgid "Index"
+msgstr "Index"
+
+#: plugins/core-schema.php:225
+#: plugins/core-schema.php:340
+msgid "Constraint"
+msgstr "Contraint"
+
+#: plugins/core-schema.php:353
+msgid "Function"
+msgstr "Functie"
+
+#: plugins/core-schema.php:744
+msgid "Viewing, exporting, and applying the schema is only used by installation and debugging.\n"
+msgstr "Afbeelden, exporteren en toepassen van het schema wordt alleen gebruikt bij installatie en debuggen.\n"
+
+#: plugins/core-schema.php:745
+msgid "Otherwise, you should not need to use this functionality.\n"
+msgstr "Verder zou u deze functionaliteit niet nodig moeten hebben.\n"
+
+#: plugins/core-schema.php:746
+msgid "Using this functionality willy-nilly may"
+msgstr "Het gebruiken van deze functionaliteit kan betekenen"
+
+#: plugins/core-schema.php:747
+msgid "TOTALLY SCREW UP"
+msgstr "HET TOTAAL VERKLOTEN"
+
+#: plugins/core-schema.php:748
+msgid "your FOSSology database."
+msgstr "van uw FOSSology database"
+
+#: plugins/core-schema.php:752
+msgid "Check to view the current schema. The output generation is harmless, but extremely technical."
+msgstr "Aanvinken om uw huidige schema te bekijken. De uitvoer is onschadelijk maar zeer technisch."
+
+#: plugins/core-schema.php:754
+msgid "Highlight the differences between the default schema (blue) and current schema (red)."
+msgstr "Markeer de verschillen tussen het standaard schema (blauw) en huidige schema (rood)."
+
+#: plugins/core-schema.php:756
+msgid "Check to export the current schema. This will overwrite your default schema configuration file. Don't do this unless you know"
+msgstr "Aanvinken om het huidige schema te exporteren. Dit zal uw standaard schema configuratiebestand overschrijven. Doe dit niet tenzij u weet"
+
+#: plugins/core-schema.php:757
+msgid "exactly"
+msgstr "exact"
+
+#: plugins/core-schema.php:758
+msgid "what you are doing. The default configuration file is the only one that is supported. This will overwrite your default file."
+msgstr "wat u doet. Het standaard configuratiebestand is het enige dat wordt ondersteund. Dit zal uw standaard bestand overschrijven."
+
+#: plugins/core-schema.php:760
+msgid "Check to apply the last exported schema. This will overwrite and atempt to migrate your database schema according to the default configuration file. Non-standard columns, tables, constraints, and views can and will be destroyed.\n"
+msgstr "Aanvinken om het laatst geexporteerde schema toe te passen. Dit zal uw database schema overschrijven en proberen te migreren volgens het standaard configuratie bestand. Niet-standaard kolommen, tabellen, constraints en views kunnen en zullen worden vernietigd. \n"
+

@@ -1,0 +1,9 @@
+<phpunit>
+  <testsuites>
+    <testsuite name="ununpack/agent_tests/Functional Tests">
+      <file>cliParamsTest4UnunpackNormal.php</file>
+      <file>cliParamsTest4UnunpackException.php</file>
+    </testsuite>
+  </testsuites>
+</phpunit>
+

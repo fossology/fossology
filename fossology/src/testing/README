@@ -1,0 +1,6 @@
+This directory contains the testing infrastucture and testing utilities code.
+The tests for each fossology mondual are contained in {modual}/agent_tests and 
+{modual}/ui_tests.
+
+Please do not put module tests in this directory.
+ 

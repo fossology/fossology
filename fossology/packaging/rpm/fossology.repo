@@ -1,0 +1,13 @@
+#FOSSology releases
+[fossology]
+name=Fossology releases
+baseurl=http://fossology.org/rpms/centos/$releasever/$basearch
+enabled=1
+gpgcheck=0
+
+# FOSSology release candidates and other special builds 
+[fossology-testing] 
+name=Fossology testing 
+baseurl=http://fossology.org/rpms-testing/centos/$releasever/$basearch
+enabled=0
+gpgcheck=0

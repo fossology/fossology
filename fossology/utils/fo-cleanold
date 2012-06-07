@@ -1,0 +1,260 @@
+#!/bin/sh
+# fo-cleanold - a utility to clean up old fossology installs
+# Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+#
+# This utility is designed to clean fossology installs off a system. By
+# default it
+# * deletes all program files from both old and new installs
+# * saves a copy of all config files, deleting the old (pre 1.0.0) config
+#    files and leaving new ones in place
+# * leaves the database alone
+# * leaves the repository alone
+# So by default it is safe to run on a (properly backed up) system you
+# are upgrading the fossology install on. However using additional flags
+# you can also delete the new config files, the database (assuming postgresql
+# is localhost), and the repo (in it's default location, including
+# files/gold/everything) which is useful if you want to completely start
+# over or for testing.
+# See the help text for options.
+
+## Options parsing and setup
+# parse options
+OPTS=`getopt -o h --long delete-conffiles,delete-database,delete-repository,delete-user,delete-everything,help -n 'fo-cleanold' -- "$@"`
+
+if [ $? != 0 ]; then
+   echo "ERROR: Bad option specified."
+   OPTS="--help"
+fi
+
+eval set -- "$OPTS"
+
+while true; do
+case "$1" in
+      --delete-conffiles) RMCONF=1; shift;;
+      --delete-database) RMDB=1; shift;;
+      --delete-repository) RMREPO=1; shift;;
+      --delete-user) RMUSER=1; shift;;
+      --delete-everything) EVERYTHING=1; shift;;
+      -h|--help)
+         echo "Usage: fo-cleanold [options]";
+         echo " By default fo-cleanold does not delete any data, but you can specify"
+         echo " additional options that WILL DELETE DATA, please use with caution."
+         echo "  --delete-conffiles  : delete configuration files"
+         echo "  --delete-database   : delete database"
+         echo "  --delete-repository : delete repository"
+         echo "  --delete-user       : delete user and group"
+         echo "  --delete-everything : delete everything"
+         echo "  -h or --help        : this help text"
+         exit;;
+      --) shift; break;;
+      *) echo "Error: option $1 not recognised"; exit 1;;
+   esac
+done
+
+if [ $EVERYTHING ]; then
+   echo "*** Deleting everything ***"
+   RMCONF=1
+   RMDB=1
+   RMREPO=1
+   RMUSER=1
+fi
+
+
+# This must run as root.
+if [ `id -u` != "0" ] ; then
+   echo "ERROR: fo-cleanold must run as root."
+   echo "Aborting."
+   exit 1
+fi
+
+# BUCKET DATA EXCEPTION
+# NOTE: for a little while the buckets agent instructed users to install
+# bucket data and scripts in $DATADIR/bucketpools/ which was not the right
+# FHS location and was later fixed. If we encounter anything in this dir
+# we don't want to delete it (unless we're deleting everything anyway).
+# This check can be removed once a fossology release no longer supports 
+# upgrading from v1.3
+if [ ! $EVERYTHING ]; then
+  for BUCKET in /usr/share/fossology/bucketpools/ /usr/local/share/fossology/bucketpools/; do
+    if [ -d $BUCKET ] && [ $(ls -A $BUCKET) ]; then
+        echo "ERROR: you have bucket data in $BUCKET,"
+        echo " please migrate it to the new location and ensure this directory"
+        echo " is empty before re-running fo-cleanold. See"
+        echo " http://fossology.org/buckets for more info." 
+        exit 1
+    fi
+  done  
+fi
+# END BUCKET DATA EXCEPTION
+
+## Files
+# config files from 0.9.0 and older installs
+# NOTE: we don't bother to look for nomos3 conffiles
+OLDSAVE="/usr/local/share/fossology/agents/proxy.conf
+/usr/local/share/fossology/agents/scheduler.conf
+/usr/local/share/fossology/dbconnect/fossology
+/usr/local/share/fossology/repository/Depth.conf
+/usr/local/share/fossology/repository/Hosts.conf
+/usr/local/share/fossology/repository/RepPath.conf
+/etc/default/fossology
+"
+# config files from 1.0.0 and newer installs
+NEWSAVE="
+/etc/cron.d/fossology
+/etc/init.d/fossology
+/usr/local/etc/default/fossology
+/usr/local/etc/fossology/Db.conf
+/usr/local/etc/fossology/fossology.conf
+/usr/local/etc/fossology/VERSION
+/usr/local/etc/fossology/samplefooter.txt
+/usr/local/etc/fossology/sampleheader.txt
+/usr/local/etc/fossology/Depth.conf
+/usr/local/etc/fossology/Hosts.conf
+/usr/local/etc/fossology/Proxy.conf
+/usr/local/etc/fossology/RepPath.conf
+/usr/local/etc/fossology/Scheduler.conf
+"
+
+FILES="
+/usr/local/bin/cp2foss
+/usr/local/bin/cp2foss.php
+/usr/local/bin/departition
+/usr/local/bin/diffm
+/usr/local/bin/fossinit
+/usr/local/bin/fossinit.php
+/usr/local/bin/fossjobs
+/usr/local/bin/fossjobs.php
+/usr/local/bin/fosslic
+/usr/local/bin/fosslic.php
+/usr/local/bin/fo_notify
+/usr/local/bin/fo_notify.php
+/usr/local/bin/GetFM
+/usr/local/bin/get-projects
+/usr/local/bin/mktop1k
+/usr/local/bin/p.sh
+/usr/local/bin/unrar
+/usr/local/bin/unrar-free
+/usr/local/bin/ununpack
+/usr/local/bin/wrapGFM
+/usr/local/include/FMDir
+/usr/local/include/fm-paths.php
+/usr/local/include/libfossagent.h
+/usr/local/include/libfossdb.h
+/usr/local/include/libfossrepo.h
+/usr/local/lib/libcp2foss.h.php
+/usr/local/lib/libfossagent.a
+/usr/local/lib/libfossdb.a
+/usr/local/lib/libfossrepo.a
+/usr/local/lib/lib_projxml.h.php
+/usr/local/lib/fossology/agents/checksum
+/usr/local/lib/fossology/agents/departition
+/usr/local/lib/fossology/agents/mkbsamcache
+/usr/local/share/man/man1/cp2foss.1
+/usr/local/share/man/man1/fo_notify.1
+/usr/local/share/man/man1/fossjobs.1
+/usr/local/share/man/man1/fosslic.1
+"
+
+DIRS="/usr/local/fossology/
+/usr/local/lib/fossology/
+/usr/local/share/fossology/
+/usr/local/etc/fossology/mods-enabled
+/usr/local/share/nomos3/"
+
+TMPDIR=`mktemp -d /tmp/fossology-configs.XXXXXX` || exit 1
+echo "*** Searching for old fossology config files ***"
+for conffile in $OLDSAVE; do
+   if [ -e "$conffile" -o -L "$conffile" ]; then
+      echo "NOTE: found old $conffile saving to $TMPDIR/ and deleting"
+      cp $conffile $TMPDIR/
+      rm -f $conffile
+   fi
+done
+
+echo "*** Searching for new fossology config files ***"
+for conffile in $NEWSAVE; do
+   if [ -f "$conffile" -o -L "$conffile" ]; then
+      if [ $RMCONF ]; then
+         echo "NOTE: found $conffile saving to $TMPDIR/ and deleting as requested"
+         cp $conffile $TMPDIR/
+      else
+         echo "WARNING: found $conffile but not deleting"
+      fi
+   fi
+done
+if [ $RMCONF ]; then
+   if [ -d /usr/local/etc/fossology ]; then
+      rm -rf /usr/local/etc/fossology
+   fi
+fi
+
+echo "*** Cleaning up old fossology files ***"
+for file in $FILES; do
+   if [ -f "$file" -o -L "$file" ]; then
+      rm -f $file
+   fi
+done
+
+for dir in $DIRS; do
+   if [ -d "$dir" -o -L "$dir" ]; then
+      rm -rf $dir
+   fi
+done
+
+## Database
+if [ $RMDB ]; then
+   # first check that the db is running
+   su postgres -c 'echo \\q|psql'
+   if [ $? != 0 ]; then
+      echo "ERROR: postgresql isn't running, not deleting database"
+   else
+      # and next that the db exists
+      su postgres -c 'psql -l' |grep -q fossology
+      if [ $? = 0 ]; then
+         echo "*** Deleting database ***"
+         # stop all users of the fossology db
+         pkill -f -u postgres fossy || true
+         su postgres -c 'echo "drop database fossology"|psql'
+         if [ $? != 0 ]; then
+            echo "ERROR: failed to delete database"
+            exit 1
+         fi
+      else
+         echo "NOTE: fossology database does not exist, not deleting"
+      fi
+   fi
+fi
+
+## Repository
+if [ $RMREPO ]; then
+   echo "*** Deleting repository ***"
+   if [ -d /srv/fossology/repository ]; then
+      rm -rf /srv/fossology
+      if [ $? != 0 ]; then
+         echo "ERROR: failed to delete repository"
+         exit 1
+      fi
+   else
+      echo "NOTE: repository does not exist, so not deleting"
+   fi
+fi
+
+## User and Group
+if [ $RMUSER ]; then
+   echo "*** Deleting user and group ***"
+   if grep -q "^fossy:" /etc/passwd; then
+      userdel -r fossy
+      if [ $? != 0 ]; then
+         echo "ERROR: failed to delete user"
+         exit 1
+      fi
+   fi
+
+   if grep -q "^fossy:" /etc/group; then
+      groupdel fossy
+      if [ $? != 0 ]; then
+         echo "ERROR: failed to delete group"
+         exit 1
+      fi
+   fi
+fi

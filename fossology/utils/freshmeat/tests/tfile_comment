@@ -1,0 +1,10 @@
+#
+# this is a test file, my name is tfile_comment, I'm supposed to have
+# comments and blank lines. I can have data as well, but that's optional.
+#
+
+#the line below is not blank there are spaces on it (at least 3)
+
+#the line below just has a newline \n
+
+this is some data

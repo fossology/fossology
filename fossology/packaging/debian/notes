@@ -1,0 +1,51 @@
+Notes on the Debian packaging of FOSSology v2.0
+==========================================
+1.) The debian/ directory is kept in upstream SVN, but it is excluded
+from upstream release tarballs in order to prevent the messy
+situation of having to patch and merge this directory.
+
+2.) How to build packages. First prepare using one of the following
+ A.) svn export the whole tree and then have the most recent upstream
+   tarball unpacked as fossology-<version>.orig
+ B.) * unpack the upstream tarball once for your working directory
+     * unpack it again as fossology-<version>.orig for the upstream
+     * export the debian directory and put it in the working dir
+ C.) use an existing debian source package
+Then hack away on the working directory and use normal methods for
+building the package (e.g. "debuild -rfakeroot").
+
+3.) FOSSology v2.0 is also composed of several different components,
+but it changed a lot as whole fossology instructure changed. Here is an explanation of the situation...
+
+Things need to happen in a certain order:
+  * All packages call the upstream provided fo-postinstall (provided
+      by fossology-common) in their postinst scripts
+  * The agents need to be configured before the scheduler can be started
+  * The agents need the database to exist before they can be configured
+  * fossology-common package is the common component in v2.0, it provided all
+    the common resources needed by other components. It provide lib/db/web/cli components
+  * fossology-common needs to be installed before another packages
+  * All the v2.0 agents seperate into different component packages, it can
+    be installed/uninstalled easily
+  * The default fossology package installs all the components
+So therefore
+  * fossology-common needs to be installed before fossology-*
+  * fossology-web and fossology-db needs to installed before fossology-*
+But....
+  * For the single-system case we want dependencies to ensure that
+      everything is installed and in the right order
+  * For the multi-system case we don't want dependencies tying things
+      together
+
+So that that results in the following packages and relationships:
+  * fossology Depends on all the components
+  * fossology-web Depends on fossology-common
+  * fossology-db Depends on fossology-common
+  * fossology-scheduler Depends on fossology-common
+  * fossology-ununpack Depends on fossology-common
+  * fossology-copyright Depends on fossology-common
+  * fossology-nomos Depends on fossology-common
+  * fossology-pkgagent Depends on fossology-common
+  * fossology-buckets Depends on fossology-nomos and fossology-pkgagent
+  * fossology-mimetype Depends on fossology-common
+  * fossology-delagent Depends on fossology-common

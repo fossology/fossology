@@ -1,0 +1,8 @@
+This rpm/ directory is meant to contain the files necessary for RPM packaging
+of FOSSology for RPM-based systems including RHEL, CentOS, etc.
+
+Initially this will contain the RPM spec file and any other supporting scripts
+and may contain additional documentation and utilities as needed.
+
+It is analogous to the debian/ directory, which serves this purpose for Debian
+distro packaging.
