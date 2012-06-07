@@ -1,2 +1,0 @@
-# fossology provides a license scanner and it includes many FOSS licenses that cause false positives
-fossology-agents binary: extra-license-file

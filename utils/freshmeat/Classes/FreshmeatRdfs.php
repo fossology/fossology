@@ -23,7 +23,7 @@
  *
  * To download a fresmeat rdf, see the class GetFreshMeatRdf.
  *
- * @version "$Id$"
+ * @version "$Id: FreshmeatRdfs.php 851 2008-06-28 05:18:46Z rrando $"
  *
  * Created on Jun 6, 2008
  */
@@ -126,7 +126,7 @@ class FreshmeatRdfs
   *
   * @author mark.donohoe@hp.com
   *
-  * @version "$Id$"
+  * @version "$Id: FreshmeatRdfs.php 851 2008-06-28 05:18:46Z rrando $"
   *
   * @todo think about making this a class that can give back any number
   * of fields.

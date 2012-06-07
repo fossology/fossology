@@ -1,0 +1,165 @@
+#!/usr/bin/php -q
+<?php
+/***********************************************************
+ Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ ***********************************************************/
+
+/**
+ * @file fo_wrapper.php
+ * @brief Bootstrap into the fossology system and then
+ *        include arg[0].  You must be in group fossy.
+ *        
+ * For example, symlink fo_schema_export to fo_wrapper.php
+ * fo_wrapper.php will bootstrap followed by including the
+ * code from fo_schema_export.php
+ *
+ * @return 0 for success, 1 for failure.
+ **/
+
+/* User must be in group fossy! */
+$GID = posix_getgrnam("fossy");
+posix_setgid($GID['gid']);
+$Group = `groups`;
+if (!preg_match("/\sfossy\s/",$Group) && (posix_getgid() != $GID['gid']))
+{
+  print "FATAL: You must be in group 'fossy'.\n";
+  exit(1);
+}
+
+/* Initialize the program configuration variables */
+$SysConf = array();  // fo system configuration variables
+$PG_CONN = 0;   // Database connection
+$Plugins = array();
+
+/* Set SYSCONFDIR and set global (for backward compatibility) */
+/** get sysconfdir */
+$sysconfdir = "";
+for ($i = 1;$i < $argc;$i++)
+{
+  $arg = $argv[$i];
+  if ("-c" === $arg) {
+    $sysconfdir = $argv[$i + 1];
+    break;
+  }
+}
+$SysConf = bootstrap($sysconfdir);
+require_once("$MODDIR/lib/php/libschema.php");
+
+/* Initialize global system configuration variables $SysConfig[] */
+ConfigInit($SYSCONFDIR, $SysConf);
+
+/* Locations where the target .php file might exist */
+$FO_phpLocations = "$BINDIR" 
+                    . PATH_SEPARATOR . "$SBINDIR" 
+                    . PATH_SEPARATOR . "$LIBEXECDIR" ;
+$IncludePath = set_include_path(get_include_path() . PATH_SEPARATOR . $FO_phpLocations);
+$basename = basename($argv[0]);
+require("$basename" . ".php");
+exit(0);
+
+/**
+ * \brief Bootstrap the fossology php library.
+ *  - Determine SYSCONFDIR
+ *  - parse fossology.conf
+ *  - source template (require_once template-plugin.php)
+ *  - source common files (require_once common.php)
+ * 
+ * The following precedence is used to resolve SYSCONFDIR:
+ *  - $SYSCONFDIR path passed in ($sysconfdir)
+ *  - environment variable SYSCONFDIR
+ *  - ./fossology.rc
+ *
+ * Any errors are fatal.  A text message will be printed followed by an exit(1)
+ *
+ * \param $sysconfdir Typically from the caller's -c command line parameter
+ *
+ * \return the $SysConf array of values.  The first array dimension
+ * is the group, the second is the variable name.
+ * For example:
+ *  -  $SysConf[DIRECTORIES][MODDIR] => "/mymoduledir/
+ *
+ * The global $SYSCONFDIR is also set for backward compatibility.
+ *
+ * \Note Since so many files expect directory paths that used to be in pathinclude.php
+ * to be global, this function will define the same globals (everything in the 
+ * DIRECTORIES section of fossology.conf).
+ */
+function bootstrap($sysconfdir="")
+{
+  $rcfile = "fossology.rc";
+  if (empty($sysconfdir))
+  {
+    $sysconfdir = getenv('SYSCONFDIR');
+    if ($sysconfdir === false)
+    {
+      if (file_exists($rcfile)) $sysconfdir = file_get_contents($rcfile);
+      if ($sysconfdir === false)
+      {
+        /** set the sysconfdir with default */
+        $sysconfdir = "{$SYSCONFDIR}";
+      }
+    }
+  }
+
+  $sysconfdir = trim($sysconfdir);
+  $GLOBALS['SYSCONFDIR'] = $sysconfdir;
+
+  /*************  Parse fossology.conf *******************/
+  $ConfFile = "{$sysconfdir}/fossology.conf";
+  if (!file_exists($ConfFile))
+  {
+    $text = _("FATAL! Missing configuration file: $ConfFile");
+    echo "$text\n";
+    exit(1);
+  }
+  $SysConf = parse_ini_file($ConfFile, true);
+  if ($SysConf === false)
+  {
+    $text = _("FATAL! Invalid configuration file: $ConfFile");
+    echo "$text\n";
+    exit(1);
+  }
+
+  /* evaluate all the DIRECTORIES group for variable substitutions.
+   * For example, if PREFIX=/usr/local and BINDIR=$PREFIX/bin, we
+   * want BINDIR=/usr/local/bin
+   */
+  foreach($SysConf['DIRECTORIES'] as $var=>$assign)
+  {
+    /* Evaluate the individual variables because they may be referenced
+     * in subsequent assignments. 
+     */
+    $toeval = "\$$var = \"$assign\";";
+    eval($toeval);
+
+    /* now reassign the array value with the evaluated result */
+    $SysConf['DIRECTORIES'][$var] = ${$var};
+    $GLOBALS[$var] = ${$var};
+  }
+
+  if (empty($MODDIR))
+  {
+    $text = _("FATAL! System initialization failure: MODDIR not defined in $SysConf");
+    echo $text. "\n"; 
+    exit(1);
+  }
+
+  //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
+  require_once("$MODDIR/www/ui/template/template-plugin.php");
+  require_once("$MODDIR/lib/php/common.php");
+  return $SysConf;
+}
+?>

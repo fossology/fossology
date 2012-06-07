@@ -1,9 +1,0 @@
-Unpack standalone:
-./ununpack -d dir -Rv myfile.tar
-
-source name should come from repo ../ununpack -d bobgout -RvQf test.cpio
-
-Unpack a pfile:
-export pfile_fk=1; export pfile='14AFB7EE280FD9384FDEAEB19CA8C1F1D94494D5.5F23C716F8E849E59394FC9E6A67A48C.12856781';export upload_pk=1; ../ununpack -d bobgout -RvQf
-
-

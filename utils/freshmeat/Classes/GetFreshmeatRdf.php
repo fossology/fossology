@@ -25,7 +25,7 @@
  *
  * Sets: $rdf_name
  *
- * @version "$Id$"
+ * @version "$Id: GetFreshmeatRdf.php 842 2008-06-25 21:04:24Z rrando $"
  *
  * Created on Jun 6, 2008
  */

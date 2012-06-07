@@ -20,7 +20,7 @@
 #
 # Author: mark.donohoe@hp.com
 #
-# Version: $Id$
+# Version: $Id: GetFM 534 2008-04-28 22:16:26Z rrando $
 
 Date=`date +"%Y-%m-%d"`
 

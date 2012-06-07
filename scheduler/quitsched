@@ -1,1 +1,0 @@
-sudo kill -QUIT `cat /dev/shm/fossology-scheduler`

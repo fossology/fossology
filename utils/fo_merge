@@ -1,0 +1,121 @@
+#!/usr/bin/python -u
+
+## 
+## Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+## 
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## version 2 as published by the Free Software Foundation.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License along
+## with this program; if not, write to the Free Software Foundation, Inc.,
+## 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+##
+
+import sys, os
+from stat      import *
+from optparse  import OptionParser
+from functools import partial
+
+FOSSology_new = None
+FOSSology_old = None
+
+no_match = []
+merge_me = []
+
+ignore = ['svn', '.o', 'scheduler']
+
+dst_help = """Path to src directory in FOSSology 2.0 tree. An attempt to will
+be made to match every file in this tree to a file in the source tree"""
+src_help = """Path to previous FOSSology version. A file in this tree will
+only be touched if it is matched to a file in the dst tree"""
+
+def main():
+  global FOSSology_new
+  global FOSSology_old
+  global no_match
+  global merge_me
+  
+  usage = "Usage: %prog [options]\nTry '%prog --help' For more information"
+  parser = OptionParser(usage)
+  parser.add_option("-d", "--dst", type="string",
+          help=dst_help)
+  parser.add_option("-s", "--src", type="string",
+          help=src_help)
+  parser.add_option("-t", "--test", action="store_true",
+          help="""Turn the output of tests off""")
+
+  (options, args) = parser.parse_args()
+  FOSSology_new = options.dst
+  FOSSology_old = options.src
+  if options.test:
+    ignore.append('ui_tests')
+    ignore.append('agent_tests')
+  
+  if not FOSSology_new or not FOSSology_old:
+    parser.error("must provide both a -d and -s option")
+  
+  explore(FOSSology_new, compare)
+  
+  print "Files that have changed:"
+  for f in merge_me:
+    print '  %-70s %s' % f
+  print "Files that didn't have a match:"
+  for f in no_match:
+    print '  ', f
+
+def explore(current, callback):
+  for f in os.listdir(current):
+    pathname = os.path.join(current, f)
+    ret = None
+    
+    if not skip(pathname):
+      if os.path.isdir(pathname):
+        # recurse if it is a directory
+        ret = explore(pathname, callback)
+        if ret: return ret
+      elif os.path.isfile(pathname):
+        # it is a file, call the callback
+        ret = callback(pathname)
+        if ret: return ret
+      else:
+        # unknown file type
+        print 'skipping %s' % pathname
+
+def compare(filename):
+  global FOSSology_old
+  global no_match
+  global merge_me
+  
+  src_file = explore(FOSSology_old, partial(find, os.path.split(filename)[1]))
+  if src_file == None:
+    no_match.append(filename)
+    return None
+  
+  dst_mod = os.stat(filename)[ST_MTIME]
+  src_mod = os.stat(src_file)[ST_MTIME]
+  
+  if src_mod > dst_mod:
+    merge_me.append((filename, src_file))
+    
+  return None
+
+def find(tofind, filename):
+  if tofind in filename:
+    return filename
+  return None
+
+def skip(fname):
+  for i in ignore:
+    if i in fname:
+      return True
+  return False
+
+# if this script is being run as main...
+if __name__ == '__main__':
+  sys.exit(main())

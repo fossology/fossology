@@ -1,3 +1,0 @@
-line 100:
-        print >> sys.stderr, 'You must specify a model file for all phases of the algorithm.
-1) What do you mean "for all phases of the algorithm"?  There is only one switch -m (--model) for specifying the model.   So to reduce ambiguity (i.e. is there a different model file for each phase"), why not just say "You mush specify a model file.".

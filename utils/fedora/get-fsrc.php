@@ -29,7 +29,7 @@
  * @param string $path-skip-pkg-list fully qualified path to file with list
  * of skipped packages to skip when processing further.
  *
- * @version "$Id$"
+ * @version "$Id: get-fsrc.php 1593 2008-10-30 10:09:41Z taggart $"
  *
  */
 

@@ -1,5 +1,5 @@
 # FOSSology Makefile - Makefile.process
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008, 2012 Hewlett-Packard Development Company, L.P.
 # This Makefile is included by other Makefiles in the tree that need
 # these targets in order to preprocess files with embedded references
 # to the variables in Makefile.conf
@@ -10,14 +10,21 @@ TOP=.
 include Makefile.conf
 endif
 
-VARIABLES := PROJECT VERSION PROJECTUSER PROJECTGROUP DESTDIR PREFIX BINDIR SBINDIR SYSCONFDIR INITDIR LIBDIR INCLUDEDIR LIBEXECDIR DATAROOTDIR DATADIR LOCALSTATEDIR LOGDIR PROJECTSTATEDIR MANDIR MAN1DIR DOCDIR WEBDIR PHPDIR AGENTDIR AGENTDATADIR AGENTSTATEDIR AGENTCHECKDDIR AGENTTESTDDIR SVN_REV
+VARIABLES := PROJECT PROJECTUSER PROJECTGROUP DESTDIR PREFIX BINDIR SBINDIR SYSCONFDIR INITDIR LIBDIR INCLUDEDIR LIBEXECDIR DATAROOTDIR MODDIR LOCALSTATEDIR LOGDIR PROJECTSTATEDIR MANDIR MAN1DIR DOCDIR WEBDIR PHPDIR 
 
 %-process: %.in
 	@ echo "Regenerating variables list ..."
 	@rm -f $(TOP)/variable.list
 	@TOP=$(TOP) $(MAKE) -f $(TOP)/Makefile.process $(TOP)/variable.list
-	@echo "Generate $* ..."
+	@echo "Generating $* ..."
 	$(TOP)/utils/preprocess $(TOP)/variable.list $< > $*
+
+%-process_php: %.php.in
+	@ echo "Regenerating variables list ..."
+	@rm -f $(TOP)/variable.list
+	@TOP=$(TOP) $(MAKE) -f $(TOP)/Makefile.process $(TOP)/variable.list
+	@echo "Generating $* ..."
+	$(TOP)/utils/preprocess_php $(TOP)/variable.list $< 
 
 $(TOP)/variable.list: $(TOP)/Makefile.conf
 	@TOP=$(TOP) $(MAKE) -f $(TOP)/Makefile.process $(VARIABLES)

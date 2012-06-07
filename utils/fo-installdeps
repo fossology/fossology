@@ -1,6 +1,18 @@
-#!/bin/bash
+
 # FOSSology fo-installdeps script
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 # This script helps you install build and runtime dependencies on a system.
 # It is NOT indented to replace package dependencies, it's just a tool to
@@ -12,7 +24,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o rbeah --long runtime,buildtime,everything,agent,help -n 'fo-installdeps' -- "$@"`
+OPTS=`getopt -o rbehy --long runtime,buildtime,everything,help -n 'fo-installdeps' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -25,19 +37,23 @@ eval set -- "$OPTS"
 if [ "$OPTS" = " --" ]; then
    EVERYTHING=1
 fi
-
+#
+# Don't show the -y option.  Should only be used for install testing, as using
+# it without being careful can destroy your system.
+#
+YesOpt=
 while true; do
    case "$1" in
       -r|--runtime) RUNTIME=1; shift;;
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
-      -a|--agent) AGENT=1; shift;;
+      -y) 
+         YesOpt=" -y --force-yes "; shift;;
       -h|--help)
          echo "Usage: fo-installdeps [options]";
 	 echo "  -r or --runtime    : install runtime dependencies"
 	 echo "  -b or --buildtime  : install buildtime dependencies"
 	 echo "  -e or --everything : install all dependencies (default)"
-	 echo "  -a or --agent      : only install agent runtime dependencies (implies -r)"
 	 echo "  -h or --help       : this help text"
 	 exit;;
       --) shift; break;;
@@ -58,11 +74,6 @@ if [ $EVERYTHING ]; then
    BUILDTIME=1
 fi
 
-if [ $AGENT ]; then
-   # agent implies runtime
-   RUNTIME=1
-fi
-
 # figure out what distro we're on
 DISTRO=`lsb_release -is`
 CODENAME=`lsb_release -cs`
@@ -76,46 +87,54 @@ fi
 
 ########################################################################
 
+echo "install core dependencies"
+
 if [ $BUILDTIME ]; then
    echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
       Debian|Ubuntu|LinuxMint)
-         apt-get install \
-            libmagic-dev libxml2-dev libextractor-dev \
-            build-essential libtext-template-perl subversion rpm librpm-dev \
-            python python-dev python-pyrex libpcre3-dev
+      echo "DB: Installing build essiential....."
+         apt-get $YesOpt install \
+            libxml2-dev libextractor-dev \
+            build-essential libtext-template-perl subversion rpm
          case "$CODENAME" in
-            lenny|hardy) apt-get install postgresql-server-dev-8.3;;
-            squeeze) apt-get install postgresql-server-dev-8.4;;
-            sid) apt-get install postgresql-server-dev-8.4;;
-            karmic|lucid|maverick) apt-get install postgresql-server-dev-8.4;;
-            isadora) apt-get install postgresql-server-dev-8.4;;
+            lenny|hardy) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.3;;
+            squeeze) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.4;;
+            sid) apt-get  $YesOpt install $YesOpt postgresql-server-dev-8.4;;
+            lucid|natty|oneiric) apt-get $YesOpt install postgresql-server-dev-8.4;;
+            isadora) apt-get $YesOpt install postgresql-server-dev-8.4;;
+            precise) apt-get $YesOpt install postgresql-server-dev-8.4;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
          esac
          ;;
       Fedora)
          # F8=Werwolf F9=Sulphur F10=Cambridge F11=Leonidas F12=Constantine dev=Rawhide
-         yum groupinstall "Development Tools"
-         yum install \
+         if [ $YesOpt ]; then
+           YesOpt='-y'
+         fi                 
+         yum $YesOpt groupinstall "Development Tools"
+         yum $YesOpt install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
-            libxml2 libextractor-devel rpm-devel Pyrex \
-            python python-devel pcre-devel
+            libxml2 libextractor-devel
          ;;
       Mandriva)
          # 2008.1 tested
          urpmi \
             postgresql-devel \
-            libextractor-devel libmagic-devel libxml2 rpm-devel \
+            libextractor-devel libxml2 \
             perl-Text-Template subversion gcc make perl
          ;;
       RedHatEnterprise*|CentOS)
          # 4=Nahant* 5=Tikanga*
-         yum install \
+         if [ $YesOpt ]; then
+           YesOpt='-y'
+         fi                     
+         yum $YesOpt install \
             postgresql-devel \
-            gcc make file libxml2 rpm-devel \
+            gcc make file libxml2 \
             perl-Text-Template subversion \
-            Pyrex libextractor-devel pcre-devel
+            libextractor-devel
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
@@ -130,30 +149,24 @@ if [ $RUNTIME ]; then
    echo "*** apt-get install mail-transport-agent, pick one and install it***";
    case "$DISTRO" in
       Debian|Ubuntu|LinuxMint)
-         [ $AGENT ] || apt-get install apache2 libapache2-mod-php5
-         apt-get install \
+        echo "doing runtime"
+         apt-get $YesOpt install apache2 libapache2-mod-php5
+         apt-get $YesOpt install  \
             php5 php5-pgsql php-pear php5-cli \
-            libmagic1 libxml2 libextractor1c2a \
-            binutils bzip2 cabextract cpio genisoimage sleuthkit xpdf-utils \
-               rpm tar upx-ucl unrar unzip p7zip libpcre3 \
-               php-gettext
+            libxml2 libextractor1c2a \
+            binutils php-gettext \
+            libextractor-plugins
          case "$CODENAME" in
-            dapper) [ $AGENT ] || apt-get install postgresql-8.1;;
-            lenny|hardy)
-               [ $AGENT ] || apt-get install postgresql-8.3
-               apt-get install libextractor-plugins;;
             squeeze)
-               [ $AGENT ] || apt-get install postgresql-8.4
-               apt-get install libextractor-plugins;;
+               apt-get $YesOpt install postgresql-8.4;;
             sid)
-               [ $AGENT ] || apt-get install postgresql-8.4
-               apt-get install libextractor-plugins;;
-            karmic|lucid|maverick)
-               [ $AGENT ] || apt-get install postgresql-8.4
-               apt-get install libextractor-plugins;;
+               apt-get $YesOpt install postgresql-8.4;;
+            lucid|natty|oneiric)
+               apt-get $YesOpt install postgresql-8.4;;
             isadora)
-               [ $AGENT ] || apt-get install postgresql-8.4
-               apt-get install libextractor-plugins;;
+               apt-get $YesOpt install postgresql-8.4;;
+            precise)
+               apt-get $YesOpt install postgresql-8.4;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
          esac
          ;;
@@ -164,17 +177,19 @@ if [ $RUNTIME ]; then
                cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
                mkisofs p7zip poppler-utils rpm tar unzip gzip
          echo "NOTE: unrar is available in PLF, please install it via urpmi if"
-	 echo "   the repository is configured or from http://plf.zarb.org/packages.php"
+         echo "   the repository is configured or from http://plf.zarb.org/packages.php"
          ;;
       Fedora)
-         [ $AGENT ] || yum install postgresql-server httpd
-         yum install \
+         if [ $YesOpt ]; then
+           YesOpt='-y'
+         fi                  
+         yum $YesOpt install postgresql-server httpd
+         yum $YesOpt install \
             postgresql \
             php php-pear php-pgsql \
             smtpdaemon \
-            file-libs libxml2 libextractor libextractor-plugins \
-            binutils bzip2 cabextract cpio genisoimage p7zip \
-               poppler-utils rpm tar upx unzip gzip pcre
+            libxml2 libextractor libextractor-plugins \
+            binutils
 
          # enable, possible init, and start postgresql
          /sbin/chkconfig postgresql on
@@ -189,7 +204,7 @@ if [ $RUNTIME ]; then
                echo "NOTE: sleuthkit and unrar is not available in Fedora release $CODENAME,";
                echo "   please install from upstream sources.";;
             Cambridge|Rawhide|Leonidas|Constantine)
-               yum install sleuthkit
+               yum $YesOpt install sleuthkit
                echo "NOTE: unrar is not available in Fedora release $CODENAME,"
                echo "   please install from upstream sources."
 	       ;;
@@ -202,17 +217,50 @@ if [ $RUNTIME ]; then
          ;;
       RedHatEnterprise*|CentOS)
          # 4=Nahant* 5=Tikanga*
-         [ $AGENT ] || yum install postgresql-server httpd
-         yum install \
+         if [ $YesOpt ]; then
+           YesOpt='-y'
+         fi                           
+         yum $YesOpt install postgresql-server httpd
+         yum $YesOpt install \
             postgresql \
             php php-pear php-pgsql \
             smtpdaemon \
             file libxml2 \
-            binutils bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip pcre
+            binutils
          echo "NOTE: libextractor, cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources.";;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
 fi
 
+########################################################################
+# install dependencies of modules via running $mods_enabled_dir/$mod_name/mod_deps
+install_mod_deps()
+{
+  mods_dir=$1
+  for mod_deps in `find -L $mods_dir -name mod_deps`;
+  do
+    if [ -f $mod_deps ]; then
+      echo "run $mod_deps to install dependencies"
+      /bin/sh $mod_deps $options
+    fi
+  done
+}
+
+
+options=""
+if [ $BUILDTIME ]; then
+  options='-b '
+fi
+
+if [ $RUNTIME ]; then
+  options="$options -r"
+fi
+if [ $YesOpt ]; then
+  options="$options -y"
+fi
+BASEDIR=$(dirname $0) 
+mods_dir=$BASEDIR"/../src/" ## get the directory where fo-installdeps resides
+install_mod_deps $mods_dir 
+ 
 ########################################################################

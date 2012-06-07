@@ -1,0 +1,117 @@
+# fossjobs man page input file
+# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+#
+# VERSION: $Id: fossjobs.pod 1573 2008-10-28 05:28:11Z taggart $
+#
+
+=head1 NAME
+
+fossjobs - Display default fossology agents or upload id's and schedule default
+fossology agents on an upload id.
+
+=head1 SYNOPSIS
+
+fossjobs [-a] [-h] [-u] [-v] [-A <string>] [-U <upload-id>] [-P priority] [--user <string>] [--password <string>]
+
+=head1 DESCRIPTION
+
+fossjobs is a command line fossology utility that can be used to list
+the available default agents or upload id's.  Using that information,
+fossjobs can be used to schedule all the default agents or a subset of
+them for a given upload id.  This effectivly creates a job and
+schedules the agents to perform their analysis on the upload id given.
+
+Additionally, the priority can be set for that upload id/job.  The
+agents will run at the priority set, or 0 if none supplied (the
+default).
+
+=head2 Options
+
+=over
+
+=item B<-a>
+
+List the available default agents.
+
+=item B<-h>
+
+Standard help flag, prints usage.
+
+=item B<--user> I<username>
+
+username, specify the username for a user who has the priviledge to execute cp2foss.
+Also you can add one file .fossology.rc in your current home directory, add user name and
+password in 2 seperate line.
+
+=item B<--password> I<password>
+
+password, specify the password for a user who has the priviledge to execute cp2foss.
+Also you can add one file .fossology.rc in your current home directory, add user name and
+password in 2 seperate line.
+
+=item B<-c> I<configuration directory>
+
+Specify the directory for the system configuration, 
+when installation from src, default dir is /usr/local/etc/fossology/ ,
+when installation from package, default dir is /etc/fossology/.
+
+=item B<-u>
+
+List the available upload id's.
+
+=item B<-v>
+
+Verbose output
+
+=item B<-A <string>>
+
+This option can be used to run a subset of the default
+agents.  The subset is specified using a comma separated list of
+agents.  To display the available agents, use -a.  To schedule all
+default agents, do not set this option.
+
+=item B<-P <priority>>
+
+The priority for the job/agents.  The default priority
+if none is supplied is zero (0).  Priorities can be negative or
+positive.  A negative priority will have less priority than zero.
+Additionally, larger negative numbers will have less priority than
+smaller negative numbers.  The highest priority is 10.
+
+=item B<-U <upload-id>>
+
+The upload id to schedule the agents to work on.  To
+find an upload id use -u.  The upload-id string can be a
+comma-separated list of upload ids. Or, use 'ALL' to specify all
+upload ids.
+
+=back
+
+=head2 Examples
+
+list all of the available agents
+
+  fossjobs --user USER --password PASSWORD -a
+
+
+list the upload id's
+
+  fossjobs --user USER --password PASSWORD -u
+
+schedule a subset of the agents (unpack and nomos) on an upload id.
+
+  fossjobs --user USER --password PASSWORD -A "agent_unpack,agent_nomos" -U 20
+
+schedule all the agents using a priority of 5 on upload id 20
+
+  fossjobs --user USER --password PASSWORD -U 20 -P 5
+
+schedule all upload id's with all default agents
+
+fossjobs --user USER --password PASSWORD -U ALL
+
+=head1 Authors
+
+Neal Krawetz and Mark Donohoe
+
+

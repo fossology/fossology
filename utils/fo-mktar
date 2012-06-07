@@ -36,12 +36,12 @@ fi
 ######################################################################
 # Package things up
 
-if [ ! -f "Makefile.conf" ]; then
+if [ ! -f "VERSIONSTRING" ]; then
    echo "ERROR: This utility must be run from the top of the fossology source tree."
    exit 1
 fi
 
-eval `grep ^VERSION= Makefile.conf`
+VERSION="`cat VERSIONSTRING`"
 
 # SVN_REV is the last revision from svn info.  This is used for packaging.
 SVN_REV="`svn info | grep '^Revision:' | awk '{print $2}'`"

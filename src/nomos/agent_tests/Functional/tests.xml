@@ -1,0 +1,13 @@
+<phpunit>
+  <testsuites>
+    <testsuite name="lib/php Tests">
+      <file>cli1Test.php</file>
+      <file>OneShot-lgpl2.1.php</file>
+      <file>OneShot-gpl3.php</file>
+      <file>OneShot-affero.php</file>
+      <file>OneShot-none.php</file>
+      <file>OneShot-empty.php</file>
+      <file>OneShot-multiFile.php</file>
+    </testsuite>
+  </testsuites>
+</phpunit>

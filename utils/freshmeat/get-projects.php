@@ -45,7 +45,7 @@
  * @todo Bonus: start to pass arrays around by ref....
  *
  * @author mark.donohoe@hp.com
- * @version $Id$
+ * @version $Id: get-projects.php 1593 2008-10-30 10:09:41Z taggart $
  *
  * @todo Stop using /tmp, switch to $VARDATADIR? (bug taggart)
  *

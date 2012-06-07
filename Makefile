@@ -1,11 +1,11 @@
 # FOSSology Makefile
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
 # pull in all our default variables
 include Makefile.conf
 
 # the directories we do things in by default
-DIRS=devel db scheduler agents ui cli common
+DIRS=install src
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
@@ -17,18 +17,20 @@ UNINSTALLDIRS = $(DIRS:%=uninstall-%)
 CLEANDIRS = $(DIRS:%=clean-%)
 TESTDIRS = $(DIRS:%=test-%)
 COVDIRS = $(DIRS:%=cov-%)
+CONFPATH=$(SYSCONFDIR)
+
 
 ## Targets
 # build
-all: $(BUILDDIRS)
+all: $(BUILDDIRS) VERSIONFILE
 $(DIRS): $(BUILDDIRS)
 $(BUILDDIRS):
 	$(MAKE) -C $(@:build-%=%)
 
 # high level dependencies:
-# the scheduler and agents need the devel stuff built first
-build-scheduler: build-devel
-build-agents: build-devel
+# the scheduler and agents need the library built first
+build-scheduler: build-src
+build-agents: build-src
 
 # cli needs the php include file built in ui
 build-cli: build-ui
@@ -36,15 +38,21 @@ build-cli: build-ui
 # utils is a separate target, since it isn't built by default yet
 utils: build-utils
 
+# generate the VERSION file
+TOP = .
+VERSIONFILE: 
+	$(call WriteVERSIONFile,"BUILD")
+
 # install depends on everything being built first
 install: all $(INSTALLDIRS)
 $(INSTALLDIRS):
+	$(INSTALL) -m 666 VERSION $(DESTDIR)$(CONFPATH)/VERSION
 	$(MAKE) -C $(@:install-%=%) install
 
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
 	$(MAKE) -C $(@:uninstall-%=%) uninstall
-
+	
 # test depends on everything being built first
 test: all $(TESTDIRS)
 $(TESTDIRS):
@@ -56,7 +64,7 @@ $(COVDIRS):
 	$(MAKE) -C $(@:cov-%=%) coverage
 
 clean: $(CLEANDIRS)
-	rm -f variable.list fo-postinstall
+	rm -f variable.list VERSION
 
 $(CLEANDIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
@@ -75,4 +83,3 @@ dist:
 .PHONY: $(TESTDIRS) $(CLEANDIRS)
 .PHONY: all install uninstall clean test utils
 .PHONY: dist dist-testing tar tar-release
-

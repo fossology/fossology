@@ -1,0 +1,2 @@
+# eg:  fofind "find this phrase"
+find . -type f -not \( -wholename "*~" \) -not \( -wholename "*svn*" \) -not \( -wholename "*srcdocs*" \) -not \( -size -10M \) |xargs  grep "$@"  2>/dev/null

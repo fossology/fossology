@@ -47,7 +47,7 @@
  * found.
  *
  * @author mark.donohoe@hp.com
- * @version $Id$
+ * @version $Id: diffm.php 1593 2008-10-30 10:09:41Z taggart $
  *
  */
 /*
