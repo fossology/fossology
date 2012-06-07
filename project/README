@@ -1,7 +1,0 @@
-This projects/ directory is intended for storing project-related
-information and notes that are not part of the source code tree.
-This directory should NOT be included in release tarballs!
-
-You can use this as an incubator to develop speculative new code.  Once the code
-gets approved by the other fossology-developers, it can move to the 
-main source tree and distributed with fossology.

@@ -1,7 +1,0 @@
-CFLAGS=`pkg-config --cflags gaim`
-LDFLAGS=`pkg-config --libs gaim`
-
-all: nullclient
-
-clean:
-	@rm -f *.o nullclient

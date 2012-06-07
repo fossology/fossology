@@ -1,5 +1,0 @@
-This directory is the test user environment directory.  It contains
-the .bash and other dot files needed.  E.g. .subversion/servers.
-
-Any file in this directory will be copied to the fosstester users'
-directory when the installTestData script is run.

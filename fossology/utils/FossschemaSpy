@@ -1,5 +1,0 @@
-#!/usr/bash
-#
-# update schemaspy output on the system, once a week, must be run as root (sudo)
-#
-"java -jar /usr/local/bin/schemaSpy_3.1.1.jar -t pgsql -cp /usr/local/share/postgresql-8.2-506.jdbc3.jar -db fossology -s public -host localhost -u fossy -p fossy -o /var/www/schemaspy"
