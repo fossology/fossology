@@ -47,11 +47,10 @@ int i_created = 0;       ///< flag indicating if the interface already been crea
 int i_terminate = 0;     ///< flag indicating if the interface has been killed
 int i_port = -1;         ///< the port that the scheduler is listening on
 GThread* socket_thread;  ///< thread that will create new connections
-GList* client_threads;   ///< threads that are currently running some form of scheduler interface
+GThreadPool* threads;    ///< thread pool used to handle interface connections
 GCancellable* cancel;    ///< used to shut down all interfaces when closing the scheudler
 GRegex* cmd_parse;       ///< regex to make parsing command more reliable
 GRegex* pro_parse;       ///< regex to parse the proxy formatting
-GSocketClient* outgoing; ///< creates outgoing socket connections
 
 GRegex* rep_init_r;
 GRegex* get_host_r;
@@ -73,7 +72,6 @@ GRegex* cmd_recv_r;
  */
 typedef struct interface_connection
 {
-    GThread* thread;          ///< the thread that the connection is running in
     GSocketConnection* conn;  ///< the socket that is our connection
     GInputStream*  istr;      ///< stream to read from the interface
     GOutputStream* ostr;      ///< stream to write to the interface
@@ -82,6 +80,37 @@ typedef struct interface_connection
 /* ************************************************************************** */
 /* **** Local Functions ***************************************************** */
 /* ************************************************************************** */
+
+/**
+ * Given a new sockect, this will create the interface connection structure.
+ *
+ * @param conn the socket that this interface is connected to
+ * @return the newly allocated and populated interface connection
+ */
+static interface_connection* interface_conn_init(GSocketConnection* conn)
+{
+  interface_connection* inter = g_new0(interface_connection, 1);
+
+  inter->conn = conn;
+  inter->istr = g_io_stream_get_input_stream((GIOStream*)inter->conn);
+  inter->ostr = g_io_stream_get_output_stream((GIOStream*)inter->conn);
+  g_thread_pool_push(threads, inter, NULL);
+
+  return inter;
+}
+
+/**
+ * free the memory associated with an interface connection. It is important to
+ * note that this will block until the thread associated with the interface has
+ * closed correctly.
+ *
+ * @param inter the interface_connection that should be freed
+ */
+static void interface_conn_destroy(interface_connection* inter)
+{
+  g_object_unref(inter->conn);
+  g_free(inter);
+}
 
 /**
  * function that will run the thread associated with a particular interface
@@ -102,19 +131,19 @@ typedef struct interface_connection
  * priority: change the priority of job
  * database: check the database job queue
  *
- * @param  pointer to the interface_connection structure
+ * @param  param   pointer to the interface_connection structure
+ * @param  unused  currently not used to pass any information
  * @return not currently used
  */
-static void* interface_thread(void* param)
+static void interface_thread(void* param, void* unused)
 {
   GMatchInfo* regex_match;
   interface_connection* conn = param;
   job to_kill;
   char buffer[BUFFER_SIZE];
   char org[sizeof(buffer)];
+  char* arg1, * arg2, * arg3;
   char* cmd;
-  char* arg1;
-  char* arg2;
   arg_int* params;
   int i;
 
@@ -156,24 +185,41 @@ static void* interface_thread(void* param)
 
       g_match_info_free(regex_match);
       g_free(cmd);
-      return NULL;
+      return;
     }
 
     /* command: "stop"
      *
-     * The interface has instructed the scheduler to shut down. The scheduler
-     * should acknowledge with the command and proceed to kill and agents and
-     * exit the event loop
+     * The interface has instructed the scheduler to shut down gracefully. The
+     * scheduler will wait for all currently executing agents to finish
+     * running, then exit the vent loop.
      */
     else if(strcmp(cmd, "stop") == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE\n", 6, NULL, NULL);
-      V_INTERFACE("INTERFACE: shutting down scheduler\n");
-      event_signal(scheduler_close_event, NULL);
+      V_INTERFACE("INTERFACE: shutting down scheduler gracefully\n");
+      event_signal(scheduler_close_event, (void*)0);
 
       g_match_info_free(regex_match);
       g_free(cmd);
-      return NULL;
+      return;
+    }
+
+    /* command: "die"
+     *
+     * The interface has instructed the scheduler to shut down. The scheduler
+     * should acknowledge the command and proceed to kill all current executing
+     * agents and exit the event loop
+     */
+    else if(strcmp(cmd, "die") == 0)
+    {
+      g_output_stream_write(conn->ostr, "CLOSE\n", 6, NULL, NULL);
+      V_INTERFACE("INTERFACE: killing the scheduler\n");
+      event_signal(scheduler_close_event, (void*)1);
+
+      g_match_info_free(regex_match);
+      g_free(cmd);
+      return;
     }
 
     /* command: "load"
@@ -201,11 +247,16 @@ static void* interface_thread(void* param)
       arg1 = g_match_info_fetch(regex_match, 3);
       arg2 = g_match_info_fetch(regex_match, 8);
 
-      if((to_kill = get_job(atoi(arg1))) == NULL)
+      if(arg1 == NULL || arg2 == NULL)
       {
         snprintf(buffer, sizeof(buffer),
             "Invalid kill command: job %s does not exist\n", arg1);
         g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+      }
+      else if((to_kill = get_job(atoi(arg1))) == NULL)
+      {
+        arg3 = g_strdup_printf(jobsql_failed, arg2, atoi(arg1));
+        event_signal(database_exec_event, arg3);
       }
       else
       {
@@ -229,21 +280,23 @@ static void* interface_thread(void* param)
     {
       arg1 = g_match_info_fetch(regex_match, 3);
 
-      if((to_kill = get_job(atoi(arg1))) == NULL)
+      if(arg1 == NULL)
       {
-        snprintf(buffer, sizeof(buffer),
-            "Invalid pause command: job %s does not exist\n", arg1);
+        arg1 = g_strdup(buffer);
+        WARNING("received invalid pause command: %s", buffer);
+        snprintf(buffer, sizeof(buffer) - 1,
+            "ERROR: Invalid pause command: %s\n", arg1);
         g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+        g_free(arg1);
       }
       else
       {
         params = g_new0(arg_int, 1);
-        params->first = get_job(atoi(arg1));
-        params->second = 1;
+        params->second = atoi(arg1);
+        params->first = get_job(params->second);
         event_signal(job_pause_event, params);
+        g_free(arg1);
       }
-
-      g_free(arg1);
     }
 
     /* command: "reload"
@@ -310,7 +363,10 @@ static void* interface_thread(void* param)
       }
       else
       {
-        event_signal(job_restart_event, get_job(atoi(arg1)));
+        params = g_new0(arg_int, 1);
+        params->second = atoi(arg1);
+        params->first = get_job(params->second);
+        event_signal(job_restart_event, params);
         g_free(arg1);
       }
     }
@@ -422,38 +478,8 @@ static void* interface_thread(void* param)
     memset(buffer, '\0', sizeof(buffer));
   }
 
-  return NULL;
-}
-
-/**
- * Given a new sockect, this will create the interface connection structure.
- *
- * @param conn the socket that this interface is connected to
- * @return the newly allocated and populated interface connection
- */
-static interface_connection* interface_conn_init(GSocketConnection* conn)
-{
-  interface_connection* inter = g_new0(interface_connection, 1);
-
-  inter->conn = conn;
-  inter->istr = g_io_stream_get_input_stream((GIOStream*)inter->conn);
-  inter->ostr = g_io_stream_get_output_stream((GIOStream*)inter->conn);
-  inter->thread = g_thread_create(interface_thread, inter, 1, NULL);
-
-  return inter;
-}
-
-/**
- * free the memory associated with an interface connection. It is important to
- * note that this will block until the thread associated with the interface has
- * closed correctly.
- *
- * @param inter the interface_connection that should be freed
- */
-static void interface_conn_destroy(interface_connection* inter)
-{
-  g_object_unref(inter->conn);
-  g_thread_join(inter->thread);
+  interface_conn_destroy(conn);
+  return;
 }
 
 /**
@@ -499,8 +525,7 @@ static void* listen_thread(void* unused)
     if(error)
       FATAL("INTERFACE closing for %s", error->message);
 
-    client_threads = g_list_append(client_threads,
-        interface_conn_init(new_connection));
+    interface_conn_init(new_connection);
   }
 
   V_INTERFACE("INTERFACE: socket listening thread closing\n");
@@ -527,8 +552,9 @@ void interface_init()
     socket_thread = g_thread_create(listen_thread, NULL, 1, NULL);
   }
 
-  outgoing = g_socket_client_new();
   cancel = g_cancellable_new();
+  threads = g_thread_pool_new(interface_thread, NULL, CONF_interface_nthreads,
+        FALSE, NULL);
 
   cmd_parse = g_regex_new(
       "(\\w+)(\\s+(-?\\d+))?(\\s+((-?\\d+)|(\"(.*)\")))?",
@@ -555,19 +581,13 @@ void interface_init()
  */
 void interface_destroy()
 {
-  GList* iter;
-
   /* only destroy the interface if it has been created */
   if(i_created)
   {
     i_terminate = 1;
     g_cancellable_cancel(cancel);
     g_thread_join(socket_thread);
-
-    for(iter = client_threads; iter != NULL; iter = iter->next)
-    {
-      interface_conn_destroy(iter->data);
-    }
+    g_thread_pool_free(threads, FALSE, TRUE);
   }
 }
 

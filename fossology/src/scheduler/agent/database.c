@@ -106,9 +106,12 @@ const char* jobsql_complete = "\
 
 const char* jobsql_restart = "\
     UPDATE jobqueue \
-      SET jq_endtime = now(), \
-          jq_schedinfo = null, \
-          jq_endtext = 'Restart' \
+      SET jq_endtext = 'Restarted', \
+          jq_starttime = ( CASE \
+            WHEN jq_starttime = CAST('9999-12-31' AS timestamp with time zone) \
+            THEN null \
+            ELSE jq_starttime \
+          END ) \
       WHERE jq_pk = '%d';";
 
 const char* jobsql_failed = "\
@@ -126,7 +129,12 @@ const char* jobsql_processed = "\
 
 const char* jobsql_paused = "\
     UPDATE jobqueue \
-      SET jq_endtext = 'Paused' \
+      SET jq_endtext = 'Paused', \
+          jq_starttime = ( CASE \
+            WHEN jq_starttime IS NULL \
+            THEN CAST('9999-12-31' AS timestamp with time zone) \
+            ELSE jq_starttime \
+          END ) \
       WHERE jq_pk = '%d';";
 
 const char* jobsql_log = "\
@@ -689,7 +697,7 @@ void database_exec_event(char* sql)
   PGresult* db_result = PQexec(db_conn, sql);
 
   if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
-    PQ_ERROR(db_result, "failed to perform dtabase exec: %s", sql);
+    PQ_ERROR(db_result, "failed to perform database exec: %s", sql);
 
   g_free(sql);
 }
@@ -799,7 +807,7 @@ void database_update_job(job j, job_status status)
   /* check how to update database */
   switch(status)
   {
-    case JB_CHECKEDOUT:
+    case JB_NOT_AVAILABLE: case JB_CHECKEDOUT:
       break;
     case JB_STARTED:
       sql = g_strdup_printf(jobsql_started, "localhost", getpid(), j_id);
@@ -813,11 +821,8 @@ void database_update_job(job j, job_status status)
     case JB_FAILED:
       sql = g_strdup_printf(jobsql_failed, message, j_id);
       break;
-    case JB_SCH_PAUSED: case JB_CLI_PAUSED:
+    case JB_PAUSED:
       sql = g_strdup_printf(jobsql_paused, j_id);
-      break;
-    case JB_ERROR:
-      sql = g_strdup_printf(jobsql_failed, j_id);
       break;
   }
 
@@ -826,7 +831,7 @@ void database_update_job(job j, job_status status)
   if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
     PQ_ERROR(db_result, "failed to update job status in job queue");
 
-  if(status == JB_COMPLETE || status == JB_FAILED || status == JB_ERROR)
+  if(status == JB_COMPLETE || status == JB_FAILED)
     email_notification(j);
 
   g_free(sql);

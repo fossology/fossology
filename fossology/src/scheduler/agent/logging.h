@@ -103,14 +103,14 @@ extern char  log_name[FILENAME_MAX];
 #define TVERB_DATAB   (verbose & 0x100)
 #define TVERB_HOST    (verbose & 0x200)
 #define TVERB_SPECIAL (verbose & 0x400)
-#define V_JOB(...)       if(TVERB_JOB)     lprintf(__VA_ARGS__);
-#define V_AGENT(...)     if(TVERB_AGENT)   lprintf(__VA_ARGS__);
-#define V_SCHED(...)     if(TVERB_SCHED)   lprintf(__VA_ARGS__);
-#define V_EVENT(...)     if(TVERB_EVENT)   lprintf(__VA_ARGS__);
-#define V_INTERFACE(...) if(TVERB_INTER)  clprintf(__VA_ARGS__);
-#define V_DATABASE(...)  if(TVERB_DATAB)   lprintf(__VA_ARGS__);
-#define V_HOST(...)      if(TVERB_HOST)    lprintf(__VA_ARGS__);
-#define V_SPECIAL(...)   if(TVERB_SPECIAL) lprintf(__VA_ARGS__);
+#define V_JOB(...)       if(TVERB_JOB)     lprintf(__VA_ARGS__)
+#define V_AGENT(...)     if(TVERB_AGENT)   lprintf(__VA_ARGS__)
+#define V_SCHED(...)     if(TVERB_SCHED)   lprintf(__VA_ARGS__)
+#define V_EVENT(...)     if(TVERB_EVENT)   lprintf(__VA_ARGS__)
+#define V_INTERFACE(...) if(TVERB_INTER)  clprintf(__VA_ARGS__)
+#define V_DATABASE(...)  if(TVERB_DATAB)   lprintf(__VA_ARGS__)
+#define V_HOST(...)      if(TVERB_HOST)    lprintf(__VA_ARGS__)
+#define V_SPECIAL(...)   if(TVERB_SPECIAL) lprintf(__VA_ARGS__)
 
 /* ************************************************************************** */
 /* **** logging functions *************************************************** */
