@@ -1,11 +1,64 @@
-fossology (2.0.1+1) unstable; urgency=low
+fossology (2.0.0) unstable; urgency=low
+	[ Build User ]
+	* Non-maintainer upload.
+	*
+
+	[ Mary Laser ]
+	*
+	*
+	
+fossology (2.0.0-rc1) unstable; urgency=low
+	[ Build User ]
+	* Non-maintainer upload.
+	*
+
+	[ Mark Donohoe ]
+	*
+	*
+	
+fossology (2.0.0~devel) unstable; urgency=low
+
+  [ Build User ]
+  * Non-maintainer upload.
+  *
+
+  [ Dong Ma ]
+  *
+  *
+
+ -- madong <madong@bl480c-1>  Wed, 23 Nov 2011 15:22:47 +0800
+fossology (1.4.1) unstable; urgency=low
 
   [ Build User ]
   * Non-maintainer upload.
   * 
-  *
 
- -- madong <madong@bl480c-1>  Wed, 23 Nov 2011 15:22:47 +0800
+  [ Mark Donohoe ]
+  * 
+  * 
+
+ -- Mark Donohoe <markd@localhost.localdomain>  Thu, 30 Jun 2011 17:27:23 -0700
+
+fossology (1.4.0~rc6+1) unstable; urgency=low
+
+  [ Build User ]
+  * Non-maintainer upload.
+  * 
+  [ Mark Donohoe ]
+  * 
+  * 
+
+ -- Mark Donohoe <markd@localhost.localdomain>  Thu, 05 May 2011 17:55:09 -0700
+
+fossology (1.4.0~rc5+1) unstable; urgency=low
+
+  [ Build User ]
+  * Non-maintainer upload.
+  * 
+  [ Mark Donohoe ]
+  * 
+
+ -- Mark Donohoe <markd@localhost.localdomain>  Fri, 22 Apr 2011 19:23:08 -0700
 
 fossology (1.4.0~20110401+2) unstable; urgency=low
 

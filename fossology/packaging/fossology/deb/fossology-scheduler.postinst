@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for fossology-wgetagent
+# postinst script for fossology-scheduler
 #
 # see: dh_installdeb(1)
 
@@ -20,8 +20,8 @@ set -e
 
 case "$1" in
     configure)
-    # need to run fo-postinstall agent stuff
-    /usr/lib/fossology/fo-postinstall --agent
+    # need to run the agent stuff
+    /usr/lib/fossology/fo-postinstall --scheduler-only
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

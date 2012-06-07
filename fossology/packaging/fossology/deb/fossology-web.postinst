@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for fossology-scheduler
+# postinst script for fossology-web
 #
 # see: dh_installdeb(1)
 
@@ -20,8 +20,13 @@ set -e
 
 case "$1" in
     configure)
-    # need to run the agent stuff
-    /usr/lib/fossology/fo-postinstall --scheduler
+    # link the apache config for fossology
+    if [ -f "/etc/apache2/sites-enabled/fossology.conf" ]; then
+    rm -rf  /etc/apache2/sites-enabled/fossology.conf
+    fi
+    ln -s /etc/fossology/conf/fo-apache.conf /etc/apache2/sites-enabled/fossology.conf
+    # need to run fo-postinstall web and agent stuff
+    /usr/lib/fossology/fo-postinstall --web-only
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

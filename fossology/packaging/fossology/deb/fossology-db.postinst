@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for fossology-ununpack
+# postinst script for fossology-db
 #
 # see: dh_installdeb(1)
 
@@ -20,8 +20,9 @@ set -e
 
 case "$1" in
     configure)
-    # need to run fo-postinstall agent stuff
-    /usr/lib/fossology/fo-postinstall --agent
+    # call the dbcreate utility specifically so we don't have to use
+    # fo-postinstall which is in fossology-common
+    /usr/lib/fossology/dbcreate
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

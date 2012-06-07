@@ -2,86 +2,90 @@
 # $Id$
 #
 
-Name:           fossology
-Version:        2.0.1
-Release:        1.el6
-License:        GPLv2
-Group:          Applications/Engineering
-Url:            http://www.fossology.org
-Source:         http://sourceforge.net/projects/fossology/files/fossology/%{name}-%{version}.tar.gz
+Name:           PBREALPKG
+Version:        PBVER
+Release:        PBTAGPBSUF
+License:        PBLIC
+Group:          PBGRP
+Url:            PBURL
+Source:         PBSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
-Requires:       fossology-db fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent
-BuildRequires:  postgresql-devel >= 8.1.11 glib2-devel libxml2 gcc make perl rpm-devel pcre-devel perl-Text-Template subversion file
+Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent PBDEP
+BuildRequires:  postgresql-devel >= 8.1.11 glib2-devel libxml2 gcc make perl rpm-devel pcre-devel PBBUILDDEP
 Summary:        FOSSology is a licenses exploration tool
 
 %package common
 Requires:       php >= 5.1.6 php-pear >= 5.16 php-pgsql >= 5.1.6 php-process
-Summary:        Architecture for analyzing software, common files 
-Group:          Applications/Engineering
+Summary:        Architecture for analyzing software, common files
+Group:          PBGRP
 
 %package web
-Requires:       fossology-common httpd
+Requires:       fossology-common fossology-db httpd
 Summary:        Architecture for analyzing software, web interface
-Group:          Applications/Engineering
+Group:          PBGRP
 
 %package db
-Requires:       fossology-web postgresql >= 8.1.11 postgresql-server >= 8.1.11
+Requires:       postgresql >= 8.1.11 postgresql-server >= 8.1.11
 Summary:        Architecture for analyzing software, database
-Group:          Applications/Engineering
+Group:          PBGRP
 
 %package ununpack
 Requires:       fossology-common libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip p7zip-plugins perl file which
 Summary:        Architecture for analyzing software, ununpack and adj2nest
-Group:          Applications/Engineering
+Group:          PBGRP
 
 %package scheduler
 Requires:       fossology-common
 Summary:        Architecture for analyzing software, scheduler
-Group:          Applications/Engineering
+Group:          PBGRP
 
 %package copyright
 Requires:       fossology-common pcre
 Summary:        Architecture for analyzing software, copyright
-Group:          Applications/Engineering
+Group:          PBGRP
 
 %package buckets
 Requires:       fossology-nomos fossology-pkgagent
 Summary:        Architecture for analyzing software, buckets
-Group:          Applications/Engineering
+Group:          PBGRP
 
 %package mimetype
 Requires:       fossology-common file-libs
 Summary:        Architecture for analyzing software, mimetype
-Group:          Applications/Engineering
+Group:          PBGRP
 
 %package nomos
 Requires:       fossology-common
 Summary:        Architecture for analyzing software, nomos
-Group:          Applications/Engineering
+Group:          PBGRP
 
 %package pkgagent
 Requires:       fossology-common rpm
 Summary:        Architecture for analyzing software, pkgagent
-Group:          Applications/Engineering
+Group:          PBGRP
 
 %package delagent
 Requires:       fossology-common
 Summary:        Architecture for analyzing software, delagent
-Group:          Applications/Engineering
+Group:          PBGRP
 
 %package wgetagent
 Requires:       fossology-common wget
 Summary:        Architecture for analyzing software, wget_agent
-Group:          Applications/Engineering
+Group:          PBGRP
 
 %package debug
 Requires:       fossology-web
 Summary:        Architecture for analyzing software, debug
-Group:          Applications/Engineering
+Group:          PBGRP
 
+%package bsam
+Requires:       fossology-web
+Summary:        Architecture for analyzing software, bsam
+Group:          PBGRP
 
 %description
-An open and modular architecture for analyzing software. Currently specializing on license detection.
+PBDESC
 
 %description common
 This package contains the resources needed by all of the other
@@ -128,130 +132,168 @@ This package contains the delagent agent programs and their resources.
 %description debug
 This package contains the debug UI.
 
+%description bsam
+This package contains the bsam UI.
+
 %prep
 %setup -q
+#PBPATCHCMD
 
 %build
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var}
+#make %{?_smp_mflags} SYSCONFDIR=%{_sysconfdir}
+make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} src/bsam/
 
 %install
 %{__rm} -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} install
+make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} -C src/bsam install
+#mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d
+#cat > $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d/PBPROJ.conf << EOF
+#Alias /repo/ /usr/share/PBPROJ/www/
+#<Directory "/usr/share/PBPROJ/www">
+#	AllowOverride None
+#	Options FollowSymLinks MultiViews
+#	Order allow,deny
+#	Allow from all
+#	# uncomment to turn on php error reporting 
+#	#php_flag display_errors on
+#	#php_value error_reporting 2039
+#</Directory>
+#EOF
+cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
+
+#rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/default/PBPROJ
 
 %clean
 %{__rm} -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-#%doc ChangeLog
+%doc ChangeLog
 %doc COPYING COPYING.LGPL HACKING README install/INSTALL install/INSTALL.multi LICENSE
 
 %files common
 %defattr(-,root,root)
 %config(noreplace) %{_sysconfdir}/cron.d/*
-%config(noreplace) %{_sysconfdir}/fossology/Db.conf
-%config(noreplace) %{_sysconfdir}/fossology/fossology.conf
-%config(noreplace) %{_sysconfdir}/fossology/VERSION
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_usr}/lib/fossology
-%dir %{_datadir}/fossology
-%{_usr}/lib/fossology/*
-%{_datadir}/fossology/lib/*
+%config(noreplace) %{_sysconfdir}/PBPROJ/Db.conf
+%config(noreplace) %{_sysconfdir}/PBPROJ/fossology.conf
+%config(noreplace) %{_sysconfdir}/PBPROJ/VERSION
+%config(noreplace) %{_sysconfdir}/PBPROJ/sampleheader.txt
+%config(noreplace) %{_sysconfdir}/PBPROJ/samplefooter.txt
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_sysconfdir}/PBPROJ/conf
+%config(noreplace) %{_sysconfdir}/PBPROJ/conf/*
+%dir %{_usr}/lib/PBPROJ
+%dir %{_datadir}/PBPROJ
+%{_usr}/lib/PBPROJ/*
+%{_datadir}/PBPROJ/lib/*
 %{_bindir}/*
 %{_includedir}/*
 %{_mandir}/man1/*
 
 %files db
 %defattr(-,root,root)
-%dir %{_usr}/lib/fossology
-%{_usr}/lib/fossology/*
+%dir %{_usr}/lib/PBPROJ
+%{_usr}/lib/PBPROJ/*
 
 %files web
 %defattr(-,root,root)
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/www
-%{_datadir}/fossology/www/*
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/www
+%{_datadir}/PBPROJ/www/*
 
 %files scheduler
 %defattr(-,root,root)
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/scheduler
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/scheduler
 %{_sysconfdir}/init.d/*
-%{_datadir}/fossology/scheduler/*
+%{_datadir}/PBPROJ/scheduler/*
 
 %files ununpack
 %defattr(-,root,root)
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/ununpack
-%{_sysconfdir}/fossology/mods-enabled/adj2nest
-%{_datadir}/fossology/ununpack/*
-%{_datadir}/fossology/adj2nest/*
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/ununpack
+%{_sysconfdir}/PBPROJ/mods-enabled/adj2nest
+%{_datadir}/PBPROJ/ununpack/*
+%{_datadir}/PBPROJ/adj2nest/*
 %{_bindir}/departition
 
 %files wgetagent
 %defattr(-,root,root)
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/wget_agent
-%{_datadir}/fossology/wget_agent/*
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/wget_agent
+%{_datadir}/PBPROJ/wget_agent/*
 
 %files copyright
 %defattr(-,root,root)
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/copyright
-%{_datadir}/fossology/copyright/*
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/copyright
+%{_datadir}/PBPROJ/copyright/*
 
 %files buckets
 %defattr(-,root,root)
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/buckets
-%{_datadir}/fossology/buckets/*
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/buckets
+%{_datadir}/PBPROJ/buckets/*
 
 %files nomos
 %defattr(-,root,root)
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/nomos
-%{_datadir}/fossology/nomos/*
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/nomos
+%{_datadir}/PBPROJ/nomos/*
 
 %files mimetype
 %defattr(-,root,root)
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/mimetype
-%{_datadir}/fossology/mimetype/*
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/mimetype
+%{_datadir}/PBPROJ/mimetype/*
 
 %files pkgagent
 %defattr(-,root,root)
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/pkgagent
-%{_datadir}/fossology/pkgagent/*
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/pkgagent
+%{_datadir}/PBPROJ/pkgagent/*
 
 %files delagent
 %defattr(-,root,root)
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/delagent
-%{_datadir}/fossology/delagent/*
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/delagent
+%{_datadir}/PBPROJ/delagent/*
 
 %files debug
 %defattr(-,root,root)
-%dir %{_sysconfdir}/fossology/mods-enabled
-%dir %{_datadir}/fossology
-%{_sysconfdir}/fossology/mods-enabled/debug
-%{_datadir}/fossology/debug/*
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/debug
+%{_datadir}/PBPROJ/debug/*
+
+%files bsam
+%defattr(-,root,root)
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/bsam
+%{_datadir}/PBPROJ/bsam/*
+
+%post common
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --common
 
 %post db
 # Check postgresql is running
 LANGUAGE=C /etc/init.d/postgresql status 2>&1 | grep -q stop
 if [ $? -eq 0 ]; then
-	/etc/init.d/postgresql initdb
+	PBFEDORAD
 	/etc/init.d/postgresql start
 fi
 chkconfig --add postgresql
@@ -267,32 +309,29 @@ local   all         all                               md5
 host    all         all         127.0.0.1/32          md5
 host	all	    all		::1/128		      md5
 EOF
-perl -pi -e 's|(host\s+all\s+all\s+127.0.0.1/32\s+ident\s+sameuser)|#$1|' /var/lib/pgsql/data/pg_hba.conf
-perl -pi -e 's|(host\s+all\s+all\s+::1/128\s+ident)|#$1|' /var/lib/pgsql/data/pg_hba.conf
+PBPGHBA
+PBPGHBB
 fi
 
 # Now restart again postgresql
 # We have do it here in order to let postgresql configure itself correctly
 # in case it wasn't already installed
 /etc/init.d/postgresql restart
-/usr/lib/fossology/fo-postinstall --database
+/usr/lib/PBPROJ/dbcreate
 
 %post web
 # Adjust PHP config (described in detail in section 2.1.5)
-grep -qw allow_call_time_pass_reference /etc/php.ini
+grep -qw allow_call_time_pass_reference PBPHPINI
 if [ $? -eq 0 ]; then
-	perl -pi -e "s/^[#\s]*allow_call_time_pass_reference.*=.*/allow_call_time_pass_reference = On/" /etc/php.ini
+	perl -pi -e "s/^[#\s]*allow_call_time_pass_reference.*=.*/allow_call_time_pass_reference = On/" PBPHPINI
 else
-	echo "allow_call_time_pass_reference = On" >> /etc/php.ini
+	echo "allow_call_time_pass_reference = On" >> PBPHPINI
 fi
 
-# Add apache config for fossology (described in detail in section 2.1.6) - done in install
+# Link apache config for fossology
+ln -s %{_sysconfdir}/PBPROJ/conf/fo-apache.conf  %{_sysconfdir}/httpd/conf.d/PBPROJ.conf
 # Run the postinstall script
-/usr/lib/fossology/fo-postinstall --web
-
-# Adds user httpd to fossy group
-#useradd -G fossy httpd
-#perl -pi -e 's/^fossy:x:([0-9]+):/fossy:x:$1:httpd/' /etc/group
+/usr/lib/PBPROJ/fo-postinstall --web-only
 
 # httpd is also assumed to run locally
 LANGUAGE=C /etc/init.d/httpd status 2>&1 | grep -q stop
@@ -305,47 +344,22 @@ chkconfig --add httpd
 
 %post scheduler
 # Run the postinstall script
-/usr/lib/fossology/fo-postinstall --scheduler
-
-%post ununpack
-# Run the postinstall script
-/usr/lib/fossology/fo-postinstall --agent
-
-%post wgetagent
-# Run the postinstall script
-/usr/lib/fossology/fo-postinstall --agent
-
-%post copyright
-# Run the postinstall script
-/usr/lib/fossology/fo-postinstall --agent
-
-%post nomos
-# Run the postinstall script
-/usr/lib/fossology/fo-postinstall --agent
-
-%post pkgagent
-# Run the postinstall script
-/usr/lib/fossology/fo-postinstall --agent
-
-%post mimetype
-# Run the postinstall script
-/usr/lib/fossology/fo-postinstall --agent
-
-%post delagent
-# Run the postinstall script
-/usr/lib/fossology/fo-postinstall --agent
+/usr/lib/PBPROJ/fo-postinstall --scheduler-only
 
 %post
-chkconfig --add fossology
-/etc/init.d/fossology start
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+chkconfig --add PBPROJ
+/etc/init.d/PBPROJ start
 
 %preun
 # If FOSSology is running, stop it before removing.
-/etc/init.d/fossology stop
-chkconfig --del fossology 2>&1 > /dev/null
+/etc/init.d/PBPROJ stop
+chkconfig --del PBPROJ 2>&1 > /dev/null
 
 # We should do some cleanup here (fossy account ...)
-#/usr/lib/fossology/fo-cleanold
+/usr/lib/PBPROJ/fo-cleanold
 
 %changelog
-
+PBLOG
