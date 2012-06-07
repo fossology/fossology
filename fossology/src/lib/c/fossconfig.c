@@ -263,8 +263,8 @@ static gboolean fo_config_eval(const GMatchInfo* match, GTree** g_current,
  *        this is called the configuration file has changed and the user would
  *        like to use the new copy.
  *
- * @param fname the name of the configuration file
- * @param error object that allows errors to propagate up the stack
+ * @param fname  the name of the configuration file
+ * @param error  object that allows errors to propagate up the stack
  * @return 0 for failure, 1 for success
  */
 fo_conf* fo_config_load(char* rawname, GError** error) {

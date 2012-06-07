@@ -54,8 +54,8 @@ const static char* sql_insert = "\
     VALUES ('%s', '%s.%s', '%s')";
 
 /* system configuration settings */
-fo_conf* sysconfig;
-char*    sysconfigdir;
+fo_conf* sysconfig    = NULL;
+char*    sysconfigdir = NULL;
 
 /* these will be freed in fo_scheduler_disconnect */
 extern GRegex* fo_conf_parse;
@@ -100,13 +100,16 @@ void fo_check_agentdb()
   PGresult* db_result = NULL;
   char*     db_error  = NULL;
   char*     db_sql    = NULL;
+  char*     db_config = NULL;
 
-  db_conn = fo_dbconnect(NULL, &db_error);
+  db_config = g_strdup_printf("%s/Db.conf", sysconfigdir);
+  db_conn   = fo_dbconnect(db_config, &db_error);
   if(db_error)
   {
     fprintf(stderr, "FATAL %s.%d: unable to open database connection: %s\n",
         __FILE__, __LINE__, db_error);
     fflush(stderr);
+    g_free(db_config);
     exit(253);
   }
 
@@ -121,6 +124,7 @@ void fo_check_agentdb()
     fflush(stderr);
     PQfinish(db_conn);
     PQclear(db_result);
+    g_free(db_config);
     g_free(db_sql);
     exit(252);
   }
@@ -142,12 +146,14 @@ void fo_check_agentdb()
       fflush(stderr);
       PQfinish(db_conn);
       PQclear(db_result);
+      g_free(db_config);
       g_free(db_sql);
       exit(251);
     }
   }
 
   g_free(db_sql);
+  g_free(db_config);
   PQclear(db_result);
   PQfinish(db_conn);
 }
@@ -209,13 +215,20 @@ void fo_scheduler_connect(int* argc, char** argv)
   };
 
   /* initialize memory associated with agent connection */
-  sysconfigdir = DEFAULT_SETUP;
-  module_name = g_strdup(basename(argv[0]));
+  sysconfigdir    = DEFAULT_SETUP;
+  module_name     = g_strdup(basename(argv[0]));
   items_processed = 0;
+  valid           = 0;
+  sscheduler      = 0;
+  agent_verbose   = 0;
   memset(buffer, 0, sizeof(buffer));
-  valid = 0;
-  sscheduler = 0;
-  agent_verbose = 0;
+
+  if(sysconfig != NULL)
+  {
+    LOG_WARNING("fo_scheduler_connect() has already been called.");
+    sscheduler = 1;
+    return;
+  }
 
   /* parse command line options */
   parsed = g_option_context_new("");
@@ -306,10 +319,12 @@ void fo_scheduler_disconnect(int retcode)
     g_free(sysconfigdir);
 
   fo_config_free(sysconfig);
-  sysconfig = NULL;
   g_regex_unref(fo_conf_parse);
-  fo_conf_parse = NULL;
   g_regex_unref(fo_conf_replace);
+
+  sysconfigdir    = NULL;
+  sysconfig       = NULL;
+  fo_conf_parse   = NULL;
   fo_conf_replace = NULL;
 
   fflush(stdout);
