@@ -1,89 +1,55 @@
-fossology (2.0.0) unstable; urgency=low
-  [ Build User ]
-  * Non-maintainer upload.
-  *
+fossology (trunk) unstable; urgency=low
 
-  [ Mary Laser ]
-  *
-  *
+  * unofficial build version
 
-fossology (2.0.0-rc1) unstable; urgency=low
-  [ Build User ]
-  * Non-maintainer upload.
-  *
+ -- madong <madong@bl480c1>  Fri, 08 Jun 2012 16:35:55 +0800
 
-  [ Mark Donohoe ]
-  *
-  *
+fossology (2.0.0-1) unstable; urgency=low
 
-fossology (2.0.0~devel) unstable; urgency=low
+  * New upstream release
+  * New package structure
 
-  [ Build User ]
-  * Non-maintainer upload.
-  *
+ -- madong <madong@bl480c1>  Fri, 08 Jun 2012 15:35:55 +0800
 
-  [ Dong Ma ]
-  *
-  *
+fossology (2.0.0~rc3-1) unstable; urgency=low
 
- -- madong <madong@bl480c-1>  Wed, 23 Nov 2011 15:22:47 +0800
-fossology (1.4.1) unstable; urgency=low
+  * Release candidate 3 for v2.0
 
-  [ Build User ]
-  * Non-maintainer upload.
-  * 
+ -- madong <madong@bl480c-1>  Fri, 01 Jun 2012 15:22:47 +0800
 
-  [ Mark Donohoe ]
-  * 
-  * 
+fossology (2.0.0~rc1-1) unstable; urgency=low
+
+  * The first release candidate for v2.0
+
+ -- madong <madong@bl480c-1>  Wed, 02 May 2012 15:22:47 +0800
+
+fossology (1.4.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Bug Fix release
+  * Use project-builder to create deb
 
  -- Mark Donohoe <markd@localhost.localdomain>  Thu, 30 Jun 2011 17:27:23 -0700
 
-fossology (1.4.0~rc6+1) unstable; urgency=low
+fossology (1.4.0-1) unstable; urgency=low
 
-  [ Build User ]
-  * Non-maintainer upload.
-  * 
-  [ Mark Donohoe ]
-  * 
-  * 
-
+  * New upstream release
+  * New Comparison tool
+  * Simplified User Interface
+  * authentication using Siteminder
+  * Multiple file upload from URL
+  * Bugs fix
+  
  -- Mark Donohoe <markd@localhost.localdomain>  Thu, 05 May 2011 17:55:09 -0700
 
-fossology (1.4.0~rc5+1) unstable; urgency=low
+fossology (1.3.0-1) unstable; urgency=low
 
-  [ Build User ]
-  * Non-maintainer upload.
-  * 
-  [ Mark Donohoe ]
-  * 
-
- -- Mark Donohoe <markd@localhost.localdomain>  Fri, 22 Apr 2011 19:23:08 -0700
-
-fossology (1.4.0~20110401+2) unstable; urgency=low
-
-  * Non-maintainer upload.
-  * 
-  * 
-
- -- Fossolgy Test User <markd@4privet.ostt>  Fri, 01 Apr 2011 10:13:44 -0600
-
-fossology (1.4.0~20110331) unstable; urgency=low
-
-  [ Build User ]
-  * Unofficial build version.
-
-  [ Mark Donohoe ]
-  * 
-
- -- Mark Donohoe <markd@localhost.localdomain>  Thu, 31 Mar 2011 11:34:35 -0700
-
-fossology (1.3.0~20110107) unstable; urgency=low
-
-  * unofficial build version
-  * 
-  [ Mark Donohoe ]
-  * 
+  * New upstream release
+  * Groups
+  * File Tagging
+  * Copyright agent replaced
+  * Fixed a cp2foss authentication bug
+  * fixed unpack defects and made some improvements
 
  -- Mark Donohoe <markd@steezy>  Fri, 07 Jan 2011 10:35:08 -0800
 
