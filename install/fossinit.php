@@ -181,7 +181,7 @@ function initLicenseRefTable($Verbose)
   $row = pg_fetch_assoc($result);
   pg_free_result($result);
   if ($row && $row['count'] > 0) {
-    echo "NOTE: Probably license_ref table has already been updated, please check it.\n";
+    echo "NOTE: license_ref table already initialized, skipping.\n";
     return;
   }
 
