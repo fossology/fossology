@@ -149,6 +149,11 @@ FILES="
 /usr/local/lib/fossology/agents/checksum
 /usr/local/lib/fossology/agents/departition
 /usr/local/lib/fossology/agents/mkbsamcache
+/usr/local/lib/python_fossology
+/usr/local/lib/python_fossology/copyright_library.py
+/usr/local/lib/python_fossology/libfosspython.so
+/usr/local/lib/python_fossology/copyright_library.pyc
+/usr/local/include/libfossology.h
 /usr/local/share/man/man1/cp2foss.1
 /usr/local/share/man/man1/fo_notify.1
 /usr/local/share/man/man1/fossjobs.1
