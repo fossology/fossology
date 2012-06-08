@@ -75,7 +75,7 @@ for ($i = 1;$i < $argc;$i++) {
   } /* for each parameter */
 
   if (empty($Version)) {
-    $Version = "2.0.0";
+    $Version = "2.0.1";
   }
 
   /* Create new version of fossology project */
@@ -94,14 +94,16 @@ for ($i = 1;$i < $argc;$i++) {
   system("rm -rf /home/build/pb/projects/fossology/pbconf/$Version/.svn");
   system("cd /home/build/pb/projects/fossology/pbconf/$Version/");
   if ($Trunk) {
-    $Cmd = "svn co http://fossology.svn.sourceforge.net/svnroot/fossology/pbconf/trunk/ /home/build/pb/projects/fossology/pbconf/$Version/";
+    $Cmd = "svn co http://fossology.svn.sourceforge.net/svnroot/fossology/trunk/fossology/packaging/ /home/build/pb/projects/fossology/pbconf/$Version/";
   } else {
-    $Cmd = "svn co http://fossology.svn.sourceforge.net/svnroot/fossology/pbconf/tags/$Version/ /home/build/pb/projects/fossology/pbconf/$Version/";
+    $Cmd = "svn co http://fossology.svn.sourceforge.net/svnroot/fossology/tags/$Version/packaging/ /home/build/pb/projects/fossology/pbconf/$Version/";
   }
   if ($Verbose) {
     print "CMD=$Cmd\n";
   }
   system($Cmd); 
+  system("mkdir /home/build/pb/projects/fossology/pbconf/$Version/fossology");
+  system("mv /home/build/pb/projects/fossology/pbconf/$Version/deb /home/build/pb/projects/fossology/pbconf/$Version/rpm /home/build/pb/projects/fossology/pbconf/$Version/pbcl /home/build/pb/projects/fossology/pbconf/$Version/fossology");
  
   /* Checkout source code for build */
   $Cmd = "pb -p fossology -r $Version sbx2build";
@@ -119,8 +121,8 @@ for ($i = 1;$i < $argc;$i++) {
   if ($Trunk){
     //$showtime = date("Ymd");
     system("perl -pi -e 's/\/var\/ftp\/pub\/fossology/\/var\/ftp\/pub\/fossology\/$Version\/testing\/$showtime/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
-    system("perl -pi -e 's/projver fossology = trunk/projver fossology = $Version/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
-    system("perl -pi -e 's/devel/$showtime/' /home/build/pb/projects/fossology/pbconf/$Version/fossology/deb/changelog");
+    //system("perl -pi -e 's/projver fossology = trunk/projver fossology = $Version/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
+    system("perl -pi -e 's/trunk/trunk~$showtime/' /home/build/pb/projects/fossology/pbconf/$Version/fossology/deb/changelog");
   } else {
     system("perl -pi -e 's/$Version\//$Version/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
     system("perl -pi -e 's/\/var\/ftp\/pub\/fossology/\/var\/ftp\/pub\/fossology\/$Version/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
@@ -141,18 +143,18 @@ for ($i = 1;$i < $argc;$i++) {
 
   /* update dataFiles */
   if ($Trunk){
-    system("perl -pi -e 's/^(deb.*debian\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/debian\//' /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/debian.ini");
-    system("perl -pi -e 's/^(deb.*ubuntu\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/ubuntu\//' /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/ubuntu.ini");
-    system("perl -pi -e 's/^(yum.*rhel\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/rhel\//' /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/redhat.ini");
-    system("perl -pi -e 's/^(yum.*fedora\/15\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/fedora\/15\//' /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/fedora.ini");
+    system("perl -pi -e 's/^(deb.*debian\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/debian\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/debian.ini");
+    system("perl -pi -e 's/^(deb.*ubuntu\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/ubuntu\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/ubuntu.ini");
+    system("perl -pi -e 's/^(yum.*rhel\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/rhel\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/redhat.ini");
+    system("perl -pi -e 's/^(yum.*fedora\/15\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/fedora\/15\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/fedora.ini");
   } else {
-    system("perl -pi -e 's/^(deb.*debian\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/debian\//' /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/debian.ini");
-    system("perl -pi -e 's/^(deb.*ubuntu\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/ubuntu\//' /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/ubuntu.ini");
-    system("perl -pi -e 's/^(yum.*rhel\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/rhel\//' /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/redhat.ini");
-    system("perl -pi -e 's/^(yum.*fedora\/15\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/fedora\/15\//' /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/fedora.ini");
+    system("perl -pi -e 's/^(deb.*debian\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/debian\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/debian.ini");
+    system("perl -pi -e 's/^(deb.*ubuntu\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/ubuntu\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/ubuntu.ini");
+    system("perl -pi -e 's/^(yum.*rhel\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/rhel\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/redhat.ini");
+    system("perl -pi -e 's/^(yum.*fedora\/15\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/fedora\/15\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/fedora.ini");
   }
 
-  system("svn commit /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/debian.ini /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/ubuntu.ini /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/redhat.ini /home/build/pb/fossology/branches/fossology2.0/fossology/src/testing/dataFiles/pkginstall/fedora.ini -m 'New $Version changes to conf files for package testing'");
+  system("svn commit /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/debian.ini /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/ubuntu.ini /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/redhat.ini /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/fedora.ini -m 'New $Version changes to conf files for package testing'");
   return (0);
 ?>
 
