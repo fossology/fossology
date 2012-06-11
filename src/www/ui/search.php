@@ -305,14 +305,14 @@ class search extends FO_Plugin
         $searchtype = GetParm("searchtype",PARM_STRING);
         $GETvars .= "&searchtype=" . urlencode($searchtype);
 
-        $Filename = GetParm("filename",PARM_STRING);
+        $Filename = GetParm("filename",PARM_RAW);
         if (!empty($Filename)) 
         {
           $CriteriaCount++;
           $GETvars .= "&filename=" . urlencode($Filename);
         }
 
-        $tag = GetParm("tag",PARM_STRING);
+        $tag = GetParm("tag",PARM_RAW);
         if (!empty($tag))
         {
           $CriteriaCount++;
