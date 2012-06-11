@@ -1,7 +1,7 @@
 /********************************************************
  delagent: Remove an upload from the DB and repository
 
- Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -44,6 +44,8 @@
  *   -F # :: Delete folder ID and all uploads under this folder.
  *   -T   :: TEST -- do not update the DB or delete any files (just pretend).
  *   -v   :: Verbose (-vv for more verbose).
+ *   --user #  :: user name
+ *   --password #  :: password
  *
  * +----------------------+
  * | Agent Based Analysis |
@@ -72,14 +74,32 @@ int main (int argc, char *argv[])
   char *SVN_REV;
   char *VERSION;
   char agent_rev[myBUFSIZ];
-
+  int option_index = 0;
+  char *user_name = NULL;
+  char *password = NULL;
+  int user_id = -1;
+  int user_perm = -1;
 
   fo_scheduler_connect(&argc, argv);
 
-  while((c = getopt(argc,argv,"ifF:lL:sTuU:vc:")) != -1)
+  static struct option long_options[] =
   {
-    switch(c)
+    {"user", required_argument, 0, 'n'},
+    {"password", required_argument, 0, 'p'},
+    {0, 0, 0, 0}
+  };
+   
+  while ((c = getopt_long (argc, argv, "n:p:ifF:lL:sTuU:vc:",
+         long_options, &option_index)) != -1)
+  {
+    switch (c)
     {
+      case 'n': 
+        user_name = optarg;
+        break; 
+      case 'p':
+        password = optarg;
+        break;
       case 'i':
         db_conn = fo_dbconnect(NULL, &ErrorBuf);
         if (!db_conn)
@@ -117,17 +137,32 @@ int main (int argc, char *argv[])
     exit(-1);
   }
 
+  if (Scheduler != 1 && 1 != authentication(user_name, password, &user_id, &user_perm)) 
+  {
+    LOG_FATAL("User name or password is invalid.\n");
+    exit(-1);
+  }
+
   SVN_REV = fo_sysconfig("delagent", "SVN_REV");
   VERSION = fo_sysconfig("delagent", "VERSION");
   sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
   /* Get the Agent Key from the DB */
   Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
-
-  if (ListProj) ListUploads();
+  
+  if (ListProj) ListUploads(user_id, user_perm);
   if (ListFolder) ListFolders();
 
   alarm(60);  /* from this point on, handle the alarm */
-  if (DelUpload) { DeleteUpload(DelUpload); }
+  if (DelUpload) 
+  {
+    if (1 != check_permission_del(DelUpload, user_id, user_perm))
+    {
+      LOG_FATAL("You '%s' does not have the permsssion to delete the upload '%ld', or the upload '%ld' does not exist.\n", user_name, DelUpload, DelUpload);
+      exit(-1);
+    }
+    DeleteUpload(DelUpload); 
+    fprintf(stdout, "The upload '%ld' is deleted by the user '%s'.\n", DelUpload, user_name);
+  }
   if (DelFolder) { DeleteFolder(DelFolder); }
   if (DelLicense) { DeleteLicense(DelLicense); }
 
