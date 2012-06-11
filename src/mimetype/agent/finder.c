@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -118,7 +118,8 @@ int DBFindMime(char *Mimetype)
      prevent multiple mimetype agents from inserting the same data at the
      same type. */
   result = PQexec(pgConn, SQL);
-  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
+  if ((result==0) || ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
+       (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5))))
   {
     PQfinish(pgConn);
     exit(-1);
