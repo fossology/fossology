@@ -1,5 +1,5 @@
 /********************************************************
- Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -28,6 +28,7 @@
 #include <time.h>
 #include <signal.h>
 #include <libgen.h>
+#include <getopt.h>
 
 #include "libfossology.h"
 
@@ -40,14 +41,17 @@ extern PGconn* db_conn;
 #define MAXSQL  1024
 #define MAXLINE 1024
 #define myBUFSIZ 2048
+#define ADMIN_PERM 10
 
 void DeleteLicense(long UploadId);
 void DeleteUpload(long UploadId);
 void ListFoldersRecurse(long Parent, int Depth, int Row, int DelFlag);
 void ListFolders();
-void ListUploads();
+void ListUploads (int user_id, int user_perm);
 void DeleteFolder(long FolderId);
 int ReadParameter(char *Parm);
 void Usage(char *Name);
+int authentication(char *user, char * password, int *user_id, int *user_perm);
+int check_permission_del(long upload_id, int user_id, int user_perm);
 
 #endif /* _DELAGENT_H */

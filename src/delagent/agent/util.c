@@ -1,5 +1,5 @@
 /********************************************************
- Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -589,17 +589,25 @@ void ListFolders ()
 
 /**
  * \brief ListUploads(): List every upload ID.
+ *
+ * \char *user_name - user name
  */
-void ListUploads ()
+void ListUploads (int user_id, int user_perm)
 {
   int Row,MaxRow;
   long NewPid;
   char SQL[MAXSQL];
+  char sub_SQL[MAXSQL];
   PGresult *result;
 
   printf("# Uploads\n");
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;");
+  memset(sub_SQL,'\0',sizeof(sub_SQL));
+  if (user_perm != ADMIN_PERM)
+  {
+    snprintf(sub_SQL, sizeof(sub_SQL), "where user_fk=%d", user_id);
+  }
+  snprintf(SQL,sizeof(SQL),"SELECT upload_pk,upload_desc,upload_filename FROM upload %s ORDER BY upload_pk;", sub_SQL);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
 
@@ -707,9 +715,9 @@ int ReadParameter (char *Parm)
   if ((Type==1) && (Target==1))	{ DeleteUpload(Id); rc=1; }
   else if ((Type==1) && (Target==2))	{ DeleteLicense(Id); rc=1; }
   else if ((Type==1) && (Target==3))	{ DeleteFolder(Id); rc=1; }
-  else if ((Type==2) && (Target==1))	{ ListUploads(); rc=1; }
-  else if ((Type==2) && (Target==2))	{ ListUploads(); rc=1; }
-  else if ((Type==2) && (Target==3))	{ ListFolders(); rc=1; }
+  else if ((Type==2) && (Target==1))	{ ListUploads(0, ADMIN_PERM); rc=1; }
+  else if ((Type==2) && (Target==2))	{ ListUploads(0, ADMIN_PERM); rc=1; }
+  else if ((Type==2) && (Target==3))	{ ListFolders(0, ADMIN_PERM); rc=1; }
   else
   {
     LOG_FATAL("Unknown command: '%s'\n",Parm);
@@ -717,6 +725,93 @@ int ReadParameter (char *Parm)
 
   return(rc);
 } /* ReadParameter() */
+
+/**
+ * \brief check if the upload can be deleted, that is the user have
+ * the permissin to delte this upload
+ * 
+ * \param long upload_id - upload id
+ * \param char *user_name - user name
+ * 
+ * \return 1: yes, can be deleted; -1: failure; 0: can not be deleted
+ */
+int check_permission_del(long upload_id, int user_id, int user_perm) 
+{
+  char SQL[MAXSQL] = {0};;
+  PGresult *result = NULL;
+  int count = 0;
+  snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload where upload_pk = %ld;", upload_id);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
+  count = atoi(PQgetvalue(result, 0, 0)); 
+  if (count == 0) return -2; // this upload does not exist
+
+  if (ADMIN_PERM == user_perm ) return 1; // admin can do anything
+  if (user_perm < 7) return 0; // permission is less than 7, no delete permmission
+
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload where upload_pk = %ld and user_fk = %d;", upload_id, user_id);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
+  count = 0;
+  count = atoi(PQgetvalue(result, 0, 0)); 
+  PQclear(result);
+  if (count > 0) return 1; // can be deleted, above delete permiss(delete, debug and admin)
+  else return -1; // have no the permission or the upload does not exist
+}
+
+/**
+ * \brief if this account is valid
+ * 
+ * \param char *user - ussr name 
+ * \param char *password - password
+ *
+ * \return 1: yes, valid; -1: failure; 0: invalid
+ */
+int authentication(char *user, char * password, int *user_id, int *user_perm)
+{
+  if (NULL == user || NULL == password)   return 0;
+  char SQL[MAXSQL] = {0};
+  char CMD[myBUFSIZ] = {0};
+  PGresult *result;
+  char user_seed[myBUFSIZ] = {0};
+  char pass_hash_valid[myBUFSIZ] = {0};
+  char pass_hash_actual[myBUFSIZ] = {0};
+  FILE *file_hash = NULL;
+
+  /** get user_seed, user_pass on one specified user */
+  snprintf(SQL,sizeof(SQL),"SELECT user_seed, user_pass, user_perm, user_pk from users where user_name='%s';", user);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
+  strcpy(user_seed, PQgetvalue(result, 0, 0));
+  strcpy(pass_hash_valid, PQgetvalue(result, 0, 1));
+  *user_perm = atoi(PQgetvalue(result, 0, 2));
+  *user_id = atoi(PQgetvalue(result, 0, 3));
+  PQclear(result);
+  if (user_seed[0] && pass_hash_valid[0]) 
+  {
+    snprintf(CMD, sizeof(CMD), "echo -n %s%s | openssl sha1", user_seed, password);  // get the hash code on seed+pass
+    file_hash = popen(CMD,"r");
+    if (!file_hash)
+    {
+      LOG_FATAL("ERROR, failed to get sha1 value\n");
+      return -1;
+    }
+  }
+  else return -1;
+
+  fgets(pass_hash_actual, sizeof(pass_hash_actual), file_hash);
+  if (pass_hash_actual[0] && pass_hash_actual[strlen(pass_hash_actual) - 1] == '\n')
+  {
+    pass_hash_actual[strlen(pass_hash_actual) - 1] = '\0'; // get rid of the new line character
+  }
+  pclose(file_hash);
+  if (strcmp(pass_hash_valid, pass_hash_actual) == 0)
+  {
+    return 1;
+  } 
+  else return -1;
+}
 
 /***********************************************
  Usage():
@@ -744,4 +839,6 @@ void Usage (char *Name)
   fprintf(stderr,"  -T   :: TEST -- do not update the DB or delete any files (just pretend)\n");
   fprintf(stderr,"  -v   :: Verbose (-vv for more verbose)\n");
   fprintf(stderr,"  -c # :: Specify the directory for the system configuration\n");
+  fprintf(stderr,"  --user|-n # :: user name\n");
+  fprintf(stderr,"  --password|-p # :: password\n");
 } /* Usage() */
