@@ -317,26 +317,44 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 
   struct stat sb;
   int rc_system =0;
-  char* http_proxy;
+  char* http_proxy = NULL;
+  char* https_proxy = NULL;
+  char* ftp_proxy = NULL;
+  char *p_no_proxy = NULL;
+  char no_proxy[MAXCMD] = {0};
   char proxy[MAXCMD] = {0};
-  GError* error = NULL;
+  GError* error1 = NULL;
+  GError* error2 = NULL;
+  GError* error3 = NULL;
+  GError* error4 = NULL;
 
-  http_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "http_proxy", &error);
+  http_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "http_proxy", &error1);
+  https_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "https_proxy", &error2);
+  ftp_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "ftp_proxy", &error3);
+  p_no_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "no_proxy", &error4);
   /* http_proxy is optional so don't error if it doesn't exist */
-  if(error) 
+  if(error1 && error2 && error3 && error4)
   {
-    if (strstr(error->message, "unknown key") == NULL)
-    {
-      LOG_FATAL("%s", error->message);
-      SafeExit(-1);
-    }
+    SafeExit(-1);
   }
-  else
+  else 
   {
     /** set proxy */
     if (http_proxy && http_proxy[0])
     {
       snprintf(proxy, MAXCMD-1, " export http_proxy='%s' ;", http_proxy);
+    }
+    if (https_proxy && https_proxy[0])
+    {
+      snprintf(proxy, MAXCMD-1, "%s export https_proxy='%s' ;", proxy, https_proxy);
+    }
+    if (ftp_proxy && ftp_proxy[0])
+    {
+      snprintf(proxy, MAXCMD-1, "%s export ftp_proxy='%s' ;", proxy, ftp_proxy);
+    }
+    if (p_no_proxy && p_no_proxy[0])
+    {
+      snprintf(no_proxy, MAXCMD-1, "-e no_proxy=%s", p_no_proxy);
     }
   }
 
@@ -344,18 +362,18 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   {
     /* Delete the temp file if it exists */
     unlink(TempFile);
-    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s 2>&1",
-        proxy, WgetArgs,TempFileDirectory,TaintedURL,GlobalParam);
+    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s %s 2>&1",
+        proxy, WgetArgs,TempFileDirectory,TaintedURL,GlobalParam, no_proxy);
   }
   else if(TempFileDir && TempFileDir[0])
   {
-    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s 2>&1",
-        proxy, WgetArgs, TempFileDir, TaintedURL, GlobalParam);
+    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s %s 2>&1",
+        proxy, WgetArgs, TempFileDir, TaintedURL, GlobalParam, no_proxy);
   }
   else 
   {
-    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s '%s' %s 2>&1",
-        proxy, WgetArgs,TaintedURL, GlobalParam);
+    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s '%s' %s %s 2>&1",
+        proxy, WgetArgs,TaintedURL, GlobalParam, no_proxy);
   }
   /* the command is like
   ". /usr/local/etc/fossology/Proxy.conf; 
@@ -363,7 +381,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
      '/srv/fossology/repository/localhost/wget/wget.xxx.dir/'
      'http://a.org/file' -l 1 -R index.html*  2>&1"
    */
-   LOG_VERBOSE0("CMD: %s", CMD);
+  LOG_VERBOSE0("CMD: %s", CMD);
   rc = system(CMD); 
 
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
