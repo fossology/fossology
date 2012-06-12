@@ -69,6 +69,7 @@
 int	fo_RepOpen	();	/* call before using any other function */
 void fo_RepClose	();	/* call after using all other functions */
 int fo_RepOpenFull (fo_conf* config); /* agents should call fo_RepOpen() */
+char * fo_RepValidate (fo_conf* config); /* checks the repo config */
 
 /* Get info -- caller must free() returned string. */
 char * fo_RepGetRepPath	(); /* path to mounted repository */

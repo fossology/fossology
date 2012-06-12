@@ -121,7 +121,6 @@ void sig_handle(int signo)
   {
 #if __GNUC__
     case SIGCHLD: __sync_fetch_and_or(&sigmask, MASK_SIGCHLD); break;
-    case SIGALRM: __sync_fetch_and_or(&sigmask, MASK_SIGALRM); break;
     case SIGTERM: __sync_fetch_and_or(&sigmask, MASK_SIGTERM); break;
     case SIGQUIT: __sync_fetch_and_or(&sigmask, MASK_SIGQUIT); break;
     case SIGHUP:  __sync_fetch_and_or(&sigmask, MASK_SIGHUP);  break;
@@ -149,6 +148,10 @@ void sig_handle(int signo)
  */
 void signal_scheduler()
 {
+  // the last time an update was run
+  static time_t last_update = 0;
+
+  // copy of the mask
   guint mask;
 
   /* this will get sigmask and set it to 0 */
@@ -158,6 +161,10 @@ void signal_scheduler()
   mask = sigmask;
   sigmask = 0;
 #endif
+
+  /* initialize last_update */
+  if(last_update == 0)
+    last_update = time(NULL);
 
   /* signal: SIGCHLD
    *
@@ -181,20 +188,6 @@ void signal_scheduler()
       pass[1] = status;
       event_signal(agent_death_event, pass);
     }
-  }
-
-  /* signal: SIGALRM
-   *
-   * A SIGALRM has been received since the last time signal_scheduler() was
-   * called. Queue an agent_update_event and database_update_event. Set the
-   * alarm to be called again.
-   */
-  if(mask & MASK_SIGALRM)
-  {
-    V_SPECIAL("SIGNALS: Scheduler received alarm signal, checking job states\n");
-    event_signal(agent_update_event, NULL);
-    event_signal(database_update_event, NULL);
-    alarm(CONF_agent_update_interval);
   }
 
   /* signal: SIGTERM
@@ -229,6 +222,21 @@ void signal_scheduler()
   {
     V_SCHED("SIGNALS: Scheduler received SGIHUP, reloading configuration data\n");
     load_config(NULL);
+  }
+
+  /* Finish by checking if an agent update needs to be performed.
+   *
+   * Every CONF_agent_update_interval, the agents and database should be
+   * updated. The agents need to be updated to check for dead and unresponsive
+   * agents. The database is updated to make sure that a new job hasn't been
+   * scheduled without the scheduler being informed.
+   */
+  if((time(NULL) - last_update) > CONF_agent_update_interval )
+  {
+    V_SPECIAL("SIGNALS: Performing agent and database update\n");
+    event_signal(agent_update_event, NULL);
+    event_signal(database_update_event, NULL);
+    last_update = time(NULL);
   }
 }
 
@@ -617,6 +625,14 @@ void load_foss_config()
       lprintf(" directory = %s\n", dirbuf);
       lprintf("       max = %d\n", max);
     }
+  }
+
+  if((tmp = fo_RepValidate(sysconfig)) != NULL)
+  {
+    ERROR("configuration file failed repository validation");
+    ERROR("The offending line: \"%s\"", tmp);
+    g_free(tmp);
+    exit(254);
   }
 
   /* This will create the load and the print command for the special
