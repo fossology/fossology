@@ -20,7 +20,7 @@
 /**
  * \brief test the delagent agent thu command line.
  */
-require_once '/usr/share/php/PHPUnit/Framework.php';
+//require_once '/usr/share/php/PHPUnit/Framework.php';
 
 /**
  * \class ft_cliDelagentTest - functioin test delagent agent from cli
@@ -94,8 +94,9 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
     } 
     pg_free_result($result);
     /** the file is one executable file */ 
-    $command = "$EXE_PATH -u";
+    $command = "$EXE_PATH -u -n fossy -p fossy";
     exec($command, $out, $rtn);
+    //print_r($out);
     $this->assertStringStartsWith($expected, $out[1]);
   }
 
@@ -118,7 +119,7 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
       $expected = "      " . $row["folder_pk"] . " :: " . $row["name"] . " (" . $row["description"]. ")";
     }
     pg_free_result($result);
-    $command = "$EXE_PATH -f";
+    $command = "$EXE_PATH -f -n fossy -p fossy";
     exec($command, $out, $rtn);
     #print $expected . "\n";
     #print $out[1] . "\n";
