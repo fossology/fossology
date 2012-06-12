@@ -927,3 +927,66 @@ int	fo_RepOpenFull	(fo_conf* config)
   return 1;
 } /* fo_RepOpen() */
 
+/**
+ * @brief validates the repository configuration information.
+ *
+ * Checks that the repository entries in fossology.conf are correct. If this
+ * function does not return NULL, then the caller owns the return value.
+ *
+ * @param config  the configuration information
+ * @return        nothing if correct, the offending line if there was an error
+ */
+char* fo_RepValidate (fo_conf* config)
+{
+  char* retval = NULL;
+  int32_t nhosts = 0, i;
+  char* gname = "REPOSITORY";
+  char** hosts;
+  char* curr;
+  GRegex*     regex = NULL;
+  GMatchInfo* match = NULL;
+  uint32_t begin, end;
+  gchar* begin_str;
+  gchar* end_str;
+
+
+  if((hosts = fo_config_key_set(config, gname, &nhosts)) == NULL)
+    return g_strdup("The fossology.conf file does not contain a \"REPOSITORY\" group.");
+
+  regex = g_regex_new(
+      "\\[((\\*|gold|files|logs|license|test)\\s+([[:xdigit:]]+)\\s+([[:xdigit:]]+))\\]",
+      0, 0, NULL);
+
+  for(i = 0; i < nhosts; i++)
+  {
+    curr = fo_config_get(config, gname, hosts[i], NULL);
+
+    if(!g_regex_match(regex, curr, 0, &match))
+    {
+      curr[strlen(curr) - 1] = '\0';
+      retval = g_strdup_printf("%s[] = %s", hosts[i], curr + 1);
+      break;
+    }
+
+    begin_str = g_match_info_fetch(match, 3);
+    end_str   = g_match_info_fetch(match, 4);
+
+    begin = strtoul(begin_str, NULL, 16);
+    end   = strtoul(end_str,   NULL, 16);
+
+    if(begin >= end)
+    {
+      curr[strlen(curr) - 1] = '\0';
+      retval = g_strdup_printf("%s[] = %s", hosts[i], curr + 1);
+      break;
+    }
+
+    g_free(begin_str);
+    g_free(end_str);
+    g_match_info_unref(match);
+  }
+
+  g_regex_unref(regex);
+  return retval;
+} /* fo_RepValidate() */
+
