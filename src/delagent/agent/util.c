@@ -772,12 +772,11 @@ int authentication(char *user, char * password, int *user_id, int *user_perm)
 {
   if (NULL == user || NULL == password)   return 0;
   char SQL[MAXSQL] = {0};
-  char CMD[myBUFSIZ] = {0};
   PGresult *result;
   char user_seed[myBUFSIZ] = {0};
   char pass_hash_valid[myBUFSIZ] = {0};
+  unsigned char hash_value[myBUFSIZ] = {0};
   char pass_hash_actual[myBUFSIZ] = {0};
-  FILE *file_hash = NULL;
 
   /** get user_seed, user_pass on one specified user */
   snprintf(SQL,sizeof(SQL),"SELECT user_seed, user_pass, user_perm, user_pk from users where user_name='%s';", user);
@@ -790,22 +789,22 @@ int authentication(char *user, char * password, int *user_id, int *user_perm)
   PQclear(result);
   if (user_seed[0] && pass_hash_valid[0]) 
   {
-    snprintf(CMD, sizeof(CMD), "echo -n %s%s | openssl sha1", user_seed, password);  // get the hash code on seed+pass
-    file_hash = popen(CMD,"r");
-    if (!file_hash)
+    strcat(user_seed, password);  // get the hash code on seed+pass
+    SHA1((unsigned char *)user_seed, strlen(user_seed), hash_value); 
+    if (!hash_value[0])
     {
       LOG_FATAL("ERROR, failed to get sha1 value\n");
       return -1;
     }
   }
   else return -1;
-
-  fgets(pass_hash_actual, sizeof(pass_hash_actual), file_hash);
-  if (pass_hash_actual[0] && pass_hash_actual[strlen(pass_hash_actual) - 1] == '\n')
+  int i = 0;
+  char temp[2] = {0};
+  for (i = 0; i < strlen(hash_value); i++)
   {
-    pass_hash_actual[strlen(pass_hash_actual) - 1] = '\0'; // get rid of the new line character
+    sprintf(temp, "%02x", hash_value[i]);
+    strcat(pass_hash_actual, temp); 
   }
-  pclose(file_hash);
   if (strcmp(pass_hash_valid, pass_hash_actual) == 0)
   {
     return 1;
