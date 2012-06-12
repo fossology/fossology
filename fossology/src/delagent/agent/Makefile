@@ -22,7 +22,7 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 TESTDIRS=../agent_tests
 
-CFLAGS_LOCAL=$(ALL_CFLAGS) -lpq
+CFLAGS_LOCAL=$(ALL_CFLAGS) -lpq -lssl
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 EXE=delagent

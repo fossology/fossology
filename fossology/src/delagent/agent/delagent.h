@@ -29,6 +29,7 @@
 #include <signal.h>
 #include <libgen.h>
 #include <getopt.h>
+#include <openssl/sha.h>
 
 #include "libfossology.h"
 
