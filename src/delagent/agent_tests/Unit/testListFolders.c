@@ -50,7 +50,7 @@ void testListUploads()
 
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
-  ListUploads();
+  ListUploads(2, 10);
 
   PQfinish(db_conn);
   CU_PASS("ListUploads PASS!");
