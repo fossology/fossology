@@ -399,7 +399,7 @@ char* fo_config_get_list(fo_conf* conf, char* group, char* key, int idx, GError*
         fo_invalid_key,
         "ERROR: %s[%s] %d is out of range", group, key, idx);
 
-  if(*error)
+  if(error && *error)
     return NULL;
 
   val = g_tree_lookup(
@@ -474,7 +474,7 @@ int fo_config_list_length(fo_conf* conf, char* group, char* key, GError** error)
         RETRIEVE_ERROR,
         fo_invalid_group,
         "ERROR: %s[%s] must be of type list to get length", group, key);
-  if(*error)
+  if(error && *error)
     return 0;
 
   val = g_tree_lookup(
