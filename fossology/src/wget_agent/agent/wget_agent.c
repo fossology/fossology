@@ -333,29 +333,22 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   ftp_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "ftp_proxy", &error3);
   p_no_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "no_proxy", &error4);
   /* http_proxy is optional so don't error if it doesn't exist */
-  if(error1 && error2 && error3 && error4)
+  /** set proxy */
+  if (http_proxy && http_proxy[0])
   {
-    SafeExit(-1);
+    snprintf(proxy, MAXCMD-1, " export http_proxy='%s' ;", http_proxy);
   }
-  else 
+  if (https_proxy && https_proxy[0])
   {
-    /** set proxy */
-    if (http_proxy && http_proxy[0])
-    {
-      snprintf(proxy, MAXCMD-1, " export http_proxy='%s' ;", http_proxy);
-    }
-    if (https_proxy && https_proxy[0])
-    {
-      snprintf(proxy, MAXCMD-1, "%s export https_proxy='%s' ;", proxy, https_proxy);
-    }
-    if (ftp_proxy && ftp_proxy[0])
-    {
-      snprintf(proxy, MAXCMD-1, "%s export ftp_proxy='%s' ;", proxy, ftp_proxy);
-    }
-    if (p_no_proxy && p_no_proxy[0])
-    {
-      snprintf(no_proxy, MAXCMD-1, "-e no_proxy=%s", p_no_proxy);
-    }
+    snprintf(proxy, MAXCMD-1, "%s export https_proxy='%s' ;", proxy, https_proxy);
+  }
+  if (ftp_proxy && ftp_proxy[0])
+  {
+    snprintf(proxy, MAXCMD-1, "%s export ftp_proxy='%s' ;", proxy, ftp_proxy);
+  }
+  if (p_no_proxy && p_no_proxy[0])
+  {
+    snprintf(no_proxy, MAXCMD-1, "-e no_proxy=%s", p_no_proxy);
   }
 
   if (TempFile && TempFile[0])
