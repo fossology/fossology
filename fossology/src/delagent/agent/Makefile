@@ -40,7 +40,8 @@ delagent.o: util.c $(HDRS)
 
 install: all
 	@echo "make delagent agent install"
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)	
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
+	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 uninstall:
 	@echo "make delagent agent uninstall"
