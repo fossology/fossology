@@ -994,7 +994,7 @@ char* fo_RepValidate (fo_conf* config)
 
       g_free(begin_str);
       g_free(end_str);
-      g_match_info_unref(match);
+      g_match_info_free(match);
     }
   }
 
