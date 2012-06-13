@@ -57,7 +57,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array())
   if (!empty($AgentList)) {
     // get user agent preferences
     $userName = $_SESSION['User'];
-    $sql = "SELECT user_name, user_agent_list FROM users WHERE
+    $sql = "SELECT user_name, user_agent_list, default_bucketpool_fk FROM users WHERE
 				    user_name='$userName';";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);    
@@ -71,6 +71,8 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array())
       return("<h3 style='color:red'>$text $UserName</h3>");
     }
     $list = explode(',',$uList[0]['user_agent_list']);
+    $default_bucketpool_fk = $uList[0]['default_bucketpool_fk'];
+    if (empty($default_bucketpool_fk)) $SkipAgents[] = "agent_bucket";
 
     foreach($AgentList as $AgentItem) {
       $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
