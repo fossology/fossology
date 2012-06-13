@@ -35,6 +35,8 @@ install: all
 
 	
 	mkdir -p $(DESTDIR)$(MODDIR)/lib/php; \
+	/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/lib/php; \
+	/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/lib; \
 	
 	for file in $(FILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/lib/php/$$file; \
