@@ -23,29 +23,38 @@ DEF =
 
 MODDIR = mods-enabled
 
+FO_CONF = fossology.conf
+V_LIST  = variables.list
 C_FILES = $(wildcard *.c)
-EXES = $(patsubst %.c, %, $(C_FILES))
+EXES    = $(patsubst %.c, %, $(C_FILES))
+
+USER=`whoami`
 
 ##########################
 # executable build rules #
 ##########################
 
-all: clean test # the make all and make test are the same thing
-test: $(EXES)   # for this directory since this creates the test agents
+all: clean test
+test: $(FO_CONF) $(EXES)
 $(EXES): %: %.c $(FOLIB) $(VARS)
-	@echo $@: 
+	@echo $@:
 	@if [ ! -d $(MODDIR)/$@ ] ; then \
 	  mkdir -p $(MODDIR)/$@/agent/; fi;
 	$(CC) $< -o $(MODDIR)/$@/agent/$@ $(CFLAGS_LOCAL)
 	@echo "[$@]\nVERSION=test\nSVN_REV=0M" > $(MODDIR)/$@/VERSION
 	@echo "[default]\ncommand=$@\nmax=-1\nspecial[]=\n" > $(MODDIR)/$@/$@.conf
-	
+
+$(FO_CONF): $(V_LIST)
+	$(TOP)/utils/preprocess_php $(V_LIST) $@.in
+
+$(V_LIST):
+	@echo "PROJECTGROUP=$(USER)\nPROJECTUSER=$(USER)" > $(V_LIST)
 
 #####################
 # other build rules #
 #####################
 
 clean:
-	rm -rf $(MODDIR)
+	rm -rf $(MODDIR) $(V_LIST) $(FO_CONF) *.log
 
 .PHONY: all $(MODDIR) $(EXE) $(FOLIB)
