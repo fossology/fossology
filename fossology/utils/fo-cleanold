@@ -181,7 +181,7 @@ for conffile in $NEWSAVE; do
    if [ -f "$conffile" -o -L "$conffile" ]; then
       if [ $RMCONF ]; then
          echo "NOTE: found $conffile saving to $TMPDIR/ and deleting as requested"
-         cp $conffile $TMPDIR/
+         mv $conffile $TMPDIR/
       else
          echo "WARNING: found $conffile but not deleting"
       fi
