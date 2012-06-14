@@ -93,19 +93,22 @@ if [ $BUILDTIME ]; then
    echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
       Debian|Ubuntu|LinuxMint)
-      echo "DB: Installing build essiential....."
+         echo "DB: Installing build essiential....."
          apt-get $YesOpt install \
             libxml2-dev libextractor-dev \
             build-essential libtext-template-perl subversion rpm
-         case "$CODENAME" in
-            lenny|hardy) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.3;;
-            squeeze) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.4;;
-            sid) apt-get  $YesOpt install $YesOpt postgresql-server-dev-8.4;;
-            lucid|natty|oneiric) apt-get $YesOpt install postgresql-server-dev-8.4;;
-            isadora) apt-get $YesOpt install postgresql-server-dev-8.4;;
-            precise) apt-get $YesOpt install postgresql-server-dev-8.4;;
-            *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
-         esac
+         POSTGRE=`dpkg --get-selections|grep postgresql-server-dev`
+         if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
+           case "$CODENAME" in
+              lenny|hardy) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.3;;
+              squeeze) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.4;;
+              sid) apt-get  $YesOpt install $YesOpt postgresql-server-dev-8.4;;
+              lucid|natty) apt-get $YesOpt install postgresql-server-dev-8.4;;
+              isadora) apt-get $YesOpt install postgresql-server-dev-8.4;;
+              precise|oneiric) apt-get $YesOpt install postgresql-server-dev-9.1;;
+              *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
+           esac
+         fi
          ;;
       Fedora)
          # F8=Werwolf F9=Sulphur F10=Cambridge F11=Leonidas F12=Constantine dev=Rawhide
@@ -156,19 +159,22 @@ if [ $RUNTIME ]; then
             libxml2 libextractor1c2a \
             binutils php-gettext \
             libextractor-plugins
-         case "$CODENAME" in
-            squeeze)
-               apt-get $YesOpt install postgresql-8.4;;
-            sid)
-               apt-get $YesOpt install postgresql-8.4;;
-            lucid|natty|oneiric)
-               apt-get $YesOpt install postgresql-8.4;;
-            isadora)
-               apt-get $YesOpt install postgresql-8.4;;
-            precise)
-               apt-get $YesOpt install postgresql-8.4;;
-            *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
-         esac
+         POSTGRE=`dpkg --get-selections|grep postgresql-8.4`
+         if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
+           case "$CODENAME" in
+              squeeze)
+                 apt-get $YesOpt install postgresql-8.4;;
+              sid)
+                 apt-get $YesOpt install postgresql-8.4;;
+              lucid|natty)
+                 apt-get $YesOpt install postgresql-8.4;;
+              isadora)
+                 apt-get $YesOpt install postgresql-8.4;;
+              precise|oneiric)
+                 apt-get $YesOpt install postgresql-9.1;;
+              *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
+           esac
+         fi
          ;;
       Mandriva)
          [ $AGENT ] || urpmi postgresql-server httpd
