@@ -129,7 +129,6 @@ int main(int argc, char** argv)
   fo_RepOpenFull(sysconfig);
 
   signal(SIGCHLD, sig_handle);
-  signal(SIGALRM, sig_handle);
   signal(SIGTERM, sig_handle);
   signal(SIGQUIT, sig_handle);
   signal(SIGHUP,  sig_handle);
@@ -149,7 +148,6 @@ int main(int argc, char** argv)
   /* *** enter the scheduler event loop **** */
   /* *************************************** */
 
-  alarm(CONF_agent_update_interval);
   event_loop_enter(update_scheduler, signal_scheduler);
 
   NOTIFY("*****************************************************************");

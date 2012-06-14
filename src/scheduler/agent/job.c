@@ -179,11 +179,12 @@ void job_list_clean()
  * @param data_size the number of elements in the data array
  * @return the new job
  */
-job job_init(char* type, int id, int priority)
+job job_init(char* type, char* host, int id, int priority)
 {
   job j = g_new0(struct job_internal, 1);
 
   j->agent_type      = g_strdup(type);
+  j->required_host   = g_strdup(host);
   j->running_agents  = NULL;
   j->finished_agents = NULL;
   j->failed_agents   = NULL;
@@ -230,6 +231,7 @@ void job_destroy(job j)
   g_list_free(j->failed_agents);
   g_free(j->message);
   g_free(j->agent_type);
+  g_free(j->required_host);
   g_free(j->data);
   g_free(j);
 }

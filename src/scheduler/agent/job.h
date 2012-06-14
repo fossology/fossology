@@ -63,6 +63,7 @@ struct job_internal
 {
     /* associated agent information */
     char*  agent_type;      ///< the type of agent used to analyze the data
+    char*  required_host;   ///< If not NULL, this job must run on a specific host machine
     GList* running_agents;  ///< the list of agents assigned to this job that are still working
     GList* finished_agents; ///< the list of agents that have completed their tasks
     GList* failed_agents;   ///< the list of agents that failed while working
@@ -86,7 +87,7 @@ struct job_internal
 
 void job_list_init();
 void job_list_clean();
-job  job_init(char* type, int id, int priority);
+job  job_init(char* type, char* host, int id, int priority);
 void job_destroy(job j);
 
 /* ************************************************************************** */
