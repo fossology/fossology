@@ -6,7 +6,7 @@
 ;   REPOSITORY: sets the repo information
 
 [FOSSOLOGY]
-port = 24693
+port = 12354
 address = localhost
 
 ; REPLACEMENT for Depth.conf
@@ -14,13 +14,6 @@ depth = 3
 
 ; REPLACEMENT for RepPath.conf
 path = /srv/fossology/repository
-
-; REPLACEMENT for Proxy.conf
-; proxy settings that will be used by fossology agents
-; examples:
-;http_proxy = http://server:8080
-;ftp_proxy = http://server:3128
-;no_proxy = localhost,10.1.2.3
 
 ; REPLACEMENT for Hosts.conf
 ; set up the set of hosts available to analyze files. If there is an entry
@@ -36,6 +29,8 @@ localhost[] = * 00 ff
 
 ; no directories are specified for the testing agents
 [DIRECTORIES]
+PROJECTGROUP = {$PROJECTGROUP}
+PROJECTUSER  = {$PROJECTUSER}
 
 [SCHEDULER]
 agent_death_timer = 10

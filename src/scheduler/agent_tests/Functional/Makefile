@@ -14,10 +14,31 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+TOP = ../../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+PHP_FILES   = $(wildcard *.php)
+AGENT_DIR   = ../../agent
+TEST_AGENTS = ../agents/
+
+##########################
+# executable build rules #
+##########################
+
 all:
-	@echo "NO TESTS (Functional) for scheduler"
-test:
-	@echo "NO TESTS (Functional) for scheduler"
+	$(MAKE) -C $(AGENT_DIR)/
+	$(MAKE) -C $(TEST_AGENTS)/
+
+test: all $(PHP_FILES)
+$(PHP_FILES): %:
+	phpunit --log-junit scheduler-Xunit.xml $@
+
+#####################
+# other build rules #
+#####################
+
 clean:
-install:
-uninstall:
+	rm -f *.xml
+
+.PHONY: all test $(PHP_FILES) $(FO_LIB)
