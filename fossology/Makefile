@@ -45,13 +45,12 @@ VERSIONFILE:
 
 # install depends on everything being built first
 install: all $(INSTALLDIRS)
-$(INSTALLDIRS):
-	$(INSTALL) -m 666 VERSION $(DESTDIR)$(CONFPATH)/VERSION
-	$(MAKE) -C $(@:install-%=%) install
 	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(CONFPATH)
 	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)
 	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(LIBEXECDIR)
-	
+$(INSTALLDIRS):
+	$(INSTALL) -m 666 VERSION $(DESTDIR)$(CONFPATH)/VERSION
+	$(MAKE) -C $(@:install-%=%) install
 
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
