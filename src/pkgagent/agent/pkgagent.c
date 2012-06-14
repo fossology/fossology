@@ -853,11 +853,11 @@ int RecordMetadataDEB (struct debpkginfo *pi)
     snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,summary,description,format,uploaders,standards_version,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',%d,E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",trim(pi->pkgName),trim(pi->pkgArch),trim(pi->version),trim(pi->maintainer),pi->installedSize,trim(pi->section),trim(pi->priority),trim(pi->homepage),trim(pi->source),trim(pi->summary),trim(pi->description),trim(pi->format),trim(pi->uploaders),trim(pi->standardsVersion),pi->pFileFk);
     result = PQexec(db_conn, SQL);
     // ignore duplicate constraint failure (23505), report others
-    if ((result==0) || ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
-        (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5))))
+    if ((result==0) || ((PQresultStatus(result) != PGRES_COMMAND_OK)))
     {
-      LOG_ERROR("Error inserting pfile, %s.", SQL);
+      LOG_FATAL("Error inserting, SQL is: %s.", SQL);
       PQexec(db_conn, "ROLLBACK;");
+      PQclear(result);
       return (-1);
     }
 
@@ -887,6 +887,7 @@ int RecordMetadataDEB (struct debpkginfo *pi)
     if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
     PQclear(result);
   }
+  PQclear(result);
   return (0);
 }/* RecordMetadataDEB(struct debpkginfo *pi) */
 
