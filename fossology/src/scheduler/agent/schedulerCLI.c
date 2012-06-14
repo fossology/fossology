@@ -49,6 +49,15 @@ fo_conf* conf;    ///< the loaded configuration data
 /* **** utility functions *************************************************** */
 /* ************************************************************************** */
 
+/**
+ * @brief Create a socket connection
+ *
+ * Creates a new socket that connects to the given host and port.
+ *
+ * @param host  Cstring name of the host to connect to
+ * @param port  Cstring representation of the port to connec to
+ * @return      The file descriptor of the new socket
+ */
 int socket_connect(char* host, char* port)
 {
   int fd;
@@ -88,6 +97,15 @@ int socket_connect(char* host, char* port)
   return fd;
 }
 
+/**
+ * @brief performs the actions necessary to receive from the scheduler.
+ *
+ * @param s       the socket that is connected to the scheduler
+ * @param buffer  buffer that is used to store messages from the scheduler
+ * @param max     the capacity of the buffer
+ * @param end     used to determine when this function should return
+ * @return
+ */
 uint8_t receive(int s, char* buffer, size_t max, uint8_t end)
 {
   size_t bytes = 0;
@@ -209,11 +227,11 @@ int main(int argc, char** argv)
 
   GOptionEntry entries[] =
   {
-      {"config",   'c', 0, G_OPTION_ARG_STRING, config,
+      {"config",   'c', 0, G_OPTION_ARG_STRING, &config,
           "Set the directory for the system configuration", "string"},
-      {"host",     'H', 0, G_OPTION_ARG_STRING, host,
+      {"host",     'H', 0, G_OPTION_ARG_STRING, &host,
           "Set the host that the scheduler is on", "string"},
-      {"port",     'p', 0, G_OPTION_ARG_STRING, port,
+      {"port",     'p', 0, G_OPTION_ARG_STRING, &port,
           "Set the port that the scheduler is listening on", "integer"},
       {"quiet",    'q', 0, G_OPTION_ARG_NONE,   &verbose,
           "Cause the CLI to not print usage hints", NULL},

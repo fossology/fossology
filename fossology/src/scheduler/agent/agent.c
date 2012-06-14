@@ -248,7 +248,7 @@ static int agent_test(char* name, meta_agent ma, host h)
   static int id_gen = -1;
 
   V_AGENT("META_AGENT[%s] testing\n", ma->name);
-  job j = job_init(ma->name, id_gen--, 0);
+  job j = job_init(ma->name, h->name, id_gen--, 0);
   agent_init(h, j);
   return 0;
 }
@@ -659,7 +659,6 @@ static void* agent_spawn(void* passed)
 /* ************************************************************************** */
 
 /**
-    a->generation = 0;
  * Creates a new meta agent. This will take and parse the information necessary
  * for the creation of a new agent instance. The name of the agent, the cmd for
  * starting the agent, the number of these agents that can run simutaniously,

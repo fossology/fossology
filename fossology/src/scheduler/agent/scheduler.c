@@ -292,12 +292,21 @@ void update_scheduler()
   {
     while((j = peek_job()) != NULL)
     {
+      // check if the agent is required to run on local host
       if(is_meta_special(j->agent_type, SAG_LOCAL))
       {
         machine = name_host(LOCAL_HOST);
         if(!(machine->running < machine->max))
           break;
       }
+      // check if the job is required to run on a specific machine
+      else if((j->required_host != NULL))
+      {
+        machine = name_host(j->required_host);
+        if(!(machine->running < machine->max))
+          break;
+      }
+      // the generic case, this can run anywhere, find a place
       else if((machine = get_host(1)) == NULL)
       {
         V_SCHED("JOB_INIT: could not find host\n");

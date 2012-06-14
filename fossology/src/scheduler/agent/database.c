@@ -732,7 +732,7 @@ void database_update_event(void* unused)
   PGresult* pri_result;
   int i, j_id;
   char sql[512];
-  char* value, * type, * pfile, * parent;
+  char* value, * type, * host, * pfile, * parent;
   job j;
 
   if(closing)
@@ -759,6 +759,7 @@ void database_update_event(void* unused)
 
     /* get relevant values out of the job queue */
     parent =      PQget(db_result, i, "jq_job_fk");
+    host   =      PQget(db_result, i, "jq_host");
     type   =      PQget(db_result, i, "jq_type");
     pfile  =      PQget(db_result, i, "jq_runonpfile");
     value  =      PQget(db_result, i, "jq_args");
@@ -781,7 +782,7 @@ void database_update_event(void* unused)
       continue;
     }
 
-    j = job_init(type, j_id, atoi(PQgetvalue(pri_result, 0, 0)));
+    j = job_init(type, host, j_id, atoi(PQgetvalue(pri_result, 0, 0)));
     job_set_data(j, value, (pfile && pfile[0] != '\0'));
 
     PQclear(pri_result);
