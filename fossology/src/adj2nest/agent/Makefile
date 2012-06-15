@@ -35,9 +35,7 @@ $(FOLIB):
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/$(EXE)/agent/
 	@mkdir -p $(CONFDIR)/mods-enabled
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
 	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 

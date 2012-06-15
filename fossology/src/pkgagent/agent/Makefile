@@ -44,7 +44,6 @@ pkgagent.o: pkgagent.c pkgagent.h
 install: all
 	@echo "make pkgagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 uninstall:
 	@echo "make pkgagent agent uninstall"

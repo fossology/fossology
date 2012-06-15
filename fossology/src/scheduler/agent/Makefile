@@ -124,9 +124,6 @@ install: all install-conf
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/scheduler/agent/$(EXE)
 	$(INSTALL_PROGRAM) $(CLI) $(DESTDIR)$(MODDIR)/scheduler/agent/$(CLI)
 	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/scheduler/agent
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/scheduler
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/scheduler; then \
 	  ln -s $(MODDIR)/scheduler $(CONFDIR)/mods-enabled ; fi;
 

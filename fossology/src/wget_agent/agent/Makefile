@@ -37,7 +37,6 @@ $(EXE): main.c $(FOLIB) libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS
 install: all
 	@echo "make wget_agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 uninstall:
 	@echo "make wget_agent uninstall"

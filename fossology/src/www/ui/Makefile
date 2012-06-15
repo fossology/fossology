@@ -36,11 +36,8 @@ all:
 install: all
 
 	mkdir -p $(DESTDIR)$(WEBDIR)/ui; \
-	/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(WEBDIR)/ui; \
-	/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(WEBDIR)
 	for dir in $(DIRS); do \
 		mkdir -p $(DESTDIR)$(WEBDIR)/ui/$$dir; \
-		/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(WEBDIR)/ui/$$dir; \
 	done
 
 	for file in $(UIFILES); do \
@@ -52,7 +49,6 @@ install: all
   
 	@echo $(SYSCONFDIR) > $(DESTDIR)$(WEBDIR)/ui/fossology.rc
 	@mkdir -p $(CONFDIR)/mods-enabled
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
 	  ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled/ ; fi;
 

@@ -39,16 +39,13 @@ install: all
 	echo "Making configuration directories"; \
 	if [ ! -e $(DESTDIR)$(CONFPATH) ] ; then \
 		mkdir -p $(DESTDIR)$(CONFPATH); \
-		/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(CONFPATH); \
 	fi
 	if [ ! -e $(DESTDIR)$(CONFPATH)/mods-enabled ] ; then \
 		mkdir -p $(DESTDIR)$(CONFPATH)/mods-enabled; \
 		/bin/chmod 775 $(DESTDIR)$(CONFPATH)/mods-enabled; \
-		/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(CONFPATH)/mods-enabled; \
 	fi
 	if [ ! -e $(DESTDIR)$(CONFPATH)/conf ] ; then \
 		mkdir -p $(DESTDIR)$(CONFPATH)/conf; \
-		/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(CONFPATH)/conf; \
 	fi
 	echo "Installing configuration files..."
 	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ] ; then \
