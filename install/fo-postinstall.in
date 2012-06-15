@@ -159,6 +159,20 @@ if [ $COMMON ]; then
    fi
    chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}/agents
    chmod 2775 {$PROJECTSTATEDIR}/agents
+  
+   # change all files ownership to fossy:fossy
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$MODDIR}
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LIBEXECDIR}
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$SYSCONFDIR}
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} /etc/cron.d/fossology
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} /etc/init.d/fossology
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/departition
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/cp2foss
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/fossjobs
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/schema-export
+   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$INCLUDEDIR}/libfossology.h
+   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$MAN1DIR}/cp2foss.1
+   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$MAN1DIR}/fossjobs.1
 
    if [ ! -d "$REPO" ] ; then
       mkdir -p "$REPO"
