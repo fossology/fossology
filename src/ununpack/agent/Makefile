@@ -31,11 +31,9 @@ install: all $(VARS)
 	   rm -f $(DESTDIR)$(MODDIR)/ununpack/agent/departition; \
 	fi
 	@mkdir -p $(CONFDIR)/mods-enabled
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(CONFDIR)/mods-enabled
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition
 	
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/ununpack/agent
 	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
 	  ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;
 	  

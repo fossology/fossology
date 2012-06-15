@@ -24,8 +24,6 @@ all:
 install:
 	@echo "make delagent ui install"
 	mkdir -p $(DESTDIR)$(MODDIR)/delagent/ui
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/delagent/ui
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/delagent
 	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/delagent/ui/
 
 uninstall:

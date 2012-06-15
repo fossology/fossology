@@ -26,8 +26,6 @@ all:
 install:
 	@echo "make nomos ui install"
 	mkdir -p $(DESTDIR)$(MODDIR)/nomos/ui
-	/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/nomos/ui/
-	/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/nomos/
 	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/nomos/ui/
 
 uninstall:

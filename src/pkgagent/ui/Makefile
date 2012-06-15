@@ -27,8 +27,6 @@ all:
 install:
 	@echo "make $(DESTDIR)$(MOD_NAME)/$(MOD_SUBDIR) install"
 	$(INSTALL_DATA) agent-pkgagent.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/agent-pkgagent.php
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 
 uninstall:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"

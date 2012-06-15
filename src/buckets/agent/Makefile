@@ -64,7 +64,6 @@ $(FOLIB):
 install: all
 	@echo "make buckets agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@/bin/chown $(PROJECTUSER):$(PROJECTGROUP) $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 uninstall:
 	@echo "make buckets agent uninstall"
