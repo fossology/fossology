@@ -340,7 +340,7 @@ int ProcessUpload (long upload_pk)
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
       strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
       if (GetMetadataDebBinary(upload_pk, dpi) != -1){
-        if (RecordMetadataDEB(dpi) != 0) return (-1);
+        if (RecordMetadataDEB(dpi) != 0) continue;
       }
       /* free memory */
       int i;
@@ -852,16 +852,17 @@ int RecordMetadataDEB (struct debpkginfo *pi)
 
     snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,summary,description,format,uploaders,standards_version,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',%d,E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",trim(pi->pkgName),trim(pi->pkgArch),trim(pi->version),trim(pi->maintainer),pi->installedSize,trim(pi->section),trim(pi->priority),trim(pi->homepage),trim(pi->source),trim(pi->summary),trim(pi->description),trim(pi->format),trim(pi->uploaders),trim(pi->standardsVersion),pi->pFileFk);
     result = PQexec(db_conn, SQL);
-    // ignore duplicate constraint failure (23505), report others
+    // ignore error
     if ((result==0) || ((PQresultStatus(result) != PGRES_COMMAND_OK)))
     {
-      LOG_FATAL("Error inserting, SQL is: %s.", SQL);
+      LOG_FATAL("Error inserting, SQL is: %s, error code is:%s\n", SQL, PQresultErrorField(result, PG_DIAG_SQLSTATE));
       PQexec(db_conn, "ROLLBACK;");
-      PQclear(result);
+      if (result) PQclear(result);
       return (-1);
+    } else 
+    {
+      PQclear(result);
     }
-
-    PQclear(result);
 
     result = PQexec(db_conn,"SELECT currval('pkg_deb_pkg_pk_seq'::regclass);");
     if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
@@ -887,7 +888,10 @@ int RecordMetadataDEB (struct debpkginfo *pi)
     if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
     PQclear(result);
   }
-  PQclear(result);
+  else
+  {
+    PQclear(result);
+  }
   return (0);
 }/* RecordMetadataDEB(struct debpkginfo *pi) */
 
