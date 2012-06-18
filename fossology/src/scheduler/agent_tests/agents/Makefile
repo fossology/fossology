@@ -28,7 +28,8 @@ V_LIST  = variables.list
 C_FILES = $(wildcard *.c)
 EXES    = $(patsubst %.c, %, $(C_FILES))
 
-USER=`whoami`
+USER  = `whoami`
+GROUP = `id -ng`
 
 ##########################
 # executable build rules #
@@ -48,7 +49,7 @@ $(FO_CONF): $(V_LIST)
 	$(TOP)/utils/preprocess_php $(V_LIST) $@.in
 
 $(V_LIST):
-	@echo "PROJECTGROUP=$(USER)\nPROJECTUSER=$(USER)" > $(V_LIST)
+	@echo "PROJECTGROUP=$(GROUP)\nPROJECTUSER=$(USER)" > $(V_LIST)
 
 #####################
 # other build rules #
