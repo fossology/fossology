@@ -69,9 +69,9 @@ int socket_connect(char* host, char* port)
   hints.ai_socktype = SOCK_STREAM;
   if(getaddrinfo(host, port, &hints, &servs) == -1)
   {
-    fprintf(stderr, "ERROR %s.%d: unable to connect to %s port: %s\n",
+    fprintf(stderr, "ERROR: %s.%d: unable to connect to %s port: %s\n",
         __FILE__, __LINE__, host, port);
-    fprintf(stderr, "ERROR errno: %s\n", strerror(errno));
+    fprintf(stderr, "ERROR: errno: %s\n", strerror(errno));
     return -1;
   }
 
@@ -88,7 +88,7 @@ int socket_connect(char* host, char* port)
 
   if(curr == NULL)
   {
-    fprintf(stderr, "ERROR %s.%d: unable to connect to %s port: %s\n",
+    fprintf(stderr, "ERROR: %s.%d: unable to connect to %s port: %s\n",
         __FILE__, __LINE__, host, port);
     return -1;
   }
@@ -206,9 +206,9 @@ int main(int argc, char** argv)
   GError* error = NULL;
 
   /* command bool and info */
+  uint8_t c_die      = 0;
   uint8_t c_stop     = 0;
   uint8_t c_load     = 0;
-  uint8_t c_force    = 0;
   uint8_t c_pause    = 0;
   uint8_t c_reload   = 0;
   uint8_t c_status   = 0;
@@ -243,8 +243,8 @@ int main(int argc, char** argv)
           "CLI will send a status command and close"},
       {"stop",     's', 0, G_OPTION_ARG_NONE,   &c_stop,
           "CLI will send stop command and close", NULL},
-      { "force",   'f', 0, G_OPTION_ARG_NONE,   &c_force,
-          "Causes stop to send a die command instead of a stop command", NULL },
+      {"die",      'D', 0, G_OPTION_ARG_NONE,   &c_die,
+          "CLI will send a die command and close"},
       {"pause",    'P', 0, G_OPTION_ARG_INT,    &c_pause,
           "CLI will send a pause command and close", "integer"},
       {"reload",   'r', 0, G_OPTION_ARG_NONE,   &c_reload,
@@ -281,7 +281,7 @@ int main(int argc, char** argv)
   conf = fo_config_load(buffer, &error);
   if(error)
   {
-    fprintf(stderr, "ERROR %s.%d: error loading config: %s\n",
+    fprintf(stderr, "ERROR: %s.%d: error loading config: %s\n",
         __FILE__, __LINE__, error->message);
     return -1;
   }
@@ -297,7 +297,7 @@ int main(int argc, char** argv)
     return -1;
 
   /* check specific command instructions */
-  if(c_stop || c_load || c_pause || c_reload || c_status || c_agents
+  if(c_die || c_stop || c_load || c_pause || c_reload || c_status || c_agents
       || c_restart || c_verbose || c_database)
   {
     response = 0;
@@ -308,12 +308,9 @@ int main(int argc, char** argv)
     if(c_database)
       bytes = write(s, "database", 8);
     if(c_stop)
-    {
-      if(c_force)
-        bytes = write(s, "die", 3);
-      else
-        bytes = write(s, "stop", 4);
-    }
+      bytes = write(s, "stop", 4);
+    if(c_die)
+      bytes = write(s, "die", 3);
 
     /* simple commands that require a parameter */
     if(c_verbose)
