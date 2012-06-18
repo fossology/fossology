@@ -16,34 +16,53 @@
 ######################################################################
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 DATA=../unpack-test-data.tar.bz2
 
 TESTFILE = tests.xml 
 AGENTDIR = ../../agent/
 
+# list of the external test data files required by this test
+# UNLIKE MOST OTHER TESTS, these will be found in ../
+TEST_FILES = unpack-test-data.tar.bz2
+
 all:
 	$(MAKE) -C $(AGENTDIR)/ $@
 
-$(DATA):
-	@echo "Downloading ununpack data"
-	rsync -acv fonightly.usa.hp.com:/var/www/testfiles/unpack-test-data.tar.bz2 ..
+# target to retrieve remote test data if it doesn't already exist
+# make sure your /etc/wgetrc file is configured correctly!
+testdata:
+	@echo "Retrieve test files"
+	@# for each test file specified, look for it in ../testdata
+	@# if it exists, do nothing.
+	@# if it does not exist, look in /var/www/testfiles
+	@# if not in /var/www/testfiles, wget it from fossology.org
+	@$(foreach test_file, $(TEST_FILES), \
+	    if [ -e ../$(test_file) ]; then \
+	        echo "../$(test_file) exists"; \
+	    elif [ -e /var/www/testfiles/$(test_file) ]; then \
+	        echo "$(test_file) found in /var/www/testfiles"; \
+	        cp /var/www/testfiles/$(test_file) ../; \
+	    else \
+	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
+	        wget --directory-prefix=../ http://www.fossology.org/testdata/$(test_file); \
+	    fi; \
+	)
 
-download: ../unpack-test-data.tar.bz2
-	@echo "untaring ununpack data"
+test: all testdata
+	@echo "ununpack agent functional test"
 	cd ..; \
 	tar -xf unpack-test-data.tar.bz2; \
-	cd Functional
-
-test: all download
-	@echo "ununpack agent functional test"
+	cd ./Functional; \
 	phpunit --log-junit ununpack-Xunit.xml --configuration $(TESTFILE)
 
 coverage:
 	@echo "no coverage for ununpack/agent_test/Functional"
 
-
 clean:
 	rm -rf ununpack-Xunit.xml  ../unpack-test-data.tar.bz2 ../test-data
+
+include $(DEPS)
 
 .PHONY: all test coverage clean

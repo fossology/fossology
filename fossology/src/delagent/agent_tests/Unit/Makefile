@@ -30,9 +30,34 @@ EXE=test_delagent
 TEST_OBJ_RUN=testRun.o
 TEST_OBJ=testListFolders.o testDeleteFolders.o testReadParameter.o
 
+# these are the external test data files needed by the tests
+# at the moment they will be found in the delagent/ directory, but this
+# may change as we organize the test data in a more consistent way
+TEST_FILES = testdb_all.tar testrepo_files.tar testrepo_gold.tar
+
 all: $(EXE)
 
-$(EXE): delagent.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS) cunit_lib test_lib
+# target to retrieve remote test data if it doesn't already exist
+# make sure your /etc/wgetrc file is configured correctly!
+testdata:
+	@echo "Retrieve test files"
+	@# for each test file specified, look for it in ../testdata
+	@# if it exists, do nothing.
+	@# if it does not exist, look in /var/www/testfiles
+	@# if not in /var/www/testfiles, wget it from fossology.org
+	@$(foreach test_file, $(TEST_FILES), \
+	    if [ -e ../testdata/$(test_file) ]; then \
+	        echo "../testdata/$(test_file) exists"; \
+	    elif [ -e /var/www/testfiles/delagent/$(test_file) ]; then \
+	        echo "$(test_file) found in /var/www/testfiles/delagent"; \
+	        cp /var/www/testfiles/delagent/$(test_file) ../testdata; \
+	    else \
+	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
+	        wget --directory-prefix=../testdata http://www.fossology.org/testdata/delagent/$(test_file); \
+            fi; \
+	)
+
+$(EXE): delagent.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS) cunit_lib test_lib $(FOLIB)
 	@echo "make delagent agent unit test"
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent.o $(CFLAGS_LOCAL) -o $@
 
@@ -42,11 +67,8 @@ $(TEST_OBJ_RUN): %.o: %.c
 $(TEST_OBJ): %.o: %.c 
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
 	
-test: all $(EXE)
+test: all $(EXE) testdata
 	@echo "execute delagent test"
-	@if test ! -e ../testdata/testdb_all.tar ; then \
-	rsync -acv fonightly.usa.hp.com:/var/www/testfiles/delagent/ ../testdata/;\
-	fi; 
 	./$(EXE)
 
 cunit_lib:
