@@ -91,44 +91,53 @@ class scheduler_testAgents extends PHPUnit_Framework_TestCase {
     
     sleep(1);
     
+    return;
+  }
+  
+  /**
+   * @brief Stops the scheduler running
+   *
+   * This reaps the child process created when the scheduler was started.
+   */
+  public function tearDown()
+  {
+    pcntl_waitpid($this->schedPid, $status, WUNTRACED);
+    chdir($this->originalDir);
+  }
+  
+  /**
+   * @brief Tests that the correct test agents are running after startup
+   * 
+   * This waits for the scheduler that was started in the startUp function
+   * finishes creating all the agents. It then checks that only the correctly
+   * finished agents passed the test. It finished by sending a stop command to
+   * the scheduler.
+   */
+  public function testSchedulerAgents()
+  {
+    /* Make sure the scheduler has finished all initializations */
     do {
       $retval = system("$this->schedulerCli -S " . $this->cmdArgs[0]);
       $delimited = explode(':', $retval);
       sleep(5);
     } while($delimited[0] != 'scheduler' && $delimited[0] != '');
     
-    return;
-  }
-  
-  /**
-   * @brief Stops the scheduler running
-   * 
-   * This simply sends a stop command to the running scheduler
-   */
-  public function tearDown()
-  {
-    exec("$this->schedulerCli -s " . $this->cmdArgs[0]);
-    pcntl_waitpid($this->schedPid, $status, WUNTRACED);
-    chdir($this->originalDir);
-  }
-  
-  /**
-   * @brief Tests that the correct agents passed the startup test
-   * 
-   * There are only 3 test agents that correctly pass the scheduler's startup
-   * tests. These are:
-   *   1. multi_connect
-   *   2. no_update
-   *   3. simple
-   * 
-   * If any new test agents that pass the scheduler startup test are created,
-   * they should be added the list $valid_agents.
-   */
-  public function testSchedulerAgents()
-  {
+    /*
+     * @brief Tests that the correct agents passed the startup test
+     *
+     * There are only 3 test agents that correctly pass the scheduler's startup
+     * tests. These are:
+     *   1. multi_connect
+     *   2. no_update
+     *   3. simple
+     *
+     * If any new test agents that pass the scheduler startup test are created,
+     * they should be added the list $valid_agents.
+     * 
+     * TODO this should be in its own tests
+     */
     $retval = system("$this->schedulerCli -a " . $this->cmdArgs[0]);
     
-    // list of valid agents, this should be sorted alphabetically
     $valid_agents = array(
         'multi_connect',
         'no_update',
@@ -169,6 +178,40 @@ class scheduler_testAgents extends PHPUnit_Framework_TestCase {
             $this->configuration['FOSSOLOGY']['address'] . ' max:10 running:0';
     
     $this->assertEquals($compare, $retval);
+    
+    /* All tests have finished, tell the scheduler to stop running */
+    exec("$this->schedulerCli -s " . $this->cmdArgs[0]);
+  }
+  
+  /**
+   * @brief Tests the gracefull and non-gracefull scheduler stops
+   *
+   * When a scheduler is started with the test agents, there are several test
+   * agents that take a while to finished running. This will use the cli to
+   * send a stop and then check that the scheduler is still running since there
+   * are test agents that haven't finished running yet. It will then send a die
+   * and check that the scheduler is not running anymore.
+   *
+   * This test was written to fix issue 681:
+   *   http://www.fossology.org/issues/681
+   */
+  public function testSchedulerStop()
+  {
+    /* Test that the scheduler is still after a stop command */
+    $retval = system("$this->schedulerCli -s " . $this->cmdArgs[0]);
+    sleep(5);
+    $retval = system("$this->schedulerCli -S " . $this->cmdArgs[0]);
+  
+    $delimited = explode(':', $retval);
+    $this->assertEquals($delimited[0], 'job');
+  
+    /* Test that the scheduler is not running after a die command */
+    $retval = system("$this->schedulerCli -D " . $this->cmdArgs[0]);
+    sleep(5);
+    $retval = system("$this->schedulerCli -S " . $this->cmdArgs[0]);
+  
+    $delimited = explode(':', $retval);
+    $this->assertEquals($delimited[0], '');
   }
 }
 
