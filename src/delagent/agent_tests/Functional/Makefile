@@ -21,14 +21,35 @@ include $(VARS)
 TESTFILE = ft_cliDelagentTest.php
 AGENTDIR = ../../agent
 
+# the list of external test data files required by this test
+# these will be found in ../testdata/
+TEST_FILES = testdb_all.tar
+
 all:
 	$(MAKE) -C $(AGENTDIR)/ $@
 
-test: all
+# target to retrieve remote test data if it doesn't already exist
+# make sure your /etc/wgetrc file is configured correctly!
+testdata:
+	@echo "Retrieve test files"
+	@# for each test file specified, look for it in ../testdata
+	@# if it exists, do nothing.
+	@# if it does not exist, look in /var/www/testfiles
+	@# if not in /var/www/testfiles, wget it from fossology.org
+	@$(foreach test_file, $(TEST_FILES), \
+	    if [ -e ../testdata/$(test_file) ]; then \
+	        echo "../testdata/$(test_file) exists"; \
+	    elif [ -e /var/www/testfiles/delagent/$(test_file) ]; then \
+	        echo "$(test_file) found in /var/www/testfiles/delagent"; \
+	        cp /var/www/testfiles/delagent/$(test_file) ../testdata; \
+	    else \
+	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
+	        wget --directory-prefix=../testdata http://www.fossology.org/testdata/delagent/$(test_file); \
+	    fi; \
+	)
+
+test: all testdata
 	@echo "make delagent functional test"
-	@if test ! -e ../testdata/testdb_all.tar ; then \
-	rsync -acv fonightly.usa.hp.com:/var/www/testfiles/delagent/ ../testdata/;\
-	fi;
 	phpunit --log-junit delagent-Xunit.xml $(TESTFILE)
 
 coverage:

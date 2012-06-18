@@ -2,6 +2,7 @@
 # Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
 TOP=../../../..
 VARS=$(TOP)/Makefile.conf
+DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 AGENTDIR=../../agent
 TESTDIR=$(TOP)/src/testing/lib/c
@@ -26,6 +27,10 @@ OBJS=	run_tests.o \
 
 FOCUNIT = libfocunit.a
 
+# list of the external test data files required by this test
+# UNLIKE MOST OTHER TESTS, these will be found in ../
+TEST_FILES = unpack-test-data.tar.bz2
+
 all: $(EXE)
 
 $(EXE): libununpack.a $(FOLIB) $(OBJS) $(VARS) $(FOCUNIT)
@@ -34,24 +39,34 @@ $(EXE): libununpack.a $(FOLIB) $(OBJS) $(VARS) $(FOCUNIT)
 $(OBJS): %.o: %.c 
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
-$(FOLIB):
-	$(MAKE) -C $(FOLIBDIR)
+# target to retrieve remote test data if it doesn't already exist
+# make sure your /etc/wgetrc file is configured correctly!
+testdata:
+	@echo "Retrieve test files"
+	@# for each test file specified, look for it in ../testdata
+	@# if it exists, do nothing.
+	@# if it does not exist, look in /var/www/testfiles
+	@# if not in /var/www/testfiles, wget it from fossology.org
+	@$(foreach test_file, $(TEST_FILES), \
+	    if [ -e ../$(test_file) ]; then \
+	        echo "../$(test_file) exists"; \
+	    elif [ -e /var/www/testfiles/$(test_file) ]; then \
+	        echo "$(test_file) found in /var/www/testfiles"; \
+	        cp /var/www/testfiles/$(test_file) ../; \
+	    else \
+	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
+	        wget --directory-prefix=../ http://www.fossology.org/testdata/$(test_file); \
+	    fi; \
+	)
 
-$(DATA):
-	@echo "Downloading ununpack data"
-	rsync -acv fonightly.usa.hp.com:/var/www/testfiles/unpack-test-data.tar.bz2 ..	
-	
 $(FOCUNIT):
 	$(MAKE) -C $(TESTDIR) $@
-	
-download: ../unpack-test-data.tar.bz2
-	@echo "untaring ununpack data"
-	cd ..; \
-	tar -xf unpack-test-data.tar.bz2; \
-	cd Unit
-	
-test: all download $(EXE)
+
+test: all testdata $(EXE)
 	@echo "Make test ununpack"
+	cd ../; \
+	tar -xf unpack-test-data.tar.bz2; \
+	cd ./Unit; \
 	./$(EXE)
 
 coverage: $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
@@ -71,4 +86,4 @@ clean:
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test download libununpack_cov.a libununpack.a $(DATA)
+.PHONY: all install uninstall clean test libununpack_cov.a libununpack.a 
