@@ -6,7 +6,7 @@
  * \mainpage Overview of $PROJECTDIR/src
  * Main source directory
  *
- * More developer information can be found at http://fossology.org/developer_documentation
+ * More developer information can be found at http://www.fossology.org/projects/fossology/wiki/Developer_Documentation
  *
  * \section libsection FOSSology C library
  * lib/ contains fossology.a and all the component files that go into this
@@ -17,7 +17,7 @@
  * under modules/ since there is both a backend and UI components.
  *
  * \section modsection modules 
- * The module directory structure can be found at  http://fossology.org/2.0:modulestruct
+ * The module directory structure can be found at  http://www.fossology.org/projects/fossology/wiki/Module_Structure
  *
  * \subsection subui ui/
  * \subsection subuitests ui_tests/
