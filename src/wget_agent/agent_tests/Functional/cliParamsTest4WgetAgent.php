@@ -40,6 +40,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     global $WGET_PATH;
     global $DB_COMMAND;
     global $DB_NAME;
+    global $db_conf;
 
     $db_conf = "";
 
@@ -183,6 +184,60 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/debian/1.3.0/fossology-scheduler-single_1.3.0~3780_amd64.deb");
     $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/debian/1.3.0/fossology-scheduler-single_1.3.0~3780_i386.deb");
     print "ending test functional wget agent \n";
+  }
+
+  /**
+   * \brief change proxy to test
+   */
+  function change_proxy($proxy_type, $porxy) {
+    global $db_conf;
+
+    $foss_conf = $db_conf."/fossology.conf";
+    exec("sudo sed 's/.$proxy_type.*=.*/$proxy_type=$porxy/' $foss_conf >/tmp/fossology.conf");
+    exec("sudo mv /tmp/fossology.conf $foss_conf");
+  }
+
+  /**
+   * \brief test proxy ftp
+   */
+  function test_proxy_ftp() {
+    global $db_conf;
+    global $TEST_RESULT_PATH;
+    global $WGET_PATH;
+    // ftp_proxy
+    $this->change_proxy("ftp_proxy", "web-proxy.cce.hp.com:8088");
+    $command = "$WGET_PATH ftp://ftp.gnu.org/gnu/wget/wget-1.10.1.tar.gz  -d $TEST_RESULT_PATH";
+    exec($command);
+    $this->assertFileExists("$TEST_RESULT_PATH/ftp.gnu.org/gnu/wget/wget-1.10.1.tar.gz");
+  }
+
+  /**
+   * \brief test proxy http
+   */
+  function test_proxy_http() {
+    global $db_conf;
+    global $TEST_RESULT_PATH;
+    global $WGET_PATH;
+    // http_proxy
+    $this->change_proxy("http_proxy", "web-proxy.cce.hp.com:8088");
+    $command = "$WGET_PATH http://www.fossology.org/rpms/fedora/10/x86_64/fossology-1.1.0-1.fc10.x86_64.rpm  -d $TEST_RESULT_PATH";
+    exec($command);
+    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/rpms/fedora/10/x86_64/fossology-1.1.0-1.fc10.x86_64.rpm");
+  }
+
+  /**
+   * \brief test proxy https
+   */
+  function test_proxy_https() {
+    global $db_conf;
+    global $TEST_RESULT_PATH;
+    global $WGET_PATH;
+
+    // https_proxy
+    $this->change_proxy("https_proxy", "web-proxy.cce.hp.com:8088");
+    $command = "$WGET_PATH https://www.google.com -l 1 -d $TEST_RESULT_PATH";
+    exec($command);
+    $this->assertFileExists("$TEST_RESULT_PATH/www.google.com");
   }
 
   /**
