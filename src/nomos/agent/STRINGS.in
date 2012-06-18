@@ -3058,6 +3058,11 @@ e /* (INFILE(j)) */
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"\<(either|or|alternately)\> =FEW= (\<mpl\>|mozilla public licen[cs]e)"
 #
+%ENTRY% _LT_MPL_SECONDARY
+%NOCHECK%
+%KEY%	"secondary license"
+%STR%	"secondary license =FEW= gnu"
+#
 %ENTRY%	_LT_MSCORP_1
 %KEY%	"distribut"
 %STR%	"may be copied and/?o?r? r?e?-?distributed royalty-free subject to the following conditions"
