@@ -87,7 +87,7 @@ class agent_copyright_once extends FO_Plugin {
     $Fin = fopen($TempFile, "r");
     if ($Fin) {
       $View->SortHighlightMenu();
-      $View->ShowView($Fin,$ModBack, 1,1,NULL,True);
+      $View->ShowView($Fin,$ModBack, 1,1,NULL,True, False);
       fclose($Fin);
     }
     if(!chdir($ui_dir)) {

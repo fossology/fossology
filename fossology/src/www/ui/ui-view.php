@@ -198,8 +198,12 @@ class ui_view extends FO_Plugin
 
   /**
    * \brief if there is a highlight menu, create it.
+   * 
+   * \param $PageBlockSize
+   * \param $ViewOnly     If true don't display match %
+   * \param $DispView     If true, display view link
    */
-  function GetHighlightMenu($PageBlockSize, $ViewOnly=False)
+  function GetHighlightMenu($PageBlockSize, $ViewOnly=False, $DispView=True)
   {
     if (empty($this->Highlight)) { return; }
     $First=1;
@@ -233,13 +237,19 @@ class ui_view extends FO_Plugin
         if ($PageBlockSize > 0)
         {
           $Page = intval($H['Start'] / $PageBlockSize);
-          $text = _("view");
-          $V .= "<a href='$Uri&page=$Page#" . $H['Index'] . "'>$text</a>";
+          if ($DispView)
+          {
+            $text = _("view");
+            $V .= "<a href='$Uri&page=$Page#" . $H['Index'] . "'>$text</a>";
+          }
         }
         else
         {
-          $text = _("view");
-          $V .= "<a href='#" . $H['Index'] . "'>$text</a>";
+          if ($DispView)
+          {
+            $text = _("view");
+            $V .= "<a href='#" . $H['Index'] . "'>$text</a>";
+          }
         }
         $V .= "</td>\n";
 
@@ -635,7 +645,7 @@ class ui_view extends FO_Plugin
    * \note This function is intended to be called from other plugins.
    */
   function ShowView($Fin=NULL, $BackMod="browse",
-  $ShowMenu=1, $ShowHeader=1, $ShowText=NULL, $ViewOnly=False)
+  $ShowMenu=1, $ShowHeader=1, $ShowText=NULL, $ViewOnly=False, $DispView=True)
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
@@ -770,7 +780,7 @@ class ui_view extends FO_Plugin
 
     if ($Format == 'hex')
     {
-      $HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_HEX, $ViewOnly);
+      $HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_HEX, $ViewOnly, $DispView);
       if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
       $PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_HEX,$Uri);
       $PageSize = VIEW_BLOCK_HEX * $Page;
@@ -780,7 +790,7 @@ class ui_view extends FO_Plugin
     }
     else if ($Format == 'text')
     {
-      $HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT, $ViewOnly);
+      $HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT, $ViewOnly, $DispView);
       if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
       $PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
       $PageSize = VIEW_BLOCK_TEXT * $Page;
@@ -790,7 +800,7 @@ class ui_view extends FO_Plugin
     }
     else if ($Format == 'flow')
     {
-      $HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT, $ViewOnly);
+      $HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT, $ViewOnly, $DispView);
       if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
       $PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
       $PageSize = VIEW_BLOCK_TEXT * $Page;
