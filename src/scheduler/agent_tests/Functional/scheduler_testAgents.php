@@ -95,7 +95,7 @@ class scheduler_testAgents extends PHPUnit_Framework_TestCase {
       $retval = system("$this->schedulerCli -S " . $this->cmdArgs[0]);
       $delimited = explode(':', $retval);
       sleep(5);
-    } while($delimited[0] != 'scheduler');
+    } while($delimited[0] != 'scheduler' && $delimited[0] != '');
     
     return;
   }
@@ -137,38 +137,36 @@ class scheduler_testAgents extends PHPUnit_Framework_TestCase {
     $returned_agents = explode(' ', $retval);
     
     $this->assertEquals($valid_agents, $returned_agents);
-  }
-  
-  /**
-   * @brief Tests that we get the correct status from the scheduler
-   * 
-   * The scheduler should not have any currently running agents. Therefore,
-   * the line returned by running am 'fo_cli -S' should be the simple scheduler
-   * line.
-   */
-  public function testSchedulerStatus()
-  {
+
+    /*
+     * @brief Tests that we get the correct status from the scheduler
+     *
+     * The scheduler should not have any currently running agents. Therefore,
+     * the line returned by running am 'fo_cli -S' should be the simple scheduler
+     * line.
+     * 
+     * TODO this should be in its own tests
+     */
     $retval = system("$this->schedulerCli -S " . $this->cmdArgs[0]);
     
     $compare = 'scheduler:' . ($this->schedPid + 2) . ' revision:(null) daemon:0 jobs:0 log:' .
-               $this->fakeAgents . '/fossology.log port:' .
-               $this->configuration['FOSSOLOGY']['port'] . ' verbose:952';
+            $this->fakeAgents . '/fossology.log port:' .
+            $this->configuration['FOSSOLOGY']['port'] . ' verbose:952';
     
     $this->assertEquals($compare, $retval);
-  }
-  
-  /**
-   * @biref Tests that we gets the correct load information from the scheduler
-   * 
-   * There is only 1 host and that is localhost so there should only be one
-   * line and it should be very simple to compare to.
-   */
-  public function testSchedulerLoad()
-  {
+
+    /*
+     * @biref Tests that we gets the correct load information from the scheduler
+     *
+     * There is only 1 host and that is localhost so there should only be one
+     * line and it should be very simple to compare to.
+     * 
+     * TODO this should be in its own tests
+     */
     $retval = system("$this->schedulerCli -l " . $this->cmdArgs[0]);
     
     $compare = 'host:localhost address:' .
-               $this->configuration['FOSSOLOGY']['address'] . ' max:10 running:0';
+            $this->configuration['FOSSOLOGY']['address'] . ' max:10 running:0';
     
     $this->assertEquals($compare, $retval);
   }
