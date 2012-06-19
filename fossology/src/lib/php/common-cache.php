@@ -54,7 +54,7 @@ function ReportCacheGet($CacheKey)
   /* Purge old entries ~ 1/500 of the times this fcn is called */
   if ( rand(1,500) == 1)
   {
-    ReportCachePurgeByDate(" now() - interval '30 days'");
+    ReportCachePurgeByDate(" now() - interval '365 days'");
   }
 
   /** Check if user has cache turned off by default it is on for everyone.
