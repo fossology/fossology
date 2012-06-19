@@ -764,8 +764,12 @@ void database_update_event(void* unused)
     pfile  =      PQget(db_result, i, "jq_runonpfile");
     value  =      PQget(db_result, i, "jq_args");
 
-    V_DATABASE("DB: jq_pk[%d] added:\n   jq_type = %s\n   jq_runonpfile = %d\n   jq_args = %s\n",
-        j_id, type, (pfile != NULL && pfile[0] != '\0'), value);
+    /* check if host is actually NULL */
+    host = (strlen(host) == 0) ? NULL : host;
+
+    V_DATABASE("DB: jq_pk[%d] added:\n   jq_type = %s\n   jq_host = %s\n   "
+        "jq_runonpfile = %d\n   jq_args = %s\n",
+        j_id, type, host, (pfile != NULL && pfile[0] != '\0'), value);
 
     /* check if this is a command */
     if(strcmp(type, "command") == 0)
