@@ -323,6 +323,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   char *p_no_proxy = NULL;
   char no_proxy[MAXCMD] = {0};
   char proxy[MAXCMD] = {0};
+  char proxy_temp[MAXCMD] = {0};
   GError* error1 = NULL;
   GError* error2 = NULL;
   GError* error3 = NULL;
@@ -336,15 +337,18 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   /** set proxy */
   if (http_proxy && http_proxy[0])
   {
-    snprintf(proxy, MAXCMD-1, " export http_proxy='%s' ;", http_proxy);
+    snprintf(proxy_temp, MAXCMD-1, "export http_proxy='%s' ;", http_proxy);
+    strcat(proxy, proxy_temp);
   }
   if (https_proxy && https_proxy[0])
   {
-    snprintf(proxy, MAXCMD-1, "%s export https_proxy='%s' ;", proxy, https_proxy);
+    snprintf(proxy_temp, MAXCMD-1, "export https_proxy='%s' ;", https_proxy);
+    strcat(proxy, proxy_temp);
   }
   if (ftp_proxy && ftp_proxy[0])
   {
-    snprintf(proxy, MAXCMD-1, "%s export ftp_proxy='%s' ;", proxy, ftp_proxy);
+    snprintf(proxy_temp, MAXCMD-1, "export ftp_proxy='%s' ;", ftp_proxy);
+    strcat(proxy, proxy_temp);
   }
   if (p_no_proxy && p_no_proxy[0])
   {
