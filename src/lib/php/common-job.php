@@ -134,7 +134,7 @@ function JobAddJob($user_pk, $job_name, $upload_pk=0, $priority=0)
  * @return new jobqueue key (jobqueue.jq_pk), or null on failure
  *
  */
-function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends)
+function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $host = NULL)
 {
   global $PG_CONN;
   $jq_args = pg_escape_string($jq_args);
@@ -163,13 +163,13 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends)
 
   /* Add the job */
   $sql = "INSERT INTO jobqueue ";
-  $sql.= "(jq_job_fk,jq_type,jq_args,jq_runonpfile,jq_starttime,jq_endtime,jq_end_bits) VALUES ";
+  $sql.= "(jq_job_fk,jq_type,jq_args,jq_runonpfile,jq_starttime,jq_endtime,jq_end_bits,jq_host) VALUES ";
   $sql.= "('$job_pk','$jq_type','$jq_args',";
   if (empty($jq_runonpfile))
     $sql.= "NULL";
   else 
     $sql.= "'$jq_runonpfile'";
-  $sql.= ",NULL,NULL,0);";
+  $sql.= ",NULL,NULL,0,'$host');";
 
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);

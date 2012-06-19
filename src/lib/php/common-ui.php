@@ -130,6 +130,24 @@ function GetArrayVal($Key, $Arr)
   return "";
 }
 
+/**
+ * \brief get host list
+ *
+ * \return return HTML of the host name tree
+ */
+function HostListOption()
+{
+  global $SysConf;
+  $options = "";
+  $i = 0;
+  foreach($SysConf['HOSTS'] as $key=>$value)
+  {
+    $options .= "<option value='$key' SELECTED> $key </option>\n";
+    $i++;
+  }
+  if (1 == $i) return ""; // if only have one host, does not display
+  return $options;
+}
 
 /**
  * \brief send the download file to the user
