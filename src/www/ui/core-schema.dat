@@ -793,6 +793,11 @@
   $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_runonpfile\" DROP NOT NULL;";
   $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["jobqueue"]["jq_host"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_host\" IS 'Field that specify the job run on this host';";
+  $Schema["TABLE"]["jobqueue"]["jq_host"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_host\" text;";
+  $Schema["TABLE"]["jobqueue"]["jq_host"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_host\" DROP NOT NULL;";
+  $Schema["TABLE"]["jobqueue"]["jq_host"]["UPDATE"] = "";
+
 
   $Schema["TABLE"]["key"]["key_pk"]["DESC"] = "";
   $Schema["TABLE"]["key"]["key_pk"]["ADD"] = "ALTER TABLE \"key\" ADD COLUMN \"key_pk\" int4;";
