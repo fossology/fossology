@@ -43,7 +43,7 @@ class upload_srv_files extends FO_Plugin {
    *
    * \return NULL on success, string on failure.
    */
-  function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name) {
+  function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName) {
     global $Plugins;
     global $SysConf;
 
@@ -118,7 +118,7 @@ class upload_srv_files extends FO_Plugin {
 
     $jq_args = "$uploadpk - $SourceFiles";
 
-    $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL);
+    $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL, $HostName );
     if (empty($jobqueuepk)) {
       $text = _("Failed to insert task 'wget' into job queue");
       return ($text);
@@ -157,10 +157,11 @@ class upload_srv_files extends FO_Plugin {
         $SourceFiles = GetParm('sourcefiles', PARM_STRING);
         $GroupNames = GetParm('groupnames', PARM_INTEGER);
         $FolderPk = GetParm('folder', PARM_INTEGER);
+        $HostName = GetParm('host', PARM_STRING);
         $Desc = GetParm('description', PARM_STRING); // may be null
         $Name = GetParm('name', PARM_STRING); // may be null
         if (!empty($SourceFiles) && !empty($FolderPk)) {
-          $rc = $this->Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name);
+          $rc = $this->Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName);
           if (empty($rc)) {
             // clear form fileds
             $SourceFiles = NULL;
@@ -190,6 +191,12 @@ class upload_srv_files extends FO_Plugin {
         $V.= "</select>\n";
         $text = _("Select the directory or file(s) on the server to upload:");
         $V.= "<p><li>$text<br />\n";
+        $hostlist = HostListOption();
+        if ($hostlist) { // if only one host, do not display it
+          $V.= "<select name='host'>\n";
+          $V.= $hostlist;
+          $V.= "</select>\n";
+        }
         $V.= "<input type='text' name='sourcefiles' size='60' value='" . htmlentities($SourceFiles, ENT_QUOTES) . "'/><br />\n";
         $text = _("NOTE");
         $text1 = _(": Contents under a directory will be recursively included.");

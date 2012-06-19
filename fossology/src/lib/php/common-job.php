@@ -169,7 +169,11 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
     $sql.= "NULL";
   else 
     $sql.= "'$jq_runonpfile'";
-  $sql.= ",NULL,NULL,0,'$host');";
+  $sql.= ",NULL,NULL,0,";
+  if ($host)
+    $sql.="'$host');";
+  else
+    $sql.="NULL);";
 
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
