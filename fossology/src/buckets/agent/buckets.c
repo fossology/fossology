@@ -60,8 +60,6 @@ int main(int argc, char **argv)
   int rv;
   int hasPrules;
   char *bucketpool_name;
-  char DBConfFile[1024];
-  char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
   char agent_rev[myBUFSIZ];
