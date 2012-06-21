@@ -94,7 +94,7 @@ function AgentHasResults($upload_pk)
   /* get the latest bucket agent_pk */
   $Latest_bucket_agent_pk = GetAgentKey($this->AgentName, "Bucket scanner");
 
-  if (empty($Latest_nomos_agent_pk) || empty($Latest_bucket_agent_pk)) return 0; // no any nomos or bucket agent in ars table
+  if (empty($Latest_nomos_agent_pk) || empty($Latest_bucket_agent_pk)) return 0; // no any nomos or bucket agent in agent table
 
   /* see if the latest nomos and bucket agents have scaned this upload for this bucketpool */
   $bucket_arsRec = GetSingleRec("bucket_ars", "where bucketpool_fk='$default_bucketpool_fk' and upload_fk='$upload_pk' and nomosagent_fk='$Latest_nomos_agent_pk' and agent_fk='$Latest_bucket_agent_pk' and ars_success='true'");
