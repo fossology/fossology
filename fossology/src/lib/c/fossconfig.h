@@ -34,6 +34,7 @@ typedef enum
   fo_invalid_key,
   fo_invalid_group,
   fo_invalid_file,
+  fo_invalid_join,
   fo_load_config
 } fo_error_codes;
 
@@ -46,6 +47,7 @@ typedef struct {
 
 fo_conf* fo_config_load(char* fname, GError** error);
 void     fo_config_free(fo_conf* conf);
+void     fo_config_join(fo_conf* dst, fo_conf* src, GError** error);
 
 char* fo_config_get(fo_conf* conf, char* group, char* key, GError** error);
 char* fo_config_get_list(fo_conf* conf, char* group, char* key, int idx, GError** error);

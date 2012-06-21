@@ -31,16 +31,42 @@ int main(int argc, char** argv)
   int j, nkeys;
   int k, nlist;
   fo_conf* config;
+  fo_conf* tmp;
+
+  if(argc < 2)
+  {
+    fprintf(stderr, "Usage: %s ini1 ini2 ... iniN\n", argv[0]);
+    return 255;
+  }
 
   config = fo_config_load(argv[1], &error);
 
   if(error)
   {
     fprintf(stderr, "ERROR: %s\n", error->message);
-    fprintf(stderr, "ERROR: errno = %s\n", strerror(errno));
-    return -1;
+    return 254;
   }
 
+  for(i = 2; i < argc; i++)
+  {
+    tmp = fo_config_load(argv[i], &error);
+
+    if(error)
+    {
+      fprintf(stderr, "ERROR: %s\n", error->message);
+      return 254;
+    }
+
+    fo_config_join(config, tmp, &error);
+
+    if(error)
+    {
+      fprintf(stderr, "ERROR: %s\n", error->message);
+      return 253;
+    }
+
+    fo_config_free(tmp);
+  }
 
   groups = fo_config_group_set(config, &ngrps);
   for(i = 0; i < ngrps; i++)
