@@ -31,11 +31,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 int main(int argc, char** argv)
 {
-  fo_scheduler_connect(&argc, argv);
-  fo_scheduler_connect(&argc, argv);
+  PGconn* db_conn;
+
+  fo_scheduler_connect(&argc, argv, &db_conn);
+  fo_scheduler_connect(&argc, argv, &db_conn);
 
   fo_scheduler_next();
   fo_scheduler_disconnect(0);
 
+  PQfinish(db_conn);
   return 0;
 }
