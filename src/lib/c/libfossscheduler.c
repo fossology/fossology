@@ -195,7 +195,7 @@ void  fo_scheduler_heart(int i)
  *
  * @param argc
  * @param argv
- * @returns void
+ * @return void
  */
 void fo_scheduler_connect(int* argc, char** argv)
 {
@@ -216,6 +216,7 @@ void fo_scheduler_connect(int* argc, char** argv)
 
   /* initialize memory associated with agent connection */
   module_name     = g_strdup(basename(argv[0]));
+  sysconfigdir    = NULL;
   items_processed = 0;
   valid           = 0;
   sscheduler      = 0;
@@ -229,6 +230,9 @@ void fo_scheduler_connect(int* argc, char** argv)
     return;
   }
 
+  if(getenv("FO_SYSCONFDIR"))
+    sysconfigdir = getenv("FO_SYSCONFDIR");
+
   /* parse command line options */
   parsed = g_option_context_new("");
   g_option_context_add_main_entries(parsed, options, NULL);
@@ -236,8 +240,6 @@ void fo_scheduler_connect(int* argc, char** argv)
   g_option_context_set_help_enabled(parsed, FALSE);
   g_option_context_parse(parsed, argc, &argv, NULL);
   g_option_context_free(parsed);
-
-  if (NULL == sysconfigdir) sysconfigdir = DEFAULT_SETUP;
 
   /* load system configuration */
   if(sysconfigdir) {
@@ -261,11 +263,14 @@ void fo_scheduler_connect(int* argc, char** argv)
       exit(254);
     }
 
-    if((keys = g_tree_lookup(version->group_map, module_name)) != NULL)
+    fo_config_join(sysconfig, version, error);
+    if(error)
     {
-      keys = g_tree_ref(keys);
-      g_tree_insert(sysconfig->group_map, g_strdup(module_name), keys);
+      fprintf(stderr, "FATAL %s.%d: unable to oin configuration files: %s\n",
+          __FILE__, __LINE__, error->message);
+      exit(250);
     }
+
 
     fo_config_free(version);
   }

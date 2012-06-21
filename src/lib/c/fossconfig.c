@@ -294,7 +294,7 @@ fo_conf* fo_config_load(char* rawname, GError** error) {
   ret->group_set = NULL;
   ret->n_groups = 0;
   ret->group_map = g_tree_new_full(str_comp, NULL, g_free,
-      (GDestroyNotify)g_tree_destroy);
+      (GDestroyNotify)g_tree_unref);
 
   GTree* g_current = NULL;
 
@@ -505,6 +505,43 @@ void fo_config_free(fo_conf* conf)
   conf->group_set = NULL;
 
   g_free(conf);
+}
+
+/**
+ * @brief takes all groups and key from a fo_conf and adds them to another.
+ *
+ * This will iterate across the groups of a configuration and add each to
+ * another configuration. This joins the two configurations, making it possible
+ * to see multiple configuration files as a single configuration.
+ *
+ * @param dst    the destination for all the information in src
+ * @param src    the information that will be duplicated into dst
+ * @param error  a location to returns errors from
+ */
+void fo_config_join(fo_conf* dst, fo_conf* src, GError** error)
+{
+  int ngroups, i;
+  char** groups = fo_config_group_set(src, &ngroups);
+  GTree* keys;
+
+  /* before making any changes, check that there are no conflicts */
+  for(i = 0; i < ngroups; i++)
+  {
+    if(fo_config_has_group(dst, groups[i]))
+    {
+      g_set_error(error, RETRIEVE_ERROR, fo_invalid_join,
+          "Cannot join configuration with conflicting group \"%s\"", groups[i]);
+      return;
+    }
+  }
+
+  /* join the two configurations */
+  for(i = 0; i < ngroups; i++)
+  {
+    keys = g_tree_lookup(src->group_map, groups[i]);
+    keys = g_tree_ref(keys);
+    g_tree_insert(dst->group_map, g_strdup(groups[i]), keys);
+  }
 }
 
 /* ************************************************************************** */
