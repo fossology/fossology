@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -29,139 +29,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/stat.h>
 #include <sys/mman.h>
 
-/* ************************************************************************** */
-/* **** data and sql statements ********************************************* */
-/* ************************************************************************** */
-
 PGconn* db_conn = NULL;
 char fossy_url[FILENAME_MAX];
 
-/* email related sql */
-const char* url_checkout = "\
-    SELECT conf_value FROM sysconfig \
-      WHERE variablename = 'FOSSologyURL';";
-
-const char* select_upload_fk =" \
-    SELECT job_upload_fk FROM job, jobqueue \
-      WHERE jq_job_fk = job_pk AND jq_pk = %d;";
-
-const char* upload_common = "\
-    SELECT * FROM jobqueue \
-      WHERE jq_job_fk IN ( \
-        SELECT job_pk FROM job \
-          WHERE job_upload_fk = %d \
-      );";
-
-const char* folder_name = "\
-    SELECT folder_name FROM folder \
-      WHERE folder_pk IN ( \
-        SELECT parent_fk FROM foldercontents \
-          WHERE foldercontents_mode = 2 AND child_id = ( \
-            SELECT job_upload_fk FROM job, jobqueue \
-              WHERE jq_job_fk = job_pk AND jq_pk = %d \
-          ) \
-      );";
-
-const char* upload_name = "\
-    SELECT upload_filename FROM upload \
-      WHERE upload_pk = ( \
-        SELECT job_upload_fk FROM job, jobqueue \
-          WHERE jq_job_fk = job_pk AND jq_pk = %d \
-      );";
-
-const char* upload_pk = "\
-    SELECT upload_fk, uploadtree_pk FROM uploadtree \
-      WHERE parent IS NULL AND upload_fk = ( \
-        SELECT job_upload_fk FROM job, jobqueue \
-          WHERE jq_job_fk = job_pk AND jq_pk = %d \
-      );";
-
-const char* jobsql_email = "\
-    SELECT user_name, user_email, email_notify FROM users, upload \
-      WHERE user_pk = user_fk AND upload_pk = %d;";
-
-/* job queue related sql */
-const char* basic_checkout = "\
-    SELECT * FROM getrunnable()\
-      LIMIT 10;";
-
-const char* change_priority = "\
-    SELECT job_priority FROM job \
-      WHERE job_pk = %s;";
-
-const char* jobsql_started = "\
-    UPDATE jobqueue \
-      SET jq_starttime = now(), \
-          jq_schedinfo ='%s.%d', \
-          jq_endtext = 'Started' \
-      WHERE jq_pk = '%d';";
-
-const char* jobsql_complete = "\
-    UPDATE jobqueue \
-      SET jq_endtime = now(), \
-          jq_end_bits = jq_end_bits | 1, \
-          jq_schedinfo = null, \
-          jq_endtext = 'Completed' \
-      WHERE jq_pk = '%d';";
-
-const char* jobsql_restart = "\
-    UPDATE jobqueue \
-      SET jq_endtext = 'Restarted', \
-          jq_starttime = ( CASE \
-            WHEN jq_starttime = CAST('9999-12-31' AS timestamp with time zone) \
-            THEN null \
-            ELSE jq_starttime \
-          END ) \
-      WHERE jq_pk = '%d';";
-
-const char* jobsql_failed = "\
-    UPDATE jobqueue \
-      SET jq_endtime = now(), \
-          jq_end_bits = jq_end_bits | 2, \
-          jq_schedinfo = null, \
-          jq_endtext = '%s' \
-      WHERE jq_pk = '%d';";
-
-const char* jobsql_processed = "\
-    Update jobqueue \
-      SET jq_itemsprocessed = %d \
-      WHERE jq_pk = '%d';";
-
-const char* jobsql_paused = "\
-    UPDATE jobqueue \
-      SET jq_endtext = 'Paused', \
-          jq_starttime = ( CASE \
-            WHEN jq_starttime IS NULL \
-            THEN CAST('9999-12-31' AS timestamp with time zone) \
-            ELSE jq_starttime \
-          END ) \
-      WHERE jq_pk = '%d';";
-
-const char* jobsql_log = "\
-    UPDATE jobqueue \
-      SET jq_log = '%s' \
-      WHERE jq_pk = '%d';";
-
-const char* jobsql_priority = "\
-    UPDATE job \
-      SET job_priority = '%d' \
-      WHERE job_pk IN ( \
-        SELECT jq_job_fk FROM jobqueue \
-        WHERE jq_pk = '%d');";
-
-const char* jobsql_anyrunnable = "\
-    SELECT * FROM getrunnable() \
-      WHERE jq_job_fk = ( \
-        SELECT jq_job_fk FROM jobqueue \
-          WHERE jq_pk = %d \
-      );";
-
-const char* jobsql_jobendbits = "\
-    SELECT jq_pk, jq_end_bits FROM jobqueue \
-      WHERE jq_job_fk = ( \
-        SELECT jq_job_fk FROM jobqueue \
-          WHERE jq_pk = %d \
-      );";
+#include <sqlstatements.h>
 
 /* ************************************************************************** */
 /* *** email notification                                                 *** */
@@ -505,6 +376,7 @@ static void email_notification(job j)
     g_string_append(email_txt, job_message(j));
     g_string_append(email_txt, email_footer);
 
+
     if(email_regex != NULL)
     {
       val = g_regex_replace_eval(email_regex, email_txt->str, email_txt->len,
@@ -648,6 +520,107 @@ void email_load()
 /* ************************************************************************** */
 
 /**
+ * @brief Data type used to check if the database is correct.
+ *
+ * This will be statically initialized in the check_tables() function.
+ */
+typedef struct
+{
+    char* table;        ///< The name of the table to check columns in
+    uint8_t ncols;      ///< The number of columns in the table that the scheduler uses
+    char* columns[13];  ///< The columns that the scheduler uses for this table
+} reqcols;
+
+/**
+ * @brief Checks that any part of the database used by the scheduler is correct
+ *
+ * This has a static list of all tables and the associated columns used by the
+ * scheduler. If any changes that affect the tables and columns used by the
+ * scheduler are made, this static list should be updated.
+ */
+static void check_tables()
+{
+  /* locals */
+  PGresult* db_result;
+  GString* sql;
+  reqcols* curr;
+  uint32_t i;
+  uint32_t curr_row;
+  int passed = TRUE;
+
+  /* All of the tables and columns that the scheduler uses
+   *
+   * Note: the columns should be listed in alphabetical order, if they are not
+   *       then the error messages that result will be erroneous
+   */
+  reqcols cols[] =
+  {
+      {"jobqueue",  13, {
+          "jq_args", "jq_end_bits", "jq_endtext", "jq_endtime", "jq_host",
+          "jq_itemsprocessed", "jq_job_fk", "jq_log", "jq_pk", "jq_runonpfile",
+          "jq_schedinfo", "jq_starttime", "jq_type"                                  }},
+      {"sysconfig",      2, {"conf_value", "variablename"                            }},
+      {"job",            2, {"job_pk",  "job_upload_fk"                              }},
+      {"folder",         2, {"folder_name",  "folder_pk"                             }},
+      {"foldercontents", 3, {"child_id",  "foldercontents_mode",  "parent_fk"        }},
+      {"upload",         2, {"upload_filename",  "upload_pk"                         }},
+      {"uploadtree",     3, {"parent",  "upload_fk",  "uploadtree_pk"                }},
+      {"users",          4, {"email_notify",  "user_email",  "user_name",  "user_pk" }},
+      { NULL }
+  };
+
+  /* iterate accros every require table and column */
+  for(curr = cols; curr->table; curr++)
+  {
+    /* build the sql statement */
+    sql = g_string_new(check_scheduler_tables);
+    g_string_append_printf(sql, "'%s' AND column_name IN (", curr->table);
+    for(i = 0; i < curr->ncols; i++)
+    {
+      g_string_append_printf(sql, "'%s'", curr->columns[i]);
+      if(i != curr->ncols - 1)
+        g_string_append(sql, ", ");
+    }
+    g_string_append(sql, ") ORDER BY column_name;");
+
+    /* execute the sql */
+    db_result = PQexec(db_conn, sql->str);
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+    {
+      passed = FALSE;
+      PQ_ERROR(db_result, "could not check database tables");
+      break;
+    }
+
+    /* check that the correct number of columns was returned */
+    if(PQntuples(db_result) != curr->ncols)
+    {
+      /* we have failed the database check */
+      passed = FALSE;
+
+      /* print the columns that do not exist */
+      for(i = 0, curr_row = 0; i < curr->ncols; i++)
+      {
+        if(strcmp(PQgetvalue(db_result, curr_row, 0), curr->columns[i]) != 0)
+          ERROR("Column %s.%s does not exist", curr->table, curr->columns[i]);
+        else
+          curr_row++;
+      }
+    }
+
+    PQclear(db_result);
+    g_string_free(sql, TRUE);
+  }
+
+  if(!passed)
+  {
+    lprintf("FATAL %s.%d: Scheduler did not pass database check\n", __FILE__, __LINE__);
+    lprintf("FATAL %s.%d: Running fo_postinstall should fix these issues\n", __FILE__, __LINE__);
+    exit(230);
+  }
+}
+
+/**
  * Initializes any one-time attributes relating to the database. Currently this
  * includes creating the db connection and checking the URL of the FOSSology
  * instance out of the db.
@@ -655,8 +628,8 @@ void email_load()
 void database_init()
 {
   PGresult* db_result;
-  gchar *DBConfFile = NULL;
-  char *ErrorBuf;
+  gchar* DBConfFile = NULL;
+  char* ErrorBuf;
 
   /* create the connection to the database */
   DBConfFile = g_strdup_printf("%s/Db.conf", sysconfigdir);
@@ -671,6 +644,10 @@ void database_init()
   }
   PQclear(db_result);
 
+  /* check that relevant database fields exist */
+  check_tables();
+
+  /* load the email information */
   email_header = NULL;
   email_footer = NULL;
   email_subject = NULL;
@@ -750,7 +727,8 @@ void database_update_event(void* unused)
     return;
   }
 
-  V_SPECIAL("DB: retrieved %d entries from the job queue\n", PQntuples(db_result));
+  V_SPECIAL("DB: retrieved %d entries from the job queue\n",
+      PQntuples(db_result));
   for(i = 0; i < PQntuples(db_result); i++)
   {
     /* start by checking that the job hasn't already been grabbed */
@@ -764,8 +742,8 @@ void database_update_event(void* unused)
     pfile  =      PQget(db_result, i, "jq_runonpfile");
     value  =      PQget(db_result, i, "jq_args");
 
-    /* check if host is actually NULL */
-    host = (strlen(host) == 0) ? NULL : host;
+    if(host != NULL)
+      host = (strlen(host) == 0) ? NULL : host;
 
     V_DATABASE("DB: jq_pk[%d] added:\n   jq_type = %s\n   jq_host = %s\n   "
         "jq_runonpfile = %d\n   jq_args = %s\n",
@@ -774,7 +752,8 @@ void database_update_event(void* unused)
     /* check if this is a command */
     if(strcmp(type, "command") == 0)
     {
-      WARNING("DB: commands in the job queue not implemented, using the interface api instead");
+      WARNING("DB: commands in the job queue not implemented,"
+          " using the interface api instead");
       continue;
     }
 
