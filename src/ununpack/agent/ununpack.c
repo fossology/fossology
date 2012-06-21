@@ -34,7 +34,7 @@ int	main(int argc, char *argv[])
   char *ListOutName=NULL;
   char *Fname = NULL;
   char *FnameCheck = NULL;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  char DBConfFile[1024];
   char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
@@ -43,6 +43,9 @@ int	main(int argc, char *argv[])
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv);
+
+  memset(DBConfFile, 0, sizeof(DBConfFile));
+  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
 
   while((c = getopt(argc,argv,"ACc:d:FfHL:m:PQiqRr:T:t:U:vXx")) != -1)
   {

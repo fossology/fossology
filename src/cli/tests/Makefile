@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -14,19 +14,17 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+all:
 
-all: 
+test:
+	@echo "make functional test for cli scripts"
+	phpunit --log-junit cli-Xunit.xml -c tests.xml
 
-test: all
-	@echo "make unit test for commom php files"
-	phpunit --log-junit lib-php-Xunit.xml --configuration tests.xml
+coverage:
+	@echo "no coverage for cli/tests"
 
-coverage: all
-	@echo "make unit coverage for commom php files"
-	phpunit --coverage-html ./results -c tests.xml
 
 clean:
-# note do not remove *.xml, it remove the php unit config file tests.xml
-	rm -rf lib-php-Xunit.xml results
+	rm -f cli-Xunit.xml
 
-.PHONY: all test coverage clean 
+.PHONY: all test coverage clean

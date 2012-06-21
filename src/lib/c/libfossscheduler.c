@@ -215,7 +215,6 @@ void fo_scheduler_connect(int* argc, char** argv)
   };
 
   /* initialize memory associated with agent connection */
-  sysconfigdir    = DEFAULT_SETUP;
   module_name     = g_strdup(basename(argv[0]));
   items_processed = 0;
   valid           = 0;
@@ -237,6 +236,8 @@ void fo_scheduler_connect(int* argc, char** argv)
   g_option_context_set_help_enabled(parsed, FALSE);
   g_option_context_parse(parsed, argc, &argv, NULL);
   g_option_context_free(parsed);
+
+  if (NULL == sysconfigdir) sysconfigdir = DEFAULT_SETUP;
 
   /* load system configuration */
   if(sysconfigdir) {

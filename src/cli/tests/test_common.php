@@ -127,6 +127,7 @@
       exec("sed s/repository/$REPO_NAME/ $file_name > /tmp/tmp.conf");
       exec("sudo mv /tmp/tmp.conf $file_name");
     }
+    if (is_dir($REPO_NAME)) exec("sudo chmod 2770 $REPO_NAME"); /// change mode to 2770
   }
 
   /**

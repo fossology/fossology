@@ -60,7 +60,7 @@ int main(int argc, char **argv)
   int rv;
   int hasPrules;
   char *bucketpool_name;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  char DBConfFile[1024];
   char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
@@ -77,6 +77,8 @@ int main(int argc, char **argv)
   fo_scheduler_connect(&argc, argv);
 
   /* Connect to the database */
+  memset(DBConfFile, 0, sizeof(DBConfFile));
+  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!pgConn) 
   {

@@ -766,7 +766,7 @@ int main(int argc, char** argv)
   int ars_pk = 0;               // the args primary key
   long upload_pk = 0;           // the upload primary key
   long agent_pk = 0;            // the agents primary key
-  char *DBConfFile = NULL;      /* use default Db.conf */
+  char DBConfFile[FILENAME_MAX];
   char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
@@ -792,6 +792,9 @@ int main(int argc, char** argv)
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv);
+
+  memset(DBConfFile, 0, sizeof(DBConfFile));
+  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
 
   /* initialize complex data strcutres */
   memset(copy_buf, '\0', sizeof(copy_buf));

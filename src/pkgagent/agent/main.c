@@ -77,7 +77,7 @@ int	main	(int argc, char *argv[])
   int rv;
   PGresult *ars_result;
   char sqlbuf[1024]; 
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  char DBConfFile[1024];
   char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
@@ -88,6 +88,9 @@ int	main	(int argc, char *argv[])
 
   //glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   //glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+
+  memset(DBConfFile, 0, sizeof(DBConfFile));
+  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
 
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   if (!db_conn)

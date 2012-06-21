@@ -788,8 +788,7 @@ int main(int argc, char **argv)
   char *SVN_REV;
   char *VERSION;
   char agent_rev[myBUFSIZ];
-
-
+  char DBConfFile[1024];
   cacheroot_t cacheroot;
 
   /* connect to the scheduler */
@@ -812,7 +811,9 @@ int main(int argc, char **argv)
     Set up variables global to the agent. Ones that are the
     same for all scans.
    */
-  gl.pgConn = fo_dbconnect(NULL, &pErrorBuf);
+  memset(DBConfFile, 0, sizeof(DBConfFile));
+  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
+  gl.pgConn = fo_dbconnect(DBConfFile, &pErrorBuf);
   if (!gl.pgConn)
   {
     LOG_FATAL("Nomos unable to connect to database.  Error: %s. Exiting...\n", pErrorBuf)
