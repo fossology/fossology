@@ -488,7 +488,7 @@ int	main	(int argc, char *argv[])
   int c, i;
   long UploadPk=-1;
   PGresult *pgResult;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  char DBConfFile[1024];
   char *ErrorBuf;
   long *uploads_to_scan;
   int  upload_count = 0;
@@ -500,6 +500,8 @@ int	main	(int argc, char *argv[])
   uploads_to_scan = calloc(argc, sizeof(long));
 
   /* open the database */
+  memset(DBConfFile, 0, sizeof(DBConfFile));
+  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
 
   if(!pgConn)

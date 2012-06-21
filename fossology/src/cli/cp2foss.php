@@ -325,6 +325,7 @@ $passwd = "";
 for ($i = 1;$i < $argc;$i++) {
   switch ($argv[$i]) {
     case '-c':
+      $i++;
       break; /* handled in fo_wrapper */
     case '-h':
     case '-?':

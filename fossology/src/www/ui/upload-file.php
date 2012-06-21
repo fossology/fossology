@@ -44,6 +44,7 @@ class upload_file extends FO_Plugin {
   {
     global $MODDIR;
     global $SysConf;
+    global $SYSCONFDIR;
 
     define("UPLOAD_ERR_EMPTY",5);
     define("UPLOAD_ERR_INVALID_FOLDER_PK",100);
@@ -93,7 +94,7 @@ class upload_file extends FO_Plugin {
     }
 
     /* Run wget_agent locally to import the file. */
-    $Prog = "$MODDIR/wget_agent/agent/wget_agent -C -g fossy -k $uploadpk '$UploadedFile'";
+    $Prog = "$MODDIR/wget_agent/agent/wget_agent -C -g fossy -k $uploadpk '$UploadedFile' -c '$SYSCONFDIR'";
     $wgetOut = array();
     $wgetLast = exec($Prog,$wgetOut,$wgetRtn);
     unlink($UploadedFile);

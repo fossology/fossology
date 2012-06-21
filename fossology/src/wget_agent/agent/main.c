@@ -82,14 +82,16 @@ int main  (int argc, char *argv[])
   GlobalUploadKey = -1;
   int upload_pk = 0;           // the upload primary key
   int Agent_pk;
-  char *DBConfFile = NULL;  /* use default Db.conf */
+  char DBConfFile[1024];
   char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
   char agent_rev[MAXCMD];
 
-
   fo_scheduler_connect(&argc, argv);
+
+  memset(DBConfFile, 0, sizeof(DBConfFile));
+  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:Cc:")) != -1)
