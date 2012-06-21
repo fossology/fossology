@@ -31,14 +31,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 int main(int argc, char** argv)
 {
-  printf("before connect\n");
+  PGconn* db_conn;
 
-  fo_scheduler_connect(&argc, argv);
+  printf("before connect");
+
+  fo_scheduler_connect(&argc, argv, &db_conn);
   if(fo_scheduler_next() == NULL)
     fo_scheduler_disconnect(0);
   else
     fo_scheduler_disconnect(-1);
 
+  PQfinish(db_conn);
   return 0;
 
 }

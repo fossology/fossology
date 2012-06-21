@@ -779,7 +779,6 @@ int main(int argc, char **argv)
   char *AgentARSName = "nomos_ars";
 
   char *cp;
-  char *pErrorBuf;
   char sErrorBuf[1024];
   char *agent_desc = "License Scanner";
   char **files_to_be_scanned; /**< The list of files to scan */
@@ -788,7 +787,6 @@ int main(int argc, char **argv)
   char *SVN_REV;
   char *VERSION;
   char agent_rev[myBUFSIZ];
-  char DBConfFile[1024];
   cacheroot_t cacheroot;
 
   /* connect to the scheduler */
