@@ -766,8 +766,6 @@ int main(int argc, char** argv)
   int ars_pk = 0;               // the args primary key
   long upload_pk = 0;           // the upload primary key
   long agent_pk = 0;            // the agents primary key
-  char DBConfFile[FILENAME_MAX];
-  char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
   char agent_rev[myBUFSIZ];
@@ -791,10 +789,7 @@ int main(int argc, char** argv)
   cin = stdin;
 
   /* connect to the scheduler */
-  fo_scheduler_connect(&argc, argv);
-
-  memset(DBConfFile, 0, sizeof(DBConfFile));
-  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
+  fo_scheduler_connect(&argc, argv, &pgConn);
 
   /* initialize complex data strcutres */
   memset(copy_buf, '\0', sizeof(copy_buf));
@@ -846,11 +841,6 @@ int main(int argc, char** argv)
         copyright_destroy(copy);
         return 0;
       case 'i': /* initialize database connections */
-        pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-        if(!pgConn) {
-          fprintf(cerr, "FATAL %s.%d: Copyright agent unable to connect to database.\n", __FILE__, __LINE__);
-          return 2;
-        }
         copyright_destroy(copy);
         PQfinish(pgConn);
         return 0;
@@ -864,14 +854,6 @@ int main(int argc, char** argv)
   /* the scheduler, open the database and grab the files to be analyzed      */
   if(num_files == 0)
   {
-    /* open the database */
-    pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-    if(!pgConn)
-    {
-      fprintf(cerr, "FATAL: %s.%d: Copyright agent unable to connect to database.\n", __FILE__, __LINE__);
-      return 4;
-    }
-
     /* create the sql copy structure */
     sqlcpy = fo_sqlCopyCreate(pgConn, "copyright", 32768, 7,
         "agent_fk", "pfile_fk", "copy_startbyte", "copy_endbyte", "content", "hash", "type");

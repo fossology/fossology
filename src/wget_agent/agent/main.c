@@ -82,16 +82,12 @@ int main  (int argc, char *argv[])
   GlobalUploadKey = -1;
   int upload_pk = 0;           // the upload primary key
   int Agent_pk;
-  char DBConfFile[1024];
   char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
   char agent_rev[MAXCMD];
 
-  fo_scheduler_connect(&argc, argv);
-
-  memset(DBConfFile, 0, sizeof(DBConfFile));
-  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
+  fo_scheduler_connect(&argc, argv, &pgConn);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:Cc:")) != -1)
@@ -141,12 +137,6 @@ int main  (int argc, char *argv[])
   {
     Usage(argv[0]);
     SafeExit(-1);
-  }
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  if (!pgConn)
-  {
-    LOG_FATAL("Unable to connect to database");
-    SafeExit(20);
   }
 
   /* When initializing the DB, don't do anything else */

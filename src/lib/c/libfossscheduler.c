@@ -31,9 +31,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <getopt.h>
 #include <libgen.h>
 
-/* other libraries */
-#include <libpq-fe.h>
-
 /* ************************************************************************** */
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
@@ -94,24 +91,10 @@ void fo_heartbeat()
  * determine if a new agent record needs to be created for this agent in the
  * database.
  */
-void fo_check_agentdb()
+void fo_check_agentdb(PGconn* db_conn)
 {
-  PGconn*   db_conn   = NULL;
   PGresult* db_result = NULL;
-  char*     db_error  = NULL;
   char*     db_sql    = NULL;
-  char*     db_config = NULL;
-
-  db_config = g_strdup_printf("%s/Db.conf", sysconfigdir);
-  db_conn   = fo_dbconnect(db_config, &db_error);
-  if(db_error)
-  {
-    fprintf(stderr, "FATAL %s.%d: unable to open database connection: %s\n",
-        __FILE__, __LINE__, db_error);
-    fflush(stderr);
-    g_free(db_config);
-    exit(253);
-  }
 
   db_sql = g_strdup_printf(sql_check, module_name,
       fo_config_get(sysconfig, module_name, "VERSION", NULL),
@@ -124,7 +107,6 @@ void fo_check_agentdb()
     fflush(stderr);
     PQfinish(db_conn);
     PQclear(db_result);
-    g_free(db_config);
     g_free(db_sql);
     exit(252);
   }
@@ -146,16 +128,13 @@ void fo_check_agentdb()
       fflush(stderr);
       PQfinish(db_conn);
       PQclear(db_result);
-      g_free(db_config);
       g_free(db_sql);
       exit(251);
     }
   }
 
   g_free(db_sql);
-  g_free(db_config);
   PQclear(db_result);
-  PQfinish(db_conn);
 }
 
 /* ************************************************************************** */
@@ -193,18 +172,21 @@ void  fo_scheduler_heart(int i)
  * Making a call to this function should be the first thing that an agent does
  * after parsing its command line arguments.
  *
- * @param argc
- * @param argv
+ * @param argc     pointer to the number of arguments passed to the agent
+ * @param argv     the command line arguments for the agent
+ * @param db_conn  pointer to the location for the database connection
  * @return void
  */
-void fo_scheduler_connect(int* argc, char** argv)
+void fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn)
 {
   /* locals */
   GError* error = NULL;
-  GTree* keys;
   GOptionContext* parsed;
   fo_conf* version;
   char  fname[FILENAME_MAX + 1];
+
+  char* db_config = NULL;
+  char* db_error  = NULL;
 
   /* command line options */
   GOptionEntry options[] =
@@ -216,7 +198,7 @@ void fo_scheduler_connect(int* argc, char** argv)
 
   /* initialize memory associated with agent connection */
   module_name     = g_strdup(basename(argv[0]));
-  sysconfigdir    = NULL;
+  sysconfigdir    = DEFAULT_SETUP;
   items_processed = 0;
   valid           = 0;
   sscheduler      = 0;
@@ -263,7 +245,7 @@ void fo_scheduler_connect(int* argc, char** argv)
       exit(254);
     }
 
-    fo_config_join(sysconfig, version, error);
+    fo_config_join(sysconfig, version, &error);
     if(error)
     {
       fprintf(stderr, "FATAL %s.%d: unable to oin configuration files: %s\n",
@@ -275,11 +257,23 @@ void fo_scheduler_connect(int* argc, char** argv)
     fo_config_free(version);
   }
 
+  /* create the database connection */
+  db_config  = g_strdup_printf("%s/Db.conf", sysconfigdir);
+  (*db_conn) = fo_dbconnect(db_config, &db_error);
+  if(db_error)
+  {
+    fprintf(stderr, "FATAL %s.%d: unable to open database connection: %s\n",
+        __FILE__, __LINE__, db_error);
+    fflush(stderr);
+    g_free(db_config);
+    exit(253);
+  }
+
   /* send "OK" to the scheduler */
   if(sscheduler)
   {
     /* check that the agent record exists */
-    fo_check_agentdb();
+    fo_check_agentdb(*db_conn);
 
     if(fo_config_has_key(sysconfig, module_name, "VERSION"))
       fprintf(stdout, "VERSION: %s\n",

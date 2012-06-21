@@ -34,18 +34,13 @@ int	main(int argc, char *argv[])
   char *ListOutName=NULL;
   char *Fname = NULL;
   char *FnameCheck = NULL;
-  char DBConfFile[1024];
-  char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
   char agent_rev[PATH_MAX];
   struct stat Stat;
 
   /* connect to the scheduler */
-  fo_scheduler_connect(&argc, argv);
-
-  memset(DBConfFile, 0, sizeof(DBConfFile));
-  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
+  fo_scheduler_connect(&argc, argv, &pgConn);
 
   while((c = getopt(argc,argv,"ACc:d:FfHL:m:PQiqRr:T:t:U:vXx")) != -1)
   {
@@ -69,15 +64,8 @@ int	main(int argc, char *argv[])
       case 'R':	Recurse=-1; break;
       case 'r':	Recurse=atoi(optarg); break;
       case 'i':
-        pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-
-        if (!pgConn)
-        {
-          LOG_FATAL("Unable to access database")
-          SafeExit(20);
-        }
         if (!IsExe("dpkg-source",Quiet))
-          LOG_WARNING("dpkg-source is not available on this system.  This means that debian source packages will NOT be unpacked.")
+          LOG_WARNING("dpkg-source is not available on this system.  This means that debian source packages will NOT be unpacked.");
         SafeExit(0);
         break; /* never reached */
       case 'Q':
@@ -112,13 +100,6 @@ int	main(int argc, char *argv[])
   /* Open DB and Initialize CMD table */
   if (UseRepository) 
   {
-    pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-    if (!pgConn)
-    {
-      LOG_FATAL("Unable to access database")
-      SafeExit(21);
-    }
-
     SVN_REV = fo_sysconfig(AgentName, "SVN_REV");
     VERSION = fo_sysconfig(AgentName, "VERSION");
     sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);

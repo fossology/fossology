@@ -792,7 +792,7 @@ int main(int argc, char **argv)
   cacheroot_t cacheroot;
 
   /* connect to the scheduler */
-  fo_scheduler_connect(&argc, argv);
+  fo_scheduler_connect(&argc, argv, &(gl.pgConn));
 
 #ifdef PROC_TRACE
   traceFunc("== main(%d, %p)\n", argc, argv);
@@ -806,19 +806,6 @@ int main(int argc, char **argv)
 #endif /* GLOBAL_DEBUG */
 
   files_to_be_scanned = calloc(argc, sizeof(char *));
-
-  /*
-    Set up variables global to the agent. Ones that are the
-    same for all scans.
-   */
-  memset(DBConfFile, 0, sizeof(DBConfFile));
-  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
-  gl.pgConn = fo_dbconnect(DBConfFile, &pErrorBuf);
-  if (!gl.pgConn)
-  {
-    LOG_FATAL("Nomos unable to connect to database.  Error: %s. Exiting...\n", pErrorBuf)
-                            Bail(-__LINE__);
-  }
 
   SVN_REV = fo_sysconfig("nomos", "SVN_REV");
   VERSION = fo_sysconfig("nomos", "VERSION");

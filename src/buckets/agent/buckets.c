@@ -74,17 +74,7 @@ int main(int argc, char **argv)
   uploadtree_t  uploadtree;
 
   /* connect to the scheduler */
-  fo_scheduler_connect(&argc, argv);
-
-  /* Connect to the database */
-  memset(DBConfFile, 0, sizeof(DBConfFile));
-  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  if (!pgConn) 
-  {
-    printf("FATAL: Bucket agent unable to connect to database, exiting...\n");
-    exit(-1);
-  }
+  fo_scheduler_connect(&argc, argv, &pgConn);
 
   /* command line options */
   while ((cmdopt = getopt(argc, argv, "in:p:t:u:vc:")) != -1) 

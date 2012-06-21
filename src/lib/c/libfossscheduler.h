@@ -30,6 +30,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/file.h>
 #include <unistd.h>
 
+/* other libraries */
+#include <libpq-fe.h>
+
 #define ALARM_SECS 30
 
 
@@ -170,7 +173,7 @@ extern char*    sysconfigdir;
     fflush(stdout)
 
 void  fo_scheduler_heart(int i);
-void  fo_scheduler_connect(int* argc, char** argv);
+void  fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn);
 void  fo_scheduler_disconnect(int retcode);
 char* fo_scheduler_next();
 

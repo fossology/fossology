@@ -50,6 +50,9 @@ int main(int argc, char** argv)
   sysconfigdir = DEFAULT_SETUP;
   logdir = LOG_DIR;
 
+  if(getenv("FO_SYSCONFDIR") != NULL)
+    sysconfigdir = getenv("FO_SYSCONFDIR");
+
   /* get this done first */
   srand(time(NULL));
   g_thread_init(NULL);
