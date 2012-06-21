@@ -76,28 +76,16 @@ int	main	(int argc, char *argv[])
   char *AgentARSName = "pkgagent_ars";
   int rv;
   PGresult *ars_result;
-  char sqlbuf[1024]; 
-  char DBConfFile[1024];
-  char *ErrorBuf;
+  char sqlbuf[1024];
   char *SVN_REV;
   char *VERSION;
   char agent_rev[MAXCMD];
   int CmdlineFlag = 0; /* run from command line flag, 1 yes, 0 not */
 
-  fo_scheduler_connect(&argc, argv);
+  fo_scheduler_connect(&argc, argv, &db_conn);
 
   //glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   //glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
-
-  memset(DBConfFile, 0, sizeof(DBConfFile));
-  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
-
-  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  if (!db_conn)
-  {
-    LOG_FATAL("Unable to connect to database. Error: %s.\n", ErrorBuf);
-    exit(-1);
-  }
 
   SVN_REV = fo_sysconfig("pkgagent", "SVN_REV");
   VERSION = fo_sysconfig("pkgagent", "VERSION");

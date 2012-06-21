@@ -488,29 +488,14 @@ int	main	(int argc, char *argv[])
   int c, i;
   long UploadPk=-1;
   PGresult *pgResult;
-  char DBConfFile[1024];
-  char *ErrorBuf;
   long *uploads_to_scan;
   int  upload_count = 0;
 
   /* connect to scheduler.  Noop if not run from scheduler.  */
-  fo_scheduler_connect(&argc, argv);
+  fo_scheduler_connect(&argc, argv, &pgConn);
 
   /* for list of upload_pk's from the command line */
   uploads_to_scan = calloc(argc, sizeof(long));
-
-  /* open the database */
-  memset(DBConfFile, 0, sizeof(DBConfFile));
-  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-
-  if(!pgConn)
-  {
-    printf("FATAL: %s.%d: adj2nest agent unable to connect to database.\n", 
-            __FILE__, __LINE__);
-	  fflush(stdout);
-    exit(-1);
-  }
 
   /* Process command-line */
   while((c = getopt(argc,argv,"aciuv")) != -1)

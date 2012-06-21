@@ -58,16 +58,14 @@ int main(int argc, char *argv[])
   char *AgentARSName = "mimetype_ars";
   int rv;
   PGresult *result;
-  char sqlbuf[1024]; 
-  char DBConfFile[1024];
-  char *ErrorBuf;
+  char sqlbuf[1024];
   int CmdlineFlag = 0; /** run from command line flag, 1 yes, 0 not */
   char *SVN_REV;
   char *VERSION;
   char agent_rev[MAXCMD];
                            
   /** initialize the scheduler connection */
-  fo_scheduler_connect(&argc, argv);
+  fo_scheduler_connect(&argc, argv, &pgConn);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"iCc:")) != -1)
@@ -88,16 +86,6 @@ int main(int argc, char *argv[])
         PQfinish(pgConn);
         exit(-1);
     }
-  }
-
-  /* Init */
-  memset(DBConfFile, 0, sizeof(DBConfFile));
-  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  if (!pgConn)
-  {
-    LOG_FATAL("Unable to connect to database");
-    exit(-1);
   }
 
   SVN_REV = fo_sysconfig("mimetype", "SVN_REV");

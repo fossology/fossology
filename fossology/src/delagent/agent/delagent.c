@@ -68,8 +68,6 @@ int main (int argc, char *argv[])
   int GotArg=0;
   char *agent_desc = "Deletes upload.  Other list/delete options available from the command line.";
   char *Parm = NULL;
-  char DBConfFile[1024];  /* use default Db.conf */
-  char *ErrorBuf;
   int Agent_pk = 0;
   char *SVN_REV;
   char *VERSION;
@@ -80,7 +78,7 @@ int main (int argc, char *argv[])
   int user_id = -1;
   int user_perm = -1;
 
-  fo_scheduler_connect(&argc, argv);
+  fo_scheduler_connect(&argc, argv, &db_conn);
 
   static struct option long_options[] =
   {
@@ -101,12 +99,6 @@ int main (int argc, char *argv[])
         password = optarg;
         break;
       case 'i':
-        db_conn = fo_dbconnect(NULL, &ErrorBuf);
-        if (!db_conn)
-        {
-          LOG_FATAL("Unable to open DB");
-          exit(-1);
-        }
         PQfinish(db_conn);
         return(0);
       case 'f': ListFolder=1; GotArg=1; break;
@@ -125,15 +117,6 @@ int main (int argc, char *argv[])
   if (!GotArg)
   {
     Usage(argv[0]);
-    exit(-1);
-  }
-
-  memset(DBConfFile, 0, sizeof(DBConfFile));
-  sprintf(DBConfFile, "%s/Db.conf", sysconfigdir);
-  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  if (!db_conn)
-  {
-    LOG_FATAL("Unable to open DB");
     exit(-1);
   }
 
