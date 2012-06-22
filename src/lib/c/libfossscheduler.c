@@ -172,6 +172,9 @@ void  fo_scheduler_heart(int i)
  * Making a call to this function should be the first thing that an agent does
  * after parsing its command line arguments.
  *
+ * If the database connection passed is NULL, then this will not return a
+ * database connection, and will not check the agent's database record.
+ *
  * @param argc     pointer to the number of arguments passed to the agent
  * @param argv     the command line arguments for the agent
  * @param db_conn  pointer to the location for the database connection
@@ -258,22 +261,26 @@ void fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn)
   }
 
   /* create the database connection */
-  db_config  = g_strdup_printf("%s/Db.conf", sysconfigdir);
-  (*db_conn) = fo_dbconnect(db_config, &db_error);
-  if(db_error)
+  if(db_conn)
   {
-    fprintf(stderr, "FATAL %s.%d: unable to open database connection: %s\n",
-        __FILE__, __LINE__, db_error);
-    fflush(stderr);
-    g_free(db_config);
-    exit(253);
+    db_config  = g_strdup_printf("%s/Db.conf", sysconfigdir);
+    (*db_conn) = fo_dbconnect(db_config, &db_error);
+    if(db_error)
+    {
+      fprintf(stderr, "FATAL %s.%d: unable to open database connection: %s\n",
+          __FILE__, __LINE__, db_error);
+      fflush(stderr);
+      g_free(db_config);
+      exit(253);
+    }
   }
 
   /* send "OK" to the scheduler */
   if(sscheduler)
   {
     /* check that the agent record exists */
-    fo_check_agentdb(*db_conn);
+    if(db_conn)
+      fo_check_agentdb(*db_conn);
 
     if(fo_config_has_key(sysconfig, module_name, "VERSION"))
       fprintf(stdout, "VERSION: %s\n",
