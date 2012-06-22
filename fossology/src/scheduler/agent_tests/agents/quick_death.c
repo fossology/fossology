@@ -30,10 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 int main(int argc, char** argv)
 {
-  PGconn* db_conn;
+  fo_scheduler_connect(&argc, argv, NULL);
 
-  fo_scheduler_connect(&argc, argv, &db_conn);
-
-  PQfinish(db_conn);
   return 0;
 }

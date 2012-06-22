@@ -166,7 +166,7 @@ void test_scheduler_no_connect()
   int argc = 2;
   char* argv[] = {"./testlibs", "--config=./scheddata"};
 
-  fo_scheduler_connect(&argc, argv);
+  fo_scheduler_connect(&argc, argv, NULL);
 
   FO_ASSERT_FALSE(sscheduler);
   FO_ASSERT_EQUAL(items_processed, 0);
@@ -196,7 +196,7 @@ void test_scheduler_connect()
   char* argv[] = {"./testlibs", "--config=./scheddata", "--scheduler_start"};
   char* tmp;
 
-  fo_scheduler_connect(&argc, argv);
+  fo_scheduler_connect(&argc, argv, NULL);
 
   FO_ASSERT_TRUE(sscheduler);
   FO_ASSERT_EQUAL(items_processed, 0);
