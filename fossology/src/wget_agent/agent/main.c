@@ -82,7 +82,6 @@ int main  (int argc, char *argv[])
   GlobalUploadKey = -1;
   int upload_pk = 0;           // the upload primary key
   int Agent_pk;
-  char *ErrorBuf;
   char *SVN_REV;
   char *VERSION;
   char agent_rev[MAXCMD];
