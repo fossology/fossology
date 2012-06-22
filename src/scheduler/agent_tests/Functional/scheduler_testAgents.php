@@ -139,6 +139,7 @@ class scheduler_testAgents extends PHPUnit_Framework_TestCase {
     $retval = system("$this->schedulerCli -a " . $this->cmdArgs[0]);
     
     $valid_agents = array(
+        'db_connect',
         'multi_connect',
         'no_update',
         'simple');
