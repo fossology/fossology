@@ -1290,7 +1290,7 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
    */
 
   /* Insert pfile record */
-  if (pgConn)
+  if (pgConn && Upload_Pk)
   {
     if (!DBInsertPfile(CI,Fuid)) return(0);
     /* Update uploadtree table */
