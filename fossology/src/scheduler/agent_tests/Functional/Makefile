@@ -41,6 +41,6 @@ test: all
 #####################
 
 clean:
-	rm -f $(test_dst)
+	rm -f $(test_dst) *.pyc
 
 .PHONY: all test $(PHP_FILES) $(FO_LIB)
