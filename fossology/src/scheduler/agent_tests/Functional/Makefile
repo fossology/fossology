@@ -18,9 +18,12 @@ TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-PHP_FILES   = $(wildcard *.php)
 AGENT_DIR   = ../../agent
 TEST_AGENTS = ../agents/
+
+regression = ./Functional.py
+test_src = Functional.xml
+test_dst = scheduler-Xunit.xml
 
 ##########################
 # executable build rules #
@@ -30,15 +33,14 @@ all:
 	$(MAKE) -C $(AGENT_DIR)/
 	$(MAKE) -C $(TEST_AGENTS)/
 
-test: all $(PHP_FILES)
-$(PHP_FILES): %:
-	phpunit --log-junit scheduler-Xunit.xml $@
+test: all 
+	$(regression) --tests=$(test_src) --results=$(test_dst)
 
 #####################
 # other build rules #
 #####################
 
 clean:
-	rm -f *.xml
+	rm -f $(test_dst)
 
 .PHONY: all test $(PHP_FILES) $(FO_LIB)
