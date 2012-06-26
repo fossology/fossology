@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<testsuites timeout="10">
+
+  <!--
+  @brief Every test suite needs its own copy of the scheduler
+  
+  The startup will start a scheduler using the configuration and log file
+  specified by the test suite. It will then wait 1 second.
+  
+  The cleanup will use the cli to send a stop command to the scheduler. This
+  will cause the scheduler to close if it is still running.
+   -->
+  <setup>
+    <concurrently command="{scheduler}" params="--config={config} --log={log} --verbose=952"/>
+    <sleep duration="1"/> 
+  </setup>
+  <cleanup>
+    <sequential command="{cli}" params="--config={config} -D"/>
+  </cleanup>
+  
+  <!--
+  @brief Tests that the scheduler's stop command is working correctly
+  
+  This starts a scheduler and waits for it to stop running the startup tests,
+  it then sends a stop command. Since the scheduler doesn't have any currently
+  running agents, this will cause the scheduler to stop running immediately.
+  -->
+  <testsuite name="Test Just Stop">
+    <definitions pwd       ="{$pwd}"
+                 config    ="{pwd}/agent_tests/agents"
+                 log       ="{config}/fossology.log"
+                 scheduler ="{pwd}/agent/fo_scheduler"
+                 cli       ="{pwd}/agent/fo_cli"/>
+    <setup>
+      <sequential command="{cli}" params="--config={config} -S" retval="0"
+                  result="scheduler:{pids:0} revision:(null) daemon:0 jobs:0 log:{log} port:12354 verbose:952"/>
+    </setup>
+  
+    <!-- Stop the scheduler and make sure it isn't running anymore -->
+    <test name="scheduler stop">
+      <sequential command="{cli}" params="--config={config} -s" retval="0"/>
+      <sleep duration="5"/>
+      <sequential command="{cli}" params="--config={config} -S" retval="255"/>
+    </test>
+  </testsuite>
+
+  <!--
+  @brief Tests that the test agents are handled correctly
+  
+  This sets the scheduler to start on the agents found in the agent_tests/agents
+  directory. These should test all of the possible fail cases and several of the
+  success cases for the agents.
+  
+  @note  If a type of failing agent that is not currently tests is found, it
+         should be added as a .c file under the agent_tests/agents directory
+  -->
+  <testsuite name="TestAgents">
+    <definitions pwd       ="{$pwd}"
+                 config    ="{pwd}/agent_tests/agents"
+                 log       ="{config}/fossology.log"
+                 scheduler ="{pwd}/agent/fo_scheduler"
+                 cli       ="{pwd}/agent/fo_cli"/>
+    <setup>
+      <sequential command="{cli}" params="--config={config} -S" retval="0"
+                  result="scheduler:{pids:0} revision:(null) daemon:0 jobs:0 log:{log} port:12354 verbose:952"/>
+    </setup>
+    
+    <!-- Test that the correct agents passed the startup test -->
+    <test name = "agents">
+      <sequential command="{cli}" params="--config={config} -a" retval="0"
+                  result="db_connect multi_connect no_update simple"/>
+    </test>
+    
+    <!-- Test that the scheduler has the correct status -->
+    <test name = "status">
+      <sequential command="{cli}" params="--config={config} -S" retval="0"
+                  result="scheduler:{pids:0} revision:(null) daemon:0 jobs:0 log:{log} port:12354 verbose:952"/>
+    </test>
+    
+    <!-- Test that the host load is correct for no running agents -->
+    <test name = "load">
+      <sequential command="{cli}" params="--config={config} -l" retval="0"
+                  result="host:localhost address:localhost max:10 running:0"/>
+    </test>
+  </testsuite>
+  
+  <!--
+  @brief Tests the graceful and non-graceful scheduler shutdowns
+  
+  Start a scheduler with the test agents but do not wait for it to stop running
+  the startup tests. Send the scheduler a stop command and make sure that it is
+  still running. Then send the scheduler a die command and make sure that it is
+  not running.
+  -->
+  <testsuite name="Test Stop/Die">
+    <definitions pwd       ="{$pwd}"
+                 config    ="{pwd}/agent_tests/agents"
+                 log       ="{config}/fossology.log"
+                 scheduler ="{pwd}/agent/fo_scheduler"
+                 cli       ="{pwd}/agent/fo_cli"/>
+    
+    <!-- Send a stop command to the scheduler, it should keep running -->
+    <test name="scheduler stop">
+      <sequential command="{cli}" params="--config={config} -s" retval="0"/>
+      <sleep duration="5"/>
+      <sequential command="{cli}" params="--config={config} -S" retval="0"/>
+    </test>
+
+    <!-- Send a die command to the scheduler, it should stop running -->
+    <test name="scheduler die">
+      <sequential command="{cli}" params="--config={config} -D" retval="0"/>
+      <sleep duration="5"/>
+      <sequential command="{cli}" params="--config={config} -S" retval="255"/>
+    </test>
+  </testsuite>
+
+</testsuites>
+
+
+
+
+
