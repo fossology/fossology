@@ -55,7 +55,7 @@
   @note  If a type of failing agent that is not currently tests is found, it
          should be added as a .c file under the agent_tests/agents directory
   -->
-  <testsuite name="TestAgents">
+  <testsuite name="Test TestAgents">
     <definitions pwd       ="{$pwd}"
                  config    ="{pwd}/agent_tests/agents"
                  log       ="{config}/fossology.log"

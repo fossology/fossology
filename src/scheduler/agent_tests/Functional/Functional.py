@@ -1,21 +1,28 @@
 #!/usr/bin/python -u
+"""
+  Functional testing module 
+  
+  Module uses a simple xml file to describe a set of functional tests. This was
+  originally written for the FOSSology scheduler and as such is tailored to
+  testing that piece of software.
+ 
+  ==============================================================================
+  Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ 
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  version 2 as published by the Free Software Foundation.
+ 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-## 
-## Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
-## 
-## This program is free software; you can redistribute it and/or
-## modify it under the terms of the GNU General Public License
-## version 2 as published by the Free Software Foundation.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License along
-## with this program; if not, write to the Free Software Foundation, Inc.,
-## 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-##
+  You should have received a copy of the GNU General Public License along
+  with this program; if not, write to the Free Software Foundation, Inc.,
+  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+  ==============================================================================
+"""
 
 from xml.dom.minidom import getDOMImplementation
 from xml.dom.minidom import parseString
@@ -36,24 +43,35 @@ defsReplace = re.compile('{([^\s]*?)}')
 defsSplit   = re.compile('(\w*):([0-9]*)')
 
 class DefineError(Exception):
+  """ Error class used for missing definitions in the xml file """
   def __init__(self, value):
     self.value = value
   def __str__(self):
     return repr(self.value)
 
 class TimeoutError(Exception):
+  """ Error class used when a test suite takes too long to run """
   pass
 
 def timeout(func, maxRuntime):
+  """
+  @brief Allows the caller to set a max runtime for a particular function call.
+  
+  @param func        the function that will have the max runtime
+  @param maxRuntime  the max amount of time alloted to the function in minutes
+  
+  Returns a Boolean, True indicating that the function finished, False otherwise
+  """
+  
   def timeout_handler(signum, frame):
-    raise TimeoutException()
+    raise TimeoutError()
   
   signal.signal(signal.SIGALRM, timeout_handler)
   signal.alarm(maxRuntime * 60)
   
   try:
     func()
-  except TimeoutException:
+  except TimeoutError:
     return False
   return True
 
@@ -62,14 +80,38 @@ def timeout(func, maxRuntime):
 ################################################################################
 
 class testsuite:
+  """
+  The testsuite class is used to deserialize a test suite from the xml file,
+  run the tests and report the results to another xml document.
+  
+  name     the name of the test suite
+  defs     a map of strings to values used to do variables replacement
+  setup    list of Actions that will be taken before running the tests
+  cleanup  list of Actions that will be taken after running the tests
+  tests    list of Actions that are the actual tests
+  subpro   list of processes that are running concurrently with the tests
+  """
   
   def __init__(self, node):
+    """
+    Constructor for the testsuite class. This will deserialize the testsuite
+    from the xml file that describes all the tests. For each element in the
+    setup, and cleanup and action will be created. For each element under each
+    <test></test> tag an action will be created.
+    
+    This will also grab the definitions of variables for the self.defs map. The
+    variable substitution will be performed when the definition is loaded from
+    the file.
+    
+    Returns nothing
+    """
+    
     definitions = node.getElementsByTagName('definitions')[0].attributes
     
     self.name = node.getAttribute('name')
     
     self.defs = {}
-    self.defs['pids'] = []
+    self.defs['pids'] = {}
     
     # get variable definitions
     for i in xrange(definitions.length):
@@ -80,17 +122,19 @@ class testsuite:
     self.tests   = []
     self.subpro  = []
     
-    # parse all actions that will be taken during the testing phase
+    # parse all actions that will be taken during the setup phase
     if len(node.getElementsByTagName('setup')) != 0:
       setup = node.getElementsByTagName('setup')[0]
       for action in [curr for curr in setup.childNodes if curr.nodeType == Node.ELEMENT_NODE]:
         self.setup.append(self.createAction(action))
     
+    # parse all actions that will be taken during the cleanup phase
     if len(node.getElementsByTagName('cleanup')) != 0:
       cleanup = node.getElementsByTagName('cleanup')[0]
       for action in [curr for curr in cleanup.childNodes if curr.nodeType == Node.ELEMENT_NODE]:
         self.cleanup.append(self.createAction(action))
     
+    # parse all actions that will be taken during the testing phase
     for test in node.getElementsByTagName('test'):
       newTest = (test.getAttribute('name'), [])
       for action in [curr for curr in test.childNodes if curr.nodeType == Node.ELEMENT_NODE]:
@@ -98,70 +142,175 @@ class testsuite:
       self.tests.append(newTest) 
   
   def substitute(self, string):
-    return defsReplace.sub(functools.partial(self.processVariable, self.defs), string)
+    """
+    Simple function to make calling processVariable a lot cleaner
+    
+    Returns the string with the variables correctly substituted
+    """
+    return defsReplace.sub(functools.partial(self.processVariable), string)
   
-  def processVariable(self, defines, match):
+  def processVariable(self, match):
+    """
+    Function passed to the regular expression library to replace variables in a
+    string from the xml file.
+    
+    The regular expression used is "{([^\s]*?)}". This will match anything that
+    doesn't contain any whitespace and falls between two curly braces. For
+    example "{hello}" will match, but "{hello goodbye}" and "hello" will not.
+    
+    Any variable name that starts with a "$" has a special meaning. The text
+    following the "$" will be used as a shell command and executed. The
+    "{$text}" will be replaced with the output of the shell command. For example
+    "{$pwd}" will be replaced with the output of the shell command "pwd".
+    
+    If a variable has a ":" in it, anything that follows the ":" will be used
+    to index into the associative array in the definitions map. For example
+    "{pids:0}" will access the element that is mapped to the string "0" in the
+    associative array that is as the mapped to the string "pids" in the defs
+    map.
+    
+    Returns the replacement string
+    """
     name = match.group(1)
     
+    # variable begins with $, replace with output of shell command 
     if name[0] == '$':
       process = os.popen(name[1:], 'r')
       ret = process.read()
       process.close()
       return ret[:-1]
     
+    # variable contains a ":", access defs[name] as an associative array or dictionary
     arrayMatch = defsSplit.match(name)
     if arrayMatch:
       name  = arrayMatch.group(1)
       index = int(arrayMatch.group(2))
       
-      if name not in defines:
+      if not isinstance(self.defs[name], dict):
+        raise DefineError('"%s" is not a dictionary in testsuite "%s"' % (name, self.name))
+      if name not in self.defs:
         raise DefineError('"%s" not defined in testsuite "%s"' % (name, self.name))
-      if not isinstance(defines[name], list):
-        raise DefineError('"%s" is not a list in testsuite "%s"' % (name, self.name))
-      if len(defines[name]) <= index:
+      if len(self.defs[name]) <= index:
         raise DefineError('"%d" is out of bounds for "%s.%s"' % (index, self.name, name))
-      return defines[name][int(arrayMatch.group(2))]
+      return self.defs[name][arrayMatch.group(2)]
     
-    if name not in defines:
+    # this is a simply definition access, check validity and return the result
+    if name not in self.defs:
       raise DefineError('"%s" not defined in testsuite "%s"' % (name, self.name))
-    return defines[name]
+    return self.defs[name]
+  
+  def failure(self, doc, dest, type, value):
+    """
+    Puts a failure node into an the results document
+    
+    Return nothing
+    """
+    failure = doc.createElement('failure')
+    failure.setAttribute('type', type)
+    
+    text = doc.createTextNode(value)
+    failure.appendChild(text)
+    
+    dest.appendChild(failure)
   
   ###############################
   # actions that tests can take #
   ###############################
   
   def createAction(self, node):
+    """
+    Creates an action given a particular test suite and xml node. This uses
+    simply python reflection to get the method of the testsuite class that has
+    the same name as the xml node tag. The action is a functor that can be
+    called later be another part of the test harness.
+    
+    To write a new type of action write a function with the signature:
+      actionName(self, source_node, xml_document, destination_node)
+    
+    * The source_node is the xml node that described the action, this node
+      should describe everything that is necessary for the action to be
+      performed. This is passed to the action when the action is created.
+    * The xml_document is the document that the test results are being written
+      to. This is passed to the action when it is called, not during creation.
+    * The destination_node is the node in the results xml document that this
+      particular action should be writing its results to. This is passed in when
+      the action is called, not during creation.
+    
+    The action should return True if it correctly executed, and False if it
+    failed. A failing action has different meanings during different parts of
+    the code. During setup, a failing action indicates that the setup is not
+    ready to proceed. Failing actions during setup will be called repeatedly
+    once every five seconds until the return True. Failing actions during
+    testing indicate a failing test. The failure will be reported to results
+    document, but the action should still call the failure method to inticate
+    in the results document why the failure happened. During cleanup what an
+    action returns is ignored.
+    
+    Returns the new action
+    """
     if not hasattr(self, node.nodeName):
       raise DefineError('testsuite "%s" does not have an "%s" action' % (self.name, node.nodeName))
     attr = getattr(self, node.nodeName)
     return functools.partial(attr, node)
   
-  def concurrently(self, node):
+  def concurrently(self, node, doc, dest):
+    """
+    Action
+    
+    Attributes:
+      command [required]: the name of the process that will be executed
+      params  [required]: the command line parameters passed to the command
+    
+    This executes a shell command concurrently with the testing harness. This
+    starts the process, sleeps for a second and then checks the pid of the
+    process. The pid will be appended to the list of pid's in the definitions
+    map. This action cannot fail as it does not check any of the results of the
+    process that was created.
+    
+    Returns True
+    """
     command  = self.substitute(node.getAttribute('command'))
     params   = self.substitute(node.getAttribute('params'))
     
     cmd  ="%s %s" % (command, params)
-    args = shlex.split(cmd)
     proc = subprocess.Popen(cmd, 0, shell = True)
     time.sleep(1)
     self.subpro.append(proc)
-    self.defs['pids'].append(subprocess.check_output(['pidof', command])[:-1])
+    self.defs['pids'][str(len(self.defs['pids']))] = subprocess.check_output(['pidof', command])[:-1]
     
     return True
   
-  def sequential(self, node):
+  def sequential(self, node, doc, dest):
+    """
+    Action
+    
+    Attributes:
+      command [required]: the name of the process that will be executed
+      params  [required]: the command line parameters passed to the command
+      result  [optional]: what the process should print to stdout
+      retval  [optional]: what the exit value of the process should be
+    
+    This executes a shell command synchronously with the testing harness. This
+    starts the process, grabs anything written to stdout by the process and the
+    return value of the process. If the results and retval attributes are
+    provided, these are compared with what the process printed/returned. If
+    the results or return value do not match, this will return False.
+    
+    Returns True if the results and return value match those provided
+    """
     command  = self.substitute(node.getAttribute('command'))
     params   = self.substitute(node.getAttribute('params'))
     expected = self.substitute(node.getAttribute('result'))
     retval   = self.substitute(node.getAttribute('retval'))
-    compare  = self.substitute(node.getAttribute('compare'))
     
     cmd  = "%s %s" % (command, params)
-    args = shlex.split(cmd)
-    proc = subprocess.Popen(args, 0, stdout = subprocess.PIPE)
+    proc = subprocess.Popen(cmd, 0, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     
     result = proc.stdout.readlines()
-    if len(expected) != 0 and (len(result) != 1 or result[0].strip() != expected):
+    if len(expected) != 0 and result[0].strip() != expected:
+      if dest and doc:
+        failure(doc, dest, "ResultMismatch",
+            "expected: '{0}' != result: '{1}'".format(expected, result[0].strip()))
       return False
     
     proc.wait()
@@ -170,7 +319,18 @@ class testsuite:
       return proc.returncode == int(retval)
     return True
   
-  def sleep(self, node):
+  def sleep(self, node, doc, dest):
+    """
+    Action
+    
+    Attributes:
+      duration [require]: how long the test harness should sleep for
+    
+    This action simply pauses execution of the test harness for duration
+    seconds. This action cannot fail and will always return True.
+    
+    Returns True
+    """
     duration = node.getAttribute('duration')
     time.sleep(int(duration))
     return True
@@ -180,26 +340,29 @@ class testsuite:
   ################################
   
   def performTests(self, suiteNode, document, fname):
+    """
+    Runs the tests and writes the output to the results document.
+    
+    Returns nothing
+    """
     failures     = 0
     tests        = 0
     totalasserts = 0
     
     for action in self.setup:
-      while not action():
+      while not action(None, None):
         time.sleep(5)
     for test in self.tests:
       assertions = 0
       testNode = document.createElement("testcase")
       
-      testNode.setAttribute("name", test[0])
       testNode.setAttribute("class", test[0])
-      testNode.setAttribute("file", fname)
-      testNode.setAttribute("line", "0");
+      testNode.setAttribute("name", test[0])
       
       starttime = time.time()
       for action in test[1]:
         assertions += 1
-        if not action():
+        if not action(document, testNode):
           failures += 1
       runtime = (time.time() - starttime)
       
@@ -212,7 +375,7 @@ class testsuite:
       suiteNode.appendChild(testNode)
       
     for action in self.cleanup:
-      action()
+      action(None, None)
     
     for process in self.subpro:
       process.wait()
@@ -226,7 +389,6 @@ class testsuite:
 ################################################################################
 
 def main():
-  
   usage = "usage: %prog [options]"
   parser = OptionParser(usage = usage)
   parser.add_option("-t", "--tests",   dest = "testfile",   help = "The xml file to pull the tests from")
@@ -252,12 +414,7 @@ def main():
     suiteNode = resultsDoc.createElement("testsuite")
     errors = 0
     
-    suiteNode.setAttribute("name", suite.nodeName)
-    suiteNode.setAttribute("file", testFile.name)
-    suiteNode.setAttribute("fullPackage", suite.getAttribute("fullPackage"))
-    suiteNode.setAttribute("tests", "0")
-    suiteNode.setAttribute("assertions", "0")
-    suiteNode.setAttribute("failures", "0");
+    suiteNode.setAttribute("name", suite.getAttribute("name"))
     suiteNode.setAttribute("errors", "0")
     suiteNode.setAttribute("time", "0")
     
