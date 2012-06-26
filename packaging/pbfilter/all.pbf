@@ -52,7 +52,7 @@ filter PBDESC = An open and modular architecture for analyzing software. Current
 filter PBURL = http://www.fossology.org
 
 # By default no build dependencies
-filter PBBUILDDEP =
+filter PBBUILDDEP = 
 
 # For fedora system
 filter PBFEDORAD = 
