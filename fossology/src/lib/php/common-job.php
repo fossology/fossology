@@ -357,13 +357,14 @@ function IsAlreadyScheduled($job_pk, $AgentName)
  * \param $Dependencies - array of named dependencies. Each array element is the plugin name.
  *         For example,  array(agent_adj2nest, agent_pkgagent).  
  *         Typically, this will just be array(agent_adj2nest).
+ * \param $jqargs (optional) jobqueue.jq_args
  *
  * \returns
  * - jq_pk Successfully queued
  * -   0   Not queued, latest version of agent has previously run successfully
  * -  -1   Not queued, error, error string in $ErrorMsg
  **/
-function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $jqargs)
+function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $jqargs="")
 {
     global $PG_CONN;
     global $Plugins;
