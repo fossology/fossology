@@ -139,22 +139,6 @@ function AgentHasResults($upload_pk)
       return(-1);
     }
 
-    /* check if the latest agent has already been run */
-    if ($this->AgentHasResults($upload_pk) == 1) return 0;
-
-    /* if it is already scheduled, then return success */
-    if (($jq_pk = IsAlreadyScheduled($job_pk, $this->AgentName)) != 0 ) return $jq_pk;
-
-    /* queue up dependencies */
-    $Dependencies[] = "agent_nomos";
-    $Dependencies[] = "agent_pkgagent";
-    foreach ($Dependencies as $PluginName)
-    {
-      $DepPlugin = &$Plugins[plugin_find_id($PluginName)];
-      if (($jqDeps[] = $DepPlugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $EmptyDeps)) == -1)
-        return -1;
-    }
-
     /* get the default_bucketpool_fk from the users record */
     $usersRec = GetSingleRec("users", "where user_pk='$user_pk'");
     $default_bucketpool_fk = $usersRec['default_bucketpool_fk'];
@@ -165,22 +149,11 @@ function AgentHasResults($upload_pk)
     }
 
     /* schedule buckets */
+    /* queue up dependencies */
+    $Dependencies[] = "agent_nomos";
+    $Dependencies[] = "agent_pkgagent";
     $jqargs = "bppk=$default_bucketpool_fk, upk=$upload_pk";
-    $jq_pk = JobQueueAdd($job_pk, $this->AgentName, $jqargs, "", $jqDeps);
-    if (empty($jq_pk)){
-      $ErrorMsg = _("Failed to insert agent $AgentName into job queue. jqargs: $jqargs");
-      return (-1);
-    }
-
-    /* Tell the scheduler to check the queue. */
-    $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
-    if (!$success)
-    {
-      $ErrorMsg = $error_msg . "\n" . $output;
-      return -1;
-    }
-
-    return ($jq_pk);
+    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $jqargs);
   } // AgentAdd()
 
   /**
