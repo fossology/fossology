@@ -37,7 +37,8 @@ $VMS = array(
              'ubuntu-11.04-i386',
              'ubuntu-11.04-x86_64',
              'ubuntu-10.04-i386',
-             'ubuntu-10.04-x86_64');
+             'ubuntu-10.04-x86_64'
+);
 //$VMS = NULL;
 $Usage = "Usage: " . basename($argv[0]) . " [options]
   Options:
@@ -121,8 +122,9 @@ for ($i = 1;$i < $argc;$i++) {
   if ($Trunk){
     //$showtime = date("Ymd");
     system("perl -pi -e 's/\/var\/ftp\/pub\/fossology/\/var\/ftp\/pub\/fossology\/$Version\/testing\/$showtime/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
-    //system("perl -pi -e 's/projver fossology = trunk/projver fossology = $Version/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
-    system("perl -pi -e 's/trunk/trunk~$showtime/' /home/build/pb/projects/fossology/pbconf/$Version/fossology/deb/changelog");
+    system("perl -pi -e 's/svnroot\/fossology\/trunk\/fossology\//svnroot\/fossology\/trunk\/fossology/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
+    system("perl -pi -e 's/projver fossology = trunk/projver fossology = $Version/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
+    system("perl -pi -e 's/trunk/$Version~$showtime/' /home/build/pb/projects/fossology/pbconf/$Version/fossology/deb/changelog");
   } else {
     system("perl -pi -e 's/$Version\//$Version/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
     system("perl -pi -e 's/\/var\/ftp\/pub\/fossology/\/var\/ftp\/pub\/fossology\/$Version/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
