@@ -276,7 +276,9 @@ class testsuite:
     proc = subprocess.Popen(cmd, 0, shell = True)
     time.sleep(1)
     self.subpro.append(proc)
-    self.defs['pids'][str(len(self.defs['pids']))] = subprocess.check_output(['pidof', command])[:-1]
+    pidproc = subprocess.Popen('pidof {0}'.format(command), 0, shell = True, stdout = subprocess.PIPE)
+    self.defs['pids'][str(len(self.defs['pids']))] = pidproc.stdout.read()[:-1]
+    pidproc.wait()
     
     return True
   
