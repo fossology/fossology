@@ -82,9 +82,9 @@ if(is_null($WORKSPACE))
 }
 else
 {
-  if(@chdir($WORKSPACE . "/trunk/fossology/src") === FALSE)
+  if(@chdir($WORKSPACE . "/src") === FALSE)
   {
-    echo "FATAL! __FILE__ could not cd to " . $WORKSPACE . "/trunk/fossology/src\n";
+    echo "FATAL! " . __FILE__ . " could not cd to " . $WORKSPACE . "/src\n";
     exit(1);
   }
 }
