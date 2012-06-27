@@ -205,13 +205,13 @@ class testsuite:
     
     Return nothing
     """
-    failure = doc.createElement('failure')
-    failure.setAttribute('type', type)
+    fail = doc.createElement('failure')
+    fail.setAttribute('type', type)
     
     text = doc.createTextNode(value)
-    failure.appendChild(text)
+    fail.appendChild(text)
     
-    dest.appendChild(failure)
+    dest.appendChild(fail)
   
   ###############################
   # actions that tests can take #
@@ -311,7 +311,7 @@ class testsuite:
     result = proc.stdout.readlines()
     if len(expected) != 0 and result[0].strip() != expected:
       if dest and doc:
-        failure(doc, dest, "ResultMismatch",
+        self.failure(doc, dest, "ResultMismatch",
             "expected: '{0}' != result: '{1}'".format(expected, result[0].strip()))
       return False
     
