@@ -35,27 +35,29 @@ require_once('../lib/createRC.php');
 
 global $failures;
 
-if(!defined('TESTROOT'))
-{
+if ( !defined('TESTROOT') ) {
   $TESTROOT = dirname(getcwd());
   $_ENV['TESTROOT'] = $TESTROOT;
   putenv("TESTROOT=$TESTROOT");
   define('TESTROOT',$TESTROOT);
 }
 
+/* when a Jenkins job executes, it sets some environment variables that are 
+   available to this script.  $WORKSPACE is set to the absolute path of the
+   Jenkins workspace (where the subversion working copy is checked out to) */
 $WORKSPACE = NULL;
 
-if(array_key_exists('WORKSPACE', $_ENV))
-{
+if ( array_key_exists('WORKSPACE', $_ENV) ) {
   $WORKSPACE = $_ENV['WORKSPACE'];
 }
 
 $func = TESTROOT . "/functional";
 
-if(@chdir($func) === FALSE)
-{
+if ( @chdir($func) === FALSE ) {
+
   echo "FATAL!, could not cd to:\n$func\n";
   exit(1);
+
 }
 
 createRC();
@@ -69,70 +71,85 @@ $funcList = array();
 
 // get the list of functional tests to run
 $modules = parse_ini_file('../dataFiles/funcTests.ini',1);
-foreach($modules as $key => $value)
-{
+foreach ($modules as $key => $value) {
   $funcList[] = $key;
 }
 
 // @todo fix this, I don't think you need to check for workspace.
-if(is_null($WORKSPACE))
-{
+if ( is_null($WORKSPACE) ) {
   // back to fossology/src
   backToParent('../..');
 }
-else
-{
-  if(@chdir($WORKSPACE . "/src") === FALSE)
+else {
+  if (@chdir($WORKSPACE . "/src") === FALSE)
   {
     echo "FATAL! " . __FILE__ . " could not cd to " . $WORKSPACE . "/src\n";
     exit(1);
   }
 }
 
+/* store the current working directory, from which each test will begin */
+$original_directory = getcwd();
+
 $failures = 0;
-foreach($funcList as $funcTest)
-{
+
+foreach ( $funcList as $funcTest ) {
+
+  /* start off each test in the original directory */
+  chdir($original_directory);
+
   echo "\n";
   echo "$funcTest\n";
+
+  /* check the first three characters of the subdirectory for 'lib' or 'cli' */
   $other = substr($funcTest, 0, 3);
-  if($other == 'lib' || $other == 'cli')
-  {
-    if(@chdir($funcTest . '/tests') === FALSE)
-    {
+
+  /* for the special case of subdirectories in src/lib/ and src/cli, 
+     the tests will be defined in a tests/ subdirectory.  For example:
+         src/lib/c/tests/
+         src/lib/php/tests/
+         cli/tests/  */
+  if($other == 'lib' || $other == 'cli') {
+
+    if(@chdir($funcTest . '/tests') === FALSE) {
+
       echo "Error! cannot cd to " . $funcTest . "/tests, skipping test\n";
       $failures++;
       continue;
+
     }
   }
-  else
-  {
-    if(@chdir($funcTest . '/agent_tests/Functional') === FALSE)
-    {
+
+  /* for normal agents, the tests will be defined in an agent_tests/Functional
+     subdirectory */
+  else {
+
+    if(@chdir($funcTest . '/agent_tests/Functional') === FALSE) {
+
       echo "Error! cannot cd to " . $funcTest . "/agent_tests/Functional, skipping test\n";
       $failures++;
       continue;
+
     }
   }
-  // why twice?
+
   $Make = new RunTest($funcTest);
   $runResults = $Make->MakeTest();
-  //$Make = new RunTest($funcTest);
-  //$runResults = $Make->MakeTest();
   //debugprint($runResults, "run results for $funcTest\n");
   $Make->printResults($runResults);
 
-  if(!processXUnit($funcTest))
-  {
+  if ( !processXUnit($funcTest) ) {
     echo "Error! could not create html report for $funcTest at\n" .
     __FILE__ . " on " . __LINE__ . "\n";
   }
-  backToParent('../../..');
   continue;
-} // for
-if($failures)
-{
+
+}   // foreach ( $funcList as $funcTest )
+
+if($failures) {
   exit(1);
 }
+
 exit(0);
 
 ?>
