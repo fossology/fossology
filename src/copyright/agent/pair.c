@@ -70,20 +70,6 @@ void  _pair_destroy(void* to_destroy)
   free(to_destroy);
 }
 
-/**
- *
- * @param to_print
- * @param ostr
- */
-void  _pair_print(void* to_print, FILE* ostr)
-{
-  fprintf(ostr, "FIRST[");
-  ((pair)to_print)->first_mem->print(((pair)to_print)->first, ostr);
-  fprintf(ostr, "]\nSECOND[");
-  ((pair)to_print)->second_mem->print(((pair)to_print)->second, ostr);
-  fprintf(ostr, "]\n");
-}
-
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
@@ -193,7 +179,6 @@ function_registry* pair_function_registry()
   ret->name = "pair";
   ret->copy = &_pair_copy;
   ret->destroy = &_pair_destroy;
-  ret->print = &_pair_print;
 
   return ret;
 }

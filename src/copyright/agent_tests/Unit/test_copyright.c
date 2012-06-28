@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* library includes */
 #include <stdio.h>
-#include <pcre.h>
+#include <glib.h>
 
 /* cunit includes */
 #include <CUnit/CUnit.h>
@@ -42,10 +42,8 @@ struct copyright_internal
   radix_tree dict;        // the dictionary to search within
   radix_tree name;        // the list of names to match
   cvector entries;        // the set of copyright found in a particular file
-  pcre* email_re;         // regex for finding emails
-  pcre* url_re;           // the regex for finding emails
-  const char* reg_error;  // for regular expression error messages
-  int reg_error_offset;   // for regex error offsets
+  GRegex* email_re;         // regex for finding emails
+  GRegex* url_re;           // the regex for finding emails
 };
 
 struct copy_entry_internal
@@ -65,7 +63,6 @@ void strip_empty_entries(copyright copy);
 int contains_copyright(radix_tree tree, char* string, char* buf);
 int load_dictionary(radix_tree dict, char* filename);
 void* copy_entry_copy(void* to_copy);
-int copyright_callout(pcre_callout_block* info);
 
 /* ************************************************************************** */
 /* **** local function tests ************************************************ */
@@ -191,43 +188,6 @@ void test_copy_entry_copy()
   free(cpy);
 }
 
-void test_copyright_callout()
-{
-  pcre_callout_block info;
-
-  /* start the test */  info.callout_data = copy->entries;
-  info.subject = "This is just a testing string";
-  info.start_match = 0;
-  info.current_position = 10;
-  info.callout_number = 1;
-
-  /* call the test methods */
-  FO_ASSERT_EQUAL(copyright_callout(&info), 1);
-  info.start_match = 1;
-  info.current_position = 9;
-  FO_ASSERT_EQUAL(copyright_callout(&info), 1);
-  info.start_match = 11;
-  info.current_position = 15;
-  FO_ASSERT_EQUAL(copyright_callout(&info), 1);
-  info.start_match = 1;
-  info.current_position = 11;
-  info.callout_number = 2;
-  FO_ASSERT_EQUAL(copyright_callout(&info), 1);
-  info.callout_number = 3;
-  FO_ASSERT_EQUAL(copyright_callout(&info), 1);
-
-  /* do the asserts */
-  FO_ASSERT_EQUAL(cvector_size(copy->entries), 3);
-  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->name_match, "email"));
-  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->dict_match, "email"));
-  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->name_match, "url"));
-  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->dict_match, "url"));
-  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->text, "This is ju"));
-  FO_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->text, "his is jus"));
-
-  cvector_clear(copy->entries);
-}
-
 /* ************************************************************************** */
 /* **** standard function tests ********************************************* */
 /* ************************************************************************** */
@@ -283,7 +243,7 @@ void test_copyright_analyze()
   FO_ASSERT_STRING_EQUAL(((copy_entry)cvector_get(copy->entries, 2))->text,
       "copyright (c) 2009, 2010 and this makes the line longer");
   FO_ASSERT_STRING_EQUAL(((copy_entry)cvector_get(copy->entries, 3))->text,
-      "<smith.not.john@not.a.url>");
+      "smith.not.john@not.a.url");
   FO_ASSERT_STRING_EQUAL(((copy_entry)cvector_get(copy->entries, 4))->text,
       "http://www.not.a.url/index.html");
 }
@@ -292,10 +252,16 @@ void test_copyright_email_url()
 {
   /* start the test */
   /* run the tests */
-  copyright_email_url(copy, "test.email@url.com http://www.testurl.com not_a_url");
-  FO_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 2);
-  FO_ASSERT_TRUE(!strcmp(cvector_get(copy->entries, 0), "test.email@url.com"));
-  FO_ASSERT_TRUE(!strcmp(cvector_get(copy->entries, 1), "http://www.testurl.com"));
+  copyright_email_url(copy, "test.email@url.com "
+                            "http://www.testurl.com "
+                            "<backed_email@url.org> "
+                            "(surround_this_name@email.net) "
+                            "not_a_url not_an_email");
+  FO_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 4);
+  FO_ASSERT_STRING_EQUAL(cvector_get(copy->entries, 0), "test.email@url.com");
+  FO_ASSERT_STRING_EQUAL(cvector_get(copy->entries, 1), "backed_email@url.org");
+  FO_ASSERT_STRING_EQUAL(cvector_get(copy->entries, 2), "surround_this_name@email.net");
+  FO_ASSERT_STRING_EQUAL(cvector_get(copy->entries, 3), "http://www.testurl.com");
 
   cvector_clear(copy->entries);
 }
@@ -439,7 +405,6 @@ CU_TestInfo copyright_testcases[] =
     {"Testing copyright_size:", test_copyright_size},
     {"Testing strip_emtpy_entries:", test_strip_empty_entries},
     {"Testing contains_copyright:", test_contains_copyright},
-    {"Testing copyright_callout:", test_copyright_callout},
     {"Testing copyright_begin:", test_copyright_begin},
     {"Testing copyright_end:", test_copyright_end},
     {"Testing copy_entry_text:", test_copy_entry_text},

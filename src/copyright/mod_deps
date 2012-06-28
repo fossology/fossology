@@ -77,48 +77,7 @@ fi
 
 ########################################################################
 
-if [ $BUILDTIME ]; then
-  echo "*** Installing $DISTRO buildtime dependencies ***";
-  case "$DISTRO" in
-    Debian|Ubuntu|LinuxMint)
-      apt-get $YesOpt install \
-        libpcre3-dev
-      ;;
-    Fedora|RedHatEnterprise*|CentOS)
-      if [ $YesOpt ]; then
-        YesOpt='-y'
-      fi        
-      yum $YesOpt install \
-        pcre-devel
-      ;;
-    Mandriva)
-      #urpmi
-      # not supported
-      ;;
-    *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
-  esac
-fi
-
-if [ $RUNTIME ]; then
-  echo "*** Installing $DISTRO runtime dependencies ***";
-  case "$DISTRO" in
-    Debian|Ubuntu|LinuxMint)
-      apt-get $YesOpt install \
-        libpcre3
-      ;;
-    Fedora|RedHatEnterprise*|CentOS)
-      if [ $YesOpt ]; then
-        YesOpt='-y'
-      fi        
-      yum $YesOpt install \
-        pcre
-      ;;
-    Mandriva)
-      #urpmi
-      # not supported
-      ;;
-  esac
-fi
+echo "*** copyright agent does not have any dependencies ***"
 
 #######################################################################
 

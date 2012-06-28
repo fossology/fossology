@@ -24,8 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <ctype.h>
 
 /* other library includes */
-#include <pcre.h>
 #include <libfossology.h>
+#include <glib.h>
 
 /* local includes */
 #include <copyright.h>
@@ -37,9 +37,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 /** regular expression to find email statements in natural language */
-char* email_regex = "[\\<\\(]?[A-Za-z0-9\\-_\\.\\+]{1,100}@[A-Za-z0-9\\-_\\.\\+]{1,100}\\.[A-Za-z]{1,4}[\\>\\)]?(?C1)";
+char* email_regex = "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?";
 /** regular expression to find url statements in natural language */
-char* url_regex = "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s])(?C2)";
+char* url_regex = "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s])";
 /** the list of letter that will be removed when matching to a radix tree */
 char token[34] = {' ','!','"','#','$','%','&','`','*','+','\'','-','.','/',':','\n',',',
                   '\t',';','<','=','>','?','@','[','\\',']','^','_','{','|','}','~',0};
@@ -54,10 +54,8 @@ struct copyright_internal
   radix_tree dict;        ///< the dictionary to search within
   radix_tree name;        ///< the list of names to match
   cvector entries;        ///< the set of copyright found in a particular file
-  pcre* email_re;         ///< regex for finding emails
-  pcre* url_re;           ///< the regex for finding urls
-  const char* reg_error;  ///< for regular expression error messages
-  int reg_error_offset;   ///< for regex error offsets
+  GRegex* email_re;       ///< regular expression for finding emails
+  GRegex* url_re;         ///< the regular expression for finding urls
 };
 
 struct copy_entry_internal
@@ -266,23 +264,6 @@ void  copy_entry_destroy(void* to_destroy)
   free(to_destroy);
 }
 
-/**
- * @brief print the data contained in the entry to the file provided
- *
- * @param to_print the copy_entry that should be printed
- * @param ostr the file pointer to print to
- */
-void  copy_entry_print(void* to_print, FILE* ostr)
-{
-  copy_entry prt = (copy_entry)to_print;
-  fprintf(ostr, "%s\t%s ==>\n%s\n%d -> %d\n",
-      prt->dict_match,
-      prt->name_match,
-      prt->text,
-      prt->start_byte,
-      prt->end_byte);
-}
-
 /*!
  * @brief creates a function registry for a copyright entry
  *
@@ -299,84 +280,8 @@ function_registry* copy_entry_function_registry()
   ret->name = "cvector";
   ret->copy = &copy_entry_copy;
   ret->destroy = &copy_entry_destroy;
-  ret->print = &copy_entry_print;
 
   return ret;
-}
-
-/**
- * This function will be called from within libpcre. Every time pcre_exec finds
- * a match for the regex it will call this function. This function will save
- * the match to the copyright object and tell the pcre_exec function to
- * continue searching for new matches.
- *
- * @param info pcre_callout_block created by the pcre_exec function. This function
- *             will only use the callout_data, subject, start_match, current_possition
- *             field of the pcre_callout_block structure.
- * @return integer telling pcre_exec if it should continue searching for matches
- */
-int copyright_callout(pcre_callout_block* info)
-{
-  /* locals */
-  char temp[1024];
-  memset(temp, 0, sizeof(temp));
-  struct copy_entry_internal new_entry;
-  copy_entry prev;
-  cvector data = (cvector)info->callout_data;
-  int size = (info->current_position - info->start_match > 1023) ?
-                1023 : info->current_position - info->start_match;
-
-  /* initialize memory */
-  copy_entry_init(&new_entry);
-
-  /* copy information into the entry */
-  strncpy(new_entry.text,
-      &(info->subject[info->start_match]),
-      size);
-  new_entry.start_byte = info->start_match;
-  new_entry.end_byte = info->start_match + size;
-
-  /* copy the type that was found into the entry */
-  switch(info->callout_number)
-  {
-    case(1) :
-      strcpy(new_entry.name_match, "email");
-      strcpy(new_entry.dict_match, "email");
-      new_entry.type = "email";
-      break;
-    case(2) :
-      strcpy(new_entry.name_match, "url");
-      strcpy(new_entry.dict_match, "url");
-      new_entry.type = "url";
-      break;
-    default :
-      return 1;
-  }
-
-  /* only log the new entry if it wasn't already located by the regex */
-  if(cvector_size(data) != 0)
-  {
-    prev = *(cvector_end(data) - 1);
-    if(!strcmp(prev->dict_match, new_entry.dict_match)
-        || !strcmp(prev->dict_match, new_entry.dict_match))
-    {
-      if(!(prev->start_byte <= new_entry.start_byte && prev->end_byte >= new_entry.end_byte))
-      {
-        cvector_push_back(data, &new_entry);
-      }
-    }
-    else
-    {
-      cvector_push_back(data, &new_entry);
-    }
-  }
-  else
-  {
-    cvector_push_back(data, &new_entry);
-  }
-
-  /* force the pcre_exec function to continue searching */
-  return 1;
 }
 
 /* ************************************************************************** */
@@ -405,24 +310,8 @@ int copyright_init(copyright* copy, char* copy_dir, char* name_dir)
     return 0;
   }
 
-  (*copy)->reg_error_offset = 0;
-
-  /* compile the regular expressions */
-  (*copy)->email_re = pcre_compile(
-      email_regex,
-      PCRE_CASELESS,
-      &(*copy)->reg_error,
-      &(*copy)->reg_error_offset,
-      NULL);
-  (*copy)->url_re   = pcre_compile(
-      url_regex,
-      PCRE_CASELESS,
-      &(*copy)->reg_error,
-      &(*copy)->reg_error_offset,
-      NULL);
-
-  /* set the callout function */
-  pcre_callout = copyright_callout;
+  (*copy)->email_re = g_regex_new(email_regex, G_REGEX_CASELESS, 0, NULL);
+  (*copy)->url_re   = g_regex_new(url_regex,   G_REGEX_CASELESS, 0, NULL);
 
   return 1;
 }
@@ -437,8 +326,8 @@ void copyright_destroy(copyright copy)
   radix_destroy(copy->dict);
   radix_destroy(copy->name);
   cvector_destroy(copy->entries);
-  pcre_free(copy->email_re);
-  pcre_free(copy->url_re);
+  g_regex_unref(copy->email_re);
+  g_regex_unref(copy->url_re);
   free(copy);
 }
 
@@ -542,32 +431,53 @@ void copyright_analyze(copyright copy, FILE* istr)
  */
 void copyright_email_url(copyright copy, char* file)
 {
-  int ovector[30];
-  memset(ovector, 0, sizeof(ovector));
+  struct copy_entry_internal new_entry;
+  GMatchInfo* match;
+  gchar* tmp;
 
-  pcre_extra pass;
+  /* check for email matches */
+  if(g_regex_match(copy->email_re, file, 0, &match))
+  {
+    do
+    {
+      copy_entry_init(&new_entry);
 
-  pass.flags = PCRE_EXTRA_CALLOUT_DATA;
-  pass.callout_data = copy->entries;
+      tmp = g_match_info_fetch(match, 1);
+      strcpy(new_entry.text, tmp);
+      strcpy(new_entry.name_match, "email");
+      strcpy(new_entry.dict_match, "email");
+      new_entry.type = "email";
 
-  pcre_exec(
-      copy->email_re,                /* the compiled regular expression       */
-      &pass,                         /* the pattern wasn't studied            */
-      file,                          /* the string to be analyzed             */
-      strlen(file),                  /* the size of the input string          */
-      0,                             /* start with 0 offset into the string   */
-      0,                             /* default options                       */
-      ovector,                       /* vector to contain the return          */
-      sizeof(ovector)/sizeof(int));  /* the size of the return vector         */
-  pcre_exec(
-      copy->url_re,                  /* the compiled regular expression       */
-      &pass,                         /* the pattern wasn't studied            */
-      file,                          /* the string to be analyzed             */
-      strlen(file),                  /* the size of the input string          */
-      0,                             /* start with 0 offset into the string   */
-      0,                             /* default options                       */
-      ovector,                       /* vector to contain the return          */
-      sizeof(ovector)/sizeof(int));  /* the size of the return vector         */
+      g_match_info_fetch_pos(match, 1, &new_entry.start_byte, &new_entry.end_byte);
+
+      g_free(tmp);
+
+      cvector_push_back(copy->entries, &new_entry);
+    } while(g_match_info_next(match, NULL));
+  }
+  g_match_info_free(match);
+
+  /* check for url matches */
+  if(g_regex_match(copy->url_re,   file, 0, &match))
+  {
+    do
+    {
+      copy_entry_init(&new_entry);
+
+      tmp = g_match_info_fetch(match, 0);
+      strcpy(new_entry.text, tmp);
+      strcpy(new_entry.name_match, "url");
+      strcpy(new_entry.dict_match, "url");
+      new_entry.type = "url";
+
+      g_match_info_fetch_pos(match, 1, &new_entry.start_byte, &new_entry.end_byte);
+
+      g_free(tmp);
+
+      cvector_push_back(copy->entries, &new_entry);
+    } while(g_match_info_next(match, NULL));
+  }
+  g_match_info_free(match);
 }
 
 /* ************************************************************************** */

@@ -413,23 +413,23 @@ int cvector_capacity(cvector vec)
  * @param pfile: the FILE pointer that will be printed to
  *
  */
-void cvector_print(cvector vec, FILE* pfile)
+/*void cvector_print(cvector vec, FILE* pfile)
 {
-  /* local variables */
+   local variables
   int length = strlen(vec->memory->name);
   cvector_iterator iter;
 
-  /* write the name and size of the list to the file */
+   write the name and size of the list to the file
   fwrite(&length, sizeof(int), 1, pfile);
   fwrite(vec->memory->name, sizeof(char), strlen(vec->memory->name), pfile);
   fwrite(&vec->size, sizeof(int), 1, pfile);
 
-  /* loop through the data and print every element */
+   loop through the data and print every element
   for(iter = cvector_begin(vec); iter != cvector_end(vec); iter++)
   {
     vec->memory->print(*iter, pfile);
   }
-}
+}*/
 
 /* ************************************************************************** */
 /* **** Memory Functions (Private) ****************************************** */
@@ -456,16 +456,6 @@ void  int_destroy(void* to_delete)
   free(to_delete);
 }
 
-/*!
- * @brief print the element to a file
- * @param to_print
- * @param pfile
- */
-void  int_print(void* to_print, FILE* pfile)
-{
-  fprintf(pfile, "%d\t", *((int*)to_print));
-}
-
 /* ********** character memory management functions ********** */
 /**
  * @brief allocated memory for a char and store the char
@@ -485,16 +475,6 @@ void* char_copy(void* to_copy)
 void  char_destroy(void* to_delete)
 {
   free(to_delete);
-}
-
-/*!
- * @brief print the element to a file
- * @param to_print
- * @param pfile
- */
-void  char_print(void* to_print, FILE* pfile)
-{
-  fprintf(pfile, "%c", *((char*)to_print));
 }
 
 /* ********** double memory management functions  ********** */
@@ -518,16 +498,6 @@ void  double_destroy(void* to_delete)
   free(to_delete);
 }
 
-/*!
- * @brief print the element to a file
- * @param to_print
- * @param pfile
- */
-void  double_print(void* to_print, FILE* pfile)
-{
-  fprintf(pfile, "%f", *((double*)to_print));
-}
-
 /* ********** pointer memory management functions ********** */
 /**
  * @brief allocated memory for a pointer and store the pointer
@@ -549,20 +519,6 @@ void  pointer_destroy(void* to_delete)
   free(to_delete);
 }
 
-/*!
- * @brief print the element to a file
- * @param to_print
- * @param pfile
- */
-void  pointer_print(void** to_print, FILE* pfile)
-{
-#ifdef _LP64
-  fprintf(pfile, "0x%lX", (unsigned long)*to_print);
-#else
-  fprintf(pfile, "0x%X",  (unsigned int )*to_print);
-#endif
-}
-
 /* ********** string memory management functions ********** */
 /**
  * @brief allocated memory for an int and store the int
@@ -582,16 +538,6 @@ void* string_copy(void* to_copy)
 void  string_destroy(void* to_delete)
 {
   free(to_delete);
-}
-
-/*!
- * @brief print the element to a file
- * @param to_print
- * @param pfile
- */
-void  string_print(void* to_print, FILE* pfile)
-{
-  fprintf(pfile, "%s", (char*)to_print);
 }
 
 /* ********** cvector memory management functions ********** */
@@ -616,16 +562,6 @@ void  cvector_destroy_reg(void* to_delete)
   free(to_delete);
 }
 
-/*!
- * @brief print the element to a file
- * @param to_print
- * @param pfile
- */
-void  cvector_print_reg(void* to_print, FILE* pfile)
-{
-  cvector_print((cvector)to_print, pfile);
-}
-
 /* ************************************************************************** */
 /* **** Memory Functions (Public) ******************************************* */
 /* ************************************************************************** */
@@ -647,7 +583,6 @@ function_registry* function_registry_copy(function_registry* vec)
   ret->name = vec->name;
   ret->copy = vec->copy;
   ret->destroy = vec->destroy;
-  ret->print = vec->print;
 
   return ret;
 }
@@ -671,7 +606,6 @@ function_registry* int_function_registry()
   ret->name = "integer";
   ret->copy = &int_copy;
   ret->destroy = &int_destroy;
-  ret->print = &int_print;
 
   return ret;
 }
@@ -695,7 +629,6 @@ function_registry* char_function_registry()
   ret->name = "character";
   ret->copy = &char_copy;
   ret->destroy = &char_destroy;
-  ret->print = &char_print;
 
   return ret;
 }
@@ -719,7 +652,6 @@ function_registry* double_function_registry()
   ret->name = "float";
   ret->copy = &double_copy;
   ret->destroy = &double_destroy;
-  ret->print = &double_print;
 
   return ret;
 }
@@ -743,7 +675,6 @@ function_registry* pointer_function_registry()
   ret->name = "pointer";
   ret->copy = (void* (*)(void*))&pointer_copy;
   ret->destroy = &pointer_destroy;
-  ret->print = (void (*)(void*, FILE*))&pointer_print;
 
   return ret;
 }
@@ -767,7 +698,6 @@ function_registry* string_function_registry()
   ret->name = "string";
   ret->copy = &string_copy;
   ret->destroy = &string_destroy;
-  ret->print = &string_print;
 
   return ret;
 }
@@ -791,7 +721,6 @@ function_registry* cvector_function_registry()
   ret->name = "cvector";
   ret->copy = &cvector_copy_reg;
   ret->destroy = &cvector_destroy_reg;
-  ret->print = &cvector_print_reg;
 
   return ret;
 }
