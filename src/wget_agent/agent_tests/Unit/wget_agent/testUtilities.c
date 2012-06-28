@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -117,9 +117,9 @@ void test_PathCheck()
 }
 
 /**
- * \brief for function Suckupfs(), dir
+ * \brief for function Archivefs(), dir
  */
-void test_Suckupfs_dir()
+void test_Archivefs_dir()
 {
   char file_path[] = "./";
   char tar_file[] = "/tmp/Suckupfs.tar.dir/test.tar";
@@ -129,7 +129,7 @@ void test_Suckupfs_dir()
   struct stat Status;
   if (stat(file_path, &Status) != 0) return; // file_path is not exist or can not access
 
-  int res = Suckupfs(file_path, tar_file, des_dir, Status);
+  int res = Archivefs(file_path, tar_file, des_dir, Status);
   CU_ASSERT_EQUAL(1, res);
   tar_status = stat(file_path, &Status);
   CU_ASSERT_EQUAL(0, tar_status);
@@ -140,9 +140,9 @@ void test_Suckupfs_dir()
 }
 
 /**
- * \brief for function Suckupfs(), reguler file
+ * \brief for function Archivefs(), reguler file
  */
-void test_Suckupfs_file()
+void test_Archivefs_file()
 {
   char file_path[] = "./Makefile";
   char tar_file[] = "/tmp/Suckupfs.tar.dir/testfile";
@@ -152,7 +152,7 @@ void test_Suckupfs_file()
   struct stat Status;
   if (stat(file_path, &Status) != 0) return; // file_path is not exist or can not access
 
-  int res = Suckupfs(file_path, tar_file, des_dir, Status);
+  int res = Archivefs(file_path, tar_file, des_dir, Status);
   CU_ASSERT_EQUAL(1, res);
   tar_status = stat(file_path, &Status);
   CU_ASSERT_EQUAL(0, tar_status);
@@ -174,8 +174,8 @@ CU_TestInfo testcases_Utiliies[] =
 {"Utiliies:GetPosition_normal", testGetPositionNormal},
 {"Utiliies:TaintURL_normal", testTaintURL},
 {"Utiliies:PathCheck", test_PathCheck},
-{"Utiliies:Suckupfs_dir", test_Suckupfs_dir},
-{"Utiliies:Suckupfs_file", test_Suckupfs_file},
+{"Utiliies:Archivefs_dir", test_Archivefs_dir},
+{"Utiliies:Archivefs_file", test_Archivefs_file},
   CU_TEST_INFO_NULL
 };
 
