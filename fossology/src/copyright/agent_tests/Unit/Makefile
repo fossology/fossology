@@ -20,7 +20,7 @@ LOCALAGENTDIR=../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
-CFLAGS_LOCAL= $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lpcre -lcunit $(TESTLIB)
+CFLAGS_LOCAL= $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(TESTLIB)
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_copyright
 

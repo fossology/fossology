@@ -18,9 +18,10 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -lpcre -Werror
-DEF = -DDATADIR='"$(MODDIR)"'
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)
+CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -Werror
+DEF          = -DDATADIR='"$(MODDIR)"'
+CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
+CFLAGS_LINK  = $(ALL_CFLAGS)
 
 EXE = copyright
 TESTDIR = ../agent_tests
@@ -32,7 +33,7 @@ OBJECTS  = copyright.o cvector.o radixtree.o  pair.o main.o
 ##########################
 $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
 	@echo "make copyright agent"
-	$(CC) $(OBJECTS) $(DEF) $(CFLAGS_LOCAL) -o $@
+	$(CC) $(OBJECTS) $(DEF) $(CFLAGS_LINK) -o $@
 
 all: $(EXE) test
 	@echo "make copyright agent and test"
@@ -44,8 +45,6 @@ test:
 #######################
 # library build rules #
 #######################
-$(FOLIB):
-	$(MAKE) -C $(FOLIBDIR)
 
 libcopyright.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
@@ -93,4 +92,4 @@ clean:
 	rm -f *.o *.a $(EXE)
 
 .PHONY: all install uninstall clean test $(FOLIB)
-	
+include ${TOP}/Makefile.deps

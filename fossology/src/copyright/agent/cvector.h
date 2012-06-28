@@ -39,7 +39,6 @@ struct _function_registry {
   const char* name;
   void* (*copy)(void*);
   void (*destroy)(void*);
-  void (*print)(void*, FILE*);
 };
 
 /*!
@@ -108,7 +107,7 @@ int cvector_capacity(cvector vec);
 /* **** Print Functions ***************************************************** */
 /* ************************************************************************** */
 
-void cvector_print(cvector vec, FILE* pfile);
+//void cvector_print(cvector vec, FILE* pfile);
 
 /* ************************************************************************** */
 /* **** Registery Creation Functions **************************************** */
