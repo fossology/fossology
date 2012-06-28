@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -201,8 +201,10 @@ int main  (int argc, char *argv[])
 
         if (stat(GlobalURL, &Status) == 0)
         {
-          if (!Suckupfs(GlobalURL, GlobalTempFile, TempFileDir, Status))
+          if (!Archivefs(GlobalURL, GlobalTempFile, TempFileDir, Status))
           {
+            LOG_FATAL("Failed to archieve. GlobalURL, GlobalTempFile, TempFileDir are: %s, %s, %s, "
+               "Mode is: %lo (octal)\n", GlobalURL, GlobalTempFile, TempFileDir, (unsigned long) Status.st_mode);
             SafeExit(50);
           }
           DBLoadGold();

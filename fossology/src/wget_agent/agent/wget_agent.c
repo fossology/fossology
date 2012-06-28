@@ -1,7 +1,7 @@
 /***************************************************************
  wget_agent: Retrieve a file and put it in the database.
 
- Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -538,15 +538,17 @@ char *PathCheck(char *DirPath)
 }
 
 /**
- * \brief suck up the the directory to one tar file or copy the file to the temporary directory
+ * \brief if the path(fs) is a directory, create a tar file from files(dir) in a directory 
+ * to the temporary directory
+ * if the path(fs) is a file, copy the file to the temporary directory
  *
- * \param char *Path - directory(file) you want to upload from server 
+ * \param char *Path - the fs will be handled, directory(file) you want to upload from server 
  * \param char *TempFile - the tar(reguler) file name
  * \param struct stat Status - the status of Path
  *
  * \return 1 on sucess, 0 on failure
  */
-int Suckupfs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
+int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
 {
   char CMD[MAXCMD] = {0};
   int rc_system = 0;

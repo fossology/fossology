@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -110,7 +110,7 @@ char *PathCheck (char *DirPath);
  */
 void  Usage (char *Name);
 
-int Suckupfs(char *Path, char *TempFile, char *TempFileDir, struct stat Status);
+int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status);
 
 #endif /* _WGET_AGENT_H */
 
