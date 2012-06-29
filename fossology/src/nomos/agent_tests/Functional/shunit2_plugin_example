@@ -1,0 +1,90 @@
+#! /bin/sh
+# vim:et:ft=sh:sts=2:sw=2
+#-----------------------------------------------------------------------------
+#
+# shunit_plugin_argv should pick out args that it reconizes from the
+# beginning of $*
+#
+# It should set shunit_plugin_argv_return to command to eval to shift away
+# all the args that it consumes.
+#
+
+shunit_plugin_argv() {
+  shunit_plugin_output_file="./nomos-Xunit.xml"
+
+  if [ $# -gt 1 ]
+  then
+    if [ "$1" = "--file" ]
+    then
+      shunit_plugin_output_file=$2
+      shunit_plugin_argv_return='shift; shift'
+    fi
+  fi
+
+  # variables you set here may need to be available in child processes
+  # of shunit that are called recursively
+  export shunit_plugin_output_file
+}
+    
+#-----------------------------------------------------------------------------
+#
+# shunit_plugin_init is called pretty early in the process.
+
+shunit_plugin_init() {
+
+  # In this example, write the header of an xml-like file
+  {
+  echo '<?xml version="1.0" ?>' 
+  echo '<testsuite name="name of testfile (OneShot_test.sh) passed to shunit2 on the command line" file="pathname of testfile">'
+  } > $shunit_plugin_output_file
+}
+
+
+#-----------------------------------------------------------------------------
+
+shunit_plugin_execute() {
+
+  _shunit_test_="$1"
+
+  start_time=` date '+%Y-%m-%d %H:%M:%S' `
+
+  # execute the per-test setup function
+  setUp
+
+  # execute the test
+  echo "${_shunit_test_}"
+  eval ${_shunit_test_}
+
+  # execute the per-test tear-down function
+  tearDown
+  end_time=` date '+%Y-%m-%d %H:%M:%S' `
+
+
+  {
+  echo "<testcase='${_shunit_test_}' start='$start_time' end='$end_time' status='$_shunit_last_test_status'>"
+  } >> $shunit_plugin_output_file
+
+  # this is important:  tell shunit that we generated a report
+  # for this test, otherwise it generates a report of its own.
+
+  __shunit_reportGenerated=${SHUNIT_TRUE}
+
+}
+
+#-----------------------------------------------------------------------------
+
+shunit_plugin_final_report() {
+  {
+  echo '</testsuite>'
+  echo "<stats total='${__shunit_testsTotal}' pass='`expr $__shunit_testsTotal - $__shunit_assertsFailed - $__shunit_assertsSkipped`' fail='$__shunit_assertsFailed' skip='$__shunit_assertsSkipped'>"
+  } >> $shunit_plugin_output_file
+}
+
+#-----------------------------------------------------------------------------
+
+shunit_plugin_finish() {
+	# the pandokia plugin does not require finalization
+	:
+#  echo '</batch>' >> $shunit_plugin_output_file
+}
+
