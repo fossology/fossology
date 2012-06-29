@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* include functions to test */
 #include <testRun.h>
 
+/* scheduler includes */
 #include <agent.h>
 #include <job.h>
 #include <scheduler.h>
@@ -237,7 +238,7 @@ void test_agent_init()
 }
 
 /* ************************************************************************** */
-/* *** suite decl *********************************************************** */
+/* **** suite declaration *************************************************** */
 /* ************************************************************************** */
 
 CU_TestInfo tests_meta_agent[] =

@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <assert.h>
 #include <CUnit/CUnit.h>
 #include <CUnit/Automated.h>
+#include <gio/gio.h>
+#include <glib.h>
 
 #include <libfossology.h>
 #include <testRun.h>
@@ -64,17 +66,25 @@ int clean_suite(void)
 /* ************************************************************************** */
 
 /* create test suite */
-CU_SuiteInfo suites[] = {
-    {"agent.c: meta",       init_suite,       clean_suite, tests_meta_agent },
-    //{"agent.c:",      agent_init_suite, agent_clean_suite, tests_agent      },
-    {"host.c:",             init_suite,       clean_suite, tests_host       },
-    {"event.c:",            init_suite,       clean_suite, tests_event      },
+CU_SuiteInfo suites[] =
+{
+    {"agent.c: meta",                init_suite,            clean_suite, tests_meta_agent       },
+    //{"agent.c:",               agent_init_suite,      agent_clean_suite, tests_agent            },
+    {"host.c:",                      init_suite,            clean_suite, tests_host             },
+    {"event.c:",                     init_suite,            clean_suite, tests_event            },
+    {"interface.c:",       interface_init_suite,  interface_clean_suite, tests_interface        },
+    //{"interface_thread:", interface_thread_init, interface_thread_clean, tests_interface_thread },
     CU_SUITE_INFO_NULL
 };
 
 int main( int argc, char *argv[] )
 {
+  g_type_init();
   g_thread_init(NULL);
 
-  return focunit_main(argc, argv, "scheduler_Tests", suites) ;
+  printf("start\n");
+  focunit_main(argc, argv, "scheduler_Tests", suites) ;
+  printf("end\n");
+
+  return 0;
 }

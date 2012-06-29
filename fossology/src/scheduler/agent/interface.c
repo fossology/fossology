@@ -52,11 +52,6 @@ GCancellable* cancel;    ///< used to shut down all interfaces when closing the 
 GRegex* cmd_parse;       ///< regex to make parsing command more reliable
 GRegex* pro_parse;       ///< regex to parse the proxy formatting
 
-GRegex* rep_init_r;
-GRegex* get_host_r;
-GRegex* dot_repl_r;
-GRegex* cmd_recv_r;
-
 #define netw g_output_stream_write
 
 #define PROXY_PROTOCOL     "socks5"
@@ -87,7 +82,7 @@ typedef struct interface_connection
  * @param conn the socket that this interface is connected to
  * @return the newly allocated and populated interface connection
  */
-static interface_connection* interface_conn_init(GSocketConnection* conn)
+interface_connection* interface_conn_init(GSocketConnection* conn)
 {
   interface_connection* inter = g_new0(interface_connection, 1);
 
@@ -106,7 +101,7 @@ static interface_connection* interface_conn_init(GSocketConnection* conn)
  *
  * @param inter the interface_connection that should be freed
  */
-static void interface_conn_destroy(interface_connection* inter)
+void interface_conn_destroy(interface_connection* inter)
 {
   g_object_unref(inter->conn);
   g_free(inter);
@@ -135,7 +130,7 @@ static void interface_conn_destroy(interface_connection* inter)
  * @param  unused  currently not used to pass any information
  * @return not currently used
  */
-static void interface_thread(void* param, void* unused)
+void interface_thread(void* param, void* unused)
 {
   GMatchInfo* regex_match;
   interface_connection* conn = param;
@@ -205,7 +200,7 @@ static void interface_thread(void* param, void* unused)
       return;
     }
 
-    /* command: "die"
+    /* command: "die"FO_ASSERT_PTR_NOT_NULL(cancel);
      *
      * The interface has instructed the scheduler to shut down. The scheduler
      * should acknowledge the command and proceed to kill all current executing
@@ -490,7 +485,7 @@ static void interface_thread(void* param, void* unused)
  * @param  unused
  * @return unused
  */
-static void* listen_thread(void* unused)
+void* interface_listen_thread(void* unused)
 {
   GSocketListener* server_socket;
   GSocketConnection* new_connection;
@@ -500,7 +495,7 @@ static void* listen_thread(void* unused)
   if(i_terminate || !i_created)
   {
     ERROR("Could not create server socket thread\n");
-    return NULL;
+    return (void*)0;
   }
 
   /* create the server socket to listen for connections on */
@@ -531,7 +526,7 @@ static void* listen_thread(void* unused)
   V_INTERFACE("INTERFACE: socket listening thread closing\n");
   g_socket_listener_close(server_socket);
   g_object_unref(server_socket);
-  return NULL;
+  return (void*)1;
 }
 
 /* ************************************************************************** */
@@ -539,45 +534,45 @@ static void* listen_thread(void* unused)
 /* ************************************************************************** */
 
 /**
- * Create all of the pieces of the interface between the scheduler and the different
- * user interfaces. The interface is how the scheduler knows that the database has
- * been updated and how it becomes aware of changes in debugging state.
-"Alex Norton" <norton@localhost>
+ * @brief Create the interface thread and thread pool that handle ui connections
+ *
+ * The GUI and the CLI use a socket connection to communicate with the
+ * scheduler. This function creates the socket connection as well as everything
+ * needed to handle incoming connections and messages.
+ *
+ * @note If interface_init() is called multiple times without a call to
+ *       interface_destroy(), it will become a no-op after the second call
  */
 void interface_init()
 {
   if(!i_created)
   {
     i_created = 1;
-    socket_thread = g_thread_create(listen_thread, NULL, 1, NULL);
-  }
+    i_terminate = 0;
+    socket_thread = g_thread_create(interface_listen_thread, NULL, 1, NULL);
 
-  cancel = g_cancellable_new();
-  threads = g_thread_pool_new(interface_thread, NULL, CONF_interface_nthreads,
+    cancel = g_cancellable_new();
+    threads = g_thread_pool_new(interface_thread, NULL, CONF_interface_nthreads,
         FALSE, NULL);
 
-  cmd_parse = g_regex_new(
-      "(\\w+)(\\s+(-?\\d+))?(\\s+((-?\\d+)|(\"(.*)\")))?",
-      0, G_REGEX_MATCH_NEWLINE_LF, NULL);
-  pro_parse = g_regex_new(
-      "(.*):(\\d+)?",
-      0, 0, NULL);
-
-  get_host_r  = g_regex_new(
-      "((\".+\")\\s)?(<.+@([^\\.]+(\\.[a-z]{2,})?)>)",
-      0, 0, NULL);
-  dot_repl_r  = g_regex_new(
-      "^\\.",
-      G_REGEX_MULTILINE, 0, NULL);
-  cmd_recv_r  = g_regex_new(
-      "^(\\d{3})\\s+(.*?)\\s+(.*)$",
-      G_REGEX_MULTILINE, 0, NULL);
+    cmd_parse = g_regex_new(
+        "(\\w+)(\\s+(-?\\d+))?(\\s+((-?\\d+)|(\"(.*)\")))?",
+        0, G_REGEX_MATCH_NEWLINE_LF, NULL);
+    pro_parse = g_regex_new(
+        "(.*):(\\d+)?",
+        0, 0, NULL);
+  }
+  else
+  {
+    WARNING("Multiple attempts made to initialize the interface");
+  }
 }
 
 /**
- * closes all interface threads and closes the listening thread. This will block
- * until all threads have closed correctly.
+ * @brief Closes the server socket and thread pool that service ui connections
  *
+ * @note If interface_destroy() is called before interface_init(), then it will
+ *       be a no-op.
  */
 void interface_destroy()
 {
@@ -585,9 +580,23 @@ void interface_destroy()
   if(i_created)
   {
     i_terminate = 1;
+    i_created = 0;
+
     g_cancellable_cancel(cancel);
     g_thread_join(socket_thread);
     g_thread_pool_free(threads, FALSE, TRUE);
+    g_regex_unref(cmd_parse);
+    g_regex_unref(pro_parse);
+
+    socket_thread = NULL;
+    cancel        = NULL;
+    threads       = NULL;
+    cmd_parse     = NULL;
+    pro_parse     = NULL;
+  }
+  else
+  {
+    WARNING("Attempt to destroy the interface without initalizing it");
   }
 }
 
