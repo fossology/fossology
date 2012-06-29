@@ -32,8 +32,16 @@ int clean_suite(void);
 int agent_init_suite(void);
 int agent_clean_suite(void);
 
+/* interface suite init and clean */
+int interface_init_suite(void);
+int interface_clean_suite(void);
+int interface_thread_init(void);
+int interface_thread_clean(void);
+
 /* test case sets */
 extern CU_TestInfo tests_meta_agent[];
 extern CU_TestInfo tests_agent[];
 extern CU_TestInfo tests_host[];
 extern CU_TestInfo tests_event[];
+extern CU_TestInfo tests_interface[];
+extern CU_TestInfo tests_interface_thread[];
