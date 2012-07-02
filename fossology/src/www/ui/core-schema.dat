@@ -793,7 +793,7 @@
   $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_runonpfile\" DROP NOT NULL;";
   $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["jobqueue"]["jq_host"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_host\" IS 'Field that specify the job run on this host';";
+  $Schema["TABLE"]["jobqueue"]["jq_host"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_host\" IS 'Host to run job on.  May be null to let the scheduler decide.';";
   $Schema["TABLE"]["jobqueue"]["jq_host"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_host\" text;";
   $Schema["TABLE"]["jobqueue"]["jq_host"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_host\" DROP NOT NULL;";
   $Schema["TABLE"]["jobqueue"]["jq_host"]["UPDATE"] = "";
@@ -1686,6 +1686,11 @@
   $Schema["TABLE"]["upload"]["upload_origin"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"upload_origin\" text;";
   $Schema["TABLE"]["upload"]["upload_origin"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"upload_origin\" DROP NOT NULL;";
   $Schema["TABLE"]["upload"]["upload_origin"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload"]["uploadtree_tablename"]["DESC"] = "";
+  $Schema["TABLE"]["upload"]["uploadtree_tablename"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"uploadtree_tablename\" varchar(18);";
+  $Schema["TABLE"]["upload"]["uploadtree_tablename"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"uploadtree_tablename\" SET NOT NULL, ALTER COLUMN \"uploadtree_tablename\" SET DEFAULT 'uploadtree_0'::character varying;";
+  $Schema["TABLE"]["upload"]["uploadtree_tablename"]["UPDATE"] = "UPDATE upload SET uploadtree_tablename='uploadtree_0'::character varying";
 
 
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["DESC"] = "";
