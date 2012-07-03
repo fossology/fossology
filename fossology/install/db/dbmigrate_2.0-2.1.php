@@ -34,8 +34,6 @@
  **/
 function Migrate_20_21($DryRun)
 {
-  global $PG_CONN;
-
   /* if uploadtree_0 already exists, then do nothing but return success */
   if (DB_TableExists('uploadtree_0')) return 0;
 
@@ -56,6 +54,8 @@ function Migrate_20_21($DryRun)
 
 function RunSQL($sql, $DryRun)
 {
+  global $PG_CONN;
+
   if ($DryRun)
     echo "DryRun: $sql\n";
   else
