@@ -95,10 +95,15 @@ class ui_license_list extends FO_Plugin {
     if (empty($Item)) {
       return;
     }
+
+    // Get the upload for this uploadtree_pk
+    $uploadtreeRec = GetSingleRec("uploadtree", "where uploadtree_pk='$Item'");
+    $uploadtree_tablename = GetUploadtreeTableName($uploadtreeRec['upload_fk']);
+
     switch ($this->OutputType) {
       case "dltext":
         $this->NoHeader = 1;
-        $Path = Dir2Path($Item);
+        $Path = Dir2Path($Item, $uploadtree_tablename);
         $Name = $Path[count($Path) - 1]['ufile_name'] . ".txt";
         header("Content-Type: text");
         header('Content-Disposition: attachment; filename="' . $Name . '"');
@@ -213,16 +218,17 @@ class ui_license_list extends FO_Plugin {
      * filepath : license list
     * e.g. Pound-2.4.tgz/Pound-2.4/svc.c: GPL_v3+, Indemnity
     */
+    $uploadtree_tablename = GetUploadtreeTableName($toprow['upload_fk']);
     while ($row = pg_fetch_assoc($outerresult))
     {
-      $filepatharray = Dir2Path($row['uploadtree_pk']);
+      $filepatharray = Dir2Path($row['uploadtree_pk'], $uploadtree_tablename);
       $filepath = "";
       foreach($filepatharray as $uploadtreeRow)
       {
         if (!empty($filepath)) $filepath .= "/";
         $filepath .= $uploadtreeRow['ufile_name'];
       }
-      $V .= $filepath . ": ". GetFileLicenses_string($agent_pk, 0, $row['uploadtree_pk']) ;
+      $V .= $filepath . ": ". GetFileLicenses_string($agent_pk, 0, $row['uploadtree_pk'], $uploadtree_tablename) ;
       if ($dltext)
       $V .= "\n";
       else

@@ -33,6 +33,7 @@ class ui_nomos_diff extends FO_Plugin
   var $LoginFlag  = 0;
   var $ColumnSeparatorStyleL = "style='border:solid 0 #006600; border-left-width:2px;padding-left:1em'";
 
+
   /**
    * \brief Create and configure database tables
    */
@@ -90,6 +91,10 @@ class ui_nomos_diff extends FO_Plugin
   {
     $TreeInfo = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $Uploadtree_pk");
     $TreeInfo['agent_pk'] = LatestAgentpk($TreeInfo['upload_fk'], "nomos_ars");
+
+    // Get the uploadtree table
+    $UploadRec = GetSingleRec("upload", "where upload_pk=$TreeInfo[upload_fk]");
+    $TreeInfo['uploadtree_tablename'] = $UploadRec['uploadtree_tablename'];
     return $TreeInfo;
   }
 
@@ -113,9 +118,9 @@ class ui_nomos_diff extends FO_Plugin
     $sql = "SELECT distinct(rf_shortname) as licname,
                    count(rf_shortname) as liccount, rf_shortname
               from license_ref,license_file,
-                  (SELECT distinct(pfile_fk) as PF from uploadtree 
+                  (SELECT distinct(pfile_fk) as PF from $TreeInfo[uploadtree_tablename]
                      where upload_fk=$upload_pk 
-                       and uploadtree.lft BETWEEN $lft and $rgt) as SS
+                       and {$TreeInfo['uploadtree_tablename']}.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$agent_pk and rf_fk=rf_pk
               group by rf_shortname 
               order by liccount desc";
@@ -213,7 +218,8 @@ class ui_nomos_diff extends FO_Plugin
 
     /* display item links */
     $ColStr .= "<td valign='top'>";
-    $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk, $Child['pfile_fk'], True, $UniqueTagArray);
+    $uploadtree_tablename = GetUploadtreeTableName($Child['upload_fk']);
+    $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk, $Child['pfile_fk'], True, $UniqueTagArray, $uploadtree_tablename);
     $ColStr .= "</td>";
     return $ColStr;
   }  /* ChildElt() */
@@ -516,8 +522,8 @@ class ui_nomos_diff extends FO_Plugin
 
     /* File path */
     $OutBuf .= "<tr>";
-    $Path1 = Dir2Path($uploadtree_pk1);
-    $Path2 = Dir2Path($uploadtree_pk2);
+    $Path1 = Dir2Path($uploadtree_pk1, $TreeInfo1['uploadtree_tablename']);
+    $Path2 = Dir2Path($uploadtree_pk2, $TreeInfo2['uploadtree_tablename']);
     $OutBuf .= "<td colspan=2>";
     $OutBuf .= Dir2BrowseDiff($Path1, $Path2, $filter, 1, $this);
     $OutBuf .= "</td>";

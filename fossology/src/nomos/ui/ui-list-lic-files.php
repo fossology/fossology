@@ -93,6 +93,11 @@ class list_lic_files extends FO_Plugin
       $Page=0;
     }
 
+    // Get upload_pk and $uploadtree_tablename
+    $UploadtreeRec = GetSingleRec("uploadtree", "where uploadtree_pk=$uploadtree_pk");
+    $UploadRec = GetSingleRec("upload", "where upload_pk=$UploadtreeRec[upload_fk]");
+    $uploadtree_tablename = $UploadRec['uploadtree_tablename'];
+
     switch($this->OutputType)
     {
       case "XML":
@@ -108,7 +113,7 @@ class list_lic_files extends FO_Plugin
         $CheckOnly = false;
 
         // Count is uploadtree recs, not pfiles
-        $CountArray = CountFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly, $CheckOnly, $tag_pk);
+        $CountArray = CountFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly, $CheckOnly, $tag_pk, $uploadtree_tablename);
         $Count = $CountArray['count'];
         $Unique = $CountArray['unique'];
 
@@ -121,7 +126,7 @@ class list_lic_files extends FO_Plugin
         $order = " order by ufile_name asc";
         /** should delete $filesresult yourself */
         $filesresult = GetFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk,
-                                           $PkgsOnly, $Offset, $limit, $order, $tag_pk);
+                                           $PkgsOnly, $Offset, $limit, $order, $tag_pk, $uploadtree_tablename);
         $NumFiles = pg_num_rows($filesresult);
         $text = _("Display");
         $text1 = _("excludes");
@@ -162,7 +167,7 @@ class list_lic_files extends FO_Plugin
         while ($row = pg_fetch_assoc($filesresult))
         {
           $pfile_pk = $row['pfile_fk'];
-          $licstring = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $row['uploadtree_pk']);
+          $licstring = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $row['uploadtree_pk'], $uploadtree_tablename);
           $URLlicstring = urlencode($licstring);
 
           // Allow user to exclude files with this extension

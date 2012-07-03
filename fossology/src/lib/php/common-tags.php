@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -27,10 +27,11 @@
  *
  * \param $Item the uploadtree_pk
  * \param $Recurse boolean, to recurse or not
+ * \param $uploadtree_tablename
  *
  * \return an array of: ag_pk and tag_name
  */
-function GetAllTags($Item, $Recurse=true)
+function GetAllTags($Item, $Recurse=true, $uploadtree_tablename)
 {
   global $PG_CONN;
   if (empty($PG_CONN)) { return; }
@@ -40,12 +41,12 @@ function GetAllTags($Item, $Recurse=true)
   if ($Recurse)
   {
     /* Get tree boundaries */
-    $sql = "select lft,rgt, upload_fk from uploadtree where uploadtree_pk=$Item";
+    $sql = "select lft,rgt, upload_fk from $uploadtree_tablename where uploadtree_pk=$Item";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $uploadtree_row = pg_fetch_assoc($result);
 
-    $Condition = " lft>=$uploadtree_row[lft] and rgt<=$uploadtree_row[rgt] ";
+    $Condition = " lft between $uploadtree_row[lft] and $uploadtree_row[rgt] ";
     $upload_pk = $uploadtree_row['upload_fk'];
     pg_free_result($result);
   }
@@ -55,13 +56,16 @@ function GetAllTags($Item, $Recurse=true)
   }
 
   /* Get list of unique tag_pk's for this item */
-//  $sql = "SELECT distinct(tag_fk) as tag_pk FROM tag_file, uploadtree WHERE tag_file.pfile_fk = uploadtree.pfile_fk and upload_fk=$upload_pk AND $Condition UNION SELECT tag_fk as tag_pk FROM tag_uploadtree WHERE tag_uploadtree.uploadtree_fk = $Item";
+  $sql = "SELECT distinct(tag_fk) as tag_pk FROM tag_file, $uploadtree_tablename WHERE tag_file.pfile_fk = {$uploadtree_tablename}.pfile_fk and upload_fk=$upload_pk AND $Condition UNION SELECT tag_fk as tag_pk FROM tag_uploadtree WHERE tag_uploadtree.uploadtree_fk = $Item";
+
   /* simplify (i.e. speed up) for special case of looking at a single file */
-  if (($uploadtree_row['rgt'] - $uploadtree_row['lft']) == 1)
-    $sql = "select distinct(tag_fk) as tag_pk from uploadtree_tag_file_inner where uploadtree_pk='$Item' UNION select tag_fk as tag_pk from tag_uploadtree where tag_uploadtree.uploadtree_fk='$Item'";
-  else
-    $sql = "select distinct(tag_fk) as tag_pk from uploadtree_tag_file_inner where upload_fk='$upload_pk' and $Condition UNION select tag_fk as tag_pk from tag_uploadtree where tag_uploadtree.uploadtree_fk='$Item'";
+//  if (($uploadtree_row['rgt'] - $uploadtree_row['lft']) == 1)
+//    $sql = "select distinct(tag_fk) as tag_pk from uploadtree_tag_file_inner where uploadtree_pk='$Item' UNION select tag_fk as tag_pk from tag_uploadtree where tag_uploadtree.uploadtree_fk='$Item'";
+//  else
+//    $sql = "select distinct(tag_fk) as tag_pk from uploadtree_tag_file_inner where upload_fk='$upload_pk' and $Condition UNION select tag_fk as tag_pk from tag_uploadtree where tag_uploadtree.uploadtree_fk='$Item'";
+//$uTime = microtime(true);
   $result = pg_query($PG_CONN, $sql);
+//printf( "<br><small>%s Elapsed time: %.2f seconds</small>", $sql, microtime(true) - $uTime); 
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $SeenTag = array();
   while ($TagRow = pg_fetch_assoc($result))
@@ -202,10 +206,12 @@ function TagSelect($SLName="unnamed", $SelectedVal= "",
                    $FirstEmpty=false, $SelElt=true)
 {
   /* Find all the tag namespaces for this user */
+/*  UNUSED
   $sql = "select lft,rgt from uploadtree where uploadtree_pk=$Item";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $uploadtree_row = pg_fetch_assoc($result);
+*/
 
   /* Find all the tags for this namespace */
 
@@ -231,15 +237,16 @@ function TagSelect($SLName="unnamed", $SelectedVal= "",
  *
  * \param $UploadtreeRows This array may be modified by this function.
  * \param $tag_pk
+ * \param $uploadtree_tablename
  *
  *\return none
  */
-function TagFilter(&$UploadtreeRows, $tag_pk)
+function TagFilter(&$UploadtreeRows, $tag_pk, $uploadtree_tablename)
 {
   foreach ($UploadtreeRows as $key=>$UploadtreeRow)
   {
     $found = false;
-    $tags = GetAllTags($UploadtreeRow["uploadtree_pk"], true);
+    $tags = GetAllTags($UploadtreeRow["uploadtree_pk"], true, $uploadtree_tablename);
     foreach($tags as $tagArray)
     {
       if ($tagArray['tag_pk'] == $tag_pk) 

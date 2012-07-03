@@ -294,7 +294,8 @@ return;
 
     /* display file links if this is a real file */
     $ColStr .= "<td valign='top'>";
-    $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk, $Child['pfile_fk'], True, $UniqueTagArray);
+    $uploadtree_tablename = GetUploadtreeTableName($Child['upload_fk']);
+    $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk, $Child['pfile_fk'], True, $UniqueTagArray, $uploadtree_tablename);
     $ColStr .= "</td>";
     return $ColStr;
   }

@@ -182,6 +182,7 @@ int  DisplayContainerInfo  (ContainerInfo *CI, int Cmd);
 char *PathCheck(char *DirPath);
 void Usage (char *Name, char *Version);
 void deleteTmpFiles(char *dir);
+void SQLNoticeProcessor(void *arg, const char *message);
 
 /* traverse.c */
 void TraverseStart (char *Filename, char *Label, char *NewDir, int Recurse);

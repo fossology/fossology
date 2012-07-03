@@ -1220,8 +1220,8 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     if (CI->PI.uploadtree_pk > 0) /* This is a child */
     {
       /* Prepare to insert child */
-      snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,E'%s',%s);",
-          CI->PI.uploadtree_pk, CI->pfile_pk, CI->ufile_mode,
+      snprintf(SQL,MAXSQL,"INSERT INTO %s (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,E'%s',%s);",
+          uploadtree_tablename, CI->PI.uploadtree_pk, CI->pfile_pk, CI->ufile_mode,
           UfileName, Upload_Pk);
       result =  PQexec(pgConn, SQL); /* INSERT INTO uploadtree */
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
@@ -1232,8 +1232,8 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     }
     else /* No parent!  This is the first upload! */
     {
-      snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (upload_fk,pfile_fk,ufile_mode,ufile_name) VALUES (%s,%ld,%ld,E'%s');",
-          Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
+      snprintf(SQL,MAXSQL,"INSERT INTO %s (upload_fk,pfile_fk,ufile_mode,ufile_name) VALUES (%s,%ld,%ld,E'%s');",
+          uploadtree_tablename, Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
       result =  PQexec(pgConn, SQL); /* INSERT INTO uploadtree */
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(41);
       PQclear(result);
@@ -1588,3 +1588,14 @@ void	Usage	(char *Name, char *Version)
   fprintf(stderr,"  Boot partitions: x86, vmlinuz\n");
   CheckCommands(Quiet);
 } /* Usage() */
+
+
+/**
+ * @brief Dummy postgresql notice processor.
+ *        This prevents Notices from being written to stderr.
+ * @param arg unused
+ * @param message unused
+ **/
+ void SQLNoticeProcessor(void *arg, const char *message)
+ {
+ }

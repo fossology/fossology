@@ -42,6 +42,7 @@ extern char *Upload_Pk;
 extern PGconn *pgConn;
 extern int agent_pk;
 extern char SQL[MAXSQL];
+extern char uploadtree_tablename[19];  /* upload.uploadtree_tablename */
 extern magic_t MagicCookie;
 
 extern unpackqueue Queue[MAXCHILD+1];    /* manage children */

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -50,7 +50,15 @@ class ajax_tags extends FO_Plugin
         break;
       case "HTML":
         $Item = GetParm("uploadtree_pk",PARM_INTEGER);
-        $List = GetAllTags($Item);
+        /* get uploadtree_tablename from $Item */
+        $uploadtreeRec = GetSingleRec("uploadtree", "where uploadtree_pk='$Item'");
+        $uploadRec = GetSingleRec("upload", "where upload_pk='$uploadtreeRec[upload_fk]'");
+        if (empty($uploadRec['uploadtree_tablename']))
+          $uploadtree_tablename = "uploadtree";
+        else
+          $uploadtree_tablename = $uploadRec['uploadtree_tablename'];
+
+        $List = GetAllTags($Item, true, $uploadtree_tablename);
         foreach($List as $L)
         {
           $V .= $L['tag_name'] . ",";
