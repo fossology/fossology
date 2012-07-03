@@ -80,9 +80,11 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $type)
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $toprow = pg_fetch_assoc($result);
   pg_free_result($result); 
+
+  $uploadtree_tablename = GetUploadtreeTableName($toprow['upload_fk']);
   
   /* loop through all the records in this tree */
-  $sql = "select uploadtree_pk, ufile_name, lft, rgt from uploadtree 
+  $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename 
               where upload_fk='$toprow[upload_fk]' 
                     and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
                     and ((ufile_mode & (1<<28)) = 0)";
@@ -95,7 +97,7 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $type)
    */
   while ($row = pg_fetch_assoc($outerresult))
   { 
-    $filepatharray = Dir2Path($row['uploadtree_pk']);
+    $filepatharray = Dir2Path($row['uploadtree_pk'], $uploadtree_tablename);
     $filepath = "";
     foreach($filepatharray as $uploadtreeRow)
     {

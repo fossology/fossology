@@ -134,11 +134,11 @@ if ($UpdateLiceneseRef)
   initLicenseRefTable(false);
 }
 
-/* for the 1.4 -> 2.0 migration, create and populate the new ars tables */
+/* for the 2.0 -> 2.1 migration, create the uploadtree_0 table */
 global $LIBEXECDIR;
-require_once("$LIBEXECDIR/dbmigrate_1.4-2.0.php");
+require_once("$LIBEXECDIR/dbmigrate_2.0-2.1.php");
 print "Migrate data\n";
-Migrate_14_20($Verbose);
+Migrate_20_21($Verbose);
 
 exit(0);
 

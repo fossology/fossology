@@ -118,11 +118,12 @@ function DirMode2String($Mode)
  *  NOTE: This is recursive!
  *
  * \param $UploadtreePk uploadtree_pk
+ * \param $uploadtree_tablename defaults to 'uploadtree' to not break bsam/ui
  *
  * \return the first non-artifact directory uploadtree_pk
  */
 $DirGetNonArtifact_Prepared=0;
-function DirGetNonArtifact($UploadtreePk)
+function DirGetNonArtifact($UploadtreePk, $uploadtree_tablename='uploadtree')
 {
   global $Plugins;
   global $PG_CONN;
@@ -134,7 +135,7 @@ function DirGetNonArtifact($UploadtreePk)
   if (!$DirGetNonArtifact_Prepared)
   {
     $DirGetNonArtifact_Prepared=1;
-    $sql = "SELECT * FROM uploadtree LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE parent = $UploadtreePk;";
+    $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE parent = $UploadtreePk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 0)
@@ -154,12 +155,12 @@ function DirGetNonArtifact($UploadtreePk)
     if (($C['ufile_name'] == 'artifact.dir') ||
     ($C['ufile_name'] == 'artifact.unpacked'))
     {
-      $Recurse = DirGetNonArtifact($C['uploadtree_pk']);
+      $Recurse = DirGetNonArtifact($C['uploadtree_pk'], $uploadtree_tablename);
     }
   }
   if (!empty($Recurse))
   {
-    return(DirGetNonArtifact($Recurse));
+    return(DirGetNonArtifact($Recurse, $uploadtree_tablename));
   }
   return($UploadtreePk);
 } // DirGetNonArtifact()
@@ -188,11 +189,12 @@ function _DirCmp($a,$b)
  *
  * \param $Upload upload_pk
  * \param $UploadtreePk uploadtree_pk (may be empty, to specify the whole upload)
+ * \param $uploadtree_tablename
  *
  * \return array of uploadtree records sorted by file name
  */
 $DirGetList_Prepared=0;
-function DirGetList($Upload,$UploadtreePk)
+function DirGetList($Upload, $UploadtreePk, $uploadtree_tablename='uploadtree')
 {
   global $Plugins;
   global $PG_CONN;
@@ -205,7 +207,7 @@ function DirGetList($Upload,$UploadtreePk)
   }
   if (empty($UploadtreePk))
   {
-    $sql = "SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $Upload AND uploadtree.parent IS NULL ORDER BY ufile_name ASC;";
+    $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE upload_fk = $Upload AND parent IS NULL ORDER BY ufile_name ASC;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $rows = pg_fetch_all($result);
@@ -215,7 +217,7 @@ function DirGetList($Upload,$UploadtreePk)
   }
   else
   {
-    $sql = "SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $Upload AND uploadtree.parent = $UploadtreePk ORDER BY ufile_name ASC;";
+    $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE upload_fk = $Upload AND parent = $UploadtreePk ORDER BY ufile_name ASC;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $rows = pg_fetch_all($result);
@@ -232,7 +234,7 @@ function DirGetList($Upload,$UploadtreePk)
     $R = &$Results[$Key];
     if (Isartifact($R['ufile_mode']) && Iscontainer($R['ufile_mode']))
     {
-      $R['uploadtree_pk'] = DirGetNonArtifact($R['uploadtree_pk']);
+      $R['uploadtree_pk'] = DirGetNonArtifact($R['uploadtree_pk'], $uploadtree_tablename);
     }
   }
   return($Results);
@@ -242,27 +244,35 @@ function DirGetList($Upload,$UploadtreePk)
 /**
  * \brief Return the path (without artifacts) of an uploadtree_pk.
  *
- * \param $UploadtreePk
+ * \param $uploadtree_pk
+ * \param $uploadtree_tablename
  *
  * \return an array containing the path (with no artifacts).  Each element 
- *         in the path is an array containing uploadtree records for 
- *         $UploadtreePk and its parents.
- *         The path begins with the UploadtreePk record.
+ *         in the path is an array containing the uploadtree record for 
+ *         $uploadtree_pk and its parents.
+ *         The path begins with the uploadtree_pk record.
  */
-function Dir2Path($UploadtreePk)
+function Dir2Path($uploadtree_pk, $uploadtree_tablename='uploadtree')
 {
-  global $Plugins;
   global $PG_CONN;
 
-  if ((empty($UploadtreePk))) { return array(); }
+  $uploadtreeArray = array();
 
-  $sql = "SELECT * from uploadtree2path($UploadtreePk) ORDER BY lft ASC";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $Rows = pg_fetch_all($result);
-  pg_free_result($result);
+  if ((empty($uploadtree_pk))) { return $uploadtreeArray; }
 
-  return($Rows);
+  while (!empty($uploadtree_pk))
+  {
+    $sql = "SELECT * from $uploadtree_tablename where uploadtree_pk='$uploadtree_pk'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $Row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (Isartifact($Row['ufile_mode'])) return($uploadtreeArray);
+    array_unshift($uploadtreeArray, $Row);
+    $uploadtree_pk = $Row['parent'];
+  }
+
+  return($uploadtreeArray);
 } // Dir2Path()
 
 /**
@@ -277,15 +287,13 @@ function Dir2Path($UploadtreePk)
  *   starting with the value $Enumerate
  * \param $PreText - optional additional text to preceed the folder path
  * \param $PostText - optional text to follow the folder path
+ * \param $uploadtree_tablename
  *
  * \return string of browse paths
  */
 function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
-$ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='')
+$ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtree_tablename="uploadtree_0")
 {
-  global $Plugins;
-  global $PG_CONN;
-
   $V = "";
   if ($ShowBox)
   {
@@ -305,7 +313,7 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='')
   /* Get array of upload recs for this path, in top down order.
    This does not contain artifacts.
    */
-  $Path = Dir2Path($UploadtreePk);
+  $Path = Dir2Path($UploadtreePk, $uploadtree_tablename);
   $Last = &$Path[count($Path)-1];
 
   $V .= "<font class='text'>\n";
@@ -412,20 +420,21 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='')
  * \param $LinkLast - create link (a href) for last item and use LinkLast as the module name
  * \param $ShowBox - draw a box around the string (default true)
  * \param $ShowMicro - show micro menu (default false)
+ * \param $uploadtree_tablename
  *
  * \return string of browse paths
  */
-function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL)
+function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL, $uploadtree_tablename)
 {
   global $PG_CONN;
   /* Find the file associated with the upload */
-  $sql = "SELECT uploadtree_pk FROM upload INNER JOIN uploadtree ON upload_fk = '$UploadPk' AND parent is null;";
+  $sql = "SELECT uploadtree_pk FROM upload INNER JOIN $uploadtree_tablename ON upload_fk = '$UploadPk' AND parent is null;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
   $UploadtreePk = $row['uploadtree_pk'];
   pg_free_result($result);
-  return(Dir2Browse($Mod,$UploadtreePk,$LinkLast,$ShowBox,$ShowMicro));
+  return(Dir2Browse($Mod,$UploadtreePk,$LinkLast,$ShowBox,$ShowMicro, -1, '','', $uploadtree_tablename));
 } // Dir2BrowseUpload()
 
 /**
@@ -552,20 +561,21 @@ function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $S
  *
  * This function replaces DirGetList()
  *
- * \param int  $uploadtree_pk
+ * \param $uploadtree_pk
+ * \param $uploadtree_tablename
  *
  * \return list of child uploadtree recs + pfile_size + pfile_mimetypefk on success.
  *         list may be empty if there are no children.
  * Child list is sorted by ufile_name.
  */
-function GetNonArtifactChildren($uploadtree_pk)
+function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtree_0')
 {
   global $PG_CONN;
 
   $foundChildren = array();
 
   /* Find all the children */
-  $sql = "select uploadtree.*, pfile_size, pfile_mimetypefk from uploadtree
+  $sql = "select {$uploadtree_tablename}.*, pfile_size, pfile_mimetypefk from $uploadtree_tablename
           left outer join pfile on (pfile_pk=pfile_fk)
           where parent=$uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
@@ -588,7 +598,7 @@ function GetNonArtifactChildren($uploadtree_pk)
       if (Iscontainer($child['ufile_mode']))
       {
         unset($children[$key]);
-        $NonAChildren = GetNonArtifactChildren($child['uploadtree_pk']);
+        $NonAChildren = GetNonArtifactChildren($child['uploadtree_pk'], $uploadtree_tablename);
         if ($NonAChildren)
         $foundChildren = array_merge($foundChildren, $NonAChildren);
       }

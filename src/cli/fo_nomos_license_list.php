@@ -68,8 +68,10 @@ function GetLicenseList($uploadtree_pk, $upload_pk)
   $toprow = pg_fetch_assoc($result);
   pg_free_result($result); 
   
+  $uploadtree_tablename = GetUploadtreeTableName($toprow['upload_fk']);
+
   /* loop through all the records in this tree */
-  $sql = "select uploadtree_pk, ufile_name, lft, rgt from uploadtree 
+  $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename 
               where upload_fk='$toprow[upload_fk]' 
                     and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
                     and ((ufile_mode & (1<<28)) = 0)";
@@ -82,14 +84,14 @@ function GetLicenseList($uploadtree_pk, $upload_pk)
    */
   while ($row = pg_fetch_assoc($outerresult))
   { 
-    $filepatharray = Dir2Path($row['uploadtree_pk']);
+    $filepatharray = Dir2Path($row['uploadtree_pk'], $uploadtree_tablename);
     $filepath = "";
     foreach($filepatharray as $uploadtreeRow)
     {
       if (!empty($filepath)) $filepath .= "/";
       $filepath .= $uploadtreeRow['ufile_name'];
     }
-    $V = $filepath . ": ". GetFileLicenses_string($agent_pk, 0, $row['uploadtree_pk']) ;
+    $V = $filepath . ": ". GetFileLicenses_string($agent_pk, 0, $row['uploadtree_pk'], $uploadtree_tablename) ;
     #$V = $filepath;
     print "$V";
     print "\n";

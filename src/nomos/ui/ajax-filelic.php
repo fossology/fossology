@@ -64,9 +64,10 @@ class ajax_filelic extends FO_Plugin
         $nomosagent_pk = GetParm("napk",PARM_INTEGER);
         $rf_shortname = GetParm("lic",PARM_RAW);
         $uploadtree_pk = GetParm("item",PARM_INTEGER);
+        $uploadtree_tablename = GetParm("ut",PARM_RAW);
         $debug = array_key_exists("debug", $_GET) ? true : false;
 
-        $Files = Level1WithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk);
+        $Files = Level1WithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, false, $uploadtree_tablename);
         $V = "";
         if (count($Files) == 0)
         $V .= "";  // no matches found

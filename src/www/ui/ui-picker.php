@@ -368,7 +368,7 @@ class ui_picker extends FO_Plugin
       $item2 = $PickRec["uploadtree_fk2"];
       else
       $item2 = $PickRec["uploadtree_fk1"];
-      $PathArray = Dir2Path($item2);
+      $PathArray = Dir2Path($item2, 'uploadtree');
       $Path = Uploadtree2PathStr($PathArray);
       $PickSelectArray[$item2] = $Path;
     }
@@ -413,7 +413,7 @@ class ui_picker extends FO_Plugin
     $SuggestionsArray = array();
     while ($row = pg_fetch_assoc($result))
     {
-      $PathArray = Dir2Path($row['uploadtree_pk']);
+      $PathArray = Dir2Path($row['uploadtree_pk'], 'uploadtree');
       $SuggestionsArray[$row['uploadtree_pk']] = Uploadtree2PathStr($PathArray);
     }
     pg_free_result($result);
@@ -455,7 +455,7 @@ class ui_picker extends FO_Plugin
     // If you aren't browsing folders,
     //   Get list of directories that this $Browseuploadtree_pk is in
     if (empty($infolder_pk))
-    $DirectoryList = Dir2Path($Browseuploadtree_pk);
+    $DirectoryList = Dir2Path($Browseuploadtree_pk, 'uploadtree');
     else
     $DirectoryList = '';
 
@@ -700,7 +700,7 @@ class ui_picker extends FO_Plugin
         $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
         else
         {
-          $PathArray = Dir2Path($uploadtree_pk);
+          $PathArray = Dir2Path($uploadtree_pk, 'uploadtree');
           $OutBuf .= $this->HTMLout($RtnMod, $uploadtree_pk, $Browseuploadtree_pk, $folder_pk,
           $PathArray);
         }

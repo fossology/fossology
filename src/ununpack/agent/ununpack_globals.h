@@ -49,6 +49,7 @@ char *Upload_Pk = NULL; /* PK for upload table */
 PGconn *pgConn = NULL; /* PGconn from DB */
 int agent_pk=-1;	/* agent ID */
 char SQL[MAXSQL];
+char uploadtree_tablename[19];  /* upload.uploadtree_tablename */
 magic_t MagicCookie = 0;
 
 unpackqueue Queue[MAXCHILD+1];    /* manage children */

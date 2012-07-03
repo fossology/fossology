@@ -31,6 +31,7 @@ int	main(int argc, char *argv[])
   char *AgentARSName = "ununpack_ars";
   int   Recurse=0;
   int   ars_pk = 0;
+  long  Pfile_size = 0;
   char *ListOutName=NULL;
   char *Fname = NULL;
   char *FnameCheck = NULL;
@@ -146,7 +147,8 @@ int	main(int argc, char *argv[])
     {  
       Pfile = strdup(PQgetvalue(result,0,0));
       Pfile_Pk = strdup(PQgetvalue(result,0,1));
-      if (atol(PQgetvalue(result, 0, 2)) == 0)
+      Pfile_size = atol(PQgetvalue(result, 0, 2));
+      if (Pfile_size == 0)
       {  
         PQclear(result);
         LOG_WARNING("Uploaded file (Upload_pk %s), is zero length.  There is nothing to unpack.", 
@@ -156,6 +158,26 @@ int	main(int argc, char *argv[])
 
       PQclear(result);
     }
+
+    // Determine if uploadtree records should go into a separate table.
+    // If the input file size is > 500MB, then create a separate uploadtree_{upload_pk} table
+    // that inherits from the master uploadtree table.
+    // Save uploadtree_tablename, it will get written to upload.uploadtree_tablename later.
+    if (Pfile_size > 500000000)
+    {
+      sprintf(uploadtree_tablename, "uploadtree_%s", Upload_Pk);
+      snprintf(SQL,MAXSQL,"CREATE TABLE %s (LIKE uploadtree INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES); ALTER TABLE %s ADD CONSTRAINT %s CHECK (upload_fk=%s); ALTER TABLE %s INHERIT uploadtree", 
+               uploadtree_tablename, uploadtree_tablename, uploadtree_tablename, Upload_Pk, uploadtree_tablename);
+      PQsetNoticeProcessor(pgConn, SQLNoticeProcessor, SQL);  // ignore notice about implicit primary key index creation
+      result =  PQexec(pgConn, SQL);
+      // Ignore postgres notice about creating an implicit index
+      if (PQresultStatus(result) != PGRES_NONFATAL_ERROR)
+        if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(151);
+      PQclear(result);
+    }
+    else
+      strcpy(uploadtree_tablename, "uploadtree");
+
   }
 
   CheckCommands(Quiet);
@@ -190,7 +212,7 @@ int	main(int argc, char *argv[])
     MaxThread=1;
   }
 
-  //Begin add by vincent
+  // Set ReunpackSwitch if the uploadtree records are missing from the database.
   if (!ReunpackSwitch && UseRepository)
   {
     snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s limit 1;",Upload_Pk);
@@ -199,7 +221,6 @@ int	main(int argc, char *argv[])
     if (PQntuples(result) == 0) ReunpackSwitch=1;
     PQclear(result);
   }
-  //End add by vincent
 
   /*** process files from command line ***/
   for( ; optind<argc; optind++)
@@ -392,8 +413,7 @@ int	main(int argc, char *argv[])
     /* If it completes, mark it! */
     if (Upload_Pk)
     {
-      memset(SQL,'\0',MAXSQL);
-      snprintf(SQL,MAXSQL,"UPDATE upload SET upload_mode = upload_mode | (1<<5) WHERE upload_pk = '%s';",Upload_Pk);
+      snprintf(SQL,MAXSQL,"UPDATE upload SET upload_mode = (upload_mode | (1<<5)), uploadtree_tablename='%s' WHERE upload_pk = '%s';",uploadtree_tablename, Upload_Pk);
       result =  PQexec(pgConn, SQL); /* UPDATE upload */
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(44);
       PQclear(result);

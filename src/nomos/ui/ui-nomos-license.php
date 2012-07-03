@@ -32,6 +32,7 @@ class ui_nomos_license extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
   var $HighlightColor = '#4bfe78';
+  var $uploadtree_tablename = "";
 
   /**
    * \brief  Only used during installation.
@@ -133,7 +134,7 @@ class ui_nomos_license extends FO_Plugin
 
     /*******  Get license names and counts  ******/
     /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree
+    $sql = "SELECT lft,rgt,upload_fk FROM $this->uploadtree_tablename
               WHERE uploadtree_pk = $Uploadtree_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -152,12 +153,14 @@ class ui_nomos_license extends FO_Plugin
     /* Find total number of files for this $Uploadtree_pk
      * Exclude artifacts and directories.
     */
-    $sql = "SELECT count(*) as count FROM uploadtree
+    $sql = "SELECT count(*) as count FROM $this->uploadtree_tablename
               WHERE upload_fk = $upload_pk 
-                    and uploadtree.lft BETWEEN $lft and $rgt
+                    and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt
                     and ((ufile_mode & (1<<28))=0) 
                     and ((ufile_mode & (1<<29))=0) and pfile_fk!=0";
+//$uTime = microtime(true);
     $result = pg_query($PG_CONN, $sql);
+//printf( "<small>count files Elapsed time: %.2f seconds</small>", microtime(true) - $uTime);  // convert usecs to secs
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
     $FileCount = $row["count"];
@@ -184,11 +187,15 @@ class ui_nomos_license extends FO_Plugin
     }
     $sql = "SELECT distinct(rf_shortname) as licname, count(rf_shortname) as liccount, rf_shortname 
             from license_file_ref $TagTable
-            right join uploadtree on license_file_ref.pfile_fk=uploadtree.pfile_fk 
-            where upload_fk='$upload_pk' and uploadtree.lft BETWEEN $lft and $rgt 
+            right join $this->uploadtree_tablename on license_file_ref.pfile_fk=$this->uploadtree_tablename.pfile_fk 
+            where upload_fk='$upload_pk' and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt 
               and agent_fk=$Agent_pk $TagClause
             group by rf_shortname order by liccount desc";
+//$uTime = microtime(true);
     $result = pg_query($PG_CONN, $sql);
+//$Time = microtime(true) - $uTime;  // convert usecs to secs
+//$text = _("histogram Elapsed time: %.2f seconds");
+//printf( "<small>$text</small>", $Time);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
     /* Get agent list */
@@ -231,7 +238,7 @@ class ui_nomos_license extends FO_Plugin
       /*  License name  */
       $VLic .= "<td align='left'>";
       $rf_shortname = rawurlencode($row['rf_shortname']);
-      $VLic .= "<a id='$rf_shortname' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filelic&napk=$Agent_pk&item=$Uploadtree_pk&lic=$rf_shortname\")'";
+      $VLic .= "<a id='$rf_shortname' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filelic&napk=$Agent_pk&item=$Uploadtree_pk&lic=$rf_shortname&ut=$this->uploadtree_tablename\")'";
       $VLic .= ">$row[licname] </a>";
       $VLic .= "</td>";
       $VLic .= "</tr>\n";
@@ -259,14 +266,15 @@ class ui_nomos_license extends FO_Plugin
 
     /*******    File Listing     ************/
     /* Get ALL the items under this Uploadtree_pk */
-    $Children = GetNonArtifactChildren($Uploadtree_pk);
+    $Children = GetNonArtifactChildren($Uploadtree_pk, $this->uploadtree_tablename);
 
     /* Filter out Children that don't have tag */
-    if (!empty($tag_pk)) TagFilter($Children, $tag_pk);
+    if (!empty($tag_pk)) TagFilter($Children, $tag_pk, $this->uploadtree_tablename);
 
     $ChildCount=0;
     $ChildLicCount=0;
 
+//$uTime = microtime(true);
     if (!empty($Children))
     {
       /* For alternating row background colors */
@@ -299,7 +307,7 @@ class ui_nomos_license extends FO_Plugin
         /* Determine link for containers */
         if (Iscontainer($C['ufile_mode']))
         {
-          $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
+          $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk'], $this->uploadtree_tablename);
           $LicUri = "$Uri&item=" . $uploadtree_pk;
         }
         else
@@ -339,11 +347,11 @@ class ui_nomos_license extends FO_Plugin
 
         /* show licenses under file name */
         $VF .= "<br>";
-        $VF .= GetFileLicenses_string($Agent_pk, $C['pfile_fk'], $C['uploadtree_pk']);
+        $VF .= GetFileLicenses_string($Agent_pk, $C['pfile_fk'], $C['uploadtree_pk'], $this->uploadtree_tablename);
         $VF .= "</td><td valign='top'>";
 
         /* display file links */
-        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $Agent_pk, $C['pfile_fk'], true, $UniqueTagArray);
+        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $Agent_pk, $C['pfile_fk'], true, $UniqueTagArray, $this->uploadtree_tablename);
         $VF .= "</td>";
         $VF .= "</tr>\n";
 
@@ -351,6 +359,9 @@ class ui_nomos_license extends FO_Plugin
       }
       $VF .= "</table>\n";
     }
+//$Time = microtime(true) - $uTime;  // convert usecs to secs
+//$text = _("Sum of children Elapsed time: %.2f seconds");
+//printf( "<small>$text</small>", $Time);
 
     /***************************************
      Problem: $ChildCount can be zero!
@@ -364,7 +375,7 @@ class ui_nomos_license extends FO_Plugin
     ***************************************/
     if ($ChildCount == 0)
     {
-      $sql = "SELECT * FROM uploadtree WHERE uploadtree_pk = '$Uploadtree_pk';";
+      $sql = "SELECT * FROM $this->uploadtree_tablename WHERE uploadtree_pk = '$Uploadtree_pk';";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
@@ -458,6 +469,8 @@ class ui_nomos_license extends FO_Plugin
     $tag_pk = GetParm("tag",PARM_INTEGER);
     $updcache = GetParm("updcache",PARM_INTEGER);
 
+    $this->uploadtree_tablename = GetUploadtreeTableName($Upload);
+
     /* Remove "updcache" from the GET args.
      * This way all the url's based on the input args won't be
      * polluted with updcache
@@ -486,7 +499,7 @@ class ui_nomos_license extends FO_Plugin
           /************************/
           /* Show the folder path */
           /************************/
-          $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
+          $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
 
           if (!empty($Upload))
           {

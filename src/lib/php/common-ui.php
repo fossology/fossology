@@ -195,4 +195,19 @@ function DownloadFile($path, $name)
   return _("Lost connection.");
 }
 
+
+/**
+ * \brief Get the uploadtree table name for this upload_pk
+ *        If upload_pk does not exist, return "uploadtree".
+ *
+ * \param $upload_pk
+ * 
+ * \return uploadtree table name
+ */
+function GetUploadtreeTableName($upload_pk)
+{
+  $upload_rec = GetSingleRec("upload", "where upload_pk='$upload_pk'");
+  if (empty($upload_rec['uploadtree_tablename'])) return "uploadtree";
+  else return $upload_rec['uploadtree_tablename'];
+}
 ?>

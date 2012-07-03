@@ -129,7 +129,7 @@ class ui_browse extends FO_Plugin {
    * \brief Given a upload_pk, list every item in it.
    * If it is an individual file, then list the file contents.
    */
-  function ShowItem($Upload, $Item, $Show, $Folder)
+  function ShowItem($Upload, $Item, $Show, $Folder, $uploadtree_tablename)
   {
     global $PG_CONN;
     $RowStyle1 = "style='background-color:#ecfaff'";  // pale blue
@@ -157,7 +157,7 @@ class ui_browse extends FO_Plugin {
     }
 
     /* Get the (non artifact) children  */
-    $Results = GetNonArtifactChildren($Item);
+    $Results = GetNonArtifactChildren($Item, $uploadtree_tablename);
     $ShowSomething = 0;
     $V.= "<table class='text' style='border-collapse: collapse' border=0 padding=0>\n";
     foreach($Results as $Row)
@@ -244,7 +244,8 @@ class ui_browse extends FO_Plugin {
   /**
    * \brief Given a Folder_pk, list every upload in the folder.
    */
-  function ShowFolder($Folder, $Show) {
+  function ShowFolder($Folder, $Show) 
+  {
     global $Plugins;
     global $PG_CONN;
 
@@ -319,7 +320,7 @@ class ui_browse extends FO_Plugin {
        Else get the first non artifact under it.
        */
       if (Isartifact($Row['ufile_mode']))
-      $UploadtreePk = DirGetNonArtifact($Row['uploadtree_pk']);
+      $UploadtreePk = DirGetNonArtifact($Row['uploadtree_pk'], $uploadtree_tablename);
       else
       $UploadtreePk = $Row['uploadtree_pk'];
 
@@ -436,7 +437,7 @@ class ui_browse extends FO_Plugin {
         /************************/
         if (!empty($Item)) {
           /* Make sure the item is not a file */
-          $sql = "SELECT ufile_mode FROM uploadtree WHERE uploadtree_pk = '$Item';";
+          $sql = "SELECT ufile_mode, upload_fk FROM uploadtree WHERE uploadtree_pk = '$Item';";
           $result = pg_query($PG_CONN, $sql);
           DBCheckResult($result, $sql, __FILE__, __LINE__);
           $row = pg_fetch_assoc($result);
@@ -449,11 +450,12 @@ class ui_browse extends FO_Plugin {
             }
           }
           $V.= "<font class='text'>\n";
-          $V.= Dir2Browse($this->Name, $Item, NULL, 1, "Browse") . "\n";
+          $uploadtree_tablename = GetUploadtreeTableName($row['upload_fk']);
+          $V.= Dir2Browse($this->Name, $Item, NULL, 1, "Browse", -1, '','',$uploadtree_tablename) . "\n";
         }
         else if (!empty($Upload)) {
           $V.= "<font class='text'>\n";
-          $V.= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse") . "\n";
+          $V.= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse", $uploadtree_tablename) . "\n";
         }
         else {
           $V.= "<font class='text'>\n";
@@ -481,10 +483,10 @@ class ui_browse extends FO_Plugin {
             }
             pg_free_result($result);
           }
-          $V.= $this->ShowItem($Upload, $Item, $Show, $Folder);
+          $V.= $this->ShowItem($Upload, $Item, $Show, $Folder, $uploadtree_tablename);
         }
         else
-        $V.= $this->ShowFolder($Folder, $Show);
+          $V.= $this->ShowFolder($Folder, $Show);
 
         $V.= "</font>\n";
         break;

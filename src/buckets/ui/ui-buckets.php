@@ -31,6 +31,7 @@ class ui_buckets extends FO_Plugin
   var $Dependency = array("browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
+  var $uploadtree_tablename = "";
 
   /**
    * \brief Create and configure database tables
@@ -168,7 +169,7 @@ class ui_buckets extends FO_Plugin
 
     /*******  Get Bucket names and counts  ******/
     /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree
+    $sql = "SELECT lft,rgt,upload_fk FROM $this->uploadtree_tablename
               WHERE uploadtree_pk = $Uploadtree_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -213,10 +214,10 @@ class ui_buckets extends FO_Plugin
     $sql = "SELECT distinct(bucket_fk) as bucket_pk,
                    count(bucket_fk) as bucketcount, bucket_reportorder
               from bucket_file, bucket_def,
-                  (SELECT distinct(pfile_fk) as PF from uploadtree 
+                  (SELECT distinct(pfile_fk) as PF from $this->uploadtree_tablename 
                      where upload_fk=$upload_pk 
                        and ((ufile_mode & (1<<28))=0)
-                       and uploadtree.lft BETWEEN $lft and $rgt) as SS
+                       and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$bucketagent_pk 
                     and bucket_file.nomosagent_fk=$nomosagent_pk
                     and bucket_pk=bucket_fk
@@ -319,7 +320,7 @@ return;
 
     if (count($Children) == 0)
     {
-      $sql = "SELECT * FROM uploadtree WHERE uploadtree_pk = '$Uploadtree_pk'";
+      $sql = "SELECT * FROM $this->uploadtree_tablename WHERE uploadtree_pk = '$Uploadtree_pk'";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
@@ -371,7 +372,7 @@ return;
       /* Determine link for containers */
       if (Iscontainer($C['ufile_mode']))
       {
-        $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
+        $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk'], $this->uploadtree_tablename);
         $tmpuri = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","folder","ars"));
         $LicUri = "$tmpuri&item=" . $uploadtree_pk;
       }
@@ -415,7 +416,7 @@ return;
       $VF .= "</td><td valign='top'>";
 
       /* display item links */
-        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $nomosagent_pk, $C['pfile_fk'], True, $UniqueTagArray);
+        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $nomosagent_pk, $C['pfile_fk'], True, $UniqueTagArray, $this->uploadtree_tablename);
       $VF .= "</td>";
       $VF .= "</tr>\n";
 
@@ -515,6 +516,8 @@ return;
     $Item = GetParm("item",PARM_INTEGER);
     $updcache = GetParm("updcache",PARM_INTEGER);
     $tagbucket = GetParm("tagbucket",PARM_INTEGER);
+
+    $this->uploadtree_tablename = GetUploadtreeTableName($Upload);
 
     /* Remove "updcache" from the GET args and set $this->UpdCache
      * This way all the url's based on the input args won't be
