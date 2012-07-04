@@ -91,27 +91,25 @@
   }
 
   /**
-   * \brief add a user, fossy/fosssy
+   * \brief add a admin user, default fossy/fosssy
    */
-  function add_user() {
+  function add_user($user='fossy', $password='fossy') {
     global $PG_CONN;
-    /* User "fossy" does not exist.  Create it. */
+    /* User does not exist.  Create it. */
     $Seed = rand() . rand();
-    $Hash = sha1($Seed . "fossy");
-    $sql = "SELECT * FROM users WHERE user_name = 'fossy';";
+    $Hash = sha1($Seed . $password);
+    $sql = "SELECT * FROM users WHERE user_name = '$user';";
     $result = pg_query($PG_CONN, $sql);
     $row0 = pg_fetch_assoc($result);
     pg_free_result($result);
     if (empty($row0['user_name'])) {
-      /* User "fossy" does not exist.  Create it. */
+      /* User does not exist.  Create it. */
       $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass," .
         "user_perm,user_email,email_notify,root_folder_fk)
-        VALUES ('fossy','Default Administrator','$Seed','$Hash',10,'fossy','y',1);";
-      $text = _("*** Created default administrator: 'fossy' with password 'fossy'.");
+        VALUES ('$user','Default Administrator','$Seed','$Hash',10,'$password','y',1);";
+      // $text = _("*** Created default administrator: '$user' with password '$password'.");
       $result = pg_query($PG_CONN, $SQL);
       pg_free_result($result);
-      $text = _("*** Created default user: 'Default User'.");
-      //print "$text\n";
     }
   }
 
@@ -126,6 +124,8 @@
     foreach ($file_list as $file_name) {
       exec("sed s/repository/$REPO_NAME/ $file_name > /tmp/tmp.conf");
       exec("sudo mv /tmp/tmp.conf $file_name");
+      exec("sudo chown fossy $file_name");
+      exec("sudo chgrp fossy $file_name");
     }
     if (is_dir($REPO_NAME)) exec("sudo chmod 2770 $REPO_NAME"); /// change mode to 2770
   }
@@ -141,6 +141,8 @@
     foreach ($file_list as $file_name) {
       exec("sed s/$REPO_NAME/repository/ $file_name > /tmp/tmp.conf");
       exec("sudo mv /tmp/tmp.conf $file_name");
+      exec("sudo chown fossy $file_name");
+      exec("sudo chgrp fossy $file_name");
     }
   }
 
