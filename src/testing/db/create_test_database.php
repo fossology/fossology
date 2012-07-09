@@ -41,15 +41,23 @@
 
        The database should have a unique, easily-identifiable name that we
        can use in subsequent FOSSology unit, function, or other tests.
+     
+       It will be called: 'fossologytest_YYYYMMDD_hhmmss
+ 
+       where YYYYMMDD_hhmmss is a timestamp indicating when the database
+       was created.
 
     3) Load the core-schema.dat database schema into the new database
 
-       This should be the core schema from the current working copy.
+       This will be the core schema from the current working copy of the
+       FOSSology code from which this script is being executed.
 
     3) Create a temporary fossology systme configuration directory for testing
 
        This is created in the system's temporary directory (e.g. /tmp).
-       It is named after the current timestamp
+       It is named after the current timestamp.  Example:
+
+           /tmp/fossologytest_20120611_172315/ 
 
     4) Create a Db.conf file in the testing system config directory
  
@@ -69,24 +77,29 @@
 /* We are going to break some testing rules here, by including and
    using application code within the testing framework:
 
-    library                          function names
-   ../../lib/php/libschema.php       ApplySchema()
-   ../../lib/php/common-cache.php    ReportCachePurgeAll()
-   ../../lib/php/common-db.php       DBCheckResult(), others?
+   PHP Library:                    Function we use:
+   ------------	                   ----------------
+   ../../lib/php/libschema.php     ApplySchema() (used to load core-schema.dat)
+   ../../lib/php/common-db.php     DBCheckResult()
+   ../../lib/php/common-cache.php  ReportCachePurgeAll() (required by ApplySchema)
 
 */
 require_once(__DIR__ . '/../../lib/php/libschema.php');
-require_once(__DIR__ . '/../../lib/php/common-cache.php');
 require_once(__DIR__ . '/../../lib/php/common-db.php');
+require_once(__DIR__ . '/../../lib/php/common-cache.php');
+
 
 /* First check to see if we can connect to Postgres as the 'fossologytest' user
 
+   This is done with the 'psql' command, using these options:
+
    --no-password tells psql to never prompt for a password; if authentication 
                  is not possible via other means (.pgpass file or the 
-                 PGPASSWORD environment variable) then psql will fail
+                 PGPASSWORD environment variable) then psql will fail.
    --dbname=template1 specifies the 'template1' database which should
                  exist on all Postgres installations;  we never actually use
-                 it but Postgres requires you to always connect to a database
+                 this database, but Postgres requires that you always 
+                 connect to an existing database
 
     Question:  is there any benefit to doing this in native PHP instead of
     making calls to the command-line psql tool?
@@ -108,7 +121,7 @@ if ($psql_return_value > 0) {
     echo "ERROR!  output was:\n";
     echo "$psql_output\n";
     if ( preg_match('/no password supplied/', $psql_output) ) {
-        echo "Before you can run tests, you need to create a Postgres user called 'fossologytest'\n";
+        echo "Before you can run tests, you must create a Postgres user called 'fossologytest'\n";
         echo "with the CREATEDB permission.  This would be done using the following command:\n";
         echo "\n    CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';\n";
     }
@@ -127,9 +140,9 @@ $system_temp_dir = sys_get_temp_dir();
 
 /* generate a timestamp directory name for this testing database instance 
    This will be, for example:
-       /tmp/fotest-20120611_172315/  */
+       /tmp/fossologytest_20120611_172315/  */
 $testing_timestamp = date("Ymd_His");
-$testing_temp_dir = $system_temp_dir . '/fotest-' . $testing_timestamp;
+$testing_temp_dir = $system_temp_dir . '/fossologytest_' . $testing_timestamp;
 
 if ( mkdir($testing_temp_dir, 0755, TRUE) === FALSE ) {
     echo "FATAL! Cannot create test configuration directory at: $testing_temp_dir\n" .
@@ -142,7 +155,7 @@ else {
 
 /* Now create a new, unique dataabase */
 echo "Creating test database... ";
-$test_db_name = "fossology_test_$testing_timestamp";
+$test_db_name = "fossologytest_$testing_timestamp";
 // note: normal 'mortal' users cannot choose 'SQL_ASCII' encoding 
 // unless the LC_CTYPE environment variable is set correctly
 #$sql_statement="CREATE DATABASE $test_db_name ENCODING='SQL_ASCII'";
@@ -300,9 +313,13 @@ echo "Applying the core schema in $core_schema_dat_file\n";
 // apply the core schema
 ApplySchema($core_schema_dat_file);
 
-// now what?
+/* When we finish successfully, print out the testing SYSCONFDIR on
+   the second-to-last line, and the testing database name on the last
+   line of the script's output */
+echo "$test_repo_dir\n";
+echo "$test_db_name\n";
 
-
-exit;
+// indicate a successful run
+exit(0);
 
 ?>
