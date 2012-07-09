@@ -547,6 +547,7 @@ static void check_tables()
   uint32_t i;
   uint32_t curr_row;
   int passed = TRUE;
+  char sqltmp[1024] = {0};
 
   /* All of the tables and columns that the scheduler uses
    *
@@ -570,10 +571,11 @@ static void check_tables()
   };
 
   /* iterate accros every require table and column */
+  sprintf(sqltmp, check_scheduler_tables, PQdb(db_conn));
   for(curr = cols; curr->table; curr++)
   {
     /* build the sql statement */
-    sql = g_string_new(check_scheduler_tables);
+    sql = g_string_new(sqltmp);
     g_string_append_printf(sql, "'%s' AND column_name IN (", curr->table);
     for(i = 0; i < curr->ncols; i++)
     {

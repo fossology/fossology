@@ -144,6 +144,9 @@
       exec("sudo chown fossy $file_name");
       exec("sudo chgrp fossy $file_name");
     }
+    /** stop the scheduler in this test */
+    $scheduler_path = "$SYSCONF_DIR/mods-enabled/scheduler/agent/fo_scheduler";
+    exec("sudo $scheduler_path -k");  // kill the running scheduler
   }
 
   /**
@@ -153,7 +156,8 @@
     global $SYSCONF_DIR;
     $scheduler_path = "$SYSCONF_DIR/mods-enabled/scheduler/agent/fo_scheduler";
     exec("sudo $scheduler_path -k");  // kill the running scheduler
-    exec("sudo $scheduler_path --daemon --reset --verbose=1 -c $SYSCONF_DIR"); // start the scheduler
+    print "sudo $scheduler_path --daemon --reset --verbose=952 -c $SYSCONF_DIR\n";
+    exec("sudo $scheduler_path --daemon --reset --verbose=952 -c $SYSCONF_DIR"); // start the scheduler
   }
 
 ?>
