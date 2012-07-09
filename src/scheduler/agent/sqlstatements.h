@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 const char* check_scheduler_tables = "\
     SELECT column_name FROM information_schema.columns \
-      WHERE table_catalog = 'fossology' AND table_schema = 'public' \
+      WHERE table_catalog = '%s' AND table_schema = 'public' \
         AND table_name = ";
 
 const char* url_checkout = "\

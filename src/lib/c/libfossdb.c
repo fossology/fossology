@@ -225,8 +225,8 @@ int fo_tableExists(PGconn *pgConn, char *tableName)
   int  TabCount;
 
   snprintf(sql, sizeof(sql), 
-           "SELECT true FROM pg_tables WHERE tablename='%s'",
-          tableName);
+           "select count(*) from information_schema.tables where table_catalog='%s' and table_name='%s'",
+          PQdb(pgConn), tableName);
   result = PQexec(pgConn, sql);
   if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__)) return 0;
 
