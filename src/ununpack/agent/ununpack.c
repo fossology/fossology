@@ -1,7 +1,7 @@
 /*******************************************************************
  Ununpack: The universal unpacker.
 
- Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -176,7 +176,7 @@ int	main(int argc, char *argv[])
       PQclear(result);
     }
     else
-      strcpy(uploadtree_tablename, "uploadtree");
+      strcpy(uploadtree_tablename, "uploadtree_0");
 
   }
 
