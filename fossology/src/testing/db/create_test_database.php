@@ -183,6 +183,30 @@ else {
 
 /* Do some minimal setup of the new database */
 // Note: from Postgres 9.1 on, can use 'CREATE OR REPLACE LANGUAGE'
+// instead of dropping and then re-creating
+
+// first drop the plsql language in case it was inherited from 
+// the default template
+$sql_statement = "DROP LANGUAGE IF EXISTS plpgsql";
+$psql_command  = "psql --no-password --username=fossologytest --dbname=$test_db_name --host=localhost\
+    --command=\"$sql_statement\" 2>&1";
+#echo "$psql_command\n";
+exec($psql_command, $psql_output_array, $psql_return_value);
+
+/* Concatenate all the output, separated by newlines */
+$psql_output = implode("\n", $psql_output_array);
+
+if ($psql_return_value > 0) {
+    echo "ERROR!  output was:\n";
+    echo "$psql_output\n";
+    exit($psql_return_value);
+}
+else {
+    #echo "Successfully dropped any existing plpgsql language.\n";
+    #echo "$psql_output\n";
+}
+
+// then create language plsql
 $sql_statement = "CREATE LANGUAGE plpgsql";
 $psql_command  = "psql --no-password --username=fossologytest --dbname=$test_db_name --host=localhost\
     --command=\"$sql_statement\" 2>&1";
