@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<testsuites timeout="1">
+<testsuites timeout="10">
 
   <!--
   @brief Every test suite needs its own copy of the scheduler
