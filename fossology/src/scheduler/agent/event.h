@@ -18,7 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef EVENT_H_INCLUDE
 #define EVENT_H_INCLUDE
 
-#include <glib.h>
+/* scheduler includes */
+#include <scheduler.h>
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
@@ -27,25 +28,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define EVENT_LOOP_SIZE 1024
 
 /** interanl structure for an event */
-struct event_internal {
-    void(*func)(void*); ///< the function that will be executed for this event
-    void* argument;     ///< the arguments for the function
-    char* name;         ///< name of the event, used for debugging
-};
+typedef struct {
+    void(*func)(scheduler_t*, void*); ///< the function that will be executed for this event
+    void* argument;                   ///< the arguments for the function
+    char* name;                       ///< name of the event, used for debugging
+} event_t;
 
 /** internal structure for the event loop */
-struct event_loop_internal {
+typedef struct event_loop {
     GAsyncQueue* queue; ///< the queue that is the core of the event loop
     int terminated;     ///< flag that signals the end of the event loop
     int occupied;       ///< does this loop already have a worker thread
-};
+} event_loop_t;
 
-/**
- * structure used to hold of the information associated with an event. This was
- * created to essentially allow for a functor in C. This will store a function
- * pointer and the argument that will be passed to the function.
- */
-typedef struct event_internal* event;
+
+typedef void(*event_function)(scheduler_t*, void*);
 
 /**
  * structure used to pass an argument and an integer to an event.
@@ -56,23 +53,14 @@ typedef struct
     int second;
 } arg_int;
 
-/**
- * An event loop that can be waited on. This essentially implements a concurrent
- * queue that a the creation thread will wait on. events can be added to the
- * event loop and will be executed and destroy correctly by the thread waiting
- * on the queue.
- */
-typedef struct event_loop_internal* event_loop;
-
-typedef void(*event_function)(void*);
-
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
-event event_init(void(*func)(void*), void* arg, char* name);
-void event_destroy(event e);
-void event_loop_destroy();
+event_t* event_init(void(*func)(scheduler_t*, void*), void* arg, char* name);
+void     event_destroy(event_t* e);
+
+void     event_loop_destroy();
 
 /* ************************************************************************** */
 /* **** EventLoop Functions ************************************************* */
@@ -81,7 +69,7 @@ void event_loop_destroy();
 #define event_signal(func, args) event_signal_ext(func, args, #func)
 
 void event_signal_ext(void* func, void* args, char* name);
-int  event_loop_enter(void(*)(void), void(*)(void));
+int  event_loop_enter(scheduler_t* scheduler, void(*)(scheduler_t*), void(*)(scheduler_t*));
 void event_loop_terminate();
 
 #endif /* EVENT_H_INCLUDE */

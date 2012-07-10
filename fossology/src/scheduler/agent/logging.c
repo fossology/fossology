@@ -33,45 +33,38 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* glib includes */
 #include <glib.h>
 
-FILE* log_file = NULL;
-char  log_name[FILENAME_MAX];
-
-static int   log_name_set = 0;
+/**
+ * The main log, this is global because every function within the scheduler
+ * hould have access to the main log.
+ */
+log_t* main_log;
 
 /* ************************************************************************** */
 /* **** local functions ***************************************************** */
 /* ************************************************************************** */
 
 /**
- * Utility function that will open the log file using whatever name is stored
- * in log_name. If the log name hasn't been set when this method is called
- * it will attempt to open the default that is stored in logdir.
+ * Since events take a single parameter, we need to create a structure when more
+ * than one parameter is necessary.
  */
-static void log_open()
+typedef struct
 {
-  if(!log_name_set)
-  {
-    set_log(logdir);
-  }
-
-  if((log_file = fopen(log_name, "a")) == NULL)
-  {
-    log_file = stderr;
-    FATAL("could not open %s for logging", log_name);
-  }
-}
+    log_t* log;
+    gchar* msg;
+} log_event_args;
 
 /**
  * Event used to pass log messages to the main thread for processing instead of
  * processing them in a side thread. This is used so that prints will happen
  * in the correct order instead of intermixed.
  *
- * @param str the string that will be printed to the log file
+ * @param pass  the arguments for the event
  */
-static void log_event(char* str)
+static void log_event(scheduler_t* scheduler, log_event_args* pass)
 {
-  lprintf("%s", str);
-  g_free(str);
+  lprintf(pass->log, "%s", pass->msg);
+  g_free(pass->msg);
+  g_free(pass);
 }
 
 /**
@@ -81,16 +74,14 @@ static void log_event(char* str)
  * @param fmt formatting string for the arguments
  * @param args variable argument list created by other functions
  */
-static int concurent_log(const char* fmt, va_list args)
+static int concurent_log(log_t* log, const char* fmt, va_list args)
 {
-  gchar* buf;
+  log_event_args* pass = g_new0(log_event_args, 1);
 
-  buf = g_strdup_vprintf(fmt, args);
+  pass->log = log;
+  pass->msg = g_strdup_vprintf(fmt, args);
 
-  if(buf == NULL)
-    return 0;
-
-  event_signal(log_event, buf);
+  event_signal(log_event, pass);
   return 1;
 }
 
@@ -99,59 +90,95 @@ static int concurent_log(const char* fmt, va_list args)
 /* ************************************************************************** */
 
 /**
- * Changes the name of the file that will be logged to. If a log file is
- * already open when this gets called, this will close the old log file.
- * This forces the logging function to attempt to open a new one before it
- * logs again.
+ * @brief Creates a new log
  *
- * @param name the new name of the log file
+ * This will open and set the parameters of a log_t type. This checks the name
+ * given and checks if it is a directory. If it is a directory, it will try to
+ * open a file named fossology.log inside the directory instead. If the file
+ * cannot be openned, this will return NULL.
+ *
+ * @param log_name  the name or directory of the log file
+ * @param pro_name  the name of the process printed to the log file, can be NULL
+ * @param pro_pid   the pid of the process that this log file belongs to
+ * @return          a new log_t stucture
  */
-void set_log(const char* name)
+log_t* log_new(gchar* log_name, gchar* pro_name, pid_t pro_pid)
 {
   struct stat stats;
+  log_t* ret = g_new0(log_t, 1);
 
-  /* make sure that the log is closed before openning a new one */
-  if(log_file != NULL && log_file != stdout && log_file != stderr)
-    fclose(log_file);
-  log_file = NULL;
-
-  memset(log_name, '\0', sizeof(log_name));
-  if((stat(name,&stats) == 0) && S_ISDIR(stats.st_mode))
-  {
-    snprintf(log_name, sizeof(log_name) - 1, "%s/fossology.log", name);
-  }
+  /* set the process name */
+  if(pro_name == NULL)
+    ret->pro_name = g_strdup(SCHE_PRONAME);
   else
+    ret->pro_name = g_strdup(pro_name);
+  ret->pro_pid = pro_pid;
+
+  /* set the logs name */
+  if((stat(log_name, &stats) == 0) && S_ISDIR(stats.st_mode))
+    ret->log_name = g_strdup_printf("%s/fossology.log", log_name);
+  else
+    ret->log_name = g_strdup(log_name);
+
+  /* open the log file */
+  if     (strcmp(ret->log_name, "stderr") == 0) { ret->log_file = stderr; }
+  else if(strcmp(ret->log_name, "stdout") == 0) { ret->log_file = stdout; }
+  else { ret->log_file = fopen(ret->log_name, "a"); }
+
+  /* make sure that everything is valid */
+  if(ret->log_file == NULL)
   {
-    snprintf(log_name, sizeof(log_name) - 1, "%s", name);
+    ERROR("could not open log file \"%s\"", ret->log_name);
+    g_free(ret->pro_name);
+    g_free(ret->log_name);
+    return NULL;
   }
 
-  /* make sure that the name provided is valid */
-  if(log_name[0] == '\0')
-  {
-    log_file = stderr;
-    errno = EINVAL;
-    ERROR("invalid file name provided to set_log(), using default: %s", logdir);
-    sprintf(log_name, "%s", logdir);
-    log_file = NULL;
-  }
-
-  /* check special cases */
-  if(strcmp(log_name, "stderr") == 0) { log_file = stderr; return; }
-  if(strcmp(log_name, "stdout") == 0) { log_file = stdout; return; }
-
-  log_name_set = 1;
+  return ret;
 }
 
 /**
- * Gets the name of the file that will be logged to. The return of this
- * function is const since set_log should be used if the log name is to
- * change.
+ * @brief Creates a log file structure based on an already created FILE*
  *
- * @return the name of the log file
+ * @param log_file  the already existing FILE*
+ * @param pro_name  the name of the process to write to the log file
+ * @param pro_pid   the PID of the process to write to the log file
+ * @return          a new log_t instance that can be used to write to
  */
-const char* lname()
+log_t* log_new_FILE(FILE* log_file, gchar* pro_name, pid_t pro_pid)
 {
-  return log_name;
+  log_t* ret = g_new0(log_t, 1);
+
+  if(pro_name == NULL)
+    ret->pro_name = g_strdup(SCHE_PRONAME);
+  else
+    ret->pro_name = g_strdup(pro_name);
+  ret->pro_pid = pro_pid;
+
+  ret->log_name = NULL;
+  ret->log_file = log_file;
+
+  return ret;
+}
+
+/**
+ * @brief Free memory associated with the log file.
+ *
+ * @param log  the log file to close
+ */
+void log_destroy(log_t* log)
+{
+  if(log->pro_name) g_free(log->pro_name);
+  if(log->log_name) g_free(log->log_name);
+  if(log->log_file) fclose(log->log_file);
+
+  log->pro_name = NULL;
+  log->log_name = NULL;
+
+  if(log->log_file != stdout && log->log_file != stderr)
+    log->log_file = NULL;
+
+  g_free(log);
 }
 
 /**
@@ -164,16 +191,16 @@ const char* lname()
  * @param fmt the format for the printed data
  * @return 1 on success, 0 otherwise
  */
-int lprintf(const char* fmt, ...)
+int lprintf(log_t* log, const char* fmt, ...)
 {
   va_list args;
   int rc;
 
   if(!fmt) return 0;
-  if(!log_file) log_open();
+  if(!log) return 0;
 
   va_start(args, fmt);
-  rc = vlprintf(log_file, fmt, args);
+  rc = vlprintf(log, fmt, args);
   va_end(args);
 
   return rc;
@@ -188,16 +215,19 @@ int lprintf(const char* fmt, ...)
  * @param fmt the formating string
  * @return 1 on success, o otherwise
  */
-int alprintf(FILE* dst, const char* fmt, ...)
+int alprintf(log_t* log, const char* fmt, ...)
 {
   va_list args;
   int rc;
 
   if(!fmt) return 0;
+  if(!log) return 0;
 
   va_start(args, fmt);
-  if(dst) rc = vlprintf(dst, fmt, args);
-  else    rc = concurent_log(fmt, args);
+  if(strcmp(log->log_name, SCHE_PRONAME) == 0)
+    rc = concurent_log(log, fmt, args);
+  else
+    rc = vlprintf(log, fmt, args);
   va_end(args);
 
   return rc;
@@ -212,7 +242,7 @@ int alprintf(FILE* dst, const char* fmt, ...)
  * @param args the arguemtn for the print in and form of a va_list
  * @return 1 on success, 0 otherwise
  */
-int vlprintf(FILE* dst, const char* fmt, va_list args)
+int vlprintf(log_t* log, const char* fmt, va_list args)
 {
   /* static used to determine if a '\n' needs to be printed */
   static int n_line = 1;
@@ -223,8 +253,8 @@ int vlprintf(FILE* dst, const char* fmt, va_list args)
   char time_buf[64];
   int e_line;
 
-  if(!dst) return 0;
   if(!fmt) return 0;
+  if(!log) return 0;
 
   strftime(time_buf, sizeof(time_buf),"%F %T",localtime(&t));
 
@@ -233,25 +263,26 @@ int vlprintf(FILE* dst, const char* fmt, va_list args)
   curr = strtok(tmp, "\n");
   while(curr != NULL)
   {
-    if(n_line && fprintf(dst, "%s scheduler [%d] :: ", time_buf, s_pid) == 0)
-        return 0;
+    if(n_line && fprintf(log->log_file, "%s %s [%d] :: ", time_buf,
+        log->pro_name, log->pro_pid) == 0)
+      return 0;
 
-    if(fprintf(dst, "%s", curr) == 0)
+    if(fprintf(log->log_file, "%s", curr) == 0)
       return 0;
 
     n_line = ((curr = strtok(NULL, "\n")) != NULL);
-    if(n_line && fprintf(dst, "\n") == 0)
+    if(n_line && fprintf(log->log_file, "\n") == 0)
         return 0;
   }
 
   if(e_line)
   {
     n_line = 1;
-    if(fprintf(dst, "\n") == 0)
+    if(fprintf(log->log_file, "\n") == 0)
       return 0;
   }
 
-  fflush(dst);
+  fflush(log->log_file);
   g_free(tmp);
   return 1;
 }
@@ -265,16 +296,16 @@ int vlprintf(FILE* dst, const char* fmt, va_list args)
  * @param fmt  the format string like any normal printf function
  * @return  if the printf was successful.
  */
-int clprintf(const char* fmt, ...)
+int clprintf(log_t* log, const char* fmt, ...)
 {
   va_list args;
   int ret;
 
-  if(!log_file) log_open();
   if(!fmt) return 0;
+  if(!log) return 0;
 
   va_start(args, fmt);
-  ret = concurent_log(fmt, args);
+  ret = concurent_log(log, fmt, args);
   va_end(args);
 
   return ret;

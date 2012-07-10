@@ -48,12 +48,14 @@ COVERAGE = scheduler_cov.o \
            job_cov.o \
            logging_cov.o \
 
-all: $(EXE) 
+all: 
+	@echo "scheduler Unit Tests currently disabled"
 	@echo "make scheduler Unit agent_tests"
 
-test: $(EXE)
+test:
+	@echo "scheduler Unit Tests currently disabled"
 	@echo "make scheduler Unit agent_tests"
-	./$(EXE)
+#	./$(EXE)
 	
 $(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)

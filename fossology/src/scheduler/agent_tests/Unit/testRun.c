@@ -26,6 +26,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossology.h>
 #include <testRun.h>
 
+#include <agent.h>
+#include <database.h>
+#include <event.h>
+#include <host.h>
+#include <interface.h>
+#include <logging.h>
+#include <scheduler.h>
+
 /* ************************************************************************** */
 /* **** suite initializations *********************************************** */
 /* ************************************************************************** */
@@ -40,8 +48,7 @@ int init_suite(void)
 {
   if(log_file && fclose(log_file) != 0)
     return -1;
-  if((log_file = fopen("/dev/null", "w+")) == NULL)
-    return -1;
+  log_file = stdout;
   return 0;
 }
 
@@ -54,8 +61,12 @@ int init_suite(void)
  */
 int clean_suite(void)
 {
-  if(fclose(log_file) != 0)
-    return -1;
+  job_list_clean();
+  host_list_clean();
+  agent_list_clean();
+  interface_destroy();
+  database_destroy();
+  event_loop_destroy();
 
   log_file = NULL;
   return 0;
@@ -73,7 +84,7 @@ CU_SuiteInfo suites[] =
     {"host.c:",                      init_suite,            clean_suite, tests_host             },
     {"event.c:",                     init_suite,            clean_suite, tests_event            },
     {"interface.c:",       interface_init_suite,  interface_clean_suite, tests_interface        },
-    //{"interface_thread:", interface_thread_init, interface_thread_clean, tests_interface_thread },
+    {"interface_thread:", interface_thread_init, interface_thread_clean, tests_interface_thread },
     CU_SUITE_INFO_NULL
 };
 
@@ -82,9 +93,7 @@ int main( int argc, char *argv[] )
   g_type_init();
   g_thread_init(NULL);
 
-  printf("start\n");
   focunit_main(argc, argv, "scheduler_Tests", suites) ;
-  printf("end\n");
 
   return 0;
 }

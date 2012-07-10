@@ -43,12 +43,15 @@ int main(int argc, char** argv)
   gboolean ki_shut  = FALSE;  // flag that indicates all schedulers should be gracefully shutdown
   gboolean db_init  = FALSE;  // flag indicating a database test
   gboolean test_die = FALSE;  // flag to run the tests then die
-  char* log = NULL;           // used when a different log from the default is used
+  gboolean s_daemon = FALSE;  // falg to run the scheduler as a daemon
+  gchar* logdir = NULL;       // used when a different log from the default is used
   GOptionContext* options;    // option context used for command line parsing
   GError* error = NULL;       // error object used during parsing
+  uint16_t port = 0;
+  gchar* sysconfigdir = DEFAULT_SETUP;
 
-  sysconfigdir = DEFAULT_SETUP;
-  logdir = LOG_DIR;
+  /* THE SCHEDULER */
+  scheduler_t* scheduler;
 
   if(getenv("FO_SYSCONFDIR") != NULL)
     sysconfigdir = getenv("FO_SYSCONFDIR");
@@ -65,19 +68,14 @@ int main(int argc, char** argv)
       { "database", 'i', 0, G_OPTION_ARG_NONE,   &db_init,      "      Initialize database connection and exit"       },
       { "kill",     'k', 0, G_OPTION_ARG_NONE,   &ki_kill,      "      Forcibly kills all running schedulers"         },
       { "shutdown", 's', 0, G_OPTION_ARG_NONE,   &ki_shut,      "      Gracefully shutdown of all running schedulers" },
-      { "log",      'L', 0, G_OPTION_ARG_STRING, &log,          "[str] Specify location of log file"                  },
-      { "port",     'p', 0, G_OPTION_ARG_INT,    &s_port,       "[num] Set the interface port"                        },
+      { "log",      'L', 0, G_OPTION_ARG_STRING, &logdir,       "[str] Specify location of log file"                  },
+      { "port",     'p', 0, G_OPTION_ARG_INT,    &port,         "[num] Set the interface port"                        },
       { "reset",    'R', 0, G_OPTION_ARG_NONE,   &db_reset,     "      Reset the job queue upon startup"              },
       { "test",     't', 0, G_OPTION_ARG_NONE,   &test_die,     "      Close the scheduler after running tests"       },
       { "verbose",  'v', 0, G_OPTION_ARG_INT,    &verbose,      "[num] Set the scheduler verbose level"               },
       { "config",   'c', 0, G_OPTION_ARG_STRING, &sysconfigdir, "[str] Specify system configuration directory"        },
       {NULL}
   };
-
-  process_name = argv[0];
-  s_pid = getpid();
-  s_daemon = FALSE;
-  s_port = -1;
 
   /* ********************* */
   /* *** parse options *** */
@@ -96,67 +94,55 @@ int main(int argc, char** argv)
 
   g_option_context_free(options);
 
-  /* first check where the log should be printed to */
-  if(log != NULL) { set_log(log); }
-
-  /* create data structs, load config and set the user groups */
-  agent_list_init();
-  host_list_init();
-  job_list_init();
-  load_foss_config();
-  set_usr_grp();
-
-  /* perform pre-initialization checks */
+  /* check changes to the process first */
   if(s_daemon && daemon(0, 0) == -1) { return -1; }
-  if(db_init) { database_init();  return 0; }
   if(ki_shut) { return kill_scheduler(FALSE); }
   if(ki_kill) { return kill_scheduler(TRUE);  }
 
-  /* the proces's pid could have change */
-  s_pid = getpid();
+  /* initialize the scheduler */
+  scheduler = scheduler_init(sysconfigdir);
+
+  scheduler->process_name = g_strdup(argv[0]);
+  scheduler->s_daemon     = s_daemon;
+
+  if(logdir)
+    scheduler->logdir = logdir;
+  scheduler->main_log = log_new(scheduler->logdir, NULL, scheduler->s_pid);
+  main_log = scheduler->main_log;
 
   NOTIFY("*****************************************************************");
   NOTIFY("***                FOSSology scheduler started                ***");
-  NOTIFY("***        pid:      %-33d        ***", s_pid);
+  NOTIFY("***        pid:      %-33d        ***", getpid());
   NOTIFY("***        verbose:  %-33d        ***", verbose);
   NOTIFY("***        config:   %-33s        ***", sysconfigdir);
   NOTIFY("*****************************************************************");
 
-  /* ********************************** */
-  /* *** do all the initializations *** */
-  /* ******* order matters here ******* */
-  /* ********************************** */
-  interface_init();
-  database_init();
-  load_agent_config();
-  fo_RepOpenFull(sysconfig);
+  scheduler_config_event(scheduler, NULL);
+  interface_init(scheduler);
+  set_usr_grp(scheduler->process_name, scheduler->sysconfig);
+  fo_RepOpenFull(scheduler->sysconfig);
 
-  signal(SIGCHLD, sig_handle);
-  signal(SIGTERM, sig_handle);
-  signal(SIGQUIT, sig_handle);
-  signal(SIGHUP,  sig_handle);
+  signal(SIGCHLD, scheduler_sig_handle);
+  signal(SIGTERM, scheduler_sig_handle);
+  signal(SIGQUIT, scheduler_sig_handle);
+  signal(SIGHUP,  scheduler_sig_handle);
 
-  /* *********************************** */
-  /* *** post initialization checks **** */
-  /* *********************************** */
+  /* ***************************************************** */
+  /* *** we have finished initialization without error *** */
+  /* ***************************************************** */
 
-  if(fo_config_has_key(sysconfig, "DIRECTORIES", "LOG_DIR"))
-    logdir = fo_config_get(sysconfig, "DIRECTORIES", "LOG_DIR", &error);
   if(db_reset)
-    database_reset_queue();
+    database_reset_queue(scheduler->db_conn);
   if(test_die)
     closing = 1;
-
-  /* *************************************** */
-  /* *** enter the scheduler event loop **** */
-  /* *************************************** */
-
-  event_loop_enter(update_scheduler, signal_scheduler);
+  event_loop_enter(scheduler, scheduler_update, scheduler_signal);
 
   NOTIFY("*****************************************************************");
   NOTIFY("***                FOSSology scheduler closed                 ***");
-  NOTIFY("***        pid:     %-34d        ***", s_pid);
+  NOTIFY("***        pid:     %-34d        ***", scheduler->s_pid);
   NOTIFY("*****************************************************************\n");
 
-  return close_scheduler();
+  interface_destroy(scheduler);
+  scheduler_destroy(scheduler);
+  return 0;
 }

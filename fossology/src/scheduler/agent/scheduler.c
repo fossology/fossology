@@ -22,7 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <event.h>
 #include <host.h>
 #include <interface.h>
-#include <logging.h>
 #include <scheduler.h>
 #include <fossconfig.h>
 
@@ -49,11 +48,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TEST_ERROR(error, ...)                                     \
   if(error)                                                        \
   {                                                                \
-    lprintf("ERROR %s.%d: %s\n",                                   \
+    log_printf("ERROR %s.%d: %s\n",                                \
       __FILE__, __LINE__, error->message);                         \
-    lprintf("ERROR %s.%d: ", __FILE__, __LINE__);                  \
-    lprintf(__VA_ARGS__);                                          \
-    lprintf("\n");                                                 \
+    log_printf("ERROR %s.%d: ", __FILE__, __LINE__);               \
+    log_printf(__VA_ARGS__);                                       \
+    log_printf("\n");                                              \
     g_clear_error(&error);                                         \
     continue;                                                      \
   }
@@ -61,15 +60,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* global flags */
 int verbose = 0;
 int closing = 0;
-int startup = 0;
-int pause_f = 1;
-int s_pid;
-int s_daemon;
-int s_port;
-char* sysconfigdir = NULL;
-fo_conf* sysconfig = NULL;
-char* logdir;
-char* process_name;
 
 #define SELECT_DECLS(type, name, l_op, w_op, val) type CONF_##name = val;
 CONF_VARIABLES_TYPES(SELECT_DECLS)
@@ -99,7 +89,7 @@ int sigmask = 0;
  *
  * @param signo  the number of the signal that was sent
  */
-void sig_handle(int signo)
+void scheduler_sig_handle(int signo)
 {
   /* Anywhere you see a "#if __GNUC__" the code is checking if gcc is the
    * compiler. This is because the __sync... set of functions are the gcc
@@ -146,7 +136,7 @@ void sig_handle(int signo)
  * always be accessed atomically since it is accessed by the event loop thread
  * as well as the signal handlers.
  */
-void signal_scheduler()
+void scheduler_signal(scheduler_t* scheduler)
 {
   // the last time an update was run
   static time_t last_update = 0;
@@ -181,8 +171,7 @@ void signal_scheduler()
     /* get all of the dead children's pids */
     while((n = waitpid(-1, &status, WNOHANG)) > 0)
     {
-      if(TVERB_SCHED)
-        clprintf("SIGNALS: received sigchld for pid %d\n", n);
+      V_SCHED("SIGNALS: received sigchld for pid %d\n", n);
       pass = g_new0(pid_t, 2);
       pass[0] = n;
       pass[1] = status;
@@ -221,7 +210,7 @@ void signal_scheduler()
   if(mask & MASK_SIGHUP)
   {
     V_SCHED("SIGNALS: Scheduler received SGIHUP, reloading configuration data\n");
-    load_config(NULL);
+    scheduler_config_event(scheduler, NULL);
   }
 
   /* Finish by checking if an agent update needs to be performed.
@@ -245,6 +234,137 @@ void signal_scheduler()
 /* ************************************************************************** */
 
 /**
+ * @brief Create a new scheduler object.
+ *
+ * This will initalize everything to a point where it can be used. All regular
+ * expressions, GTree's and the job_queue will be correctly created.
+ *
+ * @return a new scheduler_t* that can be further populated
+ */
+scheduler_t* scheduler_init(gchar* sysconfigdir)
+{
+  scheduler_t* ret = g_new0(scheduler_t, 1);
+
+  ret->process_name  = NULL;
+  ret->s_pid         = getpid();
+  ret->s_daemon      = FALSE;
+  ret->s_startup     = FALSE;
+  ret->s_pause       = TRUE;
+
+  ret->sysconfig     = NULL;
+  ret->sysconfigdir  = g_strdup(sysconfigdir);
+  ret->logdir        = LOG_DIR;
+  ret->main_log      = NULL;
+  ret->host_queue    = NULL;
+
+  ret->i_created     = FALSE;
+  ret->i_terminate   = FALSE;
+  ret->i_port        = 0;
+  ret->server        = NULL;
+  ret->workers       = NULL;
+  ret->cancel        = NULL;
+
+  ret->job_queue     = g_sequence_new(NULL);
+
+  ret->db_conn       = NULL;
+  ret->host_url      = NULL;
+  ret->email_subject = NULL;
+  ret->email_header  = NULL;
+  ret->email_footer  = NULL;
+  ret->email_command = NULL;
+
+  /* TODO in depth regex documentation
+   */
+  ret->parse_agent_heart   = g_regex_new(
+      "HEART:([ \t]*)(\\d*)([ \t]*)(\\d)",
+      0, 0, NULL);
+
+  /* TODO in depth regex documentation
+   */
+  ret->parse_agent_special = g_regex_new(
+      "SPECIAL:([ \t]*)(\\d*)([ \t]*)(\\d)",
+      0, 0, NULL);
+
+  /* This regex should find:
+   *   1. A '$' followed by any combination of capital letters or underscore
+   *   2. A '$' followed by any combination of capital letters or underscore,
+   *      followed by a '.' followed by alphabetic characters or underscore,
+   *      followed by a '.' followed by alphabetic characters or underscore
+   *
+   * Examples:
+   *   $HELLO           -> matches
+   *   $SIMPLE_NAME     -> matches
+   *   $DB.table.column -> matches
+   *   $bad             -> does not match
+   *   $DB.table        -> does not match
+   */
+  ret->parse_db_email      = g_regex_new(
+      "\\$([A-Z_]*)(\\.([a-zA-Z_]*)\\.([a-zA-Z_]*))?",
+      0, 0, NULL);
+
+  /* TODO in depth regex documentation
+   */
+  ret->parse_interface_cmd = g_regex_new(
+      "(\\w+)(\\s+(-?\\d+))?(\\s+((-?\\d+)|(\"(.*)\")))?",
+      0, G_REGEX_MATCH_NEWLINE_LF, NULL);
+
+  ret->meta_agents = g_tree_new_full(string_compare, NULL, NULL,
+      (GDestroyNotify)meta_agent_destroy);
+  ret->agents      = g_tree_new_full(int_compare,    NULL, NULL,
+      (GDestroyNotify)agent_destroy);
+  ret->host_list = g_tree_new_full(string_compare, NULL, NULL,
+      (GDestroyNotify)host_destroy);
+  ret->job_list     = g_tree_new_full(int_compare, NULL, NULL,
+      (GDestroyNotify)job_destroy);
+
+  return ret;
+}
+
+/**
+ * @brief Free any memory associated with a scheduler_t.
+ *
+ * This will stop the interface if it is currently running, and free all the
+ * memory associated with the different regular expression and similar
+ * structures.
+ *
+ * @param scheduler
+ */
+void scheduler_destroy(scheduler_t* scheduler)
+{
+  // TODO interface close
+  // TODO repo close
+
+  event_loop_destroy();
+  log_destroy(scheduler->main_log);
+
+  if(scheduler->process_name) g_free(scheduler->process_name);
+  if(scheduler->sysconfig)    fo_config_free(scheduler->sysconfig);
+  if(scheduler->sysconfigdir) g_free(scheduler->sysconfigdir);
+  if(scheduler->logdir)       g_free(scheduler->logdir);
+  if(scheduler->host_queue)   g_list_free(scheduler->host_queue);
+  if(scheduler->workers)      g_thread_pool_free(scheduler->workers, FALSE, TRUE);
+
+  if(scheduler->email_subject) g_free(scheduler->email_subject);
+  if(scheduler->email_command) g_free(scheduler->email_command);
+
+  g_sequence_free(scheduler->job_queue);
+
+  g_regex_unref(scheduler->parse_agent_heart);
+  g_regex_unref(scheduler->parse_agent_special);
+  g_regex_unref(scheduler->parse_db_email);
+  g_regex_unref(scheduler->parse_interface_cmd);
+
+  g_tree_unref(scheduler->meta_agents);
+  g_tree_unref(scheduler->agents);
+  g_tree_unref(scheduler->host_list);
+  g_tree_unref(scheduler->job_list);
+
+  main_log = NULL;
+
+  g_free(scheduler);
+}
+
+/**
  * @brief Update function called after every event
  *
  * The heart of the scheduler, the actual scheduling algorithm. This will be
@@ -260,22 +380,22 @@ void signal_scheduler()
  *   TODO: allow for job preemption. The scheduler can pause jobs, allow it
  *   TODO: allow for specific hosts to be chossen.
  */
-void update_scheduler()
+void scheduler_update(scheduler_t* scheduler)
 {
   /* queue used to hold jobs if an exclusive job enters the system */
-  static job j = NULL;
+  static job_t* job = NULL;
   static int lockout = 0;
 
   /* locals */
-  host machine = NULL;
-  int n_agents = num_agents();
-  int n_jobs   = active_jobs();
+  host_t* host = NULL;
+  int n_agents = g_tree_nnodes(scheduler->agents);
+  int n_jobs   = active_jobs(scheduler->job_list);
 
   /* check to see if we are in and can exit the startup state */
-  if(startup && n_agents == 0)
+  if(scheduler->s_startup && n_agents == 0)
   {
     event_signal(database_update_event, NULL);
-    startup = 0;
+    scheduler->s_startup = 0;
   }
 
   /* check if we are able to close the scheduler */
@@ -288,55 +408,57 @@ void update_scheduler()
   if(lockout && n_agents == 0 && n_jobs == 0)
     lockout = 0;
 
-  if(j == NULL && !lockout)
+  if(job == NULL && !lockout)
   {
-    while((j = peek_job()) != NULL)
+    while((job = peek_job(scheduler->job_queue)) != NULL)
     {
       // check if the agent is required to run on local host
-      if(is_meta_special(j->agent_type, SAG_LOCAL))
+      if(is_meta_special(
+          g_tree_lookup(scheduler->meta_agents, job->agent_type), SAG_LOCAL))
       {
-        machine = name_host(LOCAL_HOST);
-        if(!(machine->running < machine->max))
+        host = g_tree_lookup(scheduler->host_list, LOCAL_HOST);
+        if(!(host->running < host->max))
           break;
       }
       // check if the job is required to run on a specific machine
-      else if((j->required_host != NULL))
+      else if((job->required_host != NULL))
       {
-        machine = name_host(j->required_host);
-        if(!(machine->running < machine->max))
+        host = g_tree_lookup(scheduler->host_list, job->required_host);
+        if(!(host->running < host->max))
           break;
       }
       // the generic case, this can run anywhere, find a place
-      else if((machine = get_host(1)) == NULL)
+      else if((host = get_host(&(scheduler->host_queue), 1)) == NULL)
       {
         V_SCHED("JOB_INIT: could not find host\n");
         break;
       }
 
-      next_job();
-      if(is_meta_special(j->agent_type, SAG_EXCLUSIVE))
+      next_job(scheduler->job_queue);
+      if(is_meta_special(
+          g_tree_lookup(scheduler->meta_agents, job->agent_type), SAG_EXCLUSIVE))
       {
         V_SCHED("JOB_INIT: exclusive, postponing initialization\n");
         break;
       }
 
-      V_SCHED("Starting JOB[%d].%s\n", j->id, j->agent_type);
-      agent_init(machine, j);
-      j = NULL;
+      V_SCHED("Starting JOB[%d].%s\n", job->id, job->agent_type);
+      agent_init(scheduler, host, job);
+      job = NULL;
     }
   }
 
-  if(j != NULL && n_agents == 0 && n_jobs == 0)
+  if(job != NULL && n_agents == 0 && n_jobs == 0)
   {
-    agent_init(get_host(1), j);
+    agent_init(scheduler, get_host(&(scheduler->host_queue), 1), job);
     lockout = 1;
-    j = NULL;
+    job = NULL;
   }
 
-  if(pause_f)
+  if(scheduler->s_pause)
   {
-    startup = 1;
-    pause_f = 0;
+    scheduler->s_startup = 1;
+    scheduler->s_pause = 0;
   }
 }
 
@@ -353,18 +475,18 @@ void update_scheduler()
  * the user specified by PROJECT_USER and PROJECT_GROUP since the agents must be
  * able to connect to the database. This ensures that that happens correctly.
  */
-void set_usr_grp()
+void set_usr_grp(gchar* process_name, fo_conf* config)
 {
   /* locals */
   struct group*  grp;
   struct passwd* pwd;
 
   char* group =
-      fo_config_has_key(sysconfig, GU_HEADER, GU_GROUP) ?
-      fo_config_get    (sysconfig, GU_HEADER, GU_GROUP, NULL) : PROJECT_GROUP;
+      fo_config_has_key(config, GU_HEADER, GU_GROUP) ?
+      fo_config_get    (config, GU_HEADER, GU_GROUP, NULL) : PROJECT_GROUP;
   char* user  =
-      fo_config_has_key(sysconfig, GU_HEADER, GU_USER)  ?
-      fo_config_get    (sysconfig, GU_HEADER, GU_USER, NULL)  : PROJECT_USER;
+      fo_config_has_key(config, GU_HEADER, GU_USER)  ?
+      fo_config_get    (config, GU_HEADER, GU_USER, NULL)  : PROJECT_USER;
 
   /* make sure group exists */
   grp = getgrnam(group);
@@ -418,11 +540,12 @@ void set_usr_grp()
  */
 int kill_scheduler(int force)
 {
-  char f_name[FILENAME_MAX];
+  gchar f_name[FILENAME_MAX];
   struct dirent* ep;
   DIR* dp;
   FILE* file;
-  int num_killed = 0;
+  gint num_killed = 0;
+  pid_t s_pid = getpid();
 
   if((dp = opendir("/proc/")) == NULL)
   {
@@ -462,6 +585,71 @@ int kill_scheduler(int force)
 }
 
 /**
+ * @brief clears any information that is loaded when loading the configuration
+ *
+ * @param scheduler  the scheduler to reset the information on
+ */
+void scheduler_clear_config(scheduler_t* scheduler)
+{
+  g_tree_clear(scheduler->meta_agents);
+  g_tree_clear(scheduler->host_list);
+
+  g_list_free(scheduler->host_queue);
+  scheduler->host_queue = NULL;
+
+  g_free(scheduler->host_url);
+  g_free(scheduler->email_subject);
+  g_free(scheduler->email_header);
+  g_free(scheduler->email_footer);
+  g_free(scheduler->email_command);
+  PQfinish(scheduler->db_conn);
+  scheduler->db_conn       = NULL;
+  scheduler->host_url      = NULL;
+  scheduler->email_subject = NULL;
+  scheduler->email_header  = NULL;
+  scheduler->email_footer  = NULL;
+  scheduler->email_command = NULL;
+
+  fo_config_free(scheduler->sysconfig);
+  scheduler->sysconfig = NULL;
+}
+
+/**
+ * @brief GTraverseFunc used by g_tree_clear to collect all the keys in a tree
+ *
+ * @param key    the current key
+ * @param value  the value mapped to the current key
+ * @param data   a GList** that the key will be appended to
+ * @return       Always returns 0
+ */
+static gboolean g_tree_collect(gpointer key, gpointer value, gpointer data)
+{
+  GList** ret = (GList**)data;
+
+  *ret = g_list_append(*ret, key);
+
+  return 0;
+}
+
+/**
+ * @brief Clears the contents of a GTree
+ *
+ * @param tree  the tree to remove all elements from
+ */
+void g_tree_clear(GTree* tree)
+{
+  GList* keys = NULL;
+  GList* iter = NULL;
+
+  g_tree_foreach(tree, g_tree_collect, &keys);
+
+  for(iter = keys; iter != NULL; iter = iter->next)
+    g_tree_remove(tree, iter->data);
+
+  g_list_free(keys);
+}
+
+/**
  * @brief Loads a particular agents configuration file
  *
  * This loads and saves the results as a new meta_agent. This assumes that the
@@ -470,64 +658,62 @@ int kill_scheduler(int force)
  *   2. max: the maximum number of this agent that can run at once
  *   3. special: anything that is special about the agent
  */
-void load_agent_config()
+void scheduler_agent_config(scheduler_t* scheduler)
 {
   DIR* dp;                  // directory pointer used to load meta agents;
   struct dirent* ep;        // information about directory
-  char namebuf[512];        // holds the name of the current configuration file
-  int max = -1;             // the number of agents to a host or number of one type running
-  int special = 0;          // anything that is special about the agent (EXCLUSIVE)
-  int i;
-  char* name;
-  char* cmd;
-  char* tmp;
+  gchar* dirname;           // holds the name of the current configuration file
+  uint8_t max = -1;             // the number of agents to a host or number of one type running
+  uint32_t special = 0;          // anything that is special about the agent (EXCLUSIVE)
+  int32_t i;
+  gchar* name;
+  gchar* cmd;
+  gchar* tmp;
   GError* error = NULL;
   fo_conf* config;
 
-  /* clear previous configurations */
-  agent_list_clean();
-
-  snprintf(namebuf, sizeof(namebuf), "%s/%s/", sysconfigdir, AGENT_CONF);
-  if((dp = opendir(namebuf)) == NULL)
+  dirname = g_strdup_printf("%s/%s/", scheduler->sysconfigdir, AGENT_CONF);
+  if((dp = opendir(dirname)) == NULL)
   {
-    FATAL("Could not open agent config directory: %s", namebuf);
+    FATAL("Could not open agent config directory: %s", dirname);
     return;
   }
+  g_free(dirname);
 
   /* load the configuration for the agents */
   while((ep = readdir(dp)) != NULL)
   {
     if(ep->d_name[0] != '.')
     {
-      snprintf(namebuf, sizeof(namebuf), "%s/%s/%s/%s.conf",
-          sysconfigdir, AGENT_CONF, ep->d_name, ep->d_name);
+      dirname = g_strdup_printf("%s/%s/%s/%s.conf",
+          scheduler->sysconfigdir, AGENT_CONF, ep->d_name, ep->d_name);
 
-      config = fo_config_load(namebuf, &error);
+      config = fo_config_load(dirname, &error);
       if(error && error->code == fo_missing_file)
       {
-        V_SCHED("CONFIG: Could not find %s\n", namebuf);
+        V_SCHED("CONFIG: Could not find %s\n", dirname);
         g_clear_error(&error);
         continue;
       }
       TEST_ERROR(error, "no additional info");
-      V_SCHED("CONFIG: loading config file %s\n", namebuf);
+      V_SCHED("CONFIG: loading config file %s\n", dirname);
 
       if(!fo_config_has_group(config, "default"))
       {
-        lprintf("ERROR: %s must have a \"default\" group\n", namebuf);
-        lprintf("ERROR: cause by %s.%d\n", __FILE__, __LINE__);
+        log_printf("ERROR: %s must have a \"default\" group\n", dirname);
+        log_printf("ERROR: cause by %s.%d\n", __FILE__, __LINE__);
         continue;
       }
 
       special = 0;
       name = ep->d_name;
       max = fo_config_list_length(config, "default", "special", &error);
-      TEST_ERROR(error, "%s: the special key should be of type list", namebuf);
+      TEST_ERROR(error, "%s: the special key should be of type list", dirname);
       for(i = 0; i < max; i++)
       {
         cmd = fo_config_get_list(config, "default", "special", i, &error);
         TEST_ERROR(error, "%s: failed to load element %d of special list",
-            namebuf, i)
+            dirname, i)
 
         if(cmd[0] != '\0') {
           if(strncmp(cmd, "EXCLUSIVE", 9) == 0)
@@ -540,33 +726,35 @@ void load_agent_config()
             special |= SAG_LOCAL;
           else if(strlen(cmd) != 0)
             WARNING("%s: Invalid special type for agent %s: %s",
-                namebuf, name, cmd);
+                dirname, name, cmd);
         }
       }
 
       cmd  = fo_config_get(config, "default", "command", &error);
-      TEST_ERROR(error, "%s: the default group must have a command key", namebuf);
+      TEST_ERROR(error, "%s: the default group must have a command key", dirname);
       tmp  = fo_config_get(config, "default", "max", &error);
-      TEST_ERROR(error, "%s: the default group must have a max key", namebuf);
+      TEST_ERROR(error, "%s: the default group must have a max key", dirname);
 
-      if(!add_meta_agent(name, cmd, (max = atoi(tmp)), special))
+      if(!add_meta_agent(scheduler->meta_agents, name, cmd, (max = atoi(tmp)), special))
       {
         V_SCHED("CONFIG: could not create meta agent using %s\n", ep->d_name);
       }
       else if(TVERB_SCHED)
       {
-        lprintf("CONFIG: added new agent\n");
-        lprintf("    name = %s\n", name);
-        lprintf(" command = %s\n", cmd);
-        lprintf("     max = %d\n", max);
-        lprintf(" special = %d\n", special);
+        log_printf("CONFIG: added new agent\n");
+        log_printf("    name = %s\n", name);
+        log_printf(" command = %s\n", cmd);
+        log_printf("     max = %d\n", max);
+        log_printf(" special = %d\n", special);
       }
 
+      g_free(dirname);
       fo_config_free(config);
     }
   }
+
   closedir(dp);
-  for_each_host(test_agents);
+  test_agents(scheduler);
 }
 
 /**
@@ -580,63 +768,63 @@ void load_agent_config()
  * key/value pairs under this category. For each of these hosts, the scheduler
  * will create a new host as an internal representation.
  */
-void load_foss_config()
+void scheduler_foss_config(scheduler_t* scheduler)
 {
-  char* tmp;                  // pointer into a string
-  char** keys;                // list of host names grabbed from the config file
-  int max = -1;               // the number of agents to a host or number of one type running
-  int special = 0;            // anything that is special about the agent (EXCLUSIVE)
-  char addbuf[512];           // standard string buffer
-  char dirbuf[FILENAME_MAX];
-  GError* error = NULL;
-  int i;
+  gchar*   tmp;                   // pointer into a string
+  gchar**  keys;                  // list of host names grabbed from the config file
+  int32_t  max = -1;              // the number of agents to a host or number of one type running
+  int32_t  special = 0;           // anything that is special about the agent (EXCLUSIVE)
+  gchar    addbuf[512];           // standard string buffer
+  gchar    dirbuf[FILENAME_MAX];  // standard string buffer
+  GError*  error = NULL;          // error return location
+  int32_t  i;                     // indexing variable
+  host_t*  host;                  // new hosts will be created in the loop
 
-  /* clear all previous configurations */
-  host_list_clean();
-
-  if(sysconfig != NULL)
-    fo_config_free(sysconfig);
+  if(scheduler->sysconfig != NULL)
+    fo_config_free(scheduler->sysconfig);
 
   /* parse the config file */
-  snprintf(addbuf, sizeof(addbuf), "%s/fossology.conf", sysconfigdir);
-  sysconfig = fo_config_load(addbuf, &error);
-  if(error)
-    FATAL("%s", error->message);
+  tmp = g_strdup_printf("%s/fossology.conf", scheduler->sysconfigdir);
+  scheduler->sysconfig = fo_config_load(tmp, &error);
+  if(error) FATAL("%s", error->message);
+  g_free(tmp);
 
   /* load the port setting */
-  if(s_port < 0)
-    s_port = atoi(fo_config_get(sysconfig, "FOSSOLOGY", "port", &error));
-  set_port(s_port);
+  if(scheduler->i_port == 0)
+    scheduler->i_port = atoi(fo_config_get(scheduler->sysconfig,
+        "FOSSOLOGY", "port", &error));
 
   /* load the log directory */
-  if(fo_config_has_key(sysconfig, "DIRECTORIES", "LOG_DIR"))
-    logdir = fo_config_get(sysconfig, "DIRECTORIES", "LOG_DIR", &error);
+  if(fo_config_has_key(scheduler->sysconfig, "DIRECTORIES", "LOG_DIR"))
+    scheduler->logdir = fo_config_get(scheduler->sysconfig, "DIRECTORIES", "LOG_DIR", &error);
 
   /* load the host settings */
-  keys = fo_config_key_set(sysconfig, "HOSTS", &special);
+  keys = fo_config_key_set(scheduler->sysconfig, "HOSTS", &special);
   for(i = 0; i < special; i++)
   {
-    tmp = fo_config_get(sysconfig, "HOSTS", keys[i], &error);
+    tmp = fo_config_get(scheduler->sysconfig, "HOSTS", keys[i], &error);
     if(error)
     {
-      lprintf(error->message);
+      WARNING("%s\n", error->message);
       g_clear_error(&error);
       continue;
     }
 
     sscanf(tmp, "%s %s %d", addbuf, dirbuf, &max);
-    host_init(keys[i], addbuf, dirbuf, max);
+    host = host_init(keys[i], addbuf, dirbuf, max);
+    g_tree_insert(scheduler->host_list, host->name, host);
+    scheduler->host_queue = g_list_append(scheduler->host_queue, host);
     if(TVERB_SCHED)
     {
-      lprintf("CONFIG: added new host\n");
-      lprintf("      name = %s\n", keys[i]);
-      lprintf("   address = %s\n", addbuf);
-      lprintf(" directory = %s\n", dirbuf);
-      lprintf("       max = %d\n", max);
+      log_printf("CONFIG: added new host\n");
+      log_printf("      name = %s\n", keys[i]);
+      log_printf("   address = %s\n", addbuf);
+      log_printf(" directory = %s\n", dirbuf);
+      log_printf("       max = %d\n", max);
     }
   }
 
-  if((tmp = fo_RepValidate(sysconfig)) != NULL)
+  if((tmp = fo_RepValidate(scheduler->sysconfig)) != NULL)
   {
     ERROR("configuration file failed repository validation");
     ERROR("The offending line: \"%s\"", tmp);
@@ -661,9 +849,9 @@ void load_foss_config()
    *     V_SPECIAL("CONFIG: %s == %s\n", "test_variable", CONF_test_variable);
    *
    */
-#define SELECT_CONF_INIT(type, name, l_op, w_op, val)                          \
-  if(fo_config_has_key(sysconfig, "SCHEDULER", #name))                         \
-    CONF_##name = l_op(fo_config_get(sysconfig, "SCHEDULER", #name, NULL));    \
+#define SELECT_CONF_INIT(type, name, l_op, w_op, val)                                  \
+  if(fo_config_has_key(scheduler->sysconfig, "SCHEDULER", #name))                      \
+    CONF_##name = l_op(fo_config_get(scheduler->sysconfig, "SCHEDULER", #name, NULL)); \
   V_SPECIAL("CONFIG: %s == " MK_STRING_LIT(w_op) "\n", #name, CONF_##name );
   CONF_VARIABLES_TYPES(SELECT_CONF_INIT)
 #undef SELECT_CONF_INIT
@@ -672,12 +860,19 @@ void load_foss_config()
 /**
  * @brief Load both the fossology configuration and all the agent configurations
  *
- * @param unused  this can be called as an event
+ * @param scheduler  the scheduler to load the configuration for
+ * @param unused     this can be called as an event
  */
-void load_config(void* unused)
+void scheduler_config_event(scheduler_t* scheduler, void* unused)
 {
-  load_foss_config();
-  load_agent_config();
+  if(scheduler->sysconfig)
+    scheduler_clear_config(scheduler);
+
+  scheduler_foss_config(scheduler);
+  scheduler_agent_config(scheduler);
+
+  database_init(scheduler);
+  email_init(scheduler);
 }
 
 /**
@@ -686,34 +881,18 @@ void load_config(void* unused)
  * This function will cause the scheduler to slowly shutdown. If killed is true
  * this is a quick, ungraceful shutdown.
  *
- * @param killed  should the scheduler kill all currently executing agents
- *                before exiting the event loop, or should it wait for them
- *                to finished first.
+ * @param scheduler  the scheduler
+ * @param killed     should the scheduler kill all currently executing agents
+ *                   before exiting the event loop, or should it wait for them
+ *                   to finished first.
  */
-void scheduler_close_event(void* killed)
+void scheduler_close_event(scheduler_t* scheduler, void* killed)
 {
   closing = 1;
 
   if(killed) {
-    kill_agents();
+    kill_agents(scheduler);
   }
-}
-
-/**
- * @brief cleanup any memory associated with the scheduler.
- *
- * @return always returns 0
- */
-int close_scheduler()
-{
-  job_list_clean();
-  host_list_clean();
-  agent_list_clean();
-  interface_destroy();
-  database_destroy();
-  event_loop_destroy();
-  fo_RepClose();
-  return 0;
 }
 
 /**

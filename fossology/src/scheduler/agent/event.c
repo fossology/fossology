@@ -30,7 +30,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 /* the event loop is a singleton, this is the only actual event loop */
-struct event_loop_internal vl_singleton;
+event_loop_t vl_singleton;
+
 /* flag used to check if the event loop has been created */
 int el_created = 0;
 
@@ -44,7 +45,7 @@ int el_created = 0;
  *
  * @return
  */
-event_loop event_loop_get()
+event_loop_t* event_loop_get()
 {
 
   /* if the event loop has already been created, return it */
@@ -71,9 +72,9 @@ event_loop event_loop_get()
  * @param e the event to put into the event loop
  * @return true if the item was succesfully added, false otherwise
  */
-int event_loop_put(event_loop vl, event e)
+int event_loop_put(event_loop_t* event_loop, event_t* e)
 {
-  g_async_queue_push(vl->queue, e);
+  g_async_queue_push(event_loop->queue, e);
   return 1;
 }
 
@@ -86,12 +87,12 @@ int event_loop_put(event_loop vl, event e)
  * @param vl the event loop to get the event out of
  * @return the next event in the event loop, NULL if the event loop has ended
  */
-event event_loop_take(event_loop vl)
+event_t* event_loop_take(event_loop_t* event_loop)
 {
   GTimeVal timeout;
-  event ret;
+  event_t* ret;
 
-  if(vl->terminated)
+  if(event_loop->terminated)
   {
     return NULL;
   }
@@ -101,11 +102,11 @@ event event_loop_take(event_loop vl)
   timeout.tv_usec = 0;
 
 #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
-  if((ret = g_async_queue_timeout_pop(vl->queue,
+  if((ret = g_async_queue_timeout_pop(event_loop->queue,
       timeout.tv_sec * 1000000 + timeout.tv_usec)) == NULL)
     return ret;
 #else
-  if((ret = g_async_queue_timed_pop(vl->queue, &timeout)) == NULL)
+  if((ret = g_async_queue_timed_pop(event_loop->queue, &timeout)) == NULL)
     return ret;
 #endif
 
@@ -133,9 +134,9 @@ event event_loop_take(event_loop vl)
  * @param arg the arguements for the function.
  * @return the new event wrapper for the function and arguments
  */
-event event_init(void(*func)(void*), void* arg, char* name)
+event_t* event_init(void(*func)(scheduler_t*, void*), void* arg, char* name)
 {
-  event e = g_new(struct event_internal, 1);
+  event_t* e = g_new(event_t, 1);
 
   e->func = func;
   e->argument = arg;
@@ -149,7 +150,7 @@ event event_init(void(*func)(void*), void* arg, char* name)
  *
  * @param e the event to destroy
  */
-void event_destroy(event e)
+void event_destroy(event_t* e)
 {
   e->func     = NULL;
   e->argument = NULL;
@@ -165,6 +166,7 @@ void event_destroy(event e)
 void event_loop_destroy()
 {
   g_async_queue_unref(event_loop_get()->queue);
+  el_created = 0;
 }
 
 /* ************************************************************************** */
@@ -196,44 +198,46 @@ void event_signal_ext(void* func, void* args, char* name)
  *          0x0:   successful execution
  *          0x1:   attempt to enter a loop that is occupied
  */
-int event_loop_enter(void(*update_call)(void), void(*signal_call)(void))
+int event_loop_enter(scheduler_t* scheduler,
+    void(*update_call)(scheduler_t*),
+    void(*signal_call)(scheduler_t*))
 {
-  event e;
-  event_loop vl = event_loop_get();
+  event_t* e;
+  event_loop_t* event_loop = event_loop_get();
 
   /* start by checking to make sure this is the only thread in this loop */
-  g_async_queue_lock(vl->queue);
-  if(vl->occupied)
+  g_async_queue_lock(event_loop->queue);
+  if(event_loop->occupied)
   {
-    g_async_queue_unlock(vl->queue);
+    g_async_queue_unlock(event_loop->queue);
     return 0x1;
   }
-  vl->occupied = 1;
-  vl->terminated = 0;
-  g_async_queue_unlock(vl->queue);
+  event_loop->occupied = 1;
+  event_loop->terminated = 0;
+  g_async_queue_unlock(event_loop->queue);
 
   /* from here on out, this is the only thread in this event loop     */
   /* the loop to execute events is very simple, grab event, run event */
-  while(!vl->terminated)
+  while(!event_loop->terminated)
   {
-    e = event_loop_take(vl);
+    e = event_loop_take(event_loop);
 
     if(signal_call)
-      signal_call();
+      signal_call(scheduler);
     if(e == NULL)
       continue;
 
     if(TVERB_EVENT && strcmp(e->name, "log_event") != 0)
-      lprintf("EVENT: calling %s \n", e->name);
-    e->func(e->argument);
+      log_printf("EVENT: calling %s \n", e->name);
+    e->func(scheduler, e->argument);
 
     if(TVERB_EVENT && strcmp(e->name, "log_event") != 0)
-      lprintf("EVENT: finished %s \n", e->name);
+      log_printf("EVENT: finished %s \n", e->name);
 
     event_destroy(e);
 
     if(update_call)
-      update_call();
+      update_call(scheduler);
   }
 
   return 0x0;
@@ -248,10 +252,10 @@ int event_loop_enter(void(*update_call)(void), void(*signal_call)(void))
  */
 void event_loop_terminate()
 {
-  event_loop vl = event_loop_get();
+  event_loop_t* event_loop = event_loop_get();
 
-  vl->terminated = 1;
-  vl->occupied = 0;
+  event_loop->terminated = 1;
+  event_loop->occupied = 0;
   event_signal(NULL, NULL);
 }
 
