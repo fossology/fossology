@@ -29,7 +29,7 @@
  * @param $Catalog Optional database name
  * @return false=success, on error return string with error message.
  **/
-function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
+function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology', $Exclude = array())
 {
   global $PG_CONN;
 
@@ -57,11 +57,17 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
 
   pg_query($PG_CONN, "SET statement_timeout = 0;"); /* turn off DB timeouts */
   pg_query($PG_CONN, "BEGIN;");
-  $Curr = GetSchema();
   /* The gameplan: Make $Curr look like $Schema. */
-  // print "<pre>"; print_r($Schema); print "</pre>";
+  //print "<pre>"; print_r($Schema); print "</pre>";
+  //print "<pre>"; print_r($Curr); print "</pre>";
   /* turn off E_NOTICE so this stops reporting undefined index */
   $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
+  $Curr = GetSchema();
+  if (!empty($Curr['INDEX']['uploadtree_0']))
+  {
+    print "Exist uploadtree_0 table, will ignore all references to the uploadtree table!\n";
+    $Exclude = array("uploadtree");
+  }
   /************************************/
   /* Add sequences */
   /************************************/
@@ -95,6 +101,11 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
     {
       continue;
     }
+    /* if $Table in the Exclude list, will ignore the $Table */
+    if (in_array($Table, $Exclude))
+    {
+      continue;
+    }    
     if (!DB_TableExists($Table))
     {
       $SQL = "CREATE TABLE \"$Table\" ();";
@@ -274,6 +285,12 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
     {
       continue;
     }
+    /* if $Table in the Exclude list, will ignore the $Table */
+    if (in_array($Table, $Exclude)||in_array($TableFk, $Exclude))
+    {
+      continue;
+    }
+
     /* If it is already set correctly, then skip it. */
     if ($Schema['CONSTRAINT'][$Name] == $SQL)
     {
@@ -298,6 +315,11 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
   if (!empty($Curr['INDEX'])) foreach ($Curr['INDEX'] as $Table => $IndexInfo)
   {
     if (empty($Table))
+    {
+      continue;
+    }
+    /* if $Table in the Exclude list, will ignore the $Table */
+    if (in_array($Table, $Exclude))
     {
       continue;
     }
@@ -335,6 +357,11 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
   if (!empty($Schema['INDEX'])) foreach ($Schema['INDEX'] as $Table => $IndexInfo)
   {
     if (empty($Table))
+    {
+      continue;
+    }
+    /* if $Table in the Exclude list, will ignore the $Table */
+    if (in_array($Table, $Exclude))
     {
       continue;
     }
@@ -389,6 +416,18 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
       {
         continue;
       }
+      $Table = preg_replace("/^ALTER TABLE \"(.*)\" ADD CONSTRAINT.*/", '${1}', $SQL);
+      $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES \"(.*)\" \(.*/", '${1}', $SQL);
+      if ($TableFk == $SQL)
+      {
+        $TableFk = $Table;
+      }
+      /* if $Table in the Exclude list, will ignore the $Table */
+      if (in_array($Table, $Exclude)||in_array($TableFk, $Exclude))
+      {
+        continue;
+      }
+
       if ($Curr['CONSTRAINT'][$Name] == $SQL)
       {
         continue;
@@ -411,6 +450,17 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
     foreach ($Schema['CONSTRAINT'] as $Name => $SQL)
     {
       if (empty($Name))
+      {
+        continue;
+      }
+      $Table = preg_replace("/^ALTER TABLE \"(.*)\" ADD CONSTRAINT.*/", '${1}', $SQL);
+      $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES \"(.*)\" \(.*/", '${1}', $SQL);
+      if ($TableFk == $SQL)
+      {
+        $TableFk = $Table;
+      }
+      /* if $Table in the Exclude list, will ignore the $Table */
+      if (in_array($Table, $Exclude)||in_array($TableFk, $Exclude))
       {
         continue;
       }
@@ -439,6 +489,17 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
       {
         continue;
       }
+      $Table = preg_replace("/^ALTER TABLE \"(.*)\" ADD CONSTRAINT.*/", '${1}', $SQL);
+      $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES \"(.*)\" \(.*/", '${1}', $SQL);
+      if ($TableFk == $SQL)
+      {
+        $TableFk = $Table;
+      }
+      /* if $Table in the Exclude list, will ignore the $Table */
+      if (in_array($Table, $Exclude)||in_array($TableFk, $Exclude))
+      {
+        continue;
+      }
       if ($Curr['CONSTRAINT'][$Name] == $SQL)
       {
         continue;
@@ -461,6 +522,17 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
     foreach ($Schema['CONSTRAINT'] as $Name => $SQL)
     {
       if (empty($Name))
+      {
+        continue;
+      }
+      $Table = preg_replace("/^ALTER TABLE \"(.*)\" ADD CONSTRAINT.*/", '${1}', $SQL);
+      $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES \"(.*)\" \(.*/", '${1}', $SQL);
+      if ($TableFk == $SQL)
+      {
+        $TableFk = $Table;
+      }
+      /* if $Table in the Exclude list, will ignore the $Table */
+      if (in_array($Table, $Exclude)||in_array($TableFk, $Exclude))
       {
         continue;
       }
@@ -491,13 +563,13 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
       }
     }
   } /* Add constraints */
-  error_reporting($errlev); /* return to previous error reporting level */
   /************************************/
   /* CREATE FUNCTIONS */
   /************************************/
-  MakeFunctions($Debug);
+  MakeFunctions($Debug, $Exclude);
   /* Reload current since CASCADE during migration may have changed things */
   $Curr = GetSchema();
+  error_reporting($errlev); /* return to previous error reporting level */
   /************************************/
   /* Delete views */
   /************************************/
@@ -997,7 +1069,7 @@ function ExportSchema($Filename = NULL)
  * MakeFunctions
  * \brief Create any required DB functions.
  */
-function MakeFunctions($Debug)
+function MakeFunctions($Debug,$Exclude)
 {
   global $PG_CONN;
   print "  Applying database functions\n";
@@ -1090,8 +1162,11 @@ LANGUAGE plpgsql;
   }
   else
   {
-    $result = pg_query($PG_CONN, $SQL);
-    DBCheckResult($result, $SQL, __FILE__,__LINE__);
+    if (!in_array("uploadtree", $Exclude))
+    {
+      $result = pg_query($PG_CONN, $SQL);
+      DBCheckResult($result, $SQL, __FILE__,__LINE__);
+    }
   }
   return;
 } // MakeFunctions()
