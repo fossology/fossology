@@ -350,7 +350,7 @@ class testsuite:
     failures     = 0
     tests        = 0
     totalasserts = 0
-    
+
     for action in self.setup:
       while not action(None, None):
         time.sleep(5)
@@ -430,14 +430,17 @@ def main():
       curr.cleanup = cleanup + curr.cleanup
       
       starttime = time.time()
+      print "Running: {0}".format(suite.getAttribute("name"))
       if not timeout(functools.partial(curr.performTests, suiteNode, resultsDoc, testFile.name), maxRuntime):
         errors += 1
+        errorNode = resultsDoc.createElement("error")
+        errorNode.setAttribute("type", "TimeOut")
+        errorNode.appendChild(resultsDoc.createTextNode("Test suite took too long to run."))
       runtime = (time.time() - starttime)
       
       suiteNode.setAttribute("time", str(runtime))
       
     except DefineError as detail:
-      print 'DefineError:', detail.value
       errors += 1
     
     finally:

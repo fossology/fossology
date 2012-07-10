@@ -18,6 +18,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef JOB_H_INCLUDE
 #define JOB_H_INCLUDE
 
+/* local includes */
+#include <logging.h>
+
+/* std library includes */
 #include <stdio.h>
 #include <event.h>
 #include <libpq-fe.h>
@@ -28,12 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
-
-/**
- * TODO
- */
-typedef struct job_internal* job;
-
 
 #define JOB_STATUS_TYPES(apply)                        \
   apply(NOT_AVAILABLE)                                 \
@@ -57,9 +55,9 @@ typedef enum { JOB_STATUS_TYPES(SELECT_ENUM) } job_status;
 extern const char* job_status_strings[];
 
 /**
- * Internal declaration of private members of the job structure.
+ * @brief The job structure
  */
-struct job_internal
+typedef struct
 {
     /* associated agent information */
     char*  agent_type;      ///< the type of agent used to analyze the data
@@ -67,61 +65,58 @@ struct job_internal
     GList* running_agents;  ///< the list of agents assigned to this job that are still working
     GList* finished_agents; ///< the list of agents that have completed their tasks
     GList* failed_agents;   ///< the list of agents that failed while working
-    FILE*  log;             ///< the log to print any agent logging messages to
+    log_t*  log;             ///< the log to print any agent logging messages to
+
     /* information for data manipluation */
-    job_status status;      ///< the current status for the job
-    char* data;             ///< the data associated with this job
-    PGresult* db_result;    ///< results from the sql query (if any)
-    GMutex* lock;           ///< lock to maintain data integrity
-    int idx;                ///< the current index into the sql results
+    job_status status;    ///< the current status for the job
+    gchar*     data;      ///< the data associated with this job
+    PGresult*  db_result; ///< results from the sql query (if any)
+    GMutex*    lock;      ///< lock to maintain data integrity
+    uint32_t   idx;       ///< the current index into the sql results
+
     /* information about job status */
-    char* message;          ///< message that will be sent with job notification email
-    int priority;           ///< importance of the job, maps directory to unix priority
-    int verbose;            ///< the verbose level for all of the agents in this job
-    int id;                 ///< the identifier for this job
-};
+    gchar*   message;   ///< message that will be sent with job notification email
+    int32_t  priority;  ///< importance of the job, maps directory to unix priority
+    int32_t  verbose;   ///< the verbose level for all of the agents in this job
+    int32_t id;         ///< the identifier for this job
+} job_t;
 
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
-void job_list_init();
-void job_list_clean();
-job  job_init(char* type, char* host, int id, int priority);
-void job_destroy(job j);
+job_t* job_init(GTree* job_list, GSequence* job_queue, char* type, char* host,
+    int id, int priority);
+void   job_destroy(job_t* job);
 
 /* ************************************************************************** */
 /* **** Functions and events ************************************************ */
 /* ************************************************************************** */
 
-void job_verbose_event(job j);
-void job_status_event(arg_int* params);
-void job_pause_event(arg_int* params);
-void job_restart_event(arg_int* params);
-void job_priority_event(arg_int* params);
+void job_verbose_event (scheduler_t* scheduler, job_t* j);
+void job_status_event  (scheduler_t* scheduler, arg_int* params);
+void job_pause_event   (scheduler_t* scheduler, arg_int* params);
+void job_restart_event (scheduler_t* scheduler, arg_int* params);
+void job_priority_event(scheduler_t* scheduler, arg_int* params);
+void job_fail_event    (scheduler_t* scheduler, job_t* job);
 
-void job_add_agent(job j, void* a);
-void job_remove_agent(job j, void* a);
-void job_finish_agent(job j, void* a);
-void job_fail_agent(job j, void* a);
-void job_set_data(job j, char* data, int sql);
-void job_update(job j);
-void job_fail_event(job j);
-int  job_is_paused(job j);
-int  job_is_open(job j);
-job  job_verbose(job j, int level);
-char* job_message(job j);
-char* job_next(job j);
-FILE* job_log(job j);
+void job_add_agent(job_t* job, void* a);
+void job_remove_agent(job_t* job, GTree* job_list, void* a);
+void job_finish_agent(job_t* job, void* a);
+void job_fail_agent(job_t* job, void* a);
+void job_set_data(job_t* job, PGconn* db_conn, char* data, int sql);
+void job_update(scheduler_t* scheduler, job_t* job);
+
+gboolean  job_is_open(scheduler_t* scheduler, job_t* job);
+gchar*    job_next(job_t* job);
+log_t*    job_log(job_t* job);
 
 /* ************************************************************************** */
 /* **** Job list Functions ************************************************** */
 /* ************************************************************************** */
 
-job  next_job();
-job  peek_job();
-job  get_job(int id);
-int  num_jobs();
-int  active_jobs();
+job_t*   next_job(GSequence* job_queue);
+job_t*   peek_job(GSequence* job_queue);
+uint32_t active_jobs(GTree* job_list);
 
 #endif /* JOB_H_INCLUDE */

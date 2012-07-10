@@ -27,11 +27,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** local declarations ************************************************** */
 /* ************************************************************************** */
 
-extern GTree* job_list;
-extern GTree* meta_agents;
-extern GTree* agents;
-extern GRegex* heart_regex;
-
 int agent_init_suite(void)
 {
   meta_agents = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)meta_agent_destroy);

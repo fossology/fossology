@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<testsuites timeout="10">
+<testsuites timeout="1">
 
   <!--
   @brief Every test suite needs its own copy of the scheduler
@@ -69,7 +69,7 @@
     <!-- Test that the correct agents passed the startup test -->
     <test name = "agents">
       <sequential command="{cli}" params="--config={config} -a" retval="0"
-                  result="db_conect multi_connect no_update simple"/>
+                  result="db_connect multi_connect no_update simple"/>
     </test>
     
     <!-- Test that the scheduler has the correct status -->

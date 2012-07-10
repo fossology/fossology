@@ -23,7 +23,7 @@ include $(VARS)
 #GLIB_FLAGS =  -lgthread-2.0 -lgio-2.0 -I/usr/include/libgtop-2.0/ -lgtop-2.0
 AR = ar
 GLIB_FLAGS =  -lgthread-2.0 -lgio-2.0 -lgobject-2.0
-CFLAGS_LOCAL = $(GLIB_FLAGS) $(ALL_CFLAGS) -I. -lpq -lpthread
+CFLAGS_LOCAL = $(GLIB_FLAGS) $(ALL_CFLAGS) -I. -lpq -lpthread -Werror
 DEPEN = Makefile logging.h
 DEF   = -DLOG_DIR='"$(LOGDIR)"' \
         -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
@@ -31,8 +31,7 @@ DEF   = -DLOG_DIR='"$(LOGDIR)"' \
         -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"'
 
 LIB = libscheduler.a
-EXE = fo_scheduler
-CLI = fo_cli
+EXE = fo_scheduler fo_cli
 FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' \
         -DPROJECT_GROUP='"$(PROJECTGROUP)"' \
         -DPROCESS_NAME='"$(EXE)"'
@@ -43,8 +42,6 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 #######################
 # objects and headers #
 #######################
-
-MAIN = main.o \
 
 OBJS = scheduler.o \
        agent.o \
@@ -69,11 +66,8 @@ HEAD = agent.h \
 
 all: $(FOLIB) $(EXE) $(CLI) defconf/init.d/fossology 
 
-$(EXE): $(MAIN) $(LIB) $(VARS) $(HEAD) $(DEPEN)
-	$(CC) $(MAIN) $(LIB) $(DEF) $(CFLAGS_LOCAL) -o $@
-
-$(CLI): schedulerCLI.c Makefile $(FOLIB)
-	$(CC) schedulerCLI.c $(CFLAGS_LOCAL) $(DEF) -o $@
+$(EXE): %: %.c $(LIB) $(VARS) $(HEAD) $(DEPEN) $(FOLIB)
+	$(CC) $< $(LIB) $(DEF) $(CFLAGS_LOCAL) -o $@
 
 $(LIB): $(OBJS) $(VARS) $(HEAD) $(DEPEN)
 	$(AR) cr $@ $(OBJS)
@@ -121,8 +115,8 @@ logging.o: %.o: %.c $(DEPEN)
 #######################
 
 install: all install-conf
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/scheduler/agent/$(EXE)
-	$(INSTALL_PROGRAM) $(CLI) $(DESTDIR)$(MODDIR)/scheduler/agent/$(CLI)
+	$(INSTALL_PROGRAM) fo_scheduler $(DESTDIR)$(MODDIR)/scheduler/agent/fo_scheduler
+	$(INSTALL_PROGRAM) fo_cli $(DESTDIR)$(MODDIR)/scheduler/agent/fo_cli
 	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
 	@if test ! -e $(CONFDIR)/mods-enabled/scheduler; then \
 	  ln -s $(MODDIR)/scheduler $(CONFDIR)/mods-enabled ; fi;

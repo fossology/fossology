@@ -23,12 +23,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** local declarations ************************************************** */
 /* ************************************************************************** */
 
-extern GTree* host_list;
-extern GList* host_queue;
-
-host h;
-int visit;
-
 void host_traverse(host ho)
 {
   visit++;

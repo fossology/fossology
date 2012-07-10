@@ -35,9 +35,9 @@ GROUP = `id -ng`
 # executable build rules #
 ##########################
 
-all: clean test
+all: test
 test: $(FO_CONF) $(EXES)
-$(EXES): %: %.c $(FOLIB) $(VARS)
+$(EXES): %: %.c $(FOLIB)
 	@echo $@:
 	@if [ ! -d $(MODDIR)/$@ ] ; then \
 	  mkdir -p $(MODDIR)/$@/agent/; fi;

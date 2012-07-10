@@ -20,9 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* local includes */
 #include <job.h>
-
-/* postgresql library */
-#include <libpq-fe.h>
+#include <scheduler.h>
 
 /* ************************************************************************** */
 /* **** utility ************************************************************* */
@@ -37,23 +35,20 @@ extern const char* jobsql_failed;
 /* **** constructor destructor ********************************************** */
 /* ************************************************************************** */
 
-extern PGconn* db_conn;
-
-void database_init();
-void database_destroy();
-
-void email_load();
+void database_init(scheduler_t* scheduler);
+void email_init(scheduler_t* scheduler);
 
 /* ************************************************************************** */
 /* **** event and functions ************************************************* */
 /* ************************************************************************** */
 
-void database_exec_event(char* sql);
-void database_reset_queue();
-void database_update_event(void* unused);
-void database_update_job(job j, job_status status);
+void database_exec_event(scheduler_t* scheduler, char* sql);
+void database_update_event(scheduler_t* scheduler, void* unused);
+
+void database_reset_queue(PGconn* db_conn);
+void database_update_job(scheduler_t* db_conn, job_t* j, job_status status);
 void database_job_processed(int j_id, int number);
 void database_job_log(int j_id, char* log_name);
-void database_job_priority(job j, int priority);
+void database_job_priority(PGconn* db_conn, job_t* job, int priority);
 
 #endif /* DATABASE_H_INCLUDE */

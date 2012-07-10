@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <agent.h>
 #include <database.h>
 #include <logging.h>
-#include <scheduler.h>
 
 /* std library includes */
 
@@ -29,9 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/stat.h>
 #include <sys/mman.h>
 
-PGconn* db_conn = NULL;
-char fossy_url[FILENAME_MAX];
-
+/* all of the sql statements used in the database */
 #include <sqlstatements.h>
 
 /* ************************************************************************** */
@@ -45,14 +42,6 @@ char fossy_url[FILENAME_MAX];
 /* ***    notification lives.                                             *** */
 /* ************************************************************************** */
 
-static char*  email_subject = NULL;
-static char*  email_header  = NULL;
-static char*  email_footer  = NULL;
-static char*  email_command = NULL;
-static struct stat header_sb;
-static struct stat footer_sb;
-static GRegex* email_regex = NULL;
-
 #define EMAIL_ERROR(...) {                       \
   WARNING(__VA_ARGS__);                          \
   email_notify = 0;                              \
@@ -62,6 +51,17 @@ static GRegex* email_regex = NULL;
 #define DEFAULT_HEADER  "FOSSology scan complete\nmessage:\""
 #define DEFAULT_FOOTER  "\""
 #define DEFAULT_SUBJECT "FOSSology scan complete\n"
+#define DEFAULT_COMMAND "/usr/bin/mailx"
+
+/**
+ * We need to pass both a job_t* and the fossology url string to the
+ * email_replace() function. This structure allows both of these to be passed.
+ */
+typedef struct {
+    gchar* foss_url;
+    job_t* job;
+    PGconn* db_conn;
+} email_replace_args;
 
 /**
  * Replaces the variables that are in the header and footer files. This is a
@@ -82,10 +82,13 @@ static GRegex* email_regex = NULL;
  * @param j      the job that this email relates to
  * @return       always FALSE so that g_regex_replace_eval() will continue
  */
-static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
+static gboolean email_replace(const GMatchInfo* match, GString* ret,
+    email_replace_args* args)
 {
   gchar* m_str = g_match_info_fetch(match, 1);
   gchar* sql   = NULL;
+  gchar* fossy_url = args->foss_url;
+  job_t* job       = args->job;
   // TODO belongs to $DB if statement gchar* table, * column;
   PGresult* db_result;
   // TODO belongs to $DB if statement guint i;
@@ -97,13 +100,13 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
    */
   if(strcmp(m_str, "UPLOADNAME") == 0)
   {
-    sql = g_strdup_printf(upload_name, j->id);
-    db_result = PQexec(db_conn, sql);
+    sql = g_strdup_printf(upload_name, job->id);
+    db_result = PQexec(args->db_conn, sql);
 
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
     {
       g_string_append_printf(ret,
-          "[ERROR: unable to select file name for upload %d]", j->id);
+          "[ERROR: unable to select file name for upload %d]", job->id);
     }
     else
     {
@@ -121,13 +124,13 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
    */
   else if(strcmp(m_str, "BROWSELINK") == 0)
   {
-    sql = g_strdup_printf(upload_pk, j->id);
-    db_result = PQexec(db_conn, sql);
+    sql = g_strdup_printf(upload_pk, job->id);
+    db_result = PQexec(args->db_conn, sql);
 
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
     {
       g_string_append_printf(ret,
-          "[ERROR: unable to select file name for upload %d]", j->id);
+          "[ERROR: unable to select file name for upload %d]", job->id);
     }
     else
     {
@@ -146,13 +149,13 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
    */
   else if(strcmp(m_str, "JOBQUEUELINK") == 0)
   {
-    sql = g_strdup_printf(upload_pk, j->id);
-    db_result = PQexec(db_conn, sql);
+    sql = g_strdup_printf(upload_pk, job->id);
+    db_result = PQexec(args->db_conn, sql);
 
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
     {
       g_string_append_printf(ret,
-          "[ERROR: unable to select file name for upload %d]", j->id);
+          "[ERROR: unable to select file name for upload %d]", job->id);
     }
     else
     {
@@ -171,7 +174,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
   else if(strcmp(m_str, "SCHEDULERLOG") == 0)
   {
     g_string_append_printf(ret, "http://%s?mod=showjobs&show=job&job=%d",
-        fossy_url, j->id);
+        fossy_url, job->id);
   }
 
   /* $UPLOADFOLDERNAME
@@ -180,13 +183,13 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
    */
   else if(strcmp(m_str, "UPLOADFOLDERNAME") == 0)
   {
-    sql = g_strdup_printf(folder_name, j->id);
-    db_result = PQexec(db_conn, sql);
+    sql = g_strdup_printf(folder_name, job->id);
+    db_result = PQexec(args->db_conn, sql);
 
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
     {
       g_string_append_printf(ret,
-          "[ERROR: unable to select folder name for upload %d]", j->id);
+          "[ERROR: unable to select folder name for upload %d]", job->id);
     }
     else
     {
@@ -203,13 +206,13 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
    */
   else if(strcmp(m_str, "JOBRESULT") == 0)
   {
-    switch(j->status)
+    switch(job->status)
     {
       case JB_COMPLETE: g_string_append(ret, "COMPLETE"); break;
       case JB_FAILED:   g_string_append(ret, "FAILED");   break;
       default:
         g_string_append_printf(ret, "[ERROR: illegal job status \"%s\"]",
-            job_status_strings[j->status]);
+            job_status_strings[job->status]);
         break;
     }
   }
@@ -256,21 +259,23 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret, job j)
 /**
  * @brief checks the database for the status of the job
  *
- * @param j  the job queue entry that will be checked for its job's status
+ * @param db_conn   database connection for getting list of related jobs
+ * @param job_list  the list of all currently running jobs
+ * @param job       the job to check for the job status on
  * @return 0: job is not finished, 1: job has finished, 2: job has failed
  */
-static gint email_checkjobstatus(job j)
+static gint email_checkjobstatus(PGconn* db_conn, GTree* job_list, job_t* job)
 {
   gchar* sql;
   gint ret = 1;
   PGresult* db_result;
   int id, i;
 
-  sql = g_strdup_printf(jobsql_anyrunnable, j->id);
+  sql = g_strdup_printf(jobsql_anyrunnable, job->id);
   db_result = PQexec(db_conn, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
-    PQ_ERROR(db_result, "unable to check job status for jq_pk %d", j->id);
+    PQ_ERROR(db_result, "unable to check job status for jq_pk %d", job->id);
     g_free(sql);
     PQclear(db_result);
     return 0;
@@ -285,14 +290,14 @@ static gint email_checkjobstatus(job j)
   g_free(sql);
   PQclear(db_result);
 
-  sql = g_strdup_printf(jobsql_jobendbits, j->id);
+  sql = g_strdup_printf(jobsql_jobendbits, job->id);
   db_result = PQexec(db_conn, sql);
 
   /* check for any jobs that are still running */
   for(i = 0; i < PQntuples(db_result) && ret; i++)
   {
     id = atoi(PQget(db_result, i, "jq_pk"));
-    if(id != j->id && get_job(atoi(PQget(db_result, i, "jq_pk"))) != NULL)
+    if(id != job->id && g_tree_lookup(job_list, &id) != NULL)
     {
       ret = 0;
       break;
@@ -322,10 +327,10 @@ static gint email_checkjobstatus(job j)
  * @param job  the job that just finished
  * @return void, no return
  */
-static void email_notification(job j)
+static void email_notification(scheduler_t* scheduler, job_t* job)
 {
   PGresult* db_result;
-  int j_id = j->id;;
+  int j_id = job->id;;
   int upload_id;
   int status;
   char* val;
@@ -333,14 +338,15 @@ static void email_notification(job j)
   char sql[1024];
   FILE* mail_io;
   GString* email_txt;
-  job_status curr_status = j->status;
+  job_status curr_status = job->status;
+  email_replace_args args;
 
-  if(is_meta_special(j->agent_type, SAG_NOEMAIL) ||
-      !(status = email_checkjobstatus(j)))
+  if(is_meta_special(g_tree_lookup(scheduler->meta_agents, job->agent_type), SAG_NOEMAIL) ||
+      !(status = email_checkjobstatus(scheduler->db_conn, scheduler->job_list, job)))
     return;
 
   sprintf(sql, select_upload_fk, j_id);
-  db_result = PQexec(db_conn, sql);
+  db_result = PQexec(scheduler->db_conn, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
   {
     PQ_ERROR(db_result, "unable to select the upload id for job %d", j_id);
@@ -351,7 +357,7 @@ static void email_notification(job j)
   PQclear(db_result);
 
   sprintf(sql, upload_common, upload_id);
-  db_result = PQexec(db_conn, sql);
+  db_result = PQexec(scheduler->db_conn, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
     PQ_ERROR(db_result, "unable to check common uploads to job %d", j_id);
@@ -359,7 +365,7 @@ static void email_notification(job j)
   }
 
   sprintf(sql, jobsql_email, upload_id);
-  db_result = PQexec(db_conn, sql);
+  db_result = PQexec(scheduler->db_conn, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
   {
     PQ_ERROR(db_result, "unable to access email info for job %d", j_id);
@@ -369,26 +375,28 @@ static void email_notification(job j)
   if(PQget(db_result, 0, "email_notify")[0] == 'y')
   {
     if(status == 2)
-      j->status = JB_FAILED;
+      job->status = JB_FAILED;
 
     email_txt = g_string_new("");
-    g_string_append(email_txt, email_header);
-    g_string_append(email_txt, job_message(j));
-    g_string_append(email_txt, email_footer);
+    g_string_append(email_txt, scheduler->email_header);
+    g_string_append(email_txt, job->message == NULL ? "" : job->message);
+    g_string_append(email_txt, scheduler->email_footer);
 
 
-    if(email_regex != NULL)
+    if(scheduler->parse_db_email != NULL)
     {
-      val = g_regex_replace_eval(email_regex, email_txt->str, email_txt->len,
-          0, 0, (GRegexEvalCallback)email_replace, j, NULL);
+      args.foss_url = scheduler->host_url;
+      args.job      = job;
+      val = g_regex_replace_eval(scheduler->parse_db_email, email_txt->str,
+          email_txt->len, 0, 0, (GRegexEvalCallback)email_replace, &args, NULL);
     }
     else
     {
       val = email_txt->str;
     }
 
-    final_cmd = g_strdup_printf(EMAIL_BUILD_CMD, email_command, email_subject,
-        PQget(db_result, 0, "user_email"));
+    final_cmd = g_strdup_printf(EMAIL_BUILD_CMD, scheduler->email_command,
+        scheduler->email_subject, PQget(db_result, 0, "user_email"));
 
     if((mail_io = popen(final_cmd, "w")) != NULL)
     {
@@ -402,11 +410,11 @@ static void email_notification(job j)
     else
     {
       WARNING("Unable to spawn email notification process: '%s'.\n",
-          email_command);
+          scheduler->email_command);
     }
 
-    j->status = curr_status;
-    if(email_regex != NULL)
+    job->status = curr_status;
+    if(scheduler->parse_db_email != NULL)
       g_free(val);
     g_free(final_cmd);
     g_string_free(email_txt, TRUE);
@@ -423,23 +431,25 @@ static void email_notification(job j)
  *
  * @return void, no return
  */
-void email_load()
+void email_init(scheduler_t* scheduler)
 {
   int email_notify, fd;
-	char fname[FILENAME_MAX];
+  struct stat header_sb;
+  struct stat footer_sb;
+	gchar* fname;
 	GError* error = NULL;
 
-	if(email_header && strcmp(email_header, DEFAULT_HEADER) != 0)
-	  munmap(email_header, header_sb.st_size);
-	if(email_footer && strcmp(email_footer, DEFAULT_FOOTER) != 0)
-	  munmap(email_footer, footer_sb.st_size);
-	if(email_subject && strcmp(email_subject, DEFAULT_SUBJECT) != 0)
-	  g_free(email_subject);
+	if(scheduler->email_header && strcmp(scheduler->email_header, DEFAULT_HEADER) != 0)
+	  munmap(scheduler->email_header, header_sb.st_size);
+	if(scheduler->email_footer && strcmp(scheduler->email_footer, DEFAULT_FOOTER) != 0)
+	  munmap(scheduler->email_footer, footer_sb.st_size);
+	if(scheduler->email_subject && strcmp(scheduler->email_subject, DEFAULT_SUBJECT) != 0)
+	  g_free(scheduler->email_subject);
 
 	/* load the header */
 	email_notify = 1;
-	snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir,
-	    fo_config_get(sysconfig, "EMAILNOTIFY", "header", &error));
+	fname = g_strdup_printf("%s/%s", scheduler->sysconfigdir,
+	    fo_config_get(scheduler->sysconfig, "EMAILNOTIFY", "header", &error));
 	if(error && error->code == fo_missing_group)
 	  EMAIL_ERROR("email notification setting group \"[EMAILNOTIFY]\" missing. Using defaults");
 	if(error && error->code == fo_missing_key)
@@ -448,16 +458,16 @@ void email_load()
 	  EMAIL_ERROR("unable to open file for email header: %s", fname);
 	if(email_notify && fstat(fd, &header_sb) == -1)
 	  EMAIL_ERROR("unable to fstat email header: %s", fname);
-	if(email_notify && (email_header = mmap(NULL, header_sb.st_size, PROT_READ,
+	if(email_notify && (scheduler->email_header = mmap(NULL, header_sb.st_size, PROT_READ,
 	    MAP_SHARED, fd, 0)) == MAP_FAILED)
 	  EMAIL_ERROR("unable to mmap email header: %s", fname);
 	if(!email_notify)
-	  email_header = DEFAULT_HEADER;
+	  scheduler->email_header = DEFAULT_HEADER;
 
 	/* load the footer */
 	email_notify = 1;
-	snprintf(fname, FILENAME_MAX, "%s/%s", sysconfigdir,
-	      fo_config_get(sysconfig, "EMAILNOTIFY", "footer", &error));
+	fname = g_strdup_printf("%s/%s", scheduler->sysconfigdir,
+	      fo_config_get(scheduler->sysconfig, "EMAILNOTIFY", "footer", &error));
 	if(error)
 	  email_notify = 0;
 	if(error && error->code == fo_missing_key)
@@ -466,53 +476,33 @@ void email_load()
 	  EMAIL_ERROR("unable to open file for email footer: %s", fname);
 	if(email_notify && fstat(fd, &footer_sb) == -1)
 	  EMAIL_ERROR("unable to fstat email footer: %s", fname);
-	if(email_notify && (email_footer = mmap(NULL, footer_sb.st_size, PROT_READ,
+	if(email_notify && (scheduler->email_footer = mmap(NULL, footer_sb.st_size, PROT_READ,
 	    MAP_SHARED, fd, 0)) == MAP_FAILED)
 	  EMAIL_ERROR("unable to mmap email footer: %s", fname);
 	if(!email_notify)
-	  email_footer = DEFAULT_FOOTER;
+	  scheduler->email_footer = DEFAULT_FOOTER;
 	error = NULL;
 
 	/* load the email_subject */
-	email_subject = fo_config_get(sysconfig, "EMAILNOTIFY", "email_subject", &error);
+	scheduler->email_subject = fo_config_get(scheduler->sysconfig, "EMAILNOTIFY",
+	    "email_subject", &error);
 	if(error)
-	  email_subject = DEFAULT_SUBJECT;
+	  scheduler->email_subject = DEFAULT_SUBJECT;
 	if(error && error->code == fo_missing_key)
 	  EMAIL_ERROR("email notification setting key \"email_subject\" missing. Using default subject");
-	email_subject = g_strdup(email_subject);
+	scheduler->email_subject = g_strdup(scheduler->email_subject);
 	error = NULL;
 
 	/* load the client */
 	email_notify = 1;
-	email_command = fo_config_get(sysconfig, "EMAILNOTIFY", "client", &error);
+	scheduler->email_command = fo_config_get(scheduler->sysconfig, "EMAILNOTIFY",
+	    "client", &error);
 	if(error)
-	  email_command = "/usr/bin/mailx";
+	  scheduler->email_command = DEFAULT_COMMAND;
 	if(error && error->code == fo_missing_key)
 	  EMAIL_ERROR("email notification setting key \"client\" missing. Using default client");
+	scheduler->email_command = g_strdup(scheduler->email_command);
 	error = NULL;
-
-	/* create the regex for the email
-	 * This regex should find:
-	 *   1. A '$' followed by any combination of capital letters or underscore
-	 *   2. A '$' followed by any combination of capital letters or underscore,
-	 *      followed by a '.' followed by alphabetic characters or underscore,
-	 *      followed by a '.' followed by alphabetic characters or underscore
-	 *
-	 * Examples:
-	 *   $HELLO           -> matches
-	 *   $SIMPLE_NAME     -> matches
-	 *   $DB.table.column -> matches
-	 *   $bad             -> does not match
-	 *   $DB.table        -> does not match
-	 */
-	if(email_regex == NULL)
-	  email_regex = g_regex_new("\\$([A-Z_]*)(\\.([a-zA-Z_]*)\\.([a-zA-Z_]*))?",
-	      0, 0, &error);
-	if(error)
-	{
-	  EMAIL_ERROR("unable to build email regular expression: %s", error->message);
-	  email_regex = NULL;
-	}
 }
 
 /* ************************************************************************** */
@@ -538,7 +528,7 @@ typedef struct
  * scheduler. If any changes that affect the tables and columns used by the
  * scheduler are made, this static list should be updated.
  */
-static void check_tables()
+static void check_tables(PGconn* db_conn)
 {
   /* locals */
   PGresult* db_result;
@@ -616,8 +606,8 @@ static void check_tables()
 
   if(!passed)
   {
-    lprintf("FATAL %s.%d: Scheduler did not pass database check\n", __FILE__, __LINE__);
-    lprintf("FATAL %s.%d: Running fo_postinstall should fix these issues\n", __FILE__, __LINE__);
+    log_printf("FATAL %s.%d: Scheduler did not pass database check\n", __FILE__, __LINE__);
+    log_printf("FATAL %s.%d: Running fo_postinstall should fix these issues\n", __FILE__, __LINE__);
     exit(230);
   }
 }
@@ -627,76 +617,42 @@ static void check_tables()
  * includes creating the db connection and checking the URL of the FOSSology
  * instance out of the db.
  */
-void database_init()
+void database_init(scheduler_t* scheduler)
 {
   PGresult* db_result;
-  gchar* DBConfFile = NULL;
+  gchar* dbConf = NULL;
   char* ErrorBuf;
 
   /* create the connection to the database */
-  DBConfFile = g_strdup_printf("%s/Db.conf", sysconfigdir);
-  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  memset(fossy_url, '\0', sizeof(fossy_url));
+  dbConf = g_strdup_printf("%s/Db.conf", scheduler->sysconfigdir);
+  scheduler->db_conn = fo_dbconnect(dbConf, &ErrorBuf);
 
   /* get the url for the fossology instance */
-  db_result = PQexec(db_conn, url_checkout);
+  db_result = PQexec(scheduler->db_conn, url_checkout);
   if(PQresultStatus(db_result) == PGRES_TUPLES_OK && PQntuples(db_result) != 0)
-  {
-    strcpy(fossy_url, PQgetvalue(db_result, 0, 0));
-  }
+    scheduler->host_url = g_strdup(PQgetvalue(db_result, 0, 0));
   PQclear(db_result);
 
   /* check that relevant database fields exist */
-  check_tables();
-
-  /* load the email information */
-  email_header = NULL;
-  email_footer = NULL;
-  email_subject = NULL;
-  email_regex = NULL;
-
-  email_load();
-}
-
-/**
- * close the connection to the database
- */
-void database_destroy()
-{
-  PQfinish(db_conn);
-  db_conn = NULL;
+  check_tables(scheduler->db_conn);
 }
 
 /* ************************************************************************** */
 /* **** event and functions ************************************************* */
 /* ************************************************************************** */
 
-void database_exec_event(char* sql)
+/**
+ * TODO
+ *
+ * @param scheduler
+ * @param sql
+ */
+void database_exec_event(scheduler_t* scheduler, char* sql)
 {
-  PGresult* db_result = PQexec(db_conn, sql);
-
+  PGresult* db_result = PQexec(scheduler->db_conn, sql);
   if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
     PQ_ERROR(db_result, "failed to perform database exec: %s", sql);
-
   g_free(sql);
-}
-
-/**
- * Resets the any jobs in the job queue that are not completed. This is to make
- * sure that any jobs that were running with the scheduler shutdown are run correctly
- * when it starts up again.
- */
-void database_reset_queue()
-{
-  PGresult* db_result = PQexec(db_conn, "\
-      UPDATE jobqueue \
-        SET jq_starttime=null, \
-            jq_endtext=null, \
-            jq_schedinfo=null\
-        WHERE jq_endtime is NULL;");
-
-  if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
-    PQ_ERROR(db_result, "failed to reset job queue");
 }
 
 /**
@@ -704,7 +660,7 @@ void database_reset_queue()
  *
  * @param unused
  */
-void database_update_event(void* unused)
+void database_update_event(scheduler_t* scheduler, void* unused)
 {
   /* locals */
   PGresult* db_result;
@@ -712,7 +668,7 @@ void database_update_event(void* unused)
   int i, j_id;
   char sql[512];
   char* value, * type, * host, * pfile, * parent;
-  job j;
+  job_t* job;
 
   if(closing)
   {
@@ -722,7 +678,7 @@ void database_update_event(void* unused)
 
   /* make the database query */
 
-  db_result = PQexec(db_conn, basic_checkout);
+  db_result = PQexec(scheduler->db_conn, basic_checkout);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
     PQ_ERROR(db_result, "database update failed on call to PQexec");
@@ -734,7 +690,8 @@ void database_update_event(void* unused)
   for(i = 0; i < PQntuples(db_result); i++)
   {
     /* start by checking that the job hasn't already been grabbed */
-    if(get_job(j_id = atoi(PQget(db_result, i, "jq_pk"))) != NULL)
+    j_id = atoi(PQget(db_result, i, "jq_pk"));
+    if(g_tree_lookup(scheduler->job_list, &j_id) != NULL)
       continue;
 
     /* get relevant values out of the job queue */
@@ -760,15 +717,17 @@ void database_update_event(void* unused)
     }
 
     sprintf(sql, change_priority, parent);
-    pri_result = PQexec(db_conn, sql);
+    pri_result = PQexec(scheduler->db_conn, sql);
     if(PQresultStatus(pri_result) != PGRES_TUPLES_OK)
     {
       PQ_ERROR(pri_result, "database update failed on call to PQexec");
       continue;
     }
 
-    j = job_init(type, host, j_id, atoi(PQgetvalue(pri_result, 0, 0)));
-    job_set_data(j, value, (pfile && pfile[0] != '\0'));
+    // TODO change for new scheduler
+    job = job_init(scheduler->job_list, scheduler->job_queue, type, host, j_id,
+        atoi(PQgetvalue(pri_result, 0, 0)));
+    job_set_data(job, scheduler->db_conn,  value, (pfile && pfile[0] != '\0'));
 
     PQclear(pri_result);
   }
@@ -777,18 +736,36 @@ void database_update_event(void* unused)
 }
 
 /**
+ * Resets the any jobs in the job queue that are not completed. This is to make
+ * sure that any jobs that were running with the scheduler shutdown are run correctly
+ * when it starts up again.
+ */
+void database_reset_queue(PGconn* db_conn)
+{
+  PGresult* db_result = PQexec(db_conn, "\
+      UPDATE jobqueue \
+        SET jq_starttime=null, \
+            jq_endtext=null, \
+            jq_schedinfo=null\
+        WHERE jq_endtime is NULL;");
+
+  if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
+    PQ_ERROR(db_result, "failed to reset job queue");
+}
+
+/**
  * Change the status of a job in the database.
  *
  * @param j_id id number of the relevant job
  * @param status the new status of the job
  */
-void database_update_job(job j, job_status status)
+void database_update_job(scheduler_t* scheduler, job_t* job, job_status status)
 {
   /* locals */
   gchar* sql = NULL;
   PGresult* db_result;
-  int j_id = j->id;
-  char* message = (j->message == NULL) ? "Failed": j->message;
+  int j_id = job->id;
+  char* message = (job->message == NULL) ? "Failed": job->message;
 
   /* check how to update database */
   switch(status)
@@ -813,18 +790,18 @@ void database_update_job(job j, job_status status)
   }
 
   /* update the database job queue */
-  db_result = PQexec(db_conn, sql);
+  db_result = PQexec(scheduler->db_conn, sql);
   if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
     PQ_ERROR(db_result, "failed to update job status in job queue");
 
   if(status == JB_COMPLETE || status == JB_FAILED)
-    email_notification(j);
+    email_notification(scheduler, job);
 
   g_free(sql);
 }
 
 /**
- * Updates teh number of items that a job queue entry has processed.
+ * Updates the number of items that a job queue entry has processed.
  *
  * @param j_id the id number of the job queue entry
  * @param num the number of items processed in total
@@ -854,15 +831,16 @@ void database_job_log(int j_id, char* log_name)
 /**
  * Changes the priority of a job queue entry in the database.
  *
- * @param j         the job to change the priority for
+ * @param db_conn   the connection to the database
+ * @param job       the job to change the priority for
  * @param priority  the new priority of the job
  */
-void database_job_priority(job j, int priority)
+void database_job_priority(PGconn* db_conn, job_t* job, int priority)
 {
   gchar* sql = NULL;
   PGresult* db_result;
 
-  sql = g_strdup_printf(jobsql_priority, priority, j->id);
+  sql = g_strdup_printf(jobsql_priority, priority, job->id);
   db_result = PQexec(db_conn, sql);
   if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
     PQ_ERROR(db_result, "failed to change job queue entry priority");

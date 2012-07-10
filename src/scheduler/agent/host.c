@@ -25,24 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
 
-GTree* host_list = NULL;
-GList* host_queue = NULL;
-
-/**
- * allows a particular function to be called for every host. This is currently
- * used during the self test of every type of agent.
- *
- * @param host_name unused
- * @param h the host to pass into the function
- * @param func the function to call for every host
- * @return always return 0 so that it happens for all hosts
- */
-static int for_host(char* host_name, host h, void(*func)(host))
-{
-  func(h);
-  return 0;
-}
-
 /**
  * GTraversFunction that allows the information for all hosts to be printed
  *
@@ -51,9 +33,9 @@ static int for_host(char* host_name, host h, void(*func)(host))
  * @param ostr       the output stream that the info will be printed to
  * @return 0 to cause the traversal to continue
  */
-static int print_host_all(char* host_name, host h, GOutputStream* ostr)
+static int print_host_all(gchar* host_name, host_t* host, GOutputStream* ostr)
 {
-  host_print(h, ostr);
+  host_print(host, ostr);
   return 0;
 }
 
@@ -62,64 +44,37 @@ static int print_host_all(char* host_name, host h, GOutputStream* ostr)
 /* ************************************************************************** */
 
 /**
- * Create the host list. The host list should be created so that it destroys
- * any hosts when it is cleaned up.
- */
-void host_list_init()
-{
-  host_list = g_tree_new_full(string_compare, NULL, NULL,
-      (GDestroyNotify)host_destroy);
-  host_queue = NULL;
-}
-
-/**
- * removes all hosts from the host list, leaving a clean copy.
- */
-void host_list_clean()
-{
-  if(host_list != NULL)
-  {
-    g_tree_destroy(host_list);
-    g_list_free(host_queue);
-    host_list_init();
-  }
-}
-
-/**
- * creates a new host, and adds it to the host list.
+ * @brief creates a new host, and adds it to the host list.
  *
- * @param name the name of the host
- * @param address address that can be passed to ssh when starting agent on host
- * @param agent_dir the location of agent binaries on the host
- * @param max the max number of agent that can run on this host
+ * @param name        The name of the host
+ * @param address     Address that can be passed to ssh when starting agent on host
+ * @param agent_dir   The location of agent binaries on the host
+ * @param max         The max number of agent that can run on this host
  */
-void host_init(char* name, char* address, char* agent_dir, int max)
+host_t* host_init(char* name, char* address, char* agent_dir, int max)
 {
-  host h = g_new0(struct host_internal, 1);
+  host_t* host = g_new0(host_t, 1);
 
-  h->name = g_strdup(name);
-  h->address = g_strdup(address);
-  h->agent_dir = g_strdup(agent_dir);
-  h->max = max;
-  h->running = 0;
+  host->name = g_strdup(name);
+  host->address = g_strdup(address);
+  host->agent_dir = g_strdup(agent_dir);
+  host->max = max;
+  host->running = 0;
 
-  g_tree_insert(host_list, h->name, h);
-  host_queue = g_list_append(host_queue, h);
+  return host;
 }
 
 /**
- * frees any memory associated with the host stucture
+ * @brief frees any memory associated with the host struct
  *
- * @param h the host to free the memory for.
+ * @param h  the host to free the memory for.
  */
-void host_destroy(host h)
+void host_destroy(host_t* host)
 {
-  host_queue = g_list_remove(host_queue, h);
-
-  g_free(h->name);
-  g_free(h->address);
-  g_free(h->agent_dir);
-  g_free(h);
+  g_free(host->name);
+  g_free(host->address);
+  g_free(host->agent_dir);
+  g_free(host);
 }
 
 /* ************************************************************************** */
@@ -131,10 +86,10 @@ void host_destroy(host h)
  *
  * @param h the relevant host
  */
-void host_increase_load(host h)
+void host_increase_load(host_t* host)
 {
-  h->running++;
-  V_HOST("HOST[%s] load increased to %d\n", h->name, h->running);
+  host->running++;
+  V_HOST("HOST[%s] load increased to %d\n", host->name, host->running);
 }
 
 /**
@@ -142,10 +97,10 @@ void host_increase_load(host h)
  *
  * @param h the relevant host
  */
-void host_decrease_load(host h)
+void host_decrease_load(host_t* host)
 {
-  h->running--;
-  V_HOST("HOST[%s] load decreased to %d\n", h->name, h->running);
+  host->running--;
+  V_HOST("HOST[%s] load decreased to %d\n", host->name, host->running);
 }
 
 /**
@@ -154,12 +109,12 @@ void host_decrease_load(host h)
  * @param h     the relevant host
  * @param ostr  the output stream to write to
  */
-void host_print(host h, GOutputStream* ostr)
+void host_print(host_t* host, GOutputStream* ostr)
 {
   char* buf;
 
   buf = g_strdup_printf("host:%s address:%s max:%d running:%d\n",
-      h->name, h->address, h->max, h->running);
+      host->name, host->address, host->max, host->running);
   g_output_stream_write(ostr, buf, strlen(buf), NULL, NULL);
 
   g_free(buf);
@@ -172,10 +127,11 @@ void host_print(host h, GOutputStream* ostr)
  * @param num the number of agents to start on the host
  * @return the host with that number of available slots, NULL if none exist
  */
-host get_host(int num)
+host_t* get_host(GList** queue, uint8_t num)
 {
-  GList* curr = NULL;
-  host ret    = NULL;
+  GList*  host_queue = *queue;
+  GList*  curr       = NULL;
+  host_t* ret        = NULL;
 
   for(curr = host_queue; curr != NULL; curr = curr->next)
   {
@@ -191,28 +147,8 @@ host get_host(int num)
   host_queue = g_list_remove(host_queue, ret);
   host_queue = g_list_append(host_queue, ret);
 
+  *queue = host_queue;
   return ret;
-}
-
-/**
- * TODO
- *
- * @param name
- * @return
- */
-host name_host(char* name)
-{
-  return g_tree_lookup(host_list, name);
-}
-
-/**
- * Calls the given function, passing each host as an argument to the function
- *
- * @param callback the function to call on every host
- */
-void for_each_host(void(*callback)(host))
-{
-  g_tree_foreach(host_list, (GTraverseFunc)for_host, callback);
 }
 
 /**
@@ -220,19 +156,8 @@ void for_each_host(void(*callback)(host))
  *
  * @param ostr
  */
-void print_host_load(GOutputStream* ostr)
+void print_host_load(GTree* host_list, GOutputStream* ostr)
 {
   g_tree_foreach(host_list, (GTraverseFunc)print_host_all, ostr);
   g_output_stream_write(ostr, "\nend\n", 5, NULL, NULL);
-}
-
-/**
- * Gets the number of hosts that were in the configuration data. This is needed
- * because there must be at least one host to run the agents on.
- *
- * @return the number of hosts read from the config files
- */
-int num_hosts()
-{
-  return g_tree_nnodes(host_list);
 }

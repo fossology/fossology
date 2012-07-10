@@ -18,6 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SCHEDULER_H_INCLUDE
 #define SCHEDULER_H_INCLUDE
 
+/* local includes */
+#include <logging.h>
+
 /* std library includes */
 #include <errno.h>
 #include <limits.h>
@@ -25,7 +28,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdint.h>
 
 /* other library includes */
+#include <gio/gio.h>
 #include <glib.h>
+#include <libpq-fe.h>
 
 /* fo library includes */
 #include <fossconfig.h>
@@ -35,15 +40,71 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define AGENT_BINARY "%s/%s/%s/agent/%s"
 #define AGENT_CONF "mods-enabled"
 
+/* ************************************************************************** */
+/* *** Scheduler structure ************************************************** */
+/* ************************************************************************** */
+
+typedef struct
+{
+    /* information about the scheduler process */
+    gchar*   process_name;  ///< the name of the scheduler process
+    gboolean s_pid;         ///< the pid of the scheduler process
+    gboolean s_daemon;      ///< is the scheduler being run as a daemon
+    gboolean s_startup;     ///< has the scheduler finished startup tests
+    gboolean s_pause;       ///< has the scheduler been paused
+
+    /* loaded configuration information */
+    fo_conf* sysconfig;     ///< configuration information loaded from the configuration file
+    gchar*   sysconfigdir;  ///< the system directory that contain fossology.conf
+    gchar*   logdir;        ///< the directory to put the log file in
+    log_t*   main_log;      ///< the main log file for the scheduler
+
+    /* used exclusively in agent.c */
+    GTree*  meta_agents;    ///< List of all meta agents available to the scheduler
+    GTree*  agents;         ///< List of any currently running agents
+
+    /* used exclusively in host.c */
+    GTree* host_list;       ///< List of all hosts available to the scheduler
+    GList* host_queue;      ///< round-robin queue for choosing which host use next
+
+    /* used exclusively in interface.c */
+    gboolean      i_created;    ///< has the interface been created
+    gboolean      i_terminate;  ///< has the interface been terminated
+    uint16_t      i_port;       ///< the port that the scheduler is listening on
+    GThread*      server;       ///< thread that is listening to the server socket
+    GThreadPool*  workers;      ///< threads to handle incoming network communication
+    GCancellable* cancel;       ///< used to stop the listening thread when it is running
+
+    /* used exclusively in job.c */
+    GTree*     job_list;    ///< List of jobs that have been created
+    GSequence* job_queue;   ///< heap of jobs that still need to be started
+
+    /* used exclusively in database.c */
+    PGconn* db_conn;        ///< The database connection
+    gchar*  host_url;       ///< The url that is used to get to the FOSSology instance
+    gchar*  email_subject;  ///< The subject to be used for emails
+    gchar*  email_header;   ///< The beginning of the email message
+    gchar*  email_footer;   ///< The end of the email message
+    gchar*  email_command;  ///< The command that will sends emails, usually xmail
+
+    /* regular expressions */
+    GRegex* parse_agent_heart;   ///< Parses agent heart messages
+    GRegex* parse_agent_special; ///< Parses agent special messages
+    GRegex* parse_db_email;      ///< Parses database email text
+    GRegex* parse_interface_cmd; ///< Parses the commands received by the interface
+} scheduler_t;
+
+scheduler_t* scheduler_init(gchar* sysconfigdir);
+void scheduler_destroy(scheduler_t* scheduler);
+
+void scheduler_sig_handle(int signo);
+void scheduler_signal(scheduler_t* scheduler);
+void scheduler_update(scheduler_t* scheduler);
+
+void g_tree_clear(GTree* tree);
+
 extern int verbose;
 extern int closing;
-extern int s_pid;
-extern int s_daemon;
-extern int s_port;
-extern char* sysconfigdir;
-extern fo_conf* sysconfig;
-extern char* logdir;
-extern char* process_name;
 
 /* ************************************************************************** */
 /* *** CONFIGURATION                                                      *** */
@@ -105,10 +166,6 @@ CONF_VARIABLES_TYPES(SELECT_DECLS)
 /* **** Utility Functions *************************************************** */
 /* ************************************************************************** */
 
-/* scheduler utility functions */
-void load_config(void*);
-void scheduler_close_event(void*);
-
 /* glib related functions */
 gint string_is_num(gchar* str);
 gint string_compare(gconstpointer a, gconstpointer b, gpointer user_data);
@@ -118,14 +175,15 @@ gint int_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 /* **** Scheduler Functions ************************************************* */
 /* ************************************************************************** */
 
-void sig_handle(int signo);
-void update_scheduler();
-void signal_scheduler();
-void set_usr_grp();
-int  kill_scheduler(int force);
-void load_agent_config();
-void load_foss_config();
-int  close_scheduler();
+/* scheduler events */
+void scheduler_config_event(scheduler_t* scheduler, void*);
+void scheduler_close_event(scheduler_t* scheduler, void*);
+
+void scheduler_clear_config(scheduler_t* scheduler);
+void scheduler_agent_config(scheduler_t* scheduler);
+void scheduler_foss_config(scheduler_t* scheduler);
+
+void set_usr_grp(gchar* process_name, fo_conf* config);
 int  kill_scheduler(int force);
 
 #endif /* SCHEDULER_H_INCLUDE */

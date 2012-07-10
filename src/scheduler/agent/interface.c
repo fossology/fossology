@@ -43,15 +43,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define FIELD_WIDTH 10
 #define BUFFER_SIZE 1024
 
-int i_created = 0;       ///< flag indicating if the interface already been created
-int i_terminate = 0;     ///< flag indicating if the interface has been killed
-int i_port = -1;         ///< the port that the scheduler is listening on
-GThread* socket_thread;  ///< thread that will create new connections
-GThreadPool* threads;    ///< thread pool used to handle interface connections
-GCancellable* cancel;    ///< used to shut down all interfaces when closing the scheudler
-GRegex* cmd_parse;       ///< regex to make parsing command more reliable
-GRegex* pro_parse;       ///< regex to parse the proxy formatting
-
 #define netw g_output_stream_write
 
 #define PROXY_PROTOCOL     "socks5"
@@ -82,7 +73,8 @@ typedef struct interface_connection
  * @param conn the socket that this interface is connected to
  * @return the newly allocated and populated interface connection
  */
-interface_connection* interface_conn_init(GSocketConnection* conn)
+static interface_connection* interface_conn_init(
+    GSocketConnection* conn, GThreadPool* threads)
 {
   interface_connection* inter = g_new0(interface_connection, 1);
 
@@ -101,7 +93,7 @@ interface_connection* interface_conn_init(GSocketConnection* conn)
  *
  * @param inter the interface_connection that should be freed
  */
-void interface_conn_destroy(interface_connection* inter)
+static void interface_conn_destroy(interface_connection* inter)
 {
   g_object_unref(inter->conn);
   g_free(inter);
@@ -130,11 +122,10 @@ void interface_conn_destroy(interface_connection* inter)
  * @param  unused  currently not used to pass any information
  * @return not currently used
  */
-void interface_thread(void* param, void* unused)
+void interface_thread(interface_connection* conn, scheduler_t* scheduler)
 {
   GMatchInfo* regex_match;
-  interface_connection* conn = param;
-  job to_kill;
+  job_t* job;
   char buffer[BUFFER_SIZE];
   char org[sizeof(buffer)];
   char* arg1, * arg2, * arg3;
@@ -144,14 +135,14 @@ void interface_thread(void* param, void* unused)
 
   memset(buffer, '\0', sizeof(buffer));
 
-  while(g_input_stream_read(conn->istr, buffer, sizeof(buffer), cancel, NULL))
+  while(g_input_stream_read(conn->istr, buffer, sizeof(buffer), scheduler->cancel, NULL) > 0)
   {
     V_INTERFACE("INTERFACE: received \"%s\"\n", buffer);
     /* convert all characters before first ' ' to lower case */
     memcpy(org, buffer, sizeof(buffer));
     for(cmd = buffer; *cmd; cmd++)
       *cmd = g_ascii_tolower(*cmd);
-    g_regex_match(cmd_parse, buffer, 0, &regex_match);
+    g_regex_match(scheduler->parse_interface_cmd, buffer, 0, &regex_match);
     cmd = g_match_info_fetch(regex_match, 1);
 
     if(cmd == NULL)
@@ -225,7 +216,7 @@ void interface_thread(void* param, void* unused)
      */
     else if(strcmp(cmd, "load") == 0)
     {
-      print_host_load(conn->ostr);
+      print_host_load(scheduler->host_list, conn->ostr);
     }
 
     /* command: "kill <job_id> <"message">"
@@ -242,23 +233,24 @@ void interface_thread(void* param, void* unused)
       arg1 = g_match_info_fetch(regex_match, 3);
       arg2 = g_match_info_fetch(regex_match, 8);
 
-      if(arg1 == NULL || arg2 == NULL)
+      i = atoi(arg1);
+      if(arg1 == NULL || arg2 == NULL || strlen(arg1) == 0 || strlen(arg2) == 0)
       {
-        snprintf(buffer, sizeof(buffer),
-            "Invalid kill command: job %s does not exist\n", arg1);
-        g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+        g_free(cmd);
+        cmd = g_strdup_printf("Invalid kill command: \"%s\"\n", buffer);
+        g_output_stream_write(conn->ostr, cmd, strlen(cmd), NULL, NULL);
       }
-      else if((to_kill = get_job(atoi(arg1))) == NULL)
+      else if((job = g_tree_lookup(scheduler->job_list, &i)) == NULL)
       {
-        arg3 = g_strdup_printf(jobsql_failed, arg2, atoi(arg1));
+        arg3 = g_strdup_printf(jobsql_failed, arg2, i);
         event_signal(database_exec_event, arg3);
       }
       else
       {
-        if(to_kill->message)
-          g_free(to_kill->message);
-        to_kill->message = strdup(((arg2 == NULL) ? "no message" : arg2));
-        event_signal(job_fail_event, to_kill);
+        if(job->message)
+          g_free(job->message);
+        job->message = strdup(((arg2 == NULL) ? "no message" : arg2));
+        event_signal(job_fail_event, job);
       }
 
       g_free(arg1);
@@ -275,20 +267,18 @@ void interface_thread(void* param, void* unused)
     {
       arg1 = g_match_info_fetch(regex_match, 3);
 
-      if(arg1 == NULL)
+      if(arg1 == NULL || strlen(arg1) == 0)
       {
-        arg1 = g_strdup(buffer);
+        arg1 = g_strdup_printf("Invalid pause command: \"%s\"\n", buffer);
         WARNING("received invalid pause command: %s", buffer);
-        snprintf(buffer, sizeof(buffer) - 1,
-            "ERROR: Invalid pause command: %s\n", arg1);
-        g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
+        g_output_stream_write(conn->ostr, arg1, strlen(arg1), NULL, NULL);
         g_free(arg1);
       }
       else
       {
         params = g_new0(arg_int, 1);
         params->second = atoi(arg1);
-        params->first = get_job(params->second);
+        params->first = g_tree_lookup(scheduler->job_list, &params->second);
         event_signal(job_pause_event, params);
         g_free(arg1);
       }
@@ -302,7 +292,7 @@ void interface_thread(void* param, void* unused)
      */
     else if(strcmp(cmd, "reload") == 0)
     {
-      event_signal(load_config, NULL);
+      event_signal(scheduler_config_event, NULL);
     }
 
     /* command: "agents"
@@ -312,7 +302,7 @@ void interface_thread(void* param, void* unused)
      */
     else if(strcmp(cmd, "agents") == 0)
     {
-      event_signal(list_agents, conn->ostr);
+      event_signal(list_agents_event, conn->ostr);
     }
 
     /* command: "status [job_id]"
@@ -360,13 +350,13 @@ void interface_thread(void* param, void* unused)
       {
         params = g_new0(arg_int, 1);
         params->second = atoi(arg1);
-        params->first = get_job(params->second);
+        params->first = g_tree_lookup(scheduler->job_list, &params->second);
         event_signal(job_restart_event, params);
         g_free(arg1);
       }
     }
 
-    /* command: "verbose [job_id|level] [level]"
+    /* command: "verbose <job_id|level> [level]"
      *
      * The interface has either requested a change in a verbose level, or it
      * has requested the current verbose level. This command can have no
@@ -404,8 +394,19 @@ void interface_thread(void* param, void* unused)
       }
       else
       {
-        job_verbose_event(
-            job_verbose(get_job(atoi(arg1)), atoi(arg2)));
+        i = atoi(arg1);
+        if((job = g_tree_lookup(scheduler->job_list, &i)) == NULL)
+        {
+          g_free(cmd);
+          cmd = g_strdup_printf("Invalid verbose command: \"%s\"\n", buffer);
+          g_output_stream_write(conn->ostr, cmd, strlen(cmd), NULL, NULL);
+        }
+        else
+        {
+          job->verbose = atoi(arg2);
+          event_signal(job_verbose_event, job);
+        }
+
         g_free(arg1);
         g_free(arg2);
       }
@@ -424,8 +425,10 @@ void interface_thread(void* param, void* unused)
 
       if(arg1 != NULL && arg2 != NULL)
       {
+        i = atoi(arg1);
+
         params = g_new0(arg_int, 1);
-        params->first = get_job(atoi(arg1));
+        params->first = g_tree_lookup(scheduler->job_list, &i);
         params->second = atoi(arg2);
         event_signal(job_priority_event, params);
         g_free(arg1);
@@ -465,7 +468,7 @@ void interface_thread(void* param, void* unused)
       g_output_stream_write(conn->ostr, "Invalid command: \"", 18, NULL, NULL);
       g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
       g_output_stream_write(conn->ostr, "\"\n", 2, NULL, NULL);
-      clprintf("ERROR %s.%d: Interface received invalid command: %s\n", __FILE__, __LINE__, cmd);
+      clprintf(main_log, "ERROR %s.%d: Interface received invalid command: %s\n", __FILE__, __LINE__, cmd);
     }
 
     g_match_info_free(regex_match);
@@ -485,14 +488,14 @@ void interface_thread(void* param, void* unused)
  * @param  unused
  * @return unused
  */
-void* interface_listen_thread(void* unused)
+void* interface_listen_thread(scheduler_t* scheduler)
 {
   GSocketListener* server_socket;
   GSocketConnection* new_connection;
   GError* error = NULL;
 
   /* validate new thread */
-  if(i_terminate || !i_created)
+  if(scheduler->i_terminate || !scheduler->i_created)
   {
     ERROR("Could not create server socket thread\n");
     return (void*)0;
@@ -503,24 +506,25 @@ void* interface_listen_thread(void* unused)
   if(server_socket == NULL)
     FATAL("could not create the server socket");
 
-  g_socket_listener_add_inet_port(server_socket, i_port, NULL, &error);
+  g_socket_listener_add_inet_port(server_socket, scheduler->i_port, NULL, &error);
   if(error)
-    FATAL("%s", error->message);
+    FATAL("[port:%d]: %s", scheduler->i_port, error->message);
 
-  V_INTERFACE("INTERFACE: listening port is %d\n", i_port);
+  V_INTERFACE("INTERFACE: listening port is %d\n", scheduler->i_port);
 
   /* wait for new connections */
   for(;;)
   {
-    new_connection = g_socket_listener_accept(server_socket, NULL, cancel, &error);
+    new_connection = g_socket_listener_accept(server_socket, NULL,
+        scheduler->cancel, &error);
 
-    if(i_terminate)
+    if(scheduler->i_terminate)
       break;
     V_INTERFACE("INTERFACE: new interface connection\n");
     if(error)
       FATAL("INTERFACE closing for %s", error->message);
 
-    interface_conn_init(new_connection);
+    interface_conn_init(new_connection, scheduler->workers);
   }
 
   V_INTERFACE("INTERFACE: socket listening thread closing\n");
@@ -543,24 +547,18 @@ void* interface_listen_thread(void* unused)
  * @note If interface_init() is called multiple times without a call to
  *       interface_destroy(), it will become a no-op after the second call
  */
-void interface_init()
+void interface_init(scheduler_t* scheduler)
 {
-  if(!i_created)
+  if(!scheduler->i_created)
   {
-    i_created = 1;
-    i_terminate = 0;
-    socket_thread = g_thread_create(interface_listen_thread, NULL, 1, NULL);
+    scheduler->i_created = 1;
+    scheduler->i_terminate = 0;
 
-    cancel = g_cancellable_new();
-    threads = g_thread_pool_new(interface_thread, NULL, CONF_interface_nthreads,
-        FALSE, NULL);
-
-    cmd_parse = g_regex_new(
-        "(\\w+)(\\s+(-?\\d+))?(\\s+((-?\\d+)|(\"(.*)\")))?",
-        0, G_REGEX_MATCH_NEWLINE_LF, NULL);
-    pro_parse = g_regex_new(
-        "(.*):(\\d+)?",
-        0, 0, NULL);
+    scheduler->server = g_thread_create((GThreadFunc)interface_listen_thread,
+        scheduler, TRUE, NULL);
+    scheduler->workers = g_thread_pool_new((GFunc)interface_thread,
+        scheduler, CONF_interface_nthreads, FALSE, NULL);
+    scheduler->cancel  = g_cancellable_new();
   }
   else
   {
@@ -574,53 +572,24 @@ void interface_init()
  * @note If interface_destroy() is called before interface_init(), then it will
  *       be a no-op.
  */
-void interface_destroy()
+void interface_destroy(scheduler_t* scheduler)
 {
   /* only destroy the interface if it has been created */
-  if(i_created)
+  if(scheduler->i_created)
   {
-    i_terminate = 1;
-    i_created = 0;
+    scheduler->i_terminate = 1;
+    scheduler->i_created = 0;
 
-    g_cancellable_cancel(cancel);
-    g_thread_join(socket_thread);
-    g_thread_pool_free(threads, FALSE, TRUE);
-    g_regex_unref(cmd_parse);
-    g_regex_unref(pro_parse);
+    g_cancellable_cancel(scheduler->cancel);
+    g_thread_join(scheduler->server);
+    g_thread_pool_free(scheduler->workers, FALSE, TRUE);
 
-    socket_thread = NULL;
-    cancel        = NULL;
-    threads       = NULL;
-    cmd_parse     = NULL;
-    pro_parse     = NULL;
+    scheduler->server  = NULL;
+    scheduler->cancel  = NULL;
+    scheduler->workers = NULL;
   }
   else
   {
-    WARNING("Attempt to destroy the interface without initalizing it");
+    WARNING("Attempt to destroy the interface without initializing it");
   }
-}
-
-/* ************************************************************************** */
-/* **** Access Functions **************************************************** */
-/* ************************************************************************** */
-
-/**
- * Change the port that the scheudler will listen on.
- *
- * @param port_n the port number to listen on
- */
-void set_port(int port_n)
-{
-  if(port_n < 0 || port_n > USHRT_MAX)
-    ERROR("Unable to set port number, porvided port number was %d", port_n);
-
-  i_port = port_n;
-}
-
-/**
- * testes if the scheduler port has been correctly set
- */
-int is_port_set()
-{
-  return i_port != -1;
 }
