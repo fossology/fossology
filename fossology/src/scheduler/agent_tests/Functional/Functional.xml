@@ -27,11 +27,12 @@
   running agents, this will cause the scheduler to stop running immediately.
   -->
   <testsuite name="Test Just Stop">
-    <definitions pwd       ="{$pwd}"
-                 config    ="{pwd}/agent_tests/agents"
-                 log       ="{config}/fossology.log"
-                 scheduler ="{pwd}/agent/fo_scheduler"
-                 cli       ="{pwd}/agent/fo_cli"/>
+    <definitions pwd       = "{$pwd}"
+                 config    = "{pwd}/agent_tests/agents"
+                 log       = "{config}/fossology.log"
+                 agentdir  = "{pwd}/scheduler/agent"
+                 scheduler = "{agentdir}/fo_scheduler"
+                 cli       = "{agentdir}/fo_cli"/>
     <setup>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
                   result="scheduler:{pids:0} revision:(null) daemon:0 jobs:0 log:{log} port:12354 verbose:952"/>
@@ -56,11 +57,12 @@
          should be added as a .c file under the agent_tests/agents directory
   -->
   <testsuite name="Test TestAgents">
-    <definitions pwd       ="{$pwd}"
-                 config    ="{pwd}/agent_tests/agents"
-                 log       ="{config}/fossology.log"
-                 scheduler ="{pwd}/agent/fo_scheduler"
-                 cli       ="{pwd}/agent/fo_cli"/>
+    <definitions pwd       = "{$pwd}"
+                 config    = "{pwd}/agent_tests/agents"
+                 log       = "{config}/fossology.log"
+                 agentdir  = "{pwd}/scheduler/agent"
+                 scheduler = "{agentdir}/fo_scheduler"
+                 cli       = "{agentdir}/fo_cli"/>
     <setup>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
                   result="scheduler:{pids:0} revision:(null) daemon:0 jobs:0 log:{log} port:12354 verbose:952"/>
@@ -94,11 +96,12 @@
   not running.
   -->
   <testsuite name="Test Stop/Die">
-    <definitions pwd       ="{$pwd}"
-                 config    ="{pwd}/agent_tests/agents"
-                 log       ="{config}/fossology.log"
-                 scheduler ="{pwd}/agent/fo_scheduler"
-                 cli       ="{pwd}/agent/fo_cli"/>
+    <definitions pwd       = "{$pwd}"
+                 config    = "{pwd}/agent_tests/agents"
+                 log       = "{config}/fossology.log"
+                 agentdir  = "{pwd}/scheduler/agent"
+                 scheduler = "{agentdir}/fo_scheduler"
+                 cli       = "{agentdir}/fo_cli"/>
     
     <!-- Send a stop command to the scheduler, it should keep running -->
     <test name="scheduler stop">
