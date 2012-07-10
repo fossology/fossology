@@ -120,7 +120,8 @@ if ($psql_return_value > 0) {
     // user.  Try to determine why, and notify the user
     echo "ERROR!  output was:\n";
     echo "$psql_output\n";
-    if ( preg_match('/no password supplied/', $psql_output) ) {
+    if (   preg_match('/no password supplied/i', $psql_output)
+        || preg_match('/peer authentication failed/i', $psql_output) ) {
         echo "Before you can run tests, you must create a Postgres user called 'fossologytest'\n";
         echo "with the CREATEDB permission.  This would be done using the following command:\n";
         echo "\n    CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';\n";
