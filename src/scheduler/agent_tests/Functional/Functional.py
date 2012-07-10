@@ -106,7 +106,8 @@ class testsuite:
     Returns nothing
     """
     
-    definitions = node.getElementsByTagName('definitions')[0].attributes
+    defNode = node.getElementsByTagName('definitions')[0]
+    definitions = defNode.attributes
     
     self.name = node.getAttribute('name')
     
@@ -115,7 +116,8 @@ class testsuite:
     
     # get variable definitions
     for i in xrange(definitions.length):
-      self.defs[definitions.item(i).name] = self.substitute(definitions.item(i).value)
+      if definitions.item(i).name not in self.defs:
+        self.defs[definitions.item(i).name] = self.substitute(definitions.item(i).value, defNode)
     
     self.setup   = []
     self.cleanup = []
@@ -141,15 +143,15 @@ class testsuite:
         newTest[1].append(self.createAction(action))
       self.tests.append(newTest) 
   
-  def substitute(self, string):
+  def substitute(self, string, node = None):
     """
     Simple function to make calling processVariable a lot cleaner
     
     Returns the string with the variables correctly substituted
     """
-    return defsReplace.sub(functools.partial(self.processVariable), string)
+    return defsReplace.sub(functools.partial(self.processVariable, node), string)
   
-  def processVariable(self, match):
+  def processVariable(self, node, match):
     """
     Function passed to the regular expression library to replace variables in a
     string from the xml file.
@@ -173,7 +175,7 @@ class testsuite:
     """
     name = match.group(1)
     
-    # variable begins with $, replace with output of shell command 
+    # variable begins with $, replace with output of shell command
     if name[0] == '$':
       process = os.popen(name[1:], 'r')
       ret = process.read()
@@ -189,14 +191,20 @@ class testsuite:
       if not isinstance(self.defs[name], dict):
         raise DefineError('"%s" is not a dictionary in testsuite "%s"' % (name, self.name))
       if name not in self.defs:
-        raise DefineError('"%s" not defined in testsuite "%s"' % (name, self.name))
+        if node and node.hasAttribute(name):
+          self.defs[name] = self.substitute(node.getAttribute(name))
+        else:
+          raise DefineError('"%s" not defined in testsuite "%s"' % (name, self.name))
       if len(self.defs[name]) <= index:
         raise DefineError('"%d" is out of bounds for "%s.%s"' % (index, self.name, name))
       return self.defs[name][arrayMatch.group(2)]
     
     # this is a simply definition access, check validity and return the result
     if name not in self.defs:
-      raise DefineError('"%s" not defined in testsuite "%s"' % (name, self.name))
+      if node and node.hasAttribute(name):
+        self.defs[name] = self.substitute(node.getAttribute(name), node)
+      else:
+        raise DefineError('"%s" not defined in testsuite "%s"' % (name, self.name))
     return self.defs[name]
   
   def failure(self, doc, dest, type, value):
@@ -402,7 +410,7 @@ def main():
   dom = parseString(testFile.read())
   dir = os.getcwd()
   
-  os.chdir('../..')
+  os.chdir('../../..')
   
   setupNode   = dom.firstChild.getElementsByTagName('setup')[0]
   cleanupNode = dom.firstChild.getElementsByTagName('cleanup')[0]
@@ -436,12 +444,18 @@ def main():
         errorNode = resultsDoc.createElement("error")
         errorNode.setAttribute("type", "TimeOut")
         errorNode.appendChild(resultsDoc.createTextNode("Test suite took too long to run."))
+        suiteNode.appendChild(errorNode)
       runtime = (time.time() - starttime)
       
       suiteNode.setAttribute("time", str(runtime))
       
     except DefineError as detail:
       errors += 1
+      errorNode = resultsDoc.createElement("error")
+      errorNode.setAttribute("type", "DefinitionError")
+      errorNode.appendChild(resultsDoc.createTextNode("DefineError: {0}".format(detail.value)))
+      suiteNode.appendChild(errorNode)
+      print
     
     finally:
       suiteNode.setAttribute("errors", str(errors))
