@@ -107,7 +107,7 @@ require_once(__DIR__ . '/../../lib/php/common-cache.php');
 
 echo "Validating connection to Postgres database via 'psql'... ";
 $sql_statement = "\q";
-$psql_command = "psql --no-password --username=fossologytest --dbname=template1 \
+$psql_command = "psql --no-password --username=fossologytest --dbname=template1 --host=localhost\
     --command=\"$sql_statement\" 2>&1";
 #echo "$psql_command\n";
 exec($psql_command, $psql_output_array, $psql_return_value);
@@ -161,7 +161,7 @@ $test_db_name = "fossologytest_$testing_timestamp";
 // unless the LC_CTYPE environment variable is set correctly
 #$sql_statement="CREATE DATABASE $test_db_name ENCODING='SQL_ASCII'";
 $sql_statement="CREATE DATABASE $test_db_name ENCODING='UTF8'";
-$psql_command  = "psql --no-password --username=fossologytest --dbname=template1 \
+$psql_command  = "psql --no-password --username=fossologytest --dbname=template1 --host=localhost\
     --command=\"$sql_statement\" 2>&1";
 #echo "$psql_command\n";
 
@@ -184,7 +184,7 @@ else {
 /* Do some minimal setup of the new database */
 // Note: from Postgres 9.1 on, can use 'CREATE OR REPLACE LANGUAGE'
 $sql_statement = "CREATE LANGUAGE plpgsql";
-$psql_command  = "psql --no-password --username=fossologytest --dbname=$test_db_name \
+$psql_command  = "psql --no-password --username=fossologytest --dbname=$test_db_name --host=localhost\
     --command=\"$sql_statement\" 2>&1";
 #echo "$psql_command\n";
 exec($psql_command, $psql_output_array, $psql_return_value);
