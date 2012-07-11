@@ -133,7 +133,7 @@ extern log_t* main_log;
 /* ************************************************************************** */
 
 log_t* log_new(gchar* log_name, gchar* pro_name, pid_t pro_pid);
-log_t* log_new_FILE(FILE* log_file, gchar* pro_name, pid_t pro_pid);
+log_t* log_new_FILE(FILE* log_file, gchar* log_name, gchar* pro_name, pid_t pro_pid);
 void log_destroy(log_t* log);
 
 int  lprintf (log_t* log, const char* fmt, ...);

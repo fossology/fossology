@@ -618,9 +618,8 @@ log_t* job_log(job_t* job)
   file_name = g_strdup_printf("%06d", job->id);
   file_path = fo_RepMkPath("logs", file_name);
   V_JOB("JOB[%d]: job created log file:\n    %s\n", job->id, file_path);
-
   database_job_log(job->id, file_path);
-  job->log = log_new_FILE(fo_RepFwrite("logs", file_name), job->agent_type, 0);
+  job->log = log_new_FILE(fo_RepFwrite("logs", file_name), file_name, job->agent_type, 0);
 
   g_free(file_name);
   free(file_path);
