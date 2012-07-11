@@ -64,8 +64,12 @@ class ajax_filebucket extends FO_Plugin
     $bucket_pk = GetParm("bucket_pk",PARM_RAW);
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
 
+    /* Get the uploadtree table name */
+    $uploadtree_rec = GetSingleRec("uploadtree", "where uploadtree_pk='$uploadtree_pk'");
+    $uploadtree_tablename = GetUploadtreeTableName($uploadtree_rec['upload_fk']);
+
     /* Get all the non-artifact children */
-    $children = GetNonArtifactChildren($uploadtree_pk);
+    $children = GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename);
 
     /* Loop through children and create a list of those that contain $bucket_pk */
     $outstr = $bucket_pk;
