@@ -387,6 +387,7 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
     {
       args.foss_url = scheduler->host_url;
       args.job      = job;
+      args.db_conn  = scheduler->db_conn;
       val = g_regex_replace_eval(scheduler->parse_db_email, email_txt->str,
           email_txt->len, 0, 0, (GRegexEvalCallback)email_replace, &args, NULL);
     }

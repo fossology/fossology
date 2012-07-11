@@ -115,7 +115,8 @@ log_t* log_new(gchar* log_name, gchar* pro_name, pid_t pro_pid)
   ret->pro_pid = pro_pid;
 
   /* set the logs name */
-  if((stat(log_name, &stats) == 0) && S_ISDIR(stats.st_mode))
+  if(strcmp(log_name, "stderr") != 0 && strcmp(log_name, "stdio") != 0 &&
+      (stat(log_name, &stats) == 0) && S_ISDIR(stats.st_mode))
     ret->log_name = g_strdup_printf("%s/fossology.log", log_name);
   else
     ret->log_name = g_strdup(log_name);
@@ -145,7 +146,7 @@ log_t* log_new(gchar* log_name, gchar* pro_name, pid_t pro_pid)
  * @param pro_pid   the PID of the process to write to the log file
  * @return          a new log_t instance that can be used to write to
  */
-log_t* log_new_FILE(FILE* log_file, gchar* pro_name, pid_t pro_pid)
+log_t* log_new_FILE(FILE* log_file, gchar* log_name, gchar* pro_name, pid_t pro_pid)
 {
   log_t* ret = g_new0(log_t, 1);
 
@@ -155,7 +156,7 @@ log_t* log_new_FILE(FILE* log_file, gchar* pro_name, pid_t pro_pid)
     ret->pro_name = g_strdup(pro_name);
   ret->pro_pid = pro_pid;
 
-  ret->log_name = NULL;
+  ret->log_name = g_strdup(log_name);
   ret->log_file = log_file;
 
   return ret;
