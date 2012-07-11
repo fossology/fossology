@@ -217,7 +217,7 @@ class list_lic_files extends FO_Plugin
               $outdent = "";
             }
             $V .= $indent;
-            $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLastpfile, $ShowBox, $ShowMicro, ++$RowNum, $Header);
+            $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLastpfile, $ShowBox, $ShowMicro, ++$RowNum, $Header,'',$uploadtree_tablename);
             $V .= $outdent;
             $V .= "</td>";
             $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
