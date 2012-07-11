@@ -660,6 +660,9 @@ class ui_view extends FO_Plugin
     if (!$Fin && (empty($Item) || empty($Upload))) { return; }
     if (empty($Page)) { $Page=0; };
 
+    /* Get uploadtree table name */
+    $uploadtree_tablename = GetUploadtreeTablename($Upload);
+
     switch(GetParm("format",PARM_STRING))
     {
       case 'hex':	$Format='hex'; break;
@@ -707,7 +710,7 @@ class ui_view extends FO_Plugin
       if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
       if (!empty($Show)) { $Opt .= "&show=$Show"; }
       /* No item */
-      $V .= Dir2Browse($BackMod,$Item,NULL,1,"View") . "<P />\n";
+      $V .= Dir2Browse($BackMod,$Item,NULL,1,"View", -1, '', '', $uploadtree_tablename) . "<P />\n";
     } // if ShowHeader
 
     $this->SortHighlightMenu();
