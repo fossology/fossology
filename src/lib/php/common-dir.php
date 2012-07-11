@@ -528,24 +528,26 @@ function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $S
       $Phrase = "<b>$text:</b> " . htmlentities($R['phrase_text']);
     }
 
+    $uploadtree_tablename = GetUploadtreeTableName($R['upload_fk']);
+
     if ((IsDir($R['ufile_mode'])) || (Iscontainer($R['ufile_mode'])))
     {
       $V .= "<P />\n";
       $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfDirPlugin,1,
-      NULL,$Count,$Phrase, $Licenses) . "\n";
+      NULL,$Count,$Phrase, $Licenses, $uploadtree_tablename) . "\n";
     }
     else if ($R['pfile_fk'] != $LastPfilePk)
     {
       $V .= "<P />\n";
       $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
-      NULL,$Count,$Phrase, $Licenses) . "\n";
+      NULL,$Count,$Phrase, $Licenses, $uploadtree_tablename) . "\n";
       $LastPfilePk = $R['pfile_fk'];
     }
     else
     {
       $V .= "<div style='margin-left:2em;'>";
       $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
-      NULL,$Count,$Phrase, $Licenses) . "\n";
+      NULL,$Count,$Phrase, $Licenses, $uploadtree_tablename) . "\n";
       $V .= "</div>";
     }
     $Count++;
