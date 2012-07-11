@@ -221,6 +221,9 @@ class copyright_list extends FO_Plugin
     /* get all rows */
     $rows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk);
 
+    /* Get uploadtree_tablename */
+    $uploadtree_tablename = GetUploadtreeTableName($upload_pk);
+
     /* slim down to all rows with this hash and type */
     $NumInstances = 0;
     $rows = $this->GetRequestedRows($rows, $hash, $type, $excl, $NumInstances);
@@ -307,7 +310,7 @@ class copyright_list extends FO_Plugin
               if (in_array($FileExt, $ExclArray)) $ok = false;
             }
 
-            if ($ok) $OutBuf .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, ++$RowNum, $Header);
+            if ($ok) $OutBuf .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, ++$RowNum, $Header, '', $uploadtree_tablename);
           }
 
         }
