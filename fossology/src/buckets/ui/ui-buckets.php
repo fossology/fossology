@@ -316,7 +316,7 @@ return;
 
     /*******    File Listing     ************/
     /* Get ALL the items under this Uploadtree_pk */
-    $Children = GetNonArtifactChildren($Uploadtree_pk);
+    $Children = GetNonArtifactChildren($Uploadtree_pk, $this->uploadtree_tablename);
 
     if (count($Children) == 0)
     {
