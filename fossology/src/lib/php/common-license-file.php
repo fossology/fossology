@@ -374,7 +374,7 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
   global $PG_CONN;
   $pkarray = array();
 
-  $Children = GetNonArtifactChildren($uploadtree_pk);
+  $Children = GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename);
 
   /* Loop throught each top level uploadtree_pk */
   $offset = 0;
