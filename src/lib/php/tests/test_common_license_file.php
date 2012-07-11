@@ -37,6 +37,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
   public $pfile_parent = 0;
   public $pfile_child = 0;
   public $agent_pk = 0;
+  public $uploadtree_tablename = 'uploadtree';
 
   public $DB_COMMAND =  "";
   public $DB_NAME =  "";
@@ -124,7 +125,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     pg_free_result($result);
 
     /** add an upload record */
-    $sql = "INSERT INTO upload (upload_filename,upload_mode,upload_ts, pfile_fk) VALUES ('$upload_filename',40,now(), '$pfile_pk_parent');";
+    $sql = "INSERT INTO upload (upload_filename,upload_mode,upload_ts, pfile_fk, uploadtree_tablename) VALUES ('$upload_filename',40,now(), '$pfile_pk_parent', '$this->uploadtree_tablename');";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
@@ -181,7 +182,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     global $pfile_pk_parent;
     global $agent_pk;
 
-    $license_array = GetFileLicenses($agent_pk, $pfile_pk_parent, $uploadtree_pk_parent);
+    $license_array = GetFileLicenses($agent_pk, $pfile_pk_parent, $uploadtree_pk_parent, $this->uploadtree_tablename);
     /** the expected license value */
     $sql = "SELECT rf_shortname from license_ref where rf_pk = 1;";
     $result = pg_query($PG_CONN, $sql);
@@ -205,7 +206,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     global $pfile_pk_parent;
     global $agent_pk;
 
-    $license_string = GetFileLicenses_string($agent_pk, $pfile_pk_parent, $uploadtree_pk_parent);
+    $license_string = GetFileLicenses_string($agent_pk, $pfile_pk_parent, $uploadtree_pk_parent, $this->uploadtree_tablename);
     /** the expected license value */
     $sql = "SELECT rf_shortname from license_ref where rf_pk = 1;";
     $result = pg_query($PG_CONN, $sql);
@@ -236,7 +237,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     $rf_shortname = $row['rf_shortname'];
     pg_free_result($result);
 
-    $files_result = GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk_parent);
+    $files_result = GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk_parent, false, 0, "ALL", "", null, $this->uploadtree_tablename);
     $row = pg_fetch_assoc($files_result);
     $pfile_id_actual = $row['pfile_fk'];
     pg_free_result($files_result);
@@ -261,7 +262,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     $rf_shortname = $row['rf_shortname'];
     pg_free_result($result);
 
-    $CountFiles = CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk_parent);
+    $CountFiles = CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk_parent, false, false, 0, $this->uploadtree_tablename);
     $this->assertEquals(1, $CountFiles['count']);
     $this->assertEquals(1, $CountFiles['unique']);
   }
@@ -287,7 +288,8 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     $rf_shortname = $row['rf_shortname'];
     pg_free_result($result);
 
-    $file_name = Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk_parent);
+    $file_name = Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk_parent, false, $this->uploadtree_tablename);
+print_r ($file_name);
     $this->assertEquals("license_test.file.child", $file_name[$uploadtree_pk_child]);
     print "unit test for common-license-file.php end\n";
   }
