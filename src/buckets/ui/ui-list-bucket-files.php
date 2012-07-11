@@ -155,6 +155,9 @@ class list_bucket_files extends FO_Plugin
         $upload_pk = $row["upload_fk"];
         pg_free_result($result);
 
+        /* Get uploadtree table */
+        $uploadtree_tablename = GetUploadtreeTableName($upload_pk);
+
         /* If $BinNoSrc, then only list binary packages in this subtree
          * that do not have Source packages.
         * Else list files in the asked for bucket.
@@ -223,7 +226,7 @@ class list_bucket_files extends FO_Plugin
         {
           // get all the licenses in this subtree (bucket uploadtree_pk)
           $pfile_pk = $row['pfile_fk'];
-          $licstring = GetFileLicenses_string($nomosagent_pk, $row['pfile_fk'], $row['uploadtree_pk']);
+          $licstring = GetFileLicenses_string($nomosagent_pk, $row['pfile_fk'], $row['uploadtree_pk'], $uploadtree_tablename);
           if (empty($licstring)) $licstring = '-';
           $URLlicstring = urlencode($licstring);
 
@@ -253,8 +256,7 @@ class list_bucket_files extends FO_Plugin
               $PrevPfile_pk = $pfile_pk;
               $ItemNumb++;
             }
-            $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox,
-            $ShowMicro, $ItemNumb, $Header);
+            $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, $ItemNumb, $Header, '', $uploadtree_tablename);
             $V .= "</div>";
 
             $V .= "</td>";
