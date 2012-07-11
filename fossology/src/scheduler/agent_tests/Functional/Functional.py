@@ -28,6 +28,7 @@ from xml.dom.minidom import getDOMImplementation
 from xml.dom.minidom import parseString
 from xml.dom import Node
 from optparse import OptionParser
+import ConfigParser
 import subprocess
 import functools
 import signal
@@ -40,7 +41,7 @@ import os
 ### utility ####################################################################
 ################################################################################
 defsReplace = re.compile('{([^\s]*?)}')
-defsSplit   = re.compile('(\w*):([0-9]*)')
+defsSplit   = re.compile('(\w+):(\w+)')
 
 class DefineError(Exception):
   """ Error class used for missing definitions in the xml file """
@@ -186,7 +187,7 @@ class testsuite:
     arrayMatch = defsSplit.match(name)
     if arrayMatch:
       name  = arrayMatch.group(1)
-      index = int(arrayMatch.group(2))
+      index = arrayMatch.group(2)
       
       if not isinstance(self.defs[name], dict):
         raise DefineError('"%s" is not a dictionary in testsuite "%s"' % (name, self.name))
@@ -195,8 +196,8 @@ class testsuite:
           self.defs[name] = self.substitute(node.getAttribute(name))
         else:
           raise DefineError('"%s" not defined in testsuite "%s"' % (name, self.name))
-      if len(self.defs[name]) <= index:
-        raise DefineError('"%d" is out of bounds for "%s.%s"' % (index, self.name, name))
+      if index not in self.defs[name]:
+        raise DefineError('"%s" is out of bounds for "%s.%s"' % (index, self.name, name))
       return self.defs[name][arrayMatch.group(2)]
     
     # this is a simply definition access, check validity and return the result
@@ -317,7 +318,7 @@ class testsuite:
     proc = subprocess.Popen(cmd, 0, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     
     result = proc.stdout.readlines()
-    if len(expected) != 0 and result[0].strip() != expected:
+    if len(result) != 0 and len(expected) != 0 and result[0].strip() != expected:
       if dest and doc:
         self.failure(doc, dest, "ResultMismatch",
             "expected: '{0}' != result: '{1}'".format(expected, result[0].strip()))
@@ -344,6 +345,19 @@ class testsuite:
     duration = node.getAttribute('duration')
     time.sleep(int(duration))
     return True
+  
+  def loadConf(self, node, doc, dest):
+    fname = self.substitute(node.getAttribute('file'))
+    
+    config = ConfigParser.ConfigParser()
+    config.readfp(open(fname))
+    
+    self.defs["FOSSOLOGY"] = {}
+    self.defs["FOSSOLOGY"]["port"]  = config.get("FOSSOLOGY", "port")
+    self.defs["FOSSOLOGY"]["path"]  = config.get("FOSSOLOGY", "path")
+    self.defs["FOSSOLOGY"]["depth"] = config.get("FOSSOLOGY", "depth")
+    
+    return True
     
   ################################
   # run tests and produce output #
@@ -361,7 +375,9 @@ class testsuite:
 
     for action in self.setup:
       while not action(None, None):
+        print ".",
         time.sleep(5)
+    print " startup finished ",
     for test in self.tests:
       assertions = 0
       testNode = document.createElement("testcase")
@@ -372,6 +388,7 @@ class testsuite:
       starttime = time.time()
       for action in test[1]:
         assertions += 1
+        print ".",
         if not action(document, testNode):
           failures += 1
       runtime = (time.time() - starttime)
@@ -383,7 +400,8 @@ class testsuite:
       totalasserts += assertions
       
       suiteNode.appendChild(testNode)
-      
+    
+    print " cleanup"
     for action in self.cleanup:
       action(None, None)
     
@@ -421,45 +439,45 @@ def main():
   maxRuntime = int(dom.firstChild.getAttribute("timeout"))
   
   for suite in dom.firstChild.getElementsByTagName('testsuite'):
-    suiteNode = resultsDoc.createElement("testsuite")
-    errors = 0
-    
-    suiteNode.setAttribute("name", suite.getAttribute("name"))
-    suiteNode.setAttribute("errors", "0")
-    suiteNode.setAttribute("time", "0")
-    
-    try:
-      curr = testsuite(suite)
+    if not suite.hasAttribute("disable"):
+      suiteNode = resultsDoc.createElement("testsuite")
+      errors = 0
       
-      setup   = [curr.createAction(node) for node in setupNode.childNodes   if node.nodeType == Node.ELEMENT_NODE]
-      cleanup = [curr.createAction(node) for node in cleanupNode.childNodes if node.nodeType == Node.ELEMENT_NODE]
+      suiteNode.setAttribute("name", suite.getAttribute("name"))
+      suiteNode.setAttribute("errors", "0")
+      suiteNode.setAttribute("time", "0")
       
-      curr.setup   = setup + curr.setup
-      curr.cleanup = cleanup + curr.cleanup
-      
-      starttime = time.time()
-      print "Running: {0}".format(suite.getAttribute("name"))
-      if not timeout(functools.partial(curr.performTests, suiteNode, resultsDoc, testFile.name), maxRuntime):
+      try:
+        curr = testsuite(suite)
+        
+        setup   = [curr.createAction(node) for node in setupNode.childNodes   if node.nodeType == Node.ELEMENT_NODE]
+        cleanup = [curr.createAction(node) for node in cleanupNode.childNodes if node.nodeType == Node.ELEMENT_NODE]
+        
+        curr.setup   = setup + curr.setup
+        curr.cleanup = cleanup + curr.cleanup
+        
+        starttime = time.time()
+        print "Running: {0}".format(suite.getAttribute("name")),
+        if not timeout(functools.partial(curr.performTests, suiteNode, resultsDoc, testFile.name), maxRuntime):
+          errors += 1
+          errorNode = resultsDoc.createElement("error")
+          errorNode.setAttribute("type", "TimeOut")
+          errorNode.appendChild(resultsDoc.createTextNode("Test suite took too long to run."))
+          suiteNode.appendChild(errorNode)
+        runtime = (time.time() - starttime)
+        
+        suiteNode.setAttribute("time", str(runtime))
+        
+      except DefineError as detail:
         errors += 1
         errorNode = resultsDoc.createElement("error")
-        errorNode.setAttribute("type", "TimeOut")
-        errorNode.appendChild(resultsDoc.createTextNode("Test suite took too long to run."))
+        errorNode.setAttribute("type", "DefinitionError")
+        errorNode.appendChild(resultsDoc.createTextNode("DefineError: {0}".format(detail.value)))
         suiteNode.appendChild(errorNode)
-      runtime = (time.time() - starttime)
       
-      suiteNode.setAttribute("time", str(runtime))
-      
-    except DefineError as detail:
-      errors += 1
-      errorNode = resultsDoc.createElement("error")
-      errorNode.setAttribute("type", "DefinitionError")
-      errorNode.appendChild(resultsDoc.createTextNode("DefineError: {0}".format(detail.value)))
-      suiteNode.appendChild(errorNode)
-      print
-    
-    finally:
-      suiteNode.setAttribute("errors", str(errors))
-      top_output.appendChild(suiteNode)
+      finally:
+        suiteNode.setAttribute("errors", str(errors))
+        top_output.appendChild(suiteNode)
   
   os.chdir(dir);
   
