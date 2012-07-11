@@ -557,7 +557,7 @@ return;
           /************************/
           /* Show the folder path */
           /************************/
-          $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
+          $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
 
           if (!empty($Upload))
           {
