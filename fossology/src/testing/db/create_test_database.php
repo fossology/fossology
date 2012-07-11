@@ -20,7 +20,22 @@
 /*
     create_test_database.php
 
+    Create a FOSSology test database and associated configuration,
+    if one does not already exist.
+
+
     Here is what this script does:
+
+    0) Check whether an environment variable FOSSOLOGY_TESTCONFIG is set
+       If so, this environment variable should point to the fossology 
+       testing system configuration directory, which will be something like:
+ 
+           /tmp/fossologytest_20120611_172315/ 
+
+       If FOSSOLOGY_TESTCONFIG is set, then simply exit.  
+       We do not validate the testing environment further, but any 
+       subsequent tests should be able to use this test database and 
+       system configuration.
 
     1) Make sure we can connect to postgres as the 'fossologytest' user.
 
@@ -88,7 +103,21 @@ require_once(__DIR__ . '/../../lib/php/libschema.php');
 require_once(__DIR__ . '/../../lib/php/common-db.php');
 require_once(__DIR__ . '/../../lib/php/common-cache.php');
 
+/* very first step - check for the FOSSOLOGY_TESTCONFIG environment variable.
+   If this exists, then our job here is done */
+$fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
 
+if ($fossology_testconfig && strlen($fossology_testconfig) > 1) {
+    // just echo the value of the environment variable, and exit
+    echo "$fossology_testconfig\n";
+    exit(0);
+}
+else {
+    #echo "Did not find a valid FOSSOLOGY_TESTCONFIG environment variable\n";
+}
+
+echo "FAIL:  This is a debug failure\n";
+exit(1);
 /* First check to see if we can connect to Postgres as the 'fossologytest' user
 
    This is done with the 'psql' command, using these options:
@@ -105,9 +134,9 @@ require_once(__DIR__ . '/../../lib/php/common-cache.php');
     making calls to the command-line psql tool?
 */
 
-echo "Validating connection to Postgres database via 'psql'... ";
+#echo "Validating connection to Postgres database via 'psql'... ";
 $sql_statement = "\q";
-$psql_command = "psql --no-password --username=fossologytest --dbname=template1 --host=localhost\
+$psql_command = "psql --no-password --username=fossologytest --dbname=template1 --host=localhost \
     --command=\"$sql_statement\" 2>&1";
 #echo "$psql_command\n";
 exec($psql_command, $psql_output_array, $psql_return_value);
@@ -118,7 +147,7 @@ $psql_output = implode("\n", $psql_output_array);
 if ($psql_return_value > 0) {
     // for some reason, we could not connect to Postgres as the fossologytest
     // user.  Try to determine why, and notify the user
-    echo "ERROR!  output was:\n";
+    echo "FAIL!  output was:\n";
     echo "$psql_output\n";
     if (   preg_match('/no password supplied/i', $psql_output)
         || preg_match('/peer authentication failed/i', $psql_output) ) {
@@ -129,7 +158,6 @@ if ($psql_return_value > 0) {
     exit($psql_return_value);
 }
 else {
-    echo "Success\n";
     #echo "Successfully connected to PostgreSQL as user 'fossologytest'.\n";
     #echo "$psql_output\n";
 }
@@ -146,22 +174,22 @@ $testing_timestamp = date("Ymd_His");
 $testing_temp_dir = $system_temp_dir . '/fossologytest_' . $testing_timestamp;
 
 if ( mkdir($testing_temp_dir, 0755, TRUE) === FALSE ) {
-    echo "FATAL! Cannot create test configuration directory at: $testing_temp_dir\n" .
+    echo "FAIL! Cannot create test configuration directory at: $testing_temp_dir\n" .
         "    at " . __FILE__ . ":" . __LINE__  . "\n";
     exit(1);
 } 
 else {
-    echo "Successfully created test configuration directory at: $testing_temp_dir\n";
+#    echo "Successfully created test configuration directory at: $testing_temp_dir\n";
 }
 
 /* Now create a new, unique dataabase */
-echo "Creating test database... ";
+#echo "Creating test database... ";
 $test_db_name = "fossologytest_$testing_timestamp";
 // note: normal 'mortal' users cannot choose 'SQL_ASCII' encoding 
 // unless the LC_CTYPE environment variable is set correctly
 #$sql_statement="CREATE DATABASE $test_db_name ENCODING='SQL_ASCII'";
 $sql_statement="CREATE DATABASE $test_db_name ENCODING='UTF8'";
-$psql_command  = "psql --no-password --username=fossologytest --dbname=template1 --host=localhost\
+$psql_command  = "psql --no-password --username=fossologytest --dbname=template1 --host=localhost \
     --command=\"$sql_statement\" 2>&1";
 #echo "$psql_command\n";
 
@@ -171,12 +199,11 @@ exec($psql_command, $psql_output_array, $psql_return_value);
 $psql_output = implode("\n", $psql_output_array);
 
 if ($psql_return_value > 0) {
-    echo "ERROR!  output was:\n";
+    echo "FAIL!  output was:\n";
     echo "$psql_output\n";
     exit($psql_return_value);
 }
 else {
-    echo "Success\n";
     #echo "Successfully created database '$test_db_name'.\n";
     #echo "$psql_output\n";
 }
@@ -185,10 +212,9 @@ else {
 // Note: from Postgres 9.1 on, can use 'CREATE OR REPLACE LANGUAGE'
 // instead of dropping and then re-creating
 
-// first drop the plsql language in case it was inherited from 
-// the default template
-$sql_statement = "DROP LANGUAGE IF EXISTS plpgsql";
-$psql_command  = "psql --no-password --username=fossologytest --dbname=$test_db_name --host=localhost\
+// first check to make sure we don't already have the plpgsql language installed
+$sql_statement = "select lanname from pg_language where lanname = 'plpgsql'";
+$psql_command  = "psql --no-password --username=fossologytest --dbname=$test_db_name --host=localhost \
     --command=\"$sql_statement\" 2>&1";
 #echo "$psql_command\n";
 exec($psql_command, $psql_output_array, $psql_return_value);
@@ -197,35 +223,40 @@ exec($psql_command, $psql_output_array, $psql_return_value);
 $psql_output = implode("\n", $psql_output_array);
 
 if ($psql_return_value > 0) {
-    echo "ERROR!  output was:\n";
+    echo "FAIL!  output was:\n";
     echo "$psql_output\n";
     exit($psql_return_value);
 }
 else {
-    #echo "Successfully dropped any existing plpgsql language.\n";
-    #echo "$psql_output\n";
+    if ( preg_match('/plpgsql/', $psql_output) ) {
+        $plpgsql_already_installed = TRUE;
+    }
+    else {
+        $plpgsql_already_installed = FALSE;
+    }
 }
 
-// then create language plsql
-$sql_statement = "CREATE LANGUAGE plpgsql";
-$psql_command  = "psql --no-password --username=fossologytest --dbname=$test_db_name --host=localhost\
-    --command=\"$sql_statement\" 2>&1";
-#echo "$psql_command\n";
-exec($psql_command, $psql_output_array, $psql_return_value);
+// then create language plsql if not already created
+if ( $plpgsql_already_installed == FALSE ) {
+    $sql_statement = "CREATE LANGUAGE plpgsql";
+    $psql_command  = "psql --no-password --username=fossologytest --dbname=$test_db_name --host=localhost \
+        --command=\"$sql_statement\" 2>&1";
+    #echo "$psql_command\n";
+    exec($psql_command, $psql_output_array, $psql_return_value);
 
-/* Concatenate all the output, separated by newlines */
-$psql_output = implode("\n", $psql_output_array);
+    /* Concatenate all the output, separated by newlines */
+    $psql_output = implode("\n", $psql_output_array);
 
-if ($psql_return_value > 0) {
-    echo "ERROR!  output was:\n";
-    echo "$psql_output\n";
-    exit($psql_return_value);
+    if ($psql_return_value > 0) {
+        echo "FAIL!  output was:\n";
+        echo "$psql_output\n";
+        exit($psql_return_value);
+    }
+    else {
+        #echo "Successfully created plpgsql language.\n";
+        #echo "$psql_output\n";
+    }
 }
-else {
-    #echo "Successfully created plpgsql language.\n";
-    #echo "$psql_output\n";
-}
-
 
 /* now create a valid Db.conf file in the testing temp directory 
    for accessing our fancy pants new test database */
@@ -238,19 +269,19 @@ fwrite($db_conf_fh, "user     = fossologytest;\n");
 // the value we write to the Db.conf file.
 fwrite($db_conf_fh, "password = fossologytest;\n");
 fclose($db_conf_fh);
-echo "Wrote Db.conf file to $testing_temp_dir\n";
+#echo "Wrote Db.conf file to $testing_temp_dir\n";
 
 
 /* now create a mods-enabled directory to contain symlinks to the 
    agents in the current working copy of fossology */
 $mods_enabled_dir = "$testing_temp_dir/mods-enabled";
 if ( mkdir($mods_enabled_dir, 0755, TRUE) === FALSE ) {
-    echo "FATAL! Cannot create test mods-enabled directory at: $mods_enabled_dir\n" .
+    echo "FAIL! Cannot create test mods-enabled directory at: $mods_enabled_dir\n" .
         "    at " . __FILE__ . ":" . __LINE__  . "\n";
     exit(1);
 } 
 else {
-    echo "Successfully created test mods-enabled directory at: $mods_enabled_dir\n";
+#    echo "Successfully created test mods-enabled directory at: $mods_enabled_dir\n";
 }
 
 
@@ -265,7 +296,7 @@ else {
 
 $base_dir = realpath(__DIR__ . '/../..');
 $src_dirs = scandir($base_dir);
-echo "Populating symlinks in $mods_enabled_dir\n";
+#echo "Populating symlinks in $mods_enabled_dir\n";
 
 foreach ($src_dirs as $src_dir) {
     // skip dotted directories, and lib/ and cli/
@@ -277,7 +308,7 @@ foreach ($src_dirs as $src_dir) {
     $full_src_dir = $base_dir . "/" . $src_dir;
     if (is_dir($full_src_dir)) {
         if (symlink($full_src_dir, "$mods_enabled_dir/$src_dir") != TRUE) {
-            echo "Error - could not create symlink for $full_src_dir in $mods_enabled_dir\n";
+            echo "FAIL - could not create symlink for $full_src_dir in $mods_enabled_dir\n";
             exit (1);
         }
         else {
@@ -290,12 +321,12 @@ foreach ($src_dirs as $src_dir) {
    subdirectory within our temporary testing system config directory */
 $test_repo_dir = "$testing_temp_dir/repository";
 if ( mkdir($test_repo_dir, 0755, TRUE) === FALSE ) {
-    echo "FATAL! Cannot create test repository directory at: $test_repo_dir\n" .
+    echo "FAIL! Cannot create test repository directory at: $test_repo_dir\n" .
         "    at " . __FILE__ . ":" . __LINE__  . "\n";
     exit(1);
 } 
 else {
-    echo "Successfully created test repository directory at: $test_repo_dir\n";
+    #echo "Successfully created test repository directory at: $test_repo_dir\n";
 }
 
 
@@ -319,12 +350,12 @@ fwrite($fo_conf_fh, "[DIRECTORIES]\n");
 fwrite($fo_conf_fh, "PROJECTGROUP=$group_name\n");
 
 fclose($fo_conf_fh);
-echo "Wrote fossology.conf file to $testing_temp_dir\n";
+#echo "Wrote fossology.conf file to $testing_temp_dir\n";
 
 /* now load the fossology core schema into the database */
 $core_schema_dat_file = $base_dir . "/www/ui/core-schema.dat";
 
-echo "Connecting to test database via PHP pg_connect()\n";
+#echo "Connecting to test database via PHP pg_connect()\n";
 // create a native PHP database connection to our test database
 $postgres_params  = "dbname=$test_db_name ";
 $postgres_params .= "host=localhost ";
@@ -334,15 +365,23 @@ $postgres_params .= "password=fossologytest ";
 
 $PG_CONN = pg_connect($postgres_params);
 
-echo "Applying the core schema in $core_schema_dat_file\n";
+#echo "Applying the core schema in $core_schema_dat_file\n";
 // apply the core schema
+// need to silence the normal output generated by ApplySchema
+ob_start();
 ApplySchema($core_schema_dat_file);
+ob_end_clean();
 
 /* When we finish successfully, print out the testing SYSCONFDIR on
    the second-to-last line, and the testing database name on the last
    line of the script's output */
-echo "$test_repo_dir\n";
-echo "$test_db_name\n";
+echo "$testing_temp_dir\n";
+
+/* Finally set the FOSSOLOGY_TESTCONFIG environment variable for all
+   subsequent test suites to use */
+putenv("FOSSOLOGY_TESTCONFIG=$testing_temp_dir");
+$_ENV['FOSSOLOGY_TESTCONFIG'] = $testing_temp_dir;
+$GLOBALS['FOSSOLOGY_TESTCONFIG'] = $testing_temp_dir;
 
 // indicate a successful run
 exit(0);
