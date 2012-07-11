@@ -33,7 +33,7 @@
  * \return Array of file licenses   LicArray[rf_pk] = rf_shortname
  * FATAL if neither pfile_pk or uploadtree_pk were passed in
  */
-function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree_0')
+function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree')
 {
   global $PG_CONN;
 
@@ -186,7 +186,7 @@ function GetFileCopyright_string($agent_pk, $pfile_pk, $uploadtree_pk, $type)
  * \return Licenses string for specified file
  * \see GetFileLicenses() 
  */
-function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree_0')
+function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree')
 {
   $LicStr = "";
   $LicArray = GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename);
