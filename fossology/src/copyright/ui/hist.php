@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -209,8 +209,13 @@ class copyright_hist extends FO_Plugin
    * \brief Given an $Uploadtree_pk, display: \n
    * (1) The histogram for the directory BY LICENSE. \n
    * (2) The file listing for the directory.
+   *
+   * \param $Uploadtree_pk
+   * \param $Uri
+   * \param $filter
+   * \param $uploadtree_tablename
    */
-  function ShowUploadHist($Uploadtree_pk, $Uri, $filter)
+  function ShowUploadHist($Uploadtree_pk, $Uri, $filter, $uploadtree_tablename)
   {
     global $PG_CONN;
 
@@ -352,7 +357,7 @@ class copyright_hist extends FO_Plugin
 
     /*******    File Listing     ************/
     /* Get ALL the items under this Uploadtree_pk */
-    $Children = GetNonArtifactChildren($Uploadtree_pk);
+    $Children = GetNonArtifactChildren($Uploadtree_pk, $uploadtree_tablename);
     $ChildCount=0;
     $ChildLicCount=0;
     $ChildDirCount=0; /* total number of directory or containers */
@@ -387,7 +392,7 @@ class copyright_hist extends FO_Plugin
       /* Determine link for containers */
       if (Iscontainer($C['ufile_mode']))
       {
-        $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
+        $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk'], $uploadtree_tablename);
         $LicUri = "$Uri&item=" . $uploadtree_pk;
       }
       else
@@ -495,6 +500,9 @@ class copyright_hist extends FO_Plugin
     $Item = GetParm("item",PARM_INTEGER);
     $filter = GetParm("filter",PARM_STRING);
 
+    /* Get uploadtree_tablename */
+    $uploadtree_tablename = GetUploadtreeTableName($Upload);
+
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
     /********  disable cache to see if this is fast enough without it *****
      $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder")) . "&show=$Show";
@@ -527,7 +535,7 @@ class copyright_hist extends FO_Plugin
           /************************/
           /* Show the folder path */
           /************************/
-          $OutBuf .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
+          $OutBuf .= Dir2Browse($this->Name,$Item,NULL,1,"Browse",-1,'','',$uploadtree_tablename) . "<P />\n";
           if (!empty($Upload))
           {
             $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
@@ -546,7 +554,7 @@ class copyright_hist extends FO_Plugin
             $SelectFilter .= "</select>";
             $OutBuf .= $SelectFilter;
 
-            $OutBuf .= $this->ShowUploadHist($Item, $Uri, $filter);
+            $OutBuf .= $this->ShowUploadHist($Item, $Uri, $filter, $uploadtree_tablename);
           }
           $OutBuf .= "</font>\n";
           break;
