@@ -122,7 +122,7 @@ dependencies needed at FOSSology runtime for the various distros are:
     RedHatEnterprise or CentOS:
 	postgresql-server httpd postgresql php php-pear php-pgsql
 	smtpdaemon file libxml2 binutils
-        bzip2 cpio mkisofs p8zip poppler-utils rpm tar file-libs
+        bzip2 cpio mkisofs p7zip poppler-utils rpm tar file-libs
         unzip gzip p7zip-plugins sleuthkit unrar pcre glib2 wget
     Fedora:
 	postgresql-server httpd postgresql php php-pear php-pgsql
