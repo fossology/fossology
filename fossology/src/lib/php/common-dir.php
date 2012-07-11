@@ -292,7 +292,7 @@ function Dir2Path($uploadtree_pk, $uploadtree_tablename='uploadtree')
  * \return string of browse paths
  */
 function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
-$ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtree_tablename="uploadtree_0")
+$ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtree_tablename="uploadtree")
 {
   $V = "";
   if ($ShowBox)
@@ -568,7 +568,7 @@ function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $S
  *         list may be empty if there are no children.
  * Child list is sorted by ufile_name.
  */
-function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtree_0')
+function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtree')
 {
   global $PG_CONN;
 
