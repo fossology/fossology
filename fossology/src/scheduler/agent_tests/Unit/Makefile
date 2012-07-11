@@ -60,12 +60,13 @@ test:
 $(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
 
-coverage: testRun.c $(OBJECTS) $(COV)
-	@echo "make scheduler test coverage"
-	$(CC) $< -o $(EXE) $(OBJECTS) $(COV) $(CFLAGS_LOCAL) $(FLAG_COV)
-	./$(EXE)
-	lcov --directory . --capture --output-file cov.txt; \
-	genhtml  -o  results cov.txt
+coverage:
+#testRun.c $(OBJECTS) $(COV)
+#	@echo "make scheduler test coverage"
+#	$(CC) $< -o $(EXE) $(OBJECTS) $(COV) $(CFLAGS_LOCAL) $(FLAG_COV)
+#	./$(EXE)
+#	lcov --directory . --capture --output-file cov.txt; \
+#	genhtml  -o  results cov.txt
 
 $(LIB):
 	$(MAKE) -C $(LOCALAGENTDIR) $@
