@@ -86,6 +86,6 @@ CU_TestInfo ExtractAR_testcases[] =
   {"Testing function testExtractAR for archive library file:", testExtractAR4ArchiveLibraryFile},
   {"Testing function testExtractAR for deb file:", testExtractAR4DebFile},
   {"Testing function testExtractAR for abnormal parameters:", testExtractAR4EmptyParameters},
-  {"Testing function testExtractAR for abnormal parameters:", testExtractAR4ErrorParameters},
+  {"Testing function testExtractAR for error parameters:", testExtractAR4ErrorParameters},
   CU_TEST_INFO_NULL
 };
