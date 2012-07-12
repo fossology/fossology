@@ -16,6 +16,7 @@
 ######################################################################
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 AGENT_DIR   = ../../agent
@@ -33,7 +34,7 @@ all:
 	$(MAKE) -C $(AGENT_DIR)/
 	$(MAKE) -C $(TEST_AGENTS)/
 
-test: all 
+test: fossology_testconfig all
 	$(regression) --tests=$(test_src) --results=$(test_dst)
 
 #####################
@@ -42,5 +43,7 @@ test: all
 
 clean:
 	rm -f $(test_dst) *.pyc
+
+include $(DEPS)
 
 .PHONY: all test $(PHP_FILES) $(FO_LIB)

@@ -37,6 +37,8 @@ GROUP = `id -ng`
 
 all: test
 test: $(FO_CONF) $(EXES)
+	cp `echo $$FOSSOLOGY_TESTCONFIG`/Db.conf .
+
 $(EXES): %: %.c $(FOLIB)
 	@echo $@:
 	@if [ ! -d $(MODDIR)/$@ ] ; then \
@@ -56,6 +58,6 @@ $(V_LIST):
 #####################
 
 clean:
-	rm -rf $(MODDIR) $(V_LIST) $(FO_CONF) *.log
+	rm -rf $(MODDIR) $(V_LIST) $(FO_CONF) *.log Db.conf
 
 .PHONY: all $(MODDIR) $(EXE) $(FOLIB)

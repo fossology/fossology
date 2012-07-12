@@ -127,7 +127,7 @@
   tests to finish. Unlike with the test agents, all the agents should pass this
   step.
   -->
-  <testsuite name="Test RealAgents" disable="true">
+  <testsuite name="Test RealAgents">
     <definitions pwd       = "{$pwd}"
                  config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
                  log       = "{config}/fossology.log"
