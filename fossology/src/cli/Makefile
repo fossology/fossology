@@ -35,6 +35,10 @@ docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 
 # generate the postinstall script
 fo_wrapper: fo_wrapper-process_php
+	@chmod +x fo_wrapper.php
+	@for file in $(WRAP); do \
+	  ln -sf fo_wrapper.php $$file; \
+	done
 
 %.txt: %.pod
 	pod2text $< $*.txt
@@ -81,7 +85,7 @@ coverage:
 
 clean:
 	# pod2html leaves temporary files: see debian bug #378328
-	rm -f *.o core $(MAN1FILES) $(HTMLFILES) $(TEXTFILES) pod*.tmp fo_wrapper.php
+	rm -f *.o core $(MAN1FILES) $(HTMLFILES) $(TEXTFILES) pod*.tmp fo_wrapper.php $(WRAP)
 
 include $(DEPS)
 
