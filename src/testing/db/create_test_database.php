@@ -116,8 +116,6 @@ else {
     #echo "Did not find a valid FOSSOLOGY_TESTCONFIG environment variable\n";
 }
 
-echo "FAIL:  This is a debug failure\n";
-exit(1);
 /* First check to see if we can connect to Postgres as the 'fossologytest' user
 
    This is done with the 'psql' command, using these options:
