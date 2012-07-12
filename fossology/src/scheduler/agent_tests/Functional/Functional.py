@@ -366,7 +366,37 @@ class testsuite:
     self.defs["BUILD"]["BUILD_DATE"] = config.get("BUILD", "BUILD_DATE")
     
     return True
+  
+  def upload(self, node, doc, dest):
+    """
+    Action
     
+    Attributes:
+      file [required]: the file that will be uploaded to the fossology database
+    
+    This action uploads a new file into the fossology test(hopefully) database
+    so that an agent can work with it. This will place the upload_pk for the
+    file in the self.sefs map under the name ['upload_pk']['filename'] where
+    filename is just the filename, not the path + filename.
+    
+    Returns True if and only iff cp2foss succeeded
+    """
+    file = self.substitute(node.getAttribute('file'))
+    
+    cmd = self.substitute('{pwd}/cli/cp2foss -c {config} --user {user} --password {pass} ' + file)
+    proc = subprocess.Popen(cmd, 0, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    proc.wait()
+    
+    if proc.returncode != 0:
+      return False
+    
+    result = proc.stdout.readlines()
+    if 'upload_pk' not in self.defs:
+      self.defs['upload_pk'] = {}
+    self.defs['upload_pk'][file.split('/')[-1]] = re.search(r'\d+', result[-1]).group(0)
+    
+    return True
+  
   ################################
   # run tests and produce output #
   ################################
