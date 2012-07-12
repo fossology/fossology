@@ -29,7 +29,6 @@
    attempt to delete all of the extant test databases */
 $postgres_params  = "dbname=template1 ";
 $postgres_params .= "host=localhost ";
-$postgres_params .= "port=5433 ";
 $postgres_params .= "user=fossologytest ";
 
 $PG_CONN = pg_connect($postgres_params)
