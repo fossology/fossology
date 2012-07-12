@@ -126,7 +126,7 @@ void testTraverseChild4DebianSourceFile()
   {
     ParentWait();
     exists = file_dir_exists("./test-result/fcitx_3.6.2-1.dsc.dir/debian/README.Debian");
-    FO_ASSERT_EQUAL(exists, 1); // existing
+    FO_ASSERT_EQUAL(exists, 0); // existing
   }
 }
 

@@ -69,4 +69,8 @@ extern int FatDiskNameInit();
 extern int FatDiskNameClean();
 /* for ununpack-disk.c, end */
 
+/* InitCmd */
+extern int InitCmdInit();
+extern int InitCmdClean();
+
 #endif

@@ -22,7 +22,10 @@ OBJS=	run_tests.o \
 		test_TraverseChild.o \
 		test_TraverseStart.o \
 		test_ununpack-disk.o \
-		test_ununpack-iso.o
+		test_ununpack-iso.o \
+		test_TaintString.o \
+		test_IsFunctions.o \
+		test_ContainerInfo.o
 #		test_TraverseUnunpackEntry.o \
 
 FOCUNIT = libfocunit.a

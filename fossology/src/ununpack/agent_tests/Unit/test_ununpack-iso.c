@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -79,14 +79,29 @@ void testExtractISO4EmptyParameters()
   FO_ASSERT_EQUAL(Result, 1); // fail to Extract  
 }
 
+/**
+ * @brief abnormal parameters
+ */
+void testExtractISO4ErrorParameters()
+{
+  deleteTmpFiles("./test-result/");
+  exists = file_dir_exists("./test-result/");
+  FO_ASSERT_EQUAL(exists, 0); // not existing
+  Filename = "../test-data/testdata4unpack/fcitx_3.6.2.orig.tar.gz";
+  MkDirs("./test-result/fcitx_3.6.2.orig.tar.gz.dir");
+  Result = ExtractISO(Filename, "./test-result/fcitx_3.6.2.orig.tar.gz.dir");
+  FO_ASSERT_EQUAL(Result, 0); // fail to Extract
+}
+
 /* ************************************************************************** */
 /* **** cunit test cases **************************************************** */
 /* ************************************************************************** */
 
 CU_TestInfo ununpack_iso_testcases[] =
 {
-  {"testExtractAR: iso file 1:", testExtractISO1},
+  {"testExtractISO: iso file 1:", testExtractISO1},
   {"testExtractISO: iso file 2:", testExtractISO2},
-  {"testExtractAR: abnormal parameters:", testExtractISO4EmptyParameters},
+  {"testExtractISO: abnormal parameters:", testExtractISO4EmptyParameters},
+  {"testExtractISO: abnormal parameters:", testExtractISO4ErrorParameters},
   CU_TEST_INFO_NULL
 };

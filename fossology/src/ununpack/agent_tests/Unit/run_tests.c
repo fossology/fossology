@@ -39,6 +39,9 @@ extern CU_TestInfo RunCommand_testcases[];
 extern CU_TestInfo Traverse_testcases[];
 extern CU_TestInfo TraverseChild_testcases[];
 extern CU_TestInfo TraverseStart_testcases[];
+extern CU_TestInfo TaintString_testcases[];
+extern CU_TestInfo IsFunctions_testcases[];
+extern CU_TestInfo ContainerInfo_testcases[];
 
 CU_SuiteInfo suites[] = 
 {
@@ -56,6 +59,9 @@ CU_SuiteInfo suites[] =
   {"FindCmd", NULL, FindCmdClean, FindCmd_testcases},
   {"Prune", PruneInit, PruneClean, Prune_testcases},
   {"RunCommand", NULL, NULL, RunCommand_testcases},
+  {"TaintString", NULL, NULL, TaintString_testcases},
+  {"IsFunctions", NULL, NULL, IsFunctions_testcases},
+  {"ContainerInfo", NULL, NULL, ContainerInfo_testcases},
 
   // traverse.c
   {"Traverse", TraverseInit, TraverseClean, Traverse_testcases},
