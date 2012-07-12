@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -63,6 +63,19 @@ void testExtractAR4EmptyParameters()
   FO_ASSERT_EQUAL(Result, 1); // fail to Extract archieve library 
 }
 
+/**
+ * @brief abnormal parameters
+ */
+void testExtractAR4ErrorParameters()
+{
+  deleteTmpFiles("./test-result/");
+  exists = file_dir_exists("./test-result/");
+  FO_ASSERT_EQUAL(exists, 0); // not existing
+  MkDirs("./test-result/fossology-1.2.0-1.el5.i386.rpm.dir/");
+  Filename = "../test-data/testdata4unpack/fossology-1.2.0-1.el5.i386.rpm";
+  Result = ExtractAR(Filename, "./test-result/fossology-1.2.0-1.el5.i386.rpm.dir");
+  FO_ASSERT_EQUAL(Result, 1); // fail to Extract archieve library
+}
 
 /* ************************************************************************** */
 /* **** cunit test cases **************************************************** */
@@ -73,5 +86,6 @@ CU_TestInfo ExtractAR_testcases[] =
   {"Testing function testExtractAR for archive library file:", testExtractAR4ArchiveLibraryFile},
   {"Testing function testExtractAR for deb file:", testExtractAR4DebFile},
   {"Testing function testExtractAR for abnormal parameters:", testExtractAR4EmptyParameters},
+  {"Testing function testExtractAR for abnormal parameters:", testExtractAR4ErrorParameters},
   CU_TEST_INFO_NULL
 };
