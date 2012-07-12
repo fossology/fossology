@@ -102,6 +102,6 @@ CU_TestInfo ununpack_iso_testcases[] =
   {"testExtractISO: iso file 1:", testExtractISO1},
   {"testExtractISO: iso file 2:", testExtractISO2},
   {"testExtractISO: abnormal parameters:", testExtractISO4EmptyParameters},
-  {"testExtractISO: abnormal parameters:", testExtractISO4ErrorParameters},
+  {"testExtractISO: error parameters:", testExtractISO4ErrorParameters},
   CU_TEST_INFO_NULL
 };
