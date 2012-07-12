@@ -41,7 +41,7 @@ import os
 ### utility ####################################################################
 ################################################################################
 defsReplace = re.compile('{(.*?)}')
-defsSplit   = re.compile('(\w+):(\w+)')
+defsSplit   = re.compile('([^\s]+):([^\s]+)')
 
 class DefineError(Exception):
   """ Error class used for missing definitions in the xml file """
@@ -347,15 +347,23 @@ class testsuite:
     return True
   
   def loadConf(self, node, doc, dest):
-    fname = self.substitute(node.getAttribute('file'))
+    dir = self.substitute(node.getAttribute('directory'))
     
     config = ConfigParser.ConfigParser()
-    config.readfp(open(fname))
+    config.readfp(open(dir + "/fossology.conf"))
     
     self.defs["FOSSOLOGY"] = {}
+    self.defs["BUILD"] = {}
+    
     self.defs["FOSSOLOGY"]["port"]  = config.get("FOSSOLOGY", "port")
     self.defs["FOSSOLOGY"]["path"]  = config.get("FOSSOLOGY", "path")
     self.defs["FOSSOLOGY"]["depth"] = config.get("FOSSOLOGY", "depth")
+    
+    config.readfp(open(dir + "/VERSION"))
+    
+    self.defs["BUILD"]["VERSION"] = config.get("BUILD", "VERSION")
+    self.defs["BUILD"]["SVN_REV"] = config.get("BUILD", "SVN_REV")
+    self.defs["BUILD"]["BUILD_DATE"] = config.get("BUILD", "BUILD_DATE")
     
     return True
     

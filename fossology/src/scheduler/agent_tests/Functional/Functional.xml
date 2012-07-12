@@ -13,7 +13,7 @@
    -->
   <setup>
     <concurrently command="{scheduler}" params="--config={config} --log={log} --verbose=952"/>
-    <loadConf file="{config}/fossology.conf"/>
+    <loadConf directory="{config}"/>
     <sleep duration="1"/>
   </setup>
   <cleanup>
@@ -36,7 +36,7 @@
                  cli       = "{agentdir}/fo_cli"/>
     <setup>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:(null) daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </setup>
   
     <!-- Stop the scheduler and make sure it isn't running anymore -->
@@ -66,7 +66,7 @@
                  cli       = "{agentdir}/fo_cli"/>
     <setup>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:(null) daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </setup>
     
     <!-- Test that the correct agents passed the startup test -->
@@ -78,7 +78,7 @@
     <!-- Test that the scheduler has the correct status -->
     <test name = "status">
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:(null) daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </test>
     
     <!-- Test that the host load is correct for no running agents -->
@@ -136,7 +136,7 @@
                  cli       = "{agentdir}/fo_cli"/>
     <setup>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:(null) daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </setup>
     
     <!-- Test that the correct agents passed the startup test -->
@@ -148,7 +148,7 @@
     <!-- Test that the scheduler has the correct status -->
     <test name = "status">
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:(null) daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </test>
     
     <!-- Test that the host load is correct for no running agents -->
@@ -156,6 +156,32 @@
       <sequential command="{cli}" params="--config={config} -l" retval="0"
                   result="host:localhost address:localhost max:10 running:0"/>
     </test>
+  </testsuite>
+  
+  <!-- 
+  @brief Uploads a file to the e
+  
+  
+  -->
+  <testsuite name="Test SimpleUpload">
+    <definitions pwd       = "{$pwd}"
+                 config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
+                 log       = "{config}/fossology.log"
+                 agentdir  = "{pwd}/scheduler/agent"
+                 scheduler = "{agentdir}/fo_scheduler"
+                 cp2foss   = "{pwd}/cli/cp2foss"
+                 fossjobs  = "{pwd}/cli/fossjobs"
+                 cli       = "{agentdir}/fo_cli"
+                 user      = "fossy"
+                 pass      = "fossy"/>
+     <setup>
+       <sequential command="{cli}" params="--config={config} -S" retval="0"
+                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+     </setup>
+  
+  
+  
+  
   </testsuite>
 
 </testsuites>
