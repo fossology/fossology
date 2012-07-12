@@ -171,14 +171,8 @@ $system_temp_dir = sys_get_temp_dir();
 $testing_timestamp = date("Ymd_His");
 $testing_temp_dir = $system_temp_dir . '/fossologytest_' . $testing_timestamp;
 
-if ( mkdir($testing_temp_dir, 0755, TRUE) === FALSE ) {
-    echo "FAIL! Cannot create test configuration directory at: $testing_temp_dir\n" .
-        "    at " . __FILE__ . ":" . __LINE__  . "\n";
-    exit(1);
-} 
-else {
-#    echo "Successfully created test configuration directory at: $testing_temp_dir\n";
-}
+mkdir($testing_temp_dir, 0755, TRUE)
+    or die("FAIL! Cannot create test configuration directory at: $testing_temp_dir\n");
 
 /* Now create a new, unique dataabase */
 #echo "Creating test database... ";
@@ -258,7 +252,8 @@ if ( $plpgsql_already_installed == FALSE ) {
 
 /* now create a valid Db.conf file in the testing temp directory 
    for accessing our fancy pants new test database */
-$db_conf_fh = fopen("$testing_temp_dir/Db.conf", 'w');
+$db_conf_fh = fopen("$testing_temp_dir/Db.conf", 'w')
+    or die("FAIL! Cannot write $testing_temp_dir/Db.conf\n");
 fwrite($db_conf_fh, "dbname   = $test_db_name;\n");
 fwrite($db_conf_fh, "host     = localhost;\n");
 fwrite($db_conf_fh, "user     = fossologytest;\n");
@@ -267,21 +262,13 @@ fwrite($db_conf_fh, "user     = fossologytest;\n");
 // the value we write to the Db.conf file.
 fwrite($db_conf_fh, "password = fossologytest;\n");
 fclose($db_conf_fh);
-#echo "Wrote Db.conf file to $testing_temp_dir\n";
 
 
 /* now create a mods-enabled directory to contain symlinks to the 
    agents in the current working copy of fossology */
 $mods_enabled_dir = "$testing_temp_dir/mods-enabled";
-if ( mkdir($mods_enabled_dir, 0755, TRUE) === FALSE ) {
-    echo "FAIL! Cannot create test mods-enabled directory at: $mods_enabled_dir\n" .
-        "    at " . __FILE__ . ":" . __LINE__  . "\n";
-    exit(1);
-} 
-else {
-#    echo "Successfully created test mods-enabled directory at: $mods_enabled_dir\n";
-}
-
+mkdir($mods_enabled_dir, 0755, TRUE)
+    or die("FAIL! Cannot create test mods-enabled directory at: $mods_enabled_dir\n");
 
 /* here we have to do the work that each of the agents' 'make install'
    targets would normally do, but since we want the tests to be able
@@ -292,40 +279,34 @@ else {
    temporary testing mods-enabled directory we just created;  
    but always skip the cli and lib directories */
 
-$base_dir = realpath(__DIR__ . '/../..');
-$src_dirs = scandir($base_dir);
-#echo "Populating symlinks in $mods_enabled_dir\n";
+$fo_base_dir = realpath(__DIR__ . '/../..');
+$src_dirs = scandir($fo_base_dir);
 
 foreach ($src_dirs as $src_dir) {
-    // skip dotted directories, and lib/ and cli/
-    if (    preg_match('/^\..*/', $src_dir) 
-         || $src_dir == 'lib'
-         || $src_dir == 'cli' ) {
+    $full_src_dir = $fo_base_dir . "/" . $src_dir;
+    // skip dotted directories, lib/, cli/, and other non-agent directories
+    if ( preg_match("/^\./", $src_dir) 
+         || $src_dir == 'lib' 
+         || $src_dir == 'cli' 
+         || $src_dir == 'bsam' 
+         || $src_dir == 'example_wc_agent' 
+         || $src_dir == 'tutorials' 
+         || $src_dir == 'srcdocs' 
+         || $src_dir == 'testing' 
+        ) {
         continue;
     }
-    $full_src_dir = $base_dir . "/" . $src_dir;
     if (is_dir($full_src_dir)) {
-        if (symlink($full_src_dir, "$mods_enabled_dir/$src_dir") != TRUE) {
-            echo "FAIL - could not create symlink for $full_src_dir in $mods_enabled_dir\n";
-            exit (1);
-        }
-        else {
-            #echo "Created symlink for $full_src_dir in $mods_enabled_dir\n";
-        }
+        symlink($full_src_dir, "$mods_enabled_dir/$src_dir")
+            or die("FAIL - could not create symlink for $src_dir in $mods_enabled_dir\n");
     }
 }
 
 /* Now let's set up a test repository location, which is just an empty
    subdirectory within our temporary testing system config directory */
 $test_repo_dir = "$testing_temp_dir/repository";
-if ( mkdir($test_repo_dir, 0755, TRUE) === FALSE ) {
-    echo "FAIL! Cannot create test repository directory at: $test_repo_dir\n" .
-        "    at " . __FILE__ . ":" . __LINE__  . "\n";
-    exit(1);
-} 
-else {
-    #echo "Successfully created test repository directory at: $test_repo_dir\n";
-}
+mkdir($test_repo_dir, 0755, TRUE)
+    or die ("FAIL! Cannot create test repository directory at: $test_repo_dir\n");
 
 
 /* now create a valid fossology.conf file in the testing 
@@ -334,7 +315,8 @@ else {
 // be lazy and just use a system call to gather user and group name
 $user_name = rtrim(`id -un`);
 $group_name = rtrim(`id -gn`);
-$fo_conf_fh = fopen("$testing_temp_dir/fossology.conf", 'w');
+$fo_conf_fh = fopen("$testing_temp_dir/fossology.conf", 'w')
+    or die("FAIL: Could not open $testing_temp_dir/fossology.conf for writing\n");
 fwrite($fo_conf_fh, "; fossology.conf for testing\n");
 fwrite($fo_conf_fh, "[FOSSOLOGY]\n");
 // for the moment, pick a seemingly-innocuous high port number
@@ -352,12 +334,26 @@ fwrite($fo_conf_fh, "localhost = * 00 ff\n");
 fwrite($fo_conf_fh, "[DIRECTORIES]\n");
 fwrite($fo_conf_fh, "PROJECTUSER=$user_name\n");
 fwrite($fo_conf_fh, "PROJECTGROUP=$group_name\n");
-
+fwrite($fo_conf_fh, "MODDIR=$fo_base_dir\n");
+fwrite($fo_conf_fh, "BINDIR=$fo_base_dir/cli\n");
+fwrite($fo_conf_fh, "SBINDIR=$fo_base_dir/cli\n");
+fwrite($fo_conf_fh, "LIBEXECDIR==$fo_base_dir/lib\n");
 fclose($fo_conf_fh);
-#echo "Wrote fossology.conf file to $testing_temp_dir\n";
+
+
+/* Write a VERSION file */
+
+$fo_version_fh = fopen("$testing_temp_dir/VERSION", 'w')
+    or die("FAIL: Could not open $testing_temp_dir/VERSION for writing\n");
+fwrite($fo_version_fh, "[BUILD]\n");
+fwrite($fo_version_fh, "VERSION=trunk\n");
+fwrite($fo_version_fh, "SVN_REV=0000\n");
+$build_date = date("Y/m/d H:i");
+fwrite($fo_version_fh, "BUILD_DATE=$build_date\n");
+fclose($fo_version_fh);
 
 /* now load the fossology core schema into the database */
-$core_schema_dat_file = $base_dir . "/www/ui/core-schema.dat";
+$core_schema_dat_file = $fo_base_dir . "/www/ui/core-schema.dat";
 
 //echo "Connecting to test database via PHP pg_connect()\n";
 // create a native PHP database connection to our test database
@@ -367,20 +363,16 @@ $postgres_params .= "host=localhost ";
    point we may want to query the system to verify the correct postgres
    port number, but not right now.  pg_connect assumes the default
    postgres port of 5432, which is good enough for the moment */
+$postgres_params .= "port=5433 ";
 $postgres_params .= "user=fossologytest ";
 
-$PG_CONN = pg_connect($postgres_params);
-
 // make sure that the new database could actually connect
-if ($PG_CONN == FALSE) {
-    echo "FAIL! Cannot connect to newly-created database $postgres_params\n" .
-        "    at " . __FILE__ . ":" . __LINE__  . "\n";
-    exit(1);
-}
-    
-//echo "Applying the core schema in $core_schema_dat_file\n";
+$PG_CONN = pg_connect($postgres_params)
+    or die("FAIL! Cannot connect to newly-created database $postgres_params\n");
+
 // apply the core schema
-// need to silence the normal output generated by ApplySchema
+// We need to silence the normal output generated by ApplySchema 
+// or it will interfere with our makefile interface
 ob_start();
 ApplySchema($core_schema_dat_file);
 ob_end_clean();
@@ -389,12 +381,6 @@ ob_end_clean();
    the second-to-last line, and the testing database name on the last
    line of the script's output */
 echo "$testing_temp_dir\n";
-
-/* Finally set the FOSSOLOGY_TESTCONFIG environment variable for all
-   subsequent test suites to use */
-putenv("FOSSOLOGY_TESTCONFIG=$testing_temp_dir");
-$_ENV['FOSSOLOGY_TESTCONFIG'] = $testing_temp_dir;
-$GLOBALS['FOSSOLOGY_TESTCONFIG'] = $testing_temp_dir;
 
 // indicate a successful run
 exit(0);
