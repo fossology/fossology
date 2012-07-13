@@ -779,6 +779,7 @@ void scheduler_foss_config(scheduler_t* scheduler)
   GError*  error = NULL;          // error return location
   int32_t  i;                     // indexing variable
   host_t*  host;                  // new hosts will be created in the loop
+  fo_conf* version;               // information loaded from the version file
 
   if(scheduler->sysconfig != NULL)
     fo_config_free(scheduler->sysconfig);
@@ -831,6 +832,16 @@ void scheduler_foss_config(scheduler_t* scheduler)
     g_free(tmp);
     exit(254);
   }
+
+  /* load the version information */
+  tmp = g_strdup_printf("%s/VERSION", scheduler->sysconfigdir);
+  version = fo_config_load(tmp, &error);
+  if(error) FATAL("%s", error->message);
+  g_free(tmp);
+
+  log_printf("%s\n", fo_config_get(version, "BUILD", "SVN_REV", NULL));
+  fo_config_join(scheduler->sysconfig, version, NULL);
+  fo_config_free(version);
 
   /* This will create the load and the print command for the special
    * configuration variables. This uses the l_op operation to load the variable

@@ -255,7 +255,7 @@ void job_status_event(scheduler_t* scheduler, arg_int* params)
   {
     memset(buf, '\0', sizeof(buf));
     sprintf(buf, "scheduler:%d revision:%s daemon:%d jobs:%d log:%s port:%d verbose:%d\n",
-        scheduler->s_pid, fo_config_get(scheduler->sysconfig, "VERSION", "SVN_REV", &error),
+        scheduler->s_pid, fo_config_get(scheduler->sysconfig, "BUILD", "SVN_REV", &error),
         scheduler->s_daemon, g_tree_nnodes(scheduler->job_list), main_log->log_name,
         scheduler->i_port, verbose);
 

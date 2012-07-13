@@ -53,6 +53,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define DEFAULT_SUBJECT "FOSSology scan complete\n"
 #define DEFAULT_COMMAND "/usr/bin/mailx"
 
+#define min(x, y) (x < y ? x : y)
+
 /**
  * We need to pass both a job_t* and the fossology url string to the
  * email_replace() function. This structure allows both of these to be passed.
@@ -592,7 +594,7 @@ static void check_tables(PGconn* db_conn)
       passed = FALSE;
 
       /* print the columns that do not exist */
-      for(i = 0, curr_row = 0; i < curr->ncols; i++)
+      for(i = 0, curr_row = 0; i < min(PQntuples(db_result), curr->ncols); i++)
       {
         if(strcmp(PQgetvalue(db_result, curr_row, 0), curr->columns[i]) != 0)
           ERROR("Column %s.%s does not exist", curr->table, curr->columns[i]);
@@ -622,11 +624,13 @@ void database_init(scheduler_t* scheduler)
 {
   PGresult* db_result;
   gchar* dbConf = NULL;
-  char* ErrorBuf;
+  char* ErrorBuf = NULL;
 
   /* create the connection to the database */
   dbConf = g_strdup_printf("%s/Db.conf", scheduler->sysconfigdir);
   scheduler->db_conn = fo_dbconnect(dbConf, &ErrorBuf);
+  if(ErrorBuf || PQstatus(scheduler->db_conn) != CONNECTION_OK)
+    FATAL("Unable to connect to the database: \"%s\"", ErrorBuf);
 
   /* get the url for the fossology instance */
   db_result = PQexec(scheduler->db_conn, url_checkout);
