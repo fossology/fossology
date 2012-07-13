@@ -84,16 +84,31 @@ $ipv4 = gethostbyname(gethostname());
 $fullHostName = gethostbyaddr(gethostbyname($ipv4));
 $contents = "$fullHostName:*:*:fossy:fossy\n";
 $pgpass = "$userHome/.pgpass";
-$FD = fopen($pgpass,'w+');
-$howmany = fwrite($FD, $contents);
-if($howmany === FALSE)
-{
-  echo "FATAL! Could not write .pgpass file to $pgpass\n";
-  exit(1);
+
+// check for an existing ~/.pgpass.  If one already exists, and if the
+// file already contains a :fossy:fossy entry, then do not modify the
+// file at all
+$pg_pass_contents = "";     // start with an empty string
+if (file_exists($pgpass)) {
+    // read the file contents into the string
+    $pg_pass_contents = file_get_contents($pgpass);
 }
-fclose($FD);
-// chmod so only owner can read/write it, if not set this was postgres will
-// ignore the .pgpass file.
+
+// If a fossy:fossy entry does not already exist then add it.
+// If the .pgpass file already exists do not overwrite, but append
+if (!preg_match('/\:fossy\:fossy/', $pg_pass_contents)) {
+    $FD = fopen($pgpass,'w');
+    $howmany = fwrite($FD, $contents);
+    if($howmany === FALSE)
+    {
+      echo "FATAL! Could not write .pgpass file to $pgpass\n";
+      exit(1);
+    }
+    fclose($FD);
+}
+
+// chmod so only owner can read/write it. If this is not set 
+// postgres will ignore the .pgpass file.
 if(!chmod($pgpass, 0600))
 {
   echo "Warning! could not set $pgpass to 0600\n";
