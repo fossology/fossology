@@ -22,6 +22,7 @@
  *        locally to import the file to repo
  */
 
+#define _GNU_SOURCE
 #include "wget_agent.h"
 
 /**
@@ -86,6 +87,7 @@ int main  (int argc, char *argv[])
   char *VERSION;
   char agent_rev[MAXCMD];
 
+  /* open the connection to the scheduler and configuration */
   fo_scheduler_connect(&argc, argv, &pgConn);
 
   /* Process command-line */
@@ -137,6 +139,8 @@ int main  (int argc, char *argv[])
     Usage(argv[0]);
     SafeExit(-1);
   }
+
+  printf("%s\n", TempFileDir);
 
   /* When initializing the DB, don't do anything else */
   if (InitFlag)
