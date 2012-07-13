@@ -16,6 +16,7 @@
 ######################################################################
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 CFLAGS_LOCAL = $(ALL_CFLAGS) -Werror
@@ -35,8 +36,8 @@ GROUP = `id -ng`
 # executable build rules #
 ##########################
 
-all: test
-test: $(FO_CONF) $(EXES)
+all: $(FOLIB) test
+test: $(FO_CONF) $(EXES) fossology_testconfig
 	cp `echo $$FOSSOLOGY_TESTCONFIG`/Db.conf .
 	cp `echo $$FOSSOLOGY_TESTCONFIG`/VERSION .
 
@@ -60,5 +61,7 @@ $(V_LIST):
 
 clean:
 	rm -rf $(MODDIR) $(V_LIST) $(FO_CONF) *.log Db.conf VERSION
+
+include $(DEPS)
 
 .PHONY: all $(MODDIR) $(EXE) $(FOLIB)
