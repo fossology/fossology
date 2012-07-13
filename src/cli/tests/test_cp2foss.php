@@ -178,7 +178,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $command = "cp2foss $auth http://www.fossology.org/rpms/fedora/10/SRPMS/fossology-1.1.0-1.fc10.src.rpm -d 'fossology des' -f 'fossology path' -n 'test package'";
     $last = exec("$command 2>&1", $out, $rtn);
     // print_r($out);
-    sleep(10);
+    sleep(110);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
     if ($out && $out[5]) {

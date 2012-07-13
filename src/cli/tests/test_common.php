@@ -127,7 +127,11 @@
       exec("sudo chown fossy $file_name");
       exec("sudo chgrp fossy $file_name");
     }
-    if (is_dir($REPO_NAME)) exec("sudo chmod 2770 $REPO_NAME"); /// change mode to 2770
+    if (is_dir("/srv/fossology/$REPO_NAME")) {
+      exec("sudo chmod 2770 /srv/fossology/$REPO_NAME"); // change mode to 2770
+      exec("sudo chown fossy /srv/fossology/$REPO_NAME -R"); // change owner of REPO to fossy
+      exec("sudo chown fossy $SYSCONF_DIR -R"); // change owner of sysconfdir to fossy
+    }
   }
 
   /**
@@ -154,9 +158,10 @@
    */
   function scheduler_operation() {
     global $SYSCONF_DIR;
+    $scheduler_path = "/usr/local/share/fossology/scheduler/agent/fo_scheduler";
+    exec("sudo $scheduler_path -k");  // kill the default scheduler if running
     $scheduler_path = "$SYSCONF_DIR/mods-enabled/scheduler/agent/fo_scheduler";
     exec("sudo $scheduler_path -k");  // kill the running scheduler
-    print "sudo $scheduler_path --daemon --reset --verbose=952 -c $SYSCONF_DIR\n";
     exec("sudo $scheduler_path --daemon --reset --verbose=952 -c $SYSCONF_DIR"); // start the scheduler
   }
 
