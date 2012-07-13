@@ -161,7 +161,7 @@ if(array_key_exists('d', $Options))
   $uni = substr($dropName,$len);
   $rmRepo = $pathPrefix . '/testDbRepo' .$uni;
   $rmConf = $pathPrefix . '/testDbConf' .$uni;
-  $last = system("rm -rf $rmConf $rmRepo", $rmRtn);
+  $last = system("sudo rm -rf $rmConf $rmRepo", $rmRtn);
   exit(0);
 }
 $createEmpty = FALSE;
