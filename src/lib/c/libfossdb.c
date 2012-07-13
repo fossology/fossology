@@ -230,7 +230,7 @@ int fo_tableExists(PGconn *pgConn, char *tableName)
   result = PQexec(pgConn, sql);
   if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__)) return 0;
 
-  TabCount = PQntuples(result);
+  TabCount = atol(PQgetvalue(result, 0, 0));
 
   PQclear(result);
   return(TabCount);
