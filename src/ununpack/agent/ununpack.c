@@ -16,6 +16,8 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *******************************************************************/
+
+#define _GNU_SOURCE
 #include "ununpack.h"
 #include "ununpack_globals.h"
 
@@ -52,7 +54,7 @@ int	main(int argc, char *argv[])
       case 'c':	break;  /* handled by fo_scheduler_connect() */
       case 'd':	
         /* if there is a %U in the path, substitute a unique ID */
-        NewDir=PathCheck(optarg); 
+        NewDir=PathCheck(optarg);
         break;
       case 'F':	UseRepository=1; break;
       case 'f':	ForceDuplicate=1; break;

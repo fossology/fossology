@@ -176,6 +176,7 @@
                  pass      = "fossy"/>
      <setup>
        <upload file="{pwd}/testing/dataFiles/TestData/archives/3files.tar.bz2"/>
+       <schedule upload="{upload_pk:0}"/>
        <sequential command="{cli}" params="--config={config} -S" retval="0"
                   result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
      </setup>

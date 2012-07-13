@@ -1514,12 +1514,12 @@ char *PathCheck(char *DirPath)
     if (gettimeofday(&time_st, 0))
     {
       /* gettimeofday failure */
-      LOG_WARNING("gettimeofday() failure.")
+      LOG_WARNING("gettimeofday() failure.");
       time_st.tv_usec = 999999;
     }
 
     *subs = 0;
-    snprintf(TmpPath, sizeof(TmpPath), "%s/%ul", NewPath, (unsigned)time_st.tv_usec);
+    snprintf(TmpPath, sizeof(TmpPath), "%s%ul", NewPath, (unsigned)time_st.tv_usec);
     free(NewPath);
     NewPath = strdup(TmpPath);
   }
@@ -1531,6 +1531,16 @@ char *PathCheck(char *DirPath)
 
     *subs = 0;
     snprintf(TmpPath, sizeof(TmpPath), "%s%s%s", NewPath, HostName, subs+2);
+    free(NewPath);
+    NewPath = strdup(TmpPath);
+  }
+
+  if ((subs = strstr(NewPath, "%R")) )
+  {
+    /* repo location substitution */
+    *subs = 0;
+
+    snprintf(TmpPath, sizeof(TmpPath), "%s%s%s", NewPath, fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL), subs+2);
     free(NewPath);
     NewPath = strdup(TmpPath);
   }

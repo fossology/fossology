@@ -376,10 +376,11 @@ class testsuite:
     
     This action uploads a new file into the fossology test(hopefully) database
     so that an agent can work with it. This will place the upload_pk for the
-    file in the self.sefs map under the name ['upload_pk']['filename'] where
-    filename is just the filename, not the path + filename.
+    file in the self.sefs map under the name ['upload_pk'][index] where the
+    index is the current number of elements in the ['upload_pk'] mapping. So the
+    upload_pk's for the files should showup in the order they were uploaded.
     
-    Returns True if and only iff cp2foss succeeded
+    Returns True if and only if cp2foss succeeded
     """
     file = self.substitute(node.getAttribute('file'))
     
@@ -393,9 +394,37 @@ class testsuite:
     result = proc.stdout.readlines()
     if 'upload_pk' not in self.defs:
       self.defs['upload_pk'] = {}
-    self.defs['upload_pk'][file.split('/')[-1]] = re.search(r'\d+', result[-1]).group(0)
+    self.defs['upload_pk'][str(len(self.defs['upload_pk']))] = re.search(r'\d+', result[-1]).group(0)
     
     return True
+  
+  def schedule(self, node ,doc, dest):
+    """
+    Action
+    
+    Attributes:
+      upload [require]: the index of the upload in the ['upload_pk'] mapping
+      agents [optional]: comma seperated list of agent to schedule. If this is
+          not specified, all agents will be scheduled
+    
+    This action will schedule agents to run on a particular upload.
+    
+    Returns True if and only if fossjobs succeeded
+    """
+    upload = self.substitute(node.getAttribute('upload'))
+    agents = self.substitute(node.getAttribute('agents'))
+    
+    if not agents:
+      agents = ""
+    
+    cmd = self.substitute('{pwd}/cli/fossjobs -c {config} --user {user} --password {pass} -U ' + upload + ' -A ' + agents)
+    proc = subprocess.Popen(cmd, 0, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    proc.wait()
+    
+    if proc.returncode != 0:
+      return False
+    return True
+    
   
   ################################
   # run tests and produce output #
@@ -457,8 +486,9 @@ class testsuite:
 def main():
   usage = "usage: %prog [options]"
   parser = OptionParser(usage = usage)
-  parser.add_option("-t", "--tests",   dest = "testfile",   help = "The xml file to pull the tests from")
-  parser.add_option("-r", "--results", dest = "resultfile", help = "The file to output the junit xml to" )
+  parser.add_option("-t", "--tests",    dest = "testfile",   help = "The xml file to pull the tests from")
+  parser.add_option("-r", "--results",  dest = "resultfile", help = "The file to output the junit xml to" )
+  parser.add_option("-s", "--specific", dest = "specific",   help = "Only run the test with this particular name")
   
   (options, args) = parser.parse_args()
   
@@ -477,7 +507,7 @@ def main():
   maxRuntime = int(dom.firstChild.getAttribute("timeout"))
   
   for suite in dom.firstChild.getElementsByTagName('testsuite'):
-    if not suite.hasAttribute("disable"):
+    if not options.specific or (suite.getAttribute("name") == options.specific) and not suite.hasAttribute("disable"):
       suiteNode = resultsDoc.createElement("testsuite")
       errors = 0
       
