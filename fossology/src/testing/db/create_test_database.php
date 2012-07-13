@@ -337,7 +337,7 @@ fwrite($fo_conf_fh, "PROJECTGROUP=$group_name\n");
 fwrite($fo_conf_fh, "MODDIR=$fo_base_dir\n");
 fwrite($fo_conf_fh, "BINDIR=$fo_base_dir/cli\n");
 fwrite($fo_conf_fh, "SBINDIR=$fo_base_dir/cli\n");
-fwrite($fo_conf_fh, "LIBEXECDIR==$fo_base_dir/lib\n");
+fwrite($fo_conf_fh, "LIBEXECDIR=$fo_base_dir/lib\n");
 fclose($fo_conf_fh);
 
 
