@@ -42,7 +42,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     print "Starting functional test for fossjobs \n";
     create_db();
     add_user();
-    replace_repo();
+    preparations();
     scheduler_operation();
   }
 
@@ -157,7 +157,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
    * \brief clean the env
    */
   protected function tearDown() {
-    rollback_repo(); // rollback the repo dir in ununpack.conf and wget_agent.conf to the default
+    stop_scheduler(); 
     drop_db();
     print "End up functional test for fossjobs \n";
   }
