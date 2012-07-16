@@ -140,8 +140,6 @@ int main  (int argc, char *argv[])
     SafeExit(-1);
   }
 
-  printf("%s\n", TempFileDir);
-
   /* When initializing the DB, don't do anything else */
   if (InitFlag)
   {

@@ -534,6 +534,16 @@ char *PathCheck(char *DirPath)
     NewPath = strdup(TmpPath);
   }
 
+  if ((subs = strstr(NewPath, "%R")) )
+  {
+    /* repo location substitution */
+    *subs = 0;
+
+    snprintf(TmpPath, sizeof(TmpPath), "%s%s%s", NewPath, fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL), subs+2);
+    free(NewPath);
+    NewPath = strdup(TmpPath);
+  }
+
   return(NewPath);
 }
 

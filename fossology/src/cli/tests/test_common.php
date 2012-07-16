@@ -116,38 +116,26 @@
   /**
    * \brief replace default repo with new repo
    */
-  function replace_repo() {
+  function preparations() {
     global $SYSCONF_DIR;
     global $REPO_NAME;
-    $file_list = array("$SYSCONF_DIR/mods-enabled/wget_agent/wget_agent.conf",
-                       "$SYSCONF_DIR/mods-enabled/ununpack/ununpack.conf");
-    foreach ($file_list as $file_name) {
-      exec("sed s/repository/$REPO_NAME/ $file_name > /tmp/tmp.conf");
-      exec("sudo mv /tmp/tmp.conf $file_name");
-      exec("sudo chown fossy $file_name");
-      exec("sudo chgrp fossy $file_name");
-    }
+    add_proxy(); // add proxy
     if (is_dir("/srv/fossology/$REPO_NAME")) {
       exec("sudo chmod 2770 /srv/fossology/$REPO_NAME"); // change mode to 2770
       exec("sudo chown fossy /srv/fossology/$REPO_NAME -R"); // change owner of REPO to fossy
+      exec("sudo chgrp fossy /srv/fossology/$REPO_NAME -R"); // change grp of REPO to fossy
+    }
+    if (is_dir($SYSCONF_DIR)) {
       exec("sudo chown fossy $SYSCONF_DIR -R"); // change owner of sysconfdir to fossy
+      exec("sudo chgrp fossy $SYSCONF_DIR -R"); // change grp of sysconfdir to fossy
     }
   }
 
   /**
-   * \brief rollback to default repo
+   * \brief at the end of this testing, stop the testing scheduler 
    */
-  function rollback_repo() {
+  function stop_scheduler() {
     global $SYSCONF_DIR;
-    global $REPO_NAME;
-    $file_list = array("$SYSCONF_DIR/mods-enabled/wget_agent/wget_agent.conf",
-                       "$SYSCONF_DIR/mods-enabled/ununpack/ununpack.conf");
-    foreach ($file_list as $file_name) {
-      exec("sed s/$REPO_NAME/repository/ $file_name > /tmp/tmp.conf");
-      exec("sudo mv /tmp/tmp.conf $file_name");
-      exec("sudo chown fossy $file_name");
-      exec("sudo chgrp fossy $file_name");
-    }
     /** stop the scheduler in this test */
     $scheduler_path = "$SYSCONF_DIR/mods-enabled/scheduler/agent/fo_scheduler";
     exec("sudo $scheduler_path -k");  // kill the running scheduler
@@ -164,5 +152,17 @@
     exec("sudo $scheduler_path -k");  // kill the running scheduler
     exec("sudo $scheduler_path --daemon --reset --verbose=952 -c $SYSCONF_DIR"); // start the scheduler
   }
+
+/**
+ * \brief add proxy for testing
+ */
+function add_proxy($proxy_type='http_proxy', $porxy='web-proxy.cce.hp.com:8088') {
+  global $SYSCONF_DIR;
+
+  $foss_conf = $SYSCONF_DIR."/fossology.conf";
+  exec("sudo sed 's/.$proxy_type.*=.*/$proxy_type=$porxy/' $foss_conf >/tmp/fossology.conf");
+  exec("sudo mv /tmp/fossology.conf $foss_conf");
+}
+
 
 ?>
