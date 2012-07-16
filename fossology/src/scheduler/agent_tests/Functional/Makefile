@@ -31,10 +31,11 @@ test_dst = scheduler-Xunit.xml
 ##########################
 
 all:
+
+test: fossology_testconfig
+	$(MAKE) -C $(TOP)/src
 	$(MAKE) -C $(AGENT_DIR)/
 	$(MAKE) -C $(TEST_AGENTS)/
-
-test: fossology_testconfig all
 	$(regression) --tests=$(test_src) --results=$(test_dst)
 
 #####################
