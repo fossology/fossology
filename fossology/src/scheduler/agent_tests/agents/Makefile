@@ -38,8 +38,8 @@ GROUP = `id -ng`
 
 all: $(FOLIB) test
 test: $(FO_CONF) $(EXES) fossology_testconfig
-	cp `echo $$FOSSOLOGY_TESTCONFIG`/Db.conf .
-	cp `echo $$FOSSOLOGY_TESTCONFIG`/VERSION .
+	cp `echo $(FOSSOLOGY_TESTCONFIG)`/Db.conf .
+	cp `echo $(FOSSOLOGY_TESTCONFIG)`/VERSION .
 
 $(EXES): %: %.c $(FOLIB)
 	@echo $@:
