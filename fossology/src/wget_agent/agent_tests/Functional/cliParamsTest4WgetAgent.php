@@ -41,6 +41,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     global $DB_COMMAND;
     global $DB_NAME;
     global $db_conf;
+    global $REPO_NAME;
 
     $db_conf = "";
 
@@ -53,6 +54,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     }
     preg_match("/(\d+)/", $dbout[0], $matches);
     $test_name = $matches[1];
+    $REPO_NAME = "testDbRepo".$test_name;
     $db_conf = $dbout[0];
 
     $WGET_PATH = '../../agent/wget_agent';
@@ -81,6 +83,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     print "Starting test functional wget agent \n";
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
+    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
     
     $command = "$WGET_PATH http://www.fossology.org/rpms/fedora/10/ -A rpm -R fossology-1.2.1-1.fc10.src.rpm,fossology-1.2.0-1.fc10.src.rpm  -d $TEST_RESULT_PATH";
     exec($command);
@@ -97,6 +100,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     print "Starting test functional wget agent 1 \n";
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
+    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
     
     $command = "$WGET_PATH http://www.fossology.org/debian/1.3.0/ -A gz -R fossology*  -d $TEST_RESULT_PATH";
     //print "command is:$command\n";
@@ -113,6 +117,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
   function testDownloadDirHasChildDirLevel1(){
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
+    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
     $command = "$WGET_PATH http://www.fossology.org/rpms/fedora/10/ -A rpm -R fossology-1.2.1-1.fc10.src.rpm,fossology-1.2.0-1.fc10.src.rpm -l 1 -d $TEST_RESULT_PATH";
     //print "command is:$command\n";
@@ -131,6 +136,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
   function testDownloadDirCurrentDirLevel0(){
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
+    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
     $command = "$WGET_PATH http://www.fossology.org/debian/1.3.0/fossology-web-single_1.3.0~3780_all.deb";
     //print "command is:$command\n";
@@ -162,6 +168,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
   function testDownloadAcceptRejectType1(){
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
+    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
     $command = "$WGET_PATH http://www.fossology.org/rpms/fedora/10/SRPMS/ -A fossology* -R fossology-1.2.0-1.fc10.src.rpm,fossology-1.2.1-1.fc10.src.rpm -d $TEST_RESULT_PATH -l 2";
     //print "command is:$command\n";
@@ -177,6 +184,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
   function testtDownloadAcceptRejectType2(){
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
+    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
     $command = "$WGET_PATH http://www.fossology.org/debian/1.3.0/ -A fossology-scheduler-single* -R gz,fossology-scheduler-single_1.3.0~3780_i38* -d $TEST_RESULT_PATH -l 1";
     //print "command is:$command\n";
@@ -185,6 +193,25 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/debian/1.3.0/fossology-scheduler-single_1.3.0~3780_i386.deb");
     print "ending test functional wget agent \n";
   }
+
+  /**
+   * \brief replace default repo with new repo
+   */
+  function preparations() {
+    global $REPO_NAME;
+    global $db_conf;
+
+    if (is_dir("/srv/fossology/$REPO_NAME")) {
+      exec("sudo chmod 2770 /srv/fossology/$REPO_NAME"); // change mode to 2770
+      exec("sudo chown fossy /srv/fossology/$REPO_NAME -R"); // change owner of REPO to fossy
+      exec("sudo chgrp fossy /srv/fossology/$REPO_NAME -R"); // change grp of REPO to fossy
+    }
+    if (is_dir($db_conf)) {
+      exec("sudo chown fossy $SYSCONF_DIR -R"); // change owner of sysconfdir to fossy
+      exec("sudo chgrp fossy $SYSCONF_DIR -R"); // change grp of sysconfdir to fossy
+    }
+  }
+
 
   /**
    * \brief change proxy to test
@@ -241,9 +268,9 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
 
     // https_proxy
     $this->change_proxy("https_proxy", "web-proxy.cce.hp.com:8088");
-    $command = "$WGET_PATH https://www.google.com -l 1 -d $TEST_RESULT_PATH";
+    $command = "$WGET_PATH https://www.google.com/images/srpr/nav_logo80.png -l 1 -d $TEST_RESULT_PATH";
     exec($command);
-    $this->assertFileExists("$TEST_RESULT_PATH/www.google.com");
+    $this->assertFileExists("$TEST_RESULT_PATH/www.google.com/images/srpr/nav_logo80.png");
   }
 
   /**
