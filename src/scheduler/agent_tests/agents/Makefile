@@ -36,7 +36,7 @@ GROUP = `id -ng`
 # executable build rules #
 ##########################
 
-all: $(FOLIB) test
+all: $(FOLIB)
 
 test: $(FO_CONF) $(EXES) fossology_testconfig
 	cp $(FOSSOLOGY_TESTCONFIG)/Db.conf .
