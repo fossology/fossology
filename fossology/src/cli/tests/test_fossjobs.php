@@ -66,7 +66,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
       $upload_id = get_upload_id($out[4]);
     } else $this->assertFalse(TRUE);
 
-    sleep(5); //wait for the agents complete
+    sleep(20); //wait for the agents complete
 
     $agent_status = 0;
     $agent_status = check_agent_status("ununpack", $upload_id);
