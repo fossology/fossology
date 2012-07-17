@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -167,34 +167,29 @@ class core_auth extends FO_Plugin {
 		session_start();
         if (array_key_exists('UserId', $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION['UserId'];
 		$Now = time();
-		if (!empty($_SESSION['time'])) {
+		if (!empty($_SESSION['time'])) 
+        {
 			/* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
-			if (@$_SESSION['time'] + (60 * 480) < $Now) {
-				$_SESSION['User'] = NULL;
-				$_SESSION['UserId'] = NULL;
-                $SysConf['auth']['UserId'] = NULL;
-				$_SESSION['UserLevel'] = NULL;
-				$_SESSION['UserEmail'] = NULL;
-				$_SESSION['Folder'] = NULL;
-			}
+			if (@$_SESSION['time'] + (60 * 480) < $Now) $this->UpdateSess("");
 		}
+
 		$_SESSION['time'] = $Now;
-		if (empty($_SESSION['ip'])) {
+		if (empty($_SESSION['ip'])) 
+        {
 			$_SESSION['ip'] = $this->GetIP();
-		} else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP())) {
+		} 
+        else 
+        if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP())) 
+        {
 			/* Sessions are not transferable. */
-			$_SESSION['User'] = NULL;
-			$_SESSION['UserId'] = NULL;
-            $SysConf['auth']['UserId'] = NULL;
-			$_SESSION['UserLevel'] = NULL;
-			$_SESSION['UserEmail'] = NULL;
-			$_SESSION['Folder'] = NULL;
+            $this->UpdateSess("");
 			$_SESSION['ip'] = $this->GetIP();
 		}
 
 		/* Enable or disable plugins based on login status */
 		$Level = PLUGIN_DB_NONE;
-		if (@$_SESSION['User']) {
+		if (@$_SESSION['User']) 
+        {
 			/* If you are logged in, then the default level is "Download". */
 			if ("X" . $_SESSION['UserLevel'] == "X") {
 				$Level = PLUGIN_DB_DOWNLOAD;
@@ -211,80 +206,40 @@ class core_auth extends FO_Plugin {
 				DBCheckResult($result, $sql, __FILE__, __LINE__);
 				$R = pg_fetch_assoc($result);
 				pg_free_result($result);
-				$_SESSION['User'] = $R['user_name'];
-				$_SESSION['Folder'] = $R['root_folder_fk'];
-				$_SESSION['UserLevel'] = $R['user_perm'];
-				$_SESSION['UserEmail'] = $R['user_email'];
-				$_SESSION['UserEnote'] = $R['email_notify'];
-				if(empty($R['ui_preference']))
-				{
-					$_SESSION['UiPref'] = 'original';
-				}
-				$Level = @$_SESSION['UserLevel'];
+                $this->UpdateSess($R);
 				/* Check for instant logouts */
-				if (empty($R['user_pass'])) {
-					$_SESSION['User'] = NULL;
-					$_SESSION['UserId'] = NULL;
-                    $SysConf['auth']['UserId'] = NULL;
-					$_SESSION['UserLevel'] = NULL;
-					$_SESSION['UserEmail'] = NULL;
-					$_SESSION['Folder'] = NULL;
-					$sql = "SELECT * FROM users WHERE user_name='Default User';";
-					$result = pg_query($PG_CONN, $sql);
-					DBCheckResult($result, $sql, __FILE__, __LINE__);
-					$row = pg_fetch_assoc($result);
-					pg_free_result($result);
-					if (empty($result)) {
-						$Level = PLUGIN_DB_NONE;
-					} else {
-						$Level = $row['user_perm'];
-						$R = $row;
-						$_SESSION['UserId'] = $R['user_pk'];
-                        $SysConf['auth']['UserId'] = $R['user_pk'];
-						$_SESSION['Folder'] = $R['root_folder_fk'];
-						$_SESSION['UserLevel'] = $R['user_perm'];
-						$_SESSION['UserEmail'] = $R['user_email'];
-						$_SESSION['UserEnote'] = $R['email_notify'];
-						if(empty($R['ui_preference']))
-						{
-							$_SESSION['UiPref'] = 'original';
-						}
-					}
-				}
+				if (empty($R['user_pass']))  $this->UpdateSess("");
 			}
-		} else {
-			/* Default to permissions for "Default User" */
-			$sql = "SELECT * FROM users WHERE user_name='Default User';";
-			$result = pg_query($PG_CONN, $sql);
-			DBCheckResult($result, $sql, __FILE__, __LINE__);
-			$row = pg_fetch_assoc($result);
-			pg_free_result($result);
-			if (empty($result)) {
-				$Level = PLUGIN_DB_NONE;
-			} else {
-				$R = $row;
-				$Level = $R['user_perm'];
-				$_SESSION['UserId'] = $R['user_pk'];
-                $SysConf['auth']['UserId'] = $R['user_pk'];
-				$_SESSION['Folder'] = $R['root_folder_fk'];
-				$_SESSION['UserLevel'] = $R['user_perm'];
-				$_SESSION['UserEmail'] = $R['user_email'];
-				$_SESSION['UserEnote'] = $R['email_notify'];
-				if(empty($R['ui_preference']))
-				{
-					$_SESSION['UiPref'] = 'original';
-				}
-				else
-				{
-					$_SESSION['UiPref'] = 'original';
-				}
-			}
-		}
+		} 
+        else 
+          $this->UpdateSess("");
 
-		/* Disable all plugins with >= $Level access */
-		plugin_disable($Level);
+		/* Disable all plugins with >= level access */
+		plugin_disable($_SESSION['UserLevel']);
 		$this->State = PLUGIN_STATE_READY;
 	} // PostInitialize()
+
+    /**
+     * \brief Set $_SESSION and $SysConf user variables
+     * \param $UserRow users table row, if empty, use Default User
+     * \return void, updates globals $_SESSION and $SysConf[auth][UserId] variables
+     */
+    function UpdateSess($UserRow)
+    {
+      global $SysConf;
+
+      if (empty($UserRow))
+        $UserRow = GetSingleRec("Users", "where user_name='Default User'");
+
+      $_SESSION['UserId'] = $UserRow['user_pk'];
+      $SysConf['auth']['UserId'] = $UserRow['user_pk'];
+      $_SESSION['User'] = $UserRow['user_name'];
+      $_SESSION['Folder'] = $UserRow['root_folder_fk'];
+      $_SESSION['UserLevel'] = $UserRow['user_perm'];
+      $_SESSION['UserEmail'] = $UserRow['user_email'];
+      $_SESSION['UserEnote'] = $UserRow['email_notify'];
+    }
+
 
 	/**
 	 * \brief See if a username/password is valid.
@@ -329,20 +284,7 @@ class core_auth extends FO_Plugin {
 			} /* empty password required */
 		}
 		/* If you make it here, then username and password were good! */
-		$_SESSION['User'] = $R['user_name'];
-		$_SESSION['UserId'] = $R['user_pk'];
-        $SysConf['auth']['UserId'] = $R['user_pk'];
-		$_SESSION['UserEmail'] = $R['user_email'];
-		$_SESSION['UserEnote'] = $R['email_notify'];
-		if(empty($R['ui_preference']))
-		{
-			$_SESSION['UiPref'] = 'simple';
-		}
-		else
-		{
-			$_SESSION['UiPref'] = $R['ui_preference'];
-		}
-		$_SESSION['Folder'] = $R['root_folder_fk'];
+        $this->UpdateSess($R);
 		$_SESSION['time_check'] = time() + (480 * 60);
 		/* No specified permission means ALL permission */
 		if ("X" . $R['user_perm'] == "X") {
@@ -392,7 +334,7 @@ class core_auth extends FO_Plugin {
 			case "XML":
 				break;
 			case "HTML":
-				if (empty($_SESSION['User'])) {
+				if ($_SESSION['User'] == "Default User") {
 					$User = GetParm("username", PARM_TEXT);
 					$Pass = GetParm("password", PARM_TEXT);
 					$Referer = GetParm("HTTP_REFERER", PARM_TEXT);
@@ -449,37 +391,14 @@ class core_auth extends FO_Plugin {
 						$V.= "</table>";
 						$V.= "<P/>";
 						$V.= "<script type=\"text/javascript\">document.getElementById(\"unamein\").focus();</script>";
-						/* Commenting out the Validate IP option since it's probably overkill for this app,
-						 and it confuses people.
-						 $text = _("Validate IP.\n");
-						 $V.= "<input type='checkbox' name='checkip' value='1'>$text";
-						 $Referer = @$_SERVER['HTTP_REFERER'];
-						 if (!empty($Referer)) {
-						 $V.= "<input type='hidden' name='redirect' value='$Referer'>";
-						 }
-						 $text = _("This option deters session hijacking by linking your session to your IP address (");
-						 $text1 = _("). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.");
-						 $V.= "$text" . @$_SESSION['ip'] . "$text1<P />\n";
-						 */
 						$text = _("Login");
 						$V.= "<input type='submit' value='$text'>\n";
 						$V.= "</form>\n";
 					}
 				} else
 				/* It's a logout */ {
-				//echo "<pre>Output:It's a logout\n</pre>";
-				$_SESSION['User'] = NULL;
-				$_SESSION['UserId'] = NULL;
-                $SysConf['auth']['UserId'] = NULL;
-				$_SESSION['UserLevel'] = NULL;
-				$_SESSION['UserEmail'] = NULL;
-				$_SESSION['Folder'] = NULL;
+                $this->UpdateSess("");
 				$Uri = Traceback_uri();
-				if(stristr($Uri, 'simpleIndex.php'))
-				{
-					$Uri = str_replace('simpleIndex.php', 'index.php?mod=Default', $Uri);
-				}
-				//echo "<pre>Output:Uri is:$Uri\n</pre>";
 				$V.= "<script language='javascript'>\n";
 				$V.= "window.open('$Uri','_top');\n";
 				$V.= "</script>\n";

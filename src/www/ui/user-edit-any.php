@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -25,6 +25,7 @@ class user_edit_any extends FO_Plugin {
   var $Version = "1.0";
   var $Dependency = array();
   var $DBaccess = PLUGIN_DB_USERADMIN;
+  var $LoginFlag = 1;
 
   /**
    * \brief Edit a user.

@@ -34,22 +34,22 @@ class ui_browse extends FO_Plugin {
   public $DBaccess = PLUGIN_DB_READ;
   public $LoginFlag = 0;
 
-
+/*
   function PostInitialize()
   {
-    /* Keep the Browse main menu item from appearing if there are
+    * Keep the Browse main menu item from appearing if there are
      * browse restrictions and the user isn't logged in.
      * Technically, this PostInitialize() is incorrect, but it implements
      * the above expected behavior, which for practical purposes is reasonable
      * because if one wants to give the default user permission to browse,
      * they should turn on GlobalBrowse (i.e. no browse restrictions).
-     */
     if (IsRestrictedTo() and empty($_SESSION["User"]))
     $this->State = PLUGIN_STATE_INVALID;
     else
     $this->State = PLUGIN_STATE_READY;
     return $this->State;
   }
+     */
 
 
   /**
