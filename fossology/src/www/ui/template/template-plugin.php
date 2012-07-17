@@ -71,7 +71,7 @@ class FO_Plugin
    * Access level restrictions
    */
   var $DBaccess=PLUGIN_DB_NONE; /* what kind of access is needed? */
-  var $LoginFlag=1;	/* Must you be logged in to access this plugin? 1=yes, 0=no */
+  var $LoginFlag=0;	/* Must you be logged in to access this plugin? 1=yes, 0=no */
 
   /**
    * Common for HTML output

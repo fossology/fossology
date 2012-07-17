@@ -30,12 +30,29 @@ class search extends FO_Plugin
   var $LoginFlag  = 0;
   var $MaxPerPage  = 100;  /* maximum number of result items per page */
 
+  function PostInitialize()
+  {
+/*
+    * Only show the global search menu if there are no browse restrictions
+     * browse restrictions and the user isn't logged in.
+     * Technically, this PostInitialize() is incorrect, but it implements
+     * the above expected behavior, which for practical purposes is reasonable
+     * because if one wants to give the default user permission to browse,
+     * they should turn on GlobalBrowse (i.e. no browse restrictions).
+     */
+    if (IsRestrictedTo() === false)
+      $this->State = PLUGIN_STATE_READY;
+    else
+      $this->State = PLUGIN_STATE_INVALID;
+    return $this->State;
+  }
+
   /**
    * \brief Customize submenus.
    */
   function RegisterMenus()
   {
-    if (!IsRestrictedTo())
+    if (IsRestrictedTo() === false)
       menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
 
     // For all other menus, permit coming back here.

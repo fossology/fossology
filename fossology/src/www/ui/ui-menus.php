@@ -324,7 +324,7 @@ class ui_menu extends FO_Plugin
         /* Handle login information */
         if (plugin_find_id("auth") >= 0 || plugin_find_id("smauth") >= 0)
         {
-          if (empty($_SESSION['User']))
+          if ((empty($_SESSION['User'])) or ($_SESSION['User'] == "Default User"))
           {
             $text = _("login");
             $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>$text</b></a></small>";
