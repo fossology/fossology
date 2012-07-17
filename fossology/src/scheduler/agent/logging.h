@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 /* other libraries */
@@ -72,10 +73,10 @@ extern log_t* main_log;
 
 /** Macro that is called when a thread generated a fatal error */
 #define THREAD_FATAL(file, ...) do { \
-            alprintf(file, "THREAD_FATAL %s.%d: ", __FILE__, __LINE__); \
-            alprintf(file, __VA_ARGS__); \
-            alprintf(file, "\n"); \
-            alprintf(file, "THREAD_FATAL errno is: %s\n", strerror(errno)); \
+            con_printf(file, "THREAD_FATAL %s.%d: ", __FILE__, __LINE__); \
+            con_printf(file, __VA_ARGS__); \
+            con_printf(file, "\n"); \
+            con_printf(file, "THREAD_FATAL errno is: %s\n", strerror(errno)); \
             g_thread_exit(NULL); } while(0)
 
 /** Macro that is called when any type of error is generated */
@@ -118,15 +119,14 @@ extern log_t* main_log;
 #define TVERB_DATAB   (verbose & 0x100)
 #define TVERB_HOST    (verbose & 0x200)
 #define TVERB_SPECIAL (verbose & 0x400)
-#define log_printf(...)                    lprintf(main_log, __VA_ARGS__)
-#define V_JOB(...)       if(TVERB_JOB)     lprintf(main_log, __VA_ARGS__)
-#define V_AGENT(...)     if(TVERB_AGENT)   lprintf(main_log, __VA_ARGS__)
-#define V_SCHED(...)     if(TVERB_SCHED)   lprintf(main_log, __VA_ARGS__)
-#define V_EVENT(...)     if(TVERB_EVENT)   lprintf(main_log, __VA_ARGS__)
-#define V_INTERFACE(...) if(TVERB_INTER)  clprintf(main_log, __VA_ARGS__)
-#define V_DATABASE(...)  if(TVERB_DATAB)   lprintf(main_log, __VA_ARGS__)
-#define V_HOST(...)      if(TVERB_HOST)    lprintf(main_log, __VA_ARGS__)
-#define V_SPECIAL(...)   if(TVERB_SPECIAL) lprintf(main_log, __VA_ARGS__)
+#define V_JOB(...)       if(TVERB_JOB)     log_printf(__VA_ARGS__)
+#define V_AGENT(...)     if(TVERB_AGENT)   log_printf(__VA_ARGS__)
+#define V_SCHED(...)     if(TVERB_SCHED)   log_printf(__VA_ARGS__)
+#define V_EVENT(...)     if(TVERB_EVENT)   log_printf(__VA_ARGS__)
+#define V_INTERFACE(...) if(TVERB_INTER)   con_printf(main_log, __VA_ARGS__)
+#define V_DATABASE(...)  if(TVERB_DATAB)   log_printf(__VA_ARGS__)
+#define V_HOST(...)      if(TVERB_HOST)    log_printf(__VA_ARGS__)
+#define V_SPECIAL(...)   if(TVERB_SPECIAL) log_printf(__VA_ARGS__)
 
 /* ************************************************************************** */
 /* **** logging functions *************************************************** */
@@ -137,8 +137,10 @@ log_t* log_new_FILE(FILE* log_file, gchar* log_name, gchar* pro_name, pid_t pro_
 void log_destroy(log_t* log);
 
 int  lprintf (log_t* log, const char* fmt, ...);
-int  alprintf(log_t* log, const char* fmt, ...);
-int  clprintf(log_t* log, const char* fmt, ...);
+int  clprintf(log_t* log, char* s_name, uint16_t s_line, const char* fmt, ...);
 int  vlprintf(log_t* log, const char* fmt, va_list args);
+
+#define log_printf(...)       lprintf(main_log, __VA_ARGS__)
+#define con_printf(log, ...) clprintf(log, __FILE__, __LINE__, __VA_ARGS__)
 
 #endif /* LOGGING_H_INCLUDE */

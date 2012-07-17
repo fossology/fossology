@@ -32,6 +32,8 @@ typedef struct {
     void(*func)(scheduler_t*, void*); ///< the function that will be executed for this event
     void* argument;                   ///< the arguments for the function
     char* name;                       ///< name of the event, used for debugging
+    char*    source_name;
+    uint16_t source_line;
 } event_t;
 
 /** internal structure for the event loop */
@@ -57,7 +59,7 @@ typedef struct
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
-event_t* event_init(void(*func)(scheduler_t*, void*), void* arg, char* name);
+event_t* event_init(void(*func)(scheduler_t*, void*), void* arg, char* name, char* source_name, uint16_t source_line);
 void     event_destroy(event_t* e);
 
 void     event_loop_destroy();
@@ -66,9 +68,9 @@ void     event_loop_destroy();
 /* **** EventLoop Functions ************************************************* */
 /* ************************************************************************** */
 
-#define event_signal(func, args) event_signal_ext(func, args, #func)
+#define event_signal(func, args) event_signal_ext(func, args, #func, __FILE__, __LINE__)
 
-void event_signal_ext(void* func, void* args, char* name);
+void event_signal_ext(void* func, void* args, char* name, char* s_name, uint16_t s_line);
 int  event_loop_enter(scheduler_t* scheduler, void(*)(scheduler_t*), void(*)(scheduler_t*));
 void event_loop_terminate();
 

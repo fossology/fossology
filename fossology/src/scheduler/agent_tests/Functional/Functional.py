@@ -421,6 +421,7 @@ class testsuite:
     proc = subprocess.Popen(cmd, 0, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     proc.wait()
     
+    print proc.returncode
     if proc.returncode != 0:
       return False
     return True

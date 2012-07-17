@@ -35,7 +35,7 @@ all:
 test: fossology_testconfig
 	$(MAKE) -C $(TOP)/src
 	$(MAKE) -C $(AGENT_DIR)/
-	$(MAKE) -C $(TEST_AGENTS)/
+	$(MAKE) -C $(TEST_AGENTS)/ test
 	$(regression) --tests=$(test_src) --results=$(test_dst)
 
 #####################

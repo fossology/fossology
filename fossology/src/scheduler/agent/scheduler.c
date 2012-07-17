@@ -61,6 +61,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 int verbose = 0;
 int closing = 0;
 
+/* pointer to the main thread */
+GThread* main_thread;
+
 #define SELECT_DECLS(type, name, l_op, w_op, val) type CONF_##name = val;
 CONF_VARIABLES_TYPES(SELECT_DECLS)
 #undef SELECT_DECLS
