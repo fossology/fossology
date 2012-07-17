@@ -76,7 +76,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $command = "fossjobs $auth -U $upload_id -v";
     $last = exec("$command 2>&1", $out, $rtn);
     //print_r($out);
-    sleep(10); //wait for the agents complete
+    sleep(300); //wait for the agents complete
     $agent_status = 0;
     $agent_status = check_agent_status("nomos", $upload_id);
     $this->assertEquals(1, $agent_status);
