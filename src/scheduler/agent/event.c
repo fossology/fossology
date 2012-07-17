@@ -134,13 +134,15 @@ event_t* event_loop_take(event_loop_t* event_loop)
  * @param arg the arguements for the function.
  * @return the new event wrapper for the function and arguments
  */
-event_t* event_init(void(*func)(scheduler_t*, void*), void* arg, char* name)
+event_t* event_init(void(*func)(scheduler_t*, void*), void* arg, char* name, char* source_name, uint16_t source_line)
 {
   event_t* e = g_new(event_t, 1);
 
   e->func = func;
   e->argument = arg;
   e->name = name;
+  e->source_name = source_name;
+  e->source_line = source_line;
 
   return e;
 }
@@ -181,13 +183,13 @@ void event_loop_destroy()
  * @param func
  * @param args
  */
-void event_signal_ext(void* func, void* args, char* name)
+void event_signal_ext(void* func, void* args, char* name, char* s_name, uint16_t s_line)
 {
-  event_loop_put(event_loop_get(), event_init((event_function)func, args, name));
+  event_loop_put(event_loop_get(), event_init((event_function)func, args, name, s_name, s_line));
 }
 
 /**
- * Enters the event loop. This function will not return until another thread
+ * Enters the event loop. This function will not return until another threads
  * chooses to terminate the event loop. Essentially this function should not
  * return until the program is ready to exit. There should also only be one
  * thread working on this part of the event loop.
@@ -216,6 +218,8 @@ int event_loop_enter(scheduler_t* scheduler,
   event_loop->terminated = 0;
   g_async_queue_unlock(event_loop->queue);
 
+  main_thread = g_thread_self();
+
   /* from here on out, this is the only thread in this event loop     */
   /* the loop to execute events is very simple, grab event, run event */
   while(!event_loop->terminated)
@@ -228,11 +232,11 @@ int event_loop_enter(scheduler_t* scheduler,
       continue;
 
     if(TVERB_EVENT && strcmp(e->name, "log_event") != 0)
-      log_printf("EVENT: calling %s \n", e->name);
+      log_printf("EVENT: calling %s, source[%s.%d] \n", e->name, e->source_name, e->source_line);
     e->func(scheduler, e->argument);
 
     if(TVERB_EVENT && strcmp(e->name, "log_event") != 0)
-      log_printf("EVENT: finished %s \n", e->name);
+      log_printf("EVENT: finished %s, source[%s.%d] \n", e->name, e->source_name, e->source_line);
 
     event_destroy(e);
 

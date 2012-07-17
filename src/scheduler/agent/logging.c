@@ -67,24 +67,6 @@ static void log_event(scheduler_t* scheduler, log_event_args* pass)
   g_free(pass);
 }
 
-/**
- * Performs a concurent write the log file. This is necessary so that a normal
- * concurent write can happen and an agent concurrent write can happen.
- *
- * @param fmt formatting string for the arguments
- * @param args variable argument list created by other functions
- */
-static int concurent_log(log_t* log, const char* fmt, va_list args)
-{
-  log_event_args* pass = g_new0(log_event_args, 1);
-
-  pass->log = log;
-  pass->msg = g_strdup_vprintf(fmt, args);
-
-  event_signal(log_event, pass);
-  return 1;
-}
-
 /* ************************************************************************** */
 /* **** logging functions *************************************************** */
 /* ************************************************************************** */
@@ -208,33 +190,6 @@ int lprintf(log_t* log, const char* fmt, ...)
 }
 
 /**
- * agent logging function. Since the agents will log to a different location
- * this takes a file to print the log to. Other than that this will work exactly
- * like lprintf in the all line will be prepended by a time stamp.
- *
- * @param dst the destination file
- * @param fmt the formating string
- * @return 1 on success, o otherwise
- */
-int alprintf(log_t* log, const char* fmt, ...)
-{
-  va_list args;
-  int rc;
-
-  if(!fmt) return 0;
-  if(!log) return 0;
-
-  va_start(args, fmt);
-  if(strcmp(log->log_name, SCHE_PRONAME) == 0)
-    rc = concurent_log(log, fmt, args);
-  else
-    rc = vlprintf(log, fmt, args);
-  va_end(args);
-
-  return rc;
-}
-
-/**
  * The provides the same functionality for lprintf as vprintf does for printf.
  * If somebody wanted to create a custom logging function, they could simply
  * use this function within a va_start va_end pair.
@@ -297,16 +252,27 @@ int vlprintf(log_t* log, const char* fmt, va_list args)
  * @param fmt  the format string like any normal printf function
  * @return  if the printf was successful.
  */
-int clprintf(log_t* log, const char* fmt, ...)
+int clprintf(log_t* log, char* s_name, uint16_t s_line, const char* fmt, ...)
 {
   va_list args;
-  int ret;
+  int ret = 1;
+  log_event_args* pass;
 
   if(!fmt) return 0;
   if(!log) return 0;
 
   va_start(args, fmt);
-  ret = concurent_log(log, fmt, args);
+  if(g_thread_self() != main_thread)
+  {
+    pass = g_new0(log_event_args, 1);
+    pass->log = log;
+    pass->msg = g_strdup_vprintf(fmt, args);
+    event_signal_ext(log_event, pass, "log_event", s_name, s_line);
+  }
+  else
+  {
+    ret = vlprintf(log, fmt, args);
+  }
   va_end(args);
 
   return ret;

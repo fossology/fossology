@@ -103,8 +103,9 @@ void scheduler_update(scheduler_t* scheduler);
 
 void g_tree_clear(GTree* tree);
 
-extern int verbose;
-extern int closing;
+extern int      verbose;
+extern int      closing;
+extern GThread* main_thread;
 
 /* ************************************************************************** */
 /* *** CONFIGURATION                                                      *** */

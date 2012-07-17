@@ -468,7 +468,7 @@ void interface_thread(interface_connection* conn, scheduler_t* scheduler)
       g_output_stream_write(conn->ostr, "Invalid command: \"", 18, NULL, NULL);
       g_output_stream_write(conn->ostr, buffer, strlen(buffer), NULL, NULL);
       g_output_stream_write(conn->ostr, "\"\n", 2, NULL, NULL);
-      clprintf(main_log, "ERROR %s.%d: Interface received invalid command: %s\n", __FILE__, __LINE__, cmd);
+      con_printf(main_log, "ERROR %s.%d: Interface received invalid command: %s\n", __FILE__, __LINE__, cmd);
     }
 
     g_match_info_free(regex_match);

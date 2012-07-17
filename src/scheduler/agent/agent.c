@@ -58,7 +58,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /** prints the credential to the agent log */
 #define AGENT_LOG_CREDENTIAL                                              \
-  alprintf(job_log(agent->owner), "JOB[%d].%s[%d.%s]: ",                  \
+  con_printf(job_log(agent->owner), "JOB[%d].%s[%d.%s]: ",                \
       agent->owner->id, agent->type->name, agent->pid, agent->host->name)
 
 /** ERROR macro specifically for agents */
@@ -90,7 +90,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /** send logging specifically to the agent log file */
 #define AGENT_LOG(...) do {                             \
   AGENT_LOG_CREDENTIAL;                                 \
-  alprintf(job_log(agent->owner), __VA_ARGS__); } while(0)
+  con_printf(job_log(agent->owner), __VA_ARGS__); } while(0)
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
@@ -294,7 +294,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       agent->type->valid = 0;
       agent_fail_event(scheduler, agent);
       agent_kill(agent);
-      clprintf(main_log, "ERROR %s.%d: agent %s.%s has been invalidated, removing from agents\n",
+      con_printf(main_log, "ERROR %s.%d: agent %s.%s has been invalidated, removing from agents\n",
           __FILE__, __LINE__, agent->host->name, agent->type->name);
       AGENT_LOG("agent didn't send version information: \"%s\"\n", buffer);
       return;
@@ -309,15 +309,15 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
     agent->type->version_source = agent->host->name;
     agent->type->version = g_strdup(buffer);
     if(TVERB_AGENT)
-      clprintf(main_log, "META_AGENT[%s.%s] version is: \"%s\"\n",
+      con_printf(main_log, "META_AGENT[%s.%s] version is: \"%s\"\n",
           agent->host->name, agent->type->name, agent->type->version);
   }
   else if(strcmp(agent->type->version, buffer) != 0)
   {
-    alprintf(job_log(agent->owner),
+    con_printf(job_log(agent->owner),
         "ERROR %s.%d: META_DATA[%s] invalid agent spawn check\n",
         __FILE__, __LINE__, agent->type->name);
-    alprintf(job_log(agent->owner),
+    con_printf(job_log(agent->owner),
         "ERROR: versions don't match: %s(%s) != received: %s(%s)\n",
         agent->type->version_source, agent->type->version,
         agent->host->name,        buffer);
