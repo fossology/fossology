@@ -427,11 +427,6 @@ void job_remove_agent(job_t* job, GTree* job_list, void* agent)
   if(job->finished_agents && agent)
     job->finished_agents = g_list_remove(job->finished_agents, agent);
 
-
-  log_printf("JOB[%d] (%s && (%s || %s)\n", job->id,
-      job->finished_agents == NULL ? "true" : "false",
-      job->status == JB_COMPLETE ? "true" : "false",
-      job->status == JB_FAILED ? "true" : "false");
   if(job->finished_agents == NULL && (job->status == JB_COMPLETE || job->status == JB_FAILED))
   {
     V_JOB("JOB[%d]: job removed from system\n", job->id);

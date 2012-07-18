@@ -581,7 +581,6 @@ void interface_destroy(scheduler_t* scheduler)
     scheduler->i_created = 0;
 
     g_cancellable_cancel(scheduler->cancel);
-    g_thread_join(scheduler->server);
     g_thread_pool_free(scheduler->workers, FALSE, TRUE);
 
     scheduler->server  = NULL;
