@@ -842,7 +842,6 @@ void scheduler_foss_config(scheduler_t* scheduler)
   if(error) FATAL("%s", error->message);
   g_free(tmp);
 
-  log_printf("%s\n", fo_config_get(version, "BUILD", "SVN_REV", NULL));
   fo_config_join(scheduler->sysconfig, version, NULL);
   fo_config_free(version);
 
