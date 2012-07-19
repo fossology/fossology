@@ -178,7 +178,7 @@ int	main(int argc, char *argv[])
       PQclear(result);
     }
     else
-      strcpy(uploadtree_tablename, "uploadtree_0");
+      strcpy(uploadtree_tablename, "uploadtree_a");
 
   }
 
