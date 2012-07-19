@@ -138,7 +138,7 @@ if ($UpdateLiceneseRef)
 global $LIBEXECDIR;
 require_once("$LIBEXECDIR/dbmigrate_2.0-2.1.php");
 print "Migrate data\n";
-Migrate_20_21($Verbose);
+//Migrate_20_21($Verbose);
 
 exit(0);
 
