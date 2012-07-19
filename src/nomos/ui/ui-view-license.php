@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -138,6 +138,86 @@ class ui_view_license extends FO_Plugin
     $Text = str_replace("\n","<br>\n",$Text);
     print($Text);    
   } // ViewLicenseText()
+  
+  /** 
+   * \brief display license audit trail on the pop up window
+   *
+   * \param $LicenseFileId - file license ID (fl_pk in table license_file)
+   * \param $Upload - upload id
+   * \param $Item - uploadtree id
+   */
+  function ViewLicenseAuditTrail($LicenseFileId, $Upload, $Item)
+  {
+    global $PG_CONN;
+
+    $FileName = "";
+
+    /** get file name */
+    $uploadtree_tablename = GetUploadtreeTableName($Upload);
+    $sql = "SELECT ufile_name from $uploadtree_tablename where uploadtree_pk = $Item;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $FileName = $row['ufile_name'];
+    pg_free_result($result);
+
+    /** look like: Audit trail on file 'LargeLICENSE.txt' */
+    $text = _("Audit trail on file");
+    print "<b> $text '$FileName' </b> <br><hr>";
+    
+    /**　query license_file_audit, license_file_audit record the origial license */
+    $sql = "SELECT rf_fk, user_fk, date, reason from license_file_audit where fl_fk = $LicenseFileId order by date DESC;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    $org_lic = "";
+    $obj_lic = "";
+    $user = "";
+    $V .= "<table border='1'>\n";
+    $text = _("Original License");
+    $text1 = _("Objective License");
+    $text2 = _("Reason");
+    $text3 = _("User");
+    $text4 = _("Date");
+    $V .= "<tr><th>$text</th><th>$text1</th><th>$text2</th><th>$text3</th><th>$text4</th></tr>\n";
+    $changed_times = pg_num_rows($result);
+    /** get latest license, rf_shortname in license_file alway is latest license  */
+    $sql = "SELECT rf_shortname from license_file_ref where fl_pk = $LicenseFileId;";
+    $result1 = pg_query($PG_CONN, $sql);
+    DBCheckResult($result1, $sql, __FILE__, __LINE__);
+    $row1 = pg_fetch_assoc($result1);
+    $obj_lic = $row1['rf_shortname']; // get the lastest license from license_file_ref
+    pg_free_result($result1);
+    while ($row = pg_fetch_assoc($result))
+    {
+      $user_id = $row['user_fk'];
+      $sql = "select user_name from users where user_pk = $user_id;";
+      $result1 = pg_query($PG_CONN, $sql);
+      DBCheckResult($result1, $sql, __FILE__, __LINE__);
+      $row1 = pg_fetch_assoc($result1);
+      $user = $row1['user_name'];
+      pg_free_result($result1);
+
+      $sql = "SELECT rf_shortname from license_ref where rf_pk = $row[rf_fk];";
+      $result1 = pg_query($PG_CONN, $sql);
+      DBCheckResult($result1, $sql, __FILE__, __LINE__);
+      $row1 = pg_fetch_assoc($result1);
+      $org_lic = $row1['rf_shortname'];
+      pg_free_result($result1);
+      $V .= "<tr>";
+      $V .= "<td>$org_lic</td>";
+      $V .= "<td>$obj_lic</td>";
+      $V .= "<td>$row[reason]</td>";
+      $V .= "<td>$user</td>";
+      $V .= "<td>$row[date]</td>";
+      $V .= "</tr>";
+      $obj_lic = $row1['rf_shortname'];
+    }
+    pg_free_result($result);
+    $V .= "</table><br>\n";
+
+    print($V);    
+  } // ViewLicenseAuditTrail()
 
   /**
    * \brief Given an uploadtree_pk, return each
@@ -213,6 +293,26 @@ class ui_view_license extends FO_Plugin
   } // LicenseGetForFile()
 
   /**
+   * \brief check if this file license has been changed
+   *
+   * \param $fl_pk - file license id
+   *
+   * \return 1: yes, changed, 0: no not changed
+   */
+  function IsChanged($fl_pk) 
+  {
+    global $PG_CONN;
+    $sql = "select count(*) from license_file_audit where fl_fk = $fl_pk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if ($row['count'] == 0) return 0;
+    else return 1;
+  } // IsChanged()
+
+  /**
    * This function is called when user output is
    * requested.  This function is responsible for content.
    * The $ToStdout flag is "1" if output should go to stdout, and
@@ -223,7 +323,6 @@ class ui_view_license extends FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
 
-
     $V="";
     global $Plugins;
     $View = &$Plugins[plugin_find_id("view")];
@@ -232,7 +331,8 @@ class ui_view_license extends FO_Plugin
     $Item = GetParm("item",PARM_INTEGER);
     $nomosagent_pk = GetParm("napk",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
-
+    $LicenseFileId = GetParm("fl_pk",PARM_INTEGER);
+    
     /* only display nomos results if we know the nomosagent_pk 
        Otherwise, we don't know what results to display.  */
     $nomos_out = "";
@@ -250,15 +350,36 @@ class ui_view_license extends FO_Plugin
         $nomos_out = "$text <b>";
       }
       $rec_flag = 0;
-      foreach($nomos_license_array as $one_license_pk => $one_license) {
+      foreach($nomos_license_array as $fl_pk => $one_license) {
         $one_license = trim($one_license);
         if (0 == $rec_flag) {
           $rec_flag = 1;
         } else {
           $nomos_out .= " ,";
         } 
-        $nomos_out .= "<b>";
-        $nomos_out .= "<a title='Show License Reference.' href='javascript:;' onClick=\"javascript:window.open('";
+        
+        /** pop up license audit trail page*/
+        $change_license = "";
+        if ($this->IsChanged($fl_pk)) {
+          $change_license .= "onmouseout=\"javascript:window.open('";
+          $change_license .= Traceback_uri();
+          $change_license .= "?mod=view-license";
+          $change_license .= "&fl_pk=";
+          $change_license .= $fl_pk;
+          $change_license .= "&lic=";
+          $change_license .= $one_license;
+          $change_license .= "&upload=";
+          $change_license .= $Upload;
+          $change_license .= "&item=";
+          $change_license .= $Item;
+          $text = _("License Reference Trail");
+          $change_license .= "','$text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\"";
+        }
+
+        $text = _("A mouse click: Show License Reference; Mouse out: Show License Audit Trail.");
+        $nomos_out .= "<a title='$text' href='javascript:;'";
+        $nomos_out .= $change_license;
+        $nomos_out .= "onClick=\"javascript:window.open('";
         $nomos_out .= Traceback_uri();
         $nomos_out .= "?mod=view-license";
         $nomos_out .= "&lic=";
@@ -267,12 +388,27 @@ class ui_view_license extends FO_Plugin
         $nomos_out .= $Upload;
         $nomos_out .= "&item=";
         $nomos_out .= $Item;
-        $nomos_out .= "','License Text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$one_license</a>";
-        $nomos_out .= "</b>";
+        $text = _("License Text");
+        $nomos_out .= "','$text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\"";
+        $nomos_out .= ">$one_license";
+        $nomos_out .= "</a>";
+        /** edit this license */
+        $text = _("Edit");
+        /** go to the license change page */
+        if (plugin_find_id('change_license') >= 0) {
+          $text1 = _("Edit This Licence Reference");
+          $nomos_out .= "<a title='$text1' href='" . Traceback_uri() . "?mod=change_license&fl_pk=$fl_pk' style='color:#ff0000;font-style:italic'>[$text]</a>";
+        }
       }
     }
 
-    if (!empty($LicShortname))
+    if (!empty($LicenseFileId))
+    {
+      $this->ViewLicenseAuditTrail($LicenseFileId, $Upload, $Item); // keeping an audit trail of who changed what why and when
+      return;
+    }
+
+    if (!empty($LicShortname)) // dispaly the detailed license text of one license
     {
       $this->ViewLicenseText($Item,$LicShortname,$LicIdSet, $nomos_out);
       return;
