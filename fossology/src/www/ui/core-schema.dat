@@ -1689,8 +1689,8 @@
 
   $Schema["TABLE"]["upload"]["uploadtree_tablename"]["DESC"] = "";
   $Schema["TABLE"]["upload"]["uploadtree_tablename"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"uploadtree_tablename\" varchar(18);";
-  $Schema["TABLE"]["upload"]["uploadtree_tablename"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"uploadtree_tablename\" SET NOT NULL, ALTER COLUMN \"uploadtree_tablename\" SET DEFAULT 'uploadtree_0'::character varying;";
-  $Schema["TABLE"]["upload"]["uploadtree_tablename"]["UPDATE"] = "UPDATE upload SET uploadtree_tablename='uploadtree_0'::character varying";
+  $Schema["TABLE"]["upload"]["uploadtree_tablename"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"uploadtree_tablename\" SET NOT NULL, ALTER COLUMN \"uploadtree_tablename\" SET DEFAULT 'uploadtree_a'::character varying;";
+  $Schema["TABLE"]["upload"]["uploadtree_tablename"]["UPDATE"] = "UPDATE upload SET uploadtree_tablename='uploadtree_a'::character varying";
 
 
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["DESC"] = "";
@@ -1732,6 +1732,47 @@
   $Schema["TABLE"]["uploadtree"]["ufile_name"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"ufile_name\" text;";
   $Schema["TABLE"]["uploadtree"]["ufile_name"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"ufile_name\" DROP NOT NULL;";
   $Schema["TABLE"]["uploadtree"]["ufile_name"]["UPDATE"] = "";
+
+
+  $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["DESC"] = "";
+  $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"uploadtree_pk\" int4;";
+  $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"uploadtree_pk\" SET NOT NULL, ALTER COLUMN \"uploadtree_pk\" SET DEFAULT nextval('uploadtree_uploadtree_pk_seq'::regclass);";
+  $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["UPDATE"] = "UPDATE uploadtree_a SET uploadtree_pk=nextval('uploadtree_uploadtree_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["uploadtree_a"]["parent"]["DESC"] = "";
+  $Schema["TABLE"]["uploadtree_a"]["parent"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"parent\" int4;";
+  $Schema["TABLE"]["uploadtree_a"]["parent"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"parent\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree_a"]["parent"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree_a"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["uploadtree_a"]["upload_fk"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["uploadtree_a"]["upload_fk"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["uploadtree_a"]["upload_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree_a"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["uploadtree_a"]["pfile_fk"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"pfile_fk\" int4;";
+  $Schema["TABLE"]["uploadtree_a"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree_a"]["pfile_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree_a"]["ufile_mode"]["DESC"] = "";
+  $Schema["TABLE"]["uploadtree_a"]["ufile_mode"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"ufile_mode\" int4;";
+  $Schema["TABLE"]["uploadtree_a"]["ufile_mode"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"ufile_mode\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree_a"]["ufile_mode"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree_a"]["lft"]["DESC"] = "";
+  $Schema["TABLE"]["uploadtree_a"]["lft"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"lft\" int4;";
+  $Schema["TABLE"]["uploadtree_a"]["lft"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"lft\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree_a"]["lft"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree_a"]["rgt"]["DESC"] = "";
+  $Schema["TABLE"]["uploadtree_a"]["rgt"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"rgt\" int4;";
+  $Schema["TABLE"]["uploadtree_a"]["rgt"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"rgt\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree_a"]["rgt"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree_a"]["ufile_name"]["DESC"] = "";
+  $Schema["TABLE"]["uploadtree_a"]["ufile_name"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"ufile_name\" text;";
+  $Schema["TABLE"]["uploadtree_a"]["ufile_name"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"ufile_name\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree_a"]["ufile_name"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["users"]["user_pk"]["DESC"] = "";
@@ -1907,6 +1948,7 @@
   $Schema["CONSTRAINT"]["tags_uploadtree_pkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_pkey\" PRIMARY KEY (\"tag_uploadtree_pk\");";
   $Schema["CONSTRAINT"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"ufile_rel_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
   $Schema["CONSTRAINT"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pkey_idx\" PRIMARY KEY (\"upload_pk\");";
+  $Schema["CONSTRAINT"]["uploadtree_a_pkey"] = "ALTER TABLE \"uploadtree_a\" ADD CONSTRAINT \"uploadtree_a_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
   $Schema["CONSTRAINT"]["user_pkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_pkey\" PRIMARY KEY (\"user_pk\");";
   $Schema["CONSTRAINT"]["No duplicates"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"No duplicates\" UNIQUE (\"pfile_fk\",\"tok_pfile\",\"tok_match\",\"version\",\"tok_pfile_start\",\"tok_pfile_end\",\"tok_license_start\",\"tok_license_end\",\"tok_license\",\"lic_fk\");";
   $Schema["CONSTRAINT"]["One unique per software version"] = "ALTER TABLE \"agent_lic_raw\" ADD CONSTRAINT \"One unique per software version\" UNIQUE (\"lic_unique\",\"lic_version\");";
@@ -2024,6 +2066,11 @@
   $Schema["INDEX"]["uploadtree"]["parent"] = "CREATE INDEX parent ON uploadtree USING btree (parent);";
   $Schema["INDEX"]["uploadtree"]["projtree_projid_idx"] = "CREATE INDEX projtree_projid_idx ON uploadtree USING btree (upload_fk);";
   $Schema["INDEX"]["uploadtree"]["uploadtree_pfile_fk_idx"] = "CREATE INDEX uploadtree_pfile_fk_idx ON uploadtree USING btree (pfile_fk);";
+
+  $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_lft_idx"] = "CREATE INDEX uploadtree_a_lft_idx ON uploadtree_a USING btree (lft);";
+  $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_parent_idx"] = "CREATE INDEX uploadtree_a_parent_idx ON uploadtree_a USING btree (parent);";
+  $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_pfile_fk_idx"] = "CREATE INDEX uploadtree_a_pfile_fk_idx ON uploadtree_a USING btree (pfile_fk);";
+  $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_idx"] = "CREATE INDEX uploadtree_a_upload_fk_idx ON uploadtree_a USING btree (upload_fk);";
 
 
 ?>
