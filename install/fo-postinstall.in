@@ -204,7 +204,7 @@ if [ $DATABASE ]; then
 fi # end of DATABASE
 
 if [ $LICENSEREF ]; then
-   echo "*** update the license_ref table ***"
+   echo "*** update the database and license_ref table ***"
    {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR}
 fi # end of license reference
 
@@ -240,8 +240,10 @@ fi # end of SCHEDULERONLY
 
 ########################################################################
 if [ $WEBONLY ]; then
-   echo "*** Initializing database tables ***"
-   {$LIBEXECDIR}/fossinit.php -c {$SYSCONFDIR}
+   if [ $LICENSEREF == 0 ] ; then
+     echo "*** Initializing database tables ***"
+     {$LIBEXECDIR}/fossinit.php -c {$SYSCONFDIR}
+   fi
 
    echo "*** Setting up the web interface ***"
 

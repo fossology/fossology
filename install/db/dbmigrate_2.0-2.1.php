@@ -18,8 +18,8 @@
 
 /**
  * @file dbmigrate_2.0-2.1.php
- * @brief This file is called by fossinit.php to create and initialize 
- *        new ARS tables when migrating from a 2.0 database to 2.1.
+ * @brief This file is called by fossinit.php to migrate from
+ *        a 2.0 database to 2.1.
  *
  * This should be called after fossinit calls apply_schema.
  **/
@@ -34,19 +34,16 @@
  **/
 function Migrate_20_21($DryRun)
 {
-  /* if uploadtree_0 already exists, then do nothing but return success */
-  if (DB_TableExists('uploadtree_0')) return 0;
-
-  $sql = "alter table uploadtree rename to uploadtree_0";
+  $sql = "alter table nomos_ars inherit ars_master";
   RunSQL($sql, $DryRun);
 
-  $sql = "create table uploadtree (like uploadtree_0 INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES)";
+  $sql = "alter table bucket_ars inherit ars_master";
   RunSQL($sql, $DryRun);
 
-  $sql = "alter table uploadtree_0 inherit uploadtree";
+  $sql = "alter table uploadtree_a inherit uploadtree";
   RunSQL($sql, $DryRun);
 
-  $sql = "update upload set uploadtree_tablename='uploadtree_0'";
+  $sql = "update upload set uploadtree_tablename='uploadtree_a'";
   RunSQL($sql, $DryRun);
                     
   return 0;
