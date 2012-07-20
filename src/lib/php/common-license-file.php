@@ -63,7 +63,7 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_table
     pg_free_result($result);
 
     /*  Get the licenses under this $uploadtree_pk*/
-    $sql = "SELECT distinct(rf_shortname) as rf_shortname, rf_pk as rf_fk
+    $sql = "SELECT distinct(rf_shortname) as rf_shortname, rf_pk as rf_fk, fl_pk
               from license_file_ref,
                   (SELECT distinct(pfile_fk) as PF from $uploadtree_tablename 
                      where upload_fk=$upload_pk 
@@ -78,7 +78,7 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_table
   $LicArray = array();
   while ($row = pg_fetch_assoc($result))
   {
-    $LicArray[$row['rf_fk']] = $row["rf_shortname"];
+    $LicArray[$row['fl_pk']] = $row["rf_shortname"];
   }
   pg_free_result($result);
   return $LicArray;
