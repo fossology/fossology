@@ -173,13 +173,26 @@
                  fossjobs  = "{pwd}/cli/fossjobs"
                  cli       = "{agentdir}/fo_cli"
                  user      = "fossy"
-                 pass      = "fossy"/>
+                 pass      = "fossy"
+                 dbuser    = "fossologytest"/>
      <setup>
        <upload file="{pwd}/testing/dataFiles/TestData/archives/3files.tar.bz2"/>
        <schedule upload="{upload_pk:0}"/>
        <sequential command="{cli}" params="--config={config} -S" retval="0"
                   result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
      </setup>
+     
+     <test name = "finished">
+        <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = 2;">
+          <eq row="0" col="0" val="1"/>
+          <eq row="1" col="0" val="1"/>
+          <eq row="2" col="0" val="1"/>
+          <eq row="3" col="0" val="1"/>
+          <eq row="4" col="0" val="1"/>
+          <eq row="5" col="0" val="1"/>
+          <eq row="6" col="0" val="1"/>
+        </database>
+     </test>
   
   </testsuite>
 
