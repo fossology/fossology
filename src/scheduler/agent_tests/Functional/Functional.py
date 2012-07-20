@@ -245,15 +245,16 @@ class testsuite:
       particular action should be writing its results to. This is passed in when
       the action is called, not during creation.
     
-    The action should return the number of failures that it experienced. A
-    failing action has different meanings during different parts of the code.
-    During setup, a failing action indicates that the setup is not ready to
-    proceed. Failing actions during setup will be called repeatedly once every
-    five seconds until they no longer register a failure. Failing actions
-    during testing indicate a failing test. The failure will be reported to
-    results document, but the action should still call the failure method to
-    indicate in the results document why the failure happened. During cleanup
-    what an action returns is ignored.
+    The action should return the number of tests that it ran and the number of
+    failures that it experienced. A failing action has different meanings
+    during different parts of the code. During setup, a failing action
+    indicates that the setup is not ready to proceed. Failing actions during
+    setup will be called repeatedly once every five seconds until they no
+    longer register a failure. Failing actions during testing indicate a
+    failing test. The failure will be reported to results document, but the
+    action should still call the failure method to indicate in the results
+    document why the failure happened. During cleanup what an action returns is
+    ignored.
     
     Returns the new action
     """
@@ -289,7 +290,7 @@ class testsuite:
     self.defines['pids'][str(len(self.defines['pids']))] = pidproc.stdout.read()[:-1]
     pidproc.wait()
     
-    return 0
+    return (1, 0)
   
   def sequential(self, node, doc, dest):
     """
@@ -322,14 +323,14 @@ class testsuite:
       if dest and doc:
         self.failure(doc, dest, "ResultMismatch",
             "expected: '{0}' != result: '{1}'".format(expected, result[0].strip()))
-      return 1
+      return (1, 1)
     
     proc.wait()
     
     if len(retval) != 0 and proc.returncode != int(retval):
       self.failure(doc, dest, "IncorrectReturn", "expected: {0} != result: {1}".format(retval, proc.returncode))
-      return 1
-    return 0
+      return (1, 1)
+    return (1, 0)
   
   def sleep(self, node, doc, dest):
     """
@@ -345,7 +346,7 @@ class testsuite:
     """
     duration = node.getAttribute('duration')
     time.sleep(int(duration))
-    return 0
+    return (1, 0)
   
   def loadConf(self, node, doc, dest):
     """
@@ -377,7 +378,7 @@ class testsuite:
     self.defines["BUILD"]["SVN_REV"] = config.get("BUILD", "SVN_REV")
     self.defines["BUILD"]["BUILD_DATE"] = config.get("BUILD", "BUILD_DATE")
     
-    return 0
+    return (1, 0)
   
   def upload(self, node, doc, dest):
     """
@@ -402,14 +403,14 @@ class testsuite:
     proc.wait()
     
     if proc.returncode != 0:
-      return 1
+      return (1, 1)
     
     result = proc.stdout.readlines()
     if 'upload_pk' not in self.defines:
       self.defines['upload_pk'] = {}
     self.defines['upload_pk'][str(len(self.defines['upload_pk']))] = re.search(r'\d+', result[-1]).group(0)
     
-    return 0
+    return (1, 0)
   
   def schedule(self, node ,doc, dest):
     """
@@ -436,8 +437,8 @@ class testsuite:
     proc.wait()
     
     if proc.returncode != 0:
-      return 1
-    return 0
+      return (1, 1)
+    return (1, 0)
   
   def database(self, node, doc, dest):
     """
@@ -461,6 +462,7 @@ class testsuite:
     proc = subprocess.Popen(cmd, 0, shell = True, stdout = subprocess.PIPE)
     proc.wait()
     
+    total  = 0
     passed = 0
     result = [str.split() for str in proc.stdout.readlines()]
     for eq in node.getElementsByTagName('eq'):
@@ -468,6 +470,7 @@ class testsuite:
       col = int(eq.getAttribute('col'))
       val = eq.getAttribute('val')
       
+      total += 1
       if len(result) <= row:
         self.failure(doc, dest, "DatabaseMismatch", "Index out of bounds: {0} > {1}".format(row, len(result)))
         passed += 1
@@ -478,7 +481,7 @@ class testsuite:
         self.failure(doc, dest, "DatabaseMismatch", "[{2}, {3}]: expected: {0} != result: {1}".format(val, result[row][col], row, col))
         passed += 1
     
-    return passed
+    return (total, passed)
   
   ################################
   # run tests and produce output #
@@ -495,7 +498,7 @@ class testsuite:
     totalasserts = 0
 
     for action in self.setup:
-      while action(None, None) != 0:
+      while action(None, None)[1] != 0:
         print ".",
         time.sleep(5)
     print " startup finished ",
@@ -508,15 +511,17 @@ class testsuite:
       
       starttime = time.time()
       for action in test[1]:
-        assertions += 1
         print ".",
-        failures += action(document, testNode)
+        res = action(document, testNode)
+        assertions += res[0]
+        failures += res[1]
       runtime = (time.time() - starttime)
       
       testNode.setAttribute("assertions", str(assertions))
       testNode.setAttribute("time", str(runtime))
       
       tests += 1
+      
       totalasserts += assertions
       
       suiteNode.appendChild(testNode)
