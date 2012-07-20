@@ -26,136 +26,133 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SQLSTATEMENTS_H
 #define SQLSTATEMENTS_H
 
-const char* check_scheduler_tables = "\
-    SELECT column_name FROM information_schema.columns \
-      WHERE table_catalog = '%s' AND table_schema = 'public' \
-        AND table_name = ";
+const char* check_scheduler_tables =
+    " SELECT column_name FROM information_schema.columns "
+    "   WHERE table_catalog = '%s' "
+    "     AND table_schema = 'public' "
+    "     AND table_name = ";
 
-const char* url_checkout = "\
-    SELECT conf_value FROM sysconfig \
-      WHERE variablename = 'FOSSologyURL';";
+const char* url_checkout =
+    " SELECT conf_value FROM sysconfig "
+    "   WHERE variablename = 'FOSSologyURL';";
 
-const char* select_upload_fk =" \
-    SELECT job_upload_fk FROM job, jobqueue \
-      WHERE jq_job_fk = job_pk AND jq_pk = %d;";
+const char* select_upload_fk =
+    " SELECT job_upload_fk FROM job, jobqueue "
+    "   WHERE jq_job_fk = job_pk "
+    "     AND jq_pk = %d;";
 
-const char* upload_common = "\
-    SELECT * FROM jobqueue \
-      WHERE jq_job_fk IN ( \
-        SELECT job_pk FROM job \
-          WHERE job_upload_fk = %d \
-      );";
+const char* upload_common =
+    " SELECT * FROM jobqueue "
+    "   LEFT JOIN job ON jq_job_fk = job_pk"
+    "   WHERE job.job_upload_fk = %d;";
 
-const char* folder_name = "\
-    SELECT folder_name FROM folder \
-      WHERE folder_pk IN ( \
-        SELECT parent_fk FROM foldercontents \
-          WHERE foldercontents_mode = 2 AND child_id = ( \
-            SELECT job_upload_fk FROM job, jobqueue \
-              WHERE jq_job_fk = job_pk AND jq_pk = %d \
-          ) \
-      );";
+const char* folder_name =
+    " SELECT folder_name FROM folder "
+    "   LEFT JOIN foldercontents ON folder_pk = parent_fk "
+    "   LEFT JOIN job ON child_id = job_upload_fk "
+    "   LEFT JOIN jobqueue ON jq_job_fk = job_pk "
+    "   WHERE jq_pk = %d;"
 
-const char* upload_name = "\
-    SELECT upload_filename FROM upload \
-      WHERE upload_pk = ( \
-        SELECT job_upload_fk FROM job, jobqueue \
-          WHERE jq_job_fk = job_pk AND jq_pk = %d \
-      );";
+const char* upload_name =
+    " SELECT upload_filename FROM upload "
+    "   LEFT JOIN job ON upload_pk = job_upload_fk "
+    "   LEFT JOIN jobqueue ON jq_job_fk = job_pk "
+    "   WHERE jq_pk = %d;";
 
-const char* upload_pk = "\
-    SELECT upload_fk, uploadtree_pk FROM uploadtree \
-      WHERE parent IS NULL AND upload_fk = ( \
-        SELECT job_upload_fk FROM job, jobqueue \
-          WHERE jq_job_fk = job_pk AND jq_pk = %d \
-      );";
+const char* upload_pk =
+    " SELECT upload_fk, uploadtree_pk FROM uploadtree "
+    "   LEFT JOIN job ON upload_fk = job_upload_fk "
+    "   LEFT JOIN jobqueue ON jq_job_fk = job_pk "
+    "   WHERE parent IS NULL"
+    "     AND jq_pk = %d;";
 
-const char* jobsql_email = "\
-    SELECT user_name, user_email, email_notify FROM users, upload \
-      WHERE user_pk = user_fk AND upload_pk = %d;";
+const char* jobsql_email =
+    " SELECT user_name, user_email, email_notify FROM users, upload "
+    "   WHERE user_pk = user_fk "
+    "     AND upload_pk = %d;";
 
 /* job queue related sql */
-const char* basic_checkout = "\
-    SELECT * FROM getrunnable()\
-      LIMIT 10;";
+const char* basic_checkout =
+    " SELECT * FROM getrunnable() "
+    "   LIMIT 10;"
 
-const char* change_priority = "\
-    SELECT job_priority FROM job \
-      WHERE job_pk = %s;";
+const char* change_priority =
+    " SELECT job_priority FROM job "
+    "   WHERE job_pk = %s;";
 
-const char* jobsql_started = "\
-    UPDATE jobqueue \
-      SET jq_starttime = now(), \
-          jq_schedinfo ='%s.%d', \
-          jq_endtext = 'Started' \
-      WHERE jq_pk = '%d';";
+const char* jobsql_started =
+    " UPDATE jobqueue "
+    "   SET jq_starttime = now(), "
+    "       jq_schedinfo ='%s.%d', "
+    "       jq_endtext = 'Started' "
+    "   WHERE jq_pk = '%d';";
 
-const char* jobsql_complete = "\
-    UPDATE jobqueue \
-      SET jq_endtime = now(), \
-          jq_end_bits = jq_end_bits | 1, \
-          jq_schedinfo = null, \
-          jq_endtext = 'Completed' \
-      WHERE jq_pk = '%d';";
+const char* jobsql_complete =
+    " UPDATE jobqueue "
+    "   SET jq_endtime = now(), "
+    "       jq_end_bits = jq_end_bits | 1, "
+    "       jq_schedinfo = null, "
+    "       jq_endtext = 'Completed' "
+    "   WHERE jq_pk = '%d';";
 
-const char* jobsql_restart = "\
-    UPDATE jobqueue \
-      SET jq_endtext = 'Restarted', \
-          jq_starttime = ( CASE \
-            WHEN jq_starttime = CAST('9999-12-31' AS timestamp with time zone) \
-            THEN null \
-            ELSE jq_starttime \
-          END ) \
-      WHERE jq_pk = '%d';";
+const char* jobsql_restart =
+    " UPDATE jobqueue "
+    "   SET jq_endtext = 'Restarted', "
+    "       jq_starttime = ( CASE "
+    "         WHEN jq_starttime = CAST('9999-12-31' AS timestamp with time zone) "
+    "         THEN null "
+    "         ELSE jq_starttime "
+    "       END ) "
+    "   WHERE jq_pk = '%d';";
 
-const char* jobsql_failed = "\
-    UPDATE jobqueue \
-      SET jq_endtime = now(), \
-          jq_end_bits = jq_end_bits | 2, \
-          jq_schedinfo = null, \
-          jq_endtext = '%s' \
-      WHERE jq_pk = '%d';";
+const char* jobsql_failed =
+    " UPDATE jobqueue "
+    "   SET jq_endtime = now(), "
+    "       jq_end_bits = jq_end_bits | 2, "
+    "       jq_schedinfo = null, "
+    "       jq_endtext = '%s' "
+    "   WHERE jq_pk = '%d';";
 
-const char* jobsql_processed = "\
-    Update jobqueue \
-      SET jq_itemsprocessed = %d \
-      WHERE jq_pk = '%d';";
+const char* jobsql_processed =
+    " Update jobqueue "
+    "   SET jq_itemsprocessed = %d "
+    "   WHERE jq_pk = '%d';";
 
-const char* jobsql_paused = "\
-    UPDATE jobqueue \
-      SET jq_endtext = 'Paused', \
-          jq_starttime = ( CASE \
-            WHEN jq_starttime IS NULL \
-            THEN CAST('9999-12-31' AS timestamp with time zone) \
-            ELSE jq_starttime \
-          END ) \
-      WHERE jq_pk = '%d';";
+const char* jobsql_paused =
+    " UPDATE jobqueue "
+    "   SET jq_endtext = 'Paused', "
+    "       jq_starttime = ( CASE "
+    "         WHEN jq_starttime IS NULL "
+    "         THEN CAST('9999-12-31' AS timestamp with time zone) "
+    "         ELSE jq_starttime "
+    "       END ) "
+    "   WHERE jq_pk = '%d';";
 
-const char* jobsql_log = "\
-    UPDATE jobqueue \
-      SET jq_log = '%s' \
-      WHERE jq_pk = '%d';";
+const char* jobsql_log =
+    " UPDATE jobqueue "
+    "   SET jq_log = '%s' "
+    "   WHERE jq_pk = '%d';";
 
-const char* jobsql_priority = "\
-    UPDATE job \
-      SET job_priority = '%d' \
-      WHERE job_pk IN ( \
-        SELECT jq_job_fk FROM jobqueue \
-        WHERE jq_pk = '%d');";
+const char* jobsql_priority =
+    " UPDATE job "
+    "   SET job_priority = '%d' "
+    "   WHERE job_pk IN ( "
+    "     SELECT jq_job_fk FROM jobqueue "
+    "     WHERE jq_pk = '%d');";
 
-const char* jobsql_anyrunnable = "\
-    SELECT * FROM getrunnable() \
-      WHERE jq_job_fk = ( \
-        SELECT jq_job_fk FROM jobqueue \
-          WHERE jq_pk = %d \
-      );";
+const char* jobsql_anyrunnable =
+    " SELECT * FROM getrunnable() "
+    "   WHERE jq_job_fk = ( "
+    "     SELECT jq_job_fk FROM jobqueue "
+    "       WHERE jq_pk = %d "
+    "   );";
 
-const char* jobsql_jobendbits = "\
-    SELECT jq_pk, jq_end_bits FROM jobqueue \
-      WHERE jq_job_fk = ( \
-        SELECT jq_job_fk FROM jobqueue \
-          WHERE jq_pk = %d \
-      );";
+const char* jobsql_jobendbits =
+    " SELECT jq_pk, jq_end_bits FROM jobqueue "
+    "   WHERE jq_job_fk = ( "
+    "     SELECT jq_job_fk FROM jobqueue "
+    "       WHERE jq_pk = %d "
+    "   );";
 
 #endif /* SQLSTATEMENTS_H */
 

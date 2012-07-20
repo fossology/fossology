@@ -100,7 +100,7 @@ class testsuite:
     setup, and cleanup and action will be created. For each element under each
     <test></test> tag an action will be created.
     
-    This will also grab the definitions of variables for the self.defs map. The
+    This will also grab the definitions of variables for the self.defines map. The
     variable substitution will be performed when the definition is loaded from
     the file.
     
@@ -112,13 +112,13 @@ class testsuite:
     
     self.name = node.getAttribute('name')
     
-    self.defs = {}
-    self.defs['pids'] = {}
+    self.defines = {}
+    self.defines['pids'] = {}
     
     # get variable definitions
     for i in xrange(definitions.length):
-      if definitions.item(i).name not in self.defs:
-        self.defs[definitions.item(i).name] = self.substitute(definitions.item(i).value, defNode)
+      if definitions.item(i).name not in self.defines:
+        self.defines[definitions.item(i).name] = self.substitute(definitions.item(i).value, defNode)
     
     self.setup   = []
     self.cleanup = []
@@ -189,24 +189,24 @@ class testsuite:
       name  = arrayMatch.group(1)
       index = arrayMatch.group(2)
       
-      if not isinstance(self.defs[name], dict):
+      if not isinstance(self.defines[name], dict):
         raise DefineError('"%s" is not a dictionary in testsuite "%s"' % (name, self.name))
-      if name not in self.defs:
+      if name not in self.defines:
         if node and node.hasAttribute(name):
-          self.defs[name] = self.substitute(node.getAttribute(name))
+          self.defines[name] = self.substitute(node.getAttribute(name))
         else:
           raise DefineError('"%s" not defined in testsuite "%s"' % (name, self.name))
-      if index not in self.defs[name]:
+      if index not in self.defines[name]:
         raise DefineError('"%s" is out of bounds for "%s.%s"' % (index, self.name, name))
-      return self.defs[name][arrayMatch.group(2)]
+      return self.defines[name][arrayMatch.group(2)]
     
     # this is a simply definition access, check validity and return the result
-    if name not in self.defs:
+    if name not in self.defines:
       if node and node.hasAttribute(name):
-        self.defs[name] = self.substitute(node.getAttribute(name), node)
+        self.defines[name] = self.substitute(node.getAttribute(name), node)
       else:
         raise DefineError('"%s" not defined in testsuite "%s"' % (name, self.name))
-    return self.defs[name]
+    return self.defines[name]
   
   def failure(self, doc, dest, type, value):
     """
@@ -229,7 +229,7 @@ class testsuite:
   def createAction(self, node):
     """
     Creates an action given a particular test suite and xml node. This uses
-    simply python reflection to get the method of the testsuite class that has
+    simple python reflection to get the method of the testsuite class that has
     the same name as the xml node tag. The action is a functor that can be
     called later be another part of the test harness.
     
@@ -245,15 +245,15 @@ class testsuite:
       particular action should be writing its results to. This is passed in when
       the action is called, not during creation.
     
-    The action should return True if it correctly executed, and False if it
-    failed. A failing action has different meanings during different parts of
-    the code. During setup, a failing action indicates that the setup is not
-    ready to proceed. Failing actions during setup will be called repeatedly
-    once every five seconds until the return True. Failing actions during
-    testing indicate a failing test. The failure will be reported to results
-    document, but the action should still call the failure method to inticate
-    in the results document why the failure happened. During cleanup what an
-    action returns is ignored.
+    The action should return the number of failures that it experienced. A
+    failing action has different meanings during different parts of the code.
+    During setup, a failing action indicates that the setup is not ready to
+    proceed. Failing actions during setup will be called repeatedly once every
+    five seconds until they no longer register a failure. Failing actions
+    during testing indicate a failing test. The failure will be reported to
+    results document, but the action should still call the failure method to
+    indicate in the results document why the failure happened. During cleanup
+    what an action returns is ignored.
     
     Returns the new action
     """
@@ -286,10 +286,10 @@ class testsuite:
     time.sleep(1)
     self.subpro.append(proc)
     pidproc = subprocess.Popen('pidof {0}'.format(command), 0, shell = True, stdout = subprocess.PIPE)
-    self.defs['pids'][str(len(self.defs['pids']))] = pidproc.stdout.read()[:-1]
+    self.defines['pids'][str(len(self.defines['pids']))] = pidproc.stdout.read()[:-1]
     pidproc.wait()
     
-    return True
+    return 0
   
   def sequential(self, node, doc, dest):
     """
@@ -322,13 +322,14 @@ class testsuite:
       if dest and doc:
         self.failure(doc, dest, "ResultMismatch",
             "expected: '{0}' != result: '{1}'".format(expected, result[0].strip()))
-      return False
+      return 1
     
     proc.wait()
     
-    if len(retval) != 0:
-      return proc.returncode == int(retval)
-    return True
+    if len(retval) != 0 and proc.returncode != int(retval):
+      self.failure(doc, dest, "IncorrectReturn", "expected: {0} != result: {1}".format(retval, proc.returncode))
+      return 1
+    return 0
   
   def sleep(self, node, doc, dest):
     """
@@ -344,28 +345,39 @@ class testsuite:
     """
     duration = node.getAttribute('duration')
     time.sleep(int(duration))
-    return True
+    return 0
   
   def loadConf(self, node, doc, dest):
+    """
+    Action
+    
+    Attributes:
+      directory [required]: the directory location of the fossology.conf file
+    
+    This loads the configuration and VERSION data from the fossology.conf file
+    and the VERSION file. It puts the information in the definitions map.
+    
+    Returns True
+    """
     dir = self.substitute(node.getAttribute('directory'))
     
     config = ConfigParser.ConfigParser()
     config.readfp(open(dir + "/fossology.conf"))
     
-    self.defs["FOSSOLOGY"] = {}
-    self.defs["BUILD"] = {}
+    self.defines["FOSSOLOGY"] = {}
+    self.defines["BUILD"] = {}
     
-    self.defs["FOSSOLOGY"]["port"]  = config.get("FOSSOLOGY", "port")
-    self.defs["FOSSOLOGY"]["path"]  = config.get("FOSSOLOGY", "path")
-    self.defs["FOSSOLOGY"]["depth"] = config.get("FOSSOLOGY", "depth")
+    self.defines["FOSSOLOGY"]["port"]  = config.get("FOSSOLOGY", "port")
+    self.defines["FOSSOLOGY"]["path"]  = config.get("FOSSOLOGY", "path")
+    self.defines["FOSSOLOGY"]["depth"] = config.get("FOSSOLOGY", "depth")
     
     config.readfp(open(dir + "/VERSION"))
     
-    self.defs["BUILD"]["VERSION"] = config.get("BUILD", "VERSION")
-    self.defs["BUILD"]["SVN_REV"] = config.get("BUILD", "SVN_REV")
-    self.defs["BUILD"]["BUILD_DATE"] = config.get("BUILD", "BUILD_DATE")
+    self.defines["BUILD"]["VERSION"] = config.get("BUILD", "VERSION")
+    self.defines["BUILD"]["SVN_REV"] = config.get("BUILD", "SVN_REV")
+    self.defines["BUILD"]["BUILD_DATE"] = config.get("BUILD", "BUILD_DATE")
     
-    return True
+    return 0
   
   def upload(self, node, doc, dest):
     """
@@ -382,6 +394,7 @@ class testsuite:
     
     Returns True if and only if cp2foss succeeded
     """
+    print 'upload',
     file = self.substitute(node.getAttribute('file'))
     
     cmd = self.substitute('{pwd}/cli/cp2foss -c {config} --user {user} --password {pass} ' + file)
@@ -389,21 +402,21 @@ class testsuite:
     proc.wait()
     
     if proc.returncode != 0:
-      return False
+      return 1
     
     result = proc.stdout.readlines()
-    if 'upload_pk' not in self.defs:
-      self.defs['upload_pk'] = {}
-    self.defs['upload_pk'][str(len(self.defs['upload_pk']))] = re.search(r'\d+', result[-1]).group(0)
+    if 'upload_pk' not in self.defines:
+      self.defines['upload_pk'] = {}
+    self.defines['upload_pk'][str(len(self.defines['upload_pk']))] = re.search(r'\d+', result[-1]).group(0)
     
-    return True
+    return 0
   
   def schedule(self, node ,doc, dest):
     """
     Action
     
     Attributes:
-      upload [require]: the index of the upload in the ['upload_pk'] mapping
+      upload [required]: the index of the upload in the ['upload_pk'] mapping
       agents [optional]: comma seperated list of agent to schedule. If this is
           not specified, all agents will be scheduled
     
@@ -411,6 +424,7 @@ class testsuite:
     
     Returns True if and only if fossjobs succeeded
     """
+    print 'schedule',
     upload = self.substitute(node.getAttribute('upload'))
     agents = self.substitute(node.getAttribute('agents'))
     
@@ -421,11 +435,50 @@ class testsuite:
     proc = subprocess.Popen(cmd, 0, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     proc.wait()
     
-    print proc.returncode
     if proc.returncode != 0:
-      return False
-    return True
+      return 1
+    return 0
+  
+  def database(self, node, doc, dest):
+    """
+    Action
     
+    Attributes:
+      sql    [required]: the sql that will be exectued
+    
+    Sub nodes:
+      
+    
+    This action will execute an sql statement on the relevant database. It can
+    check that the results of the sql were correct.
+    
+    Returns True if results aren't expected or the results were correct
+    """
+    sql      = self.substitute(node.getAttribute('sql'))
+    
+    cmd = 'psql --username={0} --host=localhost --dbname={1} --command="{2}" -tA'.format(
+        self.defines["dbuser"], self.defines['config'].split('/')[2], sql)
+    proc = subprocess.Popen(cmd, 0, shell = True, stdout = subprocess.PIPE)
+    proc.wait()
+    
+    passed = 0
+    result = [str.split() for str in proc.stdout.readlines()]
+    for eq in node.getElementsByTagName('eq'):
+      row = int(eq.getAttribute('row'))
+      col = int(eq.getAttribute('col'))
+      val = eq.getAttribute('val')
+      
+      if len(result) <= row:
+        self.failure(doc, dest, "DatabaseMismatch", "Index out of bounds: {0} > {1}".format(row, len(result)))
+        passed += 1
+      elif len(result[row]) <= col:
+        self.failure(doc, dest, "DatabaseMismatch", "Index out of bounds: {0} > {1}".format(col, len(result[row])))
+        passed += 1
+      elif val != result[row][col]:
+        self.failure(doc, dest, "DatabaseMismatch", "[{2}, {3}]: expected: {0} != result: {1}".format(val, result[row][col], row, col))
+        passed += 1
+    
+    return passed
   
   ################################
   # run tests and produce output #
@@ -442,7 +495,7 @@ class testsuite:
     totalasserts = 0
 
     for action in self.setup:
-      while not action(None, None):
+      while action(None, None) != 0:
         print ".",
         time.sleep(5)
     print " startup finished ",
@@ -457,8 +510,7 @@ class testsuite:
       for action in test[1]:
         assertions += 1
         print ".",
-        if not action(document, testNode):
-          failures += 1
+        failures += action(document, testNode)
       runtime = (time.time() - starttime)
       
       testNode.setAttribute("assertions", str(assertions))
