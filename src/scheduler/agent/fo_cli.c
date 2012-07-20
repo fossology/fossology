@@ -389,7 +389,7 @@ int main(int argc, char** argv)
 
       if((bytes = write(s, buffer, strlen(buffer) - 1)) != strlen(buffer) - 1)
       {
-        printf("ERROR: couldn't write %ld bytes to socket\n", bytes);
+        printf("ERROR: couldn't write %Zu bytes to socket\n", bytes);
         closing = 1;
       }
     }
