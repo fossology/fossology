@@ -435,6 +435,7 @@ class ui_browse extends FO_Plugin {
         /************************/
         /* Show the folder path */
         /************************/
+        $uploadtree_tablename = "";
         if (!empty($Item)) {
           /* Make sure the item is not a file */
           $sql = "SELECT ufile_mode, upload_fk FROM uploadtree WHERE uploadtree_pk = '$Item';";
@@ -455,6 +456,7 @@ class ui_browse extends FO_Plugin {
         }
         else if (!empty($Upload)) {
           $V.= "<font class='text'>\n";
+          $uploadtree_tablename = GetUploadtreeTableName($Upload);
           $V.= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse", $uploadtree_tablename) . "\n";
         }
         else {
