@@ -159,9 +159,11 @@
   </testsuite>
   
   <!-- 
-  @brief Uploads a file to the e
+  @brief Uploads a file to the test database and runs all the agents on it
   
-  
+  This will upload a file to the test database and schedule all the agents to
+  run on that file. After the scheduler finishes running, this checks that all
+  the jobs finsihed correctly.
   -->
   <testsuite name="Test SimpleUpload">
     <definitions pwd       = "{$pwd}"
@@ -193,7 +195,6 @@
           <eq row="6" col="0" val="1"/>
         </database>
      </test>
-  
   </testsuite>
 
 </testsuites>

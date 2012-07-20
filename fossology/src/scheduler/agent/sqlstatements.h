@@ -51,7 +51,7 @@ const char* folder_name =
     "   LEFT JOIN foldercontents ON folder_pk = parent_fk "
     "   LEFT JOIN job ON child_id = job_upload_fk "
     "   LEFT JOIN jobqueue ON jq_job_fk = job_pk "
-    "   WHERE jq_pk = %d;"
+    "   WHERE jq_pk = %d;";
 
 const char* upload_name =
     " SELECT upload_filename FROM upload "
@@ -74,7 +74,7 @@ const char* jobsql_email =
 /* job queue related sql */
 const char* basic_checkout =
     " SELECT * FROM getrunnable() "
-    "   LIMIT 10;"
+    "   LIMIT 10;";
 
 const char* change_priority =
     " SELECT job_priority FROM job "
