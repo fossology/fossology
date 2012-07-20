@@ -19,7 +19,8 @@
 /**
  * \file change-license.php
  * \brief change license of one file
- * \note if one file has multiple liceneses, you only can change one each time, certainly, you can delete one license
+ * \note if one file has multiple liceneses, you only can change one each time, if you want to delete this 
+ * lecense, you can change it to No_license_found
  */
 
 define("TITLE_change_license", _("Change License"));
@@ -38,12 +39,11 @@ class change_license extends FO_Plugin {
    * \param $OriginalLicense - original license 
    * \param $ObjectiveLicense - objective license
    * \param $Reason - why do this change
-   * \param $DeleteFlag - delete or not
    * \param $FileName - file name 
    *
    * \return NULL
    */
-  function Change(&$OriginalLicense, &$ObjectiveLicense, &$Reason, $DeleteFlag, &$FileName)
+  function Change(&$OriginalLicense, &$ObjectiveLicense, &$Reason, &$FileName)
   {
     global $SysConf;
     global $PG_CONN;
@@ -60,19 +60,6 @@ class change_license extends FO_Plugin {
       $OriginalLicense = $row['rf_shortname'];
       pg_free_result($result);
     } else return NULL;
-
-    /** try to delete this license */
-    /** ojbect license is NULL, delete button is checked, and original license is not NULL */
-    if (empty($ObjectiveLicense) && !empty($DeleteFlag) && !empty($OriginalLicense)) {
-      $sql = "DELETE FROM license_file where fl_pk = $fl_pk;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-      $text = _("Delele license");
-      $Msg = "$text '$OriginalLicense'.";
-      print displayMessage($Msg,$keep);
-      return NULL;
-    }
 
     /** change the license */
     if (!empty($fl_pk) && !empty($ObjectiveLicense) && empty($DeleteFlag)) {
@@ -103,7 +90,6 @@ class change_license extends FO_Plugin {
         $text = _("is changed to");
         $Msg = "'$OriginalLicense' $text '$ObjectiveLicense'.";
         print displayMessage($Msg,$keep);
-        return (NULL);
       }
 
       $user_pk = $SysConf['auth']['UserId'];
@@ -142,11 +128,10 @@ class change_license extends FO_Plugin {
     $ObjectiveLicense = trim($ObjectiveLicense);
     $Reason = GetParm("change_reason",PARM_TEXT);
     $Reason = trim($Reason);
-    $DeleteFlag = GetParm("delete",PARM_TEXT);
     $OriginalLicense = "";
     $FileName = "";
 
-    $this->Change($OriginalLicense, $ObjectiveLicense, $Reason, $DeleteFlag, $FileName);
+    $this->Change($OriginalLicense, $ObjectiveLicense, $Reason, $FileName);
 
     $V="";
     $V.= "<form enctype='multipart/form-data' method='post'>\n";
@@ -154,13 +139,11 @@ class change_license extends FO_Plugin {
     $text = _("Original License");
     $text1 = _("Objective License");
     $text2 = _("Reason");
-    $text3 = _("Delete?");
-    $V .= "<tr><th width='20%'>$text</th><th width='20%'>$text1</th><th>$text2</th><th width='5%'>$text3</th></tr>\n";
+    $V .= "<tr><th width='20%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
     $V .= "<tr>\n";
     $V .= "<td>$OriginalLicense</td>\n";
     $V .= "<td> <input type='text' style='width:100%' name='object_license'></td>\n";
     $V .= "<td> <input type='text' style='width:100%' name='change_reason'></td>\n";
-    $V .= "<td> <input name='delete' type='checkbox'></td>\n";
     $V .= "</tr>\n";
     $V .= "</table><br>\n";
 
