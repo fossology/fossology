@@ -350,7 +350,9 @@ class ui_view_license extends FO_Plugin
         $nomos_out = "$text <b>";
       }
       $rec_flag = 0;
-      foreach($nomos_license_array as $fl_pk => $one_license) {
+      foreach($nomos_license_array as $rf_fk => $file_license) {
+        $fl_pk = $file_license[0];
+        $one_license = $file_license[1];
         $one_license = trim($one_license);
         if (0 == $rec_flag) {
           $rec_flag = 1;

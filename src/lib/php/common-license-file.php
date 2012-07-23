@@ -30,7 +30,7 @@
  * \param $uploadtree_pk - (used only if $pfile_pk is empty)
  * \param $uploadtree_tablename
  * 
- * \return Array of file licenses   LicArray[rf_pk] = rf_shortname
+ * \return Array of file licenses   LicArray[rf_fk] = arrary(fl_pk, rf_shortname)
  * FATAL if neither pfile_pk or uploadtree_pk were passed in
  */
 function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree')
@@ -78,7 +78,7 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_table
   $LicArray = array();
   while ($row = pg_fetch_assoc($result))
   {
-    $LicArray[$row['fl_pk']] = $row["rf_shortname"];
+    $LicArray[$row['rf_fk']] = array($row['fl_pk'], $row['rf_shortname']);
   }
   pg_free_result($result);
   return $LicArray;
@@ -197,7 +197,7 @@ function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtre
     $first = false;
     else
     $LicStr .= " ,";
-    $LicStr .= $Lic;
+    $LicStr .= $Lic[1];
   }
 
   return $LicStr;

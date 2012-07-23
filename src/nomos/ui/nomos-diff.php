@@ -191,8 +191,9 @@ class ui_nomos_diff extends FO_Plugin
     {
       $licstr = "";
       $DiffLicStyle = "style='background-color:#ffa8a8'";  // mid red pastel
-      foreach ($Child['licarray'] as $rf_pk => $rf_shortname)
+      foreach ($Child['licarray'] as $rf_pk => $file_license)
       {
+        $rf_shortname = $file_license[1];
         if (!empty($licstr)) $licstr .= ", ";
         if (@$OtherChild['licarray'][$rf_pk])
         {
