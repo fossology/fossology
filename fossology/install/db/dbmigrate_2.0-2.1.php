@@ -34,12 +34,6 @@
  **/
 function Migrate_20_21($DryRun)
 {
-  $sql = "alter table nomos_ars inherit ars_master";
-  RunSQL($sql, $DryRun);
-
-  $sql = "alter table bucket_ars inherit ars_master";
-  RunSQL($sql, $DryRun);
-
   $sql = "alter table uploadtree_a inherit uploadtree";
   RunSQL($sql, $DryRun);
 
