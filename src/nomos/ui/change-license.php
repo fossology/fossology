@@ -118,6 +118,26 @@ class change_license extends FO_Plugin {
     }
   } // Change()
 
+  /**
+   * \brief get all license list in fossology
+   *
+   * \return license list options
+   */
+  function LicenseList()
+  {
+    global $PG_CONN;
+    $sql = "SELECT rf_shortname from license_ref order by rf_shortname asc;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $LicenseList = "";
+    while($row = pg_fetch_assoc($result))
+    {
+      $LicenseList .= "<option value = '$row[rf_shortname]'>$row[rf_shortname]</option>";
+    }
+    pg_free_result($result);
+    return $LicenseList;
+  }
+
   /** 
    * \brief display the license changing page
    */
@@ -142,7 +162,10 @@ class change_license extends FO_Plugin {
     $V .= "<tr><th width='20%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
     $V .= "<tr>\n";
     $V .= "<td>$OriginalLicense</td>\n";
-    $V .= "<td> <input type='text' style='width:100%' name='object_license'></td>\n";
+    // $V .= "<td> <input type='text' style='width:100%' name='object_license'></td>\n";
+    $V .= "<td> <select name='object_license'>\n";
+    $V .= $this->LicenseList();
+    $V .= "</select></td>";
     $V .= "<td> <input type='text' style='width:100%' name='change_reason'></td>\n";
     $V .= "</tr>\n";
     $V .= "</table><br>\n";

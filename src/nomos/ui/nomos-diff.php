@@ -191,9 +191,8 @@ class ui_nomos_diff extends FO_Plugin
     {
       $licstr = "";
       $DiffLicStyle = "style='background-color:#ffa8a8'";  // mid red pastel
-      foreach ($Child['licarray'] as $rf_pk => $file_license)
+      foreach ($Child['licarray'] as $rf_pk => $rf_shortname)
       {
-        $rf_shortname = $file_license[1];
         if (!empty($licstr)) $licstr .= ", ";
         if (@$OtherChild['licarray'][$rf_pk])
         {
@@ -284,7 +283,8 @@ class ui_nomos_diff extends FO_Plugin
     $agent_pk = $TreeInfo['agent_pk'];
     foreach($Children as &$Child)
     {
-      $Child['licarray'] = GetFileLicenses($agent_pk, 0, $Child['uploadtree_pk']);
+      /** do not get duplicated licenses */
+      $Child['licarray'] = GetFileLicenses($agent_pk, 0, $Child['uploadtree_pk'], "uploadtree", "yes");
       $Child['licstr'] = implode(", ", $Child['licarray']);
     }
   }

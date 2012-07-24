@@ -29,27 +29,18 @@
  * \param $pfile_pk - pfile id, (if empty, $uploadtree_pk must be given)
  * \param $uploadtree_pk - (used only if $pfile_pk is empty)
  * \param $uploadtree_tablename
+ * \param $$single - get duplicated licenses or not, if NULL: yes, or No
  * 
  * \return Array of file licenses   LicArray[rf_fk] = arrary(fl_pk, rf_shortname)
  * FATAL if neither pfile_pk or uploadtree_pk were passed in
  */
-function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree')
+function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree', $single="")
 {
   global $PG_CONN;
 
   if (empty($agent_pk)) Fatal("Missing parameter: agent_pk", __FILE__, __LINE__);
 
-  // if $pfile_pk, then return the licenses for that one file
-  if ($pfile_pk)
-  {
-    $sql = "SELECT distinct(rf_shortname) as rf_shortname, rf_fk
-              from license_ref,license_file
-              where pfile_fk='$pfile_pk' and agent_fk=$agent_pk and rf_fk=rf_pk
-              order by rf_shortname asc";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-  }
-  else if ($uploadtree_pk)
+  if ($uploadtree_pk)
   {
     /* Find lft and rgt bounds for this $uploadtree_pk  */
     $sql = "SELECT lft, rgt, upload_fk FROM $uploadtree_tablename
@@ -76,9 +67,17 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_table
   else Fatal("Missing function inputs", __FILE__, __LINE__);
 
   $LicArray = array();
-  while ($row = pg_fetch_assoc($result))
+  if ($single)
   {
-    $LicArray[$row['rf_fk']] = array($row['fl_pk'], $row['rf_shortname']);
+    while ($row = pg_fetch_assoc($result))
+    {
+      $LicArray[$row['rf_fk']] = $row['rf_shortname'];
+    }
+  } else { // do not return duplicated licenses
+    while ($row = pg_fetch_assoc($result))
+    {
+      $LicArray[$row['fl_pk']] = array($row['rf_fk'], $row['rf_shortname']);
+    }
   }
   pg_free_result($result);
   return $LicArray;
@@ -190,14 +189,15 @@ function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtre
 {
   $LicStr = "";
   $LicArray = GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename);
-  $first = true;
-  foreach($LicArray as $Lic)
+  $LicArrayNoDul = array();
+  foreach($LicArray as $fl_pk => $Lic)
   {
-    if ($first)
-    $first = false;
-    else
-    $LicStr .= " ,";
-    $LicStr .= $Lic[1];
+    if (!(array_key_exists($Lic[0], $LicArrayNoDul)))
+    {
+      if (!empty($LicStr)) $LicStr .= " ,";
+      $LicArrayNoDul[$Lic[0]] = $Lic[1];
+      $LicStr .= $Lic[1];
+    }
   }
 
   return $LicStr;
