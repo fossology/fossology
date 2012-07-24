@@ -158,6 +158,31 @@
     </test>
   </testsuite>
   
+  <!--
+  @brief Starts a scheduler with the real agents and stops it 
+  
+  This simply starts up a scheduler and stops it using the cli stop command.
+  -->
+  <testsuite name="Test NormalAgents">
+    <definitions pwd       = "{$pwd}"
+                 config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
+                 log       = "{config}/fossology.log"
+                 agentdir  = "{pwd}/scheduler/agent"
+                 scheduler = "{agentdir}/fo_scheduler"
+                 cli       = "{agentdir}/fo_cli"/>
+    <setup>
+      <sequential command="{cli}" params="--config={config} -S" retval="0"
+                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+    </setup>
+  
+    <test name="Real Stop">
+      <sequential command="{cli}" params="--config={config} -s" retval="0"/>
+      <sleep duration="5"/>
+      <sequential command="{cli}" params="--config={config} -S" retval="255"/>
+    </test>
+  
+  </testsuite>
+  
   <!-- 
   @brief Uploads a file to the test database and runs all the agents on it
   
@@ -177,24 +202,24 @@
                  user      = "fossy"
                  pass      = "fossy"
                  dbuser    = "fossologytest"/>
-     <setup>
-       <upload file="{pwd}/testing/dataFiles/TestData/archives/3files.tar.bz2"/>
-       <schedule upload="{upload_pk:0}"/>
-       <sequential command="{cli}" params="--config={config} -S" retval="0"
+    <setup>
+      <upload file="{pwd}/testing/dataFiles/TestData/archives/3files.tar.bz2"/>
+      <schedule upload="{upload_pk:0}"/>
+      <sequential command="{cli}" params="--config={config} -S" retval="0"
                   result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
-     </setup>
+    </setup>
      
-     <test name = "finished">
-        <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = 2;">
-          <eq row="0" col="0" val="1"/>
-          <eq row="1" col="0" val="1"/>
-          <eq row="2" col="0" val="1"/>
-          <eq row="3" col="0" val="1"/>
-          <eq row="4" col="0" val="1"/>
-          <eq row="5" col="0" val="1"/>
-          <eq row="6" col="0" val="1"/>
-        </database>
-     </test>
+    <test name = "finished">
+      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = 2;">
+        <eq row="0" col="0" val="1"/>
+        <eq row="1" col="0" val="1"/>
+        <eq row="2" col="0" val="1"/>
+        <eq row="3" col="0" val="1"/>
+        <eq row="4" col="0" val="1"/>
+        <eq row="5" col="0" val="1"/>
+        <eq row="6" col="0" val="1"/>
+      </database>
+    </test>
   </testsuite>
 
 </testsuites>

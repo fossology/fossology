@@ -282,13 +282,11 @@ class testsuite:
     command  = self.substitute(node.getAttribute('command'))
     params   = self.substitute(node.getAttribute('params'))
     
-    cmd  ="%s %s" % (command, params)
-    proc = subprocess.Popen(cmd, 0, shell = True)
+    cmd = shlex.split("{0} {1}".format(command, params))
+    proc = subprocess.Popen(cmd, 0)
     time.sleep(1)
     self.subpro.append(proc)
-    pidproc = subprocess.Popen('pidof {0}'.format(command), 0, shell = True, stdout = subprocess.PIPE)
-    self.defines['pids'][str(len(self.defines['pids']))] = pidproc.stdout.read()[:-1]
-    pidproc.wait()
+    self.defines['pids'][str(len(self.defines['pids']))] = str(proc.pid)
     
     return (1, 0)
   
@@ -380,6 +378,48 @@ class testsuite:
     
     return (1, 0)
   
+  def loop(self, node, doc, dest):
+    """
+    Action
+    
+    Attributes:
+      varname    [required]: the name of the variable storing the current iteration
+      values     [optional]: the values that the variable should take
+      iterations [optional]: the number of iterations the loop with take
+    
+    This action actually executes the actions contained within it. This will loop
+    over the values specified or loop for the number of iterations specified. The
+    current value of the variable will be stored in the definitions mapping with
+    the value varname. While both "values" and "iterations" are optional
+    parameters, one of them is required to be provided.
+    """
+    varname    = self.substitute(node.getAttribute('varname'))
+    values     = self.substitute(node.getAttribute('values'))
+    iterations = self.substitute(node.getAttribute('iterations'))
+    
+    actions = [self.createAction(curr) for curr in node.childNodes if curr.nodeType == Node.ELEMENT_NODE]
+    
+    tests  = 0
+    failed = 0
+    
+    if values:
+      for value in values.split(','):
+        self.defines[varname] = value
+        for action in actions:
+          ret = action(doc, dest)
+          tests  += ret[0]
+          failed += ret[1]
+    else:
+      for i in xrange(int(iterations)):
+        self.defines[varname] = str(i)
+        for action in actions:
+          ret = action(doc, dest)
+          tests  += ret[0]
+          failed += ret[1]
+    
+    del self.defines[varname]
+    return (tests, failed)
+  
   def upload(self, node, doc, dest):
     """
     Action
@@ -395,7 +435,6 @@ class testsuite:
     
     Returns True if and only if cp2foss succeeded
     """
-    print 'upload',
     file = self.substitute(node.getAttribute('file'))
     
     cmd = self.substitute('{pwd}/cli/cp2foss -c {config} --user {user} --password {pass} ' + file)
@@ -425,7 +464,6 @@ class testsuite:
     
     Returns True if and only if fossjobs succeeded
     """
-    print 'schedule',
     upload = self.substitute(node.getAttribute('upload'))
     agents = self.substitute(node.getAttribute('agents'))
     
@@ -463,25 +501,25 @@ class testsuite:
     proc.wait()
     
     total  = 0
-    passed = 0
+    failed = 0
     result = [str.split() for str in proc.stdout.readlines()]
     for eq in node.getElementsByTagName('eq'):
-      row = int(eq.getAttribute('row'))
-      col = int(eq.getAttribute('col'))
-      val = eq.getAttribute('val')
+      row = int(self.substitute(eq.getAttribute('row')))
+      col = int(self.substitute(eq.getAttribute('col')))
+      val = self.substitute(eq.getAttribute('val'))
       
       total += 1
       if len(result) <= row:
         self.failure(doc, dest, "DatabaseMismatch", "Index out of bounds: {0} > {1}".format(row, len(result)))
-        passed += 1
+        failed += 1
       elif len(result[row]) <= col:
         self.failure(doc, dest, "DatabaseMismatch", "Index out of bounds: {0} > {1}".format(col, len(result[row])))
-        passed += 1
+        failed += 1
       elif val != result[row][col]:
         self.failure(doc, dest, "DatabaseMismatch", "[{2}, {3}]: expected: {0} != result: {1}".format(val, result[row][col], row, col))
-        passed += 1
+        failed += 1
     
-    return (total, passed)
+    return (total, failed)
   
   ################################
   # run tests and produce output #
