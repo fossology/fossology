@@ -210,16 +210,97 @@
     </setup>
      
     <test name = "finished">
-      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = 2;">
-        <eq row="0" col="0" val="1"/>
-        <eq row="1" col="0" val="1"/>
-        <eq row="2" col="0" val="1"/>
-        <eq row="3" col="0" val="1"/>
-        <eq row="4" col="0" val="1"/>
-        <eq row="5" col="0" val="1"/>
-        <eq row="6" col="0" val="1"/>
+      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:0};">
+        <loop varname="i" iterations="7">
+          <dbequal row="{i}" col="0" val="1"/>
+        </loop>
       </database>
     </test>
+  </testsuite>
+  
+  <!--
+  @brief Runs the scheduler on serveral uploads
+  
+  -->
+  <testsuite name="Test UploadSeveral" disable="true">
+    <definitions pwd       = "{$pwd}"
+                 config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
+                 log       = "{config}/fossology.log"
+                 agentdir  = "{pwd}/scheduler/agent"
+                 scheduler = "{agentdir}/fo_scheduler"
+                 cp2foss   = "{pwd}/cli/cp2foss"
+                 fossjobs  = "{pwd}/cli/fossjobs"
+                 cli       = "{agentdir}/fo_cli"
+                 user      = "fossy"
+                 pass      = "fossy"
+                 dbuser    = "fossologytest"/>
+    <setup>
+      <loop varname="filename" values="3files.tar.bz2,foss23D1F1L.tar.bz2,fossI16L335U29.tar.bz2,verifyFossI16L335U29.tar.bz2,eddyData.tar.bz2,fossDirsOnly.tar.bz2,fossI16L518.7z">
+        <upload file="{pwd}/testing/dataFiles/TestData/archives/{filename}"/>
+      </loop>
+      <loop varname="i" iterations="7">
+        <schedule upload="{upload_pk:{i}}"/>
+      </loop>
+      <sequential command="{cli}" params="--config={config} -S" retval="0"
+                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+    </setup>
+    
+    <test name = "3files.tar.bz2">
+      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:0};">
+        <loop varname="i" iterations="7">
+          <dbequal row="{i}" col="0" val="1"/>
+        </loop>
+      </database>
+    </test>
+    
+    <test name = "foss23D1F1L.tar.bz2">
+      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:1};">
+        <loop varname="i" iterations="7">
+          <dbequal row="{i}" col="0" val="1"/>
+        </loop>
+      </database>
+    </test>
+    
+    <test name = "fossI16L335U29.tar.bz2">
+      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:2};">
+        <loop varname="i" iterations="7">
+          <dbequal row="{i}" col="0" val="1"/>
+        </loop>
+      </database>
+    </test>
+    
+    <test name = "verifyFossI16L335U29.tar.bz2">
+      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:3};">
+        <loop varname="i" iterations="7">
+          <dbequal row="{i}" col="0" val="1"/>
+        </loop>
+      </database>
+    </test>
+    
+    <test name = "eddyData.tar.bz2">
+      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:4};">
+        <loop varname="i" iterations="7">
+          <dbequal row="{i}" col="0" val="1"/>
+        </loop>
+      </database>
+    </test>
+    
+    <test name = "fossDirsOnly.tar.bz2">
+      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:5};">
+        <loop varname="i" iterations="7">
+          <dbequal row="{i}" col="0" val="1"/>
+        </loop>
+      </database>
+    </test>
+    
+    <test name = "fossI16L518.7z">
+      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:6};">
+        <loop varname="i" iterations="7">
+          <dbequal row="{i}" col="0" val="1"/>
+        </loop>
+      </database>
+    </test>
+    
   </testsuite>
 
 </testsuites>

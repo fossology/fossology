@@ -132,7 +132,7 @@ int main(int argc, char** argv)
   /* ***************************************************** */
 
   if(db_reset)
-    database_reset_queue(scheduler->db_conn);
+    database_reset_queue(scheduler);
   if(test_die)
     closing = 1;
   event_loop_enter(scheduler, scheduler_update, scheduler_signal);

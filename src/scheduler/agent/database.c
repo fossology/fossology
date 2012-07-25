@@ -230,7 +230,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
     table  = g_match_info_fetch(match, 3);
     column = g_match_info_fetch(match, 4);
     sql = g_strdup_printf("SELECT %s FROM %s;", column, table);
-    db_result = PQexec(db_conn, sql);
+    db_result = database_exec(scheduler, sql);
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK ||
         PQntuples(db_result) == 0 || PQnfields(db_result) == 0)
     {
@@ -266,7 +266,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
  * @param job       the job to check for the job status on
  * @return 0: job is not finished, 1: job has finished, 2: job has failed
  */
-static gint email_checkjobstatus(PGconn* db_conn, GTree* job_list, job_t* job)
+static gint email_checkjobstatus(scheduler_t* scheduler, job_t* job)
 {
   gchar* sql;
   gint ret = 1;
@@ -274,7 +274,7 @@ static gint email_checkjobstatus(PGconn* db_conn, GTree* job_list, job_t* job)
   int id, i;
 
   sql = g_strdup_printf(jobsql_anyrunnable, job->id);
-  db_result = PQexec(db_conn, sql);
+  db_result = database_exec(scheduler, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
     PQ_ERROR(db_result, "unable to check job status for jq_pk %d", job->id);
@@ -293,13 +293,13 @@ static gint email_checkjobstatus(PGconn* db_conn, GTree* job_list, job_t* job)
   PQclear(db_result);
 
   sql = g_strdup_printf(jobsql_jobendbits, job->id);
-  db_result = PQexec(db_conn, sql);
+  db_result = database_exec(scheduler, sql);
 
   /* check for any jobs that are still running */
   for(i = 0; i < PQntuples(db_result) && ret; i++)
   {
     id = atoi(PQget(db_result, i, "jq_pk"));
-    if(id != job->id && g_tree_lookup(job_list, &id) != NULL)
+    if(id != job->id && g_tree_lookup(scheduler->job_list, &id) != NULL)
     {
       ret = 0;
       break;
@@ -344,11 +344,11 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
   email_replace_args args;
 
   if(is_meta_special(g_tree_lookup(scheduler->meta_agents, job->agent_type), SAG_NOEMAIL) ||
-      !(status = email_checkjobstatus(scheduler->db_conn, scheduler->job_list, job)))
+      !(status = email_checkjobstatus(scheduler, job)))
     return;
 
   sprintf(sql, select_upload_fk, j_id);
-  db_result = PQexec(scheduler->db_conn, sql);
+  db_result = database_exec(scheduler, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
   {
     PQ_ERROR(db_result, "unable to select the upload id for job %d", j_id);
@@ -359,7 +359,7 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
   PQclear(db_result);
 
   sprintf(sql, upload_common, upload_id);
-  db_result = PQexec(scheduler->db_conn, sql);
+  db_result = database_exec(scheduler, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
     PQ_ERROR(db_result, "unable to check common uploads to job %d", j_id);
@@ -367,7 +367,7 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
   }
 
   sprintf(sql, jobsql_email, upload_id);
-  db_result = PQexec(scheduler->db_conn, sql);
+  db_result = database_exec(scheduler, sql);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
   {
     PQ_ERROR(db_result, "unable to access email info for job %d", j_id);
@@ -531,7 +531,7 @@ typedef struct
  * scheduler. If any changes that affect the tables and columns used by the
  * scheduler are made, this static list should be updated.
  */
-static void check_tables(PGconn* db_conn)
+static void check_tables(scheduler_t* scheduler)
 {
   /* locals */
   PGresult* db_result;
@@ -564,7 +564,7 @@ static void check_tables(PGconn* db_conn)
   };
 
   /* iterate accros every require table and column */
-  sprintf(sqltmp, check_scheduler_tables, PQdb(db_conn));
+  sprintf(sqltmp, check_scheduler_tables, PQdb(scheduler->db_conn));
   for(curr = cols; curr->table; curr++)
   {
     /* build the sql statement */
@@ -579,7 +579,7 @@ static void check_tables(PGconn* db_conn)
     g_string_append(sql, ") ORDER BY column_name;");
 
     /* execute the sql */
-    db_result = PQexec(db_conn, sql->str);
+    db_result = database_exec(scheduler, sql->str);
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
     {
       passed = FALSE;
@@ -616,6 +616,28 @@ static void check_tables(PGconn* db_conn)
 }
 
 /**
+ * @brief Creates and performs error checking for a new database connection
+ *
+ * @param configdir  the location of the Db.conf file
+ * @return  a new database connection
+ */
+static PGconn* database_connect(gchar* configdir)
+{
+  PGconn* ret = NULL;
+  gchar* dbconf = NULL;
+  char* error  = NULL;
+
+  dbconf = g_strdup_printf("%s/Db.conf", configdir);
+  ret = fo_dbconnect(dbconf, &error);
+
+  if(error || PQstatus(ret) != CONNECTION_OK)
+    FATAL("Unable to connect to the database: \"%s\"", error);
+
+  g_free(dbconf);
+  return ret;
+}
+
+/**
  * Initializes any one-time attributes relating to the database. Currently this
  * includes creating the db connection and checking the URL of the FOSSology
  * instance out of the db.
@@ -623,28 +645,51 @@ static void check_tables(PGconn* db_conn)
 void database_init(scheduler_t* scheduler)
 {
   PGresult* db_result;
-  gchar* dbConf = NULL;
-  char* ErrorBuf = NULL;
 
   /* create the connection to the database */
-  dbConf = g_strdup_printf("%s/Db.conf", scheduler->sysconfigdir);
-  scheduler->db_conn = fo_dbconnect(dbConf, &ErrorBuf);
-  if(ErrorBuf || PQstatus(scheduler->db_conn) != CONNECTION_OK)
-    FATAL("Unable to connect to the database: \"%s\"", ErrorBuf);
+  scheduler->db_conn = database_connect(scheduler->sysconfigdir);
 
   /* get the url for the fossology instance */
-  db_result = PQexec(scheduler->db_conn, url_checkout);
+  db_result = database_exec(scheduler, url_checkout);
   if(PQresultStatus(db_result) == PGRES_TUPLES_OK && PQntuples(db_result) != 0)
     scheduler->host_url = g_strdup(PQgetvalue(db_result, 0, 0));
   PQclear(db_result);
 
   /* check that relevant database fields exist */
-  check_tables(scheduler->db_conn);
+  check_tables(scheduler);
 }
 
 /* ************************************************************************** */
 /* **** event and functions ************************************************* */
 /* ************************************************************************** */
+
+/**
+ * @brief Executes an sql statement for the scheduler
+ *
+ * This is used in case the database connection is lost. The scheduler requires
+ * a connection to the database to correctly operate. So if the connection is
+ * ever lost we automatically try to reconnect and if we are unable to, the
+ * scheduler will die.
+ *
+ * @param scheduler  the scheduler_t* that holds the connection
+ * @param sql        the sql that will be performed
+ * @return           the PGresult struct that is returned by PQexec
+ */
+PGresult* database_exec(scheduler_t* scheduler, const char* sql)
+{
+  PGresult* ret = NULL;
+
+  ret = PQexec(scheduler->db_conn, sql);
+  if(ret == NULL || PQstatus(scheduler->db_conn) != CONNECTION_OK)
+  {
+    PQfinish(scheduler->db_conn);
+    scheduler->db_conn = database_connect(scheduler->sysconfigdir);
+
+    ret = PQexec(scheduler->db_conn, sql);
+  }
+
+  return ret;
+}
 
 /**
  * TODO
@@ -654,7 +699,7 @@ void database_init(scheduler_t* scheduler)
  */
 void database_exec_event(scheduler_t* scheduler, char* sql)
 {
-  PGresult* db_result = PQexec(scheduler->db_conn, sql);
+  PGresult* db_result = database_exec(scheduler, sql);
   if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
     PQ_ERROR(db_result, "failed to perform database exec: %s", sql);
   g_free(sql);
@@ -682,8 +727,7 @@ void database_update_event(scheduler_t* scheduler, void* unused)
   }
 
   /* make the database query */
-
-  db_result = PQexec(scheduler->db_conn, basic_checkout);
+  db_result = database_exec(scheduler, basic_checkout);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
     PQ_ERROR(db_result, "database update failed on call to PQexec");
@@ -722,7 +766,7 @@ void database_update_event(scheduler_t* scheduler, void* unused)
     }
 
     sprintf(sql, change_priority, parent);
-    pri_result = PQexec(scheduler->db_conn, sql);
+    pri_result = database_exec(scheduler, sql);
     if(PQresultStatus(pri_result) != PGRES_TUPLES_OK)
     {
       PQ_ERROR(pri_result, "database update failed on call to PQexec");
@@ -732,7 +776,7 @@ void database_update_event(scheduler_t* scheduler, void* unused)
     // TODO change for new scheduler
     job = job_init(scheduler->job_list, scheduler->job_queue, type, host, j_id,
         atoi(PQgetvalue(pri_result, 0, 0)));
-    job_set_data(job, scheduler->db_conn,  value, (pfile && pfile[0] != '\0'));
+    job_set_data(scheduler, job,  value, (pfile && pfile[0] != '\0'));
 
     PQclear(pri_result);
   }
@@ -745,15 +789,9 @@ void database_update_event(scheduler_t* scheduler, void* unused)
  * sure that any jobs that were running with the scheduler shutdown are run correctly
  * when it starts up again.
  */
-void database_reset_queue(PGconn* db_conn)
+void database_reset_queue(scheduler_t* scheduler)
 {
-  PGresult* db_result = PQexec(db_conn, "\
-      UPDATE jobqueue \
-        SET jq_starttime=null, \
-            jq_endtext=null, \
-            jq_schedinfo=null\
-        WHERE jq_endtime is NULL;");
-
+  PGresult* db_result = database_exec(scheduler, jobsql_resetqueue);
   if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
     PQ_ERROR(db_result, "failed to reset job queue");
 }
@@ -795,7 +833,7 @@ void database_update_job(scheduler_t* scheduler, job_t* job, job_status status)
   }
 
   /* update the database job queue */
-  db_result = PQexec(scheduler->db_conn, sql);
+  db_result = database_exec(scheduler, sql);
   if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
     PQ_ERROR(db_result, "failed to update job status in job queue");
 
@@ -840,13 +878,13 @@ void database_job_log(int j_id, char* log_name)
  * @param job       the job to change the priority for
  * @param priority  the new priority of the job
  */
-void database_job_priority(PGconn* db_conn, job_t* job, int priority)
+void database_job_priority(scheduler_t* scheduler, job_t* job, int priority)
 {
   gchar* sql = NULL;
   PGresult* db_result;
 
   sql = g_strdup_printf(jobsql_priority, priority, job->id);
-  db_result = PQexec(db_conn, sql);
+  db_result = database_exec(scheduler, sql);
   if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
     PQ_ERROR(db_result, "failed to change job queue entry priority");
 

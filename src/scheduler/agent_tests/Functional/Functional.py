@@ -40,7 +40,7 @@ import os
 ################################################################################
 ### utility ####################################################################
 ################################################################################
-defsReplace = re.compile('{(.*?)}')
+defsReplace = re.compile('{([^{}]*)}')
 defsSplit   = re.compile('([^\s]+):([^\s]+)')
 
 class DefineError(Exception):
@@ -120,10 +120,11 @@ class testsuite:
       if definitions.item(i).name not in self.defines:
         self.defines[definitions.item(i).name] = self.substitute(definitions.item(i).value, defNode)
     
-    self.setup   = []
-    self.cleanup = []
-    self.tests   = []
-    self.subpro  = []
+    self.setup    = []
+    self.cleanup  = []
+    self.tests    = []
+    self.subpro   = []
+    self.dbresult = None
     
     # parse all actions that will be taken during the setup phase
     if len(node.getElementsByTagName('setup')) != 0:
@@ -150,13 +151,16 @@ class testsuite:
     
     Returns the string with the variables correctly substituted
     """
-    return defsReplace.sub(functools.partial(self.processVariable, node), string)
+    while defsReplace.search(string):
+      string = defsReplace.sub(functools.partial(self.processVariable, node), string)
+    return string
   
   def processVariable(self, node, match):
     """
     Function passed to the regular expression library to replace variables in a
     string from the xml file.
-    
+    doc, dest, "")
+      return (1, 0)
     The regular expression used is "{([^\s]*?)}". This will match anything that
     doesn't contain any whitespace and falls between two curly braces. For
     example "{hello}" will match, but "{hello goodbye}" and "hello" will not.
@@ -187,17 +191,17 @@ class testsuite:
     arrayMatch = defsSplit.match(name)
     if arrayMatch:
       name  = arrayMatch.group(1)
-      index = arrayMatch.group(2)
+      index = self.substitute(arrayMatch.group(2), node)
       
       if not isinstance(self.defines[name], dict):
-        raise DefineError('"%s" is not a dictionary in testsuite "%s"' % (name, self.name))
+        raise DefineError('"{0}" is not a dictionary in testsuite "{1}"'.format(name, self.name))
       if name not in self.defines:
         if node and node.hasAttribute(name):
           self.defines[name] = self.substitute(node.getAttribute(name))
         else:
-          raise DefineError('"%s" not defined in testsuite "%s"' % (name, self.name))
+          raise DefineError('"{0}" not defined in testsuite "{1}"'.format(name, self.name))
       if index not in self.defines[name]:
-        raise DefineError('"%s" is out of bounds for "%s.%s"' % (index, self.name, name))
+        raise DefineError('"{0}" is out of bounds for "{1}.{2}"'.format(index, self.name, name))
       return self.defines[name][arrayMatch.group(2)]
     
     # this is a simply definition access, check validity and return the result
@@ -205,7 +209,7 @@ class testsuite:
       if node and node.hasAttribute(name):
         self.defines[name] = self.substitute(node.getAttribute(name), node)
       else:
-        raise DefineError('"%s" not defined in testsuite "%s"' % (name, self.name))
+        raise DefineError('"{0}" not defined in testsuite "{1}"'.format(name, self.name))
     return self.defines[name]
   
   def failure(self, doc, dest, type, value):
@@ -214,17 +218,21 @@ class testsuite:
     
     Return nothing
     """
-    fail = doc.createElement('failure')
-    fail.setAttribute('type', type)
-    
-    text = doc.createTextNode(value)
-    fail.appendChild(text)
-    
-    dest.appendChild(fail)
+    if doc and dest:
+      fail = doc.createElement('failure')
+      fail.setAttribute('type', type)
+      
+      text = doc.createTextNode(value)
+      fail.appendChild(text)
+      
+      dest.appendChild(fail)
   
   ###############################
   # actions that tests can take #
   ###############################
+  
+  def createAllActions(self, node):
+    return [self.createAction(child) for child in node.childNodes if child.nodeType == Node.ELEMENT_NODE]
   
   def createAction(self, node):
     """
@@ -259,7 +267,7 @@ class testsuite:
     Returns the new action
     """
     if not hasattr(self, node.nodeName):
-      raise DefineError('testsuite "%s" does not have an "%s" action' % (self.name, node.nodeName))
+      raise DefineError('testsuite "{0}" does not have an "{1}" action'.format(self.name, node.nodeName))
     attr = getattr(self, node.nodeName)
     return functools.partial(attr, node)
   
@@ -313,14 +321,13 @@ class testsuite:
     expected = self.substitute(node.getAttribute('result'))
     retval   = self.substitute(node.getAttribute('retval'))
     
-    cmd  = "%s %s" % (command, params)
+    cmd  = "{0} {1}".format(command, params)
     proc = subprocess.Popen(cmd, 0, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     
     result = proc.stdout.readlines()
     if len(result) != 0 and len(expected) != 0 and result[0].strip() != expected:
-      if dest and doc:
-        self.failure(doc, dest, "ResultMismatch",
-            "expected: '{0}' != result: '{1}'".format(expected, result[0].strip()))
+      self.failure(doc, dest, "ResultMismatch",
+          "expected: '{0}' != result: '{1}'".format(expected, result[0].strip()))
       return (1, 1)
     
     proc.wait()
@@ -397,7 +404,7 @@ class testsuite:
     values     = self.substitute(node.getAttribute('values'))
     iterations = self.substitute(node.getAttribute('iterations'))
     
-    actions = [self.createAction(curr) for curr in node.childNodes if curr.nodeType == Node.ELEMENT_NODE]
+    actions = self.createAllActions(node)
     
     tests  = 0
     failed = 0
@@ -502,24 +509,48 @@ class testsuite:
     
     total  = 0
     failed = 0
-    result = [str.split() for str in proc.stdout.readlines()]
-    for eq in node.getElementsByTagName('eq'):
-      row = int(self.substitute(eq.getAttribute('row')))
-      col = int(self.substitute(eq.getAttribute('col')))
-      val = self.substitute(eq.getAttribute('val'))
-      
-      total += 1
-      if len(result) <= row:
-        self.failure(doc, dest, "DatabaseMismatch", "Index out of bounds: {0} > {1}".format(row, len(result)))
-        failed += 1
-      elif len(result[row]) <= col:
-        self.failure(doc, dest, "DatabaseMismatch", "Index out of bounds: {0} > {1}".format(col, len(result[row])))
-        failed += 1
-      elif val != result[row][col]:
-        self.failure(doc, dest, "DatabaseMismatch", "[{2}, {3}]: expected: {0} != result: {1}".format(val, result[row][col], row, col))
-        failed += 1
     
+    self.dbresult = [str.split() for str in proc.stdout.readlines()]
+    for action in self.createAllActions(node):
+      ret = action(doc, dest)
+      total += ret[0]
+      failed += ret[1]
+    
+    del self.dbresult
+    self.dbresult = None
     return (total, failed)
+  
+  def dbequal(self, node, doc, dest):
+    """
+    Action
+    
+    Attributes:
+      row [required]: the row of the database results
+      col [required]: the column of the database results
+      val [required]: the expected value found at that row and column
+    
+    checks if a particular row and column in the results of a database call are
+    an expected value. This fails if the correct value is not reported by the
+    database.
+    
+    returns True if the expected is the same as the result
+    """
+    row = int(self.substitute(node.getAttribute('row')))
+    col = int(self.substitute(node.getAttribute('col')))
+    val = self.substitute(node.getAttribute('val'))
+    
+    if not self.dbresult:
+      raise DefineError("dbresult action must be within a database action")
+    if len(self.dbresult) <= row:
+      self.failure(doc, dest, "DatabaseMismatch", "Index out of bounds: {0} > {1}".format(row, len(result)))
+      return (1, 1)
+    if len(self.dbresult[row]) <= col:
+      self.failure(doc, dest, "DatabaseMismatch", "Index out of bounds: {0} > {1}".format(col, len(result[row])))
+      return (1, 1)
+    if val != self.dbresult[row][col]:
+      self.failure(doc, dest, "DatabaseMismatch", "[{2}, {3}]: expected: {0} != result: {1}".format(val, result[row][col], row, col))
+      return (1, 1)
+    return (1, 0)
   
   ################################
   # run tests and produce output #
@@ -603,7 +634,7 @@ def main():
   maxRuntime = int(dom.firstChild.getAttribute("timeout"))
   
   for suite in dom.firstChild.getElementsByTagName('testsuite'):
-    if not options.specific or (suite.getAttribute("name") == options.specific) and not suite.hasAttribute("disable"):
+    if not suite.hasAttribute("disable") and (not options.specific or suite.getAttribute("name") == options.specific):
       suiteNode = resultsDoc.createElement("testsuite")
       errors = 0
       
@@ -614,8 +645,8 @@ def main():
       try:
         curr = testsuite(suite)
         
-        setup   = [curr.createAction(node) for node in setupNode.childNodes   if node.nodeType == Node.ELEMENT_NODE]
-        cleanup = [curr.createAction(node) for node in cleanupNode.childNodes if node.nodeType == Node.ELEMENT_NODE]
+        setup   = curr.createAllActions(setupNode)
+        cleanup = curr.createAllActions(cleanupNode)
         
         curr.setup   = setup + curr.setup
         curr.cleanup = cleanup + curr.cleanup
