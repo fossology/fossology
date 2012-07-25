@@ -42,13 +42,14 @@ void email_init(scheduler_t* scheduler);
 /* **** event and functions ************************************************* */
 /* ************************************************************************** */
 
+PGresult* database_exec(scheduler_t* scheduler, const char* sql);
 void database_exec_event(scheduler_t* scheduler, char* sql);
 void database_update_event(scheduler_t* scheduler, void* unused);
 
-void database_reset_queue(PGconn* db_conn);
+void database_reset_queue(scheduler_t* scheduler);
 void database_update_job(scheduler_t* db_conn, job_t* j, job_status status);
 void database_job_processed(int j_id, int number);
 void database_job_log(int j_id, char* log_name);
-void database_job_priority(PGconn* db_conn, job_t* job, int priority);
+void database_job_priority(scheduler_t* scheduler, job_t* job, int priority);
 
 #endif /* DATABASE_H_INCLUDE */

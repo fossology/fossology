@@ -104,7 +104,7 @@ void job_add_agent(job_t* job, void* a);
 void job_remove_agent(job_t* job, GTree* job_list, void* a);
 void job_finish_agent(job_t* job, void* a);
 void job_fail_agent(job_t* job, void* a);
-void job_set_data(job_t* job, PGconn* db_conn, char* data, int sql);
+void job_set_data(scheduler_t* scheduler, job_t* job, char* data, int sql);
 void job_update(scheduler_t* scheduler, job_t* job);
 
 gboolean  job_is_open(scheduler_t* scheduler, job_t* job);

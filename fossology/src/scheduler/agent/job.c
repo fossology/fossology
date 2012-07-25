@@ -364,7 +364,7 @@ void job_priority_event(scheduler_t* scheduler, arg_int* params)
 {
   GList* iter;
 
-  database_job_priority(scheduler->db_conn, params->first, params->second);
+  database_job_priority(scheduler, params->first, params->second);
   ((job_t*)params->first)->priority = params->second;
   for(iter = ((job_t*)params->first)->running_agents; iter; iter = iter->next)
     setpriority(PRIO_PROCESS, ((agent_t*)iter->data)->pid, params->second);
@@ -480,7 +480,7 @@ void job_fail_agent(job_t* job, void* agent)
  * @param data     the data that the job should be processing
  * @param sql      currently, always false
  */
-void job_set_data(job_t* job, PGconn* db_conn, char* data, int sql)
+void job_set_data(scheduler_t* scheduler, job_t* job, char* data, int sql)
 {
   job->data = g_strdup(data);
   job->idx = 0;
@@ -560,7 +560,7 @@ int job_is_open(scheduler_t* scheduler, job_t* job)
   else
   {
     PQclear(job->db_result);
-    job->db_result = PQexec(scheduler->db_conn, job->data);
+    job->db_result = database_exec(scheduler, job->data);
     job->idx = 0;
 
     retval = PQntuples(job->db_result) != 0;

@@ -154,5 +154,12 @@ const char* jobsql_jobendbits =
     "       WHERE jq_pk = %d "
     "   );";
 
+const char* jobsql_resetqueue =
+    "UPDATE jobqueue "
+    "  SET jq_starttime=null, "
+    "      jq_endtext=null, "
+    "      jqschedinfo=null "
+    "  WHERE jq_endtime is NULL;";
+
 #endif /* SQLSTATEMENTS_H */
 
