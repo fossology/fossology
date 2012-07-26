@@ -192,8 +192,42 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     $row = pg_fetch_assoc($result);
     $license_value_expected = $row['rf_shortname'];
     pg_free_result($result);
+    $count = count($license_array);
 
     $this->assertEquals($license_value_expected, $license_array[1]);
+    $this->assertEquals(1, $count);
+  }
+
+  /**
+   * \brief testing from GetFileLicenses
+   * in this test case, this pfile have 2 same license 
+   */
+  function testGetFileLicensesDul()
+  {
+    print "test function GetFileLicenses()\n";
+    global $PG_CONN;
+    global $upload_pk;
+    global $uploadtree_pk_parent;
+    global $pfile_pk_parent;
+    global $agent_pk;
+    $sql = "INSERT INTO license_file(rf_fk, agent_fk, pfile_fk) VALUES(1, $agent_pk, $pfile_pk_parent);";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    $license_array = GetFileLicenses($agent_pk, '' , $uploadtree_pk_parent, $this->uploadtree_tablename, "yes");
+    /** the expected license value */
+    $sql = "SELECT rf_shortname from license_ref where rf_pk = 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $license_value_expected = $row['rf_shortname'];
+    pg_free_result($result);
+
+    $count = count($license_array);
+    $this->assertEquals(2, $count);
+    $this->assertEquals($license_value_expected, $license_array[1]);
+    $this->assertEquals($license_value_expected, $license_array[3]);
   }
 
   /**
@@ -291,7 +325,6 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     pg_free_result($result);
 
     $file_name = Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk_parent, false, $this->uploadtree_tablename);
-print_r ($file_name);
     $this->assertEquals("license_test.file.child", $file_name[$uploadtree_pk_child]);
     print "unit test for common-license-file.php end\n";
   }
