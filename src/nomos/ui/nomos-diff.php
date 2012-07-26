@@ -284,7 +284,7 @@ class ui_nomos_diff extends FO_Plugin
     foreach($Children as &$Child)
     {
       /** do not get duplicated licenses */
-      $Child['licarray'] = GetFileLicenses($agent_pk, 0, $Child['uploadtree_pk'], "uploadtree", "yes");
+      $Child['licarray'] = GetFileLicenses($agent_pk, 0, $Child['uploadtree_pk']);
       $Child['licstr'] = implode(", ", $Child['licarray']);
     }
   }

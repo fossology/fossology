@@ -29,12 +29,13 @@
  * \param $pfile_pk - pfile id, (if empty, $uploadtree_pk must be given)
  * \param $uploadtree_pk - (used only if $pfile_pk is empty)
  * \param $uploadtree_tablename
- * \param $$single - get duplicated licenses or not, if NULL: yes, or No
+ * \param $duplicate - get duplicated licenses or not, if NULL: No, or Yes
  * 
- * \return Array of file licenses   LicArray[rf_fk] = arrary(fl_pk, rf_shortname)
+ * \return Array of file licenses   LicArray[fl_pk] = rf_shortname if $duplicate is Not NULL
+ * LicArray[rf_pk] = rf_shortname if $duplicate is NULL
  * FATAL if neither pfile_pk or uploadtree_pk were passed in
  */
-function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree', $single="")
+function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree', $duplicate="")
 {
   global $PG_CONN;
 
@@ -67,16 +68,16 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_table
   else Fatal("Missing function inputs", __FILE__, __LINE__);
 
   $LicArray = array();
-  if ($single)
+  if ($duplicate)  // get duplicated licenses
   {
     while ($row = pg_fetch_assoc($result))
     {
-      $LicArray[$row['rf_fk']] = $row['rf_shortname'];
+      $LicArray[$row['fl_pk']] = $row['rf_shortname'];
     }
   } else { // do not return duplicated licenses
     while ($row = pg_fetch_assoc($result))
     {
-      $LicArray[$row['fl_pk']] = array($row['rf_fk'], $row['rf_shortname']);
+      $LicArray[$row['rf_fk']] = $row['rf_shortname'];
     }
   }
   pg_free_result($result);
@@ -189,15 +190,14 @@ function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtre
 {
   $LicStr = "";
   $LicArray = GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename);
-  $LicArrayNoDul = array();
-  foreach($LicArray as $fl_pk => $Lic)
+  $first = true;
+  foreach($LicArray as $Lic)
   {
-    if (!(array_key_exists($Lic[0], $LicArrayNoDul)))
-    {
-      if (!empty($LicStr)) $LicStr .= " ,";
-      $LicArrayNoDul[$Lic[0]] = $Lic[1];
-      $LicStr .= $Lic[1];
-    }
+    if ($first)
+      $first = false;
+    else
+      $LicStr .= " ,";
+    $LicStr .= $Lic;
   }
 
   return $LicStr;
