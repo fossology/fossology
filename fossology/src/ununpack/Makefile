@@ -52,6 +52,7 @@ uninstall:
 
 clean:
 	$(call dirloop,clean)
+	$(MAKE) -C $(TESTDIR) clean
 	rm -rf VERSION
 
 .PHONY: all install uninstall clean test VERSIONFILE
