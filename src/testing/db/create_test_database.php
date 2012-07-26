@@ -17,6 +17,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+// If set to TRUE, print additional DEBUG information.  Note that
+// printing this information will prevent the script from working
+// from within the FOSSology makefiles
+$debug = FALSE;
+
 /*
     create_test_database.php
 
@@ -103,62 +108,141 @@ require_once(__DIR__ . '/../../lib/php/libschema.php');
 require_once(__DIR__ . '/../../lib/php/common-db.php');
 require_once(__DIR__ . '/../../lib/php/common-cache.php');
 
+
+
+$test_username = 'fossologytest';
+$test_environment_variable = 'FOSSOLOGY_TESTCONFIG';
+
+
+
 /* very first step - check for the FOSSOLOGY_TESTCONFIG environment variable.
-   If this exists, then our job here is done */
-$fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
+   If this exists, then our job here is done.  
+   We simply echo the value to stdout and exit */
+$fossology_testconfig = getenv($test_environment_variable);
 
 if ($fossology_testconfig && strlen($fossology_testconfig) > 1) {
+
     // just echo the value of the environment variable, and exit
     echo "$fossology_testconfig\n";
     exit(0);
+
 }
 else {
-    #echo "Did not find a valid FOSSOLOGY_TESTCONFIG environment variable\n";
+    debug("Did not find a valid $test_environment_variable environment variable");
 }
 
-/* First check to see if we can connect to Postgres as the 'fossologytest' user
 
-   This is done with the 'psql' command, using these options:
 
-   --no-password tells psql to never prompt for a password; if authentication 
-                 is not possible via other means (.pgpass file or the 
-                 PGPASSWORD environment variable) then psql will fail.
-   --dbname=template1 specifies the 'template1' database which should
-                 exist on all Postgres installations;  we never actually use
-                 this database, but Postgres requires that you always 
-                 connect to an existing database
+// check for a PGPASSWORD or PGPASSFILE environment variable
+// PGPASSWORD specifies the actual password to use
+// PGPASSFILE specifies the location of the 'pgpass' file
+// Otherwise the .pgpass file in the current user's $HOME directory is
+// where passwords are normally stored.
+$pgpass_file = getenv('HOME') . '/.pgpass';
 
-    Question:  is there any benefit to doing this in native PHP instead of
-    making calls to the command-line psql tool?
+$pg_password_environment = getenv('PGPASSWORD');
+$pg_passfile_environment = getenv('PGPASSFILE');
+
+if ( $pg_password_environment ) {
+    // A PGPASSWORD environment variable overrides any other
+    // password authentication mechanism
+    debug("Found a PGPASSWORD environment variable of '$pg_password_environment' overriding any PGPASSFILE or ~/.pgpass authentication");
+}
+else {
+    if ( $pg_passfile_environment ) {
+        // A PGPASSFILE environment variable specifies the location 
+        // of a pgpass file
+        debug("Found a PGPASSFILE environment variable of '$pg_passfile_environment' overriding any ~/.pgpass file");
+        $pgpass_file = $pg_passfile_environment;
+    }
+    if (is_file($pgpass_file)) {
+        $pgpass_perms = substr( sprintf("%o", fileperms('/home/danger/.pgpass')), -4);
+        if ($pgpass_perms == '0600') {
+            debug("Permissions for $pgpass_file are correct (0600)");
+            $pgpass_contents = file($pgpass_file);
+            $testuser_found = FALSE;
+            foreach ($pgpass_contents as $line) {
+                if ( preg_match("/$test_username:[^:]*$/", $line) ) {
+                    $testuser_found = TRUE;
+                }
+            }
+                
+            if ( $testuser_found == TRUE ) {
+                debug("Found a '$test_username' user in $pgpass_file");
+            }
+            else {
+                echo "FAIL: Did not find a '$test_username' user in $pgpass_file\n";
+                echo "Before you can run tests, you must first create a Postgres user called '$test_username'\n";
+                echo "which has the CREATEDB permission.  This would be done using the following SQL command:\n";
+                echo "\n    CREATE USER $test_username WITH CREATEDB LOGIN PASSWORD '$test_username';\n";
+                echo "\nOnce done, this user needs to be added to a ~/.pgpass file\n";
+                exit(1);
+            }
+        }
+        else {
+            echo "FAIL - Permissions for $pgpass_file are NOT correct, must be 0600\n";
+            exit (1);
+        }
+    }
+    else {
+        echo "FAIL - Pgpass file $pgpass_file does not exist, or is not a regular file\n";
+        exit (1);
+    }
+}
+
+
+
+/* Check to see if we can connect to the Postgres server on the
+   local host as the 'fossologytest' user, using the built-in
+   PHP postgres connector
 */
 
-#echo "Validating connection to Postgres database via 'psql'... ";
-$sql_statement = "\q";
-$psql_command = "psql --no-password --username=fossologytest --dbname=template1 --host=localhost \
-    --command=\"$sql_statement\" 2>&1";
-#echo "$psql_command\n";
-exec($psql_command, $psql_output_array, $psql_return_value);
+// database 'template1' should exist by default on all Postgres servers
+$template_db              = 'template1';
+$initial_postgres_params  = "dbname=$template_db ";
+$initial_postgres_params .= "host=localhost ";
+/* the default Postgres port is 5432 */
+//$postgres_params       .= "port=5432 ";
+$initial_postgres_params .= "user=$test_username ";
 
-/* Concatenate all the output, separated by newlines */
-$psql_output = implode("\n", $psql_output_array);
+// make sure that the new database can actually connect
+$test_pg_conn = @pg_connect($initial_postgres_params);
 
-if ($psql_return_value > 0) {
-    // for some reason, we could not connect to Postgres as the fossologytest
-    // user.  Try to determine why, and notify the user
-    echo "FAIL!  output was:\n";
-    echo "$psql_output\n";
-    if (   preg_match('/no password supplied/i', $psql_output)
-        || preg_match('/peer authentication failed/i', $psql_output) ) {
-        echo "Before you can run tests, you must create a Postgres user called 'fossologytest'\n";
-        echo "with the CREATEDB permission.  This would be done using the following command:\n";
-        echo "\n    CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';\n";
+/* pg_connect returns a database connection handle, or FALSE if it
+   was not able to connect.  
+ 
+   If we were not able to connect, try to figure out why and 
+   provide a helpful message to the tester */
+if ( $test_pg_conn == FALSE ) {
+
+    $error_array = error_get_last();
+    $pg_error_message = $error_array['message'];
+    echo "FAIL:  Cannot connect to the local Postgres server.  ";
+
+    if ( preg_match('/no password supplied/', $pg_error_message) ) {
+        echo "The '$test_username' user must already exist and be included in a ~/.pgpass file, or the PGPASSWORD environment variable must be set!\n";
+        echo "Before you can run tests, you must first create a Postgres user called '$test_username'\n";
+        echo "which has the CREATEDB permission.  This would be done using the following SQL command:\n";
+        echo "\n    CREATE USER $test_username WITH CREATEDB LOGIN PASSWORD '$test_username';\n";
+        echo "\nOnce done, this user needs to be added to a ~/.pgpass file\n";
     }
-    exit($psql_return_value);
+    elseif ( preg_match('/authentication failed/', $pg_error_message) ) {
+        echo "The password for user '$test_username' is not correct!\n";
+    }
+    elseif ( preg_match("/database \"$template_db\" does not exist/", $pg_error_message) ) {
+        echo "The database '$template_db' does not exist!\n";
+    }
+    else {
+        echo "Unknown problem: $pg_error_message\n";
+    }
+
+    exit(1);
 }
 else {
-    #echo "Successfully connected to PostgreSQL as user 'fossologytest'.\n";
-    #echo "$psql_output\n";
+    debug("Successfully connected to local Postgres server as user '$test_username'");
 }
+
+pg_close($test_pg_conn) or die ("FAIL: We could not close the posgres connection!");
 
 
 /* get the system's temporary directory location.  We'll use this as the
@@ -175,30 +259,38 @@ mkdir($testing_temp_dir, 0755, TRUE)
     or die("FAIL! Cannot create test configuration directory at: $testing_temp_dir\n");
 
 /* Now create a new, unique dataabase */
-#echo "Creating test database... ";
+debug("Creating test database... ");
 $test_db_name = "fossologytest_$testing_timestamp";
+
+// re-connect using the same template1 database as above
+$test_pg_conn = @pg_connect($initial_postgres_params)
+    or die("FAIL: Could not connect to Postgres server!");
+
 // note: normal 'mortal' users cannot choose 'SQL_ASCII' encoding 
 // unless the LC_CTYPE environment variable is set correctly
 #$sql_statement="CREATE DATABASE $test_db_name ENCODING='SQL_ASCII'";
 $sql_statement="CREATE DATABASE $test_db_name ENCODING='UTF8'";
-$psql_command  = "psql --no-password --username=fossologytest --dbname=template1 --host=localhost \
-    --command=\"$sql_statement\" 2>&1";
-#echo "$psql_command\n";
+$result = pg_query($test_pg_conn, $sql_statement) 
+    or die("FAIL: Could not create test database!\n");
 
-exec($psql_command, $psql_output_array, $psql_return_value);
+// close the connection to the template1 database. Now we can 
+// reconnect to the newly-created test database
+pg_close($test_pg_conn);
 
-/* Concatenate all the output, separated by newlines */
-$psql_output = implode("\n", $psql_output_array);
 
-if ($psql_return_value > 0) {
-    echo "FAIL!  output was:\n";
-    echo "$psql_output\n";
-    exit($psql_return_value);
-}
-else {
-    #echo "Successfully created database '$test_db_name'.\n";
-    #echo "$psql_output\n";
-}
+/* Now connect to the newly-created test database */
+$test_db_params  = "dbname=$test_db_name ";
+$test_db_params .= "host=localhost ";
+/* the default Postgres port is 5432 */
+//$postgres_params       .= "port=5432 ";
+$test_db_params .= "user=$test_username ";
+
+$test_db_conn = pg_connect($test_db_params) 
+    or die ("Could not connect to the new test database '$test_db_name'\n");
+
+##################################################
+##  DEBUG:: CONTINUE WORKING HERE
+###################################################
 
 /* Do some minimal setup of the new database */
 // Note: from Postgres 9.1 on, can use 'CREATE OR REPLACE LANGUAGE'
@@ -206,48 +298,20 @@ else {
 
 // first check to make sure we don't already have the plpgsql language installed
 $sql_statement = "select lanname from pg_language where lanname = 'plpgsql'";
-$psql_command  = "psql --no-password --username=fossologytest --dbname=$test_db_name --host=localhost \
-    --command=\"$sql_statement\" 2>&1";
-#echo "$psql_command\n";
-exec($psql_command, $psql_output_array, $psql_return_value);
 
-/* Concatenate all the output, separated by newlines */
-$psql_output = implode("\n", $psql_output_array);
+$result = pg_query($test_db_conn, $sql_statement)
+    or die("Could not check the database for plpgsql language\n");
 
-if ($psql_return_value > 0) {
-    echo "FAIL!  output was:\n";
-    echo "$psql_output\n";
-    exit($psql_return_value);
-}
-else {
-    if ( preg_match('/plpgsql/', $psql_output) ) {
-        $plpgsql_already_installed = TRUE;
-    }
-    else {
-        $plpgsql_already_installed = FALSE;
-    }
+$plpgsql_already_installed = FALSE;
+if ( $row = pg_fetch_row($result) ) {
+    $plpgsql_already_installed = TRUE;
 }
 
-// then create language plsql if not already created
+// then create language plpgsql if not already created
 if ( $plpgsql_already_installed == FALSE ) {
     $sql_statement = "CREATE LANGUAGE plpgsql";
-    $psql_command  = "psql --no-password --username=fossologytest --dbname=$test_db_name --host=localhost \
-        --command=\"$sql_statement\" 2>&1";
-    #echo "$psql_command\n";
-    exec($psql_command, $psql_output_array, $psql_return_value);
-
-    /* Concatenate all the output, separated by newlines */
-    $psql_output = implode("\n", $psql_output_array);
-
-    if ($psql_return_value > 0) {
-        echo "FAIL!  output was:\n";
-        echo "$psql_output\n";
-        exit($psql_return_value);
-    }
-    else {
-        #echo "Successfully created plpgsql language.\n";
-        #echo "$psql_output\n";
-    }
+    $result = pg_query($test_db_conn, $sql_statement)
+        or die("Could not create plpgsql language in the database\n");
 }
 
 /* now create a valid Db.conf file in the testing temp directory 
@@ -256,11 +320,12 @@ $db_conf_fh = fopen("$testing_temp_dir/Db.conf", 'w')
     or die("FAIL! Cannot write $testing_temp_dir/Db.conf\n");
 fwrite($db_conf_fh, "dbname   = $test_db_name;\n");
 fwrite($db_conf_fh, "host     = localhost;\n");
-fwrite($db_conf_fh, "user     = fossologytest;\n");
-// Note: there may be an inconsistency here between the implicit password
-// specified in a .pgpass file or $PGPASSWORD environment variable, and
-// the value we write to the Db.conf file.
-fwrite($db_conf_fh, "password = fossologytest;\n");
+fwrite($db_conf_fh, "user     = $test_username;\n");
+// Note: because the Db.conf file is itself just the parameters
+//       used in the pg_connect() command, we should be able to 
+//       safely omit the password, since whatever mechanism was
+//       already in place to authenticate can still be used.
+//fwrite($db_conf_fh, "password = fossologytest;\n");
 fclose($db_conf_fh);
 
 
@@ -269,6 +334,7 @@ fclose($db_conf_fh);
 $mods_enabled_dir = "$testing_temp_dir/mods-enabled";
 mkdir($mods_enabled_dir, 0755, TRUE)
     or die("FAIL! Cannot create test mods-enabled directory at: $mods_enabled_dir\n");
+
 
 /* here we have to do the work that each of the agents' 'make install'
    targets would normally do, but since we want the tests to be able
@@ -284,7 +350,7 @@ $src_dirs = scandir($fo_base_dir);
 
 foreach ($src_dirs as $src_dir) {
     $full_src_dir = $fo_base_dir . "/" . $src_dir;
-    // skip dotted directories, lib/, cli/, and other non-agent directories
+    // skip dotted directories, lib/, cli/, and other irrelevant directories
     if ( preg_match("/^\./", $src_dir) 
          || $src_dir == 'lib' 
          || $src_dir == 'cli' 
@@ -315,15 +381,14 @@ mkdir($test_repo_dir, 0755, TRUE)
 // be lazy and just use a system call to gather user and group name
 $user_name = rtrim(`id -un`);
 $group_name = rtrim(`id -gn`);
+// generate a random port number above 10,000 to use for testing
+$fo_port_number = mt_rand(10001, 32768);
+
 $fo_conf_fh = fopen("$testing_temp_dir/fossology.conf", 'w')
     or die("FAIL: Could not open $testing_temp_dir/fossology.conf for writing\n");
 fwrite($fo_conf_fh, "; fossology.conf for testing\n");
 fwrite($fo_conf_fh, "[FOSSOLOGY]\n");
-// for the moment, pick a seemingly-innocuous high port number
-// at some future time we in fact want to assign a random port number
-// during the tests, both to prevent collisions, and also to fully 
-// exercise the application code's ability to deal with different port numbers
-fwrite($fo_conf_fh, "port = 18529\n");
+fwrite($fo_conf_fh, "port = $fo_port_number\n");
 fwrite($fo_conf_fh, "address = localhost\n");
 fwrite($fo_conf_fh, "depth = 3\n");
 fwrite($fo_conf_fh, "path = $test_repo_dir\n");
@@ -355,19 +420,10 @@ fclose($fo_version_fh);
 /* now load the fossology core schema into the database */
 $core_schema_dat_file = $fo_base_dir . "/www/ui/core-schema.dat";
 
-//echo "Connecting to test database via PHP pg_connect()\n";
-// create a native PHP database connection to our test database
-$postgres_params  = "dbname=$test_db_name ";
-$postgres_params .= "host=localhost ";
-/* let's not assume anything about the port number here.  At some
-   point we may want to query the system to verify the correct postgres
-   port number, but not right now.  pg_connect assumes the default
-   postgres port of 5432, which is good enough for the moment */
-$postgres_params .= "user=fossologytest ";
+debug("Connecting to test database via PHP pg_connect()");
 
-// make sure that the new database can actually connect
-$test_pg_conn = pg_connect($postgres_params)
-    or die("FAIL! Cannot connect to newly-created database $postgres_params\n");
+// use our existing test database connection to populate the
+// database with the FOSSology ApplySchema() function
 
 // To make absolutely sure we do not interfere with any existing
 // database connections, save off any pre-existing database connections
@@ -376,16 +432,17 @@ if (isset($PG_CONN)) {
 }
 
 // assign the global PG_CONN variable used by ApplySchema
-$PG_CONN = $test_pg_conn;
+$PG_CONN = $test_db_conn;
 
 // apply the core schema
-// We need to silence the normal output generated by ApplySchema 
-// or it will interfere with our makefile interface
+// We need to buffer the output in order to silence the normal 
+// output generated by ApplySchema, or it will interfere with 
+// our makefile interface
 ob_start();
 $apply_result = ApplySchema($core_schema_dat_file);
 ob_end_clean();
 
-// then re-assign the previous PG_CONN if any
+// then re-assign the previous PG_CONN, if there was one
 if (isset($previous_PG_CONN)) {
     $PG_CONN = $previous_PG_CONN;
 }
@@ -393,21 +450,51 @@ if (isset($previous_PG_CONN)) {
 if (!empty($apply_result)) { 
     die("FAIL:  ApplySchema did not succeed.  Output was:\n$apply_result\n");
 }
-// insert a test user
+
+// insert the 'fossy' user into the test database
 $random_seed = rand().rand();
 $hash = sha1($random_seed . "fossy");
 $user_sql = "INSERT INTO users (user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk) VALUES ('fossy', 'Default Administrator', '$random_seed', '$hash', 10, 'fossy', 'n', 1);";
-pg_query($test_pg_conn, $user_sql)
+pg_query($test_db_conn, $user_sql)
     or die("FAIL: could not insert default user into user table\n");
 
-pg_close($test_pg_conn);
+/* now we are done setting up the test database */
+pg_close($test_db_conn);
 
-/* When we finish successfully, print out the testing SYSCONFDIR on
-   the second-to-last line, and the testing database name on the last
-   line of the script's output */
+
+/* When we finish successfully, print out the testing SYSCONFDIR 
+   to stdout as the ONLY output from the script.  In this way it
+   can be "imported" into the GNU Make environment  */
+debug("Successful test database creation");
 echo "$testing_temp_dir\n";
 
 // indicate a successful run
 exit(0);
+
+
+
+
+
+
+/*********************************************************************
+ *********************************************************************
+ ***                                                               ***
+ ***   Function definitions                                        ***
+ ***                                                               ***
+ *********************************************************************
+ *********************************************************************/
+
+// print a debug message, but only when "$debug" is set
+function debug($message) {
+    global $debug;
+    if ($debug == TRUE) {
+        echo "DEBUG: $message\n";
+    }
+}
+
+
+
+
+
 
 ?>
