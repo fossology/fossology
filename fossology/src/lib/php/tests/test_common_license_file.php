@@ -193,7 +193,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     $license_value_expected = $row['rf_shortname'];
     pg_free_result($result);
 
-    $this->assertEquals($license_value_expected, $license_array[1][1]);
+    $this->assertEquals($license_value_expected, $license_array[1]);
   }
 
   /**

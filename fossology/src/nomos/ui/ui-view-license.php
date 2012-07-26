@@ -339,7 +339,7 @@ class ui_view_license extends FO_Plugin
     if (!empty($nomosagent_pk))
     { 
       $pfile_pk = 0;  // unknown, only have uploadtree_pk aka $Item
-      $nomos_license_array = GetFileLicenses($nomosagent_pk, $pfile_pk, $Item);
+      $nomos_license_array = GetFileLicenses($nomosagent_pk, $pfile_pk, $Item, "uploadtree", "yes");
       //$nomos_license_array = explode(",", $nomos_license_string);
       //print "nomos_license_string is:$nomos_license_string\n";
       //print_r($nomos_license_array);
@@ -350,8 +350,7 @@ class ui_view_license extends FO_Plugin
         $nomos_out = "$text <b>";
       }
       $rec_flag = 0;
-      foreach($nomos_license_array as $fl_pk => $file_license) {
-        $one_license = $file_license[1];
+      foreach($nomos_license_array as $fl_pk => $one_license) {
         $one_license = trim($one_license);
         if (0 == $rec_flag) {
           $rec_flag = 1;
