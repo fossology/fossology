@@ -182,9 +182,6 @@ void interface_usage()
   printf("|%*s:   change priority for job that this jq_pk is in |\n", P_WIDTH, "priority <jq_pk> <level>");
   printf("|%*s:   causes the scheduler to check the job queue   |\n", P_WIDTH, "database");
   printf("+-----------------------------------------------------------------------------+\n");
-  printf("|%*s:   goes into the schedule dialog                 |\n", P_WIDTH, "sql");
-  printf("|%*s:   uploads a file and schedulers a set of jobs   |\n", P_WIDTH, "upload");
-  printf("+-----------------------------------------------------------------------------+\n");
   fflush(stdout);
 }
 
