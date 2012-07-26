@@ -76,6 +76,16 @@ def timeout(func, maxRuntime):
     return False
   return True
 
+class action_wrapper:
+  
+  def __init__(self, action, node):
+    self.action = action
+    self.node   = node
+  
+  def __call__(self, doc, dest):
+    print '.',
+    return self.action(self.node, doc, dest)
+
 ################################################################################
 ### class that handles running a test suite ####################################
 ################################################################################
@@ -269,7 +279,7 @@ class testsuite:
     if not hasattr(self, node.nodeName):
       raise DefineError('testsuite "{0}" does not have an "{1}" action'.format(self.name, node.nodeName))
     attr = getattr(self, node.nodeName)
-    return functools.partial(attr, node)
+    return action_wrapper(attr, node)
   
   def concurrently(self, node, doc, dest):
     """
@@ -565,12 +575,13 @@ class testsuite:
     failures     = 0
     tests        = 0
     totalasserts = 0
-
+    
+    print "start up",
     for action in self.setup:
       while action(None, None)[1] != 0:
-        print ".",
         time.sleep(5)
-    print " startup finished ",
+    
+    print "tests",
     for test in self.tests:
       assertions = 0
       testNode = document.createElement("testcase")
@@ -580,7 +591,6 @@ class testsuite:
       
       starttime = time.time()
       for action in test[1]:
-        print ".",
         res = action(document, testNode)
         assertions += res[0]
         failures += res[1]
@@ -595,7 +605,7 @@ class testsuite:
       
       suiteNode.appendChild(testNode)
     
-    print " cleanup"
+    print " clean up",
     for action in self.cleanup:
       action(None, None)
     
@@ -605,6 +615,7 @@ class testsuite:
     suiteNode.setAttribute("failures", str(failures))
     suiteNode.setAttribute("tests", str(tests))
     suiteNode.setAttribute("assertions", str(totalasserts))
+    print
  
 ################################################################################
 ### MAIN #######################################################################
@@ -652,7 +663,7 @@ def main():
         curr.cleanup = cleanup + curr.cleanup
         
         starttime = time.time()
-        print "Running: {0}".format(suite.getAttribute("name")),
+        print "{0: >15} ::".format(suite.getAttribute("name")),
         if not timeout(functools.partial(curr.performTests, suiteNode, resultsDoc, testFile.name), maxRuntime):
           errors += 1
           errorNode = resultsDoc.createElement("error")
@@ -669,7 +680,7 @@ def main():
         errorNode.setAttribute("type", "DefinitionError")
         errorNode.appendChild(resultsDoc.createTextNode("DefineError: {0}".format(detail.value)))
         suiteNode.appendChild(errorNode)
-      
+        
       finally:
         suiteNode.setAttribute("errors", str(errors))
         top_output.appendChild(suiteNode)

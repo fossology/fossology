@@ -27,7 +27,7 @@
   it then sends a stop command. Since the scheduler doesn't have any currently
   running agents, this will cause the scheduler to stop running immediately.
   -->
-  <testsuite name="Test Just Stop">
+  <testsuite name="JustStop">
     <definitions pwd       = "{$pwd}"
                  config    = "{pwd}/scheduler/agent_tests/agents"
                  log       = "{config}/fossology.log"
@@ -57,7 +57,7 @@
   @note  If a type of failing agent that is not currently tests is found, it
          should be added as a .c file under the agent_tests/agents directory
   -->
-  <testsuite name="Test TestAgents">
+  <testsuite name="TestAgents">
     <definitions pwd       = "{$pwd}"
                  config    = "{pwd}/scheduler/agent_tests/agents"
                  log       = "{config}/fossology.log"
@@ -96,7 +96,7 @@
   still running. Then send the scheduler a die command and make sure that it is
   not running.
   -->
-  <testsuite name="Test Stop/Die">
+  <testsuite name="Stop/Die">
     <definitions pwd       = "{$pwd}"
                  config    = "{pwd}/scheduler/agent_tests/agents"
                  log       = "{config}/fossology.log"
@@ -127,7 +127,7 @@
   tests to finish. Unlike with the test agents, all the agents should pass this
   step.
   -->
-  <testsuite name="Test RealAgents">
+  <testsuite name="RealAgents">
     <definitions pwd       = "{$pwd}"
                  config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
                  log       = "{config}/fossology.log"
@@ -163,7 +163,7 @@
   
   This simply starts up a scheduler and stops it using the cli stop command.
   -->
-  <testsuite name="Test NormalAgents">
+  <testsuite name="NormalAgents">
     <definitions pwd       = "{$pwd}"
                  config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
                  log       = "{config}/fossology.log"
@@ -190,7 +190,7 @@
   run on that file. After the scheduler finishes running, this checks that all
   the jobs finsihed correctly.
   -->
-  <testsuite name="Test SimpleUpload">
+  <testsuite name="SimpleUpload">
     <definitions pwd       = "{$pwd}"
                  config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
                  log       = "{config}/fossology.log"
@@ -221,8 +221,9 @@
   <!--
   @brief Runs the scheduler on serveral uploads
   
+  Upload and scheduler agents on several
   -->
-  <testsuite name="Test UploadSeveral" disable="true">
+  <testsuite name="UploadSeveral">
     <definitions pwd       = "{$pwd}"
                  config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
                  log       = "{config}/fossology.log"
