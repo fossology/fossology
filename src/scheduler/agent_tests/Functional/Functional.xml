@@ -163,7 +163,7 @@
   
   This simply starts up a scheduler and stops it using the cli stop command.
   -->
-  <testsuite name="NormalAgents">
+  <testsuite name="StopRealAgents">
     <definitions pwd       = "{$pwd}"
                  config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
                  log       = "{config}/fossology.log"
@@ -234,9 +234,16 @@
                  cli       = "{agentdir}/fo_cli"
                  user      = "fossy"
                  pass      = "fossy"
-                 dbuser    = "fossologytest"/>
+                 dbuser    = "fossologytest"
+                 filelist  = "3files.tar.bz2,
+                              foss23D1F1L.tar.bz2,
+                              fossI16L335U29.tar.bz2,
+                              verifyFossI16L335U29.tar.bz2,
+                              eddyData.tar.bz2,
+                              fossDirsOnly.tar.bz2,
+                              fossI16L518.7z"/>
     <setup>
-      <loop varname="filename" values="3files.tar.bz2,foss23D1F1L.tar.bz2,fossI16L335U29.tar.bz2,verifyFossI16L335U29.tar.bz2,eddyData.tar.bz2,fossDirsOnly.tar.bz2,fossI16L518.7z">
+      <loop varname="filename" values="{filelist}">
         <upload file="{pwd}/testing/dataFiles/TestData/archives/{filename}"/>
       </loop>
       <loop varname="i" iterations="7">
@@ -246,60 +253,14 @@
                   result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </setup>
     
-    <test name = "3files.tar.bz2">
-      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:0};">
-        <loop varname="i" iterations="7">
-          <dbequal row="{i}" col="0" val="1"/>
-        </loop>
-      </database>
-    </test>
-    
-    <test name = "foss23D1F1L.tar.bz2">
-      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:1};">
-        <loop varname="i" iterations="7">
-          <dbequal row="{i}" col="0" val="1"/>
-        </loop>
-      </database>
-    </test>
-    
-    <test name = "fossI16L335U29.tar.bz2">
-      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:2};">
-        <loop varname="i" iterations="7">
-          <dbequal row="{i}" col="0" val="1"/>
-        </loop>
-      </database>
-    </test>
-    
-    <test name = "verifyFossI16L335U29.tar.bz2">
-      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:3};">
-        <loop varname="i" iterations="7">
-          <dbequal row="{i}" col="0" val="1"/>
-        </loop>
-      </database>
-    </test>
-    
-    <test name = "eddyData.tar.bz2">
-      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:4};">
-        <loop varname="i" iterations="7">
-          <dbequal row="{i}" col="0" val="1"/>
-        </loop>
-      </database>
-    </test>
-    
-    <test name = "fossDirsOnly.tar.bz2">
-      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:5};">
-        <loop varname="i" iterations="7">
-          <dbequal row="{i}" col="0" val="1"/>
-        </loop>
-      </database>
-    </test>
-    
-    <test name = "fossI16L518.7z">
-      <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {upload_pk:6};">
-        <loop varname="i" iterations="7">
-          <dbequal row="{i}" col="0" val="1"/>
-        </loop>
-      </database>
+    <test name = "check completion">
+      <loop varname="uploadnum" values="0,1,2,3,4,5,6">
+        <database sql="select jq_end_bits from jobqueue left join job on jq_job_fk = job_pk where job_upload_fk = {uploadnum};">
+          <loop varname="i" iterations="7">
+            <dbequal row="{i}" col="0" val="1"/>
+          </loop>
+        </database>
+      </loop>
     </test>
     
   </testsuite>
