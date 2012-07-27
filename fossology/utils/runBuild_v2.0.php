@@ -118,6 +118,8 @@ for ($i = 1;$i < $argc;$i++) {
   }  
   //system("perl -pi -e 's/#pbconfurl/pbconfurl/' /home/build/.pbrc");
   //system("perl -pi -e 's/1.4.1~rc1\//1.4.1~rc1/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
+  // prevnt annoying warnings from date() by setting the timezone
+  date_default_timezone_set('America/Denver');
   $showtime = date("Ymd");
   if ($Trunk){
     //$showtime = date("Ymd");
