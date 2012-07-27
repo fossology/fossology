@@ -26,7 +26,7 @@
 
 
 /**
- * \brief Create the uploadtree_0 table
+ * \brief Migrate to the uploadtree_a table
  *
  * \param $DryRun Do not create the table, just print the sql.
  *
@@ -34,18 +34,62 @@
  **/
 function Migrate_20_21($DryRun)
 {
-  $sql = "alter table uploadtree_a inherit uploadtree";
+  // Check if uploadtree_a already inherits from uploadtree.  If so, we are done.
+  $sql = "SELECT EXISTS (SELECT 1 FROM pg_catalog.pg_inherits WHERE inhrelid = 'public.uploadtree_a'::regclass::oid);";
+  $row = RunSQL($sql, $DryRun);
+  if ($row['?column?'] == 't') 
+  {
+    echo "Data previously migrated.\n";
+    return 0;  // migration has already happened
+  }
+
+  // Is there data in uploadtree?  If so then we need to migrate
+  $sql = "select uploadtree_pk from uploadtree limit 1";
+  $row = RunSQL($sql, $DryRun);
+  if (!empty($row))
+  {
+    echo "Migrating existing uploadtree data.\n";
+
+    // drop uploadtree_a, it was put there by core schema for new installs only.
+    $sql = "drop table uploadtree_a";
+    RunSQL($sql, $DryRun);
+
+    // rename uploadtree to uploadtree_a
+    $sql = "alter table uploadtree rename to uploadtree_a";
+    RunSQL($sql, $DryRun);
+
+    // create new uploadtree table
+    $sql = "create table uploadtree (like uploadtree_a INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES)";
+    RunSQL($sql, $DryRun);
+
+    // Fix the foreign keys that moved when the table was renamed
+    $sql = "alter table uploadtree add foreign key (upload_fk) references upload(upload_pk) on delete cascade";
+    RunSQL($sql, $DryRun);
+    $sql = "alter table tag_uploadtree drop constraint tags_uploadtree_uploadtree_fk_fkey";
+    RunSQL($sql, $DryRun);
+    $sql = "alter table tag_uploadtree add foreign key (uploadtree_fk) references uploadtree(uploadtree_pk) on delete cascade";
+    RunSQL($sql, $DryRun);
+    $sql = "alter table bucket_container drop constraint bucket_container_uploadtree_fk_fkey";
+    RunSQL($sql, $DryRun);
+    $sql = "alter table bucket_container add foreign key (uploadtree_fk) references uploadtree(uploadtree_pk) on delete cascade";
+    RunSQL($sql, $DryRun);
+  }
+
+  // fix uploadtree_tablename
+  $sql = "update upload set uploadtree_tablename='uploadtree_a' where uploadtree_tablename is null";
   RunSQL($sql, $DryRun);
 
-  $sql = "update upload set uploadtree_tablename='uploadtree_a'";
+  // have uploadtreee_a inherit uploadtree
+  $sql = "alter table uploadtree_a inherit uploadtree";
   RunSQL($sql, $DryRun);
                     
-  return 0;
+  return 0;  // success
 } // Migrate_20_21
 
 function RunSQL($sql, $DryRun)
 {
   global $PG_CONN;
+  $row = '';
 
   if ($DryRun)
     echo "DryRun: $sql\n";
@@ -53,8 +97,10 @@ function RunSQL($sql, $DryRun)
   {
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
     pg_free_result($result);
   }
+  return $row;
 }
 
 ?>
