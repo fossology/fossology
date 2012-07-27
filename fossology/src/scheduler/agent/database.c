@@ -60,9 +60,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * email_replace() function. This structure allows both of these to be passed.
  */
 typedef struct {
+    scheduler_t* scheduler;
     gchar* foss_url;
     job_t* job;
-    PGconn* db_conn;
 } email_replace_args;
 
 /**
@@ -103,12 +103,17 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
   if(strcmp(m_str, "UPLOADNAME") == 0)
   {
     sql = g_strdup_printf(upload_name, job->id);
-    db_result = PQexec(args->db_conn, sql);
+    db_result = database_exec(args->scheduler, sql);
 
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
     {
       g_string_append_printf(ret,
-          "[ERROR: unable to select file name for upload %d]", job->id);
+          "[ERROR: unable to select upload file name for job %d]", job->id);
+    }
+    else if(PQntuples(db_result) == 0)
+    {
+      g_string_append_printf(ret,
+          "[ERROR: file has not been upload or unpacked yet for job %d]", job->id);
     }
     else
     {
@@ -127,12 +132,17 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
   else if(strcmp(m_str, "BROWSELINK") == 0)
   {
     sql = g_strdup_printf(upload_pk, job->id);
-    db_result = PQexec(args->db_conn, sql);
+    db_result = database_exec(args->scheduler, sql);
 
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
     {
       g_string_append_printf(ret,
-          "[ERROR: unable to select file name for upload %d]", job->id);
+          "[ERROR: unable to select upload primary key for job %d]", job->id);
+    }
+    else if(PQntuples(db_result) == 0)
+    {
+      g_string_append_printf(ret,
+          "[ERROR: file has not been upload or unpacked yet for job %d]", job->id);
     }
     else
     {
@@ -152,7 +162,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
   else if(strcmp(m_str, "JOBQUEUELINK") == 0)
   {
     sql = g_strdup_printf(upload_pk, job->id);
-    db_result = PQexec(args->db_conn, sql);
+    db_result = database_exec(args->scheduler, sql);
 
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
     {
@@ -186,7 +196,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
   else if(strcmp(m_str, "UPLOADFOLDERNAME") == 0)
   {
     sql = g_strdup_printf(folder_name, job->id);
-    db_result = PQexec(args->db_conn, sql);
+    db_result = database_exec(args->scheduler, sql);
 
     if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
     {
@@ -387,9 +397,9 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
 
     if(scheduler->parse_db_email != NULL)
     {
-      args.foss_url = scheduler->host_url;
-      args.job      = job;
-      args.db_conn  = scheduler->db_conn;
+      args.foss_url   = scheduler->host_url;
+      args.job        = job;
+      args.scheduler  = scheduler;
       val = g_regex_replace_eval(scheduler->parse_db_email, email_txt->str,
           email_txt->len, 0, 0, (GRegexEvalCallback)email_replace, &args, NULL);
     }
@@ -678,6 +688,8 @@ void database_init(scheduler_t* scheduler)
 PGresult* database_exec(scheduler_t* scheduler, const char* sql)
 {
   PGresult* ret = NULL;
+
+  V_SPECIAL("DATABASE: exec \"%s\"\n", sql);
 
   ret = PQexec(scheduler->db_conn, sql);
   if(ret == NULL || PQstatus(scheduler->db_conn) != CONNECTION_OK)

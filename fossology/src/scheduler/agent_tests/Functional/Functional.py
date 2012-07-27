@@ -421,7 +421,7 @@ class testsuite:
     
     if values:
       for value in values.split(','):
-        self.defines[varname] = value
+        self.defines[varname] = value.strip()
         for action in actions:
           ret = action(doc, dest)
           tests  += ret[0]
