@@ -156,7 +156,7 @@ else {
         $pgpass_file = $pg_passfile_environment;
     }
     if (is_file($pgpass_file)) {
-        $pgpass_perms = substr( sprintf("%o", fileperms('/home/danger/.pgpass')), -4);
+        $pgpass_perms = substr( sprintf("%o", fileperms($pgpass_file)), -4);
         if ($pgpass_perms == '0600') {
             debug("Permissions for $pgpass_file are correct (0600)");
             $pgpass_contents = file($pgpass_file);
