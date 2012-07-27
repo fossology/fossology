@@ -40,6 +40,21 @@ class cliParamsTest4UnunpackExcption extends PHPUnit_Framework_TestCase {
     $this->assertNotEquals($rtn, 0);
     $this->assertFileNotExists("$TEST_RESULT_PATH/523.iso.dir/523SFP/QMFGOEM.TXT");
   }
+   
+  /* test null-file */
+  public function testNullFile(){
+    print "test unpack with an null file\n";
+    global $UNUNPACK_CMD;
+    global $TEST_DATA_PATH;
+    global $TEST_RESULT_PATH;
+
+    $UNUNPACK_CMD = "../../agent/ununpack";
+    exec("/bin/rm -rf $TEST_RESULT_PATH");
+    $command = "$UNUNPACK_CMD -qCR $TEST_DATA_PATH/null-file -d $TEST_RESULT_PATH -c /usr/local/etc/fossology/ > /dev/null 2>&1";
+    $last = exec($command, $usageOut, $rtn);
+    $this->assertNotEquals($rtn, 0);
+    $this->assertFileNotExists("$TEST_RESULT_PATH/null-file.dir/");
+  }
 }
 
 
