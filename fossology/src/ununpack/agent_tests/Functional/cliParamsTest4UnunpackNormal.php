@@ -52,10 +52,19 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $this->UNUNPACK_PATH = "../../agent/ununpack -C -c $db_conf";
   }
 
+  /* command is ununpack -i */
+  function testNormalParamI(){
+    print "Starting test functional ununpack agent \n";
+    
+    $command = "$this->UNUNPACK_PATH -i";
+    $last = exec($command, $usageOut, $rtn);
+    $this->assertEquals($rtn, 0);
+  }
+
   /* command is ununpack -qCR xxxxx -d xxxxx, begin */
   /* unpack iso file*/
   function testNormalIso1(){
-    print "Starting test functional ununpack agent \n";
+    //print "Starting test functional ununpack agent \n";
 
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -64,6 +73,22 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     /* check if the result is ok? larry think the file & dir name should be not changed, even just to uupercase */
     $this->assertFileExists("$TEST_RESULT_PATH/523.iso.dir/523sfp/QMFGOEM.TXT");
     $this->assertFileExists("$TEST_RESULT_PATH/523.iso.dir/523sfp/p3p10131.bin");
+  }
+
+  /* command is ununpack -qCR xxxxx -d xxxxx -L log */
+  /* unpack iso file and check log file*/
+  function testNormalParamL(){
+    //print "Starting test functional ununpack agent \n";
+
+    global $TEST_DATA_PATH;
+    global $TEST_RESULT_PATH;
+    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/523.iso -d $TEST_RESULT_PATH -L $TEST_RESULT_PATH/log";
+    exec($command);
+    /* check if the result is ok? larry think the file & dir name should be not changed, even just to uupercase */
+    $this->assertFileExists("$TEST_RESULT_PATH/523.iso.dir/523sfp/QMFGOEM.TXT");
+    $this->assertFileExists("$TEST_RESULT_PATH/523.iso.dir/523sfp/p3p10131.bin");
+    /* check if the log file generated? */
+    $this->assertFileExists("$TEST_RESULT_PATH/log");
   }
 
   /* unpack iso, another case */
@@ -123,6 +148,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $this->assertFileExists("$TEST_RESULT_PATH/winscp376.rar.dir/winscp376.exe");
   }
 
+
   /* unpack archive lib and xx.deb/xx.udeb file */
   function testNormalAr(){
     global $TEST_DATA_PATH;
@@ -158,7 +184,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $this->assertFileExists("$TEST_RESULT_PATH/libpango1.0-udeb_1.28.1-1_i386.udeb.dir/".
            "data.tar.gz.dir/data.tar.dir/usr/lib/libpangoxft-1.0.so.0");
   }
-
+ 
   /* unpack jar file */
   function testNormalJar(){
     global $TEST_DATA_PATH;
@@ -169,7 +195,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     /* check if the result is ok? select one file to confirm */ 
     $this->assertFileExists("$TEST_RESULT_PATH/test.jar.dir/ununpack");
   }
-  
+   
   /* unpack zip file */
   function testNormalZip(){
     global $TEST_DATA_PATH;
@@ -182,7 +208,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
                    "SIM_Integration.pptx.dir/docProps/app.xml");
     $this->assertFileExists("$TEST_RESULT_PATH/threezip.zip.dir/Desktop.zip.dir/record.txt");
   }
-
+ 
   /* unpack cab and msi file */
   function testNormalCatMsi(){
     global $TEST_DATA_PATH;
@@ -208,7 +234,6 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $this->assertFileExists("$TEST_RESULT_PATH/xunzai_Contacts.msi.msi.dir/CONTACTS.CAB.dir/contact");
   }
 
-
   /* unpack dsc file */
   function testNormalDsc(){
     global $TEST_DATA_PATH;
@@ -219,7 +244,6 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     /* check if the result is ok? select one file to confirm */ 
     $this->assertFileExists("$TEST_RESULT_PATH/fcitx_3.6.2-1.dsc.unpacked/src/pyParser.h");
   }
-
 
   /* unpack .Z .gz .bz2 file */
   function testNormalCompressedFile(){
@@ -313,7 +337,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     //exec($command);
     //$this->assertFileExists("$TEST_RESULT_PATH/");
   }
-
+ 
   /* unpack disk image(file system) */
   function testNormalFsImage(){
     global $TEST_DATA_PATH;
@@ -358,7 +382,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     /* check if the result is ok? select one file to confirm */ 
     $this->assertFileExists("$TEST_RESULT_PATH/ntfstest-image.dir/ununpack.c");
   }
-
+ 
   /* unpack boot x-x86_boot image, to-do, do not confirm
      how is the boot x-x86 boot image like  */
   function testNormalBootImage(){
@@ -395,6 +419,30 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
      ."libpango1.0-udeb_1.28.1-1_i386.udeb.dir/data.tar.gz.dir/data.tar.dir/usr/lib/libpangox-1.0.so.0");
 
     print "ending test functional ununpack agent \n";
+  }
+ 
+  /* analyse EXE file */
+  function testNormalEXE(){
+    global $TEST_DATA_PATH;
+    global $TEST_RESULT_PATH;
+    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+                  "PUTTY.EXE -d $TEST_RESULT_PATH";
+    exec($command);
+    /* check if the result is ok? select one file to confirm.
+     */
+    $this->assertFileExists("$TEST_RESULT_PATH/PUTTY.EXE.dir/UPX1");
+  }
+
+  /* test ununpack cpio file */
+  function testNormalcpio(){
+    global $TEST_DATA_PATH;
+    global $TEST_RESULT_PATH;
+    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+                  "test.cpio -d $TEST_RESULT_PATH";
+    exec($command);
+    /* check if the result is ok?
+     */
+    $this->assertFileExists("$TEST_RESULT_PATH/test.cpio.dir/ununpack");
   }
 
   /* clear up */
