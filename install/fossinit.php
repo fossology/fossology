@@ -137,7 +137,7 @@ if ($UpdateLiceneseRef)
 /* for the 2.0 -> 2.1 migration, create the uploadtree_0 table */
 global $LIBEXECDIR;
 require_once("$LIBEXECDIR/dbmigrate_2.0-2.1.php");
-print "Migrate data - CODE IS CURRENTLY COMPLETE FOR NEW DB'S, DOES NOT MIGRATE EXISTING DATA\n";
+print "Migrate data from 2.0 to 2.1 in $LIBEXECDIR\n";
 Migrate_20_21($Verbose);
 
 exit(0);
