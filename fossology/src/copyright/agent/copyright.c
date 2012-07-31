@@ -379,6 +379,11 @@ void copyright_analyze(copyright copy, FILE* istr)
   bufsize = fread(buf, sizeof(char), sizeof(buf)/sizeof(char), istr);
   buf[bufsize-1] = 0;
 
+  if(bufsize == 0)
+  {
+    return;
+  }
+
   /* convert file to lower case and validate any characters */
   for (i=0; i<bufsize; i++)
   {
