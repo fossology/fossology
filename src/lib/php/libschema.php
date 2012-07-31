@@ -1062,6 +1062,13 @@ LANGUAGE plpgsql;
    * uploadtree2path(uploadtree_pk integer) is a DB function that returns
    * the non-artifact parents of an uploadtree_pk
    ********************************************/
+  /* first drop the function, then recreate it.  This is so we can change the 
+   * return type.
+   */
+  $SQL = 'drop function if exists uploadtree2path(integer);';
+  $result = pg_query($PG_CONN, $SQL);
+  DBCheckResult($result, $SQL, __FILE__,__LINE__);
+
   $SQL = '
 CREATE or REPLACE function uploadtree2path(uploadtree_pk_in int) returns setof uploadtree as $$
 DECLARE
