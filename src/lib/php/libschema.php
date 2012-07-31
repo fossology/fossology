@@ -286,7 +286,7 @@ function ApplySchema($Filename = NULL, $Debug=false, $Catalog='fossology')
     }
     else
     {
-      $result = pg_query($PG_CONN, $SQL);
+      $result = @pg_query($PG_CONN, $SQL);
       DBCheckResult($result, $SQL, __FILE__,__LINE__);
     }
   }
