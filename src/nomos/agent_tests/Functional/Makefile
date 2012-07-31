@@ -56,6 +56,7 @@ test: all testdata
 	pwd; \
 	ls -l; \
 	phpunit --log-junit nomos-Xunit.xml --configuration tests.xml
+	./shunit2 --plugin example OneShot_test.sh
 
 coverage:
 	@echo "no code coverage for nomos in agent_test/Functional"
