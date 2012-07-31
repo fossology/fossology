@@ -42,9 +42,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ***    notification lives.                                             *** */
 /* ************************************************************************** */
 
-#define EMAIL_ERROR(...) {                       \
-  WARNING(__VA_ARGS__);                          \
-  email_notify = 0;                              \
+#define EMAIL_ERROR(...) { \
+  WARNING(__VA_ARGS__);    \
+  email_notify = 0;        \
   error = NULL; }
 
 #define EMAIL_BUILD_CMD "%s -s '%s' %s"

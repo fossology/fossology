@@ -158,7 +158,7 @@ const char* jobsql_resetqueue =
     "UPDATE jobqueue "
     "  SET jq_starttime=null, "
     "      jq_endtext=null, "
-    "      jqschedinfo=null "
+    "      jq_schedinfo=null "
     "  WHERE jq_endtime is NULL;";
 
 #endif /* SQLSTATEMENTS_H */

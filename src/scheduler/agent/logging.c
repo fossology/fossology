@@ -37,7 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * The main log, this is global because every function within the scheduler
  * hould have access to the main log.
  */
-log_t* main_log;
+log_t* main_log = NULL;
 
 /* ************************************************************************** */
 /* **** local functions ***************************************************** */
@@ -97,7 +97,7 @@ log_t* log_new(gchar* log_name, gchar* pro_name, pid_t pro_pid)
   ret->pro_pid = pro_pid;
 
   /* set the logs name */
-  if(strcmp(log_name, "stderr") != 0 && strcmp(log_name, "stdio") != 0 &&
+  if(strcmp(log_name, "stderr") != 0 && strcmp(log_name, "stdout") != 0 &&
       (stat(log_name, &stats) == 0) && S_ISDIR(stats.st_mode))
     ret->log_name = g_strdup_printf("%s/fossology.log", log_name);
   else
