@@ -173,6 +173,7 @@ class ui_view_license extends FO_Plugin
     $org_lic = "";
     $obj_lic = "";
     $user = "";
+    $V = "";
     $V .= "<table border='1'>\n";
     $text = _("Original License");
     $text1 = _("Objective License");
