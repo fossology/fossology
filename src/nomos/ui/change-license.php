@@ -89,7 +89,7 @@ class change_license extends FO_Plugin {
       } else if (!empty($ObjectiveLicense)) { // complete change
         $text = _("is changed to");
         $Msg = "'$OriginalLicense' $text '$ObjectiveLicense'.";
-        print displayMessage($Msg,$keep);
+        print displayMessage($Msg,"");
       }
 
       $user_pk = $SysConf['auth']['UserId'];
