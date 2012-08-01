@@ -84,7 +84,7 @@ class change_license extends FO_Plugin {
         $text = _("Fatal: Objective license");
         $text1 = _("is same to original license");
         $Msg = "$text '$OriginalLicense' $text1 '$ObjectiveLicense'.";
-        print displayMessage($Msg,$keep);
+        print displayMessage($Msg,"");
         return (NULL);
       } else if (!empty($ObjectiveLicense)) { // complete change
         $text = _("is changed to");
