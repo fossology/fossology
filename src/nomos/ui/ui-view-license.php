@@ -395,10 +395,13 @@ class ui_view_license extends FO_Plugin
         $nomos_out .= "</a>";
         /** edit this license */
         $text = _("Edit");
+        $nomosAgentpk = LatestAgentpk($Upload, "nomos_ars");
         /** go to the license change page */
         if (plugin_find_id('change_license') >= 0) {
           $text1 = _("Edit This Licence Reference");
-          $nomos_out .= "<a title='$text1' href='" . Traceback_uri() . "?mod=change_license&fl_pk=$fl_pk' style='color:#ff0000;font-style:italic'>[$text]</a>";
+          $nomos_out .= "<a title='$text1' href='" . Traceback_uri() . "?mod=change_license&fl_pk=$fl_pk";
+          $nomos_out .= "&upload=$Upload&item=$Item&napk=$nomosAgentpk";
+          $nomos_out .= "' style='color:#ff0000;font-style:italic'>[$text]</a>";
         }
       }
     }

@@ -148,6 +148,9 @@ class change_license extends FO_Plugin {
     $ObjectiveLicense = trim($ObjectiveLicense);
     $Reason = GetParm("change_reason",PARM_TEXT);
     $Reason = trim($Reason);
+    $Agent_pk = GetParm("napk",PARM_STRING);
+    $upload_fk = GetParm("upload",PARM_STRING);
+    $uploadtree_pk = GetParm("item",PARM_STRING);
     $OriginalLicense = "";
     $FileName = "";
 
@@ -171,6 +174,9 @@ class change_license extends FO_Plugin {
     $V .= "</table><br>\n";
 
     $V .= "<input type='submit' value='Submit'>";
+    $V .= "<br><br>";
+    $text = _("Back to license viewer");
+    $V .= "<a href='" . Traceback_uri() . "?mod=view-license&napk=$Agent_pk&show=detail&upload=$upload_fk&item=$uploadtree_pk' >$text</a>";
     $V.= "</form>\n";
     print $V;
   }
