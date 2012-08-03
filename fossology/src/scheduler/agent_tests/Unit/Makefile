@@ -34,7 +34,7 @@ EXE = test_scheduler
 COV = libscheduler_cov.a
 FOCUNIT = libfocunit.a
 
-OBJECTS = testEvent.o     \
+OBJECTS =
 
 COVERAGE = scheduler_cov.o \
            agent_cov.o \
@@ -45,13 +45,13 @@ COVERAGE = scheduler_cov.o \
            job_cov.o \
            logging_cov.o \
 
-all: test
-test: $(EXE)
-	./$(EXE)
+all:  #$(EXE)
+test: #$(EXE)
+	#./$(EXE)
 	
 $(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
-
+ 
 coverage:
 #testRun.c $(OBJECTS) $(COV)
 #	@echo "make scheduler test coverage"
