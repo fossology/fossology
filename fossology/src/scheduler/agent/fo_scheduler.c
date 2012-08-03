@@ -95,20 +95,30 @@ int main(int argc, char** argv)
   g_option_context_free(options);
 
   /* check changes to the process first */
-  if(s_daemon && daemon(0, 0) == -1) { return -1; }
   if(ki_shut) { return kill_scheduler(FALSE); }
   if(ki_kill) { return kill_scheduler(TRUE);  }
 
   /* initialize the scheduler */
   scheduler = scheduler_init(sysconfigdir);
 
+  scheduler->main_log = log_new("stdout", "initializing", getpid());
+  main_log = scheduler->main_log;
+  if(logdir)
+  {
+    scheduler->logdir     = logdir;
+    scheduler->logcmdline = TRUE;
+    scheduler->main_log   = log_new(scheduler->logdir, NULL, scheduler->s_pid);
+
+    log_destroy(main_log);
+    main_log = scheduler->main_log;
+  }
+
   scheduler->process_name = g_strdup(argv[0]);
   scheduler->s_daemon     = s_daemon;
 
-  if(logdir)
-    scheduler->logdir = logdir;
-  scheduler->main_log = log_new(scheduler->logdir, NULL, scheduler->s_pid);
-  main_log = scheduler->main_log;
+  scheduler_config_event(scheduler, NULL);
+
+  if(s_daemon && daemon(0, 0) == -1) { return -1; }
 
   NOTIFY("*****************************************************************");
   NOTIFY("***                FOSSology scheduler started                ***");
@@ -117,7 +127,6 @@ int main(int argc, char** argv)
   NOTIFY("***        config:   %-33s        ***", sysconfigdir);
   NOTIFY("*****************************************************************");
 
-  scheduler_config_event(scheduler, NULL);
   interface_init(scheduler);
   set_usr_grp(scheduler->process_name, scheduler->sysconfig);
   fo_RepOpenFull(scheduler->sysconfig);

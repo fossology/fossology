@@ -45,21 +45,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 int interface_init_suite(void)
 {
-  i_created   = FALSE;
-  i_terminate = FALSE;
-
-  socket_thread = NULL;
-  threads       = NULL;
-  cancel        = NULL;
-  cmd_parse     = NULL;
-  pro_parse     = NULL;
-
   return init_suite();
 }
 
 int interface_clean_suite(void)
 {
-    return clean_suite();
+  return clean_suite();
 }
 
 /**
@@ -121,12 +112,7 @@ void* interface_listen_thread(void* unused);
 
 void test_set_port()
 {
-    FO_ASSERT_FALSE(is_port_set());
 
-  set_port(12354);
-
-  FO_ASSERT_EQUAL(i_port, 12354);
-  FO_ASSERT_TRUE(is_port_set());
 }
 
 void test_interface_init()

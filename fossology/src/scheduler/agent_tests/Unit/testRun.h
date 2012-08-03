@@ -21,9 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <glib.h>
 
-/* used to disable logging */
-extern FILE* log_file;
-
 /* suite init and clean */
 int init_suite(void);
 int clean_suite(void);

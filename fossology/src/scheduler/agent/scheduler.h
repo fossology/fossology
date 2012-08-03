@@ -57,6 +57,7 @@ typedef struct
     fo_conf* sysconfig;     ///< configuration information loaded from the configuration file
     gchar*   sysconfigdir;  ///< the system directory that contain fossology.conf
     gchar*   logdir;        ///< the directory to put the log file in
+    gboolean logcmdline;    ///< was the log file set by the command line
     log_t*   main_log;      ///< the main log file for the scheduler
 
     /* used exclusively in agent.c */
@@ -80,12 +81,14 @@ typedef struct
     GSequence* job_queue;   ///< heap of jobs that still need to be started
 
     /* used exclusively in database.c */
-    PGconn* db_conn;        ///< The database connection
-    gchar*  host_url;       ///< The url that is used to get to the FOSSology instance
-    gchar*  email_subject;  ///< The subject to be used for emails
-    gchar*  email_header;   ///< The beginning of the email message
-    gchar*  email_footer;   ///< The end of the email message
-    gchar*  email_command;  ///< The command that will sends emails, usually xmail
+    PGconn*  db_conn;         ///< The database connection
+    gchar*   host_url;        ///< The url that is used to get to the FOSSology instance
+    gchar*   email_subject;   ///< The subject to be used for emails
+    gchar*   email_header;    ///< The beginning of the email message
+    gchar*   email_footer;    ///< The end of the email message
+    gchar*   email_command;   ///< The command that will sends emails, usually xmail
+    gboolean default_header;  ///< Is the header the default header
+    gboolean default_footer;  ///< Is the footer the default footer
 
     /* regular expressions */
     GRegex* parse_agent_heart;   ///< Parses agent heart messages
