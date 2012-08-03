@@ -116,9 +116,9 @@ int main(int argc, char** argv)
   scheduler->process_name = g_strdup(argv[0]);
   scheduler->s_daemon     = s_daemon;
 
-  scheduler_config_event(scheduler, NULL);
-
+  scheduler_foss_config(scheduler);
   if(s_daemon && daemon(0, 0) == -1) { return -1; }
+  scheduler_agent_config(scheduler);
 
   NOTIFY("*****************************************************************");
   NOTIFY("***                FOSSology scheduler started                ***");
