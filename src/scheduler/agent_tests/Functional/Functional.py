@@ -336,6 +336,9 @@ class testsuite:
     
     result = proc.stdout.readlines()
     if len(result) != 0 and len(expected) != 0 and result[0].strip() != expected:
+      print
+      print expected
+      print result[0].strip()
       self.failure(doc, dest, "ResultMismatch",
           "expected: '{0}' != result: '{1}'".format(expected, result[0].strip()))
       return (1, 1)
@@ -343,6 +346,8 @@ class testsuite:
     proc.wait()
     
     if len(retval) != 0 and proc.returncode != int(retval):
+      print
+      print retval, " != ", proc.returncode
       self.failure(doc, dest, "IncorrectReturn", "expected: {0} != result: {1}".format(retval, proc.returncode))
       return (1, 1)
     return (1, 0)
@@ -551,13 +556,14 @@ class testsuite:
     
     if not self.dbresult:
       raise DefineError("dbresult action must be within a database action")
-    if len(self.dbresult) <= row:
+    result = self.dbresult
+    if len(result) <= row:
       self.failure(doc, dest, "DatabaseMismatch", "Index out of bounds: {0} > {1}".format(row, len(result)))
       return (1, 1)
-    if len(self.dbresult[row]) <= col:
+    if len(result[row]) <= col:
       self.failure(doc, dest, "DatabaseMismatch", "Index out of bounds: {0} > {1}".format(col, len(result[row])))
       return (1, 1)
-    if val != self.dbresult[row][col]:
+    if val != result[row][col]:
       self.failure(doc, dest, "DatabaseMismatch", "[{2}, {3}]: expected: {0} != result: {1}".format(val, result[row][col], row, col))
       return (1, 1)
     return (1, 0)

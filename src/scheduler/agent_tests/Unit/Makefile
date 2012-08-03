@@ -34,10 +34,7 @@ EXE = test_scheduler
 COV = libscheduler_cov.a
 FOCUNIT = libfocunit.a
 
-OBJECTS = testAgent.o     \
-          testHost.o      \
-          testEvent.o     \
-          testInterface.o \
+OBJECTS = testEvent.o     \
 
 COVERAGE = scheduler_cov.o \
            agent_cov.o \
@@ -48,14 +45,9 @@ COVERAGE = scheduler_cov.o \
            job_cov.o \
            logging_cov.o \
 
-all: 
-	@echo "scheduler Unit Tests currently disabled"
-	@echo "make scheduler Unit agent_tests"
-
-test:
-	@echo "scheduler Unit Tests currently disabled"
-	@echo "make scheduler Unit agent_tests"
-#	./$(EXE)
+all: test
+test: $(EXE)
+	./$(EXE)
 	
 $(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)

@@ -452,12 +452,11 @@ void email_init(scheduler_t* scheduler)
 	gchar* fname;
 	GError* error = NULL;
 
-	if(scheduler->email_header && strcmp(scheduler->email_header, DEFAULT_HEADER) != 0)
+	if(scheduler->email_header && !scheduler->default_header)
 	  munmap(scheduler->email_header, header_sb.st_size);
-	if(scheduler->email_footer && strcmp(scheduler->email_footer, DEFAULT_FOOTER) != 0)
+	if(scheduler->email_footer && !scheduler->default_footer)
 	  munmap(scheduler->email_footer, footer_sb.st_size);
-	if(scheduler->email_subject && strcmp(scheduler->email_subject, DEFAULT_SUBJECT) != 0)
-	  g_free(scheduler->email_subject);
+	g_free(scheduler->email_subject);
 
 	/* load the header */
 	email_notify = 1;
@@ -474,7 +473,7 @@ void email_init(scheduler_t* scheduler)
 	if(email_notify && (scheduler->email_header = mmap(NULL, header_sb.st_size, PROT_READ,
 	    MAP_SHARED, fd, 0)) == MAP_FAILED)
 	  EMAIL_ERROR("unable to mmap email header: %s", fname);
-	if(!email_notify)
+	if((scheduler->default_header = !email_notify))
 	  scheduler->email_header = DEFAULT_HEADER;
 
 	/* load the footer */
@@ -492,7 +491,7 @@ void email_init(scheduler_t* scheduler)
 	if(email_notify && (scheduler->email_footer = mmap(NULL, footer_sb.st_size, PROT_READ,
 	    MAP_SHARED, fd, 0)) == MAP_FAILED)
 	  EMAIL_ERROR("unable to mmap email footer: %s", fname);
-	if(!email_notify)
+	if((scheduler->default_footer = !email_notify))
 	  scheduler->email_footer = DEFAULT_FOOTER;
 	error = NULL;
 

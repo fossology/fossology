@@ -153,7 +153,9 @@ void log_destroy(log_t* log)
 {
   if(log->pro_name) g_free(log->pro_name);
   if(log->log_name) g_free(log->log_name);
-  if(log->log_file) fclose(log->log_file);
+
+  if(log->log_file && log->log_file != stdout && log->log_file != stderr)
+    fclose(log->log_file);
 
   log->pro_name = NULL;
   log->log_name = NULL;

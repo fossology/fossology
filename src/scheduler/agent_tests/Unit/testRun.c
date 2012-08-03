@@ -46,9 +46,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 int init_suite(void)
 {
-  if(log_file && fclose(log_file) != 0)
-    return -1;
-  log_file = stdout;
+  if(main_log)
+    log_destroy(main_log);
+  main_log = log_new("./founit.log", "scheduler", getpid());
   return 0;
 }
 
@@ -61,14 +61,8 @@ int init_suite(void)
  */
 int clean_suite(void)
 {
-  job_list_clean();
-  host_list_clean();
-  agent_list_clean();
-  interface_destroy();
-  database_destroy();
-  event_loop_destroy();
-
-  log_file = NULL;
+  log_destroy(main_log);
+  main_log = NULL;
   return 0;
 }
 
@@ -79,12 +73,7 @@ int clean_suite(void)
 /* create test suite */
 CU_SuiteInfo suites[] =
 {
-    {"agent.c: meta",                init_suite,            clean_suite, tests_meta_agent       },
-    //{"agent.c:",               agent_init_suite,      agent_clean_suite, tests_agent            },
-    {"host.c:",                      init_suite,            clean_suite, tests_host             },
-    {"event.c:",                     init_suite,            clean_suite, tests_event            },
-    {"interface.c:",       interface_init_suite,  interface_clean_suite, tests_interface        },
-    {"interface_thread:", interface_thread_init, interface_thread_clean, tests_interface_thread },
+
     CU_SUITE_INFO_NULL
 };
 

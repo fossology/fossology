@@ -53,8 +53,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /** prints the credential of the agent */
 #define AGENT_CREDENTIAL                                                 \
-  log_printf("JOB[%d].%s[%d.%s] %d: ", agent->owner->id, agent->type->name, \
-      agent->pid, agent->host->name, __LINE__)
+  log_printf("JOB[%d].%s[%d.%s]: ", agent->owner->id, agent->type->name, \
+      agent->pid, agent->host->name)
 
 /** prints the credential to the agent log */
 #define AGENT_LOG_CREDENTIAL                                              \

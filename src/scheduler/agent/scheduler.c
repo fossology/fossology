@@ -257,6 +257,7 @@ scheduler_t* scheduler_init(gchar* sysconfigdir)
   ret->sysconfig     = NULL;
   ret->sysconfigdir  = g_strdup(sysconfigdir);
   ret->logdir        = LOG_DIR;
+  ret->logcmdline    = FALSE;
   ret->main_log      = NULL;
   ret->host_queue    = NULL;
 
@@ -386,11 +387,11 @@ void scheduler_destroy(scheduler_t* scheduler)
 void scheduler_update(scheduler_t* scheduler)
 {
   /* queue used to hold jobs if an exclusive job enters the system */
-  static job_t* job = NULL;
+  static job_t*  job  = NULL;
+  static host_t* host = NULL;
   static int lockout = 0;
 
   /* locals */
-  host_t* host = NULL;
   int n_agents = g_tree_nnodes(scheduler->agents);
   int n_jobs   = active_jobs(scheduler->job_list);
 
@@ -421,18 +422,25 @@ void scheduler_update(scheduler_t* scheduler)
       {
         host = g_tree_lookup(scheduler->host_list, LOCAL_HOST);
         if(!(host->running < host->max))
+        {
+          job = NULL;
           break;
+        }
       }
       // check if the job is required to run on a specific machine
       else if((job->required_host != NULL))
       {
         host = g_tree_lookup(scheduler->host_list, job->required_host);
         if(!(host->running < host->max))
+        {
+          job = NULL;
           break;
+        }
       }
       // the generic case, this can run anywhere, find a place
       else if((host = get_host(&(scheduler->host_queue), 1)) == NULL)
       {
+        job = NULL;
         V_SCHED("JOB_INIT: could not find host\n");
         break;
       }
@@ -453,9 +461,10 @@ void scheduler_update(scheduler_t* scheduler)
 
   if(job != NULL && n_agents == 0 && n_jobs == 0)
   {
-    agent_init(scheduler, get_host(&(scheduler->host_queue), 1), job);
+    agent_init(scheduler, host, job);
     lockout = 1;
-    job = NULL;
+    job  = NULL;
+    host = NULL;
   }
 
   if(scheduler->s_pause)
@@ -602,16 +611,19 @@ void scheduler_clear_config(scheduler_t* scheduler)
 
   g_free(scheduler->host_url);
   g_free(scheduler->email_subject);
-  g_free(scheduler->email_header);
-  g_free(scheduler->email_footer);
   g_free(scheduler->email_command);
   PQfinish(scheduler->db_conn);
   scheduler->db_conn       = NULL;
   scheduler->host_url      = NULL;
   scheduler->email_subject = NULL;
+  scheduler->email_command = NULL;
+
+  if(scheduler->default_header)
+    munmap(scheduler->email_header, strlen(scheduler->email_header));
+  if(scheduler->default_footer)
+    munmap(scheduler->email_footer, strlen(scheduler->email_footer));
   scheduler->email_header  = NULL;
   scheduler->email_footer  = NULL;
-  scheduler->email_command = NULL;
 
   fo_config_free(scheduler->sysconfig);
   scheduler->sysconfig = NULL;
@@ -799,8 +811,14 @@ void scheduler_foss_config(scheduler_t* scheduler)
         "FOSSOLOGY", "port", &error));
 
   /* load the log directory */
-  if(fo_config_has_key(scheduler->sysconfig, "DIRECTORIES", "LOG_DIR"))
+  if(!scheduler->logcmdline && fo_config_has_key(scheduler->sysconfig, "DIRECTORIES", "LOG_DIR"))
+  {
     scheduler->logdir = fo_config_get(scheduler->sysconfig, "DIRECTORIES", "LOG_DIR", &error);
+    scheduler->main_log = log_new(scheduler->logdir, NULL, scheduler->s_pid);
+
+    log_destroy(main_log);
+    main_log = scheduler->main_log;
+  }
 
   /* load the host settings */
   keys = fo_config_key_set(scheduler->sysconfig, "HOSTS", &special);
