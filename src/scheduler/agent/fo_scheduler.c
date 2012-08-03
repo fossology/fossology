@@ -120,6 +120,9 @@ int main(int argc, char** argv)
   if(s_daemon && daemon(0, 0) == -1) { return -1; }
   scheduler_agent_config(scheduler);
 
+  database_init(scheduler);
+  email_init(scheduler);
+
   NOTIFY("*****************************************************************");
   NOTIFY("***                FOSSology scheduler started                ***");
   NOTIFY("***        pid:      %-33d        ***", getpid());
