@@ -265,12 +265,12 @@ void fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn)
   {
     db_config  = g_strdup_printf("%s/Db.conf", sysconfigdir);
     (*db_conn) = fo_dbconnect(db_config, &db_error);
+    g_free(db_config);
     if(db_error)
     {
       fprintf(stderr, "FATAL %s.%d: unable to open database connection: %s\n",
           __FILE__, __LINE__, db_error);
       fflush(stderr);
-      g_free(db_config);
       exit(253);
     }
   }
@@ -431,10 +431,31 @@ char* fo_scheduler_current()
  */
 void fo_scheduler_set_special(int option, int value)
 {
-  fflush(stdout);
-  fflush(stderr);
   fprintf(stdout, "SPECIAL: %d %d\n", option, value);
   fflush(stdout);
+}
+
+/**
+ * @brief Gets if a particular special attribute is set in the scheduler.
+ *
+ * Possible Options:
+ *   SPECIAL_NOKILL   : the agent will not be killed if it stops updating status
+ *   SPECIAL_EXCLUSIVE: the agent cannot run simultatiously with any other agent
+ *   SPECIAL_NOEMAIL  : the scheduler will not send notification emails for this agent
+ *   SPECIAL_LOCAL    : the agent is required to run on the same machine as the scheduler
+ *
+ * @param option  the relevant option to the get the value of
+ * @return  if the value of the special option was true
+ */
+int fo_scheduler_get_special(int option)
+{
+  int value;
+
+  fprintf(stdout, "GETSPECIAL: %d\n", option);
+  fflush(stdout);
+
+  fscanf(stdin, "VALUE: %d\n", &value);
+  return value;
 }
 
 /**
