@@ -441,7 +441,6 @@ void scheduler_update(scheduler_t* scheduler)
       else if((host = get_host(&(scheduler->host_queue), 1)) == NULL)
       {
         job = NULL;
-        V_SCHED("JOB_INIT: could not find host\n");
         break;
       }
 
@@ -811,9 +810,10 @@ void scheduler_foss_config(scheduler_t* scheduler)
         "FOSSOLOGY", "port", &error));
 
   /* load the log directory */
-  if(!scheduler->logcmdline && fo_config_has_key(scheduler->sysconfig, "DIRECTORIES", "LOG_DIR"))
+  if(!scheduler->logcmdline)
   {
-    scheduler->logdir = fo_config_get(scheduler->sysconfig, "DIRECTORIES", "LOG_DIR", &error);
+    if(fo_config_has_key(scheduler->sysconfig, "DIRECTORIES", "LOGDIR"))
+      scheduler->logdir = fo_config_get(scheduler->sysconfig, "DIRECTORIES", "LOGDIR", &error);
     scheduler->main_log = log_new(scheduler->logdir, NULL, scheduler->s_pid);
 
     log_destroy(main_log);

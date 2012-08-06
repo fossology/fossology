@@ -141,6 +141,9 @@ log_t* log_new_FILE(FILE* log_file, gchar* log_name, gchar* pro_name, pid_t pro_
   ret->log_name = g_strdup(log_name);
   ret->log_file = log_file;
 
+  V_JOB("NEW_LOG: log_name: \"%s\", pro_name: \"%s\", pro_pid: %d, log_file: %p\n",
+      ret->log_name, ret->pro_name, ret->pro_pid, ret->log_file);
+
   return ret;
 }
 
@@ -182,10 +185,16 @@ int lprintf(log_t* log, const char* fmt, ...)
   int rc;
 
   if(!fmt) return 0;
-  if(!log) return 0;
 
   va_start(args, fmt);
-  rc = vlprintf(log, fmt, args);
+  if(log == NULL || log->log_file == NULL)
+  {
+    rc = vlprintf(main_log, fmt, args);
+  }
+  else
+  {
+    rc = vlprintf(log, fmt, args);
+  }
   va_end(args);
 
   return rc;
