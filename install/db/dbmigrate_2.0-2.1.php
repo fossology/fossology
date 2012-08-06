@@ -65,14 +65,6 @@ function Migrate_20_21($DryRun)
     // Fix the foreign keys that moved when the table was renamed
     $sql = "alter table uploadtree add foreign key (upload_fk) references upload(upload_pk) on delete cascade";
     RunSQL($sql, $DryRun);
-    $sql = "alter table tag_uploadtree drop constraint tags_uploadtree_uploadtree_fk_fkey";
-    RunSQL($sql, $DryRun);
-    $sql = "alter table tag_uploadtree add foreign key (uploadtree_fk) references uploadtree(uploadtree_pk) on delete cascade";
-    RunSQL($sql, $DryRun);
-    $sql = "alter table bucket_container drop constraint bucket_container_uploadtree_fk_fkey";
-    RunSQL($sql, $DryRun);
-    $sql = "alter table bucket_container add foreign key (uploadtree_fk) references uploadtree(uploadtree_pk) on delete cascade";
-    RunSQL($sql, $DryRun);
   }
 
   // fix uploadtree_tablename
