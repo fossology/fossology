@@ -417,13 +417,13 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      */
     else if(strncmp(buffer, "HEART", 5) == 0)
     {
-      g_regex_match(scheduler->parse_agent_heart, buffer, 0, &match);
+      g_regex_match(scheduler->parse_agent_msg, buffer, 0, &match);
 
-      arg = g_match_info_fetch(match, 2);
+      arg = g_match_info_fetch(match, 3);
       agent->total_analyzed = atoi(arg);
       g_free(arg);
 
-      arg = g_match_info_fetch(match, 4);
+      arg = g_match_info_fetch(match, 6);
       agent->alive = (arg[0] == '1' || agent->alive);
       g_free(arg);
 
@@ -455,13 +455,13 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
     {
       relevant = INT_MAX;
 
-      g_regex_match(scheduler->parse_agent_special, buffer, 0, &match);
+      g_regex_match(scheduler->parse_agent_msg, buffer, 0, &match);
 
-      arg = g_match_info_fetch(match, 2);
+      arg = g_match_info_fetch(match, 3);
       relevant &= atoi(arg);
       g_free(arg);
 
-      arg = g_match_info_fetch(match, 4);
+      arg = g_match_info_fetch(match, 6);
       if(atoi(arg))
       {
         if(agent->special & relevant)
@@ -477,6 +477,22 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       g_match_info_free(match);
 
       agent->special ^= relevant;
+    }
+
+    else if(strncmp(buffer, "GETSPECIAL", 10) == 0)
+    {
+      g_regex_match(scheduler->parse_agent_msg, buffer, 0, &match);
+
+      arg = g_match_info_fetch(match, 3);
+      relevant = atoi(arg);
+      g_free(arg);
+
+      if(agent->special & relevant)
+        aprintf(agent, "VALUE: 1\n");
+      else
+        aprintf(agent, "VALUE: 0\n");
+
+      g_match_info_free(match);
     }
 
     /* command: unknown

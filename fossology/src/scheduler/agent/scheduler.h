@@ -91,8 +91,7 @@ typedef struct
     gboolean default_footer;  ///< Is the footer the default footer
 
     /* regular expressions */
-    GRegex* parse_agent_heart;   ///< Parses agent heart messages
-    GRegex* parse_agent_special; ///< Parses agent special messages
+    GRegex* parse_agent_msg;     ///< Parses messages coming from the agents
     GRegex* parse_db_email;      ///< Parses database email text
     GRegex* parse_interface_cmd; ///< Parses the commands received by the interface
 } scheduler_t;

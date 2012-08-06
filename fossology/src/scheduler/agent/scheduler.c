@@ -279,14 +279,8 @@ scheduler_t* scheduler_init(gchar* sysconfigdir)
 
   /* TODO in depth regex documentation
    */
-  ret->parse_agent_heart   = g_regex_new(
-      "HEART:([ \t]*)(\\d*)([ \t]*)(\\d)",
-      0, 0, NULL);
-
-  /* TODO in depth regex documentation
-   */
-  ret->parse_agent_special = g_regex_new(
-      "SPECIAL:([ \t]*)(\\d*)([ \t]*)(\\d)",
+  ret->parse_agent_msg = g_regex_new(
+      "([A-Z]+):([ \t]*)(\\d+)(([ \t]*)(\\d))?",
       0, 0, NULL);
 
   /* This regex should find:
@@ -353,8 +347,7 @@ void scheduler_destroy(scheduler_t* scheduler)
 
   g_sequence_free(scheduler->job_queue);
 
-  g_regex_unref(scheduler->parse_agent_heart);
-  g_regex_unref(scheduler->parse_agent_special);
+  g_regex_unref(scheduler->parse_agent_msg);
   g_regex_unref(scheduler->parse_db_email);
   g_regex_unref(scheduler->parse_interface_cmd);
 
@@ -803,6 +796,9 @@ void scheduler_foss_config(scheduler_t* scheduler)
   scheduler->sysconfig = fo_config_load(tmp, &error);
   if(error) FATAL("%s", error->message);
   g_free(tmp);
+
+  /* set the user and group before proceeding */
+  set_usr_grp(scheduler->process_name, scheduler->sysconfig);
 
   /* load the port setting */
   if(scheduler->i_port == 0)

@@ -131,7 +131,6 @@ int main(int argc, char** argv)
   NOTIFY("*****************************************************************");
 
   interface_init(scheduler);
-  set_usr_grp(scheduler->process_name, scheduler->sysconfig);
   fo_RepOpenFull(scheduler->sysconfig);
 
   signal(SIGCHLD, scheduler_sig_handle);
