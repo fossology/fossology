@@ -136,7 +136,6 @@ host_t* get_host(GList** queue, uint8_t num)
   for(curr = host_queue; curr != NULL; curr = curr->next)
   {
     ret = curr->data;
-    V_HOST("HOST[%s]: max = %d, running = %d\n", ret->name, ret->max, ret->running);
     if(ret->max - ret->running >= num)
       break;
   }
