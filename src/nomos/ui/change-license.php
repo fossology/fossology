@@ -33,6 +33,105 @@ class change_license extends FO_Plugin {
   public $Dependency = array();
   public $DBaccess = PLUGIN_DB_ANALYZE;
 
+  /**
+   * \brief check if this file license has been changed
+   *
+   * \param $fl_pk - file license id
+   *
+   * \return 1: yes, changed, 0: no not changed
+   */
+  function IsChanged($fl_pk) 
+  {
+    global $PG_CONN;
+    $sql = "select count(*) from license_file_audit where fl_fk = $fl_pk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if ($row['count'] == 0) return 0;
+    else return 1;
+  } // IsChanged()
+
+  /** 
+   * \brief display license audit trail on the pop up window
+   *
+   * \param $LicenseFileId - file license ID (fl_pk in table license_file)
+   * \param $Upload - upload id
+   * \param $Item - uploadtree id
+   *
+   * \return audit trail html
+   */
+  function ViewLicenseAuditTrail($LicenseFileId, $Upload, $Item)
+  {
+    global $PG_CONN;
+
+    $FileName = "";
+
+    /** get file name */
+    $uploadtree_tablename = GetUploadtreeTableName($Upload);
+    $sql = "SELECT ufile_name from $uploadtree_tablename where uploadtree_pk = $Item;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $FileName = $row['ufile_name'];
+    pg_free_result($result);
+
+    /**　query license_file_audit, license_file_audit record the origial license */
+    $sql = "SELECT rf_fk, user_fk, date, reason from license_file_audit where fl_fk = $LicenseFileId order by date DESC;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    $org_lic = "";
+    $obj_lic = "";
+    $user = "";
+    $V = "";
+    $V .= "<table border='1'>\n";
+    $text = _("License");
+    $text1 = _("Changed To");
+    $text2 = _("Reason");
+    $text3 = _("By");
+    $text4 = _("Date");
+    $V .= "<tr><th>$text</th><th>$text1</th><th>$text4</th><th>$text3</th><th>$text2</th></tr>\n";
+    $changed_times = pg_num_rows($result);
+    /** get latest license, rf_shortname in license_file alway is latest license  */
+    $sql = "SELECT rf_shortname from license_file_ref where fl_pk = $LicenseFileId;";
+    $result1 = pg_query($PG_CONN, $sql);
+    DBCheckResult($result1, $sql, __FILE__, __LINE__);
+    $row1 = pg_fetch_assoc($result1);
+    $obj_lic = $row1['rf_shortname']; // get the lastest license from license_file_ref
+    pg_free_result($result1);
+    while ($row = pg_fetch_assoc($result))
+    {
+      $user_id = $row['user_fk'];
+      $sql = "select user_name from users where user_pk = $user_id;";
+      $result1 = pg_query($PG_CONN, $sql);
+      DBCheckResult($result1, $sql, __FILE__, __LINE__);
+      $row1 = pg_fetch_assoc($result1);
+      $user = $row1['user_name'];
+      pg_free_result($result1);
+
+      $sql = "SELECT rf_shortname from license_ref where rf_pk = $row[rf_fk];";
+      $result1 = pg_query($PG_CONN, $sql);
+      DBCheckResult($result1, $sql, __FILE__, __LINE__);
+      $row1 = pg_fetch_assoc($result1);
+      $org_lic = $row1['rf_shortname'];
+      pg_free_result($result1);
+      $V .= "<tr>";
+      $V .= "<td>$org_lic</td>";
+      $V .= "<td>$obj_lic</td>";
+      $V .= "<td>$row[date]</td>";
+      $V .= "<td>$user</td>";
+      $V .= "<td>$row[reason]</td>";
+      $V .= "</tr>";
+      $obj_lic = $row1['rf_shortname'];
+    }
+    pg_free_result($result);
+    $V .= "</table><br>\n";
+
+    return ($V);
+  } // ViewLicenseAuditTrail()
+
   /** 
    * \brief change the license reference 
    * 
@@ -47,7 +146,6 @@ class change_license extends FO_Plugin {
   {
     global $SysConf;
     global $PG_CONN;
-
     $fl_pk = GetParm("fl_pk",PARM_STRING);
 
     /** get original license reference short name */
@@ -151,16 +249,25 @@ class change_license extends FO_Plugin {
     $Agent_pk = GetParm("napk",PARM_STRING);
     $upload_fk = GetParm("upload",PARM_STRING);
     $uploadtree_pk = GetParm("item",PARM_STRING);
+    $fl_pk = GetParm("fl_pk",PARM_STRING);
     $OriginalLicense = "";
     $FileName = "";
 
+    $V="";
+    /* Get uploadtree table name */
+    $uploadtree_tablename = GetUploadtreeTablename($upload_fk);
+
+    $V .= Dir2Browse('browse', $uploadtree_pk, NULL, 1,"View", -1, '', '', $uploadtree_tablename) . "<P />\n";
+
     $this->Change($OriginalLicense, $ObjectiveLicense, $Reason, $FileName);
 
-    $V="";
+    if ($this->IsChanged($fl_pk)) // if this license has been change, display the change trail 
+      $V .= $this->ViewLicenseAuditTrail($fl_pk, $upload_fk, $uploadtree_pk);
+
     $V.= "<form enctype='multipart/form-data' method='post'>\n";
     $V .= "<table border='1'>\n";
-    $text = _("Original License");
-    $text1 = _("Objective License");
+    $text = _("License");
+    $text1 = _("Changed To");
     $text2 = _("Reason");
     $V .= "<tr><th width='20%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
     $V .= "<tr>\n";
@@ -174,9 +281,6 @@ class change_license extends FO_Plugin {
     $V .= "</table><br>\n";
 
     $V .= "<input type='submit' value='Submit'>";
-    $V .= "<br><br>";
-    $text = _("Back to license viewer");
-    $V .= "<a href='" . Traceback_uri() . "?mod=view-license&napk=$Agent_pk&show=detail&upload=$upload_fk&item=$uploadtree_pk' >$text</a>";
     $V.= "</form>\n";
     print $V;
   }
