@@ -299,7 +299,8 @@ function plugin_install($Verbose)
     $State = $P->Install();
     if ($State != 0) {
       $FailMsg = "FAILED: " . $P->Name . " failed to install.\n";
-      return($FailMsg);
+      print ($FailMsg);
+      break;
     }
   }
   return(FALSE);
