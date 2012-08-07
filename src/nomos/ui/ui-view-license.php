@@ -260,7 +260,6 @@ class ui_view_license extends FO_Plugin
         
         $text = _("License Reference");
         $nomos_out .= "<a title='$text' href='javascript:;'";
-        $nomos_out .= $change_license;
         $nomos_out .= "onClick=\"javascript:window.open('";
         $nomos_out .= Traceback_uri();
         $nomos_out .= "?mod=view-license";

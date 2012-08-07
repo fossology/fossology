@@ -23,7 +23,7 @@
  * lecense, you can change it to No_license_found
  */
 
-define("TITLE_change_license", _("Change License"));
+define("TITLE_change_license", _("Change License and Change History"));
 
 class change_license extends FO_Plugin {
 
@@ -101,6 +101,7 @@ class change_license extends FO_Plugin {
     $row1 = pg_fetch_assoc($result1);
     $obj_lic = $row1['rf_shortname']; // get the lastest license from license_file_ref
     pg_free_result($result1);
+    $date = "";
     while ($row = pg_fetch_assoc($result))
     {
       $user_id = $row['user_fk'];
@@ -117,10 +118,11 @@ class change_license extends FO_Plugin {
       $row1 = pg_fetch_assoc($result1);
       $org_lic = $row1['rf_shortname'];
       pg_free_result($result1);
+      $date = substr($row['date'], 0, 16);
       $V .= "<tr>";
       $V .= "<td>$org_lic</td>";
       $V .= "<td>$obj_lic</td>";
-      $V .= "<td>$row[date]</td>";
+      $V .= "<td>$date</td>";
       $V .= "<td>$user</td>";
       $V .= "<td>$row[reason]</td>";
       $V .= "</tr>";
@@ -263,13 +265,10 @@ class change_license extends FO_Plugin {
     if ($this->Change($OriginalLicense, $ObjectiveLicense, $Reason, $FileName) === -1) 
       $ObjectiveLicense = "";
 
-    if ($this->IsChanged($fl_pk)) // if this license has been changed, display the change trail 
-      $V .= $this->ViewLicenseAuditTrail($fl_pk, $upload_fk, $uploadtree_pk);
-
     $V.= "<form enctype='multipart/form-data' method='post'>\n";
     $V .= "<table border='1'>\n";
     $text = _("License");
-    $text1 = _("Changed To");
+    $text1 = _("Change To");
     $text2 = _("Reason");
     $V .= "<tr><th width='20%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
     $V .= "<tr>\n";
@@ -285,7 +284,12 @@ class change_license extends FO_Plugin {
     $V .= "</table><br>\n";
 
     $V .= "<input type='submit' value='Submit'>";
-    $V.= "</form>\n";
+    $V .= "</form>\n";
+
+    $V .= "<br>";
+    if ($this->IsChanged($fl_pk)) // if this license has been changed, display the change trail 
+      $V .= $this->ViewLicenseAuditTrail($fl_pk, $upload_fk, $uploadtree_pk);
+
     print $V;
   }
 }
