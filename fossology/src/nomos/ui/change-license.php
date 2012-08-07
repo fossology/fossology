@@ -140,7 +140,7 @@ class change_license extends FO_Plugin {
    * \param $Reason - why do this change
    * \param $FileName - file name 
    *
-   * \return NULL
+   * \return succeed: return NULL, fail: return -1
    */
   function Change(&$OriginalLicense, &$ObjectiveLicense, &$Reason, &$FileName)
   {
@@ -171,23 +171,23 @@ class change_license extends FO_Plugin {
         $text = _("Error: license ");
         $text1 =_("does not exist in FOSSology.");
         $Msg = "$text '$ObjectiveLicense' $text1";
-        print displayMessage($Msg,$keep);
-        return (NULL);
+        print displayMessage($Msg,"");
+        return (-1);
       }
       $row = pg_fetch_assoc($result);
       $rf_fk = $row['rf_pk'];
       pg_free_result($result);
 
       if ($ObjectiveLicense === $OriginalLicense) { // original license is same with objective license
-        $text = _("Fatal: Objective license");
-        $text1 = _("is same to original license");
+        $text = _("Error: can not change");
+        $text1 = _("to");
         $Msg = "$text '$OriginalLicense' $text1 '$ObjectiveLicense'.";
         print displayMessage($Msg,"");
-        return (NULL);
+        return (-1);
       } else if (!empty($ObjectiveLicense)) { // complete change
         $text = _("is changed to");
         $Msg = "'$OriginalLicense' $text '$ObjectiveLicense'.";
-        print displayMessage($Msg,"");
+        // print displayMessage($Msg,"");
       }
 
       $user_pk = $SysConf['auth']['UserId'];
@@ -259,9 +259,11 @@ class change_license extends FO_Plugin {
 
     $V .= Dir2Browse('browse', $uploadtree_pk, NULL, 1,"View", -1, '', '', $uploadtree_tablename) . "<P />\n";
 
-    $this->Change($OriginalLicense, $ObjectiveLicense, $Reason, $FileName);
+    /** if failed to change the license, set $ObjectiveLicense as empty */
+    if ($this->Change($OriginalLicense, $ObjectiveLicense, $Reason, $FileName) === -1) 
+      $ObjectiveLicense = "";
 
-    if ($this->IsChanged($fl_pk)) // if this license has been change, display the change trail 
+    if ($this->IsChanged($fl_pk)) // if this license has been changed, display the change trail 
       $V .= $this->ViewLicenseAuditTrail($fl_pk, $upload_fk, $uploadtree_pk);
 
     $V.= "<form enctype='multipart/form-data' method='post'>\n";
@@ -271,6 +273,8 @@ class change_license extends FO_Plugin {
     $text2 = _("Reason");
     $V .= "<tr><th width='20%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
     $V .= "<tr>\n";
+    /** after the original license is changed, on the UI, the origial license is changed to the object one */
+    if (!empty($ObjectiveLicense)) $OriginalLicense = $ObjectiveLicense;
     $V .= "<td>$OriginalLicense</td>\n";
     // $V .= "<td> <input type='text' style='width:100%' name='object_license'></td>\n";
     $V .= "<td> <select name='object_license'>\n";
