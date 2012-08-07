@@ -267,8 +267,8 @@ function Dir2Path($uploadtree_pk, $uploadtree_tablename='uploadtree')
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $Row = pg_fetch_assoc($result);
     pg_free_result($result);
-    if (Isartifact($Row['ufile_mode'])) return($uploadtreeArray);
-    array_unshift($uploadtreeArray, $Row);
+    if (!Isartifact($Row['ufile_mode']))  
+      array_unshift($uploadtreeArray, $Row);
     $uploadtree_pk = $Row['parent'];
   }
 
