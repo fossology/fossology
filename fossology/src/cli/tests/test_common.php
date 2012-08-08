@@ -69,6 +69,29 @@
   }
 
 
+ 
+  /**
+   * connect to a database
+   * \param $fossology_testconfig the testing SYSCONFDIR provided by create_test_database.pl
+   *
+   * \return A valid postgres database handle, or false if connection cannot be made
+   */
+  function connect_to_DB($fossology_testconfig) {
+     $test_pg_conn = FALSE;
+
+     $db_conf_file = $fossology_testconfig . "/Db.conf";
+    
+     $test_pg_conn = pg_connect(str_replace(";", " ", file_get_contents($db_conf_file)));
+
+     if (empty($test_pg_conn)) {
+         print "Error - could not connect to test db via $db_conf_file\n";
+     }
+     else {
+         print "Successfully connected to test db\n";
+     }
+     return($test_pg_conn);
+   }
+
   /**
    * \brief check if the agent you specify is complete
    *
@@ -77,13 +100,14 @@
    *
    * \return 1 as complete sucessfully, other as failed or not scheduled
    */
-  function check_agent_status($agent_name, $upload_id) {
-    global $PG_CONN;
+  function check_agent_status($test_dbh, $agent_name, $upload_id) {
+    #global $PG_CONN;
     $ars_table_name = $agent_name."_ars";
     $count = 0;
     $sql = "SELECT count(*) FROM $ars_table_name where upload_fk = $upload_id and ars_success=true;";
     // print "sql is:$sql\n";
-    $result = pg_query($PG_CONN, $sql);
+    #$result = pg_query($PG_CONN, $sql);
+    $result = pg_query($test_dbh, $sql);
     $count = pg_num_rows($result);
     pg_free_result($result);
     if(1 == $count)  return 1;
