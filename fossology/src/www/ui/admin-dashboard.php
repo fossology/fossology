@@ -177,7 +177,7 @@ class dashboard extends FO_Plugin
 
         /**************************************************/
         $V .= "<td valign='top'>\n";
-        $text = _("Change License");
+        $text = _("Database Contents");
         $V .= "<H2>$text</H2>\n";
         $V .= "<table border=1>\n";
         $text = _("Metric");
