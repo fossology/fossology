@@ -369,13 +369,13 @@ void scheduler_destroy(scheduler_t* scheduler)
  * is executed. Therefore the code should be light weight since it will be run
  * very frequently.
  *
- * TODO:
+ * @TODO:
  *   currently this will only grab a job and create a single agent to execute
  *   the job.
  *
- *   TODO: allow for runonpfile jobs to have multiple agents based on size
- *   TODO: allow for job preemption. The scheduler can pause jobs, allow it
- *   TODO: allow for specific hosts to be chossen.
+ *   @TODO: allow for runonpfile jobs to have multiple agents based on size
+ *   @TODO: allow for job preemption. The scheduler can pause jobs, allow it
+ *   @TODO: allow for specific hosts to be chossen.
  */
 void scheduler_update(scheduler_t* scheduler)
 {
@@ -761,7 +761,7 @@ void scheduler_agent_config(scheduler_t* scheduler)
   }
 
   closedir(dp);
-  test_agents(scheduler);
+  event_signal(scheduler_test_agents, NULL);
 }
 
 /**
@@ -885,6 +885,27 @@ void scheduler_foss_config(scheduler_t* scheduler)
 }
 
 /**
+ * @brief daemonizes the scheduler
+ *
+ * This will make sure that the pid that is maintained in the scheduler struct
+ * is correct during the daemonizing process.
+ *
+ * @param scheduler  the scheduler_t struct
+ * @return  if the daemonizing was successful.
+ */
+int scheduler_daemonize(scheduler_t* scheduler)
+{
+	int ret = 0;
+
+	/* daemonize the process */
+	if((ret = daemon(0, 0)) != 0)
+	  return ret;
+
+	scheduler->s_pid = getpid();
+	return ret;
+}
+
+/**
  * @brief Load both the fossology configuration and all the agent configurations
  *
  * @param scheduler  the scheduler to load the configuration for
@@ -920,6 +941,18 @@ void scheduler_close_event(scheduler_t* scheduler, void* killed)
   if(killed) {
     kill_agents(scheduler);
   }
+}
+
+/**
+ * @brief Event used when the scheduler tests the agents
+ *
+ * @param scheduler  the scheduler struct
+ * @param unused
+ */
+void scheduler_test_agents(scheduler_t* scheduler, void* unused)
+{
+  scheduler->s_startup = TRUE;
+  test_agents(scheduler);
 }
 
 /**

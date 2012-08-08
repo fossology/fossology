@@ -185,6 +185,7 @@ void event_loop_destroy()
  */
 void event_signal_ext(void* func, void* args, char* name, char* s_name, uint16_t s_line)
 {
+  V_EVENT("EVENT: creating event: [%p, %p, %s, %s, %d]", func, args, name, s_name, s_line);
   event_loop_put(event_loop_get(), event_init((event_function)func, args, name, s_name, s_line));
 }
 

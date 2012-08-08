@@ -733,7 +733,7 @@ void database_update_event(scheduler_t* scheduler, void* unused)
 
   if(closing)
   {
-    WARNING("scheduler is closing, will not perform database update");
+    WARNING("scheduler is closing, will not check the job queue");
     return;
   }
 
