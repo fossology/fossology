@@ -83,12 +83,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   log_printf("\n"); } while(0)
 
 /** STANDARD verbose macro changed for agents */
-#define AGENT_VERB(...) if(TVERB_AGENT) do { \
+#define AGENT_SEQUENTIAL_PRINT(...) if(TVERB_AGENT) do { \
   AGENT_CREDENTIAL;                          \
   log_printf(__VA_ARGS__); } while(0)
 
 /** send logging specifically to the agent log file */
-#define AGENT_LOG(...) do {                             \
+#define AGENT_CONCURRENT_PRINT(...) do {                             \
   AGENT_LOG_CREDENTIAL;                                 \
   con_printf(job_log(agent->owner), __VA_ARGS__); } while(0)
 
@@ -152,7 +152,7 @@ static int update(int* pid_ptr, agent_t* agent, gpointer unused)
     if(time(NULL) - agent->check_in > CONF_agent_death_timer
         && !(agent->owner->status == JB_PAUSED) && !nokill)
     {
-      AGENT_LOG("no heartbeat for %d seconds\n", (time(NULL) - agent->check_in));
+      AGENT_CONCURRENT_PRINT("no heartbeat for %d seconds\n", (time(NULL) - agent->check_in));
       agent_kill(agent);
       return 0;
     }
@@ -168,12 +168,12 @@ static int update(int* pid_ptr, agent_t* agent, gpointer unused)
     }
     if(agent->n_updates > CONF_agent_update_number && !nokill)
     {
-      AGENT_LOG("agent has not set the alive flag in at least 10 minutes, killing\n");
+      AGENT_CONCURRENT_PRINT("agent has not set the alive flag in at least 10 minutes, killing\n");
       agent_kill(agent);
       return 0;
     }
 
-    AGENT_VERB("agent updated correctly, processed %d items: %d\n",
+    AGENT_SEQUENTIAL_PRINT("agent updated correctly, processed %d items: %d\n",
         agent->total_analyzed, agent->n_updates);
     agent->alive = 0;
   }
@@ -276,7 +276,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
    */
   if(fgets(buffer, sizeof(buffer), agent->read) == NULL)
   {
-    AGENT_LOG("pipe from child closed: %s\n", strerror(errno));
+    AGENT_CONCURRENT_PRINT("pipe from child closed: %s\n", strerror(errno));
     g_thread_exit(NULL);
   }
 
@@ -296,7 +296,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       agent_kill(agent);
       con_printf(main_log, "ERROR %s.%d: agent %s.%s has been invalidated, removing from agents\n",
           __FILE__, __LINE__, agent->host->name, agent->type->name);
-      AGENT_LOG("agent didn't send version information: \"%s\"\n", buffer);
+      AGENT_CONCURRENT_PRINT("agent didn't send version information: \"%s\"\n", buffer);
       return;
     }
   }
@@ -348,7 +348,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       continue;
 
     if(TVERB_AGENT && (TVERB_SPECIAL || strncmp(buffer, "SPECIAL", 7) != 0))
-      AGENT_LOG("received: \"%s\"\n", buffer);
+      AGENT_CONCURRENT_PRINT("received: \"%s\"\n", buffer);
 
     /* command: "BYE"
      *
@@ -361,7 +361,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
     {
       if((agent->return_code = atoi(&(buffer[4]))) != 0)
       {
-        AGENT_LOG("agent failed with error code %d\n", agent->return_code);
+        AGENT_CONCURRENT_PRINT("agent failed with error code %d\n", agent->return_code);
         event_signal(agent_fail_event, agent);
       }
       break;
@@ -501,11 +501,11 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      * printed into the log and move on.
      */
     else if(!(TVERB_AGENT))
-      AGENT_LOG("\"%s\"\n", buffer);
+      AGENT_CONCURRENT_PRINT("\"%s\"\n", buffer);
   }
 
   if(TVERB_AGENT)
-    AGENT_LOG("communication thread closing\n");
+    AGENT_CONCURRENT_PRINT("communication thread closing\n");
 }
 
 /**
@@ -892,31 +892,34 @@ void agent_death_event(scheduler_t* scheduler, pid_t* pid)
   int status = pid[1];
 
   if((agent = g_tree_lookup(scheduler->agents, &pid[0])) == NULL)
+  {
+    ERROR("invalid agent death event: pid[%d]", pid[0]);
     return;
+  }
 
   if(agent->owner->id >= 0)
     event_signal(database_update_event, NULL);
 
   if(write(agent->to_parent, "@@@1\n", 5) != 5)
-    AGENT_VERB("write to agent unsuccessful: %s\n", strerror(errno));
+    AGENT_SEQUENTIAL_PRINT("write to agent unsuccessful: %s\n", strerror(errno));
   g_thread_join(agent->thread);
 
   if(agent->return_code != 0)
   {
     if(WIFEXITED(status))
     {
-      AGENT_LOG("agent failed, code: %d\n", (status >> 8));
+      AGENT_CONCURRENT_PRINT("agent failed, code: %d\n", (status >> 8));
     }
     else if(WIFSIGNALED(status))
     {
-      AGENT_LOG("agent was killed by signal: %d.%s\n",
+      AGENT_CONCURRENT_PRINT("agent was killed by signal: %d.%s\n",
           WTERMSIG(status), strsignal(WTERMSIG(status)));
       if(WCOREDUMP(status))
-        AGENT_LOG("agent produced core dump\n");
+        AGENT_CONCURRENT_PRINT("agent produced core dump\n");
     }
     else
     {
-      AGENT_LOG("agent failed, code: %d\n", agent->return_code);
+      AGENT_CONCURRENT_PRINT("agent failed, code: %d\n", agent->return_code);
     }
     AGENT_WARNING("agent closed unexpectedly, agent status was %s",
         agent_status_strings[agent->status]);
@@ -935,9 +938,9 @@ void agent_death_event(scheduler_t* scheduler, pid_t* pid)
   }
 
   if(agent->owner->id < 0 && !agent->type->valid)
-    AGENT_VERB("agent failed startup test, removing from meta agents\n");
+    AGENT_SEQUENTIAL_PRINT("agent failed startup test, removing from meta agents\n");
 
-  AGENT_VERB("successfully remove from the system\n");
+  AGENT_SEQUENTIAL_PRINT("successfully remove from the system\n");
   job_remove_agent(agent->owner, scheduler->job_list, agent);
   g_tree_remove(scheduler->agents, &agent->pid);
   g_free(pid);
@@ -955,7 +958,7 @@ void agent_create_event(scheduler_t* scheduler, agent_t* agent)
 {
   TEST_NULV(agent);
 
-  AGENT_VERB("agent successfully spawned\n");
+  AGENT_SEQUENTIAL_PRINT("agent successfully spawned\n");
   g_tree_insert(scheduler->agents, &agent->pid, agent);
   agent_transition(agent, AG_SPAWNED);
   job_add_agent(agent->owner, agent);
@@ -977,7 +980,7 @@ void agent_ready_event(scheduler_t* scheduler, agent_t* agent)
   if(agent->status == AG_SPAWNED)
   {
     agent_transition(agent, AG_RUNNING);
-    AGENT_VERB("agent successfully created\n");
+    AGENT_SEQUENTIAL_PRINT("agent successfully created\n");
   }
 
   if((ret = job_is_open(scheduler, agent->owner)) == 0)
@@ -1059,7 +1062,7 @@ void list_agents_event(scheduler_t* scheduler, GOutputStream* ostr)
  */
 void agent_transition(agent_t* agent, agent_status new_status)
 {
-  AGENT_VERB("agent status change: %s -> %s\n",
+  AGENT_SEQUENTIAL_PRINT("agent status change: %s -> %s\n",
       agent_status_strings[agent->status], agent_status_strings[new_status]);
 
   if(agent->owner->id > 0)
@@ -1126,7 +1129,7 @@ void agent_print_status(agent_t* agent, GOutputStream* ostr)
       agent_status_strings[agent->status],
       time_buf);
 
-  AGENT_VERB("AGENT_STATUS: %s", status_str);
+  AGENT_SEQUENTIAL_PRINT("AGENT_STATUS: %s", status_str);
   g_output_stream_write(ostr, status_str, strlen(status_str), NULL, NULL);
   g_free(status_str);
   return;
@@ -1140,7 +1143,7 @@ void agent_print_status(agent_t* agent, GOutputStream* ostr)
  */
 void agent_kill(agent_t* agent)
 {
-  AGENT_VERB("KILL: sending SIGKILL to pid %d\n", agent->pid);
+  AGENT_SEQUENTIAL_PRINT("KILL: sending SIGKILL to pid %d\n", agent->pid);
   kill(agent->pid, SIGKILL);
 }
 
@@ -1163,7 +1166,7 @@ int aprintf(agent_t* agent, const char* fmt, ...)
   {
     tmp = g_strdup_vprintf(fmt, args);
     tmp[strlen(tmp) - 1] = '\0';
-    AGENT_LOG("sent to agent \"%s\"\n", tmp);
+    AGENT_CONCURRENT_PRINT("sent to agent \"%s\"\n", tmp);
     rc = fprintf(agent->write, "%s\n", tmp);
     g_free(tmp);
   }

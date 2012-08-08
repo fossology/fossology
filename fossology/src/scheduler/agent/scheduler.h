@@ -31,6 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gio/gio.h>
 #include <glib.h>
 #include <libpq-fe.h>
+#include <signal.h>
 
 /* fo library includes */
 #include <fossconfig.h>
@@ -181,10 +182,12 @@ gint int_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 /* scheduler events */
 void scheduler_config_event(scheduler_t* scheduler, void*);
 void scheduler_close_event(scheduler_t* scheduler, void*);
+void scheduler_test_agents(scheduler_t* scheduler, void*);
 
 void scheduler_clear_config(scheduler_t* scheduler);
 void scheduler_agent_config(scheduler_t* scheduler);
 void scheduler_foss_config(scheduler_t* scheduler);
+int  scheduler_daemonize(scheduler_t* scheduler);
 
 void set_usr_grp(gchar* process_name, fo_conf* config);
 int  kill_scheduler(int force);

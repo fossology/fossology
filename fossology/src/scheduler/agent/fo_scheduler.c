@@ -117,7 +117,7 @@ int main(int argc, char** argv)
   scheduler->s_daemon     = s_daemon;
 
   scheduler_foss_config(scheduler);
-  if(s_daemon && daemon(0, 0) == -1) { return -1; }
+  if(s_daemon && scheduler_daemonize(scheduler) == -1) { return -1; }
   scheduler_agent_config(scheduler);
 
   database_init(scheduler);
