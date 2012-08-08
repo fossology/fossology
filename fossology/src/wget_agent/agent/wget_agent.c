@@ -584,6 +584,16 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
     {
       return 0;
     }
+  } else if (strstr(Path, "*"))  // wildcards
+  {
+    memset(CMD, MAXCMD, 0);
+    /* for the wildcards upload, keep the path */
+    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s'  %s >/dev/null 2>&1", TempFile, Path);
+    rc_system = system(CMD);
+    if (rc_system != 0)
+    {
+      return 0;
+    }
   }
   else return 0; /** neither a directory nor a regular file */
 
