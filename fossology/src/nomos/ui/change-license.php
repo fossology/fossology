@@ -86,6 +86,8 @@ class change_license extends FO_Plugin {
     $obj_lic = "";
     $user = "";
     $V = "";
+    $text = _("Change History");
+    $V .= "<H2>$text</H2>\n";
     $V .= "<table border='1'>\n";
     $text = _("License");
     $text1 = _("Changed To");
@@ -119,12 +121,13 @@ class change_license extends FO_Plugin {
       $org_lic = $row1['rf_shortname'];
       pg_free_result($result1);
       $date = substr($row['date'], 0, 16);
+      $reason = htmlspecialchars($row['reason']);
       $V .= "<tr>";
       $V .= "<td>$org_lic</td>";
       $V .= "<td>$obj_lic</td>";
       $V .= "<td>$date</td>";
       $V .= "<td>$user</td>";
-      $V .= "<td>$row[reason]</td>";
+      $V .= "<td>$reason</td>";
       $V .= "</tr>";
       $obj_lic = $row1['rf_shortname'];
     }
@@ -264,7 +267,8 @@ class change_license extends FO_Plugin {
     /** if failed to change the license, set $ObjectiveLicense as empty */
     if ($this->Change($OriginalLicense, $ObjectiveLicense, $Reason, $FileName) === -1) 
       $ObjectiveLicense = "";
-
+    $text = _("Change License");
+    $V .= "<H2>$text</H2>\n";
     $V.= "<form enctype='multipart/form-data' method='post'>\n";
     $V .= "<table border='1'>\n";
     $text = _("License");
