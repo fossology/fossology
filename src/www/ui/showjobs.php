@@ -612,6 +612,7 @@ class showjobs extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
 
     $V="";
+    $Page = "";
     $UploadPk = GetParm('upload',PARM_INTEGER);
     if (empty($UploadPk)) { $UploadPk = -1; }
 
