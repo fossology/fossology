@@ -201,7 +201,7 @@ int main  (int argc, char *argv[])
         snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
         struct stat Status;
 
-        if (stat(GlobalURL, &Status) == 0)
+        if (strstr(GlobalURL, "*") || stat(GlobalURL, &Status) == 0)
         {
           if (!Archivefs(GlobalURL, GlobalTempFile, TempFileDir, Status))
           {

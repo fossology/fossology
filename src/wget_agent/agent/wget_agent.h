@@ -22,8 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef _WGET_AGENT_H
 #define _WGET_AGENT_H 1
 
-#include <stdlib.h>
-
 /* specify support for files > 2G */
 #define __USE_LARGEFILE64
 

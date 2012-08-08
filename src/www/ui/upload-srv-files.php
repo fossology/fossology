@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -91,14 +91,15 @@ class upload_srv_files extends FO_Plugin {
     if (empty($ShortName)) {
       $ShortName = $Name;
     }
-    /** check if the file/directory is existed */
-    if (!file_exists($SourceFiles)) {
+    $wildcardpath = strstr($SourceFiles, '*');
+    /** check if the file/directory is existed (the path does not include wildcards) */
+    if (empty($wildcardpath) && !file_exists($SourceFiles)) {
       $text = _("'$SourceFiles' does not exist.\n");
       return $text;
     }
 
     /** check if has the read permission */
-    if (!fopen($SourceFiles, "r")) {
+    if (empty($wildcardpath) && !fopen($SourceFiles, "r")) {
       $text = _("Have no READ permission on '$SourceFiles'.\n");
       return $text;
     }
