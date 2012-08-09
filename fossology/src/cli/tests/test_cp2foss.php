@@ -136,6 +136,8 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     //global $SYSCONF_DIR;
     global $fossology_testconfig;
     global $fo_cli_path;
+    global $cp2foss_path;
+
     fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
 
     $test_dbh = connect_to_DB($fossology_testconfig);
@@ -145,7 +147,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
-    $command = "cp2foss $auth ./test_cp2foss.php";
+    $command = "$cp2foss_path $auth ./test_cp2foss.php";
     fwrite(STDOUT, "DEBUG: test_upload_from_server executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     #print "DEBUG: output is:\n";
@@ -177,7 +179,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     /** upload a dir to Software Repository */
     $out = "";
     $pos = 0;
-    $command = "cp2foss $auth ./";
+    $command = "$cp2foss_path $auth ./";
     fwrite(STDOUT, "DEBUG: test_upload_from_server executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     print "DEBUG: output is:\n";
@@ -203,7 +205,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $out = "";
     $pos = 0;
     $upload_path = "upload_path";
-    $command = "cp2foss $auth ./ -f $upload_path -d upload_des -q all -v";
+    $command = "$cp2foss_path $auth ./ -f $upload_path -d upload_des -q all -v";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     sleep(10);
@@ -255,7 +257,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
       -d 'test des exclude dir' -X .svn -X ./ -v */
     $out = "";
     $pos = 0;
-    $command = "cp2foss $auth -q all -A -f test/exclude -n 'test exclue dir'  -d 'test des exclude dir' -X .svn ./ -v";
+    $command = "$cp2foss_path $auth -q all -A -f test/exclude -n 'test exclue dir'  -d 'test des exclude dir' -X .svn ./ -v";
     fwrite(STDOUT, "DEBUG: Running $command\n");
     $last = exec("$command 2>&1", $out, $rtn);
     sleep(10);
@@ -281,6 +283,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     //global $SYSCONF_DIR;
     global $fossology_testconfig;
     global $fo_cli_path;
+    global $cp2foss_path;
 
     fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
     $test_dbh = connect_to_DB($fossology_testconfig);
@@ -290,10 +293,11 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
-    $command = "cp2foss $auth http://www.fossology.org/rpms/fedora/10/SRPMS/fossology-1.1.0-1.fc10.src.rpm -d 'fossology des' -f 'fossology path' -n 'test package'";
+    $command = "$cp2foss_path $auth http://www.fossology.org/rpms/fedora/10/SRPMS/fossology-1.1.0-1.fc10.src.rpm -d 'fossology des' -f 'fossology path' -n 'test package'";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    // print_r($out);
+    print "DEBUG: output is:\n";
+    print_r($out);
     sleep(110);
     $upload_id = 0;
     /** get upload id that you just upload for testing */

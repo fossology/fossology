@@ -24,6 +24,7 @@ all:
 
 test: fossology_testconfig
 	@echo "make functional test for cli scripts"
+	$(MAKE) -C $(TOP)
 	phpunit --log-junit cli-Xunit.xml -c tests.xml
 
 coverage:
