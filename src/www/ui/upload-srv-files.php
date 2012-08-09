@@ -30,6 +30,61 @@ class upload_srv_files extends FO_Plugin {
   public $Dependency = array("agent_unpack");
   public $DBaccess = PLUGIN_DB_USERADMIN;
 
+  /** 
+   * \brief chck if one file/dir has one permission
+   *
+   * \param $path - file path
+   * \param $server - host name
+   * \param $permission - permission x/r/w
+   *
+   * \return 1: yes; 0: no
+   */
+  function remote_file_permission($path, $server = 'localhost', $persmission = 'r')
+  {
+    /** local file */
+    if ($server === 'localhost' || empty($server))
+    {
+      return fopen($path, $persmission);
+    }
+
+    $commands = "ssh $server 'test -$persmission $path'";
+
+    /** check on  remote server */
+    exec($commands, $out, $return_va);
+    // print "command is:$commands, return_va is:$return_va\n";
+    if (0 != $return_va)
+    {
+      return 0;
+    } else return 1;
+  }
+
+  /** 
+   * \brief chck if one file/dir exist or not
+   *
+   * \param $path - file path
+   * \param $server - host name
+   *
+   * \return 1: exist; 0: not
+   */
+  function remote_file_exists($path, $server = 'localhost')
+  {
+    $commands = "ssh $server 'test -f $path'";
+
+    /** local file */
+    if ($server === 'localhost' || empty($server)) 
+    {
+      return file_exists($path);
+    }
+
+    /** check on  remote server */
+    exec($commands, $out, $return_va);
+    // print "command is:$commands, return_va is:$return_va\n";
+    if (0 != $return_va) 
+    {
+      return 0;
+    } else return 1;
+  }
+
   /**
    * \brief Process the upload request.  Call the upload by the Name passed in or by
    * the filename if no name is supplied.
@@ -93,13 +148,13 @@ class upload_srv_files extends FO_Plugin {
     }
     $wildcardpath = strstr($SourceFiles, '*');
     /** check if the file/directory is existed (the path does not include wildcards) */
-    if (empty($wildcardpath) && !file_exists($SourceFiles)) {
+    if (empty($wildcardpath) && !$this->remote_file_exists($SourceFiles, $HostName)) {
       $text = _("'$SourceFiles' does not exist.\n");
       return $text;
     }
 
     /** check if has the read permission */
-    if (empty($wildcardpath) && !fopen($SourceFiles, "r")) {
+    if (empty($wildcardpath) && !$this->remote_file_permission($SourceFiles, $HostName, "r")) {
       $text = _("Have no READ permission on '$SourceFiles'.\n");
       return $text;
     }
@@ -162,6 +217,7 @@ class upload_srv_files extends FO_Plugin {
         $Desc = GetParm('description', PARM_STRING); // may be null
         $Name = GetParm('name', PARM_STRING); // may be null
         if (!empty($SourceFiles) && !empty($FolderPk)) {
+          if (empty($HostName)) $HostName = "localhost";
           $rc = $this->Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName);
           if (empty($rc)) {
             // clear form fileds
