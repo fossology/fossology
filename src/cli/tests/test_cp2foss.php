@@ -331,7 +331,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
     //$this->assertEquals(54, $output_msg_count);
-    $this->assertCount(54, $out, "Test that the number of output lines from '$command' is 54");
+    $this->assertEquals(54, $output_msg_count, "Test that the number of output lines from '$command' is 54");
     // print_r($out);
     /** list agents */
     $out = "";
