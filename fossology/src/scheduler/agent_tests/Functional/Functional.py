@@ -232,6 +232,9 @@ class testsuite:
   ###############################
   
   def createAllActions(self, node):
+    """
+    Creates all the child actions for a particular node in the xml file.
+    """
     return [self.createAction(child) for child in node.childNodes if child.nodeType == Node.ELEMENT_NODE]
   
   def createAction(self, node):
@@ -275,6 +278,25 @@ class testsuite:
     attr = getattr(self, node.nodeName)
     return functools.partial(action_wrapper, attr, node)
   
+  def required(self, node, name):
+    """
+    Get a required attribute for a particular action. If the attribute is not
+    defined in the xml file, this will throw a DefineError. This will perform
+    the necessary substitution for the value of the attribute.
+    """
+    retval = self.substitute(node.getAttribute(name))
+    
+    if not retval:
+      raise DefineError('attribute({0}) required for action({1})'.format(name, node.nodeName))
+    return retval
+  
+  def optional(self, node, name):
+    """
+    Gets an options attribute for a particular action. This will perform the
+    necessary substitution for the value of the attribute.
+    """
+    return self.substitute(node.getAttribute(name))
+  
   def concurrently(self, node, doc, dest):
     """
     Action
@@ -291,8 +313,8 @@ class testsuite:
     
     Returns True
     """
-    command  = self.substitute(node.getAttribute('command'))
-    params   = self.substitute(node.getAttribute('params'))
+    command  = self.required(node, 'command')
+    params   = self.required(node, 'params')
     
     cmd = shlex.split("{0} {1}".format(command, params))
     proc = subprocess.Popen(cmd, 0)
@@ -320,10 +342,10 @@ class testsuite:
     
     Returns True if the results and return value match those provided
     """
-    command  = self.substitute(node.getAttribute('command'))
-    params   = self.substitute(node.getAttribute('params'))
-    expected = self.substitute(node.getAttribute('result'))
-    retval   = self.substitute(node.getAttribute('retval'))
+    command  = self.required(node, 'command')
+    params   = self.required(node, 'params')
+    expected = self.optional(node, 'result')
+    retval   = self.optional(node, 'retval')
     
     cmd  = "{0} {1}".format(command, params)
     proc = subprocess.Popen(cmd, 0, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
@@ -374,7 +396,7 @@ class testsuite:
     
     Returns True
     """
-    dir = self.substitute(node.getAttribute('directory'))
+    dir = self.required(node, 'directory')
     
     config = ConfigParser.ConfigParser()
     config.readfp(open(dir + "/fossology.conf"))
@@ -409,9 +431,9 @@ class testsuite:
     the value varname. While both "values" and "iterations" are optional
     parameters, one of them is required to be provided.
     """
-    varname    = self.substitute(node.getAttribute('varname'))
-    values     = self.substitute(node.getAttribute('values'))
-    iterations = self.substitute(node.getAttribute('iterations'))
+    varname    = self.required(node, 'varname')
+    values     = self.optional(node, 'values')
+    iterations = self.optional(node, 'iterations')
     
     actions = self.createAllActions(node)
     
@@ -451,7 +473,7 @@ class testsuite:
     
     Returns True if and only if cp2foss succeeded
     """
-    file = self.substitute(node.getAttribute('file'))
+    file = self.required(node, 'file')
     
     cmd = self.substitute('{pwd}/cli/cp2foss -c {config} --user {user} --password {pass} ' + file)
     proc = subprocess.Popen(cmd, 0, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
@@ -480,8 +502,8 @@ class testsuite:
     
     Returns True if and only if fossjobs succeeded
     """
-    upload = self.substitute(node.getAttribute('upload'))
-    agents = self.substitute(node.getAttribute('agents'))
+    upload = self.required(node, 'upload')
+    agents = self.optional(node, 'agents')
     
     if not agents:
       agents = ""
@@ -509,7 +531,7 @@ class testsuite:
     
     Returns True if results aren't expected or the results were correct
     """
-    sql      = self.substitute(node.getAttribute('sql'))
+    sql      = self.required(node, 'sql')
     
     cmd = 'psql --username={0} --host=localhost --dbname={1} --command="{2}" -tA'.format(
         self.defines["dbuser"], self.defines['config'].split('/')[2], sql)
@@ -544,9 +566,9 @@ class testsuite:
     
     returns True if the expected is the same as the result
     """
-    row = int(self.substitute(node.getAttribute('row')))
-    col = int(self.substitute(node.getAttribute('col')))
-    val = self.substitute(node.getAttribute('val'))
+    row = int(self.required(node, 'row'))
+    col = int(self.required(node, 'col'))
+    val = self.required(node, 'val')
     
     if not self.dbresult:
       raise DefineError("dbresult action must be within a database action")
