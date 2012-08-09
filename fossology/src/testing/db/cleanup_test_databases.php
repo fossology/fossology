@@ -50,6 +50,34 @@ while ($row = pg_fetch_row($result)) {
 
 pg_close($PG_CONN);
 
+/* also try and cleanup old style test databases */
+/* our database parameters.  Connect to template1, since we are going to
+   attempt to delete all of the extant test databases */
+$postgres_params  = "dbname=template1 ";
+$postgres_params .= "host=localhost ";
+$postgres_params .= "user=fossy ";
+$postgres_params .= "password=fossy ";
+
+$PG_CONN = pg_connect($postgres_params)
+    or die("FAIL: Could not connect to postgres server\n");
+
+/* query postgres for all of the OLD style test databases */
+$sql = "SELECT datname from pg_database where datname like 'fosstest%'";
+$result = pg_query($PG_CONN, $sql)
+    or die("FAIL: Could not query postgres database\n");
+
+/* drop each test database found */
+while ($row = pg_fetch_row($result)) {
+    $dbname = $row[0];
+    echo "Dropping test databaes $dbname\n";
+    $drop_sql = "DROP DATABASE $dbname";
+    pg_query($PG_CONN, $drop_sql) 
+        or die("FAIL: Could not drop database $dbname\n");
+}
+
+
+pg_close($PG_CONN);
+
 /* now delete all of the test directories */
 $system_temp_dir = sys_get_temp_dir();
 $temp_dirs = glob($system_temp_dir . '/*');
