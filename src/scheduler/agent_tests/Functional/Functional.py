@@ -76,16 +76,6 @@ def timeout(func, maxRuntime):
     return False
   return True
 
-class action_wrapper:
-  
-  def __init__(self, action, node):
-    self.action = action
-    self.node   = node
-  
-  def __call__(self, doc, dest):
-    print '.',
-    return self.action(self.node, doc, dest)
-
 ################################################################################
 ### class that handles running a test suite ####################################
 ################################################################################
@@ -276,10 +266,14 @@ class testsuite:
     
     Returns the new action
     """
+    def action_wrapper(action, node, doc, dest):
+      print '.',# node.nodeName,
+      return action(node, doc, dest)
+    
     if not hasattr(self, node.nodeName):
       raise DefineError('testsuite "{0}" does not have an "{1}" action'.format(self.name, node.nodeName))
     attr = getattr(self, node.nodeName)
-    return action_wrapper(attr, node)
+    return functools.partial(action_wrapper, attr, node)
   
   def concurrently(self, node, doc, dest):
     """
@@ -336,9 +330,9 @@ class testsuite:
     
     result = proc.stdout.readlines()
     if len(result) != 0 and len(expected) != 0 and result[0].strip() != expected:
-      print
-      print expected
-      print result[0].strip()
+      #print
+      #print expected
+      #print result[0].strip()
       self.failure(doc, dest, "ResultMismatch",
           "expected: '{0}' != result: '{1}'".format(expected, result[0].strip()))
       return (1, 1)
@@ -346,8 +340,8 @@ class testsuite:
     proc.wait()
     
     if len(retval) != 0 and proc.returncode != int(retval):
-      print
-      print retval, " != ", proc.returncode
+      #print
+      #print retval, " != ", proc.returncode
       self.failure(doc, dest, "IncorrectReturn", "expected: {0} != result: {1}".format(retval, proc.returncode))
       return (1, 1)
     return (1, 0)
