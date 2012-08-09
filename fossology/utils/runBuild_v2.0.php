@@ -37,7 +37,11 @@ $VMS = array(
              'ubuntu-11.04-i386',
              'ubuntu-11.04-x86_64',
              'ubuntu-10.04-i386',
-             'ubuntu-10.04-x86_64'
+             'ubuntu-10.04-x86_64',
+             'fedora-17-i386',
+             'fedora-17-x86_64',
+             'ubuntu-12.04-i386',
+             'ubuntu-12.04-x86_64'
 );
 //$VMS = NULL;
 $Usage = "Usage: " . basename($argv[0]) . " [options]
