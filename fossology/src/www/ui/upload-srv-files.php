@@ -45,17 +45,7 @@ class upload_srv_files extends FO_Plugin {
     if ($server === 'localhost' || empty($server))
     {
       return fopen($path, $persmission);
-    }
-
-    $commands = "ssh $server 'test -$persmission $path'";
-
-    /** check on  remote server */
-    exec($commands, $out, $return_va);
-    // print "command is:$commands, return_va is:$return_va\n";
-    if (0 != $return_va)
-    {
-      return 0;
-    } else return 1;
+    } else return 1;  // don't do the file permission check if the file is not on the web server
   }
 
   /** 
@@ -68,21 +58,11 @@ class upload_srv_files extends FO_Plugin {
    */
   function remote_file_exists($path, $server = 'localhost')
   {
-    $commands = "ssh $server 'test -f $path'";
-
     /** local file */
     if ($server === 'localhost' || empty($server)) 
     {
       return file_exists($path);
-    }
-
-    /** check on  remote server */
-    exec($commands, $out, $return_va);
-    // print "command is:$commands, return_va is:$return_va\n";
-    if (0 != $return_va) 
-    {
-      return 0;
-    } else return 1;
+    } else return 1;  // don't do the file exist check if the file is not on the web server
   }
 
   /**
