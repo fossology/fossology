@@ -16,10 +16,20 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
 /**************************************************************
  runBuild v2.0
 
  Script to create packages use Project-Builder.
+
+ --------------------------------------------------------------------
+ NOTE:  This script is _HIGHLY_ customized for the internal fossology
+        team's package build environment.  It is _EXTREMELY UNLIKELY_
+        that it will work outside of this environment.  If you would 
+        like to build packages for FOSSology, it is not hard, and
+        we would greatly welcome your contributions, but this script
+        is probably not the place to start!!!
+ --------------------------------------------------------------------
 
  \return 0 for success, 1 for failure.
  *************************************************************/
@@ -161,6 +171,17 @@ for ($i = 1;$i < $argc;$i++) {
     system("perl -pi -e 's/^(yum.*rhel\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/rhel\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/redhat.ini");
     system("perl -pi -e 's/^(yum.*fedora\/15\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/fedora\/15\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/fedora.ini");
   }
+
+  // update a symlink on the build machine in /var/ftp/pub/
+  // so that it points to the packages we have just built
+  $ftp_base = "/var/ftp/pub/fossology/$Version/testing";
+  // first delete any existing symlink called 'current'
+  $command = "sudo rm -f $ftp_base/current";
+  exec($command);
+  // then re-create the 'current' symlink to the latest package directory
+  $command = "sudo ln -s $ftp_base/$showtime/ $ftp_base/current";
+  exec($command);
+  
 
 # temporarily disable this commit since we should really not be
 # making svn commits from within test code (not a good practice)
