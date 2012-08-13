@@ -172,14 +172,18 @@ for ($i = 1;$i < $argc;$i++) {
     system("perl -pi -e 's/^(yum.*fedora\/15\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/fedora\/15\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/fedora.ini");
   }
 
-  // update a symlink on the build machine in /var/ftp/pub/
-  // so that it points to the packages we have just built
+  // update a copy of the current packages on the build machine 
+  // in /var/ftp/pub/ called 'current', so that it includes the 
+  // packages we have just built
+  // Note:  A symlink would make more sense here, but the vsftpd
+  // FTP server does not allow symbolic links.
   $ftp_base = "/var/ftp/pub/fossology/$Version/testing";
-  // first delete any existing symlink called 'current'
+  // first delete any existing directory called 'current'
   $command = "sudo rm -f $ftp_base/current";
   exec($command);
-  // then re-create the 'current' symlink to the latest package directory
-  $command = "sudo ln -s $ftp_base/$showtime/ $ftp_base/current";
+  // then re-create the 'current' directory with a copy of 
+  // the latest package directory
+  $command = "sudo cp -R $ftp_base/$showtime/ $ftp_base/current";
   exec($command);
   
 
