@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -244,7 +244,7 @@ void scheduler_signal(scheduler_t* scheduler)
  *
  * @return a new scheduler_t* that can be further populated
  */
-scheduler_t* scheduler_init(gchar* sysconfigdir)
+scheduler_t* scheduler_init(gchar* sysconfigdir, log_t* log)
 {
   scheduler_t* ret = g_new0(scheduler_t, 1);
 
@@ -258,7 +258,7 @@ scheduler_t* scheduler_init(gchar* sysconfigdir)
   ret->sysconfigdir  = g_strdup(sysconfigdir);
   ret->logdir        = LOG_DIR;
   ret->logcmdline    = FALSE;
-  ret->main_log      = NULL;
+  ret->main_log      = log;
   ret->host_queue    = NULL;
 
   ret->i_created     = FALSE;
@@ -277,7 +277,17 @@ scheduler_t* scheduler_init(gchar* sysconfigdir)
   ret->email_footer  = NULL;
   ret->email_command = NULL;
 
-  /* TODO in depth regex documentation
+  /* This regex should find:
+   *   1. One or more capital letters followed by a ':' followed by white space,
+   *      followed by a number
+   *   2. One or more capital letters followed by a ':' followed by white space,
+   *      followed by a number, followed by white space, followed by a number
+   *
+   * Examples:
+   *   HEART: 1 2   -> matches
+   *   HEART: 1     -> matches
+   *   HEART:       -> does not match
+   *
    */
   ret->parse_agent_msg = g_regex_new(
       "([A-Z]+):([ \t]*)(\\d+)(([ \t]*)(\\d))?",
@@ -290,17 +300,33 @@ scheduler_t* scheduler_init(gchar* sysconfigdir)
    *      followed by a '.' followed by alphabetic characters or underscore
    *
    * Examples:
-   *   $HELLO           -> matches
-   *   $SIMPLE_NAME     -> matches
-   *   $DB.table.column -> matches
-   *   $bad             -> does not match
-   *   $DB.table        -> does not match
+   *   $HELLO             -> matches
+   *   $SIMPLE_NAME       -> matches
+   *   $DB.table.column   -> matches
+   *   $bad               -> does not match
+   *   $DB.table          -> does not match
    */
   ret->parse_db_email      = g_regex_new(
       "\\$([A-Z_]*)(\\.([a-zA-Z_]*)\\.([a-zA-Z_]*))?",
       0, 0, NULL);
 
-  /* TODO in depth regex documentation
+  /* This regex should match:
+   *   1. a set of alphabetical characters
+   *   2. a set of alphabetical characters, followed by white space, followed by
+   *      a number
+   *   3. a set of alphabetical characters, followed by white space, followed by
+   *      a number, followed by white space, followed by a string in quotes.
+   *
+   *
+   * Examples:
+   *   close                   -> matches
+   *   stop                    -> matches
+   *   pause 10                -> matches
+   *   kill 10 "hello world"   -> matches
+   *   pause 10 10             -> does not match
+   *   kill "hello world" 10   -> does not match
+   *
+   *
    */
   ret->parse_interface_cmd = g_regex_new(
       "(\\w+)(\\s+(-?\\d+))?(\\s+((-?\\d+)|(\"(.*)\")))?",
@@ -314,6 +340,8 @@ scheduler_t* scheduler_init(gchar* sysconfigdir)
       (GDestroyNotify)host_destroy);
   ret->job_list     = g_tree_new_full(int_compare, NULL, NULL,
       (GDestroyNotify)job_destroy);
+
+  main_log = log;
 
   return ret;
 }
@@ -333,12 +361,16 @@ void scheduler_destroy(scheduler_t* scheduler)
   // TODO repo close
 
   event_loop_destroy();
-  log_destroy(scheduler->main_log);
+
+  if(scheduler->main_log)
+  {
+    log_destroy(scheduler->main_log);
+    main_log = NULL;
+  }
 
   if(scheduler->process_name) g_free(scheduler->process_name);
   if(scheduler->sysconfig)    fo_config_free(scheduler->sysconfig);
   if(scheduler->sysconfigdir) g_free(scheduler->sysconfigdir);
-  if(scheduler->logdir)       g_free(scheduler->logdir);
   if(scheduler->host_queue)   g_list_free(scheduler->host_queue);
   if(scheduler->workers)      g_thread_pool_free(scheduler->workers, FALSE, TRUE);
 
@@ -355,8 +387,6 @@ void scheduler_destroy(scheduler_t* scheduler)
   g_tree_unref(scheduler->agents);
   g_tree_unref(scheduler->host_list);
   g_tree_unref(scheduler->job_list);
-
-  main_log = NULL;
 
   g_free(scheduler);
 }
@@ -830,8 +860,7 @@ void scheduler_foss_config(scheduler_t* scheduler)
 
     sscanf(tmp, "%s %s %d", addbuf, dirbuf, &max);
     host = host_init(keys[i], addbuf, dirbuf, max);
-    g_tree_insert(scheduler->host_list, host->name, host);
-    scheduler->host_queue = g_list_append(scheduler->host_queue, host);
+    host_insert(host, scheduler);
     if(TVERB_SCHED)
     {
       log_printf("CONFIG: added new host\n");

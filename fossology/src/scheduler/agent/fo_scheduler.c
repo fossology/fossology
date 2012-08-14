@@ -99,10 +99,9 @@ int main(int argc, char** argv)
   if(ki_kill) { return kill_scheduler(TRUE);  }
 
   /* initialize the scheduler */
-  scheduler = scheduler_init(sysconfigdir);
+  scheduler = scheduler_init(sysconfigdir,
+      log_new("stdout", "initializing", getpid()));
 
-  scheduler->main_log = log_new("stdout", "initializing", getpid());
-  main_log = scheduler->main_log;
   if(logdir)
   {
     scheduler->logdir     = logdir;

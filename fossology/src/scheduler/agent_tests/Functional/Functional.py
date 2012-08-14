@@ -531,7 +531,7 @@ class testsuite:
     
     Returns True if results aren't expected or the results were correct
     """
-    sql      = self.required(node, 'sql')
+    sql = self.required(node, 'sql')
     
     cmd = 'psql --username={0} --host=localhost --dbname={1} --command="{2}" -tA'.format(
         self.defines["dbuser"], self.defines['config'].split('/')[2], sql)

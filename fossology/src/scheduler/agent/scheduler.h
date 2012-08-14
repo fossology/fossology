@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -97,7 +97,7 @@ typedef struct
     GRegex* parse_interface_cmd; ///< Parses the commands received by the interface
 } scheduler_t;
 
-scheduler_t* scheduler_init(gchar* sysconfigdir);
+scheduler_t* scheduler_init(gchar* sysconfigdir, log_t* log);
 void scheduler_destroy(scheduler_t* scheduler);
 
 void scheduler_sig_handle(int signo);
