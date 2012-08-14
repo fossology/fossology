@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011, 2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -47,9 +47,6 @@ typedef struct {
 /* **** Contructor Destructor *********************************************** */
 /* ************************************************************************** */
 
-void host_list_init();
-void host_list_clean();
-
 host_t* host_init(char* name, char* address, char* agent_dir, int max);
 void host_destroy(host_t* h);
 
@@ -57,12 +54,12 @@ void host_destroy(host_t* h);
 /* **** Functions and events ************************************************ */
 /* ************************************************************************** */
 
+void host_insert(host_t* host, scheduler_t* scheduler);
 void host_increase_load(host_t* host);
 void host_decrease_load(host_t* host);
 void host_print(host_t* host, GOutputStream* ostr);
 
 host_t* get_host(GList** queue, uint8_t num);
 void    print_host_load(GTree* host_list, GOutputStream* ostr);
-int     num_hosts();
 
 #endif /* HOST_H_INCLUDE */

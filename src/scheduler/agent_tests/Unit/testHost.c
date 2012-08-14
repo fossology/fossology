@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011, 2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -20,121 +20,139 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <host.h>
 
 /* ************************************************************************** */
-/* **** local declarations ************************************************** */
-/* ************************************************************************** */
-
-void host_traverse(host ho)
-{
-  visit++;
-}
-
-/* ************************************************************************** */
 /* **** host function tests ************************************************* */
 /* ************************************************************************** */
 
-void test_host_list_init()
-{
-  FO_ASSERT_PTR_NULL(host_list);
-  FO_ASSERT_PTR_NULL(host_queue);
-
-  host_list_init();
-
-  FO_ASSERT_PTR_NOT_NULL(host_list);
-  FO_ASSERT_PTR_NULL(host_queue);
-}
-
-void test_host_list_clean()
-{
-
-  FO_ASSERT_PTR_NOT_NULL(host_list);
-  FO_ASSERT_EQUAL(g_tree_nnodes(host_list), 3);
-
-  host_list_clean();
-
-  FO_ASSERT_PTR_NOT_NULL(host_list);
-  FO_ASSERT_PTR_NULL(host_queue);
-  FO_ASSERT_EQUAL(g_tree_nnodes(host_list), 0);
-
-  g_tree_destroy(host_list);
-}
-
 void test_host_init()
 {
-  host_init("local", "localhost", "directory", 8);
-  h = g_tree_lookup(host_list, "local");
+  host_t* host;
 
-  FO_ASSERT_PTR_NOT_NULL(h);
-  FO_ASSERT_STRING_EQUAL(h->name, "local");
-  FO_ASSERT_STRING_EQUAL(h->address, "localhost");
-  FO_ASSERT_STRING_EQUAL(h->agent_dir, "directory");
-  FO_ASSERT_EQUAL(h->max, 8);
-  FO_ASSERT_EQUAL(h->running, 0);
+  host = host_init("local", "localhost", "directory", 10);
+  FO_ASSERT_PTR_NOT_NULL(host);
+  FO_ASSERT_STRING_EQUAL(host->name, "local");
+  FO_ASSERT_STRING_EQUAL(host->address, "localhost");
+  FO_ASSERT_STRING_EQUAL(host->agent_dir, "directory");
+  FO_ASSERT_EQUAL(host->max, 10);
+  FO_ASSERT_EQUAL(host->running, 0);
 
-  FO_ASSERT_PTR_NOT_NULL(host_queue);
-  FO_ASSERT_EQUAL(g_tree_nnodes(host_list), 1);
-  FO_ASSERT_EQUAL(g_list_length(host_queue), 1);
+  host_destroy(host);
+}
 
-  host_init("other", "localhost", "directory", 3);
-  host_init("last", "localhost", "directory", 3);
+void test_host_insert()
+{
+  scheduler_t* scheduler;
+  gint list_size;
+  gint queue_size;
+  uint32_t i;
+  GList* iter;
+  gchar* name = g_strdup(" _local");
+
+  scheduler = scheduler_init(testdb, NULL);
+
+  /* add 10 hosts to the scheduler */
+  for(i = 0; i < 9; i++)
+  {
+    name[0] = (char)('1' + i);
+    host_insert(host_init(name, "localhost", "directory", i), scheduler);
+
+    list_size  = g_tree_nnodes(scheduler->host_list);
+    queue_size = g_list_length(scheduler->host_queue);
+    FO_ASSERT_EQUAL(list_size,  i + 1);
+    FO_ASSERT_EQUAL(queue_size, i + 1);
+  }
+
+  list_size  = g_tree_nnodes(scheduler->host_list);
+  queue_size = g_list_length(scheduler->host_queue);
+  FO_ASSERT_EQUAL(list_size,  9);
+  FO_ASSERT_EQUAL(queue_size, 9);
+
+  /* make sure they are in the correct order */
+  for(iter = scheduler->host_queue, i = 0; iter != NULL; iter = iter->next, i++)
+    FO_ASSERT_EQUAL(((host_t*)iter->data)->max, i);
+
+  scheduler_destroy(scheduler);
+  g_free(name);
 }
 
 void test_host_increase_load()
 {
-  host_increase_load(h);
+  host_t* host = host_init("local", "localhost", "directory", 10);
 
-  FO_ASSERT_EQUAL(h->running, 1);
+  FO_ASSERT_EQUAL(host->running, 0);
+  host_increase_load(host);
+  FO_ASSERT_EQUAL(host->running, 1);
+  host_increase_load(host);
+  FO_ASSERT_EQUAL(host->running, 2);
+
+  host_destroy(host);
 }
 
 void test_host_decrease_load()
 {
-  host_decrease_load(h);
+  host_t* host = host_init("local", "localhost", "directory", 10);
+  host->running = 2;
 
-  FO_ASSERT_EQUAL(h->running, 0);
+  FO_ASSERT_EQUAL(host->running, 2);
+  host_decrease_load(host);
+  FO_ASSERT_EQUAL(host->running, 1);
+  host_decrease_load(host);
+  FO_ASSERT_EQUAL(host->running, 0);
+
+  host_destroy(host);
 }
 
 void test_get_host()
 {
-  host got = get_host(1);
-  FO_ASSERT_PTR_EQUAL(got, h);
-  got = get_host(1);
-  FO_ASSERT_PTR_EQUAL(got, g_tree_lookup(host_list, "other"));
-  got = get_host(1);
-  FO_ASSERT_PTR_EQUAL(got, g_tree_lookup(host_list, "last"));
-  got = get_host(1);
-  FO_ASSERT_PTR_EQUAL(got, h);
-  got = get_host(4);
-  FO_ASSERT_PTR_EQUAL(got, h);
-}
+  host_t* host;
+  scheduler_t* scheduler;
+  uint32_t i;
+  char* name = g_strdup(" _local");
 
-void test_for_each_host()
-{
-  visit = 0;
+  scheduler = scheduler_init(testdb, NULL);
 
-  for_each_host(host_traverse);
+  for(i = 0; i < 9; i++)
+  {
+    name[0] = (char)('1' + i);
+    host_insert(host_init(name, "localhost", "directory", i + 1), scheduler);
+  }
 
-  FO_ASSERT_EQUAL(visit, g_tree_nnodes(host_list));
-}
+  for(i = 0; i < 9; i++)
+  {
+    host = get_host(&scheduler->host_queue, i + 1);
+    name[0] = (char)('1' + i);
 
-void test_num_hosts()
-{
-  FO_ASSERT_EQUAL(num_hosts(), g_tree_nnodes(host_list));
+    FO_ASSERT_PTR_EQUAL(host, g_tree_lookup(scheduler->host_list, name));
+    FO_ASSERT_EQUAL(host->max, i + 1);
+  }
+
+  host = get_host(&scheduler->host_queue, 3);
+  FO_ASSERT_STRING_EQUAL(host->name, "3_local");
+  FO_ASSERT_EQUAL(host->max, 3);
+  host = get_host(&scheduler->host_queue, 1);
+  FO_ASSERT_STRING_EQUAL(host->name, "1_local");
+  FO_ASSERT_EQUAL(host->max, 1);
+  host = get_host(&scheduler->host_queue, 9);
+  FO_ASSERT_STRING_EQUAL(host->name, "9_local");
+  FO_ASSERT_EQUAL(host->max, 9);
+  host = get_host(&scheduler->host_queue, 3);
+  FO_ASSERT_STRING_EQUAL(host->name, "4_local");
+  FO_ASSERT_EQUAL(host->max, 4);
+
+  scheduler_destroy(scheduler);
+  g_free(name);
 }
 
 /* ************************************************************************** */
-/* *** suite decl *********************************************************** */
+/* *** suite declaration **************************************************** */
 /* ************************************************************************** */
 
 CU_TestInfo tests_host[] =
 {
-
-    {"Test host_list_init",     test_host_list_init     },
     {"Test host_init",          test_host_init          },
+    {"Test host_insert",        test_host_insert        },
     {"Test host_increase_load", test_host_increase_load },
     {"Test host_decrease_load", test_host_decrease_load },
     {"Test host_get_host",      test_get_host           },
-    {"Test for_each_host",      test_for_each_host      },
-    {"Test num_hosts",          test_num_hosts          },
-    {"Test host_list_clean",    test_host_list_clean    },
     CU_TEST_INFO_NULL
 };
 

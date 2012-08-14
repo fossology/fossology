@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011, 2012 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -15,7 +15,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 TOP = ../../../..
-include $(TOP)/Makefile.conf
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
+include $(VARS)
+
 LOCALAGENTDIR=../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
@@ -34,7 +37,7 @@ EXE = test_scheduler
 COV = libscheduler_cov.a
 FOCUNIT = libfocunit.a
 
-OBJECTS =
+OBJECTS = testHost.o
 
 COVERAGE = scheduler_cov.o \
            agent_cov.o \
@@ -45,9 +48,9 @@ COVERAGE = scheduler_cov.o \
            job_cov.o \
            logging_cov.o \
 
-all:  #$(EXE)
-test: #$(EXE)
-	#./$(EXE)
+all:  $(EXE)
+test: fossology_testconfig $(EXE)
+	./$(EXE)
 	
 $(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
@@ -79,11 +82,13 @@ $(OBJECTS): %.o: %.c
 
 clean:
 	@echo "make copyright agent_tests clean"
-	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno results
+	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno *.log results
 
 install:
 	@echo "make copyright agent_tests nothing to install"
 uninstall:
 	@echo "make copyright agent_tests nothing to uninstall"
+
+include $(DEPS)
 
 .PHONY: all install uninstall clean test 

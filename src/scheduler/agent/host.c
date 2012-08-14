@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -65,7 +65,7 @@ host_t* host_init(char* name, char* address, char* agent_dir, int max)
 }
 
 /**
- * @brief frees any memory associated with the host struct
+ * @brief frees and uninitializes any memory associated with the host struct
  *
  * @param h  the host to free the memory for.
  */
@@ -74,12 +74,31 @@ void host_destroy(host_t* host)
   g_free(host->name);
   g_free(host->address);
   g_free(host->agent_dir);
+
+  host->name = NULL;
+  host->address = NULL;
+  host->agent_dir = NULL;
+  host->max = 0;
+  host->running = 0;
+
   g_free(host);
 }
 
 /* ************************************************************************** */
 /* **** Functions and events ************************************************ */
 /* ************************************************************************** */
+
+/**
+ * @brief Inserts a new host into the scheduler structure.
+ *
+ * @param host       the host that will be added to the scheduler
+ * @param scheduler  the relevant scheduler struct
+ */
+void host_insert(host_t* host, scheduler_t* scheduler)
+{
+  g_tree_insert(scheduler->host_list, host->name, host);
+  scheduler->host_queue = g_list_append(scheduler->host_queue, host);
+}
 
 /**
  * Increase the number of running agents on a host by 1

@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011, 2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -38,6 +38,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** suite initializations *********************************************** */
 /* ************************************************************************** */
 
+char* testdb = NULL;
+
 /**
  * We don't want to actually generate any error messages. To do this, the log
  * file will be set to /dev/null.
@@ -48,7 +50,14 @@ int init_suite(void)
 {
   if(main_log)
     log_destroy(main_log);
-  main_log = log_new("./founit.log", "scheduler", getpid());
+  main_log = log_new("./founit.log", "UNIT_TESTS", getpid());
+
+  if(!testdb && (testdb = getenv("FOSSOLOGY_TESTCONFIG")) == NULL)
+  {
+    printf("ERROR: scheduler unit tests require a test database");
+    exit(1);
+  }
+
   return 0;
 }
 
@@ -61,7 +70,8 @@ int init_suite(void)
  */
 int clean_suite(void)
 {
-  log_destroy(main_log);
+  if(main_log)
+    log_destroy(main_log);
   main_log = NULL;
   return 0;
 }
@@ -73,7 +83,7 @@ int clean_suite(void)
 /* create test suite */
 CU_SuiteInfo suites[] =
 {
-
+    {"Testing Host.c", init_suite, clean_suite, tests_host},
     CU_SUITE_INFO_NULL
 };
 
