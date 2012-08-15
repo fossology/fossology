@@ -83,7 +83,9 @@ int clean_suite(void)
 /* create test suite */
 CU_SuiteInfo suites[] =
 {
-    {"Testing Host.c", init_suite, clean_suite, tests_host},
+    {"Host",            init_suite, clean_suite, tests_host             },
+    {"Interface",       init_suite, clean_suite, tests_interface        },
+    {"InterfaceThread", init_suite, clean_suite, tests_interface_thread },
     CU_SUITE_INFO_NULL
 };
 

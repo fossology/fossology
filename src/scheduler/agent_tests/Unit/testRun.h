@@ -17,8 +17,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include <libfocunit.h>
+/* local includes */
+#include <agent.h>
+#include <database.h>
+#include <event.h>
+#include <host.h>
+#include <interface.h>
+#include <job.h>
+#include <logging.h>
+#include <scheduler.h>
 
+/* libraries */
+#include <libfocunit.h>
 #include <glib.h>
 
 /* suite init and clean */
@@ -31,14 +41,10 @@ extern char* testdb;
 /* int agent_init_suite(void);
 int agent_clean_suite(void); */
 
-/* interface suite init and clean */
-/*int interface_init_suite(void);
-int interface_clean_suite(void);
-int interface_thread_init(void);
-int interface_thread_clean(void); */
-
 /* test case sets */
 extern CU_TestInfo tests_host[];
+extern CU_TestInfo tests_interface[];
+extern CU_TestInfo tests_interface_thread[];
 
 /* scheduler private declarations */
-//event_loop_t* event_loop_get();
+event_loop_t* event_loop_get();

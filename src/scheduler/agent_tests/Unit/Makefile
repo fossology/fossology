@@ -37,7 +37,8 @@ EXE = test_scheduler
 COV = libscheduler_cov.a
 FOCUNIT = libfocunit.a
 
-OBJECTS = testHost.o
+OBJECTS = testHost.o \
+          testInterface.o
 
 COVERAGE = scheduler_cov.o \
            agent_cov.o \
