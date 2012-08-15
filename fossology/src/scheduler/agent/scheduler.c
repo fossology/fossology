@@ -842,8 +842,11 @@ void scheduler_foss_config(scheduler_t* scheduler)
       scheduler->logdir = fo_config_get(scheduler->sysconfig, "DIRECTORIES", "LOGDIR", &error);
     scheduler->main_log = log_new(scheduler->logdir, NULL, scheduler->s_pid);
 
-    log_destroy(main_log);
-    main_log = scheduler->main_log;
+    if(main_log)
+    {
+      log_destroy(main_log);
+      main_log = scheduler->main_log;
+    }
   }
 
   /* load the host settings */

@@ -106,6 +106,8 @@ event_t* event_loop_take(event_loop_t* event_loop)
       timeout.tv_sec * 1000000 + timeout.tv_usec)) == NULL)
     return ret;
 #else
+  g_get_current_time(&timeout);
+  g_time_val_add(&timeout, 1000000);
   if((ret = g_async_queue_timed_pop(event_loop->queue, &timeout)) == NULL)
     return ret;
 #endif

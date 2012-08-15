@@ -43,16 +43,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   #define mint_t int32_t
 #endif
 
-int interface_init_suite(void)
-{
-  return init_suite();
-}
-
-int interface_clean_suite(void)
-{
-  return clean_suite();
-}
-
 /**
  * @brief Create a socket connection
  *
@@ -110,96 +100,105 @@ void* interface_listen_thread(void* unused);
 /* **** interface function tests ******************************************** */
 /* ************************************************************************** */
 
-void test_set_port()
-{
-
-}
-
 void test_interface_init()
 {
-    interface_init();
+  scheduler_t* scheduler;
+  GThread* interface_thread;
 
-  FO_ASSERT_TRUE(i_created);
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
+  interface_init(scheduler);
 
-  FO_ASSERT_PTR_NOT_NULL(socket_thread);
-  FO_ASSERT_PTR_NOT_NULL(cancel);
-  FO_ASSERT_PTR_NOT_NULL(threads);
-  FO_ASSERT_PTR_NOT_NULL(cmd_parse);
-  FO_ASSERT_PTR_NOT_NULL(pro_parse);
+  FO_ASSERT_TRUE(scheduler->i_created);
+  FO_ASSERT_FALSE(scheduler->i_terminate);
 
-  i_terminate = 1;
-  i_created = 0;
+  FO_ASSERT_PTR_NOT_NULL(scheduler->server);
+  FO_ASSERT_PTR_NOT_NULL(scheduler->workers);
+  FO_ASSERT_PTR_NOT_NULL(scheduler->cancel);
 
-  g_cancellable_cancel(cancel);
-  g_thread_pool_free(threads, TRUE, TRUE);
-  g_regex_unref(cmd_parse);
-  g_regex_unref(pro_parse);
-  g_thread_join(socket_thread);
+  interface_thread = scheduler->server;
+  interface_init(scheduler);
 
-  socket_thread = NULL;
-  cancel        = NULL;
-  threads       = NULL;
-  cmd_parse     = NULL;
-  pro_parse     = NULL;
+  FO_ASSERT_TRUE(scheduler->i_created);
+  FO_ASSERT_FALSE(scheduler->i_terminate);
+
+  FO_ASSERT_PTR_NOT_NULL(scheduler->server);
+  FO_ASSERT_PTR_EQUAL(scheduler->server, interface_thread);
+
+  interface_destroy(scheduler);
+  scheduler_destroy(scheduler);
 }
 
 void test_interface_destroy()
 {
-    interface_init();
+  scheduler_t* scheduler;
 
-  FO_ASSERT_TRUE(i_created);
-  FO_ASSERT_FALSE(i_terminate);
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
+  interface_destroy(scheduler);
 
-  interface_destroy();
+  FO_ASSERT_FALSE(scheduler->i_created);
+  FO_ASSERT_FALSE(scheduler->i_terminate);
 
-  FO_ASSERT_FALSE(i_created);
-  FO_ASSERT_TRUE(i_terminate);
+  interface_init(scheduler);
 
-  FO_ASSERT_PTR_NULL(socket_thread);
-  FO_ASSERT_PTR_NULL(cancel);
-  FO_ASSERT_PTR_NULL(threads);
-  FO_ASSERT_PTR_NULL(cmd_parse);
-  FO_ASSERT_PTR_NULL(pro_parse);
+  FO_ASSERT_TRUE(scheduler->i_created);
+  FO_ASSERT_FALSE(scheduler->i_terminate);
+
+  interface_destroy(scheduler);
+
+  FO_ASSERT_FALSE(scheduler->i_created);
+  FO_ASSERT_TRUE(scheduler->i_terminate);
+
+  scheduler_destroy(scheduler);
 }
 
 void test_interface_listen_thread()
 {
-    mint_t result;
+  mint_t result;
+  scheduler_t* scheduler;
 
-  // test error conditions
-  i_terminate = TRUE;
-  i_created   = TRUE;
-  result = (mint_t)interface_listen_thread(NULL);
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
+  scheduler->i_terminate = TRUE;
+  scheduler->i_created   = TRUE;
+  result = (mint_t)interface_listen_thread(scheduler);
   FO_ASSERT_FALSE(result);
 
-  i_terminate = FALSE;
-  i_created   = FALSE;
-  result = (mint_t)interface_listen_thread(NULL);
+  scheduler->i_terminate = FALSE;
+  scheduler->i_created   = FALSE;
+  result = (mint_t)interface_listen_thread(scheduler);
   FO_ASSERT_FALSE(result);
+
+  scheduler_destroy(scheduler);
 }
 
 void test_interface_pool()
 {
+  scheduler_t* scheduler;
   char buffer[256];
   int soc;
 
-  i_terminate = FALSE;
-  i_created   = FALSE;
-  interface_init();
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
+  scheduler->i_terminate = FALSE;
+  scheduler->i_created   = FALSE;
+  interface_init(scheduler);
   sleep(1);
 
-  FO_ASSERT_EQUAL(g_thread_pool_get_max_threads(threads), CONF_interface_nthreads);
-  FO_ASSERT_EQUAL(g_thread_pool_unprocessed(threads), 0);
+  FO_ASSERT_EQUAL(g_thread_pool_get_max_threads(scheduler->workers), CONF_interface_nthreads);
+  FO_ASSERT_EQUAL(g_thread_pool_unprocessed(scheduler->workers), 0);
 
-  snprintf(buffer, sizeof(buffer), "%d", i_port);
+  snprintf(buffer, sizeof(buffer), "%d", scheduler->i_port);
   soc = socket_connect("localhost", buffer);
   sleep(1);
 
   FO_ASSERT_TRUE(soc);
-  FO_ASSERT_EQUAL(g_thread_pool_unprocessed(threads), 0);
+  FO_ASSERT_EQUAL(g_thread_pool_unprocessed(scheduler->workers), 0);
 
   close(soc);
-  interface_destroy();
+  interface_destroy(scheduler);
+  scheduler_destroy(scheduler);
 }
 
 /* ************************************************************************** */
@@ -208,40 +207,36 @@ void test_interface_pool()
 /* ****   gets its own test suite.                                       **** */
 /* ************************************************************************** */
 
-int interface_thread_init(void)
-{
-  i_created   = FALSE;
-  i_terminate = FALSE;
+#define CREATE_INTERFACE(name)              \
+  scheduler_t* name;                         \
+  name = scheduler_init(testdb, NULL);       \
+  scheduler_foss_config(name);               \
+  scheduler_agent_config(name);              \
+  event_loop_destroy();                      \
+  interface_init(name)
 
-  socket_thread = NULL;
-  threads       = NULL;
-  cancel        = NULL;
-  cmd_parse     = NULL;
-  pro_parse     = NULL;
-
-  i_port = 12354;
-
-  return init_suite();
-}
-
-int interface_thread_clean(void)
-{
-  return clean_suite();
-}
+#define SEND_RECEIVE(string, len, res)              \
+  snprintf(buffer, sizeof(buffer), string);          \
+  result = write(soc, buffer, strlen(buffer));       \
+  FO_ASSERT_EQUAL((int)result, (int)strlen(buffer)); \
+  sleep(1);                                          \
+  memset(buffer, '\0', sizeof(buffer));              \
+  result = read(soc, buffer, sizeof(buffer));        \
+  FO_ASSERT_EQUAL((int)result, (int)len);            \
+  FO_ASSERT_STRING_EQUAL(buffer, res)
 
 void test_sending_close()
 {
-    // buffer for the port that the interface is listening on
+  // buffer for the port that the interface is listening on
   char buffer[1024];
   int soc;
   ssize_t result;
 
-  // create the interface and server socket
-  interface_init();
-  sleep(1);
+  // create data structures
+  CREATE_INTERFACE(scheduler);
 
   // Create the connection to the scheduler
-  snprintf(buffer, sizeof(buffer), "%d", i_port);
+  snprintf(buffer, sizeof(buffer), "%d", scheduler->i_port);
   soc = socket_connect("localhost", buffer);
   FO_ASSERT_TRUE_FATAL(soc);
 
@@ -254,10 +249,13 @@ void test_sending_close()
   memset(buffer, '\0', sizeof(buffer));
   result = read(soc, buffer, sizeof(buffer));
   FO_ASSERT_EQUAL((int)result, 15)
-  FO_ASSERT_STRING_EQUAL(buffer, "received\nCLOSE\n");
+  FO_ASSERT_STRING_EQUAL(buffer,
+      "received\n"
+      "CLOSE\n");
 
   close(soc);
-  interface_destroy();
+  interface_destroy(scheduler);
+  scheduler_destroy(scheduler);
 }
 
 void test_sending_load()
@@ -267,31 +265,21 @@ void test_sending_load()
   ssize_t result;
 
   // create data structures
-  host_list_init();
-  interface_init();
-  host_init("localhost", "localhost", "AGENT_DIR", 10);
-  sleep(1);
+  CREATE_INTERFACE(scheduler);
+  host_insert(host_init("localhost", "localhost", "AGENT_DIR", 10), scheduler);
 
   // create the connection
-  snprintf(buffer, sizeof(buffer), "%d", i_port);
+  snprintf(buffer, sizeof(buffer), "%d", scheduler->i_port);
   soc = socket_connect("localhost", buffer);
   FO_ASSERT_TRUE_FATAL(soc);
-
-  snprintf(buffer, sizeof(buffer), "load");
-
-  result = write(soc, buffer, strlen(buffer));
-  FO_ASSERT_EQUAL((int)result, 4);
-  sleep(1);
-
-  memset(buffer, '\0', sizeof(buffer));
-  result = read(soc, buffer, sizeof(buffer));
-  FO_ASSERT_EQUAL((int)result, 64);
-  FO_ASSERT_STRING_EQUAL(buffer, "received\n"
+  SEND_RECEIVE("load", 64,
+      "received\n"
       "host:localhost address:localhost max:10 running:0\n"
       "\nend\n");
 
   close(soc);
-  interface_destroy();
+  interface_destroy(scheduler);
+  scheduler_destroy(scheduler);
 }
 
 void test_sending_kill()
@@ -301,71 +289,58 @@ void test_sending_kill()
   ssize_t result;
 
   // create data structures
-  interface_init();
+  CREATE_INTERFACE(scheduler);
   sleep(1);
 
   // create the connection
-  snprintf(buffer, sizeof(buffer), "%d", i_port);
+  snprintf(buffer, sizeof(buffer), "%d", scheduler->i_port);
   soc = socket_connect("localhost", buffer);
   FO_ASSERT_TRUE_FATAL(soc);
 
-  /* test no arguments to kill */
-  snprintf(buffer, sizeof(buffer), "kill");
-  result = write(soc, buffer, strlen(buffer));
-  FO_ASSERT_EQUAL((int)result, 4);
-  sleep(1);
-
-  memset(buffer, '\0', sizeof(buffer));
-  result = read(soc, buffer, sizeof(buffer));
-
-  FO_ASSERT_EQUAL((int)result, 38);
-  FO_ASSERT_STRING_EQUAL(buffer, "received\n"
+  /* test no arguments to kill
+   *
+   * Sending: kill
+   * Receive: received
+   *          Invalid kill command: "kill"
+   */
+  SEND_RECEIVE("kill", 38,
+      "received\n"
       "Invalid kill command: \"kill\"\n");
 
-  /* test one argument to kill */
-  snprintf(buffer, sizeof(buffer), "kill 1");
-  result = write(soc, buffer, strlen(buffer));
-  FO_ASSERT_EQUAL((int)result, 6);
-  sleep(1);
-
-  memset(buffer, '\0', sizeof(buffer));
-  result = read(soc, buffer, sizeof(buffer));
-
-  FO_ASSERT_EQUAL((int)result, 40);
-  FO_ASSERT_STRING_EQUAL(buffer, "received\n"
+  /* test one argument to kill
+   *
+   * Sending: kill 1
+   * Receive: received
+   *          Invalid kill command: "kill 1"
+   */
+  SEND_RECEIVE("kill 1", 40,
+      "received\n"
       "Invalid kill command: \"kill 1\"\n");
 
-  /* test only second argument to kill */
-  snprintf(buffer, sizeof(buffer), "kill \"test\"");
-  result = write(soc, buffer, strlen(buffer));
-  FO_ASSERT_EQUAL((int)result, 11);
-  sleep(1);
-
-  memset(buffer, '\0', sizeof(buffer));
-  result = read(soc, buffer, sizeof(buffer));
-
-  FO_ASSERT_EQUAL((int)result, 45);
-  FO_ASSERT_STRING_EQUAL(buffer, "received\n"
+  /* test only second argument to kill
+   *
+   * Sending: kill "test"
+   * Receive: received
+   *          Invalid kill command: "kill "test""
+   */
+  SEND_RECEIVE("kill \"test\"", 45,
+      "received\n"
       "Invalid kill command: \"kill \"test\"\"\n");
 
-  /* test valid kill cmd */
-  snprintf(buffer, sizeof(buffer), "kill 1 \"test\"");
-  result = write(soc, buffer, strlen(buffer));
-  FO_ASSERT_EQUAL((int)result, 13);
-  sleep(1);
-
-  memset(buffer, '\0', sizeof(buffer));
-  result = read(soc, buffer, sizeof(buffer));
-
-  FO_ASSERT_EQUAL((int)result, 9);
-  FO_ASSERT_STRING_EQUAL(buffer, "received\n");
+  /* test valid kill command
+   *
+   * Sending: kill 1 "test"
+   * Receive: received
+   */
+  SEND_RECEIVE("kill 1 \"test\"", 9,
+      "received\n");
 
   result = g_async_queue_length(event_loop_get()->queue);
   FO_ASSERT_EQUAL((int)result, 1);
 
   close(soc);
-  interface_destroy();
-  event_loop_destroy();
+  interface_destroy(scheduler);
+  scheduler_destroy(scheduler);
 }
 
 void test_sending_pause()
@@ -375,80 +350,105 @@ void test_sending_pause()
   ssize_t result;
 
   // create data structures
-  interface_init();
-  sleep(1);
+  CREATE_INTERFACE(scheduler);
 
   // create the connection
-  snprintf(buffer, sizeof(buffer), "%d", i_port);
+  snprintf(buffer, sizeof(buffer), "%d", scheduler->i_port);
   soc = socket_connect("localhost", buffer);
   FO_ASSERT_TRUE_FATAL(soc);
 
-  /* Invalid no argument pause command */
-  snprintf(buffer, sizeof(buffer), "pause");
-  result = write(soc, buffer, strlen(buffer));
-  FO_ASSERT_EQUAL((int)result, 5);
-  sleep(1);
-
-  memset(buffer, '\0', sizeof(buffer));
-  result = read(soc, buffer, sizeof(buffer));
-
-  FO_ASSERT_EQUAL((int)result, 40);
-  FO_ASSERT_STRING_EQUAL(buffer, "received\n"
+  /* Pause command no arguments
+   *
+   * Sending: pause
+   * Receive: received
+   *          Invalid pause command: "pause:
+   */
+  SEND_RECEIVE("pause", 40,
+      "received\n"
       "Invalid pause command: \"pause\"\n");
 
-  /* Invalid wrong argument type pause command */
-  snprintf(buffer, sizeof(buffer), "pause \"test\"");
-  result = write(soc, buffer, strlen(buffer));
-  FO_ASSERT_EQUAL((int)result, 12);
-  sleep(1);
-
-  memset(buffer, '\0', sizeof(buffer));
-  result = read(soc, buffer, sizeof(buffer));
-
-  FO_ASSERT_EQUAL((int)result, 47);
-  FO_ASSERT_STRING_EQUAL(buffer, "received\n"
+  /* Pause command with wrong arugment type
+   *
+   * Sending: pause "test"
+   * Receive: received
+   *          Invalid pause command: "pause "test""
+   */
+  SEND_RECEIVE("pause \"test\"", 47,
+      "received\n"
       "Invalid pause command: \"pause \"test\"\"\n");
 
-  /* valid pause command */
-  snprintf(buffer, sizeof(buffer), "pause 1");
-  result = write(soc, buffer, strlen(buffer));
-  FO_ASSERT_EQUAL((int)result, 7);
-  sleep(1);
-
-  memset(buffer, '\0', sizeof(buffer));
-  result = read(soc, buffer, sizeof(buffer));
-
-  FO_ASSERT_EQUAL((int)result, 9);
-  FO_ASSERT_STRING_EQUAL(buffer, "received\n");
+  /* Correct pause command
+   *
+   * Sending: pause 1
+   * Receive: received
+   */
+  SEND_RECEIVE("pause 1", 9,
+      "received\n");
 
   result = g_async_queue_length(event_loop_get()->queue);
   FO_ASSERT_EQUAL((int)result, 1);
 
   close(soc);
-  interface_destroy();
-  event_loop_destroy();
+  interface_destroy(scheduler);
+  scheduler_destroy(scheduler);
 }
 
-void test_sending_status()
+void test_sending_reload()
 {
   char buffer[1024];
   int soc;
   ssize_t result;
+  event_t* event;
 
   // create data structures
-  interface_init();
-  sleep(1);
+  CREATE_INTERFACE(scheduler);
 
   // create the connection
-  snprintf(buffer, sizeof(buffer), "%d", i_port);
+  snprintf(buffer, sizeof(buffer), "%d", scheduler->i_port);
   soc = socket_connect("localhost", buffer);
   FO_ASSERT_TRUE_FATAL(soc);
 
+  SEND_RECEIVE("reload", 9,
+        "received\n");
 
+  result = g_async_queue_length(event_loop_get()->queue);
+  event = g_async_queue_pop(event_loop_get()->queue);
+  FO_ASSERT_EQUAL((int)result, 1);
+  FO_ASSERT_PTR_EQUAL((void*)event->func, (void*)scheduler_config_event);
+  FO_ASSERT_STRING_EQUAL(event->source_name, "interface.c");
 
   close(soc);
-  interface_destroy();
-  event_loop_destroy();
+  interface_destroy(scheduler);
+  scheduler_destroy(scheduler);
+}
+
+void test_sending_agents()
+{
+  char buffer[1024];
+  int soc;
+  ssize_t result;
+  event_t* event;
+
+  // create data structures
+  CREATE_INTERFACE(scheduler);
+
+  // create the connection
+  snprintf(buffer, sizeof(buffer), "%d", scheduler->i_port);
+  soc = socket_connect("localhost", buffer);
+  FO_ASSERT_TRUE_FATAL(soc);
+
+  SEND_RECEIVE("agents", 9,
+      "received\n");
+
+  result = g_async_queue_length(event_loop_get()->queue);
+  event = g_async_queue_pop(event_loop_get()->queue);
+  FO_ASSERT_EQUAL((int)result, 1);
+  FO_ASSERT_PTR_EQUAL((void*)event->func, (void*)list_agents_event);
+  FO_ASSERT_STRING_EQUAL(event->source_name, "interface.c");
+
+  close(soc);
+  interface_destroy(scheduler);
+  scheduler_destroy(scheduler);
 }
 
 /* ************************************************************************** */
@@ -457,7 +457,6 @@ void test_sending_status()
 
 CU_TestInfo tests_interface[] =
 {
-    {"Test set_port",                test_set_port                },
     {"Test interface_init",          test_interface_init          },
     {"Test interface_destroy",       test_interface_destroy       },
     {"Test interface_listen_thread", test_interface_listen_thread },
@@ -471,7 +470,7 @@ CU_TestInfo tests_interface_thread[] =
     {"Test sending \"load\"",   test_sending_load   },
     {"Test sending \"kill\"",   test_sending_kill   },
     {"Test sending \"pause\"",  test_sending_pause  },
-    {"Test sending \"status\"", test_sending_status },
+    {"Test sending \"status\"", test_sending_reload },
     CU_TEST_INFO_NULL
 };
 

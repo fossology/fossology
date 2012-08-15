@@ -233,7 +233,8 @@ void interface_thread(interface_connection* conn, scheduler_t* scheduler)
       arg1 = g_match_info_fetch(regex_match, 3);
       arg2 = g_match_info_fetch(regex_match, 8);
 
-      i = atoi(arg1);
+      if(arg1)
+        i = atoi(arg1);
       if(arg1 == NULL || arg2 == NULL || strlen(arg1) == 0 || strlen(arg2) == 0)
       {
         g_free(cmd);
@@ -509,6 +510,7 @@ void* interface_listen_thread(scheduler_t* scheduler)
   g_socket_listener_add_inet_port(server_socket, scheduler->i_port, NULL, &error);
   if(error)
     FATAL("[port:%d]: %s", scheduler->i_port, error->message);
+  scheduler->cancel  = g_cancellable_new();
 
   V_INTERFACE("INTERFACE: listening port is %d\n", scheduler->i_port);
 
@@ -554,11 +556,14 @@ void interface_init(scheduler_t* scheduler)
     scheduler->i_created = 1;
     scheduler->i_terminate = 0;
 
-    scheduler->server = g_thread_create((GThreadFunc)interface_listen_thread,
-        scheduler, TRUE, NULL);
+    scheduler->cancel = NULL;
     scheduler->workers = g_thread_pool_new((GFunc)interface_thread,
         scheduler, CONF_interface_nthreads, FALSE, NULL);
-    scheduler->cancel  = g_cancellable_new();
+    scheduler->server = g_thread_create((GThreadFunc)interface_listen_thread,
+        scheduler, TRUE, NULL);
+
+    while(scheduler->cancel == NULL)
+      usleep(100);
   }
   else
   {
@@ -581,6 +586,7 @@ void interface_destroy(scheduler_t* scheduler)
     scheduler->i_created = 0;
 
     g_cancellable_cancel(scheduler->cancel);
+    g_thread_join(scheduler->server);
     g_thread_pool_free(scheduler->workers, FALSE, TRUE);
 
     scheduler->server  = NULL;
