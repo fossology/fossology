@@ -497,11 +497,11 @@ void email_init(scheduler_t* scheduler)
 
 	/* load the email_subject */
 	scheduler->email_subject = fo_config_get(scheduler->sysconfig, "EMAILNOTIFY",
-	    "email_subject", &error);
+	    "subject", &error);
 	if(error)
 	  scheduler->email_subject = DEFAULT_SUBJECT;
 	if(error && error->code == fo_missing_key)
-	  EMAIL_ERROR("email notification setting key \"email_subject\" missing. Using default subject");
+	  EMAIL_ERROR("email notification setting key \"subject\" missing. Using default subject");
 	scheduler->email_subject = g_strdup(scheduler->email_subject);
 	error = NULL;
 
