@@ -53,6 +53,46 @@ class change_license extends FO_Plugin {
     else return 1;
   } // IsChanged()
 
+  /**
+   * \brief detect if the current user has permission to change license
+   *
+   * \param $upload_id - upload id 
+   *
+   * \return 1: has permission to change license; 0: no permission to change license
+   */
+  function ChangePermissionDetect($upload_id)
+  {
+    global $PG_CONN;
+    global $SysConf;
+
+    $current_user_id = $SysConf['auth']['UserId'];
+    $SQL = "SELECT user_perm from users where user_pk = '$current_user_id';";
+    $result = pg_query($PG_CONN, $SQL);
+    DBCheckResult($result, $SQL, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    if(empty($row)) {
+      pg_free_result($result);
+      return 0; // no permission to change 
+    }
+
+    if ($row['user_perm'] == 10) return 1; // the current user has the administrator piviledge
+    if (empty($row['user_perm'])) return 0; // the current user has no permission to change license, perhaps it is Default User
+    pg_free_result($result);
+
+    $SQL = "SELECT user_fk from upload where upload_pk = $current_user_id;";
+    $result = pg_query($PG_CONN, $SQL);
+    DBCheckResult($result, $SQL, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    if(empty($row)) {
+      pg_free_result($result);
+      return 0; // no permission to change 
+    }
+    if ($SysConf['auth']['UserId'] == $row['user_fk']) return 1; // the current user is the owner of this upload
+    pg_free_result($result);
+
+    return 0;  // no permission to change
+  }
+
   /** 
    * \brief display license audit trail on the pop up window
    *
@@ -193,6 +233,9 @@ class change_license extends FO_Plugin {
         $text = _("is changed to");
         $Msg = "'$OriginalLicense' $text '$ObjectiveLicense'.";
         // print displayMessage($Msg,"");
+
+        /** after changing one license, purge all the report cache */
+        ReportCachePurgeAll();
       }
 
       $user_pk = $SysConf['auth']['UserId'];
@@ -267,28 +310,36 @@ class change_license extends FO_Plugin {
     /** if failed to change the license, set $ObjectiveLicense as empty */
     if ($this->Change($OriginalLicense, $ObjectiveLicense, $Reason, $FileName) === -1) 
       $ObjectiveLicense = "";
+
+    /** check if the current user has the permission to change license */
+    $permission = $this->ChangePermissionDetect($upload_fk);
     $text = _("Change License");
     $V .= "<H2>$text</H2>\n";
-    $V.= "<form enctype='multipart/form-data' method='post'>\n";
-    $V .= "<table border='1'>\n";
-    $text = _("License");
-    $text1 = _("Change To");
-    $text2 = _("Reason");
-    $V .= "<tr><th width='20%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
-    $V .= "<tr>\n";
-    /** after the original license is changed, on the UI, the origial license is changed to the object one */
-    if (!empty($ObjectiveLicense)) $OriginalLicense = $ObjectiveLicense;
-    $V .= "<td>$OriginalLicense</td>\n";
-    // $V .= "<td> <input type='text' style='width:100%' name='object_license'></td>\n";
-    $V .= "<td> <select name='object_license'>\n";
-    $V .= $this->LicenseList();
-    $V .= "</select></td>";
-    $V .= "<td> <input type='text' style='width:100%' name='change_reason'></td>\n";
-    $V .= "</tr>\n";
-    $V .= "</table><br>\n";
+    if (1 === $permission) {
+      $V.= "<form enctype='multipart/form-data' method='post'>\n";
+      $V .= "<table border='1'>\n";
+      $text = _("License");
+      $text1 = _("Change To");
+      $text2 = _("Reason");
+      $V .= "<tr><th width='20%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
+      $V .= "<tr>\n";
+      /** after the original license is changed, on the UI, the origial license is changed to the object one */
+      if (!empty($ObjectiveLicense)) $OriginalLicense = $ObjectiveLicense;
+      $V .= "<td>$OriginalLicense</td>\n";
+      // $V .= "<td> <input type='text' style='width:100%' name='object_license'></td>\n";
+      $V .= "<td> <select name='object_license'>\n";
+      $V .= $this->LicenseList();
+      $V .= "</select></td>";
+      $V .= "<td> <input type='text' style='width:100%' name='change_reason'></td>\n";
+      $V .= "</tr>\n";
+      $V .= "</table><br>\n";
 
-    $V .= "<input type='submit' value='Submit'>";
-    $V .= "</form>\n";
+      $V .= "<input type='submit' value='Submit'>";
+      $V .= "</form>\n";
+    } else {
+      $text = _("Sorry, you are neither the owner of this upload, nor administrator, so have no permission to change this license.");
+      $V .= "<b>$text</b>";
+    }
 
     $V .= "<br>";
     if ($this->IsChanged($fl_pk)) // if this license has been changed, display the change trail 
