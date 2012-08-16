@@ -658,6 +658,16 @@ def main():
   
   os.chdir('../../..')
   
+  # remove all of the comment nodes, since the code assumes 
+  # that there are no comment nodes within the XML
+  comment_list = []
+  for child in dom.childNodes:
+    if child.nodeType == Node.COMMENT_NODE:
+      comment_list.append(child)
+  
+  for node in comment_list:
+    node.parentNode.removeChild(node)
+    
   setupNode   = dom.firstChild.getElementsByTagName('setup')[0]
   cleanupNode = dom.firstChild.getElementsByTagName('cleanup')[0]
   
