@@ -30,33 +30,68 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
    
   public $UNUNPACK_PATH = "";
 
+  // fossology_testconfig is the temporary system configuration directory
+  // created by the src/testing/db/create_test_database.php script.
+  // It is initialized via the Makefile and passed in via the
+  // FOSSOLOGY_TESTCONFIG environment variable.
+  public $fossology_testconfig;
+
+  // this method is run once for the entire test class, before any of the
+  // test methods are executed.
+  public static function setUpBeforeClass() {
+    
+    global $fossology_testconfig;
+    global $UNUNPACK_PATH;
+
+    fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
+
+    /**
+       get the value of the FOSSOLOGY_TESTCONFIG environment variable,
+       which will be initialized by the Makefile by running the
+       create_test_database.php script
+    */
+    $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
+    fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
+    
+    /* locate ununpack binary */
+    $UNUNPACK_PATH = $fossology_testconfig . "/mods-enabled/ununpack/agent/ununpack";
+    if (!is_executable($UNUNPACK_PATH)) {
+        print "Error:  ununpack path '$UNUNPACK_PATH' is not executable!\n";
+        exit(1);
+    }
+
+    print "\nStarting functional test for ununpack. \n";
+  }
   /* initialization */
   protected function setUp() {
-    $this->UNUNPACK_PATH = "../../agent/ununpack";
+    //$this->UNUNPACK_PATH = "../../agent/ununpack";
 
-    $db_conf = "/usr/local/etc/fossology/";
+    //$db_conf = "/usr/local/etc/fossology/";
+    global $fossology_testconfig;
+    global $UNUNPACK_PATH;
 
-    if(file_exists($this->UNUNPACK_PATH))
+    if(file_exists($UNUNPACK_PATH))
     {
-      $usage = 'Usage: ../../agent/ununpack [options] file [file [file...]]';
+      $usage = 'Usage: ' . $UNUNPACK_PATH . ' [options] file [file [file...]]';
     }
     else
     {
-      $this->assertFileExists(($this->UNUNPACK_PATH),
+      $this->assertFileExists(($UNUNPACK_PATH),
       $message = 'FATAL: cannot find executable file, stop testing\n');
     }
 
     // run it
-    $last = exec("$this->UNUNPACK_PATH -h 2>&1", $out, $rtn);
+    $last = exec("$UNUNPACK_PATH -h 2>&1", $out, $rtn);
     $this->assertEquals($usage, $out[2]); // check if ununpack aready installed
-    $this->UNUNPACK_PATH = "../../agent/ununpack -C -c $db_conf";
+    $UNUNPACK_PATH = $fossology_testconfig . "/mods-enabled/ununpack/agent/ununpack -C -c $fossology_testconfig";
   }
 
   /* command is ununpack -i */
   function testNormalParamI(){
-    print "Starting test functional ununpack agent \n";
-    
-    $command = "$this->UNUNPACK_PATH -i";
+    //print "Starting test functional ununpack agent \n";
+    global $UNUNPACK_PATH;    
+
+    $command = "$UNUNPACK_PATH -i";
     $last = exec($command, $usageOut, $rtn);
     $this->assertEquals($rtn, 0);
   }
@@ -68,7 +103,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
 
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/523.iso -d $TEST_RESULT_PATH";
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/523.iso -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? larry think the file & dir name should be not changed, even just to uupercase */
     $this->assertFileExists("$TEST_RESULT_PATH/523.iso.dir/523sfp/QMFGOEM.TXT");
@@ -82,7 +119,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
 
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/523.iso -d $TEST_RESULT_PATH -L $TEST_RESULT_PATH/log";
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/523.iso -d $TEST_RESULT_PATH -L $TEST_RESULT_PATH/log";
     exec($command);
     /* check if the result is ok? larry think the file & dir name should be not changed, even just to uupercase */
     $this->assertFileExists("$TEST_RESULT_PATH/523.iso.dir/523sfp/QMFGOEM.TXT");
@@ -91,11 +130,43 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $this->assertFileExists("$TEST_RESULT_PATH/log");
   }
 
+  /* command is ununpack -qCR -x xxxxx -d xxxxx*/
+  /* unpack iso file with -x and check if delete all unpack files.*/
+  function testNormalParamx(){
+
+    global $TEST_DATA_PATH;
+    global $TEST_RESULT_PATH;
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/523.iso -d $TEST_RESULT_PATH -x";
+    exec($command);
+    $isDir = is_dir($TEST_RESULT_PATH);
+    $this->assertTrue(!$isDir);
+  }
+
+  /* command is ununpack -qC -r 0 -d xxxxx*/
+  /* unpack iso file with -r 0.*/
+  function testNormalParamr(){
+
+    global $TEST_DATA_PATH;
+    global $TEST_RESULT_PATH;
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qC -r 0 $TEST_DATA_PATH/523.iso -d $TEST_RESULT_PATH";
+    exec($command);
+    $this->assertFileExists("$TEST_RESULT_PATH/523.iso.dir/523sfp/QMFGOEM.TXT");
+    $this->assertFileExists("$TEST_RESULT_PATH/523.iso.dir/523sfp/p3p10131.bin");
+    $isDir = is_dir("$TEST_RESULT_PATH/523.iso.dir/[BOOT]/Bootable_2.88M.img.dir/");
+    $this->assertTrue(!$isDir);
+  }
+
   /* unpack iso, another case */
   function testNormalIso2(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/imagefile.iso -d $TEST_RESULT_PATH";
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/imagefile.iso -d $TEST_RESULT_PATH";
     exec($command);
     
     $this->assertFileExists("$TEST_RESULT_PATH/imagefile.iso.dir/TEST.JAR");
@@ -106,8 +177,10 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalRpm(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
+    global $UNUNPACK_PATH;
+
     /* the first rpm package */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "fossology-1.2.0-1.el5.i386.rpm -d $TEST_RESULT_PATH";
     exec($command);
     $this->assertFileExists("$TEST_RESULT_PATH/fossology-1.2.0-1.el5.i386.rpm.unpacked.dir/".
@@ -116,7 +189,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     exec("/bin/rm -rf $TEST_RESULT_PATH");
     $isDir = is_dir($TEST_RESULT_PATH); $this->assertTrue(!$isDir);
     /* the second rpm package */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "libgnomeui2-2.24.3-1pclos2010.src.rpm -d $TEST_RESULT_PATH";
     exec($command);
     $this->assertFileExists("$TEST_RESULT_PATH/libgnomeui2-2.24.3-1pclos2010.src.rpm.unpacked.dir/".
@@ -127,7 +200,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalTar(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "rpm.tar -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select some files to confirm */ 
@@ -141,7 +216,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalRarWin(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "winscp376.rar -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -153,8 +230,10 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalAr(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
+    global $UNUNPACK_PATH;
+
     /* archive file */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "libfossagent.a -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -165,7 +244,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $isDir = is_dir($TEST_RESULT_PATH);
     $this->assertTrue(!$isDir);
     /* deb file */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -177,7 +256,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $isDir = is_dir($TEST_RESULT_PATH);
     $this->assertTrue(!$isDir);
     /* udeb file */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "libpango1.0-udeb_1.28.1-1_i386.udeb -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -189,7 +268,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalJar(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "testdir/test.jar -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -200,7 +281,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalZip(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "threezip.zip -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select some files to confirm */ 
@@ -213,9 +296,10 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalCatMsi(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
+    global $UNUNPACK_PATH;
     
     /* cab file */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "SKU011.CAB -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -227,7 +311,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $this->assertTrue(!$isDir);
 
     /* msi file */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "xunzai_Contacts.msi.msi -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -238,7 +322,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalDsc(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "fcitx_3.6.2-1.dsc -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -249,8 +335,10 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalCompressedFile(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
+    global $UNUNPACK_PATH;
+
     /* .Z file */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "ununpack.c.Z -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -261,7 +349,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $isDir = is_dir($TEST_RESULT_PATH);
     $this->assertTrue(!$isDir);
     /* .gz file */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "argmatch.c.gz -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -272,7 +360,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $isDir = is_dir($TEST_RESULT_PATH);
     $this->assertTrue(!$isDir);
     /* .bz2 file */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "metahandle.tab.bz2 -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -283,8 +371,10 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalTarball(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
+    global $UNUNPACK_PATH;
+
     /* .Z tarball*/
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "FileName.tar.Z -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -296,7 +386,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $isDir = is_dir($TEST_RESULT_PATH);
     $this->assertTrue(!$isDir);
     /* .gz tarball*/
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "fcitx_3.6.2.orig.tar.gz -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -307,7 +397,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $isDir = is_dir($TEST_RESULT_PATH);
     $this->assertTrue(!$isDir);
     /* .bz2 tarball*/
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "test.tar.bz2 -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -318,7 +408,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalPdf(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "israel.pdf -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm, 
@@ -332,6 +424,8 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalUpx(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
+    global $UNUNPACK_PATH;
+
     //$command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
     //            " -d $TEST_RESULT_PATH";
     //exec($command);
@@ -342,8 +436,10 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalFsImage(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
+    global $UNUNPACK_PATH;
+
     /* ext2 image */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "ext2test-image -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -354,7 +450,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $isDir = is_dir($TEST_RESULT_PATH);
     $this->assertTrue(!$isDir);
     /* ext3 image */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "ext3test-image -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -365,7 +461,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $isDir = is_dir($TEST_RESULT_PATH);
     $this->assertTrue(!$isDir);
     /* fat image */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "fattest-image -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -376,7 +472,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $isDir = is_dir($TEST_RESULT_PATH);
     $this->assertTrue(!$isDir);
     /* ntfs image */
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "ntfstest-image -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */ 
@@ -388,7 +484,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalBootImage(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                 "vmlinuz-2.6.26-2-686 -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm
@@ -404,7 +502,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalMultyProcess(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR -m 10 $TEST_DATA_PATH/".
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR -m 10 $TEST_DATA_PATH/".
                 "../testdata4unpack.7z -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select some files to confirm */ 
@@ -413,7 +513,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $this->assertFileExists("$TEST_RESULT_PATH/testdata4unpack.7z.dir/testdata4unpack/"
      ."FileName.tar.Z.dir/FileName.tar.dir/test.iso.dir/test1.zip.tar.dir/test1.zip.dir/test.dir/test.cpio.dir/ununpack");
     $this->assertFileExists("$TEST_RESULT_PATH/testdata4unpack.7z.dir/testdata4unpack/SKU011.CAB.dir/PRO11.INI");
-    $this->assertFileExists("$TEST_RESULT_PATH//testdata4unpack.7z.dir/testdata4unpack/"
+    $this->assertFileExists("$TEST_RESULT_PATH/testdata4unpack.7z.dir/testdata4unpack/"
          ."xunzai_Contacts.msi.msi.dir/CONTACTS.CAB.dir/contact");
     $this->assertFileExists("$TEST_RESULT_PATH/testdata4unpack.7z.dir/testdata4unpack/"
      ."libpango1.0-udeb_1.28.1-1_i386.udeb.dir/data.tar.gz.dir/data.tar.dir/usr/lib/libpangox-1.0.so.0");
@@ -425,7 +525,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalEXE(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "PUTTY.EXE -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm.
@@ -437,7 +539,9 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
   function testNormalcpio(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
-    $command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
+    global $UNUNPACK_PATH;
+
+    $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
                   "test.cpio -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok?
@@ -451,6 +555,18 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     // delete the directory ./test_result
     exec("/bin/rm -rf $TEST_RESULT_PATH");
   }
+
+  // this method is run once for the entire test class, after all of the
+  // test methods are executed.
+  public static function tearDownAfterClass() {
+
+    fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
+    // time to drop the database
+
+    print "End of functional tests for ununpack \n";
+
+  }
+
 }
 
 ?>

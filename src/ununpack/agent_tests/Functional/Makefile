@@ -50,7 +50,7 @@ testdata:
 	    fi; \
 	)
 
-test: all testdata
+test: all testdata fossology_testconfig
 	@echo "ununpack agent functional test"
 	cd ..; \
 	tar -xf unpack-test-data.tar.bz2; \

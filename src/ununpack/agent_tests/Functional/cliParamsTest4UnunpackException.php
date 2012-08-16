@@ -32,10 +32,13 @@ class cliParamsTest4UnunpackExcption extends PHPUnit_Framework_TestCase {
     global $UNUNPACK_CMD;
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
+    global $fossology_testconfig;
     
-    $UNUNPACK_CMD = "../../agent/ununpack";
+    //$UNUNPACK_CMD = "../../agent/ununpack";
+    $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
+    $UNUNPACK_CMD = $fossology_testconfig . "/mods-enabled/ununpack/agent/ununpack";
     exec("/bin/rm -rf $TEST_RESULT_PATH");
-    $command = "$UNUNPACK_CMD -qCRs $TEST_DATA_PATH/523.iso -d $TEST_RESULT_PATH -c /usr/local/etc/fossology/ > /dev/null 2>&1";
+    $command = "$UNUNPACK_CMD -qCRs $TEST_DATA_PATH/523.iso -d $TEST_RESULT_PATH -c $fossology_testconfig > /dev/null 2>&1";
     $last = exec($command, $usageOut, $rtn);
     $this->assertNotEquals($rtn, 0);
     $this->assertFileNotExists("$TEST_RESULT_PATH/523.iso.dir/523SFP/QMFGOEM.TXT");
@@ -47,10 +50,13 @@ class cliParamsTest4UnunpackExcption extends PHPUnit_Framework_TestCase {
     global $UNUNPACK_CMD;
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
+    global $fossology_testconfig;
 
-    $UNUNPACK_CMD = "../../agent/ununpack";
+    //$UNUNPACK_CMD = "../../agent/ununpack";
+    $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
+    $UNUNPACK_CMD = $fossology_testconfig . "/mods-enabled/ununpack/agent/ununpack";
     exec("/bin/rm -rf $TEST_RESULT_PATH");
-    $command = "$UNUNPACK_CMD -qCR $TEST_DATA_PATH/null-file -d $TEST_RESULT_PATH -c /usr/local/etc/fossology/ > /dev/null 2>&1";
+    $command = "$UNUNPACK_CMD -qCR $TEST_DATA_PATH/null-file -d $TEST_RESULT_PATH -c $fossology_testconfig > /dev/null 2>&1";
     $last = exec($command, $usageOut, $rtn);
     $this->assertNotEquals($rtn, 0);
     $this->assertFileNotExists("$TEST_RESULT_PATH/null-file.dir/");
