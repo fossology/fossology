@@ -37,6 +37,27 @@ void testIsNotDebianSourceFile()
   FO_ASSERT_EQUAL(Result, 0);
 }
 
+
+/**
+ * @brief function IsExeFile(char *Filename)
+ */
+void testIsExeFile()
+{
+  char *Filename = "../testdata/testdata4unpack/fcitx_3.6.2-1.dsc";
+  Result = IsExe(Filename, 1);
+  FO_ASSERT_EQUAL(Result, 1);
+}
+
+/**
+ * @brief function IsNotExeFile(char *Filename)
+ */
+void testIsNotExeFile()
+{
+  char *Filename = "../testdata/testdata4unpack/tx_3.6.2.orig.tar.gz";
+  Result = IsExe(Filename, 1);
+  FO_ASSERT_EQUAL(Result, 0);
+}
+
 /* ************************************************************************** */
 /* **** cunit test cases **************************************************** */
 /* ************************************************************************** */
@@ -45,5 +66,7 @@ CU_TestInfo IsFunctions_testcases[] =
 {
   {"IsDebianSourceFile:", testIsDebianSourceFile},
   {"IsNotDebianSourceFile:", testIsNotDebianSourceFile},
+/**  {"IsExeFile:", testIsExefile}, */
+  {"IsNotExeFile:", testIsNotExeFile},
   CU_TEST_INFO_NULL
 };
