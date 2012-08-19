@@ -179,7 +179,7 @@ for ($i = 1;$i < $argc;$i++) {
   // FTP server does not allow symbolic links.
   $ftp_base = "/var/ftp/pub/fossology/$Version/testing";
   // first delete any existing directory called 'current'
-  $command = "sudo rm -f $ftp_base/current";
+  $command = "sudo rm -rf $ftp_base/current";
   exec($command);
   // then re-create the 'current' directory with a copy of 
   // the latest package directory
