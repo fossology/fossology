@@ -99,6 +99,22 @@ void testTraverseNormal4Dir()
 }
 
 /**
+ * @brief normal test for rpm
+ */
+void testTraverseNormal4Rpm()
+{
+  Filename = "../test-data/testdata4unpack/libgnomeui2-2.24.3-1pclos2010.src.rpm";
+  Basename = "libgnomeui2-2.24.3-1pclos2010.src.rpm";
+  deleteTmpFiles(NewDir);
+  ParentInfo PITest = {0, 1287725739, 1287725739, 0, 0};
+  PI = &PITest;
+  Result = Traverse(Filename,Basename,Label,NewDir,Recurse,PI);
+  exists = file_dir_exists("./test-result/libgnomeui2-2.24.3-1pclos2010.src.rpm.unpacked.dir/pclos-libgnomeui2.spec");
+  FO_ASSERT_EQUAL(exists, 1); // is existing
+  FO_ASSERT_EQUAL(Result, 1); // Filename is one containter
+}
+
+/**
  * @brief abnormal test for null parameters
  */
 void testTraverseNullParams()
@@ -114,7 +130,6 @@ void testTraverseNullParams()
   FO_ASSERT_EQUAL(Result, 0); // Filename is not one containter
 }
 
-
 /* ************************************************************************** */
 /* **** cunit test cases **************************************************** */
 /* ************************************************************************** */
@@ -124,6 +139,7 @@ CU_TestInfo Traverse_testcases[] =
   {"Traverse normal package:", testTraverseNormal4Package},
   {"Traverse normal package another:", testTraverseNormal4Package2},
   {"Traverse normal directory:", testTraverseNormal4Dir},
+  {"Traverse normal rpm:", testTraverseNormal4Rpm},
   {"Traverse null paramters:", testTraverseNullParams},
   CU_TEST_INFO_NULL
 };

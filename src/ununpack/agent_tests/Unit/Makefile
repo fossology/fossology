@@ -25,7 +25,9 @@ OBJS=	run_tests.o \
 		test_ununpack-iso.o \
 		test_TaintString.o \
 		test_IsFunctions.o \
-		test_ContainerInfo.o
+		test_ContainerInfo.o \
+		test_Checksum.o \
+		test_PathCheck.o
 #		test_TraverseUnunpackEntry.o \
 
 FOCUNIT = libfocunit.a
