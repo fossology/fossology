@@ -42,6 +42,8 @@ extern CU_TestInfo TraverseStart_testcases[];
 extern CU_TestInfo TaintString_testcases[];
 extern CU_TestInfo IsFunctions_testcases[];
 extern CU_TestInfo ContainerInfo_testcases[];
+extern CU_TestInfo Checksum_testcases[];
+extern CU_TestInfo PathCheck_testcases[];
 
 CU_SuiteInfo suites[] = 
 {
@@ -62,12 +64,15 @@ CU_SuiteInfo suites[] =
   {"TaintString", NULL, NULL, TaintString_testcases},
   {"IsFunctions", NULL, NULL, IsFunctions_testcases},
   {"ContainerInfo", NULL, NULL, ContainerInfo_testcases},
+  {"PathCheck", NULL, NULL, PathCheck_testcases},
 
   // traverse.c
   {"Traverse", TraverseInit, TraverseClean, Traverse_testcases},
   {"TraverseChild", TraverseChildInit, NULL, TraverseChild_testcases},
   {"TraverseStart", TraverseStartInit, TraverseStartClean, TraverseStart_testcases},
 
+  // checksum.c
+  {"checksum", NULL, NULL, Checksum_testcases},
   CU_SUITE_INFO_NULL
 };
 
