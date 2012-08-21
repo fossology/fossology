@@ -34,6 +34,32 @@ class change_license extends FO_Plugin {
   public $DBaccess = PLUGIN_DB_ANALYZE;
 
   /**
+   * \brief change bucket accordingly when change license of one file
+   */
+  function ChangeBuckets()
+  {
+    global $SysConf;
+    global $PG_CONN;
+
+    $Agent_pk = GetParm("napk",PARM_STRING);
+    $upload_fk = GetParm("upload",PARM_STRING);
+    $uploadtree_pk = GetParm("item",PARM_STRING);
+
+    $sql = "SELECT bucketpool_fk from bucket_ars where upload_fk = $upload_fk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $bucketpool_array = pg_fetch_all_columns ($result, 0);
+    pg_free_result($result);
+    $buckets_dir = $SysConf['DIRECTORIES']['MODDIR'];
+    /** rerun bucket on the file */
+    foreach ($bucketpool_array as $bucketpool)
+    {
+      $command = "$buckets_dir/buckets/agent/buckets -r -t $uploadtree_pk -p $bucketpool";
+      exec($command , $output, $return_var);
+    }
+  }
+
+  /**
    * \brief check if this file license has been changed
    *
    * \param $fl_pk - file license id
@@ -260,6 +286,8 @@ class change_license extends FO_Plugin {
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
+
+      $this->ChangeBuckets(); // change bucket accordingly
       return NULL;
     }
   } // Change()
