@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -69,11 +69,8 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   uploadtree.ufile_name = strdup(PQgetvalue(origresult, 0, 4));
   uploadtree.upload_fk = atol(PQgetvalue(origresult, 0, 5));
 
-  /* Skip file if it has already been processed for buckets. 
-     This can happen due to file reuse.
-   */
   if (!skipProcessedCheck)
-    if (processed(pgConn, agent_pk, uploadtree.pfile_fk, uploadtree.uploadtree_pk, bucketpool_pk)) return 0;
+  //  if (processed(pgConn, agent_pk, uploadtree.pfile_fk, uploadtree.uploadtree_pk, bucketpool_pk)) return 0;
 
   /* If this is a leaf node, process it
      (i.e. determine what bucket it belongs in).
@@ -250,7 +247,7 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
   {
     bucketList = getContainerBuckets(pgConn, bucketDefArray, puploadtree->uploadtree_pk);
     rv = writeBuckets(pgConn, puploadtree->pfile_fk, puploadtree->uploadtree_pk, bucketList, 
-                      agent_pk, bucketDefArray->nomos_agent_pk);
+                      agent_pk, bucketDefArray->nomos_agent_pk, bucketDefArray->bucketpool_pk);
     if (bucketList) free(bucketList);
 
     /* process packages because they are treated as leafs and as containers */

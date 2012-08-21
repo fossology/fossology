@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -63,6 +63,7 @@ int main(int argc, char **argv)
   char *SVN_REV;
   char *VERSION;
   char agent_rev[myBUFSIZ];
+  int rerun = 0;
 
 
 //  int *bucketList;
@@ -70,12 +71,13 @@ int main(int argc, char **argv)
   pbucketdef_t tmpbucketDefArray = 0;
   cacheroot_t  cacheroot;
   uploadtree_t  uploadtree;
+  uploadtree.upload_fk = 0;
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "in:p:t:u:vc:")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "rin:p:t:u:vc:")) != -1) 
   {
     switch (cmdopt) 
     {
@@ -133,6 +135,9 @@ int main(int argc, char **argv)
             verbose++;
             break;
       case 'c': break; /* handled by fo_scheduler_connect() */
+      case 'r': 
+            rerun = 1; /** rerun bucket */
+            break;
       default:
             Usage(argv[0]);
             PQfinish(pgConn);
@@ -276,9 +281,10 @@ int main(int argc, char **argv)
     switch (UploadProcessed(pgConn, agent_pk, nomos_agent_pk, uploadtree.pfile_fk, head_uploadtree_pk, uploadtree.upload_fk, bucketpool_pk)) 
     {
       case 1:  /* upload has already been processed */
+        if (1 == rerun) break;
         printf("LOG: Duplicate request for bucket agent to process upload_pk: %d, uploadtree_pk: %d, bucketpool_pk: %d, bucket agent_pk: %d, nomos agent_pk: %d, pfile_pk: %d ignored.\n",
              uploadtree.upload_fk, head_uploadtree_pk, bucketpool_pk, agent_pk, nomos_agent_pk, uploadtree.pfile_fk);
-        continue;
+        continue; 
       case -1: /* SQL error, UploadProcessed() wrote error message */
         continue; 
       case 0:  /* upload has not been processed */
@@ -332,31 +338,33 @@ int main(int argc, char **argv)
     /*** END Initialize DEB_SOURCE and DEB_BINARY  ***/
 
     /*** Record analysis start in bucket_ars, the bucket audit trail. ***/
-    snprintf(sqlbuf, sizeof(sqlbuf), 
-                "insert into bucket_ars (agent_fk, upload_fk, ars_success, nomosagent_fk, bucketpool_fk) values(%d,%d,'%s',%d,%d)",
-                 agent_pk, uploadtree.upload_fk, "false", nomos_agent_pk, bucketpool_pk);
-    if (debug)
-      printf("%s(%d): %s\n", __FILE__, __LINE__, sqlbuf);
-    
-    result = PQexec(pgConn, sqlbuf);
-    if (fo_checkPQcommand(pgConn, result, sqlbuf, __FILE__ ,__LINE__)) return -1;
-    PQclear(result);
+    if (0 == rerun) { // do not have any bucket scan on this upload
+      snprintf(sqlbuf, sizeof(sqlbuf), 
+          "insert into bucket_ars (agent_fk, upload_fk, ars_success, nomosagent_fk, bucketpool_fk) values(%d,%d,'%s',%d,%d)",
+          agent_pk, uploadtree.upload_fk, "false", nomos_agent_pk, bucketpool_pk);
+      if (debug)
+        printf("%s(%d): %s\n", __FILE__, __LINE__, sqlbuf);
 
+      result = PQexec(pgConn, sqlbuf);
+      if (fo_checkPQcommand(pgConn, result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+      PQclear(result);
 
-    /* retrieve the ars_pk of the newly inserted record */
-    sprintf(sqlbuf, "select ars_pk from bucket_ars where agent_fk='%d' and upload_fk='%d' and ars_success='%s' and nomosagent_fk='%d' \
-                  and bucketpool_fk='%d' and ars_endtime is null \
-            order by ars_starttime desc limit 1",
-            agent_pk, uploadtree.upload_fk, "false", nomos_agent_pk, bucketpool_pk);
-    result = PQexec(pgConn, sqlbuf);
-    if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
-    if (PQntuples(result) == 0)
-    {
-      printf("FATAL: (%s.%d) Missing bucket_ars record.\n%s\n",__FILE__,__LINE__,sqlbuf);
-      return -1;
+      /* retrieve the ars_pk of the newly inserted record */
+      sprintf(sqlbuf, "select ars_pk from bucket_ars where agent_fk='%d' and upload_fk='%d' and ars_success='%s' and nomosagent_fk='%d' \
+          and bucketpool_fk='%d' and ars_endtime is null \
+          order by ars_starttime desc limit 1",
+          agent_pk, uploadtree.upload_fk, "false", nomos_agent_pk, bucketpool_pk);
+      result = PQexec(pgConn, sqlbuf);
+      printf("sql is:%s\n", sqlbuf);
+      if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
+      if (PQntuples(result) == 0)
+      {
+        printf("FATAL: (%s.%d) Missing bucket_ars record.\n%s\n",__FILE__,__LINE__,sqlbuf);
+        return -1;
+      }
+      ars_pk = atol(PQgetvalue(result, 0, 0));
+      PQclear(result);
     }
-    ars_pk = atol(PQgetvalue(result, 0, 0));
-    PQclear(result);
     /*** END bucket_ars insert  ***/
 
     if (debug) printf("%s sql: %s\n",__FILE__, sqlbuf);
@@ -376,7 +384,7 @@ int main(int argc, char **argv)
     }
 
     /* Record analysis end in bucket_ars, the bucket audit trail. */
-    if (ars_pk)
+    if (0 == rerun && ars_pk)
     {
       if (rv)
         snprintf(sqlbuf, sizeof(sqlbuf), 

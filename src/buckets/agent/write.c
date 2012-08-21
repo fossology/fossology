@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -28,11 +28,12 @@ extern int debug;
  * \param int $bucketList   null terminated array of bucket_pks 
  *                         that match this pfile
  * \param int $agent_pk  
+ * \param int bucketpool_pk - bucketpool id
  *
  * \return 0=success, -1 failure
  */
 FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
-                          int *bucketList, int agent_pk, int nomosagent_pk)
+                          int *bucketList, int agent_pk, int nomosagent_pk, int bucketpool_pk)
 {
   char     *fcnName = "writeBuckets";
   char      sql[1024];
@@ -48,8 +49,19 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
       fo_scheduler_heart(1);
       if (pfile_pk)
       {
-        snprintf(sql, sizeof(sql), 
-               "insert into bucket_file (bucket_fk, pfile_fk, agent_fk, nomosagent_fk) values(%d,%d,%d,%d)", *bucketList, pfile_pk, agent_pk, nomosagent_pk);
+        if (processed(pgConn, agent_pk, pfile_pk, uploadtree_pk, bucketpool_pk)) 
+        {
+          snprintf(sql, sizeof(sql), 
+              "UPDATE bucket_file set bucket_fk = %d from bucket_def where pfile_fk = %d and  \
+              bucket_fk= bucket_pk and bucket_def.bucketpool_fk = %d;",
+              *bucketList, pfile_pk, bucketpool_pk);
+        } 
+        else
+        {
+          snprintf(sql, sizeof(sql), 
+              "insert into bucket_file (bucket_fk, pfile_fk, agent_fk, nomosagent_fk) values(%d,%d,%d,%d)",
+              *bucketList, pfile_pk, agent_pk, nomosagent_pk);
+        }
         if (debug) 
           printf("%s(%d): %s\n", __FILE__, __LINE__, sql);
         result = PQexec(pgConn, sql);
@@ -60,7 +72,6 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
           printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file.\n",
                   __FILE__,fcnName, __LINE__);
           fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__);
-              
           PQclear(result);
           rv = -1;
           break;

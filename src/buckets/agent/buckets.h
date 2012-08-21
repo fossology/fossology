@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -136,7 +136,7 @@ int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int upload
 int childInBucket(PGconn *pgConn, pbucketdef_t in_bucketDef, puploadtree_t puploadtree);
 
 int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
-                 int *bucketList, int agent_pk, int nomosagent_pk);
+                 int *bucketList, int agent_pk, int nomosagent_pk, int bucketpool_pk);
 
 int matchAnyLic(PGresult *result, int numLics, regex_t *compRegex);
 
