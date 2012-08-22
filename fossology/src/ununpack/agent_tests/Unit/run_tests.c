@@ -24,7 +24,7 @@ char *NewDir = "./test-result";
 int Recurse = -1;
 int exists = 0; // default not exists
 magic_t MagicCookie;
-
+char *DBConfFile = NULL;
 
 /* ************************************************************************** */
 /* **** test suite ********************************************************** */
@@ -44,6 +44,8 @@ extern CU_TestInfo IsFunctions_testcases[];
 extern CU_TestInfo ContainerInfo_testcases[];
 extern CU_TestInfo Checksum_testcases[];
 extern CU_TestInfo PathCheck_testcases[];
+extern CU_TestInfo DBInsertPfile_testcases[];
+extern CU_TestInfo DBInsertUploadTree_testcases[];
 
 CU_SuiteInfo suites[] = 
 {
@@ -65,6 +67,7 @@ CU_SuiteInfo suites[] =
   {"IsFunctions", NULL, NULL, IsFunctions_testcases},
   {"ContainerInfo", NULL, NULL, ContainerInfo_testcases},
   {"PathCheck", NULL, NULL, PathCheck_testcases},
+  //{"DBInsert", DBInsertInit, DBInsertClean, DBInsert_testcases},
 
   // traverse.c
   {"Traverse", TraverseInit, TraverseClean, Traverse_testcases},
@@ -73,6 +76,11 @@ CU_SuiteInfo suites[] =
 
   // checksum.c
   {"checksum", NULL, NULL, Checksum_testcases},
+
+  //utils.c
+  {"DBInsertPfile", DBInsertInit, DBInsertClean, DBInsertPfile_testcases},
+  {"DBInsertUploadTree", DBInsertInit, DBInsertClean, DBInsertUploadTree_testcases}, 
+
   CU_SUITE_INFO_NULL
 };
 
@@ -98,7 +106,12 @@ int file_dir_exists(char *path_name)
 
 int main(int argc, char** argv)
 {
-  return focunit_main(argc, argv, "ununpack_Tests", suites);
+  create_db_repo_sysconf(1, "ununpack");
+  DBConfFile = get_dbconf();
+
+  int rc = focunit_main(argc, argv, "ununpack_Tests", suites);
+  drop_db_repo_sysconf(get_db_name());
+  return(rc);
 }
 
 

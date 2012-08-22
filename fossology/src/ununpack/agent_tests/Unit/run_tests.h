@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "../agent/ununpack.h"
 #include "libfocunit.h"
+#include "libfodbreposysconf.h"
 
 extern char *Filename;
 extern char *NewDir;
@@ -73,4 +74,7 @@ extern int FatDiskNameClean();
 extern int InitCmdInit();
 extern int InitCmdClean();
 
+/* DBInsert */
+extern int DBInsertInit();
+extern int DBInsertClean();
 #endif
