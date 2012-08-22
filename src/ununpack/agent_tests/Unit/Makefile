@@ -5,11 +5,13 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 AGENTDIR=../../agent
-TESTDIR=$(TOP)/src/testing/lib/c
-TESTLIB= -L $(TESTDIR) -l focunit -I $(TESTDIR)
+CUNIT_LIB_DIR=$(TOP)/src/testing/lib/c
+CUNIT_LIB= -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
+TEST_LIB_DIR=$(TOP)/src/testing/db/c
+TEST_LIB= -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
 DATA=../unpack-test-data.tar.bz2
 
-CFLAGS_LOCAL=-lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ -lcunit $(TESTLIB)
+CFLAGS_LOCAL=-lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ $(CUNIT_LIB) -lcunit $(TEST_LIB)
 EXE=run_tests
 
 OBJS=	run_tests.o \
@@ -27,7 +29,8 @@ OBJS=	run_tests.o \
 		test_IsFunctions.o \
 		test_ContainerInfo.o \
 		test_Checksum.o \
-		test_PathCheck.o
+		test_PathCheck.o \
+		test_DBInsert.o
 #		test_TraverseUnunpackEntry.o \
 
 FOCUNIT = libfocunit.a
@@ -65,7 +68,7 @@ testdata:
 	)
 
 $(FOCUNIT):
-	$(MAKE) -C $(TESTDIR) $@
+	$(MAKE) -C $(CUNIT_LIB_DIR) $@
 
 test: all testdata $(EXE)
 	@echo "Make test ununpack"
