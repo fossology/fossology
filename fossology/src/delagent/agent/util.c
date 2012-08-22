@@ -800,7 +800,7 @@ int authentication(char *user, char * password, int *user_id, int *user_perm)
   else return -1;
   int i = 0;
   char temp[2] = {0};
-  for (i = 0; i < strlen(hash_value); i++)
+  for (i = 0; i < strlen((char *)hash_value); i++)
   {
     sprintf(temp, "%02x", hash_value[i]);
     strcat(pass_hash_actual, temp); 
