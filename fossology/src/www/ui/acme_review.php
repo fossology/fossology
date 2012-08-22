@@ -230,8 +230,8 @@ class acme_review extends FO_Plugin
       $RowStyle = (($RowNum++ % (2*$ColorSpanRows))<$ColorSpanRows) ? $RowStyle1 : $RowStyle2;
 
       $Outbuf .= "<tr $RowStyle>";
-      $IncludeProj = "checked=\"checked\"";
-      $Outbuf .= "<td><input type='checkbox' name='includeproj' value='includeproj' $IncludeProj></td>\n";
+      $Checked = $project['include'] === true ? "checked=\"checked\"" : '' ;
+      $Outbuf .= "<td><input type='checkbox' name='includeproj[$project[acme_project_pk]]' $Checked></td>\n";
       $Outbuf .= "<td>$project[project_name]</td>";
       $ProjectListURL = Traceback_uri() . "?mod=" . $this->Name . "&acme_project=$project[acme_project_pk]&upload=$upload_pk";
       $Outbuf .= "<td><a href='$ProjectListURL'>$project[count]</a></td>";
@@ -282,11 +282,13 @@ class acme_review extends FO_Plugin
     global $Plugins;
     global $PG_CONN;
 
+//phpinfo();
     $CriteriaCount = 0;
     $V="";
     $GETvars="";
     $upload_pk = GetParm("upload",PARM_INTEGER);
     $detail = GetParm("detail",PARM_INTEGER);
+    $detail = empty($detail) ? 0 : 1;
     $folic = GetParm("folic",PARM_INTEGER);
     $savebtn = GetParm("savebtn",PARM_RAW);
     $spdxbtn = GetParm("spdxbtn",PARM_RAW);
@@ -298,12 +300,6 @@ class acme_review extends FO_Plugin
       exit;
     }
     $uploadtree_tablename = GetUploadtreeTableName($upload_pk);
-
-    /* If the save or spdx buttons were clicked, save the data in the acme_upload table */
-    if (!empty($savebtn) or !empty($spdxbtn))
-    {
-echo "Button clicked - save data.<br>";
-    }
 
     // Check if we have data in the acme_upload table, if not then load it
     $acme_uploadRec = GetSingleRec("acme_upload", "where upload_fk=$upload_pk ");
@@ -323,32 +319,62 @@ echo "Button clicked - save data.<br>";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $acme_project_array = pg_fetch_all($result);
+    $acme_project_array_orig = $acme_project_array;  // save the original state so we know which records to update
+
+    /* If the save or spdx buttons were clicked, update $acme_project_array and save the data in the acme_upload table */
+    if (!empty($savebtn) or !empty($spdxbtn))
+    {
+      /* First set all projects include to false */
+      foreach ($acme_project_array as &$project)
+      { 
+        $project['include'] = false;
+      }
+      /* Now turn on projects include to match form */
+      $includeArray = $_POST['includeproj'];
+      foreach ($acme_project_array as &$project)
+      { 
+        if (array_key_exists($project['acme_project_fk'], $includeArray)) $project['include'] = true;
+      }
+      /* Finally, update the db with any changed include states */
+      foreach ($acme_project_array as $project)
+      { 
+        if ($project['include'] != $acme_project_array_orig[$project['acme_project_fk']['include']])
+        {
+          $include = $project['include'] ? "true" : "false";
+          $sql = "update acme_upload set include='$include' where acme_upload_pk='$project[acme_upload_pk]'";
+          $result = pg_query($PG_CONN, $sql);
+          DBCheckResult($result, $sql, __FILE__, __LINE__);
+          pg_free_result($result);
+          echo "include state updated.<br>";
+        }
+      }
+    }
 
     /* aggregate the fossology licenses for each pfile and each acme_project */
     if ($folic)
     {
-    foreach ($acme_project_array as &$project)
-    {
-      $sql = "select uploadtree_pk from acme_pfile, uploadtree where acme_project_fk=$project[acme_project_fk] 
-              and acme_pfile.pfile_fk=uploadtree.pfile_fk and uploadtree.upload_fk=$upload_pk";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $LicArray = array();
-      $ItemLicArray = array();
-      while ($acme_pfileRow = pg_fetch_assoc($result))
+      foreach ($acme_project_array as &$project)
       {
-        $LicArray = GetFileLicenses($agent_pk, '', $acme_pfileRow['uploadtree_pk'], $uploadtree_tablename);
-        foreach($LicArray as $key=>$license) $ItemLicArray[$key] = $license;
-      }
+        $sql = "select uploadtree_pk from acme_pfile, uploadtree where acme_project_fk=$project[acme_project_fk] 
+                and acme_pfile.pfile_fk=uploadtree.pfile_fk and uploadtree.upload_fk=$upload_pk";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $LicArray = array();
+        $ItemLicArray = array();
+        while ($acme_pfileRow = pg_fetch_assoc($result))
+        {
+          $LicArray = GetFileLicenses($agent_pk, '', $acme_pfileRow['uploadtree_pk'], $uploadtree_tablename);
+          foreach($LicArray as $key=>$license) $ItemLicArray[$key] = $license;
+        }
 //debugprint($ItemLicArray, "ItemLicArray");
-      $project['licenses'] = '';
-      foreach($ItemLicArray as $license) 
-      {
-        if ($license == "No_license_found") continue;
-        if (!empty($project['licenses'])) $project['licenses'] .= ", ";
-        $project['licenses'] .= $license;
+        $project['licenses'] = '';
+        foreach($ItemLicArray as $license) 
+        {
+          if ($license == "No_license_found") continue;
+          if (!empty($project['licenses'])) $project['licenses'] .= ", ";
+          $project['licenses'] .= $license;
+        }
       }
-    }
     }
 
     /* sort $acme_project_array by count desc */
