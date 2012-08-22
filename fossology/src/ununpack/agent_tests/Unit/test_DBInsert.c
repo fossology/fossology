@@ -131,7 +131,7 @@ int DBInsertClean()
   }
   PQclear(result);
 
-  if (pgConn) PQfinish(pgConn);
+  //if (pgConn) PQfinish(pgConn);
   return 0;
 }
 
