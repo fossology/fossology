@@ -80,7 +80,11 @@ else
 $PrintOnly = ( array_key_exists('p', $Options)) ? true : false;
 $Verbose  = ( array_key_exists('v', $Options)) ? true : false;
 
-$sql = "select distinct(pfile_fk), pfile_sha1, ufile_name from uploadtree,pfile where upload_fk='$upload_pk' and pfile_pk=pfile_fk";
+//$sql = "select distinct(pfile_fk), pfile_sha1, ufile_name from uploadtree,pfile where upload_fk='$upload_pk' and pfile_pk=pfile_fk";
+$sql = "SELECT pfile_pk, pfile_sha1, ufile_name, acme_pfile_pk  FROM (SELECT distinct(pfile_fk) AS PF, ufile_name FROM uploadtree
+WHERE upload_fk='$upload_pk' and (ufile_mode&x'10000000'::int)=0) as SS
+inner join pfile on (PF=pfile_pk)
+left join acme_pfile on (PF=acme_pfile.pfile_fk) where acme_pfile_pk is null;";
 $result = pg_query($PG_CONN, $sql);
 DBCheckResult($result, $sql, __FILE__, __LINE__);
 if (pg_num_rows($result) == 0)
@@ -205,16 +209,16 @@ function QueryTag($ToAntelink, $tag_pk, $PrintOnly, $Verbose)
       }
 
       /* write the acme_pfile record */
-      writeacme_pfile($acme_project_pk, $row['pfile_fk']);
+      writeacme_pfile($acme_project_pk, $row['pfile_pk']);
 
       /* Tag the pfile (update tag_file table) */
       /* There is no constraint preventing duplicate tags so do a precheck */
-      $sql = "SELECT * from tag_file where pfile_fk='$row[pfile_fk]' and tag_fk='$tag_pk'";
+      $sql = "SELECT * from tag_file where pfile_fk='$row[pfile_pk]' and tag_fk='$tag_pk'";
       $sqlresult = pg_query($PG_CONN, $sql);
       DBCheckResult($sqlresult, $sql, __FILE__, __LINE__);
       if (pg_num_rows($sqlresult) == 0)
       {
-        $sql = "insert into tag_file (tag_fk, pfile_fk, tag_file_date, tag_file_text) values ($tag_pk, '$row[pfile_fk]', now(), NULL)";
+        $sql = "insert into tag_file (tag_fk, pfile_fk, tag_file_date, tag_file_text) values ($tag_pk, '$row[pfile_pk]', now(), NULL)";
         $insresult = pg_query($PG_CONN, $sql);
         DBCheckResult($insresult, $sql, __FILE__, __LINE__);
         pg_free_result($insresult);
@@ -294,7 +298,7 @@ function writeacme_project($project, $Verbose)
 {
   global $PG_CONN;
 
-  $project_name = pg_escape_string($PG_CONN, $project->name);
+  $project_name = pg_escape_string($PG_CONN, $project->prettyName);
   $url = pg_escape_string($PG_CONN, $project->url);
   $description = pg_escape_string($PG_CONN, $project->description);
 
