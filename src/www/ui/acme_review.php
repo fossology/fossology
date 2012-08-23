@@ -46,6 +46,7 @@ class acme_review extends FO_Plugin
   var $Dependency = array("browse", "view");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
+  var $NoHTML  = 1;  // prevent the http header from being written in case we have to download a file
 
   /**
    * \brief Customize submenus.
@@ -230,7 +231,7 @@ class acme_review extends FO_Plugin
       $RowStyle = (($RowNum++ % (2*$ColorSpanRows))<$ColorSpanRows) ? $RowStyle1 : $RowStyle2;
 
       $Outbuf .= "<tr $RowStyle>";
-      $Checked = $project['include'] === true ? "checked=\"checked\"" : '' ;
+      $Checked = $project['include'] == 't' ? "checked=\"checked\"" : '' ;
       $Outbuf .= "<td><input type='checkbox' name='includeproj[$project[acme_project_pk]]' $Checked></td>\n";
       $Outbuf .= "<td>$project[project_name]</td>";
       $ProjectListURL = Traceback_uri() . "?mod=" . $this->Name . "&acme_project=$project[acme_project_pk]&upload=$upload_pk";
@@ -327,26 +328,45 @@ class acme_review extends FO_Plugin
       /* First set all projects include to false */
       foreach ($acme_project_array as &$project)
       { 
-        $project['include'] = false;
+        $project['include'] = 'f';
       }
       /* Now turn on projects include to match form */
-      $includeArray = $_POST['includeproj'];
-      foreach ($acme_project_array as &$project)
-      { 
-        if (array_key_exists($project['acme_project_fk'], $includeArray)) $project['include'] = true;
+      if (array_key_exists('includeproj', $_POST)) 
+      {
+        $includeArray = $_POST['includeproj'];
+        foreach ($acme_project_array as &$project)
+        { 
+          if (array_key_exists($project['acme_project_fk'], $includeArray)) $project['include'] = "t";
+        }
       }
+
       /* Finally, update the db with any changed include states */
-      foreach ($acme_project_array as $project)
+//debugprint($acme_project_array, "acme_project_array");
+//debugprint($acme_project_array_orig, "acme_project_array_orig");
+      $NumRecs = count($acme_project_array);
+      for ($i=0; $i<$NumRecs; $i++)
       { 
-        if ($project['include'] != $acme_project_array_orig[$project['acme_project_fk']['include']])
+        $project = $acme_project_array[$i];
+        $project_orig = $acme_project_array_orig[$i];
+        if ($project['include'] != $project_orig['include'])
         {
+//debugprint($project, "project");
+//debugprint($project_orig, "project_orig");
           $include = $project['include'] ? "true" : "false";
           $sql = "update acme_upload set include='$include' where acme_upload_pk='$project[acme_upload_pk]'";
           $result = pg_query($PG_CONN, $sql);
           DBCheckResult($result, $sql, __FILE__, __LINE__);
           pg_free_result($result);
-          echo "include state updated.<br>";
+//          echo "include state updated.<br>";
         }
+      }
+
+      /* generate and download spdx file */
+      if (!empty($spdxbtn))
+      {
+        $spdxfile = "test";
+        $rv = DownloadString2File($spdxfile, "SPDX .rdf file", "application/octet-stream");
+        if ($rv !== true) echo $rv;
       }
     }
 
@@ -385,6 +405,9 @@ class acme_review extends FO_Plugin
       case "XML":
         break;
       case "HTML":
+$this->NoHeader = 0;
+$this->OutputOpen("HTML", 1);
+
         $V .= $this->HTMLForm($acme_project_array, $upload_pk);
         break;
       case "Text":
