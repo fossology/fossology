@@ -275,6 +275,64 @@ class acme_review extends FO_Plugin
   }
 
 
+  /** 
+   * \brief Write and return the SPDX file as a string
+   * \param $acme_project_array
+   * \return SPDX file as string
+   */
+  function GenerateSPDX($acme_project_array)
+  {
+    global $SysConf;
+
+    $spdx = '<\?xml version="1.0" encoding="UTF-8" ?\>';
+    $spdx .='<rdf:RDF ';
+    $spdx .= '    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"';
+    $spdx .= '    xmlns="http://spdx.org/rdf/terms#"';
+    $spdx .= '    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">';
+    $spdx .= '    <SpdxDocument rdf:about="http://www.spdx.org/tools#SPDXANALYSIS">';
+    $spdx .= '      <specVersion>SPDX-1.1</specVersion>';
+    $spdx .= '      <dataLicense rdf:about="http://spdx.org/licenses/PDDL-1.0" />';
+    $spdx .= '      <CreationInfo>';
+    $spdx .= " <creator>Tool: FOSSology v " . $SysConf['BUILD']['VERSION'] . " svn " . $SysConf['BUILD']['SVN_REV'] . "</creator>";
+    $spdx .= "<created>" . date('c') . "</created>";   // date-time in ISO 8601 format
+    $spdx .= '</CreationInfo>';
+
+    foreach($acme_project_array as $project)
+    {
+debugprint($project, "Project");
+exit;
+      $spdx .= '<Package>';
+      $spdx .= "<name>$project[project_name]</name>";
+      $spdx .= "<versionInfo>$project[version]</versionInfo>";
+      $spdx .= '</Package>';
+    }
+/*
+			<packageSupplier>Organization: FSF (info@fsf.com)</packageSupplier>
+			<packageOriginator>Organization: FSF (info@fsf.com)</packageOriginator>
+			<packageDdownloadLocation>http://ftp.gnu.org/gnu/coreutils/</packageDdownloadLocation>
+			<packageFileName>coreutils-8.12.tar.gz</packageFileName>
+			<sourceInfo>
+				mechanism: git
+				repository: git://git.sv.gnu.org/coreutils
+				branch: master
+				tag: v8.12
+			</sourceInfo>
+			<LicenseDeclared rdf:resource=http://www.spdx.org/licenses/GPL-3.0/>
+			<copyrightText>Copyright (C) 2007 Free Software Foundation, Inc.</copyrightText>
+			<summary>This is the core utilities package for GNU Linux</summary>
+			<description>
+				This package includes all core utilities commands for GNU Linux (ls, dir, cat ...)
+			</description>
+
+		</Package>
+*/
+
+    $spdx = '  </SpdxDocument>
+             </rdf:RDF>';
+    return $spdx;
+  }
+
+
   /**
    * \brief Display the loaded menu and plugins.
    */
@@ -313,7 +371,6 @@ class acme_review extends FO_Plugin
       $this->Populate_acme_upload($acme_project_array, $upload_pk, 1);
       $acme_project_array = $this->GetProjectArray0($upload_pk, $nomosAgentpk, $MinCount); // high level
       $this->Populate_acme_upload($acme_project_array, $upload_pk, 0);
-//debugprint($acme_project_array, "acme_project_array");
     }
 
     $sql = "select * from acme_upload, acme_project where acme_project_pk=acme_project_fk and detail=$detail and upload_fk=$upload_pk";
@@ -341,8 +398,6 @@ class acme_review extends FO_Plugin
       }
 
       /* Finally, update the db with any changed include states */
-//debugprint($acme_project_array, "acme_project_array");
-//debugprint($acme_project_array_orig, "acme_project_array_orig");
       $NumRecs = count($acme_project_array);
       for ($i=0; $i<$NumRecs; $i++)
       { 
@@ -350,22 +405,19 @@ class acme_review extends FO_Plugin
         $project_orig = $acme_project_array_orig[$i];
         if ($project['include'] != $project_orig['include'])
         {
-//debugprint($project, "project");
-//debugprint($project_orig, "project_orig");
           $include = $project['include'] ? "true" : "false";
           $sql = "update acme_upload set include='$include' where acme_upload_pk='$project[acme_upload_pk]'";
           $result = pg_query($PG_CONN, $sql);
           DBCheckResult($result, $sql, __FILE__, __LINE__);
           pg_free_result($result);
-//          echo "include state updated.<br>";
         }
       }
 
       /* generate and download spdx file */
       if (!empty($spdxbtn))
       {
-        $spdxfile = "test";
-        $rv = DownloadString2File($spdxfile, "SPDX .rdf file", "application/octet-stream");
+        $spdxfile = $this->GenerateSPDX($acme_project_array);
+        $rv = DownloadString2File($spdxfile, "SPDX .rdf file", "xml");
         if ($rv !== true) echo $rv;
       }
     }
@@ -386,7 +438,6 @@ class acme_review extends FO_Plugin
           $LicArray = GetFileLicenses($agent_pk, '', $acme_pfileRow['uploadtree_pk'], $uploadtree_tablename);
           foreach($LicArray as $key=>$license) $ItemLicArray[$key] = $license;
         }
-//debugprint($ItemLicArray, "ItemLicArray");
         $project['licenses'] = '';
         foreach($ItemLicArray as $license) 
         {
@@ -405,9 +456,8 @@ class acme_review extends FO_Plugin
       case "XML":
         break;
       case "HTML":
-$this->NoHeader = 0;
-$this->OutputOpen("HTML", 1);
-
+        $this->NoHeader = 0;
+        $this->OutputOpen("HTML", 1);
         $V .= $this->HTMLForm($acme_project_array, $upload_pk);
         break;
       case "Text":
