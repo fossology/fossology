@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 /***********************************************************
  Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
@@ -25,43 +24,57 @@
  * problem.  I'll improve this at a future date but wanted to check it in
  * because others my find it useful.
  *
- * @note default you can use this script on source installation system, if you want too use it on
- * package installation system, please replace the line postfix with '// install from source code'
- * with the line postfix with '// install from package'
- *
  */
 
-print "BEGIN\n";
-//$WEBDIR = "/usr/share/fossology/"; // install from package
-$WEBDIR = "/usr/local/share/fossology/"; // install from source code
-require_once("$WEBDIR/lib/php/common.php");
+$Usage = "Usage: " . basename($argv[0]) . " -u upload_id - t uploadtree_id -c sysconf_dir -h \n ";
+$upload = $item = $type = "statement";
 
-$Usage = "Usage: " . basename($argv[0]) . " [upload] [item] [type(statement/url/email)]";
-$upload = $item = $type = "";
-
-if ($argc ==  3) 
+$options = getopt("c:u:t:h");
+if (!is_array($options))
 {
-  $upload = $argv[1];
-  $item = $argv[2];
-} 
-
-if ($argc == 4)
-{
-  $upload = $argv[1];
-  $item = $argv[2];
-  $type = $argv[3];
+  print $Usage;
+  return 1;
 }
 
+foreach($options as $option => $value)
+{
+  switch($option)
+  {
+    case 'c':
+      $sysconfdir = $value;
+      break;
+    case 'u':
+      $upload = $value;
+      break;
+    case 't':
+      $item = $value;
+      break;
+    case 'h':
+      print $Usage;
+      return 1;
+    default:
+      print $Usage;
+      return 1;
+  }
+}
 
-print "Upload:$upload;Item:$item\n";
-$SysConf['DBCONF']['dbname'] = "fossology";
+if (!is_numeric($upload) || !is_numeric($item))
+{
+  print "Upload ID or Uploadtree ID is not digital number\n";
+  print $Usage;
+  return 1;
+}
+
+print "Upload ID:$upload; Uploadtree ID:$item\n";
+
+require_once("$MODDIR/lib/php/common.php");
+
 GetCopyrightList($item, $upload, $type);
 print "END\n";
 
 function GetCopyrightList($uploadtree_pk, $upload_pk, $type) 
 {
-  //$PG_CONN =  DBconnect("/etc/fossology/"); // install from package
-  $PG_CONN =  DBconnect("/usr/local/etc/fossology/"); // install from source
+  global $PG_CONN;
   if (empty($uploadtree_pk)) return;
 
   /* get last copyright agent_pk that has data for this upload */

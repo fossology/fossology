@@ -95,7 +95,6 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_table
  * \return Array of file copyright CopyrightArray[ct_pk] = copyright.content
  * FATAL if neither pfile_pk or uploadtree_pk were passed in
  */
-/* This function doesn't belong in this file and it doesn't appear to be used
 function GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk, $type)
 {
   global $PG_CONN;
@@ -146,7 +145,6 @@ function GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk, $type)
   pg_free_result($result);
   return $CopyrightArray;
 }
-*/
 
 /**
  * \brief  returns copyright list as a single string
@@ -157,7 +155,6 @@ function GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk, $type)
  *
  * \return copyright string for specified file
  */
-/* This function doesn't belong in this file and it doesn't appear to be used
 function GetFileCopyright_string($agent_pk, $pfile_pk, $uploadtree_pk, $type)
 {
   $CopyrightStr = "";
@@ -174,7 +171,6 @@ function GetFileCopyright_string($agent_pk, $pfile_pk, $uploadtree_pk, $type)
 
   return $CopyrightStr;
 }
-*/
 
 /**
  * \brief  Same as GetFileLicenses() but returns license list as a single string
