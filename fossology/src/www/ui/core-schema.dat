@@ -518,48 +518,6 @@
   $Schema["TABLE"]["bucketpool"]["description"]["ALTER"] = "ALTER TABLE \"bucketpool\" ALTER COLUMN \"description\" DROP NOT NULL;";
   $Schema["TABLE"]["bucketpool"]["description"]["UPDATE"] = "";
 
-
-  $Schema["TABLE"]["copyright"]["ct_pk"]["DESC"] = "";
-  $Schema["TABLE"]["copyright"]["ct_pk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"ct_pk\" int8;";
-  $Schema["TABLE"]["copyright"]["ct_pk"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('copyright_ct_pk_seq'::regclass);";
-  $Schema["TABLE"]["copyright"]["ct_pk"]["UPDATE"] = "UPDATE copyright SET ct_pk=nextval('copyright_ct_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["copyright"]["agent_fk"]["DESC"] = "";
-  $Schema["TABLE"]["copyright"]["agent_fk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"agent_fk\" int8;";
-  $Schema["TABLE"]["copyright"]["agent_fk"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"agent_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["copyright"]["agent_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["copyright"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["copyright"]["pfile_fk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"pfile_fk\" int8;";
-  $Schema["TABLE"]["copyright"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["copyright"]["pfile_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["copyright"]["content"]["DESC"] = "";
-  $Schema["TABLE"]["copyright"]["content"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"content\" text;";
-  $Schema["TABLE"]["copyright"]["content"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"content\" DROP NOT NULL;";
-  $Schema["TABLE"]["copyright"]["content"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["copyright"]["hash"]["DESC"] = "";
-  $Schema["TABLE"]["copyright"]["hash"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"hash\" text;";
-  $Schema["TABLE"]["copyright"]["hash"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"hash\" DROP NOT NULL;";
-  $Schema["TABLE"]["copyright"]["hash"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["copyright"]["type"]["DESC"] = "";
-  $Schema["TABLE"]["copyright"]["type"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"type\" text;";
-  $Schema["TABLE"]["copyright"]["type"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"type\" DROP NOT NULL;";
-  $Schema["TABLE"]["copyright"]["type"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["copyright"]["copy_startbyte"]["DESC"] = "";
-  $Schema["TABLE"]["copyright"]["copy_startbyte"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"copy_startbyte\" int4;";
-  $Schema["TABLE"]["copyright"]["copy_startbyte"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"copy_startbyte\" DROP NOT NULL;";
-  $Schema["TABLE"]["copyright"]["copy_startbyte"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["copyright"]["copy_endbyte"]["DESC"] = "";
-  $Schema["TABLE"]["copyright"]["copy_endbyte"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"copy_endbyte\" int4;";
-  $Schema["TABLE"]["copyright"]["copy_endbyte"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"copy_endbyte\" DROP NOT NULL;";
-  $Schema["TABLE"]["copyright"]["copy_endbyte"]["UPDATE"] = "";
-
-
   $Schema["TABLE"]["file_picker"]["file_picker_pk"]["DESC"] = "";
   $Schema["TABLE"]["file_picker"]["file_picker_pk"]["ADD"] = "ALTER TABLE \"file_picker\" ADD COLUMN \"file_picker_pk\" int4;";
   $Schema["TABLE"]["file_picker"]["file_picker_pk"]["ALTER"] = "ALTER TABLE \"file_picker\" ALTER COLUMN \"file_picker_pk\" SET NOT NULL, ALTER COLUMN \"file_picker_pk\" SET DEFAULT nextval('file_picker_file_picker_pk_seq'::regclass);";
@@ -1887,7 +1845,6 @@
   $Schema["SEQUENCE"]["bucket_container_bf_pk_seq"] = "CREATE SEQUENCE \"bucket_container_bf_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["bucket_file_bf_pk_seq"] = "CREATE SEQUENCE \"bucket_file_bf_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["bucketpool_bucketpool_pk_seq"] = "CREATE SEQUENCE \"bucketpool_bucketpool_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["copyright_ct_pk_seq"] = "CREATE SEQUENCE \"copyright_ct_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_file_fl_pk_seq"] = "CREATE SEQUENCE \"license_file_fl_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["folder_folder_pk_seq"] = "CREATE SEQUENCE \"folder_folder_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["foldercontents_foldercontents_pk_seq"] = "CREATE SEQUENCE \"foldercontents_foldercontents_pk_seq\" START 1;";
@@ -1940,7 +1897,6 @@
   $Schema["CONSTRAINT"]["bucket_file_pkey"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_pkey\" PRIMARY KEY (\"bf_pk\");";
   $Schema["CONSTRAINT"]["bucket_pkey"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucket_pkey\" PRIMARY KEY (\"bucket_pk\");";
   $Schema["CONSTRAINT"]["bucketpool_pkey"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_pkey\" PRIMARY KEY (\"bucketpool_pk\");";
-  $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
   $Schema["CONSTRAINT"]["foldercontents_pkey"] = "ALTER TABLE \"foldercontents\" ADD CONSTRAINT \"foldercontents_pkey\" PRIMARY KEY (\"foldercontents_pk\");";
@@ -2075,9 +2031,6 @@
   $Schema["INDEX"]["bucket_container"]["bucketcontainer_uploadtree"] = "CREATE INDEX bucketcontainer_uploadtree ON bucket_container USING btree (uploadtree_fk);";
 
   $Schema["INDEX"]["bucket_file"]["pfile_idx"] = "CREATE INDEX pfile_idx ON bucket_file USING btree (pfile_fk);";
-
-  $Schema["INDEX"]["copyright"]["agent_fk_idx"] = "CREATE INDEX agent_fk_idx ON copyright USING btree (agent_fk);";
-  $Schema["INDEX"]["copyright"]["copyright_pfile_idx"] = "CREATE INDEX copyright_pfile_idx ON copyright USING btree (pfile_fk);";
 
   $Schema["INDEX"]["license_file"]["fl_rf_fk"] = "CREATE INDEX fl_rf_fk ON license_file USING btree (rf_fk);";
   $Schema["INDEX"]["license_file"]["lf_pfile_fk"] = "CREATE INDEX lf_pfile_fk ON license_file USING btree (pfile_fk);";

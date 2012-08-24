@@ -620,6 +620,57 @@ int setup_database(PGconn* pgConn)
 }
 
 /**
+ * @brief cleanup the copyright table and add foreign key
+ *
+ * Will delete any copyright records that refer to pfiles that don't exist.
+ * And create the foreign key
+ *
+ * @param pgConn the connection to the database
+ * @return 1 if the success at the end of the function, 0 otherwise
+ */
+int cleanup_copyright(PGconn* pgConn)
+{
+  /* locals */
+  PGresult* pgResult; // the result from a database access
+
+  /* initialize memory */
+  pgResult = NULL;
+
+  /* clean up copyright records */
+  pgResult = PQexec(pgConn, cleanup_copyright_records);
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    fprintf(cerr, "ERROR %s.%d: Could not cleanup copyright records.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR sql was: %s\n", cleanup_copyright_records);
+    return -1;
+  }
+  PQclear(pgResult);
+
+  /* create the pfile foreign key index */
+  pgResult = PQexec(pgConn, create_pfile_foreign_index);
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    fprintf(cerr, "ERROR %s.%d: Could not create copyright pfile_fk.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR sql was: %s\n", create_pfile_foreign_index);
+    return -1;
+  }
+  PQclear(pgResult);
+
+  /* alter pfile_fk */
+  pgResult = PQexec(pgConn, alter_table_pfile);
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    fprintf(cerr, "ERROR %s.%d: Could not alter pfile_fk in copyright table.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR sql was: %s\n", alter_table_pfile);
+    return -1;
+  }
+  PQclear(pgResult);
+  return 1;
+}
+/**
  * @brief check to make sure the copyright has been created
  *
  * will attempt to access the copyright table, if the response from the database
@@ -659,7 +710,16 @@ int check_copyright_table(PGconn* pgConn)
       fprintf(cerr, "ERROR sql was: %s\n", check_database_table);
       ret = 0;
     }
-    free(str);
+    //free(str);
+  }
+  else
+  {
+    /* check if the copyright foreign key exsits */
+    pgResult = PQexec(pgConn, check_copyright_foreign_key);
+    if(PQntuples(pgResult) != 1)
+    {
+      ret = cleanup_copyright(pgConn);
+    }
   }
 
   /* check if the copyright exsits */
@@ -668,7 +728,6 @@ int check_copyright_table(PGconn* pgConn)
   {
     fo_CreateARSTable(pgConn, AGENT_ARS);
   }
-
   /* clean up memory and return */
   PQclear(pgResult);
   return ret;
