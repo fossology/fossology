@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 /***********************************************************
  Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
@@ -31,24 +30,56 @@
  *  
  */
 
-print "BEGIN\n";
-//$WEBDIR = "/usr/share/fossology/"; // install from package
-$WEBDIR = "/usr/local/share/fossology/"; // install from source code
-require_once("$WEBDIR/lib/php/common.php");
+$Usage = "Usage: " . basename($argv[0]) . " -u upload_id - t uploadtree_id -c sysconf_dir -h \n";
+$upload = ""; // upload id
+$item = ""; // uploadtree id
 
-$Usage = "Usage: " . basename($argv[0]) . " [upload] [item] ";
+$options = getopt("c:u:t:h");
+if (!is_array($options)) 
+{ 
+  print $Usage;
+  return 1;
+}
+foreach($options as $option => $value)
+{
+  switch($option)
+  {
+    case 'c':
+      $sysconfdir = $value;
+      break;
+    case 'u':
+      $upload = $value;
+      break;
+    case 't':
+      $item = $value;
+      break;
+    case 'h':
+      print $Usage;
+      return 1;
+    default:
+      print $Usage;
+      return 1;
+  }
+}
 
-$upload = $argv[1];
-$item = $argv[2];
-print "Upload:$upload;Item:$item\n";
-$SysConf['DBCONF']['dbname'] = "fossology";
+if (!is_numeric($upload) || !is_numeric($item))
+{
+  print "Upload ID or Uploadtree ID is not digital number\n";
+  print $Usage;
+  return 1;
+}
+
+print "Upload ID:$upload; Uploadtree ID:$item\n";
+
+require_once("$MODDIR/lib/php/common.php");
+global $PG_CONN;
+
 GetLicenseList($item, $upload);
 print "END\n";
 
 function GetLicenseList($uploadtree_pk, $upload_pk) 
 {
-  //$PG_CONN =  DBconnect("/etc/fossology/"); // install from package
-  $PG_CONN =  DBconnect("/usr/local/etc/fossology/"); // install from source code
+  global $PG_CONN;
   if (empty($uploadtree_pk)) return;
 
   /* get last nomos agent_pk that has data for this upload */
