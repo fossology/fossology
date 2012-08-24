@@ -119,7 +119,7 @@ char* alter_table_pfile = " \
 ALTER TABLE ONLY copyright \
   ADD CONSTRAINT pfile_fk \
   FOREIGN KEY (pfile_fk) \
-  REFERENCES pfile(pfile_pk)";
+  REFERENCES pfile(pfile_pk) ON DELETE CASCADE";
 
 /** TODO ??? */
 char* alter_table_agent = " \
@@ -127,5 +127,16 @@ ALTER TABLE ONLY copyright \
   ADD CONSTRAINT agent_fk \
   FOREIGN KEY (agent_fk) \
   REFERENCES agent(agent_pk)";
+
+/** check copyright table foreign key */
+char* check_copyright_foreign_key = " \
+SELECT c.conname AS constraint_name, \
+  t.relname AS table_name, t2.relname AS reftable_name \
+  FROM pg_constraint AS c \
+  INNER JOIN pg_class AS t ON c.conrelid = t.oid and t.relname = 'copyright' and c.confdeltype = 'c' \
+  INNER JOIN pg_class AS t2 ON c.confrelid = t2.oid and t2.relname = 'pfile'";
+/** clean copyright records */
+char* cleanup_copyright_records = " \
+DELETE FROM copyright WHERE pfile_fk NOT IN (SELECT pfile_pk FROM pfile)";
 
 #endif /* SQL_STATEMENTS_H_INCLUDE */
