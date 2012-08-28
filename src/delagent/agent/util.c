@@ -303,6 +303,27 @@ void DeleteUpload (long UploadId)
   snprintf(SQL,sizeof(SQL),"DELETE FROM uploadtree WHERE upload_fk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
   */
+  
+  /* Delete uploadtree_nnn table */
+  char uploadtree_tablename[1024];
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT uploadtree_tablename FROM upload WHERE upload_pk = %ld;",UploadId);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (PQntuples(result))
+  {
+    strcpy(uploadtree_tablename, PQgetvalue(result, 0, 0));
+    PQclear(result);
+    if (strcasecmp(uploadtree_tablename,"uploadtree_a")) 
+    {
+      memset(SQL,'\0',sizeof(SQL));
+      snprintf(SQL,sizeof(SQL),"DROP TABLE %s;", uploadtree_tablename);
+      result = PQexec(db_conn, SQL);
+      if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+      PQclear(result);
+    }
+  }
+
   memset(SQL,'\0',sizeof(SQL));
   if (Verbose) { printf("# Deleting upload\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM upload WHERE upload_pk = %ld;",UploadId);
