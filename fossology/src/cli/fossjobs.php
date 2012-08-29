@@ -111,58 +111,7 @@ if (array_key_exists("password", $options)) {
   $passwd = $options["password"];
 }
 
-/** get username/passwd from ~/.fossology.rc */
-$user_passwd_file = getenv("HOME") . "/.fossology.rc";
-if (empty($user) && empty($passwd) && file_exists($user_passwd_file)) {
-  $user_passwd_array = parse_ini_file($user_passwd_file, true);
-
-  if(!empty($user_passwd_array) && !empty($user_passwd_array['user']))
-    $user = $user_passwd_array['user'];
-  if(!empty($user_passwd_array) && !empty($user_passwd_array['password']))
-    $passwd = $user_passwd_array['password'];
-}
-/* check if the user name/passwd is valid */
-
-if (empty($user)) {
-  /*
-  $uid_arr = posix_getpwuid(posix_getuid());
-  $user = $uid_arr['name'];
-  */
-  echo "FATAL: You should add '--user USERNAME' when running OR add 'user=USERNAME' in ~/.fossology.rc before running.\n";
-  exit(1);
-}
-
-if (empty($passwd)) {
-  echo "The user is: $user, please enter the password:\n";
-  system('stty -echo');
-  $passwd = trim(fgets(STDIN));
-  system('stty echo');
-  if (empty($passwd)) {
-    echo "You entered an empty password.\n";
-    exit(1);
-  }
-}
-
-if (!empty($user) and !empty($passwd)) {
-  $SQL = "SELECT * from users where user_name = '$user';";
-  $result = pg_query($PG_CONN, $SQL);
-  DBCheckResult($result, $SQL, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  if(empty($row)) {
-    echo "User name or password is invalid.\n";
-    pg_free_result($result);
-    exit(0);
-  }
-  $SysConf['auth']['UserId'] = $row['user_pk'];
-  pg_free_result($result);
-  if (!empty($row['user_seed']) && !empty($row['user_pass'])) {
-    $passwd_hash = sha1($row['user_seed'] . $passwd);
-    if (strcmp($passwd_hash, $row['user_pass']) != 0) {
-      echo "User name or password is invalid.\n";
-      exit(0);
-    }
-  }
-}
+account_check($user, $passwd); // check username/password
 
 /* init plugins */
 cli_Init();

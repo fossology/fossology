@@ -19,29 +19,37 @@
 /**
  * @file fo_copyright_list.php
  *
- * @brief This file is a quick hack to get a list of filepaths and copyright information for those
- * files.  As is it isn't ready for prime time but needs to solve an immediate
- * problem.  I'll improve this at a future date but wanted to check it in
- * because others my find it useful.
+ * @brief get a list of filepaths and copyright information for those
+ * files. 
  *
  */
 
-$Usage = "Usage: " . basename($argv[0]) . " -u upload_id - t uploadtree_id -c sysconf_dir -h \n ";
-$upload = $item = $type = "statement";
+$Usage = "Usage: " . basename($argv[0]) . "
+  -u upload id        :: upload id
+  -t uploadtree id    :: uploadtree id
+  -c sysconfdir       :: Specify the directory for the system configuration
+  --type type         :: all/statement/url/email, default: all
+  --user username     :: user name
+  --password password :: password
+  -h  help, this message
+  ";
 
-$options = getopt("c:u:t:h");
-if (!is_array($options))
+$upload = $item = $type = "";
+
+$longopts = array("user:", "password:", "type:");
+$options = getopt("c:u:t:h", $longopts);
+if (empty($options) || !is_array($options))
 {
   print $Usage;
   return 1;
 }
 
+$user = $passwd = "";
 foreach($options as $option => $value)
 {
   switch($option)
   {
-    case 'c':
-      $sysconfdir = $value;
+    case 'c': // handled in fo_wrapper
       break;
     case 'u':
       $upload = $value;
@@ -52,12 +60,22 @@ foreach($options as $option => $value)
     case 'h':
       print $Usage;
       return 1;
+    case 'user':
+      $user = $value;
+      break;
+    case 'password':
+      $passwd = $value;
+      break;
+    case 'type':
+      $type = $value;
+      break;
     default:
       print $Usage;
       return 1;
   }
 }
 
+/** check if parameters are valid */
 if (!is_numeric($upload) || !is_numeric($item))
 {
   print "Upload ID or Uploadtree ID is not digital number\n";
@@ -67,11 +85,30 @@ if (!is_numeric($upload) || !is_numeric($item))
 
 print "Upload ID:$upload; Uploadtree ID:$item\n";
 
+account_check($user, $passwd); // check username/password
+
+$return_value = read_permission($upload, $user); // check if the user has the permission to read this upload
+if (empty($return_value))
+{
+  $text = _("The user '$user' has no permission to read the information of upload $upload\n");
+  echo $text;
+  return 1;
+}
+
 require_once("$MODDIR/lib/php/common.php");
 
+/** get copyright information for this uploadtree */
 GetCopyrightList($item, $upload, $type);
 print "END\n";
+return 0;
 
+/**
+ * \brief get copyright list of one specified uploadtree_id
+ *
+ * \pamam $uploadtree_pk - uploadtree id
+ * \pamam $upload_pk - upload id
+ * \param $type copyright type(all/statement/url/email)
+ */
 function GetCopyrightList($uploadtree_pk, $upload_pk, $type) 
 {
   global $PG_CONN;
@@ -124,6 +161,5 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $type)
   } 
     pg_free_result($outerresult);
 }
-
 
 ?>
