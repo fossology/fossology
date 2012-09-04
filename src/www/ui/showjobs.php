@@ -478,7 +478,7 @@ class showjobs extends FO_Plugin
         /* actions, must be admin or own the upload  */
         if (($jobqueueRec['jq_end_bits'] == 0) 
              && (($_SESSION["UserLevel"] == PLUGIN_DB_USERADMIN)
-                 || ($_SESSION["UserId"] == $Job['job_user_fk'])))
+                 || ($_SESSION["UserId"] == $Job['job']['job_user_fk'])))
         {
           $OutBuf .= "<th $jobStyle>";
           if ($isPaused)
