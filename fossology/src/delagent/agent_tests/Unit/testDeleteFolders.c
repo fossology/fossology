@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 
 extern char *DBConfFile;
+static PGresult *result = NULL;
 
 /**
  * \file testDeleteFolders.c
@@ -52,11 +53,40 @@ void testDeleteUploads()
   long UploadId = 85;
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  char sql[1024];
 
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
   DeleteUpload(UploadId);
 
+  /* check if uploadtree records deleted */
+  memset(sql, '\0', 1024);
+  snprintf(sql, 1024, "SELECT * FROM uploadtree WHERE upload_fk = %ld;", UploadId);
+  result = PQexec(db_conn, sql);
+  if (fo_checkPQresult(db_conn, result, sql, __FILE__, __LINE__)) 
+  {
+    CU_FAIL("DeleteUploads FAIL!");
+  }
+  else
+  {
+    CU_ASSERT_EQUAL(PQntuples(result),0);
+  }
+  PQclear(result);
+
+  /* check if copyright records deleted */
+  memset(sql, '\0', 1024);
+  snprintf(sql, 1024, "SELECT * FROM copyright C INNER JOIN uploadtree U ON C.pfile_fk = U.pfile_fk AND U.upload_fk = %ld;", UploadId);
+  result = PQexec(db_conn, sql);
+  if (fo_checkPQresult(db_conn, result, sql, __FILE__, __LINE__))
+  {
+    CU_FAIL("DeleteUploads FAIL!");
+  }
+  else
+  {
+    CU_ASSERT_EQUAL(PQntuples(result),0);
+  }
+  PQclear(result);
+  
   PQfinish(db_conn);
   CU_PASS("DeleteUploads PASS!");
 }
