@@ -7551,6 +7551,11 @@ k
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"[^l]gpl[[]3"
 #
+# License specifier in Debian copyright file
+%ENTRY%	_TEXT_GPLV3_CR
+%KEY%	"licen[cs]e"
+%STR%	"licen[cs]e =FEW= GPL-3"
+#
 %ENTRY%	_TEXT_GHOSTSCRIPT
 %KEY%	=NULL=
 %STR%	"ghostscript"
