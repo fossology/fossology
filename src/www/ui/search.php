@@ -270,7 +270,7 @@ class search extends FO_Plugin
       foreach($UploadtreeRecs as &$UploadtreeRec)
       {
         if ($UploadtreeRec['pfile_fk'])
-          $UploadtreeRec['licenses'] = GetFileLicenses_string($nomosagent_pk, $UploadtreeRec['pfile_fk'], 0);
+          $UploadtreeRec['licenses'] = GetFileLicenses_string($nomosagent_pk, $UploadtreeRec['pfile_fk'], $UploadtreeRec['uploadtree_pk']);
       }
     }
 
