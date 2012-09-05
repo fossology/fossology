@@ -661,6 +661,8 @@ class ui_view extends FO_Plugin
     if (empty($Page)) { $Page=0; };
 
     /* Get uploadtree table name */
+    $uploadtree_tablename = "uploadtree";
+    if (!empty($Upload))
     $uploadtree_tablename = GetUploadtreeTablename($Upload);
 
     switch(GetParm("format",PARM_STRING))
