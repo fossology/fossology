@@ -1422,7 +1422,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "GPL(proj)" : cp);
     lmem[_mGPL] = 1;
   }
-  if (!lmem[_mGPL] && !lmem[_mGFDL] 
+  if (!lmem[_mGPL] && !lmem[_mGFDL] && !lmem[_mLGPL]
       && (!INFILE(_LT_MPL_SECONDARY))
       && (!INFILE(_TEXT_NOT_GPL))
       && (!INFILE(_TEXT_NOT_GPL2))
