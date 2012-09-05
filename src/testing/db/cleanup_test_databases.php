@@ -30,6 +30,7 @@
 $postgres_params  = "dbname=template1 ";
 $postgres_params .= "host=localhost ";
 $postgres_params .= "user=fossologytest ";
+$postgres_params .= "password=fossologytest ";
 
 $PG_CONN = pg_connect($postgres_params)
     or die("FAIL: Could not connect to postgres server\n");
