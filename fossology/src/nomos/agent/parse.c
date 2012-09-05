@@ -5009,9 +5009,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Some licenses point you to files/URLs...
    */
-//  if (*licStr == NULL_CHAR) {
+  if (*licStr == NULL_CHAR) {
     checkFileReferences(filetext, size, score, kwbm, isML, isPS);
-//  }
+  }
   /*
    * Some licenses say "licensed under the same terms as FOO".
    */
