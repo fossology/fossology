@@ -5871,6 +5871,11 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
   traceFunc("== gplVersion()\n");
 #endif  /* PROC_TRACE */
   /* */
+  /* special case for Debian copyright files */
+  if (INFILE(_TEXT_GPLV3_CR)) {
+    INTERESTING("GPL_v3+");
+  }
+
   if (GPL_INFILE(_PHR_FSF_V21_OR_LATER) ||
       INFILE(_PHR_GPL21_OR_LATER)) {
     lstr = "GPL_v2.1+";
