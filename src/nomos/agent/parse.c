@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -1160,6 +1160,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "GPL_v3(#2)" : "GPL_v3");
         lmem[_mGPL] = 1;
       }
+      else if (GPL_INFILE(_LT_GPL3ref2)) {
+                INTERESTING("GPL_v3+");
+                lmem[_mGPL] = 1;
+           }
       else if (!lmem[_mLIBRE] && GPL_INFILE(_LT_GPLref1)
           && !INFILE(_PHR_NOT_UNDER_GPL)
           && !INFILE(_LT_LGPLref2)) {
@@ -2205,6 +2209,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "MS(5)" : "Microsoft");
       lmem[_fMSCORP] = 1;
     }
+    else if (INFILE(_LT_MSCORPref1)) {
+          INTERESTING("Microsoft");
+          lmem[_fMSCORP] = 1;
+         }
   }
   /*
    * Santa Cruz Operation (SCO)
@@ -2328,6 +2336,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if (INFILE(_LT_EGENIX_COM)) {
     INTERESTING("eGenix");
   }
+  else if (INFILE(_LT_PYTHON_4)) {
+        INTERESTING("Python");
+        lmem[_mPYTHON] = 1;
+       }
   else if (!lmem[_mPYTHON] && lmem[_mPYTH_TEXT]) {
     if (INFILE(_LT_PYTHON_1) || INFILE(_LT_PYTHON_2)) {
       if (INFILE(_CR_PYTHON) || INFILE(_TITLE_PYTHON)) {
@@ -4997,9 +5009,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Some licenses point you to files/URLs...
    */
-  if (*licStr == NULL_CHAR) {
+//  if (*licStr == NULL_CHAR) {
     checkFileReferences(filetext, size, score, kwbm, isML, isPS);
-  }
+//  }
   /*
    * Some licenses say "licensed under the same terms as FOO".
    */

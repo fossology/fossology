@@ -1730,8 +1730,6 @@
 %ENTRY%	_LT_FREE_75
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"free to use as you see fit"
-%ALIAS%	_FREE_last_other
-%ALIAS%	_FREECLAIM_last
 #
 %ENTRY%	_LT_FREE_77
 %KEY%	"distribut"
@@ -1756,6 +1754,20 @@
 %ENTRY%	_LT_FREE_82
 %KEY%	"restrict"
 %STR%	"you may use this program =SOME= as desired without restriction"
+#
+%ENTRY%	_LT_FREE_83
+%KEY%	"restrict"
+%STR%	"code is released =FEW= with no restrictions on usage"
+#
+%ENTRY%	_LT_FREE_84
+%KEY%	"restrict"
+%STR%	"you may (re|)distribute (and|or|and/or) modify =FEW= without restriction of copyright"
+#
+%ENTRY%	_LT_FREE_85
+%KEY%	"permi[st]"
+%STR%	"permission to use copy modify and distribute this software is freely granted provided that this notice is preserved"
+%ALIAS%	_FREE_last_other
+%ALIAS%	_FREECLAIM_last
 #
 %ENTRY%	_LT_FREEART_V10
 %KEY%	"licen[cs]"
@@ -2162,6 +2174,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_GPL3ref
 %KEY%	"\<under\>"
 %STR%	"(distribu|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =SOME= ([^l]gpl|GNU (general p|p)ublic licen[cs]e)(([v-]?| ?version) ?)3"
+#
+%ENTRY%	_LT_GPL3ref2
+%KEY%	"licen[cs]"
+%STR%	"licensed =FEW= under version 3 or any later version of the GNU General Public License"
 #
 %ENTRY%	_LT_GPL_OR
 %NOCHECK%
@@ -3135,6 +3151,10 @@ e /* (INFILE(j)) */
 %KEY%	"distribut"
 %STR%	"if you distribute any portion of the software in source code form you may do so only under this licen[cs]e by including a complete copy"
 #
+%ENTRY%	_LT_MSCORPref1
+%KEY%	"distribut"
+%STR%	"program is linked with (|and uses) microsoft distributable code"
+#
 %ENTRY%	_LT_MSCORP_PLref1
 %KEY%	"licen[cs]"
 %STR%	"microsoft public licen[cs]e Ms-PL governs use of the accompanying software"
@@ -3704,6 +3724,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_PYTHON_3
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"if you honor the copyright rules it i?s ok to use python"
+#
+%ENTRY%	_LT_PYTHON_4
+%KEY%	"licen[cs]"
+%STR%	"licensed to PSF under (a|the|) contributor agreement"
 #
 ##%ENTRY%	_LT_PYTHON22ref
 ##%KEY%	"licen[cs]"
@@ -4815,6 +4839,18 @@ k
 %ENTRY%	_LT_SEE_COPYING_12
 %KEY%	"\<files?\>"
 %STR%	"read the file copying"
+#
+%ENTRY%	_LT_SEE_COPYING_13
+%KEY%	"\<files?\>"
+%STR%	"license (may|can) =FEW= be found in the root directory =FEW= in the copying file"
+#
+%ENTRY%	_LT_SEE_COPYING_14
+%KEY%	"licen[cs]"
+%STR%	"licensing details are in the copying file"
+#
+%ENTRY%	_LT_SEE_COPYING_15
+%KEY%	"copyright"
+%STR%	"copyright =SOME= see copying?txt"
 #####
 # These MUST be the last 2 checks for license references in the file "copying"
 #####
@@ -4877,6 +4913,10 @@ k
 %ENTRY%	_LT_SEE_OTHER_11
 %KEY%	"(Â©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"see =FEW= for Copyright information"
+#
+%ENTRY%	_LT_SEE_OTHER_12
+%KEY%	"copyright"
+%STR%	"see copyright notice in lua\.?h"
 #
 #####
 # These MUST be the last 3 checks for license references in some "other" place
@@ -4942,7 +4982,11 @@ k
 #
 %ENTRY%	_LT_SEE_LICENSE_12
 %KEY%	"licen[cs]"
-%STR%	"for license =FEW= see accompanying license"
+%STR%	"license please see accompanying LICENSE"
+#
+%ENTRY%	_LT_SEE_LICENSE_13
+%KEY%	"licen[cs]"
+%STR%	"see =FEW= license file =FEW= for more information"
 #####
 # These MUST be the last 2 checks for license references in the file "license"
 #####
