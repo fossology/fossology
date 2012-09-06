@@ -1,4 +1,4 @@
-
+#!/usr/bin/php
 <?php
 /***********************************************************
  Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
@@ -30,10 +30,9 @@
  *     ./regressiontest.php -w "http://bobg.fc.hp.com/trunk"
  *  4. This will hit the url's found in the good/ and write the pages to the 
  *     "output_{pid}" directory.
- *  5. Manually diff files between the good/ and output_{pid} directories that have the same name.
+ *  5. The program will diff files between the good/ and output_{pid} directories that have the same name.
  *     Any difference is either a regression or an enhancement.  If it is an
  *     enhancement, replace the good/ file with the one from the output directory.
- *     This program could be enhanced to do the diff.
  *  6. Remove the output directory after all diffs have been resolved.
  *
  *  Notes:
@@ -41,6 +40,13 @@
  *     added so that this data doesn't print.
  *  2. Some url's need post data to test.  This program could be enhanced to supply
  *     post data.
+ *
+ *  Sample Output:
+ *   $ ./regressiontest.php -w "http://bobg.fc.hp.com/trunk"
+ *   Regression found: Baseline is regression/good//?mod=browse&upload=1&item=1, new content is regression/output_29370/?mod=browse&upload=1&item=1
+ *   Total files checked: 3
+ *   No regression in: 2
+ *   Regression found in: 1
  */
 
 // $DATAROOTDIR and $PROJECT come from Makefile
@@ -95,9 +101,14 @@ if (($DirH = opendir($GoodDir)) === false)
 }
 
 /* Loop through $GoodDir files */
+$FileCount = 0;
+$GoodFileCount = 0;
+$BadFileCount = 0;
 while (($FileName = readdir($DirH)) !== false)
 {
   if ($FileName[0] == '.') continue;
+
+  $FileCount++;
 
   /* $FileName is a URL, hit it and save the results. */
   $URL = $WebHost . "/$FileName";
@@ -113,7 +124,27 @@ while (($FileName = readdir($DirH)) !== false)
   {
     echo "Failed to write contents to $OutFileName.\n";
   }
+
+  /* Get the good file contents */
+  $GoodFileName = $GoodDir . "$FileName";
+  if (($GoodContents = file_get_contents($GoodFileName)) === false)
+  {
+    echo "Failed to read good contents from $GoodFileName.\n";
+  }
+
+  /* compare good and output file contents */
+  if ($GoodContents != $contents)
+  {
+    echo "Regression found: Baseline is $GoodFileName, new content is $OutFileName\n";
+    $BadFileCount++;
+  }
+  else
+    $GoodFileCount++;
 }
+
+echo "Total files checked: $FileCount\n";
+echo "No regression in: $GoodFileCount\n";
+echo "Regression found in: $BadFileCount\n";
 
 return (0);
 
