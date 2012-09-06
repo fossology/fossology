@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -61,6 +61,7 @@ class folder_properties extends FO_Plugin {
     }
     /* Change the properties */
     /** Block SQL injection by protecting single quotes **/
+    $NewFolder = "";
     $NewName = str_replace("'", "''", $NewName); // PostgreSQL quoting
     $NewFolder = htmlentities($NewFolder); // for a clean display
     $NewDesc = str_replace("'", "''", $NewDesc); // PostgreSQL quoting
