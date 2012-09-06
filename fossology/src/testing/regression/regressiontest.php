@@ -1,4 +1,4 @@
-#!/usr/bin/php
+
 <?php
 /***********************************************************
  Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
@@ -137,7 +137,6 @@ function Usage($argc, $argv)
   echo "$argv[0] -h -w {web host}\n";
   echo "         -h help\n";
   echo "         -w Web Host. Optional. E.G. bobg.fc.hp.com/trunk\n";
-  echo 'e.g.: ./regressiontest.php -w "http://bobg.fc.hp.com/trunk"';
 }
 
 ?>
