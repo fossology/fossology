@@ -20,7 +20,27 @@
 /** @file UI Regression test.
  *  Each file in regression/good/ is named with a URL.
  *  Capture that URL output (to regression/output_{pid}/) and compare to good.
- *  POST data is in regression/post/
+ *  POST data is in regression/post/ (not currently implemented)
+ *
+ *  To Use:
+ *  1. mkdir -p regression/good
+ *  2. use wget and save result file to regression/good.  The output file name
+ *     should look like "?mod=nomoslicense&upload=1&item=1"
+ *  3. Run this script.  e.g.:
+ *     ./regressiontest.php -w "http://bobg.fc.hp.com/trunk"
+ *  4. This will hit the url's found in the good/ and write the pages to the 
+ *     "output_{pid}" directory.
+ *  5. Manually diff files between the good/ and output_{pid} directories that have the same name.
+ *     Any difference is either a regression or an enhancement.  If it is an
+ *     enhancement, replace the good/ file with the one from the output directory.
+ *     This program could be enhanced to do the diff.
+ *  6. Remove the output directory after all diffs have been resolved.
+ *
+ *  Notes:
+ *  1. Some url's have an elapsed time printed.  These plugins should have a &testing=1 parameter
+ *     added so that this data doesn't print.
+ *  2. Some url's need post data to test.  This program could be enhanced to supply
+ *     post data.
  */
 
 // $DATAROOTDIR and $PROJECT come from Makefile
@@ -81,7 +101,7 @@ while (($FileName = readdir($DirH)) !== false)
 
   /* $FileName is a URL, hit it and save the results. */
   $URL = $WebHost . "/$FileName";
-echo "URL is $URL\n";
+//echo "URL is $URL\n";
   $ch = curl_init($URL);
   SetCurlArgs($ch);
   $contents = curl_exec( $ch );
@@ -89,8 +109,6 @@ echo "URL is $URL\n";
 
   /* Save the output in $OutputDir */
   $OutFileName = $OutputDir . "/$FileName";
-echo "OutFileName is $OutFileName\n";
-echo "data length is " . strlen($contents) . "\n";
   if (file_put_contents($OutFileName, $contents) === false)
   {
     echo "Failed to write contents to $OutFileName.\n";
@@ -136,7 +154,8 @@ function Usage($argc, $argv)
 {
   echo "$argv[0] -h -w {web host}\n";
   echo "         -h help\n";
-  echo "         -w Web Host. Optional. E.G. bobg.fc.hp.com/trunk\n";
+  echo "         -w Web Host. Optional.\n";
+  echo 'e.g.: ./regressiontest.php -w "http://bobg.fc.hp.com/trunk"\n';
 }
 
 ?>
