@@ -105,7 +105,7 @@ class change_license extends FO_Plugin {
     if (empty($row['user_perm'])) return 0; // the current user has no permission to change license, perhaps it is Default User
     pg_free_result($result);
 
-    $SQL = "SELECT user_fk from upload where upload_pk = $current_user_id;";
+    $SQL = "SELECT user_fk from upload where upload_pk = $upload_id;";
     $result = pg_query($PG_CONN, $SQL);
     DBCheckResult($result, $SQL, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
