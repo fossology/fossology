@@ -287,6 +287,10 @@
 %ENTRY%	_LT_AFFEROref2
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (agpl|affero gpl|(general a|a)ffero (general p|p)ublic licen[cs]e)"
+#
+%ENTRY%	_LT_NOTAFFEROref1
+%KEY%	"licen[cs]"
+%STR%	"Use with the GNU Affero General Public License"
 #####
 # DELETED: ... that are embodied in the original work as furnished by
 # the licen[cs]or to make use sell and offer for sale the original work
@@ -2179,6 +2183,10 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"licensed =FEW= under version 3 or any later version of the GNU General Public License"
 #
+%ENTRY%	_LT_GPL3ref3
+%KEY%	"licen[cs]"
+%STR%	"this license refers to version 3 of the GNU general public license"
+#
 %ENTRY%	_LT_GPL_OR
 %NOCHECK%
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -3640,6 +3648,11 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_PUBDOM_3
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 %STR%	"(on|is|are|with) publica?l?ly available"
+#
+# Don't get fooled by discussion of public domain in GPLV3
+%ENTRY%	_LT_NOTPUBDOM_1
+%KEY%	"propagation"
+%STR%	"propagation includes copying distribution =FEW= making available to the public"
 #
 # After making public domain an interesting license, these signatures
 # are way too broad.
