@@ -64,8 +64,8 @@ class OneShotafferoTest extends PHPUnit_Framework_TestCase
     list(,$fname,,,$license) = explode(' ', implode($out3));
     $this->assertEquals($fname, 'agpl-3.0.txt', "Error processed filename $fname
        does not equal agpl-3.0.txt");
-    $this->assertEquals($license, 'Affero_v3,Public-domain', "Error license
-      does not equal Affero_v3,Public-domain, $license was returned");
+    $this->assertEquals($license, 'Affero_v3', "Error license
+      does not equal Affero_v3, $license was returned");
   }
 }
 ?>
