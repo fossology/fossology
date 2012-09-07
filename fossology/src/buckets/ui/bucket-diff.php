@@ -205,6 +205,10 @@ return;
     $text = _("Bucket");
     $HistStr .= "<th align=left>$text</th></tr>\n";
 
+    if(empty($historows))
+    {
+      return;
+    }
     foreach ($historows as $row)
     {
       $TotalCount += $row['bucketcount'];
