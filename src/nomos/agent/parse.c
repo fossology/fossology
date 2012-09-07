@@ -970,7 +970,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "Affero(#2)" : cp);
         lmem[_mGPL] = 1;
       }
-      else if (INFILE(_LT_AFFEROref2)) {
+      else if (INFILE(_LT_AFFEROref2) && !INFILE(_LT_NOTAFFEROref1)) {
         cp = AGPLVERS();
         INTERESTING(lDebug ? "Affero(#3)" : cp);
         lmem[_mGPL] = 1;
@@ -1162,6 +1162,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       }
       else if (GPL_INFILE(_LT_GPL3ref2)) {
                 INTERESTING("GPL_v3+");
+                lmem[_mGPL] = 1;
+           }
+      else if (GPL_INFILE(_LT_GPL3ref3)) {
+                INTERESTING("GPL_v3");
                 lmem[_mGPL] = 1;
            }
       else if (!lmem[_mLIBRE] && GPL_INFILE(_LT_GPLref1)
@@ -7833,7 +7837,7 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
   } else if (INFILE(_LT_PUBDOM_1)) {
     INTERESTING(lDebug ? "Pubdom(1)" : LS_PD_CLM);
     ret = 1;
-  } else if (INFILE(_LT_PUBDOM_2) && !INFILE(_PHR_PUBLIC_FUNCT)) {
+  } else if (INFILE(_LT_PUBDOM_2) && !INFILE(_PHR_PUBLIC_FUNCT) && !INFILE(_LT_NOTPUBDOM_1)) {
     INTERESTING(lDebug ? "Pubdom(2)" : LS_PD_CLM);
     ret = 1;
   } else if (INFILE(_LT_PUBDOM_3)) {
