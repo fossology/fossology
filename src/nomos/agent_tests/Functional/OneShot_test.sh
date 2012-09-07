@@ -72,7 +72,7 @@ testOneShotgpl3()
  
 # echo "starting testOneShotgpl3"
   out=`../../agent/nomos ../../../testing/dataFiles/TestData/licenses/gpl-3.0.txt`
-  assertEquals "File gpl-3.0.txt contains license(s) FSF,GPL_v3,Public-domain" "${out}"
+  assertEquals "File gpl-3.0.txt contains license(s) FSF,GPL_v3" "${out}"
 }
 
 #
