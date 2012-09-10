@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -124,7 +124,8 @@ class user_del extends FO_Plugin
           $V .= "<ol>\n";
           $V .= _("<li>Select the user to delete.<br />");
           $V .= "<select name='userid'>\n";
-          for($i=0; $row = pg_fetch_assoc($result, $i) and !empty($row['user_name']); $i++)
+          $count = pg_num_rows($result);
+          for($i=0; $i < $count and $row = pg_fetch_assoc($result, $i) and !empty($row['user_name']); $i++)
           {
             $V .= "<option value='" . $row['user_pk'] . "'>";
             $V .= $row['user_name'];
