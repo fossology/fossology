@@ -176,8 +176,7 @@ class agent_nomos_once extends FO_Plugin {
       $ModBack = GetParm("modback",PARM_STRING);
       $Fin = fopen($tmp_name, "r");
       if ($Fin) {
-        $View->SortHighlightMenu();
-        $View->ShowView($Fin,$ModBack, 1,1,NULL,True, False);
+        $View->ShowView($Fin,$ModBack, 0,0,NULL,True, False); // do not show Header and micro menus
         fclose($Fin);
       }
 
