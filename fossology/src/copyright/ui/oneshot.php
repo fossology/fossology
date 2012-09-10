@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -87,7 +87,7 @@ class agent_copyright_once extends FO_Plugin {
     $Fin = fopen($TempFile, "r");
     if ($Fin) {
       $View->SortHighlightMenu();
-      $View->ShowView($Fin,$ModBack, 1,1,NULL,True, False);
+      $View->ShowView($Fin,$ModBack, 0,0,NULL,True, False); // do not show Header and micro menus
       fclose($Fin);
     }
     if(!chdir($ui_dir)) {
