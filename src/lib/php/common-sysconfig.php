@@ -404,9 +404,9 @@ function is_available($url, $timeout = 2, $tries = 2)
   global $SysConf;
 
   $ProxyStmts = "";
-  if ($SysConf['FOSSOLOGY']['http_proxy']) $ProxyStmts .= "export http_proxy={$SysConf['FOSSOLOGY']['http_proxy']};";
-  if ($SysConf['FOSSOLOGY']['https_proxy']) $ProxyStmts .= "export https_proxy={$SysConf['FOSSOLOGY']['https_proxy']};";
-  if ($SysConf['FOSSOLOGY']['ftp_proxy']) $ProxyStmts .= "export ftp_proxy={$SysConf['FOSSOLOGY']['ftp_proxy']};";
+  if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) && $SysConf['FOSSOLOGY']['http_proxy']) $ProxyStmts .= "export http_proxy={$SysConf['FOSSOLOGY']['http_proxy']};";
+  if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) && $SysConf['FOSSOLOGY']['https_proxy']) $ProxyStmts .= "export https_proxy={$SysConf['FOSSOLOGY']['https_proxy']};";
+  if (array_key_exists('ftp_proxy', $SysConf['FOSSOLOGY']) && $SysConf['FOSSOLOGY']['ftp_proxy']) $ProxyStmts .= "export ftp_proxy={$SysConf['FOSSOLOGY']['ftp_proxy']};";
 
   $commands = "$ProxyStmts wget --spider '$url' --tries=$tries --timeout=$timeout";
   system($commands, $return_var);
