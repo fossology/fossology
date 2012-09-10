@@ -285,7 +285,7 @@ class admin_license_file extends FO_Plugin
     }
     $text = _("License Text");
     $ob .= "<td align=right>$text $rotext</td>";
-    $ob .= "<td><textarea name='rf_text' rows=10 cols=80 $rooption>".$row[rf_text]. "</textarea></td> ";
+    $ob .= "<td><textarea name='rf_text' rows=10 cols=80 $rooption>".$row['rf_text']. "</textarea></td> ";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
@@ -314,7 +314,7 @@ class admin_license_file extends FO_Plugin
     $ob .= "<tr>";
     $text = _("Public Notes");
     $ob .= "<td align=right>$text</td>";
-    $ob .= "<td><textarea name='rf_notes' rows=5 cols=80>" .$row[rf_notes]. "</textarea></td> ";
+    $ob .= "<td><textarea name='rf_notes' rows=5 cols=80>" .$row['rf_notes']. "</textarea></td> ";
     $ob .= "</tr>";
 
     $ob .= "</table>";
