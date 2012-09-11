@@ -553,7 +553,6 @@ class ui_picker extends FO_Plugin
           break;
         case 4:  /******* child_id is uploadtree_pk (unused)   *******/
         default:
-          $OutBuf .= __FILE__ . "(" . __LINE__ . ") folder: $folder_pk, nonimplemented mode: $row[foldercontents_mode]<br>";
       }
     }
     pg_free_result($FCresult);

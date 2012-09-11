@@ -284,27 +284,30 @@ class acme_review extends FO_Plugin
   {
     global $SysConf;
 
-    $spdx = '<\?xml version="1.0" encoding="UTF-8" ?\>';
-    $spdx .='<rdf:RDF ';
-    $spdx .= '    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"';
-    $spdx .= '    xmlns="http://spdx.org/rdf/terms#"';
-    $spdx .= '    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">';
-    $spdx .= '    <SpdxDocument rdf:about="http://www.spdx.org/tools#SPDXANALYSIS">';
-    $spdx .= '      <specVersion>SPDX-1.1</specVersion>';
-    $spdx .= '      <dataLicense rdf:about="http://spdx.org/licenses/PDDL-1.0" />';
-    $spdx .= '      <CreationInfo>';
-    $spdx .= " <creator>Tool: FOSSology v " . $SysConf['BUILD']['VERSION'] . " svn " . $SysConf['BUILD']['SVN_REV'] . "</creator>";
-    $spdx .= "<created>" . date('c') . "</created>";   // date-time in ISO 8601 format
-    $spdx .= '</CreationInfo>';
+    $spdx = '<?xml version="1.0" encoding="UTF-8" ?>' . "\n";
+    $spdx .='<rdf:RDF' . "\n";
+    $spdx .= '    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"' . "\n";
+    $spdx .= '    xmlns="http://spdx.org/rdf/terms#"' . "\n";
+    $spdx .= '    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">' . "\n";
+    $spdx .= '    <SpdxDocument rdf:about="http://www.spdx.org/tools#SPDXANALYSIS">' . "\n";
+    $spdx .= '      <specVersion>SPDX-1.1</specVersion>' . "\n";
+    $spdx .= '      <dataLicense rdf:about="http://spdx.org/licenses/PDDL-1.0" />' . "\n";
+    $spdx .= '      <CreationInfo>' . "\n";
+    $spdx .= " <creator>Tool: FOSSology v " . $SysConf['BUILD']['VERSION'] . " svn " . $SysConf['BUILD']['SVN_REV'] . "</creator>\n";
+    $spdx .= "<created>" . date('c') . "</created>\n";   // date-time in ISO 8601 format
+    $spdx .= '</CreationInfo>' . "\n";
 
+$in_encoding = iconv_get_encoding("input_encoding");
     foreach($acme_project_array as $project)
     {
-debugprint($project, "Project");
-exit;
-      $spdx .= '<Package>';
-      $spdx .= "<name>$project[project_name]</name>";
-      $spdx .= "<versionInfo>$project[version]</versionInfo>";
-      $spdx .= '</Package>';
+//debugprint($project, "Project");
+      $spdx .= "<Package>\n";
+      $spdx .= '<name>' . str_replace("&", " and ", strip_tags($project['project_name'])) . '</name>' . "\n";
+      $spdx .= "<versionInfo>$project[version]</versionInfo>\n";
+      $spdx .= "<licenseDeclared>$project[licenses]</licenseDeclared>\n";
+      $spdx .= "<sourceInfo>ProjectURL: $project[url]</sourceInfo>\n";
+      $spdx .= '<description>' . str_replace("&", " and ", strip_tags($project['description'])) . '</description>' . "\n";
+      $spdx .= "</Package>\n";
     }
 /*
 			<packageSupplier>Organization: FSF (info@fsf.com)</packageSupplier>
@@ -317,18 +320,10 @@ exit;
 				branch: master
 				tag: v8.12
 			</sourceInfo>
-			<LicenseDeclared rdf:resource=http://www.spdx.org/licenses/GPL-3.0/>
-			<copyrightText>Copyright (C) 2007 Free Software Foundation, Inc.</copyrightText>
-			<summary>This is the core utilities package for GNU Linux</summary>
-			<description>
-				This package includes all core utilities commands for GNU Linux (ls, dir, cat ...)
-			</description>
-
 		</Package>
 */
 
-    $spdx = '  </SpdxDocument>
-             </rdf:RDF>';
+    $spdx .= "  </SpdxDocument> </rdf:RDF>\n";
     return $spdx;
   }
 
@@ -412,14 +407,6 @@ exit;
           pg_free_result($result);
         }
       }
-
-      /* generate and download spdx file */
-      if (!empty($spdxbtn))
-      {
-        $spdxfile = $this->GenerateSPDX($acme_project_array);
-        $rv = DownloadString2File($spdxfile, "SPDX .rdf file", "xml");
-        if ($rv !== true) echo $rv;
-      }
     }
 
     /* aggregate the fossology licenses for each pfile and each acme_project */
@@ -450,6 +437,14 @@ exit;
 
     /* sort $acme_project_array by count desc */
     usort($acme_project_array, 'proj_cmp');
+
+    /* generate and download spdx file */
+    if (!empty($spdxbtn))
+    {
+      $spdxfile = $this->GenerateSPDX($acme_project_array);
+      $rv = DownloadString2File($spdxfile, "SPDX.rdf file", "xml");
+      if ($rv !== true) echo $rv;
+    }
     
     switch($this->OutputType)
     {
@@ -471,7 +466,7 @@ exit;
   } // Output()
 
 };
-return;  // prevent anyone from seeing this plugin
+//return;  // prevent anyone from seeing this plugin
 $NewPlugin = new acme_review;
 $NewPlugin->Initialize();
 ?>
