@@ -4408,6 +4408,10 @@ e /* (INFILE(j)) */
 %KEY%	"restrict"
 %STR%	"no restrictions on distributing unmodified copies of Vim except that they must include this licen[cs]e text"
 #
+%ENTRY%	_LT_VIXIE
+%KEY%	"distribut"
+%STR%	"distribute freely except don.t remove my name from the source or documentation =SOME= mark your changes =SOME= don.t alter or remove this notice may be sold if buildable source is provided to buyer"
+#
 %ENTRY%	_LT_VMWARE
 %KEY%	"licen[cs]"
 %STR%	"VMware hereby grants you a non-exclusive non-transferable licen[cs]e without rights to sublicen[cs]e"
