@@ -815,6 +815,9 @@
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"copyright is =FEW= (BSD[ -]style|BSD[ -]type|BSD-?ish|BSD[ -]like) licen[cs]e"
 #
+%ENTRY%	_LT_BSDSTYLEref3
+%KEY%	"distribut"
+%STR%	"free distribution and use =SOME= in both source and binary form is allowed =SOME= provided"
 #
 %ENTRY%	_LT_BSDSTYLEref4
 %KEY%	"licen[cs]"
