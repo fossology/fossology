@@ -500,7 +500,7 @@ class ui_nomos_diff extends FO_Plugin
     $Selected = ($filter == 'samelicfuzzy') ? "selected" : "";
     $SelectFilter .= "<option $Selected value='samelicfuzzy'>2b. Same as 2 but fuzzy match file names";
     $Selected = ($filter == 'nolics') ? "selected" : "";
-    $SelectFilter .= "<option $Selected value='nolics'>3. Same as 3. but also remove files with no license";
+    $SelectFilter .= "<option $Selected value='nolics'>3. Same as 2b. but also remove files with no license";
     $SelectFilter .= "</select>";
 
 
