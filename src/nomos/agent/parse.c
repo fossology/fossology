@@ -748,6 +748,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "BSD-st(2)" : "BSD-style");
     lmem[_fBSD] = 1;
   }
+  else if (INFILE(_LT_BSDSTYLEref3)) {
+    INTERESTING(lDebug ? "BSD-st(3)" : "BSD-style");
+    lmem[_fBSD] = 1;
+  }
   else if (INFILE(_LT_BSDSTYLEref4)) {
       INTERESTING(lDebug ? "BSD-st(4)" : "BSD-style");
     lmem[_fBSD] = 1;
