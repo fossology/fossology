@@ -3389,6 +3389,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Vim");
   }
   /*
+   * Vixie license
+   */
+  if (INFILE(_LT_VIXIE)) {
+    INTERESTING("Vixie-license");
+  }
+  /*
    * Yahoo!
    */
   if (INFILE(_LT_YAHOO_1)) {
