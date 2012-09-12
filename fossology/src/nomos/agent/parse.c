@@ -5005,6 +5005,35 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (!lmem[_fIP] && INFILE(_LT_GEN_IP_3)) {
     INTERESTING(lDebug ? "IP(3)" : "IP-claim");
   }
+
+  /* 
+   * Dual licenses
+   */
+  if (INFILE(_LT_DUAL_LICENSE_1)) {
+    INTERESTING("Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_2)) {
+    INTERESTING("Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_3)) {
+    INTERESTING("Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_4)) {
+    INTERESTING("Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_5)) {
+    INTERESTING("Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_6)) {
+    INTERESTING("Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_7)) {
+    INTERESTING("Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_8)) {
+    INTERESTING("Dual-license");
+  }
+
   /*
    * The Beer-ware license(!)
    */

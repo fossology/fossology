@@ -1246,6 +1246,42 @@
 %KEY%	"licen[cs]"
 %STR%	"where applicable is conspicuously published on all copies and a copy of this licen[cs]e is r?e?-?distributed along with the work"
 #
+%ENTRY%	_LT_DUAL_LICENSE_1
+%KEY%	"licen[cs]"
+%STR%	"\<dual\> licensed"
+#
+%ENTRY%	_LT_DUAL_LICENSE_2
+%KEY%	"licen[cs]"
+%STR%	"under a \<dual\> license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_3
+%NOCHECK%
+%KEY%	"licen[cs]"
+%STR%	"alternatively =SOME= (this file|this software|this product) may be (used|distributed) under the terms"
+#
+%ENTRY%	_LT_DUAL_LICENSE_4
+%KEY%	"licen[cs]"
+%STR%	"under the terms of =FEW= gnu general public license =FEW= or the gnu (lesser|library) general public license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_5
+%KEY%	"licen[cs]"
+%STR%	"\<dual\> bsd =FEW= gnu general public license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_6
+%NOCHECK%
+%KEY%	"licen[cs]"
+%STR%	"either under the terms of =SOME= or"
+#
+%ENTRY%	_LT_DUAL_LICENSE_7
+%NOCHECK%
+%KEY%	"licen[cs]"
+%STR%	"may be optionally licenced under"
+#
+%ENTRY%	_LT_DUAL_LICENSE_8
+%NOCHECK%
+%KEY%	"licen[cs]"
+%STR%	"this =FEW= (header|) file may also be distributed under the terms of"
+#
 %ENTRY%	_LT_DYADE
 %KEY%	"so(ftware|urce)"
 %STR%	"put such notice in a particular source code file due to its structure then you must include such notice in a location such as a relevant directory"
