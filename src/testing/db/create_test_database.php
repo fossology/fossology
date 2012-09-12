@@ -27,8 +27,13 @@ $start_time = get_time();
 /*
     create_test_database.php
 
-    Create a FOSSology test database and associated configuration,
+    Create a minimal FOSSology test database and associated configuration,
     if one does not already exist.
+
+    This script is intended to provide a minimal PRE-INSTALLATION test 
+    environment in which FOSSology Unit, Functional, and other tests can
+    be executed.  It allows tests to be run without having the FOSSology
+    system installed on a target test system.
 
 
     Here is what this script does:
@@ -74,25 +79,39 @@ $start_time = get_time();
        This will be the core schema from the current working copy of the
        FOSSology code from which this script is being executed.
 
-    3) Create a temporary fossology systme configuration directory for testing
+    4) Create a temporary fossology system configuration directory for testing
 
        This is created in the system's temporary directory (e.g. /tmp).
-       It is named after the current timestamp.  Example:
+       It is named after the current testing database timestamp.  Example:
 
            /tmp/fossologytest_20120611_172315/ 
 
-    4) Create a Db.conf file in the testing system config directory
+    5) Create a Db.conf file in the testing system config directory
  
        This contains the database connection parameters that were just set up
+       and which should be used in subsequent tests.  Example:
 
-    5) Create a mods-enabled directory in the temporary fossology system
+           /tmp/fossologytest_20120611_172315/Db.conf
+
+    6) Create a mods-enabled directory in the temporary fossology system
        configuration directory, and populate it with symlinks to the 
-       working copy of fossology.
+       working copy of fossology.  Example:
+ 
+           /tmp/fossologytest_20120611_172315/mods-enabled/adj2nest
+           /tmp/fossologytest_20120611_172315/mods-enabled/buckets
+           ...
+           /tmp/fossologytest_20120611_172315/mods-enabled/www
 
-    6) Create a repository directory in the temporary fossology system
-       configuration directory for use in testing.
+    7) Create an empty repository directory in the temporary fossology system
+       configuration directory for use in testing.  Example:
 
-    7) Generate a simple fossology.conf file in the system config directory
+           /tmp/fossologytest_20120611_172315/repository/
+
+    8) Generate a simple fossology.conf file in the system config directory
+       with appropriate defaults for testing with the temporary fossology
+       test environment.  Example:
+
+           /tmp/fossologytest_20120611_172315/fossology.conf
 
 */
 
@@ -110,12 +129,8 @@ require_once(__DIR__ . '/../../lib/php/libschema.php');
 require_once(__DIR__ . '/../../lib/php/common-db.php');
 require_once(__DIR__ . '/../../lib/php/common-cache.php');
 
-
-
 $test_username = 'fossologytest';
 $test_environment_variable = 'FOSSOLOGY_TESTCONFIG';
-
-
 
 /* very first step - check for the FOSSOLOGY_TESTCONFIG environment variable.
    If this exists, then our job here is done.  
@@ -162,6 +177,8 @@ else {
         if ($pgpass_perms == '0600') {
             debug("Permissions for $pgpass_file are correct (0600)");
             $pgpass_contents = file($pgpass_file);
+
+            // Scan thru the pgpass file for an entry for the test user
             $testuser_found = FALSE;
             foreach ($pgpass_contents as $line) {
                 if ( preg_match("/$test_username:[^:]*$/", $line) ) {
@@ -174,10 +191,13 @@ else {
             }
             else {
                 echo "FAIL: Did not find a '$test_username' user in $pgpass_file\n";
-                echo "Before you can run tests, you must first create a Postgres user called '$test_username'\n";
-                echo "which has the CREATEDB permission.  This would be done using the following SQL command:\n";
+                echo "Before you can run FOSSology tests, you must first create a Postgres user called '$test_username'\n";
+                echo "which has the CREATEDB permission.  This can be done using the following SQL command (as the 'psql' Postgres super user):\n";
                 echo "\n    CREATE USER $test_username WITH CREATEDB LOGIN PASSWORD '$test_username';\n";
-                echo "\nOnce done, this user needs to be added to a ~/.pgpass file\n";
+                echo "\nOnce done, this user needs to be added to a ~/.pgpass file with the following contents:\n";
+                // pgpass file needs an entry like 'localhost:*:*:fossologytest:fossologytest'
+                echo "\nlocalhost:*:*:$test_username:$test_username\n";
+                echo "\nAnd this file must have permissions set to 0600\n";
                 exit(1);
             }
         }
@@ -223,10 +243,13 @@ if ( $test_pg_conn == FALSE ) {
 
     if ( preg_match('/no password supplied/', $pg_error_message) ) {
         echo "The '$test_username' user must already exist and be included in a ~/.pgpass file, or the PGPASSWORD environment variable must be set!\n";
-        echo "Before you can run tests, you must first create a Postgres user called '$test_username'\n";
-        echo "which has the CREATEDB permission.  This would be done using the following SQL command:\n";
+        echo "Before you can run FOSSology tests, you must first create a Postgres user called '$test_username'\n";
+        echo "which has the CREATEDB permission.  This can be done using the following SQL command (as the 'psql' Postgres super user):\n";
         echo "\n    CREATE USER $test_username WITH CREATEDB LOGIN PASSWORD '$test_username';\n";
-        echo "\nOnce done, this user needs to be added to a ~/.pgpass file\n";
+        echo "\nOnce done, this user needs to be added to a ~/.pgpass file with the following contents:\n";
+        // pgpass file needs an entry like 'localhost:*:*:fossologytest:fossologytest'
+        echo "\nlocalhost:*:*:$test_username:$test_username\n";
+        echo "\nAnd this file must have permissions set to 0600\n";
     }
     elseif ( preg_match('/authentication failed/', $pg_error_message) ) {
         echo "The password for user '$test_username' is not correct!\n";
@@ -272,7 +295,8 @@ $test_pg_conn = @pg_connect($initial_postgres_params)
 
 // note: normal 'mortal' users cannot choose 'SQL_ASCII' encoding 
 // unless the LC_CTYPE environment variable is set correctly
-#$sql_statement="CREATE DATABASE $test_db_name ENCODING='SQL_ASCII'";
+//$sql_statement="CREATE DATABASE $test_db_name ENCODING='SQL_ASCII'";
+// In the long run, FOSSology should be using a UTF8 encoding for text
 $sql_statement="CREATE DATABASE $test_db_name ENCODING='UTF8'";
 $result = pg_query($test_pg_conn, $sql_statement) 
     or die("FAIL: Could not create test database!\n");
@@ -295,9 +319,6 @@ $test_db_params .= "user=$test_username ";
 $test_db_conn = pg_connect($test_db_params) 
     or die ("Could not connect to the new test database '$test_db_name'\n");
 
-##################################################
-##  DEBUG:: CONTINUE WORKING HERE
-###################################################
 
 /* Do some minimal setup of the new database */
 // Note: from Postgres 9.1 on, can use 'CREATE OR REPLACE LANGUAGE'
@@ -320,6 +341,7 @@ if ( $plpgsql_already_installed == FALSE ) {
     $result = pg_query($test_db_conn, $sql_statement)
         or die("Could not create plpgsql language in the database\n");
 }
+
 
 /* now create a valid Db.conf file in the testing temp directory 
    for accessing our fancy pants new test database */
@@ -462,6 +484,7 @@ $elapsed = get_time() - $start_time;
 debug("Elapsed Time = $elapsed");
 
 // insert the 'fossy' user into the test database
+// this is the FOSSology user 'fossy' (not a Postgres user, or a system user)
 $random_seed = rand().rand();
 $hash = sha1($random_seed . "fossy");
 $user_sql = "INSERT INTO users (user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk) VALUES ('fossy', 'Default Administrator', '$random_seed', '$hash', 10, 'fossy', 'n', 1);";
