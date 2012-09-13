@@ -32,6 +32,8 @@ require_once "/usr/local/share/fossology/lib/php/bootstrap.php";
 $acmekey = file_get_contents("acme.key");
 // Antepedia Computing Machinery Engine (acme) url
 $acmebaseurl = 'https://api.antepedia.com/acme/v3';
+//$acmequeryurl = $acmebaseurl . "/fquery/$acmekey";     // Full query, slow.  Antelink support recommends only sending one sha1 at a time.
+$acmeBinaryqueryurl = $acmebaseurl . "/bquery/$acmekey";
 $acmequeryurl = $acmebaseurl . "/squery/$acmekey";
 $acmekeycheckurl = $acmebaseurl . "/checkey/$acmekey";
 
@@ -57,7 +59,8 @@ if (!$response->authorized)
 }
 
 // Maximum number of sha1's to send to antelink in a single batch 
-$MaxSend = 500;
+$MaxBinarySend = 500;
+$MaxSend = 10;
 
 /*  -p  -u {upload_pk} -t {tag_pk} 
  *  -u and -t are manditory
@@ -94,11 +97,33 @@ if (pg_num_rows($result) == 0)
 }
 
 
+/* loop through each row identifying each as foss or not
+ * Put the FOSS SHA1 into an array to send to the squery server.
+ * This two step process is needed because bquery can handle requests of 500 hashes 
+ * but squery can only handle requests of 10 hashes.  */
+$MasterFOSSarray = array();
+$ToAntelink = array();
+$FoundFOSSfiles = 0;
+$PrecheckFileCount = 0;
+while ($row = pg_fetch_assoc($result))
+{
+  $PrecheckFileCount++;
+  $ToAntelink[] = $row;
+  if (count($ToAntelink) >= $MaxBinarySend) 
+  {
+    if ($Verbose) echo "Precheck $PrecheckFileCount, found $FoundFOSSfiles\n";
+    $FoundFOSSfiles += QueryBinaryServer($ToAntelink, $MasterFOSSarray);
+    $ToAntelink = array();
+  }
+}
+if (count($ToAntelink) ) $FoundFOSSfiles += QueryBinaryServer($ToAntelink, $MasterFOSSarray);
+pg_free_result($result);
+
 /* loop through each row accumulating groups of $MaxSend files (sha1's) to send to antelink */
 $ToAntelink = array();
 $TaggedFileCount = 0;
 $TotalFileCount = 0;
-while ($row = pg_fetch_assoc($result))
+foreach ($MasterFOSSarray as $row)
 {
   $TotalFileCount++;
   $ToAntelink[] = $row;
@@ -114,6 +139,64 @@ if (count($ToAntelink) ) $TaggedFileCount += QueryTag($ToAntelink, $tag_pk, $Pri
 echo "$TaggedFileCount files tagged out of $TotalFileCount files.\n";
 
 return (0);
+
+
+/**
+ * @brief Query the Antelink public server and tag the results.
+ * @param $ToAntelink array of pfile_fk, pfile_sha1, ufile_name records
+ * @param $MasterFOSSarray master array of FOSS records.  This will be used for squery. 
+ * @return number of FOSS files in $ToAntelink.
+ **/
+function QueryBinaryServer($ToAntelink, &$MasterFOSSarray)
+{
+  global $PG_CONN;
+  global $acmeBinaryqueryurl;
+
+  $NumFound = 0;
+
+  /* construct array of just sha1's */
+  $sha1array = array();
+  foreach($ToAntelink as $row) $sha1array[] = $row['pfile_sha1'];
+  $PostData = json_encode($sha1array);
+
+  $curlch = curl_init($acmeBinaryqueryurl);
+  SetCurlArgs($curlch);
+
+  curl_setopt($curlch, CURLOPT_POST, TRUE);
+  curl_setopt($curlch,CURLOPT_POSTFIELDS, $PostData);
+  curl_setopt($curlch, CURLOPT_RETURNTRANSFER, TRUE);
+
+  //getting response from server
+  $response = curl_exec($curlch);
+
+  if (curl_errno($curlch))
+  {
+    // Fatal: display curl errors
+    echo "Error " .  curl_errno($curlch) . ": " . curl_error($curlch) . "\n";
+    return $NumFound;
+  }
+
+  //closing the curl
+  curl_close($curlch);
+
+  $response = json_decode($response);
+
+  // print any errors
+  if ($response->error)
+  {
+     echo $response->error . "\n";
+  }
+
+  /* Add tag or print */
+if (is_array($response->results))
+  foreach($response->results as $result)
+  {
+    $row = GetRawRow($result->sha1, $ToAntelink);
+    $MasterFOSSarray[] = $row;
+  }
+
+  return $NumFound;  
+}
 
 
 /**
@@ -156,8 +239,9 @@ function QueryTag($ToAntelink, $tag_pk, $PrintOnly, $Verbose)
   if (curl_errno($curlch))
   {
     // Fatal: display curl errors
-    echo "Error " .  curl_errno($curlch) . ": " . curl_error($curlch);
-    exit;
+    echo "Error " .  curl_errno($curlch) . ": " . curl_error($curlch) . "\n";
+    return 0;
+//    exit;
   }
 
   //closing the curl
@@ -174,6 +258,7 @@ function QueryTag($ToAntelink, $tag_pk, $PrintOnly, $Verbose)
   }
 
   /* Add tag or print */
+if (is_array($response->results))
   foreach($response->results as $result)
   {
     $row = GetRawRow($result->sha1, $ToAntelink);
@@ -298,7 +383,7 @@ function writeacme_project($project, $Verbose)
 {
   global $PG_CONN;
 
-  $project_name = pg_escape_string($PG_CONN, $project->prettyName);
+  $project_name = pg_escape_string($PG_CONN, $project->name);
   $url = pg_escape_string($PG_CONN, $project->url);
   $description = pg_escape_string($PG_CONN, $project->description);
 
