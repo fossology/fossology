@@ -217,6 +217,8 @@ class acme_review extends FO_Plugin
     $Outbuf .= "<th>$text</th>";
     $text = _('License');
     $Outbuf .= "<th>$text</th>";
+    $text = _('Version');
+    $Outbuf .= "<th>$text</th>";
     $Outbuf .= "</tr>";
 
     /* For alternating row background colors */
@@ -237,11 +239,14 @@ class acme_review extends FO_Plugin
       $ProjectListURL = Traceback_uri() . "?mod=" . $this->Name . "&acme_project=$project[acme_project_pk]&upload=$upload_pk";
       $Outbuf .= "<td><a href='$ProjectListURL'>$project[count]</a></td>";
       $Outbuf .= "<td><a href='$project[url]'>$project[url]</a></td>";
-      $Outbuf .= "<td>$project[description]</td>";
+      $Outbuf .= "<td>".htmlentities($project[description]) . "</td>";
       $Outbuf .= "<td>$project[licenses]</td>";
+      $Outbuf .= "<td>$project[version]</td>";
       $Outbuf .= "</tr>";
     }
     $Outbuf .= "</table>";
+
+    $Outbuf .= "$RowNum rows found<br>";
 
     $text = _("Save and Generate SPDX file");
     $Outbuf .= "<p><input type='submit' value='$text' name='spdxbtn'>\n";
@@ -466,7 +471,7 @@ $in_encoding = iconv_get_encoding("input_encoding");
   } // Output()
 
 };
-//return;  // prevent anyone from seeing this plugin
+return;  // prevent anyone from seeing this plugin
 $NewPlugin = new acme_review;
 $NewPlugin->Initialize();
 ?>
