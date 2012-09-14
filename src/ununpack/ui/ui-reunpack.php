@@ -184,7 +184,7 @@ class ui_reunpack extends FO_Plugin
         FROM upload
         INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk
         WHERE upload.upload_pk = '$uploadpk';";
-echo "bobg fix this.  JobQueueAdd used to do a reschedule here<br>";
+echo "JobQueueAdd used to do a reschedule here<br>";
     $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"pfile",$Depends);
     if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
 
