@@ -195,6 +195,35 @@ function DownloadFile($path, $name)
   return _("Lost connection.");
 }
 
+/**
+ * \brief send a string to a user as a download file
+ *
+ * \param $text - text to download as file
+ * \param $name - file name
+ * \param $contentType - download file Content-Type
+ * 
+ * \return True on success, error message on failure.
+ */
+function DownloadString2File($text, $name, $contentType)
+{
+  $connstat = connection_status();
+  if ($connstat != 0) return _("Lost connection.");
+
+  session_write_close();
+  ob_end_clean();
+  header("Expires: ".gmdate("D, d M Y H:i:s", mktime(date("H")+2, date("i"), date("s"), date("m"), date("d"), date("Y")))." GMT");
+  header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
+  header('Content-Description: File Transfer');
+  header("Content-Type: $contentType");
+  header("Content-Length: ".(string)(strlen($text)));
+  header("Content-Disposition: attachment; filename=$name");
+  header("Content-Transfer-Encoding: binary\n");
+
+  echo $text;
+  if ((connection_status()==0) and !connection_aborted()) return True;
+  return _("Lost connection.");
+}
+
 
 /**
  * \brief Get the uploadtree table name for this upload_pk

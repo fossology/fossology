@@ -116,8 +116,12 @@ while ($row = pg_fetch_assoc($result))
     $ToAntelink = array();
   }
 }
-if (count($ToAntelink) ) $FoundFOSSfiles += QueryBinaryServer($ToAntelink, $MasterFOSSarray);
 pg_free_result($result);
+if (count($ToAntelink) ) 
+{
+  $FoundFOSSfiles += QueryBinaryServer($ToAntelink, $MasterFOSSarray);
+  if ($Verbose) echo "Precheck $PrecheckFileCount, found $FoundFOSSfiles\n";
+}
 
 /* loop through each row accumulating groups of $MaxSend files (sha1's) to send to antelink */
 $ToAntelink = array();
@@ -167,7 +171,7 @@ function QueryBinaryServer($ToAntelink, &$MasterFOSSarray)
   curl_setopt($curlch, CURLOPT_RETURNTRANSFER, TRUE);
 
   //getting response from server
-  $response = curl_exec($curlch);
+  $curlresponse = curl_exec($curlch);
 
   if (curl_errno($curlch))
   {
@@ -179,7 +183,7 @@ function QueryBinaryServer($ToAntelink, &$MasterFOSSarray)
   //closing the curl
   curl_close($curlch);
 
-  $response = json_decode($response);
+  $response = json_decode($curlresponse);
 
   // print any errors
   if ($response->error)
