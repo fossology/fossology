@@ -85,8 +85,6 @@ function plugin_disable($Level)
 {
   global $Plugins;
 
-  if(empty($Level)) return(0);
-
   /* Disable all plugins with >= $Level access */
   //echo "<pre>COMP: starting to disable plugins\n</pre>";
   $LoginFlag = empty($_SESSION['User']);
@@ -99,7 +97,8 @@ function plugin_disable($Level)
       //echo "<pre>COMP: Plugin $P->Name is in INVALID state\n</pre>";
       continue;
     }
-    if (($P->DBaccess > $Level) || (empty($_SESSION['User']) && $P->LoginFlag)) {
+    if ($P->DBaccess > $Level)
+    {
       //echo "<pre>COMP: Going to disable $P->Name\n</pre>";
       //echo "<pre>COMP: disabling plugins with $P->DBaccess  >= $Level\n</pre>";
       $P->Destroy();
