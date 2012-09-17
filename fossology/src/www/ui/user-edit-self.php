@@ -43,7 +43,7 @@ class user_edit_self extends FO_Plugin
     {
       return (0);
     } // don't run
-    if (empty($_SESSION['User']) && $this->LoginFlag)
+    if ($_SESSION['User'] == "Default User")
     {
       /* Only valid if the user is logged in. */
       $this->State = PLUGIN_STATE_INVALID;
