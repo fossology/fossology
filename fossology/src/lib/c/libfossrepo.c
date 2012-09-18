@@ -1,7 +1,7 @@
 /************************************************************
  libfossrepo: A set of functions for accessing the file repository.
 
- Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -776,6 +776,10 @@ RepMmapStruct *	fo_RepMmap	(char *Type, char *Filename)
  */
 int	fo_RepImport	(char *Source, char *Type, char *Filename, int Link)
 {
+  if (0 == strcmp(Type, "files"))  
+  {
+    chmod(Source, S_ISGID|S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH); /* change mode */
+  }
   /*** code uses read/write ***/
   /*** Could use mmap, but it isn't noticably faster and could have
        problems with multi-gig files ***/
