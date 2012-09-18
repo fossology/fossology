@@ -470,7 +470,7 @@ void copyright_email_url(copyright copy, char* file)
       copy_entry_init(&new_entry);
 
       tmp = g_match_info_fetch(match, 0);
-      strcpy(new_entry.text, tmp);
+      strncpy(new_entry.text, tmp, sizeof(new_entry.text)/sizeof(char));
       strcpy(new_entry.name_match, "url");
       strcpy(new_entry.dict_match, "url");
       new_entry.type = "url";
