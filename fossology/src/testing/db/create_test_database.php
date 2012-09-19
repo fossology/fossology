@@ -483,6 +483,11 @@ debug("Done Applying the FOSSOlogy schema to test database via ApplySchema()");
 $elapsed = get_time() - $start_time;
 debug("Elapsed Time = $elapsed");
 
+/* for the 2.0 -> 2.1 migration, create the uploadtree_0 table */
+require_once("/usr/local/lib/fossology/dbmigrate_2.0-2.1.php"); // hardcode for now
+$Verbose = 0;
+Migrate_20_21($Verbose);
+
 // insert the 'fossy' user into the test database
 // this is the FOSSology user 'fossy' (not a Postgres user, or a system user)
 $random_seed = rand().rand();
