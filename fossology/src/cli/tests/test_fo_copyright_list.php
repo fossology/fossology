@@ -1,167 +1,184 @@
-<?php
-/*
- Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+  <?php
+  /*
+   Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
+   This program is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public License
+   version 2 as published by the Free Software Foundation.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+   */
 
-require_once("./test_common.php");
+  require_once("./test_common.php");
 
-/**
- * \brief test cli fo_copyright_list 
- */
+  /**
+   * \brief test cli fo_copyright_list 
+   */
 
-/**
- * @outputBuffering enabled
- */
-class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
+  /**
+   * @outputBuffering enabled
+   */
+  class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
 
-  public $SYSCONF_DIR = "/usr/local/etc/fossology/";
-  public $DB_NAME;
-  public $PG_CONN;
-  public $DB_COMMAND;
+    public $SYSCONF_DIR = "/usr/local/etc/fossology/";
+    public $DB_NAME;
+    public $PG_CONN;
+    public $DB_COMMAND;
 
-  // fossology_testconfig is the temporary system configuration directory
-  // created by the src/testing/db/create_test_database.php script.
-  // It is initialized via the Makefile and passed in via the 
-  // FOSSOLOGY_TESTCONFIG environment variable.
-  public $fossology_testconfig;
+    // fossology_testconfig is the temporary system configuration directory
+    // created by the src/testing/db/create_test_database.php script.
+    // It is initialized via the Makefile and passed in via the 
+    // FOSSOLOGY_TESTCONFIG environment variable.
+    public $fossology_testconfig;
 
-  // scheduler_path is the absolute path to the scheduler binary
-  public $scheduler_path;
+    // scheduler_path is the absolute path to the scheduler binary
+    public $scheduler_path;
 
-  // fo_cli_path is the absolute path to the fo_cli binary
-  public $fo_cli_path;
+    // fo_cli_path is the absolute path to the fo_cli binary
+    public $fo_cli_path;
 
-  // cp2foss_path is the absolute path to the cp2foss binary
-  public $cp2foss_path;
-  
-  // fo_copyright_listis the absolute path to the fo_copyright_list_path binary
-  public $fo_copyright_list_path;
-  
-  /* initialization */
+    // cp2foss_path is the absolute path to the cp2foss binary
+    public $cp2foss_path;
+    
+    // fo_copyright_listis the absolute path to the fo_copyright_list_path binary
+    public $fo_copyright_list_path;
+    
+    /* initialization */
 
-  // this method is run once for the entire test class, before any of the 
-  // test methods are executed.
-  public static function setUpBeforeClass() {
+    // this method is run once for the entire test class, before any of the 
+    // test methods are executed.
+    public static function setUpBeforeClass() {
 
-    global $fossology_testconfig;
-    global $scheduler_path;
-    global $fo_cli_path;
-    global $cp2foss_path;
-    global $fo_copyright_list_path;
+      global $fossology_testconfig;
+      global $scheduler_path;
+      global $fo_cli_path;
+      global $cp2foss_path;
+      global $fo_copyright_list_path;
 
-    fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
+      fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
+
+      /**
+         get the value of the FOSSOLOGY_TESTCONFIG environment variable,
+         which will be initialized by the Makefile by running the 
+         create_test_database.pl script
+      */
+      $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
+      fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
+
+      /* locate fo_cli binary */
+      $fo_cli_path = $fossology_testconfig . "/mods-enabled/scheduler/agent/fo_cli";
+      if (!is_executable($fo_cli_path)) {
+          print "Error:  fo_cli path '$fo_cli_path' is not executable!\n";
+          exit(1);
+      }
+
+      /* locate cp2foss binary */
+      // first get the absolute path to the current fossology src/ directory
+      $fo_base_dir = realpath(__DIR__ . '/../..');
+      $cp2foss_path = $fo_base_dir . "/cli/cp2foss";
+      if (!is_executable($cp2foss_path)) {
+          print "Error:  cp2foss path '" . $cp2foss_path . "' is not executable!\n";
+          exit(1);
+      }
+
+      /* locate fo_copyright_list binary */
+      // first get the absolute path to the current fossology src/ directory
+      $fo_base_dir = realpath(__DIR__ . '/../..');
+      $fo_copyright_list_path = $fo_base_dir . "/cli/fo_copyright_list";
+      if (!is_executable($fo_copyright_list_path)) {
+          print "Error:  fo_copyright_list path '" . $fo_copyright_list_path. "' is not executable!\n";
+          exit(1);
+      }
+
+      /* locate the scheduler binary */
+      $scheduler_path = $fossology_testconfig . "/mods-enabled/scheduler/agent/fo_scheduler";
+      if (!is_executable($scheduler_path)) {
+          print "Error:  Scheduler path '$scheduler_path' is not executable!\n";
+          exit(1);
+      }
+
+      /* invoke the scheduler */
+      $scheduler_cmd = "$scheduler_path --daemon --reset --verbose=952 -c $fossology_testconfig";
+      print "DEBUG: Starting scheduler with '$scheduler_cmd'\n";
+      exec($scheduler_cmd, $output, $return_var);
+      //print_r($output);
+      if ( $return_var != 0 ) {
+          print "Error: Could not start scheduler '$scheduler_path'\n";
+          print "$output\n";
+          exit(1);
+      }
+      print "\nStarting functional test for fo_copyright_list. \n";
+
+    }
+
+
+    // this method is run once before each test method defined for this test class.
+    protected function setUp() {
+
+      //global $fo_cli_path;
+      fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
+
+      //$SYSCONF_DIR = "/usr/local/etc/fossology/";
+      //$DB_NAME = "fossology";
+      //$DB_COMMAND = "../../testing/db/createTestDB.php";
+      
+      // these calls are deprecated with the new create_test_database call
+      //create_db();
+      //add_user();
+      //preparations();
+      //scheduler_operation();
+    }
 
     /**
-       get the value of the FOSSOLOGY_TESTCONFIG environment variable,
-       which will be initialized by the Makefile by running the 
-       create_test_database.pl script
-    */
-    $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
-    fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
+     * \brief first populate test data via upload from url, then get copyright list
+     */
+    function test_get_copryright_list() 
+    {
+      global $fossology_testconfig;
+      global $fo_copyright_list_path;
 
-    /* locate fo_cli binary */
-    $fo_cli_path = $fossology_testconfig . "/mods-enabled/scheduler/agent/fo_cli";
-    if (!is_executable($fo_cli_path)) {
-        print "Error:  fo_cli path '$fo_cli_path' is not executable!\n";
-        exit(1);
-    }
+      fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
+      $upload = $this->upload_from_url();
+      $upload_id = $upload[0];
 
-    /* locate cp2foss binary */
-    // first get the absolute path to the current fossology src/ directory
-    $fo_base_dir = realpath(__DIR__ . '/../..');
-    $cp2foss_path = $fo_base_dir . "/cli/cp2foss";
-    if (!is_executable($cp2foss_path)) {
-        print "Error:  cp2foss path '" . $cp2foss_path . "' is not executable!\n";
-        exit(1);
-    }
-
-    /* locate fo_copyright_list binary */
-    // first get the absolute path to the current fossology src/ directory
-    $fo_base_dir = realpath(__DIR__ . '/../..');
-    $fo_copyright_list_path = $fo_base_dir . "/cli/fo_copyright_list";
-    if (!is_executable($fo_copyright_list_path)) {
-        print "Error:  fo_copyright_list path '" . $fo_copyright_list_path. "' is not executable!\n";
-        exit(1);
-    }
-
-    /* locate the scheduler binary */
-    $scheduler_path = $fossology_testconfig . "/mods-enabled/scheduler/agent/fo_scheduler";
-    if (!is_executable($scheduler_path)) {
-        print "Error:  Scheduler path '$scheduler_path' is not executable!\n";
-        exit(1);
-    }
-
-    /* invoke the scheduler */
-    $scheduler_cmd = "$scheduler_path --daemon --reset --verbose=952 -c $fossology_testconfig";
-    print "DEBUG: Starting scheduler with '$scheduler_cmd'\n";
-    exec($scheduler_cmd, $output, $return_var);
-    //print_r($output);
-    if ( $return_var != 0 ) {
-        print "Error: Could not start scheduler '$scheduler_path'\n";
-        print "$output\n";
-        exit(1);
-    }
-    print "\nStarting functional test for fo_copyright_list. \n";
-
-  }
+      $auth = "--user fossy --password fossy -c $fossology_testconfig";
+      /** get all */
+      $uploadtree_id = $upload[1];
+      $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id";
+      fwrite(STDOUT, "DEBUG: Executing '$command'\n");
+      $last = exec("$command 2>&1", $out, $rtn);
+      $output_msg_count = count($out);
+      $this->assertEquals(103, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+      $this->assertEquals("test package/control.tar.gz: http://www.debian.org/doc/debian-policy/ ,http://www.debian.org/doc/debian-policy/ ,taggart@debian.org ,http://fossology.org ,copyright", $out[9]);
 
 
-  // this method is run once before each test method defined for this test class.
-  protected function setUp() {
+      $out = "";
+      /** get email */
+      $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type email";
+      fwrite(STDOUT, "DEBUG: Executing '$command'\n");
+      $last = exec("$command 2>&1", $out, $rtn);
+      $this->assertEquals("test package/control.tar.gz/control.tar: taggart@debian.org", $out[6]);
 
-    //global $fo_cli_path;
-    fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
+      $out = "";
+      /** get url */
+      $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type url";
+      fwrite(STDOUT, "DEBUG: Executing '$command'\n");
+      $last = exec("$command 2>&1", $out, $rtn);
+      $this->assertEquals("test package/data.tar.gz: http://fossology.org", $out[24]);
 
-    //$SYSCONF_DIR = "/usr/local/etc/fossology/";
-    //$DB_NAME = "fossology";
-    //$DB_COMMAND = "../../testing/db/createTestDB.php";
-    
-    // these calls are deprecated with the new create_test_database call
-    //create_db();
-    //add_user();
-    //preparations();
-    //scheduler_operation();
+      fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
+      fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
 
   /**
-   * \brief first populate test data via upload from url, then get copyright list
-   */
-  function test_get_copryright_list() 
-  {
-    global $fossology_testconfig;
-    global $fo_copyright_list_path;
-
-    fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
-    $upload_id = $this->upload_from_url();
-
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
-    $command = "$fo_copyright_list_path $auth -u $upload_id -t $upload_id";
-    fwrite(STDOUT, "DEBUG: Executing '$command'\n");
-    $last = exec("$command 2>&1", $out, $rtn);
-    $output_msg_count = count($out);
-    print_r($out);
-    var_dump($out);
-    $ss = implode(',', $out);
-
-    fwrite(STDOUT,"DEBUG: output_msg_count is: $output_msg_count, ss is:$ss\n");
-    fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
-  }
-
-  /**
-   * \brief populate test data via upload from url
+   * \brief populate test data via upload from url 
    */
   function upload_from_url(){
     //global $SYSCONF_DIR;
@@ -176,12 +193,10 @@ class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
-    $command = "$cp2foss_path $auth http://www.fossology.org/rpms/fedora/testing/10/x86_64/repodata/repomd.xml -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
+    $command = "$cp2foss_path $auth http://www.fossology.org/debian/lenny-backports/fossology-db_1.2.0-3~bpo50+1_all.deb -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    print "DEBUG: output is:\n";
-    print_r($out);
-    sleep(150);
+    sleep(100);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
     if ($out && $out[5]) {
@@ -190,10 +205,13 @@ class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
+
+    $uploadtree_id = get_uploadtree_id($test_dbh, $upload_id); // get uploadtree id
+
     pg_close($test_dbh);
 
     fwrite(STDOUT,"DEBUG: upload_id is:$upload_id\n");
-    return $upload_id;
+    return array($upload_id, $uploadtree_id);
   }
 
   /**

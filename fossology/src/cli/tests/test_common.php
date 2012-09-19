@@ -188,5 +188,21 @@ function add_proxy($proxy_type='http_proxy', $porxy='web-proxy.cce.hp.com:8088')
   exec("sudo mv /tmp/fossology.conf $foss_conf");
 }
 
+/**
+ * \brief get primary uploadtree_pk 
+ *
+ * \param $upload_id - upload_id
+ * \param $test_dbh - db connection
+ * 
+ * \return the first uploadtree id of this upload
+ */
+function get_uploadtree_id($test_dbh, $upload_id) {
+  $sql = "SELECT uploadtree_pk from uploadtree where upload_fk =$upload_id order by uploadtree_pk limit 1;";
+  $result = pg_query($test_dbh, $sql);
+  $row = pg_fetch_assoc($result);
+  $uploadtree_id = $row['uploadtree_pk'];
+  pg_free_result($result);
+  return $uploadtree_id;
+}
 
 ?>

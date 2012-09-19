@@ -145,15 +145,18 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     global $fo_nomos_license_list_path;
 
     fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
-    $upload_id = $this->upload_from_url();
+    $upload = $this->upload_from_url();
+    $upload_id = $upload[0];
 
     $auth = "--user fossy --password fossy -c $fossology_testconfig";
-    $command = "$fo_nomos_license_list_path $auth -u $upload_id -t $upload_id ";
+    $uploadtree_id = $upload[1];
+    $command = "$fo_nomos_license_list_path $auth -u $upload_id -t $uploadtree_id ";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
 
-    fwrite(STDOUT,"DEBUG: output_msg_count is:$output_msg_count\n");
+    $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
+    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL_v2.1", $out[6]);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
 
@@ -173,12 +176,12 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
-    $command = "$cp2foss_path $auth http://www.fossology.org/rpms/fedora/10/SRPMS/fossology-1.1.0-1.fc10.src.rpm -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
+    $command = "$cp2foss_path $auth http://www.fossology.org/rpms/fedora/10/i386/fossology-devel-1.1.0-1.fc10.i386.rpm -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     print "DEBUG: output is:\n";
     print_r($out);
-    sleep(110);
+    sleep(100);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
     if ($out && $out[5]) {
@@ -187,9 +190,13 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
+
+    $uploadtree_id = get_uploadtree_id($test_dbh, $upload_id); // get uploadtree id
+
     pg_close($test_dbh);
 
-    return $upload_id;
+    fwrite(STDOUT,"DEBUG: upload_id is:$upload_id\n");
+    return array($upload_id, $uploadtree_id);
   }
 
   /**
