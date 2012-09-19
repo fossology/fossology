@@ -427,7 +427,7 @@ account_check($user, $passwd); // check username/password
 
 /** list all available processing agents */
 if (!$Test && $OptionQ) {
-  $Cmd = dirname(__FILE__) . "/fossjobs --user $user --password $passwd -c $SYSCONFDIR -a";
+  $Cmd = "fossjobs --user $user --password $passwd -c $SYSCONFDIR -a";
   system($Cmd);
   exit(0);
 }
@@ -444,9 +444,9 @@ if ($stdin_flag)
 
 /** compose fossjobs command */
 if($Verbose) {
-  $fossjobs_command = dirname(__FILE__) . "/fossjobs --user $user --password $passwd -c $SYSCONFDIR -v "; 
+  $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR -v "; 
 } else {
-  $fossjobs_command = dirname(__FILE__) . "/fossjobs --user $user --password $passwd -c $SYSCONFDIR  ";
+  $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR  ";
 }
 
 //print "fossjobs_command is:$fossjobs_command\n";
