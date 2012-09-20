@@ -239,7 +239,7 @@ class acme_review extends FO_Plugin
       $ProjectListURL = Traceback_uri() . "?mod=" . $this->Name . "&acme_project=$project[acme_project_pk]&upload=$upload_pk";
       $Outbuf .= "<td><a href='$ProjectListURL'>$project[count]</a></td>";
       $Outbuf .= "<td><a href='$project[url]'>$project[url]</a></td>";
-      $Outbuf .= "<td>".htmlentities($project[description]) . "</td>";
+      $Outbuf .= "<td>" . htmlentities($project['description']) . "</td>";
       $Outbuf .= "<td>$project[licenses]</td>";
       $Outbuf .= "<td>$project[version]</td>";
       $Outbuf .= "</tr>";
