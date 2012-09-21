@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -103,16 +103,6 @@ char* create_agent_foreign_index = "\
 CREATE INDEX copyright_agent_fk_index\
   ON copyright\
   USING BTREE (agent_fk)";
-
-/** Change the owner of the copyright table to fossy*/
-char* alter_database_table = "\
-ALTER TABLE public.copyright_ct_pk_seq\
-  OWNER TO fossy";
-
-/** change the owner of the copyright table */
-char* alter_copyright_owner = "\
-ALTER TABLE public.copyright\
-  OWNER TO fossy";
 
 /** TODO ??? */
 char* alter_table_pfile = " \
