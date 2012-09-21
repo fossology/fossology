@@ -25,6 +25,18 @@
 
 */
 
+$options = getopt("c:");
+$sysconfdir = "";
+foreach($options as $option => $value)
+{
+  switch($option)
+  {
+    case 'c': // sysconf dir 
+      $sysconfdir = $value;
+      break;
+  }
+}
+
 /* our database parameters.  Connect to template1, since we are going to
    attempt to delete all of the extant test databases */
 $postgres_params  = "dbname=template1 ";
@@ -35,20 +47,28 @@ $postgres_params .= "password=fossologytest ";
 $PG_CONN = pg_connect($postgres_params)
     or die("FAIL: Could not connect to postgres server\n");
 
-/* query postgres for all the test databases */
-$sql = "SELECT datname from pg_database where datname like 'fossologytest%'";
-$result = pg_query($PG_CONN, $sql)
+if (empty($sysconfdir)) { // delete all the test databases
+  /* query postgres for all the test databases */
+  $sql = "SELECT datname from pg_database where datname like 'fossologytest%'";
+  $result = pg_query($PG_CONN, $sql)
     or die("FAIL: Could not query postgres database\n");
 
-/* drop each test database found */
-while ($row = pg_fetch_row($result)) {
+  /* drop each test database found */
+  while ($row = pg_fetch_row($result)) {
     $dbname = $row[0];
     echo "Dropping test databaes $dbname\n";
     $drop_sql = "DROP DATABASE $dbname";
-    pg_query($PG_CONN, $drop_sql) 
-        or die("FAIL: Could not drop database $dbname\n");
+    pg_query($PG_CONN, $drop_sql)
+      or die("FAIL: Could not drop database $dbname\n");
+  }
+} else { // just delete specified test databaes
+  $temp_dir = explode("/", $sysconfdir);
+  $dbname = $temp_dir[2];
+  echo "Dropping test databaes $dbname\n";
+  $drop_sql = "DROP DATABASE $dbname";
+  pg_query($PG_CONN, $drop_sql)
+    or die("FAIL: Could not drop drop database $dbname\n");
 }
-
 pg_close($PG_CONN);
 
 /* also try and cleanup old style test databases */
@@ -72,7 +92,7 @@ while ($row = pg_fetch_row($result)) {
     $dbname = $row[0];
     echo "Dropping test databaes $dbname\n";
     $drop_sql = "DROP DATABASE $dbname";
-    pg_query($PG_CONN, $drop_sql) 
+    pg_query($PG_CONN, $drop_sql)
         or die("FAIL: Could not drop database $dbname\n");
 }
 
@@ -83,6 +103,9 @@ pg_close($PG_CONN);
 $system_temp_dir = sys_get_temp_dir();
 $temp_dirs = glob($system_temp_dir . '/*');
 
+if (!empty($sysconfdir)) { // delete specified test directory
+  $temp_dirs = array($sysconfdir);
+}
 foreach ($temp_dirs as $temp_dir) {
     if (preg_match('/\/fossologytest_\d{8}_\d{6}$/', $temp_dir)) {
         echo "Deleting $temp_dir\n";
