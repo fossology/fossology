@@ -149,14 +149,16 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     $upload_id = $upload[0];
 
     $auth = "--user fossy --password fossy -c $fossology_testconfig";
-    $uploadtree_id = $upload[1];
+    $uploadtree_id = $upload[1]; // uploadtree_id is the 1st uploadtree_id for this upload
     $command = "$fo_nomos_license_list_path $auth -u $upload_id -t $uploadtree_id ";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
 
+    /** for this uload, will get 11 lines for report */
     $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
-    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL_v2.1", $out[6]);
+    /** check one line of the report */
+    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL_v2.1", $out[3]);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
 
@@ -179,8 +181,8 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     $command = "$cp2foss_path $auth http://www.fossology.org/rpms/fedora/10/i386/fossology-devel-1.1.0-1.fc10.i386.rpm -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    print "DEBUG: output is:\n";
-    print_r($out);
+
+    /** wait for all the scheduled agents complete */
     sleep(100);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
