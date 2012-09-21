@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -509,7 +509,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
 int setup_database(PGconn* pgConn)
 {
   /* locals */
-  int exists = 0;     // whether any piece of the table already exists
   PGresult* pgResult; // the result from a database access
 
   /* initialize memory */
@@ -524,24 +523,7 @@ int setup_database(PGconn* pgConn)
       fprintf(cerr, "ERROR %s.%d: Could not create copyright_ct_pk_seq.\n", __FILE__, __LINE__);
       fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
       fprintf(cerr, "ERROR sql was: %s\n", create_database_sequence);
-      return -1;
-    }
-    else
-    {
-      exists = 1;
-    }
-  }
-  PQclear(pgResult);
-
-  /* if necessary change the owner of the copyright table */
-  if(!exists)
-  {
-    pgResult = PQexec(pgConn, alter_database_table);
-    if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
-    {
-      fprintf(cerr, "ERROR %s.%d: Could not alter copyrght_ct_pk_seq.\n", __FILE__, __LINE__);
-      fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
-      fprintf(cerr, "ERROR sql was: %s\n", alter_database_table);
+      PQclear(pgResult);
       return -1;
     }
   }
@@ -556,6 +538,7 @@ int setup_database(PGconn* pgConn)
       fprintf(cerr, "ERROR %s.%d: Could not create table copyright.\n", __FILE__, __LINE__);
       fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
       fprintf(cerr, "ERROR sql was: %s\n", create_database_table);
+      PQclear(pgResult);
       return -1;
     }
   }
@@ -568,6 +551,7 @@ int setup_database(PGconn* pgConn)
     fprintf(cerr, "ERROR %s.%d: Could not create copyright pfile_fk.\n", __FILE__, __LINE__);
     fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
     fprintf(cerr, "ERROR sql was: %s\n", create_pfile_foreign_index);
+    PQclear(pgResult);
     return -1;
   }
   PQclear(pgResult);
@@ -579,17 +563,7 @@ int setup_database(PGconn* pgConn)
     fprintf(cerr, "ERROR %s.%d: Could not create copyright agent_fk.\n", __FILE__, __LINE__);
     fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
     fprintf(cerr, "ERROR sql was: %s\n", create_agent_foreign_index);
-    return -1;
-  }
-  PQclear(pgResult);
-
-  /* alter the owner of the copyright table */
-  pgResult = PQexec(pgConn, alter_copyright_owner);
-  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
-  {
-    fprintf(cerr, "ERROR %s.%d: Could not change the onwer of the copyright table.\n", __FILE__, __LINE__);
-    fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
-    fprintf(cerr, "ERROR sql was: %s\n", alter_copyright_owner);
+    PQclear(pgResult);
     return -1;
   }
   PQclear(pgResult);
@@ -601,6 +575,7 @@ int setup_database(PGconn* pgConn)
     fprintf(cerr, "ERROR %s.%d: Could not alter pfile_fk in copyright table.\n", __FILE__, __LINE__);
     fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
     fprintf(cerr, "ERROR sql was: %s\n", alter_table_pfile);
+    PQclear(pgResult);
     return -1;
   }
   PQclear(pgResult);
@@ -612,6 +587,7 @@ int setup_database(PGconn* pgConn)
     fprintf(cerr, "ERROR %s.%d: Could not alter agent_fk in copyright table.\n", __FILE__, __LINE__);
     fprintf(cerr, "ERROR PQ error message %s.\n", PQresultErrorMessage(pgResult));
     fprintf(cerr, "ERROR sql was: %s\n", alter_table_agent);
+    PQclear(pgResult);
     return -1;
   }
   PQclear(pgResult);
@@ -643,6 +619,7 @@ int cleanup_copyright(PGconn* pgConn)
     fprintf(cerr, "ERROR %s.%d: Could not cleanup copyright records.\n", __FILE__, __LINE__);
     fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
     fprintf(cerr, "ERROR sql was: %s\n", cleanup_copyright_records);
+    PQclear(pgResult);
     return -1;
   }
   PQclear(pgResult);
@@ -654,6 +631,7 @@ int cleanup_copyright(PGconn* pgConn)
     fprintf(cerr, "ERROR %s.%d: Could not create copyright pfile_fk.\n", __FILE__, __LINE__);
     fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
     fprintf(cerr, "ERROR sql was: %s\n", create_pfile_foreign_index);
+    PQclear(pgResult);
     return -1;
   }
   PQclear(pgResult);
@@ -665,6 +643,7 @@ int cleanup_copyright(PGconn* pgConn)
     fprintf(cerr, "ERROR %s.%d: Could not alter pfile_fk in copyright table.\n", __FILE__, __LINE__);
     fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
     fprintf(cerr, "ERROR sql was: %s\n", alter_table_pfile);
+    PQclear(pgResult);
     return -1;
   }
   PQclear(pgResult);
