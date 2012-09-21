@@ -137,7 +137,7 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $type)
   $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename 
               where upload_fk='$toprow[upload_fk]' 
                     and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
-                    and ((ufile_mode & (1<<28)) = 0)";
+                    and ((ufile_mode & (1<<28)) = 0) order by uploadtree_pk";
   $outerresult = pg_query($PG_CONN, $sql);
   DBCheckResult($outerresult, $sql, __FILE__, __LINE__);
 

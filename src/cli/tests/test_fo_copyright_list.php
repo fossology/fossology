@@ -150,13 +150,15 @@
 
       $auth = "--user fossy --password fossy -c $fossology_testconfig";
       /** get all */
-      $uploadtree_id = $upload[1];
+      $uploadtree_id = $upload[1]; // uploadtree_id is the 1st uploadtree_id for this upload 
       $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id";
       fwrite(STDOUT, "DEBUG: Executing '$command'\n");
       $last = exec("$command 2>&1", $out, $rtn);
       $output_msg_count = count($out);
+      /** for this uload, will get 103 lines for report */
       $this->assertEquals(103, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
-      $this->assertEquals("test package/control.tar.gz: http://www.debian.org/doc/debian-policy/ ,http://www.debian.org/doc/debian-policy/ ,taggart@debian.org ,http://fossology.org ,copyright", $out[9]);
+      /** check one line of the report */
+      $this->assertEquals("test package/control.tar.gz: http://www.debian.org/doc/debian-policy/ ,http://www.debian.org/doc/debian-policy/ ,taggart@debian.org ,http://fossology.org ,copyright", $out[92]);
 
 
       $out = "";
@@ -164,14 +166,16 @@
       $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type email";
       fwrite(STDOUT, "DEBUG: Executing '$command'\n");
       $last = exec("$command 2>&1", $out, $rtn);
-      $this->assertEquals("test package/control.tar.gz/control.tar: taggart@debian.org", $out[6]);
+      /** check one line of the report */
+      $this->assertEquals("test package/control.tar.gz/control.tar: taggart@debian.org", $out[20]);
 
       $out = "";
       /** get url */
       $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type url";
       fwrite(STDOUT, "DEBUG: Executing '$command'\n");
       $last = exec("$command 2>&1", $out, $rtn);
-      $this->assertEquals("test package/data.tar.gz: http://fossology.org", $out[24]);
+      /** check one line of the report */
+      $this->assertEquals("test package/data.tar.gz: http://fossology.org", $out[1]);
 
       fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
       fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
@@ -196,6 +200,7 @@
     $command = "$cp2foss_path $auth http://www.fossology.org/debian/lenny-backports/fossology-db_1.2.0-3~bpo50+1_all.deb -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
+    /** wait for all the scheduled agents complete */
     sleep(100);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
