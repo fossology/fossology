@@ -152,7 +152,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     #print "DEBUG: output is:\n";
     #print_r($out);
-    fwrite(STDOUT, "DEBUG: Sleeping for 10 seconds (why?)\n");
+    fwrite(STDOUT, "DEBUG: Sleeping for 10 seconds (why?), because you have to wait for all the scheduled agents are finished.\n");
     sleep(10);
     //DEBUG
     $repo_string = "Uploading to folder: 'Software Repository'";
@@ -184,7 +184,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     print "DEBUG: output is:\n";
     print_r($out);
-    print "DEBUG: Sleeping for 10 seconds (why?)\n";
+    print "DEBUG: Sleeping for 10 seconds (why?), because you have to wait for all the scheduled agents are finished.\n";
     sleep(10);
     // print_r($out);
     $repo_string = "Uploading to folder: 'Software Repository'";
