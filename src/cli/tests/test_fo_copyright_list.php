@@ -158,7 +158,8 @@
       /** for this uload, will get 103 lines for report */
       $this->assertEquals(103, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
       /** check one line of the report */
-      $this->assertEquals("test package/control.tar.gz: http://www.debian.org/doc/debian-policy/ ,http://www.debian.org/doc/debian-policy/ ,taggart@debian.org ,http://fossology.org ,copyright", $out[92]);
+      sort($out, SORT_STRING);
+      $this->assertEquals("test package/control.tar.gz: http://www.debian.org/doc/debian-policy/ ,http://www.debian.org/doc/debian-policy/ ,taggart@debian.org ,http://fossology.org ,copyright", $out[84]);
 
 
       $out = "";
@@ -167,7 +168,8 @@
       fwrite(STDOUT, "DEBUG: Executing '$command'\n");
       $last = exec("$command 2>&1", $out, $rtn);
       /** check one line of the report */
-      $this->assertEquals("test package/control.tar.gz/control.tar: taggart@debian.org", $out[20]);
+      sort($out, SORT_STRING);
+      $this->assertEquals("test package/control.tar.gz/control.tar: taggart@debian.org", $out[7]);
 
       $out = "";
       /** get url */
@@ -175,7 +177,8 @@
       fwrite(STDOUT, "DEBUG: Executing '$command'\n");
       $last = exec("$command 2>&1", $out, $rtn);
       /** check one line of the report */
-      $this->assertEquals("test package/data.tar.gz: http://fossology.org", $out[1]);
+      sort($out, SORT_STRING);
+      $this->assertEquals("test package/data.tar.gz: http://fossology.org", $out[25]);
 
       fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
       fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");

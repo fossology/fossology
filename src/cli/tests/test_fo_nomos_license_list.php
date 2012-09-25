@@ -155,10 +155,11 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
 
+    sort($out, SORT_STRING);
     /** for this uload, will get 11 lines for report */
     $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
     /** check one line of the report */
-    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL_v2.1", $out[3]);
+    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL_v2.1", $out[2]);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
 
