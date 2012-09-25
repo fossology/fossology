@@ -150,6 +150,7 @@
 
       $auth = "--user fossy --password fossy -c $fossology_testconfig";
       /** get all */
+      $out = "";
       $uploadtree_id = $upload[1]; // uploadtree_id is the 1st uploadtree_id for this upload 
       $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id";
       fwrite(STDOUT, "DEBUG: Executing '$command'\n");
