@@ -160,7 +160,7 @@
       $this->assertEquals(103, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
       /** check one line of the report */
       sort($out, SORT_STRING);
-      $this->assertEquals("test package/control.tar.gz: http://www.debian.org/doc/debian-policy/ ,http://www.debian.org/doc/debian-policy/ ,taggart@debian.org ,http://fossology.org ,copyright", $out[84]);
+      $this->assertEquals("test package/data.tar.gz/data.tar/etc/cron.d/fossology: copyright (c) 2007 hewlett-packard development company, l.p.", $out[85]);
 
 
       $out = "";
