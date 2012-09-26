@@ -9,5 +9,5 @@ filter PBDEBSTD = 3.9.1
 # PBDEBCOMP is replaced by the Debian Compatibility value
 filter PBDEBCOMP = 7
 
-filter PBBUILDDEP = postgresql-server-dev-8.4
-filter PBDEP = postgresql-8.4
+filter PBBUILDDEP = postgresql-server-dev (>=8.1)
+filter PBDEP = postgresql (>=8.1)
