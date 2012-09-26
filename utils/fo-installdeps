@@ -192,7 +192,7 @@ if [ $RUNTIME ]; then
          yum $YesOpt install postgresql-server httpd
          yum $YesOpt install \
             postgresql \
-            php php-pear php-pgsql \
+            php php-pear php-pgsql php-process \
             smtpdaemon \
             libxml2 libextractor libextractor-plugins \
             binutils
