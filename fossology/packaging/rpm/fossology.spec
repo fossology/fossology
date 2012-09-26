@@ -291,10 +291,10 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 
 %post db
 # Check postgresql is running
-LANGUAGE=C /etc/init.d/postgresql status 2>&1 | grep -q stop
+LANGUAGE=C service postgresql status 2>&1 | grep -q PBSTOP
 if [ $? -eq 0 ]; then
 	PBFEDORAD
-	/etc/init.d/postgresql start
+	service postgresql start
 fi
 chkconfig --add postgresql
 
@@ -311,34 +311,27 @@ host	all	    all		::1/128		      md5
 EOF
 PBPGHBA
 PBPGHBB
+perl -pi -e 's|local\s+all\s+all\s+peer|local all postgres peer|' /var/lib/pgsql/data/pg_hba.conf
 fi
 
 # Now restart again postgresql
 # We have do it here in order to let postgresql configure itself correctly
 # in case it wasn't already installed
-/etc/init.d/postgresql restart
+service postgresql restart
 /usr/lib/PBPROJ/dbcreate
 
 %post web
-# Adjust PHP config (described in detail in section 2.1.5)
-grep -qw allow_call_time_pass_reference PBPHPINI
-if [ $? -eq 0 ]; then
-	perl -pi -e "s/^[#\s]*allow_call_time_pass_reference.*=.*/allow_call_time_pass_reference = On/" PBPHPINI
-else
-	echo "allow_call_time_pass_reference = On" >> PBPHPINI
-fi
-
 # Link apache config for fossology
 ln -s %{_sysconfdir}/PBPROJ/conf/fo-apache.conf  %{_sysconfdir}/httpd/conf.d/PBPROJ.conf
 # Run the postinstall script
 /usr/lib/PBPROJ/fo-postinstall --web-only
 
 # httpd is also assumed to run locally
-LANGUAGE=C /etc/init.d/httpd status 2>&1 | grep -q stop
+LANGUAGE=C service httpd status 2>&1 | grep -q PBSTOP
 if [ $? -eq 0 ]; then
-	/etc/init.d/httpd start
+	service httpd start
 else
-	/etc/init.d/httpd reload
+	service httpd reload
 fi
 chkconfig --add httpd
 

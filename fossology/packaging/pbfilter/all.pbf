@@ -57,3 +57,4 @@ filter PBBUILDDEP =
 # For fedora system
 filter PBFEDORAD = 
 filter PBPGHBB = 
+filter PBSTOP = stop 
