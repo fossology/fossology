@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -48,6 +48,7 @@ class agent_nomos_once extends FO_Plugin {
    */
   function AnalyzeFile($FilePath) {
      
+    global $Plugins;
     global $SYSCONFDIR;
 
     $licenses = array();
@@ -55,7 +56,7 @@ class agent_nomos_once extends FO_Plugin {
     $licenseResult = "";
     /* move the temp file */
     $licenseResult = exec("$SYSCONFDIR/mods-enabled/nomos/agent/nomos $FilePath",$out,$rtn);
-    $licenses = explode('contains license(s)',$out[0]);
+    $licenses = explode(' ',$out[0]);
     $last = end($licenses);
     return ($last);
 
@@ -146,7 +147,6 @@ class agent_nomos_once extends FO_Plugin {
    * \brief Generate the text for this plugin.
    */
   function Output() {
-    global $Plugins;
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
@@ -159,27 +159,11 @@ class agent_nomos_once extends FO_Plugin {
     /* For REST API:
      wget -qO - --post-file=myfile.c http://myserv.com/?mod=agent_nomos_once
     */
-
-    if (file_exists($tmp_name)) {
-      $text = _("A one shot license analysis shows the following license(s) in file");
-      $keep = "$text <em>{$_FILES['licfile']['name']}:</em> ";
-      $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
-      $_FILES['licfile'] = NULL;
-      print $keep;
-
-      if (!empty($_FILES['licfile']['unlink_flag'])) {
-        unlink($tmp_name);
-      }
-
-      /** show file content */
-      $View = & $Plugins[plugin_find_id("view") ];
-      $ModBack = GetParm("modback",PARM_STRING);
-      $Fin = fopen($tmp_name, "r");
-      if ($Fin) {
-        $View->ShowView($Fin,$ModBack, 0,0,NULL,True, False); // do not show Header and micro menus
-        fclose($Fin);
-      }
-
+    if ($this->NoHTML && file_exists($tmp_name))
+    {
+      echo $this->AnalyzeFile($tmp_name);
+      echo "\n";
+      unlink($tmp_name);
       return;
     }
 
@@ -214,6 +198,20 @@ class agent_nomos_once extends FO_Plugin {
         $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
 
+
+        if (file_exists($tmp_name)) {
+          $text = _("A one shot license analysis shows the following license(s) in file");
+          $keep = "<strong>$text </strong><em>{$_FILES['licfile']['name']}:</em> ";
+          $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
+          print displayMessage(NULL,$keep);
+          $_FILES['licfile'] = NULL;
+          print $V;
+
+          if (!empty($_FILES['licfile']['unlink_flag'])) {
+            unlink($tmp_name);
+          }
+          return;
+        }
 
         break;
       case "Text":
