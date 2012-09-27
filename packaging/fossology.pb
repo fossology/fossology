@@ -75,7 +75,7 @@ defpkgdir fossology =
 # So the package name is indeed virtual
 #namingtype fossology = perl
 
-addrepo rhel-5-i386 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.i386.rpm,ftp://ftp.project-builder.org/test/centos/5/pb.repo
-addrepo rhel-5-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm,ftp://ftp.project-builder.org/test/centos/5/pb.repo
-addrepo centos-4-i386 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el4.rf.i386.rpm,ftp://ftp.project-builder.org/test/centos/4/pb.repo
-addrepo centos-4-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el4.rf.x86_64.rpm,ftp://ftp.project-builder.org/test/centos/4/pb.repo
+#addrepo rhel-5-i386 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.i386.rpm,ftp://ftp.project-builder.org/test/centos/5/pb.repo
+#addrepo rhel-5-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm,ftp://ftp.project-builder.org/test/centos/5/pb.repo
+#addrepo centos-4-i386 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el4.rf.i386.rpm,ftp://ftp.project-builder.org/test/centos/4/pb.repo
+#addrepo centos-4-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el4.rf.x86_64.rpm,ftp://ftp.project-builder.org/test/centos/4/pb.repo

@@ -296,7 +296,7 @@ if [ $? -eq 0 ]; then
 	PBFEDORAD
 	service postgresql start
 fi
-chkconfig --add postgresql
+#chkconfig --add postgresql
 
 grep -q FOSSology /var/lib/pgsql/data/pg_hba.conf
 if [ $? -ne 0 ]; then
@@ -333,7 +333,7 @@ if [ $? -eq 0 ]; then
 else
 	service httpd reload
 fi
-chkconfig --add httpd
+#chkconfig --add httpd
 
 %post scheduler
 # Run the postinstall script
