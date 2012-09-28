@@ -120,11 +120,8 @@ ALTER TABLE ONLY copyright \
 
 /** check copyright table foreign key */
 char* check_copyright_foreign_key = " \
-SELECT c.conname AS constraint_name, \
-  t.relname AS table_name, t2.relname AS reftable_name \
-  FROM pg_constraint AS c \
-  INNER JOIN pg_class AS t ON c.conrelid = t.oid and t.relname = 'copyright' and c.confdeltype = 'c' \
-  INNER JOIN pg_class AS t2 ON c.confrelid = t2.oid and t2.relname = 'pfile'";
+select tablename from pg_indexes where tablename='copyright' and indexname='copyright_pfile_fk_index'";
+
 /** clean copyright records */
 char* cleanup_copyright_records = " \
 DELETE FROM copyright WHERE pfile_fk NOT IN (SELECT pfile_pk FROM pfile)";
