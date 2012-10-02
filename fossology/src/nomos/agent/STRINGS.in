@@ -7113,7 +7113,7 @@ k
 #
 %ENTRY%	_PHR_FSF_V3_ONLY
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation.{0,30}(v|[^_-]version )3[^1-9]"
+%STR%	"by the free software foundation.{0,10}(v|[^_-]version )3[^1-9]"
 #
 %ENTRY%	_PHR_FSF_V3_OR_LATER
 %KEY%	"so(ftware|urce)"
