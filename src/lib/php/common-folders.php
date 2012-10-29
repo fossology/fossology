@@ -630,12 +630,12 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL)
 
   /* Get list of uploads */
   /** mode 1<<1 = upload_fk **/
-  $sql = "SELECT upload_pk, upload_desc, ufile_name, folder_name FROM foldercontents,uploadtree, u
-pload
+  $sql = "SELECT upload_pk, upload_desc, ufile_name, folder_name FROM folder,foldercontents,uploadtree, upload
     WHERE 
         foldercontents.parent_fk = '$ParentFolder'
     AND foldercontents.foldercontents_mode = 2 
     AND foldercontents.child_id = upload.upload_pk
+    AND folder.folder_pk = $ParentFolder
     AND uploadtree.upload_fk = upload.upload_pk
     AND uploadtree.parent is null
     ORDER BY uploadtree.ufile_name,upload.upload_desc;";
@@ -654,13 +654,13 @@ pload
 
   /* Get list of subfolders and recurse */
   /** mode 1<<0 = folder_pk **/
-  $sql = "SELECT A.child_id AS id,B.folder_name AS folder,C.folder_name AS subfolder
+  $sql = "SELECT A.child_id AS id,B.folder_name AS folder,B.folder_name AS subfolder
 	FROM foldercontents AS A
 	INNER JOIN folder AS B ON A.parent_fk = B.folder_pk
 	AND A.foldercontents_mode = 1
 	AND A.parent_fk = '$ParentFolder'
-	INNER JOIN folder AS C ON A.child_id = C.folder_pk
-	ORDER BY C.folder_name;";
+  AND B.folder_pk = $ParentFolder
+	ORDER BY B.folder_name;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   while ($R = pg_fetch_assoc($result))

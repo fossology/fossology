@@ -29,11 +29,21 @@
  * \param $Recurse boolean, to recurse or not
  * \param $uploadtree_tablename
  *
- * \return an array of: ag_pk and tag_name
+ * \return an array of: ag_pk and tag_name; return empty array: disable tagging on this upload
  */
 function GetAllTags($Item, $Recurse=true, $uploadtree_tablename)
 {
   global $PG_CONN;
+  $sql = "select * from tag_manage where is_disabled = true and upload_fk in (select upload_fk from $uploadtree_tablename where uploadtree_pk = $Item);";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);    
+  $count = pg_num_rows($result);
+  /** check if disable tagging on this upload */
+  if ($count > 0)  // yes, return
+  {
+    return array();
+  }
+
   if (empty($PG_CONN)) { return; }
   if (empty($Item)) { return; }
   $List=array();
