@@ -336,53 +336,45 @@ function LatestAgentpk($upload_pk, $arsTableName)
  *                             that have data for this agent.  Note the latest agent may have
  *                             no entries in $TableName.
  *                             If true (default), return only the agent_revs with ars data.
+ *                             Note: not used
  * \param string  $SLName    - select list element name
  * \param string  $SLID      - select list element id
- * \param string  $SelectedKey - selected key (optional)
- *                              If absent and $DataOnly is true
- *                              then the latest agent with results is selected.
- *                              If absent and $DataOnly is false
- *                              then the latest agent is selected.
+ * \param string  &$Agent_pk  - return which agent is selected
+ * \param string  $extra     - Extra info for the select element, e.g. "onclick=..."
  *
  * \return agent select list
  *      or 0 on error
  */
 function AgentSelect($TableName, $upload_pk, $DataOnly=true,
-$SLName, $SLID, $SelectedKey="")
+$SLName, $SLID, &$agent_pk, $extra = "")
 {
-  echo "DO NOT USE: PRELIMINARY AND INCOMPLETE<br>";
-  /*
-   / get the agent recs /
-   $sql = "SELECT * FROM $TableName, agent
-   WHERE upload_fk='$upload_pk' and agent_enabled=true order by agent_ts desc";
+   global $PG_CONN;
+   /* get the agent recs */
+   $TableName .= '_ars';
+   $sql = "select agent_pk, agent_name, agent_rev from agent, $TableName where agent.agent_pk = $TableName.agent_fk and upload_fk = $upload_pk;";
    $result = pg_query($PG_CONN, $sql);
    DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-   / Create an assoc array to build the select list from.
-   * "{agent_pk} [,{agent_pk} ...] => {agent name} ( {agentrevision} ), ... [ NO DATA]
-   * For example:
-   *   123 => nomos(rev 1)
-   *   111,123 => bucket(rev 5), nomos(rev 7)
-   *   112,179 => bucket(latest rev), nomos(latest rev) NO DATA
-   or one could just use the ars_pk instead of the pk list, but that is another
-   indirection.
-   /
+   $select = "<select name='$SLName' id='$SLName' $extra>";
    while ($row = pg_fetch_assoc($result))
    {
-   }
-   $AgentList = GetAgentDataList($AgentName, $upload_pk, $tablename);
-   $SelArray = array();
+     $select .= "<option value='$row[agent_pk]'";
 
-   if ($SelectedKey == "") $SelectedKey = $AgentList[0]['agent_pk'];
+     if (empty($agent_pk))
+     {
+       $select .= " SELECTED ";
+       $agent_pk = $row["agent_pk"];
+     }
+     else if ($agent_pk == $row['agent_pk'])
+     {
+       $select .= " SELECTED ";
+     }
 
-   / create key/val array for pulldown /
-   foreach($AgentList as $AgentRec)
-   {
-   $DataInd = ($AgentRec['data']) ? "" : ", NO DATA";
-   $SelArray[$AgentRec['agent_pk']] = "$AgentRec[agent_name] rev: $AgentRec[agent_rev]$DataInd";
+     $select .= ">$row[agent_name], v $row[agent_rev]\n";
    }
-   return "Results from:" . Array2SingleSelect($SelArray, $SLName, $SelectedKey, false, false);
-   */
+   $select .= "</select>";
+   pg_free_result($result);
+   return $select;
 }
 
 

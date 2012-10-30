@@ -214,8 +214,9 @@ class copyright_hist extends FO_Plugin
    * \param $Uri
    * \param $filter
    * \param $uploadtree_tablename
+   * \param $Agent_pk - agent id
    */
-  function ShowUploadHist($Uploadtree_pk, $Uri, $filter, $uploadtree_tablename)
+  function ShowUploadHist($Uploadtree_pk, $Uri, $filter, $uploadtree_tablename, $Agent_pk)
   {
     global $PG_CONN;
 
@@ -227,13 +228,6 @@ class copyright_hist extends FO_Plugin
     global $Plugins;
 
     $ModLicView = &$Plugins[plugin_find_id("copyrightview")];
-
-    $Agent_name = "copyright";
-    $Agent_desc = "copyright analysis agent";
-    if (array_key_exists("agent_pk", $_POST))
-    $Agent_pk = $_POST["agent_pk"];
-    else
-    $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
     $rows = $this->GetRows($Uploadtree_pk, $Agent_pk, $upload_pk, 0, $filter);
     if (!is_array($rows)) return $rows;
@@ -538,6 +532,42 @@ class copyright_hist extends FO_Plugin
           $OutBuf .= Dir2Browse($this->Name,$Item,NULL,1,"Browse",-1,'','',$uploadtree_tablename) . "<P />\n";
           if (!empty($Upload))
           {
+            /** advanced interface allowing user to select dataset (agent version) */
+            $Agent_name = "copyright";
+            $dataset = "copyright_dataset";
+            $arstable = "copyright_ars";
+            /** get proper agent_id */
+            $Agent_pk = GetParm("agent", PARM_INTEGER);
+            if (empty($Agent_pk))
+            {
+              $Agent_pk = LatestAgentpk($Upload, $arstable);
+            }
+
+            $AgentSelect = AgentSelect($Agent_name, $Upload, true, $dataset, $dataset, $Agent_pk,
+                "onchange=\"addArsGo('newds', 'copyright_dataset');\"");
+
+            /** change the copyright  result when selecting one version of copyright */
+            if (!empty($AgentSelect))
+            {
+              $action = Traceback_uri() . "?mod=copyrighthist&upload=$Upload&item=$Item";
+
+              $OutBuf .= "<script type='text/javascript'>
+                function addArsGo(formid, selectid)
+                {
+                  var selectobj = document.getElementById(selectid);
+                  var Agent_pk = selectobj.options[selectobj.selectedIndex].value;
+                  document.getElementById(formid).action='$action'+'&agent='+Agent_pk;
+                  document.getElementById(formid).submit();
+                  return;
+                }
+              </script>";
+
+              /* form to select new dataset, show dataset */
+              $OutBuf .= "<form action='$action' id='newds' method='POST'>\n";
+              $OutBuf .= $AgentSelect;
+              $OutBuf .= "</form>";
+            }
+
             $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
 
             /* Select list for filters */
@@ -554,7 +584,7 @@ class copyright_hist extends FO_Plugin
             $SelectFilter .= "</select>";
             $OutBuf .= $SelectFilter;
 
-            $OutBuf .= $this->ShowUploadHist($Item, $Uri, $filter, $uploadtree_tablename);
+            $OutBuf .= $this->ShowUploadHist($Item, $Uri, $filter, $uploadtree_tablename, $Agent_pk);
           }
           $OutBuf .= "</font>\n";
           break;

@@ -185,11 +185,42 @@ class ui_nomos_license extends FO_Plugin
       $TagTable = " right join tag_file on tag_file.pfile_fk=license_file_ref.pfile_fk ";
       $TagClause = " and tag_fk=$tag_pk";
     }
+
+    /** advanced interface allowing user to select dataset (agent version) */
+    $Agent_name = 'nomos';
+    $dataset = "nomos_dataset";
+    $Agent_pk = GetParm("agent", PARM_STRING);
+    /** get nomos select dataset */
+    $AgentSelect = AgentSelect($Agent_name, $upload_pk, true, $dataset, $dataset, $Agent_pk, 
+        "onchange=\"addArsGo('newds', 'nomos_dataset');\"");
+
+    /** change the nomos license result when selecting one version of nomos */
+    if (!empty($AgentSelect))
+    {
+      $action = Traceback_uri() . "?mod=nomoslicense&upload=$upload_pk&item=$Uploadtree_pk";
+
+      $VLic .= "<script type='text/javascript'>
+        function addArsGo(formid, selectid)
+        {
+          var selectobj = document.getElementById(selectid);
+          var Agent_pk = selectobj.options[selectobj.selectedIndex].value;
+          document.getElementById(formid).action='$action'+'&agent='+Agent_pk;
+          document.getElementById(formid).submit();
+          return;
+        }
+      </script>";
+
+      /* form to select new dataset, show dataset */
+      $VLic .= "<form action='$action' id='newds' method='POST'>\n";
+      $VLic .= $AgentSelect;
+      $VLic .= "</form>";
+    }
+
     $sql = "SELECT distinct(rf_shortname) as licname, count(rf_shortname) as liccount, rf_shortname 
             from license_file_ref $TagTable
             right join $this->uploadtree_tablename on license_file_ref.pfile_fk=$this->uploadtree_tablename.pfile_fk 
             where upload_fk='$upload_pk' and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt 
-              and agent_fk=$Agent_pk $TagClause
+              and agent_fk=$Agent_pk $TagClause 
             group by rf_shortname order by liccount desc";
 //$uTime = microtime(true);
     $result = pg_query($PG_CONN, $sql);
@@ -198,15 +229,6 @@ class ui_nomos_license extends FO_Plugin
 //printf( "<small>$text</small>", $Time);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-    /* Get agent list */
-    $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
-
-    /*
-     FUTURE advanced interface allowing user to select dataset (agent version)
-    $AgentSelect = AgentSelect($Agent_name, $upload_pk, "license_file", true, "agent_pk", $Agent_pk);
-    $VLic .= $AgentSelect;
-    $VLic .= "<input type='submit' value='Go'>";
-    */
 
     /* Write license histogram to $VLic  */
     $LicCount = 0;
