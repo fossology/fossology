@@ -127,7 +127,6 @@ class copyright_hist extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
-    $Agent_pk = LatestAgentpk($upload_pk, "copyright_ars");
     if ($Agent_pk == 0)
     {
       $text = _("No data available.  Use Jobs > Agents to schedule a copyright scan.");

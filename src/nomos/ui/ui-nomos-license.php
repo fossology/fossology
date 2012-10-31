@@ -166,14 +166,6 @@ class ui_nomos_license extends FO_Plugin
     $FileCount = $row["count"];
     pg_free_result($result);
 
-    $Agent_pk = LatestAgentpk($upload_pk, "nomos_ars");
-    if ($Agent_pk == 0)
-    {
-      $text = _("No data available.  Use Jobs > Agents to schedule a license scan.");
-      $VLic = "<b>$text</b><p>";
-      return $VLic;
-    }
-
     /*  Get the counts for each license under this UploadtreePk*/
     if (empty($tag_pk))
     {
@@ -190,6 +182,18 @@ class ui_nomos_license extends FO_Plugin
     $Agent_name = 'nomos';
     $dataset = "nomos_dataset";
     $Agent_pk = GetParm("agent", PARM_STRING);
+    /** if do not specify agent, get the latest agent result for this upload */
+    if (empty($Agent_pk))
+    {
+      $Agent_pk = LatestAgentpk($upload_pk, "nomos_ars");
+    }
+    if ($Agent_pk == 0)
+    {
+      $text = _("No data available.  Use Jobs > Agents to schedule a license scan.");
+      $VLic = "<b>$text</b><p>";
+      return $VLic;
+    }
+
     /** get nomos select dataset */
     $AgentSelect = AgentSelect($Agent_name, $upload_pk, true, $dataset, $dataset, $Agent_pk, 
         "onchange=\"addArsGo('newds', 'nomos_dataset');\"");
