@@ -1,5 +1,5 @@
 #####################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,6 +16,7 @@
 ######################################################################
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
+
 include $(VARS)
 
 CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -Werror
@@ -27,6 +28,7 @@ EXE = copyright
 TESTDIR = ../agent_tests
 
 OBJECTS  = copyright.o cvector.o radixtree.o  pair.o main.o
+COVERAGE=$(OBJECTS:%.o=%_cov.o)
 
 ##########################
 # executable build rules #
@@ -49,6 +51,9 @@ test:
 libcopyright.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
 	
+libcopyright_cov.a: $(COVERAGE)
+	ar cvr $@ $(COVERAGE)
+	
 ######################
 # object build rules #
 ######################
@@ -68,6 +73,8 @@ pair.o: %.o: %.c %.h cvector.h
 main.o: %.o: %.c copyright.h cvector.h pair.h sql_statements.h
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
+$(COVERAGE): %_cov.o: %.c 
+	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEF) -o $@
 
 #######################
 # install build rules #
@@ -89,7 +96,7 @@ uninstall:
 
 clean:
 	@echo "make copyright agent clean"
-	rm -f *.o *.a $(EXE)
+	rm -f *.o *.a $(EXE) *.gc*
 
 .PHONY: all install uninstall clean test $(FOLIB)
 include ${TOP}/Makefile.deps

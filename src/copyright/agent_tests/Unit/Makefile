@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -28,11 +28,6 @@ OBJECTS = test_cvector.o \
           test_copyright.o \
           test_radixtree.o \
 
-COVERAGE = copyright_cov.o \
-           cvector_cov.o \
-           radixtree_cov.o \
-           pair_cov.o \
-
 all: $(EXE)
 	@echo "make copyright Unit agent_tests"
 
@@ -40,12 +35,12 @@ test: $(EXE)
 	@echo "make copyright Unit agent_tests"
 	./$(EXE)
 
-coverage: $(OBJECTS) libcopyright_cov.a run_tests.c ${FOLIB}
+coverage: run_tests.c $(OBJECTS) libcopyright_cov.a ${FOLIB}
 	@echo "make copyright agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
-	./$(EXE)
-	lcov --directory . --capture --output-file cov.txt; \
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
+	./$(EXE); \
+	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
 $(EXE): $(OBJECTS) libcopyright.a run_tests.c ${FOLIB}
@@ -58,23 +53,8 @@ $(OBJECTS): %.o: %.c
 libcopyright.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
-libcopyright_cov.a: $(COVERAGE)
-	ar cvr $@ $(COVERAGE)
-
-########################
-# coverage build rules #
-########################
-copyright_cov.o: $(LOCALAGENTDIR)/copyright.c $(LOCALAGENTDIR)/copyright.h $(LOCALAGENTDIR)/cvector.h $(LOCALAGENTDIR)/radixtree.h
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $(DEF) -o $@
-
-cvector_cov.o: $(LOCALAGENTDIR)/cvector.c $(LOCALAGENTDIR)/cvector.h
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
-
-radixtree_cov.o: $(LOCALAGENTDIR)/radixtree.c $(LOCALAGENTDIR)/radixtree.h
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
-
-pair_cov.o:  $(LOCALAGENTDIR)/pair.c $(LOCALAGENTDIR)/pair.h $(LOCALAGENTDIR)/cvector.h
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
+libcopyright_cov.a: 
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
 	@echo "make copyright agent_tests clean"
