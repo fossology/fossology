@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -30,6 +30,9 @@ all: VERSIONFILE
 
 test: 
 	$(MAKE) -C $(TESTDIR) test
+
+coverage: 
+	$(MAKE) -C $(TESTDIR) coverage
 
 # generate the VERSION file
 VERSIONFILE:

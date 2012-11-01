@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2011, 2012 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -40,15 +40,6 @@ FOCUNIT = libfocunit.a
 OBJECTS = testHost.o \
           testInterface.o
 
-COVERAGE = scheduler_cov.o \
-           agent_cov.o \
-           database_cov.o \
-           event_cov.o \
-           host_cov.o \
-           interface_cov.o \
-           job_cov.o \
-           logging_cov.o \
-
 all:  $(EXE)
 test: fossology_testconfig $(EXE)
 	./$(EXE)
@@ -56,19 +47,18 @@ test: fossology_testconfig $(EXE)
 $(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
  
-coverage:
-#testRun.c $(OBJECTS) $(COV)
-#	@echo "make scheduler test coverage"
-#	$(CC) $< -o $(EXE) $(OBJECTS) $(COV) $(CFLAGS_LOCAL) $(FLAG_COV)
-#	./$(EXE)
-#	lcov --directory . --capture --output-file cov.txt; \
-#	genhtml  -o  results cov.txt
+coverage: testRun.c $(OBJECTS) $(COV) $(VARS) $(FOLIB) fossology_testconfig $(EXE)
+	@echo "make scheduler test coverage"
+	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(COV) $(CFLAGS_LOCAL) $(FLAG_COV); \
+	./$(EXE); \
+	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
+	genhtml  -o  results cov.txt
 
 $(LIB):
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
-$(COV): $(COVERAGE)
-	ar cvr $@ $(COVERAGE)
+$(COV):
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 $(FOCUNIT):
 	$(MAKE) -C $(TESTDIR) $@

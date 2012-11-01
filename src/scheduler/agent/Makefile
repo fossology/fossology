@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -31,6 +31,7 @@ DEF   = -DLOG_DIR='"$(LOGDIR)"' \
         -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"'
 
 LIB = libscheduler.a
+COV = libscheduler_cov.a
 EXE = fo_scheduler fo_cli
 FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' \
         -DPROJECT_GROUP='"$(PROJECTGROUP)"' \
@@ -52,6 +53,8 @@ OBJS = scheduler.o \
        job.o \
        logging.o \
 
+COVERAGE=$(OBJS:%.o=%_cov.o)
+
 HEAD = agent.h \
        event.h \
        scheduler.h \
@@ -71,6 +74,9 @@ $(EXE): %: %.c $(LIB) $(VARS) $(HEAD) $(DEPEN) $(FOLIB)
 
 $(LIB): $(OBJS) $(VARS) $(HEAD) $(DEPEN)
 	$(AR) cr $@ $(OBJS)
+
+$(COV): $(COVERAGE) $(VARS) $(HEAD) $(DEPEN)
+	$(AR) cr $@ $(COVERAGE)
 
 ##################
 # init.d scripts #
@@ -110,6 +116,10 @@ job.o: %.o: %.c %.h agent.h database.h $(DEPEN)
 logging.o: %.o: %.c $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
+
+$(COVERAGE): %_cov.o: %.c $(HEAD)  $(DEPEN)
+	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(FODEF) $(DEF) -o $@
+
 #######################
 # install build rules #
 #######################
@@ -139,7 +149,7 @@ install-conf:
 #####################
 
 clean:
-	rm -f $(OBJS) $(MAIN) $(EXE) $(CLI) $(LIB) defconf/init.d/fossology
+	rm -f $(MAIN) $(EXE) $(CLI) *.o core *.a *.gc* defconf/init.d/fossology
 
 uninstall:
 	rm -f $(OBJS) *.a
