@@ -88,7 +88,7 @@ void testGetURLNormal_URLIsOneFile()
 void testGetURLAbnormal_URLIsOneDir()
 {
   strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");
-  strcpy(URL, "http://www.fossology.org/testdata/wgetagent/2.0.0/debian");
+  strcpy(URL, "http://www.fossology.org/testdata/wgetagent/debian/2.0.0/");
   strcpy(TempFileDir, "./test_result/");
   strcpy(TempFile, "./test_result/wget.tar");
   GetURL(TempFile, URL, TempFileDir); 
