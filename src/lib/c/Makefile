@@ -10,6 +10,7 @@ CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' 
 EXE=sqlCopyTest fossconfigTest reppath
 LIB=libfossology.a
 OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o
+COVERAGE=$(OBJS:%.o=%_cov.o)
 
 all: $(LIB) $(VARS) $(EXE)
 	echo "make $(LIB)"
@@ -18,12 +19,18 @@ $(LIB): $(OBJS) $(VARS)
 	$(AR) cr $@ $(OBJS)
 #	$(CC) -c $< $(CONFDEF) -fPIC $(ALL_CFLAGS)
 
+libfossology_cov.a: $(COVERAGE)
+	$(AR) cr $@ $(COVERAGE)
+
 $(EXE): %: %.c $(LIB) $(VARS)
 	$(CC) $< $(CONFDEF) $(CFLAGS_LOCAL) $(LIB) -o $@
 
 %.o: %.c %.h
 	$(CC) -c $< $(CONFDEF)  $(CFLAGS_LOCAL)
 #	$(CC) -c $< $(CONFDEF)  -I`pg_config --includedir` -fPIC 
+
+$(COVERAGE): %_cov.o: %.c
+	$(CC) -c $< $(CONFDEF)  $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
 
 install: install-dev install-lib install-exe
 	echo "make $(LIB) install"
@@ -61,7 +68,7 @@ test: all
 
 clean:
 	echo "make $(LIB) clean "
-	rm -f $(LIB) $(EXE) *.o core
+	rm -f *.a $(EXE) *.o core *.gc*
 
 .PHONY: all clean test
 .PHONY: install-dev install-lib install-exe

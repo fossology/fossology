@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -28,22 +28,19 @@ OBJS = test_fossconfig.o    \
        test_fossscheduler.o \
        test_libfossdb.o     \
 
-COVE = fossconfig_cov.o    \
-       fossscheduler_cov.o \
-
 all: test
 test: $(EXE)
 	@echo "make library tests"
 	./$(EXE)
 
-coverage: $(OBJS) libfossology_cov.a $(EXE).c
+coverage: $(OBJS) libfossology_cov.a $(EXE).c $(FOLIB)
 	@echo "make library coverage tests"
-	$(CC) $(EXE).c -o $(EXE) $(OBJS) libfossology_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
+	$(CC) $(EXE).c -o $(EXE) $(OBJS) $(SRCDIR)/libfossology_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
 	./$(EXE)
-	lcov --directory $(SRCDIR)/ --capture --output-file cov.txt; \
+	lcov --directory $(SRCDIR) --capture --output-file cov.txt; \
 	genhtml -o results cov.txt
 
-$(EXE): $(OBJS) libfossology.a $(EXE).c
+$(EXE): $(OBJS) libfossology.a $(EXE).c $(FOLIB)
 	$(CC) $(EXE).c -o $@ $(OBJS) $(SRCDIR)/libfossology.a $(CFLAGS_LOCAL)
 
 $(OBJS): %.o: %.c
@@ -52,19 +49,8 @@ $(OBJS): %.o: %.c
 libfossology.a:
 	$(MAKE) -C $(SRCDIR) $@
 
-libfossology_cov.a: $(COVE)
-	ar cvr $@ $(COVE)
-
-########################
-# coverage build rules #
-########################
-
-fossconfig_cov.o: $(SRCDIR)/fossconfig.c $(SRCDIR)/fossconfig.h
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -DDEFAULT_SETUP='"$(SYSCONFDIR)/fossology"' -o $@
-
-fossscheduler_cov.o: $(SRCDIR)/fossscheduler.c $(SRCDIR)/fossscheduler.h
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
-
+libfossology_cov.a:
+	$(MAKE) -C $(SRCDIR) $@
 
 #####################
 # other build rules #
@@ -81,3 +67,4 @@ uninstall:
 	@echo "make library tests nothing to uninstall"
 
 .PHONY: all install uninstall clean test 
+include $(TOP)/Makefile.deps
