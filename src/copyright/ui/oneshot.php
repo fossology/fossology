@@ -35,12 +35,12 @@ class agent_copyright_once extends FO_Plugin {
   );
   public $NoHTML = 0;
   /** For anyone to access, without login, use: **/
-  // public $DBaccess   = PLUGIN_DB_NONE;
-  // public $LoginFlag  = 0;
+  public $DBaccess   = PLUGIN_DB_NONE;
+  public $LoginFlag  = 0;
 
   /** To require login access, use: **/
-  public $DBaccess = PLUGIN_DB_ANALYZE;
-  public $LoginFlag = 1;
+  // public $DBaccess = PLUGIN_DB_ANALYZE;
+  // public $LoginFlag = 1;
 
   /**
    * \brief Analyze one uploaded file.
