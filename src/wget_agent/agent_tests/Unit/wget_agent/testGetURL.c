@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -73,10 +73,10 @@ int GetURLClean()
  */
 void testGetURLNormal_URLIsOneFile()
 {
-  strcpy(URL, "http://fossology.org/debian/mkpackages");
+  strcpy(URL, "http://www.fossology.org/testdata/wgetagent/mkpackages");
   strcpy(TempFileDir, "./test_result");
-  GetURL(TempFile, URL, TempFileDir); /* download the file mkpackages into ./test_result/fossology.org/debian/ */
-  int existed = file_dir_existed("./test_result/fossology.org/debian/mkpackages");
+  GetURL(TempFile, URL, TempFileDir); /* download the file mkpackages into ./test_result/www.fossology.org/testdata/wgetagent/ */
+  int existed = file_dir_existed("./test_result/www.fossology.org/testdata/wgetagent/mkpackages");
   CU_ASSERT_EQUAL(existed, 1); /* the file downloaded? */
 }
 
@@ -88,7 +88,7 @@ void testGetURLNormal_URLIsOneFile()
 void testGetURLAbnormal_URLIsOneDir()
 {
   strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");
-  strcpy(URL, "http://fossology.org/debian/1.0.0/");
+  strcpy(URL, "http://www.fossology.org/testdata/wgetagent/2.0.0/debian");
   strcpy(TempFileDir, "./test_result/");
   strcpy(TempFile, "./test_result/wget.tar");
   GetURL(TempFile, URL, TempFileDir); 
