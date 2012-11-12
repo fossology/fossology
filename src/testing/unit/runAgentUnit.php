@@ -118,6 +118,12 @@ function genCunitRep($fileName)
 function processCUnit($unitTest)
 {
   global $failures;
+  global $other;
+
+  $unitTest = preg_replace('#/#', '-', $unitTest);
+  $libphp = "lib-php";
+  /** ignore lib/php/tests */
+  if ($libphp === $unitTest) return NULL;
 
   if(empty($unitTest))
   {
@@ -313,7 +319,9 @@ foreach($unitList as $unitTest)
   {
     // change lib/php to lib-php
     $chgUnit = preg_replace('#/#', '-', $unitTest);
-    if(processXunit($chgUnit) === FALSE)
+    $libc = "lib-c";
+    /** ignore lib/c tests */
+    if($libc != $chgUnit && processXunit($chgUnit) === FALSE)
     {
       echo "Error: Could not process lib-php-Xunit.xml file\n";
     }

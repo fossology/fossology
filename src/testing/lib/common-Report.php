@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -125,7 +125,11 @@ function check4CUnitFail($xmlFile=NULL)
       }
     } // foreach($cuResutList->CUNIT_RUN_SUITE
   } // foreach($sx->CUNIT_RESULT_LISTING
-  echo "cunit failures are:\n";print_r($failures) ."\n";
+  if (!empty($failures)) 
+  {
+    echo "cunit failures are:\n";
+    print_r($failures) ."\n";
+  }
   if(($fileContents = file_get_contents($xmlFile)) === FALSE)
   {
     throw new Exception("Can not read file $xmlFile");
@@ -221,7 +225,11 @@ function processXunit($unitTest)
   {
     // remove .xml from name
     $outFile = basename($fileName, '.xml');
-    $outPath = TESTROOT . "/reports/functional/$outFile.html";
+    /** functional tests in ./lib/php/tests */
+    if ('lib-php' === $unitTest)
+      $outPath = TESTROOT . "/reports/unit/$outFile.html";
+    else 
+      $outPath = TESTROOT . "/reports/functional/$outFile.html";
     // remove the old HTML file before creating a new one.
     $rmLast = exec("rm -rf $outPath", $rmOut, $rmRtn);
     $xslPath = TESTROOT . "/reports/junit-noframes.xsl";
