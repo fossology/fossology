@@ -71,7 +71,7 @@ int main(int argc, char** argv)
     return -1;
   }
 
-  CU_set_output_filename("Library_Tests");
+  CU_set_output_filename("lib-c");
   CU_list_tests_to_file();
   CU_automated_run_tests();
 
