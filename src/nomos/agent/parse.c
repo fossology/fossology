@@ -450,13 +450,78 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   /*
+   * Check Apache licenses before BSD
+   */
+  if (INFILE(_LT_ASL)) {
+    cp = ASLVERS();
+    INTERESTING(cp);
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_LT_ASLref3)) {
+    cp = ASLVERS();
+    INTERESTING(cp);
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_LT_ASL20)) {
+    INTERESTING(lDebug ? "Apache(2.0#2)" : "Apache_v2.0");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_LT_ASL20ref) || INFILE(_LT_ASL20ref_2)) {
+    INTERESTING(lDebug ? "Apache(2.0#3)" : "Apache_v2.0");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_TITLE_ASL20)) {
+    INTERESTING(lDebug ? "Apache(2.0#4)" : "Apache_v2.0");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_LT_APACHE_1)) {
+    INTERESTING(lDebug ? "Apache(1)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_LT_APACHE_2)) {
+    INTERESTING(lDebug ? "Apache(2)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_LT_APACHEref1)) {
+    INTERESTING(lDebug ? "Apache(ref#1)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_LT_APACHEref2)) {
+    INTERESTING(lDebug ? "Apache(ref#2)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_LT_APACHEref3)) {
+    INTERESTING(lDebug ? "Apache(ref#3)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_LT_APACHESTYLEref)) {
+    INTERESTING("Apache-style");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (URL_INFILE(_URL_ASL_V2_1)) {
+    INTERESTING(lDebug ? "Apache2(url#1)" : "Apache_v2.0");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (URL_INFILE(_URL_ASL_V2_2)) {
+    INTERESTING(lDebug ? "Apache2(url#2)" : "Apache_v2.0");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (URL_INFILE(_URL_ASL_1)) {
+    INTERESTING(lDebug ? "Apache(url#1)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (URL_INFILE(_URL_ASL_2)) {
+    INTERESTING(lDebug ? "Apache(url#2)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  /*
    * BSD and all the variant 'flavors'.  BSD licenses are kind of like
    * the cooking concept of 'the mother sauces' -- MANY things are derived
    * from the wordings of these licenses.  There are still many more, for
    * certain, but LOTS of licenses are based on ~10 originally-BSD-phrases.
    */
   if (INFILE(_LT_BSD_1)) {
-    if (INFILE(_CR_APACHE) || INFILE(_TITLE_ASL)) {
+    if (!lmem[_mAPACHE] && (INFILE(_CR_APACHE) || INFILE(_TITLE_ASL))) {
       if (INFILE(_LT_ASL20ref)) {
         INTERESTING("Apache_v2.0");
         lmem[_mAPACHE] = 1;
@@ -758,57 +823,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_FILE_BSD1) || INFILE(_FILE_BSD2)) {
     INTERESTING(lDebug ? "BSD(deb)" : "BSD");
-  }
-  if (!lmem[_mAPACHE] && !lmem[_mLIBRE]) {
-    if (INFILE(_LT_ASL)) {
-      cp = ASLVERS();
-      INTERESTING(cp);
-      lmem[_mAPACHE] = 1;
-    }
-    else if (INFILE(_LT_ASLref3)) {
-      cp = ASLVERS();
-      INTERESTING(cp);
-      lmem[_mAPACHE] = 1;
-    }
-    else if (INFILE(_LT_ASL20)) {
-      INTERESTING(lDebug ? "Apache(2.0#2)" : "Apache_v2.0");
-    }
-    else if (INFILE(_LT_ASL20ref) || INFILE(_LT_ASL20ref_2)) {
-      INTERESTING(lDebug ? "Apache(2.0#3)" : "Apache_v2.0");
-    }
-    else if (INFILE(_TITLE_ASL20)) {
-      INTERESTING(lDebug ? "Apache(2.0#4)" : "Apache_v2.0");
-    }
-    else if (INFILE(_LT_APACHE_1)) {
-      INTERESTING(lDebug ? "Apache(1)" : "Apache");
-    }
-    else if (INFILE(_LT_APACHE_2)) {
-      INTERESTING(lDebug ? "Apache(2)" : "Apache");
-    }
-    else if (INFILE(_LT_APACHEref1)) {
-      INTERESTING(lDebug ? "Apache(ref#1)" : "Apache");
-    }
-    else if (INFILE(_LT_APACHEref2)) {
-      INTERESTING(lDebug ? "Apache(ref#2)" : "Apache");
-    }
-    else if (INFILE(_LT_APACHEref3)) {
-      INTERESTING(lDebug ? "Apache(ref#3)" : "Apache");
-    }
-    else if (INFILE(_LT_APACHESTYLEref)) {
-      INTERESTING("Apache-style");
-    }
-    else if (URL_INFILE(_URL_ASL_V2_1)) {
-      INTERESTING(lDebug ? "Apache2(url#1)" : "Apache_v2.0");
-    }
-    else if (URL_INFILE(_URL_ASL_V2_2)) {
-      INTERESTING(lDebug ? "Apache2(url#2)" : "Apache_v2.0");
-    }
-    else if (URL_INFILE(_URL_ASL_1)) {
-      INTERESTING(lDebug ? "Apache(url#1)" : "Apache");
-    }
-    else if (URL_INFILE(_URL_ASL_2)) {
-      INTERESTING(lDebug ? "Apache(url#2)" : "Apache");
-    }
   }
   /*
    * Aptana public license (based on MPL)
