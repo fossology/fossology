@@ -19,14 +19,14 @@ all:
 
 test: all
 	@echo "make unit test for commom php files"
-	phpunit --log-junit lib-php-Xunit.xml --configuration tests.xml
+	phpunit --log-junit lib-php-Xunit-Results.xml --configuration tests.xml
 
 coverage: all
 	@echo "make unit coverage for commom php files"
-	phpunit --coverage-html ./results -c tests.xml
+	phpunit --coverage-html ./results --configuration tests.xml
 
 clean:
 # note do not remove *.xml, it remove the php unit config file tests.xml
-	rm -rf lib-php-Xunit.xml results
+	rm -rf lib-php-Xunit-Results.xml results
 
 .PHONY: all test coverage clean 
