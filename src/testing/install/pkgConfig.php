@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /*
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -28,6 +28,7 @@
  *
  * @version "$Id $"
  * Created on Jul 19, 2011 by Mark Donohoe
+ * Updated on Nov 15, 2012 by Vincent Ma
  */
 
 require_once '../lib/TestRun.php';
@@ -49,7 +50,7 @@ $ubuntu = NULL;
  * 1. tune kernel
  * 2. postgres files
  * 3. php ini files
- * 4. fossology.org apache file
+ * 4. fossology.org apache file (No needec)
  * 5. checkout fossology
  * 6. run fo-installdeps
  * 7. for RHEL what else?
@@ -763,12 +764,13 @@ function configDebian($osType, $osVersion)
   // can't check in pg_hba.conf as it shows HP's firewall settings, get it
   // internally
 
-  getPGhba('../dataFiles/pkginstall/debian/6/pg_hba.conf');
+  // No need to update pg_hba.conf file
+  //getPGhba('../dataFiles/pkginstall/debian/6/pg_hba.conf');
 
   $debPath = '../dataFiles/pkginstall/debian/6/';
 
   $psqlFiles = array(
-  $debPath . 'pg_hba.conf',
+  //$debPath . 'pg_hba.conf',
   $debPath . 'postgresql.conf');
 
   switch ($osVersion)
@@ -835,6 +837,33 @@ function configDebian($osType, $osVersion)
         return(FALSE);
       }
       break;
+    case '12.04':
+    case '12.10':
+      try
+      {
+        copyFiles($psqlFiles, "/etc/postgresql/9.1/main");
+      }
+      catch (Exception $e)
+      {
+        echo "Failure: Could not copy postgres 9.1 config file\n";
+      }
+      try
+      {
+        copyFiles($debPath . 'cli-php.ini', '/etc/php5/cli/php.ini');
+      } catch (Exception $e)
+      {
+        echo "Failure: Could not copy php.ini to /etc/php5/cli/php.ini\n";
+        return(FALSE);
+      }
+      try
+      {
+        copyFiles($debPath . 'apache2-php.ini', '/etc/php5/apache2/php.ini');
+      } catch (Exception $e)
+      {
+        echo "Failure: Could not copy php.ini to /etc/php5/apache2/php.ini\n";
+        return(FALSE);
+      }
+      break;
     default:
       return(FALSE);     // unsupported debian version
       break;
@@ -883,7 +912,7 @@ function configRhel($osType, $osVersion)
   $rpmPath = '../dataFiles/pkginstall/redhat/6.x';
   // getPGhba($rpmPath . '/pg_hba.conf');
   $psqlFiles = array(
-  $rpmPath . '/pg_hba.conf',
+  //$rpmPath . '/pg_hba.conf',
   $rpmPath . '/postgresql.conf');
   // fossology tweaks the postgres files so the packages work....  don't copy
   /*
