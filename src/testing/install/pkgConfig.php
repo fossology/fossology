@@ -167,7 +167,7 @@ switch ($distros[0]) {
     }
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
-    $testUtils->stopScheduler();
+    //$testUtils->stopScheduler();
 
     echo "*** Setting up config files ***\n";
     if(!configRhel($redHat, $rhVersion))
@@ -188,12 +188,6 @@ switch ($distros[0]) {
       exit(1);
     }
 
-    echo "*** Starting FOSSology ***\n";
-    if(!start('fossology'))
-    {
-      echo "Erorr! Could not start FOSSology, please restart by hand\n";
-      exit(1);
-    }
     if(!stop('iptables'))
     {
       echo "Erorr! Could not stop Firewall, please stop by hand\n";
@@ -231,7 +225,7 @@ switch ($distros[0]) {
     }
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
-    $testUtils->stopScheduler();
+    //$testUtils->stopScheduler();
 
     echo "*** Setting up config files ***\n";
     if(!configRhel($redHat, $rhVersion))
@@ -249,13 +243,6 @@ switch ($distros[0]) {
     if(!restart('httpd'))
     {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
-      exit(1);
-    }
-
-    echo "*** Starting FOSSology ***\n";
-    if(!start('fossology'))
-    {
-      echo "Erorr! Could not start FOSSology, please restart by hand\n";
       exit(1);
     }
     if(!stop('iptables'))
@@ -292,7 +279,7 @@ switch ($distros[0]) {
     }
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
-    $testUtils->stopScheduler();
+    //$testUtils->stopScheduler();
 
     echo "*** Tuning kernel ***\n";
     tuneKernel();
@@ -317,12 +304,6 @@ switch ($distros[0]) {
       exit(1);
     }
 
-    echo "*** Starting FOSSology ***\n";
-    if(!start('fossology'))
-    {
-      echo "Erorr! Could not start FOSSology, please restart by hand\n";
-      exit(1);
-    }
     $last = exec("systemctl stop iptables.service", $out, $rtn);
     if($rtn != 0)
     {
