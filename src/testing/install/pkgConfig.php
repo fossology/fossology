@@ -924,8 +924,10 @@ function configDebian($osType, $osVersion)
         return(FALSE);
       }
       break;
-    case '12.04':
+    case '12.04.1':
     case '12.10':
+      //postgresql-9.1 can't use 8.4 conf file
+      /*
       try
       {
         copyFiles($psqlFiles, "/etc/postgresql/9.1/main");
@@ -934,6 +936,7 @@ function configDebian($osType, $osVersion)
       {
         echo "Failure: Could not copy postgres 9.1 config file\n";
       }
+      */
       try
       {
         copyFiles($debPath . 'cli-php.ini', '/etc/php5/cli/php.ini');
