@@ -129,6 +129,13 @@ switch ($distros[0]) {
       echo "Erorr! Could not restart apache2, please restart by hand\n";
       exit(1);
     }
+    
+    echo "*** Starting FOSSology ***\n";
+    if(!start('fossology'))
+    {
+      echo "Erorr! Could not start FOSSology, please restart by hand\n";
+      exit(1);
+    }
     break;
   case 'Red':
     $redHat = 'RedHat';
@@ -180,6 +187,83 @@ switch ($distros[0]) {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
       exit(1);
     }
+
+    echo "*** Starting FOSSology ***\n";
+    if(!start('fossology'))
+    {
+      echo "Erorr! Could not start FOSSology, please restart by hand\n";
+      exit(1);
+    }
+    if(!stop('iptables'))
+    {
+      echo "Erorr! Could not stop Firewall, please stop by hand\n";
+      exit(1);
+    }
+
+    break;
+  case 'CentOS':
+    $redHat = 'RedHat';
+    $rhVersion = $distros[2];
+    echo "rh version is:$rhVersion\n";
+    try
+    {
+      $RedHat = new ConfigSys($redHat, $rhVersion);
+    }
+    catch (Exception $e)
+    {
+      echo "FATAL! could not process ini file for RedHat $rhVersion system\n";
+      echo $e;
+      exit(1);
+    }
+    if(!configYum($RedHat))
+    {
+      echo "FATAL! could not install fossology.conf yum configuration file\n";
+      exit(1);
+    }
+    echo "*** Tuning kernel ***\n";
+    tuneKernel();
+
+    echo "*** Installing fossology ***\n";
+    if(!installFossology($RedHat))
+    {
+      echo "FATAL! Could not install fossology on $redHat version $rhVersion\n";
+      exit(1);
+    }
+    echo "*** stopping scheduler ***\n";
+    // Stop scheduler so system files can be configured.
+    $testUtils->stopScheduler();
+
+    echo "*** Setting up config files ***\n";
+    if(!configRhel($redHat, $rhVersion))
+    {
+      echo "FATAL! could not install php and postgress configuration files\n";
+      exit(1);
+    }
+    /*
+     echo "*** Checking apache config ***\n";
+     if(!configApache2($distros[0]))
+     {
+     echo "Fatal, could not configure apache2 to use fossology\n";
+     }
+     */
+    if(!restart('httpd'))
+    {
+      echo "Erorr! Could not restart httpd, please restart by hand\n";
+      exit(1);
+    }
+
+    echo "*** Starting FOSSology ***\n";
+    if(!start('fossology'))
+    {
+      echo "Erorr! Could not start FOSSology, please restart by hand\n";
+      exit(1);
+    }
+    if(!stop('iptables'))
+    {
+      echo "Erorr! Could not stop Firewall, please stop by hand\n";
+      exit(1);
+    }
+
     break;
   case 'Fedora':
     $fedora = 'Fedora';
@@ -226,11 +310,26 @@ switch ($distros[0]) {
      echo "Fatal, could not configure apache2 to use fossology\n";
      }
      */
-    if(!restart('httpd'))
+    $last = exec("systemctl restart httpd.service", $out, $rtn);
+    if($rtn != 0)
     {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
       exit(1);
     }
+
+    echo "*** Starting FOSSology ***\n";
+    if(!start('fossology'))
+    {
+      echo "Erorr! Could not start FOSSology, please restart by hand\n";
+      exit(1);
+    }
+    $last = exec("systemctl stop iptables.service", $out, $rtn);
+    if($rtn != 0)
+    {
+      echo "Erorr! Could not stop Firewall, please stop by hand\n";
+      exit(1);
+    }
+
     break;
   case 'Ubuntu':
     $distro = 'Ubuntu';
@@ -280,6 +379,13 @@ switch ($distros[0]) {
     if(!restart('apache2'))
     {
       echo "Erorr! Could not restart apache2, please restart by hand\n";
+      exit(1);
+    }
+
+    echo "*** Starting FOSSology ***\n";
+    if(!start('fossology'))
+    {
+      echo "Erorr! Could not start FOSSology, please restart by hand\n";
       exit(1);
     }
     break;
@@ -933,13 +1039,15 @@ function configRhel($osType, $osVersion)
     echo "Failure: Could not copy php.ini to /etc/php.ini\n";
     return(FALSE);
   }
-  // restart postgres
+  // restart postgres, postgresql conf didn't change do not restart
+  /*
   $pName = 'postgresql';
   if(!restart($pName))
   {
     echo "Erorr! Could not restart $pName, please restart by hand\n";
     return(FALSE);
   }
+  */
   return(TRUE);
 } // configRhel
 
@@ -996,6 +1104,31 @@ function configYum($objRef)
     }
     copyFiles("../dataFiles/pkginstall/" . $RedFedRepo, '/etc/yum.repos.d/fossology.repo');
   }
+  //print_r($objRef);
+  if ($objRef->osFlavor == 'RedHat')
+  {
+     $last = exec("yum -y install wget", $out, $rtn);
+     if($rtn != 0)
+     {
+       echo "FATAL! install EPEL repo fail\n";
+       echo "transcript is:\n";print_r($out) . "\n";
+       return(FALSE);
+     }
+     $last = exec("wget -e http_proxy=http://lart.usa.hp.com:3128 http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-7.noarch.rpm", $out, $rtn);
+     if($rtn != 0)
+     {
+       echo "FATAL! install EPEL repo fail\n";
+       echo "transcript is:\n";print_r($out) . "\n";
+       return(FALSE);
+     }
+     $last = exec("rpm -ivh epel-release-6-7.noarch.rpm", $out, $rtn);
+     if($rtn != 0)
+     {
+       echo "FATAL! install EPEL repo fail\n";
+       echo "transcript is:\n";print_r($out) . "\n";
+       return(FALSE);
+     }
+  }
   return(TRUE);
 }  // configYum
 
@@ -1025,6 +1158,59 @@ function restart($application)
   }
   return(TRUE);
 } // restart
+
+/**
+ * \brief start the application
+ * Assumes application is restartable via /etc/init.d/<script>.
+ * The application passed in should match the script name in /etc/init.d
+ *
+ * @param string $application the application to start. The application passed
+ *  in should match the script name in /etc/init.d
+ *
+ *  @return boolen
+ */
+function start($application)
+{
+  if(empty($application))
+  {
+    return(FALSE);
+  }
+
+  $last = exec("/etc/init.d/$application start 2>&1", $out, $rtn);
+  if($rtn != 0)
+  {
+    echo "FATAL! could not start $application\n";
+    echo "transcript is:\n";print_r($out) . "\n";
+    return(FALSE);
+  }
+  return(TRUE);
+} // start
+/**
+ * \brief stop the application
+ * Assumes application is restartable via /etc/init.d/<script>.
+ * The application passed in should match the script name in /etc/init.d
+ *
+ * @param string $application the application to stop. The application passed
+ *  in should match the script name in /etc/init.d
+ *
+ *  @return boolen
+ */
+function stop($application)
+{
+  if(empty($application))
+  {
+    return(FALSE);
+  }
+
+  $last = exec("/etc/init.d/$application stop 2>&1", $out, $rtn);
+  if($rtn != 0)
+  {
+    echo "FATAL! could not stop $application\n";
+    echo "transcript is:\n";print_r($out) . "\n";
+    return(FALSE);
+  }
+  return(TRUE);
+} // stop
 
 /**
  * \brief wget the pg_hba.conf file and place it in $destPath
