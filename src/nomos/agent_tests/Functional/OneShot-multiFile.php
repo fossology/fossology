@@ -74,6 +74,7 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
   	'gpl-3.0.txt' => 'FSF,GPL_v3,Public-domain',
   	'gplv2.1' => 'LGPL_v2.1',
   	'zlibLicense-1.2.2-2004-Oct-03' => 'zlib/libpng',
+  	'DNSDigest.c' => 'APSL,Apache_v2.0,BSD-style,GPL',
   );
 
   function setUp()

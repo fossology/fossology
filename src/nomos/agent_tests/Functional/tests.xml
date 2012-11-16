@@ -8,6 +8,7 @@
       <file>OneShot-none.php</file>
       <file>OneShot-empty.php</file>
       <file>OneShot-multiFile.php</file>
+      <file>OneShot-bsd.php</file>
     </testsuite>
   </testsuites>
 </phpunit>

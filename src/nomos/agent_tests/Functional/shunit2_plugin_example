@@ -10,7 +10,7 @@
 #
 
 shunit_plugin_argv() {
-  shunit_plugin_output_file="./nomos-Xunit.xml"
+  shunit_plugin_output_file="./nomos-shunit-Xunit.xml"
 
   if [ $# -gt 1 ]
   then

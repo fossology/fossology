@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -64,7 +64,7 @@ coverage:
 # note DO NOT put *.xml in the clean rule; it will remove the tests.xml file 
 # which is needed to run the tests!
 clean:
-	rm -f nomos-Xunit.xml
+	rm -f nomos-Xunit.xml nomos-shunit-Xunit.xml
 	rm -rf ../testdata/RedHat/
 	rm -f fossology.rc
 
