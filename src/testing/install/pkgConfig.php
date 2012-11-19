@@ -245,9 +245,20 @@ switch ($distros[0]) {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
       exit(1);
     }
+    if(!restart('httpd'))
+    {
+      echo "Erorr! Could not restart httpd, please restart by hand\n";
+      exit(1);
+    }
     if(!stop('iptables'))
     {
       echo "Erorr! Could not stop Firewall, please stop by hand\n";
+      exit(1);
+    }
+    echo "*** Starting fossology ***\n";
+    if(!start('fossology'))
+    {
+      echo "Erorr! Could not start fossology, please restart by hand\n";
       exit(1);
     }
 
@@ -310,7 +321,13 @@ switch ($distros[0]) {
       echo "Erorr! Could not stop Firewall, please stop by hand\n";
       exit(1);
     }
-
+    echo "*** Starting fossology ***\n";
+    $last = exec("systemctl start fossology.service", $out, $rtn);
+    if($rtn != 0)
+    {
+      echo "Erorr! Could not start FOSSology, please stop by hand\n";
+      exit(1);
+    }
     break;
   case 'Ubuntu':
     $distro = 'Ubuntu';
@@ -1160,6 +1177,7 @@ function start($application)
     return(FALSE);
   }
 
+  echo "Starting $application ...\n";
   $last = exec("/etc/init.d/$application start 2>&1", $out, $rtn);
   if($rtn != 0)
   {
