@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -44,9 +44,6 @@ class upload_move extends FO_Plugin {
     if ($OldParentId == $NewParentId) {
       return (0);
     } // already there
-    if ($NewParentId == FolderGetTop()) {
-      return (0);
-    } // cannot move folder root
     /* New folder must exist? */
     /* Old folder and uploadId will be checked by select from foldercontents */
     $sql = "SELECT * FROM folder where folder_pk = '$NewParentId' limit 1;";
