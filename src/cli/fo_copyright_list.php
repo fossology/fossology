@@ -76,8 +76,8 @@ foreach($options as $option => $value)
       $container = $value;
       break;
     default:
+      print "unknown option $option\n";
       print $Usage;
-      return 1;
   }
 }
 
@@ -116,7 +116,7 @@ return 0;
  * \param $type copyright type(all/statement/url/email)
  * \param $container - include container or not, 1: yes, 0: no (default)
  */
-function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container) 
+function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container = 0) 
 {
   global $PG_CONN;
   if (empty($uploadtree_pk)) return;
@@ -150,7 +150,7 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container)
   if (empty($container)) {
     $sql .= $container_sql; // do not include container
   }
-  $sql .= "order by uploadtree_pk";
+  $sql .= " order by uploadtree_pk";
   $outerresult = pg_query($PG_CONN, $sql);
   DBCheckResult($outerresult, $sql, __FILE__, __LINE__);
 

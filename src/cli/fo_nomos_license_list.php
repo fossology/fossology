@@ -70,8 +70,8 @@ foreach($options as $option => $value)
       $container = $value;
       break;
     default:
+      print "unknown option $option\n";
       print $Usage;
-      return 1;
   }
 }
 

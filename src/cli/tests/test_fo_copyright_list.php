@@ -152,7 +152,7 @@
       /** get all */
       $out = "";
       $uploadtree_id = $upload[1]; // uploadtree_id is the 1st uploadtree_id for this upload 
-      $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id";
+      $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --container 1";
       fwrite(STDOUT, "DEBUG: Executing '$command'\n");
       $last = exec("$command 2>&1", $out, $rtn);
       $output_msg_count = count($out);
@@ -165,7 +165,7 @@
 
       $out = "";
       /** get email */
-      $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type email";
+      $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type email --container 1";
       fwrite(STDOUT, "DEBUG: Executing '$command'\n");
       $last = exec("$command 2>&1", $out, $rtn);
       /** check one line of the report */
@@ -174,12 +174,21 @@
 
       $out = "";
       /** get url */
-      $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type url";
+      $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type url --container 1";
       fwrite(STDOUT, "DEBUG: Executing '$command'\n");
       $last = exec("$command 2>&1", $out, $rtn);
       /** check one line of the report */
       sort($out, SORT_STRING);
       $this->assertEquals("test package/data.tar.gz: http://fossology.org", $out[25]);
+
+      /** do not include container, get url */
+      $out = "";
+      $command = "$fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type url --container 0";
+      fwrite(STDOUT, "DEBUG: Executing '$command'\n");
+      $last = exec("$command 2>&1", $out, $rtn);
+      /** check one line of the report */
+      sort($out, SORT_STRING);
+      $this->assertEquals("test package/control.tar.gz/control.tar/control: http://fossology.org", $out[3]);
 
       fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
       fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
@@ -239,7 +248,7 @@
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(9, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(10, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
 
     /** help, not authentication */
@@ -248,7 +257,7 @@
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(9, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(10, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }

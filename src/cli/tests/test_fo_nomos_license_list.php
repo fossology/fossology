@@ -150,7 +150,9 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
 
     $auth = "--user fossy --password fossy -c $fossology_testconfig";
     $uploadtree_id = $upload[1]; // uploadtree_id is the 1st uploadtree_id for this upload
-    $command = "$fo_nomos_license_list_path $auth -u $upload_id -t $uploadtree_id ";
+
+    /** include container */
+    $command = "$fo_nomos_license_list_path $auth -u $upload_id -t $uploadtree_id --container 1";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
@@ -158,6 +160,20 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     sort($out, SORT_STRING);
     /** for this uload, will get 11 lines for report */
     $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
+    /** check one line of the report */
+    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL_v2.1", $out[2]);
+    fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
+
+    /** do not include container */
+    $out = "";
+    $command = "$fo_nomos_license_list_path $auth -u $upload_id -t $uploadtree_id";
+    fwrite(STDOUT, "DEBUG: Executing '$command'\n");
+    $last = exec("$command 2>&1", $out, $rtn);
+    $output_msg_count = count($out);
+
+    sort($out, SORT_STRING);
+    /** for this uload, will get 6 lines for report */
+    $this->assertEquals(6, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
     /** check one line of the report */
     $this->assertEquals("test package/usr/include/libfossdb.h: LGPL_v2.1", $out[2]);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
@@ -218,7 +234,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(8, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(9, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
 
     /** help, not authentication */
@@ -227,7 +243,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(8, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(9, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
