@@ -29,12 +29,14 @@ $Usage = "Usage: " . basename($argv[0]) . "
   -c sysconfdir       :: Specify the directory for the system configuration
   --user username     :: user name
   --password password :: password
+  --container         :: include container or not, 1: yes, 0: no (default)
   -h  help, this message
   ";
 $upload = ""; // upload id
 $item = ""; // uploadtree id
+$container = 0; // include container or not, 1: yes, 0: no (default)
 
-$longopts = array("user:", "password:");
+$longopts = array("user:", "password:", "container:");
 $options = getopt("c:u:t:h", $longopts);
 if (empty($options) || !is_array($options)) 
 { 
@@ -63,6 +65,9 @@ foreach($options as $option => $value)
       break;
     case 'password':
       $passwd = $value;
+      break;
+    case 'container':
+      $container = $value;
       break;
     default:
       print $Usage;
@@ -94,17 +99,18 @@ require_once("$MODDIR/lib/php/common.php");
 global $PG_CONN;
 
 /** get license information for this uploadtree */
-GetLicenseList($item, $upload);
+GetLicenseList($item, $upload, $container);
 print "END\n";
 return 0;
 
 /**
  * \brief get nomos license list of one specified uploadtree_id
  *
- * \pamam $uploadtree_pk - uploadtree id
- * \pamam $upload_pk - upload id
+ * \param $uploadtree_pk - uploadtree id
+ * \param $upload_pk - upload id
+ * \param $container - include container or not, 1: yes, 0: no (default)
  */
-function GetLicenseList($uploadtree_pk, $upload_pk) 
+function GetLicenseList($uploadtree_pk, $upload_pk, $container = 0) 
 {
   global $PG_CONN;
   if (empty($uploadtree_pk)) return;
@@ -132,7 +138,13 @@ function GetLicenseList($uploadtree_pk, $upload_pk)
   $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename 
               where upload_fk='$toprow[upload_fk]' 
                     and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
-                    and ((ufile_mode & (1<<28)) = 0) order by uploadtree_pk";
+                    and ((ufile_mode & (1<<28)) = 0)";
+  $container_sql = " and ((ufile_mode & (1<<29)) = 0)";
+  /* include container or not */
+  if (empty($container)) {
+    $sql .= $container_sql; // do not include container
+  }
+  $sql .= "order by uploadtree_pk";
   $outerresult = pg_query($PG_CONN, $sql);
   DBCheckResult($outerresult, $sql, __FILE__, __LINE__);
 

@@ -31,12 +31,13 @@ $Usage = "Usage: " . basename($argv[0]) . "
   --type type         :: all/statement/url/email, default: all
   --user username     :: user name
   --password password :: password
+  --container         :: include container or not, 1: yes, 0: no (default)
   -h  help, this message
   ";
 
 $upload = $item = $type = "";
 
-$longopts = array("user:", "password:", "type:");
+$longopts = array("user:", "password:", "type:", "container:");
 $options = getopt("c:u:t:h", $longopts);
 if (empty($options) || !is_array($options))
 {
@@ -45,6 +46,8 @@ if (empty($options) || !is_array($options))
 }
 
 $user = $passwd = "";
+$container = 0; // include container or not, 1: yes, 0: no (default)
+
 foreach($options as $option => $value)
 {
   switch($option)
@@ -68,6 +71,9 @@ foreach($options as $option => $value)
       break;
     case 'type':
       $type = $value;
+      break;
+    case 'container':
+      $container = $value;
       break;
     default:
       print $Usage;
@@ -98,7 +104,7 @@ if (empty($return_value))
 require_once("$MODDIR/lib/php/common.php");
 
 /** get copyright information for this uploadtree */
-GetCopyrightList($item, $upload, $type);
+GetCopyrightList($item, $upload, $type, $container);
 print "END\n";
 return 0;
 
@@ -108,8 +114,9 @@ return 0;
  * \pamam $uploadtree_pk - uploadtree id
  * \pamam $upload_pk - upload id
  * \param $type copyright type(all/statement/url/email)
+ * \param $container - include container or not, 1: yes, 0: no (default)
  */
-function GetCopyrightList($uploadtree_pk, $upload_pk, $type) 
+function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container) 
 {
   global $PG_CONN;
   if (empty($uploadtree_pk)) return;
@@ -137,7 +144,13 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $type)
   $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename 
               where upload_fk='$toprow[upload_fk]' 
                     and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
-                    and ((ufile_mode & (1<<28)) = 0) order by uploadtree_pk";
+                    and ((ufile_mode & (1<<28)) = 0)";
+  $container_sql = " and ((ufile_mode & (1<<29)) = 0)";
+  /* include container or not */
+  if (empty($container)) {
+    $sql .= $container_sql; // do not include container
+  }
+  $sql .= "order by uploadtree_pk";
   $outerresult = pg_query($PG_CONN, $sql);
   DBCheckResult($outerresult, $sql, __FILE__, __LINE__);
 

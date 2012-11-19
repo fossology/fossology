@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -210,7 +210,7 @@ class ui_license_list extends FO_Plugin {
     $sql = "select uploadtree_pk, ufile_name, lft, rgt from uploadtree
               where upload_fk='$toprow[upload_fk]' 
                     and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
-                    and ((ufile_mode & (1<<28)) = 0)";
+                    and ((ufile_mode & (1<<28)) = 0) and ((ufile_mode & (1<<29)) = 0)";
     $outerresult = pg_query($PG_CONN, $sql);
     DBCheckResult($outerresult, $sql, __FILE__, __LINE__);
 
