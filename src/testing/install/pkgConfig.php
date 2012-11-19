@@ -240,12 +240,12 @@ switch ($distros[0]) {
      echo "Fatal, could not configure apache2 to use fossology\n";
      }
      */
-    if(!restart('httpd'))
+    if(!stop('httpd'))
     {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
       exit(1);
     }
-    if(!restart('httpd'))
+    if(!start('httpd'))
     {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
       exit(1);
@@ -322,7 +322,7 @@ switch ($distros[0]) {
       exit(1);
     }
     echo "*** Starting fossology ***\n";
-    $last = exec("systemctl start fossology.service", $out, $rtn);
+    $last = exec("systemctl restart fossology.service", $out, $rtn);
     if($rtn != 0)
     {
       echo "Erorr! Could not start FOSSology, please stop by hand\n";
@@ -1178,7 +1178,7 @@ function start($application)
   }
 
   echo "Starting $application ...\n";
-  $last = exec("/etc/init.d/$application start 2>&1", $out, $rtn);
+  $last = exec("/etc/init.d/$application restart 2>&1", $out, $rtn);
   if($rtn != 0)
   {
     echo "FATAL! could not start $application\n";
