@@ -161,7 +161,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     /** for this uload, will get 11 lines for report */
     $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
     /** check one line of the report */
-    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL_v2.1", $out[2]);
+    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL-2.1", $out[2]);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
 
     /** do not include container */
@@ -175,7 +175,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     /** for this uload, will get 6 lines for report */
     $this->assertEquals(6, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
     /** check one line of the report */
-    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL_v2.1", $out[2]);
+    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL-2.1", $out[2]);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
 
