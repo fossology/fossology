@@ -31,7 +31,7 @@ testOneShotaffero()
   fi
 
   out=`/usr/local/etc/fossology/mods-enabled/nomos/agent/nomos ../../../testing/dataFiles/TestData/licenses/Affero-v1.0`
-  assertEquals "File Affero-v1.0 contains license(s) Affero_v1" "${out}"
+  assertEquals "File Affero-v1.0 contains license(s) AGPL-1.0" "${out}"
 }
 
 #
@@ -72,7 +72,7 @@ testOneShotgpl3()
  
 # echo "starting testOneShotgpl3"
   out=`../../agent/nomos ../../../testing/dataFiles/TestData/licenses/gpl-3.0.txt`
-  assertEquals "File gpl-3.0.txt contains license(s) FSF,GPL_v3" "${out}"
+  assertEquals "File gpl-3.0.txt contains license(s) FSF,GPL-3.0" "${out}"
 }
 
 #
@@ -89,7 +89,7 @@ testOneShotgplv2dot1()
 
 # echo "starting testOneShotgplv2.1"
   out=`../../agent/nomos ../../../testing/dataFiles/TestData/licenses/gplv2.1`
-  assertEquals "File gplv2.1 contains license(s) LGPL_v2.1" "${out}"
+  assertEquals "File gplv2.1 contains license(s) LGPL-2.1" "${out}"
 }
 
 #
@@ -123,7 +123,7 @@ testOneShotApacheLicensev2dot0()
 
 # echo "starting testOneShotApacheLicensev2dot0"
   out=`../../agent/nomos ../../../testing/dataFiles/TestData/licenses/ApacheLicense-v2.0`
-  assertEquals "File ApacheLicense-v2.0 contains license(s) Apache_v2.0" "${out}"
+  assertEquals "File ApacheLicense-v2.0 contains license(s) Apache-2.0" "${out}"
 }
 
 #
@@ -531,7 +531,7 @@ testOneShotBSD_style_y()
 
 # echo "starting testOneShotBSD_style_y"
   out=`../../agent/nomos ../../../testing/dataFiles/TestData/licenses/BSD_style_y.txt`
-  assertEquals "File BSD_style_y.txt contains license(s) PHP_v3.0" "${out}"
+  assertEquals "File BSD_style_y.txt contains license(s) PHP-3.0" "${out}"
 }
 
 #
