@@ -41,9 +41,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
   // scheduler_path is the absolute path to the scheduler binary
   public $scheduler_path;
 
-  // fo_cli_path is the absolute path to the fo_cli binary
-  public $fo_cli_path;
-
   // cp2foss_path is the absolute path to the cp2foss binary
   public $cp2foss_path;
 
@@ -55,10 +52,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
 
     global $fossology_testconfig;
     global $scheduler_path;
-    global $fo_cli_path;
     global $cp2foss_path;
-
-    fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
 
     /**
        get the value of the FOSSOLOGY_TESTCONFIG environment variable,
@@ -67,13 +61,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     */
     $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
     fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
-
-    /* locate fo_cli binary */
-    $fo_cli_path = $fossology_testconfig . "/mods-enabled/scheduler/agent/fo_cli";
-    if (!is_executable($fo_cli_path)) {
-        print "Error:  fo_cli path '$fo_cli_path' is not executable!\n";
-        exit(1);
-    }
 
     $cp2foss_path = "cp2foss";
 
@@ -110,7 +97,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
   function test_upload_from_server() {
     //global $SYSCONF_DIR;
     global $fossology_testconfig;
-    global $fo_cli_path;
     global $cp2foss_path;
 
     fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
@@ -256,16 +242,14 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
   public static function tearDownAfterClass() {
 
     global $fossology_testconfig;
-    global $fo_cli_path;
-    fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
+    global $scheduler_path;
 
     // stop the scheduler
     print "Stopping the scheduler\n";
-    $fo_cli_cmd = "$fo_cli_path -s -c $fossology_testconfig";
-    print "DEBUG: command is $fo_cli_cmd\n";
-    exec($fo_cli_cmd, $output, $return_var);
+    $scheduler_cmd = "$scheduler_path -k -c $fossology_testconfig";
+    exec($scheduler_cmd, $output, $return_var);
     if ( $return_var != 0 ) {
-        print "Error: Could not stop scheduler via '$fo_cli_cmd'\n";
+        print "Error: Could not stop scheduler via '$scheduler_cmd'\n";
         print "$output\n";
 #        exit(1);
     }
