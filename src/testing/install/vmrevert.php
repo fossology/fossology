@@ -30,7 +30,8 @@ require_once('../lib/common-vm.php');
 // cycle through the arrays and revert each vm
 
 $toRevert = parse_ini_file('vm.ini', 1);
-// first shutdown then power off
+// first shutdown then power off (don't need to power off VMs)
+/*
 foreach($toRevert as $host => $vms)
 {
   $host = trim($host);
@@ -45,7 +46,7 @@ foreach($toRevert as $host => $vms)
     }
   } // foreach
 } // foreach
-
+*/
 // now revert snapshot
 foreach($toRevert as $host => $vms)
 {

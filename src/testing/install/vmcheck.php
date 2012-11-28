@@ -27,10 +27,13 @@
 require_once('../lib/common-vm.php');
 
 $vmServers = array(
-    'foss-vmhost1.usa.hp.com',
-    'foss-vmhost2.usa.hp.com',
-    'foss-vmhost3.usa.hp.com',
-    'foss-vmhost4.usa.hp.com',
+//    'foss-vmhost1.usa.hp.com',
+//    'foss-vmhost2.usa.hp.com',
+//    'foss-vmhost3.usa.hp.com',
+//    'foss-vmhost4.usa.hp.com',
+    'haymitch.fc.hp.com',
+    'primrose.fc.hp.com',
+    'madge.fc.hp.com',
 );
 
 // vmware does not change the name of the initial vm, it just displays the new
@@ -52,13 +55,16 @@ $pkgVms = array(
 );
 */
 $pkgVms = array(
-    'squeze64',
-    'fed15-64',
-    'rhel6-232',
-    'u10-043-32_1',
-    'u10-043-64',
-    'ubun11.04.64',
-    'u1110-64',
+    'fo-debian-squeeze32.fc.hp.com',
+    'fo-debian-squeeze64.fc.hp.com',
+    'fo-centos-6-32.fc.hp.com',
+    'fo-centos-6-64.fc.hp.com',
+    'fo-fedora-17-32.fc.hp.com',
+    'fo-fedora-17-64.fc.hp.com',
+    'fo-ubuntu-1204-32.fc.hp.com',
+    'fo-ubuntu-1204-64.fc.hp.com',
+    'fo-ubuntu-1210-32.fc.hp.com',
+    'fo-ubuntu-1210-64.fc.hp.com',
 );
 
 
@@ -72,7 +78,7 @@ $vmList = array();
 foreach($vmServers as $host)
 {
   $host = trim($host);
-  $cmd = "ssh $host  'vmware-cmd -l'";
+  $cmd = "vmware-cmd -H $host -U root -P iforgot -l";
   $last = exec($cmd, $listOut, $rtn);
   foreach($listOut as $vmMachine)
   {

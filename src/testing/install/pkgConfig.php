@@ -106,7 +106,7 @@ switch ($distros[0]) {
     }
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
-    $testUtils->stopScheduler();
+    //$testUtils->stopScheduler();
 
     echo "*** Tuning kernel ***\n";
     tuneKernel();
@@ -129,13 +129,14 @@ switch ($distros[0]) {
       echo "Erorr! Could not restart apache2, please restart by hand\n";
       exit(1);
     }
-    
+    /*
     echo "*** Starting FOSSology ***\n";
     if(!start('fossology'))
     {
       echo "Erorr! Could not start FOSSology, please restart by hand\n";
       exit(1);
     }
+    */
     break;
   case 'Red':
     $redHat = 'RedHat';
@@ -255,13 +256,14 @@ switch ($distros[0]) {
       echo "Erorr! Could not stop Firewall, please stop by hand\n";
       exit(1);
     }
+    /*
     echo "*** Starting fossology ***\n";
     if(!start('fossology'))
     {
       echo "Erorr! Could not start fossology, please restart by hand\n";
       exit(1);
     }
-
+    */
     break;
   case 'Fedora':
     $fedora = 'Fedora';
@@ -321,12 +323,14 @@ switch ($distros[0]) {
       echo "Erorr! Could not stop Firewall, please stop by hand\n";
       exit(1);
     }
+    /*
     echo "*** Starting fossology ***\n";
     if(!start('fossology'))
     {
       echo "Erorr! Could not start fossology, please restart by hand\n";
       exit(1);
     }
+    */
     break;
   case 'Ubuntu':
     $distro = 'Ubuntu';
@@ -358,7 +362,7 @@ switch ($distros[0]) {
     }
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
-    $testUtils->stopScheduler();
+    //$testUtils->stopScheduler();
 
     echo "*** Setting up config files ***\n";
     if(configDebian($distros[0], $ubunVersion) === FALSE)
@@ -378,13 +382,14 @@ switch ($distros[0]) {
       echo "Erorr! Could not restart apache2, please restart by hand\n";
       exit(1);
     }
-
+    /*
     echo "*** Starting FOSSology ***\n";
     if(!start('fossology'))
     {
       echo "Erorr! Could not start FOSSology, please restart by hand\n";
       exit(1);
     }
+    */
     break;
   default:
     echo "Fatal! unrecognized distribution! {$distros[0]}\n" ;

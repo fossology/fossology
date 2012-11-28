@@ -55,7 +55,7 @@ function vmOps($host,$vm, $command)
   {
     foreach($vm as $machine)
     {
-      $turnOnVm = "ssh $host -l markd 'vmware-cmd " . "\"" . $vm . "\"" .  " $command' 2>&1";
+      $turnOnVm = "vmware-cmd -H $host -U root -P iforgot $vm $command 2>&1";
       $laston = exec($turnOnVm, $inout, $inrtn);
       echo "DB: Ops: inrtn is:$inrtn\n";
       echo "DB: Ops: inout is:\n"; print_r($inout) . "\n";
@@ -69,10 +69,10 @@ function vmOps($host,$vm, $command)
   }
   else
   {
-    $turnOnVm = "ssh $host 'vmware-cmd " . "\"" . $vm . "\"" .  " start' 2>&1";
+    $turnOnVm = "vmware-cmd -H $host -U root -P iforgot $vm $command 2>&1";
     $laston = exec($turnOnVm, $inout, $inrtn);
-    echo "DB: Ops: inrtn is:$inrtn\n";
-    echo "DB: Ops: inout is:\n"; print_r($inout) . "\n";
+    //echo "DB: Ops: inrtn is:$inrtn\n";
+    //echo "DB: Ops: inout is:\n"; print_r($inout) . "\n";
     if($inrtn != 0)
     {
       echo "Error: could not $command on $vm on $host\n";
