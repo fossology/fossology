@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -341,19 +341,22 @@ class admin_license_file extends FO_Plugin
 
     $ob = "";     // output buffer
 
+    $shortname = pg_escape_string($_POST['rf_shortname']);
+    $fullname = pg_escape_string($_POST['rf_fullname']);
+    $url = pg_escape_string($_POST['rf_url']);
     $notes = pg_escape_string($_POST['rf_notes']);
     $text = pg_escape_string($_POST['rf_text']);
     $licmd5 = md5($text);
     $sql = "UPDATE license_ref set
                  rf_active='$_POST[rf_active]', 
                  marydone='$_POST[marydone]',
-                 rf_shortname='$_POST[rf_shortname]',
-                 rf_fullname='$_POST[rf_fullname]',
-                 rf_url='$_POST[rf_url]',
+                 rf_shortname='$shortname',
+                 rf_fullname='$fullname',
+                 rf_url='$url',
                  rf_notes='$notes',
                  rf_text_updatable='$_POST[rf_text_updatable]',
                  rf_detector_type='$_POST[rf_detector_type]',
-                 rf_text='$_POST[rf_text]',
+                 rf_text='$text',
                  rf_md5='$licmd5'
             WHERE rf_pk='$_POST[rf_pk]'";
     $result = pg_query($PG_CONN, $sql);
@@ -376,6 +379,9 @@ class admin_license_file extends FO_Plugin
 
     $ob = "";     // output buffer
 
+    $shortname = pg_escape_string($_POST['rf_shortname']);
+    $fullname = pg_escape_string($_POST['rf_fullname']);
+    $url = pg_escape_string($_POST['rf_url']);
     $notes = pg_escape_string($_POST['rf_notes']);
     $text = pg_escape_string($_POST['rf_text']);
     $licmd5 = md5($text);
@@ -386,9 +392,9 @@ class admin_license_file extends FO_Plugin
                  VALUES (
                  '$_POST[rf_active]',
                  '$_POST[marydone]',
-                 '$_POST[rf_shortname]',
-                 '$_POST[rf_fullname]',
-                 '$_POST[rf_url]',
+                 '$shortname',
+                 '$rf_fullname',
+                 '$rf_url',
                  '$notes', '$licmd5', '$text',
                  '$_POST[rf_text_updatable]',
                  '$_POST[rf_detector_type]')";
