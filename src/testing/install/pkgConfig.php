@@ -322,10 +322,9 @@ switch ($distros[0]) {
       exit(1);
     }
     echo "*** Starting fossology ***\n";
-    $last = exec("systemctl restart fossology.service", $out, $rtn);
-    if($rtn != 0)
+    if(!start('fossology'))
     {
-      echo "Erorr! Could not start FOSSology, please stop by hand\n";
+      echo "Erorr! Could not start fossology, please restart by hand\n";
       exit(1);
     }
     break;
@@ -1178,7 +1177,14 @@ function start($application)
   }
 
   echo "Starting $application ...\n";
-  $last = exec("/etc/init.d/$application restart 2>&1", $out, $rtn);
+  $last = exec("/etc/init.d/$application stop 2>&1", $out, $rtn);
+  if($rtn != 0)
+  {
+    echo "FATAL! could not start $application\n";
+    echo "transcript is:\n";print_r($out) . "\n";
+    return(FALSE);
+  }
+  $last = exec("/etc/init.d/$application start 2>&1", $out, $rtn);
   if($rtn != 0)
   {
     echo "FATAL! could not start $application\n";
