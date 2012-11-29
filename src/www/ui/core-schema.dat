@@ -1481,52 +1481,6 @@
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["UPDATE"] = "UPDATE report_cache_user SET cache_on='Y'::character(1)";
 
 
-  $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"unique_scheduler\" IS 'unique id for the scheduler: gethostid()+getpid() for the scheduler';";
-  $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["ADD"] = "ALTER TABLE \"scheduler_status\" ADD COLUMN \"unique_scheduler\" text;";
-  $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["ALTER"] = "ALTER TABLE \"scheduler_status\" ALTER COLUMN \"unique_scheduler\" SET NOT NULL;";
-  $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["scheduler_status"]["agent_number"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"agent_number\" IS 'unique id for the agent based on the scheduler';";
-  $Schema["TABLE"]["scheduler_status"]["agent_number"]["ADD"] = "ALTER TABLE \"scheduler_status\" ADD COLUMN \"agent_number\" int4;";
-  $Schema["TABLE"]["scheduler_status"]["agent_number"]["ALTER"] = "ALTER TABLE \"scheduler_status\" ALTER COLUMN \"agent_number\" SET NOT NULL;";
-  $Schema["TABLE"]["scheduler_status"]["agent_number"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["scheduler_status"]["agent_attrib"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"agent_attrib\" IS 'attributes for the agent (type, host, etc.)';";
-  $Schema["TABLE"]["scheduler_status"]["agent_attrib"]["ADD"] = "ALTER TABLE \"scheduler_status\" ADD COLUMN \"agent_attrib\" text;";
-  $Schema["TABLE"]["scheduler_status"]["agent_attrib"]["ALTER"] = "ALTER TABLE \"scheduler_status\" ALTER COLUMN \"agent_attrib\" SET NOT NULL;";
-  $Schema["TABLE"]["scheduler_status"]["agent_attrib"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["scheduler_status"]["agent_status"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"agent_status\" IS 'run-time status of the agent';";
-  $Schema["TABLE"]["scheduler_status"]["agent_status"]["ADD"] = "ALTER TABLE \"scheduler_status\" ADD COLUMN \"agent_status\" text;";
-  $Schema["TABLE"]["scheduler_status"]["agent_status"]["ALTER"] = "ALTER TABLE \"scheduler_status\" ALTER COLUMN \"agent_status\" SET NOT NULL;";
-  $Schema["TABLE"]["scheduler_status"]["agent_status"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["scheduler_status"]["agent_status_date"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"agent_status_date\" IS 'time of the last status change for the agent';";
-  $Schema["TABLE"]["scheduler_status"]["agent_status_date"]["ADD"] = "ALTER TABLE \"scheduler_status\" ADD COLUMN \"agent_status_date\" timestamp;";
-  $Schema["TABLE"]["scheduler_status"]["agent_status_date"]["ALTER"] = "ALTER TABLE \"scheduler_status\" ALTER COLUMN \"agent_status_date\" DROP NOT NULL;";
-  $Schema["TABLE"]["scheduler_status"]["agent_status_date"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["scheduler_status"]["record_update"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"record_update\" IS 'time this record was last updated (scheduler updates at least once a minute so old entries indicate a dead scheduler)';";
-  $Schema["TABLE"]["scheduler_status"]["record_update"]["ADD"] = "ALTER TABLE \"scheduler_status\" ADD COLUMN \"record_update\" timestamp;";
-  $Schema["TABLE"]["scheduler_status"]["record_update"]["ALTER"] = "ALTER TABLE \"scheduler_status\" ALTER COLUMN \"record_update\" SET NOT NULL, ALTER COLUMN \"record_update\" SET DEFAULT now();";
-  $Schema["TABLE"]["scheduler_status"]["record_update"]["UPDATE"] = "UPDATE scheduler_status SET record_update=now()";
-
-  $Schema["TABLE"]["scheduler_status"]["agent_host"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"agent_host\" IS 'The host class where this job runs (value from the host= scheduler.conf field)';";
-  $Schema["TABLE"]["scheduler_status"]["agent_host"]["ADD"] = "ALTER TABLE \"scheduler_status\" ADD COLUMN \"agent_host\" text;";
-  $Schema["TABLE"]["scheduler_status"]["agent_host"]["ALTER"] = "ALTER TABLE \"scheduler_status\" ALTER COLUMN \"agent_host\" DROP NOT NULL;";
-  $Schema["TABLE"]["scheduler_status"]["agent_host"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["scheduler_status"]["agent_fk"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"agent_fk\" IS 'Linking scheduler.conf \"agent=\" to agent table.';";
-  $Schema["TABLE"]["scheduler_status"]["agent_fk"]["ADD"] = "ALTER TABLE \"scheduler_status\" ADD COLUMN \"agent_fk\" int4;";
-  $Schema["TABLE"]["scheduler_status"]["agent_fk"]["ALTER"] = "ALTER TABLE \"scheduler_status\" ALTER COLUMN \"agent_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["scheduler_status"]["agent_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["scheduler_status"]["agent_param"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"agent_param\" IS 'The last parameters sent to the agent (for debugging)';";
-  $Schema["TABLE"]["scheduler_status"]["agent_param"]["ADD"] = "ALTER TABLE \"scheduler_status\" ADD COLUMN \"agent_param\" text;";
-  $Schema["TABLE"]["scheduler_status"]["agent_param"]["ALTER"] = "ALTER TABLE \"scheduler_status\" ALTER COLUMN \"agent_param\" DROP NOT NULL;";
-  $Schema["TABLE"]["scheduler_status"]["agent_param"]["UPDATE"] = "";
-
-
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["DESC"] = "";
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"sysconfig_pk\" int4;";
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"sysconfig_pk\" SET NOT NULL, ALTER COLUMN \"sysconfig_pk\" SET DEFAULT nextval('sysconfig_sysconfig_pk_seq'::regclass);";
@@ -1989,7 +1943,6 @@
   $Schema["CONSTRAINT"]["report_cache_pkey"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_pkey\" PRIMARY KEY (\"report_cache_pk\");";
   $Schema["CONSTRAINT"]["report_cache_user_pkey"] = "ALTER TABLE \"report_cache_user\" ADD CONSTRAINT \"report_cache_user_pkey\" PRIMARY KEY (\"report_cache_user_pk\");";
   $Schema["CONSTRAINT"]["rf_pkpk"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_pkpk\" PRIMARY KEY (\"rf_pk\");";
-  $Schema["CONSTRAINT"]["scheduler_status_pkey"] = "ALTER TABLE \"scheduler_status\" ADD CONSTRAINT \"scheduler_status_pkey\" PRIMARY KEY (\"unique_scheduler\",\"agent_number\");";
   $Schema["CONSTRAINT"]["sysconfig_pkey"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_pkey\" PRIMARY KEY (\"sysconfig_pk\");";
   $Schema["CONSTRAINT"]["tag_manage_pkey"] = "ALTER TABLE \"tag_manage\" ADD CONSTRAINT \"tag_manage_pkey\" PRIMARY KEY (\"tag_manage_pk\");";
   $Schema["CONSTRAINT"]["tag_ns_group_pkey"] = "ALTER TABLE \"tag_ns_group\" ADD CONSTRAINT \"tag_ns_group_pkey\" PRIMARY KEY (\"tag_ns_group_pk\");";
