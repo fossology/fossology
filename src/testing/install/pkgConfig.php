@@ -1147,6 +1147,13 @@ function configYum($objRef)
        echo "transcript is:\n";print_r($out) . "\n";
        return(FALSE);
      }
+     $last = exec("yum -y install php-phpunit-PHPUnit", $out, $rtn);
+     if($rtn != 0)
+     {
+       echo "FATAL! install PHPUnit fail\n";
+       echo "transcript is:\n";print_r($out) . "\n";
+       return(FALSE);
+     }
   }
   return(TRUE);
 }  // configYum
