@@ -52,6 +52,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     global $fossology_testconfig;
     global $scheduler_path;
     global $cp2foss_path;
+    global $PG_CONN;
 
     $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
     /** set default config dir as /etc/fossology/ */
@@ -77,6 +78,10 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
         print "$output\n";
         exit(1);
     }
+
+    connect_to_DB($fossology_testconfig); // connect db
+    add_user("fossy", "fossy"); // add account fossy/fossy
+
     print "\nStarting functional test for cp2foss. \n";
 
   }
