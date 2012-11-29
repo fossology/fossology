@@ -107,28 +107,30 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     //$testUtils->stopScheduler();
-
+    /*
     echo "*** Tuning kernel ***\n";
     tuneKernel();
-
+    
     echo "*** Setting up config files ***\n";
     if(configDebian($distros[0], $debianVersion) === FALSE)
     {
       echo "FATAL! could not configure postgres or php config files\n";
       exit(1);
     }
+    */
     /*
      echo "*** Checking apache config ***\n";
      if(!configApache2($distros[0]))
      {
      echo "Fatal, could not configure apache2 to use fossology\n";
      }
-     */
+     
     if(!restart('apache2'))
     {
       echo "Erorr! Could not restart apache2, please restart by hand\n";
       exit(1);
     }
+    */
     /*
     echo "*** Starting FOSSology ***\n";
     if(!start('fossology'))
@@ -157,9 +159,10 @@ switch ($distros[0]) {
       echo "FATAL! could not install fossology.conf yum configuration file\n";
       exit(1);
     }
+    /*
     echo "*** Tuning kernel ***\n";
     tuneKernel();
-
+    */
     echo "*** Installing fossology ***\n";
     if(!installFossology($RedHat))
     {
@@ -169,13 +172,14 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     //$testUtils->stopScheduler();
-
+    /*
     echo "*** Setting up config files ***\n";
     if(!configRhel($redHat, $rhVersion))
     {
       echo "FATAL! could not install php and postgress configuration files\n";
       exit(1);
     }
+    */
     /*
      echo "*** Checking apache config ***\n";
      if(!configApache2($distros[0]))
@@ -183,12 +187,13 @@ switch ($distros[0]) {
      echo "Fatal, could not configure apache2 to use fossology\n";
      }
      */
+    /*
     if(!restart('httpd'))
     {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
       exit(1);
     }
-
+    */
     if(!stop('iptables'))
     {
       echo "Erorr! Could not stop Firewall, please stop by hand\n";
@@ -215,9 +220,10 @@ switch ($distros[0]) {
       echo "FATAL! could not install fossology.conf yum configuration file\n";
       exit(1);
     }
+    /*
     echo "*** Tuning kernel ***\n";
     tuneKernel();
-
+    */
     echo "*** Installing fossology ***\n";
     if(!installFossology($RedHat))
     {
@@ -227,13 +233,14 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     //$testUtils->stopScheduler();
-
+    /*
     echo "*** Setting up config files ***\n";
     if(!configRhel($redHat, $rhVersion))
     {
       echo "FATAL! could not install php and postgress configuration files\n";
       exit(1);
     }
+    */
     /*
      echo "*** Checking apache config ***\n";
      if(!configApache2($distros[0]))
@@ -241,6 +248,7 @@ switch ($distros[0]) {
      echo "Fatal, could not configure apache2 to use fossology\n";
      }
      */
+    /*
     if(!stop('httpd'))
     {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
@@ -251,6 +259,7 @@ switch ($distros[0]) {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
       exit(1);
     }
+    */
     if(!stop('iptables'))
     {
       echo "Erorr! Could not stop Firewall, please stop by hand\n";
@@ -293,7 +302,7 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     //$testUtils->stopScheduler();
-
+    /*
     echo "*** Tuning kernel ***\n";
     tuneKernel();
 
@@ -303,6 +312,7 @@ switch ($distros[0]) {
       echo "FATAL! could not install php and postgress configuration files\n";
       exit(1);
     }
+    */
     /*
      echo "*** Checking apache config ***\n";
      if(!configApache2($distros[0]))
@@ -310,13 +320,14 @@ switch ($distros[0]) {
      echo "Fatal, could not configure apache2 to use fossology\n";
      }
      */
+    /*
     $last = exec("systemctl restart httpd.service", $out, $rtn);
     if($rtn != 0)
     {
       echo "Erorr! Could not restart httpd, please restart by hand\n";
       exit(1);
     }
-
+    */
     $last = exec("systemctl stop iptables.service", $out, $rtn);
     if($rtn != 0)
     {
@@ -351,9 +362,10 @@ switch ($distros[0]) {
       echo "FATAL! cannot insert deb line into /etc/apt/sources.list\n";
       exit(1);
     }
+    /*
     echo "*** Tuning kernel ***\n";
     tuneKernel();
-
+    */
     echo "*** Installing fossology ***\n";
     if(!installFossology($Ubuntu))
     {
@@ -363,25 +375,27 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     //$testUtils->stopScheduler();
-
+    /*
     echo "*** Setting up config files ***\n";
     if(configDebian($distros[0], $ubunVersion) === FALSE)
     {
       echo "FATAL! could not configure postgres or php config files\n";
       exit(1);
     }
+    */
     /*
      echo "*** Checking apache config ***\n";
      if(!configApache2($distros[0]))
      {
      echo "Fatal, could not configure apache2 to use fossology\n";
      }
-     */
+     
     if(!restart('apache2'))
     {
       echo "Erorr! Could not restart apache2, please restart by hand\n";
       exit(1);
     }
+    */
     /*
     echo "*** Starting FOSSology ***\n";
     if(!start('fossology'))
