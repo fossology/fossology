@@ -38,7 +38,11 @@ pkgagent.o: pkgagent.c pkgagent.h
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
 		$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
 	else \
-		$(CC) -c $< $(CFLAGS_LOCAL_RPM_4_4); \
+		if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.10 >/dev/null ; then \
+			$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
+		else \
+			$(CC) -c $< $(CFLAGS_LOCAL_RPM_4_4); \
+		fi \
 	fi
 
 install: all
