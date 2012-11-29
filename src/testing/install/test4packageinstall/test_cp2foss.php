@@ -27,7 +27,6 @@ require_once("./test_common.php");
  */
 class test_cp2foss extends PHPUnit_Framework_TestCase {
 
-  public $SYSCONF_DIR = "/usr/local/etc/fossology/";
   public $DB_NAME;
   public $PG_CONN;
   public $DB_COMMAND;
@@ -54,12 +53,9 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     global $scheduler_path;
     global $cp2foss_path;
 
-    /**
-       get the value of the FOSSOLOGY_TESTCONFIG environment variable,
-       which will be initialized by the Makefile by running the 
-       create_test_database.pl script
-    */
     $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
+    /** set default config dir as /etc/fossology/ */
+    if (empty($fossology_testconfig)) $fossology_testconfig = "/etc/fossology/";
     fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
 
     $cp2foss_path = "cp2foss";
@@ -95,7 +91,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
           placed in the UI under the folder "test/exclude/s-u" 
    */
   function test_upload_from_server() {
-    //global $SYSCONF_DIR;
     global $fossology_testconfig;
     global $cp2foss_path;
 
@@ -103,7 +98,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
 
     $test_dbh = connect_to_DB($fossology_testconfig);
 
-    //$auth = "--user fossy --password fossy -c $SYSCONF_DIR";
     $auth = "--user fossy --password fossy -c $fossology_testconfig";
     /** upload a file to Software Repository */
     $out = "";
