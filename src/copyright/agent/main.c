@@ -916,7 +916,7 @@ int main(int argc, char** argv)
       upload_pk = atol(fo_scheduler_current());
       ars_pk = fo_WriteARS(pgConn, 0, upload_pk, agent_pk, AGENT_ARS, NULL, 0);
 
-      sprintf(sql, fetch_pfile, upload_pk, agent_pk);
+      sprintf(sql, fetch_pfile, upload_pk, agent_pk, agent_pk);
       pgResult = PQexec(pgConn, sql);
       num_files = PQntuples(pgResult);
 

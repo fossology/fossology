@@ -913,8 +913,8 @@ int main(int argc, char **argv)
 
       /* retrieve the records to process */
       snprintf(sqlbuf, sizeof(sqlbuf),
-          "SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS left outer join license_file on (PF=pfile_fk and agent_fk='%d') inner join pfile on (PF=pfile_pk) WHERE fl_pk IS null",
-          upload_pk, gl.agentPk);
+          "SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS left outer join license_file on (PF=pfile_fk and agent_fk='%d') inner join pfile on (PF=pfile_pk) WHERE fl_pk IS null or agent_fk <>'%d'",
+          upload_pk, gl.agentPk, gl.agentPk);
       result = PQexec(gl.pgConn, sqlbuf);
       if (fo_checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__)) Bail(-__LINE__);
       numrows = PQntuples(result);

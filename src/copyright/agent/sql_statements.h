@@ -41,7 +41,7 @@ SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilenam
   ) AS SS \
     left outer join copyright on (PF = pfile_fk and agent_fk = %d) \
     inner join pfile on (PF = pfile_pk) \
-  WHERE ct_pk IS null ";
+  WHERE ct_pk IS null or agent_fk <> %d";
 
 /**
  * This will enter that no copyright entries were found for the file that was
