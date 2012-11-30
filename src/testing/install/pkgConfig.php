@@ -375,14 +375,13 @@ switch ($distros[0]) {
     echo "*** stopping scheduler ***\n";
     // Stop scheduler so system files can be configured.
     //$testUtils->stopScheduler();
-    /*
+    
     echo "*** Setting up config files ***\n";
     if(configDebian($distros[0], $ubunVersion) === FALSE)
     {
       echo "FATAL! could not configure postgres or php config files\n";
       exit(1);
     }
-    */
     /*
      echo "*** Checking apache config ***\n";
      if(!configApache2($distros[0]))
@@ -889,11 +888,11 @@ function configDebian($osType, $osVersion)
   // No need to update pg_hba.conf file
   //getPGhba('../dataFiles/pkginstall/debian/6/pg_hba.conf');
 
-  $debPath = '../dataFiles/pkginstall/debian/6/';
+  //$debPath = '../dataFiles/pkginstall/debian/6/';
 
-  $psqlFiles = array(
+  //$psqlFiles = array(
   //$debPath . 'pg_hba.conf',
-  $debPath . 'postgresql.conf');
+  //$debPath . 'postgresql.conf');
 
   switch ($osVersion)
   {
@@ -906,6 +905,7 @@ function configDebian($osType, $osVersion)
       *      debian/6/pg_hba....
       *      and use a symlink for the 'codename' squeeze -> debian/6/
       */
+      /*
       try
       {
         copyFiles($psqlFiles, "/etc/postgresql/8.4/main");
@@ -930,10 +930,13 @@ function configDebian($osType, $osVersion)
         echo "Failure: Could not copy php.ini to /etc/php5/apache2/php.ini\n";
         return(FALSE);
       }
+      */
       break;
     case '10.04.3':
     case '11.04':
     case '11.10':
+      echo "debianConfig got os version $osVersion!\n";
+      /*
       try
       {
         copyFiles($psqlFiles, "/etc/postgresql/8.4/main");
@@ -958,9 +961,30 @@ function configDebian($osType, $osVersion)
         echo "Failure: Could not copy php.ini to /etc/php5/apache2/php.ini\n";
         return(FALSE);
       }
+       */
       break;
     case '12.04.1':
+      echo "debianConfig got os version $osVersion!\n";
+      exec("echo '#!/bin/sh' > installphpunit.sh");
+      exec("echo 'apt-get -y remove phpunit' >> installphpunit.sh");
+      exec("echo 'pear config-set http_proxy http://web-proxy.cce.hp.com:8088/' >> installphpunit.sh");
+      exec("echo 'pear upgrade pear' >> installphpunit.sh");
+      exec("echo 'pear channel-discover pear.phpunit.de' >> installphpunit.sh");
+      exec("echo 'pear channel-discover pear.symfony.com' >> installphpunit.sh");
+      exec("echo 'pear channel-discover components.ez.no' >> installphpunit.sh");
+      exec("echo 'pear update-channels' >> installphpunit.sh");
+      exec("echo 'pear upgrade-all' >> installphpunit.sh");
+      exec("echo 'pear install --alldeps phpunit/PHPUnit' >> installphpunit.sh");
+      $last = exec("sh installphpunit.sh", $out, $rtn);
+      if($rtn != 0)
+      {
+        echo "FATAL! install phpunit fail\n";
+        echo "transcript is:\n";print_r($out) . "\n";
+        return(FALSE);
+      }
+      break;
     case '12.10':
+      echo "debianConfig got os version $osVersion!\n";
       //postgresql-9.1 can't use 8.4 conf file
       /*
       try
@@ -972,6 +996,7 @@ function configDebian($osType, $osVersion)
         echo "Failure: Could not copy postgres 9.1 config file\n";
       }
       */
+      /*
       try
       {
         copyFiles($debPath . 'cli-php.ini', '/etc/php5/cli/php.ini');
@@ -988,11 +1013,13 @@ function configDebian($osType, $osVersion)
         echo "Failure: Could not copy php.ini to /etc/php5/apache2/php.ini\n";
         return(FALSE);
       }
+      */
       break;
     default:
       return(FALSE);     // unsupported debian version
       break;
   }
+  /*
   // restart apache and postgres so changes take effect
   if(!restart('apache2'))
   {
@@ -1013,6 +1040,7 @@ function configDebian($osType, $osVersion)
     echo "Erorr! Could not restart $pName, please restart by hand\n";
     return(FALSE);
   }
+  */
   return(TRUE);
 }  // configDebian
 
