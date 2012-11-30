@@ -1,5 +1,5 @@
 #####
-# (C) Copyright 2006 Hewlett-Packard Development Company, L.P.
+# (C) Copyright 2006-2012 Hewlett-Packard Development Company, L.P.
 #####
 
 /* License footprints */
@@ -5687,7 +5687,7 @@ k
 #
 %ENTRY%	_CR_ORACLE
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
-%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= oracle corp"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= oracle"
 #
 %ENTRY%	_CR_OREILLY
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
