@@ -98,10 +98,11 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
   function test_upload_from_server() {
     global $fossology_testconfig;
     global $cp2foss_path;
+    global $PG_CONN;
 
     fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
 
-    $test_dbh = connect_to_DB($fossology_testconfig);
+    $test_dbh = $PG_CONN;
 
     $auth = "--user fossy --password fossy -c $fossology_testconfig";
     /** upload a file to Software Repository */

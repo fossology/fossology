@@ -77,19 +77,18 @@
    * \return A valid postgres database handle, or false if connection cannot be made
    */
   function connect_to_DB($fossology_testconfig) {
-     $test_pg_conn = FALSE;
+     global $PG_CONN;
 
      $db_conf_file = $fossology_testconfig . "/Db.conf";
     
-     $test_pg_conn = pg_connect(str_replace(";", " ", file_get_contents($db_conf_file)));
+     $PG_CONN = pg_connect(str_replace(";", " ", file_get_contents($db_conf_file)));
 
-     if (empty($test_pg_conn)) {
+     if (empty($PG_CONN)) {
          print "Error - could not connect to test db via $db_conf_file\n";
      }
      else {
          print "Successfully connected to test db\n";
      }
-     return($test_pg_conn);
    }
 
   /**
