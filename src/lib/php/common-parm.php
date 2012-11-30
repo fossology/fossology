@@ -110,7 +110,7 @@ function Traceback_parm($ShowMod=1)
   {
     $V = preg_replace("/^[^&]*/","",$V);
   }
-  return($V);
+  return($V[0]);
 } // Traceback_parm()
 
 /**
