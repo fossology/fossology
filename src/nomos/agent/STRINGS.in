@@ -3042,6 +3042,10 @@ e /* (INFILE(j)) */
 %KEY%	"permi[st]"
 %STR%	"permission is granted =SOME= without restriction =FEW= to use publicly perform distribute sell modify merge give away or sublicence"
 #
+%ENTRY% _LT_MIT_NO_EVIL
+%KEY% "evil"
+%STR% "(no|not|don't be) evil"
+#
 %ENTRY%	_LT_MITref1
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= \<mit\> =FEW= licen[cs]e"
