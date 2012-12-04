@@ -9,6 +9,8 @@
       <file>OneShot-empty.php</file>
       <file>OneShot-multiFile.php</file>
       <file>OneShot-bsd.php</file>
+      <file>OneShot-Oracle-Berkeley-DB.php</file>
+      <file>OneShot-JSON.php</file>
     </testsuite>
   </testsuites>
 </phpunit>

@@ -16,16 +16,17 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * \brief Perform a one-shot license analysis on a file (include bsd license)
+ * \brief Perform a one-shot license analysis on files (include Oracle-Berkeley-DB, Sleepycat)
+ *
  */
 
 require_once ('../../../testing/lib/createRC.php');
 
 
-class OneShotbsdTest extends PHPUnit_Framework_TestCase
+class OneShot_Oracle_Berkeley_DB extends PHPUnit_Framework_TestCase
 {
   public $nomos;
-  public $bsd;
+  public $tested_file;
 
   function setUp()
   {
@@ -36,30 +37,23 @@ class OneShotbsdTest extends PHPUnit_Framework_TestCase
     //echo "DB: nomos is:$this->nomos\n";
   }
 
-  function testOneShotbsd()
+  function testOneShotOracle_Berkeley_DB()
   {
-    /** test 1 */
-    /* check to see if the file exists */
-    $this->bsd = '../../../testing/dataFiles/TestData/licenses/BSD_style_d.txt';
-    $this->assertFileExists($this->bsd,"OneShotbsdTest FAILURE! $this->bsd not found\n");
-    $bsdlic = "BSD-style";
-    $last = exec("$this->nomos $this->bsd 2>&1", $out, $rtn);
+    /** Oracle-Berkeley-DB */
+    $this->tested_file = '../../../testing/dataFiles/TestData/licenses/Oracle-Berkeley-DB.java';
+    $license_report = "Oracle-Berkeley-DB";
+    $last = exec("$this->nomos $this->tested_file 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
-    $this->assertEquals($fname, 'BSD_style_d.txt', "Error filename $fname does not equal BSD_style_d.txt");
-    $this->assertEquals($license, $bsdlic);
+    $this->assertEquals($license, $license_report);
 
-    /** test 2 */
-    /* check to see if the file exists */
-    $this->bsd = "";
-    $license = "";
+
     $out = "";
-    $this->bsd = '../../../testing/dataFiles/TestData/licenses/DNSDigest.c';
-    $this->assertFileExists($this->bsd,"OneShotbsdTest FAILURE! $this->bsd not found\n");
-    $bsdlic = "APSL,Apache-2.0,BSD-style,GPL";
-    $last = exec("$this->nomos $this->bsd 2>&1", $out, $rtn);
+    /** sleepycat */
+    $this->tested_file = '../../../testing/dataFiles/TestData/licenses/sleepycat.php';
+    $license_report = "Sleepycat";
+    $last = exec("$this->nomos $this->tested_file 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
-    $this->assertEquals($fname, 'DNSDigest.c', "Error filename $fname does not equal DNSDigest.c");
-    $this->assertEquals($license, $bsdlic);
+    $this->assertEquals($license, $license_report);
   }
 }
 ?>

@@ -576,7 +576,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "Sleepycat(1)" : "Sleepycat");
     }
     else if (INFILE(_CR_ORACLE)) {
-      INTERESTING("Oracle-Berkeley-DB)");
+      INTERESTING("Oracle-Berkeley-DB");
     }
     else if (mCR_CMU()) {
       INTERESTING(lDebug ? "CMU(BSD-ish)" : "CMU");

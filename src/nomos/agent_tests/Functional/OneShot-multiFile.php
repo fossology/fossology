@@ -75,6 +75,9 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
   	'gplv2.1' => 'LGPL-2.1',
   	'zlibLicense-1.2.2-2004-Oct-03' => 'Zlib',
   	'DNSDigest.c' => 'APSL,Apache-2.0,BSD-style,GPL',
+  	'Oracle-Berkeley-DB.java' => 'Oracle-Berkeley-DB',
+  	'sleepycat.php' => 'Sleepycat',
+  	'jslint.js' => 'JSON',
   );
 
   function setUp()
