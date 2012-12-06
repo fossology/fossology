@@ -44,6 +44,8 @@ class upload_url extends FO_Plugin {
       $text = _("Invalid folder");
       return ($text);
     }
+
+    $GetURL = trim($GetURL);
     if (empty($GetURL)) 
     {
       $text = _("Invalid URL");
