@@ -282,7 +282,7 @@ Legal Department
 Milpitas, California 95035
 t.(408)957-1718
 f.(408)957-7137', 'http://www.adaptec.com/en-US/company/legal/legal_download.htm', NULL, NULL, NULL, 'Adaptec Software License', NULL, NULL, NULL, '', NULL, false, false, false, 'de5b952ba1bf302536e258f63545ba0c', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Adaptive', 'ADAPTIVE PUBLIC LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'APL-1.0', 'ADAPTIVE PUBLIC LICENSE
 Version 1.0
 THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THIS ADAPTIVE PUBLIC LICENSE (\\"LICENSE\\"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE LICENSED WORK CONSTITUTES RECIPIENT''S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH RECIPIENT READS THE TERMS OF THIS LICENSE. \\"LICENSED WORK\\" AND \\"RECIPIENT\\" ARE DEFINED BELOW.
 
@@ -341,7 +341,7 @@ See Section 2.2 below, Exhibit A attached, and any Suppfile.txt accompanying thi
 where such changes and/or additions originate from a Subsequent Contributor. A Subsequent Work will \\"originate\\" from a Subsequent Contributor if the Subsequent Work was a result of efforts by such Subsequent Contributor (or anyone acting on such Subsequent Contributor''s behalf, such as, a contractor or other entity that is engaged by or under the direction of the Subsequent Contributor). For greater certainty, a Subsequent Work expressly excludes and shall not capture within its meaning any Independent Module.
 
 1.19. \\"SUPPLEMENT FILE\\" means a file distributed with the Licensed Work having a file name \\"suppfile.txt\\".', 'http://www.opensource.org/licenses/apl1.0.php', NULL, NULL, NULL, 'Adaptive Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'eb59014579b4dda6991d5e9838506749', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AFL 1.1', '			Academic Free License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AFL-1.1', '			Academic Free License
 			Version 1.1
 
 The Academic Free License applies to any original work of authorship
@@ -455,7 +455,7 @@ problems with those licenses.
     the copyright to the license will control changes. The Apache
     license contains a copyright notice, but the BSD, MIT and UoI/NCSA
     licenses do not.', 'http://www.samurajdata.se/opensource/mirror/licenses/afl-1.1.txt', NULL, NULL, NULL, 'Academic Free License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, 'cd8a69970409b0e745adf9d9b7af7b75', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AFL 1.2', 'Academic Free License 
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AFL-1.2', 'Academic Free License 
 Version 1.2
 
 This Academic Free License applies to any original work of authorship (the \\"Original Work\\") whose owner (the \\"Licensor\\") has placed the following notice immediately following the copyright notice for the Original Work:
@@ -477,7 +477,7 @@ Mutual Termination for Patent Action. This License shall terminate automatically
 Right to Use. You may use the Original Work in all ways not otherwise restricted or conditioned by this License or by law, and Licensor promises not to interfere with or be responsible for such uses by You.
 
 This license is Copyright (C) 2002 Lawrence E. Rosen. All rights reserved. Permission is hereby granted to copy and distribute this license without modification. This license may not be modified without the express written permission of its copyright owner.', 'http://www.samurajdata.se/opensource/mirror/licenses/afl-1.2.txt', NULL, NULL, NULL, 'Academic Free License 1.2', NULL, NULL, NULL, '', NULL, false, false, false, '442fb89f9c27a4d5f50bec92fd3fe11d', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AFL 2.0', 'Academic Free License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AFL-2.0', 'Academic Free License
 v. 2.0
 
 This Academic Free License (the \\"License\\") applies to any original work of authorship (the \\"Original Work\\") whose owner (the \\"Licensor\\") has placed the following notice immediately following the copyright notice for the Original Work:
@@ -523,7 +523,7 @@ e) to display the Original Work publicly.
 15) Right to Use. You may use the Original Work in all ways not otherwise restricted or conditioned by this License or by law, and Licensor promises not to interfere with or be responsible for such uses by You.
 
 This license is Copyright (C) 2003 Lawrence E. Rosen. All rights reserved. Permission is hereby granted to copy and distribute this license without modification. This license may not be modified without the express written permission of its copyright owner.', 'http://www.samurajdata.se/opensource/mirror/licenses/afl-2.0.php', NULL, NULL, NULL, 'Academic Free License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '35f368ee2f054b873d1e08a92e1f2412', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AFL 2.1', 'Academic Free License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AFL-2.1', 'Academic Free License
 v. 2.1
 
 (plain text version)
@@ -566,7 +566,7 @@ to display the Original Work publicly.
 15) Right to Use. You may use the Original Work in all ways not otherwise restricted or conditioned by this License or by law, and Licensor promises not to interfere with or be responsible for such uses by You.
 
 This license is Copyright (C) 2003-2004 Lawrence E. Rosen. All rights reserved. Permission is hereby granted to copy and distribute this license without modification. This license may not be modified without the express written permission of its copyright owner.', 'http://www.samurajdata.se/opensource/mirror/licenses/afl-2.1.php', NULL, NULL, NULL, 'Academic Free License 2.1', NULL, NULL, NULL, '', NULL, false, false, false, 'aca9978bfec661792cacab77cc6a5b7b', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AFL 3.0', 'Academic Free License (\\"AFL\\") v. 3.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AFL-3.0', 'Academic Free License (\\"AFL\\") v. 3.0
 This Academic Free License (the \\"License\\") applies to any original work of authorship (the \\"Original Work\\") whose owner (the \\"Licensor\\") has placed the following licensing notice adjacent to the copyright notice for the Original Work:
 
 Licensed under the Academic Free License version 3.0
@@ -1046,7 +1046,7 @@ IS THE COMPLETE AND EXCLUSIVE STATEMENT OF THE RIGHTS AND LIABILITIES OF THE PAR
 SUPERCEDES ALL PRIOR ORAL AGREEMENTS, PROPOSALS OR UNDERSTANDINGS, AND ANY OTHER COMMUNICATIONS BETWEEN 
 
 US RELATING TO THE SUBJECT MATTER OF THIS AGREEMENT.', 'http://www.mepis.org/node/10356', NULL, NULL, NULL, 'Agere LT Modem Driver License', NULL, NULL, NULL, '', NULL, false, false, false, '640014b0dbf2eb30e8d5d60ae96e4621', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AGPL 1.0', 'AFFERO GENERAL PUBLIC LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AGPL-1.0', 'AFFERO GENERAL PUBLIC LICENSE
 Version 1, March 2002
 
 Copyright © 2002 Affero Inc.
@@ -1141,7 +1141,7 @@ NO WARRANTY
 11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM \\"AS IS\\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
 
 12. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.', 'http://www.affero.org/oagpl.html', NULL, NULL, NULL, 'Affero General Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'f24d9d5f3794d72434867b019a1e524c', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AGPL 3.0', '                    GNU AFFERO GENERAL PUBLIC LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'AGPL-3.0', '                    GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
@@ -1802,7 +1802,7 @@ specific requirements.
 if any, to sign a \\"copyright disclaimer\\" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 <http://www.gnu.org/licenses/>.', 'http://www.gnu.org/licenses/agpl-3.0.txt', NULL, NULL, NULL, 'GNU Affero General Public License', NULL, NULL, NULL, '', NULL, false, false, false, 'e826a2579663c7419a7c852023ca3c6f', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Apache', '/* ====================================================================
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Apache-1.0', '/* ====================================================================
  * Copyright (c) 1995-1999 The Apache Group.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1860,7 +1860,7 @@ INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copylef
  */
 
 ', 'http://www.apache.org/licenses/LICENSE-1.0', NULL, NULL, NULL, 'Apache License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'f35a8e2d0c46c37ecd2deac72ac3433d', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Apache2.0', 'Apache License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Apache-2.0', 'Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -1932,7 +1932,7 @@ To apply the Apache License to your work, attach the following boilerplate notic
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.', 'http://www.apache.org/licenses/LICENSE-2.0', NULL, NULL, NULL, 'Apache License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, 'd51b08168c70033fbd2b3059a6f678fc', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Apple', 'APPLE PUBLIC SOURCE LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'APSL-2.0', 'APPLE PUBLIC SOURCE LICENSE
 Version 2.0 -  August 6, 2003
 
 Please read this License carefully before downloading this software.  By downloading or using this software, you are agreeing to be bound by the terms of this License.  If you do not or cannot agree to the terms of this License, please do not download or use the software.
@@ -2031,8 +2031,8 @@ EXHIBIT A.
 
 This file contains Original Code and/or Modifications of Original Code as defined in and that are subject to the Apple Public Source License Version 2.0 (the ''License'').  You may not use this file except in compliance with the License.  Please obtain a copy of the License at http://www.opensource.apple.com/apsl/ and read it before using this file.
 
-The Original Code and all software distributed under the License are distributed on an ''AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.  Please see the License for the specific language governing rights and limitations under the License.\\" ', 'http://www.opensource.apple.com/license/apsl/', NULL, NULL, NULL, 'Apple Public Source License', NULL, NULL, NULL, '', NULL, false, false, false, '0ecdb746d2e35d62f67d24725cd01067', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Aptana', 'Aptana Public License 1.0
+The Original Code and all software distributed under the License are distributed on an ''AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.  Please see the License for the specific language governing rights and limitations under the License.\\" ', 'http://www.opensource.apple.com/license/apsl/', NULL, NULL, NULL, 'Apple Public Source License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '0ecdb746d2e35d62f67d24725cd01067', 2);
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Aptana-1.0', 'Aptana Public License 1.0
 The Aptana Public License is designed to allow you the freedom to use Aptana products without restriction, except for redistribution. We at Aptana want you to not only use Aptana for web development, but also freely share scripts, snippets, websites and other items with friends and coworkers, and to encourage others to use and adopt Aptana as well. However, we require that you do not redistribute Aptana Studio itself. If you are interested in redistributing Aptana or have a question, please contact us at license@aptana.com.
 Please view the Frequently Asked Questions if you have additional questions not answered here.
 THE PROGRAM (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS APTANA PUBLIC LICENSE (\\"LICENSE\\"). THE PROGRAM IS PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. BY EXERCISING ANY RIGHTS TO THE PROGRAM PROVIDED HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE.
@@ -2119,7 +2119,7 @@ Legal Terms
 
 8. DAMAGES WAIVER
    UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING, IN NO EVENT WILL ANY COPYRIGHTT HOLDERS, OR OTHER PARTIES WHO MAY COPY, MODIFY OR REDISTRIBUTE THE FONT AS PERMITTED ABOVE, BE LIABLE TO YOU FOR ANY DIRECT, INDIRECT, CONSEQUENTIAL, INCIDENTAL, SPECIAL OR EXEMPLARY DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE FONT (INCLUDING BUT NOT LIMITED TO PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA OR PROFITS; OR BUSINESS INTERRUPTION), EVEN IF SUCH HOLDERS OR OTHER PARTIES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.', 'http://ftp.gnu.org/gnu/non-gnu/chinese-fonts-truetype/LICENSE', NULL, NULL, NULL, 'Arphic Public License', NULL, NULL, NULL, '', NULL, false, false, false, '559c17df3aa4d5d73a9108fdbc8df9ed', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Artistic1.0', 'The Artistic License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Artistic-1.0', 'The Artistic License
 Preamble
 
 The intent of this document is to state the conditions under which a Package may be copied, such that the Copyright Holder maintains some semblance of artistic control over the development of the package, while giving the users of the package the right to use and distribute the Package in a more-or-less customary fashion, plus the right to make reasonable modifications.
@@ -2167,7 +2167,7 @@ d) make other distribution arrangements with the Copyright Holder.
 9. THIS PACKAGE IS PROVIDED \\"AS IS\\" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 The End', 'http://www.opensource.org/licenses/artistic-license-1.0.php', NULL, NULL, NULL, 'Artistic License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '179b99346a0bf509409ccf812e81fbd8', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Artistic2.0', 'Artistic License 2.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Artistic-2.0', 'Artistic License 2.0
 Copyright (c) 2000-2006, The Perl Foundation.
 
 Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
@@ -2295,7 +2295,7 @@ http://www.ascendercorp.com
 \\"Ascender\\" is a trademark of Ascender Corporation registered in the U.S. Patent and Trademark Office and elsewhere. All other trademarks are the property of their respective owners. All trademarks and copyrights are property of their respective owners.
 
 Revised 27 February, 2007', 'http://www.ascendercorp.com/services/licensing/eula-5/', NULL, NULL, NULL, 'Ascender EULA', NULL, NULL, NULL, '', NULL, false, false, false, '7dd357b925f585b4361be01a7150051c', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'APSL1.0', 'APPLE PUBLIC SOURCE LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'APSL-1.0', 'APPLE PUBLIC SOURCE LICENSE
 Version 1.0 - March 16, 1999
 
 Please read this License carefully before downloading this software.
@@ -2666,7 +2666,7 @@ FITNESS FOR A PARTICULAR PURPOSE OR NON-INFRINGEMENT. Please see the
 License for the specific language governing rights and limitations
 under the License.\\"
 ', '', NULL, NULL, NULL, 'Apple Public Source License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '58fac1a5386275d5d1bda8a1c9959260', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Apache 1.1', '/* ====================================================================
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Apache-1.1', '/* ====================================================================
  * The Apache Software License, Version 1.1
  *
  * Copyright (c) 2000 The Apache Software Foundation.  All rights
@@ -2781,7 +2781,7 @@ Should you have any questions concerning this Agreement, or if you desire to con
 
 7. Governing Law
 This agreement is governed by the laws of the United States of America and the Commonwealth of Massachusetts.', 'http://www.fontshop.com/licenses/bitstream/', NULL, NULL, NULL, 'Bitstream License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '71606f8b931bad22a2597709dcd72823', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CCA1.0', 'Attribution 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CC-BY-1.0', 'Attribution 1.0
 
 CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF THIS DRAFT LICENSE DOES NOT CREATE AN ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION ON AN \\"AS-IS\\" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM ITS USE.
 License
@@ -2836,7 +2836,7 @@ Creative Commons is not a party to this License, and makes no warranty whatsoeve
 Except for the limited purpose of indicating to the public that the Work is licensed under the CCPL, neither party will use the trademark \\"Creative Commons\\" or any related trademark or logo of Creative Commons without the prior written consent of Creative Commons. Any permitted use will be in compliance with Creative Commons'' then-current trademark usage guidelines, as may be published on its website or otherwise made available upon request from time to time.
 
 Creative Commons may be contacted at http://creativecommons.org/.', 'http://creativecommons.org/licenses/by/1.0/legalcode', NULL, NULL, NULL, 'Creative Commons Attribution 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '4d76a8d2449ad6a35e2c7f394df368db', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Eiffel1.0', 'Eiffel Forum License, version 1
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'EFL-1.0', 'Eiffel Forum License, version 1
 
 Permission is hereby granted to use, copy, modify and/or distribute
 this package, provided that:
@@ -2859,7 +2859,7 @@ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR
 ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.', 'http://www.eiffel-nice.org/license/forum.txt', NULL, NULL, NULL, 'Eiffel Forum License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '80ad9f011821321f0f2ff9e6f6bfe87a', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'EU-DataGrid', 'EU DataGrid Software License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'EUDatagrid', 'EU DataGrid Software License
 
 Copyright (c) 2001 EU DataGrid. All rights reserved.
 
@@ -2885,7 +2885,7 @@ THIS SOFTWARE IS PROVIDED BY THE EU DATAGRID AND CONTRIBUTORS \\"AS IS\\" AND AN
 
 THE EU DATAGRID AND CONTRIBUTORS SHALL HAVE NO LIABILITY TO LICENSEE OR OTHER PERSONS FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, LOSS OF USE, DATA OR PROFITS, OR BUSINESS INTERRUPTION, HOWEVER CAUSED AND ON ANY THEORY OF CONTRACT, WARRANTY, TORT (INCLUDING NEGLIGENCE), PRODUCT LIABILITY OR OTHERWISE, ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 ', 'http://www.opensource.org/licenses/eudatagrid.php', NULL, NULL, NULL, 'EU DataGrid Software License', NULL, NULL, NULL, '', NULL, false, false, false, 'c33dd839182a0708a0a0f65aadbf8d4d', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Frameworx1.0', 'THE FRAMEWORX OPEN LICENSE 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Frameworx-1.0', 'THE FRAMEWORX OPEN LICENSE 1.0
 This License Agreement, The Frameworx Open License 1.0, has been entered into between The Frameworx Company and you, the licensee hereunder, effective as of Your acceptance of the Frameworx Code Base or an Downstream Distribution (each as defined below).
 AGREEMENT BACKGROUND
 The Frameworx Company is committed to the belief that open source software results in better quality, greater technical and product innovation in the market place and a more empowered and productive developer and end-user community. Our objective is to ensure that the Frameworx Code Base, and the source code for improvements and innovations to it, remain free and open to the community. To further these beliefs and objectives, we are distributing the Frameworx Code Base, without royalties and in source code form, to the community pursuant to this License Agreement.
@@ -2944,8 +2944,8 @@ Your agreement to the foregoing as of the date hereof has been evidenced by your
 
 (C) THE FRAMEWORX COMPANY 2003
 ', 'http://opensource.org/licenses/frameworx.php', NULL, NULL, NULL, 'Frameworx Open License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '1e8bdb53db662b8ba76df594951ff287', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'gSOAP', 'gSOAP Public License
-Version 1.3a
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'gSOAP-1.3b', 'gSOAP Public License
+Version 1.3b
 The gSOAP public license is derived from the Mozilla Public License (MPL1.1). The sections that were deleted from the original MPL1.1 text are 1.0.1, 2.1.(c),(d), 2.2.(c),(d), 8.2.(b), 10, and 11. Section 3.8 was added. The modified sections are 2.1.(b), 2.2.(b), 3.2 (simplified), 3.5 (deleted the last sentence), and 3.6 (simplified).
 1  DEFINITIONS.
 
@@ -3102,8 +3102,8 @@ EXHIBIT B.
 \\"Part of the software embedded in this product is gSOAP software.
 Portions created by gSOAP are Copyright (C) 2001-2004 Robert A. van Engelen, Genivia inc. All Rights Reserved.
 THE SOFTWARE IN THIS PRODUCT WAS IN PART PROVIDED BY GENIVIA INC AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\\" 
-', 'http://www.cs.fsu.edu/~engelen/license.html', NULL, NULL, NULL, 'gSOAP Public License 1.3a', NULL, NULL, NULL, '', NULL, false, false, false, '183b0527d1448747b57ebe4edf683196', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Helix/RealNetworks EULA', 'Helix DNA Technology Binary Research Use License
+', 'http://www.cs.fsu.edu/~engelen/license.html', NULL, NULL, NULL, 'gSOAP Public License 1.3b', NULL, NULL, NULL, '', NULL, false, false, false, '183b0527d1448747b57ebe4edf683196', 2);
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Helix/RealNetworksEULA', 'Helix DNA Technology Binary Research Use License
 
 REDISTRIBUTION NOT PERMITTED
 
@@ -3160,7 +3160,7 @@ THIS AGREEMENT AND ALL MATTERS REGARDING THE SOFTWARE SHALL BE INTERPRETED EXCLU
 ANY VIOLATION OF THIS AGREEMENT AND THESE TERMS WILL BE DEEMED TO CAUSE HP IRREPARABLE HARM. 
 THESE CONDITIONS SHALL APPLY EVEN IF YOU ADVISE HP TO THE CONTRARY IN WRITING OR OTHERWISE; THIS AGREEMENT MAY NOT BE CONTRADICTED OR ALTERED, EXCEPT BY A WRITTEN AMENDMENT THAT BOTH SPECIFICALLY REFERENCES THIS AGREEMENT AND IS SIGNED BY AN AUTHORIZED REPRESENTATIVE OF HP.
 ', 'http://h30097.www3.hp.com/hp_sw_license.html ', NULL, NULL, NULL, 'HP Software License Terms', NULL, NULL, NULL, '', NULL, false, false, false, '0bff5fec79cfdb26008b45f7c612e146', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'IBM', 'IBM Public License Version 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'IPL-1.0', 'IBM Public License Version 1.0
 THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS IBM PUBLIC LICENSE (\\"AGREEMENT\\"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT''S ACCEPTANCE OF THIS AGREEMENT.
 1. DEFINITIONS
 
@@ -3228,7 +3228,7 @@ IBM may publish new versions (including revisions) of this Agreement from time t
 
 This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation.
 ', 'http://www.opensource.org/licenses/ibmpl.php', NULL, NULL, NULL, 'IBM Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '5020053cd3317a84495ff0fb7fa00cf2', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ATI EULA', 'ATI Software End User License Agreement
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ATIEULA', 'ATI Software End User License Agreement
 
 PLEASE  READ  THIS  LICENSE  CAREFULLY  BEFORE  USING   THE   SOFTWARE.   BY
 DOWNLOADING, INSTALLING, COPYING OR USING THE SOFTWARE, YOU ARE AGREEING  TO
@@ -3409,7 +3409,7 @@ or  agreements,  written  or  oral,  regarding  such  subject  matter.    No
 amendment to or modification of this  License  will  be  binding  unless  in
 writing and signed by a duly authorized representative of ATI.
 ', '', NULL, NULL, NULL, 'ATI Software EULA', NULL, NULL, NULL, '', NULL, false, false, false, 'f3abb5118e4c17f4e84b54e198fcb4d6', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ECL1.0', 'The Educational Community License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ECL-1.0', 'The Educational Community License
 
 This Educational Community License (the \\"License\\") applies to any
 original work of authorship (the \\"Original Work\\") whose owner (the
@@ -3461,7 +3461,7 @@ without specific, written prior permission. Title to copyright in the
 Original Work and any associated documentation will at all times remain
 with the copyright holders. 
 ', 'http://opensource.org/licenses/ecl1.php', NULL, NULL, NULL, 'Educational Community License', NULL, NULL, NULL, '', NULL, false, false, false, '4c369bc8d0a6a576b2fd1f57375523e5', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'APSL1.1', 'APPLE PUBLIC SOURCE LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'APSL-1.1', 'APPLE PUBLIC SOURCE LICENSE
 Version 1.1 - April 19, 1999
 
 Please read this License carefully before downloading this software.
@@ -3834,7 +3834,7 @@ FITNESS FOR A PARTICULAR PURPOSE OR NON- INFRINGEMENT. Please see the
 License for the specific language governing rights and limitations
 under the License.\\"
 ', '', NULL, NULL, NULL, 'Apple Public Source License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, 'be4d5fb042ab25eba0fe207968f13333', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'APSL1.2', 'APPLE PUBLIC SOURCE LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'APSL-1.2', 'APPLE PUBLIC SOURCE LICENSE
 Version 1.2 - January 4, 2001
 
 Please read this License carefully before downloading this software.
@@ -4206,13 +4206,13 @@ FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
 Please see the License for the specific language governing rights and
 limitations under the License.\\"
 ', '', NULL, NULL, NULL, 'Apple Public Source License 1.2', NULL, NULL, NULL, '', NULL, false, false, false, 'e54029e2d251fd4df13c29cd92de27aa', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'BitTorrent1.0', 'The contents of this file are subject to the BitTorrent Open Source
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'BitTorrent-1.0', 'The contents of this file are subject to the BitTorrent Open Source
 License Version 1.0 (the License). You may not copy or use this file,
 in either source code or executable form, except in compliance with the
 License. You may obtain a copy of the License at
 http://www.bittorrent.com/license/.
 ', '', NULL, NULL, NULL, 'BitTorrent License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '657227b7c659b6f3c3575e22ab024c75', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CA1.1', 'Computer Associates Trusted Open Source License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CATOSL-1.1', 'Computer Associates Trusted Open Source License
 
 Version 1.1
 
@@ -4565,8 +4565,8 @@ licenses and authorizations.
 
 11.7 This License constitutes the entire agreement between the parties
 with respect to the subject matter hereof.
-', 'http://opensource.org/licenses/ca-tosl1.1.php', NULL, NULL, NULL, 'Computer Associates Trusted Open Source License', NULL, NULL, NULL, '', NULL, false, false, false, '9c6d9150665371976299d7bb34eedca8', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CDDL1.0', '
+', 'http://opensource.org/licenses/ca-tosl1.1.php', NULL, NULL, NULL, 'Computer Associates Trusted Open Source License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '9c6d9150665371976299d7bb34eedca8', 2);
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CDDL-1.0', '
 COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
 
 
@@ -4952,7 +4952,7 @@ COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
       herein is intended or shall be deemed to constitute any admission
       of liability.
 ', 'http://hub.opensolaris.org/bin/download/Main/licensing/cddllicense.txt', NULL, NULL, NULL, 'Common Development and Distribution License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '4e93d6048eb72005d453fc55fa81187a', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ECL2.0', 'Educational Community License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ECL-2.0', 'Educational Community License
 Version 2.0, April 2007
 
 The Educational Community License version 2.0 (\\"ECL\\") consists of the Apache 2.0 license, modified to change the scope of the patent grant in section 3 to be specific to the needs of the education communities using this license. The original Apache 2.0 license can be found at: http://www.apache.org/licenses/LICENSE-2.0
@@ -5027,7 +5027,7 @@ BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied. See the License for the specific language governing
 permissions and limitations under the License.
 ', 'http://opensource.org/licenses/ecl2.txt ', NULL, NULL, NULL, 'Educational Community License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '98a6c3da3ffba802dbf38c73fee02ed2', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'BitTorrent', 'BitTorrent Open Source License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'BitTorrent-1.1', 'BitTorrent Open Source License
 
 Version 1.1
 
@@ -5166,7 +5166,7 @@ License:
 The contents of this file are subject to the BitTorrent Open Source License Version 1.0 (the License). You may not copy or use this file, in either source code or executable form, except in compliance with the License. You may obtain a copy of the License at http://www.bittorrent.com/license/.
 
 Software distributed under the License is distributed on an AS IS basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the specific language governing rights and limitations under the License.', 'http://www.bittorrent.com/legal/bittorrent-open-source-license', NULL, NULL, NULL, 'BitTorrent Open Source License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '87a511072ff87fd69420068519ce4e7e', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CCA2.5', 'Attribution 2.5
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CC-BY-2.5', 'Attribution 2.5
 
 CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF THIS LICENSE DOES NOT CREATE AN ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION ON AN \\"AS-IS\\" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM ITS USE.
 License
@@ -5224,7 +5224,7 @@ Creative Commons is not a party to this License, and makes no warranty whatsoeve
 Except for the limited purpose of indicating to the public that the Work is licensed under the CCPL, neither party will use the trademark \\"Creative Commons\\" or any related trademark or logo of Creative Commons without the prior written consent of Creative Commons. Any permitted use will be in compliance with Creative Commons'' then-current trademark usage guidelines, as may be published on its website or otherwise made available upon request from time to time.
 
 Creative Commons may be contacted at http://creativecommons.org/.', 'http://creativecommons.org/licenses/by/2.5/legalcode', NULL, NULL, NULL, 'Creative Commons Attribution 2.5', NULL, NULL, NULL, '', NULL, false, false, false, 'b8558a2e5e1dda6e6e595889c86f01b0', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CCA-SA1.0', 'Attribution-ShareAlike 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CC-BY-SA-1.0', 'Attribution-ShareAlike 1.0
 
 CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF THIS DRAFT LICENSE DOES NOT CREATE AN ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION ON AN \\"AS-IS\\" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM ITS USE.
 License
@@ -5312,7 +5312,7 @@ Software, including technical data, is subject to U.S. export control laws, incl
 This License shall be governed by and construed in accordance with the laws of the State of California, United States of America, as if performed wholly within the state and without giving effect to the principles of conflict of law. If any portion hereof is found to be void or unenforceable, the remaining provisions of this License shall remain in full force and effect. This License constitutes the entire License between the parties with respect to the use of the Software.
 
 Restricted Rights - Cisco''s software is provided to non-DOD agencies with RESTRICTED RIGHTS and its supporting documentation is provided with LIMITED RIGHTS. Use, duplication, or disclosure by the Government is subject to the restrictions as set forth in subparagraph \\"C\\" of the Commercial Computer Software - Restricted Rights clause at FAR 52.227-19. In the event the sale is to a DOD agency, the government''s rights in software, supporting documentation, and technical data are governed by the restrictions in the Technical Data Commercial Items clause at DFARS 252.227-7015 and DFARS 227.7202. Manufacturer is Cisco Systems, Inc. 170 W. Tasman Dr., San Jose, CA 95134.', 'http://www.cisco.com/public/sw-license-agreement.html', NULL, NULL, NULL, 'Cisco Software License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, 'aa8bd1baccb644dbb04822ca60f29890', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CPL1.0', 'Common Public License - v 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CPL-1.0', 'Common Public License - v 1.0
 
 Updated 16 Apr 2009
 
@@ -5404,8 +5404,7 @@ Everyone is permitted to copy and distribute copies of this Agreement, but in or
 
 
 This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation.', 'http://www.eclipse.org/legal/cpl-v10.html', NULL, NULL, NULL, 'Common Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '9e496f396b6b2b5aaf834106706adfbf', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ZPL1.1', 'ZPL 1.1
-Zope Public License (ZPL) Version 1.1
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ZPL-1.1', 'Zope Public License (ZPL) Version 1.1
 
 Copyright (c) Zope Corporation. All rights reserved.
 
@@ -5431,7 +5430,7 @@ Disclaimer
 THIS SOFTWARE IS PROVIDED BY ZOPE CORPORATION ``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ZOPE CORPORATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This software consists of contributions made by Zope Corporation and many individuals on behalf of Zope Corporation. Specific attributions are listed in the accompanying credits file.', 'http://www.zope.org/Resources/License/ZPL-1.1', NULL, NULL, NULL, 'Zope Public License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '5d561229dc0b5c07e7f6fe96333afb5b', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Alfresco FLOSS', 'Version 0.5, 30 August 2006
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Alfresco-FLOSS', 'Version 0.5, 30 August 2006
 
 Exception Intent
 
@@ -5588,7 +5587,7 @@ INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copylef
    not modified. Adobe Systems has no responsibility or obligation to
    support the use of the AFM files.
 ', '', NULL, NULL, NULL, 'Adobe Core AFM Files', NULL, NULL, NULL, '', NULL, false, false, false, 'c5ec9b88509a3f598c10242788efd618', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Boost', 'Boost Software License - Version 1.0 - August 17th, 2003
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'BSL-1.0', 'Boost Software License - Version 1.0 - August 17th, 2003
 
 Permission is hereby granted, free of charge, to any person or organization
 obtaining a copy of the software and accompanying documentation covered by
@@ -5611,7 +5610,7 @@ SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
 FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.', 'http://www.boost.org/LICENSE_1_0.txt', NULL, NULL, NULL, 'Boost Software License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'e4cbe3f85f5c5eada3480adda17b7628', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CCA-SA2.5', 'Attribution-ShareAlike 2.5
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CC-BY-SA-2.5', 'Attribution-ShareAlike 2.5
 
 CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF THIS LICENSE DOES NOT CREATE AN ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION ON AN \\"AS-IS\\" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM ITS USE.
 License
@@ -5671,7 +5670,7 @@ Creative Commons is not a party to this License, and makes no warranty whatsoeve
 Except for the limited purpose of indicating to the public that the Work is licensed under the CCPL, neither party will use the trademark \\"Creative Commons\\" or any related trademark or logo of Creative Commons without the prior written consent of Creative Commons. Any permitted use will be in compliance with Creative Commons'' then-current trademark usage guidelines, as may be published on its website or otherwise made available upon request from time to time.
 
 Creative Commons may be contacted at http://creativecommons.org/.', 'http://creativecommons.org/licenses/by-sa/2.5/legalcode', NULL, NULL, NULL, 'Creative Commons Attribution-ShareAlike 2.5', NULL, NULL, NULL, '', NULL, false, false, false, '9b324eed2e0a8e50be510e3de35334d7', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CUA', 'CUA Office Public License Version 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CUA-OPL-1.0', 'CUA Office Public License Version 1.0
 (plain text)
 1. Definitions.
 
@@ -6140,7 +6139,7 @@ under either the CUAPL or the [___] License.\\"
 the notices in the Source Code files of the Original Code. You should
 use the text of this Exhibit A rather than the text found in the
 Original Code Source Code for Your Modifications.]', 'http://www.opensource.org/licenses/cuaoffice.php', NULL, NULL, NULL, 'CUA Office Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '75aaccf4628159666e219310ac3944a7', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Vovida', 'Vovida Software License v. 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'VSL-1.0', 'Vovida Software License v. 1.0
 
 This license applies to all software incorporated in the \\"Vovida
 Open Communication Application Library\\" except for those portions
@@ -6200,7 +6199,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED \\"AS IS\\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.', 'http://www.opennetcf.com/FreeSoftware/Licensing/MITX11License/tabid/254/Default.aspx', NULL, NULL, NULL, 'X11 License', NULL, NULL, NULL, '', NULL, false, false, false, 'bdc762ad586266312ed2a7bee56a6ff3', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Phorum2.0', '/* ====================================================================
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Phorum-2.0', '/* ====================================================================
  * The Phorum License 2.0.
  *
  * Copyright (c) 2001 The Phorum Development Team.  All rights
@@ -6265,7 +6264,7 @@ INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copylef
  * see <http://www.apache.org/>.
  *
  */', 'http://www.phorum.org/license.txt', NULL, NULL, NULL, 'Phorum License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, 'a53f99234a84ba68e75427a31485c336', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python2.3.7', 'Python 2.3.7 license
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python-2.3.7', 'Python 2.3.7 license
 
 This is the official license for the Python 2.3.7 release:
 
@@ -6535,7 +6534,7 @@ FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'http://www.python.org/download/releases/2.3.7/license/', NULL, NULL, NULL, 'Python License 2.3.7', NULL, NULL, NULL, '', NULL, false, false, false, 'ea8d9a0d1ef3b34ebf490f982ca0d39b', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python2.4.4', 'Python 2.4.4 license
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python-2.4.4', 'Python 2.4.4 license
 
 This is the official license for the Python 2.4 release:
 
@@ -7254,7 +7253,7 @@ Note that, as provided in the License, the Software is distributed on an \\"AS I
 Original Code. The Original Code is: [name of software, version number, and release date], developed by Silicon Graphics, Inc. The Original Code is Copyright (c) [dates of first publication, as appearing in the Notice in the Original Code] Silicon Graphics, Inc. Copyright in any portions created by third parties is as indicated elsewhere herein. All Rights Reserved.
 Additional Notice Provisions: [such additional provisions, if any, as appear in the Notice in the Original Code under the heading \\"Additional Notice Provisions\\"]
 ', 'http://oss.sgi.com/projects/FreeB/SGIFreeSWLicB.1.1.doc', NULL, NULL, NULL, 'SGI Free Software License B 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '3624af6e6b1e25bbf18d0c1314d1f4dd', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'SunPL1.0', 'SUN PUBLIC LICENSE Version 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'SPL-1.0', 'SUN PUBLIC LICENSE Version 1.0
 
 1. Definitions.
 
@@ -7798,7 +7797,7 @@ The Software is licensed only with \\"RESTRICTED RIGHTS,\\" and use, duplication
 
 Miscellaneous
 Broadcom and Licensee are independent contractors. This is the entire Agreement between the parties relating to the subject matter hereof, supersedes any and all prior proposals, agreements and representations between the parties, whether written or oral, and no waiver, modification or amendment of the Agreement shall be valid unless in writing signed by each party. The waiver of a breach of any term hereof shall in no way be construed as a waiver of any other term or breach hereof. If any provision of this Agreement shall be held by a court of competent jurisdiction to be contrary to law, the remaining provisions of this Agreement shall remain in full force and effect. This Agreement is governed by the laws of the State of California without reference to conflict of laws principles. The parties expressly stipulate that the 1980 United Nations Convention on Contracts for the International Sale of Goods shall not apply. All disputes arising out of this Agreement shall be subject to the exclusive jurisdiction of the state and federal courts located in Orange County, California, and the parties agree and submit to the personal and exclusive jurisdiction and venue of these courts.', 'http://www.broadcom.com/support/ethernet_nic/driver-sla.php?driver=570x-XP-32', NULL, NULL, NULL, 'Broadcom License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '9261c73d60e367197b1b676286028fdd', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CCA-SA3.0', 'Attribution-ShareAlike 3.0 Unported
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CC-BY-SA-3.0', 'Attribution-ShareAlike 3.0 Unported
 
 CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF THIS LICENSE DOES NOT CREATE AN ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION ON AN \\"AS-IS\\" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM ITS USE.
 License
@@ -7866,195 +7865,6 @@ Creative Commons is not a party to this License, and makes no warranty whatsoeve
 Except for the limited purpose of indicating to the public that the Work is licensed under the CCPL, Creative Commons does not authorize the use by either party of the trademark \\"Creative Commons\\" or any related trademark or logo of Creative Commons without the prior written consent of Creative Commons. Any permitted use will be in compliance with Creative Commons'' then-current trademark usage guidelines, as may be published on its website or otherwise made available upon request from time to time. For the avoidance of doubt, this trademark restriction does not form part of the License.
 
 Creative Commons may be contacted at http://creativecommons.org/.', 'http://creativecommons.org/licenses/by-sa/3.0/legalcode', NULL, NULL, NULL, 'Creative Commons Attribution-ShareAlike 3.0', NULL, NULL, NULL, '', NULL, false, false, false, 'e310dca2562832823024a2fed8b85966', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CCGPL2.1', 'GNU Lesser General Public License, version 2.1
-Why you shouldn''t use the Lesser GPL for your next library
-What to do if you see a possible LGPL violation
-Translations of the LGPL
-The GNU Lesser General Public License as a text file
-The GNU Lesser General Public License as a Texinfo file
-The GNU Lesser General Public License as a as an appendix in DocBook format
-This GNU Lesser General Public License counts as the successor of the GNU Library General Public License. For an explaination of why this change was necessary, read the Why you shouldn''t use the Lesser GPL for your next library article.
-
-Table of Contents
-
-GNU LESSER GENERAL PUBLIC LICENSE
-Preamble
-TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-How to Apply These Terms to Your New Libraries
-GNU LESSER GENERAL PUBLIC LICENSE
-
-Version 2.1, February 1999
-
-Copyright (C) 1991, 1999 Free Software Foundation, Inc.
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-Everyone is permitted to copy and distribute verbatim copies
-of this license document, but changing it is not allowed.
-
-[This is the first released version of the Lesser GPL.  It also counts
- as the successor of the GNU Library Public License, version 2, hence
- the version number 2.1.]
-Preamble
-
-The licenses for most software are designed to take away your freedom to share and change it. By contrast, the GNU General Public Licenses are intended to guarantee your freedom to share and change free software--to make sure the software is free for all its users.
-
-This license, the Lesser General Public License, applies to some specially designated software packages--typically libraries--of the Free Software Foundation and other authors who decide to use it. You can use it too, but we suggest you first think carefully about whether this license or the ordinary General Public License is the better strategy to use in any particular case, based on the explanations below.
-
-When we speak of free software, we are referring to freedom of use, not price. Our General Public Licenses are designed to make sure that you have the freedom to distribute copies of free software (and charge for this service if you wish); that you receive source code or can get it if you want it; that you can change the software and use pieces of it in new free programs; and that you are informed that you can do these things.
-
-To protect your rights, we need to make restrictions that forbid distributors to deny you these rights or to ask you to surrender these rights. These restrictions translate to certain responsibilities for you if you distribute copies of the library or if you modify it.
-
-For example, if you distribute copies of the library, whether gratis or for a fee, you must give the recipients all the rights that we gave you. You must make sure that they, too, receive or can get the source code. If you link other code with the library, you must provide complete object files to the recipients, so that they can relink them with the library after making changes to the library and recompiling it. And you must show them these terms so they know their rights.
-
-We protect your rights with a two-step method: (1) we copyright the library, and (2) we offer you this license, which gives you legal permission to copy, distribute and/or modify the library.
-
-To protect each distributor, we want to make it very clear that there is no warranty for the free library. Also, if the library is modified by someone else and passed on, the recipients should know that what they have is not the original version, so that the original author''s reputation will not be affected by problems that might be introduced by others.
-
-Finally, software patents pose a constant threat to the existence of any free program. We wish to make sure that a company cannot effectively restrict the users of a free program by obtaining a restrictive license from a patent holder. Therefore, we insist that any patent license obtained for a version of the library must be consistent with the full freedom of use specified in this license.
-
-Most GNU software, including some libraries, is covered by the ordinary GNU General Public License. This license, the GNU Lesser General Public License, applies to certain designated libraries, and is quite different from the ordinary General Public License. We use this license for certain libraries in order to permit linking those libraries into non-free programs.
-
-When a program is linked with a library, whether statically or using a shared library, the combination of the two is legally speaking a combined work, a derivative of the original library. The ordinary General Public License therefore permits such linking only if the entire combination fits its criteria of freedom. The Lesser General Public License permits more lax criteria for linking other code with the library.
-
-We call this license the \\"Lesser\\" General Public License because it does Less to protect the user''s freedom than the ordinary General Public License. It also provides other free software developers Less of an advantage over competing non-free programs. These disadvantages are the reason we use the ordinary General Public License for many libraries. However, the Lesser license provides advantages in certain special circumstances.
-
-For example, on rare occasions, there may be a special need to encourage the widest possible use of a certain library, so that it becomes a de-facto standard. To achieve this, non-free programs must be allowed to use the library. A more frequent case is that a free library does the same job as widely used non-free libraries. In this case, there is little to gain by limiting the free library to free software only, so we use the Lesser General Public License.
-
-In other cases, permission to use a particular library in non-free programs enables a greater number of people to use a large body of free software. For example, permission to use the GNU C Library in non-free programs enables many more people to use the whole GNU operating system, as well as its variant, the GNU/Linux operating system.
-
-Although the Lesser General Public License is Less protective of the users'' freedom, it does ensure that the user of a program that is linked with the Library has the freedom and the wherewithal to run that program using a modified version of the Library.
-
-The precise terms and conditions for copying, distribution and modification follow. Pay close attention to the difference between a \\"work based on the library\\" and a \\"work that uses the library\\". The former contains code derived from the library, whereas the latter must be combined with the library in order to run.
-
-TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-
-0. This License Agreement applies to any software library or other program which contains a notice placed by the copyright holder or other authorized party saying it may be distributed under the terms of this Lesser General Public License (also called \\"this License\\"). Each licensee is addressed as \\"you\\".
-
-A \\"library\\" means a collection of software functions and/or data prepared so as to be conveniently linked with application programs (which use some of those functions and data) to form executables.
-
-The \\"Library\\", below, refers to any such software library or work which has been distributed under these terms. A \\"work based on the Library\\" means either the Library or any derivative work under copyright law: that is to say, a work containing the Library or a portion of it, either verbatim or with modifications and/or translated straightforwardly into another language. (Hereinafter, translation is included without limitation in the term \\"modification\\".)
-
-\\"Source code\\" for a work means the preferred form of the work for making modifications to it. For a library, complete source code means all the source code for all modules it contains, plus any associated interface definition files, plus the scripts used to control compilation and installation of the library.
-
-Activities other than copying, distribution and modification are not covered by this License; they are outside its scope. The act of running a program using the Library is not restricted, and output from such a program is covered only if its contents constitute a work based on the Library (independent of the use of the Library in a tool for writing it). Whether that is true depends on what the Library does and what the program that uses the Library does.
-
-1. You may copy and distribute verbatim copies of the Library''s complete source code as you receive it, in any medium, provided that you conspicuously and appropriately publish on each copy an appropriate copyright notice and disclaimer of warranty; keep intact all the notices that refer to this License and to the absence of any warranty; and distribute a copy of this License along with the Library.
-
-You may charge a fee for the physical act of transferring a copy, and you may at your option offer warranty protection in exchange for a fee.
-
-2. You may modify your copy or copies of the Library or any portion of it, thus forming a work based on the Library, and copy and distribute such modifications or work under the terms of Section 1 above, provided that you also meet all of these conditions:
-
-a) The modified work must itself be a software library.
-b) You must cause the files modified to carry prominent notices stating that you changed the files and the date of any change.
-c) You must cause the whole of the work to be licensed at no charge to all third parties under the terms of this License.
-d) If a facility in the modified Library refers to a function or a table of data to be supplied by an application program that uses the facility, other than as an argument passed when the facility is invoked, then you must make a good faith effort to ensure that, in the event an application does not supply such function or table, the facility still operates, and performs whatever part of its purpose remains meaningful.
-(For example, a function in a library to compute square roots has a purpose that is entirely well-defined independent of the application. Therefore, Subsection 2d requires that any application-supplied function or table used by this function must be optional: if the application does not supply it, the square root function must still compute square roots.)
-
-These requirements apply to the modified work as a whole. If identifiable sections of that work are not derived from the Library, and can be reasonably considered independent and separate works in themselves, then this License, and its terms, do not apply to those sections when you distribute them as separate works. But when you distribute the same sections as part of a whole which is a work based on the Library, the distribution of the whole must be on the terms of this License, whose permissions for other licensees extend to the entire whole, and thus to each and every part regardless of who wrote it.
-
-Thus, it is not the intent of this section to claim rights or contest your rights to work written entirely by you; rather, the intent is to exercise the right to control the distribution of derivative or collective works based on the Library.
-
-In addition, mere aggregation of another work not based on the Library with the Library (or with a work based on the Library) on a volume of a storage or distribution medium does not bring the other work under the scope of this License.
-
-3. You may opt to apply the terms of the ordinary GNU General Public License instead of this License to a given copy of the Library. To do this, you must alter all the notices that refer to this License, so that they refer to the ordinary GNU General Public License, version 2, instead of to this License. (If a newer version than version 2 of the ordinary GNU General Public License has appeared, then you can specify that version instead if you wish.) Do not make any other change in these notices.
-
-Once this change is made in a given copy, it is irreversible for that copy, so the ordinary GNU General Public License applies to all subsequent copies and derivative works made from that copy.
-
-This option is useful when you wish to copy part of the code of the Library into a program that is not a library.
-
-4. You may copy and distribute the Library (or a portion or derivative of it, under Section 2) in object code or executable form under the terms of Sections 1 and 2 above provided that you accompany it with the complete corresponding machine-readable source code, which must be distributed under the terms of Sections 1 and 2 above on a medium customarily used for software interchange.
-
-If distribution of object code is made by offering access to copy from a designated place, then offering equivalent access to copy the source code from the same place satisfies the requirement to distribute the source code, even though third parties are not compelled to copy the source along with the object code.
-
-5. A program that contains no derivative of any portion of the Library, but is designed to work with the Library by being compiled or linked with it, is called a \\"work that uses the Library\\". Such a work, in isolation, is not a derivative work of the Library, and therefore falls outside the scope of this License.
-
-However, linking a \\"work that uses the Library\\" with the Library creates an executable that is a derivative of the Library (because it contains portions of the Library), rather than a \\"work that uses the library\\". The executable is therefore covered by this License. Section 6 states terms for distribution of such executables.
-
-When a \\"work that uses the Library\\" uses material from a header file that is part of the Library, the object code for the work may be a derivative work of the Library even though the source code is not. Whether this is true is especially significant if the work can be linked without the Library, or if the work is itself a library. The threshold for this to be true is not precisely defined by law.
-
-If such an object file uses only numerical parameters, data structure layouts and accessors, and small macros and small inline functions (ten lines or less in length), then the use of the object file is unrestricted, regardless of whether it is legally a derivative work. (Executables containing this object code plus portions of the Library will still fall under Section 6.)
-
-Otherwise, if the work is a derivative of the Library, you may distribute the object code for the work under the terms of Section 6. Any executables containing that work also fall under Section 6, whether or not they are linked directly with the Library itself.
-
-6. As an exception to the Sections above, you may also combine or link a \\"work that uses the Library\\" with the Library to produce a work containing portions of the Library, and distribute that work under terms of your choice, provided that the terms permit modification of the work for the customer''s own use and reverse engineering for debugging such modifications.
-
-You must give prominent notice with each copy of the work that the Library is used in it and that the Library and its use are covered by this License. You must supply a copy of this License. If the work during execution displays copyright notices, you must include the copyright notice for the Library among them, as well as a reference directing the user to the copy of this License. Also, you must do one of these things:
-
-a) Accompany the work with the complete corresponding machine-readable source code for the Library including whatever changes were used in the work (which must be distributed under Sections 1 and 2 above); and, if the work is an executable linked with the Library, with the complete machine-readable \\"work that uses the Library\\", as object code and/or source code, so that the user can modify the Library and then relink to produce a modified executable containing the modified Library. (It is understood that the user who changes the contents of definitions files in the Library will not necessarily be able to recompile the application to use the modified definitions.)
-b) Use a suitable shared library mechanism for linking with the Library. A suitable mechanism is one that (1) uses at run time a copy of the library already present on the user''s computer system, rather than copying library functions into the executable, and (2) will operate properly with a modified version of the library, if the user installs one, as long as the modified version is interface-compatible with the version that the work was made with.
-c) Accompany the work with a written offer, valid for at least three years, to give the same user the materials specified in Subsection 6a, above, for a charge no more than the cost of performing this distribution.
-d) If distribution of the work is made by offering access to copy from a designated place, offer equivalent access to copy the above specified materials from the same place.
-e) Verify that the user has already received a copy of these materials or that you have already sent this user a copy.
-For an executable, the required form of the \\"work that uses the Library\\" must include any data and utility programs needed for reproducing the executable from it. However, as a special exception, the materials to be distributed need not include anything that is normally distributed (in either source or binary form) with the major components (compiler, kernel, and so on) of the operating system on which the executable runs, unless that component itself accompanies the executable.
-
-It may happen that this requirement contradicts the license restrictions of other proprietary libraries that do not normally accompany the operating system. Such a contradiction means you cannot use both them and the Library together in an executable that you distribute.
-
-7. You may place library facilities that are a work based on the Library side-by-side in a single library together with other library facilities not covered by this License, and distribute such a combined library, provided that the separate distribution of the work based on the Library and of the other library facilities is otherwise permitted, and provided that you do these two things:
-
-a) Accompany the combined library with a copy of the same work based on the Library, uncombined with any other library facilities. This must be distributed under the terms of the Sections above.
-b) Give prominent notice with the combined library of the fact that part of it is a work based on the Library, and explaining where to find the accompanying uncombined form of the same work.
-8. You may not copy, modify, sublicense, link with, or distribute the Library except as expressly provided under this License. Any attempt otherwise to copy, modify, sublicense, link with, or distribute the Library is void, and will automatically terminate your rights under this License. However, parties who have received copies, or rights, from you under this License will not have their licenses terminated so long as such parties remain in full compliance.
-
-9. You are not required to accept this License, since you have not signed it. However, nothing else grants you permission to modify or distribute the Library or its derivative works. These actions are prohibited by law if you do not accept this License. Therefore, by modifying or distributing the Library (or any work based on the Library), you indicate your acceptance of this License to do so, and all its terms and conditions for copying, distributing or modifying the Library or works based on it.
-
-10. Each time you redistribute the Library (or any work based on the Library), the recipient automatically receives a license from the original licensor to copy, distribute, link with or modify the Library subject to these terms and conditions. You may not impose any further restrictions on the recipients'' exercise of the rights granted herein. You are not responsible for enforcing compliance by third parties with this License.
-
-11. If, as a consequence of a court judgment or allegation of patent infringement or for any other reason (not limited to patent issues), conditions are imposed on you (whether by court order, agreement or otherwise) that contradict the conditions of this License, they do not excuse you from the conditions of this License. If you cannot distribute so as to satisfy simultaneously your obligations under this License and any other pertinent obligations, then as a consequence you may not distribute the Library at all. For example, if a patent license would not permit royalty-free redistribution of the Library by all those who receive copies directly or indirectly through you, then the only way you could satisfy both it and this License would be to refrain entirely from distribution of the Library.
-
-If any portion of this section is held invalid or unenforceable under any particular circumstance, the balance of the section is intended to apply, and the section as a whole is intended to apply in other circumstances.
-
-It is not the purpose of this section to induce you to infringe any patents or other property right claims or to contest validity of any such claims; this section has the sole purpose of protecting the integrity of the free software distribution system which is implemented by public license practices. Many people have made generous contributions to the wide range of software distributed through that system in reliance on consistent application of that system; it is up to the author/donor to decide if he or she is willing to distribute software through any other system and a licensee cannot impose that choice.
-
-This section is intended to make thoroughly clear what is believed to be a consequence of the rest of this License.
-
-12. If the distribution and/or use of the Library is restricted in certain countries either by patents or by copyrighted interfaces, the original copyright holder who places the Library under this License may add an explicit geographical distribution limitation excluding those countries, so that distribution is permitted only in or among countries not thus excluded. In such case, this License incorporates the limitation as if written in the body of this License.
-
-13. The Free Software Foundation may publish revised and/or new versions of the Lesser General Public License from time to time. Such new versions will be similar in spirit to the present version, but may differ in detail to address new problems or concerns.
-
-Each version is given a distinguishing version number. If the Library specifies a version number of this License which applies to it and \\"any later version\\", you have the option of following the terms and conditions either of that version or of any later version published by the Free Software Foundation. If the Library does not specify a license version number, you may choose any version ever published by the Free Software Foundation.
-
-14. If you wish to incorporate parts of the Library into other free programs whose distribution conditions are incompatible with these, write to the author to ask for permission. For software which is copyrighted by the Free Software Foundation, write to the Free Software Foundation; we sometimes make exceptions for this. Our decision will be guided by the two goals of preserving the free status of all derivatives of our free software and of promoting the sharing and reuse of software generally.
-
-NO WARRANTY
-
-15. BECAUSE THE LIBRARY IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE LIBRARY, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE LIBRARY \\"AS IS\\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE LIBRARY IS WITH YOU. SHOULD THE LIBRARY PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
-
-16. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE THE LIBRARY AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE LIBRARY (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE LIBRARY TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-
-END OF TERMS AND CONDITIONS
-
-How to Apply These Terms to Your New Libraries
-
-If you develop a new library, and you want it to be of the greatest possible use to the public, we recommend making it free software that everyone can redistribute and change. You can do so by permitting redistribution under these terms (or, alternatively, under the terms of the ordinary General Public License).
-
-To apply these terms, attach the following notices to the library. It is safest to attach them to the start of each source file to most effectively convey the exclusion of warranty; and each file should have at least the \\"copyright\\" line and a pointer to where the full notice is found.
-
-one line to give the library''s name and an idea of what it does.
-Copyright (C) year  name of author
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-Also add information on how to contact you by electronic and paper mail.
-
-You should also get your employer (if you work as a programmer) or your school, if any, to sign a \\"copyright disclaimer\\" for the library, if necessary. Here is a sample; alter the names:
-
-Yoyodyne, Inc., hereby disclaims all copyright interest in
-the library `Frob'' (a library for tweaking knobs) written
-by James Random Hacker.
-
-signature of Ty Coon, 1 April 1990
-Ty Coon, President of Vice
-That''s all there is to it!', 'http://creativecommons.org/licenses/LGPL/2.1/', NULL, NULL, NULL, 'Creative Commons GNU Lesser General Public License 2.1', NULL, NULL, NULL, '', NULL, false, false, false, '9bcf56c169da973fe3b7b12194a1ee1e', 2);
 INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CMU', 'CMU License
 
           Mach Operating System
@@ -8071,7 +7881,7 @@ Carnegie Mellon requests users of this software to return to
            Carnegie Mellon University
            Pittsburgh PA 15213-3890
 or Software.Distribution@CS.CMU.EDU any improvements or extensions that they make and grant Carnegie Mellon the rights to redistribute these changes.', 'http://www.gnu.org/software/hurd/gnumach-doc/CMU-License.html', NULL, NULL, NULL, 'CMU License', NULL, NULL, NULL, '', NULL, false, false, false, 'f1ae60849277a50a9bb2fd02fabb9c22', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'DataGrid', 'EU DataGrid Software License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'EUDatagrid', 'EU DataGrid Software License
 Copyright (c) 2001 EU DataGrid. All rights reserved.
 
 This software includes voluntary contributions made to the EU DataGrid. For more information on the EU DataGrid, please see http://www.eu-datagrid.org/.
@@ -8537,7 +8347,7 @@ collects at http://java.com/data/.
 For inquiries please contact: Sun Microsystems, Inc., 
 4150 Network Circle, Santa  Clara, California 95054, 
 U.S.A.', 'http://java.sun.com/javase/6/jdk-6u2-license.txt', NULL, NULL, NULL, 'Sun Microsystems, Inc. License Agreement 6', NULL, NULL, NULL, '', NULL, false, false, false, 'ae50184bbac1ede2fb127ab9fe150e60', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'wxWindows', 'The wxWindows Library Licence
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'WXwindows', 'The wxWindows Library Licence
 
 Copyright (c) 1998 Julian Smart, Robert Roebling [, ...]
 
@@ -8588,7 +8398,7 @@ accordingly.
 choice whether to permit this exception to apply to your modifications.
 If you do not wish that, you must delete the exception notice from such
 code and/or adjust the licensing conditions notice accordingly.', 'http://www.opensource.org/licenses/wxwindows.php', NULL, NULL, NULL, 'wxWindows Library License', NULL, NULL, NULL, '', NULL, false, false, false, 'd527b14a231f08b65b0effcbda49e006', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ZPL2.0', 'Zope Public License (ZPL) Version 2.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ZPL-2.0', 'Zope Public License (ZPL) Version 2.0
 
 This software is Copyright (c) Zope Corporation (tm) and Contributors. All rights reserved.
 
@@ -8605,7 +8415,7 @@ Disclaimer
 THIS SOFTWARE IS PROVIDED BY ZOPE CORPORATION ``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ZOPE CORPORATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This software consists of contributions made by Zope Corporation and many individuals on behalf of Zope Corporation. Specific attributions are listed in the accompanying credits file.', 'http://www.zope.org/Resources/License/ZPL-2.0', NULL, NULL, NULL, 'Zope Public License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, 'd6f8f19b1d0b6aedcc2288fc97c3eb6f', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Majordomo', '                      MAJORDOMO LICENSE AGREEMENT
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Majordomo-1.1', '                      MAJORDOMO LICENSE AGREEMENT
 
 
                              Version 1.1
@@ -8853,7 +8663,7 @@ Redistributions of source code must retain the above copyright notice, this list
 Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \\"AS IS\\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://www.opensource.org/licenses/bsd-license.php', NULL, NULL, NULL, 'BSD-style License', NULL, NULL, NULL, '', NULL, false, false, false, 'b852d380576822dc63fe1fc4f0b2fae1', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CeCILL2.0', 'CeCILL FREE SOFTWARE LICENSE AGREEMENT
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CECILL-2.0', 'CeCILL FREE SOFTWARE LICENSE AGREEMENT
 
 
     Notice
@@ -9422,7 +9232,7 @@ INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copylef
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */', 'http://www.netbsd.org/about/redistribution.html', NULL, NULL, NULL, 'NewBSD License', NULL, NULL, NULL, '', NULL, false, false, false, '90c8698ca5b4ef51072c451f690781fd', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OpenSoftware1.1', '	The Open Software License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OSL-1.1', '	The Open Software License
 			v. 1.1
 
 This Open Software License (the \\"License\\") applies to any original work of 
@@ -9583,7 +9393,7 @@ This license is Copyright (C) 2002 Lawrence E. Rosen. All rights reserved.
 Permission is hereby granted to copy and distribute this license without 
 modification. This license may not be modified without the express written 
 permission of its copyright owner.', 'http://opensource.linux-mirror.org/licenses/osl-1.1.txt	', NULL, NULL, NULL, 'Open Software License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, 'bb7fef6e83cf414e9cf9ddc93391c249', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OpenSoftware2.1', 'The Open Software License 2.1
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OSL-2.1', 'The Open Software License 2.1
 
 Open Software License v. 2.1
 
@@ -9752,7 +9562,7 @@ This license is effective from the date purchased by Licensee and is perpetual u
 This Agreement is the complete and exclusive statement of agreements between Licensee and Licensor relating to the Software. It supersedes all prior agreements and understandings, and prevails over any conflicting or additional terms of any quote, order, acknowledgement, or similar communication between the parties before or during the term of this Agreement. It may be modified only in writing signed by both parties.
 
 This Agreement is made under, shall be governed by and construed in accordance with the French law.', 'http://www.xmlmind.com/spellchecker/license_sc-sdk.html', NULL, NULL, NULL, 'XMLmind Spell Checker SDK License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, 'dbbb32fc364d5f53e46ced0d678bf4fc', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python2.0.1', 'Python 2.0.1 license
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python-2.0.1', 'Python 2.0.1 license
 
 This is the official license for the Python 2.0.1 release:
 
@@ -10738,7 +10548,7 @@ THE DATA FILES AND SOFTWARE ARE PROVIDED \\"AS IS\\", WITHOUT WARRANTY OF ANY KI
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in these Data Files or Software without prior written authorization of the copyright holder.
 
 Unicode and the Unicode logo are trademarks of Unicode, Inc., and may be registered in some jurisdictions. All other trademarks and registered trademarks mentioned herein are the property of their respective owners.', 'http://unicode.org/copyright.html', NULL, NULL, NULL, 'Unicode Terms of Use', NULL, NULL, NULL, '', NULL, false, false, false, '0ee4c43299aa1c99dd1756ba15e9cd8f', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ZLib', 'zlib.h -- interface of the ''zlib'' general purpose compression library
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Zlib', 'zlib.h -- interface of the ''zlib'' general purpose compression library
   version 1.2.2, October 3rd, 2004
 
   Copyright (C) 1995-2004 Jean-loup Gailly and Mark Adler
@@ -11058,7 +10868,7 @@ If any provision of this Agreement is held invalid or unenforceable
 by any agency of competent jurisdiction, the remaining provisions 
 shall nevertheless remain valid. 
 ', 'http://www.appgate.com/index/products/mindterm/mindterm_end_user_lic.html', NULL, NULL, NULL, 'Mindterm EULA', NULL, NULL, NULL, '', NULL, false, false, false, '16c25e2dcbac7b8ee345c016bad4bb8c', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'MozillaEULA1.1', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'MozillaEULA-1.1', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
 Version 1.1
 
 A SOURCE CODE VERSION OF CERTAIN FIREFOX BROWSER FUNCTIONALITY THAT YOU MAY USE, MODIFY AND DISTRIBUTE IS AVAILABLE TO YOU FREE-OF-CHARGE FROM WWW.MOZILLA.ORG UNDER THE MOZILLA PUBLIC LICENSE and other open source software licenses.
@@ -11082,7 +10892,7 @@ DURING THE MOZILLA FIREFOX INSTALLATION PROCESS, AND AT LATER TIMES, YOU MAY BE 
 7. U.S. GOVERNMENT END-USERS. The Product is a \\"commercial item,\\" as that term is defined in 48 C.F.R. 2.101, consisting of \\"commercial computer software\\" and \\"commercial computer software documentation,\\" as such terms are used in 48 C.F.R. 12.212 (Sept. 1995) and 48 C.F.R. 227.7202 (June 1995). Consistent with 48 C.F.R. 12.212, 48 C.F.R. 27.405(b)(2) (June 1998) and 48 C.F.R. 227.7202, all U.S. Government End Users acquire the Product with only those rights as set forth herein.
 
 8. MISCELLANEOUS. (a) This Agreement constitutes the entire agreement between Mozilla and you concerning the subject matter hereof, and it may only be modified by a written amendment signed by an authorized executive of Mozilla. (b) Except to the extent applicable law, if any, provides otherwise, this Agreement will be governed by the laws of the state of California, U.S.A., excluding its conflict of law provisions. (c) This Agreement will not be governed by the United Nations Convention on Contracts for the International Sale of Goods. (d) If any part of this Agreement is held invalid or unenforceable, that part will be construed to reflect the parties'' original intent, and the remaining portions will remain in full force and effect. (e) A waiver by either party of any term or condition of this Agreement or any breach thereof, in any one instance, will not waive such term or condition or any subsequent breach thereof. (f) Except as required by law, the controlling language of this Agreement is English. (g) You may assign your rights under this Agreement to any party that consents to, and agrees to be bound by, its terms; the Mozilla Corporation may assign its rights under this Agreement without condition. (h) This Agreement will be binding upon and will inure to the benefit of the parties, their successors and permitted assigns.', 'http://www.mozilla.com/en-US/legal/eula/firefox-en.txt', NULL, NULL, NULL, 'Mozilla Firefox EULA 1.1', NULL, NULL, NULL, '', NULL, false, false, false, 'b0afb2c653f0d7bd42f4c775ea463fff', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Nethack', 'NETHACK GENERAL PUBLIC LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'NGPL', 'NETHACK GENERAL PUBLIC LICENSE
 (Copyright 1989 M. Stephenson) 
 (Based on the BISON general public license, copyright 1988 Richard M. Stallman)
 
@@ -11425,7 +11235,7 @@ INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copylef
  * copied and put under another distribution licence
  * [including the GNU Public Licence.]
  */', 'http://www.openssl.org/source/license.html', NULL, NULL, NULL, 'OpenSSL License', NULL, NULL, NULL, '', NULL, false, false, false, 'a9049695d36cd1d652ebb41a64557ac3', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CCA3.0', 'Attribution 3.0 Unported
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CC-BY-3.0', 'Attribution 3.0 Unported
 
 CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF THIS LICENSE DOES NOT CREATE AN ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION ON AN \\"AS-IS\\" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM ITS USE.
 License
@@ -11490,7 +11300,7 @@ Creative Commons is not a party to this License, and makes no warranty whatsoeve
 Except for the limited purpose of indicating to the public that the Work is licensed under the CCPL, Creative Commons does not authorize the use by either party of the trademark \\"Creative Commons\\" or any related trademark or logo of Creative Commons without the prior written consent of Creative Commons. Any permitted use will be in compliance with Creative Commons'' then-current trademark usage guidelines, as may be published on its website or otherwise made available upon request from time to time. For the avoidance of doubt, this trademark restriction does not form part of this License.
 
 Creative Commons may be contacted at http://creativecommons.org/.', 'http://creativecommons.org/licenses/by/3.0/legalcode', NULL, NULL, NULL, 'Creative Commons Attribution 3.0', NULL, NULL, NULL, '', NULL, false, false, false, 'd2ba2e8c3572691d06f2c54a416f9633', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CeCILL-B', 'CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CECILL-B', 'CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 
 
     Notice
@@ -12004,7 +11814,7 @@ jurisdiction, by the more diligent Party.
 
 
 Version 1.0 dated 2006-09-05.', 'http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.txt', NULL, NULL, NULL, 'CeCILL-B License', NULL, NULL, NULL, '', NULL, false, false, false, '7a71505fd6536ae63741e2b0e0297666', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CPAL 1.0', 'Common Public Attribution License Version 1.0 (CPAL)
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CPAL-1.0', 'Common Public Attribution License Version 1.0 (CPAL)
 
 Common Public Attribution License Version 1.0 (CPAL)
 1.	“Definitions”
@@ -12198,7 +12008,7 @@ THE WORK IS PROVIDED \\"AS IS,\\" AND COMES WITH ABSOLUTELY NO WARRANTY, EXPRESS
 IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS WORK, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 END OF TERMS AND CONDITIONS', 'http://www.gnu.org/licenses/dsl.html', NULL, NULL, NULL, 'Design Science License', NULL, NULL, NULL, '', NULL, false, false, false, '0c053d3eb5e3cadc9d4814de4d486d3a', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ZPL2.1', 'Zope Public License (ZPL) Version 2.1
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'ZPL-2.1', 'Zope Public License (ZPL) Version 2.1
 
 A copyright notice accompanies this license document that identifies the copyright holders.
 
@@ -12213,7 +12023,7 @@ The right to distribute this software or to use it for any purpose does not give
 If any files are modified, you must cause the modified files to carry prominent notices stating that you changed the files and the date of any change.
 Disclaimer
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://www.zope.org/Resources/ZPL', NULL, NULL, NULL, 'Zope Public License 2.1', NULL, NULL, NULL, '', NULL, false, false, false, 'c3c5e0cdfc92576792c3bd2d0b60c9cf', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LaTeX1.3c', 'The LaTeX Project Public License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LPPL-1.3c', 'The LaTeX Project Public License
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 LPPL Version 1.3c  2008-05-04
@@ -12854,7 +12664,7 @@ Should you have any questions concerning this License Agreement, or if you desir
 Oracle America, Inc. 
 500 Oracle Parkway, 
 Redwood City, CA 94065', 'http://www.oracle.com/technetwork/testcontent/standard-license-088383.html', NULL, NULL, NULL, 'Oracle Technology Network Developer License Terms', NULL, NULL, NULL, '', NULL, false, false, false, 'ce20045565f1fabe13faf9b4e4c28795', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python2.1.3', 'Python 2.1.3 license
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python-2.1.3', 'Python 2.1.3 license
 
 This is the official license for the Python 2.1.3 release:
 
@@ -13091,7 +12901,7 @@ FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'http://www.python.org/download/releases/2.1.3/license/', NULL, NULL, NULL, 'Python License 2.1.3', NULL, NULL, NULL, '', NULL, false, false, false, 'c4655bb7e8e171ba684d8fcd49e6a166', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python3.1.1', 'Python 3.1.1 license
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python-3.1.1', 'Python 3.1.1 license
 
 This is the official license for the Python 3.1.1 release:
 
@@ -13396,7 +13206,7 @@ This end user license agreement (\\"EULA\\") governs the use of any of the versi
 6. Third Party Programs. Red Hat may distribute third party software programs with the Programs that are not part of the Programs. These third party programs are not required to run the Programs, are provided as a convenience to User, and are subject to their own license terms. The license terms either accompany the third party software programs or can be viewed at http://www.redhat.com/licenses/thirdparty/eula.html. If User does not agree to abide by the applicable license terms for the third party software programs, then User may not install them. If User wishes to install the third party software programs on more than one system or transfer the third party software programs to another party, then User must contact the licensor of the applicable third party software programs.
 
 7. General. If any provision of this agreement is held to be unenforceable, that shall not affect the enforceability of the remaining provisions. This agreement shall be governed by the laws of the State of New York and of the United States, without regard to any conflict of laws provisions. The rights and obligations of the parties to this EULA shall not be governed by the United Nations Convention on the International Sale of Goods.', 'http://www.redhat.com/licenses/rhel_rha_eula.html', NULL, NULL, NULL, 'RedHat EULA', NULL, NULL, NULL, '', NULL, false, false, false, '59e73a352a5b9a4b727e513f4e9aa33d', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Ricoh', 'Open Source Initiative OSI - The Ricoh Source Code Public License:Licensing
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'RSCPL', 'Open Source Initiative OSI - The Ricoh Source Code Public License:Licensing
 
 Ricoh Source Code Public License
 
@@ -13667,7 +13477,7 @@ IV)  It is not allowed to remove this license from the distribution of the Vim
      sources, parts of it or from a modified version.  You may use this
      license for previous Vim releases instead of the license that they came
      with, at your option.', 'http://vimdoc.sourceforge.net/htmldoc/uganda.html#license', NULL, NULL, NULL, 'VIM License', NULL, NULL, NULL, '', NULL, false, false, false, 'a680af64a9596516605e74456861a25e', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Lucent1.0', 'Lucent Public License Version 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LPL-1.0', 'Lucent Public License Version 1.0
 The following is a Lucent license template. To generate your own. change the values of OWNER, ORGANIZATION, YEAR, and STATE from their original values as given here, and substitute your own.
 
 <ORGANIZATION> = Lucent Technologies Inc.
@@ -13738,7 +13548,7 @@ All Recipient''s rights under this Agreement shall terminate if it fails to comp
 <OWNER> may publish new versions (including revisions) of this Agreement from time to time. Each new version of the Agreement will be given a distinguishing version number. The Program (including Contributions) may always be distributed subject to the version of the Agreement under which it was received. In addition, after a new version of the Agreement is published, Contributor may elect to distribute the Program (including its Contributions) under the new version. No one other than <OWNER> has the right to modify this Agreement. Except as expressly stated in Sections 2(a) and 2(b) above, Recipient receives no rights or licenses to the intellectual property of any Contributor under this Agreement, whether expressly, by implication, estoppel or otherwise. All rights in the Program not expressly granted under this Agreement are reserved.
 
 This Agreement is governed by the laws of the State of <STATE> and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation.', 'http://www.opensource.org/licenses/plan9.php', NULL, NULL, NULL, 'Lucent Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '72103dd099be8d102557e288bdf49497', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LaTeX1.0', 'LaTeX Project Public License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LPPL-1.0', 'LaTeX Project Public License
 ============================
  
 LPPL Version 1.0  1999-03-01
@@ -13949,7 +13759,7 @@ conditions would be files that contain the text of copyright notices.
    need meet only the conditions in this file; it is not necessary to
    check the header of every file in the distribution to check that a
    distribution meets these requirements.', 'http://www.latex-project.org/lppl/lppl-1-0.txt', NULL, NULL, NULL, 'LaTeX Project Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '56b96e883f97c1bda273e5baa48ee8ee', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LaTeX1.3', 'The LaTeX Project Public License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LPPL-1.3', 'The LaTeX Project Public License
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 LPPL Version 1.3  2003-12-01
@@ -14349,7 +14159,7 @@ Important Recommendations
    to comprise the Work and, in such a case, the licensee would be
    entitled to make reasonable conjectures as to which files comprise
    the Work.', 'http://www.latex-project.org/lppl/lppl-1-3.txt', NULL, NULL, NULL, 'LaTeX Project Public License 1.3', NULL, NULL, NULL, '', NULL, false, false, false, '2f80520d331dbed200f189a178cb1c57', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LaTeX1.3b', 'The LaTeX Project Public License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LPPL-1.3b', 'The LaTeX Project Public License
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 LPPL Version 1.3b  2006-01-07
@@ -14896,7 +14706,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.', 'http://www.opensource.org/licenses/mit-license.php', NULL, NULL, NULL, 'MIT License', NULL, NULL, NULL, '', NULL, false, false, false, '583c04ac6173e375741b574a799211c2', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Mozilla1.1', 'Mozilla Public License Version 1.1
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'MPL-1.1', 'Mozilla Public License Version 1.1
 
 1. Definitions.
 
@@ -15164,7 +14974,7 @@ Nothing in this Agreement limits Piriform''s liability to you in the event of de
 •    Piriform shall not be liable or responsible for any failure to perform or delay in performing its obligations under this Agreement that is caused by an event outside its reasonable control. 
 •    This Agreement and any dispute or claim arising out of or in connection with it or its subject matter or its formation (including non-contractual disputes or claims) shall be governed by and construed in accordance with English law and submitted to the non-exclusive jurisdiction of the English courts.
 Version 1.4.1', 'http://www.piriform.com/business/support-license', NULL, NULL, NULL, 'Piriform EULA', NULL, NULL, NULL, '', NULL, false, false, false, '98275b4debf6842259973bcbbfd2af5e', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python2.6.5', 'Python 2.6.5 license
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python-2.6.5', 'Python 2.6.5 license
 
 This is the official license for the Python 2.6.5 release:
 
@@ -15766,7 +15576,7 @@ REQUIRED STUDENT NOTIFICATION
 THIS SOFTWARE AND RELATED DOCUMENTATION CONTAINS PROPRIETARY MATERIAL OF REALNETWORKS, INC, WHICH ARE PROTECTED BY VARIOUS INTELLECTUAL PROPERTY RIGHTS.
  
 You may not use this file except in compliance with the License.  You may obtain a copy of the License on the web at https://www.helixcommunity.org/content/rcsl. ', 'https://helixcommunity.org/content/rcsl', NULL, NULL, NULL, 'RealNetworks Community Source License', NULL, NULL, NULL, '', NULL, false, false, false, '44588d5801785dbe5783e56060445870', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'RPSL1.0', 'RealNetworks Public Source License Version 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'RPSL-1.0', 'RealNetworks Public Source License Version 1.0
 1. General Definitions. This License applies to any program or other work which RealNetworks, Inc., or any other entity that elects to use this license, (\\"Licensor\\") makes publicly available and which contains a notice placed by Licensor identifying such program or work as \\"Original Code\\" and stating that it is subject to the terms of this RealNetworks Public Source License version 1.0 (or subsequent version thereof) (\\"License\\"). You are not required to accept this License. However, nothing else grants You permission to use, copy, modify or distribute the software or its derivative works. These actions are prohibited by law if You do not accept this License. Therefore, by modifying, copying or distributing the software (or any work based on the software), You indicate your acceptance of this License to do so, and all its terms and conditions. In addition, you agree to the terms of this License by clicking the Accept button or downloading the software. As used in this License:
 
 1.1 \\"Applicable Patent Rights\\" mean: (a) in the case where Licensor is the grantor of rights, claims of patents that (i) are now or hereafter acquired, owned by or assigned to Licensor and (ii) are necessarily infringed by using or making the Original Code alone and not in combination with other software or hardware; and (b) in the case where You are the grantor of rights, claims of patents that (i) are now or hereafter acquired, owned by or assigned to You and (ii) are infringed (directly or indirectly) by using or making Your Modifications, taken alone or in combination with Original Code.
@@ -15940,7 +15750,7 @@ RealNetworks'' Trademark policy.
 RealNetworks defines the following trademarks collectively as \\"Licensor Trademarks\\": \\"RealNetworks\\", \\"RealPlayer\\", \\"RealJukebox\\", \\"RealSystem\\", \\"RealAudio\\", \\"RealVideo\\", \\"RealOne Player\\", \\"RealMedia\\", \\"Helix\\" or any other trademarks or trade names belonging to RealNetworks.
 
 RealNetworks \\"Licensor Trademark Policy\\" forbids any use of Licensor Trademarks except as permitted by and in strict compliance at all times with RealNetworks'' third party trademark usage guidelines which are posted at www.realnetworks.com/info/helixlogo.html.', 'http://www.opensource.org/licenses/real.php', NULL, NULL, NULL, 'RealNetworks Public Source License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '1ce8b44107f20f237910433ee890f964', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GPL2.0', 'GNU General Public License, version 2
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GPL-2.0', 'GNU General Public License, version 2
 What to do if you see a possible GPL violation
 Translations of the GPL
 GPL Frequently Asked Questions
@@ -16084,7 +15894,7 @@ by James Hacker.
 signature of Ty Coon, 1 April 1989
 Ty Coon, President of Vice
 This General Public License does not permit incorporating your program into proprietary programs. If your program is a subroutine library, you may consider it more useful to permit linking proprietary applications with the library. If this is what you want to do, use the GNU Lesser General Public License instead of this License.', 'http://creativecommons.org/licenses/GPL/2.0/', NULL, NULL, NULL, 'GNU General Public License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, 'cd29fafe721db29b9e08f5acac66ff9e', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CeCILL1.0', 'FREE SOFTWARE LICENSING AGREEMENT CeCILL
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CECILL-1.0', 'FREE SOFTWARE LICENSING AGREEMENT CeCILL
                 ========================================
 
 
@@ -16745,7 +16555,7 @@ DAMAGE.
 This software consists of contributions made by NAUMEN
 and Contributors. Specific attributions are listed in the
 accompanying credits file.', 'http://www.opensource.org/licenses/naumen.php', NULL, NULL, NULL, 'NAUMEN Public License', NULL, NULL, NULL, '', NULL, false, false, false, '0eb783a6837292cb1009c06a8885b45f', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Netizen1.0', 'Netizen Open Source License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Netizen-1.0', 'Netizen Open Source License
 Version 1.0
 --------------- 
 1. Definitions.
@@ -16944,7 +16754,7 @@ The Open Group may publish new versions (including revisions) of this Agreement 
  
 No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation.
  ', 'http://www.opengroup.org/openmotif/license/', NULL, NULL, NULL, 'The Open Group Public License', NULL, NULL, NULL, '', NULL, false, false, false, 'd1340e2c6ab7d0a328f7e307320ca654', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OpenSoftware', 'Open Software License, v 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OSL-1.0', 'Open Software License, v 1.0
 
 The Open Software License
 v. 1.0
@@ -17108,7 +16918,7 @@ This license is Copyright (C) 2002 Lawrence E. Rosen. All rights
 reserved. Permission is hereby granted to copy and distribute this
 license without modification. This license may not be modified without
 the express written permission of its copyright owner.', 'http://www.opensource.org/licenses/osl-1.0.txt', NULL, NULL, NULL, 'Open Software License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'e58c1a02d9c740b7888c76e08cabb64f', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OpenLDAP2.8', 'The OpenLDAP Public License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OLDAP-2.8', 'The OpenLDAP Public License
   Version 2.8, 17 August 2003
 
 Redistribution and use of this software and associated documentation
@@ -17155,7 +16965,7 @@ OpenLDAP is a registered trademark of the OpenLDAP Foundation.
 Copyright 1999-2003 The OpenLDAP Foundation, Redwood City,
 California, USA.  All Rights Reserved.  Permission to copy and
 distribute verbatim copies of this document is granted.', 'http://www.openldap.org/software/release/license.html', NULL, NULL, NULL, 'OpenLDAP Public License 2.8', NULL, NULL, NULL, '', NULL, false, false, false, 'b5985e4a5e8ff3108fc041d19f93819d', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'PHP3.01', '-------------------------------------------------------------------- 
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'PHP-3.01', '-------------------------------------------------------------------- 
                   The PHP License, version 3.01
 Copyright (c) 1999 - 2010 The PHP Group. All rights reserved.
 -------------------------------------------------------------------- 
@@ -17223,7 +17033,7 @@ please see <http://www.php.net>.
 
 PHP includes the Zend Engine, freely available at
 <http://www.zend.com>.', 'http://www.php.net/license/3_01.txt', NULL, NULL, NULL, 'PHP License 3.01', NULL, NULL, NULL, '', NULL, false, false, false, '9ebf16acbb20bd80a9d539d1d9899ad0', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python2.5', 'Python 2.5 license
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python-2.5', 'Python 2.5 license
 
 This is the official license for the Python 2.5 release:
 
@@ -17496,7 +17306,7 @@ FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'http://www.python.org/download/releases/2.5.5/license/', NULL, NULL, NULL, 'Python License 2.5', NULL, NULL, NULL, '', NULL, false, false, false, '832c620cdd21b4a24dc217465b57b1ab', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LGPL3.0', '                   GNU LESSER GENERAL PUBLIC LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LGPL-3.0', '                   GNU LESSER GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
@@ -17661,7 +17471,7 @@ whether future versions of the GNU Lesser General Public License shall
 apply, that proxy''s public statement of acceptance of any version is
 permanent authorization for you to choose that version for the
 Library.', 'http://www.gnu.org/licenses/lgpl-3.0.txt', NULL, NULL, NULL, 'GNU Lesser General Public License 3.0', NULL, NULL, NULL, '', NULL, false, false, false, '4906543eb9b6cbb0bd7454c3b35fd7cd', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Lucent1.02', 'Lucent Public License Version 1.02
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LPL-1.02', 'Lucent Public License Version 1.02
 The following is a Lucent license template. To generate your own. change the values of OWNER, ORGANIZATION, and YEAR from their original values as given here, and substitute your own.
 
 <ORGANIZATION:> = Lucent Technologies Inc.
@@ -17751,7 +17561,7 @@ All Recipient''s rights under this Agreement shall terminate if it fails to comp
 LUCENT may publish new versions (including revisions) of this Agreement from time to time. Each new version of the Agreement will be given a distinguishing version number. The Program (including Contributions) may always be distributed subject to the version of the Agreement under which it was received. In addition, after a new version of the Agreement is published, Contributor may elect to distribute the Program (including its Contributions) under the new version. No one other than LUCENT has the right to modify this Agreement. Except as expressly stated in Sections 2(a) and 2(b) above, Recipient receives no rights or licenses to the intellectual property of any Contributor under this Agreement, whether expressly, by implication, estoppel or otherwise. All rights in the Program not expressly granted under this Agreement are reserved.
 
 This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation.', 'http://www.opensource.org/licenses/lucent1.02.php', NULL, NULL, NULL, 'Lucent Public License 1.02', NULL, NULL, NULL, '', NULL, false, false, false, '193b544a0a423e3231e8ea4bc0e68bed', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'MozillaEULA2.0', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'MozillaEULA-2.0', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
 
 Version 2.0
 
@@ -17967,7 +17777,7 @@ This LICENSE shall be deemed to have been made in, and shall be construed pursua
 7. MISCELLANEOUS
 
 If any provision of this LICENSE is inconsistent with, or cannot be fully enforced under, the law, such provision will be construed as limited to the extent necessary to be consistent with and fully enforceable under the law. This LICENSE is the final, complete and exclusive agreement between the parties relating to the subject matter hereof, and supersedes all prior or contemporaneous understandings and agreements relating to such subject matter, whether oral or written. This LICENSE may only be modified in writing signed by an authorized officer of NVIDIA.  Customer agrees that it will not ship, transfer or export the SOFTWARE into any country, or use the SOFTWARE in any manner, prohibited by the United States Bureau of Industry and Security or any export laws, restrictions or regulations.', 'http://www.nvidia.com/object/nv_swlicense.html', NULL, NULL, NULL, 'NVIDIA EULA', NULL, NULL, NULL, '', NULL, false, false, false, 'c83293d2685d0ef7cd14d33c6d3e9d53', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OpenSoftware2.0', 'This software is copyright (c) 2003, 2004 nexB Inc. All rights are reserved.
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OSL-2.0', 'This software is copyright (c) 2003, 2004 nexB Inc. All rights are reserved.
 
 This software release is licensed to You by nexB Inc. (Licensor) under the terms of the Open Software License 2.0 described below.
 
@@ -18027,7 +17837,7 @@ e) to display the Original Work publicly.
 15) Right to Use. You may use the Original Work in all ways not otherwise restricted or conditioned by this License or by law, and Licensor promises not to interfere with or be responsible for such uses by You.
 
 This license is Copyright (C) 2003 Lawrence E. Rosen. All rights reserved. Permission is hereby granted to copy and distribute this license without modification. This license may not be modified without the express written permission of its copyright owner.', 'http://www.nexb.com/license/LICENSE-OSL-2.0.html', NULL, NULL, NULL, 'Open Software License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '3a59f0ffadbe74c7a3242eb564bab3e3', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OpenSoftware3.0', 'Open Software License (\\"OSL\\") v. 3.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'OSL-3.0', 'Open Software License (\\"OSL\\") v. 3.0
 This Open Software License (the \\"License\\") applies to any original work of authorship (the \\"Original Work\\") whose owner (the \\"Licensor\\") has placed the following licensing notice adjacent to the copyright notice for the Original Work:
 
 Licensed under the Open Software License version 3.0
@@ -18073,7 +17883,7 @@ e) to display the Original Work publicly.
 15) Right to Use. You may use the Original Work in all ways not otherwise restricted or conditioned by this License or by law, and Licensor promises not to interfere with or be responsible for such uses by You.
 
 16) Modification of This License. This License is Copyright © 2005 Lawrence Rosen. Permission is granted to copy, distribute, or communicate this License without modification. Nothing in this License permits You to modify this License as applied to the Original Work or to Derivative Works. However, You may modify the text of this License and copy, distribute or communicate your modified version (the \\"Modified License\\") and apply it to other original works of authorship subject to the following conditions: (i) You may not indicate in any way that your Modified License is the \\"Open Software License\\" or \\"OSL\\" and you may not use those names in the name of your Modified License; (ii) You must replace the notice specified in the first paragraph above with the notice \\"Licensed under <insert your license name here>\\" or with a notice of your own that is not confusingly similar to the notice in this License; and (iii) You may not claim that your original works are open source software unless your Modified License has been approved by Open Source Initiative (OSI) and You comply with its license review and certification process.', 'http://www.opensource.org/licenses/osl-3.0.php', NULL, NULL, NULL, 'Open Software License 3.0', NULL, NULL, NULL, '', NULL, false, false, false, '9cef367a9c5f8a2533dd0bb48493c0e6', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python2.7', 'Python 2.7 license
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python-2.7', 'Python 2.7 license
 
 This is the official license for the Python 2.7 release:
 
@@ -18607,7 +18417,7 @@ II.1. Advertising Materials. All advertising materials mentioning features or us
 II.2. Endorsements. The names \\"InterBase,\\" \\"ISC,\\" and \\"IB\\" must not be used to endorse or promote Contributor Versions or Larger Works without the prior written permission of Interbase.
 
 II.3. Product Names. Contributor Versions and Larger Works may not be called \\"InterBase\\" or \\"Interbase\\" nor may the word \\"InterBase\\" appear in their names without the prior written permission of Interbase.', 'http://info.borland.com/devsupport/interbase/opensource/IPL.html', NULL, NULL, NULL, 'Interbase Public License', NULL, NULL, NULL, '', NULL, false, false, false, 'c8b88616ee55ec78cb30e8b6100b2db6', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LaTeX1.1', 'The LaTeX Project Public License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LPPL-1.0', 'The LaTeX Project Public License
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 LPPL Version 1.1  1999-07-10
@@ -18955,7 +18765,7 @@ TO THE EXTENT NOT PROHIBITED BY LAW, IN NO EVENT SHALL MOTOROLA BE LIABLE FOR PE
 
 TERMINATION 
 This License is effective until terminated. Your rights under this License will terminate automatically without notice from Motorola if you fail to comply with any term(s) of this License. Upon the termination of this License, you shall cease all use of the MOTOROLA MOBILE Software, MOTOROLA MOBILE Software Updates and Services. ', 'http://www.motorola.com/Support/US-EN/SOFTWARE-LICENSE-AGREEMENT', NULL, NULL, NULL, 'Motorola Mobile Software License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '2f01e0037ab3d3b1d38fb5e7c97ab3ee', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Mozilla1.0', 'MOZILLA PUBLIC LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'MPL-1.0', 'MOZILLA PUBLIC LICENSE
 Version 1.0
 
 1. Definitions.
@@ -19062,7 +18872,7 @@ The Original Code is ______________________________________.
 The Initial Developer of the Original Code is ________________________. Portions created by ______________________ are Copyright (C) ______ _______________________. All Rights Reserved.
 
 Contributor(s): ______________________________________.''''', 'http://www.mozilla.org/MPL/MPL-1.0.html', NULL, NULL, NULL, 'Mozilla Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '92617be0c82ce04f0e88e49f0dfca97c', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Cecill1.1', '                FREE SOFTWARE LICENSING AGREEMENT CeCILL
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CECILL-1.1', '                FREE SOFTWARE LICENSING AGREEMENT CeCILL
                 ========================================
 
 
@@ -20112,7 +19922,7 @@ Surviving Provisions.
 Sections 1.b, 2, and 4 through 12, will survive any termination of this Agreement.
 
 Version date: February 4, 2009', 'http://info.yahoo.com/legal/us/yahoo/toolbar/tbeula/tbeula-282.html', NULL, NULL, NULL, 'Yahoo Software License', NULL, NULL, NULL, '', NULL, false, false, false, '51b7698e3bb7ffab18a461c8e8450835', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LGPL2.1', '                  GNU LESSER GENERAL PUBLIC LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LGPL-2.1', '                  GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999
 
  Copyright (C) 1991, 1999 Free Software Foundation, Inc.
@@ -20614,7 +20424,7 @@ necessary.  Here is a sample; alter the names:
   Ty Coon, President of Vice
 
 That''s all there is to it!', 'http://www.gnu.org/licenses/lgpl-2.1.txt', NULL, NULL, NULL, 'GNU Lesser General Public License 2.1', NULL, NULL, NULL, '', NULL, false, false, false, 'd4710409d6f7f15c3260231f893cfe6f', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LaTeX1.3a', 'The LaTeX Project Public License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LPPL-1.3a', 'The LaTeX Project Public License
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 LPPL Version 1.3a  2004-10-01
@@ -21019,7 +20829,7 @@ Important Recommendations
    entitled to make reasonable conjectures as to which files comprise
    the Work.
 ', 'http://www.latex-project.org/lppl/lppl-1-3a.txt', NULL, NULL, NULL, 'LaTeX Project Public License 1.3a', NULL, NULL, NULL, '', NULL, false, false, false, '4659937d50f278b8d5c7c9a89f2692b8', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'MozillaEULA3.0', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'MozillaEULA-3.0', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
 
 Version 3.0, May 2008
 
@@ -21108,7 +20918,7 @@ To accomplish this, add the phrase `Distribution of substantively modified versi
 B. To prohibit any publication of this work or derivative works in whole or in part in standard (paper) book form for commercial purposes unless prior permission is obtained from the copyright holder. 
 
 To accomplish this, add the phrase ''Distribution of the work or derivative of the work in any standard (paper) book form is prohibited unless prior permission is obtained from the copyright holder.'' to the license reference or copy. ', 'http://www.opencontent.org/openpub/', NULL, NULL, NULL, 'Open Publication License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '512979eec4279a2ac893a6b2200ebd97', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python2.2.3', 'Python 2.2.3 license
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Python-2.2.3', 'Python 2.2.3 license
 
 This is the official license for the Python 2.2.3 release:
 
@@ -21365,7 +21175,7 @@ FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'http://www.python.org/download/releases/2.2.3/license/', NULL, NULL, NULL, 'Python License 2.2.3', NULL, NULL, NULL, '', NULL, false, false, false, '2e53c2f934df788cbefd2f436c097b4c', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'RPL1.1', 'RECIPROCAL PUBLIC LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'RPL-1.1', 'RECIPROCAL PUBLIC LICENSE
 Version 1.1, November 1, 2002 
 
 Copyright (C) 2001-2002 
@@ -21543,7 +21353,7 @@ Unless explicitly acquired and licensed from Licensor under the Technical Pursui
 You may obtain a copy of both the TPL and the RPL (the \\"Licenses\\") from Technical Pursuit Inc. at http://www.technicalpursuit.com.
 
 All software distributed under the Licenses is provided strictly on an \\"AS IS\\" basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND TECHNICAL PURSUIT INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT, OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and limitations under the Licenses.', 'http://www.opensource.org/licenses/rpl1.0.php', NULL, NULL, NULL, 'Reciprocal Public License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '9db48004ea68193315edadad5b6ee2c5', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'SugarCRM', 'SUGARCRM PUBLIC LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'SugarCRM-1.1.3', 'SUGARCRM PUBLIC LICENSE
 
 Version 1.1.3
 
@@ -21701,7 +21511,7 @@ II. SugarCRM and logo.
 This License does not grant any rights to use the trademarks \\"SugarCRM\\" and the \\"SugarCRM\\" logos even if such marks are included in the Original Code or Modifications.
 
 However, in addition to the other notice obligations, all copies of the Covered Code in Executable and Source Code form distributed must, as a form of attribution of the original author, include on each user interface screen (i) the \\"Powered by SugarCRM\\" logo and (ii) the copyright notice in the same form as the latest version of the Covered Code distributed by SugarCRM, Inc. at the time of distribution of such copy. In addition, the \\"Powered by SugarCRM\\" logo must be visible to all users and be located at the very bottom center of each user interface screen. Notwithstanding the above, the dimensions of the \\"Powered By SugarCRM\\" logo must be at least 106 x 23 pixels. When users click on the \\"Powered by SugarCRM\\" logo it must direct them back to http://www.sugarforge.org. In addition, the copyright notice must remain visible to all users at all times at the bottom of the user interface screen. When users click on the copyright notice, it must direct them back to http://www.sugarcrm.com', 'http://www.sugarcrm.com/crm/SPL', NULL, NULL, NULL, 'SugarCRM Public License', NULL, NULL, NULL, '', NULL, false, false, false, '30487e18e4d879facb4c4b5484afc5b5', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CeCILL-C', 'CeCILL-C FREE SOFTWARE LICENSE AGREEMENT
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CECILL-C', 'CeCILL-C FREE SOFTWARE LICENSE AGREEMENT
 
 
     Notice
@@ -22217,7 +22027,7 @@ jurisdiction, by the more diligent Party.
 
 
 Version 1.0 dated 2006-09-05.', 'http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.txt', NULL, NULL, NULL, 'CeCILL-C License', NULL, NULL, NULL, '', NULL, false, false, false, '51556b13bfc72bc091c09dc01bad7cff', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CPL0.5', 'Common Public License Version 0.5
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CPL-0.5', 'Common Public License Version 0.5
 
 THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS COMMON PUBLIC LICENSE (\\"AGREEMENT\\"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT''S ACCEPTANCE OF THIS AGREEMENT.
 
@@ -22305,7 +22115,7 @@ Everyone is permitted to copy and distribute copies of this Agreement, but in or
 
 This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation.
 ', 'http://www.eclipse.org/legal/cpl-v05.html', NULL, NULL, NULL, 'Common Public License 0.5', NULL, NULL, NULL, '', NULL, false, false, false, '81d9a83c6f23e5e002edecc368849521', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Eclipse', 'Eclipse Public License - v 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'EPL-1.0', 'Eclipse Public License - v 1.0
 
 THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC LICENSE (\\"AGREEMENT\\"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT''S ACCEPTANCE OF THIS AGREEMENT.
 
@@ -22410,7 +22220,7 @@ use the module on an Open Source basis as set forth in the Mozilla License. The 
 of Government rights which replaces Section 10 of the Mozilla License is stated in Section
 4 above.
 Licenses', 'http://www.opensource.org/licenses/mitrepl.php', NULL, NULL, NULL, 'Mitre Collaborative Virtual Workspace License', NULL, NULL, NULL, '', NULL, false, false, false, 'a3fe24c3227f7472d76b16ce600168f5', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Netscape1.1', 'AMENDMENTS
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Netscape-1.1', 'AMENDMENTS
 The Netscape Public License Version 1.1 (\\"NPL\\") consists of the Mozilla Public License Version 1.1 with the following Amendments, including Exhibit A-Netscape Public License.  Files identified with \\"Exhibit A-Netscape Public License\\" are governed by the Netscape Public License Version 1.1.
 
 Additional Terms applicable to the Netscape Public License.
@@ -22626,7 +22436,7 @@ LOST DATA, EVEN IF OPEN MARKET HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGES.  THE SOFTWARE AND DOCUMENTATION ARE PROVIDED \\"AS IS\\".
 OPEN MARKET HAS NO LIABILITY IN CONTRACT, TORT, NEGLIGENCE OR
 OTHERWISE ARISING OUT OF THIS SOFTWARE OR THE DOCUMENTATION.', 'http://www.fastcgi.com/devkit/LICENSE.TERMS', NULL, NULL, NULL, 'Open Market License', NULL, NULL, NULL, '', NULL, false, false, false, '53398711fb9a583cbc9c7339a0b6e07d', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'PHP2.02', '-------------------------------------------------------------------- 
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'PHP-2.02', '-------------------------------------------------------------------- 
                   The PHP License, version 2.02
 Copyright (c) 1999 - 2002 The PHP Group. All rights reserved.
 -------------------------------------------------------------------- 
@@ -22701,7 +22511,7 @@ The PHP Group can be contacted via Email at group@php.net.
 
 For more information on the PHP Group and the PHP project, 
 please see <http://www.php.net>.', 'http://www.php.net/license/2_02.txt', NULL, NULL, NULL, 'PHP License 2.02', NULL, NULL, NULL, '', NULL, false, false, false, 'f2a49acd9f8cac5c2ad47acfa3f2dcc7', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'QPL', 'THE Q PUBLIC LICENSE version 1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'QPL-1.0', 'THE Q PUBLIC LICENSE version 1.0
 
 Copyright (C) 1999-2000 Trolltech AS, Norway.
 Everyone is permitted to copy and distribute this license document.
@@ -22747,7 +22557,7 @@ The Software and this license document are provided AS IS with NO WARRANTY OF AN
 Choice of Law
 
 This license is governed by the Laws of Norway. Disputes shall be settled by Oslo City Court.', 'http://doc.trolltech.com/3.0/license.html', NULL, NULL, NULL, 'Q Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'ba40546bddcbc6d42589bbc074d99100', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'RPL1.5', 'Reciprocal Public License (RPL)
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'RPL-1.5', 'Reciprocal Public License (RPL)
 
 Version 1.5, July 15, 2007
 
@@ -23289,7 +23099,7 @@ EXHIBIT B
 
 The User-Visible Attribution Notice below, when provided, must appear in each
 user-visible display as defined in Section 6.4 (d):', 'http://www.opensource.org/licenses/rpl1.5.txt', NULL, NULL, NULL, 'Reciprocal Public License 1.5', NULL, NULL, NULL, '', NULL, false, false, false, 'bcea606ad34004bf3d4588ae6bef7225', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'SleepycatOracle', '/*
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Oracle-Berkeley-DB', '/*
  * Copyright (c) 2002-2010 Oracle.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23354,7 +23164,7 @@ INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copylef
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
- ', 'http://download.oracle.com/maven/com/sleepycat/je/license.txt', NULL, NULL, NULL, 'Sleepycat Oracle License', NULL, NULL, NULL, '', NULL, false, false, false, '609b17c82359f56b9063d7e2466eeacc', 2);
+ ', 'http://download.oracle.com/maven/com/sleepycat/je/license.txt', NULL, NULL, NULL, 'Oracle Berkeley DB License', NULL, NULL, NULL, '', NULL, false, false, false, '609b17c82359f56b9063d7e2466eeacc', 2);
 INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Wintertree', 'License Agreement
 
 This License Agreement defines the terms and conditions under which you (the Licensee) are permitted by Wintertree Software Inc. (the Licensor) to use the Wintertree Thesaurus Engine Software Development Kit.
@@ -23440,7 +23250,7 @@ DISCLAIMER OF WARRANTY
 THIS SOFTWARE DEVELOPMENT KIT IS SOLD \\"AS IS\\" AND WITHOUT WARRANTIES AS TO PERFORMANCE OR MERCHANTABILITY.
 
 THIS SOFTWARE DEVELOPMENT KIT IS SOLD WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES WHATSOEVER. BECAUSE OF THE DIVERSITY OF CONDITIONS AND HARDWARE UNDER WHICH THIS SOFTWARE DEVELOPMENT KIT MAY BE USED, NO WARRANTY OF FITNESS FOR A PARTICULAR PURPOSE IS OFFERED. THE USER IS ADVISED TO TEST THE SOFTWARE DEVELOPMENT KIT THOROUGHLY BEFORE RELYING ON IT. THE USER MUST ASSUME THE ENTIRE RISK OF USING THE SOFTWARE DEVELOPMENT KIT. ANY LIABILITY OF SELLER OR MANUFACTURER WILL BE LIMITED EXCLUSIVELY TO PRODUCT REPLACEMENT OR REFUND OF THE PURCHASE PRICE.', 'http://www.wintertree-software.com/dev/thesdb/license.html', NULL, NULL, NULL, 'Wintertree License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '47208105ea66d03ba9a57b6625f5b713', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Jabber', 'Jabber Open Source License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Jabber-1.0', 'Jabber Open Source License
 Version 1.0
 
 This Jabber Open Source License (the \\"License\\") applies to Jabber Server and related software products as well as any updates or maintenance releases of that software (\\"Jabber Products\\") that are distributed by Jabber.Com, Inc. (\\"Licensor\\"). Any Jabber Product licensed pursuant to this License is a Licensed Product. Licensed Product, in its entirety, is protected by U.S. copyright law. This License identifies the terms under which you may use, copy, distribute or modify Licensed Product.
@@ -23589,7 +23399,7 @@ Acknowledgements
 Special thanks to the Jabber Open Source Contributors for their suggestions and support of Jabber.
 
 Modifications:', 'http://www.opensource.org/licenses/jabberpl.php', NULL, NULL, NULL, 'Jabber Open Source License', NULL, NULL, NULL, '', NULL, false, false, false, 'ba7c557b0b7538cf32add3007b87ccf3', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LaTeX1.2', 'The LaTeX Project Public License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'LPPL-1.2', 'The LaTeX Project Public License
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 LPPL Version 1.2  1999-09-03
@@ -23905,7 +23715,7 @@ Important Recommendations
    conditions.
 
 ', 'http://www.latex-project.org/lppl/lppl-1-2.txt', NULL, NULL, NULL, 'LaTeX Project Public License 1.2', NULL, NULL, NULL, '', NULL, false, false, false, '9de443f0da59f23875798d94bd3515f7', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'MetroLink1.0', 'METRO LINK PUBLIC LICENSE 
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'MetroLink-1.0', 'METRO LINK PUBLIC LICENSE 
 MOTIF GRAPHICAL USER INTERFACE SOFTWARE
 Version 1.00
  
@@ -24416,7 +24226,7 @@ HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGES. THIS LIMITATION OF
 LIABILITY SHALL NOT
 APPLY TO LIABILITY FOR DEATH OR PERSONAL INJURY RESULTING FROM SUCH
 PARTY', 'http://www.opensource.org/licenses/motosoto.php', NULL, NULL, NULL, 'Motosoto Open Source License 0.9.1', NULL, NULL, NULL, '', NULL, false, false, false, '03e9db06cb6fd28b52aa76e35dff7bb1', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'NASA1.3', 'NASA OPEN SOURCE AGREEMENT VERSION 1.3
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'NASA-1.3', 'NASA OPEN SOURCE AGREEMENT VERSION 1.3
 THIS OPEN SOURCE AGREEMENT (\\"AGREEMENT\\") DEFINES THE RIGHTS OF USE,
 REPRODUCTION, DISTRIBUTION, MODIFICATION AND REDISTRIBUTION OF CERTAIN
 COMPUTER SOFTWARE ORIGINALLY RELEASED BY THE UNITED STATES GOVERNMENT
@@ -24715,7 +24525,7 @@ Recipient hereby agrees to all terms and conditions herein.
 
 F. Point of Contact: Any Recipient contact with Government Agency is
 to be directed to the designated representative as follows:', 'http://www.opensource.org/licenses/nasa1.3.php', NULL, NULL, NULL, 'NASA Open Source Agreement 1.3', NULL, NULL, NULL, '', NULL, false, false, false, 'af1782d4fc5cf9d4f7e4eff13c0155bf', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CPOL1.2', 'Preamble
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'CPOL-1.02', 'Preamble
 
 This License governs Your use of the Work. This License is intended to allow developers to use the Source Code and Executable Files provided as part of the Work in any application in any form.
 
@@ -24773,7 +24583,7 @@ This License shall be governed by the laws of the location of the head office of
 If any provision of this License is invalid or unenforceable under applicable law, it shall not affect the validity or enforceability of the remainder of the terms of this License, and without further action by the parties to this License, such provision shall be reformed to the minimum extent necessary to make such provision valid and enforceable.
 No term or provision of this License shall be deemed waived and no breach consented to unless such waiver or consent shall be in writing and signed by the party to be charged with such waiver or consent.
 This License constitutes the entire agreement between the parties with respect to the Work licensed herein. There are no understandings, agreements or representations with respect to the Work not specified herein. The Author shall not be bound by any additional provisions that may appear in any communication from You. This License may not be modified without the mutual written agreement of the Author and You.', 'http://www.codeproject.com/info/cpol10.aspx', NULL, NULL, NULL, 'Code Project Open License 1.02', NULL, NULL, NULL, '', NULL, false, false, false, '70a6bc13a2bc5ec3d2a493e32d833fe5', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Eiffel2.0', '  Eiffel Forum License, version 2
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'EFL-2.0', '  Eiffel Forum License, version 2
 
    1. Permission is hereby granted to use, copy, modify and/or
       distribute this package, provided that:
@@ -24795,7 +24605,7 @@ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
 
 ***********************', 'http://www.eiffel-nice.org/license/eiffel-forum-license-2.txt', NULL, NULL, NULL, 'Eiffel Forum License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '1387f7b9ac00e2ec1208684b96717d08', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Entessa1.0', 'Entessa Public License v1.0
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'Entessa', 'Entessa Public License v1.0
 Copyright (c) 2003 Entessa, LLC. All rights reserved. 
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
@@ -24966,7 +24776,7 @@ D. Any Contribution submitted by you to the Project shall be under the terms and
 7. Should you wish to submit work that is not your original creation, you may submit it to the Project separately from any Contribution, identifying the complete details of its source and of any license or other restriction (including, but not limited to, related patents, trademarks, and license agreements) of which you are personally aware, and conspicuously marking the work as \\"Submitted on behalf of a third-party: [named here] \\".
 8. You agree to notify the Project of any facts or circumstances of which you become aware that would make these representations inaccurate in any respect.
 9. The Project is under no obligations to accept and include every contribution..', 'http://fedoraproject.org/wiki/Legal/Licenses/CLA', NULL, NULL, NULL, 'Fedora Individual Contributor License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, 'abe5bdb4220e42552ad59d661552d539', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'FreeArt', 'Free Art License 1.3
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'FAL-1.3', 'Free Art License 1.3
 
 
 [ Copyleft Attitude ]
@@ -25086,7 +24896,7 @@ You can make reproductions and distribute this license verbatim (without any cha
 
 Translation : Jonathan Clarke, Benjamin Jean, Griselda Jung, Fanny Mourguet, Antoine Pitrou.
 Thanks to framalang.org', 'http://artlibre.org/licence/lal/en', NULL, NULL, NULL, 'Free Art License 1.3', NULL, NULL, NULL, '', NULL, false, false, false, '3ad29fc0f6047bc25844577b0cd802d7', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'BSD Doc', 'The FreeBSD Documentation License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'BSD-Doc', 'The FreeBSD Documentation License
 
 Copyright 1994-2010 The FreeBSD Project. All rights reserved.
 
@@ -25266,7 +25076,7 @@ Legal Terms
 
 
 --- end of FTL.TXT ---', 'http://www.freetype.org/FTL.TXT', NULL, NULL, NULL, 'The FreeType Project License', NULL, NULL, NULL, '', NULL, false, false, false, '40cc639a7481566cca073f04641c5b09', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GFDL', 'GNU Free Documentation License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GFDL-1.1', 'GNU Free Documentation License
 
 Version 1.1, March 2000
 
@@ -25391,7 +25201,7 @@ To use this License in a document you have written, include a copy of the Licens
 If you have no Invariant Sections, write \\"with no Invariant Sections\\" instead of saying which ones are invariant. If you have no Front-Cover Texts, write \\"no Front-Cover Texts\\" instead of \\"Front-Cover Texts being LIST\\"; likewise for Back-Cover Texts.
 
 If your document contains nontrivial examples of program code, we recommend releasing these examples in parallel under your choice of free software license, such as the GNU General Public License, to permit their use in free software.', 'http://www.gnu.org/licenses/old-licenses/fdl-1.1.html', NULL, NULL, NULL, 'GNU Free Documentation License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, 'a90231dd184b05a0d15abed4d8e3ef70', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GFDL1.2', 'GNU Free Documentation License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GFDL-1.2', 'GNU Free Documentation License
 
 Version 1.2, November 2002
 
@@ -25507,7 +25317,7 @@ You may not copy, modify, sublicense, or distribute the Document except as expre
 The Free Software Foundation may publish new, revised versions of the GNU Free Documentation License from time to time. Such new versions will be similar in spirit to the present version, but may differ in detail to address new problems or concerns. See http://www.gnu.org/copyleft/.
 
 Each version of the License is given a distinguishing version number. If the Document specifies that a particular numbered version of this License \\"or any later version\\" applies to it, you have the option of following the terms and conditions either of that specified version or of any later version that has been published (not as a draft) by the Free Software Foundation. If the Document does not specify a version number of this License, you may choose any version ever published (not as a draft) by the Free Software Foundation.', 'http://www.gnu.org/licenses/old-licenses/fdl-1.2.html', NULL, NULL, NULL, 'GNU Free Documentation License 1.2', NULL, NULL, NULL, '', NULL, false, false, false, 'b22afc925bd5dd3aacdaf3544442f571', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GFDL1.3', 'GNU Free Documentation License
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GFDL-1.3', 'GNU Free Documentation License
 
 Version 1.3, 3 November 2008
 
@@ -25631,7 +25441,7 @@ Each version of the License is given a distinguishing version number. If the Doc
 An MMC is \\"eligible for relicensing\\" if it is licensed under this License, and if all works that were first published under this License somewhere other than this MMC, and subsequently incorporated in whole or in part into the MMC, (1) had no cover texts or invariant sections, and (2) were thus incorporated prior to November 1, 2008.
 
 The operator of an MMC Site may republish an MMC contained in the site under CC-BY-SA on the same site at any time before August 1, 2009, provided the MMC is eligible for relicensing.', 'http://www.gnu.org/copyleft/fdl.html', NULL, NULL, NULL, 'GNU Free Documentation License 1.3', NULL, NULL, NULL, '', NULL, false, false, false, '8c6a722f1cd5b77b36a713b1e01e7c86', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GPL1.0', '                    GNU GENERAL PUBLIC LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GPL-1.0', '                    GNU GENERAL PUBLIC LICENSE
                      Version 1, February 1989
 
  Copyright (C) 1989 Free Software Foundation, Inc.
@@ -25881,7 +25691,7 @@ necessary.  Here a sample; alter the names:
   Ty Coon, President of Vice
 
 That''s all there is to it!', 'http://www.gnu.org/licenses/gpl-1.0.txt', NULL, NULL, NULL, 'GNU General Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '46644d93b4b711771f8288ed769de09e', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GPL3.0', '                    GNU GENERAL PUBLIC LICENSE
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'GPL-3.0', '                    GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
@@ -27722,7 +27532,7 @@ The above copyright notice including the dates of first publication and either t
 THE SOFTWARE IS PROVIDED \\"AS IS\\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL SILICON GRAPHICS, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Except as contained in this notice, the name of Silicon Graphics, Inc. shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from Silicon Graphics, Inc.
 ', 'http://oss.sgi.com/projects/FreeB/SGIFreeSWLicB.2.0.doc', NULL, NULL, NULL, 'SGI Free Software License B 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '8b445f0e163c98e77d735eae298f4013', 2);
-INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'SNIA1.1', 'STORAGE NETWORKING INDUSTRY ASSOCIATION
+INSERT INTO license_ref ( rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES ( 'SNIA-1.1', 'STORAGE NETWORKING INDUSTRY ASSOCIATION
 PUBLIC LICENSE
 Version 1.1 
 ________________________
