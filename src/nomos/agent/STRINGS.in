@@ -3046,6 +3046,10 @@ e /* (INFILE(j)) */
 %KEY% "evil"
 %STR% "(no|not|don't be) evil"
 #
+%ENTRY% _LT_JSON
+%KEY% "json"
+%STR% "."
+#
 %ENTRY%	_LT_MITref1
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= \<mit\> =FEW= licen[cs]e"

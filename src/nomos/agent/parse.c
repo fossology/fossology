@@ -1472,6 +1472,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * MIT, X11, Open Group, NEC -- text is very long, search in 2 parts
    */
+  if (INFILE(_LT_JSON) && INFILE(_LT_MIT_NO_EVIL)) { // JSON license 
+    INTERESTING("JSON");
+    lmem[_mMIT] = 1;
+  }
   if (INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) {
     if(INFILE(_LT_MIT_NO_EVIL)) {
       INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
