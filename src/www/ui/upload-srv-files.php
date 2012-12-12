@@ -81,7 +81,6 @@ class upload_srv_files extends FO_Plugin {
   function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName) {
     global $Plugins;
     global $SysConf;
-print "SourceFiles is:$SourceFiles\n";
 
     $FolderPath = FolderGetName($FolderPk);
     $SourceFiles = trim($SourceFiles);
