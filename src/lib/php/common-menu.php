@@ -417,7 +417,7 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
  * 
  * \return one HTML line with items in a "[name]" list
  */
-function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id) 
+function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id  = "") 
 {
   $V = "";
   $Std = "";
