@@ -269,4 +269,24 @@ function TagFilter(&$UploadtreeRows, $tag_pk, $uploadtree_tablename)
     if ($found == false) unset($UploadtreeRows[$key]);
   }
 }
+
+/**
+ * \brief check if tagging on one upload is disabled or not
+ * 
+ * \param $upload_id - upload id
+ * 
+ * \return 1: enble; 0: disable
+ */
+function TagStatus($upload_id) 
+{
+  global $PG_CONN;
+  /** check if this upload has been disabled */
+  $sql = "select * from tag_manage where upload_fk = $upload_id and is_disabled = true;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $count = pg_num_rows($result);
+  pg_free_result($result);
+  if ($count > 0) return 0;
+  else return 1;
+}
 ?>

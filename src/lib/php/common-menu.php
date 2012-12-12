@@ -413,10 +413,11 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
  * \param $Pre      string before "[name]"
  * \param $Post     string after "[name]"
  * \param $ShowAll  If $ShowAll==0, then items without hyperlinks are hidden.
+ * \param $upload_id upload id
  * 
  * \return one HTML line with items in a "[name]" list
  */
-function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1) 
+function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id) 
 {
   $V = "";
   $Std = "";
@@ -428,6 +429,11 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1)
         $V.= $Post;
       }
       else if (!empty($Val->URI)) {
+        if (!empty($upload_id) && "tag" == $Val->URI)
+        {
+          $tagstatus = TagStatus($upload_id);
+          if (0 == $tagstatus) break; // tagging on this upload is disabled
+        }
         $V.= $Pre;
         $V.= "[<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "&" . $Parm . "'";
         if (!empty($Val->Title)) {

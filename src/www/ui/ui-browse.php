@@ -214,9 +214,9 @@ class ui_browse extends FO_Plugin {
       $V.= "</td>\n";
 
       if (!Iscontainer($Row['ufile_mode']))
-      $V.= menu_to_1list($MenuPfileNoCompare, $Parm, "<td>", "</td>\n");
+      $V.= menu_to_1list($MenuPfileNoCompare, $Parm, "<td>", "</td>\n", 1, $Upload);
       else if (!Isdir($Row['ufile_mode']))
-      $V.= menu_to_1list($MenuPfile, $Parm, "<td>", "</td>\n");
+      $V.= menu_to_1list($MenuPfile, $Parm, "<td>", "</td>\n", 1, $Upload);
       else
       $V.= menu_to_1list($MenuTag, $Parm, "<td>", "</td>\n");
 
@@ -338,9 +338,9 @@ class ui_browse extends FO_Plugin {
       $Upload = $Row['upload_pk'];
       $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
       if (Iscontainer($Row['ufile_mode']))
-      $V.= menu_to_1list($MenuPfile, $Parm, " ", " ");
+      $V.= menu_to_1list($MenuPfile, $Parm, " ", " ", 1, $UploadPk);
       else
-      $V.= menu_to_1list($MenuPfileNoCompare, $Parm, " ", " ");
+      $V.= menu_to_1list($MenuPfileNoCompare, $Parm, " ", " ", 1, $UploadPk);
 
       /* Job queue link */
       $text = _("History");
