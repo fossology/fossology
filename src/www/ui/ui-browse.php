@@ -218,7 +218,7 @@ class ui_browse extends FO_Plugin {
       else if (!Isdir($Row['ufile_mode']))
       $V.= menu_to_1list($MenuPfile, $Parm, "<td>", "</td>\n", 1, $Upload);
       else
-      $V.= menu_to_1list($MenuTag, $Parm, "<td>", "</td>\n");
+      $V.= menu_to_1list($MenuTag, $Parm, "<td>", "</td>\n", 1, $Upload);
 
       $V.= "</td>";
     } /* foreach($Results as $Row) */
