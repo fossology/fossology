@@ -47,6 +47,7 @@ class admin_tag_manage extends FO_Plugin
 
     /** no operation */
     if (empty($manage)) return;
+    if (empty($folder_id) && empty($upload_id)) return;
 
     /** get upload list */
     $upload_list = array();
@@ -82,6 +83,7 @@ class admin_tag_manage extends FO_Plugin
         pg_free_result($result);
       }
     }
+    return 1;
   }
 
   /**
@@ -113,12 +115,19 @@ class admin_tag_manage extends FO_Plugin
         }
 
         $rc = $this->ManageTag($Folder, $upload_id, $manage);
-        if (empty($rc)) {
+        if (1 == $rc) {
+
+          $text1 = _("all uploads in folder");
+          $text2 = _("in folder");
+          $folder_path = FolderGetName($Folder);
+          $upload_name = GetUploadName($upload_id);
+
+          if (empty($upload_id)) $text = $text1;
+          else $text = "'$upload_name' $text2";
+
+          $Msg = "$manage $text '$folder_path'";
+          print displayMessage($Msg,"");
           // reset form fields
-        }
-        else {
-          $text = _("Failed to ");
-          $V.= displayMessage("$text {$_FILES['getfile']['name']}: $rc");
         }
 
         /**
@@ -133,9 +142,26 @@ class admin_tag_manage extends FO_Plugin
         $V .= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
         $V .= "    {\n";
         $V .= "    document.formy.upload.innerHTML = Uploads.responseText;\n";
+        $V .= "    document.getElementById('manage_tag').style.display= 'none';\n";
+        $V .= "    document.getElementById('manage_tag_all').style.display= 'block';\n";
         $V .= "    }\n";
         $V .= "  }\n";
         $V .= "</script>\n";
+
+        /** select one upload */
+        $V .= ActiveHTTPscript("Tagging");
+        $V .= "<script language='javascript'>\n";
+        $V .= "function Tagging_Reply()\n";
+        $V .= "  {\n";
+        $V .= "  if ((Tagging.readyState==4) && (Tagging.status==200))\n";
+        $V .= "    {\n";
+        $V .= "    document.getElementById('manage_tag_all').style.display= 'none';\n";
+        $V .= "    document.getElementById('manage_tag').style.display= 'block';\n";
+        $V .= "    document.getElementById('manage_tag').innerHTML = Tagging.responseText;\n";
+        $V .= "    }\n";
+        $V .= "  }\n";
+        $V .= "</script>\n";
+
 
 
         /*************************************************************/
@@ -154,7 +180,7 @@ class admin_tag_manage extends FO_Plugin
 
         $text = _("Select the upload to  enable/disable:");
         $V .= "<li>$text<br>";
-        $V .= "<select size='10' name='upload' >\n";
+        $V .= "<select size='10' name='upload' onChange='Tagging_Get(\"" . Traceback_uri() . "?mod=upload_tagging&upload=\" + this.value)'>\n"; 
         $List = FolderListUploads($Folder);
         foreach($List as $L)
         {
@@ -167,10 +193,17 @@ class admin_tag_manage extends FO_Plugin
           $V .= "</option>\n";
         }
         $V .= "</select><P />\n";
-        $text = _("Enable");
-        $V .= "<input type='submit' name='manage' value='$text'>\n";
+        /** for folder */
+        $V .= "<div id='manage_tag_all'>";
         $text = _("Disable");
         $V .= "<input type='submit' name='manage'  value='$text'>\n";
+        $text = _("Enable");
+        $V .= "<input type='submit' name='manage' value='$text'>\n";
+        $V .=  "</div>";
+
+        /** for upload */
+        $V .= "<div id='manage_tag'>";
+        $V .=  "</div>";
 
         break;
       case "Text":

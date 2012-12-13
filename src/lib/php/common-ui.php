@@ -239,4 +239,21 @@ function GetUploadtreeTableName($upload_pk)
   if (empty($upload_rec['uploadtree_tablename'])) return "uploadtree";
   else return $upload_rec['uploadtree_tablename'];
 }
+
+/**
+ * \brief get Upload Name thourgh upload id
+ * 
+ * \param $upload_id - upload ID
+ *
+ * \return upload name
+ */
+function GetUploadName($upload_pk)
+{
+  if (empty($upload_pk)) return "";
+  $upload_rec = GetSingleRec("upload", "where upload_pk='$upload_pk'");
+  $upload_filename = $upload_rec['upload_filename'];
+  if (empty($upload_filename)) return "";
+  else return $upload_filename;
+}
+
 ?>
