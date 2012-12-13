@@ -501,7 +501,7 @@ class ui_nomos_license extends FO_Plugin
      * This way all the url's based on the input args won't be
      * polluted with updcache
      * Use Traceback_parm_keep to ensure that all parameters are in order */
-    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","tag"));
+    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","tag", "agent"));
     if ($updcache)
     {
       $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
