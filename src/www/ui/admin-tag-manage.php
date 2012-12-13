@@ -39,7 +39,7 @@ class admin_tag_manage extends FO_Plugin
    * \param $upload_id - upload id
    * \param $manage - enable or disable
    * 
-   * \return null
+   * \return return null when no uploads to manage, return 1 after setting
    */
   function ManageTag($folder_id, $upload_id, $manage)
   {
