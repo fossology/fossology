@@ -347,34 +347,39 @@ function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=Tr
   }
 
   /********  Tag ********/
-  $TagArray = GetAllTags($uploadtree_pk, $Recurse, $uploadtree_tablename);
-  $TagStr = "";
-  foreach($TagArray as $TagPair) 
+
+  $tag_status = TagStatus($upload_fk); // check if tagging on one upload is disabled or not. 1: enable, 0: disable
+  if ($tag_status)
   {
-    /* Build string of tags for this item */
-    if (!empty($TagStr)) $TagStr .= ",";
-    $TagStr .= " " . $TagPair['tag_name'];
-
-    /* Update $UniqueTagArray */
-    $found = false;
-    foreach($UniqueTagArray as $UTA_key => $UTA_row)
+    $TagArray = GetAllTags($uploadtree_pk, $Recurse, $uploadtree_tablename);
+    $TagStr = "";
+    foreach($TagArray as $TagPair) 
     {
-      if ($TagPair['tag_pk'] == $UTA_row['tag_pk'])
+      /* Build string of tags for this item */
+      if (!empty($TagStr)) $TagStr .= ",";
+      $TagStr .= " " . $TagPair['tag_name'];
+
+      /* Update $UniqueTagArray */
+      $found = false;
+      foreach($UniqueTagArray as $UTA_key => $UTA_row)
       {
-        $found = true;
-        break;
+        if ($TagPair['tag_pk'] == $UTA_row['tag_pk'])
+        {
+          $found = true;
+          break;
+        }
       }
+      if (!$found) $UniqueTagArray[] = $TagPair;
     }
-    if (!$found) $UniqueTagArray[] = $TagPair;
+
+    $text3 = _("Tag");
+    $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=tag&upload=$upload_fk&item=$uploadtree_pk' >$text3</a>";
+
+    $LinkStr .= "<span style='color:#2897B7'>";
+    $LinkStr .= $TagStr;
+    $LinkStr .= "</span>";
+    $LinkStr .= "]";
   }
-
-  $text3 = _("Tag");
-  $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=tag&upload=$upload_fk&item=$uploadtree_pk' >$text3</a>";
-
-  $LinkStr .= "<span style='color:#2897B7'>";
-  $LinkStr .= $TagStr;
-  $LinkStr .= "</span>";
-  $LinkStr .= "]";
   return $LinkStr;
 }
 ?>
