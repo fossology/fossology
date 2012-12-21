@@ -29,10 +29,6 @@ class agent_copyright_once extends FO_Plugin {
   // in the code below.
   //public $MenuList = "Upload::One-Shot Bsam";
   public $Version = "1.0";
-  public $Dependency = array(
-        "view",
-        "copyrightview"
-  );
   public $NoHTML = 0;
   /** For anyone to access, without login, use: **/
   public $DBaccess   = PLUGIN_DB_NONE;
@@ -46,10 +42,11 @@ class agent_copyright_once extends FO_Plugin {
    * \brief Analyze one uploaded file.
    * \param $Highlight - if copyright info lines would be highlight, now always yes
    */
-  function AnalyzeOne($Highlight) {
+  function AnalyzeOne($Highlight=1) {
     global $Plugins;
     global $SYSCONFDIR;
     $ModBack = GetParm("modback",PARM_STRING);
+    $copyright_array = array();
 
     $V = "";
     $View = & $Plugins[plugin_find_id("view") ];
@@ -79,11 +76,20 @@ class agent_copyright_once extends FO_Plugin {
         //print_r($match);
         if (!empty($match['start'])) {
           $stuff[$match['type'][0]][] = $match['content'][0];
-          $View->AddHighlight($match['start'][0], $match['end'][0], $colors[$match['type'][0]], '', $match['content'][0],-1);
+          if ($this->NoHTML) // For REST API
+            array_push($copyright_array, $match['content'][0]);
+          else 
+            $View->AddHighlight($match['start'][0], $match['end'][0], $colors[$match['type'][0]], '', $match['content'][0],-1);
         }
       }
     }
     pclose($Fin);
+
+    if ($this->NoHTML) // For REST API:
+    {
+      return $copyright_array;
+    }
+
     $Fin = fopen($TempFile, "r");
     if ($Fin) {
       $View->SortHighlightMenu();
@@ -170,6 +176,26 @@ class agent_copyright_once extends FO_Plugin {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
+
+    /* For REST API:
+       wget -qO - --post-file=myfile.c http://myserv.com/?mod=agent_copyright_once
+    */
+    /* Ignore php Notice is array keys don't exist */
+    $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
+    $tmp_name = $_FILES['licfile']['tmp_name'];
+    error_reporting($errlev);
+
+    if ($this->NoHTML && file_exists($tmp_name))
+    {
+      $copyright_res = $this->AnalyzeOne();
+      foreach ($copyright_res as $copyright)
+      {
+        echo "$copyright\n";
+      }
+      unlink($tmp_name);
+      return;
+    }
+
     $V = "";
     switch ($this->OutputType) {
       case "XML":
