@@ -351,7 +351,7 @@ $SLName, $SLID, &$agent_pk, $extra = "")
    global $PG_CONN;
    /* get the agent recs */
    $TableName .= '_ars';
-   $sql = "select agent_pk, agent_name, agent_rev from agent, $TableName where agent.agent_pk = $TableName.agent_fk and upload_fk = $upload_pk;";
+   $sql = "select agent_pk, agent_name, agent_rev from agent, $TableName where agent.agent_pk = $TableName.agent_fk and upload_fk = $upload_pk order by agent_rev DESC;";
    $result = pg_query($PG_CONN, $sql);
    DBCheckResult($result, $sql, __FILE__, __LINE__);
 
