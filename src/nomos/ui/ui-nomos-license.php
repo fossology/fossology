@@ -220,10 +220,11 @@ class ui_nomos_license extends FO_Plugin
       $VLic .= "</form>";
     }
 
+    // No_license_found/Void ARE EXCLUDED FROM LICENSE COUNT
     $sql = "SELECT distinct(rf_shortname) as licname, count(rf_shortname) as liccount, rf_shortname 
             from license_file_ref $TagTable
             right join $this->uploadtree_tablename on license_file_ref.pfile_fk=$this->uploadtree_tablename.pfile_fk 
-            where upload_fk='$upload_pk' and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt 
+            where rf_shortname <> 'Void' and rf_shortname <> 'No_license_found' and upload_fk='$upload_pk' and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt 
               and agent_fk=$Agent_pk $TagClause 
             group by rf_shortname order by liccount desc";
 //$uTime = microtime(true);
