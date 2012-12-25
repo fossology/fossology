@@ -144,10 +144,11 @@ class copyright_hist extends FO_Plugin
     $sql = "";
     if ($filter == "nolics")
     {
-      /* find rf_pk for "No_license_found" */
+      /* find rf_pk for "No_license_found" or "Void" */
       $rf_clause = "";
       $NoLicStr = "No_license_found";
-      $sql_lr = "select rf_pk from license_ref where rf_shortname='$NoLicStr'";
+      $VoidLicStr = "Void";
+      $sql_lr = "select rf_pk from license_ref where rf_shortname IN ('$NoLicStr', '$VoidLicStr')";
       $result = pg_query($PG_CONN, $sql_lr);
       DBCheckResult($result, $sql_lr, __FILE__, __LINE__);
       if (pg_num_rows($result) > 0)

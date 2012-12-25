@@ -131,21 +131,24 @@ class copyright_list extends FO_Plugin
     $prev = 0;
     $ExclArray = explode(":", $excl);
 
-    /* filter will need to know the rf_pk of "No_license_found" */
+    /* filter will need to know the rf_pk of "No_license_found" or "Void" */
     if (!empty($filter))
     {
       $NoLicStr = "No_license_found";
-      $sql = "select rf_pk from license_ref where rf_shortname='$NoLicStr'";
+      $VoidLicStr = "Void";
+      $rf_clause = "";
+      $sql = "select rf_pk from license_ref where rf_shortname IN  ('$NoLicStr', '$VoidLicStr')";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       if (pg_num_rows($result) > 0)
       {
-        /* assume there is only one license ref called $NoLicStr */
-        $lr_row = pg_fetch_assoc($result);
-        $NoLic_rf_pk = $lr_row['rf_pk'];
+        $rf_rows = pg_fetch_all($result);
+        foreach($rf_rows as $row) 
+        {
+          if (!empty($rf_clause)) $rf_clause .= " or ";
+          $rf_clause .= " rf_fk=$row[rf_pk]";
+        }
       }
-      else
-        $NoLic_rf_pk = 0;
       pg_free_result($result);
     }
 
@@ -171,10 +174,10 @@ class copyright_list extends FO_Plugin
       }
 
       /* apply filters */
-      if (($filter == "nolics") and ($NoLic_rf_pk))
+      if (($filter == "nolics") and ($rf_clause))
       {
         /* discard file unless it has no license */
-        $sql = "select rf_fk from license_file where rf_fk=$NoLic_rf_pk and pfile_fk={$row['pf']}";
+        $sql = "select rf_fk from license_file where ($rf_clause) and pfile_fk={$row['pf']}";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         $FoundRows = pg_num_rows($result);
