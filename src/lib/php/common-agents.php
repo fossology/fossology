@@ -342,8 +342,8 @@ function LatestAgentpk($upload_pk, $arsTableName)
  * \param string  &$Agent_pk  - return which agent is selected
  * \param string  $extra     - Extra info for the select element, e.g. "onclick=..."
  *
- * \return agent select list
- *      or 0 on error
+ * \return agent select list, when only one data, return null
+ *      
  */
 function AgentSelect($TableName, $upload_pk, $DataOnly=true,
 $SLName, $SLID, &$agent_pk, $extra = "")
@@ -354,6 +354,13 @@ $SLName, $SLID, &$agent_pk, $extra = "")
    $sql = "select agent_pk, agent_name, agent_rev from agent, $TableName where agent.agent_pk = $TableName.agent_fk and upload_fk = $upload_pk order by agent_rev DESC;";
    $result = pg_query($PG_CONN, $sql);
    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+   $NumRows = pg_num_rows($result);
+   if ($NumRows == 1) // only one result
+   {
+     pg_free_result($result);
+     return ;  /* only one result*/
+   }
 
    $select = "<select name='$SLName' id='$SLName' $extra>";
    while ($row = pg_fetch_assoc($result))
