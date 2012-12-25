@@ -127,13 +127,6 @@ class copyright_hist extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
-    if ($Agent_pk == 0)
-    {
-      $text = _("No data available.  Use Jobs > Agents to schedule a copyright scan.");
-      $Msg = "<p><b>$text</b><p>";
-      return $Msg;
-    }
-
     /* Check for too many uploadtree rows to process.
      * This is arbitrarily set to 100000.  The copyright display
      * isn't very useful with more records and this check
@@ -542,6 +535,14 @@ class copyright_hist extends FO_Plugin
             if (empty($Agent_pk))
             {
               $Agent_pk = LatestAgentpk($Upload, $arstable);
+            }
+
+            if ($Agent_pk == 0)
+            {
+              $text = _("No data available.  Use Jobs > Agents to schedule a copyright scan.");
+              $Msg = "<b>$text</b><p>";
+              $OutBuf .= $Msg;
+              break;
             }
 
             $AgentSelect = AgentSelect($Agent_name, $Upload, true, $dataset, $dataset, $Agent_pk,
