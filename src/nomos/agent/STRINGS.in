@@ -3683,6 +3683,10 @@ e /* (INFILE(j)) */
 #%STR%	"copyright-only dedication =SOME= or public[ -]domain cert"
 %STR%	"to the best of his knowledge the work of authorship identified is in the \<public\>[ -]domain of the country from which the work is published"
 #
+%ENTRY%	_LT_UNLIN
+%KEY%	"public"
+%STR%	"free (,|and) unencumbered =FEW= public domain"
+#
 %ENTRY%	_LT_PUBDOM_1
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 #%STR%	"(licen[cs]e|under|in|is|are|to|withi?n?|contain) =SOME= \<public\>[ -]domain"

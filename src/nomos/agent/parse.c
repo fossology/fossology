@@ -7895,6 +7895,9 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
   } else if (INFILE(_CR_NONE)) {
     INTERESTING(lDebug ? "Pubdom(no-CR)" : LS_PD_CLM);
     ret = 1;
+  } else if (INFILE(_LT_UNLIN)) {
+    INTERESTING("Unlicense");
+    ret = 1;
   } else if (INFILE(_LT_PUBDOM_1)) {
     INTERESTING(lDebug ? "Pubdom(1)" : LS_PD_CLM);
     ret = 1;
