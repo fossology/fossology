@@ -483,7 +483,7 @@ class ui_tag extends FO_Plugin
     $VA .= "        var divcss=\"width:240px;font-size:12px;position:absolute;left:\"+(inputid.offsetLeft+0)+\"px;top:\"+(inputid.offsetTop+23)+\"px;border:1px solid\";\n";
     $VA .= "        creatediv(\"\",\"div\",inputid+\"mydiv\",divcss);\n";
     $VA .= "        for (var i=0;i<text_list.length-1;i++){\n";
-    $VA .= "            creatediv(inputid+\"mydiv\",\"li\",inputid+\"li\"+i,\"color:#000;background:#fff;float:left;list-style-type:none;padding:9px;margin:0;CURSOR:pointer\");\n";
+    $VA .= "            creatediv(inputid+\"mydiv\",\"li\",inputid+\"li\"+i,\"color:#000;background:#fff;list-style-type:none;padding:9px;margin:0;CURSOR:pointer\");\n";
     $VA .= "            getobj(inputid+\"li\"+i).innerHTML=text_list[i];\n";
     $VA .= "            getobj(inputid+\"li\"+i).onmouseover=function(){this.style.background=\"#eee\";}\n";
     $VA .= "            getobj(inputid+\"li\"+i).onmouseout=function(){this.style.background=\"#fff\"}\n";
@@ -541,7 +541,7 @@ class ui_tag extends FO_Plugin
     $VC .= "<p>$text:$select</p>";
     $VC .= "<p>";
     $text = _("Tag");
-    $VC .= "$text: <input type='text' id='tag_name' name='tag_name' autocomplete='off' onclick='Tags_Get(\"". Traceback_uri() . "?mod=tag_get&uploadtree_pk=$Item\")'/> ";
+    $VC .= "$text: <input type='text' id='tag_name' name='tag_name' maxlength='32' utocomplete='off' onclick='Tags_Get(\"". Traceback_uri() . "?mod=tag_get&uploadtree_pk=$Item\")'/> ";
 
     /****** Permission comments: if user don't have add or high permission, can't see this check box ******/
     //$VC .= "<input type='checkbox' name='tag_add' value='1'/>";
