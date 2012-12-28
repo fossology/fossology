@@ -545,6 +545,7 @@ function installFossology($objRef)
   }
   $aptUpdate = 'apt-get update 2>&1';
   $aptInstall = 'apt-get -y --force-yes install fossology 2>&1';
+  $yumClean = 'yum clean all';
   $yumUpdate = 'yum -y update 2>&1';
   $yumInstall = 'yum -y install fossology > fossinstall.log 2>&1';
   $debLog = NULL;
@@ -578,6 +579,14 @@ function installFossology($objRef)
       break;
     case 'Fedora':
     case 'RedHat':
+      echo "** Running yum clean **\n";
+      $last = exec($yumClean, $out, $rtn);
+      if($rtn != 0)
+      {
+        echo "Failed to clean all cache data!\nTranscript is:\n";
+        echo implode("\n",$out) . "\n";
+        return(FALSE);
+      }
       echo "** Running yum update **\n";
       $last = exec($yumUpdate, $out, $rtn);
       if($rtn != 0)
