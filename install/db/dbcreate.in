@@ -1,6 +1,6 @@
 #!/bin/bash
 # FOSSology dbcreate script
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 #
 # This script checks to see if the the fossology db exists and if not
 # then creates it.
@@ -17,7 +17,7 @@ if [ $? != 0 ]; then
 fi
 
 # then check to see if the db already exists
-su postgres -c 'psql -l' |grep -q fossology
+su postgres -c "psql --tuples-only --command \"select * from pg_database where datname = 'fossology';\""|grep fossology
 if [ $? = 0 ]; then
    echo "NOTE: fossology database already exists, not creating"
    echo "*** Checking for plpgsql support ***"
