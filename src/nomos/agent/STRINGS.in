@@ -2038,6 +2038,10 @@
 %KEY%	"bison"
 %STR%	"bison =FEW= distribute =FEW= under terms of your choice"
 #
+%ENTRY%	_LT_GPL_EXCEPT_ECOS
+%KEY%	"licen[cs]"
+%STR%	"as a special exception if other files instantiate templates or use macros or inline functions from this file or you compile this file and link it =SOME= this file does not by itself cause the resulting work to be covered by the GNU General Public License"
+#
 %ENTRY%	_LT_GPL_FONT1
 %KEY%	"permi[st]"
 %STR%	"give you permission to combine this code with free software libraries that are released under the GNU LGPL"
@@ -3253,6 +3257,10 @@ e /* (INFILE(j)) */
 # works each a FLOSS work licen[cs]ed under one or more of the licen[cs]es
 # listed below in section 1
 #####
+%ENTRY%	_LT_MULTICS
+%KEY%	"software"
+%STR%	"This edition of the Multics software materials and documentation is provided and donated to Massachusetts Institute of Technology by Group BULL including BULL HN Information Systems Inc as a contribution to computer science knowledge"
+#
 %ENTRY%	_LT_MYSQL_EXCEPT
 %KEY%	"distribut"
 %STR%	"distribute a derivative work that is formed"
@@ -3358,6 +3366,11 @@ e /* (INFILE(j)) */
 %NOCHECK%
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"(licen[cs]ed|governed|applicable|subject) =SOME= (NPL|netscape public licen[cs]e)"
+#
+%ENTRY%	_LT_NTP
+%KEY%	"permi[st]"
+%STR%	"permission to use copy modify and distribute this software and its documentation for any purpose with or without fee is hereby granted provided that the above copyright notice appears in all copies and that both the copyright notice and this permission notice appear in supporting documentation"
+#
 %ENTRY%	_LT_NVIDIA
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"hereby granted a non-?exclusive royalty-free copyright licen[cs]e"
@@ -6235,6 +6248,10 @@ k
 %KEY%	"so(ftware|urce)"
 %STR%	"cecill-c free software licen[cs]e agreement"
 #
+%ENTRY%	_TITLE_CLARTISTIC
+%KEY%	"licen[cs]"
+%STR%	"Clarified Artistic License"
+#
 %ENTRY%	_TITLE_CONDOR
 %KEY%	"licen[cs]"
 %STR%	"condor public licen[cs]e"
@@ -6623,6 +6640,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"novell =SOME= software =SOME= licen[cs]e =SOME= agreement"
 #
+%ENTRY%	_TITLE_NTP
+%KEY%	"licen[cs]"
+%STR%	"NTP license"
+#
 %ENTRY%	_TITLE_NVIDIA
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e for customer use of NVIDIA software"
@@ -6634,6 +6655,10 @@ k
 %ENTRY%	_TITLE_OCLC10
 %KEY%	"licen[cs]"
 %STR%	"OCLC research public licen[cs]e 1\.?0"
+#
+%ENTRY%	_TITLE_ODBL
+%KEY%	"licen[cs]"
+%STR%	"Open Database License"
 #
 %ENTRY%	_TITLE_OGPL
 %KEY%	"licen[cs]"
@@ -6726,6 +6751,10 @@ k
 %ENTRY%	_TITLE_OSL30
 %KEY%	"licen[cs]"
 %STR%	"open (source|software) licen[cs]e[^s] =FEW= (3\.?0|(osl |v|version )3\.?0)"
+#
+%ENTRY%	_TITLE_NON_PROFIT_OSL30
+%KEY%	"licen[cs]"
+%STR%	"non-profit open software licen[cs]e =FEW= 3\.?0"
 #
 %ENTRY%	_TITLE_QPL10_1
 %KEY%	"licen[cs]"
@@ -6995,6 +7024,14 @@ k
 %ENTRY%   _TITLE_ZEND_V20
 %KEY% "zend"
 %STR% "Zend Engine License (v|version )2\.?00"
+#
+%ENTRY%	_TITLE_ZIMBRA_13
+%KEY%	"licen[cs]"
+%STR%	"Zimbra Public License (v|version )1\.?3"
+#
+%ENTRY%	_TITLE_ZIMBRA
+%KEY%	"licen[cs]"
+%STR%	"Zimbra Public License"
 #
 %ENTRY%	_TITLE_ZONEALARM_EULA
 %KEY%	"\<(end[ -]user|eula)\>"

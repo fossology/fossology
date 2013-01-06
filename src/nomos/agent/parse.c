@@ -82,7 +82,8 @@
 #define _fW3C           30
 #define _mAPTANA        31
 #define _tOPENLDAP      32
-#define _fIP            33
+#define _mNTP			33 // To avoid W3C-style detection
+#define _fIP            34
 #define _msize          _fIP+1
 //@}
 
@@ -1383,6 +1384,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         else if (INFILE(_PHR_GPL_DESCRIPTIONS)) {
           INTERESTING(lDebug ? "GPL-kinda" : "GPL");
         }
+        else if (INFILE(_LT_GPL_EXCEPT_ECOS)) {
+          INTERESTING("eCos-2.0");
+        }
       /* checking for FSF */
       if (INFILE(_LT_FSF_1)) {
         INTERESTING(lDebug ? "FSF(1)" : "FSF");
@@ -1668,6 +1672,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_X11_STYLE)) {
     INTERESTING(lDebug ? "X11-style(6)" : "X11-style");
   }
+  /*
+   * NTP License
+   */
+  if (INFILE(_TITLE_NTP) || INFILE(_LT_NTP)) {
+    INTERESTING("NTP");
+    lmem[_mNTP] = 1;
+  }
   if (INFILE(_LT_W3C_1)) {
     if (INFILE(_CR_W3C)) {
       INTERESTING(lDebug ? "W3C(1)" : "W3C");
@@ -1677,7 +1688,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     lmem[_fW3C] = 1;
   }
-  else if (!lmem[_mPYTHON] && !lmem[_fBSD] && INFILE(_LT_W3C_2)) {
+  else if (!lmem[_mNTP] && !lmem[_mPYTHON] && !lmem[_fBSD] && INFILE(_LT_W3C_2)) {
     if (INFILE(_CR_W3C)) {
       INTERESTING(lDebug ? "W3C(2)" : "W3C");
     }
@@ -3127,6 +3138,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (!lmem[_mGPL]) {
       INTERESTING(lDebug ? "GPL(Perl-ref4)" : "GPL");
     }
+  }
+  else if (INFILE(_TITLE_CLARTISTIC)) {
+     INTERESTING("ClArtistic");
   }
   else if (!lmem[_fREAL] && !LVAL(_TEXT_GNU_LIC_INFO) &&
       (INFILE(_LT_ART_1) || INFILE(_LT_ARTref1) ||
@@ -4981,6 +4995,27 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   {
     INTERESTING("Dyade");
   }
+  /*
+   * Zimbra
+   */ 
+  if (INFILE(_TITLE_ZIMBRA_13)) {
+     INTERESTING("Zimbra-1.3");
+  }
+  else if (INFILE(_TITLE_ZIMBRA)) {
+     INTERESTING("Zimbra");
+  }
+  /*
+   * Open Database
+   */
+  if (INFILE(_TITLE_ODBL)) {
+     INTERESTING("ODbl-1.0");
+  }
+  /*
+   * Multics
+   */
+  if (INFILE(_LT_MULTICS)) {
+     INTERESTING("Multics");
+  }
 
   /*
    * The Stallman paper "Why Software Should Be Free" is a red-herring.
@@ -5640,7 +5675,10 @@ char *oslVersion(char *filetext, int size, int isML, int isPS)
   traceFunc("== oslVersion()\n");
 #endif  /* PROC_TRACE */
   /* */
-  if (INFILE(_TITLE_OSL30)) {
+  if (INFILE(_TITLE_NON_PROFIT_OSL30)) {
+    lstr = "NPOSL-3.0";
+  }
+  else if (INFILE(_TITLE_OSL30)) {
     lstr = lDebug? "OSL(v3.0#1)" : "OSL-3.0";
   }
   else if (INFILE(_TITLE_OSL21)) {
