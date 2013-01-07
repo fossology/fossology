@@ -1,6 +1,6 @@
 #!/bin/sh
 # fo-cleanold - a utility to clean up old fossology installs
-# Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 #
 # This utility is designed to clean fossology installs off a system. By
 # default it
@@ -180,8 +180,13 @@ echo "*** Searching for new fossology config files ***"
 for conffile in $NEWSAVE; do
    if [ -f "$conffile" -o -L "$conffile" ]; then
       if [ $RMCONF ]; then
-         echo "NOTE: found $conffile saving to $TMPDIR/ and deleting as requested"
-         mv $conffile $TMPDIR/
+         path=`dirname $conffile`
+         destpath="$TMPDIR/$path"
+         if [ ! -d $destpath ]; then
+           mkdir -p $destpath
+         fi 
+         echo "NOTE: found $conffile saving to $destpath/ and deleting as requested"
+         mv $conffile $destpath/
       else
          echo "WARNING: found $conffile but not deleting"
       fi
