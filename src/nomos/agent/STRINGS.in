@@ -1,5 +1,5 @@
 #####
-# (C) Copyright 2006-2012 Hewlett-Packard Development Company, L.P.
+# (C) Copyright 2006-2013 Hewlett-Packard Development Company, L.P.
 #####
 
 /* License footprints */
@@ -1809,6 +1809,15 @@
 %ENTRY%	_LT_FREE_85
 %KEY%	"permi[st]"
 %STR%	"permission to use copy modify and distribute this software is freely granted provided that this notice is preserved"
+#
+%ENTRY% _LT_FREE_86
+%KEY% "licen[cs]"
+%STR% "license AllPermissive"
+#
+%ENTRY% _LT_FREE_87
+%KEY% "software"
+%STR% "any use of this software is permitted provided that this notice is not removed"
+#
 %ALIAS%	_FREE_last_other
 %ALIAS%	_FREECLAIM_last
 #
@@ -3131,7 +3140,7 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_MPL_OR
 %NOCHECK%
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"\<(either|or|alternately)\> =FEW= (\<mpl\>|mozilla public licen[cs]e)"
+%STR%	"\<(either|or|alternately)\> =FEW= (\<[:space:]mpl[:space:]\>|mozilla public licen[cs]e)"
 #
 %ENTRY% _LT_MPL_SECONDARY
 %NOCHECK%
@@ -3220,7 +3229,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_MSCORP_PLref2
 %KEY%	"\<under\>"
-%STR%	"(distribu|offere?d?|released?|licen[cs]ed?|available|protected|provided) =SOME= under =SOME= microsoft (permissive|public) licen[cs]e"
+%STR%	"(distribu|offere?d?|released?|licen[cs]ed?|available|protected|provided|published) =SOME= under =SOME= microsoft (permissive|public) licen[cs]e"
 #####
 # DELETED: ... your products maintaining your products or enhancing the
 # interoperability of your products with the software and specifically
@@ -3534,6 +3543,14 @@ e /* (INFILE(j)) */
 %KEY%	"distribut"
 %STR%	"rights for r?e?-?distribution and/?o?r? usage in source and binary forms are granted according to the openSSL licen[cs]e"
 #
+%ENTRY% _LT_OPENSSLref3
+%KEY% "licen[cs]"
+%STR% "licensed pursuant to (the|) openssl =FEW= licen[cs]e"
+#
+%ENTRY% _LT_OPENSSLref4
+%KEY% "licen[cs]"
+%STR% "distributed under the same license as OpenSSL"
+#
 %ENTRY%	_LT_COMBINED_OPENSSL_SSLEAY
 %KEY%	"SSLeay"
 %STR%	"OpenSSL License and =SOME= SSLeay license"
@@ -3582,6 +3599,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_PERLref4
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]ed? =SOME= as perl"
+#
+%ENTRY% _LT_PERLref5
+%KEY% "licen[cs]"
+%STR% "license(:|) perl"
 #####
 # Hardy, har, har.  The phrase below is, in the actual licen[cs]e text,
 # "complete documentation whether printed or otherwise" but WE STRIP OUT
@@ -3699,6 +3720,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_UNLIN
 %KEY%	"public"
 %STR%	"free (,|and) unencumbered =FEW= public domain"
+#
+%ENTRY%	_LT_UNLINref
+%KEY% "licen[cs]"
+%STR% "(refer to|(read|see)) =FEW= unlicense\.?org"
 #
 %ENTRY%	_LT_PUBDOM_1
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
@@ -4999,6 +5024,10 @@ k
 %KEY%	"copyright"
 %STR%	"see copyright notice in lua\.?h"
 #
+%ENTRY% _LT_SEE_OTHER_13
+%KEY% "copyright"
+%STR% "see copyright file in =FEW= distribution"
+#
 #####
 # These MUST be the last 3 checks for license references in some "other" place
 #####
@@ -5068,6 +5097,14 @@ k
 %ENTRY%	_LT_SEE_LICENSE_13
 %KEY%	"licen[cs]"
 %STR%	"see =FEW= license file =FEW= for more information"
+#
+%ENTRY% _LT_SEE_LICENSE_14
+%KEY% "licen[cs]"
+%STR% "refer to the LICENSE\.?txt for licensing details"
+#
+%ENTRY% _LT_SEE_LICENSE_15
+%KEY% "licen[cs]"
+%STR% "distribute =FEW= under the terms =FEW= found in LICENSE\.?txt"
 #####
 # These MUST be the last 2 checks for license references in the file "license"
 #####
@@ -8063,6 +8100,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?cecill\.?info/licen[cs]es/li[cs]ence_CeCILL_V2-en"
 #
+%ENTRY% _URL_CMAKE
+%KEY% "copyright"
+%STR% "w?w?w?\.?cmake\.?org/HTML/Copyright\.?html"
+#
 %ENTRY%	_URL_CPL
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/cpl"
@@ -8146,6 +8187,10 @@ k
 %ENTRY%	_URL_NPL11
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"w?w?w?\.?mozilla\.?org/[MN]PL/NPL-1\.?1"
+#
+%ENTRY% _URL_ORACLE_BERKELEY_DB
+%KEY% "licen[cs]"
+%STR% "download\.?oracle\.?com/docs/cd/E17076_02/html/license/license_db\.?html"
 #
 %ENTRY%	_URL_OSL11
 %KEY%	"licen[cs]"

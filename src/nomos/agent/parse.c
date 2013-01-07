@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -906,6 +906,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_LT_ORACLE_DEVEL) && INFILE(_TITLE_ORACLE_DEVEL)) {
     INTERESTING(lDebug ? "Oracle(dev)" : "Oracle-Dev");
+  }
+  else if (INFILE(_URL_ORACLE_BERKELEY_DB)) {
+    INTERESTING(lDebug ? "URL_ORACLE_BERKELEY_DB" : "Oracle-Berkeley-DB");
   }
   /*
    * CeCILL
@@ -2325,7 +2328,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * OpenSSL
    */
-  if (INFILE(_LT_OPENSSLref1) || INFILE(_LT_OPENSSLref2)) {
+  if (INFILE(_LT_OPENSSLref1) || INFILE(_LT_OPENSSLref2) ||
+      INFILE(_LT_OPENSSLref3) || INFILE(_LT_OPENSSLref4)) {
     INTERESTING(lDebug ? "OpenSSL(ref)" : "OpenSSL");
   }
   /*
@@ -3137,6 +3141,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "Artistic(Perl-ref4)" : "Artistic-1.0");
     if (!lmem[_mGPL]) {
       INTERESTING(lDebug ? "GPL(Perl-ref4)" : "GPL");
+    }
+  }
+  else if (INFILE(_LT_PERLref5)) {
+    INTERESTING(lDebug ? "Artistic(Perl-ref5)" : "Artistic-1.0");
+    if (!lmem[_mGPL]) {
+      INTERESTING(lDebug ? "GPL(Perl-ref5)" : "GPL");
     }
   }
   else if (INFILE(_TITLE_CLARTISTIC)) {
@@ -5096,6 +5106,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (*licStr == NULL_CHAR && INFILE(_LT_BEERWARE)) {
     LOWINTEREST("Beerware");
+  }
+  /* 
+   * CMake license
+   */
+  if (INFILE(_URL_CMAKE)) {
+    INTERESTING("CMake");
   }
   /*
    * WTF Public "license"
@@ -7933,7 +7949,7 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
   } else if (INFILE(_CR_NONE)) {
     INTERESTING(lDebug ? "Pubdom(no-CR)" : LS_PD_CLM);
     ret = 1;
-  } else if (INFILE(_LT_UNLIN)) {
+  } else if (INFILE(_LT_UNLIN) || URL_INFILE(_LT_UNLINref)) {
     INTERESTING("Unlicense");
     ret = 1;
   } else if (INFILE(_LT_PUBDOM_1)) {
