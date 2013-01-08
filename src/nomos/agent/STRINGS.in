@@ -2931,6 +2931,14 @@ e /* (INFILE(j)) */
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"\<(either|or|alternately)\> =SOME= (lgpl|lesser GNU general public licen[cs]e|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))"
 #
+%ENTRY%	_LT_UNRARref1
+%KEY% "unrar" 
+%STR%	"unrar restriction"
+#
+%ENTRY%	_LT_UNRARref2
+%KEY% "rar" 
+%STR%	"re-create the rar compression algorithm"
+#
 %ENTRY%	_LT_LINUXDOC
 %KEY%	"distribut"
 %STR%	"linuxdoc =FEW= itself does not have any limitations and it (can|may) be freely used modified and r?e?-?distributed"

@@ -5114,6 +5114,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("CMake");
   }
   /*
+   * unRAR restriction
+   */
+  if (INFILE(_LT_UNRARref1) || INFILE(_LT_UNRARref2)) {
+    INTERESTING("unRAR restriction");
+  }
+
+  /*
    * WTF Public "license"
    */
   if (*licStr == NULL_CHAR && INFILE(_LT_WTFPL)) {
