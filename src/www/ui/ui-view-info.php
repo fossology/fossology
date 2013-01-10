@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -241,6 +241,16 @@ class ui_view_info extends FO_Plugin
     }
     pg_free_result($result);
       /* display where it was uploaded from */
+
+    /* display upload owner*/
+    $sql = "SELECT user_name from users, upload  where user_pk = user_fk and upload_pk = '$Upload'";
+    $result = pg_query($PG_CONN, $sql);
+    $row = pg_fetch_assoc($result);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    $text = _("Added by");
+    $V .= "<tr><td align='right'>" . $Count++ . "</td><td>$text</td>";
+    $V .= "<td>" . $row['user_name'] . "</td></tr>\n";
 
     $V .= "</table><br>\n";
     return($V);
