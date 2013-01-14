@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -67,12 +67,23 @@ class agent_copyright_once extends FO_Plugin {
     $stuff['statement'] = Array();
     $stuff['email'] = Array();
     $stuff['url'] = Array();
+    $realline = "";
     while (!feof($Fin)) {
       $Line = fgets($Fin);
-      if (strlen($Line) > 0) {
-        //print $Line;
+      if ($Line[0] == '/') continue;
+      $count = strlen($Line);
+      if ($count > 0) {
+        /** $Line is not "'", also $Line is not end with ''', please notice that: usually $Line is end with NL(new line) */
+        if ((($count > 1) && ("'" != $Line[$count - 2])) || ((1 == $count) && ("'" != $Line[$count - 1])))
+        {
+          $Line = str_replace("\n", ' ', $Line); // in order to preg_match_all correctly, replace NL with white space
+          $realline .= $Line;
+          continue;
+        }
+        $realline .= $Line;
+        //print "<br>realline$realline<br>";
         $match = array();
-        preg_match_all("/\t\[(?P<start>\d+)\:(?P<end>\d+)\:(?P<type>[A-Za-z]+)\] \'(?P<content>.+)\'/", $Line, $match);
+        preg_match_all("/\t\[(?P<start>\d+)\:(?P<end>\d+)\:(?P<type>[A-Za-z]+)\] \'(?P<content>.+)\'/", $realline, $match);
         //print_r($match);
         if (!empty($match['start'])) {
           $stuff[$match['type'][0]][] = $match['content'][0];
@@ -82,6 +93,7 @@ class agent_copyright_once extends FO_Plugin {
             $View->AddHighlight($match['start'][0], $match['end'][0], $colors[$match['type'][0]], '', $match['content'][0],-1);
         }
       }
+      $realline = "";
     }
     pclose($Fin);
 
