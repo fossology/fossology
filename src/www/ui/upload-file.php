@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -110,10 +110,17 @@ class upload_file extends FO_Plugin {
 
     if($wgetRtn == 0) 
     {
+      $Msg = "";
+      /** check if the scheudler is running */
+      $status = GetRunnableJobList();
+      if (empty($status))
+      {
+        $Msg .= _("Is the scheduler running? ");
+      }
       $text = _("The file");
       $text1 = _("has been uploaded. It is");
       $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
-      $Msg = "$text $Name $text1 ";
+      $Msg .= "$text $Name $text1 ";
       $keep = '<a href=' . $Url . '>upload #' . $uploadpk . "</a>.\n";
       print displayMessage($Msg,$keep);
       return (NULL);

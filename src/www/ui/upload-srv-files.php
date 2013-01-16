@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -163,8 +163,15 @@ class upload_srv_files extends FO_Plugin {
 
     AgentCheckBoxDo($jobpk, $uploadpk);
 
+    $msg = "";
+    /** check if the scheudler is running */
+    $status = GetRunnableJobList();
+    if (empty($status))
+    {
+      $msg .= _("Is the scheduler running? ");
+    }
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
-    $msg = "The upload for $SourceFiles has been scheduled. ";
+    $msg .= "The file $SourceFiles has been uploaded. ";
     $keep = "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
     print displayMessage($msg,$keep);
     return (NULL);

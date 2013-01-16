@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -122,10 +122,17 @@ class upload_url extends FO_Plugin {
 
     AgentCheckBoxDo($jobpk, $uploadpk);
 
+    $msg = "";
+    /** check if the scheudler is running */
+    $status = GetRunnableJobList();
+    if (empty($status))
+    {
+      $msg .= _("Is the scheduler running? ");
+    }
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
-    $text = _("The upload");
-    $text1 = _("has been scheduled. It is");
-    $msg = "$text $Name $text1 ";
+    $text = _("The file");
+    $text1 = _("has been uploaded. It is");
+    $msg .= "$text $Name $text1 ";
     $keep =  "<a href='$Url'>upload #" . $uploadpk . "</a>.\n";
     print displayMessage($msg,$keep);
     return (NULL);
