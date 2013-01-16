@@ -104,16 +104,6 @@ class upload_srv_files extends FO_Plugin {
     else {
       $Name = $SourceFiles;
     }
-    /* Check for specified agent analysis */
-    $AgentList = menu_find("Agents", $Depth);
-    foreach($AgentList as $A) {
-      if (empty($A)) {
-        continue;
-      }
-      if (GetParm("Check_" . $A->URI, PARM_INTEGER) != 1 && 'agent_unpack' != $A->URI) {
-        $A->URI = NULL;
-      }
-    }
 
     // $SourceFiles = str_replace('\\','\\\\',$SourceFiles);
     // $SourceFiles = str_replace('"','\"',$SourceFiles);
