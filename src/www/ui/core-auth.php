@@ -164,7 +164,8 @@ class core_auth extends FO_Plugin {
 		}
 
 		session_name("Login");
-		session_start();
+        $mysess = session_id();
+        if (empty($mysess)) session_start();
         if (array_key_exists('UserId', $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION['UserId'];
 		$Now = time();
 		if (!empty($_SESSION['time'])) 
