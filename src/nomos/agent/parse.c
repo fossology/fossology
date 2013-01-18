@@ -84,7 +84,8 @@
 #define _tOPENLDAP      32
 #define _mNTP			33 // To avoid W3C-style detection
 #define _fIP            34
-#define _msize          _fIP+1
+#define _fANTLR         35
+#define _msize          _fANTLR+1
 //@}
 
 static struct {
@@ -567,7 +568,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("AAL");
       lmem[_fATTRIB] = 1;
     }
-    else if (INFILE(_CR_ZOPE) || INFILE(_TITLE_ZOPE)) {
+    else if (INFILE(_CR_ZOPE)) {
       INTERESTING(lDebug ? "Zope(bsd)" : "ZPL");
     }
     else if (INFILE(_CR_NETBSD)) {
@@ -604,6 +605,20 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (!lmem[_fOPENLDAP] && !TRYGROUP(famOPENLDAP)) {
       if (INFILE(_CR_BSDCAL)) {
         INTERESTING(lDebug ? "BSD(1)" : "BSD");
+      } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
+          && INFILE(_LT_BSD_CLAUSE_3) && INFILE(_LT_BSD_CLAUSE_4) && INFILE(_LT_UC)) {
+        INTERESTING("BSD-4-Clause-UC");
+      } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2) 
+          && INFILE(_LT_BSD_CLAUSE_3) && INFILE(_LT_BSD_CLAUSE_4)) {
+        INTERESTING("BSD-4-Clause");
+      } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
+          && INFILE(_LT_BSD_CLAUSE_4)) {
+        INTERESTING("BSD-3-Clause");
+      } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
+          && INFILE(_LT_FREE_BSD)) {
+        INTERESTING("BSD-2-Clause-FreeBSD");
+      } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)) {
+        INTERESTING("BSD-2-Clause");
       }
       else {
         INTERESTING(lDebug ? "BSD-style(1)" : "BSD-style");
@@ -2268,12 +2283,18 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Zope - this license is explicitly listed (by title) in several other
    * licenses...
    */
-  if (!lmem[_mLIBRE] && !lmem[_fREAL] && INFILE(_LT_ZOPEref)) {
-    if (INFILE(_TITLE_ZOPE_V20)) {
+  if (!lmem[_mLIBRE] && !lmem[_fREAL] && INFILE(_TITLE_ZOPE)) {
+    if (INFILE(_TITLE_ZOPE_V21)) {
+      INTERESTING("ZPL-2.1");
+    }
+    else if (INFILE(_TITLE_ZOPE_V20)) {
       INTERESTING("ZPL-2.0");
     }
     else if (INFILE(_TITLE_ZOPE_V10)) {
       INTERESTING("ZPL-1.0");
+    }
+    else if (INFILE(_TITLE_ZOPE_V11)) {
+      INTERESTING("ZPL-1.1");
     }
     else {
       INTERESTING(lDebug ? "Zope(ref)" : "ZPL");
@@ -4260,14 +4281,77 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "RPL#1" : "RPL");
       }
     }
+    else if (INFILE(_TITLE_NC_SA_V30)) {
+      INTERESTING("CC-BY-NC-SA-3.0");
+    }
+    else if (INFILE(_TITLE_NC_SA_V25)) {
+      INTERESTING("CC-BY-NC-SA-2.5");
+    }
+    else if (INFILE(_TITLE_NC_SA_V20)) {
+      INTERESTING("CC-BY-NC-SA-2.0");
+    }
+    else if (INFILE(_TITLE_NC_SA_V10)) {
+      INTERESTING("CC-BY-NC-SA-1.0");
+    }
+    else if (INFILE(_TITLE_NC_ND_V30)) {
+      INTERESTING("CC-BY-NC-ND-3.0");
+    }
+    else if (INFILE(_TITLE_NC_ND_V25)) {
+      INTERESTING("CC-BY-NC-ND-2.5");
+    }
+    else if (INFILE(_TITLE_NC_ND_V20)) {
+      INTERESTING("CC-BY-NC-ND-2.0");
+    }
+    else if (INFILE(_TITLE_NC_ND_V10)) {
+      INTERESTING("CC-BY-NC-ND-1.0");
+    }
+    else if (INFILE(_TITLE_SA_V30)) {
+      INTERESTING("CC-BY-SA-3.0");
+    }
+    else if (INFILE(_TITLE_SA_V25)) {
+      INTERESTING("CC-BY-SA-2.5");
+    }
+    else if (INFILE(_TITLE_SA_V20)) {
+      INTERESTING("CC-BY-SA-2.0");
+    }
+    else if (INFILE(_TITLE_SA_V10)) {
+      INTERESTING("CC-BY-SA-1.0");
+    }
+    else if (INFILE(_TITLE_NC_V30)) {
+      INTERESTING("CC-BY-NC-3.0");
+    }
+    else if (INFILE(_TITLE_NC_V25)) {
+      INTERESTING("CC-BY-NC-2.5");
+    }
+    else if (INFILE(_TITLE_NC_V20)) {
+      INTERESTING("CC-BY-NC-2.0");
+    }
+    else if (INFILE(_TITLE_NC_V10)) {
+      INTERESTING("CC-BY-NC-1.0");
+    }
+    else if (INFILE(_TITLE_ND_V30)) {
+      INTERESTING("CC-BY-ND-3.0");
+    }
+    else if (INFILE(_TITLE_ND_V25)) {
+      INTERESTING("CC-BY-ND-2.5");
+    }
+    else if (INFILE(_TITLE_ND_V20)) {
+      INTERESTING("CC-BY-ND-2.0");
+    }
+    else if (INFILE(_TITLE_ND_V10)) {
+      INTERESTING("CC-BY-ND-1.0");
+    }
     else if (INFILE(_TITLE_ATTR_V30)) {
-      INTERESTING("CCPL-3.0");
+      INTERESTING("CC-BY-3.0");
     }
     else if (INFILE(_TITLE_ATTR_V25)) {
-      INTERESTING("CCPL-2.5");
+      INTERESTING("CC-BY-2.5");
     }
     else if (INFILE(_TITLE_ATTR_V20)) {
-      INTERESTING("CCPL-2.0");
+      INTERESTING("CC-BY-2.0");
+    }
+    else if (INFILE(_TITLE_ATTR_V10)) {
+      INTERESTING("CC-BY-1.0");
     }
     else if (INFILE(_TITLE_CCPL)) {
       INTERESTING("CCPL");
@@ -5121,6 +5205,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /*
+   * ANTLR Software Rights Notice
+   */
+  if (INFILE(_LT_ANTLR)) {
+    INTERESTING("ANTLR-PD");
+    lmem[_fANTLR] = 1;
+  }
+
+  /*
    * WTF Public "license"
    */
   if (*licStr == NULL_CHAR && INFILE(_LT_WTFPL)) {
@@ -5184,7 +5276,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /* Check for Public Domain */
-  pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
+  if (!lmem[_fANTLR]) {
+    pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
+  }
 
   /*
    * NOW look for unclassified licenses, if we haven't found anything yet.
