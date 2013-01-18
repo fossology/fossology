@@ -303,7 +303,22 @@ void DeleteUpload (long UploadId)
   snprintf(SQL,sizeof(SQL),"DELETE FROM uploadtree WHERE upload_fk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
   */
-  
+ 
+  /* Delete the bucket_container record as it can't be cascade delete with upload table */
+  memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("# Deleting bucket_container\n"); }
+  snprintf(SQL,sizeof(SQL),"DELETE FROM bucket_container USING uploadtree WHERE uploadtree_fk = uploadtree_pk AND upload_fk = %ld;",UploadId);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  PQclear(result);
+  /* Delete the tag_uploadtree record as it can't be cascade delete with upload table */
+  memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("# Deleting tag_uploadtree\n"); }
+  snprintf(SQL,sizeof(SQL),"DELETE FROM tag_uploadtree USING uploadtree WHERE uploadtree_fk = uploadtree_pk AND upload_fk = %ld;",UploadId);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  PQclear(result);
+ 
   /* Delete uploadtree_nnn table */
   char uploadtree_tablename[1024];
   memset(SQL,'\0',sizeof(SQL));
