@@ -86,7 +86,8 @@
 #define _fIP            34
 #define _fANTLR         35
 #define _fCCBY          36
-#define _msize          _fCCBY+1
+#define _fZPL           37
+#define _msize          _fZPL+1
 //@}
 
 static struct {
@@ -450,6 +451,32 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_LT_HELIX_TITLE)) {
       INTERESTING("Helix/RealNetworks-EULA");
+    }
+  }
+  /*
+   * Zope - this license is explicitly listed (by title) in several other
+   * licenses...
+   */
+  if (!lmem[_mLIBRE] && !lmem[_fREAL] && INFILE(_TITLE_ZOPE)) {
+    if (INFILE(_TITLE_ZOPE_V21)) {
+      INTERESTING("ZPL-2.1");
+      lmem[_fZPL] = 1;
+    }
+    else if (INFILE(_TITLE_ZOPE_V20)) {
+      INTERESTING("ZPL-2.0");
+      lmem[_fZPL] = 1;
+    }
+    else if (INFILE(_TITLE_ZOPE_V10)) {
+      INTERESTING("ZPL-1.0");
+      lmem[_fZPL] = 1;
+    }
+    else if (INFILE(_TITLE_ZOPE_V11)) {
+      INTERESTING("ZPL-1.1");
+      lmem[_fZPL] = 1;
+    }
+    else {
+      INTERESTING(lDebug ? "Zope(ref)" : "ZPL");
+      lmem[_fZPL] = 1;
     }
   }
   /*
@@ -1471,7 +1498,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "GPL(proj)" : cp);
     lmem[_mGPL] = 1;
   }
-  if (!lmem[_mGPL] && !lmem[_mGFDL] && !lmem[_mLGPL]
+  if (!lmem[_mGPL] && !lmem[_mGFDL] && !lmem[_mLGPL] && !lmem[_fZPL]
       && (!INFILE(_LT_MPL_SECONDARY))
       && (!INFILE(_TEXT_NOT_GPL))
       && (!INFILE(_TEXT_NOT_GPL2))
@@ -2279,27 +2306,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_SCO_COMM) && INFILE(_CR_SCO)) {
     INTERESTING("SCO(commercial)");
-  }
-  /*
-   * Zope - this license is explicitly listed (by title) in several other
-   * licenses...
-   */
-  if (!lmem[_mLIBRE] && !lmem[_fREAL] && INFILE(_TITLE_ZOPE)) {
-    if (INFILE(_TITLE_ZOPE_V21)) {
-      INTERESTING("ZPL-2.1");
-    }
-    else if (INFILE(_TITLE_ZOPE_V20)) {
-      INTERESTING("ZPL-2.0");
-    }
-    else if (INFILE(_TITLE_ZOPE_V10)) {
-      INTERESTING("ZPL-1.0");
-    }
-    else if (INFILE(_TITLE_ZOPE_V11)) {
-      INTERESTING("ZPL-1.1");
-    }
-    else {
-      INTERESTING(lDebug ? "Zope(ref)" : "ZPL");
-    }
   }
   /*
    * Zonealarm
