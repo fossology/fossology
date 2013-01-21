@@ -85,7 +85,8 @@
 #define _mNTP			33 // To avoid W3C-style detection
 #define _fIP            34
 #define _fANTLR         35
-#define _msize          _fANTLR+1
+#define _fCCBY          36
+#define _msize          _fCCBY+1
 //@}
 
 static struct {
@@ -4283,78 +4284,103 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_TITLE_NC_SA_V30)) {
       INTERESTING("CC-BY-NC-SA-3.0");
+      lmem[_fCCBY] = 1;
     }
     else if (INFILE(_TITLE_NC_SA_V25)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-SA-2.5");
     }
     else if (INFILE(_TITLE_NC_SA_V20)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-SA-2.0");
     }
     else if (INFILE(_TITLE_NC_SA_V10)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-SA-1.0");
     }
     else if (INFILE(_TITLE_NC_ND_V30)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-ND-3.0");
     }
     else if (INFILE(_TITLE_NC_ND_V25)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-ND-2.5");
     }
     else if (INFILE(_TITLE_NC_ND_V20)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-ND-2.0");
     }
     else if (INFILE(_TITLE_NC_ND_V10)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-ND-1.0");
     }
     else if (INFILE(_TITLE_SA_V30)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-SA-3.0");
     }
     else if (INFILE(_TITLE_SA_V25)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-SA-2.5");
     }
     else if (INFILE(_TITLE_SA_V20)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-SA-2.0");
     }
     else if (INFILE(_TITLE_SA_V10)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-SA-1.0");
     }
     else if (INFILE(_TITLE_NC_V30)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-3.0");
     }
     else if (INFILE(_TITLE_NC_V25)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-2.5");
     }
     else if (INFILE(_TITLE_NC_V20)) {
+      lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-2.0");
     }
     else if (INFILE(_TITLE_NC_V10)) {
       INTERESTING("CC-BY-NC-1.0");
+      lmem[_fCCBY] = 1;
     }
     else if (INFILE(_TITLE_ND_V30)) {
       INTERESTING("CC-BY-ND-3.0");
+      lmem[_fCCBY] = 1;
     }
     else if (INFILE(_TITLE_ND_V25)) {
       INTERESTING("CC-BY-ND-2.5");
+      lmem[_fCCBY] = 1;
     }
     else if (INFILE(_TITLE_ND_V20)) {
       INTERESTING("CC-BY-ND-2.0");
+      lmem[_fCCBY] = 1;
     }
     else if (INFILE(_TITLE_ND_V10)) {
       INTERESTING("CC-BY-ND-1.0");
+      lmem[_fCCBY] = 1;
     }
     else if (INFILE(_TITLE_ATTR_V30)) {
       INTERESTING("CC-BY-3.0");
+      lmem[_fCCBY] = 1;
     }
     else if (INFILE(_TITLE_ATTR_V25)) {
       INTERESTING("CC-BY-2.5");
+      lmem[_fCCBY] = 1;
     }
     else if (INFILE(_TITLE_ATTR_V20)) {
       INTERESTING("CC-BY-2.0");
+      lmem[_fCCBY] = 1;
     }
     else if (INFILE(_TITLE_ATTR_V10)) {
       INTERESTING("CC-BY-1.0");
+      lmem[_fCCBY] = 1;
     }
     else if (INFILE(_TITLE_CCPL)) {
       INTERESTING("CCPL");
+      lmem[_fCCBY] = 1;
     }
     else if (INFILE(_LT_RECIP15)) {
       INTERESTING("RPL-1.5");
@@ -5276,7 +5302,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /* Check for Public Domain */
-  if (!lmem[_fANTLR]) {
+  if (!lmem[_fANTLR] && !lmem[_fCCBY]) {
     pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
   }
 
@@ -6263,6 +6289,7 @@ char *ccsaVersion(char *filetext, int size, int isML, int isPS)
   else {
     lstr = lDebug ? "CCA-SA(def)" : "CC-BY-SA";
   }
+  lmem[_fCCBY] = 1;
   return lstr;
 }
 
@@ -6292,7 +6319,8 @@ char *ccVersion(char *filetext, int size, int isML, int isPS)
   }
   else {
     lstr = lDebug ? "CCA(def)" : "CC-BY";
-  }
+  } 
+  lmem[_fCCBY] = 1;
   return lstr;
 }
 
