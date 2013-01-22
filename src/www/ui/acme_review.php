@@ -106,7 +106,7 @@ class acme_review extends FO_Plugin
       if(pg_num_rows($projresult) > 0) 
       {
         $acme_project_array[$acme_pfileRow['acme_project_fk']] = pg_fetch_assoc($projresult);
-        $acme_project_array[$acme_pfileRow['acme_project_fk']]['count'] = ($uploadtreeRow['rgt'] - $uploadtreeRow['lft']);
+        $acme_project_array[$acme_pfileRow['acme_project_fk']]['count'] = (($uploadtreeRow['rgt'] - $uploadtreeRow['lft']) +1)/2;
       }
       return;
     }
