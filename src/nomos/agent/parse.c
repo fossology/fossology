@@ -963,43 +963,53 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "CeCILL(dual)" : "CECILL");
     lmem[_mGPL] = lmem[_mLGPL] = 1;
   }
-  else if (INFILE(_LT_CECILL_ref)) {
-    if (URL_INFILE(_URL_CECILL_C_V1)) {
+  else if (INFILE(_LT_CECILL_ref) || INFILE(_LT_CECILL_ref1)) {
+    if (URL_INFILE(_URL_CECILL_C_V11)) {
+      INTERESTING(lDebug ? "CeCILL_v1.1(url)" : "CECILL-1.1");
+    }
+    else if (URL_INFILE(_URL_CECILL_C_V1)) {
       INTERESTING(lDebug ? "CeCILL_v1(url)" : "CECILL-1.0");
     }
     else if (URL_INFILE(_URL_CECILL_V2)) {
       INTERESTING(lDebug ? "CeCILL_v2(url)" : "CECILL-2.0");
     }
-    else {
+    else if (URL_INFILE(_URL_CECILL)) {
       INTERESTING(lDebug ? "CeCILL(url)" : "CECILL");
     }
+    else {
+      INTERESTING(lDebug ? "CeCILL(#3)" : "CECILL");
+    }
+    lmem[_mGPL] = 1;
   }
   else if (INFILE(_LT_CECILL_1)) {
-    if (INFILE(_TITLE_CECILL_V11)) {
+    if (INFILE(_TITLE_CECILL_V10)) {
+      INTERESTING(lDebug ? "CeCILL_v1.0(#1)" : "CECILL-1.0");
+    }
+    else if (INFILE(_TITLE_CECILL_V11)) {
       INTERESTING(lDebug ? "CeCILL_v1.1(#1)" : "CECILL-1.1");
     }
     else if (INFILE(_TITLE_CECILL_V20)) {
       INTERESTING(lDebug ? "CeCILL_v2.0(#1)" : "CECILL-2.0");
     }
-    else if (INFILE(_TITLE_CECILL1) || INFILE(_TITLE_CECILL2)) {
-      INTERESTING(lDebug ? "CeCILL(#1)" : "CECILL");
-    }
     lmem[_mGPL] = 1;
   }
-  else if (INFILE(_LT_CECILL_2)) {
-    if (INFILE(_TITLE_CECILL_V11)) {
+  else if (INFILE(_LT_CECILL_2) || INFILE(_TITLE_CECILL1) || INFILE(_TITLE_CECILL2)) {
+    if (INFILE(_TITLE_CECILL_V10)) {
+      INTERESTING(lDebug ? "CeCILL_v1.0(#2)" : "CECILL-1.0");
+    }
+    else if (INFILE(_TITLE_CECILL_V11)) {
       INTERESTING(lDebug ? "CeCILL_v1.1(#2)" : "CECILL-1.1");
     }
     else if (INFILE(_TITLE_CECILL_V20)) {
       INTERESTING(lDebug ? "CeCILL_v2.0(#2)" : "CECILL-2.0");
     }
-    else if (INFILE(_TITLE_CECILL_B)) {
+    else if (INFILE(_TITLE_CECILL_B) || INFILE(_TITLE_CECILL_B1)) {
       INTERESTING("CECILL-B");
     }
-    else if (INFILE(_TITLE_CECILL_C)) {
+    else if (INFILE(_TITLE_CECILL_C) || INFILE(_TITLE_CECILL_C1)) {
       INTERESTING("CECILL-C");
     }
-    else if (INFILE(_TITLE_CECILL1) || INFILE(_TITLE_CECILL2)) {
+    else {
       INTERESTING(lDebug ? "CeCILL(#2)" : "CECILL");
     }
     lmem[_mGPL] = 1;
@@ -5245,6 +5255,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /*
+   * Creative Commons Zero v1.0 Universal
+   */
+  if (INFILE(_TITLE_CC0_10)) {
+    INTERESTING("CC0-1.0");
+  }
+
+  /*
    * WTF Public "license"
    */
   if (*licStr == NULL_CHAR && INFILE(_LT_WTFPL)) {
@@ -5866,7 +5883,7 @@ char *cddlVersion(char *filetext, int size, int isML, int isPS)
   else if (URL_INFILE(_URL_CDDL_V1)) {
     lstr = "CDDL-1.0";
   }
-  else {
+  else if (INFILE(_TITLE_CDDL_V11)) {
     lstr = "CDDL-1.1";
   }
   return lstr;

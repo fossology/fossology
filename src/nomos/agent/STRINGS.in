@@ -1065,6 +1065,10 @@
 %ENTRY%	_LT_CECILL_ref
 %KEY%	"so(ftware|urce)"
 %STR%	"software is governed by the CeCILL licen[cs]e under french law and abiding by the rules of distribution of free software"
+#
+%ENTRY%	_LT_CECILL_ref1
+%KEY%	"so(ftware|urce)"
+%STR%	"software is governed by the CeCILL"
 #####
 # DELTED: permission is granted to ... and re-?distribute it freely subject
 # to the following restrictions
@@ -6297,6 +6301,10 @@ k
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution =FEW= 3\.?0"
 #
+%ENTRY%	_TITLE_CC0_10
+%KEY%	"universal"
+%STR%	"cc0 1\.?0 universal"
+#
 %ENTRY%	_TITLE_ATT_SRC_12D
 %KEY%	"(condit|vers)ion"
 %STR%	"source code agreement version 1\.?2d"
@@ -6381,13 +6389,21 @@ k
 %KEY%	"licen[cs]"
 %STR%	"common development and distribution licen[cs]e cddl (v|version )1\.?0"
 #
+%ENTRY%	_TITLE_CDDL_V11
+%KEY%	"licen[cs]"
+%STR%	"common development and distribution licen[cs]e cddl (v|version )1\.?1"
+#
+%ENTRY%	_TITLE_CECILL_V10
+%KEY%	"licen[cs]"
+%STR%	"license =FEW= (version |v)1\.?0"
+#
 %ENTRY%	_TITLE_CECILL_V11
-%KEY%	"(condit|vers)ion"
-%STR%	"version 1\.?1 (of|dated)"
+%KEY%	"licen[cs]"
+%STR%	"license =FEW= (version |v)1\.?1"
 #
 %ENTRY%	_TITLE_CECILL_V20
-%KEY%	"(condit|vers)ion"
-%STR%	"version 2\.?0 (of|dated)"
+%KEY%	"licen[cs]"
+%STR%	"license =FEW= (version |v)2\.?0"
 #
 %ENTRY%	_TITLE_CECILL1
 %KEY%	"so(ftware|urce)"
@@ -6401,9 +6417,17 @@ k
 %KEY%	"so(ftware|urce)"
 %STR%	"cecill-b free software licen[cs]e agreement"
 #
+%ENTRY%	_TITLE_CECILL_B1
+%KEY%	"licen[cs]"
+%STR%	"contrat de licence de logiciel libre cecill-b"
+#
 %ENTRY%	_TITLE_CECILL_C
 %KEY%	"so(ftware|urce)"
 %STR%	"cecill-c free software licen[cs]e agreement"
+#
+%ENTRY%	_TITLE_CECILL_C1
+%KEY%	"licen[cs]"
+%STR%	"contrat de licence de logiciel libre cecill-c"
 #
 %ENTRY%	_TITLE_CLARTISTIC
 %KEY%	"licen[cs]"
@@ -8220,13 +8244,21 @@ k
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/cddl"
 #
+%ENTRY%	_URL_CECILL
+%KEY%	"licen[cs]"
+%STR%	"w?w?w?\.?cecill\.?info"
+#
 %ENTRY%	_URL_CECILL_C_V1
 %KEY%	"licen[cs]"
-%STR%	"w?w?w?\.?cecill\.?info/licen[cs]es/li[cs]ence_CeCILL-C_V1-en"
+%STR%	"w?w?w?\.?cecill\.?info/licen[cs]es/li[cs]ence_CeCILL_V1"
+#
+%ENTRY%	_URL_CECILL_C_V11
+%KEY%	"licen[cs]"
+%STR%	"w?w?w?\.?cecill\.?info/licen[cs]es/li[cs]ence_CeCILL_V1\.?1"
 #
 %ENTRY%	_URL_CECILL_V2
 %KEY%	"licen[cs]"
-%STR%	"w?w?w?\.?cecill\.?info/licen[cs]es/li[cs]ence_CeCILL_V2-en"
+%STR%	"w?w?w?\.?cecill\.?info/licen[cs]es/li[cs]ence_CeCILL_V2"
 #
 %ENTRY% _URL_CMAKE
 %KEY% "copyright"
