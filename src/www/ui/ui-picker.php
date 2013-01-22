@@ -627,10 +627,12 @@ class ui_picker extends FO_Plugin
      * So if they want to compare a .bz2 with a .gz, they will have to
      * use the Browse Window.
      */
+/* too slow
     $SuggestionsHTML = $this->SuggestionsPick($PathStr, $uploadtree_pk, $rtncount);
     $text = "Suggestions";
     $OutBuf .= "<hr><h3>$text ($rtncount):</h3>";
     $OutBuf .= $SuggestionsHTML;
+*/
 
     /* Browse window */
     $text = _("Browse");
