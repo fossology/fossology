@@ -39,10 +39,10 @@ define("PLUGIN_DB_ADMIN",10);	/* add/delete users */
  * Permissions
  * See http://www.fossology.org/projects/fossology/wiki/PermsPt2
  */
-define("PERM_NONE",0);
-define("PERM_READ",1);
-define("PERM_WRITE",3);	/* DB writes permitted */
-define("PERM_ADMIN",10);	/* add/delete users */
+define("PERM_NONE",0);   /* No permissions */
+define("PERM_READ",1);   /* Read only */
+define("PERM_WRITE",3);	 /* Create and write data. */
+define("PERM_ADMIN",10); /* Control permissions    */
 
 /**
  * \class FO_Plugin
