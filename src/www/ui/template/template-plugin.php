@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -34,6 +34,15 @@ define("PLUGIN_DB_NONE",0);
 define("PLUGIN_DB_READ",1);
 define("PLUGIN_DB_WRITE",3);	/* DB writes permitted */
 define("PLUGIN_DB_ADMIN",10);	/* add/delete users */
+
+/**
+ * Permissions
+ * See http://www.fossology.org/projects/fossology/wiki/PermsPt2
+ */
+define("PERM_NONE",0);
+define("PERM_READ",1);
+define("PERM_WRITE",3);	/* DB writes permitted */
+define("PERM_ADMIN",10);	/* add/delete users */
 
 /**
  * \class FO_Plugin
