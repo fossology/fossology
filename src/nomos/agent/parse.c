@@ -87,7 +87,8 @@
 #define _fANTLR         35
 #define _fCCBY          36
 #define _fZPL           37
-#define _msize          _fZPL+1
+#define _fCLA           38
+#define _msize          _fCLA+1
 //@}
 
 static struct {
@@ -1512,6 +1513,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       && (!INFILE(_LT_MPL_SECONDARY))
       && (!INFILE(_TEXT_NOT_GPL))
       && (!INFILE(_TEXT_NOT_GPL2))
+      && (!INFILE(_LT_CNRI_PYTHON_GPL))
       && (INFILE(_LT_GPL_NAMED) 
         || INFILE(_LT_GPL_NAMED2)
         || INFILE(_LT_GPL_NAMED3))) {
@@ -2425,9 +2427,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
        }
   else if (!lmem[_mPYTHON] && lmem[_mPYTH_TEXT]) {
     if (INFILE(_LT_PYTHON_1) || INFILE(_LT_PYTHON_2)) {
-      if (INFILE(_CR_PYTHON) || INFILE(_TITLE_PYTHON)) {
+      if (INFILE(_LT_CNRI_PYTHON_GPL)) {
+        INTERESTING("CNRI-Python-GPL-Compatible");
+      }
+      else if (INFILE(_CR_PYTHON) || INFILE(_TITLE_PYTHON)) {
         cp = PYTHVERS();
         INTERESTING(lDebug ? "Python(1)" : cp);
+      }
+      else if (INFILE(_LT_CNRI_PYTHON)) {
+        INTERESTING("CNRI-Python");
       }
       else {
         INTERESTING("Python-style");
@@ -3189,6 +3197,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_TITLE_CLARTISTIC)) {
      INTERESTING("ClArtistic");
+     lmem[_fCLA] = 1;
   }
   else if (!lmem[_fREAL] && !LVAL(_TEXT_GNU_LIC_INFO) &&
       (INFILE(_LT_ART_1) || INFILE(_LT_ARTref1) ||
@@ -4089,11 +4098,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Educational Community License
    */
-  if (INFILE(_LT_ECL)) {
-    INTERESTING(lDebug ? "ECL(1)" : "ECL-1.0");
+  if (INFILE(_LT_ECL1)) {
+    INTERESTING("ECL-1.0");
   }
-  else if (INFILE(_LT_ECLref)) {
-    INTERESTING(lDebug ? "ECL(2)" : "ECL-1.0");
+  else if (INFILE(_LT_ECL2)) {
+    INTERESTING("ECL-2.0");
+  }
+  else if (INFILE(_LT_ECL)) {
+    INTERESTING(lDebug ? "ECL(1)" : "ECL-1.0");
   }
   /*
    * EU DataGrid and Condor PL
@@ -5325,7 +5337,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /* Check for Public Domain */
-  if (!lmem[_fANTLR] && !lmem[_fCCBY]) {
+  if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON]) {
     pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
   }
 
@@ -5660,6 +5672,9 @@ char *mplNplVersion(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_TITLE_MPL20) || INFILE(_URL_MPL20)) {
     lstr = "MPL-2.0";
+  }
+  else if (INFILE(_TITLE_MPL10) && INFILE(_TITLE_ERLPL)) {
+    lstr = "ErlPL-1.1";
   }
   else if (INFILE(_TITLE_MPL10)) {
     lstr = "MPL-1.0";

@@ -1338,9 +1338,13 @@
 %KEY%	"so(ftware|urce)"
 %STR%	"this original work including software source code documents"
 #
-%ENTRY%	_LT_ECLref
+%ENTRY%	_LT_ECL1
 %KEY%	"licen[cs]"
-%STR%	"licen[cs]ed under the educational community licen[cs]e version"
+%STR%	"under the educational community licen[cs]e (version |v)1\.?0"
+#
+%ENTRY%	_LT_ECL2
+%KEY%	"licen[cs]"
+%STR%	"under the educational community licen[cs]e (version |v)2\.?0"
 #
 %ENTRY%	_LT_ECLIPSEref
 %KEY%	"\<under\>"
@@ -3894,6 +3898,14 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_PYTHONSTYLEref
 %KEY%	"licen[cs]"
 %STR%	"(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected) =SOME= python-style licen[cs]e"
+#
+%ENTRY%	_LT_CNRI_PYTHON
+%KEY%	"licen[cs]"
+%STR%	"cnri open source license agreement"
+#
+%ENTRY%	_LT_CNRI_PYTHON_GPL
+%KEY%	"licen[cs]"
+%STR%	"cnri open source gpl-compatible license agreement"
 #####
 # DELETED: distributing party must clearly and ... is produced by the
 # party that modified the software and is not a qualcomm product
@@ -6720,6 +6732,10 @@ k
 %ENTRY%	_TITLE_MOTOSOTO091
 %KEY%	"licen[cs]"
 %STR%	"motosoto open source licen[cs]e =FEW= (v|version )0\.?9\.?1"
+#
+%ENTRY%	_TITLE_ERLPL
+%KEY%	"licen[cs]"
+%STR%	"erlang public license"
 #
 %ENTRY%	_TITLE_MOZNET_PL
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
