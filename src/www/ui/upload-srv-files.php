@@ -28,7 +28,7 @@ class upload_srv_files extends FO_Plugin {
   public $Version = "1.0";
   public $MenuList = "Upload::From Server";
   public $Dependency = array("agent_unpack");
-  public $DBaccess = PLUGIN_DB_USERADMIN;
+  public $DBaccess = PLUGIN_DB_ADMIN;
 
   /** 
    * \brief chck if one file/dir has one permission
@@ -247,7 +247,7 @@ class upload_srv_files extends FO_Plugin {
         $text = _("NOTE");
         $text1 = _(": If no name is provided, then the uploaded file name will be used.");
         $V.= "<b>$text</b>$text1<P />\n";
-        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
+        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
           $text = _("Select optional analysis");
           $V.= "<li>$text<br />\n";
           $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@ class user_edit_any extends FO_Plugin {
   var $MenuList = "Admin::Users::Edit Users";
   var $Version = "1.0";
   var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_USERADMIN;
+  var $DBaccess = PLUGIN_DB_ADMIN;
   var $LoginFlag = 1;
 
   /**
@@ -471,13 +471,8 @@ class user_edit_any extends FO_Plugin {
 
         $V.= "<option " . (($Val==0)?"selected":"") . " value='" . PLUGIN_DB_NONE . "'>$text1</option>\n";
         $V.= "<option " . (($Val==1)?"selected":"") . " value='" . PLUGIN_DB_READ . "'>$text2</option>\n";
-        $V.= "<option " . (($Val==2)?"selected":"") . " value='" . PLUGIN_DB_DOWNLOAD . "'>$text3</option>\n";
         $V.= "<option " . (($Val==3)?"selected":"") . " value='" . PLUGIN_DB_WRITE . "'>$text4</option>\n";
-        $V.= "<option " . (($Val==4)?"selected":"") . " value='" . PLUGIN_DB_UPLOAD . "'>$text5</option>\n";
-        $V.= "<option " . (($Val==5)?"selected":"") . " value='" . PLUGIN_DB_ANALYZE . "'>$text6</option>\n";
-        $V.= "<option " . (($Val==6)?"selected":"") . " value='" . PLUGIN_DB_DELETE . "'>$text7</option>\n";
-        $V.= "<option " . (($Val==7)?"selected":"") . " value='" . PLUGIN_DB_DEBUG . "'>$text8</option>\n";
-        $V.= "<option " . (($Val==10)?"selected":"") . " value='" . PLUGIN_DB_USERADMIN . "'>$text9</option>\n";
+        $V.= "<option " . (($Val==10)?"selected":"") . " value='" . PLUGIN_DB_ADMIN . "'>$text9</option>\n";
         $V.= "</select></td>\n";
         $V.= "</tr>\n";
         $text = _("Select the user's top-level folder. Access is restricted to this folder.");

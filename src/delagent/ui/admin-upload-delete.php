@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -32,7 +32,7 @@ class admin_upload_delete extends FO_Plugin {
   var $MenuList = "Organize::Uploads::Delete Uploaded File";
   var $Version = "1.0";
   var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_DELETE;
+  var $DBaccess = PLUGIN_DB_WRITE;
 
   /**
    * \brief Register additional menus.

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@ class upload_url extends FO_Plugin {
   public $Version = "1.0";
   public $MenuList = "Upload::From URL";
   //public $Dependency = array("agent_unpack"); // TODO to display, temporarily comment out
-  public $DBaccess = PLUGIN_DB_UPLOAD;
+  public $DBaccess = PLUGIN_DB_WRITE;
 
   /**
    * \brief Process the upload request.
@@ -226,7 +226,7 @@ class upload_url extends FO_Plugin {
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='level' size=60 value='" . htmlentities($Level) . "'/><P />\n";
 
-        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
+        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
           $text = _("Select optional analysis");
           $V.= "<li>$text<br />\n";
           $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");

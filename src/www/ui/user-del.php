@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -29,7 +29,7 @@ class user_del extends FO_Plugin
   var $MenuList   = "Admin::Users::Delete";
   var $Version    = "1.0";
   var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_USERADMIN;
+  var $DBaccess   = PLUGIN_DB_ADMIN;
 
   /**
    * \brief Delete a user.

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -25,7 +25,7 @@ class debug_user extends FO_Plugin
   var $Title      = TITLE_debug_user;
   var $MenuList   = "Help::Debug::Debug User";
   var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_DEBUG;
+  var $DBaccess   = PLUGIN_DB_ADMIN;
 
   /**
    * \brief Generate output.

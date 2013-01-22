@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@ class ui_download extends FO_Plugin
   var $Title      = TITLE_ui_download;
   var $Version    = "1.0";
   var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_DOWNLOAD;
+  var $DBaccess   = PLUGIN_DB_WRITE;
   var $NoHTML     = 1;
 
   /**

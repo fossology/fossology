@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -54,7 +54,7 @@ class core_init extends FO_Plugin
       if ($P->State == PLUGIN_STATE_INVALID) { continue; }
       /* Don't turn off plugins that are already up and running. */
       if ($P->State == PLUGIN_STATE_READY) { continue; }
-      if ($P->DBaccess == PLUGIN_DB_DEBUG) { continue; }
+      if ($P->DBaccess == PLUGIN_DB_ADMIN) { continue; }
       $Key = array_search($P->Name,$this->Dependency);
       if (($Key === FALSE) && strcmp($P->Name,$this->Name))
       {
@@ -68,7 +68,7 @@ class core_init extends FO_Plugin
       }
     }
     $this->State = PLUGIN_STATE_READY;
-    if ((@$_SESSION['UserLevel'] >= PLUGIN_DB_USERADMIN) && ($this->MenuList !== ""))
+    if ((@$_SESSION['UserLevel'] >= PLUGIN_DB_ADMIN) && ($this->MenuList !== ""))
     {
       menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
     }

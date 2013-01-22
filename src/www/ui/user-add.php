@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@ class user_add extends FO_Plugin {
   var $MenuList = "Admin::Users::Add";
   var $Version = "1.0";
   var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_USERADMIN;
+  var $DBaccess = PLUGIN_DB_ADMIN;
 
   /**
    * \brief Add a user.
@@ -210,20 +210,10 @@ class user_add extends FO_Plugin {
         $V.= "<option value='" . PLUGIN_DB_NONE . "'>$text</option>\n";
         $text = _("Read-only (read, but no writes or downloads)");
         $V.= "<option selected value='" . PLUGIN_DB_READ . "'>$text</option>\n";
-        $text = _("Download (Read-only, but can download files)");
-        $V.= "<option value='" . PLUGIN_DB_DOWNLOAD . "'>$text</option>\n";
         $text = _("Read-Write (read, download, or edit information)");
         $V.= "<option value='" . PLUGIN_DB_WRITE . "'>$text</option>\n";
-        $text = _("Upload (read-write, and permits uploading files)");
-        $V.= "<option value='" . PLUGIN_DB_UPLOAD . "'>$text</option>\n";
-        $text = _("Analyze (... and permits scheduling analysis tasks)");
-        $V.= "<option value='" . PLUGIN_DB_ANALYZE . "'>$text</option>\n";
-        $text = _("Delete (... and permits deleting uploaded files and analysis)");
-        $V.= "<option value='" . PLUGIN_DB_DELETE . "'>$text</option>\n";
-        $text = _("Debug (... and allows access to debugging functions)");
-        $V.= "<option value='" . PLUGIN_DB_DEBUG . "'>$text</option>\n";
         $text = _("Full Administrator (all access including adding and deleting users)");
-        $V.= "<option value='" . PLUGIN_DB_USERADMIN . "'>$text</option>\n";
+        $V.= "<option value='" . PLUGIN_DB_ADMIN . "'>$text</option>\n";
         $V.= "</select></td>\n";
         $V.= "</tr>\n";
         $text = _("User root folder");

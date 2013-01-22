@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -39,7 +39,7 @@ class showjobs extends FO_Plugin
   var $Version    = "1.0";
   var $MenuOrder  = 5;
   var $Dependency = array("browse");
-  var $DBaccess   = PLUGIN_DB_UPLOAD;
+  var $DBaccess   = PLUGIN_DB_WRITE;
   var $MaxUploadsPerPage = 10;  /* max number of uploads to display on a page */
   var $nhours = 336;  /* 336=24*14 What is considered a recent number of hours for "My Recent Jobs" */
 
@@ -477,7 +477,7 @@ class showjobs extends FO_Plugin
 
         /* actions, must be admin or own the upload  */
         if (($jobqueueRec['jq_end_bits'] == 0) 
-             && (($_SESSION["UserLevel"] == PLUGIN_DB_USERADMIN)
+             && (($_SESSION["UserLevel"] == PLUGIN_DB_ADMIN)
                  || ($_SESSION["UserId"] == $Job['job']['job_user_fk'])))
         {
           $OutBuf .= "<th $jobStyle>";
@@ -622,7 +622,7 @@ class showjobs extends FO_Plugin
 	    break;
       case "HTML":
         /* Process any actions */
-        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_UPLOAD)
+        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
         {
           $jq_pk = GetParm("jobid",PARM_INTEGER);
           $Action = GetParm("action",PARM_STRING);

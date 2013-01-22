@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -25,7 +25,7 @@ class admin_tag_ns_perm extends FO_Plugin
   var $MenuList = "Admin::Tag::Assign TagNS Permission";
   var $Version = "1.3";
   var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_USERADMIN;
+  var $DBaccess = PLUGIN_DB_ADMIN;
 
   /**
    * \brief Delete exsit Tag Namespace Permission.

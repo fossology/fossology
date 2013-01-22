@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@ class core_debug extends FO_Plugin
   var $Title      = TITLE_core_debug;
   var $Version    = "1.0";
   var $MenuList   = "Help::Debug::Debug Plugins";
-  var $DBaccess   = PLUGIN_DB_DEBUG;
+  var $DBaccess   = PLUGIN_DB_ADMIN;
 
   /**
    * \brief Display the loaded menu and plugins.

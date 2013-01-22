@@ -32,13 +32,8 @@ define("PLUGIN_STATE_READY",2); // used during post-install
  */
 define("PLUGIN_DB_NONE",0);
 define("PLUGIN_DB_READ",1);
-define("PLUGIN_DB_DOWNLOAD",2);	/* file download permitted */
 define("PLUGIN_DB_WRITE",3);	/* DB writes permitted */
-define("PLUGIN_DB_UPLOAD",4);	/* file upload permitted */
-define("PLUGIN_DB_ANALYZE",5);	/* file analysis permitted */
-define("PLUGIN_DB_DELETE",6);	/* record deletion permitted */
-define("PLUGIN_DB_DEBUG",7);	/* see and run debug code */
-define("PLUGIN_DB_USERADMIN",10);	/* add/delete users */
+define("PLUGIN_DB_ADMIN",10);	/* add/delete users */
 
 /**
  * \class FO_Plugin

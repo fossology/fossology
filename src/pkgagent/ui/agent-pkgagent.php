@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2009-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@ class agent_pkgagent extends FO_Plugin
   //public $MenuList   = "Jobs::Agents::Package Analysis";
   public $Version    = "1.0";
   public $Dependency = array();
-  public $DBaccess   = PLUGIN_DB_ANALYZE;
+  public $DBaccess   = PLUGIN_DB_WRITE;
   public $AgentName = "pkgagent";   // agent.agent_name
 
   /**

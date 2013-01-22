@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -81,14 +81,14 @@ class core_auth extends FO_Plugin {
 		/* There must always be at least one user with user-admin access.
 		 If he does not exist, make it user "fossy".
 		 If user "fossy" does not exist, add him with the default password 'fossy'. */
-		$Perm = PLUGIN_DB_USERADMIN;
+		$Perm = PLUGIN_DB_ADMIN;
 		$sql = "SELECT * FROM users WHERE user_perm = $Perm;";
 		$result = pg_query($PG_CONN, $sql);
 		DBCheckResult($result, $sql, __FILE__, __LINE__);
 		$row = pg_fetch_assoc($result);
 		pg_free_result($result);
 		if (empty($row['user_name'])) {
-			/* No user with PLUGIN_DB_USERADMIN access. */
+			/* No user with PLUGIN_DB_ADMIN access. */
 			$Seed = rand() . rand();
 			$Hash = sha1($Seed . "fossy");
 			$sql = "SELECT * FROM users WHERE user_name = 'fossy';";
@@ -193,7 +193,7 @@ class core_auth extends FO_Plugin {
         {
 			/* If you are logged in, then the default level is "Download". */
 			if ("X" . $_SESSION['UserLevel'] == "X") {
-				$Level = PLUGIN_DB_DOWNLOAD;
+				$Level = PLUGIN_DB_WRITE;
 			} else {
 				$Level = @$_SESSION['UserLevel'];
 			}
@@ -289,7 +289,7 @@ class core_auth extends FO_Plugin {
 		$_SESSION['time_check'] = time() + (480 * 60);
 		/* No specified permission means ALL permission */
 		if ("X" . $R['user_perm'] == "X") {
-			$_SESSION['UserLevel'] = PLUGIN_DB_USERADMIN;
+			$_SESSION['UserLevel'] = PLUGIN_DB_ADMIN;
 		} else {
 			$_SESSION['UserLevel'] = $R['user_perm'];
 		}
@@ -355,7 +355,7 @@ class core_auth extends FO_Plugin {
 							$V.= "<P />\n";
 							/* Check for a default user */
 							global $PG_CONN;
-							$Level = PLUGIN_DB_USERADMIN;
+							$Level = PLUGIN_DB_ADMIN;
 							$sql = "SELECT * FROM users WHERE user_perm = $Level LIMIT 1;";
 							$result = pg_query($PG_CONN, $sql);
 							DBCheckResult($result, $sql, __FILE__, __LINE__);

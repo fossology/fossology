@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@ class ui_reunpack extends FO_Plugin
   //public $MenuList   = "Jobs::Agents::Reunpack";
   public $Version    = "1.2";
   public $Dependency = array();
-  public $DBaccess   = PLUGIN_DB_UPLOAD;
+  public $DBaccess   = PLUGIN_DB_WRITE;
 
   /**
    * \brief Generate the text for this plugin.

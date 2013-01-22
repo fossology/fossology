@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -36,7 +36,7 @@ class agent_nomos_once extends FO_Plugin {
   public $LoginFlag  = 0;
 
   /** To require login access, use: **/
-  //  public $DBaccess = PLUGIN_DB_ANALYZE;
+  //  public $DBaccess = PLUGIN_DB_WRITE;
   //  public $LoginFlag = 1;
 
   /**
@@ -123,11 +123,11 @@ class agent_nomos_once extends FO_Plugin {
 
     /* Only register with the menu system if the user is logged in. */
     if (!empty($_SESSION['User'])) {
-      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
+      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
         menu_insert("Main::Upload::One-Shot Analysis", $this->MenuOrder, $this->Name, $this->MenuTarget);
       }
       // Debugging changes to license analysis
-      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG) {
+      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ADMIN) {
         $URI = $this->Name . Traceback_parm_keep(array(
           "format",
           "item"

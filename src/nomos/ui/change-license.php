@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -31,7 +31,7 @@ class change_license extends FO_Plugin {
   public $Title = TITLE_change_license;
   public $Version = "1.0";
   public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_ANALYZE;
+  public $DBaccess = PLUGIN_DB_WRITE;
 
   /**
    * \brief change bucket accordingly when change license of one file

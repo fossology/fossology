@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -32,7 +32,7 @@ class ajax_admin_scheduler extends FO_Plugin
   public $Title = TITLE_ajax_admin_scheduler;
   public $Version = "1.0";
   public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_UPLOAD;
+  public $DBaccess = PLUGIN_DB_WRITE;
   public $NoHTML     = 1; /* This plugin needs no HTML content help */
   public $LoginFlag = 0;
 

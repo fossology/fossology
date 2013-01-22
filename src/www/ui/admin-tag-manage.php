@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@ class admin_tag_manage extends FO_Plugin
   var $MenuList = "Admin::Tag::Enable/Disable Tag";
   var $Version = "1.3";
   var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_USERADMIN;
+  var $DBaccess = PLUGIN_DB_ADMIN;
 
   /**
    * \brief Enable/Disable Tag on one folder(all uploads under this folder) or one upload

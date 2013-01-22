@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -25,7 +25,7 @@ class admin_license_file extends FO_Plugin
   var $Title      = TITLE_admin_license_file;
   var $MenuList   = "Admin::License Admin";
   var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_USERADMIN;
+  var $DBaccess   = PLUGIN_DB_ADMIN;
 
   /**
    * \brief Customize submenus.

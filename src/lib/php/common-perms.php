@@ -249,7 +249,7 @@
     global $SysConf;
 
     if ((strcasecmp(@$SysConf["SYSCONFIG"]["GlobalBrowse"],"true") == 0) 
-      or (@$_SESSION['UserLevel'] == PLUGIN_DB_USERADMIN)) return false;
+      or (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN)) return false;
     return @$_SESSION['UserId'];
   }
 

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@ class change_owner extends FO_Plugin {
   var $Version = "1.0";
   var $MenuList = "Admin::Change Owner";
   var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_USERADMIN;
+  var $DBaccess = PLUGIN_DB_ADMIN;
 
   /**
    * \brief Change the owner (user_fk) of an upload.

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@ class admin_folder_delete extends FO_Plugin {
   public $MenuList = "Organize::Folders::Delete Folder";
   public $Version = "1.0";
   public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_DELETE;
+  public $DBaccess = PLUGIN_DB_WRITE;
 
   /**
    * \brief Register additional menus.

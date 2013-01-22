@@ -35,7 +35,7 @@ class agent_copyright_once extends FO_Plugin {
   public $LoginFlag  = 0;
 
   /** To require login access, use: **/
-  // public $DBaccess = PLUGIN_DB_ANALYZE;
+  // public $DBaccess = PLUGIN_DB_WRITE;
   // public $LoginFlag = 1;
 
   /**
@@ -168,7 +168,7 @@ class agent_copyright_once extends FO_Plugin {
     if (!empty($_SESSION['User']))
     {
       // Debugging changes to license analysis NOTE: this comment doesn't make sense.
-      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
       {
         menu_insert("Main::Upload::One-Shot Copyright/Email/URL", $this->MenuOrder, $this->Name, $this->MenuTarget);
 
