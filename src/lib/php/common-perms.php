@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -333,17 +333,6 @@
       /* Add the user(s) to $GroupArray */
       AddUserToGroupArray($row, $GroupArray);
     }
-
-    /****** Find all the groups that are a member of this group ******/
-    $sql = "select member_group_fk from group_group_member where group_fk=$group_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    while ($row = pg_fetch_assoc($result)) 
-    {
-      /* Now recurse on all the groups that contain this group */
-      GetGroupUsers($user_pk, $row['member_group_fk'], $GroupArray);
-    }
-    pg_free_result($result);
   }
 
   /**
@@ -378,4 +367,26 @@
     return $GroupArray;
   }
 
+
+  /**
+   *  @brief Get the upload permission for a user
+   *  @param $upload_pk
+   *  @param $user_pk
+   *  @return hightest permission level a user has for an upload
+   **/
+  function GetUploadPerm($upload_pk, $user_pk)
+  {
+    $sql = "select max(perm) as perm from perm_upload, group_user_member where perm_upload.upload_fk=$upload_pk and user_fk=$user_pk and group_user_member.group_fk=perm_upload.group_fk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) < 1) 
+      $perm = PERM_NONE;
+    else
+    {
+      $row = pg_fetch_assoc($result);
+      $perm = $row['perm'];
+    }
+    pg_free_result($result);
+    return $perm;
+  }
 ?>
