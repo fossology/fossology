@@ -6563,6 +6563,10 @@ k
 #%STR%	"(v|[^_]version )1\.?2 November 2002"
 %STR%	"gnu free documentation ?licen[cs]e (v|version )1\.?2 nov"
 #
+%ENTRY%	_TITLE_GFDL_V13_ONLY
+%KEY%	"(docume|warra)nt"
+%STR%	"gnu free documentation ?licen[cs]e (v|version )1\.?3"
+#
 %ENTRY%	_TITLE_GFDL_V12_OR_LATER
 %KEY%	"(docume|warra)nt"
 %STR%	"gnu free documentation ?licen[cs](e|e gfdl) (v|version )1\.?2 =SOME= or =SOME= (later|newer|subsequent|more recent)"
@@ -6736,6 +6740,14 @@ k
 %ENTRY%	_TITLE_ERLPL
 %KEY%	"licen[cs]"
 %STR%	"erlang public license"
+#
+%ENTRY%	_TITLE_EUPL_V10
+%KEY%	"licen[cs]"
+%STR%	"licensed under the eupl (version |v)\.?1\.?0"
+#
+%ENTRY%	_TITLE_EUPL_V11
+%KEY%	"licen[cs]"
+%STR%	"licensed under the eupl (version |v)\.?1\.?1"
 #
 %ENTRY%	_TITLE_MOZNET_PL
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"

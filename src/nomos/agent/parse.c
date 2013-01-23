@@ -5274,6 +5274,16 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /*
+   * European Union Public Licence 
+   */
+  if (INFILE(_TITLE_EUPL_V10)) {
+    INTERESTING("EUPL-1.0");
+  }
+  else if (INFILE(_TITLE_EUPL_V11)) {
+    INTERESTING("EUPL-1.1");
+  }
+
+  /*
    * WTF Public "license"
    */
   if (*licStr == NULL_CHAR && INFILE(_LT_WTFPL)) {
@@ -5337,7 +5347,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /* Check for Public Domain */
-  if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON]) {
+  if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON] && !lmem[_mGFDL]) {
     pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
   }
 
@@ -6070,7 +6080,10 @@ char *gfdlVersion(char *filetext, int size, int isML, int isPS)
    * under 1.1 or later - have to be careful what we're looking for, and in a
    * specific order
    */
-  if (INFILE(_TITLE_GFDL_V12_ONLY)) {
+  if (INFILE(_TITLE_GFDL_V13_ONLY)) {
+    lstr = lDebug ? "GFDL-1.3(#1)" : "GFDL-1.3";
+  }
+  else if (INFILE(_TITLE_GFDL_V12_ONLY)) {
     lstr = lDebug ? "GFDL-1.2(#1)" : "GFDL-1.2";
   }
   else if (INFILE(_TITLE_GFDL_V11_ONLY)) {
