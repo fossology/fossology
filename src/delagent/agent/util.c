@@ -1,5 +1,5 @@
 /********************************************************
- Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -149,13 +149,15 @@ void DeleteUpload (long UploadId)
 
   /***********************************************/
   /* Delete the upload from the folder-contents table */
+  /*
   memset(SQL,'\0',sizeof(SQL));
   if (Verbose) { printf("# Deleting foldercontents\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE (foldercontents_mode & 2) != 0 AND child_id = %ld;",UploadId);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
   PQclear(result);
-
+  */
+ 
   if (!Test)
   {
     /* The UI depends on uploadtree and folders for navigation.
@@ -164,10 +166,10 @@ void DeleteUpload (long UploadId)
     result = PQexec(db_conn, "COMMIT;");
     if (fo_checkPQcommand(db_conn, result, "COMMIT;", __FILE__, __LINE__)) exit(-1);
     PQclear(result);
-    if (Verbose) { printf("# BEGIN;\n"); }
-    result = PQexec(db_conn, "BEGIN;");
-    if (fo_checkPQcommand(db_conn, result, "BEGIN;", __FILE__, __LINE__)) exit(-1);
-    PQclear(result);
+    //if (Verbose) { printf("# BEGIN;\n"); }
+    //result = PQexec(db_conn, "BEGIN;");
+    //if (fo_checkPQcommand(db_conn, result, "BEGIN;", __FILE__, __LINE__)) exit(-1);
+    //PQclear(result);
   }
 
   /***********************************************/
@@ -197,11 +199,61 @@ void DeleteUpload (long UploadId)
   if (Verbose) { printf("# Created pfile table: %ld entries\n",atol(PQgetvalue(result,0,0))); }
   PQclear(result);
 
+
+  /* Get the file listing -- needed for deleting pfiles from the repository. */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT * FROM %s_pfile ORDER BY pfile_pk;",TempTable);
+  pfile_result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, pfile_result, SQL, __FILE__, __LINE__)) exit(-1);
+  MaxRow = PQntuples(pfile_result);
+
+  /***********************************************/
+  /* Now to delete the actual pfiles from the repository before remove the DB. */
+  if (Test <= 1)
+  {
+    for(Row=0; Row<MaxRow; Row++)
+    {
+      memset(SQL,'\0',sizeof(SQL));
+      S = PQgetvalue(pfile_result,Row,1); /* sha1.md5.len */
+      if (fo_RepExist("license",S))
+      {
+        if (Test) printf("TEST: Delete %s %s\n","license",S);
+        else fo_RepRemove("license",S);
+      }
+      if (fo_RepExist("files",S))
+      {
+        if (Test) printf("TEST: Delete %s %s\n","files",S);
+        else fo_RepRemove("files",S);
+      }
+      if (fo_RepExist("gold",S))
+      {
+        if (Test) printf("TEST: Delete %s %s\n","gold",S);
+        else fo_RepRemove("gold",S);
+      }
+      fo_scheduler_heart(1);
+    }
+  } /* if Test <= 1 */
+  PQclear(pfile_result);
+
   /***********************************************
    This begins the slow part that locks the DB.
    The problem is, we don't want to lock a critical row,
    otherwise the scheduler will lock and/or fail.
    ***********************************************/
+  if (!Test)
+  {
+    if (Verbose) { printf("# BEGIN;\n"); }
+    result = PQexec(db_conn, "BEGIN;");
+    if (fo_checkPQcommand(db_conn, result, "BEGIN;", __FILE__, __LINE__)) exit(-1);
+    PQclear(result);
+  }
+  /* Delete the upload from the folder-contents table */
+  memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("# Deleting foldercontents\n"); }
+  snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE (foldercontents_mode & 2) != 0 AND child_id = %ld;",UploadId);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  PQclear(result);
 
   /***********************************************/
   /* delete pfile references from all the pfile dependent tables */
@@ -380,11 +432,13 @@ void DeleteUpload (long UploadId)
   //}
 
   /* Get the file listing -- needed for deleting pfiles from the repository. */
+  /* Move before delete DB
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT * FROM %s_pfile ORDER BY pfile_pk;",TempTable);
   pfile_result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, pfile_result, SQL, __FILE__, __LINE__)) exit(-1);
   MaxRow = PQntuples(pfile_result);
+  */
 
   /***********************************************/
   /* delete from pfile is SLOW due to constraint checking.
@@ -413,6 +467,11 @@ void DeleteUpload (long UploadId)
     result = PQexec(db_conn, "ROLLBACK;");
     if (fo_checkPQcommand(db_conn, result, "ROLLBACK", __FILE__, __LINE__)) exit(-1);
     PQclear(result);
+    memset(SQL,'\0',sizeof(SQL));
+    snprintf(SQL,sizeof(SQL),"DROP TABLE %s_pfile;",TempTable);
+    result = PQexec(db_conn, SQL);
+    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+    PQclear(result);
   }
   else
   {
@@ -424,12 +483,13 @@ void DeleteUpload (long UploadId)
  /***********************************************/
   /* Whew!  Now to delete the actual pfiles from the repository. */
   /** If someone presses ^C now, then at least the DB is accurate. **/
+  /* Move before delete DB
   if (Test <= 1)
   {
     for(Row=0; Row<MaxRow; Row++)
     {
       memset(SQL,'\0',sizeof(SQL));
-      S = PQgetvalue(pfile_result,Row,1); /* sha1.md5.len */
+      S = PQgetvalue(pfile_result,Row,1);
       if (fo_RepExist("license",S))
       {
         if (Test) printf("TEST: Delete %s %s\n","license",S);
@@ -447,8 +507,9 @@ void DeleteUpload (long UploadId)
       }
       fo_scheduler_heart(1);
     }
-  } /* if Test <= 1 */
+  }
   PQclear(pfile_result);
+  */
   if (Verbose) { printf("Deleted upload %ld\n",UploadId); }
 } /* DeleteUpload() */
 
@@ -865,7 +926,7 @@ void Usage (char *Name)
   fprintf(stderr,"  -i   :: Initialize the DB, then exit.\n");
   fprintf(stderr,"  -u   :: List uploads IDs.\n");
   fprintf(stderr,"  -U # :: Delete upload ID.\n");
-  fprintf(stderr,"  -L # :: Delete ALL licenses associated with upload ID.\n");
+  //fprintf(stderr,"  -L # :: Delete ALL licenses associated with upload ID.\n");
   fprintf(stderr,"  -f   :: List folder IDs.\n");
   fprintf(stderr,"  -F # :: Delete folder ID and all uploads under this folder.\n");
   fprintf(stderr,"          Folder '1' is the default folder.  '-F 1' will delete\n");
