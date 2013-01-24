@@ -387,6 +387,19 @@
       $perm = $row['perm'];
     }
     pg_free_result($result);
-    return $perm;
+
+    /* check the Default User permissions, all users are members of group "Default User" */
+    $sql = "select max(perm) as perm from perm_upload, groups where perm_upload.upload_fk=$upload_pk and group_name='Default User' and group_pk=perm_upload.group_fk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) < 1) 
+      $perm2 = PERM_NONE;
+    else
+    {
+      $row = pg_fetch_assoc($result);
+      $perm2 = $row['perm'];
+    }
+    pg_free_result($result);
+    return max($perm, $perm2);
   }
 ?>
