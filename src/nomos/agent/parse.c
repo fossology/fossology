@@ -88,7 +88,8 @@
 #define _fCCBY          36
 #define _fZPL           37
 #define _fCLA           38
-#define _msize          _fCLA+1
+#define _fODBL          39
+#define _msize          _fODBL+1
 //@}
 
 static struct {
@@ -633,7 +634,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("Google-BSD");
     }
     else if (!lmem[_fOPENLDAP] && !TRYGROUP(famOPENLDAP)) {
-      if (INFILE(_CR_BSDCAL)) {
+      if (HASTEXT(_LT_OPENSSLref5, REG_EXTENDED)) {
+        INTERESTING(lDebug ? "OpenSSL(ref)" : "OpenSSL");
+      } else if (INFILE(_CR_BSDCAL)) {
         INTERESTING(lDebug ? "BSD(1)" : "BSD");
       } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
           && INFILE(_LT_BSD_CLAUSE_3) && INFILE(_LT_BSD_CLAUSE_4) && INFILE(_LT_UC)) {
@@ -688,7 +691,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     lmem[_fBSD] = 1;
   }
-  else if (INFILE(_LT_BSD_3)) {
+  else if (INFILE(_LT_BSD_3) && !INFILE(_TITLE_OPENLDAP)) {
     if (INFILE(_CR_APACHE)) {
       cp = ASLVERS();
       INTERESTING(lDebug ? "Apache(g)" : cp);
@@ -1024,6 +1027,18 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (INFILE(_PHR_GPL_NO_MORE)) {
       lmem[_mGPL] = 1;
     }
+  }
+
+  /* Open Font License   */
+  if (INFILE(_LT_OPEN_FONT_V10))
+  {
+    INTERESTING("OFL-1.0");
+    lmem[_mMIT] = 1;
+  }
+  else if (INFILE(_LT_OPEN_FONT_V11))
+  {
+    INTERESTING("OFL-1.1");
+    lmem[_mMIT] = 1;
   }
   /*
    * GPL, LGPL, GFDL
@@ -3838,14 +3853,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
 
-  /* Open Font License
-   * Added April 4, 2011
-   */
-  if (INFILE(_LT_OPEN_FONT))
-  {
-    INTERESTING("Open Font");
-  }
-
   /*
    * AT&T
    */
@@ -5233,6 +5240,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_TITLE_ODBL)) {
      INTERESTING("ODbl-1.0");
+     lmem[_fODBL] = 1;
   }
   /*
    * Multics
@@ -5437,7 +5445,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /* Check for Public Domain */
-  if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON] && !lmem[_mGFDL]) {
+  if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON] && !lmem[_mGFDL] && !lmem[_fODBL]) {
     pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
   }
 

@@ -151,12 +151,15 @@
 #####
 # License Text entries start here...
 #####
-#
 # Open Font License
-%ENTRY%	_LT_OPEN_FONT
+%ENTRY%	_LT_OPEN_FONT_V10
 %KEY%	"font"
-%STR%	"open font license"
-
+%STR%	"open font license(,|[[:space:]])* version 1\.?0"
+#
+%ENTRY%	_LT_OPEN_FONT_V11
+%KEY%	"font"
+%STR%	"open font license(,|[[:space:]])* version 1\.?1"
+#
 %ENTRY%	_LT_ACAA_RIGHTS
 %KEY%	"so(ftware|urce)"
 %STR%	"ada conformity assessment authority ACAA (obtained|holds) unlimited rights in the software and documentation contained herein"
@@ -3606,6 +3609,10 @@ e /* (INFILE(j)) */
 %ENTRY% _LT_OPENSSLref4
 %KEY% "licen[cs]"
 %STR% "distributed under the same license as OpenSSL"
+#
+%ENTRY% _LT_OPENSSLref5
+%KEY% =NULL=
+%STR% "openssl (toolkit|project)"
 #
 %ENTRY%	_LT_COMBINED_OPENSSL_SSLEAY
 %KEY%	"SSLeay"
