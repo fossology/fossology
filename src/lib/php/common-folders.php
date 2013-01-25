@@ -608,6 +608,51 @@ function FolderListUploads($ParentFolder=-1)
 } // FolderListUploads()
 
 /**
+ * \brief Returns an array of uploads in a folder.
+ *  Only uploads for which the user has permission >= $perm are returned
+ *  This does NOT recurse.
+ *  The returned array is sorted by ufile_name and upload_pk.
+ * \param $ParentFolder Optional folder_pk, default is users root folder.
+ * \param $perm minimum permission
+ * \return array{upload_pk, upload_desc, upload_ts, ufile_name}
+ *  for all uploads in a given folder.
+ *
+ * \note THIS WILL REPLACE FolderListUploads() when permissions go live.
+ */
+function FolderListUploads_perm($ParentFolder=-1, $perm)
+{
+  global $PG_CONN;
+  if (empty($PG_CONN)) { return; }
+  if (empty($ParentFolder)) { return; }
+  if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
+  $List=array();
+
+  /* Get list of uploads */
+  /** mode 1<<1 = upload_fk **/
+  $sql = "SELECT upload_pk, upload_desc, upload_ts, upload_filename
+	FROM foldercontents,perm_upload,upload
+	WHERE foldercontents.parent_fk = '$ParentFolder'
+	AND foldercontents.foldercontents_mode = 2
+	AND foldercontents.child_id = upload.upload_pk
+	AND perm_upload.upload_fk = upload.upload_pk
+	AND perm >= $perm
+	ORDER BY upload_filename,upload_pk;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  while ($R = pg_fetch_assoc($result))
+  {
+    if (empty($R['upload_pk'])) { continue; }
+    $New['upload_pk'] = $R['upload_pk'];
+    $New['upload_desc'] = $R['upload_desc'];
+    $New['upload_ts'] = substr($R['upload_ts'],0,19);
+    $New['name'] = $R['upload_filename'];
+    array_push($List,$New);
+  }
+  pg_free_result($result);
+  return($List);
+} // FolderListUploads()
+
+/**
  * \brief Get uploads and folder info, starting from $ParentFolder.
  * The array is sorted by folder and upload name.
  * Folders that are empty do not show up.
