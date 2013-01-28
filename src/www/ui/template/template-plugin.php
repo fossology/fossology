@@ -44,6 +44,12 @@ define("PERM_READ",1);   /* Read only */
 define("PERM_WRITE",3);	 /* Create and write data. */
 define("PERM_ADMIN",10); /* Control permissions    */
 
+$NoneText = _("None");
+$ReadText = _("Read");
+$WriteText = _("Write");
+$AdminText = _("Admin");
+$GLOBALS['PERM_NAMES'] = array(PERM_NONE=>$NoneText, PERM_READ=>$ReadText, PERM_WRITE=>$WriteText, PERM_ADMIN=>$AdminText);
+
 /**
  * \class FO_Plugin
  * \brief This is the Plugin class.  All plugins should:
