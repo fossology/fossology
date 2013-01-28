@@ -89,7 +89,10 @@
 #define _fZPL           37
 #define _fCLA           38
 #define _fODBL          39
-#define _msize          _fODBL+1
+#define _fPDDL          40
+#define _fRUBY          41
+#define _fSAX           42
+#define _msize          _fSAX+1
 //@}
 
 static struct {
@@ -1040,6 +1043,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("OFL-1.1");
     lmem[_mMIT] = 1;
   }
+
+  /** Simple Public License 2.0 */
+  if (INFILE(_TITLE_SimPL_V2)) {
+    INTERESTING("SimPL-2.0");
+    lmem[_mGPL] = 1;
+  }
+
   /*
    * GPL, LGPL, GFDL
    * QUESTION: do we need to check for the FSF copyright since we also
@@ -1814,8 +1824,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /** MirOS License (MirOS) */
-  if (INFILE(_TITLE_MIROS)) {
-    INTERESTING("MirOS");
+  if (INFILE(_TITLE_MIROS)) { 
+    INTERESTING("MirOS"); 
   }
 
   /** Libpng license */
@@ -2237,6 +2247,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "CDDL(url#1)" : cp);
       lmem[_mCDDL] = 1;
     }
+    else if (INFILE(_TITLE_RHeCos_v11)) {
+      INTERESTING("RHeCos-1.1");
+    }
     else {
       INTERESTING("MPL-style");
       lmem[_mMPL] = 1;
@@ -2474,6 +2487,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_RUBY)) {
     INTERESTING("Ruby");
+    lmem[_fRUBY] = 1;
   }
   else if (INFILE(_LT_RUBYref1)) {
     INTERESTING(lDebug ? "Ruby(ref1)" : "Ruby");
@@ -5381,6 +5395,24 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_mMIT] = 1;
   }
 
+  /** ODC Public Domain Dedication & License 1.0 */
+  if (INFILE(_TITLE_PDDL)) {
+    INTERESTING("PDDL-1.0");
+    lmem[_fPDDL] = 1;
+  }
+
+  /** PostgreSQL License */
+  if (INFILE(_TITLE_POSTGRES)) {
+    INTERESTING("PostgreSQL");
+    lmem[_fBSD] = 1;
+  }
+
+  /**   Sax Public Domain Notice */
+  if (INFILE(_LT_SAX_PD)) {
+    INTERESTING("SAX-PD");
+    lmem[_fSAX] = 1;
+  }
+
   /*
    * WTF Public "license"
    */
@@ -5445,7 +5477,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /* Check for Public Domain */
-  if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON] && !lmem[_mGFDL] && !lmem[_fODBL]) {
+  if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON] && !lmem[_mGFDL] &&
+      !lmem[_fODBL] && !lmem[_fPDDL] && !lmem[_fRUBY] && !lmem[_fSAX]) {
     pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
   }
 

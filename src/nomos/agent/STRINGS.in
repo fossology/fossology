@@ -4103,6 +4103,10 @@ e /* (INFILE(j)) */
 # DELETED: ... of the software but belong to whomever generated them and
 # may be sold commercially and may be aggregated with this software
 #####
+%ENTRY%	_LT_SAX_PD
+%KEY%	"licen[cs]"
+%STR%	"not possible to own a license to sax"
+#
 %ENTRY%	_LT_RUBY
 %KEY%	"so(ftware|urce)"
 %STR%	"the scripts and library files supplied as input to or produced as output from the software do not automatically fall under the copyright"
@@ -4215,7 +4219,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_SNIA_PL
 %KEY%	"so(ftware|urce)"
-%STR%	"any modification which you create or to which you contribute must be made available in source code form under the terms of this licen[cs]e"
+%STR%	"(SNIA|Storage Network Industry) =ANY= any modification which you create or to which you contribute must be made available in source code form under the terms of this licen[cs]e"
 #
 %ENTRY%	_LT_SNIAref
 %KEY%	"licen[cs]"
@@ -4580,6 +4584,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_TITLE_ZLIB
 %KEY%	"licen[cs]"
 %STR%	"zlib license"
+#
+%ENTRY%	_TITLE_SimPL_V2
+%KEY%	"licen[cs]"
+%STR%	"simple public license 2\.?0 =SOME= is a plain language implementation of gpl 2\.?0"
 #####
 # DELETED: ... of this document or the W3C document from which this
 # statement is linked in any medium for any purpose and without fee or
@@ -6776,6 +6784,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"miros licen[cs]e"
 #
+%ENTRY%	_TITLE_POSTGRES
+%KEY%	"copyright"
+%STR%	"portions copyright =FEW= postgresql global development group"
+#
 %ENTRY%	_TITLE_MIT
 %KEY%	"licen[cs]"
 %STR%	"MIT licen[cs]e"
@@ -6799,6 +6811,10 @@ k
 %ENTRY%	_TITLE_MOZNET_PL
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"(mozilla|netscape) public licen[cs]e"
+#
+%ENTRY%	_TITLE_RHeCos_v11
+%KEY%	"licen[cs]"
+%STR%	"red hat ecos public license (version |v)1\.?1"
 #
 %ENTRY%	_TITLE_MPL
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
@@ -7011,6 +7027,10 @@ k
 %ENTRY%	_TITLE_OSL30
 %KEY%	"licen[cs]"
 %STR%	"open (source|software) licen[cs]e[^s] =FEW= (3\.?0|(osl |v|version )3\.?0)"
+#
+%ENTRY%	_TITLE_PDDL
+%KEY%	"licen[cs]"
+%STR%	"open data commons =FEW= public domain dedication =FEW= licen[cs]e"
 #
 %ENTRY%	_TITLE_NON_PROFIT_OSL30
 %KEY%	"licen[cs]"
