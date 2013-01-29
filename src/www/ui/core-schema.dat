@@ -628,27 +628,6 @@
   $Schema["TABLE"]["foldercontents"]["child_id"]["UPDATE"] = "";
 
 
-  $Schema["TABLE"]["group_group_member"]["group_group_member_pk"]["DESC"] = "";
-  $Schema["TABLE"]["group_group_member"]["group_group_member_pk"]["ADD"] = "ALTER TABLE \"group_group_member\" ADD COLUMN \"group_group_member_pk\" int4;";
-  $Schema["TABLE"]["group_group_member"]["group_group_member_pk"]["ALTER"] = "ALTER TABLE \"group_group_member\" ALTER COLUMN \"group_group_member_pk\" SET NOT NULL;";
-  $Schema["TABLE"]["group_group_member"]["group_group_member_pk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["group_group_member"]["group_fk"]["DESC"] = "";
-  $Schema["TABLE"]["group_group_member"]["group_fk"]["ADD"] = "ALTER TABLE \"group_group_member\" ADD COLUMN \"group_fk\" int4;";
-  $Schema["TABLE"]["group_group_member"]["group_fk"]["ALTER"] = "ALTER TABLE \"group_group_member\" ALTER COLUMN \"group_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["group_group_member"]["group_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["group_group_member"]["member_group_fk"]["DESC"] = "COMMENT ON COLUMN \"group_group_member\".\"member_group_fk\" IS 'group that is a member of group_fk';";
-  $Schema["TABLE"]["group_group_member"]["member_group_fk"]["ADD"] = "ALTER TABLE \"group_group_member\" ADD COLUMN \"member_group_fk\" int4;";
-  $Schema["TABLE"]["group_group_member"]["member_group_fk"]["ALTER"] = "ALTER TABLE \"group_group_member\" ALTER COLUMN \"member_group_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["group_group_member"]["member_group_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["group_group_member"]["group_perm"]["DESC"] = "";
-  $Schema["TABLE"]["group_group_member"]["group_perm"]["ADD"] = "ALTER TABLE \"group_group_member\" ADD COLUMN \"group_perm\" int4;";
-  $Schema["TABLE"]["group_group_member"]["group_perm"]["ALTER"] = "ALTER TABLE \"group_group_member\" ALTER COLUMN \"group_perm\" SET NOT NULL;";
-  $Schema["TABLE"]["group_group_member"]["group_perm"]["UPDATE"] = "";
-
-
   $Schema["TABLE"]["group_user_member"]["group_user_member_pk"]["DESC"] = "";
   $Schema["TABLE"]["group_user_member"]["group_user_member_pk"]["ADD"] = "ALTER TABLE \"group_user_member\" ADD COLUMN \"group_user_member_pk\" int4;";
   $Schema["TABLE"]["group_user_member"]["group_user_member_pk"]["ALTER"] = "ALTER TABLE \"group_user_member\" ALTER COLUMN \"group_user_member_pk\" SET NOT NULL, ALTER COLUMN \"group_user_member_pk\" SET DEFAULT nextval('group_user_member_group_user_member_pk_seq'::regclass);";
@@ -1212,6 +1191,27 @@
   $Schema["TABLE"]["nomos_ars"]["ars_endtime"]["ADD"] = "ALTER TABLE \"nomos_ars\" ADD COLUMN \"ars_endtime\" timestamptz;";
   $Schema["TABLE"]["nomos_ars"]["ars_endtime"]["ALTER"] = "ALTER TABLE \"nomos_ars\" ALTER COLUMN \"ars_endtime\" DROP NOT NULL;";
   $Schema["TABLE"]["nomos_ars"]["ars_endtime"]["UPDATE"] = "";
+
+
+  $Schema["TABLE"]["perm_upload"]["perm_upload_pk"]["DESC"] = "";
+  $Schema["TABLE"]["perm_upload"]["perm_upload_pk"]["ADD"] = "ALTER TABLE \"perm_upload\" ADD COLUMN \"perm_upload_pk\" int4;";
+  $Schema["TABLE"]["perm_upload"]["perm_upload_pk"]["ALTER"] = "ALTER TABLE \"perm_upload\" ALTER COLUMN \"perm_upload_pk\" SET NOT NULL, ALTER COLUMN \"perm_upload_pk\" SET DEFAULT nextval('perm_upload_perm_upload_pk_seq'::regclass);";
+  $Schema["TABLE"]["perm_upload"]["perm_upload_pk"]["UPDATE"] = "UPDATE perm_upload SET perm_upload_pk=nextval('perm_upload_perm_upload_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["perm_upload"]["perm"]["DESC"] = "COMMENT ON COLUMN \"perm_upload\".\"perm\" IS 'permission PERM_NONE, PERM_READ, PERM_WRITE, PERM_ADMIN';";
+  $Schema["TABLE"]["perm_upload"]["perm"]["ADD"] = "ALTER TABLE \"perm_upload\" ADD COLUMN \"perm\" int4;";
+  $Schema["TABLE"]["perm_upload"]["perm"]["ALTER"] = "ALTER TABLE \"perm_upload\" ALTER COLUMN \"perm\" SET NOT NULL;";
+  $Schema["TABLE"]["perm_upload"]["perm"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["perm_upload"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["perm_upload"]["upload_fk"]["ADD"] = "ALTER TABLE \"perm_upload\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["perm_upload"]["upload_fk"]["ALTER"] = "ALTER TABLE \"perm_upload\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["perm_upload"]["upload_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["perm_upload"]["group_fk"]["DESC"] = "";
+  $Schema["TABLE"]["perm_upload"]["group_fk"]["ADD"] = "ALTER TABLE \"perm_upload\" ADD COLUMN \"group_fk\" int4;";
+  $Schema["TABLE"]["perm_upload"]["group_fk"]["ALTER"] = "ALTER TABLE \"perm_upload\" ALTER COLUMN \"group_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["perm_upload"]["group_fk"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["pfile"]["pfile_pk"]["DESC"] = "";
@@ -1858,6 +1858,7 @@
   $Schema["SEQUENCE"]["bucket_container_bf_pk_seq"] = "CREATE SEQUENCE \"bucket_container_bf_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["bucket_file_bf_pk_seq"] = "CREATE SEQUENCE \"bucket_file_bf_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["bucketpool_bucketpool_pk_seq"] = "CREATE SEQUENCE \"bucketpool_bucketpool_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["perm_upload_perm_upload_pk_seq"] = "CREATE SEQUENCE \"perm_upload_perm_upload_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["copyright_ct_pk_seq"] = "CREATE SEQUENCE \"copyright_ct_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_file_fl_pk_seq"] = "CREATE SEQUENCE \"license_file_fl_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["folder_folder_pk_seq"] = "CREATE SEQUENCE \"folder_folder_pk_seq\" START 1;";
@@ -1915,7 +1916,6 @@
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
   $Schema["CONSTRAINT"]["foldercontents_pkey"] = "ALTER TABLE \"foldercontents\" ADD CONSTRAINT \"foldercontents_pkey\" PRIMARY KEY (\"foldercontents_pk\");";
-  $Schema["CONSTRAINT"]["group_group_member_pkey"] = "ALTER TABLE \"group_group_member\" ADD CONSTRAINT \"group_group_member_pkey\" PRIMARY KEY (\"group_group_member_pk\");";
   $Schema["CONSTRAINT"]["group_pkey"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_pkey\" PRIMARY KEY (\"group_pk\");";
   $Schema["CONSTRAINT"]["group_user_member_pkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_pkey\" PRIMARY KEY (\"group_user_member_pk\");";
   $Schema["CONSTRAINT"]["job_pkey"] = "ALTER TABLE \"job\" ADD CONSTRAINT \"job_pkey\" PRIMARY KEY (\"job_pk\");";
@@ -1935,6 +1935,7 @@
   $Schema["CONSTRAINT"]["mimetype_pk"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"mimetype_pk\" PRIMARY KEY (\"mimetype_pk\");";
   $Schema["CONSTRAINT"]["nomos_ars_pkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"nomos_ars_pkey\" PRIMARY KEY (\"ars_pk\");";
   $Schema["CONSTRAINT"]["nomos_ars_pkey1"] = "ALTER TABLE \"nomos_ars\" ADD CONSTRAINT \"nomos_ars_pkey1\" PRIMARY KEY (\"ars_pk\");";
+  $Schema["CONSTRAINT"]["perm_upload_pkey"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_pkey\" PRIMARY KEY (\"perm_upload_pk\");";
   $Schema["CONSTRAINT"]["pfile_pkey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_pkey\" PRIMARY KEY (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["pkg_deb_pkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pkey\" PRIMARY KEY (\"pkg_pk\");";
   $Schema["CONSTRAINT"]["pkg_deb_req_pkey"] = "ALTER TABLE \"pkg_deb_req\" ADD CONSTRAINT \"pkg_deb_req_pkey\" PRIMARY KEY (\"req_pk\");";
@@ -1993,8 +1994,6 @@
   $Schema["CONSTRAINT"]["bucket_container_agent_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["bucket_container_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["bucketpool_fk"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucketpool_fk\" FOREIGN KEY (\"bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["group_group_member_group_fk_fkey"] = "ALTER TABLE \"group_group_member\" ADD CONSTRAINT \"group_group_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["group_group_member_member_group_fk_fkey"] = "ALTER TABLE \"group_group_member\" ADD CONSTRAINT \"group_group_member_member_group_fk_fkey\" FOREIGN KEY (\"member_group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["group_user_member_group_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["group_user_member_user_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["jdep_depends_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_depends_jq_fk\" FOREIGN KEY (\"jdep_jq_depends_fk\") REFERENCES \"jobqueue\" (\"jq_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2018,6 +2017,8 @@
   $Schema["CONSTRAINT"]["nomos_ars_upload_fk_fkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"nomos_ars_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["nomos_ars_upload_fk_fkey1"] = "ALTER TABLE \"nomos_ars\" ADD CONSTRAINT \"nomos_ars_upload_fk_fkey1\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["nomosagentpk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"nomosagentpk\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["perm_upload_fkidx"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_fkidx\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE CASCADE ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["perm_upload_group_fkidx"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_group_fkidx\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["pfile_fk"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"pfile_fk\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_fkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["pkg_rpm_pfile_fk_fkey"] = "ALTER TABLE \"pkg_rpm\" ADD CONSTRAINT \"pkg_rpm_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2059,6 +2060,9 @@
   $Schema["INDEX"]["license_test"]["pfilefk"] = "CREATE INDEX pfilefk ON license_test USING btree (pfile_fk);";
 
   $Schema["INDEX"]["licterm_name"]["licterm_name_pfile_pk_idx"] = "CREATE UNIQUE INDEX licterm_name_pfile_pk_idx ON licterm_name USING btree (licterm_name_pk, pfile_fk);";
+
+  $Schema["INDEX"]["perm_upload"]["group_fk_idx"] = "CREATE INDEX group_fk_idx ON perm_upload USING btree (group_fk);";
+  $Schema["INDEX"]["perm_upload"]["upload_fk_idx"] = "CREATE INDEX upload_fk_idx ON perm_upload USING btree (upload_fk);";
 
   $Schema["INDEX"]["pfile"]["pfile_mimetypefk_idx"] = "CREATE INDEX pfile_mimetypefk_idx ON pfile USING btree (pfile_mimetypefk);";
 
