@@ -40,13 +40,29 @@ function Migrate_21_22()
 {
   global $PG_CONN;
 
+/* NO - use Default User for Public
+  // Before adding all the user groups, add the special group "Public" 
+  $sql = "select group_pk from groups where group_name='Public'";
+  $GroupResult = pg_query($PG_CONN, $sql);
+  DBCheckResult($GroupResult, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($GroupResult) == 0)
+  {
+    // No group with name Public, so create one
+    $sql = "insert into groups(group_name) values ('Public')";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+  }
+  pg_free_result($GroupResult);
+*/
+
   $sql = "select user_pk, user_name, root_folder_fk from users";
   $UserResult = pg_query($PG_CONN, $sql);
   DBCheckResult($UserResult, $sql, __FILE__, __LINE__);
 
   /* Loop through all user records making sure there is a group with the same name,
    * the group has the user with PERM_WRITE, the user is PERM_ADMIN of their own uploads
-   * and the user has PERM_WRITE to their root folder.
+   * and the user has PERM_ADMIN to their root folder (PERM_WRITE if their root folder is
+   * Software Repository.
    */
   while($UserRow = pg_fetch_assoc($UserResult))
   {
@@ -111,7 +127,6 @@ function Migrate_21_22()
   }
   pg_free_result($UserResult);
                     
-echo "\n!!!  TBD: 2.1 to 2.2 Folder permissions migration !!!\n";
   return 0;  // success
 } // Migrate_21_22
 

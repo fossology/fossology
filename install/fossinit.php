@@ -134,11 +134,11 @@ if ($UpdateLiceneseRef)
   initLicenseRefTable(false);
 }
 
-/* for the 2.0 -> 2.1 migration, create the uploadtree_0 table */
+/* migration */
 global $LIBEXECDIR;
-require_once("$LIBEXECDIR/dbmigrate_2.0-2.1.php");
-print "Migrate data from 2.0 to 2.1 in $LIBEXECDIR\n";
-Migrate_20_21($Verbose);
+require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
+print "Migrate data from 2.1 to 2.2 in $LIBEXECDIR\n";
+Migrate_21_22($Verbose);
 
 exit(0);
 
