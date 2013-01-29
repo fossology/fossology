@@ -479,6 +479,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("ZPL-1.1");
       lmem[_fZPL] = 1;
     }
+    if (INFILE(_TITLE_ZIMBRA_13)) {
+      INTERESTING("Zimbra-1.3");
+    }
     else {
       INTERESTING(lDebug ? "Zope(ref)" : "ZPL");
       lmem[_fZPL] = 1;
@@ -1629,7 +1632,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       lmem[_mMIT] = 1;
     }
     else if (INFILE(_LT_MIT_2)) {
-      if (mCR_X11()) {
+      if (INFILE(_CR_XFREE86)) {
+        INTERESTING("XFree86-1.1");
+      }
+      else if (mCR_X11()) {
         INTERESTING(lDebug ? "X11(1)" : "X11");
       }
       else if (INFILE(_CR_SPI)) {
@@ -1637,6 +1643,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       }
       else if (mCR_MIT() || INFILE(_TITLE_MIT)) {
         INTERESTING(lDebug ? "MIT(1)" : "MIT");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_TITLE_XNET)) {
+        INTERESTING("Xnet");
         lmem[_mMIT] = 1;
       }
       else {
@@ -1647,6 +1657,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (INFILE(_LT_BITSTREAM_1)) {
       INTERESTING(lDebug ? "Bitstream(1)" : "Bitstream");
       lmem[_mMIT] = 1;
+    }
+    else if (INFILE(_CR_XFREE86)) {
+      INTERESTING("XFree86-1.1");
     }
     else if (mCR_X11()) {
       INTERESTING("X11");
@@ -1854,6 +1867,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (INFILE(_CR_W3C)) {
       INTERESTING(lDebug ? "W3C(3)" : "W3C");
     }
+    if (INFILE(_LT_W3Cref4)) {
+      INTERESTING(lDebug ? "W3C(ref4)" : "W3C");
+    }
     else {
       INTERESTING(lDebug ? "W3C-style(3)" : "W3C-style");
     }
@@ -1905,6 +1921,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_LT_W3Cref3)) {
     INTERESTING(lDebug ? "W3C(ref3)" : "W3C");
+    lmem[_fW3C] = 1;
+  }
+  else if (INFILE(_LT_W3Cref4)) {
+    INTERESTING(lDebug ? "W3C(ref4)" : "W3C");
     lmem[_fW3C] = 1;
   }
   else if (URL_INFILE(_URL_W3C_IP)) {
@@ -3600,8 +3620,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("Yahoo-EULA");
     }
     else {
-      INTERESTING("YPL-1.0");
+      INTERESTING("YPL");
     }
+  }
+  if(INFILE(_TITLE_YPL_V10)) {
+    INTERESTING("YPL-1.0");
+  }
+  else if(INFILE(_TITLE_YPL_V11)) {
+    INTERESTING("YPL-1.1");
   }
   /*
    * Public Use

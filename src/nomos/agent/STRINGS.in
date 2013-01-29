@@ -4656,6 +4656,10 @@ e /* (INFILE(j)) */
 %KEY%	"so(ftware|urce)"
 %STR%	"published (under|under the) w3c software copyright notice and licen[cs]e"
 #
+%ENTRY%	_LT_W3Cref4
+%KEY%	"so(ftware|urce)"
+%STR%	"w3c software notice and licen[cs]e"
+#
 %ENTRY%	_LT_WINTERTREE
 %KEY%	"licen[cs]"
 %STR%	"this licen[cs]e agreement defines the terms and conditions under which you the licen[cs]ee are permitted by wintertree software inc the licen[cs]or to use"
@@ -4744,6 +4748,14 @@ e /* (INFILE(j)) */
 # DELETED: ... the yahoo software are owned by yahoo or yahoo s licen[cs]ors
 # and content and data providers
 #####
+%ENTRY%	_TITLE_YPL_V10
+%KEY%	"licen[cs]"
+%STR%	"yahoo\!? public license\,? (version |v)1\.?0"
+#
+%ENTRY%	_TITLE_YPL_V11
+%KEY%	"licen[cs]"
+%STR%	"yahoo\!? public license\,? (version |v)1\.?1"
+#
 %ENTRY%	_LT_YAHOO_1
 %KEY%	"so(ftware|urce)"
 %STR%	"the yahoo software applications documentation and local computer files installed or utili[sz]ed by the installer application collectively"
@@ -6066,6 +6078,10 @@ k
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= xfree86 =SOME= project"
 #
+%ENTRY%	_CR_XFREE86_V11
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= xfree86 project (version |v)1\.?1"
+#
 %ENTRY%	_CR_XILINX
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= xilinx inc"
@@ -7298,7 +7314,7 @@ k
 #
 %ENTRY%	_TITLE_XNET
 %KEY%	"licen[cs]"
-%STR%	"the xnet inc licen[cs]e"
+%STR%	"the x\.?net\,? inc\.? licen[cs]e"
 #
 # Zend license
 %ENTRY%   _TITLE_ZEND_V20
