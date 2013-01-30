@@ -25,10 +25,10 @@
  */
 
 $Usage = "Usage: " . basename($argv[0]) . "
-  -u upload id        :: upload id
-  -t uploadtree id    :: uploadtree id
-  -c sysconfdir       :: Specify the directory for the system configuration
-  --type type         :: all/statement/url/email, default: all
+  -u upload id        :: required - upload id
+  -t uploadtree id    :: required - uploadtree id
+  -c sysconfdir       :: optional - Specify the directory for the system configuration
+  --type type         :: optional - all/statement/url/email, default: all
   --user username     :: user name
   --password password :: password
   --container         :: include container or not, 1: yes, 0: no (default)
