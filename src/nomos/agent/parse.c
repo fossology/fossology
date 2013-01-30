@@ -92,7 +92,8 @@
 #define _fPDDL          40
 #define _fRUBY          41
 #define _fSAX           42
-#define _msize          _fSAX+1
+#define _fAPL           43
+#define _msize          _fAPL+1
 //@}
 
 static struct {
@@ -479,7 +480,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("ZPL-1.1");
       lmem[_fZPL] = 1;
     }
-    if (INFILE(_TITLE_ZIMBRA_13)) {
+    else if (INFILE(_TITLE_ZIMBRA_13)) {
       INTERESTING("Zimbra-1.3");
     }
     else {
@@ -659,7 +660,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)) {
         INTERESTING("BSD-2-Clause");
       }
-      else {
+      else if (!lmem[_fZPL]) {
         INTERESTING(lDebug ? "BSD-style(1)" : "BSD-style");
       }
     }
@@ -1329,7 +1330,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
             INFILE(_PHR_PYTHON_NOTGPL_2)) {
           lmem[_mGPL] = 1;
         }
-        else {
+        else if (!HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED)){
           cp = GPLVERS();
           INTERESTING(lDebug ? "GPL(ref1#1)" : cp);
           lmem[_mGPL] = 1;
@@ -1548,7 +1549,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       else if (mCR_FSF() && INFILE(_LT_FSF_5)) {
         INTERESTING(lDebug ? "FSF(5)" : "FSF");
       }
-      else if (INFILE(_LT_FSFref1)) {
+      else if (INFILE(_LT_FSFref1) && !lmem[_mGPL]) {
         INTERESTING(lDebug ? "FSF(ref1)" : "FSF");
       }
       else if (INFILE(_LT_FSFref2)) {
@@ -1839,6 +1840,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /** MirOS License (MirOS) */
   if (INFILE(_TITLE_MIROS)) { 
     INTERESTING("MirOS"); 
+    lmem[_mMIT] = 1;
   }
 
   /** Libpng license */
@@ -4251,6 +4253,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else {
       INTERESTING("APL");
     }
+    lmem[_fAPL] = 1;
   }
   /*
    * gSOAP Public License
@@ -5504,7 +5507,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 
   /* Check for Public Domain */
   if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON] && !lmem[_mGFDL] &&
-      !lmem[_fODBL] && !lmem[_fPDDL] && !lmem[_fRUBY] && !lmem[_fSAX]) {
+      !lmem[_fODBL] && !lmem[_fPDDL] && !lmem[_fRUBY] && !lmem[_fSAX] && !lmem[_fAPL]) {
     pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
   }
 

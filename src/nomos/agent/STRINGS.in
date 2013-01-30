@@ -7958,7 +7958,7 @@ k
 #
 %ENTRY%	_TEXT_GCC
 %KEY%	=NULL=
-%STR%	"gcc linking"
+%STR%	"gcc (linking|runtime library)"
 #
 %ENTRY%	_TEXT_FREEWARE
 %KEY%	=NULL=
