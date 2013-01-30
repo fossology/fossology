@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -622,26 +622,30 @@ function FolderListUploads($ParentFolder=-1)
 function FolderListUploads_perm($ParentFolder=-1, $perm)
 {
   global $PG_CONN;
+
   if (empty($PG_CONN)) { return; }
   if (empty($ParentFolder)) { return; }
   if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
   $List=array();
 
-  /* Get list of uploads */
+  /* Get list of uploads under $ParentFolder */
   /** mode 1<<1 = upload_fk **/
   $sql = "SELECT upload_pk, upload_desc, upload_ts, upload_filename
-	FROM foldercontents,perm_upload,upload
+	FROM foldercontents,upload
 	WHERE foldercontents.parent_fk = '$ParentFolder'
 	AND foldercontents.foldercontents_mode = 2
 	AND foldercontents.child_id = upload.upload_pk
-	AND perm_upload.upload_fk = upload.upload_pk
-	AND perm >= $perm
 	ORDER BY upload_filename,upload_pk;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $user_pk = GetArrayVal("UserId", $_SESSION);
   while ($R = pg_fetch_assoc($result))
   {
     if (empty($R['upload_pk'])) { continue; }
+
+    // Filter out uploads where the user doesn't have sufficient permission 
+    if (GetUploadPerm($R['upload_pk'], $user_pk) < $perm) continue;
+
     $New['upload_pk'] = $R['upload_pk'];
     $New['upload_desc'] = $R['upload_desc'];
     $New['upload_ts'] = substr($R['upload_ts'],0,19);
@@ -650,7 +654,7 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
   }
   pg_free_result($result);
   return($List);
-} // FolderListUploads()
+} // FolderListUploads_perm()
 
 /**
  * \brief Get uploads and folder info, starting from $ParentFolder.

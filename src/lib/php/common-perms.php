@@ -376,6 +376,8 @@
    **/
   function GetUploadPerm($upload_pk, $user_pk)
   {
+    global $PG_CONN;
+
     $sql = "select max(perm) as perm from perm_upload, group_user_member where perm_upload.upload_fk=$upload_pk and user_fk=$user_pk and group_user_member.group_fk=perm_upload.group_fk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);

@@ -86,10 +86,22 @@ class upload_permissions extends FO_Plugin
     }
     else if (!empty($newgroup) and (!empty($newperm)))
     {
-      $sql = "insert into perm_upload (perm, upload_fk, group_fk) values ($newperm, $upload_pk, $newgroup)";
+      // before inserting this new record, delete any record for the same upload and group since
+      // that would be a duplicate
+      $sql = "delete from perm_upload where upload_fk=$upload_pk and group_fk=$newgroup";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
+    
+      // Don't insert a PERM_NONE.  NONE is the default 
+      if ($newperm != PERM_NONE)
+      {
+        $sql = "insert into perm_upload (perm, upload_fk, group_fk) values ($newperm, $upload_pk, $newgroup)";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
+      }
+      $newperm = $newgroup = 0;
     }
 
     $root_folder_pk = GetUserRootFolder();
@@ -104,8 +116,6 @@ class upload_permissions extends FO_Plugin
     /* define js_url */
     $V .= js_url(); 
 
-    /* Build the HTML form */
-//    $V.= "<form name='formy' method='post'>\n"; // no url = this url
     $text = _("Select the folder that contains the upload:  \n");
     $V.= "$text";
 
@@ -121,8 +131,16 @@ class upload_permissions extends FO_Plugin
     // Get list of all upload records in this folder that the user has PERM_ADMIN
     $UploadList = FolderListUploads_perm($folder_pk, PERM_ADMIN);
 
+/*
+if (empty($UploadList))
+{
+echo "You have no uploads in this folder for which you are an admin.  Hit the back button";
+return;
+}
+*/
     // Make data array for upload select list.  Key is upload_pk, value is a composite
     // of the upload_filename and upload_ts.
+    // Note that $UploadList may be empty so $UploadArray will be empty
     $UploadArray = array();
     foreach($UploadList as $UploadRec) 
     {
@@ -146,68 +164,73 @@ class upload_permissions extends FO_Plugin
     $V .= Array2SingleSelect($UploadArray, "uploadselect", $upload_pk, false, false, $onchange);
 
     /* Get permissions for this upload */
-    $sql = "select perm_upload_pk, perm, group_pk, group_name from groups, perm_upload where group_fk=group_pk and upload_fk='$upload_pk'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $PermArray = pg_fetch_all($result);
-    pg_free_result($result);
-
-    /* Get master array of groups */
-    $sql = "select group_pk, group_name from groups order by group_name";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $GroupArray = array();
-    while ($GroupRow = pg_fetch_assoc($result))
+    if (!empty($UploadArray))
     {
-      $GroupArray[$GroupRow['group_pk']] = $GroupRow['group_name'];
-    }
-    pg_free_result($result);
+      $sql = "select perm_upload_pk, perm, group_pk, group_name from groups, perm_upload where group_fk=group_pk and upload_fk='$upload_pk'";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $PermArray = pg_fetch_all($result);
+      pg_free_result($result);
 
-    /* Permissions Table */
-    $V .= "<p><table border=1>";
-    $GroupText = _("Group");
-    $PermText = _("Permission");
-    $V .= "<tr><th>$GroupText</th><th>$PermText</th></tr>";
-    foreach ($PermArray as $PermRow)
-    {
+      /* Get master array of groups */
+      $sql = "select group_pk, group_name from groups order by group_name";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $GroupArray = array();
+      while ($GroupRow = pg_fetch_assoc($result))
+      {
+        $GroupArray[$GroupRow['group_pk']] = $GroupRow['group_name'];
+      }
+      pg_free_result($result);
+
+      /* Permissions Table */
+      $V .= "<p><table border=1>";
+      $GroupText = _("Group");
+      $PermText = _("Permission");
+      $V .= "<tr><th>$GroupText</th><th>$PermText</th></tr>";
+      foreach ($PermArray as $PermRow)
+      {
+        $V .= "<tr>";
+        $V .= "<td>";  // group
+        $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&permupk={$PermRow['perm_upload_pk']}&group=";
+        $onchange = "onchange=\"js_url(this.value, '$url')\"";
+        $V .= Array2SingleSelect($GroupArray, "groupselect", $PermRow['group_pk'], false, false, $onchange);
+        $V .= "</td>";
+        $V .= "<td>";  // permission
+        $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&permupk={$PermRow['perm_upload_pk']}&perm=";
+        $onchange = "onchange=\"js_url(this.value, '$url')\"";
+        $V .= Array2SingleSelect($PERM_NAMES, "permselect", $PermRow['perm'], false, false, $onchange);
+        $V .= "</td>";
+        $V .= "</tr>";
+      }
+      /* Print one extra row for adding perms */
       $V .= "<tr>";
       $V .= "<td>";  // group
-      $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&permupk={$PermRow['perm_upload_pk']}&group=";
+      $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&newperm=$newperm&newgroup=";
       $onchange = "onchange=\"js_url(this.value, '$url')\"";
-      $V .= Array2SingleSelect($GroupArray, "groupselect", $PermRow['group_pk'], false, false, $onchange);
+      $Selected = (empty($newgroup)) ? "" : $newgroup;
+      $V .= Array2SingleSelect($GroupArray, "groupselectnew", $Selected, true, false, $onchange);
       $V .= "</td>";
       $V .= "<td>";  // permission
-      $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&permupk={$PermRow['perm_upload_pk']}&perm=";
+      $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&newgroup=$newgroup&newperm=";
       $onchange = "onchange=\"js_url(this.value, '$url')\"";
-      $V .= Array2SingleSelect($PERM_NAMES, "permselect", $PermRow['perm'], false, false, $onchange);
+      $Selected = (empty($newperm)) ? "" : $newperm;
+      $V .= Array2SingleSelect($PERM_NAMES, "permselectnew", $Selected, false, false, $onchange);
       $V .= "</td>";
       $V .= "</tr>";
+  
+      $V .= "</table>";
+  
+      $text = _("All upload permissions take place immediatly when a value is changed.  There is no submit button.");
+      $V .= "<p>" . $text;
+      $text = _("Add new groups on the last line.");
+      $V .= "<br>" . $text;
     }
-    /* Print one extra row for adding perms */
-    $V .= "<tr>";
-    $V .= "<td>";  // group
-    $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&newperm={$PermRow['perm_upload_pk']}&newgroup=";
-    $onchange = "onchange=\"js_url(this.value, '$url')\"";
-    $V .= Array2SingleSelect($GroupArray, "groupselectnew", "None", true, true, $onchange);
-    $V .= "</td>";
-    $V .= "<td>";  // permission
-    $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&newgroup={$PermRow['group_pk']}&newperm=";
-    $onchange = "onchange=\"js_url(this.value, '$url')\"";
-    $V .= Array2SingleSelect($PERM_NAMES, "permselectnew", "", true, false, $onchange);
-    $V .= "</td>";
-    $V .= "</tr>";
-
-    $V .= "</table>";
-
-    $text = _("All upload permissions take place immediatly when a value is changed.  There is no submit button.");
-    $V .= "<p>" . $text;
-    $text = _("Add new groups on the last line.");
-    $V .= "<br>" . $text;
-/*
-    $text = _("Submit");
-    $V.= "<p><input type='submit' value='$text!'>\n";
-    $V.= "</form>\n";
-*/
+    else
+    {
+      $text = _("You have no permission to change permissions on any upload in this folder.");
+      $V .= "<p>$text<p>";
+    }
 
     if (!$this->OutputToStdout) return ($V);
     print ("$V");
