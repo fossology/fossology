@@ -37,14 +37,15 @@ function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "",
 $FirstEmpty=false, $SelElt=true, $Options="")
 {
   $str ="\n<select name='$SLName' $Options>\n";
-  if ($FirstEmpty) $str .= "<option value='' > \n";
+  if ($FirstEmpty == true) $str .= "<option value='' > </option>\n";
+
   foreach ($KeyValArray as $key => $val)
   {
     if ($SelElt == true)
     $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
     else
     $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
-    $str .= "<option value='$key' $SELECTED>$val\n";
+    $str .= "<option value='$key' $SELECTED>$val</option>\n";
   }
   $str .= "</select>";
   return $str;
