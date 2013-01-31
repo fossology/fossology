@@ -371,7 +371,7 @@ void DeleteUpload (long UploadId)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
   PQclear(result);
  
-  /* Delete uploadtree_nnn table */
+  /* Delete uploadtree_nnn table */ 
   char uploadtree_tablename[1024];
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT uploadtree_tablename FROM upload WHERE upload_pk = %ld;",UploadId);
@@ -390,6 +390,15 @@ void DeleteUpload (long UploadId)
       PQclear(result);
     }
   }
+  
+  /* Blow away jobs as job table can't cascade delete */
+  memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("# Deleting job\n"); }
+  snprintf(SQL,sizeof(SQL),"DELETE FROM job WHERE job_upload_fk = %ld;",UploadId);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  PQclear(result);
+
 
   memset(SQL,'\0',sizeof(SQL));
   if (Verbose) { printf("# Deleting upload\n"); }
