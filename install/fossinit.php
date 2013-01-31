@@ -136,8 +136,10 @@ if ($UpdateLiceneseRef)
 
 /* migration */
 global $LIBEXECDIR;
+require_once("$LIBEXECDIR/dbmigrate_2.0-2.1.php");  // this is needed for all new installs from 2.0 on
 require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
 print "Migrate data from 2.1 to 2.2 in $LIBEXECDIR\n";
+Migrate_20_21($Verbose);
 Migrate_21_22($Verbose);
 
 exit(0);
