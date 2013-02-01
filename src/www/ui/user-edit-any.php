@@ -55,6 +55,8 @@ class user_edit_any extends FO_Plugin {
     $Block = GetParm("block", PARM_INTEGER);
     $Blank = GetParm("blank", PARM_INTEGER);
     $default_bucketpool_fk = GetParm("default_bucketpool_fk", PARM_INTEGER);
+    $new_upload_group_fk = GetParm('new_upload_group_fk', PARM_INTEGER);
+    $new_upload_perm = GetParm('new_upload_perm', PARM_INTEGER);
     if (!empty($Email_notify)) {
     }
     /* Make sure username looks valid */
@@ -217,6 +219,24 @@ class user_edit_any extends FO_Plugin {
       pg_free_result($result);
     }
 
+    /**** new upload group  ****/
+    if ($new_upload_group_fk != $R['new_upload_group_fk']) {
+      if ($new_upload_group_fk == 0) $new_upload_group_fk='NULL';
+      $sql = "UPDATE users SET new_upload_group_fk = $new_upload_group_fk WHERE user_pk = '$UserId'";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+    }
+
+    /**** new upload perm  ****/
+    if ($new_upload_perm != $R['new_upload_perm']) {
+      if ($new_upload_perm == 0) $new_upload_perm='NULL';
+      $sql = "UPDATE users SET new_upload_perm = $new_upload_perm WHERE user_pk = '$UserId'";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+    }
+
     return (NULL);
   } // Edit()
 
@@ -229,6 +249,8 @@ class user_edit_any extends FO_Plugin {
     }
 
     global $PG_CONN;
+    global $PERM_NAMES;
+
     $V = "";
 
     switch($this->OutputType) {
@@ -256,7 +278,8 @@ class user_edit_any extends FO_Plugin {
         /* Get the list of users */
         $sql = "SELECT user_pk,user_name,user_desc,user_pass,
                                 root_folder_fk,user_perm,user_email,email_notify,
-                                user_agent_list,default_bucketpool_fk,ui_preference FROM users WHERE
+                                user_agent_list,default_bucketpool_fk,ui_preference,
+                                new_upload_group_fk, new_upload_perm FROM users WHERE
                                 user_pk != '" . @$_SESSION['UserId'] . "' ORDER BY user_name;";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -277,6 +300,8 @@ class user_edit_any extends FO_Plugin {
         $V.= "var Userblock = new Array();\n";
         $V.= "var Userfolder = new Array();\n";
         $V.= "var default_bucketpool_fk = new Array();\n";
+        $V.= "var new_upload_group_fk = new Array();\n";
+        $V.= "var new_upload_perm = new Array();\n";
         $V.= "var UiPref = new Array();\n";
         pg_result_seek($result, 0);
         while ($row = pg_fetch_assoc($result))
@@ -296,6 +321,8 @@ class user_edit_any extends FO_Plugin {
           $V.= "Useragents[" . $Id . '] = "' . $R['user_agent_list'] . "\";\n";
           $V.= "Userfolder[" . $Id . '] = "' . $R['root_folder_fk'] . "\";\n";
           $V.= "default_bucketpool_fk[" . $Id . '] = "' . $R['default_bucketpool_fk'] . "\";\n";
+          $V.= "new_upload_group_fk[" . $Id . '] = "' . $R['new_upload_group_fk'] . "\";\n";
+          $V.= "new_upload_perm[" . $Id . '] = "' . $R['new_upload_perm'] . "\";\n";
           $V.= "Userperm[" . $Id . '] = "' . $R['user_perm'] . "\";\n";
           if (substr($R['user_pass'], 0, 1) == ' ') {
             $Block = 1;
@@ -372,6 +399,8 @@ class user_edit_any extends FO_Plugin {
                   document.userEditAny.permission.value = Userperm[id];
                   document.userEditAny.folder.value = Userfolder[id];
                   document.userEditAny.default_bucketpool_fk.value = default_bucketpool_fk[id];
+                  document.userEditAny.new_upload_group_fk.value = new_upload_group_fk[id];
+                  document.userEditAny.new_upload_perm.value = new_upload_perm[id];
                   if (Userblock[id] == 1) { document.userEditAny.block.checked=true; }
                   else { document.userEditAny.block.checked=false; }
                   if (Userenote[id] == \"\") { document.userEditAny.enote.checked=false; }
@@ -510,6 +539,33 @@ class user_edit_any extends FO_Plugin {
         $V.= SelectBucketPool($Val);
         $V.= "</td>\n";
         $V.= "</tr>\n";
+
+        /******  New Upload Group ******/
+        /* Get master array of groups */
+        $sql = "select group_pk, group_name from groups order by group_name";
+        $groupresult = pg_query($PG_CONN, $sql);
+        DBCheckResult($groupresult, $sql, __FILE__, __LINE__);
+        $GroupArray = array();
+        while ($GroupRow = pg_fetch_assoc($groupresult))
+          $GroupArray[$GroupRow['group_pk']] = $GroupRow['group_name'];
+        pg_free_result($groupresult);
+        $text = _("New Upload Group<br>(Group to give a new upload permission to access)");
+        $V.= "$Style<th>$text</th>";
+        $V.= "<td>";
+        $V .= Array2SingleSelect($GroupArray, "new_upload_group_fk", $R['new_upload_group_fk'], true, false);
+        $V.= "</td>";
+        $V .= "</tr>\n";
+
+        /******  New Upload Permissions ******/
+        $text = _("New Upload Permission<br>(Permission to give a new upload group)");
+        $V.= "$Style<th>$text</th>";
+        $V.= "<td>";
+        $Selected = (empty($R['new_upload_perm'])) ? -1 : $R['new_upload_perm'];
+        $V .= Array2SingleSelect($PERM_NAMES, "new_upload_perm", $Selected, true, false);
+        $V.= "</td>";
+        $V .= "</tr>\n";
+
+
         $text = _("User Interface Options");
         $text1 = _("Use the simplified UI (Default)");
         $text2 = _("Use the original UI");

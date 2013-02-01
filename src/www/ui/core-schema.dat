@@ -1836,6 +1836,16 @@
   $Schema["TABLE"]["users"]["ui_preference"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"ui_preference\" DROP NOT NULL, ALTER COLUMN \"ui_preference\" SET DEFAULT 'simple'::character varying;";
   $Schema["TABLE"]["users"]["ui_preference"]["UPDATE"] = "UPDATE users SET ui_preference='simple'::character varying";
 
+  $Schema["TABLE"]["users"]["new_upload_group_fk"]["DESC"] = "COMMENT ON COLUMN \"users\".\"new_upload_group_fk\" IS 'group given new_upload_perm on new uploads';";
+  $Schema["TABLE"]["users"]["new_upload_group_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"new_upload_group_fk\" int4;";
+  $Schema["TABLE"]["users"]["new_upload_group_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"new_upload_group_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["users"]["new_upload_group_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["users"]["new_upload_perm"]["DESC"] = "COMMENT ON COLUMN \"users\".\"new_upload_perm\" IS 'permission given to new_upload_group on new uploads';";
+  $Schema["TABLE"]["users"]["new_upload_perm"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"new_upload_perm\" int4;";
+  $Schema["TABLE"]["users"]["new_upload_perm"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"new_upload_perm\" DROP NOT NULL;";
+  $Schema["TABLE"]["users"]["new_upload_perm"]["UPDATE"] = "";
+
 
 
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
@@ -1976,6 +1986,7 @@
   $Schema["CONSTRAINT"]["only_one_licterm_map"] = "ALTER TABLE \"licterm_map\" ADD CONSTRAINT \"only_one_licterm_map\" UNIQUE (\"licterm_fk\",\"licterm_words_fk\");";
   $Schema["CONSTRAINT"]["only_one_licterm_maplic"] = "ALTER TABLE \"licterm_maplic\" ADD CONSTRAINT \"only_one_licterm_maplic\" UNIQUE (\"licterm_fk\",\"lic_fk\");";
   $Schema["CONSTRAINT"]["only_one_licterm_name"] = "ALTER TABLE \"licterm_name\" ADD CONSTRAINT \"only_one_licterm_name\" UNIQUE (\"licterm_fk\",\"agent_lic_meta_fk\");";
+  $Schema["CONSTRAINT"]["perm_upload_upload_fk_group_fk_key"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_upload_fk_group_fk_key\" UNIQUE (\"upload_fk\",\"group_fk\");";
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_key"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
   $Schema["CONSTRAINT"]["report_cache_report_cache_key_key"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_report_cache_key_key\" UNIQUE (\"report_cache_key\");";
   $Schema["CONSTRAINT"]["rf_md5unique"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_md5unique\" UNIQUE (\"rf_md5\");";
@@ -2031,6 +2042,7 @@
   $Schema["CONSTRAINT"]["tags_uploadtree_tag_fk_fkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_tag_fk_fkey\" FOREIGN KEY (\"tag_fk\") REFERENCES \"tag\" (\"tag_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["users_default_bucketpool_pk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_default_bucketpool_pk_fkey\" FOREIGN KEY (\"default_bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["users_new_upload_group_fk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_new_upload_group_fk_fkey\" FOREIGN KEY (\"new_upload_group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE RESTRICT;";
 
   $Schema["INDEX"]["agent_lic_meta"]["lic_fk_btree"] = "CREATE INDEX lic_fk_btree ON agent_lic_meta USING btree (lic_fk);";
   $Schema["INDEX"]["agent_lic_meta"]["pfile_fk_idx"] = "CREATE INDEX pfile_fk_idx ON agent_lic_meta USING btree (pfile_fk);";

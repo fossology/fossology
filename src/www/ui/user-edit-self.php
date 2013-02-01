@@ -103,6 +103,8 @@ class user_edit_self extends FO_Plugin
     $Email_notify = GetParm('emailnotify', PARM_TEXT);
     $agentList = userAgents();
     $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
+    $new_upload_group_fk = GetParm('new_upload_group_fk', PARM_INTEGER);
+    $new_upload_perm = GetParm('new_upload_perm', PARM_INTEGER);
     $uiChoice = GetParm('whichui', PARM_TEXT);
 
     /* Make sure username looks valid */
@@ -224,6 +226,28 @@ class user_edit_self extends FO_Plugin
       $GotUpdate = 1;
     }
 
+    if ($new_upload_group_fk != $R['new_upload_group_fk'])
+    {
+      if ($new_upload_group_fk == 0) $new_upload_group_fk='NULL';
+      if ($GotUpdate)
+      {
+        $SQL.= ", ";
+      }
+      $SQL.= " new_upload_group_fk = $new_upload_group_fk";
+      $GotUpdate = 1;
+    }
+
+    if ($new_upload_perm != $R['new_upload_perm'])
+    {
+      if ($new_upload_perm == 0) $new_upload_perm='NULL';
+      if ($GotUpdate)
+      {
+        $SQL.= ", ";
+      }
+      $SQL.= " new_upload_perm = $new_upload_perm";
+      $GotUpdate = 1;
+    }
+
     if ($uiChoice != $R['ui_preference'])
     {
       if ($GotUpdate)
@@ -266,6 +290,8 @@ class user_edit_self extends FO_Plugin
       return;
     }
     global $PG_CONN;
+    global $PERM_NAMES;
+
     $V = "";
     switch ($this->OutputType)
     {
@@ -309,40 +335,41 @@ class user_edit_self extends FO_Plugin
         $V.= _("To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n");
         $Style = "<tr><td colspan=2 style='background:black;'></td></tr><tr>";
         $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
+
         $Val = htmlentities($R['user_name'], ENT_QUOTES);
         $text = _("Username");
         $V.= "$Style<th width='25%'>$text</th>";
         $V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
         $V.= "</tr>\n";
+
         $Val = htmlentities($R['user_desc'], ENT_QUOTES);
         $text = _("Description, full name, contact, etc. (optional) ");
         $V.= "$Style<th>$text</th>\n";
         $V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
         $V.= "</tr>\n";
+
         $Val = htmlentities($R['user_email'], ENT_QUOTES);
         $text = _("Email address (optional)");
         $V.= "$Style<th>$text</th>\n";
         $V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
         $V.= "</tr>\n";
+
         $text = _("Password");
         $text1 = _("Re-enter password");
         $V.= "$Style<th>$text<br>$text1</th><td>";
         $V.= "<input type='password' name='pass1' size=20><br />\n";
         $V.= "<input type='password' name='pass2' size=20></td>\n";
         $V.= "</tr>\n";
+
         if (empty($R['email_notify']))
-        {
           $Checked = "";
-        }
         else
-        {
           $Checked = "checked='checked'";
-        }
         $text = _("E-mail Notification");
         $V .= "$Style<th>$text</th><td>\n";
         $V .= "<input name='emailnotify' type='checkbox' $Checked>";
         $V.= "</tr>\n";
-        $V.= "</tr>\n";
+
         $text = _("Default scans");
         $V .= "$Style<th>$text\n</th><td>\n";
         /*
@@ -369,12 +396,38 @@ class user_edit_self extends FO_Plugin
             $V.= AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest", "wget_agent"));
           }
         }
-        $V .= "</td>\n";
+        $V .= "</td></tr>\n";
+
         $text = _("Default bucketpool");
         $V.= "$Style<th>$text</th>";
         $V.= "<td>";
         $Val = htmlentities($R['default_bucketpool_fk'], ENT_QUOTES);
         $V.= SelectBucketPool($Val);
+        $V.= "</td>";
+        $V .= "</tr>\n";
+
+        /******  New Upload Group ******/
+        /* Get master array of groups */
+        $sql = "select group_pk, group_name from groups order by group_name";
+        $groupresult = pg_query($PG_CONN, $sql);
+        DBCheckResult($groupresult, $sql, __FILE__, __LINE__);
+        $GroupArray = array();
+        while ($GroupRow = pg_fetch_assoc($groupresult))
+          $GroupArray[$GroupRow['group_pk']] = $GroupRow['group_name'];
+        pg_free_result($groupresult);
+        $text = _("New Upload Group<br>(Group to give a new upload permission to access)");
+        $V.= "$Style<th>$text</th>";
+        $V.= "<td>";
+        $V .= Array2SingleSelect($GroupArray, "new_upload_group_fk", $R['new_upload_group_fk'], true, false);
+        $V.= "</td>";
+        $V .= "</tr>\n";
+
+        /******  New Upload Permissions ******/
+        $text = _("New Upload Permission<br>(Permission to give a new upload group)");
+        $V.= "$Style<th>$text</th>";
+        $V.= "<td>";
+        $Selected = (empty($R['new_upload_perm'])) ? -1 : $R['new_upload_perm'];
+        $V .= Array2SingleSelect($PERM_NAMES, "new_upload_perm", $Selected, true, false);
         $V.= "</td>";
         $V .= "</tr>\n";
 
