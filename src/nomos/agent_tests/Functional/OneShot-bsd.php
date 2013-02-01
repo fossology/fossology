@@ -42,7 +42,7 @@ class OneShotbsdTest extends PHPUnit_Framework_TestCase
     /* check to see if the file exists */
     $this->bsd = '../../../testing/dataFiles/TestData/licenses/BSD_style_d.txt';
     $this->assertFileExists($this->bsd,"OneShotbsdTest FAILURE! $this->bsd not found\n");
-    $bsdlic = "BSD-style";
+    $bsdlic = "BSD-3-Clause";
     $last = exec("$this->nomos $this->bsd 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
     $this->assertEquals($fname, 'BSD_style_d.txt', "Error filename $fname does not equal BSD_style_d.txt");
