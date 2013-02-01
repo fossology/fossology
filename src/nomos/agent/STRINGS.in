@@ -7351,7 +7351,7 @@ k
 #
 %ENTRY%	_TITLE_ZOPE
 %KEY%	"licen[cs]"
-%STR%	"(zope public licen[cs]e|ZPL)"
+%STR%	"(zope public licen[cs]e|\<ZPL\>)"
 #
 %ENTRY%	_MISC_DEBDATA
 %KEY%	=NULL=

@@ -93,7 +93,8 @@
 #define _fRUBY          41
 #define _fSAX           42
 #define _fAPL           43
-#define _msize          _fAPL+1
+#define _fARTISTIC      44
+#define _msize          _fARTISTIC+1
 //@}
 
 static struct {
@@ -3341,6 +3342,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       }
       else {
         INTERESTING("Artistic-1.0");
+        lmem[_fARTISTIC] = 1;
       }
     }
   }
@@ -4157,7 +4159,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_TITLE_LUCENT10)) {
       INTERESTING("LPL-1.0");
     }
-    else {
+    else if (!INFILE(_LT_CA)) {
       cp = CPLVERS();
       INTERESTING(lDebug ? "CPL(#1)" : cp);
     }
@@ -5507,7 +5509,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 
   /* Check for Public Domain */
   if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON] && !lmem[_mGFDL] &&
-      !lmem[_fODBL] && !lmem[_fPDDL] && !lmem[_fRUBY] && !lmem[_fSAX] && !lmem[_fAPL]) {
+      !lmem[_fODBL] && !lmem[_fPDDL] && !lmem[_fRUBY] && !lmem[_fSAX] && !lmem[_fAPL] &&!lmem[_mAPACHE] &&
+      !lmem[_fARTISTIC]) {
     pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
   }
 
