@@ -54,10 +54,12 @@
  * \param $folder_pk   The folder to contain this upload
  *
  * \return upload_pk or null (failure)
+ *         On failure, error is written to stdout
  */
 function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folder_pk) 
 {
   global $PG_CONN;
+  global $SysConf;
 
   /* check all required inputs */
   if (empty($user_pk) or empty($job_name) or empty($filename) or 
@@ -84,6 +86,46 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
+
+  /* Add user permission to perm_upload */
+  /* First look up user's group_pk */
+  $UserName = $_SESSION['User'];
+  $GroupRow = GetSingleRec("Groups", "where group_name='$UserName'");
+  if (empty($GroupRow))
+  {
+    $text = _("Error!");
+    $text1 = _("Group");
+    $text2 = _("is missing!");
+    echo "$text $text1 $UserName $text2<br>";
+    return NULL;
+  }
+  $group_pk = $GroupRow['group_pk'];
+  $user_pk = $SysConf['auth']['UserId'];
+  $perm_admin = PERM_ADMIN;
+  $sql = "INSERT INTO perm_upload (perm, upload_fk, group_fk) 
+               VALUES ($perm_admin, $upload_pk, $group_pk)";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+
+  /* Now add any user new_upload_group_fk/new_upload_perm to perm_upload */
+  $usersRow = GetSingleRec("users", "where user_name='$UserName'");
+  if (empty($usersRow))
+  {
+    $text1 = _("User");
+    echo "$text $text1 $UserName $text2<br>";
+    return NULL;
+  }
+  $new_upload_group_fk = $usersRow['new_upload_group_fk'];
+  $new_upload_perm = $usersRow['new_upload_perm'];
+  if (!empty($new_upload_group_fk) and !empty($new_upload_perm))
+  {
+    $sql = "INSERT INTO perm_upload (perm, upload_fk, group_fk) 
+               VALUES ($new_upload_perm, $upload_pk, $new_upload_group_fk)";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+  }
 
   return ($upload_pk);
 } // JobAddUpload()
