@@ -95,6 +95,8 @@ class showjobs extends FO_Plugin
     $Row = pg_fetch_assoc($result);
     pg_free_result($result);
 
+if (!empty($Row["job_upload_fk"]))
+{
     /* get the upload filename */
     $uploadsql = "select upload_filename, upload_desc from upload where upload_pk='$Row[job_upload_fk]'";
     $uploadresult = pg_query($PG_CONN, $uploadsql);
@@ -121,7 +123,7 @@ class showjobs extends FO_Plugin
     $uploadtreeRec = GetSingleRec("uploadtree", 
                                   "where parent is NULL and upload_fk='$Row[job_upload_fk]'");
     $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
-
+}
     $V .= "<h3>" . _("Geeky Scan Details") . "</h3>";
 
     $V .= "<table class='text' border=1 name='jobtable1'>\n";
@@ -254,6 +256,29 @@ class showjobs extends FO_Plugin
     return $JobArray;
   }  /* MyJobs() */
 
+  /**
+   * @brief Find all of my deleted jobs submitted within the last n hours.
+   *
+   * @param $nhours Number of hours that the job report spans
+   *
+   * @return array of job_pk's
+   **/
+  function GetDeletedJobs($upload_pk)
+  {
+    global $PG_CONN;
+
+    $DeletedJobArray = array();
+    if (empty($upload_pk))
+      $sql = "select job.*, D.job_pk AS deleted_job_pk from job, (select job_pk,job_upload_fk from job where job_name = 'Delete') D where job_user_fk='$_SESSION[UserId]' and job_queued >= (now() - interval '$this->nhours hours') and job.job_upload_fk=D.job_upload_fk and job_name != 'Delete' order by job_queued desc";
+    else
+      $sql = "select job.*, D.job_pk AS deleted_job_pk from job, (select job_pk,job_upload_fk from job where job_name = 'Delete') D where job.job_upload_fk = '$upload_pk' and job.job_upload_fk=D.job_upload_fk and job_name != 'Delete' order by job_queued desc";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    while($Row = pg_fetch_assoc($result)) $DeletedJobArray[] = $Row;
+    pg_free_result($result);
+
+    return $DeletedJobArray;
+  }  /* GetDeletedJobs() */
 
   /**
    * @brief Get job queue data from db.
@@ -281,37 +306,38 @@ class showjobs extends FO_Plugin
    *    JobQueue ['jq_end_bits'] = jq_end_bits
    * \endcode
    **/
-  function GetJobInfo($job_pks, $Page=0)
+  function GetJobInfo($job_pks, $DeletedJobs, $Page=0)
   {
     global $PG_CONN;
 
     /* Output data array */
     $JobData = array();
-
     foreach($job_pks as $job_pk)
     {
       /* Get job table data */
       $JobRec = GetSingleRec("job", "where job_pk='$job_pk'");
-
       /* If unpack failed, the upload_pk may be missing.  If so, ignore. */
-      if (empty($JobRec["job_upload_fk"])) continue;
-
-      $JobData[$job_pk]["job"] = $JobRec;
-      $upload_pk = $JobRec["job_upload_fk"];
-
-      /* Get Upload record for job */
-      $UploadRec = GetSingleRec("upload", "where upload_pk='$upload_pk'");
-      if (!empty($UploadRec))
-        $JobData[$job_pk]["upload"] = $UploadRec;
+      if (!empty($JobRec["job_upload_fk"]) || (preg_match("/Delete Folder/", $JobRec["job_name"]) != 0))
+        $JobData[$job_pk]["job"] = $JobRec;
       else
-      {
-        unset($JobData[$job_pk]);
         continue;
-      }
-      /* Get Upload record for uploadtree */
-      $UploadtreeRec = GetSingleRec("uploadtree", "where upload_fk='$upload_pk' and parent is null");
-      $JobData[$job_pk]["uploadtree"] = $UploadtreeRec;
+      if (!empty($JobRec["job_upload_fk"]))
+      {
+        $upload_pk = $JobRec["job_upload_fk"];
 
+        /* Get Upload record for job */
+        $UploadRec = GetSingleRec("upload", "where upload_pk='$upload_pk'");
+        if (!empty($UploadRec))
+          $JobData[$job_pk]["upload"] = $UploadRec;
+        else
+        {
+          unset($JobData[$job_pk]);
+          continue;
+        }
+        /* Get Upload record for uploadtree */
+        $UploadtreeRec = GetSingleRec("uploadtree", "where upload_fk='$upload_pk' and parent is null");
+        $JobData[$job_pk]["uploadtree"] = $UploadtreeRec;
+      }
       /* Get jobqueue table data */
       $sql = "select * from jobqueue where jq_job_fk='$job_pk' order by jq_pk asc";
       $result = pg_query($PG_CONN, $sql);
@@ -337,6 +363,58 @@ class showjobs extends FO_Plugin
       }
       else
         unset($JobData[$job_pk]);
+      pg_free_result($result);
+    }
+
+    /* Show Deleted Jobs */
+    foreach($DeletedJobs as $JobRec)
+    {
+      $job_pk = $JobRec["job_pk"];
+      $deleted_job_pk = $JobRec["deleted_job_pk"];
+      $JobData[$job_pk]["job"] = $JobRec;
+      $upload_pk = $JobRec["job_upload_fk"];
+      $DeletedUploadRec = array();
+      $DeletedUploadRec["upload_pk"] = $upload_pk;
+      $DeletedUploadRec["upload_filename"] = "Deleted Upload " . $upload_pk . "(" . $JobRec["job_name"] . ")";
+      $DeletedUploadRec["upload_desc"] = $DeletedUploadRec["upload_name"];
+  
+      $JobData[$job_pk]["upload"] = $DeletedUploadRec;
+      /* Get jobqueue table data */
+      $sql = "select * from jobqueue where jq_job_fk='$job_pk' order by jq_pk asc";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result))
+      {
+        $Rows = pg_fetch_all($result);
+        foreach($Rows as $JobQueueRec)
+        {
+          $jq_pk = $JobQueueRec["jq_pk"];
+          /* Get dependencies */
+          $DepArray = array();
+          $sql = "select jdep_jq_depends_fk from jobdepends where jdep_jq_fk='$jq_pk' order by jdep_jq_depends_fk asc";
+          $DepResult = pg_query($PG_CONN, $sql);
+          DBCheckResult($DepResult, $sql, __FILE__, __LINE__);
+          while ($DepRow = pg_fetch_assoc($DepResult)) $DepArray[] = $DepRow["jdep_jq_depends_fk"];
+          $JobQueueRec["depends"] = $DepArray;
+          pg_free_result($DepResult);
+
+          $JobData[$job_pk]['jobqueue'][$jq_pk] = $JobQueueRec;
+        }
+      }
+      pg_free_result($result);
+      /* Get delagent jobqueue data */
+      $sql = "select * from jobqueue where jq_job_fk='$deleted_job_pk' order by jq_pk asc";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result))
+      {
+        $Rows = pg_fetch_all($result);
+        foreach($Rows as $JobQueueRec)
+        {
+          $jq_pk = $JobQueueRec["jq_pk"];
+          $JobData[$job_pk]['jobqueue'][$jq_pk] = $JobQueueRec;
+        }
+      }
       pg_free_result($result);
     }
     return $JobData;
@@ -415,6 +493,19 @@ class showjobs extends FO_Plugin
       }
       else  if ($JobNumber < $FirstJob) continue;
 
+      /* Show Delete folder Job data */
+      if (empty($upload_pk))
+      {
+        /* blank line separator between pfiles */
+        $OutBuf .= "<tr><td colspan=7> <hr> </td></tr>";
+        $OutBuf .= "<tr>";
+        $OutBuf .= "<th $uploadStyle></th>";
+        $OutBuf .= "<th colspan=4 $uploadStyle>";
+        $OutBuf .= $Job["job"]["job_name"];
+        $OutBuf .= "</th>";
+        $OutBuf .= "<th $uploadStyle></th>";
+        $OutBuf .= "</tr>";
+      }
       /* Job data */
       $OutBuf .= "<tr>";
       $OutBuf .= "<th $jobStyle>";
@@ -669,13 +760,14 @@ class showjobs extends FO_Plugin
           {
             $upload_pks = array($UploadPk);
             $Jobs = $this->Uploads2Jobs($upload_pks, $Page);
+            $DeletedJobs = $this->GetDeletedJobs($UploadPk);
           }
           else
           {
             $Jobs = $this->MyJobs($this->nhours);
+            $DeletedJobs = $this->GetDeletedJobs();
           } 
-          $JobsInfo = $this->GetJobInfo($Jobs,  $Page);
-
+          $JobsInfo = $this->GetJobInfo($Jobs,$DeletedJobs,  $Page);
           /* Group Jobs by upload_pk within $JobsInfo */
           usort($JobsInfo, "CompareJobsInfo");
 
