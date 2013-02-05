@@ -40,20 +40,40 @@ function Migrate_21_22()
 {
   global $PG_CONN;
 
-/* NO - use Default User for Public
-  // Before adding all the user groups, add the special group "Public" 
-  $sql = "select group_pk from groups where group_name='Public'";
-  $GroupResult = pg_query($PG_CONN, $sql);
-  DBCheckResult($GroupResult, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($GroupResult) == 0)
+  // Before adding all the user groups, make sure there is a "Default User" user
+  $user_name = "Default User";
+  $sql = "select user_pk from users where user_name='$user_name'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) == 0)
   {
-    // No group with name Public, so create one
-    $sql = "insert into groups(group_name) values ('Public')";
+    // No Default User, so create one
+    $Perm = PLUGIN_DB_NONE;
+    $sql = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
+        VALUES ($user_name,'Default User when nobody is logged in','Seed','Pass',$Perm,NULL,1);";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
   }
-  pg_free_result($GroupResult);
-*/
+  pg_free_result($result);
+
+  // Before adding all the user groups, make sure there is a "fossy" user
+  $user_name = "fossy";
+  $sql = "select user_pk from users where user_name='$user_name'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) == 0)
+  {
+    // No Default User, so create one
+    $Perm = PLUGIN_DB_ADMIN;
+    $Seed = rand() . rand();
+    $Hash = sha1($Seed . $user_name);
+    $sql = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
+        VALUES ($user_name,'Default Administrator','$Seed','$Hash',$user_name,'y',1);";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+  }
+  pg_free_result($result);
+
 
   $sql = "select user_pk, user_name, root_folder_fk from users";
   $UserResult = pg_query($PG_CONN, $sql);
