@@ -596,7 +596,11 @@ class ui_view_info extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) { return; }
 
     $Folder = GetParm("folder",PARM_INTEGER);
+
     $Upload = GetParm("upload",PARM_INTEGER);
+    $UploadPerm = GetUploadPerm($Upload);
+    if ($UploadPerm < PERM_READ) return;
+
     $Item = GetParm("item",PARM_INTEGER);
 
     $V="";

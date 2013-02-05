@@ -41,7 +41,7 @@ class showjobs extends FO_Plugin
   var $Dependency = array("browse");
   var $DBaccess   = PLUGIN_DB_WRITE;
   var $MaxUploadsPerPage = 10;  /* max number of uploads to display on a page */
-  var $nhours = 336;  /* 336=24*14 What is considered a recent number of hours for "My Recent Jobs" */
+  var $nhours = 672;  /* 672=24*28 (4 weeks) What is considered a recent number of hours for "My Recent Jobs" */
 
   var $Colors=array(
 	"Queued" => "#FFFFCC",	// "white-ish",
@@ -247,10 +247,15 @@ if (!empty($Row["job_upload_fk"]))
 
     $JobArray = array();
 
-    $sql = "select job_pk from job where job_user_fk='$_SESSION[UserId]' and job_queued >= (now() - interval '$nhours hours') order by job_queued desc";
+    $sql = "select job_pk, job_upload_fk from job where job_user_fk='$_SESSION[UserId]' and job_queued >= (now() - interval '$nhours hours') order by job_queued desc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    while($Row = pg_fetch_assoc($result)) $JobArray[] = $Row['job_pk'];
+    while($Row = pg_fetch_assoc($result)) 
+    {
+      $UploadPerm = GetUploadPerm($Row['job_upload_fk']);
+      if ($UploadPerm < PERM_WRITE) continue;
+      $JobArray[] = $Row['job_pk'];
+    }
     pg_free_result($result);
 
     return $JobArray;
@@ -263,7 +268,7 @@ if (!empty($Row["job_upload_fk"]))
    *
    * @return array of job_pk's
    **/
-  function GetDeletedJobs($upload_pk)
+  function GetDeletedJobs($upload_pk= "")
   {
     global $PG_CONN;
 
@@ -705,7 +710,20 @@ if (!empty($Row["job_upload_fk"]))
     $V="";
     $Page = "";
     $UploadPk = GetParm('upload',PARM_INTEGER);
-    if (empty($UploadPk)) { $UploadPk = -1; }
+    if (empty($UploadPk)) 
+    { 
+      $UploadPk = -1; 
+    }
+    else
+    {
+      $UploadPerm = GetUploadPerm($UploadPk);
+      if ($UploadPerm < PERM_WRITE) 
+      {
+        $PermDenied = "<h2>Permission Denied</h2>";
+        echo $PermDenied;
+        return;
+      }
+    }
 
     switch($this->OutputType)
     {
@@ -718,6 +736,16 @@ if (!empty($Row["job_upload_fk"]))
           $jq_pk = GetParm("jobid",PARM_INTEGER);
           $Action = GetParm("action",PARM_STRING);
           $UploadPk = GetParm("upload",PARM_INTEGER);
+          if (!empty($UploadPk))
+          {
+            $UploadPerm = GetUploadPerm($UploadPk);
+            if ($UploadPerm < PERM_WRITE) 
+            {
+              $PermDenied = "</h2>Permission Denied</h2>";
+              echo $PermDenied;
+              return;
+            }
+          }
           $Page = GetParm('page',PARM_INTEGER);
           if (empty($Page)) $Page = 0;
           $jqtype = GetParm("jqtype",PARM_STRING);
@@ -762,7 +790,7 @@ if (!empty($Row["job_upload_fk"]))
             $Jobs = $this->Uploads2Jobs($upload_pks, $Page);
             $DeletedJobs = $this->GetDeletedJobs($UploadPk);
           }
-          else
+         else
           {
             $Jobs = $this->MyJobs($this->nhours);
             $DeletedJobs = $this->GetDeletedJobs();

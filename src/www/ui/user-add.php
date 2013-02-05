@@ -58,6 +58,8 @@ class user_add extends FO_Plugin {
     $Email = str_replace("'", "''", GetParm('email', PARM_TEXT));
     $agentList = userAgents();
     $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
+    $new_upload_group_fk = GetParm('new_upload_group_fk', PARM_INTEGER);
+    $new_upload_perm = GetParm('new_upload_perm', PARM_INTEGER);
     $uiChoice = GetParm('whichui', PARM_TEXT);
 
     /* debug
@@ -121,21 +123,25 @@ class user_add extends FO_Plugin {
     {
       $uiChoice = 'original';
     }
+
+    if (empty($new_upload_group_fk)) $new_upload_group_fk = 'NULL';
+    if (empty($new_upload_perm)) $new_upload_perm = 'NULL';
+
     if (empty($default_bucketpool_fk)) {
       $VALUES = " VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
       '$Email_notify','$agentList',$Folder, NULL,
-      '$uiChoice');";
+      '$uiChoice', $new_upload_group_fk, $new_upload_perm);";
     }
     else {
       $VALUES = " VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
                '$Email_notify','$agentList',$Folder, $default_bucketpool_fk,
-               '$uiChoice');";
+               '$uiChoice', $new_upload_group_fk, $new_upload_perm);";
     }
 
     $SQL = "INSERT INTO users
       (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
        email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk,
-       ui_preference)
+       ui_preference, new_upload_group_fk, new_upload_perm)
        $VALUES";
      //print "<pre>SQL is:\n$SQL\n</pre>";
 
@@ -152,13 +158,38 @@ class user_add extends FO_Plugin {
        $text = _("Failed to insert user.");
        return ($text);
      }
-     return (NULL);
+     else
+     {
+      $user_name = $row['user_name'];
+      $user_pk = $row['user_pk'];
+      // Add user group
+      $sql = "insert into groups(group_name) values ('$user_name')";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      /* Get new group_pk */
+      $sql = "select group_pk from groups where group_name='$user_name'";
+      $GroupResult = pg_query($PG_CONN, $sql);
+      DBCheckResult($GroupResult, $sql, __FILE__, __LINE__);
+      $GroupRow = pg_fetch_assoc($GroupResult);
+      $group_pk = $GroupRow['group_pk'];
+      pg_free_result($GroupResult);
+      // make user a member of their own group
+      $sql = "insert into group_user_member(group_fk, user_fk, group_perm) values($group_pk, $user_pk, 1)";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+    }
+
+    return (NULL);
   } // Add()
 
   /**
    * \brief Generate the text for this plugin.
    */
   function Output() {
+    global $PG_CONN;
+    global $PERM_NAMES;
+
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
@@ -246,14 +277,31 @@ class user_add extends FO_Plugin {
         $V.= SelectBucketPool($default_bucketpool_fk);
         $V.= "</td>";
         $V .= "</tr>\n";
-        $text = _("User Interface Options");
-        $text1 = _("Use the simplified UI (Default)");
-        $text2 = _("Use the original UI");
-        //$V .= "$Style<th>11.</th><th>$text</th><td><input type='radio'" .
-                "name='whichui' value='simple' checked='checked'>" .
-                "$text1<br><input type='radio'" .
-                "name='whichui' value='original'>" .
-                "$text2</td>\n";
+
+        /******  New Upload Group ******/
+        /* Get master array of groups */
+        $sql = "select group_pk, group_name from groups order by group_name";
+        $groupresult = pg_query($PG_CONN, $sql);
+        DBCheckResult($groupresult, $sql, __FILE__, __LINE__);
+        $GroupArray = array();
+        while ($GroupRow = pg_fetch_assoc($groupresult))
+          $GroupArray[$GroupRow['group_pk']] = $GroupRow['group_name'];
+        pg_free_result($groupresult);
+        $text = _("New Upload Group<br>(Group to give a new upload permission to access)");
+        $V.= "$Style<th>$text</th>";
+        $V.= "<td>";
+        $V .= Array2SingleSelect($GroupArray, "new_upload_group_fk", "", true, false);
+        $V.= "</td>";
+        $V .= "</tr>\n";
+
+        /******  New Upload Permissions ******/
+        $text = _("New Upload Permission<br>(Permission to give a new upload group)");
+        $V.= "$Style<th>$text</th>";
+        $V.= "<td>";
+        $V .= Array2SingleSelect($PERM_NAMES, "new_upload_perm", "", true, false);
+        $V.= "</td>";
+        $V .= "</tr>\n";
+
         $V.= "</table border=0><P />";
 
 

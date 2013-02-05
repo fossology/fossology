@@ -68,202 +68,6 @@
    }  /* GetUploadsFromFolder_recurse */
 
 
-  /***********************************************************
-   Function: GetFolderOwners()
-
-   Get owners of $folder_pk uploads
-
-   @param int $folder_pk 
-
-   @Return array of user_pks of the owners of the uploads
-           in this folder (and subfolders).
-   ***********************************************************/
-   function GetFolderOwners($folder_pk)
-   {
-     global $PG_CONN;
-
-     /* get all the upload_pk's for all the uploads in this
-      * folder and its subfolders.
-      */
-     $upload_pkArray = GetUploadsFromFolder($folder_pk);
-
-     /* no uploads */
-     if (empty($upload_pkArray)) return array();
-
-     /* get all the unique user_pks for these uploads */
-     $sql = "select distinct user_fk as user_pk from upload where (user_fk is not NULL) and (";
-     $uploadCount = 0;
-     foreach($upload_pkArray as $upload_pk)
-     {
-       if ($uploadCount++) $sql .= " or ";
-       $sql .= "(upload_pk=$upload_pk)";
-     }
-     $sql .= ")";
-     $result = pg_query($PG_CONN, $sql);
-     DBCheckResult($result, $sql, __FILE__, __LINE__);
-     $owner_pkArray = array();
-     while ($row = pg_fetch_assoc($result)) $owner_pkArray[] = $row["user_pk"];
-     pg_free_result($result);
-     return $owner_pkArray;
-   }  /* GetFolderOwners() */
-
-
-  /***********************************************************
-   Function: GetValidFolder()
-
-   @param int $RequestedFolder_pk Folder user is requesting.
-
-   @Return the folder to browse.  If the user has access to 
-           the requested folder, then return that.  If not,
-           or $RequestedFolder is empty, return the users
-           root folder.
-
-   If GlobalBrowse is true, anyone can browse any folder.
-   If GlobalBrowse is false, the user can only browse their folder.
-   If an illegal folder is requested, return the users root folder.
-  
-   NOTE: This implementation is a kludge until permissions are 
-         implemented on folders, uploads, and items.
-   NOTE: This function doesn't check if the $RequestedFolder exists.
-   ***********************************************************/
-  function GetValidFolder($RequestedFolder)
-  {
-    /* Nothing asked for?  Then return their root folder */
-    if (empty($RequestedFolder)) return GetUserRootFolder();
-
-    /* If there are no restrictions on browsing, then we are done */
-    if (IsRestrictedTo() === false) return $RequestedFolder;
-
-    /* Since there are restrictions, make sure the user has an upload in
-     * the requested folder.
-     */
-    $FolderOwnersArray = GetFolderOwners($RequestedFolder);
-    if (false === array_search($_SESSION['UserId'], $FolderOwnersArray))
-      return GetUserRootFolder();
-    return $RequestedFolder;
-  }  /* GetValidFolder() */
-
-
-  /***********************************************************
-   Function: HaveFolderPerm()
-
-   @param int $RequestedFolder_pk Folder user is requesting.
-
-   @Return true if the user has permission to browse this folder.
-                or $RequestedFolder is empty.
-           false if user does not hav permission to browse this folder.
-
-   NOTE: This implementation is a kludge until permissions are 
-         implemented on folders, uploads, and items.
-   ***********************************************************/
-  function HaveFolderPerm($RequestedFolder)
-  {
-    /* Nothing asked for?  Then permission granted. */
-    if (empty($RequestedFolder)) return true;
-
-    /* If there are no restrictions on browsing, then we are done */
-    if (IsRestrictedTo() === false) return true;
-
-    /* Since there are restrictions, make sure the user has an upload in
-     * the requested folder.
-     */
-    $FolderOwnersArray = GetFolderOwners($RequestedFolder);
-    if (false === array_search($_SESSION['UserId'], $FolderOwnersArray))
-      return false;
-    return true;
-  }  /* HaveFolderPerm() */
-
-
-  /***********************************************************
-   Function: HaveUploadPerm()
-
-   @param int $upload_pk
-   @Return true if user has permission to browse this upload
-                or $upload_pk is empty.
-   ***********************************************************/
-  function HaveUploadPerm($upload_pk)
-  {
-    global $PG_CONN;
-     
-    /* Nothing asked for?  Then return true */
-    if (empty($upload_pk)) return true;
-
-    /* If there are no restrictions on browsing, then we are done */
-    if (IsRestrictedTo() === false) return true;
-
-    /* upload is permission controlled so make sure the owner is the requestor */
-    $sql = "select user_fk from upload where upload_pk=$upload_pk and user_fk='$_SESSION[UserId]'";
-     $result = pg_query($PG_CONN, $sql);
-     DBCheckResult($result, $sql, __FILE__, __LINE__);
-     $found = pg_num_rows($result);
-     pg_free_result($result);
-     if ($found > 0) return true;
-     return false;
-  }  /* HaveUploadPerm() */
-
-
-  /***********************************************************
-   Function: HaveItemPerm()
-
-   @param int $uploadtree_pk
-   @Return true if user has permission to browse this item
-                or $uploadtree_pk is empty.
-   ***********************************************************/
-  function HaveItemPerm($uploadtree_pk)
-  {
-    global $PG_CONN;
-     
-    /* Nothing asked for?  Then return true */
-    if (empty($upload_pk)) return true;
-
-    /* If there are no restrictions on browsing, then we are done */
-    if (IsRestrictedTo() === false) return true;
-
-    /* upload is permission controlled so make sure the owner is the requestor 
-     * First find what upload this item came from.
-     */
-    $sql = "select upload_fk from uploadtree where uploadtree_pk=$uploadtree_pk";
-     $result = pg_query($PG_CONN, $sql);
-     DBCheckResult($result, $sql, __FILE__, __LINE__);
-     $row = pg_fetch_assoc($result);
-     pg_free_result($result);
-     return HaveUploadPerm($row["upload_fk"]);
-  }  /* HaveItemPerm() */
-
-
-  /***********************************************************
-   Function: IsRestrictedTo()
-
-   @Return If the user has browsing restricted, return their userId.
-           If not, return false, there are no browsing restrictions.
-
-   If GlobalBrowse is true, anyone can browse anything.
-   If GlobalBrowse is false, the user can only browse their folder, 
-                             uploads, items.
-  
-   NOTE: This implementation is a kludge until permissions are 
-         implemented on folders, uploads, and items.
-   ***********************************************************/
-  function IsRestrictedTo()
-  {
-    global $SysConf;
-
-    if ((strcasecmp(@$SysConf["SYSCONFIG"]["GlobalBrowse"],"true") == 0) 
-      or (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN)) return false;
-    return @$_SESSION['UserId'];
-  }
-
-
-  /**
-   *  @brief Get all users in a group
-   *  @param $group_pk
-   *  @return array of user_pk's and their permission (group_perm)
-   *  @todo currently this function is not implemented
-   **/
-  function GetUsersInGroup($group_pk)
-  {
-  }
-
   /**
    *  @brief Check if User is already in the $GroupArray.
    *  If not, add them.  If they are, update their record with the
@@ -371,12 +175,17 @@
   /**
    *  @brief Get the upload permission for a user
    *  @param $upload_pk
-   *  @param $user_pk
+   *  @param $user_pk (optional, default is current user_pk)
    *  @return hightest permission level a user has for an upload
    **/
-  function GetUploadPerm($upload_pk, $user_pk)
+  function GetUploadPerm($upload_pk, $user_pk=0)
   {
     global $PG_CONN;
+    global $SysConf;
+
+    if ($user_pk == 0) $user_pk = $SysConf['auth']['UserId'];
+
+    if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN) return PERM_ADMIN;
 
     $sql = "select max(perm) as perm from perm_upload, group_user_member where perm_upload.upload_fk=$upload_pk and user_fk=$user_pk and group_user_member.group_fk=perm_upload.group_fk";
     $result = pg_query($PG_CONN, $sql);

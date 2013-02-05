@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -250,19 +250,12 @@ class ui_browse extends FO_Plugin {
     global $PG_CONN;
 
     $V = "";
-    /* Get list of uploads in this folder
-     * If the user is browse restricted, then restrict the list.
-     */
-    $UserId = IsRestrictedTo();
-    if ($UserId === false)
-    $UserCondition = "";  // no browse restriction
-    else
-    $UserCondition = " and user_fk='$UserId'";  // browse restriction
+    /* Get list of uploads in this folder */
     $sql = "SELECT * FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
         AND parent IS NULL
-        AND lft IS NOT NULL $UserCondition
+        AND lft IS NOT NULL 
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
         ORDER BY upload_filename,upload_desc,upload_pk,upload_origin;";
@@ -311,6 +304,11 @@ class ui_browse extends FO_Plugin {
       }
       $Desc = htmlentities($Row['upload_desc']);
       $UploadPk = $Row['upload_pk'];
+
+      /* check permission on upload */
+      $UploadPerm = GetUploadPerm($UploadPk);
+      if ($UploadPerm < PERM_READ) continue;
+
       $Name = $Row['ufile_name'];
       if (empty($Name)) {
         $Name = $Row['upload_filename'];
@@ -362,7 +360,7 @@ class ui_browse extends FO_Plugin {
 
 
   /**
-   * \brief This function returns the scheduler status.
+   * \brief This function returns the output html
    */
   function Output()
   {
@@ -372,17 +370,29 @@ class ui_browse extends FO_Plugin {
     if ($this->State != PLUGIN_STATE_READY)  return (0);
 
     $V = "";
-    $Folder_URL = GetParm("folder", PARM_INTEGER);
+    $folder_pk = GetParm("folder", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);  // upload_pk to browse
     $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
+
+    /* check permission if $Upload is given */
+    if (!empty($Upload))
+    {
+      $UploadPerm = GetUploadPerm($Upload);
+      if ($UploadPerm < PERM_READ)
+      {
+        $PermDenied = "Permission Denied";
+        echo $PermDenied;
+        return;
+      }
+    }
 
     /* kludge for plugins not supplying a folder parameter.
      * Find what folder this upload is in.  Error if in multiple folders.
      */
-    if (empty($Folder_URL))
+    if (empty($folder_pk))
     {
       if (empty($Upload))
-      $Folder_URL = GetUserRootFolder();
+      $folder_pk = GetUserRootFolder();
       else
       {
         $sql = "select parent_fk from foldercontents where child_id=$Upload and foldercontents_mode=2";
@@ -390,41 +400,16 @@ class ui_browse extends FO_Plugin {
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         if ( pg_num_rows($result) > 1)
         Fatal("Upload $Upload found in multiple folders.",__FILE__, __LINE__);
+        if ( pg_num_rows($result) < 1)
+        Fatal("Upload $Upload missing from foldercontents.",__FILE__, __LINE__);
 
         $row = pg_fetch_assoc($result);
-        $Folder_URL = $row['parent_fk'];
+        $folder_pk = $row['parent_fk'];
         pg_free_result($result);
       }
     }
 
-    $Folder = GetValidFolder($Folder_URL);
-    if ($Folder != $Folder_URL)
-    {
-      /* user is trying to access folder without permission.  Redirect to their
-       * root folder.
-       */
-      $NewURL = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
-      echo "<script type=\"text/javascript\"> window.location.replace(\"$NewURL\"); </script>";
-    }
-
-    if (HaveUploadPerm($Upload) === false)
-    {
-      /* user trying to access upload without permission.  Redirect to their
-       * specified folder.
-       */
-      $NewURL = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
-      echo "<script type=\"text/javascript\"> window.location.replace(\"$NewURL\"); </script>";
-    }
-
-    if (HaveItemPerm($Item) === false)
-    {
-      /* user trying to access item without permission.  Redirect to their
-       * specified folder.
-       */
-      $NewURL = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
-      if (!empty($Upload)) $NewURL .= "&upload=$Upload";
-      echo "<script type=\"text/javascript\"> window.location.replace(\"$NewURL\"); </script>";
-    }
+    $Folder = $folder_pk;
 
     $Show = 'detail';                                           // always use detail
 
@@ -443,6 +428,16 @@ class ui_browse extends FO_Plugin {
           DBCheckResult($result, $sql, __FILE__, __LINE__);
           $row = pg_fetch_assoc($result);
           pg_free_result($result);
+
+          $Upload = $row['upload_fk'];
+          $UploadPerm = GetUploadPerm($Upload);
+          if ($UploadPerm < PERM_READ)
+          {
+            $PermDenied = "<h2>Permission Denied<h2>";
+            echo $PermDenied;
+            return;
+          }
+
           if (!Iscontainer($row['ufile_mode'])) {
             /* Not a container! */
             $View = & $Plugins[plugin_find_id("view") ];

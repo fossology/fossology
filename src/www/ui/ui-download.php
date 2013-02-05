@@ -130,7 +130,7 @@ class ui_download extends FO_Plugin
     /* note that CheckRestore() does not return. */
     if (empty($Fin)) $this->CheckRestore($Item, $Filename);
 
-    $sql = "SELECT ufile_name FROM uploadtree WHERE uploadtree_pk = $Item LIMIT 1;";
+    $sql = "SELECT ufile_name, upload_fk FROM uploadtree WHERE uploadtree_pk = $Item LIMIT 1;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
@@ -141,6 +141,15 @@ class ui_download extends FO_Plugin
       pg_free_result($result);
       return;
     }
+    $Upload = $row['upload_fk'];
+    $UploadPerm = GetUploadPerm($Upload);
+    if ($UploadPerm < PERM_WRITE)
+    {
+      $text = _("No Permission");
+      echo "<h2>$text: $Item</h2>";
+      return;
+    }
+
     $Name = $row['ufile_name'];
     pg_free_result($result);
 

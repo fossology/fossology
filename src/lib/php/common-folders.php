@@ -69,6 +69,11 @@ function GetUserRootFolder()
   $UsersRow = pg_fetch_assoc($result);
   $root_folder_fk = $UsersRow['root_folder_fk'];
   pg_free_result($result);
+  if (empty($root_folder_fk))
+  {
+    $text = _("Missing root_folder_fk for user ");
+    fatal("<h2>".$text.$user_pk."</h2>", __FILE__, __LINE__);
+  }
   return $root_folder_fk;
 } // GetUserRootFolder()
 
@@ -499,7 +504,6 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
     $V .= "<div id='TreeDiv-$ParentFolder' $Hide>\n";
     while($row = pg_fetch_assoc($result))
     {
-      if (!HaveFolderPerm($row['folder_pk'])) continue;
       $V .= FolderListDiv($row['folder_pk'],$Depth+1,$Highlight);
     }
     $V .= "</div>\n";

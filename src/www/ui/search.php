@@ -40,10 +40,7 @@ class search extends FO_Plugin
      * because if one wants to give the default user permission to browse,
      * they should turn on GlobalBrowse (i.e. no browse restrictions).
      */
-    if (IsRestrictedTo() === false)
       $this->State = PLUGIN_STATE_READY;
-    else
-      $this->State = PLUGIN_STATE_INVALID;
     return $this->State;
   }
 
@@ -52,8 +49,7 @@ class search extends FO_Plugin
    */
   function RegisterMenus()
   {
-    if (IsRestrictedTo() === false)
-      menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+    menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
 
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array( "page", "item",));
@@ -105,6 +101,11 @@ class search extends FO_Plugin
       $lft = $row["lft"];
       $rgt = $row["rgt"];
       $upload_pk = $row["upload_fk"];
+ 
+       /* Check upload permission */
+       $UploadPerm = GetUploadPerm($upload_pk);
+       if ($UploadPerm < PERM_READ) return $UploadtreeRecs;
+
       pg_free_result($result);
     }
 
@@ -235,7 +236,15 @@ class search extends FO_Plugin
 
     $result = pg_query($PG_CONN, $SQL);
     DBCheckResult($result, $SQL, __FILE__, __LINE__);
-    if (pg_num_rows($result)) $UploadtreeRecs = pg_fetch_all($result);
+    if (pg_num_rows($result)) 
+    {
+      while ($row = pg_fetch_assoc($result))
+      {
+        $UploadPerm = GetUploadPerm($row['upload_fk']);
+        if ($UploadPerm < PERM_READ) continue;
+        $UploadtreeRecs[] = $row;
+      }
+    }
     pg_free_result($result);
 
     return($UploadtreeRecs);
