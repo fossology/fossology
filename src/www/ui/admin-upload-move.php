@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -26,6 +26,7 @@ class upload_move extends FO_Plugin {
   var $MenuList = "Organize::Uploads::Move";
   var $Dependency = array();
   var $DBaccess = PLUGIN_DB_WRITE;
+  var $Title = "Move upload to different foler";
 
   /**
    * \brief Given an uploadID, it's parent folder and a Target folder Id, move
