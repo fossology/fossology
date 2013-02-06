@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -670,6 +670,28 @@ class ui_picker extends FO_Plugin
 
     /* Item to start Browse window on */
     $Browseuploadtree_pk = GetParm("bitem",PARM_INTEGER);
+
+    /* Check item1 and item2 upload permissions */
+    $Item1Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $uploadtree_pk");
+    $UploadPerm = GetUploadPerm($Item1Row['upload_fk']);
+    if ($UploadPerm < PERM_READ)
+    {
+      $text = _("Permission Denied");
+      echo "<h2>$text item 1<h2>";
+      return;
+    }
+
+    if (!empty($uploadtree_pk2))
+    {
+      $Item2Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $uploadtree_pk2");
+      $UploadPerm = GetUploadPerm($Item2Row['upload_fk']);
+      if ($UploadPerm < PERM_READ)
+      {
+        $text = _("Permission Denied");
+        echo "<h2>$text item 2<h2>";
+        return;
+      }
+    }
 
     /**
      * After picking an item2, this logic will record the pick in

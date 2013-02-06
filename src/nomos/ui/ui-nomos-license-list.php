@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -183,7 +183,17 @@ class ui_license_list extends FO_Plugin {
     $V = "";
     $uploadtree_pk = GetParm("item", PARM_INTEGER);
     if (empty($uploadtree_pk)) return;
+
     $upload_pk = GetParm("upload", PARM_INTEGER);
+    if (empty($upload_pk)) return;
+    $UploadPerm = GetUploadPerm($upload_pk);
+    if ($UploadPerm < PERM_READ)
+    {
+      $text = _("Permission Denied");
+      echo "<h2>$text<h2>";
+      return;
+    }
+
     if (GetParm("output", PARM_STRING) == 'dltext')
     $dltext = true;
     else

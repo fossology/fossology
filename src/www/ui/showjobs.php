@@ -719,8 +719,8 @@ if (!empty($Row["job_upload_fk"]))
       $UploadPerm = GetUploadPerm($UploadPk);
       if ($UploadPerm < PERM_WRITE) 
       {
-        $PermDenied = "<h2>Permission Denied</h2>";
-        echo $PermDenied;
+        $text = _("Permission Denied");
+        echo "<h2>$text<h2>";
         return;
       }
     }
@@ -741,8 +741,8 @@ if (!empty($Row["job_upload_fk"]))
             $UploadPerm = GetUploadPerm($UploadPk);
             if ($UploadPerm < PERM_WRITE) 
             {
-              $PermDenied = "</h2>Permission Denied</h2>";
-              echo $PermDenied;
+              $text = _("Permission Denied");
+              echo "<h2>$text<h2>";
               return;
             }
           }

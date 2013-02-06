@@ -256,6 +256,18 @@ class copyright_list extends FO_Plugin
       echo $this->Name . " $text.";
       return;
     }
+
+    /* Check item1 and item2 upload permissions */
+    $Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $uploadtree_pk");
+    $UploadPerm = GetUploadPerm($Row['upload_fk']);
+    if ($UploadPerm < PERM_READ)
+    {
+      $text = _("Permission Denied");
+      echo "<h2>$text<h2>";
+      return;
+    }
+
+
     $Page = GetParm("page",PARM_INTEGER);
     if (empty($Page)) {
       $Page=0;

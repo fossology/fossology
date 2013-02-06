@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -515,6 +515,14 @@ return;
     $V="";
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
+    $UploadPerm = GetUploadPerm($Upload);
+    if ($UploadPerm < PERM_READ)
+    {
+      $text = _("Permission Denied");
+      echo "<h2>$text<h2>";
+      return;
+    }
+
     $Item = GetParm("item",PARM_INTEGER);
     $updcache = GetParm("updcache",PARM_INTEGER);
     $tagbucket = GetParm("tagbucket",PARM_INTEGER);

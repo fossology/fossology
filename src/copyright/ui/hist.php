@@ -489,6 +489,15 @@ class copyright_hist extends FO_Plugin
     $Item = GetParm("item",PARM_INTEGER);
     $filter = GetParm("filter",PARM_STRING);
 
+    /* check upload permissions */
+    $UploadPerm = GetUploadPerm($Upload);
+    if ($UploadPerm < PERM_READ)
+    {
+      $text = _("Permission Denied");
+      echo "<h2>$text<h2>";
+      return;
+    }
+
     /* Get uploadtree_tablename */
     $uploadtree_tablename = GetUploadtreeTableName($Upload);
 

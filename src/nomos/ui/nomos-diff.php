@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -603,7 +603,27 @@ class ui_nomos_diff extends FO_Plugin
       $in_uploadtree_pk2 = GetParm("item2",PARM_INTEGER);
 
       if (empty($in_uploadtree_pk1) && empty($in_uploadtree_pk2))
-      Fatal("Bad input parameters.  Both item1 and item2 must be specified.", __FILE__, __LINE__);
+        Fatal("Bad input parameters.  Both item1 and item2 must be specified.", __FILE__, __LINE__);
+
+      /* Check item1 and item2 upload permissions */
+      $Item1Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $in_uploadtree_pk1");
+      $UploadPerm = GetUploadPerm($Item1Row['upload_fk']);
+      if ($UploadPerm < PERM_READ)
+      {
+        $text = _("Permission Denied");
+        echo "<h2>$text item 1<h2>";
+        return;
+      }
+
+      $Item2Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $in_uploadtree_pk2");
+      $UploadPerm = GetUploadPerm($Item2Row['upload_fk']);
+      if ($UploadPerm < PERM_READ)
+      {
+        $text = _("Permission Denied");
+        echo "<h2>$text item 2<h2>";
+        return;
+      }
+
       $in_newuploadtree_pk1 = GetParm("newitem1",PARM_INTEGER);
       $in_newuploadtree_pk2 = GetParm("newitem2",PARM_INTEGER);
       $uploadtree_pk1  = $in_uploadtree_pk1;

@@ -380,8 +380,8 @@ class ui_browse extends FO_Plugin {
       $UploadPerm = GetUploadPerm($Upload);
       if ($UploadPerm < PERM_READ)
       {
-        $PermDenied = "Permission Denied";
-        echo $PermDenied;
+        $text = _("Permission Denied");
+        echo "<h2>$text<h2>";
         return;
       }
     }
@@ -433,8 +433,8 @@ class ui_browse extends FO_Plugin {
           $UploadPerm = GetUploadPerm($Upload);
           if ($UploadPerm < PERM_READ)
           {
-            $PermDenied = "<h2>Permission Denied<h2>";
-            echo $PermDenied;
+            $text = _("Permission Denied");
+            echo "<h2>$text<h2>";
             return;
           }
 
