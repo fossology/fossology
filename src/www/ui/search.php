@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -78,7 +78,7 @@ class search extends FO_Plugin
    * \return array of uploadtree recs.  Each record contains uploadtree_pk, parent, 
    *         upload_fk, pfile_fk, ufile_mode, and ufile_name
    */
-  function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchtype)
+  function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchtype, $License, $Copyright)
   {
     global $PG_CONN;
     $UploadtreeRecs = array();  // uploadtree record array to return
@@ -232,8 +232,9 @@ class search extends FO_Plugin
     if ($searchtype == 'containers') $SQL .= " AND ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0)";
 
     $Offset = $Page * $this->MaxPerPage;
-    $SQL .= " ORDER BY ufile_name, uploadtree.pfile_fk LIMIT $this->MaxPerPage OFFSET $Offset;";
-
+    $SQL .= " ORDER BY ufile_name, uploadtree.pfile_fk";
+    if (empty($License) && empty($Copyright))
+      $SQL .= " LIMIT $this->MaxPerPage OFFSET $Offset;";
     $result = pg_query($PG_CONN, $SQL);
     DBCheckResult($result, $SQL, __FILE__, __LINE__);
     if (pg_num_rows($result)) 
@@ -246,7 +247,6 @@ class search extends FO_Plugin
       }
     }
     pg_free_result($result);
-
     return($UploadtreeRecs);
   } // GetResults()
 
@@ -256,9 +256,11 @@ class search extends FO_Plugin
    * \param $UploadtreeRecs Array of search results (uploadtree recs)
    * \param $Page page number being displayed.
    * \param $GETvars GET variables
+   * \param $License filter the results with License
+   * \param $Copyright filter the results with copyright
    * \return HTML to display record results
    */
-  function HTMLResults($UploadtreeRecs, $Page, $GETvars)
+  function HTMLResults($UploadtreeRecs, $Page, $GETvars, $License, $Copyright)
   {
     $Outbuf = "";
     $Count = count($UploadtreeRecs);
@@ -273,6 +275,8 @@ class search extends FO_Plugin
     $upload_pk = $UploadtreeRecs[0]["upload_fk"];
     $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
     $nomosagent_pk = $AgentRec[0]["agent_fk"];
+    $CopyrightAgentRec = AgentARSList("copyright_ars", $upload_pk, 1);
+    $copyrightagent_pk = $CopyrightAgentRec[0]["agent_fk"];
     /* add license string to record */
     if ($nomosagent_pk)
     {
@@ -282,17 +286,54 @@ class search extends FO_Plugin
           $UploadtreeRec['licenses'] = GetFileLicenses_string($nomosagent_pk, $UploadtreeRec['pfile_fk'], $UploadtreeRec['uploadtree_pk']);
       }
     }
-
-    if (($Page > 0) || ($Count >= $this->MaxPerPage))
+    if ($copyrightagent_pk)
     {
-      $Uri = Traceback_uri() . "?mod=" . $this->Name . $GETvars;
-      $PageChoices = MenuEndlessPage($Page, ($Count >= $this->MaxPerPage),$Uri) . "<P />\n";
-      $Outbuf .= $PageChoices;
+      foreach($UploadtreeRecs as &$UploadtreeRec)
+      {
+        if ($UploadtreeRec['pfile_fk'])
+          $UploadtreeRec['copyright'] = GetFileCopyright_string($copyrightagent_pk, $UploadtreeRec['pfile_fk'], $UploadtreeRec['uploadtree_pk']);
+      }
+    }
+    
+    if (!empty($License) || !empty($Copyright))
+    {
+      $UploadtreeRecswithLicenseCopyright = array();
+      foreach($UploadtreeRecs as &$UploadtreeRec)
+      {
+        if (!empty($License)&&!empty($Copyright))
+        {
+          if((preg_match("/$License/", $UploadtreeRec['licenses'])!= 0) && (preg_match("/$Copyright/", $UploadtreeRec['copyright'])!= 0))
+            $UploadtreeRecswithLicenseCopyright[] = $UploadtreeRec; 
+            continue;
+        }
+        if (!empty($License))
+        {
+          if(preg_match("/$License/", $UploadtreeRec['licenses'])!= 0)
+            $UploadtreeRecswithLicenseCopyright[] = $UploadtreeRec;
+        }
+        if (!empty($Copyright))
+        {
+          if(preg_match("/$Copyright/", $UploadtreeRec['copyright'])!= 0)
+            $UploadtreeRecswithLicenseCopyright[] = $UploadtreeRec;
+        }
+      }
+      $Count = count($UploadtreeRecswithLicenseCopyright);
     }
     else
-      $PageChoices = "";
-
-    $Outbuf .= UploadtreeFileList($UploadtreeRecs, "browse","view",$Page*$this->MaxPerPage + 1);
+    {
+      if (($Page > 0) || ($Count >= $this->MaxPerPage))
+      {
+        $Uri = Traceback_uri() . "?mod=" . $this->Name . $GETvars;
+        $PageChoices = MenuEndlessPage($Page, ($Count >= $this->MaxPerPage),$Uri) . "<P />\n";
+        $Outbuf .= $PageChoices;
+      }
+      else
+        $PageChoices = "";
+    }
+    if (empty($License) && empty($Copyright))
+      $Outbuf .= UploadtreeFileList($UploadtreeRecs, "browse","view",$Page*$this->MaxPerPage + 1);
+    else
+      $Outbuf .= UploadtreeFileList($UploadtreeRecswithLicenseCopyright, "browse","view",$Page*$this->MaxPerPage + 1);
 
     /* put page menu at the bottom, too */
     $Outbuf .= $PageChoices;
@@ -361,6 +402,18 @@ class search extends FO_Plugin
           $GETvars .= "&sizemax=$SizeMax";
         }
 
+        $License = GetParm("license",PARM_RAW);
+        if (!empty($License))
+        {
+          //$CriteriaCount++;
+          $GETvars .= "&license=" . urlencode($License);
+        }
+        $Copyright = GetParm("copyright",PARM_RAW);
+        if (!empty($Copyright))
+        {
+          $GETvars .= "&copyright=" . urlencode($Copyright);
+        }
+
         $Page = GetParm("page",PARM_INTEGER);
 
         /*******  Input form  *******/
@@ -403,8 +456,19 @@ class search extends FO_Plugin
         $text = _("File size is");
         $text1 = _(" bytes\n");
         $V .= "<li><b>$text &le; </b><input name='sizemax' size=10 value='$SizeMax'>$text1";
+        $V .= "</ul>\n";
+
+        $V .= "<ul>\n";
+        
+        $V .= "<p><u><i><b>" . _("Choose the search filter.(Filter the search result use license and copyright, the filter must work with the search criteria.)") . "</b></i></u>";
+        /* license */
+        $text = _("License");
+        $V .= "<li><b>$text: </b><input name='license' value='$License'>";
+        $text = _("Copyright");
+        $V .= "<li><b>$text: </b><input name='copyright' value='$Copyright'>";
 
         $V .= "</ul>\n";
+
         $V .= "<input type='hidden' name='item' value='$Item'>\n";
         $text = _("Search");
         $V .= "<input type='submit' value='$text'>\n";
@@ -417,8 +481,8 @@ class search extends FO_Plugin
           $V .= "<hr>\n";
           $text = _("Files matching");
           $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
-          $UploadtreeRecs = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype);
-          $V .= $this->HTMLResults($UploadtreeRecs, $Page, $GETvars);
+          $UploadtreeRecs = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype,$License, $Copyright);
+          $V .= $this->HTMLResults($UploadtreeRecs, $Page, $GETvars, $License, $Copyright);
         } 
         break;
       case "Text":
