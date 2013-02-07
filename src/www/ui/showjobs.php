@@ -27,8 +27,14 @@ define("TITLE_showjobs", _("Show Jobs"));
    */
   function CompareJobsInfo($JobsInfo1, $JobsInfo2)
   {
-    $upload_pk1 = GetArrayVal("upload_pk", $JobsInfo1["upload"]);
-    $upload_pk2 = GetArrayVal("upload_pk", $JobsInfo2["upload"]);
+    if (!empty($JobsInfo1["upload"]))
+      $upload_pk1 = GetArrayVal("upload_pk", $JobsInfo1["upload"]);
+    else
+      $upload_pk1 = 0;
+    if (!empty($JobsInfo2["upload"]))
+      $upload_pk2 = GetArrayVal("upload_pk", $JobsInfo2["upload"]);
+    else
+      $upload_pk2 = 0;
     return $upload_pk2 - $upload_pk1;
   }
 
@@ -380,8 +386,8 @@ if (!empty($Row["job_upload_fk"]))
       $upload_pk = $JobRec["job_upload_fk"];
       $DeletedUploadRec = array();
       $DeletedUploadRec["upload_pk"] = $upload_pk;
-      $DeletedUploadRec["upload_filename"] = "Deleted Upload " . $upload_pk . "(" . $JobRec["job_name"] . ")";
-      $DeletedUploadRec["upload_desc"] = $DeletedUploadRec["upload_name"];
+      $DeletedUploadRec["upload_filename"] = "Deleted Upload " . $upload_pk;
+      $DeletedUploadRec["upload_desc"] = $JobRec["job_name"];
   
       $JobData[$job_pk]["upload"] = $DeletedUploadRec;
       /* Get jobqueue table data */
@@ -467,39 +473,46 @@ if (!empty($Row["job_upload_fk"]))
     foreach ($JobData as $job_pk => $Job)
     {
       /* Upload  */
-      $UploadName = GetArrayVal("upload_filename", $Job["upload"]);
-      $UploadDesc = GetArrayVal("upload_desc", $Job["upload"]);
-      $upload_pk = GetArrayVal("upload_pk", $Job["upload"]);
-      /** the column pfile_fk of the record in the table(upload) is NULL when this record is inserted */
-      if ((!empty($upload_pk) && $prevupload_pk != $upload_pk) || (empty($upload_pk) && 0 == $single_browse))
+      if (!empty($Job["upload"]))
       {
-        $prevupload_pk = $upload_pk;
-        $JobNumber++;
+        $UploadName = GetArrayVal("upload_filename", $Job["upload"]);
+        $UploadDesc = GetArrayVal("upload_desc", $Job["upload"]);
+        $upload_pk = GetArrayVal("upload_pk", $Job["upload"]);
+        /** the column pfile_fk of the record in the table(upload) is NULL when this record is inserted */
+        if ((!empty($upload_pk) && $prevupload_pk != $upload_pk) || (empty($upload_pk) && 0 == $single_browse))
+        {
+          $prevupload_pk = $upload_pk;
+          $JobNumber++;
 
-        /* Only display the jobs for this page */
-        if ($JobNumber >= $LastJob) break;
-        if ($JobNumber < $FirstJob) continue;
+          /* Only display the jobs for this page */
+          if ($JobNumber >= $LastJob) break;
+          if ($JobNumber < $FirstJob) continue;
 
-        /* blank line separator between pfiles */
-	    $OutBuf .= "<tr><td colspan=7> <hr> </td></tr>";
+          /* blank line separator between pfiles */
+	  $OutBuf .= "<tr><td colspan=7> <hr> </td></tr>";
 
-        $OutBuf .= "<tr>";
-        $OutBuf .= "<th $uploadStyle></th>";
-        $OutBuf .= "<th colspan=4 $uploadStyle>";
-        $uploadtree_pk = $Job['uploadtree']['uploadtree_pk'];
-        $OutBuf .= "<a title='Click to browse' href='" . Traceback_uri() . "?mod=browse&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
-        $OutBuf .= $UploadName;
-        if (!empty($UploadDesc)) $OutBuf .= " (" . $UploadDesc . ")";
-        $OutBuf .= "</a>";
-        $OutBuf .= "</th>";
-        $OutBuf .= "<th $uploadStyle></th>";
-        $OutBuf .= "</tr>";
-        $single_browse = 1;
+          $OutBuf .= "<tr>";
+          $OutBuf .= "<th $uploadStyle></th>";
+          $OutBuf .= "<th colspan=4 $uploadStyle>";
+          if(!empty($Job['uploadtree'])) 
+          {
+            $uploadtree_pk = $Job['uploadtree']['uploadtree_pk'];
+            $OutBuf .= "<a title='Click to browse' href='" . Traceback_uri() . "?mod=browse&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
+          }
+          else
+            $OutBuf .= "<a title='Click to browse' href='" . Traceback_uri() . "?mod=browse'>";
+          $OutBuf .= $UploadName;
+          if (!empty($UploadDesc)) $OutBuf .= " (" . $UploadDesc . ")";
+          $OutBuf .= "</a>";
+          $OutBuf .= "</th>";
+          $OutBuf .= "<th $uploadStyle></th>";
+          $OutBuf .= "</tr>";
+          $single_browse = 1;
+        }
+        else  if ($JobNumber < $FirstJob) continue;
       }
-      else  if ($JobNumber < $FirstJob) continue;
-
       /* Show Delete folder Job data */
-      if (empty($upload_pk))
+      else
       {
         /* blank line separator between pfiles */
         $OutBuf .= "<tr><td colspan=7> <hr> </td></tr>";
@@ -541,12 +554,15 @@ if (!empty($Row["job_upload_fk"]))
         $OutBuf .= $jq_pk;
         $OutBuf .= "</a>";
         $count = 0;
-        foreach ($jobqueueRec["depends"] as $depend_jq_pk)
+        if (!empty($jobqueueRec["depends"]))
         {
-          $OutBuf .= ($count++ == 0) ? " / " : ", ";
-          $OutBuf .= "<a href='$UriFull&show=job&job=" . $depend_jq_pk . "'>" ;
-          $OutBuf .= $depend_jq_pk;
-          $OutBuf .= "</a>";
+          foreach ($jobqueueRec["depends"] as $depend_jq_pk)
+          {
+            $OutBuf .= ($count++ == 0) ? " / " : ", ";
+            $OutBuf .= "<a href='$UriFull&show=job&job=" . $depend_jq_pk . "'>" ;
+            $OutBuf .= $depend_jq_pk;
+            $OutBuf .= "</a>";
+          }
         }
         $OutBuf .= "</td>";
 
