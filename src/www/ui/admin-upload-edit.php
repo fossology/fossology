@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -108,6 +108,18 @@ class upload_properties extends FO_Plugin
     $upload_pk = GetArrayVal("upload_pk", $_POST);
     if (empty($upload_pk)) $upload_pk = GetParm('upload', PARM_INTEGER);
 
+    /* Check Upload permission */
+    if (!empty($upload_pk))
+    {
+      $UploadPerm = GetUploadPerm($upload_pk);
+      if ($UploadPerm < PERM_WRITE)
+      {
+        $text = _("Permission Denied");
+        echo "<h2>$text<h2>";
+        return;
+      }
+    }
+
     $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc);
     if($rc == 0)
     {
@@ -131,7 +143,8 @@ class upload_properties extends FO_Plugin
 
     // Get folder array folder_pk => folder_name
     $FolderArray = array();
-    GetFolderArray(-1, $FolderArray);
+    $folder_pk = GetUserRootFolder();
+    GetFolderArray($folder_pk, $FolderArray);
 
     /*** Display folder select list, on change request new page with folder= in url ***/
     $url = Traceback_uri() . "?mod=upload_properties&folder=";
@@ -143,7 +156,7 @@ class upload_properties extends FO_Plugin
     $V.= "<li>$text";
 
     // Get list of all upload records in this folder
-    $UploadList = FolderListUploads($folder_pk);
+    $UploadList = FolderListUploads_perm($folder_pk, PERM_WRITE);
 
     // Make data array for upload select list.  Key is upload_pk, value is a composite
     // of the upload_filename and upload_ts.

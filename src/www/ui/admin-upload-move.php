@@ -78,9 +78,10 @@ class upload_move extends FO_Plugin {
   function Output() {
     global $Plugins;
     global $PG_CONN;
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
+    global $PERM_NAMES;
+
+    if ($this->State != PLUGIN_STATE_READY)  return;
+
     $V = "";
     switch ($this->OutputType) {
       case "XML":
@@ -92,7 +93,17 @@ class upload_move extends FO_Plugin {
         $OldFolderId = GetParm('oldfolderid', PARM_INTEGER);
         $UploadId = GetParm('uploadid', PARM_INTEGER);
         $TargetFolderId = GetParm('targetfolderid', PARM_INTEGER);
-        if (!empty($OldFolderId) && !empty($TargetFolderId)) {
+        if (!empty($OldFolderId) && !empty($TargetFolderId)) 
+        {
+          /* check upload permission */
+          $UploadPerm = GetUploadPerm($UploadId);
+          if ($UploadPerm < PERM_WRITE)
+          {
+            $text = _("Permission Denied");
+            echo "<h2>$text<h2>";
+            return;
+          }
+
           $rc = $this->Move($UploadId, $TargetFolderId, $OldFolderId);
           if ($rc == 1) {
             /* Need to refresh the screen */
@@ -150,12 +161,14 @@ class upload_move extends FO_Plugin {
         $V.= "<select name='oldfolderid'\n";
         $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
         $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
-        $V.= FolderListOption(-1, 0);
+
+        $root_folder_pk = GetUserRootFolder();
+        $V.= FolderListOption($root_folder_pk, 0);
         $V.= "</select><P />\n";
         $text = _("Select the upload you wish to move:  \n");
         $V.= "<li>$text";
         $V.= "<select name='uploadid'>\n";
-        $List = FolderListUploads(-1);
+        $List = FolderListUploads_perm($root_folder_pk, PERM_WRITE);
         foreach($List as $L) {
           $V.= "<option value='" . $L['upload_pk'] . "'>";
           $V.= htmlentities($L['name']);

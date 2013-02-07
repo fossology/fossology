@@ -642,13 +642,12 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
 	ORDER BY upload_filename,upload_pk;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $user_pk = GetArrayVal("UserId", $_SESSION);
   while ($R = pg_fetch_assoc($result))
   {
     if (empty($R['upload_pk'])) { continue; }
 
     // Filter out uploads where the user doesn't have sufficient permission 
-    if (GetUploadPerm($R['upload_pk'], $user_pk) < $perm) continue;
+    if (GetUploadPerm($R['upload_pk']) < $perm) continue;
 
     $New['upload_pk'] = $R['upload_pk'];
     $New['upload_desc'] = $R['upload_desc'];

@@ -80,10 +80,12 @@ class admin_upload_delete extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  function Output() {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
+  function Output() 
+  {
+    global $PERM_NAMES;
+
+    if ($this->State != PLUGIN_STATE_READY)  return;
+
     $V = "";
     switch ($this->OutputType) {
       case "XML":
@@ -142,12 +144,14 @@ class admin_upload_delete extends FO_Plugin {
         $V.= "<select name='folder' ";
         $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
         $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
-        $V.= FolderListOption(-1, 0);
+
+        $root_folder_pk = GetUserRootFolder();
+        $V.= FolderListOption($root_folder_pk, 0);
         $V.= "</select><P />\n";
         $text = _("Select the uploaded project to delete:");
         $V.= "<li>$text";
         $V.= "<BR><select name='upload' size='10'>\n";
-        $List = FolderListUploads(-1);
+        $List = FolderListUploads_perm($root_folder_pk, PERM_WRITE);
         foreach($List as $L) {
           $V.= "<option value='" . $L['upload_pk'] . "'>";
           $V.= htmlentities($L['name']);

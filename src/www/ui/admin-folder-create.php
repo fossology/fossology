@@ -153,7 +153,8 @@ class folder_create extends FO_Plugin
         $text = _("Select the parent folder:  \n");
         $V .= "<li>$text";
         $V .= "<select name='parentid'>\n";
-        $V .= FolderListOption(-1, 0);
+        $root_folder_pk = GetUserRootFolder();
+        $V.= FolderListOption($root_folder_pk, 0);
         $V .= "</select><P />\n";
         $text = _("Enter the new folder name:  \n");
         $V .= "<li>$text";
