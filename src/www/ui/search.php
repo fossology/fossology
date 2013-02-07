@@ -263,6 +263,7 @@ class search extends FO_Plugin
   function HTMLResults($UploadtreeRecs, $Page, $GETvars, $License, $Copyright)
   {
     $Outbuf = "";
+    $PageChoices = "";
     $Count = count($UploadtreeRecs);
     if ($Count == 0)
     {
@@ -291,7 +292,7 @@ class search extends FO_Plugin
       foreach($UploadtreeRecs as &$UploadtreeRec)
       {
         if ($UploadtreeRec['pfile_fk'])
-          $UploadtreeRec['copyright'] = GetFileCopyright_string($copyrightagent_pk, $UploadtreeRec['pfile_fk'], $UploadtreeRec['uploadtree_pk']);
+          $UploadtreeRec['copyright'] = GetFileCopyright_string($copyrightagent_pk, $UploadtreeRec['pfile_fk'], $UploadtreeRec['uploadtree_pk'], "all");
       }
     }
     
@@ -302,19 +303,28 @@ class search extends FO_Plugin
       {
         if (!empty($License)&&!empty($Copyright))
         {
-          if((preg_match("/$License/", $UploadtreeRec['licenses'])!= 0) && (preg_match("/$Copyright/", $UploadtreeRec['copyright'])!= 0))
-            $UploadtreeRecswithLicenseCopyright[] = $UploadtreeRec; 
+          if(!empty($UploadtreeRec['licenses']) && !empty($UploadtreeRec['copyright']))
+          {
+            if((preg_match("/$License/i", $UploadtreeRec['licenses'])!= 0) && (preg_match("/$Copyright/i", $UploadtreeRec['copyright'])!= 0))
+              $UploadtreeRecswithLicenseCopyright[] = $UploadtreeRec; 
             continue;
+          }
         }
         if (!empty($License))
         {
-          if(preg_match("/$License/", $UploadtreeRec['licenses'])!= 0)
-            $UploadtreeRecswithLicenseCopyright[] = $UploadtreeRec;
+          if(!empty($UploadtreeRec['licenses']))
+          {
+            if(preg_match("/$License/i", $UploadtreeRec['licenses'])!= 0)
+              $UploadtreeRecswithLicenseCopyright[] = $UploadtreeRec;
+          }
         }
         if (!empty($Copyright))
         {
-          if(preg_match("/$Copyright/", $UploadtreeRec['copyright'])!= 0)
-            $UploadtreeRecswithLicenseCopyright[] = $UploadtreeRec;
+          if(!empty($UploadtreeRec['copyright']))
+          {
+            if(preg_match("/$Copyright/i", $UploadtreeRec['copyright'])!= 0)
+              $UploadtreeRecswithLicenseCopyright[] = $UploadtreeRec;
+          }
         }
       }
       $Count = count($UploadtreeRecswithLicenseCopyright);
@@ -460,7 +470,7 @@ class search extends FO_Plugin
 
         $V .= "<ul>\n";
         
-        $V .= "<p><u><i><b>" . _("Choose the search filter.(Filter the search result use license and copyright, the filter must work with the search criteria.)") . "</b></i></u>";
+        $V .= "<p><u><i><b>" . _("Choose the search filter.") . "</b></i></u>";
         /* license */
         $text = _("License");
         $V .= "<li><b>$text: </b><input name='license' value='$License'>";
