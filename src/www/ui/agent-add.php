@@ -189,7 +189,7 @@ class agent_add extends FO_Plugin
         $text = _("Select the upload to analyze:");
         $V .= "<li>$text<br>";
         $V .= "<select size='10' name='upload' onChange='Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=\" + this.value)'>\n";
-        $List = FolderListUploads($Folder);
+        $List = FolderListUploads_perm($Folder, PERM_WRITE);
         foreach($List as $L)
         {
           $V .= "<option value='" . $L['upload_pk'] . "'>";

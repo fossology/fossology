@@ -52,7 +52,7 @@ class admin_tag_manage extends FO_Plugin
     /** get upload list */
     $upload_list = array();
     if (!empty($upload_id)) $upload_list[0] = array('upload_pk'=>$upload_id);
-    else $upload_list = FolderListUploadsRecurse($folder_id); // want to manage all uploads under a folder
+    else $upload_list = FolderListUploadsRecurse($folder_id, NULL, PERM_WRITE); // want to manage all uploads under a folder
 
     foreach($upload_list as $upload)
     {
@@ -181,7 +181,7 @@ class admin_tag_manage extends FO_Plugin
         $text = _("Select the upload to  enable/disable:");
         $V .= "<li>$text<br>";
         $V .= "<select size='10' name='upload' onChange='Tagging_Get(\"" . Traceback_uri() . "?mod=upload_tagging&upload=\" + this.value)'>\n"; 
-        $List = FolderListUploads($Folder);
+        $List = FolderListUploads_perm($Folder, PERM_WRITE);
         foreach($List as $L)
         {
           $V .= "<option value='" . $L['upload_pk'] . "'>";

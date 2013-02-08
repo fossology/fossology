@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -23,6 +23,7 @@
  * plugin. 
  * This is intended as an active plugin to provide support
  * data to the UI.
+ * User must have PERM_WRITE to the uploads.
  */
 
 define("TITLE_core_uploads", _("List Uploads as Options"));
@@ -55,7 +56,7 @@ class core_uploads extends FO_Plugin
         if (empty($FolderId)) {
           $FolderId = FolderGetTop();
         }
-        $List = FolderListUploads($FolderId);
+        $List = FolderListUploads_perm($FolderId, PERM_WRITE);
         foreach($List as $L)
         {
           $V .= "<option value='" . $L['upload_pk'] . "'>";

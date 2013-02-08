@@ -569,47 +569,6 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
   return($List);
 } // FolderGetFromUpload()
 
-/**
- * \brief Returns an array of uploads in a folder.
- *  This does NOT recurse.
- *  The returned array is sorted by ufile_name and ufile_desc.
- *  Folders may be empty!
- * \param $ParentFolder Optional folder_pk, default is users root folder.
- * \return array{upload_pk, upload_desc, upload_ts, ufile_name}
- *  for all uploads in a given folder.
- */
-function FolderListUploads($ParentFolder=-1)
-{
-  global $PG_CONN;
-  if (empty($PG_CONN)) { return; }
-  if (empty($ParentFolder)) { return; }
-  if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
-  $List=array();
-
-  /* Get list of uploads */
-  /** mode 1<<1 = upload_fk **/
-  $sql = "SELECT upload_pk, upload_desc, upload_ts, ufile_name
-	FROM foldercontents,uploadtree,upload
-	WHERE foldercontents.parent_fk = '$ParentFolder'
-	AND foldercontents.foldercontents_mode = 2
-	AND foldercontents.child_id = upload.upload_pk
-	AND uploadtree.upload_fk = upload.upload_pk
-	AND uploadtree.parent IS NULL
-	ORDER BY uploadtree.ufile_name,upload_pk;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  while ($R = pg_fetch_assoc($result))
-  {
-    if (empty($R['upload_pk'])) { continue; }
-    $New['upload_pk'] = $R['upload_pk'];
-    $New['upload_desc'] = $R['upload_desc'];
-    $New['upload_ts'] = substr($R['upload_ts'],0,19);
-    $New['name'] = $R['ufile_name'];
-    array_push($List,$New);
-  }
-  pg_free_result($result);
-  return($List);
-} // FolderListUploads()
 
 /**
  * \brief Returns an array of uploads in a folder.
@@ -621,7 +580,6 @@ function FolderListUploads($ParentFolder=-1)
  * \return array{upload_pk, upload_desc, upload_ts, ufile_name}
  *  for all uploads in a given folder.
  *
- * \note THIS WILL REPLACE FolderListUploads() when permissions go live.
  */
 function FolderListUploads_perm($ParentFolder=-1, $perm)
 {
@@ -672,7 +630,7 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
  *
  * \return array of {upload_pk, upload_desc, name, folder}
  */
-function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL)
+function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=PERM_READ)
 {
   global $PG_CONN;
   if (empty($PG_CONN)) { return; }
@@ -696,6 +654,11 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL)
   while ($R = pg_fetch_assoc($result))
   {
     if (empty($R['upload_pk'])) { continue; }
+
+    /* Check upload permission */
+    $UploadPerm = GetUploadPerm($R['upload_pk']);
+    if ($UploadPerm < $perm) continue;
+
     $New['upload_pk'] = $R['upload_pk'];
     $New['upload_desc'] = $R['upload_desc'];
     $New['name'] = $R['ufile_name'];
