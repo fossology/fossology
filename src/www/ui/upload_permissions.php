@@ -21,7 +21,7 @@
  * @brief edit upload permissions
  **/
 
-define("TITLE_upload_permissions", _("Edit Upload File Permissions"));
+define("TITLE_upload_permissions", _("Edit Uploaded File Permissions"));
 
 class upload_permissions extends FO_Plugin 
 {
