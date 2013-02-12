@@ -28,7 +28,7 @@ class upload_permissions extends FO_Plugin
   var $Name = "upload_permissions";
   public $Title = TITLE_upload_permissions;
   var $Version = "1.0";
-  var $MenuList = "Organize::Uploads::Permissions";
+  var $MenuList = "Admin::Upload Permissions";
   var $Dependency = array();
   var $DBaccess = PLUGIN_DB_WRITE;
 
