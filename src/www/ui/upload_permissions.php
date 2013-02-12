@@ -32,21 +32,6 @@ class upload_permissions extends FO_Plugin
   var $Dependency = array();
   var $DBaccess = PLUGIN_DB_WRITE;
 
-  /**
-   * @brief Update upload Properties (name and description)
-   *
-   * @param $uploadId upload.upload_pk of record to update
-   * @param $NewName New upload.upload_filename, and uploadtree.ufle_name
-   *        If null, old value is not changed.
-   * @param $NewDesc New upload description (upload.upload_desc)
-   *        If null, old value is not changed.
-   *
-   * @return 1 if the upload record is updated, 0 if not, 2 if no inputs
-   **/
-  function myfunction($uploadId, $NewName, $NewDesc) 
-  {
-    global $PG_CONN;
-  }
 
   /*********************************************
    Output(): Generate the text for this plugin.
