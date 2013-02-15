@@ -53,6 +53,42 @@ $FirstEmpty=false, $SelElt=true, $Options="")
 
 
 /**
+ * \brief  Use two columns in a table to create an array key => val
+ * \param $keycol key column
+ * \param $valcol can be a comma separated list of value columns
+ * \param $tablename
+ * \param $separator is used to separate values if there are multiple columns
+ * \param $where is an optional where clause eg "where a=b", "order by x", ...
+ */
+function Table2Array($keycol, $valcol, $tablename, $separator=" ", $where="")
+{
+  global $PG_CONN;
+
+  $valarray = explode(",", $valcol);
+  $RetArray = array();
+  $sql = "select $keycol, $valcol from $tablename $where";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+  if (pg_num_rows($result) > 0)
+  {
+    while ($row = pg_fetch_assoc($result))
+    {
+      $newval = "";
+      foreach ($valarray as $sqlcolname)
+      {
+        if (!empty($newval)) $newval .= $separator;
+        $newval .= $row[trim($sqlcolname)];
+      }
+      $RetArray[$row[$keycol]] = $newval;
+    }
+  }
+  pg_free_result($result);
+  return $RetArray;
+}
+
+
+/**
  * \brief Write message to stdout and die.
  *
  * \param $msg - Message to write
