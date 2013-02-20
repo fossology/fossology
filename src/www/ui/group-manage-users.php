@@ -30,39 +30,6 @@ class group_manage_users extends FO_Plugin {
   var $DBaccess = PLUGIN_DB_WRITE;
   var $LoginFlag = 1;  /* Don't allow Default User to add a group */
 
-  /* @brief Get array of groups that this user has admin access to
-   * @param $user_pk
-   *
-   * @return Array in the format {group_pk=>group_name, group_pk=>group_name, ...}
-   *         Array may be empty.
-   **/
-  function GetGroupArray($user_pk)
-  {
-    global $PG_CONN;
-
-    $GroupArray = array();
-
-    if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN)
-    {
-      $sql = "select group_pk, group_name from groups";
-    }
-    else
-    {
-      $sql = "select group_pk, group_name from groups, group_user_member 
-                  where group_pk=group_fk and user_fk='$user_pk' and group_perm=1";
-    }
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) > 0)
-    {
-      while($row = pg_fetch_assoc($result))
-      {
-        $GroupArray[$row['group_pk']] = $row['group_name'];
-      }
-    }
-    pg_free_result($result);
-    return $GroupArray;
-  }
 
   /* @brief Verify user has access to update record
    * @param $user_pk
@@ -151,7 +118,7 @@ class group_manage_users extends FO_Plugin {
     $V .= js_url(); 
 
     /* Get array of groups that this user is an admin of */
-    $GroupArray = $this->GetGroupArray($user_pk);
+    $GroupArray = GetGroupArray($user_pk);
     if (empty($GroupArray))
     {
       $text = _("You have no permission to manage any group.");

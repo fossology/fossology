@@ -171,6 +171,40 @@
     return $GroupArray;
   }
 
+  /* @brief Get array of groups that this user has admin access to
+   * @param $user_pk
+   *
+   * @return Array in the format {group_pk=>group_name, group_pk=>group_name, ...}
+   *         Array may be empty.
+   **/
+  function GetGroupArray($user_pk)
+  {
+    global $PG_CONN;
+
+    $GroupArray = array();
+
+    if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN)
+    {
+      $sql = "select group_pk, group_name from groups";
+    }
+    else
+    {
+      $sql = "select group_pk, group_name from groups, group_user_member 
+                  where group_pk=group_fk and user_fk='$user_pk' and group_perm=1";
+    }
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) > 0)
+    {
+      while($row = pg_fetch_assoc($result))
+      {
+        $GroupArray[$row['group_pk']] = $row['group_name'];
+      }
+    }
+    pg_free_result($result);
+    return $GroupArray;
+  }
+
 
   /**
    *  @brief Get the upload permission for a user
@@ -218,4 +252,93 @@
 */
     return $perm;
   }
+
+
+  /**
+   * \brief Delete a group.
+   * \param $group_pk
+   * Returns NULL on success, string on failure.
+   */
+  function DeleteGroup($group_pk) 
+  {
+    global $PG_CONN;
+    global $SysConf;
+
+    $user_pk = $SysConf['auth']['UserId'];
+
+    /* Make sure groupname looks valid */
+    if (empty($group_pk)) 
+    {
+      $text = _("Error: Group name must be specified.");
+      return ($text);
+    }
+
+    /* See if the group already exists */
+    $sql = "SELECT group_pk FROM groups WHERE group_pk = '$group_pk'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) < 1)
+    {
+      pg_free_result($result);
+      $text = _("Group does not exist.  Not deleted.");
+      return ($text);
+    }
+    pg_free_result($result);
+
+    /* Make sure the user has permission to delete this group 
+     * Look through all the group users (table group_user_member)
+     * and make sure the user has admin access.
+     */
+    if ($_SESSION['UserLevel'] != PLUGIN_DB_ADMIN)
+    {
+      $sql = "SELECT *  FROM group_user_member WHERE group_fk = '$group_pk' and user_fk='$user_pk' and group_perm=1";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result) < 1)
+      {
+        pg_free_result($result);
+        $text = _("Permission Denied.");
+        return ($text);
+      }
+      pg_free_result($result);
+    }
+
+    /* Start transaction */
+    $sql = "begin";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    /* Delete group records from perm_upload */
+    $sql = "delete from perm_upload where group_fk='$group_pk'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    /* Delete group records from group_user_member */
+    $sql = "delete from group_user_member where group_fk='$group_pk'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    /* Update new_upload_group_fk and new_upload_perm in users table */
+    $sql = "update users set new_upload_group_fk=NULL, new_upload_perm=NULL where new_upload_group_fk='$group_pk'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    /* Delete group records from groups table */
+    $sql = "delete from groups where group_pk='$group_pk'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    /* End transaction */
+    $sql = "commit";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    return (NULL);
+  } // DeleteGroup()
 ?>

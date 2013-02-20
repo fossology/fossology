@@ -39,7 +39,7 @@ class user_del extends FO_Plugin
   function Delete($UserId)
   {
     global $PG_CONN;
-    /* See if the user already exists (better not!) */
+    /* See if the user already exists */
     $sql = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -50,6 +50,23 @@ class user_del extends FO_Plugin
       $text = _("User does not exist.");
       return($text);
     }
+
+    /* Delete the users group 
+     * First look up the users group_pk
+     */
+    $sql = "SELECT group_pk FROM groups WHERE group_name = '$row[user_name]' LIMIT 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $GroupRow = pg_fetch_assoc($result);
+    pg_free_result($result);
+    /* Now delete their group */
+    DeleteGroup($GroupRow['group_pk']);
+
+    /* Delete all the group user members for this user_pk */
+    $sql = "DELETE FROM group_user_member WHERE user_fk = '$UserId'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
 
     /* Delete the user */
     $sql = "DELETE FROM users WHERE user_pk = '$UserId';";
