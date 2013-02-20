@@ -50,7 +50,7 @@ function Migrate_21_22()
     // No Default User, so create one
     $Perm = PLUGIN_DB_NONE;
     $sql = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
-        VALUES ($user_name,'Default User when nobody is logged in','Seed','Pass',$Perm,NULL,1);";
+        VALUES ('$user_name','Default User when nobody is logged in','Seed','Pass',$Perm,NULL,1);";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
   }
@@ -68,7 +68,7 @@ function Migrate_21_22()
     $Seed = rand() . rand();
     $Hash = sha1($Seed . $user_name);
     $sql = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
-        VALUES ($user_name,'Default Administrator','$Seed','$Hash',$user_name,'y',1);";
+        VALUES ($user_name,'Default Administrator','$Seed','$Hash',$Perm,'y',1);";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
   }
