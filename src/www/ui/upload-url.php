@@ -130,8 +130,8 @@ class upload_url extends FO_Plugin {
       $msg .= _("Is the scheduler running? ");
     }
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
-    $text = _("The file");
-    $text1 = _("has been uploaded. It is");
+    $text = _("The upload");
+    $text1 = _("has been queued. It is");
     $msg .= "$text $Name $text1 ";
     $keep =  "<a href='$Url'>upload #" . $uploadpk . "</a>.\n";
     print displayMessage($msg,$keep);
