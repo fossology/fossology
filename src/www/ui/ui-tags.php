@@ -24,23 +24,15 @@ class ui_tag extends FO_Plugin
   var $Title      = TITLE_ui_tag;
   var $Version    = "1.0";
   var $Dependency = array();
+  var $DBaccess   = PLUGIN_DB_WRITE;
 
   /**
    * \brief Customize submenus.
    */
   function RegisterMenus()
   {
-    /****** Permission comments: if user don't have read or high permission, can't see tag menu. ******/
-    if (!empty($_SESSION['UserId'])) {
-      $perm = GetTaggingPerms($_SESSION['UserId'],NULL);
-      //print ($perm);
-      if ($perm > 0){
-        $text = _("Tag files or containers");
-        menu_insert("Browse-Pfile::Tag",0,$this->Name,$text);
-      } else {
-        return(0);
-      }
-    }
+    $text = _("Tag files or containers");
+    menu_insert("Browse-Pfile::Tag",0,$this->Name,$text);
   } // RegisterMenus()
 
   /**
@@ -58,7 +50,6 @@ class ui_tag extends FO_Plugin
 
     if (isset($tag_array))
     {
-      $tag_ns_pk = $tag_array["tag_ns_pk"];
       $tag_name = $tag_array["tag_name"];
       $tag_notes = $tag_array["tag_notes"];
       $tag_file = $tag_array["tag_file"];
@@ -69,7 +60,6 @@ class ui_tag extends FO_Plugin
     }
     else
     {
-      $tag_ns_pk = GetParm('tag_ns_pk', PARM_INTEGER);
       $tag_name = GetParm('tag_name', PARM_TEXT);
       $tag_notes = GetParm('tag_notes', PARM_TEXT);
       $tag_file = GetParm('tag_file', PARM_TEXT);
@@ -81,7 +71,6 @@ class ui_tag extends FO_Plugin
 
     /* Debug
      print "<pre>";
-     print "Create Tag: TagNameSpace is:$tag_ns_pk\n";
      print "Create Tag: TagName is:$tag_name\n";
      print "Create Tag: TagNotes is:$tag_notes\n";
      print "Create Tag: TagFile is:$tag_file\n";
@@ -107,7 +96,7 @@ class ui_tag extends FO_Plugin
     pg_exec("BEGIN;");
 
     /* See if the tag already exists */
-    $sql = "SELECT * FROM tag WHERE tag = '$tag_name' AND tag_ns_fk = '$tag_ns_pk';";
+    $sql = "SELECT * FROM tag WHERE tag = '$tag_name'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1)
@@ -116,7 +105,7 @@ class ui_tag extends FO_Plugin
 
       $Val = str_replace("'", "''", $tag_name);
       $Val1 = str_replace("'", "''", $tag_desc);
-      $sql = "INSERT INTO tag (tag,tag_ns_fk,tag_desc) VALUES ('$Val', $tag_ns_pk, '$Val1');";
+      $sql = "INSERT INTO tag (tag,tag_desc) VALUES ('$Val', '$Val1');";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
@@ -125,7 +114,7 @@ class ui_tag extends FO_Plugin
     }
 
     /* Make sure it was added */
-    $sql = "SELECT * FROM tag WHERE tag = '$tag_name' AND tag_ns_fk = $tag_ns_pk LIMIT 1;";
+    $sql = "SELECT * FROM tag WHERE tag = '$tag_name' LIMIT 1;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1)
@@ -254,7 +243,6 @@ class ui_tag extends FO_Plugin
 
     $tag_pk = GetParm('tag_pk', PARM_INTEGER);
     $tag_file_pk = GetParm('tag_file_pk', PARM_INTEGER);
-    $tag_ns_pk = GetParm('tag_ns_pk', PARM_INTEGER);
     $tag_name = GetParm('tag_name', PARM_TEXT);
     $tag_notes = GetParm('tag_notes', PARM_TEXT);
     $tag_file = GetParm('tag_file', PARM_TEXT);
@@ -265,7 +253,6 @@ class ui_tag extends FO_Plugin
 
     /* Debug
      print "<pre>";
-     print "Edit Tag: TagNameSpace is:$tag_ns_pk\n";
      print "Edit Tag: TagName is:$tag_name\n";
      print "Edit Tag: TagNotes is:$tag_notes\n";
      print "Edit Tag: TagFile is:$tag_file\n";
@@ -291,7 +278,7 @@ class ui_tag extends FO_Plugin
       /* Is Tag name changed */
       if ($row[0] <> $tag_name)
       {
-        $sql = "SELECT * FROM tag WHERE tag = '$tag_name' AND tag_ns_fk = '$tag_ns_pk';";
+        $sql = "SELECT * FROM tag WHERE tag = '$tag_name'";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         /* Is new Tag name defined in name space */
@@ -304,7 +291,7 @@ class ui_tag extends FO_Plugin
           /* Existing tag values cannot be changed at this phase. */
           /* Create new tag association, do not delete old notes! */
 
-          $tag_data = array("tag_pk" => $row[0], "tag_name" => $row[1], "tag_ns_pk" => $row[2], "tag_desc" => $row[3],
+          $tag_data = array("tag_pk" => $row[0], "tag_name" => $row[1], "tag_desc" => $row[3],
                             "tag_notes" => $tag_notes, "tag_file" => $tag_file, "tag_package" => $tag_package,
                             "tag_container" => $tag_container, "tag_dir" => $tag_dir);
           $this->CreateTag($tag_data);
@@ -317,7 +304,7 @@ class ui_tag extends FO_Plugin
     /* Update the tag table */
     $Val = str_replace("'", "''", $tag_name);
     $Val1 = str_replace("'", "''", $tag_desc);
-    $sql = "UPDATE tag SET tag = '$Val', tag_ns_fk = $tag_ns_pk, tag_desc = '$Val1' WHERE tag_pk = $tag_pk;";
+    $sql = "UPDATE tag SET tag = '$Val', tag_desc = '$Val1' WHERE tag_pk = $tag_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
@@ -404,22 +391,22 @@ class ui_tag extends FO_Plugin
     global $PG_CONN;
     $VE = "";
     $VE = _("<h3>Current Tags:</h3>\n");
-    $sql = "SELECT tag_pk, tag, tag_desc, tag_ns_pk, tag_ns_name, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_ns, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag.tag_ns_fk = tag_ns.tag_ns_pk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Uploadtree_pk UNION SELECT tag_pk, tag, tag_desc, tag_ns_pk, tag_ns_name, tag_uploadtree_pk AS tag_file_pk, tag_uploadtree_date AS tag_file_date, tag_uploadtree_text AS tag_file_text FROM tag, tag_ns, tag_uploadtree WHERE tag.tag_pk = tag_uploadtree.tag_fk AND tag.tag_ns_fk = tag_ns.tag_ns_pk AND tag_uploadtree.uploadtree_fk = $Uploadtree_pk;";
+    $sql = "SELECT tag_pk, tag, tag_desc, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Uploadtree_pk UNION SELECT tag_pk, tag, tag_desc, tag_uploadtree_pk AS tag_file_pk, tag_uploadtree_date AS tag_file_date, tag_uploadtree_text AS tag_file_text FROM tag, tag_uploadtree WHERE tag.tag_pk = tag_uploadtree.tag_fk AND tag_uploadtree.uploadtree_fk = $Uploadtree_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 0)
     {
       $VE .= "<table border=1>\n";
-      $text = _("Tag Namespace");
       $text1 = _("Tag");
       $text2 = _("Tag Description");
       $text3 = _("Tag Date");
-      $VE .= "<tr><th>$text</th><th>$text1</th><th>$text2</th><th>$text3</th><th></th></tr>\n";
+      $VE .= "<tr><th>$text1</th><th>$text2</th><th>$text3</th><th></th></tr>\n";
       while ($row = pg_fetch_assoc($result))
       {
-        $VE .= "<tr><td align='center'>" . $row['tag_ns_name'] . "</td><td align='center'>" . $row['tag'] . "</td><td align='center'>" . $row['tag_desc'] . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td>";
-        $perm = GetTaggingPerms($_SESSION['UserId'],$row['tag_ns_pk']);
-        if ($perm > 1){
+        $VE .= "<tr><td align='center'>" . $row['tag'] . "</td><td align='center'>" . $row['tag_desc'] . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td>";
+        $perm = GetUploadPerm($Upload);
+        if ($perm >= PERM_WRITE ) 
+        {
           $VE .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>View/Edit</a>|<a href='" . Traceback_uri() . "?mod=tag&action=delete&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Delete</a></td></tr>\n";
         }else{
           $VE .= "<td align='center'></td></tr>\n";
@@ -528,17 +515,7 @@ class ui_tag extends FO_Plugin
     pg_free_result($result);
 
     $VC.= "<form name='form' method='POST' action='" . Traceback_uri() ."?mod=tag&upload=$Upload&item=$Item'>\n";
-    /* Get TagName Space Name */
-    $tag_ns = DB2KeyValArray("tag_ns", "tag_ns_pk", "tag_ns_name","");
 
-    /*
-     $text = _("Tag");
-     $VC .= "<p><font color='blue'>$text: $ufile_name</font></p>";
-     */
-
-    $select = Array2SingleSelectTag($tag_ns, "tag_ns_pk", "");
-    $text = _("Namespace");
-    $VC .= "<p>$text:$select</p>";
     $VC .= "<p>";
     $text = _("Tag");
     $VC .= "$text: <input type='text' id='tag_name' name='tag_name' maxlength='32' utocomplete='off' onclick='Tags_Get(\"". Traceback_uri() . "?mod=tag_get&uploadtree_pk=$Item\")'/> ";
@@ -604,9 +581,9 @@ class ui_tag extends FO_Plugin
 
     /* Get all information about $tag_file_pk (tag_file/tag_uploadtree table)*/
     if (Isdir($ufile_mode))
-    $sql = "SELECT tag_pk, tag_uploadtree_text, tag, tag_ns_pk, tag_ns_name, tag_desc FROM tag_uploadtree, tag, tag_ns WHERE tag_uploadtree_pk=$tag_file_pk AND tag_uploadtree.tag_fk = tag.tag_pk AND tag.tag_ns_fk = tag_ns.tag_ns_pk;";
+    $sql = "SELECT tag_pk, tag_uploadtree_text, tag, tag_desc FROM tag_uploadtree, tag, WHERE tag_uploadtree_pk=$tag_file_pk AND tag_uploadtree.tag_fk = tag.tag_pk";
     else
-    $sql = "SELECT tag_pk, tag_file_text, tag, tag_ns_pk, tag_ns_name, tag_desc FROM tag_file, tag, tag_ns WHERE tag_file_pk=$tag_file_pk AND tag_file.tag_fk = tag.tag_pk AND tag.tag_ns_fk = tag_ns.tag_ns_pk;";
+    $sql = "SELECT tag_pk, tag_file_text, tag, tag_desc FROM tag_file, tag WHERE tag_file_pk=$tag_file_pk AND tag_file.tag_fk = tag.tag_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
@@ -616,17 +593,10 @@ class ui_tag extends FO_Plugin
     $tag_notes = $row['tag_uploadtree_text'];
     else
     $tag_notes = $row['tag_file_text'];
-    $tag_ns_pk = $row['tag_ns_pk'];
     $tag_desc = $row['tag_desc'];
     pg_free_result($result);
 
     $VEd.= "<form name='form' method='POST' action='" . Traceback_uri() ."?mod=tag&upload=$Upload&item=$Item'>\n";
-    /* Get TagName Space Name */
-    $tag_ns = DB2KeyValArray("tag_ns", "tag_ns_pk", "tag_ns_name","");
-
-    $select = Array2SingleSelect($tag_ns, "tag_ns_pk",$tag_ns_pk,false,false);
-    $text = _("Namespace");
-    $VEd .= "<p>$text:$select</p>";
     $VEd .= "<p>";
     $text = _("Tag");
     $VEd .= "$text: <input type='text' id='tag_name' name='tag_name' autocomplete='off' onclick='Tags_Get(\"". Traceback_uri() . "?mod=tag_get&uploadtree_pk=$Item\")' value=\"$tag\"/> ";
@@ -682,7 +652,7 @@ class ui_tag extends FO_Plugin
     $ufile_mode = $row["ufile_mode"];
     pg_free_result($result);
 
-    $sql = "SELECT tag_pk, tag, tag_ns_pk, tag_ns_name, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_ns, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag.tag_ns_fk = tag_ns.tag_ns_pk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Item;";
+    $sql = "SELECT tag_pk, tag, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Item;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 0)
@@ -691,7 +661,7 @@ class ui_tag extends FO_Plugin
       $VD .= "<select multiple size='10' name='tag_file_pk[]'>\n";
       while ($row = pg_fetch_assoc($result))
       {
-        $VD .= "<option value='" . $row['tag_file_pk'] . "'>" . $row['tag_ns_name'] . "-" . $row['tag'] . "</option>\n";
+        $VD .= "<option value='" . $row['tag_file_pk'] . "'>" . "-" . $row['tag'] . "</option>\n";
       }
       $VD .= "</select>\n";
       if (Iscontainer($ufile_mode))
@@ -746,8 +716,8 @@ class ui_tag extends FO_Plugin
       $V .= $this->ShowEditTagPage($Upload,$Item);
     } else {
       /* Show create tag page */
-      $perm = GetTaggingPerms($_SESSION['UserId'],NULL);
-      if ($perm > 1) {
+      $perm = GetUploadPerm($Upload);
+      if ($perm >= PERM_WRITE ) {
         $V .= $this->ShowCreateTagPage($Upload,$Item);
       }
       /* Show delete tag page removing
