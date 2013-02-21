@@ -1298,6 +1298,11 @@
 %KEY%	"licen[cs]"
 %STR%	"alternatively =SOME= (this file|this software|this product) may be (used|distributed) under the terms"
 #
+%ENTRY%	_LT_DUAL_LICENSE_3_EXHIBIT
+%NOCHECK%
+%KEY%	"licen[cs]"
+%STR%	"exhibit [abc] =ANY= alternatively =SOME= (this file|this software|this product) may be (used|distributed) under the terms"
+#
 %ENTRY%	_LT_DUAL_LICENSE_4
 %KEY%	"licen[cs]"
 %STR%	"under the terms of =FEW= gnu general public license =FEW= or the gnu (lesser|library) general public license"
@@ -2123,6 +2128,10 @@
 #%STR%	"licen[cs]e ([^l]gpl|GNU (gpl|(g?eneral p|p)ublic licen[cs]e))"
 %STR%	"([^l]gpl|GNU) ((g?eneral p|p)ublic) licen[cs]e"
 #
+%ENTRY%	_LT_GPL_NAMED_EXHIBIT
+%KEY%	"licen[cs]"
+%STR%	"exhibit [abc] =ANY= ([^l]gpl|GNU) ((g?eneral p|p)ublic) licen[cs]e"
+#
 %ENTRY%	_LT_GPL_NAMED2
 %KEY%	"gpl"
 %STR%	"(under|terms|releas) ==SOME== (^l|^a)gpl"
@@ -2131,6 +2140,10 @@
 %ENTRY%	_LT_GPL_NAMED3
 %KEY%	"gpl"
 %STR%	"\<gpl\>"
+#
+%ENTRY%	_LT_GPL_NAMED3_EXHIBIT
+%KEY%	"gpl"
+%STR%	"Compatible Licences =SOME= \<gpl\>"
 #####
 # FIX-ME: these 'patterns' are really references, are they not?
 #####
@@ -2972,6 +2985,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_LGPL_NAMED
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e (GNU (lgpl|lesser GNU general public licen[cs]e|(library|lesser) (g?eneral p|p)ublic licen[cs]e))"
+#
+%ENTRY%	_LT_LGPL_NAMED_EXHIBIT
+%KEY%	"licen[cs]"
+%STR%	"exhibit [abc] =ANY= licen[cs]e (GNU (lgpl|lesser GNU general public licen[cs]e|(library|lesser) (g?eneral p|p)ublic licen[cs]e))"
 # To catch things like "this is LGPL".
 %ENTRY%	_LT_LGPL_NAMED2
 %KEY%	"lgpl"
@@ -3747,6 +3764,10 @@ e /* (INFILE(j)) */
 %ENTRY% _LT_PNG_ZLIBref4
 %KEY% "licen[cs]" 
 %STR% "licen[cs]e zlib" 
+#
+%ENTRY% _LT_PNG_ZLIBref4_EXHIBIT
+%KEY% "licen[cs]" 
+%STR% "exhibit [abc] =ANY= licen[cs]e zlib" 
 #
 %ENTRY% _LT_WXWINDOWS
 %KEY% "licen[cs]" 
@@ -6268,6 +6289,10 @@ k
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution-noncommercial-noderivs 1\.?0"
 #
+%ENTRY%	_TITLE_NC_ND_V10_1
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
+%STR%	"attribution-noderivs-noncommercial 1\.?0"
+#
 %ENTRY%	_TITLE_NC_ND_V20
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution-noncommercial-noderivs 2\.?0"
@@ -6459,6 +6484,10 @@ k
 %ENTRY%	_TITLE_CECILL_V11
 %KEY%	"licen[cs]"
 %STR%	"license =FEW= (version |v)1\.?1"
+#
+%ENTRY%	_TITLE_CECILL_V11_2
+%KEY%	"licen[cs]"
+%STR%	"free software licensing agreement cecill"
 #
 %ENTRY%	_TITLE_CECILL_V20
 %KEY%	"licen[cs]"
@@ -6808,6 +6837,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"MIT licen[cs]e"
 #
+%ENTRY%	_TITLE_MIT_EXHIBIT
+%KEY%	"licen[cs]"
+%STR%	"exhibit [abc] =ANY= MIT licen[cs]e"
+#
 %ENTRY%	_TITLE_MOTOSOTO091
 %KEY%	"licen[cs]"
 %STR%	"motosoto open source licen[cs]e =FEW= (v|version )0\.?9\.?1"
@@ -6887,6 +6920,10 @@ k
 %ENTRY%	_TITLE_NCSA
 %KEY%	"licen[cs]"
 %STR%	"university of illinois/ncsa open source licen[cs]e"
+#
+%ENTRY%	_TITLE_NCSA_EXHIBIT
+%KEY%	"licen[cs]"
+%STR%	"exhibit [abc] =ANY= university of illinois/ncsa open source licen[cs]e"
 #
 %ENTRY%	_TITLE_NESSUS
 %KEY%	"licen[cs]"
@@ -7040,9 +7077,17 @@ k
 %KEY%	"licen[cs]"
 %STR%	"open (source|software) licen[cs]e[^s] =FEW= (2\.?1|(osl |v|version )2\.?1)"
 #
+%ENTRY%	_TITLE_OSL21_EXHIBIT
+%KEY%	"licen[cs]"
+%STR%	"Compatible Licences =ANY= open (source|software) licen[cs]e[^s] =FEW= (2\.?1|(osl |v|version )2\.?1)"
+#
 %ENTRY%	_TITLE_OSL30
 %KEY%	"licen[cs]"
 %STR%	"open (source|software) licen[cs]e[^s] =FEW= (3\.?0|(osl |v|version )3\.?0)"
+#
+%ENTRY%	_TITLE_OSL30_EXHIBIT
+%KEY%	"licen[cs]"
+%STR%	"Compatible Licences =ANY= open (source|software) licen[cs]e[^s] =FEW= (3\.?0|(osl |v|version )3\.?0)"
 #
 %ENTRY%	_TITLE_PDDL
 %KEY%	"licen[cs]"

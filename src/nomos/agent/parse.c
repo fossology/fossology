@@ -972,7 +972,17 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * The CeCILL-C (C_V1) license is close to the GNU LGPL
    * The CeCILL (V2.0) license is compatible with the GNU GPL
    */
-  if (INFILE(_LT_CECILL_DUALref)) {
+  if (INFILE(_TITLE_CECILL_V11_2)) {
+    INTERESTING(lDebug ? "CeCILL_v1.1(#2)" : "CECILL-1.1");
+    lmem[_mGPL] = lmem[_mLGPL] = 1;
+  }
+  else if (INFILE(_TITLE_CECILL_B) || INFILE(_TITLE_CECILL_B1)) {
+    INTERESTING("CECILL-B");
+  }
+  else if (INFILE(_TITLE_CECILL_C) || INFILE(_TITLE_CECILL_C1)) {
+    INTERESTING("CECILL-C");
+  }
+  else if (INFILE(_LT_CECILL_DUALref)) {
     INTERESTING(lDebug ? "CeCILL(dual)" : "CECILL");
     lmem[_mGPL] = lmem[_mLGPL] = 1;
   }
@@ -998,9 +1008,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (INFILE(_TITLE_CECILL_V10)) {
       INTERESTING(lDebug ? "CeCILL_v1.0(#1)" : "CECILL-1.0");
     }
-    else if (INFILE(_TITLE_CECILL_V11)) {
-      INTERESTING(lDebug ? "CeCILL_v1.1(#1)" : "CECILL-1.1");
-    }
     else if (INFILE(_TITLE_CECILL_V20)) {
       INTERESTING(lDebug ? "CeCILL_v2.0(#1)" : "CECILL-2.0");
     }
@@ -1011,16 +1018,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "CeCILL_v1.0(#2)" : "CECILL-1.0");
     }
     else if (INFILE(_TITLE_CECILL_V11)) {
-      INTERESTING(lDebug ? "CeCILL_v1.1(#2)" : "CECILL-1.1");
+      INTERESTING(lDebug ? "CeCILL_v1.1(#1)" : "CECILL-1.1");
     }
     else if (INFILE(_TITLE_CECILL_V20)) {
       INTERESTING(lDebug ? "CeCILL_v2.0(#2)" : "CECILL-2.0");
-    }
-    else if (INFILE(_TITLE_CECILL_B) || INFILE(_TITLE_CECILL_B1)) {
-      INTERESTING("CECILL-B");
-    }
-    else if (INFILE(_TITLE_CECILL_C) || INFILE(_TITLE_CECILL_C1)) {
-      INTERESTING("CECILL-C");
     }
     else {
       INTERESTING(lDebug ? "CeCILL(#2)" : "CECILL");
@@ -1605,19 +1606,19 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       && (!INFILE(_TEXT_NOT_GPL))
       && (!INFILE(_TEXT_NOT_GPL2))
       && (!INFILE(_LT_CNRI_PYTHON_GPL))
-      && (!INFILE(_TITLE_EUPL_V10))
-      && (!INFILE(_TITLE_EUPL_V11))
       && (!INFILE(_LT_GPL_EXCEPT_BISON_1))
       && (!INFILE(_LT_GPL_EXCEPT_BISON_2))
       && (!INFILE(_LT_W3Cref4))
       && (INFILE(_LT_GPL_NAMED) 
         || INFILE(_LT_GPL_NAMED2)
-        || INFILE(_LT_GPL_NAMED3))) {
+        || INFILE(_LT_GPL_NAMED3))
+      && (!INFILE(_LT_GPL_NAMED3_EXHIBIT))
+      && (!INFILE(_LT_GPL_NAMED_EXHIBIT))) {
     cp = GPLVERS();
     INTERESTING(lDebug ? "GPL(named)" : cp);
   }
   if (!lmem[_mLGPL] && (INFILE(_LT_LGPL_NAMED)
-        || INFILE(_LT_LGPL_NAMED2))) {
+        || INFILE(_LT_LGPL_NAMED2)) && !INFILE(_LT_GPL_NAMED_EXHIBIT)) {
     cp = LGPLVERS();
     INTERESTING(lDebug ? "LGPL(named)" : cp);
   }
@@ -1634,7 +1635,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("JSON");
     lmem[_mMIT] = 1;
   }
-  if (INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) {
+  if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) && !INFILE(_TITLE_MIT_EXHIBIT)) {
     if(INFILE(_LT_MIT_NO_EVIL)) {
       INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
       lmem[_mMIT] = 1;
@@ -1677,7 +1678,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "MPL/NPL#5" : cp);
       lmem[_mMPL] = 1;
     }
-    else if (!lmem[_mMIT] && (mCR_MIT() || INFILE(_TITLE_MIT))) {
+    else if (!lmem[_mMIT] && (mCR_MIT() || INFILE(_TITLE_MIT)) && !INFILE(_TITLE_MIT_EXHIBIT)) {
       INTERESTING(lDebug ? "MIT(2)" : "MIT");
       lmem[_mMIT] = 1;
     }
@@ -2095,7 +2096,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_PNG_ZLIB_1)) {
     INTERESTING(lDebug ? "ZLIB(1)" : "Zlib");
   }
-  else if (INFILE(_LT_PNG_ZLIBref4)) {
+  else if (INFILE(_LT_PNG_ZLIBref4) && !INFILE(_LT_PNG_ZLIBref4_EXHIBIT)) {
     INTERESTING(lDebug ? "ZLIB(6)" : "Zlib");
   }
   else if (!lmem[_fW3C] && INFILE(_LT_PNG_ZLIB_2)) {
@@ -4372,7 +4373,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     cp = (INFILE(_TITLE_AFL) ?  AFLVERS() : OSLVERS());
     INTERESTING(lDebug? "AFL#1" : cp);
   }
-  else if (INFILE(_TITLE_OSL21)  && !INFILE(_TITLE_EUPL_V10)  && !INFILE(_TITLE_EUPL_V11)) {
+  else if (INFILE(_TITLE_OSL21) && !INFILE(_TITLE_OSL21_EXHIBIT)) {
     cp = OSLVERS();
     INTERESTING(lDebug? "OSL(T2.1)" : cp);
   }
@@ -4380,7 +4381,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     cp = AFLVERS();
     INTERESTING(lDebug? "AFL(T2.1)" : cp);
   }
-  else if (INFILE(_TITLE_OSL30) && !INFILE(_TITLE_EUPL_V10)  && !INFILE(_TITLE_EUPL_V11)) {
+  else if (INFILE(_TITLE_OSL30) && !INFILE(_TITLE_OSL30_EXHIBIT)) {
     cp = OSLVERS();
     INTERESTING(lDebug? "OSL(T3.0)" : cp);
   }
@@ -4472,7 +4473,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-ND-2.0");
     }
-    else if (INFILE(_TITLE_NC_ND_V10)) {
+    else if (INFILE(_TITLE_NC_ND_V10) || INFILE(_TITLE_NC_ND_V10_1)) {
       lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-ND-1.0");
     }
@@ -5352,10 +5353,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if (INFILE(_LT_DUAL_LICENSE_1)) {
     INTERESTING(lDebug ? "Dual-license(1)" : "Dual-license");
   }
-  else if (INFILE(_LT_DUAL_LICENSE_2)) {
+  else if (INFILE(_LT_DUAL_LICENSE_2)) { 
     INTERESTING(lDebug ? "Dual-license(2)" : "Dual-license");
   }
-  else if (INFILE(_LT_DUAL_LICENSE_3) && !INFILE(_TITLE_MPL11) && !INFILE(_TITLE_CUA10)) {
+  else if (INFILE(_LT_DUAL_LICENSE_3) && !INFILE(_LT_DUAL_LICENSE_3_EXHIBIT)) {
     INTERESTING(lDebug ? "Dual-license(3)" : "Dual-license");
   }
   else if (INFILE(_LT_DUAL_LICENSE_4)) {
@@ -5426,7 +5427,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /** University of Illinois/NCSA Open Source License */
-  if (INFILE(_TITLE_NCSA)) {
+  if (INFILE(_TITLE_NCSA) && !INFILE(_TITLE_NCSA_EXHIBIT)) {
     INTERESTING("NCSA");
     lmem[_fBSD] = 1;
     lmem[_mMIT] = 1;
