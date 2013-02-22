@@ -287,7 +287,7 @@ class user_add extends FO_Plugin {
         while ($GroupRow = pg_fetch_assoc($groupresult))
           $GroupArray[$GroupRow['group_pk']] = $GroupRow['group_name'];
         pg_free_result($groupresult);
-        $text = _("New Upload Group<br>(Group to give a new upload permission to access)");
+        $text = _("Group to give access permission for every new upload");
         $V.= "$Style<th>$text</th>";
         $V.= "<td>";
         $V .= Array2SingleSelect($GroupArray, "new_upload_group_fk", "", true, false);
@@ -295,7 +295,7 @@ class user_add extends FO_Plugin {
         $V .= "</tr>\n";
 
         /******  New Upload Permissions ******/
-        $text = _("New Upload Permission<br>(Permission to give a new upload group)");
+        $text = _("Access Permission to give the above group");
         $V.= "$Style<th>$text</th>";
         $V.= "<td>";
         $V .= Array2SingleSelect($PERM_NAMES, "new_upload_perm", "", true, false);
