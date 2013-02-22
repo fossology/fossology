@@ -209,9 +209,14 @@ class admin_license_file extends FO_Plugin
 
     $ob = "";     // output buffer
     $ob .= "<FORM name='Updatefm' action='?mod=" . $this->Name . "' method='POST'>";
+    $req_marydone = $req_shortname = "";
+    if ($rf_pk) {
+      $req_marydone = $_GET['req_marydone'];
+      $req_shortname = $_GET['req_shortname'];
+    }
     $ob .= "<input type=hidden name=rf_pk value='$rf_pk'>";
-    $ob .= "<input type=hidden name=req_marydone value='$_GET[req_marydone]'>";
-    $ob .= "<input type=hidden name=req_shortname value='$_GET[req_shortname]'>";
+    $ob .= "<input type=hidden name=req_marydone value='$req_marydone'";
+    $ob .= "<input type=hidden name=req_shortname value='$req_shortname'>";
     $ob .= "<table>";
 
     if ($rf_pk)  // true if this is an update
@@ -232,16 +237,30 @@ class admin_license_file extends FO_Plugin
       }
       $ob .= "<input type=hidden name=updateit value=true>";
       $row = pg_fetch_assoc($result);
+      pg_free_result($result);
     }
     else  // this is an add new rec
     {
       $ob .= "<input type=hidden name=addit value=true>";
       $row = array();
     }
-    pg_free_result($result);
+
+    $rf_active = $marydone = $rf_shortname = $rf_fullname = $rf_text_updatable = $rf_detector_type = $rf_text = $rf_url = $rf_notes = "";
+    if ($row)
+    {
+      $rf_active = $row['rf_active'];
+      $marydone = $row['marydone'];
+      $rf_shortname = $row['rf_shortname'];
+      $rf_fullname = $row['rf_fullname'];
+      $rf_text_updatable = $row['rf_text_updatable'];
+      $rf_detector_type = $row['rf_detector_type'];
+      $rf_text = $row['rf_text'];
+      $rf_url = $row['rf_url'];
+      $rf_notes = $row['rf_notes'];
+    }
 
     $ob .= "<tr>";
-    $active = ($row['rf_active'] == 't') ? "Yes" : "No";
+    $active = ($rf_active == 't') ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_active", $active);
     $text = _("Active");
     $ob .= "<td align=right>$text</td>";
@@ -249,7 +268,7 @@ class admin_license_file extends FO_Plugin
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
+    $marydone = ($marydone == 't') ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "marydone", $marydone);
     $text = _("Checked");
     $ob .= "<td align=right>$text</td>";
@@ -261,17 +280,17 @@ class admin_license_file extends FO_Plugin
     //    $ob .= "<td><input readonly='readonly' type='text' name='rf_shortname' value='$row[rf_shortname]' size=80></td>";
     $text = _("Short name");
     $ob .= "<td align=right>$text</td>";
-    $ob .= "<td><input type='text' name='rf_shortname' value='$row[rf_shortname]' size=80></td>";
+    $ob .= "<td><input type='text' name='rf_shortname' value='$rf_shortname' size=80></td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
     $text = _("Full name");
     $ob .= "<td align=right>$text</td>";
-    $ob .= "<td><input type='text' name='rf_fullname' value='$row[rf_fullname]' size=80></td>";
+    $ob .= "<td><input type='text' name='rf_fullname' value='$rf_fullname' size=80></td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $updatable = ($row['rf_text_updatable'] == 't') ? true : false;
+    $updatable = ($rf_text_updatable == 't') ? true : false;
     if (empty($rf_pk) || $updatable)
     {
       $rotext = '';
@@ -285,11 +304,11 @@ class admin_license_file extends FO_Plugin
     }
     $text = _("License Text");
     $ob .= "<td align=right>$text $rotext</td>";
-    $ob .= "<td><textarea name='rf_text' rows=10 cols=80 $rooption>".$row['rf_text']. "</textarea></td> ";
+    $ob .= "<td><textarea name='rf_text' rows=10 cols=80 $rooption>".$rf_text. "</textarea></td> ";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $tupable = ($row['rf_text_updatable'] == 't') ? "Yes" : "No";
+    $tupable = ($rf_text_updatable == 't') ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_text_updatable", $tupable);
     $text = _("Text Updatable");
     $ob .= "<td align=right>$text</td>";
@@ -297,7 +316,7 @@ class admin_license_file extends FO_Plugin
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $dettype = ($row['rf_detector_type'] == '2') ? "Nomos" : "Reference License";
+    $dettype = ($rf_detector_type == '2') ? "Nomos" : "Reference License";
     $select = Array2SingleSelect(array("1"=>"Reference License", "2"=>"Nomos"), "rf_detector_type", $dettype);
     $text = _("Detector Type");
     $ob .= "<td align=right>$text</td>";
@@ -307,14 +326,14 @@ class admin_license_file extends FO_Plugin
     $ob .= "<tr>";
     $text = _("URL");
     $ob .= "<td align=right>$text";
-    $ob .= "<a href='$row[rf_url]'><image border=0 src=" . Traceback_uri() . "images/right-point-bullet.gif></a></td>";
-    $ob .= "<td><input type='text' name='rf_url' value='$row[rf_url]' size=80></td>";
+    $ob .= "<a href='$rf_url'><image border=0 src=" . Traceback_uri() . "images/right-point-bullet.gif></a></td>";
+    $ob .= "<td><input type='text' name='rf_url' value='$rf_url' size=80></td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
     $text = _("Public Notes");
     $ob .= "<td align=right>$text</td>";
-    $ob .= "<td><textarea name='rf_notes' rows=5 cols=80>" .$row['rf_notes']. "</textarea></td> ";
+    $ob .= "<td><textarea name='rf_notes' rows=5 cols=80>" .$rf_notes. "</textarea></td> ";
     $ob .= "</tr>";
 
     $ob .= "</table>";
@@ -379,12 +398,12 @@ class admin_license_file extends FO_Plugin
 
     $ob = "";     // output buffer
 
-    $shortname = pg_escape_string($_POST['rf_shortname']);
-    $fullname = pg_escape_string($_POST['rf_fullname']);
-    $url = pg_escape_string($_POST['rf_url']);
-    $notes = pg_escape_string($_POST['rf_notes']);
-    $text = pg_escape_string($_POST['rf_text']);
-    $licmd5 = md5($text);
+    $rf_shortname = pg_escape_string($_POST['rf_shortname']);
+    $rf_fullname = pg_escape_string($_POST['rf_fullname']);
+    $rf_url = pg_escape_string($_POST['rf_url']);
+    $rf_notes = pg_escape_string($_POST['rf_notes']);
+    $rf_text = pg_escape_string($_POST['rf_text']);
+    $licmd5 = md5($rf_text);
     $sql = "INSERT into license_ref (
                  rf_active, marydone, rf_shortname, rf_fullname,
                  rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable,
@@ -392,10 +411,10 @@ class admin_license_file extends FO_Plugin
                  VALUES (
                  '$_POST[rf_active]',
                  '$_POST[marydone]',
-                 '$shortname',
+                 '$rf_shortname',
                  '$rf_fullname',
                  '$rf_url',
-                 '$notes', '$licmd5', '$text',
+                 '$rf_notes', '$licmd5', '$rf_text',
                  '$_POST[rf_text_updatable]',
                  '$_POST[rf_detector_type]')";
     $result = pg_query($PG_CONN, $sql);
@@ -461,8 +480,6 @@ class admin_license_file extends FO_Plugin
         {
           $V .= $this->Updatedb($_POST);
           $V .= $this->Inputfm();
-          if ($_POST["req_shortname"])
-          $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
           break;
         }
 
@@ -477,8 +494,6 @@ class admin_license_file extends FO_Plugin
         {
           $V .= $this->Adddb($_POST);
           $V .= $this->Inputfm();
-          if ($_POST["req_shortname"])
-          $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
           break;
         }
 
