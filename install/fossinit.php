@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -177,16 +177,6 @@ function initLicenseRefTable($Verbose)
   global $LIBEXECDIR;
   global $PG_CONN;
 
-  $sql = "SELECT count(rf_pk) from license_ref;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
-  if ($row && $row['count'] > 0) {
-    echo "NOTE: license_ref table already initialized, skipping.\n";
-    return;
-  }
-
   if (!is_dir($LIBEXECDIR)) {
     print "FATAL: Directory '$LIBEXECDIR' does not exist.\n";
     return (1);
@@ -196,47 +186,102 @@ function initLicenseRefTable($Verbose)
     print "FATAL: Unable to access '$LIBEXECDIR'.\n";
     return (1);
   }
-  $file = "$LIBEXECDIR/licenseref.sql";
+  /** back up data of license_ref table */
+  $sql = "CREATE TABLE license_ref_2 as select * from license_ref;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+  /** delete data of old license_ref table */
+  $sql = "DELETE FROM license_ref;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
 
-  if (is_file($file)) {
-    $handle = fopen($file, "r");
-    $pattern = '/^INSERT INTO/';
-    $sql = "";
-    $flag = 0;
-    while(!feof($handle))
-    {
-      $buffer = fgets($handle, 4096);
-      if ( preg_match($pattern, $buffer) == 0)
-      {
-        $sql .= $buffer;
-        continue;
-      } else {
-        if ($flag)
-        {
-          @$result = pg_query($PG_CONN, $sql);
-          if ($result == FALSE)
-          {
-            $PGError = pg_last_error($PG_CONN);
-            print "SQL failed: $PGError\n";
-          }
-          @pg_free_result($result);
-        }
-        $sql = $buffer;
-        $flag = 1;
-      }
-    }
-    @$result = pg_query($PG_CONN, $sql);
-    if ($result == FALSE)
-    {
-      $PGError = pg_last_error($PG_CONN);
-      print "SQL failed: $PGError\n";
-    }
-    @pg_free_result($result);
-    fclose($handle);
-  } else {
-    print "FATAL: Unable to access '$file'.\n";
+  /** import licenseref.sql */
+  $import_license_ref = "psql -U fossy -w -d fossology -f db/licenseref.sql > /dev/null";
+  system($import_license_ref, $return_val);
+  if ($return_val)
+  {
+    print "FATAL: Unable to import licenseref.sql.\n";
     return (1);
   }
+
+  $sql = "select * from license_ref_2;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  /** traverse all records in user's license_ref table, update or insert */
+  while ($row = pg_fetch_assoc($result))
+  {
+    $rf_shortname = $row['rf_shortname'];
+    $escaped_name = pg_escape_string($rf_shortname);
+    $sql = "SELECT * from license_ref where rf_shortname = '$escaped_name';";
+    $result_check = pg_query($PG_CONN, $sql);
+    DBCheckResult($result_check, $sql, __FILE__, __LINE__);
+    $count = pg_num_rows($result_check);
+
+    $rf_text = pg_escape_string($row['rf_text']);
+    $rf_url = pg_escape_string($row['rf_url']);
+    $rf_fullname = pg_escape_string($row['rf_fullname']);
+    $rf_notes = pg_escape_string($row['rf_notes']);
+    $rf_active = $row['rf_active'];
+    $marydone = $row['marydone'];
+    $rf_text_updatable = $row['rf_text_updatable'];
+    $rf_detector_type = $row['rf_detector_type'];
+
+    if ($count) // update when it is existing
+    {
+      $row_check = pg_fetch_assoc($result_check);
+      pg_free_result($result_check);
+      $rf_text_check = pg_escape_string($row_check['rf_text']);
+      $rf_url_check = pg_escape_string($row_check['rf_url']);
+      $rf_fullname_check = pg_escape_string($row_check['rf_fullname']);
+      $rf_notes_check = pg_escape_string($row_check['rf_notes']);
+      $rf_active_check = $row_check['rf_active'];
+      $marydone_check = $row_check['marydone'];
+      $rf_text_updatable_check = $row_check['rf_text_updatable'];
+      $rf_detector_type_check = $row_check['rf_detector_type'];
+
+      /** no record to update */
+      if ($rf_text_check === $rf_text && $rf_url_check === $rf_url && $rf_fullname_check === $rf_fullname && 
+          $rf_notes_check === $rf_notes && $rf_active_check === $rf_active &&
+          $rf_text_updatable_check === $rf_text_updatable && $marydone === $marydone_check)
+        continue;
+
+      $sql = "UPDATE license_ref set ";
+      if ($rf_text_check != $rf_text && !empty($rf_text))  $sql .= " rf_text='$rf_text',";
+      if ($rf_url_check != $rf_url && !empty($rf_url))  $sql .= " rf_url='$rf_url',";
+      if ($rf_fullname_check != $rf_fullname && !empty($rf_fullname))  $sql .= " rf_fullname ='$rf_fullname',";
+      if ($rf_notes_check != $rf_notes && !empty($rf_notes))  $sql .= " rf_notes ='$rf_notes',";
+      if ($rf_active_check != $rf_active && !empty($rf_active))  $sql .= " rf_active ='$rf_active',";
+      if ($marydone_check != $marydone && !empty($marydone))  $sql .= " marydone ='$marydone',";
+      if ($rf_text_updatable_check != $rf_text_updatable && !empty($rf_text_updatable))  $sql .= " rf_text_updatable ='$rf_text_updatable',";
+      if ($rf_detector_type_check != $rf_detector_type && !empty($rf_detector_type))  $sql .= " rf_detector_type = '$rf_detector_type',";
+      $sql = substr_replace($sql ,"",-1);
+
+      $sql .= " where rf_shortname = '$escaped_name';";
+      $result_back = pg_query($PG_CONN, $sql);
+      DBCheckResult($result_back, $sql, __FILE__, __LINE__);
+      pg_free_result($result_back);
+
+    }
+    else  // insert when it is new
+    {
+      pg_free_result($result_check);
+
+      $sql = "INSERT INTO license_ref (rf_shortname, rf_text, rf_url, rf_fullname, rf_notes, rf_active, rf_text_updatable, rf_detector_type, marydone) VALUES ('$escaped_name', '$rf_text', '$rf_url', '$rf_fullname', '$rf_notes', '$row[rf_active]', '$row[rf_text_updatable]', '$row[rf_detector_type]', '$row[marydone]');";
+      $result_back = pg_query($PG_CONN, $sql);
+      DBCheckResult($result_back, $sql, __FILE__, __LINE__);
+      pg_free_result($result_back);
+    }
+  }
+
+  pg_free_result($result);
+
+  /** drop the backup table */
+  $sql = "DROP TABLE license_ref_2;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
   return (0);
 } // initLicenseRefTable()
 
