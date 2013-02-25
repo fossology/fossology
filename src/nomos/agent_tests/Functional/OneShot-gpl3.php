@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -50,7 +50,7 @@ class OneShotgpl3Test extends PHPUnit_Framework_TestCase
     $last = exec("$this->nomos $this->gplv3 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
     $this->assertEquals($fname, 'gpl-3.0.txt', "Error filename $fname does not equal gpl-3.0.txt");
-    $this->assertEquals($license, 'FSF,GPL-3.0+',
+    $this->assertEquals($license, 'GPL-3.0+',
       "Error license does not equal FSF,GPL_v3. $license was returned");
   }
 }
