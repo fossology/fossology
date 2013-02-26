@@ -945,6 +945,10 @@
 %KEY%	"software"
 %STR%	"neither the name =SOME= may be used to endorse or promote products derived from this software without specific prior written permission"
 #
+%ENTRY%	_LT_BSD_CLAUSE_CLEAR
+%KEY%	"licen[cs]"
+%STR%	"no express or implied licenses to any =FEW= patent rights are granted by this license"
+#
 %ENTRY%	_LT_FREE_BSD
 %KEY% "software"	
 %STR%	"this software is provided by =FEW= freebsd project"

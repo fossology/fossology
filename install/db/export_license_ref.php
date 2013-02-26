@@ -24,6 +24,18 @@
  * \exit 0: sucess; 1: failed
  */
 
+$Usage = "Usage: " . basename($argv[0]) . "
+  -h     help, this message
+  --help  help, this message
+  ";
+
+$options = getopt("h", array("help"));
+if (!empty($options))
+{
+  print $Usage;
+  exit (0);
+}
+
 # dump license_ref table into a temp file
 $temp_file = "licenseref.sql";
 $dump_command = "pg_dump -f licenseref.sql -a -t license_ref --column-inserts fossology -U fossy -w";

@@ -653,6 +653,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           && INFILE(_LT_BSD_CLAUSE_3) && INFILE(_LT_BSD_CLAUSE_4)) {
         INTERESTING("BSD-4-Clause");
       } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
+          && INFILE(_LT_BSD_CLAUSE_4) && INFILE(_LT_BSD_CLAUSE_CLEAR)) {
+        INTERESTING("BSD-3-Clause-Clear");
+      } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
           && INFILE(_LT_BSD_CLAUSE_4)) {
         INTERESTING("BSD-3-Clause");
       } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
