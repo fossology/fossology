@@ -1537,11 +1537,6 @@
   $Schema["TABLE"]["tag"]["tag"]["ALTER"] = "ALTER TABLE \"tag\" ALTER COLUMN \"tag\" SET NOT NULL;";
   $Schema["TABLE"]["tag"]["tag"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["tag"]["tag_ns_fk"]["DESC"] = "";
-  $Schema["TABLE"]["tag"]["tag_ns_fk"]["ADD"] = "ALTER TABLE \"tag\" ADD COLUMN \"tag_ns_fk\" int4;";
-  $Schema["TABLE"]["tag"]["tag_ns_fk"]["ALTER"] = "ALTER TABLE \"tag\" ALTER COLUMN \"tag_ns_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["tag"]["tag_ns_fk"]["UPDATE"] = "";
-
   $Schema["TABLE"]["tag"]["tag_desc"]["DESC"] = "COMMENT ON COLUMN \"tag\".\"tag_desc\" IS 'tag description';";
   $Schema["TABLE"]["tag"]["tag_desc"]["ADD"] = "ALTER TABLE \"tag\" ADD COLUMN \"tag_desc\" text;";
   $Schema["TABLE"]["tag"]["tag_desc"]["ALTER"] = "ALTER TABLE \"tag\" ALTER COLUMN \"tag_desc\" DROP NOT NULL;";
@@ -1588,38 +1583,6 @@
   $Schema["TABLE"]["tag_manage"]["is_disabled"]["ADD"] = "ALTER TABLE \"tag_manage\" ADD COLUMN \"is_disabled\" bool;";
   $Schema["TABLE"]["tag_manage"]["is_disabled"]["ALTER"] = "ALTER TABLE \"tag_manage\" ALTER COLUMN \"is_disabled\" DROP NOT NULL;";
   $Schema["TABLE"]["tag_manage"]["is_disabled"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["tag_ns"]["tag_ns_pk"]["DESC"] = "";
-  $Schema["TABLE"]["tag_ns"]["tag_ns_pk"]["ADD"] = "ALTER TABLE \"tag_ns\" ADD COLUMN \"tag_ns_pk\" int4;";
-  $Schema["TABLE"]["tag_ns"]["tag_ns_pk"]["ALTER"] = "ALTER TABLE \"tag_ns\" ALTER COLUMN \"tag_ns_pk\" SET NOT NULL, ALTER COLUMN \"tag_ns_pk\" SET DEFAULT nextval('tags_ns_tag_ns_pk_seq'::regclass);";
-  $Schema["TABLE"]["tag_ns"]["tag_ns_pk"]["UPDATE"] = "UPDATE tag_ns SET tag_ns_pk=nextval('tags_ns_tag_ns_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["tag_ns"]["tag_ns_name"]["DESC"] = "";
-  $Schema["TABLE"]["tag_ns"]["tag_ns_name"]["ADD"] = "ALTER TABLE \"tag_ns\" ADD COLUMN \"tag_ns_name\" varchar(32);";
-  $Schema["TABLE"]["tag_ns"]["tag_ns_name"]["ALTER"] = "ALTER TABLE \"tag_ns\" ALTER COLUMN \"tag_ns_name\" SET NOT NULL;";
-  $Schema["TABLE"]["tag_ns"]["tag_ns_name"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_group_pk"]["DESC"] = "";
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_group_pk"]["ADD"] = "ALTER TABLE \"tag_ns_group\" ADD COLUMN \"tag_ns_group_pk\" int4;";
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_group_pk"]["ALTER"] = "ALTER TABLE \"tag_ns_group\" ALTER COLUMN \"tag_ns_group_pk\" SET NOT NULL, ALTER COLUMN \"tag_ns_group_pk\" SET DEFAULT nextval('tag_ns_group_tag_ns_group_pk_seq'::regclass);";
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_group_pk"]["UPDATE"] = "UPDATE tag_ns_group SET tag_ns_group_pk=nextval('tag_ns_group_tag_ns_group_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_fk"]["DESC"] = "";
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_fk"]["ADD"] = "ALTER TABLE \"tag_ns_group\" ADD COLUMN \"tag_ns_fk\" int4;";
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_fk"]["ALTER"] = "ALTER TABLE \"tag_ns_group\" ALTER COLUMN \"tag_ns_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["tag_ns_group"]["group_fk"]["DESC"] = "";
-  $Schema["TABLE"]["tag_ns_group"]["group_fk"]["ADD"] = "ALTER TABLE \"tag_ns_group\" ADD COLUMN \"group_fk\" int4;";
-  $Schema["TABLE"]["tag_ns_group"]["group_fk"]["ALTER"] = "ALTER TABLE \"tag_ns_group\" ALTER COLUMN \"group_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["tag_ns_group"]["group_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_perm"]["DESC"] = "COMMENT ON COLUMN \"tag_ns_group\".\"tag_ns_perm\" IS 'Permission the group has in this tag namespace; 0=none, 1=read only, 2=read/write, 3=admin';";
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_perm"]["ADD"] = "ALTER TABLE \"tag_ns_group\" ADD COLUMN \"tag_ns_perm\" int4;";
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_perm"]["ALTER"] = "ALTER TABLE \"tag_ns_group\" ALTER COLUMN \"tag_ns_perm\" SET NOT NULL;";
-  $Schema["TABLE"]["tag_ns_group"]["tag_ns_perm"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_pk"]["DESC"] = "";
@@ -1956,9 +1919,7 @@
   $Schema["CONSTRAINT"]["rf_pkpk"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_pkpk\" PRIMARY KEY (\"rf_pk\");";
   $Schema["CONSTRAINT"]["sysconfig_pkey"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_pkey\" PRIMARY KEY (\"sysconfig_pk\");";
   $Schema["CONSTRAINT"]["tag_manage_pkey"] = "ALTER TABLE \"tag_manage\" ADD CONSTRAINT \"tag_manage_pkey\" PRIMARY KEY (\"tag_manage_pk\");";
-  $Schema["CONSTRAINT"]["tag_ns_group_pkey"] = "ALTER TABLE \"tag_ns_group\" ADD CONSTRAINT \"tag_ns_group_pkey\" PRIMARY KEY (\"tag_ns_group_pk\");";
   $Schema["CONSTRAINT"]["tags_file_pkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_pkey\" PRIMARY KEY (\"tag_file_pk\");";
-  $Schema["CONSTRAINT"]["tags_ns_pkey"] = "ALTER TABLE \"tag_ns\" ADD CONSTRAINT \"tags_ns_pkey\" PRIMARY KEY (\"tag_ns_pk\");";
   $Schema["CONSTRAINT"]["tags_pkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_pkey\" PRIMARY KEY (\"tag_pk\");";
   $Schema["CONSTRAINT"]["tags_uploadtree_pkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_pkey\" PRIMARY KEY (\"tag_uploadtree_pk\");";
   $Schema["CONSTRAINT"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"ufile_rel_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
@@ -1991,8 +1952,6 @@
   $Schema["CONSTRAINT"]["report_cache_report_cache_key_key"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_report_cache_key_key\" UNIQUE (\"report_cache_key\");";
   $Schema["CONSTRAINT"]["rf_md5unique"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_md5unique\" UNIQUE (\"rf_md5\");";
   $Schema["CONSTRAINT"]["sysconfig_variablename_key"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_variablename_key\" UNIQUE (\"variablename\");";
-  $Schema["CONSTRAINT"]["tags_ns_tag_ns_name_key"] = "ALTER TABLE \"tag_ns\" ADD CONSTRAINT \"tags_ns_tag_ns_name_key\" UNIQUE (\"tag_ns_name\");";
-  $Schema["CONSTRAINT"]["tags_tag_key"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_tag_key\" UNIQUE (\"tag\",\"tag_ns_fk\");";
   $Schema["CONSTRAINT"]["user_user_name_key"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_user_name_key\" UNIQUE (\"user_name\");";
   $Schema["CONSTRAINT"]["agent_lic_meta_pfile_fk_fkey"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"agent_lic_meta_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["agent_lic_status_pfile_fk_fkey"] = "ALTER TABLE \"agent_lic_status\" ADD CONSTRAINT \"agent_lic_status_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2034,11 +1993,8 @@
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_fkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["pkg_rpm_pfile_fk_fkey"] = "ALTER TABLE \"pkg_rpm\" ADD CONSTRAINT \"pkg_rpm_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["tag_manage_upload_fk_fkey"] = "ALTER TABLE \"tag_manage\" ADD CONSTRAINT \"tag_manage_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["tag_ns_group_group_fk_fkey"] = "ALTER TABLE \"tag_ns_group\" ADD CONSTRAINT \"tag_ns_group_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["tag_ns_group_tag_ns_fk_fkey"] = "ALTER TABLE \"tag_ns_group\" ADD CONSTRAINT \"tag_ns_group_tag_ns_fk_fkey\" FOREIGN KEY (\"tag_ns_fk\") REFERENCES \"tag_ns\" (\"tag_ns_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["tags_file_pfile_fk_fkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["tags_file_tag_fk_fkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_tag_fk_fkey\" FOREIGN KEY (\"tag_fk\") REFERENCES \"tag\" (\"tag_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["tags_tag_ns_fk_fkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_tag_ns_fk_fkey\" FOREIGN KEY (\"tag_ns_fk\") REFERENCES \"tag_ns\" (\"tag_ns_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["tags_uploadtree_tag_fk_fkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_tag_fk_fkey\" FOREIGN KEY (\"tag_fk\") REFERENCES \"tag\" (\"tag_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["users_default_bucketpool_pk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_default_bucketpool_pk_fkey\" FOREIGN KEY (\"default_bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
