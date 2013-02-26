@@ -468,6 +468,77 @@ int	SetParm	(char *ParmName, char *Parm)
 } /* SetParm() */
 
 
+/**
+ * \brief Update the perm_upload table
+ *
+ * \param long upload_pk
+ *
+ * \return int 0 failure, 1 success
+ */
+int UpdatePerms(long UploadPk)
+{
+  PGresult *result;
+  int user_pk;
+  int group_pk;
+  int new_upload_group_fk;
+  int new_upload_perm;
+  char *user_name;
+
+  /* Add user permission to perm_upload */
+
+  /* Get the user_pk from the upload table */
+  snprintf(SQL, sizeof(SQL), "select user_fk from upload where upload_pk='%ld'", UploadPk);
+  result = PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  if (PQntuples(result) < 1)
+  {
+    LOG_ERROR("No records returned in %s", SQL);
+    return 0;
+  }
+  user_pk = atoi(PQgetvalue(result, 0, 0));
+  PQclear(result);
+
+  /* Get the user_name from the users table */
+  snprintf(SQL, sizeof(SQL), "select user_name, new_upload_group_fk, new_upload_perm from users where user_pk='%d'", user_pk);
+  result =  PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  if (PQntuples(result) < 1)
+  {
+    LOG_ERROR("No records returned in %s", SQL);
+    return 0;
+  }
+  user_name = PQgetvalue(result, 0, 0);
+  new_upload_group_fk = atoi(PQgetvalue(result, 0, 1));
+  new_upload_perm = atoi(PQgetvalue(result, 0, 2));
+  PQclear(result);
+
+  /* look up user's group_pk */
+  snprintf(SQL, sizeof(SQL), "select group_pk from groups where group_name='%s'", user_name);
+  result =  PQexec(pgConn, SQL); 
+  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  if (PQntuples(result) < 1)
+  {
+    LOG_ERROR("No records returned in %s", SQL);
+    return 0;
+  }
+  group_pk = atoi(PQgetvalue(result, 0, 0));
+  PQclear(result);
+
+  /* insert user PERM_ADMIN record into perm_upload table */
+  snprintf(SQL, sizeof(SQL), "INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES (%d, %ld, %d)", PERM_ADMIN, UploadPk, group_pk);
+  result =  PQexec(pgConn, SQL); 
+  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) return(0);
+  PQclear(result);
+
+  /* Now add any user new_upload_group_fk/new_upload_perm to perm_upload  */
+  snprintf(SQL, sizeof(SQL), "INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES (%d, %ld, %d)", new_upload_perm, UploadPk, new_upload_group_fk);
+  result =  PQexec(pgConn, SQL); 
+  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) return(0);
+  PQclear(result);
+
+  return(1);
+}
+
 /*********************************************************
  Usage():
  *********************************************************/
@@ -485,7 +556,7 @@ void    Usage   (char *Name)
 /*********************************************************/
 int	main	(int argc, char *argv[])
 {
-  int c, i;
+  int c, i, rv;
   long UploadPk=-1;
   PGresult *pgResult;
   long *uploads_to_scan;
@@ -564,8 +635,12 @@ int	main	(int argc, char *argv[])
   if (fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__))
   PQclear(pgResult);
 
+  /* Update upload permissions */
+  rv = UpdatePerms(UploadPk);
+
   PQfinish(pgConn);
   fo_scheduler_disconnect(0);
+  if (rv == 0) LOG_ERROR("Unable to update permissions on upload %ld", UploadPk);
   return 0;
 } /* main() */
 

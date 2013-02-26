@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -26,4 +26,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "libfossagent.h"
 #include "sqlCopy.h"
 #include "fossconfig.h"
+
+#define PERM_NONE 0
+#define PERM_READ 1
+#define PERM_WRITE 3
+#define PERM_ADMIN 10
+
 #endif /* LIBFOSSOLOGY_H */
