@@ -204,6 +204,9 @@ class upload_file extends FO_Plugin {
         $text = _("Upload");
         $V.= "<p>&nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='$text'>\n";
         $V.= "</form>\n";
+        
+        $text = _("Starting in FOSSology v 2.2 only your group and your designated group will have access to your uploaded files.  To specify a designated group go into Admin > Users > Account Settings.  To specify which users are in your group or your designated group, go into Admin > Groups > Manage Group Users.");
+        $V .= "<p>$text";
         break;
       case "Text":
         break;
