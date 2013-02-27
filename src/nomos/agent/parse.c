@@ -6084,6 +6084,9 @@ char *cddlVersion(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_TITLE_CDDL_V11)) {
     lstr = "CDDL-1.1";
   }
+  else {
+    lstr = "CDDL";
+  }
   return lstr;
 }
 
