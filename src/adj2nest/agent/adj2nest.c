@@ -18,7 +18,7 @@
 
  -------------------------------------------
  adj2nest
- Convert an adjacency list to a nested set.
+ Convert an adjacency list to a nested set and update user permissions to the upload.
  Ununpack creates an adjacency list: every child knows it's parent.
  For performance: convert this to nested set.
    P1
