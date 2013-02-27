@@ -192,7 +192,7 @@ void interface_thread(interface_connection* conn, scheduler_t* scheduler)
       return;
     }
 
-    /* command: "die"FO_ASSERT_PTR_NOT_NULL(cancel);
+    /* command: "die"
      *
      * The interface has instructed the scheduler to shut down. The scheduler
      * should acknowledge the command and proceed to kill all current executing
@@ -560,8 +560,14 @@ void interface_init(scheduler_t* scheduler)
     scheduler->cancel = NULL;
     scheduler->workers = g_thread_pool_new((GFunc)interface_thread,
         scheduler, CONF_interface_nthreads, FALSE, NULL);
+
+#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+    scheduler->server = g_thread_new("interface",
+        (GThreadFunc)interface_listen_thread, scheduler);
+#else
     scheduler->server = g_thread_create((GThreadFunc)interface_listen_thread,
         scheduler, TRUE, NULL);
+#endif
 
     while(scheduler->cancel == NULL)
       usleep(100);

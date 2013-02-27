@@ -76,9 +76,10 @@ const char* basic_checkout =
     " SELECT * FROM getrunnable() "
     "   LIMIT 10;";
 
-const char* change_priority =
-    " SELECT job_priority FROM job "
-    "   WHERE job_pk = %s;";
+const char* jobsql_information =
+    " SELECT user_pk, job_priority FROM users "
+    "   LEFT JOIN job ON job_user_fk = user_pk "
+    "   WHERE job_pk = 1;";
 
 const char* jobsql_started =
     " UPDATE jobqueue "

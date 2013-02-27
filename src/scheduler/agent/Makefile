@@ -62,6 +62,7 @@ HEAD = agent.h \
        job.h \
        logging.h \
        interface.h \
+       sqlstatements.h 
        
 ##########################
 # executable build rules #

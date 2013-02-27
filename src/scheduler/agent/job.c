@@ -149,14 +149,17 @@ static gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data)
  * agent fails when processing data from a job, that job might need to create a
  * new agent to deal with the data.
  *
- * @param id the id number for this job
- * @param type the name of the type of agent (i.e. copyright, nomos, buckets...)
- * @param data the data that this job will process
- * @param data_size the number of elements in the data array
+ * @param job_list   the list of all jobs, the job will be added to this list
+ * @param job_queue  the job queue, the job must be added to this for scheduling
+ * @param type       the type of agent that will be created for this job
+ * @param host       the name of the host that this job will execute on
+ * @param id         the id number for the job in the database
+ * @param user_id    the id of the user that created the job
+ * @param priority   the priority of the job, this is just a linux process priority
  * @return the new job
  */
 job_t* job_init(GTree* job_list, GSequence* job_queue,
-    char* type, char* host, int id, int priority)
+    char* type, char* host, int id, int user_id, int priority)
 {
   job_t* job = g_new0(job_t, 1);
 
@@ -175,6 +178,7 @@ job_t* job_init(GTree* job_list, GSequence* job_queue,
   job->priority        = priority;
   job->verbose         = 0;
   job->id              = id;
+  job->user_id         = user_id;
 
   g_tree_insert(job_list, &job->id, job);
   if(id >= 0) g_sequence_insert_sorted(job_queue, job, job_compare, NULL);
@@ -195,7 +199,12 @@ void job_destroy(job_t* job)
   if(job->db_result != NULL)
   {
     PQclear(job->db_result);
+
+#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+    g_mutex_clear(job->lock);
+#else
     g_mutex_free(job->lock);
+#endif
   }
 
   if(job->log)

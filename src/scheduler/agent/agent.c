@@ -239,7 +239,7 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
     host = (host_t*)iter->data;
     V_AGENT("META_AGENT[%s] testing on HOST[%s]\n", ma->name, host->name);
     job_t* job = job_init(scheduler->job_list, scheduler->job_queue, ma->name,
-        host->name, id_gen--, 0);
+        host->name, id_gen--, 0, 0);
     agent_init(scheduler, host, job);
   }
 
@@ -479,6 +479,11 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       agent->special ^= relevant;
     }
 
+    /* command: GETSPECIAL
+     *
+     * The agent has requested the value of a special attribute. The scheduler
+     * will respond with the value of the special attribute.
+     */
     else if(strncmp(buffer, "GETSPECIAL", 10) == 0)
     {
       g_regex_match(scheduler->parse_agent_msg, buffer, 0, &match);
@@ -509,13 +514,20 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
 }
 
 /**
- * TODO
+ * Parses the shell command that is found in the configuration file.
  *
- * @param input
- * @param argc
- * @param argv
+ * @param confdir  the configuration directory for FOSSology
+ * @param userid   the id of the user that created the job
+ * @param input    the command line that was in the agent configuration file
+ * @param argc     return: returns the number of arguments parsed
+ * @param argv     return: the parsed arguments
  */
-static void shell_parse(char* confdir, char* input, int* argc, char*** argv)
+static void shell_parse(
+    char* confdir,
+    int32_t userid,
+    char* input,
+    int* argc,
+    char*** argv)
 {
   char* begin;
   char* curr;
@@ -552,8 +564,8 @@ static void shell_parse(char* confdir, char* input, int* argc, char*** argv)
     }
   }
 
-  (*argv)[idx++] = "-c";
-  (*argv)[idx++] = confdir;
+  (*argv)[idx++] = g_strdup_printf("--config=%s", confdir);
+  (*argv)[idx++] = g_strdup_printf("--userID=%d", userid);
   (*argv)[idx++] = "--scheduler_start";
   (*argc) = idx;
 }
@@ -621,7 +633,8 @@ static void* agent_spawn(agent_spawn_args* pass)
     /* were parsed when the meta_agent was created    */
     if(strcmp(agent->host->address, LOCAL_HOST) == 0)
     {
-      shell_parse(scheduler->sysconfigdir, agent->type->raw_cmd, &argc, &args);
+      shell_parse(scheduler->sysconfigdir, agent->owner->user_id,
+          agent->type->raw_cmd, &argc, &args);
 
       tmp = args[0];
       args[0] = g_strdup_printf(AGENT_BINARY,
@@ -844,7 +857,13 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   pass = g_new0(agent_spawn_args, 1);
   pass->scheduler = scheduler;
   pass->agent = agent;
+
+#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+  agent->thread = g_thread_new(agent->type->name, (GThreadFunc)agent_spawn, pass);
+#else
   agent->thread = g_thread_create((GThreadFunc)agent_spawn, pass, 1, NULL);
+#endif
+
   return agent;
 }
 

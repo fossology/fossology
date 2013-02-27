@@ -290,7 +290,7 @@ scheduler_t* scheduler_init(gchar* sysconfigdir, log_t* log)
    *
    */
   ret->parse_agent_msg = g_regex_new(
-      "([A-Z]+):([ \t]*)(\\d+)(([ \t]*)(\\d))?",
+      "([A-Z]+):([ \t]+)(\\d+)(([ \t]+)(\\d))?",
       0, 0, NULL);
 
   /* This regex should find:
@@ -405,7 +405,7 @@ void scheduler_destroy(scheduler_t* scheduler)
  *
  *   @TODO: allow for runonpfile jobs to have multiple agents based on size
  *   @TODO: allow for job preemption. The scheduler can pause jobs, allow it
- *   @TODO: allow for specific hosts to be chossen.
+ *   @TODO: allow for specific hosts to be chosen.
  */
 void scheduler_update(scheduler_t* scheduler)
 {

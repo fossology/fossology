@@ -58,7 +58,9 @@ int main(int argc, char** argv)
 
   /* get this done first */
   srand(time(NULL));
+#if !(GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32)
   g_thread_init(NULL);
+#endif
   g_type_init();
 
   /* the options for the command line parser */

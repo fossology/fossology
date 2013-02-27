@@ -776,7 +776,7 @@ void database_update_event(scheduler_t* scheduler, void* unused)
       continue;
     }
 
-    sprintf(sql, change_priority, parent);
+    sprintf(sql, jobsql_information, parent);
     pri_result = database_exec(scheduler, sql);
     if(PQresultStatus(pri_result) != PGRES_TUPLES_OK)
     {
@@ -786,7 +786,8 @@ void database_update_event(scheduler_t* scheduler, void* unused)
 
     // TODO change for new scheduler
     job = job_init(scheduler->job_list, scheduler->job_queue, type, host, j_id,
-        atoi(PQgetvalue(pri_result, 0, 0)));
+        atoi(PQget(pri_result, 0, "user_pk")),
+        atoi(PQget(pri_result, 0, "job_priority")));
     job_set_data(scheduler, job,  value, (pfile && pfile[0] != '\0'));
 
     PQclear(pri_result);

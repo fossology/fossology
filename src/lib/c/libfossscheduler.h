@@ -182,7 +182,9 @@ char* fo_scheduler_next();
 /* ************************************************************************** */
 
 char* fo_scheduler_current();
+int   fo_scheduler_userID();
 void  fo_scheduler_set_special(int option, int value);
+int   fo_scheduler_get_special(int option);
 char* fo_sysconfig(char* sectionname, char* variablename);
 
 #endif /* LIBFOSSSCHEDULER_H_INCLUDE */

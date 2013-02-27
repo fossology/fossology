@@ -40,6 +40,7 @@ char  buffer[2048];    ///< the last thing received from the scheduler
 int   alive;           ///< if the agent has updated with a hearbeat
 int   valid;           ///< if the information stored in buffer is valid
 int   sscheduler;      ///< whether the agent was started by the scheduler
+int   userID;          ///< the id of the user that created the job
 char* module_name;     ///< the name of the agent
 
 const static char* sql_check = "\
@@ -195,6 +196,7 @@ void fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn)
   GOptionEntry options[] =
   {
       {"config",          'c', 0, G_OPTION_ARG_STRING, &sysconfigdir, ""},
+      {"userID",            0, 0, G_OPTION_ARG_INT,    &userID,       ""},
       {"scheduler_start",   0, 0, G_OPTION_ARG_NONE,   &sscheduler,   ""},
       {NULL}
   };
@@ -205,6 +207,7 @@ void fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn)
   items_processed = 0;
   valid           = 0;
   sscheduler      = 0;
+  userID          = -1;
   agent_verbose   = 0;
   memset(buffer, 0, sizeof(buffer));
 
@@ -454,8 +457,19 @@ int fo_scheduler_get_special(int option)
   fprintf(stdout, "GETSPECIAL: %d\n", option);
   fflush(stdout);
 
-  fscanf(stdin, "VALUE: %d\n", &value);
+  if(fscanf(stdin, "VALUE: %d\n", &value) != 1)
+    return 0;
   return value;
+}
+
+/**
+ * @brief Gets the id of the user that created the job that the agent is running
+ *
+ * @return the user id
+ */
+int fo_scheduler_userID()
+{
+  return userID;
 }
 
 /**
