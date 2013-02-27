@@ -184,7 +184,7 @@ class upload_move extends FO_Plugin {
         $text = _("Select the destination folder:  \n");
         $V.= "<li>$text";
         $V.= "<select name='targetfolderid'>\n";
-        $V.= FolderListOption(-1, 0);
+        $V.= FolderListOption($root_folder_pk, 0);
         $V.= "</select><P />\n";
         $V.= "</ol>\n";
         $text = ("Move");
