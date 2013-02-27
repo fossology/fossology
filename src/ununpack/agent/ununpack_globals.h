@@ -1,5 +1,5 @@
 /*******************************************************************
- Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -95,7 +95,8 @@ cmdlist CMD[] =
 /* 25 */{ "application/x-ext3","linux-ext","","","",CMD_DISK,1,0177777,0177777, },
 /* 26 */{ "application/x-x86_boot","departition","","> /dev/null 2>&1","",CMD_PARTITION,1,0177000,0177000, },
 /* 27 */{ "application/x-debian-source","dpkg-source","-x","'%s' >/dev/null 2>&1","",CMD_DEB,1,0177000,0177000, },
-/* 28 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
+/* 28 */{ "application/x-xz","tar","-xSf","2>&1 ; echo ''","",CMD_ARC,1,0177000,0177777, },
+/* 29 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
   { NULL,NULL,NULL,NULL,NULL,-1,-1,0177000,0177000, },
 };
 #endif

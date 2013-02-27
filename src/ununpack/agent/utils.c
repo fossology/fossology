@@ -1,5 +1,5 @@
 /*******************************************************************
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -861,6 +861,11 @@ int	FindCmd	(char *Filename)
     if (RunCommand("tar","-tf",Filename,">/dev/null 2>&1",NULL,NULL) != 0)
       return(-1); /* bad tar! (Yes, they do happen) */
   } /* if was x-tar */
+  else if (strstr(Type, "application/x-xz"))
+  {
+    if (RunCommand("tar","-tf",Filename,">/dev/null 2>&1",NULL,NULL) != 0)
+      return(-1); /* bad tar! (Yes, they do happen) */
+  } /* if was xz-tar */
 
 
   /* Match Type (mimetype from magic or from special processing above to determine 
