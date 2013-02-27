@@ -32,4 +32,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PERM_WRITE 3
 #define PERM_ADMIN 10
 
+#define PLUGIN_DB_NONE 0
+#define PLUGIN_DB_READ 1
+#define PLUGIN_DB_WRITE 3
+#define PLUGIN_DB_ADMIN 10
+
 #endif /* LIBFOSSOLOGY_H */

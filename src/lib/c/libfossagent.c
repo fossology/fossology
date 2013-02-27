@@ -1,7 +1,7 @@
 /***************************************************************
  libfossagent: Set of generic functions handy for agent development.
 
- Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -169,3 +169,104 @@ FUNCTION int fo_CreateARSTable(PGconn *pgConn, char *tableName)
   if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) return 0;
   return 1;  /* success */
 }  /* fo_CreateARSTable() */
+
+
+/**
+ * \brief Return user and group data
+ *
+ * \param long upload_pk
+ *
+ * \return int 0 failure, 1 success
+ */
+pPermGroup_t GetUserGroup(long UploadPk)
+{
+  PGresult *result;
+  PGconn *pgConn = NULL;  // Database connection
+  char SQL[1024];
+  pPermGroup_t pPG;
+
+  pPG = malloc(sizeof(PermGroup_t));
+  if (!pPG)
+  {
+    LOG_ERROR("Out of memory, alloc %d bytes failed", (int)sizeof(PermGroup_t));
+    return 0;
+  }
+
+  /* Get the user_pk from the upload table */
+  snprintf(SQL, sizeof(SQL), "select user_fk from upload where upload_pk='%ld'", UploadPk);
+  result = PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  if (PQntuples(result) < 1)
+  {
+    LOG_ERROR("No records returned in %s", SQL);
+    return 0;
+  }
+  pPG->user_pk = atoi(PQgetvalue(result, 0, 0));
+  PQclear(result);
+
+  /* Get the user_name from the users table */
+  snprintf(SQL, sizeof(SQL), "select user_name, new_upload_group_fk, new_upload_perm from users where user_pk='%d'", pPG->user_pk);
+  result =  PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  if (PQntuples(result) < 1)
+  {
+    LOG_ERROR("No records returned in %s", SQL);
+    return 0;
+  }
+  pPG->user_name = PQgetvalue(result, 0, 0);
+  pPG->new_upload_group_fk = atoi(PQgetvalue(result, 0, 1));
+  pPG->new_upload_perm = atoi(PQgetvalue(result, 0, 2));
+  PQclear(result);
+
+  /* look up user's group_pk */
+  snprintf(SQL, sizeof(SQL), "select group_pk from groups where group_name='%s'", pPG->user_name);
+  result =  PQexec(pgConn, SQL); 
+  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  if (PQntuples(result) < 1)
+  {
+    LOG_ERROR("No records returned in %s", SQL);
+    return 0;
+  }
+  pPG->group_pk = atoi(PQgetvalue(result, 0, 0));
+  PQclear(result);
+
+  return (pPG);
+}
+
+
+/**
+ * \brief Get users permission to this upload
+ *
+ * \param long upload_pk
+ * \param pPermGroup_t  Upload permission and group data
+ * \param user_pk  
+ *
+ * \return permission (PERM_)
+ */
+int GetUploadPerm(long UploadPk, pPermGroup_t pPG, int user_pk)
+{
+  PGresult *result;
+  PGconn *pgConn = NULL;  // Database connection
+  char SQL[1024];
+  int perm;
+
+  /* Check the users PLUGIN_DB level.  PLUGIN_DB_ADMIN are superusers. */
+  snprintf(SQL, sizeof(SQL), "select user_perm from users where user_pk='%d'", user_pk);
+  result =  PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  if (PQntuples(result) < 1)
+  {
+    LOG_ERROR("No records returned in %s", SQL);
+    return 0;
+  }
+  perm = atoi(PQgetvalue(result, 0, 0));
+  PQclear(result);
+  if (perm >= PLUGIN_DB_ADMIN) return(PERM_ADMIN);
+
+  /* Get the user permission level */
+  snprintf(SQL, sizeof(SQL), "select max(perm) as perm from perm_upload, group_user_member where perm_upload.upload_fk=%ld and user_fk=%d and group_user_member.group_fk=perm_upload.group_fk", UploadPk, user_pk);
+  result = PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  perm = atoi(PQgetvalue(result, 0, 0));
+  return (PERM_ADMIN);
+}
