@@ -25,7 +25,7 @@ class user_edit_self extends FO_Plugin
   var $MenuList = "Admin::Users::Account Settings";
   var $Version = "1.0";
   var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_WRITE;
+  var $DBaccess = PLUGIN_DB_READ;
   var $LoginFlag = 1;
 
   /**
@@ -205,6 +205,7 @@ class user_edit_self extends FO_Plugin
       $_SESSION['UserEnote'] = $Email_notify;
       $GotUpdate = 1;
     }
+
     if($agentList != $R['user_agent_list'])
     {
       if ($GotUpdate)
@@ -370,6 +371,8 @@ class user_edit_self extends FO_Plugin
         $V .= "<input name='emailnotify' type='checkbox' $Checked>";
         $V.= "</tr>\n";
 
+      if (@$_SESSION['UserLevel'] > PLUGIN_DB_READ)
+      {
         $text = _("Default scans");
         $V .= "$Style<th>$text\n</th><td>\n";
         /*
@@ -430,30 +433,7 @@ class user_edit_self extends FO_Plugin
         $V .= Array2SingleSelect($PERM_NAMES, "new_upload_perm", $Selected, true, false);
         $V.= "</td>";
         $V .= "</tr>\n";
-
-/* remove simple UI option to expedite 2.0 release
-        $text = _("User Interface Options");
-        $text1 = _("Use the simplified UI");
-        $text2 = _("Use the original UI");
-        $sCheck = NULL;
-        $oCheck = NULL;
-        if($R['ui_preference'] == 'simple')
-        {
-          $sCheck = "checked='checked'";
-          $oCheck = NULL;
-        }
-        else if ($R['ui_preference'] == 'original')
-        {
-          $oCheck = "checked='checked'";
-          $sCheck = NULL;
-        }
-        $P = "$Style<th>11.</th><th>$text</th><td><input type='radio' " .
-                "name='whichui' value='simple' $sCheck>" .
-                "$text1<br><input type='radio'" .
-                " name='whichui' value='original' $oCheck>" .
-                "$text2</td>\n";
-        $V .= $P;
-*/
+      }
         $V.= "</table><P />";
         $text = _("Update Account");
         $V.= "<input type='submit' value='$text'>\n";
