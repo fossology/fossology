@@ -4212,9 +4212,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_RICOH)) {
     if (INFILE(_TITLE_RICOH10)) {
-      INTERESTING("RSCPL-1.0");
-    }
-    else {
       INTERESTING("RSCPL");
     }
   }
