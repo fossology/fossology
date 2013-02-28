@@ -605,6 +605,7 @@ static void* agent_spawn(agent_spawn_args* pass)
   gchar* tmp;                 // pointer to temporary string
   gchar** args;               // the arguments that will be passed to the child
   int argc;                   // the number of arguments parsed
+  int len;
   char buffer[2048];          // character buffer
 
   /* spawn the new process */
@@ -659,11 +660,13 @@ static void* agent_spawn(agent_spawn_args* pass)
     else
     {
       args = g_new0(char*, 4);
-      sprintf(buffer, AGENT_BINARY,
+      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY,
           agent->host->agent_dir,
           AGENT_CONF,
           agent->type->name,
           agent->type->raw_cmd);
+      len = snprintf(buffer + len, sizeof(buffer) - len, " --userID=%d",
+          agent->owner->user_id);
       args[0] = "/usr/bin/ssh";
       args[1] = agent->host->address;
       args[2] = buffer;
