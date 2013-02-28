@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -110,7 +110,7 @@ FUNCTION long add2license_ref(char *licenseName) {
     LOG_WARNING("Does license name %s have multibyte encoding?", licenseName)
 
     /* verify the license is not already in the table */
-    sprintf(query, "SELECT rf_pk FROM license_ref where rf_shortname='%s' and rf_detector_type=2", escLicName);
+    sprintf(query, "SELECT rf_pk FROM license_ref where rf_shortname='%s'", escLicName);
   result = PQexec(gl.pgConn, query);
   if (fo_checkPQresult(gl.pgConn, result, query, __FILE__, __LINE__)) return 0;
   numRows = PQntuples(result);
