@@ -31065,6 +31065,14 @@ usage guidelines, as may be published on its website or otherwise made
 available upon request from time to time.
 
 Creative Commons may be contacted at http://creativecommons.org/. ', 'http://creativecommons.org/licenses/by-nc-nd/2.5/legalcode', NULL, NULL, NULL, 'Creative Commons Attribution Non Commercial No Derivatives 2.5', NULL, NULL, NULL, '', NULL, false, false, false, 'be4ba4cf6b501994d18c3dd5e92f879e', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (435, 'ISC', 'ISC License: 
+
+Copyright (c) 2004-2010 by Internet Systems Consortium, Inc. ("ISC") 
+Copyright (c) 1995-2003 by Internet Software Consortium 
+
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies. 
+
+THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'http://www.isc.org/software/license', NULL, NULL, NULL, 'ISC Licens', NULL, NULL, NULL, '', NULL, false, false, false, '7fb086fddaeb43ab29faa0e67e89cbd0', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (395, 'BSD-3-Clause', 'Copyright (c) {{YEAR}}, {{OWNER}}
 All rights reserved.
 
@@ -31554,6 +31562,35 @@ notice, this list of conditions and the following disclaimer in the
 documentation and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE NETBSD FOUNDATION, INC. AND CONTRIBUTORS ``AS IS'''' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE FOUNDATION OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. ', 'http://www.netbsd.org/about/redistribution.html#default', NULL, NULL, NULL, 'BSD 2-clause NetBSD License', NULL, NULL, NULL, '', NULL, false, false, true, 'cb67adae9f0e191318bfd93876ba1dd4', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (436, 'GPL-3.0-with-GCC-exception', 'insert GPL v3 text here 
+
+GCC RUNTIME LIBRARY EXCEPTION 
+Version 3.1, 31 March 2009 
+
+General information: 
+http://www.gnu.org/licenses/gcc-exception.html 
+Copyright (C) 2009 Free Software Foundation, Inc. <http://fsf.org/> 
+
+Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed. 
+This GCC Runtime Library Exception ("Exception") is an additional permission under section 7 of the GNU General Public License, version 3 ("GPLv3"). It applies to a given file (the "Runtime Library") that bears a notice placed by the copyright holder of the file stating that the file is governed by GPLv3 along with this Exception. 
+
+When you use GCC to compile a program, GCC may combine portions of certain GCC header files and runtime libraries with the compiled program. The purpose of this Exception is to allow compilation of non-GPL (including proprietary) programs to use, in this way, the header files and runtime libraries covered by this Exception. 
+
+0. Definitions. 
+A file is an "Independent Module" if it either requires the Runtime Library for execution after a Compilation Process, or makes use of an interface provided by the Runtime Library, but is not otherwise based on the Runtime Library. 
+"GCC" means a version of the GNU Compiler Collection, with or without modifications, governed by version 3 (or a specified later version) of the GNU General Public License (GPL) with the option of using any subsequent versions published by the FSF. 
+"GPL-compatible Software" is software whose conditions of propagation, modification and use would permit combination with GCC in accord with the license of GCC. 
+
+"Target Code" refers to output from any compiler for a real or virtual target processor architecture, in executable form or suitable for input to an assembler, loader, linker and/or execution phase. Notwithstanding that, Target Code does not include data in any format that is used as a compiler intermediate representation, or used for producing a compiler intermediate representation. 
+The "Compilation Process" transforms code entirely represented in non-intermediate languages designed for human-written code, and/or in Java Virtual Machine byte code, into Target Code. Thus, for example, use of source code generators and preprocessors need not be considered part of the Compilation Process, since the Compilation Process can be understood as starting with the output of the generators or preprocessors. 
+
+A Compilation Process is "Eligible" if it is done using GCC, alone or with other GPL-compatible software, or if it is done without using any work based on GCC. For example, using non-GPL-compatible Software to optimize any GCC intermediate representations would not qualify as an Eligible Compilation Process. 
+
+1. Grant of Additional Permission. 
+You have permission to propagate a work of Target Code formed by combining the Runtime Library with Independent Modules, even if such propagation would otherwise violate the terms of GPLv3, provided that all Target Code was generated by Eligible Compilation Processes. You may then convey such a combination under terms of your choice, consistent with the licensing of the Independent Modules. 
+
+2. No Weakening of GCC Copyleft. 
+The availability of this Exception does not imply any general presumption that third-party software is unaffected by the copyleft requirements of the license of GCC.', 'http://www.gnu.org/licenses/gcc-exception-3.1.html', NULL, NULL, NULL, 'GNU General Public License v3.0 w/GCC Runtime Library exception', NULL, NULL, NULL, '', NULL, false, false, false, '6ba78589db03be5717a6a8bf56a8aad0', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (373, 'Entessa', 'Entessa Public License v1.0
 Copyright (c) 2003 Entessa, LLC. All rights reserved. 
 
@@ -32728,6 +32765,89 @@ usage guidelines, as may be published on its website or otherwise made
 available upon request from time to time.
 
 Creative Commons may be contacted at http://creativecommons.org/. ', 'http://creativecommons.org/licenses/by-sa/2.0/legalcode', NULL, NULL, NULL, 'Creative Commons Attribution Share Alike 2.0', NULL, NULL, NULL, '', NULL, false, false, true, 'ce44a85900133c1f98768be6f78478c2', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (253, 'X11', 'Copyright (c) 2007 OpenNETCF Consulting, LLC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.', 'http://www.xfree86.org/3.3.6/COPYRIGHT2.html#3', NULL, NULL, NULL, 'X11 License', NULL, NULL, NULL, '', NULL, false, false, false, '5c0a8c82ed6d1cbb03916190b14736d9', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (437, 'OCLC-2.0', 'OCLC Research Public License 2.0 
+Terms & Conditions Of Use 
+May, 2002 
+Copyright © 2002. OCLC Online Computer Library Center, Inc. All Rights Reserved 
+
+PLEASE READ THIS DOCUMENT CAREFULLY. BY DOWNLOADING OR USING THE CODE BASE AND/OR DOCUMENTATION ACCOMPANYING THIS LICENSE (THE "License"), YOU AGREE TO THE FOLLOWING TERMS AND CONDITIONS OF THIS LICENSE. 
+
+Section 1. Your Rights 
+
+Subject to these terms and conditions of this License, the OCLC Office of Research (the "Original Contributor") and each subsequent contributor (collectively with the Original Contributor, the "Contributors") hereby grant you a non-exclusive, worldwide, no-charge, transferable license to execute, prepare derivative works of, and distribute (internally and externally), for commercial and noncommercial purposes, the original code contributed by Original Contributor and all Modifications (collectively called the "Program"). 
+
+Section 2. Definitions 
+
+A "Modification" to the Program is any addition to or deletion from the contents of any file of the Program and any new file that contains any part of the Program. If you make a Modification and distribute the Program externally you are a "Contributor." The distribution of the Program must be under the terms of this license including those in Section 3 below. 
+
+A "Combined Work" results from combining and integrating all or parts of the Program with other code. A Combined Work may be thought of as having multiple parents or being result of multiple lines of code development. 
+
+Section 3. Distribution Licensing Terms 
+
+A. General Requirements 
+Except as necessary to recognize third-party rights or third-party restriction (see below), a distribution of the Program in any of the forms listed below must not put any further restrictions on the recipient’s exercise of the rights granted herein. 
+
+As a Contributor, you represent that your Modification(s) are your original creation(s) and, to the best of your knowledge, no third party has any claim (including but not limited to intellectual property claims) relating to your Modification(s). You represent that each of your Modifications includes complete details of any third-party right or other third-party restriction associated with any part of your Modification (including a copy of any applicable license agreement). 
+
+The Program must be distributed without charge beyond the costs of physically transferring the files to the recipient. 
+
+This Warranty Disclaimer/Limitation of Liability must be prominently displayed with every distribution of the Program in any form: 
+
+YOU AGREE THAT THE PROGRAM IS PROVIDED AS-IS, WITHOUT WARRANTY OF ANY KIND (EITHER EXPRESS OR IMPLIED). ACCORDINGLY, OCLC MAKES NO WARRANTIES, REPRESENTATIONS OR GUARANTEES, EITHER EXPRESS OR IMPLIED, AND DISCLAIMS ALL SUCH WARRANTIES, REPRESENTATIONS OR GUARANTEES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AS TO: (A) THE FUNCTIONALITY OR NONINFRINGEMENT OF PROGRAM, ANY MODIFICATION, A COMBINED WORK OR AN AGGREGATE WORK; OR (B) THE RESULTS OF ANY PROJECT UNDERTAKEN USING THE PROGRAM, ANY MODIFICATION, A COMBINED WORK OR AN AGGREGATE WORK. IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, CONSEQUENTIAL OR ANY OTHER DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE PROGRAM, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. YOU HEREBY WAIVE ANY CLAIMS FOR DAMAGES OF ANY KIND AGAINST CONTRIBUTORS WHICH MAY RESULT FROM YOUR USE OF THE PROGRAM. 
+
+B. Requirements for a Distribution of Modifiable Code 
+If you distribute the Program in a form to which the recipient can make Modifications (e.g. source code), the terms of this license apply to use by recipient. In addition, each source and data file of the Program and any Modification you distribute must contain the following notice: 
+
+"Copyright (c) 2000- (insert then current year) OCLC Online Computer Library Center, Inc. and other contributors. All rights reserved. The contents of this file, as updated from time to time by the OCLC Office of Research, are subject to OCLC Research Public License Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a current copy of the License at http://purl.oclc.org/oclc/research/ORPL/. Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the specific language governing rights and limitations under the License. This software consists of voluntary contributions made by many individuals on behalf of OCLC Research. For more information on OCLC Research, please see http://www.oclc.org/research/. The Original Code is ______________________________. The Initial Developer of the Original Code is ________________________. Portions created by ______________________ are Copyright (C) _____ _______________________. All Rights Reserved. Contributor(s): ______________________________________." 
+
+C. Requirements for a Distribution of Non-modifiable Code 
+If you distribute the Program in a form to which the recipient cannot make Modifications (e.g. object code), the terms of this license apply to use by recipient and you must include the following statement in appropriate and conspicuous locations: 
+
+"Copyright (c) 2000- (insert then current year) OCLC Online Computer Library Center, Inc. and other contributors. All rights reserved." 
+
+In addition, the source code must be included with the object code distribution or the distributor must provide the source code to the recipient upon request. 
+
+D. Requirements for a Combined Work Distribution 
+Distributions of Combined Works are subject to the terms of this license and must be made at no charge to the recipient beyond the costs of physically transferring the files to recipient. 
+
+A Combined Work may be distributed as either modifiable or non-modifiable code. The requirements of Section 3.B or 3.C above (as appropriate) apply to such distributions. 
+
+An "Aggregate Work" is when the Program exists, without integration, with other programs on a storage medium. This License does not apply to portions of an Aggregate Work which are not covered by the definition of "Program" provided in this License. You are not forbidden from selling an Aggregate Work. However, the Program contained in an Aggregate Work is subject to this License. Also, should the Program be extracted from an Aggregate Work, this License applies to any use of the Program apart from the Aggregate Work. 
+
+Section 4. License Grant 
+
+For purposes of permitting use of your Modifications by OCLC and other licensees hereunder, you hereby grant to OCLC and such other licensees the non-exclusive, worldwide, royalty-free, transferable, sublicenseable license to execute, copy, alter, delete, modify, adapt, change, revise, enhance, develop, publicly display, distribute (internally and externally) and/or create derivative works based on your Modifications (and derivative works thereof) in accordance with these Terms. This Section 4 shall survive termination of this License for any reason. 
+
+Section 5. Termination of Rights 
+
+This non-exclusive license (with respect to the grant from a particular Contributor) automatically terminates for any entity that initiates legal action for intellectual property infringement (with respect to the Program) against such Contributor as of the initiation of such action. 
+
+If you fail to comply with this License, your rights (but not your obligations) under this License shall terminate automatically unless you cure such breach within thirty (30) days of becoming aware of the noncompliance. All sublicenses granted by you which preexist such termination and are properly granted shall survive such termination. 
+
+Section 6. Other Terms 
+
+Except for the copyright notices required above, you may not use any trademark of any of the Contributors without the prior written consent of the relevant Contributor. You agree not to remove, alter or obscure any copyright or other proprietary rights notice contained in the Program. 
+
+All transfers of the Program or any part thereof shall be made in compliance with U.S. import/export regulations or other restrictions of the U.S. Department of Commerce, as well as other similar trade or commerce restrictions which might apply. 
+
+Any patent obtained by any party covering the Program or any part thereof must include a provision providing for the free, perpetual and unrestricted commercial and noncommercial use by any third party. 
+
+If, as a consequence of a court judgment or settlement relating to intellectual property infringement or any other cause of action, conditions are imposed on you that contradict the conditions of this License, such conditions do not excuse you from compliance with this License. If you cannot distribute the Program so as to simultaneously satisfy your obligations under this License and such other conditions, you may not distribute the Program at all. For example, if a patent license would not permit royalty-free redistribution of the Program by all those who receive copies directly or indirectly through you, you could not satisfy both the patent license and this License, and you would be required to refrain entirely from distribution of the Program. 
+
+If you learn of a third party claim or other restriction relating to a Program you have already distributed you shall promptly redo your Program to address the issue and take all reasonable steps to inform those who may have received the Program at issue. An example of an appropriate reasonable step to inform would be posting an announcement on an appropriate web bulletin board. 
+
+The provisions of this License are deemed to be severable, and the invalidity or unenforceability of any provision shall not affect or impair the remaining provisions which shall continue in full force and effect. In substitution for any provision held unlawful, there shall be substituted a provision of similar import reflecting the original intent of the parties hereto to the extent permissible under law. 
+
+The Original Contributor from time to time may change this License, and the amended license will apply to all copies of the Program downloaded after the new license is posted. This License grants only the rights expressly stated herein and provides you with no implied rights or licenses to the intellectual property of any Contributor. 
+
+This License is the complete and exclusive statement of the agreement between the parties concerning the subject matter hereof and may not be amended except by the written agreement of the parties. This License shall be governed by and construed in accordance with the laws of the State of Ohio and the United States of America, without regard to principles of conflicts of law.', 'http://www.oclc.org/research/activities/software/license/v2final.htm', NULL, NULL, NULL, 'OCLC Research Public License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '7cdb53ca385e775a395c782b9976f70a', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (390, 'WashU', 'Source Code License
 Copyright (c) 2009, Washington University in St. Louis
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -33657,13 +33777,11 @@ accordingly.
 choice whether to permit this exception to apply to your modifications.
 If you do not wish that, you must delete the exception notice from such
 code and/or adjust the licensing conditions notice accordingly.', 'http://www.wxwidgets.org/about/licence3.txt', NULL, NULL, NULL, 'wxWindows Library License', NULL, NULL, NULL, '', NULL, false, false, false, '3cced671caeb024522088f5cdade900e', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (253, 'X11', 'Copyright (c) 2007 OpenNETCF Consulting, LLC
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (438, 'NTP', 'NTP License (NTP) 
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Copyright (c) (CopyrightHoldersName) (From 4-digit-year)-(To 4-digit-year) 
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.', 'http://www.xfree86.org/3.3.6/COPYRIGHT2.html#3', NULL, NULL, NULL, 'X11 License', NULL, NULL, NULL, '', NULL, false, false, false, '5c0a8c82ed6d1cbb03916190b14736d9', 1);
+Permission to use, copy, modify, and distribute this software and its documentation for any purpose with or without fee is hereby granted, provided that the above copyright notice appears in all copies and that both the copyright notice and this permission notice appear in supporting documentation, and that the name (TrademarkedName) not be used in advertising or publicity pertaining to distribution of the software without specific, written prior permission. (TrademarkedName) makes no representations about the suitability this software for any purpose. It is provided "as is" without express or implied warranty.', 'http://www.opensource.org/licenses/NTP', NULL, NULL, NULL, 'NTP License', NULL, NULL, NULL, '', NULL, false, false, false, '6b4c2e6435c651d3777ba12b48f929d3', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (295, 'ZPL-2.1', 'Zope Public License (ZPL) Version 2.1
 
 A copyright notice accompanies this license document that identifies the copyright holders.
@@ -35906,6 +36024,92 @@ Unless explicitly acquired and licensed from Licensor under the Technical Pursui
 You may obtain a copy of both the TPL and the RPL (the "Licenses") from Technical Pursuit Inc. at http://www.technicalpursuit.com.
 
 All software distributed under the Licenses is provided strictly on an "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND TECHNICAL PURSUIT INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT, OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and limitations under the Licenses.', 'http://opensource.org/licenses/rpl1.0', NULL, NULL, NULL, 'Reciprocal Public License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '40a7629074ab847672c20b9a730be644', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (450, 'OFL-1.1', 'SIL OPEN FONT LICENSE 
+
+Version 1.1 - 26 February 2007 
+
+PREAMBLE 
+The goals of the Open Font License (OFL) are to stimulate worldwide 
+development of collaborative font projects, to support the font creation 
+efforts of academic and linguistic communities, and to provide a free and 
+open framework in which fonts may be shared and improved in partnership 
+with others. 
+
+The OFL allows the licensed fonts to be used, studied, modified and 
+redistributed freely as long as they are not sold by themselves. The 
+fonts, including any derivative works, can be bundled, embedded, 
+redistributed and/or sold with any software provided that any reserved 
+names are not used by derivative works. The fonts and derivatives, 
+however, cannot be released under any other type of license. The 
+requirement for fonts to remain under this license does not apply 
+to any document created using the fonts or their derivatives. 
+
+DEFINITIONS 
+"Font Software" refers to the set of files released by the Copyright 
+Holder(s) under this license and clearly marked as such. This may 
+include source files, build scripts and documentation. 
+
+"Reserved Font Name" refers to any names specified as such after the 
+copyright statement(s). 
+
+"Original Version" refers to the collection of Font Software components as 
+distributed by the Copyright Holder(s). 
+
+"Modified Version" refers to any derivative made by adding to, deleting, 
+or substituting — in part or in whole — any of the components of the 
+Original Version, by changing formats or by porting the Font Software to a 
+new environment. 
+
+"Author" refers to any designer, engineer, programmer, technical 
+writer or other person who contributed to the Font Software. 
+
+PERMISSION & CONDITIONS 
+Permission is hereby granted, free of charge, to any person obtaining 
+a copy of the Font Software, to use, study, copy, merge, embed, modify, 
+redistribute, and sell modified and unmodified copies of the Font 
+Software, subject to the following conditions: 
+
+1) Neither the Font Software nor any of its individual components, 
+in Original or Modified Versions, may be sold by itself. 
+
+2) Original or Modified Versions of the Font Software may be bundled, 
+redistributed and/or sold with any software, provided that each copy 
+contains the above copyright notice and this license. These can be 
+included either as stand-alone text files, human-readable headers or 
+in the appropriate machine-readable metadata fields within text or 
+binary files as long as those fields can be easily viewed by the user. 
+
+3) No Modified Version of the Font Software may use the Reserved Font 
+Name(s) unless explicit written permission is granted by the corresponding 
+Copyright Holder. This restriction only applies to the primary font name as 
+presented to the users. 
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font 
+Software shall not be used to promote, endorse or advertise any 
+Modified Version, except to acknowledge the contribution(s) of the 
+Copyright Holder(s) and the Author(s) or with their explicit written 
+permission. 
+
+5) The Font Software, modified or unmodified, in part or in whole, 
+must be distributed entirely under this license, and must not be 
+distributed under any other license. The requirement for fonts to 
+remain under this license does not apply to any document created 
+using the Font Software. 
+
+TERMINATION 
+This license becomes null and void if any of the above conditions are 
+not met. 
+
+DISCLAIMER 
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF 
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT 
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE 
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL 
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM 
+OTHER DEALINGS IN THE FONT SOFTWARE.', 'http://scripts.sil.org/cms/scripts/page.php?item_id=OFL_web', NULL, NULL, NULL, 'SIL Open Font License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '858f5eb0169a269174bc2c055a9b7173', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (427, 'SAX-PD', 'Copyright Status 
 
 SAX is free! 
@@ -36204,41 +36408,6 @@ certification mark of the Open Source Initiative.
 Glenn Randers-Pehrson 
 glennrp at users.sourceforge.net 
 December 9, 2010', 'http://www.libpng.org/pub/png/src/libpng-LICENSE.txt', NULL, NULL, NULL, 'libpng License', NULL, NULL, NULL, '', NULL, false, false, false, '6c0da0e5f351e6a246679876a8df0e99', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (431, ' Zimbra-1.3', 'Zimbra Public License, Version 1.3 (ZPL) 
-
-This Zimbra Public License (this "Agreement") is a legal agreement that describes the terms under which VMware, Inc., a Delaware corporation having its principal place of business at 3401 Hillview Avenue, Palo Alto, California 94304 ("VMware") will provide software to you via download or otherwise ("Software"). By using the Software, you, an individual or an entity ("You") agree to the terms of this Agreement. 
-
-In consideration of the mutual promises and upon the terms and conditions set forth below, the parties agree as follows: 
-
-1. Grant of Copyright License 
-1.1 - Subject to the terms and conditions of this Agreement, VMware hereby grants to You, under any and all of its copyright interest in and to the Software, a royalty-free, non-exclusive, non-transferable license to copy, modify, compile, execute, and distribute the Software and Modifications. For the purposes of this Agreement, any change to, addition to, or abridgement of the Software made by You is a "Modification;" however, any file You add to the Software that does not contain any part of the Software is not a "Modification." 
-1.2 - If You are an individual acting on behalf of a corporation or other entity, Your use of the Software or any Modification is subject to Your having the authority to bind such corporation or entity to this Agreement. Providing copies to persons within such corporation or entity is not considered distribution for purposes of this Agreement. 
-1.3 - For the Software or any Modification You distribute in source code format, You must do so only under the terms of this Agreement, and You must include a complete copy of this Agreement with Your distribution. With respect to any Modification You distribute in source code format, the terms of this Agreement will apply to You in the same way those terms apply to VMware with respect to the Software. In other words, when You are distributing Modifications under this Agreement, You "stand in the shoes" of VMware in terms of the rights You grant and how the terms and conditions apply to You and the licensees of Your Modifications. Notwithstanding the foregoing, when You "stand in the shoes" of VMware, You are not subject to the jurisdiction provision under Section 7, which requires all disputes under this Agreement to be subject to the jurisdiction of federal or state courts of northern California. 
-1.4 - For the Software or any Modification You distribute in compiled or object code format, You must also provide recipients with access to the Software or Modification in source code format along with a complete copy of this Agreement. The distribution of the Software or Modifications in compiled or object code format may be under a license of Your choice, provided that You are in compliance with the terms of this Agreement. In addition, You must make absolutely clear that any license terms applying to such Software or Modification that differ from this Agreement are offered by You alone and not by VMware, and that such license does not restrict recipients from exercising rights in the source code to the Software granted by VMware under this Agreement or rights in the source code to any Modification granted by You as described in Section 1.3. 
-1.5 - This Agreement does not limit Your right to distribute files that are entirely Your own work (i.e., which do not incorporate any portion of the Software and are not Modifications) under any terms You choose. 
-
-2. Support 
-VMware has no obligation to provide technical support or updates to You. Nothing in this Agreement requires VMware to enter into any license with You for any other edition of the Software. 
-
-3. Intellectual Property Rights 
-3.1 - Except for the license expressly granted under copyright in Section 1.1, no rights, licenses or forbearances are granted or may arise in relation to this Agreement whether expressly, by implication, exhaustion, estoppel or otherwise. All rights, including all intellectual property rights, that are not expressly granted under this Agreement are hereby reserved. 
-3.2 - In any copy of the Software or in any Modification you create, You must retain and reproduce, any and all copyright, patent, trademark, and attribution notices that are included in the Software in the same form as they appear in the Software. This includes the preservation of attribution notices in the form of trademarks or logos that exist within a user interface of the Software. 
-3.3 - This license does not grant You rights to use any party''s name, logo, or trademarks, except solely as necessary to comply with Section 3.2. 
-
-4. Disclaimer of Warranties 
-THE SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND. VMWARE MAKES NO WARRANTIES, WHETHER EXPRESS, IMPLIED, OR STATUTORY REGARDING OR RELATING TO THE SOFTWARE. SPECIFICALLY, VMWARE DOES NOT WARRANT THAT THE SOFTWARE WILL BE ERROR FREE OR WILL PERFORM IN AN UNINTERRUPTED MANNER. TO THE GREATEST EXTENT ALLOWED BY LAW, VMWARE SPECIFICALLY DISCLAIMS ALL IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE (EVEN IF VMWARE HAD BEEN INFORMED OF SUCH PURPOSE), AND NONINFRINGEMENT WITH RESPECT TO THE SOFTWARE, ANY MODIFICATIONS THERETO AND WITH RESPECT TO THE USE OF THE FOREGOING. 
-
-5. Limitation of Liability 
-IN NO EVENT WILL VMWARE BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES OF ANY KIND (INCLUDING WITHOUT LIMITATION LOSS OF PROFITS, LOSS OF USE, BUSINESS INTERRUPTION, LOSS OF DATA, COST OF COVER) IN CONNECTION WITH OR ARISING OUT OF OR RELATING TO THE FURNISHING, PERFORMANCE OR USE OF THE SOFTWARE OR ANY OTHER RIGHTS GRANTED HEREUNDER, WHETHER ALLEGED AS A BREACH OF CONTRACT OR TORTIOUS CONDUCT, INCLUDING NEGLIGENCE, AND EVEN IF VMWARE HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. 
-
-6. Term and Termination 
-6.1 - This Agreement will continue in effect unless and until terminated earlier pursuant to this Section 6. 
-6.2 - In the event You violate the terms of this Agreement, VMware may terminate this Agreement. 
-6.3 - All licenses granted hereunder shall terminate upon the termination of this Agreement. Termination will be in addition to any rights and remedies available to VMware at law or equity or under this Agreement. 
-6.4 - Termination of this Agreement will not affect the provisions regarding reservation of rights (Section 3.1), provisions disclaiming or limiting VMware''s liability (Sections 4 and 5), Termination (Section 6) or Miscellaneous (Section 7), which provisions will survive termination of this Agreement. 
-
-7. Miscellaneous 
-This Agreement contains the entire agreement of the parties with respect to the subject matter of this Agreement and supersedes all previous communications, representations, understandings and agreements, either oral or written, between the parties with respect to said subject matter. The relationship of the parties hereunder is that of independent contractors, and this Agreement will not be construed as creating an agency, partnership, joint venture or any other form of legal association between the parties. If any term, condition, or provision in this Agreement is found to be invalid, unlawful or unenforceable to any extent, this Agreement will be construed in a manner that most closely effectuates the intent of this Agreement. Such invalid term, condition or provision will be severed from the remaining terms, conditions and provisions, which will continue to be valid and enforceable to the fullest extent permitted by law. This Agreement will be interpreted and construed in accordance with the laws of the State of California and the United States of America, without regard to conflict of law principles. The U.N. Convention on Contracts for the International Sale of Goods shall not apply to this Agreement. All disputes arising out of this Agreement involving VMware or any of its subsidiaries shall be subject to the jurisdiction of the federal or state courts of northern California, with venue lying in Santa Clara County, California. No rights may be assigned, no obligations may be delegated, and this Agreement may not be transferred by You, in whole or in part, whether voluntary or by operation of law, including by way of sale of assets, merger or consolidation, without the prior written consent of VMware, and any purported assignment, delegation or transfer without such consent shall be void ab initio. Any waiver of the provisions of this Agreement or of a party''s rights or remedies under this Agreement must be in writing to be effective. Failure, neglect or delay by a party to enforce the provisions of this Agreement or its rights or remedies at any time, will not be construed or be deemed to be a waiver of such party''s rights under this Agreement and will not in any way affect the validity of the whole or any part of this Agreement or prejudice such party''s right to take subsequent action.', 'http://www.zimbra.com/license/zimbra-public-license-1-3.html', NULL, NULL, NULL, 'Zimbra Public License v1.3', NULL, NULL, NULL, '', NULL, false, false, false, '04fe161c4f7b77bb8d470422fb205552', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (432, 'YPL-1.1', 'Yahoo! Public License, Version 1.1 (YPL) 
 
 This Yahoo! Public License (this "Agreement") is a legal agreement that describes the terms under which Yahoo! Inc., a Delaware corporation having its principal place of business at 701 First Avenue, Sunnyvale, California 94089 ("Yahoo!") will provide software to you via download or otherwise ("Software"). By using the Software, you, an individual or an entity ("You") agree to the terms of this Agreement. 
@@ -36330,150 +36499,41 @@ THE SOFTWARE.
 
 This agreement shall be governed in all respects by the laws of the State of 
 California and by the laws of the United States of America.', 'http://www.opensource.org/licenses/xnet', NULL, NULL, NULL, 'X.Net License', NULL, NULL, NULL, '', NULL, false, false, false, '843c0d4f11fe3e71efdbf876fda61cf1', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (435, 'ISC', 'ISC License: 
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (431, 'Zimbra-1.3', 'Zimbra Public License, Version 1.3 (ZPL) 
 
-Copyright (c) 2004-2010 by Internet Systems Consortium, Inc. ("ISC") 
-Copyright (c) 1995-2003 by Internet Software Consortium 
+This Zimbra Public License (this "Agreement") is a legal agreement that describes the terms under which VMware, Inc., a Delaware corporation having its principal place of business at 3401 Hillview Avenue, Palo Alto, California 94304 ("VMware") will provide software to you via download or otherwise ("Software"). By using the Software, you, an individual or an entity ("You") agree to the terms of this Agreement. 
 
-Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies. 
+In consideration of the mutual promises and upon the terms and conditions set forth below, the parties agree as follows: 
 
-THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'http://www.isc.org/software/license', NULL, NULL, NULL, 'ISC Licens', NULL, NULL, NULL, '', NULL, false, false, false, '7fb086fddaeb43ab29faa0e67e89cbd0', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (436, 'GPL-3.0-with-GCC-exception', 'insert GPL v3 text here 
+1. Grant of Copyright License 
+1.1 - Subject to the terms and conditions of this Agreement, VMware hereby grants to You, under any and all of its copyright interest in and to the Software, a royalty-free, non-exclusive, non-transferable license to copy, modify, compile, execute, and distribute the Software and Modifications. For the purposes of this Agreement, any change to, addition to, or abridgement of the Software made by You is a "Modification;" however, any file You add to the Software that does not contain any part of the Software is not a "Modification." 
+1.2 - If You are an individual acting on behalf of a corporation or other entity, Your use of the Software or any Modification is subject to Your having the authority to bind such corporation or entity to this Agreement. Providing copies to persons within such corporation or entity is not considered distribution for purposes of this Agreement. 
+1.3 - For the Software or any Modification You distribute in source code format, You must do so only under the terms of this Agreement, and You must include a complete copy of this Agreement with Your distribution. With respect to any Modification You distribute in source code format, the terms of this Agreement will apply to You in the same way those terms apply to VMware with respect to the Software. In other words, when You are distributing Modifications under this Agreement, You "stand in the shoes" of VMware in terms of the rights You grant and how the terms and conditions apply to You and the licensees of Your Modifications. Notwithstanding the foregoing, when You "stand in the shoes" of VMware, You are not subject to the jurisdiction provision under Section 7, which requires all disputes under this Agreement to be subject to the jurisdiction of federal or state courts of northern California. 
+1.4 - For the Software or any Modification You distribute in compiled or object code format, You must also provide recipients with access to the Software or Modification in source code format along with a complete copy of this Agreement. The distribution of the Software or Modifications in compiled or object code format may be under a license of Your choice, provided that You are in compliance with the terms of this Agreement. In addition, You must make absolutely clear that any license terms applying to such Software or Modification that differ from this Agreement are offered by You alone and not by VMware, and that such license does not restrict recipients from exercising rights in the source code to the Software granted by VMware under this Agreement or rights in the source code to any Modification granted by You as described in Section 1.3. 
+1.5 - This Agreement does not limit Your right to distribute files that are entirely Your own work (i.e., which do not incorporate any portion of the Software and are not Modifications) under any terms You choose. 
 
-GCC RUNTIME LIBRARY EXCEPTION 
-Version 3.1, 31 March 2009 
+2. Support 
+VMware has no obligation to provide technical support or updates to You. Nothing in this Agreement requires VMware to enter into any license with You for any other edition of the Software. 
 
-General information: 
-http://www.gnu.org/licenses/gcc-exception.html 
-Copyright (C) 2009 Free Software Foundation, Inc. <http://fsf.org/> 
+3. Intellectual Property Rights 
+3.1 - Except for the license expressly granted under copyright in Section 1.1, no rights, licenses or forbearances are granted or may arise in relation to this Agreement whether expressly, by implication, exhaustion, estoppel or otherwise. All rights, including all intellectual property rights, that are not expressly granted under this Agreement are hereby reserved. 
+3.2 - In any copy of the Software or in any Modification you create, You must retain and reproduce, any and all copyright, patent, trademark, and attribution notices that are included in the Software in the same form as they appear in the Software. This includes the preservation of attribution notices in the form of trademarks or logos that exist within a user interface of the Software. 
+3.3 - This license does not grant You rights to use any party''s name, logo, or trademarks, except solely as necessary to comply with Section 3.2. 
 
-Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed. 
-This GCC Runtime Library Exception ("Exception") is an additional permission under section 7 of the GNU General Public License, version 3 ("GPLv3"). It applies to a given file (the "Runtime Library") that bears a notice placed by the copyright holder of the file stating that the file is governed by GPLv3 along with this Exception. 
+4. Disclaimer of Warranties 
+THE SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND. VMWARE MAKES NO WARRANTIES, WHETHER EXPRESS, IMPLIED, OR STATUTORY REGARDING OR RELATING TO THE SOFTWARE. SPECIFICALLY, VMWARE DOES NOT WARRANT THAT THE SOFTWARE WILL BE ERROR FREE OR WILL PERFORM IN AN UNINTERRUPTED MANNER. TO THE GREATEST EXTENT ALLOWED BY LAW, VMWARE SPECIFICALLY DISCLAIMS ALL IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE (EVEN IF VMWARE HAD BEEN INFORMED OF SUCH PURPOSE), AND NONINFRINGEMENT WITH RESPECT TO THE SOFTWARE, ANY MODIFICATIONS THERETO AND WITH RESPECT TO THE USE OF THE FOREGOING. 
 
-When you use GCC to compile a program, GCC may combine portions of certain GCC header files and runtime libraries with the compiled program. The purpose of this Exception is to allow compilation of non-GPL (including proprietary) programs to use, in this way, the header files and runtime libraries covered by this Exception. 
+5. Limitation of Liability 
+IN NO EVENT WILL VMWARE BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES OF ANY KIND (INCLUDING WITHOUT LIMITATION LOSS OF PROFITS, LOSS OF USE, BUSINESS INTERRUPTION, LOSS OF DATA, COST OF COVER) IN CONNECTION WITH OR ARISING OUT OF OR RELATING TO THE FURNISHING, PERFORMANCE OR USE OF THE SOFTWARE OR ANY OTHER RIGHTS GRANTED HEREUNDER, WHETHER ALLEGED AS A BREACH OF CONTRACT OR TORTIOUS CONDUCT, INCLUDING NEGLIGENCE, AND EVEN IF VMWARE HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. 
 
-0. Definitions. 
-A file is an "Independent Module" if it either requires the Runtime Library for execution after a Compilation Process, or makes use of an interface provided by the Runtime Library, but is not otherwise based on the Runtime Library. 
-"GCC" means a version of the GNU Compiler Collection, with or without modifications, governed by version 3 (or a specified later version) of the GNU General Public License (GPL) with the option of using any subsequent versions published by the FSF. 
-"GPL-compatible Software" is software whose conditions of propagation, modification and use would permit combination with GCC in accord with the license of GCC. 
+6. Term and Termination 
+6.1 - This Agreement will continue in effect unless and until terminated earlier pursuant to this Section 6. 
+6.2 - In the event You violate the terms of this Agreement, VMware may terminate this Agreement. 
+6.3 - All licenses granted hereunder shall terminate upon the termination of this Agreement. Termination will be in addition to any rights and remedies available to VMware at law or equity or under this Agreement. 
+6.4 - Termination of this Agreement will not affect the provisions regarding reservation of rights (Section 3.1), provisions disclaiming or limiting VMware''s liability (Sections 4 and 5), Termination (Section 6) or Miscellaneous (Section 7), which provisions will survive termination of this Agreement. 
 
-"Target Code" refers to output from any compiler for a real or virtual target processor architecture, in executable form or suitable for input to an assembler, loader, linker and/or execution phase. Notwithstanding that, Target Code does not include data in any format that is used as a compiler intermediate representation, or used for producing a compiler intermediate representation. 
-The "Compilation Process" transforms code entirely represented in non-intermediate languages designed for human-written code, and/or in Java Virtual Machine byte code, into Target Code. Thus, for example, use of source code generators and preprocessors need not be considered part of the Compilation Process, since the Compilation Process can be understood as starting with the output of the generators or preprocessors. 
-
-A Compilation Process is "Eligible" if it is done using GCC, alone or with other GPL-compatible software, or if it is done without using any work based on GCC. For example, using non-GPL-compatible Software to optimize any GCC intermediate representations would not qualify as an Eligible Compilation Process. 
-
-1. Grant of Additional Permission. 
-You have permission to propagate a work of Target Code formed by combining the Runtime Library with Independent Modules, even if such propagation would otherwise violate the terms of GPLv3, provided that all Target Code was generated by Eligible Compilation Processes. You may then convey such a combination under terms of your choice, consistent with the licensing of the Independent Modules. 
-
-2. No Weakening of GCC Copyleft. 
-The availability of this Exception does not imply any general presumption that third-party software is unaffected by the copyleft requirements of the license of GCC.', 'http://www.gnu.org/licenses/gcc-exception-3.1.html', NULL, NULL, NULL, 'GNU General Public License v3.0 w/GCC Runtime Library exception', NULL, NULL, NULL, '', NULL, false, false, false, '6ba78589db03be5717a6a8bf56a8aad0', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (437, 'OCLC-2.0', 'OCLC Research Public License 2.0 
-Terms & Conditions Of Use 
-May, 2002 
-Copyright © 2002. OCLC Online Computer Library Center, Inc. All Rights Reserved 
-
-PLEASE READ THIS DOCUMENT CAREFULLY. BY DOWNLOADING OR USING THE CODE BASE AND/OR DOCUMENTATION ACCOMPANYING THIS LICENSE (THE "License"), YOU AGREE TO THE FOLLOWING TERMS AND CONDITIONS OF THIS LICENSE. 
-
-Section 1. Your Rights 
-
-Subject to these terms and conditions of this License, the OCLC Office of Research (the "Original Contributor") and each subsequent contributor (collectively with the Original Contributor, the "Contributors") hereby grant you a non-exclusive, worldwide, no-charge, transferable license to execute, prepare derivative works of, and distribute (internally and externally), for commercial and noncommercial purposes, the original code contributed by Original Contributor and all Modifications (collectively called the "Program"). 
-
-Section 2. Definitions 
-
-A "Modification" to the Program is any addition to or deletion from the contents of any file of the Program and any new file that contains any part of the Program. If you make a Modification and distribute the Program externally you are a "Contributor." The distribution of the Program must be under the terms of this license including those in Section 3 below. 
-
-A "Combined Work" results from combining and integrating all or parts of the Program with other code. A Combined Work may be thought of as having multiple parents or being result of multiple lines of code development. 
-
-Section 3. Distribution Licensing Terms 
-
-A. General Requirements 
-Except as necessary to recognize third-party rights or third-party restriction (see below), a distribution of the Program in any of the forms listed below must not put any further restrictions on the recipient’s exercise of the rights granted herein. 
-
-As a Contributor, you represent that your Modification(s) are your original creation(s) and, to the best of your knowledge, no third party has any claim (including but not limited to intellectual property claims) relating to your Modification(s). You represent that each of your Modifications includes complete details of any third-party right or other third-party restriction associated with any part of your Modification (including a copy of any applicable license agreement). 
-
-The Program must be distributed without charge beyond the costs of physically transferring the files to the recipient. 
-
-This Warranty Disclaimer/Limitation of Liability must be prominently displayed with every distribution of the Program in any form: 
-
-YOU AGREE THAT THE PROGRAM IS PROVIDED AS-IS, WITHOUT WARRANTY OF ANY KIND (EITHER EXPRESS OR IMPLIED). ACCORDINGLY, OCLC MAKES NO WARRANTIES, REPRESENTATIONS OR GUARANTEES, EITHER EXPRESS OR IMPLIED, AND DISCLAIMS ALL SUCH WARRANTIES, REPRESENTATIONS OR GUARANTEES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AS TO: (A) THE FUNCTIONALITY OR NONINFRINGEMENT OF PROGRAM, ANY MODIFICATION, A COMBINED WORK OR AN AGGREGATE WORK; OR (B) THE RESULTS OF ANY PROJECT UNDERTAKEN USING THE PROGRAM, ANY MODIFICATION, A COMBINED WORK OR AN AGGREGATE WORK. IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, CONSEQUENTIAL OR ANY OTHER DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE PROGRAM, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. YOU HEREBY WAIVE ANY CLAIMS FOR DAMAGES OF ANY KIND AGAINST CONTRIBUTORS WHICH MAY RESULT FROM YOUR USE OF THE PROGRAM. 
-
-B. Requirements for a Distribution of Modifiable Code 
-If you distribute the Program in a form to which the recipient can make Modifications (e.g. source code), the terms of this license apply to use by recipient. In addition, each source and data file of the Program and any Modification you distribute must contain the following notice: 
-
-"Copyright (c) 2000- (insert then current year) OCLC Online Computer Library Center, Inc. and other contributors. All rights reserved. The contents of this file, as updated from time to time by the OCLC Office of Research, are subject to OCLC Research Public License Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a current copy of the License at http://purl.oclc.org/oclc/research/ORPL/. Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the specific language governing rights and limitations under the License. This software consists of voluntary contributions made by many individuals on behalf of OCLC Research. For more information on OCLC Research, please see http://www.oclc.org/research/. The Original Code is ______________________________. The Initial Developer of the Original Code is ________________________. Portions created by ______________________ are Copyright (C) _____ _______________________. All Rights Reserved. Contributor(s): ______________________________________." 
-
-C. Requirements for a Distribution of Non-modifiable Code 
-If you distribute the Program in a form to which the recipient cannot make Modifications (e.g. object code), the terms of this license apply to use by recipient and you must include the following statement in appropriate and conspicuous locations: 
-
-"Copyright (c) 2000- (insert then current year) OCLC Online Computer Library Center, Inc. and other contributors. All rights reserved." 
-
-In addition, the source code must be included with the object code distribution or the distributor must provide the source code to the recipient upon request. 
-
-D. Requirements for a Combined Work Distribution 
-Distributions of Combined Works are subject to the terms of this license and must be made at no charge to the recipient beyond the costs of physically transferring the files to recipient. 
-
-A Combined Work may be distributed as either modifiable or non-modifiable code. The requirements of Section 3.B or 3.C above (as appropriate) apply to such distributions. 
-
-An "Aggregate Work" is when the Program exists, without integration, with other programs on a storage medium. This License does not apply to portions of an Aggregate Work which are not covered by the definition of "Program" provided in this License. You are not forbidden from selling an Aggregate Work. However, the Program contained in an Aggregate Work is subject to this License. Also, should the Program be extracted from an Aggregate Work, this License applies to any use of the Program apart from the Aggregate Work. 
-
-Section 4. License Grant 
-
-For purposes of permitting use of your Modifications by OCLC and other licensees hereunder, you hereby grant to OCLC and such other licensees the non-exclusive, worldwide, royalty-free, transferable, sublicenseable license to execute, copy, alter, delete, modify, adapt, change, revise, enhance, develop, publicly display, distribute (internally and externally) and/or create derivative works based on your Modifications (and derivative works thereof) in accordance with these Terms. This Section 4 shall survive termination of this License for any reason. 
-
-Section 5. Termination of Rights 
-
-This non-exclusive license (with respect to the grant from a particular Contributor) automatically terminates for any entity that initiates legal action for intellectual property infringement (with respect to the Program) against such Contributor as of the initiation of such action. 
-
-If you fail to comply with this License, your rights (but not your obligations) under this License shall terminate automatically unless you cure such breach within thirty (30) days of becoming aware of the noncompliance. All sublicenses granted by you which preexist such termination and are properly granted shall survive such termination. 
-
-Section 6. Other Terms 
-
-Except for the copyright notices required above, you may not use any trademark of any of the Contributors without the prior written consent of the relevant Contributor. You agree not to remove, alter or obscure any copyright or other proprietary rights notice contained in the Program. 
-
-All transfers of the Program or any part thereof shall be made in compliance with U.S. import/export regulations or other restrictions of the U.S. Department of Commerce, as well as other similar trade or commerce restrictions which might apply. 
-
-Any patent obtained by any party covering the Program or any part thereof must include a provision providing for the free, perpetual and unrestricted commercial and noncommercial use by any third party. 
-
-If, as a consequence of a court judgment or settlement relating to intellectual property infringement or any other cause of action, conditions are imposed on you that contradict the conditions of this License, such conditions do not excuse you from compliance with this License. If you cannot distribute the Program so as to simultaneously satisfy your obligations under this License and such other conditions, you may not distribute the Program at all. For example, if a patent license would not permit royalty-free redistribution of the Program by all those who receive copies directly or indirectly through you, you could not satisfy both the patent license and this License, and you would be required to refrain entirely from distribution of the Program. 
-
-If you learn of a third party claim or other restriction relating to a Program you have already distributed you shall promptly redo your Program to address the issue and take all reasonable steps to inform those who may have received the Program at issue. An example of an appropriate reasonable step to inform would be posting an announcement on an appropriate web bulletin board. 
-
-The provisions of this License are deemed to be severable, and the invalidity or unenforceability of any provision shall not affect or impair the remaining provisions which shall continue in full force and effect. In substitution for any provision held unlawful, there shall be substituted a provision of similar import reflecting the original intent of the parties hereto to the extent permissible under law. 
-
-The Original Contributor from time to time may change this License, and the amended license will apply to all copies of the Program downloaded after the new license is posted. This License grants only the rights expressly stated herein and provides you with no implied rights or licenses to the intellectual property of any Contributor. 
-
-This License is the complete and exclusive statement of the agreement between the parties concerning the subject matter hereof and may not be amended except by the written agreement of the parties. This License shall be governed by and construed in accordance with the laws of the State of Ohio and the United States of America, without regard to principles of conflicts of law.', 'http://www.oclc.org/research/activities/software/license/v2final.htm', NULL, NULL, NULL, 'OCLC Research Public License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '7cdb53ca385e775a395c782b9976f70a', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (438, 'NTP', 'NTP License (NTP) 
-
-Copyright (c) (CopyrightHoldersName) (From 4-digit-year)-(To 4-digit-year) 
-
-Permission to use, copy, modify, and distribute this software and its documentation for any purpose with or without fee is hereby granted, provided that the above copyright notice appears in all copies and that both the copyright notice and this permission notice appear in supporting documentation, and that the name (TrademarkedName) not be used in advertising or publicity pertaining to distribution of the software without specific, written prior permission. (TrademarkedName) makes no representations about the suitability this software for any purpose. It is provided "as is" without express or implied warranty.', 'http://www.opensource.org/licenses/NTP', NULL, NULL, NULL, 'NTP License', NULL, NULL, NULL, '', NULL, false, false, false, '6b4c2e6435c651d3777ba12b48f929d3', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (439, 'GPL-3.0-with-autoconf-exceptio', 'insert GPL v3 text here 
-
-AUTOCONF CONFIGURE SCRIPT EXCEPTION 
-
-Version 3.0, 18 August 2009 
-
-Copyright © 2009 Free Software Foundation, Inc. <http://fsf.org/> 
-
-Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed. 
-
-This Exception is an additional permission under section 7 of the GNU General Public License, version 3 ("GPLv3"). It applies to a given file that bears a notice placed by the copyright holder of the file stating that the file is governed by GPLv3 along with this Exception. 
-
-The purpose of this Exception is to allow distribution of Autoconf''s typical output under terms of the recipient''s choice (including proprietary). 
-
-0. Definitions. 
-"Covered Code" is the source or object code of a version of Autoconf that is a covered work under this License. 
-
-"Normally Copied Code" for a version of Autoconf means all parts of its Covered Code which that version can copy from its code (i.e., not from its input file) into its minimally verbose, non-debugging and non-tracing output. 
-
-"Ineligible Code" is Covered Code that is not Normally Copied Code. 
-
-1. Grant of Additional Permission. 
-You have permission to propagate output of Autoconf, even if such propagation would otherwise violate the terms of GPLv3. However, if by modifying Autoconf you cause any Ineligible Code of the version you received to become Normally Copied Code of your modified version, then you void this Exception for the resulting covered work. If you convey that resulting covered work, you must remove this Exception in accordance with the second paragraph of Section 7 of GPLv3. 
-
-2. No Weakening of Autoconf Copyleft. 
-The availability of this Exception does not imply any general presumption that third-party software is unaffected by the copyleft requirements of the license of Autoconf.', 'http://www.gnu.org/licenses/autoconf-exception-3.0.html', NULL, NULL, NULL, 'GNU General Public License v3.0 w/Autoconf exception', NULL, NULL, NULL, '', NULL, false, false, false, '7863864fee53d8919858d3af9dabba07', 1);
+7. Miscellaneous 
+This Agreement contains the entire agreement of the parties with respect to the subject matter of this Agreement and supersedes all previous communications, representations, understandings and agreements, either oral or written, between the parties with respect to said subject matter. The relationship of the parties hereunder is that of independent contractors, and this Agreement will not be construed as creating an agency, partnership, joint venture or any other form of legal association between the parties. If any term, condition, or provision in this Agreement is found to be invalid, unlawful or unenforceable to any extent, this Agreement will be construed in a manner that most closely effectuates the intent of this Agreement. Such invalid term, condition or provision will be severed from the remaining terms, conditions and provisions, which will continue to be valid and enforceable to the fullest extent permitted by law. This Agreement will be interpreted and construed in accordance with the laws of the State of California and the United States of America, without regard to conflict of law principles. The U.N. Convention on Contracts for the International Sale of Goods shall not apply to this Agreement. All disputes arising out of this Agreement involving VMware or any of its subsidiaries shall be subject to the jurisdiction of the federal or state courts of northern California, with venue lying in Santa Clara County, California. No rights may be assigned, no obligations may be delegated, and this Agreement may not be transferred by You, in whole or in part, whether voluntary or by operation of law, including by way of sale of assets, merger or consolidation, without the prior written consent of VMware, and any purported assignment, delegation or transfer without such consent shall be void ab initio. Any waiver of the provisions of this Agreement or of a party''s rights or remedies under this Agreement must be in writing to be effective. Failure, neglect or delay by a party to enforce the provisions of this Agreement or its rights or remedies at any time, will not be construed or be deemed to be a waiver of such party''s rights under this Agreement and will not in any way affect the validity of the whole or any part of this Agreement or prejudice such party''s right to take subsequent action.', 'http://www.zimbra.com/license/zimbra-public-license-1-3.html', NULL, NULL, NULL, 'Zimbra Public License v1.3', NULL, NULL, NULL, '', NULL, false, false, false, '04fe161c4f7b77bb8d470422fb205552', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (440, 'HPND', 'Historical Permission Notice and Disclaimer 
 
 <copyright notice> 
@@ -37817,92 +37877,6 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM 
 OTHER DEALINGS IN THE FONT SOFTWARE.', 'http://scripts.sil.org/cms/scripts/page.php?item_id=OFL10_web', NULL, NULL, NULL, 'SIL Open Font License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'c252ad141e4a6d0c264d6e42f97f3419', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (450, 'OFL-1.1', 'SIL OPEN FONT LICENSE 
-
-Version 1.1 - 26 February 2007 
-
-PREAMBLE 
-The goals of the Open Font License (OFL) are to stimulate worldwide 
-development of collaborative font projects, to support the font creation 
-efforts of academic and linguistic communities, and to provide a free and 
-open framework in which fonts may be shared and improved in partnership 
-with others. 
-
-The OFL allows the licensed fonts to be used, studied, modified and 
-redistributed freely as long as they are not sold by themselves. The 
-fonts, including any derivative works, can be bundled, embedded, 
-redistributed and/or sold with any software provided that any reserved 
-names are not used by derivative works. The fonts and derivatives, 
-however, cannot be released under any other type of license. The 
-requirement for fonts to remain under this license does not apply 
-to any document created using the fonts or their derivatives. 
-
-DEFINITIONS 
-"Font Software" refers to the set of files released by the Copyright 
-Holder(s) under this license and clearly marked as such. This may 
-include source files, build scripts and documentation. 
-
-"Reserved Font Name" refers to any names specified as such after the 
-copyright statement(s). 
-
-"Original Version" refers to the collection of Font Software components as 
-distributed by the Copyright Holder(s). 
-
-"Modified Version" refers to any derivative made by adding to, deleting, 
-or substituting — in part or in whole — any of the components of the 
-Original Version, by changing formats or by porting the Font Software to a 
-new environment. 
-
-"Author" refers to any designer, engineer, programmer, technical 
-writer or other person who contributed to the Font Software. 
-
-PERMISSION & CONDITIONS 
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of the Font Software, to use, study, copy, merge, embed, modify, 
-redistribute, and sell modified and unmodified copies of the Font 
-Software, subject to the following conditions: 
-
-1) Neither the Font Software nor any of its individual components, 
-in Original or Modified Versions, may be sold by itself. 
-
-2) Original or Modified Versions of the Font Software may be bundled, 
-redistributed and/or sold with any software, provided that each copy 
-contains the above copyright notice and this license. These can be 
-included either as stand-alone text files, human-readable headers or 
-in the appropriate machine-readable metadata fields within text or 
-binary files as long as those fields can be easily viewed by the user. 
-
-3) No Modified Version of the Font Software may use the Reserved Font 
-Name(s) unless explicit written permission is granted by the corresponding 
-Copyright Holder. This restriction only applies to the primary font name as 
-presented to the users. 
-
-4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font 
-Software shall not be used to promote, endorse or advertise any 
-Modified Version, except to acknowledge the contribution(s) of the 
-Copyright Holder(s) and the Author(s) or with their explicit written 
-permission. 
-
-5) The Font Software, modified or unmodified, in part or in whole, 
-must be distributed entirely under this license, and must not be 
-distributed under any other license. The requirement for fonts to 
-remain under this license does not apply to any document created 
-using the Font Software. 
-
-TERMINATION 
-This license becomes null and void if any of the above conditions are 
-not met. 
-
-DISCLAIMER 
-THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT 
-OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE 
-COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL 
-DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
-FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM 
-OTHER DEALINGS IN THE FONT SOFTWARE.', 'http://scripts.sil.org/cms/scripts/page.php?item_id=OFL_web', NULL, NULL, NULL, 'SIL Open Font License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '858f5eb0169a269174bc2c055a9b7173', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (451, 'eCos-2.0', 'The eCos license version 2.0 
 
 This file is part of eCos, the Embedded Configurable Operating System. Copyright (C) 1998, 1999, 2000, 2001, 2002 Red Hat, Inc. 
@@ -38619,6 +38593,32 @@ A "contributor" is any person that distributes its contribution under this licen
 (D) If you distribute any portion of the software, you must retain all copyright, patent, trademark, and attribution notices that are present in the software. 
 (E) If you distribute any portion of the software in source code form, you may do so only under this license by including a complete copy of this license with your distribution. If you distribute any portion of the software in compiled or object code form, you may only do so under a license that complies with this license. 
 (F) The software is licensed "as-is." You bear the risk of using it. The contributors give no express warranties, guarantees, or conditions. You may have additional consumer rights under your local laws which this license cannot change. To the extent permitted under your local laws, the contributors exclude the implied warranties of merchantability, fitness for a particular purpose and non-infringement.', 'http://www.microsoft.com/opensource/licenses.mspx', NULL, NULL, NULL, 'Microsoft Reciprocal License', NULL, NULL, NULL, '', NULL, false, false, false, '4ac19d26a628a64584d15daec29258b6', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (439, 'GPL-3.0-with-autoconf-exception', 'insert GPL v3 text here 
+
+AUTOCONF CONFIGURE SCRIPT EXCEPTION 
+
+Version 3.0, 18 August 2009 
+
+Copyright © 2009 Free Software Foundation, Inc. <http://fsf.org/> 
+
+Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed. 
+
+This Exception is an additional permission under section 7 of the GNU General Public License, version 3 ("GPLv3"). It applies to a given file that bears a notice placed by the copyright holder of the file stating that the file is governed by GPLv3 along with this Exception. 
+
+The purpose of this Exception is to allow distribution of Autoconf''s typical output under terms of the recipient''s choice (including proprietary). 
+
+0. Definitions. 
+"Covered Code" is the source or object code of a version of Autoconf that is a covered work under this License. 
+
+"Normally Copied Code" for a version of Autoconf means all parts of its Covered Code which that version can copy from its code (i.e., not from its input file) into its minimally verbose, non-debugging and non-tracing output. 
+
+"Ineligible Code" is Covered Code that is not Normally Copied Code. 
+
+1. Grant of Additional Permission. 
+You have permission to propagate output of Autoconf, even if such propagation would otherwise violate the terms of GPLv3. However, if by modifying Autoconf you cause any Ineligible Code of the version you received to become Normally Copied Code of your modified version, then you void this Exception for the resulting covered work. If you convey that resulting covered work, you must remove this Exception in accordance with the second paragraph of Section 7 of GPLv3. 
+
+2. No Weakening of Autoconf Copyleft. 
+The availability of this Exception does not imply any general presumption that third-party software is unaffected by the copyleft requirements of the license of Autoconf.', 'http://www.gnu.org/licenses/autoconf-exception-3.0.html', NULL, NULL, NULL, 'GNU General Public License v3.0 w/Autoconf exception', NULL, NULL, NULL, '', NULL, false, false, false, '7863864fee53d8919858d3af9dabba07', 1);
 
 
 --

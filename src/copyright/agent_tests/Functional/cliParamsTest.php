@@ -45,8 +45,8 @@ class cliParamsTest extends PHPUnit_Framework_TestCase {
 	function testHelp() {
 		// copyright -h
 		$last = exec("$this->copyright -h 2>&1", $usageOut, $rtn=NULL);
-		//print "testHelp: last is:$last\nusageout is:\n";
-		//print_r($usageOut) . "\n";
+		print "testHelp: last is:$last\nusageout is:\n";
+		print_r($usageOut) . "\n";
     // Check a couple of options for sanity
 		$usage = 'Usage: ../../agent/copyright [options]';
     $dashD = '-d  :: Turns verbose on, matches printed to Matches file.';
@@ -70,8 +70,8 @@ class cliParamsTest extends PHPUnit_Framework_TestCase {
     {
       $this->assertEquals($expected[$i], trim($got[$i]));
     }
-		//print "testC: last is:$last\nout is:\n";
-		//print_r($out) . "\n";
+		print "testC: last is:$last\nout is:\n";
+		print_r($got) . "\n";
 		return;
 	}
 
@@ -97,8 +97,8 @@ class cliParamsTest extends PHPUnit_Framework_TestCase {
 			$this->fail("FATAL! could not cd to agent_tests\n");
 		}
 		$last = exec("../agent/copyright -t 2>&1", $accuracy, $rtn=NULL);
-		//print "testT: last is:$last\naccuracy is:\n";
-		//print_r($accuracy) . "\n";
+		print "testT: last is:$last\naccuracy is:\n";
+		print_r($accuracy) . "\n";
     $size = count($accuracy);
     $start = $size-4;
     //print "starting at:{$accuracy[$start]}\n";

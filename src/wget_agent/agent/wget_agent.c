@@ -277,6 +277,7 @@ int TaintURL(char *Sin, char *Sout, int SoutSize)
  */
 int GetURL(char *TempFile, char *URL, char *TempFileDir)
 {
+  LOG_FATAL("hellow world\n");
   char CMD[MAXCMD];
   char TaintedURL[MAXCMD];
   char TempFileDirectory[MAXCMD];
