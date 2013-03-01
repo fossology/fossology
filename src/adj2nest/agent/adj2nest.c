@@ -573,7 +573,7 @@ int	main	(int argc, char *argv[])
       TreeSize=0;
       /* Update Upload */
       rv = UpdateUpload(UploadPk);
-      if (rv == -1) LOG_ERROR("Unable to update permissions on upload %ld", UploadPk);
+      if (rv == -1) LOG_ERROR("Unable to update mode on upload %ld", UploadPk);
     } /* while() */
   }
   else
@@ -588,7 +588,7 @@ int	main	(int argc, char *argv[])
       TreeSize=0;
       /* Update Upload */
       rv = UpdateUpload(UploadPk);
-      if (rv == -1) LOG_ERROR("Unable to update permissions on upload %ld", UploadPk);
+      if (rv == -1) LOG_ERROR("Unable to update mode on upload %ld", UploadPk);
     }
     free(uploads_to_scan);
   }
