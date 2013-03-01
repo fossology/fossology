@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -226,7 +226,7 @@ class ui_view_license extends FO_Plugin
     $V="";
     global $Plugins;
     $View = &$Plugins[plugin_find_id("view")];
-    $LicShortname = GetParm("lic",PARM_STRING);
+    $LicShortname = GetParm("lic",PARM_TEXT);
     $LicIdSet = GetParm("licset",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
     $nomosagent_pk = GetParm("napk",PARM_INTEGER);
@@ -258,13 +258,14 @@ class ui_view_license extends FO_Plugin
           $nomos_out .= " ,";
         } 
         
+        $url_one_license = urlencode($one_license);
         $text = _("License Reference");
         $nomos_out .= "<a title='$text' href='javascript:;'";
         $nomos_out .= "onClick=\"javascript:window.open('";
         $nomos_out .= Traceback_uri();
         $nomos_out .= "?mod=view-license";
         $nomos_out .= "&lic=";
-        $nomos_out .= $one_license;
+        $nomos_out .= $url_one_license;
         $nomos_out .= "&upload=";
         $nomos_out .= $Upload;
         $nomos_out .= "&item=";
