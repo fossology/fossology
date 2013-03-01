@@ -27,7 +27,6 @@
  * @param (optional) string -a lists agents
  * @param (optional) string -A specify agents
  * @param (optional) string -u list available uploads
- * @param (optional) string -P priority for the jobs (default: 0)
  * @param (optional) string --user specify user name
  * @param (optional) string --password specify password
  * @param (optional) string -c Specify the directory for the system configuration
@@ -83,7 +82,6 @@ $usage = basename($argv[0]) . " [options]
   -U upload :: the upload identifier for scheduling agent tasks
                The string can be a comma-separated list of upload ids.
                Or, use 'ALL' to specify all upload ids.
-  -P num    :: priority for the jobs (higher = more important, default:0)
   --user string :: user name
   --password string :: password
   -c string :: Specify the directory for the system configuration
@@ -125,10 +123,6 @@ cli_Init();
 $Verbose = 0;
 if (array_key_exists("v", $options)) {
   $Verbose = 1;
-}
-$Priority = 0;
-if (array_key_exists("P", $options)) {
-  $Priority = intval($options["P"]);
 }
 
 // Get the list of registered agents
@@ -194,28 +188,50 @@ if (array_key_exists("u", $options))
   exit(0);
 }
 
-$upload_pk_list = "";
-if (array_key_exists("U", $options)) {
-  $upload_pk_list = $options['U'];
-  if ($upload_pk_list == 'ALL') {
-    $upload_pk_list = "";
+if (array_key_exists("U", $options)) 
+{
+  /* $options['U'] can either be 'ALL', a string (the upload_pk), 
+     or an array of upload_pk's if multiple -U's were specified. 
+   */
+  $upload_options = $options['U'];
+  $upload_pk_array = array();
+  if ($upload_options == 'ALL') 
+  {
     $SQL = "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;";
     $result = pg_query($PG_CONN, $SQL);
     DBCheckResult($result, $SQL, __FILE__, __LINE__);
-    $i = 0;
-    while ($row = pg_fetch_assoc($result) and !empty($row['upload_pk'])) {
-      if ($i == 0) {
-        $upload_pk_list = $row['upload_pk'];
-      } else {
-        $upload_pk_list.= "," . $row['upload_pk'];
-      }
-      $i++;
+    while ($row = pg_fetch_assoc($result) and !empty($row['upload_pk'])) 
+    {
+        $upload_pk_array[] = $row['upload_pk'];
     }
     pg_free_result($result);
   }
+  else if (is_array($upload_options))
+  {
+    $upload_pk_array = $upload_options;
+  }
+  else
+  {
+    $upload_pk_array[] = $upload_options;
+  }
+   
+  /* check permissions */
+  $checked_list = array();
+  foreach($upload_pk_array as $upload_pk)
+  {
+    $UploadPerm = GetUploadPerm($upload_pk);
+    if ($UploadPerm < PERM_WRITE)
+    {
+      print "You have no permission to queue agents for upload " . $upload_pk . "\n";
+      continue;
+    }
+    $checked_list[] = $upload_pk;
+  }
+  $checked_list_str = implode(",", $checked_list);
+
+  /** scheduling agent tasks on upload ids */
+  QueueUploadsOnAgents($checked_list_str, $agent_list, $Verbose);
 }
-/** scheduling agent tasks on upload ids */
-QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose, $Priority);
 
 exit(0);
 ?>
