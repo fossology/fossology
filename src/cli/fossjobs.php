@@ -62,6 +62,11 @@ function list_agents() {
  */
 require_once("$MODDIR/lib/php/common-cli.php");
 
+global $Plugins;
+global $PERM_NAMES;
+global $SysConf;
+global $PG_CONN;
+
 /**********************************************************************
  **********************************************************************
 INITIALIZE THIS INTERFACE
@@ -95,7 +100,7 @@ if (array_key_exists("h", $options)) {
   echo $usage;
   exit(0);
 }
-global $Plugins;
+
 /**********************************************************************
  **********************************************************************
 PROCESS COMMAND LINE SELECTION
@@ -112,6 +117,7 @@ if (array_key_exists("password", $options)) {
 }
 
 account_check($user, $passwd); // check username/password
+$user_pk = $SysConf['auth']['UserId'];
 
 /* init plugins */
 cli_Init();
@@ -173,28 +179,18 @@ if (array_key_exists("A", $options))
   }
 }
 
-global $PG_CONN;
 /* List available uploads */
-if (array_key_exists("u", $options)) {
-  $SQL = "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;";
-  $result = pg_query($PG_CONN, $SQL);
-  DBCheckResult($result, $SQL, __FILE__, __LINE__);
+if (array_key_exists("u", $options)) 
+{
+  $root_folder_pk = GetUserRootFolder();
+  $FolderList = FolderListUploads_perm($root_folder_pk, PERM_WRITE);
+
   print "# The following uploads are available (upload id: name)\n";
-  $upload_count = pg_num_rows($result);
-  $AllUploadPk = "";
-  while ($row = pg_fetch_assoc($result) and !empty($row['upload_pk'])) {
-    $Label = $row['upload_filename'];
-    if (!empty($row['upload_desc'])) {
-      $Label.= " (" . $row['upload_desc'] . ')';
-    }
-    print $row['upload_pk'] . ": $Label\n";
-    if ($upload_count == 1) {
-      $AllUploadPk = $row['upload_pk'];
-    } else {
-      $AllUploadPk.= "," . $row['upload_pk'];
-    }
+  foreach($FolderList as $Folder)
+  {
+    $Label = $Folder['name'] . " (" . $Folder['upload_desc'] . ')';
+    print $Folder['upload_pk'] . ": $Label\n";
   }
-  pg_free_result($result);
   exit(0);
 }
 

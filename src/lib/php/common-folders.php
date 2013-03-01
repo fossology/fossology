@@ -55,9 +55,10 @@ function FolderGetTop()
 function GetUserRootFolder()
 {
   global $PG_CONN;
+  global $SysConf;
 
   /* validate inputs */
-  $user_pk = GetArrayVal("UserId", $_SESSION);
+  $user_pk = $SysConf['auth']['UserId'];
 
   /* everyone has a user_pk, even if not logged in.  But verify. */
   if (empty($user_pk)) return "__FILE__:__LINE__ GetUserRootFolder(Not logged in)<br>";
@@ -587,7 +588,7 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
 
   if (empty($PG_CONN)) { return; }
   if (empty($ParentFolder)) { return; }
-  if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
+  if ($ParentFolder == "-1")  $ParentFolder = GetUserRootFolder(); 
   $List=array();
 
   /* Get list of uploads under $ParentFolder */
