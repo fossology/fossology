@@ -469,58 +469,24 @@ int	SetParm	(char *ParmName, char *Parm)
 
 
 /**
- * \brief Update the perm_upload table
- *
- * \param long UploadPk
- * \param pPermGroup_t pPG  contains permission and group data fo UploadPk
- *
- * \return int 0 failure, 1 success
- */
-int UpdatePerms(long UploadPk, pPermGroup_t pPG)
-{
-  PGresult *result;
-
-  /* Add user permission to perm_upload */
-
-  /* insert user PERM_ADMIN record into perm_upload table */
-  snprintf(SQL, sizeof(SQL), "INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES (%d, %ld, %d)", PERM_ADMIN, UploadPk, pPG->group_pk);
-  result =  PQexec(pgConn, SQL); 
-  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) return(0);
-  PQclear(result);
-
-  /* Now add any user new_upload_group_fk/new_upload_perm to perm_upload  */
-  snprintf(SQL, sizeof(SQL), "INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES (%d, %ld, %d)", pPG->new_upload_perm, UploadPk, pPG->new_upload_group_fk);
-  result =  PQexec(pgConn, SQL); 
-  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) return(0);
-  PQclear(result);
-
-  return(1);
-}
-
-
-/**
  * \brief Finish updating the upload record and permissions data
  *
  * \param long UploadPk
- * \param pPermGroup_t pPG  contains permission and group data fo UploadPk
  *
- * \return int 0 failure, 1 success
+ * \return int -1 failure, 0 success
  */
-int UpdateUpload(long UploadPk, pPermGroup_t pPG)
+int UpdateUpload(long UploadPk)
 {
   PGresult *pgResult;
-  int rv;
 
   /* update upload.upload_mode to say that adj2nest was successful */
   snprintf(SQL, sizeof(SQL), "UPDATE upload SET upload_mode = upload_mode | (1<<6) WHERE upload_pk='%ld'",
            UploadPk);
   pgResult =  PQexec(pgConn, SQL); /* UPDATE upload */
-  if (fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__))
+  if (fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__)) return -1;
   PQclear(pgResult);
 
-  /* Update upload permissions */
-  rv = UpdatePerms(UploadPk, pPG);
-  return(rv);
+  return(0);
 }
 
 /*********************************************************
@@ -544,7 +510,7 @@ int	main	(int argc, char *argv[])
   long UploadPk=-1;
   long *uploads_to_scan;
   int  upload_count = 0;
-  pPermGroup_t pPG;
+  int  user_pk;
 
   /* connect to scheduler.  Noop if not run from scheduler.  */
   fo_scheduler_connect(&argc, argv, &pgConn);
@@ -588,20 +554,17 @@ int	main	(int argc, char *argv[])
 
   if (upload_count == 0)
   {
+    user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
     while(fo_scheduler_next())
     {
       UploadPk = atol(fo_scheduler_current());
-      pPG = GetUserGroup(UploadPk);
-      if (pPG == 0) LOG_ERROR("Unable to get permissions on upload %ld", UploadPk);
 
       /* Check Permissions */
-/* need user_pk from scheduler
-      if (GetUploadPerm(UploadPk, pPG, user_pk) < PERM_WRITE)
+      if (GetUploadPerm(pgConn, UploadPk, user_pk) < PERM_WRITE)
       {
-        LOG_ERROR("Unable to update permissions on upload %ld", UploadPk);
+        LOG_ERROR("You have no update permissions on upload %ld", UploadPk);
         continue;
       }
-*/
 
       LoadAdj(UploadPk);
       if (Tree) WalkTree(0,0); 
@@ -609,8 +572,8 @@ int	main	(int argc, char *argv[])
       Tree=NULL;
       TreeSize=0;
       /* Update Upload */
-      rv = UpdateUpload(UploadPk, pPG);
-      if (rv == 0) LOG_ERROR("Unable to update permissions on upload %ld", UploadPk);
+      rv = UpdateUpload(UploadPk);
+      if (rv == -1) LOG_ERROR("Unable to update permissions on upload %ld", UploadPk);
     } /* while() */
   }
   else
@@ -618,26 +581,14 @@ int	main	(int argc, char *argv[])
     for (i = 0; i < upload_count; i++) 
     {
       UploadPk = uploads_to_scan[i];
-      pPG = GetUserGroup(UploadPk);
-      if (pPG == 0) LOG_ERROR("Unable to get permissions on upload %ld", UploadPk);
-
-      /* Check Permissions */
-/* need user_pk from scheduler
-      if (GetUploadPerm(UploadPk, pPG, user_pk) < PERM_WRITE)
-      {
-        LOG_ERROR("Unable to update permissions on upload %ld", UploadPk);
-        continue;
-      }
-*/
-
       LoadAdj(UploadPk);
       if (Tree) WalkTree(0,0); 
       if (Tree) free(Tree);
       Tree=NULL;
       TreeSize=0;
       /* Update Upload */
-      rv = UpdateUpload(UploadPk, pPG);
-      if (rv == 0) LOG_ERROR("Unable to update permissions on upload %ld", UploadPk);
+      rv = UpdateUpload(UploadPk);
+      if (rv == -1) LOG_ERROR("Unable to update permissions on upload %ld", UploadPk);
     }
     free(uploads_to_scan);
   }

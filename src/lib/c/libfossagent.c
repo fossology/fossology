@@ -171,29 +171,29 @@ FUNCTION int fo_CreateARSTable(PGconn *pgConn, char *tableName)
 }  /* fo_CreateARSTable() */
 
 
+#ifdef NOLONGERUSED
 /**
- * \brief Return user and group data
+ * \brief Return user, group and permission data for UploadPk
  *
  * \param long upload_pk
  *
- * \return int 0 failure, 1 success
+ * \return int 0 failure, initialized pUserGroupPerm_t on success
  */
-pPermGroup_t GetUserGroup(long UploadPk)
+pUserGroupPerm_t GetUserGroupPerm(PGconn *pgConn, long UploadPk)
 {
   PGresult *result;
-  PGconn *pgConn = NULL;  // Database connection
   char SQL[1024];
-  pPermGroup_t pPG;
+  pUserGroupPerm_t pUGP;
 
-  pPG = malloc(sizeof(PermGroup_t));
-  if (!pPG)
+  pUGP = malloc(sizeof(UserGroupPerm_t));
+  if (!pUGP)
   {
-    LOG_ERROR("Out of memory, alloc %d bytes failed", (int)sizeof(PermGroup_t));
+    LOG_ERROR("Out of memory, alloc %d bytes failed", (int)sizeof(UserGroupPerm_t));
     return 0;
   }
 
   /* Get the user_pk from the upload table */
-  snprintf(SQL, sizeof(SQL), "select user_fk from upload where upload_pk='%ld'", UploadPk);
+  snprintf(SQL, sizeof(SQL), "select user_fk from upload where upload_pk=%ld", UploadPk);
   result = PQexec(pgConn, SQL);
   fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
   if (PQntuples(result) < 1)
@@ -201,11 +201,11 @@ pPermGroup_t GetUserGroup(long UploadPk)
     LOG_ERROR("No records returned in %s", SQL);
     return 0;
   }
-  pPG->user_pk = atoi(PQgetvalue(result, 0, 0));
+  pUGP->user_pk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
 
   /* Get the user_name from the users table */
-  snprintf(SQL, sizeof(SQL), "select user_name, new_upload_group_fk, new_upload_perm from users where user_pk='%d'", pPG->user_pk);
+  snprintf(SQL, sizeof(SQL), "select user_name, new_upload_group_fk, new_upload_perm from users where user_pk='%d'", pUGP->user_pk);
   result =  PQexec(pgConn, SQL);
   fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
   if (PQntuples(result) < 1)
@@ -213,13 +213,13 @@ pPermGroup_t GetUserGroup(long UploadPk)
     LOG_ERROR("No records returned in %s", SQL);
     return 0;
   }
-  pPG->user_name = PQgetvalue(result, 0, 0);
-  pPG->new_upload_group_fk = atoi(PQgetvalue(result, 0, 1));
-  pPG->new_upload_perm = atoi(PQgetvalue(result, 0, 2));
+  pUGP->user_name = PQgetvalue(result, 0, 0);
+  pUGP->new_upload_group_fk = atoi(PQgetvalue(result, 0, 1));
+  pUGP->new_upload_perm = atoi(PQgetvalue(result, 0, 2));
   PQclear(result);
 
   /* look up user's group_pk */
-  snprintf(SQL, sizeof(SQL), "select group_pk from groups where group_name='%s'", pPG->user_name);
+  snprintf(SQL, sizeof(SQL), "select group_pk from groups where group_name='%s'", pUGP->user_name);
   result =  PQexec(pgConn, SQL); 
   fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
   if (PQntuples(result) < 1)
@@ -227,26 +227,25 @@ pPermGroup_t GetUserGroup(long UploadPk)
     LOG_ERROR("No records returned in %s", SQL);
     return 0;
   }
-  pPG->group_pk = atoi(PQgetvalue(result, 0, 0));
+  pUGP->group_pk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
 
-  return (pPG);
+  return (pUGP);
 }
+#endif
 
 
 /**
  * \brief Get users permission to this upload
  *
  * \param long upload_pk
- * \param pPermGroup_t  Upload permission and group data
  * \param user_pk  
  *
- * \return permission (PERM_)
+ * \return permission (PERM_) this user has for UploadPk
  */
-int GetUploadPerm(long UploadPk, pPermGroup_t pPG, int user_pk)
+int GetUploadPerm(PGconn *pgConn, long UploadPk, int user_pk)
 {
   PGresult *result;
-  PGconn *pgConn = NULL;  // Database connection
   char SQL[1024];
   int perm;
 
