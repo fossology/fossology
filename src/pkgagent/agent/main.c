@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -73,6 +73,7 @@ int	main	(int argc, char *argv[])
   int ars_pk = 0;
 
   int upload_pk = 0;           // the upload primary key
+  int user_pk = 0;           // the upload primary key
   char *AgentARSName = "pkgagent_ars";
   int rv;
   PGresult *ars_result;
@@ -117,9 +118,18 @@ int	main	(int argc, char *argv[])
   /* If no args, run from scheduler! */
   if (CmdlineFlag == 0)
   {
+    user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
+
     while(fo_scheduler_next())
     {
       upload_pk = atoi(fo_scheduler_current());
+
+      /* Check Permissions */
+      if (GetUploadPerm(db_conn, upload_pk, user_pk) < PERM_WRITE)
+      {
+        LOG_ERROR("You have no update permissions on upload %d", upload_pk);
+        continue;
+      }
 
       if (Verbose) { printf("PKG: pkgagent read %d\n", upload_pk);}
       if (upload_pk ==0) continue;

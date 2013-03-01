@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
   int ars_pk = 0;
 
   int upload_pk = 0;           // the upload primary key
+  int user_pk = 0;
   char *AgentARSName = "mimetype_ars";
   int rv;
   PGresult *result;
@@ -126,6 +127,8 @@ int main(int argc, char *argv[])
   /* Run from scheduler! */
   if (0 == CmdlineFlag)
   {
+    user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
+
     while(fo_scheduler_next())
     {
       /** get piece of information, including upload_pk, others */
@@ -134,6 +137,14 @@ int main(int argc, char *argv[])
       {
         fo_scheduler_heart(1);
         upload_pk = atoi(Parm);
+
+        /* Check Permissions */
+        if (GetUploadPerm(pgConn, upload_pk, user_pk) < PERM_WRITE)
+        {
+          LOG_ERROR("You have no update permissions on upload %d", upload_pk);
+          continue;
+        }
+
         /* does ars table exist?
          * If not, create it.
          */

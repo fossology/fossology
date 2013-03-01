@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -75,6 +75,7 @@ int main  (int argc, char *argv[])
   int c;
   int InitFlag=0;
   int CmdlineFlag = 0; /** run from command line flag, 1 yes, 0 not */
+  int user_pk;
   char *agent_desc = "Network downloader.  Uses wget(1).";
 
   memset(GlobalTempFile,'\0',MAXCMD);
@@ -187,6 +188,7 @@ int main  (int argc, char *argv[])
   /* Run from scheduler! */
   if (0 == CmdlineFlag)
   {
+    user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
     while(fo_scheduler_next())
     {
       Parm = fo_scheduler_current(); /* get piece of information, including upload_pk, downloadfile url, and parameters */
@@ -196,6 +198,14 @@ int main  (int argc, char *argv[])
         /* set globals: uploadpk, downloadfile url, parameters */
         SetEnv(Parm,TempFileDir);
         upload_pk = GlobalUploadKey;
+
+        /* Check Permissions */
+        if (GetUploadPerm(pgConn, upload_pk, user_pk) < PERM_WRITE)
+        {
+          LOG_ERROR("You have no update permissions on upload %d", upload_pk);
+          continue;
+        }
+
         char TempDir[MAXCMD];
         memset(TempDir,'\0',MAXCMD);
         snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget

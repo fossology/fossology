@@ -837,14 +837,23 @@ int check_permission_del(long upload_id, int user_id, int user_perm)
   char SQL[MAXSQL] = {0};;
   PGresult *result = NULL;
   int count = 0;
+  int user_pk = 0;
+
   snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload where upload_pk = %ld;", upload_id);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
   count = atoi(PQgetvalue(result, 0, 0)); 
   if (count == 0) return -2; // this upload does not exist
 
-  if (ADMIN_PERM == user_perm ) return 1; // admin can do anything
-  if (user_perm < 7) return 0; // permission is less than 7, no delete permmission
+  user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
+
+  /* Check Permissions */
+  if (GetUploadPerm(db_conn, upload_id, user_pk) < PERM_WRITE)
+  {
+    LOG_ERROR("You have no update permissions on upload %ld", upload_id);
+    return 0;
+  }
+
 
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload where upload_pk = %ld and user_fk = %d;", upload_id, user_id);

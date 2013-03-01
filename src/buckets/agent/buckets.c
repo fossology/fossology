@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -59,6 +59,7 @@ int main(int argc, char **argv)
   int readnum = 0;
   int rv;
   int hasPrules;
+  int user_pk = 0;
   char *bucketpool_name;
   char *SVN_REV;
   char *VERSION;
@@ -75,6 +76,7 @@ int main(int argc, char **argv)
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
+  user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
 
   /* command line options */
   while ((cmdopt = getopt(argc, argv, "rin:p:t:u:vc:")) != -1) 
@@ -207,6 +209,13 @@ int main(int argc, char **argv)
           uploadtree.upload_fk = atoi(strtok_r(NULL, Delims, &saveptr));
         }
         token = strtok_r(NULL, Delims, &saveptr);
+      }
+
+      /* Check Permissions */
+      if (GetUploadPerm(pgConn, uploadtree.upload_fk, user_pk) < PERM_WRITE)
+      {
+        LOG_ERROR("You have no update permissions on upload %d", uploadtree.upload_fk);
+        continue;
       }
 
       /* From the upload_pk, get the head of the uploadtree, pfile_pk and ufile_name  */

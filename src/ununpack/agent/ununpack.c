@@ -1,7 +1,7 @@
 /*******************************************************************
  Ununpack: The universal unpacker.
 
- Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -33,6 +33,7 @@ int	main(int argc, char *argv[])
   char *AgentARSName = "ununpack_ars";
   int   Recurse=0;
   int   ars_pk = 0;
+  int   user_pk = 0;
   long  Pfile_size = 0;
   char *ListOutName=NULL;
   char *Fname = NULL;
@@ -74,6 +75,8 @@ int	main(int argc, char *argv[])
       case 'Q':
         UseRepository=1;
 
+        user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
+
         /* Get the upload_pk from the scheduler */
         if((Upload_Pk = fo_scheduler_next()) == NULL) SafeExit(0);
         break;
@@ -103,6 +106,13 @@ int	main(int argc, char *argv[])
   /* Open DB and Initialize CMD table */
   if (UseRepository) 
   {
+    /* Check Permissions */
+    if (GetUploadPerm(pgConn, atoi(Upload_Pk), user_pk) < PERM_WRITE)
+    {
+      LOG_ERROR("You have no update permissions on upload %s", Upload_Pk);
+      SafeExit(99);
+    }
+        
     SVN_REV = fo_sysconfig(AgentName, "SVN_REV");
     VERSION = fo_sysconfig(AgentName, "VERSION");
     sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);

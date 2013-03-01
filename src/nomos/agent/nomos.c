@@ -776,6 +776,7 @@ int main(int argc, char **argv)
   int upload_pk = 0;
   int numrows;
   int ars_pk = 0;
+  int user_pk = 0;
   char *AgentARSName = "nomos_ars";
 
   char *cp;
@@ -883,11 +884,20 @@ int main(int argc, char **argv)
     /* DEBUG printf("   LOG: nomos agent starting up in scheduler mode....\n"); */
     schedulerMode = 1;
 
+    user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
+
     /* read upload_pk from scheduler */
     while (fo_scheduler_next())
     {
       upload_pk = atoi(fo_scheduler_current());
       if (upload_pk == 0) continue;
+
+      /* Check Permissions */
+      if (GetUploadPerm(gl.pgConn, upload_pk, user_pk) < PERM_WRITE)
+      {
+        LOG_ERROR("You have no update permissions on upload %d", upload_pk);
+        continue;
+      }
 
       /* Is this a duplicate request (same upload_pk, sameagent_fk)?
              If so, there is no point in repeating it.

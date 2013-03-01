@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -802,6 +802,7 @@ int main(int argc, char** argv)
   int c, i = -1;                // temporary int containers
   int num_files = 0;            // the number of rows in a job
   int ars_pk = 0;               // the args primary key
+  int user_pk = 0;
   long upload_pk = 0;           // the upload primary key
   long agent_pk = 0;            // the agents primary key
   char *SVN_REV;
@@ -910,10 +911,20 @@ int main(int argc, char** argv)
       return 5;
     }
 
+    user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
+
     /* enter the main agent loop */
     while(fo_scheduler_next())
     {
       upload_pk = atol(fo_scheduler_current());
+
+      /* Check Permissions */
+      if (GetUploadPerm(pgConn, upload_pk, user_pk) < PERM_WRITE)
+      {
+        LOG_ERROR("You have no update permissions on upload %ld", upload_pk);
+        continue;
+      }
+                                               
       ars_pk = fo_WriteARS(pgConn, 0, upload_pk, agent_pk, AGENT_ARS, NULL, 0);
 
       sprintf(sql, fetch_pfile, upload_pk, agent_pk, agent_pk);
