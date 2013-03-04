@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -79,12 +79,12 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     --user USER --password PASSWORD \\
     -f path -d 'the file' /tmp/file
 
-  Depricated options:
-    -a archive = (depricated) see archive
-    -p path    = (depricated) see -f
-    -R         = (depricated and ignored)
-    -w         = (depricated and ignored)
-    -W         = (depricated and ignored)
+  Deprecated options:
+    -a archive = (deprecated) see archive
+    -p path    = (deprecated) see -f
+    -R         = (deprecated and ignored)
+    -w         = (deprecated and ignored)
+    -W         = (deprecated and ignored)
   ";
 /* Load command-line options */
 global $PG_CONN;
@@ -351,7 +351,7 @@ for ($i = 1;$i < $argc;$i++) {
       }
       break;
     case '-f': /* folder path */
-    case '-p': /* depricated 'path' to folder */
+    case '-p': /* deprecated 'path' to folder */
       $i++;
       $FolderPath = $argv[$i];
       /* idiot check for absolute paths */
