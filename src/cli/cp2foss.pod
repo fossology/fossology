@@ -72,13 +72,13 @@ Help, prints a verbose usage message.
 
 username, specify the username for a user who has the priviledge to execute cp2foss.
 Also you can add one file .fossology.rc in your current home directory, add user name and 
-password in 2 seperate line.
+password in 2 separate lines.
 
 =item B<--password> I<password>
 
 password, specify the password for a user who has the priviledge to execute cp2foss.
 Also you can add one file .fossology.rc in your current home directory, add user name and 
-password in 2 seperate line.
+password in 2 separate lines.
 
 =item B<-c> I<configuration directory>
 
@@ -121,7 +121,7 @@ before the archive's directory path: -X .svn -X .cvs
 
 =back
 
-=head2 Depricated Options
+=head2 Deprecated Options
 
 =over
 
