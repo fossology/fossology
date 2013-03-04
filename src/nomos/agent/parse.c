@@ -1458,7 +1458,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       }
       else if (!lmem[_mGPL] && !lmem[_mLGPL] &&
           (INFILE(_LT_GNU_1) + INFILE(_LT_GNU_2) +
-              INFILE(_LT_GNU_3) + INFILE(_LT_GNU_4) >= 2)) {
+              INFILE(_LT_GNU_3) + INFILE(_LT_GNU_4) > 2)) {
         cp = GPLVERS();
         INTERESTING(lDebug ? "GPL(GNU)" : cp);
         lmem[_mGPL] = 1;
