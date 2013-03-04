@@ -2146,8 +2146,8 @@
 %STR%	"\<gpl\>"
 #
 %ENTRY%	_LT_GPL_NAMED3_EXHIBIT
-%KEY%	"gpl"
-%STR%	"Compatible Licences =SOME= \<gpl\>"
+%KEY%	"licen[cs]"
+%STR%	"Compatible Licences =SOME= (\<gpl\>|gnu general public license)"
 #####
 # FIX-ME: these 'patterns' are really references, are they not?
 #####
