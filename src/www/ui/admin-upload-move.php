@@ -146,7 +146,7 @@ class upload_move extends FO_Plugin {
         $V.= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
         $V.= "    {\n";
         /* Remove all options */
-        $V.= "    document.formy.uploadid.innerHTML = Uploads.responseText;\n";
+        $V.= "    document.getElementById('uploaddiv').innerHTML = '<select name=\'uploadid\'>' + Uploads.responseText + '</select><P />';\n";
         /* Add new options */
         $V.= "    }\n";
         $V.= "  }\n";
@@ -167,6 +167,7 @@ class upload_move extends FO_Plugin {
         $V.= "</select><P />\n";
         $text = _("Select the upload you wish to move:  \n");
         $V.= "<li>$text";
+        $V.= "<div id='uploaddiv'>\n";
         $V.= "<select name='uploadid'>\n";
         $List = FolderListUploads_perm($root_folder_pk, PERM_WRITE);
         foreach($List as $L) {
@@ -181,6 +182,7 @@ class upload_move extends FO_Plugin {
           $V.= "</option>\n";
         }
         $V.= "</select><P />\n";
+        $V.= "</div>\n";
         $text = _("Select the destination folder:  \n");
         $V.= "<li>$text";
         $V.= "<select name='targetfolderid'>\n";

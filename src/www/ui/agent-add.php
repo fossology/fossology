@@ -152,8 +152,9 @@ class agent_add extends FO_Plugin
         $V .= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
         $V .= "    {\n";
         /* Remove all options */
-        $V .= "    document.formy.upload.innerHTML = Uploads.responseText;\n";
-        $V .= "    document.getElementById('agents').innerHTML = '';\n";
+        $V .= "    document.getElementById('uploaddiv').innerHTML = '<select size=\'10\' name=\'upload\' onChange=\'Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=\" + this.value)\'>' + Uploads.responseText + '</select><P />';\n";
+        //$V .= "alert(document.getElementById('uploaddiv').innerHTML)\n";
+        $V .= "    document.getElementById('agentsdiv').innerHTML = '';\n";
         /* Add new options */
         $V .= "    }\n";
         $V .= "  }\n";
@@ -166,7 +167,7 @@ class agent_add extends FO_Plugin
         $V .= "  if ((Agents.readyState==4) && (Agents.status==200))\n";
         $V .= "    {\n";
         /* Remove all options */
-        $V .= "    document.getElementById('agents').innerHTML = Agents.responseText;\n";
+        $V .= "    document.getElementById('agentsdiv').innerHTML = '<select multiple size=\'10\' id=\'agents\' name=\'agents[]\'>' + Agents.responseText + '</select>';\n";
         /* Add new options */
         $V .= "    }\n";
         $V .= "  }\n";
@@ -188,6 +189,7 @@ class agent_add extends FO_Plugin
 
         $text = _("Select the upload to analyze:");
         $V .= "<li>$text<br>";
+        $V .= "<div id='uploaddiv'>\n";
         $V .= "<select size='10' name='upload' onChange='Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=\" + this.value)'>\n";
         $List = FolderListUploads_perm($Folder, PERM_WRITE);
         foreach($List as $L)
@@ -201,9 +203,12 @@ class agent_add extends FO_Plugin
           $V .= "</option>\n";
         }
         $V .= "</select><P />\n";
+        $V .= "</div>\n";
         $text = _("Select additional analysis.");
         $V .= "<li>$text<br>\n";
+        $V .= "<div id='agentsdiv'>\n";
         $V .= "<select multiple size='10' id='agents' name='agents[]'></select>\n";
+        $V .= "</div>\n";
         $V .= "</ol>\n";
         $text = _("Analyze");
         $V .= "<input type='submit' value='$text!'>\n";
