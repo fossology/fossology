@@ -99,7 +99,7 @@ class ui_view_license extends FO_Plugin
     global $Plugins;
     $View = &$Plugins[plugin_find_id("view")];    
 
-    $sql = "select * from license_ref where rf_shortname = '$LicShortname' and rf_text != 'License by Nomos.';";
+    $sql = "select * from license_ref where rf_shortname = '$LicShortname';";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
