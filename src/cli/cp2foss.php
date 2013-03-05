@@ -239,6 +239,14 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $SysConf;
   $user_pk = $SysConf['auth']['UserId'];
 
+  /* Get the user record and check the PLUGIN_DB_ level to make sure they have at least write access */
+  $UsersRow = GetSingleRec("users", "where user_pk=$user_pk");
+  if ($UsersRow["user_perm"] < PLUGIN_DB_WRITE)
+  {
+    print "You have no permission to upload files into FOSSology\n";
+    return 1;
+  }
+
   /* Create the upload for the file */
   if ($Verbose) {
     print "JobAddUpload($user_pk, $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk);\n";
