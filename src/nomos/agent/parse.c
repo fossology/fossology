@@ -1059,6 +1059,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_mGPL] = 1;
   }
 
+  /** Leptonica license */
+  if (INFILE(_TITLE_LEPTONICA)) {
+    INTERESTING("Leptonica");
+  }
+
   /*
    * GPL, LGPL, GFDL
    * QUESTION: do we need to check for the FSF copyright since we also
