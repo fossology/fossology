@@ -89,7 +89,8 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
 
   /****  Add user permission to perm_upload *****/
   /* First look up user's group_pk */
-  $UserName = $_SESSION['User'];
+  $usersRow = GetSingleRec("users", "where user_pk='$user_pk'");
+  $UserName = $usersRow['user_name'];
   $GroupRow = GetSingleRec("Groups", "where group_name='$UserName'");
   if (empty($GroupRow))
   {
@@ -117,7 +118,6 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
   pg_free_result($result);
 
   /* Now add any user new_upload_group_fk/new_upload_perm to perm_upload */
-  $usersRow = GetSingleRec("users", "where user_name='$UserName'");
   if (empty($usersRow))
   {
     $text1 = _("User");
