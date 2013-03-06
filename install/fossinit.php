@@ -206,7 +206,7 @@ function initLicenseRefTable($Verbose)
   pg_free_result($result);
 
   /** import licenseref.sql */
-  $import_license_ref = "psql -U fossy -w -d fossology -f $LIBEXECDIR/licenseref.sql > /dev/null";
+  $import_license_ref = "su fossy -c 'psql -U fossy -w -d fossology -f $LIBEXECDIR/licenseref.sql > /dev/null'";
   system($import_license_ref, $return_val);
   if ($return_val)
   {
