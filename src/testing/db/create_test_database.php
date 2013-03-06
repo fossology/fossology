@@ -483,13 +483,6 @@ debug("Done Applying the FOSSOlogy schema to test database via ApplySchema()");
 $elapsed = get_time() - $start_time;
 debug("Elapsed Time = $elapsed");
 
-/* for the 2.0 -> 2.1 migration, create the uploadtree_0 table */
-require_once("/usr/local/lib/fossology/dbmigrate_2.0-2.1.php"); // hardcode for now
-require_once("/usr/local/lib/fossology/dbmigrate_2.1-2.2.php"); // hardcode for now
-$Verbose = 0;
-Migrate_20_21($Verbose);
-Migrate_21_22($Verbose);
-
 // insert the 'fossy' user into the test database
 // this is the FOSSology user 'fossy' (not a Postgres user, or a system user)
 $random_seed = rand().rand();
@@ -497,6 +490,13 @@ $hash = sha1($random_seed . "fossy");
 $user_sql = "INSERT INTO users (user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk) VALUES ('fossy', 'Default Administrator', '$random_seed', '$hash', 10, 'fossy', 'n', 1);";
 pg_query($test_db_conn, $user_sql)
     or die("FAIL: could not insert default user into user table\n");
+
+/* for the 2.0 -> 2.1 migration, create the uploadtree_0 table */
+require_once("/usr/local/lib/fossology/dbmigrate_2.0-2.1.php"); // hardcode for now
+require_once("/usr/local/lib/fossology/dbmigrate_2.1-2.2.php"); // hardcode for now
+$Verbose = 0;
+Migrate_20_21($Verbose);
+Migrate_21_22($Verbose);
 
 /* now we are done setting up the test database */
 pg_close($test_db_conn);
