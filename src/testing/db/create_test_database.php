@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /*
- Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -485,8 +485,10 @@ debug("Elapsed Time = $elapsed");
 
 /* for the 2.0 -> 2.1 migration, create the uploadtree_0 table */
 require_once("/usr/local/lib/fossology/dbmigrate_2.0-2.1.php"); // hardcode for now
+require_once("/usr/local/lib/fossology/dbmigrate_2.1-2.2.php"); // hardcode for now
 $Verbose = 0;
 Migrate_20_21($Verbose);
+Migrate_21_22($Verbose);
 
 // insert the 'fossy' user into the test database
 // this is the FOSSology user 'fossy' (not a Postgres user, or a system user)
