@@ -186,11 +186,19 @@ function initLicenseRefTable($Verbose)
     print "FATAL: Unable to access '$LIBEXECDIR'.\n";
     return (1);
   }
+
+  /** drop table license_ref_2 table if exists */
+  $sql = "DROP TABLE IF EXISTS license_ref_2;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+
   /** back up data of license_ref table */
   $sql = "CREATE TABLE license_ref_2 as select * from license_ref;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
+
   /** delete data of old license_ref table */
   $sql = "DELETE FROM license_ref;";
   $result = pg_query($PG_CONN, $sql);
