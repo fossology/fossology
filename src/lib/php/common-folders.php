@@ -592,11 +592,11 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
   $List=array();
 
   /* Get list of uploads under $ParentFolder */
-  /** mode 1<<1 = upload_fk **/
+  /** mode 1 = upload_fk **/
   $sql = "SELECT upload_pk, upload_desc, upload_ts, upload_filename
 	FROM foldercontents,upload
 	WHERE foldercontents.parent_fk = '$ParentFolder'
-	AND foldercontents.foldercontents_mode = 2
+	AND foldercontents.foldercontents_mode = 1
 	AND foldercontents.child_id = upload.upload_pk
 	ORDER BY upload_filename,upload_pk;";
   $result = pg_query($PG_CONN, $sql);

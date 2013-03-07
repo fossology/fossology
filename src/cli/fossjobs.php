@@ -177,7 +177,8 @@ if (array_key_exists("A", $options))
 if (array_key_exists("u", $options)) 
 {
   $root_folder_pk = GetUserRootFolder();
-  $FolderList = FolderListUploads_perm($root_folder_pk, PERM_WRITE);
+  $FolderPath = NULL;
+  $FolderList = FolderListUploadsRecurse($root_folder_pk, $FolderPath, PERM_WRITE);
 
   print "# The following uploads are available (upload id: name)\n";
   foreach($FolderList as $Folder)

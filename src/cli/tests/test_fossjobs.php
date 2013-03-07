@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -136,7 +136,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $auth = "--user fossy --password fossy -c $fossology_testconfig";
     $cp2foss_command = "$cp2foss_path $auth ./ -f fossjobs -d 'fossjobs testing'";
     // print "cp2foss_command is:$cp2foss_command\n";
-    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " executing '$cp2foss_command'\n");
+    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$cp2foss_command'\n");
     $last = exec("$cp2foss_command 2>&1", $out, $rtn);
     // print_r($out);
     $upload_id = 0;
@@ -153,10 +153,10 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
 
     /** reschedule all rest of agent */
     $command = "$fossjobs_path $auth -U $upload_id -v";
-    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " executing '$command'\n");
+    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     //print_r($out);
-    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Waiting 300 seconds for the agents to complete\n");
+    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  Waiting 300 seconds for the agents to complete\n");
     sleep(300); //wait for the agents complete $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"nomos", $upload_id);
     $this->assertEquals(1, $agent_status);
@@ -175,7 +175,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
 
     /** 2. upload one file, schedule copyright except wget/unpack/adj2nest */
     $cp2foss_command = "$cp2foss_path $auth ./test_fossjobs.php -f fossjobs -d 'fossjobs testing copyright' -q agent_copyright";
-    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " executing '$cp2foss_command'\n");
+    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$cp2foss_command'\n");
     $last = exec("$cp2foss_command 2>&1", $out, $rtn);
     //print_r($out);
     $upload_id = 0;
@@ -194,7 +194,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
 
     /** reschedule just nomos */
     $command = "$fossjobs_path $auth -U $upload_id -v -A agent_nomos";
-    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " executing '$command'\n");
+    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     //print_r($out);
     sleep(5); //wait for the agents complete
@@ -223,7 +223,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     //$this->test_reschedule_agents(); // using the uloads in test case test_reschedule_agents()
     /** help */
     $command = "$fossjobs_path -h -c $fossology_testconfig";
-    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " executing '$command'\n");
+    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
     //print_r($out);
@@ -233,7 +233,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $out = "";
     $pos = 0;
     $command = "$fossjobs_path $auth -a ";
-    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " executing '$command'\n");
+    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     //print_r($out);
     $output_msg_count = count($out);
@@ -243,17 +243,17 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $out = "";
     $pos = 0;
     $command = "$fossjobs_path $auth -u ";
-    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " executing '$command'\n");
+    fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     fwrite(STDOUT, "DEBUG: output was:\n");
     print_r($out);
     $output_msg_count = count($out);
-    // TODO: / Note:  This is *Highly* dependent on the exection of 
+    // TODO: / Note:  This is *Highly* dependent on the execution of 
     // test_reschedule_agents() - i.e. these two test cases are 
     // tightly coupled, and they should _not_ be so.
     // at the end of test_reschedule and this method, the number of
     // uploads should be 7 ( 8 - 1 line for the header );
-    $this->assertEquals(8, $output_msg_count); // have 2 = (3 -1_ upploads
+    $this->assertEquals(2, $output_msg_count); // have 2 = (3 -1_ uploads
 
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
