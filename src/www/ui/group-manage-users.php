@@ -95,6 +95,13 @@ class group_manage_users extends FO_Plugin {
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         pg_free_result($result);
       } 
+      else if ($perm === -1)
+      {
+        $sql = "delete from group_user_member where group_user_member_pk='$gum_pk'";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
+      }
     }
     else if (!empty($newuser) && (!empty($group_pk)))
     {
@@ -105,10 +112,13 @@ class group_manage_users extends FO_Plugin {
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
       
-      $sql = "insert into group_user_member (group_fk, user_fk, group_perm) values ($group_pk, $newuser, $newperm)";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
+      if ($newperm >= 0)
+      {
+        $sql = "insert into group_user_member (group_fk, user_fk, group_perm) values ($group_pk, $newuser, $newperm)";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
+      }
       $newperm = $newuser = 0;
     }
 
@@ -137,7 +147,7 @@ class group_manage_users extends FO_Plugin {
     $V .= Array2SingleSelect($GroupArray, "groupselect", $group_pk, false, false, $onchange);
 
     /* Create array of group_user_member group_perm possible values for use in a select list */
-    $group_permArray = array(0=>"User", 1=>"Admin");
+    $group_permArray = array(-1 => "None", 0=>"User", 1=>"Admin");
 
     /* Select all the user members of this group */
     $sql = "select group_user_member_pk, user_fk, group_perm, user_name from group_user_member, users
