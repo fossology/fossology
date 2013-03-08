@@ -652,8 +652,11 @@ class ui_view extends FO_Plugin
     global $Plugins;
 
     $Upload = GetParm("upload",PARM_INTEGER);
-    $UploadPerm = GetUploadPerm($Upload);
-    if ($UploadPerm < PERM_READ) return;
+    if (!empty($Upload))
+    {
+      $UploadPerm = GetUploadPerm($Upload);
+      if ($UploadPerm < PERM_READ) return;
+    }
 
     $Folder = GetParm("folder",PARM_INTEGER);
     $Show = GetParm("show",PARM_STRING);
