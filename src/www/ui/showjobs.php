@@ -258,8 +258,11 @@ if (!empty($Row["job_upload_fk"]))
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     while($Row = pg_fetch_assoc($result)) 
     {
-      $UploadPerm = GetUploadPerm($Row['job_upload_fk']);
-      if ($UploadPerm < PERM_WRITE) continue;
+      if (!empty($Row['job_upload_fk']))
+      {
+        $UploadPerm = GetUploadPerm($Row['job_upload_fk']);
+        if ($UploadPerm < PERM_WRITE) continue;
+      }
       $JobArray[] = $Row['job_pk'];
     }
     pg_free_result($result);
