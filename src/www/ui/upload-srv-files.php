@@ -212,6 +212,9 @@ class upload_srv_files extends FO_Plugin {
           }
         }
         /* Display instructions */
+        $text22 = _("Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your uploaded files.  To manage your own group go into Admin > Groups > Manage Group Users.  To manage permissions for this one upload, go to Admin > Upload Permissions");
+        $V .= "<p><b>$text22</b><p>";
+
         $V.= _("This option permits uploading a file, set of files, or a directory from the web server to FOSSology.\n");
         $V.= _("This option is designed for developers who have large source code directories that they wish to analyze (and the directories are already mounted on the web server's system).\n");
         $V.= _("This option only uploads files located on the FOSSology web server.\n");
@@ -257,8 +260,7 @@ class upload_srv_files extends FO_Plugin {
         $text = _("Upload");
         $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
-        $text = _("Starting in FOSSology v 2.2 only your group and your designated group will have access to your uploaded files.  To specify a designated group go into Admin > Users > Account Settings.  To specify which users are in your group or your designated group, go into Admin > Groups > Manage Group Users.");
-        $V .= "<p>$text";
+        $V .= "<p><b>$text22</b><p>";
 
         break;
       case "Text":
