@@ -118,6 +118,8 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
   pg_free_result($result);
 
   /* Now add any user new_upload_group_fk/new_upload_perm to perm_upload */
+/* this code is inactivated here and in the user account settings (user-edit-self.php and user-edit-any.php)
+because it may be too confusing for the user.
   if (empty($usersRow))
   {
     $text1 = _("User");
@@ -134,6 +136,7 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
   }
+*/
 
   return ($upload_pk);
 } // JobAddUpload()
