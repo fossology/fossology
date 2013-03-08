@@ -209,7 +209,6 @@ class upload_file extends FO_Plugin {
         $V.= "</form>\n";
         $V .= "<p><b>$text22</b><p>";
         
-        $V .= "<p>$text";
         break;
       case "Text":
         break;
