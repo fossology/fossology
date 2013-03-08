@@ -54,7 +54,11 @@ class upload_permissions extends FO_Plugin
     $sql = "";
     if (!empty($perm_upload_pk))
     { 
-      if (!empty($perm))
+      if ($perm === 0)
+      {
+        $sql = "delete from perm_upload where perm_upload_pk='$perm_upload_pk'";
+      }
+      else if (!empty($perm))
       {
         $sql = "update perm_upload set perm='$perm' where perm_upload_pk='$perm_upload_pk'";
       }
