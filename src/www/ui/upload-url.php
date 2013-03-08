@@ -184,6 +184,8 @@ class upload_url extends FO_Plugin {
           $GetURL = 'http://';
         }
         /* Display instructions */
+        $text22 = _("Starting in FOSSology v 2.2 only your group and your designated group will have access to your uploaded files.  To specify a designated group go into Admin > Users > Account Settings.  To specify which users are in your group or your designated group, go into Admin > Groups > Manage Group Users.");
+        $V .= "<p><b>$text22</b><p>";
         $V.= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) or a directory from a remote web or FTP server to FOSSology.\n");
         $V.= _("The file or directory to upload must be accessible via a URL and must not require human interaction ");
         $V.= _("such as login credentials.\n");
@@ -237,8 +239,7 @@ class upload_url extends FO_Plugin {
         $text = _("Upload");
         $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
-        $text = _("Starting in FOSSology v 2.2 only your group and your designated group will have access to your uploaded files.  To specify a designated group go into Admin > Users > Account Settings.  To specify which users are in your group or your designated group, go into Admin > Groups > Manage Group Users.");
-        $V .= "<p>$text";
+        $V .= "<p><b>$text22</b>";
 
         break;
       case "Text":
