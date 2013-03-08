@@ -540,8 +540,9 @@ class user_edit_any extends FO_Plugin {
         $V.= "</td>\n";
         $V.= "</tr>\n";
 
-        /******  New Upload Group ******/
-        /* Get master array of groups */
+/*
+        / ******  New Upload Group ****** /
+        / * Get master array of groups * /
         $sql = "select group_pk, group_name from groups order by group_name";
         $groupresult = pg_query($PG_CONN, $sql);
         DBCheckResult($groupresult, $sql, __FILE__, __LINE__);
@@ -556,7 +557,7 @@ class user_edit_any extends FO_Plugin {
         $V.= "</td>";
         $V .= "</tr>\n";
 
-        /******  New Upload Permissions ******/
+        / ******  New Upload Permissions ****** /
         $text = _("Access Permission to give the above group");
         $V.= "$Style<th>$text</th>";
         $V.= "<td>";
@@ -564,7 +565,7 @@ class user_edit_any extends FO_Plugin {
         $V .= Array2SingleSelect($PERM_NAMES, "new_upload_perm", $Selected, true, false);
         $V.= "</td>";
         $V .= "</tr>\n";
-
+*/
 
         $text = _("User Interface Options");
         $text1 = _("Use the simplified UI (Default)");
