@@ -33,6 +33,71 @@ class upload_permissions extends FO_Plugin
   var $DBaccess = PLUGIN_DB_WRITE;
 
 
+  /* @brief Display group membership
+   * @return html
+   **/
+  function DisplayGroupMembership()
+  {
+    global $SysConf;
+    global $PG_CONN;
+    global $PERM_NAMES;
+
+    $group_pk = GetParm('group_pk', PARM_INTEGER);
+    $user_pk = $SysConf['auth']['UserId'];
+    $V = "";
+
+    $text = _("To edit group memberships ");
+    $text2 = _("click here");
+    $V .= "<p>$text" . "<a href='" . Traceback_uri() . "?mod=upload_permissions'>" . $text2 . "</a>";
+    $text = _("Look up who is a member of group ");
+
+    /* Get array of groups that this user is an admin of */
+    $GroupArray = GetGroupArray($user_pk);
+    if (empty($GroupArray))
+    {
+      $text = _("You have no permission to manage any group.");
+      echo "<p>$text<p>";
+      return;
+    }
+    reset($GroupArray);
+    if (empty($group_pk)) $group_pk = key($GroupArray);
+
+    $text = _("To list the users in a group, select the group:  \n");
+    $V.= "<p>$text";
+
+    /*** Display group select list, on change request new page with group= in url ***/
+    $url = preg_replace('/&group_pk=[0-9]*/',"",Traceback()) . "&group_pk=";
+
+    $onchange = "onchange=\"js_url(this.value, '$url')\"";
+    $V .= Array2SingleSelect($GroupArray, "groupuserselect", $group_pk, false, false, $onchange);
+
+    /* Select all the user members of this group */
+    $sql = "select group_user_member_pk, user_fk, group_perm, user_name from group_user_member, users
+              where group_fk='$group_pk' and user_fk=user_pk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $GroupMembersArray = pg_fetch_all($result);
+    pg_free_result($result);
+
+    /* Permissions Table */
+    $V .= "<p><table border=1>";
+    $UserText = _("User");
+    $V .= "<tr><th>$UserText</th></tr>";
+    foreach ($GroupMembersArray as $GroupMember)
+    {
+      $V .= "<tr>";
+      $V .= "<td>";  // user
+      $V .= $GroupMember['user_name'];
+      $V .= "</td>";
+      $V .= "</tr>";
+    }
+
+    $V .= "</table>";
+
+    return $V;
+  }
+
+
   /*********************************************
    Output(): Generate the text for this plugin.
    *********************************************/
@@ -44,6 +109,7 @@ class upload_permissions extends FO_Plugin
     /* GET parameters */
     $folder_pk = GetParm('folder', PARM_INTEGER);
     $upload_pk = GetParm('upload', PARM_INTEGER);
+    $users_group_pk = GetParm('group_pk', PARM_INTEGER);
     $group_pk = GetParm('group', PARM_INTEGER);
     $perm_upload_pk = GetParm('permupk', PARM_INTEGER);
     $perm = GetParm('perm', PARM_INTEGER);
@@ -181,12 +247,12 @@ return;
       {
         $V .= "<tr>";
         $V .= "<td>";  // group
-        $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&permupk={$PermRow['perm_upload_pk']}&group=";
+        $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&permupk={$PermRow['perm_upload_pk']}&group=";
         $onchange = "onchange=\"js_url(this.value, '$url')\"";
         $V .= Array2SingleSelect($GroupArray, "groupselect", $PermRow['group_pk'], false, false, $onchange);
         $V .= "</td>";
         $V .= "<td>";  // permission
-        $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&permupk={$PermRow['perm_upload_pk']}&perm=";
+        $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&permupk={$PermRow['perm_upload_pk']}&perm=";
         $onchange = "onchange=\"js_url(this.value, '$url')\"";
         $V .= Array2SingleSelect($PERM_NAMES, "permselect", $PermRow['perm'], false, false, $onchange);
         $V .= "</td>";
@@ -195,13 +261,13 @@ return;
       /* Print one extra row for adding perms */
       $V .= "<tr>";
       $V .= "<td>";  // group
-      $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&newperm=$newperm&newgroup=";
+      $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&newperm=$newperm&newgroup=";
       $onchange = "onchange=\"js_url(this.value, '$url')\"";
       $Selected = (empty($newgroup)) ? "" : $newgroup;
       $V .= Array2SingleSelect($GroupArray, "groupselectnew", $Selected, true, false, $onchange);
       $V .= "</td>";
       $V .= "<td>";  // permission
-      $url = Traceback_uri() . "?mod=upload_permissions&upload=$upload_pk&newgroup=$newgroup&newperm=";
+      $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&newgroup=$newgroup&newperm=";
       $onchange = "onchange=\"js_url(this.value, '$url')\"";
       $Selected = (empty($newperm)) ? "" : $newperm;
       $V .= Array2SingleSelect($PERM_NAMES, "permselectnew", $Selected, false, false, $onchange);
@@ -210,7 +276,7 @@ return;
   
       $V .= "</table>";
   
-      $text = _("All upload permissions take place immediatly when a value is changed.  There is no submit button.");
+      $text = _("All upload permissions take place immediately when a value is changed.  There is no submit button.");
       $V .= "<p>" . $text;
       $text = _("Add new groups on the last line.");
       $V .= "<br>" . $text;
@@ -221,6 +287,8 @@ return;
       $V .= "<p>$text<p>";
     }
 
+    $V .= "<hr>";
+    $V .= $this->DisplayGroupMembership();
     if (!$this->OutputToStdout) return ($V);
     print ("$V");
     return;
