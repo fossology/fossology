@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -216,11 +216,15 @@ function TagFilter(&$UploadtreeRows, $tag_pk, $uploadtree_tablename)
  * 
  * \param $upload_id - upload id
  * 
- * \return 1: enabled; 0: disabled
+ * \return 1: enabled; 0: disabled, or no write permission
  */
 function TagStatus($upload_id) 
 {
   global $PG_CONN;
+
+  $UploadPerm = GetUploadPerm($upload_id);
+  if ($UploadPerm < PERM_WRITE) return 0;
+
   /** check if this upload has been disabled */
   $sql = "select tag_manage_pk from tag_manage where upload_fk = $upload_id and is_disabled = true;";
   $result = pg_query($PG_CONN, $sql);
