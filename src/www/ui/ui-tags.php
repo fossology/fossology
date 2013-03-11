@@ -408,8 +408,11 @@ class ui_tag extends FO_Plugin
         if ($perm >= PERM_WRITE ) 
         {
           $VE .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>View/Edit</a>|<a href='" . Traceback_uri() . "?mod=tag&action=delete&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Delete</a></td></tr>\n";
-        }else{
-          $VE .= "<td align='center'></td></tr>\n";
+        }
+        else
+        {
+          $nopermtext = _("No permission to edit tag.");
+          $VE .= "<td align='center'>$nopermtext</td></tr>\n";
         }
       }
       $VE .= "</table><p>\n";
@@ -717,8 +720,14 @@ class ui_tag extends FO_Plugin
     } else {
       /* Show create tag page */
       $perm = GetUploadPerm($Upload);
-      if ($perm >= PERM_WRITE ) {
+      if ($perm >= PERM_WRITE ) 
+      {
         $V .= $this->ShowCreateTagPage($Upload,$Item);
+      }
+      else
+      {
+        $nopermtext = _("You do not have permission to tag this upload.");
+        $V .= $nopermtext;
       }
       /* Show delete tag page removing
        $V .= $this->ShowDeleteTagPage($Upload,$Item);
