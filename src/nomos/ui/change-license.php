@@ -79,45 +79,6 @@ class change_license extends FO_Plugin {
     else return 1;
   } // IsChanged()
 
-  /**
-   * \brief detect if the current user has permission to change license
-   *
-   * \param $upload_id - upload id 
-   *
-   * \return 1: has permission to change license; 0: no permission to change license
-   */
-  function ChangePermissionDetect($upload_id)
-  {
-    global $PG_CONN;
-    global $SysConf;
-
-    $current_user_id = $SysConf['auth']['UserId'];
-    $SQL = "SELECT user_perm from users where user_pk = '$current_user_id';";
-    $result = pg_query($PG_CONN, $SQL);
-    DBCheckResult($result, $SQL, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    if(empty($row)) {
-      pg_free_result($result);
-      return 0; // no permission to change 
-    }
-
-    if ($row['user_perm'] == 10) return 1; // the current user has the administrator piviledge
-    if (empty($row['user_perm'])) return 0; // the current user has no permission to change license, perhaps it is Default User
-    pg_free_result($result);
-
-    $SQL = "SELECT user_fk from upload where upload_pk = $upload_id;";
-    $result = pg_query($PG_CONN, $SQL);
-    DBCheckResult($result, $SQL, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    if(empty($row)) {
-      pg_free_result($result);
-      return 0; // no permission to change 
-    }
-    if ($SysConf['auth']['UserId'] == $row['user_fk']) return 1; // the current user is the owner of this upload
-    pg_free_result($result);
-
-    return 0;  // no permission to change
-  }
 
   /** 
    * \brief display license audit trail on the pop up window
@@ -340,10 +301,11 @@ class change_license extends FO_Plugin {
       $ObjectiveLicense = "";
 
     /** check if the current user has the permission to change license */
-    $permission = $this->ChangePermissionDetect($upload_fk);
+    $permission = GetUploadPerm($upload_fk);
     $text = _("Change License");
     $V .= "<H2>$text</H2>\n";
-    if (1 === $permission) {
+    if ($permission >= PERM_WRITE) 
+    {
       $V.= "<form enctype='multipart/form-data' method='post'>\n";
       $V .= "<table border='1'>\n";
       $text = _("License");
