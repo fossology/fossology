@@ -162,19 +162,21 @@ class group_manage_users extends FO_Plugin {
     $UserText = _("User");
     $PermText = _("Permission");
     $V .= "<tr><th>$UserText</th><th>$PermText</th></tr>";
-    foreach ($GroupMembersArray as $GroupMember)
-    {
-      $V .= "<tr>";
-      $V .= "<td>";  // user
-      $V .= $GroupMember['user_name'];
-      $V .= "</td>";
+    if (!empty($GroupMembersArray)) { // does this group have childen ?
+      foreach ($GroupMembersArray as $GroupMember)
+      {
+        $V .= "<tr>";
+        $V .= "<td>";  // user
+        $V .= $GroupMember['user_name'];
+        $V .= "</td>";
 
-      $V .= "<td>";  // permission
-      $url = Traceback_uri() . "?mod=group_manage_users&gum_pk=$GroupMember[group_user_member_pk]&perm=";
-      $onchange = "onchange=\"js_url(this.value, '$url')\"";
-      $V .= Array2SingleSelect($group_permArray, "permselect", $GroupMember['group_perm'], false, false, $onchange);
-      $V .= "</td>";
-      $V .= "</tr>";
+        $V .= "<td>";  // permission
+        $url = Traceback_uri() . "?mod=group_manage_users&gum_pk=$GroupMember[group_user_member_pk]&perm=";
+        $onchange = "onchange=\"js_url(this.value, '$url')\"";
+        $V .= Array2SingleSelect($group_permArray, "permselect", $GroupMember['group_perm'], false, false, $onchange);
+        $V .= "</td>";
+        $V .= "</tr>";
+      }
     }
     /* Print one extra row for adding perms */
     $V .= "<tr>";
