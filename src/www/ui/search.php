@@ -32,15 +32,7 @@ class search extends FO_Plugin
 
   function PostInitialize()
   {
-/*
-    * Only show the global search menu if there are no browse restrictions
-     * browse restrictions and the user isn't logged in.
-     * Technically, this PostInitialize() is incorrect, but it implements
-     * the above expected behavior, which for practical purposes is reasonable
-     * because if one wants to give the default user permission to browse,
-     * they should turn on GlobalBrowse (i.e. no browse restrictions).
-     */
-      $this->State = PLUGIN_STATE_READY;
+    $this->State = PLUGIN_STATE_READY;
     return $this->State;
   }
 

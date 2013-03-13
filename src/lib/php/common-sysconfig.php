@@ -56,7 +56,6 @@ define("CONFIG_TYPE_TEXTAREA", 3);
  * The first array dimension of $SysConf is the group, the second is the variable name.
  * For example:
  *  -  $SysConf[SYSCONFIG][LogoLink] => "http://my/logo.gif"
- *  -  $SysConf[SYSCONFIG][GlobalBrowse] => "true"
  *  -  $SysConf[DIRECTORIES][MODDIR] => "/mymoduledir/
  *  -  $SysConf[VERSION][SVN_REV] => "4467M"
  *
@@ -238,14 +237,6 @@ function Populate_sysconfig()
   . CONFIG_TYPE_TEXT .
                     ",'Logo', 2, '$LogoLinkDesc', '$LogoLinkValid'" ;
    
-  $Variable = "GlobalBrowse";
-  $BrowsePrompt = _("Global Browsing");
-  $BrowseDesc = _("true = allow browsing and searching the entire repository.<br>false = user can only browse/search their own uploads.");
-  $BrowseValid = "check_boolean";
-  $ValueArray[$Variable] = "'$Variable', 'false', '$BrowsePrompt', "
-  . CONFIG_TYPE_INT .
-                    ",'UI', 1, '$BrowseDesc', '$BrowseValid'";
-
   $Variable = "FOSSologyURL";
   $URLPrompt = _("FOSSology URL");
   $hostname = exec("hostname -f");

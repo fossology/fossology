@@ -60,7 +60,7 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
    * \brief test for ConfigInit()
    * after ConfigInit() is executed, we can get some sysconfig information,
    * include: SupportEmailLabel, SupportEmailAddr, SupportEmailSubject,
-   * BannerMsg, LogoImage, LogoLink, GlobalBrowse, FOSSologyURL
+   * BannerMsg, LogoImage, LogoLink, FOSSologyURL
    */
   function testConfigInit()
   {
@@ -70,7 +70,6 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
     #$sysconfig = './sysconfigDirTest';
     ConfigInit($sys_conf, &$SysConf);
     $this->assertEquals("FOSSology Support",  $SysConf['SYSCONFIG']['SupportEmailSubject']);
-    $this->assertEquals("false",  $SysConf['SYSCONFIG']['GlobalBrowse']);
     $hostname = exec("hostname -f");
     if (empty($hostname)) $hostname = "localhost";
     $FOSSologyURL = $hostname."/repo/";
