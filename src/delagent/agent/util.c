@@ -848,7 +848,7 @@ int check_permission_del(long upload_id, int user_id, int user_perm)
   user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
 
   /* Check Permissions */
-  if (GetUploadPerm(db_conn, upload_id, user_pk) < PERM_WRITE)
+  if (GetUploadPerm(db_conn, upload_id, user_id) < PERM_WRITE)
   {
     LOG_ERROR("You have no update permissions on upload %ld", upload_id);
     return 0;
