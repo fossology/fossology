@@ -1,7 +1,7 @@
 <?php
 
 /*
- Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -57,10 +57,12 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
 
     $EXE_PATH = '../../agent/delagent';
     $usage= ""; 
-    
+    $usageL = "";    
+
     if(file_exists($EXE_PATH))
     {
       $usage = 'Usage: ../../agent/delagent [options]';
+      $usageL = '  -f   :: List folder IDs.';
     }
     else
     {
@@ -70,6 +72,7 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
     // run it
     $last = exec("$EXE_PATH -h 2>&1", $out, $rtn);
     $this->assertEquals($usage, $out[1]); // check if executable file delagent is exited
+    $this->assertEquals($usageL, $out[7]); // check if the option -L removed
     $PG_CONN = pg_connect("host=localhost port=5432 dbname=" . $DB_NAME . " user=fossy password=fossy")
                or die("Could not connect");
     $EXE_PATH = $EXE_PATH." -c $db_conf";
@@ -125,6 +128,35 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
     #print $out[1] . "\n";
     $this->assertStringStartsWith($expected, $out[2]);
   }
+
+  /**
+   * \brief test delagent -U 85
+   */
+  function testDelagentUpload(){
+    global $EXE_PATH;
+    global $PG_CONN;
+    global $DB_NAME;
+    $expected = "The upload '85' is deleted by the user 'fossy'.";
+
+    exec("sudo su postgres -c 'pg_restore -d $DB_NAME ../testdata/testdb_all.tar'");
+    $sql = "UPDATE upload SET user_fk = 2;";
+    $result = pg_query($PG_CONN, $sql);
+    pg_free_result($result);
+    
+    $command = "$EXE_PATH -U 85 -n fossy -p fossy";
+    exec($command, $out, $rtn);
+    #print $expected . "\n";
+    #print $out[1] . "\n";
+    $sql = "SELECT upload_fk, uploadtree_pk FROM bucket_container, uploadtree WHERE uploadtree_fk = uploadtree_pk AND upload_fk = 85;";
+    $result = pg_query($PG_CONN, $sql);
+    if (pg_num_rows($result) > 0){
+      $this->assertFalse("bucket_container records not deleted!");
+    }
+    pg_free_result($result);
+
+    $this->assertStringStartsWith($expected, $out[0]);
+  }
+
 
   /**
    * \brief clean the env
