@@ -77,6 +77,7 @@
  */
 #define	OPTS_DEBUG		0x1
 #define	OPTS_TRACE_SWITCH	0x2
+#define OPTS_LONG_CMD_OUTPUT 0x4
 
 char debugStr[myBUFSIZ];
 char dbErrString[myBUFSIZ];

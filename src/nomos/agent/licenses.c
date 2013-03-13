@@ -1030,9 +1030,12 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
    */
   /* print results if running from the command line */
   /* DBug: printf("saveLicenseData on return gl.initwd is:%s\n",gl.initwd); */
-  if(cur.cliMode) {
-    printf("File %s contains license(s) %s\n", basename(cur.targetFile),
-        cur.compLic);
+  if(cur.cliMode) 
+  {
+    if (optionIsSet(OPTS_LONG_CMD_OUTPUT))
+      printf("File %s contains license(s) %s\n", cur.targetFile, cur.compLic);
+    else
+      printf("File %s contains license(s) %s\n", basename(cur.targetFile), cur.compLic);
   }
   return;
 } /* saveLicenseData */

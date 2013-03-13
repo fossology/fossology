@@ -551,6 +551,7 @@ FUNCTION void Usage(char *Name) {
   printf("  -h   :: help (print this message), then exit.\n");
   printf("  -i   :: initialize the database, then exit.\n");
   printf("  -c   :: specify the directory for the system configuration.\n");
+  printf("  -l   :: print full file path (command line only).\n");
   /*    printf("  -v   :: verbose (-vv = more verbose)\n"); */
   printf(
       "  file :: if files are listed, print the licenses detected within them.\n");
@@ -852,13 +853,17 @@ int main(int argc, char **argv)
   }
 
   /* Process command line options */
-  while ((c = getopt(argc, argv, "hic:")) != -1)
+  while ((c = getopt(argc, argv, "hilc:")) != -1)
   {
     switch (c) {
       case 'c': break; /* handled by fo_scheduler_connect() */
       case 'i':
         /* "Initialize" */
         Bail(0); /* DB was opened above, now close it and exit */
+      case 'l':
+        /* set long command line output */
+        gl.progOpts |= OPTS_LONG_CMD_OUTPUT;
+        break;
       case 'h':
       default:
         Usage(argv[0]);
