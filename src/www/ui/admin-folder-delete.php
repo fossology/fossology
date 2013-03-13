@@ -91,12 +91,12 @@ class admin_folder_delete extends FO_Plugin {
         $folder = GetParm('folder', PARM_INTEGER);
         if (!empty($folder)) {
           $rc = $this->Delete($folder);
+          $sql = "SELECT * FROM folder where folder_pk = '$folder';";
+          $result = pg_query($PG_CONN, $sql);
+          DBCheckResult($result, $sql, __FILE__, __LINE__);
+          $Folder = pg_fetch_assoc($result);
+          pg_free_result($result);
           if (empty($rc)) {
-            $sql = "SELECT * FROM folder where folder_pk = '$folder';";
-            $result = pg_query($PG_CONN, $sql);
-            DBCheckResult($result, $sql, __FILE__, __LINE__);
-            $Folder = pg_fetch_assoc($result);
-            pg_free_result($result);
             /* Need to refresh the screen */
             $text = _("Deletion of folder ");
             $text1 = _(" added to job queue");
