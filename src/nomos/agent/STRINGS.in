@@ -3809,9 +3809,13 @@ e /* (INFILE(j)) */
 %KEY%	"public"
 %STR%	"free (,|and) unencumbered =FEW= public domain"
 #
-%ENTRY%	_LT_UNLINref
+%ENTRY%	_URL_UNLINref
 %KEY% "licen[cs]"
 %STR% "(refer to|(read|see)) =FEW= unlicense\.?org"
+#
+%ENTRY%	_URL_UNLIN
+%KEY%	"licen[cs]"
+%STR%	"all rights reversed =FEW= unlicense\.?org"
 #
 %ENTRY%	_LT_PUBDOM_1
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"

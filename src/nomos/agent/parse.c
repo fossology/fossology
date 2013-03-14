@@ -8306,7 +8306,7 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
   } else if (INFILE(_CR_NONE)) {
     INTERESTING(lDebug ? "Pubdom(no-CR)" : LS_PD_CLM);
     ret = 1;
-  } else if (INFILE(_LT_UNLIN) || URL_INFILE(_LT_UNLINref)) {
+  } else if (INFILE(_LT_UNLIN) || URL_INFILE(_URL_UNLINref) || URL_INFILE(_URL_UNLIN)) {
     INTERESTING("Unlicense");
     ret = 1;
   } else if (INFILE(_LT_PUBDOM_1)) {
