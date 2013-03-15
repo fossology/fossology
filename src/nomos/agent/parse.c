@@ -918,6 +918,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     lmem[_mPHP] = 1;
   }
+  else if (INFILE(_LT_PHP_ref)) {
+    INTERESTING(lDebug ? "PHP(2)" : "PHP");
+  }
   else if (!lmem[_mPHP] && INFILE(_LT_PHPref1)) {
     if (INFILE(_PHR_PHP_V301)) {
       INTERESTING(lDebug ? "PHP(ref-3.01)" : "PHP-3.01");
