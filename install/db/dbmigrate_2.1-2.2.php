@@ -147,6 +147,13 @@ function Migrate_21_22()
   }
   pg_free_result($UserResult);
                     
+
+  /** delete GlobalBrowse field if exist */
+  $sql = "delete from sysconfig where variablename = 'GlobalBrowse'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+
   return 0;  // success
 } // Migrate_21_22
 
