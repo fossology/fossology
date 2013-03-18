@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -37,7 +37,11 @@ function Migrate_20_21($DryRun)
   // Check if uploadtree_a already inherits from uploadtree.  If so, we are done.
   $sql = "SELECT EXISTS (SELECT 1 FROM pg_catalog.pg_inherits WHERE inhrelid = 'public.uploadtree_a'::regclass::oid);";
   $row = RunSQL($sql, $DryRun);
-  if ($row['?column?'] == 't') 
+  /** on fedora 18, the column name is 'exist', on other distritution, it is '?column?' */
+  foreach ($row as $exist_key => $exist_value) {
+  }
+
+  if ($exist_value == 't') 
   {
     echo "Data previously migrated.\n";
     return 0;  // migration has already happened
