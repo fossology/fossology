@@ -6691,6 +6691,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"gnu (general p|p)ublic licen[cs]e =SOME= version 2"
 #
+%ENTRY%	_TITLE_MODULE_LICENSE
+%KEY%	"licen[cs]"
+%STR%	"MODULE_LICENSE"
+#
 %ENTRY%	_TITLE_GPL_KDE
 %KEY%	"licen[cs]"
 %STR%	"gnu (general p|p)ublic licen[cs]e =ANY= (accepted|approved) by (the membership of kde|trolltech asa =FEW= the kde free qt foundation)"
@@ -7860,6 +7864,10 @@ k
 %ENTRY%	_PHR_PATENT
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 %STR%	"patent encumbered|patent[ -]pending|(by|under) patent"
+#
+%ENTRY%	_PHR_PATENT_NOT
+%KEY%	"p(atent|roduc|rofit|roject|ublic)"
+%STR%	"no|none|not patent encumbered"
 #
 %ENTRY%	_PHR_PHP_V20
 %KEY%	"(condit|vers)ion"

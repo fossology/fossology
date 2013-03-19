@@ -5641,7 +5641,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (!lmem[_mALADDIN] && INFILE(_PHR_NOT_OPEN)) {
       MEDINTEREST("NOT-Open-Source!");
     }
-    if (HASKW(kwbm, _KW_patent) && INFILE(_PHR_PATENT)) {
+    if (HASKW(kwbm, _KW_patent) && INFILE(_PHR_PATENT) && !INFILE(_PHR_PATENT_NOT)) {
       MEDINTEREST("Patent-ref");
     }
     if (INFILE(_PHR_RESTRICT_RIGHTS)) {
@@ -6436,6 +6436,9 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_FILE_GPL1) || INFILE(_FILE_GPL2)) {
     lstr = lDebug ? "GPL(deb)" : "GPL";
+  }
+  else if (INFILE(_TITLE_MODULE_LICENSE)) {
+    lstr = lDebug ? "GPL(linux-kernel)" : "GPL-2.0";
   }
   /*
    * Special case, HACK: "Debian packaging ... licensed under GPL"
