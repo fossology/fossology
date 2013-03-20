@@ -378,7 +378,7 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
 
   sprintf(sql, jobsql_email, upload_id);
   db_result = database_exec(scheduler, sql);
-  if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
+  if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
     PQ_ERROR(db_result, "unable to access email info for job %d", j_id);
     return;
