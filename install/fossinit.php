@@ -220,6 +220,21 @@ function initLicenseRefTable($Verbose)
     return (1);
   }
 
+  /** get maximal rf_pk */
+  $sql = "SELECT max(rf_pk) from license_ref;";
+  $result_max = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_max, $sql, __FILE__, __LINE__);
+  $row_max = pg_fetch_assoc($result_max);
+  pg_free_result($result_max);
+
+  $current_license_ref_rf_pk_seq = $row_max['max'];
+
+  /** set next license_ref_rf_pk_seq value */
+  $sql = "SELECT setval('license_ref_rf_pk_seq', $current_license_ref_rf_pk_seq);";
+  $result_seq = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_seq, $sql, __FILE__, __LINE__);
+  pg_free_result($result_seq);
+
   $sql = "select * from license_ref_2;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -290,21 +305,6 @@ function initLicenseRefTable($Verbose)
   }
 
   pg_free_result($result);
-
-  /** get maximal rf_pk */
-  $sql = "SELECT max(rf_pk) from license_ref;";
-  $result_max = pg_query($PG_CONN, $sql);
-  DBCheckResult($result_max, $sql, __FILE__, __LINE__);
-  $row_max = pg_fetch_assoc($result_max);
-  pg_free_result($result_max);
-
-  $current_license_ref_rf_pk_seq = $row_max['max'];
-
-  /** set next license_ref_rf_pk_seq value */
-  $sql = "SELECT setval('license_ref_rf_pk_seq', $current_license_ref_rf_pk_seq);";
-  $result_seq = pg_query($PG_CONN, $sql);
-  DBCheckResult($result_seq, $sql, __FILE__, __LINE__);
-  pg_free_result($result_seq);
 
   /** drop the backup table */
   $sql = "DROP TABLE license_ref_2;";
