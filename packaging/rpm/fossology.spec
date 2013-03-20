@@ -304,7 +304,7 @@ if [ $? -ne 0 ]; then
 	cat >> /var/lib/pgsql/data/pg_hba.conf << EOF
 # Added for FOSSology connection
 # Local connections
-local   all         all                               ident
+local   all         all                               md5
 # IPv4 local connections:
 host    all         all         127.0.0.1/32          md5
 host	all	    all		::1/128		      md5
