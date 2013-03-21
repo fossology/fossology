@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -26,7 +26,6 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 DIRS=css images locale
 
 UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd)$$" `
-OBSOLETEFILES = admin-tag-ns.php admin-change-owner.php admin-tag-ns-perm.php
 
 OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png)$$" `
 
@@ -41,9 +40,6 @@ install: all
 		mkdir -p $(DESTDIR)$(WEBDIR)/ui/$$dir; \
 	done
 
-	for file in $(OBSOLETEFILES); do \
-	  rm -f $(DESTDIR)$(WEBDIR)/ui/$$file; \
-	done
 	for file in $(UIFILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
