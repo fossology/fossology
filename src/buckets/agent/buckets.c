@@ -364,7 +364,6 @@ int main(int argc, char **argv)
           order by ars_starttime desc limit 1",
           agent_pk, uploadtree.upload_fk, "false", nomos_agent_pk, bucketpool_pk);
       result = PQexec(pgConn, sqlbuf);
-      printf("sql is:%s\n", sqlbuf);
       if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
       if (PQntuples(result) == 0)
       {
