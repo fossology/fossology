@@ -91,19 +91,28 @@ require_once("$MODDIR/lib/php/common.php");
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
 
-/* initialize the license_ref table */
-if ($UpdateLiceneseRef) 
-{
-  print "Update reference licenses\n";
-  initLicenseRefTable(false);
-}
-
 if (empty($SchemaFilePath)) $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
 
 if (!file_exists($SchemaFilePath))
 {
   print "FAILED: Schema data file ($SchemaFilePath) not found.\n";
   exit(1);
+}
+
+/** delete duplicate license(License by Nomos)s in license_ref */
+/** firstly check table license_rf exist or not */
+$sql = "SELECT count(*) FROM information_schema.tables WHERE table_name = 'license_ref';";
+$result = pg_query($PG_CONN, $sql);
+DBCheckResult($result, $sql, __FILE__, __LINE__);
+$row = pg_fetch_assoc($result);
+pg_free_result($result);
+/** delete duplicate */
+if ($row['count'] > 0)
+{
+  $sql = "delete from license_ref where 2 < (SELECT count(*) from license_ref group by rf_shortname having count(*) > 1) and  rf_text like 'License by Nomos%';";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
 }
 
 $FailMsg = ApplySchema($SchemaFilePath, $Verbose, $DatabaseName);
@@ -132,6 +141,13 @@ else
   {
     print "Database schema update completed successfully.\n";
   }
+}
+
+/* initialize the license_ref table */
+if ($UpdateLiceneseRef) 
+{
+  print "Update reference licenses\n";
+  initLicenseRefTable(false);
 }
 
 /* migration */
@@ -189,12 +205,6 @@ function initLicenseRefTable($Verbose)
 
   /** drop table license_ref_2 table if exists */
   $sql = "DROP TABLE IF EXISTS license_ref_2;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-
-  /** delelte duplicate license(License by Nomos)s in license_ref */
-  $sql = "delete from license_ref where 2 < (SELECT count(*) from license_ref group by rf_shortname having count(*) > 1) and  rf_text like 'License by Nomos%';";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
