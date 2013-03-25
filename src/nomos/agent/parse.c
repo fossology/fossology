@@ -4683,7 +4683,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Pixware
    */
   if (INFILE(_LT_PIXWARE_EULA)) {
-    INTERESTING("Pixware-EULA");
+    INTERESTING("Pixware");
   }
   /*
    * Compuserve
