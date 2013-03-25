@@ -26,19 +26,37 @@
 
 $Usage = "Usage: " . basename($argv[0]) . "
   -h     help, this message
-  --help  help, this message
+  -f     {output file}
+  --help help, this message (Note: the user postgres should have write permission on the output file.)
   ";
 
-$options = getopt("h", array("help"));
-if (!empty($options))
+$Options = getopt("hf:", array("help"));
+
+/* command-line options */
+$SchemaFilePath = "";
+foreach($Options as $Option => $OptVal)
 {
-  print $Usage;
-  exit (0);
+  switch($Option)
+  {
+    case 'f': /* schema file */
+      $SchemaFilePath = $OptVal;
+      break;
+    case 'h': /* help */
+      print $Usage;
+      exit (0);
+    case 'help': /* help */
+      print $Usage;
+      exit (0);
+    default:
+      echo "Invalid Option \"$Option\".\n";
+      print $Usage;
+      exit (1);
+  }
 }
 
 # dump license_ref table into a temp file
-$temp_file = "licenseref.sql";
-$dump_command = "pg_dump -f licenseref.sql -a -t license_ref --column-inserts fossology -U fossy -w";
+if (empty($SchemaFilePath)) $SchemaFilePath = "licenseref.sql";
+$dump_command = "sudo su postgres -c 'pg_dump -f $SchemaFilePath -a -t license_ref --column-inserts fossology'";
 system($dump_command, $return_var);
 
 if(!$return_var) exit (0);

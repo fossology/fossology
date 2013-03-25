@@ -3798,17 +3798,17 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_OPENPUBL_1) || INFILE(_LT_OPENPUBL_2)) {
     if (INFILE(_TITLE_OPENPUBL10)) {
-      INTERESTING("Open-Publication-1.0");
+      INTERESTING("Open-PL-1.0");
     }
     else if (INFILE(_TITLE_OPENPUBL)) {
-      INTERESTING("Open-Publication");
+      INTERESTING("Open-PL");
     }
     else {
-      INTERESTING("Open-Publication-style");
+      INTERESTING("Open-PL-style");
     }
   }
   else if (INFILE(_LT_OPENPUBLref)) {
-    INTERESTING(lDebug ? "Open-Publ(ref)" : "Open-Publication");
+    INTERESTING(lDebug ? "Open-Publ(ref)" : "Open-PL");
   }
   /*
    * Free Art License
@@ -4025,7 +4025,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * ATI Corp
    */
   else if (INFILE(_TITLE_ATI_EULA) && INFILE(_LT_ATI_EULA)) {
-    INTERESTING("ATI-EULA");
+    INTERESTING("ATI");
   }
   /*
    * Agere Systems
@@ -4163,7 +4163,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("IPL");
     }
     else if (INFILE(_TITLE_OGPL)) {
-      INTERESTING("OpenGroup-PL");
+      INTERESTING("OpenGroup");
     }
     else if (INFILE(_TITLE_ECLIPSE10)) {
       INTERESTING(lDebug ? "Eclipse(v.0#1)" : "EPL-1.0");
