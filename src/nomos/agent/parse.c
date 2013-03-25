@@ -5142,7 +5142,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * VMware
    */
   if (INFILE(_LT_VMWARE) && INFILE(_TITLE_VMWARE)) {
-    INTERESTING("VMware-EULA");
+    INTERESTING("VMware");
   }
   /*
    * UCWARE.com
