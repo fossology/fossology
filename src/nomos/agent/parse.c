@@ -3626,7 +3626,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Vim license
    */
   if ((INFILE(_LT_VIM_1) || INFILE(_LT_VIM_2)) && INFILE(_TITLE_VIM)) {
-    INTERESTING("Vim");
+    INTERESTING("VIM");
   }
   /*
    * Vixie license
