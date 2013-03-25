@@ -3639,7 +3639,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_YAHOO_1)) {
     if (INFILE(_LT_YAHOO_BINARY)) {
-      INTERESTING("Yahoo-EULA");
+      INTERESTING("Yahoo");
     }
     else {
       INTERESTING("YPL");
