@@ -3003,7 +3003,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("TrollTech");
   }
   else if (INFILE(_LT_QT_COMMref)) {
-    INTERESTING("Qt(Commercial)");
+    INTERESTING("QT");
   }
   /*
    * SNIA (Storage Network Industry) public license
