@@ -5184,7 +5184,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Skype
    */
   if (INFILE(_TITLE_SKYPE) && INFILE(_LT_SKYPE)) {
-    INTERESTING("Skype(Non-commercial)");
+    INTERESTING("Skype");
   }
   /*
    * Hauppauge
