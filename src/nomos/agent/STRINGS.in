@@ -6166,8 +6166,8 @@ k
 %STR%	"(\<sftp\>|\<stelnet\>|\<slogin\>|digital[ -]?signature|c[iy]pher|X509|\<(opens|s)s[hl]\>|authenticat|privacy|confidentiality|\<wireless\>|\<wifi\>|802.11\.?[bgi]|\<bluetooth\>|\<WEP\>|\<CFAR\>|(en|de)crypt|crypto|\<RSA\>|\<DSA\>|\<MD5\>|\<SHA\>|munition|sasl)"
 #
 %ENTRY%	_TITLE_LEPTONICA
-%KEY%	"copyright"
-%STR%	"copyright( \(c\))? [0-9][0-9][0-9][0-9] leptonica"
+%KEY%	"licen[cs]"
+%STR%	"licens(e|ed) (from|in|under) =SOME= leptonica"
 #
 %ENTRY%	_TITLE_ADAPTIVE10
 %KEY%	"licen[cs]"
