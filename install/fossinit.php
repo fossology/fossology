@@ -99,22 +99,6 @@ if (!file_exists($SchemaFilePath))
   exit(1);
 }
 
-/** delete duplicate license(License by Nomos)s in license_ref */
-/** firstly check table license_rf exist or not */
-$sql = "SELECT count(*) FROM information_schema.tables WHERE table_name = 'license_ref';";
-$result = pg_query($PG_CONN, $sql);
-DBCheckResult($result, $sql, __FILE__, __LINE__);
-$row = pg_fetch_assoc($result);
-pg_free_result($result);
-/** delete duplicate */
-if ($row['count'] > 0)
-{
-  $sql = "delete from license_ref where 2 < (SELECT count(*) from license_ref group by rf_shortname having count(*) > 1) and  rf_text like 'License by Nomos%';";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-}
-
 $FailMsg = ApplySchema($SchemaFilePath, $Verbose, $DatabaseName);
 if ($FailMsg)
 {
@@ -312,6 +296,18 @@ function initLicenseRefTable($Verbose)
       DBCheckResult($result_back, $sql, __FILE__, __LINE__);
       pg_free_result($result_back);
     }
+
+    /* Update the license_file table substituting the new rf_pk  for the old rf_fk */
+    $sql = "UPDATE license_file set rf_fk = $row[rf_pk] where license_file.rf_fk = $row[rf_pk]";
+    $result_license_file = pg_query($PG_CONN, $sql);
+    DBCheckResult($result_license_file, $sql, __FILE__, __LINE__);
+    pg_free_result($result_license_file);
+
+      /* do the same thing for the license_file_audit table */
+    $sql = "UPDATE license_file_audit set rf_fk = $row[rf_pk] where license_file_audit.rf_fk = $row[rf_pk]";
+    $result_license_file_audit = pg_query($PG_CONN, $sql);
+    DBCheckResult($result_license_file_audit, $sql, __FILE__, __LINE__);
+    pg_free_result($result_license_file_audit);
   }
 
   pg_free_result($result);
