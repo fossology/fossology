@@ -851,16 +851,7 @@ int check_permission_del(long upload_id, int user_id, int user_perm)
     return 0;
   }
 
-
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload where upload_pk = %ld and user_fk = %d;", upload_id, user_id);
-  result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
-  count = 0;
-  count = atoi(PQgetvalue(result, 0, 0)); 
-  PQclear(result);
-  if (count > 0) return 1; // can be deleted, above delete permiss(delete, debug and admin)
-  else return -1; // have no the permission or the upload does not exist
+  return 1; // can be deleted
 }
 
 /**
