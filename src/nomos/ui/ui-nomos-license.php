@@ -220,7 +220,7 @@ class ui_nomos_license extends FO_Plugin
       $VLic .= "</form>";
     }
 
-    // No_license_found/Void ARE EXCLUDED FROM LICENSE COUNT
+    // Void ARE EXCLUDED FROM LICENSE COUNT
     $sql = "SELECT distinct(rf_shortname) as licname, count(rf_shortname) as liccount, rf_shortname 
             from license_file_ref $TagTable
             right join $this->uploadtree_tablename on license_file_ref.pfile_fk=$this->uploadtree_tablename.pfile_fk 
