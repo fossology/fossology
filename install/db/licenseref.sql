@@ -1050,62 +1050,6 @@ General Provisions
 (13) This license includes the non-exclusive, worldwide, free-of-charge patent license to make, have made, use, offer to sell, sell, import and otherwise transfer the Package with respect to any patent claims licensable by the Copyright Holder that are necessarily infringed by the Package. If you institute patent litigation (including a cross-claim or counterclaim) against any party alleging that the Package constitutes direct or contributory patent infringement, then this Artistic License to you shall terminate on the date that such litigation is filed.
 
 (14) Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES. THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://www.opensource.org/licenses/artistic-license-2.0.php', NULL, NULL, NULL, 'Artistic License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '64b25501594b8afb9c3db8aafd151539', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (219, 'Ascender', 'Ascender Corporation End User License Agreement
-
-Note: Click here for more information on various font license options, including multi-workstation licenses, enterprise-wide licenses, and application server licenses.
-
-This Ascender Corporation End User Agreement (the "Agreement") becomes a binding contract between you and Ascender Corporation when you click on the area marked "OK" or "I Accept." If you do not wish to be bound by the Agreement, you cannot access, use or download the Font Software. Please read all of the Agreement before you agree to be bound by its terms and conditions.
-
-You hereby agree to the following:
-
-1. You are bound by the Agreement and you acknowledge that all Use (as defined herein) of the Font Software (as defined herein) supplied to you by Ascender is governed by the Agreement.
-
-2. "Ascender" as used herein shall mean collectively Ascender Corporation, its authorized distributors and suppliers.
-
-3. "Font Software" as used herein shall mean software which, when used on an appropriate device, generates the typefaces. Font Software includes all bitmap representations of the typeface designs. Font Software includes permitted copies, and related documentation.
-
-4. "Licensed Computers" as used herein shall mean five (5) personal computers, unless you specifically purchased the right from Ascender to use the Font Software on more than five (5) personal computers. If you intend to use the Font Software on more than five (5) personal computers, you may obtain a license from Ascender (or its authorized distributor) for an additional fee. Your receipt will serve as your record of the number of personal computers for which you are licensed to use the Font Software.
-
-5. "Use" of the Font Software shall occur when an individual is able to give commands (whether by keyboard or otherwise) that are followed by the Font Software, regardless of the location in which the Font Software resides.
-
-6. "Personal or Internal Business Use" shall mean Use of the Font Software for your customary personal or internal business purposes and shall not mean any distribution whatsoever of the Font Software. "Personal or Internal Business Use" shall not include any Use of the Font Software by persons that are not members of your immediate household, your authorized employees, or your authorized agents.
-
-7. "Commercial Product" as used herein shall mean an electronic document or data file created by Use of the Font Software which is offered for distribution as a commercial product in exchange for a separate fee or other consideration. By way of illustration and not by way of limitation, an electronic book or magazine distributed for a fee shall be considered a Commercial Product; a document distributed in connection with a commercial transaction in which the consideration is unrelated to such document (for example, a business letter, a ticket for an event, or a receipt for purchase of tangible goods such as clothing) shall not be considered a Commercial Product.
-
-8. You are hereby granted a non-exclusive, non-assignable, non-transferable (except as expressly permitted herein) license to access the Font Software (i) only in a Licensed Computer, (ii) only for your Personal or Internal Business Use, and (iii) only subject to all of the terms and conditions of the Agreement. You have no rights to the Font Software other than as expressly set forth in the Agreement. You agree that Ascender owns all right, title and interest in and to the Font Software, its structure, organization, code, and related files, including all property rights therein such as copyright, design and trademarks rights. You agree that the Font Software, its structure, organization, code, and related files are valuable property of Ascender and that any intentional Use of the Font Software not expressly permitted by the Agreement constitutes a theft of valuable property. All rights not expressly granted in the Agreement are expressly reserved to Ascender. You may not use or include the Font Software as part of a Commercial Product, or any other hardware or software product, without a separate license from Ascender authorizing you to do so.
-
-9. You may install and Use the Font Software on a single file server for Use on a single local area network ("LAN") only when the Use of such Font Software is limited to the number of Licensed Computers for which you have a license. The Font Software may not be installed or Used on a server that can be accessed via the Internet or other external network system (a system other than a LAN) by personal computers which are not Licensed Computers, unless you acquire a license from Ascender granting you this specific right.
-
-10. You may electronically distribute Font Software embedded in a "Personal or Internal Business Use" document (that is, a document other than a "Commercial Product" as defined herein) only when the Font Software embedded in such document is distributed in a secure format that permits only the viewing, printing and editing (and not the installing) of such Font Software. You may not embed Font Software in a Commercial Product without a separate written license from Ascender, for an additional fee. You may not alter or modify the embedding permission contained within the Font Software.
-
-11. You acknowledge that the Font Software is protected by the copyright and other intellectual property law of the United States and its various States, by the copyright and design laws of other nations, and by international treaties. You agree to treat the Font Software as you would any other copyrighted material, such as a book. You may not copy the Font Software, except as expressly provided herein and you agree not to copy the design embodied within the Font Software. Any copies that you are expressly permitted to make pursuant to the Agreement must contain the same copyright, trademark, and other proprietary notices that appear on or in the Font Software. You agree not to adapt, modify, alter, translate, convert, or otherwise change the Font Software, or to create any derivative works from Font Software or any portion thereof. You further agree not to use Font Software in connection with software and/or hardware which creates any derivative works of such Font Software. You agree not to reverse engineer, decompile, disassemble, or otherwise attempt to discover the source code of the Font Software, provided, however, that if you are located in a European Community member country or any other country which provides rights materially similar to the rights set forth in this proviso, you may reverse engineer or decompile the Font Software only to the extent that sufficient information is not available for the purpose of creating an interoperable software program (but only for such purpose and only to the extent that sufficient information is not provided by Ascender upon written request). You agree to use trademarks associated with the Font Software according to accepted trademark practice, including identification of the trademark owner''s name. Trademarks can only be used to identify printed output produced by the Font Software. The use of any trademark as herein authorized does not give you any rights of ownership in that trademark and all use of any trademark shall inure to the sole benefit of the trademark owner. You may not change any trademark or trade name designation for the Font Software.
-
-12. You may not rent, lease, sublicense, give, lend, or further distribute the Font Software, or any copy thereof, except as expressly provided herein. You may transfer all your rights to use the Font Software to another person or legal entity provided that (i) the transferee accepts and agrees to be bound by all the terms and conditions of this Agreement, and (ii) you destroy all copies of the Font Software, including all copies stored in the memory of a hardware device. If you are a business or organization, you agree that upon request from Ascender or Ascender''s authorized representative, you will with thirty (30) days fully document and certify that use of any and all Ascender Font Software at the time of the request is in conformity with your valid licenses from Ascender.
-
-13. You may make one back-up copy of Font Software for archival purposes only, and you shall retain exclusive custody and control over such copy. Upon termination of the Agreement, you must destroy the original and any and all copies of the Font Software.
-
-14. Ascender warrants to you that the Font Software will perform substantially in accordance with its documentation for the ninety (90) day period following delivery of the Font Software. To make a warranty claim, you must, within the ninety (90) day warranty period, return the Font Software to the location from which you obtained it along with a copy of your receipt or, if such Font Software is acquired on-line, contact the on-line provider with sufficient information regarding your acquisition of the Font Software so as to enable Ascender to verify the existence and date of the transaction. If the Font Software does not perform substantially in accordance with its documentation, the entire, exclusive, and cumulative liability and remedy shall be limited to the refund of the license fee you paid to Ascender to obtain delivery of the Font Software. ASCENDER DOES NOT WARRANT THE PERFORMANCE OR RESULTS YOU MAY OBTAIN BY USING THE FONT SOFTWARE. THE FOREGOING STATES THE SOLE AND EXCLUSIVE REMEDIES FOR ASCENDER''S BREACH OF WARRANTY. EXCEPT FOR THE FOREGOING LIMITED WARRANTY, Ascender MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, AS TO NONINFRINGEMENT OF THIRD PARTY RIGHTS, MERCHANTABILITY, OR FITNESS FOR ANY PARTICULAR PURPOSE. IN NO EVENT WILL ASCENDER BE LIABLE TO YOU OR ANYONE ELSE (I) FOR ANY CONSEQUENTIAL, INCIDENTAL OR SPECIAL DAMAGES, INCLUDING WITHOUT LIMITATION ANY LOST PROFITS, LOST DATA, LOST BUSINESS OPPORTUNITIES, OR LOST SAVINGS, EVEN IF ASCENDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES, OR (II) FOR ANY CLAIM AGAINST YOU BY ANY THIRD PARTY SEEKING SUCH DAMAGES EVEN IF ASCENDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-
-Some states or jurisdictions do not allow the exclusions of limitations of incidental, consequential or special damages, so the above exclusion may not apply to you. Also, some states or jurisdictions do not allow the exclusions of implied warranties or limitations on how long an implied warranty may last, so the above limitations may not apply to you. To the greatest extent permitted by law, any implied warranties not effectively excluded by the Agreement are limited to ninety (90) days. Some jurisdictions do not permit a limitation of implied warranties where the product results in physical injury or death so that such limitations may not apply to you. In those jurisdictions, you agree that Ascender''s liability for such physical injury or death shall not exceed One Hundred Thousand Dollars (U.S. $100,000), provided that such jurisdictions permit a limitation of such liability. This warranty gives you specific legal rights. You may have other rights that vary from state to state or jurisdiction to jurisdiction. The Font Software is nonreturnable and nonrefundable.
-
-15. The Agreement will be governed by the laws of Illinois applicable to contracts wholly entered and performable within such state. All disputes related to the Agreement shall be heard in the Circuit Court of Cook County, Illinois, U.S.A. or the United States District Court for the Northern District of Illinois, Chicago, Illinois U.S.A. Both you and Ascender agree to the personal jurisdiction and venue of these courts in any action related to the Agreement. The Agreement will not be governed by the United Nations Convention of Contracts for the International Sale of Goods, the application of which is expressly excluded. If any part of this Agreement is found void and unenforceable, it will not affect the validity of the balance of the Agreement, which shall remain valid and enforceable according to its terms.
-
-16. The Agreement shall automatically terminate upon failure by you (or any authorized person or member of your immediate household to whom you have given permission to Use the Font Software) to comply with its terms. The termination of the Agreement shall not preclude Ascender from suing you for damages of any breach of the Agreement. The Agreement may only be modified in writing signed by an authorized officer of Ascender. You agree that the Font Software will not be shipped, transferred or exported into any country or used in any manner prohibited by the United States Export Administration or any applicable export laws, restrictions or regulations.
-
-17. You have the rights expressly set forth in the Agreement and no other. All rights in and to the Font Software, including unpublished rights, are reserved under the copyright laws of the United States and other jurisdictions. All rights reserved. Notwithstanding the foregoing, to the extent that any law, statute, treaty, or governmental regulation shall be deemed by a court of competent jurisdiction to provide you with any additional or different rights from those provided herein and such rights shall be deemed non-waiveable as a matter of law and to supersede the rights specifically provided herein, then such law, statute, treaty, or governmental regulation shall be deemed to be made a part of the Agreement. To the extent that any such rights created by any law, statute, treaty or governmental regulation are waiveable, you agree that your acceptance of the Agreement shall constitute an effective and irrevocable waiver of such rights. The Agreement may be enforced by Ascender or by an authorized dealer acting on behalf of Ascender.
-
-18. If this product is acquired under the terms of a (i) GSA contract: use, reproduction or disclosure is subject to the restrictions set forth in the applicable ADP Schedule contract, (ii) DOD contract: use, duplication or disclosure by the Government is subject to the applicable restrictions set forth in DFARS 252.277-7013; (iii) Civilian agency contract: use, reproduction, or disclosure is subject to FAR 52.277-19(a) through (d) and restrictions set forth in the Agreement.
-
-Ascender Corporation
-25 Northwest Point Blvd. Suite 225
-Elk Grove Village, IL 60007
-Phone 847-357-0730
-
-http://www.ascendercorp.com
-
-"Ascender" is a trademark of Ascender Corporation registered in the U.S. Patent and Trademark Office and elsewhere. All other trademarks are the property of their respective owners. All trademarks and copyrights are property of their respective owners.
-
-Revised 27 February, 2007', 'http://www.ascendercorp.com/services/licensing/eula-5/', NULL, NULL, NULL, 'Ascender EULA', NULL, NULL, NULL, '', NULL, false, false, false, '7dd357b925f585b4361be01a7150051c', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (221, 'Apache-1.1', '/* ====================================================================
  * The Apache Software License, Version 1.1
  *
@@ -3242,46 +3186,6 @@ EXHIBIT B.
 Portions created by gSOAP are Copyright (C) 2001-2004 Robert A. van Engelen, Genivia inc. All Rights Reserved.
 THE SOFTWARE IN THIS PRODUCT WAS IN PART PROVIDED BY GENIVIA INC AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE." 
 ', 'http://www.cs.fsu.edu/~engelen/license.html', NULL, NULL, NULL, 'gSOAP Public License 1.3b', NULL, NULL, NULL, '', NULL, false, false, false, '183b0527d1448747b57ebe4edf683196', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (228, 'Helix/RealNetworksEULA', 'Helix DNA Technology Binary Research Use License
-
-REDISTRIBUTION NOT PERMITTED
-
-This Helix DNA Technology Binary Research Use License ("License") is a legal agreement between You and RealNetworks, Inc. and its suppliers and licensors (collectively, "RealNetworks") for the binary versions of the Helix DNA Compiled Binaries distributed under this License ("Software"), which are made available from the "Helix DNA Compiled Binaries" section of the www.helixcommunity.org Web site. "You" means an individual, or a legal entity acting by and through an individual or individuals, exercising rights either under this License. For legal entities, "You" includes any entity that by majority voting interest controls, is controlled by, or is under common control with You. The terms and conditions for this License are as follows:
-
-By clicking on or accepting the "I AGREE TO THE ABOVE LICENSE TERMS" option below, or by installing, copying or otherwise using the Software, You agree to be bound by the terms of this License Agreement. IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENSE AGREEMENT, CLICK THE "I DO NOT AGREE TO THE ABOVE LICENSE TERMS" BUTTON AND/OR DO NOT INSTALL THE SOFTWARE.
-
-YOU AGREE THAT YOUR USE OF THE SOFTWARE ACKNOWLEDGES THAT YOU HAVE READ THIS LICENSE, UNDERSTAND IT, AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
-
-1. GRANT OF LICENSE FOR INTERNAL RESEARCH AND DEVELOPMENT WORK. Subject to the restrictions set forth herein, RealNetworks hereby grants to You a non-exclusive, non-sublicensable, personal license to use the Software in object code and any accompanying documentation ("Documentation") solely for Your internal, non-commercial evaluation and research use, provided that You may only install and use a reasonable number of copies of the Software on computers owned or controlled by You and located on Your premises. As part of such use You may combine the Software with other Helix software properly licensed to You under the terms of the RealNetworks Community Source License Agreement or the RealNetworks Public Source License Agreement, but You may not otherwise create derivative works of the Software or Documentation.
-
-2. LICENSE RESTRICTIONS.
-
-a) You may not: (i) permit other individuals to use the Software except under the terms listed above; (ii) modify, translate, reverse engineer, decompile, disassemble or use any other method (including "clean room" development) to learn the source code of the Software (except to the extent that this restriction is expressly prohibited by law); (iii) rent, lease, transfer, or otherwise transfer rights to the Software or Documentation; (iv) remove any proprietary notices or labels on the Software or Documentation; (v) use the Software to encode, reproduce or copy any material or intellectual property You do not have the right to encode, reproduce, or copy; (vi) use the Software to develop any application that has the capability of transcoding or converting RealAudio or RealVideo Files into any other file format ("Transcode" means to alter the current encoding or form of media files that was decoded from its original form, including by way of example but not limited to by way of example but not limited to: decompression of an audio or video stream and recompression using a different compression algorithm); or (vii) make available to any third party the results of any evaluation or testing of the Software by You under this License. Any such forbidden use shall immediately terminate Your license to the Software.
-
-b) You agree that You shall only use the Software and Documentation in a manner that complies with all applicable laws in the jurisdictions in which You use the Software and Documentation, including, but not limited to, applicable restrictions concerning copyright and other intellectual property rights.
-
-c) You may not use the Software in an attempt to, or in conjunction with, any device, program or service designed to circumvent technological measures employed to control access to, or the rights in, a digital media content file or other work protected by the copyright laws of any jurisdiction.
-
-d) Certain components of the Software may embody a serial copying management system required by the laws of the United States. You may not circumvent or attempt to circumvent this system by any means.
-
-3. COPIES OF SOFTWARE AND ENHANCEMENTS. This license does not grant You any right to any enhancement or update.
-
-4. TITLE. Title, ownership, rights, and intellectual property rights in and to the Software and Documentation shall remain in RealNetworks. The Software is protected by the copyright laws of the United States and international copyright treaties. Title, ownership rights and intellectual property rights in and to the content accessed through the Software including the content contained in the Software media demonstration files shall be retained by the applicable content owner and may be protected by applicable copyright or other law. This license gives You no rights to such content.
-
-5. DISCLAIMER OF WARRANTY & LIMIT OF LIABILITY. THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, REALNETWORKS FURTHER DISCLAIMS ALL WARRANTIES, INCLUDING WITHOUT LIMITATION ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. THE ENTIRE RISK ARISING OUT OF THE USE OR PERFORMANCE OF THE SOFTWARE AND DOCUMENTATION REMAINS WITH YOU. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL REALNETWORKS OR ITS SUPPLIERS BE LIABLE FOR ANY CONSEQUENTIAL, INCIDENTAL, INDIRECT, SPECIAL, PUNITIVE, OR OTHER DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR OTHER PECUNIARY LOSS) ARISING OUT OF THIS LICENSE OR THE USE OF OR INABILITY TO USE THE PRODUCT, EVEN IF REALNETWORKS HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. REALNETWORKS'' TOTAL LIABLITY FOR ANY DIRECT DAMAGES SHALL NOT EXCEED FIVE DOLLARS ($5.00). BECAUSE SOME STATES/JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES, THE ABOVE LIMITATION MAY NOT APPLY TO YOU.
-
-6. INDEMNIFICATION. This Software is intended for use only with properly licensed media, content and content creation tools. It is Your responsibility to ascertain whether any copyright, patent or other licenses are necessary and to obtain any licenses to such media and content. You agree to use only those materials for which You have the necessary patent, copyright and other permissions, licenses, and/or clearances. You agree to hold harmless, indemnify and defend RealNetworks, its officers, directors and employees, from and against any losses, damages, fines and expenses (including attorneys'' fees and costs) arising out of or relating to any claims that You have encoded, copied, compressed, enabled the "Allow Recording" feature, enabled the "Allow Download" feature, or copied, used, published, displayed, or transmitted any content or materials (other than materials provided by RealNetworks specifically for Your use) in connection with the Software in violation of another party''s rights If You are importing the Software from the United States, You shall indemnify and hold RealNetworks harmless from and against any import and export duties or other claims arising from such importation.
-
-7. TERMINATION. This License and Your right to use this Software automatically terminate if You fail to comply with any material provision of this License. RealNetworks may terminate this License at any time by delivering notice to You and You may terminate this License at any time by destroying or erasing Your copy of the Software. Upon termination of this License, You agree to destroy or erase the Software.
-
-8. NO ASSIGNMENT. This License is personal to You, and may not be assigned without RealNetworks'' express written consent.
-
-9. U.S. GOVERNMENT RESTRICTED RIGHTS. U.S. GOVERNMENT RESTRICTED RIGHTS: This Software and documentation are provided with RESTRICTED RIGHTS. Use, duplication or disclosure by the Government is subject to restrictions set forth in subparagraphs (a) through (d) of the Commercial Computer Software--Restricted Rights at FAR 52.227-19 when applicable, or in subparagraph (c)(1)(ii) of the Rights in Technical Data and Computer Software clause at DFARS 252.227-7013, and in similar clauses in the NASA FAR supplement, as applicable. Manufacturer is RealNetworks, Inc./2601 Elliott, Suite 1000/Seattle, Washington 98121. You are responsible for complying with all trade regulations and laws both foreign and domestic. You acknowledge that none of the Software or underlying information or technology may be downloaded or otherwise exported or re-exported (i) into (or to a national or resident of) Cuba, Iraq, Libya, Sudan, North Korea, Iran, Syria or any other country subject to a U.S. embargo; or (ii) to anyone on the U.S. Treasury Department''s list of Specially Designated Nationals or the U.S. Commerce Department''s Denied Parties List or Entity List. By using the Software You are agreeing to the foregoing and are representing and warranting that (i) no U.S. federal agency has suspended, revoked, or denied You export privileges, (ii) You are not located in or under the control of a national or resident of any such country or on any such list, and (iii) You will not export or re-export the Software to any prohibited county, or to any prohibited person, entity, or end-user as specified by U.S. export controls.
-
-10. MISCELLANEOUS. This License Agreement shall constitute the complete and exclusive agreement between us. A separate written agreement with respect to the subject matter hereof shall supersede this instrument to the extent indicated in such separate agreement. This License Agreement may not be modified except in a writing duly signed by an authorized representative of RealNetworks and You. If any provision of this License Agreement is held to be unenforceable for any reason, such provision shall be reformed only to the extent necessary to make it enforceable, and such decision shall not affect the enforceability of such provision under other circumstances, or of the remaining provisions hereof under all circumstances. This License Agreement shall be governed by the laws of the State of Washington without regard to conflicts of law provisions and You consent to the exclusive jurisdiction of the state and federal courts sitting in the State of Washington. This License Agreement will not be governed by the United Nations Convention of Contracts for the International Sale of Goods, the application of which is hereby expressly excluded.
-
-Copyright ©1995-2002 RealNetworks, Inc. and/or its suppliers. 2601 Elliott Avenue, Suite 1000, Seattle, Washington 98121 U.S.A. The Software may incorporate one or more of the following patents: U.S. Patent #5,917,835; U.S. Patent # 5,854,858; U.S. Patent # 5,917,954. Other U.S. patents pending. All rights reserved. RealNetworks, Helix, RealAudio, and RealVideo are trademarks or registered trademarks of RealNetworks, Inc. 
-', 'https://helixcommunity.org/beula/', NULL, NULL, NULL, 'Helix DNA Technology Binary Research Use License', NULL, NULL, NULL, '', NULL, false, false, false, '93a9915fb7b15a8ced15a859ddbc5a2b', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (229, 'HP', 'HP SOFTWARE LICENSE TERMS
 NO COMMERCIALIZATION, LIMITED DISTRIBUTION PERMITTED 
 
@@ -6493,6 +6397,323 @@ by James Random Hacker.
 signature of Ty Coon, 1 April 1990
 Ty Coon, President of Vice
 That''s all there is to it!  ', 'http://www.gnu.org/licenses/old-licenses/lgpl-2.0-standalone.html', NULL, NULL, NULL, 'GNU Library General Public License v2 or later', NULL, NULL, NULL, '', NULL, false, false, false, '85dc9607a1a3f4031f3a46ae7eb35c4e', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (281, 'SISSL', 'Sun Industry Standards Source License (SISSL)
+
+(Sun has ceased to use or recommend this license)
+
+1.0 DEFINITIONS
+
+1.1 "Commercial Use" means distribution or otherwise making the
+Original Code available to a third party.
+
+1.2 "Contributor Version" means the combination of the Original
+Code, and the Modifications made by that particular Contributor.
+
+1.3 "Electronic Distribution Mechanism" means a mechanism generally
+accepted in the software development community for the electronic transfer
+of data.
+
+1.4 "Executable" means Original Code in any form other than Source
+Code.
+
+1.5 "Initial Developer" means the individual or entity identified
+as the Initial Developer in the Source Code notice required by Exhibit
+A.
+
+1.6 "Larger Work" means a work which combines Original Code or
+portions thereof with code not governed by the terms of this License.
+
+1.7 "License" means this document.
+
+1.8 "Licensable" means having the right to grant, to the maximum
+extent possible, whether at the time of the initial grant or subsequently
+acquired, any and all of the rights conveyed herein.
+
+1.9 "Modifications" means any addition to or deletion from the
+substance or structure of either the Original Code or any previous
+Modifications.
+A Modification is:
+
+A. Any addition to or deletion from the contents of a file containing
+Original Code or previous Modifications.
+B. Any new file that contains any part of the Original
+Code or previous Modifications.
+
+1.10 "Original Code" means Source Code of computer software code
+which is described in the Source Code notice required by Exhibit A as Original
+Code.
+
+1.11 "Patent Claims" means any patent claim(s), now owned or
+hereafter acquired, including without limitation, method, process, and
+apparatus claims, in any patent Licensable by grantor.
+
+1.12 "Source Code" means the preferred form of the Original Code
+for making modifications to it, including all modules it contains, plus
+any associated interface definition files, or scripts used to control
+compilation
+and installation of an Executable.
+
+1.13 "Standards" means the standards identified in Exhibit B.
+
+1.14 "You" (or "Your") means an individual or a legal entity
+exercising rights under, and complying with all of the terms of, this License
+or a future version of this License issued under Section 6.1. For legal
+entities, "You'''' includes any entity which controls, is controlled by,
+or is under common control with You. For purposes of this definition, "control''''
+
+means (a) the power, direct or indirect, to cause the direction or management
+of such entity, whether by contract or otherwise, or (b) ownership of more
+than fifty percent (50%) of the outstanding shares or beneficial ownership
+of such entity.
+
+2.0 SOURCE CODE LICENSE
+
+2.1 The Initial Developer Grant
+
+The Initial Developer hereby grants You a world-wide, royalty-free,
+non-exclusive license, subject to third party intellectual property
+claims: 
+
+(a) under intellectual property rights (other than patent or
+trademark) Licensable by Initial Developer to use, reproduce, modify, display,
+perform, sublicense and distribute the Original Code (or portions thereof)
+with or without Modifications, and/or as part of a Larger Work; and
+(b) under Patents Claims infringed by the making, using or selling
+of Original Code, to make, have made, use, practice, sell, and offer for
+sale, and/or otherwise dispose of the Original Code (or portions thereof).
+
+(c) the licenses granted in this Section 2.1(a) and (b) are effective
+on the date Initial Developer first distributes Original Code under the
+terms of this License.
+
+(d) Notwithstanding Section
+2.1(b) above, no patent license is granted: 1) for code that You delete from
+the Original Code; 2) separate from the Original Code; or 3) for infringements
+
+caused by: i) the modification of the Original Code or ii) the combination of
+
+the Original Code with other software or devices, including but not limited to
+
+Modifications. 
+
+3.0 DISTRIBUTION OBLIGATIONS
+
+3.1 Application of License.
+
+
+The Source Code version of Original Code may be distributed only under
+the terms of this License or a future version of this License released
+under Section 6.1, and You must include a copy of this License with every
+copy of the Source Code You distribute. You may not offer or impose any
+terms on any Source Code version that alters or restricts the applicable
+version of this License or the recipients'' rights hereunder. Your license
+for shipment of the Contributor Version is conditioned upon Your full compliance
+
+with this Section. The Modifications which You create must comply with
+all requirements set out by the Standards body in effect one hundred twenty
+(120) days before You ship the Contributor Version. In the event that the
+Modifications do not meet such requirements, You agree to publish either
+(i) any deviation from the Standards protocol resulting from implementation
+of Your Modifications and a reference implementation of Your Modifications
+or (ii) Your Modifications in Source Code form, and to make any such deviation
+and reference implementation or Modifications available to all third parties
+under the same terms as this license on a royalty free basis within thirty
+(30) days of Your first customer shipment of Your Modifications.
+
+3.2 Required Notices.
+
+
+You must duplicate the notice in Exhibit A in each file of the
+Source Code. If it is not possible to put such notice in a particular Source
+Code file due to its structure, then You must include such notice in a
+location (such as a relevant directory) where a user would be likely to
+look for such a notice. If You created one or more Modification(s) You
+may add Your name as a Contributor to the notice described in Exhibit
+A. You must also duplicate this License in any documentation for the
+Source Code where You describe recipients'' rights or ownership rights relating
+to Initial Code. You may choose to offer, and to charge a fee for, warranty,
+support, indemnity or liability obligations to one or more recipients of
+Your version of the Code. However, You may do so only on Your own behalf,
+and not on behalf of the Initial Developer. You must make it absolutely
+clear than any such warranty, support, indemnity or liability obligation
+is offered by You alone, and You hereby agree to indemnify the Initial
+Developer for any liability incurred by the Initial Developer as a result
+of warranty, support, indemnity or liability terms You offer.
+
+3.3 Distribution of Executable Versions.
+
+
+You may distribute Original Code in Executable and Source form only
+if the requirements of Sections 3.1 and 3.2 have been met for that Original
+Code, and if You include a notice stating that the Source Code version
+of the Original Code is available under the terms of this License. The
+notice must be conspicuously included in any notice in an Executable or
+Source versions, related documentation or collateral in which You describe
+recipients'' rights relating to the Original Code. You may distribute the
+Executable and Source versions of Your version of the Code or ownership
+rights under a license of Your choice, which may contain terms different
+from this License, provided that You are in compliance with the terms of
+this License. If You distribute the Executable and Source versions under
+a different license You must make it absolutely clear that any terms which
+differ from this License are offered by You alone, not by the Initial Developer.
+
+You hereby agree to indemnify the Initial Developer for any liability incurred
+by the Initial Developer as a result of any such terms You offer.
+
+3.4 Larger Works.
+
+
+You may create a Larger Work by combining Original Code with other
+code not governed by the terms of this License and distribute the Larger
+Work as a single product. In such a case, You must make sure the requirements
+of this License are fulfilled for the Original Code.
+
+4.0 INABILITY TO COMPLY DUE TO STATUTE OR REGULATION
+
+If it is impossible for You to comply with any of the terms of this
+License with respect to some or all of the Original Code due to statute,
+judicial order, or regulation then You must: (a) comply with the terms
+of this License to the maximum extent possible; and (b) describe the limitations
+
+and the code they affect. Such description must be included in the LEGAL
+file described in Section 3.2 and must be included with all distributions
+of the Source Code. Except to the extent prohibited by statute or regulation,
+such description must be sufficiently detailed for a recipient of ordinary
+skill to be able to understand it.
+
+5.0 APPLICATION OF THIS LICENSE
+
+This License applies to code to which the Initial Developer has attached
+the notice in Exhibit A and to related Modifications as set out in Section
+3.1.
+
+6.0 VERSIONS OF THE LICENSE
+
+6.1 New Versions.
+
+
+Sun may publish revised and/or new versions of the License from time
+to time. Each version will be given a distinguishing version number.
+
+6.2 Effect of New Versions.
+
+
+Once Original Code has been published under a particular version of
+the License, You may always continue to use it under the terms of that
+version. You may also choose to use such Original Code under the terms
+of any subsequent version of the License published by Sun. No one other
+than Sun has the right to modify the terms applicable to Original Code.
+
+7.0 DISCLAIMER OF WARRANTY
+
+ORIGINAL CODE IS PROVIDED UNDER THIS LICENSE ON AN "AS IS" BASIS, WITHOUT
+WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, WITHOUT
+LIMITATION,
+WARRANTIES THAT THE ORIGINAL CODE IS FREE OF DEFECTS, MERCHANTABLE, FIT
+FOR A PARTICULAR PURPOSE OR NON-INFRINGING. THE ENTIRE RISK AS TO THE QUALITY
+AND PERFORMANCE OF THE ORIGINAL CODE IS WITH YOU. SHOULD ANY ORIGINAL CODE
+PROVE DEFECTIVE IN ANY RESPECT, YOU (NOT THE INITIAL DEVELOPER) ASSUME
+THE COST OF ANY NECESSARY SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER
+OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS LICENSE. NO USE OF ANY
+ORIGINAL CODE IS AUTHORIZED HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
+
+8.0 TERMINATION
+
+8.1 This License and the rights granted hereunder will terminate
+automatically if You fail to comply with terms herein and fail to cure
+such breach within 30 days of becoming aware of the breach. All sublicenses
+to the Original Code which are properly granted shall survive any termination
+of this License. Provisions which, by their nature, must remain in effect
+beyond the termination of this License shall survive.
+
+8.2 In the event of termination under Section 8.1 above, all
+end user license agreements (excluding distributors and resellers) which
+have been validly granted by You or any distributor hereunder prior to
+termination shall survive termination.
+
+9.0 LIMIT OF LIABILITY
+
+UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY, WHETHER TORT (INCLUDING
+NEGLIGENCE), CONTRACT, OR OTHERWISE, SHALL YOU, THE INITIAL DEVELOPER,
+ANY OTHER CONTRIBUTOR, OR ANY DISTRIBUTOR OF ORIGINAL CODE, OR ANY SUPPLIER
+OF ANY OF SUCH PARTIES, BE LIABLE TO ANY PERSON FOR ANY INDIRECT, SPECIAL,
+INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT
+LIMITATION, DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, COMPUTER FAILURE
+OR MALFUNCTION, OR ANY AND ALL OTHER COMMERCIAL DAMAGES OR LOSSES, EVEN
+IF SUCH PARTY SHALL HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGES.
+THIS LIMITATION OF LIABILITY SHALL NOT APPLY TO LIABILITY FOR DEATH OR
+PERSONAL INJURY RESULTING FROM SUCH PARTY''S NEGLIGENCE TO THE EXTENT APPLICABLE
+LAW PROHIBITS SUCH LIMITATION. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION
+OR LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THIS EXCLUSION
+AND LIMITATION MAY NOT APPLY TO YOU.
+
+10.0 U.S. GOVERNMENT END USERS
+
+U.S. Government: If this Software is being acquired by or on behalf
+of the U.S. Government or by a U.S. Government prime contractor or subcontractor
+
+(at any tier), then the Government''s rights in the Software and accompanying
+documentation shall be only as set forth in this license; this is in accordance
+with 48 C.F.R. 227.7201 through 227.7202-4 (for Department of Defense (DoD)
+acquisitions) and with 48 C.F.R. 2.101 and 12.212 (for non-DoD acquisitions).
+
+11.0 MISCELLANEOUS
+
+This License represents the complete agreement concerning subject matter
+hereof. If any provision of this License is held to be unenforceable, such
+provision shall be reformed only to the extent necessary to make it enforceable.
+
+This License shall be governed by California law provisions (except to
+the extent applicable law, if any, provides otherwise), excluding its
+conflict-of-law
+provisions. With respect to disputes in which at least one party is a citizen
+of, or an entity chartered or registered to do business in the United States
+of America, any litigation relating to this License shall be subject to
+the jurisdiction of the Federal Courts of the Northern District of California,
+with venue lying in Santa Clara County, California, with the losing party
+responsible for costs, including without limitation, court costs and reasonable
+attorneys'' fees and expenses. The application of the United Nations Convention
+on Contracts for the International Sale of Goods is expressly excluded.
+Any law or regulation which provides that the language of a contract shall
+be construed against the drafter shall not apply to this License.
+
+EXHIBIT A - Sun Standards License
+
+"The contents of this file are subject to the Sun Standards
+License Version 1.1 (the "License");
+You may not use this file except in compliance with the 
+License. You may obtain a copy of the
+License at _______________________________.
+
+Software distributed under the License is distributed on 
+an "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either 
+express or implied. See the License for the specific
+language governing rights and limitations under the License.
+
+The Original Code is ______________________________________.
+
+The Initial Developer of the Original Code is: 
+Sun Microsystems, Inc..
+
+Portions created by: _______________________________________
+
+are Copyright (C): _______________________________________
+
+All Rights Reserved.
+
+Contributor(s): _______________________________________
+
+EXHIBIT B - Standards
+
+The Standard is defined as the following:
+
+OpenOffice.org XML File Format Specification, located at 
+href="http://xml.openoffice.org">http://xml.openoffice.org
+
+OpenOffice.org Application Programming Interface Specification, located
+at
+
+http://api.openoffice.org', 'http://www.opensource.org/licenses/sisslpl.php', NULL, NULL, NULL, 'Sun Industry Standards Source License', NULL, NULL, NULL, '', NULL, false, false, false, '5ebc45f58d5d2a638a8afb243a43f400', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (244, 'ZPL-1.1', 'Zope Public License (ZPL) Version 1.1
 
 Copyright (c) Zope Corporation. All rights reserved.
@@ -11230,142 +11451,6 @@ any time by destroying Majordomo and its associated documentation.
 
 [ Note: the form of this license was derived, by permission, from the license
 for the Firewalls Toolkit distributed by Trusted Information Systems, Inc. ]', 'http://www.greatcircle.com/majordomo/LICENSE', NULL, NULL, NULL, 'Majordomo License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '304ab3a3643d5264eb25eb702c412140', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (269, 'VMWare', 'VMWARE MASTER END USER LICENSE AGREEMENT
-
-NOTICE: BY DOWNLOADING AND INSTALLING, COPYING OR OTHERWISE USING THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS VMWARE MASTER END USER LICENSE AGREEMENT ("EULA"). IF YOU DO NOT AGREE TO THE TERMS OF THIS EULA, YOU MAY NOT DOWNLOAD, INSTALL, COPY OR USE THE SOFTWARE, AND YOU MAY RETURN THE UNUSED SOFTWARE TO THE VENDORFROM WHICH YOU ACQUIRED IT WITHIN THIRTY (30) DAYS AND REQUEST A REFUND OF THE LICENSE FEE, IF ANY, ALREADY PAID UPON SHOWING PROOF OF PAYMENT. "YOU" MEANS THE NATURAL PERSON OR THE ENTITY THAT IS AGREEING TO BE BOUND BY THIS EULA, THEIR EMPLOYEES AND THIRD PARTY CONTRACTORS THAT PROVIDE SERVICES TO YOU.YOU SHALL BE LIABLE FOR ANY FAILURE BY SUCH EMPLOYEES AND THIRD PARTY CONTRACTORS TO COMPLY WITH THE TERMS OF THIS AGREEMENT.
-
-1. DEFINITIONS
-
-1.1 "Designated Administrative Access" means that access to the standard user interfaces of a given instance of the Software (designated in this section) that you may grant to a designated third party (a) for which you have provided advance written notice to VMware that you are providing outsourced services and (b) for whose dedicated benefit you have licensed such instance of the Software. Designated Administrative Access is applicable only where you are 1) an IT outsourcing company that is providing outsourced IT services to a client company and 2) applicable only to the following Software: ESX, VMware Server and vCenter Server.
-
-1.2 "Guest Operating Systems" means
-
-instances of third-party operating systems licensed by you and installed in a
-
-Virtual Machine and run using the Software.
-
-1.3 "Licensed Additional Module" means additional modules that may be provided with and/or used in conjunction with the Software for which you have paid the applicable license fee and accepted any applicable additional license terms.
-
-1.4 "Open Source Software" means various open source software components licensed under the terms of applicable open source license agreements included in the materials relating to such software. Open Source Software is composed of individual software components, each of which has its own copyright and its own applicable license conditions. The Open Source Software licenses can be found in the open_source_licenses.txt file, other materials accompanying the software package, the documentation or corresponding source files available at www.vmware.com/download/open_source.html.
-
-1.5 "Processor" means a single, physical chip that houses no more than the number of processor cores as defined by the description of the Software licensed, and set forth in the license portal or applicable documentation for the Software.
-
-1.6 "Sample Programs" means sample client management programs or scripts that may be distributed with the Software.
-
-1.7 "Server" means a single physical computer of a type that meets the specifications as set forth in the applicable product documentation posted at www.vmware.com/support/pubs/. Multiple computers that share processing power or operate in a networked configuration as a single logical computer, such as a "server farm" or similar arrangement, constitute multiple Servers for the purpose of this EULA.
-
-1.8 "Software" means software products that are licensed to you under this EULA, including, but not limited to, any related components purchased or provided with the Software, application programming interfaces, associated media, printed materials, online or electronic documentation, and any updates and maintenance releases thereto.
-
-1.9 "Software License Key" means, if applicable, a serial number issued to you by VMware to activate and use the Software. A separate, additional Software License Key may be required to activate and use each Licensed Additional Module.
-
-1.10 "VMware Tools" means a suite of utilities and drivers that can be installed in Guest Operating System to enhance the performance and functionality of your Guest Operating System when running in a VMware virtual machine.
-
-1.11 "Virtual Machine" means an instance of a Guest Operating System and any application programs installed thereon, running on a computing device on which the Software is installed, or suspended to disk or any other storage media accessible by the computing device.
-
-2. EVALUATION LICENSES
-
-2.1 General. If available, the Software and each Licensed Additional Module may be activated with no-cost evaluation Software License Key(s). You acknowledge that Evaluation Software License Keys have an expiration date ("Expiration Date") and that VMware is not obligated to permit further use of the Software.
-
-2.2 Evaluation License. If you activate the Software or any Licensed Additional Module with an evaluation Software License Key ("Evaluation Product") you may use the Evaluation Product until the Expiration Date only to evaluate the suitability of the Evaluation Product for licensing on a for-fee basis. You may acquire evaluation Software License Key(s) for Licensed Additional Modules. In such case, the Licensed Additional Modules are licensed to you subject to the terms of this "EVALUATION LICENSES" section.
-
-2.3 Evaluation Product Warranty Disclaimer. During the use of the Evaluation Product, the limited 90-day warranty referenced in Section 7.1 below is not applicable to you. the EVALUATION PRODUCT is provided to you "as is" without warranty of any kind, whether express, implied, statutory, or otherwise. VMWARE AND ITS LICENSORS BEAR NO LIABILITY FOR ANY DAMAGES RESULTING FROM USE (OR ATTEMPTED USE) OF THE EVALUATION PRODUCT THROUGH AND AFTER THE EXPIRATION DATE.
-
-2.4 No Support. VMware has no duty to provide support to you during your use of the Evaluation Product.
-
-3. GRANT AND USE RIGHTS FOR SOFTWARE.
-
-3.1 License. The Software is licensed, not sold. Subject to the terms of this EULA, VMware hereby grants you a non-exclusive, non-transferable license, without rights to sublicense, to use the object code of the Software for the purpose as set forth in the applicable documentation for the Software and to the extent permitted by your payment of applicable license fees, if any, under a VMware approved licensing model and/or your Software License Key subject to the software product specific terms specified in this EULA, the technical restrictions of the Software and/or any additional licensing terms specified by VMware via product documentation, notification and/or policy change posted at www.vmware.com. Your use of the Software is limited to the country where you’ve been invoiced for purchase of the Software. However, if you’ve been invoiced within any of the European Union member states, you may deploy the Software in any of the member states without restriction, subject to the terms of the approved licensing model and the terms of this EULA. Depending upon the model utilized to compute the applicable license fees paid by you to use the Software (whether per Processor, per Virtual Machine, per user, or any other VMware approved licensing model), an applicable Software License Key may limit your usage of the Software accordingly. You may use the documentation accompanying the Software in connection with permitted uses of the Software. If the Software is a version that you have converted or exchanged from a valid licensed prior version, you agree that by using the Software you will no longer use the prior version. VMware reserves the right to require the certification of the destruction of such previous version of the Software.
-
-3.2 License Limitations. You may not copy the Software except for a reasonable number of machine-readable copies of the Software for backup or archival purposes and except as expressly permitted in this EULA. You may not remove any titles, trademarks or trade names, copyright notices, legends, or other propri etary markings on the Software. You are not granted any rights to any trademarks or service marks of VMware. VMware retains all rights not expressly granted to you in this EULA.
-
-3.3 Restrictions. You may not (i) sell, lease, license, sublicense, distribute or otherwise transfer in whole or in part the Software or the Software License Key to another party; (ii) provide, disclose, divulge or make available to, or permit use of the Software in whole or in part by, any third party (except Designated Administrative Access) without VMware’s prior written consent; (iii) modify or create derivative works based upon the Software; or (iv) create, develop, license, install, use, or deploy any third party software or services to circumvent, enable, modify or provide access, permissions or rights which violate the technical restrictions of the Software, any additional licensing terms provided by VMware via product documentation, notification, and/or policy change posted at www.vmware.com, and the terms of this EULA. Except to the extent expressly permitted by applicable law, and to the extent that VMware is not permitted by that applicable law to exclude or limit the following rights, you may not decompile, disassemble, reverse engineer, or otherwise attempt to derive source code from the Software, in whole or in part. Before you exercise any rights that you believe to be entitled to based on mandatory law, you provide VMware with 30 days prior written notice at info@vmware.com and provide all reasonably requested information to allow VMware to assess your claim and, at VMware’s sole discretion, to provide alternatives that reduce any adverse impact on VMware’s intellectual property or other rights. You may use the Software to conduct internal performance testing and benchmarking studies, the results of which you (and not unauthorized third parties) may publish or publicly disseminate; provided that VMware has reviewed and approved of the methodology, assumptions and other parameters of the study. Please contact VMware at benchmark@vmware.com to request such review.
-
-3.4 VMware Tools. You may distribute the VMware Tools to any third party provided that (i) you only distribute the VMware Tools as a whole in object code format whether or not as part of, the Virtual Machine you create with the Software; (ii) you do not use VMware’s name, logo or trademarks to market the VMware Tools, except you may refer to VMware names, logos or trademarks to indicate that the VMware Tools are compatible with or designed for use with the Software and (iii) you agree to indemnify, hold harmless, and defend VMware from and against any claims or lawsuits, including attorneys’ fees, that arise or result from your use or distribution of VMware Tools. Notwithstanding the foregoing, you may distribute and modify the Open Source Software of VMware Tools; however, VMware may not provide any support, pursuant to Section 5, for such modified VMware Tools.
-
-3.5 Licenses required for third-party software. The Software enables you to run multiple instances of third-party guest operating systems and application programs. You are responsible for obtaining and complying with any licenses necessary to operate any such third-party software, including Guest Operating Systems and/or application programs.
-
-3.6 Sample Programs. The Software may include Sample Programs. You may use and distribute Sample Programs under the terms set forth in the applicable Sample Programs files. VMware does not provide support services for Sample Programs.
-
-3.7 VMware License Programs. VMware makes available VMware License programs (for e.g., VMware Academic License). If you have received the Software pursuant to these VMware License programs, the then-current terms and conditions posted on www.vmware.com/download/eula/vmtn.html
-
-for that program shall apply for use of the products under such VMware License programs.
-
-3.8 Audit Rights. You will maintain accurate records as to your use of the Software as authorized by this EULA, for at least two (2) years from the last day on which support and subscription services ("Services") expired for the applicable Software.  VMware, or persons designated by VMware, will, at any time during the period when you are obliged to maintain such records, be entitled to inspect such records and your computing devices, in order to verify that the Software is used by you in accordance with the terms of this EULA and that you have paid the applicable license fees and Services fees for the Software; provided that VMware may conduct no more than one (1) audit in any twelve (12) month period.  You shall promptly pay to VMware any underpayments revealed by any such audit.  Any such audit will be performed at VMware’s expense during normal business hours, provided that you shall promptly reimburse VMware for the cost of such audit and any applicable fees if such audit reveals an underpayment by you of more than five percent (5%) of the amounts payable by you to VMware for the period audited.
-
-4. TITLE. VMware retains all right, title, and interest in and to the Software and the Software License Key and in all related copyrights, trade secrets, patents, trademarks, and any other intellectual and industrial property and proprietary rights, including registrations, applications, renewals, and extensions of such rights.
-
-5. SUPPORT AND SUBSCRIPTION SERVICES NOT INCLUDED
-
-VMware will not provide any support services under this EULA. This EULA does not give you any rights to any updates or upgrades to the Software or to any extensions or enhancements to the Software developed by VMware at any time in the future. VMware may offer support and subscription services separately. If you have purchased VMware support and subscription services with the Software, these services are provided to you under the Support Contract Terms and Conditions posted on VMware’s Web site at www.vmware.com/support/ and by accepting the terms of this EULA you are accepting these Support Contract Terms and Conditions. Any supplemental software code or related materials that VMware provides to you as part of any support and subscription services are to be considered part of the Software and are subject to the terms and conditions of this EULA. VMware may use any technical information you provide to VMware for any VMware business purposes without restriction, including for product support and development. VMware will not use information in a form that personally identifies you.
-
-6. TERMINATION
-
-6.1 Termination. VMware may terminate this EULA immediately and without notice if you fail to comply with any term of this EULA.
-
-6.2 Effect of Termination. In the event of termination, you must destroy all copies of the Software and Software License Key. In addition you must remove all copies of the Software, including all backup copies, from the Server and all computers and terminals on which it is installed. From time to time, VMware may change the terms of this EULA. VMware will notify you of such change. Your continued use of the Software will indicate your agreement to the change.
-
-7. LIMITED WARRANTY AND LIMITATION OF LIABILITY
-
-7.1 Limited Warranty. VMware warrants that the media, if any, on which the Software is delivered will be free of defects and that the Software will substantially conform to the description contained in the applicable end user documentation with respect to the particular Software licensed under this EULA in each case for a period of 90 days after the date of shipment of the Software License Key to you ("Warranty Period"). If during the Warranty Period the media is defective and the version of that Software is still commercially available, your sole remedy will be that VMware shall, at its option, repair or replace the defective media returned to VMware within the Warranty Period. If you are returning a defective media, please email VMware at sales@vmware.com to request a Return Authorization number (RMA) and further instructions. If during the Warranty Period the Software does not substantially conform to the description contained in the applicable end user documentation, your sole remedy will be that VMware shall, at it option, correct the defects in the Software or refund the license fees you paid, if any, related to the Software provided that (a) the Software has been properly installed and used at all times and in accordance with the instructions in the applicable end user documentation; (b) no modification, alteration or addition has been made to the Software product by persons other than VMware or VMware’s authorized representative; and (c) VMware receives written notice of the non-conformity within ninety (90) days following shipment. EXCEPT FOR THE PRECEDING EXPRESS LIMITED WARRANTY, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE MANDATORY LAW, VMWARE AND ITS LICENSORS PROVIDE THE SOFTWARE WITHOUT ANY WARRANTIES OF ANY KIND, EXPRESS, IMPLIED, STATUTORY, OR IN ANY OTHER PROVISION OF THIS EULA OR COMMUNICATION WITH YOU, AND VMWARE AND ITS LICENSORS SPECIFICALLY DISCLAIM ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
-
-7.2 LIMITATION OF LIABILITY. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE MANDATORY LAW, IN NO EVENT WILL VMWARE AND ITS LICENSORS BE LIABLE FOR ANY LOST PROFITS OR BUSINESS OPPORTUNITIES, LOSS OF USE, BUSINESS INTERRUPTION, LOSS OF DATA, OR ANY OTHER INDIRECT, SPECIAL, INCIDENTAL, OR CONSE QUEN TIAL DAMAGES UNDER ANY THEORY OF LIABILITY, WHETHER BASED IN CONTRACT, TORT, NEGLIGENCE, PRODUCT LIABILITY, OR OTHERWISE. BECAUSE SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES, THE PRECEDING LIMITATION MAY NOT APPLY TO YOU. VMWARE AND ITS LICENSORS’ LIABILITY UNDER THIS EULA WILL NOT, IN ANY EVENT, EXCEED THE LICENSE FEES, IF ANY, PAID BY YOU FOR THE SOFTWARE LICENSED TO YOU UNDER THIS EULA. THE FOREGOING LIMITATIONS SHALL APPLY TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, REGARDLESS OF WHETHER VMWARE OR ITS LICENSORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF WHETHER ANY REMEDY FAILS OF ITS ESSENTIAL PURPOSE.
-
-8. GENERAL
-
-Entire Agreement. This Agreement sets forth VMware’s entire liability and your exclusive remedy with respect to the Software and supersedes the terms of any purchase orders and any other communications or advertising with respect to the Software. You acknowledge that this Agreement is a complete statement of the agreement between you and VMware with respect to the Software, and that there are no other prior or contemporaneous understandings, promises, representations, or descriptions with respect to the Software.
-
-8.2 Headings. Headings under this EULA are intended only for convenience and shall not affect the interpretation of this EULA.
-
-8.3 Waiver and Modification. No failure of either party to exercise or enforce any of its rights under this EULA will act as a waiver of those rights. This EULA may only be modified, or any rights under it waived, by a written document executed by the party against which it is asserted.
-
-8.4 Severability. If any provision of this EULA is found illegal or unenforceable, it will be enforced to the maximum extent permissible, and the legality and enforceability of the other provisions of this EULA will not be affected.
-
-8.5 Governing Law. This EULA will be governed by California law and the United States of America, without regard to its choice of law principles. The United Nations Convention for the International Sale of Goods shall not apply.
-
-8.6 Government Restrictions. You may not export or re-export the Soft ware except in compliance with the United States Export Administration Act and the related rules and regulations and similar non-U.S. government restrictions, if applicable. The Software and accompanying documentation are deemed to be "commercial computer software" and "commercial computer software documentation," respectively, pursuant to DFAR Section 227.7202 and FAR Section 12.212(b), as applicable. Any use, modification, reproduction, release, performing, displaying, or disclosing of the Software by the U.S. Government shall be governed solely by the terms of this EULA.
-
-8.7 Contact Information. If you have any questions about this EULA, or if you want to contact VMware for any reason, please direct all correspondence to: VMware, Inc., 3401 Hillview Avenue, Palo Alto, CA 94304, United States of America or email info@vmware.com.
-
-8.8 Other. VMware and VMTN are trademarks and/or registered trademarks of VMware, Inc. in the United States and/or various jurisdictions.', 'http://www.vmware.com/download/eula/', NULL, NULL, NULL, 'VMWare Master EULA', NULL, NULL, NULL, '', NULL, false, false, false, 'b624eeaaf89a1ec75aa7748d27bdd900', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (260, 'Broadcom', 'BroadCom License Agreement
-IMPORTANT-READ CAREFULLY: This End-User License Agreement ("EULA") is a legal agreement between you ("Licensee") and Broadcom Corporation ("Broadcom") for the Broadcom software that accompanies this EULA, which includes computer software and may include associated media, printed materials, "online" or electronic documentation, and Internet-based services ("Software"). BY OPENING THE SOFTWARE PACKAGE, CLICKING ON THE "ACCEPT" BUTTON OF ANY ELECTRONIC VERSION OF THIS END USER LICENSE AGREEMENT ("AGREEMENT") OR ACCESSING OR INSTALLING THE SOFTWARE, YOU ACKNOWLEDGE THAT YOU HAVE READ THE LICENSE AGREEMENT, UNDERSTAND IT AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS. IF YOU DO NOT AGREE TO THE TERMS OF THIS EULA, PROMPTLY CLICK ON THE "DECLINE" BUTTON AND DO NOT DOWNLOAD, INSTALL, COPY OR USE THE SOFTWARE.
-
-License
-Subject to the terms and conditions of this Agreement, Broadcom grants to Licensee the non-exclusive, non-transferable, personal, revocable right to use the Software only in connection with proprietary semiconductor products of Broadcom incorporated in the equipment purchased by Licensee, and to make one (1) copy of the Software for back-up or archival purposes only. Any other use of this Software or removal of the Software from a country in which it is licensed shall automatically terminate this license.
-
-Restrictions
-This Software is protected by U.S. Copyright Law. This Software is licensed, not sold. Licensee may not use, disclose, modify, reproduce or distribute the Software except as expressly permitted in this Agreement. No license is granted to Licensee in any human readable code of the Software (source code). Licensee shall not decompile, reverse engineer, modify, or otherwise attempt to derive source code from the Software except to the extent that restrictions on these activities may be prohibited under applicable law. Additionally, Licensee may not remove, efface or otherwise obscure any proprietary notices, labels, or marks on the Software. Licensee agrees that each copy of the Software and Documentation will include reproductions of all proprietary notices, labels or marks included therein. Licensee further acknowledges and agrees that all right, title and interest in the Software and all subsequent copies thereof regardless of the form or media are retained and held by Broadcom. ALL RIGHTS NOT EXPRESSLY GRANTED HEREIN ARE RESERVED BY BROADCOM.
-
-Termination
-Licensee may terminate this EULA at any time by destroying all copies of the Software. Also, Licensee''s rights under this EULA will terminate immediately without notice from Broadcom if Licensee fails to comply with any provision of this Agreement. Upon termination, Licensee shall destroy the Software and all copies thereof that are in Licensee''s possession or control.
-
-No Support
-Nothing in this Agreement shall obligate Broadcom to provide any support for the Software including without limitation any obligation to correct any defects or provide any updates to the Software to Licensee.
-
-
-No Warranty / Disclaimer
-TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS" AND WITH ALL FAULTS AND BROADCOM MAKES NO PROMISES, REPRESENTATIONS OR WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND BROADCOM SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE, MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR CORRESPONDENCE TO DESCRIPTION. THE ENTIRE RISK ARISING OUT OF USE OR PERFORMANCE OF THE SOFTWARE LIES WITH LICENSEE.
-
-Exclusion of Incidental, Consequential and Certain Other Damages
-TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL BROADCOM OR ITS SUPPLIERS BE LIABLE FOR CONSEQUENTIAL, INCIDENTAL, SPECIAL, INDIRECT, OR EXEMPLARY DAMAGES WHATSOEVER ARISING OUT OF OR IN ANY WAY RELATING TO THIS AGREEMENT OR LICENSEE''S USE OF OR INABILITY TO USE THE SOFTWARE, OR THE PROVISION OR FAILURE TO PROVIDE SUPPORT SERVICES, INCLUDING BUT NOT LIMITED TO LOST PROFITS, LOSS OF CONFIDENTIAL OR OTHER INFORMATION, BUSINESS INTERRUPTION, PERSONAL INJURY, LOSS OF PRIVACY, FAILURE TO MEET ANY DUTY (INCLUDING OF GOOD FAITH OR REASONABLE CARE), NEGLIGENCE, COSTS OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, OR ANY OTHER CLAIM FOR PECUNIARY OR OTHER LOSS WHATSOEVER, OR FOR ANY CLAIM OR DEMAND AGAINST YOU BY ANY OTHER PARTY, EVEN IF BROADCOM HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. THESE LIMITATIONS SHALL APPLY NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY LIMITED REMEDY.
-
-Limitation of Liability and Remedies
-NOTWITHSTANDING ANY DAMAGES YOU MAY INCUR FOR ANY REASON WHATSOEVER (INCLUDING, WITHOUT LIMITATION, ALL DAMAGES REFERENCED ABOVE AND ALL DIRECT OR GENERAL DAMAGES), THE ENTIRE LIABILITY OF BROADCOM AND ANY OF ITS SUPPLIERS UNDER ANY PROVISION OF THIS AGREEMENT AND YOUR EXCLUSIVE REMEDY FOR ALL OF THE FOREGOING SHALL BE LIMITED TO THE GREATER OF THE AMOUNT ACTUALLY PAID FOR THE SOFTWARE ITSELF OR U.S. $1. THE FOREGOING LIMITATIONS, EXCLUSIONS AND DISCLAIMERS SHALL APPLY TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, EVEN IF ANY REMEDY FAILS ITS ESSENTIAL PURPOSE.
-
-Confidentiality
-"Confidential Information" means any trade secrets, confidential data, or other confidential information relating to or used in the Software. Licensee shall not use or disclose Confidential Information except as expressly permitted hereunder and shall use all reasonable efforts to protect the confidentiality thereof. Licensee agrees and acknowledges that the structure, sequence and organization of the Software are the valuable trade secrets of Broadcom, and thus constitute Confidential Information under this Agreement.
-
-Export Regulations
-Software, including technical data, may be subject to U.S. export control laws, including the U.S. Export Administration Act and its associated regulations, and may be subject to export or import regulations in other countries. Licensee warrants that it will comply strictly in all respects with all such regulations and acknowledges that it has the responsibility to obtain licenses to export, re-export or import the Software.
-
-Non-Assignability
-Licensee may not sell, transfer, assign or subcontract the Software or any right or obligation set forth in this Agreement without the prior written consent of Broadcom. Any act in derogation of the foregoing shall be null and void.
-
-U.S. Government License Rights
-The Software is licensed only with "RESTRICTED RIGHTS," and use, duplication or disclosure by the Government is subject to restrictions as set forth in FAR, 48 CFR 52.227-14 and DFAR252.227-7013 et seq. or its successor(s). Use of the Software by the Government constitutes acknowledgement that the Software is commercial, and of Broadcom''s proprietary rights therein. The Contractor/Manufacturer of the Software is Broadcom. Licensee agrees not to remove or deface any portion of any legend provided in or with the Software provided hereunder. The Software is a trade secret of Broadcom for all purposes of the Freedom of Information Act and is, in all respects, proprietary data belonging solely to Broadcom.
-
-Miscellaneous
-Broadcom and Licensee are independent contractors. This is the entire Agreement between the parties relating to the subject matter hereof, supersedes any and all prior proposals, agreements and representations between the parties, whether written or oral, and no waiver, modification or amendment of the Agreement shall be valid unless in writing signed by each party. The waiver of a breach of any term hereof shall in no way be construed as a waiver of any other term or breach hereof. If any provision of this Agreement shall be held by a court of competent jurisdiction to be contrary to law, the remaining provisions of this Agreement shall remain in full force and effect. This Agreement is governed by the laws of the State of California without reference to conflict of laws principles. The parties expressly stipulate that the 1980 United Nations Convention on Contracts for the International Sale of Goods shall not apply. All disputes arising out of this Agreement shall be subject to the exclusive jurisdiction of the state and federal courts located in Orange County, California, and the parties agree and submit to the personal and exclusive jurisdiction and venue of these courts.', 'http://www.calculate-linux.ru/packages/licenses/Broadcom', NULL, NULL, NULL, 'Broadcom License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, 'dbfd6cdf2e80dabff6e1611f1d823a03', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (406, 'CC-BY-ND-2.5', 'Creative Commons Attribution-NoDerivs 2.5
 
 CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
@@ -13133,541 +13218,103 @@ Miscellaneous
 
 Waiver of Jury Trial
 TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, EACH PARTY WAIVES THE RIGHT TO TRIAL BY JURY IN ANY LEGAL PROCEEDING ARISING OUT OF OR RELATING TO THIS AGREEMENT OR THE TRANSACTIONS CONTEMPLATED UNDER THIS AGREEMENT.', 'https://www.redhat.com/licenses/us.html', NULL, NULL, NULL, 'Red Hat Enterprise Agreement', NULL, NULL, NULL, '', NULL, false, false, false, 'bb936b80ec3367ff37434313834f056d', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (281, 'SISSL', 'Sun Industry Standards Source License (SISSL)
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (269, 'VMWare-EULA', 'VMWARE MASTER END USER LICENSE AGREEMENT
 
-(Sun has ceased to use or recommend this license)
+NOTICE: BY DOWNLOADING AND INSTALLING, COPYING OR OTHERWISE USING THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS VMWARE MASTER END USER LICENSE AGREEMENT ("EULA"). IF YOU DO NOT AGREE TO THE TERMS OF THIS EULA, YOU MAY NOT DOWNLOAD, INSTALL, COPY OR USE THE SOFTWARE, AND YOU MAY RETURN THE UNUSED SOFTWARE TO THE VENDORFROM WHICH YOU ACQUIRED IT WITHIN THIRTY (30) DAYS AND REQUEST A REFUND OF THE LICENSE FEE, IF ANY, ALREADY PAID UPON SHOWING PROOF OF PAYMENT. "YOU" MEANS THE NATURAL PERSON OR THE ENTITY THAT IS AGREEING TO BE BOUND BY THIS EULA, THEIR EMPLOYEES AND THIRD PARTY CONTRACTORS THAT PROVIDE SERVICES TO YOU.YOU SHALL BE LIABLE FOR ANY FAILURE BY SUCH EMPLOYEES AND THIRD PARTY CONTRACTORS TO COMPLY WITH THE TERMS OF THIS AGREEMENT.
 
-1.0 DEFINITIONS
+1. DEFINITIONS
 
-1.1 "Commercial Use" means distribution or otherwise making the
-Original Code available to a third party.
+1.1 "Designated Administrative Access" means that access to the standard user interfaces of a given instance of the Software (designated in this section) that you may grant to a designated third party (a) for which you have provided advance written notice to VMware that you are providing outsourced services and (b) for whose dedicated benefit you have licensed such instance of the Software. Designated Administrative Access is applicable only where you are 1) an IT outsourcing company that is providing outsourced IT services to a client company and 2) applicable only to the following Software: ESX, VMware Server and vCenter Server.
 
-1.2 "Contributor Version" means the combination of the Original
-Code, and the Modifications made by that particular Contributor.
+1.2 "Guest Operating Systems" means
 
-1.3 "Electronic Distribution Mechanism" means a mechanism generally
-accepted in the software development community for the electronic transfer
-of data.
+instances of third-party operating systems licensed by you and installed in a
 
-1.4 "Executable" means Original Code in any form other than Source
-Code.
+Virtual Machine and run using the Software.
 
-1.5 "Initial Developer" means the individual or entity identified
-as the Initial Developer in the Source Code notice required by Exhibit
-A.
+1.3 "Licensed Additional Module" means additional modules that may be provided with and/or used in conjunction with the Software for which you have paid the applicable license fee and accepted any applicable additional license terms.
 
-1.6 "Larger Work" means a work which combines Original Code or
-portions thereof with code not governed by the terms of this License.
+1.4 "Open Source Software" means various open source software components licensed under the terms of applicable open source license agreements included in the materials relating to such software. Open Source Software is composed of individual software components, each of which has its own copyright and its own applicable license conditions. The Open Source Software licenses can be found in the open_source_licenses.txt file, other materials accompanying the software package, the documentation or corresponding source files available at www.vmware.com/download/open_source.html.
 
-1.7 "License" means this document.
+1.5 "Processor" means a single, physical chip that houses no more than the number of processor cores as defined by the description of the Software licensed, and set forth in the license portal or applicable documentation for the Software.
 
-1.8 "Licensable" means having the right to grant, to the maximum
-extent possible, whether at the time of the initial grant or subsequently
-acquired, any and all of the rights conveyed herein.
+1.6 "Sample Programs" means sample client management programs or scripts that may be distributed with the Software.
 
-1.9 "Modifications" means any addition to or deletion from the
-substance or structure of either the Original Code or any previous
-Modifications.
-A Modification is:
+1.7 "Server" means a single physical computer of a type that meets the specifications as set forth in the applicable product documentation posted at www.vmware.com/support/pubs/. Multiple computers that share processing power or operate in a networked configuration as a single logical computer, such as a "server farm" or similar arrangement, constitute multiple Servers for the purpose of this EULA.
 
-A. Any addition to or deletion from the contents of a file containing
-Original Code or previous Modifications.
-B. Any new file that contains any part of the Original
-Code or previous Modifications.
-
-1.10 "Original Code" means Source Code of computer software code
-which is described in the Source Code notice required by Exhibit A as Original
-Code.
+1.8 "Software" means software products that are licensed to you under this EULA, including, but not limited to, any related components purchased or provided with the Software, application programming interfaces, associated media, printed materials, online or electronic documentation, and any updates and maintenance releases thereto.
 
-1.11 "Patent Claims" means any patent claim(s), now owned or
-hereafter acquired, including without limitation, method, process, and
-apparatus claims, in any patent Licensable by grantor.
+1.9 "Software License Key" means, if applicable, a serial number issued to you by VMware to activate and use the Software. A separate, additional Software License Key may be required to activate and use each Licensed Additional Module.
 
-1.12 "Source Code" means the preferred form of the Original Code
-for making modifications to it, including all modules it contains, plus
-any associated interface definition files, or scripts used to control
-compilation
-and installation of an Executable.
-
-1.13 "Standards" means the standards identified in Exhibit B.
-
-1.14 "You" (or "Your") means an individual or a legal entity
-exercising rights under, and complying with all of the terms of, this License
-or a future version of this License issued under Section 6.1. For legal
-entities, "You'''' includes any entity which controls, is controlled by,
-or is under common control with You. For purposes of this definition, "control''''
-
-means (a) the power, direct or indirect, to cause the direction or management
-of such entity, whether by contract or otherwise, or (b) ownership of more
-than fifty percent (50%) of the outstanding shares or beneficial ownership
-of such entity.
+1.10 "VMware Tools" means a suite of utilities and drivers that can be installed in Guest Operating System to enhance the performance and functionality of your Guest Operating System when running in a VMware virtual machine.
 
-2.0 SOURCE CODE LICENSE
-
-2.1 The Initial Developer Grant
+1.11 "Virtual Machine" means an instance of a Guest Operating System and any application programs installed thereon, running on a computing device on which the Software is installed, or suspended to disk or any other storage media accessible by the computing device.
 
-The Initial Developer hereby grants You a world-wide, royalty-free,
-non-exclusive license, subject to third party intellectual property
-claims: 
+2. EVALUATION LICENSES
 
-(a) under intellectual property rights (other than patent or
-trademark) Licensable by Initial Developer to use, reproduce, modify, display,
-perform, sublicense and distribute the Original Code (or portions thereof)
-with or without Modifications, and/or as part of a Larger Work; and
-(b) under Patents Claims infringed by the making, using or selling
-of Original Code, to make, have made, use, practice, sell, and offer for
-sale, and/or otherwise dispose of the Original Code (or portions thereof).
+2.1 General. If available, the Software and each Licensed Additional Module may be activated with no-cost evaluation Software License Key(s). You acknowledge that Evaluation Software License Keys have an expiration date ("Expiration Date") and that VMware is not obligated to permit further use of the Software.
 
-(c) the licenses granted in this Section 2.1(a) and (b) are effective
-on the date Initial Developer first distributes Original Code under the
-terms of this License.
+2.2 Evaluation License. If you activate the Software or any Licensed Additional Module with an evaluation Software License Key ("Evaluation Product") you may use the Evaluation Product until the Expiration Date only to evaluate the suitability of the Evaluation Product for licensing on a for-fee basis. You may acquire evaluation Software License Key(s) for Licensed Additional Modules. In such case, the Licensed Additional Modules are licensed to you subject to the terms of this "EVALUATION LICENSES" section.
 
-(d) Notwithstanding Section
-2.1(b) above, no patent license is granted: 1) for code that You delete from
-the Original Code; 2) separate from the Original Code; or 3) for infringements
+2.3 Evaluation Product Warranty Disclaimer. During the use of the Evaluation Product, the limited 90-day warranty referenced in Section 7.1 below is not applicable to you. the EVALUATION PRODUCT is provided to you "as is" without warranty of any kind, whether express, implied, statutory, or otherwise. VMWARE AND ITS LICENSORS BEAR NO LIABILITY FOR ANY DAMAGES RESULTING FROM USE (OR ATTEMPTED USE) OF THE EVALUATION PRODUCT THROUGH AND AFTER THE EXPIRATION DATE.
 
-caused by: i) the modification of the Original Code or ii) the combination of
+2.4 No Support. VMware has no duty to provide support to you during your use of the Evaluation Product.
 
-the Original Code with other software or devices, including but not limited to
+3. GRANT AND USE RIGHTS FOR SOFTWARE.
 
-Modifications. 
+3.1 License. The Software is licensed, not sold. Subject to the terms of this EULA, VMware hereby grants you a non-exclusive, non-transferable license, without rights to sublicense, to use the object code of the Software for the purpose as set forth in the applicable documentation for the Software and to the extent permitted by your payment of applicable license fees, if any, under a VMware approved licensing model and/or your Software License Key subject to the software product specific terms specified in this EULA, the technical restrictions of the Software and/or any additional licensing terms specified by VMware via product documentation, notification and/or policy change posted at www.vmware.com. Your use of the Software is limited to the country where you’ve been invoiced for purchase of the Software. However, if you’ve been invoiced within any of the European Union member states, you may deploy the Software in any of the member states without restriction, subject to the terms of the approved licensing model and the terms of this EULA. Depending upon the model utilized to compute the applicable license fees paid by you to use the Software (whether per Processor, per Virtual Machine, per user, or any other VMware approved licensing model), an applicable Software License Key may limit your usage of the Software accordingly. You may use the documentation accompanying the Software in connection with permitted uses of the Software. If the Software is a version that you have converted or exchanged from a valid licensed prior version, you agree that by using the Software you will no longer use the prior version. VMware reserves the right to require the certification of the destruction of such previous version of the Software.
 
-3.0 DISTRIBUTION OBLIGATIONS
+3.2 License Limitations. You may not copy the Software except for a reasonable number of machine-readable copies of the Software for backup or archival purposes and except as expressly permitted in this EULA. You may not remove any titles, trademarks or trade names, copyright notices, legends, or other propri etary markings on the Software. You are not granted any rights to any trademarks or service marks of VMware. VMware retains all rights not expressly granted to you in this EULA.
 
-3.1 Application of License.
+3.3 Restrictions. You may not (i) sell, lease, license, sublicense, distribute or otherwise transfer in whole or in part the Software or the Software License Key to another party; (ii) provide, disclose, divulge or make available to, or permit use of the Software in whole or in part by, any third party (except Designated Administrative Access) without VMware’s prior written consent; (iii) modify or create derivative works based upon the Software; or (iv) create, develop, license, install, use, or deploy any third party software or services to circumvent, enable, modify or provide access, permissions or rights which violate the technical restrictions of the Software, any additional licensing terms provided by VMware via product documentation, notification, and/or policy change posted at www.vmware.com, and the terms of this EULA. Except to the extent expressly permitted by applicable law, and to the extent that VMware is not permitted by that applicable law to exclude or limit the following rights, you may not decompile, disassemble, reverse engineer, or otherwise attempt to derive source code from the Software, in whole or in part. Before you exercise any rights that you believe to be entitled to based on mandatory law, you provide VMware with 30 days prior written notice at info@vmware.com and provide all reasonably requested information to allow VMware to assess your claim and, at VMware’s sole discretion, to provide alternatives that reduce any adverse impact on VMware’s intellectual property or other rights. You may use the Software to conduct internal performance testing and benchmarking studies, the results of which you (and not unauthorized third parties) may publish or publicly disseminate; provided that VMware has reviewed and approved of the methodology, assumptions and other parameters of the study. Please contact VMware at benchmark@vmware.com to request such review.
 
+3.4 VMware Tools. You may distribute the VMware Tools to any third party provided that (i) you only distribute the VMware Tools as a whole in object code format whether or not as part of, the Virtual Machine you create with the Software; (ii) you do not use VMware’s name, logo or trademarks to market the VMware Tools, except you may refer to VMware names, logos or trademarks to indicate that the VMware Tools are compatible with or designed for use with the Software and (iii) you agree to indemnify, hold harmless, and defend VMware from and against any claims or lawsuits, including attorneys’ fees, that arise or result from your use or distribution of VMware Tools. Notwithstanding the foregoing, you may distribute and modify the Open Source Software of VMware Tools; however, VMware may not provide any support, pursuant to Section 5, for such modified VMware Tools.
 
-The Source Code version of Original Code may be distributed only under
-the terms of this License or a future version of this License released
-under Section 6.1, and You must include a copy of this License with every
-copy of the Source Code You distribute. You may not offer or impose any
-terms on any Source Code version that alters or restricts the applicable
-version of this License or the recipients'' rights hereunder. Your license
-for shipment of the Contributor Version is conditioned upon Your full compliance
+3.5 Licenses required for third-party software. The Software enables you to run multiple instances of third-party guest operating systems and application programs. You are responsible for obtaining and complying with any licenses necessary to operate any such third-party software, including Guest Operating Systems and/or application programs.
 
-with this Section. The Modifications which You create must comply with
-all requirements set out by the Standards body in effect one hundred twenty
-(120) days before You ship the Contributor Version. In the event that the
-Modifications do not meet such requirements, You agree to publish either
-(i) any deviation from the Standards protocol resulting from implementation
-of Your Modifications and a reference implementation of Your Modifications
-or (ii) Your Modifications in Source Code form, and to make any such deviation
-and reference implementation or Modifications available to all third parties
-under the same terms as this license on a royalty free basis within thirty
-(30) days of Your first customer shipment of Your Modifications.
-
-3.2 Required Notices.
-
-
-You must duplicate the notice in Exhibit A in each file of the
-Source Code. If it is not possible to put such notice in a particular Source
-Code file due to its structure, then You must include such notice in a
-location (such as a relevant directory) where a user would be likely to
-look for such a notice. If You created one or more Modification(s) You
-may add Your name as a Contributor to the notice described in Exhibit
-A. You must also duplicate this License in any documentation for the
-Source Code where You describe recipients'' rights or ownership rights relating
-to Initial Code. You may choose to offer, and to charge a fee for, warranty,
-support, indemnity or liability obligations to one or more recipients of
-Your version of the Code. However, You may do so only on Your own behalf,
-and not on behalf of the Initial Developer. You must make it absolutely
-clear than any such warranty, support, indemnity or liability obligation
-is offered by You alone, and You hereby agree to indemnify the Initial
-Developer for any liability incurred by the Initial Developer as a result
-of warranty, support, indemnity or liability terms You offer.
-
-3.3 Distribution of Executable Versions.
-
-
-You may distribute Original Code in Executable and Source form only
-if the requirements of Sections 3.1 and 3.2 have been met for that Original
-Code, and if You include a notice stating that the Source Code version
-of the Original Code is available under the terms of this License. The
-notice must be conspicuously included in any notice in an Executable or
-Source versions, related documentation or collateral in which You describe
-recipients'' rights relating to the Original Code. You may distribute the
-Executable and Source versions of Your version of the Code or ownership
-rights under a license of Your choice, which may contain terms different
-from this License, provided that You are in compliance with the terms of
-this License. If You distribute the Executable and Source versions under
-a different license You must make it absolutely clear that any terms which
-differ from this License are offered by You alone, not by the Initial Developer.
-
-You hereby agree to indemnify the Initial Developer for any liability incurred
-by the Initial Developer as a result of any such terms You offer.
-
-3.4 Larger Works.
-
-
-You may create a Larger Work by combining Original Code with other
-code not governed by the terms of this License and distribute the Larger
-Work as a single product. In such a case, You must make sure the requirements
-of this License are fulfilled for the Original Code.
-
-4.0 INABILITY TO COMPLY DUE TO STATUTE OR REGULATION
-
-If it is impossible for You to comply with any of the terms of this
-License with respect to some or all of the Original Code due to statute,
-judicial order, or regulation then You must: (a) comply with the terms
-of this License to the maximum extent possible; and (b) describe the limitations
-
-and the code they affect. Such description must be included in the LEGAL
-file described in Section 3.2 and must be included with all distributions
-of the Source Code. Except to the extent prohibited by statute or regulation,
-such description must be sufficiently detailed for a recipient of ordinary
-skill to be able to understand it.
-
-5.0 APPLICATION OF THIS LICENSE
-
-This License applies to code to which the Initial Developer has attached
-the notice in Exhibit A and to related Modifications as set out in Section
-3.1.
-
-6.0 VERSIONS OF THE LICENSE
-
-6.1 New Versions.
-
-
-Sun may publish revised and/or new versions of the License from time
-to time. Each version will be given a distinguishing version number.
-
-6.2 Effect of New Versions.
-
-
-Once Original Code has been published under a particular version of
-the License, You may always continue to use it under the terms of that
-version. You may also choose to use such Original Code under the terms
-of any subsequent version of the License published by Sun. No one other
-than Sun has the right to modify the terms applicable to Original Code.
-
-7.0 DISCLAIMER OF WARRANTY
-
-ORIGINAL CODE IS PROVIDED UNDER THIS LICENSE ON AN "AS IS" BASIS, WITHOUT
-WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, WITHOUT
-LIMITATION,
-WARRANTIES THAT THE ORIGINAL CODE IS FREE OF DEFECTS, MERCHANTABLE, FIT
-FOR A PARTICULAR PURPOSE OR NON-INFRINGING. THE ENTIRE RISK AS TO THE QUALITY
-AND PERFORMANCE OF THE ORIGINAL CODE IS WITH YOU. SHOULD ANY ORIGINAL CODE
-PROVE DEFECTIVE IN ANY RESPECT, YOU (NOT THE INITIAL DEVELOPER) ASSUME
-THE COST OF ANY NECESSARY SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER
-OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS LICENSE. NO USE OF ANY
-ORIGINAL CODE IS AUTHORIZED HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
-
-8.0 TERMINATION
-
-8.1 This License and the rights granted hereunder will terminate
-automatically if You fail to comply with terms herein and fail to cure
-such breach within 30 days of becoming aware of the breach. All sublicenses
-to the Original Code which are properly granted shall survive any termination
-of this License. Provisions which, by their nature, must remain in effect
-beyond the termination of this License shall survive.
+3.6 Sample Programs. The Software may include Sample Programs. You may use and distribute Sample Programs under the terms set forth in the applicable Sample Programs files. VMware does not provide support services for Sample Programs.
 
-8.2 In the event of termination under Section 8.1 above, all
-end user license agreements (excluding distributors and resellers) which
-have been validly granted by You or any distributor hereunder prior to
-termination shall survive termination.
+3.7 VMware License Programs. VMware makes available VMware License programs (for e.g., VMware Academic License). If you have received the Software pursuant to these VMware License programs, the then-current terms and conditions posted on www.vmware.com/download/eula/vmtn.html
 
-9.0 LIMIT OF LIABILITY
+for that program shall apply for use of the products under such VMware License programs.
 
-UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY, WHETHER TORT (INCLUDING
-NEGLIGENCE), CONTRACT, OR OTHERWISE, SHALL YOU, THE INITIAL DEVELOPER,
-ANY OTHER CONTRIBUTOR, OR ANY DISTRIBUTOR OF ORIGINAL CODE, OR ANY SUPPLIER
-OF ANY OF SUCH PARTIES, BE LIABLE TO ANY PERSON FOR ANY INDIRECT, SPECIAL,
-INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT
-LIMITATION, DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, COMPUTER FAILURE
-OR MALFUNCTION, OR ANY AND ALL OTHER COMMERCIAL DAMAGES OR LOSSES, EVEN
-IF SUCH PARTY SHALL HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGES.
-THIS LIMITATION OF LIABILITY SHALL NOT APPLY TO LIABILITY FOR DEATH OR
-PERSONAL INJURY RESULTING FROM SUCH PARTY''S NEGLIGENCE TO THE EXTENT APPLICABLE
-LAW PROHIBITS SUCH LIMITATION. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION
-OR LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THIS EXCLUSION
-AND LIMITATION MAY NOT APPLY TO YOU.
+3.8 Audit Rights. You will maintain accurate records as to your use of the Software as authorized by this EULA, for at least two (2) years from the last day on which support and subscription services ("Services") expired for the applicable Software.  VMware, or persons designated by VMware, will, at any time during the period when you are obliged to maintain such records, be entitled to inspect such records and your computing devices, in order to verify that the Software is used by you in accordance with the terms of this EULA and that you have paid the applicable license fees and Services fees for the Software; provided that VMware may conduct no more than one (1) audit in any twelve (12) month period.  You shall promptly pay to VMware any underpayments revealed by any such audit.  Any such audit will be performed at VMware’s expense during normal business hours, provided that you shall promptly reimburse VMware for the cost of such audit and any applicable fees if such audit reveals an underpayment by you of more than five percent (5%) of the amounts payable by you to VMware for the period audited.
 
-10.0 U.S. GOVERNMENT END USERS
+4. TITLE. VMware retains all right, title, and interest in and to the Software and the Software License Key and in all related copyrights, trade secrets, patents, trademarks, and any other intellectual and industrial property and proprietary rights, including registrations, applications, renewals, and extensions of such rights.
 
-U.S. Government: If this Software is being acquired by or on behalf
-of the U.S. Government or by a U.S. Government prime contractor or subcontractor
+5. SUPPORT AND SUBSCRIPTION SERVICES NOT INCLUDED
 
-(at any tier), then the Government''s rights in the Software and accompanying
-documentation shall be only as set forth in this license; this is in accordance
-with 48 C.F.R. 227.7201 through 227.7202-4 (for Department of Defense (DoD)
-acquisitions) and with 48 C.F.R. 2.101 and 12.212 (for non-DoD acquisitions).
+VMware will not provide any support services under this EULA. This EULA does not give you any rights to any updates or upgrades to the Software or to any extensions or enhancements to the Software developed by VMware at any time in the future. VMware may offer support and subscription services separately. If you have purchased VMware support and subscription services with the Software, these services are provided to you under the Support Contract Terms and Conditions posted on VMware’s Web site at www.vmware.com/support/ and by accepting the terms of this EULA you are accepting these Support Contract Terms and Conditions. Any supplemental software code or related materials that VMware provides to you as part of any support and subscription services are to be considered part of the Software and are subject to the terms and conditions of this EULA. VMware may use any technical information you provide to VMware for any VMware business purposes without restriction, including for product support and development. VMware will not use information in a form that personally identifies you.
 
-11.0 MISCELLANEOUS
+6. TERMINATION
 
-This License represents the complete agreement concerning subject matter
-hereof. If any provision of this License is held to be unenforceable, such
-provision shall be reformed only to the extent necessary to make it enforceable.
+6.1 Termination. VMware may terminate this EULA immediately and without notice if you fail to comply with any term of this EULA.
 
-This License shall be governed by California law provisions (except to
-the extent applicable law, if any, provides otherwise), excluding its
-conflict-of-law
-provisions. With respect to disputes in which at least one party is a citizen
-of, or an entity chartered or registered to do business in the United States
-of America, any litigation relating to this License shall be subject to
-the jurisdiction of the Federal Courts of the Northern District of California,
-with venue lying in Santa Clara County, California, with the losing party
-responsible for costs, including without limitation, court costs and reasonable
-attorneys'' fees and expenses. The application of the United Nations Convention
-on Contracts for the International Sale of Goods is expressly excluded.
-Any law or regulation which provides that the language of a contract shall
-be construed against the drafter shall not apply to this License.
+6.2 Effect of Termination. In the event of termination, you must destroy all copies of the Software and Software License Key. In addition you must remove all copies of the Software, including all backup copies, from the Server and all computers and terminals on which it is installed. From time to time, VMware may change the terms of this EULA. VMware will notify you of such change. Your continued use of the Software will indicate your agreement to the change.
 
-EXHIBIT A - Sun Standards License
+7. LIMITED WARRANTY AND LIMITATION OF LIABILITY
 
-"The contents of this file are subject to the Sun Standards
-License Version 1.1 (the "License");
-You may not use this file except in compliance with the 
-License. You may obtain a copy of the
-License at _______________________________.
+7.1 Limited Warranty. VMware warrants that the media, if any, on which the Software is delivered will be free of defects and that the Software will substantially conform to the description contained in the applicable end user documentation with respect to the particular Software licensed under this EULA in each case for a period of 90 days after the date of shipment of the Software License Key to you ("Warranty Period"). If during the Warranty Period the media is defective and the version of that Software is still commercially available, your sole remedy will be that VMware shall, at its option, repair or replace the defective media returned to VMware within the Warranty Period. If you are returning a defective media, please email VMware at sales@vmware.com to request a Return Authorization number (RMA) and further instructions. If during the Warranty Period the Software does not substantially conform to the description contained in the applicable end user documentation, your sole remedy will be that VMware shall, at it option, correct the defects in the Software or refund the license fees you paid, if any, related to the Software provided that (a) the Software has been properly installed and used at all times and in accordance with the instructions in the applicable end user documentation; (b) no modification, alteration or addition has been made to the Software product by persons other than VMware or VMware’s authorized representative; and (c) VMware receives written notice of the non-conformity within ninety (90) days following shipment. EXCEPT FOR THE PRECEDING EXPRESS LIMITED WARRANTY, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE MANDATORY LAW, VMWARE AND ITS LICENSORS PROVIDE THE SOFTWARE WITHOUT ANY WARRANTIES OF ANY KIND, EXPRESS, IMPLIED, STATUTORY, OR IN ANY OTHER PROVISION OF THIS EULA OR COMMUNICATION WITH YOU, AND VMWARE AND ITS LICENSORS SPECIFICALLY DISCLAIM ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
 
-Software distributed under the License is distributed on 
-an "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either 
-express or implied. See the License for the specific
-language governing rights and limitations under the License.
+7.2 LIMITATION OF LIABILITY. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE MANDATORY LAW, IN NO EVENT WILL VMWARE AND ITS LICENSORS BE LIABLE FOR ANY LOST PROFITS OR BUSINESS OPPORTUNITIES, LOSS OF USE, BUSINESS INTERRUPTION, LOSS OF DATA, OR ANY OTHER INDIRECT, SPECIAL, INCIDENTAL, OR CONSE QUEN TIAL DAMAGES UNDER ANY THEORY OF LIABILITY, WHETHER BASED IN CONTRACT, TORT, NEGLIGENCE, PRODUCT LIABILITY, OR OTHERWISE. BECAUSE SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES, THE PRECEDING LIMITATION MAY NOT APPLY TO YOU. VMWARE AND ITS LICENSORS’ LIABILITY UNDER THIS EULA WILL NOT, IN ANY EVENT, EXCEED THE LICENSE FEES, IF ANY, PAID BY YOU FOR THE SOFTWARE LICENSED TO YOU UNDER THIS EULA. THE FOREGOING LIMITATIONS SHALL APPLY TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, REGARDLESS OF WHETHER VMWARE OR ITS LICENSORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF WHETHER ANY REMEDY FAILS OF ITS ESSENTIAL PURPOSE.
 
-The Original Code is ______________________________________.
+8. GENERAL
 
-The Initial Developer of the Original Code is: 
-Sun Microsystems, Inc..
+Entire Agreement. This Agreement sets forth VMware’s entire liability and your exclusive remedy with respect to the Software and supersedes the terms of any purchase orders and any other communications or advertising with respect to the Software. You acknowledge that this Agreement is a complete statement of the agreement between you and VMware with respect to the Software, and that there are no other prior or contemporaneous understandings, promises, representations, or descriptions with respect to the Software.
 
-Portions created by: _______________________________________
+8.2 Headings. Headings under this EULA are intended only for convenience and shall not affect the interpretation of this EULA.
 
-are Copyright (C): _______________________________________
+8.3 Waiver and Modification. No failure of either party to exercise or enforce any of its rights under this EULA will act as a waiver of those rights. This EULA may only be modified, or any rights under it waived, by a written document executed by the party against which it is asserted.
 
-All Rights Reserved.
+8.4 Severability. If any provision of this EULA is found illegal or unenforceable, it will be enforced to the maximum extent permissible, and the legality and enforceability of the other provisions of this EULA will not be affected.
 
-Contributor(s): _______________________________________
+8.5 Governing Law. This EULA will be governed by California law and the United States of America, without regard to its choice of law principles. The United Nations Convention for the International Sale of Goods shall not apply.
 
-EXHIBIT B - Standards
+8.6 Government Restrictions. You may not export or re-export the Soft ware except in compliance with the United States Export Administration Act and the related rules and regulations and similar non-U.S. government restrictions, if applicable. The Software and accompanying documentation are deemed to be "commercial computer software" and "commercial computer software documentation," respectively, pursuant to DFAR Section 227.7202 and FAR Section 12.212(b), as applicable. Any use, modification, reproduction, release, performing, displaying, or disclosing of the Software by the U.S. Government shall be governed solely by the terms of this EULA.
 
-The Standard is defined as the following:
+8.7 Contact Information. If you have any questions about this EULA, or if you want to contact VMware for any reason, please direct all correspondence to: VMware, Inc., 3401 Hillview Avenue, Palo Alto, CA 94304, United States of America or email info@vmware.com.
 
-OpenOffice.org XML File Format Specification, located at 
-href="http://xml.openoffice.org">http://xml.openoffice.org
-
-OpenOffice.org Application Programming Interface Specification, located
-at
-
-http://api.openoffice.org', 'http://www.opensource.org/licenses/sisslpl.php', NULL, NULL, NULL, 'Sun Industry Standards Source License', NULL, NULL, NULL, '', NULL, false, false, false, '5ebc45f58d5d2a638a8afb243a43f400', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (282, 'Skype', 'Skype End User License Agreement
-IMPORTANT – PLEASE READ CAREFULLY
-Please note the following preliminary terms, which use some of the definitions set out in paragraph 1 below:
-
-No Access To Emergency Services: Skype is not a replacement for Your ordinary mobile or fixed line telephone. In particular, apart from in the very limited circumstances set out in paragraph 3.5 of the Terms of Service, Skype does not allow You to make emergency calls to emergency services. You must make alternative communications arrangements to ensure that You can make emergency calls if needed.  Please also see paragraphs 3.6 and 6.2 below.
-
-This Agreement: This Agreement, and any new versions, between Skype and You, covers all Your use of Skype Software from any terminals where Skype Software has been installed, by You or by third parties. You can accept this Agreement by clicking on the ACCEPT button or similar buttons or links as may be designated by Skype.
-
-Additional Terms: Your agreement with Skype will also include the Additional Terms (as defined below). The Additional Terms shall include, but are not limited to, the terms and policies set out in paragraph 7 below. In order to use the Skype Software, Skype Website and Products, You must accept the Additional Terms. You can accept the Additional Terms by (i) clicking to accept or agree where this option is made available to You, or (ii) by actually using the Skype Software, Skype Website and Products, in which case You acknowledge and agree that Skype will treat such use as acceptance of the applicable terms. You acknowledge and agree that by accepting this Agreement and the Additional Terms you are entering into a legally binding contract, which collectively is referred to below as the “Terms”. If there is any contradiction between the Additional Terms and this Agreement, then the Additional Terms shall take precedence in relation to the relevant Skype Service. You should print off or save a copy of the Terms for your records.
-
-Electronic Signature(s): You hereby agree to the use of electronic communication in order to enter into contracts, place orders and create other records and to the electronic delivery of notices, policies and records of transactions initiated or completed through the Skype Software. Furthermore, You hereby waive any rights or requirements under any laws or regulations in any jurisdiction which require an original (non-electronic) signature or delivery or retention of non-electronic records, to the extent permitted under applicable mandatory law.
-
-Jurisdiction’s Restrictions: If the law of Your country prohibits You from downloading or using Skype Software because You are under the age limit or because the Skype Software is not allowed in Your country, please don’t use it.
-
-Table of contents
-Definitions
-License and Restrictions
-What You should and should not expect from Skype
-What we expect from You
-Term, Termination, Updates
-Disclaimer of Warranties and Limitation of Liability
-Additional Terms
-Miscellaneous
-1. Definitions
-1.1 The following terms and expressions shall have the following meanings:
-
-Additional Terms: the terms and conditions and policies applicable to Your use of the Skype Software, the Skype Website and the Products, in addition to this Agreement.
-
-Affiliate: any corporation, company or other entity that directly or indirectly controls, is controlled by, or is under common control with, Skype. For the purpose of this definition, the word "control" shall mean the direct or indirect ownership of more than fifty percent (50%) of the outstanding voting stock of the corporation, company, or other entity.
-
-Agreement: this End User License Agreement, as may be renewed and/or amended from time to time.
-
-Broadcast TOS: has the meaning given to it in paragraph 2.9.
-
-Content: means any and all content consisting of text, sounds, pictures, photos, video and/or any type of information or communications.
-
-Documentation: any online or otherwise enclosed documentation provided by Skype.
-
-Effective Date: the date on which this Agreement is entered into by clicking on the ACCEPT button as stated above or upon installation or use of the Skype Software by You, whichever occurs earlier.
-
-Emergency Service(s): means services that connect a user to emergency services personnel or public safety answering points pursuant to applicable local and or national regulatory requirements.
-
-IP Rights: means (i) patents, pending patent applications, designs, trade marks and trade names (whether registered or unregistered), copyright and related rights, database rights, knowhow, trade secrets and confidential information; (ii) all other intellectual property rights and similar or equivalent rights anywhere in the world which currently exist or are recognised in the future; and (iii) applications, extensions and renewals in relation to any such rights.
-
-Password: refers to a code You select, which, in combination with the User ID, gives You access to Your User Account.
-
-Product(s): shall have the meaning given in the Terms of Service at http://www.skype.com/legal/terms/voip/.
-
-Skype: refers to the company established under the laws of Luxembourg, Skype Software S.a.r.l, with its address at 22/24 Boulevard Royal L-2449 Luxembourg (B100467), VAT no. (LU20180239).
-
-Skype API: application program interface consisting of the set of routines utilized by the Skype Software to provide the Skype Software functionality for a given platform or operating system, Skype API being included in or linked to the Skype Software as well as any future versions, improvements, developments, programming fixes, updates and upgrades thereof.
-
-Skype Online Material: the Skype buttons and widgets available for download on the Skype Website at http://www.skype.com/share/buttons/, as such may be changed from time to time by Skype in its sole discretion.
-
-Skype Promotional Materials: any and all trademarks, names, signs, logos, banners, and any other materials, in whatever form, owned and/or used by Skype for the promotion of its company, its products and activities, other than the Skype Online Material.
-
-Skype Software: the software distributed by Skype for internet communication applications, including without limitation the Skype API, UI and Documentation, as well as any future versions, improvements, developments, programming fixes, updates and upgrades thereof.
-
-Skype Staff: the officers, directors, employees and agents of Skype or its Affiliates, or any other persons hired by Skype or its Affiliates.
-
-Skype Website: any and all elements, contents and the ‘look and feel’ of the website available under the URL, www.skype.com, – among other URL’s –, from which website the Skype Software can be downloaded.
-
-Terms: has the meaning given in the “Additional Terms” preliminary term above.
-
-UI: the user interface of the Skype Software.
-
-User Account: refers to the account with User ID and Password that You create for Your use of the Skype Software.
-
-User ID: refers to an identification code You selected, which in combination with the Password, gives access to Your User Account.
-
-You: You, the end user of the Skype Software, also used in the form “Your” where applicable.
-
-1.2 References to the singular include the plural and vice versa, and references to one gender include the other gender.
-
-1.3 Any phrase introduced by the expressions “including”, “include”, “in particular” or any similar expression shall be construed as illustrative and shall not limit the sense of the words preceding those terms.
-
-2. License and Restrictions
-2.1 License: Subject to the terms of this Agreement, Skype hereby grants You a limited, personal, non-commercial, non-exclusive, non-sublicensable, non-assignable, free of charge license to download, install and use the Skype Software on Your computer, phone or PDA for the sole purpose of personally using the internet communication applications provided by Skype and any other applications that may be explicitly provided by Skype. You are allowed to use the Skype Software at university or any other educational institution, subject to paragraph 4.4 below and in accordance with this Agreement and any applicable Additional Terms. You are allowed to use the Skype Software at work to make communications relating to Your business in accordance with this Agreement and any applicable Additional Terms (such as the Terms of Service referred to in paragraph 7 below if You use the Products and/or are a Member or an Administrator of a Business Control Panel).
-
-2.2 No Granting of Rights to Third Parties: You will not sell, assign, rent, lease, distribute, export, import, act as an intermediary or provider, or otherwise grant rights to third parties with regard to the Skype Software or any part thereof.
-
-2.3 No Modifications: You will not undertake, cause, permit or authorize the modification, creation of derivative works, translation, reverse engineering, decompiling, disassembling or hacking of the Skype Software or any part thereof except to the extent permitted by law.
-
-2.4 Third Parties: The Skype Software may be incorporated into, and may incorporate itself, software and other technology owned and controlled by third parties. Any such third party software or technology that is incorporated in the Skype Software falls under the scope of this Agreement. Any and all other third party software or technology that may be distributed together with the Skype Software will be subject to You explicitly accepting a license agreement with that third party. You acknowledge and agree that You will not enter into a contractual relationship with Skype or its Affiliates regarding such third party software or technology and you will look solely to the applicable third party and not to Skype or its Affiliates to enforce any of your rights.
-
-2.5 Exclusive Ownership: Any and all IP Rights in the Skype Software, the Skype Website, the Skype Online Material and the Skype Promotional Materials are and shall remain the exclusive property of Skype and/or its licensors. Nothing in this Agreement intends to transfer any such IP Rights to, or to vest any such IP Rights in, You. You are only entitled to the limited use of the IP Rights granted to You in this Agreement. You will not take any action to jeopardize, limit or interfere with Skype’s IP Rights. Any unauthorized use of Skype’s IP Rights is a violation of this Agreement as well as a violation of intellectual property laws and treaties, including without limitation copyright laws and trademark laws. All title and IP Rights in and to any third party content that is not contained in the Skype Software, but may be accessed through use of the Skype Software, is the property of the respective content owners and may be protected by applicable copyright or other intellectual property laws and treaties.
-
-2.6 No Removal of Notices: You agree that You will not remove, obscure, make illegible or alter any notices or indications of the IP Rights and/or Skype’s rights and ownership thereof, whether such notice or indications are affixed on, contained in or otherwise connected to any materials.
-
-2.7 Use of Skype API.
-
-2.7.1 You may make use of the Skype API provided that:
-
-(i) You comply with the Skype API Terms of Use at http://www.skype.com/legal/terms/api/ ;
-
-(ii) Your use of the Skype API is for legitimate purposes only and shall not adversely affect the functionality or performance of the Skype Software or services provided by Skype; and
-
-(iii) You will monitor the Skype Website in order to ensure that You are aware of any changes in the Skype API Terms of Use. If such changes are not acceptable to You, You will immediately stop using the Skype API and, where applicable, the Skype Software.
-
-2.7.2 If You are interested in using the Skype API for a purpose which is not permitted under this Agreement or the Skype API Terms of Use, You will have to obtain Skype’s prior written consent and explicitly agree upon any further commercial terms.
-
-2.8 Skype Promotional Materials: Nothing in this Agreement will give You any right to use the Skype Promotional Materials.
-
-2.9 Broadcasts Using Skype Software.  Except as expressly permitted in the Broadcast Terms and Conditions at http://www.skype.com/legal/terms/broadcast/ (" Broadcast TOS"), You are not allowed to use the Skype Software in connection with any Broadcasts (as defined in such Broadcast TOS).
-
-3. What You should and should not expect from Skype
-3.1 No Warranties: Installing Skype Software enables You to communicate with other people. Skype cannot guarantee that You will always be able to communicate with other people, nor can Skype guarantee that You can communicate without disruptions, delays or communication-related flaws or that all Your communications shall always be delivered to other people.
-
-3.2 Content
-
-3.2.1 Content of Communications: The content of the communication spread by the use of the Skype Software is entirely the responsibility of the person from whom such content originated. You understand, therefore, that by using the Skype Software, the Products and the Skype Website You may be exposed to content that is offensive, harmful to minors, indecent or otherwise objectionable, and that You use the Skype Software, the Products and the Skype Website at Your own risk.
-
-3.2.2 You acknowledge and agree that You are solely responsible for any Content that You upload, submit, post, transmit or display through the Skype Software and/or the Skype Website -(“ Use” or “Used”) and that Skype is not responsible to You or any third party for any Content that is Used by You or any other Skype Software user.
-
-3.2.3 Third Party IP Rights: You agree that You shall not Use any Content that is subject to any third party IP Rights, unless you have a licence or specific permission from the owner to Use such third party content, and to grant Skype the licence set out in paragraph 3.2.4 below.
-
-3.2.4 Licence: You hereby grant to Skype a non-exclusive, worldwide, perpetual, irrevocable, royalty-free, sublicensable and transferable licence to: (i) reproduce, modify and publish any Content that you Use on the publicly accessible areas of the Skype Website (e.g. Skype forum, blogs) for the purpose of displaying and distributing such Content on the Skype Website for such time as You continue to Use such Content on the Skype Website; and (ii) distribute and/or display through the Skype Software any Content that You provide or make available using the Skype Software for the sole purposes of making the Skype Software and the Products available to You.
-
-3.2.5 Removal of Content: Skype reserves the right (but shall have no obligation) to decide whether any Content that You Use complies with this Agreement and any Additional Terms. Skype may in its sole discretion remove such Content and/or terminate this Agreement and Your User Account if You Use any Content that is in breach of this Agreement and/or any Additional Terms at any time and without prior notice to You.
-
-3.3 Utilization of Your Computer: Skype Software may utilize the processor and bandwidth of the computer (or other applicable device) You are utilizing, for the limited purpose of facilitating the communication between Skype Software users. Skype will use its commercially reasonable efforts to protect the privacy and integrity of the computer resources (or other applicable device) You are utilizing and of Your communication, however Skype cannot give any warranties in this respect.
-
-3.4 New Versions of the Skype Software: Skype, in its sole discretion, reserves the right to add additional features or functions, or to provide programming fixes, updates and upgrades, to the Skype Software. Skype has no obligation to make available to You any subsequent versions of the Skype Software. You may have to enter into a renewed version of this Agreement, in the event you want to download, install or use a new version of the Skype Software.
-
-3.5 Suspension: Skype may, in its sole discretion and to the maximum extent permitted within Your jurisdiction, modify or discontinue or suspend Your ability to use any version of the Skype Software, and/or disable any Skype Software You may already have accessed or installed without any notice to You, for the repair, improvement, and/or upgrade of the underlying technology or for any other justifiable reason, including but not limited to, circumstances where You, at Skype’s discretion, are in breach of the Terms, creating problems, possible legal liabilities, or engaging in fraudulent, immoral or illegal activities, or for other similar reasons.
-
-3.6 No Access to Emergency Services: The Skype Software is not intended to support or carry emergency calls to any type of hospitals, law enforcement agencies, medical care unit or any other kind of Emergency Service, except in the very limited circumstances described in paragraph 3.5 of the Terms of Service. There are important differences between traditional telephone services and the Skype Software. You acknowledge and agree that: (i) Skype is not required to offer access to Emergency Services under any applicable local and/or national rules, regulations or law; (ii) it is Your responsibility to purchase, separately from the Skype Software, traditional wireless (mobile) or fixed line telephone services that offer access to Emergency Services, and (iii) Skype is not a replacement for Your primary telephone service.
-
-4. What we expect from You
-4.1 Lawful purposes: You will use the Skype Software solely for lawful purposes. In this respect You may not, without limitation (a) intercept or monitor, damage or modify any communication which is not intended for You; (b) use any type of spider, virus, worm, trojan-horse, time bomb or any other codes or instructions that are designed to distort, delete, damage or disassemble the Skype Software or the communication; (c) send any unsolicited communication not permitted by applicable law (d) expose any third party to material which is offensive, harmful to minors, indecent or otherwise objectionable in any way; (e) use the Skype Software to cause or intend to cause embarrassment or distress to, or to threaten, harass or invade the privacy of, any third party; or (f) use (including as part of your user name) any material or content that is subject to any third party proprietary rights, unless you have a licence or permission from the owner of such rights;
-
-4.2 Representations: You represent and warrant that You are authorized to enter into and comply with the Terms. Furthermore, You represent and warrant that You will at any and all times meet with Your obligations under the Terms, as well as any and all laws, regulations and policies that may apply to the use of the Skype Software, the Products and/or the Skype Website.
-
-4.3 Indemnification: YOU AGREE TO INDEMNIFY, DEFEND AND HOLD SKYPE AND ITS AFFILIATES HARMLESS FROM AND AGAINST ANY AND ALL LIABILITY AND COSTS, INCLUDING REASONABLE ATTORNEYS’ FEES INCURRED BY SUCH PARTIES, IN CONNECTION WITH OR ARISING OUT OF YOUR (A) VIOLATION OR BREACH OF ANY TERM OF THIS AGREEMENT OR ANY APPLICABLE LAW OR REGULATION, WHETHER OR NOT REFERENCED HEREIN, OR (B) VIOLATION OF ANY RIGHTS OF ANY THIRD PARTY, OR (C) USE OR MISUSE OF THE SKYPE SOFTWARE, OR (D) COMMUNICATION SPREAD BY MEANS OF THE SKYPE SOFTWARE.
-
-4.4 Utilization of Your Computer: If Your use of the Skype Software is dependent upon the use of a processor and bandwidth owned or controlled by a third party, You acknowledge and agree that Your licence to use the Skype Software is subject to You obtaining consent from the relevant third party for such use. You represent and warrant that by accepting this Agreement and using the Skype Software, You have obtained such consent.
-
-4.5 Export Restrictions: Skype Software may be subject to international rules that govern the export of software. You shall comply with all applicable international and national laws that apply to the Skype Software as well as end-user, end-use and destination restrictions issued by national governments. This software is controlled under ECCN 5D992.b.1 of the Export Administration Regulations (“EAR”) per CCATS # G047973 and thus may not be exported or re exported to or downloaded by any person in any countries controlled for anti terrorism reasons under the EAR, which include Iran, North Korea, Cuba, Syria and Sudan. EAR 742.15(a), Title 15 Code of Federal Regulations. Moreover, the software may not be exported or re exported to or downloaded by any person or entity subject to US sanctions regardless of location. See http://www.bis.doc.gov/ComplianceAndEnforcement/ListsToCheck.htm and EAR Part 736. Skype is making this software available to You for download only on the condition that You certify that You are not such a person or entity and that the download is not otherwise in violation of US export control and sanctions regulations.
-
-4.6 Government Users. The Skype Software and Documentation are “commercial computer software” and “commercial computer software documentation,” respectively, as such terms are used in United States Federal Acquisition Regulations Section 12.212. Any use, duplication or disclosure of the Skype Software or the Documentation by or on behalf of the U.S. Government is subject to restrictions as set forth in this Agreement.
-
-5. Term, Termination, Updates
-5.1 Term: This Agreement will be effective as of the Effective Date and will remain effective until terminated by either Skype or You as set out below. The Additional Terms will be effective as of the date upon which they are accepted by You or You use the relevant Skype Service (as applicable), and will remain effective until terminated by either Skype or You as set out below and/or in the applicable terms.
-
-5.2 Termination: You may terminate the Terms with immediate effect at any time. Without limiting other remedies, Skype may limit, suspend, or terminate this license and Your use of Skype Software, prohibit access to the Skype Website and delete Your User Account and/or User ID, with immediate effect, automatically and without recourse to the courts, if we think that You are in breach of the Terms, creating problems, legal liabilities (actual or potential), infringing someone else’s intellectual property rights, engaging in fraudulent, immoral or illegal activities, or for other similar reasons. Skype shall effect such termination by providing notice to You to the email address You have provided, and/or by preventing Your access to Your User Account. We reserve the right to cancel User Accounts that have been inactive for more than one (1) year.
-
-5.3 Consequences of Termination: Upon termination of this Agreement and the Additional Terms: (a) all licenses and rights to use the Skype Software shall immediately terminate; (b) You will immediately cease any and all use of the Skype Software; and (c) You will immediately remove the Skype Software from all hard drives, networks and other storage media and destroy all copies of the Skype Software in Your possession or under Your control.
-
-5.4 New Versions: Skype reserves the right to change this Agreement at any time by publishing the revised Agreement on the Skype Website. The revised Agreement shall become effective within thirty (30) days of such publication, unless You expressly accept the revised Agreement earlier by clicking on the accept button. Your express acceptance or Your continued use of the Skype Software after expiry of the notice period of thirty (30) days, shall constitute Your acceptance to be bound by the terms and conditions of the revised Agreement. You can find the latest version of this Agreement at http://www.skype.com/company/legal/eula. Skype reserves the right to change any of the Additional Terms from time to time and such changes shall become effective either within thirty (30) days of publication of the revised version on the Skype Website (unless You expressly accept the revised terms earlier by clicking on the accept button if this option is made available), or within the timeframe set out in the applicable terms if different.
-
-6. Disclaimer of Warranties and Limitation of Liability
-6.1 No Warranties: THE SKYPE SOFTWARE IS PROVIDED “AS IS” WITH NO WARRANTIES WHATSOEVER; SKYPE DOES NOT, EITHER EXPRESSED, IMPLIED OR STATUTORY, MAKE ANY WARRANTIES, CLAIMS OR REPRESENTATIONS WITH RESPECT TO THE SKYPE SOFTWARE, INCLUDING, WITHOUT LIMITATION, WARRANTIES OR CONDITIONS OF QUALITY, PERFORMANCE, NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR USE FOR A PARTICULAR PURPOSE. SKYPE FURTHER DOES NOT REPRESENT OR WARRANT THAT THE SKYPE SOFTWARE WILL ALWAYS BE AVAILABLE, ACCESSIBLE, UNINTERRUPTED, TIMELY, SECURE, ACCURATE, COMPLETE AND ERROR-FREE OR WILL OPERATE WITHOUT PACKET LOSS, NOR DOES SKYPE WARRANT ANY CONNECTION TO OR TRANSMISSION FROM THE INTERNET, OR ANY QUALITY OF CALLS MADE THROUGH THE SKYPE SOFTWARE.
-
-6.2 Specific Disclaimer Of Liability For Emergency Services: EXCEPT AS PROVIDED FOR IN THE LIMITED CIRCUMSTANCES SET OUT IN PARAGRAPH 3.5 OF THE TERMS OF SERVICE, SKYPE DOES NOT PROVIDE CONNECTIONS TO EMERGENCY SERVICES VIA THE SKYPE SOFTWARE. YOU SHOULD BE AWARE THAT FURTHER DISCLAIMERS OF LIABILITY APPLY IN THE TERMS OF SERVICE, TO THE EXTENT THAT LIMITED EMERGENCY CALLING IS PROVIDED. SKYPE SHALL NOT BE LIABLE (WHETHER IN CONTRACT, TORT (INCLUDING NEGLIGENCE), OR ANY OTHER THEORY OF LIABILITY, AND WHETHER OR NOT THE POSSIBILITY OF SUCH DAMAGES OR LOSS HAS BEEN NOTIFIED TO SKYPE) FOR ANY CLAIM, DAMAGE, OR LOSS, ARISING FROM OR RELATING TO:
-
-(I) YOUR INABILITY TO USE THE SKYPE SOFTWARE TO CONTACT EMERGENCY SERVICES, OR
-
-(II) YOUR FAILURE TO MAKE ADDITIONAL ARRANGEMENTS TO ACCESS EMERGENCY SERVICES IN ACCORDANCE WITH PARAGRAPH 3.6 ABOVE.
-
-6.3 Your own Risk: You acknowledge and agree that the entire risk arising out of Your use of the Skype Software remains with You, to the maximum extent permitted by law.
-
-6.4 No Liability: The Skype Software is being provided to You free of charge. ACCORDINGLY, YOU ACKNOWLEDGE AND AGREE THAT SKYPE, ITS AFFILIATES, ITS LICENSORS AND THE SKYPE STAFF WILL HAVE NO LIABILITY IN CONNECTION WITH OR ARISING FROM YOUR USE OF THE SKYPE SOFTWARE, AS SET FORTH BELOW. YOUR ONLY RIGHT OR REMEDY WITH RESPECT TO ANY PROBLEMS OR DISSATISFACTION WITH THE SKYPE SOFTWARE IS TO IMMEDIATELY DEINSTALL AND CEASE USE OF SUCH SKYPE SOFTWARE.
-
-6.5 Limitation of Liability: IN NO EVENT SHALL SKYPE, ITS AFFILIATES, ITS LICENSORS OR THE SKYPE STAFF BE LIABLE, WHETHER IN CONTRACT, WARRANTY, TORT (INCLUDING NEGLIGENCE), PRODUCT LIABILITY OR ANY OTHER FORM OF LIABILITY, FOR:
-
-6.5.1 ANY INDIRECT, INCIDENTAL, SPECIAL OR CONSEQUENTIAL DAMAGES (INCLUDING WITHOUT LIMITATION ANY LOSS OF OR CORRUPTION TO DATA, INTERRUPTION, COMPUTER FAILURE OR PECUNIARY LOSS) ARISING OUT OF THE USE OR INABILITY TO USE THE SKYPE SOFTWARE; AND
-
-6.5.2 ANY LOSS OF INCOME, BUSINESS OR PROFITS (WHETHER DIRECT OR INDIRECT) ARISING OUT OF THE USE OR INABILITY TO USE THE SKYPE SOFTWARE;
-
-6.5.3 ANY LOSS OR DAMAGE WHICH MAY BE INCURRED BY YOU AS A RESULT OF;
-
-(I) ANY DISRUPTIONS OR DELAYS IN ANY COMMUNICATION WHEN USING THE SKYPE SOFTWARE;
-
-(II) THE SUSPENSION OR TERMINATION OF THIS AGREEMENT BY YOU OR BY SKYPE FOR ANY REASON; AND
-
-(III) THE RELEASE OR THE DECISION NOT TO RELEASE NEW VERSIONS OF THE SKYPE SOFTWARE TO YOU.
-
-6.6 THE LIMITATIONS ON SKYPE’S LIABILITY TO YOU IN PARAGRAPH 6.5 ABOVE SHALL APPLY WHETHER OR NOT SKYPE, ITS AFFILIATES OR THE SKYPE STAFF HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH LOSSES OR DAMAGES ARISING.
-
-6.7 NOTHING IN THIS AGREEMENT IS INTENDED TO EXCLUDE OR RESTRICT OR SHALL BE CONSTRUED AS EXCLUDING OR RESTRICTING THE LIABILITY OF SKYPE FOR (I) THE DEATH OR PERSONAL INJURY CAUSED BY THE NEGLIGENCE OF SKYPE, THE SKYPE STAFF OR ITS AGENTS, OR (II) ANY LIABILITY WHICH CANNOT BE LIMITED OR EXCLUDED BY LAW.
-
-6.8 Jurisdiction’s Limitations: As some jurisdictions do not allow some of the exclusions or limitations as set forth above, some of these exclusions or limitations may not apply to You. In such event the liability will be limited to the maximum extent possible within the applicable legislation.
-
-7. Additional Terms
-7.1 In addition to this Agreement, You have to comply with the following Additional Terms when using the Skype Software, the Products and the Skype Website. We expect You to read these Additional Terms carefully, all of which are made part of this Agreement:
-
-The Skype Etiquette http://www.skype.com/legal/terms/etiquette provides guidelines to treat properly and respectfully the other members of Skype’s
-Skype API. You are not allowed to use the Skype API unless You comply with the API Terms at http://www.skype.com/legal/terms/api/
-Skype Online Material. You are not allowed to use the Skype Online Material unless You comply with the Online Material Terms at http://www.skype.com/company/legal/promote/materials/
-Skype payable internet communications products are provided by Skype Communications S.a.r.l. and are subject to the Terms of Service at http://www.skype.com/legal/terms/voip/
-The use of http://www.skype.com/ website is subject to the Terms of Use with Skype Technologies SA at http://www.skype.com/legal/terms/web/
-If You want to provide chargeable services to other Skype Software users through the Skype Software as a service provider, You will need to comply with the Service Provider Agreement with Skype Communications Sa.r.l. at http://www.skype.com/legal/terms/callserviceprovider .
-If you want to use Skype Premium Call Service then You will need to comply with the Terms of Service for Skype Premium Call (Beta) at http://www.skype.com/legal/terms/callservices/
-You will need to comply with the Broadcast TOS at http://www.skype.com/legal/terms/broadcast if You want to use the Skype Software in connection with any Broadcast (as defined in such Broadcast TOS).
-7.2 Any other exceptions: If You are interested in doing anything which is not permitted under this Agreement or by one of the above Additional Terms, You will have to obtain Skype’s prior written consent and explicitly agree upon any further terms.
-
-7.3 Your Confidential Information and Your Privacy: Skype is committed to respecting Your privacy and the confidentiality of Your personal data. The Privacy Policy at http://www.skype.com/go/privacy sets out how Skype may use Your personal data, the traffic data and the content contained in Your communication(s). If You object to Your information being used in the way set out in the Privacy Policy then please do not use the Skype Software or the Products.
-
-8. Miscellaneous
-8.1 Entire Agreement: The terms and conditions of the Terms constitute the entire agreement between You and Skype with respect to the subject matter hereof and will supersede and replace all prior understandings and agreements, in whatever form, regarding the subject matter. Nothing in this clause shall exclude or restrict the liability of either You or Skype arising out of fraud or fraudulent misrepresentation.
-
-8.2 Partial Invalidity: If any provision of the Terms, or any part of a provision, is found by any court or administrative body of competent jurisdiction to be illegal, invalid or unenforceable, and the provision (or part-provision) in question is not of a fundamental nature to the Terms as a whole, the legality, validity or enforceability of the remainder of the Terms (including the remainder of the term which contains the relevant provision) shall not be affected.
-
-8.3 No waiver:The failure to exercise, or delay in exercising, a right, power or remedy provided by the Terms or by law shall not constitute a waiver of that right, power or remedy. If Skype waives a breach of any provision of the Terms this shall not operate as a waiver of a subsequent breach of that provision, or as a waiver of a breach of any other provision.
-
-8.4 Assignment: You are not allowed to assign the Terms or any rights hereunder. Skype is allowed at its sole discretion to assign the Terms or any rights hereunder to any third party, without giving prior notice.
-
-8.5 Applicable Law and Competent Court: The Terms shall be governed by and interpreted in accordance with the laws of Luxembourg and shall be subject to the jurisdiction of the courts of the district of Luxembourg.
-
-8.6 Language: The original English version of the Terms may have been translated into other languages. In the event of inconsistency or discrepancy between the English version and any other language version, the English language version shall prevail.
-
-8.7 Survival: The terms of paragraphs 2.5, 5 and 6 of this Agreement, and any other provision of the Additional Terms which is expressed to survive or operate in the event of termination, shall survive termination of this Agreement and the applicable Additional Terms for whatever reason.
-
-8.8 AVC/H.264 Notice. IfIf the Skype Software is used to make video calls (i) between Your personal computer and a device that is not a personal computer or (ii) between devices that are not personal computers, the AVC/H.264 codec may be used to facilitate video functionality in which case the following notice applies: THE AVC VIDEO FUNCTIONALITY IN THIS PRODUCT IS LICENSED UNDER THE AVC PATENT PORTFOLIO LICENSE FOR THE PERSONAL AND NONCOMMERCIAL USE OF A CONSUMER TO (i) ENCODE VIDEO IN COMPLIANCE WITH THE AVC STANDARD (“AVC VIDEO”) AND/OR (ii) DECODE AVC VIDEO THAT WAS ENCODED BY A CONSUMER ENGAGED IN A PERSONAL AND NON-COMMERCIAL ACTIVITY AND/OR WAS OBTAINED FROM A VIDEO PROVIDER LICENSED TO PROVIDE AVC VIDEO. NO LICENSE IS GRANTED OR SHALL BE IMPLIED FOR ANY OTHER USE. ADDITIONAL INFORMATION MAY BE OBTAINED FROM MPEG LA, L.L.C. SEE HTTP://WWW.MPEGLA.COM/.
-
-YOU EXPRESSLY ACKNOWLEDGE THAT YOU HAVE READ THIS AGREEMENT AND UNDERSTAND THE RIGHTS, OBLIGATIONS, TERMS AND CONDITIONS SET FORTH HEREIN. BY CLICKING ON THE ACCEPT BUTTON AND/OR CONTINUING TO INSTALL THE SKYPE SOFTWARE, YOU EXPRESSLY CONSENT TO BE BOUND BY ITS TERMS AND CONDITIONS AND GRANT TO SKYPE THE RIGHTS SET FORTH HEREIN.
-
-© Skype – Last revised: August 2009', 'http://www.skype.com/intl/en-us/legal/eula/', NULL, NULL, NULL, 'Skype EULA', NULL, NULL, NULL, '', NULL, false, false, false, '8ae9fc441f3044d1a5d3e4753c05ed56', 1);
+8.8 Other. VMware and VMTN are trademarks and/or registered trademarks of VMware, Inc. in the United States and/or various jurisdictions.', 'http://www.vmware.com/download/eula/', NULL, NULL, NULL, 'VMWare Master EULA', NULL, NULL, NULL, '', NULL, false, false, false, '6c0225e4d38de052d862ee8dc96fe2b2', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (283, 'Unicode', 'Unicode Terms of Use
 For the general privacy policy governing access to this site, see the  Unicode Privacy Policy. For trademark usage, see the Unicode Consortium® Trademarks and Logo Policy.
 
@@ -14035,30 +13682,6 @@ If any provision of this Agreement is held invalid or unenforceable
 by any agency of competent jurisdiction, the remaining provisions 
 shall nevertheless remain valid. 
 ', 'http://www.appgate.com/index/products/mindterm/mindterm_end_user_lic.html', NULL, NULL, NULL, 'Mindterm EULA', NULL, NULL, NULL, '', NULL, false, false, false, '16c25e2dcbac7b8ee345c016bad4bb8c', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (287, 'MozillaEULA-1.1', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
-Version 1.1
-
-A SOURCE CODE VERSION OF CERTAIN FIREFOX BROWSER FUNCTIONALITY THAT YOU MAY USE, MODIFY AND DISTRIBUTE IS AVAILABLE TO YOU FREE-OF-CHARGE FROM WWW.MOZILLA.ORG UNDER THE MOZILLA PUBLIC LICENSE and other open source software licenses.
-
-The accompanying executable code version of Mozilla Firefox and related documentation (the "Product") is made available to you under the terms of this MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT (THE "AGREEMENT"). BY CLICKING THE "ACCEPT" BUTTON, OR BY INSTALLING OR USING THE MOZILLA FIREFOX BROWSER, YOU ARE CONSENTING TO BE BOUND BY THE AGREEMENT. IF YOU DO NOT AGREE TO THE TERMS AND CONDITIONS OF THIS AGREEMENT, DO NOT CLICK THE "ACCEPT" BUTTON, AND DO NOT INSTALL OR USE ANY PART OF THE MOZILLA FIREFOX BROWSER.
-
-DURING THE MOZILLA FIREFOX INSTALLATION PROCESS, AND AT LATER TIMES, YOU MAY BE GIVEN THE OPTION OF INSTALLING ADDITIONAL COMPONENTS FROM THIRD-PARTY SOFTWARE PROVIDERS. THE INSTALLATION AND USE OF THOSE THIRD-PARTY COMPONENTS MAY BE GOVERNED BY ADDITIONAL LICENSE AGREEMENTS.
-
-1. LICENSE GRANT. The Mozilla Corporation grants you a non-exclusive license to use the executable code version of the Product. This Agreement will also govern any software upgrades provided by Mozilla that replace and/or supplement the original Product, unless such upgrades are accompanied by a separate license, in which case the terms of that license will govern.
-
-2. TERMINATION. If you breach this Agreement your right to use the Product will terminate immediately and without notice, but all provisions of this Agreement except the License Grant (Paragraph 1) will survive termination and continue in effect. Upon termination, you must destroy all copies of the Product.
-
-3. PROPRIETARY RIGHTS. Portions of the Product are available in source code form under the terms of the Mozilla Public License and other open source licenses (collectively, "Open Source Licenses") at http://www.mozilla.org. Nothing in this Agreement will be construed to limit any rights granted under the Open Source Licenses. Subject to the foregoing, Mozilla, for itself and on behalf of its licensors, hereby reserves all intellectual property rights in the Product, except for the rights expressly granted in this Agreement. You may not remove or alter any trademark, logo, copyright or other proprietary notice in or on the Product. This license does not grant you any right to use the trademarks, service marks or logos of Mozilla or its licensors.
-
-4. DISCLAIMER OF WARRANTY. THE PRODUCT IS PROVIDED "AS IS" WITH ALL FAULTS. TO THE EXTENT PERMITTED BY LAW, MOZILLA AND MOZILLA''S DISTRIBUTORS, LICENSORS HEREBY DISCLAIM ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION WARRANTIES THAT THE PRODUCT IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE AND NON-INFRINGING. YOU BEAR ENTIRE RISK AS TO SELECTING THE PRODUCT FOR YOUR PURPOSES AND AS TO THE QUALITY AND PERFORMANCE OF THE PRODUCT. THIS LIMITATION WILL APPLY NOTWITHSTANDING THE FAILURE OF ESSENTIAL PURPOSE OF ANY REMEDY. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF IMPLIED WARRANTIES, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
-
-5. LIMITATION OF LIABILITY. EXCEPT AS REQUIRED BY LAW, MOZILLA AND ITS DISTRIBUTORS, DIRECTORS, LICENSORS, CONTRIBUTORS AND AGENTS (COLLECTIVELY, THE "MOZILLA GROUP") WILL NOT BE LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES ARISING OUT OF OR IN ANY WAY RELATING TO THIS AGREEMENT OR THE USE OF OR INABILITY TO USE THE PRODUCT, INCLUDING WITHOUT LIMITATION DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, LOST PROFITS, LOSS OF DATA, AND COMPUTER FAILURE OR MALFUNCTION, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE THEORY (CONTRACT, TORT OR OTHERWISE) UPON WHICH SUCH CLAIM IS BASED. THE MOZILLA GROUP''S COLLECTIVE LIABILITY UNDER THIS AGREEMENT WILL NOT EXCEED THE GREATER OF $500 (FIVE HUNDRED DOLLARS) AND THE FEES PAID BY YOU UNDER THIS LICENSE (IF ANY). SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL, CONSEQUENTIAL OR SPECIAL DAMAGES, SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
-
-6. EXPORT CONTROLS. This license is subject to all applicable export restrictions. You must comply with all export and import laws and restrictions and regulations of any United States or foreign agency or authority relating to the Product and its use.
-
-7. U.S. GOVERNMENT END-USERS. The Product is a "commercial item," as that term is defined in 48 C.F.R. 2.101, consisting of "commercial computer software" and "commercial computer software documentation," as such terms are used in 48 C.F.R. 12.212 (Sept. 1995) and 48 C.F.R. 227.7202 (June 1995). Consistent with 48 C.F.R. 12.212, 48 C.F.R. 27.405(b)(2) (June 1998) and 48 C.F.R. 227.7202, all U.S. Government End Users acquire the Product with only those rights as set forth herein.
-
-8. MISCELLANEOUS. (a) This Agreement constitutes the entire agreement between Mozilla and you concerning the subject matter hereof, and it may only be modified by a written amendment signed by an authorized executive of Mozilla. (b) Except to the extent applicable law, if any, provides otherwise, this Agreement will be governed by the laws of the state of California, U.S.A., excluding its conflict of law provisions. (c) This Agreement will not be governed by the United Nations Convention on Contracts for the International Sale of Goods. (d) If any part of this Agreement is held invalid or unenforceable, that part will be construed to reflect the parties'' original intent, and the remaining portions will remain in full force and effect. (e) A waiver by either party of any term or condition of this Agreement or any breach thereof, in any one instance, will not waive such term or condition or any subsequent breach thereof. (f) Except as required by law, the controlling language of this Agreement is English. (g) You may assign your rights under this Agreement to any party that consents to, and agrees to be bound by, its terms; the Mozilla Corporation may assign its rights under this Agreement without condition. (h) This Agreement will be binding upon and will inure to the benefit of the parties, their successors and permitted assigns.', 'http://www.mozilla.com/en-US/legal/eula/firefox-en.txt', NULL, NULL, NULL, 'Mozilla Firefox EULA 1.1', NULL, NULL, NULL, '', NULL, false, false, false, 'b0afb2c653f0d7bd42f4c775ea463fff', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (288, 'NGPL', 'NETHACK GENERAL PUBLIC LICENSE
 (Copyright 1989 M. Stephenson) 
 (Based on the BISON general public license, copyright 1988 Richard M. Stallman)
@@ -15645,82 +15268,6 @@ NO WARRANTY
 4. BECAUSE THE OPENCONTENT (OC) IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE OC, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE OC "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK OF USE OF THE OC IS WITH YOU. SHOULD THE OC PROVE FAULTY, INACCURATE, OR OTHERWISE UNACCEPTABLE YOU ASSUME THE COST OF ALL NECESSARY REPAIR OR CORRECTION. 
 
 5. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MIRROR AND/OR REDISTRIBUTE THE OC AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE OC, EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.', 'http://www.opencontent.org/opl.shtml', NULL, NULL, NULL, 'OpenContent License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '8b2147f3f488694ad60405d6b8310af3', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (300, 'OracleDev', 'Oracle Technology Network Developer License Terms 
-
-Export Controls on the Programs 
-Selecting the "Accept License Agreement" button is a confirmation of your agreement that you comply, now and during the trial term, with each of the following statements: 
-
--You are not a citizen, national, or resident of, and are not under control of, the government of Cuba, Iran, Sudan, Libya, North Korea, Syria, nor any country to which the United States has prohibited export. 
--You will not download or otherwise export or re-export the Programs, directly or indirectly, to the above mentioned countries nor to citizens, nationals or residents of those countries. 
--You are not listed on the United States Department of Treasury lists of Specially Designated Nationals, Specially Designated Terrorists, and Specially Designated Narcotic Traffickers, nor are you listed on the United States Department of Commerce Table of Denial Orders. 
-
-You will not download or otherwise export or re-export the Programs, directly or indirectly, to persons on the above mentioned lists. 
-
-You will not use the Programs for, and will not allow the Programs to be used for, any purposes prohibited by United States law, including, without limitation, for the development, design, manufacture or production of nuclear, chemical or biological weapons of mass destruction. 
-
-EXPORT RESTRICTIONS 
-You agree that U.S. export control laws and other applicable export and import laws govern your use of the programs, including technical data; additional information can be found on Oracle®''s Global Trade Compliance web site (http://www.oracle.com/products/export). 
-
-You agree that neither the programs nor any direct product thereof will be exported, directly, or indirectly, in violation of these laws, or will be used for any purpose prohibited by these laws including, without limitation, nuclear, chemical, or biological weapons proliferation. 
-
-Oracle Employees: Under no circumstances are Oracle Employees authorized to download software for the purpose of distributing it to customers. Oracle products are available to employees for internal use or demonstration purposes only. In keeping with Oracle''s trade compliance obligations under U.S. and applicable multilateral law, failure to comply with this policy could result in disciplinary action up to and including termination. 
-
-Note: You are bound by the Oracle Technology Network ("OTN") License Agreement terms. The OTN License Agreement terms also apply to all updates you receive under your Technology Track subscription. 
-
-The OTN License Agreement terms below supercede any shrinkwrap license on the OTN Technology Track software CDs and previous OTN License terms (including the Oracle Program License as modified by the OTN Program Use Certificate). 
-
-Oracle Technology Network Development License Agreement
-"We," "us," and "our" refers to Oracle America, Inc., for and on behalf of itself and its subsidiaries and affiliates under common control. "You" and "your" refers to the individual or entity that wishes to use the programs from Oracle. "Programs" refers to the Oracle software product you wish to download and use and program documentation. "License" refers to your right to use the programs under the terms of this agreement. This agreement is governed by the substantive and procedural laws of California. You and Oracle agree to submit to the exclusive jurisdiction of, and venue in, the courts of San Francisco, San Mateo, or Santa Clara counties in California in any dispute arising out of or relating to this agreement. 
-
-We are willing to license the programs to you only upon the condition that you accept all of the terms contained in this agreement. Read the terms carefully and select the "Accept License Agreement" button to confirm your acceptance. If you are not willing to be bound by these terms, select the "Decline License Agreement" button and the registration process will not continue. 
-
-LICENSE RIGHTS 
-We grant you a nonexclusive, nontransferable limited license to use the programs only for the purpose of developing, testing, prototyping and demonstrating your application, and not for any other purpose. If you use the application you develop under this license for any internal data processing or for any commercial or production purposes, or you want to use the programs for any purpose other than as permitted under this agreement, you must obtain a production release version of the program by contacting us or an Oracle reseller to obtain the appropriate license. You acknowledge that we may not produce a production release version of the program and any development efforts undertaken by you are at your own risk. We may audit your use of the programs. Program documentation, if available, may accessed online at http://www.oracle.com/technetwork/documentation/index.html.
-
-Ownership and Restrictions We retain all ownership and intellectual property rights in the programs. The programs may be installed on one computer only, and used by one person in the operating environment identified by us. You may make one copy of the programs for backup purposes. 
-
-You may not: 
-- use the programs for your own internal data processing or for any commercial or production purposes, or use the programs for any purpose except the development of your application; 
-- use the application you develop with the programs for any internal data processing or commercial or production purposes without securing an appropriate license from us; 
-- continue to develop your application after you have used it for any internal data processing, commercial or production purpose without securing an appropriate license from us, or an Oracle reseller; 
-- remove or modify any program markings or any notice of our proprietary rights; 
-- make the programs available in any manner to any third party; 
-- use the programs to provide third party training; 
-- assign this agreement or give or transfer the programs or an interest in them to another individual or entity; - cause or permit reverse engineering (unless required by law for interoperability), disassembly or decompilation of the programs; 
-- disclose results of any program benchmark tests without our prior consent. 
-
-Export 
-You agree that U.S. export control laws and other applicable export and import laws govern your use of the programs, including technical data; additional information can be found on Oracle''s Global Trade Compliance web site located at http://www.oracle.com/products/export/index.html?content.html. You agree that neither the programs nor any direct product thereof will be exported, directly, or indirectly, in violation of these laws, or will be used for any purpose prohibited by these laws including, without limitation, nuclear, chemical, or biological weapons proliferation. 
-
-Disclaimer of Warranty and Exclusive Remedies 
-THE PROGRAMS ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. WE FURTHER DISCLAIM ALL WARRANTIES, EXPRESS AND IMPLIED, INCLUDING WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT. 
-
-IN NO EVENT SHALL WE BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, PUNITIVE OR CONSEQUENTIAL DAMAGES, OR DAMAGES FOR LOSS OF PROFITS, REVENUE, DATA OR DATA USE, INCURRED BY YOU OR ANY THIRD PARTY, WHETHER IN AN ACTION IN CONTRACT OR TORT, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. OUR ENTIRE LIABILITY FOR DAMAGES HEREUNDER SHALL IN NO EVENT EXCEED ONE THOUSAND DOLLARS (U.S. $1,000). 
-
-Trial Programs Included With Orders 
-We may include additional programs with an order which may be used for trial purposes only. You will have 30 days from the delivery date to evaluate these programs. Any use of these programs after the 30 day trial period requires you to obtain the applicable license. Programs licensed for trial purposes are provided "as is" and we do not provide technical support or any warranties for these programs.
-
-No Technical Support 
-Our technical support organization will not provide technical support, phone support, or updates to you for the programs licensed under this agreement. 
-
-End of Agreement 
-You may terminate this agreement by destroying all copies of the programs. We have the right to terminate your right to use the programs if you fail to comply with any of the terms of this agreement, in which case you shall destroy all copies of the programs. 
-
-Relationship Between the Parties 
-The relationship between you and us is that of licensee/licensor. Neither party will represent that it has any authority to assume or create any obligation, express or implied, on behalf of the other party, nor to represent the other party as agent, employee, franchisee, or in any other capacity. Nothing in this agreement shall be construed to limit either party''s right to independently develop or distribute software that is functionally similar to the other party''s products, so long as proprietary information of the other party is not included in such software. 
-
-Open Source 
-"Open Source" software - software available without charge for use, modification and distribution - is often licensed under terms that require the user to make the user''s modifications to the Open Source software or any software that the user ''combines'' with the Open Source software freely available in source code form. If you use Open Source software in conjunction with the programs, you must ensure that your use does not: (i) create, or purport to create, obligations of us with respect to the Oracle programs; or (ii) grant, or purport to grant, to any third party any rights to or immunities under our intellectual property or proprietary rights in the Oracle programs. For example, you may not develop a software program using an Oracle program and an Open Source program where such use results in a program file(s) that contains code from both the Oracle program and the Open Source program (including without limitation libraries) if the Open Source program is licensed under a license that requires any "modifications" be made freely available. You also may not combine the Oracle program with programs licensed under the GNU General Public License ("GPL") in any manner that could cause, or could be interpreted or asserted to cause, the Oracle program or any modifications thereto to become subject to the terms of the GPL. 
-
-Entire Agreement 
-You agree that this agreement is the complete agreement for the programs and licenses, and this agreement supersedes all prior or contemporaneous agreements or representations. If any term of this agreement is found to be invalid or unenforceable, the remaining provisions will remain effective. 
-
-Last updated: 01/24/09 
-
-Should you have any questions concerning this License Agreement, or if you desire to contact Oracle for any reason, please write: 
-Oracle America, Inc. 
-500 Oracle Parkway, 
-Redwood City, CA 94065', 'http://www.oracle.com/technetwork/testcontent/standard-license-088383.html', NULL, NULL, NULL, 'Oracle Technology Network Developer License Terms', NULL, NULL, NULL, '', NULL, false, false, false, 'ce20045565f1fabe13faf9b4e4c28795', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (301, 'Python-2.1.3', 'Python 2.1.3 license
 
 This is the official license for the Python 2.1.3 release:
@@ -16244,25 +15791,6 @@ FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'http://www.python.org/download/releases/3.1.2/license/', NULL, NULL, NULL, 'Python License 3.1.1', NULL, NULL, NULL, '', NULL, false, false, false, '7b7dcf530d4c72fbb899d0f9a4e6b5ae', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (303, 'RedHatEULA', 'LICENSE AGREEMENT
-RED HAT® ENTERPRISE LINUX®
-AND RED HAT® APPLICATIONS
-
-This end user license agreement ("EULA") governs the use of any of the versions of Red Hat Enterprise Linux, any Red Hat Applications (as set forth at www.redhat.com/licenses/products), and any related updates, source code, appearance, structure and organization (the "Programs"), regardless of the delivery mechanism.
-
-1. License Grant. Subject to the following terms, Red Hat, Inc. ("Red Hat") grants to you ("User") a perpetual, worldwide license to the Programs pursuant to the GNU General Public License v.2. The Programs are either a modular operating system or an application consisting of hundreds of software components. With the exception of certain image files identified in Section 2 below, the license agreement for each software component is located in the software component''s source code and permits User to run, copy, modify, and redistribute (subject to certain obligations in some cases) the software component, in both source code and binary code forms. This EULA pertains solely to the Programs and does not limit User''s rights under, or grant User rights that supersede, the license terms of any particular component.
-
-2. Intellectual Property Rights. The Programs and each of their components are owned by Red Hat and others and are protected under copyright law and under other laws as applicable. Title to the Programs and any component, or to any copy, modification, or merged portion shall remain with the aforementioned, subject to the applicable license. The "Red Hat" trademark and the "Shadowman" logo are registered trademarks of Red Hat in the U.S. and other countries. This EULA does not permit User to distribute the Programs or their components using Red Hat''s trademarks, regardless of whether the copy has been modified. User should read the information found at http://www.redhat.com/about/corporate/trademark/ before distributing a copy of the Programs. User may make a commercial redistribution of the Programs only if, (a) a separate agreement with Red Hat authorizing such commercial redistribution is executed or other written permission is granted by Red Hat or (b) User modifies any files identified as "REDHAT-LOGOS" to remove and replace all images containing the "Red Hat" trademark or the "Shadowman" logo. Merely deleting these files may corrupt the Programs.
-
-3. Limited Warranty. Except as specifically stated in this Section 3, a separate agreement with Red Hat, or a license for a particular component, to the maximum extent permitted under applicable law, the Programs and the components are provided and licensed "as is" without warranty of any kind, expressed or implied, including the implied warranties of merchantability, non-infringement or fitness for a particular purpose. Red Hat warrants that the media on which the Programs and the components are furnished will be free from defects in materials and manufacture under normal use for a period of 30 days from the date of delivery to User. Red Hat does not warrant that the functions contained in the Programs will meet User''s requirements or that the operation of the Programs will be entirely error free, appear precisely as described in the accompanying documentation, or comply with regulatory requirements. This warranty extends only to the party that purchases services pertaining to the Programs from Red Hat or a Red Hat authorized distributor.
-
-4. Limitation of Remedies and Liability. To the maximum extent permitted by applicable law, User''s exclusive remedy under this EULA is to return any defective media within 30 days of delivery along with a copy of User''s payment receipt and Red Hat, at its option, will replace it or refund the money paid by User for the media. To the maximum extent permitted under applicable law, neither Red Hat, any Red Hat authorized distributor, nor the licensor of any component provided to User under this EULA will be liable to User for any incidental or consequential damages, including lost profits or lost savings arising out of the use or inability to use the Programs or any component, even if Red Hat, such authorized distributor or licensor has been advised of the possibility of such damages. In no event shall Red Hat''s liability, an authorized distributor''s liability or the liability of the licensor of a component provided to User under this EULA exceed the amount that User paid to Red Hat under this EULA during the twelve months preceding the action.
-
-5. Export Control. As required by the laws of the United States and other countries, User represents and warrants that it: (a) understands that the Programs and their components may be subject to export controls under the U.S. Commerce Department''s Export Administration Regulations ("EAR"); (b) is not located in a prohibited destination country under the EAR or U.S. sanctions regulations (currently Cuba, Iran, Iraq, North Korea, Sudan and Syria, subject to change as posted by the United States government); (c) will not export, re-export, or transfer the Programs to any prohibited destination or persons or entities on the U.S. Bureau of Industry and Security Denied Parties List or Entity List, or the U.S. Office of Foreign Assets Control list of Specially Designated Nationals and Blocked Persons, or any similar lists maintained by other countries, without the necessary export license(s) or authorizations(s); (d) will not use or transfer the Programs for use in connection with any nuclear, chemical or biological weapons, missile technology, or military end-uses where prohibited by an applicable arms embargo, unless authorized by the relevant government agency by regulation or specific license; (e) understands and agrees that if it is in the United States and exports or transfers the Programs to eligible end users, it will, to the extent required by EAR Section 740.17(e), submit semi-annual reports to the Commerce Department''s Bureau of Industry and Security, which include the name and address (including country) of each transferee; and (f) understands that countries including the United States may restrict the import, use, or export of encryption products (which may include the Programs and the components) and agrees that it shall be solely responsible for compliance with any such import, use, or export restrictions.
-
-6. Third Party Programs. Red Hat may distribute third party software programs with the Programs that are not part of the Programs. These third party programs are not required to run the Programs, are provided as a convenience to User, and are subject to their own license terms. The license terms either accompany the third party software programs or can be viewed at http://www.redhat.com/licenses/thirdparty/eula.html. If User does not agree to abide by the applicable license terms for the third party software programs, then User may not install them. If User wishes to install the third party software programs on more than one system or transfer the third party software programs to another party, then User must contact the licensor of the applicable third party software programs.
-
-7. General. If any provision of this agreement is held to be unenforceable, that shall not affect the enforceability of the remaining provisions. This agreement shall be governed by the laws of the State of New York and of the United States, without regard to any conflict of laws provisions. The rights and obligations of the parties to this EULA shall not be governed by the United Nations Convention on the International Sale of Goods.', 'http://www.redhat.com/licenses/rhel_rha_eula.html', NULL, NULL, NULL, 'RedHat EULA', NULL, NULL, NULL, '', NULL, false, false, false, '59e73a352a5b9a4b727e513f4e9aa33d', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (304, 'RSCPL', 'Open Source Initiative OSI - The Ricoh Source Code Public License:Licensing
 
 Ricoh Source Code Public License
@@ -17742,6 +17270,608 @@ agreement between the parties with respect to the purchase by Buyer of the
 Software. No modification or deletion of, or addition to these terms will be
 binding unless made in writing and signed by duly authorized representatives of
 both parties.', 'http://www.mibble.org/download/commercial-license.pdf', NULL, NULL, NULL, 'Mibble Software License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, 'ad08f0a4a8a4d7c6a06dc8e7cbca2193', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (340, 'CECILL-1.1', '                FREE SOFTWARE LICENSING AGREEMENT CeCILL
+                ========================================
+
+
+Notice
+------
+
+
+This Agreement is a free software license that is the result of  discussions
+between its authors  in  order  to  ensure  compliance  with  the  two  main
+principles guiding its drafting:
+   - firstly, its conformity with French law, both as  regards  the  law  of
+     torts and intellectual property law, and the protection that it offers
+     to authors and the holders of economic rights over software.
+   - secondly, compliance with the principles for the distribution  of  free
+     software: access to source codes, extended user-rights.
+
+The following bodies are the authors of this license CeCILL (Ce : CEA, C :
+CNRS, I : INRIA, LL : Logiciel Libre):
+
+Commissariat à l''Energie Atomique - CEA, a public scientific, technical  and
+industrial establishment, having its principal place of  business  at  31-33
+rue de la Fédération, 75752 PARIS cedex 15, France.
+
+Centre National de la Recherche Scientifique -  CNRS,  a  public  scientific
+and technological establishment, having its principal place of  business  at
+3 rue Michel-Ange 75794 Paris cedex 16, France.
+
+Institut National de Recherche en Informatique et en Automatique - INRIA,  a
+public scientific and  technological  establishment,  having  its  principal
+place of business at Domaine de Voluceau, Rocquencourt,  BP  105,  78153  Le
+Chesnay cedex.
+
+
+PREAMBLE
+--------
+
+
+The purpose of this Free Software Licensing Agreement is to grant users  the
+right to modify and redistribute  the  software  governed  by  this  license
+within the framework of an "open source" distribution model.
+
+The exercising of these rights is conditional upon certain  obligations  for
+users  so  as  to  ensure  that  this  status  is  retained  for  subsequent
+redistribution operations.
+
+As a counterpart to the access to the source code and rights to copy, modify
+and redistribute granted by the license,  users are provided only with  a
+limited warranty and  the software''s author, the holder of the economic
+rights,  and  the  successive licensors only have limited liability.
+
+In this respect, it is brought to the user''s attention that the risks
+associated  with loading, using, modifying and/or developing or reproducing
+the  software  by the user given its nature of Free Software,  that  may  
+mean that it is complicated to manipulate, and that also therefore means 
+that it is reserved for developers and experienced professionals having
+in-depth computer knowledge. Users are therefore encouraged to load and test
+the Software''s suitability  as  regards  their  requirements  in  conditions
+enabling  the security of their systems and/or data to be ensured and, more
+generally,  to use and operate  it  in  the  same  conditions  of security.
+This Agreement may be  freely  reproduced  and  published, provided  it  is
+not altered, and that no Articles are either added or removed herefrom. 
+
+This Agreement may apply to any or all software for which the holder of  the
+economic rights decides to submit the operation thereof to its provisions.
+
+
+Article 1  - DEFINITIONS
+------------------------
+
+
+For the purposes of this Agreement, when the following expressions  commence
+with a capital letter, they shall have the following meaning:
+
+Agreement: means this Licensing Agreement, and any or all of its  subsequent
+versions.
+
+Software: means the software in its Object  Code  and/or  Source  Code  form
+and, where applicable, its documentation, "as  is"  at  the  time  when  the
+Licensee accepts the Agreement.
+
+Initial Software: means the Software in its Source Code and/or  Object  Code
+form and, where applicable, its documentation, "as is" at the time  when  it
+is distributed for the first time under the  terms  and  conditions  of  the
+Agreement.
+
+Modified  Software:  means  the  Software   modified   by   at   least   one
+Contribution.
+
+Source Code: means all the Software''s  instructions  and  program  lines  to
+which access is required so as to modify the Software.
+
+Object Code: means the binary files originating from the compilation of  the
+Source Code.
+
+Holder: means  the  holder  of  the  economic  rights  over  the  Initial
+Software.
+
+Licensee(s): mean(s) the Software user(s) having accepted the Agreement.
+
+Contributor: means a Licensee having made at least one Contribution.
+
+Licensor: means the Holder, or any or all other individual or legal  entity,
+that distributes the Software under the Agreement.
+
+Contributions: mean any or  all  modifications,  corrections,  translations,
+adaptations and/or new functionalities integrated into the Software  by  any
+or all Contributor, and the Static Modules.
+
+Module: means a set of sources files  including  their  documentation  that,
+once compiled in executable form, enables supplementary  functionalities  or
+services to be developed in addition to those offered by the Software.
+
+Dynamic Module: means any or all module, created by  the  Contributor,  that
+is independent of the Software, so that this module and the Software are  in
+two different executable forms that are  run  in  separate  address  spaces,
+with one calling the other when they are run.
+
+Static Module: means any or all  module,  created  by  the  Contributor  and
+connected to the Software by a static link that  makes  their  object  codes
+interdependent. This module and the Software to which it is  connected,  are
+combined in a single executable.
+
+Parties: mean both the Licensee and the Licensor.
+
+These expressions may be used both in singular and plural form.
+
+
+Article 2 - PURPOSE
+-------------------
+
+
+The purpose of the  Agreement  is  to  enable  the  Licensor  to  grant  the
+Licensee a free, non-exclusive, transferable and worldwide License  for  the
+Software as set forth in  Article  5  hereinafter  for  the  whole  term  of
+protection of the rights over said Software.
+
+
+Article 3 - ACCEPTANCE
+----------------------
+
+
+3.1. The  Licensee  shall  be  deemed  as  having  accepted  the  terms  and
+conditions of  this  Agreement  by  the  occurrence  of  the  first  of  the
+following events:
+- (i) loading the Software by any or all means, notably,  by  downloading
+  from a remote server, or by loading from a physical medium;
+- (ii) the first time the Licensee exercises any of  the  rights  granted
+  hereunder.
+
+3.2. One copy  of  the  Agreement,  containing  a  notice  relating  to  the
+specific nature of the  Software,  to  the  limited  warranty,  and  to  the
+limitation to use by experienced users has been  provided  to  the  Licensee
+prior to its acceptance as set forth in Article  3.1  hereinabove,  and  the
+Licensee hereby acknowledges that it is aware thereof.
+
+
+Article 4 - EFFECTIVE DATE AND TERM
+-----------------------------------
+
+
+4.1. EFFECTIVE DATE
+
+The Agreement shall become effective on the date when it is accepted by  the
+Licensee as set forth in Article 3.1.
+
+4.2. TERM
+
+The Agreement  shall  remain  in  force  during  the  whole  legal  term  of
+protection of the economic rights over the Software.
+
+
+Article 5 - SCOPE OF THE RIGHTS GRANTED
+---------------------------------------
+
+
+The  Licensor  hereby  grants  to  the  Licensee,  that  accepts  such,  the
+following rights as regards the Software for any or all  use,  and  for  the
+term of the Agreement, on the basis of the terms and  conditions  set  forth
+hereinafter.
+
+Otherwise, the Licensor grants to the Licensee free of  charge  exploitation
+rights on  the  patents  he  holds  on  whole  or  part  of  the  inventions
+implemented in the Software.
+
+5.1. RIGHTS OF USE
+
+The Licensee is authorized to use the Software, unrestrictedly,  as  regards
+the fields of application, with it being  hereinafter  specified  that  this
+relates to:
+- permanent or temporary reproduction of all or part of the Software  by
+  any or all means and in any or all form.
+- loading, displaying, running, or storing the Software on any or all
+  medium.
+- entitlement to observe, study or test the operation thereof so  as  to
+  establish the ideas and principles that form the basis for any or  all
+  constituent elements of said  Software.  This  shall  apply  when  the
+  Licensee  carries  out  any  or  all  loading,  displaying,   running,
+  transmission or storage operation as regards the Software, that it  is
+  entitled to carry out hereunder.
+
+5.2. entitlement to make CONTRIBUTIONS
+
+The right to make Contributions includes  the  right  to  translate,  adapt,
+arrange, or make any or all modification to the Software, and the  right  to
+reproduce the resulting Software.
+
+The Licensee is authorized to make any or all Contribution to  the  Software
+provided that it  explicitly  mentions  its  name  as  the  author  of  said
+Contribution and the date of the development thereof.
+
+5.3. DISTRIBUTION AND PUBLICATION RIGHTS
+
+In particular, the right of distribution and publication includes the  right
+to transmit and communicate the Software to the general  public  on  any  or
+all medium, and by any or all means, and the  right  to  market,  either  in
+consideration of a fee, or free of charge, a  copy or copies of the Software 
+by means of any or all process.
+The Licensee is further authorized to redistribute copies  of  the  modified
+or  unmodified  Software  to  third  parties  according  to  the  terms  and
+conditions set forth hereinafter.
+
+5.3.1. REDISTRIBUTION OF SOFTWARE WITHOUT MODIFICATION
+
+The Licensee is authorized to redistribute true copies of  the  Software  in
+Source Code or Object Code form, provided that said redistribution  complies
+with all the provisions of the Agreement and is accompanied by:
+- a copy of the Agreement,
+- a notice relating to the limitation of both  the  Licensor''s  warranty
+  and liability as set forth in Articles 8 and 9,
+and  that,  in  the  event  that  only  the  Software''s   Object   Code   is
+redistributed, the Licensee allows future  Licensees  unhindered  access  to
+the Software''s full Source  Code  by  providing  them  with  the  terms  and
+conditions for access thereto, it being understood that the additional  cost
+of acquiring the Source Code shall not exceed the cost of  transferring  the
+data.
+
+5.3.2. REDISTRIBUTION OF MODIFIED  SOFTWARE
+
+When the Licensee makes a  Contribution  to  the  Software,  the  terms  and
+conditions for the redistribution of the Modified  Software  shall  then  be
+subject to all the provisions hereof.
+
+The Licensee is authorized to redistribute the Modified Software, in  Source
+Code or Object Code form, provided that said  redistribution  complies  with
+all the provisions of the Agreement and is accompanied by:
+- a copy of the Agreement,
+- a notice relating to the limitation of both  the  Licensor''s  warranty
+  and liability as set forth in Articles 8 and 9,
+and that, in the event that only the  Modified  Software''s  Object  Code  is
+redistributed, the Licensee allows future  Licensees  unhindered  access  to
+the Modified Software''s full Source Code by providing them  with  the  terms
+and conditions for access thereto, it being understood that  the  additional
+cost of acquiring the Source Code shall not exceed the cost of  transferring
+the data.
+
+
+5.3.3. redistribution OF DYNAMIC MODULES
+
+When the Licensee has developed a Dynamic Module, the terms  and  conditions
+hereof do not apply to said Dynamic Module, that  may  be  distributed under 
+a separate Licensing Agreement.
+
+5.3.4. COMPATIBILITY WITH THE GPL LICENSE
+
+In the event that the Modified or unmodified Software is included in a code
+that is subject to the provisions of the GPL License, the Licensee is
+authorized to redistribute the whole under the GPL License.
+
+In the event that the Modified Software includes a code that is  subject  to
+the  provisions  of  the  GPL  License,  the  Licensee  is   authorized   to
+redistribute the Modified Software under the GPL License.
+
+
+Article 6  - INTELLECTUAL PROPERTY
+----------------------------------
+
+
+6.1. OVER THE INITIAL SOFTWARE
+
+The Holder owns the economic rights over the Initial Software.  Any  or  all
+use of the Initial Software is subject to  compliance  with  the  terms  and
+conditions under which the Holder has elected to distribute its work and  no
+one shall be entitled to  and it shall have sole entitlement to  modify  the
+terms and conditions for the distribution of said Initial Software.
+
+The Holder undertakes to maintain the distribution of the  Initial  Software
+under the conditions of  the  Agreement,  for  the  duration  set  forth  in
+article 4.2..
+
+6.2. OVER THE CONTRIBUTIONS
+
+The intellectual property rights over the Contributions belong to  the
+holder of the economic rights as designated by effective legislation.
+
+6.3. OVER THE DYNAMIC MODULES
+
+The Licensee having  developed  a  Dynamic  Module  is  the  holder  of  the
+intellectual property rights over said Dynamic Module and is free to  choose
+the agreement that shall govern its distribution.
+
+6.4. JOINT PROVISIONS
+
+6.4.1. The Licensee expressly undertakes:
+- not to remove, or modify, in  any  or  all  manner,  the  intellectual
+  property notices affixed to the Software;
+- to reproduce said notices, in an identical manner, in  the  copies  of
+  the Software.
+
+6.4.2. The Licensee undertakes not to directly or  indirectly  infringe  the
+intellectual property rights of the Holder and/or Contributors and to  take,
+where applicable, vis-à-vis its staff,  any  or  all  measures  required  to
+ensure respect for said intellectual property rights of  the  Holder  and/or
+Contributors.
+
+
+Article 7  - RELATED SERVICES
+-----------------------------
+
+
+7.1. Under no circumstances shall  the  Agreement  oblige  the  Licensor  to
+provide technical assistance or maintenance services for the Software.
+
+However, the Licensor is entitled to offer  this  type  of  service. The
+terms  and  conditions  of  such  technical  assistance,  and/or   such 
+maintenance, shall then be set forth in  a  separate  instrument.  Only  the
+Licensor offering said  maintenance  and/or  technical  assistance  services
+shall incur liability therefor.
+
+7.2. Similarly, any or all Licensor  shall  be  entitled  to  offer  to  its
+Licensees, under its own responsibility, a  warranty,  that  shall  only  be
+binding upon itself, for the  redistribution  of  the  Software  and/or  the
+Modified Software, under terms and conditions  that  it  shall  decide  upon
+itself. Said warranty,  and  the  financial  terms  and  conditions  of  its
+application, shall be subject to a separate instrument executed between  the
+Licensor and the Licensee.
+
+
+Article 8  - LIABILITY
+----------------------
+
+
+8.1. Subject to the provisions of Article 8.2, should the Licensor  fail  to
+fulfill all or part of its obligations  hereunder,  the  Licensee  shall  be
+entitled to claim compensation for the direct loss suffered  as a result of
+a fault on the part of the Licensor, subject to providing evidence of it. 
+
+8.2. The Licensor''s liability is limited to the commitments made under  this
+Licensing Agreement and shall not be incurred as a result ,  in  particular:
+(i) of loss due the Licensee''s total  or  partial  failure  to  fulfill  its
+obligations, (ii) direct or consequential loss due to the Software''s use  or
+performance that  is  suffered  by  the  Licensee,  when  the  latter  is  a
+professional  using  said  Software  for  professional  purposes  and  (iii)
+consequential loss due to the Software''s use  or  performance.  The  Parties
+expressly agree that any or all pecuniary or business  loss  (i.e.  loss  of
+data, loss  of  profits,  operating  loss,  loss  of  customers  or  orders,
+opportunity cost, any disturbance to business  activities)  or  any  or  all
+legal proceedings instituted against the Licensee by a  third  party,  shall
+constitute consequential loss and shall not provide entitlement  to  any  or
+all compensation from the Licensor.
+
+
+Article 9  - WARRANTY
+---------------------
+
+
+9.1. The  Licensee  acknowledges  that  the  current  situation  as  regards
+scientific and  technical  know-how  at  the  time  when  the  Software  was
+distributed did not enable all possible uses to be tested and verified,  nor
+for the presence of any or all faults to be detected. In this  respect,  the
+Licensee''s attention has been drawn to the risks  associated  with  loading,
+using, modifying and/or developing and reproducing  the  Software  that  are
+reserved for experienced users.
+
+The Licensee shall be responsible for verifying, by any or  all  means,  the
+product''s suitability for its requirements, its due and proper  functioning,
+and for ensuring that it  shall  not  cause  damage  to  either  persons  or
+property.
+
+9.2. The Licensor hereby represents, in good faith, that it is  entitled  to
+grant all the rights on the  Software (including in  particular  the  rights
+set forth in Article 5 hereof over the Software).
+
+9.3. The Licensee acknowledges that the Software is supplied "as is" by  the
+Licensor without any or all other express  or  tacit  warranty,  other  than
+that provided for in Article 9.2 and, in  particular,  without  any  or  all
+warranty as to its market  value,  its  secured,  innovative  or  relevant
+nature.
+
+Specifically, the Licensor does not warrant that the Software is  free  from
+any or all error, that it shall  operate  continuously,  that  it  shall  be
+compatible  with   the   Licensee''s   own   equipment   and   its   software
+configuration, nor that it shall meet the Licensee''s requirements.
+
+9.4. The Licensor does not either expressly  or  tacitly  warrant  that  the
+Software does not  infringe  any  or  all  third  party  intellectual  right
+relating to a patent, software or  to  any  or  all  other  property  right.
+Moreover, the Licensor shall not hold the Licensee harmless against  any  or
+all proceedings for infringement that may be instituted in  respect  of  the
+use, modification and redistribution of the Software.  Nevertheless,  should
+such proceedings be instituted against  the  Licensee,  the  Licensor  shall
+provide it with  technical  and  legal  assistance  for  its  defense.  Such
+technical and legal assistance shall  be  decided  upon  on  a  case-by-case
+basis  between  the  relevant  Licensor  and  the  Licensee  pursuant  to  a
+memorandum of understanding. The Licensor disclaims any or all liability  as
+regards the Licensee''s use of the Software''s  name.  No  warranty  shall  be
+provided as regards the existence of prior  rights  over  the  name  of  the
+Software and as regards the existence of a trademark.
+
+
+Article 10  - TERMINATION
+-------------------------
+
+
+10.1. In  the  event  of  a  breach  by  the  Licensee  of  its  obligations
+hereunder, the Licensor may automatically terminate  this  Agreement  thirty
+(30) days after notice has been  sent  to  the  Licensee  and  has  remained
+ineffective.
+
+10.2. The  Licensee  whose  Agreement  is  terminated  shall  no  longer  be
+authorized to use, modify or distribute the Software. However,  any  or  all
+licenses that it may have granted prior to  termination  of  the  Agreement
+shall remain valid subject to their having been granted in  compliance  with
+the terms and conditions hereof.
+
+
+Article 11  - MISCELLANEOUS PROVISIONS
+--------------------------------------
+
+
+11.1. EXCUSABLE EVENTS
+
+Neither Party shall be liable for any or all delay, or  failure  to  perform
+the Agreement, that may be attributable to an event  of  force  majeure,  an
+act of God or an outside cause, such as, notably, defective functioning,  or
+interruptions affecting  the  electricity  or  telecommunications  networks,
+blocking of the network following a virus attack, the  intervention  of  the
+government authorities, natural disasters, water damage, earthquakes,  fire,
+explosions, strikes and labor unrest, war, etc.
+
+11.2. The fact that either Party may fail, on one or several  occasions,  to
+invoke  one  or  several  of  the  provisions   hereof,   shall   under   no
+circumstances be interpreted as being a waiver by the  interested  Party  of
+its entitlement to invoke said provision(s) subsequently.
+
+11.3. The Agreement cancels and replaces  any  or  all  previous  agreement,
+whether written or oral, between the Parties and having  the  same  purpose,
+and  constitutes  the  entirety  of  the  agreement  between  said   Parties
+concerning said purpose. No supplement or  modification  to  the  terms  and
+conditions hereof shall be effective as regards the  Parties  unless  it  is
+made in writing and signed by their duly authorized representatives.
+
+11.4. In the event that one or several of  the  provisions  hereof  were  to
+conflict with a current or future applicable act or legislative  text,  said
+act or legislative text shall take precedence, and the  Parties  shall  make
+the necessary amendments so  as  to  be  in  compliance  with  said  act  or
+legislative  text.  All  the  other  provisions  shall   remain   effective.
+Similarly, the fact that a provision of  the  Agreement  may   be  null  and
+void, for any reason whatsoever, shall not cause the Agreement  as  a  whole
+to be null and void.
+
+11.5. LANGUAGE
+
+The Agreement is drafted in both French and  English.  In  the  event  of  a
+conflict as  regards  construction,  the  French  version  shall  be  deemed
+authentic.
+
+
+Article 12  - NEW VERSIONS OF THE AGREEMENT
+-------------------------------------------
+
+
+12.1. Any or all person is authorized to duplicate and distribute copies  of
+this Agreement.
+
+12.2. So as to ensure coherence, the wording of this Agreement is  protected
+and may only be modified by the authors of the  License,  that  reserve  the
+right to periodically publish updates or  new  versions  of  the  Agreement,
+each with a separate number. These subsequent versions may address new issues
+encountered by Free Software.
+
+12.3. Any  or  all  Software  distributed  under  a  given  version  of  the
+Agreement may only be subsequently distributed under  the  same  version  of
+the Agreement, or  a  subsequent  version,  subject  to  the  provisions  of
+article 5.3.4.
+
+
+Article 13 - GOVERNING LAW AND JURISDICTION
+-------------------------------------------
+
+
+13.1. The Agreement is  governed  by  French  law.   The  Parties  agree  to
+endeavor to settle the disagreements or disputes that may arise  during  the
+performance of the Agreement out-of-court.
+
+13.2. In the absence of an out-of-court settlement within two (2) months  as
+from their occurrence, and unless emergency proceedings are  necessary,  the
+disagreements or disputes shall be  referred  to  the  Paris  Courts  having
+jurisdiction, by the first Party to take action.
+
+
+                                                   Version 1.1 of 10/26/2004
+
+
+
+
+
+
+
+
+
+', 'http://www.cecill.info/licences/Licence_CeCILL_V1.1-US.txt', NULL, NULL, NULL, 'CeCILL License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '2ef6443e7f7f6a6ce51926d6bc7aa493', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (341, 'Comtrol', 'COMTROL CORPORATION ON THE WORLD WIDE WEB IS PROVIDED SUBJECT TO THE FOLLOWING TERMS AND CONDITIONS:
+
+
+These Terms and Conditions shall be governed by and construed in accordance with the law of the United States of America.
+
+USAGE OF THIS WEB SITE IMPLYS ACCEPTANCE IN FULL OF THESE TERMS AND GUIDELINES.
+
+
+This Web Site and the information, names, images, pictures, logos and icons regarding or relating to Comtrol Corporation and its affiliates, products and services is provided "AS IS" and on an "AS AVAILABLE" basis without any representation or endorsement made and without warranty of any kind, whether expressed or implied, including, but not limited to the implied warranties of merchantability, fitness for a particular purpose or non-infringement. In no event shall Comtrol Corporation or its subsidiaries, affiliates, contractors or respective employees, be liable for any damages, including without limitation, special, indirect or consequential damages, or any damages whatsoever resulting from loss of use, data or profits, whether in an action of contract, negligence or other tortious action, arising out of or in connection with the use or performance of this Web Site.
+
+
+This Web Site may include publications with technical inaccuracies or typographical errors that will be corrected as they are discovered at Comtrol Corporation''s sole discretion. Also, changes are periodically added to the information contained herein. These corrections and changes may be incorporated into this Web Site at a late date. Comtrol Corporation may at any time make modifications, improvements and/or changes to these Terms and Conditions, the information, names, images, pictures, logos and icons described in this publication or the products and services referred to within, with or without notice. As the Internet is maintained independently at thousands of sites around the world, the information, names, images, pictures, logos and icons that may be accessed may originate outside the boundaries of Comtrol Corporation''s Web Site. Therefore, Comtrol Corporation excludes any obligation or responsibility regarding any content derived, obtained, accessed within, through or outside Comtrol Corporation''s own Web Site.
+
+Information contained on this Web site is based on Comtrol product comparisons, pricing, or other information that is believed accurate as of the date this information was published to the Web site. Comtrol encourages all customers to verify the information presented here for accuracy as of the date referenced on that particular Web page.
+
+
+You may not modify, copy, distribute, transmit, display, perform, reproduce, publish, license, create derivative works from, transfer, or sell any information, software, products, or services obtained from this Web site.
+
+
+Permission to use documents (such as white papers, press releases, data sheets, and FAQs) is granted, provided that (1) the below copyright notice appears in all copies and that both the copyright notice and this permission notice appear, (2) use of such documents is for informational purposes only and will not appear on any network computer or broadcast in any media, and (3) no modifications of any documents are made without the express written consent of Comtrol Corporation.
+
+Accredited educational institutions may download and reproduce documents for classroom distribution. Distribution outside the classroom requires the express written permission of Comtrol Corporation.
+
+Use for any other purpose is expressly prohibited by law, and may result in severe civil and criminal penalties. Violators will be prosecuted to the maximum extent possible.
+
+Elements of the Comtrol.com Web site or any other Comtrol owned, operated, licensed or controlled site (including, but not limited to: DeviceMaster.com and RocketPort.com). Elements of Comtrol Web sites are protected by trade dress, trademark, unfair competition, and other laws and may not be copied or imitated in whole or in part. No logo, graphic, sound, or image from ANY Comtrol Web site may be copied or retransmitted unless expressly permitted by Comtrol Corporation.
+
+
+Any licensed software available from, or represented on, this Web site is the copyrighted work of Comtrol Corporation and/or its suppliers. Use of the software is governed by the terms of the license agreement, if any, which accompanies, is included with, or proceeds in way of written contract for purchase of the software. An end user will be unable to install any software that is governed by a license agreement, unless he or she first agrees to the license agreement terms.
+
+
+Comtrol offers some product enhancements, available for download to extend the usefulness of limited products that have already been purchased. These downloads, including hardware drivers, patches to firmware, drivers, or other software, are offered with no warranty and may be available for limited, undetermined periods of time. While some additional drivers and enhancements are offered, no guarantee is made that any hardware or software products will be forward compatible beyond what is available at the time of purchase. Some enhancements may be offered free of charge, others may require licensed purchase, and others may require the purchase of new products to ensure compatibility in the current environment.
+
+
+As a condition of your use of Comtrol Web sites, you will not use these pages or sites for any purpose that is illegal or prohibited by these terms, conditions, guidelines, or as otherwise prohibited by statute. You may not use these sites and materials herein in any manner that could damage, disable, overburden, or in any way impair Comtrol servers or equipment, or interfere with any other party''s use of these Web sites.
+
+You may not attempt to gain unauthorized access to Comtrol resources including accounts, computer systems, or networks connected to any Comtrol server through hacking, password mining or any other means. You may not attempt to gain access to any other materials not intended to be available through Comtrol Web sites.
+
+
+Comtrol provides links to third party Web sites solely for the convenience of the user and is not responsible for the content and any link contained within any linked site, or any changes or updates to such sites. A link from Comtrol''s Web sites does not imply endorsement of such sites.
+
+Consideration for the addition of a link to a Comtrol site should be addressed to info@comtrol.com, but no guarantees as the acceptance of a request are made, and if a request is not accepted, Comtrol reserves the right to withhold any reason for denial.
+
+
+Comtrol Corporation provides access to Comtrol Corporation international data and, therefore, may contain references or cross references to Comtrol Corporation products and services that are not (readily) available in any particular country. Such reference does not imply that Comtrol Corporation in your country intends to market such products or services. All actions resulting from a search of this data must be related to solutions using only products and services announced by Comtrol Corporation in your country.
+
+The names, images, logos and pictures identifying Comtrol Corporation products and services in many countries are proprietary marks of Comtrol Corporation and/or its subsidiaries or affiliates ("Comtrol Corporation"). Nothing contained herein shall be construed as conferring by implication, estoppel or otherwise any license or right under any patent or trademark of Comtrol Corporation or any third party. Except as expressly provided above, nothing contained herein shall be construed as conferring any license or right under Comtrol Corporation copyright or other intellectual property rights.', 'http://www.comtrol.com/pub/en/terms-of-use/', NULL, NULL, NULL, 'Comtrol User License', NULL, NULL, NULL, '', NULL, false, false, false, 'ca406610b90d5b5456bd2f79fe8a0e3d', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (303, 'RedHat-EULA', 'LICENSE AGREEMENT
+RED HAT® ENTERPRISE LINUX®
+AND RED HAT® APPLICATIONS
+
+This end user license agreement ("EULA") governs the use of any of the versions of Red Hat Enterprise Linux, any Red Hat Applications (as set forth at www.redhat.com/licenses/products), and any related updates, source code, appearance, structure and organization (the "Programs"), regardless of the delivery mechanism.
+
+1. License Grant. Subject to the following terms, Red Hat, Inc. ("Red Hat") grants to you ("User") a perpetual, worldwide license to the Programs pursuant to the GNU General Public License v.2. The Programs are either a modular operating system or an application consisting of hundreds of software components. With the exception of certain image files identified in Section 2 below, the license agreement for each software component is located in the software component''s source code and permits User to run, copy, modify, and redistribute (subject to certain obligations in some cases) the software component, in both source code and binary code forms. This EULA pertains solely to the Programs and does not limit User''s rights under, or grant User rights that supersede, the license terms of any particular component.
+
+2. Intellectual Property Rights. The Programs and each of their components are owned by Red Hat and others and are protected under copyright law and under other laws as applicable. Title to the Programs and any component, or to any copy, modification, or merged portion shall remain with the aforementioned, subject to the applicable license. The "Red Hat" trademark and the "Shadowman" logo are registered trademarks of Red Hat in the U.S. and other countries. This EULA does not permit User to distribute the Programs or their components using Red Hat''s trademarks, regardless of whether the copy has been modified. User should read the information found at http://www.redhat.com/about/corporate/trademark/ before distributing a copy of the Programs. User may make a commercial redistribution of the Programs only if, (a) a separate agreement with Red Hat authorizing such commercial redistribution is executed or other written permission is granted by Red Hat or (b) User modifies any files identified as "REDHAT-LOGOS" to remove and replace all images containing the "Red Hat" trademark or the "Shadowman" logo. Merely deleting these files may corrupt the Programs.
+
+3. Limited Warranty. Except as specifically stated in this Section 3, a separate agreement with Red Hat, or a license for a particular component, to the maximum extent permitted under applicable law, the Programs and the components are provided and licensed "as is" without warranty of any kind, expressed or implied, including the implied warranties of merchantability, non-infringement or fitness for a particular purpose. Red Hat warrants that the media on which the Programs and the components are furnished will be free from defects in materials and manufacture under normal use for a period of 30 days from the date of delivery to User. Red Hat does not warrant that the functions contained in the Programs will meet User''s requirements or that the operation of the Programs will be entirely error free, appear precisely as described in the accompanying documentation, or comply with regulatory requirements. This warranty extends only to the party that purchases services pertaining to the Programs from Red Hat or a Red Hat authorized distributor.
+
+4. Limitation of Remedies and Liability. To the maximum extent permitted by applicable law, User''s exclusive remedy under this EULA is to return any defective media within 30 days of delivery along with a copy of User''s payment receipt and Red Hat, at its option, will replace it or refund the money paid by User for the media. To the maximum extent permitted under applicable law, neither Red Hat, any Red Hat authorized distributor, nor the licensor of any component provided to User under this EULA will be liable to User for any incidental or consequential damages, including lost profits or lost savings arising out of the use or inability to use the Programs or any component, even if Red Hat, such authorized distributor or licensor has been advised of the possibility of such damages. In no event shall Red Hat''s liability, an authorized distributor''s liability or the liability of the licensor of a component provided to User under this EULA exceed the amount that User paid to Red Hat under this EULA during the twelve months preceding the action.
+
+5. Export Control. As required by the laws of the United States and other countries, User represents and warrants that it: (a) understands that the Programs and their components may be subject to export controls under the U.S. Commerce Department''s Export Administration Regulations ("EAR"); (b) is not located in a prohibited destination country under the EAR or U.S. sanctions regulations (currently Cuba, Iran, Iraq, North Korea, Sudan and Syria, subject to change as posted by the United States government); (c) will not export, re-export, or transfer the Programs to any prohibited destination or persons or entities on the U.S. Bureau of Industry and Security Denied Parties List or Entity List, or the U.S. Office of Foreign Assets Control list of Specially Designated Nationals and Blocked Persons, or any similar lists maintained by other countries, without the necessary export license(s) or authorizations(s); (d) will not use or transfer the Programs for use in connection with any nuclear, chemical or biological weapons, missile technology, or military end-uses where prohibited by an applicable arms embargo, unless authorized by the relevant government agency by regulation or specific license; (e) understands and agrees that if it is in the United States and exports or transfers the Programs to eligible end users, it will, to the extent required by EAR Section 740.17(e), submit semi-annual reports to the Commerce Department''s Bureau of Industry and Security, which include the name and address (including country) of each transferee; and (f) understands that countries including the United States may restrict the import, use, or export of encryption products (which may include the Programs and the components) and agrees that it shall be solely responsible for compliance with any such import, use, or export restrictions.
+
+6. Third Party Programs. Red Hat may distribute third party software programs with the Programs that are not part of the Programs. These third party programs are not required to run the Programs, are provided as a convenience to User, and are subject to their own license terms. The license terms either accompany the third party software programs or can be viewed at http://www.redhat.com/licenses/thirdparty/eula.html. If User does not agree to abide by the applicable license terms for the third party software programs, then User may not install them. If User wishes to install the third party software programs on more than one system or transfer the third party software programs to another party, then User must contact the licensor of the applicable third party software programs.
+
+7. General. If any provision of this agreement is held to be unenforceable, that shall not affect the enforceability of the remaining provisions. This agreement shall be governed by the laws of the State of New York and of the United States, without regard to any conflict of laws provisions. The rights and obligations of the parties to this EULA shall not be governed by the United Nations Convention on the International Sale of Goods.', 'http://www.redhat.com/licenses/rhel_rha_eula.html', NULL, NULL, NULL, 'RedHat EULA', NULL, NULL, NULL, '', NULL, false, false, false, '06c76bc5bab85dd388f43febb3451220', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (287, 'MPL-EULA-1.1', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
+Version 1.1
+
+A SOURCE CODE VERSION OF CERTAIN FIREFOX BROWSER FUNCTIONALITY THAT YOU MAY USE, MODIFY AND DISTRIBUTE IS AVAILABLE TO YOU FREE-OF-CHARGE FROM WWW.MOZILLA.ORG UNDER THE MOZILLA PUBLIC LICENSE and other open source software licenses.
+
+The accompanying executable code version of Mozilla Firefox and related documentation (the "Product") is made available to you under the terms of this MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT (THE "AGREEMENT"). BY CLICKING THE "ACCEPT" BUTTON, OR BY INSTALLING OR USING THE MOZILLA FIREFOX BROWSER, YOU ARE CONSENTING TO BE BOUND BY THE AGREEMENT. IF YOU DO NOT AGREE TO THE TERMS AND CONDITIONS OF THIS AGREEMENT, DO NOT CLICK THE "ACCEPT" BUTTON, AND DO NOT INSTALL OR USE ANY PART OF THE MOZILLA FIREFOX BROWSER.
+
+DURING THE MOZILLA FIREFOX INSTALLATION PROCESS, AND AT LATER TIMES, YOU MAY BE GIVEN THE OPTION OF INSTALLING ADDITIONAL COMPONENTS FROM THIRD-PARTY SOFTWARE PROVIDERS. THE INSTALLATION AND USE OF THOSE THIRD-PARTY COMPONENTS MAY BE GOVERNED BY ADDITIONAL LICENSE AGREEMENTS.
+
+1. LICENSE GRANT. The Mozilla Corporation grants you a non-exclusive license to use the executable code version of the Product. This Agreement will also govern any software upgrades provided by Mozilla that replace and/or supplement the original Product, unless such upgrades are accompanied by a separate license, in which case the terms of that license will govern.
+
+2. TERMINATION. If you breach this Agreement your right to use the Product will terminate immediately and without notice, but all provisions of this Agreement except the License Grant (Paragraph 1) will survive termination and continue in effect. Upon termination, you must destroy all copies of the Product.
+
+3. PROPRIETARY RIGHTS. Portions of the Product are available in source code form under the terms of the Mozilla Public License and other open source licenses (collectively, "Open Source Licenses") at http://www.mozilla.org. Nothing in this Agreement will be construed to limit any rights granted under the Open Source Licenses. Subject to the foregoing, Mozilla, for itself and on behalf of its licensors, hereby reserves all intellectual property rights in the Product, except for the rights expressly granted in this Agreement. You may not remove or alter any trademark, logo, copyright or other proprietary notice in or on the Product. This license does not grant you any right to use the trademarks, service marks or logos of Mozilla or its licensors.
+
+4. DISCLAIMER OF WARRANTY. THE PRODUCT IS PROVIDED "AS IS" WITH ALL FAULTS. TO THE EXTENT PERMITTED BY LAW, MOZILLA AND MOZILLA''S DISTRIBUTORS, LICENSORS HEREBY DISCLAIM ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION WARRANTIES THAT THE PRODUCT IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE AND NON-INFRINGING. YOU BEAR ENTIRE RISK AS TO SELECTING THE PRODUCT FOR YOUR PURPOSES AND AS TO THE QUALITY AND PERFORMANCE OF THE PRODUCT. THIS LIMITATION WILL APPLY NOTWITHSTANDING THE FAILURE OF ESSENTIAL PURPOSE OF ANY REMEDY. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF IMPLIED WARRANTIES, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
+
+5. LIMITATION OF LIABILITY. EXCEPT AS REQUIRED BY LAW, MOZILLA AND ITS DISTRIBUTORS, DIRECTORS, LICENSORS, CONTRIBUTORS AND AGENTS (COLLECTIVELY, THE "MOZILLA GROUP") WILL NOT BE LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES ARISING OUT OF OR IN ANY WAY RELATING TO THIS AGREEMENT OR THE USE OF OR INABILITY TO USE THE PRODUCT, INCLUDING WITHOUT LIMITATION DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, LOST PROFITS, LOSS OF DATA, AND COMPUTER FAILURE OR MALFUNCTION, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE THEORY (CONTRACT, TORT OR OTHERWISE) UPON WHICH SUCH CLAIM IS BASED. THE MOZILLA GROUP''S COLLECTIVE LIABILITY UNDER THIS AGREEMENT WILL NOT EXCEED THE GREATER OF $500 (FIVE HUNDRED DOLLARS) AND THE FEES PAID BY YOU UNDER THIS LICENSE (IF ANY). SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL, CONSEQUENTIAL OR SPECIAL DAMAGES, SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
+
+6. EXPORT CONTROLS. This license is subject to all applicable export restrictions. You must comply with all export and import laws and restrictions and regulations of any United States or foreign agency or authority relating to the Product and its use.
+
+7. U.S. GOVERNMENT END-USERS. The Product is a "commercial item," as that term is defined in 48 C.F.R. 2.101, consisting of "commercial computer software" and "commercial computer software documentation," as such terms are used in 48 C.F.R. 12.212 (Sept. 1995) and 48 C.F.R. 227.7202 (June 1995). Consistent with 48 C.F.R. 12.212, 48 C.F.R. 27.405(b)(2) (June 1998) and 48 C.F.R. 227.7202, all U.S. Government End Users acquire the Product with only those rights as set forth herein.
+
+8. MISCELLANEOUS. (a) This Agreement constitutes the entire agreement between Mozilla and you concerning the subject matter hereof, and it may only be modified by a written amendment signed by an authorized executive of Mozilla. (b) Except to the extent applicable law, if any, provides otherwise, this Agreement will be governed by the laws of the state of California, U.S.A., excluding its conflict of law provisions. (c) This Agreement will not be governed by the United Nations Convention on Contracts for the International Sale of Goods. (d) If any part of this Agreement is held invalid or unenforceable, that part will be construed to reflect the parties'' original intent, and the remaining portions will remain in full force and effect. (e) A waiver by either party of any term or condition of this Agreement or any breach thereof, in any one instance, will not waive such term or condition or any subsequent breach thereof. (f) Except as required by law, the controlling language of this Agreement is English. (g) You may assign your rights under this Agreement to any party that consents to, and agrees to be bound by, its terms; the Mozilla Corporation may assign its rights under this Agreement without condition. (h) This Agreement will be binding upon and will inure to the benefit of the parties, their successors and permitted assigns.', 'http://www.mozilla.com/en-US/legal/eula/firefox-en.txt', NULL, NULL, NULL, 'Mozilla Firefox EULA 1.1', NULL, NULL, NULL, '', NULL, false, false, false, 'cd0b0420f0ab9b6b5dcd0549166000dd', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (311, 'MIT', 'The MIT License
 
 Copyright (c) <year> <copyright holders>
@@ -20580,84 +20710,6 @@ All Recipient''s rights under this Agreement shall terminate if it fails to comp
 LUCENT may publish new versions (including revisions) of this Agreement from time to time. Each new version of the Agreement will be given a distinguishing version number. The Program (including Contributions) may always be distributed subject to the version of the Agreement under which it was received. In addition, after a new version of the Agreement is published, Contributor may elect to distribute the Program (including its Contributions) under the new version. No one other than LUCENT has the right to modify this Agreement. Except as expressly stated in Sections 2(a) and 2(b) above, Recipient receives no rights or licenses to the intellectual property of any Contributor under this Agreement, whether expressly, by implication, estoppel or otherwise. All rights in the Program not expressly granted under this Agreement are reserved.
 
 This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation.', 'http://www.opensource.org/licenses/lucent1.02.php', NULL, NULL, NULL, 'Lucent Public License 1.02', NULL, NULL, NULL, '', NULL, false, false, false, '193b544a0a423e3231e8ea4bc0e68bed', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (329, 'MozillaEULA-2.0', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
-
-Version 2.0
-
-A SOURCE CODE VERSION OF CERTAIN FIREFOX BROWSER FUNCTIONALITY THAT YOU MAY USE, MODIFY AND DISTRIBUTE IS AVAILABLE TO YOU FREE-OF-CHARGE FROM WWW.MOZILLA.ORG UNDER THE MOZILLA PUBLIC LICENSE and other open source software licenses.
-
-The accompanying executable code version of Mozilla Firefox and related documentation (the "Product") is made available to you under the terms of this MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT (THE "AGREEMENT"). BY CLICKING THE "ACCEPT" BUTTON, OR BY INSTALLING OR USING THE MOZILLA FIREFOX BROWSER, YOU ARE CONSENTING TO BE BOUND BY THE AGREEMENT. IF YOU DO NOT AGREE TO THE TERMS AND CONDITIONS OF THIS AGREEMENT, DO NOT CLICK THE "ACCEPT" BUTTON, AND DO NOT INSTALL OR USE ANY PART OF THE MOZILLA FIREFOX BROWSER.
-
-DURING THE MOZILLA FIREFOX INSTALLATION PROCESS, AND AT LATER TIMES, YOU MAY BE GIVEN THE OPTION OF INSTALLING ADDITIONAL COMPONENTS FROM THIRD-PARTY SOFTWARE PROVIDERS. THE INSTALLATION AND USE OF THOSE THIRD-PARTY COMPONENTS MAY BE GOVERNED BY ADDITIONAL LICENSE AGREEMENTS.
-
-1. LICENSE GRANT. The Mozilla Corporation grants you a non-exclusive license to use the executable code version of the Product. This Agreement will also govern any software upgrades provided by Mozilla that replace and/or supplement the original Product, unless such upgrades are accompanied by a separate license, in which case the terms of that license will govern.
-
-2. TERMINATION. If you breach this Agreement your right to use the Product will terminate immediately and without notice, but all provisions of this Agreement except the License Grant (Paragraph 1) will survive termination and continue in effect. Upon termination, you must destroy all copies of the Product.
-
-3. PROPRIETARY RIGHTS. Portions of the Product are available in source code form under the terms of the Mozilla Public License and other open source licenses (collectively, "Open Source Licenses") at www.mozilla.org. Nothing in this Agreement will be construed to limit any rights granted under the Open Source Licenses. Subject to the foregoing, Mozilla, for itself and on behalf of its licensors, hereby reserves all intellectual property rights in the Product, except for the rights expressly granted in this Agreement. You may not remove or alter any trademark, logo, copyright or other proprietary notice in or on the Product. This license does not grant you any right to use the trademarks, service marks or logos of Mozilla or its licensors.
-
-4. PRIVACY POLICY. You agree to the Mozilla Firefox Privacy Policy, made available online at http://www.mozilla.com/legal/privacy/, as that policy may be changed from time to time. When Mozilla changes the policy in a material way a notice will be posted on the website at www.mozilla.com, and when any change is made in the privacy policy, the updated policy will be posted at the above link. It is your responsibility to ensure that you understand the terms of the privacy policy, so you should periodically check the current version of the policy for changes.
-
-5. DISCLAIMER OF WARRANTY. THE PRODUCT IS PROVIDED "AS IS" WITH ALL FAULTS. TO THE EXTENT PERMITTED BY LAW, MOZILLA AND MOZILLA''S DISTRIBUTORS, AND LICENSORS HEREBY DISCLAIM ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION WARRANTIES THAT THE PRODUCT IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE AND NON-INFRINGING. YOU BEAR THE ENTIRE RISK AS TO SELECTING THE PRODUCT FOR YOUR PURPOSES AND AS TO THE QUALITY AND PERFORMANCE OF THE PRODUCT. THIS LIMITATION WILL APPLY NOTWITHSTANDING THE FAILURE OF ESSENTIAL PURPOSE OF ANY REMEDY. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF IMPLIED WARRANTIES, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
-
-6. LIMITATION OF LIABILITY. EXCEPT AS REQUIRED BY LAW, MOZILLA AND ITS DISTRIBUTORS, DIRECTORS, LICENSORS, CONTRIBUTORS AND AGENTS (COLLECTIVELY, THE "MOZILLA GROUP") WILL NOT BE LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES ARISING OUT OF OR IN ANY WAY RELATING TO THIS AGREEMENT OR THE USE OF OR INABILITY TO USE THE PRODUCT, INCLUDING WITHOUT LIMITATION DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, LOST PROFITS, LOSS OF DATA, AND COMPUTER FAILURE OR MALFUNCTION, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE THEORY (CONTRACT, TORT OR OTHERWISE) UPON WHICH SUCH CLAIM IS BASED. THE MOZILLA GROUP''S COLLECTIVE LIABILITY UNDER THIS AGREEMENT WILL NOT EXCEED THE GREATER OF $500 (FIVE HUNDRED DOLLARS) AND THE FEES PAID BY YOU UNDER THE LICENSE (IF ANY). SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL, CONSEQUENTIAL OR SPECIAL DAMAGES, SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
-
-7. EXPORT CONTROLS. This license is subject to all applicable export restrictions. You must comply with all export and import laws and restrictions and regulations of any United States or foreign agency or authority relating to the Product and its use.
-
-8. U.S. GOVERNMENT END-USERS. This Product is a "commercial item," as that term is defined in 48 C.F.R. 2.101, consisting of "commercial computer software" and "commercial computer software documentation," as such terms are used in 48 C.F.R. 12.212 (Sept. 1995) and 48 C.F.R. 227.7202 (June 1995). Consistent with 48 C.F.R. 12.212, 48 C.F.R. 27.405(b)(2) (June 1998) and 48 C.F.R. 227.7202, all U.S. Government End Users acquire the Product with only those rights as set forth therein.
-
-9. MISCELLANEOUS. (a) This Agreement constitutes the entire agreement between Mozilla and you concerning the subject matter hereof, and it may only be modified by a written amendment signed by an authorized executive of Mozilla. (b) Except to the extent applicable law, if any, provides otherwise, this Agreement will be governed by the laws of the state of California, U.S.A., excluding its conflict of law provisions. (c) This Agreement will not be governed by the United Nations Convention on Contracts for the International Sale of Goods. (d) If any part of this Agreement is held invalid or unenforceable, that part will be construed to reflect the parties'' original intent, and the remaining portions will remain in full force and effect. (e) A waiver by either party of any term or condition of this Agreement or any breach thereof, in any one instance, will not waive such term or condition or any subsequent breach thereof. (f) Except as required by law, the controlling language of this Agreement is English. (g) You may assign your rights under this Agreement to any party that consents to, and agrees to be bound by, its terms; the Mozilla Corporation may assign its rights under this Agreement without condition. (h) This Agreement will be binding upon and inure to the benefit of the parties, their successors and permitted assigns.', 'http://www.mozilla.com/en-US/legal/eula/firefox2-en.txt', NULL, NULL, NULL, 'Mozilla Firefox EULA 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '746244e050253713f4d07f11f9e0a43d', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (331, 'NvidiaEULA', 'License For Customer Use of NVIDIA Software 
- 
-IMPORTANT NOTICE -- READ CAREFULLY: This License For Customer Use of NVIDIA Software ("LICENSE") is the agreement which governs use of the software of NVIDIA Corporation and its subsidiaries (“NVIDIA”) downloadable herefrom, including computer software and associated printed materials ("SOFTWARE"). By downloading, installing, copying, or otherwise using the SOFTWARE, you agree to be bound by the terms of this LICENSE. If you do not agree to the terms of this LICENSE, do not download the SOFTWARE.
-
-RECITALS
-
-Use of NVIDIA''s products requires three elements: the SOFTWARE, the hardware on a graphics controller board, and a personal computer. The SOFTWARE is protected by copyright laws and international copyright treaties, as well as other intellectual property laws and treaties. The SOFTWARE is not sold, and instead is only licensed for use, strictly in accordance with this document. The hardware is protected by various patents, and is sold, but this LICENSE does not cover that sale, since it may not necessarily be sold as a package with the SOFTWARE. This LICENSE sets forth the terms and conditions of the SOFTWARE LICENSE only.
-
-1. DEFINITIONS
-
-1.1 Customer. Customer means the entity or individual that downloads the SOFTWARE.
-
-2. GRANT OF LICENSE
-
-2.1 Rights and Limitations of Grant. NVIDIA hereby grants Customer the following non-exclusive, non-transferable right to use the SOFTWARE, with the following limitations:
-
-2.1.1 Rights. Customer may install and use one copy of the SOFTWARE on a single computer, and except for making one back-up copy of the Software, may not otherwise copy the SOFTWARE. This LICENSE of SOFTWARE may not be shared or used concurrently on different computers.
-
-2.1.2 Linux/FreeBSD/OpenSolaris Exception. Notwithstanding the foregoing terms of Section 2.1.1, SOFTWARE designed exclusively for use on the Linux or FreeBSD operating systems, or other operating systems derived from the source code to these operating systems, may be copied and redistributed, provided that the binary files thereof are not modified in any way (except for unzipping of compressed files).
-
-2.1.3 Limitations.
-
-No Reverse Engineering. Customer may not reverse engineer, decompile, or disassemble the SOFTWARE, nor attempt in any other manner to obtain the source code.
-
-No Separation of Components. The SOFTWARE is licensed as a single product. Its component parts may not be separated for use on more than one computer, nor otherwise used separately from the other parts.
-
-No Rental. Customer may not rent or lease the SOFTWARE to someone else.
-
-3. TERMINATION
-
-This LICENSE will automatically terminate if Customer fails to comply with any of the terms and conditions hereof. In such event, Customer must destroy all copies of the SOFTWARE and all of its component parts.
-
-Defensive Suspension. If Customer commences or participates in any legal proceeding against NVIDIA, then NVIDIA may, in its sole discretion, suspend or terminate all license grants and any other rights provided under this LICENSE during the pendency of such legal proceedings.
-
-4. COPYRIGHT
-
-All title and copyrights in and to the SOFTWARE (including but not limited to all images, photographs, animations, video, audio, music, text, and other information incorporated into the SOFTWARE), the accompanying printed materials, and any copies of the SOFTWARE, are owned by NVIDIA, or its suppliers. The SOFTWARE is protected by copyright laws and international treaty provisions. Accordingly, Customer is required to treat the SOFTWARE like any other copyrighted material, except as otherwise allowed pursuant to this LICENSE and that it may make one copy of the SOFTWARE solely for backup or archive purposes.
-
-5. APPLICABLE LAW
-
-This LICENSE shall be deemed to have been made in, and shall be construed pursuant to, the laws of the State of California. The United Nations Convention on Contracts for the International Sale of Goods is specifically disclaimed.
-
-6. DISCLAIMER OF WARRANTIES AND LIMITATION ON LIABILITY
-
-6.1 No Warranties. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED "AS IS" AND NVIDIA AND ITS SUPPLIERS DISCLAIM ALL WARRANTIES, EITHERWHETHER EXPRESS OR, IMPLIED, OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND, FITNESS FOR A PARTICULAR PURPOSE. , TITLE, AND NON-INFRINGEMENT. Without limiting the foregoing, you are solely responsible for determining and verifying that the SOFTWARE that you obtain and install is the appropriate version for your model of graphics controller board, operating system, and computer hardware.
-
-6.2 No Liability for Consequential Damages. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL NVIDIA OR ITS SUPPLIERS BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, LOSS OF DATA, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE, EVEN IF NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-
-7. MISCELLANEOUS
-
-If any provision of this LICENSE is inconsistent with, or cannot be fully enforced under, the law, such provision will be construed as limited to the extent necessary to be consistent with and fully enforceable under the law. This LICENSE is the final, complete and exclusive agreement between the parties relating to the subject matter hereof, and supersedes all prior or contemporaneous understandings and agreements relating to such subject matter, whether oral or written. This LICENSE may only be modified in writing signed by an authorized officer of NVIDIA.  Customer agrees that it will not ship, transfer or export the SOFTWARE into any country, or use the SOFTWARE in any manner, prohibited by the United States Bureau of Industry and Security or any export laws, restrictions or regulations.', 'http://www.nvidia.com/object/nv_swlicense.html', NULL, NULL, NULL, 'NVIDIA EULA', NULL, NULL, NULL, '', NULL, false, false, false, 'c83293d2685d0ef7cd14d33c6d3e9d53', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (332, 'OSL-2.0', 'This software is copyright (c) 2003, 2004 nexB Inc. All rights are reserved.
 
 This software release is licensed to You by nexB Inc. (Licensor) under the terms of the Open Software License 2.0 described below.
@@ -21038,67 +21090,6 @@ FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'http://www.python.org/download/releases/2.7/license/', NULL, NULL, NULL, 'Python License 2.7', NULL, NULL, NULL, '', NULL, false, false, false, '0b4f2608a394e34a7475ba4f16a1cf67', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (335, 'RealNetworks', 'REALNETWORKS, INC.
-REAL LICENSING PROGRAM
-LICENSE SUPPLEMENT
-REDISTRIBUTION NOT PERMITTED
-IMPORTANT: READ CAREFULLY:
-This RealNetworks, Inc. License Supplement (“License Supplement”) is a legal
-agreement between you (either an individual or an entity, “You”) and RealNetworks, Inc.
-and its suppliers and licensors (collectively, “RealNetworks”) for the products (the
-“Software”) listed on the Real Licensing Program invoice (the “Invoice”) provided to
-You by RealNetworks.
-BY CLICKING ON “ACCEPT”, INSTALLING, COPYING OR OTHERWISE USING
-THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS
-LICENSE SUPPLEMENT. IF YOU DO NOT AGREE TO THE TERMS OF THIS
-LICENSE SUPPLEMENT, CLICK THE “I DO NOT ACCEPT” TO TERMINATE THE
-SOFTWARE INSTALLATION PROCESS.
-YOU AGREE THAT YOUR USE OF THE SOFTWARE ACKNOWLEDGES THAT
-YOU HAVE READ THIS LICENSE SUPPLEMENT, UNDERSTAND IT, AND
-AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
-1. SUPPLEMENT. This License Supplement supplements the End User License
-Agreement(s) accompanying the Software (“EULA”). In the event of any conflict
-between the terms of this License Supplement and any EULA, the terms of this License
-Supplement will control. Except for the provisions set forth in this License Supplement,
-all EULA provisions will remain in full force and effect.
-2. ELIGIBILITY. Notwithstanding anything to the contrary in the EULA, the Software
-covered by the EULA and this License Supplement are available only to the following
-types of entities, and You represent and warrant that You are one of the following:
-(a) Corporations, educational institutions, government organizations or not-for-profit
-organizations who deploy the server for their own internal non-commercial use. Wireless
-Network service providers or wireless network operators may not deploy this Software
-within their network(s). (b) End User Network Service Providers of less than 200,000
-subscribers. As used in this License Supplement, "End User Network Service Providers"
-means an entity that provides data network services to consumers or individuals. (c )
-Media Companies with less than fifty million dollars ($50,000,000) in annual revenue.
-As used in this License Supplement, "Media Company" means an entity that provides
-text, audio or video programming to distributors or direct to consumers in exchange for
-fees or based on an advertising business model. Notwithstanding the above, this License
-Supplement is not available to an organization that is using this Software to provide
-content to consumers via an Operator. As used in this License Supplement, "Operator"
-means an organization that provides voice and/or data network services to consumers and
-businesses through wireless wide area network technologies, including but not limited to
-GPRS, Edge, CDMA2000, UMTS, EVDO and WiMax; eligible organizations may either
-own or lease network infrastructure (MVNO).
-The Software is not available to organizations that provide network services to consumers
-or businesses or provide content aggregation and digital media application services to
-businesses.
-3. SEATS. Notwithstanding anything to the contrary in the EULA, You may install the
-number of copies of the Software sufficient to distribute content up to the number of seats
-specified in the applicable Invoice. You may increase the number of seats by purchasing
-additional license rights from RealNetworks.
-4. TERMINATION. This License Supplement and Your right to use the Software
-automatically terminate if You fail to comply with any material provision of this License
-Supplement. No notice will be required from RealNetworks to effect such termination.
-You and RealNetworks may terminate the EULA pursuant to the termination provisions
-set forth therein. Any termination of a EULA automatically terminates this License
-Supplement with respect to the Software covered by such EULA.
-Copyright © 1995-2010 RealNetworks, Inc. and/or its suppliers. 2601 Elliott Ave., Suite
-1000, Seattle, Washington 98121 U.S.A. This product may incorporate one or more of
-the following: U.S. Patent # 5,793,980; U.S. Patent # 5,917,835; U.S. Patent # 6,151,634.
-Other U.S. patents pending. All rights reserved. RealNetworks, Helix, RealPlayer,
-RealAudio, and RealVideo are trademarks or registered trademarks of RealNetworks,
-Inc.', 'http://www.realnetworks.com/uploadedFiles/Support/helix-support/eula-Real-LicProg-Perp-Supp.pdf', NULL, NULL, NULL, 'RealNetworks Real Licensing Program License Supplement', NULL, NULL, NULL, '', NULL, false, false, false, 'b1c092de8db2af33995589f9b41c3945', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (336, 'Interbase', 'INTERBASE PUBLIC LICENSE
 Version 1.0
 
@@ -21440,565 +21431,84 @@ The Original Code is ______________________________________.
 The Initial Developer of the Original Code is ________________________. Portions created by ______________________ are Copyright (C) ______ _______________________. All Rights Reserved.
 
 Contributor(s): ______________________________________.''''', 'http://www.mozilla.org/MPL/MPL-1.0.html', NULL, NULL, NULL, 'Mozilla Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '92617be0c82ce04f0e88e49f0dfca97c', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (340, 'CECILL-1.1', '                FREE SOFTWARE LICENSING AGREEMENT CeCILL
-                ========================================
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (331, 'Nvidia-EULA', 'License For Customer Use of NVIDIA Software 
+ 
+IMPORTANT NOTICE -- READ CAREFULLY: This License For Customer Use of NVIDIA Software ("LICENSE") is the agreement which governs use of the software of NVIDIA Corporation and its subsidiaries (“NVIDIA”) downloadable herefrom, including computer software and associated printed materials ("SOFTWARE"). By downloading, installing, copying, or otherwise using the SOFTWARE, you agree to be bound by the terms of this LICENSE. If you do not agree to the terms of this LICENSE, do not download the SOFTWARE.
 
+RECITALS
 
-Notice
-------
+Use of NVIDIA''s products requires three elements: the SOFTWARE, the hardware on a graphics controller board, and a personal computer. The SOFTWARE is protected by copyright laws and international copyright treaties, as well as other intellectual property laws and treaties. The SOFTWARE is not sold, and instead is only licensed for use, strictly in accordance with this document. The hardware is protected by various patents, and is sold, but this LICENSE does not cover that sale, since it may not necessarily be sold as a package with the SOFTWARE. This LICENSE sets forth the terms and conditions of the SOFTWARE LICENSE only.
 
+1. DEFINITIONS
 
-This Agreement is a free software license that is the result of  discussions
-between its authors  in  order  to  ensure  compliance  with  the  two  main
-principles guiding its drafting:
-   - firstly, its conformity with French law, both as  regards  the  law  of
-     torts and intellectual property law, and the protection that it offers
-     to authors and the holders of economic rights over software.
-   - secondly, compliance with the principles for the distribution  of  free
-     software: access to source codes, extended user-rights.
+1.1 Customer. Customer means the entity or individual that downloads the SOFTWARE.
 
-The following bodies are the authors of this license CeCILL (Ce : CEA, C :
-CNRS, I : INRIA, LL : Logiciel Libre):
+2. GRANT OF LICENSE
 
-Commissariat à l''Energie Atomique - CEA, a public scientific, technical  and
-industrial establishment, having its principal place of  business  at  31-33
-rue de la Fédération, 75752 PARIS cedex 15, France.
+2.1 Rights and Limitations of Grant. NVIDIA hereby grants Customer the following non-exclusive, non-transferable right to use the SOFTWARE, with the following limitations:
 
-Centre National de la Recherche Scientifique -  CNRS,  a  public  scientific
-and technological establishment, having its principal place of  business  at
-3 rue Michel-Ange 75794 Paris cedex 16, France.
+2.1.1 Rights. Customer may install and use one copy of the SOFTWARE on a single computer, and except for making one back-up copy of the Software, may not otherwise copy the SOFTWARE. This LICENSE of SOFTWARE may not be shared or used concurrently on different computers.
 
-Institut National de Recherche en Informatique et en Automatique - INRIA,  a
-public scientific and  technological  establishment,  having  its  principal
-place of business at Domaine de Voluceau, Rocquencourt,  BP  105,  78153  Le
-Chesnay cedex.
+2.1.2 Linux/FreeBSD/OpenSolaris Exception. Notwithstanding the foregoing terms of Section 2.1.1, SOFTWARE designed exclusively for use on the Linux or FreeBSD operating systems, or other operating systems derived from the source code to these operating systems, may be copied and redistributed, provided that the binary files thereof are not modified in any way (except for unzipping of compressed files).
 
+2.1.3 Limitations.
 
-PREAMBLE
---------
+No Reverse Engineering. Customer may not reverse engineer, decompile, or disassemble the SOFTWARE, nor attempt in any other manner to obtain the source code.
 
+No Separation of Components. The SOFTWARE is licensed as a single product. Its component parts may not be separated for use on more than one computer, nor otherwise used separately from the other parts.
 
-The purpose of this Free Software Licensing Agreement is to grant users  the
-right to modify and redistribute  the  software  governed  by  this  license
-within the framework of an "open source" distribution model.
+No Rental. Customer may not rent or lease the SOFTWARE to someone else.
 
-The exercising of these rights is conditional upon certain  obligations  for
-users  so  as  to  ensure  that  this  status  is  retained  for  subsequent
-redistribution operations.
+3. TERMINATION
 
-As a counterpart to the access to the source code and rights to copy, modify
-and redistribute granted by the license,  users are provided only with  a
-limited warranty and  the software''s author, the holder of the economic
-rights,  and  the  successive licensors only have limited liability.
+This LICENSE will automatically terminate if Customer fails to comply with any of the terms and conditions hereof. In such event, Customer must destroy all copies of the SOFTWARE and all of its component parts.
 
-In this respect, it is brought to the user''s attention that the risks
-associated  with loading, using, modifying and/or developing or reproducing
-the  software  by the user given its nature of Free Software,  that  may  
-mean that it is complicated to manipulate, and that also therefore means 
-that it is reserved for developers and experienced professionals having
-in-depth computer knowledge. Users are therefore encouraged to load and test
-the Software''s suitability  as  regards  their  requirements  in  conditions
-enabling  the security of their systems and/or data to be ensured and, more
-generally,  to use and operate  it  in  the  same  conditions  of security.
-This Agreement may be  freely  reproduced  and  published, provided  it  is
-not altered, and that no Articles are either added or removed herefrom. 
+Defensive Suspension. If Customer commences or participates in any legal proceeding against NVIDIA, then NVIDIA may, in its sole discretion, suspend or terminate all license grants and any other rights provided under this LICENSE during the pendency of such legal proceedings.
 
-This Agreement may apply to any or all software for which the holder of  the
-economic rights decides to submit the operation thereof to its provisions.
+4. COPYRIGHT
 
+All title and copyrights in and to the SOFTWARE (including but not limited to all images, photographs, animations, video, audio, music, text, and other information incorporated into the SOFTWARE), the accompanying printed materials, and any copies of the SOFTWARE, are owned by NVIDIA, or its suppliers. The SOFTWARE is protected by copyright laws and international treaty provisions. Accordingly, Customer is required to treat the SOFTWARE like any other copyrighted material, except as otherwise allowed pursuant to this LICENSE and that it may make one copy of the SOFTWARE solely for backup or archive purposes.
 
-Article 1  - DEFINITIONS
-------------------------
+5. APPLICABLE LAW
 
+This LICENSE shall be deemed to have been made in, and shall be construed pursuant to, the laws of the State of California. The United Nations Convention on Contracts for the International Sale of Goods is specifically disclaimed.
 
-For the purposes of this Agreement, when the following expressions  commence
-with a capital letter, they shall have the following meaning:
+6. DISCLAIMER OF WARRANTIES AND LIMITATION ON LIABILITY
 
-Agreement: means this Licensing Agreement, and any or all of its  subsequent
-versions.
+6.1 No Warranties. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED "AS IS" AND NVIDIA AND ITS SUPPLIERS DISCLAIM ALL WARRANTIES, EITHERWHETHER EXPRESS OR, IMPLIED, OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND, FITNESS FOR A PARTICULAR PURPOSE. , TITLE, AND NON-INFRINGEMENT. Without limiting the foregoing, you are solely responsible for determining and verifying that the SOFTWARE that you obtain and install is the appropriate version for your model of graphics controller board, operating system, and computer hardware.
 
-Software: means the software in its Object  Code  and/or  Source  Code  form
-and, where applicable, its documentation, "as  is"  at  the  time  when  the
-Licensee accepts the Agreement.
+6.2 No Liability for Consequential Damages. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL NVIDIA OR ITS SUPPLIERS BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, LOSS OF DATA, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE, EVEN IF NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-Initial Software: means the Software in its Source Code and/or  Object  Code
-form and, where applicable, its documentation, "as is" at the time  when  it
-is distributed for the first time under the  terms  and  conditions  of  the
-Agreement.
+7. MISCELLANEOUS
 
-Modified  Software:  means  the  Software   modified   by   at   least   one
-Contribution.
+If any provision of this LICENSE is inconsistent with, or cannot be fully enforced under, the law, such provision will be construed as limited to the extent necessary to be consistent with and fully enforceable under the law. This LICENSE is the final, complete and exclusive agreement between the parties relating to the subject matter hereof, and supersedes all prior or contemporaneous understandings and agreements relating to such subject matter, whether oral or written. This LICENSE may only be modified in writing signed by an authorized officer of NVIDIA.  Customer agrees that it will not ship, transfer or export the SOFTWARE into any country, or use the SOFTWARE in any manner, prohibited by the United States Bureau of Industry and Security or any export laws, restrictions or regulations.', 'http://www.nvidia.com/object/nv_swlicense.html', NULL, NULL, NULL, 'NVIDIA EULA', NULL, NULL, NULL, '', NULL, false, false, false, 'aa4775fccf03e8d5a14cae0f24072fc7', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (329, 'MPL-EULA-2.0', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
 
-Source Code: means all the Software''s  instructions  and  program  lines  to
-which access is required so as to modify the Software.
+Version 2.0
 
-Object Code: means the binary files originating from the compilation of  the
-Source Code.
+A SOURCE CODE VERSION OF CERTAIN FIREFOX BROWSER FUNCTIONALITY THAT YOU MAY USE, MODIFY AND DISTRIBUTE IS AVAILABLE TO YOU FREE-OF-CHARGE FROM WWW.MOZILLA.ORG UNDER THE MOZILLA PUBLIC LICENSE and other open source software licenses.
 
-Holder: means  the  holder  of  the  economic  rights  over  the  Initial
-Software.
+The accompanying executable code version of Mozilla Firefox and related documentation (the "Product") is made available to you under the terms of this MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT (THE "AGREEMENT"). BY CLICKING THE "ACCEPT" BUTTON, OR BY INSTALLING OR USING THE MOZILLA FIREFOX BROWSER, YOU ARE CONSENTING TO BE BOUND BY THE AGREEMENT. IF YOU DO NOT AGREE TO THE TERMS AND CONDITIONS OF THIS AGREEMENT, DO NOT CLICK THE "ACCEPT" BUTTON, AND DO NOT INSTALL OR USE ANY PART OF THE MOZILLA FIREFOX BROWSER.
 
-Licensee(s): mean(s) the Software user(s) having accepted the Agreement.
+DURING THE MOZILLA FIREFOX INSTALLATION PROCESS, AND AT LATER TIMES, YOU MAY BE GIVEN THE OPTION OF INSTALLING ADDITIONAL COMPONENTS FROM THIRD-PARTY SOFTWARE PROVIDERS. THE INSTALLATION AND USE OF THOSE THIRD-PARTY COMPONENTS MAY BE GOVERNED BY ADDITIONAL LICENSE AGREEMENTS.
 
-Contributor: means a Licensee having made at least one Contribution.
+1. LICENSE GRANT. The Mozilla Corporation grants you a non-exclusive license to use the executable code version of the Product. This Agreement will also govern any software upgrades provided by Mozilla that replace and/or supplement the original Product, unless such upgrades are accompanied by a separate license, in which case the terms of that license will govern.
 
-Licensor: means the Holder, or any or all other individual or legal  entity,
-that distributes the Software under the Agreement.
+2. TERMINATION. If you breach this Agreement your right to use the Product will terminate immediately and without notice, but all provisions of this Agreement except the License Grant (Paragraph 1) will survive termination and continue in effect. Upon termination, you must destroy all copies of the Product.
 
-Contributions: mean any or  all  modifications,  corrections,  translations,
-adaptations and/or new functionalities integrated into the Software  by  any
-or all Contributor, and the Static Modules.
+3. PROPRIETARY RIGHTS. Portions of the Product are available in source code form under the terms of the Mozilla Public License and other open source licenses (collectively, "Open Source Licenses") at www.mozilla.org. Nothing in this Agreement will be construed to limit any rights granted under the Open Source Licenses. Subject to the foregoing, Mozilla, for itself and on behalf of its licensors, hereby reserves all intellectual property rights in the Product, except for the rights expressly granted in this Agreement. You may not remove or alter any trademark, logo, copyright or other proprietary notice in or on the Product. This license does not grant you any right to use the trademarks, service marks or logos of Mozilla or its licensors.
 
-Module: means a set of sources files  including  their  documentation  that,
-once compiled in executable form, enables supplementary  functionalities  or
-services to be developed in addition to those offered by the Software.
+4. PRIVACY POLICY. You agree to the Mozilla Firefox Privacy Policy, made available online at http://www.mozilla.com/legal/privacy/, as that policy may be changed from time to time. When Mozilla changes the policy in a material way a notice will be posted on the website at www.mozilla.com, and when any change is made in the privacy policy, the updated policy will be posted at the above link. It is your responsibility to ensure that you understand the terms of the privacy policy, so you should periodically check the current version of the policy for changes.
 
-Dynamic Module: means any or all module, created by  the  Contributor,  that
-is independent of the Software, so that this module and the Software are  in
-two different executable forms that are  run  in  separate  address  spaces,
-with one calling the other when they are run.
+5. DISCLAIMER OF WARRANTY. THE PRODUCT IS PROVIDED "AS IS" WITH ALL FAULTS. TO THE EXTENT PERMITTED BY LAW, MOZILLA AND MOZILLA''S DISTRIBUTORS, AND LICENSORS HEREBY DISCLAIM ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION WARRANTIES THAT THE PRODUCT IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE AND NON-INFRINGING. YOU BEAR THE ENTIRE RISK AS TO SELECTING THE PRODUCT FOR YOUR PURPOSES AND AS TO THE QUALITY AND PERFORMANCE OF THE PRODUCT. THIS LIMITATION WILL APPLY NOTWITHSTANDING THE FAILURE OF ESSENTIAL PURPOSE OF ANY REMEDY. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF IMPLIED WARRANTIES, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
 
-Static Module: means any or all  module,  created  by  the  Contributor  and
-connected to the Software by a static link that  makes  their  object  codes
-interdependent. This module and the Software to which it is  connected,  are
-combined in a single executable.
+6. LIMITATION OF LIABILITY. EXCEPT AS REQUIRED BY LAW, MOZILLA AND ITS DISTRIBUTORS, DIRECTORS, LICENSORS, CONTRIBUTORS AND AGENTS (COLLECTIVELY, THE "MOZILLA GROUP") WILL NOT BE LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES ARISING OUT OF OR IN ANY WAY RELATING TO THIS AGREEMENT OR THE USE OF OR INABILITY TO USE THE PRODUCT, INCLUDING WITHOUT LIMITATION DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, LOST PROFITS, LOSS OF DATA, AND COMPUTER FAILURE OR MALFUNCTION, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE THEORY (CONTRACT, TORT OR OTHERWISE) UPON WHICH SUCH CLAIM IS BASED. THE MOZILLA GROUP''S COLLECTIVE LIABILITY UNDER THIS AGREEMENT WILL NOT EXCEED THE GREATER OF $500 (FIVE HUNDRED DOLLARS) AND THE FEES PAID BY YOU UNDER THE LICENSE (IF ANY). SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL, CONSEQUENTIAL OR SPECIAL DAMAGES, SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
 
-Parties: mean both the Licensee and the Licensor.
+7. EXPORT CONTROLS. This license is subject to all applicable export restrictions. You must comply with all export and import laws and restrictions and regulations of any United States or foreign agency or authority relating to the Product and its use.
 
-These expressions may be used both in singular and plural form.
+8. U.S. GOVERNMENT END-USERS. This Product is a "commercial item," as that term is defined in 48 C.F.R. 2.101, consisting of "commercial computer software" and "commercial computer software documentation," as such terms are used in 48 C.F.R. 12.212 (Sept. 1995) and 48 C.F.R. 227.7202 (June 1995). Consistent with 48 C.F.R. 12.212, 48 C.F.R. 27.405(b)(2) (June 1998) and 48 C.F.R. 227.7202, all U.S. Government End Users acquire the Product with only those rights as set forth therein.
 
-
-Article 2 - PURPOSE
--------------------
-
-
-The purpose of the  Agreement  is  to  enable  the  Licensor  to  grant  the
-Licensee a free, non-exclusive, transferable and worldwide License  for  the
-Software as set forth in  Article  5  hereinafter  for  the  whole  term  of
-protection of the rights over said Software.
-
-
-Article 3 - ACCEPTANCE
-----------------------
-
-
-3.1. The  Licensee  shall  be  deemed  as  having  accepted  the  terms  and
-conditions of  this  Agreement  by  the  occurrence  of  the  first  of  the
-following events:
-- (i) loading the Software by any or all means, notably,  by  downloading
-  from a remote server, or by loading from a physical medium;
-- (ii) the first time the Licensee exercises any of  the  rights  granted
-  hereunder.
-
-3.2. One copy  of  the  Agreement,  containing  a  notice  relating  to  the
-specific nature of the  Software,  to  the  limited  warranty,  and  to  the
-limitation to use by experienced users has been  provided  to  the  Licensee
-prior to its acceptance as set forth in Article  3.1  hereinabove,  and  the
-Licensee hereby acknowledges that it is aware thereof.
-
-
-Article 4 - EFFECTIVE DATE AND TERM
------------------------------------
-
-
-4.1. EFFECTIVE DATE
-
-The Agreement shall become effective on the date when it is accepted by  the
-Licensee as set forth in Article 3.1.
-
-4.2. TERM
-
-The Agreement  shall  remain  in  force  during  the  whole  legal  term  of
-protection of the economic rights over the Software.
-
-
-Article 5 - SCOPE OF THE RIGHTS GRANTED
----------------------------------------
-
-
-The  Licensor  hereby  grants  to  the  Licensee,  that  accepts  such,  the
-following rights as regards the Software for any or all  use,  and  for  the
-term of the Agreement, on the basis of the terms and  conditions  set  forth
-hereinafter.
-
-Otherwise, the Licensor grants to the Licensee free of  charge  exploitation
-rights on  the  patents  he  holds  on  whole  or  part  of  the  inventions
-implemented in the Software.
-
-5.1. RIGHTS OF USE
-
-The Licensee is authorized to use the Software, unrestrictedly,  as  regards
-the fields of application, with it being  hereinafter  specified  that  this
-relates to:
-- permanent or temporary reproduction of all or part of the Software  by
-  any or all means and in any or all form.
-- loading, displaying, running, or storing the Software on any or all
-  medium.
-- entitlement to observe, study or test the operation thereof so  as  to
-  establish the ideas and principles that form the basis for any or  all
-  constituent elements of said  Software.  This  shall  apply  when  the
-  Licensee  carries  out  any  or  all  loading,  displaying,   running,
-  transmission or storage operation as regards the Software, that it  is
-  entitled to carry out hereunder.
-
-5.2. entitlement to make CONTRIBUTIONS
-
-The right to make Contributions includes  the  right  to  translate,  adapt,
-arrange, or make any or all modification to the Software, and the  right  to
-reproduce the resulting Software.
-
-The Licensee is authorized to make any or all Contribution to  the  Software
-provided that it  explicitly  mentions  its  name  as  the  author  of  said
-Contribution and the date of the development thereof.
-
-5.3. DISTRIBUTION AND PUBLICATION RIGHTS
-
-In particular, the right of distribution and publication includes the  right
-to transmit and communicate the Software to the general  public  on  any  or
-all medium, and by any or all means, and the  right  to  market,  either  in
-consideration of a fee, or free of charge, a  copy or copies of the Software 
-by means of any or all process.
-The Licensee is further authorized to redistribute copies  of  the  modified
-or  unmodified  Software  to  third  parties  according  to  the  terms  and
-conditions set forth hereinafter.
-
-5.3.1. REDISTRIBUTION OF SOFTWARE WITHOUT MODIFICATION
-
-The Licensee is authorized to redistribute true copies of  the  Software  in
-Source Code or Object Code form, provided that said redistribution  complies
-with all the provisions of the Agreement and is accompanied by:
-- a copy of the Agreement,
-- a notice relating to the limitation of both  the  Licensor''s  warranty
-  and liability as set forth in Articles 8 and 9,
-and  that,  in  the  event  that  only  the  Software''s   Object   Code   is
-redistributed, the Licensee allows future  Licensees  unhindered  access  to
-the Software''s full Source  Code  by  providing  them  with  the  terms  and
-conditions for access thereto, it being understood that the additional  cost
-of acquiring the Source Code shall not exceed the cost of  transferring  the
-data.
-
-5.3.2. REDISTRIBUTION OF MODIFIED  SOFTWARE
-
-When the Licensee makes a  Contribution  to  the  Software,  the  terms  and
-conditions for the redistribution of the Modified  Software  shall  then  be
-subject to all the provisions hereof.
-
-The Licensee is authorized to redistribute the Modified Software, in  Source
-Code or Object Code form, provided that said  redistribution  complies  with
-all the provisions of the Agreement and is accompanied by:
-- a copy of the Agreement,
-- a notice relating to the limitation of both  the  Licensor''s  warranty
-  and liability as set forth in Articles 8 and 9,
-and that, in the event that only the  Modified  Software''s  Object  Code  is
-redistributed, the Licensee allows future  Licensees  unhindered  access  to
-the Modified Software''s full Source Code by providing them  with  the  terms
-and conditions for access thereto, it being understood that  the  additional
-cost of acquiring the Source Code shall not exceed the cost of  transferring
-the data.
-
-
-5.3.3. redistribution OF DYNAMIC MODULES
-
-When the Licensee has developed a Dynamic Module, the terms  and  conditions
-hereof do not apply to said Dynamic Module, that  may  be  distributed under 
-a separate Licensing Agreement.
-
-5.3.4. COMPATIBILITY WITH THE GPL LICENSE
-
-In the event that the Modified or unmodified Software is included in a code
-that is subject to the provisions of the GPL License, the Licensee is
-authorized to redistribute the whole under the GPL License.
-
-In the event that the Modified Software includes a code that is  subject  to
-the  provisions  of  the  GPL  License,  the  Licensee  is   authorized   to
-redistribute the Modified Software under the GPL License.
-
-
-Article 6  - INTELLECTUAL PROPERTY
-----------------------------------
-
-
-6.1. OVER THE INITIAL SOFTWARE
-
-The Holder owns the economic rights over the Initial Software.  Any  or  all
-use of the Initial Software is subject to  compliance  with  the  terms  and
-conditions under which the Holder has elected to distribute its work and  no
-one shall be entitled to  and it shall have sole entitlement to  modify  the
-terms and conditions for the distribution of said Initial Software.
-
-The Holder undertakes to maintain the distribution of the  Initial  Software
-under the conditions of  the  Agreement,  for  the  duration  set  forth  in
-article 4.2..
-
-6.2. OVER THE CONTRIBUTIONS
-
-The intellectual property rights over the Contributions belong to  the
-holder of the economic rights as designated by effective legislation.
-
-6.3. OVER THE DYNAMIC MODULES
-
-The Licensee having  developed  a  Dynamic  Module  is  the  holder  of  the
-intellectual property rights over said Dynamic Module and is free to  choose
-the agreement that shall govern its distribution.
-
-6.4. JOINT PROVISIONS
-
-6.4.1. The Licensee expressly undertakes:
-- not to remove, or modify, in  any  or  all  manner,  the  intellectual
-  property notices affixed to the Software;
-- to reproduce said notices, in an identical manner, in  the  copies  of
-  the Software.
-
-6.4.2. The Licensee undertakes not to directly or  indirectly  infringe  the
-intellectual property rights of the Holder and/or Contributors and to  take,
-where applicable, vis-à-vis its staff,  any  or  all  measures  required  to
-ensure respect for said intellectual property rights of  the  Holder  and/or
-Contributors.
-
-
-Article 7  - RELATED SERVICES
------------------------------
-
-
-7.1. Under no circumstances shall  the  Agreement  oblige  the  Licensor  to
-provide technical assistance or maintenance services for the Software.
-
-However, the Licensor is entitled to offer  this  type  of  service. The
-terms  and  conditions  of  such  technical  assistance,  and/or   such 
-maintenance, shall then be set forth in  a  separate  instrument.  Only  the
-Licensor offering said  maintenance  and/or  technical  assistance  services
-shall incur liability therefor.
-
-7.2. Similarly, any or all Licensor  shall  be  entitled  to  offer  to  its
-Licensees, under its own responsibility, a  warranty,  that  shall  only  be
-binding upon itself, for the  redistribution  of  the  Software  and/or  the
-Modified Software, under terms and conditions  that  it  shall  decide  upon
-itself. Said warranty,  and  the  financial  terms  and  conditions  of  its
-application, shall be subject to a separate instrument executed between  the
-Licensor and the Licensee.
-
-
-Article 8  - LIABILITY
-----------------------
-
-
-8.1. Subject to the provisions of Article 8.2, should the Licensor  fail  to
-fulfill all or part of its obligations  hereunder,  the  Licensee  shall  be
-entitled to claim compensation for the direct loss suffered  as a result of
-a fault on the part of the Licensor, subject to providing evidence of it. 
-
-8.2. The Licensor''s liability is limited to the commitments made under  this
-Licensing Agreement and shall not be incurred as a result ,  in  particular:
-(i) of loss due the Licensee''s total  or  partial  failure  to  fulfill  its
-obligations, (ii) direct or consequential loss due to the Software''s use  or
-performance that  is  suffered  by  the  Licensee,  when  the  latter  is  a
-professional  using  said  Software  for  professional  purposes  and  (iii)
-consequential loss due to the Software''s use  or  performance.  The  Parties
-expressly agree that any or all pecuniary or business  loss  (i.e.  loss  of
-data, loss  of  profits,  operating  loss,  loss  of  customers  or  orders,
-opportunity cost, any disturbance to business  activities)  or  any  or  all
-legal proceedings instituted against the Licensee by a  third  party,  shall
-constitute consequential loss and shall not provide entitlement  to  any  or
-all compensation from the Licensor.
-
-
-Article 9  - WARRANTY
----------------------
-
-
-9.1. The  Licensee  acknowledges  that  the  current  situation  as  regards
-scientific and  technical  know-how  at  the  time  when  the  Software  was
-distributed did not enable all possible uses to be tested and verified,  nor
-for the presence of any or all faults to be detected. In this  respect,  the
-Licensee''s attention has been drawn to the risks  associated  with  loading,
-using, modifying and/or developing and reproducing  the  Software  that  are
-reserved for experienced users.
-
-The Licensee shall be responsible for verifying, by any or  all  means,  the
-product''s suitability for its requirements, its due and proper  functioning,
-and for ensuring that it  shall  not  cause  damage  to  either  persons  or
-property.
-
-9.2. The Licensor hereby represents, in good faith, that it is  entitled  to
-grant all the rights on the  Software (including in  particular  the  rights
-set forth in Article 5 hereof over the Software).
-
-9.3. The Licensee acknowledges that the Software is supplied "as is" by  the
-Licensor without any or all other express  or  tacit  warranty,  other  than
-that provided for in Article 9.2 and, in  particular,  without  any  or  all
-warranty as to its market  value,  its  secured,  innovative  or  relevant
-nature.
-
-Specifically, the Licensor does not warrant that the Software is  free  from
-any or all error, that it shall  operate  continuously,  that  it  shall  be
-compatible  with   the   Licensee''s   own   equipment   and   its   software
-configuration, nor that it shall meet the Licensee''s requirements.
-
-9.4. The Licensor does not either expressly  or  tacitly  warrant  that  the
-Software does not  infringe  any  or  all  third  party  intellectual  right
-relating to a patent, software or  to  any  or  all  other  property  right.
-Moreover, the Licensor shall not hold the Licensee harmless against  any  or
-all proceedings for infringement that may be instituted in  respect  of  the
-use, modification and redistribution of the Software.  Nevertheless,  should
-such proceedings be instituted against  the  Licensee,  the  Licensor  shall
-provide it with  technical  and  legal  assistance  for  its  defense.  Such
-technical and legal assistance shall  be  decided  upon  on  a  case-by-case
-basis  between  the  relevant  Licensor  and  the  Licensee  pursuant  to  a
-memorandum of understanding. The Licensor disclaims any or all liability  as
-regards the Licensee''s use of the Software''s  name.  No  warranty  shall  be
-provided as regards the existence of prior  rights  over  the  name  of  the
-Software and as regards the existence of a trademark.
-
-
-Article 10  - TERMINATION
--------------------------
-
-
-10.1. In  the  event  of  a  breach  by  the  Licensee  of  its  obligations
-hereunder, the Licensor may automatically terminate  this  Agreement  thirty
-(30) days after notice has been  sent  to  the  Licensee  and  has  remained
-ineffective.
-
-10.2. The  Licensee  whose  Agreement  is  terminated  shall  no  longer  be
-authorized to use, modify or distribute the Software. However,  any  or  all
-licenses that it may have granted prior to  termination  of  the  Agreement
-shall remain valid subject to their having been granted in  compliance  with
-the terms and conditions hereof.
-
-
-Article 11  - MISCELLANEOUS PROVISIONS
---------------------------------------
-
-
-11.1. EXCUSABLE EVENTS
-
-Neither Party shall be liable for any or all delay, or  failure  to  perform
-the Agreement, that may be attributable to an event  of  force  majeure,  an
-act of God or an outside cause, such as, notably, defective functioning,  or
-interruptions affecting  the  electricity  or  telecommunications  networks,
-blocking of the network following a virus attack, the  intervention  of  the
-government authorities, natural disasters, water damage, earthquakes,  fire,
-explosions, strikes and labor unrest, war, etc.
-
-11.2. The fact that either Party may fail, on one or several  occasions,  to
-invoke  one  or  several  of  the  provisions   hereof,   shall   under   no
-circumstances be interpreted as being a waiver by the  interested  Party  of
-its entitlement to invoke said provision(s) subsequently.
-
-11.3. The Agreement cancels and replaces  any  or  all  previous  agreement,
-whether written or oral, between the Parties and having  the  same  purpose,
-and  constitutes  the  entirety  of  the  agreement  between  said   Parties
-concerning said purpose. No supplement or  modification  to  the  terms  and
-conditions hereof shall be effective as regards the  Parties  unless  it  is
-made in writing and signed by their duly authorized representatives.
-
-11.4. In the event that one or several of  the  provisions  hereof  were  to
-conflict with a current or future applicable act or legislative  text,  said
-act or legislative text shall take precedence, and the  Parties  shall  make
-the necessary amendments so  as  to  be  in  compliance  with  said  act  or
-legislative  text.  All  the  other  provisions  shall   remain   effective.
-Similarly, the fact that a provision of  the  Agreement  may   be  null  and
-void, for any reason whatsoever, shall not cause the Agreement  as  a  whole
-to be null and void.
-
-11.5. LANGUAGE
-
-The Agreement is drafted in both French and  English.  In  the  event  of  a
-conflict as  regards  construction,  the  French  version  shall  be  deemed
-authentic.
-
-
-Article 12  - NEW VERSIONS OF THE AGREEMENT
--------------------------------------------
-
-
-12.1. Any or all person is authorized to duplicate and distribute copies  of
-this Agreement.
-
-12.2. So as to ensure coherence, the wording of this Agreement is  protected
-and may only be modified by the authors of the  License,  that  reserve  the
-right to periodically publish updates or  new  versions  of  the  Agreement,
-each with a separate number. These subsequent versions may address new issues
-encountered by Free Software.
-
-12.3. Any  or  all  Software  distributed  under  a  given  version  of  the
-Agreement may only be subsequently distributed under  the  same  version  of
-the Agreement, or  a  subsequent  version,  subject  to  the  provisions  of
-article 5.3.4.
-
-
-Article 13 - GOVERNING LAW AND JURISDICTION
--------------------------------------------
-
-
-13.1. The Agreement is  governed  by  French  law.   The  Parties  agree  to
-endeavor to settle the disagreements or disputes that may arise  during  the
-performance of the Agreement out-of-court.
-
-13.2. In the absence of an out-of-court settlement within two (2) months  as
-from their occurrence, and unless emergency proceedings are  necessary,  the
-disagreements or disputes shall be  referred  to  the  Paris  Courts  having
-jurisdiction, by the first Party to take action.
-
-
-                                                   Version 1.1 of 10/26/2004
-
-
-
-
-
-
-
-
-
-', 'http://www.cecill.info/licences/Licence_CeCILL_V1.1-US.txt', NULL, NULL, NULL, 'CeCILL License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '2ef6443e7f7f6a6ce51926d6bc7aa493', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (341, 'Comtrol', 'COMTROL CORPORATION ON THE WORLD WIDE WEB IS PROVIDED SUBJECT TO THE FOLLOWING TERMS AND CONDITIONS:
-
-
-These Terms and Conditions shall be governed by and construed in accordance with the law of the United States of America.
-
-USAGE OF THIS WEB SITE IMPLYS ACCEPTANCE IN FULL OF THESE TERMS AND GUIDELINES.
-
-
-This Web Site and the information, names, images, pictures, logos and icons regarding or relating to Comtrol Corporation and its affiliates, products and services is provided "AS IS" and on an "AS AVAILABLE" basis without any representation or endorsement made and without warranty of any kind, whether expressed or implied, including, but not limited to the implied warranties of merchantability, fitness for a particular purpose or non-infringement. In no event shall Comtrol Corporation or its subsidiaries, affiliates, contractors or respective employees, be liable for any damages, including without limitation, special, indirect or consequential damages, or any damages whatsoever resulting from loss of use, data or profits, whether in an action of contract, negligence or other tortious action, arising out of or in connection with the use or performance of this Web Site.
-
-
-This Web Site may include publications with technical inaccuracies or typographical errors that will be corrected as they are discovered at Comtrol Corporation''s sole discretion. Also, changes are periodically added to the information contained herein. These corrections and changes may be incorporated into this Web Site at a late date. Comtrol Corporation may at any time make modifications, improvements and/or changes to these Terms and Conditions, the information, names, images, pictures, logos and icons described in this publication or the products and services referred to within, with or without notice. As the Internet is maintained independently at thousands of sites around the world, the information, names, images, pictures, logos and icons that may be accessed may originate outside the boundaries of Comtrol Corporation''s Web Site. Therefore, Comtrol Corporation excludes any obligation or responsibility regarding any content derived, obtained, accessed within, through or outside Comtrol Corporation''s own Web Site.
-
-Information contained on this Web site is based on Comtrol product comparisons, pricing, or other information that is believed accurate as of the date this information was published to the Web site. Comtrol encourages all customers to verify the information presented here for accuracy as of the date referenced on that particular Web page.
-
-
-You may not modify, copy, distribute, transmit, display, perform, reproduce, publish, license, create derivative works from, transfer, or sell any information, software, products, or services obtained from this Web site.
-
-
-Permission to use documents (such as white papers, press releases, data sheets, and FAQs) is granted, provided that (1) the below copyright notice appears in all copies and that both the copyright notice and this permission notice appear, (2) use of such documents is for informational purposes only and will not appear on any network computer or broadcast in any media, and (3) no modifications of any documents are made without the express written consent of Comtrol Corporation.
-
-Accredited educational institutions may download and reproduce documents for classroom distribution. Distribution outside the classroom requires the express written permission of Comtrol Corporation.
-
-Use for any other purpose is expressly prohibited by law, and may result in severe civil and criminal penalties. Violators will be prosecuted to the maximum extent possible.
-
-Elements of the Comtrol.com Web site or any other Comtrol owned, operated, licensed or controlled site (including, but not limited to: DeviceMaster.com and RocketPort.com). Elements of Comtrol Web sites are protected by trade dress, trademark, unfair competition, and other laws and may not be copied or imitated in whole or in part. No logo, graphic, sound, or image from ANY Comtrol Web site may be copied or retransmitted unless expressly permitted by Comtrol Corporation.
-
-
-Any licensed software available from, or represented on, this Web site is the copyrighted work of Comtrol Corporation and/or its suppliers. Use of the software is governed by the terms of the license agreement, if any, which accompanies, is included with, or proceeds in way of written contract for purchase of the software. An end user will be unable to install any software that is governed by a license agreement, unless he or she first agrees to the license agreement terms.
-
-
-Comtrol offers some product enhancements, available for download to extend the usefulness of limited products that have already been purchased. These downloads, including hardware drivers, patches to firmware, drivers, or other software, are offered with no warranty and may be available for limited, undetermined periods of time. While some additional drivers and enhancements are offered, no guarantee is made that any hardware or software products will be forward compatible beyond what is available at the time of purchase. Some enhancements may be offered free of charge, others may require licensed purchase, and others may require the purchase of new products to ensure compatibility in the current environment.
-
-
-As a condition of your use of Comtrol Web sites, you will not use these pages or sites for any purpose that is illegal or prohibited by these terms, conditions, guidelines, or as otherwise prohibited by statute. You may not use these sites and materials herein in any manner that could damage, disable, overburden, or in any way impair Comtrol servers or equipment, or interfere with any other party''s use of these Web sites.
-
-You may not attempt to gain unauthorized access to Comtrol resources including accounts, computer systems, or networks connected to any Comtrol server through hacking, password mining or any other means. You may not attempt to gain access to any other materials not intended to be available through Comtrol Web sites.
-
-
-Comtrol provides links to third party Web sites solely for the convenience of the user and is not responsible for the content and any link contained within any linked site, or any changes or updates to such sites. A link from Comtrol''s Web sites does not imply endorsement of such sites.
-
-Consideration for the addition of a link to a Comtrol site should be addressed to info@comtrol.com, but no guarantees as the acceptance of a request are made, and if a request is not accepted, Comtrol reserves the right to withhold any reason for denial.
-
-
-Comtrol Corporation provides access to Comtrol Corporation international data and, therefore, may contain references or cross references to Comtrol Corporation products and services that are not (readily) available in any particular country. Such reference does not imply that Comtrol Corporation in your country intends to market such products or services. All actions resulting from a search of this data must be related to solutions using only products and services announced by Comtrol Corporation in your country.
-
-The names, images, logos and pictures identifying Comtrol Corporation products and services in many countries are proprietary marks of Comtrol Corporation and/or its subsidiaries or affiliates ("Comtrol Corporation"). Nothing contained herein shall be construed as conferring by implication, estoppel or otherwise any license or right under any patent or trademark of Comtrol Corporation or any third party. Except as expressly provided above, nothing contained herein shall be construed as conferring any license or right under Comtrol Corporation copyright or other intellectual property rights.', 'http://www.comtrol.com/pub/en/terms-of-use/', NULL, NULL, NULL, 'Comtrol User License', NULL, NULL, NULL, '', NULL, false, false, false, 'ca406610b90d5b5456bd2f79fe8a0e3d', 1);
+9. MISCELLANEOUS. (a) This Agreement constitutes the entire agreement between Mozilla and you concerning the subject matter hereof, and it may only be modified by a written amendment signed by an authorized executive of Mozilla. (b) Except to the extent applicable law, if any, provides otherwise, this Agreement will be governed by the laws of the state of California, U.S.A., excluding its conflict of law provisions. (c) This Agreement will not be governed by the United Nations Convention on Contracts for the International Sale of Goods. (d) If any part of this Agreement is held invalid or unenforceable, that part will be construed to reflect the parties'' original intent, and the remaining portions will remain in full force and effect. (e) A waiver by either party of any term or condition of this Agreement or any breach thereof, in any one instance, will not waive such term or condition or any subsequent breach thereof. (f) Except as required by law, the controlling language of this Agreement is English. (g) You may assign your rights under this Agreement to any party that consents to, and agrees to be bound by, its terms; the Mozilla Corporation may assign its rights under this Agreement without condition. (h) This Agreement will be binding upon and inure to the benefit of the parties, their successors and permitted assigns.', 'http://www.mozilla.com/en-US/legal/eula/firefox2-en.txt', NULL, NULL, NULL, 'Mozilla Firefox EULA 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '184182107aa67a26f0a36c964d40c256', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (342, 'Docbook', 'GNU Free Documentation License
 
 Version 1.1, March 2000
@@ -22961,39 +22471,6 @@ Each version of the License is given a distinguishing version number. If the Doc
 An MMC is "eligible for relicensing" if it is licensed under this License, and if all works that were first published under this License somewhere other than this MMC, and subsequently incorporated in whole or in part into the MMC, (1) had no cover texts or invariant sections, and (2) were thus incorporated prior to November 1, 2008.
 
 The operator of an MMC Site may republish an MMC contained in the site under CC-BY-SA on the same site at any time before August 1, 2009, provided the MMC is eligible for relicensing.', 'http://www.gnu.org/copyleft/fdl.html', NULL, NULL, NULL, 'GNU Free Documentation License 1.3', NULL, NULL, NULL, '', NULL, false, false, false, '8c6a722f1cd5b77b36a713b1e01e7c86', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (345, 'UCWare', 'SOFTWARE LICENSE AGREEMENT
-
-This user license agreement (the "AGREEMENT") is an agreement between you (individual or single entity) and UCWare Group (UCWARE.COM), for the UCWare Group software (the "SOFTWARE") that is accompanying this AGREEMENT.
-
-NOTICE TO USERS: CAREFULLY READ THE FOLLOWING LEGAL AGREEMENT. USE OF THE SOFTWARE PROVIDED WITH THIS AGREEMENT CONSTITUTES YOUR ACCEPTANCE OF THESE TERMS.
-
-The SOFTWARE is distributes as try-before-you-buy. This means:
-
-1. All copyrights to SOFTWARE are exclusively owned by the UCWare Group.
-
-2. The SOFTWARE is not sold. It is licensed.
-
-3. Anyone may evaluate SOFTWARE during a test period of 30 days. Following this test period, if you wish to continue to use the SOFTWARE, you MUST register.
-
-4. Software developed using the trial version must not be distributed to end-users for profit, or otherwise, except so far as educational or demonstration purposes in a program developed specifically for the purpose of demonstrating the functionality of this SOFTWARE.
-
-5. Once registered, the user is granted a non-exclusive license to use SOFTWARE on as many computers as according to the license type and to the number of licenses purchased, for any legal purpose. The registered SOFTWARE may not be rented or leased.
-
-6. The unregistered trial version SOFTWARE may be freely distributed, with exceptions noted below, provided the distribution package is not modified in any way.
-
-a. No person or company may distribute separate parts of the package without written permission of the copyright owner.
-
-b. The unregistered trial version SOFTWARE may not be distributed inside of any other software package without written permission of the copyright owner.
-
-c. Hacks/crack, keys or key generators may not be included on the same distribution.
-
-7. You may not use, copy, emulate, clone, rent, lease, sell, modify, decompile, disassemble, otherwise reverse engineer, or transfer the licensed program, or any subset of the licensed program, except as provided for in this agreement. Any such unauthorized use shall result in immediate and automatic termination of this license and may result in criminal and/or civil prosecution.
-
-8. SOFTWARE keyfiles may not be distributed.
-
-9. THE SOFTWARE IS DISTRIBUTED "AS IS". NO WARRANTY OF ANY KIND IS EXPRESSED OR IMPLIED. YOU USE AT YOUR OWN RISK. NEITHER THE AUTHOR NOR THE AGENTS OF THE AUTHOR WILL BE LIABLE FOR DATA LOSS, DAMAGES, LOSS OF PROFITS OR ANY OTHER KIND OF LOSS WHILE USING OR MISUSING THIS SOFTWARE.
-
-10. All rights not expressly granted here are reserved by UCWare Group.', 'http://www.ucware.com/jexec/documentation/license.html', NULL, NULL, NULL, 'UCWare Software License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, 'f81ae259f7325e9070ea95dc40612021', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (346, 'W3C', 'W3C SOFTWARE NOTICE AND LICENSE
 This work (and included software, documentation such as READMEs, or other related items) is being provided by the copyright holders under the following license.
 License
@@ -23006,99 +22483,6 @@ Disclaimers
 THIS SOFTWARE AND DOCUMENTATION IS PROVIDED "AS IS," AND COPYRIGHT HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE SOFTWARE OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
 COPYRIGHT HOLDERS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE SOFTWARE OR DOCUMENTATION.
 The name and trademarks of copyright holders may NOT be used in advertising or publicity pertaining to the software without specific, written prior permission. Title to copyright in this software and any associated documentation will at all times remain with copyright holders.', 'http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231', NULL, NULL, NULL, 'W3C Software Notice and License', NULL, NULL, NULL, '', NULL, false, false, false, '718a860503e862d47e4904ba9d361afe', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (347, 'Yahoo', 'Software License
-
-Welcome to Yahoo! software (the "Yahoo! Software"). By clicking the "I Agree" button below, you agree to these software license terms (the "Software License") that supplement the Yahoo! Terms of Service ("TOS") below, also located at http://info.yahoo.com/legal/us/yahoo/utos/utos-173.html. If you disagree with any of the terms below, Yahoo! does not grant you a license to use the Yahoo! Software; click the "I Disagree" or "Cancel" button to exit the installer.
-
-Information collected through Yahoo! Software by Yahoo! is subject to the full Yahoo! Privacy Policy: http://info.yahoo.com/privacy/us/yahoo/. To find out more about setting your preferences and the information collected by the Yahoo! Software and used by Yahoo!, go to: http://info.yahoo.com/privacy/us/yahoo/toolbar/details.html.
-
-Yahoo! reserves the right to update and change, from time to time, this Software License and all documents incorporated by reference. You can always find the most recent version of this Software License at http://info.yahoo.com/legal/us/yahoo/toolbar/tbeula/tbeula-282.html. Yahoo! may change this Software License by posting a new version without notice to you. Use of the Yahoo! Software after such change constitutes acceptance of such changes.
-
-Licensed Uses and Restrictions.
-
-By accepting the terms of this Agreement, you represent to Yahoo! Inc. and its affiliates (collectively, "Yahoo!") that you are at least 18 years old. The Yahoo! Software applications, documentation, and local computer files installed or utilized by the installer application (collectively, the "Yahoo! Software") are owned by Yahoo!, or Yahoo!''s licensors and content and data providers ("Yahoo! Licensors"), and are licensed to you on a worldwide (except as limited below), non-exclusive, non-sublicenseable basis on the terms and conditions set forth herein. This Software License defines legal use of the Yahoo! Software, all updates, revisions, substitutions, and any copies of the Yahoo! Software made by or for you. All rights not expressly granted to you are reserved by Yahoo! or their respective owners.
-
-YOU MAY install and personally use the Yahoo! Software and any updates provided by Yahoo! (in its sole discretion) in object code form on a personal computer owned or controlled by you and may use the Yahoo! Software for your own noncommercial use or benefit. Your license to the Yahoo! Software under this Software License continues until it is terminated by either party. You may terminate the Software License by discontinuing use of all or any of the Yahoo! Software and by destroying all your copies of the applicable Yahoo! Software. To uninstall the Yahoo! Software, you may use the standard Microsoft Windows “Add/Remove Programs” menu in either the My Computer/Control Panel option or the Settings/Control Panel option. Once you access the Microsoft Windows Control Panel option, select “Add/Remove Programs”, and then the name of the Yahoo! Software. The Yahoo! Software will be uninstalled and will no longer be visible when you restart Internet Explorer. This Software License terminates automatically if you violate any term of this Software License, Yahoo! publicly posts a written notice of termination on Yahoo!''s web site, or Yahoo! sends a written notice of termination to you.
-
-YOU MAY NOT:
-
-(i) decompile, reverse engineer, disassemble, modify, rent, lease, loan, distribute, or create derivative works (as defined by the U.S. Copyright Act) or improvements (as defined by U.S. patent law) from the Yahoo! Software or any portion thereof.
-
-(ii) incorporate the Yahoo! Software into any computer chip or the firmware of a computing device manufactured by or for you.
-
-(iii) use the Yahoo! Software in any unlawful manner, for any unlawful purpose, or in any manner inconsistent with TOS or this Software License.
-
-(iv) you may not use the Yahoo! Software to operate nuclear facilities, life support, or other mission critical application where human life or property may be at stake. You understand that the Yahoo! Software is not designed for such purposes and that its failure in such cases could lead to death, personal injury, or severe property or environmental damage for which Yahoo! is not responsible.
-
-(v) use, or export the Yahoo! Software in violation of applicable U.S. laws or regulations.
-
-(vi) sell, lease, loan, distribute, transfer, or sublicense the Yahoo! Software or access thereto or derive income from the use or provision of the Yahoo! Software, whether for direct commercial or monetary gain or otherwise, without Yahoo!''s prior, express, written permission.
-
-Ownership and Relationship of Parties; Support.
-
-The Yahoo! Software is protected by copyrights, trademarks, service marks, international treaties, and/or other proprietary rights and laws of the U.S. and other countries. You agree to abide by all applicable proprietary rights laws and other laws, as well as any additional copyright notices or restrictions contained in this Software License and in the TOS. Yahoo! and Yahoo!''s Licensors own all rights, title, and interest in and to their applicable contributions to the Yahoo! Software. This Software License grants you no right, title, or interest in any intellectual property owned or licensed by Yahoo!, including (but not limited to) the Yahoo! Software and Yahoo! trademarks, and creates no relationship between yourself and Yahoo!''s Licensors, or between you and Yahoo! other than that of Yahoo! to licensee.
-
-The Yahoo! Software and its components contain software licensed from Yahoo! Licensors ("Licensor Software"). The Licensor Software enables the Yahoo! Software to perform certain functions, including, without limitation, access proprietary data on third -party data servers. You agree that you will use the Yahoo! Software, and any data accessed through the Yahoo! Software, for your own personal non-commercial use only. You agree not to assign, copy, transfer, or transmit the Yahoo! Software, or any data obtained through the Yahoo! Software, to any third party. Your license to use the Yahoo! Software, its components, and any third -party data, will terminate if you violate these restrictions. If your license terminates, you agree to cease any and all use of the Yahoo! Software, its components, and any third -party data. All rights in any third -party data, any third -party software, and any third -party data servers, including all ownership rights are reserved and remain with the respective third parties. You agree that these third parties may enforce their rights under this Agreement against you directly in their own name.
-
-Yahoo! may elect to provide you with customer support and/or software upgrades, enhancements, or modifications for the Yahoo! Software (collectively, "Support"), in its sole discretion, and may terminate such Support at any time without notice to you. Yahoo! may change, suspend, or discontinue any aspect of the Yahoo! Software at any time, including the availability of any Yahoo! Software feature, database, or content. Yahoo! may also impose limits on certain features and services or restrict your access to parts or all of the Yahoo! Software or the Yahoo! web site without notice or liability. Additionally, in order to enhance the security of the Yahoo! Software or to fix bugs, from time to time, Yahoo! may automatically download and install updates to the Yahoo! Software with or without prior notification.
-
-Yahoo! Search Protection Auto-Updater.
-
-If you installed Yahoo! Search Protection, from time to time, Yahoo! may automatically download and install the latest version of Yahoo! Search Protection without prior notification. Visit the Privacy Module to turn off or change your settings for this feature and find out more.
-
-Fees and Payments.
-
-Also Yahoo! reserves the right to charge fees for future use of or access to the Yahoo! Software or the Yahoo! services and web sites (collectively, "Yahoo! Software Services") in Yahoo!''s sole discretion. If Yahoo! decides to charge for the Yahoo! Software Services, such charges will be disclosed to you prior.
-
-Disclaimer of Warranties by Yahoo!.
-
-USE OF THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THROUGH THE YAHOO! SOFTWARE (SUCH AS STOCK QUOTES, MARKET INFORMATION, NEWS, OR OTHER INFORMATION) IS AT YOUR SOLE RISK. THEY ARE PROVIDED "AS IS."
-
-ANY MATERIAL OR SERVICE DOWNLOADED OR OTHERWISE OBTAINED THROUGH THE USE OF THE YAHOO! SOFTWARE (SUCH AS ANY ANTI-SPYWARE FEATURE) IS DONE AT YOUR OWN DISCRETION AND RISK, AND YOU WILL BE SOLELY RESPONSIBLE FOR ANY DAMAGE TO YOUR COMPUTER SYSTEM OR LOSS OF DATA THAT RESULTS FROM THE DOWNLOAD AND/OR USE OF ANY SUCH MATERIAL OR SERVICE.
-
-YAHOO!, ITS OFFICERS, DIRECTORS, EMPLOYEES, CONTRACTORS, AGENTS, AFFILIATES, AND ASSIGNS (COLLECTIVELY, "YAHOO! ENTITIES") AND YAHOO! LICENSORS DO NOT REPRESENT THAT THE YAHOO! SOFTWARE OR ANY DATA ACCESSED THEREFROM IS APPROPRIATE OR AVAILABLE FOR USE OUTSIDE THE UNITED STATES.
-
-THE YAHOO! ENTITIES AND YAHOO! LICENSORS EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, RELATING TO THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THEREFROM, OR THE ACCURACY, TIMELINESS, COMPLETENESS, OR ADEQUACY OF THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THEREFROM, INCLUDING THE IMPLIED WARRANTIES OF TITLE, MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
-
-THE YAHOO! SOFTWARE IS NOT DESIGNED, INTENDED OR LICENSED FOR USE IN HAZARDOUS ENVIRONMENTS REQUIRING FAIL-SAFE CONTROLS, INCLUDING WITHOUT LIMITATION, THE DESIGN, CONSTRUCTION, MAINTENANCE OR OPERATION OF NUCLEAR FACILITIES, AIRCRAFT NAVIGATION OR COMMUNICATION SYSTEMS, AIR TRAFFIC CONTROL, AND LIFE SUPPORT OR WEAPONS SYSTEMS. YAHOO! SPECIFICALLY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTY OF FITNESS FOR SUCH PURPOSES.
-
-IF THE YAHOO! SOFTWARE OR ANY DATA ACCESSED THEREFROM PROVES DEFECTIVE, YOU (AND NOT THE YAHOO! ENTITIES OR THE YAHOO! LICENSORS) ASSUME THE ENTIRE COST OF ALL REPAIR OR INJURY OF ANY KIND, EVEN IF THE YAHOO! ENTITIES OR YAHOO! LICENSORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH A DEFECT OR DAMAGES. SOME JURISDICTIONS DO NOT ALLOW RESTRICTIONS ON IMPLIED WARRANTIES SO SOME OF THESE LIMITATIONS MAY NOT APPLY TO YOU.
-
-Limitation of Liability.
-
-THE YAHOO! ENTITIES AND YAHOO! LICENSORS WILL NOT BE LIABLE TO YOU FOR CLAIMS AND LIABILITIES OF ANY KIND ARISING OUT OF OR IN ANY WAY RELATED TO THE USE OF THE YAHOO! SOFTWARE BY YOURSELF OR BY THIRD PARTIES, TO THE USE OR NON-USE OF ANY BROKERAGE FIRM OR DEALER, OR TO THE SALE OR PURCHASE OF ANY SECURITY, WHETHER SUCH CLAIMS AND LIABILITIES ARE BASED ON ANY LEGAL OR EQUITABLE THEORY.
-
-THE YAHOO! ENTITIES AND YAHOO! LICENSORS ARE NOT LIABLE TO YOU FOR ANY AND ALL DIRECT, INCIDENTAL, SPECIAL, INDIRECT, OR CONSEQUENTIAL DAMAGES ARISING OUT OF OR RELATED TO ANY THIRD -PARTY SOFTWARE, ANY DATA ACCESSED THROUGH THE YAHOO! SOFTWARE, YOUR USE OR INABILITY TO USE OR ACCESS THE YAHOO!
-
-SOFTWARE, OR ANY DATA PROVIDED THROUGH THE YAHOO! SOFTWARE, WHETHER SUCH DAMAGE CLAIMS ARE BROUGHT UNDER ANY THEORY OF LAW OR EQUITY. DAMAGES EXCLUDED BY THIS CLAUSE INCLUDE, WITHOUT LIMITATION, THOSE FOR LOSS OF BUSINESS PROFITS, INJURY TO PERSON OR PROPERTY, BUSINESS INTERRUPTION, LOSS OF BUSINESS OR PERSONAL INFORMATION. SOME JURISDICTIONS DO NOT ALLOW LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES SO THIS RESTRICTION MAY NOT APPLY TO YOU.
-
-INFORMATION PROVIDED THROUGH THE YAHOO! SOFTWARE, INCLUDING STOCK QUOTES, ANALYSIS, MARKET INFORMATION, NEWS, AND FINANCIAL DATA, MAY BE DELAYED, INACCURATE, OR CONTAIN ERRORS OR OMISSIONS, AND THE YAHOO! ENTITIES AND YAHOO! LICENSORS WILL HAVE NO LIABILITY WITH RESPECT THERETO. YAHOO! MAY CHANGE OR DISCONTINUE ANY ASPECT OR FEATURE OF THE YAHOO! SOFTWARE OR THE USE OF ALL OR ANY FEATURES OR TECHNOLOGY IN THE YAHOO! SOFTWARE AT ANY TIME WITHOUT PRIOR NOTICE TO YOU, INCLUDING, BUT NOT LIMITED TO, CONTENT, HOURS OF AVAILABILITY.
-
-Indemnification.
-
-You agree to indemnify and hold the Yahoo! Entities harmless from any claim or demand, including reasonable attorneys'' fees, made by any third party in connection with or arising out of your use of the Yahoo! Software, your violation of any terms or conditions of this Software License, your violation of applicable laws, or your violation of any rights of another person or entity.
-
-Government End Users.
-
-If the Yahoo! Software and related documentation are supplied to or purchased by or on behalf of the United States Government, then the Yahoo! Software is deemed to be "commercial software" as that term is used in the Federal Acquisition Regulation system. Rights of the United States shall not exceed the minimum rights set forth in FAR 52.227- 19 for "restricted computer software." All other terms and conditions of this Software License apply.
-
-Controlling Law.
-
-This Software License and the relationship between you and Yahoo! is governed by the laws of the State of California without regard to its conflict of law provisions. You and Yahoo! agree to submit to the personal and exclusive jurisdiction of the courts located within the county of Santa Clara, California. The United Nations Convention on the International Sale of Goods does not apply to this Software License.
-
-No General Waiver; Severability.
-
-The failure of Yahoo! to exercise or enforce any right or provision of this Software License shall not constitute a waiver of such right or provision. If any provision of this Software License is found by a court of competent jurisdiction to be invalid, the parties nevertheless agree that the court should endeavor to give effect to the parties'' intentions as reflected in the provision, and the other provisions of this Software License remain in full force and effect.
-
-Complete Agreement.
-
-This Software License and the TOS constitute the entire understanding between the parties respecting use of the Yahoo! Software, superseding all prior agreements between you and Yahoo!. In the event of any conflict between the terms and conditions of this Software License and those in the TOS, the terms and conditions of this Software License will control, except to the extent that the TOS impose additional restrictions and liabilities on your actions. In the event of a conflict between the terms of this Software License and the TOS, this Software License will control to the extent of such conflict.
-
-Surviving Provisions.
-
-Sections 1.b, 2, and 4 through 12, will survive any termination of this Agreement.
-
-Version date: February 4, 2009', 'http://info.yahoo.com/legal/us/yahoo/toolbar/tbeula/tbeula-282.html', NULL, NULL, NULL, 'Yahoo Software License', NULL, NULL, NULL, '', NULL, false, false, false, '51b7698e3bb7ffab18a461c8e8450835', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (348, 'LGPL-2.1', '                  GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999
 
@@ -24006,35 +23390,6 @@ Important Recommendations
    entitled to make reasonable conjectures as to which files comprise
    the Work.
 ', 'http://www.latex-project.org/lppl/lppl-1-3a.txt', NULL, NULL, NULL, 'LaTeX Project Public License 1.3a', NULL, NULL, NULL, '', NULL, false, false, false, '4659937d50f278b8d5c7c9a89f2692b8', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (350, 'MozillaEULA-3.0', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
-
-Version 3.0, May 2008
-
-A SOURCE CODE VERSION OF CERTAIN FIREFOX BROWSER FUNCTIONALITY THAT YOU MAY USE, MODIFY AND DISTRIBUTE IS AVAILABLE TO YOU FREE-OF-CHARGE FROM WWW.MOZILLA.ORG UNDER THE MOZILLA PUBLIC LICENSE and other open source software licenses.
-
-The accompanying executable code version of Mozilla Firefox and related documentation (the "Product") is made available to you under the terms of this MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT (THE "AGREEMENT").  BY CLICKING THE "ACCEPT" BUTTON, OR BY INSTALLING OR USING THE MOZILLA FIREFOX BROWSER, YOU ARE CONSENTING TO BE BOUND BY THE AGREEMENT.  IF YOU DO NOT AGREE TO THE TERMS AND CONDITIONS OF THIS AGREEMENT, DO NOT CLICK THE "ACCEPT" BUTTON, AND DO NOT INSTALL OR USE ANY PART OF THE MOZILLA FIREFOX BROWSER.
-
-DURING THE MOZILLA FIREFOX INSTALLATION PROCESS, AND AT LATER TIMES, YOU MAY BE GIVEN THE OPTION OF INSTALLING ADDITIONAL COMPONENTS FROM THIRD-PARTY SOFTWARE PROVIDERS.  THE INSTALLATION AND USE OF THOSE THIRD-PARTY COMPONENTS MAY BE GOVERNED BY ADDITIONAL LICENSE AGREEMENTS.
-
-1.  LICENSE GRANT.  The Mozilla Corporation grants you a non-exclusive license to use the executable code version of the Product.  This Agreement will also govern any software upgrades provided by Mozilla that replace and/or supplement the original Product, unless such upgrades are accompanied by a separate license, in which case the terms of that license will govern.
-
-2.  TERMINATION.  If you breach this Agreement your right to use the Product will terminate immediately and without notice, but all provisions of this Agreement except the License Grant (Paragraph 1) will survive termination and continue in effect.  Upon termination, you must destroy all copies of the Product.
-
-3.  PROPRIETARY RIGHTS.  Portions of the Product are available in source code form under the terms of the Mozilla Public License and other open source licenses (collectively, "Open Source Licenses") at http://www.mozilla.org/MPL.  Nothing in this Agreement will be construed to limit any rights granted under the Open Source Licenses.  Subject to the foregoing, Mozilla, for itself and on behalf of its licensors, hereby reserves all intellectual property rights in the Product, except for the rights expressly granted in this Agreement.  You may not remove or alter any trademark, logo, copyright or other proprietary notice in or on the Product.  This license does not grant you any right to use the trademarks, service marks or logos of Mozilla or its licensors.
-
-4.  PRIVACY POLICY.  You agree to the Mozilla Firefox Privacy Policy, made available online at http://www.mozilla.com/legal/privacy/, as that policy may be changed from time to time.  When Mozilla changes the policy in a material way a notice will be posted on the website at www.mozilla.com and when any change is made in the privacy policy, the updated policy will be posted at the above link.  It is your responsibility to ensure that you understand the terms of the privacy policy, so you should periodically check the current version of the policy for changes.
-
-5.  WEBSITE INFORMATION SERVICES.  Mozilla and its contributors, licensors and partners work to provide the most accurate and up-to-date phishing and malware information.  However, they cannot guarantee that this information is comprehensive and error-free: some risky sites may not be identified, and some safe sites may be identified in error.
-
-6.  DISCLAIMER OF WARRANTY.  THE PRODUCT IS PROVIDED "AS IS" WITH ALL FAULTS.  TO THE EXTENT PERMITTED BY LAW, MOZILLA AND MOZILLA''S DISTRIBUTORS, AND LICENSORS HEREBY DISCLAIM ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION WARRANTIES THAT THE PRODUCT IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE AND NON-INFRINGING.  YOU BEAR THE ENTIRE RISK AS TO SELECTING THE PRODUCT FOR YOUR PURPOSES AND AS TO THE QUALITY AND PERFORMANCE OF THE PRODUCT.  THIS LIMITATION WILL APPLY NOTWITHSTANDING THE FAILURE OF ESSENTIAL PURPOSE OF ANY REMEDY.  SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF IMPLIED WARRANTIES, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
-
-7.  LIMITATION OF LIABILITY.  EXCEPT AS REQUIRED BY LAW, MOZILLA AND ITS DISTRIBUTORS, DIRECTORS, LICENSORS, CONTRIBUTORS AND AGENTS (COLLECTIVELY, THE "MOZILLA GROUP") WILL NOT BE LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES ARISING OUT OF OR IN ANY WAY RELATING TO THIS AGREEMENT OR THE USE OF OR INABILITY TO USE THE PRODUCT, INCLUDING WITHOUT LIMITATION DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, LOST PROFITS, LOSS OF DATA, AND COMPUTER FAILURE OR MALFUNCTION, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE THEORY (CONTRACT, TORT OR OTHERWISE) UPON WHICH SUCH CLAIM IS BASED.  THE MOZILLA GROUP''S COLLECTIVE LIABILITY UNDER THIS AGREEMENT WILL NOT EXCEED THE GREATER OF $500 (FIVE HUNDRED DOLLARS) AND THE FEES PAID BY YOU UNDER THE LICENSE (IF ANY).  SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL, CONSEQUENTIAL OR SPECIAL DAMAGES, SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
-
-8.  EXPORT CONTROLS.  This license is subject to all applicable export restrictions.  You must comply with all export and import laws and restrictions and regulations of any United States or foreign agency or authority relating to the Product and its use.
-
-9.  U.S. GOVERNMENT END-USERS.  This Product is a "commercial item," as that term is defined in 48 C.F.R. 2.101, consisting of "commercial computer software" and "commercial computer software documentation," as such terms are used in 48 C.F.R. 12.212 (Sept. 1995) and 48 C.F.R. 227.7202 (June 1995).  Consistent with 48 C.F.R. 12.212, 48 C.F.R. 27.405(b)(2) (June 1998) and 48 C.F.R. 227.7202, all U.S. Government End Users acquire the Product with only those rights as set forth therein.
-
-10.  MISCELLANEOUS.  (a) This Agreement constitutes the entire agreement between Mozilla and you concerning the subject matter hereof, and it may only be modified by a written amendment signed by an authorized executive of Mozilla.  (b) Except to the extent applicable law, if any, provides otherwise, this Agreement will be governed by the laws of the state of California, U.S.A., excluding its conflict of law provisions.  (c) This Agreement will not be governed by the United Nations Convention on Contracts for the International Sale of Goods.  (d) If any part of this Agreement is held invalid or unenforceable, that part will be construed to reflect the parties'' original intent, and the remaining portions will remain in full force and effect.  (e) A waiver by either party of any term or condition of this Agreement or any breach thereof, in any one instance, will not waive such term or condition or any subsequent breach thereof. (f) Except as required by law, the controlling language of this Agreement is English.  (g) You may assign your rights under this Agreement to any party that consents to, and agrees to be bound by, its terms; the Mozilla Corporation may assign its rights under this Agreement without condition.  (h) This Agreement will be binding upon and inure to the benefit of the parties, their successors and permitted assigns.', 'http://www.mozilla.com/en-US/legal/eula/firefox3-en.txt', NULL, NULL, NULL, 'Mozilla Firefox EULA 3.0', NULL, NULL, NULL, '', NULL, false, false, false, '38450d563477c29f78c8b5f6f3bafa34', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (352, 'Python-2.2.3', 'Python 2.2.3 license
 
 This is the official license for the Python 2.2.3 release:
@@ -25054,6 +24409,35 @@ Everyone is permitted to copy and distribute copies of this Agreement, but in or
 
 This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation.
 ', 'http://www.eclipse.org/legal/cpl-v05.html', NULL, NULL, NULL, 'Common Public License 0.5', NULL, NULL, NULL, '', NULL, false, false, false, '81d9a83c6f23e5e002edecc368849521', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (350, 'MPL-EULA-3.0', 'MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT
+
+Version 3.0, May 2008
+
+A SOURCE CODE VERSION OF CERTAIN FIREFOX BROWSER FUNCTIONALITY THAT YOU MAY USE, MODIFY AND DISTRIBUTE IS AVAILABLE TO YOU FREE-OF-CHARGE FROM WWW.MOZILLA.ORG UNDER THE MOZILLA PUBLIC LICENSE and other open source software licenses.
+
+The accompanying executable code version of Mozilla Firefox and related documentation (the "Product") is made available to you under the terms of this MOZILLA FIREFOX END-USER SOFTWARE LICENSE AGREEMENT (THE "AGREEMENT").  BY CLICKING THE "ACCEPT" BUTTON, OR BY INSTALLING OR USING THE MOZILLA FIREFOX BROWSER, YOU ARE CONSENTING TO BE BOUND BY THE AGREEMENT.  IF YOU DO NOT AGREE TO THE TERMS AND CONDITIONS OF THIS AGREEMENT, DO NOT CLICK THE "ACCEPT" BUTTON, AND DO NOT INSTALL OR USE ANY PART OF THE MOZILLA FIREFOX BROWSER.
+
+DURING THE MOZILLA FIREFOX INSTALLATION PROCESS, AND AT LATER TIMES, YOU MAY BE GIVEN THE OPTION OF INSTALLING ADDITIONAL COMPONENTS FROM THIRD-PARTY SOFTWARE PROVIDERS.  THE INSTALLATION AND USE OF THOSE THIRD-PARTY COMPONENTS MAY BE GOVERNED BY ADDITIONAL LICENSE AGREEMENTS.
+
+1.  LICENSE GRANT.  The Mozilla Corporation grants you a non-exclusive license to use the executable code version of the Product.  This Agreement will also govern any software upgrades provided by Mozilla that replace and/or supplement the original Product, unless such upgrades are accompanied by a separate license, in which case the terms of that license will govern.
+
+2.  TERMINATION.  If you breach this Agreement your right to use the Product will terminate immediately and without notice, but all provisions of this Agreement except the License Grant (Paragraph 1) will survive termination and continue in effect.  Upon termination, you must destroy all copies of the Product.
+
+3.  PROPRIETARY RIGHTS.  Portions of the Product are available in source code form under the terms of the Mozilla Public License and other open source licenses (collectively, "Open Source Licenses") at http://www.mozilla.org/MPL.  Nothing in this Agreement will be construed to limit any rights granted under the Open Source Licenses.  Subject to the foregoing, Mozilla, for itself and on behalf of its licensors, hereby reserves all intellectual property rights in the Product, except for the rights expressly granted in this Agreement.  You may not remove or alter any trademark, logo, copyright or other proprietary notice in or on the Product.  This license does not grant you any right to use the trademarks, service marks or logos of Mozilla or its licensors.
+
+4.  PRIVACY POLICY.  You agree to the Mozilla Firefox Privacy Policy, made available online at http://www.mozilla.com/legal/privacy/, as that policy may be changed from time to time.  When Mozilla changes the policy in a material way a notice will be posted on the website at www.mozilla.com and when any change is made in the privacy policy, the updated policy will be posted at the above link.  It is your responsibility to ensure that you understand the terms of the privacy policy, so you should periodically check the current version of the policy for changes.
+
+5.  WEBSITE INFORMATION SERVICES.  Mozilla and its contributors, licensors and partners work to provide the most accurate and up-to-date phishing and malware information.  However, they cannot guarantee that this information is comprehensive and error-free: some risky sites may not be identified, and some safe sites may be identified in error.
+
+6.  DISCLAIMER OF WARRANTY.  THE PRODUCT IS PROVIDED "AS IS" WITH ALL FAULTS.  TO THE EXTENT PERMITTED BY LAW, MOZILLA AND MOZILLA''S DISTRIBUTORS, AND LICENSORS HEREBY DISCLAIM ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION WARRANTIES THAT THE PRODUCT IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE AND NON-INFRINGING.  YOU BEAR THE ENTIRE RISK AS TO SELECTING THE PRODUCT FOR YOUR PURPOSES AND AS TO THE QUALITY AND PERFORMANCE OF THE PRODUCT.  THIS LIMITATION WILL APPLY NOTWITHSTANDING THE FAILURE OF ESSENTIAL PURPOSE OF ANY REMEDY.  SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF IMPLIED WARRANTIES, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
+
+7.  LIMITATION OF LIABILITY.  EXCEPT AS REQUIRED BY LAW, MOZILLA AND ITS DISTRIBUTORS, DIRECTORS, LICENSORS, CONTRIBUTORS AND AGENTS (COLLECTIVELY, THE "MOZILLA GROUP") WILL NOT BE LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES ARISING OUT OF OR IN ANY WAY RELATING TO THIS AGREEMENT OR THE USE OF OR INABILITY TO USE THE PRODUCT, INCLUDING WITHOUT LIMITATION DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, LOST PROFITS, LOSS OF DATA, AND COMPUTER FAILURE OR MALFUNCTION, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE THEORY (CONTRACT, TORT OR OTHERWISE) UPON WHICH SUCH CLAIM IS BASED.  THE MOZILLA GROUP''S COLLECTIVE LIABILITY UNDER THIS AGREEMENT WILL NOT EXCEED THE GREATER OF $500 (FIVE HUNDRED DOLLARS) AND THE FEES PAID BY YOU UNDER THE LICENSE (IF ANY).  SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL, CONSEQUENTIAL OR SPECIAL DAMAGES, SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
+
+8.  EXPORT CONTROLS.  This license is subject to all applicable export restrictions.  You must comply with all export and import laws and restrictions and regulations of any United States or foreign agency or authority relating to the Product and its use.
+
+9.  U.S. GOVERNMENT END-USERS.  This Product is a "commercial item," as that term is defined in 48 C.F.R. 2.101, consisting of "commercial computer software" and "commercial computer software documentation," as such terms are used in 48 C.F.R. 12.212 (Sept. 1995) and 48 C.F.R. 227.7202 (June 1995).  Consistent with 48 C.F.R. 12.212, 48 C.F.R. 27.405(b)(2) (June 1998) and 48 C.F.R. 227.7202, all U.S. Government End Users acquire the Product with only those rights as set forth therein.
+
+10.  MISCELLANEOUS.  (a) This Agreement constitutes the entire agreement between Mozilla and you concerning the subject matter hereof, and it may only be modified by a written amendment signed by an authorized executive of Mozilla.  (b) Except to the extent applicable law, if any, provides otherwise, this Agreement will be governed by the laws of the state of California, U.S.A., excluding its conflict of law provisions.  (c) This Agreement will not be governed by the United Nations Convention on Contracts for the International Sale of Goods.  (d) If any part of this Agreement is held invalid or unenforceable, that part will be construed to reflect the parties'' original intent, and the remaining portions will remain in full force and effect.  (e) A waiver by either party of any term or condition of this Agreement or any breach thereof, in any one instance, will not waive such term or condition or any subsequent breach thereof. (f) Except as required by law, the controlling language of this Agreement is English.  (g) You may assign your rights under this Agreement to any party that consents to, and agrees to be bound by, its terms; the Mozilla Corporation may assign its rights under this Agreement without condition.  (h) This Agreement will be binding upon and inure to the benefit of the parties, their successors and permitted assigns.', 'http://www.mozilla.com/en-US/legal/eula/firefox3-en.txt', NULL, NULL, NULL, 'Mozilla Firefox EULA 3.0', NULL, NULL, NULL, '', NULL, false, false, false, '158e26120f7246f23650d5a5eac99522', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (357, 'EPL-1.0', 'Eclipse Public License - v 1.0
 
 THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC LICENSE ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT''S ACCEPTANCE OF THIS AGREEMENT.
@@ -29774,252 +29158,6 @@ To apply the ImageMagick License to your work, attach the following boilerplate 
    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
    License for the specific language governing permissions and limitations
    under the License.', 'http://www.imagemagick.org/script/license.php', NULL, NULL, NULL, 'ImageMagick EULA', NULL, NULL, NULL, '', NULL, false, false, false, '5570b6376c02a6c77e31fd7d3b78e45c', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (389, 'Intel', 'IMPORTANT - READ BEFORE COPYING, INSTALLING OR USING.
-Do not copy, install, or use the Materials provided under this license agreement ("Agreement"), until you
-have carefully read the following terms and conditions.
-By copying, installing, or otherwise using the Materials, you agree to be bound by the terms of this
-Agreement. If you do not agree to the terms of this Agreement, do not copy, install, or use the
-Materials.
-End User License Agreement for the Intel(R) Software Development Products
-1. LICENSE DEFINITIONS:
-A. "Materials" are defined as the software, documentation, license key codes and other materials,
-including any updates and upgrade thereto, for the applicable Intel Software Development
-Product (which may be found at http://www.intel.com/software/products/), that are provided to
-you under this Agreement. Materials also include the Redistributables as defined below.
-B. "Redistributables" are the files listed in the following text files that may be included in the
-Materials for the applicable Intel Software Development Product: clredist.txt, credist.txt,
-fredist.txt, redist.txt..
-C. “Cluster OpenMP Library”, is comprised of the files listed in the “clredist.txt” file specified above,
-is the Intel(R) Cluster OpenMP* Library add-on option to the Intel(R) C++ Compiler for Linux*
-and Intel(R) Fortran Compiler for Linux* products (“Intel Compiler for Linux”). The use of the
-Cluster OpenMP Library is conditioned on having a valid license from Intel for the Cluster
-OpenMP Library and for either Intel Compiler for Linux, and further is governed by the terms
-and conditions of the license agreement for applicable the Intel Compiler for Linux.
-D. “Source Code” is defined as the Materials provided in human readable format, whether
-unmodified or modified by you.
-E. "Sample Source" is the Source Code file(s) that: (i) demonstrate certain limited functions
-included in the binary libraries of the Intel(R) Integrated Performance Primitives (“Intel(R) IPPs”);
-(ii) are identified as Intel IPP sample source code; and (iii) are obtained separately from Intel
-after you register your copy of the Intel Integrated Performance Primitives product with Intel.
-F. “Microsoft Platforms” means any current and future Microsoft operating system products,
-Microsoft run-time technologies (such as the .NET Framework), and Microsoft application
-platforms (such as Microsoft Office or Microsoft Dynamics) that Microsoft offers.
-2. LICENSE GRANT:
-A. Subject to all of the terms and conditions of this Agreement, Intel Corporation ("Intel") grants to
-you a non-exclusive, non-assignable, copyright license to use the Materials.
-B. Subject to all of the terms and conditions of this Agreement, Intel grants to you a non-exclusive,
-non-assignable copyright license to modify the Materials, or any portions thereof, that are (i)
-provided in Source Code form or, (ii) are defined as Redistributables and are provided in text
-form.
-C. Subject to all of the terms and conditions of this Agreement and any specific restrictions which
-may appear in the Redistributables text files, Intel grants to you a non-exclusive, nonassignable,
-fully-paid copyright license to distribute (except if you received the Materials under
-an Evaluation License as specified below) the Redistributables, or any portions thereof, as part
-of the product or application you developed using the Materials. If such application is a
-software development library, then attribution, as specified in the product release notes of the
-corresponding Materials, shall be displayed prominently in that application’s product
-documentation and on the application’s product web site.
-3. LICENSE RESTRICTIONS:
-A. If you receive your first copy of the Materials electronically, and a second copy on media, then
-you may use the second copy only in accordance with your applicable license stated in this
-Agreement, or for backup or archival purposes. You may not provide the second copy to
-another user.
-B. You may NOT: (i) use or copy the Materials except as provided in this Agreement; (ii) rent or
-lease the Materials to any third party; (iii) assign this Agreement or transfer the Materials without
-the express written consent of Intel; (iv) modify, adapt, or translate the Materials in whole or in
-part except as provided in this Agreement; (v) reverse engineer, decompile, or disassemble the
-Materials; (vi) attempt to modify or tamper with the normal function of a license manager that
-regulates usage of the Materials; (vii) distribute, sublicense or transfer the Source Code form of
-any components of the Materials, Redistributables and Sample Source and derivatives thereof
-to any third party except as provided in this Agreement; (viii) distribute Redistributables except
-as part of a larger program that adds significant primary functionality different from that of the
-Redistributables; (ix) distribute the Redistributables to run on a platform other than a Microsoft
-Platform if per the accompanying user documentation the Materials are meant to execute on the
-Microsoft Platforms; (x) modify or distribute the Source Code of any Redistributable so that any
-part of it becomes subject to an Excluded License. An “Excluded License” is one that
-requires, as a condition of use, modification, or distribution, that (a) the code be disclosed or
-distributed in source code form; or (b) others have the right to modify it; or (xi) include the
-Redistributables in malicious, deceptive, or unlawful programs.
-C. The scope and duration (time period) of your license depends on the type of license you
-obtained from Intel. The variety of license types are set forth below, which may not be available
-for all "Intel(R) Software Development Products" and therefore may not apply to the Materials.
-For more information on the types of licenses, please contact Intel or your sales representative.
-i. EVALUATION LICENSE: If you are using the Materials under the control of an
-Evaluation license, you as an individual may use the Materials only for internal evaluation
-purposes and only for the term of the evaluation time period, which is controlled by the
-license key code for the Materials. NOTWITHSTANDING ANYTHING TO THE CONTRARY
-ELSEWHERE IN THIS AGREEMENT, YOU MAY NOT DISTRIBUTE ANY PORTION OF THE
-MATERIALS, AND THE APPLICATION AND/OR PRODUCT DEVELOPED BY YOU MAY
-ONLY BE USED FOR EVALUATION PURPOSES AND ONLY FOR THE TERM OF THE
-EVALUATION PERIOD. You may install copies of the Materials on an unlimited number of
-computers provided that you are the only individual using the Materials and only one copy
-of the Materials is in use at any one time. A separate license is required for each additional
-use and/or individual user in all other cases. Intel will provide you with a license code key
-that enables the Materials for an Evaluation license. If you are an entity, Intel grants you
-the right to designate one individual within your organization to have the sole right to use
-the Materials in the manner provided above.
-ii. NONCOMMERCIAL-USE LICENSE: If you are using the Materials under the control of a
-Noncommercial-Use license, you as an individual may use the Materials only for nonbusiness
-use where you receive no fee, salary or any other form of compensation. The
-Materials may not be used for any other purpose, whether "for profit" or "not for profit." Any
-work performed or produced as a result of use of the Materials cannot be performed or
-produced for the benefit of other parties for a fee, compensation or any other
-reimbursement or remuneration. You may install copies of the Materials on an unlimited
-number of computers provided that you are the only individual using the Materials and only
-one copy of the Materials is in use at any one time. A separate license is required for each
-additional use and/or individual user in all other cases. Intel will provide you with a license
-code key that enables the Materials for a Noncommercial-Use license. If you obtained a
-time-limited Noncommercial-Use license, the duration (time period) of your license and your
-ability to use the Materials is limited to the time period of the obtained license, which is
-controlled by the license key code for the Materials. If you are an entity, Intel grants you the
-right to designate one individual within your organization to have the sole right to use the
-Materials in the manner provided above.
-iii. SINGLE-USER LICENSE: If you are using the Materials under the control of a Single-
-User license, you as an individual may install and use the Materials on an unlimited number
-of computers provided that you are the only individual using the Materials and only one
-copy of the Materials is in use at any one time. A separate license is required for each
-additional use and/or individual user in all other cases. Intel will provide you with a license
-code key that enables the Materials for a Single-User license. If you obtained a time-limited
-Single-User license, the duration (time period) of your license and your ability to use the
-Materials is limited to the time period of the obtained license, which is controlled by the
-license key code for the Materials. If you are an entity, Intel grants you the right to
-designate one individual within your organization to have the sole right to use the Materials
-in the manner provided above.
-iv. NODE-LOCKED LICENSE: If you are using the Materials under the control of a Node-
-Locked license, you may use the Materials only on a single designated computer by no
-more than the authorized number of concurrent users. A separate license is required for
-each additional concurrent user and/or computer in all other cases. Intel will provide you
-with a license code key that enables the Materials for a Node-Locked license up to the
-authorized number of concurrent users. If you obtained a time-limited Node-Locked license,
-the duration (time period) of your license and your ability to use the Materials is limited to the
-time period of the obtained license, which is controlled by the license key code for the
-Materials.
-v. FLOATING LICENSE: If you are using the Materials under the control of a Floating
-license, you may (a) install the Materials on an unlimited number of computers that are
-connected to the designated network and (b) use the Material by no more than the
-authorized number of concurrent users. A separate license is required for each additional
-concurrent user and/or network on which the Materials are used. Intel will provide you with a
-license code key that enables the Materials for a Floating license up to the authorized
-number of concurrent users. If you obtained a time-limited Floating license, the duration
-(time period) of your license and your ability to use the Materials is limited to the time period
-of the obtained license, which is controlled by the license key code for the Materials. Intel
-Library Floating License: If the Materials are the Intel(R) Math Kernel Library or the Intel(R)
-Integrated Performance Primitives Library or the Intel(R) Threading Building Blocks (either
-"Intel Library"), then the Intel Library is provided to you as an add-on option to either the
-Intel(R) C++ Compiler product or the Intel(R) Fortran Compiler product (either "Intel
-Compiler") for which you have a Floating license, and as such, in addition to the terms and
-conditions above, the Intel Library may only be used by the authorized concurrent users of
-that Intel Compiler Floating license.
-D. DISTRIBUTION: Distribution of the Redistributables is also subject to the following limitations:
-You (i) shall be solely responsible to your customers for any update or support obligation or
-other liability which may arise from the distribution, (ii) shall not make any statement that your
-product is "certified", or that its performance is guaranteed, by Intel, (iii) shall not use Intel''s
-name or trademarks to market your product without written permission, (iv) shall use a license
-agreement that prohibits disassembly and reverse engineering of the Redistributables, (v) shall
-not publish reviews of Materials designated as beta without written permission by Intel, and (vi)
-shall indemnify, hold harmless, and defend Intel and its suppliers from and against any claims or
-lawsuits, including attorney''s fees, that arise or result from your distribution of any product.
-E. Intel(R) Integrated Performance Primitives (Intel IPP). The following terms and conditions
-apply only to the Intel IPP.
-i. Notwithstanding anything in this Agreement to the contrary, if you implement the
-Sample Sources in your application or if you use Intel IPP to implement algorithms that are
-protected by others’ licenses then you may need additional licenses from various
-entities. Should any such additional licenses be required, you are solely responsible for
-obtaining any such licenses and agree to obtain any such licenses at your own expense.
-ii. Notwithstanding anything herein to the contrary, a valid license to Intel IPP is a
-prerequisite to any license for Sample Source, and possession of Sample Source does not
-grant any license to Intel IPP (or any portion thereof). To access Sample Source, you must
-first register your licensed copy of the Intel IPP with Intel. By downloading, installing or
-copying any Sample Source file, you agree to be bound by terms of this Agreement.
-F. SOFTWARE TRANSFER: You may permanently transfer the Materials and all of your rights
-under this Agreement to another party (“Recipient”) only if you notify Intel of the transfer by
-sending a letter to Intel certifying that you retain no copies of the Materials and that the
-Recipient has agreed in writing to be bound by all of the terms and conditions of this
-Agreement. Please send such letter to:
-Intel Corporation
-2111 NE 25th Avenue
-Hillsboro, OR 97124
-Attn: DPD Contracts Management, JF1-15
-4. COPYRIGHT: Title to the Materials and all copies thereof remain with Intel or its suppliers. The
-Materials are copyrighted and are protected by United States copyright laws and international treaty
-provisions. You will not remove any copyright notice from the Materials. You agree to prevent any
-unauthorized copying of the Materials. Except as expressly provided herein, no license or right is
-granted to you directly or by implication, inducement, estoppel or otherwise, specifically Intel does
-not grant any express or implied right to you under Intel patents, copyrights, trademarks, or trade
-secret information.
-5. NO WARRANTY AND LIMITED REPLACEMENT: THE MATERIALS AND INFORMATION ARE
-PROVIDED "AS IS" WITH NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-LIMITED TO ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE, NON-INFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY
-OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION, OR SAMPLE. If the media on
-which the Materials are furnished are found to be defective in material or workmanship under normal
-use for a period of ninety (90) days from the date of receipt, Intel''s entire liability and your exclusive
-remedy shall be the replacement of the media. This offer is void if the media defect results from
-accident, abuse, or misapplication.
-6. LIMITATION OF LIABILITY: THE ABOVE REPLACEMENT PROVISION IS THE ONLY WARRANTY
-OF ANY KIND. INTEL OFFERS NO OTHER WARRANTY EITHER EXPRESS OR IMPLIED
-INCLUDING THOSE OF MERCHANTABILITY, NONINFRINGEMENT OF THIRD- PARTY
-INTELLECTUAL PROPERTY OR FITNESS FOR A PARTICULAR PURPOSE. NEITHER INTEL NOR
-ITS SUPPLIERS SHALL BE LIABLE FOR ANY DAMAGES WHATSOEVER (INCLUDING, WITHOUT
-LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS
-OF BUSINESS INFORMATION, OR OTHER LOSS) ARISING OUT OF THE USE OF OR INABILITY
-TO USE THE SOFTWARE, EVEN IF INTEL HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGES. BECAUSE SOME JURISDICTIONS PROHIBIT THE EXCLUSION OR LIMITATION OF
-LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES, THE ABOVE LIMITATION MAY
-NOT APPLY TO YOU.
-7. UNAUTHORIZED USE: THE MATERIALS ARE NOT DESIGNED, INTENDED, OR AUTHORIZED
-FOR USE IN ANY TYPE OF SYSTEM OR APPLICATION IN WHICH THE FAILURE OF THE
-MATERIALS COULD CREATE A SITUATION WHERE PERSONAL INJURY OR DEATH MAY
-OCCUR (E.G MEDICAL SYSTEMS, LIFE SUSTAINING OR LIFE SAVING SYSTEMS). Should the
-buyer purchase or use the Materials for any such unintended or unauthorized use, the buyer shall
-indemnify and hold Intel and its officers, subsidiaries and affiliates harmless against all claims, costs,
-damages, and expenses, and reasonable attorney fees arising out of, directly or indirectly, any
-claim of product liability, personal injury or death associated with such unintended or unauthorized
-use, even if such claim alleges that Intel was negligent regarding the design or manufacture of the
-part.
-8. USER SUBMISSIONS: You agree that any material, information or other communication you
-transmit or post to an Intel website or provide to Intel under this Agreement related to the features,
-functions, performance or use of the Materials will be considered non-confidential and nonproprietary
-("Communications"). Intel will have no obligations with respect to the Communications.
-You agree that Intel and its designees will be free to copy, modify, create derivative works, publicly
-display, disclose, distribute, license and sublicense through multiple tiers of distribution and
-licensees, incorporate and otherwise use the Communications and all data, images, sounds, text,
-and other things embodied therein, including derivative works thereto, for any and all commercial or
-non-commercial purposes. You are prohibited from posting or transmitting to or from an Intel website
-or provide to Intel any unlawful, threatening, libelous, defamatory, obscene, pornographic, or other
-material that would violate any law. If you wish to provide Intel with your confidential information,
-Intel requires a non-disclosure agreement (“NDA”) to receive such confidential information, so please
-contact your Intel representative to ensure the proper NDA is in place.
-9. CONSENT. You agree that Intel, its subsidiaries or suppliers may collect and use technical and
-related information, including but not limited to technical information about your computer, system
-and application software, and peripherals, that is gathered periodically to facilitate the provision of
-software updates, product support and other services to you (if any) related to the Materials, and to
-verify compliance with the terms of this Agreement. Intel may use this information, as long as it is in
-a form that does not personally identify you, to improve our products or to provide services or
-technologies to you.
-10. TERMINATION OF THIS LICENSE: This Agreement becomes effective on the date you accept this
-Agreement and will continue until terminated as provided for in this Agreement. If you are using the
-Materials under the control of a time-limited license, for example an Evaluation License, this
-Agreement terminates without notice on the last day of the time period, which is controlled by the
-license key code for the Materials. Intel may terminate this license immediately if you are in breach
-of any of its terms and conditions and such breach is not cured within thirty (30) days of written
-notice from Intel. Upon termination, you will immediately return to Intel or destroy the Materials and
-all copies thereof. Any distribution of the Redistributables conducted in accordance with the terms
-and conditions of this Agreement shall survive termination of this Agreement.
-11. U.S. GOVERNMENT RESTRICTED RIGHTS: The Materials are provided with "RESTRICTED
-RIGHTS". Use, duplication or disclosure by the Government is subject to restrictions set forth in
-FAR52.227-14 and DFAR252.227-7013 et seq. or its successor. Use of the Materials by the
-Government constitutes acknowledgment of Intel''s rights in them.
-12. APPLICABLE LAWS: Any claim arising under or relating to this Agreement shall be governed by the
-internal substantive laws of the State of Delaware, without regard to principles of conflict of laws.
-You agree that the terms of the United Nations Convention on Contracts for the Sale of Goods do not apply to
-this Agreement. You agree that your distribution and export/re-export of the Software and permitted
-modifications shall be in compliance with the laws, regulations, orders or other restrictions of applicable
-export laws.
-13. THIRD PARTY PROGRAMS. The Materials may include third party programs or materials. The
-license terms with those programs or materials apply to your use of them, and Intel is not liable for
-them.
-* Other names and brands may be claimed as the property of others', 'http://software.intel.com/sites/products/documentation/EULA/Intel_SW_Dev_Products_EULA.pdf', NULL, NULL, NULL, 'Intel EULA', NULL, NULL, NULL, '', NULL, false, false, false, 'b6e5d606f9408005cb7447fbfceacdd5', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (413, 'CC-BY-NC-ND-2.0', 'Creative Commons Attribution-NonCommercial-NoDerivs 2.0
 
 CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
@@ -30506,6 +29644,252 @@ Copyright (c) 1995-2003 by Internet Software Consortium
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies. 
 
 THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'http://www.isc.org/software/license', NULL, NULL, NULL, 'ISC Licens', NULL, NULL, NULL, '', NULL, false, false, false, '7fb086fddaeb43ab29faa0e67e89cbd0', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (389, 'Intel-EULA', 'IMPORTANT - READ BEFORE COPYING, INSTALLING OR USING.
+Do not copy, install, or use the Materials provided under this license agreement ("Agreement"), until you
+have carefully read the following terms and conditions.
+By copying, installing, or otherwise using the Materials, you agree to be bound by the terms of this
+Agreement. If you do not agree to the terms of this Agreement, do not copy, install, or use the
+Materials.
+End User License Agreement for the Intel(R) Software Development Products
+1. LICENSE DEFINITIONS:
+A. "Materials" are defined as the software, documentation, license key codes and other materials,
+including any updates and upgrade thereto, for the applicable Intel Software Development
+Product (which may be found at http://www.intel.com/software/products/), that are provided to
+you under this Agreement. Materials also include the Redistributables as defined below.
+B. "Redistributables" are the files listed in the following text files that may be included in the
+Materials for the applicable Intel Software Development Product: clredist.txt, credist.txt,
+fredist.txt, redist.txt..
+C. “Cluster OpenMP Library”, is comprised of the files listed in the “clredist.txt” file specified above,
+is the Intel(R) Cluster OpenMP* Library add-on option to the Intel(R) C++ Compiler for Linux*
+and Intel(R) Fortran Compiler for Linux* products (“Intel Compiler for Linux”). The use of the
+Cluster OpenMP Library is conditioned on having a valid license from Intel for the Cluster
+OpenMP Library and for either Intel Compiler for Linux, and further is governed by the terms
+and conditions of the license agreement for applicable the Intel Compiler for Linux.
+D. “Source Code” is defined as the Materials provided in human readable format, whether
+unmodified or modified by you.
+E. "Sample Source" is the Source Code file(s) that: (i) demonstrate certain limited functions
+included in the binary libraries of the Intel(R) Integrated Performance Primitives (“Intel(R) IPPs”);
+(ii) are identified as Intel IPP sample source code; and (iii) are obtained separately from Intel
+after you register your copy of the Intel Integrated Performance Primitives product with Intel.
+F. “Microsoft Platforms” means any current and future Microsoft operating system products,
+Microsoft run-time technologies (such as the .NET Framework), and Microsoft application
+platforms (such as Microsoft Office or Microsoft Dynamics) that Microsoft offers.
+2. LICENSE GRANT:
+A. Subject to all of the terms and conditions of this Agreement, Intel Corporation ("Intel") grants to
+you a non-exclusive, non-assignable, copyright license to use the Materials.
+B. Subject to all of the terms and conditions of this Agreement, Intel grants to you a non-exclusive,
+non-assignable copyright license to modify the Materials, or any portions thereof, that are (i)
+provided in Source Code form or, (ii) are defined as Redistributables and are provided in text
+form.
+C. Subject to all of the terms and conditions of this Agreement and any specific restrictions which
+may appear in the Redistributables text files, Intel grants to you a non-exclusive, nonassignable,
+fully-paid copyright license to distribute (except if you received the Materials under
+an Evaluation License as specified below) the Redistributables, or any portions thereof, as part
+of the product or application you developed using the Materials. If such application is a
+software development library, then attribution, as specified in the product release notes of the
+corresponding Materials, shall be displayed prominently in that application’s product
+documentation and on the application’s product web site.
+3. LICENSE RESTRICTIONS:
+A. If you receive your first copy of the Materials electronically, and a second copy on media, then
+you may use the second copy only in accordance with your applicable license stated in this
+Agreement, or for backup or archival purposes. You may not provide the second copy to
+another user.
+B. You may NOT: (i) use or copy the Materials except as provided in this Agreement; (ii) rent or
+lease the Materials to any third party; (iii) assign this Agreement or transfer the Materials without
+the express written consent of Intel; (iv) modify, adapt, or translate the Materials in whole or in
+part except as provided in this Agreement; (v) reverse engineer, decompile, or disassemble the
+Materials; (vi) attempt to modify or tamper with the normal function of a license manager that
+regulates usage of the Materials; (vii) distribute, sublicense or transfer the Source Code form of
+any components of the Materials, Redistributables and Sample Source and derivatives thereof
+to any third party except as provided in this Agreement; (viii) distribute Redistributables except
+as part of a larger program that adds significant primary functionality different from that of the
+Redistributables; (ix) distribute the Redistributables to run on a platform other than a Microsoft
+Platform if per the accompanying user documentation the Materials are meant to execute on the
+Microsoft Platforms; (x) modify or distribute the Source Code of any Redistributable so that any
+part of it becomes subject to an Excluded License. An “Excluded License” is one that
+requires, as a condition of use, modification, or distribution, that (a) the code be disclosed or
+distributed in source code form; or (b) others have the right to modify it; or (xi) include the
+Redistributables in malicious, deceptive, or unlawful programs.
+C. The scope and duration (time period) of your license depends on the type of license you
+obtained from Intel. The variety of license types are set forth below, which may not be available
+for all "Intel(R) Software Development Products" and therefore may not apply to the Materials.
+For more information on the types of licenses, please contact Intel or your sales representative.
+i. EVALUATION LICENSE: If you are using the Materials under the control of an
+Evaluation license, you as an individual may use the Materials only for internal evaluation
+purposes and only for the term of the evaluation time period, which is controlled by the
+license key code for the Materials. NOTWITHSTANDING ANYTHING TO THE CONTRARY
+ELSEWHERE IN THIS AGREEMENT, YOU MAY NOT DISTRIBUTE ANY PORTION OF THE
+MATERIALS, AND THE APPLICATION AND/OR PRODUCT DEVELOPED BY YOU MAY
+ONLY BE USED FOR EVALUATION PURPOSES AND ONLY FOR THE TERM OF THE
+EVALUATION PERIOD. You may install copies of the Materials on an unlimited number of
+computers provided that you are the only individual using the Materials and only one copy
+of the Materials is in use at any one time. A separate license is required for each additional
+use and/or individual user in all other cases. Intel will provide you with a license code key
+that enables the Materials for an Evaluation license. If you are an entity, Intel grants you
+the right to designate one individual within your organization to have the sole right to use
+the Materials in the manner provided above.
+ii. NONCOMMERCIAL-USE LICENSE: If you are using the Materials under the control of a
+Noncommercial-Use license, you as an individual may use the Materials only for nonbusiness
+use where you receive no fee, salary or any other form of compensation. The
+Materials may not be used for any other purpose, whether "for profit" or "not for profit." Any
+work performed or produced as a result of use of the Materials cannot be performed or
+produced for the benefit of other parties for a fee, compensation or any other
+reimbursement or remuneration. You may install copies of the Materials on an unlimited
+number of computers provided that you are the only individual using the Materials and only
+one copy of the Materials is in use at any one time. A separate license is required for each
+additional use and/or individual user in all other cases. Intel will provide you with a license
+code key that enables the Materials for a Noncommercial-Use license. If you obtained a
+time-limited Noncommercial-Use license, the duration (time period) of your license and your
+ability to use the Materials is limited to the time period of the obtained license, which is
+controlled by the license key code for the Materials. If you are an entity, Intel grants you the
+right to designate one individual within your organization to have the sole right to use the
+Materials in the manner provided above.
+iii. SINGLE-USER LICENSE: If you are using the Materials under the control of a Single-
+User license, you as an individual may install and use the Materials on an unlimited number
+of computers provided that you are the only individual using the Materials and only one
+copy of the Materials is in use at any one time. A separate license is required for each
+additional use and/or individual user in all other cases. Intel will provide you with a license
+code key that enables the Materials for a Single-User license. If you obtained a time-limited
+Single-User license, the duration (time period) of your license and your ability to use the
+Materials is limited to the time period of the obtained license, which is controlled by the
+license key code for the Materials. If you are an entity, Intel grants you the right to
+designate one individual within your organization to have the sole right to use the Materials
+in the manner provided above.
+iv. NODE-LOCKED LICENSE: If you are using the Materials under the control of a Node-
+Locked license, you may use the Materials only on a single designated computer by no
+more than the authorized number of concurrent users. A separate license is required for
+each additional concurrent user and/or computer in all other cases. Intel will provide you
+with a license code key that enables the Materials for a Node-Locked license up to the
+authorized number of concurrent users. If you obtained a time-limited Node-Locked license,
+the duration (time period) of your license and your ability to use the Materials is limited to the
+time period of the obtained license, which is controlled by the license key code for the
+Materials.
+v. FLOATING LICENSE: If you are using the Materials under the control of a Floating
+license, you may (a) install the Materials on an unlimited number of computers that are
+connected to the designated network and (b) use the Material by no more than the
+authorized number of concurrent users. A separate license is required for each additional
+concurrent user and/or network on which the Materials are used. Intel will provide you with a
+license code key that enables the Materials for a Floating license up to the authorized
+number of concurrent users. If you obtained a time-limited Floating license, the duration
+(time period) of your license and your ability to use the Materials is limited to the time period
+of the obtained license, which is controlled by the license key code for the Materials. Intel
+Library Floating License: If the Materials are the Intel(R) Math Kernel Library or the Intel(R)
+Integrated Performance Primitives Library or the Intel(R) Threading Building Blocks (either
+"Intel Library"), then the Intel Library is provided to you as an add-on option to either the
+Intel(R) C++ Compiler product or the Intel(R) Fortran Compiler product (either "Intel
+Compiler") for which you have a Floating license, and as such, in addition to the terms and
+conditions above, the Intel Library may only be used by the authorized concurrent users of
+that Intel Compiler Floating license.
+D. DISTRIBUTION: Distribution of the Redistributables is also subject to the following limitations:
+You (i) shall be solely responsible to your customers for any update or support obligation or
+other liability which may arise from the distribution, (ii) shall not make any statement that your
+product is "certified", or that its performance is guaranteed, by Intel, (iii) shall not use Intel''s
+name or trademarks to market your product without written permission, (iv) shall use a license
+agreement that prohibits disassembly and reverse engineering of the Redistributables, (v) shall
+not publish reviews of Materials designated as beta without written permission by Intel, and (vi)
+shall indemnify, hold harmless, and defend Intel and its suppliers from and against any claims or
+lawsuits, including attorney''s fees, that arise or result from your distribution of any product.
+E. Intel(R) Integrated Performance Primitives (Intel IPP). The following terms and conditions
+apply only to the Intel IPP.
+i. Notwithstanding anything in this Agreement to the contrary, if you implement the
+Sample Sources in your application or if you use Intel IPP to implement algorithms that are
+protected by others’ licenses then you may need additional licenses from various
+entities. Should any such additional licenses be required, you are solely responsible for
+obtaining any such licenses and agree to obtain any such licenses at your own expense.
+ii. Notwithstanding anything herein to the contrary, a valid license to Intel IPP is a
+prerequisite to any license for Sample Source, and possession of Sample Source does not
+grant any license to Intel IPP (or any portion thereof). To access Sample Source, you must
+first register your licensed copy of the Intel IPP with Intel. By downloading, installing or
+copying any Sample Source file, you agree to be bound by terms of this Agreement.
+F. SOFTWARE TRANSFER: You may permanently transfer the Materials and all of your rights
+under this Agreement to another party (“Recipient”) only if you notify Intel of the transfer by
+sending a letter to Intel certifying that you retain no copies of the Materials and that the
+Recipient has agreed in writing to be bound by all of the terms and conditions of this
+Agreement. Please send such letter to:
+Intel Corporation
+2111 NE 25th Avenue
+Hillsboro, OR 97124
+Attn: DPD Contracts Management, JF1-15
+4. COPYRIGHT: Title to the Materials and all copies thereof remain with Intel or its suppliers. The
+Materials are copyrighted and are protected by United States copyright laws and international treaty
+provisions. You will not remove any copyright notice from the Materials. You agree to prevent any
+unauthorized copying of the Materials. Except as expressly provided herein, no license or right is
+granted to you directly or by implication, inducement, estoppel or otherwise, specifically Intel does
+not grant any express or implied right to you under Intel patents, copyrights, trademarks, or trade
+secret information.
+5. NO WARRANTY AND LIMITED REPLACEMENT: THE MATERIALS AND INFORMATION ARE
+PROVIDED "AS IS" WITH NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+LIMITED TO ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, NON-INFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY
+OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION, OR SAMPLE. If the media on
+which the Materials are furnished are found to be defective in material or workmanship under normal
+use for a period of ninety (90) days from the date of receipt, Intel''s entire liability and your exclusive
+remedy shall be the replacement of the media. This offer is void if the media defect results from
+accident, abuse, or misapplication.
+6. LIMITATION OF LIABILITY: THE ABOVE REPLACEMENT PROVISION IS THE ONLY WARRANTY
+OF ANY KIND. INTEL OFFERS NO OTHER WARRANTY EITHER EXPRESS OR IMPLIED
+INCLUDING THOSE OF MERCHANTABILITY, NONINFRINGEMENT OF THIRD- PARTY
+INTELLECTUAL PROPERTY OR FITNESS FOR A PARTICULAR PURPOSE. NEITHER INTEL NOR
+ITS SUPPLIERS SHALL BE LIABLE FOR ANY DAMAGES WHATSOEVER (INCLUDING, WITHOUT
+LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS
+OF BUSINESS INFORMATION, OR OTHER LOSS) ARISING OUT OF THE USE OF OR INABILITY
+TO USE THE SOFTWARE, EVEN IF INTEL HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGES. BECAUSE SOME JURISDICTIONS PROHIBIT THE EXCLUSION OR LIMITATION OF
+LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES, THE ABOVE LIMITATION MAY
+NOT APPLY TO YOU.
+7. UNAUTHORIZED USE: THE MATERIALS ARE NOT DESIGNED, INTENDED, OR AUTHORIZED
+FOR USE IN ANY TYPE OF SYSTEM OR APPLICATION IN WHICH THE FAILURE OF THE
+MATERIALS COULD CREATE A SITUATION WHERE PERSONAL INJURY OR DEATH MAY
+OCCUR (E.G MEDICAL SYSTEMS, LIFE SUSTAINING OR LIFE SAVING SYSTEMS). Should the
+buyer purchase or use the Materials for any such unintended or unauthorized use, the buyer shall
+indemnify and hold Intel and its officers, subsidiaries and affiliates harmless against all claims, costs,
+damages, and expenses, and reasonable attorney fees arising out of, directly or indirectly, any
+claim of product liability, personal injury or death associated with such unintended or unauthorized
+use, even if such claim alleges that Intel was negligent regarding the design or manufacture of the
+part.
+8. USER SUBMISSIONS: You agree that any material, information or other communication you
+transmit or post to an Intel website or provide to Intel under this Agreement related to the features,
+functions, performance or use of the Materials will be considered non-confidential and nonproprietary
+("Communications"). Intel will have no obligations with respect to the Communications.
+You agree that Intel and its designees will be free to copy, modify, create derivative works, publicly
+display, disclose, distribute, license and sublicense through multiple tiers of distribution and
+licensees, incorporate and otherwise use the Communications and all data, images, sounds, text,
+and other things embodied therein, including derivative works thereto, for any and all commercial or
+non-commercial purposes. You are prohibited from posting or transmitting to or from an Intel website
+or provide to Intel any unlawful, threatening, libelous, defamatory, obscene, pornographic, or other
+material that would violate any law. If you wish to provide Intel with your confidential information,
+Intel requires a non-disclosure agreement (“NDA”) to receive such confidential information, so please
+contact your Intel representative to ensure the proper NDA is in place.
+9. CONSENT. You agree that Intel, its subsidiaries or suppliers may collect and use technical and
+related information, including but not limited to technical information about your computer, system
+and application software, and peripherals, that is gathered periodically to facilitate the provision of
+software updates, product support and other services to you (if any) related to the Materials, and to
+verify compliance with the terms of this Agreement. Intel may use this information, as long as it is in
+a form that does not personally identify you, to improve our products or to provide services or
+technologies to you.
+10. TERMINATION OF THIS LICENSE: This Agreement becomes effective on the date you accept this
+Agreement and will continue until terminated as provided for in this Agreement. If you are using the
+Materials under the control of a time-limited license, for example an Evaluation License, this
+Agreement terminates without notice on the last day of the time period, which is controlled by the
+license key code for the Materials. Intel may terminate this license immediately if you are in breach
+of any of its terms and conditions and such breach is not cured within thirty (30) days of written
+notice from Intel. Upon termination, you will immediately return to Intel or destroy the Materials and
+all copies thereof. Any distribution of the Redistributables conducted in accordance with the terms
+and conditions of this Agreement shall survive termination of this Agreement.
+11. U.S. GOVERNMENT RESTRICTED RIGHTS: The Materials are provided with "RESTRICTED
+RIGHTS". Use, duplication or disclosure by the Government is subject to restrictions set forth in
+FAR52.227-14 and DFAR252.227-7013 et seq. or its successor. Use of the Materials by the
+Government constitutes acknowledgment of Intel''s rights in them.
+12. APPLICABLE LAWS: Any claim arising under or relating to this Agreement shall be governed by the
+internal substantive laws of the State of Delaware, without regard to principles of conflict of laws.
+You agree that the terms of the United Nations Convention on Contracts for the Sale of Goods do not apply to
+this Agreement. You agree that your distribution and export/re-export of the Software and permitted
+modifications shall be in compliance with the laws, regulations, orders or other restrictions of applicable
+export laws.
+13. THIRD PARTY PROGRAMS. The Materials may include third party programs or materials. The
+license terms with those programs or materials apply to your use of them, and Intel is not liable for
+them.
+* Other names and brands may be claimed as the property of others', 'http://software.intel.com/sites/products/documentation/EULA/Intel_SW_Dev_Products_EULA.pdf', NULL, NULL, NULL, 'Intel EULA', NULL, NULL, NULL, '', NULL, false, false, false, 'ee8276c37c7046f36876e2a1ea71dacf', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (395, 'BSD-3-Clause', 'Copyright (c) {{YEAR}}, {{OWNER}}
 All rights reserved.
 
@@ -32293,240 +31677,6 @@ Redistribution and use in source and binary forms, with or without modification,
     contributors may be used to endorse or promote products derived from 
     this software without specific prior written permission.
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://ultrasound.engineering.wustl.edu/index.php/Washington_University_in_St._Louis', NULL, NULL, NULL, 'Washing University Source Code License', NULL, NULL, NULL, '', NULL, false, false, false, '25da96f07556435b05bf767d6165f34c', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (391, 'ZoneAlarm', 'ZONEALARM, A CHECK POINT SOFTWARE TECHNOLOGIES, INC. COMPANY
-END USER LICENSE AGREEMENT
-
-THIS END USER LICENSE AGREEMENT ("Agreement") IS A LEGAL AGREEMENT BETWEEN YOU 
-(EITHER ON BEHALF OF YOURSELF AS AN INDIVIDUAL OR ON BEHALF OF AN ENTITY AS ITS 
-AUTHORIZED REPRESENTATIVE) AND ZONEALARM.  PLEASE READ THIS 
-AGREEMENT CAREFULLY AND PRINT OUT A COPY FOR YOUR RECORDS.  THIS AGREEMENT 
-SUPERSEDES PREVIOUS VERSIONS.
-
-BY CHECKING THE AGREEMENT CHECKBOX BELOW AND DOWNLOADING, INSTALLING, COPYING 
-OR OTHERWISE USING ZONEALARM''S SOFTWARE YOU AGREE TO BE BOUND BY ALL OF THE 
-TERMS OF THIS AGREEMENT.  IF YOU DO NOT AGREE TO THE TERMS OF THIS AGREEMENT, 
-CLICK ON THE "CANCEL" BUTTON AND/OR DO NOT DOWNLOAD, INSTALL, COPY OR OTHERWISE 
-USE THE SOFTWARE.
-
-1. SOFTWARE:  As used in this Agreement, the term "Software" refers to the 
-ZoneAlarm software which you have selected to download.  The term "Software" 
-also shall include any upgrades, modified versions or updates of the Software
- made available to you by ZoneAlarm.  The Software is deemed accepted by you 
-upon download of the Software. The term "Software" also includes any third 
-party software made available to you by ZoneAlarm.
-
-2. GRANT OF LICENSE:  Subject to the terms of this Agreement, ZoneAlarm hereby 
-grants you a perpetual, non-exclusive, non-transferable right to:  (i) install 
-the Software, (ii) use the Software for your internal use, and (iii) copy the 
-Software for back-up or archival purposes.  Notwithstanding the foregoing, you 
-acknowledge and agree that, depending on the version (free, trial or fully 
-licensed) of Software you select to download, certain restrictions may apply 
-to your use of the Software and certain features of the Software ("Special 
-Features") may be unavailable to you or available subject to certain limitations, 
-as follows:
-2.1 FREE VERSIONS:  You may only download and use a free non-trial version of the 
-Software if you are (i) an individual (and then only for your personal home use) 
-or (ii) a not-for-profit charitable entity as set forth in U.S.C., Title 26, 
-Section 501(c)(3) (excluding government entities and educational institutions).  
-If you select to download a free non-trial version of the Software, you will be 
-unable to access the Special Features of the Software unless you upgrade to a 
-fully licensed version of the Software (provided such option is made available 
-to you), and pay the applicable fees, if any.
-2.2 TRIAL VERSIONS:  If you select to download a free trial version of the Software, 
-you will be able to access the Special Features of the Software only for a limited 
-trial period (the "Trial Period").  Unless you pay the applicable one-time license 
-fee for the Software and install a license key (as described in Section 6 ("License 
-Keys")), the Special Features of the Software will become inoperable and automatically 
-expire at the end of your Trial Period.  In the event that you pay the applicable 
-license fee for the Software, your ability to access the Special Features of the 
-Software on the number of computers for which you have paid the applicable license 
-fee will continue perpetually, subject to the terms of this Agreement.
-2.3 FULLY LICENSED VERSIONS:  If you select to download a fully licensed version of 
-the Software and pay the applicable license fee, your ability to access the Special 
-Features of the Software on the number of computers for which you have paid the 
-applicable license fee will continue perpetually, subject to the terms of this Agreement.
-2.4  SERVICE VERSION:  If you are receiving this software as a service then this 
-software shall only operate if the applicable fee is paid in accordance with the 
-applicable providers policy.  
-2.5  VERSIONS INCLUDING ANTI-SPYWARE:  If you elect to receive the anti-spyware 
-feature you explicitly request ZoneAlarm to make a determination for you on the 
-potential effect identified programs may have on your system.  You agree that 
-we may automatically delete certain programs and/or provide you the customized 
-ability to delete certain programs.  The deletion of these programs may be in 
-violation with other license agreements you have knowingly or unknowingly agreed 
-to. The deletion of these programs and the potential violation of a third party 
-license is your responsibility.  ZoneAlarm has no ability to verify what, if any, 
-third party agreements you may have agreed to.    
-
-3. SUBSCRIPTION SERVICES:  If you select to download a fully licensed version of the 
-Software (or upgrade to a fully licensed version of the Software if you have previously 
-downloaded a free or trial version of the Software), you may receive Subscription Services 
-as provided in this Section.  The term "Subscription Services" includes technical support 
-and such additional services as ZoneAlarm may, in ZoneAlarm''s discretion, make available to 
-you for the designated time the subscription service was purchased.
-
-3.1 TECHNICAL SUPPORT:  Subject to payment of the applicable license fee, ZoneAlarm will 
-provide you with technical support, free of charge, for a limited period commencing on 
-your payment of such license fee.  You may obtain continued technical support for a 
-specified period of time by paying ZoneAlarm''s applicable then-current fee for Subscription 
-Services and installing the applicable license keys, provided that such option is made 
-available to you.  All technical support is provided subject to ZoneAlarm''s then-current 
-technical support policy, and includes such updates to the Software as ZoneAlarm may make 
-generally available thereunder from time to time in ZoneAlarm''s sole discretion.  In the event 
-you are eligible to receive such updates to the Software, ZoneAlarm will notify you when 
-such updates are available to be downloaded by you.  All updates to the Software shall be 
-governed by this Agreement unless other license terms are provided with the update.
-3.2 ADDITIONAL SERVICES:  During the time you are eligible to receive technical support, 
-ZoneAlarm may, in ZoneAlarm''s sole discretion, also make certain additional web-based security 
-services available to you.  Such additional services will be provided subject to ZoneAlarm''s 
-then-current policies regarding use of such additional services.  ZoneAlarm reserves the right 
-to discontinue any such additional services and/or offer new additional services at any time, 
-without right to refund or set-off.
-3.3 VERSION SUPPORT: ZoneAlarm, in its sole discretion, may discontinue ongoing support for 
-specific operating system versions.  For updated support notifications on your operating system, 
-please visit zonelabs.com.  
-
-4. LICENSE RESTRICTIONS:  You acknowledge that the foregoing license extends only to your use 
-of the features and functionality of the Software as described in the online documentation 
-accompanying the version of the Software downloaded by you (the "Documentation"), and you 
-agree not to reconfigure or modify the Software in order to enable features or functionality 
-different than those described in such Documentation or available in other ZoneAlarm products 
-without notifying ZoneAlarm and paying the applicable Software upgrade fee.  You may not:  (i) 
-reverse engineer, decompile, or disassemble the Software; (ii) modify, or create derivative 
-works based upon, the Software in whole or in part; (iii) distribute copies of the Software; 
-(iv) remove any proprietary notices or labels on the Software; or (v) resell, lease, rent, 
-transfer, sublicense, or otherwise transfer rights to the Software.  Any use in violation of 
-this Section shall immediately terminate your license to the Software.
-
-5. THIRD PARTY SOFTWARE:  Certain third party software included with the Software is subject to 
-additional terms and conditions imposed by ZoneAlarm''s third party licensor(s).  Such terms and 
-conditions are contained in the "About" pages of the Software and are deemed incorporated herein 
-by reference. 
- 
-6. LICENSE KEYS:  You acknowledge that the Software contains a license key.  If you select to 
-download a trial or fully licensed version of the Software, and pay the applicable license fee 
-for the Software, ZoneAlarm will provide you an initial license key for installation with the 
-Software which will enable you to (i) use the Software (including Special Features) during the 
-term of your license and (ii) obtain certain subscription-based services ("Subscription Services") 
-for a limited period pursuant to the terms of Section 3 ("Subscription Services").  In the event 
-you subsequently purchase continued Subscription Services pursuant to Section 3 ("Subscription 
-Services"), and at each renewal thereof, ZoneAlarm will provide you additional license key(s) 
-for installation with the Software to enable you to obtain such Subscription Services for the 
-applicable subscription period.  You agree not to purchase any license keys or similar computer 
-code for the Software from any source other than ZoneAlarm or ZoneAlarm''s authorized partners.  
-
-7. TITLE:  You agree that no title to the intellectual property in the Software, Subscription 
-Services (as defined), or license keys is transferred to you.  Title, ownership, rights, and 
-intellectual property rights in and to the Software, Subscription Services, and license keys 
-shall remain in ZoneAlarm and/or ZoneAlarm''s licensors.  The Software, Subscription Services 
-and license keys are protected by intellectual property laws of the United States and other 
-countries and by international treaties.
-
-8. WARRANTY:
-8.1 Limited Warranty. ZoneAlarm warrants to You that the encoding of the Software on the media 
-on which the Software is furnished will be free from defects in material and workmanship, and 
-that the Software shall substantially conform to its user manual, as it exists at the date of 
-delivery, for a period of ninety (90) days from the date You receive the original License Key. 
-ZoneAlarm''s entire liability and Your exclusive remedy shall be, at ZoneAlarm''s option, either: 
-(i) return of the price paid to ZoneAlarm for the Software, resulting in the termination of 
-this Agreement, or (ii) repair or replacement of the Software or media that does not meet this 
-limited warranty. Some jurisdictions do not allow the exclusion of implied warranties or 
-limitations on how long an implied warranty may last, so the above limitations may not apply 
-to You. This warranty gives You specific legal rights. You may have other rights that vary 
-from state to state.
-
-8.2 GENERAL:  The Software and Subscription Services are provided to you at minimal charge.  
-ZoneAlarm does not guarantee that use of the Software or Subscription Services will be uninterrupted 
-or error-free.  ZoneAlarm does not guarantee that the information accessed by the Software or 
-Subscription Services will be accurate or complete.  You acknowledge that performance of the 
-Software and Subscription Services may be affected by any number of factors, including without 
-limitation, technical failure of the Software, the acts or omissions of third parties and other 
-causes reasonably beyond the control of ZoneAlarm.  Certain features of the Software may not be 
-forward-compatible with future versions of the Software and use of such features with future 
-versions of the Software may require purchase of the applicable future version of the Software.
-8.3 AS IS SALE:  EXCEPT FOR THE LIMITED WARRANTIES SET FORTH IN SECTION 8.1, YOU AGREE THAT
-ZONEALARM AND ITS LICENSORS HAVE MADE NO EXPRESS WARRANTIES, ORAL OR WRITTEN, TO YOU REGARDING THE 
-SOFTWARE AND SUBSCRIPTION SERVICES AND THAT THE SOFTWARE AND SUBSCRIPTION SERVICES ARE BEING 
-PROVIDED TO YOU "AS IS" WITHOUT WARRANTY OF ANY KIND.  YOU ACKNOWLEDGE THAT THE ENTIRE RISK AS 
-TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE AND/OR SUBSCRIPTION SERVICES IS WITH YOU.  SHOULD 
-THE SOFTWARE AND/OR SUBSCRIPTION SERVICES PROVE DEFECTIVE, YOU (AND NOT ZONEALARM, THE RETAILER, 
-OR ANY DISTRIBUTOR) ASSUME THE ENTIRE COST OF ALL NECESSARY REPAIRS.
-8.4 DISCLAIMER:  ZONEALARM DISCLAIMS ANY AND ALL OTHER WARRANTIES, WHETHER EXPRESS, IMPLIED, OR 
-STATUTORY, INCLUDING, BUT WITHOUT LIMITATION, (i) THE IMPLIED WARRANTIES OF NONINFRINGEMENT OF 
-THIRD PARTY RIGHTS, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE; (ii) THAT THE SOFTWARE 
-OR SUBSCRIPTION SERVICES WILL AVERT OR PREVENT ALL OCCURRENCES (OR THE CONSEQUENCES THEREFROM) 
-THAT THE SOFTWARE OR SUBSCRIPTION SERVICES ARE DESIGNED TO DETECT AND/OR PREVENT; OR (iii) THAT 
-ANY INFORMATION ACCESSED BY THE SOFTWARE OR SUBSCRIPTION SERVICES WILL BE ACCURATE OR COMPLETE.  
-THIS WARRANTY DISCLAIMER AFFECTS YOUR LEGAL RIGHTS, AND YOU MAY ALSO HAVE OTHER RIGHTS WHICH VARY 
-FROM JURISDICTION TO JURISDICTION.  SOME JURISDICTIONS DO NOT ALLOW EXCLUSIONS OF IMPLIED WARRANTIES 
-OR LIMITATIONS ON HOW LONG AN IMPLIED WARRANTY LASTS, SO THE ABOVE EXCLUSION MAY NOT APPLY TO YOU.
-
-9. Limitation on Liability. EXCEPT FOR BODILY INJURY OF A PERSON, IN NO EVENT WILL ZONEALARM BE 
-LIABLE TO YOU OR ANY THIRD PARTY FOR ANY DAMAGES ARISING OUT OF THE SUBJECT MATTER OF THIS 
-AGREEMENT, THE PRODUCT OR ANY SERVICES UNDER ANY CONTRACT, NEGLIGENCE, STRICT LIABILITY OR OTHER 
-THEORY, FOR ANY INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES (INCLUDING LOST PROFITS), 
-OR FOR LOSS OF OR CORRUPTION OF DATA, OR FOR COST OF PROCUREMENT OF SUBSTITUTE GOODS OR TECHNOLOGY, 
-IRRESPECTIVE OF WHETHER ZONEALARM HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. ZONEALARM''S 
-MAXIMUM LIABILITY FOR DAMAGES SHALL BE LIMITED TO THE LICENSE FEES RECEIVED BY ZONEALARM UNDER THIS 
-LICENSE FOR THE PARTICULAR PRODUCT(S) WHICH CAUSED THE DAMAGES. Some jurisdictions do not allow 
-the exclusion or limitation of incidental or consequential damages, so the above limitation or 
-exclusion may not apply to You.
-
-10. TERMINATION:  This Agreement shall terminate automatically if you fail to comply with the terms 
-of this Agreement.  No notice shall be required from ZoneAlarm to effect such termination.  You may 
-also terminate this Agreement at any time by notifying ZoneAlarm in writing of termination.  Upon 
-any termination of this Agreement, you must uninstall and destroy all copies of the Software.
-
-11. MISCELLANEOUS:
-11.1 COMPLIANCE WITH EXPORT CONTROL LAWS:  You acknowledge that Software is subject to the export 
-control laws and regulations of the United States ("U.S.") and agree to abide by those laws and 
-regulations.  Under U.S. law, the Software may not be downloaded or otherwise exported, reexported, 
-or transferred to restricted countries, restricted end-users, or for restricted end-uses.  The U.S. 
-currently has embargo restrictions against Cuba, Iran, Iraq, Libya, North Korea, Sudan, and Syria.  
-The lists of restricted end-users are maintained on the U.S. Commerce Department''s Denied Persons 
-List, the Commerce Department''s Entity List, the Commerce Department''s List of Unverified Persons, 
-and the U.S. Treasury Department''s List of Specially Designated Nationals and Blocked Persons.  In 
-addition, the Software may not be downloaded or otherwise exported, reexported, or transferred to 
-an end-user engaged in activities related to weapons of mass destruction.  Such activities include 
-but are not necessarily limited to activities related to:  (1) the design, development, production 
-or use of nuclear materials, nuclear facilities, or nuclear weapons; (2) the design, development, 
-production or use of missiles or support of missile projects; and (3) the design, development, 
-production, or use of chemical or biological weapons.  By downloading or using the Software, you 
-are agreeing to the foregoing.  You are also warranting that you are not (i) located in, or a 
-resident or national of, a restricted country; (ii) on any of the U.S. lists of restricted end-users; 
-or (iii) engaged in any activity related to weapons of mass destruction.  You understand that the 
-requirements and restrictions of U.S. law as applicable to you may vary depending on the software 
-downloaded and may change over time, and that, to determine the precise controls applicable to the 
-software, it is necessary to refer to the U.S. Export Administration Regulations and the U.S. Foreign 
-Assets Control Regulations.
-11.2 U.S. GOVERNMENT RIGHTS:  The Software under this Agreement is commercial computer software as that 
-term is described in 48 C.F.R. 252.227-7014(a)(1).  If acquired by or on behalf of a civilian agency, 
-the U.S. Government acquires this commercial computer software and/or commercial computer software 
-documentation subject to the terms of this Agreement as specified in 48 C.F.R. 12.212 (Computer Software) 
-and 12.211 (Technical Data) of the Federal Acquisition Regulations ("FAR") and its successors.  If 
-acquired by or on behalf of any agency within the Department of Defense ("DOD"), the U.S. Government 
-acquires this commercial computer software and/or commercial computer software documentation subject 
-to the terms of this Agreement as specified in 48 C.F.R. 227.7202-3 of the DOD FAR Supplement ("DFAR") 
-and its successors.
-11.3 GOVERNING LAW:  This Agreement will be governed by the laws of the State of California as they are 
-applied to agreements between California residents entered into and to be performed entirely within 
-California.  The United Nations Convention on Contracts for the International Sale of Goods is specifically 
-disclaimed.
-11.4 ENTIRE AGREEMENT:  You agree that this is the entire agreement between you and ZoneAlarm, and that it 
-supersedes any prior agreement, whether written or oral, and all other communications between ZoneAlarm 
-and you relating to the subject matter of this Agreement.  This Agreement may be amended, modified or 
-supplemented only by a writing that is signed by the authorized representatives of both parties.
-11.5 RESERVATION OF RIGHTS:  All rights not expressly granted in this Agreement are reserved by ZoneAlarm.
-
-©2003-2008 Check Point Software Technologies Ltd. All rights reserved. Check Point, Check Point logo, 
-DefenseNet, IMsecure, OSFirewall, Safe@Office, SmartDefense, SmartDefense Advisor, TrueVector, ZoneAlarm, 
-ZoneAlarm Anti-Spyware, ZoneAlarm Antivirus, ZoneAlarm Internet Security Suite, ZoneAlarm Pro, ZoneAlarm 
-Secure Wireless Router, Zone Labs, and the Zone Labs logo are trademarks or registered trademarks of Check 
-Point Software Technologies Ltd. or its affiliates. ZoneAlarm is a Check Point Software Technologies, Inc. 
-Company. All other product names mentioned herein are trademarks or registered trademarks of their respective 
-owners. The products described in this document are protected by U.S. Patent No. 5,606,668, 5,835,726, 
-6,496,935, 6,873,988, and 6,850,943 and may be protected by other U.S. Patents, foreign patents, or pending 
-applications.', 'http://www.zonealarm.com/security/en-us/end-user-license-agreement-zonealarm.htm', NULL, NULL, NULL, 'ZoneAlarm EULA', NULL, NULL, NULL, '', NULL, false, false, false, 'da291ac4d26a21f6d2674f443727790d', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (392, 'SGI-B2.0', 'SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
 Copyright (C) [dates of first publication] Silicon Graphics, Inc. All Rights Reserved.
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -38438,7 +37588,567 @@ To accomplish this, add the phrase `Distribution of substantively modified versi
 B. To prohibit any publication of this work or derivative works in whole or in part in standard (paper) book form for commercial purposes unless prior permission is obtained from the copyright holder. 
 
 To accomplish this, add the phrase ''Distribution of the work or derivative of the work in any standard (paper) book form is prohibited unless prior permission is obtained from the copyright holder.'' to the license reference or copy. ', 'http://www.opencontent.org/openpub/', NULL, NULL, NULL, 'Open Publication License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'd59b6f101a8fd1e7ac453186f0768c4d', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (231, 'ATI', 'ATI Software End User License Agreement
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (335, 'RealNetworks-EULA', 'REALNETWORKS, INC.
+REAL LICENSING PROGRAM
+LICENSE SUPPLEMENT
+REDISTRIBUTION NOT PERMITTED
+IMPORTANT: READ CAREFULLY:
+This RealNetworks, Inc. License Supplement (“License Supplement”) is a legal
+agreement between you (either an individual or an entity, “You”) and RealNetworks, Inc.
+and its suppliers and licensors (collectively, “RealNetworks”) for the products (the
+“Software”) listed on the Real Licensing Program invoice (the “Invoice”) provided to
+You by RealNetworks.
+BY CLICKING ON “ACCEPT”, INSTALLING, COPYING OR OTHERWISE USING
+THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS
+LICENSE SUPPLEMENT. IF YOU DO NOT AGREE TO THE TERMS OF THIS
+LICENSE SUPPLEMENT, CLICK THE “I DO NOT ACCEPT” TO TERMINATE THE
+SOFTWARE INSTALLATION PROCESS.
+YOU AGREE THAT YOUR USE OF THE SOFTWARE ACKNOWLEDGES THAT
+YOU HAVE READ THIS LICENSE SUPPLEMENT, UNDERSTAND IT, AND
+AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
+1. SUPPLEMENT. This License Supplement supplements the End User License
+Agreement(s) accompanying the Software (“EULA”). In the event of any conflict
+between the terms of this License Supplement and any EULA, the terms of this License
+Supplement will control. Except for the provisions set forth in this License Supplement,
+all EULA provisions will remain in full force and effect.
+2. ELIGIBILITY. Notwithstanding anything to the contrary in the EULA, the Software
+covered by the EULA and this License Supplement are available only to the following
+types of entities, and You represent and warrant that You are one of the following:
+(a) Corporations, educational institutions, government organizations or not-for-profit
+organizations who deploy the server for their own internal non-commercial use. Wireless
+Network service providers or wireless network operators may not deploy this Software
+within their network(s). (b) End User Network Service Providers of less than 200,000
+subscribers. As used in this License Supplement, "End User Network Service Providers"
+means an entity that provides data network services to consumers or individuals. (c )
+Media Companies with less than fifty million dollars ($50,000,000) in annual revenue.
+As used in this License Supplement, "Media Company" means an entity that provides
+text, audio or video programming to distributors or direct to consumers in exchange for
+fees or based on an advertising business model. Notwithstanding the above, this License
+Supplement is not available to an organization that is using this Software to provide
+content to consumers via an Operator. As used in this License Supplement, "Operator"
+means an organization that provides voice and/or data network services to consumers and
+businesses through wireless wide area network technologies, including but not limited to
+GPRS, Edge, CDMA2000, UMTS, EVDO and WiMax; eligible organizations may either
+own or lease network infrastructure (MVNO).
+The Software is not available to organizations that provide network services to consumers
+or businesses or provide content aggregation and digital media application services to
+businesses.
+3. SEATS. Notwithstanding anything to the contrary in the EULA, You may install the
+number of copies of the Software sufficient to distribute content up to the number of seats
+specified in the applicable Invoice. You may increase the number of seats by purchasing
+additional license rights from RealNetworks.
+4. TERMINATION. This License Supplement and Your right to use the Software
+automatically terminate if You fail to comply with any material provision of this License
+Supplement. No notice will be required from RealNetworks to effect such termination.
+You and RealNetworks may terminate the EULA pursuant to the termination provisions
+set forth therein. Any termination of a EULA automatically terminates this License
+Supplement with respect to the Software covered by such EULA.
+Copyright © 1995-2010 RealNetworks, Inc. and/or its suppliers. 2601 Elliott Ave., Suite
+1000, Seattle, Washington 98121 U.S.A. This product may incorporate one or more of
+the following: U.S. Patent # 5,793,980; U.S. Patent # 5,917,835; U.S. Patent # 6,151,634.
+Other U.S. patents pending. All rights reserved. RealNetworks, Helix, RealPlayer,
+RealAudio, and RealVideo are trademarks or registered trademarks of RealNetworks,
+Inc.', 'http://www.realnetworks.com/uploadedFiles/Support/helix-support/eula-Real-LicProg-Perp-Supp.pdf', NULL, NULL, NULL, 'RealNetworks Real Licensing Program License Supplement', NULL, NULL, NULL, '', NULL, false, false, false, '90596696ef8824e2674cfcc66521d586', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (228, 'Helix/RealNetworks-EULA', 'Helix DNA Technology Binary Research Use License
+
+REDISTRIBUTION NOT PERMITTED
+
+This Helix DNA Technology Binary Research Use License ("License") is a legal agreement between You and RealNetworks, Inc. and its suppliers and licensors (collectively, "RealNetworks") for the binary versions of the Helix DNA Compiled Binaries distributed under this License ("Software"), which are made available from the "Helix DNA Compiled Binaries" section of the www.helixcommunity.org Web site. "You" means an individual, or a legal entity acting by and through an individual or individuals, exercising rights either under this License. For legal entities, "You" includes any entity that by majority voting interest controls, is controlled by, or is under common control with You. The terms and conditions for this License are as follows:
+
+By clicking on or accepting the "I AGREE TO THE ABOVE LICENSE TERMS" option below, or by installing, copying or otherwise using the Software, You agree to be bound by the terms of this License Agreement. IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENSE AGREEMENT, CLICK THE "I DO NOT AGREE TO THE ABOVE LICENSE TERMS" BUTTON AND/OR DO NOT INSTALL THE SOFTWARE.
+
+YOU AGREE THAT YOUR USE OF THE SOFTWARE ACKNOWLEDGES THAT YOU HAVE READ THIS LICENSE, UNDERSTAND IT, AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
+
+1. GRANT OF LICENSE FOR INTERNAL RESEARCH AND DEVELOPMENT WORK. Subject to the restrictions set forth herein, RealNetworks hereby grants to You a non-exclusive, non-sublicensable, personal license to use the Software in object code and any accompanying documentation ("Documentation") solely for Your internal, non-commercial evaluation and research use, provided that You may only install and use a reasonable number of copies of the Software on computers owned or controlled by You and located on Your premises. As part of such use You may combine the Software with other Helix software properly licensed to You under the terms of the RealNetworks Community Source License Agreement or the RealNetworks Public Source License Agreement, but You may not otherwise create derivative works of the Software or Documentation.
+
+2. LICENSE RESTRICTIONS.
+
+a) You may not: (i) permit other individuals to use the Software except under the terms listed above; (ii) modify, translate, reverse engineer, decompile, disassemble or use any other method (including "clean room" development) to learn the source code of the Software (except to the extent that this restriction is expressly prohibited by law); (iii) rent, lease, transfer, or otherwise transfer rights to the Software or Documentation; (iv) remove any proprietary notices or labels on the Software or Documentation; (v) use the Software to encode, reproduce or copy any material or intellectual property You do not have the right to encode, reproduce, or copy; (vi) use the Software to develop any application that has the capability of transcoding or converting RealAudio or RealVideo Files into any other file format ("Transcode" means to alter the current encoding or form of media files that was decoded from its original form, including by way of example but not limited to by way of example but not limited to: decompression of an audio or video stream and recompression using a different compression algorithm); or (vii) make available to any third party the results of any evaluation or testing of the Software by You under this License. Any such forbidden use shall immediately terminate Your license to the Software.
+
+b) You agree that You shall only use the Software and Documentation in a manner that complies with all applicable laws in the jurisdictions in which You use the Software and Documentation, including, but not limited to, applicable restrictions concerning copyright and other intellectual property rights.
+
+c) You may not use the Software in an attempt to, or in conjunction with, any device, program or service designed to circumvent technological measures employed to control access to, or the rights in, a digital media content file or other work protected by the copyright laws of any jurisdiction.
+
+d) Certain components of the Software may embody a serial copying management system required by the laws of the United States. You may not circumvent or attempt to circumvent this system by any means.
+
+3. COPIES OF SOFTWARE AND ENHANCEMENTS. This license does not grant You any right to any enhancement or update.
+
+4. TITLE. Title, ownership, rights, and intellectual property rights in and to the Software and Documentation shall remain in RealNetworks. The Software is protected by the copyright laws of the United States and international copyright treaties. Title, ownership rights and intellectual property rights in and to the content accessed through the Software including the content contained in the Software media demonstration files shall be retained by the applicable content owner and may be protected by applicable copyright or other law. This license gives You no rights to such content.
+
+5. DISCLAIMER OF WARRANTY & LIMIT OF LIABILITY. THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, REALNETWORKS FURTHER DISCLAIMS ALL WARRANTIES, INCLUDING WITHOUT LIMITATION ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. THE ENTIRE RISK ARISING OUT OF THE USE OR PERFORMANCE OF THE SOFTWARE AND DOCUMENTATION REMAINS WITH YOU. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL REALNETWORKS OR ITS SUPPLIERS BE LIABLE FOR ANY CONSEQUENTIAL, INCIDENTAL, INDIRECT, SPECIAL, PUNITIVE, OR OTHER DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR OTHER PECUNIARY LOSS) ARISING OUT OF THIS LICENSE OR THE USE OF OR INABILITY TO USE THE PRODUCT, EVEN IF REALNETWORKS HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. REALNETWORKS'' TOTAL LIABLITY FOR ANY DIRECT DAMAGES SHALL NOT EXCEED FIVE DOLLARS ($5.00). BECAUSE SOME STATES/JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES, THE ABOVE LIMITATION MAY NOT APPLY TO YOU.
+
+6. INDEMNIFICATION. This Software is intended for use only with properly licensed media, content and content creation tools. It is Your responsibility to ascertain whether any copyright, patent or other licenses are necessary and to obtain any licenses to such media and content. You agree to use only those materials for which You have the necessary patent, copyright and other permissions, licenses, and/or clearances. You agree to hold harmless, indemnify and defend RealNetworks, its officers, directors and employees, from and against any losses, damages, fines and expenses (including attorneys'' fees and costs) arising out of or relating to any claims that You have encoded, copied, compressed, enabled the "Allow Recording" feature, enabled the "Allow Download" feature, or copied, used, published, displayed, or transmitted any content or materials (other than materials provided by RealNetworks specifically for Your use) in connection with the Software in violation of another party''s rights If You are importing the Software from the United States, You shall indemnify and hold RealNetworks harmless from and against any import and export duties or other claims arising from such importation.
+
+7. TERMINATION. This License and Your right to use this Software automatically terminate if You fail to comply with any material provision of this License. RealNetworks may terminate this License at any time by delivering notice to You and You may terminate this License at any time by destroying or erasing Your copy of the Software. Upon termination of this License, You agree to destroy or erase the Software.
+
+8. NO ASSIGNMENT. This License is personal to You, and may not be assigned without RealNetworks'' express written consent.
+
+9. U.S. GOVERNMENT RESTRICTED RIGHTS. U.S. GOVERNMENT RESTRICTED RIGHTS: This Software and documentation are provided with RESTRICTED RIGHTS. Use, duplication or disclosure by the Government is subject to restrictions set forth in subparagraphs (a) through (d) of the Commercial Computer Software--Restricted Rights at FAR 52.227-19 when applicable, or in subparagraph (c)(1)(ii) of the Rights in Technical Data and Computer Software clause at DFARS 252.227-7013, and in similar clauses in the NASA FAR supplement, as applicable. Manufacturer is RealNetworks, Inc./2601 Elliott, Suite 1000/Seattle, Washington 98121. You are responsible for complying with all trade regulations and laws both foreign and domestic. You acknowledge that none of the Software or underlying information or technology may be downloaded or otherwise exported or re-exported (i) into (or to a national or resident of) Cuba, Iraq, Libya, Sudan, North Korea, Iran, Syria or any other country subject to a U.S. embargo; or (ii) to anyone on the U.S. Treasury Department''s list of Specially Designated Nationals or the U.S. Commerce Department''s Denied Parties List or Entity List. By using the Software You are agreeing to the foregoing and are representing and warranting that (i) no U.S. federal agency has suspended, revoked, or denied You export privileges, (ii) You are not located in or under the control of a national or resident of any such country or on any such list, and (iii) You will not export or re-export the Software to any prohibited county, or to any prohibited person, entity, or end-user as specified by U.S. export controls.
+
+10. MISCELLANEOUS. This License Agreement shall constitute the complete and exclusive agreement between us. A separate written agreement with respect to the subject matter hereof shall supersede this instrument to the extent indicated in such separate agreement. This License Agreement may not be modified except in a writing duly signed by an authorized representative of RealNetworks and You. If any provision of this License Agreement is held to be unenforceable for any reason, such provision shall be reformed only to the extent necessary to make it enforceable, and such decision shall not affect the enforceability of such provision under other circumstances, or of the remaining provisions hereof under all circumstances. This License Agreement shall be governed by the laws of the State of Washington without regard to conflicts of law provisions and You consent to the exclusive jurisdiction of the state and federal courts sitting in the State of Washington. This License Agreement will not be governed by the United Nations Convention of Contracts for the International Sale of Goods, the application of which is hereby expressly excluded.
+
+Copyright ©1995-2002 RealNetworks, Inc. and/or its suppliers. 2601 Elliott Avenue, Suite 1000, Seattle, Washington 98121 U.S.A. The Software may incorporate one or more of the following patents: U.S. Patent #5,917,835; U.S. Patent # 5,854,858; U.S. Patent # 5,917,954. Other U.S. patents pending. All rights reserved. RealNetworks, Helix, RealAudio, and RealVideo are trademarks or registered trademarks of RealNetworks, Inc. 
+', 'https://helixcommunity.org/beula/', NULL, NULL, NULL, 'Helix DNA Technology Binary Research Use License', NULL, NULL, NULL, '', NULL, false, false, false, '88c12cbf7fc40c8998040b851200fa55', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (300, 'Oracle-Dev', 'Oracle Technology Network Developer License Terms 
+
+Export Controls on the Programs 
+Selecting the "Accept License Agreement" button is a confirmation of your agreement that you comply, now and during the trial term, with each of the following statements: 
+
+-You are not a citizen, national, or resident of, and are not under control of, the government of Cuba, Iran, Sudan, Libya, North Korea, Syria, nor any country to which the United States has prohibited export. 
+-You will not download or otherwise export or re-export the Programs, directly or indirectly, to the above mentioned countries nor to citizens, nationals or residents of those countries. 
+-You are not listed on the United States Department of Treasury lists of Specially Designated Nationals, Specially Designated Terrorists, and Specially Designated Narcotic Traffickers, nor are you listed on the United States Department of Commerce Table of Denial Orders. 
+
+You will not download or otherwise export or re-export the Programs, directly or indirectly, to persons on the above mentioned lists. 
+
+You will not use the Programs for, and will not allow the Programs to be used for, any purposes prohibited by United States law, including, without limitation, for the development, design, manufacture or production of nuclear, chemical or biological weapons of mass destruction. 
+
+EXPORT RESTRICTIONS 
+You agree that U.S. export control laws and other applicable export and import laws govern your use of the programs, including technical data; additional information can be found on Oracle®''s Global Trade Compliance web site (http://www.oracle.com/products/export). 
+
+You agree that neither the programs nor any direct product thereof will be exported, directly, or indirectly, in violation of these laws, or will be used for any purpose prohibited by these laws including, without limitation, nuclear, chemical, or biological weapons proliferation. 
+
+Oracle Employees: Under no circumstances are Oracle Employees authorized to download software for the purpose of distributing it to customers. Oracle products are available to employees for internal use or demonstration purposes only. In keeping with Oracle''s trade compliance obligations under U.S. and applicable multilateral law, failure to comply with this policy could result in disciplinary action up to and including termination. 
+
+Note: You are bound by the Oracle Technology Network ("OTN") License Agreement terms. The OTN License Agreement terms also apply to all updates you receive under your Technology Track subscription. 
+
+The OTN License Agreement terms below supercede any shrinkwrap license on the OTN Technology Track software CDs and previous OTN License terms (including the Oracle Program License as modified by the OTN Program Use Certificate). 
+
+Oracle Technology Network Development License Agreement
+"We," "us," and "our" refers to Oracle America, Inc., for and on behalf of itself and its subsidiaries and affiliates under common control. "You" and "your" refers to the individual or entity that wishes to use the programs from Oracle. "Programs" refers to the Oracle software product you wish to download and use and program documentation. "License" refers to your right to use the programs under the terms of this agreement. This agreement is governed by the substantive and procedural laws of California. You and Oracle agree to submit to the exclusive jurisdiction of, and venue in, the courts of San Francisco, San Mateo, or Santa Clara counties in California in any dispute arising out of or relating to this agreement. 
+
+We are willing to license the programs to you only upon the condition that you accept all of the terms contained in this agreement. Read the terms carefully and select the "Accept License Agreement" button to confirm your acceptance. If you are not willing to be bound by these terms, select the "Decline License Agreement" button and the registration process will not continue. 
+
+LICENSE RIGHTS 
+We grant you a nonexclusive, nontransferable limited license to use the programs only for the purpose of developing, testing, prototyping and demonstrating your application, and not for any other purpose. If you use the application you develop under this license for any internal data processing or for any commercial or production purposes, or you want to use the programs for any purpose other than as permitted under this agreement, you must obtain a production release version of the program by contacting us or an Oracle reseller to obtain the appropriate license. You acknowledge that we may not produce a production release version of the program and any development efforts undertaken by you are at your own risk. We may audit your use of the programs. Program documentation, if available, may accessed online at http://www.oracle.com/technetwork/documentation/index.html.
+
+Ownership and Restrictions We retain all ownership and intellectual property rights in the programs. The programs may be installed on one computer only, and used by one person in the operating environment identified by us. You may make one copy of the programs for backup purposes. 
+
+You may not: 
+- use the programs for your own internal data processing or for any commercial or production purposes, or use the programs for any purpose except the development of your application; 
+- use the application you develop with the programs for any internal data processing or commercial or production purposes without securing an appropriate license from us; 
+- continue to develop your application after you have used it for any internal data processing, commercial or production purpose without securing an appropriate license from us, or an Oracle reseller; 
+- remove or modify any program markings or any notice of our proprietary rights; 
+- make the programs available in any manner to any third party; 
+- use the programs to provide third party training; 
+- assign this agreement or give or transfer the programs or an interest in them to another individual or entity; - cause or permit reverse engineering (unless required by law for interoperability), disassembly or decompilation of the programs; 
+- disclose results of any program benchmark tests without our prior consent. 
+
+Export 
+You agree that U.S. export control laws and other applicable export and import laws govern your use of the programs, including technical data; additional information can be found on Oracle''s Global Trade Compliance web site located at http://www.oracle.com/products/export/index.html?content.html. You agree that neither the programs nor any direct product thereof will be exported, directly, or indirectly, in violation of these laws, or will be used for any purpose prohibited by these laws including, without limitation, nuclear, chemical, or biological weapons proliferation. 
+
+Disclaimer of Warranty and Exclusive Remedies 
+THE PROGRAMS ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. WE FURTHER DISCLAIM ALL WARRANTIES, EXPRESS AND IMPLIED, INCLUDING WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT. 
+
+IN NO EVENT SHALL WE BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, PUNITIVE OR CONSEQUENTIAL DAMAGES, OR DAMAGES FOR LOSS OF PROFITS, REVENUE, DATA OR DATA USE, INCURRED BY YOU OR ANY THIRD PARTY, WHETHER IN AN ACTION IN CONTRACT OR TORT, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. OUR ENTIRE LIABILITY FOR DAMAGES HEREUNDER SHALL IN NO EVENT EXCEED ONE THOUSAND DOLLARS (U.S. $1,000). 
+
+Trial Programs Included With Orders 
+We may include additional programs with an order which may be used for trial purposes only. You will have 30 days from the delivery date to evaluate these programs. Any use of these programs after the 30 day trial period requires you to obtain the applicable license. Programs licensed for trial purposes are provided "as is" and we do not provide technical support or any warranties for these programs.
+
+No Technical Support 
+Our technical support organization will not provide technical support, phone support, or updates to you for the programs licensed under this agreement. 
+
+End of Agreement 
+You may terminate this agreement by destroying all copies of the programs. We have the right to terminate your right to use the programs if you fail to comply with any of the terms of this agreement, in which case you shall destroy all copies of the programs. 
+
+Relationship Between the Parties 
+The relationship between you and us is that of licensee/licensor. Neither party will represent that it has any authority to assume or create any obligation, express or implied, on behalf of the other party, nor to represent the other party as agent, employee, franchisee, or in any other capacity. Nothing in this agreement shall be construed to limit either party''s right to independently develop or distribute software that is functionally similar to the other party''s products, so long as proprietary information of the other party is not included in such software. 
+
+Open Source 
+"Open Source" software - software available without charge for use, modification and distribution - is often licensed under terms that require the user to make the user''s modifications to the Open Source software or any software that the user ''combines'' with the Open Source software freely available in source code form. If you use Open Source software in conjunction with the programs, you must ensure that your use does not: (i) create, or purport to create, obligations of us with respect to the Oracle programs; or (ii) grant, or purport to grant, to any third party any rights to or immunities under our intellectual property or proprietary rights in the Oracle programs. For example, you may not develop a software program using an Oracle program and an Open Source program where such use results in a program file(s) that contains code from both the Oracle program and the Open Source program (including without limitation libraries) if the Open Source program is licensed under a license that requires any "modifications" be made freely available. You also may not combine the Oracle program with programs licensed under the GNU General Public License ("GPL") in any manner that could cause, or could be interpreted or asserted to cause, the Oracle program or any modifications thereto to become subject to the terms of the GPL. 
+
+Entire Agreement 
+You agree that this agreement is the complete agreement for the programs and licenses, and this agreement supersedes all prior or contemporaneous agreements or representations. If any term of this agreement is found to be invalid or unenforceable, the remaining provisions will remain effective. 
+
+Last updated: 01/24/09 
+
+Should you have any questions concerning this License Agreement, or if you desire to contact Oracle for any reason, please write: 
+Oracle America, Inc. 
+500 Oracle Parkway, 
+Redwood City, CA 94065', 'http://www.oracle.com/technetwork/testcontent/standard-license-088383.html', NULL, NULL, NULL, 'Oracle Technology Network Developer License Terms', NULL, NULL, NULL, '', NULL, false, false, false, 'da18dd97eb62940ac6efa3e54b44897d', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (391, 'ZoneAlarm-EULA', 'ZONEALARM, A CHECK POINT SOFTWARE TECHNOLOGIES, INC. COMPANY
+END USER LICENSE AGREEMENT
+
+THIS END USER LICENSE AGREEMENT ("Agreement") IS A LEGAL AGREEMENT BETWEEN YOU 
+(EITHER ON BEHALF OF YOURSELF AS AN INDIVIDUAL OR ON BEHALF OF AN ENTITY AS ITS 
+AUTHORIZED REPRESENTATIVE) AND ZONEALARM.  PLEASE READ THIS 
+AGREEMENT CAREFULLY AND PRINT OUT A COPY FOR YOUR RECORDS.  THIS AGREEMENT 
+SUPERSEDES PREVIOUS VERSIONS.
+
+BY CHECKING THE AGREEMENT CHECKBOX BELOW AND DOWNLOADING, INSTALLING, COPYING 
+OR OTHERWISE USING ZONEALARM''S SOFTWARE YOU AGREE TO BE BOUND BY ALL OF THE 
+TERMS OF THIS AGREEMENT.  IF YOU DO NOT AGREE TO THE TERMS OF THIS AGREEMENT, 
+CLICK ON THE "CANCEL" BUTTON AND/OR DO NOT DOWNLOAD, INSTALL, COPY OR OTHERWISE 
+USE THE SOFTWARE.
+
+1. SOFTWARE:  As used in this Agreement, the term "Software" refers to the 
+ZoneAlarm software which you have selected to download.  The term "Software" 
+also shall include any upgrades, modified versions or updates of the Software
+ made available to you by ZoneAlarm.  The Software is deemed accepted by you 
+upon download of the Software. The term "Software" also includes any third 
+party software made available to you by ZoneAlarm.
+
+2. GRANT OF LICENSE:  Subject to the terms of this Agreement, ZoneAlarm hereby 
+grants you a perpetual, non-exclusive, non-transferable right to:  (i) install 
+the Software, (ii) use the Software for your internal use, and (iii) copy the 
+Software for back-up or archival purposes.  Notwithstanding the foregoing, you 
+acknowledge and agree that, depending on the version (free, trial or fully 
+licensed) of Software you select to download, certain restrictions may apply 
+to your use of the Software and certain features of the Software ("Special 
+Features") may be unavailable to you or available subject to certain limitations, 
+as follows:
+2.1 FREE VERSIONS:  You may only download and use a free non-trial version of the 
+Software if you are (i) an individual (and then only for your personal home use) 
+or (ii) a not-for-profit charitable entity as set forth in U.S.C., Title 26, 
+Section 501(c)(3) (excluding government entities and educational institutions).  
+If you select to download a free non-trial version of the Software, you will be 
+unable to access the Special Features of the Software unless you upgrade to a 
+fully licensed version of the Software (provided such option is made available 
+to you), and pay the applicable fees, if any.
+2.2 TRIAL VERSIONS:  If you select to download a free trial version of the Software, 
+you will be able to access the Special Features of the Software only for a limited 
+trial period (the "Trial Period").  Unless you pay the applicable one-time license 
+fee for the Software and install a license key (as described in Section 6 ("License 
+Keys")), the Special Features of the Software will become inoperable and automatically 
+expire at the end of your Trial Period.  In the event that you pay the applicable 
+license fee for the Software, your ability to access the Special Features of the 
+Software on the number of computers for which you have paid the applicable license 
+fee will continue perpetually, subject to the terms of this Agreement.
+2.3 FULLY LICENSED VERSIONS:  If you select to download a fully licensed version of 
+the Software and pay the applicable license fee, your ability to access the Special 
+Features of the Software on the number of computers for which you have paid the 
+applicable license fee will continue perpetually, subject to the terms of this Agreement.
+2.4  SERVICE VERSION:  If you are receiving this software as a service then this 
+software shall only operate if the applicable fee is paid in accordance with the 
+applicable providers policy.  
+2.5  VERSIONS INCLUDING ANTI-SPYWARE:  If you elect to receive the anti-spyware 
+feature you explicitly request ZoneAlarm to make a determination for you on the 
+potential effect identified programs may have on your system.  You agree that 
+we may automatically delete certain programs and/or provide you the customized 
+ability to delete certain programs.  The deletion of these programs may be in 
+violation with other license agreements you have knowingly or unknowingly agreed 
+to. The deletion of these programs and the potential violation of a third party 
+license is your responsibility.  ZoneAlarm has no ability to verify what, if any, 
+third party agreements you may have agreed to.    
+
+3. SUBSCRIPTION SERVICES:  If you select to download a fully licensed version of the 
+Software (or upgrade to a fully licensed version of the Software if you have previously 
+downloaded a free or trial version of the Software), you may receive Subscription Services 
+as provided in this Section.  The term "Subscription Services" includes technical support 
+and such additional services as ZoneAlarm may, in ZoneAlarm''s discretion, make available to 
+you for the designated time the subscription service was purchased.
+
+3.1 TECHNICAL SUPPORT:  Subject to payment of the applicable license fee, ZoneAlarm will 
+provide you with technical support, free of charge, for a limited period commencing on 
+your payment of such license fee.  You may obtain continued technical support for a 
+specified period of time by paying ZoneAlarm''s applicable then-current fee for Subscription 
+Services and installing the applicable license keys, provided that such option is made 
+available to you.  All technical support is provided subject to ZoneAlarm''s then-current 
+technical support policy, and includes such updates to the Software as ZoneAlarm may make 
+generally available thereunder from time to time in ZoneAlarm''s sole discretion.  In the event 
+you are eligible to receive such updates to the Software, ZoneAlarm will notify you when 
+such updates are available to be downloaded by you.  All updates to the Software shall be 
+governed by this Agreement unless other license terms are provided with the update.
+3.2 ADDITIONAL SERVICES:  During the time you are eligible to receive technical support, 
+ZoneAlarm may, in ZoneAlarm''s sole discretion, also make certain additional web-based security 
+services available to you.  Such additional services will be provided subject to ZoneAlarm''s 
+then-current policies regarding use of such additional services.  ZoneAlarm reserves the right 
+to discontinue any such additional services and/or offer new additional services at any time, 
+without right to refund or set-off.
+3.3 VERSION SUPPORT: ZoneAlarm, in its sole discretion, may discontinue ongoing support for 
+specific operating system versions.  For updated support notifications on your operating system, 
+please visit zonelabs.com.  
+
+4. LICENSE RESTRICTIONS:  You acknowledge that the foregoing license extends only to your use 
+of the features and functionality of the Software as described in the online documentation 
+accompanying the version of the Software downloaded by you (the "Documentation"), and you 
+agree not to reconfigure or modify the Software in order to enable features or functionality 
+different than those described in such Documentation or available in other ZoneAlarm products 
+without notifying ZoneAlarm and paying the applicable Software upgrade fee.  You may not:  (i) 
+reverse engineer, decompile, or disassemble the Software; (ii) modify, or create derivative 
+works based upon, the Software in whole or in part; (iii) distribute copies of the Software; 
+(iv) remove any proprietary notices or labels on the Software; or (v) resell, lease, rent, 
+transfer, sublicense, or otherwise transfer rights to the Software.  Any use in violation of 
+this Section shall immediately terminate your license to the Software.
+
+5. THIRD PARTY SOFTWARE:  Certain third party software included with the Software is subject to 
+additional terms and conditions imposed by ZoneAlarm''s third party licensor(s).  Such terms and 
+conditions are contained in the "About" pages of the Software and are deemed incorporated herein 
+by reference. 
+ 
+6. LICENSE KEYS:  You acknowledge that the Software contains a license key.  If you select to 
+download a trial or fully licensed version of the Software, and pay the applicable license fee 
+for the Software, ZoneAlarm will provide you an initial license key for installation with the 
+Software which will enable you to (i) use the Software (including Special Features) during the 
+term of your license and (ii) obtain certain subscription-based services ("Subscription Services") 
+for a limited period pursuant to the terms of Section 3 ("Subscription Services").  In the event 
+you subsequently purchase continued Subscription Services pursuant to Section 3 ("Subscription 
+Services"), and at each renewal thereof, ZoneAlarm will provide you additional license key(s) 
+for installation with the Software to enable you to obtain such Subscription Services for the 
+applicable subscription period.  You agree not to purchase any license keys or similar computer 
+code for the Software from any source other than ZoneAlarm or ZoneAlarm''s authorized partners.  
+
+7. TITLE:  You agree that no title to the intellectual property in the Software, Subscription 
+Services (as defined), or license keys is transferred to you.  Title, ownership, rights, and 
+intellectual property rights in and to the Software, Subscription Services, and license keys 
+shall remain in ZoneAlarm and/or ZoneAlarm''s licensors.  The Software, Subscription Services 
+and license keys are protected by intellectual property laws of the United States and other 
+countries and by international treaties.
+
+8. WARRANTY:
+8.1 Limited Warranty. ZoneAlarm warrants to You that the encoding of the Software on the media 
+on which the Software is furnished will be free from defects in material and workmanship, and 
+that the Software shall substantially conform to its user manual, as it exists at the date of 
+delivery, for a period of ninety (90) days from the date You receive the original License Key. 
+ZoneAlarm''s entire liability and Your exclusive remedy shall be, at ZoneAlarm''s option, either: 
+(i) return of the price paid to ZoneAlarm for the Software, resulting in the termination of 
+this Agreement, or (ii) repair or replacement of the Software or media that does not meet this 
+limited warranty. Some jurisdictions do not allow the exclusion of implied warranties or 
+limitations on how long an implied warranty may last, so the above limitations may not apply 
+to You. This warranty gives You specific legal rights. You may have other rights that vary 
+from state to state.
+
+8.2 GENERAL:  The Software and Subscription Services are provided to you at minimal charge.  
+ZoneAlarm does not guarantee that use of the Software or Subscription Services will be uninterrupted 
+or error-free.  ZoneAlarm does not guarantee that the information accessed by the Software or 
+Subscription Services will be accurate or complete.  You acknowledge that performance of the 
+Software and Subscription Services may be affected by any number of factors, including without 
+limitation, technical failure of the Software, the acts or omissions of third parties and other 
+causes reasonably beyond the control of ZoneAlarm.  Certain features of the Software may not be 
+forward-compatible with future versions of the Software and use of such features with future 
+versions of the Software may require purchase of the applicable future version of the Software.
+8.3 AS IS SALE:  EXCEPT FOR THE LIMITED WARRANTIES SET FORTH IN SECTION 8.1, YOU AGREE THAT
+ZONEALARM AND ITS LICENSORS HAVE MADE NO EXPRESS WARRANTIES, ORAL OR WRITTEN, TO YOU REGARDING THE 
+SOFTWARE AND SUBSCRIPTION SERVICES AND THAT THE SOFTWARE AND SUBSCRIPTION SERVICES ARE BEING 
+PROVIDED TO YOU "AS IS" WITHOUT WARRANTY OF ANY KIND.  YOU ACKNOWLEDGE THAT THE ENTIRE RISK AS 
+TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE AND/OR SUBSCRIPTION SERVICES IS WITH YOU.  SHOULD 
+THE SOFTWARE AND/OR SUBSCRIPTION SERVICES PROVE DEFECTIVE, YOU (AND NOT ZONEALARM, THE RETAILER, 
+OR ANY DISTRIBUTOR) ASSUME THE ENTIRE COST OF ALL NECESSARY REPAIRS.
+8.4 DISCLAIMER:  ZONEALARM DISCLAIMS ANY AND ALL OTHER WARRANTIES, WHETHER EXPRESS, IMPLIED, OR 
+STATUTORY, INCLUDING, BUT WITHOUT LIMITATION, (i) THE IMPLIED WARRANTIES OF NONINFRINGEMENT OF 
+THIRD PARTY RIGHTS, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE; (ii) THAT THE SOFTWARE 
+OR SUBSCRIPTION SERVICES WILL AVERT OR PREVENT ALL OCCURRENCES (OR THE CONSEQUENCES THEREFROM) 
+THAT THE SOFTWARE OR SUBSCRIPTION SERVICES ARE DESIGNED TO DETECT AND/OR PREVENT; OR (iii) THAT 
+ANY INFORMATION ACCESSED BY THE SOFTWARE OR SUBSCRIPTION SERVICES WILL BE ACCURATE OR COMPLETE.  
+THIS WARRANTY DISCLAIMER AFFECTS YOUR LEGAL RIGHTS, AND YOU MAY ALSO HAVE OTHER RIGHTS WHICH VARY 
+FROM JURISDICTION TO JURISDICTION.  SOME JURISDICTIONS DO NOT ALLOW EXCLUSIONS OF IMPLIED WARRANTIES 
+OR LIMITATIONS ON HOW LONG AN IMPLIED WARRANTY LASTS, SO THE ABOVE EXCLUSION MAY NOT APPLY TO YOU.
+
+9. Limitation on Liability. EXCEPT FOR BODILY INJURY OF A PERSON, IN NO EVENT WILL ZONEALARM BE 
+LIABLE TO YOU OR ANY THIRD PARTY FOR ANY DAMAGES ARISING OUT OF THE SUBJECT MATTER OF THIS 
+AGREEMENT, THE PRODUCT OR ANY SERVICES UNDER ANY CONTRACT, NEGLIGENCE, STRICT LIABILITY OR OTHER 
+THEORY, FOR ANY INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES (INCLUDING LOST PROFITS), 
+OR FOR LOSS OF OR CORRUPTION OF DATA, OR FOR COST OF PROCUREMENT OF SUBSTITUTE GOODS OR TECHNOLOGY, 
+IRRESPECTIVE OF WHETHER ZONEALARM HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. ZONEALARM''S 
+MAXIMUM LIABILITY FOR DAMAGES SHALL BE LIMITED TO THE LICENSE FEES RECEIVED BY ZONEALARM UNDER THIS 
+LICENSE FOR THE PARTICULAR PRODUCT(S) WHICH CAUSED THE DAMAGES. Some jurisdictions do not allow 
+the exclusion or limitation of incidental or consequential damages, so the above limitation or 
+exclusion may not apply to You.
+
+10. TERMINATION:  This Agreement shall terminate automatically if you fail to comply with the terms 
+of this Agreement.  No notice shall be required from ZoneAlarm to effect such termination.  You may 
+also terminate this Agreement at any time by notifying ZoneAlarm in writing of termination.  Upon 
+any termination of this Agreement, you must uninstall and destroy all copies of the Software.
+
+11. MISCELLANEOUS:
+11.1 COMPLIANCE WITH EXPORT CONTROL LAWS:  You acknowledge that Software is subject to the export 
+control laws and regulations of the United States ("U.S.") and agree to abide by those laws and 
+regulations.  Under U.S. law, the Software may not be downloaded or otherwise exported, reexported, 
+or transferred to restricted countries, restricted end-users, or for restricted end-uses.  The U.S. 
+currently has embargo restrictions against Cuba, Iran, Iraq, Libya, North Korea, Sudan, and Syria.  
+The lists of restricted end-users are maintained on the U.S. Commerce Department''s Denied Persons 
+List, the Commerce Department''s Entity List, the Commerce Department''s List of Unverified Persons, 
+and the U.S. Treasury Department''s List of Specially Designated Nationals and Blocked Persons.  In 
+addition, the Software may not be downloaded or otherwise exported, reexported, or transferred to 
+an end-user engaged in activities related to weapons of mass destruction.  Such activities include 
+but are not necessarily limited to activities related to:  (1) the design, development, production 
+or use of nuclear materials, nuclear facilities, or nuclear weapons; (2) the design, development, 
+production or use of missiles or support of missile projects; and (3) the design, development, 
+production, or use of chemical or biological weapons.  By downloading or using the Software, you 
+are agreeing to the foregoing.  You are also warranting that you are not (i) located in, or a 
+resident or national of, a restricted country; (ii) on any of the U.S. lists of restricted end-users; 
+or (iii) engaged in any activity related to weapons of mass destruction.  You understand that the 
+requirements and restrictions of U.S. law as applicable to you may vary depending on the software 
+downloaded and may change over time, and that, to determine the precise controls applicable to the 
+software, it is necessary to refer to the U.S. Export Administration Regulations and the U.S. Foreign 
+Assets Control Regulations.
+11.2 U.S. GOVERNMENT RIGHTS:  The Software under this Agreement is commercial computer software as that 
+term is described in 48 C.F.R. 252.227-7014(a)(1).  If acquired by or on behalf of a civilian agency, 
+the U.S. Government acquires this commercial computer software and/or commercial computer software 
+documentation subject to the terms of this Agreement as specified in 48 C.F.R. 12.212 (Computer Software) 
+and 12.211 (Technical Data) of the Federal Acquisition Regulations ("FAR") and its successors.  If 
+acquired by or on behalf of any agency within the Department of Defense ("DOD"), the U.S. Government 
+acquires this commercial computer software and/or commercial computer software documentation subject 
+to the terms of this Agreement as specified in 48 C.F.R. 227.7202-3 of the DOD FAR Supplement ("DFAR") 
+and its successors.
+11.3 GOVERNING LAW:  This Agreement will be governed by the laws of the State of California as they are 
+applied to agreements between California residents entered into and to be performed entirely within 
+California.  The United Nations Convention on Contracts for the International Sale of Goods is specifically 
+disclaimed.
+11.4 ENTIRE AGREEMENT:  You agree that this is the entire agreement between you and ZoneAlarm, and that it 
+supersedes any prior agreement, whether written or oral, and all other communications between ZoneAlarm 
+and you relating to the subject matter of this Agreement.  This Agreement may be amended, modified or 
+supplemented only by a writing that is signed by the authorized representatives of both parties.
+11.5 RESERVATION OF RIGHTS:  All rights not expressly granted in this Agreement are reserved by ZoneAlarm.
+
+©2003-2008 Check Point Software Technologies Ltd. All rights reserved. Check Point, Check Point logo, 
+DefenseNet, IMsecure, OSFirewall, Safe@Office, SmartDefense, SmartDefense Advisor, TrueVector, ZoneAlarm, 
+ZoneAlarm Anti-Spyware, ZoneAlarm Antivirus, ZoneAlarm Internet Security Suite, ZoneAlarm Pro, ZoneAlarm 
+Secure Wireless Router, Zone Labs, and the Zone Labs logo are trademarks or registered trademarks of Check 
+Point Software Technologies Ltd. or its affiliates. ZoneAlarm is a Check Point Software Technologies, Inc. 
+Company. All other product names mentioned herein are trademarks or registered trademarks of their respective 
+owners. The products described in this document are protected by U.S. Patent No. 5,606,668, 5,835,726, 
+6,496,935, 6,873,988, and 6,850,943 and may be protected by other U.S. Patents, foreign patents, or pending 
+applications.', 'http://www.zonealarm.com/security/en-us/end-user-license-agreement-zonealarm.htm', NULL, NULL, NULL, 'ZoneAlarm EULA', NULL, NULL, NULL, '', NULL, false, false, false, '2a6ee4d004d4bd365e473e42feb12f71', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (219, 'Ascender-EULA', 'Ascender Corporation End User License Agreement
+
+Note: Click here for more information on various font license options, including multi-workstation licenses, enterprise-wide licenses, and application server licenses.
+
+This Ascender Corporation End User Agreement (the "Agreement") becomes a binding contract between you and Ascender Corporation when you click on the area marked "OK" or "I Accept." If you do not wish to be bound by the Agreement, you cannot access, use or download the Font Software. Please read all of the Agreement before you agree to be bound by its terms and conditions.
+
+You hereby agree to the following:
+
+1. You are bound by the Agreement and you acknowledge that all Use (as defined herein) of the Font Software (as defined herein) supplied to you by Ascender is governed by the Agreement.
+
+2. "Ascender" as used herein shall mean collectively Ascender Corporation, its authorized distributors and suppliers.
+
+3. "Font Software" as used herein shall mean software which, when used on an appropriate device, generates the typefaces. Font Software includes all bitmap representations of the typeface designs. Font Software includes permitted copies, and related documentation.
+
+4. "Licensed Computers" as used herein shall mean five (5) personal computers, unless you specifically purchased the right from Ascender to use the Font Software on more than five (5) personal computers. If you intend to use the Font Software on more than five (5) personal computers, you may obtain a license from Ascender (or its authorized distributor) for an additional fee. Your receipt will serve as your record of the number of personal computers for which you are licensed to use the Font Software.
+
+5. "Use" of the Font Software shall occur when an individual is able to give commands (whether by keyboard or otherwise) that are followed by the Font Software, regardless of the location in which the Font Software resides.
+
+6. "Personal or Internal Business Use" shall mean Use of the Font Software for your customary personal or internal business purposes and shall not mean any distribution whatsoever of the Font Software. "Personal or Internal Business Use" shall not include any Use of the Font Software by persons that are not members of your immediate household, your authorized employees, or your authorized agents.
+
+7. "Commercial Product" as used herein shall mean an electronic document or data file created by Use of the Font Software which is offered for distribution as a commercial product in exchange for a separate fee or other consideration. By way of illustration and not by way of limitation, an electronic book or magazine distributed for a fee shall be considered a Commercial Product; a document distributed in connection with a commercial transaction in which the consideration is unrelated to such document (for example, a business letter, a ticket for an event, or a receipt for purchase of tangible goods such as clothing) shall not be considered a Commercial Product.
+
+8. You are hereby granted a non-exclusive, non-assignable, non-transferable (except as expressly permitted herein) license to access the Font Software (i) only in a Licensed Computer, (ii) only for your Personal or Internal Business Use, and (iii) only subject to all of the terms and conditions of the Agreement. You have no rights to the Font Software other than as expressly set forth in the Agreement. You agree that Ascender owns all right, title and interest in and to the Font Software, its structure, organization, code, and related files, including all property rights therein such as copyright, design and trademarks rights. You agree that the Font Software, its structure, organization, code, and related files are valuable property of Ascender and that any intentional Use of the Font Software not expressly permitted by the Agreement constitutes a theft of valuable property. All rights not expressly granted in the Agreement are expressly reserved to Ascender. You may not use or include the Font Software as part of a Commercial Product, or any other hardware or software product, without a separate license from Ascender authorizing you to do so.
+
+9. You may install and Use the Font Software on a single file server for Use on a single local area network ("LAN") only when the Use of such Font Software is limited to the number of Licensed Computers for which you have a license. The Font Software may not be installed or Used on a server that can be accessed via the Internet or other external network system (a system other than a LAN) by personal computers which are not Licensed Computers, unless you acquire a license from Ascender granting you this specific right.
+
+10. You may electronically distribute Font Software embedded in a "Personal or Internal Business Use" document (that is, a document other than a "Commercial Product" as defined herein) only when the Font Software embedded in such document is distributed in a secure format that permits only the viewing, printing and editing (and not the installing) of such Font Software. You may not embed Font Software in a Commercial Product without a separate written license from Ascender, for an additional fee. You may not alter or modify the embedding permission contained within the Font Software.
+
+11. You acknowledge that the Font Software is protected by the copyright and other intellectual property law of the United States and its various States, by the copyright and design laws of other nations, and by international treaties. You agree to treat the Font Software as you would any other copyrighted material, such as a book. You may not copy the Font Software, except as expressly provided herein and you agree not to copy the design embodied within the Font Software. Any copies that you are expressly permitted to make pursuant to the Agreement must contain the same copyright, trademark, and other proprietary notices that appear on or in the Font Software. You agree not to adapt, modify, alter, translate, convert, or otherwise change the Font Software, or to create any derivative works from Font Software or any portion thereof. You further agree not to use Font Software in connection with software and/or hardware which creates any derivative works of such Font Software. You agree not to reverse engineer, decompile, disassemble, or otherwise attempt to discover the source code of the Font Software, provided, however, that if you are located in a European Community member country or any other country which provides rights materially similar to the rights set forth in this proviso, you may reverse engineer or decompile the Font Software only to the extent that sufficient information is not available for the purpose of creating an interoperable software program (but only for such purpose and only to the extent that sufficient information is not provided by Ascender upon written request). You agree to use trademarks associated with the Font Software according to accepted trademark practice, including identification of the trademark owner''s name. Trademarks can only be used to identify printed output produced by the Font Software. The use of any trademark as herein authorized does not give you any rights of ownership in that trademark and all use of any trademark shall inure to the sole benefit of the trademark owner. You may not change any trademark or trade name designation for the Font Software.
+
+12. You may not rent, lease, sublicense, give, lend, or further distribute the Font Software, or any copy thereof, except as expressly provided herein. You may transfer all your rights to use the Font Software to another person or legal entity provided that (i) the transferee accepts and agrees to be bound by all the terms and conditions of this Agreement, and (ii) you destroy all copies of the Font Software, including all copies stored in the memory of a hardware device. If you are a business or organization, you agree that upon request from Ascender or Ascender''s authorized representative, you will with thirty (30) days fully document and certify that use of any and all Ascender Font Software at the time of the request is in conformity with your valid licenses from Ascender.
+
+13. You may make one back-up copy of Font Software for archival purposes only, and you shall retain exclusive custody and control over such copy. Upon termination of the Agreement, you must destroy the original and any and all copies of the Font Software.
+
+14. Ascender warrants to you that the Font Software will perform substantially in accordance with its documentation for the ninety (90) day period following delivery of the Font Software. To make a warranty claim, you must, within the ninety (90) day warranty period, return the Font Software to the location from which you obtained it along with a copy of your receipt or, if such Font Software is acquired on-line, contact the on-line provider with sufficient information regarding your acquisition of the Font Software so as to enable Ascender to verify the existence and date of the transaction. If the Font Software does not perform substantially in accordance with its documentation, the entire, exclusive, and cumulative liability and remedy shall be limited to the refund of the license fee you paid to Ascender to obtain delivery of the Font Software. ASCENDER DOES NOT WARRANT THE PERFORMANCE OR RESULTS YOU MAY OBTAIN BY USING THE FONT SOFTWARE. THE FOREGOING STATES THE SOLE AND EXCLUSIVE REMEDIES FOR ASCENDER''S BREACH OF WARRANTY. EXCEPT FOR THE FOREGOING LIMITED WARRANTY, Ascender MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, AS TO NONINFRINGEMENT OF THIRD PARTY RIGHTS, MERCHANTABILITY, OR FITNESS FOR ANY PARTICULAR PURPOSE. IN NO EVENT WILL ASCENDER BE LIABLE TO YOU OR ANYONE ELSE (I) FOR ANY CONSEQUENTIAL, INCIDENTAL OR SPECIAL DAMAGES, INCLUDING WITHOUT LIMITATION ANY LOST PROFITS, LOST DATA, LOST BUSINESS OPPORTUNITIES, OR LOST SAVINGS, EVEN IF ASCENDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES, OR (II) FOR ANY CLAIM AGAINST YOU BY ANY THIRD PARTY SEEKING SUCH DAMAGES EVEN IF ASCENDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+Some states or jurisdictions do not allow the exclusions of limitations of incidental, consequential or special damages, so the above exclusion may not apply to you. Also, some states or jurisdictions do not allow the exclusions of implied warranties or limitations on how long an implied warranty may last, so the above limitations may not apply to you. To the greatest extent permitted by law, any implied warranties not effectively excluded by the Agreement are limited to ninety (90) days. Some jurisdictions do not permit a limitation of implied warranties where the product results in physical injury or death so that such limitations may not apply to you. In those jurisdictions, you agree that Ascender''s liability for such physical injury or death shall not exceed One Hundred Thousand Dollars (U.S. $100,000), provided that such jurisdictions permit a limitation of such liability. This warranty gives you specific legal rights. You may have other rights that vary from state to state or jurisdiction to jurisdiction. The Font Software is nonreturnable and nonrefundable.
+
+15. The Agreement will be governed by the laws of Illinois applicable to contracts wholly entered and performable within such state. All disputes related to the Agreement shall be heard in the Circuit Court of Cook County, Illinois, U.S.A. or the United States District Court for the Northern District of Illinois, Chicago, Illinois U.S.A. Both you and Ascender agree to the personal jurisdiction and venue of these courts in any action related to the Agreement. The Agreement will not be governed by the United Nations Convention of Contracts for the International Sale of Goods, the application of which is expressly excluded. If any part of this Agreement is found void and unenforceable, it will not affect the validity of the balance of the Agreement, which shall remain valid and enforceable according to its terms.
+
+16. The Agreement shall automatically terminate upon failure by you (or any authorized person or member of your immediate household to whom you have given permission to Use the Font Software) to comply with its terms. The termination of the Agreement shall not preclude Ascender from suing you for damages of any breach of the Agreement. The Agreement may only be modified in writing signed by an authorized officer of Ascender. You agree that the Font Software will not be shipped, transferred or exported into any country or used in any manner prohibited by the United States Export Administration or any applicable export laws, restrictions or regulations.
+
+17. You have the rights expressly set forth in the Agreement and no other. All rights in and to the Font Software, including unpublished rights, are reserved under the copyright laws of the United States and other jurisdictions. All rights reserved. Notwithstanding the foregoing, to the extent that any law, statute, treaty, or governmental regulation shall be deemed by a court of competent jurisdiction to provide you with any additional or different rights from those provided herein and such rights shall be deemed non-waiveable as a matter of law and to supersede the rights specifically provided herein, then such law, statute, treaty, or governmental regulation shall be deemed to be made a part of the Agreement. To the extent that any such rights created by any law, statute, treaty or governmental regulation are waiveable, you agree that your acceptance of the Agreement shall constitute an effective and irrevocable waiver of such rights. The Agreement may be enforced by Ascender or by an authorized dealer acting on behalf of Ascender.
+
+18. If this product is acquired under the terms of a (i) GSA contract: use, reproduction or disclosure is subject to the restrictions set forth in the applicable ADP Schedule contract, (ii) DOD contract: use, duplication or disclosure by the Government is subject to the applicable restrictions set forth in DFARS 252.277-7013; (iii) Civilian agency contract: use, reproduction, or disclosure is subject to FAR 52.277-19(a) through (d) and restrictions set forth in the Agreement.
+
+Ascender Corporation
+25 Northwest Point Blvd. Suite 225
+Elk Grove Village, IL 60007
+Phone 847-357-0730
+
+http://www.ascendercorp.com
+
+"Ascender" is a trademark of Ascender Corporation registered in the U.S. Patent and Trademark Office and elsewhere. All other trademarks are the property of their respective owners. All trademarks and copyrights are property of their respective owners.
+
+Revised 27 February, 2007', 'http://www.ascendercorp.com/services/licensing/eula-5/', NULL, NULL, NULL, 'Ascender EULA', NULL, NULL, NULL, '', NULL, false, false, false, '4421cd48b5d07ca98ea4bb93e48e8a81', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (347, 'Yahoo-EULA', 'Software License
+
+Welcome to Yahoo! software (the "Yahoo! Software"). By clicking the "I Agree" button below, you agree to these software license terms (the "Software License") that supplement the Yahoo! Terms of Service ("TOS") below, also located at http://info.yahoo.com/legal/us/yahoo/utos/utos-173.html. If you disagree with any of the terms below, Yahoo! does not grant you a license to use the Yahoo! Software; click the "I Disagree" or "Cancel" button to exit the installer.
+
+Information collected through Yahoo! Software by Yahoo! is subject to the full Yahoo! Privacy Policy: http://info.yahoo.com/privacy/us/yahoo/. To find out more about setting your preferences and the information collected by the Yahoo! Software and used by Yahoo!, go to: http://info.yahoo.com/privacy/us/yahoo/toolbar/details.html.
+
+Yahoo! reserves the right to update and change, from time to time, this Software License and all documents incorporated by reference. You can always find the most recent version of this Software License at http://info.yahoo.com/legal/us/yahoo/toolbar/tbeula/tbeula-282.html. Yahoo! may change this Software License by posting a new version without notice to you. Use of the Yahoo! Software after such change constitutes acceptance of such changes.
+
+Licensed Uses and Restrictions.
+
+By accepting the terms of this Agreement, you represent to Yahoo! Inc. and its affiliates (collectively, "Yahoo!") that you are at least 18 years old. The Yahoo! Software applications, documentation, and local computer files installed or utilized by the installer application (collectively, the "Yahoo! Software") are owned by Yahoo!, or Yahoo!''s licensors and content and data providers ("Yahoo! Licensors"), and are licensed to you on a worldwide (except as limited below), non-exclusive, non-sublicenseable basis on the terms and conditions set forth herein. This Software License defines legal use of the Yahoo! Software, all updates, revisions, substitutions, and any copies of the Yahoo! Software made by or for you. All rights not expressly granted to you are reserved by Yahoo! or their respective owners.
+
+YOU MAY install and personally use the Yahoo! Software and any updates provided by Yahoo! (in its sole discretion) in object code form on a personal computer owned or controlled by you and may use the Yahoo! Software for your own noncommercial use or benefit. Your license to the Yahoo! Software under this Software License continues until it is terminated by either party. You may terminate the Software License by discontinuing use of all or any of the Yahoo! Software and by destroying all your copies of the applicable Yahoo! Software. To uninstall the Yahoo! Software, you may use the standard Microsoft Windows “Add/Remove Programs” menu in either the My Computer/Control Panel option or the Settings/Control Panel option. Once you access the Microsoft Windows Control Panel option, select “Add/Remove Programs”, and then the name of the Yahoo! Software. The Yahoo! Software will be uninstalled and will no longer be visible when you restart Internet Explorer. This Software License terminates automatically if you violate any term of this Software License, Yahoo! publicly posts a written notice of termination on Yahoo!''s web site, or Yahoo! sends a written notice of termination to you.
+
+YOU MAY NOT:
+
+(i) decompile, reverse engineer, disassemble, modify, rent, lease, loan, distribute, or create derivative works (as defined by the U.S. Copyright Act) or improvements (as defined by U.S. patent law) from the Yahoo! Software or any portion thereof.
+
+(ii) incorporate the Yahoo! Software into any computer chip or the firmware of a computing device manufactured by or for you.
+
+(iii) use the Yahoo! Software in any unlawful manner, for any unlawful purpose, or in any manner inconsistent with TOS or this Software License.
+
+(iv) you may not use the Yahoo! Software to operate nuclear facilities, life support, or other mission critical application where human life or property may be at stake. You understand that the Yahoo! Software is not designed for such purposes and that its failure in such cases could lead to death, personal injury, or severe property or environmental damage for which Yahoo! is not responsible.
+
+(v) use, or export the Yahoo! Software in violation of applicable U.S. laws or regulations.
+
+(vi) sell, lease, loan, distribute, transfer, or sublicense the Yahoo! Software or access thereto or derive income from the use or provision of the Yahoo! Software, whether for direct commercial or monetary gain or otherwise, without Yahoo!''s prior, express, written permission.
+
+Ownership and Relationship of Parties; Support.
+
+The Yahoo! Software is protected by copyrights, trademarks, service marks, international treaties, and/or other proprietary rights and laws of the U.S. and other countries. You agree to abide by all applicable proprietary rights laws and other laws, as well as any additional copyright notices or restrictions contained in this Software License and in the TOS. Yahoo! and Yahoo!''s Licensors own all rights, title, and interest in and to their applicable contributions to the Yahoo! Software. This Software License grants you no right, title, or interest in any intellectual property owned or licensed by Yahoo!, including (but not limited to) the Yahoo! Software and Yahoo! trademarks, and creates no relationship between yourself and Yahoo!''s Licensors, or between you and Yahoo! other than that of Yahoo! to licensee.
+
+The Yahoo! Software and its components contain software licensed from Yahoo! Licensors ("Licensor Software"). The Licensor Software enables the Yahoo! Software to perform certain functions, including, without limitation, access proprietary data on third -party data servers. You agree that you will use the Yahoo! Software, and any data accessed through the Yahoo! Software, for your own personal non-commercial use only. You agree not to assign, copy, transfer, or transmit the Yahoo! Software, or any data obtained through the Yahoo! Software, to any third party. Your license to use the Yahoo! Software, its components, and any third -party data, will terminate if you violate these restrictions. If your license terminates, you agree to cease any and all use of the Yahoo! Software, its components, and any third -party data. All rights in any third -party data, any third -party software, and any third -party data servers, including all ownership rights are reserved and remain with the respective third parties. You agree that these third parties may enforce their rights under this Agreement against you directly in their own name.
+
+Yahoo! may elect to provide you with customer support and/or software upgrades, enhancements, or modifications for the Yahoo! Software (collectively, "Support"), in its sole discretion, and may terminate such Support at any time without notice to you. Yahoo! may change, suspend, or discontinue any aspect of the Yahoo! Software at any time, including the availability of any Yahoo! Software feature, database, or content. Yahoo! may also impose limits on certain features and services or restrict your access to parts or all of the Yahoo! Software or the Yahoo! web site without notice or liability. Additionally, in order to enhance the security of the Yahoo! Software or to fix bugs, from time to time, Yahoo! may automatically download and install updates to the Yahoo! Software with or without prior notification.
+
+Yahoo! Search Protection Auto-Updater.
+
+If you installed Yahoo! Search Protection, from time to time, Yahoo! may automatically download and install the latest version of Yahoo! Search Protection without prior notification. Visit the Privacy Module to turn off or change your settings for this feature and find out more.
+
+Fees and Payments.
+
+Also Yahoo! reserves the right to charge fees for future use of or access to the Yahoo! Software or the Yahoo! services and web sites (collectively, "Yahoo! Software Services") in Yahoo!''s sole discretion. If Yahoo! decides to charge for the Yahoo! Software Services, such charges will be disclosed to you prior.
+
+Disclaimer of Warranties by Yahoo!.
+
+USE OF THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THROUGH THE YAHOO! SOFTWARE (SUCH AS STOCK QUOTES, MARKET INFORMATION, NEWS, OR OTHER INFORMATION) IS AT YOUR SOLE RISK. THEY ARE PROVIDED "AS IS."
+
+ANY MATERIAL OR SERVICE DOWNLOADED OR OTHERWISE OBTAINED THROUGH THE USE OF THE YAHOO! SOFTWARE (SUCH AS ANY ANTI-SPYWARE FEATURE) IS DONE AT YOUR OWN DISCRETION AND RISK, AND YOU WILL BE SOLELY RESPONSIBLE FOR ANY DAMAGE TO YOUR COMPUTER SYSTEM OR LOSS OF DATA THAT RESULTS FROM THE DOWNLOAD AND/OR USE OF ANY SUCH MATERIAL OR SERVICE.
+
+YAHOO!, ITS OFFICERS, DIRECTORS, EMPLOYEES, CONTRACTORS, AGENTS, AFFILIATES, AND ASSIGNS (COLLECTIVELY, "YAHOO! ENTITIES") AND YAHOO! LICENSORS DO NOT REPRESENT THAT THE YAHOO! SOFTWARE OR ANY DATA ACCESSED THEREFROM IS APPROPRIATE OR AVAILABLE FOR USE OUTSIDE THE UNITED STATES.
+
+THE YAHOO! ENTITIES AND YAHOO! LICENSORS EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, RELATING TO THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THEREFROM, OR THE ACCURACY, TIMELINESS, COMPLETENESS, OR ADEQUACY OF THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THEREFROM, INCLUDING THE IMPLIED WARRANTIES OF TITLE, MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+THE YAHOO! SOFTWARE IS NOT DESIGNED, INTENDED OR LICENSED FOR USE IN HAZARDOUS ENVIRONMENTS REQUIRING FAIL-SAFE CONTROLS, INCLUDING WITHOUT LIMITATION, THE DESIGN, CONSTRUCTION, MAINTENANCE OR OPERATION OF NUCLEAR FACILITIES, AIRCRAFT NAVIGATION OR COMMUNICATION SYSTEMS, AIR TRAFFIC CONTROL, AND LIFE SUPPORT OR WEAPONS SYSTEMS. YAHOO! SPECIFICALLY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTY OF FITNESS FOR SUCH PURPOSES.
+
+IF THE YAHOO! SOFTWARE OR ANY DATA ACCESSED THEREFROM PROVES DEFECTIVE, YOU (AND NOT THE YAHOO! ENTITIES OR THE YAHOO! LICENSORS) ASSUME THE ENTIRE COST OF ALL REPAIR OR INJURY OF ANY KIND, EVEN IF THE YAHOO! ENTITIES OR YAHOO! LICENSORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH A DEFECT OR DAMAGES. SOME JURISDICTIONS DO NOT ALLOW RESTRICTIONS ON IMPLIED WARRANTIES SO SOME OF THESE LIMITATIONS MAY NOT APPLY TO YOU.
+
+Limitation of Liability.
+
+THE YAHOO! ENTITIES AND YAHOO! LICENSORS WILL NOT BE LIABLE TO YOU FOR CLAIMS AND LIABILITIES OF ANY KIND ARISING OUT OF OR IN ANY WAY RELATED TO THE USE OF THE YAHOO! SOFTWARE BY YOURSELF OR BY THIRD PARTIES, TO THE USE OR NON-USE OF ANY BROKERAGE FIRM OR DEALER, OR TO THE SALE OR PURCHASE OF ANY SECURITY, WHETHER SUCH CLAIMS AND LIABILITIES ARE BASED ON ANY LEGAL OR EQUITABLE THEORY.
+
+THE YAHOO! ENTITIES AND YAHOO! LICENSORS ARE NOT LIABLE TO YOU FOR ANY AND ALL DIRECT, INCIDENTAL, SPECIAL, INDIRECT, OR CONSEQUENTIAL DAMAGES ARISING OUT OF OR RELATED TO ANY THIRD -PARTY SOFTWARE, ANY DATA ACCESSED THROUGH THE YAHOO! SOFTWARE, YOUR USE OR INABILITY TO USE OR ACCESS THE YAHOO!
+
+SOFTWARE, OR ANY DATA PROVIDED THROUGH THE YAHOO! SOFTWARE, WHETHER SUCH DAMAGE CLAIMS ARE BROUGHT UNDER ANY THEORY OF LAW OR EQUITY. DAMAGES EXCLUDED BY THIS CLAUSE INCLUDE, WITHOUT LIMITATION, THOSE FOR LOSS OF BUSINESS PROFITS, INJURY TO PERSON OR PROPERTY, BUSINESS INTERRUPTION, LOSS OF BUSINESS OR PERSONAL INFORMATION. SOME JURISDICTIONS DO NOT ALLOW LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES SO THIS RESTRICTION MAY NOT APPLY TO YOU.
+
+INFORMATION PROVIDED THROUGH THE YAHOO! SOFTWARE, INCLUDING STOCK QUOTES, ANALYSIS, MARKET INFORMATION, NEWS, AND FINANCIAL DATA, MAY BE DELAYED, INACCURATE, OR CONTAIN ERRORS OR OMISSIONS, AND THE YAHOO! ENTITIES AND YAHOO! LICENSORS WILL HAVE NO LIABILITY WITH RESPECT THERETO. YAHOO! MAY CHANGE OR DISCONTINUE ANY ASPECT OR FEATURE OF THE YAHOO! SOFTWARE OR THE USE OF ALL OR ANY FEATURES OR TECHNOLOGY IN THE YAHOO! SOFTWARE AT ANY TIME WITHOUT PRIOR NOTICE TO YOU, INCLUDING, BUT NOT LIMITED TO, CONTENT, HOURS OF AVAILABILITY.
+
+Indemnification.
+
+You agree to indemnify and hold the Yahoo! Entities harmless from any claim or demand, including reasonable attorneys'' fees, made by any third party in connection with or arising out of your use of the Yahoo! Software, your violation of any terms or conditions of this Software License, your violation of applicable laws, or your violation of any rights of another person or entity.
+
+Government End Users.
+
+If the Yahoo! Software and related documentation are supplied to or purchased by or on behalf of the United States Government, then the Yahoo! Software is deemed to be "commercial software" as that term is used in the Federal Acquisition Regulation system. Rights of the United States shall not exceed the minimum rights set forth in FAR 52.227- 19 for "restricted computer software." All other terms and conditions of this Software License apply.
+
+Controlling Law.
+
+This Software License and the relationship between you and Yahoo! is governed by the laws of the State of California without regard to its conflict of law provisions. You and Yahoo! agree to submit to the personal and exclusive jurisdiction of the courts located within the county of Santa Clara, California. The United Nations Convention on the International Sale of Goods does not apply to this Software License.
+
+No General Waiver; Severability.
+
+The failure of Yahoo! to exercise or enforce any right or provision of this Software License shall not constitute a waiver of such right or provision. If any provision of this Software License is found by a court of competent jurisdiction to be invalid, the parties nevertheless agree that the court should endeavor to give effect to the parties'' intentions as reflected in the provision, and the other provisions of this Software License remain in full force and effect.
+
+Complete Agreement.
+
+This Software License and the TOS constitute the entire understanding between the parties respecting use of the Yahoo! Software, superseding all prior agreements between you and Yahoo!. In the event of any conflict between the terms and conditions of this Software License and those in the TOS, the terms and conditions of this Software License will control, except to the extent that the TOS impose additional restrictions and liabilities on your actions. In the event of a conflict between the terms of this Software License and the TOS, this Software License will control to the extent of such conflict.
+
+Surviving Provisions.
+
+Sections 1.b, 2, and 4 through 12, will survive any termination of this Agreement.
+
+Version date: February 4, 2009', 'http://info.yahoo.com/legal/us/yahoo/toolbar/tbeula/tbeula-282.html', NULL, NULL, NULL, 'Yahoo Software License', NULL, NULL, NULL, '', NULL, false, false, false, '40f189830818d0468048f5da21bd12d0', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (231, 'ATI-EULA', 'ATI Software End User License Agreement
 
 PLEASE  READ  THIS  LICENSE  CAREFULLY  BEFORE  USING   THE   SOFTWARE.   BY
 DOWNLOADING, INSTALLING, COPYING OR USING THE SOFTWARE, YOU ARE AGREEING  TO
@@ -38619,6 +38329,296 @@ or  agreements,  written  or  oral,  regarding  such  subject  matter.    No
 amendment to or modification of this  License  will  be  binding  unless  in
 writing and signed by a duly authorized representative of ATI.
 ', 'https://olex-secure.openlogic.com/licenses/atisoftwareeula', NULL, NULL, NULL, 'ATI Software EULA', NULL, NULL, NULL, '', NULL, false, false, false, '12669f94232564b6e4b2812cd16bcec8', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (260, 'Broadcom-EULA', 'BroadCom License Agreement
+IMPORTANT-READ CAREFULLY: This End-User License Agreement ("EULA") is a legal agreement between you ("Licensee") and Broadcom Corporation ("Broadcom") for the Broadcom software that accompanies this EULA, which includes computer software and may include associated media, printed materials, "online" or electronic documentation, and Internet-based services ("Software"). BY OPENING THE SOFTWARE PACKAGE, CLICKING ON THE "ACCEPT" BUTTON OF ANY ELECTRONIC VERSION OF THIS END USER LICENSE AGREEMENT ("AGREEMENT") OR ACCESSING OR INSTALLING THE SOFTWARE, YOU ACKNOWLEDGE THAT YOU HAVE READ THE LICENSE AGREEMENT, UNDERSTAND IT AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS. IF YOU DO NOT AGREE TO THE TERMS OF THIS EULA, PROMPTLY CLICK ON THE "DECLINE" BUTTON AND DO NOT DOWNLOAD, INSTALL, COPY OR USE THE SOFTWARE.
+
+License
+Subject to the terms and conditions of this Agreement, Broadcom grants to Licensee the non-exclusive, non-transferable, personal, revocable right to use the Software only in connection with proprietary semiconductor products of Broadcom incorporated in the equipment purchased by Licensee, and to make one (1) copy of the Software for back-up or archival purposes only. Any other use of this Software or removal of the Software from a country in which it is licensed shall automatically terminate this license.
+
+Restrictions
+This Software is protected by U.S. Copyright Law. This Software is licensed, not sold. Licensee may not use, disclose, modify, reproduce or distribute the Software except as expressly permitted in this Agreement. No license is granted to Licensee in any human readable code of the Software (source code). Licensee shall not decompile, reverse engineer, modify, or otherwise attempt to derive source code from the Software except to the extent that restrictions on these activities may be prohibited under applicable law. Additionally, Licensee may not remove, efface or otherwise obscure any proprietary notices, labels, or marks on the Software. Licensee agrees that each copy of the Software and Documentation will include reproductions of all proprietary notices, labels or marks included therein. Licensee further acknowledges and agrees that all right, title and interest in the Software and all subsequent copies thereof regardless of the form or media are retained and held by Broadcom. ALL RIGHTS NOT EXPRESSLY GRANTED HEREIN ARE RESERVED BY BROADCOM.
+
+Termination
+Licensee may terminate this EULA at any time by destroying all copies of the Software. Also, Licensee''s rights under this EULA will terminate immediately without notice from Broadcom if Licensee fails to comply with any provision of this Agreement. Upon termination, Licensee shall destroy the Software and all copies thereof that are in Licensee''s possession or control.
+
+No Support
+Nothing in this Agreement shall obligate Broadcom to provide any support for the Software including without limitation any obligation to correct any defects or provide any updates to the Software to Licensee.
+
+
+No Warranty / Disclaimer
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS" AND WITH ALL FAULTS AND BROADCOM MAKES NO PROMISES, REPRESENTATIONS OR WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND BROADCOM SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE, MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR CORRESPONDENCE TO DESCRIPTION. THE ENTIRE RISK ARISING OUT OF USE OR PERFORMANCE OF THE SOFTWARE LIES WITH LICENSEE.
+
+Exclusion of Incidental, Consequential and Certain Other Damages
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL BROADCOM OR ITS SUPPLIERS BE LIABLE FOR CONSEQUENTIAL, INCIDENTAL, SPECIAL, INDIRECT, OR EXEMPLARY DAMAGES WHATSOEVER ARISING OUT OF OR IN ANY WAY RELATING TO THIS AGREEMENT OR LICENSEE''S USE OF OR INABILITY TO USE THE SOFTWARE, OR THE PROVISION OR FAILURE TO PROVIDE SUPPORT SERVICES, INCLUDING BUT NOT LIMITED TO LOST PROFITS, LOSS OF CONFIDENTIAL OR OTHER INFORMATION, BUSINESS INTERRUPTION, PERSONAL INJURY, LOSS OF PRIVACY, FAILURE TO MEET ANY DUTY (INCLUDING OF GOOD FAITH OR REASONABLE CARE), NEGLIGENCE, COSTS OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, OR ANY OTHER CLAIM FOR PECUNIARY OR OTHER LOSS WHATSOEVER, OR FOR ANY CLAIM OR DEMAND AGAINST YOU BY ANY OTHER PARTY, EVEN IF BROADCOM HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. THESE LIMITATIONS SHALL APPLY NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY LIMITED REMEDY.
+
+Limitation of Liability and Remedies
+NOTWITHSTANDING ANY DAMAGES YOU MAY INCUR FOR ANY REASON WHATSOEVER (INCLUDING, WITHOUT LIMITATION, ALL DAMAGES REFERENCED ABOVE AND ALL DIRECT OR GENERAL DAMAGES), THE ENTIRE LIABILITY OF BROADCOM AND ANY OF ITS SUPPLIERS UNDER ANY PROVISION OF THIS AGREEMENT AND YOUR EXCLUSIVE REMEDY FOR ALL OF THE FOREGOING SHALL BE LIMITED TO THE GREATER OF THE AMOUNT ACTUALLY PAID FOR THE SOFTWARE ITSELF OR U.S. $1. THE FOREGOING LIMITATIONS, EXCLUSIONS AND DISCLAIMERS SHALL APPLY TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, EVEN IF ANY REMEDY FAILS ITS ESSENTIAL PURPOSE.
+
+Confidentiality
+"Confidential Information" means any trade secrets, confidential data, or other confidential information relating to or used in the Software. Licensee shall not use or disclose Confidential Information except as expressly permitted hereunder and shall use all reasonable efforts to protect the confidentiality thereof. Licensee agrees and acknowledges that the structure, sequence and organization of the Software are the valuable trade secrets of Broadcom, and thus constitute Confidential Information under this Agreement.
+
+Export Regulations
+Software, including technical data, may be subject to U.S. export control laws, including the U.S. Export Administration Act and its associated regulations, and may be subject to export or import regulations in other countries. Licensee warrants that it will comply strictly in all respects with all such regulations and acknowledges that it has the responsibility to obtain licenses to export, re-export or import the Software.
+
+Non-Assignability
+Licensee may not sell, transfer, assign or subcontract the Software or any right or obligation set forth in this Agreement without the prior written consent of Broadcom. Any act in derogation of the foregoing shall be null and void.
+
+U.S. Government License Rights
+The Software is licensed only with "RESTRICTED RIGHTS," and use, duplication or disclosure by the Government is subject to restrictions as set forth in FAR, 48 CFR 52.227-14 and DFAR252.227-7013 et seq. or its successor(s). Use of the Software by the Government constitutes acknowledgement that the Software is commercial, and of Broadcom''s proprietary rights therein. The Contractor/Manufacturer of the Software is Broadcom. Licensee agrees not to remove or deface any portion of any legend provided in or with the Software provided hereunder. The Software is a trade secret of Broadcom for all purposes of the Freedom of Information Act and is, in all respects, proprietary data belonging solely to Broadcom.
+
+Miscellaneous
+Broadcom and Licensee are independent contractors. This is the entire Agreement between the parties relating to the subject matter hereof, supersedes any and all prior proposals, agreements and representations between the parties, whether written or oral, and no waiver, modification or amendment of the Agreement shall be valid unless in writing signed by each party. The waiver of a breach of any term hereof shall in no way be construed as a waiver of any other term or breach hereof. If any provision of this Agreement shall be held by a court of competent jurisdiction to be contrary to law, the remaining provisions of this Agreement shall remain in full force and effect. This Agreement is governed by the laws of the State of California without reference to conflict of laws principles. The parties expressly stipulate that the 1980 United Nations Convention on Contracts for the International Sale of Goods shall not apply. All disputes arising out of this Agreement shall be subject to the exclusive jurisdiction of the state and federal courts located in Orange County, California, and the parties agree and submit to the personal and exclusive jurisdiction and venue of these courts.', 'http://www.calculate-linux.ru/packages/licenses/Broadcom', NULL, NULL, NULL, 'Broadcom License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, 'dbfd6cdf2e80dabff6e1611f1d823a03', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (345, 'UCWare-EULA', 'SOFTWARE LICENSE AGREEMENT
+
+This user license agreement (the "AGREEMENT") is an agreement between you (individual or single entity) and UCWare Group (UCWARE.COM), for the UCWare Group software (the "SOFTWARE") that is accompanying this AGREEMENT.
+
+NOTICE TO USERS: CAREFULLY READ THE FOLLOWING LEGAL AGREEMENT. USE OF THE SOFTWARE PROVIDED WITH THIS AGREEMENT CONSTITUTES YOUR ACCEPTANCE OF THESE TERMS.
+
+The SOFTWARE is distributes as try-before-you-buy. This means:
+
+1. All copyrights to SOFTWARE are exclusively owned by the UCWare Group.
+
+2. The SOFTWARE is not sold. It is licensed.
+
+3. Anyone may evaluate SOFTWARE during a test period of 30 days. Following this test period, if you wish to continue to use the SOFTWARE, you MUST register.
+
+4. Software developed using the trial version must not be distributed to end-users for profit, or otherwise, except so far as educational or demonstration purposes in a program developed specifically for the purpose of demonstrating the functionality of this SOFTWARE.
+
+5. Once registered, the user is granted a non-exclusive license to use SOFTWARE on as many computers as according to the license type and to the number of licenses purchased, for any legal purpose. The registered SOFTWARE may not be rented or leased.
+
+6. The unregistered trial version SOFTWARE may be freely distributed, with exceptions noted below, provided the distribution package is not modified in any way.
+
+a. No person or company may distribute separate parts of the package without written permission of the copyright owner.
+
+b. The unregistered trial version SOFTWARE may not be distributed inside of any other software package without written permission of the copyright owner.
+
+c. Hacks/crack, keys or key generators may not be included on the same distribution.
+
+7. You may not use, copy, emulate, clone, rent, lease, sell, modify, decompile, disassemble, otherwise reverse engineer, or transfer the licensed program, or any subset of the licensed program, except as provided for in this agreement. Any such unauthorized use shall result in immediate and automatic termination of this license and may result in criminal and/or civil prosecution.
+
+8. SOFTWARE keyfiles may not be distributed.
+
+9. THE SOFTWARE IS DISTRIBUTED "AS IS". NO WARRANTY OF ANY KIND IS EXPRESSED OR IMPLIED. YOU USE AT YOUR OWN RISK. NEITHER THE AUTHOR NOR THE AGENTS OF THE AUTHOR WILL BE LIABLE FOR DATA LOSS, DAMAGES, LOSS OF PROFITS OR ANY OTHER KIND OF LOSS WHILE USING OR MISUSING THIS SOFTWARE.
+
+10. All rights not expressly granted here are reserved by UCWare Group.', 'http://www.ucware.com/jexec/documentation/license.html', NULL, NULL, NULL, 'UCWare Software License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '68dd429b99672fcc640f6a39619c4021', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (282, 'Skype-EULA', 'Skype End User License Agreement
+IMPORTANT – PLEASE READ CAREFULLY
+Please note the following preliminary terms, which use some of the definitions set out in paragraph 1 below:
+
+No Access To Emergency Services: Skype is not a replacement for Your ordinary mobile or fixed line telephone. In particular, apart from in the very limited circumstances set out in paragraph 3.5 of the Terms of Service, Skype does not allow You to make emergency calls to emergency services. You must make alternative communications arrangements to ensure that You can make emergency calls if needed.  Please also see paragraphs 3.6 and 6.2 below.
+
+This Agreement: This Agreement, and any new versions, between Skype and You, covers all Your use of Skype Software from any terminals where Skype Software has been installed, by You or by third parties. You can accept this Agreement by clicking on the ACCEPT button or similar buttons or links as may be designated by Skype.
+
+Additional Terms: Your agreement with Skype will also include the Additional Terms (as defined below). The Additional Terms shall include, but are not limited to, the terms and policies set out in paragraph 7 below. In order to use the Skype Software, Skype Website and Products, You must accept the Additional Terms. You can accept the Additional Terms by (i) clicking to accept or agree where this option is made available to You, or (ii) by actually using the Skype Software, Skype Website and Products, in which case You acknowledge and agree that Skype will treat such use as acceptance of the applicable terms. You acknowledge and agree that by accepting this Agreement and the Additional Terms you are entering into a legally binding contract, which collectively is referred to below as the “Terms”. If there is any contradiction between the Additional Terms and this Agreement, then the Additional Terms shall take precedence in relation to the relevant Skype Service. You should print off or save a copy of the Terms for your records.
+
+Electronic Signature(s): You hereby agree to the use of electronic communication in order to enter into contracts, place orders and create other records and to the electronic delivery of notices, policies and records of transactions initiated or completed through the Skype Software. Furthermore, You hereby waive any rights or requirements under any laws or regulations in any jurisdiction which require an original (non-electronic) signature or delivery or retention of non-electronic records, to the extent permitted under applicable mandatory law.
+
+Jurisdiction’s Restrictions: If the law of Your country prohibits You from downloading or using Skype Software because You are under the age limit or because the Skype Software is not allowed in Your country, please don’t use it.
+
+Table of contents
+Definitions
+License and Restrictions
+What You should and should not expect from Skype
+What we expect from You
+Term, Termination, Updates
+Disclaimer of Warranties and Limitation of Liability
+Additional Terms
+Miscellaneous
+1. Definitions
+1.1 The following terms and expressions shall have the following meanings:
+
+Additional Terms: the terms and conditions and policies applicable to Your use of the Skype Software, the Skype Website and the Products, in addition to this Agreement.
+
+Affiliate: any corporation, company or other entity that directly or indirectly controls, is controlled by, or is under common control with, Skype. For the purpose of this definition, the word "control" shall mean the direct or indirect ownership of more than fifty percent (50%) of the outstanding voting stock of the corporation, company, or other entity.
+
+Agreement: this End User License Agreement, as may be renewed and/or amended from time to time.
+
+Broadcast TOS: has the meaning given to it in paragraph 2.9.
+
+Content: means any and all content consisting of text, sounds, pictures, photos, video and/or any type of information or communications.
+
+Documentation: any online or otherwise enclosed documentation provided by Skype.
+
+Effective Date: the date on which this Agreement is entered into by clicking on the ACCEPT button as stated above or upon installation or use of the Skype Software by You, whichever occurs earlier.
+
+Emergency Service(s): means services that connect a user to emergency services personnel or public safety answering points pursuant to applicable local and or national regulatory requirements.
+
+IP Rights: means (i) patents, pending patent applications, designs, trade marks and trade names (whether registered or unregistered), copyright and related rights, database rights, knowhow, trade secrets and confidential information; (ii) all other intellectual property rights and similar or equivalent rights anywhere in the world which currently exist or are recognised in the future; and (iii) applications, extensions and renewals in relation to any such rights.
+
+Password: refers to a code You select, which, in combination with the User ID, gives You access to Your User Account.
+
+Product(s): shall have the meaning given in the Terms of Service at http://www.skype.com/legal/terms/voip/.
+
+Skype: refers to the company established under the laws of Luxembourg, Skype Software S.a.r.l, with its address at 22/24 Boulevard Royal L-2449 Luxembourg (B100467), VAT no. (LU20180239).
+
+Skype API: application program interface consisting of the set of routines utilized by the Skype Software to provide the Skype Software functionality for a given platform or operating system, Skype API being included in or linked to the Skype Software as well as any future versions, improvements, developments, programming fixes, updates and upgrades thereof.
+
+Skype Online Material: the Skype buttons and widgets available for download on the Skype Website at http://www.skype.com/share/buttons/, as such may be changed from time to time by Skype in its sole discretion.
+
+Skype Promotional Materials: any and all trademarks, names, signs, logos, banners, and any other materials, in whatever form, owned and/or used by Skype for the promotion of its company, its products and activities, other than the Skype Online Material.
+
+Skype Software: the software distributed by Skype for internet communication applications, including without limitation the Skype API, UI and Documentation, as well as any future versions, improvements, developments, programming fixes, updates and upgrades thereof.
+
+Skype Staff: the officers, directors, employees and agents of Skype or its Affiliates, or any other persons hired by Skype or its Affiliates.
+
+Skype Website: any and all elements, contents and the ‘look and feel’ of the website available under the URL, www.skype.com, – among other URL’s –, from which website the Skype Software can be downloaded.
+
+Terms: has the meaning given in the “Additional Terms” preliminary term above.
+
+UI: the user interface of the Skype Software.
+
+User Account: refers to the account with User ID and Password that You create for Your use of the Skype Software.
+
+User ID: refers to an identification code You selected, which in combination with the Password, gives access to Your User Account.
+
+You: You, the end user of the Skype Software, also used in the form “Your” where applicable.
+
+1.2 References to the singular include the plural and vice versa, and references to one gender include the other gender.
+
+1.3 Any phrase introduced by the expressions “including”, “include”, “in particular” or any similar expression shall be construed as illustrative and shall not limit the sense of the words preceding those terms.
+
+2. License and Restrictions
+2.1 License: Subject to the terms of this Agreement, Skype hereby grants You a limited, personal, non-commercial, non-exclusive, non-sublicensable, non-assignable, free of charge license to download, install and use the Skype Software on Your computer, phone or PDA for the sole purpose of personally using the internet communication applications provided by Skype and any other applications that may be explicitly provided by Skype. You are allowed to use the Skype Software at university or any other educational institution, subject to paragraph 4.4 below and in accordance with this Agreement and any applicable Additional Terms. You are allowed to use the Skype Software at work to make communications relating to Your business in accordance with this Agreement and any applicable Additional Terms (such as the Terms of Service referred to in paragraph 7 below if You use the Products and/or are a Member or an Administrator of a Business Control Panel).
+
+2.2 No Granting of Rights to Third Parties: You will not sell, assign, rent, lease, distribute, export, import, act as an intermediary or provider, or otherwise grant rights to third parties with regard to the Skype Software or any part thereof.
+
+2.3 No Modifications: You will not undertake, cause, permit or authorize the modification, creation of derivative works, translation, reverse engineering, decompiling, disassembling or hacking of the Skype Software or any part thereof except to the extent permitted by law.
+
+2.4 Third Parties: The Skype Software may be incorporated into, and may incorporate itself, software and other technology owned and controlled by third parties. Any such third party software or technology that is incorporated in the Skype Software falls under the scope of this Agreement. Any and all other third party software or technology that may be distributed together with the Skype Software will be subject to You explicitly accepting a license agreement with that third party. You acknowledge and agree that You will not enter into a contractual relationship with Skype or its Affiliates regarding such third party software or technology and you will look solely to the applicable third party and not to Skype or its Affiliates to enforce any of your rights.
+
+2.5 Exclusive Ownership: Any and all IP Rights in the Skype Software, the Skype Website, the Skype Online Material and the Skype Promotional Materials are and shall remain the exclusive property of Skype and/or its licensors. Nothing in this Agreement intends to transfer any such IP Rights to, or to vest any such IP Rights in, You. You are only entitled to the limited use of the IP Rights granted to You in this Agreement. You will not take any action to jeopardize, limit or interfere with Skype’s IP Rights. Any unauthorized use of Skype’s IP Rights is a violation of this Agreement as well as a violation of intellectual property laws and treaties, including without limitation copyright laws and trademark laws. All title and IP Rights in and to any third party content that is not contained in the Skype Software, but may be accessed through use of the Skype Software, is the property of the respective content owners and may be protected by applicable copyright or other intellectual property laws and treaties.
+
+2.6 No Removal of Notices: You agree that You will not remove, obscure, make illegible or alter any notices or indications of the IP Rights and/or Skype’s rights and ownership thereof, whether such notice or indications are affixed on, contained in or otherwise connected to any materials.
+
+2.7 Use of Skype API.
+
+2.7.1 You may make use of the Skype API provided that:
+
+(i) You comply with the Skype API Terms of Use at http://www.skype.com/legal/terms/api/ ;
+
+(ii) Your use of the Skype API is for legitimate purposes only and shall not adversely affect the functionality or performance of the Skype Software or services provided by Skype; and
+
+(iii) You will monitor the Skype Website in order to ensure that You are aware of any changes in the Skype API Terms of Use. If such changes are not acceptable to You, You will immediately stop using the Skype API and, where applicable, the Skype Software.
+
+2.7.2 If You are interested in using the Skype API for a purpose which is not permitted under this Agreement or the Skype API Terms of Use, You will have to obtain Skype’s prior written consent and explicitly agree upon any further commercial terms.
+
+2.8 Skype Promotional Materials: Nothing in this Agreement will give You any right to use the Skype Promotional Materials.
+
+2.9 Broadcasts Using Skype Software.  Except as expressly permitted in the Broadcast Terms and Conditions at http://www.skype.com/legal/terms/broadcast/ (" Broadcast TOS"), You are not allowed to use the Skype Software in connection with any Broadcasts (as defined in such Broadcast TOS).
+
+3. What You should and should not expect from Skype
+3.1 No Warranties: Installing Skype Software enables You to communicate with other people. Skype cannot guarantee that You will always be able to communicate with other people, nor can Skype guarantee that You can communicate without disruptions, delays or communication-related flaws or that all Your communications shall always be delivered to other people.
+
+3.2 Content
+
+3.2.1 Content of Communications: The content of the communication spread by the use of the Skype Software is entirely the responsibility of the person from whom such content originated. You understand, therefore, that by using the Skype Software, the Products and the Skype Website You may be exposed to content that is offensive, harmful to minors, indecent or otherwise objectionable, and that You use the Skype Software, the Products and the Skype Website at Your own risk.
+
+3.2.2 You acknowledge and agree that You are solely responsible for any Content that You upload, submit, post, transmit or display through the Skype Software and/or the Skype Website -(“ Use” or “Used”) and that Skype is not responsible to You or any third party for any Content that is Used by You or any other Skype Software user.
+
+3.2.3 Third Party IP Rights: You agree that You shall not Use any Content that is subject to any third party IP Rights, unless you have a licence or specific permission from the owner to Use such third party content, and to grant Skype the licence set out in paragraph 3.2.4 below.
+
+3.2.4 Licence: You hereby grant to Skype a non-exclusive, worldwide, perpetual, irrevocable, royalty-free, sublicensable and transferable licence to: (i) reproduce, modify and publish any Content that you Use on the publicly accessible areas of the Skype Website (e.g. Skype forum, blogs) for the purpose of displaying and distributing such Content on the Skype Website for such time as You continue to Use such Content on the Skype Website; and (ii) distribute and/or display through the Skype Software any Content that You provide or make available using the Skype Software for the sole purposes of making the Skype Software and the Products available to You.
+
+3.2.5 Removal of Content: Skype reserves the right (but shall have no obligation) to decide whether any Content that You Use complies with this Agreement and any Additional Terms. Skype may in its sole discretion remove such Content and/or terminate this Agreement and Your User Account if You Use any Content that is in breach of this Agreement and/or any Additional Terms at any time and without prior notice to You.
+
+3.3 Utilization of Your Computer: Skype Software may utilize the processor and bandwidth of the computer (or other applicable device) You are utilizing, for the limited purpose of facilitating the communication between Skype Software users. Skype will use its commercially reasonable efforts to protect the privacy and integrity of the computer resources (or other applicable device) You are utilizing and of Your communication, however Skype cannot give any warranties in this respect.
+
+3.4 New Versions of the Skype Software: Skype, in its sole discretion, reserves the right to add additional features or functions, or to provide programming fixes, updates and upgrades, to the Skype Software. Skype has no obligation to make available to You any subsequent versions of the Skype Software. You may have to enter into a renewed version of this Agreement, in the event you want to download, install or use a new version of the Skype Software.
+
+3.5 Suspension: Skype may, in its sole discretion and to the maximum extent permitted within Your jurisdiction, modify or discontinue or suspend Your ability to use any version of the Skype Software, and/or disable any Skype Software You may already have accessed or installed without any notice to You, for the repair, improvement, and/or upgrade of the underlying technology or for any other justifiable reason, including but not limited to, circumstances where You, at Skype’s discretion, are in breach of the Terms, creating problems, possible legal liabilities, or engaging in fraudulent, immoral or illegal activities, or for other similar reasons.
+
+3.6 No Access to Emergency Services: The Skype Software is not intended to support or carry emergency calls to any type of hospitals, law enforcement agencies, medical care unit or any other kind of Emergency Service, except in the very limited circumstances described in paragraph 3.5 of the Terms of Service. There are important differences between traditional telephone services and the Skype Software. You acknowledge and agree that: (i) Skype is not required to offer access to Emergency Services under any applicable local and/or national rules, regulations or law; (ii) it is Your responsibility to purchase, separately from the Skype Software, traditional wireless (mobile) or fixed line telephone services that offer access to Emergency Services, and (iii) Skype is not a replacement for Your primary telephone service.
+
+4. What we expect from You
+4.1 Lawful purposes: You will use the Skype Software solely for lawful purposes. In this respect You may not, without limitation (a) intercept or monitor, damage or modify any communication which is not intended for You; (b) use any type of spider, virus, worm, trojan-horse, time bomb or any other codes or instructions that are designed to distort, delete, damage or disassemble the Skype Software or the communication; (c) send any unsolicited communication not permitted by applicable law (d) expose any third party to material which is offensive, harmful to minors, indecent or otherwise objectionable in any way; (e) use the Skype Software to cause or intend to cause embarrassment or distress to, or to threaten, harass or invade the privacy of, any third party; or (f) use (including as part of your user name) any material or content that is subject to any third party proprietary rights, unless you have a licence or permission from the owner of such rights;
+
+4.2 Representations: You represent and warrant that You are authorized to enter into and comply with the Terms. Furthermore, You represent and warrant that You will at any and all times meet with Your obligations under the Terms, as well as any and all laws, regulations and policies that may apply to the use of the Skype Software, the Products and/or the Skype Website.
+
+4.3 Indemnification: YOU AGREE TO INDEMNIFY, DEFEND AND HOLD SKYPE AND ITS AFFILIATES HARMLESS FROM AND AGAINST ANY AND ALL LIABILITY AND COSTS, INCLUDING REASONABLE ATTORNEYS’ FEES INCURRED BY SUCH PARTIES, IN CONNECTION WITH OR ARISING OUT OF YOUR (A) VIOLATION OR BREACH OF ANY TERM OF THIS AGREEMENT OR ANY APPLICABLE LAW OR REGULATION, WHETHER OR NOT REFERENCED HEREIN, OR (B) VIOLATION OF ANY RIGHTS OF ANY THIRD PARTY, OR (C) USE OR MISUSE OF THE SKYPE SOFTWARE, OR (D) COMMUNICATION SPREAD BY MEANS OF THE SKYPE SOFTWARE.
+
+4.4 Utilization of Your Computer: If Your use of the Skype Software is dependent upon the use of a processor and bandwidth owned or controlled by a third party, You acknowledge and agree that Your licence to use the Skype Software is subject to You obtaining consent from the relevant third party for such use. You represent and warrant that by accepting this Agreement and using the Skype Software, You have obtained such consent.
+
+4.5 Export Restrictions: Skype Software may be subject to international rules that govern the export of software. You shall comply with all applicable international and national laws that apply to the Skype Software as well as end-user, end-use and destination restrictions issued by national governments. This software is controlled under ECCN 5D992.b.1 of the Export Administration Regulations (“EAR”) per CCATS # G047973 and thus may not be exported or re exported to or downloaded by any person in any countries controlled for anti terrorism reasons under the EAR, which include Iran, North Korea, Cuba, Syria and Sudan. EAR 742.15(a), Title 15 Code of Federal Regulations. Moreover, the software may not be exported or re exported to or downloaded by any person or entity subject to US sanctions regardless of location. See http://www.bis.doc.gov/ComplianceAndEnforcement/ListsToCheck.htm and EAR Part 736. Skype is making this software available to You for download only on the condition that You certify that You are not such a person or entity and that the download is not otherwise in violation of US export control and sanctions regulations.
+
+4.6 Government Users. The Skype Software and Documentation are “commercial computer software” and “commercial computer software documentation,” respectively, as such terms are used in United States Federal Acquisition Regulations Section 12.212. Any use, duplication or disclosure of the Skype Software or the Documentation by or on behalf of the U.S. Government is subject to restrictions as set forth in this Agreement.
+
+5. Term, Termination, Updates
+5.1 Term: This Agreement will be effective as of the Effective Date and will remain effective until terminated by either Skype or You as set out below. The Additional Terms will be effective as of the date upon which they are accepted by You or You use the relevant Skype Service (as applicable), and will remain effective until terminated by either Skype or You as set out below and/or in the applicable terms.
+
+5.2 Termination: You may terminate the Terms with immediate effect at any time. Without limiting other remedies, Skype may limit, suspend, or terminate this license and Your use of Skype Software, prohibit access to the Skype Website and delete Your User Account and/or User ID, with immediate effect, automatically and without recourse to the courts, if we think that You are in breach of the Terms, creating problems, legal liabilities (actual or potential), infringing someone else’s intellectual property rights, engaging in fraudulent, immoral or illegal activities, or for other similar reasons. Skype shall effect such termination by providing notice to You to the email address You have provided, and/or by preventing Your access to Your User Account. We reserve the right to cancel User Accounts that have been inactive for more than one (1) year.
+
+5.3 Consequences of Termination: Upon termination of this Agreement and the Additional Terms: (a) all licenses and rights to use the Skype Software shall immediately terminate; (b) You will immediately cease any and all use of the Skype Software; and (c) You will immediately remove the Skype Software from all hard drives, networks and other storage media and destroy all copies of the Skype Software in Your possession or under Your control.
+
+5.4 New Versions: Skype reserves the right to change this Agreement at any time by publishing the revised Agreement on the Skype Website. The revised Agreement shall become effective within thirty (30) days of such publication, unless You expressly accept the revised Agreement earlier by clicking on the accept button. Your express acceptance or Your continued use of the Skype Software after expiry of the notice period of thirty (30) days, shall constitute Your acceptance to be bound by the terms and conditions of the revised Agreement. You can find the latest version of this Agreement at http://www.skype.com/company/legal/eula. Skype reserves the right to change any of the Additional Terms from time to time and such changes shall become effective either within thirty (30) days of publication of the revised version on the Skype Website (unless You expressly accept the revised terms earlier by clicking on the accept button if this option is made available), or within the timeframe set out in the applicable terms if different.
+
+6. Disclaimer of Warranties and Limitation of Liability
+6.1 No Warranties: THE SKYPE SOFTWARE IS PROVIDED “AS IS” WITH NO WARRANTIES WHATSOEVER; SKYPE DOES NOT, EITHER EXPRESSED, IMPLIED OR STATUTORY, MAKE ANY WARRANTIES, CLAIMS OR REPRESENTATIONS WITH RESPECT TO THE SKYPE SOFTWARE, INCLUDING, WITHOUT LIMITATION, WARRANTIES OR CONDITIONS OF QUALITY, PERFORMANCE, NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR USE FOR A PARTICULAR PURPOSE. SKYPE FURTHER DOES NOT REPRESENT OR WARRANT THAT THE SKYPE SOFTWARE WILL ALWAYS BE AVAILABLE, ACCESSIBLE, UNINTERRUPTED, TIMELY, SECURE, ACCURATE, COMPLETE AND ERROR-FREE OR WILL OPERATE WITHOUT PACKET LOSS, NOR DOES SKYPE WARRANT ANY CONNECTION TO OR TRANSMISSION FROM THE INTERNET, OR ANY QUALITY OF CALLS MADE THROUGH THE SKYPE SOFTWARE.
+
+6.2 Specific Disclaimer Of Liability For Emergency Services: EXCEPT AS PROVIDED FOR IN THE LIMITED CIRCUMSTANCES SET OUT IN PARAGRAPH 3.5 OF THE TERMS OF SERVICE, SKYPE DOES NOT PROVIDE CONNECTIONS TO EMERGENCY SERVICES VIA THE SKYPE SOFTWARE. YOU SHOULD BE AWARE THAT FURTHER DISCLAIMERS OF LIABILITY APPLY IN THE TERMS OF SERVICE, TO THE EXTENT THAT LIMITED EMERGENCY CALLING IS PROVIDED. SKYPE SHALL NOT BE LIABLE (WHETHER IN CONTRACT, TORT (INCLUDING NEGLIGENCE), OR ANY OTHER THEORY OF LIABILITY, AND WHETHER OR NOT THE POSSIBILITY OF SUCH DAMAGES OR LOSS HAS BEEN NOTIFIED TO SKYPE) FOR ANY CLAIM, DAMAGE, OR LOSS, ARISING FROM OR RELATING TO:
+
+(I) YOUR INABILITY TO USE THE SKYPE SOFTWARE TO CONTACT EMERGENCY SERVICES, OR
+
+(II) YOUR FAILURE TO MAKE ADDITIONAL ARRANGEMENTS TO ACCESS EMERGENCY SERVICES IN ACCORDANCE WITH PARAGRAPH 3.6 ABOVE.
+
+6.3 Your own Risk: You acknowledge and agree that the entire risk arising out of Your use of the Skype Software remains with You, to the maximum extent permitted by law.
+
+6.4 No Liability: The Skype Software is being provided to You free of charge. ACCORDINGLY, YOU ACKNOWLEDGE AND AGREE THAT SKYPE, ITS AFFILIATES, ITS LICENSORS AND THE SKYPE STAFF WILL HAVE NO LIABILITY IN CONNECTION WITH OR ARISING FROM YOUR USE OF THE SKYPE SOFTWARE, AS SET FORTH BELOW. YOUR ONLY RIGHT OR REMEDY WITH RESPECT TO ANY PROBLEMS OR DISSATISFACTION WITH THE SKYPE SOFTWARE IS TO IMMEDIATELY DEINSTALL AND CEASE USE OF SUCH SKYPE SOFTWARE.
+
+6.5 Limitation of Liability: IN NO EVENT SHALL SKYPE, ITS AFFILIATES, ITS LICENSORS OR THE SKYPE STAFF BE LIABLE, WHETHER IN CONTRACT, WARRANTY, TORT (INCLUDING NEGLIGENCE), PRODUCT LIABILITY OR ANY OTHER FORM OF LIABILITY, FOR:
+
+6.5.1 ANY INDIRECT, INCIDENTAL, SPECIAL OR CONSEQUENTIAL DAMAGES (INCLUDING WITHOUT LIMITATION ANY LOSS OF OR CORRUPTION TO DATA, INTERRUPTION, COMPUTER FAILURE OR PECUNIARY LOSS) ARISING OUT OF THE USE OR INABILITY TO USE THE SKYPE SOFTWARE; AND
+
+6.5.2 ANY LOSS OF INCOME, BUSINESS OR PROFITS (WHETHER DIRECT OR INDIRECT) ARISING OUT OF THE USE OR INABILITY TO USE THE SKYPE SOFTWARE;
+
+6.5.3 ANY LOSS OR DAMAGE WHICH MAY BE INCURRED BY YOU AS A RESULT OF;
+
+(I) ANY DISRUPTIONS OR DELAYS IN ANY COMMUNICATION WHEN USING THE SKYPE SOFTWARE;
+
+(II) THE SUSPENSION OR TERMINATION OF THIS AGREEMENT BY YOU OR BY SKYPE FOR ANY REASON; AND
+
+(III) THE RELEASE OR THE DECISION NOT TO RELEASE NEW VERSIONS OF THE SKYPE SOFTWARE TO YOU.
+
+6.6 THE LIMITATIONS ON SKYPE’S LIABILITY TO YOU IN PARAGRAPH 6.5 ABOVE SHALL APPLY WHETHER OR NOT SKYPE, ITS AFFILIATES OR THE SKYPE STAFF HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH LOSSES OR DAMAGES ARISING.
+
+6.7 NOTHING IN THIS AGREEMENT IS INTENDED TO EXCLUDE OR RESTRICT OR SHALL BE CONSTRUED AS EXCLUDING OR RESTRICTING THE LIABILITY OF SKYPE FOR (I) THE DEATH OR PERSONAL INJURY CAUSED BY THE NEGLIGENCE OF SKYPE, THE SKYPE STAFF OR ITS AGENTS, OR (II) ANY LIABILITY WHICH CANNOT BE LIMITED OR EXCLUDED BY LAW.
+
+6.8 Jurisdiction’s Limitations: As some jurisdictions do not allow some of the exclusions or limitations as set forth above, some of these exclusions or limitations may not apply to You. In such event the liability will be limited to the maximum extent possible within the applicable legislation.
+
+7. Additional Terms
+7.1 In addition to this Agreement, You have to comply with the following Additional Terms when using the Skype Software, the Products and the Skype Website. We expect You to read these Additional Terms carefully, all of which are made part of this Agreement:
+
+The Skype Etiquette http://www.skype.com/legal/terms/etiquette provides guidelines to treat properly and respectfully the other members of Skype’s
+Skype API. You are not allowed to use the Skype API unless You comply with the API Terms at http://www.skype.com/legal/terms/api/
+Skype Online Material. You are not allowed to use the Skype Online Material unless You comply with the Online Material Terms at http://www.skype.com/company/legal/promote/materials/
+Skype payable internet communications products are provided by Skype Communications S.a.r.l. and are subject to the Terms of Service at http://www.skype.com/legal/terms/voip/
+The use of http://www.skype.com/ website is subject to the Terms of Use with Skype Technologies SA at http://www.skype.com/legal/terms/web/
+If You want to provide chargeable services to other Skype Software users through the Skype Software as a service provider, You will need to comply with the Service Provider Agreement with Skype Communications Sa.r.l. at http://www.skype.com/legal/terms/callserviceprovider .
+If you want to use Skype Premium Call Service then You will need to comply with the Terms of Service for Skype Premium Call (Beta) at http://www.skype.com/legal/terms/callservices/
+You will need to comply with the Broadcast TOS at http://www.skype.com/legal/terms/broadcast if You want to use the Skype Software in connection with any Broadcast (as defined in such Broadcast TOS).
+7.2 Any other exceptions: If You are interested in doing anything which is not permitted under this Agreement or by one of the above Additional Terms, You will have to obtain Skype’s prior written consent and explicitly agree upon any further terms.
+
+7.3 Your Confidential Information and Your Privacy: Skype is committed to respecting Your privacy and the confidentiality of Your personal data. The Privacy Policy at http://www.skype.com/go/privacy sets out how Skype may use Your personal data, the traffic data and the content contained in Your communication(s). If You object to Your information being used in the way set out in the Privacy Policy then please do not use the Skype Software or the Products.
+
+8. Miscellaneous
+8.1 Entire Agreement: The terms and conditions of the Terms constitute the entire agreement between You and Skype with respect to the subject matter hereof and will supersede and replace all prior understandings and agreements, in whatever form, regarding the subject matter. Nothing in this clause shall exclude or restrict the liability of either You or Skype arising out of fraud or fraudulent misrepresentation.
+
+8.2 Partial Invalidity: If any provision of the Terms, or any part of a provision, is found by any court or administrative body of competent jurisdiction to be illegal, invalid or unenforceable, and the provision (or part-provision) in question is not of a fundamental nature to the Terms as a whole, the legality, validity or enforceability of the remainder of the Terms (including the remainder of the term which contains the relevant provision) shall not be affected.
+
+8.3 No waiver:The failure to exercise, or delay in exercising, a right, power or remedy provided by the Terms or by law shall not constitute a waiver of that right, power or remedy. If Skype waives a breach of any provision of the Terms this shall not operate as a waiver of a subsequent breach of that provision, or as a waiver of a breach of any other provision.
+
+8.4 Assignment: You are not allowed to assign the Terms or any rights hereunder. Skype is allowed at its sole discretion to assign the Terms or any rights hereunder to any third party, without giving prior notice.
+
+8.5 Applicable Law and Competent Court: The Terms shall be governed by and interpreted in accordance with the laws of Luxembourg and shall be subject to the jurisdiction of the courts of the district of Luxembourg.
+
+8.6 Language: The original English version of the Terms may have been translated into other languages. In the event of inconsistency or discrepancy between the English version and any other language version, the English language version shall prevail.
+
+8.7 Survival: The terms of paragraphs 2.5, 5 and 6 of this Agreement, and any other provision of the Additional Terms which is expressed to survive or operate in the event of termination, shall survive termination of this Agreement and the applicable Additional Terms for whatever reason.
+
+8.8 AVC/H.264 Notice. IfIf the Skype Software is used to make video calls (i) between Your personal computer and a device that is not a personal computer or (ii) between devices that are not personal computers, the AVC/H.264 codec may be used to facilitate video functionality in which case the following notice applies: THE AVC VIDEO FUNCTIONALITY IN THIS PRODUCT IS LICENSED UNDER THE AVC PATENT PORTFOLIO LICENSE FOR THE PERSONAL AND NONCOMMERCIAL USE OF A CONSUMER TO (i) ENCODE VIDEO IN COMPLIANCE WITH THE AVC STANDARD (“AVC VIDEO”) AND/OR (ii) DECODE AVC VIDEO THAT WAS ENCODED BY A CONSUMER ENGAGED IN A PERSONAL AND NON-COMMERCIAL ACTIVITY AND/OR WAS OBTAINED FROM A VIDEO PROVIDER LICENSED TO PROVIDE AVC VIDEO. NO LICENSE IS GRANTED OR SHALL BE IMPLIED FOR ANY OTHER USE. ADDITIONAL INFORMATION MAY BE OBTAINED FROM MPEG LA, L.L.C. SEE HTTP://WWW.MPEGLA.COM/.
+
+YOU EXPRESSLY ACKNOWLEDGE THAT YOU HAVE READ THIS AGREEMENT AND UNDERSTAND THE RIGHTS, OBLIGATIONS, TERMS AND CONDITIONS SET FORTH HEREIN. BY CLICKING ON THE ACCEPT BUTTON AND/OR CONTINUING TO INSTALL THE SKYPE SOFTWARE, YOU EXPRESSLY CONSENT TO BE BOUND BY ITS TERMS AND CONDITIONS AND GRANT TO SKYPE THE RIGHTS SET FORTH HEREIN.
+
+© Skype – Last revised: August 2009', 'http://www.skype.com/intl/en-us/legal/eula/', NULL, NULL, NULL, 'Skype EULA', NULL, NULL, NULL, '', NULL, false, false, false, '76cd66f51760a868bb7a9275b9b9fd84', 1);
 
 
 --
