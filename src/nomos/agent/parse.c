@@ -1063,7 +1063,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /** Leptonica license */
-  if (INFILE(_TITLE_LEPTONICA)) {
+  if (INFILE(_TITLE_LEPTONICA) && INFILE(_LT_GNU_3)) {
     INTERESTING("Leptonica");
   }
 
@@ -3003,7 +3003,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("TrollTech");
   }
   else if (INFILE(_LT_QT_COMMref)) {
-    INTERESTING("QT");
+    INTERESTING("QT(Commercial)");
   }
   /*
    * SNIA (Storage Network Industry) public license
@@ -3639,7 +3639,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_YAHOO_1)) {
     if (INFILE(_LT_YAHOO_BINARY)) {
-      INTERESTING("Yahoo");
+      INTERESTING("Yahoo-EULA");
     }
     else {
       INTERESTING("YPL");
@@ -3767,7 +3767,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("YaST(SuSE)");
   }
   else if (INFILE(_TITLE_NOVELL_EULA)) {
-    INTERESTING("Novell/SUSE");
+    INTERESTING("Novell-EULA");
   }
   else if (INFILE(_TITLE_UL_EULA)) {
     INTERESTING("UnitedLinux-EULA");
@@ -4025,7 +4025,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * ATI Corp
    */
   else if (INFILE(_TITLE_ATI_EULA) && INFILE(_LT_ATI_EULA)) {
-    INTERESTING("ATI");
+    INTERESTING("ATI-EULA");
   }
   /*
    * Agere Systems
@@ -4683,7 +4683,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Pixware
    */
   if (INFILE(_LT_PIXWARE_EULA)) {
-    INTERESTING("Pixware");
+    INTERESTING("Pixware-EULA");
   }
   /*
    * Compuserve
@@ -5142,7 +5142,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * VMware
    */
   if (INFILE(_LT_VMWARE) && INFILE(_TITLE_VMWARE)) {
-    INTERESTING("VMware");
+    INTERESTING("VMware-EULA");
   }
   /*
    * UCWARE.com
@@ -5184,7 +5184,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Skype
    */
   if (INFILE(_TITLE_SKYPE) && INFILE(_LT_SKYPE)) {
-    INTERESTING("Skype");
+    INTERESTING("Skype-EULA");
   }
   /*
    * Hauppauge
