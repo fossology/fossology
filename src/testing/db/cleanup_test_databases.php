@@ -119,7 +119,7 @@ if ( empty($database_name) ) {
     /* drop each test database found */
     while ($row = pg_fetch_row($result)) {
         $dbname = $row[0];
-        echo "Dropping test databae $dbname\n";
+        echo "Dropping test database $dbname\n";
         $drop_sql = "DROP DATABASE $dbname";
         pg_query($PG_CONN, $drop_sql)
             or die("FAIL: Could not drop database '$dbname'\n");
@@ -127,7 +127,7 @@ if ( empty($database_name) ) {
 } 
 /* otherwise just delete the specified test database */
 else { 
-    echo "Dropping test databae $database_name ONLY.\n";
+    echo "Dropping test database $database_name ONLY.\n";
     $drop_sql = "DROP DATABASE $database_name";
     pg_query($PG_CONN, $drop_sql)
         or die("FAIL: Could not drop drop database '$dbname'\n");
@@ -177,7 +177,7 @@ if (empty($sysconfdir)) {
     /* drop each test database found */
     while ($row = pg_fetch_row($result)) {
         $dbname = $row[0];
-        echo "Dropping test databaes $dbname\n";
+        echo "Dropping test databases $dbname\n";
         $drop_sql = "DROP DATABASE $dbname";
         pg_query($PG_CONN, $drop_sql)
             or die("FAIL: Could not drop database $dbname\n");
