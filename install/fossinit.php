@@ -186,33 +186,36 @@ function initLicenseRefTable($Verbose)
     print "FATAL: Unable to access '$LIBEXECDIR'.\n";
     return (1);
   }
+  
+  /** transaction begins */
+  $sql = "BEGIN;";
+  $result_begin = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_begin, $sql, __FILE__, __LINE__);
+  pg_free_result($result_begin);
 
   /** drop table license_ref_2 table if exists */
   $sql = "DROP TABLE IF EXISTS license_ref_2;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  $result_drop1 = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_drop1, $sql, __FILE__, __LINE__);
+  pg_free_result($result_drop1);
 
   /** back up data of license_ref table */
   $sql = "CREATE TABLE license_ref_2 as select * from license_ref;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  $result_create = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_create, $sql, __FILE__, __LINE__);
+  pg_free_result($result_create);
 
   /** delete data of old license_ref table */
   $sql = "DELETE FROM license_ref;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  $result_delete = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_delete, $sql, __FILE__, __LINE__);
+  pg_free_result($result_delete);
 
   /** import licenseref.sql */
-  $import_license_ref = "su postgres -c 'psql -d fossology -f $LIBEXECDIR/licenseref.sql > /dev/null'";
-  system($import_license_ref, $return_val);
-  if ($return_val)
-  {
-    print "FATAL: Unable to import licenseref.sql.\n";
-    return (1);
-  }
+  $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql.bk");
+  $result_import = pg_query($PG_CONN, $sqlstmts);
+  DBCheckResult($result_import, $sqlstmts, __FILE__, __LINE__);
+  pg_free_result($result_import);
 
   /** get maximal rf_pk */
   $sql = "SELECT max(rf_pk) from license_ref;";
@@ -230,10 +233,10 @@ function initLicenseRefTable($Verbose)
   pg_free_result($result_seq);
 
   $sql = "select * from license_ref_2;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $result_old = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_old, $sql, __FILE__, __LINE__);
   /** traverse all records in user's license_ref table, update or insert */
-  while ($row = pg_fetch_assoc($result))
+  while ($row = pg_fetch_assoc($result_old))
   {
     $rf_shortname = $row['rf_shortname'];
     $escaped_name = pg_escape_string($rf_shortname);
@@ -303,20 +306,27 @@ function initLicenseRefTable($Verbose)
     DBCheckResult($result_license_file, $sql, __FILE__, __LINE__);
     pg_free_result($result_license_file);
 
-      /* do the same thing for the license_file_audit table */
+    /* do the same thing for the license_file_audit table */
     $sql = "UPDATE license_file_audit set rf_fk = $row[rf_pk] where license_file_audit.rf_fk = $row[rf_pk]";
     $result_license_file_audit = pg_query($PG_CONN, $sql);
     DBCheckResult($result_license_file_audit, $sql, __FILE__, __LINE__);
     pg_free_result($result_license_file_audit);
   }
 
-  pg_free_result($result);
+  pg_free_result($result_old);
 
   /** drop the backup table */
   $sql = "DROP TABLE license_ref_2;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  $result_drop2 = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_drop2, $sql, __FILE__, __LINE__);
+  pg_free_result($result_drop2);
+
+  /** transaction ends */
+  $sql = "COMMIT;";
+  $result_end = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_end, $sql, __FILE__, __LINE__);
+  pg_free_result($result_end);
+
   return (0);
 } // initLicenseRefTable()
 
