@@ -129,7 +129,10 @@ FUNCTION long add2license_ref(char *licenseName) {
       "insert into license_ref(rf_shortname, rf_text, rf_detector_type) values('%s', '%s', 2)",
       escLicName, specialLicenseText);
   result = PQexec(gl.pgConn, insert);
-  if (PQresultStatus(result) != PGRES_COMMAND_OK) {
+  // ignore duplicate constraint failure (23505), report others
+  if ((result==0) || ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
+      (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5))))
+  {
     printf("ERROR: %s(%d): Nomos failed to add a new license. %s/n: %s/n",
         __FILE__,__LINE__, PQresultErrorMessage(result), insert);
     PQclear(result);
