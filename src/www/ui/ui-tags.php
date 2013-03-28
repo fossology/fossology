@@ -584,7 +584,7 @@ class ui_tag extends FO_Plugin
 
     /* Get all information about $tag_file_pk (tag_file/tag_uploadtree table)*/
     if (Isdir($ufile_mode))
-    $sql = "SELECT tag_pk, tag_uploadtree_text, tag, tag_desc FROM tag_uploadtree, tag, WHERE tag_uploadtree_pk=$tag_file_pk AND tag_uploadtree.tag_fk = tag.tag_pk";
+    $sql = "SELECT tag_pk, tag_uploadtree_text, tag, tag_desc FROM tag_uploadtree, tag WHERE tag_uploadtree_pk=$tag_file_pk AND tag_uploadtree.tag_fk = tag.tag_pk";
     else
     $sql = "SELECT tag_pk, tag_file_text, tag, tag_desc FROM tag_file, tag WHERE tag_file_pk=$tag_file_pk AND tag_file.tag_fk = tag.tag_pk";
     $result = pg_query($PG_CONN, $sql);
