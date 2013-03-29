@@ -212,7 +212,7 @@ function initLicenseRefTable($Verbose)
   pg_free_result($result_delete);
 
   /** import licenseref.sql */
-  $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql.bk");
+  $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
   $result_import = pg_query($PG_CONN, $sqlstmts);
   DBCheckResult($result_import, $sqlstmts, __FILE__, __LINE__);
   pg_free_result($result_import);
