@@ -116,6 +116,9 @@ class upload_permissions extends FO_Plugin
     $newgroup = GetParm('newgroup', PARM_INTEGER);
     $newperm = GetParm('newperm', PARM_INTEGER);
 
+    // start building the output buffer
+    $V = "";
+
     /* If perm_upload_pk is passed in, update either the perm or group_pk */
     $sql = "";
     if (!empty($perm_upload_pk))
@@ -134,7 +137,7 @@ class upload_permissions extends FO_Plugin
       }
       if (!empty($sql))
       {
-        $result = pg_query($PG_CONN, $sql);
+        $result = @pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         pg_free_result($result);
       } 
@@ -166,8 +169,6 @@ class upload_permissions extends FO_Plugin
     $FolderArray = array();
     GetFolderArray($root_folder_pk, $FolderArray);
 
-    // start building the output buffer
-    $V = "";
     /* define js_url */
     $V .= js_url(); 
 
@@ -247,12 +248,12 @@ return;
       {
         $V .= "<tr>";
         $V .= "<td>";  // group
-        $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&permupk={$PermRow['perm_upload_pk']}&group=";
+        $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&folder=$folder_pk&permupk={$PermRow['perm_upload_pk']}&group=";
         $onchange = "onchange=\"js_url(this.value, '$url')\"";
         $V .= Array2SingleSelect($GroupArray, "groupselect", $PermRow['group_pk'], false, false, $onchange);
         $V .= "</td>";
         $V .= "<td>";  // permission
-        $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&permupk={$PermRow['perm_upload_pk']}&perm=";
+        $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&folder=$folder_pk&permupk={$PermRow['perm_upload_pk']}&perm=";
         $onchange = "onchange=\"js_url(this.value, '$url')\"";
         $V .= Array2SingleSelect($PERM_NAMES, "permselect", $PermRow['perm'], false, false, $onchange);
         $V .= "</td>";
@@ -261,13 +262,13 @@ return;
       /* Print one extra row for adding perms */
       $V .= "<tr>";
       $V .= "<td>";  // group
-      $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&newperm=$newperm&newgroup=";
+      $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&folder=$folder_pk&newperm=$newperm&newgroup=";
       $onchange = "onchange=\"js_url(this.value, '$url')\"";
       $Selected = (empty($newgroup)) ? "" : $newgroup;
       $V .= Array2SingleSelect($GroupArray, "groupselectnew", $Selected, true, false, $onchange);
       $V .= "</td>";
       $V .= "<td>";  // permission
-      $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&newgroup=$newgroup&newperm=";
+      $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&folder=$folder_pk&newgroup=$newgroup&newperm=";
       $onchange = "onchange=\"js_url(this.value, '$url')\"";
       $Selected = (empty($newperm)) ? "" : $newperm;
       $V .= Array2SingleSelect($PERM_NAMES, "permselectnew", $Selected, false, false, $onchange);
