@@ -54,7 +54,7 @@ class admin_license_file extends FO_Plugin
     $V = "";
 
     $V.= "<FORM name='Inputfm' action='?mod=" . $this->Name . "' method='POST'>";
-    $V.= _("What license family do you wish to view:<br>");
+    $V.= _("What license family do you wish to view(the Short Name and License Text are unique):<br>");
 
     // qualify by marydone, short name and long name
     // all are optional
@@ -358,10 +358,6 @@ class admin_license_file extends FO_Plugin
   {
     global $PG_CONN;
 
-    /** check if the objective license is existing */
-
-
-
     $ob = "";     // output buffer
 
     $shortname = pg_escape_string($_POST['rf_shortname']);
@@ -370,18 +366,46 @@ class admin_license_file extends FO_Plugin
     $notes = pg_escape_string($_POST['rf_notes']);
     $text = pg_escape_string($_POST['rf_text']);
     $licmd5 = md5($text);
-    $sql = "UPDATE license_ref set
-                 rf_active='$_POST[rf_active]', 
-                 marydone='$_POST[marydone]',
-                 rf_shortname='$shortname',
-                 rf_fullname='$fullname',
-                 rf_url='$url',
-                 rf_notes='$notes',
-                 rf_text_updatable='$_POST[rf_text_updatable]',
-                 rf_detector_type='$_POST[rf_detector_type]',
-                 rf_text='$text',
-                 rf_md5='$licmd5'
-            WHERE rf_pk='$_POST[rf_pk]'";
+
+    /** check if shortname or license text of this license is existing */
+    $sql = "SELECT count(*) from license_ref where rf_pk <> $_POST[rf_pk] and (rf_shortname = '$shortname' or (rf_text <> '' and rf_text = '$text'));";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $check_count = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (0 < $check_count['count'])
+    {
+      $text = _("The shortname or license text is existing, please check it before DOING this action.");
+      return $text;
+    }
+
+    if (empty($text)) {
+      $sql = "UPDATE license_ref set
+        rf_active='$_POST[rf_active]', 
+        marydone='$_POST[marydone]',
+        rf_shortname='$shortname',
+        rf_fullname='$fullname',
+        rf_url='$url',
+        rf_notes='$notes',
+        rf_text_updatable='$_POST[rf_text_updatable]',
+        rf_detector_type='$_POST[rf_detector_type]',
+        rf_text='$text',
+        rf_md5=null
+          WHERE rf_pk='$_POST[rf_pk]'";
+    } else {
+      $sql = "UPDATE license_ref set
+        rf_active='$_POST[rf_active]', 
+        marydone='$_POST[marydone]',
+        rf_shortname='$shortname',
+        rf_fullname='$fullname',
+        rf_url='$url',
+        rf_notes='$notes',
+        rf_text_updatable='$_POST[rf_text_updatable]',
+        rf_detector_type='$_POST[rf_detector_type]',
+        rf_text='$text',
+        rf_md5='$licmd5'
+          WHERE rf_pk='$_POST[rf_pk]'";
+    }
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
@@ -407,24 +431,50 @@ class admin_license_file extends FO_Plugin
     $rf_url = pg_escape_string($_POST['rf_url']);
     $rf_notes = pg_escape_string($_POST['rf_notes']);
     $rf_text = pg_escape_string($_POST['rf_text']);
+
+    /** check if shortname or license text of this license is existing */
+    $sql = "SELECT count(*) from license_ref where rf_shortname = '$rf_shortname' or (rf_text <> '' and rf_text = '$rf_text');";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $check_count = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (0 < $check_count['count'])
+    {
+      $text = _("The shortname or license text of this license is existing, please check it before DOING this action.");
+      return $text;
+    }
+
+    $sql = "";
     if (empty($rf_text)) {
-      $licmd5 = md5($rf_shortname);
+      $sql = "INSERT into license_ref (
+        rf_active, marydone, rf_shortname, rf_fullname,
+        rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable,
+        rf_detector_type) 
+          VALUES (
+              '$_POST[rf_active]',
+              '$_POST[marydone]',
+              '$rf_shortname',
+              '$rf_fullname',
+              '$rf_url',
+              '$rf_notes', null, '$rf_text',
+              '$_POST[rf_text_updatable]',
+              '$_POST[rf_detector_type]')";
     } else {
       $licmd5 = md5($rf_text);
+      $sql = "INSERT into license_ref (
+        rf_active, marydone, rf_shortname, rf_fullname,
+        rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable,
+        rf_detector_type) 
+          VALUES (
+              '$_POST[rf_active]',
+              '$_POST[marydone]',
+              '$rf_shortname',
+              '$rf_fullname',
+              '$rf_url',
+              '$rf_notes', '$licmd5', '$rf_text',
+              '$_POST[rf_text_updatable]',
+              '$_POST[rf_detector_type]')";
     }
-    $sql = "INSERT into license_ref (
-                 rf_active, marydone, rf_shortname, rf_fullname,
-                 rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable,
-                 rf_detector_type) 
-                 VALUES (
-                 '$_POST[rf_active]',
-                 '$_POST[marydone]',
-                 '$rf_shortname',
-                 '$rf_fullname',
-                 '$rf_url',
-                 '$rf_notes', '$licmd5', '$rf_text',
-                 '$_POST[rf_text_updatable]',
-                 '$_POST[rf_detector_type]')";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
