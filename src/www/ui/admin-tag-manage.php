@@ -141,7 +141,7 @@ class admin_tag_manage extends FO_Plugin
         $V .= "  {\n";
         $V .= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
         $V .= "    {\n";
-        $V .= "    document.formy.upload.innerHTML = Uploads.responseText;\n";
+        $V .= "    document.getElementById('tagdiv').innerHTML = '<select size=\'10\' name=\'upload\' onChange=\'Tagging_Get(\"" . Traceback_uri() . "?mod=upload_tagging&upload=\" + this.value)\'>' + Uploads.responseText+ '</select><P/>';\n";
         $V .= "    document.getElementById('manage_tag').style.display= 'none';\n";
         $V .= "    document.getElementById('manage_tag_all').style.display= 'block';\n";
         $V .= "    }\n";
@@ -180,6 +180,7 @@ class admin_tag_manage extends FO_Plugin
 
         $text = _("Select the upload to  enable/disable:");
         $V .= "<li>$text<br>";
+        $V .= "<div id='tagdiv'>\n";
         $V .= "<select size='10' name='upload' onChange='Tagging_Get(\"" . Traceback_uri() . "?mod=upload_tagging&upload=\" + this.value)'>\n"; 
         $List = FolderListUploads_perm($Folder, PERM_WRITE);
         foreach($List as $L)
@@ -193,6 +194,7 @@ class admin_tag_manage extends FO_Plugin
           $V .= "</option>\n";
         }
         $V .= "</select><P />\n";
+        $V .= "</div>\n";
         /** for folder */
         $V .= "<div id='manage_tag_all'>";
         $text = _("Disable");
