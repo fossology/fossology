@@ -44,6 +44,7 @@ install: all
 
 	for file in $(OBSOLETEFILES); do \
 	  rm -f $(DESTDIR)$(WEBDIR)/ui/$$file; \
+	  rm -f $$file; \
 	done
 	for file in $(UIFILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \

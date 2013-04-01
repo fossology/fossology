@@ -358,6 +358,10 @@ class admin_license_file extends FO_Plugin
   {
     global $PG_CONN;
 
+    /** check if the objective license is existing */
+
+
+
     $ob = "";     // output buffer
 
     $shortname = pg_escape_string($_POST['rf_shortname']);
@@ -403,7 +407,11 @@ class admin_license_file extends FO_Plugin
     $rf_url = pg_escape_string($_POST['rf_url']);
     $rf_notes = pg_escape_string($_POST['rf_notes']);
     $rf_text = pg_escape_string($_POST['rf_text']);
-    $licmd5 = md5($rf_text);
+    if (empty($rf_text)) {
+      $licmd5 = md5($rf_shortname);
+    } else {
+      $licmd5 = md5($rf_text);
+    }
     $sql = "INSERT into license_ref (
                  rf_active, marydone, rf_shortname, rf_fullname,
                  rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable,
