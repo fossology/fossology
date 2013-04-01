@@ -1,6 +1,0 @@
-#!/bin/bash
-for file in $(find RedHat -type f)
-do
-#echo "$file"
-../agent/nomos "$file"
-done
