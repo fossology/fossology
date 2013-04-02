@@ -206,8 +206,8 @@ class admin_license_file extends FO_Plugin
   function Updatefm($rf_pk)
   {
     global $PG_CONN;
-    $text = _("<b>The Short Name and License Text must be unique.</b><br>");
-    echo $text;
+    $text = _("The Short Name and License Text must be unique.");
+    echo "<b>$text</b><br>";;
 
     $rf_active = $marydone = $rf_shortname = $rf_fullname = $rf_text_updatable = $rf_detector_type = $rf_text = $rf_url = $rf_notes = "";
 
@@ -389,7 +389,7 @@ class admin_license_file extends FO_Plugin
     $licmd5 = md5($text);
 
     /** check if shortname or license text of this license is existing */
-    $sql = "SELECT count(*) from license_ref where rf_pk <> $_POST[rf_pk] and (rf_shortname = '$shortname' or (rf_text <> ''
+    $sql = "SELECT count(*) from license_ref where rf_pk <> $_POST[rf_pk] and (LOWER(rf_shortname) = LOWER('$shortname') or (rf_text <> ''
       and rf_text = '$text' and LOWER(rf_text) NOT LIKE 'license by nomos'));";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -397,8 +397,8 @@ class admin_license_file extends FO_Plugin
     pg_free_result($result);
     if (0 < $check_count['count'])
     {
-      $text = _("Error: The shortname or license text is existing, please check it before DOING this action.");
-      return $text;
+      $text = _("ERROR: The shortname or license text already exist in the license list.  License not added.");
+      return "<b>$text</b><p>";
     }
 
     if (empty($text) || stristr($text, "License by Nomos")) {
@@ -464,8 +464,8 @@ class admin_license_file extends FO_Plugin
     pg_free_result($result);
     if (0 < $check_count['count'])
     {
-      $text = _("Error: The shortname or license text of this license is existing, please check it before DOING this action.");
-      return $text;
+      $text = _("ERROR: The shortname or license text already exist in the license list.  License not added.");
+      return "<b>$text</b><p>";
     }
 
     $sql = "";
@@ -557,7 +557,7 @@ class admin_license_file extends FO_Plugin
 
         //debugprint($_REQUEST, "_REQUEST");
 
-        $errorstr = "please check it before DOING this action";
+        $errorstr = "License not added";
 
         // update the db
         if (@$_POST["updateit"])
