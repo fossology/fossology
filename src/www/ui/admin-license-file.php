@@ -211,7 +211,12 @@ class admin_license_file extends FO_Plugin
 
     $rf_active = $marydone = $rf_shortname = $rf_fullname = $rf_text_updatable = $rf_detector_type = $rf_text = $rf_url = $rf_notes = "";
 
+    $rf_pk_update = "";
+
     if (0 < count($_POST)) {
+      $rf_pk_update = $_POST['rf_pk'];
+      if (!empty($rf_pk)) $rf_pk_update = $rf_pk;
+      else if (empty($rf_pk_update)) $rf_pk_update = $_GET['rf_pk'];
       $rf_active = $_POST['rf_active'];
       $marydone = $_POST['marydone'];
       $rf_text_updatable = $_POST['rf_text_updatable'];
@@ -224,7 +229,7 @@ class admin_license_file extends FO_Plugin
     }
 
     $ob = "";     // output buffer
-    $ob .= "<FORM name='Updatefm' action='?mod=" . $this->Name . "' method='POST'>";
+    $ob .= "<FORM name='Updatefm' action='?mod=" . $this->Name."&rf_pk=$rf_pk_update". "' method='POST'>";
     $req_marydone = $req_shortname = "";
     if ($rf_pk) {
       $req_marydone = $_GET['req_marydone'];
@@ -275,7 +280,7 @@ class admin_license_file extends FO_Plugin
     }
 
     $ob .= "<tr>";
-    $active = ($rf_active == 't' || true == $rf_active) ? "Yes" : "No";
+    $active = ($rf_active == 't' || $rf_active == 'true') ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_active", $active);
     $text = _("Active");
     $ob .= "<td align=right>$text</td>";
@@ -283,7 +288,7 @@ class admin_license_file extends FO_Plugin
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $marydone = ($marydone == 't' || true == $marydone) ? "Yes" : "No";
+    $marydone = ($marydone == 't' || 'true' == $marydone) ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "marydone", $marydone);
     $text = _("Checked");
     $ob .= "<td align=right>$text</td>";
@@ -305,7 +310,7 @@ class admin_license_file extends FO_Plugin
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $updatable = ($rf_text_updatable == 't' || true == $rf_text_updatable) ? true : false;
+    $updatable = ($rf_text_updatable == 't' || 'true' == $rf_text_updatable) ? true : false;
     if (empty($rf_pk) || $updatable)
     {
       $rotext = '';
@@ -323,7 +328,7 @@ class admin_license_file extends FO_Plugin
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $tupable = ($rf_text_updatable == 't' || true == $rf_text_updatable) ? "Yes" : "No";
+    $tupable = ($rf_text_updatable == 't' || 'true' == $rf_text_updatable) ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_text_updatable", $tupable);
     $text = _("Text Updatable");
     $ob .= "<td align=right>$text</td>";
@@ -352,8 +357,7 @@ class admin_license_file extends FO_Plugin
     $ob .= "</tr>";
 
     $ob .= "</table>";
-    if (empty($rf_pk) && 0 < count($_POST))    $rf_pk = $_POST['rf_pk'];
-    if ($rf_pk){
+    if ($rf_pk || $rf_pk_update){
       $text = _("Update");
       $ob .= "<INPUT type='submit' value='$text'>\n";
     }else{
