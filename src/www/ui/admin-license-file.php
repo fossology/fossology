@@ -54,7 +54,7 @@ class admin_license_file extends FO_Plugin
     $V = "";
 
     $V.= "<FORM name='Inputfm' action='?mod=" . $this->Name . "' method='POST'>";
-    $V.= _("What license family do you wish to view(the Short Name and License Text are unique):<br>");
+    $V.= _("What license family do you wish to view:<br>");
 
     // qualify by marydone, short name and long name
     // all are optional
@@ -206,6 +206,22 @@ class admin_license_file extends FO_Plugin
   function Updatefm($rf_pk)
   {
     global $PG_CONN;
+    $text = _("<b>The Short Name and License Text must be unique.</b><br>");
+    echo $text;
+
+    $rf_active = $marydone = $rf_shortname = $rf_fullname = $rf_text_updatable = $rf_detector_type = $rf_text = $rf_url = $rf_notes = "";
+
+    if (0 < count($_POST)) {
+      $rf_active = $_POST['rf_active'];
+      $marydone = $_POST['marydone'];
+      $rf_text_updatable = $_POST['rf_text_updatable'];
+      $rf_detector_type = $_POST['rf_detector_type'];
+      $rf_shortname = pg_escape_string($_POST['rf_shortname']);
+      $rf_fullname = pg_escape_string($_POST['rf_fullname']);
+      $rf_url = pg_escape_string($_POST['rf_url']);
+      $rf_notes = pg_escape_string($_POST['rf_notes']);
+      $rf_text = pg_escape_string($_POST['rf_text']);
+    }
 
     $ob = "";     // output buffer
     $ob .= "<FORM name='Updatefm' action='?mod=" . $this->Name . "' method='POST'>";
@@ -245,7 +261,6 @@ class admin_license_file extends FO_Plugin
       $row = array();
     }
 
-    $rf_active = $marydone = $rf_shortname = $rf_fullname = $rf_text_updatable = $rf_detector_type = $rf_text = $rf_url = $rf_notes = "";
     if ($row)
     {
       $rf_active = $row['rf_active'];
@@ -260,7 +275,7 @@ class admin_license_file extends FO_Plugin
     }
 
     $ob .= "<tr>";
-    $active = ($rf_active == 't') ? "Yes" : "No";
+    $active = ($rf_active == 't' || true == $rf_active) ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_active", $active);
     $text = _("Active");
     $ob .= "<td align=right>$text</td>";
@@ -268,7 +283,7 @@ class admin_license_file extends FO_Plugin
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $marydone = ($marydone == 't') ? "Yes" : "No";
+    $marydone = ($marydone == 't' || true == $marydone) ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "marydone", $marydone);
     $text = _("Checked");
     $ob .= "<td align=right>$text</td>";
@@ -290,7 +305,7 @@ class admin_license_file extends FO_Plugin
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $updatable = ($rf_text_updatable == 't') ? true : false;
+    $updatable = ($rf_text_updatable == 't' || true == $rf_text_updatable) ? true : false;
     if (empty($rf_pk) || $updatable)
     {
       $rotext = '';
@@ -308,7 +323,7 @@ class admin_license_file extends FO_Plugin
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $tupable = ($rf_text_updatable == 't') ? "Yes" : "No";
+    $tupable = ($rf_text_updatable == 't' || true == $rf_text_updatable) ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_text_updatable", $tupable);
     $text = _("Text Updatable");
     $ob .= "<td align=right>$text</td>";
@@ -337,6 +352,7 @@ class admin_license_file extends FO_Plugin
     $ob .= "</tr>";
 
     $ob .= "</table>";
+    if (empty($rf_pk) && 0 < count($_POST))    $rf_pk = $_POST['rf_pk'];
     if ($rf_pk){
       $text = _("Update");
       $ob .= "<INPUT type='submit' value='$text'>\n";
@@ -365,21 +381,23 @@ class admin_license_file extends FO_Plugin
     $url = pg_escape_string($_POST['rf_url']);
     $notes = pg_escape_string($_POST['rf_notes']);
     $text = pg_escape_string($_POST['rf_text']);
+    $text = trim($text);
     $licmd5 = md5($text);
 
     /** check if shortname or license text of this license is existing */
-    $sql = "SELECT count(*) from license_ref where rf_pk <> $_POST[rf_pk] and (rf_shortname = '$shortname' or (rf_text <> '' and rf_text = '$text'));";
+    $sql = "SELECT count(*) from license_ref where rf_pk <> $_POST[rf_pk] and (rf_shortname = '$shortname' or (rf_text <> ''
+      and rf_text = '$text' and LOWER(rf_text) NOT LIKE 'license by nomos'));";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $check_count = pg_fetch_assoc($result);
     pg_free_result($result);
     if (0 < $check_count['count'])
     {
-      $text = _("The shortname or license text is existing, please check it before DOING this action.");
+      $text = _("Error: The shortname or license text is existing, please check it before DOING this action.");
       return $text;
     }
 
-    if (empty($text)) {
+    if (empty($text) || stristr($text, "License by Nomos")) {
       $sql = "UPDATE license_ref set
         rf_active='$_POST[rf_active]', 
         marydone='$_POST[marydone]',
@@ -431,21 +449,23 @@ class admin_license_file extends FO_Plugin
     $rf_url = pg_escape_string($_POST['rf_url']);
     $rf_notes = pg_escape_string($_POST['rf_notes']);
     $rf_text = pg_escape_string($_POST['rf_text']);
+    $rf_text = trim($rf_text);
 
     /** check if shortname or license text of this license is existing */
-    $sql = "SELECT count(*) from license_ref where rf_shortname = '$rf_shortname' or (rf_text <> '' and rf_text = '$rf_text');";
+    $sql = "SELECT count(*) from license_ref where rf_shortname = '$rf_shortname' or (rf_text <> '' 
+      and rf_text = '$rf_text' and LOWER(rf_text) NOT LIKE 'license by nomos');";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $check_count = pg_fetch_assoc($result);
     pg_free_result($result);
     if (0 < $check_count['count'])
     {
-      $text = _("The shortname or license text of this license is existing, please check it before DOING this action.");
+      $text = _("Error: The shortname or license text of this license is existing, please check it before DOING this action.");
       return $text;
     }
 
     $sql = "";
-    if (empty($rf_text)) {
+    if (empty($rf_text) || stristr($rf_text, "License by Nomos")) {
       $sql = "INSERT into license_ref (
         rf_active, marydone, rf_shortname, rf_fullname,
         rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable,
@@ -533,11 +553,18 @@ class admin_license_file extends FO_Plugin
 
         //debugprint($_REQUEST, "_REQUEST");
 
+        $errorstr = "please check it before DOING this action";
+
         // update the db
         if (@$_POST["updateit"])
         {
-          $V .= $this->Updatedb($_POST);
+          $resultstr = $this->Updatedb($_POST);
+          $V .= $resultstr;
+          if (strstr($resultstr, $errorstr)) {
+            $V .= $this->Updatefm(0);
+          } else {
           $V .= $this->Inputfm();
+          }
           break;
         }
 
@@ -550,8 +577,13 @@ class admin_license_file extends FO_Plugin
         // Add new rec to db
         if (@$_POST["addit"])
         {
-          $V .= $this->Adddb($_POST);
+          $resultstr = $this->Adddb($_POST);
+          $V .= $resultstr;
+          if (strstr($resultstr, $errorstr)) {
+            $V .= $this->Updatefm(0);
+          } else {
           $V .= $this->Inputfm();
+          }
           break;
         }
 
