@@ -403,7 +403,8 @@ database "fossy" and owner's password "fossy".  For security reasons,
 please change this password, after the database is created, using
 the alter command. Here are the steps:
 
-Check to see the database server is running
+Check to see the database server is running (NOTE: the following commands are
+specific to the 8.4 version of Postgresql; your version may be different.):
    A) Ensure that postgresql is running using this command:
       /etc/init.d/postgresql-8.4 status
       Version Cluster   Port Status Owner    Data directory            Log file
