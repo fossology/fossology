@@ -434,7 +434,7 @@ class search extends FO_Plugin
         $text2 = _("All Files");
         $V .= "<br> <input type='radio' name='searchtype' value='allfiles' $AllFilesChecked><b>$text2</b>\n";
 
-        $V .= "<p><u><i><b>" . _("Choose one or more search criteria.") . "</b></i></u>";
+        $V .= "<p><u><i><b>" . _("You must choose one or more search criteria.") . "</b></i></u>";
         $V .= "<ul>\n";
 
         /* filename */
@@ -462,7 +462,7 @@ class search extends FO_Plugin
 
         $V .= "<ul>\n";
         
-        $V .= "<p><u><i><b>" . _("Choose the search filter.") . "</b></i></u>";
+        $V .= "<p><u><i><b>" . _("You may also choose one or more optional search filters.") . "</b></i></u>";
         /* license */
         $text = _("License");
         $V .= "<li><b>$text: </b><input name='license' value='$License'>";
