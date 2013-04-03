@@ -300,20 +300,22 @@ function initLicenseRefTable($Verbose)
       pg_free_result($result_back);
     }
 
-    /* Update the license_file table substituting the new rf_pk  for the old rf_fk */
-    $sql = "UPDATE license_file set rf_fk = $row[rf_pk] where license_file.rf_fk = $row[rf_pk]";
-    $result_license_file = pg_query($PG_CONN, $sql);
-    DBCheckResult($result_license_file, $sql, __FILE__, __LINE__);
-    pg_free_result($result_license_file);
-
-    /* do the same thing for the license_file_audit table */
-    $sql = "UPDATE license_file_audit set rf_fk = $row[rf_pk] where license_file_audit.rf_fk = $row[rf_pk]";
-    $result_license_file_audit = pg_query($PG_CONN, $sql);
-    DBCheckResult($result_license_file_audit, $sql, __FILE__, __LINE__);
-    pg_free_result($result_license_file_audit);
   }
 
   pg_free_result($result_old);
+
+
+  /* Update the license_file table substituting the new rf_pk  for the old rf_fk */
+  $sql = "update license_file set rf_fk = license_ref.rf_pk from license_ref,license_ref_2 where license_ref.rf_shortname = license_ref_2.rf_shortname and rf_fk = license_ref_2.rf_pk;";
+  $result_license_file = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_license_file, $sql, __FILE__, __LINE__);
+  pg_free_result($result_license_file);
+
+  /* do the same thing for the license_file_audit table */
+  $sql = "update license_file_audit set rf_fk = license_ref.rf_pk from license_ref,license_ref_2 where license_ref.rf_shortname = license_ref_2.rf_shortname and rf_fk = license_ref_2.rf_pk;";
+  $result_license_file_audit = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_license_file_audit, $sql, __FILE__, __LINE__);
+  pg_free_result($result_license_file_audit);
 
   /** drop the backup table */
   $sql = "DROP TABLE license_ref_2;";
