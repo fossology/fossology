@@ -98,7 +98,6 @@ global $PG_CONN;
 
 /** get license information for this uploadtree */
 GetLicenseList($item, $upload, $container);
-print "END\n";
 return 0;
 
 /**

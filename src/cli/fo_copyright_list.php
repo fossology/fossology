@@ -103,7 +103,6 @@ require_once("$MODDIR/lib/php/common.php");
 
 /** get copyright information for this uploadtree */
 GetCopyrightList($item, $upload, $type, $container);
-print "END\n";
 return 0;
 
 /**
