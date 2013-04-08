@@ -71,6 +71,11 @@ const char* jobsql_email =
     "   WHERE user_pk = user_fk "
     "     AND upload_pk = %d;";
 
+const char* jobsql_email_job =
+    " SELECT user_name, user_email, email_notify FROM users, job, jobqueue "
+    "   WHERE user_pk = job_user_fk AND job_pk = jq_job_fk "
+    "     AND jq_pk = %d;";
+
 /* job queue related sql */
 const char* basic_checkout =
     " SELECT * FROM getrunnable() "

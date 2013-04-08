@@ -384,6 +384,18 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
     return;
   }
 
+  /* special for delagent, upload records have been deleted, so can't get the user info from upload table, so get the user info from job table */
+  if(PQntuples(db_result) == 0)
+  {
+    sprintf(sql, jobsql_email_job, j_id);
+    db_result = database_exec(scheduler, sql);
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
+    {
+      PQ_ERROR(db_result, "unable to access email info for job %d", j_id);
+      return;
+    }
+  }
+
   if(PQget(db_result, 0, "email_notify")[0] == 'y')
   {
     if(status == 2)
