@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -82,14 +82,12 @@ foreach($options as $option => $value)
 }
 
 /** check if parameters are valid */
-if (!is_numeric($upload) || !is_numeric($item))
+if (!is_numeric($upload) || (!empty($item) && !is_numeric($item)))
 {
   print "Upload ID or Uploadtree ID is not digital number\n";
   print $Usage;
   return 1;
 }
-
-print "Upload ID:$upload; Uploadtree ID:$item\n";
 
 account_check($user, $passwd); // check username/password
 
@@ -119,7 +117,13 @@ return 0;
 function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container = 0) 
 {
   global $PG_CONN;
-  if (empty($uploadtree_pk)) return;
+  if (empty($uploadtree_pk)) {
+      /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
+      $uploadtreeRec = GetSingleRec("uploadtree", "where parent is NULL and upload_fk='$upload_pk'");
+      $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
+  }
+
+//  print "Upload ID:$upload_pk; Uploadtree ID:$uploadtree_pk\n";
 
   /* get last copyright agent_pk that has data for this upload */
   $Agent_name = "copyright";
