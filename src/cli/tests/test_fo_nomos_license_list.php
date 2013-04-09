@@ -158,10 +158,10 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     $output_msg_count = count($out);
 
     sort($out, SORT_STRING);
-    /** for this uload, will get 11 lines for report */
-    $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
+    /** for this uload, will get 9 lines for report */
+    $this->assertEquals(9, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
     /** check one line of the report */
-    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL-2.1", $out[2]);
+    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL-2.1", $out[0]);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
 
     /** do not include container */
@@ -172,10 +172,10 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     $output_msg_count = count($out);
 
     sort($out, SORT_STRING);
-    /** for this uload, will get 6 lines for report */
-    $this->assertEquals(6, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
+    /** for this uload, will get 4 lines for report */
+    $this->assertEquals(4, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
     /** check one line of the report */
-    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL-2.1", $out[2]);
+    $this->assertEquals("test package/usr/include/libfossdb.h: LGPL-2.1", $out[0]);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
 

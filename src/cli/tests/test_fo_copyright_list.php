@@ -156,11 +156,11 @@
       fwrite(STDOUT, "DEBUG: Executing '$command'\n");
       $last = exec("$command 2>&1", $out, $rtn);
       $output_msg_count = count($out);
-      /** for this uload, will get 103 lines for report */
-      $this->assertEquals(103, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+      /** for this uload, will get 101 lines for report */
+      $this->assertEquals(101, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
       /** check one line of the report */
       sort($out, SORT_STRING);
-      $this->assertEquals("test package/data.tar.gz/data.tar/etc/cron.d/fossology: copyright (c) 2007 hewlett-packard development company, l.p.", $out[85]);
+      $this->assertEquals("test package/data.tar.gz/data.tar/etc/cron.d/fossology: copyright (c) 2007 hewlett-packard development company, l.p.", $out[83]);
 
 
       $out = "";
@@ -170,7 +170,7 @@
       $last = exec("$command 2>&1", $out, $rtn);
       /** check one line of the report */
       sort($out, SORT_STRING);
-      $this->assertEquals("test package/control.tar.gz/control.tar: taggart@debian.org", $out[7]);
+      $this->assertEquals("test package/control.tar.gz/control.tar: taggart@debian.org", $out[5]);
 
       $out = "";
       /** get url */
@@ -179,7 +179,7 @@
       $last = exec("$command 2>&1", $out, $rtn);
       /** check one line of the report */
       sort($out, SORT_STRING);
-      $this->assertEquals("test package/data.tar.gz: http://fossology.org", $out[25]);
+      $this->assertEquals("test package/data.tar.gz: http://fossology.org", $out[23]);
 
       /** do not include container, get url */
       $out = "";
@@ -188,7 +188,7 @@
       $last = exec("$command 2>&1", $out, $rtn);
       /** check one line of the report */
       sort($out, SORT_STRING);
-      $this->assertEquals("test package/control.tar.gz/control.tar/control: http://fossology.org", $out[3]);
+      $this->assertEquals("test package/control.tar.gz/control.tar/control: http://fossology.org", $out[1]);
 
       fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
       fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
