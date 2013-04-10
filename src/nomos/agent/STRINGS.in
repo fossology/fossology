@@ -8026,7 +8026,7 @@ k
 #
 %ENTRY%	_TEXT_FONT
 %KEY%	=NULL=
-%STR%	"font"
+%STR%	"as a special exception =SOME= font"
 #
 %ENTRY%	_TEXT_GCC
 %KEY%	=NULL=
