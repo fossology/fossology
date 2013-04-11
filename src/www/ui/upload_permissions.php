@@ -48,7 +48,7 @@ class upload_permissions extends FO_Plugin
 
     $text = _("To edit group memberships ");
     $text2 = _("click here");
-    $V .= "<p>$text" . "<a href='" . Traceback_uri() . "?mod=upload_permissions'>" . $text2 . "</a>";
+    $V .= "<p>$text" . "<a href='" . Traceback_uri() . "?mod=group_manage_users'>" . $text2 . "</a>";
     $text = _("Look up who is a member of group ");
 
     /* Get array of groups that this user is an admin of */
