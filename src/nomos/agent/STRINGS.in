@@ -151,6 +151,9 @@
 #####
 # License Text entries start here...
 #####
+%ENTRY%	_LT_Imlib2
+%KEY%	"licen[cs]"
+%STR%	"this license does not apply to any software that links to the libraries provided by this software"
 # Open Font License
 %ENTRY%	_LT_OPEN_FONT_V10
 %KEY%	"font"
@@ -814,6 +817,10 @@
 %KEY%	"licen[cs]"
 %STR%	"license\.? bsd"
 #
+%ENTRY% _LT_BSDref10
+%KEY% "licen[cs]"
+%STR% "(re|)distribution and (use|modifications) (is|are) (allowed|permitted) (according|subject) to =FEW= bsd license"
+#
 %ENTRY%	_LT_BSDSTYLEref1
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (BSD[ -]style|BSD[ -]type|BSD-?ish|BSD[ -]like) licen[cs]e"
@@ -1196,6 +1203,11 @@
 # as required only in conjunction with devices using a Cypress USB
 # microcontroller
 #####
+#
+%ENTRY% _LT_CRYPTOGAMS
+%KEY% "licen[cs]"
+%STR% "licensed under =FEW= cryptogams license"
+#
 %ENTRY%	_LT_CUPS
 %KEY%	"\<under\>"
 %STR%	"you must provide source for any new drivers changes or additions to the software and all code must be provided under the GPL or LGPL as appropriate"
@@ -1291,7 +1303,7 @@
 #
 %ENTRY%	_LT_DUAL_LICENSE_1
 %KEY%	"licen[cs]"
-%STR%	"\<dual\> licensed"
+%STR%	"(\<dual\>|multiple)[ -]licensed"
 #
 %ENTRY%	_LT_DUAL_LICENSE_2
 %KEY%	"licen[cs]"
@@ -1869,6 +1881,18 @@
 %ENTRY% _LT_FREE_87
 %KEY% "software"
 %STR% "any use of this software is permitted provided that this notice is not removed"
+#
+%ENTRY% _LT_FREE_88
+%KEY% "commerc"
+%STR% "may be freely used for any purpose commercial or otherwise =SOME= following notice must appear"
+#
+%ENTRY% _LT_FREE_89
+%KEY% "permi[st]"
+%STR% "permission is granted to freely use copy modify and (re|)distribute =FEW= provided that the author is not (construed to be liable|responsible) for any results of using the software =SOME= this notice is not modified"
+#
+%ENTRY% _LT_FREE_90
+%KEY% "permi[st]"
+%STR% "permission is granted for =FEW= all use providing that this copyright is (properly|) acknowledged"
 #
 %ALIAS%	_FREE_last_other
 %ALIAS%	_FREECLAIM_last
@@ -3638,6 +3662,10 @@ e /* (INFILE(j)) */
 %KEY% =NULL=
 %STR% "openssl (toolkit|project)"
 #
+%ENTRY% _LT_OPENSSLref6
+%KEY% "licen[cs]"
+%STR% "licensed under OpenSSL"
+#
 %ENTRY%	_LT_COMBINED_OPENSSL_SSLEAY
 %KEY%	"SSLeay"
 %STR%	"OpenSSL License and =SOME= SSLeay license"
@@ -4613,6 +4641,10 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"VMware hereby grants you a non-exclusive non-transferable licen[cs]e without rights to sublicen[cs]e"
 #
+%ENTRY%	_TITLE_FTL
+%KEY%	"licen[cs]"
+%STR%	"freetype project license"
+#
 %ENTRY%	_TITLE_LIBPNG
 %KEY%	"licen[cs]"
 %STR%	"released under the libpng license"
@@ -4702,7 +4734,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_WTFPL
 %KEY%	"distribut"
-%STR%	"do what the =FEW= you want to public licen[cs]e terms and conditions for copying distribution and/?o?r? modification =FEW= just do what the"
+%STR%	"do what the =FEW= you want to public licen[cs]e terms and conditions for copying\,? distribution and/?o?r? modification"
 #
 %ENTRY%	_LT_WTFPLref
 %KEY%	"\<under\>"
@@ -5159,6 +5191,10 @@ k
 %KEY% "copyright"
 %STR% "see copyright file in =FEW= distribution"
 #
+%ENTRY% _LT_SEE_OTHER_14
+%KEY% "copyright"
+%STR% "see =FEW= for more details on licensing"
+#
 #####
 # These MUST be the last 3 checks for license references in some "other" place
 #####
@@ -5520,6 +5556,10 @@ k
 %ENTRY%	_CR_CRYPTIX
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= cryptix foundation"
+#
+%ENTRY% _CR_CRYPTOGAMS
+%KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR% "(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= cryptogams"
 #
 %ENTRY%	_CR_CYBERNEKO
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -6628,9 +6668,13 @@ k
 %KEY%	"licen[cs]"
 %STR%	"the frameworx open licen[cs]e 1\.?0"
 #
-%ENTRY%	_TITLE_FREETYPE
-%KEY%	"licen[cs]"
-%STR%	"the freetype project licen[cs]e"
+%ENTRY% _TITLE_FREETYPE
+%KEY% "licen[cs]"
+%STR% "the freetype project licen[cs]e"
+#
+%ENTRY% _TITLE_IJG
+%KEY% =NULL=
+%STR% "Independent JPEG Group"
 #
 %ENTRY%	_TITLE_FREEBSD_DOC
 %KEY%	"(docume|warra)nt"
@@ -6721,6 +6765,10 @@ k
 %ENTRY%	_TITLE_GSOAP_V13
 %KEY%	"licen[cs]"
 %STR%	"gsoap public licen[cs]e version 1\.?3"
+#
+%ENTRY% _TITLE_H2_V10
+%KEY% "licen[cs]"
+%STR% "H2 license (v|version) 1\.?0"
 #
 %ENTRY%	_TITLE_IBM_PL20
 %KEY%	"licen[cs]"
@@ -6907,6 +6955,10 @@ k
 %ENTRY%	_TITLE_MPL20
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"mozilla public licen[cs]e (2\.?0|(\<mpl\> |v|version )2\.?0)"
+#
+%ENTRY%	_TITLE_MPL20_EXCEPTION
+%KEY%	"licen[cs]"
+%STR%	"exhibit b =FEW= incompatible with secondary licenses"
 #
 %ENTRY%	_TITLE_MPL_EULA_20
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
@@ -8478,6 +8530,10 @@ k
 %ENTRY%	_URL_GPL_3
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"w?w?w?\.?gnu\.?org/copyleft/gpl"
+#
+%ENTRY% _URL_H2
+%KEY% "licen[cs]"
+%STR% "http://h2database\.?com/html/license\.?html"
 #
 %ENTRY%	_URL_IBM_PL
 %KEY%	"licen[cs]"

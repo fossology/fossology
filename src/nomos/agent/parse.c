@@ -663,6 +663,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("BSD-2-Clause-FreeBSD");
       } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)) {
         INTERESTING("BSD-2-Clause");
+      } else if (INFILE(_CR_CRYPTOGAMS)) {
+        INTERESTING("Cryptogams");
       }
       else if (!lmem[_fZPL]) {
         INTERESTING(lDebug ? "BSD-style(1)" : "BSD-style");
@@ -859,6 +861,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_LT_BSDref9)) {
     INTERESTING(lDebug ? "BSD(ref9)" : "BSD");
+    /* lmem[_fBSD] = 1; */
+  }
+  else if (INFILE(_LT_BSDref10)) {
+    INTERESTING(lDebug ? "BSD(ref10)" : "BSD");
     /* lmem[_fBSD] = 1; */
   }
   else if (URL_INFILE(_URL_BSD_1) || URL_INFILE(_URL_BSD_2)) {
@@ -2292,6 +2298,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_TITLE_RHeCos_v11)) {
       INTERESTING("RHeCos-1.1");
+    } else if (INFILE(_TITLE_H2_V10)) {
+      INTERESTING("H2-1.0");
     }
     else {
       INTERESTING("MPL-style");
@@ -2516,7 +2524,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * OpenSSL
    */
   if (INFILE(_LT_OPENSSLref1) || INFILE(_LT_OPENSSLref2) ||
-      INFILE(_LT_OPENSSLref3) || INFILE(_LT_OPENSSLref4)) {
+      INFILE(_LT_OPENSSLref3) || INFILE(_LT_OPENSSLref4) ||
+      INFILE(_LT_OPENSSLref6)) {
     INTERESTING(lDebug ? "OpenSSL(ref)" : "OpenSSL");
   }
   /*
@@ -4174,7 +4183,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "Eclipse(#1)" : "EPL");
     }
     else if (INFILE(_TITLE_LUCENT102)) {
-      INTERESTING("LPL-1.0");
+      INTERESTING("LPL-1.02");
     }
     else if (INFILE(_TITLE_LUCENT10)) {
       INTERESTING("LPL-1.0");
@@ -4327,17 +4336,17 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "Catharon(2)" : "Catharon");
     }
     else if (INFILE(_TITLE_FREETYPE)) {
-      INTERESTING("Freetype");
+      INTERESTING("FTL");
     }
     else {
-      INTERESTING("Freetype-style");
+      INTERESTING("FTL-style");
     }
   }
   else if (INFILE(_LT_CATHARON)) {
     INTERESTING(lDebug ? "Catharon(3)" : "Catharon");
   }
   else if (INFILE(_LT_FREETYPEref)) {
-    INTERESTING(lDebug ? "Freetype(ref)" : "Freetype");
+    INTERESTING(lDebug ? "FTL(ref)" : "FTL");
   }
   /*
    * Eiffel Forum License
@@ -5311,6 +5320,23 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      INTERESTING("Multics");
   }
 
+  /**
+   * H2
+   * Note, H2 title is also checked in MPL section
+   */
+  if (INFILE(_TITLE_H2_V10)) {
+    INTERESTING("H2-1.0");
+  }
+  else if (INFILE(_URL_H2)) {
+    INTERESTING("H2");
+  }
+  /**
+   * CRYPTOGAMS
+   */
+  if (INFILE(_LT_CRYPTOGAMS)) {
+    INTERESTING("Cryptogams");
+  }
+
   /*
    * The Stallman paper "Why Software Should Be Free" is a red-herring.
    * His 1986 interview in Byte magazine also is, too.
@@ -5464,12 +5490,23 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * WTF Public "license"
    */
-  if (*licStr == NULL_CHAR && INFILE(_LT_WTFPL)) {
-    LOWINTEREST("WTF-PL");
+  if (INFILE(_LT_WTFPL)) {
+    INTERESTING("WTFPL");
   }
-  if (*licStr == NULL_CHAR && INFILE(_LT_WTFPLref)) {
-    LOWINTEREST(lDebug ? "WTF-PL(ref)" : "WTF-PL");
+  else if (INFILE(_LT_WTFPLref)) {
+    INTERESTING(lDebug ? "WTFPL(ref)" : "WTFPL");
   }
+
+  /** Independent JPEG Group License */
+  if (HASTEXT(_TITLE_IJG, 0)) {
+    INTERESTING("IJG");
+  }
+
+  /** Imlib2 License */
+  if (INFILE(_LT_Imlib2)) {
+    INTERESTING("Imlib2");
+  }
+
   /*
    * Some licenses point you to files/URLs...
    */
@@ -5859,6 +5896,9 @@ char *mplNplVersion(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_TITLE_MPL11)) {
     lstr = "MPL-1.1";
+  }
+  else if (INFILE(_TITLE_MPL20_EXCEPTION)) {
+    lstr = "MPL-2.0-no-copyleft-exception";
   }
   else if (INFILE(_TITLE_MPL20) || INFILE(_URL_MPL20)) {
     lstr = "MPL-2.0";
