@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -114,7 +114,8 @@ FUNCTION void Usage(char *Name)
   printf("  -i   :: Initialize the database, then exit.\n");
   printf("  -n   :: bucketpool name of bucketpool to use.\n");
   printf("  -p   :: bucketpool_pk of bucketpool to use.\n");
-  printf("  -t   :: uploadtree_pk, root of tree to scan. Will turn on -d!\n");
+  printf("  -r   :: rerun buckets.\n");
+  printf("  -t   :: uploadtree_pk, root of tree to scan.\n");
   printf("  -u   :: upload_pk to scan.\n");
   printf("  -v   :: verbose (turns on copious debugging output)\n"); 
   printf("  NOTE: -n and -p are mutually exclusive.  If both are specified\n");
