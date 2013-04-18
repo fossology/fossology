@@ -136,7 +136,7 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
     echo "<p>";
     echo _("The purpose of this is to facilitate editing an existing bucketpool.  Make sure you
 understand");
-    echo " <a href='http://fossology.org/buckets'>";
+    echo " <a href='http://www.fossology.org/projects/fossology/wiki/Buckets'>";
     echo _("Creating Bucket Pools");
     echo "</a> ";
     echo _("before continuing.");
