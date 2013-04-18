@@ -66,7 +66,7 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
   	'FILEgpl3.0' => 'FSF,GPL-3.0',
   	'FILEgplv2.1' => 'LGPL-2.1',
   	'OSIzlibLicense-2006-10-31' => 'Zlib',
-  	'RCSL_v3.0_a.txt' => 'RCSL-3.0',
+  	'RCSL_v3.0_a.txt' => 'Dual-license,RCSL-3.0',
   	'RPSL_v1.0_a.txt' => 'GPL,LGPL,MIT,NCSA,RPSL-1.0,Zlib',
   	'RPSL_v1.0_b.txt' => 'GPL,LGPL,MIT,NCSA,RPSL-1.0,Zlib',
   	'agpl-3.0.txt' => 'AGPL-3.0',
