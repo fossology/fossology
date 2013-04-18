@@ -503,7 +503,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(cp);
     lmem[_mAPACHE] = 1;
   }
-  else if (INFILE(_LT_ASL20)) {
+  else if (INFILE(_LT_ASL20) && !INFILE(_TITLE_Flora) && !URL_INFILE(_URL_Flora)) {
     INTERESTING(lDebug ? "Apache(2.0#2)" : "Apache-2.0");
     lmem[_mAPACHE] = 1;
   }
@@ -1231,6 +1231,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         else {
           cp = LGPLVERS();
           INTERESTING(lDebug ? "LGPL(ref1)" : cp);
+          lmem[_mGPL] = 1;
         }
         lmem[_mLGPL] = 1;
       }
@@ -3973,13 +3974,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Silicon Graphics
    */
   if (INFILE(_TITLE_SGI_V10)) {
-    INTERESTING("SGI-1.0");
+    INTERESTING("SGI-B-1.0");
   }
   else if (INFILE(_TITLE_SGI_V11)) {
-    INTERESTING("SGI-1.1");
+    INTERESTING("SGI-B-1.1");
   }
   else if (INFILE(_TITLE_SGI_V20)) {
-    INTERESTING("SGI-2.0");
+    INTERESTING("SGI-B-2.0");
   }
   else if (INFILE(_LT_SGI_1) || INFILE(_LT_SGI_2)) {
     if (INFILE(_CR_SGI) || URL_INFILE(_URL_SGI)) {
@@ -4265,7 +4266,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_EU)) {
     if (INFILE(_TITLE_CONDOR)) {
-      INTERESTING("Condor-PL");
+      INTERESTING("Condor-1.1");
     }
     else {
       INTERESTING("EUDatagrid");
@@ -5505,6 +5506,26 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /** Imlib2 License */
   if (INFILE(_LT_Imlib2)) {
     INTERESTING("Imlib2");
+  }
+
+  /** OPEN PUBLIC LICENSE  */
+  if (INFILE(_TITLE_OPL_V10)) {
+    INTERESTING("OPL-1.0");
+  }
+
+  /** Netizen Open Source License  */
+  if (INFILE(_TITLE_NOSL)) {
+    INTERESTING("NOSL");
+  }
+
+  /** Net Boolean Public License v1 */
+  if (INFILE(_TITLE_NBPL_V10)) {
+    INTERESTING("NBPL-1.0");
+  }
+
+  /** Flora License */
+  if (INFILE(_TITLE_Flora) || URL_INFILE(_URL_Flora)) {
+    INTERESTING("Flora");
   }
 
   /*
@@ -7917,8 +7938,48 @@ int famOPENLDAP(char *filetext, int size, int isML, int isPS)
       INTERESTING("OLDAP-2.8");
       ret = 1;
     }
+    else if (INFILE(_TITLE_OPENLDAP201)) {
+      INTERESTING("OLDAP-2.0.1");
+      ret = 1;
+    }
+    else if (INFILE(_TITLE_OPENLDAP20)) {
+      INTERESTING("OLDAP-2.0");
+      ret = 1;
+    }
+    else if (INFILE(_TITLE_OPENLDAP21)) {
+      INTERESTING("OLDAP-2.1");
+      ret = 1;
+    }
+    else if (INFILE(_TITLE_OPENLDAP221)) {
+      INTERESTING("OLDAP-2.2.1");
+      ret = 1;
+    }
+    else if (INFILE(_TITLE_OPENLDAP222)) {
+      INTERESTING("OLDAP-2.2.2");
+      ret = 1;
+    }
+    else if (INFILE(_TITLE_OPENLDAP22)) {
+      INTERESTING("OLDAP-2.2");
+      ret = 1;
+    }
+    else if (INFILE(_TITLE_OPENLDAP11)) {
+      INTERESTING("OLDAP-1.1");
+      ret = 1;
+    }
+    else if (INFILE(_TITLE_OPENLDAP23)) {
+      INTERESTING("OLDAP-2.3");
+      ret = 1;
+    }
+    else if (INFILE(_TITLE_OPENLDAP24)) {
+      INTERESTING("OLDAP-2.4");
+      ret = 1;
+    }
     else if (INFILE(_TITLE_OPENLDAP12)) {
       INTERESTING("OLDAP-1.2");
+      ret = 1;
+    }
+    else if (INFILE(_TITLE_OPENLDAP13)) {
+      INTERESTING("OLDAP-1.3");
       ret = 1;
     }
     else if (INFILE(_TITLE_OPENLDAP14)) {

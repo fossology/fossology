@@ -7084,13 +7084,53 @@ k
 %KEY%	"licen[cs]"
 %STR%	"open ?content licen[cs]e"
 #
+%ENTRY%	_TITLE_OPENLDAP11
+%KEY%	"licen[cs]"
+%STR%	"openldap public licen[cs]e (v|version )1\.?1"
+#
 %ENTRY%	_TITLE_OPENLDAP12
 %KEY%	"licen[cs]"
 %STR%	"openldap public licen[cs]e (v|version )1\.?2"
 #
+%ENTRY%	_TITLE_OPENLDAP13
+%KEY%	"licen[cs]"
+%STR%	"openldap public licen[cs]e (v|version )1\.?3"
+#
 %ENTRY%	_TITLE_OPENLDAP14
 %KEY%	"licen[cs]"
 %STR%	"openldap public licen[cs]e (v|version )1\.?4"
+#
+%ENTRY%	_TITLE_OPENLDAP20
+%KEY%	"licen[cs]"
+%STR%	"openldap public licen[cs]e (v|version )2\.?0"
+#
+%ENTRY%	_TITLE_OPENLDAP201
+%KEY%	"licen[cs]"
+%STR%	"openldap public licen[cs]e (v|version )2\.?0\.?1"
+#
+%ENTRY%	_TITLE_OPENLDAP21
+%KEY%	"licen[cs]"
+%STR%	"openldap public licen[cs]e (v|version )2\.?1"
+#
+%ENTRY%	_TITLE_OPENLDAP22
+%KEY%	"licen[cs]"
+%STR%	"openldap public licen[cs]e (v|version )2\.?2"
+#
+%ENTRY%	_TITLE_OPENLDAP221
+%KEY%	"licen[cs]"
+%STR%	"openldap public licen[cs]e (v|version )2\.?2\.?1"
+#
+%ENTRY%	_TITLE_OPENLDAP222
+%KEY%	"licen[cs]"
+%STR%	"openldap public licen[cs]e (v|version )2\.?2\.?2"
+#
+%ENTRY%	_TITLE_OPENLDAP23
+%KEY%	"licen[cs]"
+%STR%	"openldap public licen[cs]e (v|version )2\.?3"
+#
+%ENTRY%	_TITLE_OPENLDAP24
+%KEY%	"licen[cs]"
+%STR%	"openldap public licen[cs]e (v|version )2\.?4"
 #
 %ENTRY%	_TITLE_OPENLDAP25
 %KEY%	"licen[cs]"
@@ -7472,6 +7512,22 @@ k
 %ENTRY%	_TITLE_ZOPE
 %KEY%	"licen[cs]"
 %STR%	"(zope public licen[cs]e|\<ZPL\>)"
+#
+%ENTRY%	_TITLE_OPL_V10
+%KEY%	"licen[cs]"
+%STR%	"open public licen[cs]e (v|version )1\.?0"
+#
+%ENTRY%	_TITLE_NOSL
+%KEY%	"licen[cs]"
+%STR%	"netizen open source licen[cs]e"
+#
+%ENTRY%	_TITLE_NBPL_V10
+%KEY% "licen[cs]"	
+%STR%	"the net boolean public licen[cs]e (v|version )?1"
+#
+%ENTRY%	_TITLE_Flora
+%KEY% "licen[cs]"	
+%STR%	"Flora Licen[cs]e"
 #
 %ENTRY%	_MISC_DEBDATA
 %KEY%	=NULL=
@@ -8663,6 +8719,10 @@ k
 %ENTRY%	_URL_ZLIB
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?(zlib|gzip)\.?org/zlib/zlib_licen[cs]e"
+#
+%ENTRY%	_URL_Flora
+%KEY% "licen[cs]"	
+%STR%	"floralicense\.?org/license"
 #
 %ENTRY%	_MIN_AFFERO_V3
 %KEY%	"licen[cs]"
