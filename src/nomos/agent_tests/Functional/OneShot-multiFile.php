@@ -62,7 +62,7 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
     'BSD_style_w.txt' => 'BSD-style',
     'BSD_style_x.txt' => 'BSD-style,Gov\'t-work',
     'BSD_style_y.txt' => 'PHP-3.0',
-    'BSD_style_z.txt' => 'OLDAP',
+    'BSD_style_z.txt' => 'OLDAP-2.3',
   	'FILEgpl3.0' => 'FSF,GPL-3.0',
   	'FILEgplv2.1' => 'LGPL-2.1',
   	'OSIzlibLicense-2006-10-31' => 'Zlib',
