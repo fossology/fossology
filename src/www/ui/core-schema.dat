@@ -1938,6 +1938,7 @@
   $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"dirmodemask\" UNIQUE (\"mimetype_name\");";
   $Schema["CONSTRAINT"]["file_picker_user_fk_key"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_user_fk_key\" UNIQUE (\"user_fk\",\"uploadtree_fk1\",\"uploadtree_fk2\");";
   $Schema["CONSTRAINT"]["group_group_name_key"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_group_name_key\" UNIQUE (\"group_name\");";
+  $Schema["CONSTRAINT"]["license_ref_rf_shortname_key"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"license_ref_rf_shortname_key\" UNIQUE (\"rf_shortname\");";
   $Schema["CONSTRAINT"]["licgroup_licgroup_name_key"] = "ALTER TABLE \"licgroup\" ADD CONSTRAINT \"licgroup_licgroup_name_key\" UNIQUE (\"licgroup_name\");";
   $Schema["CONSTRAINT"]["licterm_licterm_name_key"] = "ALTER TABLE \"licterm\" ADD CONSTRAINT \"licterm_licterm_name_key\" UNIQUE (\"licterm_name\");";
   $Schema["CONSTRAINT"]["licterm_words_licterm_words_text_key"] = "ALTER TABLE \"licterm_words\" ADD CONSTRAINT \"licterm_words_licterm_words_text_key\" UNIQUE (\"licterm_words_text\");";
