@@ -506,7 +506,6 @@ class user_edit_any extends FO_Plugin {
         $V.= "</tr>\n";
         $text = _("Select the user's top-level folder. Access is restricted to this folder.");
         $V.= "$Style<th>$text";
-        $V.= _(" (NOTE: This is only partially implemented right now. Current users can escape the top of tree limitation.)");
         $V.= "</th>";
         $V.= "<td><select name='folder'>";
         $V.= FolderListOption(-1, 0);
