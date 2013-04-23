@@ -2119,6 +2119,10 @@
 %KEY%	"(condit|vers)ion"
 %STR%	"version of autoconf"
 #
+%ENTRY%	_LT_GPL_EXCEPT_AUTOCONF_2
+%KEY%	"configur"
+%STR%	"configur(e|ation) scripts? =FEW= Autoconf"
+#
 %ENTRY%	_TEXT_CLASSPATH
 %KEY%	=NULL=
 %STR%	"class\ ?path"
@@ -6380,6 +6384,10 @@ k
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution-noncommercial-sharealike 3\.?0"
 #
+%ENTRY%	_TITLE_NC_SA_V30_1
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
+%STR%	"attribution-noncommercial-sharealike 3\.?0"
+#
 %ENTRY%	_TITLE_SA_V10
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution-sharealike 1\.?0"
@@ -6580,9 +6588,13 @@ k
 %KEY%	"licen[cs]"
 %STR%	"Clarified Artistic License"
 #
-%ENTRY%	_TITLE_CONDOR
+%ENTRY%	_TITLE_CONDOR_V10
 %KEY%	"licen[cs]"
-%STR%	"condor public licen[cs]e"
+%STR%	"condor public licen[cs]e (v|version )1\.?0"
+#
+%ENTRY%	_TITLE_CONDOR_V11
+%KEY%	"licen[cs]"
+%STR%	"condor public licen[cs]e (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_CPAL
 %KEY%	"licen[cs]"
@@ -7529,6 +7541,14 @@ k
 %KEY% "licen[cs]"	
 %STR%	"Flora Licen[cs]e"
 #
+%ENTRY%	_TITLE_SMLNJ
+%KEY% "licen[cs]"	
+%STR%	"standard ml of new jersey copyright notice\,? licen[cs]e and disclaimer"
+#
+%ENTRY%	_TITLE_CITRIX
+%KEY% "licen[cs]"	
+%STR%	"citrix\(r\) license agreement"
+#
 %ENTRY%	_MISC_DEBDATA
 %KEY%	=NULL=
 %STR%	"data.tar.*$"
@@ -8056,6 +8076,22 @@ k
 %ENTRY%	_PHR_YAST_CR
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"yast =SOME= copyright"
+#
+%ENTRY%	_PHR_CC_BY_NC_SA_30_1
+%KEY%	"distribut"
+%STR%	"redistribute =FEW= modify =FEW= under the terms of the creative commons attribution-noncommercial-sharealike 3\.?0"
+#
+%ENTRY%	_PHR_CC_BY_NC_SA_30_2
+%KEY%	"licen[cs]"
+%STR%	"licensed under the creative commons attribution-noncommercial-sharealike 3\.?0"
+#
+%ENTRY%	_PHR_CC_BY_SA_30
+%KEY%	"licen[cs]"
+%STR%	"licensed under the creative commons attribution-sharealike 3\.?0"
+#
+%ENTRY%	_PHR_CC_BY_SA_1
+%KEY%	"licen[cs]"
+%STR%	"license =FEW= creative commons =FEW= attribution\,? share-?alike"
 #
 %ENTRY%	_TEXT_ADOBE_FRAME
 %KEY%	=NULL=
@@ -8626,6 +8662,10 @@ k
 %ENTRY%	_URL_MPL
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/mozilla"
+#
+%ENTRY%	_URL_MPL_LATEST
+%KEY%	"\<([mn]pl|mozilla|netscape)\>"
+%STR%	"w?w?w?\.?mozilla\.?org/[MN]PL"
 #
 %ENTRY%	_URL_MPL10
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"

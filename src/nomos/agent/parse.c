@@ -94,7 +94,8 @@
 #define _fSAX           42
 #define _fAPL           43
 #define _fARTISTIC      44
-#define _msize          _fARTISTIC+1
+#define _fCITRIX        45
+#define _msize          _fCITRIX+1
 //@}
 
 static struct {
@@ -1353,7 +1354,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           lmem[_mGPL] = 1;
         }
         else if (!HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED) 
-            && !INFILE(_LT_GPL_EXCEPT_BISON_1) && !INFILE(_LT_GPL_EXCEPT_BISON_2)){
+            && !INFILE(_LT_GPL_EXCEPT_BISON_1) && !INFILE(_LT_GPL_EXCEPT_BISON_2) 
+            && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED)){
           cp = GPLVERS();
           INTERESTING(lDebug ? "GPL(ref1#1)" : cp);
           lmem[_mGPL] = 1;
@@ -1537,21 +1539,31 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         }
         else if (INFILE(_LT_GPL_EXCEPT_BISON_1)) {
           INTERESTING(lDebug ? "GPL-except-Bison-1" : "GPL-2.0-with-bison-exception");
+          lmem[_mGPL] = 1;
         }
         else if (INFILE(_LT_GPL_EXCEPT_BISON_2)) {
           INTERESTING(lDebug ? "GPL-except-Bison-2" : "GPL-2.0-with-bison-exception");
+          lmem[_mGPL] = 1;
         }
         else if (INFILE(_LT_GPL_EXCEPT_1)) {
           INTERESTING(lDebug ? "GPL-except-1" : "GPL-exception");
+          lmem[_mGPL] = 1;
+        }
+        else if (INFILE(_LT_GPL_EXCEPT_2) && _LT_GPL_EXCEPT_AUTOCONF_2) {
+          INTERESTING("GPL-with-autoconf-exception");
+          lmem[_mGPL] = 1;
         }
         else if (INFILE(_LT_GPL_EXCEPT_2)) {
           INTERESTING(lDebug ? "GPL-except-2" : "GPL-exception");
+          lmem[_mGPL] = 1;
         }
         else if (INFILE(_LT_GPL_EXCEPT_3)) {
           INTERESTING(lDebug ? "GPL-except-3" : "GPL-exception");
+          lmem[_mGPL] = 1;
         }
         else if (INFILE(_PHR_GPL_DESCRIPTIONS)) {
           INTERESTING(lDebug ? "GPL-kinda" : "GPL");
+          lmem[_mGPL] = 1;
         }
         else if (INFILE(_LT_GPL_EXCEPT_ECOS)) {
           INTERESTING("eCos-2.0");
@@ -1637,8 +1649,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     cp = GPLVERS();
     INTERESTING(lDebug ? "GPL(named)" : cp);
   }
-  if (!lmem[_mLGPL] && (INFILE(_LT_LGPL_NAMED)
-        || INFILE(_LT_LGPL_NAMED2)) && !INFILE(_LT_GPL_NAMED_EXHIBIT)) {
+  if (!lmem[_mLGPL] && (INFILE(_LT_LGPL_NAMED) 
+        || INFILE(_LT_LGPL_NAMED2)) && !INFILE(_LT_GPL_NAMED_EXHIBIT) 
+      && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED)) {
     cp = LGPLVERS();
     INTERESTING(lDebug ? "LGPL(named)" : cp);
   }
@@ -4265,7 +4278,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * EU DataGrid and Condor PL
    */
   if (INFILE(_LT_EU)) {
-    if (INFILE(_TITLE_CONDOR)) {
+    if (INFILE(_TITLE_CONDOR_V10)) {
+      INTERESTING("Condor-1.0");
+    } else if (INFILE(_TITLE_CONDOR_V11)) {
       INTERESTING("Condor-1.1");
     }
     else {
@@ -5528,6 +5543,36 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Flora");
   }
 
+  /** Standard ML of New Jersey License */
+  if (INFILE(_TITLE_SMLNJ)) {
+    INTERESTING("SMLNJ");
+  }
+
+  /** part of the Creative Commons license */
+  if (INFILE(_PHR_CC_BY_NC_SA_30_1) || INFILE(_PHR_CC_BY_NC_SA_30_2)) {
+    INTERESTING("CC-BY-NC-SA-3.0");
+    lmem[_fCCBY] = 1;
+  }
+  else if (INFILE(_PHR_CC_BY_SA_30)) {
+    INTERESTING("CC-BY-SA-3.0");
+    lmem[_fCCBY] = 1;
+  }
+  else if (INFILE(_PHR_CC_BY_SA_1)) {
+    INTERESTING("CC-BY-SA");
+    lmem[_fCCBY] = 1;
+  }
+  
+  /** Mozilla Public License possibility */
+  if (URL_INFILE(_URL_MPL_LATEST)) {
+    INTERESTING(lDebug ? "MPL(latest)" : "MPL");
+  }
+
+  /** Citrix License */
+  if (INFILE(_TITLE_CITRIX)) {
+    INTERESTING("Citrix");
+    lmem[_fCITRIX] = 1;
+  }
+
   /*
    * Some licenses point you to files/URLs...
    */
@@ -5585,7 +5630,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /* Check for Public Domain */
   if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON] && !lmem[_mGFDL] &&
       !lmem[_fODBL] && !lmem[_fPDDL] && !lmem[_fRUBY] && !lmem[_fSAX] && !lmem[_fAPL] &&!lmem[_mAPACHE] &&
-      !lmem[_fARTISTIC]) {
+      !lmem[_fARTISTIC] && !lmem[_fCITRIX]) {
     pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
   }
 
@@ -5959,6 +6004,9 @@ char *mplNplVersion(char *filetext, int size, int isML, int isPS)
   }
   else if (URL_INFILE(_URL_NPL)) {
     lstr = (lDebug ? "NPL(url)" : "NPL");
+  }
+  else if (URL_INFILE(_URL_MPL_LATEST)) {
+    lstr = (lDebug ? "MPL(latest)" : "MPL");
   }
   else if (URL_INFILE(_URL_MPL)) {
     lstr = (lDebug ? "MPL(url)" : "MPL");
