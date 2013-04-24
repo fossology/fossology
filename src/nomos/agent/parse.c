@@ -172,7 +172,7 @@ static int pd;     /* Flag for whether we've checked for a
           public domain "license" */
 static int crCheck;
 static int checknw;
-static int lDebug = 0;  /* set this to non-zero for more debugging */
+static int lDebug = 1;  /* set this to non-zero for more debugging */
 static int lDiags = 0;  /* set this to non-zero for printing diagnostics */
 //@}
 
@@ -996,8 +996,17 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("CECILL-C");
   }
   else if (INFILE(_LT_CECILL_DUALref)) {
-    INTERESTING(lDebug ? "CeCILL(dual)" : "CECILL");
+    INTERESTING("CeCILL(dual)");
     lmem[_mGPL] = lmem[_mLGPL] = 1;
+  }
+  else if (INFILE(_LT_CECILL_2_ref)) {
+    INTERESTING("CECILL-2.0");
+  }
+  else if (INFILE(_LT_CECILL_ref2)) {
+    INTERESTING("CECILL");
+  }
+  else if (INFILE(_LT_CECILL_B_ref)) {
+    INTERESTING("CECILL-B");
   }
   else if (INFILE(_LT_CECILL_ref) || INFILE(_LT_CECILL_ref1)) {
     if (URL_INFILE(_URL_CECILL_C_V11)) {
@@ -1571,6 +1580,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       /* checking for FSF */
       if (INFILE(_LT_FSF_1)) {
         INTERESTING(lDebug ? "FSF(1)" : "FSF");
+        lmem[_mLGPL] = 1;
       }
       else if (INFILE(_LT_FSF_2)) {
         INTERESTING(lDebug ? "FSF(2)" : "FSF");
@@ -4319,6 +4329,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("CA");
     }
   }
+  else if (INFILE(_TITLE_CA)) {
+    INTERESTING("CATOSL");
+  }
   /*
    * Frameworx
    */
@@ -4377,6 +4390,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else {
       INTERESTING("EFL");
     }
+  }
+  else if (INFILE(_LT_EIFFEL_20)) {
+    INTERESTING("EFL-2.0");
+  }
+  else if (INFILE(_LT_EIFFEL_1)) {
+    INTERESTING("EFL");
   }
   /*
    * BISON, Nethack, etc.
@@ -4610,6 +4629,30 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       cp = CCVERS();
       INTERESTING(cp);
     }
+  }
+  if (INFILE(_PHR_CC_BY_NC_SA_30_1) || INFILE(_PHR_CC_BY_NC_SA_30_2)) {
+    INTERESTING("CC-BY-NC-SA-3.0");
+    lmem[_fCCBY] = 1;
+  }
+  else if (INFILE(_PHR_CC_BY_SA_30)) {
+    INTERESTING("CC-BY-SA-3.0");
+    lmem[_fCCBY] = 1;
+  }
+  else if (INFILE(_PHR_CC_BY_SA_1)) {
+    INTERESTING("CC-BY-SA");
+    lmem[_fCCBY] = 1;
+  }
+  else if (INFILE(_URL_CCA_BY_ND_V20)) {
+    INTERESTING("CC-BY-ND-2.0");
+    lmem[_fCCBY] = 1;
+  }
+  else if (INFILE(_URL_CCA_BY_SA_V25)) {
+    INTERESTING("CC-BY-SA-2.5");
+    lmem[_fCCBY] = 1;
+  }
+  else if (INFILE(_URL_CCA_BY_NC_SA_V20)) {
+    INTERESTING("CC-BY-NC-SA-2.0");
+    lmem[_fCCBY] = 1;
   }
   else if (INFILE(_LT_CCA_SAref)) {
     cp = CCSAVERS();
@@ -5548,20 +5591,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("SMLNJ");
   }
 
-  /** part of the Creative Commons license */
-  if (INFILE(_PHR_CC_BY_NC_SA_30_1) || INFILE(_PHR_CC_BY_NC_SA_30_2)) {
-    INTERESTING("CC-BY-NC-SA-3.0");
-    lmem[_fCCBY] = 1;
-  }
-  else if (INFILE(_PHR_CC_BY_SA_30)) {
-    INTERESTING("CC-BY-SA-3.0");
-    lmem[_fCCBY] = 1;
-  }
-  else if (INFILE(_PHR_CC_BY_SA_1)) {
-    INTERESTING("CC-BY-SA");
-    lmem[_fCCBY] = 1;
-  }
-  
   /** Mozilla Public License possibility */
   if (URL_INFILE(_URL_MPL_LATEST)) {
     INTERESTING(lDebug ? "MPL(latest)" : "MPL");
@@ -6627,6 +6656,9 @@ char *ccsaVersion(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_URL_CCA_SA_V10)) {
     lstr = "CC-BY-SA-1.0";
+  }
+  else if (INFILE(_URL_CCA_BY_ND_V20)) {
+    lstr = "CC-BY-ND-2.0";
   }
   else if (INFILE(_URL_CCA_SA)) {
     lstr = lDebug ? "CCA-SA(2)" : "CC-BY-SA";

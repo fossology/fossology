@@ -1072,6 +1072,10 @@
 %KEY%	"distribut"
 %STR%	"compliance with the principles governing the distribution of free software access to source code broad rights granted to users"
 #
+%ENTRY%	_LT_CECILL_2_ref
+%KEY%	"licen[cs]"
+%STR%	"(free|distributed?|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) under the terms of =FEW=  CeCILL licen[cs]e (v|version )2\.?0?"
+#
 %ENTRY%	_LT_CECILL_DUALref
 %KEY%	"so(ftware|urce)"
 %STR%	"software is governed either by the CeCILL or the CeCILL-C licen[cs]e under french law and abiding by the rules of distribution of free software"
@@ -1083,6 +1087,14 @@
 %ENTRY%	_LT_CECILL_ref1
 %KEY%	"so(ftware|urce)"
 %STR%	"software is governed by the CeCILL"
+#
+%ENTRY%	_LT_CECILL_ref2
+%KEY%	"licen[cs]"
+%STR%	"(free|distributed?|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) under =FEW= CeCILL licen[cs]e"
+#
+%ENTRY%	_LT_CECILL_B_ref
+%KEY%	"licen[cs]"
+%STR%	"(free|distributed?|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) under =FEW= CeCILL-B licen[cs]e"
 #####
 # DELTED: permission is granted to ... and re-?distribute it freely subject
 # to the following restrictions
@@ -1419,6 +1431,14 @@
 %ENTRY%	_LT_EIFFEL
 %KEY%	"permi[st]"
 %STR%	"permission is hereby granted to use copy modify and/or distribute"
+#
+%ENTRY%	_LT_EIFFEL_1
+%KEY%	"licen[cs]"
+%STR%	"released? under the eiffel forum licen[cs]e"
+#
+%ENTRY%	_LT_EIFFEL_20
+%KEY%	"licen[cs]"
+%STR%	"licen[cs]e(:|) =FEW= eiffel forum licen[cs]e (v|version )2\.?0?"
 #####
 # DELETED: ... modify perform and display this software and associated
 # documentation files
@@ -6487,6 +6507,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"computer associates trusted open source licen[cs]e =FEW= (v|version )1\.?1"
 #
+%ENTRY%	_TITLE_CA
+%KEY%	"licen[cs]"
+%STR%	"(free|distributed?|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) under =FEW= (CA|computer associates) trusted open source licen[cs]e"
+#
 %ENTRY%	_TITLE_CATHARON
 %KEY%	"licen[cs]"
 %STR%	"the catharon open source licen[cs]e"
@@ -8554,6 +8578,18 @@ k
 %ENTRY%	_URL_CCA_SA_V30
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/by-sa/3\.?0"
+#
+%ENTRY%	_URL_CCA_BY_ND_V20
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by-nc-nd/2\.?0"
+#
+%ENTRY%	_URL_CCA_BY_SA_V25
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by-sa/2\.?5"
+#
+%ENTRY%	_URL_CCA_BY_NC_SA_V20
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by-nc-sa/2\.?0"
 #
 %ENTRY%	_URL_CCGPL
 %KEY%	"licen[cs]"
