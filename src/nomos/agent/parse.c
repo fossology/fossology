@@ -172,7 +172,7 @@ static int pd;     /* Flag for whether we've checked for a
           public domain "license" */
 static int crCheck;
 static int checknw;
-static int lDebug = 1;  /* set this to non-zero for more debugging */
+static int lDebug = 0;  /* set this to non-zero for more debugging */
 static int lDiags = 0;  /* set this to non-zero for printing diagnostics */
 //@}
 
