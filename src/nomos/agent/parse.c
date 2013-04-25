@@ -2273,9 +2273,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("Nokia");
       lmem[_mMPL] = 1;
     }
-    else if (INFILE(_TITLE_CUA10)) {
-      INTERESTING("CUA-OPL-1.0");
-    }
     else if (INFILE(_TITLE_OPENPL10)) {
       INTERESTING("Open-PL-1.0");
     }
@@ -4642,16 +4639,32 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("CC-BY-SA");
     lmem[_fCCBY] = 1;
   }
+  else if (INFILE(_URL_CCA_BY_V25)) {
+    INTERESTING("CC-BY-2.5");
+    lmem[_fCCBY] = 1;
+  }
   else if (INFILE(_URL_CCA_BY_ND_V20)) {
     INTERESTING("CC-BY-ND-2.0");
+    lmem[_fCCBY] = 1;
+  }
+  else if (INFILE(_URL_CCA_BY_NC_V25)) {
+    INTERESTING("CC-BY-NC-2.5");
     lmem[_fCCBY] = 1;
   }
   else if (INFILE(_URL_CCA_BY_SA_V25)) {
     INTERESTING("CC-BY-SA-2.5");
     lmem[_fCCBY] = 1;
   }
+  else if (INFILE(_URL_CCA_BY_NC_SA_V30)) {
+    INTERESTING("CC-BY-NC-SA-3.0");
+    lmem[_fCCBY] = 1;
+  }
   else if (INFILE(_URL_CCA_BY_NC_SA_V20)) {
     INTERESTING("CC-BY-NC-SA-2.0");
+    lmem[_fCCBY] = 1;
+  }
+  else if (INFILE(_LT_CCA_BY_V30)) {
+    INTERESTING("CC-BY-3.0");
     lmem[_fCCBY] = 1;
   }
   else if (INFILE(_LT_CCA_SAref)) {
@@ -5555,6 +5568,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_WTFPLref)) {
     INTERESTING(lDebug ? "WTFPL(ref)" : "WTFPL");
   }
+  else if (INFILE(_LT_WTFPLref_1)) {
+    INTERESTING(lDebug ? "WTFPL(ref#1)" : "WTFPL");
+  }
 
   /** Independent JPEG Group License */
   if (HASTEXT(_TITLE_IJG, 0)) {
@@ -5600,6 +5616,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if (INFILE(_TITLE_CITRIX)) {
     INTERESTING("Citrix");
     lmem[_fCITRIX] = 1;
+  }
+
+  /** CUA office public license */
+  if (INFILE(_TITLE_CUA10)) {
+    INTERESTING("CUA-OPL-1.0");
   }
 
   /*

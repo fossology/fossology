@@ -950,7 +950,7 @@
 #
 %ENTRY%	_LT_BSD_CLAUSE_4
 %KEY%	"software"
-%STR%	"neither the name =SOME= may be used to endorse or promote products derived from this software without specific prior written permission"
+%STR%	"neither the name =SOME= nor the names of its contributors may be used to endorse or promote products derived from this software without (specific |)prior written permission"
 #
 %ENTRY%	_LT_BSD_CLAUSE_CLEAR
 %KEY%	"licen[cs]"
@@ -1028,6 +1028,10 @@
 %ENTRY%	_LT_CCA_ND_ref
 %KEY%	"licen[cs]"
 %STR%	"work is licensed under the creative commons attribution-noderivs 3\.?0"
+#
+%ENTRY%	_LT_CCA_BY_V30
+%KEY%	"licen[cs]"
+%STR%	"licen[cs]ed? under the creative commons attribution 3\.?0"
 #####
 # DELETED: ... you a world-?wide royalty-free non-?exclusive perpetual
 # for the duration of the applicable copyright licen[cs]e to exercise
@@ -4759,6 +4763,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_WTFPL
 %KEY%	"distribut"
 %STR%	"do what the =FEW= you want to public licen[cs]e terms and conditions for copying\,? distribution and/?o?r? modification"
+#
+%ENTRY%	_LT_WTFPLref_1
+%KEY%	"licen[cs]"
+%STR%	"do what the fuck you want to public licen[cs]e"
 #
 %ENTRY%	_LT_WTFPLref
 %KEY%	"\<under\>"
@@ -8563,6 +8571,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?debian\.?org/misc/bsd\.?licen[cs]e"
 #
+%ENTRY%	_URL_CCA_BY_V25
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by/2\.?5"
+#
 %ENTRY%	_URL_CCA_SA
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/by-sa"
@@ -8587,9 +8599,17 @@ k
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/by-sa/2\.?5"
 #
+%ENTRY%	_URL_CCA_BY_NC_V25
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by-nc/2\.?5"
+#
 %ENTRY%	_URL_CCA_BY_NC_SA_V20
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/by-nc-sa/2\.?0"
+#
+%ENTRY%	_URL_CCA_BY_NC_SA_V30
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by-nc-sa/3\.?0"
 #
 %ENTRY%	_URL_CCGPL
 %KEY%	"licen[cs]"
