@@ -15,7 +15,7 @@
 #
 
 # Script to generate the Unit Test Result together
-cd /home/jenkins/jobs/Fossology_Unit_Tests/htmlreports/Unit_Test_Results/
+cd ../reports/unit
 echo "" > Unit_Tests_Results.html
 ls *-Results* > /tmp/test.txt
 while read fn; do
