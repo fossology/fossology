@@ -138,6 +138,10 @@
 %KEY%	=NULL=
 %STR%	"without (fee|restrict|limit)"
 %ALIAS%	_KW_last
+#
+%ENTRY%	_KW_severability
+%KEY%	=NULL=
+%STR%	"severability clause"
 #####
 # Filenames
 #####
@@ -2701,6 +2705,10 @@ e /* (INFILE(j)) */
 # DELETED: ... use of th(e|is) software in conjunction with non-Intel
 # component =SOME= is not licen[cs]ed hereunder
 #####
+%ENTRY%	_LT_INTEL
+%KEY%	"licen[cs]"
+%STR%	"intel open source licen[cs]e"
+#
 %ENTRY%	_LT_INTEL_1
 %KEY%	"so(ftware|urce)"
 %STR%	"this software is licen[cs]ed for use only in conjunction with Intel component products"
@@ -2725,6 +2733,14 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_INTEL_5
 %KEY%	"licen[cs]"
 %STR%	"in addition to the provisions of the common public licen[cs]e as included in =SOME= intel grants the recipient the right to use the name and trademark"
+#
+%ENTRY%	_LT_INTEL_6
+%KEY%	"licen[cs]"
+%STR%	"agree to intel['] software licen[cs]e"
+#
+%ENTRY%	_LT_INTEL_7
+%KEY%	"licen[cs]"
+%STR%	"intel software licen[cs]e agreement"
 #
 %ENTRY%	_LT_INTEL_EULA
 %KEY%	"licen[cs]"
@@ -6748,7 +6764,7 @@ k
 #
 %ENTRY%	_TITLE_GFDL_V13_ONLY
 %KEY%	"(docume|warra)nt"
-%STR%	"gnu free documentation ?licen[cs]e (v|version )1\.?3"
+%STR%	"gnu free documentation ?licen[cs]e =FEW= (v|version )1\.?3"
 #
 %ENTRY%	_TITLE_GFDL_V12_OR_LATER
 %KEY%	"(docume|warra)nt"
@@ -6963,6 +6979,10 @@ k
 %ENTRY%	_TITLE_ERLPL
 %KEY%	"licen[cs]"
 %STR%	"erlang public license"
+#
+%ENTRY%	_TITLE_ERLPL_ref
+%KEY%	"licen[cs]"
+%STR%	"(be|are|is) subject to the erlang public licen[cs]e\,? (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_EUPL_V10
 %KEY%	"licen[cs]"
@@ -8820,6 +8840,10 @@ k
 %KEY% "licen[cs]"	
 %STR%	"floralicense\.?org/license"
 #
+%ENTRY%	_URL_EUDatagrid
+%KEY% "licen[cs]"	
+%STR%	"w?w?w?\.?eu-datagrid\.?org/license\.?html"
+#
 %ENTRY%	_MIN_AFFERO_V3
 %KEY%	"licen[cs]"
 %STR%	"(Affero_v3 lic-instance|affero[ _-]?v3 =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= affero?[ _-]v3)"
@@ -9159,7 +9183,7 @@ k
 #
 %ENTRY%	_LEGAL_VERBS
 %KEY%	=NULL=
-%STR%	"(r?e?-?distribut(e|ion)|deploy|publish|replicat|[^/]\<cop(y|ied)\>|contribut|execute|execution|sublicen[cs]\<r?e?-?sell\>|\<sold\>|<reserve[ds]?\>|(term|condition)s? appl(y|ies)|for sale|ma[dk]e available|copyleft|retain|confer|convey|licen[cs]ed|\<provided?>\>)"
+%STR%	"(r?e?-?distribut(e|ion)|deploy|publish|replicat|[^/]\<cop(y|ied)\>|contribut|execute|execution|sublicen[cs]\<r?e?-?sell\>|\<sold\>|\<reserve[ds]?\>|(term|condition)s? appl(y|ies)|for sale|ma[dk]e available|copyleft|retain|confer|convey|licen[cs]ed|\<provided?>\>)"
 %ALIAS%	_LEGAL_first
 #####
 # Interesting observation -- some licenses are actually worded with NO "owner"

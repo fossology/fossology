@@ -657,6 +657,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           && INFILE(_LT_BSD_CLAUSE_4) && INFILE(_LT_BSD_CLAUSE_CLEAR)) {
         INTERESTING("BSD-3-Clause-Clear");
       } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
+          && INFILE(_LT_BSD_CLAUSE_4) && HASTEXT(_KW_severability, REG_EXTENDED)) {
+        INTERESTING("BSD-3-Clause-Severability");
+      } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
           && INFILE(_LT_BSD_CLAUSE_4)) {
         INTERESTING("BSD-3-Clause");
       } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
@@ -2651,7 +2654,16 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Intel
    */
-  if (HASTEXT(_TEXT_INTELCORP, 0)) {
+  if (INFILE(_LT_INTEL)) {
+    INTERESTING(lDebug ? "Intel(8)" : "Intel");
+  }
+  else if (INFILE(_LT_INTEL_6)) {
+    INTERESTING(lDebug ? "Intel(9)" : "Intel");
+  }
+  else if (INFILE(_LT_INTEL_7)) {
+    INTERESTING(lDebug ? "Intel(10)" : "Intel");
+  }
+  else if (HASTEXT(_TEXT_INTELCORP, 0)) {
     if (INFILE(_LT_INTEL_1)) {
       if (INFILE(_LT_INTEL_FW)) {
         INTERESTING(lDebug ? "Intel(2)" :
@@ -4294,6 +4306,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("EUDatagrid");
     }
   }
+  else if (URL_INFILE(_URL_EUDatagrid)) {
+    INTERESTING("EUDatagrid");
+  }
   /*
    * Adaptive Public License
    */
@@ -5621,6 +5636,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /** CUA office public license */
   if (INFILE(_TITLE_CUA10)) {
     INTERESTING("CUA-OPL-1.0");
+  }
+
+  /**  the Erlang Public License */
+  if (INFILE(_TITLE_ERLPL_ref)) {
+    INTERESTING("ErlPL-1.1");
   }
 
   /*
