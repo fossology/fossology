@@ -61,7 +61,9 @@ All paths are under the user top level folder.
 B<cp2foss> will correctly create all of the other
 intermediate folders in the path under the top folder.
 
-=item B<-?> Help, see -h
+=item B<-?> 
+
+Help, see -h
 
 =item B<-h>
 
@@ -70,13 +72,13 @@ Help, prints a verbose usage message.
 =item B<--user> I<username>
 
 username, specify the username for a user who has the priviledge to execute cp2foss.
-Alternativly, you can add the file .fossology.rc in your current home directory, add user name and 
+Alternatively, you can add the file .fossology.rc in your current home directory, add user name and 
 password in 2 separate lines.
 
 =item B<--password> I<password>
 
 password, specify the password for a user who has the priviledge to execute cp2foss.
-Alternativly, you can add the file .fossology.rc in your current home directory, add user name and 
+Alternatively, you can add the file .fossology.rc in your current home directory, add user name and 
 password in 2 separate lines.
 
 =item B<-c> I<configuration directory>
