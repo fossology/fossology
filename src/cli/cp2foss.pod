@@ -10,6 +10,7 @@ cp2foss - upload one or more files or archives into FOSSology and run scans.
  Usage: cp2foss [options] [archives]
  Options: -AQThv [-f path] [-AA num] [-q {agent,agent.. | all}] [-X path]
  [-n name] [-d description] [--user user name] [--password password]
+ [-c configuration directory]
 
 =head1 DESCRIPTION
 
