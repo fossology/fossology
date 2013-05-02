@@ -655,7 +655,7 @@
   $Schema["TABLE"]["groups"]["group_pk"]["UPDATE"] = "UPDATE groups SET group_pk=nextval('group_group_pk_seq'::regclass)";
 
   $Schema["TABLE"]["groups"]["group_name"]["DESC"] = "";
-  $Schema["TABLE"]["groups"]["group_name"]["ADD"] = "ALTER TABLE \"groups\" ADD COLUMN \"group_name\" varchar(32);";
+  $Schema["TABLE"]["groups"]["group_name"]["ADD"] = "ALTER TABLE \"groups\" ADD COLUMN \"group_name\" varchar(64);";
   $Schema["TABLE"]["groups"]["group_name"]["ALTER"] = "ALTER TABLE \"groups\" ALTER COLUMN \"group_name\" DROP NOT NULL;";
   $Schema["TABLE"]["groups"]["group_name"]["UPDATE"] = "";
 
@@ -2019,7 +2019,7 @@
   $Schema["INDEX"]["bucket_file"]["pfile_idx"] = "CREATE INDEX pfile_idx ON bucket_file USING btree (pfile_fk);";
 
   $Schema["INDEX"]["copyright"]["agent_fk_idx"] = "CREATE INDEX agent_fk_idx ON copyright USING btree (agent_fk);";
-  $Schema["INDEX"]["copyright"]["copyright_pfile_idx"] = "CREATE INDEX copyright_pfile_idx ON copyright USING btree (pfile_fk);";
+  $Schema["INDEX"]["copyright"]["copyright_pfile_fk_index"] = "CREATE INDEX copyright_pfile_fk_index ON copyright USING btree (pfile_fk);";
 
   $Schema["INDEX"]["license_file"]["fl_rf_fk"] = "CREATE INDEX fl_rf_fk ON license_file USING btree (rf_fk);";
   $Schema["INDEX"]["license_file"]["lf_pfile_fk"] = "CREATE INDEX lf_pfile_fk ON license_file USING btree (pfile_fk);";
