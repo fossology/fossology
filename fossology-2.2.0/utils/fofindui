@@ -1,3 +1,0 @@
-# Utility for finding a string in the ui directories
-# eg:  fofind "find this phrase"
-find . -type f \( \( -wholename "*/ui/*" \) -or \( -wholename "*/php/*" \) -or \( -wholename "*/cli/*" \) \) -not \( -wholename "*~" \) -not \( -wholename "*svn*" \) -not \( -wholename "*srcdocs*" \) |xargs  grep "$@"  2>/dev/null

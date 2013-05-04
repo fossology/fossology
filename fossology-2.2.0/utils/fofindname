@@ -1,3 +1,0 @@
-# search a directory tree for a filename, ignore svn files
-# e.g. fofindname myfile.h
-find . -type f -not \( -wholename "*svn*" \) -not \( -wholename "*~" \) -wholename "*$1*"

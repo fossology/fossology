@@ -1,9 +1,0 @@
-#!/bin/bash
-#
-# cron script for running schemaspy.  NOTE you must supply the db, 
-# user and password. They are xxxxx for now.
-#
-java -jar /usr/local/bin/schemaSpy_4.1.1.jar -t pgsql \
--cp /usr/local/share/postgresql-8.4-701.jdbc3.jar \
--db fossology -s public -host localhost -u xxxx -p xxxx -o /var/www/schemaspy
-

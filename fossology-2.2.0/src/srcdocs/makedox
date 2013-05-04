@@ -1,4 +1,0 @@
-RootDir=..
-DoxDir=`pwd`
-cd $RootDir
-doxygen $DoxDir/fodox.conf > $DoxDir/fodox.log 2>$DoxDir/fodox.errs

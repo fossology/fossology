@@ -655,7 +655,7 @@
   $Schema["TABLE"]["groups"]["group_pk"]["UPDATE"] = "UPDATE groups SET group_pk=nextval('group_group_pk_seq'::regclass)";
 
   $Schema["TABLE"]["groups"]["group_name"]["DESC"] = "";
-  $Schema["TABLE"]["groups"]["group_name"]["ADD"] = "ALTER TABLE \"groups\" ADD COLUMN \"group_name\" varchar(32);";
+  $Schema["TABLE"]["groups"]["group_name"]["ADD"] = "ALTER TABLE \"groups\" ADD COLUMN \"group_name\" varchar(64);";
   $Schema["TABLE"]["groups"]["group_name"]["ALTER"] = "ALTER TABLE \"groups\" ALTER COLUMN \"group_name\" DROP NOT NULL;";
   $Schema["TABLE"]["groups"]["group_name"]["UPDATE"] = "";
 
@@ -1938,6 +1938,7 @@
   $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"dirmodemask\" UNIQUE (\"mimetype_name\");";
   $Schema["CONSTRAINT"]["file_picker_user_fk_key"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_user_fk_key\" UNIQUE (\"user_fk\",\"uploadtree_fk1\",\"uploadtree_fk2\");";
   $Schema["CONSTRAINT"]["group_group_name_key"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_group_name_key\" UNIQUE (\"group_name\");";
+  $Schema["CONSTRAINT"]["license_ref_rf_shortname_key"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"license_ref_rf_shortname_key\" UNIQUE (\"rf_shortname\");";
   $Schema["CONSTRAINT"]["licgroup_licgroup_name_key"] = "ALTER TABLE \"licgroup\" ADD CONSTRAINT \"licgroup_licgroup_name_key\" UNIQUE (\"licgroup_name\");";
   $Schema["CONSTRAINT"]["licterm_licterm_name_key"] = "ALTER TABLE \"licterm\" ADD CONSTRAINT \"licterm_licterm_name_key\" UNIQUE (\"licterm_name\");";
   $Schema["CONSTRAINT"]["licterm_words_licterm_words_text_key"] = "ALTER TABLE \"licterm_words\" ADD CONSTRAINT \"licterm_words_licterm_words_text_key\" UNIQUE (\"licterm_words_text\");";
@@ -2018,7 +2019,7 @@
   $Schema["INDEX"]["bucket_file"]["pfile_idx"] = "CREATE INDEX pfile_idx ON bucket_file USING btree (pfile_fk);";
 
   $Schema["INDEX"]["copyright"]["agent_fk_idx"] = "CREATE INDEX agent_fk_idx ON copyright USING btree (agent_fk);";
-  $Schema["INDEX"]["copyright"]["copyright_pfile_idx"] = "CREATE INDEX copyright_pfile_idx ON copyright USING btree (pfile_fk);";
+  $Schema["INDEX"]["copyright"]["copyright_pfile_fk_index"] = "CREATE INDEX copyright_pfile_fk_index ON copyright USING btree (pfile_fk);";
 
   $Schema["INDEX"]["license_file"]["fl_rf_fk"] = "CREATE INDEX fl_rf_fk ON license_file USING btree (rf_fk);";
   $Schema["INDEX"]["license_file"]["lf_pfile_fk"] = "CREATE INDEX lf_pfile_fk ON license_file USING btree (pfile_fk);";

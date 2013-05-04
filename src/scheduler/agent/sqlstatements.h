@@ -84,7 +84,7 @@ const char* basic_checkout =
 const char* jobsql_information =
     " SELECT user_pk, job_priority FROM users "
     "   LEFT JOIN job ON job_user_fk = user_pk "
-    "   WHERE job_pk = 1;";
+    "   WHERE job_pk = '%s';";
 
 const char* jobsql_started =
     " UPDATE jobqueue "
