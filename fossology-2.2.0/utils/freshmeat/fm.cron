@@ -1,0 +1,7 @@
+# Cron Template for Fossology Freshmeat Process
+#
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/local/lib:/sbin:/bin:/usr/sbin:/usr/bin
+# Run at 10pm every day
+# m h dom mon dow user    command
+0 22 * * * wrapGFM 

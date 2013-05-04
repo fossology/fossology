@@ -1,0 +1,49 @@
+#!/bin/bash
+# Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+# Script to install items needed by unit tests on package install systems.
+# after items are installed the unit tests are run.  This script assumes it 
+# is being run by jenkins.
+#
+# @version "$Id$"
+
+# This must run as root.
+if [ `id -u` != "0" ] ; then
+   echo "ERROR: $0 must run as root."
+   echo "Aborting."
+   exit 1
+fi
+
+cd /var/lib/jenkins/workspace/PITUnit/2.0PkgTests/$NODE_NAME/fossology2.0/
+
+utils/fo-installdeps -y -e
+
+# set a proxy so things work from inside HP
+pear config-set http_proxy http://lart.usa.hp.com:3128 
+
+# upgrade pear first
+pear channel-update pear.php.net
+pear upgrade-all
+
+# install PHPUnit
+pear config-set auto_discover 1
+pear install pear.phpunit.de/PHPUnit
+
+echo "would now run tests"
+cd src/testing/unit
+pwd
+# ./runAgentUnit.php
+

@@ -1,0 +1,271 @@
+#!/bin/bash
+# FOSSology postinstall script
+# Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+#
+# This script is for things that need to be done on the runtime system
+# after we've installed the bits on the filesystem. It needs to be
+# idempotent, meaning that running it repeatedly will still do the
+# right thing, regardless of the success of previous runs.
+
+## Options parsing and setup
+# parse options
+OPTS=`getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,help -n 'fo-postinstall' -- "$@"`
+
+if [ $? != 0 ]; then
+   echo "ERROR: Bad option specified."
+   OPTS="--help"
+fi
+
+eval set -- "$OPTS"
+
+# if no options or just -o then do everything
+if [ "$OPTS" = " --" -o "$OPTS" = " -o --" ]; then
+   EVERYTHING=1
+fi
+
+while true; do
+   case "$1" in
+      -a|--agent) AGENT=1; shift;;
+      -d|--database) DATABASE=1; shift;;
+      -w|--web-only) WEBONLY=1; shift;;
+      -s|--scheduler-only) SCHEDULERONLY=1; shift;;
+      -e|--everything) EVERYTHING=1; shift;;
+      -o|--overwrite) OVERWRITE=1; shift;;
+      -l|--licenseref) LICENSEREF=1; shift;;
+      -c|--common) COMMON=1; shift;;
+      -h|--help)
+         echo "Usage: fo-postinstall [options]";
+         echo "  -a or --agent      : agent specific actions"
+         echo "  -d or --database   : Create the FOSSology database"
+         echo "  -w or --web-only   : web interface specific actions"
+         echo "  -s or --scheduler-only  : scheduler specific actions"
+         echo "  -e or --everything : all actions, default"
+         echo "  -o or --overwrite  : overwrite config files with new versions"
+         echo "  -l or --licenseref : update the license_ref table with fossology supplied licenses"
+         echo "  -c or --common     : common actions"
+         echo "  -h or --help       : this help text"
+         echo " Special options"
+         echo "  --web-only         : web, but exclude normal agent actions"
+         echo "  --scheduler-only   : scheduler, but exclude normal agent actions"
+
+         exit;;
+      --) shift; break;;
+      *) echo "Error: option $1 not recognised"; exit 1;;
+   esac
+done
+
+# the scheduler and web machines needs the agent stuff done too
+if [ $SCHEDULER ]; then
+   SCHEDULERONLY=1
+fi
+
+if [ $EVERYTHING ]; then
+   echo "*** Running postinstall for everything ***"
+   COMMON=1
+   SCHEDULERONLY=1
+   AGENT=1
+   DATABASE=1
+   WEBONLY=1
+   LICENSEREF=1
+fi
+
+# This must run as root.
+if [ `id -u` != "0" ] ; then
+   echo "ERROR: fo-postinstall must run as root."
+   echo "Aborting."
+   exit 1
+fi
+
+if [ $COMMON ]; then
+   echo "*** Running postinstall for common actions***"
+
+   ## get path to repo
+   if [ -e "{$SYSCONFDIR}/fossology.conf" ] ; then
+      while read line; do
+      if [[ $line =~ "path = " ]]; then
+          REPO=$\{line//'path = '/\}
+      fi
+      done < '{$SYSCONFDIR}/fossology.conf'
+   else
+      echo "ERROR: Cannot find {$SYSCONFDIR}/fossology.conf"
+      exit 1
+   fi
+
+   ## create user and group
+   # Because we are doing these by name, in the multi-machine install case
+   # we may end up with uid/gid being different across machines. This will
+   # either need to be fixed by hand or with NFSv4 you can use rpc.idmapd
+   # to do uid/gid mapping. More details will be provided in the multi-machine
+   # documentation.
+
+   # Make sure the user and group exist, if not then create
+   echo "*** Creating user and group ***"
+
+   # check for group
+   if grep -q "^{$PROJECTGROUP}:" /etc/group; then
+      echo "NOTE: group '{$PROJECTGROUP}' already exists, good."
+   else
+      # use addgroup if it exists since it supports --system
+      if [ -f /usr/sbin/addgroup -a ! -L /usr/sbin/addgroup ]; then
+         addgroup --system {$PROJECTGROUP}
+      else
+         groupadd {$PROJECTGROUP}
+      fi
+      if [ "$?" != "0" ] ; then
+         echo "ERROR: Unable to create group '{$PROJECTGROUP}'"
+         exit 1
+      else
+         echo "NOTE: group '{$PROJECTGROUP}' created"
+      fi
+   fi
+
+   # check for user
+   if grep -q "^{$PROJECTUSER}:" /etc/passwd; then
+      echo "NOTE: user '{$PROJECTUSER}' already exists, good."
+      USERSHELL=`grep "^{$PROJECTUSER}:" /etc/passwd |cut -d: -f 7`
+      if [ "$USERSHELL" = "/bin/false" ]; then
+         echo "ERROR: {$PROJECTUSER} shell must be a real shell"
+         exit 1
+      fi
+   else
+      # ensure that the full parent path of the HOME exists first
+      mkdir -p $\{REPO%/*/*\}
+      # use adduser if it exists since it supports --system, but
+      # not if it's a symlink (probably to /usr/sbin/useradd)
+      if [ -f /usr/sbin/adduser -a ! -L /usr/sbin/adduser ]; then
+         adduser --gecos "{$PROJECT}" --ingroup {$PROJECTGROUP} --system \
+           --shell /bin/bash --home "$\{REPO%/*\}" {$PROJECTUSER}
+      else
+         useradd -c "{$PROJECT}" -g {$PROJECTGROUP} -m \
+           -s /bin/bash -d "$\{REPO%/*\}" {$PROJECTUSER}
+      fi
+      if [ "$?" != "0" ] ; then
+         echo "ERROR: Unable to create user '{$PROJECTUSER}'"
+         exit 1
+      else
+         echo "NOTE: user '{$PROJECTUSER}' created"
+      fi
+   fi
+
+   ## check for existance/ownership/permissions of needed directories
+   echo "*** Making sure needed dirs exist with right ownership/permissions ***"
+   if [ ! -d "{$PROJECTSTATEDIR}" ] ; then
+      mkdir -m 2775 -p "{$PROJECTSTATEDIR}"
+   fi
+   chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}
+   chmod 2775 {$PROJECTSTATEDIR}
+   if [ ! -d "{$PROJECTSTATEDIR}/agents" ] ; then
+      mkdir -m 2775 -p "{$PROJECTSTATEDIR}/agents"
+   fi
+   chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}/agents
+   chmod 2775 {$PROJECTSTATEDIR}/agents
+  
+   # change all files ownership to fossy:fossy
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$MODDIR}
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LIBEXECDIR}
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$SYSCONFDIR}
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} /etc/cron.d/fossology
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} /etc/init.d/fossology
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/departition
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/cp2foss
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/fossjobs
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/schema-export
+   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$INCLUDEDIR}/libfossology.h
+   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$MAN1DIR}/cp2foss.1
+   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$MAN1DIR}/fossjobs.1
+
+   if [ ! -d "$REPO" ] ; then
+      mkdir -p "$REPO"
+      chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
+      chmod 2770 $REPO
+      # make sure the parent dir has the right permissions too
+      chown {$PROJECTUSER}:{$PROJECTGROUP} $\{REPO%/*\}
+      chmod 2770 $\{REPO%/*\}
+   else
+      echo "NOTE: Repository already exists at $REPO"
+   fi
+
+   # make install sets Db.conf's mode to 660, but can't chgrp it because
+   # the group doesn't exist until we create it above. So chgrp now
+   chgrp {$PROJECTGROUP} {$SYSCONFDIR}/Db.conf || echo "ERROR: failed to chgrp {$SYSCONFDIR}/Db.conf"
+
+fi
+
+if [ $WEBONLY ]; then
+   echo "*** Running postinstall for web-only actions***"
+   LICENSEREF=1
+fi
+
+########################################################################
+
+if [ $DATABASE ]; then
+   {$LIBEXECDIR}/dbcreate
+
+fi # end of DATABASE
+
+if [ $LICENSEREF ]; then
+   echo "*** update the database and license_ref table ***"
+   {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR}
+fi # end of license reference
+
+########################################################################
+
+if [ $AGENT ]; then
+   {$LIBEXECDIR}/fo_dbcheck.php -c {$SYSCONFDIR}
+   if [ $? != 0 ] ; then
+     echo "FATAL: unable to connect to database, please check {$SYSCONFDIR}/Db.conf"
+     exit 1
+   fi
+   echo "Database connectivity is good."
+
+fi # end of AGENT
+
+########################################################################
+
+if [ $SCHEDULERONLY ]; then
+   echo "*** Setting up scheduler ***"
+
+   # Create the scheduler log directory.
+   if [ -f {$LOGDIR} ] ; then
+     # Must be a directory and not a file
+     rm -f {$LOGDIR}
+   fi
+   if [ ! -d {$LOGDIR} ] ; then
+     mkdir -p {$LOGDIR}
+   fi
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LOGDIR}
+   chmod 2775 {$LOGDIR}
+   find {$LOGDIR} -type f | while read i ; do chmod 660 "$i" ; done
+fi # end of SCHEDULERONLY
+
+########################################################################
+if [ $WEBONLY ]; then
+   if [ $LICENSEREF == 0 ] ; then
+     echo "*** Initializing database tables ***"
+     {$LIBEXECDIR}/fossinit.php -c {$SYSCONFDIR}
+   fi
+
+   echo "*** Setting up the web interface ***"
+
+   # See if web server user exists, if so add to the group.
+   # check for www-data (Debian, etc)
+   grep -q "^www-data:" /etc/passwd
+   if [ $? == 0 ] ; then
+     echo "NOTE: Adding user www-data to group {$PROJECTGROUP}"
+     # this is smart enough to not add multiple times so it's ok to repeat
+     usermod -G {$PROJECTGROUP} -a www-data
+   fi
+   # check for apache (RHEL/CentOS, etc)
+   grep -q "^apache:" /etc/passwd
+   if [ $? == 0 ] ; then
+     echo "NOTE: Adding user apache to group {$PROJECTGROUP}"
+     # this is smart enough to not add multiple times so it's ok to repeat
+     usermod -G {$PROJECTGROUP} -a apache
+   fi
+
+fi # end of WEBONLY
+
+########################################################################
+
+echo "FOSSology postinstall complete, but sure to complete the remaining"
+echo "  steps in the INSTALL instructions."

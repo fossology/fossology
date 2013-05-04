@@ -1,0 +1,34 @@
+#!/bin/bash 
+#
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+#
+# create the db user fosstester for use during the tests
+
+# first check that postgres is running
+su postgres -c 'echo \\q|psql'
+if [ $? != 0 ]; then
+   echo "ERROR: postgresql isn't running"
+   exit 1
+fi
+echo "*** Creating database user fosstester ***"
+
+su postgres -c "psql < createDbUser.sql 2>&1" | grep -q exists
+if [ $? == 0 ] ; then
+   echo "OK, Database User 'fosstester' exists"
+   exit 0
+fi

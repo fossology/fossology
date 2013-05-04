@@ -1,0 +1,43 @@
+# FOSSology Makefile dependencies
+# Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+# 
+# This file contains some targets used in multiple places in the build
+# tree, mostly for dependencies. They can't go in Makefile.conf because
+# we don't want them to be the first target. To use them in a Makefile
+# be sure to include Makefile.conf first and then include this file
+# below the default target.
+
+# set up our test config environment
+#export FOSSOLOGY_TESTCONFIG := $(shell ${TOP}/dostuff.php)
+
+# targets to ensure that the libraries are up to date before building with them
+$(FOLIB):
+	$(MAKE) -C $(FOLIBDIR)
+
+# this target will set the FOSSOLOGY_TESTCONFIG variable to the value
+# printed to standard output by the 'create_test_database.php' script.
+#
+# This value will be the SYSCONFIG directory where a temporary database
+# connection (specified in Db.conf) and temporary repository location
+# (specified in fossology.conf) will be placed
+# 
+# The create_test_database.php script creates a FOSSology test database
+# and FOSSology test repository, and prints a single line on standard
+# output that is the location of the FOSSology sysconfdir for the test
+# database. Otherwise if the script cannot generate a test database 
+# for any reason, it will echo "FAIL" to stdout.
+fossology_testconfig: fossology_testconfig_notice
+	$(eval export FOSSOLOGY_TESTCONFIG := $(shell $(TOP)/src/testing/db/create_test_database.php))
+	@echo "Got FOSSOLOGY_TESTCONFIG = '$(FOSSOLOGY_TESTCONFIG)' in Makefile.deps"
+	@if [ -d '$(FOSSOLOGY_TESTCONFIG)' ]; then \
+	    echo "Test directory is: '$(FOSSOLOGY_TESTCONFIG)'"; \
+	    exit 0; \
+	else \
+	    echo "A failure occured: $(FOSSOLOGY_TESTCONFIG)"; \
+	    exit 1; \
+	fi
+
+# provide a notice to the user since the preceding target can take a long
+# time to build
+fossology_testconfig_notice:
+	@echo "Running create_test_database.php script (This make take a moment)"

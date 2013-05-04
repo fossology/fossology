@@ -1,0 +1,64 @@
+#!/usr/bin/perl -w
+# repo-range - split the hex range of 00-ff and output in a format suitable
+#              for use in a FOSSology Hosts.conf file
+#
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+use strict;
+use Getopt::Std;
+$Getopt::Std::STANDARD_HELP_VERSION="true";
+
+use vars qw($count $opt_c $opt_s $i $start $end $space $chunk $size);
+
+# we're just splitting 00-ff, but this could be used to split anything
+$space=256;
+
+getopts('sc:');
+
+sub HELP_MESSAGE {
+  print "Usage: repo-range [-c #] [-s]\n";
+  print "     -c #: the number to split the repo into\n";
+  print "     -s  : print the size of each split\n";
+}
+
+if ($opt_c) {
+   $count=$opt_c;
+} else {
+   print "Enter split count: ";
+   $count = <STDIN>;
+   chomp($count);
+}
+
+die "Count must be a positive integer\n" unless ($count=~/^[1-9][0-9]*$/);
+
+# the potentially non-integer size of the split
+$chunk=$space/$count;
+
+for ($i = 0; $i < $count; $i++) {
+   # the start of this host, rounded to the nearest int
+   $start=int($chunk*$i + 0.5);
+   # the end of this host, rounded to the nearest int
+   $end=int($chunk*($i+1) + 0.5)-1;
+   # the size of this host, for -s debugging flag
+   $size=$end-$start;
+
+   if ($opt_s) {
+      printf "host%d * %02x %02x   size = %d\n",$i+1,$start,$end,$size;
+   } else {
+      printf "host%d * %02x %02x\n",$i+1,$start,$end;
+   }
+}

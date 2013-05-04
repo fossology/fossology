@@ -1,0 +1,184 @@
+# /***********************************************************
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# ***********************************************************/
+
+How to configure and set up nightly Freshmeat updates.
+
+Overview
+========
+
+The Freshmeat process consists of a number of some what independent programs
+all tied together and automated by a shell/cron script. 
+
+The process starts with initially loading the top 1000 projects.  
+
+After the initial top 1000 projects have been obtained and uploaded.  When 
+the cron job is set up and activated, only the projects in the top 1000 
+that have had a version change will be uploaded.  This is accomplished by 
+using the GetFM script.  GetFM should be scheduled with cron to get the 
+daily Freshmeat RDF file and process it.  GetFM will:
+  - Uncompress the rdf file
+  - run mktop1k on it
+  - use diffm to compare todays top1000 projects to yesterdays top1000.
+  - Diffm will create an xml file that can be processed by get-projects.
+  - If there are differences, get-projects is scheduled to go get them.
+  - All successfully obtained projects are then scheduled for upload using
+    cp2foss.
+
+If you use the examples below, then setting up the nightly updates using
+the GetFM script will be easier.
+
+Set Up
+======
+
+0. Find significant disk space to hold the compressed archives that
+get downloaded as well as the data files needed by the process.  At a minimum
+a 100GB area should be used.  
+
+For example, on the fossology instance, sneezy is an agent 
+machine.  In the path /srv/fossology/repository/sneezy the Freshmeat
+area is created and used.
+
+0.1 Now that there is space, edit the makefile Makefile.utils, follow the
+comments and put your path in.  When the makefiles are run the path will 
+get propagated into the correct include files.
+
+Run the makefiles and install the software.
+(e.g. make install; sudo ./install.sh -f)
+
+The Freshmeat process expects the following directory setup:
+
+<path>/Freshmeat
+<path>/Freshmeat/Rdfs
+                 Input-Files
+                 Run-logs
+                 
+If you have changed the makefile (see above), then the GetFM script will
+make the above directories.  GetFM will also create a golden directory.
+                 
+A directory called golden{Date}, where date is yyyy-mm-dd format, is created 
+in the Freshmeat area for each run, all data for a run is kept in the
+golden.yyyy-mm-dd directory, 
+
+For the example below: the $DIR = /srv/fossology/repository/sneezy/Freshmeat
+
+Get the initial project seed
+============================
+
+1. The initial 1000 Freshmeat projects should be loaded as the first step.
+This entails multiple steps:
+   1. Get the Freshmeat RDF file from Freshmeat:
+      - wget -o /tmp/wget-log $DIR/RDfs/fm-projects.rdf-20007-12-9.bz2 \
+        http://freshmeat.net/backend/fm-projects.rdf.bz2
+        
+   2. Uncompress the fm-projects file downloaded in step 1 above.
+   
+   3. Use mktop1k(.php) to extract the top 1000 projects from the 
+      uncompressed rdf file in step 2.  Put the result back in the Rdfs 
+      directory. The naming convention to use is:
+      'Top1k-yyyy-mm-dd' for example, Top1k-2007-12-09.
+      
+   4. Use get-projects to process the top1k file created in step 3.
+      For example:
+      get-projects -f /srv/fossology/repository/sneezy/Freshmeat/Rdfs/Top1k-20007-12-09
+      
+      The above will create a directory called golden.20007-12-09
+      all results will be stored in this directory. There are three
+      subdirectories in the golden directory:
+      
+      wget-logs/: the wget logs for each attempted download in this run.
+      
+      Logs-Data/: A directory for storing:
+        - failed-wgets: list of projects where the wget failed.
+        - skipped_fmprojects: list of projects that have no download urls
+        - skipped_uploads: is a list of projects where the downloaded file
+          is not a compressed archive.  The file format for skipped_uploads
+          is project name followed by the path to the item that was downloaded.
+          
+      Input-files/: All successful downloads are recorded in 
+                    Input-files/Freshmeat_to_Upload.  This file is actually
+                    the input file for cp2foss.
+                    
+   5. Run cp2foss to upload the archives into the data-base and repository.
+      e.g. 
+      cp2foss -f <path>/goldenxxx/Input-files/Freshmeat_to_Upload
+      
+   6. Once the initial 1000 projects have loaded, (this can take days 
+      sometimes) the cron job should be set up so that changes are checked 
+      once a day and uploaded to the db.  There is already an example 
+      crontab file, it's called fm.cron and is stored with the Freshmeat 
+      sources.   See below for a complete discussion of the steps needed.
+      
+Setting Up daily Runs
+=====================
+
+1. Before starting cron, a few more important setup files must be created.
+
+   - using the example paths above, two files must be created in 
+     the Rdfs directory for the diffm program to use.  The GetFM script
+     expects the following files to exist in the <path>/Freshmeat/Rdfs/ path:
+     Current-top1k and Previous-top1k. 
+     
+     The contents of the above files is the path to the current and
+     previous days top 1000 Freshmeat projects xml file respectively.
+     These files are also in the <path>/Freshmeat/Rdfs/ path.
+     
+     Using the above example, the initial projects were obtained 
+     (the top 1000). The next update run was on 12/05.  At this point the two 
+     files should contain:
+     
+     Current-top1k:		<path>/Freshmeat/Rdfs/Top1k-2007-12-06
+     Previous-top1k:	<path>/Freshmeat/Rdfs/Top1k-2007-12-05
+     
+     After that when the GetFM script runs on 12-06 the GetFM script will 
+     keep the two files updated, and the above process should not need to be done.
+     
+     It's always a good idea to check on things to make sure it all worked.
+     This is the hardest part to get right in the set up.
+     
+     The Current-top1k and Previous-top1k files may need to be adjusted if
+     the cron is stopped for more than 1 day.  Technically the diffs should 
+     just get bigger, but it doesn't always seem to work that way.  Again
+     checking on the process is encouraged.
+     
+2. Now that the Rdfs directory is set up, use the cron template file,
+   (fm.cron) and create a cron entry and start it in cron.
+   
+That's it!
+
+Possible problems
+=================
+
+One possible problem is the use of proxy's.  Some sites need them, if you do
+then set your proxy in the GETFM file.  See the comments in that file and 
+follow the instructions.  If you are not sure if you need a proxy, talk 
+with your administrators or just try the process.  If wget keeps failing, 
+set your proxy.
+
+
+Monitoring Activity
+===================
+
+--OUTLINE--
+- all programs keep logs
+- logs are found in:
+- No automatic cleanup (yet)
+  - What should get cleaned up?
+    - When (how often?)
+    
+
+-
+   

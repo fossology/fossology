@@ -1,0 +1,41 @@
+#!/bin/bash
+# FOSSology dbcreate script
+# Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+#
+# This script checks to see if the the fossology db exists and if not
+# then creates it.
+
+echo "*** Setting up the FOSSology database ***"
+
+# At some point this is where we could dynamically set the db password
+
+# first check that postgres is running
+su postgres -c 'echo \\q|psql'
+if [ $? != 0 ]; then
+   echo "ERROR: postgresql isn't running"
+   exit 1
+fi
+
+# then check to see if the db already exists
+su postgres -c "psql --tuples-only --command \"select * from pg_database where datname = 'fossology';\""|grep fossology
+if [ $? = 0 ]; then
+   echo "NOTE: fossology database already exists, not creating"
+   echo "*** Checking for plpgsql support ***"
+   su postgres -c 'createlang -l fossology' |grep -q plpgsql
+   if [ $? = 0 ]; then
+      echo "NOTE: plpgsql already exists in fossology database, good"
+   else
+      echo "NOTE: plpgsql doesn't exist, adding"
+      su postgres -c 'createlang plpgsql fossology'
+      if [ $? != 0 ]; then
+         echo "ERROR: failed to add plpgsql to fossology database"
+      fi
+   fi
+else
+   echo "*** Initializing database ***"
+   su postgres -c "psql < {$LIBEXECDIR}/fossologyinit.sql"
+   if [ $? != 0 ] ; then
+      echo "ERROR: Database failed during configuration.\n"
+      exit 1
+   fi
+fi

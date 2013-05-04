@@ -1,0 +1,17 @@
+<phpunit>
+  <testsuites>
+    <testsuite name="lib/php Tests">
+      <file>test_common_active.php</file>
+      <file>test_common_auth.php</file>
+      <file>test_common_cache.php</file>
+      <file>test_common_cli.php</file>
+      <file>test_common_dir.php</file>
+      <file>test_common_license_file.php</file>
+      <file>test_common_menu.php</file>
+      <file>test_common_parm.php</file>
+      <file>test_common_pkg.php</file>
+      <file>test_common_sysconfig.php</file>
+      <file></file>
+    </testsuite>
+  </testsuites>
+</phpunit>

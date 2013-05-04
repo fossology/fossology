@@ -1,0 +1,15 @@
+#
+# $Id$
+#
+# Filter for debian build
+#
+# PBDEBSTD is replaced by the Debian standard version
+filter PBDEBSTD = 3.9.1
+
+# PBDEBCOMP is replaced by the Debian Compatibility value
+filter PBDEBCOMP = 7
+
+# for Ubuntu prior to 12.04, use the postgres 8.4 libpq headers
+filter PBBUILDDEP = postgresql-server-dev-8.4
+# and allow any postgres version 8.1 or better at runtime
+filter PBDEP = postgresql (>= 8.1) | postgresql-8.4 | postgresql-9.1
