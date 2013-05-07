@@ -17,11 +17,11 @@ without optimization. You could do that with
 
 or just in a particular subdir and everything below it
 
-  $ cd devel; make clean; make CFLAGS=-g -Wall
+  $ cd src/nomos/agent; make clean; make CFLAGS=-g -Wall
 
 Or maybe you want to build the scheduler using electricfence
 
-  $ cd scheduler; make clean; make CFLAGS=-lefence
+  $ cd src/scheduler/agent; make clean; make CFLAGS=-lefence
 
 
 Installation location:
@@ -37,8 +37,8 @@ If you are someone packaging for a distribution you want to use the paths
 defined by the FHS for distributions, and install to a pseudoroot so you
 can run your packaging results.
 
- $ make PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var
- $ make DESTDIR=/tmp/foo PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
+ $ make PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var
+ $ make DESTDIR=/tmp/foo PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            install
 
 Note: PREFIX, SYSCONFDIR and LOCALSTATEDIR need to be set during the build as
@@ -147,4 +147,4 @@ should work with the following caveats:
 * User interface
   It's easy to have two different versions of the UI operate on the same
   DB.  Just install the alternate UI in a new location and point your
-  web browser.  You will have to adjust pathinclude.php.
+  web browser. 
