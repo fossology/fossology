@@ -928,6 +928,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     lmem[_mPHP] = 1;
   }
+  else if (!lmem[_mPHP] && INFILE(_LT_PHP_V30_1)) {
+    INTERESTING("PHP-3.0");
+    lmem[_mPHP] = 1;
+  }
+  else if (!lmem[_mPHP] && INFILE(_LT_PHP_V30_2)) {
+    INTERESTING("PHP-3.0");
+    lmem[_mPHP] = 1;
+  }
   else if (INFILE(_LT_PHP_ref)) {
     INTERESTING(lDebug ? "PHP(2)" : "PHP");
   }
@@ -1665,13 +1673,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         || INFILE(_LT_GPL_NAMED2)
         || INFILE(_LT_GPL_NAMED3))
       && (!INFILE(_LT_GPL_NAMED3_EXHIBIT))
+      && (!INFILE(_LT_GPL_NAMED_COMPATIBLE))
       && (!INFILE(_LT_GPL_NAMED_EXHIBIT))) {
     cp = GPLVERS();
     INTERESTING(lDebug ? "GPL(named)" : cp);
   }
   if (!lmem[_mLGPL] && (INFILE(_LT_LGPL_NAMED) 
         || INFILE(_LT_LGPL_NAMED2)) && !INFILE(_LT_GPL_NAMED_EXHIBIT) 
-      && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED)) {
+      && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED)
+      && !INFILE(_LT_PHP_V30_2)) {
     cp = LGPLVERS();
     INTERESTING(lDebug ? "LGPL(named)" : cp);
   }
@@ -1688,7 +1698,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("JSON");
     lmem[_mMIT] = 1;
   }
-  if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) && !INFILE(_TITLE_MIT_EXHIBIT)) {
+  if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) && 
+      !INFILE(_TITLE_MIT_EXHIBIT) && !INFILE(_TITLE_SGI)) {
     if(INFILE(_LT_MIT_NO_EVIL)) {
       INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
       lmem[_mMIT] = 1;

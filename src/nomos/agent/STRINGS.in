@@ -2204,6 +2204,10 @@
 %ENTRY%	_LT_GPL_NAMED3_EXHIBIT
 %KEY%	"licen[cs]"
 %STR%	"Compatible Licences =SOME= (\<gpl\>|gnu general public license)"
+#
+%ENTRY%	_LT_GPL_NAMED_COMPATIBLE
+%KEY%	"licen[cs]"
+%STR%	"licen[cs]e is compatible with =FEW= (\<gpl\>|gnu general public license)"
 #####
 # FIX-ME: these 'patterns' are really references, are they not?
 #####
@@ -3810,6 +3814,14 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_PHPref1
 %KEY%	"licen[cs]"
 %STR%	"this =SOME= the php licen[cs]e"
+#
+%ENTRY%	_LT_PHP_V30_1
+%KEY%	"licen[cs]"
+%STR%	"(under|subject to) the php licen[cs]e (v|version |)3\.?0"
+#
+%ENTRY%	_LT_PHP_V30_2
+%KEY%	"licen[cs]"
+%STR%	"(under|subject to) (v|version )3\.?0 of the php licen[cs]e"
 #
 %ENTRY%	_LT_PIRIFORM
 %KEY%	"so(ftware|urce)"
@@ -7436,6 +7448,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"glx public licen[cs]e (v|version )1\.?0"
 #
+%ENTRY%	_TITLE_SGI
+%KEY%	"so(ftware|urce)"
+%STR%	"sgi free software (b licen[cs]e|licen[cs]e b)"
+#
 %ENTRY%	_TITLE_SGI_V10
 %KEY%	"so(ftware|urce)"
 %STR%	"sgi free software licen[cs]e b (v|version )1\.?0"
@@ -7599,7 +7615,7 @@ k
 #
 %ENTRY%	_TITLE_CITRIX
 %KEY% "licen[cs]"	
-%STR%	"citrix\(r\) license agreement"
+%STR%	"citrix =FEW= license agreement"
 #
 %ENTRY%	_MISC_DEBDATA
 %KEY%	=NULL=
