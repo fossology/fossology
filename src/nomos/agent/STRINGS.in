@@ -2137,7 +2137,7 @@
 #
 %ENTRY%	_LT_GPL_EXCEPT_CLASSPATH_1
 %KEY%	"classpath"
-%STR%	"classpath exception"
+%STR%	"classpath (linking)? exception"
 #
 %ENTRY%	_LT_GPL_EXCEPT_CLASSPATH_2
 %KEY%	"independent"

@@ -231,7 +231,7 @@ static int lDiags = 0;  /* set this to non-zero for printing diagnostics */
 static int fileHasPatt(int licTextIdx, char *filetext, int size,
     int isML, int isPS, int qType)
 {
-  int ret;
+  int ret = 0;
   int show = 0;
   item_t *ip;
 
@@ -1367,7 +1367,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         }
         else if (!HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED) 
             && !INFILE(_LT_GPL_EXCEPT_BISON_1) && !INFILE(_LT_GPL_EXCEPT_BISON_2) 
-            && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED)){
+            && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)){
           cp = GPLVERS();
           INTERESTING(lDebug ? "GPL(ref1#1)" : cp);
           lmem[_mGPL] = 1;
@@ -1517,12 +1517,19 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * Listed _explictly_ as an exception to the GPL -- this is NOT an 'else'
      * clause!
      */
-    if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)) {
+    if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2) 
+          || GPL_INFILE(_PHR_FSF_V3_ONLY) || GPL_INFILE(_PHR_GPL3_ONLY) || INFILE(_FILE_GPLv3))) {
+      INTERESTING(lDebug ? "GPL-except-classpath_3" : "GPL-3.0-with-classpath-exception");
+      lmem[_mGPL] = 1;
+    }
+    else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)) {
       INTERESTING(lDebug ? "GPL-except-classpath_1" : "GPL-2.0-with-classpath-exception");
+      lmem[_mGPL] = 1;
     }
     else
       if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_2)) {
         INTERESTING(lDebug ? "GPL-except-classpath_2" : "GPL-2.0-with-classpath-exception");
+        lmem[_mGPL] = 1;
       }
       else
         if (INFILE(_LT_GPL_EXCEPT_AUTOCONF) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2))) {
@@ -8681,7 +8688,7 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
     If we find it, report failure for the paragraph and remember
     finding the no--warranty.
      */
-    if (checknw && idxGrep(checknw, cp, REG_ICASE|REG_EXTENDED)) {
+    if (checknw && !idxGrep(checknw, cp, REG_ICASE|REG_EXTENDED)) {
       if (lDiags) {
         printf("... no, warranty regex %d\n", checknw);
       }
