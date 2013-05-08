@@ -2672,7 +2672,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Intel
    */
-  if (INFILE(_LT_INTEL)) {
+  if (INFILE(_LT_INTEL) && !INFILE(_LT_REAL_RPSL)) {
     INTERESTING(lDebug ? "Intel(8)" : "Intel");
   }
   else if (INFILE(_LT_INTEL_6)) {
