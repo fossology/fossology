@@ -190,8 +190,7 @@
     else
     {
       $sql = "select group_pk, group_name from groups, group_user_member 
-                  where group_pk=group_fk and user_fk='$user_pk' and group_perm=1 
-                  order by group_name";
+                  where group_pk=group_fk and user_fk='$user_pk' and group_perm=1";
     }
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -203,6 +202,8 @@
       }
     }
     pg_free_result($result);
+
+    natcasesort($GroupArray);
     return $GroupArray;
   }
 
