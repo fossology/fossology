@@ -3305,21 +3305,25 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "GS-GPL(2)" : "Ghostscript-GPL");
       }
       else if (INFILE(_LT_FREEPL) || INFILE(_LT_FREEPLref)) {
+          INTERESTING(lDebug ? "Aladdin(Closed-Source!)" : "Aladdin");
         if (INFILE(_PHR_NOT_OPEN)) {
-          INTERESTING("Aladdin(Closed-Source!)");
+          INTERESTING(lDebug ? "Aladdin(Closed-Source!)" : "Aladdin");
           lmem[_mALADDIN] = 1;
         }
         else {
-          INTERESTING("Aladdin-Ghostscript");
+          INTERESTING(lDebug ? "Aladdin-Ghostscript" : "Aladdin");
         }
       }
       else if (INFILE(_LT_ALADDIN_RESTRICT)) {
-        INTERESTING("Aladdin(RESTRICTED)");
+        INTERESTING(lDebug ? "Aladdin(RESTRICTED)": "Aladdin");
       }
     }
     else if (INFILE(_LT_AFPL)) {
       INTERESTING("AFPL-Ghostscript");
     }
+  }
+  else if (INFILE(_LT_FREEPLref_1)) {
+    INTERESTING("Aladdin");
   }
   else if (INFILE(_LT_FREEPL) || INFILE(_LT_FREEPLref)) {
     INTERESTING("Free-PL");
@@ -4686,8 +4690,16 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("CC-BY-SA");
     lmem[_fCCBY] = 1;
   }
+  else if (INFILE(_URL_CCA_BY_V30)) {
+    INTERESTING("CC-BY-3.0");
+    lmem[_fCCBY] = 1;
+  }
   else if (INFILE(_URL_CCA_BY_V25)) {
     INTERESTING("CC-BY-2.5");
+    lmem[_fCCBY] = 1;
+  }
+  else if (INFILE(_URL_CCA_BY_V20)) {
+    INTERESTING("CC-BY-2.0");
     lmem[_fCCBY] = 1;
   }
   else if (INFILE(_URL_CCA_BY_ND_V20)) {
@@ -6758,6 +6770,9 @@ char *ccVersion(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_TITLE_CCA_V25)) {
     lstr = "CC-BY-2.5";
+  }
+  else if (INFILE(_URL_CCA_BY_V30)) {
+    lstr = "CC-BY-3.0";
   }
   else if (INFILE(_TITLE_CCA_V30)) {
     lstr = "CC-BY-3.0";

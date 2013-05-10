@@ -1944,6 +1944,10 @@
 %ENTRY%	_LT_FREEPLref
 %KEY%	"licen[cs]"
 %STR%	"refer to the (aladdin =FEW= f|f)ree public licen[cs]e"
+#
+%ENTRY%	_LT_FREEPLref_1
+%KEY%	"licen[cs]"
+%STR%	"subject to the (aladdin =FEW= f|f)ree public licen[cs]e"
 #####
 # DELETED: ... provided that this copyright notice appears intact permission
 # is also granted to adapt this software to produce derivative works as long
@@ -8627,9 +8631,17 @@ k
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?debian\.?org/misc/bsd\.?licen[cs]e"
 #
+%ENTRY%	_URL_CCA_BY_V30
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by/3\.?0"
+#
 %ENTRY%	_URL_CCA_BY_V25
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/by/2\.?5"
+#
+%ENTRY%	_URL_CCA_BY_V20
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by/2\.?0"
 #
 %ENTRY%	_URL_CCA_SA
 %KEY%	"licen[cs]"
