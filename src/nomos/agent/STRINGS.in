@@ -5417,6 +5417,18 @@ k
 %STR%	"(distribut|copy|mod) =SOME= contained in the (file =FEW= \<readme\>|\<readme\> file)"
 %ALIAS%	_SEEREADME_last
 #
+%ENTRY%	_LT_XFREE86
+%KEY%	"licen[cs]e"
+%STR%	"under =FEW= XFree86 licen[cs]e"
+#
+%ENTRY%	_LT_XFREE86_V10
+%KEY%	"licen[cs]e"
+%STR%	"XFree86 licen[cs]e =FEW= (version |v)1\.?0"
+#
+%ENTRY%	_LT_XFREE86_V11
+%KEY%	"licen[cs]e"
+%STR%	"XFree86 licen[cs]e =FEW= (version |v)1\.?1"
+#
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 ##%STR%	"&copy"
@@ -6213,6 +6225,10 @@ k
 %ENTRY%	_CR_XFREE86
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= xfree86 =SOME= project"
+#
+%ENTRY%	_CR_XFREE86_V10
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= xfree86 project (version |v)1\.?0"
 #
 %ENTRY%	_CR_XFREE86_V11
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -7565,6 +7581,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"Zimbra Public License (v|version )1\.?3"
 #
+%ENTRY%	_TITLE_ZIMBRA_12
+%KEY%	"licen[cs]"
+%STR%	"Zimbra Public License (v|version )1\.?2"
+#
 %ENTRY%	_TITLE_ZIMBRA
 %KEY%	"licen[cs]"
 %STR%	"Zimbra Public License"
@@ -7593,10 +7613,6 @@ k
 %KEY%	"licen[cs]"
 %STR%	"(zope public licen[cs]e|\<ZPL\>)"
 #
-%ENTRY%	_TITLE_OPL_V10
-%KEY%	"licen[cs]"
-%STR%	"open public licen[cs]e (v|version )1\.?0"
-#
 %ENTRY%	_TITLE_NOSL
 %KEY%	"licen[cs]"
 %STR%	"netizen open source licen[cs]e"
@@ -7616,6 +7632,10 @@ k
 %ENTRY%	_TITLE_CITRIX
 %KEY% "licen[cs]"	
 %STR%	"citrix =FEW= license agreement"
+#
+%ENTRY%	_TITLE_MPL_style
+%KEY% "licen[cs]"	
+%STR%	"the openi public licen[cs]e"
 #
 %ENTRY%	_MISC_DEBDATA
 %KEY%	=NULL=
@@ -8757,7 +8777,7 @@ k
 #
 %ENTRY%	_URL_MPL_LATEST
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"w?w?w?\.?mozilla\.?org/[MN]PL"
+%STR%	"w?w?w?\.?mozilla\.?org/[MN]PL/ "
 #
 %ENTRY%	_URL_MPL10
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"

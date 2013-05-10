@@ -485,6 +485,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_TITLE_ZIMBRA_13)) {
       INTERESTING("Zimbra-1.3");
     }
+    else if (INFILE(_TITLE_ZIMBRA_12)) {
+      INTERESTING("Zimbra-1.2");
+    }
     else {
       INTERESTING(lDebug ? "Zope(ref)" : "ZPL");
       lmem[_fZPL] = 1;
@@ -1332,7 +1335,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mLGPL] = 1;
       }
     }
-    if (!lmem[_mGPL]) {
+    if (!lmem[_mGPL] && !HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED)
+      && !INFILE(_LT_GPL_EXCEPT_BISON_1) && !INFILE(_LT_GPL_EXCEPT_BISON_2)
+      && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)) {
       if (GPL_INFILE(_LT_GPL_ALT)) {
         cp = GPLVERS();
         INTERESTING(lDebug ? "GPL(alternate)" : cp);
@@ -1447,7 +1452,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mGPL] = 1;
       }
       else if (GPL_INFILE(_LT_GPLref14) &&
-          !INFILE(_LT_LGPLref2)) {
+          !INFILE(_LT_LGPLref2) && !INFILE(_LT_OPENPUBL_1) && !INFILE(_LT_OPENPUBL_2)) {
         cp = GPLVERS();
         INTERESTING(lDebug ? "GPL(ref14)" : cp);
         lmem[_mGPL] = 1;
@@ -1564,6 +1569,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           INTERESTING("GPL-2.0-with-GCC-exception");
           lmem[_mGPL] = 1;
         }
+        else if ((INFILE(_LT_GPL_EXCEPT_BISON_1) || INFILE(_LT_GPL_EXCEPT_BISON_2)) && 
+            (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2) || GPL_INFILE(_LT_GPL3ref2) || 
+            GPL_INFILE(_PHR_FSF_V3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER))) {
+          INTERESTING(lDebug ? "GPL-except-Bison-3" : "GPL-3.0-with-bison-exception");
+          lmem[_mGPL] = 1;
+        }
         else if (INFILE(_LT_GPL_EXCEPT_BISON_1)) {
           INTERESTING(lDebug ? "GPL-except-Bison-1" : "GPL-2.0-with-bison-exception");
           lmem[_mGPL] = 1;
@@ -1674,6 +1685,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         || INFILE(_LT_GPL_NAMED3))
       && (!INFILE(_LT_GPL_NAMED3_EXHIBIT))
       && (!INFILE(_LT_GPL_NAMED_COMPATIBLE))
+      && !INFILE(_LT_OPENPUBL_1) 
+      && !INFILE(_LT_OPENPUBL_2)
       && (!INFILE(_LT_GPL_NAMED_EXHIBIT))) {
     cp = GPLVERS();
     INTERESTING(lDebug ? "GPL(named)" : cp);
@@ -1698,20 +1711,24 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("JSON");
     lmem[_mMIT] = 1;
   }
-  if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) && 
+
+  if (INFILE(_CR_XFREE86_V10) || INFILE(_LT_XFREE86_V10)) {
+    INTERESTING("XFree86-1.0");
+  }
+  else if (INFILE(_CR_XFREE86_V11) || INFILE(_LT_XFREE86_V11)) {
+    INTERESTING("XFree86-1.1");
+  }
+  else if (INFILE(_CR_XFREE86) || INFILE(_LT_XFREE86)) {
+    INTERESTING("XFree86");
+  }
+  else if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) && 
       !INFILE(_TITLE_MIT_EXHIBIT) && !INFILE(_TITLE_SGI)) {
     if(INFILE(_LT_MIT_NO_EVIL)) {
       INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
       lmem[_mMIT] = 1;
     }
     else if (INFILE(_LT_MIT_2)) {
-      if (INFILE(_CR_XFREE86)) {
-        INTERESTING("XFree86-1.1");
-      }
-      else if (mCR_X11()) {
-        INTERESTING(lDebug ? "X11(1)" : "X11");
-      }
-      else if (INFILE(_CR_SPI)) {
+      if (INFILE(_CR_SPI)) {
         INTERESTING("Debian-SPI");
       }
       else if (mCR_MIT() || INFILE(_TITLE_MIT)) {
@@ -1727,12 +1744,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mMIT] = 1;
       }
     }
-    if (INFILE(_LT_BITSTREAM_1)) {
+    else if (INFILE(_LT_BITSTREAM_1)) {
       INTERESTING(lDebug ? "Bitstream(1)" : "Bitstream");
       lmem[_mMIT] = 1;
-    }
-    else if (INFILE(_CR_XFREE86)) {
-      INTERESTING("XFree86-1.1");
     }
     else if (mCR_X11()) {
       INTERESTING("X11");
@@ -2295,7 +2309,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       lmem[_mMPL] = 1;
     }
     else if (INFILE(_TITLE_OPENPL10)) {
-      INTERESTING("Open-PL-1.0");
+      INTERESTING("OPL-1.0");
     }
     else if (INFILE(_TITLE_SNIA_V11)) {
       INTERESTING("SNIA-1.1");
@@ -2304,7 +2318,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("SNIA-1.0");
     }
     else if (INFILE(_TITLE_OPENPL)) {
-      INTERESTING(lDebug ? "Open-PL(title)" : "Open-PL");
+      INTERESTING(lDebug ? "OPL(title)" : "OPL");
     }
     else if (INFILE(_TITLE_CPAL10)) {
       INTERESTING(lDebug ? "CPAL_v1.0(#1)" : "CPAL-1.0");
@@ -3862,7 +3876,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (INFILE(_TITLE_OPENPUBL10)) {
       INTERESTING("Open-PL-1.0");
     }
-    else if (INFILE(_TITLE_OPENPUBL)) {
+    else if (INFILE(_TITLE_OPENPUBL) && !GPL_INFILE(_LT_GPLref14)) {
       INTERESTING("Open-PL");
     }
     else {
@@ -3870,7 +3884,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   else if (INFILE(_LT_OPENPUBLref)) {
-    INTERESTING(lDebug ? "Open-Publ(ref)" : "Open-PL");
+    INTERESTING(lDebug ? "Open-PL(ref)" : "Open-PL");
   }
   /*
    * Free Art License
@@ -5408,6 +5422,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if (INFILE(_TITLE_ZIMBRA_13)) {
      INTERESTING("Zimbra-1.3");
   }
+  else if (INFILE(_TITLE_ZIMBRA_12)) {
+    INTERESTING("Zimbra-1.2");
+  }
   else if (INFILE(_TITLE_ZIMBRA)) {
      INTERESTING("Zimbra");
   }
@@ -5613,11 +5630,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /** Imlib2 License */
   if (INFILE(_LT_Imlib2)) {
     INTERESTING("Imlib2");
-  }
-
-  /** OPEN PUBLIC LICENSE  */
-  if (INFILE(_TITLE_OPL_V10)) {
-    INTERESTING("OPL-1.0");
   }
 
   /** Netizen Open Source License  */
@@ -6047,6 +6059,9 @@ char *mplNplVersion(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_TITLE_MPL11_OR_LATER)) {
     lstr = "MPL-1.1+";
+  }
+  else if (INFILE(_TITLE_MPL11) && INFILE(_TITLE_MPL_style)) {
+    lstr = "MPL-1.1-style";
   }
   else if (INFILE(_TITLE_MPL11)) {
     lstr = "MPL-1.1";
