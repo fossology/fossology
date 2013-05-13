@@ -46,5 +46,9 @@ extern CU_TestInfo tests_host[];
 extern CU_TestInfo tests_interface[];
 extern CU_TestInfo tests_interface_thread[];
 
+extern CU_TestInfo tests_meta_agent[];
+extern CU_TestInfo tests_agent[];
+
+extern CU_TestInfo tests_event[];
 /* scheduler private declarations */
 event_loop_t* event_loop_get();

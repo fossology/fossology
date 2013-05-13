@@ -86,6 +86,9 @@ CU_SuiteInfo suites[] =
     {"Host",            init_suite, clean_suite, tests_host             },
     {"Interface",       init_suite, clean_suite, tests_interface        },
     {"InterfaceThread", init_suite, clean_suite, tests_interface_thread },
+    {"MetaAgent", init_suite, clean_suite, tests_meta_agent },
+    {"Agent", init_suite, clean_suite, tests_agent },
+    {"Event",NULL,NULL, tests_event },
     CU_SUITE_INFO_NULL
 };
 
