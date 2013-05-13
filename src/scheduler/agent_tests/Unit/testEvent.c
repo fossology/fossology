@@ -43,9 +43,12 @@ void sample_event(scheduler_t* scheduler, void* args)
   scheduler_destroy(scheduler);
 }
 
-void other_event(void* args)
+void other_event(scheduler_t* scheduler, void* args)
 {
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
   samp_num--;
+  scheduler_destroy(scheduler);
 }
 
 void sample_callback(scheduler_t* scheduler)

@@ -89,6 +89,7 @@ void test_add_meta_agent()
   meta_agent_t* ma;
 
   scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
 
   FO_ASSERT_TRUE(add_meta_agent(scheduler->meta_agents, "name", "cmd", 11, 1));
   FO_ASSERT_FALSE(add_meta_agent(scheduler->meta_agents, NULL, "cmd", 11, 1));
@@ -148,6 +149,7 @@ void test_agent_death_event()
   agent_t* a1;
 
   scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
   //meta_agent_t* ma = meta_agent_init("sample", "test_binary", 0, 0);
 
   fagent.pid    = 10;
@@ -172,9 +174,10 @@ void test_agent_death_event()
   FO_ASSERT_EQUAL(fagent.status, AG_CREATED);
   FO_ASSERT_PTR_NULL(a1);
 
-  //close(fagent.from_child);
-  //close(fagent.to_parent);
-  //fclose(fagent.write);
+  close(fagent.from_child);
+  close(fagent.to_parent);
+  fclose(fagent.write);
+  scheduler_destroy(scheduler);
 }
 
 // TODO add to suite
@@ -191,6 +194,7 @@ void test_agent_create_event()
   fagent.status = AG_CREATED;
 
   scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
 
   agent_create_event(scheduler, &fagent);
 
@@ -201,6 +205,8 @@ void test_agent_create_event()
   FO_ASSERT_PTR_NOT_NULL(gl);
   FO_ASSERT_EQUAL(fagent.status, AG_SPAWNED);
   FO_ASSERT_PTR_EQUAL(ag, gl->data);
+  
+  //scheduler_destroy(scheduler);
 }
 
 // TODO add to suite
@@ -209,6 +215,8 @@ void test_agent_init()
   scheduler_t* scheduler;
   meta_agent_t* ma;
   scheduler = scheduler_init(testdb, NULL); 
+  scheduler_foss_config(scheduler);
+
   add_meta_agent(scheduler->meta_agents,"copyright", "copyright", 10, 0);
 
   host_t fhost;
@@ -257,7 +265,7 @@ CU_TestInfo tests_agent[] =
 {
     {"Test agent_init",  test_agent_init  },
     {"Test agent_death_event", test_agent_death_event },
-//    {"Test agent_create_event", test_agent_create_event },
+    {"Test agent_create_event", test_agent_create_event },
     CU_TEST_INFO_NULL
 };
 
