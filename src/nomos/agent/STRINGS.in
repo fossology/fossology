@@ -738,6 +738,14 @@
 %KEY%	"licen[cs]"
 %STR%	"subject to the bittorrent open source licen[cs]e"
 #
+%ENTRY%	_LT_BITTORRENT_V11
+%KEY%	"licen[cs]"
+%STR%	"subject to the bittorrent open source licen[cs]e (v|version )1\.?1"
+#
+%ENTRY%	_LT_BITTORRENT_V10
+%KEY%	"licen[cs]"
+%STR%	"subject to the bittorrent open source licen[cs]e (v|version )1\.?0"
+#
 %ENTRY%	_LT_BIZNET
 %KEY%	"permi[st]"
 %STR%	"permission to use copy modify and distribute this software for any purpose is hereby granted without fee provided that the above copyright notice and this permission notice appear in all copies"
@@ -3369,6 +3377,11 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_MSCORP_LIMITED
 %KEY%	"so(ftware|urce)"
 %STR%	"only to the software or derivative works that you create that run on a microsoft windows"
+#
+%ENTRY% _LT_MSCORP_LIMITEDref1
+%KEY% "\<micros(oft|ystems)\>"
+%STR% "Microsoft Corporation =SOME= ((released|distributed) under|covered by) (the|) MLPL"
+#
 #####
 # DELETED: ... of this licen[cs]e with your distribution if you distribute any
 # portion of the software in compiled or object code form you may only do so
@@ -5249,7 +5262,7 @@ k
 #
 %ENTRY%	_LT_SEE_OTHER_12
 %KEY%	"copyright"
-%STR%	"see copyright notice in lua\.?h"
+%STR%	"see copyright notice in (lua\.?h|main\.?c)"
 #
 %ENTRY% _LT_SEE_OTHER_13
 %KEY% "copyright"
@@ -5258,6 +5271,10 @@ k
 %ENTRY% _LT_SEE_OTHER_14
 %KEY% "copyright"
 %STR% "see =FEW= for more details on licensing"
+#
+%ENTRY% _LT_SEE_OTHER_15
+%KEY% "so(ftware|urce)"
+%STR% "see the source for copying conditions"
 #
 #####
 # These MUST be the last 3 checks for license references in some "other" place
@@ -5311,7 +5328,7 @@ k
 #
 %ENTRY%	_LT_SEE_LICENSE_9
 %KEY%	"licen[cs]"
-%STR%	"see license?qla =SOME= for copyright and licensing details"
+%STR%	"see license?(qla|qlcnic|qlge) =SOME= for copyright and licensing details"
 #
 %ENTRY% _LT_SEE_LICENSE_10
 %KEY% "licen[cs]" 
@@ -6375,6 +6392,10 @@ k
 %ENTRY%	_TITLE_APSL12
 %KEY%	"\<ap(ache|ple)\>"
 %STR%	"apple public source licen[cs]e (v|version )1\.?2"
+#
+%ENTRY%	_TITLE_APSL_style
+%KEY%	"\<ap(ache|ple)\>"
+%STR%	"based on the apple public source licen[cs]e"
 #####
 # DELETED: ... =SOME= april =SOME= 1999
 #####
@@ -7036,6 +7057,10 @@ k
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"mozilla public licen[cs]e version"
 #
+%ENTRY%	_TITLE_MPL_ref
+%KEY%	"licen[cs]e"
+%STR%	"licen[cs]e =FEW= (\<mpl\>|mozilla public licen[cs]e)"
+#
 %ENTRY%	_TITLE_MPL10
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"mozilla public licen[cs]e (1\.?0|(\<mpl\> |v|version )1\.?0)"
@@ -7640,6 +7665,10 @@ k
 %ENTRY%	_TITLE_MPL_style
 %KEY% "licen[cs]"	
 %STR%	"the openi public licen[cs]e"
+#
+%ENTRY%	_TITLE_X11
+%KEY%	"licen[cs]e"
+%STR%	"x window system licen[cs]e =FEW= x11"
 #
 %ENTRY%	_MISC_DEBDATA
 %KEY%	=NULL=
