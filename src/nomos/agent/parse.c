@@ -2225,7 +2225,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * MPL (Mozilla)
    * ... Sun SISSL and one Mozilla licensing derivative share wording
    */
-  if (INFILE(_LT_MPL_OR) || INFILE(_TITLE_MPL_ref) && !INFILE(_LT_RPSL_COMPATIBLE)) {
+  if ((INFILE(_LT_MPL_OR) || INFILE(_TITLE_MPL_ref)) && !INFILE(_LT_RPSL_COMPATIBLE)) {
     cp = MPLVERS(); /* NPL, too */
     INTERESTING(lDebug ? "MPL/NPL#2" : cp);
     lmem[_mMPL] = 1;
