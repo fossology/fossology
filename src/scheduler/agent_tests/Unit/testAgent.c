@@ -184,69 +184,78 @@ void test_agent_death_event()
 void test_agent_create_event()
 {
   scheduler_t* scheduler;
-  agent_t fagent;
-  job_t   fjob;
+  agent_t* fagent = NULL;
+  job_t*  fjob = NULL;
   agent_t* ag = NULL;
   GList* gl = NULL;
 
-  fagent.pid    = 10;
-  fagent.owner  = &fjob;
-  fagent.status = AG_CREATED;
+  static int32_t id_gen = -1;
+  GList*  iter;
+  host_t* host;
 
   scheduler = scheduler_init(testdb, NULL);
-  scheduler_foss_config(scheduler);
+  scheduler_config_event(scheduler, NULL);
 
-  agent_create_event(scheduler, &fagent);
+  meta_agent_t* ma = g_tree_lookup(scheduler->meta_agents, "copyright");
+  for(iter = scheduler->host_queue; iter != NULL; iter = iter->next)
+  {
+    host = (host_t*)iter->data;
+    fjob = job_init(scheduler->job_list, scheduler->job_queue, ma->name,
+        host->name, id_gen--, 0, 0);
+    fagent = agent_init(scheduler, host, fjob);
+  }
+  fagent->pid    = 10;
+  fagent->owner  = fjob;
+  fagent->status = AG_CREATED;
 
-  ag = g_tree_lookup(scheduler->agents, &fagent.pid);
-  gl = g_list_find(fjob.running_agents, &fagent);
+  agent_create_event(scheduler, fagent);
+
+  ag = g_tree_lookup(scheduler->agents, &fagent->pid);
+  gl = g_list_find(fjob->running_agents, fagent);
 
   FO_ASSERT_PTR_NOT_NULL(ag);
   FO_ASSERT_PTR_NOT_NULL(gl);
-  FO_ASSERT_EQUAL(fagent.status, AG_SPAWNED);
+  FO_ASSERT_EQUAL(fagent->status, AG_SPAWNED);
   FO_ASSERT_PTR_EQUAL(ag, gl->data);
-  
-  //scheduler_destroy(scheduler);
+ 
+  scheduler_close_event(scheduler, (void*)1); 
+  scheduler_destroy(scheduler);
 }
 
 // TODO add to suite
 void test_agent_init()
 {
   scheduler_t* scheduler;
-  meta_agent_t* ma;
-  scheduler = scheduler_init(testdb, NULL); 
-  scheduler_foss_config(scheduler);
+  agent_t* fagent = NULL;
+  job_t*  fjob = NULL;
 
-  add_meta_agent(scheduler->meta_agents,"copyright", "copyright", 10, 0);
+  static int32_t id_gen = -1;
+  GList*  iter;
+  host_t* host;
 
-  host_t fhost;
-  job_t fjob;
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler_config_event(scheduler, NULL);
 
-  fhost.address   = "localhost";
-  fhost.agent_dir = "AGENT_DIR";
-  fhost.running   = 0;
-  fjob.agent_type = "copyright";
-  fjob.data       = "";
-  fjob.db_result  = NULL;
-  fjob.id         = 1;
-  fjob.status     = JB_CHECKEDOUT;
-  fjob.idx        = 0;
-
-  g_tree_insert(scheduler->job_list, &fjob.id, &fjob);
-
-  ma = g_tree_lookup(scheduler->meta_agents, "copyright");
-  FO_ASSERT_EQUAL(g_tree_nnodes(scheduler->meta_agents), 1);
+  meta_agent_t* ma = g_tree_lookup(scheduler->meta_agents, "copyright");
+  for(iter = scheduler->host_queue; iter != NULL; iter = iter->next)
+  {
+    host = (host_t*)iter->data;
+    fjob = job_init(scheduler->job_list, scheduler->job_queue, ma->name,
+        host->name, id_gen--, 0, 0);
+    fagent = agent_init(scheduler, host, fjob);
+  }
+  /*
+  FO_ASSERT_EQUAL(g_tree_nnodes(scheduler->meta_agents), 9);
   FO_ASSERT_PTR_NOT_NULL(ma);
   FO_ASSERT_STRING_EQUAL(ma->name, "copyright");
   FO_ASSERT_STRING_EQUAL(ma->raw_cmd, "copyright --scheduler_start");
-  FO_ASSERT_EQUAL(ma->max_run, 10);
+  FO_ASSERT_EQUAL(ma->max_run, 255);
   FO_ASSERT_EQUAL(ma->special, 0);
   FO_ASSERT_PTR_NULL(ma->version);
   FO_ASSERT_TRUE(ma->valid);
-
-  agent_t* ag= agent_init(scheduler, &fhost, &fjob);
-  printf("%d\n", ag->pid); 
-  //scheduler_destroy(scheduler);  
+  */
+  scheduler_close_event(scheduler, (void*)1);
+  scheduler_destroy(scheduler);  
   // TODO finish
 }
 /* ************************************************************************** */

@@ -37,26 +37,17 @@ uint16_t s_line = 0;
 
 void sample_event(scheduler_t* scheduler, void* args)
 {
-  scheduler = scheduler_init(testdb, NULL);
-  scheduler_foss_config(scheduler);
   samp_num++;
-  scheduler_destroy(scheduler);
 }
 
-void other_event(scheduler_t* scheduler, void* args)
+void other_event(void* args)
 {
-  scheduler = scheduler_init(testdb, NULL);
-  scheduler_foss_config(scheduler);
   samp_num--;
-  scheduler_destroy(scheduler);
 }
 
 void sample_callback(scheduler_t* scheduler)
 {
-  scheduler = scheduler_init(testdb, NULL);
-  scheduler_foss_config(scheduler);
   call_num++;
-  scheduler_destroy(scheduler);
 }
 
 void terminate_event(void* args)
@@ -89,6 +80,10 @@ void test_event_loop_get()
 
 void test_event_init()
 {
+  scheduler_t* scheduler;
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
+
   event_t* e;
 
   sample_args = &call_num;
@@ -99,10 +94,15 @@ void test_event_init()
   FO_ASSERT_STRING_EQUAL(e->name,     "sample");
 
   g_free(e);
+  scheduler_destroy(scheduler);
 }
 
 void test_event_signal_ext()
 {
+  scheduler_t* scheduler;
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
+
   event_t* e;
 
   sample_args = &call_num;
@@ -115,10 +115,14 @@ void test_event_signal_ext()
   FO_ASSERT_STRING_EQUAL(e->name,     "sample");
 
   g_free(e);
+  scheduler_destroy(scheduler);
 }
 
 void test_event_signal()
 {
+  scheduler_t* scheduler;
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
   event_t* e;
 
   sample_args = &call_num;
@@ -131,6 +135,7 @@ void test_event_signal()
   FO_ASSERT_STRING_EQUAL(e->name,     "sample_event");
 
   g_free(e);
+  scheduler_destroy(scheduler);
 }
 
 void test_event_loop_enter()
@@ -138,34 +143,37 @@ void test_event_loop_enter()
   scheduler_t* scheduler;
   scheduler = scheduler_init(testdb, NULL);
   scheduler_foss_config(scheduler);
+
   event_loop_t* vl = event_loop_get();
   int retval = 0;
 
   call_num = 0;
   samp_num = 0;
   event_signal(NULL, NULL);
+  event_signal(terminate_event, NULL);
 
   retval = event_loop_enter(scheduler, sample_callback, NULL);
   FO_ASSERT_EQUAL(retval, 0x0);
-  FO_ASSERT_EQUAL(call_num, 0);
-  FO_ASSERT_FALSE(vl->terminated);
-  FO_ASSERT_TRUE(vl->occupied);
+  FO_ASSERT_EQUAL(call_num,1);
+  FO_ASSERT_TRUE(vl->terminated);
+  FO_ASSERT_FALSE(vl->occupied);
 
   event_signal(sample_event, NULL);
-  event_signal(NULL, NULL);
-
-  retval = event_loop_enter(scheduler, sample_callback, NULL);
-  FO_ASSERT_EQUAL(retval, 0x1);
-  FO_ASSERT_EQUAL(samp_num, 0);
-  FO_ASSERT_EQUAL(call_num, 0);
-
-  vl->occupied = 0;
-  vl->terminated = 0;
+  event_signal(terminate_event, NULL);
 
   retval = event_loop_enter(scheduler, sample_callback, NULL);
   FO_ASSERT_EQUAL(retval, 0x0);
   FO_ASSERT_EQUAL(samp_num, 1);
-  FO_ASSERT_EQUAL(call_num, 1);
+  FO_ASSERT_EQUAL(call_num, 3);
+
+  vl->occupied = 0;
+  vl->terminated = 0;
+  event_signal(terminate_event, NULL);
+
+  retval = event_loop_enter(scheduler, sample_callback, NULL);
+  FO_ASSERT_EQUAL(retval, 0x0);
+  FO_ASSERT_EQUAL(samp_num, 1);
+  FO_ASSERT_EQUAL(call_num, 4);
 
   vl->occupied = 0;
   vl->terminated = 0;
@@ -178,15 +186,15 @@ void test_event_loop_enter()
   event_signal(sample_event, NULL);
   event_signal(sample_event, NULL);
   event_signal(other_event, NULL);
-  event_signal(NULL, NULL);
+  event_signal(terminate_event, NULL);
 
   retval = event_loop_enter(scheduler, sample_callback, NULL);
   FO_ASSERT_EQUAL(retval, 0x0);
   FO_ASSERT_EQUAL(samp_num, 2);
-  FO_ASSERT_EQUAL(call_num, 6);
+  FO_ASSERT_EQUAL(call_num, 7);
 
   vl->occupied = 0;
-  vl->terminated = 0;
+  vl->terminated = 1;
   samp_num = 0;
   call_num = 0;
 
@@ -196,31 +204,33 @@ void test_event_loop_enter()
   event_signal(sample_event, NULL);
   event_signal(sample_event, NULL);
   event_signal(other_event, NULL);
-  event_signal(NULL, NULL);
+  event_signal(terminate_event, NULL);
 
-  retval = event_loop_enter(scheduler, NULL, NULL);
+  retval = event_loop_enter(scheduler, sample_callback, NULL);
   FO_ASSERT_EQUAL(retval, 0x0);
   FO_ASSERT_EQUAL(samp_num, 2);
-  FO_ASSERT_EQUAL(call_num, 0);
+  FO_ASSERT_EQUAL(call_num, 7);
 
   scheduler_destroy(scheduler);
 }
 
 void test_event_loop_terminate()
 {
+  int retval = 0;
   scheduler_t* scheduler;
   scheduler = scheduler_init(testdb, NULL);
   scheduler_foss_config(scheduler);
   event_loop_t* vl = event_loop_get();
 
-  event_signal(terminate_event, NULL);
-
   vl->occupied = 0;
   vl->terminated = 1;
 
-  FO_ASSERT_EQUAL(event_loop_enter(scheduler, NULL, NULL), 0x0);
+  event_signal(terminate_event, NULL);
+  retval = event_loop_enter(scheduler, NULL, NULL);
+  FO_ASSERT_EQUAL(retval, 0x0);
   FO_ASSERT_FALSE(vl->occupied);
   FO_ASSERT_TRUE(vl->terminated);
+
   scheduler_destroy(scheduler);
 }
 
@@ -234,6 +244,7 @@ CU_TestInfo tests_event[] =
     {"Test event_init",       test_event_init       },
     {"Test event_signal_ext", test_event_signal_ext },
     {"Test event_signal",     test_event_signal     },
-    //{"Test event_loop_enter", test_event_loop_enter },
+    {"Test event_loop_enter", test_event_loop_enter },
+    {"Test event_loop_terminate", test_event_loop_terminate },
     CU_TEST_INFO_NULL
 };
