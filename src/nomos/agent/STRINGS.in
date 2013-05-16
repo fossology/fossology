@@ -2220,6 +2220,10 @@
 %ENTRY%	_LT_GPL_NAMED_COMPATIBLE
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e is compatible with =FEW= (\<gpl\>|gnu general public license)"
+#
+%ENTRY%	_LT_RPSL_COMPATIBLE
+%KEY%	"licen[cs]"
+%STR%	"compatible source licen[cs]es? for the realnetworks public source licen[cs]e"
 #####
 # FIX-ME: these 'patterns' are really references, are they not?
 #####
