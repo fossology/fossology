@@ -58,5 +58,6 @@ char** fo_config_group_set(fo_conf* conf, int* length);
 char** fo_config_key_set(fo_conf* conf, char* group, int* length);
 int    fo_config_has_group(fo_conf* conf, char* group);
 int    fo_config_has_key(fo_conf* conf, char* group, char* key);
+char *trim(char *ptext);
 
 #endif /* FOSSCONFIG_H_INCLUDE */

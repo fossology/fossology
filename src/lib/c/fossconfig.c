@@ -661,13 +661,16 @@ int fo_config_has_key(fo_conf* conf, char* group, char* key)
   return g_tree_lookup(tree, key) != NULL;
 }
 
-/** 
- * \brief trim text
+/**
+ * \brief Trimming whitespace
  *
- * \param char *ptext - the text you want to trim
+ * will trim the lead/trail space
  *
+ * \param ptext - the string to trim
+ *
+ * \return the string after trim
  */
-void *trim(char *ptext)
+char *trim(char *ptext)
 {
   if (ptext && ptext[0])
   {
@@ -675,5 +678,7 @@ void *trim(char *ptext)
     while(isspace(ptext[len - 1])) ptext[--len] = 0;  // right trim
     while(isspace(*ptext)) ++ptext;  // left trim
   }
+
+  return ptext;
 }
 
