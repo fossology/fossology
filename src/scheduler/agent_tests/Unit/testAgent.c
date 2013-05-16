@@ -234,7 +234,7 @@ void test_agent_init()
   host_t* host;
 
   scheduler = scheduler_init(testdb, NULL);
-  scheduler_config_event(scheduler, NULL);
+  scheduler_agent_config(scheduler);
 
   meta_agent_t* ma = g_tree_lookup(scheduler->meta_agents, "copyright");
   for(iter = scheduler->host_queue; iter != NULL; iter = iter->next)
@@ -254,7 +254,6 @@ void test_agent_init()
   FO_ASSERT_PTR_NULL(ma->version);
   FO_ASSERT_TRUE(ma->valid);
   */
-  scheduler_close_event(scheduler, (void*)1);
   scheduler_destroy(scheduler);  
   // TODO finish
 }
