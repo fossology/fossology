@@ -7703,7 +7703,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
         *cp = ' ';
         f = 0;
       } else if (f || g) {
-        *cp = INVISIBLE;
+      //  *cp = INVISIBLE;   larry comment out this line, I do not think this logic is correct
       } else if ((*cp == '<') || (*cp == '>')) {
         *cp = ' ';
       }
