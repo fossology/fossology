@@ -89,6 +89,7 @@ CU_SuiteInfo suites[] =
     {"MetaAgent", init_suite, clean_suite, tests_meta_agent },
     {"Agent", init_suite, clean_suite, tests_agent },
     {"Event",init_suite,clean_suite, tests_event },
+    {"Database",init_suite,clean_suite, tests_database },
     CU_SUITE_INFO_NULL
 };
 

@@ -61,7 +61,7 @@ void terminate_event(void* args)
 
 void test_event_loop_get()
 {
-  FO_ASSERT_FALSE(el_created);
+  FO_ASSERT_TRUE(el_created);
 
   void* vl_addr = &vl_singleton;
   event_loop_t* vl = event_loop_get();

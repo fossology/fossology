@@ -40,7 +40,8 @@ FOCUNIT = libfocunit.a
 OBJECTS = testHost.o \
           testInterface.o \
           testAgent.o  \
-          testEvent.o
+          testEvent.o  \
+          testDatabase.o
 
 all:  $(EXE)
 test: fossology_testconfig $(EXE)
