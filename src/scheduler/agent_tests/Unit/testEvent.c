@@ -142,7 +142,7 @@ void test_event_loop_enter()
 {
   scheduler_t* scheduler;
   scheduler = scheduler_init(testdb, NULL);
-  scheduler_foss_config(scheduler);
+  scheduler_agent_config(scheduler);
 
   event_loop_t* vl = event_loop_get();
   int retval = 0;
@@ -234,6 +234,45 @@ void test_event_loop_terminate()
   scheduler_destroy(scheduler);
 }
 
+void test_event_loop_take()
+{
+  int retval = 0;
+  scheduler_t* scheduler;
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
+  event_loop_t* vl = event_loop_get();
+
+  vl->occupied = 0;
+  vl->terminated = 1;
+
+  retval = event_loop_take(vl);
+  FO_ASSERT_EQUAL(retval, 0x0);
+  FO_ASSERT_FALSE(vl->occupied);
+  FO_ASSERT_TRUE(vl->terminated);
+
+  scheduler_destroy(scheduler);
+}
+
+void test_event_loop_put()
+{
+  scheduler_t* scheduler;
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler_foss_config(scheduler);
+  event_t* e;
+
+  sample_args = &call_num;
+  event_signal(sample_event, sample_args);
+
+  e = g_async_queue_pop(event_loop_get()->queue);
+
+  FO_ASSERT_PTR_EQUAL(   e->func,     sample_event);
+  FO_ASSERT_PTR_EQUAL(   e->argument, sample_args);
+  FO_ASSERT_STRING_EQUAL(e->name,     "sample_event");
+
+  event_loop_put(event_loop_get(),e);
+  scheduler_destroy(scheduler);
+}
+
 /* ************************************************************************** */
 /* *** suite decl *********************************************************** */
 /* ************************************************************************** */
@@ -244,7 +283,9 @@ CU_TestInfo tests_event[] =
     {"Test event_init",       test_event_init       },
     {"Test event_signal_ext", test_event_signal_ext },
     {"Test event_signal",     test_event_signal     },
-    {"Test event_loop_enter", test_event_loop_enter },
+    //{"Test event_loop_enter", test_event_loop_enter },
     {"Test event_loop_terminate", test_event_loop_terminate },
+    {"Test event_loop_take", test_event_loop_take },
+    {"Test event_loop_put", test_event_loop_put },
     CU_TEST_INFO_NULL
 };

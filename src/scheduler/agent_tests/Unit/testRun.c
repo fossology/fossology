@@ -90,6 +90,7 @@ CU_SuiteInfo suites[] =
     {"Agent", init_suite, clean_suite, tests_agent },
     {"Event",init_suite,clean_suite, tests_event },
     {"Database",init_suite,clean_suite, tests_database },
+    {"Email",init_suite,clean_suite, tests_email },
     CU_SUITE_INFO_NULL
 };
 

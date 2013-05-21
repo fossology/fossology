@@ -157,7 +157,7 @@ void test_agent_death_event()
   fagent.status = AG_CREATED;
   //fagent.thread = g_thread_create(fake_thread, NULL, TRUE, NULL);
 
-  fjob.id            = -1;
+  fjob.id            = 1;
   fjob.status        = JB_STARTED;
   fjob.failed_agents = NULL;
 
@@ -217,6 +217,24 @@ void test_agent_create_event()
   FO_ASSERT_PTR_NOT_NULL(gl);
   FO_ASSERT_EQUAL(fagent->status, AG_SPAWNED);
   FO_ASSERT_PTR_EQUAL(ag, gl->data);
+
+  agent_ready_event(scheduler, fagent);
+  ag = g_tree_lookup(scheduler->agents, &fagent->pid);
+
+  FO_ASSERT_PTR_NOT_NULL(ag);
+  FO_ASSERT_EQUAL(fagent->status, AG_PAUSED);
+
+  agent_fail_event(scheduler, fagent);
+  ag = g_tree_lookup(scheduler->agents, &fagent->pid);
+
+  FO_ASSERT_PTR_NOT_NULL(ag);
+  FO_ASSERT_EQUAL(fagent->status, AG_FAILED);
+  
+
+  agent_update_event(scheduler, NULL);
+  ag = g_tree_lookup(scheduler->agents, &fagent->pid);
+  FO_ASSERT_PTR_NOT_NULL(ag);
+  FO_ASSERT_EQUAL(fagent->status, AG_FAILED);
  
   scheduler_close_event(scheduler, (void*)1); 
   scheduler_destroy(scheduler);
@@ -254,6 +272,7 @@ void test_agent_init()
   FO_ASSERT_PTR_NULL(ma->version);
   FO_ASSERT_TRUE(ma->valid);
   */
+
   scheduler_destroy(scheduler);  
   // TODO finish
 }

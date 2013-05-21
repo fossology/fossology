@@ -28,7 +28,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* testing sql statements */
 char sqltmp[1024] = {0};
 extern char* check_scheduler_tables;
-
 /**
  * Local function for testing data prepare
  */
@@ -236,6 +235,29 @@ void test_database_job()
   g_free(params);
   scheduler_destroy(scheduler);  
 }
+
+void test_email_notify()
+{
+  scheduler_t* scheduler;
+  job_t* job;
+  int jq_pk;
+
+  scheduler = scheduler_init(testdb, NULL);
+
+  FO_ASSERT_PTR_NULL(scheduler->db_conn);
+  database_init(scheduler);
+  email_init(scheduler);
+  FO_ASSERT_PTR_NOT_NULL(scheduler->db_conn);
+
+  jq_pk = Prepare_Testing_Data(scheduler);
+  job = job_init(scheduler->job_list, scheduler->job_queue, "ununpack", "localhost", -1, 0, 0);
+  job->id = jq_pk;
+ 
+  database_update_job(scheduler, job, JB_FAILED); 
+  FO_ASSERT_STRING_EQUAL(job_status_strings[job->status], "JOB_CHECKEDOUT");
+
+  scheduler_destroy(scheduler);
+}
 /* ************************************************************************** */
 /* **** suite declaration *************************************************** */
 /* ************************************************************************** */
@@ -249,17 +271,13 @@ CU_TestInfo tests_database[] =
     {"Test database_job",       test_database_job       },
     CU_TEST_INFO_NULL
 };
-/*
-CU_TestInfo tests_interface_thread[] =
+
+CU_TestInfo tests_email[] =
 {
-    {"Test sending \"close\"",  test_sending_close  },
-    {"Test sending \"load\"",   test_sending_load   },
-    {"Test sending \"kill\"",   test_sending_kill   },
-    {"Test sending \"pause\"",  test_sending_pause  },
-    {"Test sending \"status\"", test_sending_reload },
+    {"Test email_notify",  test_email_notify  },
     CU_TEST_INFO_NULL
 };
-*/
+
 
 
 
