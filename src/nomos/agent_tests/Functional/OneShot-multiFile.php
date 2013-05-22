@@ -74,7 +74,7 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
   	'gpl-3.0.txt' => 'FSF,GPL-3.0',
   	'gplv2.1' => 'LGPL-2.1',
   	'zlibLicense-1.2.2-2004-Oct-03' => 'Zlib',
-  	'DNSDigest.c' => 'APSL,Apache-2.0,BSD-style,GPL',
+  	'DNSDigest.c' => 'Apache-2.0,BSD-style,GPL',
   	'Oracle-Berkeley-DB.java' => 'Oracle-Berkeley-DB',
   	'sleepycat.php' => 'Sleepycat',
   	'jslint.js' => 'JSON',
@@ -99,8 +99,9 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
       list(,$fileName,,,$licenses) = preg_split('/[\s]+/', $nomosResults);
       $this->assertArrayHasKey($fileName, $this->Results,
         "Failure, filename $fileName was not found in the master results\n");
-      $this->assertContains($licenses, $this->Results[$fileName],
-        "Failure, Master results $this->Results[$fileName]\n do not match current results $licenses \n");
+      $expected  = $this->Results[$fileName];
+      $this->assertContains($licenses, $expected,
+        "Failure, Master results $expected \n do not match current results $licenses \n");
     }
   }
 }

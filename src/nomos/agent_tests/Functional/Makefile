@@ -44,7 +44,6 @@ testdata:
 	        cp /var/www/testfiles/$(test_file) ../testdata; \
 	    else \
 	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
-	        wget --directory-prefix=../testdata http://www.fossology.org/testdata/$(test_file); \
 	    fi; \
 	)
 
