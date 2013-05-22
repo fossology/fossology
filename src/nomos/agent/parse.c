@@ -1183,6 +1183,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mGPL] = 1;
       }
     }
+    else if (INFILE(_TITLE_GPL3_ref3_later)) {
+      INTERESTING("GPL-3.0+");
+    }
+    else if (INFILE(_TITLE_GPL3_ref3)) {
+      INTERESTING("GPL-3.0");
+    }
     if (INFILE(_LT_LGPL_1) || INFILE(_LT_LGPL_2)) {
       if ((INFILE(_PHR_LGPL21_OR_LATER) ||
                 RM_INFILE(_PHR_FSF_V21_OR_LATER)) &&  !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
