@@ -41,7 +41,8 @@ OBJECTS = testHost.o \
           testInterface.o \
           testAgent.o  \
           testEvent.o  \
-          testDatabase.o
+          testDatabase.o \
+          testJob.o
 
 all:  $(EXE)
 test: fossology_testconfig $(EXE)

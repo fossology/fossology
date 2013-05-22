@@ -188,6 +188,7 @@ void test_agent_create_event()
   job_t*  fjob = NULL;
   agent_t* ag = NULL;
   GList* gl = NULL;
+  int* pid_set = NULL;
 
   static int32_t id_gen = -1;
   GList*  iter;
@@ -208,6 +209,7 @@ void test_agent_create_event()
   fagent->owner  = fjob;
   fagent->status = AG_CREATED;
 
+  /* test agent_create_event */
   agent_create_event(scheduler, fagent);
 
   ag = g_tree_lookup(scheduler->agents, &fagent->pid);
@@ -218,24 +220,45 @@ void test_agent_create_event()
   FO_ASSERT_EQUAL(fagent->status, AG_SPAWNED);
   FO_ASSERT_PTR_EQUAL(ag, gl->data);
 
+  agent_pause(fagent);
+  FO_ASSERT_EQUAL(fagent->status, AG_PAUSED);
+  agent_unpause(fagent);
+  FO_ASSERT_EQUAL(fagent->status, AG_RUNNING);
+
+  //agent_print_status(fagent, stdout);
+
+  /* test agent_ready_event */
   agent_ready_event(scheduler, fagent);
   ag = g_tree_lookup(scheduler->agents, &fagent->pid);
 
   FO_ASSERT_PTR_NOT_NULL(ag);
   FO_ASSERT_EQUAL(fagent->status, AG_PAUSED);
 
+  /* test agent fail event */
   agent_fail_event(scheduler, fagent);
   ag = g_tree_lookup(scheduler->agents, &fagent->pid);
 
   FO_ASSERT_PTR_NOT_NULL(ag);
   FO_ASSERT_EQUAL(fagent->status, AG_FAILED);
   
-
+  /* test agent update event */
   agent_update_event(scheduler, NULL);
   ag = g_tree_lookup(scheduler->agents, &fagent->pid);
   FO_ASSERT_PTR_NOT_NULL(ag);
   FO_ASSERT_EQUAL(fagent->status, AG_FAILED);
  
+  pid_set = g_new0(int, 2);
+  pid_set[0] = fagent->pid;
+  pid_set[1] = 0;
+  fagent->return_code = 0;
+
+  /* test agent death event */
+  agent_death_event(scheduler, pid_set);
+  ag = g_tree_lookup(scheduler->agents, &fagent->pid);
+
+  FO_ASSERT_EQUAL(fagent->status, AG_FAILED);
+  FO_ASSERT_PTR_NULL(ag);
+
   scheduler_close_event(scheduler, (void*)1); 
   scheduler_destroy(scheduler);
 }
@@ -291,7 +314,7 @@ CU_TestInfo tests_meta_agent[] =
 CU_TestInfo tests_agent[] =
 {
     {"Test agent_init",  test_agent_init  },
-    {"Test agent_death_event", test_agent_death_event },
+    //{"Test agent_death_event", test_agent_death_event },
     {"Test agent_create_event", test_agent_create_event },
     CU_TEST_INFO_NULL
 };
