@@ -1014,7 +1014,7 @@
 #
 %ENTRY%	_LT_CCA_ref
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons attribution =FEW= licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons (attribution|public) =FEW= licen[cs]e"
 #
 # _LT_CCA_SA is for v 2.5
 %ENTRY%	_LT_CCA_SA
