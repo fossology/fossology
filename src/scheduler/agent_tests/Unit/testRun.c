@@ -89,6 +89,7 @@ CU_SuiteInfo suites[] =
     {"Database",init_suite,clean_suite, tests_database },
     {"Email",init_suite,clean_suite, tests_email },
     {"Job",init_suite,clean_suite, tests_job },
+    {"Scheduler", init_suite,clean_suite, tests_scheduler },
     {"MetaAgent", init_suite, clean_suite, tests_meta_agent },
     {"Agent", init_suite, clean_suite, tests_agent },
     {"Event",init_suite,clean_suite, tests_event },

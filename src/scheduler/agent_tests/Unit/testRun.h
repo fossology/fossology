@@ -55,5 +55,7 @@ extern CU_TestInfo tests_database[];
 extern CU_TestInfo tests_email[];
 
 extern CU_TestInfo tests_job[];
+
+extern CU_TestInfo tests_scheduler[];
 /* scheduler private declarations */
 event_loop_t* event_loop_get();

@@ -109,6 +109,8 @@ void test_job_event()
 
   job_fail_event(scheduler, job);
   FO_ASSERT_EQUAL(job->status, JB_FAILED);
+  
+  scheduler_update(scheduler);
 
   scheduler_destroy(scheduler);
 }
