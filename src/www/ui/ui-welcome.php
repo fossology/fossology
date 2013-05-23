@@ -67,7 +67,7 @@ class ui_welcome extends FO_Plugin
         $text4 = _("Inside FOSSology");
         $text41 = _("Some parts of FOSSology helpful to know about are:");
         $text42 = _("Software Repository");
-        $text43 = _("- Stores files downloaded for analysis.");
+        $text43 = _("- Stores files uploaded for analysis.");
         $text44 = _("Database");
         $text45 = _("- Stores user accounts, file information, and analysis results.");
         $text46 = _("Agents");
