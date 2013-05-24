@@ -11,7 +11,7 @@
 #pburl fossology = svn://svn.fossology.org/fossology/devel
 #pburl fossology = svn://svn+ssh.fossology.org/fossology/devel
 #pburl fossology = cvs://cvs.fossology.org/fossology/devel
-pburl fossology = svn+https://fossology.svn.sourceforge.net/svnroot/fossology/tags/2.2.0
+pburl fossology = svn+https://fossology.svn.sourceforge.net/svnroot/fossology/trunk/fossology/
 #pburl fossology = ftp://ftp.fossology.org/src/fossology-devel.tar.gz
 #pburl fossology = file:///src/fossology-devel.tar.gz
 #pburl fossology = dir:///src/fossology-devel
@@ -43,13 +43,13 @@ sshport fossology = 22
 #
 # Global version/tag for the project
 #
-projver fossology = 2.2.0
+projver fossology = trunk
 projtag fossology = 1
 # Hash of valid version names
 version fossology = trunk
 
 # Is it a test version or a production version
-testver fossology = false
+testver fossology = true
 
 # Additional repository to add at build time
 # addrepo centos-5-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm,ftp://ftp.project-builder.org/test/centos/5/pb.repo
