@@ -1010,7 +1010,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("CECILL-C");
   }
   else if (INFILE(_LT_CECILL_DUALref)) {
-    INTERESTING("CeCILL(dual)");
+    INTERESTING("CECILL(dual)");
     lmem[_mGPL] = lmem[_mLGPL] = 1;
   }
   else if (INFILE(_LT_CECILL_2_ref)) {
