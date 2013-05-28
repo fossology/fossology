@@ -6670,10 +6670,10 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
     lstr = lDebug ? "GPL-v1(#2)" : "GPL-1.0";
   }
   else if (URL_INFILE(_URL_CCGPL_V2)) {
-    lstr = "CC-GPL-2";
+    lstr = "GPL-2.0";
   }
   else if (INFILE(_LT_CC_GPL) || INFILE(_TITLE_CC_GPL)) {
-    lstr = "CC-GPL";
+    lstr = "GPL";
   }
   else if (NY_INFILE(_TEXT_GPLV3) && !INFILE(_TEXT_GPLV3_FOOTNOTE) &&
       HASREGEX(_TEXT_GPLV3, filetext)) {
