@@ -6397,6 +6397,10 @@ k
 %KEY%	"\<ap(ache|ple)\>"
 %STR%	"apple public source licen[cs]e (v|version )1\.?2"
 #
+%ENTRY%	_TITLE_Ferris
+%KEY%	"licen[cs]e"
+%STR%	"ferris public source licen[cs]e =FEW= 1\.?2"
+#
 %ENTRY%	_TITLE_APSL_style
 %KEY%	"\<ap(ache|ple)\>"
 %STR%	"based on the apple public source licen[cs]e"
