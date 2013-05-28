@@ -11,6 +11,7 @@
       <file>OneShot-bsd.php</file>
       <file>OneShot-Oracle-Berkeley-DB.php</file>
       <file>OneShot-JSON.php</file>
+      <file>Nomos-fun-test.php</file>
     </testsuite>
   </testsuites>
 </phpunit>
