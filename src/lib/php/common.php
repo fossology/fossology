@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -43,6 +43,7 @@ require_once("common-compare.php");
 require_once("common-db.php");
 require_once("common-auth.php");
 require_once("common-perms.php");
+require_once("common-users.php");
 
 /* Only include the command-line interface functions if it is required. */
 global $UI_CLI;
