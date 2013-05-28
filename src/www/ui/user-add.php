@@ -127,60 +127,10 @@ class user_add extends FO_Plugin {
     if (empty($new_upload_group_fk)) $new_upload_group_fk = 'NULL';
     if (empty($new_upload_perm)) $new_upload_perm = 'NULL';
 
-    if (empty($default_bucketpool_fk)) {
-      $VALUES = " VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
-      '$Email_notify','$agentList',$Folder, NULL,
-      '$uiChoice', $new_upload_group_fk, $new_upload_perm);";
-    }
-    else {
-      $VALUES = " VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
-               '$Email_notify','$agentList',$Folder, $default_bucketpool_fk,
-               '$uiChoice', $new_upload_group_fk, $new_upload_perm);";
-    }
+    $ErrMsg = add_user($User,$Desc,$Seed,$Hash,$Perm,$Email,
+                       $Email_notify,$agentList,$Folder, $default_bucketpool_fk);
 
-    $SQL = "INSERT INTO users
-      (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
-       email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk,
-       ui_preference, new_upload_group_fk, new_upload_perm)
-       $VALUES";
-     //print "<pre>SQL is:\n$SQL\n</pre>";
-
-     $result = pg_query($PG_CONN, $SQL);
-     DBCheckResult($result, $SQL, __FILE__, __LINE__);
-     pg_free_result($result);
-     /* Make sure it was added */
-     $SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
-     $result = pg_query($PG_CONN, $SQL);
-     DBCheckResult($result, $SQL, __FILE__, __LINE__);
-     $row = pg_fetch_assoc($result);
-     pg_free_result($result);
-     if (empty($row['user_name'])) {
-       $text = _("Failed to insert user.");
-       return ($text);
-     }
-     else
-     {
-      $user_name = $row['user_name'];
-      $user_pk = $row['user_pk'];
-      // Add user group
-      $sql = "insert into groups(group_name) values ('$user_name')";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      /* Get new group_pk */
-      $sql = "select group_pk from groups where group_name='$user_name'";
-      $GroupResult = pg_query($PG_CONN, $sql);
-      DBCheckResult($GroupResult, $sql, __FILE__, __LINE__);
-      $GroupRow = pg_fetch_assoc($GroupResult);
-      $group_pk = $GroupRow['group_pk'];
-      pg_free_result($GroupResult);
-      // make user a member of their own group
-      $sql = "insert into group_user_member(group_fk, user_fk, group_perm) values($group_pk, $user_pk, 1)";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-    }
-
-    return (NULL);
+    return ($ErrMsg);
   } // Add()
 
   /**
