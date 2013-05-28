@@ -8933,6 +8933,10 @@ k
 %KEY% "licen[cs]"	
 %STR%	"w?w?w?\.?eu-datagrid\.?org/license\.?html"
 #
+%ENTRY%	_URL_OPEN_PL_V10
+%KEY% "open"	
+%STR%	"opencontent\.?org/openpub"
+#
 %ENTRY%	_MIN_AFFERO_V3
 %KEY%	"licen[cs]"
 %STR%	"(Affero_v3 lic-instance|affero[ _-]?v3 =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= affero?[ _-]v3)"

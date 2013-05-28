@@ -3897,7 +3897,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Open Publication license
    */
   if (INFILE(_LT_OPENPUBL_1) || INFILE(_LT_OPENPUBL_2)) {
-    if (INFILE(_TITLE_OPENPUBL10)) {
+    if (INFILE(_TITLE_OPENPUBL10) || URL_INFILE(_URL_OPEN_PL_V10)) {
       INTERESTING("Open-PL-1.0");
     }
     else if (INFILE(_TITLE_OPENPUBL)) {
