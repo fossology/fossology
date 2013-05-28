@@ -3900,7 +3900,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (INFILE(_TITLE_OPENPUBL10)) {
       INTERESTING("Open-PL-1.0");
     }
-    else if (INFILE(_TITLE_OPENPUBL) && !GPL_INFILE(_LT_GPLref14)) {
+    else if (INFILE(_TITLE_OPENPUBL)) {
       INTERESTING("Open-PL");
     }
     else {
