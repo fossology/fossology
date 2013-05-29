@@ -2756,7 +2756,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_INTEL_6
 %KEY%	"licen[cs]"
-%STR%	"agree to intel['] software licen[cs]e"
+%STR%	"agree to intel =FEW= software licen[cs]e"
 #
 %ENTRY%	_LT_INTEL_7
 %KEY%	"licen[cs]"

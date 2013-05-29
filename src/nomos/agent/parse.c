@@ -1488,7 +1488,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "GPL(ref20)" : cp);
         lmem[_mGPL] = 1;
       }
-      else if (!LVAL(_TEXT_GNU_LIC_INFO) &&
+      else if (!LVAL(_TEXT_GNU_LIC_INFO) && !INFILE(_LT_INTEL_7) && 
           (URL_INFILE(_URL_GPL_1) ||
               URL_INFILE(_URL_GPL_2) ||
               URL_INFILE(_URL_GPL_3))) {
@@ -1693,7 +1693,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       && (!INFILE(_LT_GPL_NAMED_COMPATIBLE))
       && !INFILE(_LT_OPENPUBL_1) 
       && !INFILE(_LT_OPENPUBL_2)
-      && (!INFILE(_LT_GPL_NAMED_EXHIBIT))) {
+      && (!INFILE(_LT_GPL_NAMED_EXHIBIT))
+      && !INFILE(_LT_INTEL_7)) {
     cp = GPLVERS();
     INTERESTING(lDebug ? "GPL(named)" : cp);
   }
@@ -1751,7 +1752,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       else if (INFILE(_TITLE_X11)) {
         INTERESTING("X11");
       }
-      else {
+      else if (!INFILE(_LT_INTEL_7)) {
         INTERESTING(lDebug ? "MIT-style(1)" : "MIT-style");
         lmem[_mMIT] = 1;
       }
@@ -2707,10 +2708,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "Intel(8)" : "Intel");
   }
   else if (INFILE(_LT_INTEL_6)) {
-    INTERESTING(lDebug ? "Intel(9)" : "Intel");
+    INTERESTING(lDebug ? "Intel(9)" : "Intel-other");
   }
   else if (INFILE(_LT_INTEL_7)) {
-    INTERESTING(lDebug ? "Intel(10)" : "Intel");
+    INTERESTING(lDebug ? "Intel(10)" : "Intel-other");
   }
   else if (HASTEXT(_TEXT_INTELCORP, 0)) {
     if (INFILE(_LT_INTEL_1)) {
