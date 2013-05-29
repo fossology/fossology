@@ -5715,6 +5715,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("ErlPL-1.1");
   }
 
+  /**  CCLRC License */
+  if (INFILE(_TITLE_CCLRC)) {
+    INTERESTING("CCLRC");
+  }
+
   /*
    * Some licenses point you to files/URLs...
    */

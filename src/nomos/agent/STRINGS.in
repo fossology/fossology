@@ -7686,6 +7686,10 @@ k
 %KEY%	"licen[cs]e"
 %STR%	"x window system licen[cs]e =FEW= x11"
 #
+%ENTRY%	_TITLE_CCLRC
+%KEY%	"licen[cs]e"
+%STR%	"under the terms of the cclrc licen[cs]e"
+#
 %ENTRY%	_MISC_DEBDATA
 %KEY%	=NULL=
 %STR%	"data.tar.*$"
