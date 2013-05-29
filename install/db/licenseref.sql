@@ -10074,49 +10074,6 @@ FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'http://www.python.org/download/releases/2.4.6/license/', NULL, NULL, NULL, 'Python License 2.4.4', NULL, NULL, NULL, '', NULL, false, false, false, '71533413d9aeae7481da0b19eedcb6d2', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (258, 'SGI-B1.1', 'SGI FREE SOFTWARE LICENSE B (Version 1.1 [02/22/2000]) 
-1.	Definitions.
-1.1.	"Additional Notice Provisions" means such additional provisions as appear in the Notice in Original Code under the heading "Additional Notice Provisions."
-1.2.	"Covered Code" means the Original Code or Modifications, or any combination thereof.
-1.3.	"Hardware" means any physical device that accepts input, processes input, stores the results of processing, and/or provides output.
-1.4.	"Larger Work" means a work that combines Covered Code or portions thereof with code not governed by the terms of this License.
-1.5.	"Licensable" means having the right to grant, to the maximum extent possible, whether at the time of the initial grant or subsequently acquired, any and all of the rights conveyed herein.
-1.6.	"License" means this document.
-1.7.	"Licensed Patents" means patent claims Licensable by SGI that are infringed by the use or sale of Original Code or any Modifications provided by SGI, or any combination thereof.
-1.8.	"Modifications" means any addition to or deletion from the substance or structure of the Original Code or any previous Modifications. When Covered Code is released as a series of files, a Modification is: 
-A.	Any addition to the contents of a file containing Original Code and/or addition to or deletion from the contents of a file containing previous Modifications.
-B.	Any new file that contains any part of the Original Code or previous Modifications.
-1.9.	"Notice" means any notice in Original Code or Covered Code, as required by and in compliance with this License.
-1.10.	"Original Code" means source code of computer software code that is described in the source code Notice required by Exhibit A as Original Code, and updates and error corrections specifically thereto.
-1.11.	"Recipient" means an individual or a legal entity exercising rights under, and complying with all of the terms of, this License or a future version of this License issued under Section 8. For legal entities, "Recipient" includes any entity that controls, is controlled by, or is under common control with Recipient. For purposes of this definition, "control" of an entity means (a) the power, direct or indirect, to direct or manage such entity, or (b) ownership of fifty percent (50%) or more of the outstanding shares or beneficial ownership of such entity.
-1.12.	"Recipient Patents" means patent claims Licensable by a Recipient that are infringed by the use or sale of Original Code or any Modifications provided by SGI, or any combination thereof. 
-1.13.	"SGI" means Silicon Graphics, Inc.
-1.14.	"SGI Patents" means patent claims Licensable by SGI other than the Licensed Patents.
-2.	License Grant and Restrictions.
-2.1.	SGI License Grant. Subject to the terms of this License and any third party intellectual property claims, for the duration of intellectual property protections inherent in the Original Code, SGI hereby grants Recipient a worldwide, royalty-free, non-exclusive license, to do the following: (i) under copyrights Licensable by SGI, to reproduce, distribute, create derivative works from, and, to the extent applicable, display and perform the Original Code and/or any Modifications provided by SGI alone and/or as part of a Larger Work; and (ii) under any Licensable Patents, to make, have made, use, sell, offer for sale, import and/or otherwise transfer the Original Code and/or any Modifications provided by SGI. Recipient accepts the terms and conditions of this License by undertaking any of the aforementioned actions. The patent license shall apply to the Covered Code if, at the time any related Modification is added, such addition of the Modification causes such combination to be covered by the Licensed Patents. The patent license in Section 2.1(ii) shall not apply to any other combinations that include the Modification. No patent license is provided under SGI Patents for infringements of SGI Patents by Modifications not provided by SGI or combinations of Original Code and Modifications not provided by SGI. 
-2.2.	Recipient License Grant. Subject to the terms of this License and any third party intellectual property claims, Recipient hereby grants SGI and any other Recipients a worldwide, royalty-free, non-exclusive license, under any Recipient Patents, to make, have made, use, sell, offer for sale, import and/or otherwise transfer the Original Code and/or any Modifications provided by SGI.
-2.3.	No License For Hardware Implementations. The licenses granted in Section 2.1 and 2.2 are not applicable to implementation in Hardware of the algorithms embodied in the Original Code or any Modifications provided by SGI .
-3.	Redistributions. 
-3.1.	Retention of Notice/Copy of License. The Notice set forth in Exhibit A, below, must be conspicuously retained or included in any and all redistributions of Covered Code. For distributions of the Covered Code in source code form, the Notice must appear in every file that can include a text comments field; in executable form, the Notice and a copy of this License must appear in related documentation or collateral where the Recipient’s rights relating to Covered Code are described. Any Additional Notice Provisions which actually appears in the Original Code must also be retained or included in any and all redistributions of Covered Code.
-3.2.	Alternative License. Provided that Recipient is in compliance with the terms of this License, Recipient may, so long as without derogation of any of SGI’s rights in and to the Original Code, distribute the source code and/or executable version(s) of Covered Code under (1) this License; (2) a license identical to this License but for only such changes as are necessary in order to clarify Recipient’s role as licensor of Modifications; and/or (3) a license of Recipient’s choosing, containing terms different from this License, provided that the license terms include this Section 3 and Sections 4, 6, 7, 10, 12, and 13, which terms may not be modified or superseded by any other terms of such license. If Recipient elects to use any license other than this License, Recipient must make it absolutely clear that any of its terms which differ from this License are offered by Recipient alone, and not by SGI. It is emphasized that this License is a limited license, and, regardless of the license form employed by Recipient in accordance with this Section 3.2, Recipient may relicense only such rights, in Original Code and Modifications by SGI, as it has actually been granted by SGI in this License.
-3.3.	Indemnity. Recipient hereby agrees to indemnify SGI for any liability incurred by SGI as a result of any such alternative license terms Recipient offers.
-4.	Termination. This License and the rights granted hereunder will terminate automatically if Recipient breaches any term herein and fails to cure such breach within 30 days thereof. Any sublicense to the Covered Code that is properly granted shall survive any termination of this License, absent termination by the terms of such sublicense. Provisions that, by their nature, must remain in effect beyond the termination of this License, shall survive.
-5.	No Trademark Or Other Rights. This License does not grant any rights to: (i) any software apart from the Covered Code, nor shall any other rights or licenses not expressly granted hereunder arise by implication, estoppel or otherwise with respect to the Covered Code; (ii) any trade name, trademark or service mark whatsoever, including without limitation any related right for purposes of endorsement or promotion of products derived from the Covered Code, without prior written permission of SGI; or (iii) any title to or ownership of the Original Code, which shall at all times remains with SGI. All rights in the Original Code not expressly granted under this License are reserved. 
-6.	Compliance with Laws; Non-Infringement. There are various worldwide laws, regulations, and executive orders applicable to dispositions of Covered Code, including without limitation export, re-export, and import control laws, regulations, and executive orders, of the U.S. government and other countries, and Recipient is reminded it is obliged to obey such laws, regulations, and executive orders. Recipient may not distribute Covered Code that (i) in any way infringes (directly or contributorily) any intellectual property rights of any kind of any other person or entity or (ii) breaches any representation or warranty, express, implied or statutory, to which, under any applicable law, it might be deemed to have been subject.
-7.	Claims of Infringement. If Recipient learns of any third party claim that any disposition of Covered Code and/or functionality wholly or partially infringes the third party''s intellectual property rights, Recipient will promptly notify SGI of such claim.
-8.	Versions of the License. SGI may publish revised and/or new versions of the License from time to time, each with a distinguishing version number. Once Covered Code has been published under a particular version of the License, Recipient may, for the duration of the license, continue to use it under the terms of that version, or choose to use such Covered Code under the terms of any subsequent version published by SGI. Subject to the provisions of Sections 3 and 4 of this License, only SGI may modify the terms applicable to Covered Code created under this License.
-9.	DISCLAIMER OF WARRANTY. COVERED CODE IS PROVIDED "AS IS." ALL EXPRESS AND IMPLIED WARRANTIES AND CONDITIONS ARE DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES AND CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. SGI ASSUMES NO RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE. SHOULD THE SOFTWARE PROVE DEFECTIVE IN ANY RESPECT, SGI ASSUMES NO COST OR LIABILITY FOR SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER OF WARRANTY IS AN ESSENTIAL PART OF THIS LICENSE. NO USE OF ANY COVERED CODE IS AUTHORIZED HEREUNDER EXCEPT SUBJECT TO THIS DISCLAIMER.
-10.	LIMITATION OF LIABILITY. UNDER NO CIRCUMSTANCES NOR LEGAL THEORY, WHETHER TORT (INCLUDING, WITHOUT LIMITATION, NEGLIGENCE OR STRICT LIABILITY), CONTRACT, OR OTHERWISE, SHALL SGI OR ANY SGI LICENSOR BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, LOSS OF DATA, COMPUTER FAILURE OR MALFUNCTION, OR ANY AND ALL OTHER COMMERCIAL DAMAGES OR LOSSES, EVEN IF SUCH PARTY SHALL HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGES. THIS LIMITATION OF LIABILITY SHALL NOT APPLY TO LIABILITY FOR DEATH OR PERSONAL INJURY RESULTING FROM SGI''s NEGLIGENCE TO THE EXTENT APPLICABLE LAW PROHIBITS SUCH LIMITATION. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THAT EXCLUSION AND LIMITATION MAY NOT APPLY TO RECIPIENT.
-11.	Indemnity. Recipient shall be solely responsible for damages arising, directly or indirectly, out of its utilization of rights under this License. Recipient will defend, indemnify and hold harmless Silicon Graphics, Inc. from and against any loss, liability, damages, costs or expenses (including the payment of reasonable attorneys fees) arising out of Recipient''s use, modification, reproduction and distribution of the Covered Code or out of any representation or warranty made by Recipient.
-12.	U.S. Government End Users. The Covered Code is a "commercial item" consisting of "commercial computer software" as such terms are defined in title 48 of the Code of Federal Regulations and all U.S. Government End Users acquire only the rights set forth in this License and are subject to the terms of this License.
-13.	Miscellaneous. This License represents the complete agreement concerning the its subject matter. If any provision of this License is held to be unenforceable, such provision shall be reformed so as to achieve as nearly as possible the same legal and economic effect as the original provision and the remainder of this License will remain in effect. This License shall be governed by and construed in accordance with the laws of the United States and the State of California as applied to agreements entered into and to be performed entirely within California between California residents. Any litigation relating to this License shall be subject to the exclusive jurisdiction of the Federal Courts of the Northern District of California (or, absent subject matter jurisdiction in such courts, the courts of the State of California), with venue lying exclusively in Santa Clara County, California, with the losing party responsible for costs, including without limitation, court costs and reasonable attorneys fees and expenses. The application of the United Nations Convention on Contracts for the International Sale of Goods is expressly excluded. Any law or regulation that provides that the language of a contract shall be construed against the drafter shall not apply to this License.
-Exhibit A
-License Applicability. Except to the extent portions of this file are made subject to an alternative license as permitted in the SGI Free Software License B, Version 1.1 (the "License"), the contents of this file are subject only to the provisions of the License. You may not use this file except in compliance with the License. You may obtain a copy of the License at Silicon Graphics, Inc., attn: Legal Services, 1600 Amphitheatre Parkway, Mountain View, CA 94043-1351, or at: 
-http://oss.sgi.com/projects/FreeB
-Note that, as provided in the License, the Software is distributed on an "AS IS" basis, with ALL EXPRESS AND IMPLIED WARRANTIES AND CONDITIONS DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES AND CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
-Original Code. The Original Code is: [name of software, version number, and release date], developed by Silicon Graphics, Inc. The Original Code is Copyright (c) [dates of first publication, as appearing in the Notice in the Original Code] Silicon Graphics, Inc. Copyright in any portions created by third parties is as indicated elsewhere herein. All Rights Reserved.
-Additional Notice Provisions: [such additional provisions, if any, as appear in the Notice in the Original Code under the heading "Additional Notice Provisions"]
-', 'http://oss.sgi.com/projects/FreeB/SGIFreeSWLicB.1.1.doc', NULL, NULL, NULL, 'SGI Free Software License B 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '3624af6e6b1e25bbf18d0c1314d1f4dd', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (259, 'SPL-1.0', 'SUN PUBLIC LICENSE Version 1.0
 
 1. Definitions.
@@ -10706,6 +10663,48 @@ Carnegie Mellon requests users of this software to return to
            Carnegie Mellon University
            Pittsburgh PA 15213-3890
 or Software.Distribution@CS.CMU.EDU any improvements or extensions that they make and grant Carnegie Mellon the rights to redistribute these changes.', 'http://www.gnu.org/software/hurd/gnumach-doc/CMU-License.html', NULL, NULL, NULL, 'CMU License', NULL, NULL, NULL, '', NULL, false, false, false, 'f1ae60849277a50a9bb2fd02fabb9c22', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (258, 'SGI-B-1.1', 'SGI FREE SOFTWARE LICENSE B (Version 1.1 [02/22/2000]) 
+1.	Definitions.
+1.1.	"Additional Notice Provisions" means such additional provisions as appear in the Notice in Original Code under the heading "Additional Notice Provisions."
+1.2.	"Covered Code" means the Original Code or Modifications, or any combination thereof.
+1.3.	"Hardware" means any physical device that accepts input, processes input, stores the results of processing, and/or provides output.
+1.4.	"Larger Work" means a work that combines Covered Code or portions thereof with code not governed by the terms of this License.
+1.5.	"Licensable" means having the right to grant, to the maximum extent possible, whether at the time of the initial grant or subsequently acquired, any and all of the rights conveyed herein.
+1.6.	"License" means this document.
+1.7.	"Licensed Patents" means patent claims Licensable by SGI that are infringed by the use or sale of Original Code or any Modifications provided by SGI, or any combination thereof.
+1.8.	"Modifications" means any addition to or deletion from the substance or structure of the Original Code or any previous Modifications. When Covered Code is released as a series of files, a Modification is: 
+A.	Any addition to the contents of a file containing Original Code and/or addition to or deletion from the contents of a file containing previous Modifications.
+B.	Any new file that contains any part of the Original Code or previous Modifications.
+1.9.	"Notice" means any notice in Original Code or Covered Code, as required by and in compliance with this License.
+1.10.	"Original Code" means source code of computer software code that is described in the source code Notice required by Exhibit A as Original Code, and updates and error corrections specifically thereto.
+1.11.	"Recipient" means an individual or a legal entity exercising rights under, and complying with all of the terms of, this License or a future version of this License issued under Section 8. For legal entities, "Recipient" includes any entity that controls, is controlled by, or is under common control with Recipient. For purposes of this definition, "control" of an entity means (a) the power, direct or indirect, to direct or manage such entity, or (b) ownership of fifty percent (50%) or more of the outstanding shares or beneficial ownership of such entity.
+1.12.	"Recipient Patents" means patent claims Licensable by a Recipient that are infringed by the use or sale of Original Code or any Modifications provided by SGI, or any combination thereof. 
+1.13.	"SGI" means Silicon Graphics, Inc.
+1.14.	"SGI Patents" means patent claims Licensable by SGI other than the Licensed Patents.
+2.	License Grant and Restrictions.
+2.1.	SGI License Grant. Subject to the terms of this License and any third party intellectual property claims, for the duration of intellectual property protections inherent in the Original Code, SGI hereby grants Recipient a worldwide, royalty-free, non-exclusive license, to do the following: (i) under copyrights Licensable by SGI, to reproduce, distribute, create derivative works from, and, to the extent applicable, display and perform the Original Code and/or any Modifications provided by SGI alone and/or as part of a Larger Work; and (ii) under any Licensable Patents, to make, have made, use, sell, offer for sale, import and/or otherwise transfer the Original Code and/or any Modifications provided by SGI. Recipient accepts the terms and conditions of this License by undertaking any of the aforementioned actions. The patent license shall apply to the Covered Code if, at the time any related Modification is added, such addition of the Modification causes such combination to be covered by the Licensed Patents. The patent license in Section 2.1(ii) shall not apply to any other combinations that include the Modification. No patent license is provided under SGI Patents for infringements of SGI Patents by Modifications not provided by SGI or combinations of Original Code and Modifications not provided by SGI. 
+2.2.	Recipient License Grant. Subject to the terms of this License and any third party intellectual property claims, Recipient hereby grants SGI and any other Recipients a worldwide, royalty-free, non-exclusive license, under any Recipient Patents, to make, have made, use, sell, offer for sale, import and/or otherwise transfer the Original Code and/or any Modifications provided by SGI.
+2.3.	No License For Hardware Implementations. The licenses granted in Section 2.1 and 2.2 are not applicable to implementation in Hardware of the algorithms embodied in the Original Code or any Modifications provided by SGI .
+3.	Redistributions. 
+3.1.	Retention of Notice/Copy of License. The Notice set forth in Exhibit A, below, must be conspicuously retained or included in any and all redistributions of Covered Code. For distributions of the Covered Code in source code form, the Notice must appear in every file that can include a text comments field; in executable form, the Notice and a copy of this License must appear in related documentation or collateral where the Recipient’s rights relating to Covered Code are described. Any Additional Notice Provisions which actually appears in the Original Code must also be retained or included in any and all redistributions of Covered Code.
+3.2.	Alternative License. Provided that Recipient is in compliance with the terms of this License, Recipient may, so long as without derogation of any of SGI’s rights in and to the Original Code, distribute the source code and/or executable version(s) of Covered Code under (1) this License; (2) a license identical to this License but for only such changes as are necessary in order to clarify Recipient’s role as licensor of Modifications; and/or (3) a license of Recipient’s choosing, containing terms different from this License, provided that the license terms include this Section 3 and Sections 4, 6, 7, 10, 12, and 13, which terms may not be modified or superseded by any other terms of such license. If Recipient elects to use any license other than this License, Recipient must make it absolutely clear that any of its terms which differ from this License are offered by Recipient alone, and not by SGI. It is emphasized that this License is a limited license, and, regardless of the license form employed by Recipient in accordance with this Section 3.2, Recipient may relicense only such rights, in Original Code and Modifications by SGI, as it has actually been granted by SGI in this License.
+3.3.	Indemnity. Recipient hereby agrees to indemnify SGI for any liability incurred by SGI as a result of any such alternative license terms Recipient offers.
+4.	Termination. This License and the rights granted hereunder will terminate automatically if Recipient breaches any term herein and fails to cure such breach within 30 days thereof. Any sublicense to the Covered Code that is properly granted shall survive any termination of this License, absent termination by the terms of such sublicense. Provisions that, by their nature, must remain in effect beyond the termination of this License, shall survive.
+5.	No Trademark Or Other Rights. This License does not grant any rights to: (i) any software apart from the Covered Code, nor shall any other rights or licenses not expressly granted hereunder arise by implication, estoppel or otherwise with respect to the Covered Code; (ii) any trade name, trademark or service mark whatsoever, including without limitation any related right for purposes of endorsement or promotion of products derived from the Covered Code, without prior written permission of SGI; or (iii) any title to or ownership of the Original Code, which shall at all times remains with SGI. All rights in the Original Code not expressly granted under this License are reserved. 
+6.	Compliance with Laws; Non-Infringement. There are various worldwide laws, regulations, and executive orders applicable to dispositions of Covered Code, including without limitation export, re-export, and import control laws, regulations, and executive orders, of the U.S. government and other countries, and Recipient is reminded it is obliged to obey such laws, regulations, and executive orders. Recipient may not distribute Covered Code that (i) in any way infringes (directly or contributorily) any intellectual property rights of any kind of any other person or entity or (ii) breaches any representation or warranty, express, implied or statutory, to which, under any applicable law, it might be deemed to have been subject.
+7.	Claims of Infringement. If Recipient learns of any third party claim that any disposition of Covered Code and/or functionality wholly or partially infringes the third party''s intellectual property rights, Recipient will promptly notify SGI of such claim.
+8.	Versions of the License. SGI may publish revised and/or new versions of the License from time to time, each with a distinguishing version number. Once Covered Code has been published under a particular version of the License, Recipient may, for the duration of the license, continue to use it under the terms of that version, or choose to use such Covered Code under the terms of any subsequent version published by SGI. Subject to the provisions of Sections 3 and 4 of this License, only SGI may modify the terms applicable to Covered Code created under this License.
+9.	DISCLAIMER OF WARRANTY. COVERED CODE IS PROVIDED "AS IS." ALL EXPRESS AND IMPLIED WARRANTIES AND CONDITIONS ARE DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES AND CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. SGI ASSUMES NO RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE. SHOULD THE SOFTWARE PROVE DEFECTIVE IN ANY RESPECT, SGI ASSUMES NO COST OR LIABILITY FOR SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER OF WARRANTY IS AN ESSENTIAL PART OF THIS LICENSE. NO USE OF ANY COVERED CODE IS AUTHORIZED HEREUNDER EXCEPT SUBJECT TO THIS DISCLAIMER.
+10.	LIMITATION OF LIABILITY. UNDER NO CIRCUMSTANCES NOR LEGAL THEORY, WHETHER TORT (INCLUDING, WITHOUT LIMITATION, NEGLIGENCE OR STRICT LIABILITY), CONTRACT, OR OTHERWISE, SHALL SGI OR ANY SGI LICENSOR BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, LOSS OF DATA, COMPUTER FAILURE OR MALFUNCTION, OR ANY AND ALL OTHER COMMERCIAL DAMAGES OR LOSSES, EVEN IF SUCH PARTY SHALL HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGES. THIS LIMITATION OF LIABILITY SHALL NOT APPLY TO LIABILITY FOR DEATH OR PERSONAL INJURY RESULTING FROM SGI''s NEGLIGENCE TO THE EXTENT APPLICABLE LAW PROHIBITS SUCH LIMITATION. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THAT EXCLUSION AND LIMITATION MAY NOT APPLY TO RECIPIENT.
+11.	Indemnity. Recipient shall be solely responsible for damages arising, directly or indirectly, out of its utilization of rights under this License. Recipient will defend, indemnify and hold harmless Silicon Graphics, Inc. from and against any loss, liability, damages, costs or expenses (including the payment of reasonable attorneys fees) arising out of Recipient''s use, modification, reproduction and distribution of the Covered Code or out of any representation or warranty made by Recipient.
+12.	U.S. Government End Users. The Covered Code is a "commercial item" consisting of "commercial computer software" as such terms are defined in title 48 of the Code of Federal Regulations and all U.S. Government End Users acquire only the rights set forth in this License and are subject to the terms of this License.
+13.	Miscellaneous. This License represents the complete agreement concerning the its subject matter. If any provision of this License is held to be unenforceable, such provision shall be reformed so as to achieve as nearly as possible the same legal and economic effect as the original provision and the remainder of this License will remain in effect. This License shall be governed by and construed in accordance with the laws of the United States and the State of California as applied to agreements entered into and to be performed entirely within California between California residents. Any litigation relating to this License shall be subject to the exclusive jurisdiction of the Federal Courts of the Northern District of California (or, absent subject matter jurisdiction in such courts, the courts of the State of California), with venue lying exclusively in Santa Clara County, California, with the losing party responsible for costs, including without limitation, court costs and reasonable attorneys fees and expenses. The application of the United Nations Convention on Contracts for the International Sale of Goods is expressly excluded. Any law or regulation that provides that the language of a contract shall be construed against the drafter shall not apply to this License.
+Exhibit A
+License Applicability. Except to the extent portions of this file are made subject to an alternative license as permitted in the SGI Free Software License B, Version 1.1 (the "License"), the contents of this file are subject only to the provisions of the License. You may not use this file except in compliance with the License. You may obtain a copy of the License at Silicon Graphics, Inc., attn: Legal Services, 1600 Amphitheatre Parkway, Mountain View, CA 94043-1351, or at: 
+http://oss.sgi.com/projects/FreeB
+Note that, as provided in the License, the Software is distributed on an "AS IS" basis, with ALL EXPRESS AND IMPLIED WARRANTIES AND CONDITIONS DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES AND CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+Original Code. The Original Code is: [name of software, version number, and release date], developed by Silicon Graphics, Inc. The Original Code is Copyright (c) [dates of first publication, as appearing in the Notice in the Original Code] Silicon Graphics, Inc. Copyright in any portions created by third parties is as indicated elsewhere herein. All Rights Reserved.
+Additional Notice Provisions: [such additional provisions, if any, as appear in the Notice in the Original Code under the heading "Additional Notice Provisions"]', 'http://oss.sgi.com/projects/FreeB/SGIFreeSWLicB.1.1.doc', NULL, NULL, NULL, 'SGI Free Software License B 1.1', NULL, NULL, NULL, '', NULL, false, false, false, 'e17d8e6897944d18ccc612023531bdf3', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (264, 'Sleepycat', 'The Sleepycat License
 Copyright (c) 1990-1999
 Sleepycat Software. All rights reserved.
@@ -31316,13 +31315,6 @@ Redistribution and use in source and binary forms, with or without modification,
     contributors may be used to endorse or promote products derived from 
     this software without specific prior written permission.
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://ultrasound.engineering.wustl.edu/index.php/Washington_University_in_St._Louis', NULL, NULL, NULL, 'Washing University Source Code License', NULL, NULL, NULL, '', NULL, false, false, false, '25da96f07556435b05bf767d6165f34c', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (392, 'SGI-B2.0', 'SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
-Copyright (C) [dates of first publication] Silicon Graphics, Inc. All Rights Reserved.
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice including the dates of first publication and either this permission notice or a reference to http://oss.sgi.com/projects/FreeB/ shall be included in all copies or substantial portions of the Software. 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL SILICON GRAPHICS, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-Except as contained in this notice, the name of Silicon Graphics, Inc. shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from Silicon Graphics, Inc.
-', 'http://oss.sgi.com/projects/FreeB/SGIFreeSWLicB.2.0.doc', NULL, NULL, NULL, 'SGI Free Software License B 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '8b445f0e163c98e77d735eae298f4013', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (317, 'GPL-2.0', 'GNU General Public License, version 2
 What to do if you see a possible GPL violation
 Translations of the GPL
@@ -38602,3 +38594,2027 @@ This license is effective from the date purchased by Licensee and is perpetual u
 This Agreement is the complete and exclusive statement of agreements between Licensee and Licensor relating to the Software. It supersedes all prior agreements and understandings, and prevails over any conflicting or additional terms of any quote, order, acknowledgement, or similar communication between the parties before or during the term of this Agreement. It may be modified only in writing signed by both parties.
 
 This Agreement is made under, shall be governed by and construed in accordance with the French law.', 'http://www.xmlmind.com/spellchecker/license_sc-sdk.html', NULL, NULL, NULL, 'XMLmind Spell Checker SDK License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '44b6167bb706ecbffb9685cdbf9cbc25', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (463, 'Cryptogams', 'Copyright (c) 2006, CRYPTOGAMS by <appro@openssl.org>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+      *	Redistributions of source code must retain copyright notices,
+	this list of conditions and the following disclaimer.
+
+      *	Redistributions in binary form must reproduce the above
+	copyright notice, this list of conditions and the following
+	disclaimer in the documentation and/or other materials
+	provided with the distribution.
+
+      *	Neither the name of the CRYPTOGAMS nor the names of its
+	copyright holder and contributors may be used to endorse or
+	promote products derived from this software without specific
+	prior written permission.
+
+ALTERNATIVELY, provided that this notice is retained in full, this
+product may be distributed under the terms of the GNU General Public
+License (GPL), in which case the provisions of the GPL apply INSTEAD OF
+those given above.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://www.openssl.org/~appro/cryptogams/', NULL, NULL, NULL, 'Cryptogams', NULL, NULL, NULL, '', NULL, false, false, false, 'cd1a147bce6b38197f6fd3eb1c566c28', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (464, 'H2-1.0', 'H2 is dual licensed and available under a modified version of the MPL 1.1 (Mozilla Public License) or under the (unmodified) EPL 1.0 (Eclipse Public License). The changes to the MPL are underlined. There is a license FAQ for both the MPL and the EPL, most of that is applicable to the H2 license as well.
+
+You can use H2 for free. You can integrate it into your applications (including in commercial applications), and you can distribute it.
+Files containing only your code are not covered by this license (it is ''commercial friendly'').
+Modifications to the H2 source code must be published.
+You don''t need to provide the source code of H2 if you did not modify anything.
+If you distribute a binary that includes H2, you need to add a disclaimer of liability - see the example below.
+However, nobody is allowed to rename H2, modify it a little, and sell it as a database engine without telling the customers it is in fact H2. This happened to HSQLDB: a company called ''bungisoft'' copied HSQLDB, renamed it to ''RedBase'', and tried to sell it, hiding the fact that it was in fact just HSQLDB. It seems ''bungisoft'' does not exist any more, but you can use the Wayback Machine and visit old web pages of http://www.bungisoft.com.
+
+About porting the source code to another language (for example C# or C++): converted source code (even if done manually) stays under the same copyright and license as the original code. The copyright of the ported source code does not (automatically) go to the person who ported the code.
+
+If you distribute a binary that includes H2, you need to add the license and a disclaimer of liability (as you should do for your own code). You should add a disclaimer for each open source libraries you use. For example, add a file 3rdparty_license.txt in the directory where the jar files are, and list all open source libraries, each one with its license and disclaimer. For H2, a simple solution is to copy the following text below. You may also include a copy of the complete license.
+http://www.h2database.com/html/license.html#h2_license', 'http://www.h2database.com/html/license.html#h2_license', NULL, NULL, NULL, 'H2 License - Version 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'c8933ff0ff755d4e983eb9c20633f20d', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (465, 'MPL-2.0-no-copyleft-exception', 'Mozilla Public License Version 2.0 
+================================== 
+
+1. Definitions 
+-------------- 
+
+1.1. "Contributor" 
+means each individual or legal entity that creates, contributes to 
+the creation of, or owns Covered Software. 
+
+1.2. "Contributor Version" 
+means the combination of the Contributions of others (if any) used 
+by a Contributor and that particular Contributor''s Contribution. 
+
+1.3. "Contribution" 
+means Covered Software of a particular Contributor. 
+
+1.4. "Covered Software" 
+means Source Code Form to which the initial Contributor has attached 
+the notice in Exhibit A, the Executable Form of such Source Code 
+Form, and Modifications of such Source Code Form, in each case 
+including portions thereof. 
+
+1.5. "Incompatible With Secondary Licenses" 
+means 
+
+(a) that the initial Contributor has attached the notice described 
+in Exhibit B to the Covered Software; or 
+
+(b) that the Covered Software was made available under the terms of 
+version 1.1 or earlier of the License, but not also under the 
+terms of a Secondary License. 
+
+1.6. "Executable Form" 
+means any form of the work other than Source Code Form. 
+
+1.7. "Larger Work" 
+means a work that combines Covered Software with other material, in 
+a separate file or files, that is not Covered Software. 
+
+1.8. "License" 
+means this document. 
+
+1.9. "Licensable" 
+means having the right to grant, to the maximum extent possible, 
+whether at the time of the initial grant or subsequently, any and 
+all of the rights conveyed by this License. 
+
+1.10. "Modifications" 
+means any of the following: 
+
+(a) any file in Source Code Form that results from an addition to, 
+deletion from, or modification of the contents of Covered 
+Software; or 
+
+(b) any new file in Source Code Form that contains any Covered 
+Software. 
+
+1.11. "Patent Claims" of a Contributor 
+means any patent claim(s), including without limitation, method, 
+process, and apparatus claims, in any patent Licensable by such 
+Contributor that would be infringed, but for the grant of the 
+License, by the making, using, selling, offering for sale, having 
+made, import, or transfer of either its Contributions or its 
+Contributor Version. 
+
+1.12. "Secondary License" 
+means either the GNU General Public License, Version 2.0, the GNU 
+Lesser General Public License, Version 2.1, the GNU Affero General 
+Public License, Version 3.0, or any later versions of those 
+licenses. 
+
+1.13. "Source Code Form" 
+means the form of the work preferred for making modifications. 
+
+1.14. "You" (or "Your") 
+means an individual or a legal entity exercising rights under this 
+License. For legal entities, "You" includes any entity that 
+controls, is controlled by, or is under common control with You. For 
+purposes of this definition, "control" means (a) the power, direct 
+or indirect, to cause the direction or management of such entity, 
+whether by contract or otherwise, or (b) ownership of more than 
+fifty percent (50%) of the outstanding shares or beneficial 
+ownership of such entity. 
+
+2. License Grants and Conditions 
+-------------------------------- 
+
+2.1. Grants 
+
+Each Contributor hereby grants You a world-wide, royalty-free, 
+non-exclusive license: 
+
+(a) under intellectual property rights (other than patent or trademark) 
+Licensable by such Contributor to use, reproduce, make available, 
+modify, display, perform, distribute, and otherwise exploit its 
+Contributions, either on an unmodified basis, with Modifications, or 
+as part of a Larger Work; and 
+
+(b) under Patent Claims of such Contributor to make, use, sell, offer 
+for sale, have made, import, and otherwise transfer either its 
+Contributions or its Contributor Version. 
+
+2.2. Effective Date 
+
+The licenses granted in Section 2.1 with respect to any Contribution 
+become effective for each Contribution on the date the Contributor first 
+distributes such Contribution. 
+
+2.3. Limitations on Grant Scope 
+
+The licenses granted in this Section 2 are the only rights granted under 
+this License. No additional rights or licenses will be implied from the 
+distribution or licensing of Covered Software under this License. 
+Notwithstanding Section 2.1(b) above, no patent license is granted by a 
+Contributor: 
+
+(a) for any code that a Contributor has removed from Covered Software; 
+or 
+
+(b) for infringements caused by: (i) Your and any other third party''s 
+modifications of Covered Software, or (ii) the combination of its 
+Contributions with other software (except as part of its Contributor 
+Version); or 
+
+(c) under Patent Claims infringed by Covered Software in the absence of 
+its Contributions. 
+
+This License does not grant any rights in the trademarks, service marks, 
+or logos of any Contributor (except as may be necessary to comply with 
+the notice requirements in Section 3.4). 
+
+2.4. Subsequent Licenses 
+
+No Contributor makes additional grants as a result of Your choice to 
+distribute the Covered Software under a subsequent version of this 
+License (see Section 10.2) or under the terms of a Secondary License (if 
+permitted under the terms of Section 3.3). 
+
+2.5. Representation 
+
+Each Contributor represents that the Contributor believes its 
+Contributions are its original creation(s) or it has sufficient rights 
+to grant the rights to its Contributions conveyed by this License. 
+
+2.6. Fair Use 
+
+This License is not intended to limit any rights You have under 
+applicable copyright doctrines of fair use, fair dealing, or other 
+equivalents. 
+
+2.7. Conditions 
+
+Sections 3.1, 3.2, 3.3, and 3.4 are conditions of the licenses granted 
+in Section 2.1. 
+
+3. Responsibilities 
+------------------- 
+
+3.1. Distribution of Source Form 
+
+All distribution of Covered Software in Source Code Form, including any 
+Modifications that You create or to which You contribute, must be under 
+the terms of this License. You must inform recipients that the Source 
+Code Form of the Covered Software is governed by the terms of this 
+License, and how they can obtain a copy of this License. You may not 
+attempt to alter or restrict the recipients'' rights in the Source Code 
+Form. 
+
+3.2. Distribution of Executable Form 
+
+If You distribute Covered Software in Executable Form then: 
+
+(a) such Covered Software must also be made available in Source Code 
+Form, as described in Section 3.1, and You must inform recipients of 
+the Executable Form how they can obtain a copy of such Source Code 
+Form by reasonable means in a timely manner, at a charge no more 
+than the cost of distribution to the recipient; and 
+
+(b) You may distribute such Executable Form under the terms of this 
+License, or sublicense it under different terms, provided that the 
+license for the Executable Form does not attempt to limit or alter 
+the recipients'' rights in the Source Code Form under this License. 
+
+3.3. Distribution of a Larger Work 
+
+You may create and distribute a Larger Work under terms of Your choice, 
+provided that You also comply with the requirements of this License for 
+the Covered Software. If the Larger Work is a combination of Covered 
+Software with a work governed by one or more Secondary Licenses, and the 
+Covered Software is not Incompatible With Secondary Licenses, this 
+License permits You to additionally distribute such Covered Software 
+under the terms of such Secondary License(s), so that the recipient of 
+the Larger Work may, at their option, further distribute the Covered 
+Software under the terms of either this License or such Secondary 
+License(s). 
+
+3.4. Notices 
+
+You may not remove or alter the substance of any license notices 
+(including copyright notices, patent notices, disclaimers of warranty, 
+or limitations of liability) contained within the Source Code Form of 
+the Covered Software, except that You may alter any license notices to 
+the extent required to remedy known factual inaccuracies. 
+
+3.5. Application of Additional Terms 
+
+You may choose to offer, and to charge a fee for, warranty, support, 
+indemnity or liability obligations to one or more recipients of Covered 
+Software. However, You may do so only on Your own behalf, and not on 
+behalf of any Contributor. You must make it absolutely clear that any 
+such warranty, support, indemnity, or liability obligation is offered by 
+You alone, and You hereby agree to indemnify every Contributor for any 
+liability incurred by such Contributor as a result of warranty, support, 
+indemnity or liability terms You offer. You may include additional 
+disclaimers of warranty and limitations of liability specific to any 
+jurisdiction. 
+
+4. Inability to Comply Due to Statute or Regulation 
+--------------------------------------------------- 
+
+If it is impossible for You to comply with any of the terms of this 
+License with respect to some or all of the Covered Software due to 
+statute, judicial order, or regulation then You must: (a) comply with 
+the terms of this License to the maximum extent possible; and (b) 
+describe the limitations and the code they affect. Such description must 
+be placed in a text file included with all distributions of the Covered 
+Software under this License. Except to the extent prohibited by statute 
+or regulation, such description must be sufficiently detailed for a 
+recipient of ordinary skill to be able to understand it. 
+
+5. Termination 
+-------------- 
+
+5.1. The rights granted under this License will terminate automatically 
+if You fail to comply with any of its terms. However, if You become 
+compliant, then the rights granted under this License from a particular 
+Contributor are reinstated (a) provisionally, unless and until such 
+Contributor explicitly and finally terminates Your grants, and (b) on an 
+ongoing basis, if such Contributor fails to notify You of the 
+non-compliance by some reasonable means prior to 60 days after You have 
+come back into compliance. Moreover, Your grants from a particular 
+Contributor are reinstated on an ongoing basis if such Contributor 
+notifies You of the non-compliance by some reasonable means, this is the 
+first time You have received notice of non-compliance with this License 
+from such Contributor, and You become compliant prior to 30 days after 
+Your receipt of the notice. 
+
+5.2. If You initiate litigation against any entity by asserting a patent 
+infringement claim (excluding declaratory judgment actions, 
+counter-claims, and cross-claims) alleging that a Contributor Version 
+directly or indirectly infringes any patent, then the rights granted to 
+You by any and all Contributors for the Covered Software under Section 
+2.1 of this License shall terminate. 
+
+5.3. In the event of termination under Sections 5.1 or 5.2 above, all 
+end user license agreements (excluding distributors and resellers) which 
+have been validly granted by You or Your distributors under this License 
+prior to termination shall survive termination. 
+
+************************************************************************ 
+* * 
+* 6. Disclaimer of Warranty * 
+* ------------------------- * 
+* * 
+* Covered Software is provided under this License on an "as is" * 
+* basis, without warranty of any kind, either expressed, implied, or * 
+* statutory, including, without limitation, warranties that the * 
+* Covered Software is free of defects, merchantable, fit for a * 
+* particular purpose or non-infringing. The entire risk as to the * 
+* quality and performance of the Covered Software is with You. * 
+* Should any Covered Software prove defective in any respect, You * 
+* (not any Contributor) assume the cost of any necessary servicing, * 
+* repair, or correction. This disclaimer of warranty constitutes an * 
+* essential part of this License. No use of any Covered Software is * 
+* authorized under this License except under this disclaimer. * 
+* * 
+************************************************************************ 
+
+************************************************************************ 
+* * 
+* 7. Limitation of Liability * 
+* -------------------------- * 
+* * 
+* Under no circumstances and under no legal theory, whether tort * 
+* (including negligence), contract, or otherwise, shall any * 
+* Contributor, or anyone who distributes Covered Software as * 
+* permitted above, be liable to You for any direct, indirect, * 
+* special, incidental, or consequential damages of any character * 
+* including, without limitation, damages for lost profits, loss of * 
+* goodwill, work stoppage, computer failure or malfunction, or any * 
+* and all other commercial damages or losses, even if such party * 
+* shall have been informed of the possibility of such damages. This * 
+* limitation of liability shall not apply to liability for death or * 
+* personal injury resulting from such party''s negligence to the * 
+* extent applicable law prohibits such limitation. Some * 
+* jurisdictions do not allow the exclusion or limitation of * 
+* incidental or consequential damages, so this exclusion and * 
+* limitation may not apply to You. * 
+* * 
+************************************************************************ 
+
+8. Litigation 
+------------- 
+
+Any litigation relating to this License may be brought only in the 
+courts of a jurisdiction where the defendant maintains its principal 
+place of business and such litigation shall be governed by laws of that 
+jurisdiction, without reference to its conflict-of-law provisions. 
+Nothing in this Section shall prevent a party''s ability to bring 
+cross-claims or counter-claims. 
+
+9. Miscellaneous 
+---------------- 
+
+This License represents the complete agreement concerning the subject 
+matter hereof. If any provision of this License is held to be 
+unenforceable, such provision shall be reformed only to the extent 
+necessary to make it enforceable. Any law or regulation which provides 
+that the language of a contract shall be construed against the drafter 
+shall not be used to construe this License against a Contributor. 
+
+10. Versions of the License 
+--------------------------- 
+
+10.1. New Versions 
+
+Mozilla Foundation is the license steward. Except as provided in Section 
+10.3, no one other than the license steward has the right to modify or 
+publish new versions of this License. Each version will be given a 
+distinguishing version number. 
+
+10.2. Effect of New Versions 
+
+You may distribute the Covered Software under the terms of the version 
+of the License under which You originally received the Covered Software, 
+or under the terms of any subsequent version published by the license 
+steward. 
+
+10.3. Modified Versions 
+
+If you create software not governed by this License, and you want to 
+create a new license for such software, you may create and use a 
+modified version of this License if you rename the license and remove 
+any references to the name of the license steward (except to note that 
+such modified license differs from this License). 
+
+10.4. Distributing Source Code Form that is Incompatible With Secondary 
+Licenses 
+
+If You choose to distribute Source Code Form that is Incompatible With 
+Secondary Licenses under the terms of this version of the License, the 
+notice described in Exhibit B of this License must be attached. 
+
+Exhibit A - Source Code Form License Notice 
+------------------------------------------- 
+
+This Source Code Form is subject to the terms of the Mozilla Public 
+License, v. 2.0. If a copy of the MPL was not distributed with this 
+file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+
+If it is not possible or desirable to put the notice in a particular 
+file, then You may include the notice in a location (such as a LICENSE 
+file in a relevant directory) where a recipient would be likely to look 
+for such a notice. 
+
+You may add additional accurate notices of copyright ownership. 
+
+Exhibit B - "Incompatible With Secondary Licenses" Notice 
+--------------------------------------------------------- 
+
+This Source Code Form is "Incompatible With Secondary Licenses", as 
+defined by the Mozilla Public License, v. 2.0.', 'https://spdx.org/licenses/MPL-2.0-no-copyleft-exception', NULL, NULL, NULL, 'Mozilla Public License 2.0 (no copyleft exception)', NULL, NULL, NULL, '', NULL, false, false, false, '6d27a4b34373c123ba1f5418be3c1917', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (466, 'IJG', 'Independent JPEG Group License
+
+
+LEGAL ISSUES
+============
+
+In plain English:
+
+1. We don''t promise that this software works. (But if you find any bugs,
+please let us know!)
+2. You can use this software for whatever you want. You don''t have to pay us.
+3. You may not pretend that you wrote this software. If you use it in a
+program, you must acknowledge somewhere in your documentation that
+you''ve used the IJG code.
+
+In legalese:
+
+The authors make NO WARRANTY or representation, either express or implied,
+with respect to this software, its quality, accuracy, merchantability, or
+fitness for a particular purpose. This software is provided "AS IS", and you,
+its user, assume the entire risk as to its quality and accuracy.
+
+This software is copyright (C) 1991-1998, Thomas G. Lane.
+All Rights Reserved except as specified below.
+
+Permission is hereby granted to use, copy, modify, and distribute this
+software (or portions thereof) for any purpose, without fee, subject to these
+conditions:
+(1) If any part of the source code for this software is distributed, then this
+README file must be included, with this copyright and no-warranty notice
+unaltered; and any additions, deletions, or changes to the original files
+must be clearly indicated in accompanying documentation.
+(2) If only executable code is distributed, then the accompanying
+documentation must state that "this software is based in part on the work of
+the Independent JPEG Group".
+(3) Permission for use of this software is granted only if the user accepts
+full responsibility for any undesirable consequences; the authors accept
+NO LIABILITY for damages of any kind.
+
+These conditions apply to any software derived from or based on the IJG code,
+not just to the unmodified library. If you use our work, you ought to
+acknowledge us.
+
+Permission is NOT granted for the use of any IJG author''s name or company name
+in advertising or publicity relating to this software or products derived from
+it. This software may be referred to only as "the Independent JPEG Group''s
+software".
+
+We specifically permit and encourage the use of this software as the basis of
+commercial products, provided that all warranty or liability claims are
+assumed by the product vendor.
+
+
+ansi2knr.c is included in this distribution by permission of L. Peter Deutsch,
+sole proprietor of its copyright holder, Aladdin Enterprises of Menlo Park, CA.
+ansi2knr.c is NOT covered by the above copyright and conditions, but instead
+by the usual distribution terms of the Free Software Foundation; principally,
+that you must include source code if you redistribute it. (See the file
+ansi2knr.c for full details.) However, since ansi2knr.c is not needed as part
+of any program generated from the IJG code, this does not limit you more than
+the foregoing paragraphs do.
+
+The Unix configuration script "configure" was produced with GNU Autoconf.
+It is copyright by the Free Software Foundation but is freely distributable.
+The same holds for its supporting scripts (config.guess, config.sub,
+ltconfig, ltmain.sh). Another support script, install-sh, is copyright
+by M.I.T. but is also freely distributable.
+
+It appears that the arithmetic coding option of the JPEG spec is covered by
+patents owned by IBM, AT&T, and Mitsubishi. Hence arithmetic coding cannot
+legally be used without obtaining one or more licenses. For this reason,
+support for arithmetic coding has been removed from the free JPEG software.
+(Since arithmetic coding provides only a marginal gain over the unpatented
+Huffman mode, it is unlikely that very many implementations will support it.)
+So far as we are aware, there are no patent restrictions on the remaining
+code.
+
+The IJG distribution formerly included code to read and write GIF files.
+To avoid entanglement with the Unisys LZW patent, GIF reading support has
+been removed altogether, and the GIF writer has been simplified to produce
+"uncompressed GIFs". This technique does not use the LZW algorithm; the
+resulting GIF files are larger than usual, but are readable by all standard
+GIF decoders.
+
+We are required to state that
+"The Graphics Interchange Format(c) is the Copyright property of
+CompuServe Incorporated. GIF(sm) is a Service Mark property of
+CompuServe Incorporated."', 'http://spdx.org/licenses/IJG#licenseText', NULL, NULL, NULL, 'Independent JPEG Group License', NULL, NULL, NULL, '', NULL, false, false, false, 'c0df0c60061c7ff52d95ed8afe2f8ee4', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (467, 'Imlib2', 'Imlib2 License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to
+deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies of the Software and its Copyright notices. In addition publicly
+documented acknowledgment must be given that this software has been used if no
+source code of this software is made available publicly. Making the source
+available publicly means including the source for this software with the
+distribution, or a method to get this software via some reasonable mechanism
+(electronic transfer via a network or media) as well as making an offer to
+supply the source on request. This Copyright notice serves as an offer to
+supply the source on on request as well. Instead of this, supplying
+acknowledgments of use of this software in either Copyright notices, Manuals,
+Publicity and Marketing documents or any documentation provided with any
+product containing this software. This License does not apply to any software
+that links to the libraries provided by this software (statically or
+dynamically), but only to the software provided.
+
+Please see the COPYING-PLAIN for a plain-english explanation of this notice
+and its intent.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.', 'http://spdx.org/licenses/Imlib2#licenseText', NULL, NULL, NULL, 'Imlib2 License', NULL, NULL, NULL, '', NULL, false, false, false, 'ff40b2b80f52bda7fcc670f75ebb6f7c', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (468, 'SMLNJ', 'STANDARD ML OF NEW JERSEY COPYRIGHT NOTICE, LICENSE AND DISCLAIMER.
+Copyright (c) 2001-2011 by The Fellowship of SML/NJ
+Copyright (c) 1989-2001 by Lucent Technologies
+
+Permission to use, copy, modify, and distribute this software and its documentation for any purpose and without fee is hereby granted, provided that the above copyright notice appear in all copies and that both the copyright notice and this permission notice and warranty disclaimer appear in supporting documentation, and that the name of Lucent Technologies, Bell Labs or any Lucent entity not be used in advertising or publicity pertaining to distribution of the software without specific, written prior permission.
+
+Lucent disclaims all warranties with regard to this software, including all implied warranties of merchantability and fitness. In no event shall Lucent be liable for any special, indirect or consequential damages or any damages whatsoever resulting from loss of use, data or profits, whether in an action of contract, negligence or other tortious action, arising out of or in connection with the use or performance of this software.', 'http://www.smlnj.org//license.html', NULL, NULL, NULL, 'Standard ML of New Jersey License', NULL, NULL, NULL, '', NULL, false, false, false, 'afe2c6b69907ec05880a46633f3bfa8a', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (392, 'SGI-B-2.0', 'SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
+Copyright (C) [dates of first publication] Silicon Graphics, Inc. All Rights Reserved.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice including the dates of first publication and either this permission notice or a reference to http://oss.sgi.com/projects/FreeB/ shall be included in all copies or substantial portions of the Software. 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL SILICON GRAPHICS, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Except as contained in this notice, the name of Silicon Graphics, Inc. shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from Silicon Graphics, Inc.', 'http://oss.sgi.com/projects/FreeB/SGIFreeSWLicB.2.0.doc', NULL, NULL, NULL, 'SGI Free Software License B 2.0', NULL, NULL, NULL, '', NULL, false, false, false, 'cf37137fe121a9ce8d71b10bb0d3a13f', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (469, 'OLDAP-2.2.2', 'The OpenLDAP Public License
+  Version 2.2.2, 28 July 2000
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain copyright statements
+and notices.
+
+2. Redistributions in binary form must reproduce applicable copyright
+statements and notices, this list of conditions, and the following
+disclaimer in the documentation and/or other materials provided
+with the distribution.
+
+3. Redistributions must contain a verbatim copy of this document.
+
+4. The name "OpenLDAP" must not be used to endorse or promote
+products derived from this Software without prior written permission
+of the OpenLDAP Foundation.
+
+5. Products derived from this Software may not be called "OpenLDAP"
+nor may "OpenLDAP" appear in their names without prior written
+permission of the OpenLDAP Foundation.
+
+6. Due credit should be given to the OpenLDAP Project
+(http://www.openldap.org/).
+
+7. The OpenLDAP Foundation may revise this license from time to
+time.  Each revision is distinguished by a version number.  You
+may use the Software under terms of this license revision or under
+the terms of any subsequent revision of the license.
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND CONTRIBUTORS
+``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE OPENLDAP FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+
+OpenLDAP is a trademark of the OpenLDAP Foundation.
+
+Copyright 1999-2000 The OpenLDAP Foundation, Redwood City,
+California, USA.  All Rights Reserved.  Permission to copy and
+distributed verbatim copies of this document is granted.', 'http://spdx.org/licenses/OLDAP-2.2.2#licenseText', NULL, NULL, NULL, 'Open LDAP Public License 2.2.2', NULL, NULL, NULL, '', NULL, false, false, false, '9aaeead054346ee60ebd573dc4138e33', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (470, 'OLDAP-1.1', 'The OpenLDAP Public License
+
+Version 1.1, 25 August 1998
+Copyright 1998, The OpenLDAP Foundation.
+All Rights Reserved.
+
+Note:
+	This license is derived from the "Artistic License" as distributed
+	with the Perl Programming Language.  Its terms are different from
+	those of the "Artistic License." 
+
+PREAMBLE
+
+The intent of this document is to state the conditions under which a
+Package may be copied, such that the Copyright Holder maintains some
+semblance of artistic control over the development of the package,
+while giving the users of the package the right to use and distribute
+the Package in a more-or-less customary fashion, plus the right to make
+reasonable modifications.
+
+Definitions:
+
+	"Package" refers to the collection of files distributed by the
+	Copyright Holder, and derivatives of that collection of files
+	created through textual modification.
+
+	"Standard Version" refers to such a Package if it has not been
+	modified, or has been modified in accordance with the wishes
+	of the Copyright Holder.
+
+	"Copyright Holder" is whoever is named in the copyright or
+	copyrights for the package.
+
+	"You" is you, if you''re thinking about copying or distributing
+	this Package.
+
+	"Reasonable copying fee" is whatever you can justify on the
+	basis of media cost, duplication charges, time of people involved,
+	and so on.  (You will not be required to justify it to the
+	Copyright Holder, but only to the computing community at large
+	as a market that must bear the fee.)
+
+	"Freely Available" means that no fee is charged for the item
+	itself, though there may be fees involved in handling the item.
+	It also means that recipients of the item may redistribute it
+	under the same conditions they received it.
+
+1. You may make and give away verbatim copies of the source form of the
+Standard Version of this Package without restriction, provided that you
+duplicate all of the original copyright notices and associated disclaimers.
+
+2. You may apply bug fixes, portability fixes and other modifications
+derived from the Public Domain or from the Copyright Holder.  A Package
+modified in such a way shall still be considered the Standard Version.
+
+3. You may otherwise modify your copy of this Package in any way, provided
+that you insert a prominent notice in each changed file stating how and
+when you changed that file, and provided that you do at least ONE of the
+following:
+
+    a) place your modifications in the Public Domain or otherwise make them
+    Freely Available, such as by posting said modifications to Usenet or
+    an equivalent medium, or placing the modifications on a major archive
+    site such as uunet.uu.net, or by allowing the Copyright Holder to include
+    your modifications in the Standard Version of the Package.
+
+    b) use the modified Package only within your corporation or organization.
+
+    c) rename any non-standard executables so the names do not conflict
+    with standard executables, which must also be provided, and provide
+    a separate manual page for each non-standard executable that clearly
+    documents how it differs from the Standard Version.
+
+    d) make other distribution arrangements with the Copyright Holder.
+
+4. You may distribute the programs of this Package in object code or
+executable form, provided that you do at least ONE of the following:
+
+    a) distribute a Standard Version of the executables and library files,
+    together with instructions (in the manual page or equivalent) on where
+    to get the Standard Version.
+
+    b) accompany the distribution with the machine-readable source of
+    the Package with your modifications.
+
+    c) accompany any non-standard executables with their corresponding
+    Standard Version executables, giving the non-standard executables
+    non-standard names, and clearly documenting the differences in manual
+    pages (or equivalent), together with instructions on where to get
+    the Standard Version.
+
+    d) make other distribution arrangements with the Copyright Holder.
+
+5. You may charge a reasonable copying fee for any distribution of this
+Package.  You may charge any fee you choose for support of this Package.
+You may not charge a fee for this Package itself.  However,
+you may distribute this Package in aggregate with other (possibly
+commercial) programs as part of a larger (possibly commercial) software
+distribution provided that you do not advertise this Package as a
+product of your own.
+
+6. The scripts and library files supplied as input to or produced as
+output from the programs of this Package do not automatically fall
+under the copyright of this Package, but belong to whomever generated
+them, and may be sold commercially, and may be aggregated with this
+Package.
+
+7. C subroutines supplied by you and linked into this Package in order
+to emulate subroutines and variables of the language defined by this
+Package shall not be considered part of this Package, but are the
+equivalent of input as in Paragraph 6, provided these subroutines do
+not change the language in any way that would cause it to fail the
+regression tests for the language.
+
+8. The name of the Copyright Holder may not be used to endorse or promote
+products derived from this software without specific prior written permission.
+
+9. THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+The End', 'http://spdx.org/licenses/OLDAP-1.1#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v1.1', NULL, NULL, NULL, '', NULL, false, false, false, 'f774a60fd40d6363189db9c47f6f2c58', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (471, 'OLDAP-1.2', 'The OpenLDAP Public License
+
+Version 1.2, 1 September 1998
+Copyright 1998, The OpenLDAP Foundation.
+All Rights Reserved.
+
+Note:
+    This license is derived from the "Artistic License" as distributed
+    with the Perl Programming Language.  As differences may exist,
+    the complete license should be read.
+
+PREAMBLE
+
+The intent of this document is to state the conditions under which
+a Package may be copied, such that the Copyright Holder maintains
+some semblance of artistic control over the development of the
+package, while giving the users of the package the right to use
+and distribute the Package in a more-or-less customary fashion,
+plus the right to make reasonable modifications.
+
+Definitions:
+
+    "Package" refers to the collection of files distributed by the
+    Copyright Holder, and derivatives of that collection of files
+    created through textual modification.
+
+    "Standard Version" refers to such a Package if it has not been
+    modified, or has been modified in accordance with the wishes
+    of the Copyright Holder.
+
+    "Copyright Holder" is whoever is named in the copyright or
+    copyrights for the package.
+
+    "You" is you, if you''re thinking about copying or distributing
+    this Package.
+
+    "Reasonable copying fee" is whatever you can justify on the
+    basis of media cost, duplication charges, time of people
+    involved, and so on.  (You will not be required to justify it
+    to the Copyright Holder, but only to the computing community
+    at large as a market that must bear the fee.)
+
+    "Freely Available" means that no fee is charged for the item
+    itself, though there may be fees involved in handling the item.
+    It also means that recipients of the item may redistribute it
+    under the same conditions they received it.
+
+1. You may make and give away verbatim copies of the source form
+of the Standard Version of this Package without restriction, provided
+that you duplicate all of the original copyright notices and
+associated disclaimers.
+
+2. You may apply bug fixes, portability fixes and other modifications
+derived from the Public Domain or from the Copyright Holder.  A
+Package modified in such a way shall still be considered the Standard
+Version.
+
+3. You may otherwise modify your copy of this Package in any way,
+provided that you insert a prominent notice in each changed file
+stating how and when you changed that file, and provided that you
+do at least ONE of the following:
+
+    a) place your modifications in the Public Domain or otherwise
+    make them Freely Available, such as by posting said modifications
+    to Usenet or an equivalent medium, or placing the modifications
+    on a major archive site such as uunet.uu.net, or by allowing
+    the Copyright Holder to include your modifications in the
+    Standard Version of the Package.
+
+    b) use the modified Package only within your corporation or
+    organization.
+
+    c) rename any non-standard executables so the names do not
+    conflict with standard executables, which must also be provided,
+    and provide a separate manual page for each non-standard
+    executable that clearly documents how it differs from the
+    Standard Version.
+
+    d) make other distribution arrangements with the Copyright
+    Holder.
+
+4. You may distribute the programs of this Package in object code
+or executable form, provided that you do at least ONE of the
+following:
+
+    a) distribute a Standard Version of the executables and library
+    files, together with instructions (in the manual page or
+    equivalent) on where to get the Standard Version.
+
+    b) accompany the distribution with the machine-readable source
+    of the Package with your modifications.
+
+    c) accompany any non-standard executables with their corresponding
+    Standard Version executables, giving the non-standard executables
+    non-standard names, and clearly documenting the differences in
+    manual pages (or equivalent), together with instructions on
+    where to get the Standard Version.
+
+    d) make other distribution arrangements with the Copyright
+    Holder.
+
+5. You may charge a reasonable copying fee for any distribution of
+this Package.  You may charge any fee you choose for support of
+this Package.  You may not charge a fee for this Package itself.
+However, you may distribute this Package in aggregate with other
+(possibly commercial) programs as part of a larger (possibly
+commercial) software distribution provided that you do not advertise
+this Package as a product of your own.
+
+6. The scripts and library files supplied as input to or produced
+as output from the programs of this Package do not automatically
+fall under the copyright of this Package, but belong to whomever
+generated them, and may be sold commercially, and may be aggregated
+with this Package.
+
+7. C subroutines supplied by you and linked into this Package in
+order to emulate subroutines and variables of the language defined
+by this Package shall not be considered part of this Package, but
+are the equivalent of input as in Paragraph 6, provided these
+subroutines do not change the language in any way that would cause
+it to fail the regression tests for the language.
+
+8. The name of the Copyright Holder may not be used to endorse or
+promote products derived from this software without specific prior
+written permission.
+
+9. THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+The End', 'http://spdx.org/licenses/OLDAP-1.2#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v1.2', NULL, NULL, NULL, '', NULL, false, false, false, '4351a7e34451b686fc82e23745e4f41d', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (472, 'OLDAP-1.3', 'The OpenLDAP Public License
+
+Version 1.3, 17 January 1999
+Copyright 1998-1999, The OpenLDAP Foundation.
+All Rights Reserved.
+
+Note:
+    This license is derived from the "Artistic License" as distributed
+    with the Perl Programming Language.  As significant differences
+    exist, the complete license should be read.
+
+PREAMBLE
+
+The intent of this document is to state the conditions under which
+a Package may be copied, such that the Copyright Holder maintains
+some semblance of artistic control over the development of the
+package, while giving the users of the package the right to use
+and distribute the Package in a more-or-less customary fashion,
+plus the right to make reasonable modifications.
+
+Definitions:
+
+    "Package" refers to the collection of files distributed by the
+    Copyright Holder, and derivatives of that collection of files
+    created through textual modification.
+
+    "Standard Version" refers to such a Package if it has not been
+    modified, or has been modified in accordance with the wishes
+    of the Copyright Holder.
+
+    "Copyright Holder" is whoever is named in the copyright or
+    copyrights for the package.
+
+    "You" is you, if you''re thinking about copying or distributing
+    this Package.
+
+    "Reasonable copying fee" is whatever you can justify on the
+    basis of media cost, duplication charges, time of people
+    involved, and so on.  (You will not be required to justify it
+    to the Copyright Holder, but only to the computing community
+    at large as a market that must bear the fee.)
+
+    "Freely Available" means that no fee is charged for the item
+    itself, though there may be fees involved in handling the item.
+    It also means that recipients of the item may redistribute it
+    under the same conditions they received it.
+
+1. You may make and give away verbatim copies of the source form
+of the Standard Version of this Package without restriction, provided
+that you duplicate all of the original copyright notices and
+associated disclaimers.
+
+2. You may apply bug fixes, portability fixes and other modifications
+derived from the Public Domain or from the Copyright Holder.  A
+Package modified in such a way shall still be considered the Standard
+Version.
+
+3. You may otherwise modify your copy of this Package in any way,
+provided that you insert a prominent notice in each changed file
+stating how and when you changed that file, and provided that you
+do at least ONE of the following:
+
+    a) place your modifications in the Public Domain or otherwise
+    make them Freely Available, such as by posting said modifications
+    to Usenet or an equivalent medium, or placing the modifications
+    on a major archive site such as uunet.uu.net, or by allowing
+    the Copyright Holder to include your modifications in the
+    Standard Version of the Package.
+
+    b) use the modified Package only within your corporation or
+    organization.
+
+    c) rename any non-standard executables so the names do not
+    conflict with standard executables, which must also be provided,
+    and provide a separate manual page for each non-standard
+    executable that clearly documents how it differs from the
+    Standard Version.
+
+    d) make other distribution arrangements with the Copyright
+    Holder.
+
+4. You may distribute the programs of this Package in object code
+or executable form, provided that you do at least ONE of the
+following:
+
+    a) distribute a Standard Version of the executables and library
+    files, together with instructions (in the manual page or
+    equivalent) on where to get the Standard Version.
+
+    b) accompany the distribution with the machine-readable source
+    of the Package with your modifications.
+
+    c) accompany any non-standard executables with their corresponding
+    Standard Version executables, giving the non-standard executables
+    non-standard names, and clearly documenting the differences in
+    manual pages (or equivalent), together with instructions on
+    where to get the Standard Version.
+
+    d) make other distribution arrangements with the Copyright
+    Holder.
+
+5. You may charge a reasonable copying fee for any distribution of
+this Package.  You may charge any fee you choose for support of
+this Package.  You may not charge a fee for this Package itself.
+However, you may distribute this Package in aggregate with other
+(possibly commercial) programs as part of a larger (possibly
+commercial) software distribution provided that you do not advertise
+this Package as a product of your own.
+
+6. The scripts and library files supplied as input to or produced
+as output from the programs of this Package do not automatically
+fall under the copyright of this Package, but belong to whomever
+generated them, and may be sold commercially, and may be aggregated
+with this Package.
+
+7. C subroutines supplied by you and linked into this Package in
+order to emulate subroutines and variables defined by this Package
+shall not be considered part of this Package, but are the equivalent
+of input as in Paragraph 6, provided these subroutines do not change
+the behavior of the Package in any way that would cause it to fail
+the regression tests for the Package.
+
+8. Software supplied by you and linked with this Package in order
+to use subroutines and variables defined by this Package shall not
+be considered part of this Package and do not automatically fall
+under the copyright of this Package, and the executables produced
+by linking your software with this Package may be used and
+redistributed without restriction and may be sold commercially.
+
+9. The name of the Copyright Holder may not be used to endorse or
+promote products derived from this software without specific prior
+written permission.
+
+10. THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+The End', 'http://spdx.org/licenses/OLDAP-1.3#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v1.3', NULL, NULL, NULL, '', NULL, false, false, false, '452852633acbe641db3eab4f0ad00e41', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (473, 'OLDAP-1.4', 'The OpenLDAP Public License
+
+Version 1.4, 18 January 1999
+Copyright 1998-1999, The OpenLDAP Foundation.
+All Rights Reserved.
+
+Note:
+    This license is derived from the "Artistic License" as distributed
+    with the Perl Programming Language.  As significant differences
+    exist, the complete license should be read.
+
+PREAMBLE
+
+The intent of this document is to state the conditions under which
+a Package may be copied, such that the Copyright Holder maintains
+some semblance of artistic control over the development of the
+package, while giving the users of the package the right to use
+and distribute the Package in a more-or-less customary fashion,
+plus the right to make reasonable modifications.
+
+Definitions:
+
+    "Package" refers to the collection of files distributed by the
+    Copyright Holder, and derivatives of that collection of files
+    created through textual modification.
+
+    "Standard Version" refers to such a Package if it has not been
+    modified, or has been modified in accordance with the wishes
+    of the Copyright Holder.
+
+    "Copyright Holder" is whoever is named in the copyright or
+    copyrights for the package.
+
+    "You" is you, if you''re thinking about copying or distributing
+    this Package.
+
+    "Reasonable copying fee" is whatever you can justify on the
+    basis of media cost, duplication charges, time of people
+    involved, and so on.  (You will not be required to justify it
+    to the Copyright Holder, but only to the computing community
+    at large as a market that must bear the fee.)
+
+    "Freely Available" means that no fee is charged for the item
+    itself, though there may be fees involved in handling the item.
+    It also means that recipients of the item may redistribute it
+    under the same conditions they received it.
+
+1. You may make and give away verbatim copies of the source form
+of the Standard Version of this Package without restriction, provided
+that you duplicate all of the original copyright notices and
+associated disclaimers.
+
+2. You may apply bug fixes, portability fixes and other modifications
+derived from the Public Domain or from the Copyright Holder.  A
+Package modified in such a way shall still be considered the Standard
+Version.
+
+3. You may otherwise modify your copy of this Package in any way,
+provided that you insert a prominent notice in each changed file
+stating how and when you changed that file, and provided that you
+do at least ONE of the following:
+
+    a) place your modifications in the Public Domain or otherwise
+    make them Freely Available, such as by posting said modifications
+    to Usenet or an equivalent medium, or placing the modifications
+    on a major archive site such as uunet.uu.net, or by allowing
+    the Copyright Holder to include your modifications in the
+    Standard Version of the Package.
+
+    b) use the modified Package only within your corporation or
+    organization.
+
+    c) rename any non-standard executables so the names do not
+    conflict with standard executables, which must also be provided,
+    and provide a separate manual page for each non-standard
+    executable that clearly documents how it differs from the
+    Standard Version.
+
+    d) make other distribution arrangements with the Copyright
+    Holder.
+
+4. You may distribute the programs of this Package in object code
+or executable form, provided that you do at least ONE of the
+following:
+
+    a) distribute a Standard Version of the executables and library
+    files, together with instructions (in the manual page or
+    equivalent) on where to get the Standard Version.
+
+    b) accompany the distribution with the machine-readable source
+    of the Package with your modifications.
+
+    c) accompany any non-standard executables with their corresponding
+    Standard Version executables, giving the non-standard executables
+    non-standard names, and clearly documenting the differences in
+    manual pages (or equivalent), together with instructions on
+    where to get the Standard Version.
+
+    d) make other distribution arrangements with the Copyright
+    Holder.
+
+5. You may charge a reasonable copying fee for any distribution of
+this Package.  You may charge any fee you choose for support of
+this Package.  You may not charge a fee for this Package itself.
+However, you may distribute this Package in aggregate with other
+(possibly commercial) programs as part of a larger (possibly
+commercial) software distribution provided that you do not advertise
+this Package as a product of your own.
+
+6. The scripts and library files supplied as input to or produced
+as output from the programs of this Package do not automatically
+fall under the copyright of this Package, but belong to whomever
+generated them, and may be sold commercially, and may be aggregated
+with this Package.
+
+7. C subroutines supplied by you and linked into this Package in
+order to emulate subroutines and variables defined by this Package
+shall not be considered part of this Package, but are the equivalent
+of input as in Paragraph 6, provided these subroutines do not change
+the behavior of the Package in any way that would cause it to fail
+the regression tests for the Package.
+
+8. Software supplied by you and linked with this Package in order
+to use subroutines and variables defined by this Package shall not
+be considered part of this Package and do not automatically fall
+under the copyright of this Package.  Executables produced
+by linking your software with this Package may be used and
+redistributed without restriction and may be sold commercially
+so long as the primary function of your software is different
+than the package itself.
+
+9. The name of the Copyright Holder may not be used to endorse or
+promote products derived from this software without specific prior
+written permission.
+
+10. THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+The End', 'http://spdx.org/licenses/OLDAP-1.4#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v1.4', NULL, NULL, NULL, '', NULL, false, false, false, 'aa05cda70e736b186fa160b1ea3fd345', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (474, 'OLDAP-2.0', 'The OpenLDAP Public License
+
+  Version 2.0, 7 June 1999
+  Copyright 1999, The OpenLDAP Foundation, Redwood City, California, USA.
+  All Rights Reserved.
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain copyright
+statements and notices.  Redistributions must also contain a
+copy of this document.
+
+2. Redistributions in binary form must reproduce the
+above copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+3. The name "OpenLDAP" must not be used to endorse or promote
+products derived from this Software without prior written
+permission of the OpenLDAP Foundation.  For written permission,
+please contact foundation@openldap.org.
+
+4. Products derived from this Software may not be called "OpenLDAP"
+nor may "OpenLDAP" appear in their names without prior written
+permission of the OpenLDAP Foundation.  OpenLDAP is a registered
+trademark of the OpenLDAP Foundation.
+
+5. Due credit should be given to the OpenLDAP Project
+(http://www.openldap.org/).
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND CONTRIBUTORS
+``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE OPENLDAP FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://spdx.org/licenses/OLDAP-2.0#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.0 (or possibly 2.0A and 2.0B)', NULL, NULL, NULL, '', NULL, false, false, false, '18cef22bdacc424fbb84f4068dee2a1b', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (475, 'OLDAP-2.0.1', 'The OpenLDAP Public License
+
+  Version 2.0.1, 21 December 1999
+  Copyright 1999, The OpenLDAP Foundation, Redwood City, California, USA.
+  All Rights Reserved.
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain copyright
+statements and notices.  Redistributions must also contain a
+copy of this document.
+
+2. Redistributions in binary form must reproduce the
+above copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+3. The name "OpenLDAP" must not be used to endorse or promote
+products derived from this Software without prior written
+permission of the OpenLDAP Foundation.  For written permission,
+please contact foundation@openldap.org.
+
+4. Products derived from this Software may not be called "OpenLDAP"
+nor may "OpenLDAP" appear in their names without prior written
+permission of the OpenLDAP Foundation.  OpenLDAP is a trademark
+of the OpenLDAP Foundation.
+
+5. Due credit should be given to the OpenLDAP Project
+(http://www.openldap.org/).
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND CONTRIBUTORS
+``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE OPENLDAP FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://spdx.org/licenses/OLDAP-2.0.1#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.0.1', NULL, NULL, NULL, '', NULL, false, false, false, '8d1eabcb6926ee05445f50182eed086e', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (476, 'OLDAP-2.1', 'The OpenLDAP Public License
+
+  Version 2.1, 29 February 2000
+  Copyright 1999-2000, The OpenLDAP Foundation, Redwood City, California, USA.
+  All Rights Reserved.
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain copyright
+statements and notices.  Redistributions must also contain a
+copy of this document.
+
+2. Redistributions in binary form must reproduce the
+above copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+3. The name "OpenLDAP" must not be used to endorse or promote
+products derived from this Software without prior written
+permission of the OpenLDAP Foundation.  For written permission,
+please contact foundation@openldap.org.
+
+4. Products derived from this Software may not be called "OpenLDAP"
+nor may "OpenLDAP" appear in their names without prior written
+permission of the OpenLDAP Foundation.  OpenLDAP is a trademark
+of the OpenLDAP Foundation.
+
+5. Due credit should be given to the OpenLDAP Project
+(http://www.openldap.org/).
+
+6. The OpenLDAP Foundation may revise this license from time to
+time.  Each revision is distinguished by a version number.  You
+may use the Software under terms of this license revision or under
+the terms of any subsequent license revision.
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND CONTRIBUTORS
+``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE OPENLDAP FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://spdx.org/licenses/OLDAP-2.1#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.1', NULL, NULL, NULL, '', NULL, false, false, false, '733437bac72eb6f6e1ff9b7b1073913a', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (477, 'OLDAP-2.2', 'The OpenLDAP Public License
+  Version 2.2, 1 March 2000
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain copyright statements
+and notices.  Redistributions must also contain a copy of this
+document.
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+3. The name "OpenLDAP" must not be used to endorse or promote
+products derived from this Software without prior written permission
+of the OpenLDAP Foundation.
+
+4. Products derived from this Software may not be called "OpenLDAP"
+nor may "OpenLDAP" appear in their names without prior written
+permission of the OpenLDAP Foundation.
+
+5. Due credit should be given to the OpenLDAP Project
+(http://www.openldap.org/).
+
+6. The OpenLDAP Foundation may revise this license from time to
+time.  Each revision is distinguished by a version number.  You
+may use the Software under terms of this license revision or under
+the terms of any subsequent the license.
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND CONTRIBUTORS
+``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE OPENLDAP FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+
+OpenLDAP is a trademark of the OpenLDAP Foundation.
+
+Copyright 1999-2000, The OpenLDAP Foundation, Redwood City,
+California, USA.  All Rights Reserved.  Permission to copy and
+distributed verbatim copies of this document is granted.', 'http://spdx.org/licenses/OLDAP-2.2#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.2', NULL, NULL, NULL, '', NULL, false, false, false, 'e55dedd208aada07361af8178542e1c6', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (478, 'OLDAP-2.2.1', 'The OpenLDAP Public License
+  Version 2.2.1, 1 March 2000
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain copyright statements
+and notices.  Redistributions must also contain a copy of this
+document.
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+3. The name "OpenLDAP" must not be used to endorse or promote
+products derived from this Software without prior written permission
+of the OpenLDAP Foundation.
+
+4. Products derived from this Software may not be called "OpenLDAP"
+nor may "OpenLDAP" appear in their names without prior written
+permission of the OpenLDAP Foundation.
+
+5. Due credit should be given to the OpenLDAP Project
+(http://www.openldap.org/).
+
+6. The OpenLDAP Foundation may revise this license from time to
+time.  Each revision is distinguished by a version number.  You
+may use the Software under terms of this license revision or under
+the terms of any subsequent revision of the license.
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND CONTRIBUTORS
+``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE OPENLDAP FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+
+OpenLDAP is a trademark of the OpenLDAP Foundation.
+
+Copyright 1999-2000 The OpenLDAP Foundation, Redwood City,
+California, USA.  All Rights Reserved.  Permission to copy and
+distributed verbatim copies of this document is granted.', 'http://spdx.org/licenses/OLDAP-2.2.1#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.2.1', NULL, NULL, NULL, '', NULL, false, false, false, '615892b1b9ca71fb291a5e1ae1859100', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (479, 'OLDAP-2.3', 'The OpenLDAP Public License
+  Version 2.3, 28 July 2000
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain copyright statements
+and notices.
+
+2. Redistributions in binary form must reproduce applicable copyright
+statements and notices, this list of conditions, and the following
+disclaimer in the documentation and/or other materials provided
+with the distribution.
+
+3. Redistributions must contain a verbatim copy of this document.
+
+4. The name "OpenLDAP" must not be used to endorse or promote
+products derived from this Software without prior written permission
+of the OpenLDAP Foundation.
+
+5. Products derived from this Software may not be called "OpenLDAP"
+nor may "OpenLDAP" appear in their names without prior written
+permission of the OpenLDAP Foundation.
+
+6. Due credit should be given to the OpenLDAP Project
+(http://www.openldap.org/).
+
+7. The OpenLDAP Foundation may revise this license from time to
+time.  Each revision is distinguished by a version number.  You
+may use the Software under terms of this license revision or under
+the terms of any subsequent revision of the license.
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND CONTRIBUTORS
+``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE OPENLDAP FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+
+OpenLDAP is a trademark of the OpenLDAP Foundation.
+
+Copyright 1999-2000 The OpenLDAP Foundation, Redwood City,
+California, USA.  All Rights Reserved.  Permission to copy and
+distributed verbatim copies of this document is granted.', 'http://spdx.org/licenses/OLDAP-2.3#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.3', NULL, NULL, NULL, '', NULL, false, false, false, 'df954d3e6c1c320994831662c8f010e2', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (480, 'OLDAP-2.4', 'The OpenLDAP Public License
+  Version 2.4, 8 December 2000
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain copyright statements
+and notices.
+
+2. Redistributions in binary form must reproduce applicable copyright
+statements and notices, this list of conditions, and the following
+disclaimer in the documentation and/or other materials provided
+with the distribution.
+
+3. Redistributions must contain a verbatim copy of this document.
+
+4. The names and trademarks of the authors and copyright holders
+must not be used in advertising or otherwise to promote the sale,
+use or other dealing in this Software without specific, written
+prior permission.
+
+5. Due credit should be given to the OpenLDAP Project.
+
+6. The OpenLDAP Foundation may revise this license from time to
+time.  Each revision is distinguished by a version number.  You
+may use the Software under terms of this license revision or under
+the terms of any subsequent revision of the license.
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND CONTRIBUTORS
+``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE OPENLDAP FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+OpenLDAP is a trademark of the OpenLDAP Foundation.
+
+Copyright 1999-2000 The OpenLDAP Foundation, Redwood City,
+California, USA.  All Rights Reserved.  Permission to copy and
+distributed verbatim copies of this document is granted.', 'http://spdx.org/licenses/OLDAP-2.4#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.4', NULL, NULL, NULL, '', NULL, false, false, false, 'ab77165f8f5828760211427c7c4474ff', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (481, 'OLDAP-2.5', 'The OpenLDAP Public License
+  Version 2.5, 11 May 2001
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain copyright statements
+and notices.
+
+2. Redistributions in binary form must reproduce applicable copyright
+statements and notices, this list of conditions, and the following
+disclaimer in the documentation and/or other materials provided
+with the distribution.
+
+3. Redistributions must contain a verbatim copy of this document.
+
+4. The names and trademarks of the authors and copyright holders
+must not be used in advertising or otherwise to promote the sale,
+use or other dealing in this Software without specific, written
+prior permission.
+
+5. Due credit should be given to the authors of the Software.
+
+6. The OpenLDAP Foundation may revise this license from time to
+time.  Each revision is distinguished by a version number.  You
+may use the Software under terms of this license revision or under
+the terms of any subsequent revision of the license.
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND CONTRIBUTORS
+``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE OPENLDAP FOUNDATION, ITS CONTRIBUTORS, OR THE AUTHOR(S) OR
+OWNER(S) OF THE SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+OpenLDAP is a trademark of the OpenLDAP Foundation.
+
+Copyright 1999-2001 The OpenLDAP Foundation, Redwood City,
+California, USA.  All Rights Reserved.  Permission to copy and
+distributed verbatim copies of this document is granted.', 'http://spdx.org/licenses/OLDAP-2.5#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.5', NULL, NULL, NULL, '', NULL, false, false, false, 'ac7103462b2f7b13089ad5bc10f37977', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (482, 'OLDAP-2.6', 'The OpenLDAP Public License
+  Version 2.6, 14 June 2001
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain copyright statements
+and notices.
+
+2. Redistributions in binary form must reproduce applicable copyright
+statements and notices, this list of conditions, and the following
+disclaimer in the documentation and/or other materials provided
+with the distribution.
+
+3. Redistributions must contain a verbatim copy of this document.
+
+4. The names and trademarks of the authors and copyright holders
+must not be used in advertising or otherwise to promote the sale,
+use or other dealing in this Software without specific, written
+prior permission.
+
+5. The OpenLDAP Foundation may revise this license from time to
+time.  Each revision is distinguished by a version number.  You
+may use the Software under terms of this license revision or under
+the terms of any subsequent revision of the license.
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND CONTRIBUTORS
+``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE OPENLDAP FOUNDATION, ITS CONTRIBUTORS, OR THE AUTHOR(S) OR
+OWNER(S) OF THE SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+OpenLDAP is a trademark of the OpenLDAP Foundation.
+
+Copyright 1999-2001 The OpenLDAP Foundation, Redwood City,
+California, USA.  All Rights Reserved.  Permission to copy and
+distributed verbatim copies of this document is granted.', 'http://spdx.org/licenses/OLDAP-2.6#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.6', NULL, NULL, NULL, '', NULL, false, false, false, 'de47cd817cfbe0c3ec242d3aadd99310', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (483, 'OLDAP-2.7', 'The OpenLDAP Public License
+  Version 2.7, 7 September 2001
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain copyright statements
+   and notices,
+
+2. Redistributions in binary form must reproduce applicable copyright
+   statements and notices, this list of conditions, and the following
+   disclaimer in the documentation and/or other materials provided
+   with the distribution, and
+
+3. Redistributions must contain a verbatim copy of this document.
+
+The OpenLDAP Foundation may revise this license from time to time.
+Each revision is distinguished by a version number.  You may use
+this Software under terms of this license revision or under the
+terms of any subsequent revision of the license.
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND ITS
+CONTRIBUTORS ``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT
+SHALL THE OPENLDAP FOUNDATION, ITS CONTRIBUTORS, OR THE AUTHOR(S)
+OR OWNER(S) OF THE SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+The names of the authors and copyright holders must not be used in
+advertising or otherwise to promote the sale, use or other dealing
+in this Software without specific, written prior permission.  Title
+to copyright in this Software shall at all times remain with
+copyright holders.
+
+OpenLDAP is a registered trademark of the OpenLDAP Foundation.
+
+Copyright 1999-2001 The OpenLDAP Foundation, Redwood City,
+California, USA.  All Rights Reserved.  Permission to copy and
+distribute verbatim copies of this document is granted.', 'http://www.openldap.org/devel/gitweb.cgi?p=openldap.git;a=blob;f=LICENSE;hb=47c2415c1df81556eeb39be6cad458ef87c534a2', NULL, NULL, NULL, 'Open LDAP Public License v2.7', NULL, NULL, NULL, '', NULL, false, false, false, '3f49a8c6ef4c444fc97ae16ad27ba87d', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (484, 'NBPL-1.0', 'The Net Boolean Public License
+
+Version 1, 22 August 1998
+Copyright 1998, Net Boolean Incorporated, Redwood City, California, USA
+All Rights Reserved.
+
+Note:
+	This license is derived from the "Artistic License" as distributed
+	with the Perl Programming Language.  Its terms are different from
+	those of the "Artistic License." 
+
+PREAMBLE
+
+The intent of this document is to state the conditions under which a
+Package may be copied, such that the Copyright Holder maintains some
+semblance of artistic control over the development of the package,
+while giving the users of the package the right to use and distribute
+the Package in a more-or-less customary fashion, plus the right to make
+reasonable modifications.
+
+Definitions:
+
+	"Package" refers to the collection of files distributed by the
+	Copyright Holder, and derivatives of that collection of files
+	created through textual modification.
+
+	"Standard Version" refers to such a Package if it has not been
+	modified, or has been modified in accordance with the wishes
+	of the Copyright Holder.
+
+	"Copyright Holder" is whoever is named in the copyright or
+	copyrights for the package.
+
+	"You" is you, if you''re thinking about copying or distributing
+	this Package.
+
+	"Reasonable copying fee" is whatever you can justify on the
+	basis of media cost, duplication charges, time of people involved,
+	and so on.  (You will not be required to justify it to the
+	Copyright Holder, but only to the computing community at large
+	as a market that must bear the fee.)
+
+	"Freely Available" means that no fee is charged for the item
+	itself, though there may be fees involved in handling the item.
+	It also means that recipients of the item may redistribute it
+	under the same conditions they received it.
+
+1. You may make and give away verbatim copies of the source form of the
+Standard Version of this Package without restriction, provided that you
+duplicate all of the original copyright notices and associated disclaimers.
+
+2. You may apply bug fixes, portability fixes and other modifications
+derived from the Public Domain or from the Copyright Holder.  A Package
+modified in such a way shall still be considered the Standard Version.
+
+3. You may otherwise modify your copy of this Package in any way, provided
+that you insert a prominent notice in each changed file stating how and
+when you changed that file, and provided that you do at least ONE of the
+following:
+
+    a) place your modifications in the Public Domain or otherwise make them
+    Freely Available, such as by posting said modifications to Usenet or
+    an equivalent medium, or placing the modifications on a major archive
+    site such as uunet.uu.net, or by allowing the Copyright Holder to include
+    your modifications in the Standard Version of the Package.
+
+    b) use the modified Package only within your corporation or organization.
+
+    c) rename any non-standard executables so the names do not conflict
+    with standard executables, which must also be provided, and provide
+    a separate manual page for each non-standard executable that clearly
+    documents how it differs from the Standard Version.
+
+    d) make other distribution arrangements with the Copyright Holder.
+
+4. You may distribute the programs of this Package in object code or
+executable form, provided that you do at least ONE of the following:
+
+    a) distribute a Standard Version of the executables and library files,
+    together with instructions (in the manual page or equivalent) on where
+    to get the Standard Version.
+
+    b) accompany the distribution with the machine-readable source of
+    the Package with your modifications.
+
+    c) accompany any non-standard executables with their corresponding
+    Standard Version executables, giving the non-standard executables
+    non-standard names, and clearly documenting the differences in manual
+    pages (or equivalent), together with instructions on where to get
+    the Standard Version.
+
+    d) make other distribution arrangements with the Copyright Holder.
+
+5. You may charge a reasonable copying fee for any distribution of this
+Package.  You may charge any fee you choose for support of this Package.
+You may not charge a fee for this Package itself.  However,
+you may distribute this Package in aggregate with other (possibly
+commercial) programs as part of a larger (possibly commercial) software
+distribution provided that you do not advertise this Package as a
+product of your own.
+
+6. The scripts and library files supplied as input to or produced as
+output from the programs of this Package do not automatically fall
+under the copyright of this Package, but belong to whomever generated
+them, and may be sold commercially, and may be aggregated with this
+Package.
+
+7. C subroutines supplied by you and linked into this Package in order
+to emulate subroutines and variables of the language defined by this
+Package shall not be considered part of this Package, but are the
+equivalent of input as in Paragraph 6, provided these subroutines do
+not change the language in any way that would cause it to fail the
+regression tests for the language.
+
+8. The name of the Copyright Holder may not be used to endorse or promote
+products derived from this software without specific prior written permission.
+
+9. THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+The End', 'http://www.openldap.org/devel/gitweb.cgi?p=openldap.git;a=blob;f=LICENSE;hb=37b4b3f6cc4bf34e1d3dec61e69914b9819d8894', NULL, NULL, NULL, 'Net Boolean Public License v1', NULL, NULL, NULL, '', NULL, false, false, false, 'c33339ba08fb4391ca9626dd86a0cdce', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (485, 'Condor-1.0', 'CONDOR PUBLIC LICENSE
+
+Version 1.0, February 7, 2003
+
+Copyright © 1990-2007 Condor Team, Computer Sciences Department, University of Wisconsin-Madison, Madison, WI. All Rights Reserved. For more information contact: Condor Team, Attention: Professor Miron Livny, Dept of Computer Sciences, 1210 W. Dayton St., Madison, WI 53706-1685, (608) 262-0856 or miron@cs.wisc.edu.
+
+This software referred to as the Condor® Version 6.x software ("Software") consists of voluntary contributions made to the Condor Project collaboration. For more information on the Condor Project, please see http://www.condorproject.org/.
+
+Installation, use, reproduction, display, modification and redistribution of this Software, with or without modification, in source and binary forms, are permitted. Any exercise of rights under this license by you or your sub-licensees is subject to the following conditions:
+
+Redistributions of this Software, with or without modification, must reproduce this Condor Public License in: (1) the Software, and (2) the user documentation or some other similar material which is provided with the Software (if any).
+The user documentation, if any, included with a redistribution, must include the following notice:
+"This product includes software from the Condor® Project (http://www.condorproject.org/)"
+Alternatively, if that is where third-party acknowledgments normally appear, this acknowledgment must be reproduced in the Software itself.
+
+Any academic report, publication, or other academic disclosure of results obtained with this Software will acknowledge this Software''s use by an appropriate citation.
+The name Condor® is a registered trademark of the University of Wisconsin-Madison. The trademark may not be used to endorse or promote software, or products derived therefrom, and, other than as required by section 2, above, it may not be affixed to modified redistributions of this Software except with prior written approval, obtainable via email to condor-admin@cs.wisc.edu.
+To the extent that patent claims licensable by the University of Wisconsin-Madison are necessarily infringed by the use or sale of the Software, you are granted a non-exclusive, worldwide, royalty- free perpetual license under such patent claims, with the rights for you to make, use, sell, offer to sell, import and otherwise transfer the Software in source code and object code form and derivative works. This patent license shall apply to the combination of the Software with other software if, at the time the Software is added by you, such addition of the Software causes such combination to be covered by such patent claims. This patent license shall not apply to any other combinations which include the Software. No hardware per se is licensed hereunder.
+If you or any subsequent sub-licensee (a "Recipient") institutes patent litigation against any entity (including a cross-claim or counterclaim in a lawsuit) alleging that the Software infringes such Recipient''s patent(s), then such Recipient''s rights granted (directly or indirectly) under the patent license above shall terminate as of the date such litigation is filed. All sublicenses to the Software which have been properly granted prior to termination shall survive any termination of said patent license, if not otherwise terminated pursuant to this section.
+
+DISCLAIMER
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, OF SATISFACTORY QUALITY, AND FITNESS FOR A PARTICULAR PURPOSE OR USE ARE DISCLAIMED. THE COPYRIGHT HOLDERS AND CONTRIBUTORS MAKE NO REPRESENTATION THAT THE SOFTWARE, MODIFICATIONS, ENHANCEMENTS OR DERIVATIVE WORKS THEREOF, WILL NOT INFRINGE ANY PATENT, COPYRIGHT, TRADEMARK, TRADE SECRET OR OTHER PROPRIETARY RIGHT.
+
+LIMITATION OF LIABILITY
+THE COPYRIGHT HOLDERS AND CONTRIBUTORS SHALL HAVE NO LIABILITY TO LICENSEE OR OTHER PERSONS FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, LOSS OF USE, DATA OR PROFITS, OR BUSINESS INTERRUPTION, HOWEVER CAUSED AND ON ANY THEORY OF CONTRACT, WARRANTY, TORT (INCLUDING NEGLIGENCE), PRODUCT LIABILITY OR OTHERWISE, ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+LICENSEE AGREES THAT THE EXPORT OF GOODS AND/OR TECHNICAL DATA FROM THE UNITED STATES MAY REQUIRE SOME FORM OF EXPORT CONTROL LICENSE FROM THE U.S. GOVERNMENT AND THAT FAILURE TO OBTAIN SUCH EXPORT CONTROL LICENSE MAY RESULT IN CRIMINAL LIABILITY UNDER U.S. LAWS. This software is exported from the United States in accordance with the Export Administration Regulations. Diversion contrary to U.S. law is prohibited. At the time of the creation of this license, export of the software to Cuba, Iran, Iraq, Libya, North Korea, Sudan, and Syria is prohibited without a license, and it is also prohibited for citizens of these countries to use the software without a license.
+The Condor Team may publish revised and/or new versions of this Condor Public License ("this License") from time to time. Each version will be given a distinguishing version number. Once Software has been published under a particular version of this License, you may always continue to use it under the terms of that version. You may also choose to use such Software under the terms of any subsequent version of this License published by the Condor Team. No one other than the Condor Team has the right to modify the terms of this License.', 'http://parrot.cs.wisc.edu/contrib.license.html', NULL, NULL, NULL, 'Condor Public License v1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'b4307519924d800bdaec9d644f853496', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (486, 'WTFPL', 'DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                    Version 2, December 2004
+
+ Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.', 'http://www.wtfpl.net/txt/copying/', NULL, NULL, NULL, 'Do What The F*ck You Want To Public License', NULL, NULL, NULL, '', NULL, false, false, false, 'b6ab2834dc82762c48a27b5775ffd978', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (487, 'MS-LPL', 'Microsoft Limited Public License (Ms-LPL)
+
+This license governs use of the accompanying software. If you use the software, you accept this license. If you do not accept the license, do not use the software.
+
+1. Definitions
+
+The terms "reproduce," "reproduction," "derivative works," and "distribution" have the same meaning here as under U.S. copyright law. A "contribution" is the original software, or any additions or changes to the software. A "contributor" is any person that distributes its contribution under this license. "Licensed patents" are a contributor''s patent claims that read directly on its contribution.
+
+2. Grant of Rights
+
+(A) Copyright Grant- Subject to the terms of this license, including the license conditions and limitations in section 3, each contributor grants you a non-exclusive, worldwide, royalty-free copyright license to reproduce its contribution, prepare derivative works of its contribution, and distribute its contribution or any derivative works that you create.
+(B) Patent Grant- Subject to the terms of this license, including the license conditions and limitations in section 3, each contributor grants you a non-exclusive, worldwide, royalty-free license under its licensed patents to make, have made, use, sell, offer for sale, import, and/or otherwise dispose of its contribution in the software or derivative works of the contribution in the software.
+
+3. Conditions and Limitations
+
+(A) No Trademark License- This license does not grant you rights to use any contributors'' name, logo, or trademarks. 
+(B) If you bring a patent claim against any contributor over patents that you claim are infringed by the software, your patent license from such contributor to the software ends automatically. 
+(C) If you distribute any portion of the software, you must retain all copyright, patent, trademark, and attribution notices that are present in the software. 
+(D) If you distribute any portion of the software in source code form, you may do so only under this license by including a complete copy of this license with your distribution. If you distribute any portion of the software in compiled or object code form, you may only do so under a license that complies with this license. 
+(E) The software is licensed "as-is." You bear the risk of using it. The contributors give no express warranties, guarantees, or conditions. You may have additional consumer rights under your local laws which this license cannot change. To the extent permitted under your local laws, the contributors exclude the implied warranties of merchantability, fitness for a particular purpose and non-infringement.
+
+4. (F) Platform Limitation- The licenses granted in sections 2(A) & 2(B) extend only to the software or derivative works that you create that run on a Microsoft Windows operating system product.', 'http://www.ohloh.net/licenses/mslpl', NULL, NULL, NULL, 'Microsoft Limited Public License', NULL, NULL, NULL, '', NULL, false, false, false, 'b440d2a8b054f1368e529671e4eb3231', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (488, 'Ferris-1.2', '0. This license is based on the Apple Public Source License version 1.2. All references to Apple, Apple Computer, and any other Apple trademarks or copyrights have been modified or removed.
+
+1. General; Definitions. This License applies to any program or other work which Mike Ferris makes publicly available and which contains a notice placed by Mike Ferris identifying such program or work as "Original Code" and stating that it is subject to the terms of this Ferris Public Source License version 1.2 (or subsequent version thereof) ("License"). As used in this License:
+
+1.1 "Applicable Patent Rights" mean: (a) in the case where Mike Ferris is the grantor of rights, (i) claims of patents that are now or hereafter acquired, owned by or assigned to Mike Ferris and (ii) that cover subject matter contained in the Original Code, but only to the extent necessary to use, reproduce and/or distribute the Original Code without infringement; and (b) in the case where You are the grantor of rights, (i) claims of patents that are now or hereafter acquired, owned by or assigned to You and (ii) that cover subject matter in Your Modifications, taken alone or in combination with Original Code.
+
+1.2 "Contributor" means any person or entity that creates or contributes to the creation of Modifications.
+
+1.3 "Covered Code" means the Original Code, Modifications, the combination of Original Code and any Modifications, and/or any respective portions thereof.
+
+1.4 "Deploy" means to use, sublicense or distribute Covered Code other than for Your internal research and development (R&D) and/or Personal Use, and includes without limitation, any and all internal use or distribution of Covered Code within Your business or organization except for R&D use and/or Personal Use, as well as direct or indirect sublicensing or distribution of Covered Code by You to any third party in any form or manner.
+
+1.5 "Larger Work" means a work which combines Covered Code or portions thereof with code not governed by the terms of this License.
+
+1.6 "Modifications" mean any addition to, deletion from, and/or change to, the substance and/or structure of the Original Code, any previous Modifications, the combination of Original Code and any previous Modifications, and/or any respective portions thereof. When code is released as a series of files, a Modification is: (a) any addition to or deletion from the contents of a file containing Covered Code; and/or (b) any new file or other representation of computer program statements that contains any part of Covered Code.
+
+1.7 "Original Code" means (a) the Source Code of a program or other work as originally made available by Mike Ferris under this License, including the Source Code of any updates or upgrades to such programs or works made available by Mike Ferris under this License, and that has been expressly identified by Mike Ferris as such in the header file(s) of such work; and (b) the object code compiled from such Source Code and originally made available by Mike Ferris under this License.
+
+1.8 "Personal Use" means use of Covered Code by an individual solely for his or her personal, private and non-commercial purposes. An individual''s use of Covered Code in his or her capacity as an officer, employee, member, independent contractor or agent of a corporation, business or organization (commercial or non-commercial) does not qualify as Personal Use.
+
+1.9 "Source Code" means the human readable form of a program or other work that is suitable for making modifications to it, including all modules it contains, plus any associated interface definition files, scripts used to control compilation and installation of an executable (object code).
+
+1.10 "You" or "Your" means an individual or a legal entity exercising rights under this License. For legal entities, "You" or "Your" includes any entity which controls, is controlled by, or is under common control with, You, where "control" means (a) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (b) ownership of fifty percent (50%) or more of the outstanding shares or beneficial ownership of such entity.
+
+2. Permitted Uses; Conditions & Restrictions. Subject to the terms and conditions of this License, Mike Ferris hereby grants You, effective on the date You accept this License and download the Original Code, a world-wide, royalty-free, non-exclusive license, to the extent of Mike Ferris'' Applicable Patent Rights and copyrights covering the Original Code, to do the following:
+
+2.1 You may use, reproduce, display, perform, modify and distribute Original Code, with or without Modifications, solely for Your internal research and development and/or Personal Use, provided that in each instance:
+
+(a) You must retain and reproduce in all copies of Original Code the copyright and other proprietary notices and disclaimers of Mike Ferris as they appear in the Original Code, and keep intact all notices in the Original Code that refer to this License; and
+
+(b) You must include a copy of this License with every copy of Source Code of Covered Code and documentation You distribute, and You may not offer or impose any terms on such Source Code that alter or restrict this License or the recipients'' rights hereunder, except as permitted under Section 6.
+
+2.2 You may use, reproduce, display, perform, modify and Deploy Covered Code, provided that in each instance:
+
+(a) You must satisfy all the conditions of Section 2.1 with respect to the Source Code of the Covered Code;
+
+(b) You must duplicate, to the extent it does not already exist, the notice in Exhibit A in each file of the Source Code of all Your Modifications, and cause the modified files to carry prominent notices stating that You changed the files and the date of any change;
+
+(c) You must make Source Code of all Your Deployed Modifications publicly available under the terms of this License, including the license grants set forth in Section 3 below, for as long as you Deploy the Covered Code or twelve (12) months from the date of initial Deployment, whichever is longer. You should preferably distribute the Source Code of Your Deployed Modifications electronically (e.g. download from a web site); and
+
+(d) if You Deploy Covered Code in object code, executable form only, You must include a prominent notice, in the code itself as well as in related documentation, stating that Source Code of the Covered Code is available under the terms of this License with information on how and where to obtain such Source Code.
+
+2.3 You expressly acknowledge and agree that although Mike Ferris and each Contributor grants the licenses to their respective portions of the Covered Code set forth herein, no assurances are provided by Mike Ferris or any Contributor that the Covered Code does not infringe the patent or other intellectual property rights of any other entity. Mike Ferris and each Contributor disclaim any liability to You for claims brought by any other entity based on infringement of intellectual property rights or otherwise. As a condition to exercising the rights and licenses granted hereunder, You hereby assume sole responsibility to secure any other intellectual property rights needed, if any. For example, if a third party patent license is required to allow You to distribute the Covered Code, it is Your responsibility to acquire that license before distributing the Covered Code.
+
+3. Your Grants. In consideration of, and as a condition to, the licenses granted to You under this License:
+
+(a) You hereby grant to Mike Ferris and all third parties a non-exclusive, royalty-free license, under Your Applicable Patent Rights and other intellectual property rights (other than patent) owned or controlled by You, to use, reproduce, display, perform, modify, distribute and Deploy Your Modifications of the same scope and extent as Mike Ferris'' licenses under Sections 2.1 and 2.2; and
+
+(b) You hereby grant to Mike Ferris a non-exclusive, worldwide, royalty-free, perpetual and irrevocable license, under Your Applicable Patent Rights and other intellectual property rights (other than patent) owned or controlled by You, to use, reproduce, display, perform, modify or have modified (for Mike Ferris), sublicense and distribute Your Modifications, in any form, through multiple tiers of distribution.
+
+4. Larger Works. You may create a Larger Work by combining Covered Code with other code not governed by the terms of this License and distribute the Larger Work as a single product. In each such instance, You must make sure the requirements of this License are fulfilled for the Covered Code or any portion thereof.
+
+5. Limitations on Patent License. Except as expressly stated in Section 2, no other patent rights, express or implied, are granted by Mike Ferris herein. Modifications and/or Larger Works may require additional patent licenses from Mike Ferris which Mike Ferris may grant in his sole discretion.
+
+6. Additional Terms. You may choose to offer, and to charge a fee for, warranty, support, indemnity or liability obligations and/or other rights consistent with the scope of the license granted herein ("Additional Terms") to one or more recipients of Covered Code. However, You may do so only on Your own behalf and as Your sole responsibility, and not on behalf of Mike Ferris or any Contributor. You must obtain the recipient''s agreement that any such Additional Terms are offered by You alone, and You hereby agree to indemnify, defend and hold Mike Ferris and every Contributor harmless for any liability incurred by or claims asserted against Mike Ferris or such Contributor by reason of any such Additional Terms.
+
+7. Versions of the License. Mike Ferris may publish revised and/or new versions of this License from time to time. Each version will be given a distinguishing version number. Once Original Code has been published under a particular version of this License, You may continue to use it under the terms of that version. You may also choose to use such Original Code under the terms of any subsequent version of this License published by Mike Ferris. No one other than Mike Ferris has the right to modify the terms applicable to Covered Code created under this License.
+
+8. NO WARRANTY OR SUPPORT. The Covered Code may contain in whole or in part pre-release, untested, or not fully tested works. The Covered Code may contain errors that could cause failures or loss of data, and may be incomplete or contain inaccuracies. You expressly acknowledge and agree that use of the Covered Code, or any portion thereof, is at Your sole and entire risk. THE COVERED CODE IS PROVIDED "AS IS" AND WITHOUT WARRANTY, UPGRADES OR SUPPORT OF ANY KIND AND MIKE FERRIS AND MIKE FERRIS'' LICENSOR(S) (COLLECTIVELY REFERRED TO AS MIKE FERRIS FOR THE PURPOSES OF SECTIONS 8 AND 9) AND ALL CONTRIBUTORS EXPRESSLY DISCLAIM ALL WARRANTIES AND/OR CONDITIONS, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES AND/OR CONDITIONS OF MERCHANTABILITY, OF SATISFACTORY QUALITY, OF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY, OF QUIET ENJOYMENT, AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. MIKE FERRIS AND EACH CONTRIBUTOR DOES NOT WARRANT AGAINST INTERFERENCE WITH YOUR ENJOYMENT OF THE COVERED CODE, THAT THE FUNCTIONS CONTAINED IN THE COVERED CODE WILL MEET YOUR REQUIREMENTS, THAT THE OPERATION OF THE COVERED CODE WILL BE UNINTERRUPTED OR ERROR-FREE, OR THAT DEFECTS IN THE COVERED CODE WILL BE CORRECTED. NO ORAL OR WRITTEN INFORMATION OR ADVICE GIVEN BY MIKE FERRIS OR ANY CONTRIBUTOR SHALL CREATE A WARRANTY. You acknowledge that the Covered Code is not intended for use in the operation of nuclear facilities, aircraft navigation, communication systems, or air traffic control machines in which case the failure of the Covered Code could lead to death, personal injury, or severe physical or environmental damage.
+
+9. LIMITATION OF LIABILITY. TO THE EXTENT NOT PROHIBITED BY LAW, IN NO EVENT SHALL MIKE FERRIS OR ANY CONTRIBUTOR BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES ARISING OUT OF OR RELATING TO THIS LICENSE OR YOUR USE OR INABILITY TO USE THE COVERED CODE, OR ANY PORTION THEREOF, WHETHER UNDER A THEORY OF CONTRACT, WARRANTY, TORT (INCLUDING NEGLIGENCE), PRODUCTS LIABILITY OR OTHERWISE, EVEN IF MIKE FERRIS OR SUCH CONTRIBUTOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND NOTWITHSTANDING THE FAILURE OF ESSENTIAL PURPOSE OF ANY REMEDY. SOME JURISDICTIONS DO NOT ALLOW THE LIMITATION OF LIABILITY OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THIS LIMITATION MAY NOT APPLY TO YOU. In no event shall Mike Ferris'' total liability to You for all damages (other than as may be required by applicable law) under this License exceed the amount of fifty dollars ($50.00).
+
+10. Trademarks. This License does not grant any rights to use any trademarks or trade names belonging to Mike Ferris or to any trademark or trade name belonging to any Contributor. No such trademarks or trade names may be used to endorse or promote products derived from the Original Code other than by explicit written permission from Mike Ferris or the Contributor who owns the trademark or trade name.
+
+11. Ownership. Subject to the licenses granted under this License, each Contributor retains all rights, title and interest in and to any Modifications made by such Contributor. Mike Ferris retains all rights, title and interest in and to the Original Code and any Modifications made by or on behalf of Mike Ferris ("Mike Ferris Modifications"), and such Mike Ferris Modifications will not be automatically subject to this License. Mike Ferris may, at his sole discretion, choose to license such Mike Ferris Modifications under this License, or on different terms from those contained in this License or may choose not to license them at all.
+
+12. Termination.
+
+12.1 Termination. This License and the rights granted hereunder will terminate:
+
+(a) automatically without notice from Mike Ferris if You fail to comply with any term(s) of this License and fail to cure such breach within 30 days of becoming aware of such breach;
+
+(b) immediately in the event of the circumstances described in Section 13.5(b); or
+
+(c) automatically without notice from Mike Ferris if You, at any time during the term of this License, commence an action for patent infringement against Mike Ferris.
+
+12.2 Effect of Termination. Upon termination, You agree to immediately stop any further use, reproduction, modification, sublicensing and distribution of the Covered Code and to destroy all copies of the Covered Code that are in your possession or control. All sublicenses to the Covered Code which have been properly granted prior to termination shall survive any termination of this License. Provisions which, by their nature, should remain in effect beyond the termination of this License shall survive, including but not limited to Sections 3, 5, 8, 9, 10, 11, 12.2 and 13. No party will be liable to any other for compensation, indemnity or damages of any sort solely as a result of terminating this License in accordance with its terms, and termination of this License will be without prejudice to any other right or remedy of any party.
+
+13. Miscellaneous.
+
+13.1 Government End Users. The Covered Code is a "commercial item" as defined in FAR 2.101. Government software and technical data rights in the Covered Code include only those rights customarily provided to the public as defined in this License. This customary commercial license in technical data and software is provided in accordance with FAR 12.211 (Technical Data) and 12.212 (Computer Software) and, for Department of Defense purchases, DFAR 252.227-7015 (Technical Data -- Commercial Items) and 227.7202-3 (Rights in Commercial Computer Software or Computer Software Documentation). Accordingly, all U.S. Government End Users acquire Covered Code with only those rights set forth herein.
+
+13.2 Relationship of Parties. This License will not be construed as creating an agency, partnership, joint venture or any other form of legal association between or among You, Mike Ferris or any Contributor, and You will not represent to the contrary, whether expressly, by implication, appearance or otherwise.
+
+13.3 Independent Development. Nothing in this License will impair Mike Ferris'' right to acquire, license, develop, have others develop for it, market and/or distribute technology or products that perform the same or similar functions as, or otherwise compete with, Modifications, Larger Works, technology or products that You may develop, produce, market or distribute.
+
+13.4 Waiver; Construction. Failure by Mike Ferris or any Contributor to enforce any provision of this License will not be deemed a waiver of future enforcement of that or any other provision. Any law or regulation which provides that the language of a contract shall be construed against the drafter will not apply to this License.
+
+13.5 Severability. (a) If for any reason a court of competent jurisdiction finds any provision of this License, or portion thereof, to be unenforceable, that provision of the License will be enforced to the maximum extent permissible so as to effect the economic benefits and intent of the parties, and the remainder of this License will continue in full force and effect. (b) Notwithstanding the foregoing, if applicable law prohibits or restricts You from fully and/or specifically complying with Sections 2 and/or 3 or prevents the enforceability of either of those Sections, this License will immediately terminate and You must immediately discontinue any use of the Covered Code and destroy all copies of it that are in your possession or control.
+
+13.6 Dispute Resolution. Any litigation or other dispute resolution between You and Mike Ferris relating to this License shall take place in the Northern District of California, and You and Mike Ferris hereby consent to the personal jurisdiction of, and venue in, the state and federal courts within that District with respect to this License. The application of the United Nations Convention on Contracts for the International Sale of Goods is expressly excluded.
+
+13.7 Entire Agreement; Governing Law. This License constitutes the entire agreement between the parties with respect to the subject matter hereof. This License shall be governed by the laws of the United States and the State of California, except that body of California law concerning conflicts of law.
+
+Where You are located in the province of Quebec, Canada, the following clause applies: The parties hereby confirm that they have requested that this License and all related documents be drafted in English. Les parties ont exigé que le présent contrat et tous les documents connexes soient rédigés en anglais.
+
+EXHIBIT A.
+
+"Portions Copyright (c) 1996-2002 Mike Ferris. All Rights Reserved.
+
+This file contains Original Code and/or Modifications of Original Code as defined in and that are subject to the Ferris Public Source License Version 1.2 (the ''License''). You may not use this file except in compliance with the License. Please obtain a copy of the License at http://www.lorax.com/publicsource and read it before using this file.
+
+The Original Code and all software distributed under the License are distributed on an ''AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND MIKE FERRIS HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT. Please see the License for the specific language governing rights and limitations under the License."', 'http://mokit.sourceforge.net/License.html', NULL, NULL, NULL, 'Ferris Public Source License Ver. 1.2', NULL, NULL, NULL, '', NULL, false, false, false, '5658e07b8dc5bf0fa9205e471cca07de', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (489, 'Zimbra-1.2', 'The Zimbra Public License Version 1.2 ("ZPL") consists of the Mozilla Public License Version 1.1, modified to be specific to Zimbra, with the Additional Terms in Exhibit B. The original Mozilla Public License 1.1 can be found at: http://www.mozilla.org/MPL/MPL-1.1.html 
+
+This is not an OSI approved license. 
+
+Zimbra Public License, Version 1.2 (ZPL) 
+
+* 1. Definitions. 
+o 1.0.1. "Commercial Use" means distribution or otherwise making the Covered Code available to a third party. 
+o 1.1. "Contributor" means each entity that creates or contributes to the creation of Modifications. 
+o 1.2. "Contributor Version" means the combination of the Original Code, prior Modifications used by a Contributor, and the Modifications made by that particular Contributor. 
+o 1.3. "Covered Code" means the Original Code or Modifications or the combination of the Original Code and Modifications, in each case including portions thereof. 
+o 1.4. "Electronic Distribution Mechanism" means a mechanism generally accepted in the software development community for the electronic transfer of data. 
+o 1.5. "Executable" means Covered Code in any form other than Source Code. 
+o 1.6. "Initial Developer" means the individual or entity identified as the Initial Developer in the Source Code notice required by Exhibit A. 
+o 1.7. "Larger Work" means a work which combines Covered Code or portions thereof with code not governed by the terms of this License. 
+o 1.8. "License" means this document. 
+o 1.8.1. "Licensable" means having the right to grant, to the maximum extent possible, whether at the time of the initial grant or subsequently acquired, any and all of the rights conveyed herein. 
+o 1.9. "Modifications" means any addition to or deletion from the substance or structure of either the Original Code or any previous Modifications. When Covered Code is released as a series of files, a Modification is: 
++ A. Any addition to or deletion from the contents of a file containing Original Code or previous Modifications. 
++ B. Any new file that contains any part of the Original Code or previous Modifications. 
+o 1.10. "Original Code" means Source Code of computer software code which is described in the Source Code notice required by Exhibit A as Original Code, and which, at the time of its release under this License is not already Covered Code governed by this License. 
+o 1.10.1. "Patent Claims" means any patent claim(s), now owned or hereafter acquired, including without limitation, method, process, and apparatus claims, in any patent Licensable by grantor. 
+o 1.11. "Source Code" means the preferred form of the Covered Code for making modifications to it, including all modules it contains, plus any associated interface definition files, scripts used to control compilation and installation of an Executable, or source code differential comparisons against either the Original Code or another well known, available Covered Code of the Contributor''s choice. The Source Code can be in a compressed or archival form, provided the appropriate decompression or de-archiving software is widely available for no charge. 
+o 1.12. "You" (or "Your") means an individual or a legal entity exercising rights under, and complying with all of the terms of, this License or a future version of this License issued under Section 6.1. For legal entities, "You" includes any entity which controls, is controlled by, or is under common control with You. For purposes of this definition, "control" means (a) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (b) ownership of more than fifty percent (50%) of the outstanding shares or beneficial ownership of such entity. 
+* 2. Source Code License. 
+o 2.1. The Initial Developer Grant. 
+The Initial Developer hereby grants You a world-wide, royalty-free, non-exclusive license, subject to third party intellectual property claims: 
++ (a) under intellectual property rights (other than patent or trademark) Licensable by Initial Developer to use, reproduce, modify, display, perform, sublicense and distribute the Original Code (or portions thereof) with or without Modifications, and/or as part of a Larger Work; and 
++ (b) under Patents Claims infringed by the making, using or selling of Original Code, to make, have made, use, practice, sell, and offer for sale, and/or otherwise dispose of the Original Code (or portions thereof). 
++ (c) the licenses granted in this Section 2.1(a) and (b) are effective on the date Initial Developer first distributes Original Code under the terms of this License. 
++ (d) Notwithstanding Section 2.1(b) above, no patent license is granted: 1) for code that You delete from the Original Code; 2) separate from the Original Code; or 3) for infringements caused by: i) the modification of the Original Code or ii) the combination of the Original Code with other software or devices. 
+o 2.2. Contributor Grant. 
+Subject to third party intellectual property claims, each Contributor hereby grants You a world-wide, royalty-free, non-exclusive license 
++ (a) under intellectual property rights (other than patent or trademark) Licensable by Contributor, to use, reproduce, modify, display, perform, sublicense and distribute the Modifications created by such Contributor (or portions thereof) either on an unmodified basis, with other Modifications, as Covered Code and/or as part of a Larger Work; and 
++ (b) under Patent Claims infringed by the making, using, or selling of Modifications made by that Contributor either alone and/or in combination with its Contributor Version (or portions of such combination), to make, use, sell, offer for sale, have made, and/or otherwise dispose of: 1) Modifications made by that Contributor (or portions thereof); and 2) the combination of Modifications made by that Contributor with its Contributor Version (or portions of such combination). 
++ (c) the licenses granted in Sections 2.2(a) and 2.2(b) are effective on the date Contributor first makes Commercial Use of the Covered Code. 
++ (d) Notwithstanding Section 2.2(b) above, no patent license is granted: 1) for any code that Contributor has deleted from the Contributor Version; 2) separate from the Contributor Version; 3) for infringements caused by: i) third party modifications of Contributor Version or ii) the combination of Modifications made by that Contributor with other software (except as part of the Contributor Version) or other devices; or 4) under Patent Claims infringed by Covered Code in the absence of Modifications made by that Contributor. 
+* 3. Distribution Obligations. 
+o 3.1. Application of License. 
+The Modifications which You create or to which You contribute are governed by the terms of this License, including without limitation Section 2.2. The Source Code version of Covered Code may be distributed only under the terms of this License or a future version of this License released under Section 6.1, and You must include a copy of this License with every copy of the Source Code You distribute. You may not offer or impose any terms on any Source Code version that alters or restricts the applicable version of this License or the recipients'' rights hereunder. However, You may include an additional document offering the additional rights described in Section 3.5. 
+o 3.2. Availability of Source Code. 
+Any Modification which You create or to which You contribute must be made available in Source Code form under the terms of this License either on the same media as an Executable version or via an accepted Electronic Distribution Mechanism to anyone to whom you made an Executable version available; and if made available via Electronic Distribution Mechanism, must remain available for at least twelve (12) months after the date it initially became available, or at least six (6) months after a subsequent version of that particular Modification has been made available to such recipients. You are responsible for ensuring that the Source Code version remains available even if the Electronic Distribution Mechanism is maintained by a third party. 
+o 3.3. Description of Modifications. 
+You must cause all Covered Code to which You contribute to contain a file documenting the changes You made to create that Covered Code and the date of any change. You must include a prominent statement that the Modification is derived, directly or indirectly, from Original Code provided by the Initial Developer and including the name of the Initial Developer in (a) the Source Code, and (b) in any notice in an Executable version or related documentation in which You describe the origin or ownership of the Covered Code. 
+o 3.4. Intellectual Property Matters 
++ (a) Third Party Claims. 
+If Contributor has knowledge that a license under a third party''s intellectual property rights is required to exercise the rights granted by such Contributor under Sections 2.1 or 2.2, Contributor must include a text file with the Source Code distribution titled "LEGAL" which describes the claim and the party making the claim in sufficient detail that a recipient will know whom to contact. If Contributor obtains such knowledge after the Modification is made available as described in Section 3.2, Contributor shall promptly modify the LEGAL file in all copies Contributor makes available thereafter and shall take other steps (such as notifying appropriate mailing lists or newsgroups) reasonably calculated to inform those who received the Covered Code that new knowledge has been obtained. 
++ (b) Contributor APIs. 
+If Contributor''s Modifications include an application programming interface and Contributor has knowledge of patent licenses which are reasonably necessary to implement that API, Contributor must also include this information in the LEGAL file. 
++ (c) Representations. 
+Contributor represents that, except as disclosed pursuant to Section 3.4(a) above, Contributor believes that Contributor''s Modifications are Contributor''s original creation(s) and/or Contributor has sufficient rights to grant the rights conveyed by this License. 
+o 3.5. Required Notices. 
+You must duplicate the notice in Exhibit A in each file of the Source Code. If it is not possible to put such notice in a particular Source Code file due to its structure, then You must include such notice in a location (such as a relevant directory) where a user would be likely to look for such a notice. If You created one or more Modification(s) You may add your name as a Contributor to the notice described in Exhibit A. You must also duplicate this License in any documentation for the Source Code where You describe recipients'' rights or ownership rights relating to Covered Code. You may choose to offer, and to charge a fee for, warranty, support, indemnity or liability obligations to one or more recipients of Covered Code. However, You may do so only on Your own behalf, and not on behalf of the Initial Developer or any Contributor. You must make it absolutely clear than any such warranty, support, indemnity or liability obligation is offered by You alone, and You hereby agree to indemnify the Initial Developer and every Contributor for any liability incurred by the Initial Developer or such Contributor as a result of warranty, support, indemnity or liability terms You offer. 
+o 3.6. Distribution of Executable Versions. 
+You may distribute Covered Code in Executable form only if the requirements of Section 3.1-3.5 have been met for that Covered Code, and if You include a notice stating that the Source Code version of the Covered Code is available under the terms of this License, including a description of how and where You have fulfilled the obligations of Section 3.2. The notice must be conspicuously included in any notice in an Executable version, related documentation or collateral in which You describe recipients'' rights relating to the Covered Code. You may distribute the Executable version of Covered Code or ownership rights under a license of Your choice, which may contain terms different from this License, provided that You are in compliance with the terms of this License and that the license for the Executable version does not attempt to limit or alter the recipient''s rights in the Source Code version from the rights set forth in this License. If You distribute the Executable version under a different license You must make it absolutely clear that any terms which differ from this License are offered by You alone, not by the Initial Developer or any Contributor. You hereby agree to indemnify the Initial Developer and every Contributor for any liability incurred by the Initial Developer or such Contributor as a result of any such terms You offer. 
+o 3.7. Larger Works. 
+You may create a Larger Work by combining Covered Code with other code not governed by the terms of this License and distribute the Larger Work as a single product. In such a case, You must make sure the requirements of this License are fulfilled for the Covered Code. 
+* 4. Inability to Comply Due to Statute or Regulation. 
+o If it is impossible for You to comply with any of the terms of this License with respect to some or all of the Covered Code due to statute, judicial order, or regulation then You must: (a) comply with the terms of this License to the maximum extent possible; and (b) describe the limitations and the code they affect. Such description must be included in the LEGAL file described in Section 3.4 and must be included with all distributions of the Source Code. Except to the extent prohibited by statute or regulation, such description must be sufficiently detailed for a recipient of ordinary skill to be able to understand it.
+* 5. Application of this License. 
+o This License applies to code to which the Initial Developer has attached the notice in Exhibit A and to related Covered Code. 
+* 6. Versions of the License. 
+o 6.1. New Versions. Zimbra, Inc. ("Zimbra") may publish revised and/or new versions of the License from time to time. Each version will be given a distinguishing version number. 
+o 6.2. Effect of New Versions. Once Covered Code has been published under a particular version of the License, You may always continue to use it under the terms of that version. You may also choose to use such Covered Code under the terms of any subsequent version of the License published by Zimbra. No one other than Zimbra has the right to modify the terms applicable to Covered Code created under this License. 
+o 6.3. Derivative Works. If You create or use a modified version of this License (which you may only do in order to apply it to code which is not already Covered Code governed by this License), You must (a) rename Your license so that the phrases "Zimbra", "ZPL" or any confusingly similar phrase do not appear in your license (except to note that your license differs from this License) and (b) otherwise make it clear that Your version of the license contains terms which differ from the Zimbra Public License. (Filling in the name of the Initial Developer, Original Code or Contributor in the notice described in Exhibit A shall not of themselves be deemed to be modifications of this License.) 
+* 7. DISCLAIMER OF WARRANTY. 
+o COVERED CODE IS PROVIDED UNDER THIS LICENSE ON AN "AS IS" BASIS, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES THAT THE COVERED CODE IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE OR NON-INFRINGING. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE COVERED CODE IS WITH YOU. SHOULD ANY COVERED CODE PROVE DEFECTIVE IN ANY RESPECT, YOU (NOT THE INITIAL DEVELOPER OR ANY OTHER CONTRIBUTOR) ASSUME THE COST OF ANY NECESSARY SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS LICENSE. NO USE OF ANY COVERED CODE IS AUTHORIZED HEREUNDER EXCEPT UNDER THIS DISCLAIMER. 
+* 8. TERMINATION. 
+o 8.1. This License and the rights granted hereunder will terminate automatically if You fail to comply with terms herein and fail to cure such breach within 30 days of becoming aware of the breach. All sublicenses to the Covered Code which are properly granted shall survive any termination of this License. Provisions which, by their nature, must remain in effect beyond the termination of this License shall survive. 
+o 8.2. If You initiate litigation by asserting a patent infringement claim (excluding declatory judgment actions) against Initial Developer or a Contributor (the Initial Developer or Contributor against whom You file such action is referred to as "Participant") alleging that: 
++ (a) such Participant''s Contributor Version directly or indirectly infringes any patent, then any and all rights granted by such Participant to You under Sections 2.1 and/or 2.2 of this License shall, upon 60 days notice from Participant terminate prospectively, unless if within 60 days after receipt of notice You either: (i) agree in writing to pay Participant a mutually agreeable reasonable royalty for Your past and future use of Modifications made by such Participant, or (ii) withdraw Your litigation claim with respect to the Contributor Version against such Participant. If within 60 days of notice, a reasonable royalty and payment arrangement are not mutually agreed upon in writing by the parties or the litigation claim is not withdrawn, the rights granted by Participant to You under Sections 2.1 and/or 2.2 automatically terminate at the expiration of the 60 day notice period specified above. 
++ (b) any software, hardware, or device, other than such Participant''s Contributor Version, directly or indirectly infringes any patent, then any rights granted to You by such Participant under Sections 2.1(b) and 2.2(b) are revoked effective as of the date You first made, used, sold, distributed, or had made, Modifications made by that Participant. 
+o 8.3. If You assert a patent infringement claim against Participant alleging that such Participant''s Contributor Version directly or indirectly infringes any patent where such claim is resolved (such as by license or settlement) prior to the initiation of patent infringement litigation, then the reasonable value of the licenses granted by such Participant under Sections 2.1 or 2.2 shall be taken into account in determining the amount or value of any payment or license. 
+o 8.4. In the event of termination under Sections 8.1 or 8.2 above, all end-user license agreements (excluding distributors and resellers) which have been validly granted by You or any distributor hereunder prior to termination shall survive termination. 
+* 9. LIMITATION OF LIABILITY. 
+o UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY, WHETHER TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE, SHALL YOU, THE INITIAL DEVELOPER, ANY OTHER CONTRIBUTOR, OR ANY DISTRIBUTOR OF COVERED CODE, OR ANY SUPPLIER OF ANY OF SUCH PARTIES, BE LIABLE TO ANY PERSON FOR ANY INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, COMPUTER FAILURE OR MALFUNCTION, OR ANY AND ALL OTHER COMMERCIAL DAMAGES OR LOSSES, EVEN IF SUCH PARTY SHALL HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGES. THIS LIMITATION OF LIABILITY SHALL NOT APPLY TO LIABILITY FOR DEATH OR PERSONAL INJURY RESULTING FROM SUCH PARTY''S NEGLIGENCE TO THE EXTENT APPLICABLE LAW PROHIBITS SUCH LIMITATION. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU. 
+* 10. U.S. GOVERNMENT END USERS. 
+o The Covered Code is a "commercial item," as that term is defined in 48 C.F.R. 2.101 (Oct. 1995), consisting of "commercial computer software" and "commercial computer software documentation," as such terms are used in 48 C.F.R. 12.212 (Sept. 1995). Consistent with 48 C.F.R. 12.212 and 48 C.F.R. 227.7202-1 through 227.7202-4 (June 1995), all U.S. Government End-Users acquire Covered Code with only those rights set forth herein. 
+* 11. MISCELLANEOUS. 
+o This License represents the complete agreement concerning subject matter hereof. If any provision of this License is held to be unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable. This License shall be governed by California law provisions (except to the extent applicable law, if any, provides otherwise), excluding its conflict-of-law provisions. With respect to disputes in which at least one party is a citizen of, or an entity chartered or registered to do business in the United States of America, any litigation relating to this License shall be subject to the jurisdiction of the Federal Courts of the Northern District of California, with venue lying in Santa Clara County, California, with the losing party responsible for costs, including without limitation, court costs and reasonable attorneys'' fees and expenses. The application of the United Nations Convention on Contracts for the International Sale of Goods is expressly excluded. Any law or regulation which provides that the language of a contract shall be construed against the drafter shall not apply to this License. 
+* 12. RESPONSIBILITY FOR CLAIMS. 
+o As between Initial Developer and the Contributors, each party is responsible for claims and damages arising, directly or indirectly, out of its utilization of rights under this License and You agree to work with Initial Developer and Contributors to distribute such responsibility on an equitable basis. Nothing herein is intended or shall be deemed to constitute any admission of liability. 
+* 13. MULTIPLE-LICENSED CODE. 
+o Initial Developer may designate portions of the Covered Code as Multiple-Licensed. Multiple-Licensed means that the Initial Developer permits you to utilize portions of the Covered Code under Your choice of the ZPL or the alternative licenses, if any, specified by the Initial Developer in the file described in Exhibit A. 
+* EXHIBIT A -Zimbra Public License. 
+The contents of this file are subject to the Zimbra Public License 
+Version 1.1 ("License"); you may not use this file except in 
+compliance with the License. You may obtain a copy of the License at 
+http://www.zimbra.com/license 
+
+Software distributed under the License is distributed on an "AS IS" 
+basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See 
+the License for the specific language governing rights and limitations 
+under the License. 
+
+The Original Code is ______________________________________. 
+The Initial Developer of the Original Code is ________________________. 
+Portions created by ______________________ are Copyright (C) ______ 
+_______________________. All Rights Reserved. 
+
+Contributor(s): ______________________________________. 
+
+* EXHIBIT B -Zimbra Public License. 
+o Additional Terms applicable to the Zimbra Public License. 
+o I. Effect. 
+o These additional terms described in this Zimbra Public License - Additional Terms shall apply to the Covered Code under this License. 
+o II. Zimbra and logo. 
+o This License does not grant any rights to use the trademarks "Zimbra" and the "Zimbra" logos even if such marks are included in the Original Code or Modifications. 
+o However, in addition to the other notice obligations, (1) all copies of the Original Code in Executable and Source Code form must, as a form of attribution of the original author, include on each user interface screen (i) the original Zimbra logo, and once for each user session (ii) the copyright notice as it appears in the Original Code; and (2) all derivative works and copies of derivative works of the Covered Code in Executable and Source Code form must include on each user interface screen (i) the "Zimbra Powered" logo,, and once for each user session (ii) the copyright notice from the version of the Covered Code from which the copy or the derivative work was made. In addition, the original Zimbra logo or the "Zimbra Powered" logo, as appropriate, must be visible to all users, must appear in each user interface screen, and must be in the same position as and at least as large as the Zimbra logo is within the Original Code. When users click on the original Zimbra logo it must direct them to http://www.zimbra.com/, and when users click on the "Zimbra Powered" logo it must direct them to http://www.zimbra.com/powered. This obligation shall also apply to any copies or derivative works which are distributed under the alternative terms of Section 3.6 and this obligation must be included in any such license.
+
+Read more about this license at http://www.zimbra.com/license/zimbra_public_license_1.2.html', 'http://www.ohloh.net/licenses/zpl', NULL, NULL, NULL, 'Zimbra Public License Version 1.2', NULL, NULL, NULL, '', NULL, false, false, false, '563faa3278a532d91a294e4e7ec9ee10', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel', 'Intel Open Source License 
+
+
+Copyright (c) 1996-2000 Intel Corporation All rights reserved. 
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
+•	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+•	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+•	Neither the name of the Intel Corporation nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE INTEL OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. EXPORT LAWS: THIS LICENSE ADDS NO RESTRICTIONS TO THE EXPORT LAWS OF YOUR JURISDICTION. It is licensee''s responsibility to comply with any export regulations applicable in licensee''s jurisdiction. Under CURRENT (May 2000) U.S. export regulations this software is eligible for export from the U.S. and can be downloaded by or otherwise exported or reexported worldwide EXCEPT to U.S. embargoed destinations which include Cuba, Iraq, Libya, North Korea, Iran, Syria, Sudan, Afghanistan and any other country to which the U.S. has embargoed goods and services.', 'http://opensource.org/licenses/Intel', NULL, NULL, NULL, 'Intel Open Source License', NULL, NULL, NULL, '', NULL, false, false, false, '273a6c7b3d192b2f6c368e706423b815', 1);
