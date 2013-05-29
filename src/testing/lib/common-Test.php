@@ -416,7 +416,7 @@ function filesByDir($dir) {
  */
 class RunTest
 {
-  protected $makeOutput = array();
+  public $makeOutput = array();
   protected $unitTest;
   protected $makeErrors;
   protected $cunitErrors;
@@ -446,6 +446,7 @@ class RunTest
    * 'cunit' => boolean, true for cunit failures false for none
    * 'phpunit' => boolean, true for phpunit failures false for none
    * 'notest' => boolean, false for no tests for that module, true for tests
+   * 'nomosfunc' => None-0 for nomos functional failures
    */
   function MakeTest()
   {
@@ -457,6 +458,7 @@ class RunTest
       'phpunit' => FALSE,
       'notest' => FALSE,
       'other' => NULL,
+      'nomosfunc' => NULL,
     );
 
     $cleanMake = exec('make clean 2>&1', $cleanOut, $cleanRtn);
@@ -725,6 +727,15 @@ class RunTest
           }
           echo "Other errors for $test:\n";
           echo $value . "\n";
+          $failures++;
+          break;
+        case 'nomosfunc':
+          if(empty($value))
+          {
+            break;
+          }
+          echo "Nomos diff errors for $test:\n";
+          echo $value . " diffs.\n";
           $failures++;
           break;
       }

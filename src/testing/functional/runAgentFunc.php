@@ -136,6 +136,24 @@ foreach ( $funcList as $funcTest ) {
   $Make = new RunTest($funcTest);
   $runResults = $Make->MakeTest();
   //debugprint($runResults, "run results for $funcTest\n");
+
+  if($funcTest == 'nomos')
+  {
+    $diffResult = array();
+    foreach ($Make->makeOutput as $makeOutput)
+    if((strpos($makeOutput, '< File')!=false) || (strpos($makeOutput, '> File')!=false))
+    {
+      $diffResult[]  = $makeOutput;
+    }
+    if(count($diffResult)!=0)
+    {
+      //echo "Nomos result have " . count($diffResult) . " difference!\n";
+      //print_r($diffResult);
+      foreach($diffResult as $diff)
+        echo substr($diff, strpos($diff, '=> ')+3) . "\n";
+      $runResults['nomosfunc'] = count($diffResult);
+    }
+  }
   $Make->printResults($runResults);
 
   if ( !processXUnit($funcTest) ) {
