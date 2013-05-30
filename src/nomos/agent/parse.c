@@ -1344,7 +1344,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (!lmem[_mGPL] && !HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED)
       && !INFILE(_LT_GPL_EXCEPT_BISON_1) && !INFILE(_LT_GPL_EXCEPT_BISON_2)
       && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)) {
-      if (GPL_INFILE(_LT_GPL_ALT)) {
+      if (GPL_INFILE(_LT_GPL_ALT) && !INFILE(_LT_LGPL_ALT)) {
         cp = GPLVERS();
         INTERESTING(lDebug ? "GPL(alternate)" : cp);
         lmem[_mGPL] = 1;
