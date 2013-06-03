@@ -902,7 +902,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_APTANA)) {
     if (INFILE(_TITLE_APTANA_V10)) {
-      INTERESTING("Aptana-PL-1.0");
+      INTERESTING("Aptana-1.0");
     }
     else {
       INTERESTING("Aptana");
@@ -2276,7 +2276,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       lmem[_mMPL] = 1;
     }
     else if (INFILE(_TITLE_NETIZEN)) {
-      INTERESTING("Netizen");
+      INTERESTING("NOSL");
       lmem[_mMPL] = 1;
     }
     else if (INFILE(_TITLE_TPL10)) {
@@ -3094,7 +3094,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * TrollTech
    */
   if (INFILE(_LT_TROLLTECH)) {
-    INTERESTING("TrollTech");
+    INTERESTING("Trolltech");
   }
   else if (INFILE(_LT_QT_COMMref)) {
     INTERESTING("QT(Commercial)");
@@ -3851,7 +3851,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_mREDHAT] = 1;
   }
   else if (INFILE(_LT_FEDORA_CLA) || INFILE(_TITLE_FEDORA_CLA)) {
-    INTERESTING("Fedora-CLA");
+    INTERESTING("FedoraCLA");
     lmem[_mREDHAT] = 1;
   }
   else if (INFILE(_CR_REDHAT)) {
@@ -5408,7 +5408,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Against DRM
    */
   if (INFILE(_LT_AGAINST_DRM)) {
-    INTERESTING("Against-DRM");
+    INTERESTING("AgainstDRM");
   }
   /*
    * The TeXinfo exception clause
@@ -6503,7 +6503,7 @@ char *agplVersion(char *filetext, int size, int isML, int isPS)
     lstr = lDebug ? "Affero-v3(url)" : "AGPL-3.0";
   }
   else {
-    lstr = "Affero";
+    lstr = "AGPL";
   }
   return lstr;
 }
@@ -6634,7 +6634,7 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
   else if (GPL_INFILE(_PHR_FSF_V2_OR_LATER) ||
       INFILE(_PHR_GPL2_OR_LATER)) {
     if (INFILE(_TITLE_GPL_KDE)) {
-      lstr = "GPLv2+KDEupgradeClause";
+      lstr = "GPL-2.0+KDEupgradeClause";
     }
     else if (INFILE(_TITLE_GPL2)) {
       lstr = lDebug ? "GPL-v2(#1)" : "GPL-2.0";
@@ -6644,7 +6644,7 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
     }
   }
   else if (GPL_INFILE(_PHR_GPL2_OR_GPL3)) {
-    lstr = "GPL-2:3";
+    lstr = "GPL-2.0:3.0";
   }
   else if (GPL_INFILE(_PHR_FSF_V3_OR_LATER) ||
       GPL_INFILE(_PHR_GPL3_OR_LATER)) {
