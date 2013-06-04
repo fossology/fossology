@@ -3792,7 +3792,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("APSL-2.0");
       }
       else if (INFILE(_TITLE_Ferris)) {
-        INTERESTING("Ferris-1.2");
+        INTERESTING(lDebug ? "Ferris-1.2" : "APSL-style");
       }
       else if (INFILE(_TITLE_APSL_style)) {
         INTERESTING("APSL-style");
