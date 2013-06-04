@@ -274,7 +274,7 @@ function initLicenseRefTable($Verbose)
         continue;
 
       $sql = "UPDATE license_ref set ";
-      if ($rf_text_check != $rf_text && !empty($rf_text))  $sql .= " rf_text='$rf_text',";
+      if ($rf_text_check != $rf_text && !empty($rf_text) && !(stristr($rf_text, 'License by Nomos')))  $sql .= " rf_text='$rf_text',";
       if ($rf_url_check != $rf_url && !empty($rf_url))  $sql .= " rf_url='$rf_url',";
       if ($rf_fullname_check != $rf_fullname && !empty($rf_fullname))  $sql .= " rf_fullname ='$rf_fullname',";
       if ($rf_notes_check != $rf_notes && !empty($rf_notes))  $sql .= " rf_notes ='$rf_notes',";
@@ -284,11 +284,13 @@ function initLicenseRefTable($Verbose)
       if ($rf_detector_type_check != $rf_detector_type && !empty($rf_detector_type))  $sql .= " rf_detector_type = '$rf_detector_type',";
       $sql = substr_replace($sql ,"",-1);
 
-      $sql .= " where rf_shortname = '$escaped_name';";
-      $result_back = pg_query($PG_CONN, $sql);
-      DBCheckResult($result_back, $sql, __FILE__, __LINE__);
-      pg_free_result($result_back);
-
+      if ($sql != "UPDATE license_ref set") // check if have something to update
+      {
+        $sql .= " where rf_shortname = '$escaped_name';";
+        $result_back = pg_query($PG_CONN, $sql);
+        DBCheckResult($result_back, $sql, __FILE__, __LINE__);
+        pg_free_result($result_back);
+      }
     }
     else  // insert when it is new
     {
