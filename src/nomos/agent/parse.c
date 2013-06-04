@@ -5554,7 +5554,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /* 
    * Dual licenses
    */
-  if (INFILE(_LT_DUAL_LICENSE_1)) {
+  if (INFILE(_LT_DUAL_LICENSE_1) && !INFILE(_TITLE_NOSL)) {
     INTERESTING(lDebug ? "Dual-license(1)" : "Dual-license");
   }
   else if (INFILE(_LT_DUAL_LICENSE_2)) { 
