@@ -3456,6 +3456,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       if (INFILE(_LT_ART_V2) || INFILE(_TITLE_ART20)) {
         INTERESTING(lDebug ? "Artistic(v2.0#1)" : "Artistic-2.0");
       }
+      else if (INFILE(_TITLE_NBPL_V10)) {
+        INTERESTING("NBPL-1.0");
+        lmem[_fARTISTIC] = 1;
+      }
       else {
         INTERESTING("Artistic-1.0");
         lmem[_fARTISTIC] = 1;
