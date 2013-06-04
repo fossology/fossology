@@ -7666,9 +7666,13 @@ k
 %KEY% "licen[cs]"	
 %STR%	"the net boolean public licen[cs]e (v|version )?1"
 #
-%ENTRY%	_TITLE_Flora
+%ENTRY%	_TITLE_Flora_V10
 %KEY% "licen[cs]"	
-%STR%	"Flora Licen[cs]e"
+%STR%	"Flora Licen[cs]e (version |v)1\.?0"
+#
+%ENTRY%	_TITLE_Flora_V11
+%KEY% "licen[cs]"	
+%STR%	"Flora Licen[cs]e (version |v)1\.?1"
 #
 %ENTRY%	_TITLE_SMLNJ
 %KEY% "licen[cs]"	

@@ -507,7 +507,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(cp);
     lmem[_mAPACHE] = 1;
   }
-  else if (INFILE(_LT_ASL20) && !INFILE(_TITLE_Flora) && !URL_INFILE(_URL_Flora)) {
+  else if (INFILE(_LT_ASL20) && !INFILE(_TITLE_Flora_V10) && !INFILE(_TITLE_Flora_V11) && !URL_INFILE(_URL_Flora)) {
     INTERESTING(lDebug ? "Apache(2.0#2)" : "Apache-2.0");
     lmem[_mAPACHE] = 1;
   }
@@ -5685,7 +5685,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /** Flora License */
-  if (INFILE(_TITLE_Flora) || URL_INFILE(_URL_Flora)) {
+  if (INFILE(_TITLE_Flora_V10)) {
+    INTERESTING("Flora-1.0");
+  }
+  else if (INFILE(_TITLE_Flora_V11)) {
+    INTERESTING("Flora-1.1");
+  }
+  else if (URL_INFILE(_URL_Flora)) {
     INTERESTING("Flora");
   }
 
