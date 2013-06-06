@@ -6650,7 +6650,7 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
   else if ((GPL_INFILE(_PHR_FSF_V3_ONLY) || GPL_INFILE(_PHR_GPL3_ONLY) ||
                 INFILE(_FILE_GPLv3) || GPL_INFILE(_PHR_GPL3_ONLY_ref1) || GPL_INFILE(_PHR_GPL3_ONLY_ref2)) &&
      (GPL_INFILE(_PHR_FSF_V2_OR_LATER) || INFILE(_PHR_GPL2_OR_LATER))) {
-    lstr = "GPL-2.0:3.0";
+    lstr = "GPL-2.0+:3.0";
   }
   else if (GPL_INFILE(_PHR_FSF_V2_OR_LATER) ||
       INFILE(_PHR_GPL2_OR_LATER)) {
