@@ -1216,7 +1216,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       }
     }
     else if (INFILE(_LT_LGPL_3)) {
-      if ((INFILE(_PHR_LGPL3_OR_LATER) || INFILE(_PHR_LGPL3_OR_LATER_ref1) ||
+      if ((INFILE(_PHR_LGPL3_OR_LATER) || INFILE(_PHR_LGPL3_OR_LATER_ref1) || INFILE(_PHR_LGPL3_OR_LATER_ref2) ||
                 RM_INFILE(_PHR_FSF_V3_OR_LATER)) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
       {
         INTERESTING("LGPL-3.0+");
@@ -1250,7 +1250,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "LGPL(alternate)" : cp);
         lmem[_mLGPL] = 1;
       }
-      else if (INFILE(_PHR_LGPL3_OR_LATER_ref1)) {
+      else if (INFILE(_PHR_LGPL3_OR_LATER_ref1) || INFILE(_PHR_LGPL3_OR_LATER_ref2)) {
         INTERESTING("LGPL-3.0+");
         lmem[_mLGPL] = 1;
       }
@@ -1354,7 +1354,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mGPL] = 1;
       }
       else if ((GPL_INFILE(_LT_GPL3ref2) || GPL_INFILE(_PHR_FSF_V3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER) 
-            || GPL_INFILE(_PHR_GPL3_OR_LATER_ref1)) 
+            || GPL_INFILE(_PHR_GPL3_OR_LATER_ref1) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref2) ) 
           && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
       {
         INTERESTING("GPL-3.0+");
@@ -6575,12 +6575,12 @@ char *lgplVersion(char *filetext, int size, int isML, int isPS)
   traceFunc("== lgplVersion()\n");
 #endif  /* PROC_TRACE */
   /* */
-  if ((INFILE(_PHR_LGPL3_OR_LATER) || INFILE(_PHR_FSF_V3_OR_LATER) || INFILE(_PHR_LGPL3_OR_LATER_ref1)) 
-      && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+  if ((INFILE(_PHR_LGPL3_OR_LATER) || INFILE(_PHR_FSF_V3_OR_LATER) || INFILE(_PHR_LGPL3_OR_LATER_ref1) || 
+        INFILE(_PHR_LGPL3_OR_LATER_ref2)) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
     lstr = "LGPL-3.0+";
   }
   else if (GPL_INFILE(_PHR_LGPL3_ONLY) || GPL_INFILE(_PHR_FSF_V3_ONLY) ||
-      INFILE(_FILE_LGPLv3)) {
+      INFILE(_FILE_LGPLv3) || GPL_INFILE(_PHR_LGPL3_ONLY_ref1) || GPL_INFILE(_PHR_LGPL3_ONLY_ref2)) {
     lstr = "LGPL-3.0";
   }
   else if ((INFILE(_PHR_LGPL21_OR_LATER) 
@@ -6647,6 +6647,11 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
       INFILE(_PHR_GPL21_OR_LATER)) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
     lstr = "GPL-2.1+";
   }
+  else if ((GPL_INFILE(_PHR_FSF_V3_ONLY) || GPL_INFILE(_PHR_GPL3_ONLY) ||
+                INFILE(_FILE_GPLv3) || GPL_INFILE(_PHR_GPL3_ONLY_ref1) || GPL_INFILE(_PHR_GPL3_ONLY_ref2)) &&
+     (GPL_INFILE(_PHR_FSF_V2_OR_LATER) || INFILE(_PHR_GPL2_OR_LATER))) {
+    lstr = "GPL-2.0:3.0";
+  }
   else if (GPL_INFILE(_PHR_FSF_V2_OR_LATER) ||
       INFILE(_PHR_GPL2_OR_LATER)) {
     if (INFILE(_TITLE_GPL_KDE)) {
@@ -6662,8 +6667,8 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
   else if (GPL_INFILE(_PHR_GPL2_OR_GPL3)) {
     lstr = "GPL-2.0:3.0";
   }
-  else if (GPL_INFILE(_PHR_FSF_V3_OR_LATER) ||
-      GPL_INFILE(_PHR_GPL3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref1)) {
+  else if (GPL_INFILE(_PHR_FSF_V3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref2)
+      || GPL_INFILE(_PHR_GPL3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref1)) {
     if (INFILE(_TITLE_GPL3)) {
       lstr = lDebug ? "GPL-v3(#1)" : "GPL-3.0";
     }
@@ -6672,7 +6677,7 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
     }
   }
   else if (GPL_INFILE(_PHR_FSF_V3_ONLY) || GPL_INFILE(_PHR_GPL3_ONLY) ||
-      INFILE(_FILE_GPLv3)) {
+      INFILE(_FILE_GPLv3) || GPL_INFILE(_PHR_GPL3_ONLY_ref1) || GPL_INFILE(_PHR_GPL3_ONLY_ref2)) {
     lstr = lDebug ? "GPL-v3(#2)" : "GPL-3.0";
   }
   else if (INFILE(_PHR_FSF_V21_ONLY) || INFILE(_PHR_GPL21_ONLY)) {

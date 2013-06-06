@@ -7811,7 +7811,7 @@ k
 #
 %ENTRY%	_PHR_FSF_V3_OR_LATER
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation ((either v|v)ersion 3 =SOME= or =SOME= (later|newer|subsequent|more recent))"
+%STR%	"by the free software foundation ((either v|v)ersion 3 =SOME= or =SOME= (\<later\>|newer|subsequent|more recent))"
 #
 %ENTRY%	_PHR_GNU_COPYING
 %KEY%	"(docume|warra)nt"
@@ -7863,6 +7863,14 @@ k
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))"
 #
+%ENTRY%	_PHR_GPL3_ONLY_ref1
+%KEY%	"licen[cs]"
+%STR%	"under the terms of version 3 of the gnu general public licen[cs]e"
+#
+%ENTRY%	_PHR_GPL3_ONLY_ref2
+%KEY%	"licen[cs]"
+%STR%	"under the terms of the gnu general public licen[cs]e version 3"
+#
 %ENTRY%	_PHR_GPL3_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))|gpl[_-]?v?3) =SOME= or =SOME= (later|newer|subsequent|more recent)"
@@ -7870,6 +7878,10 @@ k
 %ENTRY%	_PHR_GPL3_OR_LATER_ref1
 %KEY%	"licen[cs]"
 %STR%	"under the terms of version 3 or later of the gnu general public licen[cs]e"
+#
+%ENTRY%	_PHR_GPL3_OR_LATER_ref2
+%KEY%	"licen[cs]"
+%STR%	"under the terms of the gnu general public licen[cs]e version 3 or later"
 #
 %ENTRY%	_PHR_GPLISH_SAMPLE
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -8019,13 +8031,25 @@ k
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )3"
 #
+%ENTRY%	_PHR_LGPL3_ONLY_ref1
+%KEY%	"licen[cs]"
+%STR%	"under the terms of version 3 of the gnu lesser general public licen[cs]e"
+#
+%ENTRY%	_PHR_LGPL3_ONLY_ref2
+%KEY%	"licen[cs]"
+%STR%	"under the terms of the gnu lesser general public licen[cs]e version 3"
+#
 %ENTRY%	_PHR_LGPL3_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )3 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )3 =SOME= or =SOME= (\<later\>|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LGPL3_OR_LATER_ref1
 %KEY%	"licen[cs]"
 %STR%	"under the terms of the gnu lesser general public licen[cs]e version 3 =SOME= any later version"
+#
+%ENTRY%	_PHR_LGPL3_OR_LATER_ref2
+%KEY%	"licen[cs]"
+%STR%	"under the terms of version 3 =SOME= any later version of the gnu lesser general public licen[cs]e"
 #
 ##%ENTRY%	_PHR_OBJONLY
 ##%KEY%	"so(ftware|urce)"
