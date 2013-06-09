@@ -1205,6 +1205,10 @@
 %KEY%	"licen[cs]"
 %STR%	"subject to the common public attribution licen[cs]e"
 #
+%ENTRY%	_LT_CPAL_V1_ref
+%KEY%	"licen[cs]"
+%STR%	"under the terms of the (cpal|common public attribution) (v|version )1\.?0 licen[cs]e"
+#
 %ENTRY%	_LT_CPOL
 %KEY%	"licen[cs]"
 %STR%	"the work as defined below is provided under the terms of this code project open licen[cs]e"
@@ -2213,6 +2217,16 @@
 %KEY%	"gpl"
 %STR%	"\<gpl\>"
 #
+# To catch things like "this is GPLV2".
+%ENTRY%	_LT_GPL_V2_NAMED
+%KEY%	"gpl"
+%STR%	"\<gplv2\>"
+#
+# To catch things like "this is GPLV3".
+%ENTRY%	_LT_GPL_V3_NAMED
+%KEY%	"gpl"
+%STR%	"\<gplv3\>"
+#
 %ENTRY%	_LT_GPL_NAMED3_EXHIBIT
 %KEY%	"licen[cs]"
 %STR%	"Compatible Licences =SOME= (\<gpl\>|gnu general public license)"
@@ -2338,6 +2352,10 @@ e /* (INFILE(j)) */
 # in whole or in part contains or is a derivative of this program or any part
 # thereof to be ...
 #####
+%ENTRY%	_LT_GPL_ref
+%KEY%	"licen[cs]"
+%STR%	"under (the |)general public licen[cs]e"
+#
 %ENTRY%	_LT_GPL_V1
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]ed at no charge to all third parties on terms identical to those contained in this licen[cs]e agreement"
@@ -2345,6 +2363,14 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_GPL_V2
 %KEY%	"licen[cs]"
 %STR%	"under the terms of the gnu ((general p|p)ublic|general purpose) (([v-]?| ?version) ?)2 licen[cs]e"
+#
+%ENTRY%	_LT_GPL_V2_ref
+%KEY%	"licen[cs]"
+%STR% "licen[cs]ed under (the |)((general p|p)ublic|general purpose) licen[cs]e (version |v)2"
+#
+%ENTRY%	_LT_GPL_V3_ref
+%KEY%	"licen[cs]"
+%STR% "licen[cs]ed under (the |)((general p|p)ublic|general purpose) licen[cs]e (version |v)3"
 #####
 # DELETED: this licen[cs]e =SOME= ... saying it may be distributed under
 # the terms =SOME= general public licen[cs]e
@@ -2387,9 +2413,6 @@ e /* (INFILE(j)) */
 %NOCHECK%
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"\<(either|or|alternately)\> =FEW= ([^l]gpl|GNU (general p|p)ublic licen[cs]e)"
-%ENTRY%	_LT_IGNORE_CLAUSE
-%KEY%	=NULL=
-%STR%	"to apply these terms =ANY= attach the following notices to the (program|library)"
 #####
 # This is an 'exclusionary' clause - the Python licen[cs]e for instance has
 # the text "previously distributed under the GNU ...".  We use this when
@@ -7771,7 +7794,7 @@ k
 #
 %ENTRY%	_PHR_FSF_V1_OR_LATER
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation ((either v|v)ersion 1 =SOME= or =SOME= (later|newer|subsequent|more recent))"
+%STR%	"by the free software =SOME= ((either v|v)ersion 1 =SOME= or =SOME= (later|newer|subsequent|more recent))"
 #
 %ENTRY%	_PHR_FSF_V11_ONLY
 %KEY%	"so(ftware|urce)"
@@ -7779,7 +7802,7 @@ k
 #
 %ENTRY%	_PHR_FSF_V11_OR_LATER
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation ((either v|v)ersion 1\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent))"
+%STR%	"by the free software =SOME= ((either v|v)ersion 1\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent))"
 #
 %ENTRY%	_PHR_FSF_V12_ONLY
 %KEY%	"so(ftware|urce)"
@@ -7787,7 +7810,7 @@ k
 #
 %ENTRY%	_PHR_FSF_V12_OR_LATER
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation ((either v|v)ersion 1\.?2 =SOME= or =SOME= (later|newer|subsequent|more recent))"
+%STR%	"by the free software =SOME= ((either v|v)ersion 1\.?2 =SOME= or =SOME= (later|newer|subsequent|more recent))"
 #
 %ENTRY%	_PHR_FSF_V2_ONLY
 %KEY%	"so(ftware|urce)"
@@ -7795,7 +7818,7 @@ k
 #
 %ENTRY%	_PHR_FSF_V2_OR_LATER
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation ((either v|v)ersion 2 =SOME= or =SOME= (later|newer|subsequent|more recent))"
+%STR%	"by the free software =SOME= ((either v|v)ersion 2 =SOME= or =SOME= (later|newer|subsequent|more recent))"
 #
 %ENTRY%	_PHR_FSF_V21_ONLY
 %KEY%	"so(ftware|urce)"
@@ -7803,7 +7826,7 @@ k
 #
 %ENTRY%	_PHR_FSF_V21_OR_LATER
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation ((either v|v)ersion 2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent))"
+%STR%	"by the free software =SOME= ((either v|v)ersion 2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent))"
 #
 %ENTRY%	_PHR_FSF_V3_ONLY
 %KEY%	"so(ftware|urce)"
@@ -7811,7 +7834,7 @@ k
 #
 %ENTRY%	_PHR_FSF_V3_OR_LATER
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation ((either v|v)ersion 3 =SOME= or =SOME= (\<later\>|newer|subsequent|more recent))"
+%STR%	"by the free software =SOME= ((either v|v)ersion 3 =SOME= or =SOME= (\<later\>|newer|subsequent|more recent))"
 #
 %ENTRY%	_PHR_GNU_COPYING
 %KEY%	"(docume|warra)nt"
@@ -7849,7 +7872,7 @@ k
 #
 %ENTRY%	_PHR_GPL2_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|gpl[_-]?v?2) =ANY= (or|Alternatively) =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|gpl[_-]?v?2) =SOME= (or|Alternatively) =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL21_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -8021,7 +8044,11 @@ k
 #
 %ENTRY%	_PHR_LGPL21_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )2\.?1"
+%STR%  "(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )2\.?1"
+#
+%ENTRY%	_PHR_LGPL21_ONLY_ref
+%KEY%	"licen[cs]"
+%STR%	"licen[cs]ed under =FEW= (gnu (lesser|library)|(lesser|library) gnu) (general p|p)ublic licen[cs]e\,? =FEW= (v|[^_-]version )2\.?1"
 #
 %ENTRY%	_PHR_LGPL21_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
