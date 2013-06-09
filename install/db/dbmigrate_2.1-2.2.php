@@ -154,6 +154,12 @@ function Migrate_21_22()
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 
+  /** add UNIQUE CONSTRAINT on rf_shortname column of licenser_ref table */
+  $sql = "ALTER TABLE license_ref ADD CONSTRAINT  license_ref_rf_shortname_key UNIQUE (rf_shortname); ";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+
   return 0;  // success
 } // Migrate_21_22
 
