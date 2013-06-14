@@ -5755,12 +5755,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /** gpl license */
   if (!lmem[_mGPL] && INFILE(_LT_GPL_V2_ref))
   {
-    INTERESTING("GPL-2");
+    INTERESTING("GPL-2.0");
     lmem[_mGPL] = 1;
   }
   else if (!lmem[_mGPL] && INFILE(_LT_GPL_V3_ref))
   {
-    INTERESTING("GPL-3");
+    INTERESTING("GPL-3.0");
     lmem[_mGPL] = 1;
   }
   else if (!lmem[_mGPL] && INFILE(_LT_GPL_ref))
