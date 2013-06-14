@@ -44,9 +44,15 @@ class NomosFunTest extends PHPUnit_Framework_TestCase
 
     print "starting NomosFunTest\n";
     $last = exec("find $this->testdir -type f -not \( -wholename \"*svn*\" \) -exec $this->nomos -l '{}' + > scan.out", $out, $rtn);
-    $last1 = exec("diff scan.out ../testdata/LastGoodNomosTestfilesScan", $out, $rtn);
-    //$this->assertEquals($out,'0', "$out lines different!");
-    print_r($out);
+
+    $file_correct = "../testdata/LastGoodNomosTestfilesScan";
+    $old = " ..\/testdata\/";
+    $last = exec("sed 's/$old/ /g' ./scan.out > ./scan.out.r");
+    $last = exec("sort $file_correct >./LastGoodNomosTestfilesScan.s");
+    $last = exec("sort ./scan.out.r >./scan.out.s");
+    $last = exec("diff ./LastGoodNomosTestfilesScan.s ./scan.out.s >./report.d", $out, $rtn);
+    $count = exec("cat report.d|wc -l", $out, $ret);
+    $this->assertEquals($count,'0', "some lines of licenses are different, please view ./report.d for the details!");
   }
 }
 ?>
