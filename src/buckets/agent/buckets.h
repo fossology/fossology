@@ -146,7 +146,7 @@ int arrayAinB        (int *arrayA, int *arrayB);
 int intAinB          (int intA, int *arrayB);
 int validate_pk      (PGconn *pgConn, char *sql);
 void Usage           (char *Name);
-int processed        (PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk, int bucketpool_pk);
+int processed        (PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk, int bucketpool_pk, int bucket_pk);
 int UploadProcessed  (PGconn *pgConn, int bucketagent_pk, int nomosagent_pk, int pfile_pk, int uploadtree_pk, int upload_pk, int bucketpool_pk);
 
 /* inits.c */

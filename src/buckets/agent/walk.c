@@ -103,7 +103,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   {
     childuploadtree.uploadtree_pk = atol(PQgetvalue(result, childIdx, 0));
     childuploadtree.pfile_fk = atol(PQgetvalue(result, childIdx, 1));
-    if (processed(pgConn, agent_pk, childuploadtree.pfile_fk, childuploadtree.uploadtree_pk, bucketpool_pk)) continue;
+    if (processed(pgConn, agent_pk, childuploadtree.pfile_fk, childuploadtree.uploadtree_pk, bucketpool_pk, 0)) continue;
 
     childuploadtree.lft = atoi(PQgetvalue(result, childIdx, 2));
     childuploadtree.rgt = atoi(PQgetvalue(result, childIdx, 3));

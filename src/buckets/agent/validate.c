@@ -132,15 +132,16 @@ FUNCTION void Usage(char *Name)
  * bucket_file, or bucket_container.
  *
  * \param PGconn $pgConn  postgresql connection
- * \param int $agent_pk   agent ID
- * \param int $pfile_pk  
- * \param int $uploadtree_pk  
- * \param int $bucketpool_pk  
+ * \param int agent_pk   agent ID
+ * \param int pfile_pk  
+ * \param int uploadtree_pk  
+ * \param int bucketpool_pk  
+ * \param int bucket_pk  may be zero (to skip bucket_pk check)
  *
  * \return 1=yes, 0=no
  */
 FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk,
-                       int bucketpool_pk)
+                       int bucketpool_pk, int bucket_pk)
 {
   char *fcnName = "processed";
   int numRecs=0;
@@ -149,7 +150,21 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtre
 
   /* Skip file if it has already been processed for buckets. 
      See if this pfile or uploadtree_pk has any buckets. */
-  sprintf(sqlbuf,
+  if (bucket_pk)
+  {
+    sprintf(sqlbuf,
+    "select bf_pk from bucket_file, bucket_def \
+      where pfile_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+            and bucket_pk=%d and bucket_fk=bucket_pk \
+     union \
+     select bf_pk from bucket_container, bucket_def \
+      where uploadtree_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+            and bucket_pk=%d and bucket_fk=bucket_pk limit 1",
+    pfile_pk, agent_pk, bucketpool_pk, bucket_pk, uploadtree_pk, agent_pk, bucketpool_pk, bucket_pk);
+  }
+  else
+  {
+    sprintf(sqlbuf,
     "select bf_pk from bucket_file, bucket_def \
       where pfile_fk=%d and agent_fk=%d and bucketpool_fk=%d \
             and bucket_fk=bucket_pk \
@@ -157,7 +172,8 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtre
      select bf_pk from bucket_container, bucket_def \
       where uploadtree_fk=%d and agent_fk=%d and bucketpool_fk=%d \
             and bucket_fk=bucket_pk limit 1",
-    pfile_pk, agent_pk, bucketpool_pk, uploadtree_pk, agent_pk, bucketpool_pk);
+    pfile_pk, agent_pk, bucketpool_pk, bucket_pk, uploadtree_pk, agent_pk, bucketpool_pk);
+  }
   result = PQexec(pgConn, sqlbuf);
   if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
   numRecs = PQntuples(result);
