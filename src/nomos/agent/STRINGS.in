@@ -3853,7 +3853,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_PHP_ref
 %KEY%	"licen[cs]"
-%STR%	"under the terms =ANY= php license"
+%STR%	"under the terms =ANY= \<php\> license"
 #
 %ENTRY%	_LT_PHPref1
 %KEY%	"licen[cs]"
