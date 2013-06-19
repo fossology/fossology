@@ -134,6 +134,7 @@ for ($i = 1;$i < $argc;$i++) {
 
   /* if exist source code, svn update */
   if (file_exists("/home/build/pb/projects/fossology/$Version/")){
+    system("rm /home/build/pb/projects/fossology/$Version/Makefile.conf");
     system("svn update /home/build/pb/projects/fossology/$Version/");
   }  
   //system("perl -pi -e 's/#pbconfurl/pbconfurl/' /home/build/.pbrc");
