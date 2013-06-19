@@ -160,6 +160,18 @@ function Migrate_21_22()
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 
+  /** Run program to rename licenses **/
+  global $LIBEXECDIR;
+  require_once("$LIBEXECDIR/fo_mapping_license.php");
+  print "Rename license in $LIBEXECDIR\n";
+  Rename_Licenses();
+  /** Clear out the report cache **/
+  print "Clear out the report cache.\n";
+  $sql = "DELETE FROM report_cache;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);  
+
   return 0;  // success
 } // Migrate_21_22
 
