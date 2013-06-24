@@ -755,6 +755,12 @@ void OctetType(char *Filename, char *TypeBuf)
     return;
   }
 
+  if (strstr(Type, "ISO 9660"))
+  {
+    strcpy(TypeBuf,"application/x-iso9660-image");
+    return;
+  }
+
   /* 7zr can handle many formats (including isos), so try this first */
   rc1 = RunCommand("7z","l -y ",Filename,">/dev/null 2>&1",NULL,NULL);
   rc2 = RunCommand("7z","t -y ",Filename,">/dev/null 2>&1",NULL,NULL);
@@ -791,12 +797,6 @@ void OctetType(char *Filename, char *TypeBuf)
   if (strstr(Type, "x86 boot")) /* the file type is boot partition */
   {
     strcpy(TypeBuf,"application/x-x86_boot");
-    return;
-  }
-
-  if (strstr(Type, "ISO 9660"))
-  {
-    strcpy(TypeBuf,"application/x-iso9660-image");
     return;
   }
 }
