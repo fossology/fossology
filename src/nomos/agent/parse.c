@@ -8090,6 +8090,8 @@ void addRef(char *str, int interest)
   char *bp;
   char *sp = str;
   char *cp;
+  if(!(str && str[0]))
+    return;
 
 #ifdef  PROC_TRACE
   traceFunc("== addRef(\"%s\", %d)\n", str, interest);
