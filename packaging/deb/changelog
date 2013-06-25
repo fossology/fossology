@@ -1,8 +1,8 @@
-fossology (trunk) unstable; urgency=low
+fossology (2.2.0rc3-1) unstable; urgency=low
 
-  * unofficial build version
+  * Release candidate 3 for v2.2.0
 
- -- madong <madong@bl480c1>  Fri, 08 Jun 2012 16:35:55 +0800
+ -- madong <madong@bl480c1>  Tue, 25 Jun 2013 16:35:55 +0800
 
 fossology (2.0.0-1) unstable; urgency=low
 
