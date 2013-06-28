@@ -42,8 +42,8 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
 
   FOSSology storage options:
     -f path  = folder path for placing files (e.g., -f 'Fedora/ISOs/Disk 1')
-               You do not need to specify '/System Repository'.
-               All paths are under '/System Repository'.
+               You do not need to specify your top level folder.
+               All paths are under your top level folder.
     -A       = alphabet folders; organize uploads into folder a-c, d-f, etc.
     -AA num  = specify the number of letters per folder (default: 3); implies -A
     -n name  = (optional) name for the upload (default: name it after the file)

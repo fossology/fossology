@@ -202,6 +202,8 @@
       }
     }
     pg_free_result($result);
+
+    natcasesort($GroupArray);
     return $GroupArray;
   }
 

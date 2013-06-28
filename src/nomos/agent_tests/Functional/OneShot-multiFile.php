@@ -39,7 +39,7 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
   	'ApacheV2.0.gz' => 'No_license_found',
   	'BSD_style_a.txt' => 'BSD-style',
   	'BSD_style_b.txt' => 'BSD-style',
-  	'BSD_style_c.txt' => 'BSD-2-Clause',
+  	'BSD_style_c.txt' => 'BSD-3-Clause',
   	'BSD_style_d.txt' => 'BSD-3-Clause',
   	'BSD_style_e.txt' => 'BSD',
   	'BSD_style_f.txt' => 'BSD-2-Clause',
@@ -62,19 +62,19 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
     'BSD_style_w.txt' => 'BSD-style',
     'BSD_style_x.txt' => 'BSD-style,Gov\'t-work',
     'BSD_style_y.txt' => 'PHP-3.0',
-    'BSD_style_z.txt' => 'OLDAP',
+    'BSD_style_z.txt' => 'OLDAP-2.3',
   	'FILEgpl3.0' => 'FSF,GPL-3.0',
   	'FILEgplv2.1' => 'LGPL-2.1',
   	'OSIzlibLicense-2006-10-31' => 'Zlib',
-  	'RCSL_v3.0_a.txt' => 'RCSL-3.0',
-  	'RPSL_v1.0_a.txt' => 'GPL,LGPL,MIT,NCSA,RPSL-1.0,Zlib',
-  	'RPSL_v1.0_b.txt' => 'GPL,LGPL,MIT,NCSA,RPSL-1.0,Zlib',
+  	'RCSL_v3.0_a.txt' => 'Dual-license,RCSL-3.0',
+  	'RPSL_v1.0_a.txt' => 'RPSL-1.0',
+  	'RPSL_v1.0_b.txt' => 'RPSL-1.0',
   	'agpl-3.0.txt' => 'AGPL-3.0',
   	'apple.lic' => 'APSL-2.0',
   	'gpl-3.0.txt' => 'FSF,GPL-3.0',
   	'gplv2.1' => 'LGPL-2.1',
   	'zlibLicense-1.2.2-2004-Oct-03' => 'Zlib',
-  	'DNSDigest.c' => 'APSL,Apache-2.0,BSD-style,GPL',
+  	'DNSDigest.c' => 'Apache-2.0,BSD-style,GPL',
   	'Oracle-Berkeley-DB.java' => 'Oracle-Berkeley-DB',
   	'sleepycat.php' => 'Sleepycat',
   	'jslint.js' => 'JSON',
@@ -99,8 +99,9 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
       list(,$fileName,,,$licenses) = preg_split('/[\s]+/', $nomosResults);
       $this->assertArrayHasKey($fileName, $this->Results,
         "Failure, filename $fileName was not found in the master results\n");
-      $this->assertContains($licenses, $this->Results[$fileName],
-        "Failure, Master results $this->Results[$fileName]\n do not match current results $licenses \n");
+      $expected  = $this->Results[$fileName];
+      $this->assertContains($licenses, $expected,
+        "Failure, Master results $expected \n do not match current results $licenses \n");
     }
   }
 }

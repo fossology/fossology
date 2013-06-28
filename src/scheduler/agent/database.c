@@ -796,7 +796,6 @@ void database_update_event(scheduler_t* scheduler, void* unused)
       continue;
     }
 
-    // TODO change for new scheduler
     job = job_init(scheduler->job_list, scheduler->job_queue, type, host, j_id,
         atoi(PQget(pri_result, 0, "user_pk")),
         atoi(PQget(pri_result, 0, "job_priority")));

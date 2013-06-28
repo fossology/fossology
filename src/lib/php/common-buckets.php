@@ -86,7 +86,7 @@ function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $e
     reset($rows);
   }
 
-  $select .= "<option value=''";
+//  $select .= "<option value=''";
   foreach ($rows as $row)
   {
     $select .= "<option value='$row[ars_pk]'";

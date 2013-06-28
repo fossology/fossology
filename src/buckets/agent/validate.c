@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -114,7 +114,8 @@ FUNCTION void Usage(char *Name)
   printf("  -i   :: Initialize the database, then exit.\n");
   printf("  -n   :: bucketpool name of bucketpool to use.\n");
   printf("  -p   :: bucketpool_pk of bucketpool to use.\n");
-  printf("  -t   :: uploadtree_pk, root of tree to scan. Will turn on -d!\n");
+  printf("  -r   :: rerun buckets.\n");
+  printf("  -t   :: uploadtree_pk, root of tree to scan.\n");
   printf("  -u   :: upload_pk to scan.\n");
   printf("  -v   :: verbose (turns on copious debugging output)\n"); 
   printf("  NOTE: -n and -p are mutually exclusive.  If both are specified\n");
@@ -131,15 +132,16 @@ FUNCTION void Usage(char *Name)
  * bucket_file, or bucket_container.
  *
  * \param PGconn $pgConn  postgresql connection
- * \param int $agent_pk   agent ID
- * \param int $pfile_pk  
- * \param int $uploadtree_pk  
- * \param int $bucketpool_pk  
+ * \param int agent_pk   agent ID
+ * \param int pfile_pk  
+ * \param int uploadtree_pk  
+ * \param int bucketpool_pk  
+ * \param int bucket_pk  may be zero (to skip bucket_pk check)
  *
  * \return 1=yes, 0=no
  */
 FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk,
-                       int bucketpool_pk)
+                       int bucketpool_pk, int bucket_pk)
 {
   char *fcnName = "processed";
   int numRecs=0;
@@ -148,7 +150,21 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtre
 
   /* Skip file if it has already been processed for buckets. 
      See if this pfile or uploadtree_pk has any buckets. */
-  sprintf(sqlbuf,
+  if (bucket_pk)
+  {
+    sprintf(sqlbuf,
+    "select bf_pk from bucket_file, bucket_def \
+      where pfile_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+            and bucket_pk=%d and bucket_fk=bucket_pk \
+     union \
+     select bf_pk from bucket_container, bucket_def \
+      where uploadtree_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+            and bucket_pk=%d and bucket_fk=bucket_pk limit 1",
+    pfile_pk, agent_pk, bucketpool_pk, bucket_pk, uploadtree_pk, agent_pk, bucketpool_pk, bucket_pk);
+  }
+  else
+  {
+    sprintf(sqlbuf,
     "select bf_pk from bucket_file, bucket_def \
       where pfile_fk=%d and agent_fk=%d and bucketpool_fk=%d \
             and bucket_fk=bucket_pk \
@@ -156,7 +172,8 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtre
      select bf_pk from bucket_container, bucket_def \
       where uploadtree_fk=%d and agent_fk=%d and bucketpool_fk=%d \
             and bucket_fk=bucket_pk limit 1",
-    pfile_pk, agent_pk, bucketpool_pk, uploadtree_pk, agent_pk, bucketpool_pk);
+    pfile_pk, agent_pk, bucketpool_pk, bucket_pk, uploadtree_pk, agent_pk, bucketpool_pk);
+  }
   result = PQexec(pgConn, sqlbuf);
   if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
   numRecs = PQntuples(result);

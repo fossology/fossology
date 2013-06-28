@@ -333,6 +333,10 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   https_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "https_proxy", &error2);
   ftp_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "ftp_proxy", &error3);
   p_no_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "no_proxy", &error4);
+  trim(http_proxy);
+  trim(https_proxy);
+  trim(ftp_proxy);
+  trim(p_no_proxy);
   /* http_proxy is optional so don't error if it doesn't exist */
   /** set proxy */
   if (http_proxy && http_proxy[0])

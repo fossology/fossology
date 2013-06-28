@@ -1,21 +1,20 @@
 # cp2foss.pod man page input file
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-#
-# VERSION: $Id: cp2foss.pod 1696 2008-11-20 01:32:19Z rrando $
+# Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
 
 =head1 NAME
 
-cp2foss - load one or more files or archives into the FOSSology Database.
+cp2foss - upload one or more files or archives into FOSSology and run scans.
 
 =head1 SYNOPSIS
 
  Usage: cp2foss [options] [archives]
  Options: -AQThv [-f path] [-AA num] [-q {agent,agent.. | all}] [-X path]
- [-n name] [-d descritpion] [--user user name] [--password password]
+ [-n name] [-d description] [--user user name] [--password password]
+ [-c configuration directory]
 
 =head1 DESCRIPTION
 
-B<cp2foss> (copy to foss) will load  one or more files or archives into the
+B<cp2foss> (copy to FOSSology) will load  one or more files or archives into the
 folder path specified by B<-f>.
 The folders in the I<folder-path> do not need to exist. B<cp2foss>
 will create them as needed.
@@ -52,17 +51,20 @@ so on.
 =item B<-d> I<description>
 
 A short meaningful description the captures what the upload folder will contain.
-Description must be quoted with either single or double quotes.
+Description must be quoted with either single or double quotes.  This is ignored
+if you are uploading a directory.
 
 =item B<-f> I<path>
 
 folder path for storing uploaded files (e.g., -f 'Fedora/ISOs/Disk 1'). You do not
-need to specify  the top or root folder I</Software Repository>.
-All paths are under I</Software Repository>.  If I</Software Repository> is
-used in the folder path, B<cp2foss> will correctly create all of the other
-other folders in the path under the top folder.
+need to specify your top level folder.
+All paths are under the user top level folder.  
+B<cp2foss> will correctly create all of the other
+intermediate folders in the path under the top folder.
 
-=item B<-?> Help, see -h
+=item B<-?> 
+
+Help, see -h
 
 =item B<-h>
 
@@ -71,25 +73,28 @@ Help, prints a verbose usage message.
 =item B<--user> I<username>
 
 username, specify the username for a user who has the priviledge to execute cp2foss.
-Also you can add one file .fossology.rc in your current home directory, add user name and 
+Alternatively, you can add the file .fossology.rc in your current home directory, add user name and 
 password in 2 separate lines.
 
 =item B<--password> I<password>
 
 password, specify the password for a user who has the priviledge to execute cp2foss.
-Also you can add one file .fossology.rc in your current home directory, add user name and 
+Alternatively, you can add the file .fossology.rc in your current home directory, add user name and 
 password in 2 separate lines.
 
 =item B<-c> I<configuration directory>
 
 Specify the directory for the system configuration,
-when installation from src, default dir is /usr/local/etc/fossology/ ,
+when installation from src, default dir is /usr/local/etc/fossology/,
 when installation from package, default dir is /etc/fossology/.
+This defaults to your last installation location.
 
 =item B<-n> I<name>
 
 An optional name that will be used to store the upload in the
 database.  The default name is the filename from the upload.
+Must be set before each archive.  Ignored if you specify
+a directory to upload.
 
 =item B<-Q>
 
@@ -115,7 +120,7 @@ Verbose (for debugging). Details the actions being performed.  B<-T> turns this 
 
 =item B<-X>
 
-Item to exclude when archive is a directory. You can specify more than one -X.
+Items to exclude when the input archive is a directory. You can specify more than one -X.
 For example, to exclude all svn and cvs directories, include the following
 before the archive's directory path: -X .svn -X .cvs
 
@@ -175,5 +180,5 @@ Neal Krawetz/Mark Donohoe for the Hewlett-Packard Company
 
 =head1 SEE ALSO
 
-wget, fossjobs 
+fossjobs 
 

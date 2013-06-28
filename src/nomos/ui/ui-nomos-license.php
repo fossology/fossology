@@ -361,7 +361,7 @@ class ui_nomos_license extends FO_Plugin
         {
           $VF .= "<a href='$LinkUri'>"; $HasHref=1;
         }
-        $VF .= "<b>" . $C['ufile_name'] . "</b>";
+        $VF .= $C['ufile_name'];
         if ($IsDir) {
           $VF .= "/";
         };

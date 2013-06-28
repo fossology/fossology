@@ -739,7 +739,7 @@ int IsDebianSourceFile(char *Filename)
  **/
 void OctetType(char *Filename, char *TypeBuf)
 {
-  int rc;
+  int rc1, rc2;
   char *Type;
 
   /* Get more information from magic */
@@ -755,9 +755,16 @@ void OctetType(char *Filename, char *TypeBuf)
     return;
   }
 
+  if (strstr(Type, "ISO 9660"))
+  {
+    strcpy(TypeBuf,"application/x-iso9660-image");
+    return;
+  }
+
   /* 7zr can handle many formats (including isos), so try this first */
-  rc = RunCommand("7z","l -y ",Filename,">/dev/null 2>&1",NULL,NULL);
-  if (rc==0)
+  rc1 = RunCommand("7z","l -y ",Filename,">/dev/null 2>&1",NULL,NULL);
+  rc2 = RunCommand("7z","t -y ",Filename,">/dev/null 2>&1",NULL,NULL);
+  if ((rc1 || rc2)==0)
   {
     strcpy(TypeBuf,"application/x-7z-w-compressed");
     return;
@@ -790,12 +797,6 @@ void OctetType(char *Filename, char *TypeBuf)
   if (strstr(Type, "x86 boot")) /* the file type is boot partition */
   {
     strcpy(TypeBuf,"application/x-x86_boot");
-    return;
-  }
-
-  if (strstr(Type, "ISO 9660"))
-  {
-    strcpy(TypeBuf,"application/x-iso9660-image");
     return;
   }
 }
@@ -861,12 +862,6 @@ int	FindCmd	(char *Filename)
     if (RunCommand("tar","-tf",Filename,">/dev/null 2>&1",NULL,NULL) != 0)
       return(-1); /* bad tar! (Yes, they do happen) */
   } /* if was x-tar */
-  else if (strstr(Type, "application/x-xz"))
-  {
-    if (RunCommand("tar","-tf",Filename,">/dev/null 2>&1",NULL,NULL) != 0)
-      return(-1); /* bad tar! (Yes, they do happen) */
-  } /* if was xz-tar */
-
 
   /* Match Type (mimetype from magic or from special processing above to determine 
    * the command for Filename 

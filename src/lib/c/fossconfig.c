@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -659,5 +659,26 @@ int fo_config_has_key(fo_conf* conf, char* group, char* key)
   if((tree = g_tree_lookup(conf->group_map, group)) == NULL)
     return 0;
   return g_tree_lookup(tree, key) != NULL;
+}
+
+/**
+ * \brief Trimming whitespace
+ *
+ * will trim the lead/trail space
+ *
+ * \param ptext - the string to trim
+ *
+ * \return the string after trim
+ */
+char *trim(char *ptext)
+{
+  if (ptext && ptext[0])
+  {
+    int len = strlen(ptext);
+    while(isspace(ptext[len - 1])) ptext[--len] = 0;  // right trim
+    while(isspace(*ptext)) ++ptext;  // left trim
+  }
+
+  return ptext;
 }
 

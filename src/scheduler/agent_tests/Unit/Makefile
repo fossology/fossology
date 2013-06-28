@@ -38,7 +38,12 @@ COV = libscheduler_cov.a
 FOCUNIT = libfocunit.a
 
 OBJECTS = testHost.o \
-          testInterface.o
+          testInterface.o \
+          testAgent.o  \
+          testEvent.o  \
+          testDatabase.o \
+          testJob.o \
+          testScheduler.o
 
 all:  $(EXE)
 test: fossology_testconfig $(EXE)

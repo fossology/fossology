@@ -100,6 +100,8 @@ uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
 	rm -f $(DESTDIR)$(CONFPATH)/sampleheader.txt
 	rm -f $(DESTDIR)$(CONFPATH)/samplefooter.txt
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fossinit.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fo_dbcheck.php
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 		if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \

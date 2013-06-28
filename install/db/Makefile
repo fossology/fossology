@@ -18,6 +18,7 @@ install: all
 	$(INSTALL_DATA) dbmigrate_1.4-2.0.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_1.4-2.0.php
 	$(INSTALL_DATA) dbmigrate_2.0-2.1.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.1.php
 	$(INSTALL_DATA) dbmigrate_2.1-2.2.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.1-2.2.php
+	$(INSTALL_DATA) fo_mapping_license.php $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 	
 	$(INSTALL_PROGRAM) export_license_ref.php $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php
 	$(INSTALL_PROGRAM) dbcreate $(DESTDIR)$(LIBEXECDIR)/dbcreate
@@ -34,6 +35,11 @@ uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
 	rm -f $(DESTDIR)$(LIBEXECDIR)/licenseref.sql
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbcreate
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_1.4-2.0.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.1.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.1-2.2.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 	   if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \

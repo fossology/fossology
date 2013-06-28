@@ -1,6 +1,6 @@
 
 # FOSSology fo-installdeps script
-# Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -102,6 +102,7 @@ if [ $BUILDTIME ]; then
            case "$CODENAME" in
               lenny|hardy) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.3;;
               squeeze) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.4;;
+              wheezy) apt-get $YesOpt install $YesOpt postgresql-server-dev-9.1;;
               sid) apt-get  $YesOpt install $YesOpt postgresql-server-dev-8.4;;
               lucid|natty) apt-get $YesOpt install postgresql-server-dev-8.4;;
               isadora) apt-get $YesOpt install postgresql-server-dev-8.4;;
@@ -154,16 +155,19 @@ if [ $RUNTIME ]; then
       Debian|Ubuntu|LinuxMint)
         echo "doing runtime"
          apt-get $YesOpt install apache2 libapache2-mod-php5
-         apt-get $YesOpt install  \
-            php5 php5-pgsql php-pear php5-cli \
-            libxml2 libextractor1c2a \
+         apt-get $YesOpt install php5 php5-pgsql php-pear php5-cli \
+            libxml2 \
             binutils php-gettext \
             libextractor-plugins
+         apt-get $YesOpt install libextractor1c2a
+         apt-get $YesOpt install libextractor3
          POSTGRE=`dpkg --get-selections|grep postgresql-8.4`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
            case "$CODENAME" in
               squeeze)
                  apt-get $YesOpt install postgresql-8.4;;
+              wheezy)
+                 apt-get $YesOpt install postgresql-9.1;;
               sid)
                  apt-get $YesOpt install postgresql-8.4;;
               lucid|natty)
@@ -262,7 +266,8 @@ fi
 if [ $RUNTIME ]; then
   options="$options -r"
 fi
-if [ $YesOpt ]; then
+
+if [ ! -z "$YesOpt" ]; then
   options="$options -y"
 fi
 BASEDIR=$(dirname $0) 

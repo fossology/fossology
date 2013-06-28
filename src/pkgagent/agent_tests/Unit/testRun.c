@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -28,7 +28,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* test case sets */
 extern CU_TestInfo testcases_GetFieldValue[];
 extern CU_TestInfo testcases_GetMetadata[];
-extern CU_TestInfo testcases_Trim[];
 //extern CU_TestInfo testcases_ProcessUpload[];
 extern CU_TestInfo testcases_RecordMetadataRPM[];
 extern CU_TestInfo testcases_RecordMetadataDEB[];
@@ -57,7 +56,6 @@ int PkgagentDBClean()
 
 /* create test suite */
 CU_SuiteInfo suites[] = {
-    {"Testing the function trim:", NULL, NULL, testcases_Trim},
     {"Testing the function GetFieldValue:", NULL, NULL, testcases_GetFieldValue},
     //{"Testing the function ProcessUpload:", NULL, NULL, testcases_ProcessUpload},
     {"Testing the function RecordMetadataDEB:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataDEB},

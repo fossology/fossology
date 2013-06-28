@@ -55,7 +55,7 @@ class OneShotbsdTest extends PHPUnit_Framework_TestCase
     $out = "";
     $this->bsd = '../../../testing/dataFiles/TestData/licenses/DNSDigest.c';
     $this->assertFileExists($this->bsd,"OneShotbsdTest FAILURE! $this->bsd not found\n");
-    $bsdlic = "APSL,Apache-2.0,BSD-style,GPL";
+    $bsdlic = "Apache-2.0,BSD-style,GPL";
     $last = exec("$this->nomos $this->bsd 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
     $this->assertEquals($fname, 'DNSDigest.c', "Error filename $fname does not equal DNSDigest.c");

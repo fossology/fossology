@@ -151,7 +151,7 @@ class group_manage_users extends FO_Plugin {
 
     /* Select all the user members of this group */
     $sql = "select group_user_member_pk, user_fk, group_perm, user_name from group_user_member, users
-              where group_fk='$group_pk' and user_fk=user_pk";
+              where group_fk='$group_pk' and user_fk=user_pk order by user_name";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $GroupMembersArray = pg_fetch_all($result);
@@ -184,7 +184,7 @@ class group_manage_users extends FO_Plugin {
     $url = Traceback_uri() . "?mod=group_manage_users&newperm=$newperm&group=$group_pk&newuser=";
     $onchange = "onchange=\"js_url(this.value, '$url')\"";
     $Selected = (empty($newuser)) ? "" : $newuser;
-    $UserArray = Table2Array("user_pk", "user_name", "users");
+    $UserArray = Table2Array("user_pk", "user_name", "users", " ", "order by user_name");
     $V .= Array2SingleSelect($UserArray, "userselectnew", $Selected, true, false, $onchange);
     $V .= "</td>";
     $V .= "<td>";  // permission

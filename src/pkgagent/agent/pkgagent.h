@@ -100,7 +100,5 @@ int GetMetadataDebSource(char *repFile, struct debpkginfo *pi);
 
 void Usage(char *Name);
 
-char *trim(char *str);
-
 char *GetFieldValue(char *Sin, char *Field, int FieldMax,char *Value, int ValueMax, char Separator);
 #endif /*  _PKGAGENT_H */

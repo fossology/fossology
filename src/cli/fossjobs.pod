@@ -1,17 +1,15 @@
 # fossjobs man page input file
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-#
-# VERSION: $Id: fossjobs.pod 1573 2008-10-28 05:28:11Z taggart $
+# Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
 #
 
 =head1 NAME
 
-fossjobs - Display default fossology agents or upload id's and schedule default
-fossology agents on an upload id.
+fossjobs - Run fossology agents on an uploaded file.
 
 =head1 SYNOPSIS
 
-fossjobs [-a] [-h] [-u] [-v] [-A <string>] [-U <upload-id>] [-P priority] [--user <string>] [--password <string>]
+fossjobs [-a] [-h] [-u] [-v] [-A <string>] [-U <upload-id>] [-P priority] 
+         [--user <string>] [--password <string>] [-c configuration directory]
 
 =head1 DESCRIPTION
 
@@ -20,10 +18,6 @@ the available default agents or upload id's.  Using that information,
 fossjobs can be used to schedule all the default agents or a subset of
 them for a given upload id.  This effectivly creates a job and
 schedules the agents to perform their analysis on the upload id given.
-
-Additionally, the priority can be set for that upload id/job.  The
-agents will run at the priority set, or 0 if none supplied (the
-default).
 
 =head2 Options
 
@@ -54,6 +48,7 @@ password in 2 seperate line.
 Specify the directory for the system configuration, 
 when installation from src, default dir is /usr/local/etc/fossology/ ,
 when installation from package, default dir is /etc/fossology/.
+This defaults to your last installation location.
 
 =item B<-u>
 
@@ -69,14 +64,6 @@ This option can be used to run a subset of the default
 agents.  The subset is specified using a comma separated list of
 agents.  To display the available agents, use -a.  To schedule all
 default agents, do not set this option.
-
-=item B<-P <priority>>
-
-The priority for the job/agents.  The default priority
-if none is supplied is zero (0).  Priorities can be negative or
-positive.  A negative priority will have less priority than zero.
-Additionally, larger negative numbers will have less priority than
-smaller negative numbers.  The highest priority is 10.
 
 =item B<-U <upload-id>>
 

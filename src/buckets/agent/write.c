@@ -23,11 +23,11 @@ extern int debug;
  * \brief Write bucket results to either db (bucket_file, bucket_container) or stdout.
  *
  * \param PGconn $pgConn  postgresql connection
- * \param int $pfile_pk  
- * \param int $uploadtree_pk  
- * \param int $bucketList   null terminated array of bucket_pks 
+ * \param int pfile_pk  
+ * \param int uploadtree_pk  
+ * \param int bucketList   null terminated array of bucket_pks 
  *                         that match this pfile
- * \param int $agent_pk  
+ * \param int agent_pk  
  * \param int bucketpool_pk - bucketpool id
  *
  * \return 0=success, -1 failure
@@ -39,6 +39,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
   char      sql[1024];
   PGresult *result = 0;
   int rv = 0;
+  //if (debug) printf("debug: %s:%s() pfile: %d, uploadtree_pk: %d\n", __FILE__, fcnName, pfile_pk, uploadtree_pk);
   if (debug) printf("debug: %s:%s() pfile: %d, uploadtree_pk: %d\n", __FILE__, fcnName, pfile_pk, uploadtree_pk);
 
 
@@ -49,7 +50,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
       fo_scheduler_heart(1);
       if (pfile_pk)
       {
-        if (processed(pgConn, agent_pk, pfile_pk, uploadtree_pk, bucketpool_pk)) 
+        if (processed(pgConn, agent_pk, pfile_pk, uploadtree_pk, bucketpool_pk, *bucketList)) 
         {
           snprintf(sql, sizeof(sql), 
               "UPDATE bucket_file set bucket_fk = %d from bucket_def where pfile_fk = %d and  \
