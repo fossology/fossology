@@ -42,7 +42,7 @@ if (empty($options) || !is_array($options))
 }
 */
 
-function Rename_Licenses()
+function Rename_Licenses($Verbose)
 {
   global $PG_CONN;
 /** PLEASE PUT THE LICENSE MAP THERE */
@@ -396,7 +396,8 @@ foreach ($shortname_array as $old_shortname => $new_shortname)
     $res = update_license($old_rf_pk, $new_rf_pk);
     if (0 == $res) 
     {
-      print "update successfully, substitute rf_id(license_name) from $old_rf_pk($old_shortname) to $new_rf_pk($new_shortname).\n";
+      if($Verbose)
+        print "update successfully, substitute rf_id(license_name) from $old_rf_pk($old_shortname) to $new_rf_pk($new_shortname).\n";
     }
   }
   else if (-1 != $old_rf_pk && -1 == $new_rf_pk)
@@ -404,17 +405,20 @@ foreach ($shortname_array as $old_shortname => $new_shortname)
     $res =  change_license_name($old_shortname, $new_shortname);
     if (0 == $res)
     {
-      print "change license name successfully, substitute license shortname from $old_shortname to $new_shortname.\n";
+      if($Verbose)
+        print "change license name successfully, substitute license shortname from $old_shortname to $new_shortname.\n";
     }
 
   } 
   else if (-1 == $old_rf_pk)
   {
-    print "the $old_shortname is not existing.\n";
+    if($Verbose)
+      print "the $old_shortname is not existing.\n";
   }
 }
 
-print "End!\n";
+if($Verbose)
+  print "End!\n";
 }
 
 /** 

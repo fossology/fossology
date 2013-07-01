@@ -36,7 +36,7 @@
  *
  * \return 0 on success, 1 on failure
  **/
-function Migrate_21_22()
+function Migrate_21_22($Verbose)
 {
   global $PG_CONN;
 
@@ -163,10 +163,12 @@ function Migrate_21_22()
   /** Run program to rename licenses **/
   global $LIBEXECDIR;
   require_once("$LIBEXECDIR/fo_mapping_license.php");
-  print "Rename license in $LIBEXECDIR\n";
-  Rename_Licenses();
+  if($Verbose)
+    print "Rename license in $LIBEXECDIR\n";
+  Rename_Licenses($Verbose);
   /** Clear out the report cache **/
-  print "Clear out the report cache.\n";
+  if($Verbose)
+    print "Clear out the report cache.\n";
   $sql = "DELETE FROM report_cache;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
