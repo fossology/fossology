@@ -52,7 +52,7 @@ class OneShotgplv21Test extends PHPUnit_Framework_TestCase
     $last = exec("$this->nomos $this->gplv21 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
     $this->assertEquals($fname, 'gplv2.1', "Error filename $fname does not equal gplv2.1");
-    $this->assertEquals($license, 'LGPL-2.1', "Error license does not equal LGPL_v2.1,
+    $this->assertEquals($license, 'LGPL-2.1+', "Error license does not equal LGPL_v2.1,
        $license was returned");
   }
 }
