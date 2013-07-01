@@ -43,7 +43,11 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 
+#ifdef STANDALONE
+#include "standalone.h"
+#else
 #include <libfossology.h>
+#endif
 
 /*
  * TO use our local version of debug-malloc(), compile -DMEMORY_TRACING
