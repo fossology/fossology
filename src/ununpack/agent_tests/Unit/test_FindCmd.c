@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -115,7 +115,7 @@ void testFindCmd4IsoFile()
   char *Filename = "../test-data/testdata4unpack/imagefile.iso";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 16);  // let 7z handle the isos
+  FO_ASSERT_EQUAL(result, 20);  // let isoinfo handle the isos
 }
 
 /**
