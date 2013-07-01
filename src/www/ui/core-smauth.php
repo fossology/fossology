@@ -243,7 +243,7 @@ class core_smauth extends FO_Plugin {
       }
 
       //create user
-      add_user($Email,$UserDesc,null,null,5,$Email,y,agent_bucket,agent_copyright,$FolderPk,$BucketPool);
+      add_user($Email,$UserDesc,null,null,5,$Email,y,"agent_bucket,agent_copyright",$FolderPk,$BucketPool);
 
       pg_exec("COMMIT;");
     } /* no user */
