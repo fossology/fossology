@@ -169,7 +169,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $command = "$UNUNPACK_PATH -qCR $TEST_DATA_PATH/imagefile.iso -d $TEST_RESULT_PATH";
     exec($command);
     
-    $this->assertFileExists("$TEST_RESULT_PATH/imagefile.iso.dir/TEST.JAR");
+    $this->assertFileExists("$TEST_RESULT_PATH/imagefile.iso.dir/TEST.JAR;1");
     
   }
  
