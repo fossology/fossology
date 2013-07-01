@@ -6694,6 +6694,9 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
     else if (INFILE(_TITLE_GPL2)) {
       lstr = lDebug ? "GPL-v2(#1)" : "GPL-2.0";
     }
+    else {
+      lstr = "GPL-2.0+";
+    }
   }
   else if (GPL_INFILE(_PHR_GPL2_OR_GPL3)) {
     lstr = "GPL-2.0:3.0";
