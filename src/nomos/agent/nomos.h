@@ -34,7 +34,6 @@
 #include <regex.h>
 #include <getopt.h>
 #include <time.h>
-#include <magic.h>
 #include <libgen.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -287,7 +286,6 @@ struct globals {
 #ifdef	PROC_TRACE_SWITCH
   int ptswitch;
 #endif	/* PROC_TRACE_SWITCH */
-  magic_t mcookie;
   list_t sHash;
   /** Agent-specific Things */
   int agentPk;
