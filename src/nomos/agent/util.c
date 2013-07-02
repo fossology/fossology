@@ -881,48 +881,6 @@ void makeSymlink(char *path)
 }
 
 
-#ifdef notdef
-int fileTypeIs(char *pathname, int index, char *magicData)
-{
-  if (idxGrep(index, magicData, REG_ICASE|REG_EXTENDED)) {
-    return(1);
-  }
-  return(0);
-}
-
-
-int fileIsShar(char *textp, char *magicData)
-{
-
-#if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef PROC_TRACE_SWITCH
-  if (gl.ptswitch)
-#endif /* PROC_TRACE_SWITCH */
-    printf("== fileIsShar(%p, \"%s\")\n", textp, magicData);
-#endif /* PROC_TRACE || UNPACK_DEBUG */
-
-#ifdef DEBUG
-  if (!idxGrep(_UTIL_SHARTYPE, magicData, REG_ICASE|REG_EXTENDED)) {
-    printf("DEBUG: NOT _UTIL_SHARTYPE\n");
-    return(0);
-  }
-  if (!idxGrep(_UTIL_SHAR, textp, REG_ICASE|REG_NEWLINE)) {
-    printf("DEBUG: NOT _UTIL_SHAR\n");
-    return(0);
-  }
-  printf("DEBUG: Hey, a shar file!\n");
-  return(1);
-#else /* not DEBUG */
-  if (idxGrep(_UTIL_SHARTYPE, magicData, REG_ICASE|REG_EXTENDED) &&
-      idxGrep(_UTIL_SHAR, textp, REG_ICASE|REG_NEWLINE)) {
-    return(1);
-  }
-  return(0);
-#endif /* not DEBUG */
-}
-#endif /* notdef */
-
-
 /**
  * \brief CDB -- Need to review this code, particularly for the use of an
  * external file (Nomos.strings.txt). Despite the fact that variable 
