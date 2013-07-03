@@ -1585,8 +1585,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           lmem[_mGPL] = 1;
         }
         else if ((INFILE(_LT_GPL_EXCEPT_BISON_1) || INFILE(_LT_GPL_EXCEPT_BISON_2)) && 
-            (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2) || GPL_INFILE(_LT_GPL3ref2) || 
-            GPL_INFILE(_PHR_FSF_V3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER))) {
+            (GPL_INFILE(_PHR_FSF_V3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER))) {
+          INTERESTING(lDebug ? "GPL-except-Bison-3+" : "GPL-3.0+-with-bison-exception");
+          lmem[_mGPL] = 1;
+        }
+        else if ((INFILE(_LT_GPL_EXCEPT_BISON_1) || INFILE(_LT_GPL_EXCEPT_BISON_2)) && 
+            (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2) || GPL_INFILE(_LT_GPL3ref2))) {
           INTERESTING(lDebug ? "GPL-except-Bison-3" : "GPL-3.0-with-bison-exception");
           lmem[_mGPL] = 1;
         }
@@ -1707,7 +1711,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     cp = GPLVERS();
     INTERESTING(lDebug ? "GPL(named)" : cp);
   }
-  else if (INFILE(_LT_GPL_V2_NAMED) && !lmem[_mGPL])
+  else if (INFILE(_LT_GPL_V2_NAMED) && !lmem[_mGPL] && !INFILE(_TITLE_MIROS))
   {
     INTERESTING(lDebug ? "GPLV2(named)" : "GPL-2.0");
   }
