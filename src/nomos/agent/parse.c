@@ -1169,7 +1169,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mGPL] = 1;
       }
     }
-    else if (INFILE(_LT_GPL_V2)) {
+    else if (INFILE(_LT_GPL_V2) || INFILE(_LT_GPL_V2_ref) || INFILE(_LT_GPL_V2_ref1)) {
       INTERESTING("GPL-2.0");
       lmem[_mGPL] = 1;
     }
@@ -1707,11 +1707,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     cp = GPLVERS();
     INTERESTING(lDebug ? "GPL(named)" : cp);
   }
-  else if (INFILE(_LT_GPL_V2_NAMED))
+  else if (INFILE(_LT_GPL_V2_NAMED) && !lmem[_mGPL])
   {
     INTERESTING(lDebug ? "GPLV2(named)" : "GPL-2.0");
   }
-  else if (INFILE(_LT_GPL_V3_NAMED))
+  else if (INFILE(_LT_GPL_V3_NAMED) && !lmem[_mGPL])
   {
     INTERESTING(lDebug ? "GPLV3(named)" : "GPL-3.0");
   }
@@ -2249,7 +2249,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * MPL (Mozilla)
    * ... Sun SISSL and one Mozilla licensing derivative share wording
    */
-  if ((INFILE(_LT_MPL_OR) || INFILE(_TITLE_MPL_ref)) && !INFILE(_LT_RPSL_COMPATIBLE)) {
+  if ((INFILE(_LT_MPL_OR) || INFILE(_TITLE_MPL_ref)) && 
+      !INFILE(_LT_RPSL_COMPATIBLE) && !INFILE(_LT_CPALref)) {
     cp = MPLVERS(); /* NPL, too */
     INTERESTING(lDebug ? "MPL/NPL#2" : cp);
     lmem[_mMPL] = 1;
@@ -4780,7 +4781,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     cp = CCSAVERS();
     INTERESTING(lDebug ? "CCA-SA(ref)" : cp);
   }
-  else if (INFILE(_LT_CCA_ref)) {
+  else if (INFILE(_LT_CCA_ref) && !lmem[_fCCBY]) {
     cp = CCVERS();
     INTERESTING(lDebug ? "CCA(ref)" : cp);
   }
@@ -5753,7 +5754,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /** gpl license */
-  if (!lmem[_mGPL] && INFILE(_LT_GPL_V2_ref))
+  if (!lmem[_mGPL] && (INFILE(_LT_GPL_V2_ref) || INFILE(_LT_GPL_V2_ref1)))
   {
     INTERESTING("GPL-2.0");
     lmem[_mGPL] = 1;

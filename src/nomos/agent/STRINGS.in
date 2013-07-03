@@ -2364,6 +2364,10 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"under the terms of the gnu ((general p|p)ublic|general purpose) (([v-]?| ?version) ?)2 licen[cs]e"
 #
+%ENTRY%	_LT_GPL_V2_ref1
+%KEY%	"licen[cs]"
+%STR%	"under the terms of the gnu ((general p|p)ublic|general purpose) licen[cs]e (([v-]?| ?version) ?)2"
+#
 %ENTRY%	_LT_GPL_V2_ref
 %KEY%	"licen[cs]"
 %STR% "licen[cs]ed under (the |)((general p|p)ublic|general purpose) licen[cs]e (version |v)2"
@@ -6662,7 +6666,7 @@ k
 #
 %ENTRY%	_TITLE_CCA_SA_V30
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
-%STR%	"creative commons attribution[ -]share[ -]alike 3\.?0 licen[cs]e"
+%STR%	"creative commons attribution[ -]share[ -]alike 3\.?0 (licen[cs]e|)"
 #
 %ENTRY%	_TITLE_CCPL
 %KEY%	"licen[cs]"
