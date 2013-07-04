@@ -8722,7 +8722,7 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
   } else if (INFILE(_LT_PUBDOM_8)) {
     INTERESTING(lDebug ? "Pubdom(8)" : LS_PD_CLM);
     ret = 1;
-  }else if (HASKW(kwbm, _KW_public_domain) && score < 3) {
+  }else if (HASKW(kwbm, _KW_public_domain) && score <= 3) {
     INTERESTING(LS_PD_ONLY);
     ret = 1;
   }
