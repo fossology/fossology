@@ -2254,7 +2254,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * ... Sun SISSL and one Mozilla licensing derivative share wording
    */
   if ((INFILE(_LT_MPL_OR) || INFILE(_TITLE_MPL_ref)) && 
-      !INFILE(_LT_RPSL_COMPATIBLE) && !INFILE(_LT_CPALref)) {
+      !INFILE(_LT_RPSL_COMPATIBLE) && !INFILE(_LT_CPALref) && !INFILE(_TITLE_GSOAP)) {
     cp = MPLVERS(); /* NPL, too */
     INTERESTING(lDebug ? "MPL/NPL#2" : cp);
     lmem[_mMPL] = 1;
@@ -2302,8 +2302,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("Interbase-PL");
       lmem[_mMPL] = 1;
     }
+    else if (INFILE(_TITLE_NETIZEN_V10)) {
+      INTERESTING("NOSL-1.0");
+      lmem[_mMPL] = 1;
+    }
     else if (INFILE(_TITLE_NETIZEN)) {
-      INTERESTING("NOSL");
+      INTERESTING(lDebug ? "NOSL(#1)" : "NOSL");
       lmem[_mMPL] = 1;
     }
     else if (INFILE(_TITLE_TPL10)) {
@@ -5706,8 +5710,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /** Netizen Open Source License  */
-  if (INFILE(_TITLE_NOSL)) {
-    INTERESTING("NOSL");
+  if (INFILE(_TITLE_NOSL) && !lmem[_mMPL]) {
+    INTERESTING(lDebug ? "NOSL(#2)" : "NOSL");
   }
 
   /** Net Boolean Public License v1 */
@@ -5774,6 +5778,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_mGPL] = 1;
   }
 
+  /** not public domain */
+  if (INFILE(_LT_PUBDOM_NOTclaim)) {
+    INTERESTING(LS_NOT_PD);
+  }
+
   /*
    * Some licenses point you to files/URLs...
    */
@@ -5831,7 +5840,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /* Check for Public Domain */
   if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON] && !lmem[_mGFDL] &&
       !lmem[_fODBL] && !lmem[_fPDDL] && !lmem[_fRUBY] && !lmem[_fSAX] && !lmem[_fAPL] &&!lmem[_mAPACHE] &&
-      !lmem[_fARTISTIC] && !lmem[_fCITRIX] && !lmem[_mLGPL]) {
+      !lmem[_fARTISTIC] && !lmem[_fCITRIX] && !lmem[_mLGPL] && !lmem[_fBSD]) {
     pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
   }
 

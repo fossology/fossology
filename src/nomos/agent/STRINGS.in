@@ -4007,7 +4007,7 @@ e /* (INFILE(j)) */
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 #%STR%	"not =FEW= (under|in|is|are|to) =SOME= \<public\>[ -]domain"
 #%STR%	"not =FEW= (under|in|to) =SOME= \<public\>[ -]domain"
-%STR%	"\<not\> (covered|under|in|to) =SOME= \<public\>[ -]\<domain\>"
+%STR%	"\<not\> (covered|under|in|to) =FEW= \<public\>[ -]\<domain\>"
 
 #####
 # DELETED: the purpose of this document is to enable rightsholders to place
@@ -7175,6 +7175,10 @@ k
 %ENTRY%	_TITLE_NETSCAPE_EULA
 %KEY%	"licen[cs]"
 %STR%	"netscape =SOME= licen[cs]e agreement"
+#
+%ENTRY%	_TITLE_NETIZEN_V10
+%KEY%	"licen[cs]"
+%STR%	"netizen open source licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_NETIZEN
 %KEY%	"licen[cs]"
