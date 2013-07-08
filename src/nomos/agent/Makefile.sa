@@ -17,7 +17,7 @@ HDRS=nomos.h $(OBJS:.o=.h) _autodefs.h
 #CFLAGS_LOCAL= -DSTANDALONE -g -O2 -Wall -D_FILE_OFFSET_BITS=64
 CFLAGS_LOCAL= -DSTANDALONE -Wall -D_FILE_OFFSET_BITS=64
 
-all: nomos
+all: encode nomos
 
 debug: nomos-gl 
 
@@ -39,6 +39,8 @@ $(OBJS) $(GENOBJS): %.o: %.c $(HDRS) $(DB) $(VARS)
 #
 # Non "standard" preprocessing stuff starts here...
 #
+encode: encode.o
+	$(CC) $(CFLAGS) -o $@ $@.c
 
 _precheck.c:	_autodata.c $(PRE) $(CHECK)
 #	@echo "NOTE: _autodata.c has changed --> regenerate _precheck.c"
@@ -69,7 +71,7 @@ coverage:
 	@echo "NOTICE: no coverage available for nomos"
 
 clean:
-	rm -f nomos  nomossa *.o core \
+	rm -f encode nomos  nomossa *.o core \
            _autodata.c _autodefs.c _autodefs.h _precheck.c \
            _strings.data _STRFILTER strings.HISTOGRAM words.HISTOGRAM \
            split.OTHER checkstr.OK
