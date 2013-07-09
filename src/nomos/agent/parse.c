@@ -2206,7 +2206,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_JPEG_2)) {
     INTERESTING(lDebug ? "JPEG(2)" : "JPEG/netpbm");
   }
-  else if (INFILE(_LT_PNG_ZLIB_1)) {
+  else if (INFILE(_LT_PNG_ZLIB_1) && !INFILE(_TITLE_ZOPE)) {
     INTERESTING(lDebug ? "ZLIB(1)" : "Zlib");
   }
   else if (INFILE(_LT_PNG_ZLIBref4) && !INFILE(_LT_PNG_ZLIBref4_EXHIBIT)) {
@@ -5610,6 +5610,18 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_DUAL_LICENSE_8)) {
     INTERESTING(lDebug ? "Dual-license(8)" : "Dual-license");
   }
+  else if (INFILE(_LT_DUAL_LICENSE_9)) {
+    INTERESTING(lDebug ? "Dual-license(9)" : "Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_10)) {
+    INTERESTING(lDebug ? "Dual-license(10)" : "Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_11)) {
+    INTERESTING(lDebug ? "Dual-license(11)" : "Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_12)) {
+    INTERESTING(lDebug ? "Dual-license(12)" : "Dual-license");
+  }
 
   /*
    * The Beer-ware license(!)
@@ -6164,6 +6176,11 @@ char *mplNplVersion(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_TITLE_MPL11) && INFILE(_TITLE_MPL_style)) {
     lstr = "MPL-1.1-style";
+  }
+  else if (INFILE(_TITLE_SUGARCRM_PL)) {
+    lstr = "SugarCRM-1.1.3";
+    lmem[_mMPL] = 1;
+    lmem[_fATTRIB] = 1;
   }
   else if (INFILE(_TITLE_MPL11)) {
     lstr = "MPL-1.1";
