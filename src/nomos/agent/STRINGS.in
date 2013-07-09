@@ -2417,6 +2417,10 @@ e /* (INFILE(j)) */
 %NOCHECK%
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"\<(either|or|alternately)\> =FEW= ([^l]gpl|GNU (general p|p)ublic licen[cs]e)"
+#
+%ENTRY%  _LT_IGNORE_CLAUSE
+%KEY%  =NULL=
+%STR%  "to apply these terms =ANY= attach the following notices to the (program|library)"
 #####
 # This is an 'exclusionary' clause - the Python licen[cs]e for instance has
 # the text "previously distributed under the GNU ...".  We use this when
