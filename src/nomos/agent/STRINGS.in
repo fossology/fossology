@@ -962,7 +962,7 @@
 #
 %ENTRY%	_LT_BSD_CLAUSE_4
 %KEY%	"software"
-%STR%	"neither the name =SOME= nor the names of its contributors may be used to endorse or promote products derived from this software without (specific |)prior written permission"
+%STR%	"(neither the name =SOME= nor the names of its contributors may|name(s|) of (the author(s|)|its contributors) may not) be used to endorse or promote products derived from this software without (specific |)prior written permission"
 #
 %ENTRY%	_LT_BSD_CLAUSE_CLEAR
 %KEY%	"licen[cs]"
