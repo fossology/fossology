@@ -6809,6 +6809,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"eclipse public licen[cs]e =FEW= (v|version)"
 #
+%ENTRY%	_TITLE_ECLIPSE_IGNORE
+%KEY%	"licen[cs]"
+%STR%	"eclipse public licen[cs]e =FEW= (v|version) =FEW= of the cpl"
+#
 %ENTRY%	_TITLE_ECLIPSE10
 %KEY%	"licen[cs]"
 %STR%	"eclipse public licen[cs]e =FEW= (1\.?0|(v|version )1\.?0)"

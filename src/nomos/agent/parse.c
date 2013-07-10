@@ -4309,7 +4309,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_TITLE_ECLIPSE10)) {
       INTERESTING(lDebug ? "Eclipse(v.0#1)" : "EPL-1.0");
     }
-    else if (INFILE(_TITLE_ECLIPSE)) {
+    else if (INFILE(_TITLE_ECLIPSE) && !INFILE(_TITLE_ECLIPSE_IGNORE)) {
       INTERESTING(lDebug ? "Eclipse(#1)" : "EPL");
     }
     else if (INFILE(_TITLE_LUCENT102)) {
