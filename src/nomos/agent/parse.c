@@ -1705,6 +1705,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         || INFILE(_LT_GPL_NAMED3))
       && (!INFILE(_LT_GPL_NAMED3_EXHIBIT))
       && (!INFILE(_LT_GPL_NAMED_COMPATIBLE))
+      && (!HASTEXT(_LT_GPL_NAMED_COMPATIBLE_1, REG_EXTENDED))
       && !INFILE(_LT_OPENPUBL_1) 
       && !INFILE(_LT_OPENPUBL_2)
       && (!INFILE(_LT_GPL_NAMED_EXHIBIT))
@@ -8348,11 +8349,11 @@ int checkUnclassified(char *filetext, int size, int score,
   }
 
   /*
-   * A Generic EULA 'qualifies' as an UnclassifiedLicense, too... check this
+   * A Generic EULA 'qualifies' as an UnclassifiedLicense, or the clause 'License agreement' as an UnclassifiedLicense, check this
    * one before trying the word-matching magic checks (below).
    */
   gl.flags |= FL_SAVEBASE; /* save match buffer (if any) */
-  m = INFILE(_LT_GEN_EULA);
+  m = INFILE(_LT_GEN_EULA) || INFILE(_LT_LG);
   /* gl.flags & ~FL_SAVEBASE;  CDB -- This makes no sense, given line above */
   if (m) {
     if (cur.licPara == NULL_STR) {

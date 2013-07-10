@@ -2033,6 +2033,10 @@
 #####
 # DELETED: ... you preserve this copyright notice and permission notice
 #####
+%ENTRY%	_LT_LG
+%KEY%	"licen[cs]"
+%STR% "License agreement"
+#
 %ENTRY%	_LT_FSFref2
 %KEY%	"distribut"
 %STR%	"you may copy distribute and/?o?r? modify it freely as long as"
@@ -2251,6 +2255,10 @@
 %ENTRY%	_LT_GPL_NAMED_COMPATIBLE
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e is compatible with =FEW= (\<gpl\>|gnu general public license)"
+#
+%ENTRY%	_LT_GPL_NAMED_COMPATIBLE_1
+%KEY%	 =NULL=
+%STR%	"(\<gpl\>|gnu general public license) compatib(le|ility)"
 #
 %ENTRY%	_LT_RPSL_COMPATIBLE
 %KEY%	"licen[cs]"
