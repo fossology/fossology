@@ -3608,6 +3608,10 @@ e /* (INFILE(j)) */
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"(licen[cs]ed|governed|applicable|subject) =SOME= (NPL|netscape public licen[cs]e)"
 #
+%ENTRY%	_LT_NP_AME
+%KEY% =NULL=
+%STR%	"(NPL|netscape public licen[cs]e) =FEW= consists of =FEW= (\<mpl\>|Mozilla public licen[cs]e)"
+#
 %ENTRY%	_LT_NTP
 %KEY%	"permi[st]"
 %STR%	"permission to use copy modify and distribute this software and its documentation for any purpose with or without fee is hereby granted provided that the above copyright notice appears in all copies and that both the copyright notice and this permission notice appear in supporting documentation"

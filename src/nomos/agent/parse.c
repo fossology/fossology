@@ -6183,7 +6183,7 @@ char *mplNplVersion(char *filetext, int size, int isML, int isPS)
     lmem[_mMPL] = 1;
     lmem[_fATTRIB] = 1;
   }
-  else if (INFILE(_TITLE_MPL11)) {
+  else if (INFILE(_TITLE_MPL11) && !HASTEXT(_LT_NP_AME, REG_EXTENDED)) {
     lstr = "MPL-1.1";
   }
   else if (INFILE(_TITLE_MPL20_EXCEPTION)) {
