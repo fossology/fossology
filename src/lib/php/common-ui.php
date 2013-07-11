@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2009-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -291,6 +291,22 @@ function GetUploadName($upload_pk)
   $upload_filename = $upload_rec['upload_filename'];
   if (empty($upload_filename)) return "";
   else return $upload_filename;
+}
+
+/**
+ * \brief get upload id through uploadtreeid
+ *
+ * \param $uploadtreeid - uploadtree id
+ *
+ * \return return upload id
+ */
+function GetUploadID($uploadtreeid)
+{
+  if (empty($uploadtreeid)) return "";
+  $upload_rec = GetSingleRec("uploadtree", "where uploadtree_pk=$uploadtreeid");
+  $uploadid = $upload_rec['upload_fk'];
+  if (empty($uploadid)) return "" ;
+  else return $uploadid;
 }
 
 ?>

@@ -81,6 +81,9 @@ foreach($options as $option => $value)
   }
 }
 
+/** get upload id through uploadtree id */
+if (is_numeric($item) && !is_numeric($upload)) $upload = GetUploadID($item);
+
 /** check if parameters are valid */
 if (!is_numeric($upload) || (!empty($item) && !is_numeric($item)))
 {
