@@ -648,8 +648,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (!lmem[_fOPENLDAP] && !TRYGROUP(famOPENLDAP)) {
       if (HASTEXT(_LT_OPENSSLref5, REG_EXTENDED)) {
         INTERESTING(lDebug ? "OpenSSL(ref)" : "OpenSSL");
-      } else if (INFILE(_CR_BSDCAL)) {
-        INTERESTING(lDebug ? "BSD(1)" : "BSD");
       } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
           && INFILE(_LT_BSD_CLAUSE_3) && INFILE(_LT_BSD_CLAUSE_4) && INFILE(_LT_UC)) {
         INTERESTING("BSD-4-Clause-UC");
@@ -672,6 +670,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("BSD-2-Clause");
       } else if (INFILE(_CR_CRYPTOGAMS)) {
         INTERESTING("Cryptogams");
+      } else if (INFILE(_CR_BSDCAL)) {
+        INTERESTING(lDebug ? "BSD(1)" : "BSD");
       }
       else if (!lmem[_fZPL]) {
         INTERESTING(lDebug ? "BSD-style(1)" : "BSD-style");
@@ -1575,6 +1575,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         }
         else if (HASTEXT(_TEXT_FONT, REG_EXTENDED) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
           INTERESTING("GPL-2.0-with-font-exception");
+          lmem[_mGPL] = 1;
+        }
+        else if (HASTEXT(_TEXT_GCC, REG_EXTENDED) && (GPL_INFILE(_PHR_FSF_V3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER))) {
+          INTERESTING("GPL-3.0+-with-GCC-exception");
           lmem[_mGPL] = 1;
         }
         else if (HASTEXT(_TEXT_GCC, REG_EXTENDED) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2))) {
