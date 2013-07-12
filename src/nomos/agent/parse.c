@@ -1756,7 +1756,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("XFree86");
   }
   else if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) && 
-      !INFILE(_TITLE_MIT_EXHIBIT) && !INFILE(_TITLE_SGI)) {
+      !INFILE(_TITLE_MIT_EXHIBIT) && !INFILE(_TITLE_SGI) && !lmem[_fBSD]) {
     if(INFILE(_LT_MIT_NO_EVIL)) {
       INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
       lmem[_mMIT] = 1;
@@ -5806,6 +5806,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("MX4J");
   }
   
+  /** postfix license */
+  if (INFILE(_TITLE_POSTFIX))
+  {
+    INTERESTING("Postfix");
+  }
   /** not public domain */
   if (INFILE(_LT_PUBDOM_NOTclaim)) {
     INTERESTING(LS_NOT_PD);
