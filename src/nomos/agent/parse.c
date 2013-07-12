@@ -5796,6 +5796,16 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_mGPL] = 1;
   }
 
+  /** MX4J License version 1.0 */
+  if (INFILE(_LT_MX4J_V10))
+  {
+    INTERESTING("MX4J-1.0");
+  }
+  else if (INFILE(_LT_MX4J))
+  {
+    INTERESTING("MX4J");
+  }
+  
   /** not public domain */
   if (INFILE(_LT_PUBDOM_NOTclaim)) {
     INTERESTING(LS_NOT_PD);

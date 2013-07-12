@@ -962,7 +962,7 @@
 #
 %ENTRY%	_LT_BSD_CLAUSE_4
 %KEY%	"software"
-%STR%	"(neither the name =SOME= nor the names of its contributors may|name(s|) of (the author(s|)|its contributors) may not) be used to endorse or promote products derived from this software without (specific |)prior written permission"
+%STR%	"(neither the name =SOME= nor the names of its contribut[eo]rs may|name(s|) of (the author(s|)|its contribut[eo]rs) may not) be used to endorse or promote products derived from this software without (specific |)(prior |)written permission"
 #
 %ENTRY%	_LT_BSD_CLAUSE_CLEAR
 %KEY%	"licen[cs]"
@@ -5513,6 +5513,14 @@ k
 %ENTRY%	_LT_XFREE86_V11
 %KEY%	"licen[cs]e"
 %STR%	"XFree86 licen[cs]e =FEW= (version |v)1\.?1"
+#
+%ENTRY%	_LT_MX4J_V10
+%KEY%	"licen[cs]e"
+%STR%	"under the terms of =FEW= MX4J Licen[cs]e (version |v)1\.?0"
+#
+%ENTRY%	_LT_MX4J
+%KEY%	"licen[cs]e"
+%STR%	"under the terms of =FEW= MX4J Licen[cs]e"
 #
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
