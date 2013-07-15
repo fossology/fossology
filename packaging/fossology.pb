@@ -17,7 +17,7 @@ pburl fossology = svn+https://svn.code.sf.net/p/fossology/code/trunk/fossology/
 #pburl fossology = dir:///src/fossology-devel
 
 # Repository
-pbrepo fossology = ftp://fossology.org
+pbrepo fossology = http://www.fossology.org/releases
 #pbml fossology = fossology-announce@lists.fossology.org
 #pbsmtp fossology = localhost
 
