@@ -7377,6 +7377,10 @@ k
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 %STR%	"open publication licen[cs]e (v|version )1\.?0"
 #
+%ENTRY%	_TITLE_OPENPUBL04
+%KEY%	"p(atent|roduc|rofit|roject|ublic)"
+%STR%	"open publication licen[cs]e (draft)? (v|version )0\.?4"
+#
 %ENTRY%	_TITLE_OPENPUBL
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 %STR%	"open publication licen[cs]e"

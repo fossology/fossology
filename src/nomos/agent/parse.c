@@ -1468,7 +1468,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mGPL] = 1;
       }
       else if (GPL_INFILE(_LT_GPLref14) &&
-          !INFILE(_LT_LGPLref2) && !INFILE(_LT_OPENPUBL_1) && !INFILE(_LT_OPENPUBL_2)) {
+          !INFILE(_LT_LGPLref2)) {
         cp = GPLVERS();
         INTERESTING(lDebug ? "GPL(ref14)" : cp);
         lmem[_mGPL] = 1;
@@ -1710,8 +1710,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       && (!INFILE(_LT_GPL_NAMED3_EXHIBIT))
       && (!INFILE(_LT_GPL_NAMED_COMPATIBLE))
       && (!HASTEXT(_LT_GPL_NAMED_COMPATIBLE_1, REG_EXTENDED))
-      && !INFILE(_LT_OPENPUBL_1) 
-      && !INFILE(_LT_OPENPUBL_2)
       && (!INFILE(_LT_GPL_NAMED_EXHIBIT))
       && !INFILE(_LT_INTEL_7)) {
     cp = GPLVERS();
@@ -2367,9 +2365,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_TITLE_SNIA_V10)) {
       INTERESTING("SNIA-1.0");
     }
-    else if (INFILE(_TITLE_OPENPL)) {
-      INTERESTING(lDebug ? "OPL(title)" : "OPL");
-    }
     else if (INFILE(_TITLE_CPAL10)) {
       INTERESTING(lDebug ? "CPAL_v1.0(#1)" : "CPAL-1.0");
       lmem[_mMPL] = 1;
@@ -2450,6 +2445,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_NPL_2)) {
     INTERESTING(lDebug ? "NPL(#1)" : "NPL");
     lmem[_mMPL] = 0;
+  }
+  else if (INFILE(_TITLE_OPENPL)) {
+    INTERESTING(lDebug ? "OPL(title)" : "OPL-style");
   }
   /*
    * Other CDDL
@@ -3942,7 +3940,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Open Publication license
    */
   if (INFILE(_LT_OPENPUBL_1) || INFILE(_LT_OPENPUBL_2)) {
-    if (INFILE(_TITLE_OPENPUBL10) || URL_INFILE(_URL_OPEN_PL_V10)) {
+    if (INFILE(_TITLE_OPENPUBL04)) {
+      INTERESTING("Open-PL-0.4");
+    }
+    else if (INFILE(_TITLE_OPENPUBL10) || URL_INFILE(_URL_OPEN_PL_V10)) {
       INTERESTING("Open-PL-1.0");
     }
     else if (INFILE(_TITLE_OPENPUBL)) {
@@ -5515,7 +5516,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Open Database
    */
   if (INFILE(_TITLE_ODBL)) {
-     INTERESTING("ODbl-1.0");
+     INTERESTING("ODbL-1.0");
      lmem[_fODBL] = 1;
   }
   /*
