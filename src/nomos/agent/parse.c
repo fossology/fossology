@@ -1599,6 +1599,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           INTERESTING(lDebug ? "GPL-except-Bison-3" : "GPL-3.0-with-bison-exception");
           lmem[_mGPL] = 1;
         }
+        else if ((INFILE(_LT_GPL_EXCEPT_BISON_1)  || INFILE(_LT_GPL_EXCEPT_BISON_2)) &&
+            (GPL_INFILE(_PHR_FSF_V2_OR_LATER) || INFILE(_PHR_GPL2_OR_LATER))) {
+          INTERESTING("GPL-2.0+-with-bison-exception");
+          lmem[_mGPL] = 1;
+        }
         else if (INFILE(_LT_GPL_EXCEPT_BISON_1)) {
           INTERESTING(lDebug ? "GPL-except-Bison-1" : "GPL-2.0-with-bison-exception");
           lmem[_mGPL] = 1;
