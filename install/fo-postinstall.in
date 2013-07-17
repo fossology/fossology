@@ -1,6 +1,6 @@
 #!/bin/bash
 # FOSSology postinstall script
-# Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 #
 # This script is for things that need to be done on the runtime system
 # after we've installed the bits on the filesystem. It needs to be
@@ -176,14 +176,15 @@ if [ $COMMON ]; then
 
    if [ ! -d "$REPO" ] ; then
       mkdir -p "$REPO"
-      chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
-      chmod 2770 $REPO
-      # make sure the parent dir has the right permissions too
-      chown {$PROJECTUSER}:{$PROJECTGROUP} $\{REPO%/*\}
-      chmod 2770 $\{REPO%/*\}
    else
       echo "NOTE: Repository already exists at $REPO"
    fi
+
+   chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
+   chmod 2770 $REPO
+   # make sure the parent dir has the right permissions too
+   chown {$PROJECTUSER}:{$PROJECTGROUP} $\{REPO%/*\}
+   chmod 2770 $\{REPO%/*\}
 
    # make install sets Db.conf's mode to 660, but can't chgrp it because
    # the group doesn't exist until we create it above. So chgrp now
