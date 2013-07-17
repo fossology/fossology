@@ -431,6 +431,18 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
     }
+    else
+    {
+      memset(CMD,'\0',MAXCMD);
+      snprintf(CMD,MAXCMD-1, "find '%s' -type f -exec mv {} %s \\; > /dev/null 2>&1", TempFileDirectory, TempFile); 
+      rc_system = system(CMD);
+      if (rc_system != 0)
+      {
+        unlink(GlobalTempFile);
+        system(DeleteTempDirCmd);
+        SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
+      }
+    }
   } 
 
   if (TempFile && TempFile[0] && !IsFile(TempFile,1))
