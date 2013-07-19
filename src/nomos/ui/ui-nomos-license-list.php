@@ -174,6 +174,7 @@ class ui_license_list extends FO_Plugin {
    */
   function Output()
   {
+    global $SysConf;
     global $PG_CONN;
     if (!$PG_CONN) {
       echo _("NO DB connection");
@@ -209,6 +210,9 @@ class ui_license_list extends FO_Plugin {
       return;
     }
 
+    /* how many lines of data do you want to display */
+    $NomostListNum =  @$SysConf['SYSCONFIG']['NomostListNum'];
+
     /* get the top of tree */
     $sql = "SELECT upload_fk, lft, rgt from uploadtree where uploadtree_pk='$uploadtree_pk'";
     $result = pg_query($PG_CONN, $sql);
@@ -220,7 +224,7 @@ class ui_license_list extends FO_Plugin {
     $sql = "select uploadtree_pk, ufile_name, lft, rgt from uploadtree
               where upload_fk='$toprow[upload_fk]' 
                     and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
-                    and ((ufile_mode & (1<<28)) = 0) and ((ufile_mode & (1<<29)) = 0)";
+                    and ((ufile_mode & (1<<28)) = 0) and ((ufile_mode & (1<<29)) = 0) limit $NomostListNum";
     $outerresult = pg_query($PG_CONN, $sql);
     DBCheckResult($outerresult, $sql, __FILE__, __LINE__);
 
@@ -244,8 +248,14 @@ class ui_license_list extends FO_Plugin {
       else
       $V .= "<br>";
     }
+
+    $RealNumber = pg_num_rows($outerresult);
     pg_free_result($outerresult);
 
+    if ($RealNumber == $NomostListNum)
+    {
+      $V .= _("<br><B>Warning: Just show $NomostListNum line of items, in order to get the whole list, please run fo_nomos_license_list from commend line.</B><br>");
+    }
     if (!$this->OutputToStdout) return ($V);
     print "$V";
     return;

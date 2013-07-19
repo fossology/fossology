@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -247,6 +247,14 @@ function Populate_sysconfig()
   $ValueArray[$Variable] = "'$Variable', '$FOSSologyURL', '$URLPrompt', "
   . CONFIG_TYPE_TEXT .
                     ",'URL', 1, '$URLDesc', '$URLValid'";
+
+  $Variable = "NomostListNum";
+  $NomosNumPrompt = _("Number of Nomost List");
+  $NomostListNum = "2200";
+  $NomosNumDesc = _("For the Nomos List/Nomost List Download, you can set the number of lines to list/download. Default 2200.");
+  $ValueArray[$Variable] = "'$Variable', '$NomostListNum', '$NomosNumPrompt', "
+  . CONFIG_TYPE_TEXT .
+                    ",'Number', 4, '$NomosNumDesc', null";
 
    
   /* Doing all the rows as a single insert will fail if any row is a dupe.
