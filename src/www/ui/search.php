@@ -221,7 +221,9 @@ class search extends FO_Plugin
     }
 
     /* search only containers */
+    $dir_ufile_mode = 536888320;
     if ($searchtype == 'containers') $SQL .= " AND ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0)";
+    if ($searchtype == 'directory') $SQL .= " AND ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0) AND (ufile_mode != $dir_ufile_mode)";
 
     $Offset = $Page * $this->MaxPerPage;
     $SQL .= " ORDER BY ufile_name, uploadtree.pfile_fk";
@@ -423,16 +425,21 @@ class search extends FO_Plugin
 
         /* searchtype:  'allfiles' or 'containers' */
         $ContainersChecked = "";
+        $DirectoryChecked = "";
         $AllFilesChecked = "";
         if ($searchtype == 'containers') 
           $ContainersChecked = "checked=\"checked\"";
+        else if ($searchtype == 'directory')
+          $DirectoryChecked = "checked=\"checked\"";
         else
           $AllFilesChecked = "checked=\"checked\"";
         $text = _("Limit search to");
-        $text1 = _("Containers only (rpms, tars, isos, etc)");
+        $text1 = _("Containers only, include directoty (rpms, tars, isos, etc)");
         $V .= "<u><i><b>$text:</b></i></u><br> <input type='radio' name='searchtype' value='containers' $ContainersChecked><b>$text1</b>\n";
-        $text2 = _("All Files");
-        $V .= "<br> <input type='radio' name='searchtype' value='allfiles' $AllFilesChecked><b>$text2</b>\n";
+        $text2 = _("Containers only, exclude directory (rpms, tars, isos, etc)");
+        $V .= "<br> <input type='radio' name='searchtype' value='directory' $DirectoryChecked><b>$text2</b>\n";
+        $text3 = _("All Files");
+        $V .= "<br> <input type='radio' name='searchtype' value='allfiles' $AllFilesChecked><b>$text3</b>\n";
 
         $V .= "<p><u><i><b>" . _("You must choose one or more search criteria.") . "</b></i></u>";
         $V .= "<ul>\n";
