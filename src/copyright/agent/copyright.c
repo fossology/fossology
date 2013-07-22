@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -475,7 +475,7 @@ void copyright_email_url(copyright copy, char* file)
       strcpy(new_entry.dict_match, "url");
       new_entry.type = "url";
 
-      g_match_info_fetch_pos(match, 1, &new_entry.start_byte, &new_entry.end_byte);
+      g_match_info_fetch_pos(match, 0, &new_entry.start_byte, &new_entry.end_byte);
 
       g_free(tmp);
 
