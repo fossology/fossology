@@ -18627,6 +18627,142 @@ FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. ', 'http://www.opensource.org/licenses/Python-2.0', NULL, NULL, NULL, 'Python License 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '2fb0fab23960f9f66bd747a8461667b7', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (452, 'ClArtistic', 'The Clarified Artistic License 
+
+Preamble 
+
+The intent of this document is to state the conditions under which a 
+Package may be copied, such that the Copyright Holder maintains some 
+semblance of artistic control over the development of the package, 
+while giving the users of the package the right to use and distribute 
+the Package in a more-or-less customary fashion, plus the right to make 
+reasonable modifications. 
+
+Definitions: 
+
+"Package" refers to the collection of files distributed by the 
+Copyright Holder, and derivatives of that collection of files 
+created through textual modification. 
+
+"Standard Version" refers to such a Package if it has not been 
+modified, or has been modified in accordance with the wishes 
+of the Copyright Holder as specified below. 
+
+"Copyright Holder" is whoever is named in the copyright or 
+copyrights for the package. 
+
+"You" is you, if you''re thinking about copying or distributing 
+this Package. 
+
+"Distribution fee" is a fee you charge for providing a copy 
+of this Package to another party. 
+
+"Freely Available" means that no fee is charged for the right to 
+use the item, though there may be fees involved in handling the 
+item. It also means that recipients of the item may redistribute 
+it under the same conditions they received it. 
+
+1. You may make and give away verbatim copies of the source form of the 
+Standard Version of this Package without restriction, provided that you 
+duplicate all of the original copyright notices and associated disclaimers. 
+
+2. You may apply bug fixes, portability fixes and other modifications 
+derived from the Public Domain, or those made Freely Available, or from 
+the Copyright Holder. A Package modified in such a way shall still be 
+considered the Standard Version. 
+
+3. You may otherwise modify your copy of this Package in any way, provided 
+that you insert a prominent notice in each changed file stating how and 
+when you changed that file, and provided that you do at least ONE of the 
+following: 
+
+a) place your modifications in the Public Domain or otherwise make them 
+Freely Available, such as by posting said modifications to Usenet or an 
+equivalent medium, or placing the modifications on a major network 
+archive site allowing unrestricted access to them, or by allowing the 
+Copyright Holder to include your modifications in the Standard Version 
+of the Package. 
+
+b) use the modified Package only within your corporation or organization. 
+
+c) rename any non-standard executables so the names do not conflict 
+with standard executables, which must also be provided, and provide 
+a separate manual page for each non-standard executable that clearly 
+documents how it differs from the Standard Version. 
+
+d) make other distribution arrangements with the Copyright Holder. 
+
+e) permit and encourge anyone who receives a copy of the modified Package 
+permission to make your modifications Freely Available 
+in some specific way. 
+
+
+4. You may distribute the programs of this Package in object code or 
+executable form, provided that you do at least ONE of the following: 
+
+a) distribute a Standard Version of the executables and library files, 
+together with instructions (in the manual page or equivalent) on where 
+to get the Standard Version. 
+
+b) accompany the distribution with the machine-readable source of 
+the Package with your modifications. 
+
+c) give non-standard executables non-standard names, and clearly 
+document the differences in manual pages (or equivalent), together 
+with instructions on where to get the Standard Version. 
+
+d) make other distribution arrangements with the Copyright Holder. 
+
+e) offer the machine-readable source of the Package, with your 
+modifications, by mail order. 
+
+5. You may charge a distribution fee for any distribution of this Package. 
+If you offer support for this Package, you may charge any fee you choose 
+for that support. You may not charge a license fee for the right to use 
+this Package itself. You may distribute this Package in aggregate with 
+other (possibly commercial and possibly nonfree) programs as part of a 
+larger (possibly commercial and possibly nonfree) software distribution, 
+and charge license fees for other parts of that software distribution, 
+provided that you do not advertise this Package as a product of your own. 
+If the Package includes an interpreter, You may embed this Package''s 
+interpreter within an executable of yours (by linking); this shall be 
+construed as a mere form of aggregation, provided that the complete 
+Standard Version of the interpreter is so embedded. 
+
+6. The scripts and library files supplied as input to or produced as 
+output from the programs of this Package do not automatically fall 
+under the copyright of this Package, but belong to whoever generated 
+them, and may be sold commercially, and may be aggregated with this 
+Package. If such scripts or library files are aggregated with this 
+Package via the so-called "undump" or "unexec" methods of producing a 
+binary executable image, then distribution of such an image shall 
+neither be construed as a distribution of this Package nor shall it 
+fall under the restrictions of Paragraphs 3 and 4, provided that you do 
+not represent such an executable image as a Standard Version of this 
+Package. 
+
+7. C subroutines (or comparably compiled subroutines in other 
+languages) supplied by you and linked into this Package in order to 
+emulate subroutines and variables of the language defined by this 
+Package shall not be considered part of this Package, but are the 
+equivalent of input as in Paragraph 6, provided these subroutines do 
+not change the language in any way that would cause it to fail the 
+regression tests for the language. 
+
+8. Aggregation of the Standard Version of the Package with a commercial 
+distribution is always permitted provided that the use of this Package 
+is embedded; that is, when no overt attempt is made to make this Package''s 
+interfaces visible to the end user of the commercial distribution. 
+Such use shall not be construed as a distribution of this Package. 
+
+9. The name of the Copyright Holder may not be used to endorse or promote 
+products derived from this software without specific prior written permission. 
+
+10. THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR 
+IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED 
+WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE. 
+
+The End', 'http://www.ncftp.com/ncftp/doc/LICENSE.txt', NULL, NULL, NULL, 'Clarified Artistic License', NULL, NULL, NULL, '', NULL, false, false, false, 'e90060810192c41c761d67bc1752fd8a', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (311, 'MIT', 'The MIT License
 
 Copyright (c) <year> <copyright holders>
@@ -30079,6 +30215,134 @@ As between Initial Developer and the Contributors, each party is responsible for
 
 NOTICE PURSUANT TO SECTION 9 OF THE COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
 The code released under the CDDL shall be governed by the laws of the State of California (excluding conflict-of-law provisions). Any litigation relating to this License shall be subject to the jurisdiction of the Federal Courts of the Northern District of California and the state courts of the State of California, with venue lying in Santa Clara County, California. ', 'http://glassfish.java.net/public/CDDL+GPL_1_1.html', NULL, NULL, NULL, 'Common Development and Distribution License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, 'b81b887c9d77d6cc9c49c027ad79af3b', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (453, 'CC0-1.0', 'Creative Commons CC0 1.0 Universal 
+
+CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE 
+LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN 
+ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION 
+ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE 
+USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED HEREUNDER, AND 
+DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM THE USE OF THIS DOCUMENT 
+OR THE INFORMATION OR WORKS PROVIDED HEREUNDER. 
+
+Statement of Purpose 
+
+The laws of most jurisdictions throughout the world automatically confer 
+exclusive Copyright and Related Rights (defined below) upon the creator 
+and subsequent owner(s) (each and all, an "owner") of an original work 
+of authorship and/or a database (each, a "Work"). 
+
+Certain owners wish to permanently relinquish those rights to a Work for 
+the purpose of contributing to a commons of creative, cultural and 
+scientific works ("Commons") that the public can reliably and without 
+fear of later claims of infringement build upon, modify, incorporate in 
+other works, reuse and redistribute as freely as possible in any form 
+whatsoever and for any purposes, including without limitation commercial 
+purposes. These owners may contribute to the Commons to promote the 
+ideal of a free culture and the further production of creative, cultural 
+and scientific works, or to gain reputation or greater distribution for 
+their Work in part through the use and efforts of others. 
+
+For these and/or other purposes and motivations, and without any 
+expectation of additional consideration or compensation, the person 
+associating CC0 with a Work (the "Affirmer"), to the extent that he or 
+she is an owner of Copyright and Related Rights in the Work, voluntarily 
+elects to apply CC0 to the Work and publicly distribute the Work under 
+its terms, with knowledge of his or her Copyright and Related Rights in 
+the Work and the meaning and intended legal effect of CC0 on those 
+rights. 
+
+1. Copyright and Related Rights. A Work made available under CC0 may be 
+protected by copyright and related or neighboring rights ("Copyright and 
+Related Rights"). Copyright and Related Rights include, but are not 
+limited to, the following: 
+
+i. the right to reproduce, adapt, distribute, perform, display, 
+communicate, and translate a Work; 
+
+ii. moral rights retained by the original author(s) and/or performer(s); 
+
+iii. publicity and privacy rights pertaining to a person''s image or 
+likeness depicted in a Work; 
+
+iv. rights protecting against unfair competition in regards to a Work, 
+subject to the limitations in paragraph 4(a), below; 
+
+v. rights protecting the extraction, dissemination, use and reuse of 
+data in a Work; 
+
+vi. database rights (such as those arising under Directive 96/9/EC of 
+the European Parliament and of the Council of 11 March 1996 on the legal 
+protection of databases, and under any national implementation thereof, 
+including any amended or successor version of such directive); and 
+
+vii. other similar, equivalent or corresponding rights throughout the 
+world based on applicable law or treaty, and any national 
+implementations thereof. 
+
+2. Waiver. To the greatest extent permitted by, but not in contravention 
+of, applicable law, Affirmer hereby overtly, fully, permanently, 
+irrevocably and unconditionally waives, abandons, and surrenders all of 
+Affirmer''s Copyright and Related Rights and associated claims and causes 
+of action, whether now known or unknown (including existing as well as 
+future claims and causes of action), in the Work (i) in all territories 
+worldwide, (ii) for the maximum duration provided by applicable law or 
+treaty (including future time extensions), (iii) in any current or 
+future medium and for any number of copies, and (iv) for any purpose 
+whatsoever, including without limitation commercial, advertising or 
+promotional purposes (the "Waiver"). Affirmer makes the Waiver for the 
+benefit of each member of the public at large and to the detriment of 
+Affirmer''s heirs and successors, fully intending that such Waiver shall 
+not be subject to revocation, rescission, cancellation, termination, or 
+any other legal or equitable action to disrupt the quiet enjoyment of 
+the Work by the public as contemplated by Affirmer''s express Statement 
+of Purpose. 
+
+3. Public License Fallback. Should any part of the Waiver for any reason 
+be judged legally invalid or ineffective under applicable law, then the 
+Waiver shall be preserved to the maximum extent permitted taking into 
+account Affirmer''s express Statement of Purpose. In addition, to the 
+extent the Waiver is so judged Affirmer hereby grants to each affected 
+person a royalty-free, non transferable, non sublicensable, non 
+exclusive, irrevocable and unconditional license to exercise Affirmer''s 
+Copyright and Related Rights in the Work (i) in all territories 
+worldwide, (ii) for the maximum duration provided by applicable law or 
+treaty (including future time extensions), (iii) in any current or 
+future medium and for any number of copies, and (iv) for any purpose 
+whatsoever, including without limitation commercial, advertising or 
+promotional purposes (the "License"). The License shall be deemed 
+effective as of the date CC0 was applied by Affirmer to the Work. Should 
+any part of the License for any reason be judged legally invalid or 
+ineffective under applicable law, such partial invalidity or 
+ineffectiveness shall not invalidate the remainder of the License, and 
+in such case Affirmer hereby affirms that he or she will not (i) 
+exercise any of his or her remaining Copyright and Related Rights in the 
+Work or (ii) assert any associated claims and causes of action with 
+respect to the Work, in either case contrary to Affirmer''s express 
+Statement of Purpose. 
+
+4. Limitations and Disclaimers. 
+
+a. No trademark or patent rights held by Affirmer are waived, abandoned, 
+surrendered, licensed or otherwise affected by this document. 
+
+b. Affirmer offers the Work as-is and makes no representations or 
+warranties of any kind concerning the Work, express, implied, statutory 
+or otherwise, including without limitation warranties of title, 
+merchantability, fitness for a particular purpose, non infringement, or 
+the absence of latent or other defects, accuracy, or the present or 
+absence of errors, whether or not discoverable, all to the greatest 
+extent permissible under applicable law. 
+
+c. Affirmer disclaims responsibility for clearing rights of other 
+persons that may apply to the Work or any use thereof, including without 
+limitation any person''s Copyright and Related Rights in the Work. 
+Further, Affirmer disclaims responsibility for obtaining any necessary 
+consents, permissions or other rights required for any use of the Work. 
+
+d. Affirmer understands and acknowledges that Creative Commons is not a 
+party to this document and has no duty or obligation with respect to 
+this CC0 or use of the Work.', 'http://creativecommons.org/publicdomain/zero/1.0/legalcode', NULL, NULL, NULL, 'Creative Commons Zero v1.0 Universal', NULL, NULL, NULL, '', NULL, false, false, false, '7653669676e63e4eb128f6953e2da0cf', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (397, 'BSD-2-Clause-FreeBSD', 'The FreeBSD Copyright
 
 Copyright 1992-2012 The FreeBSD Project. All rights reserved.
@@ -33960,6 +34224,55 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM 
 OTHER DEALINGS IN THE FONT SOFTWARE.', 'http://scripts.sil.org/cms/scripts/page.php?item_id=OFL_web', NULL, NULL, NULL, 'SIL Open Font License 1.1', NULL, NULL, NULL, '', NULL, false, false, false, '858f5eb0169a269174bc2c055a9b7173', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (454, 'AAL', 'Attribution Assurance License 
+Copyright (c) 2002 by AUTHOR 
+PROFESSIONAL IDENTIFICATION * URL 
+"PROMOTIONAL SLOGAN FOR AUTHOR''S PROFESSIONAL PRACTICE" 
+
+All Rights Reserved 
+ATTRIBUTION ASSURANCE LICENSE (adapted from the original BSD license) 
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the conditions below are met. 
+These conditions require a modest attribution to <AUTHOR> (the 
+"Author"), who hopes that its promotional value may help justify the 
+thousands of dollars in otherwise billable time invested in writing 
+this and other freely available, open-source software. 
+
+1. Redistributions of source code, in whole or part and with or without 
+modification (the "Code"), must prominently display this GPG-signed 
+text in verifiable form. 
+2. Redistributions of the Code in binary form must be accompanied by 
+this GPG-signed text in any documentation and, each time the resulting 
+executable program or a program dependent thereon is launched, a 
+prominent display (e.g., splash screen or banner text) of the Author''s 
+attribution information, which includes: 
+(a) Name ("AUTHOR"), 
+(b) Professional identification ("PROFESSIONAL IDENTIFICATION"), and 
+(c) URL ("URL"). 
+3. Neither the name nor any trademark of the Author may be used to 
+endorse or promote products derived from this software without specific 
+prior written permission. 
+4. Users are entirely responsible, to the exclusion of the Author and 
+any other persons, for compliance with (1) regulations set by owners or 
+administrators of employed equipment, (2) licensing terms of any other 
+software, and (3) local regulations regarding use, including those 
+regarding import, export, and use of encryption software. 
+
+THIS FREE SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND 
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO 
+EVENT SHALL THE AUTHOR OR ANY CONTRIBUTOR BE LIABLE FOR 
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+EFFECTS OF UNAUTHORIZED OR MALICIOUS NETWORK ACCESS; 
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
+AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+--End of License', 'http://www.opensource.org/licenses/attribution', NULL, NULL, NULL, 'Attribution Assurance License', NULL, NULL, NULL, '', NULL, false, false, false, '96414e50c7a8559d63bc73e3a44b6640', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (427, 'SAX-PD', 'Copyright Status 
 
 SAX is free! 
@@ -35640,319 +35953,6 @@ This exception does not invalidate any other reasons why a work based on this fi
 Alternative licenses for eCos may be arranged by contacting Red Hat, Inc. at http://sources.redhat.com/ecos/ecos-license/ ------------------------------------------- 
 
 ####ECOSGPLCOPYRIGHTEND####', 'http://www.gnu.org/licenses/ecos-license.html', NULL, NULL, NULL, 'eCos license version 2.0', NULL, NULL, NULL, '', NULL, false, false, false, '47f0550d014de57cf50529d5d377e34e', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (452, 'ClArtistic', 'The Clarified Artistic License 
-
-Preamble 
-
-The intent of this document is to state the conditions under which a 
-Package may be copied, such that the Copyright Holder maintains some 
-semblance of artistic control over the development of the package, 
-while giving the users of the package the right to use and distribute 
-the Package in a more-or-less customary fashion, plus the right to make 
-reasonable modifications. 
-
-Definitions: 
-
-"Package" refers to the collection of files distributed by the 
-Copyright Holder, and derivatives of that collection of files 
-created through textual modification. 
-
-"Standard Version" refers to such a Package if it has not been 
-modified, or has been modified in accordance with the wishes 
-of the Copyright Holder as specified below. 
-
-"Copyright Holder" is whoever is named in the copyright or 
-copyrights for the package. 
-
-"You" is you, if you''re thinking about copying or distributing 
-this Package. 
-
-"Distribution fee" is a fee you charge for providing a copy 
-of this Package to another party. 
-
-"Freely Available" means that no fee is charged for the right to 
-use the item, though there may be fees involved in handling the 
-item. It also means that recipients of the item may redistribute 
-it under the same conditions they received it. 
-
-1. You may make and give away verbatim copies of the source form of the 
-Standard Version of this Package without restriction, provided that you 
-duplicate all of the original copyright notices and associated disclaimers. 
-
-2. You may apply bug fixes, portability fixes and other modifications 
-derived from the Public Domain, or those made Freely Available, or from 
-the Copyright Holder. A Package modified in such a way shall still be 
-considered the Standard Version. 
-
-3. You may otherwise modify your copy of this Package in any way, provided 
-that you insert a prominent notice in each changed file stating how and 
-when you changed that file, and provided that you do at least ONE of the 
-following: 
-
-a) place your modifications in the Public Domain or otherwise make them 
-Freely Available, such as by posting said modifications to Usenet or an 
-equivalent medium, or placing the modifications on a major network 
-archive site allowing unrestricted access to them, or by allowing the 
-Copyright Holder to include your modifications in the Standard Version 
-of the Package. 
-
-b) use the modified Package only within your corporation or organization. 
-
-c) rename any non-standard executables so the names do not conflict 
-with standard executables, which must also be provided, and provide 
-a separate manual page for each non-standard executable that clearly 
-documents how it differs from the Standard Version. 
-
-d) make other distribution arrangements with the Copyright Holder. 
-
-e) permit and encourge anyone who receives a copy of the modified Package 
-permission to make your modifications Freely Available 
-in some specific way. 
-
-
-4. You may distribute the programs of this Package in object code or 
-executable form, provided that you do at least ONE of the following: 
-
-a) distribute a Standard Version of the executables and library files, 
-together with instructions (in the manual page or equivalent) on where 
-to get the Standard Version. 
-
-b) accompany the distribution with the machine-readable source of 
-the Package with your modifications. 
-
-c) give non-standard executables non-standard names, and clearly 
-document the differences in manual pages (or equivalent), together 
-with instructions on where to get the Standard Version. 
-
-d) make other distribution arrangements with the Copyright Holder. 
-
-e) offer the machine-readable source of the Package, with your 
-modifications, by mail order. 
-
-5. You may charge a distribution fee for any distribution of this Package. 
-If you offer support for this Package, you may charge any fee you choose 
-for that support. You may not charge a license fee for the right to use 
-this Package itself. You may distribute this Package in aggregate with 
-other (possibly commercial and possibly nonfree) programs as part of a 
-larger (possibly commercial and possibly nonfree) software distribution, 
-and charge license fees for other parts of that software distribution, 
-provided that you do not advertise this Package as a product of your own. 
-If the Package includes an interpreter, You may embed this Package''s 
-interpreter within an executable of yours (by linking); this shall be 
-construed as a mere form of aggregation, provided that the complete 
-Standard Version of the interpreter is so embedded. 
-
-6. The scripts and library files supplied as input to or produced as 
-output from the programs of this Package do not automatically fall 
-under the copyright of this Package, but belong to whoever generated 
-them, and may be sold commercially, and may be aggregated with this 
-Package. If such scripts or library files are aggregated with this 
-Package via the so-called "undump" or "unexec" methods of producing a 
-binary executable image, then distribution of such an image shall 
-neither be construed as a distribution of this Package nor shall it 
-fall under the restrictions of Paragraphs 3 and 4, provided that you do 
-not represent such an executable image as a Standard Version of this 
-Package. 
-
-7. C subroutines (or comparably compiled subroutines in other 
-languages) supplied by you and linked into this Package in order to 
-emulate subroutines and variables of the language defined by this 
-Package shall not be considered part of this Package, but are the 
-equivalent of input as in Paragraph 6, provided these subroutines do 
-not change the language in any way that would cause it to fail the 
-regression tests for the language. 
-
-8. Aggregation of the Standard Version of the Package with a commercial 
-distribution is always permitted provided that the use of this Package 
-is embedded; that is, when no overt attempt is made to make this Package''s 
-interfaces visible to the end user of the commercial distribution. 
-Such use shall not be construed as a distribution of this Package. 
-
-9. The name of the Copyright Holder may not be used to endorse or promote 
-products derived from this software without specific prior written permission. 
-
-10. THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR 
-IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED 
-WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE. 
-
-The End', 'http://www.ncftp.com/ncftp/doc/LICENSE.txt', NULL, NULL, NULL, 'Clarified Artistic License', NULL, NULL, NULL, '', NULL, false, false, false, 'e90060810192c41c761d67bc1752fd8a', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (453, 'CC0-1.0', 'Creative Commons CC0 1.0 Universal 
-
-CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE 
-LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN 
-ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION 
-ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE 
-USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED HEREUNDER, AND 
-DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM THE USE OF THIS DOCUMENT 
-OR THE INFORMATION OR WORKS PROVIDED HEREUNDER. 
-
-Statement of Purpose 
-
-The laws of most jurisdictions throughout the world automatically confer 
-exclusive Copyright and Related Rights (defined below) upon the creator 
-and subsequent owner(s) (each and all, an "owner") of an original work 
-of authorship and/or a database (each, a "Work"). 
-
-Certain owners wish to permanently relinquish those rights to a Work for 
-the purpose of contributing to a commons of creative, cultural and 
-scientific works ("Commons") that the public can reliably and without 
-fear of later claims of infringement build upon, modify, incorporate in 
-other works, reuse and redistribute as freely as possible in any form 
-whatsoever and for any purposes, including without limitation commercial 
-purposes. These owners may contribute to the Commons to promote the 
-ideal of a free culture and the further production of creative, cultural 
-and scientific works, or to gain reputation or greater distribution for 
-their Work in part through the use and efforts of others. 
-
-For these and/or other purposes and motivations, and without any 
-expectation of additional consideration or compensation, the person 
-associating CC0 with a Work (the "Affirmer"), to the extent that he or 
-she is an owner of Copyright and Related Rights in the Work, voluntarily 
-elects to apply CC0 to the Work and publicly distribute the Work under 
-its terms, with knowledge of his or her Copyright and Related Rights in 
-the Work and the meaning and intended legal effect of CC0 on those 
-rights. 
-
-1. Copyright and Related Rights. A Work made available under CC0 may be 
-protected by copyright and related or neighboring rights ("Copyright and 
-Related Rights"). Copyright and Related Rights include, but are not 
-limited to, the following: 
-
-i. the right to reproduce, adapt, distribute, perform, display, 
-communicate, and translate a Work; 
-
-ii. moral rights retained by the original author(s) and/or performer(s); 
-
-iii. publicity and privacy rights pertaining to a person''s image or 
-likeness depicted in a Work; 
-
-iv. rights protecting against unfair competition in regards to a Work, 
-subject to the limitations in paragraph 4(a), below; 
-
-v. rights protecting the extraction, dissemination, use and reuse of 
-data in a Work; 
-
-vi. database rights (such as those arising under Directive 96/9/EC of 
-the European Parliament and of the Council of 11 March 1996 on the legal 
-protection of databases, and under any national implementation thereof, 
-including any amended or successor version of such directive); and 
-
-vii. other similar, equivalent or corresponding rights throughout the 
-world based on applicable law or treaty, and any national 
-implementations thereof. 
-
-2. Waiver. To the greatest extent permitted by, but not in contravention 
-of, applicable law, Affirmer hereby overtly, fully, permanently, 
-irrevocably and unconditionally waives, abandons, and surrenders all of 
-Affirmer''s Copyright and Related Rights and associated claims and causes 
-of action, whether now known or unknown (including existing as well as 
-future claims and causes of action), in the Work (i) in all territories 
-worldwide, (ii) for the maximum duration provided by applicable law or 
-treaty (including future time extensions), (iii) in any current or 
-future medium and for any number of copies, and (iv) for any purpose 
-whatsoever, including without limitation commercial, advertising or 
-promotional purposes (the "Waiver"). Affirmer makes the Waiver for the 
-benefit of each member of the public at large and to the detriment of 
-Affirmer''s heirs and successors, fully intending that such Waiver shall 
-not be subject to revocation, rescission, cancellation, termination, or 
-any other legal or equitable action to disrupt the quiet enjoyment of 
-the Work by the public as contemplated by Affirmer''s express Statement 
-of Purpose. 
-
-3. Public License Fallback. Should any part of the Waiver for any reason 
-be judged legally invalid or ineffective under applicable law, then the 
-Waiver shall be preserved to the maximum extent permitted taking into 
-account Affirmer''s express Statement of Purpose. In addition, to the 
-extent the Waiver is so judged Affirmer hereby grants to each affected 
-person a royalty-free, non transferable, non sublicensable, non 
-exclusive, irrevocable and unconditional license to exercise Affirmer''s 
-Copyright and Related Rights in the Work (i) in all territories 
-worldwide, (ii) for the maximum duration provided by applicable law or 
-treaty (including future time extensions), (iii) in any current or 
-future medium and for any number of copies, and (iv) for any purpose 
-whatsoever, including without limitation commercial, advertising or 
-promotional purposes (the "License"). The License shall be deemed 
-effective as of the date CC0 was applied by Affirmer to the Work. Should 
-any part of the License for any reason be judged legally invalid or 
-ineffective under applicable law, such partial invalidity or 
-ineffectiveness shall not invalidate the remainder of the License, and 
-in such case Affirmer hereby affirms that he or she will not (i) 
-exercise any of his or her remaining Copyright and Related Rights in the 
-Work or (ii) assert any associated claims and causes of action with 
-respect to the Work, in either case contrary to Affirmer''s express 
-Statement of Purpose. 
-
-4. Limitations and Disclaimers. 
-
-a. No trademark or patent rights held by Affirmer are waived, abandoned, 
-surrendered, licensed or otherwise affected by this document. 
-
-b. Affirmer offers the Work as-is and makes no representations or 
-warranties of any kind concerning the Work, express, implied, statutory 
-or otherwise, including without limitation warranties of title, 
-merchantability, fitness for a particular purpose, non infringement, or 
-the absence of latent or other defects, accuracy, or the present or 
-absence of errors, whether or not discoverable, all to the greatest 
-extent permissible under applicable law. 
-
-c. Affirmer disclaims responsibility for clearing rights of other 
-persons that may apply to the Work or any use thereof, including without 
-limitation any person''s Copyright and Related Rights in the Work. 
-Further, Affirmer disclaims responsibility for obtaining any necessary 
-consents, permissions or other rights required for any use of the Work. 
-
-d. Affirmer understands and acknowledges that Creative Commons is not a 
-party to this document and has no duty or obligation with respect to 
-this CC0 or use of the Work.', 'http://creativecommons.org/publicdomain/zero/1.0/legalcode', NULL, NULL, NULL, 'Creative Commons Zero v1.0 Universal', NULL, NULL, NULL, '', NULL, false, false, false, '7653669676e63e4eb128f6953e2da0cf', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (454, 'AAL', 'Attribution Assurance License 
-Copyright (c) 2002 by AUTHOR 
-PROFESSIONAL IDENTIFICATION * URL 
-"PROMOTIONAL SLOGAN FOR AUTHOR''S PROFESSIONAL PRACTICE" 
-
-All Rights Reserved 
-ATTRIBUTION ASSURANCE LICENSE (adapted from the original BSD license) 
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted provided that the conditions below are met. 
-These conditions require a modest attribution to <AUTHOR> (the 
-"Author"), who hopes that its promotional value may help justify the 
-thousands of dollars in otherwise billable time invested in writing 
-this and other freely available, open-source software. 
-
-1. Redistributions of source code, in whole or part and with or without 
-modification (the "Code"), must prominently display this GPG-signed 
-text in verifiable form. 
-2. Redistributions of the Code in binary form must be accompanied by 
-this GPG-signed text in any documentation and, each time the resulting 
-executable program or a program dependent thereon is launched, a 
-prominent display (e.g., splash screen or banner text) of the Author''s 
-attribution information, which includes: 
-(a) Name ("AUTHOR"), 
-(b) Professional identification ("PROFESSIONAL IDENTIFICATION"), and 
-(c) URL ("URL"). 
-3. Neither the name nor any trademark of the Author may be used to 
-endorse or promote products derived from this software without specific 
-prior written permission. 
-4. Users are entirely responsible, to the exclusion of the Author and 
-any other persons, for compliance with (1) regulations set by owners or 
-administrators of employed equipment, (2) licensing terms of any other 
-software, and (3) local regulations regarding use, including those 
-regarding import, export, and use of encryption software. 
-
-THIS FREE SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
-FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO 
-EVENT SHALL THE AUTHOR OR ANY CONTRIBUTOR BE LIABLE FOR 
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-EFFECTS OF UNAUTHORIZED OR MALICIOUS NETWORK ACCESS; 
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
-AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
-IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
---End of License', 'http://www.opensource.org/licenses/attribution', NULL, NULL, NULL, 'Attribution Assurance License', NULL, NULL, NULL, '', NULL, false, false, false, '96414e50c7a8559d63bc73e3a44b6640', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (455, 'Multics', 'Multics License 
 
 Historical Background 
@@ -36339,6 +36339,7 @@ A "contributor" is any person that distributes its contribution under this licen
 (D) If you distribute any portion of the software, you must retain all copyright, patent, trademark, and attribution notices that are present in the software. 
 (E) If you distribute any portion of the software in source code form, you may do so only under this license by including a complete copy of this license with your distribution. If you distribute any portion of the software in compiled or object code form, you may only do so under a license that complies with this license. 
 (F) The software is licensed "as-is." You bear the risk of using it. The contributors give no express warranties, guarantees, or conditions. You may have additional consumer rights under your local laws which this license cannot change. To the extent permitted under your local laws, the contributors exclude the implied warranties of merchantability, fitness for a particular purpose and non-infringement.', 'http://www.microsoft.com/opensource/licenses.mspx', NULL, NULL, NULL, 'Microsoft Reciprocal License', NULL, NULL, NULL, '', NULL, false, false, false, '4ac19d26a628a64584d15daec29258b6', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (504, 'GPL', 'GPL is referenced without a version number. Please look up GPL in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'GNU General Public License', NULL, NULL, NULL, '', NULL, false, false, false, '336c692e88117f051e16e8c67af502a9', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (439, 'GPL-3.0-with-autoconf-exception', 'insert GPL v3 text here 
 
 AUTOCONF CONFIGURE SCRIPT EXCEPTION 
@@ -37955,63 +37956,42 @@ not limited to:
 - The Licensed Software’s Resource Compiler (“rcc”)
 - The Licensed Software’s generator (only in the case of Qt Jambi)
 - The License Software’s Qt SDK', 'http://qt.nokia.com/files/pdf/licenses/qtdesktop_us_v3_8.pdf', NULL, NULL, NULL, 'QT Commercial License Agreement 3.8', NULL, NULL, NULL, '', NULL, false, false, false, 'b0181acaf767c83e89930655e6996d31', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (277, 'Pixware-EULA', 'XMLmind Spell Checker SDK License Agreement
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (463, 'Cryptogams', 'Copyright (c) 2006, CRYPTOGAMS by <appro@openssl.org>
+All rights reserved.
 
-Version 1.3
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
 
-March 12, 2007
+      *	Redistributions of source code must retain copyright notices,
+	this list of conditions and the following disclaimer.
 
-IMPORTANT! Read the terms and conditions of this license agreement (hereafter "Agreement") carefully before using XMLmind Spell Checker SDK (hereafter "Software"). Use of the Software implies acceptance of this Agreement, and legally binds you and/or your company (hereafter "Licensee"), and Pixware SARL (hereafter "Licensor"), to the terms and conditions set forth below.
+      *	Redistributions in binary form must reproduce the above
+	copyright notice, this list of conditions and the following
+	disclaimer in the documentation and/or other materials
+	provided with the distribution.
 
-1 Grant of License
+      *	Neither the name of the CRYPTOGAMS nor the names of its
+	copyright holder and contributors may be used to endorse or
+	promote products derived from this software without specific
+	prior written permission.
 
-Subject to the terms and conditions of this Agreement, Licensor hereby grants to Licensee a non-exclusive and non-transferable license to install and use the Software on a Licensee''s host machine, to modify the Software, and to distribute some parts of the Software.
+ALTERNATIVELY, provided that this notice is retained in full, this
+product may be distributed under the terms of the GNU General Public
+License (GPL), in which case the provisions of the GPL apply INSTEAD OF
+those given above.
 
-1.1 Installation and use
-
-The Software may only be installed on a single host machine, however Licensee may uninstall the Software and reinstall it on a different host without notice to Licensor. The Software may not be remotely accessed from another machine.
-
-The Software may only be used by a single software developer, whose identity shall be registered by Licensee. Right to use the Software may be transferred from one developer to another in the same organization upon request to Licensor, however such transfers are limited to one every six months.
-
-1.2 Modification
-
-Licensee may modify and recompile the source code of all GUI components and examples included with the Software. Subject to prior notice to Licensor, Licensee may modify and recompile the source code of the core spell checker engine, however such a modification frees Licensor from any further technical support to Licensee.
-
-Licensee may modify and rebuild all dictionaries included with the Software.
-
-1.3 Distribution
-
-Licensee may distribute a copy of the binary class library and binary dictionary files, in original or modified form, along with any application, developed by Licensee, which integrates XMLmind Spell Checker. Licensee may not distribute any other part of the Software, in either modified or original form.
-
-Licensee shall include the following copyright notice: "XMLmind Spell Checker Copyright © 2002-2007 Pixware SARL", with every copy of any application, developed by Licensee, which integrates XMLmind Spell Checker. This copyright notice may be placed together with Licensee''s own copyright notices, or in any reasonably visible location in the packaging or documentation of the application.
-
-Licensee may not include the binary class library and binary dictionary files with any software product which is itself a development kit, a component or a library.
-
-2 Restrictions
-
-The Software is copyrighted and title to all copies is retained by Licensor. Licensee may not make copies of the Software, other than a single copy for archival purposes. Licensee may, for its internal use only, print copies of the documentation of the Software, in which event all proprietary rights notices on the Software shall be reproduced and applied. Except as stated in section 1, Licensee may not modify, decompile, or otherwise reverse engineer the Software.
-
-The Software is not designed or licensed for use in on-line control equipment in hazardous environments such as operation of nuclear facilities, aircraft navigation or control, or direct life support machines.
-
-The Software is confidential and proprietary information of Licensor. Licensee agrees to protect the Software from unauthorized use or disclosure.
-
-3 Warranty Disclaimer
-
-Licensor does not warrant that the Software will meet Licensee''s requirements or that the Software is error-free. Except as specified in this Agreement, Licensor expressly disclaims all warranties, express or implied, with respect to the Software, including, but not limited to, warranties of merchantability, fitness for a particular purpose or non-infringement.
-
-4 Limitation of Liability
-
-In no event shall Licensor be liable to Licensee or a third party for any lost revenue, profit or data, or for any indirect, special or consequential damages, however caused and regardless of theory of liability, arising out of the use of or inability to use the Software, even if Licensor has been advised of the possibility of such damages.
-
-5 Termination
-
-This license is effective from the date purchased by Licensee and is perpetual unless terminated by Licensee''s election or by breach of this Agreement. Licensee may terminate this license at any time by destroying all copies of the Software, including any documentation. This license will terminate immediately without notice from Licensor if Licensee fails to comply with any provision of this Agreement. Upon termination, Licensee must destroy all copies of the Software, including any documentation.
-
-6 Entirety
-
-This Agreement is the complete and exclusive statement of agreements between Licensee and Licensor relating to the Software. It supersedes all prior agreements and understandings, and prevails over any conflicting or additional terms of any quote, order, acknowledgement, or similar communication between the parties before or during the term of this Agreement. It may be modified only in writing signed by both parties.
-
-This Agreement is made under, shall be governed by and construed in accordance with the French law.', 'http://www.xmlmind.com/spellchecker/license_sc-sdk.html', NULL, NULL, NULL, 'XMLmind Spell Checker SDK License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '44b6167bb706ecbffb9685cdbf9cbc25', 1);
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://www.openssl.org/~appro/cryptogams/', NULL, NULL, NULL, 'Cryptogams', NULL, NULL, NULL, '', NULL, false, false, false, 'cd1a147bce6b38197f6fd3eb1c566c28', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (335, 'RealNetworks-EULA', 'REALNETWORKS, INC.
 REAL LICENSING PROGRAM
 LICENSE SUPPLEMENT
@@ -38166,42 +38146,6 @@ Surviving Provisions.
 Sections 1.b, 2, and 4 through 12, will survive any termination of this Agreement.
 
 Version date: February 4, 2009', 'http://info.yahoo.com/legal/us/yahoo/toolbar/tbeula/tbeula-282.html', NULL, NULL, NULL, 'Yahoo Software License', NULL, NULL, NULL, '', NULL, false, false, false, '40f189830818d0468048f5da21bd12d0', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (463, 'Cryptogams', 'Copyright (c) 2006, CRYPTOGAMS by <appro@openssl.org>
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-      *	Redistributions of source code must retain copyright notices,
-	this list of conditions and the following disclaimer.
-
-      *	Redistributions in binary form must reproduce the above
-	copyright notice, this list of conditions and the following
-	disclaimer in the documentation and/or other materials
-	provided with the distribution.
-
-      *	Neither the name of the CRYPTOGAMS nor the names of its
-	copyright holder and contributors may be used to endorse or
-	promote products derived from this software without specific
-	prior written permission.
-
-ALTERNATIVELY, provided that this notice is retained in full, this
-product may be distributed under the terms of the GNU General Public
-License (GPL), in which case the provisions of the GPL apply INSTEAD OF
-those given above.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://www.openssl.org/~appro/cryptogams/', NULL, NULL, NULL, 'Cryptogams', NULL, NULL, NULL, '', NULL, false, false, false, 'cd1a147bce6b38197f6fd3eb1c566c28', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (464, 'H2-1.0', 'H2 is dual licensed and available under a modified version of the MPL 1.1 (Mozilla Public License) or under the (unmodified) EPL 1.0 (Eclipse Public License). The changes to the MPL are underlined. There is a license FAQ for both the MPL and the EPL, most of that is applicable to the H2 license as well.
 
 You can use H2 for free. You can integrate it into your applications (including in commercial applications), and you can distribute it.
@@ -38722,6 +38666,13 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice including the dates of first publication and either this permission notice or a reference to http://oss.sgi.com/projects/FreeB/ shall be included in all copies or substantial portions of the Software. 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL SILICON GRAPHICS, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Except as contained in this notice, the name of Silicon Graphics, Inc. shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from Silicon Graphics, Inc.', 'http://oss.sgi.com/projects/FreeB/SGIFreeSWLicB.2.0.doc', NULL, NULL, NULL, 'SGI Free Software License B 2.0', NULL, NULL, NULL, '', NULL, false, false, false, 'cf37137fe121a9ce8d71b10bb0d3a13f', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (503, 'GPL-3.0+-with-bison-exception', 'insert GPL v3+ text here 
+
+Bison Exception 
+
+As a special exception, you may create a larger work that contains part or all of the Bison parser skeleton and distribute that work under terms of your choice, so long as that work isn''t itself a parser generator using the skeleton or a modified version thereof as a parser skeleton. Alternatively, if you modify or redistribute the parser skeleton itself, you may (at your option) remove this special exception, which will cause the skeleton and the resulting Bison output files to be licensed under the GNU General Public License without this special exception. 
+
+This special exception was added by the Free Software Foundation in version 2.2 of Bison.', '', NULL, NULL, NULL, 'GNU General Public License v3.0+ w/Bison exception', NULL, NULL, NULL, '', NULL, false, true, false, '3e8f2aa0d5021f314afa6885eb3d3360', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (469, 'OLDAP-2.2.2', 'The OpenLDAP Public License
   Version 2.2.2, 28 July 2000
 
@@ -40166,211 +40117,6 @@ o This License does not grant any rights to use the trademarks "Zimbra" and the 
 o However, in addition to the other notice obligations, (1) all copies of the Original Code in Executable and Source Code form must, as a form of attribution of the original author, include on each user interface screen (i) the original Zimbra logo, and once for each user session (ii) the copyright notice as it appears in the Original Code; and (2) all derivative works and copies of derivative works of the Covered Code in Executable and Source Code form must include on each user interface screen (i) the "Zimbra Powered" logo,, and once for each user session (ii) the copyright notice from the version of the Covered Code from which the copy or the derivative work was made. In addition, the original Zimbra logo or the "Zimbra Powered" logo, as appropriate, must be visible to all users, must appear in each user interface screen, and must be in the same position as and at least as large as the Zimbra logo is within the Original Code. When users click on the original Zimbra logo it must direct them to http://www.zimbra.com/, and when users click on the "Zimbra Powered" logo it must direct them to http://www.zimbra.com/powered. This obligation shall also apply to any copies or derivative works which are distributed under the alternative terms of Section 3.6 and this obligation must be included in any such license.
 
 Read more about this license at http://www.zimbra.com/license/zimbra_public_license_1.2.html', 'http://www.ohloh.net/licenses/zpl', NULL, NULL, NULL, 'Zimbra Public License Version 1.2', NULL, NULL, NULL, '', NULL, false, false, false, '563faa3278a532d91a294e4e7ec9ee10', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel-EULA', 'Intel Open Source License 
-
-
-Copyright (c) 1996-2000 Intel Corporation All rights reserved. 
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
-•	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
-•	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
-•	Neither the name of the Intel Corporation nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE INTEL OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. EXPORT LAWS: THIS LICENSE ADDS NO RESTRICTIONS TO THE EXPORT LAWS OF YOUR JURISDICTION. It is licensee''s responsibility to comply with any export regulations applicable in licensee''s jurisdiction. Under CURRENT (May 2000) U.S. export regulations this software is eligible for export from the U.S. and can be downloaded by or otherwise exported or reexported worldwide EXCEPT to U.S. embargoed destinations which include Cuba, Iraq, Libya, North Korea, Iran, Syria, Sudan, Afghanistan and any other country to which the U.S. has embargoed goods and services.', 'http://opensource.org/licenses/Intel', NULL, NULL, NULL, 'Intel Open Source License', NULL, NULL, NULL, '', NULL, false, false, false, '273a6c7b3d192b2f6c368e706423b815', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (320, 'Naumen', 'NAUMEN Public License
-This software is Copyright (c) NAUMEN (tm) and Contributors.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or
-without modification, are permitted provided that the following
-conditions are met:
-
-1. Redistributions in source code must retain the above
-copyright notice, this list of conditions, and the following
-disclaimer.
-
-2. Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions, and the following
-disclaimer in the documentation and/or other materials
-provided with the distribution.
-
-3. The name NAUMEN (tm) must not be used to
-endorse or promote products derived from this software without prior
-written permission from NAUMEN.
-
-4. The right to distribute this software or to use it for any
-purpose does not give you the right to use Servicemarks (sm)
-or Trademarks (tm) of NAUMEN.
-
-5. If any files originating from NAUMEN or Contributors are modified, you must
-cause the modified files to carry prominent notices stating
-that you changed the files and the date of any change.
-
-Disclaimer:
-
-THIS SOFTWARE IS PROVIDED BY NAUMEN "AS IS" AND ANY EXPRESSED
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NAUMEN
-OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGE.
-
-This software consists of contributions made by NAUMEN
-and Contributors. Specific attributions are listed in the
-accompanying credits file.', 'http://www.opensource.org/licenses/naumen.php', NULL, NULL, NULL, 'Naumen Public License', NULL, NULL, NULL, '', NULL, false, false, false, '19fb518675cb6fb01d4724c2667f16c6', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (331, 'Nvidia-EULA', 'License For Customer Use of NVIDIA Software 
- 
-IMPORTANT NOTICE -- READ CAREFULLY: This License For Customer Use of NVIDIA Software ("LICENSE") is the agreement which governs use of the software of NVIDIA Corporation and its subsidiaries (“NVIDIA”) downloadable herefrom, including computer software and associated printed materials ("SOFTWARE"). By downloading, installing, copying, or otherwise using the SOFTWARE, you agree to be bound by the terms of this LICENSE. If you do not agree to the terms of this LICENSE, do not download the SOFTWARE.
-
-RECITALS
-
-Use of NVIDIA''s products requires three elements: the SOFTWARE, the hardware on a graphics controller board, and a personal computer. The SOFTWARE is protected by copyright laws and international copyright treaties, as well as other intellectual property laws and treaties. The SOFTWARE is not sold, and instead is only licensed for use, strictly in accordance with this document. The hardware is protected by various patents, and is sold, but this LICENSE does not cover that sale, since it may not necessarily be sold as a package with the SOFTWARE. This LICENSE sets forth the terms and conditions of the SOFTWARE LICENSE only.
-
-1. DEFINITIONS
-
-1.1 Customer. Customer means the entity or individual that downloads the SOFTWARE.
-
-2. GRANT OF LICENSE
-
-2.1 Rights and Limitations of Grant. NVIDIA hereby grants Customer the following non-exclusive, non-transferable right to use the SOFTWARE, with the following limitations:
-
-2.1.1 Rights. Customer may install and use one copy of the SOFTWARE on a single computer, and except for making one back-up copy of the Software, may not otherwise copy the SOFTWARE. This LICENSE of SOFTWARE may not be shared or used concurrently on different computers.
-
-2.1.2 Linux/FreeBSD/OpenSolaris Exception. Notwithstanding the foregoing terms of Section 2.1.1, SOFTWARE designed exclusively for use on the Linux or FreeBSD operating systems, or other operating systems derived from the source code to these operating systems, may be copied and redistributed, provided that the binary files thereof are not modified in any way (except for unzipping of compressed files).
-
-2.1.3 Limitations.
-
-No Reverse Engineering. Customer may not reverse engineer, decompile, or disassemble the SOFTWARE, nor attempt in any other manner to obtain the source code.
-
-No Separation of Components. The SOFTWARE is licensed as a single product. Its component parts may not be separated for use on more than one computer, nor otherwise used separately from the other parts.
-
-No Rental. Customer may not rent or lease the SOFTWARE to someone else.
-
-3. TERMINATION
-
-This LICENSE will automatically terminate if Customer fails to comply with any of the terms and conditions hereof. In such event, Customer must destroy all copies of the SOFTWARE and all of its component parts.
-
-Defensive Suspension. If Customer commences or participates in any legal proceeding against NVIDIA, then NVIDIA may, in its sole discretion, suspend or terminate all license grants and any other rights provided under this LICENSE during the pendency of such legal proceedings.
-
-4. COPYRIGHT
-
-All title and copyrights in and to the SOFTWARE (including but not limited to all images, photographs, animations, video, audio, music, text, and other information incorporated into the SOFTWARE), the accompanying printed materials, and any copies of the SOFTWARE, are owned by NVIDIA, or its suppliers. The SOFTWARE is protected by copyright laws and international treaty provisions. Accordingly, Customer is required to treat the SOFTWARE like any other copyrighted material, except as otherwise allowed pursuant to this LICENSE and that it may make one copy of the SOFTWARE solely for backup or archive purposes.
-
-5. APPLICABLE LAW
-
-This LICENSE shall be deemed to have been made in, and shall be construed pursuant to, the laws of the State of California. The United Nations Convention on Contracts for the International Sale of Goods is specifically disclaimed.
-
-6. DISCLAIMER OF WARRANTIES AND LIMITATION ON LIABILITY
-
-6.1 No Warranties. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED "AS IS" AND NVIDIA AND ITS SUPPLIERS DISCLAIM ALL WARRANTIES, EITHERWHETHER EXPRESS OR, IMPLIED, OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND, FITNESS FOR A PARTICULAR PURPOSE. , TITLE, AND NON-INFRINGEMENT. Without limiting the foregoing, you are solely responsible for determining and verifying that the SOFTWARE that you obtain and install is the appropriate version for your model of graphics controller board, operating system, and computer hardware.
-
-6.2 No Liability for Consequential Damages. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL NVIDIA OR ITS SUPPLIERS BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, LOSS OF DATA, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE, EVEN IF NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-
-7. MISCELLANEOUS
-
-If any provision of this LICENSE is inconsistent with, or cannot be fully enforced under, the law, such provision will be construed as limited to the extent necessary to be consistent with and fully enforceable under the law. This LICENSE is the final, complete and exclusive agreement between the parties relating to the subject matter hereof, and supersedes all prior or contemporaneous understandings and agreements relating to such subject matter, whether oral or written. This LICENSE may only be modified in writing signed by an authorized officer of NVIDIA.  Customer agrees that it will not ship, transfer or export the SOFTWARE into any country, or use the SOFTWARE in any manner, prohibited by the United States Bureau of Industry and Security or any export laws, restrictions or regulations.', 'http://www.nvidia.com/object/nv_swlicense.html', NULL, NULL, NULL, 'NVIDIA EULA', NULL, NULL, NULL, '', NULL, false, false, false, 'aa4775fccf03e8d5a14cae0f24072fc7', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (300, 'Oracle-Dev', 'Oracle Technology Network Developer License Terms 
-
-Export Controls on the Programs 
-Selecting the "Accept License Agreement" button is a confirmation of your agreement that you comply, now and during the trial term, with each of the following statements: 
-
--You are not a citizen, national, or resident of, and are not under control of, the government of Cuba, Iran, Sudan, Libya, North Korea, Syria, nor any country to which the United States has prohibited export. 
--You will not download or otherwise export or re-export the Programs, directly or indirectly, to the above mentioned countries nor to citizens, nationals or residents of those countries. 
--You are not listed on the United States Department of Treasury lists of Specially Designated Nationals, Specially Designated Terrorists, and Specially Designated Narcotic Traffickers, nor are you listed on the United States Department of Commerce Table of Denial Orders. 
-
-You will not download or otherwise export or re-export the Programs, directly or indirectly, to persons on the above mentioned lists. 
-
-You will not use the Programs for, and will not allow the Programs to be used for, any purposes prohibited by United States law, including, without limitation, for the development, design, manufacture or production of nuclear, chemical or biological weapons of mass destruction. 
-
-EXPORT RESTRICTIONS 
-You agree that U.S. export control laws and other applicable export and import laws govern your use of the programs, including technical data; additional information can be found on Oracle®''s Global Trade Compliance web site (http://www.oracle.com/products/export). 
-
-You agree that neither the programs nor any direct product thereof will be exported, directly, or indirectly, in violation of these laws, or will be used for any purpose prohibited by these laws including, without limitation, nuclear, chemical, or biological weapons proliferation. 
-
-Oracle Employees: Under no circumstances are Oracle Employees authorized to download software for the purpose of distributing it to customers. Oracle products are available to employees for internal use or demonstration purposes only. In keeping with Oracle''s trade compliance obligations under U.S. and applicable multilateral law, failure to comply with this policy could result in disciplinary action up to and including termination. 
-
-Note: You are bound by the Oracle Technology Network ("OTN") License Agreement terms. The OTN License Agreement terms also apply to all updates you receive under your Technology Track subscription. 
-
-The OTN License Agreement terms below supercede any shrinkwrap license on the OTN Technology Track software CDs and previous OTN License terms (including the Oracle Program License as modified by the OTN Program Use Certificate). 
-
-Oracle Technology Network Development License Agreement
-"We," "us," and "our" refers to Oracle America, Inc., for and on behalf of itself and its subsidiaries and affiliates under common control. "You" and "your" refers to the individual or entity that wishes to use the programs from Oracle. "Programs" refers to the Oracle software product you wish to download and use and program documentation. "License" refers to your right to use the programs under the terms of this agreement. This agreement is governed by the substantive and procedural laws of California. You and Oracle agree to submit to the exclusive jurisdiction of, and venue in, the courts of San Francisco, San Mateo, or Santa Clara counties in California in any dispute arising out of or relating to this agreement. 
-
-We are willing to license the programs to you only upon the condition that you accept all of the terms contained in this agreement. Read the terms carefully and select the "Accept License Agreement" button to confirm your acceptance. If you are not willing to be bound by these terms, select the "Decline License Agreement" button and the registration process will not continue. 
-
-LICENSE RIGHTS 
-We grant you a nonexclusive, nontransferable limited license to use the programs only for the purpose of developing, testing, prototyping and demonstrating your application, and not for any other purpose. If you use the application you develop under this license for any internal data processing or for any commercial or production purposes, or you want to use the programs for any purpose other than as permitted under this agreement, you must obtain a production release version of the program by contacting us or an Oracle reseller to obtain the appropriate license. You acknowledge that we may not produce a production release version of the program and any development efforts undertaken by you are at your own risk. We may audit your use of the programs. Program documentation, if available, may accessed online at http://www.oracle.com/technetwork/documentation/index.html.
-
-Ownership and Restrictions We retain all ownership and intellectual property rights in the programs. The programs may be installed on one computer only, and used by one person in the operating environment identified by us. You may make one copy of the programs for backup purposes. 
-
-You may not: 
-- use the programs for your own internal data processing or for any commercial or production purposes, or use the programs for any purpose except the development of your application; 
-- use the application you develop with the programs for any internal data processing or commercial or production purposes without securing an appropriate license from us; 
-- continue to develop your application after you have used it for any internal data processing, commercial or production purpose without securing an appropriate license from us, or an Oracle reseller; 
-- remove or modify any program markings or any notice of our proprietary rights; 
-- make the programs available in any manner to any third party; 
-- use the programs to provide third party training; 
-- assign this agreement or give or transfer the programs or an interest in them to another individual or entity; - cause or permit reverse engineering (unless required by law for interoperability), disassembly or decompilation of the programs; 
-- disclose results of any program benchmark tests without our prior consent. 
-
-Export 
-You agree that U.S. export control laws and other applicable export and import laws govern your use of the programs, including technical data; additional information can be found on Oracle''s Global Trade Compliance web site located at http://www.oracle.com/products/export/index.html?content.html. You agree that neither the programs nor any direct product thereof will be exported, directly, or indirectly, in violation of these laws, or will be used for any purpose prohibited by these laws including, without limitation, nuclear, chemical, or biological weapons proliferation. 
-
-Disclaimer of Warranty and Exclusive Remedies 
-THE PROGRAMS ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. WE FURTHER DISCLAIM ALL WARRANTIES, EXPRESS AND IMPLIED, INCLUDING WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT. 
-
-IN NO EVENT SHALL WE BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, PUNITIVE OR CONSEQUENTIAL DAMAGES, OR DAMAGES FOR LOSS OF PROFITS, REVENUE, DATA OR DATA USE, INCURRED BY YOU OR ANY THIRD PARTY, WHETHER IN AN ACTION IN CONTRACT OR TORT, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. OUR ENTIRE LIABILITY FOR DAMAGES HEREUNDER SHALL IN NO EVENT EXCEED ONE THOUSAND DOLLARS (U.S. $1,000). 
-
-Trial Programs Included With Orders 
-We may include additional programs with an order which may be used for trial purposes only. You will have 30 days from the delivery date to evaluate these programs. Any use of these programs after the 30 day trial period requires you to obtain the applicable license. Programs licensed for trial purposes are provided "as is" and we do not provide technical support or any warranties for these programs.
-
-No Technical Support 
-Our technical support organization will not provide technical support, phone support, or updates to you for the programs licensed under this agreement. 
-
-End of Agreement 
-You may terminate this agreement by destroying all copies of the programs. We have the right to terminate your right to use the programs if you fail to comply with any of the terms of this agreement, in which case you shall destroy all copies of the programs. 
-
-Relationship Between the Parties 
-The relationship between you and us is that of licensee/licensor. Neither party will represent that it has any authority to assume or create any obligation, express or implied, on behalf of the other party, nor to represent the other party as agent, employee, franchisee, or in any other capacity. Nothing in this agreement shall be construed to limit either party''s right to independently develop or distribute software that is functionally similar to the other party''s products, so long as proprietary information of the other party is not included in such software. 
-
-Open Source 
-"Open Source" software - software available without charge for use, modification and distribution - is often licensed under terms that require the user to make the user''s modifications to the Open Source software or any software that the user ''combines'' with the Open Source software freely available in source code form. If you use Open Source software in conjunction with the programs, you must ensure that your use does not: (i) create, or purport to create, obligations of us with respect to the Oracle programs; or (ii) grant, or purport to grant, to any third party any rights to or immunities under our intellectual property or proprietary rights in the Oracle programs. For example, you may not develop a software program using an Oracle program and an Open Source program where such use results in a program file(s) that contains code from both the Oracle program and the Open Source program (including without limitation libraries) if the Open Source program is licensed under a license that requires any "modifications" be made freely available. You also may not combine the Oracle program with programs licensed under the GNU General Public License ("GPL") in any manner that could cause, or could be interpreted or asserted to cause, the Oracle program or any modifications thereto to become subject to the terms of the GPL. 
-
-Entire Agreement 
-You agree that this agreement is the complete agreement for the programs and licenses, and this agreement supersedes all prior or contemporaneous agreements or representations. If any term of this agreement is found to be invalid or unenforceable, the remaining provisions will remain effective. 
-
-Last updated: 01/24/09 
-
-Should you have any questions concerning this License Agreement, or if you desire to contact Oracle for any reason, please write: 
-Oracle America, Inc. 
-500 Oracle Parkway, 
-Redwood City, CA 94065', 'http://www.oracle.com/technetwork/testcontent/standard-license-088383.html', NULL, NULL, NULL, 'Oracle Technology Network Developer License Terms', NULL, NULL, NULL, '', NULL, false, false, false, 'da18dd97eb62940ac6efa3e54b44897d', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (303, 'RedHat-EULA', 'LICENSE AGREEMENT
-RED HAT® ENTERPRISE LINUX®
-AND RED HAT® APPLICATIONS
-
-This end user license agreement ("EULA") governs the use of any of the versions of Red Hat Enterprise Linux, any Red Hat Applications (as set forth at www.redhat.com/licenses/products), and any related updates, source code, appearance, structure and organization (the "Programs"), regardless of the delivery mechanism.
-
-1. License Grant. Subject to the following terms, Red Hat, Inc. ("Red Hat") grants to you ("User") a perpetual, worldwide license to the Programs pursuant to the GNU General Public License v.2. The Programs are either a modular operating system or an application consisting of hundreds of software components. With the exception of certain image files identified in Section 2 below, the license agreement for each software component is located in the software component''s source code and permits User to run, copy, modify, and redistribute (subject to certain obligations in some cases) the software component, in both source code and binary code forms. This EULA pertains solely to the Programs and does not limit User''s rights under, or grant User rights that supersede, the license terms of any particular component.
-
-2. Intellectual Property Rights. The Programs and each of their components are owned by Red Hat and others and are protected under copyright law and under other laws as applicable. Title to the Programs and any component, or to any copy, modification, or merged portion shall remain with the aforementioned, subject to the applicable license. The "Red Hat" trademark and the "Shadowman" logo are registered trademarks of Red Hat in the U.S. and other countries. This EULA does not permit User to distribute the Programs or their components using Red Hat''s trademarks, regardless of whether the copy has been modified. User should read the information found at http://www.redhat.com/about/corporate/trademark/ before distributing a copy of the Programs. User may make a commercial redistribution of the Programs only if, (a) a separate agreement with Red Hat authorizing such commercial redistribution is executed or other written permission is granted by Red Hat or (b) User modifies any files identified as "REDHAT-LOGOS" to remove and replace all images containing the "Red Hat" trademark or the "Shadowman" logo. Merely deleting these files may corrupt the Programs.
-
-3. Limited Warranty. Except as specifically stated in this Section 3, a separate agreement with Red Hat, or a license for a particular component, to the maximum extent permitted under applicable law, the Programs and the components are provided and licensed "as is" without warranty of any kind, expressed or implied, including the implied warranties of merchantability, non-infringement or fitness for a particular purpose. Red Hat warrants that the media on which the Programs and the components are furnished will be free from defects in materials and manufacture under normal use for a period of 30 days from the date of delivery to User. Red Hat does not warrant that the functions contained in the Programs will meet User''s requirements or that the operation of the Programs will be entirely error free, appear precisely as described in the accompanying documentation, or comply with regulatory requirements. This warranty extends only to the party that purchases services pertaining to the Programs from Red Hat or a Red Hat authorized distributor.
-
-4. Limitation of Remedies and Liability. To the maximum extent permitted by applicable law, User''s exclusive remedy under this EULA is to return any defective media within 30 days of delivery along with a copy of User''s payment receipt and Red Hat, at its option, will replace it or refund the money paid by User for the media. To the maximum extent permitted under applicable law, neither Red Hat, any Red Hat authorized distributor, nor the licensor of any component provided to User under this EULA will be liable to User for any incidental or consequential damages, including lost profits or lost savings arising out of the use or inability to use the Programs or any component, even if Red Hat, such authorized distributor or licensor has been advised of the possibility of such damages. In no event shall Red Hat''s liability, an authorized distributor''s liability or the liability of the licensor of a component provided to User under this EULA exceed the amount that User paid to Red Hat under this EULA during the twelve months preceding the action.
-
-5. Export Control. As required by the laws of the United States and other countries, User represents and warrants that it: (a) understands that the Programs and their components may be subject to export controls under the U.S. Commerce Department''s Export Administration Regulations ("EAR"); (b) is not located in a prohibited destination country under the EAR or U.S. sanctions regulations (currently Cuba, Iran, Iraq, North Korea, Sudan and Syria, subject to change as posted by the United States government); (c) will not export, re-export, or transfer the Programs to any prohibited destination or persons or entities on the U.S. Bureau of Industry and Security Denied Parties List or Entity List, or the U.S. Office of Foreign Assets Control list of Specially Designated Nationals and Blocked Persons, or any similar lists maintained by other countries, without the necessary export license(s) or authorizations(s); (d) will not use or transfer the Programs for use in connection with any nuclear, chemical or biological weapons, missile technology, or military end-uses where prohibited by an applicable arms embargo, unless authorized by the relevant government agency by regulation or specific license; (e) understands and agrees that if it is in the United States and exports or transfers the Programs to eligible end users, it will, to the extent required by EAR Section 740.17(e), submit semi-annual reports to the Commerce Department''s Bureau of Industry and Security, which include the name and address (including country) of each transferee; and (f) understands that countries including the United States may restrict the import, use, or export of encryption products (which may include the Programs and the components) and agrees that it shall be solely responsible for compliance with any such import, use, or export restrictions.
-
-6. Third Party Programs. Red Hat may distribute third party software programs with the Programs that are not part of the Programs. These third party programs are not required to run the Programs, are provided as a convenience to User, and are subject to their own license terms. The license terms either accompany the third party software programs or can be viewed at http://www.redhat.com/licenses/thirdparty/eula.html. If User does not agree to abide by the applicable license terms for the third party software programs, then User may not install them. If User wishes to install the third party software programs on more than one system or transfer the third party software programs to another party, then User must contact the licensor of the applicable third party software programs.
-
-7. General. If any provision of this agreement is held to be unenforceable, that shall not affect the enforceability of the remaining provisions. This agreement shall be governed by the laws of the State of New York and of the United States, without regard to any conflict of laws provisions. The rights and obligations of the parties to this EULA shall not be governed by the United Nations Convention on the International Sale of Goods.', 'http://www.redhat.com/licenses/rhel_rha_eula.html', NULL, NULL, NULL, 'RedHat EULA', NULL, NULL, NULL, '', NULL, false, false, false, '06c76bc5bab85dd388f43febb3451220', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (491, 'Flora', 'Flora License 
 
 Version 1.1, April, 2013
@@ -40591,11 +40337,635 @@ Bison Exception
 As a special exception, you may create a larger work that contains part or all of the Bison parser skeleton and distribute that work under terms of your choice, so long as that work isn''t itself a parser generator using the skeleton or a modified version thereof as a parser skeleton. Alternatively, if you modify or redistribute the parser skeleton itself, you may (at your option) remove this special exception, which will cause the skeleton and the resulting Bison output files to be licensed under the GNU General Public License without this special exception. 
 
 This special exception was added by the Free Software Foundation in version 2.2 of Bison.', '', NULL, NULL, NULL, 'GNU General Public License v2.0+ w/Bison exception', NULL, NULL, NULL, '', NULL, false, true, false, '14180505dc95d59e181ff0f7deb35579', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (504, 'GPL', 'GPL is referenced without a version number. Please look up GPL in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'GNU General Public License', NULL, NULL, NULL, '', NULL, false, false, false, '336c692e88117f051e16e8c67af502a9', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (503, 'GPL-3.0+-with-bison-exception', 'insert GPL v3+ text here 
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (320, 'Naumen', 'NAUMEN Public License
+This software is Copyright (c) NAUMEN (tm) and Contributors.
+All rights reserved.
 
-Bison Exception 
+Redistribution and use in source and binary forms, with or
+without modification, are permitted provided that the following
+conditions are met:
 
-As a special exception, you may create a larger work that contains part or all of the Bison parser skeleton and distribute that work under terms of your choice, so long as that work isn''t itself a parser generator using the skeleton or a modified version thereof as a parser skeleton. Alternatively, if you modify or redistribute the parser skeleton itself, you may (at your option) remove this special exception, which will cause the skeleton and the resulting Bison output files to be licensed under the GNU General Public License without this special exception. 
+1. Redistributions in source code must retain the above
+copyright notice, this list of conditions, and the following
+disclaimer.
 
-This special exception was added by the Free Software Foundation in version 2.2 of Bison.', '', NULL, NULL, NULL, 'GNU General Public License v3.0+ w/Bison exception', NULL, NULL, NULL, '', NULL, false, true, false, '3e8f2aa0d5021f314afa6885eb3d3360', 1);
+2. Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions, and the following
+disclaimer in the documentation and/or other materials
+provided with the distribution.
+
+3. The name NAUMEN (tm) must not be used to
+endorse or promote products derived from this software without prior
+written permission from NAUMEN.
+
+4. The right to distribute this software or to use it for any
+purpose does not give you the right to use Servicemarks (sm)
+or Trademarks (tm) of NAUMEN.
+
+5. If any files originating from NAUMEN or Contributors are modified, you must
+cause the modified files to carry prominent notices stating
+that you changed the files and the date of any change.
+
+Disclaimer:
+
+THIS SOFTWARE IS PROVIDED BY NAUMEN "AS IS" AND ANY EXPRESSED
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NAUMEN
+OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+This software consists of contributions made by NAUMEN
+and Contributors. Specific attributions are listed in the
+accompanying credits file.', 'http://www.opensource.org/licenses/naumen.php', NULL, NULL, NULL, 'Naumen Public License', NULL, NULL, NULL, '', NULL, false, false, false, '19fb518675cb6fb01d4724c2667f16c6', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (331, 'Nvidia-EULA', 'License For Customer Use of NVIDIA Software 
+ 
+IMPORTANT NOTICE -- READ CAREFULLY: This License For Customer Use of NVIDIA Software ("LICENSE") is the agreement which governs use of the software of NVIDIA Corporation and its subsidiaries (“NVIDIA”) downloadable herefrom, including computer software and associated printed materials ("SOFTWARE"). By downloading, installing, copying, or otherwise using the SOFTWARE, you agree to be bound by the terms of this LICENSE. If you do not agree to the terms of this LICENSE, do not download the SOFTWARE.
+
+RECITALS
+
+Use of NVIDIA''s products requires three elements: the SOFTWARE, the hardware on a graphics controller board, and a personal computer. The SOFTWARE is protected by copyright laws and international copyright treaties, as well as other intellectual property laws and treaties. The SOFTWARE is not sold, and instead is only licensed for use, strictly in accordance with this document. The hardware is protected by various patents, and is sold, but this LICENSE does not cover that sale, since it may not necessarily be sold as a package with the SOFTWARE. This LICENSE sets forth the terms and conditions of the SOFTWARE LICENSE only.
+
+1. DEFINITIONS
+
+1.1 Customer. Customer means the entity or individual that downloads the SOFTWARE.
+
+2. GRANT OF LICENSE
+
+2.1 Rights and Limitations of Grant. NVIDIA hereby grants Customer the following non-exclusive, non-transferable right to use the SOFTWARE, with the following limitations:
+
+2.1.1 Rights. Customer may install and use one copy of the SOFTWARE on a single computer, and except for making one back-up copy of the Software, may not otherwise copy the SOFTWARE. This LICENSE of SOFTWARE may not be shared or used concurrently on different computers.
+
+2.1.2 Linux/FreeBSD/OpenSolaris Exception. Notwithstanding the foregoing terms of Section 2.1.1, SOFTWARE designed exclusively for use on the Linux or FreeBSD operating systems, or other operating systems derived from the source code to these operating systems, may be copied and redistributed, provided that the binary files thereof are not modified in any way (except for unzipping of compressed files).
+
+2.1.3 Limitations.
+
+No Reverse Engineering. Customer may not reverse engineer, decompile, or disassemble the SOFTWARE, nor attempt in any other manner to obtain the source code.
+
+No Separation of Components. The SOFTWARE is licensed as a single product. Its component parts may not be separated for use on more than one computer, nor otherwise used separately from the other parts.
+
+No Rental. Customer may not rent or lease the SOFTWARE to someone else.
+
+3. TERMINATION
+
+This LICENSE will automatically terminate if Customer fails to comply with any of the terms and conditions hereof. In such event, Customer must destroy all copies of the SOFTWARE and all of its component parts.
+
+Defensive Suspension. If Customer commences or participates in any legal proceeding against NVIDIA, then NVIDIA may, in its sole discretion, suspend or terminate all license grants and any other rights provided under this LICENSE during the pendency of such legal proceedings.
+
+4. COPYRIGHT
+
+All title and copyrights in and to the SOFTWARE (including but not limited to all images, photographs, animations, video, audio, music, text, and other information incorporated into the SOFTWARE), the accompanying printed materials, and any copies of the SOFTWARE, are owned by NVIDIA, or its suppliers. The SOFTWARE is protected by copyright laws and international treaty provisions. Accordingly, Customer is required to treat the SOFTWARE like any other copyrighted material, except as otherwise allowed pursuant to this LICENSE and that it may make one copy of the SOFTWARE solely for backup or archive purposes.
+
+5. APPLICABLE LAW
+
+This LICENSE shall be deemed to have been made in, and shall be construed pursuant to, the laws of the State of California. The United Nations Convention on Contracts for the International Sale of Goods is specifically disclaimed.
+
+6. DISCLAIMER OF WARRANTIES AND LIMITATION ON LIABILITY
+
+6.1 No Warranties. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED "AS IS" AND NVIDIA AND ITS SUPPLIERS DISCLAIM ALL WARRANTIES, EITHERWHETHER EXPRESS OR, IMPLIED, OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND, FITNESS FOR A PARTICULAR PURPOSE. , TITLE, AND NON-INFRINGEMENT. Without limiting the foregoing, you are solely responsible for determining and verifying that the SOFTWARE that you obtain and install is the appropriate version for your model of graphics controller board, operating system, and computer hardware.
+
+6.2 No Liability for Consequential Damages. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL NVIDIA OR ITS SUPPLIERS BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, LOSS OF DATA, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE, EVEN IF NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+7. MISCELLANEOUS
+
+If any provision of this LICENSE is inconsistent with, or cannot be fully enforced under, the law, such provision will be construed as limited to the extent necessary to be consistent with and fully enforceable under the law. This LICENSE is the final, complete and exclusive agreement between the parties relating to the subject matter hereof, and supersedes all prior or contemporaneous understandings and agreements relating to such subject matter, whether oral or written. This LICENSE may only be modified in writing signed by an authorized officer of NVIDIA.  Customer agrees that it will not ship, transfer or export the SOFTWARE into any country, or use the SOFTWARE in any manner, prohibited by the United States Bureau of Industry and Security or any export laws, restrictions or regulations.', 'http://www.nvidia.com/object/nv_swlicense.html', NULL, NULL, NULL, 'NVIDIA EULA', NULL, NULL, NULL, '', NULL, false, false, false, 'aa4775fccf03e8d5a14cae0f24072fc7', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (300, 'Oracle-Dev', 'Oracle Technology Network Developer License Terms 
+
+Export Controls on the Programs 
+Selecting the "Accept License Agreement" button is a confirmation of your agreement that you comply, now and during the trial term, with each of the following statements: 
+
+-You are not a citizen, national, or resident of, and are not under control of, the government of Cuba, Iran, Sudan, Libya, North Korea, Syria, nor any country to which the United States has prohibited export. 
+-You will not download or otherwise export or re-export the Programs, directly or indirectly, to the above mentioned countries nor to citizens, nationals or residents of those countries. 
+-You are not listed on the United States Department of Treasury lists of Specially Designated Nationals, Specially Designated Terrorists, and Specially Designated Narcotic Traffickers, nor are you listed on the United States Department of Commerce Table of Denial Orders. 
+
+You will not download or otherwise export or re-export the Programs, directly or indirectly, to persons on the above mentioned lists. 
+
+You will not use the Programs for, and will not allow the Programs to be used for, any purposes prohibited by United States law, including, without limitation, for the development, design, manufacture or production of nuclear, chemical or biological weapons of mass destruction. 
+
+EXPORT RESTRICTIONS 
+You agree that U.S. export control laws and other applicable export and import laws govern your use of the programs, including technical data; additional information can be found on Oracle®''s Global Trade Compliance web site (http://www.oracle.com/products/export). 
+
+You agree that neither the programs nor any direct product thereof will be exported, directly, or indirectly, in violation of these laws, or will be used for any purpose prohibited by these laws including, without limitation, nuclear, chemical, or biological weapons proliferation. 
+
+Oracle Employees: Under no circumstances are Oracle Employees authorized to download software for the purpose of distributing it to customers. Oracle products are available to employees for internal use or demonstration purposes only. In keeping with Oracle''s trade compliance obligations under U.S. and applicable multilateral law, failure to comply with this policy could result in disciplinary action up to and including termination. 
+
+Note: You are bound by the Oracle Technology Network ("OTN") License Agreement terms. The OTN License Agreement terms also apply to all updates you receive under your Technology Track subscription. 
+
+The OTN License Agreement terms below supercede any shrinkwrap license on the OTN Technology Track software CDs and previous OTN License terms (including the Oracle Program License as modified by the OTN Program Use Certificate). 
+
+Oracle Technology Network Development License Agreement
+"We," "us," and "our" refers to Oracle America, Inc., for and on behalf of itself and its subsidiaries and affiliates under common control. "You" and "your" refers to the individual or entity that wishes to use the programs from Oracle. "Programs" refers to the Oracle software product you wish to download and use and program documentation. "License" refers to your right to use the programs under the terms of this agreement. This agreement is governed by the substantive and procedural laws of California. You and Oracle agree to submit to the exclusive jurisdiction of, and venue in, the courts of San Francisco, San Mateo, or Santa Clara counties in California in any dispute arising out of or relating to this agreement. 
+
+We are willing to license the programs to you only upon the condition that you accept all of the terms contained in this agreement. Read the terms carefully and select the "Accept License Agreement" button to confirm your acceptance. If you are not willing to be bound by these terms, select the "Decline License Agreement" button and the registration process will not continue. 
+
+LICENSE RIGHTS 
+We grant you a nonexclusive, nontransferable limited license to use the programs only for the purpose of developing, testing, prototyping and demonstrating your application, and not for any other purpose. If you use the application you develop under this license for any internal data processing or for any commercial or production purposes, or you want to use the programs for any purpose other than as permitted under this agreement, you must obtain a production release version of the program by contacting us or an Oracle reseller to obtain the appropriate license. You acknowledge that we may not produce a production release version of the program and any development efforts undertaken by you are at your own risk. We may audit your use of the programs. Program documentation, if available, may accessed online at http://www.oracle.com/technetwork/documentation/index.html.
+
+Ownership and Restrictions We retain all ownership and intellectual property rights in the programs. The programs may be installed on one computer only, and used by one person in the operating environment identified by us. You may make one copy of the programs for backup purposes. 
+
+You may not: 
+- use the programs for your own internal data processing or for any commercial or production purposes, or use the programs for any purpose except the development of your application; 
+- use the application you develop with the programs for any internal data processing or commercial or production purposes without securing an appropriate license from us; 
+- continue to develop your application after you have used it for any internal data processing, commercial or production purpose without securing an appropriate license from us, or an Oracle reseller; 
+- remove or modify any program markings or any notice of our proprietary rights; 
+- make the programs available in any manner to any third party; 
+- use the programs to provide third party training; 
+- assign this agreement or give or transfer the programs or an interest in them to another individual or entity; - cause or permit reverse engineering (unless required by law for interoperability), disassembly or decompilation of the programs; 
+- disclose results of any program benchmark tests without our prior consent. 
+
+Export 
+You agree that U.S. export control laws and other applicable export and import laws govern your use of the programs, including technical data; additional information can be found on Oracle''s Global Trade Compliance web site located at http://www.oracle.com/products/export/index.html?content.html. You agree that neither the programs nor any direct product thereof will be exported, directly, or indirectly, in violation of these laws, or will be used for any purpose prohibited by these laws including, without limitation, nuclear, chemical, or biological weapons proliferation. 
+
+Disclaimer of Warranty and Exclusive Remedies 
+THE PROGRAMS ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. WE FURTHER DISCLAIM ALL WARRANTIES, EXPRESS AND IMPLIED, INCLUDING WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT. 
+
+IN NO EVENT SHALL WE BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, PUNITIVE OR CONSEQUENTIAL DAMAGES, OR DAMAGES FOR LOSS OF PROFITS, REVENUE, DATA OR DATA USE, INCURRED BY YOU OR ANY THIRD PARTY, WHETHER IN AN ACTION IN CONTRACT OR TORT, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. OUR ENTIRE LIABILITY FOR DAMAGES HEREUNDER SHALL IN NO EVENT EXCEED ONE THOUSAND DOLLARS (U.S. $1,000). 
+
+Trial Programs Included With Orders 
+We may include additional programs with an order which may be used for trial purposes only. You will have 30 days from the delivery date to evaluate these programs. Any use of these programs after the 30 day trial period requires you to obtain the applicable license. Programs licensed for trial purposes are provided "as is" and we do not provide technical support or any warranties for these programs.
+
+No Technical Support 
+Our technical support organization will not provide technical support, phone support, or updates to you for the programs licensed under this agreement. 
+
+End of Agreement 
+You may terminate this agreement by destroying all copies of the programs. We have the right to terminate your right to use the programs if you fail to comply with any of the terms of this agreement, in which case you shall destroy all copies of the programs. 
+
+Relationship Between the Parties 
+The relationship between you and us is that of licensee/licensor. Neither party will represent that it has any authority to assume or create any obligation, express or implied, on behalf of the other party, nor to represent the other party as agent, employee, franchisee, or in any other capacity. Nothing in this agreement shall be construed to limit either party''s right to independently develop or distribute software that is functionally similar to the other party''s products, so long as proprietary information of the other party is not included in such software. 
+
+Open Source 
+"Open Source" software - software available without charge for use, modification and distribution - is often licensed under terms that require the user to make the user''s modifications to the Open Source software or any software that the user ''combines'' with the Open Source software freely available in source code form. If you use Open Source software in conjunction with the programs, you must ensure that your use does not: (i) create, or purport to create, obligations of us with respect to the Oracle programs; or (ii) grant, or purport to grant, to any third party any rights to or immunities under our intellectual property or proprietary rights in the Oracle programs. For example, you may not develop a software program using an Oracle program and an Open Source program where such use results in a program file(s) that contains code from both the Oracle program and the Open Source program (including without limitation libraries) if the Open Source program is licensed under a license that requires any "modifications" be made freely available. You also may not combine the Oracle program with programs licensed under the GNU General Public License ("GPL") in any manner that could cause, or could be interpreted or asserted to cause, the Oracle program or any modifications thereto to become subject to the terms of the GPL. 
+
+Entire Agreement 
+You agree that this agreement is the complete agreement for the programs and licenses, and this agreement supersedes all prior or contemporaneous agreements or representations. If any term of this agreement is found to be invalid or unenforceable, the remaining provisions will remain effective. 
+
+Last updated: 01/24/09 
+
+Should you have any questions concerning this License Agreement, or if you desire to contact Oracle for any reason, please write: 
+Oracle America, Inc. 
+500 Oracle Parkway, 
+Redwood City, CA 94065', 'http://www.oracle.com/technetwork/testcontent/standard-license-088383.html', NULL, NULL, NULL, 'Oracle Technology Network Developer License Terms', NULL, NULL, NULL, '', NULL, false, false, false, 'da18dd97eb62940ac6efa3e54b44897d', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (303, 'RedHat-EULA', 'LICENSE AGREEMENT
+RED HAT® ENTERPRISE LINUX®
+AND RED HAT® APPLICATIONS
+
+This end user license agreement ("EULA") governs the use of any of the versions of Red Hat Enterprise Linux, any Red Hat Applications (as set forth at www.redhat.com/licenses/products), and any related updates, source code, appearance, structure and organization (the "Programs"), regardless of the delivery mechanism.
+
+1. License Grant. Subject to the following terms, Red Hat, Inc. ("Red Hat") grants to you ("User") a perpetual, worldwide license to the Programs pursuant to the GNU General Public License v.2. The Programs are either a modular operating system or an application consisting of hundreds of software components. With the exception of certain image files identified in Section 2 below, the license agreement for each software component is located in the software component''s source code and permits User to run, copy, modify, and redistribute (subject to certain obligations in some cases) the software component, in both source code and binary code forms. This EULA pertains solely to the Programs and does not limit User''s rights under, or grant User rights that supersede, the license terms of any particular component.
+
+2. Intellectual Property Rights. The Programs and each of their components are owned by Red Hat and others and are protected under copyright law and under other laws as applicable. Title to the Programs and any component, or to any copy, modification, or merged portion shall remain with the aforementioned, subject to the applicable license. The "Red Hat" trademark and the "Shadowman" logo are registered trademarks of Red Hat in the U.S. and other countries. This EULA does not permit User to distribute the Programs or their components using Red Hat''s trademarks, regardless of whether the copy has been modified. User should read the information found at http://www.redhat.com/about/corporate/trademark/ before distributing a copy of the Programs. User may make a commercial redistribution of the Programs only if, (a) a separate agreement with Red Hat authorizing such commercial redistribution is executed or other written permission is granted by Red Hat or (b) User modifies any files identified as "REDHAT-LOGOS" to remove and replace all images containing the "Red Hat" trademark or the "Shadowman" logo. Merely deleting these files may corrupt the Programs.
+
+3. Limited Warranty. Except as specifically stated in this Section 3, a separate agreement with Red Hat, or a license for a particular component, to the maximum extent permitted under applicable law, the Programs and the components are provided and licensed "as is" without warranty of any kind, expressed or implied, including the implied warranties of merchantability, non-infringement or fitness for a particular purpose. Red Hat warrants that the media on which the Programs and the components are furnished will be free from defects in materials and manufacture under normal use for a period of 30 days from the date of delivery to User. Red Hat does not warrant that the functions contained in the Programs will meet User''s requirements or that the operation of the Programs will be entirely error free, appear precisely as described in the accompanying documentation, or comply with regulatory requirements. This warranty extends only to the party that purchases services pertaining to the Programs from Red Hat or a Red Hat authorized distributor.
+
+4. Limitation of Remedies and Liability. To the maximum extent permitted by applicable law, User''s exclusive remedy under this EULA is to return any defective media within 30 days of delivery along with a copy of User''s payment receipt and Red Hat, at its option, will replace it or refund the money paid by User for the media. To the maximum extent permitted under applicable law, neither Red Hat, any Red Hat authorized distributor, nor the licensor of any component provided to User under this EULA will be liable to User for any incidental or consequential damages, including lost profits or lost savings arising out of the use or inability to use the Programs or any component, even if Red Hat, such authorized distributor or licensor has been advised of the possibility of such damages. In no event shall Red Hat''s liability, an authorized distributor''s liability or the liability of the licensor of a component provided to User under this EULA exceed the amount that User paid to Red Hat under this EULA during the twelve months preceding the action.
+
+5. Export Control. As required by the laws of the United States and other countries, User represents and warrants that it: (a) understands that the Programs and their components may be subject to export controls under the U.S. Commerce Department''s Export Administration Regulations ("EAR"); (b) is not located in a prohibited destination country under the EAR or U.S. sanctions regulations (currently Cuba, Iran, Iraq, North Korea, Sudan and Syria, subject to change as posted by the United States government); (c) will not export, re-export, or transfer the Programs to any prohibited destination or persons or entities on the U.S. Bureau of Industry and Security Denied Parties List or Entity List, or the U.S. Office of Foreign Assets Control list of Specially Designated Nationals and Blocked Persons, or any similar lists maintained by other countries, without the necessary export license(s) or authorizations(s); (d) will not use or transfer the Programs for use in connection with any nuclear, chemical or biological weapons, missile technology, or military end-uses where prohibited by an applicable arms embargo, unless authorized by the relevant government agency by regulation or specific license; (e) understands and agrees that if it is in the United States and exports or transfers the Programs to eligible end users, it will, to the extent required by EAR Section 740.17(e), submit semi-annual reports to the Commerce Department''s Bureau of Industry and Security, which include the name and address (including country) of each transferee; and (f) understands that countries including the United States may restrict the import, use, or export of encryption products (which may include the Programs and the components) and agrees that it shall be solely responsible for compliance with any such import, use, or export restrictions.
+
+6. Third Party Programs. Red Hat may distribute third party software programs with the Programs that are not part of the Programs. These third party programs are not required to run the Programs, are provided as a convenience to User, and are subject to their own license terms. The license terms either accompany the third party software programs or can be viewed at http://www.redhat.com/licenses/thirdparty/eula.html. If User does not agree to abide by the applicable license terms for the third party software programs, then User may not install them. If User wishes to install the third party software programs on more than one system or transfer the third party software programs to another party, then User must contact the licensor of the applicable third party software programs.
+
+7. General. If any provision of this agreement is held to be unenforceable, that shall not affect the enforceability of the remaining provisions. This agreement shall be governed by the laws of the State of New York and of the United States, without regard to any conflict of laws provisions. The rights and obligations of the parties to this EULA shall not be governed by the United Nations Convention on the International Sale of Goods.', 'http://www.redhat.com/licenses/rhel_rha_eula.html', NULL, NULL, NULL, 'RedHat EULA', NULL, NULL, NULL, '', NULL, false, false, false, '06c76bc5bab85dd388f43febb3451220', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel-EULA', 'Intel Open Source License 
+
+
+Copyright (c) 1996-2000 Intel Corporation All rights reserved. 
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
+•	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+•	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+•	Neither the name of the Intel Corporation nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE INTEL OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. EXPORT LAWS: THIS LICENSE ADDS NO RESTRICTIONS TO THE EXPORT LAWS OF YOUR JURISDICTION. It is licensee''s responsibility to comply with any export regulations applicable in licensee''s jurisdiction. Under CURRENT (May 2000) U.S. export regulations this software is eligible for export from the U.S. and can be downloaded by or otherwise exported or reexported worldwide EXCEPT to U.S. embargoed destinations which include Cuba, Iraq, Libya, North Korea, Iran, Syria, Sudan, Afghanistan and any other country to which the U.S. has embargoed goods and services.', 'http://opensource.org/licenses/Intel', NULL, NULL, NULL, 'Intel Open Source License', NULL, NULL, NULL, '', NULL, false, false, false, '273a6c7b3d192b2f6c368e706423b815', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (277, 'Pixware-EULA', 'XMLmind Spell Checker SDK License Agreement
+
+Version 1.3
+
+March 12, 2007
+
+IMPORTANT! Read the terms and conditions of this license agreement (hereafter "Agreement") carefully before using XMLmind Spell Checker SDK (hereafter "Software"). Use of the Software implies acceptance of this Agreement, and legally binds you and/or your company (hereafter "Licensee"), and Pixware SARL (hereafter "Licensor"), to the terms and conditions set forth below.
+
+1 Grant of License
+
+Subject to the terms and conditions of this Agreement, Licensor hereby grants to Licensee a non-exclusive and non-transferable license to install and use the Software on a Licensee''s host machine, to modify the Software, and to distribute some parts of the Software.
+
+1.1 Installation and use
+
+The Software may only be installed on a single host machine, however Licensee may uninstall the Software and reinstall it on a different host without notice to Licensor. The Software may not be remotely accessed from another machine.
+
+The Software may only be used by a single software developer, whose identity shall be registered by Licensee. Right to use the Software may be transferred from one developer to another in the same organization upon request to Licensor, however such transfers are limited to one every six months.
+
+1.2 Modification
+
+Licensee may modify and recompile the source code of all GUI components and examples included with the Software. Subject to prior notice to Licensor, Licensee may modify and recompile the source code of the core spell checker engine, however such a modification frees Licensor from any further technical support to Licensee.
+
+Licensee may modify and rebuild all dictionaries included with the Software.
+
+1.3 Distribution
+
+Licensee may distribute a copy of the binary class library and binary dictionary files, in original or modified form, along with any application, developed by Licensee, which integrates XMLmind Spell Checker. Licensee may not distribute any other part of the Software, in either modified or original form.
+
+Licensee shall include the following copyright notice: "XMLmind Spell Checker Copyright © 2002-2007 Pixware SARL", with every copy of any application, developed by Licensee, which integrates XMLmind Spell Checker. This copyright notice may be placed together with Licensee''s own copyright notices, or in any reasonably visible location in the packaging or documentation of the application.
+
+Licensee may not include the binary class library and binary dictionary files with any software product which is itself a development kit, a component or a library.
+
+2 Restrictions
+
+The Software is copyrighted and title to all copies is retained by Licensor. Licensee may not make copies of the Software, other than a single copy for archival purposes. Licensee may, for its internal use only, print copies of the documentation of the Software, in which event all proprietary rights notices on the Software shall be reproduced and applied. Except as stated in section 1, Licensee may not modify, decompile, or otherwise reverse engineer the Software.
+
+The Software is not designed or licensed for use in on-line control equipment in hazardous environments such as operation of nuclear facilities, aircraft navigation or control, or direct life support machines.
+
+The Software is confidential and proprietary information of Licensor. Licensee agrees to protect the Software from unauthorized use or disclosure.
+
+3 Warranty Disclaimer
+
+Licensor does not warrant that the Software will meet Licensee''s requirements or that the Software is error-free. Except as specified in this Agreement, Licensor expressly disclaims all warranties, express or implied, with respect to the Software, including, but not limited to, warranties of merchantability, fitness for a particular purpose or non-infringement.
+
+4 Limitation of Liability
+
+In no event shall Licensor be liable to Licensee or a third party for any lost revenue, profit or data, or for any indirect, special or consequential damages, however caused and regardless of theory of liability, arising out of the use of or inability to use the Software, even if Licensor has been advised of the possibility of such damages.
+
+5 Termination
+
+This license is effective from the date purchased by Licensee and is perpetual unless terminated by Licensee''s election or by breach of this Agreement. Licensee may terminate this license at any time by destroying all copies of the Software, including any documentation. This license will terminate immediately without notice from Licensor if Licensee fails to comply with any provision of this Agreement. Upon termination, Licensee must destroy all copies of the Software, including any documentation.
+
+6 Entirety
+
+This Agreement is the complete and exclusive statement of agreements between Licensee and Licensor relating to the Software. It supersedes all prior agreements and understandings, and prevails over any conflicting or additional terms of any quote, order, acknowledgement, or similar communication between the parties before or during the term of this Agreement. It may be modified only in writing signed by both parties.
+
+This Agreement is made under, shall be governed by and construed in accordance with the French law.', 'http://www.xmlmind.com/spellchecker/license_sc-sdk.html', NULL, NULL, NULL, 'XMLmind Spell Checker SDK License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '44b6167bb706ecbffb9685cdbf9cbc25', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (505, 'Open-PL-0.4', 'Can not find license text for Open-PL-0.4, please refer to Open-PL-1.0', '', NULL, NULL, NULL, 'Open Publication License v0.4', NULL, NULL, NULL, '', NULL, false, false, false, '4b5cd29eff51fa913f3b234c4344a051', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (506, 'OPL-style', 'according to the Open Public License, add some modifications', '', NULL, NULL, NULL, 'OPL-style', NULL, NULL, NULL, '', NULL, false, false, false, 'b553fc0bbd6e3eec625658868baf8006', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (507, 'No_license_found', 'Not find any license in the scanned file', '', NULL, NULL, NULL, 'No_license_found', NULL, NULL, NULL, '', NULL, false, false, false, 'd3f27628f4f07e377eed85223e747da0', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (508, 'Dual-license', 'Multi-licensing is the practice of distributing software under two or more different sets of terms and conditions. This may mean multiple different software licenses or sets of licenses. Prefixes may be used to indicate the number of licenses used, e.g. dual-licensed for software licensed under two different licenses.
+When software is multi-licensed, recipients can choose which terms under which they want to use or distribute the software. The distributor may or may not apply a fee to either option. The two usual motivations for multi-licensing are license compatibility and market segregation based business models.', '', NULL, NULL, NULL, 'Dual-license', NULL, NULL, NULL, '', NULL, false, false, false, '7cee64d8943af3ec21761814c2fd0c33', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (509, 'BSD-style', 'According to BSD license, add some modifications', '', NULL, NULL, NULL, 'BSD-style', NULL, NULL, NULL, '', NULL, false, false, false, '10215fc49d301bf3addf289bcad2b238', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (510, 'BSD', 'BSD is referenced without a version number. Please look up BSD in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'BSD', NULL, NULL, NULL, '', NULL, false, false, false, '7fd363ae5dfe05cb0d8cb0f20df6ed97', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (511, 'MIT-style', 'According to MIT license, add some modifications', '', NULL, NULL, NULL, 'MIT-style', NULL, NULL, NULL, '', NULL, false, false, false, '6786c4f5f3ba61ecad8d121a369f5294', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (512, 'Public-domain', 'Public domain software is software that is not copyrighted. If the source code is in the public domain, that is a special case of noncopylefted free software, which means that some copies or modified versions may not be free at all.
+
+In some cases, an executable program can be in the public domain but the source code is not available. This is not free software, because free software requires accessibility of source code. Meanwhile, most free software is not in the public domain; it is copyrighted, and the copyright holders have legally given permission for everyone to use it in freedom, using a free software license.
+
+Sometimes people use the term “public domain” in a loose fashion to mean “free” or “available gratis.” However, “public domain” is a legal term and means, precisely, “not copyrighted”. For clarity, we recommend using “public domain” for that meaning only, and using other terms to convey the other meanings.
+
+Under the Berne Convention, which most countries have signed, anything written down is automatically copyrighted. This includes programs. Therefore, if you want a program you have written to be in the public domain, you must take some legal steps to disclaim the copyright on it; otherwise, the program is copyrighted.', 'https://www.gnu.org/philosophy/categories.html#publicdomainsoftware', NULL, NULL, NULL, 'Public domain software', NULL, NULL, NULL, '', NULL, false, false, false, '36ef664ecb655e91bf32c72773ce05d5', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (513, 'LGPL', 'LGPL is referenced without a version number. Please look up LGPL in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'GNU Lesser General Public License', NULL, NULL, NULL, '', NULL, false, false, false, '6991d4409789d1fac3a4b85f118236b7', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (514, 'CECILL', 'CECILL is referenced without a version number. Please look up CECILL in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'CeCILL Free Software License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '81724ed1004549a4538ec846b1dae80e', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (515, 'CDDL', 'CDDL is referenced without a version number. Please look up CDDL in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'Common Development and Distribution License', NULL, NULL, NULL, '', NULL, false, false, false, '9071d04d63eb6b0982576c3f81b8213c', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (516, 'CC-BY', 'CC-BY is referenced without a version number. Please look up CC-BY in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'Creative Commons Attribution', NULL, NULL, NULL, '', NULL, false, false, false, 'eddf2220903affb864c33b119e1df09f', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (517, 'JSON', 'Copyright (c) 2002 JSON.org
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+The Software shall be used for Good, not Evil.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.', 'http://www.json.org/license.html', NULL, NULL, NULL, 'JSON License', NULL, NULL, NULL, '', NULL, false, false, false, 'dd25bda26981119aa090434d2bee8c57', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (518, 'Citrix', 'CITRIX® LICENSE AGREEMENT
+This is a legal agreement (“AGREEMENT”) between you, the Licensed User, and Citrix Systems, Inc., Citrix 
+Systems International GmbH, or Citrix Systems Asia Pacific Pty Ltd. Your location of receipt of this product or 
+feature release (both hereinafter “PRODUCT”) or technical support (hereinafter “SUPPORT”) determines the 
+providing entity hereunder (the applicable entity is hereinafter referred to as “CITRIX”). Citrix Systems, Inc., a 
+Delaware corporation, licenses this PRODUCT in the Americas and Japan and provides SUPPORT in the Americas. 
+Citrix Systems International GmbH, a Swiss company wholly owned by Citrix Systems, Inc., licenses this 
+PRODUCT and provides SUPPORT in Europe, the Middle East, and Africa, and licenses the PRODUCT in Asia 
+and the Pacific (excluding Japan). Citrix Systems Asia Pacific Pty Ltd. provides SUPPORT in Asia and the Pacific 
+(excluding Japan). Citrix Systems Japan KK provides SUPPORT in Japan. BY INSTALLING AND/OR USING 
+THE PRODUCT, YOU ARE AGREEING TO BE BOUND BY THE TERMS OF THIS AGREEMENT. IF YOU 
+DO NOT AGREE TO THE TERMS OF THIS AGREEMENT, DO NOT INSTALL AND/OR USE THE 
+PRODUCT.
+1. GRANT OF LICENSE.
+Definitions. “Xen Code” means the hypervisor code of the XenServer PRODUCT licensed by CITRIX under an 
+open source licensing model (that is, the GNU General Public License, BSD or a license similar to those 
+approved by the Open Source Initiative); “XenServer Technology” means the management console object code 
+and any other object code of the XenServer PRODUCT that is not Xen Code and that is licensed pursuant to 
+this AGREEMENT; and “SOFTWARE” means the PRODUCT and accompanying user documentation.
+Grant. This PRODUCT contains software that provides services on a physical server (“Licensed Server”). This 
+PRODUCT is activated by licenses (“Licenses”). Except as set forth herein, this PRODUCT is licensed for a 
+specific quantity of Licensed Servers. If you received this PRODUCT as a component of Citrix XenApp 
+Fundamentals, Advanced, Enterprise or Platinum Edition or if this PRODUCT is free XenServer, this 
+PRODUCT is licensed for an unlimited quantity of Licensed Servers. If you received this PRODUCT as a 
+component of Citrix XenDesktop VDI, Enterprise or Platinum Edition, this PRODUCT is licensed for an 
+unlimited quantity of Licensed Servers, but only for supporting virtual machines in the Citrix XenDesktop 
+solution environment, including those for virtual desktop images or infrastructure. Virtual machines used as 
+Citrix XenDesktop infrastructure servers may not be used for any other purpose. Licenses for other CITRIX 
+products (other than as specified for Citrix XenDesktop above) or other editions of the same PRODUCT may 
+not be used to increase the allowable use for the PRODUCT. CITRIX grants to you a worldwide, nonexclusive 
+right to use the PRODUCT on Licensed Servers. You may use the PRODUCT only on Licensed Servers and 
+only in accordance with the accompanying SOFTWARE user documentation. Notwithstanding anything set 
+forth in this AGREEMENT, your use of Xen Code shall in all ways be governed by the open source license 
+indicated as applicable to the code at www.citrix.com/eula. You may also access these License terms in the root 
+directory (/EULA) after installing the PRODUCT. CITRIX retains ownership of all XenServer Technology. 
+You will maintain the copyright notice and any other notices that appear on the PRODUCT.
+a. Perpetual License. If the SOFTWARE is “Perpetual License SOFTWARE,” the SOFTWARE is licensed 
+on a perpetual basis and includes the right to receive Subscription (as defined in Section 2 below).
+b. Annual PRODUCT. If the SOFTWARE is “Annual License SOFTWARE,” your license is for one (1) year 
+and includes the right to receive Updates for that period (but not under Subscription)). For the purposes of 
+this AGREEMENT, an Update shall mean a generally available release of the same SOFTWARE. Free 
+XenServer SOFTWARE is offered with an Annual License, but with NO RIGHT TO RECEIVE 
+UPDATES, NO WARRANTY, NOR INFRINGEMENT INDEMNIFICATION. To extend an Annual 
+License, you must install an additional Annual License prior to the expiration of the current Annual 
+License. Note that if a new Annual License is not installed, Annual License SOFTWARE disables itself 
+upon the expiration of the Annual License period. 
+c. Partner Demo. If this SOFTWARE is “Partner Demo SOFTWARE,” notwithstanding any term to the 
+contrary in this AGREEMENT, your License permits use only if you are a current CITRIX authorized 
+distributor or reseller and then only for demonstration, test, or evaluation purposes in support of your 
+customers. Note that Partner Demo SOFTWARE disables itself on the “time-out” date identified in the 
+SOFTWARE readme or documentation.
+d. Evaluation. If this SOFTWARE is “Evaluation SOFTWARE,” notwithstanding any term to the contrary in this AGREEMENT, your License permits use only for your internal demonstration, test, or evaluation 
+purposes. Note that Evaluation SOFTWARE disables itself on the “time-out” date identified in the 
+SOFTWARE readme or documentation.
+e. Developers’ Edition. If this SOFTWARE is “Developers’ Edition SOFTWARE,” notwithstanding any term 
+to the contrary in this AGREEMENT, your License permits use only for your internal development of 
+product(s) to operate in conjunction with the SOFTWARE. You receive no License hereunder to 
+incorporate the SOFTWARE or any portion thereof in your own product(s).
+f. Internal Use Only. If this SOFTWARE is “Internal Use Only SOFTWARE,” notwithstanding any term to 
+the contrary in this AGREEMENT, your License permits use only if you are a current CITRIX authorized 
+distributor or reseller and then only for your own internal business use. Note that Internal Use Only 
+SOFTWARE disables itself on the “time-out” date identified in the SOFTWARE readme or 
+documentation.
+g. Archive Copy. You may make one (1) copy of the SOFTWARE in machine-readable form solely for 
+backup purposes, provided that you reproduce all proprietary notices on the copy.
+2. SUBSCRIPTION RIGHTS. Your subscription for Perpetual License SOFTWARE (“Subscription”), including 
+any Subscription offerings you purchase which include SUPPORT, shall begin on the date the Licenses are 
+delivered to you by email and shall run for a one (1) year term subject to your purchase of annual renewals (the 
+“Subscription Term”). During the initial or a renewal Subscription Term, CITRIX may, from time to time, 
+generally make Updates available for licensing to the public. Upon general availability of Updates during the 
+Subscription Term, CITRIX shall provide you with Updates for covered Licenses. Any such Updates so 
+delivered to you shall be considered SOFTWARE under the terms of this AGREEMENT, except they are not 
+covered by the Limited Warranty applicable to SOFTWARE, to the extent permitted by applicable law. 
+Subscription may be purchased for the SOFTWARE until it is no longer offered in accordance with the CITRIX 
+PRODUCT Support Lifecycle Policy posted at www.citrix.com.
+You acknowledge that CITRIX may develop and market new or different computer programs or editions of the 
+SOFTWARE that use portions of the SOFTWARE and that perform all or part of the functions performed by 
+the SOFTWARE. Nothing contained in this AGREEMENT shall give you any rights with respect to such new 
+or different computer programs or editions. You also acknowledge that CITRIX is not obligated under this 
+AGREEMENT to make any Updates available to the public. Any deliveries of Updates shall be Ex Works 
+CITRIX (Incoterms 2000).
+3. SUPPORT. You may buy SUPPORT for the SOFTWARE. SUPPORT, excluding any Subscription offerings 
+which include SUPPORT (see Section 2 above), shall begin on the date of SUPPORT activation by CITRIX 
+and shall run for a one (1) year term subject to your purchase of annual renewals. SUPPORT, including 
+SUPPORT included as part of Subscription offerings, is sold including various combinations of Incidents, 
+technical contacts, coverage hours, geographic coverage areas, technical relationship management coverage, 
+and infrastructure assessment options. An “Incident” is defined as a single SUPPORT issue and reasonable 
+effort(s) needed to resolve it. An Incident may require multiple telephone calls and offline research to achieve 
+final resolution. The Incident severity will determine the response levels for the SOFTWARE. Unused Incidents 
+or other entitlements expire at the end of each annual term. SUPPORT may be purchased for the SOFTWARE 
+until it is no longer offered in accordance with the CITRIX PRODUCT Support Lifecycle Policy posted at 
+www.citrix.com. SUPPORT will be provided remotely from CITRIX to your locations. Where on-site visits are 
+mutually agreed, you will be billed for reasonable travel and living expenses in accordance with your travel 
+policy. CITRIX’ performance is predicated upon the following responsibilities being fulfilled by you: (i) you 
+will designate a Customer Support Manager (“CSM”) who will be the primary administrative contact; (ii) you 
+will designate Named Contacts (including a CSM), preferably each CITRIX certified, and each Named Contact 
+(excluding CSM) will be supplied with an individual service ID number for contacting SUPPORT; (iii) you 
+agree to perform reasonable problem determination activities and to perform reasonable problem resolution 
+activities as suggested by CITRIX. You agree to cooperate with such requests; (iv) you are responsible for 
+implementing procedures necessary to safeguard the integrity and security of SOFTWARE and data from 
+unauthorized access and for reconstructing any lost or altered files resulting from catastrophic failures; (v) you 
+are responsible for procuring, installing, and maintaining all equipment, telephone lines, communications 
+interfaces, and other hardware at your site and providing CITRIX with access to your facilities as required to 
+operate the SOFTWARE and permitting CITRIX to perform the service called for by this AGREEMENT; and (vi) you are required to implement all currently available and applicable hotfixes, hotfix rollup packs, and 
+service packs or their equivalent to the SOFTWARE in a timely manner. CITRIX is not required to provide any 
+SUPPORT relating to problems arising out of: (i) your or any third party’s alterations or additions to the 
+SOFTWARE, operating system or environment that adversely affects the SOFTWARE (ii) Citrix provided 
+alterations or additions to the SOFTWARE that do not address Errors or Defects; (ii) any functionality not 
+defined in the PRODUCT documentation published by CITRIX and included with the PRODUCT; (iii) use of 
+the SOFTWARE on a processor and peripherals other than the processor and peripherals defined in the 
+documentation; (iv) SOFTWARE that has reached End-of-Life; and (v) any consulting deliverables from any 
+party. An “Error” is defined as a failure in the SOFTWARE to materially conform to the functionality defined 
+in the documentation. A “Defect” is defined as a failure in the SOFTWARE to conform to the specifications in 
+the documentation. In situations where CITRIX cannot provide a satisfactory resolution to your critical problem 
+through normal SUPPORT methods, CITRIX may engage its product development team to create a private fix. 
+Private fixes are designed to address your specific situation and may not be distributed by you outside your 
+organization without written consent from CITRIX. CITRIX retains all right, title, and interest in and to all 
+private fixes. Any hotfixes or private fixes are not SOFTWARE under the terms of this AGREEMENT and they 
+are not covered by the Limited Warranty or Infringement Indemnification applicable to SOFTWARE, to the 
+extent permitted by applicable law. With respect to infrastructure assessments or other consulting services, all 
+intellectual property rights in all reports, preexisting works and derivative works of such preexisting works, as 
+well as installation scripts and other deliverables and developments made, conceived, created, discovered, 
+invented, or reduced to practice in the performance of the assessment or other consulting services are and shall 
+remain the sole and absolute property of CITRIX, subject to a worldwide, nonexclusive License to you for 
+internal use.
+4. DESCRIPTION OF OTHER RIGHTS, LIMITATIONS, AND OBLIGATIONS. Unless expressly permitted by 
+applicable law, you may not transfer, rent, timeshare, or lease the SOFTWARE. If you purchased Licenses for 
+the SOFTWARE to replace other CITRIX Licenses for other CITRIX SOFTWARE and such replacement is a 
+condition of the transaction, you agree to destroy those other CITRIX Licenses and retain no copies after 
+installation of the new Licenses and SOFTWARE. You shall provide the serial numbers of such replaced 
+Licenses and corresponding replacement Licenses to the reseller, and upon request, directly to CITRIX for 
+license tracking purposes. Except as specifically licensed herein, you may not modify, translate, reverse 
+engineer, decompile, disassemble, create derivative works based on, or copy (except for backup as permitted 
+above) the SOFTWARE, except to the extent such foregoing restriction is expressly prohibited by applicable 
+law. You may not remove any proprietary notices, labels, or marks on any SOFTWARE. To the extent 
+permitted by applicable law, you agree to allow CITRIX to audit your compliance with the terms of this 
+AGREEMENT upon prior written notice during normal business hours. Notwithstanding the foregoing, this 
+AGREEMENT shall not prevent or restrict you from exercising additional or different rights to any free, open 
+source code, documentation and materials contained in or provided with the SOFTWARE in accordance with 
+the applicable free, open source license for such code, documentation, and materials.
+YOU MAY NOT USE, COPY, MODIFY, OR TRANSFER THE SOFTWARE OR ANY COPY IN WHOLE 
+OR IN PART, OR GRANT ANY RIGHTS IN THE SOFTWARE OR ACCOMPANYING 
+DOCUMENTATION, EXCEPT AS EXPRESSLY PROVIDED IN THIS AGREEMENT. ALL RIGHTS NOT 
+EXPRESSLY GRANTED ARE RESERVED BY CITRIX OR ITS SUPPLIERS.
+You hereby agree, that to the extent that any applicable mandatory laws (such as, for example, national laws 
+implementing EC Directive 91/250 on the Legal Protection of Computer Programs) give you the right to 
+perform any of the aforementioned activities without the consent of CITRIX to gain certain information about 
+the SOFTWARE, before you exercise any such rights, you shall first request such information from CITRIX in 
+writing detailing the purpose for which you need the information. Only if and after CITRIX, at its sole 
+discretion, partly or completely denies your request, shall you exercise your statutory rights.
+5. INFRINGEMENT INDEMNIFICATION. CITRIX shall indemnify and defend, or at its option, settle any 
+claim, suit, or proceeding brought against you based on an allegation that the XenServer Technology (excluding 
+that received in free XenServer) infringes upon any patent or copyright of any third party (“Infringement 
+Claim”), provided you promptly notify CITRIX in writing of your notification or discovery of an Infringement 
+Claim such that CITRIX is not prejudiced by any delay in such notification. CITRIX will have sole control over 
+the defense or settlement of any Infringement Claim and you will provide reasonable assistance in the defense 
+of the same. Following notice of an Infringement Claim or if CITRIX believes such a claim is likely, CITRIX may at its sole expense and option: (i) procure for you the right to continue to use the alleged infringing
+XenServer Technology; (ii) replace or modify the XenServer Technology to make it non-infringing; or (iii) 
+accept return of the SOFTWARE and provide you with a refund as appropriate. CITRIX assumes no liability 
+for any Infringement Claims or allegations of infringement based on: (i) your use of any XenServer Technology 
+after notice that you should cease use of the same due to an Infringement Claim; (ii) any modification of the 
+XenServer Technology by you or at your direction; or (iii) your combination of XenServer Technology with 
+other programs, data, hardware, or other materials, if such Infringement Claim would have been avoided by the 
+use of the XenServer Technology alone. THE FOREGOING STATES YOUR EXCLUSIVE REMEDY WITH 
+RESPECT TO ANY INFRINGEMENT CLAIM.
+6. LIMITED WARRANTY AND DISCLAIMER. CITRIX warrants that for a period of ninety (90) days from the 
+date of delivery of the SOFTWARE (excluding free XenServer) to you, the SOFTWARE will perform 
+substantially in accordance with the PRODUCT documentation published by CITRIX and included with the 
+PRODUCT. CITRIX and its suppliers’ entire liability and your exclusive remedy under this warranty (which is 
+subject to you returning the SOFTWARE to CITRIX or an authorized reseller) will be, at the sole option of 
+CITRIX and subject to applicable law, to replace the media and/or SOFTWARE or to refund the purchase price 
+and terminate this AGREEMENT. CITRIX will provide the SUPPORT requested by you in a professional and 
+workmanlike manner, but CITRIX cannot guarantee that every question or problem raised by you will be 
+resolved or resolved in a certain amount of time.
+TO THE EXTENT PERMITTED BY APPLICABLE LAW AND EXCEPT FOR THE ABOVE LIMITED 
+WARRANTY FOR SOFTWARE, CITRIX AND ITS SUPPLIERS MAKE AND YOU RECEIVE NO 
+WARRANTIES OR CONDITIONS, EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE; AND CITRIX 
+AND ITS SUPPLIERS SPECIFICALLY DISCLAIM WITH RESPECT TO SOFTWARE, UPDATES, 
+SUBSCRIPTION(INCLUDING SUBSCRIPTION WITH SUPPORT) AND SUPPORT ANY CONDITIONS 
+OF QUALITY, AVAILABILITY, RELIABILITY, SECURITY, LACK OF VIRUSES, BUGS, OR ERRORS, 
+AND ANY IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, ANY WARRANTY OF 
+TITLE, QUIET ENJOYMENT, QUIET POSSESSION, MERCHANTABILITY, NONINFRINGEMENT, OR 
+FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE IS NOT DESIGNED, MANUFACTURED, 
+OR INTENDED FOR USE OR DISTRIBUTION WITH ANY EQUIPMENT THE FAILURE OF WHICH 
+COULD LEAD DIRECTLY TO DEATH, PERSONAL INJURY, OR SEVERE PHYSICAL OR 
+ENVIRONMENTAL DAMAGE. YOU ASSUME THE RESPONSIBILITY FOR THE SELECTION OF THE 
+SOFTWARE AND HARDWARE TO ACHIEVE YOUR INTENDED RESULTS, AND FOR THE 
+INSTALLATION OF, USE OF, AND RESULTS OBTAINED FROM THE SOFTWARE AND HARDWARE.
+7. PROPRIETARY RIGHTS. No title to or ownership of the XenServer Technology is transferred to you. CITRIX 
+and/or its licensors own and retain all title and ownership of all intellectual property rights in and to the 
+XenServer Technology, including any adaptations or copies. You acquire only a limited License to use the 
+XenServer Technology.
+8. EXPORT RESTRICTION. You agree that you will not export, re-export, or import the SOFTWARE in any 
+form without the appropriate government licenses. You understand that under no circumstances may the 
+SOFTWARE be exported to any country subject to U.S. embargo or to U.S.-designated denied persons or 
+prohibited entities or U.S. specially designated nationals.
+9. LIMITATION OF LIABILITY. TO THE EXTENT PERMITTED BY APPLICABLE LAW, YOU AGREE 
+THAT NEITHER CITRIX NOR ITS AFFILIATES, SUPPLIERS, OR AUTHORIZED DISTRIBUTORS 
+SHALL BE LIABLE FOR ANY LOSS OF DATA OR PRIVACY, LOSS OF INCOME, LOSS OF 
+OPPORTUNITY OR PROFITS, COST OF RECOVERY, LOSS ARISING FROM YOUR USE OF THE 
+SOFTWARE, SUBSCRIPTION (INCLUDING SUBSCRIPTION WITH SUPPORT) OR SUPPORT, OR 
+DAMAGE ARISING FROM YOUR USE OF THIRD PARTY SOFTWARE OR HARDWARE OR ANY 
+OTHER SPECIAL, INCIDENTAL, CONSEQUENTIAL, OR INDIRECT DAMAGES ARISING OUT OF OR 
+IN CONNECTION WITH THIS AGREEMENT; OR THE USE OF THE SOFTWARE, SUBSCRIPTION 
+(INCLUDING SUBSCRIPTION WITH SUPPORT) OR SUPPORT, REFERENCE MATERIALS, OR 
+ACCOMPANYING DOCUMENTATION; OR YOUR EXPORTATION, REEXPORTATION, OR 
+IMPORTATION OF THE SOFTWARE, HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY. 
+THIS LIMITATION WILL APPLY EVEN IF CITRIX, ITS AFFILIATES, SUPPLIERS, OR AUTHORIZED 
+DISTRIBUTORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. TO THE EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE LIABILITY OF CITRIX, ITS 
+AFFILIATES, SUPPLIERS, OR AUTHORIZED DISTRIBUTORS EXCEED THE AMOUNT PAID FOR 
+THE SOFTWARE, SUBSCRIPTION (INCLUDING SUBSCRIPTION WITH SUPPORT) OR SUPPORT AT 
+ISSUE. YOU ACKNOWLEDGE THAT THE LICENSE OR SUPPORT FEE REFLECTS THIS 
+ALLOCATION OF RISK. SOME JURISDICTIONS DO NOT ALLOW THE LIMITATION OR 
+EXCLUSION OF LIABILITY FOR INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THE ABOVE 
+LIMITATION OR EXCLUSION MAY NOT APPLY TO YOU. For purposes of this AGREEMENT, the term 
+“CITRIX AFFILIATE” shall mean any legal entity fifty percent (50%) or more of the voting interests in which 
+are owned directly or indirectly by Citrix Systems, Inc. Affiliates, suppliers, and authorized distributors are 
+intended to be third party beneficiaries of this AGREEMENT.
+10. TERMINATION. This AGREEMENT is effective until terminated. You may terminate this AGREEMENT at 
+any time by removing the SOFTWARE from your computers and destroying all copies and providing written 
+notice to CITRIX with the serial numbers of the terminated licenses. CITRIX may terminate this 
+AGREEMENT at any time for your breach of this AGREEMENT. Unauthorized copying of the SOFTWARE 
+or the accompanying documentation or otherwise failing to comply with the license grant of this AGREEMENT 
+will result in automatic termination of this AGREEMENT and will make available to CITRIX all other legal 
+remedies. You agree and acknowledge that your material breach of this AGREEMENT shall cause CITRIX 
+irreparable harm for which monetary damages alone would be inadequate and that, to the extent permitted by 
+applicable law, CITRIX shall be entitled to injunctive or equitable relief without the need for posting a bond. 
+Upon termination of this AGREEMENT, the License granted herein will terminate and you must immediately 
+destroy the SOFTWARE and accompanying documentation, and all backup copies thereof.
+11. U.S. GOVERNMENT END-USERS. If you are a U.S. Government agency, in accordance with Section 12.212 
+of the Federal Acquisition Regulation (48 CFR 12.212 (October 1995)) and Sections 227.7202-1 and 
+227.7202-3 of the Defense Federal Acquisition Regulation Supplement (48 CFR 227.7202-1, 227.7202-3 (June 
+1995)), you hereby acknowledge that the SOFTWARE constitutes “Commercial Computer Software” and that 
+the use, duplication, and disclosure of the SOFTWARE by the U.S. Government or any of its agencies is 
+governed by, and is subject to, all of the terms, conditions, restrictions, and limitations set forth in this standard 
+commercial license AGREEMENT. In the event that, for any reason, Sections 12.212, 227.7202-1 or 
+227.7202-3 are deemed not applicable, you hereby acknowledge that the Government’s right to use, duplicate, 
+or disclose the SOFTWARE are “Restricted Rights” as defined in 48 CFR Section 52.227-19(c)(1) and (2) 
+(June 1987), or DFARS 252.227-7014(a)(14) (June 1995), as applicable. Manufacturer is Citrix Systems, Inc., 
+851 West Cypress Creek Road, Fort Lauderdale, Florida, 33309.
+12. AUTHORIZED DISTRIBUTORS AND RESELLERS. CITRIX authorized distributors and resellers do not 
+have the right to make modifications to this AGREEMENT or to make any additional representations, 
+commitments, or warranties binding on CITRIX.
+13. CHOICE OF LAW AND VENUE. If provider is Citrix Systems, Inc., this AGREEMENT will be governed by 
+the laws of the State of Florida without reference to conflict of laws principles and excluding the United Nations 
+Convention on Contracts for the International Sale of Goods, and in any dispute arising out of this 
+AGREEMENT, you consent to the exclusive personal jurisdiction and venue in the State and Federal courts 
+within Broward County, Florida. If provider is Citrix Systems International GmbH, this AGREEMENT will be 
+governed by the laws of Switzerland without reference to the conflict of laws principles, and excluding the 
+United Nations Convention on Contracts for the International Sale of Goods, and in any dispute arising out of 
+this AGREEMENT, you consent to the exclusive personal jurisdiction and venue of the competent courts in the 
+Canton of Zurich. If provider is Citrix Systems Asia Pacific Pty Ltd, this AGREEMENT will be governed by 
+the laws of the State of New South Wales, Australia and excluding the United Nations Convention on Contracts 
+for the International Sale of Goods, and in any dispute arising out of this AGREEMENT, you consent to the 
+exclusive personal jurisdiction and venue of the competent courts sitting in the State of New South Wales. If 
+any provision of this AGREEMENT is invalid or unenforceable under applicable law, it shall be to that extent 
+deemed omitted and the remaining provisions will continue in full force and effect. To the extent a provision is 
+deemed omitted, the parties agree to comply with the remaining terms of this AGREEMENT in a manner 
+consistent with the original intent of the AGREEMENT.
+14. HOW TO CONTACT CITRIX. Should you have any questions concerning this AGREEMENT or want to 
+contact CITRIX for any reason, write to CITRIX at the following address: Citrix Systems, Inc., Customer Service, 851 West Cypress Creek Road, Ft. Lauderdale, Florida 33309; Citrix Systems International GmbH, 
+Rheinweg 9, CH-8200 Schaffhausen, Switzerland; or Citrix Systems Asia Pacific Pty Ltd., Level 3, 1 Julius 
+Ave., Riverside Corporate Park, North Ryde NSW 2113, Sydney, Australia.
+15. TRADEMARKS. Citrix, XenServer XenDesktop and XenApp are trademarks and/or registered trademarks of 
+Citrix Systems, Inc., in the U.S. and other countries. Microsoft, Windows and Windows Vista are registered 
+trademarks of Microsoft Corporation in the U.S. and other countries.
+CTX_code: XS_R_52359', 'http://www.citrix.com/content/dam/citrix/en_us/documents/buy/XS_EULA_English.pdf', NULL, NULL, NULL, 'CITRIX LICENSE AGREEMENT', NULL, NULL, NULL, '', NULL, false, false, false, '2cd7d9b81be8a2cfe3b86e683415452a', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (519, 'CMake', 'CMake - Cross Platform Makefile Generator
+Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+* Neither the names of Kitware, Inc., the Insight Software Consortium, nor the names of their contributors may be used to endorse or promote products derived from this software without specific prior written  permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://www.cmake.org/cmake/project/license.html', NULL, NULL, NULL, 'CMake license', NULL, NULL, NULL, '', NULL, false, false, false, '5f5020d28ac174c8efe6089024124a93', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (520, 'EFL', 'EFL is referenced without a version number. Please look up EFL in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'Eiffel Forum License', NULL, NULL, NULL, '', NULL, false, false, false, '2800b8d499cd160a07891d9df5a5a253', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (521, 'Flora-1.0', 'Not find a complete license text of Flora-1.0.
+
+The text of Flora License Version 1.0 is similar to Apache License 2.0. Some of the differences include changed text in the Definitions, Grant of Patent License, and Redistribution sections. Paragraph 4 regarding the redistribution is comparable to standard BSD licenses:
+4. Redistribution. You may reproduce and distribute copies of the Work or Derivative Works thereof pursuant to the copyright license above, in any medium, with or without modifications, and in Source or Object form, provided that You meet the following conditions:
+
+  1. You must give any other recipients of the Work or Derivative Works a copy of this License; and
+
+  2. You must cause any modified files to carry prominent notices stating that You changed the files; and
+
+  3. You must retain, in the Source form of any Derivative Works that You distribute, all copyright, patent, trademark, and attribution notices from the Source form of the Work, excluding those notices that do not pertain to any part of the Derivative Works;', '', NULL, NULL, NULL, 'Flora License Version 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '2cb8fee53a7bd890b5ea00ff148de242', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (522, 'ZPL', 'ZPL is referenced without a version number. Please look up ZPL in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'Zope Public License', NULL, NULL, NULL, '', NULL, false, false, false, 'b83be6a2007834a5642782b761ad04c4', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (523, 'WebM', 'Software License
+Copyright (c) 2010, Google Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+Neither the name of Google nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://www.webmproject.org/license/software/', NULL, NULL, NULL, 'WebM Software License', NULL, NULL, NULL, '', NULL, false, false, false, 'add394ca6ef158bd3bda0e30116e7f17', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (524, 'Vixie', 'Vixie License
+
+Copyright 1988,1990,1993 by Paul Vixie
+
+All rights reserved
+
+Distribute freely, except: don''t remove my name from the source or documentation (don''t take credit for my work), mark your changes (don''t get me blamed for your possible bugs), don''t alter or remove this notice. May be sold if buildable source is provided to buyer. No warrantee of any kind, express or implied, is included with this software; use at your own risk, responsibility for damages (if any) to anyone resulting from the use of this software rests entirely with the user.
+
+Send bug reports, bug fixes, enhancements, requests, flames, etc., and I''ll try to keep a version up to date. I can be reached as follows:
+Paul Vixie
+<paul@vix.com>
+uunet!decwrl!vixie!paul', 'http://licensing.pianodisc.com/vixie.html', NULL, NULL, NULL, 'Vixie License', NULL, NULL, NULL, '', NULL, false, false, false, 'dfef7a9d83c12b3981132c888ba81d97', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (525, 'Unlicense', 'This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <http://unlicense.org/>', 'http://unlicense.org/', NULL, NULL, NULL, 'Unlicense', NULL, NULL, NULL, '', NULL, false, false, false, 'a1a9d0cf11e58d95864df58255d0b6b3', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (526, 'PHP', 'PHP is referenced without a version number. Please look up PHP in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'PHP license', NULL, NULL, NULL, '', NULL, false, false, false, '7aebe5796fe3a0d5919ed358c9600f54', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (527, 'OLDAP', 'OLDAP is referenced without a version number. Please look up OLDAP in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'Open LDAP Public License', NULL, NULL, NULL, '', NULL, false, false, false, '2642960e3afc192be1c342d4b9d815a5', 1);
