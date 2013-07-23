@@ -3965,10 +3965,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Free Art License
    */
   if (INFILE(_LT_FREEART_V10)) {
-    INTERESTING("Free-Art-1.0");
+    INTERESTING("FAL-1.0");
   }
   else if (INFILE(_LT_FREEART_V13)) {
-    INTERESTING("Free-Art-1.3");
+    INTERESTING("FAL-1.3");
   }
   /*
    * RSA Security, Inc.
