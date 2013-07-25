@@ -63,7 +63,7 @@ $distros = explode(' ', $dist[0]);
 //$testUtils = new TestRun();
 // distro can be Debian, Red, Fedora, Ubuntu
 switch ($distros[0]) {
-  case 'Debian':
+  case 'Debian1':
     $debian = TRUE;  // is this needed?
     $debianVersion = $distros[2];
     echo "debian version is:$debianVersion\n";
@@ -83,7 +83,7 @@ switch ($distros[0]) {
       exit(1);
     }
     break;
-  case 'Red':
+  case 'Red1':
     $redHat = 'RedHat';
     $rhVersion = $distros[6];
     //echo "rh version is:$rhVersion\n";
@@ -111,7 +111,7 @@ switch ($distros[0]) {
     }
 
     break;
-  case 'CentOS':
+  case 'CentOS1':
     $redHat = 'RedHat';
     $rhVersion = $distros[2];
     echo "rh version is:$rhVersion\n";
@@ -139,7 +139,7 @@ switch ($distros[0]) {
     }
     
     break;
-  case 'Fedora':
+  case 'Fedora1':
     $fedora = 'Fedora';
     $fedVersion = $distros[2];
     try
@@ -180,7 +180,7 @@ switch ($distros[0]) {
       exit(1);
     }
     echo "*** Configure fossology ***\n";
-    if(!configFossology($Ubuntu))
+    if(!configDebian($distros[0], $ubunVersion))
     {
       echo "FATAL! Could not config fossology on {$distros[0]} version $ubunVersion\n";
       exit(1);
