@@ -55,6 +55,7 @@ extern long GlobalUploadKey;
 extern char GlobalTempFile[MAXCMD];
 extern char GlobalURL[MAXCMD];
 extern char GlobalParam[MAXCMD];
+extern char GlobalType[MAXCMD];
 extern int GlobalImportGold; /* set to 0 to not store file in gold repository */
 extern gid_t ForceGroup;
 
@@ -109,6 +110,8 @@ char *PathCheck (char *DirPath);
 void  Usage (char *Name);
 
 int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status);
+
+int GetVersionControl();
 
 #endif /* _WGET_AGENT_H */
 

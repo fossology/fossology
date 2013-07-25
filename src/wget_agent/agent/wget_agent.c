@@ -1,7 +1,7 @@
 /***************************************************************
  wget_agent: Retrieve a file and put it in the database.
 
- Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -36,6 +36,7 @@ PGconn *pgConn = NULL;
 long GlobalUploadKey=-1;
 char GlobalTempFile[MAXCMD];
 char GlobalURL[MAXCMD];
+char GlobalType[MAXCMD];
 char GlobalParam[MAXCMD];
 int GlobalImportGold=1; /* set to 0 to not store file in gold repository */
 gid_t ForceGroup=-1;
@@ -460,6 +461,55 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 } /* GetURL() */
 
 /**
+ * \brief get source code from version control system
+ * 
+ * \return int - 0: successful; others: fail
+ */
+int GetVersionControl()
+{
+  char Type[][4] = {"SVN", "CVS", "Git"};
+  char command[MAXCMD] = {0};
+  char TempFileDirectory[MAXCMD];
+  char DeleteTempDirCmd[MAXCMD];
+  int rc = 0;
+
+  /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
+  sprintf(TempFileDirectory, "%s.dir", GlobalTempFile);
+  sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
+
+  if (0 == strcmp(GlobalType, Type[0]))
+  {
+    sprintf(command, "svn export %s %s %s >/dev/null 2>&1", GlobalURL, GlobalParam, TempFileDirectory);
+  }
+  else if (0 == strcmp(GlobalType, Type[1]))
+  {
+  }
+
+#if 0
+  LOG_FATAL("command is:%s, GlobalTempFile is:%s\n", command, GlobalTempFile);
+#endif
+  rc = system(command);
+  if (rc != 0)
+  {
+    LOG_FATAL("please make sure the URL of repo is correct, also add correct proxy for your version control system. \n");
+    system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    return 1;
+  }
+
+  snprintf(command,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ >/dev/null 2>&1", GlobalTempFile, TempFileDirectory);
+  rc = system(command);
+  if (rc != 0)
+  {
+    system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    return 1;
+  }
+
+  system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+
+  return 0; // succeed to retrieve source
+}
+
+/**
  * \brief Convert input pairs into globals.
  *        This functions taints the parameters as needed.
  *
@@ -520,6 +570,16 @@ void    SetEnv  (char *S, char *TempFileDir)
   S+=SLen;
 
   while(S[0] && isspace(S[0])) S++; /* skip spaces */
+
+  char Type[][4] = {"SVN", "CVS", "Git"};
+  int i = 0; // type index
+
+  strncpy(GlobalType, S, 3);
+  if ((0 == strcmp(GlobalType, Type[i++])) || (0 == strcmp(GlobalType, Type[i++])) || (0 == strcmp(GlobalType, Type[i++])))
+  {
+    S += 3;
+  }
+
   strncpy(GlobalParam, S, sizeof(GlobalParam)); // get the parameters, kind of " -A rpm -R fosso -l 1* "
   LOG_VERBOSE0("  upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s  URL=%s  GlobalParam=%s\n",GlobalUploadKey, GlobalUploadKey,GlobalTempFile,GlobalURL,GlobalParam);
 } /* SetEnv() */

@@ -81,6 +81,7 @@ int main  (int argc, char *argv[])
   memset(GlobalTempFile,'\0',MAXCMD);
   memset(GlobalURL,'\0',MAXCMD);
   memset(GlobalParam,'\0',MAXCMD);
+  memset(GlobalType,'\0',MAXCMD);
   GlobalUploadKey = -1;
   int upload_pk = 0;           // the upload primary key
   int Agent_pk;
@@ -211,7 +212,21 @@ int main  (int argc, char *argv[])
         snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
         struct stat Status;
 
-        if (strstr(GlobalURL, "*") || stat(GlobalURL, &Status) == 0)
+        if (GlobalType[0])
+        {
+          if (GetVersionControl() == 0)
+          {
+            DBLoadGold();
+            unlink(GlobalTempFile);
+          }
+          else
+          {
+            LOG_FATAL("upload %ld File retrieval failed: uploadpk=%ld tempfile=%s URL=%s Type=%s",
+                GlobalUploadKey,GlobalUploadKey,GlobalTempFile,GlobalURL, GlobalType);
+            SafeExit(23);
+          }
+        }
+        else if (strstr(GlobalURL, "*") || stat(GlobalURL, &Status) == 0)
         {
           if (!Archivefs(GlobalURL, GlobalTempFile, TempFileDir, Status))
           {
