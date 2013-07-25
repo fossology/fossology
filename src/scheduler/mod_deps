@@ -38,7 +38,7 @@ while true; do
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
       -y) 
-         YesOpt=" -y --force-yes "; shift;;    
+         YesOpt=" -y "; shift;;    
       -h|--help)
          echo "Usage: mod_deps [options]";
      echo "  -r or --runtime    : install runtime dependencies"
