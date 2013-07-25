@@ -1,0 +1,33 @@
+#!/bin/bash
+# Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+# Script to generate the Functional Test Result together
+cd ../reports/functional
+echo "" > Functional_Tests_Results.html
+ls *-Xunit* > /tmp/test.txt
+while read fn; do
+  name=`echo $fn|awk -F '-X' '{print $1}'`
+  while read line; do
+    if echo $line |grep -qE "<h1>Unit Test Results.</h1>"
+    then
+      echo "<br/><br/><a name="top"></a><h1>$name Test Results.</h1>" >> Functional_Tests_Results.html
+    else
+       echo $line >> Functional_Tests_Results.html
+    fi
+  done < $fn
+done </tmp/test.txt
+rm /tmp/test.txt
+
