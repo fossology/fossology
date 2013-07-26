@@ -29,7 +29,7 @@ path = /srv/fossology/repository
 ; host can have as many agents running as necessary, (i.e. there should always
 ; be a max on the number of agents for a particular host).
 [HOSTS]
-localhost = localhost AGENT_DIR 10
+localhost = localhost {$SYSCONFDIR} 10
 
 [REPOSITORY]
 localhost[] = * 00 ff
