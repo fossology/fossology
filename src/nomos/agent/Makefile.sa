@@ -1,6 +1,9 @@
 # FOSSology Makefile - agent/nomossa
 # This is to make a version of nomos that does not require any of the fossology build dependencies.
 # Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+TOP=../../..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
 
 EXE = nomossa
 
@@ -16,6 +19,7 @@ HDRS=nomos.h $(OBJS:.o=.h) _autodefs.h
 
 #CFLAGS_LOCAL= -DSTANDALONE -g -O2 -Wall -D_FILE_OFFSET_BITS=64
 CFLAGS_LOCAL= -DSTANDALONE -Wall -D_FILE_OFFSET_BITS=64
+DEFS= -DVERSION_S=\"$(VERSION)\" -DSVN_REV_S=\"$(SVN_REV)\"
 
 all: encode nomos
 
@@ -25,7 +29,7 @@ nomos: nomos.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $(EXE)
 
 nomos.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) -c $< $(CFLAGS_LOCAL)
+	$(CC) -c $< $(CFLAGS_LOCAL) $(DEFS)
 	
 nomos-gl: nomos-g.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@

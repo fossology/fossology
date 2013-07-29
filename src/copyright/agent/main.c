@@ -729,6 +729,7 @@ void copyright_usage(char* arg)
   fprintf(cout, "  -i  :: Initialize the database, the exit.\n");
   fprintf(cout, "  -C {filename} :: Scan {filename} from command line. Does not write to database.\n");
   fprintf(cout, "  -t  :: Run the accuracy tests, nothing written to database.\n");
+  fprintf(cout, "  -V  :: print the version info, then exit.\n");
   fprintf(cout, "NOTE: -i, -c, and -t cause the agent to perform the request\n");
   fprintf(cout, "       and then exit without waiting for scheduler input\n");
 }
@@ -805,8 +806,8 @@ int main(int argc, char** argv)
   int user_pk = 0;
   long upload_pk = 0;           // the upload primary key
   long agent_pk = 0;            // the agents primary key
-  char *SVN_REV;
-  char *VERSION;
+  char *SVN_REV = NULL;
+  char *VERSION = NULL;
   char agent_rev[myBUFSIZ];
   char copy_buf[FILENAME_MAX];
   char name_buf[FILENAME_MAX];
@@ -849,7 +850,7 @@ int main(int argc, char** argv)
   }
 
   /* parse the command line options */
-  while((c = getopt(argc, argv, "dc:C:ti")) != -1)
+  while((c = getopt(argc, argv, "dc:C:tiV")) != -1)
   {
     switch(c)
     {
@@ -883,6 +884,11 @@ int main(int argc, char** argv)
         copyright_destroy(copy);
         PQfinish(pgConn);
         return 0;
+      case 'V':
+        SVN_REV = fo_sysconfig("copyright", "SVN_REV");
+        VERSION = fo_sysconfig("copyright", "VERSION");
+        printf("copyright version %s (r%s).\n", VERSION, SVN_REV);
+	return 0;
       default: /* error, print usage */
         copyright_usage(argv[0]);
         return 3;

@@ -559,6 +559,7 @@ FUNCTION void Usage(char *Name) {
   printf(
       "  file :: if files are listed, print the licenses detected within them.\n");
   printf("  no file :: process data from the scheduler.\n");
+  printf("  -V   :: print the version info, then exit.\n");
 } /* Usage() */
 
 FUNCTION void Bail(int exitval) {
@@ -789,8 +790,8 @@ int main(int argc, char **argv)
   char **files_to_be_scanned; /**< The list of files to scan */
   char sqlbuf[1024];
   PGresult *result;
-  char *SVN_REV;
-  char *VERSION;
+  char *SVN_REV = NULL;
+  char *VERSION = NULL;
   char agent_rev[myBUFSIZ];
   cacheroot_t cacheroot;
 
@@ -813,6 +814,7 @@ int main(int argc, char **argv)
   SVN_REV = fo_sysconfig("nomos", "SVN_REV");
   VERSION = fo_sysconfig("nomos", "VERSION");
   sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  
   gl.agentPk = fo_GetAgentKey(gl.pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
 
   /* Record the progname name */
@@ -856,7 +858,7 @@ int main(int argc, char **argv)
   }
 
   /* Process command line options */
-  while ((c = getopt(argc, argv, "hilc:")) != -1)
+  while ((c = getopt(argc, argv, "Vhilc:")) != -1)
   {
     switch (c) {
       case 'c': break; /* handled by fo_scheduler_connect() */
@@ -867,6 +869,15 @@ int main(int argc, char **argv)
         /* set long command line output */
         gl.progOpts |= OPTS_LONG_CMD_OUTPUT;
         break;
+      case 'V':
+#ifdef VERSION_S
+        printf("nomos version %s (r%s).\n", VERSION_S, SVN_REV_S);
+#endif
+
+#ifndef VERSION_S
+        printf("nomos version %s (r%s).\n", VERSION, SVN_REV);
+#endif
+        Bail(0);
       case 'h':
       default:
         Usage(argv[0]);
