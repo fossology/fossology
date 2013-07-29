@@ -483,19 +483,16 @@ int GetVersionControl()
   }
   else if (0 == strcmp(GlobalType, Type[1]))
   {
-    sprintf(command, "git clone %s %s %s >/dev/null 2>&1", GlobalURL, GlobalParam, TempFileDirectory);
+    sprintf(command, "git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
   }
 
-#if 0
-  LOG_FATAL("command is:%s, GlobalTempFile is:%s\n", command, GlobalTempFile);
-#endif
   rc = system(command);
   if (rc != 0)
   {
     /** for user fossy */
     /** git: git config --global http.proxy web-proxy.cce.hp.com:8088; git clone http://github.com/schacon/grit.git */
     /** svn: svn checkout --config-option servers:global:http-proxy-host=web-proxy.cce.hp.com --config-option servers:global:http-proxy-port=8088 https://svn.code.sf.net/p/fossology/code/trunk/fossology/utils/ **/
-    LOG_FATAL("please make sure the URL of repo is correct, also add correct proxy for your version control system, rc is:%d. \n", rc);
+    LOG_FATAL("please make sure the URL of repo is correct, also add correct proxy for your version control system, command is:%s, GlobalTempFile is:%s, rc is:%d. \n", command, GlobalTempFile, rc);
     system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
     return 1;
   }
