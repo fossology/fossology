@@ -112,7 +112,6 @@ class core_smauth extends FO_Plugin {
         $_SESSION['UiPref'] = $R['ui_preference'];
       }
       $Level = @$_SESSION['UserLevel'];
-      pg_free_result($result);
     }
     } else {
       $this->CheckUser($UID);
