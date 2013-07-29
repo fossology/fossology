@@ -181,8 +181,8 @@ class upload_vcs extends FO_Plugin {
         $V.= "<li>$text\n";
         $V.= "<select name='vcstype'>\n";
         $V.= "<option value='SVN'>SVN</option>";
-        $V.= "<option value='CVS'>CVS</option>";
         $V.= "<option value='Git'>Git</option>";
+#$V.= "<option value='CVS'>CVS</option>";
         $V.= "</select><P />\n";
         $text = _("Enter the URL to the repo:");
         $V.= "<li>$text<br />\n";
