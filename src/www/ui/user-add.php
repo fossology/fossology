@@ -86,6 +86,12 @@ class user_add extends FO_Plugin {
       $text = _("Username must be specified. Not added.");
       return ($text);
     }
+    /* limit the user name size to 64 characters when creating an account */
+    if (strlen($User) > 64)
+    {
+      $text = _("Username exceed 64 characters. Not added.");
+      return ($text);
+    }
     /* Make sure password matches */
     if ($Pass != $Pass2) {
       $text = _("Passwords did not match. Not added.");
