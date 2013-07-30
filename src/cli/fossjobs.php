@@ -30,6 +30,7 @@
  * @param (optional) string --user specify user name
  * @param (optional) string --password specify password
  * @param (optional) string -c Specify the directory for the system configuration
+ * @param (optional) string -D Delete upload
  * @param int -U $upload_pk upload primary key to run agents on....
  *
  * @exit 0 for success, others for failure....
@@ -82,13 +83,16 @@ $usage = basename($argv[0]) . " [options]
   -U upload :: the upload identifier for scheduling agent tasks
                The string can be a comma-separated list of upload ids.
                Or, use 'ALL' to specify all upload ids.
+  -D upload :: the upload identifier for scheduling delete tasks
+               The string can either be 'ALL', a string (the upload_pk),
+               or an array of upload_pk's if multiple -D's were specified.
   --user string :: user name
   --password string :: password
   -c string :: Specify the directory for the system configuration
 ";
 //process parameters, see usage above
 $longopts = array("user:", "password:");
-$options = getopt("c:haA:P:uU:v", $longopts);
+$options = getopt("c:haA:P:uU:D:v", $longopts);
 //print_r($options);
 if (empty($options)) {
   echo $usage;
@@ -232,6 +236,50 @@ if (array_key_exists("U", $options))
 
   /** scheduling agent tasks on upload ids */
   QueueUploadsOnAgents($checked_list_str, $agent_list, $Verbose);
+}
+
+if (array_key_exists("D", $options))
+{
+  /* $options['D'] can either be 'ALL', a string (the upload_pk),
+     or an array of upload_pk's if multiple -D's were specified.
+   */
+  $upload_options = $options['D'];
+  $upload_pk_array = array();
+  if ($upload_options == 'ALL')
+  {
+    $SQL = "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;";
+    $result = pg_query($PG_CONN, $SQL);
+    DBCheckResult($result, $SQL, __FILE__, __LINE__);
+    while ($row = pg_fetch_assoc($result) and !empty($row['upload_pk']))
+    {
+        $upload_pk_array[] = $row['upload_pk'];
+    }
+    pg_free_result($result);
+  }
+  else if (is_array($upload_options))
+  {
+    $upload_pk_array = $upload_options;
+  }
+  else
+  {
+    $upload_pk_array[] = $upload_options;
+  }
+  /* check permissions */
+  $checked_list = array();
+  foreach($upload_pk_array as $upload_pk)
+  {
+    $UploadPerm = GetUploadPerm($upload_pk);
+    if ($UploadPerm < PERM_WRITE)
+    {
+      print "You have no permission to delete upload " . $upload_pk . "\n";
+      continue;
+    }
+    $checked_list[] = $upload_pk;
+  }
+  $checked_list_str = implode(",", $checked_list);
+
+  /** scheduling delagent tasks on upload ids */
+  QueueUploadsOnDelagents($checked_list_str, $Verbose);
 }
 
 exit(0);

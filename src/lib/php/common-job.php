@@ -366,6 +366,46 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
 } /* QueueUploadsOnAgents() */
 
 /**
+ * \brief Schedule delagent on upload ids
+ *
+ * \param $upload_pk_list -  upload ids, The string can be a comma-separated list of upload ids.
+ * Or, use 'ALL' to specify all upload ids.
+ * \param $Verbose - verbose output, not empty: output, empty: does not output
+ */
+function QueueUploadsOnDelagents($upload_pk_list, $Verbose)
+{
+  global $PG_CONN;
+  global $SysConf;
+
+  /* Get the users.default_bucketpool_fk */
+  $user_pk = $SysConf['auth']['UserId'];
+
+  if (!empty($upload_pk_list))
+  {
+    $results = array();
+    foreach(explode(",", $upload_pk_list) as $upload_pk)
+    {
+      if (empty($upload_pk))  continue;
+
+      // Create a job for the upload
+      $jobpk = JobAddJob($user_pk, "Delete", $upload_pk); 
+      if (empty($jobpk) || ($jobpk < 0)) {
+        echo "WARNING: Failed to schedule Delagent for Upload $upload_pk";
+      }
+      $jqargs = "DELETE UPLOAD $upload_pk";
+      $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, NULL, NULL);
+      if (empty($jobqueuepk)) {
+        echo "WARNING: Failed to schedule Delagent for Upload $upload_pk";
+      }
+      print "Delagent is queued to run on Upload: $upload_pk.\n";
+    } /* for each $upload_pk */
+  } // if $upload_pk is defined
+  /* Tell the scheduler to check the queue. */
+  $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
+  if (!$success) echo $error_msg . "\n" . $output;
+} /* QueueUploadsOnDelagents() */
+
+/**
  * \brief Check if an agent is already scheduled in a job.
  * This is used to make sure dependencies, like unpack
  * don't get scheduled multiple times within a single job.
