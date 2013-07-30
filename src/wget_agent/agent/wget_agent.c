@@ -38,6 +38,8 @@ char GlobalTempFile[MAXCMD];
 char GlobalURL[MAXCMD];
 char GlobalType[MAXCMD];
 char GlobalParam[MAXCMD];
+char *GlobalProxy[6];
+char GlobalHttpProxy[MAXCMD];
 int GlobalImportGold=1; /* set to 0 to not store file in gold repository */
 gid_t ForceGroup=-1;
 
@@ -318,46 +320,30 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 
   struct stat sb;
   int rc_system =0;
-  char* http_proxy = NULL;
-  char* https_proxy = NULL;
-  char* ftp_proxy = NULL;
-  char *p_no_proxy = NULL;
   char no_proxy[MAXCMD] = {0};
   char proxy[MAXCMD] = {0};
   char proxy_temp[MAXCMD] = {0};
-  GError* error1 = NULL;
-  GError* error2 = NULL;
-  GError* error3 = NULL;
-  GError* error4 = NULL;
 
-  http_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "http_proxy", &error1);
-  https_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "https_proxy", &error2);
-  ftp_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "ftp_proxy", &error3);
-  p_no_proxy = fo_config_get(sysconfig, "FOSSOLOGY", "no_proxy", &error4);
-  trim(http_proxy);
-  trim(https_proxy);
-  trim(ftp_proxy);
-  trim(p_no_proxy);
   /* http_proxy is optional so don't error if it doesn't exist */
   /** set proxy */
-  if (http_proxy && http_proxy[0])
+  if (GlobalProxy[0] && GlobalProxy[0][0])
   {
-    snprintf(proxy_temp, MAXCMD-1, "export http_proxy='%s' ;", http_proxy);
+    snprintf(proxy_temp, MAXCMD-1, "export http_proxy='%s' ;", GlobalProxy[0]);
     strcat(proxy, proxy_temp);
   }
-  if (https_proxy && https_proxy[0])
+  if (GlobalProxy[1] && GlobalProxy[1][0])
   {
-    snprintf(proxy_temp, MAXCMD-1, "export https_proxy='%s' ;", https_proxy);
+    snprintf(proxy_temp, MAXCMD-1, "export https_proxy='%s' ;", GlobalProxy[1]);
     strcat(proxy, proxy_temp);
   }
-  if (ftp_proxy && ftp_proxy[0])
+  if (GlobalProxy[2] && GlobalProxy[2][0])
   {
-    snprintf(proxy_temp, MAXCMD-1, "export ftp_proxy='%s' ;", ftp_proxy);
+    snprintf(proxy_temp, MAXCMD-1, "export ftp_proxy='%s' ;", GlobalProxy[2]);
     strcat(proxy, proxy_temp);
   }
-  if (p_no_proxy && p_no_proxy[0])
+  if (GlobalProxy[3] && GlobalProxy[3][0])
   {
-    snprintf(no_proxy, MAXCMD-1, "-e no_proxy=%s", p_no_proxy);
+    snprintf(no_proxy, MAXCMD-1, "-e no_proxy=%s", GlobalProxy[3]);
   }
 
   if (TempFile && TempFile[0])
@@ -479,14 +465,21 @@ int GetVersionControl()
 
   if (0 == strcmp(GlobalType, Type[0]))
   {
-    sprintf(command, "svn export %s %s %s >/dev/null 2>&1", GlobalURL, GlobalParam, TempFileDirectory);
+    if (GlobalProxy[0] && GlobalProxy[0][0])
+      sprintf(command, "svn --config-option servers:global:http-proxy-host=%s --config-option servers:global:http-proxy-port=%s export %s %s %s >/dev/null 2>&1", GlobalProxy[4], GlobalProxy[5], GlobalURL, GlobalParam, TempFileDirectory);
+    else
+      sprintf(command, "svn export %s %s %s >/dev/null 2>&1", GlobalURL, GlobalParam, TempFileDirectory);
   }
   else if (0 == strcmp(GlobalType, Type[1]))
   {
-    sprintf(command, "git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
+    if (GlobalProxy[0] && GlobalProxy[0][0])
+      sprintf(command, "git config --global http.proxy %s && git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalProxy[0], GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
+    else
+      sprintf(command, "git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
   }
 
   rc = system(command);
+
   if (rc != 0)
   {
     /** for user fossy */
@@ -680,6 +673,48 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
   else return 0; /** neither a directory nor a regular file */
 
   return 1;
+}
+
+/** 
+ * \brief get proxy from fossology.conf
+ */
+void GetProxy()
+{
+  int i = 0;
+  char *http_proxy_port = NULL;
+
+  for (i = 0; i < 6; i++)
+  {
+    GlobalProxy[i++] = NULL;
+  }
+  GError* error1 = NULL;
+  GError* error2 = NULL;
+  GError* error3 = NULL;
+  GError* error4 = NULL;
+
+  i = 0;
+  GlobalProxy[i] = fo_config_get(sysconfig, "FOSSOLOGY", "http_proxy", &error1);
+  trim(GlobalProxy[i++]);
+  GlobalProxy[i] = fo_config_get(sysconfig, "FOSSOLOGY", "https_proxy", &error2);
+  trim(GlobalProxy[i++]);
+  GlobalProxy[i] = fo_config_get(sysconfig, "FOSSOLOGY", "ftp_proxy", &error3);
+  trim(GlobalProxy[i++]);
+  GlobalProxy[i] = fo_config_get(sysconfig, "FOSSOLOGY", "no_proxy", &error4);
+  trim(GlobalProxy[i++]);
+
+  
+  if (GlobalProxy[0] && GlobalProxy[0][0])
+  {
+    http_proxy_port = strrchr(GlobalProxy[0], ':');
+    strncpy(GlobalHttpProxy, GlobalProxy[0], (http_proxy_port - GlobalProxy[0]));
+    http_proxy_port++;
+
+    if (http_proxy_port && http_proxy_port[0])
+    {
+      GlobalProxy[4] = GlobalHttpProxy;
+      GlobalProxy[5] = http_proxy_port;
+    }
+  }
 }
 
 /**

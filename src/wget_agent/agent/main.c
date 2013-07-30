@@ -212,6 +212,9 @@ int main  (int argc, char *argv[])
         snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
         struct stat Status;
 
+        /** get proxy */
+        GetProxy();
+
         if (GlobalType[0])
         {
           if (GetVersionControl() == 0)

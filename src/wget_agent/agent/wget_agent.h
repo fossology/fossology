@@ -113,5 +113,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
 
 int GetVersionControl();
 
+void GetProxy();
+
 #endif /* _WGET_AGENT_H */
 
