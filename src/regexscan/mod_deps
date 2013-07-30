@@ -1,0 +1,111 @@
+#!/bin/bash
+# FOSSology mod_deps script
+# This script helps you install dependencies on a system. for a module
+#
+# Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+## Options parsing and setup
+# parse options
+OPTS=`getopt -o rbehy --long runtime,buildtime,everything,,help -n 'mod_deps' -- "$@"`
+
+if [ $? != 0 ]; then
+   echo "ERROR: Bad option specified."
+   OPTS="--help"
+fi
+
+eval set -- "$OPTS"
+
+# if no options then do everything
+if [ "$OPTS" = " --" ]; then
+   EVERYTHING=1
+fi
+
+while true; do
+   case "$1" in
+      -r|--runtime) RUNTIME=1; shift;;
+      -b|--buildtime) BUILDTIME=1; shift;;
+      -e|--everything) EVERYTHING=1; shift;;
+      -y) 
+         YesOpt=" -y --force-yes "; shift;;          
+      -h|--help)
+         echo "Usage: mod_deps [options]";
+	 echo "  -r or --runtime    : install runtime dependencies"
+	 echo "  -b or --buildtime  : install buildtime dependencies"
+	 echo "  -e or --everything : install all dependencies (default)"
+	 echo "  -h or --help       : this help text"
+	 exit;;
+      --) shift; break;;
+      *) echo "ERROR: option $1 not recognised"; exit 1;;
+   esac
+done
+
+# This must run as root.
+if [ `id -u` != "0" ] ; then
+   echo "ERROR: fo-installdeps must run as root."
+   echo "Aborting."
+   exit 1
+fi
+
+if [ $EVERYTHING ]; then
+   echo "*** Installing both runtime and buildtime dependencies ***"
+   RUNTIME=1
+   BUILDTIME=1
+fi
+# This must run as root.
+if [ `id -u` != "0" ] ; then
+  echo "ERROR: fo-installdeps must run as root."
+  echo "Aborting."
+  exit 1
+fi
+
+# figure out what distro we're on
+DISTRO=`lsb_release -is`
+CODENAME=`lsb_release -cs`
+
+if [ "$?" != "0" ]; then
+  echo "ERROR: this program requires the lsb_release command. On Debian based"
+  echo "  systems this is probably in the lsb-release package, on"
+  echo "  Fedora/RedHat systems it is probably the redhat-lsb package."
+  exit 1
+fi
+
+########################################################################
+
+if [ $BUILDTIME ]; then
+  echo "*** Installing $DISTRO buildtime dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu|LinuxMint)
+      apt-get $YesOpt install \
+        libssl-dev;;
+    RedHatEnterprise*|CentOS)
+      if [ $YesOpt ]; then
+        YesOpt='-y'
+      fi    
+      yum $YesOpt install \
+         openssl-devel;;
+    Fedora)
+      if [ $YesOpt ]; then
+        YesOpt='-y'
+      fi    
+      yum $YesOpt install \
+       openssl-devel;; 
+  esac
+fi
+
+if [ $RUNTIME ]; then
+  echo "*** Installing $DISTRO runtime dependencies ***";
+fi
+
+#######################################################################
