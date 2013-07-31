@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
   fo_scheduler_connect(&argc, argv, &pgConn);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"iCc:")) != -1)
+  while((c = getopt(argc,argv,"iCc:h")) != -1)
   {
     switch(c)
     {

@@ -520,8 +520,9 @@ int ReadLine(FILE *Fin, char *Line, int MaxLine)
 void Usage(char *Name)
 {
   printf("Usage: %s [options] [file [file [...]]\n",Name);
+  printf("  -h   :: help (print this message), then exit.\n");
   printf("  -i   :: initialize the database, then exit.\n");
-  printf("  -v   :: verbose (-vv = more verbose)\n");
+  //printf("  -v   :: verbose (-vv = more verbose)\n");
   printf("  -c   :: Specify the directory for the system configuration.\n");
   printf("  -C   :: run from command line.\n");
   printf("  file :: if files are listed, display their mimetype.\n");
