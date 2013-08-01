@@ -68,7 +68,7 @@ class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
     }
     // run it
     $last = exec("$EXE_PATH -h 2>&1", $out, $rtn);
-    $this->assertEquals($usage, $out[1]); // check if executable file mimetype is exited
+    $this->assertEquals($usage, $out[0]); // check if executable file mimetype is exited
     $EXE_PATH = $EXE_PATH." -C -c $db_conf";
   }
 

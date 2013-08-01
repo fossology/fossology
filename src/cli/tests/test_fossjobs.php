@@ -227,7 +227,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
     //print_r($out);
-    $this->assertEquals(14, $output_msg_count);
+    $this->assertEquals(17, $output_msg_count);
     $auth = "--user fossy --password fossy -c $fossology_testconfig";
     /** list agents */
     $out = "";
