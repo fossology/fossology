@@ -2243,6 +2243,10 @@
 %KEY%	"gpl"
 %STR%	"\<gplv2\>"
 #
+%ENTRY%	_LT_GPL_V2_NAMED_later
+%KEY%	"gpl"
+%STR%	"gpl-2\+"
+#
 # To catch things like "this is GPLV3".
 %ENTRY%	_LT_GPL_V3_NAMED
 %KEY%	"gpl"

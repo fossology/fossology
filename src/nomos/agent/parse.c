@@ -1701,7 +1701,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "GPL(proj)" : cp);
     lmem[_mGPL] = 1;
   }
-  if (!lmem[_mGPL] && !lmem[_mGFDL] && !lmem[_mLGPL] && !lmem[_fZPL]
+  if (INFILE(_LT_GPL_V2_NAMED_later) || HASTEXT(_LT_GPL_V2_NAMED_later, REG_EXTENDED))
+  {
+    INTERESTING(lDebug ? "GPLV2+(named)" : "GPL-2.0+");
+  }
+  else if (!lmem[_mGPL] && !lmem[_mGFDL] && !lmem[_mLGPL] && !lmem[_fZPL]
       && (!INFILE(_LT_MPL_SECONDARY))
       && (!INFILE(_TEXT_NOT_GPL))
       && (!INFILE(_TEXT_NOT_GPL2))
