@@ -3440,7 +3440,7 @@ e /* (INFILE(j)) */
 #####
 %ENTRY%	_LT_MSCORP_LIMITED
 %KEY%	"so(ftware|urce)"
-%STR%	"only to the software or derivative works that you create that run on a microsoft windows"
+%STR%	"only to the software or derivative works =FEW= run on a microsoft windows operating system"
 #
 %ENTRY% _LT_MSCORP_LIMITEDref1
 %KEY% "\<micros(oft|ystems)\>"
