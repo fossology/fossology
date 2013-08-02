@@ -660,6 +660,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
           && INFILE(_LT_BSD_CLAUSE_4) && HASTEXT(_KW_severability, REG_EXTENDED)) {
         INTERESTING("BSD-3-Clause-Severability");
+      } else if (INFILE(_LT_XML_DB_V10)) {
+        INTERESTING("XMLDB-1.0");
       } else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)
           && INFILE(_LT_BSD_CLAUSE_4)) {
         INTERESTING("BSD-3-Clause");

@@ -964,6 +964,10 @@
 %KEY%	"software"
 %STR%	"names? =FEW= be used to endorse or promote products derived from this software without (specific |)(prior |)written permission"
 #
+%ENTRY%	_LT_XML_DB_V10
+%KEY%	"software"
+%STR%	"the xml =FEW= initiative software license =FEW= (version |v)1\.?0"
+#
 %ENTRY%	_LT_BSD_CLAUSE_CLEAR
 %KEY%	"licen[cs]"
 %STR%	"no express or implied licenses to any =FEW= patent rights are granted by this license"
