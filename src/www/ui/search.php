@@ -416,7 +416,7 @@ class search extends FO_Plugin
         $V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
         $V .= "<br>" . _("You can use '%' as a wild-card. ");
         $V .= _("For example, '%v3.war', or 'mypkg%.tar'.");
-        $V .= " &nbsp;" . _("Filename search is not case sensitive.");
+        $V .= " &nbsp;" . _("Filename search is case sensitive.");
 
         /* tag  */
         $text = _("Tag to find");
