@@ -188,12 +188,13 @@ class list_bucket_files extends FO_Plugin
                from uploadtree, bucket_file, bucket_def
                where upload_fk=$upload_pk and uploadtree.lft between $lft and $rgt
                  and ((ufile_mode & (1<<28)) = 0)
+                 and ((ufile_mode & (1<<29))=0)
                  and uploadtree.pfile_fk=bucket_file.pfile_fk
                  and agent_fk=$bucketagent_pk
                  and bucket_fk=$bucket_pk
                  and bucketpool_fk=$bucketpool_pk
                  and bucket_pk=bucket_fk 
-                 order by uploadtree.ufile_name
+                 order by uploadtree.pfile_fk
                  offset $Offset $limit";
           $fileresult = pg_query($PG_CONN, $sql);
           DBCheckResult($fileresult, $sql, __FILE__, __LINE__);
@@ -233,7 +234,7 @@ class list_bucket_files extends FO_Plugin
         $PrevPfile_pk = 0;
 
         if ($Count > 0)
-        while ($row = pg_fetch_assoc($fileresult, $RowNum))
+        while ($row = pg_fetch_assoc($fileresult))
         {
           // get all the licenses in this subtree (bucket uploadtree_pk)
           $pfile_pk = $row['pfile_fk'];
@@ -264,10 +265,8 @@ class list_bucket_files extends FO_Plugin
             else
             {
               $V .= "<div>";
-              $PrevPfile_pk = $pfile_pk;
-              $ItemNumb++;
             }
-            $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, $ItemNumb, $Header, '', $uploadtree_tablename);
+            $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, ++$RowNum, $Header, '', $uploadtree_tablename);
             $V .= "</div>";
 
             $V .= "</td>";
@@ -277,10 +276,8 @@ class list_bucket_files extends FO_Plugin
             // in this container with that license.
             $V .= "<td>$licstring</td></tr>";
             $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
-            if ($Count == $RowNum) break;
           }
-          $RowNum++;
-          if ($Count == $RowNum) break;
+          $PrevPfile_pk = $pfile_pk;
         }
         pg_free_result($fileresult);
         $V .= "</table>";

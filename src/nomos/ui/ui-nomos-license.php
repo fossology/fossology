@@ -221,11 +221,13 @@ class ui_nomos_license extends FO_Plugin
     }
 
     // Void ARE EXCLUDED FROM LICENSE COUNT
-    $sql = "SELECT distinct(rf_shortname) as licname, count(rf_shortname) as liccount, rf_shortname 
+    $sql = "SELECT distinct(SS.rf_shortname) as licname, count(SS.rf_shortname) as liccount, SS.rf_shortname from 
+            (SELECT distinct(license_file_ref.pfile_fk), rf_shortname
             from license_file_ref $TagTable
             right join $this->uploadtree_tablename on license_file_ref.pfile_fk=$this->uploadtree_tablename.pfile_fk 
             where rf_shortname <> 'Void' and upload_fk='$upload_pk' and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt 
-              and agent_fk=$Agent_pk $TagClause 
+              and agent_fk=$Agent_pk $TagClause group by license_file_ref.pfile_fk, rf_shortname
+            ) as SS
             group by rf_shortname order by liccount desc";
 //$uTime = microtime(true);
     $result = pg_query($PG_CONN, $sql);

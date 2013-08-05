@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -123,7 +123,7 @@ class list_lic_files extends FO_Plugin
         $V.= "$Count $text ($Unique $text1) $text2 <b>$rf_shortname</b>";
         if ($Count < $Max) $Max = $Count;
         $limit = ($Page < 0) ? "ALL":$Max;
-        $order = " order by ufile_name asc";
+        $order = " order by pfile_fk asc";
         /** should delete $filesresult yourself */
         $filesresult = GetFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk,
                                            $PkgsOnly, $Offset, $limit, $order, $tag_pk, $uploadtree_tablename);

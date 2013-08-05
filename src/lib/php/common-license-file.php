@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2009-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -175,7 +175,8 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   $sql = "select uploadtree_pk, license_file.pfile_fk, ufile_name
           from license_file, $TagTable
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from $uploadtree_tablename 
-                 where upload_fk=$upload_pk and lft BETWEEN $lft and $rgt) as SS
+                 where upload_fk=$upload_pk and lft BETWEEN $lft and $rgt 
+                 and ((ufile_mode & (1<<28))=0) and ((ufile_mode & (1<<29))=0)) as SS
           where PF=license_file.pfile_fk and agent_fk=$agent_pk and rf_fk in ($rf_pk)
                 $TagClause
   $order limit $limit offset $offset";

@@ -219,6 +219,7 @@ class ui_buckets extends FO_Plugin
                   (SELECT distinct(pfile_fk) as PF from $this->uploadtree_tablename 
                      where upload_fk=$upload_pk 
                        and ((ufile_mode & (1<<28))=0)
+                       and ((ufile_mode & (1<<29))=0)
                        and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$bucketagent_pk 
                     and bucket_file.nomosagent_fk=$nomosagent_pk
