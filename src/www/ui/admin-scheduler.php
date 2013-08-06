@@ -117,6 +117,14 @@ class admin_scheduler extends FO_Plugin
         $text = _("Shutdown Scheduler");
         $operation_text = $text;
         break;
+      case 'start':
+        $text = _("Start Scheduler");
+        $operation_text = $text;
+        break;
+      case 'restarts':
+        $text = _("Restart Scheduler");
+        $operation_text = $text;
+        break;
       case 'restart':
         $text = _("Restart the");
         $operation_text = "$text $job_type";
@@ -145,6 +153,25 @@ class admin_scheduler extends FO_Plugin
    **/
   function OperationSubmit($operation, $job_id, $priority_id, $level_id)
   {
+    if ("start" === $operation) // start the scheduler 
+    {
+      $commu_status = fo_communicate_with_scheduler('status', $response_from_scheduler, $this->error_info);
+      if ($commu_status) // the scheduler is running
+      {
+        $response_from_scheduler = "Warning, the scheduler is running";
+      }
+      else // start the stopped scheduler
+      {
+        $this->error_info = null;
+        $this->StartScheduler();
+        return $this->error_info;
+      }
+    }
+    else if ("restarts" === $operation) // restart the scheduler 
+    {
+      $this->StartScheduler('restarts');
+      return $this->error_info;
+    }
     $commands = $operation;
     if (!empty($job_id) && 'scheduler' != $job_id) $commands .= " $job_id";
     if (isset($priority_id)) $commands .= " $priority_id";
@@ -153,6 +180,25 @@ class admin_scheduler extends FO_Plugin
     $commu_status = fo_communicate_with_scheduler($commands, $response_from_scheduler, $this->error_info);
     return $response_from_scheduler . $this->error_info;
   } // OperationSubmit()
+
+  /**
+   * \brief start the scheduler
+   * \param $operation - null maeans start, others mean restart
+   */
+  function StartScheduler($operation = '')
+  {
+    if ($operation) {
+      $command = "/etc/init.d/fossology restart >/dev/null 2>&1";
+    }
+    else {
+      $command = "/etc/init.d/fossology start >/dev/null 2>&1";
+    }
+    $lastline = system($command, $rc);
+    if ($rc)
+    {
+      $this->error_info = " Failed to start the scheduler, return value is: $rc.";
+    }
+  }
 
   /**
    * \brief output the scheduler admin UI
@@ -179,6 +225,8 @@ class admin_scheduler extends FO_Plugin
         "agents" => array(_("Agents"), _("Show a list of enabled agents.")), 
         "verbose" => array(_("Verbose"), _("Change the verbosity level of the scheduler or a job.")), 
         "stop" => array(_("Shutdown Scheduler"), _("Shutdown the scheduler gracefully and stop all background processing.  This can take a while for all the agents to quit.")), 
+        "start" => array(_("Start Scheduler"), _("Start Scheduler.")), 
+        "restarts" => array(_("Restart Scheduler"), _("Restart Scheduler.")), 
         "restart" => array(_("Unpause a job"), _("Unpause a job.")), 
         "pause" => array(_("Pause a running job"), _("Pause a running job.")), 
         "priority" => array(_("Priority"), _("Change the priority of a job."))
