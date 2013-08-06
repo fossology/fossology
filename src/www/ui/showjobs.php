@@ -187,6 +187,26 @@ if (!empty($Row["job_upload_fk"]))
               pg_free_result($userresult);
             }
             break;
+        case 'jq_args':
+            $jq_args_temp = $Row[$Field];
+            $jq_args_show = $jq_args_temp;
+            if (!empty($jq_args_temp))
+            {
+              $pos = strpos($jq_args_temp, ' SVN ');
+              if ($pos) {
+                $jq_args_show = substr($jq_args_temp, 0, $pos + 4);
+              }
+              $pos = strpos($jq_args_temp, ' CVS ');
+              if ($pos) {
+                $jq_args_show = substr($jq_args_temp, 0, $pos + 4);
+              }
+              $pos = strpos($jq_args_temp, ' Git ');
+              if ($pos) {
+                $jq_args_show = substr($jq_args_temp, 0, $pos + 4);
+              }
+              $V .= $jq_args_show;
+            }
+            break;
 	    default:
             if (array_key_exists($Field, $Row)) $V .= htmlentities($Row[$Field]);
             break;
