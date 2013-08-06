@@ -8,7 +8,7 @@ fossjobs - Run fossology agents on an uploaded file.
 
 =head1 SYNOPSIS
 
-fossjobs [-a] [-h] [-u] [-v] [-A <string>] [-U <upload-id>] [-P priority] 
+fossjobs [-a] [-h] [-u] [-v] [-A <string>] [-U <upload-id>] [-D <upload-id>] 
          [--user <string>] [--password <string>] [-c configuration directory]
 
 =head1 DESCRIPTION
@@ -72,6 +72,13 @@ find an upload id use -u.  The upload-id string can be a
 comma-separated list of upload ids. Or, use 'ALL' to specify all
 upload ids.
 
+=item B<-D <upload-id>>
+
+The upload id to schedule the delete agents to work on.  To
+find an upload id use -u.  The string can either be 'ALL', a 
+string (the upload_id), or an array of upload_id's if multiple 
+-D's were specified.
+
 =back
 
 =head2 Examples
@@ -95,7 +102,11 @@ schedule all the agents using a priority of 5 on upload id 20
 
 schedule all upload id's with all default agents
 
-fossjobs --user USER --password PASSWORD -U ALL
+  fossjobs --user USER --password PASSWORD -U ALL
+
+schedule delete task for all upload id
+
+  fossjobs --user USER --password PASSWORD -D ALL
 
 =head1 Authors
 
