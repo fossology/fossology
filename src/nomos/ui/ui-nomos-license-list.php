@@ -254,7 +254,7 @@ class ui_license_list extends FO_Plugin {
 
     if ($RealNumber == $NomostListNum)
     {
-      $V .= _("<br><B>Warning: Just show $NomostListNum line of items, in order to get the whole list, please run fo_nomos_license_list from commend line.</B><br>");
+      $V .= _("<br><B>Warning: Only the last $NomostListNum lines are displayed.  To see the whole list, run fo_nomos_license_list from the command line.</B><br>");
     }
     if (!$this->OutputToStdout) return ($V);
     print "$V";
