@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -140,7 +140,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     pg_free_result($result);
 
     /** add parent uploadtree record */
-    $sql= "INSERT INTO uploadtree (parent, upload_fk, pfile_fk, lft, rgt, ufile_name) VALUES(NULL, $upload_pk, $pfile_pk_parent, 1, 2, 'license_test.file.parent');";
+    $sql= "INSERT INTO uploadtree (parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES(NULL, $upload_pk, $pfile_pk_parent, 33188, 1, 2, 'license_test.file.parent');";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
@@ -154,7 +154,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     pg_free_result($result);
 
     /** add child uploadtree record */
-    $sql= "INSERT INTO uploadtree (parent, upload_fk, pfile_fk, lft, rgt, ufile_name) VALUES($uploadtree_pk_parent, $upload_pk, $pfile_pk_child, 1, 2, 'license_test.file.child')";
+    $sql= "INSERT INTO uploadtree (parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES($uploadtree_pk_parent, $upload_pk, $pfile_pk_child, 33188, 1, 2, 'license_test.file.child')";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
