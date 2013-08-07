@@ -50,6 +50,11 @@ int verbose = 0;                      ///< turn on or off dumping to debug files
 int db_connected = 0;                 ///< indicates if the database is connected
 char* test_dir = "testdata/testdata"; ///< the location of the labeled and raw testing data
 
+#ifdef SVN_REV_S
+char BuildVersion[]="copyright build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#else
+char BuildVersion[]="copyright build version: NULL.\n";
+#endif
 /* ************************************************************************** */
 /* **** Utility Functions *************************************************** */
 /* ************************************************************************** */
@@ -725,11 +730,13 @@ void copyright_usage(char* arg)
 {
   fprintf(cout, "Usage: %s [options]\n", arg);
   fprintf(cout, "  Options are:\n");
-  fprintf(cout, "  -d  :: Turns verbose on, matches printed to Matches file.\n");
+  fprintf(cout, "  -h  :: help (print this message), then exit.\n");
+  fprintf(cout, "  -v  :: Turns verbose on, matches printed to Matches file.\n");
   fprintf(cout, "  -i  :: Initialize the database, the exit.\n");
   fprintf(cout, "  -C {filename} :: Scan {filename} from command line. Does not write to database.\n");
   fprintf(cout, "  -t  :: Run the accuracy tests, nothing written to database.\n");
   fprintf(cout, "  -V  :: print the version info, then exit.\n");
+  fprintf(cout, "  -c SYSCONFDIR :: Specify the directory for the system configuration.\n");
   fprintf(cout, "NOTE: -i, -c, and -t cause the agent to perform the request\n");
   fprintf(cout, "       and then exit without waiting for scheduler input\n");
 }
@@ -850,11 +857,11 @@ int main(int argc, char** argv)
   }
 
   /* parse the command line options */
-  while((c = getopt(argc, argv, "dc:C:tiV")) != -1)
+  while((c = getopt(argc, argv, "dc:C:tiVvh")) != -1)
   {
     switch(c)
     {
-      case 'd': /* debugging */
+      case 'v': /* debugging */
         mout = fopen("Matches", "w");
         if(!mout)
         {
@@ -885,9 +892,9 @@ int main(int argc, char** argv)
         PQfinish(pgConn);
         return 0;
       case 'V':
-        SVN_REV = fo_sysconfig("copyright", "SVN_REV");
-        VERSION = fo_sysconfig("copyright", "VERSION");
-        printf("copyright version %s (r%s).\n", VERSION, SVN_REV);
+        printf("%s", BuildVersion);
+        copyright_destroy(copy);
+        PQfinish(pgConn);
 	return 0;
       default: /* error, print usage */
         copyright_usage(argv[0]);

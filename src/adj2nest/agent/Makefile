@@ -23,7 +23,7 @@ CFLAGS_LOCAL= $(ALL_CFLAGS)
 EXE=adj2nest
 
 $(EXE): adj2nest.c $(FOLIB) $(VARS)
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+	$(CC) $< $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 all: $(EXE)
 

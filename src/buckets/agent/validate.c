@@ -117,7 +117,9 @@ FUNCTION void Usage(char *Name)
   printf("  -r   :: rerun buckets.\n");
   printf("  -t   :: uploadtree_pk, root of tree to scan.\n");
   printf("  -u   :: upload_pk to scan.\n");
-  printf("  -v   :: verbose (turns on copious debugging output)\n"); 
+  printf("  -v   :: verbose (turns on copious debugging output)\n");
+  printf("  -V   :: print the version info, then exit.\n");
+  printf("  -c SYSCONFDIR :: Specify the directory for the system configuration. \n");
   printf("  NOTE: -n and -p are mutually exclusive.  If both are specified\n");
   printf("         -p is used.  One of these is required.\n");
   printf("  NOTE: -t and -u are mutually exclusive.  If both are specified\n");
@@ -172,7 +174,7 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtre
      select bf_pk from bucket_container, bucket_def \
       where uploadtree_fk=%d and agent_fk=%d and bucketpool_fk=%d \
             and bucket_fk=bucket_pk limit 1",
-    pfile_pk, agent_pk, bucketpool_pk, bucket_pk, uploadtree_pk, agent_pk, bucketpool_pk);
+    pfile_pk, agent_pk, bucketpool_pk, uploadtree_pk, agent_pk, bucketpool_pk);
   }
   result = PQexec(pgConn, sqlbuf);
   if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;

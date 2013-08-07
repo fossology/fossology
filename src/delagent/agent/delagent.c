@@ -1,7 +1,7 @@
 /********************************************************
  delagent: Remove an upload from the DB and repository
 
- Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,6 +24,13 @@
  */
 #include "delagent.h"
 
+#ifdef SVN_REV_S
+char BuildVersion[]="delagent build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#else
+char BuildVersion[]="delagent build version: NULL.\n";
+#endif
+
+
 /**
  * \brief main function for the delagent
  *
@@ -36,6 +43,7 @@
  * +-----------------------+
  *
  * List or delete uploads.
+ *   -h   :: help (print this message), then exit.
  *   -i   :: Initialize the DB
  *   -u   :: List uploads IDs.
  *   -U # :: Delete upload ID.
@@ -44,6 +52,8 @@
  *   -F # :: Delete folder ID and all uploads under this folder.
  *   -T   :: TEST -- do not update the DB or delete any files (just pretend).
  *   -v   :: Verbose (-vv for more verbose).
+ *   -V   :: print the version info, then exit.
+ *   -c SYSCONFDIR :: Specify the directory for the system configuration.
  *   --user #  :: user name
  *   --password #  :: password
  *
@@ -87,7 +97,7 @@ int main (int argc, char *argv[])
     {0, 0, 0, 0}
   };
    
-  while ((c = getopt_long (argc, argv, "n:p:ifF:lL:sTuU:vc:",
+  while ((c = getopt_long (argc, argv, "n:p:ifF:lL:sTuU:vVc:h",
          long_options, &option_index)) != -1)
   {
     switch (c)
@@ -110,6 +120,7 @@ int main (int argc, char *argv[])
       case 'U': DelUpload=atol(optarg); GotArg=1; break;
       case 'v': Verbose++; break;
       case 'c': GotArg=1; break; /* handled by fo_scheduler_connect() */
+      case 'V': printf("%s", BuildVersion); PQfinish(db_conn); return(0);
       default:	Usage(argv[0]); exit(-1);
     }
   }

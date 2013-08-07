@@ -25,6 +25,12 @@
 #define _GNU_SOURCE
 #include "wget_agent.h"
 
+#ifdef SVN_REV_S
+char BuildVersion[]="wget_agent build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#else
+char BuildVersion[]="wget_agent build version: NULL.\n";
+#endif
+
 /**
  * \brief main function for the wget_agent
  *
@@ -93,7 +99,7 @@ int main  (int argc, char *argv[])
   fo_scheduler_connect(&argc, argv, &pgConn);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:Cc:")) != -1)
+  while((c = getopt(argc,argv,"d:Gg:ik:A:R:l:Cc:Vvh")) != -1)
   {
     switch(c)
     {
@@ -131,6 +137,10 @@ int main  (int argc, char *argv[])
       case 'C':
         CmdlineFlag = 1;
         break;
+      case 'v': break;
+      case 'V': 
+       printf("%s", BuildVersion);
+       SafeExit(0);
       default:
         Usage(argv[0]);
         SafeExit(-1);

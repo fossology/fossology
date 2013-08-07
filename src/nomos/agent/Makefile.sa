@@ -19,7 +19,6 @@ HDRS=nomos.h $(OBJS:.o=.h) _autodefs.h
 
 #CFLAGS_LOCAL= -DSTANDALONE -g -O2 -Wall -D_FILE_OFFSET_BITS=64
 CFLAGS_LOCAL= -DSTANDALONE -Wall -D_FILE_OFFSET_BITS=64
-DEFS= -DVERSION_S=\"$(VERSION)\" -DSVN_REV_S=\"$(SVN_REV)\"
 
 all: encode nomos
 

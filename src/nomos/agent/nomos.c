@@ -37,11 +37,17 @@
 #include "nomos_regex.h"
 #include "_autodefs.h"
 
+#ifdef SVN_REV_S
+char BuildVersion[]="nomos build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#else
+char BuildVersion[]="nomos build version: NULL.\n";
+#endif
+
 extern licText_t licText[]; /* Defined in _autodata.c */
 struct globals gl;
 struct curScan cur;
 int schedulerMode = 0; /**< Non-zero when being run from scheduler */
-
+int Verbose = 0; 
 
 /** shortname cache very simple nonresizing hash table */
 struct cachenode 
@@ -555,7 +561,7 @@ FUNCTION void Usage(char *Name) {
   printf("  -i   :: initialize the database, then exit.\n");
   printf("  -c   :: specify the directory for the system configuration.\n");
   printf("  -l   :: print full file path (command line only).\n");
-  /*    printf("  -v   :: verbose (-vv = more verbose)\n"); */
+  printf("  -v   :: verbose (-vv = more verbose)\n");
   printf(
       "  file :: if files are listed, print the licenses detected within them.\n");
   printf("  no file :: process data from the scheduler.\n");
@@ -858,7 +864,7 @@ int main(int argc, char **argv)
   }
 
   /* Process command line options */
-  while ((c = getopt(argc, argv, "Vhilc:")) != -1)
+  while ((c = getopt(argc, argv, "Vvhilc:")) != -1)
   {
     switch (c) {
       case 'c': break; /* handled by fo_scheduler_connect() */
@@ -869,14 +875,10 @@ int main(int argc, char **argv)
         /* set long command line output */
         gl.progOpts |= OPTS_LONG_CMD_OUTPUT;
         break;
+      case 'v':
+        Verbose++; break;
       case 'V':
-#ifdef VERSION_S
-        printf("nomos version %s (r%s).\n", VERSION_S, SVN_REV_S);
-#endif
-
-#ifndef VERSION_S
-        printf("nomos version %s (r%s).\n", VERSION, SVN_REV);
-#endif
+        printf("%s", BuildVersion);
         Bail(0);
       case 'h':
       default:

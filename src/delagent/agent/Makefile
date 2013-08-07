@@ -33,7 +33,7 @@ all: $(EXE)
 
 $(EXE): %: %.c $(FOLIB) delagent.o $(VARS) $(HDRS)
 	@echo "make delagent agent"
-	$(CC) $< delagent.o $(CFLAGS_LOCAL) -o $@
+	$(CC) $< delagent.o $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 delagent.o: util.c $(HDRS)
 	$(CC) -c $< $(CFLAGS_LOCAL) -o $@
@@ -53,7 +53,7 @@ coverage: delagent_cov.o
 	$(MAKE) -C $(TESTDIRS) coverage
 
 delagent_cov.o: util.c $(HDRS)
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 clean:
 	@echo "make delagent agent clean"

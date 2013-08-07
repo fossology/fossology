@@ -21,6 +21,12 @@
 #include "ununpack.h"
 #include "ununpack_globals.h"
 
+#ifdef SVN_REV_S
+char BuildVersion[]="ununpack build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#else
+char BuildVersion[]="ununpack build version: NULL.\n";
+#endif
+
 /***********************************************************************/
 int	main(int argc, char *argv[])
 {
@@ -46,7 +52,7 @@ int	main(int argc, char *argv[])
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
 
-  while((c = getopt(argc,argv,"ACc:d:FfHL:m:PQiqRr:T:t:U:vXx")) != -1)
+  while((c = getopt(argc,argv,"ACc:d:FfHhL:m:PQiqRr:T:t:U:VvXx")) != -1)
   {
     switch(c)
     {
@@ -94,11 +100,12 @@ int	main(int argc, char *argv[])
         Recurse = -1;
         Upload_Pk = optarg; 
         break;
+      case 'V': printf("%s", BuildVersion);SafeExit(0);
       case 'v':	Verbose++; break;
       case 'X':	UnlinkSource=1; break;
       case 'x':	UnlinkAll=1; break;
       default:
-        Usage(argv[0], Version);
+        Usage(argv[0], BuildVersion);
         SafeExit(25);
     }
   }

@@ -37,6 +37,11 @@ int debug = 0;
 int DEB_SOURCE;
 int DEB_BINARY;
 
+#ifdef SVN_REV_S
+char BuildVersion[]="buckets build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#else
+char BuildVersion[]="buckets build version: NULL.\n";
+#endif
 
 /****************************************************/
 int main(int argc, char **argv) 
@@ -79,7 +84,7 @@ int main(int argc, char **argv)
   user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "rin:p:t:u:vc:")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "rin:p:t:u:vc:hV")) != -1) 
   {
     switch (cmdopt) 
     {
@@ -140,6 +145,10 @@ int main(int argc, char **argv)
       case 'r': 
             rerun = 1; /** rerun bucket */
             break;
+      case 'V': /* print version info */
+            printf("%s", BuildVersion);           
+            PQfinish(pgConn);
+            exit(0);
       default:
             Usage(argv[0]);
             PQfinish(pgConn);

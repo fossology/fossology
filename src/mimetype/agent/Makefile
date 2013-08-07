@@ -17,7 +17,7 @@ all: $(EXE)
 
 $(EXE): mimetype.c $(FOLIB) libmimetype.a $(DB) $(REPO) $(VARS)
 	@echo "make $(EXE)"
-	$(CC) mimetype.c libmimetype.a $(CFLAGS_LOCAL) -o $@
+	$(CC) mimetype.c libmimetype.a $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 install: all
 	@echo "make $(EXE) install"
@@ -39,7 +39,7 @@ $(OBJECTS): %.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL)
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
+	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEFS) -o $@
 
 libmimetype.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)

@@ -33,10 +33,6 @@
 int Verbose = 0;
 PGconn* db_conn = NULL;        // the connection to Database
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
-#endif /* SVN_REV */
-
 /** Array of RPMTAG */
 int tag[15] = { RPMTAG_NAME,
     RPMTAG_EPOCH,
@@ -975,5 +971,6 @@ void Usage (char *Name)
   printf("  -C   :: run from command line.\n");
   printf("  file :: if files are rpm package listed, display their package information.\n");
   printf("  no file :: process data from the scheduler.\n");
+  printf("  -V   :: print the version info, then exit.\n");
 } /* Usage() */
 

@@ -32,7 +32,7 @@ all: $(EXE)
 
 $(EXE): main.c $(FOLIB) pkgagent.o $(VARS) $(HDRS)
 	@echo "make pkgagent agent"
-	$(CC) main.c pkgagent.o  $(CFLAGS_LOCAL) -o $@
+	$(CC) main.c pkgagent.o  $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 pkgagent.o: pkgagent.c pkgagent.h
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \

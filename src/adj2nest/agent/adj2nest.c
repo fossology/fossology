@@ -61,8 +61,10 @@
 #define MAXCMD 4096
 char SQL[256];
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
+#ifdef SVN_REV_S
+char BuildVersion[]="adj2nest build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#else
+char BuildVersion[]="adj2nest build version: NULL.\n";
 #endif
 
 PGconn *pgConn = NULL;  // Database connection
@@ -495,12 +497,15 @@ int UpdateUpload(long UploadPk)
 void    Usage   (char *Name)
 {
   printf("Usage: %s [options] [id [id ...]]\n",Name);
-  printf("  -i        :: initialize the database, then exit.\n");
-  printf("  -a        :: run on ALL uploads that have no nested set records.\n");
-  printf("  -c SYSCONFDIR :: FOSSology configuration directory.\n");
-  printf("  -u        :: list all upload ids, then exit.\n");
-  printf("  no file   :: process upload ids from the scheduler.\n");
-  printf("  id        :: process upload ids from the command-line.\n");
+  printf("  -h            :: help (print this message), then exit.\n");
+  printf("  -i            :: initialize the database, then exit.\n");
+  printf("  -a            :: run on ALL uploads that have no nested set records.\n");
+  printf("  -c SYSCONFDIR :: Specify the directory for the system configuration.\n");
+  printf("  -v            :: verbose (-vv = more verbose).\n");
+  printf("  -u            :: list all upload ids, then exit.\n");
+  printf("  no file       :: process upload ids from the scheduler.\n");
+  printf("  id            :: process upload ids from the command-line.\n");
+  printf("  -V            :: print the version info, then exit.\n");
 } /* Usage() */
 
 /*********************************************************/
@@ -519,7 +524,7 @@ int	main	(int argc, char *argv[])
   uploads_to_scan = calloc(argc, sizeof(long));
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"aciuv")) != -1)
+  while((c = getopt(argc,argv,"aciuvVh")) != -1)
   {
     switch(c)
     {
@@ -536,6 +541,10 @@ int	main	(int argc, char *argv[])
       /* list ids */
       ListUploads();
       PQfinish(pgConn);
+      return(0);
+    case 'V':
+      printf("%s", BuildVersion);
+      PQfinish(pgConn); 
       return(0);
     default:
       Usage(argv[0]);

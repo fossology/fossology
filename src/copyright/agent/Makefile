@@ -71,10 +71,10 @@ pair.o: %.o: %.c %.h cvector.h
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
 main.o: %.o: %.c copyright.h cvector.h pair.h sql_statements.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
 
 $(COVERAGE): %_cov.o: %.c 
-	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEF) -o $@
+	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
 
 #######################
 # install build rules #

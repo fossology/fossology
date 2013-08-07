@@ -30,6 +30,12 @@
  */
 #include "pkgagent.h"
 
+#ifdef SVN_REV_S
+char BuildVersion[]="pkgagent build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#else
+char BuildVersion[]="pkgagent build version: NULL.\n";
+#endif
+
 /**
  * \brief main function for the pkgagent
  *
@@ -94,7 +100,7 @@ int	main	(int argc, char *argv[])
   Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"ic:Cvh")) != -1)
+  while((c = getopt(argc,argv,"ic:CvVh")) != -1)
   {
     switch(c)
     {
@@ -109,6 +115,10 @@ int	main	(int argc, char *argv[])
       case 'C':
         CmdlineFlag = 1; 
         break;        
+      case 'V':
+        printf("%s", BuildVersion);
+        PQfinish(db_conn);
+        return(0);
       default:
         Usage(argv[0]);
         PQfinish(db_conn);

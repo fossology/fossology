@@ -1,5 +1,5 @@
 # FOSSology Makefile - agent/nomos
-# Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2006-2013 Hewlett-Packard Development Company, L.P.
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
@@ -27,7 +27,7 @@ nomos: nomos.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@
 
 nomos.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) -c $< $(CFLAGS_LOCALO)
+	$(CC) -c $< $(CFLAGS_LOCALO) $(DEFS)
 	
 nomos-gl: nomos-g.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@

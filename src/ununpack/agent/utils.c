@@ -1563,12 +1563,13 @@ void deleteTmpFiles(char *dir)
  **/
 void	Usage	(char *Name, char *Version)
 {
-  fprintf(stderr,"Universal Unpacker, version %s, compiled %s %s\n",
+  fprintf(stderr,"Universal Unpacker, %s, compiled %s %s\n",
       Version,__DATE__,__TIME__);
   fprintf(stderr,"Usage: %s [options] file [file [file...]]\n",Name);
   fprintf(stderr,"  Extracts each file.\n");
   fprintf(stderr,"  If filename specifies a directory, then extracts everything in it.\n");
   fprintf(stderr," Unpack Options:\n");
+  fprintf(stderr,"  -h     :: help (print this message), then exit.\n");
   fprintf(stderr,"  -C     :: force continue when unpack tool fails.\n");
   fprintf(stderr,"  -d dir :: specify alternate extraction directory. %%U substitutes a unique ID.\n");
   fprintf(stderr,"            Default is the same directory as file (usually not a good idea).\n");
@@ -1591,6 +1592,7 @@ void	Usage	(char *Name, char *Version)
   fprintf(stderr,"  -q     :: quiet (generate no output).\n");
   fprintf(stderr,"  -U upload_pk :: upload to unpack (implies -RQ). Writes to db.\n");
   fprintf(stderr,"  -v     :: verbose (-vv = more verbose).\n");
+  fprintf(stderr,"  -V     :: print the version info, then exit.\n");
   fprintf(stderr,"Currently identifies and processes:\n");
   fprintf(stderr,"  Compressed files: .Z .gz .bz .bz2 upx\n");
   fprintf(stderr,"  Archives files: tar cpio zip jar ar rar cab\n");

@@ -22,10 +22,6 @@
 
 #include "finder.h"
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
-#endif
-
 char SQL[MAXCMD];
 
 /** for the DB */
@@ -522,9 +518,10 @@ void Usage(char *Name)
   printf("Usage: %s [options] [file [file [...]]\n",Name);
   printf("  -h   :: help (print this message), then exit.\n");
   printf("  -i   :: initialize the database, then exit.\n");
-  //printf("  -v   :: verbose (-vv = more verbose)\n");
+  printf("  -v   :: verbose (-vv = more verbose)\n");
   printf("  -c   :: Specify the directory for the system configuration.\n");
   printf("  -C   :: run from command line.\n");
+  printf("  -V   :: print the version info, then exit.\n");
   printf("  file :: if files are listed, display their mimetype.\n");
   printf("  no file :: process data from the scheduler.\n");
 } /* Usage() */

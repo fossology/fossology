@@ -37,6 +37,13 @@
  */
 
 #include "finder.h"
+
+#ifdef SVN_REV_S
+char BuildVersion[]="mimetype build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#else
+char BuildVersion[]="mimetype build version: NULL.\n";
+#endif
+
 /**
  * \brief Get the mimetype for a package
  * \param argc the number of command line arguments
@@ -69,7 +76,7 @@ int main(int argc, char *argv[])
   fo_scheduler_connect(&argc, argv, &pgConn);
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"iCc:h")) != -1)
+  while((c = getopt(argc,argv,"iCc:hvV")) != -1)
   {
     switch(c)
     {
@@ -82,6 +89,13 @@ int main(int argc, char *argv[])
       case 'C':
         CmdlineFlag = 1;
         break;
+      case 'v':
+        agent_verbose++;
+        break;
+      case 'V':
+        printf("%s", BuildVersion);
+        PQfinish(pgConn);
+        return(0);
       default:
         Usage(argv[0]);
         PQfinish(pgConn);

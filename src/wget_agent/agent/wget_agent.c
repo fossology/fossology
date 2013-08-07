@@ -24,10 +24,6 @@
 
 #include "wget_agent.h"
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
-#endif
-
 char SQL[MAXCMD];
 
 /* for the DB */
@@ -725,6 +721,7 @@ void GetProxy()
 void Usage(char *Name)
 {
   printf("Usage: %s [options] [OBJ]\n",Name);
+  printf("  -h  :: help (print this message), then exit.\n");
   printf("  -i  :: Initialize the DB connection then exit (nothing downloaded)\n");
   printf("  -g group :: Set the group on processed files (e.g., -g fossy).\n");
   printf("  -G  :: Do NOT copy the file to the gold repository.\n");
@@ -735,6 +732,8 @@ void Usage(char *Name)
   printf("  -l depth :: Specify recursion maximum depth level depth.  The default maximum depth is 5.\n");
   printf("  -c configdir :: Specify the directory for the system configuration.\n");
   printf("  -C :: run from command line.\n");
+  printf("  -v :: verbose (-vv = more verbose).\n");
+  printf("  -V :: print the version info, then exit.\n");
   printf("  OBJ :: if a URL is listed, then it is retrieved.\n");
   printf("         if a file is listed, then it used.\n");
   printf("         if OBJ and Key are provided, then it is inserted into\n");
