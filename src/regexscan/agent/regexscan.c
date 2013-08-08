@@ -19,11 +19,13 @@
  -------------------------------------------
 
  regexscan - A Fossology agent creation "Tutorial" in multiple stages.
-   This is stage 1 and demonstrates the fundamental agent requirements:
+   This is stage 2 and demonstrates the fundamental agent requirements:
 
     1. Connect to database
     2. Connect to Scheduler
-    3. Terminate
+    3. Process -r as a regex argument
+    4. Process filename and report regex scan results
+    5. Terminate
 
  ***************************************************************/
 #include <stdlib.h>
@@ -53,6 +55,71 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
 PGconn *pgConn = NULL;  // Database connection
 
 /*********************************************************
+ *********************************************************/
+
+int regexScan(char *regexStr, FILE *scanFilePtr, char *fileName)
+{
+  int retCode;
+
+  regex_t regex;
+  bool match = false;   /* regex match found indicator */
+
+  char msgBuff[250];
+  char textBuff[2000];  /* line buffer for regex match processing */
+
+  regmatch_t  rm[1];
+  int  lineCount = 0;
+
+  /* Compile the regex for improved performance */
+  retCode = regcomp(&regex, regexStr, REG_ICASE+REG_EXTENDED);
+  if (retCode)
+  {
+    fprintf(stderr, "regex %s failed to compile\n", regexStr);
+    return 1;
+  }
+
+  /* Now scan the file for regex line by line */
+  while (fgets(textBuff, 1024, scanFilePtr) != NULL)
+  {
+    lineCount++;    /* Another line read */
+    retCode = regexec(&regex, textBuff, 1, rm, 0);  /* nmatch = 1, matchptr = rm */
+    if (!retCode)
+    {
+      sprintf(msgBuff, "%s: regex found at line %d at position %d. -> %.*s \n", fileName, lineCount, rm[0].rm_so+1, rm[0].rm_eo-rm[0].rm_so, textBuff + rm[0].rm_so);
+      puts(msgBuff);
+      if (!match)
+      {
+        match = true;   /* Indicate we've had at least one match */
+      }
+    }
+    else if (retCode == REG_NOMATCH)
+    {
+      /* Skip the "no match" retCode */
+    }
+    else
+    {
+      regerror(retCode, &regex, msgBuff, sizeof(msgBuff));
+      fprintf(stderr, "Out of memory? - regex match failure: %s\n", msgBuff);
+      fclose(scanFilePtr);
+      return 3;
+    }
+  }
+
+  /* Report if no matches found */
+  if (!match)
+  {
+    sprintf(msgBuff, "%s: %s not found\n", fileName, regexStr);
+    puts(msgBuff);
+  }
+
+  /* clean up and exit */
+  regfree(&regex);
+  fclose(scanFilePtr);
+  return 0;
+}
+
+
+/*********************************************************
  Usage():
  *********************************************************/
 void    Usage   (char *Name)
@@ -69,23 +136,18 @@ void    Usage   (char *Name)
 /*********************************************************/
 int	main	(int argc, char *argv[])
 {
-#ifdef REGEX_DEBUG
   int index, nonoptargs = 0;
-#endif
 
-  int  c, retCode;
-  bool match = false;   /* regex match found indicator */ 
+  int  c;
 
   regex_t regex;
-
-  char msgBuff[250];
   char regexStr[1024];  /* string storage for the regex expression */
-  char textBuff[2000];  /* line buffer for regex match processing */
 
-  regmatch_t  rm[1];
   FILE *scanFilePtr;
   char fileName[1000];
-  int  lineCount = 0;
+
+  int   user_pk;
+  long  UploadPK=-1;
 
   char *SVN_REV;
   char *VERSION;
@@ -129,70 +191,40 @@ int	main	(int argc, char *argv[])
     }
   }
 
-#ifdef REGEX_DEBUG
   /* process filename after switches */
   for (index = optind; index < argc; index++)
   {
+/*  process no option arguments
     printf("Non-option argument %s\n", argv[index]);  /* diag display */
     nonoptargs++;
   }
-#endif
 
-  /* Compile the regex for improved performance */
-  retCode = regcomp(&regex, regexStr, REG_ICASE+REG_EXTENDED);
-  if (retCode)
+  if (nonoptargs == 0)
   {
-    fprintf(stderr, "regex %s failed to compile\n", regexStr);
-    return 1;
-  }
+    /* Assume it was a scheduler call */
+    user_pk = fo_scheduler_userID();
+    while(fo_scheduler_next())
+    {
+      UploadPK = atol(fo_scheduler_current());
 
-  /* File access initialization */
-  sprintf(fileName, "%s", argv[optind]);      /* Grab first non-switch argument as filename */
-  scanFilePtr = fopen(fileName, "r");
-  if (!scanFilePtr)
-  {
-    fprintf(stderr, "failed to open text inout file %s\n", fileName);
-    regfree(&regex);
-    return 2;
-  }
-
-  /* Now scan the file for regex line by line */
-  while (fgets(textBuff, 1024, scanFilePtr) != NULL)
-  {
-    lineCount++;    /* Another line read */
-    retCode = regexec(&regex, textBuff, 1, rm, 0);  /* nmatch = 1, matchptr = rm */
-    if (!retCode)
-    {
-      sprintf(msgBuff, "%s: regex found at line %d at position %d. -> %.*s \n", fileName, lineCount, rm[0].rm_so+1, rm[0].rm_eo-rm[0].rm_so, textBuff + rm[0].rm_so);
-      puts(msgBuff);
-      if (!match)
-      {
-        match = true;   /* Indicate we've had at least one match */
-      }
-    }
-    else if (retCode == REG_NOMATCH)
-    {
-      /* Skip the "no match" retCode */
-    }
-    else
-    {
-      regerror(retCode, &regex, msgBuff, sizeof(msgBuff));
-      fprintf(stderr, "Out of memory? - regex match failure: %s\n", msgBuff);
-      fclose(scanFilePtr);
-      return 3;
+      printf("UploadPK is: %ld\n", UploadPK);
     }
   }
-
-  /* Report if no matches found */
-  if (!match)
+  else
   {
-    sprintf(msgBuff, "%s: %s not found\n", fileName, regexStr);
-    puts(msgBuff);
-  }
+    /* File access initialization */
+    sprintf(fileName, "%s", argv[optind]);      /* Grab first non-switch argument as filename */
+    scanFilePtr = fopen(fileName, "r");
+    if (!scanFilePtr)
+    {
+      fprintf(stderr, "failed to open text inout file %s\n", fileName);
+      regfree(&regex);
+      return 2;
+    }
 
-  /* clean up and exit */
-  regfree(&regex);
-  fclose(scanFilePtr);
+  /* Call scan function */
+  regexScan(regexStr, scanFilePtr, fileName);
+  }
 
   PQfinish(pgConn);
   fo_scheduler_disconnect(0);
