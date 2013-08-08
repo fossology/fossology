@@ -71,8 +71,8 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
     }
     // run it
     $last = exec("$EXE_PATH -h 2>&1", $out, $rtn);
-    $this->assertEquals($usage, $out[1]); // check if executable file delagent is exited
-    $this->assertEquals($usageL, $out[7]); // check if the option -L removed
+    $this->assertEquals($usage, $out[0]); // check if executable file delagent is exited
+    $this->assertEquals($usageL, $out[6]); // check if the option -L removed
     $PG_CONN = pg_connect("host=localhost port=5432 dbname=" . $DB_NAME . " user=fossy password=fossy")
                or die("Could not connect");
     $EXE_PATH = $EXE_PATH." -c $db_conf";

@@ -1,7 +1,7 @@
 <?php
 
 /*
- Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -49,9 +49,9 @@ class cliParamsTest extends PHPUnit_Framework_TestCase {
 		//print_r($usageOut) . "\n";
     // Check a couple of options for sanity
 		$usage = 'Usage: ../../agent/copyright [options]';
-    $dashD = '-d  :: Turns verbose on, matches printed to Matches file.';
-    $this->assertEquals($usage, $usageOut[1]);
-    $this->assertEquals($dashD, trim($usageOut[3]));
+    $dashv = '-v  :: Turns verbose on, matches printed to Matches file.';
+    $this->assertEquals($usage, $usageOut[0]);
+    $this->assertEquals($dashv, trim($usageOut[3]));
 		return;
 	}
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -70,7 +70,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     }
     // run it
     $last = exec("$WGET_PATH -h 2>&1", $out, $rtn);
-    $this->assertEquals($usage, $out[1]); // check if executable file wget_agent is exited
+    $this->assertEquals($usage, $out[0]); // check if executable file wget_agent is exited
 
     $WGET_PATH = $WGET_PATH." -C -c $db_conf";
   }
