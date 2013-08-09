@@ -454,6 +454,7 @@ int GetVersionControl()
   char TempFileDirectory[MAXCMD];
   char DeleteTempDirCmd[MAXCMD];
   int rc = 0;
+  int flag = 0; // 0: default; 1: home is null before setting, should rollback
 
   /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
   sprintf(TempFileDirectory, "%s.dir", GlobalTempFile);
@@ -468,13 +469,24 @@ int GetVersionControl()
   }
   else if (0 == strcmp(GlobalType, Type[1]))
   {
+    char *homeenv = NULL;
+    homeenv = getenv("HOME");
+    if(!(homeenv && homeenv[0]))
+    {
+      setenv("HOME", "/srv/fossology", 0);
+      flag = 1;
+    }
     if (GlobalProxy[0] && GlobalProxy[0][0])
-      sprintf(command, "git config --global http.proxy %s && git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalProxy[0], GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
+      sprintf(command, "git config --global http.proxy %s && git clone %s %s %s  && rm -rf %s/.git", GlobalProxy[0], GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
     else
       sprintf(command, "git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
   }
 
   rc = system(command);
+  if (flag) // rollback
+  {
+    unsetenv("HOME");
+  }
 
   if (rc != 0)
   {
