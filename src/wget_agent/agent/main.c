@@ -165,6 +165,9 @@ int main  (int argc, char *argv[])
   /* Get the Agent Key from the DB */
   Agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), GlobalUploadKey, agent_rev, agent_desc);
 
+  /** get proxy */
+  GetProxy();
+
   /* Run from the command-line (for testing) */
   for(arg=optind; arg < argc; arg++)
   {
@@ -221,9 +224,6 @@ int main  (int argc, char *argv[])
         memset(TempDir,'\0',MAXCMD);
         snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
         struct stat Status;
-
-        /** get proxy */
-        GetProxy();
 
         if (GlobalType[0])
         {
