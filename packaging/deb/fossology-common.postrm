@@ -26,10 +26,18 @@ case "$1" in
        echo "removing FOSSology user..."
        deluser --system fossy || true
        echo "removing FOSSology group..."
-       delgroup --system fossy || true
-       # we can't remove the repo because we can't know if that's what
-       # the user wants
-       echo "NOTE: Not removing the FOSSology repository, please clean up by hand"
+       delgroup fossy || true
+       # purge will remove the repository directory
+       echo "removing the FOSSology repository..."
+       if [ -d /srv/fossology/repository ]; then
+         rm -rf /srv/fossology
+         if [ $? != 0 ]; then
+           echo "ERROR: failed to delete repository"
+           exit 1
+         fi
+       else
+        echo "NOTE: repository does not exist, so not deleting"
+       fi
     ;;
 
     remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)

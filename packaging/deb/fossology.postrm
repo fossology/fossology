@@ -21,6 +21,10 @@ set -e
 
 case "$1" in
     purge)
+        # clean up /var/lib/fossology
+        if [ -d /var/lib/fossology ]; then
+          rm -rf /var/lib/fossology
+        fi
 	# clean up /etc/init.d/fossology
 	if [ -e /etc/init.d/fossology ]; then
            rm -rf /etc/init.d/fossology || echo "ERROR: could not remove /etc/init.d/fossology"
