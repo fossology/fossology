@@ -932,6 +932,7 @@ void Usage (char *Name)
   fprintf(stderr,"  -T   :: TEST -- do not update the DB or delete any files (just pretend)\n");
   fprintf(stderr,"  -v   :: Verbose (-vv for more verbose)\n");
   fprintf(stderr,"  -c # :: Specify the directory for the system configuration\n");
+  fprintf(stderr,"  -V   :: print the version info, then exit.\n");
   fprintf(stderr,"  --user|-n # :: user name\n");
   fprintf(stderr,"  --password|-p # :: password\n");
 } /* Usage() */
