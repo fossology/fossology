@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -347,7 +347,7 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
           $agent_jq_pk = $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
           if ($agent_jq_pk <= 0) 
           {
-            echo "WARNING: Scheduling failed for Agent $agentname\n";
+            echo "WARNING: Scheduling failed for Agent $agentname, upload_pk is: $upload_pk, job_pk is:$job_pk\n";
             echo "WARNING message: $ErrorMsg\n";
           } 
           else if ($Verbose) 
