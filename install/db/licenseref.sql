@@ -34273,6 +34273,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 --End of License', 'http://www.opensource.org/licenses/attribution', NULL, NULL, NULL, 'Attribution Assurance License', NULL, NULL, NULL, '', NULL, false, false, false, '96414e50c7a8559d63bc73e3a44b6640', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (494, 'CATOSL', 'CATOSL is referenced without a version number. Please look up CATOSL in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'CATOSL', NULL, NULL, NULL, '', NULL, false, false, false, '01bb42e20f6cc95eb53ce8786b6abadb', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (427, 'SAX-PD', 'Copyright Status 
 
 SAX is free! 
@@ -36340,6 +36341,10 @@ A "contributor" is any person that distributes its contribution under this licen
 (E) If you distribute any portion of the software in source code form, you may do so only under this license by including a complete copy of this license with your distribution. If you distribute any portion of the software in compiled or object code form, you may only do so under a license that complies with this license. 
 (F) The software is licensed "as-is." You bear the risk of using it. The contributors give no express warranties, guarantees, or conditions. You may have additional consumer rights under your local laws which this license cannot change. To the extent permitted under your local laws, the contributors exclude the implied warranties of merchantability, fitness for a particular purpose and non-infringement.', 'http://www.microsoft.com/opensource/licenses.mspx', NULL, NULL, NULL, 'Microsoft Reciprocal License', NULL, NULL, NULL, '', NULL, false, false, false, '4ac19d26a628a64584d15daec29258b6', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (504, 'GPL', 'GPL is referenced without a version number. Please look up GPL in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'GNU General Public License', NULL, NULL, NULL, '', NULL, false, false, false, '336c692e88117f051e16e8c67af502a9', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (493, 'FSF', 'Copyright (C) 2003, 2006-2007 Free Software Foundation, Inc.
+This file is free software; the Free Software Foundation
+gives unlimited permission to copy and/or distribute it,
+with or without modifications, as long as this notice is preserved.', '', NULL, NULL, NULL, 'Free Software Foundation', NULL, NULL, NULL, '', NULL, false, false, false, '34518a40552bca97ec5767a38759cea3', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (439, 'GPL-3.0-with-autoconf-exception', 'insert GPL v3 text here 
 
 AUTOCONF CONFIGURE SCRIPT EXCEPTION 
@@ -37992,67 +37997,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://www.openssl.org/~appro/cryptogams/', NULL, NULL, NULL, 'Cryptogams', NULL, NULL, NULL, '', NULL, false, false, false, 'cd1a147bce6b38197f6fd3eb1c566c28', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (335, 'RealNetworks-EULA', 'REALNETWORKS, INC.
-REAL LICENSING PROGRAM
-LICENSE SUPPLEMENT
-REDISTRIBUTION NOT PERMITTED
-IMPORTANT: READ CAREFULLY:
-This RealNetworks, Inc. License Supplement (“License Supplement”) is a legal
-agreement between you (either an individual or an entity, “You”) and RealNetworks, Inc.
-and its suppliers and licensors (collectively, “RealNetworks”) for the products (the
-“Software”) listed on the Real Licensing Program invoice (the “Invoice”) provided to
-You by RealNetworks.
-BY CLICKING ON “ACCEPT”, INSTALLING, COPYING OR OTHERWISE USING
-THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS
-LICENSE SUPPLEMENT. IF YOU DO NOT AGREE TO THE TERMS OF THIS
-LICENSE SUPPLEMENT, CLICK THE “I DO NOT ACCEPT” TO TERMINATE THE
-SOFTWARE INSTALLATION PROCESS.
-YOU AGREE THAT YOUR USE OF THE SOFTWARE ACKNOWLEDGES THAT
-YOU HAVE READ THIS LICENSE SUPPLEMENT, UNDERSTAND IT, AND
-AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
-1. SUPPLEMENT. This License Supplement supplements the End User License
-Agreement(s) accompanying the Software (“EULA”). In the event of any conflict
-between the terms of this License Supplement and any EULA, the terms of this License
-Supplement will control. Except for the provisions set forth in this License Supplement,
-all EULA provisions will remain in full force and effect.
-2. ELIGIBILITY. Notwithstanding anything to the contrary in the EULA, the Software
-covered by the EULA and this License Supplement are available only to the following
-types of entities, and You represent and warrant that You are one of the following:
-(a) Corporations, educational institutions, government organizations or not-for-profit
-organizations who deploy the server for their own internal non-commercial use. Wireless
-Network service providers or wireless network operators may not deploy this Software
-within their network(s). (b) End User Network Service Providers of less than 200,000
-subscribers. As used in this License Supplement, "End User Network Service Providers"
-means an entity that provides data network services to consumers or individuals. (c )
-Media Companies with less than fifty million dollars ($50,000,000) in annual revenue.
-As used in this License Supplement, "Media Company" means an entity that provides
-text, audio or video programming to distributors or direct to consumers in exchange for
-fees or based on an advertising business model. Notwithstanding the above, this License
-Supplement is not available to an organization that is using this Software to provide
-content to consumers via an Operator. As used in this License Supplement, "Operator"
-means an organization that provides voice and/or data network services to consumers and
-businesses through wireless wide area network technologies, including but not limited to
-GPRS, Edge, CDMA2000, UMTS, EVDO and WiMax; eligible organizations may either
-own or lease network infrastructure (MVNO).
-The Software is not available to organizations that provide network services to consumers
-or businesses or provide content aggregation and digital media application services to
-businesses.
-3. SEATS. Notwithstanding anything to the contrary in the EULA, You may install the
-number of copies of the Software sufficient to distribute content up to the number of seats
-specified in the applicable Invoice. You may increase the number of seats by purchasing
-additional license rights from RealNetworks.
-4. TERMINATION. This License Supplement and Your right to use the Software
-automatically terminate if You fail to comply with any material provision of this License
-Supplement. No notice will be required from RealNetworks to effect such termination.
-You and RealNetworks may terminate the EULA pursuant to the termination provisions
-set forth therein. Any termination of a EULA automatically terminates this License
-Supplement with respect to the Software covered by such EULA.
-Copyright © 1995-2010 RealNetworks, Inc. and/or its suppliers. 2601 Elliott Ave., Suite
-1000, Seattle, Washington 98121 U.S.A. This product may incorporate one or more of
-the following: U.S. Patent # 5,793,980; U.S. Patent # 5,917,835; U.S. Patent # 6,151,634.
-Other U.S. patents pending. All rights reserved. RealNetworks, Helix, RealPlayer,
-RealAudio, and RealVideo are trademarks or registered trademarks of RealNetworks,
-Inc.', 'http://www.realnetworks.com/uploadedFiles/Support/helix-support/eula-Real-LicProg-Perp-Supp.pdf', NULL, NULL, NULL, 'RealNetworks Real Licensing Program License Supplement', NULL, NULL, NULL, '', NULL, false, false, false, '90596696ef8824e2674cfcc66521d586', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (495, 'CC-BY-SA', 'CC-BY-SA is referenced without a version number. Please look up CC-BY-SA in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'CC-BY-SA', NULL, NULL, NULL, '', NULL, false, false, false, '21e1ac9adeaa3c88c23cafea292cb78e', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (347, 'Yahoo-EULA', 'Software License
 
 Welcome to Yahoo! software (the "Yahoo! Software"). By clicking the "I Agree" button below, you agree to these software license terms (the "Software License") that supplement the Yahoo! Terms of Service ("TOS") below, also located at http://info.yahoo.com/legal/us/yahoo/utos/utos-173.html. If you disagree with any of the terms below, Yahoo! does not grant you a license to use the Yahoo! Software; click the "I Disagree" or "Cancel" button to exit the installer.
@@ -38673,6 +38618,22 @@ Bison Exception
 As a special exception, you may create a larger work that contains part or all of the Bison parser skeleton and distribute that work under terms of your choice, so long as that work isn''t itself a parser generator using the skeleton or a modified version thereof as a parser skeleton. Alternatively, if you modify or redistribute the parser skeleton itself, you may (at your option) remove this special exception, which will cause the skeleton and the resulting Bison output files to be licensed under the GNU General Public License without this special exception. 
 
 This special exception was added by the Free Software Foundation in version 2.2 of Bison.', '', NULL, NULL, NULL, 'GNU General Public License v3.0+ w/Bison exception', NULL, NULL, NULL, '', NULL, false, true, false, '3e8f2aa0d5021f314afa6885eb3d3360', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (496, 'BSD-3-Clause-Severability', 'BSD-3-Clause-Severability is a BSD-style with a severability clause. Please refer to the BSD-3-Clause in the License Admin.', '', NULL, NULL, NULL, 'BSD-3-Clause-Severability', NULL, NULL, NULL, '', NULL, false, false, false, '17cfd56ba41dd29abaad39b06bb18f1d', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (497, 'CCLRC', 'CCLRC License for CCLRC Software forming part of the Climate Data Analysis Tools Package
+The Council for the Central Laboratory of the Research Councils (CCLRC) grants any person who obtains a copy of this software (the Software), free of charge, the non-exclusive, worldwide right to use, copy, modify, distribute and sub-license the use of the Software on the terms and conditions appearing below: 
+1)The Software may be used only as part of the Climate Data Analysis Tools Package, made available to users free of charge. 
+2)The CCLRC copyright notice and any other notice placed by CCLRC on the Software must be reproduced on every copy of the Software, and on every Derived Work. A Derived Work means any modification of, or enhancement or improvement to, any of the Software, and any software or other work developed or derived from any of the Software. 3)CCLRC gives no warranty and makes no representation in relation to the Software. The Licensee and anyone to whom the Licensee makes the Software or any Derived Work available, use the Software at their own risk. 
+4)All warranties, conditions, terms, undertakings and obligations on the part of CCLRC, implied by statute, common law, custom, trade usage, course of dealing or in any other way are excluded to the fullest extent permitted by law.  
+5)Subject to condition 6, CCLRC will not be liable for: 
+            a)any loss of profits, loss of revenue, loss or corruption of data, loss of contracts or opportunity, loss of savings or third party claims (in each case whether direct or indirect); 
+            b)any indirect loss or damage arising out of or in connection with the Software; 
+            c)any direct loss or damage arising out of, or in connection with, the Software in each case, whether that loss arises as a result of CCLRCâ€™s negligence, or in any other way, even if CCLRC has been advised of the possibility of that loss arising, or if it was within CCLRC''s contemplation. 
+6)None of these conditions limits or excludes CCLRC''s liability for death or personal injury caused by its negligence or for any fraud, or for any sort of liability that, by law, cannot be limited or excluded. 
+7)These conditions set out the entire agreement relating to the Software. The licensee acknowledges that it has not relied on any warranty, representation, statement, agreement or undertaking given by CCLRC, and waives any claim in respect of any of the same. 
+8)The rights granted above will cease immediately on any breach of these conditions and the licensee will destroy all copies of the Software and any Derived Work in its control or possession. Conditions 3, 4, 5, 6, 7, 8, 9 and 10 will survive termination and continue indefinitely. 
+9)The licence and these conditions are governed by, and are to be construed in accordance with, English law. The English Courts will have exclusive jurisdiction to deal with any dispute which has arisen or may arise out of or in connection with the Software, the rights granted and these conditions, except that CCLRC may bring proceedings for an injunction in any jurisdiction. 
+10)If the whole or any part of these conditions are void or unenforceable in any jurisdiction, the other provisions, and the rest of the void or unenforceable provision, will continue in force in that jurisdiction, and the validity and enforceability of that provision in any other jurisdiction will not be affected.', 'http://www2-pcmdi.llnl.gov/cdat/docs/cdat-license', NULL, NULL, NULL, 'CCLRC License', NULL, NULL, NULL, '', NULL, false, false, false, '3b8e75df7fde83aa734bad9ffece7e4a', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (499, 'MPL-1.1-style', 'MPL-1.1-style is a MPL-style license, Please look up MPL-1.1 in the License Admin to view the original one.', '', NULL, NULL, NULL, 'MPL-1.1-style', NULL, NULL, NULL, '', NULL, false, false, false, '3426deb4a8b2bbefe02f3fc26b5f4cb7', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (469, 'OLDAP-2.2.2', 'The OpenLDAP Public License
   Version 2.2.2, 28 July 2000
 
@@ -39392,6 +39353,7 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://spdx.org/licenses/OLDAP-2.1#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.1', NULL, NULL, NULL, '', NULL, false, false, false, '733437bac72eb6f6e1ff9b7b1073913a', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (498, 'UnclassifiedLicense', 'An unclassified license reference looks like a license (it contains common license terminology) but we don''t recognize a specific license.', '', NULL, NULL, NULL, 'UnclassifiedLicense', NULL, NULL, NULL, '', NULL, false, false, false, '0e3ad2fef7377f8c932cf60672414fdd', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (477, 'OLDAP-2.2', 'The OpenLDAP Public License
   Version 2.2, 1 March 2000
 
@@ -39590,6 +39552,13 @@ OpenLDAP is a trademark of the OpenLDAP Foundation.
 Copyright 1999-2000 The OpenLDAP Foundation, Redwood City,
 California, USA.  All Rights Reserved.  Permission to copy and
 distributed verbatim copies of this document is granted.', 'http://spdx.org/licenses/OLDAP-2.4#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.4', NULL, NULL, NULL, '', NULL, false, false, false, 'ab77165f8f5828760211427c7c4474ff', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (502, 'GPL-3.0-with-bison-exception', 'insert GPL v3 text here 
+
+Bison Exception 
+
+As a special exception, you may create a larger work that contains part or all of the Bison parser skeleton and distribute that work under terms of your choice, so long as that work isn''t itself a parser generator using the skeleton or a modified version thereof as a parser skeleton. Alternatively, if you modify or redistribute the parser skeleton itself, you may (at your option) remove this special exception, which will cause the skeleton and the resulting Bison output files to be licensed under the GNU General Public License without this special exception. 
+
+This special exception was added by the Free Software Foundation in version 2.2 of Bison.', '', NULL, NULL, NULL, 'GNU General Public License v3.0 w/Bison exception', NULL, NULL, NULL, '', NULL, false, false, false, 'df8535a451d4e27dc0a5ee4e40acaf52', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (481, 'OLDAP-2.5', 'The OpenLDAP Public License
   Version 2.5, 11 May 2001
 
@@ -40299,36 +40268,6 @@ Change Log
 The term "Compatibility Definition Document" has been changed to "Tizen Compliance Specification"
 The term "Compatibility Test Suites" has been changed to "Tizen Compliance Tests"
 Clarified 4.4 condition on Licensee''''s own copyright to derivative works or modifications', 'http://floralicense.org/license', NULL, NULL, NULL, 'Flora License version 1.1', NULL, NULL, NULL, '', NULL, false, false, false, 'e034237dd3d306372ee9ff92e2ec50f5', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (493, 'FSF', 'Copyright (C) 2003, 2006-2007 Free Software Foundation, Inc.
-This file is free software; the Free Software Foundation
-gives unlimited permission to copy and/or distribute it,
-with or without modifications, as long as this notice is preserved.', '', NULL, NULL, NULL, 'Free Software Foundation', NULL, NULL, NULL, '', NULL, false, false, false, '34518a40552bca97ec5767a38759cea3', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (495, 'CC-BY-SA', 'CC-BY-SA is referenced without a version number. Please look up CC-BY-SA in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'CC-BY-SA', NULL, NULL, NULL, '', NULL, false, false, false, '21e1ac9adeaa3c88c23cafea292cb78e', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (502, 'GPL-3.0-with-bison-exception', 'insert GPL v3 text here 
-
-Bison Exception 
-
-As a special exception, you may create a larger work that contains part or all of the Bison parser skeleton and distribute that work under terms of your choice, so long as that work isn''t itself a parser generator using the skeleton or a modified version thereof as a parser skeleton. Alternatively, if you modify or redistribute the parser skeleton itself, you may (at your option) remove this special exception, which will cause the skeleton and the resulting Bison output files to be licensed under the GNU General Public License without this special exception. 
-
-This special exception was added by the Free Software Foundation in version 2.2 of Bison.', '', NULL, NULL, NULL, 'GNU General Public License v3.0 w/Bison exception', NULL, NULL, NULL, '', NULL, false, false, false, 'df8535a451d4e27dc0a5ee4e40acaf52', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (494, 'CATOSL', 'CATOSL is referenced without a version number. Please look up CATOSL in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'CATOSL', NULL, NULL, NULL, '', NULL, false, false, false, '01bb42e20f6cc95eb53ce8786b6abadb', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (496, 'BSD-3-Clause-Severability', 'BSD-3-Clause-Severability is a BSD-style with a severability clause. Please refer to the BSD-3-Clause in the License Admin.', '', NULL, NULL, NULL, 'BSD-3-Clause-Severability', NULL, NULL, NULL, '', NULL, false, false, false, '17cfd56ba41dd29abaad39b06bb18f1d', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (497, 'CCLRC', 'CCLRC License for CCLRC Software forming part of the Climate Data Analysis Tools Package
-The Council for the Central Laboratory of the Research Councils (CCLRC) grants any person who obtains a copy of this software (the Software), free of charge, the non-exclusive, worldwide right to use, copy, modify, distribute and sub-license the use of the Software on the terms and conditions appearing below: 
-1)The Software may be used only as part of the Climate Data Analysis Tools Package, made available to users free of charge. 
-2)The CCLRC copyright notice and any other notice placed by CCLRC on the Software must be reproduced on every copy of the Software, and on every Derived Work. A Derived Work means any modification of, or enhancement or improvement to, any of the Software, and any software or other work developed or derived from any of the Software. 3)CCLRC gives no warranty and makes no representation in relation to the Software. The Licensee and anyone to whom the Licensee makes the Software or any Derived Work available, use the Software at their own risk. 
-4)All warranties, conditions, terms, undertakings and obligations on the part of CCLRC, implied by statute, common law, custom, trade usage, course of dealing or in any other way are excluded to the fullest extent permitted by law.  
-5)Subject to condition 6, CCLRC will not be liable for: 
-            a)any loss of profits, loss of revenue, loss or corruption of data, loss of contracts or opportunity, loss of savings or third party claims (in each case whether direct or indirect); 
-            b)any indirect loss or damage arising out of or in connection with the Software; 
-            c)any direct loss or damage arising out of, or in connection with, the Software in each case, whether that loss arises as a result of CCLRCâ€™s negligence, or in any other way, even if CCLRC has been advised of the possibility of that loss arising, or if it was within CCLRC''s contemplation. 
-6)None of these conditions limits or excludes CCLRC''s liability for death or personal injury caused by its negligence or for any fraud, or for any sort of liability that, by law, cannot be limited or excluded. 
-7)These conditions set out the entire agreement relating to the Software. The licensee acknowledges that it has not relied on any warranty, representation, statement, agreement or undertaking given by CCLRC, and waives any claim in respect of any of the same. 
-8)The rights granted above will cease immediately on any breach of these conditions and the licensee will destroy all copies of the Software and any Derived Work in its control or possession. Conditions 3, 4, 5, 6, 7, 8, 9 and 10 will survive termination and continue indefinitely. 
-9)The licence and these conditions are governed by, and are to be construed in accordance with, English law. The English Courts will have exclusive jurisdiction to deal with any dispute which has arisen or may arise out of or in connection with the Software, the rights granted and these conditions, except that CCLRC may bring proceedings for an injunction in any jurisdiction. 
-10)If the whole or any part of these conditions are void or unenforceable in any jurisdiction, the other provisions, and the rest of the void or unenforceable provision, will continue in force in that jurisdiction, and the validity and enforceability of that provision in any other jurisdiction will not be affected.', 'http://www2-pcmdi.llnl.gov/cdat/docs/cdat-license', NULL, NULL, NULL, 'CCLRC License', NULL, NULL, NULL, '', NULL, false, false, false, '3b8e75df7fde83aa734bad9ffece7e4a', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (498, 'UnclassifiedLicense', 'An unclassified license reference looks like a license (it contains common license terminology) but we don''t recognize a specific license.', '', NULL, NULL, NULL, 'UnclassifiedLicense', NULL, NULL, NULL, '', NULL, false, false, false, '0e3ad2fef7377f8c932cf60672414fdd', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (499, 'MPL-1.1-style', 'MPL-1.1-style is a MPL-style license, Please look up MPL-1.1 in the License Admin to view the original one.', '', NULL, NULL, NULL, 'MPL-1.1-style', NULL, NULL, NULL, '', NULL, false, false, false, '3426deb4a8b2bbefe02f3fc26b5f4cb7', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (500, 'XFree86', 'XFree86 is referenced without a version number. Please look up XFree86 in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'XFree86', NULL, NULL, NULL, '', NULL, false, false, false, '33d6520a41e895e662f2d63253b81328', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (501, 'GPL-2.0+-with-bison-exception', 'insert GPL v2+ text here 
 
@@ -40337,54 +40276,14 @@ Bison Exception
 As a special exception, you may create a larger work that contains part or all of the Bison parser skeleton and distribute that work under terms of your choice, so long as that work isn''t itself a parser generator using the skeleton or a modified version thereof as a parser skeleton. Alternatively, if you modify or redistribute the parser skeleton itself, you may (at your option) remove this special exception, which will cause the skeleton and the resulting Bison output files to be licensed under the GNU General Public License without this special exception. 
 
 This special exception was added by the Free Software Foundation in version 2.2 of Bison.', '', NULL, NULL, NULL, 'GNU General Public License v2.0+ w/Bison exception', NULL, NULL, NULL, '', NULL, false, true, false, '14180505dc95d59e181ff0f7deb35579', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (320, 'Naumen', 'NAUMEN Public License
-This software is Copyright (c) NAUMEN (tm) and Contributors.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or
-without modification, are permitted provided that the following
-conditions are met:
-
-1. Redistributions in source code must retain the above
-copyright notice, this list of conditions, and the following
-disclaimer.
-
-2. Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions, and the following
-disclaimer in the documentation and/or other materials
-provided with the distribution.
-
-3. The name NAUMEN (tm) must not be used to
-endorse or promote products derived from this software without prior
-written permission from NAUMEN.
-
-4. The right to distribute this software or to use it for any
-purpose does not give you the right to use Servicemarks (sm)
-or Trademarks (tm) of NAUMEN.
-
-5. If any files originating from NAUMEN or Contributors are modified, you must
-cause the modified files to carry prominent notices stating
-that you changed the files and the date of any change.
-
-Disclaimer:
-
-THIS SOFTWARE IS PROVIDED BY NAUMEN "AS IS" AND ANY EXPRESSED
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NAUMEN
-OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGE.
-
-This software consists of contributions made by NAUMEN
-and Contributors. Specific attributions are listed in the
-accompanying credits file.', 'http://www.opensource.org/licenses/naumen.php', NULL, NULL, NULL, 'Naumen Public License', NULL, NULL, NULL, '', NULL, false, false, false, '19fb518675cb6fb01d4724c2667f16c6', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (505, 'Open-PL-0.4', 'Can not find license text for Open-PL-0.4, please refer to Open-PL-1.0', '', NULL, NULL, NULL, 'Open Publication License v0.4', NULL, NULL, NULL, '', NULL, false, false, false, '4b5cd29eff51fa913f3b234c4344a051', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (506, 'OPL-style', 'according to the Open Public License, add some modifications', '', NULL, NULL, NULL, 'OPL-style', NULL, NULL, NULL, '', NULL, false, false, false, 'b553fc0bbd6e3eec625658868baf8006', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (507, 'No_license_found', 'Not find any license in the scanned file', '', NULL, NULL, NULL, 'No_license_found', NULL, NULL, NULL, '', NULL, false, false, false, 'd3f27628f4f07e377eed85223e747da0', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (508, 'Dual-license', 'Multi-licensing is the practice of distributing software under two or more different sets of terms and conditions. This may mean multiple different software licenses or sets of licenses. Prefixes may be used to indicate the number of licenses used, e.g. dual-licensed for software licensed under two different licenses.
+When software is multi-licensed, recipients can choose which terms under which they want to use or distribute the software. The distributor may or may not apply a fee to either option. The two usual motivations for multi-licensing are license compatibility and market segregation based business models.', '', NULL, NULL, NULL, 'Dual-license', NULL, NULL, NULL, '', NULL, false, false, false, '7cee64d8943af3ec21761814c2fd0c33', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (509, 'BSD-style', 'According to BSD license, add some modifications', '', NULL, NULL, NULL, 'BSD-style', NULL, NULL, NULL, '', NULL, false, false, false, '10215fc49d301bf3addf289bcad2b238', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (510, 'BSD', 'BSD is referenced without a version number. Please look up BSD in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'BSD', NULL, NULL, NULL, '', NULL, false, false, false, '7fd363ae5dfe05cb0d8cb0f20df6ed97', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (511, 'MIT-style', 'According to MIT license, add some modifications', '', NULL, NULL, NULL, 'MIT-style', NULL, NULL, NULL, '', NULL, false, false, false, '6786c4f5f3ba61ecad8d121a369f5294', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (331, 'Nvidia-EULA', 'License For Customer Use of NVIDIA Software 
  
 IMPORTANT NOTICE -- READ CAREFULLY: This License For Customer Use of NVIDIA Software ("LICENSE") is the agreement which governs use of the software of NVIDIA Corporation and its subsidiaries (“NVIDIA”) downloadable herefrom, including computer software and associated printed materials ("SOFTWARE"). By downloading, installing, copying, or otherwise using the SOFTWARE, you agree to be bound by the terms of this LICENSE. If you do not agree to the terms of this LICENSE, do not download the SOFTWARE.
@@ -40512,36 +40411,6 @@ Should you have any questions concerning this License Agreement, or if you desir
 Oracle America, Inc. 
 500 Oracle Parkway, 
 Redwood City, CA 94065', 'http://www.oracle.com/technetwork/testcontent/standard-license-088383.html', NULL, NULL, NULL, 'Oracle Technology Network Developer License Terms', NULL, NULL, NULL, '', NULL, false, false, false, 'da18dd97eb62940ac6efa3e54b44897d', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (303, 'RedHat-EULA', 'LICENSE AGREEMENT
-RED HAT® ENTERPRISE LINUX®
-AND RED HAT® APPLICATIONS
-
-This end user license agreement ("EULA") governs the use of any of the versions of Red Hat Enterprise Linux, any Red Hat Applications (as set forth at www.redhat.com/licenses/products), and any related updates, source code, appearance, structure and organization (the "Programs"), regardless of the delivery mechanism.
-
-1. License Grant. Subject to the following terms, Red Hat, Inc. ("Red Hat") grants to you ("User") a perpetual, worldwide license to the Programs pursuant to the GNU General Public License v.2. The Programs are either a modular operating system or an application consisting of hundreds of software components. With the exception of certain image files identified in Section 2 below, the license agreement for each software component is located in the software component''s source code and permits User to run, copy, modify, and redistribute (subject to certain obligations in some cases) the software component, in both source code and binary code forms. This EULA pertains solely to the Programs and does not limit User''s rights under, or grant User rights that supersede, the license terms of any particular component.
-
-2. Intellectual Property Rights. The Programs and each of their components are owned by Red Hat and others and are protected under copyright law and under other laws as applicable. Title to the Programs and any component, or to any copy, modification, or merged portion shall remain with the aforementioned, subject to the applicable license. The "Red Hat" trademark and the "Shadowman" logo are registered trademarks of Red Hat in the U.S. and other countries. This EULA does not permit User to distribute the Programs or their components using Red Hat''s trademarks, regardless of whether the copy has been modified. User should read the information found at http://www.redhat.com/about/corporate/trademark/ before distributing a copy of the Programs. User may make a commercial redistribution of the Programs only if, (a) a separate agreement with Red Hat authorizing such commercial redistribution is executed or other written permission is granted by Red Hat or (b) User modifies any files identified as "REDHAT-LOGOS" to remove and replace all images containing the "Red Hat" trademark or the "Shadowman" logo. Merely deleting these files may corrupt the Programs.
-
-3. Limited Warranty. Except as specifically stated in this Section 3, a separate agreement with Red Hat, or a license for a particular component, to the maximum extent permitted under applicable law, the Programs and the components are provided and licensed "as is" without warranty of any kind, expressed or implied, including the implied warranties of merchantability, non-infringement or fitness for a particular purpose. Red Hat warrants that the media on which the Programs and the components are furnished will be free from defects in materials and manufacture under normal use for a period of 30 days from the date of delivery to User. Red Hat does not warrant that the functions contained in the Programs will meet User''s requirements or that the operation of the Programs will be entirely error free, appear precisely as described in the accompanying documentation, or comply with regulatory requirements. This warranty extends only to the party that purchases services pertaining to the Programs from Red Hat or a Red Hat authorized distributor.
-
-4. Limitation of Remedies and Liability. To the maximum extent permitted by applicable law, User''s exclusive remedy under this EULA is to return any defective media within 30 days of delivery along with a copy of User''s payment receipt and Red Hat, at its option, will replace it or refund the money paid by User for the media. To the maximum extent permitted under applicable law, neither Red Hat, any Red Hat authorized distributor, nor the licensor of any component provided to User under this EULA will be liable to User for any incidental or consequential damages, including lost profits or lost savings arising out of the use or inability to use the Programs or any component, even if Red Hat, such authorized distributor or licensor has been advised of the possibility of such damages. In no event shall Red Hat''s liability, an authorized distributor''s liability or the liability of the licensor of a component provided to User under this EULA exceed the amount that User paid to Red Hat under this EULA during the twelve months preceding the action.
-
-5. Export Control. As required by the laws of the United States and other countries, User represents and warrants that it: (a) understands that the Programs and their components may be subject to export controls under the U.S. Commerce Department''s Export Administration Regulations ("EAR"); (b) is not located in a prohibited destination country under the EAR or U.S. sanctions regulations (currently Cuba, Iran, Iraq, North Korea, Sudan and Syria, subject to change as posted by the United States government); (c) will not export, re-export, or transfer the Programs to any prohibited destination or persons or entities on the U.S. Bureau of Industry and Security Denied Parties List or Entity List, or the U.S. Office of Foreign Assets Control list of Specially Designated Nationals and Blocked Persons, or any similar lists maintained by other countries, without the necessary export license(s) or authorizations(s); (d) will not use or transfer the Programs for use in connection with any nuclear, chemical or biological weapons, missile technology, or military end-uses where prohibited by an applicable arms embargo, unless authorized by the relevant government agency by regulation or specific license; (e) understands and agrees that if it is in the United States and exports or transfers the Programs to eligible end users, it will, to the extent required by EAR Section 740.17(e), submit semi-annual reports to the Commerce Department''s Bureau of Industry and Security, which include the name and address (including country) of each transferee; and (f) understands that countries including the United States may restrict the import, use, or export of encryption products (which may include the Programs and the components) and agrees that it shall be solely responsible for compliance with any such import, use, or export restrictions.
-
-6. Third Party Programs. Red Hat may distribute third party software programs with the Programs that are not part of the Programs. These third party programs are not required to run the Programs, are provided as a convenience to User, and are subject to their own license terms. The license terms either accompany the third party software programs or can be viewed at http://www.redhat.com/licenses/thirdparty/eula.html. If User does not agree to abide by the applicable license terms for the third party software programs, then User may not install them. If User wishes to install the third party software programs on more than one system or transfer the third party software programs to another party, then User must contact the licensor of the applicable third party software programs.
-
-7. General. If any provision of this agreement is held to be unenforceable, that shall not affect the enforceability of the remaining provisions. This agreement shall be governed by the laws of the State of New York and of the United States, without regard to any conflict of laws provisions. The rights and obligations of the parties to this EULA shall not be governed by the United Nations Convention on the International Sale of Goods.', 'http://www.redhat.com/licenses/rhel_rha_eula.html', NULL, NULL, NULL, 'RedHat EULA', NULL, NULL, NULL, '', NULL, false, false, false, '06c76bc5bab85dd388f43febb3451220', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel-EULA', 'Intel Open Source License 
-
-
-Copyright (c) 1996-2000 Intel Corporation All rights reserved. 
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
-•	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
-•	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
-•	Neither the name of the Intel Corporation nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE INTEL OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. EXPORT LAWS: THIS LICENSE ADDS NO RESTRICTIONS TO THE EXPORT LAWS OF YOUR JURISDICTION. It is licensee''s responsibility to comply with any export regulations applicable in licensee''s jurisdiction. Under CURRENT (May 2000) U.S. export regulations this software is eligible for export from the U.S. and can be downloaded by or otherwise exported or reexported worldwide EXCEPT to U.S. embargoed destinations which include Cuba, Iraq, Libya, North Korea, Iran, Syria, Sudan, Afghanistan and any other country to which the U.S. has embargoed goods and services.', 'http://opensource.org/licenses/Intel', NULL, NULL, NULL, 'Intel Open Source License', NULL, NULL, NULL, '', NULL, false, false, false, '273a6c7b3d192b2f6c368e706423b815', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (277, 'Pixware-EULA', 'XMLmind Spell Checker SDK License Agreement
 
 Version 1.3
@@ -40599,14 +40468,25 @@ This license is effective from the date purchased by Licensee and is perpetual u
 This Agreement is the complete and exclusive statement of agreements between Licensee and Licensor relating to the Software. It supersedes all prior agreements and understandings, and prevails over any conflicting or additional terms of any quote, order, acknowledgement, or similar communication between the parties before or during the term of this Agreement. It may be modified only in writing signed by both parties.
 
 This Agreement is made under, shall be governed by and construed in accordance with the French law.', 'http://www.xmlmind.com/spellchecker/license_sc-sdk.html', NULL, NULL, NULL, 'XMLmind Spell Checker SDK License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '44b6167bb706ecbffb9685cdbf9cbc25', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (505, 'Open-PL-0.4', 'Can not find license text for Open-PL-0.4, please refer to Open-PL-1.0', '', NULL, NULL, NULL, 'Open Publication License v0.4', NULL, NULL, NULL, '', NULL, false, false, false, '4b5cd29eff51fa913f3b234c4344a051', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (506, 'OPL-style', 'according to the Open Public License, add some modifications', '', NULL, NULL, NULL, 'OPL-style', NULL, NULL, NULL, '', NULL, false, false, false, 'b553fc0bbd6e3eec625658868baf8006', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (507, 'No_license_found', 'Not find any license in the scanned file', '', NULL, NULL, NULL, 'No_license_found', NULL, NULL, NULL, '', NULL, false, false, false, 'd3f27628f4f07e377eed85223e747da0', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (508, 'Dual-license', 'Multi-licensing is the practice of distributing software under two or more different sets of terms and conditions. This may mean multiple different software licenses or sets of licenses. Prefixes may be used to indicate the number of licenses used, e.g. dual-licensed for software licensed under two different licenses.
-When software is multi-licensed, recipients can choose which terms under which they want to use or distribute the software. The distributor may or may not apply a fee to either option. The two usual motivations for multi-licensing are license compatibility and market segregation based business models.', '', NULL, NULL, NULL, 'Dual-license', NULL, NULL, NULL, '', NULL, false, false, false, '7cee64d8943af3ec21761814c2fd0c33', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (509, 'BSD-style', 'According to BSD license, add some modifications', '', NULL, NULL, NULL, 'BSD-style', NULL, NULL, NULL, '', NULL, false, false, false, '10215fc49d301bf3addf289bcad2b238', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (510, 'BSD', 'BSD is referenced without a version number. Please look up BSD in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'BSD', NULL, NULL, NULL, '', NULL, false, false, false, '7fd363ae5dfe05cb0d8cb0f20df6ed97', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (511, 'MIT-style', 'According to MIT license, add some modifications', '', NULL, NULL, NULL, 'MIT-style', NULL, NULL, NULL, '', NULL, false, false, false, '6786c4f5f3ba61ecad8d121a369f5294', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (303, 'RedHat-EULA', 'LICENSE AGREEMENT
+RED HAT® ENTERPRISE LINUX®
+AND RED HAT® APPLICATIONS
+
+This end user license agreement ("EULA") governs the use of any of the versions of Red Hat Enterprise Linux, any Red Hat Applications (as set forth at www.redhat.com/licenses/products), and any related updates, source code, appearance, structure and organization (the "Programs"), regardless of the delivery mechanism.
+
+1. License Grant. Subject to the following terms, Red Hat, Inc. ("Red Hat") grants to you ("User") a perpetual, worldwide license to the Programs pursuant to the GNU General Public License v.2. The Programs are either a modular operating system or an application consisting of hundreds of software components. With the exception of certain image files identified in Section 2 below, the license agreement for each software component is located in the software component''s source code and permits User to run, copy, modify, and redistribute (subject to certain obligations in some cases) the software component, in both source code and binary code forms. This EULA pertains solely to the Programs and does not limit User''s rights under, or grant User rights that supersede, the license terms of any particular component.
+
+2. Intellectual Property Rights. The Programs and each of their components are owned by Red Hat and others and are protected under copyright law and under other laws as applicable. Title to the Programs and any component, or to any copy, modification, or merged portion shall remain with the aforementioned, subject to the applicable license. The "Red Hat" trademark and the "Shadowman" logo are registered trademarks of Red Hat in the U.S. and other countries. This EULA does not permit User to distribute the Programs or their components using Red Hat''s trademarks, regardless of whether the copy has been modified. User should read the information found at http://www.redhat.com/about/corporate/trademark/ before distributing a copy of the Programs. User may make a commercial redistribution of the Programs only if, (a) a separate agreement with Red Hat authorizing such commercial redistribution is executed or other written permission is granted by Red Hat or (b) User modifies any files identified as "REDHAT-LOGOS" to remove and replace all images containing the "Red Hat" trademark or the "Shadowman" logo. Merely deleting these files may corrupt the Programs.
+
+3. Limited Warranty. Except as specifically stated in this Section 3, a separate agreement with Red Hat, or a license for a particular component, to the maximum extent permitted under applicable law, the Programs and the components are provided and licensed "as is" without warranty of any kind, expressed or implied, including the implied warranties of merchantability, non-infringement or fitness for a particular purpose. Red Hat warrants that the media on which the Programs and the components are furnished will be free from defects in materials and manufacture under normal use for a period of 30 days from the date of delivery to User. Red Hat does not warrant that the functions contained in the Programs will meet User''s requirements or that the operation of the Programs will be entirely error free, appear precisely as described in the accompanying documentation, or comply with regulatory requirements. This warranty extends only to the party that purchases services pertaining to the Programs from Red Hat or a Red Hat authorized distributor.
+
+4. Limitation of Remedies and Liability. To the maximum extent permitted by applicable law, User''s exclusive remedy under this EULA is to return any defective media within 30 days of delivery along with a copy of User''s payment receipt and Red Hat, at its option, will replace it or refund the money paid by User for the media. To the maximum extent permitted under applicable law, neither Red Hat, any Red Hat authorized distributor, nor the licensor of any component provided to User under this EULA will be liable to User for any incidental or consequential damages, including lost profits or lost savings arising out of the use or inability to use the Programs or any component, even if Red Hat, such authorized distributor or licensor has been advised of the possibility of such damages. In no event shall Red Hat''s liability, an authorized distributor''s liability or the liability of the licensor of a component provided to User under this EULA exceed the amount that User paid to Red Hat under this EULA during the twelve months preceding the action.
+
+5. Export Control. As required by the laws of the United States and other countries, User represents and warrants that it: (a) understands that the Programs and their components may be subject to export controls under the U.S. Commerce Department''s Export Administration Regulations ("EAR"); (b) is not located in a prohibited destination country under the EAR or U.S. sanctions regulations (currently Cuba, Iran, Iraq, North Korea, Sudan and Syria, subject to change as posted by the United States government); (c) will not export, re-export, or transfer the Programs to any prohibited destination or persons or entities on the U.S. Bureau of Industry and Security Denied Parties List or Entity List, or the U.S. Office of Foreign Assets Control list of Specially Designated Nationals and Blocked Persons, or any similar lists maintained by other countries, without the necessary export license(s) or authorizations(s); (d) will not use or transfer the Programs for use in connection with any nuclear, chemical or biological weapons, missile technology, or military end-uses where prohibited by an applicable arms embargo, unless authorized by the relevant government agency by regulation or specific license; (e) understands and agrees that if it is in the United States and exports or transfers the Programs to eligible end users, it will, to the extent required by EAR Section 740.17(e), submit semi-annual reports to the Commerce Department''s Bureau of Industry and Security, which include the name and address (including country) of each transferee; and (f) understands that countries including the United States may restrict the import, use, or export of encryption products (which may include the Programs and the components) and agrees that it shall be solely responsible for compliance with any such import, use, or export restrictions.
+
+6. Third Party Programs. Red Hat may distribute third party software programs with the Programs that are not part of the Programs. These third party programs are not required to run the Programs, are provided as a convenience to User, and are subject to their own license terms. The license terms either accompany the third party software programs or can be viewed at http://www.redhat.com/licenses/thirdparty/eula.html. If User does not agree to abide by the applicable license terms for the third party software programs, then User may not install them. If User wishes to install the third party software programs on more than one system or transfer the third party software programs to another party, then User must contact the licensor of the applicable third party software programs.
+
+7. General. If any provision of this agreement is held to be unenforceable, that shall not affect the enforceability of the remaining provisions. This agreement shall be governed by the laws of the State of New York and of the United States, without regard to any conflict of laws provisions. The rights and obligations of the parties to this EULA shall not be governed by the United Nations Convention on the International Sale of Goods.', 'http://www.redhat.com/licenses/rhel_rha_eula.html', NULL, NULL, NULL, 'RedHat EULA', NULL, NULL, NULL, '', NULL, false, false, false, '06c76bc5bab85dd388f43febb3451220', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (512, 'Public-domain', 'Public domain software is software that is not copyrighted. If the source code is in the public domain, that is a special case of noncopylefted free software, which means that some copies or modified versions may not be free at all.
 
 In some cases, an executable program can be in the public domain but the source code is not available. This is not free software, because free software requires accessibility of source code. Meanwhile, most free software is not in the public domain; it is copyrighted, and the copyright holders have legally given permission for everyone to use it in freedom, using a free software license.
@@ -40969,3 +40849,169 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <http://unlicense.org/>', 'http://unlicense.org/', NULL, NULL, NULL, 'Unlicense', NULL, NULL, NULL, '', NULL, false, false, false, 'a1a9d0cf11e58d95864df58255d0b6b3', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (526, 'PHP', 'PHP is referenced without a version number. Please look up PHP in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'PHP license', NULL, NULL, NULL, '', NULL, false, false, false, '7aebe5796fe3a0d5919ed358c9600f54', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (527, 'OLDAP', 'OLDAP is referenced without a version number. Please look up OLDAP in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'Open LDAP Public License', NULL, NULL, NULL, '', NULL, false, false, false, '2642960e3afc192be1c342d4b9d815a5', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel-EULA', 'Intel Open Source License 
+
+
+Copyright (c) 1996-2000 Intel Corporation All rights reserved. 
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
+•	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+•	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+•	Neither the name of the Intel Corporation nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE INTEL OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. EXPORT LAWS: THIS LICENSE ADDS NO RESTRICTIONS TO THE EXPORT LAWS OF YOUR JURISDICTION. It is licensee''s responsibility to comply with any export regulations applicable in licensee''s jurisdiction. Under CURRENT (May 2000) U.S. export regulations this software is eligible for export from the U.S. and can be downloaded by or otherwise exported or reexported worldwide EXCEPT to U.S. embargoed destinations which include Cuba, Iraq, Libya, North Korea, Iran, Syria, Sudan, Afghanistan and any other country to which the U.S. has embargoed goods and services.', 'http://opensource.org/licenses/Intel', NULL, NULL, NULL, 'Intel Open Source License', NULL, NULL, NULL, '', NULL, false, false, false, '273a6c7b3d192b2f6c368e706423b815', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (320, 'Naumen', 'NAUMEN Public License
+This software is Copyright (c) NAUMEN (tm) and Contributors.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or
+without modification, are permitted provided that the following
+conditions are met:
+
+1. Redistributions in source code must retain the above
+copyright notice, this list of conditions, and the following
+disclaimer.
+
+2. Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions, and the following
+disclaimer in the documentation and/or other materials
+provided with the distribution.
+
+3. The name NAUMEN (tm) must not be used to
+endorse or promote products derived from this software without prior
+written permission from NAUMEN.
+
+4. The right to distribute this software or to use it for any
+purpose does not give you the right to use Servicemarks (sm)
+or Trademarks (tm) of NAUMEN.
+
+5. If any files originating from NAUMEN or Contributors are modified, you must
+cause the modified files to carry prominent notices stating
+that you changed the files and the date of any change.
+
+Disclaimer:
+
+THIS SOFTWARE IS PROVIDED BY NAUMEN "AS IS" AND ANY EXPRESSED
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NAUMEN
+OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+This software consists of contributions made by NAUMEN
+and Contributors. Specific attributions are listed in the
+accompanying credits file.', 'http://www.opensource.org/licenses/naumen.php', NULL, NULL, NULL, 'Naumen Public License', NULL, NULL, NULL, '', NULL, false, false, false, '19fb518675cb6fb01d4724c2667f16c6', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (335, 'RealNetworks-EULA', 'REALNETWORKS, INC.
+REAL LICENSING PROGRAM
+LICENSE SUPPLEMENT
+REDISTRIBUTION NOT PERMITTED
+IMPORTANT: READ CAREFULLY:
+This RealNetworks, Inc. License Supplement (“License Supplement”) is a legal
+agreement between you (either an individual or an entity, “You”) and RealNetworks, Inc.
+and its suppliers and licensors (collectively, “RealNetworks”) for the products (the
+“Software”) listed on the Real Licensing Program invoice (the “Invoice”) provided to
+You by RealNetworks.
+BY CLICKING ON “ACCEPT”, INSTALLING, COPYING OR OTHERWISE USING
+THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS
+LICENSE SUPPLEMENT. IF YOU DO NOT AGREE TO THE TERMS OF THIS
+LICENSE SUPPLEMENT, CLICK THE “I DO NOT ACCEPT” TO TERMINATE THE
+SOFTWARE INSTALLATION PROCESS.
+YOU AGREE THAT YOUR USE OF THE SOFTWARE ACKNOWLEDGES THAT
+YOU HAVE READ THIS LICENSE SUPPLEMENT, UNDERSTAND IT, AND
+AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
+1. SUPPLEMENT. This License Supplement supplements the End User License
+Agreement(s) accompanying the Software (“EULA”). In the event of any conflict
+between the terms of this License Supplement and any EULA, the terms of this License
+Supplement will control. Except for the provisions set forth in this License Supplement,
+all EULA provisions will remain in full force and effect.
+2. ELIGIBILITY. Notwithstanding anything to the contrary in the EULA, the Software
+covered by the EULA and this License Supplement are available only to the following
+types of entities, and You represent and warrant that You are one of the following:
+(a) Corporations, educational institutions, government organizations or not-for-profit
+organizations who deploy the server for their own internal non-commercial use. Wireless
+Network service providers or wireless network operators may not deploy this Software
+within their network(s). (b) End User Network Service Providers of less than 200,000
+subscribers. As used in this License Supplement, "End User Network Service Providers"
+means an entity that provides data network services to consumers or individuals. (c )
+Media Companies with less than fifty million dollars ($50,000,000) in annual revenue.
+As used in this License Supplement, "Media Company" means an entity that provides
+text, audio or video programming to distributors or direct to consumers in exchange for
+fees or based on an advertising business model. Notwithstanding the above, this License
+Supplement is not available to an organization that is using this Software to provide
+content to consumers via an Operator. As used in this License Supplement, "Operator"
+means an organization that provides voice and/or data network services to consumers and
+businesses through wireless wide area network technologies, including but not limited to
+GPRS, Edge, CDMA2000, UMTS, EVDO and WiMax; eligible organizations may either
+own or lease network infrastructure (MVNO).
+The Software is not available to organizations that provide network services to consumers
+or businesses or provide content aggregation and digital media application services to
+businesses.
+3. SEATS. Notwithstanding anything to the contrary in the EULA, You may install the
+number of copies of the Software sufficient to distribute content up to the number of seats
+specified in the applicable Invoice. You may increase the number of seats by purchasing
+additional license rights from RealNetworks.
+4. TERMINATION. This License Supplement and Your right to use the Software
+automatically terminate if You fail to comply with any material provision of this License
+Supplement. No notice will be required from RealNetworks to effect such termination.
+You and RealNetworks may terminate the EULA pursuant to the termination provisions
+set forth therein. Any termination of a EULA automatically terminates this License
+Supplement with respect to the Software covered by such EULA.
+Copyright © 1995-2010 RealNetworks, Inc. and/or its suppliers. 2601 Elliott Ave., Suite
+1000, Seattle, Washington 98121 U.S.A. This product may incorporate one or more of
+the following: U.S. Patent # 5,793,980; U.S. Patent # 5,917,835; U.S. Patent # 6,151,634.
+Other U.S. patents pending. All rights reserved. RealNetworks, Helix, RealPlayer,
+RealAudio, and RealVideo are trademarks or registered trademarks of RealNetworks,
+Inc.', 'http://www.realnetworks.com/uploadedFiles/Support/helix-support/eula-Real-LicProg-Perp-Supp.pdf', NULL, NULL, NULL, 'RealNetworks Real Licensing Program License Supplement', NULL, NULL, NULL, '', NULL, false, false, false, '90596696ef8824e2674cfcc66521d586', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (528, 'MX4J-1.0', 'The MX4J License, Version 1.0
+
+         Copyright (c) 2001-2004 by the MX4J contributors.  All rights reserved.
+
+         Redistribution and use in source and binary forms, with or without
+         modification, are permitted provided that the following conditions
+         are met:
+
+         1. Redistributions of source code must retain the above copyright
+            notice, this list of conditions and the following disclaimer.
+
+         2. Redistributions in binary form must reproduce the above copyright
+            notice, this list of conditions and the following disclaimer in
+            the documentation and/or other materials provided with the
+            distribution.
+
+         3. The end-user documentation included with the redistribution,
+            if any, must include the following acknowledgment:
+               "This product includes software developed by the
+                MX4J project (http://mx4j.sourceforge.net)."
+            Alternately, this acknowledgment may appear in the software itself,
+            if and wherever such third-party acknowledgments normally appear.
+
+         4. The name "MX4J" must not be used to endorse or promote
+            products derived from this software without prior written
+            permission.
+            For written permission, please contact
+            biorn_steedom [at] users [dot] sourceforge [dot] net
+
+         5. Products derived from this software may not be called "MX4J",
+            nor may "MX4J" appear in their name, without prior written
+            permission of Simone Bordet.
+
+         THIS SOFTWARE IS PROVIDED ``AS IS'''' AND ANY EXPRESSED OR IMPLIED
+         WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+         OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+         DISCLAIMED.  IN NO EVENT SHALL THE MX4J CONTRIBUTORS
+         BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+         SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+         LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+         USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+         ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+         OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+         OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+         SUCH DAMAGE.', 'http://mx4j.sourceforge.net/docs/ch01s06.html', NULL, NULL, NULL, 'The MX4J License, Version 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '9ff8e27702d4054752e10f52e10dc0e0', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (529, 'MX4J', 'MX4J is referenced without a version number. Please look up MX4J in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'The MX4J License', NULL, NULL, NULL, '', NULL, false, false, false, '6d57f8e3a64599e2b03ab197186cfa58', 1);
