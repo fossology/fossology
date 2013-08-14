@@ -143,7 +143,6 @@ class upload_properties extends FO_Plugin
 
     // Get folder array folder_pk => folder_name
     $FolderArray = array();
-    $folder_pk = GetUserRootFolder();
     GetFolderArray($folder_pk, $FolderArray);
 
     /*** Display folder select list, on change request new page with folder= in url ***/
