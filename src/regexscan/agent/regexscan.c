@@ -293,7 +293,7 @@ void    Usage   (char *Name)
 /*********************************************************/
 int	main	(int argc, char *argv[])
 {
-  int index, nonoptargs = 0;
+  int  nonoptargs;
   int  c, retCode;
 
   regex_t regex;
@@ -363,18 +363,14 @@ int	main	(int argc, char *argv[])
     return 1;
   }
 
-  /* process filename after switches */
-  for (index = optind; index < argc; index++)
-  {
-/*  process no option arguments
-    printf("Non-option argument %s\n", argv[index]);  /* diag display */
-    nonoptargs++;
-  }
+  /* process filename after switches. How many non-option arguments are there ? */
+  nonoptargs = argc - optind; /* total argument count minus the option count */
 
   if (nonoptargs == 0)
   {
     /* Assume it was a scheduler call */
     user_pk = fo_scheduler_userID();
+
     while(fo_scheduler_next())
     {
       UploadPK = atol(fo_scheduler_current());
