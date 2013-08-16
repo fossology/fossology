@@ -595,6 +595,7 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
   /** mode 2 = upload_fk **/
   $sql = "SELECT upload_pk, upload_desc, upload_ts, upload_filename
 	FROM foldercontents,upload
+  INNER JOIN uploadtree ON upload_fk = upload_pk AND upload.pfile_fk = uploadtree.pfile_fk AND parent IS NULL AND lft IS NOT NULL
 	WHERE foldercontents.parent_fk = '$ParentFolder'
 	AND foldercontents.foldercontents_mode = 2
 	AND foldercontents.child_id = upload.upload_pk
