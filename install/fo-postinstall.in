@@ -162,6 +162,7 @@ if [ $COMMON ]; then
   
    # change all files ownership to fossy:fossy
    chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$MODDIR}
+   chmod u+s {$MODDIR}/scheduler/agent/fo_scheduler
    chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LIBEXECDIR}
    chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$SYSCONFDIR}
    #chown -f {$PROJECTUSER}:{$PROJECTGROUP} /etc/cron.d/fossology

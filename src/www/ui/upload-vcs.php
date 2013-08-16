@@ -182,11 +182,11 @@ class upload_vcs extends FO_Plugin {
         $V.= "<option value='Git'>Git</option>";
 #$V.= "<option value='CVS'>CVS</option>";
         $V.= "</select><P />\n";
-        $text = _("Enter the URL to the repo:");
+        $text = _("Enter the URL of the repo:");
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='geturl' size=60 value='" . htmlentities($GetURL) . "'/><br />\n";
         $text = _("NOTE");
-        $text1 = _(": If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file (directory). The URL can begin with HTTP://, HTTPS://, or FTP://.");
+        $text1 = _(": The URL can begin with HTTP://, HTTPS:// .");
         $V.= "<b>$text</b>$text1<P />\n";
         $text = _("(Optional) Enter a description of this file (directory):");
         $V.= "<li>$text<br />\n";
