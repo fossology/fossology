@@ -197,7 +197,7 @@ class group_manage_users extends FO_Plugin {
  
     $V .= "</table>";
 
-    $text = _("All user permissions take place immediatly when a value is changed.  There is no submit button.");
+    $text = _("All user permissions take place immediately when a value is changed.  There is no submit button.");
     $V .= "<p>" . $text;
     $text = _("Add new users on the last line.");
     $V .= "<br>" . $text;
