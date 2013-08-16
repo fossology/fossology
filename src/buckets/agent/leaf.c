@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -457,10 +457,7 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
         exit(-1);
     }
 #ifdef BOBG
-if (match)
-printf("bobg found MATCH\n");
-else
-printf("bobg found NO Match\n");
+printf("bobg match: %d\n", match);
 #endif
     if (match && bucketDefArray->stopon == 'Y') break;
   }
