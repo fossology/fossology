@@ -70,7 +70,7 @@ Summary:        Architecture for analyzing software, delagent
 Group:          PBGRP
 
 %package wgetagent
-Requires:       fossology-common wget
+Requires:       fossology-common wget subversion git
 Summary:        Architecture for analyzing software, wget_agent
 Group:          PBGRP
 
