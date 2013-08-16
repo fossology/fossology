@@ -92,18 +92,21 @@ if [ $RUNTIME ]; then
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
       apt-get $YesOpt install \
+      subversion git \
       wget;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
         YesOpt='-y'
       fi    
       yum $YesOpt install \
+      subversion git \
       wget;;
     Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
       fi    
       yum $YesOpt install \
+      subversion git \
       wget;;
   esac
 fi

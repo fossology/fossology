@@ -159,8 +159,7 @@ if [ $RUNTIME ]; then
          apt-get $YesOpt install php5 php5-pgsql php-pear php5-cli \
             libxml2 \
             binutils php-gettext \
-            libextractor-plugins \
-            subversion git 
+            libextractor-plugins 
          apt-get $YesOpt install libextractor1c2a
          apt-get $YesOpt install libextractor3
          POSTGRE=`dpkg --get-selections|grep postgresql-8.4`
@@ -201,8 +200,7 @@ if [ $RUNTIME ]; then
             php php-pear php-pgsql php-process \
             smtpdaemon \
             libxml2 libextractor libextractor-plugins \
-            binutils \
-            subversion git 
+            binutils 
 
          # enable, possible init, and start postgresql
          /sbin/chkconfig postgresql on
@@ -239,8 +237,7 @@ if [ $RUNTIME ]; then
             php php-pear php-pgsql php-process\
             smtpdaemon \
             file libxml2 \
-            binutils \
-            subversion git 
+            binutils 
          echo "NOTE: libextractor, cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources.";;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
