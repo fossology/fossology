@@ -155,15 +155,15 @@ understand");
     echo "<li>";
     echo _("Manually insert/update/delete the new bucketdef records.");
     echo "<li>";
-    echo _("Delete your old bucket job from the job queue (from Show Jobs).  You must delete the old completed bucket job from the queue rather than reset it because a reset will use the previous bucketpool (the one you originally queued).");
+    echo _("Manually insert a new buckets record in the agent table.");
     echo "<li>";
-    echo _("Queue up the new bucket job in Jobs > Agents.");
+    echo _("Queue up the new bucket job in Jobs > Schedule Agents.");
     echo "<li>";
     echo _("Use Buckets > Compare to compare the new and old runs.  Verify the results.");
     echo "<li>";
     echo _("If you still need to edit the buckets, use Buckets > Remove Bucket Results to remove the previous runs results and repeat starting with editing the bucketpool or def records.");
     echo "<li>";
-    echo _("When the bucket results are what you want, then you can reset all the users of the old bucketpool to the new one with Buckets > New Bucketpool.");
+    echo _("When the bucket results are what you want, then you can reset all the users of the old bucketpool to the new one (manual sql step).");
     echo "</ol>";
     echo "<hr>";
 
