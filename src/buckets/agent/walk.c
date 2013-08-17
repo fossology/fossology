@@ -69,8 +69,10 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   uploadtree.ufile_name = strdup(PQgetvalue(origresult, 0, 4));
   uploadtree.upload_fk = atol(PQgetvalue(origresult, 0, 5));
 
-  if (!skipProcessedCheck)
-  //  if (processed(pgConn, agent_pk, uploadtree.pfile_fk, uploadtree.uploadtree_pk, bucketpool_pk)) return 0;
+/*
+ *if (!skipProcessedCheck)
+ *  if (processed(pgConn, agent_pk, uploadtree.pfile_fk, uploadtree.uploadtree_pk, bucketpool_pk)) return 0;
+ */
 
   /* If this is a leaf node, process it
      (i.e. determine what bucket it belongs in).
