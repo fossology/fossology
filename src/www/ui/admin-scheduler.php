@@ -59,6 +59,8 @@ class admin_scheduler extends FO_Plugin
   function JobListOption()
   {
     $job_list_option = "<option value='0'>scheduler</option>";
+    $operation = GetParm('operation', PARM_TEXT);
+    if ("stop" === $operation) return $job_list_option; // not jobs
     $job_array = GetRunnableJobList(); /* get all job list */
     $size = sizeof($job_array);
     for($i = 0; $i < sizeof($job_array); $i++)
