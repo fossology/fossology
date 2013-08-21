@@ -80,6 +80,13 @@ class upload_instructions extends FO_Plugin
         $V .= _("This option is intended for developers who have mounted directories containing source trees.\n");
         $V .= _("The directory must be accessible via the web server's user.\n");
         $V .= "<P />\n";
+        $text = _("On the version control system");
+        $V .= "<li><b>$text</b>.\n";
+        $text = _("Use the");
+        $text1 = _("Upload from Version Control System");
+        $text2 = _("option to specify URL of a repo.");
+        $V .= "$text <a href='${Uri}?mod=upload_vcs'>$text1</a> $text2\n";
+        $V .= "<P />\n";
         $V .= _("If your system is configured to use multiple agent servers, the data area must be\n");
         $V .= _("mounted and accessible to the FOSSology user (fossy) on every agent system.  See\n");
         $text = _("the section");
