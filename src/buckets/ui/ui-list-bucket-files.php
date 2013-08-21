@@ -178,7 +178,8 @@ class list_bucket_files extends FO_Plugin
         }
         else
         {
-          $limit = ($Page < 0) ? "":" limit $Offset+$Max";
+          $Offset= ($Page < 0) ? 0 : $Page*$Max;
+          $limit = ($Page < 0) ? "ALL":$Max;
           // Get all the uploadtree_pk's with this bucket (for this agent and bucketpool)
           // in this subtree.
           // It would be best to sort by pfile_pk, so that the duplicate pfiles are
@@ -195,7 +196,7 @@ class list_bucket_files extends FO_Plugin
                  and bucketpool_fk=$bucketpool_pk
                  and bucket_pk=bucket_fk 
                  order by uploadtree.pfile_fk
-                 offset $Offset $limit";
+                 limit $limit offset $Offset";
           $fileresult = pg_query($PG_CONN, $sql);
           DBCheckResult($fileresult, $sql, __FILE__, __LINE__);
           $Count = pg_num_rows($fileresult);
