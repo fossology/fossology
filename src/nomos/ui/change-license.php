@@ -327,7 +327,7 @@ class change_license extends FO_Plugin {
       $V .= "<input type='submit' value='Submit'>";
       $V .= "</form>\n";
     } else {
-      $text = _("Sorry, you are neither the owner of this upload, nor administrator, so have no permission to change this license.");
+      $text = _("Sorry, you are an administrator, also have no write and above permission on this upload, have can not change the license of this file.");
       $V .= "<b>$text</b>";
     }
 
