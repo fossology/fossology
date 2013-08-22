@@ -400,14 +400,14 @@ class search extends FO_Plugin
         else
           $AllFilesChecked = "checked=\"checked\"";
         $text = _("Limit search to (Note: can not limit license and copyright search on containers)");
-        $text1 = _("Containers only, include directory (rpms, tars, isos, etc)");
+        $text1 = _("Containers only (rpms, tars, isos, etc), including directories.");
         $V .= "<u><i><b>$text:</b></i></u><br> <input type='radio' name='searchtype' value='containers' $ContainersChecked><b>$text1</b>\n";
-        $text2 = _("Containers only, exclude directory (rpms, tars, isos, etc)");
+        $text2 = _("Containers only (rpms, tars, isos, etc), excluding directories.");
         $V .= "<br> <input type='radio' name='searchtype' value='directory' $DirectoryChecked><b>$text2</b>\n";
         $text3 = _("All Files");
         $V .= "<br> <input type='radio' name='searchtype' value='allfiles' $AllFilesChecked><b>$text3</b>\n";
 
-        $V .= "<p><u><i><b>" . _("You must choose one or more search criteria.") . "</b></i></u>";
+        $V .= "<p><u><i><b>" . _("You must choose one or more search criteria (not case sensitive).") . "</b></i></u>";
         $V .= "<ul>\n";
 
         /* filename */
@@ -416,7 +416,6 @@ class search extends FO_Plugin
         $V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
         $V .= "<br>" . _("You can use '%' as a wild-card. ");
         $V .= _("For example, '%v3.war', or 'mypkg%.tar'.");
-        $V .= " &nbsp;" . _("Filename search is case insensitive.");
 
         /* tag  */
         $text = _("Tag to find");
@@ -435,14 +434,14 @@ class search extends FO_Plugin
 
         $V .= "<ul>\n";
         
-        $V .= "<p><u><i><b>" . _("You may also choose one or more optional search filters.") . "</b></i></u>";
+        $V .= "<p><u><i><b>" . _("You may also choose one or more optional search filters (not case sensitive).") . "</b></i></u>";
         /* license */
         $text = _("License");
         $V .= "<li><b>$text: </b><input name='license' value='$License'>";
-        $V .= "<br>" . _("License search is case insensitive.");
+        $V .= "<br>" . _("For example, 'AGPL%'.");
         $text = _("Copyright");
         $V .= "<li><b>$text: </b><input name='copyright' value='$Copyright'>";
-        $V .= "<br>" . _("Copyright search is case insensitive.");
+        $V .= "<br>" . _("For example, 'fsf'.");
 
         $V .= "</ul>\n";
 
