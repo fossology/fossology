@@ -160,22 +160,6 @@ if [ $COMMON ]; then
    chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}/agents
    chmod 2775 {$PROJECTSTATEDIR}/agents
   
-   # change all files ownership to fossy:fossy
-   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$MODDIR}
-   chmod u+s {$MODDIR}/scheduler/agent/fo_scheduler
-   chmod g+s {$MODDIR}/scheduler/agent/fo_scheduler
-   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LIBEXECDIR}
-   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$SYSCONFDIR}
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} /etc/cron.d/fossology
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} /etc/init.d/fossology
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/departition
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/cp2foss
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/fossjobs
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/schema-export
-   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$INCLUDEDIR}/libfossology.h
-   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$MAN1DIR}/cp2foss.1
-   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$MAN1DIR}/fossjobs.1
-
    if [ ! -d "$REPO" ] ; then
       mkdir -p "$REPO"
    else
@@ -214,6 +198,22 @@ fi # end of license reference
 ########################################################################
 
 if [ $AGENT ]; then
+   # change all files ownership to fossy:fossy
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$MODDIR}
+   chmod u+s {$MODDIR}/scheduler/agent/fo_scheduler
+   chmod g+s {$MODDIR}/scheduler/agent/fo_scheduler
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LIBEXECDIR}
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$SYSCONFDIR}
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} /etc/cron.d/fossology
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} /etc/init.d/fossology
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/departition
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/cp2foss
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/fossjobs
+   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/schema-export
+   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$INCLUDEDIR}/libfossology.h
+   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$MAN1DIR}/cp2foss.1
+   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$MAN1DIR}/fossjobs.1
+
    {$LIBEXECDIR}/fo_dbcheck.php -c {$SYSCONFDIR}
    if [ $? != 0 ] ; then
      echo "FATAL: unable to connect to database, please check {$SYSCONFDIR}/Db.conf"
