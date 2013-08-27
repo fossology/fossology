@@ -689,7 +689,10 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
 void GetProxy()
 {
   int i = 0;
+  int count_temp = 0;
+  char *http_proxy_host = NULL;
   char *http_proxy_port = NULL;
+  char *http_temp = NULL;
 
   for (i = 0; i < 6; i++)
   {
@@ -719,7 +722,17 @@ void GetProxy()
 
     if (http_proxy_port && http_proxy_port[0])
     {
-      GlobalProxy[4] = GlobalHttpProxy;
+      /* exclude '/' in http_proxy_port and 'http://' in http_proxy_host */
+      http_temp = strchr(http_proxy_port, '/'); 
+      if (http_temp && http_temp[0])
+      {
+        count_temp = http_temp - http_proxy_port;
+        http_proxy_port[count_temp] = 0;
+      }
+      http_proxy_host = strrchr(GlobalHttpProxy, '/');
+      http_proxy_host++;
+
+      GlobalProxy[4] = http_proxy_host;
       GlobalProxy[5] = http_proxy_port;
     }
   }
