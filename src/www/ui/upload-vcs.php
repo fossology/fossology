@@ -197,10 +197,10 @@ class upload_vcs extends FO_Plugin {
         $text = _("NOTE");
         $text1 = _(": If no name is provided, then the uploaded file (directory) name will be used.");
         $V.= "<b>$text</b>$text1<P />\n";
-        $text = _("Username:");
+        $text = _("(Optional) Username:");
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='username' size=60 value='" . htmlentities($Username) . "'/><P />\n";
-        $text = _("Password:");
+        $text = _("(Optional) Password:");
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='password' name='passwd' size=60 value='" . htmlentities($Passwd) . "'/><P />\n";
 
