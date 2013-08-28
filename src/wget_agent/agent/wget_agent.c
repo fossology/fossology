@@ -729,11 +729,15 @@ void GetProxy()
         count_temp = http_temp - http_proxy_port;
         http_proxy_port[count_temp] = 0;
       }
-      http_proxy_host = strrchr(GlobalHttpProxy, '/');
-      http_proxy_host++;
-
-      GlobalProxy[4] = http_proxy_host;
+      GlobalProxy[4] = GlobalHttpProxy;
       GlobalProxy[5] = http_proxy_port;
+
+      http_proxy_host = strrchr(GlobalHttpProxy, '/');
+      if (http_proxy_host && http_proxy_host[0])
+      {
+        http_proxy_host++;
+        GlobalProxy[4] = http_proxy_host;
+      }
     }
   }
 }
