@@ -2182,7 +2182,7 @@
 #
 %ENTRY%	_LT_GPL_EXCEPT_CLASSPATH_2
 %KEY%	"independent"
-%STR%	"special exception permission to link this library with independent modules to produce an executable"
+%STR%	"special exception =SOME= permission to link this library with independent modules to produce an executable"
 #
 %ENTRY%	_LT_GPL_EXCEPT_AUTOCONF
 %KEY%	"(condit|vers)ion"
@@ -2453,7 +2453,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%  _LT_IGNORE_CLAUSE
 %KEY%  =NULL=
-%STR%  "to apply these terms =ANY= attach the following notices to the (program|library)"
+%STR%  "to apply these terms =ANY= to (the|your) (program|library)"
 #####
 # This is an 'exclusionary' clause - the Python licen[cs]e for instance has
 # the text "previously distributed under the GNU ...".  We use this when

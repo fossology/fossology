@@ -1398,7 +1398,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         }
         else if (!HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED) 
             && !INFILE(_LT_GPL_EXCEPT_BISON_1) && !INFILE(_LT_GPL_EXCEPT_BISON_2) 
-            && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)){
+            && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)
+            && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_2)){
           cp = GPLVERS();
           INTERESTING(lDebug ? "GPL(ref1#1)" : cp);
           lmem[_mGPL] = 1;
@@ -1553,12 +1554,21 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "GPL-except-classpath_3" : "GPL-3.0-with-classpath-exception");
       lmem[_mGPL] = 1;
     }
-    else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)) {
+    else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && (GPL_INFILE(_PHR_FSF_V2_OR_LATER) || GPL_INFILE(_PHR_GPL2_OR_LATER))
+        && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+      INTERESTING("GPL-2.0+-with-classpath-exception");
+      lmem[_mGPL] = 1;
+    }
+    else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
       INTERESTING(lDebug ? "GPL-except-classpath_1" : "GPL-2.0-with-classpath-exception");
       lmem[_mGPL] = 1;
     }
-    else
-      if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_2)) {
+    else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && (GPL_INFILE(_PHR_FSF_V2_OR_LATER) || GPL_INFILE(_PHR_GPL2_OR_LATER)) 
+        && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+      INTERESTING("GPL-2.0+-with-classpath-exception");
+      lmem[_mGPL] = 1;
+    }
+    else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
         INTERESTING(lDebug ? "GPL-except-classpath_2" : "GPL-2.0-with-classpath-exception");
         lmem[_mGPL] = 1;
       }
@@ -1579,7 +1589,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           INTERESTING("GPL-2.0-with-font-exception");
           lmem[_mGPL] = 1;
         }
-        else if (HASTEXT(_TEXT_GCC, REG_EXTENDED) && (GPL_INFILE(_PHR_FSF_V3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER))) {
+        else if (HASTEXT(_TEXT_GCC, REG_EXTENDED) && (GPL_INFILE(_PHR_FSF_V3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER)) 
+            && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
           INTERESTING("GPL-3.0+-with-GCC-exception");
           lmem[_mGPL] = 1;
         }
@@ -1602,7 +1613,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           lmem[_mGPL] = 1;
         }
         else if ((INFILE(_LT_GPL_EXCEPT_BISON_1)  || INFILE(_LT_GPL_EXCEPT_BISON_2)) &&
-            (GPL_INFILE(_PHR_FSF_V2_OR_LATER) || INFILE(_PHR_GPL2_OR_LATER))) {
+            (GPL_INFILE(_PHR_FSF_V2_OR_LATER) || INFILE(_PHR_GPL2_OR_LATER)) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
           INTERESTING("GPL-2.0+-with-bison-exception");
           lmem[_mGPL] = 1;
         }
