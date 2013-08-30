@@ -101,7 +101,10 @@ class upload_properties extends FO_Plugin
 
     $V = "";
     $folder_pk = GetParm('folder', PARM_TEXT);
-    if (empty($folder_pk)) $folder_pk = FolderGetTop();
+    $FolderSelectId = GetParm('selectfolderid', PARM_INTEGER);
+    if (empty($FolderSelectId)) {
+      $FolderSelectId = GetUserRootFolder();
+    }
 
     $NewName = GetArrayVal("newname", $_POST);
     $NewDesc = GetArrayVal("newdesc", $_POST);
@@ -141,21 +144,18 @@ class upload_properties extends FO_Plugin
     $text = _("Select the folder that contains the upload:  \n");
     $V.= "<li>$text";
 
-    // Get folder array folder_pk => folder_name
-    $FolderArray = array();
-    GetFolderArray($folder_pk, $FolderArray);
-
     /*** Display folder select list, on change request new page with folder= in url ***/
-    $url = Traceback_uri() . "?mod=upload_properties&folder=";
-    $onchange = "onchange=\"js_url(this.value, '$url')\"";
-    $V .= Array2SingleSelect($FolderArray, "folderselect", $folder_pk, false, false, $onchange);
+    $Uri = Traceback_uri() . "?mod=" . $this->Name . "&selectfolderid=";
+    $V.= "<select name='oldfolderid' onChange='window.location.href=\"$Uri\" + this.value'>\n";
+    $V.= FolderListOption(-1, 0, 1, $FolderSelectId);
+    $V.= "</select><P />\n";
 
     /*** Display upload select list, on change, request new page with new upload= in url ***/
     $text = _("Select the upload you wish to edit:  \n");
     $V.= "<li>$text";
 
     // Get list of all upload records in this folder
-    $UploadList = FolderListUploads_perm($folder_pk, PERM_WRITE);
+    $UploadList = FolderListUploads_perm($FolderSelectId, PERM_WRITE);
 
     // Make data array for upload select list.  Key is upload_pk, value is a composite
     // of the upload_filename and upload_ts.
