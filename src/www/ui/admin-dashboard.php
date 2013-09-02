@@ -262,10 +262,22 @@ class dashboard extends FO_Plugin
         pg_free_result($result);
         if (!empty($item_count))
         {
+          $sql = "SELECT * from version();";
+          $result = pg_query($PG_CONN, $sql);
+          DBCheckResult($result, $sql, __FILE__, __LINE__);
+          DBCheckResult($result, $sql, __FILE__, __LINE__);
+          $row = pg_fetch_assoc($result);
+          pg_free_result($result);
+          $version = explode(' ', $row['version'], 3);
+          $current_sql = "current_query";
+          if (strcmp($version[1], "9.2") >= 0) // when greater than PostgreSQL 9.2 replace "current_query" with "state"
+          {
+            $current_sql = "state";
+          }
           $text = _("Active database connections");
           $V .= "<tr><td>$text</td>";
           $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
-          $sql = "SELECT count(*) AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology';";
+          $sql = "SELECT count(*) AS val FROM pg_stat_activity WHERE $current_sql != '<IDLE>' AND datname = 'fossology';";
           $result = pg_query($PG_CONN, $sql);
           DBCheckResult($result, $sql, __FILE__, __LINE__);
           $row = pg_fetch_assoc($result);
@@ -275,7 +287,7 @@ class dashboard extends FO_Plugin
           $text = _("Active FOSSology queries");
           $V .= "<tr><td>$text</td>";
           $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
-          $sql = "SELECT datname,now()-query_start AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology' ORDER BY val;"; 
+          $sql = "SELECT datname,now()-query_start AS val FROM pg_stat_activity WHERE $current_sql != '<IDLE>' AND datname = 'fossology' ORDER BY val;"; 
           $result = pg_query($PG_CONN, $sql);
           DBCheckResult($result, $sql, __FILE__, __LINE__);
           for ($i = 0; ($row = pg_fetch_assoc($result)) and !empty($row['datname']); $i++)
