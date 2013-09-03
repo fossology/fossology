@@ -168,6 +168,7 @@ Description: architecture for analyzing software, delagent
 Package: fossology-wgetagent
 Architecture: any
 Depends: fossology-common, wget, subversion, git, ${shlibs:Depends}, ${misc:Depends}
+Replaces: fossology-wgetagent (<= 2.2.0)
 Description: architecture for analyzing software, wget_agent
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
