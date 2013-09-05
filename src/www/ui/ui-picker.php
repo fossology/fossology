@@ -165,7 +165,7 @@ class ui_picker extends FO_Plugin
       /* write subfolders */
       foreach ($FolderContents as $Folder)
       {
-        if (array_key_exists('folder_pk', $Folder))
+        if ($Folder && array_key_exists('folder_pk', $Folder))
         {
           $folder_pk = $Folder['folder_pk'];
           $folder_name = htmlentities($Folder['name']);
@@ -177,7 +177,7 @@ class ui_picker extends FO_Plugin
           $OutBuf .= "<a href='$Uri&folder=$folder_pk&item=$File1uploadtree_pk'><b>$folder_name</b></a>/";
           $OutBuf .= "</td></tr>";
         }
-        else if (array_key_exists('uploadtree_pk', $Folder))
+        else if ($Folder && array_key_exists('uploadtree_pk', $Folder))
         {
           $bitem = $Folder['uploadtree_pk'];
           $upload_filename = htmlentities($Folder['name']);
