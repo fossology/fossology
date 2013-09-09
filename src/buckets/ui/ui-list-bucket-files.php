@@ -195,11 +195,30 @@ class list_bucket_files extends FO_Plugin
                  and bucket_fk=$bucket_pk
                  and bucketpool_fk=$bucketpool_pk
                  and bucket_pk=bucket_fk 
-                 order by uploadtree.pfile_fk
+                 order by uploadtree.ufile_name
                  limit $limit offset $Offset";
           $fileresult = pg_query($PG_CONN, $sql);
           DBCheckResult($fileresult, $sql, __FILE__, __LINE__);
           $Count = pg_num_rows($fileresult);
+        }
+        $file_result_temp = pg_fetch_all($fileresult);
+        $sourted_file_result = array(); // the final file list will display
+        $max_num = $Count;
+        /** sorting by ufile_name from DB, then reorder the duplicates indented */
+        for($i = 0; $i < $max_num; $i++)
+        {
+          $row = $file_result_temp[$i];
+          if (empty($row)) continue;
+          array_push($sourted_file_result, $row);
+          for($j = $i + 1; $j < $max_num; $j++)
+          {
+            $row_next = $file_result_temp[$j];
+            if (!empty($row_next) && ($row['pfile_fk'] == $row_next['pfile_fk']))
+            {
+              array_push($sourted_file_result, $row_next);
+              $file_result_temp[$j] = null;
+            }
+          }
         }
 
         if ($Count < (1.25 * $Max)) $Max = $Count;
@@ -235,7 +254,7 @@ class list_bucket_files extends FO_Plugin
         $PrevPfile_pk = 0;
 
         if ($Count > 0)
-        while ($row = pg_fetch_assoc($fileresult))
+        foreach ($sourted_file_result as $row)
         {
           // get all the licenses in this subtree (bucket uploadtree_pk)
           $pfile_pk = $row['pfile_fk'];

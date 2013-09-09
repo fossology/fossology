@@ -123,11 +123,32 @@ class list_lic_files extends FO_Plugin
         $V.= "$Count $text ($Unique $text1) $text2 <b>$rf_shortname</b>";
         if ($Count < $Max) $Max = $Count;
         $limit = ($Page < 0) ? "ALL":$Max;
-        $order = " order by pfile_fk asc";
+        $order = " order by ufile_name asc";
         /** should delete $filesresult yourself */
         $filesresult = GetFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk,
                                            $PkgsOnly, $Offset, $limit, $order, $tag_pk, $uploadtree_tablename);
         $NumFiles = pg_num_rows($filesresult);
+
+        $file_result_temp = pg_fetch_all($filesresult);
+        $sorted_file_result = array(); // the final file list will display
+        $max_num = $NumFiles;
+        /** sorting by ufile_name from DB, then reorder the duplicates indented */
+        for($i = 0; $i < $max_num; $i++)
+        {
+          $row = $file_result_temp[$i];
+          if (empty($row)) continue;
+          array_push($sorted_file_result, $row);
+          for($j = $i + 1; $j < $max_num; $j++)
+          {
+            $row_next = $file_result_temp[$j];
+            if (!empty($row_next) && ($row['pfile_fk'] == $row_next['pfile_fk']))
+            {
+              array_push($sorted_file_result, $row_next);
+              $file_result_temp[$j] = null;
+            }
+          }
+        }
+
         $text = _("Display");
         $text1 = _("excludes");
         $text2 = _("files with these extensions");
@@ -164,7 +185,7 @@ class list_lic_files extends FO_Plugin
         $LastPfilePk = -1;
         $ExclArray = explode(":", $Excl);
         $ExclicArray = explode(":", $Exclic);
-        while ($row = pg_fetch_assoc($filesresult))
+        foreach ($sorted_file_result as $row)
         {
           $pfile_pk = $row['pfile_fk'];
           $licstring = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $row['uploadtree_pk'], $uploadtree_tablename);
