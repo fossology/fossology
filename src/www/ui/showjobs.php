@@ -591,7 +591,7 @@ if (!empty($Row["job_upload_fk"]))
 
         /* status */
         $Status = $jobqueueRec["jq_endtext"];
-        $OutBuf .= "<td>$Status</td>";
+        $OutBuf .= "<td style='text-align:center'>$Status</td>";
         $isPaused = ($Status == "Paused") ? true : false;
 
         /* agent name */
@@ -599,7 +599,10 @@ if (!empty($Row["job_upload_fk"]))
 
         /* items processed */
         if ( $jobqueueRec["jq_itemsprocessed"] > 0)
-          $OutBuf .= "<td>$jobqueueRec[jq_itemsprocessed] items</td>";
+        {
+          $items = number_format($jobqueueRec['jq_itemsprocessed']);
+          $OutBuf .= "<td style='text-align:right'>$items items</td>";
+        }
         else
           $OutBuf .= "<td></td>";
 
@@ -607,7 +610,21 @@ if (!empty($Row["job_upload_fk"]))
         $OutBuf .= "<td>";
         $OutBuf .= substr($jobqueueRec['jq_starttime'], 0, 16);
         if (!empty($jobqueueRec["jq_endtime"])) 
+        {
           $OutBuf .= " - " . substr($jobqueueRec['jq_endtime'], 0, 16);
+          $NumSecs = strtotime($jobqueueRec['jq_endtime']) - strtotime($jobqueueRec['jq_starttime']);
+        }
+        else
+          $NumSecs = time()  - strtotime($jobqueueRec['jq_starttime']);
+
+        if ( $NumSecs > 0)
+        {
+          $ItemsPerSec = round($jobqueueRec['jq_itemsprocessed']/$NumSecs);
+          if ($ItemsPerSec < 1)
+            $OutBuf .= sprintf(" : (%01.2f items/sec)", $jobqueueRec['jq_itemsprocessed']/$NumSecs);
+          else
+            $OutBuf .= sprintf(" : (%d items/sec)", $ItemsPerSec);
+        }
         $OutBuf .= "</td>";
 
         /* actions, must be admin or own the upload  */
