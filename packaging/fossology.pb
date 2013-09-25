@@ -11,7 +11,7 @@
 #pburl fossology = svn://svn.fossology.org/fossology/devel
 #pburl fossology = svn://svn+ssh.fossology.org/fossology/devel
 #pburl fossology = cvs://cvs.fossology.org/fossology/devel
-pburl fossology = svn+https://svn.code.sf.net/p/fossology/code/tags/2.3.0~rc1
+pburl fossology = svn+https://svn.code.sf.net/p/fossology/code/tags/2.3.0
 #pburl fossology = ftp://ftp.fossology.org/src/fossology-devel.tar.gz
 #pburl fossology = file:///src/fossology-devel.tar.gz
 #pburl fossology = dir:///src/fossology-devel
@@ -43,7 +43,7 @@ sshport fossology = 22
 #
 # Global version/tag for the project
 #
-projver fossology = 2.3.0rc1
+projver fossology = 2.3.0
 projtag fossology = 1
 # Hash of valid version names
 version fossology = trunk
