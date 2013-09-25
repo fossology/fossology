@@ -309,4 +309,22 @@ function GetUploadID($uploadtreeid)
   else return $uploadid;
 }
 
+/**
+ * \brief execute a shell command
+ *
+ * \param $cmd - command to execute
+ *
+ * \return command results
+ */
+function DoCmd($Cmd)
+{
+  $Fin = popen($Cmd,"r");
+
+  /* Read results */
+  $Buf = "";
+  while(!feof($Fin)) $Buf .= fread($Fin,8192);
+  pclose($Fin);
+  return $Buf;
+}
+
 ?>
