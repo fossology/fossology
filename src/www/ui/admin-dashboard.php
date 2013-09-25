@@ -28,148 +28,6 @@ class dashboard extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_ADMIN;
 
   /**
-   * \brief Database Contents metrics
-   * \returns html table containing metrics
-   */
-  function DatabaseContents()
-  {
-    global $PG_CONN;
-
-        $V = "<table border=1>\n";
-        $text = _("Metric");
-        $text1 = _("Total");
-        $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
-        $sql = "SELECT count(*) AS val FROM upload;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $item_count = '';
-        $item_count = $row['val'];
-        pg_free_result($result);
-        $text = _("Unique Uploads");
-        $V .= "<tr><td>$text</td>";
-        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
-        $sql = "SELECT count(*) AS val FROM pfile;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $item_count = '';
-        $item_count = $row['val'];
-        pg_free_result($result);
-        $text = _("Unique Extracted Files");
-        $V .= "<tr><td>$text</td>";
-        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
-        $sql = "SELECT count(*) AS val FROM uploadtree;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $item_count = '';
-        $item_count = $row['val'];
-        pg_free_result($result);
-        $text = _("Extracted Names");
-        $V .= "<tr><td>$text</td>";
-        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
-        $sql = "SELECT count(*) AS val FROM agent_lic_raw;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $item_count = '';
-        $item_count = $row['val'];
-        pg_free_result($result);
-        $text = _("Known License Templates");
-        $V .= "<tr><td>$text</td>";
-        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
-        $sql = "SELECT count(*) AS val FROM agent_lic_meta;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $item_count = '';
-        $item_count = $row['val'];
-        pg_free_result($result);
-        $text = _("Identified Licenses");
-        $V .= "<tr><td>$text</td>";
-        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
-        $V .= "</table>\n";
-
-    return $V;
-  }
-
-
-  /**
-   * \brief Database metrics
-   * \returns html table containing metrics
-   */
-  function DatabaseMetrics()
-  {
-    global $PG_CONN;
-
-        $V = "<table border=1>\n";
-        $text = _("Metric");
-        $text1 = _("Total");
-        $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
-        $sql = "SELECT pg_size_pretty(pg_database_size('fossology')) as val;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $Size = $row['val'];
-        pg_free_result($result);
-        $text = _("FOSSology database size");
-        $V .= "<tr><td>$text</td>";
-        $V .= "<td align='right'>  $Size </td></tr>\n";;
-
-        $sql = "SELECT count(*) AS val FROM pg_stat_activity;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $item_count = '';
-        $item_count = $row['val'];
-        pg_free_result($result);
-        if (!empty($item_count))
-        {
-          $sql = "SELECT * from version();";
-          $result = pg_query($PG_CONN, $sql);
-          DBCheckResult($result, $sql, __FILE__, __LINE__);
-          DBCheckResult($result, $sql, __FILE__, __LINE__);
-          $row = pg_fetch_assoc($result);
-          pg_free_result($result);
-          $version = explode(' ', $row['version'], 3);
-          $current_sql = "current_query";
-          if (strcmp($version[1], "9.2") >= 0) // when greater than PostgreSQL 9.2 replace "current_query" with "state"
-          {
-            $current_sql = "state";
-          }
-          $text = _("Active database connections");
-          $V .= "<tr><td>$text</td>";
-          $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
-          $sql = "SELECT count(*) AS val FROM pg_stat_activity WHERE $current_sql != '<IDLE>' AND datname = 'fossology';";
-          $result = pg_query($PG_CONN, $sql);
-          DBCheckResult($result, $sql, __FILE__, __LINE__);
-          $row = pg_fetch_assoc($result);
-          $item_count = '';
-          $item_count = $row['val'];
-          pg_free_result($result);
-          $text = _("Active FOSSology queries");
-          $V .= "<tr><td>$text</td>";
-          $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
-          $sql = "SELECT datname,now()-query_start AS val FROM pg_stat_activity WHERE $current_sql != '<IDLE>' AND datname = 'fossology' ORDER BY val;"; 
-          $result = pg_query($PG_CONN, $sql);
-          DBCheckResult($result, $sql, __FILE__, __LINE__);
-          for ($i = 0; ($row = pg_fetch_assoc($result)) and !empty($row['datname']); $i++)
-          {
-            $text = _("Duration query #");
-            $text1 = _(" has been active");
-            $V .= "<tr><td>$text . $i . $text1</td>";
-            $V .= "<td align='right'>" . $row['val'] . "</td></tr>\n";
-          }
-          pg_free_result($result);
-        }
-        $V .= "</table>\n";
-
-    return $V;
-  }
-
-
-  /**
    * \brief Database metrics
    * \returns html table containing information on the job queue
    */
@@ -255,6 +113,219 @@ class dashboard extends FO_Plugin
   }
 
 
+  /**
+   * \brief Database Contents metrics
+   * \returns html table containing metrics
+   */
+  function DatabaseContents()
+  {
+    global $PG_CONN;
+
+    $V = "<table border=1>\n";
+
+    $text = _("Metric");
+    $text1 = _("Total");
+    $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
+
+    /**** Users ****/
+    $sql = "SELECT count(*) AS val FROM users";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $item_count = $row['val'];
+    pg_free_result($result);
+    $text = _("Users");
+    $V .= "<tr><td>$text</td>";
+    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+
+    /**** Uploads  ****/
+    $sql = "SELECT count(*) AS val FROM upload;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $item_count = $row['val'];
+    pg_free_result($result);
+    $text = _("Uploads");
+    $V .= "<tr><td>$text</td>";
+    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+
+    /**** Unique pfiles  ****/
+    // $sql = "SELECT count(*) AS val FROM pfile;";  too slow on big tables, use pg_class which will be accurate as of last ANALYZE
+    $sql = "select reltuples as val from pg_class where relname='pfile'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $item_count = $row['val'];
+    pg_free_result($result);
+    $text = _("Unique Files referenced in repository");
+    $V .= "<tr><td>$text</td>";
+    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+
+    /**** uploadtree recs  ****/
+    // $sql = "SELECT count(*) AS val FROM uploadtree;";  too slow on big tables, use pg_class which will be accurate as of last ANALYZE
+    $sql = "select sum(reltuples) as val from pg_class where relname like 'uploadtree_%' and reltype !=0";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $item_count = $row['val'];
+    pg_free_result($result);
+    $text = _("Individual Files");
+    $V .= "<tr><td>$text</td>";
+    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+
+    /**** License recs  ****/
+    // $sql = "SELECT count(*) AS val FROM license_file;";  too slow on big tables, use pg_class which will be accurate as of last ANALYZE
+    $sql = "select reltuples as val from pg_class where relname='license_file'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $item_count = $row['val'];
+    pg_free_result($result);
+    $text = _("Discovered Licenses");
+    $V .= "<tr><td>$text</td>";
+    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+
+    /**** Copyright recs  ****/
+    // $sql = "SELECT count(*) AS val FROM copyright;";  too slow on big tables, use pg_class which will be accurate as of last ANALYZE
+    $sql = "select reltuples as val from pg_class where relname='copyright'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $item_count = $row['val'];
+    pg_free_result($result);
+    $text = _("Copyrights/URLs/Emails");
+    $V .= "<tr><td>$text</td>";
+    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+
+    $V .= "</table>\n";
+
+    return $V;
+  }
+
+
+  /**
+   * \brief Database metrics
+   * \returns html table containing metrics
+   */
+  function DatabaseMetrics()
+  {
+    global $PG_CONN;
+
+    $V = "<table border=1>\n";
+    $text = _("Metric");
+    $text1 = _("Total");
+    $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
+
+    /* Database size */
+    $sql = "SELECT pg_size_pretty(pg_database_size('fossology')) as val;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $Size = Bytes2Human($row['val'] * 1000000);
+    pg_free_result($result);
+    $text = _("FOSSology database size");
+    $V .= "<tr><td>$text</td>";
+    $V .= "<td align='right'>  $Size </td></tr>\n";;
+
+    /**** Version ****/
+    $sql = "SELECT * from version();";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    $version = explode(' ', $row['version'], 3);
+    $text = _("Postgresql version");
+    $V .= "<tr><td>$text</td>";
+    $V .= "<td align='right'>  $version[1] </td></tr>\n";;
+
+    // Get the current query column name in pg_stat_activity
+    if (strcmp($version[1], "9.2") >= 0) // when greater than PostgreSQL 9.2 replace "current_query" with "state"
+      $current_query = "state";
+    else
+      $current_query = "current_query";
+
+    /**** Query stats ****/
+    // count current queries
+    $sql = "SELECT count(*) AS val FROM pg_stat_activity";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $connection_count = '';
+    $connection_count = $row['val'];
+    pg_free_result($result);
+
+    /**** Active connection count ****/
+    $text = _("Active database connections");
+    $V .= "<tr><td>$text</td>";
+    $V .= "<td align='right'>" . number_format($connection_count,0,"",",") . "</td></tr>\n";;
+    $sql = "SELECT count(*) AS val FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $item_count = $row['val'];
+    pg_free_result($result);
+
+    $V .= "</table>\n";
+
+    return $V;
+  }
+
+
+  /**
+   * \brief Database queries
+   * \returns html table containing query strings, pid, and start time
+   */
+  function DatabaseQueries()
+  {
+    global $PG_CONN;
+
+    $V = "<table border=1>\n";
+    $head1 = _("PID");
+    $head2 = _("Query");
+    $head3 = _("Started");
+    $head4 = _("Elapsed");
+    $V .= "<tr><th>$head1</th><th>$head2</th><th>$head3</th><th>$head4</th></tr>\n";
+
+    /**** Version ****/
+    $sql = "SELECT * from version();";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    pg_free_result($result);
+    $version = explode(' ', $row['version'], 3);
+
+    // Get the current query column name in pg_stat_activity
+    if (strcmp($version[1], "9.2") >= 0) // when greater than PostgreSQL 9.2 replace "current_query" with "state"
+      $current_query = "state";
+    else
+      $current_query = "current_query";
+
+    $sql = "SELECT procpid, $current_query, query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY procpid;"; 
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) > 1)
+    {
+      while ($row = pg_fetch_assoc($result))
+      {
+        if ($row[$current_query] == $sql) continue;  // Don't display this query
+        $V .= "<tr>";
+        $V .= "<td>$row[procpid]</td>";
+        $V .= "<td>" . htmlspecialchars($row[$current_query]) . "</td>";
+        $StartTime = substr($row['query_start'], 0, 19);
+        $V .= "<td>$StartTime</td>";
+        $V .= "<td>$row[elapsed]</td>";
+        $V .= "</tr>\n";
+      }
+    }
+    else
+      $V .= "<tr><td colspan=4>There are no active FOSSology queries</td></tr>";
+
+    pg_free_result($result);
+    $V .= "</table>\n";
+
+    return $V;
+  }
+
 
   /**
    * \brief Determine amount of free disk space.
@@ -263,15 +334,7 @@ class dashboard extends FO_Plugin
   {
     global $SYSCONFDIR;
     $Cmd = "df -Pk `cat '$SYSCONFDIR/fossology/RepPath.conf'`/*/* | sort -u | grep '%'";
-    $Fin = popen($Cmd,"r");
-
-    /* Read results */
-    $Buf = "";
-    while(!feof($Fin))
-    {
-      $Buf .= fread($Fin,8192);
-    }
-    pclose($Fin);
+    $Buf = DoCmd($Cmd);
 
     /* Separate lines */
     $Lines = explode("\n",$Buf);
@@ -330,24 +393,31 @@ class dashboard extends FO_Plugin
         $text = _("Job Queue");
         $V .= "<H2>$text</H2>\n";
         $V .= $this->JobQueueInfo();
-
+        $V .= "</td>";
 
         /**************************************************/
         $V .= "<td valign='top'>\n";
         $text = _("Database Contents");
         $V .= "<H2>$text</H2>\n";
         $V .= $this->DatabaseContents();
-
+        $V .= "</td>";
 
         /**************************************************/
         $V .= "<td valign='top'>\n";
         $text = _("Database Metrics");
         $V .= "<H2>$text</H2>\n";
         $V .= $this->DatabaseMetrics();
+        $V .= "</td>";
+
+        /**************************************************/
+        $V .= "</tr></table>\n";
 
 
         /**************************************************/
-        $V .= "</table>\n";
+        $text = _("Active FOSSology queries");
+        $V .= "<H2>$text</H2>\n";
+        $V .= $this->DatabaseQueries();
+        $V .= "</td>";
 
         /**************************************************/
         $text = _("Repository Disk Space");
@@ -360,6 +430,7 @@ class dashboard extends FO_Plugin
       default:
         break;
     }
+
     if (!$this->OutputToStdout) { return($V); }
     print($V);
     return;
