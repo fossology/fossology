@@ -28,90 +28,42 @@ class dashboard extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_ADMIN;
 
   /**
-   * \brief Database metrics
-   * \returns html table containing information on the job queue
+   * \brief Return each html row for DatabaseContents()
+   * \returns html table row
    */
-  function JobQueueInfo()
+  function DatabaseContentsRow($TableName, $TableLabel)
   {
     global $PG_CONN;
 
-        $V = "<table border=1>\n";
-        $text = _("Queue Information");
-        $text1 = _("Total");
-        $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
-        // Dynamically set hyperlinks based on showjobs plugin existence.
-        $uri_showjobs = Traceback_uri() . "?mod=showjobs";
-        $showjobs_exists = &$Plugins[plugin_find_id("showjobs")]; /* may be null */
+    // $sql = "SELECT count(*) AS val FROM $TableName;";  too slow on big tables, use pg_class which will be accurate as of last ANALYZE
+    //$sql = "select reltuples as val from pg_class where relname='$TableName'"; this doesn't handle uploadtree
+    $sql = "select sum(reltuples) as val from pg_class where relname like '$TableName' and reltype !=0";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $item_count = $row['val'];
+    pg_free_result($result);
 
-        $sql = "SELECT COUNT(DISTINCT jq_job_fk) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $item_count = '';
-        $item_count = $row['val'];
-        pg_free_result($result);
-        if ($showjobs_exists) {
-          $text = _("Pending Analysis Jobs");
-          $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
-        }
-        else {
-          $text = _("Pending Analysis Jobs");
-          $V .= "<tr><td>$text</td>";
-        }
-        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
-        $sql = "SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $item_count = '';
-        $item_count = $row['val'];
-        pg_free_result($result);
-        if ($showjobs_exists) {
-          $text = _("Tasks in the Job Queue");
-          $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
-        }
-        else {
-          $text = _("Tasks in the Job Queue");
-          $V .= "<tr><td>$text</td>";
-        }
-        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";
-        $sql = "SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL AND jq_starttime IS NOT NULL;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $item_count = '';
-        $item_count = $row['val'];
-        pg_free_result($result);
-        if ($showjobs_exists) {
-          $text = _("Running Tasks");
-          $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
-        }
-        else {
-          $text = _("Running Tasks");
-          $V .= "<tr><td>$text</td>";
-        }
-        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";
-        $sql = "SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NOT NULL AND jq_end_bits=2;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $item_count = '';
-        $item_count = $row['val'];
-        pg_free_result($result);
-        if ($showjobs_exists) {
-          $text = _("Failed Tasks");
-          $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
-        }
-        else {
-          $text = _("Failed Tasks");
-          $V .= "<tr><td>$text</td>";
-        }
-        $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";
-        $V .= "</table>\n";
-        $V .= "</td>";
+    $V = "<tr><td>$TableLabel</td>";
+    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td>";
+
+    $LastVacTime = $this->GetLastVacTime($TableName);
+    if (empty($LastVacTime))
+      $mystyle = "style=background-color:red";
+    else
+      $mystyle = "";
+    $V .= "<td $mystyle>" . substr($LastVacTime, 0, 16) . "</td>";
+
+    $LastAnalyzeTime = $this->GetLastAnalyzeTime($TableName);
+    if (empty($LastAnalyzeTime))
+      $mystyle = "style=background-color:red";
+    else
+      $mystyle = "";
+    $V .= "<td $mystyle>" . substr($LastAnalyzeTime, 0, 16) . "</td>";
+
+    $V .= "</tr>\n";
     return $V;
   }
-
 
   /**
    * \brief Database Contents metrics
@@ -123,84 +75,59 @@ class dashboard extends FO_Plugin
 
     $V = "<table border=1>\n";
 
-    $text = _("Metric");
-    $text1 = _("Total");
-    $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
+    $head1 = _("Metric");
+    $head2 = _("Total");
+    $head3 = _("Last<br>Vacuum");
+    $head4 = _("Last<br>Analyze");
+    $V .= "<tr><th>$head1</th><th>$head2</th><th>$head3</th><th>$head4</th></tr>\n";
 
     /**** Users ****/
-    $sql = "SELECT count(*) AS val FROM users";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $item_count = $row['val'];
-    pg_free_result($result);
-    $text = _("Users");
-    $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+    $V .= $this->DatabaseContentsRow("users", _("Users"));
 
     /**** Uploads  ****/
-    $sql = "SELECT count(*) AS val FROM upload;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $item_count = $row['val'];
-    pg_free_result($result);
-    $text = _("Uploads");
-    $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+    $V .= $this->DatabaseContentsRow("upload", _("Uploads"));
 
     /**** Unique pfiles  ****/
-    // $sql = "SELECT count(*) AS val FROM pfile;";  too slow on big tables, use pg_class which will be accurate as of last ANALYZE
-    $sql = "select reltuples as val from pg_class where relname='pfile'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $item_count = $row['val'];
-    pg_free_result($result);
-    $text = _("Unique Files referenced in repository");
-    $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+    $V .= $this->DatabaseContentsRow("pfile", _("Unique files referenced in repository"));
 
     /**** uploadtree recs  ****/
-    // $sql = "SELECT count(*) AS val FROM uploadtree;";  too slow on big tables, use pg_class which will be accurate as of last ANALYZE
-    $sql = "select sum(reltuples) as val from pg_class where relname like 'uploadtree_%' and reltype !=0";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $item_count = $row['val'];
-    pg_free_result($result);
-    $text = _("Individual Files");
-    $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+    $V .= $this->DatabaseContentsRow("uploadtree_%", _("Individual Files"));
 
     /**** License recs  ****/
-    // $sql = "SELECT count(*) AS val FROM license_file;";  too slow on big tables, use pg_class which will be accurate as of last ANALYZE
-    $sql = "select reltuples as val from pg_class where relname='license_file'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $item_count = $row['val'];
-    pg_free_result($result);
-    $text = _("Discovered Licenses");
-    $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+    $V .= $this->DatabaseContentsRow("license_file", _("Discovered Licenses"));
 
     /**** Copyright recs  ****/
-    // $sql = "SELECT count(*) AS val FROM copyright;";  too slow on big tables, use pg_class which will be accurate as of last ANALYZE
-    $sql = "select reltuples as val from pg_class where relname='copyright'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $item_count = $row['val'];
-    pg_free_result($result);
-    $text = _("Copyrights/URLs/Emails");
-    $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td></tr>\n";;
+    $V .= $this->DatabaseContentsRow("copyright", _("Copyrights/URLs/Emails"));
 
     $V .= "</table>\n";
 
     return $V;
   }
+
+function GetLastVacTime($TableName)
+{
+  global $PG_CONN;
+  
+  $sql = "select greatest(last_vacuum, last_autovacuum) as lasttime from pg_stat_all_tables where schemaname = 'public' and relname like '$TableName'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  pg_free_result($result);
+
+  return $row["lasttime"];
+}
+function GetLastAnalyzeTime($TableName)
+{
+  global $PG_CONN;
+  
+  $sql = "select greatest(last_analyze, last_autoanalyze) as lasttime from pg_stat_all_tables where schemaname = 'public' and relname like '$TableName'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  pg_free_result($result);
+
+  return $row["lasttime"];
+}
 
 
   /**
@@ -217,11 +144,11 @@ class dashboard extends FO_Plugin
     $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
 
     /* Database size */
-    $sql = "SELECT pg_size_pretty(pg_database_size('fossology')) as val;";
+    $sql = "SELECT pg_database_size('fossology') as val;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
-    $Size = Bytes2Human($row['val'] * 1000000);
+    $Size = Bytes2Human($row['val']);
     pg_free_result($result);
     $text = _("FOSSology database size");
     $V .= "<tr><td>$text</td>";
@@ -333,7 +260,9 @@ class dashboard extends FO_Plugin
   function DiskFree()
   {
     global $SYSCONFDIR;
-    $Cmd = "df -Pk `cat '$SYSCONFDIR/fossology/RepPath.conf'`/*/* | sort -u | grep '%'";
+    global $SysConf;
+
+    $Cmd = "df -h";
     $Buf = DoCmd($Cmd);
 
     /* Separate lines */
@@ -342,30 +271,74 @@ class dashboard extends FO_Plugin
     /* Display results */
     $V = "";
     $V .= "<table border=1>\n";
-    $text = _("Filesystem");
-    $text1 = _("Used");
-    $text2 = _("Capacity");
-    $text3 = _("Percent Full");
-    $V .= "<tr><th>$text</th><th colspan=2>$text1</th><th colspan=2>$text2</th><th>$text3</th></tr>\n";
+    $head0 = _("Filesystem");
+    $head1 = _("Capacity");
+    $head2 = _("Used");
+    $head3 = _("Available");
+    $head4 = _("Percent Full");
+    $head5 = _("Mount Point");
+    $V .= "<tr><th>$head0</th><th>$head1</th><th>$head2</th><th>$head3</th><th>$head4</th><th>$head5</th></tr>\n";
+    $headerline = true;
     foreach($Lines as $L)
     {
+      // Skip top header line
+      if ($headerline)
+      {
+        $headerline = false;
+        continue;
+      }
+
       if (empty($L)) { continue; }
       $L = trim($L);
       $L = preg_replace("/[[:space:]][[:space:]]*/"," ",$L);
       $List = explode(" ",$L);
-      $V .= "<tr><td>" . htmlentities($List[0]) . "</td>";
-      $Used = $List[2] * 1024;
-      $UsedH = Bytes2Human($Used);
-      $Capacity = $List[1] * 1024;
-      $CapacityH = Bytes2Human($Capacity);
 
-      $V .= "<td align='right' style='border-right:none'>$UsedH</td>";
-      $V .= "<td align='right' style='border-left:none'>(" . number_format($Used,0,"",",") . ")</td>";
-      $V .= "<td align='right' style='border-right:none'>$CapacityH</td>";
-      $V .= "<td align='right' style='border-left:none'>(" . number_format($Capacity,0,"",",") . ")</td>";
-      $V .= "<td align='right'>" . htmlentities($List[4]) . "</td></tr>\n";
+      // Skip some filesystems we are not interested in
+      if ($List[0] == 'tmpfs') continue;
+      if ($List[0] == 'udev') continue;
+      if ($List[0] == 'none') continue;
+      if ($List[5] == '/boot') continue;
+
+      $V .= "<tr><td>" . htmlentities($List[0]) . "</td>";
+      $V .= "<td align='right' style='border-right:none'>$List[1]</td>";
+      $V .= "<td align='right' style='border-right:none'>$List[2]</td>";
+      $V .= "<td align='right' style='border-right:none'>$List[3]</td>";
+
+      // Warn if running out of disk space
+      $PctFull = (int)$List[4];
+      $WarnAtPct = 90;  // warn the user if they exceed this % full
+      if ($PctFull > $WarnAtPct)
+        $mystyle = "style=border-right:none;background-color:red";
+      else
+        $mystyle = "style='border-right:none'";
+      $V .= "<td align='right' $mystyle>$List[4]</td>";
+
+      $V .= "<td align='left'>" . htmlentities($List[5]) . "</td></tr>\n";
     }
     $V .= "</table>\n";
+
+    /***  Print out important file paths so users can interpret the above "df"  ***/
+    $V .= _("Note:") . "<br>";
+    $Indent = "&nbsp;&nbsp;";
+
+    // File path to the database
+    $V .= $Indent . _("Database"). ": " . "&nbsp;";
+    // Get the database data_directory.  If we were the superuser we could
+    // just query the database with "show data_directory", but we are not.
+    // So try to get it from a ps and parse the -D argument
+    $Cmd = "ps -eo cmd | grep postgres | grep -- -D";
+    $Buf = DoCmd($Cmd);
+    // Find the -D
+    $DargToEndOfStr = trim(substr($Buf, strpos($Buf, "-D") + 2 ));
+    $DargArray = explode(' ', $DargToEndOfStr);
+    $V .= $DargArray[0] . "<br>";
+
+    // Repository path
+    $V .= $Indent . _("Repository") . ": " . $SysConf['FOSSOLOGY']['path'] . "<br>";
+
+    // FOSSology config location
+    $V .= $Indent . _("FOSSology config") . ": " . $SYSCONFDIR . "<br>";
+
     return($V);
   } // DiskFree()
 
@@ -390,13 +363,6 @@ class dashboard extends FO_Plugin
 
         /**************************************************/
         $V .= "<td valign='top'>\n";
-        $text = _("Job Queue");
-        $V .= "<H2>$text</H2>\n";
-        $V .= $this->JobQueueInfo();
-        $V .= "</td>";
-
-        /**************************************************/
-        $V .= "<td valign='top'>\n";
         $text = _("Database Contents");
         $V .= "<H2>$text</H2>\n";
         $V .= $this->DatabaseContents();
@@ -417,10 +383,9 @@ class dashboard extends FO_Plugin
         $text = _("Active FOSSology queries");
         $V .= "<H2>$text</H2>\n";
         $V .= $this->DatabaseQueries();
-        $V .= "</td>";
 
         /**************************************************/
-        $text = _("Repository Disk Space");
+        $text = _("Disk Space");
         $V .= "<H2>$text</H2>\n";
         $V .= $this->DiskFree();
 
