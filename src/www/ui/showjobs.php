@@ -64,6 +64,27 @@ class showjobs extends FO_Plugin
   function RegisterMenus()
   {
     menu_insert("Main::Jobs::My Recent Jobs",$this->MenuOrder -1,$this->Name, $this->MenuTarget);
+
+    if (@$_SESSION['UserLevel'] != PLUGIN_DB_ADMIN) return;
+
+    if (GetParm("mod", PARM_STRING) == $this->Name)
+    {
+      /* Set micro menu to select either all users or this user */
+      $allusers = GetParm("allusers",PARM_INTEGER);
+      if ($allusers == 0)
+      {
+        $text = _("Show uploads from all users");
+        $URI = $this->Name . Traceback_parm_keep(array( "page" )) . "&allusers=1";
+      }
+      else
+      {
+        $text = _("Show only your own uploads");
+        $URI = $this->Name . Traceback_parm_keep(array( "page")) . "&allusers=0";
+      }
+
+      menu_insert("showjobs::$text", 1, $URI, $text);
+    }
+
   } // RegisterMenus()
 
 
@@ -272,8 +293,14 @@ if (!empty($Row["job_upload_fk"]))
     global $PG_CONN;
 
     $JobArray = array();
+    $allusers = GetParm("allusers",PARM_INTEGER); 
 
-    $sql = "select job_pk, job_upload_fk from job where job_user_fk='$_SESSION[UserId]' and job_queued >= (now() - interval '$nhours hours') order by job_queued desc";
+    if ($allusers == 0) 
+      $allusers_str = "job_user_fk='$_SESSION[UserId]' and ";
+    else
+      $allusers_str = "";
+    
+    $sql = "select job_pk, job_upload_fk from job where $allusers_str job_queued >= (now() - interval '$nhours hours') order by job_queued desc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     while($Row = pg_fetch_assoc($result)) 
@@ -524,7 +551,18 @@ if (!empty($Row["job_upload_fk"]))
           }
           else
             $OutBuf .= "<a title='Click to browse' href='" . Traceback_uri() . "?mod=browse'>";
-          $OutBuf .= $UploadName;
+          
+          /* get $UserName if all jobs are shown */
+          $UserName = "";
+          $allusers = GetParm("allusers",PARM_INTEGER);
+          if ($allusers > 0)
+          {
+            $UploadRec = GetSingleRec("upload", "where upload_pk={$Job['job']['job_upload_fk']}");
+            $UserRec = GetSingleRec("users", "where user_pk={$UploadRec['user_fk']}");
+            $UserName = "&nbsp;&nbsp;&nbsp;($UserRec[user_name])";
+          }
+
+          $OutBuf .= $UploadName . $UserName;
           if (!empty($UploadDesc)) $OutBuf .= " (" . $UploadDesc . ")";
           $OutBuf .= "</a>";
           $OutBuf .= "</th>";
@@ -786,6 +824,9 @@ if (!empty($Row["job_upload_fk"]))
       case "XML":
 	    break;
       case "HTML":
+        // micro menus
+        $V .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
+
         /* Process any actions */
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
         {
