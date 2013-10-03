@@ -655,13 +655,17 @@ if (!empty($Row["job_upload_fk"]))
         else
           $NumSecs = time()  - strtotime($jobqueueRec['jq_starttime']);
 
-        if ( $NumSecs > 0)
+        /* Don't display items/sec unless the job has started */
+        if ($jobqueueRec['jq_starttime'])
         {
-          $ItemsPerSec = round($jobqueueRec['jq_itemsprocessed']/$NumSecs);
-          if ($ItemsPerSec < 1)
-            $OutBuf .= sprintf(" : (%01.2f items/sec)", $jobqueueRec['jq_itemsprocessed']/$NumSecs);
-          else
-            $OutBuf .= sprintf(" : (%d items/sec)", $ItemsPerSec);
+          if ( $NumSecs > 0)
+          {
+            $ItemsPerSec = round($jobqueueRec['jq_itemsprocessed']/$NumSecs);
+            if ($ItemsPerSec < 1)
+              $OutBuf .= sprintf(" : (%01.2f items/sec)", $jobqueueRec['jq_itemsprocessed']/$NumSecs);
+            else
+              $OutBuf .= sprintf(" : (%d items/sec)", $ItemsPerSec);
+          }
         }
         $OutBuf .= "</td>";
 
