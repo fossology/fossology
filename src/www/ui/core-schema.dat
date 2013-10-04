@@ -1656,6 +1656,21 @@
   $Schema["TABLE"]["upload"]["uploadtree_tablename"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"uploadtree_tablename\" SET NOT NULL, ALTER COLUMN \"uploadtree_tablename\" SET DEFAULT 'uploadtree_a'::character varying;";
   $Schema["TABLE"]["upload"]["uploadtree_tablename"]["UPDATE"] = "UPDATE upload SET uploadtree_tablename='uploadtree_a'::character varying";
 
+  $Schema["TABLE"]["upload"]["expire_date"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"expire_date\" IS 'expiration date';";
+  $Schema["TABLE"]["upload"]["expire_date"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"expire_date\" date;";
+  $Schema["TABLE"]["upload"]["expire_date"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"expire_date\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload"]["expire_date"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload"]["expire_action"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"expire_action\" IS '''a'' archive, ''d'' delete';";
+  $Schema["TABLE"]["upload"]["expire_action"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"expire_action\" char(1);";
+  $Schema["TABLE"]["upload"]["expire_action"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"expire_action\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload"]["expire_action"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload"]["public_perm"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"public_perm\" IS 'permission PERM_NONE, PERM_READ, PERM_WRITE, PERM_ADMIN';";
+  $Schema["TABLE"]["upload"]["public_perm"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"public_perm\" int4;";
+  $Schema["TABLE"]["upload"]["public_perm"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"public_perm\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload"]["public_perm"]["UPDATE"] = "";
+
 
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["DESC"] = "";
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"uploadtree_pk\" int4;";
