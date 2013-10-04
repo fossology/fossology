@@ -115,6 +115,7 @@ class upload_permissions extends FO_Plugin
     $perm = GetParm('perm', PARM_INTEGER);
     $newgroup = GetParm('newgroup', PARM_INTEGER);
     $newperm = GetParm('newperm', PARM_INTEGER);
+    $public_perm = GetParm('public', PARM_INTEGER);
 
     // start building the output buffer
     $V = "";
@@ -135,6 +136,7 @@ class upload_permissions extends FO_Plugin
       {
         $sql = "update perm_upload set group_fk='$group_pk' where perm_upload_pk='$perm_upload_pk'";
       }
+      
       if (!empty($sql))
       {
         $result = @pg_query($PG_CONN, $sql);
@@ -160,6 +162,13 @@ class upload_permissions extends FO_Plugin
         pg_free_result($result);
       }
       $newperm = $newgroup = 0;
+    }
+    else if (!empty($public_perm))
+    {
+      $sql = "update upload set public_perm='$public_perm' where upload_pk='$upload_pk'";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
     }
 
     $root_folder_pk = GetUserRootFolder();
@@ -222,6 +231,19 @@ return;
     /* Get permissions for this upload */
     if (!empty($UploadArray))
     {
+      // Get upload.public_perm
+      $sql = "select public_perm from upload where upload_pk='$upload_pk'";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $Row = pg_fetch_all($result);
+      $public_perm = $Row[0]['public_perm'];
+      pg_free_result($result);
+      $text1 = _("Public Permission");
+      $V .= "<p>$text1 &nbsp;";
+      $url = Traceback_uri() . "?mod=upload_permissions&folder=$folder_pk&upload=$upload_pk&public=";
+      $onchange = "onchange=\"js_url(this.value, '$url')\"";
+      $V .= Array2SingleSelect($PERM_NAMES, "publicpermselect", $public_perm, false, false, $onchange);
+
       $sql = "select perm_upload_pk, perm, group_pk, group_name from groups, perm_upload where group_fk=group_pk and upload_fk='$upload_pk'";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);

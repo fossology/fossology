@@ -235,24 +235,21 @@
     }
     pg_free_result($result);
 
-    /* check the Default User permissions, all users are members of group "Default User" */
-/* It may make sense for people to NOT see uploads from group Default User unless they are
-   explicitly a member of that group.  I could go either way on this so for now I'm 
-   commenting out this code.
-    $sql = "select max(perm) as perm from perm_upload, groups where perm_upload.upload_fk=$upload_pk and group_name='Default User' and group_pk=perm_upload.group_fk";
+    /* check the upload public permission */
+    $sql = "select public_perm from upload where upload_pk=$upload_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+
     if (pg_num_rows($result) < 1) 
       $perm2 = PERM_NONE;
     else
     {
       $row = pg_fetch_assoc($result);
-      $perm2 = $row['perm'];
+      $perm2 = $row['public_perm'];
     }
     pg_free_result($result);
+
     return max($perm, $perm2);
-*/
-    return $perm;
   }
 
 

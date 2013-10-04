@@ -75,10 +75,11 @@ class upload_srv_files extends FO_Plugin {
    *        passed on as -A option to cp2foss.
    * \param $Desc - optional description for the upload
    * \param $Name - optional Name for the upload
+   * \param $public_perm public permission on the upload
    *
    * \return NULL on success, string on failure.
    */
-  function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName) {
+  function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName, $public_perm) {
     global $Plugins;
     global $SysConf;
 
@@ -135,7 +136,7 @@ class upload_srv_files extends FO_Plugin {
     $jobq = NULL;
     $Mode = (1 << 3); // code for "it came from web upload"
     $user_pk = $SysConf['auth']['UserId'];
-    $uploadpk = JobAddUpload($user_pk, $ShortName, $SourceFiles, $Desc, $Mode, $FolderPk);
+    $uploadpk = JobAddUpload($user_pk, $ShortName, $SourceFiles, $Desc, $Mode, $FolderPk, $public_perm);
 
     /* Prepare the job: job "wget" */
     $jobpk = JobAddJob($user_pk, "wget", $uploadpk);
@@ -195,9 +196,15 @@ class upload_srv_files extends FO_Plugin {
         $HostName = GetParm('host', PARM_STRING);
         $Desc = GetParm('description', PARM_STRING); // may be null
         $Name = GetParm('name', PARM_STRING); // may be null
+        $public = GetParm('public', PARM_TEXT); // may be null
+        if (empty($public))
+          $public_perm = PERM_NONE;
+        else
+          $public_perm = PERM_READ;
+
         if (!empty($SourceFiles) && !empty($FolderPk)) {
           if (empty($HostName)) $HostName = "localhost";
-          $rc = $this->Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName);
+          $rc = $this->Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName, $public_perm);
           if (empty($rc)) {
             // clear form fileds
             $SourceFiles = NULL;
@@ -250,6 +257,11 @@ class upload_srv_files extends FO_Plugin {
         $text = _("NOTE");
         $text1 = _(": If no name is provided, then the uploaded file name will be used.");
         $V.= "<b>$text</b>$text1<P />\n";
+
+        $text1 = _("(Optional) Make Public");
+        $V.= "<li>";
+        $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
+
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
           $text = _("Select optional analysis");
           $V.= "<li>$text<br />\n";

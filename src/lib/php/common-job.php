@@ -52,11 +52,12 @@
  * \param $desc       Optional user file description.
  * \param $UploadMode 1<<2=URL, 1<<3=upload from server or file
  * \param $folder_pk   The folder to contain this upload
+ * \param $public_perm The public permission on this upload
  *
  * \return upload_pk or null (failure)
  *         On failure, error is written to stdout
  */
-function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folder_pk) 
+function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=PERM_NONE) 
 {
   global $PG_CONN;
   global $SysConf;
@@ -70,8 +71,8 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
   $desc = pg_escape_string($desc);
 
   $sql = "INSERT INTO upload
-      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin) VALUES
-      ('$desc','$job_name','$user_pk','$UploadMode','$filename')";
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm) VALUES
+      ('$desc','$job_name','$user_pk','$UploadMode','$filename', '$public_perm')";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);

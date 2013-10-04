@@ -32,9 +32,17 @@ class upload_url extends FO_Plugin {
 
   /**
    * \brief Process the upload request.
+   * \param $Folder
+   * \param  $GetURL
+   * \param  $Desc
+   * \param  $Name
+   * \param  $Accept
+   * \param  $Reject
+   * \param  $Level
+   * \param $public_perm public permission on the upload
    * Returns NULL on success, string on failure.
    */
-  function Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level) 
+  function Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level, $public_perm) 
   {
     global $SysConf;
 
@@ -68,7 +76,7 @@ class upload_url extends FO_Plugin {
     /* Create an upload record. */
     $Mode = (1 << 2); // code for "it came from wget"
     $user_pk = $SysConf['auth']['UserId'];
-    $uploadpk = JobAddUpload($user_pk, $ShortName, $GetURL, $Desc, $Mode, $Folder);
+    $uploadpk = JobAddUpload($user_pk, $ShortName, $GetURL, $Desc, $Mode, $Folder, $public_perm);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
       return ($text);
@@ -158,8 +166,14 @@ class upload_url extends FO_Plugin {
         $Accept = GetParm('accept', PARM_TEXT); // may be null
         $Reject = GetParm('reject', PARM_TEXT); // may be null
         $Level = GetParm('level', PARM_TEXT); // may be null
+        $public = GetParm('public', PARM_TEXT); // may be null
+        if (empty($public))
+          $public_perm = PERM_NONE;
+        else
+          $public_perm = PERM_READ;
+
         if (!empty($GetURL) && !empty($Folder)) {
-          $rc = $this->Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level);
+          $rc = $this->Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level, $public_perm);
           if (empty($rc)) {
             /* Need to refresh the screen */
             $GetURL = NULL;
@@ -227,6 +241,10 @@ class upload_url extends FO_Plugin {
         $text = _("(Optional) maximum recursion depth (inf or 0 for infinite):");
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='level' size=60 value='" . htmlentities($Level) . "'/><P />\n";
+
+        $text1 = _("(Optional) Make Public");
+        $V.= "<li>";
+        $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
 
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
           $text = _("Select optional analysis");

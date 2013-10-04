@@ -38,9 +38,10 @@ class upload_file extends FO_Plugin {
    * \param $TempFile path to temporary (upload) file
    * \param $Desc optional upload description.
    * \param $Name original name of the file on the client machine.
+   * \param $public_perm public permission on the upload
    * \return NULL on success, error string on failure.
    */
-  function Upload($folder_pk, $TempFile, $Desc, $Name) 
+  function Upload($folder_pk, $TempFile, $Desc, $Name, $public_perm) 
   {
     global $MODDIR;
     global $SysConf;
@@ -77,7 +78,7 @@ class upload_file extends FO_Plugin {
     /* Create an upload record. */
     $Mode = (1 << 3); // code for "it came from web upload"
     $user_pk = $SysConf['auth']['UserId'];
-    $uploadpk = JobAddUpload($user_pk, $ShortName, $originName, $Desc, $Mode, $folder_pk);
+    $uploadpk = JobAddUpload($user_pk, $ShortName, $originName, $Desc, $Mode, $folder_pk, $public_perm);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
       return ($text);
@@ -150,8 +151,14 @@ class upload_file extends FO_Plugin {
         $folder_pk = GetParm('folder', PARM_INTEGER);
         $Desc = GetParm('description', PARM_TEXT); // may be null
         $Name = GetParm('name', PARM_TEXT); // may be null
+        $public = GetParm('public', PARM_TEXT); // may be null
+        if (empty($public))
+          $public_perm = PERM_NONE;
+        else
+          $public_perm = PERM_READ;
+
         if (file_exists(@$_FILES['getfile']['tmp_name']) && !empty($folder_pk)) {
-          $rc = $this->Upload($folder_pk, @$_FILES['getfile']['tmp_name'], $Desc, $Name);
+          $rc = $this->Upload($folder_pk, @$_FILES['getfile']['tmp_name'], $Desc, $Name, $public_perm);
           if (empty($rc)) {
             // reset form fields
             $GetURL = NULL;
@@ -179,31 +186,43 @@ class upload_file extends FO_Plugin {
         /* Display the form */
         $V.= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
+
         $text = _("Select the folder for storing the uploaded file:");
         $V.= "<li>$text\n";
         $V.= "<select name='folder'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
+
         $text = _("Select the file to upload:");
         $V.= "<li>$text<br />\n";
         $V.= "<input name='getfile' size='60' type='file' /><br />\n";
+
         $text = _("(Optional) Enter a description of this file:");
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
+
         $text = _("(Optional) Enter a viewable name for this file:");
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
         $text1 = _("If no name is provided, then the uploaded file name will be used.");
         $V.= "$text1<P />\n";
+
+        $text1 = _("(Optional) Make Public");
+        $V.= "<li>";
+        $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
+
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
           $text = _("Select optional analysis");
           $V.= "<li>$text<br />\n";
           $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
           $V.= AgentCheckBoxMake(-1, $Skip);
+          $V.= "<p>";
         }
+
         $V.= "</ol>\n";
+
         $text = _("After you press Upload, please be patient while your file is transferring.");
-        $V.= "$text<br>\n";
+        $V.= "<p>$text<br>\n";
         $text = _("Upload");
         $V.= "<p>&nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='$text'>\n";
         $V.= "</form>\n";

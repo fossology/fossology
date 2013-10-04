@@ -31,9 +31,17 @@ class upload_vcs extends FO_Plugin {
 
   /**
    * \brief Process the upload request.
+   * \param $Folder
+   * \param $VCSType
+   * \param $GetURL
+   * \param $Desc
+   * \param $Name
+   * \param $Username
+   * \param $Passwd 
+   * \param $public_perm public permission on the upload
    * Returns NULL on success, string on failure.
    */
-  function Upload($Folder, $VCSType, $GetURL, $Desc, $Name, $Username, $Passwd) 
+  function Upload($Folder, $VCSType, $GetURL, $Desc, $Name, $Username, $Passwd, $public_perm) 
   {
     global $SysConf;
 
@@ -67,7 +75,7 @@ class upload_vcs extends FO_Plugin {
     /* Create an upload record. */
     $Mode = (1 << 2); // code for "it came from wget"
     $user_pk = $SysConf['auth']['UserId'];
-    $uploadpk = JobAddUpload($user_pk, $ShortName, $GetURL, $Desc, $Mode, $Folder);
+    $uploadpk = JobAddUpload($user_pk, $ShortName, $GetURL, $Desc, $Mode, $Folder, $public_perm);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
       return ($text);
@@ -142,8 +150,14 @@ class upload_vcs extends FO_Plugin {
         $Name = GetParm('name', PARM_TEXT); // may be null
         $Username = GetParm('username', PARM_TEXT);
         $Passwd = GetParm('passwd', PARM_TEXT);
+        $public = GetParm('public', PARM_TEXT); // may be null
+        if (empty($public))
+          $public_perm = PERM_NONE;
+        else
+          $public_perm = PERM_READ;
+
         if (!empty($GetURL) && !empty($Folder)) {
-          $rc = $this->Upload($Folder, $VCSType, $GetURL, $Desc, $Name, $Username, $Passwd);
+          $rc = $this->Upload($Folder, $VCSType, $GetURL, $Desc, $Name, $Username, $Passwd, $public_perm);
           if (empty($rc)) {
             /* Need to refresh the screen */
             $VCSType = NULL;
@@ -203,6 +217,10 @@ class upload_vcs extends FO_Plugin {
         $text = _("(Optional) Password:");
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='password' name='passwd' size=60 value='" . htmlentities($Passwd) . "'/><P />\n";
+
+        $text1 = _("(Optional) Make Public");
+        $V.= "<li>";
+        $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
 
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
           $text = _("Select optional analysis");
