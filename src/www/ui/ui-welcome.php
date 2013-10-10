@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -49,9 +49,11 @@ class ui_welcome extends FO_Plugin
         else { $Login = _("Login"); }
         $text1 = _("The FOSSology Toolset");
         $text11 = _("FOSSology is a framework for software analysis tools. The current FOSSology tools can:");
-        $text12 = _("Identify licenses in software");
-        $text13 = _("Allow browsing uploaded file hierarchies");
-        $text14 = _("Extract MIME type and meta data information");
+        $text12 = _("Find license references in software");
+        $text13 = _("Browse uploaded file hierarchies");
+        $text14 = _("Find copyrights, url's and email addresses");
+        $text15 = _("Classify licenses into user definable categories (aka buckets)");
+        $text16 = _("Browse package (rpm, apt) metadata");
         $text2 = _("FOSSology's Graphical User Interface");
         $text21 = _("This website is an interface into the FOSSology project. With it, you can:");
         $text22 = _("Upload files to analyze.");
@@ -85,8 +87,6 @@ class ui_welcome extends FO_Plugin
         $text54 = _("- Select this website's Help tab for software-related help and tips.");
         $text55 = _("FOSSology web site");
         $text56 = _("- Where you can find more information and get help on FOSSology.");
-        $text57 = _("FOSSbazaar web site");
-        $text58 = _("- A community website with information on Open Source Governance.");
 
         $V .= "
 <table width='100%' border='0'>
@@ -97,8 +97,11 @@ class ui_welcome extends FO_Plugin
           <br>
           <img src='${SiteURI}images/right-point-bullet.gif'>$text12<br>
           <img src='${SiteURI}images/right-point-bullet.gif'>$text13<br>
-          <img src='${SiteURI}images/right-point-bullet.gif'>$text14</font></p>
-        <p>&nbsp;</p>
+          <img src='${SiteURI}images/right-point-bullet.gif'>$text14<br>
+          <img src='${SiteURI}images/right-point-bullet.gif'>$text15<br>
+          <img src='${SiteURI}images/right-point-bullet.gif'>$text16<br>
+          </font>
+        <p>
       </blockquote></td>
     <td><img src='${SiteURI}images/white.png'></td>
   </tr>
@@ -164,8 +167,7 @@ class ui_welcome extends FO_Plugin
               </font><br>-->
             
 			  <font face='Arial, Helvetica, sans-serif'><em><strong><a href='http://fossology.org/'>$text55</a></strong></em> $text56<br>
-              <em><strong><a href='https://fossbazaar.org/'>$text57</a></strong></em></font> 
-              <font face='Arial, Helvetica, sans-serif'> $text58</font>
+              </font> 
           </blockquote>
         </blockquote>
       </blockquote></td>
