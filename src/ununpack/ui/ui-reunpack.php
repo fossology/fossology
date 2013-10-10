@@ -96,16 +96,9 @@ class ui_reunpack extends FO_Plugin
       LEFT OUTER JOIN job ON jobqueue.jq_job_fk = job.job_pk
       WHERE job.job_upload_fk = '$uploadpk'
       AND job.job_name = '$job_name'
-      AND jobqueue.jq_type = '$jobqueue_type';";
+      AND jobqueue.jq_type = '$jobqueue_type' ORDER BY jq_pk DESC;";
     $result = pg_query($PG_CONN, $SQLcheck);
     DBCheckResult($result, $SQLcheck, __FILE__, __LINE__);
-    $row_count = pg_num_rows($result);
-    if($row_count) {
-      print $SQLcheck;
-      pg_free_result($result);
-      return(0);
-    }
-    else {
       $i = 0;
       $State = 0;
       while ($Row = pg_fetch_assoc($result)) {
@@ -127,7 +120,7 @@ class ui_reunpack extends FO_Plugin
         $i++;
       }
       return ($State);
-    }
+    
     pg_free_result($result);
   }
 
@@ -141,20 +134,29 @@ class ui_reunpack extends FO_Plugin
   function AgentAdd ($uploadpk,$Depends=NULL,$priority=0)
   {
     global $PG_CONN; 
-    $Job_name = str_replace("'", "''", "unpack");
+    $Job_name = str_replace("'", "''", "reunpack");
+    
+    //get userpk from uploadpk
+    $UploadRec = GetSingleRec("upload", "where upload_pk='$uploadpk'");
+    
+    //updated ununpack_ars table to let reunpack run 
+    $SQLARS = "UPDATE ununpack_ars SET ars_success = FALSE WHERE upload_fk = '$uploadpk';";
+    $result = pg_query($PG_CONN, $SQLARS);
+    DBCheckResult($result, $SQLARS, __FILE__, __LINE__);
+    pg_free_result($result);
 
     if (empty($uploadpk)) {
       $SQLInsert = "INSERT INTO job
-        (job_queued,job_priority,job_name) VALUES
-        (now(),'$priority','$Job_name');";
+        (job_queued,job_priority,job_name,job_user_fk) VALUES
+        (now(),'$priority','$Job_name',{$UploadRec['user_fk']});";
     }
     else {
       $SQLInsert = "INSERT INTO job
-        (job_queued,job_priority,job_name,job_upload_fk) VALUES
-        (now(),'$priority','$Job_name','$uploadpk');";
+        (job_queued,job_priority,job_name,job_upload_fk,job_user_fk) VALUES
+        (now(),'$priority','$Job_name','$uploadpk',{$UploadRec['user_fk']});";
     }
 
-    $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk is NULL;";
+    $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk = {$UploadRec['user_fk']} ORDER BY job_pk DESC LIMIT 1;";
     $result = pg_query($PG_CONN, $SQLcheck);
     DBCheckResult($result, $SQLcheck, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
@@ -167,7 +169,7 @@ class ui_reunpack extends FO_Plugin
       DBCheckResult($result, $SQLInsert, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
       pg_free_result($result);
-      $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk is NULL;";
+      $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk = {$UploadRec['user_fk']};";
       $result = pg_query($PG_CONN, $SQLcheck);
       DBCheckResult($result, $SQLcheck, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
@@ -185,7 +187,7 @@ class ui_reunpack extends FO_Plugin
         INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk
         WHERE upload.upload_pk = '$uploadpk';";
 echo "JobQueueAdd used to do a reschedule here<br>";
-    $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"pfile",$Depends);
+    $jobqueuepk = JobQueueAdd($jobpk,"ununpack",$uploadpk,NULL,$Depends);
     if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
 
     return(NULL);

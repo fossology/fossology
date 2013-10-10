@@ -744,7 +744,7 @@ class ui_view extends FO_Plugin
         $flag = 0;
 
         $P = &$Plugins[plugin_find_id("ui_reunpack")];
-        $state = $P->CheckStatus($uploadpk, "unpack", "unpack");
+        $state = $P->CheckStatus($uploadpk, "reunpack", "ununpack");
         //print "<p>$state</p>";
         if ( $state == 0 || $state == 2)
         {
