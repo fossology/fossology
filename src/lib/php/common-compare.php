@@ -489,7 +489,17 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin)
     @$PathElt2 = $Path2[$PathLev];  // temporarily ignore notice of missing Path2[PathLev]
     $PathElt = ($Column == 1) ? $PathElt1: $PathElt2;
 
-    if ($PathElt != $Last)
+    /* Prevent a malformed href if any path information is missing */
+    if (!empty($PathElt1) and (!empty($PathElt2)))
+    {
+      $UseHref = true;
+    }
+    else
+    {
+      $UseHref = false;
+    }
+
+    if (($UseHref) and ($PathElt != $Last))
     {
       $href = "$Uri2&item1=$PathElt1[uploadtree_pk]&item2=$PathElt2[uploadtree_pk]{$filter_clause}&col=$Column";
 //      $href = "$Uri2&item1=$item1&item2=$item2&newitem{$Column}=$PathElt[uploadtree_pk]{$filter_clause}&col=$Column";
@@ -499,7 +509,7 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin)
     if (!$FirstPath) $V .= "<br>";
     $V .= "&nbsp;&nbsp;<b>" . $PathElt['ufile_name'] . "/</b>";
 
-    if ($PathElt != $Last) $V .= "</a>";
+    if ($UseHref and ($PathElt != $Last)) $V .= "</a>";
     $FirstPath = false;
   }
 

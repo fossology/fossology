@@ -417,7 +417,7 @@ class ui_nomos_diff extends FO_Plugin
   {
     /* Initialize */
     $FreezeText = _("Freeze Path");
-    $unFreezeText = _("Frozen, Click to unfreeze");
+    $FrozenText = _("Frozen, Click to unfreeze");
     $OutBuf = '';
 
     /******* javascript functions ********/
@@ -427,7 +427,7 @@ class ui_nomos_diff extends FO_Plugin
     $OutBuf .= "  var selectidx = selectObj.selectedIndex;";
     $OutBuf .= "  var filter = selectObj.options[selectidx].value;";
     $OutBuf .= '  window.location.assign("?mod=' . $this->Name .'&item1="+utpk1+"&item2="+utpk2+"&filter=" + filter); ';
-    $OutBuf .= "}";
+    $OutBuf .= "}\n";
 
     /* Freeze function (path list in banner)
      FreezeColNo is the ID of the column to freeze: 1 or 2
@@ -439,52 +439,64 @@ class ui_nomos_diff extends FO_Plugin
     $OutBuf .= "function Freeze(FreezeColNo) {";
     $OutBuf .=  "var FreezeElt1 = document.getElementById('Freeze1');";
     $OutBuf .=  "var FreezeElt2 = document.getElementById('Freeze2');";
+    $OutBuf .=  "var AddFreezeArg = 1; "; //1 to add &freeze=, 0 to remove &freeze= from url
+    $OutBuf .=  "var old_uploadtree_pk;\n";
 
     /* change the freeze labels to denote their new status */
     $OutBuf .=  "if (FreezeColNo == '1')";
     $OutBuf .=  "{";
-    $OutBuf .=    "if (FreezeElt1.innerHTML == '$unFreezeText') ";
+    $OutBuf .=    "if (FreezeElt1.innerHTML == '$FrozenText') ";
     $OutBuf .=    "{";
     $OutBuf .=      "FreezeElt1.innerHTML = '$FreezeText';";
-    $OutBuf .=      "FreezeElt1.style.backgroundColor = 'white';";
+    $OutBuf .=      "FreezeElt1.style.backgroundColor = 'white'; ";
+    $OutBuf .=      "AddFreezeArg = 0;";
     $OutBuf .=    "}";
-    $OutBuf .=    "else {";
-    $OutBuf .=      "FreezeElt1.innerHTML = '$unFreezeText';";
-    $OutBuf .=      "FreezeElt1.style.backgroundColor = '#EAF7FB';";
+    $OutBuf .=    "else { ";
+    $OutBuf .=      "FreezeElt1.innerHTML = '$FrozenText'; ";
+    $OutBuf .=      "FreezeElt1.style.backgroundColor = '#EAF7FB'; ";
     $OutBuf .=      "FreezeElt2.innerHTML = '$FreezeText';";
     $OutBuf .=      "FreezeElt2.style.backgroundColor = 'white';";
+    $OutBuf .=      "old_uploadtree_pk = $in_uploadtree_pk1;";
     $OutBuf .=    "}";
     $OutBuf .=  "}";
     $OutBuf .=  "else {";
-    $OutBuf .=    "if (FreezeElt2.innerHTML == '$unFreezeText') ";
+    $OutBuf .=    "if (FreezeElt2.innerHTML == '$FrozenText') ";
     $OutBuf .=    "{";
     $OutBuf .=      "FreezeElt2.innerHTML = '$FreezeText';";
     $OutBuf .=      "FreezeElt2.style.backgroundColor = 'white';";
+    $OutBuf .=      "AddFreezeArg = 0;";
     $OutBuf .=    "}";
     $OutBuf .=    "else {";
     $OutBuf .=      "FreezeElt1.innerHTML = '$FreezeText';";
     $OutBuf .=      "FreezeElt1.style.backgroundColor = 'white';";
-    $OutBuf .=      "FreezeElt2.innerHTML = '$unFreezeText';";
+    $OutBuf .=      "FreezeElt2.innerHTML = '$FrozenText';";
     $OutBuf .=      "FreezeElt2.style.backgroundColor = '#EAF7FB';";
+    $OutBuf .=      "old_uploadtree_pk = $in_uploadtree_pk2;";
     $OutBuf .=    "}";
     $OutBuf .=  "}";
 
-    /* Alter the url to add freeze={column number}  */
-    $OutBuf .=  "var i=0;";
-    $OutBuf .=  "var linkid;";
-    $OutBuf .=  "var linkelt;";
-    $OutBuf .=  "var UpdateCol;";
-    $OutBuf .=  "if (FreezeColNo == 1) UpdateCol=2;else UpdateCol=1;";
-    $OutBuf .=  "var numlinks = document.links.length;";
-    $OutBuf .=  "for (i=0; i < numlinks; i++)";
+    /* Alter the url to add or remove freeze={column number}  */
+    $OutBuf .=  "var i=0;\n";
+    $OutBuf .=  "var linkid;\n";
+    $OutBuf .=  "var linkelt;\n";
+    $OutBuf .=  "var FreezeIdx;\n";
+    $OutBuf .=  "var BaseURL;\n";
+    $OutBuf .=  "var numlinks = document.links.length;\n";
+    $OutBuf .=  "for (i=0; i < numlinks; i++)\n";
     $OutBuf .=  "{";
-    $OutBuf .=    "linkelt = document.links[i];";
-    $OutBuf .=    "if (linkelt.href.indexOf('col='+UpdateCol) >= 0)";
-    $OutBuf .=    "{";
-    $OutBuf .=      "linkelt.href = linkelt.href + '&freeze=' + FreezeColNo;";
-    $OutBuf .=    "}";
-    $OutBuf .=  "}";
-    $OutBuf .= "}";
+    $OutBuf .=    "linkelt = document.links[i];\n";
+    // freeze is the last url arg, so trim it off if it exists
+    $OutBuf .=      "FreezeIdx = linkelt.href.indexOf('&freeze');\n";
+    $OutBuf .=      "if (FreezeIdx > 0) \n";
+    $OutBuf .=        "BaseURL = linkelt.href.substr(0,FreezeIdx); \n";
+    $OutBuf .=      "else ";
+    $OutBuf .=        "BaseURL = linkelt.href; \n";
+    $OutBuf .=      "if (AddFreezeArg == 1) \n ";
+    $OutBuf .=        "linkelt.href = BaseURL + '&freeze=' + FreezeColNo + '&itemf=' + old_uploadtree_pk;";
+    $OutBuf .=      "else \n";
+    $OutBuf .=        "linkelt.href = BaseURL;";
+    $OutBuf .=  "}\n";
+    $OutBuf .= "}\n";
     $OutBuf .= "</script>\n";
     /******* END javascript functions  ********/
 
@@ -563,8 +575,6 @@ class ui_nomos_diff extends FO_Plugin
    * filter: optional filter to apply \n
    * item1:  uploadtree_pk of the column 1 tree \n
    * item2:  uploadtree_pk of the column 2 tree \n
-   * newitem1:  uploadtree_pk of the new column 1 tree \n
-   * newitem2:  uploadtree_pk of the new column 2 tree \n
    * freeze: column number (1 or 2) to freeze
    */
   function Output()
@@ -582,7 +592,7 @@ class ui_nomos_diff extends FO_Plugin
      * This way all the url's based on the input args won't be
      * polluted with updcache
      * Use Traceback_parm_keep to ensure that all parameters are in order */
-    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("item1","item2", "filter"));
+    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("item1","item2", "filter", "col", "freeze", "itemf"));
     if ($updcache)
     {
       $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
@@ -598,14 +608,23 @@ class ui_nomos_diff extends FO_Plugin
     {
       $filter = GetParm("filter",PARM_STRING);
       if (empty($filter)) $filter = "samehash";
-      $FreezeCol = GetParm("freeze",PARM_INTEGER);
+      $FreezeCol = GetParm("freeze",PARM_INTEGER);  // which column to freeze?  1 or 2 or null
+      $ClickedCol = GetParm("col",PARM_INTEGER);  // which column was clicked on?  1 or 2 or null
+      $ItemFrozen = GetParm("itemf",PARM_INTEGER);  // frozen item or null
       $in_uploadtree_pk1 = GetParm("item1",PARM_INTEGER);
       $in_uploadtree_pk2 = GetParm("item2",PARM_INTEGER);
 
-      if (empty($in_uploadtree_pk1) && empty($in_uploadtree_pk2))
+      if (empty($in_uploadtree_pk1) or empty($in_uploadtree_pk2))
         Fatal("Bad input parameters.  Both item1 and item2 must be specified.", __FILE__, __LINE__);
 
-      /* Check item1 and item2 upload permissions */
+      /* If you click on a item in a frozen column, then you are a dope so ignore $ItemFrozen */
+      if ($FreezeCol == $ClickedCol) 
+      {
+        $ItemFrozen= 0;
+        $FreezeCol = 0;
+      }
+
+      /* Check item1 upload permissions */
       $Item1Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $in_uploadtree_pk1");
       $UploadPerm = GetUploadPerm($Item1Row['upload_fk']);
       if ($UploadPerm < PERM_READ)
@@ -615,6 +634,7 @@ class ui_nomos_diff extends FO_Plugin
         return;
       }
 
+      /* Check item2 upload permissions */
       $Item2Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $in_uploadtree_pk2");
       $UploadPerm = GetUploadPerm($Item2Row['upload_fk']);
       if ($UploadPerm < PERM_READ)
@@ -624,23 +644,17 @@ class ui_nomos_diff extends FO_Plugin
         return;
       }
 
-      $in_newuploadtree_pk1 = GetParm("newitem1",PARM_INTEGER);
-      $in_newuploadtree_pk2 = GetParm("newitem2",PARM_INTEGER);
       $uploadtree_pk1  = $in_uploadtree_pk1;
       $uploadtree_pk2 = $in_uploadtree_pk2;
 
-      if (!empty($in_newuploadtree_pk1))
+      //  if someone is going to freeze a column, let them manually select in the other column (don't try to do matching)
+      if ($FreezeCol == 1)
       {
-        if ($FreezeCol != 2)
-        $uploadtree_pk2  = NextUploadtree_pk($in_newuploadtree_pk1, $in_uploadtree_pk2);
-        $uploadtree_pk1  = $in_newuploadtree_pk1;
+        $uploadtree_pk1 = $ItemFrozen;
       }
-      else
-      if (!empty($in_newuploadtree_pk2))
+      else if ($FreezeCol == 2)
       {
-        if ($FreezeCol != 1)
-        $uploadtree_pk1 = NextUploadtree_pk($in_newuploadtree_pk2, $in_uploadtree_pk1);
-        $uploadtree_pk2 = $in_newuploadtree_pk2;
+        $uploadtree_pk2 = $ItemFrozen;
       }
 
       $newURL = Traceback_dir() . "?mod=" . $this->Name . "&item1=$uploadtree_pk1&item2=$uploadtree_pk2";
