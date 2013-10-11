@@ -2644,6 +2644,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_IBM_PLref1
 %KEY%	"licen[cs]"
 %STR%	"(distribu|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =SOME= ibm public licen[cs]e"
+#
+%ENTRY%	_LT_IBM_PIBS
+%KEY%	"licen[cs]"
+%STR%	"source code has been made available to you by ibm on an as-is basis =SOME= source is licensed under ibm copyrights? to use it in any way"
 #####
 # DELETED: licen[cs]e to use copy modify and distribute this software
 # and its documentation for any purpose =ANY= is ...

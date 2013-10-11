@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -134,7 +134,7 @@ void listClear(list_t *l, int deallocFlag) {
     return;
   }
 #ifdef LIST_DEBUG
-  listDump(l, YES)
+  listDump(l, YES);
 #endif /* LIST_DEBUG */
 
 #ifdef GLOBAL_DEBUG
@@ -646,7 +646,7 @@ void listSort(list_t *l, int sortType) {
 
   if (l->used == 0) {
 #ifdef LIST_DEBUG
-    Warn("\"%s\" is empty", l->name);
+    LOG_WARNING("\"%s\" is empty", l->name);
 #endif /* LIST_DEBUG */
     return;
   }
@@ -816,7 +816,7 @@ void listDump(list_t *l, int verbose) {
   }
   if (l->used == 0) {
 #if defined(LIST_DEBUG) || defined(UNPACK_DEBUG) || defined(REPORT_DEBUG)
-    Warn("%s is empty", l->name);
+    LOG_WARNING("%s is empty", l->name);
 #endif /* LIST_DEBUG || UNPACK_DEBUG || REPORT_DEBUG */
     return;
   }

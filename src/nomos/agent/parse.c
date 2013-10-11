@@ -318,7 +318,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   int i;
   int j;
   int nw = 0;
-  int rs = 0;
   int score = scp->score;
   int kwbm = scp->kwbm;
 #ifdef  PRECHECK
@@ -1629,7 +1628,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           INTERESTING(lDebug ? "GPL-except-1" : "GPL-exception");
           lmem[_mGPL] = 1;
         }
-        else if (INFILE(_LT_GPL_EXCEPT_2) && _LT_GPL_EXCEPT_AUTOCONF_2) {
+        else if (INFILE(_LT_GPL_EXCEPT_2) && HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED)) {
           INTERESTING("GPL-with-autoconf-exception");
           lmem[_mGPL] = 1;
         }
@@ -3096,6 +3095,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_PHR_IBM_EULA)) {
       INTERESTING(lDebug ? "IBM-EULA(2)" : "IBM-EULA");
+    }
+    else if (INFILE(_LT_IBM_PIBS)) {
+      INTERESTING("IBM-pibs");
     }
   }
   /*
@@ -5591,12 +5593,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         break;
       }
     }
-    if (HASTEXT(_PHR_RESTRICTIONS_1, REG_EXTENDED)) {
-      rs = _PHR_RESTRICTIONS_1;
-    }
-    else if (INFILE(_PHR_RESTRICTIONS_2)) {
-      rs = _PHR_RESTRICTIONS_2;
-    }
   }
   /*
    * Statements about IP (Intellectual Property) rights
@@ -7442,7 +7438,7 @@ int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 #endif  /* PARSE_STOPWATCH */
   if (lDiags && ret) {
     printRegexMatch(index, NO);
-    locateRegex(filetext, op, index, size, sso, seo);
+    /* locateRegex(filetext, op, index, size, sso, seo); */
   }
   return(ret);
 }
@@ -7687,7 +7683,7 @@ void locateRegex(char *text, item_t *op, int index, int size, int sso, int seo)
     }
 #ifdef  DEBUG
     else {
-      Note("Nothing to trim from the front (*cp == NULL)");
+      LOG_NOTICE("Nothing to trim from the front (*cp == NULL)");
     }
 #endif  /* DEBUG */
   }
@@ -8173,7 +8169,6 @@ void addRef(char *str, int interest)
   item_t *p;
   char *bp;
   char *sp = str;
-  char *cp;
   if(!(str && str[0]))
     return;
 
@@ -8203,7 +8198,6 @@ void addRef(char *str, int interest)
   }
   bp = licStr+refOffset;
   *bp++ = ',';
-  cp = bp;        /* later->NOW! */
   /*
       CDB - Opportunity for optimization via memcpy
    */
