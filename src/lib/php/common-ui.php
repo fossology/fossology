@@ -176,13 +176,22 @@ function HostListOption()
 {
   global $SysConf;
   $options = "";
-  $i = 0;
-  foreach($SysConf['HOSTS'] as $key=>$value)
-  {
+  $LOCALHOST = 'localhost'; 
+  $localhost_flag = 0; // whether have 'localhost' in HOST list or not. 0: no; 1: yes 
+  $hostname = ""; 
+  $i = 0; 
+  foreach($SysConf['HOSTS'] as $key=>$value) {
     $options .= "<option value='$key' SELECTED> $key </option>\n";
+    $hostname = $key;
+    if (0 == strcasecmp($LOCALHOST, $hostname)) {
+      $localhost_flag = 1;
+    }
     $i++;
   }
-  if (1 == $i) return ""; // if only have one host, does not display
+  if (0 == $localhost_flag && 0 != $i) { // for cluster without webserver  configration
+    $options .= "<option value='$LOCALHOST' SELECTED> $LOCALHOST </option>\n";
+  }
+  if ((1 == $i) && (0 == strcasecmp($LOCALHOST, $hostname))) return ""; // if only have one host, no seperate agent server, does not display
   return $options;
 }
 
