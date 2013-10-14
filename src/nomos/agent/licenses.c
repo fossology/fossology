@@ -568,7 +568,7 @@ void licenseScan(list_t *licenseList) {
   int i;
   int c;
   int lowWater;
-  int lowest;
+  //int lowest;
   int nCand;
   int nSkip;
   char *textp;
@@ -606,7 +606,7 @@ void licenseScan(list_t *licenseList) {
    * when parsing a distribution.  Little slow-downs ADD UP quickly!
    */
 
-  lowest = nSkip = 0;
+  nSkip = 0;
   for (scp = scores; (p = listIterate(licenseList)) != NULL_ITEM; scp++) {
 
     /*

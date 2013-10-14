@@ -44,7 +44,6 @@
  */
 FUNCTION int fo_GetAgentKey(PGconn *pgConn, char * agent_name, long Upload_pk, char *rev, char *agent_desc)
 {
-  int rc;
   int Agent_pk=-1;    /* agent identifier */
   char sql[256];
   char sqlselect[256];
@@ -66,7 +65,6 @@ FUNCTION int fo_GetAgentKey(PGconn *pgConn, char * agent_name, long Upload_pk, c
 
     result = PQexec(pgConn, sqlselect);
     if (fo_checkPQresult(pgConn, result, sqlselect, __FILE__, __LINE__)) return 0;
-    rc = PQntuples(result);
   }
 
   Agent_pk = atol(PQgetvalue(result, 0, 0));

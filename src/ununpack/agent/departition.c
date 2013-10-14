@@ -278,8 +278,8 @@ int	ReadMBR	(int Fin, uint64_t MBRStart)
   uint64_t Start,Size;
   /* disk descriptions */
   uint64_t SectorSize;
-  uint64_t SectorPerCluster;
-  uint64_t SectorPerCylinder;
+  //uint64_t SectorPerCluster;
+  //uint64_t SectorPerCylinder;
 
   lseek(Fin,MBRStart,SEEK_SET);	/* rewind file */
   for(i=0; i<0x200; i++)
@@ -305,8 +305,8 @@ int	ReadMBR	(int Fin, uint64_t MBRStart)
      But IDE uses 512.
    */
   SectorSize = 512;
-  SectorPerCluster = 0;   /* does not matter for extraction */
-  SectorPerCylinder = 0;  /* does not matter for extraction */
+  //SectorPerCluster = 0;   /* does not matter for extraction */
+  //SectorPerCylinder = 0;  /* does not matter for extraction */
 
   /* process each partition table */
   for(i=446; i<510; i+=16)

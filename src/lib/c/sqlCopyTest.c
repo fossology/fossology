@@ -56,7 +56,6 @@ int main(int argc, char **argv)
   int         RowsToTest;
   int         NumTextBytes;
   int         RowNum;
-  int         rv;  /* return status value */
   clock_t     StartTime, EndTime;
   char       *DBConfFile = NULL;  /* use default Db.conf */
   char       *ErrorBuf;
@@ -104,7 +103,7 @@ int main(int argc, char **argv)
   for(RowNum = 0; RowNum < RowsToTest; RowNum++)
   {
     snprintf(DataBuf, datasize, "%d\t%s\t%s\n", RowNum, col_text, col_vc);
-    rv = fo_sqlCopyAdd(pCopy, DataBuf);
+    fo_sqlCopyAdd(pCopy, DataBuf);
   }
 
   /* Destroy - flushes remaining data and frees */

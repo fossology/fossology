@@ -66,7 +66,7 @@ FUNCTION void lrcache_print(cacheroot_t *pcroot)
     if (pcnode->rf_pk != 0L) 
     {
       hashval = lrcache_hash(pcroot, pcnode->rf_shortname);
-      // printf("%ld, %ld, %s\n", hashval, pcnode->rf_pk, pcnode->rf_shortname);
+      printf("%ld, %ld, %s\n", hashval, pcnode->rf_pk, pcnode->rf_shortname);
     }
     pcnode++;
   }
