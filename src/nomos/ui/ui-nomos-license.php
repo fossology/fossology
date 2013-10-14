@@ -220,6 +220,37 @@ class ui_nomos_license extends FO_Plugin
       $VLic .= "</form>";
     }
 
+    $orderBy = array('count', 'license_name');
+    $ordersql = "liccount desc";
+    static $ordercount = 1;
+    static $orderlic = 1;
+    /** sorting by count/licnese name */
+    if (isset($_GET['orderBy']) && in_array($_GET['orderBy'], $orderBy)) {
+      $order = $_GET['orderBy'];
+      if (isset($_GET['orderc'])) $ordercount = $_GET['orderc'];
+      if (isset($_GET['orderl'])) $orderlic = $_GET['orderl'];
+      if ('count' == $order && 1 == $ordercount)
+      {
+        $ordersql = "liccount desc";
+        $ordercount = 0;
+      }
+      else if ('count' == $order && 0 == $ordercount)
+      {
+        $ordersql = "liccount ";
+        $ordercount = 1;
+      }
+      else if ('license_name' == $order && 1 == $orderlic)
+      {
+        $ordersql = "rf_shortname ";
+        $orderlic = 0;
+      }
+      else if ('license_name' == $order && 0 == $orderlic)
+      {
+        $ordersql = "rf_shortname desc";
+        $orderlic = 1;
+      }
+    }
+
     // Void ARE EXCLUDED FROM LICENSE COUNT
     $sql = "SELECT distinct(SS.rf_shortname) as licname, count(SS.rf_shortname) as liccount, SS.rf_shortname from 
             (SELECT distinct(license_file_ref.pfile_fk), rf_shortname
@@ -228,7 +259,7 @@ class ui_nomos_license extends FO_Plugin
             where rf_shortname <> 'Void' and upload_fk='$upload_pk' and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt 
               and agent_fk=$Agent_pk $TagClause group by license_file_ref.pfile_fk, rf_shortname
             ) as SS
-            group by rf_shortname order by liccount desc";
+            group by rf_shortname order by $ordersql";
 //$uTime = microtime(true);
     $result = pg_query($PG_CONN, $sql);
 //$Time = microtime(true) - $uTime;  // convert usecs to secs
@@ -243,11 +274,15 @@ class ui_nomos_license extends FO_Plugin
     $NoLicFound = 0;
     $VLic .= "<table border=1 width='100%' id='lichistogram'>\n";
     $text = _("Count");
-    $VLic .= "<tr><th width='10%'>$text</th>";
+    $VLic .= "<tr><th>";
+    $VLic .= "<a href=?mod=" . "$this->Name" . Traceback_parm_keep(array("upload", "item", "tag", "agent")) . "&orderBy=count&orderc=$ordercount>$text</a>";
+    $VLic .= "</th>";
     $text = _("Files");
     $VLic .= "<th width='10%'>$text</th>";
     $text = _("License Name");
-    $VLic .= "<th align=left>$text</th></tr>\n";
+    $VLic .= "<th>";
+    $VLic .= "<a href=?mod=" . "$this->Name" . Traceback_parm_keep(array("upload", "item", "tag", "agent")) . "&orderBy=license_name&orderl=$orderlic>$text</a>";
+    $VLic .= "</th></tr>\n";
 
     while ($row = pg_fetch_assoc($result))
     {

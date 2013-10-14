@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -22,12 +22,39 @@
  * copyright ui plugin.
  */
 
+
 /**
- * \brief Sort query histogram results (by content)
+ * \brief Sort query histogram results (by content), ascend
+ */
+function hist_rowcmp_count_asc($a, $b)
+{
+  $res = $a['copyright_count'] - $b['copyright_count'];
+  return $res;
+}
+
+/**
+ * \brief Sort query histogram results (by content), descend
+ */
+function hist_rowcmp_count_desc($a, $b)
+{
+  $res = $a['copyright_count'] - $b['copyright_count'];
+  return -$res;
+}
+
+/**
+ * \brief Sort query histogram results (by content), ascend
  */
 function hist_rowcmp($rowa, $rowb)
 {
   return (strnatcasecmp($rowa['content'], $rowb['content']));
+}
+
+/**
+ * \brief Sort query histogram results (by content), descend
+ */
+function hist_rowcmp_desc($rowa, $rowb)
+{
+  return -(strnatcasecmp($rowa['content'], $rowb['content']));
 }
 
 /**

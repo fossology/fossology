@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -98,6 +98,20 @@ class copyright_hist extends FO_Plugin
         unset($rows[$RowIdx-1]);
       }
     }
+
+    /** sorting */
+    $ordercount = '-1';
+    $ordercopyright = '-1';
+
+    if (isset($_GET['orderc'])) $ordercount = $_GET['orderc'];
+    if (isset($_GET['ordercp'])) $ordercopyright = $_GET['ordercp'];
+    // sort by count
+    if (1 == $ordercount) usort($rows, 'hist_rowcmp_count_desc');
+    else if (0 == $ordercount) usort($rows, 'hist_rowcmp_count_asc'); 
+    // sort by copyrigyht statement
+    else if (1 == $ordercopyright) usort($rows, 'hist_rowcmp_desc');
+    else if (0 == $ordercopyright) usort($rows, 'hist_rowcmp');
+    else usort($rows, 'hist_rowcmp_count_desc'); // default as sorting by count desc
 
     /* note $rows indexes may not be contiguous due to unset in step 3 */
     return $rows;
@@ -225,6 +239,33 @@ class copyright_hist extends FO_Plugin
     $rows = $this->GetRows($Uploadtree_pk, $Agent_pk, $upload_pk, 0, $filter);
     if (!is_array($rows)) return $rows;
 
+    $orderBy = array('count', 'copyright');
+    static $ordercount = 1;
+    static $ordercopyright = 1;
+    $order = "";
+    /** sorting by count/copyright statement */
+    if (isset($_GET['orderBy']) && in_array($_GET['orderBy'], $orderBy)) {
+      $order = $_GET['orderBy'];
+      if (isset($_GET['orderc'])) $ordercount = $_GET['orderc'];
+      if (isset($_GET['ordercp'])) $ordercopyright = $_GET['ordercp'];
+      if ('count' == $order && 1 == $ordercount)
+      {
+        $ordercount = 0;
+      }
+      else if ('count' == $order && 0 == $ordercount)
+      {
+        $ordercount = 1;
+      }
+      else if ('copyright' == $order && 1 == $ordercopyright)
+      {
+        $ordercopyright = 0;
+      }
+      else if ('copyright' == $order && 0 == $ordercopyright)
+      {
+        $ordercopyright = 1;
+      }
+    }
+
     /* Write license histogram to $VLic  */
     $CopyrightCount = 0;
     $UniqueCopyrightCount = 0;
@@ -237,9 +278,14 @@ class copyright_hist extends FO_Plugin
     $text2 = _("Copyright Statements");
     $text3 = _("Email");
     $text4 = _("URL");
-    $VCopyright .= "<tr><th width='10%'>$text</th>";
+    $VCopyright .= "<tr><th>";
+    $VCopyright .= "<a href=?mod=" . "$this->Name" . Traceback_parm_keep(array("upload", "item", "filter", "agent")) . "&orderBy=count&orderc=$ordercount>$text</a>";
+    $VCopyright .= "</th>";
     $VCopyright .= "<th width='10%'>$text1</th>";
-    $VCopyright .= "<th>$text2</th></tr>\n";
+    $VCopyright .= "<th>";
+    $VCopyright .= "<a href=?mod=" . "$this->Name" . Traceback_parm_keep(array("upload", "item", "filter", "agent")) . "&orderBy=copyright&ordercp=$ordercopyright>$text2</a>";
+    $VCopyright .= "</th>";
+    $VCopyright .= "</th></tr>\n";
 
     $EmailCount = 0;
     $UniqueEmailCount = 0;
