@@ -795,7 +795,11 @@ void database_update_event(scheduler_t* scheduler, void* unused)
       PQ_ERROR(pri_result, "database update failed on call to PQexec");
       continue;
     }
-
+    if(PQntuples(pri_result)==0)
+    {
+      WARNING("can not find the user information of job_pk %s\n", parent);
+      continue;
+    }
     job = job_init(scheduler->job_list, scheduler->job_queue, type, host, j_id,
         atoi(PQget(pri_result, 0, "user_pk")),
         atoi(PQget(pri_result, 0, "job_priority")));
