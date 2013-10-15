@@ -33,7 +33,7 @@
 
  \param pgConn Database connection object pointer.
  \param agent_name Name of agent to look up.
- \param Upload_pk is only used for error reporting.
+ \param Upload_pk is no longer used.
  \param rev agent revision, if given this is the exact revision of the agent being requested.
  \param agent_desc Description of the agent.  Used to write a new agent record in the
                    case where no enabled agent records exist for this agent_name.
