@@ -549,7 +549,7 @@ class copyright_hist extends FO_Plugin
 
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
     /********  disable cache to see if this is fast enough without it *****
-     $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder")) . "&show=$Show";
+     $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder", "orderBy", "orderc", "ordercp")) . "&show=$Show";
     if ($this->UpdCache != 0)
     {
     $OutBuf .= "";
