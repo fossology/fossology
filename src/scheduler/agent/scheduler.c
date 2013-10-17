@@ -454,11 +454,21 @@ void scheduler_update(scheduler_t* scheduler)
       else if((job->required_host != NULL))
       {
         host = g_tree_lookup(scheduler->host_list, job->required_host);
-        if(!(host->running < host->max))
-        {
+        if(host != NULL)
+        { 
+          if(!(host->running < host->max))
+          {
           job = NULL;
           break;
         }
+       } else {
+         //log_printf("ERROR %s.%d: jq_pk %d jq_host '%s' not in the agent list!\n",
+         //  __FILE__, __LINE__, job->id, job->required_host);
+         job->message = "ERROR: jq_host not in the agent list!";
+         job_fail_event(scheduler, job);
+         job = NULL;
+         break;
+       }
       }
       // the generic case, this can run anywhere, find a place
       else if((host = get_host(&(scheduler->host_queue), 1)) == NULL)
