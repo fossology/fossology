@@ -21,36 +21,11 @@ include $(VARS)
 
 EXE_DIR = ../../agent/
 
-# list of the external test data files required by this test
-# these will be found in ../testdata/
-TEST_FILES = RedHat.tar.gz
-
 all: $(FOLIB)
 	$(MAKE) -C $(EXE_DIR)
 
-# target to retrieve remote test data if it doesn't already exist
-# make sure your /etc/wgetrc file is configured correctly!
-testdata:
-	@echo "Retrieve test files"
-	@# for each test file specified, look for it in ../testdata
-	@# if it exists, do nothing.
-	@# if it does not exist, look in /var/www/testfiles
-	@# if not in /var/www/testfiles, wget it from fossology.org
-	@$(foreach test_file, $(TEST_FILES), \
-	    if [ -e ../testdata/$(test_file) ]; then \
-	        echo "../testdata/$(test_file) exists"; \
-	    elif [ -e /var/www/testfiles/$(test_file) ]; then \
-	        echo "$(test_file) found in /var/www/testfiles"; \
-	        cp /var/www/testfiles/$(test_file) ../testdata; \
-	    else \
-	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
-	    fi; \
-	)
-
-test: all testdata
+test: all
 	@echo "make nomos agent functional test"
-	cd ../testdata; \
-	tar -xf RedHat.tar.gz; \
 	cd ../Functional; \
 	pwd; \
 	ls -l; \
@@ -64,8 +39,8 @@ coverage:
 # which is needed to run the tests!
 clean:
 	rm -f nomos-Xunit.xml nomos-shunit-Xunit.xml
-	rm -rf ../testdata/RedHat/
 	rm -f fossology.rc
+	rm -f scan.out* report.d* LastGoodNomosTestfilesScan.s output.txt
 
 .PHONY: all test coverage clean
 
