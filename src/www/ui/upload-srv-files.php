@@ -44,7 +44,7 @@ class upload_srv_files extends FO_Plugin {
     /** local file */
     if ($server === 'localhost' || empty($server))
     {
-      return fopen($path, $persmission);
+      return @fopen($path, $persmission);
     } else return 1;  // don't do the file permission check if the file is not on the web server
   }
 
