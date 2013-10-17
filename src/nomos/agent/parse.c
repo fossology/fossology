@@ -7773,6 +7773,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
   int f;
   int g;
   int n;
+  char *MODULE_LICENSE = "MODULE_LICENSE";
 
 #if     defined(PROC_TRACE) || defined(DOCTOR_DEBUG)
   traceFunc("== doctorBuffer(%p, %d, %d, %d)\n", buf, isML, isPS, isCR);
@@ -7888,8 +7889,19 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
         }
         break;
       case '/':       /* c++ style comment // */
-        (void) memset(cp, INVISIBLE, 2);
-        cp += 2;
+        if(cp && cp[0])
+        {
+          /** when MODULE_LICENSE("GPL") is outcommented, do not get rid of this line. */
+          if (strstr(cp, MODULE_LICENSE) && '/' == cp[0])
+          {
+            (void) memset(cp, INVISIBLE, strlen(cp));
+            cp += strlen(cp);
+          }
+          else {
+            (void) memset(cp, INVISIBLE, 2);
+            cp += 2;
+          }
+        }
         break;
       case '\\':      /* c++ style comment // */
         if (strncasecmp(cp+1, "par ", 3) == 0) {
