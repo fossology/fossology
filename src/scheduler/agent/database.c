@@ -798,6 +798,7 @@ void database_update_event(scheduler_t* scheduler, void* unused)
     if(PQntuples(pri_result)==0)
     {
       WARNING("can not find the user information of job_pk %s\n", parent);
+      PQclear(pri_result);
       continue;
     }
     job = job_init(scheduler->job_list, scheduler->job_queue, type, host, j_id,
