@@ -255,7 +255,11 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
 static void agent_listen(scheduler_t* scheduler, agent_t* agent)
 {
   /* static locals */
-  static GStaticMutex version_lock = G_STATIC_MUTEX_INIT;
+  #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+    static GMutex version_lock;
+  #else
+    static GStaticMutex version_lock = G_STATIC_MUTEX_INIT;
+  #endif
 
   /* locals */
   char buffer[1024]; // buffer to store c strings read from agent
@@ -302,7 +306,11 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
   }
 
   /* check that the VERSION information is correct */
+  #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+  g_mutex_lock(&version_lock);
+  #else
   g_static_mutex_lock(&version_lock);
+  #endif
   strcpy(buffer, &buffer[9]);
   if(agent->type->version == NULL && agent->type->valid)
   {
@@ -323,10 +331,18 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
         agent->host->name,        buffer);
     agent->type->valid = 0;
     agent_kill(agent);
+    #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+    g_mutex_unlock(&version_lock);
+    #else
     g_static_mutex_unlock(&version_lock);
+    #endif
     return;
   }
+  #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+  g_mutex_unlock(&version_lock);
+  #else
   g_static_mutex_unlock(&version_lock);
+  #endif
 
   /* If we reach here the agent has correctly sent VERION information to the
    * scheduler. The agent now enters a listening loop. The communication thread

@@ -61,7 +61,9 @@ int main(int argc, char** argv)
 #if !(GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32)
   g_thread_init(NULL);
 #endif
+#if !(GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 36)
   g_type_init();
+#endif
 
   /* the options for the command line parser */
   GOptionEntry entries[] =
