@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -568,9 +568,7 @@ void licenseScan(list_t *licenseList) {
   int i;
   int c;
   int lowWater;
-  //int lowest;
   int nCand;
-  int nSkip;
   char *textp;
   char *cp;
   int counts[NKEYWORDS + 1];
@@ -606,7 +604,6 @@ void licenseScan(list_t *licenseList) {
    * when parsing a distribution.  Little slow-downs ADD UP quickly!
    */
 
-  nSkip = 0;
   for (scp = scores; (p = listIterate(licenseList)) != NULL_ITEM; scp++) {
 
     /*
