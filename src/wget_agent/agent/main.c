@@ -90,7 +90,7 @@ int main  (int argc, char *argv[])
   memset(GlobalType,'\0',MAXCMD);
   GlobalUploadKey = -1;
   int upload_pk = 0;           // the upload primary key
-  int Agent_pk;
+  //int Agent_pk;
   char *SVN_REV;
   char *VERSION;
   char agent_rev[MAXCMD];
@@ -163,7 +163,7 @@ int main  (int argc, char *argv[])
   VERSION = fo_sysconfig("wget_agent", "VERSION");
   sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
   /* Get the Agent Key from the DB */
-  Agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), GlobalUploadKey, agent_rev, agent_desc);
+  fo_GetAgentKey(pgConn, basename(argv[0]), GlobalUploadKey, agent_rev, agent_desc);
 
   /** get proxy */
   GetProxy();

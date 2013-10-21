@@ -879,7 +879,6 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
   char field[MAXCMD];
   char value[MAXCMD];
   char line[MAXCMD];
-  char *s = NULL;
 
   /*  Parse the debian .dsc file to get every Field and Value */
   if ((fp = fopen(repFile, "r")) == NULL){
@@ -889,7 +888,7 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
 
   while (fgets(line,MAXCMD,fp)!=NULL)
   {
-    s = ParseDebFile(line,field,value);
+    ParseDebFile(line,field,value);
 
     trim(value);
     if (!strcasecmp(field, "Format")) {

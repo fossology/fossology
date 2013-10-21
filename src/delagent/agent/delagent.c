@@ -78,7 +78,7 @@ int main (int argc, char *argv[])
   int GotArg=0;
   char *agent_desc = "Deletes upload.  Other list/delete options available from the command line.";
   char *Parm = NULL;
-  int Agent_pk = 0;
+  //int Agent_pk = 0;
   char *SVN_REV;
   char *VERSION;
   char agent_rev[myBUFSIZ];
@@ -141,7 +141,7 @@ int main (int argc, char *argv[])
   VERSION = fo_sysconfig("delagent", "VERSION");
   sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
   /* Get the Agent Key from the DB */
-  Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
+  fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
   
   if (ListProj) ListUploads(user_id, user_perm);
   if (ListFolder) ListFolders();
