@@ -223,6 +223,10 @@
 
     if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN) return PERM_ADMIN;
 
+    //for the command line didn't have session info
+    $UserRow = GetSingleRec("Users", "where user_pk='$user_pk'");
+    if ($UserRow['user_perm'] == PLUGIN_DB_ADMIN) return PERM_ADMIN;
+
     $sql = "select max(perm) as perm from perm_upload, group_user_member where perm_upload.upload_fk=$upload_pk and user_fk=$user_pk and group_user_member.group_fk=perm_upload.group_fk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
