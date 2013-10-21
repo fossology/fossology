@@ -200,7 +200,7 @@ class upload_vcs extends FO_Plugin {
         $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='geturl' size=60 value='" . htmlentities($GetURL) . "'/><br />\n";
         $text = _("NOTE");
-        $text1 = _(": The URL can begin with HTTP://, HTTPS:// .");
+        $text1 = _(": The URL can begin with HTTP://, HTTPS:// . When do git upload, if https url fails, please try http URL.");
         $V.= "<b>$text</b>$text1<P />\n";
         $text = _("(Optional) Enter a description of this file (directory):");
         $V.= "<li>$text<br />\n";
