@@ -96,7 +96,7 @@ if [ $BUILDTIME ]; then
       Debian|Ubuntu|LinuxMint)
          echo "DB: Installing build essiential....."
          apt-get $YesOpt install \
-            libxml2-dev libextractor-dev \
+            libxml2-dev \
             build-essential libtext-template-perl subversion rpm
          POSTGRE=`dpkg --get-selections|grep postgresql-server-dev`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
@@ -121,13 +121,13 @@ if [ $BUILDTIME ]; then
          yum $YesOpt install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
-            libxml2 libextractor-devel
+            libxml2 
          ;;
       Mandriva)
          # 2008.1 tested
          urpmi \
             postgresql-devel \
-            libextractor-devel libxml2 \
+            libxml2 \
             perl-Text-Template subversion gcc make perl
          ;;
       RedHatEnterprise*|CentOS)
@@ -138,8 +138,7 @@ if [ $BUILDTIME ]; then
          yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
-            perl-Text-Template subversion \
-            libextractor-devel
+            perl-Text-Template subversion
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
@@ -158,10 +157,7 @@ if [ $RUNTIME ]; then
          apt-get $YesOpt install apache2 libapache2-mod-php5
          apt-get $YesOpt install php5 php5-pgsql php-pear php5-cli \
             libxml2 \
-            binutils php-gettext \
-            libextractor-plugins 
-         apt-get $YesOpt install libextractor1c2a
-         apt-get $YesOpt install libextractor3
+            binutils php-gettext
          POSTGRE=`dpkg --get-selections|grep postgresql-8.4`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
            case "$CODENAME" in
@@ -184,7 +180,7 @@ if [ $RUNTIME ]; then
       Mandriva)
          [ $AGENT ] || urpmi postgresql-server httpd
             urpmi php php-pear php-pgsql postgresql \
-               libextractor libextractor-plugins libxml2 \
+               libxml2 \
                cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
                mkisofs p7zip poppler-utils rpm tar unzip gzip
          echo "NOTE: unrar is available in PLF, please install it via urpmi if"
@@ -199,7 +195,7 @@ if [ $RUNTIME ]; then
             postgresql \
             php php-pear php-pgsql php-process \
             smtpdaemon \
-            libxml2 libextractor libextractor-plugins \
+            libxml2 \
             binutils 
 
          # enable, possible init, and start postgresql
@@ -238,7 +234,7 @@ if [ $RUNTIME ]; then
             smtpdaemon \
             file libxml2 \
             binutils 
-         echo "NOTE: libextractor, cabextract, sleuthkit, upx, and unrar are not"
+         echo "NOTE: cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources.";;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
