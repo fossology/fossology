@@ -185,11 +185,11 @@ function GetFolder($FolderPath, $Parent = NULL) {
     }
     if (!$Test) {
       $P->Create($Parent, $Folder, "");
+      pg_free_result($result);
+      $result = pg_query($PG_CONN, $SQL);
+      DBCheckResult($result, $SQL, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
     }
-    pg_free_result($result);
-    $result = pg_query($PG_CONN, $SQL);
-    DBCheckResult($result, $SQL, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
   }
   $Parent = $row['folder_pk'];
   pg_free_result($result);
@@ -261,38 +261,50 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
 
   /* Prepare the job: job "wget" */
-  $jobpk = JobAddJob($user_pk, "wget", $UploadPk);
-  if (empty($jobpk) || ($jobpk < 0)) {
-    $text = _("Failed to insert job record");
-    echo $text;
-    return 1;
+  if ($Verbose) {
+    print "JobAddJob($user_pk, wget, $UploadPk);\n";
+  }
+  if (!$Test) {
+    $jobpk = JobAddJob($user_pk, "wget", $UploadPk);
+    if (empty($jobpk) || ($jobpk < 0)) {
+      $text = _("Failed to insert job record");
+      echo $text;
+      return 1;
+    }
   }
 
   $jq_args = "$UploadPk - $Src";
-
-  $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL);
-  if (empty($jobqueuepk)) {
-    $text = _("Failed to insert task 'wget' into job queue");
-    echo $text;
-    return 1;
+  if ($Verbose) {
+    print "JobQueueAdd($jobpk, wget_agent, $jq_args, no, NULL);\n";
   }
-
+  if (!$Test) {
+    $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL);
+    if (empty($jobqueuepk)) {
+      $text = _("Failed to insert task 'wget' into job queue");
+      echo $text;
+      return 1;
+    }
+  }
   /* schedule agents */
   global $Plugins;
-  $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
-  $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array("wget_agent"));
-  if ($ununpack_jq_pk < 0) {
-    echo  $ErrorMsg;
-    return 1;
+  if ($Verbose) {
+    print "AgentAdd wget_agent and dj2nest.\n";
   }
+  if (!$Test) {
+    $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
+    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array("wget_agent"));
+    if ($ununpack_jq_pk < 0) {
+      echo  $ErrorMsg;
+      return 1;
+    }
 
-  $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest") ];
-  $adj2nest_jq_pk = $adj2nestplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array());
-  if ($adj2nest_jq_pk < 0) {
-    echo $ErrorMsg;
-    return 1;
+    $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest") ];
+    $adj2nest_jq_pk = $adj2nestplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array());
+    if ($adj2nest_jq_pk < 0) {
+      echo $ErrorMsg;
+      return 1;
+    }
   }
-
   if (!empty($QueueList)) {
     switch ($QueueList) {
       case 'ALL':
