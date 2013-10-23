@@ -1394,7 +1394,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         else if (!HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED) 
             && !INFILE(_LT_GPL_EXCEPT_BISON_1) && !INFILE(_LT_GPL_EXCEPT_BISON_2) 
             && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)
-            && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_2)){
+            && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && !INFILE(_TITLE_D_FSL_10)){
           cp = GPLVERS();
           INTERESTING(lDebug ? "GPL(ref1#1)" : cp);
           lmem[_mGPL] = 1;
@@ -1728,6 +1728,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       && (!INFILE(_LT_GPL_NAMED_COMPATIBLE))
       && (!HASTEXT(_LT_GPL_NAMED_COMPATIBLE_1, REG_EXTENDED))
       && (!INFILE(_LT_GPL_NAMED_EXHIBIT))
+      && (!INFILE(_TITLE_D_FSL_10))
       && !INFILE(_LT_INTEL_7)) {
     cp = GPLVERS();
     INTERESTING(lDebug ? "GPL(named)" : cp);
@@ -3515,8 +3516,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("NBPL-1.0");
         lmem[_fARTISTIC] = 1;
       }
+      else if (HASTEXT(_PHR_ARTISTIC_CLAUSE8, 0))
+      {
+        INTERESTING(lDebug ? "Artistic(v1.0#clause8)" : "Artistic-1.0-Perl");
+        lmem[_fARTISTIC] = 1;
+      }
       else {
-        INTERESTING("Artistic-1.0");
+        INTERESTING(lDebug ? "Artistic(v1.0#other)" : "Artistic-1.0");
         lmem[_fARTISTIC] = 1;
       }
     }
@@ -5831,6 +5837,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(LS_NOT_PD);
   }
 
+  /** German Free Software License */
+  if (INFILE(_TITLE_D_FSL_10))
+  {
+    INTERESTING("D-FSL-1.0");
+  }
   /*
    * Some licenses point you to files/URLs...
    */
@@ -5888,7 +5899,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /* Check for Public Domain */
   if (!lmem[_fANTLR] && !lmem[_fCCBY] && !lmem[_fCLA] && !lmem[_mPYTHON] && !lmem[_mGFDL] &&
       !lmem[_fODBL] && !lmem[_fPDDL] && !lmem[_fRUBY] && !lmem[_fSAX] && !lmem[_fAPL] &&!lmem[_mAPACHE] &&
-      !lmem[_fARTISTIC] && !lmem[_fCITRIX] && !lmem[_mLGPL] && !lmem[_fBSD]) {
+      !lmem[_fARTISTIC] && !lmem[_fCITRIX] && !lmem[_mLGPL] && !lmem[_fBSD]&& !INFILE(_TITLE_D_FSL_10)) {
     pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
   }
 
@@ -6144,6 +6155,9 @@ char *sisslVersion(char *filetext, int size, int isML, int isPS)
 
   if (INFILE(_TITLE_SISSL_V11)) {
     lstr = "SISSL-1.1";
+  }
+  else if (INFILE(_TITLE_SISSL_V12)) {
+    lstr = "SISSL-1.2";
   } else {
     lstr = "SISSL";
   }

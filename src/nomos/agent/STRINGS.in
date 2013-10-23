@@ -7633,6 +7633,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"su(n|n industry) standard(s|s source) licen[cs]e version 1\.?1"
 #
+%ENTRY%	_TITLE_SISSL_V12
+%KEY%	"licen[cs]"
+%STR%	"su(n|n industry) standard(s|s source) licen[cs]e version 1\.?2"
+#
 %ENTRY%	_TITLE_SKYPE
 %KEY%	"\<(end[ -]user|eula)\>"
 %STR%	"skype end[ -]user licen[cs]e agreement"
@@ -7798,6 +7802,10 @@ k
 %KEY%	"licen[cs]e"
 %STR%	"the (postfix|secure mailer) licen[cs]e"
 #
+%ENTRY% _TITLE_D_FSL_10
+%KEY%	"licen[cs]e"
+%STR%	"German Free Software Licen[cs]e"
+#
 %ENTRY%	_MISC_DEBDATA
 %KEY%	=NULL=
 %STR%	"data.tar.*$"
@@ -7844,6 +7852,10 @@ k
 %ENTRY%	_PHR_ARTISTIC_DESC1
 %KEY%	"distribut"
 %STR%	"licen[cs]es Perl allows itself to be r?e?-?distributed and/or modified for the other one th(e perl|e) artistic licen[cs]e"
+#
+%ENTRY%	_PHR_ARTISTIC_CLAUSE8
+%KEY% =NULL=
+%STR%	"Aggregation of this Package with a commercial distribution is always permitted provided that the use of this Package is embedded"
 #
 %ENTRY%	_PHR_ATTRIBUTION
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
