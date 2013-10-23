@@ -167,6 +167,14 @@
 %KEY%	"font"
 %STR%	"open font license(,|[[:space:]])* version 1\.?1"
 #
+%ENTRY%	_LT_OPEN_FONT_V10_1
+%KEY%	"licen[cs]"
+%STR%	"licen[cs]ed under (sil open font license|sil ofl) =FEW= 1\.?0"
+#
+%ENTRY%	_LT_OPEN_FONT_V11_1
+%KEY%	"licen[cs]"
+%STR%	"licen[cs]ed under (sil open font license|sil ofl) =FEW= 1\.?1"
+#
 %ENTRY%	_LT_ACAA_RIGHTS
 %KEY%	"so(ftware|urce)"
 %STR%	"ada conformity assessment authority ACAA (obtained|holds) unlimited rights in the software and documentation contained herein"
@@ -7945,7 +7953,7 @@ k
 #
 %ENTRY%	_PHR_GPL2_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|gpl[_-]?v?2) =SOME= (or|Alternatively) =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|gpl[_-]?v?2) =SOME= (or|Alternatively) =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL21_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -7969,7 +7977,7 @@ k
 #
 %ENTRY%	_PHR_GPL3_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))|gpl[_-]?v?3) =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))|gpl[_-]?v?3) =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL3_OR_LATER_ref1
 %KEY%	"licen[cs]"
@@ -8113,7 +8121,7 @@ k
 #
 %ENTRY%	_PHR_LGPL2_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )2 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =SOME= (v|[^_-]version )2 =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LGPL21_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -8125,7 +8133,7 @@ k
 #
 %ENTRY%	_PHR_LGPL21_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =SOME= (v|[^_-]version )2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LGPL3_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -8141,7 +8149,7 @@ k
 #
 %ENTRY%	_PHR_LGPL3_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )3 =SOME= or =SOME= (\<later\>|newer|subsequent|more recent)"
+%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =SOME= (v|[^_-]version )3 =SOME= or =SOME= (\<later\>|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LGPL3_OR_LATER_ref1
 %KEY%	"licen[cs]"
