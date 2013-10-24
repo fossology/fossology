@@ -31,6 +31,7 @@ class copyright_hist extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
   var $UpdCache   = 0;
+  var $uploadtree_tablename = "";
 
   /**
    * \brief Customize submenus.
@@ -131,7 +132,7 @@ class copyright_hist extends FO_Plugin
 
     /*******  Get license names and counts  ******/
     /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree
+    $sql = "SELECT lft,rgt,upload_fk FROM $this->uploadtree_tablename
               WHERE uploadtree_pk = $Uploadtree_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -177,8 +178,8 @@ class copyright_hist extends FO_Plugin
 
         /* select copyright records that have No_license_found */
         $sql = "SELECT substring(content from 1 for 150) as content, type from copyright, license_file,
-                (SELECT distinct(pfile_fk) as pf from uploadtree 
-                  where upload_fk=$upload_pk and uploadtree.lft BETWEEN $lft and $rgt) as SS
+                (SELECT distinct(pfile_fk) as pf from $this->uploadtree_tablename 
+                  where upload_fk=$upload_pk and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt) as SS
                where copyright.pfile_fk=license_file.pfile_fk and ($rf_clause) 
                      and copyright.pfile_fk=pf and copyright.agent_fk=$Agent_pk";
       }
@@ -188,9 +189,9 @@ class copyright_hist extends FO_Plugin
     {
       /* get all the copyright records for this uploadtree.  */
       $sql = "SELECT substring(content from 1 for 150) as content, type from copyright,
-              (SELECT distinct(pfile_fk) as PF from uploadtree 
+              (SELECT distinct(pfile_fk) as PF from $this->uploadtree_tablename 
                  where upload_fk=$upload_pk 
-                   and uploadtree.lft BETWEEN $lft and $rgt) as SS
+                   and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$Agent_pk";
     }
     $result = pg_query($PG_CONN, $sql);
@@ -489,7 +490,7 @@ class copyright_hist extends FO_Plugin
     ***************************************/
     if ($ChildCount == 0)
     {
-      $sql = "SELECT * FROM uploadtree WHERE uploadtree_pk = '$Uploadtree_pk';";
+      $sql = "SELECT * FROM $this->uploadtree_tablename WHERE uploadtree_pk = '$Uploadtree_pk';";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
@@ -546,6 +547,7 @@ class copyright_hist extends FO_Plugin
 
     /* Get uploadtree_tablename */
     $uploadtree_tablename = GetUploadtreeTableName($Upload);
+    $this->uploadtree_tablename = $uploadtree_tablename;
 
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
     /********  disable cache to see if this is fast enough without it *****
