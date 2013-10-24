@@ -71,13 +71,13 @@ class core_debug_fileloc extends FO_Plugin
     /**
      *  Collect the various file upload values
      **/
-        $var1 = "memory_limit";
+        $var1 = _("memory_limit");
         $val1 = ini_get('memory_limit');
 
-        $var2 = "post_max_size";
+        $var2 = _("post_max_size");
         $val2 = ini_get('post_max_size');
 
-        $var3 = "upload_max_filesize";
+        $var3 = _("upload_max_filesize");
         $val3 = ini_get('upload_max_filesize');
 
         $V .= "<table cellpadding=3><tr><th align=left>$text</th><th>&nbsp";
