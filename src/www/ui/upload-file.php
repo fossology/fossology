@@ -180,8 +180,8 @@ class upload_file extends FO_Plugin {
         $V .= "<p><b>$text22</b><p>";
 
         $V.= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from your computer to FOSSology.\n");
-        $V.= _("Your FOSSology server has imposed a maximum file size of");
-        $V.= " ".  ini_get('post_max_size') . " ";
+        $V.= _("Your FOSSology server has imposed a maximum upload file size of");
+        $V.= " ".  ini_get('upload_max_filesize') . " ";
         $V.= _("bytes.");
         /* Display the form */
         $V.= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
