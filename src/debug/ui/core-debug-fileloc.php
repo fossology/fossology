@@ -52,12 +52,10 @@ class core_debug_fileloc extends FO_Plugin
    */
   function Output()
   {
-    global $BINDIR, $LIBDIR, $LIBEXECDIR, $INCLUDEDIR, $MAN1DIR,
-    $AGENTDIR, $SYSCONFDIR, $WEBDIR, $PHPDIR, $PROJECTSTATEDIR,
-    $PROJECT, $DATADIR, $VERSION, $SVN_REV;
-    $varray = array("BINDIR", "LIBDIR", "LIBEXECDIR", "INCLUDEDIR", "MAN1DIR",
-           "AGENTDIR", "SYSCONFDIR", "WEBDIR", "PHPDIR", "PROJECTSTATEDIR",
-           "PROJECT", "DATADIR", "VERSION", "SVN_REV");
+    global $BINDIR, $LIBDIR, $LIBEXECDIR, $INCLUDEDIR, $LOGDIR,
+    $SYSCONFDIR, $PROJECTSTATEDIR, $PROJECT, $VERSION, $SVN_REV;
+    $varray = array("BINDIR", "LIBDIR", "LIBEXECDIR", "INCLUDEDIR", "LOGDIR",
+           "SYSCONFDIR", "PROJECTSTATEDIR", "PROJECT", "VERSION", "SVN_REV");
 
     if ($this->State != PLUGIN_STATE_READY) {
       return;
