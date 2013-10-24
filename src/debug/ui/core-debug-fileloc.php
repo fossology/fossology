@@ -68,10 +68,29 @@ class core_debug_fileloc extends FO_Plugin
         break;
       case "HTML":
         $text = _(" Variable");
+    /**
+     *  Collect the various file upload values
+     **/
+        $var1 = "memory_limit";
+        $val1 = ini_get('memory_limit');
+
+        $var2 = "post_max_size";
+        $val2 = ini_get('post_max_size');
+
+        $var3 = "upload_max_filesize";
+        $val3 = ini_get('upload_max_filesize');
+
         $V .= "<table cellpadding=3><tr><th align=left>$text</th><th>&nbsp";
         foreach ($varray as $var)
         $V .= "<tr><td>$var</td><td>&nbsp;</td><td>". $$var ."</td></tr>";
-         
+    /**
+     * Display the file upload php settings following a blank row/line
+     */
+        $V .= "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+        $V .= "<tr><td>$var1</td><td>&nbsp;</td><td>$val1</td></tr>";
+        $V .= "<tr><td>$var2</td><td>&nbsp;</td><td>$val2</td></tr>";
+        $V .= "<tr><td>$var3</td><td>&nbsp;</td><td>$val3</td></tr>";
+
         $V .= "</table>";
         break;
       case "Text":
