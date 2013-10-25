@@ -21,25 +21,11 @@
 #include <stdio.h>
 #include <libpq-fe.h>
 
-#ifdef NOLONGERUSED
-/*  User, Group and Permission info for an upload_pk */
-struct UserGroupPerm_struct
-{
-  char  *user_name;          /* from users table */
-  int    user_pk;            /* from users table */
-  int    group_pk;           /* The user's group_pk from groups table */
-  int    new_upload_group_fk;/* from users table */
-  int    new_upload_perm;    /* from users table */
-};
-typedef struct UserGroupPerm_struct UserGroupPerm_t, *pUserGroupPerm_t;
-pUserGroupPerm_t GetUserGroupPerm(PGconn *pgConn, long UploadPk);
-#endif
-
 int  fo_GetAgentKey   (PGconn *pgConn, char *agent_name, long unused, char *cpunused, char *agent_desc);
-int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk,
+int fo_WriteARS       (PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk,
                          char *tableName, char *ars_status, int ars_success);
-int fo_CreateARSTable(PGconn *pgConn, char *table_name);
-
-int GetUploadPerm(PGconn *pgConn, long UploadPk, int user_pk);
+int fo_CreateARSTable (PGconn *pgConn, char *table_name);
+int GetUploadPerm     (PGconn *pgConn, long UploadPk, int user_pk);
+char *GetUploadtreeTableName(PGconn *pgConn, int upload_pk);
 
 #endif

@@ -169,79 +169,16 @@ FUNCTION int fo_CreateARSTable(PGconn *pgConn, char *tableName)
 }  /* fo_CreateARSTable() */
 
 
-#ifdef NOLONGERUSED
-/**
- * \brief Return user, group and permission data for UploadPk
- *
- * \param long upload_pk
- *
- * \return int 0 failure, initialized pUserGroupPerm_t on success
- */
-pUserGroupPerm_t GetUserGroupPerm(PGconn *pgConn, long UploadPk)
-{
-  PGresult *result;
-  char SQL[1024];
-  pUserGroupPerm_t pUGP;
-
-  pUGP = malloc(sizeof(UserGroupPerm_t));
-  if (!pUGP)
-  {
-    LOG_ERROR("Out of memory, alloc %d bytes failed", (int)sizeof(UserGroupPerm_t));
-    return 0;
-  }
-
-  /* Get the user_pk from the upload table */
-  snprintf(SQL, sizeof(SQL), "select user_fk from upload where upload_pk=%ld", UploadPk);
-  result = PQexec(pgConn, SQL);
-  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
-  if (PQntuples(result) < 1)
-  {
-    LOG_ERROR("No records returned in %s", SQL);
-    return 0;
-  }
-  pUGP->user_pk = atoi(PQgetvalue(result, 0, 0));
-  PQclear(result);
-
-  /* Get the user_name from the users table */
-  snprintf(SQL, sizeof(SQL), "select user_name, new_upload_group_fk, new_upload_perm from users where user_pk='%d'", pUGP->user_pk);
-  result =  PQexec(pgConn, SQL);
-  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
-  if (PQntuples(result) < 1)
-  {
-    LOG_ERROR("No records returned in %s", SQL);
-    return 0;
-  }
-  pUGP->user_name = PQgetvalue(result, 0, 0);
-  pUGP->new_upload_group_fk = atoi(PQgetvalue(result, 0, 1));
-  pUGP->new_upload_perm = atoi(PQgetvalue(result, 0, 2));
-  PQclear(result);
-
-  /* look up user's group_pk */
-  snprintf(SQL, sizeof(SQL), "select group_pk from groups where group_name='%s'", pUGP->user_name);
-  result =  PQexec(pgConn, SQL); 
-  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
-  if (PQntuples(result) < 1)
-  {
-    LOG_ERROR("No records returned in %s", SQL);
-    return 0;
-  }
-  pUGP->group_pk = atoi(PQgetvalue(result, 0, 0));
-  PQclear(result);
-
-  return (pUGP);
-}
-#endif
-
-
 /**
  * \brief Get users permission to this upload
  *
+ * \param pgConn Database connection object pointer.
  * \param long upload_pk
  * \param user_pk  
  *
  * \return permission (PERM_) this user has for UploadPk
  */
-int GetUploadPerm(PGconn *pgConn, long UploadPk, int user_pk)
+FUNCTION int GetUploadPerm(PGconn *pgConn, long UploadPk, int user_pk)
 {
   PGresult *result;
   char SQL[1024];
@@ -266,4 +203,31 @@ int GetUploadPerm(PGconn *pgConn, long UploadPk, int user_pk)
   fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
   perm = atoi(PQgetvalue(result, 0, 0));
   return (PERM_ADMIN);
+}
+
+
+/**
+ * \brief Get the uploadtree table name for this upload_pk
+ *        If upload_pk does not exist, return "uploadtree".
+ *
+ * \param pgConn Database connection object pointer.
+ * \param upload_pk
+ * 
+ * \return uploadtree table name, or null if upload_pk does not exist.
+ * Caller must free the (non-null) returned value.
+ */
+FUNCTION char *GetUploadtreeTableName(PGconn *pgConn, int upload_pk)
+{
+  PGresult *result;
+  char *uploadtree_tablename = 0;
+  char SQL[1024];
+
+  /* Get the uploadtree table name from the upload table */
+  snprintf(SQL, sizeof(SQL), "select uploadtree_tablename from upload where upload_pk='%d'", upload_pk);
+  result =  PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  if (PQntuples(result) == 1) uploadtree_tablename = strdup(PQgetvalue(result, 0, 0));
+  PQclear(result);
+
+  return (uploadtree_tablename);
 }
