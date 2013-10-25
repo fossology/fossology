@@ -86,6 +86,7 @@ void RemovePostfix(char *Name)
   if (NULL == Name) return; // exception
   // keep the part before the last dot
   char *LastDot = strrchr(Name, '.');
+  if (LastDot == NULL) return;
   // if the part after the last dot is number, do not get rid of the postfix
   if ((LastDot[1]>='0')&&(LastDot[1]<='9')) return;
   if (LastDot) *LastDot = 0;
