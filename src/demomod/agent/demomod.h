@@ -32,13 +32,22 @@
 #define FUNCTION
 
 #define myBUFSIZ	2048
+#define DataSize    32
 
-#define IsContainer(mode)  ((mode & 1<<29) != 0)
-#define IsArtifact(mode)   ((mode & 1<<28) != 0)
-
+/* A structure to put the results of a single file scan */
+struct FileResult_struct
+{
+  char Buf[DataSize];
+  char HexStr[(DataSize * 2) + 1];
+};
+typedef struct FileResult_struct FileResult_t, *pFileResult_t;
 
 void CheckTable     (char *AgentARSName);
 void ExitNow        (int ExitVal);
 void Usage          (char *Name);
+void Char2Hex       (char *InBuf, int NumBytes, char *OutBuf);
+
+int  ProcessUpload  (int upload_pk, int agent_fk);
+int  ProcessFile    (char *FilePath, pFileResult_t FileResult);
 
 #endif /* _DEMOMOD_H */

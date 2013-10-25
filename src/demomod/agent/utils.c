@@ -29,6 +29,8 @@ extern PGconn    *pgConn;        // database connection
 /**
  * @brief Check to make sure the demomod and demomod_ars tables exists.
  *        If they don't, then create them.
+ *        This is also where you would make any table changes for new versions
+ *        if you aren't part of the fossology release (which uses core-schema.dat).
  * @param AgentARSName Name of _ars table
  *
  * @returns void  Can call ExitNow() on fatal error.
@@ -42,15 +44,15 @@ FUNCTION void CheckTable(char *AgentARSName)
        "CREATE TABLE demomod ( \
           demomod_pk serial NOT NULL PRIMARY KEY, \
           pfile_fk integer, \
-          firstbytes character(32), \
+          agent_fk integer, \
+          firstbytes character(65), \
         FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk) ON DELETE CASCADE \
+        FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk) ON DELETE CASCADE \
         ); \
         COMMENT ON TABLE demomod IS 'table for demo module'; \
-        COMMENT ON COLUMN demomod.firstbytes IS 'first 32 bytes of the pfile'; \
+        COMMENT ON COLUMN demomod.firstbytes IS 'Hex string of first 32 bytes of the pfile'; \
       ";
 
-//ALTER TABLE ONLY demomod ADD CONSTRAINT demomod_pfile_fk_fkey FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk) ON DELETE CASCADE;
-//ALTER TABLE ONLY demomod ADD CONSTRAINT demomod_pkey PRIMARY KEY (demomod_pk);
 
   /* Check if the demomod_ars table exists.  If not, create it.  
    * The _ars tables serve as an audit trail.  They tell you when an agent
@@ -87,6 +89,25 @@ FUNCTION void CheckTable(char *AgentARSName)
   }
 
 }
+
+
+/**
+ * @brief Convert a character buffer to a hex string
+ *
+ * @param InBuf Input buffer
+ * @param NumBytes Number of input characters to process
+ * @param OutBuf Output buffer (must be large enough to hold output)
+ * @returns void
+ */
+FUNCTION void Char2Hex(char *InBuf, int NumBytes, char *OutBuf) 
+{
+  int i;
+  char* pbuf = OutBuf;
+  for (i=0; i<NumBytes; i++) pbuf += sprintf(pbuf, "%02X", InBuf[i]);
+
+  *(pbuf + 1) = '\0';
+} /* Char2Hex() */
+
 
 /**
  * @brief Exit function.  This does all cleanup and should be used

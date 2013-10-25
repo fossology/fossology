@@ -61,7 +61,9 @@ int main(int argc, char **argv)
   int upload_pk = 0;
   int ars_pk = 0;
   int Unused = 0;
-
+  int i;
+  int UseScheduler = 0;
+  FileResult_t FileResult;
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
@@ -72,7 +74,7 @@ int main(int argc, char **argv)
    */
   SVN_REV = fo_sysconfig("demomod", "SVN_REV");
   VERSION = fo_sysconfig("demomod", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, SVN_REV);
   agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), Unused, agent_rev, agentDesc);
 
   /* Verify that the user has PLUGIN_DB_ADMIN */
@@ -84,7 +86,8 @@ int main(int argc, char **argv)
     {
       case 'i': /* "Initialize" */
             ExitNow(0);
-      case 'u': /* upload_pk when run from the command line  */
+      case 'u': /* upload_pk when run from the scheduler  */
+            UseScheduler = 1;
             upload_pk = atoi(optarg);
             break;
       case 'v': /* verbose output for debugging  */
@@ -100,8 +103,7 @@ int main(int argc, char **argv)
     }
   }
 
-  /* If no upload_pk was passed in (-u), then run with input from the scheduler (stdin via fo_scheduler functions) */
-  if (upload_pk == 0)
+  if (UseScheduler)
   {
     /* make sure the demomod and demomod_ars tables exists */
     CheckTable(AgentARSName);
@@ -151,13 +153,15 @@ int main(int argc, char **argv)
       ars_pk = fo_WriteARS(pgConn, ars_pk, upload_pk, agent_pk, AgentARSName, 0, 0);
 
       /* Create the sql copy structure for the demomod table.
+       * The fo_sqlCopy functions are used to batch copy records into the database.  This is
+       * much faster than single inserts.
        * This creates a struct with buffer size of 100,000 bytes, and two columns
        */
-      psqlcpy = fo_sqlCopyCreate(pgConn, "demomod", 100000, 2, "pfile_fk", "firstbytes" );
+      psqlcpy = fo_sqlCopyCreate(pgConn, "demomod", 100000, 3, "pfile_fk", "agent_fk", "firstbytes" );
       if (!psqlcpy) ExitNow(-4);
 
       /* process the upload_pk */
-      if(ProcessUpload(upload_pk) != 0) ExitNow(-5);
+      if(ProcessUpload(upload_pk, agent_pk) != 0) ExitNow(-5);
 
       /* Record scan success in ars table. */
       fo_WriteARS(pgConn, ars_pk, upload_pk, agent_pk, AgentARSName, 0, 1);
@@ -165,7 +169,12 @@ int main(int argc, char **argv)
   }
   else
   {
-    LOG_VERBOSE("demomod running from command line, upload_pk is %d\n", upload_pk);
+    /* loop through files on the command line */
+    for (i=optind; i<argc; i++)
+    {
+      if(ProcessFile(argv[i], &FileResult) != 0) ExitNow(-5);
+      printf("%s: %s \n", argv[i], FileResult.HexStr);
+    }
   }
 
   ExitNow(0);  /* success */

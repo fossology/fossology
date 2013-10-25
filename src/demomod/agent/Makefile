@@ -22,7 +22,7 @@ DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
 CFLAGS_LOCAL= $(DEF) $(ALL_CFLAGS) $(DEFS) 
 
 EXE=demomod
-OBJS=usage.o utils.o 
+OBJS=usage.o utils.o process.o
 HDRS=demomod.h
 
 all: $(EXE)
@@ -36,6 +36,9 @@ usage.o: $(HDRS) usage.c
 
 utils.o: $(HDRS) utils.c
 	$(CC) -c $(CFLAGS_LOCAL) utils.c
+
+process.o: $(HDRS) process.c
+	$(CC) -c $(CFLAGS_LOCAL) process.c
 
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
