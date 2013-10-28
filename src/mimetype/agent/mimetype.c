@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
 
         /** get all pfile ids on a upload record */
         memset(sqlbuf, 0, sizeof(sqlbuf));
-        snprintf(sqlbuf, sizeof(sqlbuf), "SELECT DISTINCT(pfile_pk) as Akey, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A FROM uploadtree, pfile WHERE uploadtree.pfile_fk = pfile.pfile_pk AND pfile_mimetypefk is NULL AND upload_fk = '%d' LIMIT 5000;", upload_pk);
+        snprintf(sqlbuf, sizeof(sqlbuf), "SELECT DISTINCT(pfile_pk) as Akey, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A FROM uploadtree, pfile WHERE uploadtree.pfile_fk = pfile.pfile_pk AND pfile_mimetypefk is NULL AND upload_fk = '%d';", upload_pk);
         result = PQexec(pgConn, sqlbuf);
         if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
         pfile_count = PQntuples(result);
