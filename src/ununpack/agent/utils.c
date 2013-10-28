@@ -119,7 +119,7 @@ void	InitCmd	()
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT mimetype_pk FROM mimetype WHERE mimetype_name = '%s';",CMD[i].Magic);
     result =  PQexec(pgConn, SQL); /* SELECT */
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(4);
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(1);
     else if (PQntuples(result) > 0) /* if there is a value */
     {  
       CMD[i].DBindex = atol(PQgetvalue(result,0,0));
@@ -131,7 +131,7 @@ void	InitCmd	()
       memset(SQL,'\0',MAXSQL);
       snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('%s');",CMD[i].Magic);
       result =  PQexec(pgConn, SQL); /* INSERT INTO mimetype */
-      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(5);
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(2);
       else 
       {
         PQclear(result);
@@ -251,7 +251,7 @@ inline int	MkDirs	(char *Fname)
         if (!S_ISDIR(Status.st_mode))
         {
           LOG_FATAL("'%s' is not a directory.",Dir)
-          return(1);
+          SafeExit(3);
         }
       }
       else /* else, it does not exist */
@@ -261,7 +261,7 @@ inline int	MkDirs	(char *Fname)
         if (rc)
         {
           LOG_FATAL("mkdir %s' failed, error: %s",Dir,strerror(errno))
-          SafeExit(7);
+          SafeExit(4);
         }
         chmod(Dir,02770);
       } /* else */
@@ -273,7 +273,7 @@ inline int	MkDirs	(char *Fname)
   if (rc)
   {
     LOG_FATAL("mkdir %s' failed, error: %s",Dir,strerror(errno))
-    SafeExit(8);
+    SafeExit(5);
   }
   chmod(Dir,02770);
   return(rc);
@@ -436,7 +436,7 @@ int	CopyFile	(char *Src, char *Dst)
   if (Fin == -1)
   {
     LOG_FATAL("Unable to open source '%s'",Src)
-    return(1);
+    SafeExit(22);
   }
 
   /* Make sure the directory exists for copying */
@@ -453,7 +453,7 @@ int	CopyFile	(char *Src, char *Dst)
   {
     LOG_FATAL("Unable to open target '%s'",Dst)
     close(Fin);
-    return(1);
+    SafeExit(23);
   }
 
   /* load the source file */
@@ -511,7 +511,7 @@ int     ParentWait      ()
     if (!ForceContinue)
     {
       LOG_FATAL("Child had unnatural death")
-      SafeExit(9);
+      SafeExit(6);
     }
     Queue[i].ChildCorrupt=1;
     Status = -1;
@@ -625,7 +625,7 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
   if (getcwd(CWD,sizeof(CWD)) == NULL)
   {
     LOG_FATAL("directory name longer than %d characters",(int)sizeof(CWD))
-    return(-1);
+    SafeExit(24);
   }
   if (Verbose > 1) LOG_DEBUG("CWD: %s\n",CWD);
   if ((Where != NULL) && (Where[0] != '\0'))
@@ -636,7 +636,7 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
       if (chdir(Where) != 0)
       {
         LOG_FATAL("Unable to access directory '%s'",Where)
-        return(-1);
+        SafeExit(25);
       }
     }
     if (Verbose > 1) LOG_DEBUG("CWD: %s",Where)
@@ -666,7 +666,7 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
   if (WIFSIGNALED(rc))
   {
     LOG_ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd1)
-    SafeExit(11);
+    SafeExit(8);
   }
   if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
   else rc=-1;
@@ -690,7 +690,7 @@ int InitMagic()
   if (MagicCookie == NULL)
   {
     LOG_FATAL("Failed to initialize magic cookie")
-    SafeExit(-1);
+    SafeExit(9);
   }
   return magic_load(MagicCookie,NULL);
 }
@@ -944,13 +944,13 @@ dirlist *	MakeDirList	(char *Fullname)
     if (!dhead)
     {
       LOG_FATAL("Failed to allocate dirlist memory")
-      SafeExit(12);
+      SafeExit(10);
     }
     dhead->Name = (char *)malloc(strlen(Entry->d_name)+1);
     if (!dhead->Name)
     {
       LOG_FATAL("Failed to allocate dirlist.Name memory")
-      SafeExit(13);
+      SafeExit(11);
     }
     memset(dhead->Name,'\0',strlen(Entry->d_name)+1);
     strcpy(dhead->Name,Entry->d_name);
@@ -1080,7 +1080,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
       Fuid,Fuid+41,Fuid+74);
   result =  PQexec(pgConn, SQL); /* SELECT */
-  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(33);
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(12);
 
   /* add it if it was not found */
   if (PQntuples(result) == 0)
@@ -1106,7 +1106,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
         (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5))))
     {
       LOG_ERROR("Error inserting pfile, %s.", SQL);
-      SafeExit(34);
+      SafeExit(13);
     }
     PQclear(result);
 
@@ -1116,7 +1116,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
     snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
         Fuid,Fuid+41,Fuid+74);
     result =  PQexec(pgConn, SQL);  /* SELECT */
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(15);
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(14);
   }
 
   /* Now *DB contains the pfile_pk information */
@@ -1134,7 +1134,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
       snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld' WHERE pfile_pk = '%ld';",
           CMD[CI->PI.Cmd].DBindex, CI->pfile_pk);
       result =  PQexec(pgConn, SQL); /* UPDATE pfile */
-      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(36);
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(16);
     }
     PQclear(result);
   }
@@ -1180,7 +1180,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     char *ufile_name;
     snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
     result =  PQexec(pgConn, UfileName);
-    if (fo_checkPQresult(pgConn, result, UfileName, __FILE__, __LINE__)) SafeExit(38);
+    if (fo_checkPQresult(pgConn, result, UfileName, __FILE__, __LINE__)) SafeExit(17);
     memset(UfileName,'\0',sizeof(UfileName));
     ufile_name = PQgetvalue(result,0,0);
     PQclear(result);
@@ -1229,7 +1229,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
       result =  PQexec(pgConn, SQL); /* INSERT INTO uploadtree */
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
       {
-        SafeExit(39);
+        SafeExit(18);
       }
       PQclear(result);
     }
@@ -1238,14 +1238,14 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
       snprintf(SQL,MAXSQL,"INSERT INTO %s (upload_fk,pfile_fk,ufile_mode,ufile_name) VALUES (%s,%ld,%ld,E'%s');",
           uploadtree_tablename, Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
       result =  PQexec(pgConn, SQL); /* INSERT INTO uploadtree */
-      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(41);
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(19);
       PQclear(result);
     }
     /* Find the inserted child */
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT currval('uploadtree_uploadtree_pk_seq');");
     result =  PQexec(pgConn, SQL);
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(42);
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(20);
     CI->uploadtree_pk = atol(PQgetvalue(result,0,0));
     PQclear(result);
   } 
@@ -1279,7 +1279,7 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
       if (fo_RepImport(CI->Source,REP_FILES,Fuid,1) != 0)
       {
         LOG_ERROR("Failed to import '%s' as '%s' into the repository",CI->Source,Fuid)
-        SafeExit(16);
+        SafeExit(21);
       }
     }
     if (Verbose) LOG_DEBUG("Repository[%s]: insert '%s' as '%s'",

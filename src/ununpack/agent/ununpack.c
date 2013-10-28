@@ -106,7 +106,7 @@ int	main(int argc, char *argv[])
       case 'x':	UnlinkAll=1; break;
       default:
         Usage(argv[0], BuildVersion);
-        SafeExit(25);
+        SafeExit(0);
     }
   }
 
@@ -117,7 +117,7 @@ int	main(int argc, char *argv[])
     if (GetUploadPerm(pgConn, atoi(Upload_Pk), user_pk) < PERM_WRITE)
     {
       LOG_ERROR("You have no update permissions on upload %s", Upload_Pk);
-      SafeExit(99);
+      SafeExit(100);
     }
         
     SVN_REV = fo_sysconfig(AgentName, "SVN_REV");
@@ -141,7 +141,7 @@ int	main(int argc, char *argv[])
         "SELECT ars_pk from %s where upload_fk='%s' and ars_success=TRUE",
            AgentARSName, Upload_Pk);
     result =  PQexec(pgConn, SQL);
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(51);
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(101);
 
     if (PQntuples(result) > 0) /* if there is a value */
     {  
@@ -160,7 +160,7 @@ int	main(int argc, char *argv[])
         "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile, pfile_fk, pfile_size FROM upload INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk WHERE upload.upload_pk = '%s'", 
            Upload_Pk);
     result =  PQexec(pgConn, SQL);
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(51);
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(102);
 
     if (PQntuples(result) > 0) /* if there is a value */
     {  
@@ -191,7 +191,7 @@ int	main(int argc, char *argv[])
       result =  PQexec(pgConn, SQL);
       // Ignore postgres notice about creating an implicit index
       if (PQresultStatus(result) != PGRES_NONFATAL_ERROR)
-        if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(151);
+        if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(103);
       PQclear(result);
     }
     else
@@ -210,7 +210,7 @@ int	main(int argc, char *argv[])
     if (!ListOutFile)
     {
       LOG_ERROR("pfile %s Unable to write to %s\n",Pfile_Pk,ListOutName)
-      SafeExit(27);
+      SafeExit(104);
     }
     else
     {
@@ -236,7 +236,7 @@ int	main(int argc, char *argv[])
   {
     snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s limit 1;",Upload_Pk);
     result =  PQexec(pgConn, SQL);
-    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(14);
+    if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(105);
     if (PQntuples(result) == 0) ReunpackSwitch=1;
     PQclear(result);
   }
@@ -257,7 +257,7 @@ int	main(int argc, char *argv[])
         if (fo_RepImport(argv[optind],REP_FILES,argv[optind],1) != 0)
         {
           LOG_ERROR("Failed to import '%s' as '%s' into the repository",argv[optind],argv[optind])
-          SafeExit(28);
+          SafeExit(106);
         }
       }
     }
@@ -274,7 +274,7 @@ int	main(int argc, char *argv[])
         if (fo_RepImport(Fname,REP_FILES,argv[optind],1) != 0)
         {
           LOG_ERROR("Failed to import '%s' as '%s' into the repository",Fname,argv[optind])
-          SafeExit(29);
+          SafeExit(107);
         }
       }
 
@@ -286,7 +286,7 @@ int	main(int argc, char *argv[])
       else
       {
         LOG_ERROR("NO file unpacked.  File %s does not exist either in GOLD or FILES", Pfile);
-        SafeExit(31);
+        SafeExit(108);
       }
       /* else: Fname is NULL and CF is NULL */
     }
@@ -300,13 +300,13 @@ int	main(int argc, char *argv[])
     if (stat(FnameCheck,&Stat)) 
     {
       LOG_ERROR("File to unpack is unavailable: %s, error: %s", Fname, strerror(errno));
-      SafeExit(102);
+      SafeExit(109);
     }
     else
     if (Stat.st_size < 1)
     {
       LOG_WARNING("File to unpack is empty: %s", Fname);
-      SafeExit(103);
+      SafeExit(110);
     }
 
     if (ListOutFile)
@@ -375,7 +375,7 @@ int	main(int argc, char *argv[])
       if (fo_RepImport(Fname,REP_FILES,Pfile,1) != 0)
       {
         LOG_ERROR("Failed to import '%s' as '%s' into the repository",Fname,Pfile)
-        SafeExit(30);
+        SafeExit(111);
       }
     }
     if (Fname)
@@ -397,7 +397,7 @@ int	main(int argc, char *argv[])
         Fname=fo_RepMkPath(REP_GOLD, Pfile);
         LOG_ERROR("Error is %s for %s", strerror(rvExist2), Fname);
       }
-      SafeExit(32);
+      SafeExit(112);
     }
   }
 
@@ -434,7 +434,7 @@ int	main(int argc, char *argv[])
     {
       snprintf(SQL,MAXSQL,"UPDATE upload SET upload_mode = (upload_mode | (1<<5)), uploadtree_tablename='%s' WHERE upload_pk = '%s';",uploadtree_tablename, Upload_Pk);
       result =  PQexec(pgConn, SQL); /* UPDATE upload */
-      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(44);
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(113);
       PQclear(result);
     }
 

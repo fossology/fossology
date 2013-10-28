@@ -455,7 +455,7 @@ int	Traverse	(char *Filename, char *Basename,
           LOG_FATAL("Unable to mkdir(%s) in Traverse", Queue[Index].ChildRecurse)
           if (!ForceContinue)
           {
-            SafeExit(17);
+            SafeExit(30);
           }
         }
         if (CMD[CI.PI.Cmd].Type == CMD_PARTITION)
@@ -473,7 +473,7 @@ int	Traverse	(char *Filename, char *Basename,
           result =  PQexec(pgConn, SQL);  // get name of the upload file
           if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
           {
-            SafeExit(32);
+            SafeExit(31);
           }
           UFileName = PQgetvalue(result,0,0);
           PQclear(result);
@@ -536,7 +536,7 @@ int	Traverse	(char *Filename, char *Basename,
       if (WIFSIGNALED(rc))
       {
         LOG_ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd)
-        SafeExit(18);
+        SafeExit(32);
       }
       if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
       else rc=-1;
@@ -565,7 +565,7 @@ int	Traverse	(char *Filename, char *Basename,
         if (Pid == -1)
         {
           LOG_FATAL("Unable to fork child.")
-          SafeExit(19);
+          SafeExit(33);
         }
         Queue[Index].ChildPid = Pid;
 
