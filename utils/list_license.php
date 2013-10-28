@@ -66,9 +66,9 @@ function list_license($reference_flag, $nomos_flag)
 {
   global $PG_CONN;
   $sql_statment = "SELECT rf_shortname from license_ref ";
-  if ($reference_flag && $nomos_flag) $sql_statment .= "order by rf_detector_type, rf_shortname";
-  else if ($reference_flag) $sql_statment .= " where rf_detector_type = 1 order by rf_shortname";
-  else if ($nomos_flag) $sql_statment .= " where rf_detector_type = 2 order by rf_shortname";
+  if ($reference_flag) $sql_statment .= " where rf_detector_type = 1";
+  else if ($nomos_flag) $sql_statment .= " where rf_detector_type = 2";
+  $sql_statment .= " order by rf_shortname";
   $result = pg_query($PG_CONN, $sql_statment);
   DBCheckResult($result, $sql_statment, __FILE__, __LINE__);
   while ($row = pg_fetch_assoc($result))
