@@ -11,6 +11,7 @@ cp2foss - upload one or more files or archives into FOSSology and run scans.
  Options: -AQThv [-f path] [-AA num] [-q {agent,agent.. | all}] [-X path]
  [-n name] [-d description] [--user user name] [--password password]
  [-c configuration directory]
+ [-P set public permission]
 
 =head1 DESCRIPTION
 
@@ -88,6 +89,10 @@ Specify the directory for the system configuration,
 when installation from src, default dir is /usr/local/etc/fossology/,
 when installation from package, default dir is /etc/fossology/.
 This defaults to your last installation location.
+
+=item B<-P> I<set public permission>
+
+set the permission to public on this upload or not. 1: yes; 0: no
 
 =item B<-n> I<name>
 

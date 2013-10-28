@@ -39,6 +39,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     --user string = user name
     --password string = password
     -c string = Specify the directory for the system configuration
+    -P number = set the permission to public on this upload or not. 1: yes; 0: no
 
   FOSSology storage options:
     -f path  = folder path for placing files (e.g., -f 'Fedora/ISOs/Disk 1')
@@ -211,6 +212,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $Test;
   global $QueueList;
   global $fossjobs_command;
+  global $public_flag;
 
   if (empty($UploadName)) {
     $text = "UploadName is empty\n";
@@ -249,14 +251,14 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
 
   /* Create the upload for the file */
   if ($Verbose) {
-    print "JobAddUpload($user_pk, $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk);\n";
+    print "JobAddUpload($user_pk, $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk, $public_flag);\n";
   }
   if (!$Test) {
     $Src = $UploadArchive;
     if (!empty($TarSource)) {
       $Src = $TarSource;
     }
-    $UploadPk = JobAddUpload($user_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk);
+    $UploadPk = JobAddUpload($user_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk, $public_flag);
     print "  UploadPk is: '$UploadPk'\n";
   }
 
@@ -338,6 +340,7 @@ $UploadName = "";
 $QueueList = "";
 $TarExcludeList = "";
 $bucket_size = 3;
+$public_flag = "";
 
 $user = "";
 $passwd = "";
@@ -431,6 +434,15 @@ for ($i = 1;$i < $argc;$i++) {
       break;
     case '-': /* it's an archive list from stdin! */
       $stdin_flag = 1;
+      break;
+    case '-P': /* set the permission to public or not */
+      $i++;
+      if (1 == $argv[$i]) {
+        $public_flag = 1;
+      }
+      else {
+        $public_flag = 0;
+      }
       break;
     default:
       if (substr($argv[$i], 0, 1) == '-') {
