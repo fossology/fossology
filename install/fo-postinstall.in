@@ -127,6 +127,12 @@ if [ $COMMON ]; then
          echo "ERROR: {$PROJECTUSER} shell must be a real shell"
          exit 1
       fi
+      USERHOME=`grep "^{$PROJECTUSER}:" /etc/passwd |cut -d: -f 6`
+      if [ "$USERHOME" != "/home/fossy" ]; then
+         echo "NOTE: change user 'fossy' homedir from $USERHOME to /home/fossy."
+         mkdir -p /home/fossy
+         usermod -d /home/fossy {$PROJECTUSER}
+      fi
    else
       # ensure that the full parent path of the HOME exists first
       mkdir -p $\{REPO%/*/*\}
@@ -134,10 +140,10 @@ if [ $COMMON ]; then
       # not if it's a symlink (probably to /usr/sbin/useradd)
       if [ -f /usr/sbin/adduser -a ! -L /usr/sbin/adduser ]; then
          adduser --gecos "{$PROJECT}" --ingroup {$PROJECTGROUP} --system \
-           --shell /bin/bash --home "$\{REPO%/*\}" {$PROJECTUSER}
+           --shell /bin/bash --home /home/fossy {$PROJECTUSER}
       else
          useradd -c "{$PROJECT}" -g {$PROJECTGROUP} -m \
-           -s /bin/bash -d "$\{REPO%/*\}" {$PROJECTUSER}
+           -s /bin/bash -d /home/fossy {$PROJECTUSER}
       fi
       if [ "$?" != "0" ] ; then
          echo "ERROR: Unable to create user '{$PROJECTUSER}'"
