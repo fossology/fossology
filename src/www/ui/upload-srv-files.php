@@ -247,7 +247,7 @@ class upload_srv_files extends FO_Plugin {
         $text = _("NOTE");
         $text1 = _(": Contents under a directory will be recursively included.");
         $V.= "<strong>$text</strong>$text1\n";
-        $V.= _("If you specify a regular expression for the filename, then multiple filenames will be selected.\n");
+        $V.= _("If you specify the regular expression for the filename, right now, just support '*', then multiple filenames will be selected.\n");
         $text = _("(Optional) Enter a description for this Upload:");
         $V.= "<p><li>$text<br />\n";
         $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc, ENT_QUOTES) . "'/>\n";
