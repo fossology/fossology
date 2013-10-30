@@ -25,6 +25,9 @@ is a URL, then it is retrieved and added. If the archive is a file, then
 it is used as the source to add. If the archive is a directory, then I<all>
 files under it are recursively added.
 
+The archive support regular expression '*', all the matched files will be added.
+Note: have to use the real path, and put this path in single/double quotes, e.g. '/tmp/*.php'
+
 A single hyphen means the archive list will come from standard in (stdin).
 
 =head2 Options

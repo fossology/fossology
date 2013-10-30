@@ -64,6 +64,8 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
              If the archive is a file, then it is used as the source to add.
              If the archive is a directory, then ALL files under it are
              recursively added.
+             The archive support regular expression '*', all the matched files will be added.
+                 Note: have to use the real path, and put this path in single/double quotes, e.g. '/tmp/*.php'
     -        = a single hyphen means the archive list will come from stdin.
     -X path  = item to exclude when archive is a directory
              You can specify more than one -X.  For example, to exclude
@@ -79,6 +81,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
   cp2foss \\
     --user USER --password PASSWORD \\
     -f path -d 'the file' /tmp/file
+  cp2foss --user USER --password PASSWORD -f path -d 'the file' '/tmp/*.php'
 
   Deprecated options:
     -a archive = (deprecated) see archive
@@ -340,7 +343,7 @@ $UploadName = "";
 $QueueList = "";
 $TarExcludeList = "";
 $bucket_size = 3;
-$public_flag = "";
+$public_flag = 0;
 
 $user = "";
 $passwd = "";
@@ -492,7 +495,7 @@ if (!$UploadArchive) {  // upload is empty
 $UploadArchiveTmp = "";
 $UploadArchiveTmp = realpath($UploadArchive);
 if (!$UploadArchiveTmp)  { // neither a file nor folder from server?
-    print "NOTE: '$UploadArchive' is a URL or does not exist.\n";
+    print "NOTE: '$UploadArchive' is a URL or does not exist or a regular expression file name.\n";
 } else {  // is a file or folder from server
   $UploadArchive = $UploadArchiveTmp;
 }
