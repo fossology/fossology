@@ -216,19 +216,31 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $QueueList;
   global $fossjobs_command;
   global $public_flag;
+  global $SysConf;
 
   if (empty($UploadName)) {
     $text = "UploadName is empty\n";
     echo $text;
     return 1;
   }
+
+  $user_pk = $SysConf['auth']['UserId'];
+  /* Get the user record and check the PLUGIN_DB_ level to make sure they have at least write access */
+  $UsersRow = GetSingleRec("users", "where user_pk=$user_pk");
+  if ($UsersRow["user_perm"] < PLUGIN_DB_WRITE)
+  {
+    print "You have no permission to upload files into FOSSology\n";
+    return 1;
+  }
+
   /* Get the folder's primary key */
+  $root_folder_fk = $UsersRow["root_folder_fk"];
   global $OptionA; /* Should it use bucket names? */
   if ($OptionA) {
     global $bucket_size;
     $FolderPath.= "/" . GetBucketFolder($UploadName, $bucket_size);
   }
-  $FolderPk = GetFolder($FolderPath);
+  $FolderPk = GetFolder($FolderPath, $root_folder_fk);
   if ($FolderPk == 1) {
     print "  Uploading to folder: 'Software Repository'\n";
   }
@@ -241,16 +253,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
 
   $Mode = (1 << 3); // code for "it came from web upload"
-  global $SysConf;
-  $user_pk = $SysConf['auth']['UserId'];
-
-  /* Get the user record and check the PLUGIN_DB_ level to make sure they have at least write access */
-  $UsersRow = GetSingleRec("users", "where user_pk=$user_pk");
-  if ($UsersRow["user_perm"] < PLUGIN_DB_WRITE)
-  {
-    print "You have no permission to upload files into FOSSology\n";
-    return 1;
-  }
 
   /* Create the upload for the file */
   if ($Verbose) {
