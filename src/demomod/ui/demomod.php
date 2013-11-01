@@ -14,246 +14,226 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+***********************************************************/
+/**
+ * \file demomod.php
+ * \brief browse an upload and display the demomod data (first bytes of the file)
+ */
 
-define("TITLE_demomod", _("Demo Module"));
+define("TITLE_ui_demomod", _("Demomod Browser"));
 
-class demomod extends FO_Plugin
+class ui_demomod extends FO_Plugin
 {
   var $Name       = "demomod";
-  var $Version    = "1.0";
-  var $Title      = TITLE_demomod;
-  var $MenuList   = "Help::Demo::Demo Regex Scanner";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_ADMIN;
+  var $Title      = TITLE_ui_demomod;
+  var $Dependency = array("browse","view");
+  var $DBaccess   = PLUGIN_DB_READ;
+  var $uploadtree_tablename;
 
   /**
-   * \brief Fix the DB by deleting offending records.
+   * \brief  Only used during installation.
+   * \return 0 on success, non-zero on failure.
    */
-  function FixDB($CheckType)
+  function Install()
   {
     global $PG_CONN;
-    $text = _("Deleting");
-    print $text . $CheckType['label'] . "...";
-    print "<pre>";
-    $sql = "DELETE " . $CheckType['sql'];
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    print "db command is:$sql\n";
-    print "</pre>";
-    if (pg_affected_rows($result) > 0)
-    {
-      $text = _("Deleted");
-      $text1 = _("from");
-      print $text .  pg_affected_rows($result) . $text1 ;
-      print $CheckType['label'] . ".<br>\n";
+
+    if (!$PG_CONN) {
+      return(1);
     }
-    pg_free_result($result);
-  } // FixDB()
+
+    return(0);
+  } // Install()
 
   /**
-   * \brief Generate output.
+   * \brief Customize submenus.
+   */
+  function RegisterMenus()
+  {
+    // For all other menus, permit coming back here.
+    $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
+    $MenuName = "Demomod Browser";
+
+    $Item = GetParm("item",PARM_INTEGER);
+    $Upload = GetParm("upload",PARM_INTEGER);
+    if (!empty($Item) && !empty($Upload))
+    {
+      if (GetParm("mod",PARM_STRING) == $this->Name)
+      {
+        menu_insert("Browse::$MenuName",100);
+      }
+      else
+      {
+        $text = _("Demomod data");
+        menu_insert("Browse::$MenuName",100,$URI,$text);
+        menu_insert("View::$MenuName",100,$URI,$text);
+      }
+    }
+  } // RegisterMenus()
+
+
+  /**
+   * \brief This is called before the plugin is used.
+   * It should assume that Install() was already run one time
+   * (possibly years ago and not during this object's creation).
+   *
+   * \return true on success, false on failure.
+   * A failed initialize is not used by the system.
+   *
+   * \note This function must NOT assume that other plugins are installed.
+   */
+  function Initialize()
+  {
+    if ($this->State != PLUGIN_STATE_INVALID)  return(1);  // don't re-run
+
+    return($this->State == PLUGIN_STATE_VALID);
+  } // Initialize()
+
+
+  /**
+   * \brief Display the demomod data
+   * 
+   * \param $upload_pk
+   * \param $uploadtree_pk
+   */
+  function ShowData($upload_pk, $uploadtree_pk)
+  {
+    global $PG_CONN;
+
+    /* Check the demomod_ars table to see if we have any data */
+    $sql = "select ars_pk from demomod_ars where upload_fk=$upload_pk and ars_success=true";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $rows = pg_num_rows($result);
+    pg_free_result($result);
+
+    if ($rows == 0) return _("There is no demomod data for this upload.  Use Jobs > Schedule Agent.");
+
+    /* Get the scan result */
+    /* First we need the pfile_pk */
+    $sql = "select pfile_fk from $this->uploadtree_tablename where uploadtree_pk=$uploadtree_pk and upload_fk=$upload_pk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $rows = pg_num_rows($result);
+    if ($rows == 0) return _("Internal consistency error. Failed: $sql");
+    $row = pg_fetch_assoc($result);
+    $pfile_fk = $row['pfile_fk'];
+    pg_free_result($result);
+
+    /* Now we can get the scan result */
+    $sql = "select firstbytes from demomod where pfile_fk=$pfile_fk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $rows = pg_num_rows($result);
+    if ($rows == 0) return _("Internal consistency error. Failed: $sql");
+    $row = pg_fetch_assoc($result);
+    $firstbytes = $row['firstbytes'];
+    pg_free_result($result);
+
+    $text = _("The first bytes of this file are: ");
+    return ($text . $firstbytes);
+  }
+  
+
+  /**
+   * \brief This function returns the scheduler status.
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
-    $V="";
-    global $PG_CONN;
-    switch($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        $Checks = array();
-        $i=0;
-
-        $Checks[$i]['tag']   = "bad_upload_pfile";
-        $Checks[$i]['label'] = "Uploads missing pfiles";
-        $Checks[$i]['sql']   = "FROM upload WHERE upload_pk IN (SELECT upload_fk FROM uploadtree WHERE parent IS NULL AND pfile_fk IS NULL) OR upload_pk NOT IN (SELECT upload_fk FROM uploadtree);";
-        $Checks[$i]['list']  = "SELECT upload_filename AS list " . $Checks[$i]['sql'];
-        $i++;
-
-        $Checks[$i]['tag']   = "bad_foldercontents_upload";
-        $Checks[$i]['label'] = "Foldercontents with invalid upload references";
-        $Checks[$i]['sql']   = "FROM foldercontents WHERE foldercontents_mode = 2 AND child_id NOT IN (SELECT upload_pk FROM upload);";
-        $i++;
-
-        $Checks[$i]['tag']   = "bad_foldercontents_uploadtree";
-        $Checks[$i]['label'] = "Foldercontents with invalid uploadtree references";
-        $Checks[$i]['sql']   = "FROM foldercontents WHERE foldercontents_mode = 4 AND child_id NOT IN (SELECT uploadtree_pk FROM uploadtree);";
-        $i++;
-
-        $Checks[$i]['tag']   = "bad_foldercontents_folder";
-        $Checks[$i]['label'] = "Foldercontents with invalid folder references";
-        $Checks[$i]['sql']   = "FROM foldercontents WHERE foldercontents_mode = 1 AND child_id NOT IN (SELECT folder_pk FROM folder);";
-        $i++;
-
-        $Checks[$i]['tag']   = "unreferenced_folder";
-        $Checks[$i]['label'] = "Unreferenced folders";
-        $Checks[$i]['sql']   = "FROM folder WHERE folder_pk NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1) AND folder_pk != '1';";
-        $Checks[$i]['list']  = "SELECT folder_name AS list FROM folder WHERE folder_pk NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1) AND folder_pk != '1' LIMIT 20;";
-        $i++;
-
-        $Checks[$i]['tag']   = "duplicate_attrib";
-        $Checks[$i]['label'] = "Duplicate attrib records";
-        $Checks[$i]['sql']   = "FROM attrib WHERE attrib_pk NOT IN (SELECT MIN(dup.attrib_pk) FROM attrib AS dup GROUP BY dup.pfile_fk, dup.attrib_key_fk, dup.attrib_value);";
-        $i++;
-
-        $Checks[$i]['tag']   = "unused_terms";
-        $Checks[$i]['label'] = "License terms with no canonical names";
-        $Checks[$i]['sql']   = "FROM licterm_words WHERE licterm_words_pk NOT IN (SELECT licterm_words_fk FROM licterm_map);";
-        $Checks[$i]['list']  = "SELECT licterm_words_text AS list " . $Checks[$i]['sql'];
-        $i++;
-
-        if (0)
-        {
-          $Checks[$i]['tag']   = "abandoned_license_temp_table";
-          $Checks[$i]['label'] = "Stranded temporary license lookup table";
-          $Checks[$i]['sql']   = "FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public' AND table_name SIMILAR TO '^license_[[:digit:]]+$';";
-          $Checks[$i]['list']  = "SELECT table_name AS list " . $Checks[$i]['sql'];
-          $i++;
-
-          $Checks[$i]['tag']   = "abandoned_metaanalysis_temp_table";
-          $Checks[$i]['label'] = "Stranded temporary metaanalysis lookup table";
-          $Checks[$i]['sql']   = "FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public' AND table_name SIMILAR TO '^metaanalysis_[[:digit:]]+$';";
-          $Checks[$i]['list']  = "SELECT table_name AS list " . $Checks[$i]['sql'];
-          $i++;
-        }
-
-
-        /* Check for anything to fix */
-        $Args=0;
-        for($i=0; !empty($Checks[$i]['tag']); $i++)
-        {
-          if (GetParm($Checks[$i]['tag'],PARM_INTEGER) == 1)
-          {
-            $text = _("Fixing Records");
-            if ($Args==0) { print "<H1>$text</H1>\n"; }
-            $this->FixDB($Checks[$i]);
-            $Args++;
-          }
-        }
-        $text = _("Fix Records");
-        if ($Args > 0) { $V .= "<H1>$text</H1>\n"; }
-
-        /***************************************/
-        $V .= _("On occasion, the database can become inconsistent.");
-        $V .= _(" For example, there may be pfile records without uploadtree entries");
-        $V .= _(" or uploadtree entries that are not linked by any upload records.");
-        $V .= _(" Inconsistencies usually arise due to failed unpacking, partial deletions, and testing.\n");
-
-        $V .= "<script language='javascript'>\n";
-        $V .= "<!--\n";
-        $V .= "function ShowHideDBDetails(name)\n";
-        $V .= "  {\n";
-        $V .= "  if (name.length < 1) { return; }\n";
-        $V .= "  var Element, State;\n";
-        $V .= "  if (document.getElementById) // standard\n";
-        $V .= "    { Element = document.getElementById(name); }\n";
-        $V .= "  else if (document.all) // IE 4, 5, beta 6\n";
-        $V .= "    { Element = document.all[name]; }\n";
-        $V .= "  else // if (document.layers) // Netscape 4 and older\n";
-        $V .= "    { Element = document.layers[name]; }\n";
-        $V .= "  State = Element.style;\n";
-        $V .= "  if (State.display == 'none') { State.display='block'; }\n";
-        $V .= "  else { State.display='none'; }\n";
-        $V .= "  }\n";
-        $V .= "// -->\n";
-        $V .= "</script>\n";
-
-        $sql = "SELECT COUNT(*) AS count FROM jobqueue WHERE (jq_type = 'unpack' OR jq_type = 'delagent' OR jq_type = 'license' OR jq_type = 'pkgmetagetta') AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        $Count = $row['count'];
-        pg_free_result($result);
-        if ($Count == 1) { $Verb = "is"; $String = "task"; }
-        else { $Verb = "are"; $String = "tasks"; }
-        $text = _("Temporary inconsistencies may exist when a file is uploaded, being unpacked, or being deleted.\n");
-        $V .= "<P>$text";
-        $V .= "<ul>";
-        $text = _("An uploaded file -- before being unpacked -- can appear inconsistent.\n");
-        $V .= "<li>$text";
-        $text = _("The unpack system creates pfiles first, then links them together when it completes.\n");
-        $V .= "<li>$text";
-        $text = _("The delete system removes records in series, so a partial delete (or delete in progress) can show inconsistencies.\n");
-        $V .= "<li>$text";
-        $V .= "</ul>\n";
-        $text = _("There");
-        $text1 = _("currently");
-        $text2 = _("running");
-        $text3 = _("in the job queue that may make records appear inconsistent.\n");
-        $V .= "$text $Verb <b>$text1 $Count $String $text2</b> $text3";
-        $V .= _("Fixing inconsistencies while any jobs are running could lead to job failures and further inconsistencies.\n");
-        $text = _("NOTE: Some of these inconsistencies may not be resolvable from here due to table constraints.\n");
-        $V.= "<P>$text";
-
-        /****************************************************/
-        $text = _("The following inconsistencies have been identified:\n");
-        $V .= "<P>$text";
-        $V .= "<form method='POST'>";
-        $V .= "<table border=1 width='100%'>\n";
-        $text = _("Fix");
-        $text1 = _("Type of Inconsistency");
-        $V .= "<tr><th width='5%'>$text</th><th width='80%'>$text1</th><th>Count</th></tr>\n";
-
-        $FixCount=0;
-        for($i=0; !empty($Checks[$i]['tag']); $i++)
-        {
-          $sql = "SELECT COUNT(*) AS count " . $Checks[$i]['sql'];
-          $result = pg_query($PG_CONN, $sql);
-          DBCheckResult($result, $sql, __FILE__, __LINE__);
-          $row = pg_fetch_assoc($result);
-          $Count = $row['count'];
-          pg_free_result($result);
-          $V .= "<tr>";
-          if ($Count > 0)
-          {
-            $V .= "<td valign='top'><input type='checkbox' name='" . $Checks[$i]['tag'] . "' value='1'></td>";
-            $FixCount++;
-          }
-          else { $V .= "<td></td>"; }
-          $V .= "<td valign='top'>" . $Checks[$i]['label'];
-          if (!empty($Checks[$i]['list']) && ($Count > 0))
-          {
-            $text = _("Details");
-            $V .= " (<a href=\"javascript:ShowHideDBDetails('Details_$i')\">$text</a>)<br>\n";
-            $V .= "<div id='Details_$i' style='display:none;'>";
-            $sql = $Checks[$i]['list'];
-            $result = pg_query($PG_CONN, $sql);
-            DBCheckResult($result, $sql, __FILE__, __LINE__);
-            for($j=0; ($row = pg_fetch_assoc($result)) and !empty($row['list']); $j++)
-            {
-              if ($j > 0) { $V .= "<br>\n"; }
-              $V .= ($j+1) . ": " . htmlentities($row['list']);
-            }
-            pg_free_result($result);
-
-            if ($j < $Count) { $V .= "<br>\n..."; }
-            $V .= "</div>\n";
-          }
-          $V .= "</td>";
-          $V .= "<td align='right' valign='top'>" . number_format($Count,0,"",",") . "</td></tr>\n";
-        }
-
-        $V .= "</table>\n";
-        $V .= "<P />";
-        $text = _("Fix");
-        if ($FixCount > 0) { $V .= "<input type='submit' value='$text!'>"; }
-        else { $V .= _("No database inconsistencies found.\n"); }
-        $V .= "</form>";
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+    $uTime = microtime(true);
+    if ($this->State != PLUGIN_STATE_READY) {
+      return(0);
     }
-    if (!$this->OutputToStdout) { return($V); }
-    print($V);
+    $V="";
+
+    $Upload = GetParm("upload",PARM_INTEGER);
+    $UploadPerm = GetUploadPerm($Upload);
+    if ($UploadPerm < PERM_READ)
+    {
+      $text = _("Permission Denied");
+      echo "<h2>$text<h2>";
+      return;
+    }
+
+    $Item = GetParm("item",PARM_INTEGER);
+    $updcache = GetParm("updcache",PARM_INTEGER);
+
+    /* Remove "updcache" from the GET args.
+     * This way all the url's based on the input args won't be
+     * polluted with updcache
+     * Use Traceback_parm_keep to ensure that all parameters are in order */
+    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","agent"));
+    if ($updcache)
+    {
+      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
+      unset($_GET['updcache']);
+      $V = ReportCachePurgeByKey($CacheKey);
+    }
+    else
+    {
+      $V = ReportCacheGet($CacheKey);
+    }
+
+    $this->uploadtree_tablename = GetUploadtreeTableName($Upload);
+
+    if (empty($V) )  // no cache exists
+    {
+      switch($this->OutputType)
+      {
+        case "XML":
+          break;
+        case "HTML":
+          $V .= "<font class='text'>\n";
+
+          /************************/
+          /* Show the folder path */
+          /************************/
+          $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
+
+          if (!empty($Upload))
+          {
+            $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
+            $V .= js_url();
+            $V .= $this->ShowData($Upload, $Item);
+          }
+          $V .= "</font>\n";
+          $V .= "<p>\n";
+          break;
+        case "Text":
+          break;
+        default:
+      }
+
+      $Cached = false;
+    }
+    else
+    $Cached = true;
+
+    if (!$this->OutputToStdout) {
+      return($V);
+    }
+    print "$V";
+    $Time = microtime(true) - $uTime;  // convert usecs to secs
+    $text = _("Elapsed time: %.2f seconds");
+    printf( "<small>$text</small>", $Time);
+
+    if ($Cached)
+    {
+      $text = _("cached");
+      $text1 = _("Update");
+      echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+    }
+    else
+    {
+      /*  Cache Report if this took longer than 1/2 second*/
+      if ($Time > 0.5) ReportCachePut($CacheKey, $V);
+    }
     return;
-  } // Output()
+  }
 
 };
-$NewPlugin = new demomod;
+
+$NewPlugin = new ui_demomod;
 $NewPlugin->Initialize();
+
 ?>
