@@ -46,7 +46,7 @@ FUNCTION void CheckTable(char *AgentARSName)
           pfile_fk integer, \
           agent_fk integer, \
           firstbytes character(65), \
-        FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk) ON DELETE CASCADE \
+        FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk) ON DELETE CASCADE, \
         FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk) ON DELETE CASCADE \
         ); \
         COMMENT ON TABLE demomod IS 'table for demo module'; \
@@ -96,16 +96,16 @@ FUNCTION void CheckTable(char *AgentARSName)
  *
  * @param InBuf Input buffer
  * @param NumBytes Number of input characters to process
- * @param OutBuf Output buffer (must be large enough to hold output)
+ * @param OutBuf Output buffer (must be large enough to hold output including null terminator)
  * @returns void
  */
 FUNCTION void Char2Hex(char *InBuf, int NumBytes, char *OutBuf) 
 {
-  int i;
+  int i,n;
   char* pbuf = OutBuf;
-  for (i=0; i<NumBytes; i++) pbuf += sprintf(pbuf, "%02X", InBuf[i]);
+  for (i=0; i<NumBytes; i++) pbuf += sprintf(pbuf, "%02X", (unsigned char)InBuf[i]);
 
-  *(pbuf + 1) = '\0';
+  *(pbuf) = '\0';
 } /* Char2Hex() */
 
 
@@ -118,14 +118,9 @@ FUNCTION void Char2Hex(char *InBuf, int NumBytes, char *OutBuf)
  */
 FUNCTION void ExitNow(int ExitVal) 
 {
-  int FlushWriteBuff = 1;  // default to flush fo_sqlCopy buffer
+  if (pgConn) PQfinish(pgConn);
 
-  if (pgConn) 
-  {
-    if (ExitVal) FlushWriteBuff = 0;  // don't bother flushing db writes if there is a non zero ExitVal (i.e. an error)
-    fo_sqlCopyDestroy(psqlcpy, FlushWriteBuff);
-    PQfinish(pgConn);
-  }
+  if (ExitVal) LOG_ERROR("Exiting with status %d", ExitVal);
 
   fo_scheduler_disconnect(ExitVal);
   exit(ExitVal);

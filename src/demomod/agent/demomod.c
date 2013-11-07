@@ -50,7 +50,6 @@ int main(int argc, char **argv)
   char *agentDesc = "demomod demonstration module";
   char *AgentARSName = "demomod_ars";
   int cmdopt;
-  int verbose = 0;
   PGresult *ars_result;
   char sqlbuf[512];
   int agent_pk = 0;
@@ -62,7 +61,6 @@ int main(int argc, char **argv)
   int ars_pk = 0;
   int Unused = 0;
   int i;
-  int UseScheduler = 0;
   FileResult_t FileResult;
 
   /* connect to the scheduler */
@@ -86,12 +84,8 @@ int main(int argc, char **argv)
     {
       case 'i': /* "Initialize" */
             ExitNow(0);
-      case 'u': /* upload_pk when run from the scheduler  */
-            UseScheduler = 1;
-            upload_pk = atoi(optarg);
-            break;
       case 'v': /* verbose output for debugging  */
-            verbose++;
+          agent_verbose++;   // global agent verbose flag.  Can be changed in running agent by the scheduler on each fo_scheduler_next() call
             break;
       case 'V': /* print version info */
             printf("%s", BuildVersion);           
@@ -103,12 +97,19 @@ int main(int argc, char **argv)
     }
   }
 
-  if (UseScheduler)
+  if (optind >= argc)  // if this is true then files weren't specified on the command line, so use the scheduler
   {
     /* make sure the demomod and demomod_ars tables exists */
     CheckTable(AgentARSName);
 
     user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
+
+    /* The following is used for debugging only!
+     * Once the user_pk is set, you can test this agent as if it were run from the scheduler by
+     *     echo 158 | ./demomod -c /usr/local/etc/fossology/
+     * where 158 is the upload_pk
+     */
+    //user_pk=2; // TODO: REMOVE THIS FROM THE PRODUCTION CODE!
 
     /* It isn't necessary to use a loop here because this agent only reads one item
      * from the scheduler, the upload_pk.  However, it is possible to queue jobs such
@@ -131,6 +132,7 @@ int main(int argc, char **argv)
         LOG_ERROR("You do not have write permission on upload %d", upload_pk);
         ExitNow(-3);
       }
+
 
       /*
        * check if demomod has already been run on this upload.
@@ -155,13 +157,16 @@ int main(int argc, char **argv)
       /* Create the sql copy structure for the demomod table.
        * The fo_sqlCopy functions are used to batch copy records into the database.  This is
        * much faster than single inserts.
-       * This creates a struct with buffer size of 100,000 bytes, and two columns
+       * This creates a struct with buffer size of 100,000 bytes, and three columns
        */
       psqlcpy = fo_sqlCopyCreate(pgConn, "demomod", 100000, 3, "pfile_fk", "agent_fk", "firstbytes" );
       if (!psqlcpy) ExitNow(-4);
 
       /* process the upload_pk */
       if(ProcessUpload(upload_pk, agent_pk) != 0) ExitNow(-5);
+
+      /* Flush the sqlCopy buffer */
+      fo_sqlCopyDestroy(psqlcpy, 1);
 
       /* Record scan success in ars table. */
       fo_WriteARS(pgConn, ars_pk, upload_pk, agent_pk, AgentARSName, 0, 1);

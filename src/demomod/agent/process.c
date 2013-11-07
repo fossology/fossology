@@ -38,6 +38,8 @@ FUNCTION int ProcessFile(char *FilePath, pFileResult_t FileResult)
   int   rv;             // generic renurn value
   FILE *fin;
 
+  LOG_VERBOSE("ProcessFile: %s",FilePath);
+
   /* Open the file */
   fin = fopen(FilePath, "r");
   if (!fin)
@@ -81,6 +83,7 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
   char  sqlbuf[1024];
   char  FileName[128];
   char  DataBuf[128];
+  char *RepoArea = "files";
   FileResult_t FileResult;
 
   /* Select each upload filename (repository filename) that hasn't been processed by this agent yet */
@@ -89,15 +92,15 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
           FROM ( SELECT distinct(pfile_fk) AS PF  FROM uploadtree \
                   WHERE upload_fk = %d and (ufile_mode&x'30000000'::int)=0 \
                ) AS SS \
-          left outer join demomod on (PF = pfile_fk and agent_fk = %d) \
+          left outer join demomod on (PF = pfile_fk ) \
           inner join pfile on (PF = pfile_pk) \
-          WHERE demomod_pk IS null or agent_fk <> %d";
+          WHERE demomod_pk IS null ";
   char* SelectFilename2_sql = "\
         SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename \
-          FROM ( SELECT distinct(pfile_fk) AS PF  FROM uploadtree \
+          FROM ( SELECT distinct(pfile_fk) AS PF  FROM %s \
                   WHERE (ufile_mode&x'30000000'::int)=0 \
                ) AS SS \
-          left outer join demomod on (PF = pfile_fk and agent_fk = %d) \
+          left outer join demomod on (PF = pfile_fk ) \
           inner join pfile on (PF = pfile_pk) \
           WHERE demomod_pk IS null or agent_fk <> %d";
 
@@ -107,7 +110,7 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
   {
     LOG_FATAL("demomod passed invalid upload, upload_pk = %d", upload_pk);
     return(-110);
-  }
+}
 
   /* If the last character of the uploadtree_tablename is a digit, then we don't need upload_fk
    * in the query (because the table only has that uplaod).
@@ -115,7 +118,7 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
   LastChar = uploadtree_tablename[strlen(uploadtree_tablename)-1];
   if (LastChar >= '0' && LastChar <= '9')
   {
-    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename2_sql, agent_fk, agent_fk);
+    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename2_sql, uploadtree_tablename, agent_fk, agent_fk);
   }
   else
   {
@@ -133,7 +136,7 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
   {
     strcpy(FileName, PQgetvalue(result, i, 1));
     pfile_pk = atoi(PQgetvalue(result, i, 0));
-    FilePath = fo_RepMkPath("files", FileName);
+    FilePath = fo_RepMkPath(RepoArea, FileName);
     if (!FilePath)
     {
       LOG_FATAL("demomod was unable to derive a file path for pfile %d.  Check your HOSTS configuration.", pfile_pk);
@@ -141,11 +144,14 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
     }
 
     rv = ProcessFile(FilePath, &FileResult);
-    if (rv == 0) fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+    if (rv == 0) 
+    {
+      fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
 
-    /* Update the database (through fo_sqlCopyAdd buffered copy, this is much faster than single inserts) */
-    snprintf(DataBuf, sizeof(DataBuf), "%d\t%d\t%s\n", pfile_pk, agent_fk, FileResult.HexStr);
-    fo_sqlCopyAdd(psqlcpy, DataBuf);
+      /* Update the database (through fo_sqlCopyAdd buffered copy, this is much faster than single inserts) */
+      snprintf(DataBuf, sizeof(DataBuf), "%d\t%d\t%s\n", pfile_pk, agent_fk, FileResult.HexStr);
+      fo_sqlCopyAdd(psqlcpy, DataBuf);
+    }
   }
   PQclear(result);
   return(0);  // success
