@@ -75,10 +75,8 @@ int main(int argc, char **argv)
   snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, SVN_REV);
   agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), Unused, agent_rev, agentDesc);
 
-  /* Verify that the user has PLUGIN_DB_ADMIN */
-
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "ivVu:c:")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "ivVc:")) != -1) 
   {
     switch (cmdopt) 
     {
@@ -177,7 +175,7 @@ int main(int argc, char **argv)
     /* loop through files on the command line */
     for (i=optind; i<argc; i++)
     {
-      if(ProcessFile(argv[i], &FileResult) != 0) ExitNow(-5);
+      if(ProcessFile(argv[i], &FileResult) != 0) ExitNow(-6);
       printf("%s: %s \n", argv[i], FileResult.HexStr);
     }
   }

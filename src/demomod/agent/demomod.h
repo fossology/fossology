@@ -42,11 +42,15 @@ struct FileResult_struct
 };
 typedef struct FileResult_struct FileResult_t, *pFileResult_t;
 
+/* File utils.c */
 void CheckTable     (char *AgentARSName);
 void ExitNow        (int ExitVal);
-void Usage          (char *Name);
 void Char2Hex       (char *InBuf, int NumBytes, char *OutBuf);
 
+/* File usage.c */
+void Usage          (char *Name);
+
+/* File process.c */
 int  ProcessUpload  (int upload_pk, int agent_fk);
 int  ProcessFile    (char *FilePath, pFileResult_t FileResult);
 
