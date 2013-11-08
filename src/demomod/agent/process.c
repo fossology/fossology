@@ -120,11 +120,11 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
   LastChar = uploadtree_tablename[strlen(uploadtree_tablename)-1];
   if (LastChar >= '0' && LastChar <= '9')
   {
-    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename2_sql, uploadtree_tablename, ufile_mode, agent_fk, agent_fk);
+    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename2_sql, uploadtree_tablename, ufile_mode, agent_fk);
   }
   else
   {
-    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename_sql, upload_pk, ufile_mode, agent_fk, agent_fk);
+    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename_sql, upload_pk, ufile_mode, agent_fk);
   }
   free(uploadtree_tablename);
 
