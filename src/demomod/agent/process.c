@@ -96,7 +96,7 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
                ) AS SS \
           left outer join demomod on (PF = pfile_fk ) \
           inner join pfile on (PF = pfile_pk) \
-          WHERE demomod_pk IS null ";
+          WHERE demomod_pk IS null or agent_fk <> %d";
   char* SelectFilename2_sql = "\
         SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename \
           FROM ( SELECT distinct(pfile_fk) AS PF  FROM %s \
