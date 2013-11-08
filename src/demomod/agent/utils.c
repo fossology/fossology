@@ -101,7 +101,7 @@ FUNCTION void CheckTable(char *AgentARSName)
  */
 FUNCTION void Char2Hex(char *InBuf, int NumBytes, char *OutBuf) 
 {
-  int i,n;
+  int i;
   char* pbuf = OutBuf;
   for (i=0; i<NumBytes; i++) pbuf += sprintf(pbuf, "%02X", (unsigned char)InBuf[i]);
 

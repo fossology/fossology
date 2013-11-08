@@ -84,13 +84,15 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
   char  FileName[128];
   char  DataBuf[128];
   char *RepoArea = "files";
+//  char  *ufile_mode = "30000000";  // This mode is for artifacts and containers (which will be excluded)
+  char  *ufile_mode = "10000000";  // This mode is for artifacts only (which will be excluded)
   FileResult_t FileResult;
 
   /* Select each upload filename (repository filename) that hasn't been processed by this agent yet */
   char* SelectFilename_sql = "\
         SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename \
           FROM ( SELECT distinct(pfile_fk) AS PF  FROM uploadtree \
-                  WHERE upload_fk = %d and (ufile_mode&x'30000000'::int)=0 \
+                  WHERE upload_fk = %d and (ufile_mode&x'%s'::int)=0 \
                ) AS SS \
           left outer join demomod on (PF = pfile_fk ) \
           inner join pfile on (PF = pfile_pk) \
@@ -98,7 +100,7 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
   char* SelectFilename2_sql = "\
         SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename \
           FROM ( SELECT distinct(pfile_fk) AS PF  FROM %s \
-                  WHERE (ufile_mode&x'30000000'::int)=0 \
+                  WHERE (ufile_mode&x'%s'::int)=0 \
                ) AS SS \
           left outer join demomod on (PF = pfile_fk ) \
           inner join pfile on (PF = pfile_pk) \
@@ -118,11 +120,11 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
   LastChar = uploadtree_tablename[strlen(uploadtree_tablename)-1];
   if (LastChar >= '0' && LastChar <= '9')
   {
-    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename2_sql, uploadtree_tablename, agent_fk, agent_fk);
+    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename2_sql, uploadtree_tablename, ufile_mode, agent_fk, agent_fk);
   }
   else
   {
-    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename_sql, upload_pk, agent_fk, agent_fk);
+    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename_sql, upload_pk, ufile_mode, agent_fk, agent_fk);
   }
   free(uploadtree_tablename);
 

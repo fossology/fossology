@@ -20,13 +20,13 @@
  * \brief browse an upload and display the demomod data (first bytes of the file)
  */
 
-define("TITLE_ui_demomod", _("Demomod Browser"));
+define("TITLE_ui_demomod", _("Demomod View"));
 
 class ui_demomod extends FO_Plugin
 {
   var $Name       = "demomod";
   var $Title      = TITLE_ui_demomod;
-  var $Dependency = array("browse","view");
+  var $Dependency = array("browse");
   var $DBaccess   = PLUGIN_DB_READ;
   var $uploadtree_tablename;
 
@@ -52,22 +52,15 @@ class ui_demomod extends FO_Plugin
   {
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
-    $MenuName = "Demomod Browser";
+    $MenuName = "Demomod View";
 
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
-    if (!empty($Item) && !empty($Upload))
+    if (!empty($Item))
     {
-      if (GetParm("mod",PARM_STRING) == $this->Name)
-      {
-        menu_insert("Browse::$MenuName",100);
-      }
-      else
-      {
-        $text = _("Demomod data");
-        menu_insert("Browse::$MenuName",100,$URI,$text);
-        menu_insert("View::$MenuName",100,$URI,$text);
-      }
+      $text = _("Demomod data");
+      menu_insert("Browse::$MenuName",100,$URI,$text);
+      menu_insert("View::$MenuName",100,$URI,$text);
     }
   } // RegisterMenus()
 
