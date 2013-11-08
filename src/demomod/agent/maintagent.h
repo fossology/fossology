@@ -26,32 +26,27 @@
 #include <ctype.h>
 #include <getopt.h>
 #include <errno.h>
+#include <time.h>
 #include <sys/types.h>
 
 #include <libfossology.h>
 #define FUNCTION
 
 #define myBUFSIZ	2048
-#define DataSize    32
-
-/* A structure to put the results of a single file scan */
-struct FileResult_struct
-{
-  char Buf[DataSize];
-  char HexStr[(DataSize * 2) + 1];
-};
-typedef struct FileResult_struct FileResult_t, *pFileResult_t;
 
 /* File utils.c */
-void CheckTable     (char *AgentARSName);
 void ExitNow        (int ExitVal);
-void Char2Hex       (char *InBuf, int NumBytes, char *OutBuf);
 
 /* File usage.c */
 void Usage          (char *Name);
 
 /* File process.c */
-int  ProcessUpload  (int upload_pk, int agent_fk);
-int  ProcessFile    (char *FilePath, pFileResult_t FileResult);
+void VacAnalyze();
+void ValidateFolders();
+void VerifyFilePerms(int fix);
+void RemoveUploads();
+void RemoveTemps();
+void ProcessExpired();
+void RemoveOrphanedFiles();
 
 #endif /* _DEMOMOD_H */

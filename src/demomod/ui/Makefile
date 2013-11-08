@@ -22,7 +22,7 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 DIR = $(realpath .)
-MOD_NAME=demomod
+MOD_NAME=maintagent
 MOD_SUBDIR=ui
 
 all: 

@@ -20,141 +20,220 @@
  * \brief Functions to process a single file and process an upload
  */
 
-#include "demomod.h"
+#include "maintagent.h"
 
 /**********  Globals  *************/
-extern psqlCopy_t psqlcpy;       // fo_sqlCopy struct used for fast data insertion
 extern PGconn    *pgConn;        // database connection
 
-/**
- * @brief Process a single file - read the first 32 bytes 
- * @param FilePath Path of the file to read.
- * @param FileResult Structure to save the file result (32 bytes)
- *
- * @returns 0 if success, may also write fatal error to stderr.
- */
-FUNCTION int ProcessFile(char *FilePath, pFileResult_t FileResult) 
-{
-  int   rv;             // generic renurn value
-  FILE *fin;
-
-  LOG_VERBOSE("ProcessFile: %s",FilePath);
-
-  /* Open the file */
-  fin = fopen(FilePath, "r");
-  if (!fin)
-  {
-    LOG_ERROR("FATAL: %s.%s.%d Failure to open file %s.\nError: %s\n",
-               __FILE__, "ProcessFile()", __LINE__, FilePath, strerror(errno));
-    return -1;
-  }
-
-  /* Read the first buffer's worth from the file, ignoring errors to simplify the demo */
-  rv = fread(FileResult->Buf, sizeof(char), sizeof(FileResult->Buf), fin);
-
-  /* Convert to a hex string and save in the FileResult */
-  Char2Hex(FileResult->Buf, DataSize, FileResult->HexStr);
-
-  /* Close the file */
-  fclose(fin);
-
-  /* Return Success */
-  return 0;
-}
-
 
 /**
- * @brief Process a single upload - read the first 32 bytes in each file
- * @param upload_pk
- * @param agent_fk version of the agent that is processing this upload
+ * @brief Do database vacuum and analyze
  *
- * @returns 0 if success, may also write fatal error to stderr.
+ * @returns void but writes status to LOG_NOTICE
  */
-FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
+FUNCTION void VacAnalyze()
 {
   PGresult* result; // the result of the database access
-  int i;
-  int rv;             // generic return value
-  int numrows;             // generic return value
-  int pfile_pk;
-  char *FilePath;   // complete path to file in the repository
-  char *uploadtree_tablename;
-  char  LastChar;
-  char  sqlbuf[1024];
-  char  FileName[128];
-  char  DataBuf[128];
-  char *RepoArea = "files";
-//  char  *ufile_mode = "30000000";  // This mode is for artifacts and containers (which will be excluded)
-  char  *ufile_mode = "10000000";  // This mode is for artifacts only (which will be excluded)
-  FileResult_t FileResult;
+  long StartTime, EndTime;
+  char *sql="vacuum analyze";
 
-  /* Select each upload filename (repository filename) that hasn't been processed by this agent yet */
-  char* SelectFilename_sql = "\
-        SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename \
-          FROM ( SELECT distinct(pfile_fk) AS PF  FROM uploadtree \
-                  WHERE upload_fk = %d and (ufile_mode&x'%s'::int)=0 \
-               ) AS SS \
-          left outer join demomod on (PF = pfile_fk ) \
-          inner join pfile on (PF = pfile_pk) \
-          WHERE demomod_pk IS null or agent_fk <> %d";
-  char* SelectFilename2_sql = "\
-        SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename \
-          FROM ( SELECT distinct(pfile_fk) AS PF  FROM %s \
-                  WHERE (ufile_mode&x'%s'::int)=0 \
-               ) AS SS \
-          left outer join demomod on (PF = pfile_fk ) \
-          inner join pfile on (PF = pfile_pk) \
-          WHERE demomod_pk IS null or agent_fk <> %d";
+  StartTime = (long)time(0);
 
-  /* Find the correct uploadtree table name */
-  uploadtree_tablename = GetUploadtreeTableName(pgConn, upload_pk);
-  if (!uploadtree_tablename)
-  {
-    LOG_FATAL("demomod passed invalid upload, upload_pk = %d", upload_pk);
-    return(-110);
+  /* Vacuume and Analyze */
+  result = PQexec(pgConn, sql);
+  if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) ExitNow(-102);
+  PQclear(result);
+
+  EndTime = (long)time(0);
+  printf("Vacuum Analyze took %ld seconds\n", EndTime-StartTime);
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
 }
 
-  /* If the last character of the uploadtree_tablename is a digit, then we don't need upload_fk
-   * in the query (because the table only has that uplaod).
-   */
-  LastChar = uploadtree_tablename[strlen(uploadtree_tablename)-1];
-  if (LastChar >= '0' && LastChar <= '9')
-  {
-    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename2_sql, uploadtree_tablename, ufile_mode, agent_fk);
-  }
-  else
-  {
-    snprintf(sqlbuf, sizeof(sqlbuf), SelectFilename_sql, upload_pk, ufile_mode, agent_fk);
-  }
-  free(uploadtree_tablename);
 
-  /* retrieve the records to process */
-  result = PQexec(pgConn, sqlbuf);
-  if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) ExitNow(-100);
-  numrows = PQntuples(result);
+/**
+ * @brief Validate folder and foldercontents tables
+ *
+ * @returns void but writes status to LOG_NOTICE
+ */
+FUNCTION void ValidateFolders()
+{
+  PGresult* result; // the result of the database access
+  char *StatStr;
+  char *InvalidUploadRefs="DELETE FROM foldercontents WHERE foldercontents_mode = 2 AND child_id NOT IN (SELECT upload_pk FROM upload)";
+  char *InvalidUploadtreeRefs="DELETE FROM foldercontents WHERE foldercontents_mode = 4 AND child_id NOT IN (SELECT uploadtree_pk FROM uploadtree)";
+  char *UnrefFolders="DELETE FROM folder WHERE folder_pk \
+   NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1) AND folder_pk != '1'";
+  long StartTime, EndTime;
 
-  /* process all files in this upload */
-  for (i=0; i<numrows; i++)
-  {
-    strcpy(FileName, PQgetvalue(result, i, 1));
-    pfile_pk = atoi(PQgetvalue(result, i, 0));
-    FilePath = fo_RepMkPath(RepoArea, FileName);
-    if (!FilePath)
-    {
-      LOG_FATAL("demomod was unable to derive a file path for pfile %d.  Check your HOSTS configuration.", pfile_pk);
-      return(-111);
-    }
+  StartTime = (long)time(0);
 
-    rv = ProcessFile(FilePath, &FileResult);
-    if (rv == 0) 
-    {
-      fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-
-      /* Update the database (through fo_sqlCopyAdd buffered copy, this is much faster than single inserts) */
-      snprintf(DataBuf, sizeof(DataBuf), "%d\t%d\t%s\n", pfile_pk, agent_fk, FileResult.HexStr);
-      fo_sqlCopyAdd(psqlcpy, DataBuf);
-    }
-  }
+  /* Remove folder contents with invalid upload references */
+  result = PQexec(pgConn, InvalidUploadRefs);
+  if (fo_checkPQcommand(pgConn, result, InvalidUploadRefs, __FILE__, __LINE__)) ExitNow(-100);
+  StatStr = PQcmdTuples(result);
   PQclear(result);
-  return(0);  // success
+  printf("%s Invalid folder upload References\n", StatStr);
+
+  /* Remove folder contents with invalid uploadtree references */
+  result = PQexec(pgConn, InvalidUploadtreeRefs);
+  if (fo_checkPQcommand(pgConn, result, InvalidUploadtreeRefs, __FILE__, __LINE__)) ExitNow(-101);
+  StatStr = PQcmdTuples(result);
+  PQclear(result);
+  printf("%s Invalid folder uploadtree References\n", StatStr);
+
+  /* Remove unreferenced folders */
+  result = PQexec(pgConn, UnrefFolders);
+  if (fo_checkPQcommand(pgConn, result, UnrefFolders, __FILE__, __LINE__)) ExitNow(-102);
+  StatStr = PQcmdTuples(result);
+  PQclear(result);
+  printf("%s unreferenced folders\n", StatStr);
+
+  EndTime = (long)time(0);
+  printf("Validate folders took %ld seconds\n", EndTime-StartTime);
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
+}
+
+
+/**
+ * @brief Verify and optionally fix file permissions
+ *
+ * @param fix 0 to report bad permissions, 1 to report and fix them
+ * @returns void but writes status to LOG_NOTICE
+ */
+FUNCTION void VerifyFilePerms(int fix)
+{
+  long StartTime, EndTime;
+
+  StartTime = (long)time(0);
+
+LOG_NOTICE("Verify File Permissions is not implemented yet");
+
+  EndTime = (long)time(0);
+  printf("Verify File Permissions took %ld seconds\n", EndTime-StartTime);
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
+}
+
+
+/**
+ * @brief Remove Uploads with no pfiles
+ *
+ * @returns void but writes status to LOG_NOTICE
+ */
+FUNCTION void RemoveUploads()
+{
+//  PGresult* result; // the result of the database access
+//  int numrows;             // generic return value
+  long StartTime, EndTime;
+//  char *sql="vacuum analyze";
+
+  StartTime = (long)time(0);
+
+/*
+  result = PQexec(pgConn, sql);
+  if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) ExitNow(-102);
+  PQclear(result);
+*/
+LOG_NOTICE("Remove uploads with no pfiles is not implemented yet");
+
+  EndTime = (long)time(0);
+  printf("Remove uploads with no pfiles took %ld seconds\n", EndTime-StartTime);
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
+}
+
+
+/**
+ * @brief Remove orphaned temp files
+ *
+ * @returns void but writes status to LOG_NOTICE
+ */
+FUNCTION void RemoveTemps()
+{
+//  PGresult* result; // the result of the database access
+//  int numrows;             // generic return value
+  long StartTime, EndTime;
+//  char *sql="vacuum analyze";
+
+  StartTime = (long)time(0);
+
+  /* Vacuume and Analyze */
+/*
+  result = PQexec(pgConn, VacAnalyze);
+  if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) ExitNow(-102);
+  PQclear(result);
+*/
+LOG_NOTICE("Remove orphaned temp files is not implemented yet");
+
+  EndTime = (long)time(0);
+  printf("Remove orphaned temp files took %ld seconds\n", EndTime-StartTime);
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
+}
+
+
+/**
+ * @brief Process expired uploads (slow)
+ *
+ * @returns void but writes status to LOG_NOTICE
+ */
+FUNCTION void ProcessExpired()
+{
+//  PGresult* result; // the result of the database access
+//  int numrows;             // generic return value
+  long StartTime, EndTime;
+//  char *sql="vacuum analyze";
+
+  StartTime = (long)time(0);
+
+  /* Vacuume and Analyze */
+/*
+  result = PQexec(pgConn, VacAnalyze);
+  if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) ExitNow(-102);
+  PQclear(result);
+*/
+LOG_NOTICE("Process expired uploads is not implemented yet");
+
+  EndTime = (long)time(0);
+  printf("Process expired uploads took %ld seconds\n", EndTime-StartTime);
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
+}
+
+
+/**
+ * @brief Remove orphaned files from the repository (slow)
+ *
+ * @returns void but writes status to LOG_NOTICE
+ */
+FUNCTION void RemoveOrphanedFiles()
+{
+//  PGresult* result; // the result of the database access
+//  int numrows;             // generic return value
+  long StartTime, EndTime;
+//  char *sql="vacuum analyze";
+
+  StartTime = (long)time(0);
+
+  /* Vacuume and Analyze */
+/*
+  result = PQexec(pgConn, VacAnalyze);
+  if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) ExitNow(-102);
+  PQclear(result);
+*/
+LOG_NOTICE("Remove orphaned files from the repository is not implemented yet");
+
+  EndTime = (long)time(0);
+  printf("Remove orphaned files from the repository took %ld seconds\n", EndTime-StartTime);
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
 }

@@ -21,15 +21,15 @@ include $(VARS)
 DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
 CFLAGS_LOCAL= $(DEF) $(ALL_CFLAGS) $(DEFS) 
 
-EXE=demomod
+EXE=maintagent
 OBJS=usage.o utils.o process.o
-HDRS=demomod.h
+HDRS=maintagent.h
 
 all: $(EXE)
-	@echo "make demomod agent"
+	@echo "make maintagent agent"
 
-$(EXE): demomod.c $(FOLIB) $(OBJS) $(HDRS)
-	$(CC) demomod.c $(OBJS) -lpq $(CFLAGS_LOCAL) -o $@
+$(EXE): maintagent.c $(FOLIB) $(OBJS) $(HDRS)
+	$(CC) maintagent.c $(OBJS) -lpq $(CFLAGS_LOCAL) -o $@
 
 usage.o: $(HDRS) usage.c
 	$(CC) -c $(CFLAGS_LOCAL) usage.c
@@ -44,11 +44,11 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
-	@echo "make demomod  agent install"
+	@echo "make maintagent  agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make demomod  agent uninstall"
+	@echo "make maintagent  agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:

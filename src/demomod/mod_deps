@@ -15,10 +15,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #########################################################
-# There are no module specific dependencies for demomod
+# There are no module specific dependencies for this module
 # so this script does nothing.
 # Since it does nothing, this script doesn't even need to exist, but
-# it is here as a placeholder in case your module does have
+# it is here as a placeholder in case this module does have
 # module specific install dependencies.  If that is the case, this would
 # be a bash (or other) script.  See src/pkgagent/mod_deps for an example.
 #########################################################

@@ -17,20 +17,20 @@
 ***********************************************************/
 
 /**
- * \file agent-demomod.php
- * \brief run the demomod agent
+ * \file agent-maintagent.php
+ * \brief run the maintenance agent agent
  */
 
-define("TITLE_agent_demomod", _("Demomod scanner"));
+define("TITLE_agent_maintagent", _("Maintenance agent"));
 
-class agent_demomod extends FO_Plugin {
+class agent_maintagent extends FO_Plugin {
 
   public $Name = "agent_nomos";
-  public $Title = TITLE_agent_demomod;
+  public $Title = TITLE_agent_maintagent;
   public $Version = "1.0";
   public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_WRITE;
-  public $AgentName = "demomod";   // agent.agent_name
+  public $DBaccess = PLUGIN_DB_ADMIN;
+  public $AgentName = "maintagent";   // agent.agent_name
 
 
   /**
@@ -44,23 +44,7 @@ class agent_demomod extends FO_Plugin {
 
 
   /**
-   * \brief Check if the upload has already been successfully scanned.
-   *
-   * \param $upload_pk
-   *
-   * \returns:
-   * - 0 = no
-   * - 1 = yes, from latest agent version
-   * - 2 = yes, from older agent version 
-   **/
-  function AgentHasResults($upload_pk)
-  {
-    return CheckARS($upload_pk, $this->AgentName, "demonstration module scanner", "demomod_ars");
-  } // AgentHasResults()
-
-
-  /**
-   * \brief Queue the demomod agent.
+   * \brief Queue the maintagent agent.
    *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
    *  - It is already queued
    *  - It has already been run by the latest agent version
@@ -78,10 +62,10 @@ class agent_demomod extends FO_Plugin {
    **/
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
   {
-    $Dependencies[] = "agent_adj2nest";
+    $Dependencies[] = "";
     return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
   } // AgentAdd()
 }
 
-$NewPlugin = new agent_demomod;
+$NewPlugin = new agent_maintagent;
 ?>

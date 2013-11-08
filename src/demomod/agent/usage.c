@@ -17,18 +17,28 @@
  ***************************************************************/
 /**
  * \file usage.c
- * \brief Print agent usage statement
+ * \brief Maintenance agent validation, and usage functions
  */
 
-#include "demomod.h"
+#include "maintagent.h"
 
 FUNCTION void Usage(char *Name) 
 {
-  printf("Usage: %s [options] file1 file2 ...\n", Name);
+  printf("Usage: %s [options]\n", Name);
+  printf("  -a   :: Run all non slow maintenance operations.\n");
+  printf("  -A   :: Run all maintenance operations.\n");
+  printf("  -D   :: Vacuum Analyze the database (slow).\n");
+  printf("  -F   :: Validate folder contents.\n");
+  printf("  -p   :: Verify file permissions (report only).\n");
+  printf("  -P   :: Verify and fix file permissions.\n");
+  printf("  -R   :: Remove uploads with no pfiles.\n");
+  printf("  -T   :: Remove orphaned temp tables.\n");
+  printf("  -U   :: Process expired uploads (slow).\n");
+  printf("  -Z   :: Remove orphaned files from the repository (slow).\n");
   printf("  -i   :: Initialize the database, then exit.\n");
   printf("  -v   :: verbose (turns on debugging output)\n");
   printf("  -V   :: print the version info, then exit.\n");
-  printf("  -c SYSCONFDIR :: System Config directory (used by testing system). \n");
+  printf("  -c SYSCONFDIR :: Specify the directory for the system configuration. \n");
 } /* Usage() */
 
 
