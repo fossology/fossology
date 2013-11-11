@@ -1,0 +1,7 @@
+demomod is a working demonstration FOSSology module.  All you have to do is a make, sudo make install,
+and link this directory in your fossology/mods-enabled/ 
+
+If you are writing a module for the first time, study this.  You can also use it as a template for 
+writing a new module.  Just duplicate the demomod directory tree for your new module.  That will give
+you the file structure as well as the basic code for the agent and UI. Then go through the code
+substituting the demo functionality for your code.
