@@ -1108,7 +1108,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     /*
      * Affero
      */
-    if (INFILE(_PHR_AFFERO)) {
+    if (INFILE(_PHR_AFFERO) && !INFILE(_LT_GPL3ref3)) {
       if (INFILE(_LT_AFFERO1) || INFILE(_LT_AFFERO2) ||
           INFILE(_LT_AFFERO3)) {
         cp = AGPLVERS();

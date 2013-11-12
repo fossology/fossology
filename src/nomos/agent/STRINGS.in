@@ -2452,7 +2452,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_GPL3ref3
 %KEY%	"licen[cs]"
-%STR%	"this license refers to version 3 of the GNU general public license"
+%STR%	"this license =FEW= refers to version 3 of the =FEW= GNU =FEW= general public license"
 #
 %ENTRY%	_LT_GPL_OR
 %NOCHECK%
