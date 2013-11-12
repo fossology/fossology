@@ -66,6 +66,7 @@ int main(int argc, char **argv)
           VerifyFilePerms(1);
           RemoveUploads();
           RemoveTemps();
+          VacAnalyze();
           break;
       case 'A': /* All operations */
           ValidateFolders();

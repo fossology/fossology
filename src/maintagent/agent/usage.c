@@ -27,7 +27,7 @@ FUNCTION void Usage(char *Name)
   printf("Usage: %s [options]\n", Name);
   printf("  -a   :: Run all non slow maintenance operations.\n");
   printf("  -A   :: Run all maintenance operations.\n");
-  printf("  -D   :: Vacuum Analyze the database (slow).\n");
+  printf("  -D   :: Vacuum Analyze the database.\n");
   printf("  -F   :: Validate folder contents.\n");
   printf("  -p   :: Verify file permissions (report only).\n");
   printf("  -P   :: Verify and fix file permissions.\n");
