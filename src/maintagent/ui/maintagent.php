@@ -53,8 +53,12 @@ class maintagent extends FO_Plugin {
     $job_pk = JobAddJob($user_pk, "Maintenance", $upload_pk);
     if (empty($job_pk) || ($job_pk < 0)) return _("Failed to insert job record");
     
-    $jq_pk = JobQueueAdd($job_pk, "maintagent", $options, NULL, NULL);
+    $jq_pk = JobQueueAdd($job_pk, "maintagent", NULL, NULL, NULL, NULL, $options);
     if (empty($jq_pk)) return _("Failed to insert task 'Maintenance' into job queue");
+
+    /* Tell the scheduler to check the queue. */
+    $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
+    if (!$success) return($error_msg . "\n" . $output);
 
     return _("The maintenance job has been queued");
   }
@@ -118,7 +122,8 @@ class maintagent extends FO_Plugin {
 
     if (!empty($queue))
     {
-      $V .= $this->QueueJob();
+      $Msg = $this->QueueJob();
+      $V .= "<font style='background-color:gold'>" . $Msg . "</font>";
     }
     
     $V .= $this->DisplayForm();

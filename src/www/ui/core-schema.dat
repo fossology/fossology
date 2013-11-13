@@ -777,6 +777,11 @@
   $Schema["TABLE"]["jobqueue"]["jq_host"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_host\" DROP NOT NULL;";
   $Schema["TABLE"]["jobqueue"]["jq_host"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["jobqueue"]["jq_cmd_args"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_cmd_args\" IS 'command line arguments, i.e. \"-ab -u 123 -c /my/dir\"';";
+  $Schema["TABLE"]["jobqueue"]["jq_cmd_args"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_cmd_args\" varchar(1024);";
+  $Schema["TABLE"]["jobqueue"]["jq_cmd_args"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_cmd_args\" DROP NOT NULL;";
+  $Schema["TABLE"]["jobqueue"]["jq_cmd_args"]["UPDATE"] = "";
+
 
   $Schema["TABLE"]["key"]["key_pk"]["DESC"] = "";
   $Schema["TABLE"]["key"]["key_pk"]["ADD"] = "ALTER TABLE \"key\" ADD COLUMN \"key_pk\" int4;";

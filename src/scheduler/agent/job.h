@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -69,7 +69,8 @@ typedef struct
 
     /* information for data manipluation */
     job_status status;    ///< the current status for the job
-    gchar*     data;      ///< the data associated with this job
+    gchar*     data;      ///< the data associated with this job (jq_args)
+    gchar     *jq_cmd_args; ///< command line arguments for this job
     PGresult*  db_result; ///< results from the sql query (if any)
     GMutex*    lock;      ///< lock to maintain data integrity
     uint32_t   idx;       ///< the current index into the sql results
@@ -87,7 +88,7 @@ typedef struct
 /* ************************************************************************** */
 
 job_t* job_init(GTree* job_list, GSequence* job_queue, char* type, char* host,
-    int id, int user_id, int priority);
+    int id, int user_id, int priority, char *jq_cmd_args);
 void   job_destroy(job_t* job);
 
 /* ************************************************************************** */

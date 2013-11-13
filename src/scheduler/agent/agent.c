@@ -233,13 +233,14 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
 
   GList*  iter;
   host_t* host;
+  char   *jq_cmd_args = 0;
 
   for(iter = scheduler->host_queue; iter != NULL; iter = iter->next)
   {
     host = (host_t*)iter->data;
     V_AGENT("META_AGENT[%s] testing on HOST[%s]\n", ma->name, host->name);
     job_t* job = job_init(scheduler->job_list, scheduler->job_queue, ma->name,
-        host->name, id_gen--, 0, 0);
+        host->name, id_gen--, 0, 0, jq_cmd_args);
     agent_init(scheduler, host, job);
   }
 
@@ -542,6 +543,7 @@ static void shell_parse(
     char* confdir,
     int32_t userid,
     char* input,
+    char *jq_cmd_args,
     int* argc,
     char*** argv)
 {
@@ -583,16 +585,17 @@ static void shell_parse(
   (*argv)[idx++] = g_strdup_printf("--config=%s", confdir);
   (*argv)[idx++] = g_strdup_printf("--userID=%d", userid);
   (*argv)[idx++] = "--scheduler_start";
+  if (jq_cmd_args) (*argv)[idx++] = jq_cmd_args;
   (*argc) = idx;
 }
 
 /**
- * structure used to pass 2 things to the agent_spawn() function. The function
- * needs both an argument to the scheduler_t structure and agent_t strcture.
+ * For the agent_spawn() function.
  */
 typedef struct {
     scheduler_t* scheduler;
     agent_t* agent;
+    job_t *job;
 } agent_spawn_args;
 
 /**
@@ -618,6 +621,7 @@ static void* agent_spawn(agent_spawn_args* pass)
   /* locals */
   scheduler_t* scheduler = pass->scheduler;
   agent_t*     agent     = pass->agent;
+  job_t       *job       = pass->job;
   gchar* tmp;                 // pointer to temporary string
   gchar** args;               // the arguments that will be passed to the child
   int argc;                   // the number of arguments parsed
@@ -646,12 +650,12 @@ static void* agent_spawn(agent_spawn_args* pass)
       ERROR("unable to correctly set priority of agent process %d", agent->pid);
 
     /* if host is null, the agent will run locally to */
-    /* run the agent localy, use the commands that    */
+    /* run the agent locally, use the commands that    */
     /* were parsed when the meta_agent was created    */
     if(strcmp(agent->host->address, LOCAL_HOST) == 0)
     {
       shell_parse(scheduler->sysconfigdir, agent->owner->user_id,
-          agent->type->raw_cmd, &argc, &args);
+          agent->type->raw_cmd, job->jq_cmd_args, &argc, &args);
 
       tmp = args[0];
       args[0] = g_strdup_printf(AGENT_BINARY,
@@ -675,7 +679,7 @@ static void* agent_spawn(agent_spawn_args* pass)
     /* command as the last argument to the ssh command */
     else
     {
-      args = g_new0(char*, 4);
+      args = g_new0(char*, 5);
       len = snprintf(buffer, sizeof(buffer), AGENT_BINARY,
           agent->host->agent_dir,
           AGENT_CONF,
@@ -686,7 +690,8 @@ static void* agent_spawn(agent_spawn_args* pass)
       args[0] = "/usr/bin/ssh";
       args[1] = agent->host->address;
       args[2] = buffer;
-      args[3] = NULL;
+      args[3] = job->jq_cmd_args;
+      args[4] = NULL;
       execv(args[0], args);
     }
 
@@ -876,6 +881,7 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   pass = g_new0(agent_spawn_args, 1);
   pass->scheduler = scheduler;
   pass->agent = agent;
+  pass->job = job;
 
 #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
   agent->thread = g_thread_new(agent->type->name, (GThreadFunc)agent_spawn, pass);

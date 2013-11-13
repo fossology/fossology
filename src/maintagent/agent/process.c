@@ -35,7 +35,7 @@ FUNCTION void VacAnalyze()
 {
   PGresult* result; // the result of the database access
   long StartTime, EndTime;
-  char *sql="vacuum analyze";
+  char *sql="vacuum analyze ";
 
   StartTime = (long)time(0);
 

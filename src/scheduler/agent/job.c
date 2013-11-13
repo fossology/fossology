@@ -156,10 +156,11 @@ static gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data)
  * @param id         the id number for the job in the database
  * @param user_id    the id of the user that created the job
  * @param priority   the priority of the job, this is just a linux process priority
+ * @param jq_cmd_args command line arguments
  * @return the new job
  */
 job_t* job_init(GTree* job_list, GSequence* job_queue,
-    char* type, char* host, int id, int user_id, int priority)
+    char* type, char* host, int id, int user_id, int priority, char *jq_cmd_args)
 {
   job_t* job = g_new0(job_t, 1);
 
@@ -179,6 +180,7 @@ job_t* job_init(GTree* job_list, GSequence* job_queue,
   job->verbose         = 0;
   job->id              = id;
   job->user_id         = user_id;
+  job->jq_cmd_args     = g_strdup(jq_cmd_args);
 
   g_tree_insert(job_list, &job->id, job);
   if(id >= 0) g_sequence_insert_sorted(job_queue, job, job_compare, NULL);
@@ -217,6 +219,7 @@ void job_destroy(job_t* job)
   g_free(job->agent_type);
   g_free(job->required_host);
   g_free(job->data);
+  if (job->jq_cmd_args) g_free(job->jq_cmd_args);
   g_free(job);
 }
 

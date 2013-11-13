@@ -184,11 +184,12 @@ function JobAddJob($user_pk, $job_name, $upload_pk=0, $priority=0)
  * $jq_args="folder_pk='$Folder' name='$Name' description='$Desc' ...";
  * @param string $jq_runonpfile column name
  * @param array  $Depends array of jq_pk's this jobqueue is dependent on.
+ * @param string $jq_cmd_args  command line arguments
  *
  * @return new jobqueue key (jobqueue.jq_pk), or null on failure
  *
  */
-function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $host = NULL)
+function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $host = NULL, $jq_cmd_args=NULL)
 {
   global $PG_CONN;
   $jq_args = pg_escape_string($jq_args);
@@ -217,7 +218,7 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
 
   /* Add the job */
   $sql = "INSERT INTO jobqueue ";
-  $sql.= "(jq_job_fk,jq_type,jq_args,jq_runonpfile,jq_starttime,jq_endtime,jq_end_bits,jq_host) VALUES ";
+  $sql.= "(jq_job_fk,jq_type,jq_args,jq_runonpfile,jq_starttime,jq_endtime,jq_end_bits,jq_host,jq_cmd_args) VALUES ";
   $sql.= "('$job_pk','$jq_type','$jq_args',";
   if (empty($jq_runonpfile))
     $sql.= "NULL";
@@ -225,7 +226,11 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
     $sql.= "'$jq_runonpfile'";
   $sql.= ",NULL,NULL,0,";
   if ($host)
-    $sql.="'$host');";
+    $sql.="'$host',";
+  else
+    $sql.="NULL,";
+  if ($jq_cmd_args)
+    $sql.="'$jq_cmd_args');";
   else
     $sql.="NULL);";
 

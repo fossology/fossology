@@ -740,7 +740,7 @@ void database_update_event(scheduler_t* scheduler, void* unused)
   PGresult* pri_result;
   int i, j_id;
   char sql[512];
-  char* value, * type, * host, * pfile, * parent;
+  char* value, * type, * host, * pfile, * parent, *jq_cmd_args;
   job_t* job;
 
   if(closing)
@@ -772,13 +772,14 @@ void database_update_event(scheduler_t* scheduler, void* unused)
     type   =      PQget(db_result, i, "jq_type");
     pfile  =      PQget(db_result, i, "jq_runonpfile");
     value  =      PQget(db_result, i, "jq_args");
+    jq_cmd_args  =PQget(db_result, i, "jq_cmd_args");
 
     if(host != NULL)
       host = (strlen(host) == 0) ? NULL : host;
 
     V_DATABASE("DB: jq_pk[%d] added:\n   jq_type = %s\n   jq_host = %s\n   "
-        "jq_runonpfile = %d\n   jq_args = %s\n",
-        j_id, type, host, (pfile != NULL && pfile[0] != '\0'), value);
+        "jq_runonpfile = %d\n   jq_args = %s\n  jq_cmd_args = %s\n",
+        j_id, type, host, (pfile != NULL && pfile[0] != '\0'), value, jq_cmd_args);
 
     /* check if this is a command */
     if(strcmp(type, "command") == 0)
@@ -803,7 +804,7 @@ void database_update_event(scheduler_t* scheduler, void* unused)
     }
     job = job_init(scheduler->job_list, scheduler->job_queue, type, host, j_id,
         atoi(PQget(pri_result, 0, "user_pk")),
-        atoi(PQget(pri_result, 0, "job_priority")));
+        atoi(PQget(pri_result, 0, "job_priority")), jq_cmd_args);
     job_set_data(scheduler, job,  value, (pfile && pfile[0] != '\0'));
 
     PQclear(pri_result);
