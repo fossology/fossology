@@ -327,10 +327,16 @@ if (!empty($Row["job_upload_fk"]))
   function GetDeletedJobs($upload_pk= "")
   {
     global $PG_CONN;
+    $allusers = GetParm("allusers",PARM_INTEGER);
+
+    if ($allusers == 0)
+      $allusers_str = "job_user_fk='$_SESSION[UserId]' and ";
+    else
+      $allusers_str = "";
 
     $DeletedJobArray = array();
     if (empty($upload_pk))
-      $sql = "select job.*, D.job_pk AS deleted_job_pk from job, (select job_pk,job_upload_fk from job where job_name = 'Delete') D where job_user_fk='$_SESSION[UserId]' and job_queued >= (now() - interval '$this->nhours hours') and job.job_upload_fk=D.job_upload_fk and job_name != 'Delete' order by job_queued desc";
+      $sql = "select job.*, D.job_pk AS deleted_job_pk from job, (select job_pk,job_upload_fk from job where job_name = 'Delete') D where $allusers_str job_queued >= (now() - interval '$this->nhours hours') and job.job_upload_fk=D.job_upload_fk and job_name != 'Delete' order by job_queued desc";
     else
       $sql = "select job.*, D.job_pk AS deleted_job_pk from job, (select job_pk,job_upload_fk from job where job_name = 'Delete') D where job.job_upload_fk = '$upload_pk' and job.job_upload_fk=D.job_upload_fk and job_name != 'Delete' order by job_queued desc";
     $result = pg_query($PG_CONN, $sql);
@@ -564,7 +570,10 @@ if (!empty($Row["job_upload_fk"]))
               $UserName = "&nbsp;&nbsp;&nbsp;($UserRec[user_name])";
             }
             else
-              $UserName = "Deleted";
+            {
+              $UserRec = GetSingleRec("users", "where user_pk={$Job['job']['job_user_fk']}");
+              $UserName = "&nbsp;&nbsp;&nbsp;($UserRec[user_name])";
+            }
           }
 
           $OutBuf .= $UploadName . $UserName;
