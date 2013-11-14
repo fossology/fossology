@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <time.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <libfossology.h>
 #define FUNCTION

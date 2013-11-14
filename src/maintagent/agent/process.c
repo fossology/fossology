@@ -29,7 +29,7 @@ extern PGconn    *pgConn;        // database connection
 /**
  * @brief Do database vacuum and analyze
  *
- * @returns void but writes status to LOG_NOTICE
+ * @returns void but writes status to stdout
  */
 FUNCTION void VacAnalyze()
 {
@@ -39,9 +39,9 @@ FUNCTION void VacAnalyze()
 
   StartTime = (long)time(0);
 
-  /* Vacuume and Analyze */
+  /* Vacuum and Analyze */
   result = PQexec(pgConn, sql);
-  if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) ExitNow(-102);
+  if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) ExitNow(-110);
   PQclear(result);
 
   EndTime = (long)time(0);
@@ -55,7 +55,7 @@ FUNCTION void VacAnalyze()
 /**
  * @brief Validate folder and foldercontents tables
  *
- * @returns void but writes status to LOG_NOTICE
+ * @returns void but writes status to stdout
  */
 FUNCTION void ValidateFolders()
 {
@@ -71,21 +71,21 @@ FUNCTION void ValidateFolders()
 
   /* Remove folder contents with invalid upload references */
   result = PQexec(pgConn, InvalidUploadRefs);
-  if (fo_checkPQcommand(pgConn, result, InvalidUploadRefs, __FILE__, __LINE__)) ExitNow(-100);
+  if (fo_checkPQcommand(pgConn, result, InvalidUploadRefs, __FILE__, __LINE__)) ExitNow(-120);
   StatStr = PQcmdTuples(result);
   PQclear(result);
   printf("%s Invalid folder upload References\n", StatStr);
 
   /* Remove folder contents with invalid uploadtree references */
   result = PQexec(pgConn, InvalidUploadtreeRefs);
-  if (fo_checkPQcommand(pgConn, result, InvalidUploadtreeRefs, __FILE__, __LINE__)) ExitNow(-101);
+  if (fo_checkPQcommand(pgConn, result, InvalidUploadtreeRefs, __FILE__, __LINE__)) ExitNow(-121);
   StatStr = PQcmdTuples(result);
   PQclear(result);
   printf("%s Invalid folder uploadtree References\n", StatStr);
 
   /* Remove unreferenced folders */
   result = PQexec(pgConn, UnrefFolders);
-  if (fo_checkPQcommand(pgConn, result, UnrefFolders, __FILE__, __LINE__)) ExitNow(-102);
+  if (fo_checkPQcommand(pgConn, result, UnrefFolders, __FILE__, __LINE__)) ExitNow(-122);
   StatStr = PQcmdTuples(result);
   PQclear(result);
   printf("%s unreferenced folders\n", StatStr);
@@ -100,20 +100,32 @@ FUNCTION void ValidateFolders()
 
 /**
  * @brief Verify and optionally fix file permissions
+ /usr/share/fossology drwxr-sr-x 15 fossy fossy
+ /srv/repostitory 
+ path  /srv/fossology/repository drwxrws--- 3 fossy fossy
+ /etc/fossology drwxr-sr-x 4 fossy fossy
+ /usr/local/lib/fossology/ drwxr-sr-x 2 fossy fossy
  *
  * @param fix 0 to report bad permissions, 1 to report and fix them
- * @returns void but writes status to LOG_NOTICE
+ * @returns void but writes status to stdout
  */
 FUNCTION void VerifyFilePerms(int fix)
 {
+/*
   long StartTime, EndTime;
+  char *RepoPath;
 
   StartTime = (long)time(0);
 
-LOG_NOTICE("Verify File Permissions is not implemented yet");
+  RepoPath = fo_sysconfig("FOSSOLOGY", "path");
+  if (stat(RepoPath, &statbuf) == -1)
+  {
+  }
 
   EndTime = (long)time(0);
   printf("Verify File Permissions took %ld seconds\n", EndTime-StartTime);
+*/
+LOG_NOTICE("Verify file permissions is not implemented yet");
 
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success
@@ -123,26 +135,25 @@ LOG_NOTICE("Verify File Permissions is not implemented yet");
 /**
  * @brief Remove Uploads with no pfiles
  *
- * @returns void but writes status to LOG_NOTICE
+ * @returns void but writes status to stdout
  */
 FUNCTION void RemoveUploads()
 {
-//  PGresult* result; // the result of the database access
-//  int numrows;             // generic return value
+  PGresult* result; // the result of the database access
   long StartTime, EndTime;
-//  char *sql="vacuum analyze";
+  char *StatStr;
+  char *sql="DELETE FROM upload WHERE upload_pk  \
+    IN (SELECT upload_fk FROM uploadtree WHERE parent IS NULL AND pfile_fk IS NULL)  \
+      OR upload_pk NOT IN (SELECT upload_fk FROM uploadtree)";
 
   StartTime = (long)time(0);
 
-/*
   result = PQexec(pgConn, sql);
-  if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) ExitNow(-102);
+  if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) ExitNow(-130);
+  StatStr = PQcmdTuples(result);
   PQclear(result);
-*/
-LOG_NOTICE("Remove uploads with no pfiles is not implemented yet");
-
   EndTime = (long)time(0);
-  printf("Remove uploads with no pfiles took %ld seconds\n", EndTime-StartTime);
+  printf("%s Uploads with no pfiles (%ld seconds)\n", StatStr, EndTime-StartTime);
 
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success
@@ -150,29 +161,42 @@ LOG_NOTICE("Remove uploads with no pfiles is not implemented yet");
 
 
 /**
- * @brief Remove orphaned temp files
+ * @brief Remove orphaned temp tables from deprecated pkgmettagetta and old delagent
  *
- * @returns void but writes status to LOG_NOTICE
+ * @returns void but writes status to stdout
  */
 FUNCTION void RemoveTemps()
 {
-//  PGresult* result; // the result of the database access
-//  int numrows;             // generic return value
+  PGresult* result; 
+  PGresult* DropResult; 
+  int row;
+  int NumRows;
+  int DroppedCount = 0;
   long StartTime, EndTime;
-//  char *sql="vacuum analyze";
+  char *sql="select table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE'  \
+   AND table_schema = 'public' AND (table_name SIMILAR TO '^metaanalysis_[[:digit:]]+$' \
+     or table_name similar to '^delup_%')";
+  char sqlBuf[1024];
 
   StartTime = (long)time(0);
 
-  /* Vacuume and Analyze */
-/*
-  result = PQexec(pgConn, VacAnalyze);
-  if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) ExitNow(-102);
-  PQclear(result);
-*/
-LOG_NOTICE("Remove orphaned temp files is not implemented yet");
+  result = PQexec(pgConn, sql);
+  if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__)) ExitNow(-140);
+  NumRows = PQntuples(result);
 
+  /* Loop through the temp table names, dropping the tables */
+  for (row = 0; row < NumRows; row++)
+  {
+    snprintf(sqlBuf, sizeof(sqlBuf), "drop table %s", PQgetvalue(result, row, 0));
+    DropResult = PQexec(pgConn, sqlBuf);
+    if (fo_checkPQcommand(pgConn, DropResult, sql, __FILE__, __LINE__)) ExitNow(-141);
+    PQclear(DropResult);
+    DroppedCount++;
+  }
+
+  PQclear(result);
   EndTime = (long)time(0);
-  printf("Remove orphaned temp files took %ld seconds\n", EndTime-StartTime);
+  printf("%d Orphaned temp tables were dropped (%ld seconds)\n", DroppedCount, EndTime-StartTime);
 
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success
@@ -182,27 +206,21 @@ LOG_NOTICE("Remove orphaned temp files is not implemented yet");
 /**
  * @brief Process expired uploads (slow)
  *
- * @returns void but writes status to LOG_NOTICE
+ * @returns void but writes status to stdout
  */
 FUNCTION void ProcessExpired()
 {
-//  PGresult* result; // the result of the database access
-//  int numrows;             // generic return value
+/*
+  PGresult* result; // the result of the database access
+  int numrows;             // generic return value
   long StartTime, EndTime;
-//  char *sql="vacuum analyze";
 
   StartTime = (long)time(0);
 
-  /* Vacuume and Analyze */
-/*
-  result = PQexec(pgConn, VacAnalyze);
-  if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) ExitNow(-102);
-  PQclear(result);
-*/
-LOG_NOTICE("Process expired uploads is not implemented yet");
-
   EndTime = (long)time(0);
   printf("Process expired uploads took %ld seconds\n", EndTime-StartTime);
+*/
+LOG_NOTICE("Process expired uploads is not implemented yet");
 
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success
@@ -211,28 +229,24 @@ LOG_NOTICE("Process expired uploads is not implemented yet");
 
 /**
  * @brief Remove orphaned files from the repository (slow)
+ *        Loop through each file in the repository and make sure there is a pfile table entry.
+ *        Then make sure the pfile_pk is used by uploadtree.
  *
- * @returns void but writes status to LOG_NOTICE
+ * @returns void but writes status to stdout
  */
 FUNCTION void RemoveOrphanedFiles()
 {
-//  PGresult* result; // the result of the database access
-//  int numrows;             // generic return value
+/*
+  PGresult* result; // the result of the database access
+  int numrows;             // generic return value
   long StartTime, EndTime;
-//  char *sql="vacuum analyze";
 
   StartTime = (long)time(0);
 
-  /* Vacuume and Analyze */
-/*
-  result = PQexec(pgConn, VacAnalyze);
-  if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) ExitNow(-102);
-  PQclear(result);
-*/
-LOG_NOTICE("Remove orphaned files from the repository is not implemented yet");
-
   EndTime = (long)time(0);
   printf("Remove orphaned files from the repository took %ld seconds\n", EndTime-StartTime);
+*/
+LOG_NOTICE("Remove orphaned files from the repository is not implemented yet");
 
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success
