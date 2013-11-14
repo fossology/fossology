@@ -32,6 +32,7 @@ build-arch-stamp: configure-stamp
 
 	# Add here commands to compile the arch part of the package.
 	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var
+	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var -C src/nomos/agent/ -f Makefile.sa
 	touch $@
 
 build-indep: build-indep-stamp
@@ -109,6 +110,9 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-nomos \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/nomos install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-nomos \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/nomos/agent/ -f Makefile.sa install
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-pkgagent \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/pkgagent install
