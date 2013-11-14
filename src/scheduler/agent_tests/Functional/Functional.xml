@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     <sleep duration="1"/>
   </setup>
   <cleanup>
-    <sequential command="{cli}" params="--config={config} -D"/>
+    <sequential command="{scheduler}" params="--config={config} -k"/>
   </cleanup>
   
   <!--
