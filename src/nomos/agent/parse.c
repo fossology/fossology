@@ -1108,7 +1108,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     /*
      * Affero
      */
-    if (INFILE(_PHR_AFFERO) && !INFILE(_LT_GPL3ref3)) {
+    if (INFILE(_PHR_AFFERO) && !INFILE(_LT_GPL3ref31)) {
       if (INFILE(_LT_AFFERO1) || INFILE(_LT_AFFERO2) ||
           INFILE(_LT_AFFERO3)) {
         cp = AGPLVERS();
@@ -1366,7 +1366,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "GPL_v3(#2)" : "GPL-3.0");
         lmem[_mGPL] = 1;
       }
-      else if (GPL_INFILE(_LT_GPL3ref3)) {
+      else if (GPL_INFILE(_LT_GPL3ref3) && !INFILE(_TITLE_LGPL3)) {
                 INTERESTING("GPL-3.0");
                 lmem[_mGPL] = 1;
            }
@@ -3516,9 +3516,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("NBPL-1.0");
         lmem[_fARTISTIC] = 1;
       }
+      else if(HASTEXT(_PHR_ARTISTIC_PERL, 0)) {
+        INTERESTING("Artistic-1.0-Perl");
+        lmem[_fARTISTIC] = 1;
+      }
       else if (HASTEXT(_PHR_ARTISTIC_CLAUSE8, 0))
       {
-        INTERESTING(lDebug ? "Artistic(v1.0#clause8)" : "Artistic-1.0-Perl");
+        INTERESTING("Artistic-1.0-cl8");
         lmem[_fARTISTIC] = 1;
       }
       else {

@@ -2454,6 +2454,10 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"this license =FEW= refers to version 3 of the =FEW= GNU =FEW= general public license"
 #
+%ENTRY%	_LT_GPL3ref31
+%KEY%	"licen[cs]"
+%STR%	"this license =FEW= refers to version 3 of the GNU general public license"
+#
 %ENTRY%	_LT_GPL_OR
 %NOCHECK%
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -6969,7 +6973,7 @@ k
 #
 %ENTRY%	_TITLE_GPL3
 %KEY%	"licen[cs]"
-%STR%	"gnu (general p|p)ublic licen[cs]e =SOME= version 3 29 june 2007"
+%STR%	"gnu (general p|p)ublic licen[cs]e =SOME= version 3"
 #
 %ENTRY%	_TITLE_GS11
 %KEY%	"licen[cs]"
@@ -7856,6 +7860,10 @@ k
 %ENTRY%	_PHR_ARTISTIC_CLAUSE8
 %KEY% =NULL=
 %STR%	"Aggregation of this Package with a commercial distribution is always permitted provided that the use of this Package is embedded"
+#
+%ENTRY%	_PHR_ARTISTIC_PERL
+%KEY% =NULL=
+%STR%	"provided that the complete Standard Version of the interpreter is so embedded"
 #
 %ENTRY%	_PHR_ATTRIBUTION
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
