@@ -378,6 +378,16 @@ class ui_browse extends FO_Plugin {
       $folder_pk = GetUserRootFolder();
       else
       {
+        /* Make sure the upload record exists */
+        $sql = "select upload_pk from upload where upload_pk=$Upload";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        if ( pg_num_rows($result) < 1)
+        {
+          echo "This upload no longer exists on this system.";
+          return;
+        }
+
         $sql = "select parent_fk from foldercontents where child_id=$Upload and foldercontents_mode=2";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
