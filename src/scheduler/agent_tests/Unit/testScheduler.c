@@ -231,7 +231,7 @@ void test_email_notify()
   FO_ASSERT_PTR_NOT_NULL(scheduler->db_conn);
 
   jq_pk = Prepare_Testing_Data(scheduler);
-  job = job_init(scheduler->job_list, scheduler->job_queue, "ununpack", "localhost", -1, 0, 0);
+  job = job_init(scheduler->job_list, scheduler->job_queue, "ununpack", "localhost", -1, 0, 0, 0);
   job->id = jq_pk;
  
   database_update_job(scheduler, job, JB_FAILED); 

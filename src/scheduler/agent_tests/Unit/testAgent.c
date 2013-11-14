@@ -202,7 +202,7 @@ void test_agent_create_event()
   {
     host = (host_t*)iter->data;
     fjob = job_init(scheduler->job_list, scheduler->job_queue, ma->name,
-        host->name, id_gen--, 0, 0);
+        host->name, id_gen--, 0, 0, 0);
     fagent = agent_init(scheduler, host, fjob);
   }
   fagent->pid    = 10;
@@ -282,7 +282,7 @@ void test_agent_init()
   {
     host = (host_t*)iter->data;
     fjob = job_init(scheduler->job_list, scheduler->job_queue, ma->name,
-        host->name, id_gen--, 0, 0);
+        host->name, id_gen--, 0, 0, 0);
     fagent = agent_init(scheduler, host, fjob);
   }
   /*
