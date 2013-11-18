@@ -776,6 +776,8 @@ void database_update_event(scheduler_t* scheduler, void* unused)
 
     if(host != NULL)
       host = (strlen(host) == 0) ? NULL : host;
+    if(jq_cmd_args != NULL)
+      jq_cmd_args = (strlen(jq_cmd_args) == 0) ? NULL : jq_cmd_args;
 
     V_DATABASE("DB: jq_pk[%d] added:\n   jq_type = %s\n   jq_host = %s\n   "
         "jq_runonpfile = %d\n   jq_args = %s\n  jq_cmd_args = %s\n",
