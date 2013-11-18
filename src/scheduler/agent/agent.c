@@ -595,7 +595,6 @@ static void shell_parse(
 typedef struct {
     scheduler_t* scheduler;
     agent_t* agent;
-    job_t *job;
 } agent_spawn_args;
 
 /**
@@ -621,7 +620,6 @@ static void* agent_spawn(agent_spawn_args* pass)
   /* locals */
   scheduler_t* scheduler = pass->scheduler;
   agent_t*     agent     = pass->agent;
-  job_t       *job       = pass->job;
   gchar* tmp;                 // pointer to temporary string
   gchar** args;               // the arguments that will be passed to the child
   int argc;                   // the number of arguments parsed
@@ -655,7 +653,7 @@ static void* agent_spawn(agent_spawn_args* pass)
     if(strcmp(agent->host->address, LOCAL_HOST) == 0)
     {
       shell_parse(scheduler->sysconfigdir, agent->owner->user_id,
-          agent->type->raw_cmd, job->jq_cmd_args, &argc, &args);
+          agent->type->raw_cmd, agent->owner->jq_cmd_args, &argc, &args);
 
       tmp = args[0];
       args[0] = g_strdup_printf(AGENT_BINARY,
@@ -690,7 +688,7 @@ static void* agent_spawn(agent_spawn_args* pass)
       args[0] = "/usr/bin/ssh";
       args[1] = agent->host->address;
       args[2] = buffer;
-      args[3] = job->jq_cmd_args;
+      args[3] = agent->owner->jq_cmd_args;
       args[4] = NULL;
       execv(args[0], args);
     }
@@ -881,7 +879,6 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   pass = g_new0(agent_spawn_args, 1);
   pass->scheduler = scheduler;
   pass->agent = agent;
-  pass->job = job;
 
 #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
   agent->thread = g_thread_new(agent->type->name, (GThreadFunc)agent_spawn, pass);
