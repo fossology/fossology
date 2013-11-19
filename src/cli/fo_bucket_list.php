@@ -25,18 +25,21 @@
  */
 
 $Usage = "Usage: " . basename($argv[0]) . "
-  -u upload id        :: required - upload id
+  -u upload id        :: upload id
+  -t uploadtree id    :: uploadtree id
   -c sysconfdir       :: optional - Specify the directory for the system configuration
   --user username     :: user name
   --password password :: password
-  -b                  :: required - bucket id
+  -b bucket id        :: bucket id
+  -a bucket agent id  :: bucket agent id
+  -n nomos agent id   :: nomos agent id
   -h  help, this message
   ";
 
-$upload = $bucket = "";
+$upload = $item = $bucket = $bucket_agent = $nomos_agent = "";
 
 $longopts = array("user:", "password:");
-$options = getopt("c:u:b:h", $longopts);
+$options = getopt("c:u:t:b:a:n:h", $longopts);
 if (empty($options) || !is_array($options))
 {
   print $Usage;
@@ -53,6 +56,15 @@ foreach($options as $option => $value)
       break;
     case 'u':
       $upload = $value;
+      break;
+    case 't':
+      $item = $value;
+      break;
+    case 'a':
+      $bucket_agent = $value;
+      break;
+    case 'n':
+      $nomos_agent = $value;
       break;
     case 'b':
       $bucket = $value;
@@ -72,10 +84,22 @@ foreach($options as $option => $value)
   }
 }
 
+if (empty($item) || empty($bucket) || empty($bucket_agent) || empty($nomos_agent)) {
+  print "Uploadtree ID  or bucket ID or bucket agent ID or nomos agent ID is NULL\n";
+  print $Usage;
+  return 1;
+}
+
+/** get upload id through uploadtree id */
+if (is_numeric($item) && !is_numeric($upload)) $upload = GetUploadID($item);
+
+//print "Upload ID, Uploadtree ID, bucket ID, bucket agent ID, nomos agent ID is $upload, $item, $bucket, $bucket_agent, $nomos_agent\n";
+
 /** check if parameters are valid */
-if (!is_numeric($bucket) && !empty($upload) && !is_numeric($upload))
+if (!is_numeric($bucket) && (!is_numeric($upload) || (!empty($item) && !is_numeric($item))) 
+    && !is_numeric($bucket_agent) && !is_numeric($nomos_agent))
 {
-  print "Upload ID or Uploadtree ID is not digital number\n";
+  print "Upload ID or Uploadtree ID  or bucket ID or bucket agent ID or nomos agent ID is not digital number\n";
   print $Usage;
   return 1;
 }
@@ -93,7 +117,7 @@ if (empty($return_value))
 require_once("$MODDIR/lib/php/common.php");
 
 /** get bucket information for this uploadtree */
-GetBucketList($bucket, $upload);
+GetBucketList($bucket, $bucket_agent, $nomos_agent, $item, $upload);
 return 0;
 
 /**
@@ -101,29 +125,41 @@ return 0;
  *
  * \pamam $upload_pk - upload id
  * \param $bucket_pk - bucket id
+ * \param $bucket_agent - bucket agent ID
+ * \param $nomos_agent - nomos agent ID
+ * \prram $uploadtree_pk - uploadtree ID
  */
-function GetBucketList($bucket_pk, $upload_pk = 0)
+function GetBucketList($bucket_pk, $bucket_agent, $nomos_agent, $uploadtree_pk, $upload_pk = 0)
 {
   global $PG_CONN;
 
-  $sql = "SELECT bucket_name from  bucket_def where bucket_pk = $bucket_pk;";
+  /** get bucket name */
+  $sql = "SELECT bucket_name from bucket_def where bucket_pk = $bucket_pk;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
   pg_free_result($result);
-  if ($upload_pk) $text = "upload $upload_pk";
-  else $text = "all uploads";
-  print "Get all files have bucket $row[bucket_name] for $text \n";
-  $uploadtree_tablename = GetUploadtreeTableName($upload_pk);
-  $sql_upload = '';
-  if ($upload_pk) $sql_upload = "and upload_fk = $upload_pk";
-  $sql = "SELECT DISTINCT uploadtree_pk from pfile, bucket_file, uploadtree where pfile_pk = bucket_file.pfile_fk and pfile_pk = uploadtree.pfile_fk and bucket_fk = $bucket_pk and ((ufile_mode & (1<<28)) = 0) and ((ufile_mode & (1<<29)) = 0) $sql_upload order by uploadtree_pk;";
-  $outerresult = pg_query($PG_CONN, $sql);
-  DBCheckResult($outerresult, $sql, __FILE__, __LINE__);
 
-  /* Select each uploadtree row in this tree, write out text:
-   * filepath : bucket list
-   */
+  print "For uploadtree ID $uploadtree_pk have bucket $row[bucket_name]:\n";
+  $uploadtree_tablename = GetUploadtreeTableName($upload_pk);
+
+  /* get the top of tree */
+  $sql = "SELECT upload_fk, lft, rgt from uploadtree where uploadtree_pk='$uploadtree_pk';";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $toprow = pg_fetch_assoc($result);
+  pg_free_result($result);
+
+  /* loop through all the records in this tree */
+  $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename, bucket_file
+    where upload_fk=$upload_pk
+    and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
+    and ((ufile_mode & (1<<28)) = 0)  and ((ufile_mode & (1<<29)) = 0) and bucket_file.pfile_fk = $uploadtree_tablename.pfile_fk
+    and bucket_fk = '$bucket_pk' and agent_fk = '$bucket_agent' and nomosagent_fk = '$nomos_agent'
+    order by uploadtree_pk";
+  $outerresult = pg_query($PG_CONN, $sql);
+
+  /* Select each uploadtree row in this tree, write out text */
   while ($row = pg_fetch_assoc($outerresult))
   { 
     $filepatharray = Dir2Path($row['uploadtree_pk'], $uploadtree_tablename);
