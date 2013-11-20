@@ -619,9 +619,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_CR_SLEEPYCAT)) {
       INTERESTING(lDebug ? "Sleepycat(1)" : "Sleepycat");
     }
-    else if (INFILE(_CR_ORACLE)) {
-      INTERESTING("Oracle-Berkeley-DB");
-    }
     else if (mCR_CMU()) {
       INTERESTING(lDebug ? "CMU(BSD-ish)" : "CMU");
     }
@@ -631,6 +628,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_TITLE_ZEND_V20)) {
       INTERESTING("Zend-2.0");
+    }
+    else if (INFILE(_LT_Oracle_Berkeley_DB)) {
+      INTERESTING("Oracle-Berkeley-DB");
     }
     /*
      * Discussion from Raino on why some BSD-style is better called Google-BSD: 
@@ -5779,7 +5779,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
 
   /** Mozilla Public License possibility */
-  if (URL_INFILE(_URL_MPL_LATEST)) {
+  if (URL_INFILE(_URL_MPL_LATEST) && !lmem[_mMPL]) {
     INTERESTING(lDebug ? "MPL(latest)" : "MPL");
   }
 
@@ -6226,6 +6226,9 @@ char *mplNplVersion(char *filetext, int size, int isML, int isPS)
 
   if (INFILE(_TITLE_MPL11_OR_LATER)) {
     lstr = "MPL-1.1+";
+  }
+  else if (INFILE(_TITLE_NPL11_MPL)) {
+    lstr = "NPL-1.1";
   }
   else if (INFILE(_TITLE_MPL11) && INFILE(_TITLE_MPL_style)) {
     lstr = "MPL-1.1-style";
