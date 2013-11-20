@@ -76,13 +76,14 @@ class maintagent extends FO_Plugin {
     $Options = array("a"=>_("Run all non slow maintenance operations."),
                      "A"=>_("Run all maintenance operations."),
                      "F"=>_("Validate folder contents."),
-                     "p"=>_("Verify file permissions (report only)."),
-                     "P"=>_("Verify and fix file permissions."),
+              //       "g"=>_("Remove orphaned gold files."),
+              //       "p"=>_("Verify file permissions (report only)."),
+              //       "P"=>_("Verify and fix file permissions."),
                      "R"=>_("Remove uploads with no pfiles."),
                      "T"=>_("Remove orphaned temp tables."),
                      "D"=>_("Vacuum Analyze the database."),
-                     "U"=>_("Process expired uploads (slow)."),
-                     "Z"=>_("Remove orphaned files from the repository (slow)."),
+              //       "U"=>_("Process expired uploads (slow)."),
+              //       "Z"=>_("Remove orphaned files from the repository (slow)."),
                      "v"=>_("verbose (turns on debugging output)")
                     );
     $V = "";
@@ -99,6 +100,11 @@ class maintagent extends FO_Plugin {
     $V.= "</ol>\n";
     $text = _("Queue the maintenance agent");
     $V.= "<input type='submit' value='$text'>\n";
+
+    $V.= "<p>";
+    $V.= _("More information about these operations can be found ");
+    $text = _("here.");
+    $V.= "<a href=http://www.fossology.org/projects/fossology/wiki/Maintagent> $text </a>";
 
     $V.= "<input type=hidden name=queue value=true>";
 

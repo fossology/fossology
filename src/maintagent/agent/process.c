@@ -251,3 +251,28 @@ LOG_NOTICE("Remove orphaned files from the repository is not implemented yet");
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success
 }
+
+
+/**
+ * @brief Delete orphaned gold files from the repository
+ *        Loop through each gold file in the repository and make sure there is a pfile entry in the upload table.
+ *
+ * @returns void but writes status to stdout
+ */
+FUNCTION void DeleteOrphanGold()
+{
+/*
+  PGresult* result; // the result of the database access
+  int numrows;             // generic return value
+  long StartTime, EndTime;
+
+  StartTime = (long)time(0);
+
+  EndTime = (long)time(0);
+  printf("Remove orphaned files from the repository took %ld seconds\n", EndTime-StartTime);
+*/
+LOG_NOTICE("Remove orphaned gold files from the repository is not implemented yet");
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
+}

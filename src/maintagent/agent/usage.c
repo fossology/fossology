@@ -29,6 +29,7 @@ FUNCTION void Usage(char *Name)
   printf("  -A   :: Run all maintenance operations.\n");
   printf("  -D   :: Vacuum Analyze the database.\n");
   printf("  -F   :: Validate folder contents.\n");
+  printf("  -g   :: Delete orphan gold files.\n");
   printf("  -p   :: Verify file permissions (report only).\n");
   printf("  -P   :: Verify and fix file permissions.\n");
   printf("  -R   :: Remove uploads with no pfiles.\n");

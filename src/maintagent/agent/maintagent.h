@@ -49,5 +49,6 @@ void RemoveUploads();
 void RemoveTemps();
 void ProcessExpired();
 void RemoveOrphanedFiles();
+void DeleteOrphanGold();
 
 #endif /* _DEMOMOD_H */

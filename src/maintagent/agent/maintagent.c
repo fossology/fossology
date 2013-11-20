@@ -57,7 +57,7 @@ int main(int argc, char **argv)
   snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, SVN_REV);
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aADFpPRTUZivVc:")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "aADFgpPRTUZivVc:")) != -1) 
   {
     switch (cmdopt) 
     {
@@ -82,6 +82,9 @@ int main(int argc, char **argv)
           break;
       case 'F': /* Validate folder contents */
           ValidateFolders();
+          break;
+      case 'g': /* Delete orphan gold files */
+          DeleteOrphanGold();
           break;
       case 'p': /* Verify file permissions */
           VerifyFilePerms(0);
