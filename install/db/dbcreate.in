@@ -17,7 +17,7 @@ if [ $? != 0 ]; then
 fi
 
 # then check to see if the db already exists
-su postgres -c "psql --tuples-only --command \"select * from pg_database where datname = 'fossology';\""|grep fossology
+su postgres -c "psql --tuples-only --command \"select * from pg_database where datname = 'fossology';\""|grep fossology >/dev/null 2>&1
 if [ $? = 0 ]; then
    echo "NOTE: fossology database already exists, not creating"
    echo "*** Checking for plpgsql support ***"
