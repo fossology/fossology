@@ -6626,6 +6626,9 @@ char *agplVersion(char *filetext, int size, int isML, int isPS)
     if (INFILE(_TITLE_GPL3)) {
       lstr = lDebug ? "GPLv3(Affero#1)" : "GPL-3.0";
     }
+    else if (INFILE(_LT_GPL3ref3)){
+      lstr = lDebug ? "GPLv3(special)" : "GPL-3.0";
+    }
     else {
       lstr = lDebug ? "Affero-v3(#2)" : "AGPL-3.0";
     }
