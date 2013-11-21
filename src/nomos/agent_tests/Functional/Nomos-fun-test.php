@@ -46,6 +46,8 @@ class NomosFunTest extends PHPUnit_Framework_TestCase
     $last = exec("find $this->testdir -type f -not \( -wholename \"*svn*\" \) -exec $this->nomos -l '{}' + > scan.out", $out, $rtn);
 
     $file_correct = "../testdata/LastGoodNomosTestfilesScan";
+    $last = exec("wc -l < $file_correct");
+    print "Right now, we have $last nomos regression tests\n";
     $old = " ..\/testdata\/";
     $last = exec("sed 's/$old/ /g' ./scan.out > ./scan.out.r");
     $last = exec("sort $file_correct >./LastGoodNomosTestfilesScan.s");
