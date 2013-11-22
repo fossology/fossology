@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /*
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -153,6 +153,9 @@ foreach ( $funcList as $funcTest ) {
         echo substr($diff, strpos($diff, '=> ')+3) . "\n";
       $runResults['nomosfunc'] = count($diffResult);
     }
+
+    /** cp nomos-regression-test.html to ./reports/functional/ */
+    exec("cp ./nomos-regression-test.html ".TESTROOT.  "/reports/functional/");
   }
   $Make->printResults($runResults);
 

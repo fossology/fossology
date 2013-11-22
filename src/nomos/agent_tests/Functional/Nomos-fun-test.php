@@ -47,7 +47,10 @@ class NomosFunTest extends PHPUnit_Framework_TestCase
 
     $file_correct = "../testdata/LastGoodNomosTestfilesScan";
     $last = exec("wc -l < $file_correct");
-    print "Right now, we have $last nomos regression tests\n";
+    $regtest_msg = "Right now, we have $last nomos regression tests\n";
+    print $regtest_msg;
+    $regtest_cmd = "echo '$regtest_msg' >./nomos-regression-test.html";
+    $last = exec($regtest_cmd);
     $old = " ..\/testdata\/";
     $last = exec("sed 's/$old/ /g' ./scan.out > ./scan.out.r");
     $last = exec("sort $file_correct >./LastGoodNomosTestfilesScan.s");
