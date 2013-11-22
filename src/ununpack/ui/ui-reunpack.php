@@ -221,7 +221,7 @@ echo "JobQueueAdd used to do a reschedule here<br>";
     $Fin_gold = @fopen( RepPath($Pfile_fk,"gold") ,"rb");
     if (empty($Fin_gold))
     {
-      $text = _("The File's Gold file are not available in the repository.");
+      $text = _("The File's Gold file is not available in the repository.");
       $V = "<p/>$text\n";
       return $V;
     }
