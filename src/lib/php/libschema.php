@@ -630,10 +630,10 @@ function GetSchema()
     $R = & $Results[$i];
     $Table = $R['table'];
     //echo "processing tabel $Table\n";
-    if (preg_match('/[0-9]/', $Table))
-    {
-      continue;
-    }
+    //if (preg_match('/[0-9]/', $Table))
+    //{
+    //  continue;
+    //}
     $Column = $R['column_name'];
     $Type = $R['type'];
     if ($Type == 'bpchar')
