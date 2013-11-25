@@ -185,14 +185,17 @@ int	main(int argc, char *argv[])
     if (Pfile_size > 500000000)
     {
       sprintf(uploadtree_tablename, "uploadtree_%s", Upload_Pk);
-      snprintf(SQL,MAXSQL,"CREATE TABLE %s (LIKE uploadtree INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES); ALTER TABLE %s ADD CONSTRAINT %s CHECK (upload_fk=%s); ALTER TABLE %s INHERIT uploadtree", 
+      if (!fo_tableExists(pgConn, uploadtree_tablename))
+      {
+        snprintf(SQL,MAXSQL,"CREATE TABLE %s (LIKE uploadtree INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES); ALTER TABLE %s ADD CONSTRAINT %s CHECK (upload_fk=%s); ALTER TABLE %s INHERIT uploadtree", 
                uploadtree_tablename, uploadtree_tablename, uploadtree_tablename, Upload_Pk, uploadtree_tablename);
-      PQsetNoticeProcessor(pgConn, SQLNoticeProcessor, SQL);  // ignore notice about implicit primary key index creation
-      result =  PQexec(pgConn, SQL);
-      // Ignore postgres notice about creating an implicit index
-      if (PQresultStatus(result) != PGRES_NONFATAL_ERROR)
-        if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(103);
-      PQclear(result);
+        PQsetNoticeProcessor(pgConn, SQLNoticeProcessor, SQL);  // ignore notice about implicit primary key index creation
+        result =  PQexec(pgConn, SQL);
+        // Ignore postgres notice about creating an implicit index
+        if (PQresultStatus(result) != PGRES_NONFATAL_ERROR)
+          if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(103);
+        PQclear(result);
+      }
     }
     else
       strcpy(uploadtree_tablename, "uploadtree_a");
