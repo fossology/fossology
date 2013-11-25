@@ -25,7 +25,7 @@ define("TITLE_agent_demomod", _("Demomod scanner"));
 
 class agent_demomod extends FO_Plugin {
 
-  public $Name = "agent_nomos";
+  public $Name = "agent_demomod";
   public $Title = TITLE_agent_demomod;
   public $Version = "1.0";
   public $Dependency = array();
