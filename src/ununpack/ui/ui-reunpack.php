@@ -138,7 +138,10 @@ class ui_reunpack extends FO_Plugin
     
     //get userpk from uploadpk
     $UploadRec = GetSingleRec("upload", "where upload_pk='$uploadpk'");
-    
+    //if upload record didn't have user pk, use current user
+    $user_fk = $UploadRec['user_fk'];
+    if (empty($user_fk))
+      $user_fk = $_SESSION[UserId]; 
     //updated ununpack_ars table to let reunpack run 
     $SQLARS = "UPDATE ununpack_ars SET ars_success = FALSE WHERE upload_fk = '$uploadpk';";
     $result = pg_query($PG_CONN, $SQLARS);
@@ -148,15 +151,15 @@ class ui_reunpack extends FO_Plugin
     if (empty($uploadpk)) {
       $SQLInsert = "INSERT INTO job
         (job_queued,job_priority,job_name,job_user_fk) VALUES
-        (now(),'$priority','$Job_name',{$UploadRec['user_fk']});";
+        (now(),'$priority','$Job_name','$user_fk');";
     }
     else {
       $SQLInsert = "INSERT INTO job
         (job_queued,job_priority,job_name,job_upload_fk,job_user_fk) VALUES
-        (now(),'$priority','$Job_name','$uploadpk',{$UploadRec['user_fk']});";
+        (now(),'$priority','$Job_name','$uploadpk','$user_fk');";
     }
 
-    $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk = {$UploadRec['user_fk']} ORDER BY job_pk DESC LIMIT 1;";
+    $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk = '$user_fk' ORDER BY job_pk DESC LIMIT 1;";
     $result = pg_query($PG_CONN, $SQLcheck);
     DBCheckResult($result, $SQLcheck, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
@@ -169,7 +172,7 @@ class ui_reunpack extends FO_Plugin
       DBCheckResult($result, $SQLInsert, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
       pg_free_result($result);
-      $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk = {$UploadRec['user_fk']};";
+      $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk = '$user_fk';";
       $result = pg_query($PG_CONN, $SQLcheck);
       DBCheckResult($result, $SQLcheck, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
