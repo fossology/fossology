@@ -487,7 +487,7 @@ if (!empty($Row["job_upload_fk"]))
           if ($allusers > 0)
           {
             $UploadRec = GetSingleRec("upload", "where upload_pk={$Job['job']['job_upload_fk']}");
-            if (!empty($UploadRec))
+            if (!empty($UploadRec['user_fk']))
             {
               $UserRec = GetSingleRec("users", "where user_pk={$UploadRec['user_fk']}");
               $UserName = "&nbsp;&nbsp;&nbsp;($UserRec[user_name])";
