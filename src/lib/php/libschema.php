@@ -856,7 +856,7 @@ function GetSchema()
   /** CONSTRAINT: ALL OTHERS **/
   for ($i = 0;!empty($Results[$i]['constraint_name']);$i++)
   {
-    if ($Results[$i]['processed'] == 1) continue;
+    if (!empty($Results[$i]['processed']) && $Results[$i]['processed'] == 1) continue;
 
     $SQL = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
     $SQL.= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
