@@ -276,5 +276,7 @@ fi # end of WEBONLY
 
 ########################################################################
 
+echo "NOTE: Running the PostgreSQL vacuum and analyze command can result in a large database performance improvement.  We suggest that you either configure postgres to run its autovacuum and autoanalyze daemons, or maintagent -D in a cron job, or run Admin > Maintenance on a regular basis.  Admin > Dashboard will show you the last time vacuum and analyze have been run."
+echo "#####################################################################################"
 echo "FOSSology postinstall complete, but sure to complete the remaining"
 echo "  steps in the INSTALL instructions."
