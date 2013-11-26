@@ -106,7 +106,7 @@ int	main(int argc, char *argv[])
       case 'x':	UnlinkAll=1; break;
       default:
         Usage(argv[0], BuildVersion);
-        SafeExit(0);
+        SafeExit(25);
     }
   }
 
