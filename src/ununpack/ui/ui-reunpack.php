@@ -192,7 +192,13 @@ class ui_reunpack extends FO_Plugin
 echo "JobQueueAdd used to do a reschedule here<br>";
     $jobqueuepk = JobQueueAdd($jobpk,"ununpack",$uploadpk,NULL,$Depends);
     if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
-
+    
+    /* Tell the scheduler to check the queue. */
+    $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
+    if (!$success)
+    {
+      $ErrorMsg = $error_msg . "\n" . $output;
+    }
     return(NULL);
   } // AgentAdd()
 
