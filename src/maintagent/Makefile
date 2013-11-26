@@ -17,7 +17,7 @@
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
-MOD_NAME=demomod
+MOD_NAME=maintagent
 
 DIRS = agent ui
 TESTDIR = agent_tests
