@@ -1,5 +1,5 @@
 # FOSSology Makefile - src dir
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
 #
 
 TOP = ..
@@ -7,7 +7,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # the directories we do things in by default
-DIRS = adj2nest ununpack buckets cli copyright lib scheduler nomos pkgagent delagent wget_agent mimetype www debug
+DIRS = adj2nest ununpack buckets cli copyright lib scheduler nomos pkgagent delagent wget_agent mimetype maintagent www debug
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
