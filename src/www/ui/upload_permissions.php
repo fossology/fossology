@@ -163,7 +163,7 @@ class upload_permissions extends FO_Plugin
       }
       $newperm = $newgroup = 0;
     }
-    else if (!empty($public_perm))
+    else if ($public_perm >= 0)
     {
       $sql = "update upload set public_perm='$public_perm' where upload_pk='$upload_pk'";
       $result = pg_query($PG_CONN, $sql);
