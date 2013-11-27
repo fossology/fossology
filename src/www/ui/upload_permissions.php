@@ -115,7 +115,9 @@ class upload_permissions extends FO_Plugin
     $perm = GetParm('perm', PARM_INTEGER);
     $newgroup = GetParm('newgroup', PARM_INTEGER);
     $newperm = GetParm('newperm', PARM_INTEGER);
-    $public_perm = GetParm('public', PARM_INTEGER);
+    
+    $public_perm = GetArrayVal('public', $_GET);
+    if ($public_perm == "") $public_perm = -1;
 
     // start building the output buffer
     $V = "";
