@@ -29,6 +29,14 @@ class maintagent extends FO_Plugin {
   public $MenuList = "Admin::Maintenance";
   public $DBaccess = PLUGIN_DB_ADMIN;
 
+  /**
+   * \brief  Register additional menus.
+   */
+  function RegisterMenus() 
+  {
+    if ($this->State != PLUGIN_STATE_READY)  return (0); // don't run
+    menu_insert("Agents::" . $this->Title, 0, $this->Name);
+  }
 
   /**
    * \brief queue the job
