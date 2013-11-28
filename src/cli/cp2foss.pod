@@ -182,6 +182,11 @@ the Subversion and CVS directories.  The files are placed in the
 UI under the folder "Fedora/Fedora8" and are grouped by the first letter
 of each file (a-c, d-f, g-h, etc.).
 
+C<cp2foss --user USER --password PASSWORD
+-d 'regular expression test' '/tmp/*.php'
+
+The above example, B<cp2foss> will upload all the mached php files in tmp dir
+
 =head1 AUTHOR
 
 Neal Krawetz/Mark Donohoe for the Hewlett-Packard Company
