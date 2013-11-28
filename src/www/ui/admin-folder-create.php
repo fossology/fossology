@@ -88,7 +88,7 @@ class folder_create extends FO_Plugin
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
-    $sql = "SELECT folder_pk FROM folder WHERE folder_name='$NewFolder' AND folder_desc = '$Desc';";
+    $sql = "SELECT folder_pk FROM folder WHERE folder_name='$NewFolder' AND folder_desc = '$Desc' ORDER BY folder_pk DESC;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
