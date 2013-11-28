@@ -131,6 +131,7 @@ if [ $COMMON ]; then
       if [ "$USERHOME" != "/home/fossy" ]; then
          echo "NOTE: change user 'fossy' homedir from $USERHOME to /home/fossy."
          mkdir -p /home/fossy
+         chown {$PROJECTUSER}:{$PROJECTUSER} /home/fossy
          usermod -d /home/fossy {$PROJECTUSER}
       fi
    else
