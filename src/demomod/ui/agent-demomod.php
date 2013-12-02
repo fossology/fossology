@@ -35,12 +35,13 @@ class agent_demomod extends FO_Plugin {
 
   /**
    * \brief  Register additional menus.
-   */
+   * \note Demomod scanner is just a demo, so do not Register Menu
   function RegisterMenus() 
   {
     if ($this->State != PLUGIN_STATE_READY)  return (0); // don't run
     menu_insert("Agents::" . $this->Title, 0, $this->Name);
   }
+  */
 
 
   /**
