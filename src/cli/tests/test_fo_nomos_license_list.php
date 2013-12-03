@@ -159,7 +159,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
 
     sort($out, SORT_STRING);
     /** for this uload, will get 9 lines for report */
-    $this->assertEquals(9, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
+    $this->assertEquals(9, $output_msg_count, " upload[1] is:$upload[1], Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
     /** check one line of the report */
     $this->assertEquals("test package/usr/include/libfossdb.h: LGPL-2.1", $out[0]);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
@@ -214,7 +214,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
 
     pg_close($test_dbh);
 
-    fwrite(STDOUT,"DEBUG: upload_id is:$upload_id\n");
+    fwrite(STDOUT,"DEBUG: upload_id is:$upload_id, uploadtree_id, is:$uploadtree_id\n");
     return array($upload_id, $uploadtree_id);
   }
 
