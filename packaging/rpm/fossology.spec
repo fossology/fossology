@@ -193,6 +193,8 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_bindir}/*
 %{_includedir}/*
 %{_mandir}/man1/*
+%{_sysconfdir}/PBPROJ/mods-enabled/maintagent
+%{_datadir}/PBPROJ/maintagent/*
 
 %files db
 %defattr(-,root,root)

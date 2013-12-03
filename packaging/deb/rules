@@ -78,6 +78,9 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/cli install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/maintagent install
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
