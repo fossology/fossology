@@ -56,7 +56,7 @@ class agent_unpack extends FO_Plugin
    **/
   function AgentHasResults($upload_pk)
   {
-    return CheckARS($upload_pk, "unpack", "Archive unpacker", "ununpack_ars");
+    return CheckARS($upload_pk, "ununpack", "Archive unpacker", "ununpack_ars");
   } // AgentHasResults()
 
 
