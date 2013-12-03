@@ -183,9 +183,9 @@ UI under the folder "Fedora/Fedora8" and are grouped by the first letter
 of each file (a-c, d-f, g-h, etc.).
 
 C<cp2foss --user USER --password PASSWORD
--d 'regular expression test' '/tmp/*.php'
+-d 'regular expression test' '/tmp/*.php' >
 
-The above example, B<cp2foss> will upload all the mached php files in tmp dir
+The above example, will upload all the php files in /tmp.
 
 =head1 AUTHOR
 
