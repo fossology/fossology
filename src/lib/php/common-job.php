@@ -329,18 +329,16 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
       if (empty($upload_pk))  continue;
 
       // Create a job for the upload
-      $where = "where upload_pk ='$upload_pk'";
-      $UploadRec = GetSingleRec("upload", $where);
+      // Use the upload name for the job name
+      $where = "where job_upload_fk='$upload_pk'";
+      $UploadRec = GetSingleRec("job", $where);
       if (empty($UploadRec))
       {
         echo "ERROR: unknown upload_pk: $upload_pk\n";
         continue;
       }
 
-      $ShortName = $UploadRec['upload_filename'];
-
-      /* Create Job */
-      $job_pk = JobAddJob($user_pk, $ShortName, $upload_pk);
+      $job_pk = $UploadRec['job_pk'];
 
       // don't exit on AgentAdd failure, or all the agents requested will
       // not get scheduled.
