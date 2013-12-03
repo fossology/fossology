@@ -35,7 +35,6 @@ class agent_demomod extends FO_Plugin {
 
   /**
    * \brief  Register additional menus.
-   * \note Demomod scanner is just a demo, so do not Register Menu
    */
   function RegisterMenus() 
   {
