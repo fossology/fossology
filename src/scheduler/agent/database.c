@@ -112,7 +112,11 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
     }
     else if(PQntuples(db_result) == 0)
     {
-      g_string_append_printf(ret,
+      if(strcmp(job->agent_type, "delagent") == 0)
+        g_string_append_printf(ret,
+          "[File has been deleted by job %d]", job->id);
+      else
+        g_string_append_printf(ret,
           "[ERROR: file has not been upload or unpacked yet for job %d]", job->id);
     }
     else
@@ -141,7 +145,11 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
     }
     else if(PQntuples(db_result) == 0)
     {
-      g_string_append_printf(ret,
+      if(strcmp(job->agent_type, "delagent") == 0)
+        g_string_append_printf(ret,
+          "[File has been deleted by job %d]", job->id);
+      else
+        g_string_append_printf(ret,
           "[ERROR: file has not been upload or unpacked yet for job %d]", job->id);
     }
     else
