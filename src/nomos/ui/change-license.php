@@ -188,6 +188,7 @@ class change_license extends FO_Plugin {
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
       $OriginalLicense = $row['rf_shortname'];
+      $OriginalLicense = pg_escape_string($OriginalLicense);
       pg_free_result($result);
     } else return NULL;
 
@@ -267,7 +268,8 @@ class change_license extends FO_Plugin {
     $LicenseList = "";
     while($row = pg_fetch_assoc($result))
     {
-      $LicenseList .= "<option value = '$row[rf_shortname]'>$row[rf_shortname]</option>";
+      $temp = urlencode($row['rf_shortname']);
+      $LicenseList .= "<option value = '$temp'>$row[rf_shortname]</option>";
     }
     pg_free_result($result);
     return $LicenseList;
@@ -280,6 +282,8 @@ class change_license extends FO_Plugin {
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $ObjectiveLicense = GetParm("object_license",PARM_TEXT);
+    $ObjectiveLicense = urldecode($ObjectiveLicense);
+    $ObjectiveLicense = pg_escape_string($ObjectiveLicense);
     $ObjectiveLicense = trim($ObjectiveLicense);
     $Reason = GetParm("change_reason",PARM_TEXT);
     $Reason = trim($Reason);

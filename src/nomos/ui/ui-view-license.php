@@ -289,6 +289,7 @@ class ui_view_license extends FO_Plugin
 
     if (!empty($LicShortname)) // dispaly the detailed license text of one license
     {
+      $LicShortname = pg_escape_string($LicShortname);
       $this->ViewLicenseText($Item,$LicShortname,$LicIdSet, $nomos_out);
       return;
     }
