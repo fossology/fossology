@@ -73,10 +73,11 @@ typedef struct {
  *
  * Variables:
  *   $UPLOADNAME
- *   $BROESELINK
- *   $SHCEDULERLOG
+ *   $BROWSELINK
+ *   $SCHEDULERLOG
  *   $UPLOADFOLDERNAME
  *   $JOBRESULT
+ *   $JOBQUEUELINK
  *   $DB.table.column [not implemented]
  *
  * @param match  the regex match that glib found
@@ -243,7 +244,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
    */
   else if(strcmp(m_str, "DB") == 0)
   {
-    g_string_append(ret, "[NOT IMPLEMENTED]");
+    g_string_append(ret, "[DB. syntax is NOT IMPLEMENTED]");
     /* TODO reimplement $DB variable
     table  = g_match_info_fetch(match, 3);
     column = g_match_info_fetch(match, 4);
