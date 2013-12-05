@@ -1063,7 +1063,7 @@
 #####
 %ENTRY%	_LT_CCPL
 %KEY%	"(condit|vers)ion"
-%STR%	"subject to the terms and conditions of this licen[cs]e licen[cs]or hereby grants"
+%STR%	"subject to the terms and conditions of this (public )?licen[cs]e =FEW= licen[cs]or hereby grants"
 #####
 # DELETED: ... modify display perform sublicen[cs]e and distribute the 
 # modifications created by such contributor
@@ -2860,6 +2860,10 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"except for a limited copyright licen[cs]e to copy =FEW= for internal use only no licen[cs]e express or implied"
 #
+%ENTRY% _LT_INTEL_WLAN
+%KEY% "permit"
+%STR%   "intel cannot permit any manipulation by third parties of the software provided in binary format with the wireless wlan adapters"
+#
 %ENTRY%	_LT_INTERLINK_EULA
 %KEY%	"legal"
 %STR%	"this end[ -]user licen[cs]e agreement eula is a legal agreement between you either an individual or an entity and interlink networks inc for the product identified above"
@@ -4179,7 +4183,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_QT_COMMref
 %KEY%	"licen[cs]"
-%STR%	"licen[cs]ed to you under the terms of the qt commercial licen[cs]e agreement"
+%STR%	"licen[cs]e[ds] (to you under the terms of|may use this file in accordance with) the qt commercial licen[cs]e agreement"
 #
 %ENTRY%	_LT_QUEST_EULA
 %KEY%	"so(ftware|urce)"
@@ -6547,7 +6551,7 @@ k
 #
 %ENTRY%	_TITLE_NC_ND_V10
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
-%STR%	"attribution-noncommercial-noderivs 1\.?0"
+%STR%	"attribution-noncommercial-noderiv(ative)?s 1\.?0"
 #
 %ENTRY%	_TITLE_NC_ND_V10_1
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
@@ -6555,15 +6559,19 @@ k
 #
 %ENTRY%	_TITLE_NC_ND_V20
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
-%STR%	"attribution-noncommercial-noderivs 2\.?0"
+%STR%	"attribution-noncommercial-noderiv(ative)?s 2\.?0"
 #
 %ENTRY%	_TITLE_NC_ND_V25
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
-%STR%	"attribution-noncommercial-noderivs 2\.?5"
+%STR%	"attribution-noncommercial-noderiv(ative)?s 2\.?5"
 #
 %ENTRY%	_TITLE_NC_ND_V30
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
-%STR%	"attribution-noncommercial-noderivs 3\.?0"
+%STR%	"attribution-noncommercial-noderiv(ative)?s 3\.?0"
+#
+%ENTRY%	_TITLE_NC_ND_V40
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
+%STR%	"attribution-noncommercial-noderiv(ative)?s 4\.?0"
 #
 %ENTRY%	_TITLE_NC_SA_V10
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
@@ -6585,6 +6593,10 @@ k
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution-noncommercial-sharealike 3\.?0"
 #
+%ENTRY%	_TITLE_NC_SA_V40
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
+%STR%	"attribution-noncommercial-sharealike 4\.?0"
+#
 %ENTRY%	_TITLE_SA_V10
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution-sharealike 1\.?0"
@@ -6600,6 +6612,10 @@ k
 %ENTRY%	_TITLE_SA_V30
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution-sharealike 3\.?0"
+#
+%ENTRY%	_TITLE_SA_V40
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
+%STR%	"attribution-sharealike 4\.?0"
 #
 %ENTRY%	_TITLE_NC_V10
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
@@ -6617,21 +6633,29 @@ k
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution-nonCommercial 3\.?0"
 #
+%ENTRY%	_TITLE_NC_V40
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
+%STR%	"attribution-nonCommercial 4\.?0"
+#
 %ENTRY%	_TITLE_ND_V10
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
-%STR%	"attribution-noderivs 1\.?0"
+%STR%	"attribution-noderiv(ative)?s 1\.?0"
 #
 %ENTRY%	_TITLE_ND_V20
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
-%STR%	"attribution-noderivs 2\.?0"
+%STR%	"attribution-noderiv(ative)?s 2\.?0"
 #
 %ENTRY%	_TITLE_ND_V25
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
-%STR%	"attribution-noderivs 2\.?5"
+%STR%	"attribution-noderiv(ative)?s 2\.?5"
 #
 %ENTRY%	_TITLE_ND_V30
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
-%STR%	"attribution-noderivs 3\.?0"
+%STR%	"attribution-noderiv(ative)?s 3\.?0"
+#
+%ENTRY%	_TITLE_ND_V40
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
+%STR%	"attribution-noderiv(ative)?s 4\.?0"
 #
 %ENTRY%	_TITLE_ATTR_V10
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
@@ -6648,6 +6672,10 @@ k
 %ENTRY%	_TITLE_ATTR_V30
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution =FEW= 3\.?0"
+#
+%ENTRY%	_TITLE_ATTR_V40
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
+%STR%	"attribution =FEW= 4\.?0"
 #
 %ENTRY%	_TITLE_CC0_10
 %KEY%	"universal"
@@ -6717,6 +6745,10 @@ k
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"creative commons attribution 3\.?0 generic"
 #
+%ENTRY%	_TITLE_CCA_V40
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
+%STR%	"creative commons attribution 4\.?0 generic"
+#
 %ENTRY%	_TITLE_CCA_SA
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"creative commons attribution[ -]share[ -]alike"
@@ -6732,6 +6764,10 @@ k
 %ENTRY%	_TITLE_CCA_SA_V30
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"creative commons attribution[ -]share[ -]alike 3\.?0( licen[cs]e)?"
+#
+%ENTRY%	_TITLE_CCA_SA_V40
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
+%STR%	"creative commons attribution[ -]share[ -]alike 4\.?0( licen[cs]e)?"
 #
 %ENTRY%	_TITLE_CCPL
 %KEY%	"licen[cs]"
@@ -8848,6 +8884,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?debian\.?org/misc/bsd\.?licen[cs]e"
 #
+%ENTRY%	_URL_CCA_BY_V40
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by/4\.?0"
+#
 %ENTRY%	_URL_CCA_BY_V30
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/by/3\.?0"
@@ -8876,6 +8916,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/by-sa/3\.?0"
 #
+%ENTRY%	_URL_CCA_SA_V40
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by-sa/4\.?0"
+#
 %ENTRY%	_URL_CCA_BY_ND_V20
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/by-nc-nd/2\.?0"
@@ -8895,6 +8939,10 @@ k
 %ENTRY%	_URL_CCA_BY_NC_SA_V30
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/by-nc-sa/3\.?0"
+#
+%ENTRY%	_URL_CCA_BY_NC_SA_V40
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by-nc-sa/4\.?0"
 #
 %ENTRY%	_URL_CCGPL
 %KEY%	"licen[cs]"

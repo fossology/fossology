@@ -2796,6 +2796,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_INTEL_EULA)) {
     INTERESTING("Intel-EULA");
   }
+  else if (INFILE(_LT_INTEL_WLAN)) {
+    INTERESTING("Intel-WLAN");
+  }
+
   /*
    * Bellcore
    */
@@ -4643,6 +4647,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "RPL#1" : "RPL");
       }
     }
+    else if (INFILE(_TITLE_NC_SA_V40)) {
+      INTERESTING("CC-BY-NC-SA-4.0");
+      lmem[_fCCBY] = 1;
+    }
     else if (INFILE(_TITLE_NC_SA_V30)) {
       INTERESTING("CC-BY-NC-SA-3.0");
       lmem[_fCCBY] = 1;
@@ -4658,6 +4666,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_TITLE_NC_SA_V10)) {
       lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-SA-1.0");
+    }
+    else if (INFILE(_TITLE_NC_ND_V40)) {
+      lmem[_fCCBY] = 1;
+      INTERESTING("CC-BY-NC-ND-4.0");
     }
     else if (INFILE(_TITLE_NC_ND_V30)) {
       lmem[_fCCBY] = 1;
@@ -4675,6 +4687,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-NC-ND-1.0");
     }
+    else if (INFILE(_TITLE_SA_V40)) {
+      lmem[_fCCBY] = 1;
+      INTERESTING("CC-BY-SA-4.0");
+    }
     else if (INFILE(_TITLE_SA_V30)) {
       lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-SA-3.0");
@@ -4690,6 +4706,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_TITLE_SA_V10)) {
       lmem[_fCCBY] = 1;
       INTERESTING("CC-BY-SA-1.0");
+    }
+    else if (INFILE(_TITLE_NC_V40)) {
+      lmem[_fCCBY] = 1;
+      INTERESTING("CC-BY-NC-4.0");
     }
     else if (INFILE(_TITLE_NC_V30)) {
       lmem[_fCCBY] = 1;
@@ -4707,6 +4727,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("CC-BY-NC-1.0");
       lmem[_fCCBY] = 1;
     }
+    else if (INFILE(_TITLE_ND_V40)) {
+      INTERESTING("CC-BY-ND-4.0");
+      lmem[_fCCBY] = 1;
+    }
     else if (INFILE(_TITLE_ND_V30)) {
       INTERESTING("CC-BY-ND-3.0");
       lmem[_fCCBY] = 1;
@@ -4721,6 +4745,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_TITLE_ND_V10)) {
       INTERESTING("CC-BY-ND-1.0");
+      lmem[_fCCBY] = 1;
+    }
+    else if (INFILE(_TITLE_ATTR_V40)) {
+      INTERESTING("CC-BY-4.0");
       lmem[_fCCBY] = 1;
     }
     else if (INFILE(_TITLE_ATTR_V30)) {
@@ -6904,8 +6932,14 @@ char *ccsaVersion(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_TITLE_CCA_SA_V30)) {
     lstr = "CC-BY-SA-3.0";
   }
+  else if (INFILE(_TITLE_CCA_SA_V40)) {
+    lstr = "CC-BY-SA-4.0";
+  }
   else if (INFILE(_TITLE_CCA_SA)) {
     lstr = lDebug ? "CCA-SA(1)" : "CC-BY-SA";
+  }
+  else if (URL_INFILE(_URL_CCA_SA_V40)) {
+    lstr = "CC-BY-SA-4.0";
   }
   else if (URL_INFILE(_URL_CCA_SA_V30)) {
     lstr = "CC-BY-SA-3.0";
@@ -6943,6 +6977,12 @@ char *ccVersion(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_TITLE_CCA_V25)) {
     lstr = "CC-BY-2.5";
+  }
+  else if (URL_INFILE(_URL_CCA_BY_V40)) {
+    lstr = "CC-BY-4.0";
+  }
+  else if (INFILE(_TITLE_CCA_V40)) {
+    lstr = "CC-BY-4.0";
   }
   else if (URL_INFILE(_URL_CCA_BY_V30)) {
     lstr = "CC-BY-3.0";
