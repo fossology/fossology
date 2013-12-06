@@ -160,6 +160,20 @@ function Migrate_21_22($Verbose)
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 
+  /** Clean uploadtree_a table  */
+  $sql = "CREATE VIEW uploadtree_a_upload AS SELECT uploadtree_pk,upload_fk,upload_pk FROM uploadtree_a LEFT OUTER JOIN upload ON upload_fk=upload_pk;
+          DELETE FROM uploadtree_a WHERE uploadtree_pk IN (SELECT uploadtree_pk FROM uploadtree_a_upload WHERE upload_pk IS NULL);
+          DROP VIEW uploadtree_a_upload;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+  /** add foreign key CONSTRAINT on upload_fk of uploadtree_a table */
+  $sql = "ALTER TABLE uploadtree_a ADD CONSTRAINT uploadtree_a_uploadfk FOREIGN KEY (upload_fk) REFERENCES upload (upload_pk) ON DELETE CASCADE; ";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  pg_free_result($result);
+
+
   /** Run program to rename licenses **/
   global $LIBEXECDIR;
   require_once("$LIBEXECDIR/fo_mapping_license.php");
