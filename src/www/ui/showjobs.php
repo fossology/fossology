@@ -378,6 +378,13 @@ if (!empty($Row["job_upload_fk"]))
           $UploadtreeRec = GetSingleRec("uploadtree", "where upload_fk='$upload_pk' and parent is null");
           $JobData[$job_pk]["uploadtree"] = $UploadtreeRec;
         }
+        else
+        {
+          $UploadRec = GetSingleRec("upload", "right join job on upload_pk = job_upload_fk where job_upload_fk = '$upload_pk'");
+	  $UploadRec["upload_filename"] = "Delete Upload: " . $UploadRec["job_upload_fk"] . "(" . $UploadRec["job_name"] . ")";
+          $UploadRec["upload_pk"] = $UploadRec["job_upload_fk"];
+          $JobData[$job_pk]["upload"] = $UploadRec;
+        }
       }
 
       /* Get jobqueue table data */
@@ -440,6 +447,7 @@ if (!empty($Row["job_upload_fk"]))
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     $UriFull = $Uri . Traceback_parm_keep(array("upload"));
     $uploadStyle = "style='font:bold 10pt verdana, arial, helvetica; background:gold; color:white;'";
+    $NoUploadStyle = "style='font:bold 10pt verdana, arial, helvetica; background:gold; color:black;'";
     $jobStyle = "style='font:bold 8pt verdana, arial, helvetica; background:lavender; color:black;'";
     $prevupload_pk = "";
 
@@ -479,7 +487,7 @@ if (!empty($Row["job_upload_fk"]))
             $OutBuf .= "<a title='Click to browse' href='" . Traceback_uri() . "?mod=browse&upload=" . $Job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
           }
           else
-            $OutBuf .= "<a title='Click to browse' href='" . Traceback_uri() . "?mod=browse'>";
+            $OutBuf .= "<a $NoUploadStyle>";
           
           /* get $UserName if all jobs are shown */
           $UserName = "";
@@ -511,8 +519,12 @@ if (!empty($Row["job_upload_fk"]))
       }
       else /* Show Jobs that are not attached to an upload */
       {
+        $JobNumber++;
+        /* Only display the jobs for this page */
+        if ($JobNumber >= $LastJob) break;
+        if ($JobNumber < $FirstJob) continue;
+
         /* blank line separator between pfiles */
-        $NoUploadStyle = "style='font:bold 10pt verdana, arial, helvetica; background:gold; color:black;'";
         $OutBuf .= "<tr><td colspan=7> <hr> </td></tr>";
         $OutBuf .= "<tr>";
         $OutBuf .= "<th $NoUploadStyle></th>";
