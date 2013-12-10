@@ -68,6 +68,11 @@ class admin_folder_delete extends FO_Plugin {
       $text = _("Failed to place delete in job queue");
       return ($text);
     }
+
+    /* Tell the scheduler to check the queue. */
+    $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
+    if (!$success) return $error_msg . "\n" . $output;
+
     return (NULL);
   } // Delete()
 
