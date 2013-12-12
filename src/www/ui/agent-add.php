@@ -127,11 +127,19 @@ class agent_add extends FO_Plugin
           $rc = $this->AgentsAdd($uploadpk,$agents);
           if (empty($rc))
           {
+            /** check if the scheudler is running */
+            $status = GetRunnableJobList();
+            $scheduler_msg = "";
+            if (empty($status))
+            {
+              $scheduler_msg .= _("Is the scheduler running? ");
+            }
+
             $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
             /* Need to refresh the screen */
             $text = _("Your jobs have been added to job queue.");
             $LinkText = _("View Jobs");
-            $msg = "$text <a href=$URL>$LinkText</a>";
+            $msg = "$scheduler_msg"."$text <a href=$URL>$LinkText</a>";
             $V .= displayMessage($msg);
           }
           else
