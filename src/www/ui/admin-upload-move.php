@@ -26,7 +26,7 @@ class upload_move extends FO_Plugin {
   var $MenuList = "Organize::Uploads::Move";
   var $Dependency = array();
   var $DBaccess = PLUGIN_DB_WRITE;
-  var $Title = "Move upload to different foler";
+  var $Title = "Move upload to different folder";
 
   /**
    * \brief Given an uploadID, it's parent folder and a Target folder Id, move
