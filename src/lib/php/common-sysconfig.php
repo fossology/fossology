@@ -442,7 +442,7 @@ function check_url($url)
 function check_IP($ip)
 {
   $e="([0-9]|1[0-9]{2}|[1-9][0-9]|2[0-4][0-9]|25[0-5])";
-  if(ereg("^$e\.$e\.$e\.$e$",$ip))
+  if(preg_match("/^$e\.$e\.$e\.$e/",$ip))
   {
     return 1;
   }
