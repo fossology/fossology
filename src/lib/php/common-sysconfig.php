@@ -319,9 +319,12 @@ function check_fossology_url($url)
     if($res)
     {
       $hostname1 = gethostbyaddr($name);
+      if (strcmp($hostname, $hostname1) == 0)  return 0;  // host is not reachable
     }
     $server_name = $_SERVER['SERVER_NAME'];
-    if (strcmp($name, $hostname) && strcmp($hostname, $hostname1) && strcmp($name, $server_name))
+
+    /* intput $name must match either the hostname or the server name */
+    if (strcmp($name, $hostname) && strcmp($name, $server_name))
     {
       return 0;
     }
