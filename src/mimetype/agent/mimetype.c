@@ -149,7 +149,6 @@ int main(int argc, char *argv[])
       Parm = fo_scheduler_current();
       if (Parm && Parm[0])
       {
-        fo_scheduler_heart(1);
         upload_pk = atoi(Parm);
 
         /* Check Permissions */
@@ -228,6 +227,7 @@ int main(int argc, char *argv[])
             free(Path);
             Path = NULL;
           }
+          fo_scheduler_heart(1);
         }
         PQclear(result);
         
