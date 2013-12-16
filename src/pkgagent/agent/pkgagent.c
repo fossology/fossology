@@ -723,7 +723,7 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
       strcpy(temp, "");
     }
     if ((s[0] != '\0') && (temp!=NULL)) {
-      if ((strlen(temp) + strlen(s)) > MAXCMD )
+      if ((strlen(temp) + strlen(s)) >= MAXCMD )
         continue;
       else
         strcat(temp,s);
