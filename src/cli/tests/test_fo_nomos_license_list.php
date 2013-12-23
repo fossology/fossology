@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -195,7 +195,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
-    $command = "$cp2foss_path $auth http://www.fossology.org/rpms/fedora/10/i386/fossology-devel-1.1.0-1.fc10.i386.rpm -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
+    $command = "$cp2foss_path $auth http://www.fossology.org/testdata/rpms/fedora/10/i386/fossology-devel-1.1.0-1.fc10.i386.rpm -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
 

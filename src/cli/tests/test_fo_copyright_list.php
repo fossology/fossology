@@ -1,6 +1,6 @@
   <?php
   /*
-   Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+   Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
@@ -210,7 +210,7 @@
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
-    $command = "$cp2foss_path $auth http://www.fossology.org/debian/lenny-backports/fossology-db_1.2.0-3~bpo50+1_all.deb -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
+    $command = "$cp2foss_path $auth http://www.fossology.org/testdata/debian/lenny-backports/fossology-db_1.2.0-3~bpo50+1_all.deb -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     /** wait for all the scheduled agents complete */
