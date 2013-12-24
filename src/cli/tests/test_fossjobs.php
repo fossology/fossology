@@ -253,7 +253,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     // tightly coupled, and they should _not_ be so.
     // at the end of test_reschedule and this method, the number of
     // uploads should be 7 ( 8 - 1 line for the header );
-    $this->assertEquals(8, $output_msg_count, $command); // have 2 = (3 -1_ uploads
+    $this->assertEquals(3, $output_msg_count, $command); // have 2 = (3 -1_ uploads
 
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
