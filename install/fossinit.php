@@ -130,8 +130,20 @@ else
 /* initialize the license_ref table */
 if ($UpdateLiceneseRef) 
 {
-  print "Update reference licenses\n";
-  initLicenseRefTable(false);
+  global $MODDIR;
+
+  $command = "$MODDIR/nomos/agent/nomos -V";
+  $version = system($command, $return_var);
+  $pattern = '/(\d)+/';
+  preg_match($pattern, $version, $matches);
+
+  $version230 = 6922;
+
+  /** when the version is less than or equal to svn 6922, call Update reference licenses process */
+  if ($matches[0] <= $version230) {
+    print "Update reference licenses\n";
+    initLicenseRefTable(false);
+  }
 }
 
 /* migration */
