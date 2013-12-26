@@ -84,8 +84,8 @@ foreach($options as $option => $value)
   }
 }
 
-if (empty($item) || empty($bucket) || empty($bucket_agent) || empty($nomos_agent)) {
-  print "Uploadtree ID  or bucket ID or bucket agent ID or nomos agent ID is NULL\n";
+if (!(is_numeric($item)) &&  !(is_numeric($upload))) {
+  print "At least provide uploadtree_id or upload_id.\n";
   print $Usage;
   return 1;
 }
@@ -96,10 +96,10 @@ if (is_numeric($item) && !is_numeric($upload)) $upload = GetUploadID($item);
 //print "Upload ID, Uploadtree ID, bucket ID, bucket agent ID, nomos agent ID is $upload, $item, $bucket, $bucket_agent, $nomos_agent\n";
 
 /** check if parameters are valid */
-if (!is_numeric($bucket) && (!is_numeric($upload) || (!empty($item) && !is_numeric($item))) 
-    && !is_numeric($bucket_agent) && !is_numeric($nomos_agent))
+if (!is_numeric($bucket) || !is_numeric($upload) || !is_numeric($bucket_agent) || !is_numeric($nomos_agent))
 {
   print "Upload ID or Uploadtree ID  or bucket ID or bucket agent ID or nomos agent ID is not digital number\n";
+  Usage4Options($upload, $item);
   print $Usage;
   return 1;
 }
@@ -140,16 +140,29 @@ function GetBucketList($bucket_pk, $bucket_agent, $nomos_agent, $uploadtree_pk, 
   $row = pg_fetch_assoc($result);
   pg_free_result($result);
 
-  print "For uploadtree ID $uploadtree_pk have bucket $row[bucket_name]:\n";
   $uploadtree_tablename = GetUploadtreeTableName($upload_pk);
 
   /* get the top of tree */
-  $sql = "SELECT upload_fk, lft, rgt from uploadtree where uploadtree_pk='$uploadtree_pk';";
+  $sql = "SELECT upload_fk, lft, rgt, uploadtree_pk  from $uploadtree_tablename";
+  
+  if ($uploadtree_pk){ // if uploadtree_pk is null, that means get all data on an upload 
+    $sql .= " where uploadtree_pk='$uploadtree_pk';";
+  }
+  else {
+    $sql .= " where upload_fk='$upload_pk' and parent is null;";
+  }
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $toprow = pg_fetch_assoc($result);
+  $uploadtree_pk = $toprow['uploadtree_pk'];
   pg_free_result($result);
 
+  if (empty($toprow)) {
+    print "Sorry, Can not find upload $upload_pk.\n";
+    return 1;
+  }
+
+  print "For uploadtree(ID is:$uploadtree_pk), upload(ID is:$upload_pk) has bucket $row[bucket_name]:\n";
   /* loop through all the records in this tree */
   $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename, bucket_file
     where upload_fk=$upload_pk
@@ -174,6 +187,26 @@ function GetBucketList($bucket_pk, $bucket_agent, $nomos_agent, $uploadtree_pk, 
     print "\n";
   } 
     pg_free_result($outerresult);
+}
+
+function Usage4Options($UploadID, $item)
+{
+  global $PG_CONN;
+  $sql = "SELECT agent_fk as bucket_agent_id, nomosagent_fk as nomos_agent_id, bucket_pk as bucket_id, bucket_ars.bucketpool_fk as bucketpoo_id, bucket_name from bucket_ars right join bucket_def on bucket_def.bucketpool_fk = bucket_ars.bucketpool_fk where upload_fk =  '$UploadID';";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $bucket_arr = pg_fetch_all($result);
+  pg_free_result($result);
+  $clause4uploadtree = "";
+  if ($item) $clause4uploadtree = " uploadtree(ID is:$item)";
+  if ($bucket_arr) {
+    print "For"."$clause4uploadtree upload(ID is:$UploadID), you can select specify options below: \n 
+      bucket_agent_id : -a
+      nomos_agent_id  : -n
+      bucket_id       : -b
+      \n";
+    print_r($bucket_arr);
+  }
 }
 
 ?>
