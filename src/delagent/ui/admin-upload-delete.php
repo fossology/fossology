@@ -72,8 +72,14 @@ class admin_upload_delete extends FO_Plugin {
 
     /* Tell the scheduler to check the queue. */
     $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
-    if (!$success) return $error_msg . "\n" . $output;
-
+    if (!$success) 
+    {
+      $error_msg = _("Is the scheduler running? Your jobs have been added to job queue.");
+      $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
+      $LinkText = _("View Jobs");
+      $msg = "$error_msg <a href=$URL>$LinkText</a>";
+      return $msg; 
+    }
     return (NULL);
   } // Delete()
 
@@ -97,8 +103,11 @@ class admin_upload_delete extends FO_Plugin {
           $rc = $this->Delete($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $text=_("Deletion added to job queue");
-            $V.= displayMessage($text);
+            $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
+            $LinkText = _("View Jobs");
+            $text=_("Deletion added to job queue.");
+            $msg = "$text <a href=$URL>$LinkText</a>";
+            $V.= displayMessage($msg);
           }
           else {
             $text=_("Deletion Scheduling failed: ");
