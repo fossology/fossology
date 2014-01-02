@@ -1,7 +1,7 @@
 <?php
 
 /*
- Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -247,15 +247,15 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     global $WGET_PATH;
     // http_proxy
     $this->change_proxy("http_proxy", "web-proxy.cce.hp.com:8088");
-    $command = "$WGET_PATH http://www.fossology.org/rpms/fedora/10/x86_64/fossology-1.1.0-1.fc10.x86_64.rpm  -d $TEST_RESULT_PATH";
+    $command = "$WGET_PATH http://www.fossology.org/testdata/rpms/fedora/10/x86_64/fossology-1.1.0-1.fc10.x86_64.rpm  -d $TEST_RESULT_PATH";
     exec($command);
-    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/rpms/fedora/10/x86_64/fossology-1.1.0-1.fc10.x86_64.rpm");
+    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/testdata/rpms/fedora/10/x86_64/fossology-1.1.0-1.fc10.x86_64.rpm");
 
     // no proxy
     $this->change_proxy("no_proxy", "fossology.org");
-    $command = "$WGET_PATH http://www.fossology.org/rpms/epel/6Server/i386/fossology-1.4.1-1.el6.i686.rpm  -d $TEST_RESULT_PATH";
+    $command = "$WGET_PATH http://www.fossology.org/testdata/rpms/epel/6/i386/fossology-1.4.1-1.el6.i686.rpm  -d $TEST_RESULT_PATH";
     exec($command);
-    $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/rpms/epel/6Server/i386/fossology-1.4.1-1.el6.i686.rpm");
+    $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/testdata/rpms/epel/6/i386/fossology-1.4.1-1.el6.i686.rpm");
   }
 
   /**
