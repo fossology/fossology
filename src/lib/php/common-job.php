@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -329,16 +329,18 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
       if (empty($upload_pk))  continue;
 
       // Create a job for the upload
-      // Use the upload name for the job name
-      $where = "where job_upload_fk='$upload_pk'";
-      $UploadRec = GetSingleRec("job", $where);
+      $where = "where upload_pk ='$upload_pk'";
+      $UploadRec = GetSingleRec("upload", $where);
       if (empty($UploadRec))
       {
         echo "ERROR: unknown upload_pk: $upload_pk\n";
         continue;
       }
 
-      $job_pk = $UploadRec['job_pk'];
+      $ShortName = $UploadRec['upload_filename'];
+
+      /* Create Job */
+      $job_pk = JobAddJob($user_pk, $ShortName, $upload_pk);
 
       // don't exit on AgentAdd failure, or all the agents requested will
       // not get scheduled.
@@ -423,13 +425,20 @@ function QueueUploadsOnDelagents($upload_pk_list, $Verbose)
  * jq_pk of scheduled jobqueue
  * or 0 = not scheduled
  */
-function IsAlreadyScheduled($job_pk, $AgentName)
+function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
 {
   global $PG_CONN;
 
   $jq_pk = 0;
-  /* check if the upload_pk is currently in the job queue being processed */
-  $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk AND jq_type='$AgentName' and job_pk=$job_pk";
+
+  /* check if the upload_pk is currently in the job queue being processed when agent name is ununpack or adj2nest */
+  /* it is unneccessary to reschedule ununpack and adj2nest, one time is enough */
+  if ($AgentName == "ununpack" || $AgentName == "adj2nest") {
+    $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk AND jq_type='$AgentName' and job_upload_fk = $upload_pk";
+  } else {
+    /* check if the upload_pk is currently in the job queue being processed */
+    $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk AND jq_type='$AgentName' and job_pk=$job_pk";
+  }
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   if (pg_num_rows($result) > 0)
@@ -474,7 +483,7 @@ function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies,
     if ($plugin->AgentHasResults($upload_pk) == 1) return 0;
 
     /* if it is already scheduled, then return success */
-    if (($jq_pk = IsAlreadyScheduled($job_pk, $plugin->AgentName)) != 0 ) return $jq_pk;
+    if (($jq_pk = IsAlreadyScheduled($job_pk, $plugin->AgentName, $upload_pk)) != 0 ) return $jq_pk;
 
     /* queue up dependencies */
     foreach ($Dependencies as $PluginName)
