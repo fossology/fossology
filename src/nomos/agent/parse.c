@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -1169,8 +1169,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       }
     }
     else if (INFILE(_LT_GPL_V2) || INFILE(_LT_GPL_V2_ref) || INFILE(_LT_GPL_V2_ref1)) {
-      INTERESTING("GPL-2.0");
-      lmem[_mGPL] = 1;
+      if (INFILE(_PHR_GPL2_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
+      {
+        INTERESTING("GPL-2.0+");
+        lmem[_mGPL] = 1;
+      }
+      else {
+        INTERESTING("GPL-2.0");
+        lmem[_mGPL] = 1;
+      }
     }
     else if (INFILE(_LT_GPL3_PATENTS)) {
       if (INFILE(_TITLE_GPL3)) {
@@ -6737,7 +6744,12 @@ char *lgplVersion(char *filetext, int size, int isML, int isPS)
     lstr = "LGPL-3.0";
   }
   else if (INFILE(_PHR_LGPL21_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
-    lstr = "LGPL-2.1+";
+    if (INFILE(_TITLE_LGPL_KDE)) {
+      lstr = "LGPL-2.1+-KDE-exception";
+    }
+    else {
+      lstr = "LGPL-2.1+";
+    }
   }
   else if (INFILE(_PHR_LGPL21_ONLY) ||
       INFILE(_FILE_LGPLv21) || URL_INFILE(_URL_LGPL_V21) || INFILE(_PHR_LGPL21_ONLY_ref)) {
@@ -8624,6 +8636,9 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
     INTERESTING(lDebug ? "Gen-EXC-3" : "Free-SW(run-COMMAND)");
   }
 #endif
+  if(HASTEXT(_LT_SEE_COPYING_LICENSE_1, REG_EXTENDED) || HASTEXT(_LT_SEE_COPYING_LICENSE_2, REG_EXTENDED)) {
+    INTERESTING("See-file(copyright|license)");
+  }
   return;
 
 #ifdef OLD_VERSION

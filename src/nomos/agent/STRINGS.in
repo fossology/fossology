@@ -1,5 +1,5 @@
 #####
-# (C) Copyright 2006-2013 Hewlett-Packard Development Company, L.P.
+# (C) Copyright 2006-2014 Hewlett-Packard Development Company, L.P.
 #####
 
 /* License footprints */
@@ -5224,6 +5224,14 @@ k
 #####
 # DELETED: free software you can re-?distribute (it a|a)nd/or modify it ...
 #####
+%ENTRY% _LT_SEE_COPYING_LICENSE_1
+%KEY% =NULL=
+%STR% "see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt) =FEW= (for|with|in) =FEW= (details|license|distribut|information|foder|directory)"
+#
+%ENTRY% _LT_SEE_COPYING_LICENSE_2
+%KEY% =NULL=
+%STR% "for =FEW= (details|license|distribut|information|use|usage) =FEW= see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt) =FEW= (for|with|in)"
+#
 %ENTRY%	_LT_SEE_COPYING_1
 %KEY%	"licen[cs]"
 %STR%	"under th(e|e terms of the) licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<copying\>|\<copying\> file)"
@@ -7006,6 +7014,10 @@ k
 %ENTRY%	_TITLE_GPL_KDE
 %KEY%	"licen[cs]"
 %STR%	"gnu (general p|p)ublic licen[cs]e =ANY= (accepted|approved) by (the membership of kde|trolltech asa =FEW= the kde free qt foundation)"
+#
+%ENTRY%	_TITLE_LGPL_KDE
+%KEY%	"licen[cs]"
+%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =ANY= (accepted|approved) by (the membership of kde|trolltech asa =FEW= the kde free qt foundation)"
 #
 %ENTRY%	_TITLE_GPL3
 %KEY%	"licen[cs]"
