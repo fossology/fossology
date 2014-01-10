@@ -5881,6 +5881,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   {
     INTERESTING("D-FSL-1.0");
   }
+
+  /** License: Apache 2.0 */
+  if (INFILE(_LT_APACHE_V2ref))
+  {
+    INTERESTING("Apache-2.0");
+  }
+
   /*
    * Some licenses point you to files/URLs...
    */

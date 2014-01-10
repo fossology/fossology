@@ -413,6 +413,10 @@
 %ENTRY%	_LT_APACHESTYLEref
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (apache[ -]style|apache[ -]type|apache-?ish|apache[ -]like) licen[cs]e"
+#
+%ENTRY% _LT_APACHE_V2ref 
+%KEY% "licen[cs]"
+%STR% "licen[cs]e(:?) apache 2\.?0"
 #####
 # DELETED: ... =ANY= in consideration of your agreement to the following
 # terms and your use installation modification or re-?distribution
@@ -6997,7 +7001,7 @@ k
 #
 %ENTRY% _TITLE_GPL3_ref3_later
 %KEY% "licen[cs]"
-%STR% "licen[cs]e(:?) gplv3+"
+%STR% "licen[cs]e(:?) gplv3\+"
 #
 %ENTRY%	_TITLE_GPL2_ref1
 %KEY%	"gpl"
