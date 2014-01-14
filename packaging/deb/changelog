@@ -1,8 +1,8 @@
-fossology (trunk) unstable; urgency=low
+fossology (2.4.0-1) unstable; urgency=low
 
-  * unofficial build version
+  * New upstream 2.4.0 release
 
- -- madong <madong@bl480c1>  Fri, 08 Jun 2012 16:35:55 +0800
+ -- madong <madong@bl480c1>  Tue, 14 Jun 2013 11:35:55 +0800
 
 fossology (2.0.0-1) unstable; urgency=low
 
