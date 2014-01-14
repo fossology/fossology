@@ -5566,6 +5566,10 @@ k
 %KEY%	"so(ftware|urce)"
 %STR%	"copyright =FEW= oracle =ANY= redistributions in any form must be accompanied by information on how to obtain complete source code for the db software and any accompanying software that uses the db software"
 #
+%ENTRY%	_LT_LIBGCJ
+%KEY%	"licen[cs]e"
+%STR%	"under the terms of the libgcj licen[cs]e"
+#
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 ##%STR%	"&copy"

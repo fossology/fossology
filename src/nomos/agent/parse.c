@@ -4369,7 +4369,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "CPL(#1)" : cp);
     }
   }
-  else if (INFILE(_LT_CPLref1)) {
+  else if (INFILE(_LT_CPLref1) && !INFILE(_TITLE_ECLIPSE10)) {
     cp = CPLVERS();
     INTERESTING(lDebug ? "CPL(ref)" : cp);
   }
@@ -5886,6 +5886,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if (INFILE(_LT_APACHE_V2ref))
   {
     INTERESTING("Apache-2.0");
+  }
+
+  /** LIBGCJ license */
+  if (INFILE(_LT_LIBGCJ))
+  {
+    INTERESTING("LIBGCJ");
   }
 
   /*
