@@ -5570,6 +5570,14 @@ k
 %KEY%	"licen[cs]e"
 %STR%	"under the terms of the libgcj licen[cs]e"
 #
+%ENTRY%	_LT_Interbase_V10
+%KEY%	"licen[cs]e"
+%STR%	"subject to the interbase public licen[cs]e version 1\.?0"
+#
+%ENTRY%	_LT_KnowledgeTree_V11
+%KEY%	"licen[cs]e"
+%STR%	"subject to the knowledgetree public licen[cs]e version 1\.?1"
+#
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 ##%STR%	"&copy"
@@ -7870,6 +7878,14 @@ k
 %KEY%	"licen[cs]e"
 %STR%	"German Free Software Licen[cs]e"
 #
+%ENTRY% _TITLE_WORDNET
+%KEY%	"licen[cs]e"
+%STR%	"wordnet =FEW= 3\.?0 =SOME= software and database is being provided to you =SOME= by princeton university under the following licen[cs]e"
+#
+%ENTRY% _TITLE_OPEN_CASCADE
+%KEY%	"licen[cs]e"
+%STR%	"open cascade technology public licen[cs]e"
+#
 %ENTRY%	_MISC_DEBDATA
 %KEY%	=NULL=
 %STR%	"data.tar.*$"
@@ -8057,7 +8073,7 @@ k
 #
 %ENTRY%	_PHR_GPL3_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))|gpl[_-]?v?3) =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%  "(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))|gpl[_-]?v?3) =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL3_OR_LATER_ref1
 %KEY%	"licen[cs]"
@@ -8066,6 +8082,10 @@ k
 %ENTRY%	_PHR_GPL3_OR_LATER_ref2
 %KEY%	"licen[cs]"
 %STR%	"under the terms of the gnu general public licen[cs]e version 3 or later"
+#
+%ENTRY%	_PHR_GPL3_OR_LATER_ref3
+%KEY%	"(\<gnu|free\>|l?gpl)"
+%STR%  "([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= versions? (three|\<3\>) =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPLISH_SAMPLE
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"

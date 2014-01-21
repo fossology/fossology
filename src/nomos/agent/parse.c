@@ -1769,6 +1769,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_mMIT] = 1;
   }
 
+  if (INFILE(_TITLE_WORDNET))
+  {
+    INTERESTING("WordNet");
+    lmem[_mMIT] = 1;
+  }
+
   if (INFILE(_CR_XFREE86_V10) || INFILE(_LT_XFREE86_V10)) {
     INTERESTING("XFree86-1.0");
   }
@@ -1880,7 +1886,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       lmem[_mMIT] = 1;
     }
   }
-  else if (INFILE(_LT_MIT_7)) {
+  else if (INFILE(_LT_MIT_7) && !lmem[_mMIT]) {
     if (INFILE(_CR_OG)) {
       INTERESTING(lDebug ? "OpenGroup(2)" : "OpenGroup");
     }
@@ -3653,7 +3659,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Princeton
    */
-  else if (INFILE(_LT_PRINCETON)) {
+  else if (INFILE(_LT_PRINCETON) && !INFILE(_TITLE_WORDNET)) {
     if (INFILE(_CR_PRINCETON)) {
       INTERESTING("Princeton");
     }
@@ -3768,7 +3774,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Boost references
    */
-  else if (!lmem[_mMIT] && INFILE(_LT_BOOST_2)) {
+  if (!lmem[_mMIT] && INFILE(_LT_BOOST_2)) {
     if (INFILE(_CR_BOOST)) {
       INTERESTING(lDebug ? "Boost(2)" : "BSL-1.0");
     }
@@ -5894,6 +5900,24 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("LIBGCJ");
   }
 
+  /** open cascade technology public license */
+  if (INFILE(_TITLE_OPEN_CASCADE))
+  {
+    INTERESTING("OCCT");
+  }
+
+  /**  KnowledgeTree Public License */
+  if (INFILE(_LT_KnowledgeTree_V11))
+  {
+    INTERESTING("KnowledgeTree-1.1");
+  }
+
+  /** Interbase Public License */
+  if (INFILE(_LT_Interbase_V10))
+  {
+    INTERESTING("Interbase-1.0");
+  }
+
   /*
    * Some licenses point you to files/URLs...
    */
@@ -6837,12 +6861,9 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
   else if (GPL_INFILE(_PHR_GPL2_OR_GPL3)) {
     lstr = "GPL-2.0:3.0";
   }
-  else if (GPL_INFILE(_PHR_GPL3_OR_LATER_ref2)
+  else if (GPL_INFILE(_PHR_GPL3_OR_LATER_ref2) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref3)
       || GPL_INFILE(_PHR_GPL3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref1)) {
-    if (INFILE(_TITLE_GPL3)) {
-      lstr = lDebug ? "GPL-v3(#1)" : "GPL-3.0";
-    }
-    else if (!HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+    if (!HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
       lstr = "GPL-3.0+";
     }
   }
