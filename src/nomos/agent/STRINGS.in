@@ -1245,7 +1245,7 @@
 #
 %ENTRY%	_LT_CPLref1
 %KEY%	"licen[cs]"
-%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= common public licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= (this|the) common public licen[cs]e"
 #####
 # DELETED: ... to use or re-?distribute this =SOME= in text or binary form
 # as required only in conjunction with devices using a Cypress USB
@@ -2399,7 +2399,11 @@ e /* (INFILE(j)) */
 #####
 %ENTRY%	_LT_GPL_ref
 %KEY%	"licen[cs]"
-%STR%	"under (the )?general public licen[cs]e"
+%STR%	"under ((the )?|(the terms of the )?)general public licen[cs]e"
+#
+%ENTRY% _LT_GPL_ref1
+%KEY% =NULL=
+%STR% "(licensed|released) under (the )?gnu (gpl|general public licen[cs]e)"
 #
 %ENTRY%	_LT_GPL_V1
 %KEY%	"licen[cs]"
@@ -3252,6 +3256,10 @@ e /* (INFILE(j)) */
 #####
 # DELETED: ... =SOME= obtaining a copy
 #####
+%ENTRY%	_LT_MIT_0
+%KEY%	"so(ftware|urce)"
+%STR%	"the software is provided =FEW= without warranty of any kind =FEW= express or implied =FEW= including but not limited to the warranties of merchantability =FEW= fitness for a particular purpose and noninfringement =FEW= in no event shall the =FEW= be liable for any claim =FEW= damages or other liability =FEW= whether in an action of contract =FEW= tort or otherwise =FEW= arising from =FEW= out of or in connection with the software or the use or other dealings in the software"
+#
 %ENTRY%	_LT_MIT_1
 %KEY%	"permi[st]"
 %STR%	"permission is hereby granted free of charge to any person"
@@ -5577,6 +5585,10 @@ k
 %ENTRY%	_LT_KnowledgeTree_V11
 %KEY%	"licen[cs]e"
 %STR%	"subject to the knowledgetree public licen[cs]e version 1\.?1"
+#
+%ENTRY%	_LT_FTL
+%KEY%	"licen[cs]e"
+%STR%	"(distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes) =FEW= under =FEW= freetype project licen[cs]e"
 #
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -8073,7 +8085,7 @@ k
 #
 %ENTRY%	_PHR_GPL3_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%  "(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))|gpl[_-]?v?3) =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%  "(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))|gpl[_-]?v?3) =SOME= \<or\> =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL3_OR_LATER_ref1
 %KEY%	"licen[cs]"

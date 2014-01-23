@@ -1777,12 +1777,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 
   if (INFILE(_CR_XFREE86_V10) || INFILE(_LT_XFREE86_V10)) {
     INTERESTING("XFree86-1.0");
+    lmem[_mMIT] = 1;
   }
   else if (INFILE(_CR_XFREE86_V11) || INFILE(_LT_XFREE86_V11)) {
     INTERESTING("XFree86-1.1");
+    lmem[_mMIT] = 1;
   }
   else if (INFILE(_CR_XFREE86) || INFILE(_LT_XFREE86)) {
     INTERESTING("XFree86");
+    lmem[_mMIT] = 1;
   }
   else if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) && 
       !INFILE(_TITLE_MIT_EXHIBIT) && !INFILE(_TITLE_SGI) && !lmem[_fBSD]) {
@@ -1804,8 +1807,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       }
       else if (mCR_X11()) {
         INTERESTING("X11");
+        lmem[_mMIT] = 1;
       }
       else if (INFILE(_TITLE_X11)) {
+        lmem[_mMIT] = 1;
         INTERESTING("X11");
       }
       else if (!INFILE(_LT_INTEL_7)) {
@@ -2713,7 +2718,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   /*
    * Python and EGenix.com look a bit alike
-   * Q: should all these Python checks be a family-check like OpenLDAP?
+   * Q: should all these Python rhecks be a family-check like OpenLDAP?
    */
   if (INFILE(_LT_EGENIX_COM)) {
     INTERESTING("eGenix");
@@ -4435,12 +4440,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_ECL1)) {
     INTERESTING("ECL-1.0");
+    lmem[_mMIT] = 1;
   }
   else if (INFILE(_LT_ECL2)) {
     INTERESTING("ECL-2.0");
+    lmem[_mMIT] = 1;
   }
   else if (INFILE(_LT_ECL)) {
     INTERESTING(lDebug ? "ECL(1)" : "ECL-1.0");
+    lmem[_mMIT] = 1;
   }
   /*
    * EU DataGrid and Condor PL
@@ -4531,6 +4539,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else {
       INTERESTING("FTL-style");
     }
+  }
+  else if (INFILE(_LT_FTL)) {
+      INTERESTING("FTL");
   }
   else if (INFILE(_LT_CATHARON)) {
     INTERESTING(lDebug ? "Catharon(3)" : "Catharon");
@@ -5840,6 +5851,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("ErlPL-1.1");
   }
 
+  /** German Free Software License */
+  if (INFILE(_TITLE_D_FSL_10))
+  {
+    INTERESTING("D-FSL-1.0");
+    lmem[_mGPL] = 1;
+  }
+
   /**  CCLRC License */
   if (INFILE(_TITLE_CCLRC)) {
     INTERESTING("CCLRC");
@@ -5856,7 +5874,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("GPL-3.0");
     lmem[_mGPL] = 1;
   }
-  else if (!lmem[_mGPL] && INFILE(_LT_GPL_ref))
+  else if (!lmem[_mGPL] && (INFILE(_LT_GPL_ref) || HASTEXT(_LT_GPL_ref1, REG_EXTENDED)))
   {
     INTERESTING("GPL");
     lmem[_mGPL] = 1;
@@ -5882,12 +5900,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(LS_NOT_PD);
   }
 
-  /** German Free Software License */
-  if (INFILE(_TITLE_D_FSL_10))
-  {
-    INTERESTING("D-FSL-1.0");
-  }
-
   /** License: Apache 2.0 */
   if (INFILE(_LT_APACHE_V2ref))
   {
@@ -5900,6 +5912,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("LIBGCJ");
   }
 
+  /** MIT license */
+  if (INFILE(_LT_MIT_0) && !lmem[_mMIT]) {
+    INTERESTING(lDebug ? "MIT(0)" : "MIT");
+    lmem[_mMIT] = 1;
+  }
   /** open cascade technology public license */
   if (INFILE(_TITLE_OPEN_CASCADE))
   {
@@ -6821,6 +6838,10 @@ char *lgplVersion(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_TEXT_LGPLV2) &&
       HASREGEX(_TEXT_LGPLV2, filetext)) {
     lstr = lDebug ? "LGPL-v2(#2)" : "LGPL-2.0";
+  }
+  else if (HASTEXT(_LT_GPL_ref1, REG_EXTENDED))
+  {
+    lstr = "GPL";
   }
   else {
     lstr = "LGPL";
