@@ -5238,11 +5238,15 @@ k
 #####
 %ENTRY% _LT_SEE_COPYING_LICENSE_1
 %KEY% =NULL=
-%STR% "see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt) =FEW= (for|with|in) =FEW= (details|license|distribut|information|foder|directory)"
+%STR% "see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt|readme\.?txt|file) =FEW= (for|with|in) =FEW= (details|license|distribut|information|foder|directory)"
 #
 %ENTRY% _LT_SEE_COPYING_LICENSE_2
 %KEY% =NULL=
 %STR% "for =FEW= (details|license|distribut|information|use|usage) =FEW= see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt) =FEW= (for|with|in)"
+#
+%ENTRY% _LT_SEE_URL
+%KEY% =NULL=
+%STR% "see (https?|ftp) =SOME= (for|with|in) =FEW= (details|license|distribut|information|foder|directory)"
 #
 %ENTRY%	_LT_SEE_COPYING_1
 %KEY%	"licen[cs]"
@@ -5589,6 +5593,10 @@ k
 %ENTRY%	_LT_FTL
 %KEY%	"licen[cs]e"
 %STR%	"(distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes) =FEW= under =FEW= freetype project licen[cs]e"
+#
+%ENTRY%	_LT_ClearSilver
+%KEY%	"licen[cs]e"
+%STR%	"(distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes) under =FEW= clearsilver licen[cs]e"
 #
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"

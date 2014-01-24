@@ -5935,12 +5935,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Interbase-1.0");
   }
 
-  /*
-   * Some licenses point you to files/URLs...
-   */
-  if (*licStr == NULL_CHAR) {
-    checkFileReferences(filetext, size, score, kwbm, isML, isPS);
+  /** ClearSilver license */
+  if (INFILE(_LT_ClearSilver))
+  {
+    INTERESTING("ClearSilver");
   }
+
   /*
    * Some licenses say "licensed under the same terms as FOO".
    */
@@ -5996,6 +5996,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
   }
 
+  /*
+   * Some licenses point you to files/URLs...
+   */
+  if (*licStr == NULL_CHAR) {
+    checkFileReferences(filetext, size, score, kwbm, isML, isPS);
+  }
   /*
    * NOW look for unclassified licenses, if we haven't found anything yet.
    * And avoid checking .po files -- message catalogues are known to have
@@ -8693,6 +8699,9 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
 #endif
   if(HASTEXT(_LT_SEE_COPYING_LICENSE_1, REG_EXTENDED) || HASTEXT(_LT_SEE_COPYING_LICENSE_2, REG_EXTENDED)) {
     INTERESTING("See-file(copyright|license)");
+  }
+  else if (HASTEXT(_LT_SEE_URL, REG_EXTENDED)) {
+    INTERESTING("See-URL");
   }
   return;
 
