@@ -1771,7 +1771,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 
   if (INFILE(_TITLE_WORDNET))
   {
-    INTERESTING("WordNet");
+    INTERESTING("WordNet-3.0");
     lmem[_mMIT] = 1;
   }
 
@@ -5941,6 +5941,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("ClearSilver");
   }
 
+  /** ACE, TAO, CIAO */
+  if(INFILE(_LT_ACE)) {
+    INTERESTING("ACE");
+  }
+  else if(INFILE(_LT_FACE)) {
+    INTERESTING("FACE");
+  }
+
   /*
    * Some licenses say "licensed under the same terms as FOO".
    */
@@ -8698,7 +8706,7 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
   }
 #endif
   if(HASTEXT(_LT_SEE_COPYING_LICENSE_1, REG_EXTENDED) || HASTEXT(_LT_SEE_COPYING_LICENSE_2, REG_EXTENDED)) {
-    INTERESTING("See-file(copyright|license)");
+    INTERESTING("See-file");
   }
   else if (HASTEXT(_LT_SEE_URL, REG_EXTENDED)) {
     INTERESTING("See-URL");

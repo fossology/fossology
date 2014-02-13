@@ -5598,6 +5598,14 @@ k
 %KEY%	"licen[cs]e"
 %STR%	"(distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes) under =FEW= clearsilver licen[cs]e"
 #
+%ENTRY% _LT_ACE
+%KEY% "software"
+%STR% "you can use doc software in commercial and/or binary software releases"
+#
+%ENTRY% _LT_FACE
+%KEY% "so(ftware|urce)"
+%STR% "you can modify and change the source of face"
+#
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 ##%STR%	"&copy"
