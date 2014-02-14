@@ -1191,9 +1191,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_TITLE_GPL3_ref3_later)) {
       INTERESTING("GPL-3.0+");
+      lmem[_mGPL] = 1;
     }
     else if (INFILE(_TITLE_GPL3_ref3)) {
       INTERESTING("GPL-3.0");
+      lmem[_mGPL] = 1;
     }
     if (INFILE(_LT_LGPL_1) || INFILE(_LT_LGPL_2)) {
       if (INFILE(_PHR_LGPL21_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
@@ -8137,7 +8139,8 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
         break;
         /* allow + only within the regex " [Mm]\+ " */
       case '+':
-        if (cp > buf+1 && (*(cp-1) == 'M' ||
+        if (*(cp+1) == 0 || *(cp+1) == ' ' || *(cp+1) == '\t' || *(cp+1) == '\n' || *(cp+1) == '\r') break;
+        else if (cp > buf+1 && (*(cp-1) == 'M' ||
             *(cp-1) == 'm') && *(cp-2) == ' ' &&
             *(cp+1) == ' ') {
           f = 0; /* no-op */
