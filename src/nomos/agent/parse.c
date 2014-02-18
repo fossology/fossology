@@ -2179,6 +2179,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     lmem[_mMIT] = 1;
   }
+  else if (INFILE(_LT_MIT_0) && !INFILE(_LT_ECL) && !lmem[_mMIT]) {
+    INTERESTING(lDebug ? "MIT(0)" : "MIT-style");
+    lmem[_mMIT] = 1;
+  }
   else if (INFILE(_LT_MPL_OR_MITX)) {
     if (!lmem[_mMPL]) {
       cp = MPLVERS();
@@ -5914,11 +5918,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("LIBGCJ");
   }
 
-  /** MIT license */
-  if (INFILE(_LT_MIT_0) && !lmem[_mMIT]) {
-    INTERESTING(lDebug ? "MIT(0)" : "MIT");
-    lmem[_mMIT] = 1;
-  }
   /** open cascade technology public license */
   if (INFILE(_TITLE_OPEN_CASCADE))
   {
