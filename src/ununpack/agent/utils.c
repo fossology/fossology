@@ -766,7 +766,7 @@ void OctetType(char *Filename, char *TypeBuf)
 
   /* 7zr can handle many formats (including isos), so try this first */
   rc1 = RunCommand("7z","l -y ",Filename,">/dev/null 2>&1",NULL,NULL);
-  rc2 = RunCommand("7z","t -y ",Filename,">/dev/null 2>&1",NULL,NULL);
+  rc2 = RunCommand("7z","t -y -pjunk",Filename,">/dev/null 2>&1",NULL,NULL);
   if ((rc1 || rc2)==0)
   {
     strcpy(TypeBuf,"application/x-7z-w-compressed");
