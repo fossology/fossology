@@ -6804,21 +6804,21 @@ char *lgplVersion(char *filetext, int size, int isML, int isPS)
   traceFunc("== lgplVersion()\n");
 #endif  /* PROC_TRACE */
   /* */
-  if ((INFILE(_PHR_LGPL3_OR_LATER) || INFILE(_PHR_LGPL3_OR_LATER_ref1) || 
-        INFILE(_PHR_LGPL3_OR_LATER_ref2)) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
-    lstr = "LGPL-3.0+";
-  }
-  else if (GPL_INFILE(_PHR_LGPL3_ONLY) ||
-      INFILE(_FILE_LGPLv3) || GPL_INFILE(_PHR_LGPL3_ONLY_ref1) || GPL_INFILE(_PHR_LGPL3_ONLY_ref2)) {
-    lstr = "LGPL-3.0";
-  }
-  else if (INFILE(_PHR_LGPL21_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+  if (INFILE(_PHR_LGPL21_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
     if (INFILE(_TITLE_LGPL_KDE)) {
       lstr = "LGPL-2.1+-KDE-exception";
     }
     else {
       lstr = "LGPL-2.1+";
     }
+  }
+  else if ((INFILE(_PHR_LGPL3_OR_LATER) || INFILE(_PHR_LGPL3_OR_LATER_ref1) || 
+        INFILE(_PHR_LGPL3_OR_LATER_ref2)) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+    lstr = "LGPL-3.0+";
+  }
+  else if (GPL_INFILE(_PHR_LGPL3_ONLY) ||
+      INFILE(_FILE_LGPLv3) || GPL_INFILE(_PHR_LGPL3_ONLY_ref1) || GPL_INFILE(_PHR_LGPL3_ONLY_ref2)) {
+    lstr = "LGPL-3.0";
   }
   else if (INFILE(_PHR_LGPL21_ONLY) ||
       INFILE(_FILE_LGPLv21) || URL_INFILE(_URL_LGPL_V21) || INFILE(_PHR_LGPL21_ONLY_ref)) {
