@@ -1,6 +1,6 @@
 #!/bin/sh
 # This script packages the directory into a tar file.
-# Copyright (C) 2014 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -15,16 +15,21 @@
 #  with this program; if not, write to the Free Software Foundation, Inc.,
 #  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-# make sure we're in a checked out git copy
-if [ ! -d .git ]; then
-   echo "ERROR: No Git information found. This script requires an git tree."
+# make sure we're in a checked out svn copy
+if [ ! -d .svn ]; then
+   echo "ERROR: No SubVersion information found. This script requires an svn tree."
    exit 0
 fi
 
 # Check if SVN is available.  If not, then abort.
-which git >/dev/null 2>&1
+which svn >/dev/null 2>&1
 if [ $? != 0 ]; then
-   echo "ERROR: git command missing."
+   echo "ERROR: svn command missing."
+   exit 1
+fi
+which svnversion >/dev/null 2>&1
+if [ $? != 0 ]; then
+   echo "ERROR: svnversion command missing."
    exit 1
 fi
 
@@ -38,16 +43,36 @@ fi
 
 VERSION="`cat VERSIONSTRING`"
 
-# GIT_REV is the last revision from git info.  This is used for packaging.
-GIT_REV="`git show | head -1 | awk '{print substr($2,1,6)}'`"
+# SVN_REV is the last revision from svn info.  This is used for packaging.
+SVN_REV="`svn info | grep '^Revision:' | awk '{print $2}'`"
 
 TARBASE="fossology-$VERSION"
 # Check for command-line for subversion
 if [ "$1" = "-s" ]; then
-   TARBASE="fossology-$VERSION-$GIT_REV"
+   TARBASE="fossology-$VERSION-$SVN_REV"
 fi
 
-echo "*** Packaging $VERSION (git $GIT_REV) into $TARBASE ***"
+echo "*** Packaging $VERSION (svn $SVN_REV) into $TARBASE ***"
+
+# Check for mixed revisions
+# Warn if the current directory does not match SVN_REV, but allow it
+SVN_CURR="`svnversion -n .`"
+if [ "$SVN_CURR" != "$SVN_REV" ]; then
+   echo "WARNING: Revision ($SVN_REV) does not match current directory"
+   echo "  ($SVN_CURR). Using $SVN_REV, not $SVN_CURR. To use $SVN_CURR,"
+   echo "  commit any changes and run 'svn up' before running this command."
+   echo "  Proceeding anyway..."
+fi
+
+# Check for outstanding changes, warn if they exist, but allow it
+STATUS=`svn status |wc -l`
+if [ $STATUS != 0 ]; then
+   echo "WARNING: there are outstanding changes in this svn tree, but the tar"
+   echo "  file that will be created will be based on SVN revision $SVN_REV and"
+   echo "  will not include these changes. Please run 'make clean' to clean up"
+   echo "  built files and 'svn status' to see outstanding differences."
+   echo "  Proceeding anyway..."
+fi
 
 if [ -d "../$TARBASE" ]; then
    echo "WARNING: ../$TARBASE exists, removing"
@@ -58,12 +83,10 @@ if [ -d "../$TARBASE" ]; then
    fi
 fi
 
-echo "*** Exporting git version $GIT_REV to ../$TARBASE ***"
-mkdir "../$TARBASE"
-cp -r . "../$TARBASE"
-find "../$TARBASE" | grep .git | xargs rm -rf
+echo "*** Exporting svn version $SVN_REV to ../$TARBASE ***"
+svn export -r "$SVN_REV" . "../$TARBASE" >/dev/null
 if [ $? != 0 ]; then
-   echo "ERROR: git export failed."
+   echo "ERROR: svn export failed."
    exit 3
 fi
 
@@ -71,11 +94,11 @@ fi
 (
 cd "../$TARBASE"
 
-echo "*** Storing git version in Makefile.conf ***"
-# Remove the dependency on git; make the version static.
-cp Makefile.conf Makefile.conf.git
-sed -e "s@SVN_REV=\`git .*\`@SVN_REV=${GIT_REV}@" Makefile.conf.git > Makefile.conf
-#rm Makefile.conf.git
+echo "*** Storing svn version in Makefile.conf ***"
+# Remove the dependency on svnversion; make the version static.
+cp Makefile.conf Makefile.conf.svn
+sed -e "s@SVN_REV=\`svnversion \`@SVN_REV=${SVN_REV}@" Makefile.conf.svn > Makefile.conf
+rm Makefile.conf.svn
 )
 
 # Create the tar
