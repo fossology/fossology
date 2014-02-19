@@ -1276,7 +1276,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         else {
           cp = LGPLVERS();
           INTERESTING(lDebug ? "LGPL(ref1)" : cp);
-          lmem[_mGPL] = 1;
         }
         lmem[_mLGPL] = 1;
       }
@@ -6875,7 +6874,7 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
   /* */
   /* special case for Debian copyright files */
   if (INFILE(_TEXT_GPLV3_CR) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
-    INTERESTING("GPL-3.0+");
+    INTERESTING("GPL-3.0");
   }
 
   if (INFILE(_PHR_GPL21_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
