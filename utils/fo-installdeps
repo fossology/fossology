@@ -1,6 +1,6 @@
 
 # FOSSology fo-installdeps script
-# Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -107,7 +107,7 @@ if [ $BUILDTIME ]; then
               sid) apt-get  $YesOpt install $YesOpt postgresql-server-dev-8.4;;
               lucid|natty) apt-get $YesOpt install postgresql-server-dev-8.4;;
               isadora) apt-get $YesOpt install postgresql-server-dev-8.4;;
-              precise|oneiric|quantal) apt-get $YesOpt install postgresql-server-dev-9.1;;
+              precise|oneiric|quantal|raring|saucy) apt-get $YesOpt install postgresql-server-dev-9.1;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac
          fi
@@ -171,7 +171,7 @@ if [ $RUNTIME ]; then
                  apt-get $YesOpt install postgresql-8.4;;
               isadora)
                  apt-get $YesOpt install postgresql-8.4;;
-              precise|oneiric|quantal)
+              precise|oneiric|quantal|raring|saucy)
                  apt-get $YesOpt install postgresql-9.1;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac
