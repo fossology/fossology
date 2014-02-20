@@ -253,9 +253,9 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
 
     // no proxy
     $this->change_proxy("no_proxy", "fossology.org");
-    $command = "$WGET_PATH http://www.fossology.org/testdata/rpms/epel/6/i386/fossology-1.4.1-1.el6.i686.rpm  -d $TEST_RESULT_PATH";
+    $command = "$WGET_PATH http://www.fossology.org/testdata/rpms/fedora/13/i386/fossology-1.4.1-1.fc13.i686.rpm  -d $TEST_RESULT_PATH";
     exec($command);
-    $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/testdata/rpms/epel/6/i386/fossology-1.4.1-1.el6.i686.rpm");
+    $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/testdata/rpms/fedora/13/i386/fossology-1.4.1-1.fc13.i686.rpm");
   }
 
   /**
