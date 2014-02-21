@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -36,12 +36,13 @@ testdata:
 	@# if it exists, do nothing.
 	@# if it does not exist, look in /var/www/testfiles
 	@# if not in /var/www/testfiles, wget it from fossology.org
+	mkdir ../testdata -p
 	@$(foreach test_file, $(TEST_FILES), \
 	    if [ -e ../testdata/$(test_file) ]; then \
 	        echo "../testdata/$(test_file) exists"; \
 	    elif [ -e /var/www/testfiles/delagent/$(test_file) ]; then \
 	        echo "$(test_file) found in /var/www/testfiles/delagent"; \
-	        cp /var/www/testfiles/delagent/$(test_file) ../testdata; \
+	        cp /var/www/testfiles/delagent/$(test_file) ../testdata/; \
 	    else \
 	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
 	        wget --directory-prefix=../testdata http://www.fossology.org/testdata/delagent/$(test_file); \
