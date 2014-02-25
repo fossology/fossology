@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -65,7 +65,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
              If the archive is a directory, then ALL files under it are
              recursively added.
              The archive support regular expression '*', all the matched files will be added.
-                 Note: have to use the real path, and put this path in single/double quotes, e.g. '/tmp/*.php'
+                 Note: have to put this regulaer expresstion in single/double quotes, e.g. '*.php'
     -        = a single hyphen means the archive list will come from stdin.
     -X path  = item to exclude when archive is a directory
              You can specify more than one -X.  For example, to exclude
@@ -81,6 +81,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
   cp2foss \\
     --user USER --password PASSWORD \\
     -f path -d 'the file' /tmp/file
+  One example, to upload all the php files in /tmp:
   cp2foss --user USER --password PASSWORD -f path -d 'the file' '/tmp/*.php'
 
   Deprecated options:
@@ -496,8 +497,18 @@ if (!$UploadArchive) {  // upload is empty
 /** get real path, and file name */
 $UploadArchiveTmp = "";
 $UploadArchiveTmp = realpath($UploadArchive);
+print "UploadArchive, UploadArchiveTmp is:$UploadArchive, $UploadArchiveTmp\n";
 if (!$UploadArchiveTmp)  { // neither a file nor folder from server?
     print "NOTE: '$UploadArchive' is a URL or does not exist or a regular expression file name.\n";
+    if (filter_var($url, FILTER_VALIDATE_URL)) {
+      print "NOTE: it is one URL. \n";
+    }
+    else {
+      print "NOTE: it is one regular expresstion file. \n";
+      if ("/" != $UploadArchive[0]) { // it is a absolute path
+        $UploadArchive = getcwd()."/".$UploadArchive;
+      }
+    }
 } else {  // is a file or folder from server
   $UploadArchive = $UploadArchiveTmp;
 }

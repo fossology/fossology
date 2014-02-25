@@ -1,5 +1,5 @@
 # cp2foss.pod man page input file
-# Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P.
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ it is used as the source to add. If the archive is a directory, then I<all>
 files under it are recursively added.
 
 The archive support regular expression '*', all the matched files will be added.
-Note: have to use the real path, and put this path in single/double quotes, e.g. '/tmp/*.php'
+Note: have to put this regulaer expresstion in single/double quotes, e.g. '*.php'
 
 A single hyphen means the archive list will come from standard in (stdin).
 
