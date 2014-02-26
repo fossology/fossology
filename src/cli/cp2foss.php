@@ -497,14 +497,12 @@ if (!$UploadArchive) {  // upload is empty
 /** get real path, and file name */
 $UploadArchiveTmp = "";
 $UploadArchiveTmp = realpath($UploadArchive);
-print "UploadArchive, UploadArchiveTmp is:$UploadArchive, $UploadArchiveTmp\n";
 if (!$UploadArchiveTmp)  { // neither a file nor folder from server?
-    print "NOTE: '$UploadArchive' is a URL or does not exist or a regular expression file name.\n";
-    if (filter_var($url, FILTER_VALIDATE_URL)) {
-      print "NOTE: it is one URL. \n";
+    if (filter_var($UploadArchive, FILTER_VALIDATE_URL)) {
+      print "NOTE: it is one URL or does not exist. \n";
     }
     else {
-      print "NOTE: it is one regular expresstion file. \n";
+      print "NOTE: it is one regular expresstion file or does not exist. \n";
       if ("/" != $UploadArchive[0]) { // it is a absolute path
         $UploadArchive = getcwd()."/".$UploadArchive;
       }

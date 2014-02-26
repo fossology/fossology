@@ -130,7 +130,9 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
    * 3. upload a dir to one specified path
    *    schedule all agents, set the description for this upload.
    * 4. Loads every file under the corrent directory, except files in the Subversion directories.  The files are
-          placed in the UI under the folder "test/exclude/s-u" 
+   *       placed in the UI under the folder "test/exclude/s-u" 
+   * 5. upload php file file in cli/tests through regular expression
+   *
    */
   function test_upload_from_server() {
     //global $SYSCONF_DIR;
@@ -271,6 +273,33 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
 
+    /** cp2foss --user USER --password PASSWORD -q all -A -f 'regular expression testing' -n 'test regular expression dir'  \ 
+      -d 'test des regular expression' '*.php' */
+    $out = "";
+    $pos = 0;
+    $command = "$cp2foss_path $auth -q all -A -f 'regular expression testing' -n 'test regular expression dir' -d 'test des regular expression' '*.php' -v";
+    fwrite(STDOUT, "DEBUG: Running $command\n");
+    $last = exec("$command 2>&1", $out, $rtn);
+    sleep(10);
+    // print_r($out);
+    $upload_id = 0;
+    /** get upload id that you just upload for testing */
+    if ($out && $out[20]) {
+      $upload_id = get_upload_id($out[18]);
+    } else $this->assertFalse(TRUE);
+    $agent_status = 0;
+    $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
+    $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status($test_dbh, "nomos", $upload_id);
+    $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status($test_dbh, "copyright", $upload_id);
+    $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status($test_dbh, "pkgagent", $upload_id);
+    $this->assertEquals(1, $agent_status);
+
     pg_close($test_dbh);
 
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
@@ -307,6 +336,13 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
+    $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status($test_dbh,"nomos", $upload_id);
+    $this->assertEquals(1, $agent_status);
+
     pg_close($test_dbh);
 
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
@@ -331,7 +367,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
     //$this->assertEquals(58, $output_msg_count);
-    $this->assertEquals(58, $output_msg_count, "Test that the number of output lines from '$command' is 58");
+    $this->assertEquals(59, $output_msg_count, "Test that the number of output lines from '$command' is 59");
     // print_r($out);
     /** list agents */
     $out = "";
