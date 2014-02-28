@@ -205,7 +205,11 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
   {
     /* if command failed but we want to continue anyway */
     /** Note: CMD_DEFAULT will never get here because rc==0 **/
-    LOG_ERROR("pfile %s Command %s failed on: %s",
+    if (strstr(CMD[CI->PI.Cmd].Cmd, "unzip") && (rc == 82))
+      LOG_ERROR("pfile %s Command %s failed on: %s as require password.",
+        Pfile_Pk, CMD[CI->PI.Cmd].Cmd, CI->Source)
+    else
+      LOG_ERROR("pfile %s Command %s failed on: %s",
         Pfile_Pk, CMD[CI->PI.Cmd].Cmd, CI->Source)
     if (ForceContinue) rc=-1;
   }
