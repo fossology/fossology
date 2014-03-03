@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -125,7 +125,9 @@ if (!empty($Row["job_upload_fk"]))
     DBCheckResult($uploadresult, $uploadsql, __FILE__, __LINE__);
     if (pg_num_rows($uploadresult) == 0)
     {
-      $upload_filename = "Deleted " . $Row['job_upload_fk'];
+      /* upload has been deleted so try to get the job name from the original upload job record */
+      $JobName = $this->GetJobName($Row["job_upload_fk"]);
+      $upload_filename = "Deleted " . $JobName;
       $upload_desc = '';
     }
     else
@@ -381,7 +383,12 @@ if (!empty($Row["job_upload_fk"]))
         else
         {
           $UploadRec = GetSingleRec("upload", "right join job on upload_pk = job_upload_fk where job_upload_fk = '$upload_pk'");
-	  $UploadRec["upload_filename"] = "Delete Upload: " . $UploadRec["job_upload_fk"] . "(" . $UploadRec["job_name"] . ")";
+
+          /* upload has been deleted so try to get the job name from the original upload job record */
+          $JobName = $this->GetJobName($UploadRec["job_upload_fk"]);
+
+	      $UploadRec["upload_filename"] = "Deleted Upload: " . $UploadRec["job_upload_fk"] . "(" . $JobName . ")";
+
           $UploadRec["upload_pk"] = $UploadRec["job_upload_fk"];
           $JobData[$job_pk]["upload"] = $UploadRec;
         }
@@ -417,6 +424,28 @@ if (!empty($Row["job_upload_fk"]))
     return $JobData;
   }  /* GetJobInfo() */
 
+
+  /** 
+   * @brief Return job name.  Used for deleted jobs
+   * @param upload_pk
+   * @return Original job name in job record.
+   */
+  function GetJobName($upload_pk)
+  {
+    global $PG_CONN;
+
+    /* upload has been deleted so try to get the job name from the original upload job record */
+    $sql = "SELECT job_name from job where job_upload_fk='$upload_pk' order by job_pk asc";
+    $JobResult = pg_query($PG_CONN, $sql);
+    DBCheckResult($JobResult, $sql, __FILE__, __LINE__);
+    $JobRow = pg_fetch_assoc($JobResult);
+    pg_free_result($JobResult);
+    if (empty($JobRow))
+      $JobName = $upload_pk;
+    else
+      $JobName = $JobRow['job_name'];
+    return $JobName;
+  }
 
   /**
    * @brief Returns an upload job status in html
