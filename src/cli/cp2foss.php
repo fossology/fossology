@@ -499,13 +499,17 @@ $UploadArchiveTmp = "";
 $UploadArchiveTmp = realpath($UploadArchive);
 if (!$UploadArchiveTmp)  { // neither a file nor folder from server?
     if (filter_var($UploadArchive, FILTER_VALIDATE_URL)) {
-      print "NOTE: it is one URL or does not exist. \n";
+      print "NOTE: i seems that $UploadArchive is one URL. \n";
     }
-    else {
-      print "NOTE: it is one regular expresstion file or does not exist. \n";
+    else if (strchr($UploadArchive, '*')) {
+      print "NOTE: it seems that $UploadArchive is one regular expression file name. \n";
       if ("/" != $UploadArchive[0]) { // it is a absolute path
         $UploadArchive = getcwd()."/".$UploadArchive;
       }
+    }
+    else {
+      print "Note: it seems that $UploadArchive does not exist. \n";
+      exit(1);
     }
 } else {  // is a file or folder from server
   $UploadArchive = $UploadArchiveTmp;

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -43,8 +43,9 @@ class upload_srv_files extends FO_Plugin {
   {
     /** local file */
     if ($server === 'localhost' || empty($server))
-    {
-      return @fopen($path, $persmission);
+    { 
+      $temp_path = str_replace('\ ', ' ', $path); // replace '\ ' with ' '
+      return @fopen($temp_path, $persmission);
     } else return 1;  // don't do the file permission check if the file is not on the web server
   }
 
@@ -61,7 +62,8 @@ class upload_srv_files extends FO_Plugin {
     /** local file */
     if ($server === 'localhost' || empty($server)) 
     {
-      return file_exists($path);
+      $temp_path = str_replace('\ ', ' ', $path); // replace '\ ' with ' '
+      return file_exists($temp_path);
     } else return 1;  // don't do the file exist check if the file is not on the web server
   }
 

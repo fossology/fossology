@@ -1,7 +1,7 @@
 /***************************************************************
  wget_agent: Retrieve a file and put it in the database.
 
- Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -560,9 +560,17 @@ void    SetEnv  (char *S, char *TempFileDir)
   /* third value is the URL location -- taint any single-quotes */
   SLen=0;
   GLen=0;
-  while((GLen < MAXCMD-4) && S[SLen] && !isspace(S[SLen]))
+  while((GLen < MAXCMD-4) && S[SLen])
   {
-    if ((S[SLen] == '\'') || isspace(S[SLen]) || !isprint(S[SLen]))
+    if ((S[SLen] == '\\') && isprint(S[SLen+1])) // in file path, if include '\ ', that mean this file name include spaces
+    {
+      LOG_FATAL("S[SLen] is:%c\n", S[SLen]);
+      GlobalURL[GLen++] = ' '; 
+      SLen += 2;
+      continue;
+    }
+    else if ((S[SLen] != '\\') && isspace(S[SLen])) break;
+    else if ((S[SLen] == '\'') || isspace(S[SLen]) || !isprint(S[SLen]))
     {
       sprintf(GlobalURL+GLen,"%%%02x",(unsigned char)(S[SLen]));
       GLen += 3;
