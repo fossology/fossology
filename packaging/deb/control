@@ -65,7 +65,6 @@ Description: architecture for analyzing software, scheduler
 Package: fossology-db
 Architecture: any
 Depends: PBDEP, ${misc:Depends}
-Replaces: fossology-common
 Description: architecture for analyzing software, database
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
