@@ -1721,6 +1721,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   {
     INTERESTING(lDebug ? "GPLV2+(named)" : "GPL-2.0+");
   }
+  else if (INFILE(_LT_TAPJOY)) {
+    INTERESTING("Tapjoy");
+    lmem[_fGPL] = 1;
+    lmem[_mMIT] = 1;
+  }
   else if (!lmem[_mGPL] && !lmem[_mGFDL] && !lmem[_mLGPL] && !lmem[_fZPL]
       && (!INFILE(_LT_MPL_SECONDARY))
       && (!INFILE(_TEXT_NOT_GPL))
@@ -1789,7 +1794,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_mMIT] = 1;
   }
   else if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) && 
-      !INFILE(_TITLE_MIT_EXHIBIT) && !INFILE(_TITLE_SGI) && !lmem[_fBSD]) {
+      !INFILE(_TITLE_MIT_EXHIBIT) && !INFILE(_TITLE_SGI) && !lmem[_fBSD] && !lmem[_mMIT]) {
     if(INFILE(_LT_MIT_NO_EVIL)) {
       INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
       lmem[_mMIT] = 1;

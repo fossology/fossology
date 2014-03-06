@@ -5606,6 +5606,10 @@ k
 %KEY% "so(ftware|urce)"
 %STR% "you can modify and change the source of face"
 #
+%ENTRY% _LT_TAPJOY
+%KEY% "licen[cs]e"
+%STR% "you and the company or entity that you represent =FEW= are agreeing to be bound by and are becoming a party to this tapjoy sdk licen[cs]e agreement"
+#
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 ##%STR%	"&copy"
