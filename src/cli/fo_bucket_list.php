@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2013-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -90,15 +90,41 @@ if (!(is_numeric($item)) &&  !(is_numeric($upload))) {
   return 1;
 }
 
-/** get upload id through uploadtree id */
-if (is_numeric($item) && !is_numeric($upload)) $upload = GetUploadID($item);
+/** check upload Id and uploadtree ID */
+$upload_from_item = $uploadtree1stid = "";
+if (is_numeric($item)) $upload_from_item = GetUploadID($item);
+else if (empty($item) && is_numeric($upload)) {
+  $uploadtree1stid = Get1stUploadtreeID($upload);
+  if (empty($uploadtree1stid)) {
+    print "Upload $upload does not exist.\n";
+    print $Usage;
+    return 1;
+  }
+  else {
+    $item = $uploadtree1stid;
+    $upload_from_item = $upload;
+  }
+}
 
-//print "Upload ID, Uploadtree ID, bucket ID, bucket agent ID, nomos agent ID is $upload, $item, $bucket, $bucket_agent, $nomos_agent\n";
+// print "\$upload_from_item, \$item, \$upload, \$uploadtree1stid are: $upload_from_item, $item, $upload, $uploadtree1stid \n";
+
+if (empty($upload_from_item)) {
+  print "Uploadtree ID $item does not exist.\n";
+  print $Usage;
+  return 1;
+} else if (empty($upload)) {
+  $upload = $upload_from_item;
+} else if ($upload_from_item != $upload) {
+  print "Uploadtree ID $item does not under Upload $upload.\n";
+  print $Usage;
+  return 1;
+}
 
 /** check if parameters are valid */
-if (!is_numeric($bucket) || !is_numeric($upload) || !is_numeric($bucket_agent) || !is_numeric($nomos_agent))
+if (!is_numeric($bucket) || !is_numeric($bucket_agent) || !is_numeric($nomos_agent))
 {
-  print "Upload ID or Uploadtree ID  or bucket ID or bucket agent ID or nomos agent ID is not digital number\n";
+  print "please enter the correct bucket agent ID and nomos agent ID and bucket ID.\n";
+  // print "\$upload, \$item are $upload, $item \n";
   Usage4Options($upload, $item);
   print $Usage;
   return 1;
@@ -162,7 +188,7 @@ function GetBucketList($bucket_pk, $bucket_agent, $nomos_agent, $uploadtree_pk, 
     return 1;
   }
 
-  print "For uploadtree(ID is:$uploadtree_pk), upload(ID is:$upload_pk) has bucket $row[bucket_name]:\n";
+  print "For uploadtree $uploadtree_pk under upload $upload_pk has bucket $row[bucket_name]:\n";
   /* loop through all the records in this tree */
   $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename, bucket_file
     where upload_fk=$upload_pk
@@ -198,14 +224,17 @@ function Usage4Options($UploadID, $item)
   $bucket_arr = pg_fetch_all($result);
   pg_free_result($result);
   $clause4uploadtree = "";
-  if ($item) $clause4uploadtree = " uploadtree(ID is:$item)";
+  if ($item) $clause4uploadtree = " uploadtree $item";
   if ($bucket_arr) {
-    print "For"."$clause4uploadtree upload(ID is:$UploadID), you can select specify options below: \n 
+    print "For"."$clause4uploadtree under upload $UploadID, you can specify options below: \n 
       bucket_agent_id : -a
       nomos_agent_id  : -n
       bucket_id       : -b
       \n";
     print_r($bucket_arr);
+  }
+  else {
+    print "Please confirm uploadtree $item under upload $UploadID has done one bucket scanning.\n";
   }
 }
 

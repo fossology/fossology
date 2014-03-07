@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -307,6 +307,26 @@ function GetUploadID($uploadtreeid)
   $uploadid = $upload_rec['upload_fk'];
   if (empty($uploadid)) return "" ;
   else return $uploadid;
+}
+
+/**
+ * \brief get 1st uploadtree id through upload id
+ *
+ * \param $upload - upload id
+ *
+ * \return return 1st uploadtree id 
+ */
+function Get1stUploadtreeID($upload)
+{
+  global $PG_CONN;
+  if (empty($upload)) return "";
+  $sql = "SELECT max(uploadtree_pk) from uploadtree where upload_fk = $upload and parent is null;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  $uploadtree_id = $row['max'];
+  pg_free_result($result);
+  return $uploadtree_id;
 }
 
 /**
