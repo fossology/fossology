@@ -40963,65 +40963,6 @@ Surviving Provisions.
 Sections 1.b, 2, and 4 through 12, will survive any termination of this Agreement.
 
 Version date: February 4, 2009', 'http://info.yahoo.com/legal/us/yahoo/toolbar/tbeula/tbeula-282.html', NULL, NULL, NULL, 'Yahoo Software License', NULL, NULL, NULL, '', NULL, false, false, false, '40f189830818d0468048f5da21bd12d0', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel-EULA', 'Intel Open Source License 
-
-
-Copyright (c) 1996-2000 Intel Corporation All rights reserved. 
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
-•	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
-•	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
-•	Neither the name of the Intel Corporation nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE INTEL OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. EXPORT LAWS: THIS LICENSE ADDS NO RESTRICTIONS TO THE EXPORT LAWS OF YOUR JURISDICTION. It is licensee''s responsibility to comply with any export regulations applicable in licensee''s jurisdiction. Under CURRENT (May 2000) U.S. export regulations this software is eligible for export from the U.S. and can be downloaded by or otherwise exported or reexported worldwide EXCEPT to U.S. embargoed destinations which include Cuba, Iraq, Libya, North Korea, Iran, Syria, Sudan, Afghanistan and any other country to which the U.S. has embargoed goods and services.', 'http://opensource.org/licenses/Intel', NULL, NULL, NULL, 'Intel Open Source License', NULL, NULL, NULL, '', NULL, false, false, false, '273a6c7b3d192b2f6c368e706423b815', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (320, 'Naumen', 'NAUMEN Public License
-This software is Copyright (c) NAUMEN (tm) and Contributors.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or
-without modification, are permitted provided that the following
-conditions are met:
-
-1. Redistributions in source code must retain the above
-copyright notice, this list of conditions, and the following
-disclaimer.
-
-2. Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions, and the following
-disclaimer in the documentation and/or other materials
-provided with the distribution.
-
-3. The name NAUMEN (tm) must not be used to
-endorse or promote products derived from this software without prior
-written permission from NAUMEN.
-
-4. The right to distribute this software or to use it for any
-purpose does not give you the right to use Servicemarks (sm)
-or Trademarks (tm) of NAUMEN.
-
-5. If any files originating from NAUMEN or Contributors are modified, you must
-cause the modified files to carry prominent notices stating
-that you changed the files and the date of any change.
-
-Disclaimer:
-
-THIS SOFTWARE IS PROVIDED BY NAUMEN "AS IS" AND ANY EXPRESSED
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NAUMEN
-OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGE.
-
-This software consists of contributions made by NAUMEN
-and Contributors. Specific attributions are listed in the
-accompanying credits file.', 'http://www.opensource.org/licenses/naumen.php', NULL, NULL, NULL, 'Naumen Public License', NULL, NULL, NULL, '', NULL, false, false, false, '19fb518675cb6fb01d4724c2667f16c6', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (531, 'Intel-WLAN', 'Intel wireless LAN adapters are engineered, manufactured, tested, and
 quality checked to ensure that they meet all necessary local and
 governmental regulatory agency requirements for the regions that they
@@ -41653,3 +41594,543 @@ To the extent possible, if any provision of this Public License is deemed unenfo
 No term or condition of this Public License will be waived and no failure to comply consented to unless expressly agreed to by the Licensor.
 Nothing in this Public License constitutes or may be interpreted as a limitation upon, or waiver of, any privileges and immunities that apply to the Licensor or You, including from the legal processes of any jurisdiction or authority.
 Creative Commons is not a party to its public licenses. Notwithstanding, Creative Commons may elect to apply one of its public licenses to material it publishes and in those instances will be considered the “Licensor.” Except for the limited purpose of indicating that material is shared under a Creative Commons public license or as otherwise permitted by the Creative Commons policies published at creativecommons.org/policies, Creative Commons does not authorize the use of the trademark “Creative Commons” or any other trademark or logo of Creative Commons without its prior written consent including, without limitation, in connection with any unauthorized modifications to any of its public licenses or any other arrangements, understandings, or agreements concerning use of licensed material. For the avoidance of doubt, this paragraph does not form part of the public licenses.', 'http://creativecommons.org/licenses/by-nc-nd/4.0/legalcode', NULL, NULL, NULL, 'Creative Commons Attribution Non Commercial No Derivatives 4.0', NULL, NULL, NULL, '', NULL, false, false, false, 'ca3dccf53daf891819084678ff6a916f', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel-EULA', 'Intel Open Source License 
+
+
+Copyright (c) 1996-2000 Intel Corporation All rights reserved. 
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
+•	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+•	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+•	Neither the name of the Intel Corporation nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE INTEL OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. EXPORT LAWS: THIS LICENSE ADDS NO RESTRICTIONS TO THE EXPORT LAWS OF YOUR JURISDICTION. It is licensee''s responsibility to comply with any export regulations applicable in licensee''s jurisdiction. Under CURRENT (May 2000) U.S. export regulations this software is eligible for export from the U.S. and can be downloaded by or otherwise exported or reexported worldwide EXCEPT to U.S. embargoed destinations which include Cuba, Iraq, Libya, North Korea, Iran, Syria, Sudan, Afghanistan and any other country to which the U.S. has embargoed goods and services.', 'http://opensource.org/licenses/Intel', NULL, NULL, NULL, 'Intel Open Source License', NULL, NULL, NULL, '', NULL, false, false, false, '273a6c7b3d192b2f6c368e706423b815', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (320, 'Naumen', 'NAUMEN Public License
+This software is Copyright (c) NAUMEN (tm) and Contributors.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or
+without modification, are permitted provided that the following
+conditions are met:
+
+1. Redistributions in source code must retain the above
+copyright notice, this list of conditions, and the following
+disclaimer.
+
+2. Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions, and the following
+disclaimer in the documentation and/or other materials
+provided with the distribution.
+
+3. The name NAUMEN (tm) must not be used to
+endorse or promote products derived from this software without prior
+written permission from NAUMEN.
+
+4. The right to distribute this software or to use it for any
+purpose does not give you the right to use Servicemarks (sm)
+or Trademarks (tm) of NAUMEN.
+
+5. If any files originating from NAUMEN or Contributors are modified, you must
+cause the modified files to carry prominent notices stating
+that you changed the files and the date of any change.
+
+Disclaimer:
+
+THIS SOFTWARE IS PROVIDED BY NAUMEN "AS IS" AND ANY EXPRESSED
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NAUMEN
+OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+This software consists of contributions made by NAUMEN
+and Contributors. Specific attributions are listed in the
+accompanying credits file.', 'http://www.opensource.org/licenses/naumen.php', NULL, NULL, NULL, 'Naumen Public License', NULL, NULL, NULL, '', NULL, false, false, false, '19fb518675cb6fb01d4724c2667f16c6', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (538, 'See-file', 'This license means that you can get copyright or license information through a reference file.
+
+one example below:
+/* 
+ * Copyright (C) 2007  Olli Salonen &lt;oasalonen@gmail.com&gt;
+ * see btnx.c for detailed license information
+ * 
+ * revoco.c is under a different copyright. See that file for details.
+ * 
+ */', '', NULL, NULL, NULL, 'See-file', NULL, NULL, NULL, '', NULL, false, false, false, '2a6b03dc16aceeb103ca9b8865a7e18e', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (539, 'LGPL-2.1+-KDE-exception', 'This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) version 3, or any
+    later version accepted by the membership of KDE e.V. (or its
+    successor approved by the membership of KDE e.V.), Nokia Corporation
+    (or its successors, if any) and the KDE Free Qt Foundation, which shall
+    act as a proxy defined in Section 6 of version 3 of the license.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.', '', NULL, NULL, NULL, 'LGPL-2.1+-KDE-exception', NULL, NULL, NULL, '', NULL, false, false, false, '9d7f7fa667748fc9599b51f4f9a50813', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (540, 'LIBGCJ', 'Jan 21, 2002
+
+The libgcj library is licensed under the terms of the GNU General
+Public License.
+
+Linking this library statically or dynamically with other modules is
+making a combined work based on this library.  Thus, the terms and
+conditions of the GNU General Public License cover the whole
+combination.
+
+As a special exception, the copyright holders of this library give you
+permission to link this library with independent modules to produce an
+executable, regardless of the license terms of these independent
+modules, and to copy and distribute the resulting executable under
+terms of your choice, provided that you also meet, for each linked
+independent module, the terms and conditions of the license of that
+module.  An independent module is a module which is not derived from
+or based on this library.  If you modify this library, you may extend
+this exception to your version of the library, but you are not
+obligated to do so.  If you do not wish to do so, delete this
+exception statement from your version.
+
+You should have received a copy of the GNU General Public License
+along with libjava; see the file COPYING.  If not, write to the
+Free Software Foundation, 51 Franklin Street, Fifth Floor,
+Boston, MA 02110-1301, USA.', '', NULL, NULL, NULL, 'LIBGCJ', NULL, NULL, NULL, '', NULL, false, false, false, '458324bdae28af6aaf3a4613f33035e9', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (541, 'WordNet-3.0', 'WordNet Release 3.0 This software and database is being provided to you, the LICENSEE, by Princeton University under the following license. By obtaining, using and/or copying this software and database, you agree that you have read, understood, and will comply with these terms and conditions.: Permission to use, copy, modify and distribute this software and database and its documentation for any purpose and without fee or royalty is hereby granted, provided that you agree to comply with the following copyright notice and statements, including the disclaimer, and that the same appear on ALL copies of the software, database and documentation, including modifications that you make for internal use or for distribution. WordNet 3.0 Copyright 2006 by Princeton University. All rights reserved. THIS SOFTWARE AND DATABASE IS PROVIDED "AS IS" AND PRINCETON UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED. BY WAY OF EXAMPLE, BUT NOT LIMITATION, PRINCETON UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES OF MERCHANT- ABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE, DATABASE OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS. The name of Princeton University or Princeton may not be used in advertising or publicity pertaining to distribution of the software and/or database. Title to copyright in this software, database and any associated documentation shall at all times remain with Princeton University and LICENSEE agrees to preserve same.', '', NULL, NULL, NULL, 'WordNet 3.0 license', NULL, NULL, NULL, '', NULL, false, false, false, 'eb77df57e088fba17c3bfc522b24b5d6', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (542, 'ClearSilver', 'Copyright 2001-2009 Brandon Long
+ClearSilver is now licensed under the New BSD License.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', ' http://www.clearsilver.net/license.hdf', NULL, NULL, NULL, 'ClearSilver', NULL, NULL, NULL, '', NULL, false, false, false, 'a924f13305c50cc585a148ff46f09c37', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (543, 'FaCE', '==
+== Copyright and Licensing Information
+== $Id: License.txt 94670 2011-10-07 09:56:15Z johnnyw $
+==
+
+ACE(tm) and TAO(tm) are copyrighted by Dr. Douglas C. Schmidt and the Center for Distributed
+Object Computing (''DOC'' group) at Washington University, Copyright (C) 1993 - 2002, all rights
+reserved.  Since ACE and TAO are open source, free software, you are free to use, modify, and
+distribute the ACE and TAO source code and object code produced from the source, as long as
+you include this copyright statement along with code built using ACE and TAO.  Please refer to
+ACE and TAO documentations for detailed copyright and license information on ACE and TAO.
+
+FaCE is an additional front-end shell package designed for ACE and TAO testing work for Pocket
+PC 2002 platform, created and released by Object Computing, Inc. (OCI) and distributed with ACE
+and TAO under the same licensing terms. You can modify and change the source of FaCE for your
+own use as long as you provide attribution to OCI by including its copyright statement in your
+distributions of source and object code. OCI welcomes submissions of improvements to the FaCE
+code base.
+
+FaCE is copyrighted by Object Computing, Inc., St. Louis Missouri, Copyright (C) 2002,
+all rights reserved.
+
+
+==
+== Warranty Information
+==
+
+FaCE is provided ''as is'' without warranties of any kind.', 'http://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/contrib/FaCE/License.txt', NULL, NULL, NULL, 'FaCE', NULL, NULL, NULL, '', NULL, false, false, false, '5c72293b0a806db1ea92cdc1914c6f35', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (544, 'ACE', 'Copyright and Licensing Information for ACE(TM), TAO(TM), CIAO(TM), DAnCE(TM), and CoSMIC(TM)
+
+ACE(TM), TAO(TM), CIAO(TM), DAnCE>(TM), and CoSMIC(TM) (henceforth referred to as "DOC software") are copyrighted by Douglas C. Schmidt and his research group at Washington University, University of California, Irvine, and Vanderbilt University, Copyright (c) 1993-2009, all rights reserved. Since DOC software is open-source, freely available software, you are free to use, modify, copy, and distribute--perpetually and irrevocably--the DOC software source code and object code produced from the source, as well as copy and distribute modified versions of this software. You must, however, include this copyright statement along with any code built using DOC software that you release. No copyright statement needs to be provided if you just ship binary executables of your software products.
+You can use DOC software in commercial and/or binary software releases and are under no obligation to redistribute any of your source code that is built using DOC software. Note, however, that you may not misappropriate the DOC software code, such as copyrighting it yourself or claiming authorship of the DOC software code, in a way that will prevent DOC software from being distributed freely using an open-source development model. You needn''t inform anyone that you''re using DOC software in your software, though we encourage you to let us know so we can promote your project in the DOC software success stories.
+
+The ACE, TAO, CIAO, DAnCE, and CoSMIC web sites are maintained by the DOC Group at the Institute for Software Integrated Systems (ISIS) and the Center for Distributed Object Computing of Washington University, St. Louis for the development of open-source software as part of the open-source software community. Submissions are provided by the submitter ``as is'''' with no warranties whatsoever, including any warranty of merchantability, noninfringement of third party intellectual property, or fitness for any particular purpose. In no event shall the submitter be liable for any direct, indirect, special, exemplary, punitive, or consequential damages, including without limitation, lost profits, even if advised of the possibility of such damages. Likewise, DOC software is provided as is with no warranties of any kind, including the warranties of design, merchantability, and fitness for a particular purpose, noninfringement, or arising from a course of dealing, usage or trade practice. Washington University, UC Irvine, Vanderbilt University, their employees, and students shall have no liability with respect to the infringement of copyrights, trade secrets or any patents by DOC software or any part thereof. Moreover, in no event will Washington University, UC Irvine, or Vanderbilt University, their employees, or students be liable for any lost revenue or profits or other special, indirect and consequential damages.
+
+DOC software is provided with no support and without any obligation on the part of Washington University, UC Irvine, Vanderbilt University, their employees, or students to assist in its use, correction, modification, or enhancement. A number of companies around the world provide commercial support for DOC software, however. DOC software is Y2K-compliant, as long as the underlying OS platform is Y2K-compliant. Likewise, DOC software is compliant with the new US daylight savings rule passed by Congress as "The Energy Policy Act of 2005," which established new daylight savings times (DST) rules for the United States that expand DST as of March 2007. Since DOC software obtains time/date and calendaring information from operating systems users will not be affected by the new DST rules as long as they upgrade their operating systems accordingly.
+
+The names ACE(TM), TAO(TM), CIAO(TM), DAnCE(TM), CoSMIC(TM), Washington University, UC Irvine, and Vanderbilt University, may not be used to endorse or promote products or services derived from this source without express written permission from Washington University, UC Irvine, or Vanderbilt University. This license grants no permission to call products or services derived from this source ACE(TM), TAO(TM), CIAO(TM), DAnCE(TM), or CoSMIC(TM), nor does it grant permission for the name Washington University, UC Irvine, or Vanderbilt University to appear in their names.
+
+If you have any suggestions, additions, comments, or questions, please let me know.
+
+Douglas C. Schmidt', 'http://www.cs.wustl.edu/~schmidt/ACE-copying.html', NULL, NULL, NULL, 'ACE', NULL, NULL, NULL, '', NULL, false, false, false, '7305bb2575f9bc7e96c86816c47aaada', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (545, 'Tapjoy', 'Copyright © 2014 Tapjoy, Inc. All Rights Reserved
+TAPJOY SDK DOWNLOAD LICENSE AGREEMENT
+
+BY USING THE SDK, YOU AND THE COMPANY OR ENTITY THAT YOU REPRESENT ("YOU") ARE AGREEING TO BE BOUND BY AND ARE BECOMING A PARTY TO THIS TAPJOY SDK LICENSE AGREEMENT ("AGREEMENT"). IF YOU DO NOT AGREE TO ALL OF THE TERMS OF THIS AGREEMENT, CLICK THE "CANCEL" BUTTON AND THE DOWNLOAD AND INSTALLATION PROCESS WILL NOT CONTINUE. IF THESE TERMS ARE CONSIDERED AN OFFER, ACCEPTANCE IS EXPRESSLY LIMITED TO THESE TERMS.
+
+GRANT. Subject to Your compliance with all of the terms and conditions of this Agreement, Tapjoy, Inc. ("Tapjoy") hereby grants You (i) if you are a publisher, a limited, personal, non-sublicensable, non-transferable, royalty-free, nonexclusive license to copy, install and use the SDK development kit that You are about to download along with any documentation that accompanies it (collectively, the "SDK") solely for the purpose of internally creating end user mobile (including tablet) applications ("Application(s)") that are interoperable with the Tapjoy service (as such service is described at www.Tapjoy.com) (the "Service"), and (ii) if you are an advertiser, a limited, personal, non-sublicensable, non-transferable, royalty-free, nonexclusive license to copy, install and use the SDK solely for the purpose of advertising with the Tapjoy Service. You may exercise the foregoing license only within and for the benefit of Your organization. You shall not distribute the SDK to any third party.
+USER DATA. You agree that the SDK will enable You to exchange Your user information with Tapjoy which may inculde UDID (unique device identifier), MAC address and OpenUDID. As a condition of any user of the SDKs, You must obtain express consent to collect and share user data with Tapjoy by including, as applicable, in Your terms of service and/or privacy policy provisions the following (or similar terms that are no less protective of Tapjoy):
+You agree that in order to provide services to you which you have requested including relevant content and advertising, and to track and award virtual rewards, we may exchange information that we collect from you with third parties who help us perform these tasks and provide these products and services including UDID (unique device identifier), MAC address, OpenUDID, information about your device systems, application software and periphials, and the country setting on the device.
+
+RESTRICTIONS. You shall not, directly or indirectly (or allow any third party to): use the SDK to create (or facilitate the creation of) any product or service that is competitive (in any way) with the Service; use the SDK for any commercial purpose (except to the extent, if you are a publisher, your Application(s) are considered to have a "commercial purpose"); rent or lease the SDK; use the SDK for timesharing or service bureau purposes, or otherwise for the benefit of third parties; use the SDK for performing comparisons or other "benchmarking" activities, either alone or in connection with any software (and You will not publish any such performance information or comparisons); use the SDK except as expressly licensed above; or remove or alter or obscure any proprietary notices from the SDK. Further, if Tapjoy makes available and You use the SDK in compiled form, You shall not decompile, reverse engineer, modify or create derivative works of the SDK (including the runtime components and any other portions thereof).
+OWNERSHIP; FEEDBACK. As between the parties, title, ownership rights, and intellectual property rights in and to the SDK, and any copies or portions thereof, shall remain in Tapjoy and its suppliers or licensors. You agree that Tapjoy may collect and use comments, feedback, suggestions and other technical information provided by you, if any, related to the SDK, and that Tapjoy may use this information to improve, develop and otherwise provide applications, services and technologies. You understand that Tapjoy may modify or discontinue offering the SDK at any time. The SDK is protected by the copyright laws of the United States and international copyright treaties. Tapjoy reserves all rights in the SDK not expressly licensed above.
+SUPPORT AND UPGRADES. If Tapjoy provides You with any upgrades, patches, enhancements, or fixes for the SDK, then the items that are provided will become part of the SDK and subject to this Agreement. Tapjoy shall have no obligation, however, under this Agreement to provide any upgrades, patches, enhancements, fixes or any other support to You for the SDK. Tapjoy may make such support services available to You under a separate agreement for a fee.
+INDEMNITY. You agree that Tapjoy shall have no liability whatsoever for any use You make of the SDK. You hereby agree to indemnify and hold harmless Tapjoy from any and all claims, demands, damages, losses, liabilities, costs, and expenses (including attorney''s fees) arising from Your use of the SDK.
+WARRANTY AND DISCLAIMER. TAPJOY PROVIDES THE SDK "AS IS" AND WITHOUT WARRANTY OF ANY KIND, AND TAPJOY HEREBY DISCLAIMS ALL EXPRESS OR IMPLIED WARRANTIES, INCLUDING WITHOUT LIMITATION WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, PERFORMANCE, ACCURACY, RELIABILITY, AND NON-INFRINGEMENT. THIS DISCLAIMER OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS AGREEMENT.
+LIMITATION OF LIABILITY. UNDER NO CIRCUMSTANCES (AND UNDER NO LEGAL THEORY, TORT, CONTRACT, STRICT LIABILITY, OR OTHERWISE) SHALL TAPJOY OR ITS LICENSORS OR SUPPLIERS BE LIABLE TO YOU OR ANY OTHER PERSON FOR ANY: (I) DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF ANY CHARACTER, EVEN IF FORESEEABLE, INCLUDING, WITHOUT LIMITATION, COST OF SUBSTITUTE TECHNOLOGY, DAMAGES FOR LOST PROFITS, LOSS OF GOODWILL, WORK STOPPAGE, ACCURACY OF RESULTS, LOSS OF DATA, COMPUTER FAILURE OR MALFUNCTION, (II) AMOUNTS IN THE AGGREGATE IN EXCESS OF US$100.00, OR (III) MATTERS BEYOND THEIR REASONABLE CONTROL.
+TERMINATION. You may terminate this Agreement and the license granted herein at any time by destroying or removing from all hard drives, networks, and other storage media all copies of the SDK. Tapjoy may terminate this Agreement and the license granted herein immediately if You breach any provision of this Agreement. Upon receiving notice of termination from Tapjoy You agree to destroy or remove from such storage media all copies of the SDK. Sections 2 through 12 shall survive termination of this Agreement.
+EXPORT CONTROLS. You shall comply with all export laws and restrictions and regulations of the Department of Commerce, the United States Department of Treasury Office of Foreign Assets Control ("OFAC"), or other United States or foreign agency or authority, and not to export, or allow the export or re-export of the SDK in violation of any such restrictions, laws or regulations. By downloading or using the SDK, You are agreeing to the foregoing and You are representing and warranting that You are not located in, under the control of, or a national or resident of any restricted country or on any such list.
+U.S. GOVERNMENT RESTRICTED RIGHTS. Use, duplication or disclosure by the Government is subject to restrictions set forth in subparagraphs (a) through (d) of the Commercial Computer-Restricted Rights clause at FAR 52.227-19 when applicable, or in subparagraph (c) (1) (ii) of the Rights in Technical Data and Computer Software clause in DFARS 252.227-7013, and in similar clauses in the NASA FAR Supplement.
+MISCELLANEOUS. You shall not assign or transfer any part of this Agreement to any third party. This Agreement represents the complete agreement concerning this license between the parties and supersedes all prior agreements and representations between them. If any provision of this Agreement is held to be unenforceable for any reason, such provision shall be reformed only to the extent necessary to make it enforceable. This Agreement shall be governed by and construed under California law as such law applies to agreements between California residents entered into and to be performed within California. Any disputes arising from this Agreement shall be subject to the sole and exclusive jurisdiction of, and venue in, the state and Federal Courts located in San Francisco, California (and the You hereby consent and submit to such jurisdiction and venue). The prevailing party in any action or proceeding to enforce this Agreement will be entitled to costs and attorneys'' fees.
+Tapjoy, Inc. 
+111 Sutter Street, 13th Floor 
+San Francisco, CA 94104
+When you access and download the SDK, You may also have access to use the Silverlight SharpZipLib software product. The Silverlight SharpZip Lib software is licensed pursuant to the GNU General Public License version 2 (GPLv2), Copyright (C) 1989, 1991 Free Software Foundation, Inc. 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA which is available at http://slsharpziplib.codeplex.com/license (the "License"). Any use of Silverlight SharpZipLib shall be subject to the License. For a complete machine-readable copy of the Silverlight SharpZipLib 0.86.0.518 source code, please contact Tapjoy at the address set forth above or download it at: http://slsharpziplib.codeplex.com/releases/view/50561.
+
+When you access and download the SDK, You may have access to use the UIDevice-with-UniqueIdentifier-for-iOS-5. The UIDevice-with-UniqueIdentifier-for-iOS-5 software is licensed pursuant to the MIT license as follows and available at https://github.com/gekitz/UIDevice-with-UniqueIdentifier-for-iOS-5/blob/master/license. For a complete machine-readable copy of the UIDevice-with-UniqueIdentifier-for-iOS-5 source code, please contact Tapjoy at the address set forth above or download it at https://github.com/gekitz/UIDevice-with-UniqueIdentifier-for-iOS-5:
+
+Copyright (C) 2012, Georg Kitz, @gekitz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.', 'https://dashboard.tapjoy.com/dashboard/sdk/license', NULL, NULL, NULL, 'Tapjoy', NULL, NULL, NULL, '', NULL, false, false, false, '58bdb743164971f33ed44baa6764c769', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (546, 'Interbase-1.0', 'INTERBASE PUBLIC LICENSE
+
+Version 1.0
+
+1. Definitions.
+
+1.0.1. "Commercial Use" means distribution or otherwise making the Covered Code available to a third party.
+
+1.1. ''''Contributor'''' means each entity that creates or contributes to the creation of Modifications.
+
+1.2. ''''Contributor Version'''' means the combination of the Original Code, prior Modifications used by a Contributor, and the Modifications made by that particular Contributor.
+
+1.3. ''''Covered Code'''' means the Original Code or Modifications or the combination of the Original Code and Modifications, in each case including portions thereof.
+
+1.4. ''''Electronic Distribution Mechanism'''' means a mechanism generally accepted in the software development community for the electronic transfer of data.
+
+1.5. ''''Executable'''' means Covered Code in any form other than Source Code.
+
+1.6. ''''Initial Developer'''' means the individual or entity identified as the Initial Developer in the Source Code notice required by Exhibit A.
+
+1.7. ''''Larger Work'''' means a work which combines Covered Code or portions thereof with code not governed by the terms of this License.
+
+1.8. ''''License'''' means this document.
+
+1.8.1. "Licensable" means having the right to grant, to the maximum extent possible, whether at the time of the initial grant or subsequently acquired, any and all of the rights conveyed herein.
+
+1.9. ''''Modifications'''' means any addition to or deletion from the substance or structure of either the Original Code or any previous Modifications. When Covered Code is released as a series of files, a Modification is:
+
+A. Any addition to or deletion from the contents of a file containing Original Code or previous Modifications.
+
+B. Any new file that contains any part of the Original Code or previous Modifications.
+
+1.10. ''''Original Code'''' means Source Code of computer software code which is described in the Source Code notice required by Exhibit A as Original Code, and which, at the time of its release under this License is not already Covered Code governed by this License.
+
+1.10.1. "Patent Claims" means any patent claim(s), now owned or hereafter acquired, including without limitation, method, process, and apparatus claims, in any patent Licensable by grantor.
+
+1.11. ''''Source Code'''' means the preferred form of the Covered Code for making modifications to it, including all modules it contains, plus any associated interface definition files, scripts used to control compilation and installation of an Executable, or source code differential comparisons against either the Original Code or another well known, available Covered Code of the Contributor''s choice. The Source Code can be in a compressed or archival form, provided the appropriate decompression or de-archiving software is widely available for no charge.
+
+1.12. "You'''' (or "Your") means an individual or a legal entity exercising rights under, and complying with all of the terms of, this License or a future version of this License issued under Section 6.1. For legal entities, "You'''' includes any entity which controls, is controlled by, or is under common control with You. For purposes of this definition, "control'''' means (a) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (b) ownership of more than fifty percent (50%) of the outstanding shares or beneficial ownership of such entity.
+
+2. Source Code License.
+
+2.1. The Initial Developer Grant.
+
+The Initial Developer hereby grants You a world-wide, royalty-free, non-exclusive license, subject to third party intellectual property claims:
+
+(a) under intellectual property rights (other than patent or trademark) Licensable by Initial Developer to use, reproduce, modify, display, perform, sublicense and distribute the Original Code (or portions thereof) with or without Modifications, and/or as part of a Larger Work; and
+
+(b) under Patents Claims infringed by the making, using or selling of Original Code, to make, have made, use, practice, sell, and offer for sale, and/or otherwise dispose of the Original Code (or portions thereof).
+
+(c) the licenses granted in this Section 2.1(a) and (b) are effective on the date Initial Developer first distributes Original Code under the terms of this License.
+
+(d) Notwithstanding Section 2.1(b) above, no patent license is granted: 1) for code that You delete from the Original Code; 2) separate from the Original Code; or 3) for infringements caused by: i) the modification of the Original Code or ii) the combination of the Original Code with other software or devices.
+
+2.2. Contributor Grant.
+
+Subject to third party intellectual property claims, each Contributor hereby grants You a world-wide, royalty-free, non-exclusive license
+
+(a) under intellectual property rights (other than patent or trademark) Licensable by Contributor, to use, reproduce, modify, display, perform, sublicense and distribute the Modifications created by such Contributor (or portions thereof) either on an unmodified basis, with other Modifications, as Covered Code and/or as part of a Larger Work; and
+
+(b) under Patent Claims infringed by the making, using, or selling of Modifications made by that Contributor either alone and/or in combination with its Contributor Version (or portions of such combination), to make, use, sell, offer for sale, have made, and/or otherwise dispose of: 1) Modifications made by that Contributor (or portions thereof); and 2) the combination of Modifications made by that Contributor with its Contributor Version (or portions of such combination).
+
+(c) the licenses granted in Sections 2.2(a) and 2.2(b) are effective on the date Contributor first makes Commercial Use of the Covered Code.
+
+(d) Notwithstanding Section 2.2(b) above, no patent license is granted: 1) for any code that Contributor has deleted from the Contributor Version; 2) separate from the Contributor Version; 3) for infringements caused by: i) third party modifications of Contributor Version or ii) the combination of Modifications made by that Contributor with other software (except as part of the Contributor Version) or other devices; or 4) under Patent Claims infringed by Covered Code in the absence of Modifications made by that Contributor.
+
+3. Distribution Obligations.
+
+3.1. Application of License.
+
+The Modifications which You create or to which You contribute are governed by the terms of this License, including without limitation Section 2.2. The Source Code version of Covered Code may be distributed only under the terms of this License or a future version of this License released under Section 6.1, and You must include a copy of this License with every copy of the Source Code You distribute. You may not offer or impose any terms on any Source Code version that alters or restricts the applicable version of this License or the recipients'' rights hereunder. However, You may include an additional document offering the additional rights described in Section 3.5.
+
+3.2. Availability of Source Code.
+
+Any Modification which You create or to which You contribute must be made available in Source Code form under the terms of this License either on the same media as an Executable version or via an accepted Electronic Distribution Mechanism to anyone to whom you made an Executable version available; and if made available via Electronic Distribution Mechanism, must remain available for at least twelve (12) months after the date it initially became available, or at least six (6) months after a subsequent version of that particular Modification has been made available to such recipients. You are responsible for ensuring that the Source Code version remains available even if the Electronic Distribution Mechanism is maintained by a third party.
+
+3.3. Description of Modifications.
+
+You must cause all Covered Code to which You contribute to contain a file documenting the changes You made to create that Covered Code and the date of any change. You must include a prominent statement that the Modification is derived, directly or indirectly, from Original Code provided by the Initial Developer and including the name of the Initial Developer in (a) the Source Code, and (b) in any notice in an Executable version or related documentation in which You describe the origin or ownership of the Covered Code.
+
+3.4. Intellectual Property Matters
+
+(a) Third Party Claims.
+
+If Contributor has knowledge that a license under a third party''s intellectual property rights is required to exercise the rights granted by such Contributor under Sections 2.1 or 2.2, Contributor must include a text file with the Source Code distribution titled "LEGAL'''' which describes the claim and the party making the claim in sufficient detail that a recipient will know whom to contact. If Contributor obtains such knowledge after the Modification is made available as described in Section 3.2, Contributor shall promptly modify the LEGAL file in all copies Contributor makes available thereafter and shall take other steps (such as notifying appropriate mailing lists or newsgroups) reasonably calculated to inform those who received the Covered Code that new knowledge has been obtained.
+
+(b) Contributor APIs.
+
+If Contributor''s Modifications include an application programming interface and Contributor has knowledge of patent licenses which are reasonably necessary to implement that API, Contributor must also include this information in the LEGAL file.
+
+(c) Representations.
+
+Contributor represents that, except as disclosed pursuant to Section 3.4(a) above, Contributor believes that Contributor''s Modifications are Contributor''s original creation(s) and/or Contributor has sufficient rights to grant the rights conveyed by this License.
+
+3.5. Required Notices.
+
+You must duplicate the notice in Exhibit A in each file of the Source Code. If it is not possible to put such notice in a particular Source Code file due to its structure, then You must include such notice in a location (such as a relevant directory) where a user would be likely to look for such a notice. If You created one or more Modification(s) You may add your name as a Contributor to the notice described in Exhibit A. You must also duplicate this License in any documentation for the Source Code where You describe recipients'' rights or ownership rights relating to Covered Code. You may choose to offer, and to charge a fee for, warranty, support, indemnity or liability obligations to one or more recipients of Covered Code. However, You may do so only on Your own behalf, and not on behalf of the Initial Developer or any Contributor. You must make it absolutely clear than any such warranty, support, indemnity or liability obligation is offered by You alone, and You hereby agree to indemnify the Initial Developer and every Contributor for any liability incurred by the Initial Developer or such Contributor as a result of warranty, support, indemnity or liability terms You offer.
+
+3.6. Distribution of Executable Versions.
+
+You may distribute Covered Code in Executable form only if the requirements of Section 3.1-3.5 have been met for that Covered Code, and if You include a notice stating that the Source Code version of the Covered Code is available under the terms of this License, including a description of how and where You have fulfilled the obligations of Section 3.2. The notice must be conspicuously included in any notice in an Executable version, related documentation or collateral in which You describe recipients'' rights relating to the Covered Code. You may distribute the Executable version of Covered Code or ownership rights under a license of Your choice, which may contain terms different from this License, provided that You are in compliance with the terms of this License and that the license for the Executable version does not attempt to limit or alter the recipient''s rights in the Source Code version from the rights set forth in this License. If You distribute the Executable version under a different license You must make it absolutely clear that any terms which differ from this License are offered by You alone, not by the Initial Developer or any Contributor. You hereby agree to indemnify the Initial Developer and every Contributor for any liability incurred by the Initial Developer or such Contributor as a result of any such terms You offer.
+
+3.7. Larger Works.
+
+You may create a Larger Work by combining Covered Code with other code not governed by the terms of this License and distribute the Larger Work as a single product. In such a case, You must make sure the requirements of this License are fulfilled for the Covered Code.
+
+4. Inability to Comply Due to Statute or Regulation.
+
+If it is impossible for You to comply with any of the terms of this License with respect to some or all of the Covered Code due to statute, judicial order, or regulation then You must: (a) comply with the terms of this License to the maximum extent possible; and (b) describe the limitations and the code they affect. Such description must be included in the LEGAL file described in Section 3.4 and must be included with all distributions of the Source Code. Except to the extent prohibited by statute or regulation, such description must be sufficiently detailed for a recipient of ordinary skill to be able to understand it.
+
+5. Application of this License.
+
+This License applies to code to which the Initial Developer has attached the notice in Exhibit A and to related Covered Code.
+
+6. Versions of the License.
+
+6.1. New Versions.
+
+Inprise Corporation (''''Inprise'''') may publish revised and/or new versions of the License from time to time. Each version will be given a distinguishing version number.
+
+6.2. Effect of New Versions.
+
+Once Covered Code has been published under a particular version of the License, You may always continue to use it under the terms of that version. You may also choose to use such Covered Code under the terms of any subsequent version of the License published by Inprise. No one other than Inprise has the right to modify the terms applicable to Covered Code created under this License.
+
+6.3. Derivative Works.
+
+If You create or use a modified version of this License (which you may only do in order to apply it to code which is not already Covered Code governed by this License), You must (a) rename Your license so that the phrases ''''Mozilla'''', ''''MOZILLAPL'''', ''''MOZPL'''', ''''Netscape'''', "MPL", ''''NPL", "InterBase", "Inprise", "Borland'''' or any confusingly similar phrase do not appear in your license (except to note that your license differs from this License) and (b) otherwise make it clear that Your version of the license contains terms which differ from the Mozilla Public License and Netscape Public License. (Filling in the name of the Initial Developer, Original Code or Contributor in the notice described in Exhibit A shall not of themselves be deemed to be modifications of this License.)
+
+6.4 Origin of the InterBase Public License.
+
+The InterBase public license is based on the Mozilla Public License V 1.1 with the following changes:
+
+1. The license is published by Inprise Corporation. Only Inprise Corporation can modify the terms applicable to Covered Code.
+2. The license can be modified and used for code which is not already governed by this license. Modified versions of the license must be renamed to avoid confusion with Netscape’s or Inprise’s license and must include a description of changes from the InterBase Public License.
+3. The name of the license in Exhibit A is the "InterBase Public License".
+4. The reference to an alternative license in Exhibit A has been removed.
+5. Amendments I, II, III, V, and VI have been deleted.
+6. Exhibit A, Netscape Public License has been deleted
+7. A new amendment (II) has been added, describing the required and restricted rights to use the trademarks of Inprise Corporation.
+
+7. DISCLAIMER OF WARRANTY.
+
+COVERED CODE IS PROVIDED UNDER THIS LICENSE ON AN "AS IS'''' BASIS, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES THAT THE COVERED CODE IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE OR NON-INFRINGING. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE COVERED CODE IS WITH YOU. SHOULD ANY COVERED CODE PROVE DEFECTIVE IN ANY RESPECT, YOU (NOT THE INITIAL DEVELOPER OR ANY OTHER CONTRIBUTOR) ASSUME THE COST OF ANY NECESSARY SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS LICENSE. NO USE OF ANY COVERED CODE IS AUTHORIZED HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
+
+8. TERMINATION.
+
+8.1. This License and the rights granted hereunder will terminate automatically if You fail to comply with terms herein and fail to cure such breach within 30 days of becoming aware of the breach. All sublicenses to the Covered Code which are properly granted shall survive any termination of this License. Provisions which, by their nature, must remain in effect beyond the termination of this License shall survive.
+
+8.2. If You initiate litigation by asserting a patent infringement claim (excluding declaratory judgment actions) against Initial Developer or a Contributor (the Initial Developer or Contributor against whom You file such action is referred to as "Participant") alleging that:
+
+(a) such Participant''s Contributor Version directly or indirectly infringes any patent, then any and all rights granted by such Participant to You under Sections 2.1 and/or 2.2 of this License shall, upon 60 days notice from Participant terminate prospectively, unless if within 60 days after receipt of notice You either: (i) agree in writing to pay Participant a mutually agreeable reasonable royalty for Your past and future use of Modifications made by such Participant, or (ii) withdraw Your litigation claim with respect to the Contributor Version against such Participant. If within 60 days of notice, a reasonable royalty and payment arrangement are not mutually agreed upon in writing by the parties or the litigation claim is not withdrawn, the rights granted by Participant to You under Sections 2.1 and/or 2.2 automatically terminate at the expiration of the 60 day notice period specified above.
+
+(b) any software, hardware, or device, other than such Participant''s Contributor Version, directly or indirectly infringes any patent, then any rights granted to You by such Participant under Sections 2.1(b) and 2.2(b) are revoked effective as of the date You first made, used, sold, distributed, or had made, Modifications made by that Participant.
+
+8.3. If You assert a patent infringement claim against Participant alleging that such Participant''s Contributor Version directly or indirectly infringes any patent where such claim is resolved (such as by license or settlement) prior to the initiation of patent infringement litigation, then the reasonable value of the licenses granted by such Participant under Sections 2.1 or 2.2 shall be taken into account in determining the amount or value of any payment or license.
+
+8.4. In the event of termination under Sections 8.1 or 8.2 above, all end user license agreements (excluding distributors and resellers) which have been validly granted by You or any distributor hereunder prior to termination shall survive termination.
+
+9. LIMITATION OF LIABILITY.
+
+UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY, WHETHER TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE, SHALL YOU, THE INITIAL DEVELOPER, ANY OTHER CONTRIBUTOR, OR ANY DISTRIBUTOR OF COVERED CODE, OR ANY SUPPLIER OF ANY OF SUCH PARTIES, BE LIABLE TO ANY PERSON FOR ANY INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, COMPUTER FAILURE OR MALFUNCTION, OR ANY AND ALL OTHER COMMERCIAL DAMAGES OR LOSSES, EVEN IF SUCH PARTY SHALL HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGES. THIS LIMITATION OF LIABILITY SHALL NOT APPLY TO LIABILITY FOR DEATH OR PERSONAL INJURY RESULTING FROM SUCH PARTY''S NEGLIGENCE TO THE EXTENT APPLICABLE LAW PROHIBITS SUCH LIMITATION. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
+
+10. U.S. GOVERNMENT END USERS.
+
+The Covered Code is a ''''commercial item,'''' as that term is defined in 48 C.F.R. 2.101 (Oct. 1995), consisting of ''''commercial computer software'''' and ''''commercial computer software documentation,'''' as such terms are used in 48 C.F.R. 12.212 (Sept. 1995). Consistent with 48 C.F.R. 12.212 and 48 C.F.R. 227.7202-1 through 227.7202-4 (June 1995), all U.S. Government End Users acquire Covered Code with only those rights set forth herein.
+
+11. MISCELLANEOUS.
+
+This License represents the complete agreement concerning subject matter hereof. If any provision of this License is held to be unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable. This License shall be governed by Georgia law provisions (except to the extent applicable law, if any, provides otherwise), excluding its conflict-of-law provisions. With respect to disputes in which at least one party is a citizen of, or an entity chartered or registered to do business in the United States of America, Any litigation relating to this License shall be subject to the jurisdiction of the Federal Courts of the Northern District of Georgia and/or the state courts of Gwinnett County, Georgia, with the losing party responsible for costs, including without limitation, court costs and reasonable attorneys'' fees and expenses. The application of the United Nations Convention on Contracts for the International Sale of Goods is expressly excluded. Any law or regulation which provides that the language of a contract shall be construed against the drafter shall not apply to this License.
+
+12. RESPONSIBILITY FOR CLAIMS.
+
+As between Initial Developer and the Contributors, each party is responsible for claims and damages arising, directly or indirectly, out of its utilization of rights under this License and You agree to work with Initial Developer and Contributors to distribute such responsibility on an equitable basis. Nothing herein is intended or shall be deemed to constitute any admission of liability.
+
+13. MULTIPLE-LICENSED CODE.
+
+Initial Developer may designate portions of the Covered Code as "Multiple-Licensed". "Multiple-Licensed" means that the Initial Developer permits you to utilize portions of the Covered Code under Your choice of the InterBase Public License or the alternative licenses, if any, specified by the Initial Developer in the file described in Exhibit A.
+
+EXHIBIT A - InterBase Public License.
+
+``The contents of this file are subject to the InterBase Public License Version 1.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.interbase.com/IPL.html
+
+Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the specific language governing rights and limitations under the License.
+
+The Original Code was created by InterBase Software Corp and its successors.
+
+Portions created by Borland/Inprise are Copyright (C) Borland/Inprise. All Rights Reserved.
+
+Contributor(s): ______________________________________.
+
+AMENDMENTS
+
+I. InterBase and logo. This License does not grant any rights to use the trademarks "InterBase'''', "Java" or "JavaScript" even if such marks are included in the Original Code or Modifications.
+
+II. Trademark Usage.
+
+II.1. Advertising Materials. All advertising materials mentioning features or use of the covered Code must display the following acknowledgement: "This product includes software developed by Inprise Corporation. "
+
+II.2. Endorsements. The names "InterBase," "Inprise," and "Borland" must not be used to endorse or promote Contributor Versions or Larger Works without the prior written permission of InterBase.
+
+II.3. Product Names. Contributor Versions and Larger Works may not be called "InterBase" or "InterBase" nor may the word "InterBase" appear in their names without the prior written permission of Inprise.', 'http://www.firebirdsql.org/en/interbase-public-license/', NULL, NULL, NULL, 'InterBase Public License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '93a8eb7ab361d545a4ddabad2b88737e', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (547, 'OCCT', 'Open CASCADE Technology Public License
+
+License version: 6.6 
+April 2013 
+
+Open CASCADE S.A.S. releases and makes publicly available the source code of the software Open CASCADE Technology to the free software development community under the terms and conditions of this license. 
+
+It is not the purpose of this license to induce you to infringe any patents or other property right claims or to contest validity of any such claims; this license has the sole purpose of protecting the integrity of the free software distribution system, which is implemented by public license practices. Many people have made generous contributions to the wide range of software distributed through that system in reliance on consistent application of that system; it is up to the author/donor to decide if he or she is willing to distribute software through any other system and a licensee cannot impose that choice. 
+
+Please read this license carefully and completely before downloading this software. By downloading, using, modifying, distributing and sublicensing this software, you indicate your acceptance to be bound by the terms and conditions of this license. If you do not want to accept or cannot accept for any reasons the terms and conditions of this license, please do not download or use in any manner this software. 
+
+1. Definitions 
+
+Unless there is something in the subject matter or in the context inconsistent therewith, the capitalized terms used in this License shall have the following meaning. 
+
+"Applicable Intellectual Property Rights" means (a) with respect to the Initial Developer, any rights under patents or patents applications or other intellectual property rights that are now or hereafter acquired, owned by or assigned to the Initial Developer and that cover subject matter contained in the Original Code, but only to the extent necessary to use, reproduce, modify, distribute or sublicense the Original Code without infringement; and (b) with respect to You or any Contributor, any rights under patents or patents applications or other intellectual property rights that are now or hereafter acquired, owned by or assigned to You or to such Contributor and that cover subject matter contained in Your Modifications or in such Contributor''s Modifications, taken alone or in combination with Original Code 
+
+"Contributor" means each individual or legal entity that creates or contributes to the creation of any Modification, including the Initial Developer. 
+
+"Derivative Program": means a new program combining the Software or portions thereof with other source code not governed by the terms of this License. 
+
+"Initial Developer": means Open CASCADE S.A.S., with main offices at 1, place des Frères Montgolfier, 78280, Guyancourt, France. 
+
+"Modifications": mean any addition to, deletion from or change to the substance or the structure of the Software. When source code of the Software is released as a series of files, a Modification is: (a) any addition to, deletion from or change to the contents of a file containing the Software or (b) any new file or other representation of computer program statements that contains any part of the Software. By way of example, Modifications include any debug of, or improvement to, the Original Code or any of its components or portions as well as its next versions or releases thereof.
+
+"Original Code": means (a) the source code of the software Open CASCADE Technology originally made available by the Initial Developer under this License, including the source code of any updates or upgrades of the Original Code and (b) the object code compiled from such source code and originally made available by Initial Developer under this License. 
+
+"Software": means the Original Code, the Modifications, the combination of Original Code and any Modifications or any respective portions thereof. 
+
+"You" or "Your": means an individual or a legal entity exercising rights under this License 
+
+2. Acceptance of license 
+
+By using, reproducing, modifying, distributing or sublicensing the Software or any portion thereof, You expressly indicate Your acceptance of the terms and conditions of this License and undertake to act in accordance with all the provisions of this License applicable to You. 
+
+3. Scope and purpose 
+
+This License applies to the Software and You may not use, reproduce, modify, distribute, sublicense or circulate the Software, or any portion thereof, except as expressly provided under this License. Any attempt to otherwise use, reproduce, modify, distribute or sublicense the Software is void and will automatically terminate Your rights under this License. 
+
+4. Contributor license 
+
+Subject to the terms and conditions of this License, the Initial Developer and each of the Contributors hereby grant You a world-wide, royalty-free, irrevocable and non-exclusive license under the Applicable Intellectual Property Rights they own or control, to use, reproduce, modify, distribute and sublicense the Software provided that: 
+
+You reproduce in all copies of the Software the copyright and other proprietary notices and disclaimers of the Initial Developer as they appear in the Original Code and attached hereto as Schedule "A" and any other notices or disclaimers attached to the Software and keep intact all notices in the Original Code that refer to this License and to the absence of any warranty; 
+
+You include a copy of this License with every copy of the Software You distribute; 
+
+If you distribute or sublicense the Software (as modified by You or on Your behalf as the case may be), You cause such Software to be licensed as a whole, at no charge, to all third parties, under the terms and conditions of the License, making in particular available to all third parties the source code of the Software;
+
+You document all Your Modifications, indicate the date of each such Modification, designate the version of the Software You used, prominently include a file carrying such information with respect to the Modifications and duplicate the copyright and other proprietary notices and disclaimers attached hereto as Schedule "B" or any other notices or disclaimers attached to the Software with your Modifications.
+
+For greater certainty, it is expressly understood that You may freely create Derivative Programs (without any obligation to publish such Derivative Program) and distribute same as a single product. In such case, You must ensure that all the requirements of this License are fulfilled for the Software or any portion thereof.
+
+5. Your license 
+
+You hereby grant all Contributors and anyone who becomes a party under this License a world-wide, non-exclusive, royalty-free and irrevocable license under the Applicable Intellectual Property Rights owned or controlled by You, to use, reproduce, modify, distribute and sublicense all Your Modifications under the terms and conditions of this License. 
+
+6. Software subject to license 
+
+Your Modifications shall be governed by the terms and conditions of this License. You are not authorized to impose any other terms or conditions than those prevailing under this License when You distribute and/or sublicense the Software, save and except as permitted under Section 7 hereof. 
+
+7. Additional terms 
+
+You may choose to offer, on a non-exclusive basis, and to charge a fee for any warranty, support, maintenance, liability obligations or other rights consistent with the scope of this License with respect to the Software (the "Additional Terms") to the recipients of the Software. However, You may do so only on Your own behalf and on Your sole and exclusive responsibility. You must obtain the recipient''s agreement that any such Additional Terms are offered by You alone, and You hereby agree to indemnify, defend and hold the Initial Developer and any Contributor harmless for any liability incurred by or claims asserted against the Initial Developer or any Contributors with respect to any such Additional Terms. 
+
+8. Disclaimer of warranty 
+
+The Software is provided under this License on an "as is" basis, without warranty of any kind, including without limitation, warranties that the Software is free of defects, merchantable, fit for a particular purpose or non-infringing. The entire risk as to the quality and performance of the Software is with You. 
+
+9. Liability 
+
+Under no circumstances shall You, the Initial Developer or any Contributor be liable to any person for any direct or indirect damages of any kind including, without limitation, damages for loss of goodwill, loss of data, work stoppage, computer failure or malfunction or any and all other commercial damages or losses resulting from or relating to this License or indirectly to the use of the Software. 
+
+10. Trademark 
+
+This License does not grant any rights to use the trademarks, trade names and domain names "MATRA", "EADS Matra Datavision", "CAS.CADE", "Open CASCADE", "opencascade.com" and "opencascade.org" or any other trademarks, trade names or domain names used or owned by the Initial Developer. 
+
+11. Copyright 
+
+The Initial Developer retains all rights, title and interest in and to the Original Code. You may not remove the copyright © notice which appears when You download the Software. 
+
+12. Term 
+
+This License is granted to You for a term equal to the remaining period of protection covered by the intellectual property rights applicable to the Original Code. 
+
+13. Termination 
+
+In case of termination, as provided in Section 3 above, You agree to immediately stop any further use, reproduction, modification, distribution and sublicensing of the Software and to destroy all copies of the Software that are in Your possession or control. All sublicenses of the Software which have been properly granted prior to termination shall survive any termination of this License. In addition, Sections 5, 8 to 11, 13.2 and 15.2 of this License, in reason of their nature, shall survive the termination of this License for a period of fifteen (15) years. 
+
+14. Versions of the license 
+
+The Initial Developer may publish new versions of this License from time to time. Once Original Code has been published under a particular version of this License, You may choose to continue to use it under the terms and conditions of that version or use the Original Code under the terms of any subsequent version of this License published by the Initial Developer. 
+
+15. Miscellaneous 
+
+15.1 Relationship of the Parties 
+
+This License will not be construed as creating an agency, partnership, joint venture or any other form of legal association between You and the Initial Developer, and You will not represent to the contrary, whether expressly, by implication or otherwise. 
+
+15.2 Independent Development 
+
+Nothing in this License will impair the Initial Developer''s right to acquire, license, develop, have others develop for it, market or distribute technology or products that perform the same or similar functions as, or otherwise compete with, Modifications, Derivative Programs, technology or products that You may develop, produce, market or distribute. 
+
+15.3 Severability 
+
+If for any reason a court of competent jurisdiction finds any provision of this License, or portion thereof, to be unenforceable, that provision of the License will be enforced to the maximum extent permissible so as to effect the economic benefits and intent of the parties, and the remainder of this License will continue in full force and extent. 
+
+END OF THE TERMS AND CONDITIONS 
+OF THIS LICENSE 
+
+Open CASCADE S.A.S. is a French société par actions simplifiée having its registered head office at 1, place des Frères Montgolfier, 78280, Guyancourt, France and main offices at 1, place des Frères Montgolfier, 78280, Guyancourt, France. Its web site is located at the following address www.opencascade.com 
+
+Open CASCADE Technology Public License 
+Schedule "A"
+
+The content of this file is subject to the Open CASCADE Technology Public License (the "License"). You may not use the content of this file except in compliance with the License. Please obtain a copy of the License at http://www.opencascade.org and read it completely before using this file. 
+The Initial Developer of the Original Code is Open CASCADE S.A.S., with main offices at 1, place des Frères Montgolfier, 78280, Guyancourt, France. The Original Code is copyright © Open CASCADE S.A.S., 2001. All rights reserved. 
+
+"The Original Code and all software distributed under the License are distributed on an "AS IS" basis, without warranty of any kind, and the Initial Developer hereby disclaims all such warranties, including without limitation, any warranties of merchantability, fitness for a particular purpose or non-infringement.
+
+Please see the License for the specific terms and conditions governing rights and limitations under the License". 
+
+End of Schedule "A" 
+
+Open CASCADE Technology Public License 
+Schedule "B" 
+
+"The content of this file is subject to the Open CASCADE Technology Public License (the "License"). You may not use the content of this file except in compliance with the License. Please obtain a copy of the License at http://www.opencascade.org and read it completely before using this file. 
+The Initial Developer of the Original Code is Open CASCADE S.A.S., with main offices at 1, place des Frères Montgolfier, 78280, Guyancourt, France. The Original Code is copyright © Open CASCADE S.A.S., 2001. All rights reserved. 
+
+Modifications to the Original Code have been made by ________________________. Modifications are copyright © [Year to be included]. All rights reserved. 
+
+The software Open CASCADE Technology and all software distributed under the License are distributed on an "AS IS" basis, without warranty of any kind, and the Initial Developer hereby disclaims all such warranties, including without limitation, any warranties of merchantability, fitness for a particular purpose or non-infringement. Please see the License for the specific terms and conditions governing rights and limitations under the License" 
+
+End of Schedule "B"', 'http://www.opencascade.org/getocc/license/license_old/', NULL, NULL, NULL, 'Open CASCADE Technology Public License', NULL, NULL, NULL, '', NULL, false, false, false, '661777cb1f688cf209ac2bc44ff8a98a', 1);
