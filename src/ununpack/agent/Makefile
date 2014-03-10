@@ -40,7 +40,7 @@ install: all $(VARS)
 # create wrapper for departition in BINDIR
 	@mkdir -p $(DESTDIR)$(BINDIR)
 	@echo "#!/bin/bash" > $(DESTDIR)$(BINDIR)/departition
-	@echo "MODDIR=$(DESTDIR)$(MODDIR)" >> $(DESTDIR)$(BINDIR)/departition
+	@echo "MODDIR=$(MODDIR)" >> $(DESTDIR)$(BINDIR)/departition
 	@echo "\$$MODDIR/ununpack/agent/departition \$$@" >> $(DESTDIR)$(BINDIR)/departition
 	chmod a+x $(DESTDIR)$(BINDIR)/departition
 

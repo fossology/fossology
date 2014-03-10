@@ -399,8 +399,8 @@ class user_edit_any extends FO_Plugin {
                   document.userEditAny.permission.value = Userperm[id];
                   document.userEditAny.folder.value = Userfolder[id];
                   document.userEditAny.default_bucketpool_fk.value = default_bucketpool_fk[id];
-                  document.userEditAny.new_upload_group_fk.value = new_upload_group_fk[id];
-                  document.userEditAny.new_upload_perm.value = new_upload_perm[id];
+                  //document.userEditAny.new_upload_group_fk.value = new_upload_group_fk[id];
+                  //document.userEditAny.new_upload_perm.value = new_upload_perm[id];
                   if (Userblock[id] == 1) { document.userEditAny.block.checked=true; }
                   else { document.userEditAny.block.checked=false; }
                   if (Userenote[id] == \"\") { document.userEditAny.enote.checked=false; }
