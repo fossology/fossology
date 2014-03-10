@@ -963,7 +963,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Licenses between here and all the GPL/LGPL/GFDL/FSF checks (below) MUST
    * be tested PRIOR to checking GPL/FSF and friends
    */
-  if ((INFILE(_CR_EASYSW) || INFILE(_TITLE_CUPS)) && INFILE(_LT_CUPS)) {
+  if (INFILE(_TITLE_CUPS) && INFILE(_LT_CUPS)) {
+  // if ((INFILE(_CR_EASYSW) || INFILE(_TITLE_CUPS)) && INFILE(_LT_CUPS)) {
     if (INFILE(_LT_CUPS_COMMERCIAL)) {
       INTERESTING("CUPS-EULA");
     }
