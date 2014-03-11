@@ -25,8 +25,8 @@ is a URL, then it is retrieved and added. If the archive is a file, then
 it is used as the source to add. If the archive is a directory, then I<all>
 files under it are recursively added.
 
-The archive support regular expression '*', all the matched files will be added.
-Note: have to put this regulaer expresstion in single/double quotes, e.g. '*.php'
+The archive support globbing - '*', all the matched files will be added.
+Note: have to put it in single/double quotes, e.g. '*.php'
 
 A single hyphen means the archive list will come from standard in (stdin).
 
@@ -183,7 +183,7 @@ UI under the folder "Fedora/Fedora8" and are grouped by the first letter
 of each file (a-c, d-f, g-h, etc.).
 
 C<cp2foss --user USER --password PASSWORD
--d 'regular expression test' '/tmp/*.php' >
+-d 'globbing test' '/tmp/*.php' >
 
 The above example, will upload all the php files in /tmp.
 

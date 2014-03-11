@@ -131,7 +131,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
    *    schedule all agents, set the description for this upload.
    * 4. Loads every file under the corrent directory, except files in the Subversion directories.  The files are
    *       placed in the UI under the folder "test/exclude/s-u" 
-   * 5. upload php file file in cli/tests through regular expression
+   * 5. upload php file file in cli/tests through globbing
    *
    */
   function test_upload_from_server() {
@@ -277,15 +277,15 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
       -d 'test des regular expression' '*.php' */
     $out = "";
     $pos = 0;
-    $command = "$cp2foss_path $auth -q all -A -f 'regular expression testing' -n 'test regular expression dir' -d 'test des regular expression' '*.php' -v";
+    $command = "$cp2foss_path $auth -q all -A -f 'regular expression testing' -n 'test globbing dir' -d 'test des globbing' '*.php' -v";
     fwrite(STDOUT, "DEBUG: Running $command\n");
     $last = exec("$command 2>&1", $out, $rtn);
     sleep(10);
     // print_r($out);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[20]) {
-      $upload_id = get_upload_id($out[18]);
+    if ($out && $out[19]) {
+      $upload_id = get_upload_id($out[17]);
     } else $this->assertFalse(TRUE);
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
@@ -330,8 +330,8 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     sleep(110);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[5]) {
-      $upload_id = get_upload_id($out[5]);
+    if ($out && $out[4]) {
+      $upload_id = get_upload_id($out[4]);
     } else $this->assertFalse(TRUE);
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);

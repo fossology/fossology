@@ -217,8 +217,8 @@
     sleep(100);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[5]) {
-      $upload_id = get_upload_id($out[5]);
+    if ($out && $out[4]) {
+      $upload_id = get_upload_id($out[4]);
     } else $this->assertFalse(TRUE);
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);

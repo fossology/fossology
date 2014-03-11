@@ -64,8 +64,8 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
              If the archive is a file, then it is used as the source to add.
              If the archive is a directory, then ALL files under it are
              recursively added.
-             The archive support regular expression '*', all the matched files will be added.
-                 Note: have to put this regulaer expresstion in single/double quotes, e.g. '*.php'
+             The archive support globbing - '*', all the matched files will be added.
+                 Note: have to put it in single/double quotes, e.g. '*.php'
     -        = a single hyphen means the archive list will come from stdin.
     -X path  = item to exclude when archive is a directory
              You can specify more than one -X.  For example, to exclude
@@ -499,10 +499,11 @@ $UploadArchiveTmp = "";
 $UploadArchiveTmp = realpath($UploadArchive);
 if (!$UploadArchiveTmp)  { // neither a file nor folder from server?
     if (filter_var($UploadArchive, FILTER_VALIDATE_URL)) {
-      print "NOTE: it seems that what you want to upload '$UploadArchive' is one URL. \n";
     }
     else if (strchr($UploadArchive, '*')) {
-      print "NOTE: it seems that what you want to upload '$UploadArchive' is one regular expression file. \n";
+      $file_number_cmd = "ls $UploadArchive > /dev/null";
+      system($file_number_cmd, $return_val);
+      if ($return_val) exit(1); // not files matched
       if ("/" != $UploadArchive[0]) { // it is a absolute path
         $UploadArchive = getcwd()."/".$UploadArchive;
       }
