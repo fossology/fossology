@@ -351,37 +351,43 @@ chkconfig --add PBPROJ
 /etc/init.d/PBPROJ start
 
 %preun
-# If FOSSology is running, stop it before removing.
-/etc/init.d/PBPROJ stop
-chkconfig --del PBPROJ 2>&1 > /dev/null
+if [ $1 -eq 0 ]; then
+  # If FOSSology is running, stop it before removing.
+  /etc/init.d/PBPROJ stop
+  chkconfig --del PBPROJ 2>&1 > /dev/null
 
-# We should do some cleanup here (fossy account ...)
-/usr/lib/PBPROJ/fo-cleanold
+  # We should do some cleanup here (fossy account ...)
+  /usr/lib/PBPROJ/fo-cleanold
+fi
 
 %postun scheduler
-# cleanup logs
-if [ -e /var/log/PBPROJ ]; then
-  rm -rf /var/log/PBPROJ || echo "ERROR: could not remove /var/log/fossology"
+if [ $1 -eq 0 ]; then
+  # cleanup logs
+  if [ -e /var/log/PBPROJ ]; then
+    rm -rf /var/log/PBPROJ || echo "ERROR: could not remove /var/log/fossology"
+  fi
 fi
 %postun common
-echo "removing FOSSology user..."
-deluser --system fossy || true
-echo "removing FOSSology group..."
-delgroup fossy || true
-# remove the conf directory
-echo "removing the conf directory..."
-if [ -e /etc/PBPROJ ]; then
-  rm -rf /etc/PBPROJ || echo "ERROR: could not remove FOSSology conf directory"
-fi
-# remove the data directory
-echo "removing the data directory..."
-if [ -e /usr/share/PBPROJ ]; then
-  rm -rf /usr/share/PBPROJ || echo "ERROR: could not remove FOSSology data directory"
-fi
-# remove the repository directory
-echo "removing the FOSSology repository..."
-if [ -e /srv/PBPROJ ]; then
-  rm -rf /srv/PBPROJ || echo "ERROR: could not remove FOSSology repository"
+if [ $1 -eq 0 ]; then
+  echo "removing FOSSology user..."
+  deluser --system fossy || true
+  echo "removing FOSSology group..."
+  delgroup fossy || true
+  # remove the conf directory
+  echo "removing the conf directory..."
+  if [ -e /etc/PBPROJ ]; then
+    rm -rf /etc/PBPROJ || echo "ERROR: could not remove FOSSology conf directory"
+  fi
+  # remove the data directory
+  echo "removing the data directory..."
+  if [ -e /usr/share/PBPROJ ]; then
+    rm -rf /usr/share/PBPROJ || echo "ERROR: could not remove FOSSology data directory"
+  fi
+  # remove the repository directory
+  echo "removing the FOSSology repository..."
+  if [ -e /srv/PBPROJ ]; then
+    rm -rf /srv/PBPROJ || echo "ERROR: could not remove FOSSology repository"
+  fi
 fi
 
 %changelog
