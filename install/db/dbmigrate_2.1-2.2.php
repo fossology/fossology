@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2013-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -154,11 +154,18 @@ function Migrate_21_22($Verbose)
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 
-  /** add UNIQUE CONSTRAINT on rf_shortname column of licenser_ref table */
-  $sql = "ALTER TABLE license_ref ADD CONSTRAINT  license_ref_rf_shortname_key UNIQUE (rf_shortname); ";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  /** add UNIQUE CONSTRAINT on rf_shortname column of licenser_ref table when not exist */
+  $sql = "SELECT conname from pg_constraint where conname= 'license_ref_rf_shortname_key';";
+  $conresult = pg_query($PG_CONN, $sql);
+  DBCheckResult($conresult, $sql, __FILE__, __LINE__);
+  $tt = pg_num_rows($conresult);
+  if (pg_num_rows($conresult) == 0) {
+    $sql = "ALTER TABLE license_ref ADD CONSTRAINT  license_ref_rf_shortname_key UNIQUE (rf_shortname); ";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+  }
+  pg_free_result($conresult);
 
   /** Clean uploadtree_a table  */
   $sql = "CREATE VIEW uploadtree_a_upload AS SELECT uploadtree_pk,upload_fk,upload_pk FROM uploadtree_a LEFT OUTER JOIN upload ON upload_fk=upload_pk;
@@ -167,11 +174,17 @@ function Migrate_21_22($Verbose)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
-  /** add foreign key CONSTRAINT on upload_fk of uploadtree_a table */
-  $sql = "ALTER TABLE uploadtree_a ADD CONSTRAINT uploadtree_a_uploadfk FOREIGN KEY (upload_fk) REFERENCES upload (upload_pk) ON DELETE CASCADE; ";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  /** add foreign key CONSTRAINT on upload_fk of uploadtree_a table when not exist */
+  $sql = "SELECT conname from pg_constraint where conname= 'uploadtree_a_upload_fk_fkey';";
+  $conresult = pg_query($PG_CONN, $sql);
+  DBCheckResult($conresult, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($conresult) == 0) {
+    $sql = "ALTER TABLE uploadtree_a ADD CONSTRAINT uploadtree_a_upload_fk_fkey FOREIGN KEY (upload_fk) REFERENCES upload (upload_pk) ON DELETE CASCADE; ";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+  }
+  pg_free_result($conresult);
 
 
   /** Run program to rename licenses **/

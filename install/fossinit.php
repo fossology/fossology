@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -134,13 +134,13 @@ if ($UpdateLiceneseRef)
 
   $command = "$MODDIR/nomos/agent/nomos -V";
   $version = system($command, $return_var);
-  $pattern = '/(\d)+/';
+  $pattern = '/r\((\w+)\)/';
   preg_match($pattern, $version, $matches);
 
   $version230 = 6922;
 
-  /** when the version is less than or equal to svn 6922, call Update reference licenses process */
-  if ($matches[0] <= $version230) {
+  /** when the version is less than or equal to svn 6922, when we switch to git, always greater than 6932, call Update reference licenses process */
+  if (5 > strlen($matches[1]) && $matches[1] <= $version230) {
     print "Update reference licenses\n";
     initLicenseRefTable(false);
   }

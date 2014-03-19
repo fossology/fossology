@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -72,8 +72,12 @@ function Migrate_20_21($DryRun)
   }
 
   // Fix the forieign keys removed when the table was renamed
-  $sql = "alter table uploadtree_a add foreign key (upload_fk) references upload(upload_pk) on delete cascade";
-  RunSQL($sql, $DryRun);
+  $sql = "SELECT conname from pg_constraint where conname= 'uploadtree_a_upload_fk_fkey';";
+  $row = RunSQL($sql, $DryRun);
+  if (empty($row)) {
+    $sql = "alter table uploadtree_a add foreign key (upload_fk) references upload(upload_pk) on delete cascade";
+    RunSQL($sql, $DryRun);
+  }
 
   // fix uploadtree_tablename
   $sql = "update upload set uploadtree_tablename='uploadtree_a' where uploadtree_tablename is null";
