@@ -25,7 +25,6 @@ Description: open and modular architecture for analyzing software
 Package: fossology-common
 Architecture: any
 Depends: php5-pgsql, php-pear, php5-cli, ${shlibs:Depends}, ${misc:Depends}
-Replaces: fossology-db (<= 1.4.1)
 Breaks: fossology-db (<= 1.4.1)
 Description: architecture for analyzing software, common files
  The FOSSology project is a web based framework that allows you to
