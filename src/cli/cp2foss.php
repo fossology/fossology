@@ -490,7 +490,7 @@ if($Verbose) {
 //print "fossjobs_command is:$fossjobs_command\n";
 
 if (!$UploadArchive) {  // upload is empty
-  print "FATAL: you want to upload '$UploadArchive'.\n";
+  print "FATAL: No files to upload were specified.\n";
   exit(1);
 }
 
