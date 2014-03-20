@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -240,7 +240,7 @@ class search extends FO_Plugin
     if ($searchtype == 'directory')
     {
       if ($NeedAnd) $SQL .= " AND"; 
-      $SQL .= " ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0) AND (ufile_mode != $dir_ufile_mode)";
+      $SQL .= " ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0) AND (ufile_mode != $dir_ufile_mode) and pfile_fk != 0";
       $NeedAnd=1;
     }
 
