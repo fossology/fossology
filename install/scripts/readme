@@ -1,0 +1,15 @@
+3 simple scripts to assist with FOSSology installations.
+
+Based upon material obtained from:
+http://www.fossology.org/projects/fossology/wiki/SysConfig
+
+1. setshm.sh automates the process of "Adjusting the Kernel"
+
+2. pgsql-conf-fix.sh automates the process of "Preparing Postgresql"
+
+3. php-conf-fix.sh automates the process of "Configuring PHP"
+
+The three scripts have been tested and appear to work on Ubuntu 12.04LTS
+
+Paul...
+
