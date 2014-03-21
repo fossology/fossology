@@ -36,6 +36,15 @@ function Migrate_20_25($Verbose)
 {
   global $PG_CONN;
 
+  $sql = "select count(*) from pg_class where relname='copyright';";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  pg_free_result($result);
+  if (1 > $row['count']) {
+    return 0; // fresh install, even no copyright table
+  }
+
   $sql = "delete from copyright where pfile_fk not in (select pfile_pk from pfile);";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
