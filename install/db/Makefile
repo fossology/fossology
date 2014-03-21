@@ -1,5 +1,5 @@
 # FOSSology Makefile - db/
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 TOP=../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
@@ -18,6 +18,7 @@ install: all
 	$(INSTALL_DATA) dbmigrate_1.4-2.0.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_1.4-2.0.php
 	$(INSTALL_DATA) dbmigrate_2.0-2.1.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.1.php
 	$(INSTALL_DATA) dbmigrate_2.1-2.2.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.1-2.2.php
+	$(INSTALL_DATA) dbmigrate_2.0-2.5-pre.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.5-pre.php
 	$(INSTALL_DATA) fo_mapping_license.php $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 	
 	$(INSTALL_PROGRAM) export_license_ref.php $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php

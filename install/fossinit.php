@@ -91,6 +91,11 @@ require_once("$MODDIR/lib/php/common.php");
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
 
+/** delete from copyright where pfile_fk not in (select pfile_pk from pfile) */
+/** add foreign constraint on copyright pfile_fk if not exist */
+require_once("$LIBEXECDIR/dbmigrate_2.0-2.5-pre.php");
+Migrate_20_25($Verbose);
+
 if (empty($SchemaFilePath)) $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
 
 if (!file_exists($SchemaFilePath))
