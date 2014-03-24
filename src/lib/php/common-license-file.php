@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -159,6 +159,8 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   }
   pg_free_result($result);
 
+  if (empty($rf_pk)) return array(); // if when the rf_shortname does not exist
+
   $shortname = pg_escape_string($rf_shortname);
 
   /* Optional tag restriction */
@@ -228,6 +230,8 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
     $rf_pk .= "," . $row["rf_pk"];
   }
   pg_free_result($result);
+
+  if (empty($rf_pk)) return array(); // if when the rf_shortname does not exist
 
   $shortname = pg_escape_string($rf_shortname);
   $chkonly = ($CheckOnly) ? " LIMIT 1" : "";

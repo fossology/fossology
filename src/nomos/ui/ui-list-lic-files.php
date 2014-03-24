@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -114,6 +114,12 @@ class list_lic_files extends FO_Plugin
 
         // Count is uploadtree recs, not pfiles
         $CountArray = CountFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly, $CheckOnly, $tag_pk, $uploadtree_tablename);
+
+        if (empty($CountArray)) {
+          $V .=  _("<b> No files found for license $rf_shortname !</b>\n");
+          break;
+        }
+
         $Count = $CountArray['count'];
         $Unique = $CountArray['unique'];
 
