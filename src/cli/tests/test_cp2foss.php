@@ -384,7 +384,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     // print_r($out);
-    $output_msg = "FATAL: you want to upload ''.";
+    $output_msg = "FATAL: No files to upload were specified.";
     $this->assertEquals($output_msg, $out[0]);
 
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
