@@ -139,17 +139,33 @@ if ($UpdateLiceneseRef)
 {
   global $MODDIR;
 
-  $command = "$MODDIR/nomos/agent/nomos -V";
-  $version = system($command, $return_var);
-  $pattern = '/r\((\w+)\)/';
-  preg_match($pattern, $version, $matches);
+  $sqlstmts = "select count(*) from license_ref;";
+  $result = pg_query($PG_CONN, $sqlstmts);
+  DBCheckResult($result, $sqlstmts, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  pg_free_result($result);
 
-  $version230 = 6922;
+  if ($row['count'] >  0) {
+    $command = "$MODDIR/nomos/agent/nomos -V";
+    $version = system($command, $return_var);
+    $pattern = '/r\((\w+)\)/';
+    preg_match($pattern, $version, $matches);
 
-  /** when the version is less than or equal to svn 6922, when we switch to git, always greater than 6932, call Update reference licenses process */
-  if (5 > strlen($matches[1]) && $matches[1] <= $version230) {
-    print "Update reference licenses\n";
-    initLicenseRefTable(false);
+    $version230 = 6922;
+
+    /** when the version is less than or equal to svn 6922, when we switch to git, always greater than 6932, call Update reference licenses process */
+    if (5 > strlen($matches[1]) && $matches[1] <= $version230) {
+      print "Update reference licenses\n";
+      initLicenseRefTable(false);
+    }
+  }
+  else if ($row['count'] ==  0) {
+    /** import licenseref.sql */
+    $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
+    $result_import = pg_query($PG_CONN, $sqlstmts);
+    DBCheckResult($result_import, $sqlstmts, __FILE__, __LINE__);
+    pg_free_result($result_import);
+    print "fresh install, import licenseref.sql \n";
   }
 }
 
