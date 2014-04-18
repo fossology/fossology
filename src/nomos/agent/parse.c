@@ -5951,7 +5951,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("ACE");
   }
   else if(INFILE(_LT_FACE)) {
-    INTERESTING("FACE");
+    INTERESTING("FaCE");
   }
 
   /*
