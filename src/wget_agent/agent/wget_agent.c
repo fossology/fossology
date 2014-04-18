@@ -680,7 +680,14 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
   {
     memset(CMD, MAXCMD, 0);
     /* for the wildcards upload, keep the path */
-    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s'  %s >/dev/null 2>&1", TempFile, Path);
+    /* copy * files to TempFileDir/temp primarily */
+    snprintf(CMD,MAXCMD-1, "mkdir -p %s/temp  > /dev/null 2>&1 && cp %s  %s/temp > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
+    rc_system = system(CMD);
+    if (rc_system != 0)
+    {
+      return 0;
+    }
+    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C %s/temp ./  > /dev/null 2>&1 && rm -rf %s/temp  > /dev/null 2>&1", TempFile, TempFileDir, TempFileDir);
     rc_system = system(CMD);
     if (rc_system != 0)
     {
