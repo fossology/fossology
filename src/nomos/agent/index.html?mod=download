@@ -1,0 +1,6 @@
+Module unavailable or your login session timed out. <P /><a href='/fossology/?mod=auth'>Click here to continue.</a><script language='JavaScript'>
+function Redirect()
+{
+window.location.href = '/fossology/?mod=auth';
+}
+</script>

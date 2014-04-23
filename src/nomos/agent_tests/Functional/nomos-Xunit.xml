@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="lib/php Tests" tests="11" assertions="119" failures="0" errors="0" time="156.815461">
+    <testsuite name="cli1Test" file="/home/larry/fossology/src/nomos/agent_tests/Functional/cli1Test.php" tests="1" assertions="1" failures="0" errors="0" time="0.049864">
+      <testcase name="testHelp" class="cli1Test" file="/home/larry/fossology/src/nomos/agent_tests/Functional/cli1Test.php" line="28" assertions="1" time="0.049864"/>
+    </testsuite>
+    <testsuite name="OneShotgplv21Test" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-lgpl2.1.php" tests="1" assertions="3" failures="0" errors="0" time="0.583006">
+      <testcase name="testOneShotgplv21" class="OneShotgplv21Test" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-lgpl2.1.php" line="48" assertions="3" time="0.583006"/>
+    </testsuite>
+    <testsuite name="OneShotgpl3Test" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-gpl3.php" tests="1" assertions="3" failures="0" errors="0" time="0.919788">
+      <testcase name="testOneShotgplv3" class="OneShotgpl3Test" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-gpl3.php" line="48" assertions="3" time="0.919788"/>
+    </testsuite>
+    <testsuite name="OneShotafferoTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-affero.php" tests="1" assertions="6" failures="0" errors="0" time="1.494288">
+      <testcase name="testOneShotafferos" class="OneShotafferoTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-affero.php" line="53" assertions="6" time="1.494288"/>
+    </testsuite>
+    <testsuite name="OneShotnoneTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-none.php" tests="1" assertions="3" failures="0" errors="0" time="0.120297">
+      <testcase name="testOneShotnone" class="OneShotnoneTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-none.php" line="48" assertions="3" time="0.120297"/>
+    </testsuite>
+    <testsuite name="OneShotemptyTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-empty.php" tests="1" assertions="3" failures="0" errors="0" time="0.085213">
+      <testcase name="testOneShotempty" class="OneShotemptyTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-empty.php" line="49" assertions="3" time="0.085213"/>
+    </testsuite>
+    <testsuite name="OneShotMultiFileTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-multiFile.php" tests="1" assertions="89" failures="0" errors="0" time="11.478436">
+      <testcase name="testOneShotmultiFile" class="OneShotMultiFileTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-multiFile.php" line="93" assertions="89" time="11.478436"/>
+    </testsuite>
+    <testsuite name="OneShotbsdTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-bsd.php" tests="1" assertions="6" failures="0" errors="0" time="0.824339">
+      <testcase name="testOneShotbsd" class="OneShotbsdTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-bsd.php" line="39" assertions="6" time="0.824339"/>
+    </testsuite>
+    <testsuite name="OneShot_Oracle_Berkeley_DB" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-Oracle-Berkeley-DB.php" fullPackage="OneShot.Oracle.Berkeley" tests="1" assertions="2" failures="0" errors="0" time="0.287293">
+      <testcase name="testOneShotOracle_Berkeley_DB" class="OneShot_Oracle_Berkeley_DB" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-Oracle-Berkeley-DB.php" line="40" assertions="2" time="0.287293"/>
+    </testsuite>
+    <testsuite name="OneShot_JSON" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-JSON.php" fullPackage="OneShot" tests="1" assertions="1" failures="0" errors="0" time="0.461395">
+      <testcase name="testOneShot_JSON" class="OneShot_JSON" file="/home/larry/fossology/src/nomos/agent_tests/Functional/OneShot-JSON.php" line="40" assertions="1" time="0.461395"/>
+    </testsuite>
+    <testsuite name="NomosFunTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/Nomos-fun-test.php" tests="1" assertions="2" failures="0" errors="0" time="140.511542">
+      <testcase name="testDiffNomos" class="NomosFunTest" file="/home/larry/fossology/src/nomos/agent_tests/Functional/Nomos-fun-test.php" line="42" assertions="2" time="140.511542"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

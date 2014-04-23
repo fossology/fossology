@@ -1,0 +1,239 @@
+gcc -c parse.c  -g -O2 -Wall -D_FILE_OFFSET_BITS=64 -lfossology -I`pg_config --includedir` `pkg-config glib-2.0 --cflags --libs` -I../../../src/lib/c -L../../../src/lib/c -lpq
+parse.c: In function ‘fileHasPatt’:
+parse.c:254: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c: In function ‘dbgIdxGrep’:
+parse.c:302: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c: In function ‘parseLicenses’:
+parse.c:358: warning: pointer targets in assignment differ in signedness
+parse.c:376: warning: pointer targets in passing argument 1 of ‘strncasecmp’ differ in signedness
+/usr/include/string.h:538: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:396: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:397: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:409: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:431: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:648: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:660: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1107: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1148: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1157: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1172: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1201: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1206: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1226: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1358: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1358: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1360: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1368: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1402: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1402: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1404: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1487: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1561: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1570: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1587: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1591: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1595: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1596: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1600: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1604: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1619: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1635: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1720: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1742: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1759: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:1759: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:2424: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:2641: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:2656: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:2797: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:2867: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:3224: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:3235: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:3283: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:3286: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:3335: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:3341: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:3397: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:3464: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:3551: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:3555: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:4051: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:4656: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:4991: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:5279: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:5808: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:5887: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6064: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6112: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6118: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6180: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6200: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c: In function ‘mplNplVersion’:
+parse.c:6349: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c: In function ‘lgplVersion’:
+parse.c:6811: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6820: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6831: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6837: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6850: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6854: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6858: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6861: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c: In function ‘gplVersion’:
+parse.c:6881: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6885: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6897: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6906: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6926: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6940: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:6947: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c: In function ‘findPhrase’:
+parse.c:7194: warning: pointer targets in passing argument 1 of ‘getInstances’ differ in signedness
+util.h:50: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c: In function ‘doctorBuffer’:
+parse.c:7952: warning: pointer targets in passing argument 1 of ‘strncasecmp’ differ in signedness
+/usr/include/string.h:538: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:7965: warning: pointer targets in passing argument 1 of ‘strncasecmp’ differ in signedness
+/usr/include/string.h:538: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:7997: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:8008: warning: pointer targets in passing argument 1 of ‘strncasecmp’ differ in signedness
+/usr/include/string.h:538: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:8011: warning: pointer targets in passing argument 1 of ‘strncasecmp’ differ in signedness
+/usr/include/string.h:538: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:8014: warning: pointer targets in passing argument 1 of ‘strncasecmp’ differ in signedness
+/usr/include/string.h:538: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:8018: warning: pointer targets in passing argument 1 of ‘strncasecmp’ differ in signedness
+/usr/include/string.h:538: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:8023: warning: pointer targets in passing argument 1 of ‘strncasecmp’ differ in signedness
+/usr/include/string.h:538: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:8033: warning: pointer targets in passing argument 1 of ‘strstr’ differ in signedness
+/usr/include/string.h:340: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:8035: warning: pointer targets in passing argument 1 of ‘strlen’ differ in signedness
+/usr/include/string.h:397: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:8036: warning: pointer targets in passing argument 1 of ‘strlen’ differ in signedness
+/usr/include/string.h:397: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:8045: warning: pointer targets in passing argument 1 of ‘strncasecmp’ differ in signedness
+/usr/include/string.h:538: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:8081: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:8176: warning: pointer targets in passing argument 1 of ‘strncasecmp’ differ in signedness
+/usr/include/string.h:538: note: expected ‘const char *’ but argument is of type ‘unsigned char *’
+parse.c:8177: warning: pointer targets in passing argument 1 of ‘__builtin_strncpy’ differ in signedness
+parse.c:8177: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:8211: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:8237: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:8245: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:8261: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c: In function ‘checkUnclassified’:
+parse.c:8562: warning: pointer targets in passing argument 1 of ‘getInstances’ differ in signedness
+util.h:50: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c: In function ‘checkFileReferences’:
+parse.c:8714: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:8714: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c:8717: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c: In function ‘checkCornerCases’:
+parse.c:8986: warning: pointer targets in passing argument 2 of ‘idxGrep’ differ in signedness
+nomos_regex.h:30: note: expected ‘char *’ but argument is of type ‘unsigned char *’
+parse.c: In function ‘match3’:
+parse.c:9021: warning: pointer targets in passing argument 2 of ‘dbgIdxGrep’ differ in signedness
+parse.c:290: note: expected ‘unsigned char *’ but argument is of type ‘char *’
+parse.c:9061: warning: pointer targets in passing argument 1 of ‘doctorBuffer’ differ in signedness
+parse.c:7907: note: expected ‘unsigned char *’ but argument is of type ‘char *’
+parse.c:9083: warning: pointer targets in passing argument 2 of ‘dbgIdxGrep’ differ in signedness
+parse.c:290: note: expected ‘unsigned char *’ but argument is of type ‘char *’
+parse.c:9094: warning: pointer targets in passing argument 2 of ‘dbgIdxGrep’ differ in signedness
+parse.c:290: note: expected ‘unsigned char *’ but argument is of type ‘char *’
+parse.c:9095: warning: pointer targets in passing argument 2 of ‘dbgIdxGrep’ differ in signedness
+parse.c:290: note: expected ‘unsigned char *’ but argument is of type ‘char *’
+parse.c:9096: warning: pointer targets in passing argument 2 of ‘dbgIdxGrep’ differ in signedness
+parse.c:290: note: expected ‘unsigned char *’ but argument is of type ‘char *’
+parse.c:9165: warning: pointer targets in passing argument 2 of ‘dbgIdxGrep’ differ in signedness
+parse.c:290: note: expected ‘unsigned char *’ but argument is of type ‘char *’
+gcc nomos.o licenses.o list.o parse.o process.o nomos_regex.o util.o  _precheck.o _autodata.o    -lpq -g -O2 -Wall -D_FILE_OFFSET_BITS=64 -lfossology -I`pg_config --includedir` `pkg-config glib-2.0 --cflags --libs` -I../../../src/lib/c -L../../../src/lib/c -lpq -o nomos

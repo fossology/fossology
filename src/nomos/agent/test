@@ -1,0 +1,19 @@
+Declared Ubuntu Licences:  Apache 2.0
+This package was debianized by Varun Hiremath on
+Tue, 24 Apr 2007 17:19:10 +0530.
+
+It was downloaded from http://xml.apache.org/security/dist/java-library/
+
+Upstream Authors: The Apache Software Foundation.
+
+Copyright:
+(C) 2003-2004 The Apache Software Foundation.
+(C) 2005-2006 Sun Microsystems, Inc. All rights reserved.
+(C) 2001 The Internet Society and W3C
+
+License: Apache 2.0
+
+On Debian GNU/Linux system you can find the complete text of the
+  Apache-2.0 license in `/usr/share/common-licenses/Apache-2.0'
+  The Debian packaging is (C) 2007, Varun Hiremath and
+  is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
