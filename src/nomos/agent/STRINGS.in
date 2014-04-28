@@ -7916,7 +7916,7 @@ k
 #
 %ENTRY% _TITLE_OPEN_CASCADE
 %KEY%	"licen[cs]e"
-%STR%	"open cascade technology public licen[cs]e"
+%STR%	"open cascade (technology |)public licen[cs]e"
 #
 %ENTRY%	_MISC_DEBDATA
 %KEY%	=NULL=
