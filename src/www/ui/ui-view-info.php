@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -338,7 +338,25 @@ class ui_view_info extends FO_Plugin
     $agent_status = AgentARSList('pkgagent_ars', $Upload);
     if (empty($agent_status))
     {
-      $V .= _("No data available. Use Jobs > Agents to schedule a pkgagent scan.");
+
+      $V .= ActiveHTTPscript("Schedule");
+      $V .= "<script language='javascript'>\n";
+      $V .= "function Schedule_Reply()\n";
+      $V .= "  {\n";
+      $V .= "  if ((Schedule.readyState==4) && (Schedule.status==200))\n";
+      $V .= "    document.getElementById('msgdiv').innerHTML = Schedule.responseText;\n";
+      $V .= "  }\n";
+      $V .= "</script>\n";
+
+      $V .= "<form name='formy' method='post'>\n";
+      $V .= "<div id='msgdiv'>\n";
+      $V .= "</div> \n";
+      $V .= _("No data available.");
+      $V .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
+      $V .= "onClick='Schedule_Get(\"" . Traceback_uri() . "?mod=schedule_agent&upload=$Upload&agent=agent_pkgagent \")'>\n";
+      $V .= "</input>";
+      $V .= "</form>\n";
+
       return($V);
     }
     $sql = "SELECT mimetype_name
