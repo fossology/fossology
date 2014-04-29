@@ -416,7 +416,7 @@
 #
 %ENTRY% _LT_APACHE_V2ref 
 %KEY% "licen[cs]"
-%STR% "licen[cs]e(:?) apache 2\.?0"
+%STR% "licen[cs]e(:?) apache( |-)2\.?0"
 #####
 # DELETED: ... =ANY= in consideration of your agreement to the following
 # terms and your use installation modification or re-?distribution
