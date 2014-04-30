@@ -102,7 +102,7 @@ class ajax_schedule_agent extends FO_Plugin
         else
         {
           $text = _("Scheduling of Agent(s) failed: ");
-          $V .= displayMessage($text.$rc);
+          $V .= displayMessage($text.$rv.$ErrorMsg);
         }
 
         break;

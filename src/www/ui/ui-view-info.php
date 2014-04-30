@@ -339,6 +339,7 @@ class ui_view_info extends FO_Plugin
     if (empty($agent_status))
     {
 
+      /** schedule pkgagent */
       $V .= ActiveHTTPscript("Schedule");
       $V .= "<script language='javascript'>\n";
       $V .= "function Schedule_Reply()\n";
@@ -350,11 +351,11 @@ class ui_view_info extends FO_Plugin
 
       $V .= "<form name='formy' method='post'>\n";
       $V .= "<div id='msgdiv'>\n";
-      $V .= "</div> \n";
       $V .= _("No data available.");
       $V .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
       $V .= "onClick='Schedule_Get(\"" . Traceback_uri() . "?mod=schedule_agent&upload=$Upload&agent=agent_pkgagent \")'>\n";
       $V .= "</input>";
+      $V .= "</div> \n";
       $V .= "</form>\n";
 
       return($V);

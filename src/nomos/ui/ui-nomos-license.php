@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -189,8 +189,25 @@ class ui_nomos_license extends FO_Plugin
     }
     if ($Agent_pk == 0)
     {
-      $text = _("No data available.  Use Jobs > Agents to schedule a license scan.");
-      $VLic = "<b>$text</b><p>";
+      /** schedule nomos */
+      $VLic .= ActiveHTTPscript("Schedule");
+      $VLic .= "<script language='javascript'>\n";
+      $VLic .= "function Schedule_Reply()\n";
+      $VLic .= "  {\n";
+      $VLic .= "  if ((Schedule.readyState==4) && (Schedule.status==200))\n";
+      $VLic .= "    document.getElementById('msgdiv').innerHTML = Schedule.responseText;\n";
+      $VLic .= "  }\n";
+      $VLic .= "</script>\n";
+
+      $VLic .= "<form name='formy' method='post'>\n";
+      $VLic .= "<div id='msgdiv'>\n";
+      $VLic .= _("No data available.");
+      $VLic .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
+      $VLic .= "onClick='Schedule_Get(\"" . Traceback_uri() . "?mod=schedule_agent&upload=$upload_pk&agent=agent_nomos \")'>\n";
+      $VLic .= "</input>";
+      $VLic .= "</div> \n";
+      $VLic .= "</form>\n";
+
       return $VLic;
     }
 

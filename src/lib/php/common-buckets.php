@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -45,8 +45,25 @@ function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $e
 {
   global $PG_CONN;
 
-  $NoDataText = _("No data available.  Use Jobs > Agents to schedule a bucket scan.");
-  $NoData = "<b>$NoDataText</b><p>";
+  /** schedule bucket */
+  $NoData = ActiveHTTPscript("Schedule");
+  $NoData .= "<script language='javascript'>\n";
+  $NoData .= "function Schedule_Reply()\n";
+  $NoData .= "  {\n";
+  $NoData .= "  if ((Schedule.readyState==4) && (Schedule.status==200))\n";
+  $NoData .= "    document.getElementById('msgdiv').innerHTML = Schedule.responseText;\n";
+  $NoData .= "  }\n";
+  $NoData .= "</script>\n";
+
+  $NoData .= "<form name='formy' method='post'>\n";
+  $NoData .= "<div id='msgdiv'>\n";
+  $NoData .= _("No data available.");
+  $NoData .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
+  $NoData .= "onClick='Schedule_Get(\"" . Traceback_uri() . "?mod=schedule_agent&upload=$upload_pk&agent=agent_bucket \")'>\n";
+  $NoData .= "</input>";
+  $NoData .= "</div> \n";
+  $NoData .= "</form>\n";
+
   $name = $id;
   $select = "<select name='$name' id='$id' $extra>";
 

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -600,9 +600,24 @@ class copyright_hist extends FO_Plugin
 
             if ($Agent_pk == 0)
             {
-              $text = _("No data available.  Use Jobs > Agents to schedule a copyright scan.");
-              $Msg = "<b>$text</b><p>";
-              $OutBuf .= $Msg;
+              /** schedule copyright */
+              $OutBuf .= ActiveHTTPscript("Schedule");
+              $OutBuf .= "<script language='javascript'>\n";
+              $OutBuf .= "function Schedule_Reply()\n";
+              $OutBuf .= "  {\n";
+              $OutBuf .= "  if ((Schedule.readyState==4) && (Schedule.status==200))\n";
+              $OutBuf .= "    document.getElementById('msgdiv').innerHTML = Schedule.responseText;\n";
+              $OutBuf .= "  }\n";
+              $OutBuf .= "</script>\n";
+
+              $OutBuf .= "<form name='formy' method='post'>\n";
+              $OutBuf .= "<div id='msgdiv'>\n";
+              $OutBuf .= _("No data available.");
+              $OutBuf .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
+              $OutBuf .= "onClick='Schedule_Get(\"" . Traceback_uri() . "?mod=schedule_agent&upload=$Upload&agent=agent_copyright \")'>\n";
+              $OutBuf .= "</input>";
+              $OutBuf .= "</div> \n";
+              $OutBuf .= "</form>\n";
               break;
             }
 
