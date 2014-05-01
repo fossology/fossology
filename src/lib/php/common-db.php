@@ -58,7 +58,10 @@ function DBconnect($sysconfdir, $Options="", $FailExit=true)
   {
     $text = _("Could not connect to FOSSology database.");
     echo "<h2>$text</h2>";
-    debugbacktrace();
+// I'm (bobg) commenting out this backtrace because it exposes the ConfigInit() calling parameters which contain
+// the db user and password in plain text.  Unfortunately, those are exactly the data you need to help debug a connect
+// problem.
+//    debugbacktrace();
     exit;
   }
   else
