@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -71,9 +71,10 @@ struct bucketdef_struct
   regex_file_t *regex_row;  /* array of regex_file_structs if type=5 */
   char     stopon;          /* Y to stop procecessing if this bucket matches */
   char     applies_to;      /* 'f'=every file, 'p'=packages only  */
-  int      nomos_agent_pk;  /* nomos agent_pk whose results this bucket analsis is using */
+  int      nomos_agent_pk;  /* nomos agent_pk whose results this bucket scan is using */
   int      bucket_agent_pk; /* bucket agent_pk */
   int      bucketpool_pk;
+  char    *uploadtree_tablename;
 };
 typedef struct bucketdef_struct bucketdef_t, *pbucketdef_t;
 
@@ -146,7 +147,7 @@ int arrayAinB        (int *arrayA, int *arrayB);
 int intAinB          (int intA, int *arrayB);
 int validate_pk      (PGconn *pgConn, char *sql);
 void Usage           (char *Name);
-int processed        (PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk, int bucketpool_pk, int bucket_pk);
+int processed        (PGconn *pgConn, int agent_pk, int nomos_agent_pk, int pfile_pk, int uploadtree_pk, int bucketpool_pk, int bucket_pk);
 int UploadProcessed  (PGconn *pgConn, int bucketagent_pk, int nomosagent_pk, int pfile_pk, int uploadtree_pk, int upload_pk, int bucketpool_pk);
 
 /* inits.c */

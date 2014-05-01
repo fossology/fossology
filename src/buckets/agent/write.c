@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -50,7 +50,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
       fo_scheduler_heart(1);
       if (pfile_pk)
       {
-        if (processed(pgConn, agent_pk, pfile_pk, uploadtree_pk, bucketpool_pk, *bucketList)) 
+        if (processed(pgConn, agent_pk, nomosagent_pk, pfile_pk, uploadtree_pk, bucketpool_pk, *bucketList)) 
         {
           snprintf(sql, sizeof(sql), 
               "UPDATE bucket_file set bucket_fk = %d from bucket_def where pfile_fk = %d and  \

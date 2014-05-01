@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -319,6 +319,14 @@ int main(int argc, char **argv)
     }
     bucketDefArray->nomos_agent_pk = nomos_agent_pk;
     bucketDefArray->bucket_agent_pk = agent_pk;
+
+    /* Find the correct uploadtree table name */
+    bucketDefArray->uploadtree_tablename = GetUploadtreeTableName(pgConn, uploadtree.upload_fk);
+    if (!(bucketDefArray->uploadtree_tablename))
+    {
+      LOG_FATAL("buckets passed invalid upload, upload_pk = %d", uploadtree.upload_fk);
+      return(-110);
+    }
 
     /* loop through rules (bucket defs) to see if there are any package only rules */
     hasPrules = 0;

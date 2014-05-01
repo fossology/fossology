@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -53,7 +53,8 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   if (debug) printf("---- START walkTree, uploadtree_pk=%d ----\n",uploadtree_pk);
 
   /* get uploadtree rec for uploadtree_pk */
-  sprintf(sqlbuf, "select pfile_fk, lft, rgt, ufile_mode, ufile_name, upload_fk from uploadtree where uploadtree_pk=%d", uploadtree_pk);
+  sprintf(sqlbuf, "select pfile_fk, lft, rgt, ufile_mode, ufile_name, upload_fk from %s where uploadtree_pk=%d", 
+          bucketDefArray->uploadtree_tablename, uploadtree_pk);
   origresult = PQexec(pgConn, sqlbuf);
   if (fo_checkPQresult(pgConn, origresult, sqlbuf, fcnName, __LINE__)) return -1;
   if (PQntuples(origresult) == 0) 
@@ -69,10 +70,8 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   uploadtree.ufile_name = strdup(PQgetvalue(origresult, 0, 4));
   uploadtree.upload_fk = atol(PQgetvalue(origresult, 0, 5));
 
-/*
- *if (!skipProcessedCheck)
- *  if (processed(pgConn, agent_pk, uploadtree.pfile_fk, uploadtree.uploadtree_pk, bucketpool_pk)) return 0;
- */
+ if (!skipProcessedCheck)
+   if (processed(pgConn, agent_pk, bucketDefArray->nomos_agent_pk, uploadtree.pfile_fk, uploadtree.uploadtree_pk, bucketpool_pk, 0)) return 0;
 
   /* If this is a leaf node, process it
      (i.e. determine what bucket it belongs in).
@@ -88,8 +87,8 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
      process (if child is leaf) or recurse on container.
      Packages need both processing (check bucket_def rules) and recursion.
    */
-  sprintf(sqlbuf, "select uploadtree_pk,pfile_fk, lft, rgt, ufile_mode, ufile_name from uploadtree where parent=%d", 
-          uploadtree_pk);
+  sprintf(sqlbuf, "select uploadtree_pk,pfile_fk, lft, rgt, ufile_mode, ufile_name from %s where parent=%d", 
+          bucketDefArray->uploadtree_tablename, uploadtree_pk);
   result = PQexec(pgConn, sqlbuf);
   if (fo_checkPQresult(pgConn, result, sqlbuf, fcnName, __LINE__)) return -1;
   numChildren = PQntuples(result);
@@ -105,7 +104,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   {
     childuploadtree.uploadtree_pk = atol(PQgetvalue(result, childIdx, 0));
     childuploadtree.pfile_fk = atol(PQgetvalue(result, childIdx, 1));
-    if (processed(pgConn, agent_pk, childuploadtree.pfile_fk, childuploadtree.uploadtree_pk, bucketpool_pk, 0)) continue;
+    if (processed(pgConn, agent_pk, bucketDefArray->nomos_agent_pk, childuploadtree.pfile_fk, childuploadtree.uploadtree_pk, bucketpool_pk, 0)) continue;
 
     childuploadtree.lft = atoi(PQgetvalue(result, childIdx, 2));
     childuploadtree.rgt = atoi(PQgetvalue(result, childIdx, 3));
