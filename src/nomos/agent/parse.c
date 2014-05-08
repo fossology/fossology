@@ -2794,6 +2794,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_INTEL_7)) {
     INTERESTING(lDebug ? "Intel(10)" : "Intel-other");
   }
+  else if (INFILE(_LT_INTEL_WLAN)) {
+    INTERESTING("Intel-WLAN");
+  }
   else if (HASTEXT(_TEXT_INTELCORP, 0)) {
     if (INFILE(_LT_INTEL_1)) {
       if (INFILE(_LT_INTEL_FW)) {
@@ -2823,9 +2826,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_LT_INTEL_EULA)) {
     INTERESTING("Intel-EULA");
-  }
-  else if (INFILE(_LT_INTEL_WLAN)) {
-    INTERESTING("Intel-WLAN");
   }
 
   /*
@@ -3865,7 +3865,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Apple
    */
   if (INFILE(_TEXT_APPLE)) {
-    if (INFILE(_LT_APPLE_1)) {
+    if (INFILE(_LT_MIT_12)) {
+      INTERESTING(lDebug ? "Apple MIT License" : "AML");
+    }
+    else if (INFILE(_LT_APPLE_1)) {
       INTERESTING(lDebug ? "Apple(1)" : "Apple");
     }
     else if (INFILE(_LT_APPLE_2)) {
@@ -5925,7 +5928,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /** open cascade technology public license */
   if (INFILE(_TITLE_OPEN_CASCADE))
   {
-    INTERESTING("OCCT");
+    INTERESTING("OpenCASCADE-PL");
   }
 
   /**  KnowledgeTree Public License */

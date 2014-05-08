@@ -3322,6 +3322,10 @@ e /* (INFILE(j)) */
 %KEY%	"permi[st]"
 %STR%	"permission is granted =SOME= without restriction =FEW= to use publicly perform distribute sell modify merge give away or sublicence"
 #
+%ENTRY%	_LT_MIT_12
+%KEY%	"so(ftware|urce)"
+%STR%	"regarding the apple software or its use and operation alone or in combination with your products"
+#
 %ENTRY% _LT_MIT_NO_EVIL
 %KEY% "evil"
 %STR% "(no|not|don't be) evil"
