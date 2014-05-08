@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -750,7 +750,9 @@ JSOUT;
     }
     else
     {
-      $BucketDefArray = initBucketDefArray($TreeInfo1['bucketpool_pk']);
+      $BucketDefArray1 = initBucketDefArray($TreeInfo1['bucketpool_pk']);
+      $BucketDefArray2 = initBucketDefArray($TreeInfo2['bucketpool_pk']);
+      $BucketDefArray = $BucketDefArray1 + $BucketDefArray2;
 
       /* Get list of children */
       $Children1 = GetNonArtifactChildren($uploadtree_pk1);

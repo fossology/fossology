@@ -262,7 +262,7 @@ function GetLastAnalyzeTime($TableName)
     global $SYSCONFDIR;
     global $SysConf;
 
-    $Cmd = "df -h";
+    $Cmd = "df -hP";
     $Buf = DoCmd($Cmd);
 
     /* Separate lines */

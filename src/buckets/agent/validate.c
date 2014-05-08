@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -133,16 +133,17 @@ FUNCTION void Usage(char *Name)
  * This only works if the bucket has been recorded in table 
  * bucket_file, or bucket_container.
  *
- * \param PGconn $pgConn  postgresql connection
- * \param int agent_pk   agent ID
+ * \param PGconn $pgConn     postgresql connection
+ * \param int agent_pk       bucket agent_pk
+ * \param int nomos_agent_pk nomos agent_pk
  * \param int pfile_pk  
  * \param int uploadtree_pk  
  * \param int bucketpool_pk  
- * \param int bucket_pk  may be zero (to skip bucket_pk check)
+ * \param int bucket_pk      may be zero (to skip bucket_pk check)
  *
  * \return 1=yes, 0=no
  */
-FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk,
+FUNCTION int processed(PGconn *pgConn, int agent_pk, int nomos_agent_pk, int pfile_pk, int uploadtree_pk,
                        int bucketpool_pk, int bucket_pk)
 {
   char *fcnName = "processed";
@@ -156,25 +157,27 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtre
   {
     sprintf(sqlbuf,
     "select bf_pk from bucket_file, bucket_def \
-      where pfile_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+      where pfile_fk=%d and agent_fk=%d and nomosagent_fk=%d and bucketpool_fk=%d \
             and bucket_pk=%d and bucket_fk=bucket_pk \
      union \
      select bf_pk from bucket_container, bucket_def \
-      where uploadtree_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+      where uploadtree_fk=%d and agent_fk=%d and nomosagent_fk=%d and bucketpool_fk=%d \
             and bucket_pk=%d and bucket_fk=bucket_pk limit 1",
-    pfile_pk, agent_pk, bucketpool_pk, bucket_pk, uploadtree_pk, agent_pk, bucketpool_pk, bucket_pk);
+    pfile_pk, agent_pk, nomos_agent_pk, bucketpool_pk, bucket_pk, 
+    uploadtree_pk, agent_pk, nomos_agent_pk, bucketpool_pk, bucket_pk);
   }
   else
   {
     sprintf(sqlbuf,
     "select bf_pk from bucket_file, bucket_def \
-      where pfile_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+      where pfile_fk=%d and agent_fk=%d and nomosagent_fk=%d and bucketpool_fk=%d \
             and bucket_fk=bucket_pk \
      union \
      select bf_pk from bucket_container, bucket_def \
-      where uploadtree_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+      where uploadtree_fk=%d and agent_fk=%d and nomosagent_fk=%d and bucketpool_fk=%d \
             and bucket_fk=bucket_pk limit 1",
-    pfile_pk, agent_pk, bucketpool_pk, uploadtree_pk, agent_pk, bucketpool_pk);
+    pfile_pk, agent_pk, nomos_agent_pk, bucketpool_pk, 
+    uploadtree_pk, agent_pk, nomos_agent_pk, bucketpool_pk);
   }
   result = PQexec(pgConn, sqlbuf);
   if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
@@ -188,7 +191,7 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtre
 
 /**
  * \brief Has this upload already been bucket processed?
- * This function checkes buckets_ars to see if the upload has
+ * This function checks buckets_ars to see if the upload has
  * been processed.  
  * 
  * \param PGconn $pgConn  postgresql connection
