@@ -1,0 +1,8 @@
+#
+# $Id$
+#
+# Filter for Ubuntu 14.04 build
+
+# for Ubuntu 14.04 use the postgres 9.3 libpq headers
+# according to thread at http://postgresql.1045698.n5.nabble.com/Details-about-libpq-cross-version-compatibility-td5723830.html the API has not changed significantly since 7.4
+filter PBBUILDDEP = postgresql-server-dev-9.3
