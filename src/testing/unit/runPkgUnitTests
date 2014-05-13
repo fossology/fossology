@@ -31,16 +31,14 @@ cd /var/lib/jenkins/workspace/PITUnit/2.0PkgTests/$NODE_NAME/fossology2.0/
 
 utils/fo-installdeps -y -e
 
-# set a proxy so things work from inside HP
-pear config-set http_proxy http://lart.usa.hp.com:3128 
+# # This is also a valid way to install phpunit
+#wget https://phar.phpunit.de/phpunit.phar
+#php phpunit.phar
 
-# upgrade pear first
-pear channel-update pear.php.net
-pear upgrade-all
-
-# install PHPUnit
-pear config-set auto_discover 1
-pear install pear.phpunit.de/PHPUnit
+# install PHPUnit (and maybe other dependencies) with composer
+cd src
+composer install
+cd -
 
 echo "would now run tests"
 cd src/testing/unit
