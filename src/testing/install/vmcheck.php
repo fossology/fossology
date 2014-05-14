@@ -34,6 +34,7 @@ $vmServers = array(
     'haymitch.fc.hp.com',
     'primrose.fc.hp.com',
     'madge.fc.hp.com',
+    'buttercup.fc.hp.com'
 );
 
 // vmware does not change the name of the initial vm, it just displays the new
@@ -57,14 +58,22 @@ $pkgVms = array(
 $pkgVms = array(
     'fo-debian-squeeze32.fc.hp.com',
     'fo-debian-squeeze64.fc.hp.com',
+    'fo-debian-wheezy32.fc.hp.com',
+    'fo-debian-wheezy64.fc.hp.com',
     'fo-centos-6-32.fc.hp.com',
     'fo-centos-6-64.fc.hp.com',
-    'fo-fedora-17-32.fc.hp.com',
-    'fo-fedora-17-64.fc.hp.com',
+    'fo-fedora-19-32.fc.hp.com',
+    'fo-fedora-19-64.fc.hp.com',
+    'fo-fedora-18-32.fc.hp.com',
+    'fo-fedora-18-64.fc.hp.com',
     'fo-ubuntu-1204-32.fc.hp.com',
     'fo-ubuntu-1204-64.fc.hp.com',
     'fo-ubuntu-1210-32.fc.hp.com',
     'fo-ubuntu-1210-64.fc.hp.com',
+    'fo-ubuntu-1304-32.fc.hp.com',
+    'fo-ubuntu-1304-64.fc.hp.com',
+    'fo-ubuntu-1310-32.fc.hp.com',
+    'fo-ubuntu-1310-64.fc.hp.com',
 );
 
 
@@ -114,7 +123,7 @@ foreach($hosts as $host => $vms)
   }
   foreach($vms as $vm)
   {
-    if(!vmOps($host, $vm, 'start'))
+    if(!vmOps($host, $vm, 'getstate'))
     {
       echo "Warning: $vm would not start, not in this test run.\n";
       continue;
