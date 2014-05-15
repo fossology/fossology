@@ -34,6 +34,7 @@ require_once '../lib/TestRun.php';
 
 global $Debian;
 global $RedHat;
+global $Migrate;
 
 $debian = NULL;
 $redHat = NULL;
@@ -64,6 +65,11 @@ if($euid != 0) {
   exit(1);
 }
 
+//determine if install of upgrade
+if($argc > 1){
+  $Migrate = $argv[1];
+  echo "fossVersion: $Migrate\n";
+}
 // determine os flavor
 $distros = array();
 $f = exec('cat /etc/issue', $dist, $dRtn);
@@ -81,7 +87,7 @@ switch ($distros[0]) {
     echo "debian version is:$debianVersion\n";
     try
     {
-      $Debian = new ConfigSys($distros[0], $debianVersion);
+      $Debian = new ConfigSys($distros[0], $debianVersion,$Migrate);
     }
     catch (Exception $e)
     {
@@ -95,7 +101,7 @@ switch ($distros[0]) {
       exit(1);
     }
     echo "*** Installing fossology ***\n";
-    if(!installFossology($Debian))
+    if(!installFossology($Debian,$Migrate))
     {
       echo "FATAL! Could not install fossology on {$distros[0]} version $debianVersion\n";
       exit(1);
@@ -107,7 +113,7 @@ switch ($distros[0]) {
     //echo "rh version is:$rhVersion\n";
     try
     {
-      $RedHat = new ConfigSys($redHat, $rhVersion);
+      $RedHat = new ConfigSys($redHat, $rhVersion,$Migrate);
     }
     catch (Exception $e)
     {
@@ -121,7 +127,7 @@ switch ($distros[0]) {
       exit(1);
     }
     echo "*** Installing fossology ***\n";
-    if(!installFossology($RedHat))
+    if(!installFossology($RedHat,$Migrate))
     {
       echo "FATAL! Could not install fossology on $redHat version $rhVersion\n";
       exit(1);
@@ -141,7 +147,7 @@ switch ($distros[0]) {
     echo "rh version is:$rhVersion\n";
     try
     {
-      $RedHat = new ConfigSys($redHat, $rhVersion);
+      $RedHat = new ConfigSys($redHat, $rhVersion,$Migrate);
     }
     catch (Exception $e)
     {
@@ -155,7 +161,7 @@ switch ($distros[0]) {
       exit(1);
     }
     echo "*** Installing fossology ***\n";
-    if(!installFossology($RedHat))
+    if(!installFossology($RedHat,$Migrate))
     {
       echo "FATAL! Could not install fossology on $redHat version $rhVersion\n";
       exit(1);
@@ -173,7 +179,7 @@ switch ($distros[0]) {
     $fedVersion = $distros[2];
     try
     {
-      $Fedora = new ConfigSys($fedora, $fedVersion);
+      $Fedora = new ConfigSys($fedora, $fedVersion, $Migrate);
     }
     catch (Exception $e)
     {
@@ -188,7 +194,7 @@ switch ($distros[0]) {
       break;
     }
     echo "*** Installing fossology ***\n";
-    if(!installFossology($Fedora))
+    if(!installFossology($Fedora,$Migrate))
     {
       echo "FATAL! Could not install fossology on $fedora version $fedVersion\n";
       exit(1);
@@ -208,7 +214,7 @@ switch ($distros[0]) {
     echo "Ubuntu version is:$ubunVersion\n";
     try
     {
-      $Ubuntu = new ConfigSys($distros[0], $ubunVersion);
+      $Ubuntu = new ConfigSys($distros[0], $ubunVersion, $Migrate);
     }
     catch (Exception $e)
     {
@@ -222,7 +228,7 @@ switch ($distros[0]) {
       exit(1);
     }
     echo "*** Installing fossology ***\n";
-    if(!installFossology($Ubuntu))
+    if(!installFossology($Ubuntu, $Migrate))
     {
       echo "FATAL! Could not install fossology on {$distros[0]} version $ubunVersion\n";
       exit(1);
@@ -253,7 +259,7 @@ class ConfigSys {
   public $comment = '';
   public $yum;
 
-  function __construct($osFlavor, $osVersion)
+  function __construct($osFlavor, $osVersion, $migrate)
   {
     if(empty($osFlavor))
     {
@@ -264,7 +270,14 @@ class ConfigSys {
       throw new Exception("No Os Version Supplied\n");
     }
 
-    $dataFile = '../dataFiles/pkginstall/' . strtolower($osFlavor) . '.ini';
+    if(empty($migrate))
+    {
+      $dataFile = '../dataFiles/miginstall/' . strtolower($osFlavor) . '.ini';
+    }else
+    {
+      $dataFile = '../dataFiles/pkginstall/' . strtolower($osFlavor) . '.ini';
+    }    
+    //$dataFile = '../dataFiles/pkginstall/' . strtolower($osFlavor) . '.ini';
     $releases = parse_ini_file($dataFile, 1);
     //echo "DB: the parsed ini file is:\n";
     //print_r($releases) . "\n";
@@ -371,7 +384,7 @@ function insertDeb($objRef)
  *
  * @return boolean
  */
-function installFossology($objRef)
+function installFossology($objRef, $migrate)
 {
   if(!is_object($objRef))
   {
