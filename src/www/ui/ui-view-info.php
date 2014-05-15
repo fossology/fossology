@@ -64,7 +64,6 @@ class ui_view_info extends FO_Plugin
     $Page = GetParm("page",PARM_INTEGER);
     if (empty($Page)) { $Page=0; }
     $Max = 50;
-    $Offset = $Page * $Max;
 
     /**********************************
      List File Info
@@ -86,8 +85,8 @@ class ui_view_info extends FO_Plugin
       $text1 = _("Value");
       $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
       $Bytes = $R['pfile_size'];
-      $BytesH = Bytes2Human($Bytes);
-      $Bytes = number_format($Bytes, 0, "", ",");
+      $BytesH = HumanSize($Bytes);
+      $Bytes = number_format($Bytes, 0, "", ",").' B';
       if ($BytesH == $Bytes) { $BytesH = ""; }
       else { $BytesH = '(' . $BytesH . ')'; }
       $text = _("File Size");
@@ -613,9 +612,7 @@ class ui_view_info extends FO_Plugin
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
-
-    $Folder = GetParm("folder",PARM_INTEGER);
-
+    //$Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $UploadPerm = GetUploadPerm($Upload);
     if ($UploadPerm < PERM_READ) return;
@@ -645,7 +642,6 @@ class ui_view_info extends FO_Plugin
     return;
   }
 
-};
+}
 $NewPlugin = new ui_view_info;
 $NewPlugin->Initialize();
-?>

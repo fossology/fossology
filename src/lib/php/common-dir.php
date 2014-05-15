@@ -26,35 +26,6 @@ function Isartifact($mode) { return(($mode & 1<<28) != 0); }
 function Iscontainer($mode) { return(($mode & 1<<29) != 0); }
 
 /**
- * \brief DEPRECATED 
- *  Convert a number of bytes into a human-readable format.
- * \todo Use HumanSize() instead.
- *
- * \param $Bytes
- *
- * \return human-readable string, e.g. 23KB or 1.3MB
- */
-function Bytes2Human  ($Bytes)
-{
-  if ($Bytes < 1024) { return($Bytes); }
-  $Bytes = $Bytes / 1024;
-  $Bint = intval($Bytes * 100.0) / 100.0;
-  if ($Bytes < 1024) { return("$Bint KB"); }
-  $Bytes = $Bytes / 1024;
-  $Bint = intval($Bytes * 100.0) / 100.0;
-  if ($Bytes < 1024) { return("$Bint MB"); }
-  $Bytes = $Bytes / 1024;
-  $Bint = intval($Bytes * 100.0) / 100.0;
-  if ($Bytes < 1024) { return("$Bint GB"); }
-  $Bytes = $Bytes / 1024;
-  $Bint = intval($Bytes * 100.0) / 100.0;
-  if ($Bytes < 1024) { return("$Bint TB"); }
-  $Bytes = $Bytes / 1024;
-  $Bint = intval($Bytes * 100.0) / 100.0;
-  return("$Bint PB");
-} // Bytes2Human()
-
-/**
  * \brief Convert a file mode to string values.
  *
  * \param $Mode file mode (as octal integer)
@@ -125,7 +96,6 @@ function DirMode2String($Mode)
 $DirGetNonArtifact_Prepared=0;
 function DirGetNonArtifact($UploadtreePk, $uploadtree_tablename='uploadtree')
 {
-  global $Plugins;
   global $PG_CONN;
 
   $Children = array();
@@ -196,7 +166,6 @@ function _DirCmp($a,$b)
 $DirGetList_Prepared=0;
 function DirGetList($Upload, $UploadtreePk, $uploadtree_tablename='uploadtree')
 {
-  global $Plugins;
   global $PG_CONN;
 
   /* Get the basic directory contents */
@@ -208,25 +177,21 @@ function DirGetList($Upload, $UploadtreePk, $uploadtree_tablename='uploadtree')
   if (empty($UploadtreePk))
   {
     $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE upload_fk = $Upload AND parent IS NULL ORDER BY ufile_name ASC;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $rows = pg_fetch_all($result);
-    if (!is_array($rows)) $rows = array();
-    pg_free_result($result);
-    $Results=$rows;
   }
-  else
+  else 
   {
     $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE upload_fk = $Upload AND parent = $UploadtreePk ORDER BY ufile_name ASC;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $rows = pg_fetch_all($result);
-    if (!is_array($rows)) $rows = array();
-    pg_free_result($result);
-    $Results=$rows;
   }
-  usort($Results,'_DirCmp');
-
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $rows = pg_fetch_all($result);
+  pg_free_result($result);
+  if (is_array($rows))
+  {
+    $Results = $rows;
+    usort($Results,'_DirCmp');
+  }
+  
   /* Replace all artifact directories */
   foreach($Results as $Key => $Val)
   {
@@ -267,11 +232,12 @@ function Dir2Path($uploadtree_pk, $uploadtree_tablename='uploadtree')
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $Row = pg_fetch_assoc($result);
     pg_free_result($result);
-    if (!Isartifact($Row['ufile_mode']))  
+    if (!Isartifact($Row['ufile_mode']))
       array_unshift($uploadtreeArray, $Row);
+    
     $uploadtree_pk = $Row['parent'];
   }
-
+  
   return($uploadtreeArray);
 } // Dir2Path()
 
@@ -630,4 +596,3 @@ function Uploadtree2PathStr ($PathArray)
     foreach($PathArray as $PathRow) $Path .= "/" . $PathRow['ufile_name'];
   return $Path;
 }
-?>

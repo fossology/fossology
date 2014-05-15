@@ -31,7 +31,15 @@ class test_common_dir extends PHPUnit_Framework_TestCase
   /* initialization */
   protected function setUp()
   {
-    //print "Starting unit test for common-parm.php\n";
+    // print "Starting unit test for common-dir.php\n";
+    print('.');
+  }
+  
+  /**
+   * \brief clean the env
+   */
+  protected function tearDown() {
+    //print "Ending unit test for common-dir.php\n";
   }
 
   /**
@@ -68,25 +76,31 @@ class test_common_dir extends PHPUnit_Framework_TestCase
     //print "Ending unit test for common-dir.php\n";
   }
   /**
-   * \brief test for Bytes2Human
+   * \brief test of ExtensionGetter
    */
-  function test_Bytes2Human()
+  public function test_GetFileExt()
   {
-    print "test function Bytes2Human()\n";
-    $Bytes = 1073741824;
-    $result = Bytes2Human($Bytes);
-    $this->assertEquals("1 GB", $result);
-    $Bytes = 10240;
-    $result = Bytes2Human($Bytes);
-    $this->assertEquals("10 KB", $result);
+    $this->assertEquals(GetFileExt('autodestroy.exe.bak'),'bak');
   }
-
-  /**
-   * \brief clean the env
+  
+   /**
+   * \brief test for DirMode2String
    */
-  protected function tearDown() {
-    //print "Ending unit test for common-parm.php\n";
+  public function test_DirMode2String()
+  {
+    // print "test function DirMode2String()\n";
+    $result = DirMode2String(805323776);
+    $this->assertEquals("a-d-----S---", $result);
+    $result = DirMode2String(0644);
+    $this->assertEquals("---rw-r--r--", $result);
   }
+  
+   /**
+   * \brief test for Uploadtree2PathStr
+   */
+  public function test_Uploadtree2PathStr (){
+    $result = Uploadtree2PathStr(array(array('ufile_name'=>'path'),array('ufile_name'=>'to'),array('ufile_name'=>'nowhere'),));
+    $this->assertEquals($result,'/path/to/nowhere');
+  }  
+  
 }
-
-?>
