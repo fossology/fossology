@@ -395,6 +395,10 @@ function installFossology($objRef, $migrate)
   $yumClean = 'yum clean all';
   $yumUpdate = 'yum -y update 2>&1';
   $yumInstall = 'yum -y install fossology > fossinstall.log 2>&1';
+
+  $aptUpgrade = 'apt-get dist-upgrade 2>&1';
+  $yumUpgrade = 'yum -y upgrade 2>&1';
+
   $debLog = NULL;
   $installLog = NULL;
 
@@ -404,7 +408,10 @@ function installFossology($objRef, $migrate)
     case 'Debian':
       $last = exec($aptUpdate, $out, $rtn);
       //echo "last is:$last\nresults of update are:\n";print_r($out) . "\n";
-      $last = exec($aptInstall, $iOut, $iRtn);
+      if (empty($migrate))
+        $last = exec($aptInstall, $iOut, $iRtn);
+      else
+        $last = exec($aptUpgrade, $iOut, $iRtn);
       if($iRtn != 0)
       {
         echo "Failed to install fossology!\nTranscript is:\n";
@@ -443,7 +450,10 @@ function installFossology($objRef, $migrate)
         return(FALSE);
       }
       echo "** Running yum install fossology **\n";
-      $last = exec($yumInstall, $yumOut, $yumRtn);
+      if(empty($migrate))
+        $last = exec($yumInstall, $yumOut, $yumRtn);
+      else
+        $last = exec($yumUpgrade, $yumOut, $yumRtn);
       //echo "install of fossology finished, yumRtn is:$yumRtn\nlast is:$last\n";
       //$clast = system('cat fossinstall.log');
       if($yumRtn != 0)
@@ -616,103 +626,6 @@ function findVerPsql()
 }
 
 /**
- * \brief tune the kernel for this boot and successive boots
- *
- * returns void
- */
-function tuneKernel()
-{
-  // check to see if we have already done this... so the sysctl.conf file doesn't
-  // end up with dup entries.
-  $grepCmd = 'grep shmmax=512000000 /etc/sysctl.conf /dev/null 2>&1';
-  $last = exec($grepCmd, $out, $rtn);
-  if($rtn == 0)   // kernel already configured
-  {
-    echo "NOTE: kernel already configured.\n";
-    return;
-  }
-  $cmd1 = "echo 512000000 > /proc/sys/kernel/shmmax";
-  $cmd2 = "echo 'kernel.shmmax=512000000' >> /etc/sysctl.conf";
-  // Tune the kernel
-  $last1 = exec($cmd1, $cmd1Out, $rtn1);
-  if ($rtn1 != 0)
-  {
-    echo "Fatal! Could not set kernel shmmax in /proc/sys/kernel/shmmax\n";
-  }
-  $last2 = exec($cmd2, $cmd2Out, $rtn2);
-  // make it permanent
-  if ($rtn2 != 0)
-  {
-    echo "Fatal! Could not turn kernel.shmmax in /etc/sysctl.conf\n";
-  }
-  return;
-} // tuneKernel
-
-/**
- * \brief check to see if fossology is configured into apache.  If not copy the
- * config file and configure it.  Restart apache if configured.
- *
- * @param string $osType type of the os, e.g. Debian, Ubuntu, Red, Fedora
- *
- * @return boolean
- */
-
-function configApache2($osType)
-{
-  if(empty($osType))
-  {
-    return(FALSE);
-  }
-  switch ($osType) {
-    case 'Ubuntu':
-    case 'Debian':
-      if(is_link('/etc/apache2/conf.d/fossology'))
-      {
-        break;
-      }
-      else
-      {
-        // copy config file, create sym link
-        if(!copy('../dataFiles/pkginstall/fo-apache.conf', '/etc/fossology/fo-apache.conf'))
-        {
-          echo "FATAL!, Cannot configure fossology into apache2\n";
-          return(FALSE);
-        }
-        if(!symlink('/etc/fossology/fo-apache.conf','/etc/apache2/conf.d/fossology'))
-        {
-          echo "FATAL! Could not create symlink in /etc/apache2/conf.d/ for fossology\n";
-          return(FALSE);
-        }
-        // restart apache so changes take effect
-        if(!restart('apache2'))
-        {
-          echo "Erorr! Could not restart apache2, please restart by hand\n";
-          return(FALSE);
-        }
-      }
-      break;
-    case 'Red':
-      // copy config file, no symlink needed for redhat
-      if(!copy('../dataFiles/pkginstall/fo-apache.conf', '/etc/httpd/conf.d/fossology.conf'))
-      {
-        echo "FATAL!, Cannot configure fossology into apache2\n";
-        return(FALSE);
-      }
-      // restart apapche so changes take effect
-      if(!restart('httpd'))
-      {
-        echo "Erorr! Could not restart httpd, please restart by hand\n";
-        return(FALSE);
-      }
-      break;
-    default:
-      ;
-      break;
-  }
-  return(TRUE);
-} // configApache2
-
-/**
  * \brief config a debian based system to install fossology.
  *
  * copy postgres, php config files so that fossology can run.
@@ -738,86 +651,15 @@ function configDebian($osType, $osVersion)
   //echo "DB:configD: osType is:$osType\n";
   //echo "DB:configD: osversion is:$osVersion\n";
 
-  // can't check in pg_hba.conf as it shows HP's firewall settings, get it
-  // internally
-
-  // No need to update pg_hba.conf file
-  //getPGhba('../dataFiles/pkginstall/debian/6/pg_hba.conf');
-
-  //$debPath = '../dataFiles/pkginstall/debian/6/';
-
-  //$psqlFiles = array(
-  //$debPath . 'pg_hba.conf',
-  //$debPath . 'postgresql.conf');
-
   switch ($osVersion)
   {
     case '6.0':
       echo "debianConfig got os version 6.0!\n";
-      // copy config files
-      /*
-      * Change the structure of data files:
-      * e.g. debian/5/pg_hba..., etc, all files that go with this version
-      *      debian/6/pg_hba....
-      *      and use a symlink for the 'codename' squeeze -> debian/6/
-      */
-      /*
-      try
-      {
-        copyFiles($psqlFiles, "/etc/postgresql/8.4/main");
-      }
-      catch (Exception $e)
-      {
-        echo "Failure: Could not copy postgres 8.4 config file\n";
-      }
-      try
-      {
-        copyFiles($debPath . 'cli-php.ini', '/etc/php5/cli/php.ini');
-      } catch (Exception $e)
-      {
-        echo "Failure: Could not copy php.ini to /etc/php5/cli/php.ini\n";
-        return(FALSE);
-      }
-      try
-      {
-        copyFiles($debPath . 'apache2-php.ini', '/etc/php5/apache2/php.ini');
-      } catch (Exception $e)
-      {
-        echo "Failure: Could not copy php.ini to /etc/php5/apache2/php.ini\n";
-        return(FALSE);
-      }
-      */
       break;
     case '10.04.3':
     case '11.04':
     case '11.10':
       echo "debianConfig got os version $osVersion!\n";
-      /*
-      try
-      {
-        copyFiles($psqlFiles, "/etc/postgresql/8.4/main");
-      }
-      catch (Exception $e)
-      {
-        echo "Failure: Could not copy postgres 8.4 config file\n";
-      }
-      try
-      {
-        copyFiles($debPath . 'cli-php.ini', '/etc/php5/cli/php.ini');
-      } catch (Exception $e)
-      {
-        echo "Failure: Could not copy php.ini to /etc/php5/cli/php.ini\n";
-        return(FALSE);
-      }
-      try
-      {
-        copyFiles($debPath . 'apache2-php.ini', '/etc/php5/apache2/php.ini');
-      } catch (Exception $e)
-      {
-        echo "Failure: Could not copy php.ini to /etc/php5/apache2/php.ini\n";
-        return(FALSE);
-      }
-       */
       break;
     case '12.04.1':
       echo "debianConfig got os version $osVersion!\n";
@@ -842,61 +684,11 @@ function configDebian($osType, $osVersion)
     case '12.10':
       echo "debianConfig got os version $osVersion!\n";
       //postgresql-9.1 can't use 8.4 conf file
-      /*
-      try
-      {
-        copyFiles($psqlFiles, "/etc/postgresql/9.1/main");
-      }
-      catch (Exception $e)
-      {
-        echo "Failure: Could not copy postgres 9.1 config file\n";
-      }
-      */
-      /*
-      try
-      {
-        copyFiles($debPath . 'cli-php.ini', '/etc/php5/cli/php.ini');
-      } catch (Exception $e)
-      {
-        echo "Failure: Could not copy php.ini to /etc/php5/cli/php.ini\n";
-        return(FALSE);
-      }
-      try
-      {
-        copyFiles($debPath . 'apache2-php.ini', '/etc/php5/apache2/php.ini');
-      } catch (Exception $e)
-      {
-        echo "Failure: Could not copy php.ini to /etc/php5/apache2/php.ini\n";
-        return(FALSE);
-      }
-      */
       break;
     default:
       return(FALSE);     // unsupported debian version
       break;
   }
-  /*
-  // restart apache and postgres so changes take effect
-  if(!restart('apache2'))
-  {
-    echo "Erorr! Could not restart apache2, please restart by hand\n";
-    return(FALSE);
-  }
-  // Get the postrgres version so the correct file is used.
-  $pName = 'postgresql';
-  if($osVersion == '10.04.3')
-  {
-    $ver = findVerPsql();
-    //echo "DB: returned version is:$ver\n";
-    $pName = 'postgresql-' . $ver;
-  }
-  echo "DB pName is:$pName\n";
-  if(!restart($pName))
-  {
-    echo "Erorr! Could not restart $pName, please restart by hand\n";
-    return(FALSE);
-  }
-  */
   return(TRUE);
 }  // configDebian
 
@@ -963,7 +755,7 @@ function configRhel($osType, $osVersion)
  *
  * @return boolean
  */
-function configYum($objRef)
+function configYum($objRef,$migrate)
 {
   if(!is_object($objRef))
   {
