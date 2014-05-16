@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -296,7 +296,7 @@ void run_test_files(copyright copy)
     }
 
     /* perform the analysis on the current file */
-    copyright_analyze(copy, istr);
+    copyright_analyze(copy, istr, 7);
     fclose(istr);
 
     /* loop over every match that the copyright object found */
@@ -391,8 +391,9 @@ void run_test_files(copyright copy)
  * @param current_file the file and the pfile_pk that is currently being analyzed
  * @param agent_pk the primary key for this agent, use to enter info into the database
  * @param mout a logging file to used for debugging
+ * @param type report type, statemant, url, email
  */
-void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long agent_pk, FILE* mout)
+void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long agent_pk, FILE* mout, int report_type)
 {
   /* locals */
   char sql[2048];               // buffer to hold the sql commands
@@ -436,7 +437,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   }
 
   /* perform the actual analysis */
-  copyright_analyze(copy, input_fp);
+  copyright_analyze(copy, input_fp, report_type);
 
   /* if running command line, print file name */
   if(*(int*)pair_second(current_file) < 0)
@@ -734,6 +735,7 @@ void copyright_usage(char* arg)
   fprintf(cout, "  -v  :: Turns verbose on, matches printed to Matches file.\n");
   fprintf(cout, "  -i  :: Initialize the database, the exit.\n");
   fprintf(cout, "  -C {filename} :: Scan {filename} from command line. Does not write to database.\n");
+  fprintf(cout, "  -T {type} :: defaul as all. 0: all, 1: statment, 2: email, 3: url, 4: email and url.\n");
   fprintf(cout, "  -t  :: Run the accuracy tests, nothing written to database.\n");
   fprintf(cout, "  -V  :: print the version info, then exit.\n");
   fprintf(cout, "  -c SYSCONFDIR :: Specify the directory for the system configuration.\n");
@@ -757,11 +759,12 @@ void copyright_usage(char* arg)
  * +-----------------------+
  *
  * To analyze a file from the command line:
- *   -c <filename>      :: run copyright agent from command line
+ *   -C <filename>      :: run copyright agent from command line
  *   -d                 :: turn on debugging information
+ *   -T <Copyright Statements | URLs| Emails> :: Copyright Statements | URLs |Emails
  *
  *   example:
- *     $ ./copyright -c myfiletoscan
+ *     $ ./copyright -C myfiletoscan
  *
  * +----------------------+
  * | Agent Based Analysis |
@@ -818,6 +821,8 @@ int main(int argc, char** argv)
   char agent_rev[myBUFSIZ];
   char copy_buf[FILENAME_MAX];
   char name_buf[FILENAME_MAX];
+  int report_type = 7;         // defaul as all. binary xxx 1st number as email, 2nd number as url, 3rd number as statement 
+  int cli_run = 0;               // when run from command line, that mean -C option is set; 1: yes, 0: no
 
   /* Database structs */
   PGconn* pgConn = NULL;        // the connection to Database
@@ -857,7 +862,7 @@ int main(int argc, char** argv)
   }
 
   /* parse the command line options */
-  while((c = getopt(argc, argv, "dc:C:tiVvh")) != -1)
+  while((c = getopt(argc, argv, "T:dc:C:tiVvh")) != -1)
   {
     switch(c)
     {
@@ -874,14 +879,17 @@ int main(int argc, char** argv)
         }
         break;
       case 'C': /* run from command line */
+        cli_run = 1;
         pair_init(&curr, string_function_registry(), int_function_registry());
 
         pair_set_first(curr, optarg);
         pair_set_second(curr, &i);
-        perform_analysis(pgConn, copy, curr, agent_pk, mout);
         num_files++;
 
-        pair_destroy(curr);
+        break;
+      case 'T': /* report type, Copyright Statements | URLs| Emails */
+        report_type = atoi(optarg);
+        printf("report_type is:%d\n", report_type);
         break;
       case 't': /* run accuracy testing */
         run_test_files(copy);
@@ -900,6 +908,12 @@ int main(int argc, char** argv)
         copyright_usage(argv[0]);
         return 3;
     }
+  }
+
+  /** run from command line */
+  if (1 == cli_run) {
+    perform_analysis(pgConn, copy, curr, agent_pk, mout, report_type);
+    pair_destroy(curr);
   }
 
   /* if there are no files in the file list then the agent is begin run from */
@@ -949,7 +963,7 @@ int main(int argc, char** argv)
         c = atoi(PQgetvalue(pgResult, i, PQfnumber(pgResult, "pfile_pk")));
         pair_set_first(curr, PQgetvalue(pgResult, i, PQfnumber(pgResult, "pfilename")));
         pair_set_second(curr, &c);
-        perform_analysis(pgConn, copy, curr, agent_pk, mout);
+        perform_analysis(pgConn, copy, curr, agent_pk, mout, 7);
       }
 
       fo_WriteARS(pgConn, ars_pk, upload_pk, agent_pk, AGENT_ARS, NULL, 1);

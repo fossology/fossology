@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -74,8 +74,9 @@ void copyright_destroy(copyright copy);
 /* ************************************************************************** */
 
 void copyright_clear(copyright copy);
-void copyright_analyze(copyright copy, FILE* file_name);
-void copyright_email_url(copyright copy, char* file);
+void copyright_analyze(copyright copy, FILE* file_name, int report_type);
+void copyright_email(copyright copy, char* file);
+void copyright_url(copyright copy, char* file);
 
 /* ************************************************************************** */
 /* **** Accessor Functions ************************************************** */

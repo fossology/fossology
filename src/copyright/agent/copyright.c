@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -358,8 +358,9 @@ void copyright_clear(copyright copy)
  *
  * @param copy the copyright instance that will be analyzed
  * @param file_name the name of the file to be openned and analyzed
+ * @param report_type binary xxx 1st number as email, 2nd number as url, 3rd number as statement
  */
-void copyright_analyze(copyright copy, FILE* istr)
+void copyright_analyze(copyright copy, FILE* istr, int report_type)
 {
   /* local variables */
   char buf[MAXBUF];
@@ -367,6 +368,9 @@ void copyright_analyze(copyright copy, FILE* istr)
   int beg = 0, end = 0;
   char temp[1024];
   struct copy_entry_internal entry;
+  char *ret;
+  const char *email = "@";
+  const char *url = "://";
 
   /* open the relevant file */
   fseek(istr, 0, SEEK_SET);
@@ -392,49 +396,67 @@ void copyright_analyze(copyright copy, FILE* istr)
       buf[i] = 32;
   }
 
-  /* look through the whole file for something in the dictionary */
-  for(bufidx = 0; bufidx < bufsize; bufidx = end+1)
-  {
-    copy_entry_init(&entry);
-    bufidx += contains_copyright(copy->dict, &buf[bufidx], temp);
-    if(bufidx < bufsize)
+  /** report_type binary xxx 1st number as email, 2nd number as url, 3rd number as statement */
+  if (report_type & 1) {
+    /* look through the whole file for something in the dictionary */
+    for(bufidx = 0; bufidx < bufsize; bufidx = end+1)
     {
-      /* copy the dictionary entry into the copyright entry */
-      strcpy(entry.dict_match, temp);
-
-      /* grab the begging and end of the match */
-      beg = find_beginning(buf, bufidx);
-      end = find_end(buf, bufidx, bufsize);
-
-      /* copy the match into a new entry */
-      memcpy(entry.text, &buf[beg+1], end-beg);
-      entry.text[end-beg]=0;
-      entry.start_byte = beg;
-      entry.end_byte = end;
-      entry.type = "statement";
-
-      /* push the string onto the list and increment bufidx */
-      contains_copyright(copy->name, entry.text, temp);
-      if(strlen(temp))
+      copy_entry_init(&entry);
+      bufidx += contains_copyright(copy->dict, &buf[bufidx], temp);
+      if(bufidx < bufsize)
       {
-        strcpy(entry.name_match, temp);
-        cvector_push_back(copy->entries, &entry);
+        /* copy the dictionary entry into the copyright entry */
+        strcpy(entry.dict_match, temp);
+
+        /* grab the begging and end of the match */
+        beg = find_beginning(buf, bufidx);
+        end = find_end(buf, bufidx, bufsize);
+
+        /* copy the match into a new entry */
+        memcpy(entry.text, &buf[beg+1], end-beg);
+        entry.text[end-beg]=0;
+        entry.start_byte = beg;
+        entry.end_byte = end;
+        entry.type = "statement";
+
+        /* push the string onto the list and increment bufidx */
+        contains_copyright(copy->name, entry.text, temp);
+        if(strlen(temp))
+        {
+          strcpy(entry.name_match, temp);
+          cvector_push_back(copy->entries, &entry);
+        }
       }
     }
   }
 
-  copyright_email_url(copy, buf);
+  /** pre-filter with '@' and '://' before running regular expression */
+  /** report_type binary xxx 1st number as email, 2nd number as url, 3rd number as statement */
+  if (report_type & 4) { 
+    ret = strstr(buf, email);
+    if (ret != NULL)
+    {
+      copyright_email(copy, buf);
+    }
+  }
+  if (report_type & 2) {
+    ret = strstr(buf, url);
+    if (ret != NULL)
+    {
+      copyright_url(copy, buf);
+    }
+  }
   strip_empty_entries(copy);
 }
 
 /**
- * function to specifically find emails and urls within a block of text. This
+ * function to specifically find emails within a block of text. This
  * will make two different calls to pcre_exec to do this searching.
  *
  * @param copy the copyright to store the results in
- * @param file the text that will be searched for emails and urls
+ * @param file the text that will be searched for emails
  */
-void copyright_email_url(copyright copy, char* file)
+void copyright_email(copyright copy, char* file)
 {
   struct copy_entry_internal new_entry;
   GMatchInfo* match;
@@ -461,6 +483,20 @@ void copyright_email_url(copyright copy, char* file)
     } while(g_match_info_next(match, NULL));
   }
   g_match_info_free(match);
+}
+
+/**
+ * function to specifically find emails and urls within a block of text. This
+ * will make two different calls to pcre_exec to do this searching.
+ *
+ * @param copy the copyright to store the results in
+ * @param file the text that will be searched for urls
+ */
+void copyright_url(copyright copy, char* file)
+{
+  struct copy_entry_internal new_entry;
+  GMatchInfo* match;
+  gchar* tmp;
 
   /* check for url matches */
   if(g_regex_match(copy->url_re,   file, 0, &match))
