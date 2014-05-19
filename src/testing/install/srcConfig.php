@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /*
- Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2013-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -470,6 +470,7 @@ function configDebian($osType, $osVersion)
       exec("echo 'pear channel-discover components.ez.no' >> installphpunit.sh");
       exec("echo 'pear update-channels' >> installphpunit.sh");
       exec("echo 'pear upgrade-all' >> installphpunit.sh");
+      exec("echo 'pear uninstall phpunit/PHPUnit' >> installphpunit.sh");
       exec("echo 'pear install --alldeps phpunit/PHPUnit' >> installphpunit.sh");
       $last = exec("sh installphpunit.sh", $out, $rtn);
       if($rtn != 0)
