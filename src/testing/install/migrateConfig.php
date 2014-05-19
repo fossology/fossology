@@ -396,8 +396,8 @@ function installFossology($objRef, $migrate)
   $yumUpdate = 'yum -y update 2>&1';
   $yumInstall = 'yum -y install fossology > fossinstall.log 2>&1';
 
-  $aptUpgrade = 'apt-get dist-upgrade 2>&1';
-  $yumUpgrade = 'yum -y upgrade 2>&1';
+  $aptUpgrade = 'apt-get -y dist-upgrade 2>&1';
+  $yumUpgrade = 'yum -y upgrade fossology* 2>&1';
 
   $debLog = NULL;
   $installLog = NULL;
@@ -600,31 +600,6 @@ function copyFiles($files, $dest)
   return(TRUE);
 } // copyFiles
 
-
-/**
- * \brief find the version of postgres and return major release and sub release.
- * For example, if postgres is at 8.4.8, this function will return 8.4.
- *
- * @return boolean
- */
-function findVerPsql()
-{
-  $version = NULL;
-
-  $last = exec('psql --version', $out, $rtn);
-  if($rtn != 0)
-  {
-    return(FALSE);
-  }
-  else
-  {
-    // isolate the version number and return it
-    list( , ,$ver) = explode(' ', $out[0]);
-    $version = substr($ver, 0, 3);
-  }
-  return($version);
-}
-
 /**
  * \brief config a debian based system to install fossology.
  *
@@ -672,6 +647,7 @@ function configDebian($osType, $osVersion)
       exec("echo 'pear channel-discover components.ez.no' >> installphpunit.sh");
       exec("echo 'pear update-channels' >> installphpunit.sh");
       exec("echo 'pear upgrade-all' >> installphpunit.sh");
+      exec("echo 'pear uninstall phpunit/PHPUnit' >> installphpunit.sh");
       exec("echo 'pear install --alldeps phpunit/PHPUnit' >> installphpunit.sh");
       $last = exec("sh installphpunit.sh", $out, $rtn);
       if($rtn != 0)
@@ -693,60 +669,6 @@ function configDebian($osType, $osVersion)
 }  // configDebian
 
 /**
- * \brief copy configuration files and restart apache and postgres
- *
- * @param string $osType
- * @param string $osVersion
- * @return boolean
- */
-function configRhel($osType, $osVersion)
-{
-  if(empty($osType))
-  {
-    return(FALSE);
-  }
-  if(empty($osVersion))
-  {
-    return(FALSE);
-  }
-
-  $rpmPath = '../dataFiles/pkginstall/redhat/6.x';
-  // getPGhba($rpmPath . '/pg_hba.conf');
-  $psqlFiles = array(
-  //$rpmPath . '/pg_hba.conf',
-  $rpmPath . '/postgresql.conf');
-  // fossology tweaks the postgres files so the packages work....  don't copy
-  /*
-  try
-  {
-  copyFiles($psqlFiles, "/var/lib/pgsql/data/");
-  }
-  catch (Exception $e)
-  {
-  echo "Failure: Could not copy postgres 8.4 config files\n";
-  }
-  */
-  try
-  {
-    copyFiles($rpmPath . '/php.ini', '/etc/php.ini');
-  } catch (Exception $e)
-  {
-    echo "Failure: Could not copy php.ini to /etc/php.ini\n";
-    return(FALSE);
-  }
-  // restart postgres, postgresql conf didn't change do not restart
-  /*
-  $pName = 'postgresql';
-  if(!restart($pName))
-  {
-    echo "Erorr! Could not restart $pName, please restart by hand\n";
-    return(FALSE);
-  }
-  */
-  return(TRUE);
-} // configRhel
-
-/**
  * \brief config yum on a redhat based system to install fossology.
  *
  * Copies the Yum configuration file for fossology to
@@ -755,7 +677,7 @@ function configRhel($osType, $osVersion)
  *
  * @return boolean
  */
-function configYum($objRef,$migrate)
+function configYum($objRef)
 {
   if(!is_object($objRef))
   {
@@ -771,11 +693,6 @@ function configYum($objRef,$migrate)
   // replace the baseurl line with the current one.
   $n = "../dataFiles/pkginstall/" . $RedFedRepo;
   $fcont = file_get_contents($n);
-  //if(!$fcont);
-  //{
-  //echo "FATAL! could not read repo file $n\n";
-  //exit(1);
-  //}
   //echo "DB: contents is:\n$fcont\n";
   $newRepo = preg_replace("/baseurl=(.*)?/", 'baseurl=' . $objRef->yum, $fcont,-1, $cnt);
   // write the file, fix below to copy the correct thing...
@@ -835,67 +752,6 @@ function configYum($objRef,$migrate)
 }  // configYum
 
 /**
- * \brief restart the application passed in, so any config changes will take
- * affect.  Assumes application is restartable via /etc/init.d/<script>.
- * The application passed in should match the script name in /etc/init.d
- *
- * @param string $application the application to restart. The application passed
- *  in should match the script name in /etc/init.d
- *
- *  @return boolen
- */
-function restart($application)
-{
-  if(empty($application))
-  {
-    return(FALSE);
-  }
-
-  $last = exec("/etc/init.d/$application restart 2>&1", $out, $rtn);
-  if($rtn != 0)
-  {
-    echo "FATAL! could not restart $application\n";
-    echo "transcript is:\n";print_r($out) . "\n";
-    return(FALSE);
-  }
-  return(TRUE);
-} // restart
-
-/**
- * \brief start the application
- * Assumes application is restartable via /etc/init.d/<script>.
- * The application passed in should match the script name in /etc/init.d
- *
- * @param string $application the application to start. The application passed
- *  in should match the script name in /etc/init.d
- *
- *  @return boolen
- */
-function start($application)
-{
-  if(empty($application))
-  {
-    return(FALSE);
-  }
-
-  echo "Starting $application ...\n";
-  $last = exec("/etc/init.d/$application stop 2>&1", $out, $rtn);
-  if($rtn != 0)
-  {
-    echo "FATAL! could not start $application\n";
-    echo "transcript is:\n";print_r($out) . "\n";
-    return(FALSE);
-  }
-  $last = exec("/etc/init.d/$application start 2>&1", $out, $rtn);
-  if($rtn != 0)
-  {
-    echo "FATAL! could not start $application\n";
-    echo "transcript is:\n";print_r($out) . "\n";
-    return(FALSE);
-  }
-  return(TRUE);
-} // start
-/**
  * \brief stop the application
  * Assumes application is restartable via /etc/init.d/<script>.
  * The application passed in should match the script name in /etc/init.d
@@ -922,29 +778,4 @@ function stop($application)
   return(TRUE);
 } // stop
 
-/**
- * \brief wget the pg_hba.conf file and place it in $destPath
- *
- * @param string $destPath the full path to the destination
- * @return boolean, TRUE on success, FALSE otherwise.
- *
- */
-function getPGhba($destPath)
-{
-  if(empty($destPath))
-  {
-    return(FALSE);
-  }
-  $wcmd = "wget -q -O $destPath " .
-    "http://fonightly.usa.hp.com/testfiles/pg_hba.conf ";
-
-  $last = exec($wcmd, $wOut, $wRtn);
-  if($wRtn != 0)
-  {
-    echo "Error, could not download pg_hba.conf file, pleases configure by hand\n";
-    echo "wget output is:\n" . implode("\n",$wOut) . "\n";
-    return(FALSE);
-  }
-  return(TRUE);
-}
 ?>
