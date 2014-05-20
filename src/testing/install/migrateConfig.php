@@ -396,7 +396,7 @@ function installFossology($objRef, $migrate)
   $yumUpdate = 'yum -y update 2>&1';
   $yumInstall = 'yum -y install fossology > fossinstall.log 2>&1';
 
-  $aptUpgrade = 'apt-get -y dist-upgrade 2>&1';
+  $aptUpgrade = 'apt-get -y --force-yes dist-upgrade 2>&1';
   $yumUpgrade = 'yum -y upgrade fossology* 2>&1';
 
   $debLog = NULL;
