@@ -143,7 +143,8 @@ switch ($distros[0]) {
     break;
   case 'CentOS':
     $redHat = 'RedHat';
-    $rhVersion = $distros[2];
+    //$rhVersion = $distros[2];
+    $rhVersion = '6.3';
     echo "rh version is:$rhVersion\n";
     try
     {
@@ -515,7 +516,7 @@ function ckInstallLog($log) {
   echo "Number of FATAL's found:$fates\n";
   echo "Number of 'cannot connect' found:$connects\n";
   echo "Number of 'cannot connect to postgres server' found:$postgresFail\n";
-  //print "DB: install log is:\n$log\n";
+  print "DB: install log is:\n$log\n";
   if($traces ||
   $fates ||
   $connects ||
