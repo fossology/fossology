@@ -398,7 +398,7 @@ function installFossology($objRef, $migrate)
   $yumInstall = 'yum -y install fossology > fossinstall.log 2>&1';
 
   $aptUpgrade = 'apt-get -y --force-yes dist-upgrade 2>&1';
-  $yumUpgrade = 'yum -y upgrade fossology* 2>&1';
+  $yumUpgrade = 'yum -y upgrade fossology* > fossinstall.log 2>&1';
 
   $debLog = NULL;
   $installLog = NULL;
@@ -718,7 +718,7 @@ function configYum($objRef)
     copyFiles("../dataFiles/pkginstall/" . $RedFedRepo, '/etc/yum.repos.d/fossology.repo');
   }
   //print_r($objRef);
-  if ($objRef->osFlavor == 'RedHat')
+  if (($objRef->osFlavor == 'RedHat') && (empty($migrate)))
   {
      $last = exec("yum -y install wget", $out, $rtn);
      if($rtn != 0)
