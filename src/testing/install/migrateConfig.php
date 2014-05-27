@@ -121,7 +121,7 @@ switch ($distros[0]) {
       echo $e;
       exit(1);
     }
-    if(!configYum($RedHat))
+    if(!configYum($RedHat,$Migrate))
     {
       echo "FATAL! could not install fossology.conf yum configuration file\n";
       exit(1);
@@ -156,7 +156,7 @@ switch ($distros[0]) {
       echo $e;
       exit(1);
     }
-    if(!configYum($RedHat))
+    if(!configYum($RedHat,$Migrate))
     {
       echo "FATAL! could not install fossology.conf yum configuration file\n";
       exit(1);
@@ -188,7 +188,7 @@ switch ($distros[0]) {
       echo $e;
       exit(1);
     }
-    if(!configYum($Fedora))
+    if(!configYum($Fedora,$Migrate))
     {
       echo "FATAL! could not install fossology.repo yum configuration file\n";
       exit(1);
@@ -442,19 +442,28 @@ function installFossology($objRef, $migrate)
         echo implode("\n",$out) . "\n";
         return(FALSE);
       }
-      echo "** Running yum update **\n";
-      $last = exec($yumUpdate, $out, $rtn);
-      if($rtn != 0)
-      {
-        echo "Failed to update yum repositories with fossology!\nTranscript is:\n";
-        echo implode("\n",$out) . "\n";
-        return(FALSE);
-      }
-      echo "** Running yum install fossology **\n";
       if(empty($migrate))
+      {
+        echo "** Running yum update **\n";
+        $last = exec($yumUpdate, $out, $rtn);
+        if($rtn != 0)
+        {
+          echo "Failed to update yum repositories with fossology!\nTranscript is:\n";
+          echo implode("\n",$out) . "\n";
+          return(FALSE);
+        }
+      }
+      //echo "** Running yum install fossology **\n";
+      if(empty($migrate))
+      {
+        echo "** Running yum install fossology **\n";
         $last = exec($yumInstall, $yumOut, $yumRtn);
+      }
       else
+      {
+        echo "** Running yum upgrade fossology **\n";
         $last = exec($yumUpgrade, $yumOut, $yumRtn);
+      }
       //echo "install of fossology finished, yumRtn is:$yumRtn\nlast is:$last\n";
       //$clast = system('cat fossinstall.log');
       if($yumRtn != 0)
@@ -678,7 +687,7 @@ function configDebian($osType, $osVersion)
  *
  * @return boolean
  */
-function configYum($objRef)
+function configYum($objRef,$migrate)
 {
   if(!is_object($objRef))
   {
