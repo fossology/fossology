@@ -22,12 +22,13 @@
  */
 
 require_once("../../lib/php/bootstrap.php");
+include_once("fo-render.php");
 
 $SysConf = array();  // fo system configuration variables
 $PG_CONN = 0;   // Database connection
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
-$SysConf = bootstrap();
+$SysConf = bootstrap(); 
 
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
@@ -67,4 +68,4 @@ else
 }
 plugin_unload();
 $container->get("db.manager")->flushStats();
-return(0);
+return 0;1
