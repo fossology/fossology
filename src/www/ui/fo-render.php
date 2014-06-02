@@ -20,16 +20,18 @@ Copyright (C) 2014, Siemens AG
 class FO_Renderer
 {
   var $language='en';
-   /**
-    * \brief Generate output
-    * \param template name
-    * \return output
-    */
+  /**
+   * \brief Generate output
+   * \param template name
+   * \return output
+   */
   function renderTemplate($templateName){
     $filename = 'template/' . $templateName . '.htc';
     if (!file_exists($filename))
+    {
       return 'Unknown template';
-   // return $filename. file_get_contents ($filename);
+    }
+    // return $filename. file_get_contents ($filename);
     ob_start();
     require_once($filename);
     $output = ob_get_contents();
