@@ -41,6 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define AGENT_NAME "copyright"       ///< the name of the agent, used to get agent key
 #define AGENT_DESC "copyright agent" ///< what program this is
 #define AGENT_ARS  "copyright_ars"   ///< name used for the ars table
+#define REPORTALL 7                  ///< report all data(statement, url and email)
 
 psqlCopy_t sqlcpy;                    ///< the sql copy struct used for insertion
 FILE* cout;                           ///< the file to print information to
@@ -296,7 +297,7 @@ void run_test_files(copyright copy)
     }
 
     /* perform the analysis on the current file */
-    copyright_analyze(copy, istr, 7);
+    copyright_analyze(copy, istr, REPORTALL);
     fclose(istr);
 
     /* loop over every match that the copyright object found */
@@ -391,7 +392,7 @@ void run_test_files(copyright copy)
  * @param current_file the file and the pfile_pk that is currently being analyzed
  * @param agent_pk the primary key for this agent, use to enter info into the database
  * @param mout a logging file to used for debugging
- * @param type report type, statemant, url, email
+ * @param type report_type binary number xyz, 0x1(bit z): statement, 0x2(bit y): url, 0x4(bit x): email
  */
 void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long agent_pk, FILE* mout, int report_type)
 {
@@ -735,7 +736,7 @@ void copyright_usage(char* arg)
   fprintf(cout, "  -v  :: Turns verbose on, matches printed to Matches file.\n");
   fprintf(cout, "  -i  :: Initialize the database, the exit.\n");
   fprintf(cout, "  -C {filename} :: Scan {filename} from command line. Does not write to database.\n");
-  fprintf(cout, "  -T {type} :: defaul as all. 0: all, 1: statment, 2: email, 3: url, 4: email and url.\n");
+  fprintf(cout, "  -T {type} :: defaul as all. binary number xyz, 0x1(bit z): statement, 0x2(bit y): url, 0x4(bit x): email.\n");
   fprintf(cout, "  -t  :: Run the accuracy tests, nothing written to database.\n");
   fprintf(cout, "  -V  :: print the version info, then exit.\n");
   fprintf(cout, "  -c SYSCONFDIR :: Specify the directory for the system configuration.\n");
@@ -963,7 +964,7 @@ int main(int argc, char** argv)
         c = atoi(PQgetvalue(pgResult, i, PQfnumber(pgResult, "pfile_pk")));
         pair_set_first(curr, PQgetvalue(pgResult, i, PQfnumber(pgResult, "pfilename")));
         pair_set_second(curr, &c);
-        perform_analysis(pgConn, copy, curr, agent_pk, mout, 7);
+        perform_analysis(pgConn, copy, curr, agent_pk, mout, REPORTALL);
       }
 
       fo_WriteARS(pgConn, ars_pk, upload_pk, agent_pk, AGENT_ARS, NULL, 1);

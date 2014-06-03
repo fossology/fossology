@@ -358,7 +358,7 @@ void copyright_clear(copyright copy)
  *
  * @param copy the copyright instance that will be analyzed
  * @param file_name the name of the file to be openned and analyzed
- * @param report_type binary xxx 1st number as email, 2nd number as url, 3rd number as statement
+ * @param report_type binary number xyz, 0x1(bit z): statement, 0x2(bit y): url, 0x4(bit x): email.
  */
 void copyright_analyze(copyright copy, FILE* istr, int report_type)
 {
