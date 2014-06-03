@@ -74,6 +74,10 @@ $pkgVms = array(
     'fo-ubuntu-1304-64.fc.hp.com',
     'fo-ubuntu-1310-32.fc.hp.com',
     'fo-ubuntu-1310-64.fc.hp.com',
+    'fo-fedora-20-32.fc.hp.com',
+    'fo-fedora-20-64.fc.hp.com',
+    'fo-ubuntu-1404-32.fc.hp.com',
+    'fo-ubuntu-1404-64.fc.hp.com',
 );
 
 
