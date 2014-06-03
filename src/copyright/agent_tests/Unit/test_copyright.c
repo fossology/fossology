@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -234,7 +234,7 @@ void test_copyright_analyze()
     return;
   }
 
-  copyright_analyze(copy, istr);
+  copyright_analyze(copy, istr, 7);
   FO_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 5);
   FO_ASSERT_STRING_EQUAL(((copy_entry)cvector_get(copy->entries, 0))->text,
       "copyright (c) 2010 john not_a_person smith and this makes the line longer");
@@ -252,17 +252,22 @@ void test_copyright_email_url()
 {
   /* start the test */
   /* run the tests */
-  copyright_email_url(copy, "test.email@url.com "
+  copyright_email(copy, "test.email@url.com "
+                            "http://www.testurl.com "
+                            "<backed_email@url.org> "
+                            "(surround_this_name@email.net) "
+                            "not_a_url not_an_email");
+  FO_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 3);
+  FO_ASSERT_STRING_EQUAL((char *)cvector_get(copy->entries, 0), "test.email@url.com");
+  FO_ASSERT_STRING_EQUAL((char *)cvector_get(copy->entries, 1), "backed_email@url.org");
+  FO_ASSERT_STRING_EQUAL((char *)cvector_get(copy->entries, 2), "surround_this_name@email.net");
+  copyright_url(copy, "test.email@url.com "
                             "http://www.testurl.com "
                             "<backed_email@url.org> "
                             "(surround_this_name@email.net) "
                             "not_a_url not_an_email");
   FO_ASSERT_EQUAL_FATAL(cvector_size(copy->entries), 4);
-  FO_ASSERT_STRING_EQUAL(cvector_get(copy->entries, 0), "test.email@url.com");
-  FO_ASSERT_STRING_EQUAL(cvector_get(copy->entries, 1), "backed_email@url.org");
-  FO_ASSERT_STRING_EQUAL(cvector_get(copy->entries, 2), "surround_this_name@email.net");
-  FO_ASSERT_STRING_EQUAL(cvector_get(copy->entries, 3), "http://www.testurl.com");
-
+  FO_ASSERT_STRING_EQUAL((char *)cvector_get(copy->entries, 3), "http://www.testurl.com");
   cvector_clear(copy->entries);
 }
 
