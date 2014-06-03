@@ -10,7 +10,7 @@ cp2foss - upload one or more files or archives into FOSSology and run scans.
  Usage: cp2foss [options] [archives]
  Options: -AQThv [-f path] [-AA num] [-q {agent,agent.. | all}] [-X path]
  [-n name] [-d description] [--user user name] [--password password]
- [-c configuration directory]
+ [-c configuration directory] [-s Run synchronously]
  [-P set public permission]
 
 =head1 DESCRIPTION
@@ -96,6 +96,11 @@ This defaults to your last installation location.
 =item B<-P> I<set public permission>
 
 set the permission to public on this upload or not. 1: yes; 0: no
+
+=item B<-s> I<Run synchronously>
+
+Run synchronously. Don't return until archive already in FOSSology repository.
+If the archive is a file (see below), then the file can be safely removed.
 
 =item B<-n> I<name>
 

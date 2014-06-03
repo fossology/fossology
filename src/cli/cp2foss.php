@@ -40,6 +40,8 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     --password string = password
     -c string = Specify the directory for the system configuration
     -P number = set the permission to public on this upload or not. 1: yes; 0: no
+    -s        = Run synchronously. Don't return until archive already in FOSSology repository.
+                If the archive is a file (see below), then the file can be safely removed.
 
   FOSSology storage options:
     -f path  = folder path for placing files (e.g., -f 'Fedora/ISOs/Disk 1')
@@ -218,6 +220,8 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $fossjobs_command;
   global $public_flag;
   global $SysConf;
+  global $PG_CONN;
+  $jobqueuepk = 0;
 
   if (empty($UploadName)) {
     $text = "UploadName is empty\n";
@@ -333,6 +337,27 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   else {
     /* No other agents other than unpack scheduled, attach to unpack*/
   }
+  global $OptionS; /* Should it run synchronously? */
+  if ($OptionS) {
+    $working = True;
+    while ($working) {
+      sleep(3);
+      $SQL = "SELECT * FROM jobqueue WHERE jq_endtext <> 'Completed' AND jq_job_fk in (SELECT job_pk from job where job_upload_fk = '$UploadPk');";
+
+      if ($Verbose) {
+        print "SQL=\n$SQL\n";
+      }
+      $result = pg_query($PG_CONN, $SQL);
+      DBCheckResult($result, $SQL, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      $row_count = pg_num_rows($result);
+      pg_free_result($result);
+      if ($row_count == 0) {
+        $working = False;
+      }
+    }
+    print "'$UploadArchive' uploaded\n";
+  }
 } /* UploadOne() */
 
 
@@ -418,6 +443,9 @@ for ($i = 1;$i < $argc;$i++) {
     case '-q':
       $i++;
       $QueueList = $argv[$i];
+      break;
+    case '-s':
+      $OptionS = true;
       break;
     case '-T': /* Test mode */
       $Test = 1;
