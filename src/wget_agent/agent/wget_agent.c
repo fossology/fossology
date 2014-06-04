@@ -471,9 +471,9 @@ int GetVersionControl()
   if (0 == strcmp(GlobalType, Type[0]))
   {
     if (GlobalProxy[0] && GlobalProxy[0][0])
-      sprintf(command, "svn --config-option servers:global:http-proxy-host=%s --config-option servers:global:http-proxy-port=%s export %s %s %s >/dev/null 2>&1", GlobalProxy[4], GlobalProxy[5], GlobalURL, GlobalParam, TempFileDirectory);
+      sprintf(command, "svn --config-option servers:global:http-proxy-host=%s --config-option servers:global:http-proxy-port=%s export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalProxy[4], GlobalProxy[5], GlobalURL, GlobalParam, TempFileDirectory);
     else
-      sprintf(command, "svn export %s %s %s >/dev/null 2>&1", GlobalURL, GlobalParam, TempFileDirectory);
+      sprintf(command, "svn export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalURL, GlobalParam, TempFileDirectory);
   }
   else if (0 == strcmp(GlobalType, Type[1]))
   {
