@@ -2193,8 +2193,8 @@
 %STR%	"classpath (linking)? exception"
 #
 %ENTRY%	_LT_GPL_EXCEPT_CLASSPATH_2
-%KEY%	"independent"
-%STR%	"special exception =SOME= permission to link this library with independent modules to produce an executable"
+%KEY%	"produce"
+%STR%	"special exception =ANY= link this library with =SOME= to produce an executable"
 #
 %ENTRY%	_LT_GPL_EXCEPT_AUTOCONF
 %KEY%	"(condit|vers)ion"
@@ -2937,6 +2937,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_JAVA_WSDL_SCHEMA
 %KEY%	"permi[st]"
 %STR%	"authors grant permission to copy and distribute the WSDL schema files in any medium without fee or royalty as long as this notice and licen[cs]e are r?e?-?distributed with them"
+#
+%ENTRY% _LT_JISP
+%KEY% "permi[st]"
+%STR% "author specifically permits =FEW= and encourages the use of this source code for entertainment =FEW= education =FEW= decoration"
 #####
 # DELETED: readme file from the jpeg library =SOME= ...
 #####
@@ -3241,6 +3245,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_METRO_NONFREE
 %KEY%	"so(ftware|urce)"
 %STR%	"any part of the software that you merge with other software is still property of ML in the event this licen[cs]e is terminated"
+#
+%ENTRY% _LT_MIGEMO
+%KEY% "so(ftware|urce)"
+%STR% "right to devolve the part or the whole of the rights related to this software"
 #
 %ENTRY%	_LT_MIBBLE
 %KEY%	"distribut"
@@ -4170,6 +4178,10 @@ e /* (INFILE(j)) */
 # DELETED: distributing party must clearly and ... is produced by the
 # party that modified the software and is not a qualcomm product
 #####
+%ENTRY% _LT_QMAIL
+%KEY%   "distribute"
+%STR%   "you may distribute copies of qmail"
+#
 %ENTRY%	_LT_QUALCOMM
 %KEY%	"so(ftware|urce)"
 %STR%	"conspicuously communicate to all recipients that the modified software"

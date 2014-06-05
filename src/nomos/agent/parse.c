@@ -1562,13 +1562,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("GPL-2.0+-with-classpath-exception");
       lmem[_mGPL] = 1;
     }
-    else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
-      INTERESTING(lDebug ? "GPL-except-classpath_1" : "GPL-2.0-with-classpath-exception");
-      lmem[_mGPL] = 1;
-    }
-    else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && GPL_INFILE(_PHR_GPL2_OR_LATER) 
+    else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && GPL_INFILE(_PHR_GPL2_OR_LATER)
         && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
       INTERESTING("GPL-2.0+-with-classpath-exception");
+      lmem[_mGPL] = 1;
+    }
+    else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
+      INTERESTING(lDebug ? "GPL-except-classpath_1" : "GPL-2.0-with-classpath-exception");
       lmem[_mGPL] = 1;
     }
     else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
@@ -5955,6 +5955,21 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if(INFILE(_LT_FACE)) {
     INTERESTING("FaCE");
+  }
+
+  /** JISP */
+  if(INFILE(_LT_JISP)) {
+    INTERESTING("JISP");
+  }
+
+  /** Qmail */
+  if(INFILE(_LT_QMAIL)) {
+    INTERESTING("Qmail");
+  }
+
+  /** Migemo */
+  if(INFILE(_LT_MIGEMO)) {
+    INTERESTING("Migemo");
   }
 
   /*
