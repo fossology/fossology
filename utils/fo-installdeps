@@ -238,6 +238,13 @@ if [ $RUNTIME ]; then
          echo "    available in RHEL please install from upstream sources.";;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
+   
+   which composer
+    if [ $? -eq 0 ]; then
+      composer selfupdate
+    else
+      curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
+    fi
 fi
 
 ########################################################################

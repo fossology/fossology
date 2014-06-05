@@ -647,25 +647,16 @@ function configDebian($osType, $osVersion)
       echo "debianConfig got os version $osVersion!\n";
       break;
     case '12.04.1':
+    case '12.04.2':
+    case '12.04.3':
+    case '12.04.4':
       echo "debianConfig got os version $osVersion!\n";
-      exec("echo '#!/bin/sh' > installphpunit.sh");
-      exec("echo 'apt-get -y remove phpunit' >> installphpunit.sh");
-      exec("echo 'pear config-set http_proxy http://web-proxy.cce.hp.com:8088/' >> installphpunit.sh");
-      exec("echo 'pear upgrade pear' >> installphpunit.sh");
-      exec("echo 'pear channel-discover pear.phpunit.de' >> installphpunit.sh");
-      exec("echo 'pear channel-discover pear.symfony.com' >> installphpunit.sh");
-      exec("echo 'pear channel-discover components.ez.no' >> installphpunit.sh");
-      exec("echo 'pear update-channels' >> installphpunit.sh");
-      exec("echo 'pear upgrade-all' >> installphpunit.sh");
-      exec("echo 'pear uninstall phpunit/PHPUnit' >> installphpunit.sh");
-      exec("echo 'pear install --alldeps phpunit/PHPUnit' >> installphpunit.sh");
-      $last = exec("sh installphpunit.sh", $out, $rtn);
-      if($rtn != 0)
-      {
-        echo "FATAL! install phpunit fail\n";
-        echo "transcript is:\n";print_r($out) . "\n";
-        return(FALSE);
-      }
+
+      echo "Old PHPunit installation with PEAR is deprecated, it is now done with composer.\n";
+      echo "To install composer type:\n";
+        echo "curl -sS https://getcomposer.org/installer | php && sudo mv composer.phar /usr/local/bin/composer\n ";
+      
+
       break;
     case '12.10':
       echo "debianConfig got os version $osVersion!\n";

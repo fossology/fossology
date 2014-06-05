@@ -69,6 +69,12 @@ clean: $(CLEANDIRS)
 $(CLEANDIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
 
+phpvendors: 
+	cd src/;\
+	composer install;\
+	cd -;
+
+
 # release stuff
 tar: dist-testing
 dist-testing:

@@ -1,0 +1,11 @@
+/.idea
+/.project
+/.cproject
+_*.c
+*.o
+*.a
+*.dSYM
+VERSION
+.*.sw?
+*~
+/src/vendor
