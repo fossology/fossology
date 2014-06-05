@@ -6901,7 +6901,7 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
   }
 
   if (INFILE(_PHR_GPL21_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
-    lstr = "GPL-2.1+";
+    lstr = "GPL-2.1+[sic]";
   }
   else if ((GPL_INFILE(_PHR_GPL3_ONLY) ||
                 INFILE(_FILE_GPLv3) || GPL_INFILE(_PHR_GPL3_ONLY_ref1) || GPL_INFILE(_PHR_GPL3_ONLY_ref2)) &&
@@ -6930,7 +6930,7 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
     lstr = lDebug ? "GPL-v3(#2)" : "GPL-3.0";
   }
   else if (INFILE(_PHR_FSF_V21_ONLY) || INFILE(_PHR_GPL21_ONLY)) {
-    lstr = lDebug ? "GPL-v2.1" : "GPL-2.1";
+    lstr = lDebug ? "GPL-v2.1[sic]" : "GPL-2.1[sic]";
   }
   else if (INFILE(_PHR_FSF_V2_ONLY) || INFILE(_PHR_GPL2_ONLY) ||
       INFILE(_FILE_GPLv2)) {
