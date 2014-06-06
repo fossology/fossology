@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -262,7 +262,7 @@ function Dir2Path($uploadtree_pk, $uploadtree_tablename='uploadtree')
 
   while (!empty($uploadtree_pk))
   {
-    $sql = "SELECT * from $uploadtree_tablename where uploadtree_pk='$uploadtree_pk'";
+    $sql = "SELECT parent, upload_fk, ufile_mode, ufile_name from $uploadtree_tablename where uploadtree_pk='$uploadtree_pk'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $Row = pg_fetch_assoc($result);

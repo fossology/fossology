@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2013-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -32,13 +32,14 @@ $Usage = "Usage: " . basename($argv[0]) . "
   --user username     :: user name
   --password password :: password
   --container         :: include container or not, 1: yes, 0: no (default)
+  -x                  :: do not show files which have no copyright information 
   -h  help, this message
   ";
 
 $upload = $item = $type = "";
 
 $longopts = array("user:", "password:", "type:", "container:");
-$options = getopt("c:u:t:h", $longopts);
+$options = getopt("c:u:t:hx", $longopts);
 if (empty($options) || !is_array($options))
 {
   print $Usage;
@@ -47,6 +48,7 @@ if (empty($options) || !is_array($options))
 
 $user = $passwd = "";
 $container = 0; // include container or not, 1: yes, 0: no (default)
+$ignore = 0; // do not show files which have no copyright information, 1: yes, 0: no (default)
 
 foreach($options as $option => $value)
 {
@@ -74,6 +76,9 @@ foreach($options as $option => $value)
       break;
     case 'container':
       $container = $value;
+      break;
+    case 'x':
+      $ignore = 1;
       break;
     default:
       print "unknown option $option\n";
@@ -119,6 +124,7 @@ return 0;
 function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container = 0) 
 {
   global $PG_CONN;
+  global $ignore;
   if (empty($uploadtree_pk)) {
       /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
       $uploadtreeRec = GetSingleRec("uploadtree", "where parent is NULL and upload_fk='$upload_pk'");
@@ -133,7 +139,7 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container = 0)
   $agent_pk = $AgentRec[0]["agent_fk"];
   if ($AgentRec === false)
   {
-    echo _("No data available");
+    echo _("No data available \n");
     return;
   }
 
@@ -173,7 +179,11 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container = 0)
       if (!empty($filepath)) $filepath .= "/";
       $filepath .= $uploadtreeRow['ufile_name'];
     }
-    $V = $filepath . ": ". GetFileCopyright_string($agent_pk, 0, $row['uploadtree_pk'], $type) ;
+
+    $copyright = GetFileCopyright_string($agent_pk, 0, $row['uploadtree_pk'], $type) ;
+    if ($ignore && empty($copyright)) continue;
+
+    $V = $filepath . ": ". $copyright;
     #$V = $filepath;
     print "$V";
     print "\n";
