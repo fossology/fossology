@@ -43,6 +43,10 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -s        = Run synchronously. Don't return until archive already in FOSSology repository.
                 If the archive is a file (see below), then the file can be safely removed.
 
+  Upload from version control system options:
+    -S       = upload from subversion repo
+    -G       = upload from git repo
+
   FOSSology storage options:
     -f path  = folder path for placing files (e.g., -f 'Fedora/ISOs/Disk 1')
                You do not need to specify your top level folder.
@@ -221,6 +225,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $public_flag;
   global $SysConf;
   global $PG_CONN;
+  global $VCS;
   $jobqueuepk = 0;
 
   if (empty($UploadName)) {
@@ -286,6 +291,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
 
   $jq_args = "$UploadPk - $Src";
+  if ($VCS)  $jq_args .= " ".$VCS; // add flags when upload from version control system 
   if ($Verbose) {
     print "JobQueueAdd($jobpk, wget_agent, $jq_args, no, NULL);\n";
   }
@@ -477,6 +483,12 @@ for ($i = 1;$i < $argc;$i++) {
       else {
         $public_flag = 0;
       }
+      break;
+    case '-S': /* upload from subversion repo */
+      $VCS = 'SVN';
+      break;
+    case '-G': /* upload from git repo */
+      $VCS = 'GIT';
       break;
     default:
       if (substr($argv[$i], 0, 1) == '-') {

@@ -12,6 +12,7 @@ cp2foss - upload one or more files or archives into FOSSology and run scans.
  [-n name] [-d description] [--user user name] [--password password]
  [-c configuration directory] [-s Run synchronously]
  [-P set public permission]
+ [-S upload from subversion repo] [-G upload from git repo]
 
 =head1 DESCRIPTION
 
