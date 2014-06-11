@@ -126,13 +126,13 @@ FUNCTION int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk
     /* If ars_pk is not null, update success, status and endtime */
     if (ars_status)
     {
-      snprintf(sql, sizeof(sql), "update %s set ars_success=%s, ars_status='%s',ars_endtime=now()",
-             tableName, ars_success?"True":"False", ars_status);
+      snprintf(sql, sizeof(sql), "update %s set ars_success=%s, ars_status='%s',ars_endtime=now() where ars_pk = %d",
+             tableName, ars_success?"True":"False", ars_status, ars_pk);
     }
     else
     {
-      snprintf(sql, sizeof(sql), "update %s set ars_success=%s, ars_endtime=now()",
-             tableName, ars_success?"True":"False");
+      snprintf(sql, sizeof(sql), "update %s set ars_success=%s, ars_endtime=now() where ars_pk = %d",
+             tableName, ars_success?"True":"False", ars_pk);
     }
     result = PQexec(pgConn, sql);
     if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) return 0;
