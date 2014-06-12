@@ -436,8 +436,10 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
     {
       fprintf(mail_io, "%s", val);
 
+      /* Removed these two putc() calls to address Bug#1989 and remove the garbage from the footer... Paul Guttmann
       putc(-1,   mail_io);
       putc('\n', mail_io);
+      */
 
       pclose(mail_io);
     }
