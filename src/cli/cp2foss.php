@@ -36,16 +36,18 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
   Options:
     -h       = this help message
     -v       = enable verbose debugging
-    --user string = user name
+    --username string = user name
     --password string = password
     -c string = Specify the directory for the system configuration
     -P number = set the permission to public on this upload or not. 1: yes; 0: no
     -s        = Run synchronously. Don't return until archive already in FOSSology repository.
                 If the archive is a file (see below), then the file can be safely removed.
 
-  Upload from version control system options:
+  Upload from version control system options(you have to specify which type of vcs you are using):
     -S       = upload from subversion repo
     -G       = upload from git repo
+    --user string = user name
+    --pass string = password
 
   FOSSology storage options:
     -f path  = folder path for placing files (e.g., -f 'Fedora/ISOs/Disk 1')
@@ -226,6 +228,9 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $SysConf;
   global $PG_CONN;
   global $VCS;
+  global $vcsuser;
+  global $vcspass;
+  global $TarExcludeList;
   $jobqueuepk = 0;
 
   if (empty($UploadName)) {
@@ -291,7 +296,9 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
 
   $jq_args = "$UploadPk - $Src";
+  if ($TarExcludeList) $jq_args .= " ".$TarExcludeList;
   if ($VCS)  $jq_args .= " ".$VCS; // add flags when upload from version control system 
+  if ($vcsuser && $vcspass) $jq_args .= " --username $vcsuser --password $vcspass ";
   if ($Verbose) {
     print "JobQueueAdd($jobpk, wget_agent, $jq_args, no, NULL);\n";
   }
@@ -350,9 +357,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
       sleep(3);
       $SQL = "SELECT * FROM jobqueue WHERE jq_endtext <> 'Completed' AND jq_job_fk in (SELECT job_pk from job where job_upload_fk = '$UploadPk');";
 
-      if ($Verbose) {
-        print "SQL=\n$SQL\n";
-      }
       $result = pg_query($PG_CONN, $SQL);
       DBCheckResult($result, $SQL, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
@@ -362,7 +366,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
         $working = False;
       }
     }
-    print "'$UploadArchive' uploaded\n";
   }
 } /* UploadOne() */
 
@@ -378,9 +381,10 @@ $QueueList = "";
 $TarExcludeList = "";
 $bucket_size = 3;
 $public_flag = 0;
+$OptionS = "";
 
-$user = "";
-$passwd = "";
+$user = $passwd = "";
+$vcsuser = $vcspass= "";
 
 for ($i = 1;$i < $argc;$i++) {
   switch ($argv[$i]) {
@@ -391,13 +395,21 @@ for ($i = 1;$i < $argc;$i++) {
     case '-?':
       print $Usage . "\n";
       exit(0);
-    case '--user':
+    case '--username':
       $i++;
       $user = $argv[$i];
       break;
     case '--password':
       $i++;
       $passwd = $argv[$i];
+      break;
+    case '--user':
+      $i++;
+      $vcsuser = $argv[$i];
+      break;
+    case '--pass':
+      $i++;
+      $vcspass = $argv[$i];
       break;
     case '-A': /* use alphabet buckets */
       $OptionA = true;
@@ -464,10 +476,10 @@ for ($i = 1;$i < $argc;$i++) {
       break;
     case '-X':
       if (!empty($TarExcludeList)) {
-        $TarExcludeList.= " ";
+        $TarExcludeList .= " ";
       }
       $i++;
-      $TarExcludeList.= "--exclude '" . $argv[$i] . "'";
+      $TarExcludeList = "--exclude '" . $argv[$i] . "'";
       break;
     case '-a': /* it's an archive! */
       /* ignore -a since the next name is a file. */
@@ -560,6 +572,10 @@ if (strlen($UploadArchive) > 0) {
   if (empty($UploadName)) {
     $UploadName = basename($UploadArchive);
   }
+}
+
+if ($vcsuser && $vcspass) {
+  print "Warning: usernames and passwords on the command line are visible to system users with a shell account.  To avoid this you can download your source, then upload.\n";
 }
 
 print "Loading '$UploadArchive'\n";

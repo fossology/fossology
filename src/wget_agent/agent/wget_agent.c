@@ -661,7 +661,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
   if (S_ISDIR(Status.st_mode)) /** directory? */
   {
     memset(CMD, MAXCMD, 0);
-    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ >/dev/null 2>&1", TempFile, Path);
+    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ %s >/dev/null 2>&1", TempFile, Path, GlobalParam);
     rc_system = system(CMD);
     if (rc_system != 0)
     {
