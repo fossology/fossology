@@ -262,7 +262,7 @@ function Dir2Path($uploadtree_pk, $uploadtree_tablename='uploadtree')
 
   while (!empty($uploadtree_pk))
   {
-    $sql = "SELECT parent, upload_fk, ufile_mode, ufile_name from $uploadtree_tablename where uploadtree_pk='$uploadtree_pk'";
+    $sql = "SELECT parent, upload_fk, ufile_mode, ufile_name, uploadtree_pk from $uploadtree_tablename where uploadtree_pk='$uploadtree_pk'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $Row = pg_fetch_assoc($result);
