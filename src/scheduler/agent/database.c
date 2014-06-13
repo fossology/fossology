@@ -118,7 +118,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
           "[File has been deleted by job %d]", job->id);
       else
         g_string_append_printf(ret,
-          "[ERROR: file has not been upload or unpacked yet for job %d]", job->id);
+          "[ERROR: file has not been uploaded or unpacked yet for job %d]", job->id);
     }
     else
     {
@@ -151,7 +151,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
           "[File has been deleted by job %d]", job->id);
       else
         g_string_append_printf(ret,
-          "[ERROR: file has not been upload or unpacked yet for job %d]", job->id);
+          "[ERROR: file has not been uploaded or unpacked yet for job %d]", job->id);
     }
     else
     {
