@@ -1193,6 +1193,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("GPL-3.0+");
       lmem[_mGPL] = 1;
     }
+    else if (INFILE(_TITLE_GPL3_ref4_later)) {
+      INTERESTING("GPL-3.0+");
+      lmem[_mGPL] = 1;
+    }
     else if (INFILE(_TITLE_GPL3_ref3)) {
       INTERESTING("GPL-3.0");
       lmem[_mGPL] = 1;

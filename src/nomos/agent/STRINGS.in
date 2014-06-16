@@ -7063,6 +7063,10 @@ k
 %KEY% "licen[cs]"
 %STR% "licen[cs]e(:?) gplv3\+"
 #
+%ENTRY% _TITLE_GPL3_ref4_later
+%KEY%  "licen[cs]"
+%STR%  "license =SOME= (gplv3\+|gnu gpl version 3 or later)"
+#
 %ENTRY%	_TITLE_GPL2_ref1
 %KEY%	"gpl"
 %STR%	"gpl (v|version )2 (license|text)"
