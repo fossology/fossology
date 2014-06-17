@@ -155,7 +155,7 @@ class upload_file extends FO_Plugin {
     global $renderer;
     /* If this is a POST, then process the request. */
     $folder_pk = GetParm('folder', PARM_INTEGER);
-    $renderer->description = GetParm('description', PARM_TEXT); // may be null
+    $renderer->vars['description'] = GetParm('description', PARM_TEXT); // may be null
     $Name = GetParm('name', PARM_TEXT); // may be null
     $public = GetParm('public', PARM_TEXT); // may be null
     if (empty($public))
@@ -167,7 +167,7 @@ class upload_file extends FO_Plugin {
       $rc = $this->Upload($folder_pk, @$_FILES['getfile']['tmp_name'], $Desc, $Name, $public_perm);
       if (empty($rc)) {
         // reset form fields
-        $renderer->description = NULL;
+        $renderer->vars['description'] = NULL;
         $Name = NULL;
       }
       else {
@@ -177,11 +177,11 @@ class upload_file extends FO_Plugin {
     }
 
     /* Display instructions */
-    $renderer->description = htmlentities($renderer->description);
-    $renderer->agentCheckBoxMake = '';
+    $renderer->vars['description'] = $renderer->vars['description'];
+    $renderer->vars['agentCheckBoxMake'] = '';
     if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-      $renderer->agentCheckBoxMake = AgentCheckBoxMake(-1, $Skip);
+      $renderer->vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $Skip);
     }        
     $V = $renderer->renderTemplate("upload_file");        
     if (!$this->OutputToStdout) {

@@ -20,6 +20,7 @@ Copyright (C) 2014, Siemens AG
 class FO_Renderer
 {
   var $language='en';
+  var $vars=array();
   /**
    * \brief Generate output
    * \param template name
@@ -36,6 +37,7 @@ class FO_Renderer
     require_once($filename);
     $output = ob_get_contents();
     ob_end_clean();
+    $output = $this->evalVars($output);
     return $this->translateI18n($output);
   }
   
@@ -63,7 +65,38 @@ class FO_Renderer
         return $res._(substr($haystack,$offset));
       }
       $res .= _(substr($haystack,$offset,$close-$offset));
-      $offset = $close+7; // strlen('</i18n>')==6
+      $offset = $close+7; // strlen('</i18n>')==7
+    }
+    return $res.substr($haystack,$offset);
+  }
+  
+  /**
+   * \brief evaluates variables in format {{ x }}
+   */
+  function evalVars($haystack){
+    $res = '';
+    $offset = 0;
+    while (false!==($open=strpos($haystack,'{{ ',$offset)))
+    {
+      $res .= substr($haystack,$offset,$open-$offset);
+      $offset = $open+3; // strlen('{{ ')==3
+      $close = strpos($haystack,' }}',$offset);
+      /* $close>=6 is sure, but this way no missleading */
+      if (!$close && !strpos($haystack,'{{ ',$offset))
+      {
+        return $haystack;
+      }
+      if (!$close)
+        $key = substr($haystack,$offset);
+      else
+        $key = substr($haystack,$offset,$close-$offset);
+      if(key_exists($key, $this->vars))
+        $res .= $this->vars[$key];
+      else
+        $res .= $key;
+      if(!$close)
+        return res;
+      $offset = $close+3; // strlen(' }}')==3
     }
     return $res.substr($haystack,$offset);
   }
