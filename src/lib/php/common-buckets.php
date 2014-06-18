@@ -129,26 +129,29 @@ function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $e
  * \brief Return a select list containing all the active bucketpool's.
  *
  * \param string $selected, selected bucketpool_pk
+ * \param string $active, 'Y' (default) or 'all'
  *
  * \return string select list
  * Note: list uses static element id="default_bucketpool_fk"
  *       the element name is the same as the id.
  */
-function SelectBucketPool($selected)
+function SelectBucketPool($selected, $active='Y')
 {
   global $PG_CONN;
 
   $id = "default_bucketpool_fk";
   $name = $id;
   $select = "<select name='$name' id='$id'>";
-  $select .= "<option value=''></option>";
 
   /* get the bucketpool recs */
-  $sql = "select * from bucketpool where active='Y'";
+  if ($active == 'Y')
+    $Where = "where active='Y'";
+  else
+    $Where = "";
+  $sql = "select * from bucketpool $Where order by bucketpool_name asc,version desc";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-  //$select .= "<option value=''";
   while ($row = pg_fetch_assoc($result)) 
   {
     $select .= "<option value='$row[bucketpool_pk]'";
