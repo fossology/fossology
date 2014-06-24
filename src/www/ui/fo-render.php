@@ -27,7 +27,11 @@ class FO_Renderer
    * \return output
    */
   function renderTemplate($templateName){
-    $filename = 'template/' . $templateName . '.htc';
+    $filename = 'template/' . $templateName . '.htm';
+    if (!file_exists($filename))
+    {
+      $this->makeTemplate('template/' . $templateName . '.htc');
+    }
     if (!file_exists($filename))
     {
       return 'Unknown template';
@@ -37,8 +41,32 @@ class FO_Renderer
     require_once($filename);
     $output = ob_get_contents();
     ob_end_clean();
-    $output = $this->evalVars($output);
-    return $this->translateI18n($output);
+    return $output;
+  }
+  
+  /*
+   * rewrite all templates
+   */
+  function updateTemplates($folder='template',$extension='htc') {
+    foreach(glob("$folder/*.$extension") as $file) {
+      $this->makeTemplate($file);
+    }
+  }
+
+  /*
+   * make *.php from *.htc by tranforming i18n tags and {{ }} 
+   */
+  function makeTemplate($filename){
+    if (!file_exists($filename))
+    {
+      return false;
+    }
+    $output = file_get_contents($filename);
+    $output = $this->parseI18n($output);
+    $output = $this->parseVars($output);
+    $phpfilename = preg_replace('/\\.[^.\\s]{3,4}$/', '.htm', $filename);
+    $success = file_put_contents($phpfilename,$output);
+    return (false!==$success);
   }
   
   /**
@@ -46,7 +74,7 @@ class FO_Renderer
    * \param text with i18n tag
    * \return translation if input is well-structured
    */
-  function translateI18n($haystack)
+  function parseI18n($haystack)
   {
     $res = '';
     $offset = 0;
@@ -62,9 +90,9 @@ class FO_Renderer
       }
       if (!$close)
       {
-        return $res._(substr($haystack,$offset));
+        return $res.'<?php echo _("'.htmlspecialchars(substr($haystack,$offset)).'"); ?>';
       }
-      $res .= _(substr($haystack,$offset,$close-$offset));
+      $res .= '<?php echo _("'.htmlspecialchars(substr($haystack,$offset,$close-$offset)).'"); ?>';
       $offset = $close+7; // strlen('</i18n>')==7
     }
     return $res.substr($haystack,$offset);
@@ -73,7 +101,7 @@ class FO_Renderer
   /**
    * \brief evaluates variables in format {{ x }}
    */
-  function evalVars($haystack){
+  function parseVars($haystack){
     $res = '';
     $offset = 0;
     while (false!==($open=strpos($haystack,'{{ ',$offset)))
@@ -90,15 +118,27 @@ class FO_Renderer
         $key = substr($haystack,$offset);
       else
         $key = substr($haystack,$offset,$close-$offset);
-      if(key_exists($key, $this->vars))
-        $res .= $this->vars[$key];
-      else
-        $res .= $key;
+      $res .= $this->translateVar($key);
       if(!$close)
         return res;
       $offset = $close+3; // strlen(' }}')==3
     }
     return $res.substr($haystack,$offset);
   }
+  
+  /*
+   * \brief handles expression within {{ }}
+   */
+  function translateVar($subject){
+    if (preg_match($pattern='/^[a-zA-Z0-9]+$/', $subject) )
+      $var = '$renderer->vars["'.$subject.'"]';
+    else if (preg_match($pattern='/^([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)$/', $subject, $matches) ){
+      $var = '$renderer->vars["'.$matches[1].'"]["'.$matches[2].'"]';
+    }
+    return "<?php echo $var; ?>";
+  }
 }
 $renderer = new FO_Renderer();
+if ('m'==@$argv[1]){
+ $renderer->updateTemplates();
+}
