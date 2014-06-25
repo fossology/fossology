@@ -148,7 +148,7 @@ function GetLastAnalyzeTime($TableName)
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
-    $Size = Bytes2Human($row['val']);
+    $Size = HumanSize($row['val']);
     pg_free_result($result);
     $text = _("FOSSology database size");
     $V .= "<tr><td>$text</td>";
@@ -346,10 +346,6 @@ function GetLastAnalyzeTime($TableName)
    * \brief Generate output.
    */
   function Output() {
-
-    global $PG_CONN;
-    global $Plugins;
-
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
 
@@ -358,35 +354,23 @@ function GetLastAnalyzeTime($TableName)
       case "XML":
         break;
       case "HTML":
-        /**************************************************/
         $V .= "<table border=0 width='100%'><tr>\n";
-
-        /**************************************************/
         $V .= "<td valign='top'>\n";
         $text = _("Database Contents");
-        $V .= "<H2>$text</H2>\n";
+        $V .= "<h2>$text</h2>\n";
         $V .= $this->DatabaseContents();
         $V .= "</td>";
-
-        /**************************************************/
         $V .= "<td valign='top'>\n";
         $text = _("Database Metrics");
-        $V .= "<H2>$text</H2>\n";
+        $V .= "<h2>$text</h2>\n";
         $V .= $this->DatabaseMetrics();
         $V .= "</td>";
-
-        /**************************************************/
         $V .= "</tr></table>\n";
-
-
-        /**************************************************/
         $text = _("Active FOSSology queries");
-        $V .= "<H2>$text</H2>\n";
+        $V .= "<h2>$text</h2>\n";
         $V .= $this->DatabaseQueries();
-
-        /**************************************************/
         $text = _("Disk Space");
-        $V .= "<H2>$text</H2>\n";
+        $V .= "<h2>$text</h2>\n";
         $V .= $this->DiskFree();
 
         break;
@@ -401,7 +385,6 @@ function GetLastAnalyzeTime($TableName)
     return;
   } // Output()
 
-};
+}
 $NewPlugin = new dashboard;
 $NewPlugin->Initialize();
-?>

@@ -126,13 +126,18 @@ function debugprint($val, $title)
 }
 
 /**
- * \brief transelate a byte number to a proper type, xxx bytes to xxx B/KB/MB/GB/TB
+ * \brief translate a byte number to a proper type, xxx bytes to xxx B/KB/MB/GB/TB/PB
  */
 function HumanSize( $bytes )
 {
-  $types = array( 'B', 'KB', 'MB', 'GB', 'TB' );
-  for( $i = 0; $bytes >= 1024 && $i < ( count( $types ) -1 ); $bytes /= 1024, $i++ );
-  return( round( $bytes, 2 ) . " " . $types[$i] );
+  foreach(array('B','KB','MB','GB','TB') as $unit){
+    if ($bytes < 1024)
+    {
+      return(round($bytes, 2) .' '. $unit);
+    }
+    $bytes /= 1024;
+  }
+  return(round($bytes, 2) . ' PB');
 }
  
 /**
@@ -145,7 +150,7 @@ function HumanSize( $bytes )
 function GetFileExt($fname)
 {
   $extpos = strrpos($fname, '.') + 1;
-  $extension = strtolower(substr($fname, $extpos, strlen($fname) - $extpos));
+  $extension = strtolower(substr($fname, $extpos));
   return $extension;
 }
 
@@ -253,7 +258,7 @@ function DownloadString2File($text, $name, $contentType)
   header('Content-Description: File Transfer');
   header("Content-Type: $contentType");
   header("Content-Length: ".(string)(strlen($text)));
-  header("Content-Disposition: attachment; filename=$name");
+  header("Content-Disposition: attachment; filename=\"$name\"");
   header("Content-Transfer-Encoding: binary\n");
 
   echo $text;

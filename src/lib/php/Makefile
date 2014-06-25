@@ -46,5 +46,11 @@ uninstall:
 
 clean:
 	rm -f *.o core bootstrap.php
-
+	
+test:
+	make -C tests test
+	
+coverage:
+	make -C tests coverage
+	
 .PHONY: all install uninstall clean test

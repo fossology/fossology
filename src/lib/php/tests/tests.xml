@@ -11,6 +11,7 @@
       <file>test_common_parm.php</file>
       <file>test_common_pkg.php</file>
       <file>test_common_sysconfig.php</file>
+      <file>test_common_ui.php</file>
       <file></file>
     </testsuite>
   </testsuites>
