@@ -2196,6 +2196,10 @@
 %KEY%	"produce"
 %STR%	"special exception =ANY= link this library with =SOME= to produce an executable"
 #
+%ENTRY%	_LT_GNU_JAVAMAIL_EXCEPT
+%KEY%	"gnu"
+%STR%	"GNU JavaMail is distributed in the hope that it will be useful =ANY= special exception =SOME= you link this library with other files to produce an executable"
+#
 %ENTRY%	_LT_GPL_EXCEPT_AUTOCONF
 %KEY%	"(condit|vers)ion"
 %STR%	"version of autoconf"

@@ -655,7 +655,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
   char CMD[MAXCMD] = {0};
   int rc_system = 0;
 
-  snprintf(CMD,MAXCMD-1, "mkdir -p '%s' >/dev/null 2>&1", TempFileDir);
+  snprintf(CMD,MAXCMD-1, "mkdir -p 770 '%s' >/dev/null 2>&1", TempFileDir);
   system(CMD);
 
   if (S_ISDIR(Status.st_mode)) /** directory? */
@@ -681,16 +681,18 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
     memset(CMD, MAXCMD, 0);
     /* for the wildcards upload, keep the path */
     /* copy * files to TempFileDir/temp primarily */
-    snprintf(CMD,MAXCMD-1, "mkdir -p %s/temp  > /dev/null 2>&1 && cp %s  %s/temp > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
+    snprintf(CMD,MAXCMD-1, "mkdir -p 770 %s/temp  > /dev/null 2>&1 && cp %s  %s/temp > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
     rc_system = system(CMD);
     if (rc_system != 0)
     {
+      LOG_FATAL("rc_system is:%d, CMD is:%s\n", rc_system, CMD);
       return 0;
     }
     snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C %s/temp ./  > /dev/null 2>&1 && rm -rf %s/temp  > /dev/null 2>&1", TempFile, TempFileDir, TempFileDir);
     rc_system = system(CMD);
     if (rc_system != 0)
     {
+      LOG_FATAL("rc_system is:%d, CMD is:%s\n", rc_system, CMD);
       return 0;
     }
   }

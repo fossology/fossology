@@ -1406,7 +1406,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         else if (!HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED) 
             && !INFILE(_LT_GPL_EXCEPT_BISON_1) && !INFILE(_LT_GPL_EXCEPT_BISON_2) 
             && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)
-            && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && !INFILE(_TITLE_D_FSL_10)){
+            && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && !INFILE(_TITLE_D_FSL_10) && !INFILE(_LT_GNU_JAVAMAIL_EXCEPT)){
           cp = GPLVERS();
           INTERESTING(lDebug ? "GPL(ref1#1)" : cp);
           lmem[_mGPL] = 1;
@@ -1559,6 +1559,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2) 
           || GPL_INFILE(_PHR_FSF_V3_ONLY) || GPL_INFILE(_PHR_GPL3_ONLY) || INFILE(_FILE_GPLv3))) {
       INTERESTING(lDebug ? "GPL-except-classpath_3" : "GPL-3.0-with-classpath-exception");
+      lmem[_mGPL] = 1;
+    }
+    else if (INFILE(_LT_GNU_JAVAMAIL_EXCEPT) && GPL_INFILE(_PHR_GPL2_OR_LATER)
+        && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+      INTERESTING("GNU-javamail-exception");
       lmem[_mGPL] = 1;
     }
     else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && GPL_INFILE(_PHR_GPL2_OR_LATER)

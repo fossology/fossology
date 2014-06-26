@@ -258,7 +258,7 @@ function DownloadString2File($text, $name, $contentType)
   header('Content-Description: File Transfer');
   header("Content-Type: $contentType");
   header("Content-Length: ".(string)(strlen($text)));
-  header("Content-Disposition: attachment; filename=$name");
+  header("Content-Disposition: attachment; filename=\"$name\"");
   header("Content-Transfer-Encoding: binary\n");
 
   echo $text;

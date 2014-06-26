@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2012-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -41,9 +41,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
   // scheduler_path is the absolute path to the scheduler binary
   public $scheduler_path;
 
-  // fo_cli_path is the absolute path to the fo_cli binary
-  public $fo_cli_path;
-
   // cp2foss_path is the absolute path to the cp2foss binary
   public $cp2foss_path;
 
@@ -55,7 +52,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
 
     global $fossology_testconfig;
     global $scheduler_path;
-    global $fo_cli_path;
     global $cp2foss_path;
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
@@ -68,13 +64,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
     fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
 
-    /* locate fo_cli binary */
-    $fo_cli_path = $fossology_testconfig . "/mods-enabled/scheduler/agent/fo_cli";
-    if (!is_executable($fo_cli_path)) {
-        print "Error:  fo_cli path '$fo_cli_path' is not executable!\n";
-        exit(1);
-    }
-
     /* locate cp2foss binary */
     // first get the absolute path to the current fossology src/ directory
     $fo_base_dir = realpath(__DIR__ . '/../..');
@@ -83,6 +72,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
         print "Error:  cp2foss path '" . $cp2foss_path . "' is not executable!\n";
         exit(1);
     }
+    $cp2foss_path .= " -s ";
 
     /* locate the scheduler binary */
     $scheduler_path = $fossology_testconfig . "/mods-enabled/scheduler/agent/fo_scheduler";
@@ -93,7 +83,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
 
     /* invoke the scheduler */
     $scheduler_cmd = "$scheduler_path --daemon --reset --verbose=952 -c $fossology_testconfig";
-    print "DEBUG: Starting scheduler with '$scheduler_cmd'\n";
+    fwrite(STDOUT, "DEBUG: Starting scheduler with '$scheduler_cmd'\n");
     exec($scheduler_cmd, $output, $return_var);
     //print_r($output);
     if ( $return_var != 0 ) {
@@ -109,7 +99,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
   // this method is run once before each test method defined for this test class.
   protected function setUp() {
 
-    //global $fo_cli_path;
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
 
     //$SYSCONF_DIR = "/usr/local/etc/fossology/";
@@ -137,15 +126,46 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
   function test_upload_from_server() {
     //global $SYSCONF_DIR;
     global $fossology_testconfig;
-    global $fo_cli_path;
     global $cp2foss_path;
 
     fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
 
     $test_dbh = connect_to_DB($fossology_testconfig);
 
-    //$auth = "--user fossy --password fossy -c $SYSCONF_DIR";
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
+    $auth = "--username fossy --password fossy -c $fossology_testconfig";
+
+    /** cp2foss --username USER --password PASSWORD -q all -d 'regular expression testing'  -s '' */
+    $out = "";
+    $pos = 0;
+    $command = "$cp2foss_path $auth -q all -d 'regular expression testing' '../*.php' -v";
+    fwrite(STDOUT, "DEBUG: Running $command\n");
+    $last = exec("$command 2>&1", $out, $rtn);
+    fwrite(STDOUT, "DEBUG: $out[5] \n");
+    fwrite(STDOUT, print_r($out));
+    $upload_id = 0;
+    /** get upload id that you just upload for testing */
+    if ($out && $out[13]) {
+      $upload_id = get_upload_id($out[5]);
+    } else $this->assertFalse(TRUE);
+    fwrite(STDOUT, "DEBUG: $upload_id \n");
+    $agent_status = 0;
+    $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
+    $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status($test_dbh, "nomos", $upload_id);
+    $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status($test_dbh, "copyright", $upload_id);
+    $this->assertEquals(1, $agent_status);
+    $agent_status = 0;
+    $agent_status = check_agent_status($test_dbh, "pkgagent", $upload_id);
+    $this->assertEquals(1, $agent_status);
+
+    /** file path should not include fossology/src */
+    $is_exist = check_file_uploadtree($test_dbh, 'src', $upload_id);
+    fwrite(STDOUT, "DEBUG: is_exist is:$is_exist\n");
+    $this->assertEquals(0, $is_exist);
+
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
@@ -154,8 +174,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     #print "DEBUG: output is:\n";
     #print_r($out);
-    fwrite(STDOUT, "DEBUG: Sleeping for 10 seconds (why?), because you have to wait for all the scheduled agents are finished.\n");
-    sleep(10);
     //DEBUG
     $repo_string = "Uploading to folder: 'Software Repository'";
     $repo_pos = strpos($out[1], $repo_string);
@@ -184,10 +202,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $command = "$cp2foss_path $auth ./";
     fwrite(STDOUT, "DEBUG: test_upload_from_server executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    print "DEBUG: output is:\n";
-    print_r($out);
-    print "DEBUG: Sleeping for 10 seconds (why?), because you have to wait for all the scheduled agents are finished.\n";
-    sleep(10);
     // print_r($out);
     $repo_string = "Uploading to folder: 'Software Repository'";
     $repo_pos = strpos($out[1], $repo_string);
@@ -210,7 +224,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $command = "$cp2foss_path $auth ./ -f $upload_path -d upload_des -q all -v";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    sleep(10);
     // print_r($out);
     $repo_string = "Uploading to folder: '/$upload_path'";
     $repo_pos = strpos($out[7], $repo_string);
@@ -255,14 +268,13 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $agent_status = check_agent_status($test_dbh, "pkgagent", $upload_id);
     $this->assertEquals(1, $agent_status);
 
-    /** cp2foss --user USER --password PASSWORD -q all -A -f test/exclude -n 'test exclue dir'  \ 
+    /** cp2foss --username USER --password PASSWORD -q all -A -f test/exclude -n 'test exclue dir'  \ 
       -d 'test des exclude dir' -X .svn -X ./ -v */
     $out = "";
     $pos = 0;
     $command = "$cp2foss_path $auth -q all -A -f test/exclude -n 'test exclue dir'  -d 'test des exclude dir' -X .svn ./ -v";
     fwrite(STDOUT, "DEBUG: Running $command\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    sleep(10);
     // print_r($out);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
@@ -273,20 +285,20 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
 
-    /** cp2foss --user USER --password PASSWORD -q all -A -f 'regular expression testing' -n 'test regular expression dir'  \ 
+    /** cp2foss --username USER --password PASSWORD -q all -A -f 'regular expression testing' -n 'test regular expression dir'  \ 
       -d 'test des regular expression' '*.php' */
     $out = "";
     $pos = 0;
     $command = "$cp2foss_path $auth -q all -A -f 'regular expression testing' -n 'test globbing dir' -d 'test des globbing' '*.php' -v";
     fwrite(STDOUT, "DEBUG: Running $command\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    sleep(10);
     // print_r($out);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
     if ($out && $out[19]) {
       $upload_id = get_upload_id($out[17]);
     } else $this->assertFalse(TRUE);
+    fwrite(STDOUT, "Debug: upload_id is:$upload_id\n");
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
@@ -311,14 +323,12 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
   function test_upload_from_url(){
     //global $SYSCONF_DIR;
     global $fossology_testconfig;
-    global $fo_cli_path;
     global $cp2foss_path;
 
     fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
     $test_dbh = connect_to_DB($fossology_testconfig);
 
-    //$auth = "--user fossy --password fossy -c $SYSCONF_DIR";
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
+    $auth = "--username fossy --password fossy -c $fossology_testconfig";
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
@@ -327,7 +337,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     print "DEBUG: output is:\n";
     print_r($out);
-    sleep(110);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
     if ($out && $out[4]) {
@@ -337,11 +346,9 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
     $agent_status = 0;
-    $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
-    $this->assertEquals(1, $agent_status);
-    $agent_status = 0;
+    /** do not schedule nomos */
     $agent_status = check_agent_status($test_dbh,"nomos", $upload_id);
-    $this->assertEquals(1, $agent_status);
+    $this->assertEquals(0, $agent_status);
 
     pg_close($test_dbh);
 
@@ -354,20 +361,17 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
    */
   function test_list_agent_and_others() {
     global $fossology_testconfig;
-    global $fo_cli_path;
     global $cp2foss_path;
     //global $SYSCONF_DIR;
 
     fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
-    //$auth = "--user fossy --password fossy -c $SYSCONF_DIR";
+    $auth = "--username fossy --password fossy -c $fossology_testconfig";
     /** help */
     $command = "$cp2foss_path $auth -h";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    //$this->assertEquals(58, $output_msg_count);
-    $this->assertEquals(59, $output_msg_count, "Test that the number of output lines from '$command' is 59");
+    $this->assertEquals(67, $output_msg_count, "Test that the number of output lines from '$command' is 65");
     // print_r($out);
     /** list agents */
     $out = "";
@@ -396,7 +400,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
   // this method is run once after each test method defined for this test class.
   protected function tearDown() {
 
-    global $fo_cli_path;
     global $fossology_testconfig;
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
@@ -412,22 +415,23 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
   public static function tearDownAfterClass() {
 
     global $fossology_testconfig;
-    global $fo_cli_path;
+    global $scheduler_path;
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
 
     // stop the scheduler
     print "Stopping the scheduler\n";
-    $fo_cli_cmd = "$fo_cli_path -s -c $fossology_testconfig";
-    print "DEBUG: command is $fo_cli_cmd\n";
-    exec($fo_cli_cmd, $output, $return_var);
+    $scheduler_cmd = "$scheduler_path -k -c $fossology_testconfig";
+    fwrite(STDOUT, "DEBUG: command is $scheduler_cmd \n");
+    exec($scheduler_cmd, $output, $return_var);
     if ( $return_var != 0 ) {
-        print "Error: Could not stop scheduler via '$fo_cli_cmd'\n";
+        print "Error: Could not stop scheduler via '$scheduler_cmd'\n";
         print "$output\n";
 #        exit(1);
     }
 
     // time to drop the database 
 
+    sleep(10);
     print "End of functional tests for cp2foss \n";
 
   }

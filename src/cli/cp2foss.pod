@@ -75,7 +75,7 @@ Help, see -h
 
 Help, prints a verbose usage message.
 
-=item B<--user> I<username>
+=item B<--username> I<username>
 
 username, specify the username for a user who has the priviledge to execute cp2foss.
 Alternatively, you can add the file .fossology.rc in your current home directory, add user name and 
@@ -168,19 +168,19 @@ Ignored.
 
 =head1 EXAMPLES
 
-C<cp2foss --user USER --password PASSWORD
+C<cp2foss --username USER --password PASSWORD
 -f Folder -d 'the first file' /tmp/file  >
 
 Would load the archive I<file> in the folder I<Folder> using the
 supplied descriptions for the upload.
 
-C<cp2foss --user USER --password PASSWORD
+C<cp2foss --username USER --password PASSWORD
 -q all -p Ubuntu -n 'Gutsy Gibon' -d 'Ubuntu Gutsy 7.10' 'http://ubuntu.cs.utah.edu/releases/gutsy/ubuntu-7.10-desktop-i386.iso' >
 
 The above example, B<cp2foss> will first get the archive using wget.  It will
 then load the downloaded archive into the database calling the upload 'Gutsy Gibon'.
 
-C<cp2foss --user USER --password PASSWORD
+C<cp2foss --username USER --password PASSWORD
 -A -f Fedora/Fedora8 -n Fedora8  -d 'Fedora 8 Sources' -X .svn -X .cvs /bigdisk/fedora>
 
 Loads every file under the /bigdisk/fedora directory, except files in
@@ -188,7 +188,7 @@ the Subversion and CVS directories.  The files are placed in the
 UI under the folder "Fedora/Fedora8" and are grouped by the first letter
 of each file (a-c, d-f, g-h, etc.).
 
-C<cp2foss --user USER --password PASSWORD
+C<cp2foss --username USER --password PASSWORD
 -d 'globbing test' '/tmp/*.php' >
 
 The above example, will upload all the php files in /tmp.

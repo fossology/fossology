@@ -1,6 +1,6 @@
   <?php
   /*
-   Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+   Copyright (C) 2013-2014 Hewlett-Packard Development Company, L.P.
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@
     {
       $command = "wget -qO - --post-file ./test_oneshot.php http://fossology.usa.hp.com/noauth/?mod=agent_nomos_once";
       $output = array();
-      $license = "GPL-v2";
+      $license = " GPL-2.0";
 
       exec($command, $output);
       $this->assertEquals($license, $output[0]);
@@ -43,7 +43,7 @@
     {
       $command = "wget -qO - --post-file ./test_oneshot.php http://fossology.usa.hp.com/noauth/?mod=agent_copyright_once";
       $output = array();
-      $license = "copyright (c) 2013 hewlett-packard development company, l.p.";
+      $license = "copyright (c) 2013-2014 hewlett-packard development company, l.p.";
 
       exec($command, $output);
       $this->assertEquals($license, $output[0]);

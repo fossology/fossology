@@ -27,7 +27,7 @@
  * @param (optional) string -a lists agents
  * @param (optional) string -A specify agents
  * @param (optional) string -u list available uploads
- * @param (optional) string --user specify user name
+ * @param (optional) string --username specify user name
  * @param (optional) string --password specify password
  * @param (optional) string -c Specify the directory for the system configuration
  * @param (optional) string -D Delete upload
@@ -86,12 +86,12 @@ $usage = basename($argv[0]) . " [options]
   -D upload :: the upload identifier for scheduling delete tasks
                The string can either be 'ALL', a string (the upload_pk),
                or an array of upload_pk's if multiple -D's were specified.
-  --user string :: user name
+  --username string :: user name
   --password string :: password
   -c string :: Specify the directory for the system configuration
 ";
 //process parameters, see usage above
-$longopts = array("user:", "password:");
+$longopts = array("username:", "password:");
 $options = getopt("c:haA:P:uU:D:v", $longopts);
 //print_r($options);
 if (empty($options)) {
@@ -110,8 +110,8 @@ PROCESS COMMAND LINE SELECTION
 **********************************************************************/
 $user = "";
 $passwd = "";
-if (array_key_exists("user", $options)) {
-  $user = $options["user"];
+if (array_key_exists("username", $options)) {
+  $user = $options["username"];
 }
 
 if (array_key_exists("password", $options)) {

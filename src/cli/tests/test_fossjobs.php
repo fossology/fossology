@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2013-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -36,9 +36,6 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
   // scheduler_path is the absolute path to the scheduler binary
   public $scheduler_path;
 
-  // fo_cli_path is the absolute path to the fo_cli binary
-  public $fo_cli_path;
-
   // cp2foss_path is the absolute path to the cp2foss binary
   public $cp2foss_path;
 
@@ -51,7 +48,6 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
 
     global $fossology_testconfig;
     global $scheduler_path;
-    global $fo_cli_path;
     global $cp2foss_path;
     global $fossjobs_path;
 
@@ -64,13 +60,6 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     */
     $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
     fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
-
-    /* locate fo_cli binary */
-    $fo_cli_path = $fossology_testconfig . "/mods-enabled/scheduler/agent/fo_cli";
-    if (!is_executable($fo_cli_path)) {
-        print "Error:  fo_cli path '$fo_cli_path' is not executable!\n";
-        exit(1);
-    }
 
     /* locate cp2foss binary */
     // first get the absolute path to the current fossology src/ directory
@@ -112,7 +101,6 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
   /* initialization */
   protected function setUp() {
 
-    //global $fo_cli_path;
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
 
   }
@@ -123,7 +111,6 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
   function test_reschedule_agents(){
     global $fossology_testconfig;
     global $scheduler_path;
-    global $fo_cli_path;
     global $cp2foss_path;
     global $fossjobs_path;
 
@@ -133,8 +120,8 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
 
     $out = "";
     /** 1. upload one dir, no any agents except wget/unpack/adj2nest */
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
-    $cp2foss_command = "$cp2foss_path $auth ./ -f fossjobs -d 'fossjobs testing'";
+    $auth = "--username fossy --password fossy -c $fossology_testconfig";
+    $cp2foss_command = "$cp2foss_path -s $auth ./ -f fossjobs -d 'fossjobs testing'";
     // print "cp2foss_command is:$cp2foss_command\n";
     fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$cp2foss_command'\n");
     $last = exec("$cp2foss_command 2>&1", $out, $rtn);
@@ -145,14 +132,12 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
       $upload_id = get_upload_id($out[4]);
     } else $this->assertFalse(TRUE);
 
-    sleep(20); //wait for the agents complete
-
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
 
     /** reschedule all rest of agent */
-    $command = "$fossjobs_path $auth -U $upload_id -v";
+    $command = "$fossjobs_path $auth -U $upload_id -A agent_copyright,agent_mimetype,agent_nomos,agent_pkgagent -v";
     fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     //print_r($out);
@@ -174,7 +159,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $out = "";
 
     /** 2. upload one file, schedule copyright except wget/unpack/adj2nest */
-    $cp2foss_command = "$cp2foss_path $auth ./test_fossjobs.php -f fossjobs -d 'fossjobs testing copyright' -q agent_copyright";
+    $cp2foss_command = "$cp2foss_path -s $auth ./test_fossjobs.php -f fossjobs -d 'fossjobs testing copyright' -q agent_copyright";
     fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$cp2foss_command'\n");
     $last = exec("$cp2foss_command 2>&1", $out, $rtn);
     //print_r($out);
@@ -214,7 +199,6 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
 
     global $fossology_testconfig;
     global $scheduler_path;
-    global $fo_cli_path;
     global $cp2foss_path;
     global $fossjobs_path;
 
@@ -228,7 +212,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $output_msg_count = count($out);
     //print_r($out);
     $this->assertEquals(17, $output_msg_count);
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
+    $auth = "--username fossy --password fossy -c $fossology_testconfig";
     /** list agents */
     $out = "";
     $pos = 0;
@@ -252,7 +236,6 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     // test_reschedule_agents() - i.e. these two test cases are 
     // tightly coupled, and they should _not_ be so.
     // at the end of test_reschedule and this method, the number of
-    // uploads should be 7 ( 8 - 1 line for the header );
     $this->assertEquals(3, $output_msg_count, $command); // have 2 = (3 -1_ uploads
 
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
@@ -262,7 +245,6 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
    * \brief clean the env
    */
   protected function tearDown() {
-    global $fo_cli_path;
     global $fossology_testconfig;
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
@@ -278,16 +260,16 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
   public static function tearDownAfterClass() {
 
     global $fossology_testconfig;
-    global $fo_cli_path;
+    global $scheduler_path;
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
 
     // stop the scheduler
     print "Stopping the scheduler\n";
-    $fo_cli_cmd = "$fo_cli_path -s -c $fossology_testconfig";
-    print "DEBUG: command is $fo_cli_cmd\n";
-    exec($fo_cli_cmd, $output, $return_var);
+    $scheduler_cmd = "$scheduler_path -k -c $fossology_testconfig";
+    print "DEBUG: command is $scheduler_cmd \n";
+    exec($scheduler_cmd, $output, $return_var);
     if ( $return_var != 0 ) {
-        print "Error: Could not stop scheduler via '$fo_cli_cmd'\n";
+        print "Error: Could not stop scheduler via '$scheduler_cmd'\n";
         print "$output\n";
 #        exit(1);
     }
