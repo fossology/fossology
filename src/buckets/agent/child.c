@@ -68,9 +68,10 @@ FUNCTION int childInBucket(PGconn *pgConn, pbucketdef_t bucketDef, puploadtree_t
   snprintf(sql, sizeof(sql), 
            "select uploadtree_pk from %s \
               inner join bucket_file \
-                on uploadtree.pfile_fk=bucket_file.pfile_fk and bucket_fk=%d \
+                on %s.pfile_fk=bucket_file.pfile_fk and bucket_fk=%d \
                    and agent_fk=%d and nomosagent_fk=%d \
             where upload_fk=%d and %s.lft BETWEEN %d and %d limit 1",
+           bucketDef->uploadtree_tablename,
            bucketDef->uploadtree_tablename,
            bucketDef->bucket_pk, bucketDef->bucket_agent_pk, 
            bucketDef->nomos_agent_pk, upload_pk,
