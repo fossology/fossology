@@ -77,7 +77,7 @@ int regexScan(regex_t *regex, char *regexStr, FILE *scanFilePtr, char *fileName)
 //  regex_t regex;
   bool match = false;   /* regex match found indicator */
 
-  char msgBuff[250];
+  char msgBuff[2500];
   char textBuff[2000];  /* line buffer for regex match processing */
 
   regmatch_t  rm[1];
