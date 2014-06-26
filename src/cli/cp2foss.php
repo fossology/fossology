@@ -87,10 +87,10 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
 
   One example, to load a file into one path:
   cp2foss \\
-    --user USER --password PASSWORD \\
+    --username USER --password PASSWORD \\
     -f path -d 'the file' /tmp/file
   One example, to upload all the php files in /tmp:
-  cp2foss --user USER --password PASSWORD -f path -d 'the file' '/tmp/*.php'
+  cp2foss --username USER --password PASSWORD -f path -d 'the file' '/tmp/*.php'
 
   Deprecated options:
     -a archive = (deprecated) see archive
@@ -517,7 +517,7 @@ account_check($user, $passwd); // check username/password
 
 /** list all available processing agents */
 if (!$Test && $OptionQ) {
-  $Cmd = "fossjobs --user $user --password $passwd -c $SYSCONFDIR -a";
+  $Cmd = "fossjobs --username $user --password $passwd -c $SYSCONFDIR -a";
   system($Cmd);
   exit(0);
 }
@@ -534,9 +534,9 @@ if ($stdin_flag)
 
 /** compose fossjobs command */
 if($Verbose) {
-  $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR -v "; 
+  $fossjobs_command = "fossjobs --username $user --password $passwd -c $SYSCONFDIR -v "; 
 } else {
-  $fossjobs_command = "fossjobs --user $user --password $passwd -c $SYSCONFDIR  ";
+  $fossjobs_command = "fossjobs --username $user --password $passwd -c $SYSCONFDIR  ";
 }
 
 //print "fossjobs_command is:$fossjobs_command\n";

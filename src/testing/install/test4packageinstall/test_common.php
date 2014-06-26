@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+   Copyright (C) 2012-2014 Hewlett-Packard Development Company, L.P.
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
@@ -77,18 +77,19 @@
    * \return A valid postgres database handle, or false if connection cannot be made
    */
   function connect_to_DB($fossology_testconfig) {
-     global $PG_CONN;
+     $test_pg_conn = FALSE;
 
      $db_conf_file = $fossology_testconfig . "/Db.conf";
     
-     $PG_CONN = pg_connect(str_replace(";", " ", file_get_contents($db_conf_file)));
+     $test_pg_conn = pg_connect(str_replace(";", " ", file_get_contents($db_conf_file)));
 
-     if (empty($PG_CONN)) {
+     if (empty($test_pg_conn)) {
          print "Error - could not connect to test db via $db_conf_file\n";
      }
      else {
          print "Successfully connected to test db\n";
      }
+     return($test_pg_conn);
    }
 
   /**
@@ -103,7 +104,7 @@
     #global $PG_CONN;
     $ars_table_name = $agent_name."_ars";
     $count = 0;
-    $sql = "SELECT count(*) FROM $ars_table_name where upload_fk = $upload_id and ars_success=true;";
+    $sql = "SELECT upload_fk FROM $ars_table_name where upload_fk = $upload_id and ars_success=true;";
     // print "sql is:$sql\n";
     #$result = pg_query($PG_CONN, $sql);
     $result = pg_query($test_dbh, $sql);
@@ -111,6 +112,28 @@
     pg_free_result($result);
     if(1 == $count)  return 1;
     else return 0;
+  }
+
+  /**
+   * \brief check if the one upload has one file/path in uploadtree
+   *
+   * \param $file_name file you want to check
+   * \param $upload_id upload id
+   *
+   * \return 1: exist; 0: not exist
+   */
+  function check_file_uploadtree($test_dbh, $file_name, $upload_id) {
+    $count = 0;
+    $sql = "SELECT uploadtree_pk FROM uploadtree where upload_fk = $upload_id and ufile_name = '$file_name';";
+    // print "sql is:$sql\n";
+    $result = pg_query($test_dbh, $sql);
+    $count = pg_num_rows($result);
+    pg_free_result($result);
+    if ($count > 0) {
+      return 1; // exist
+    } else {
+      return 0; // not exist
+    }
   }
 
   /**

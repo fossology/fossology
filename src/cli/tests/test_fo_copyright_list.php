@@ -1,6 +1,6 @@
   <?php
   /*
-   Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
+   Copyright (C) 2012-2014 Hewlett-Packard Development Company, L.P.
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
@@ -41,9 +41,6 @@
     // scheduler_path is the absolute path to the scheduler binary
     public $scheduler_path;
 
-    // fo_cli_path is the absolute path to the fo_cli binary
-    public $fo_cli_path;
-
     // cp2foss_path is the absolute path to the cp2foss binary
     public $cp2foss_path;
     
@@ -58,7 +55,6 @@
 
       global $fossology_testconfig;
       global $scheduler_path;
-      global $fo_cli_path;
       global $cp2foss_path;
       global $fo_copyright_list_path;
 
@@ -72,13 +68,6 @@
       $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
       fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
 
-      /* locate fo_cli binary */
-      $fo_cli_path = $fossology_testconfig . "/mods-enabled/scheduler/agent/fo_cli";
-      if (!is_executable($fo_cli_path)) {
-          print "Error:  fo_cli path '$fo_cli_path' is not executable!\n";
-          exit(1);
-      }
-
       /* locate cp2foss binary */
       // first get the absolute path to the current fossology src/ directory
       $fo_base_dir = realpath(__DIR__ . '/../..');
@@ -87,6 +76,7 @@
           print "Error:  cp2foss path '" . $cp2foss_path . "' is not executable!\n";
           exit(1);
       }
+      $cp2foss_path .= " -s ";
 
       /* locate fo_copyright_list binary */
       // first get the absolute path to the current fossology src/ directory
@@ -122,7 +112,6 @@
     // this method is run once before each test method defined for this test class.
     protected function setUp() {
 
-      //global $fo_cli_path;
       fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
 
       //$SYSCONF_DIR = "/usr/local/etc/fossology/";
@@ -200,21 +189,17 @@
   function upload_from_url(){
     //global $SYSCONF_DIR;
     global $fossology_testconfig;
-    global $fo_cli_path;
     global $cp2foss_path;
 
     $test_dbh = connect_to_DB($fossology_testconfig);
 
-    //$auth = "--user fossy --password fossy -c $SYSCONF_DIR";
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
+    $auth = "--username fossy --password fossy -c $fossology_testconfig";
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
-    $command = "$cp2foss_path $auth http://www.fossology.org/testdata/debian/lenny-backports/fossology-db_1.2.0-3~bpo50+1_all.deb -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
+    $command = "$cp2foss_path -s $auth http://www.fossology.org/testdata/debian/lenny-backports/fossology-db_1.2.0-3~bpo50+1_all.deb -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    /** wait for all the scheduled agents complete */
-    sleep(100);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
     if ($out && $out[4]) {
@@ -248,7 +233,7 @@
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(10, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
 
     /** help, not authentication */
@@ -257,7 +242,7 @@
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(10, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
@@ -268,7 +253,6 @@
   // this method is run once after each test method defined for this test class.
   protected function tearDown() {
 
-    global $fo_cli_path;
     global $fossology_testconfig;
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
@@ -284,21 +268,22 @@
   public static function tearDownAfterClass() {
 
     global $fossology_testconfig;
-    global $fo_cli_path;
+    global $scheduler_path;
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
 
     // stop the scheduler
     print "Stopping the scheduler\n";
-    $fo_cli_cmd = "$fo_cli_path -s -c $fossology_testconfig";
-    print "DEBUG: command is $fo_cli_cmd\n";
-    exec($fo_cli_cmd, $output, $return_var);
+    $scheduler_cmd = "$scheduler_path -k -c $fossology_testconfig";
+    print "DEBUG: command is $scheduler_cmd \n";
+    exec($scheduler_cmd, $output, $return_var);
     if ( $return_var != 0 ) {
-        print "Error: Could not stop scheduler via '$fo_cli_cmd'\n";
+        print "Error: Could not stop scheduler via '$scheduler_cmd'\n";
         print "$output\n";
 #        exit(1);
     }
 
     // time to drop the database 
+    sleep(10);
 
     print "End of functional tests for fo_copyright_list\n";
 
