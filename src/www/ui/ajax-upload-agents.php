@@ -40,6 +40,16 @@ class ajax_upload_agents extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_READ;
   var $NoHTML     = 1; /* This plugin needs no HTML content help */
 
+  function jobNotYetScheduled( $agentName ,  $upload_pk )
+  {
+    global $PG_CONN;
+    $sql = "select * from job inner join jobqueue on job_pk=jq_job_fk where job_upload_fk=$upload_pk and jq_endtext is null and jq_type='$agentName'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $nrows=pg_num_rows($result);
+    pg_free_result($result);
+    return $nrows<1;
+  }
   /**
    * \brief Display the loaded menu and plugins.
    */
@@ -66,7 +76,7 @@ class ajax_upload_agents extends FO_Plugin
         {
           if (array_search($agent_list[$ac]->URI, $Skip) !== false) continue;
           $P = &$Plugins[plugin_find_id($agent_list[$ac]->URI)];
-          if ($P->AgentHasResults($UploadPk) != 1)
+          if ( ($P->AgentHasResults($UploadPk) != 1 ) &&  $this->jobNotYetScheduled($P->AgentName,$UploadPk )  )
           {
             $V .= "<option value='" . $agent_list[$ac]->URI . "'>";
             $V .= htmlentities($agent_list[$ac]->Name);
@@ -86,8 +96,7 @@ class ajax_upload_agents extends FO_Plugin
     return;
   } // Output()
 
-};
+}
 $NewPlugin = new ajax_upload_agents;
 $NewPlugin->Initialize();
 
-?>
