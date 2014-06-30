@@ -65,9 +65,11 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
 
     /* locate cp2foss binary */
-    // first get the absolute path to the current fossology src/ directory
-    $fo_base_dir = realpath(__DIR__ . '/../..');
-    $cp2foss_path = $fo_base_dir . "/cli/cp2foss";
+    /** set default config dir as /etc/fossology/ */
+    if (empty($fossology_testconfig)) $fossology_testconfig = "/etc/fossology/";
+    fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
+
+    $cp2foss_path = "cp2foss";
     if (!is_executable($cp2foss_path)) {
         print "Error:  cp2foss path '" . $cp2foss_path . "' is not executable!\n";
         exit(1);
