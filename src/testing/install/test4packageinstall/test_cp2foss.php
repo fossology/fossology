@@ -61,7 +61,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
        create_test_database.pl script
     */
     $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
-    $fossology_testconfig =  "/usr/local/etc/fossology/";
     fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
 
     /* locate cp2foss binary */
