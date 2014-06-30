@@ -27,7 +27,6 @@ require_once("./test_common.php");
  */
 class test_cp2foss extends PHPUnit_Framework_TestCase {
 
-  public $SYSCONF_DIR = "/usr/local/etc/fossology/";
   public $DB_NAME;
   public $PG_CONN;
   public $DB_COMMAND;
@@ -70,10 +69,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
 
     $cp2foss_path = "cp2foss";
-    if (!is_executable($cp2foss_path)) {
-        print "Error:  cp2foss path '" . $cp2foss_path . "' is not executable!\n";
-        exit(1);
-    }
     $cp2foss_path .= " -s ";
 
     /* locate the scheduler binary */
@@ -93,25 +88,9 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
         print "$output\n";
         exit(1);
     }
+
     print "\nStarting functional test for cp2foss. \n";
 
-  }
-
-
-  // this method is run once before each test method defined for this test class.
-  protected function setUp() {
-
-    fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
-
-    //$SYSCONF_DIR = "/usr/local/etc/fossology/";
-    //$DB_NAME = "fossology";
-    //$DB_COMMAND = "../../testing/db/createTestDB.php";
-    
-    // these calls are deprecated with the new create_test_database call
-    //create_db();
-    //add_user();
-    //preparations();
-    //scheduler_operation();
   }
 
   /** 
@@ -126,13 +105,14 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
    *
    */
   function test_upload_from_server() {
-    //global $SYSCONF_DIR;
     global $fossology_testconfig;
     global $cp2foss_path;
+    global $PG_CONN;
 
     fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
 
-    $test_dbh = connect_to_DB($fossology_testconfig);
+    $PG_CONN = $test_dbh = connect_to_DB($fossology_testconfig);
+    add_user("fossy", "fossy"); // add account fossy/fossy
 
     $auth = "--username fossy --password fossy -c $fossology_testconfig";
 
@@ -245,9 +225,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $pos = false;
     $pos = strpos($out[$output_msg_count - 3], $scheduled_agent_info_3);
     $this->assertEquals(0, $pos);
-    $pos = false;
-    $pos = strpos($out[$output_msg_count - 5], $scheduled_agent_info_4);
-    $this->assertEquals(0, $pos, $out[$output_msg_count-4]);
     $upload_id = 0;
 
     /** get upload id that you just upload for testing */
@@ -317,99 +294,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     pg_close($test_dbh);
 
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
-  }
-
-  /**
-   * \brief upload from url
-   */
-  function test_upload_from_url(){
-    //global $SYSCONF_DIR;
-    global $fossology_testconfig;
-    global $cp2foss_path;
-
-    fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
-    $test_dbh = connect_to_DB($fossology_testconfig);
-
-    $auth = "--username fossy --password fossy -c $fossology_testconfig";
-    /** upload a file to Software Repository */
-    $out = "";
-    $pos = 0;
-    $command = "$cp2foss_path $auth http://www.fossology.org/testdata/rpms/fedora/10/SRPMS/fossology-1.1.0-1.fc10.src.rpm -d 'fossology des' -f 'fossology path' -n 'test package'";
-    fwrite(STDOUT, "DEBUG: Executing '$command'\n");
-    $last = exec("$command 2>&1", $out, $rtn);
-    print "DEBUG: output is:\n";
-    print_r($out);
-    $upload_id = 0;
-    /** get upload id that you just upload for testing */
-    if ($out && $out[4]) {
-      $upload_id = get_upload_id($out[4]);
-    } else $this->assertFalse(TRUE);
-    $agent_status = 0;
-    $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
-    $this->assertEquals(1, $agent_status);
-    $agent_status = 0;
-    /** do not schedule nomos */
-    $agent_status = check_agent_status($test_dbh,"nomos", $upload_id);
-    $this->assertEquals(0, $agent_status);
-
-    pg_close($test_dbh);
-
-    fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
-
-  }
-
-  /**
-   * \brief list agents and help msg, etc
-   */
-  function test_list_agent_and_others() {
-    global $fossology_testconfig;
-    global $cp2foss_path;
-    //global $SYSCONF_DIR;
-
-    fwrite(STDOUT, " ----> Running " . __METHOD__ . "\n");
-    $auth = "--username fossy --password fossy -c $fossology_testconfig";
-    /** help */
-    $command = "$cp2foss_path $auth -h";
-    fwrite(STDOUT, "DEBUG: Executing '$command'\n");
-    $last = exec("$command 2>&1", $out, $rtn);
-    $output_msg_count = count($out);
-    $this->assertEquals(67, $output_msg_count, "Test that the number of output lines from '$command' is 65");
-    // print_r($out);
-    /** list agents */
-    $out = "";
-    $pos = 0;
-    $command = "$cp2foss_path $auth -Q";
-    fwrite(STDOUT, "DEBUG: Executing '$command'\n");
-    $last = exec("$command 2>&1", $out, $rtn);
-    $output_msg_count = count($out);
-    $this->assertEquals(9, $output_msg_count);
-    /** uplaod NULL */
-    $out = "";
-    $pos = 0;
-    $command = "$cp2foss_path $auth ";
-    fwrite(STDOUT, "DEBUG: Executing '$command'\n");
-    $last = exec("$command 2>&1", $out, $rtn);
-    // print_r($out);
-    $output_msg = "FATAL: No files to upload were specified.";
-    $this->assertEquals($output_msg, $out[0]);
-
-    fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
-  }
-
-  /**
-   * \brief clean the env
-   */
-  // this method is run once after each test method defined for this test class.
-  protected function tearDown() {
-
-    global $fossology_testconfig;
-
-    fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
-   
-    // TODO:  Drop the test database
-    
-    //stop_scheduler(); 
-    //drop_db();
   }
 
   // this method is run once for the entire test class, after all of the 
