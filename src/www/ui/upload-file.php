@@ -49,6 +49,7 @@ class upload_file extends FO_Plugin {
 
     define("UPLOAD_ERR_EMPTY",5);
     define("UPLOAD_ERR_INVALID_FOLDER_PK",100);
+    define("UPLOAD_ERR_RESEND",200);
     $upload_errors = array(
       UPLOAD_ERR_OK         => _("No errors."), 
       UPLOAD_ERR_INI_SIZE   => _("Larger than upload_max_filesize ") . ini_get('upload_max_filesize'),
@@ -59,16 +60,22 @@ class upload_file extends FO_Plugin {
       UPLOAD_ERR_CANT_WRITE => _("Can't write to disk."),
       UPLOAD_ERR_EXTENSION  => _("File upload stopped by extension."),
       UPLOAD_ERR_EMPTY      => _("File is empty or you don't have permission to read the file."),
-      UPLOAD_ERR_INVALID_FOLDER_PK => _("Invalid Folder.")
+      UPLOAD_ERR_INVALID_FOLDER_PK => _("Invalid Folder."),
+      UPLOAD_ERR_RESEND => _("This seems to be a resent file.")
     );
-
+    
+    if($_SESSION['uploadformbuild']!=$_REQUEST['uploadformbuild']){
+      $UploadFile['error'] = UPLOAD_ERR_RESEND;
+      return $upload_errors[$UploadFile['error']];
+    }
+    
     $UploadFile = $_FILES['getfile'];
-    $UploadError = @$UploadFile['error'];
-
-    /* Additional error checks */
-    if($UploadFile['size'] == 0 && $UploadFile['error'] == 0) $UploadFile['error'] = UPLOAD_ERR_EMPTY;
-    if (empty($folder_pk)) $UploadFile['error'] = UPLOAD_ERR_INVALID_FOLDER_PK;
-    if ($UploadFile['error'] != UPLOAD_ERR_OK) return $upload_errors[$UploadFile['error']];
+    if($UploadFile['size'] == 0 && $UploadFile['error'] == 0)
+      $UploadFile['error'] = UPLOAD_ERR_EMPTY;
+    if (empty($folder_pk))
+      $UploadFile['error'] = UPLOAD_ERR_INVALID_FOLDER_PK;
+    if ($UploadFile['error'] != UPLOAD_ERR_OK)
+      return $upload_errors[$UploadFile['error']];
 
     $originName = @$UploadFile['name'];
     if (empty($Name)) $Name = basename($originName);
@@ -143,103 +150,102 @@ class upload_file extends FO_Plugin {
       return;
     }
     $V = "";
-    switch ($this->OutputType) {
-      case "XML":
-        break;
-      case "HTML":
-        /* If this is a POST, then process the request. */
-        $folder_pk = GetParm('folder', PARM_INTEGER);
-        $Desc = GetParm('description', PARM_TEXT); // may be null
-        $Name = GetParm('name', PARM_TEXT); // may be null
-        $public = GetParm('public', PARM_TEXT); // may be null
-        if (empty($public))
-          $public_perm = PERM_NONE;
-        else
-          $public_perm = PERM_READ;
-
-        if (file_exists(@$_FILES['getfile']['tmp_name']) && !empty($folder_pk)) {
-          $rc = $this->Upload($folder_pk, @$_FILES['getfile']['tmp_name'], $Desc, $Name, $public_perm);
-          if (empty($rc)) {
-            // reset form fields
-            $GetURL = NULL;
-            $Desc = NULL;
-            $Name = NULL;
-          }
-          else {
-            $text = _("Upload failed for file");
-            $V.= displayMessage("$text {$_FILES['getfile']['name']}: $rc");
-          }
-        }
-
-        /* Set default values */
-        if (empty($GetURL)) {
-          $GetURL = 'http://';
-        }
-        /* Display instructions */
-        $text22 = _("Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your uploaded files.  To manage your own group go into Admin > Groups > Manage Group Users.  To manage permissions for this one upload, go to Admin > Upload Permissions");
-        $V .= "<p><b>$text22</b><p>";
-
-        $V.= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from your computer to FOSSology.\n");
-        $V.= _("Your FOSSology server has imposed a maximum upload file size of");
-        $V.= " ".  ini_get('upload_max_filesize') . " ";
-        $V.= _("bytes.");
-        /* Display the form */
-        $V.= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
-        $V.= "<ol>\n";
-
-        $text = _("Select the folder for storing the uploaded file:");
-        $V.= "<li>$text\n";
-        $V.= "<select name='folder'>\n";
-        $V.= FolderListOption(-1, 0);
-        $V.= "</select><P />\n";
-
-        $text = _("Select the file to upload:");
-        $V.= "<li>$text<br />\n";
-        $V.= "<input name='getfile' size='60' type='file' /><br />\n";
-
-        $text = _("(Optional) Enter a description of this file:");
-        $V.= "<li>$text<br />\n";
-        $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
-
-        $text = _("(Optional) Enter a viewable name for this file:");
-        $V.= "<li>$text<br />\n";
-        $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
-        $text1 = _("If no name is provided, then the uploaded file name will be used.");
-        $V.= "$text1<P />\n";
-
-        $text1 = _("(Optional) Make Public");
-        $V.= "<li>";
-        $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
-
-        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
-          $text = _("Select optional analysis");
-          $V.= "<li>$text<br />\n";
-          $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-          $V.= AgentCheckBoxMake(-1, $Skip);
-          $V.= "<p>";
-        }
-
-        $V.= "</ol>\n";
-
-        $text = _("After you press Upload, please be patient while your file is transferring.");
-        $V.= "<p>$text<br>\n";
-        $text = _("Upload");
-        $V.= "<p>&nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='$text'>\n";
-        $V.= "</form>\n";
-        $V .= "<p><b>$text22</b><p>";
-        
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+    if ($this->OutputType=="HTML"){
+      $V = $this->outputHTML();
     }
     if (!$this->OutputToStdout) {
       return ($V);
     }
-    print ("$V");
+    print $V;
     return;
   }
-};
+  
+  /*
+   * \brief returns the HTML output If this is a POST, then process the request.
+   */
+  function outputHTML(){
+    $folder_pk = GetParm('folder', PARM_INTEGER);
+    $Desc = GetParm('description', PARM_TEXT);
+    $Name = GetParm('name', PARM_TEXT);
+    $public = GetParm('public', PARM_TEXT);
+    if (empty($public))
+      $public_perm = PERM_NONE;
+    else
+      $public_perm = PERM_READ;
+
+    if (file_exists(@$_FILES['getfile']['tmp_name']) && !empty($folder_pk)) {
+      $rc = $this->Upload($folder_pk, @$_FILES['getfile']['tmp_name'], $Desc, $Name, $public_perm);
+      if (empty($rc)) {
+        $GetURL = NULL;
+        $Desc = NULL;
+        $Name = NULL;
+        $V = '';
+      }
+      else {
+        $text = _("Upload failed for file");
+        $V = displayMessage("$text {$_FILES['getfile']['name']}: $rc");
+      }
+    }
+    $_SESSION['uploadformbuild'] = time().':'.$_SERVER['REMOTE_ADDR'];
+
+    /* Set default values */
+    if (empty($GetURL)) {
+      $GetURL = 'http://';
+    }
+    /* Display instructions */
+    $text22 = _("Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your uploaded files.  To manage your own group go into Admin > Groups > Manage Group Users.  To manage permissions for this one upload, go to Admin > Upload Permissions");
+    $V .= "<p><b>$text22</b><p>";
+
+    $V.= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from your computer to FOSSology.\n");
+    $V.= _("Your FOSSology server has imposed a maximum upload file size of");
+    $V.= " ".  ini_get('upload_max_filesize') . " ";
+    $V.= _("bytes.");
+    /* Display the form */
+    $V.= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
+    $V.= "<input type='hidden' name='uploadformbuild' value='{$_SESSION[uploadformbuild]}'/>";
+    $V.= "<ol>\n";
+
+    $text = _("Select the folder for storing the uploaded file:");
+    $V.= "<li>$text\n";
+    $V.= "<select name='folder'>\n";
+    $V.= FolderListOption(-1, 0);
+    $V.= "</select><P />\n";
+
+    $text = _("Select the file to upload:");
+    $V.= "<li>$text<br />\n";
+    $V.= "<input name='getfile' size='60' type='file' /><br />\n";
+
+    $text = _("(Optional) Enter a description of this file:");
+    $V.= "<li>$text<br />\n";
+    $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
+
+    $text = _("(Optional) Enter a viewable name for this file:");
+    $V.= "<li>$text<br />\n";
+    $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
+    $text1 = _("If no name is provided, then the uploaded file name will be used.");
+    $V.= "$text1<P />\n";
+
+    $text1 = _("(Optional) Make Public");
+    $V.= "<li>";
+    $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
+
+    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
+      $text = _("Select optional analysis");
+      $V.= "<li>$text<br />\n";
+      $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+      $V.= AgentCheckBoxMake(-1, $Skip);
+      $V.= "<p>";
+    }
+
+    $V.= "</ol>\n";
+
+    $text = _("After you press Upload, please be patient while your file is transferring.");
+    $V.= "<p>$text<br>\n";
+    $text = _("Upload");
+    $V.= "<p>&nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='$text'>\n";
+    $V.= "</form>\n";
+    $V .= "<p><b>$text22</b><p>";
+    return $V;    
+  }
+}
 $NewPlugin = new upload_file;
-?>
