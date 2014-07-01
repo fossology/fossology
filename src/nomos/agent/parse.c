@@ -5981,6 +5981,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Migemo");
   }
 
+  /** Sendmail */
+  if(INFILE(_LT_Sendmail_title) ) {
+     INTERESTING("Sendmail");
+  }
   /*
    * Some licenses say "licensed under the same terms as FOO".
    */

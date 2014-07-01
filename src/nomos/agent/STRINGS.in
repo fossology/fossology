@@ -5626,6 +5626,11 @@ k
 %KEY% "so(ftware|urce)"
 %STR% "you can modify and change the source of face"
 #
+#
+%ENTRY%  _LT_Sendmail_title
+%KEY%  "licen"
+%STR%  "unless a different license is obtained directly from Sendmail"
+#
 %ENTRY% _LT_TAPJOY
 %KEY% "licen[cs]e"
 %STR% "you and the company or entity that you represent =FEW= are agreeing to be bound by and are becoming a party to this tapjoy sdk licen[cs]e agreement"
