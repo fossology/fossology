@@ -40,6 +40,14 @@ class ajax_upload_agents extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_READ;
   var $NoHTML     = 1; /* This plugin needs no HTML content help */
 
+
+  /**
+   * \brief This function checks if the current job was not already scheduled, or did already fail (You can reschedule failed jobs)
+   * 
+   * \param $agentName   Name of the agent as specified in the agents table
+   * \param $upload_pk   Upload identifier
+   * \return true if the agent is not currently scheduled for this upload, else false
+   */
   function jobNotYetScheduled( $agentName ,  $upload_pk )
   {
     global $PG_CONN;

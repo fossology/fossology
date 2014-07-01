@@ -31,6 +31,24 @@ class agent_add extends FO_Plugin
   public $Dependency = array();
   public $DBaccess   = PLUGIN_DB_WRITE;
 
+    /**
+   * \brief This function checks if the current job was already scheduled, but did not yet run (You can reschedule failed jobs)
+   * 
+   * \param $agentName   Name of the agent as specified in the agents table
+   * \param $upload_pk   Upload identifier
+   * \return true if the agent is currently scheduled for this upload and did not yet run, else false
+   */
+  function jobAlreadyScheduled( $agentName ,  $upload_pk )
+  {
+    global $PG_CONN;
+    $sql = "select * from job inner join jobqueue on job_pk=jq_job_fk where job_upload_fk=$upload_pk and jq_endtext is null and jq_type='$agentName'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $nrows=pg_num_rows($result);
+    pg_free_result($result);
+    return !($nrows<1);
+  }
+  
   /**
    * \brief Add an upload to multiple agents.
    *
@@ -86,6 +104,9 @@ class agent_add extends FO_Plugin
         //print "Adding to " . $agentlist[$Found] . "<br>\n";
         $Dependencies = array();
         $P = &$Plugins[plugin_find_id($agentlist[$Found])];
+        if ($this->jobAlreadyScheduled($P->AgentName,$uploadpk ) ) {
+          continue;
+        }
         $rv = $P->AgentAdd($job_pk, $uploadpk, $ErrorMsg, $Dependencies);
         if ($rv == -1) $rc .= $ErrorMsg;
       }
