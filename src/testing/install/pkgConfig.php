@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /*
- Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -544,7 +544,7 @@ function installFossology($objRef)
     return(FALSE);
   }
   $aptUpdate = 'apt-get update 2>&1';
-  $aptInstall = 'apt-get -y --force-yes install fossology 2>&1';
+  $aptInstall = 'apt-get -y --force-yes install fossology > fossinstall.log 2>&1';
   $yumClean = 'yum clean all';
   $yumUpdate = 'yum -y update 2>&1';
   $yumInstall = 'yum -y install fossology > fossinstall.log 2>&1';
@@ -560,7 +560,7 @@ function installFossology($objRef)
       $last = exec($aptInstall, $iOut, $iRtn);
       if($iRtn != 0)
       {
-        echo "Failed to install fossology!\nTranscript is:\n";
+        echo "Failed to install fossology! aptInstall is:$aptInstall, iRtn is:$iRtn, last is:$last \nTranscript is:\n";
         echo implode("\n",$iOut) . "\n";
         return(FALSE);
       }
@@ -601,8 +601,8 @@ function installFossology($objRef)
       //$clast = system('cat fossinstall.log');
       if($yumRtn != 0)
       {
-        echo "Failed to install fossology!\nTranscript is:\n";
-        system('cat fossinstall.log');
+        echo "Failed to install fossology! yumInstall is:$yumInstall, yumRtn is:$yumRtn, last is:$last \nTranscript is:\n";
+        echo implode("\n",$yumOut) . "\n";
         return(FALSE);
       }
       if(!($installLog = file_get_contents('fossinstall.log')))
