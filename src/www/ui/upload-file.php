@@ -172,7 +172,7 @@ class upload_file extends FO_Plugin {
       $public_perm = PERM_NONE;
     else
       $public_perm = PERM_READ;
-
+    $V = "";
     if (file_exists(@$_FILES['getfile']['tmp_name']) && !empty($folder_pk)) {
       $rc = $this->Upload($folder_pk, @$_FILES['getfile']['tmp_name'], $Desc, $Name, $public_perm);
       if (empty($rc)) {
@@ -202,7 +202,7 @@ class upload_file extends FO_Plugin {
     $V.= _("bytes.");
     /* Display the form */
     $V.= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
-    $V.= "<input type='hidden' name='uploadformbuild' value='{$_SESSION[uploadformbuild]}'/>";
+    $V.= "<input type='hidden' name='uploadformbuild' value='{$_SESSION['uploadformbuild']}'/>";
     $V.= "<ol>\n";
 
     $text = _("Select the folder for storing the uploaded file:");
