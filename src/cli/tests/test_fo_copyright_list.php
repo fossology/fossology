@@ -197,7 +197,7 @@
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
-    $command = "$cp2foss_path -s $auth http://www.fossology.org/testdata/debian/lenny-backports/fossology-db_1.2.0-3~bpo50+1_all.deb -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
+    $command = "$cp2foss_path $auth http://www.fossology.org/testdata/debian/lenny-backports/fossology-db_1.2.0-3~bpo50+1_all.deb -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $upload_id = 0;

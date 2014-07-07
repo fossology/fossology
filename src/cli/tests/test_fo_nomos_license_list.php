@@ -182,7 +182,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     /** upload a file to Software Repository */
     $out = "";
     $pos = 0;
-    $command = "$cp2foss_path -s $auth http://www.fossology.org/testdata/rpms/fedora/10/i386/fossology-devel-1.1.0-1.fc10.i386.rpm -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
+    $command = "$cp2foss_path $auth http://www.fossology.org/testdata/rpms/fedora/10/i386/fossology-devel-1.1.0-1.fc10.i386.rpm -d 'fossology des' -f 'fossology path' -n 'test package' -q 'all'";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
 

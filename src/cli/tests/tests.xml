@@ -1,8 +1,10 @@
 <phpunit>
   <testsuites>
     <testsuite name="cli Tests">
-      <file>test_fo_copyright_list.php</file>
+      <file>test_fossjobs.php</file>
+      <file>test_cp2foss.php</file>
       <file>test_fo_nomos_license_list.php</file>
+      <file>test_fo_copyright_list.php</file>
       <file>test_oneshot.php</file>
       <file></file>
     </testsuite>

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -64,7 +64,7 @@ function account_check(&$user, &$passwd)
        $uid_arr = posix_getpwuid(posix_getuid());
        $user = $uid_arr['name'];
      */
-    echo "FATAL: You should add '--user USERNAME' when running OR add 'user=USERNAME' in ~/.fossology.rc before running.\n";
+    echo "FATAL: You should add '--username USERNAME' when running OR add 'username=USERNAME' in ~/.fossology.rc before running.\n";
     exit(1);
   }
   if (empty($passwd)) {

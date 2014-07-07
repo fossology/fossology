@@ -91,6 +91,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
         print "$output\n";
         exit(1);
     }
+    sleep(10);
     print "\nStarting functional test for cp2foss. \n";
 
   }
@@ -244,7 +245,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $pos = strpos($out[$output_msg_count - 3], $scheduled_agent_info_3);
     $this->assertEquals(0, $pos);
     $pos = false;
-    $pos = strpos($out[$output_msg_count - 5], $scheduled_agent_info_4);
+    $pos = strpos($out[$output_msg_count - 4], $scheduled_agent_info_4);
     $this->assertEquals(0, $pos, $out[$output_msg_count-4]);
     $upload_id = 0;
 
@@ -380,7 +381,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(9, $output_msg_count);
+    $this->assertEquals(8, $output_msg_count);
     /** uplaod NULL */
     $out = "";
     $pos = 0;

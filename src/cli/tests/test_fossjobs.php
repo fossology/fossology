@@ -94,6 +94,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
         print "$output\n";
         exit(1);
     }
+    sleep(10);
     print "\nStarting functional test for fossjobs. \n";
 
   }
@@ -221,7 +222,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     //print_r($out);
     $output_msg_count = count($out);
-    $this->assertEquals(9, $output_msg_count);
+    $this->assertEquals(8, $output_msg_count);
 
     /** list uploads */
     $out = "";
@@ -275,6 +276,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     }
 
     // time to drop the database 
+    sleep(10);
 
     print "End of functional tests for cp2foss \n";
   }
