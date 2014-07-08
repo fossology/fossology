@@ -727,7 +727,7 @@ function configYum($objRef,$migrate)
        echo "transcript is:\n";print_r($out) . "\n";
        return(FALSE);
      }
-     $last = exec("wget -e http_proxy=http://lart.usa.hp.com:3128 http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm", $out, $rtn);
+     $last = exec("wget -e http_proxy=http://web-proxy.cce.hp.com:8088 http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm", $out, $rtn);
      if($rtn != 0)
      {
        echo "FATAL! install EPEL repo fail\n";
