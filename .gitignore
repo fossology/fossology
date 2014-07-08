@@ -9,6 +9,7 @@ VERSION
 .*.sw?
 *~
 /src/vendor
+.vagrant/
 
 # compiled or derived files
 install/db/dbcreate
