@@ -32,14 +32,14 @@ $Usage = "Usage: " . basename($argv[0]) . "
   --user username     :: user name
   --password password :: password
   --container         :: include container or not, 1: yes, 0: no (default)
-  -x                  :: do not show files which have no copyright information 
+  -x                  :: 1: do not show files without copyright information, -1: just show files without copyright, 0(default): show all files
   -h  help, this message
   ";
 
 $upload = $item = $type = "";
 
 $longopts = array("user:", "password:", "type:", "container:");
-$options = getopt("c:u:t:hx", $longopts);
+$options = getopt("c:u:t:hx:", $longopts);
 if (empty($options) || !is_array($options))
 {
   print $Usage;
@@ -78,7 +78,7 @@ foreach($options as $option => $value)
       $container = $value;
       break;
     case 'x':
-      $ignore = 1;
+      $ignore = $value;
       break;
     default:
       print "unknown option $option\n";
@@ -181,7 +181,8 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container = 0)
     }
 
     $copyright = GetFileCopyright_string($agent_pk, 0, $row['uploadtree_pk'], $type) ;
-    if ($ignore && empty($copyright)) continue;
+    if (1 == $ignore && empty($copyright)) continue; // just show files with copyright
+    if (-1 == $ignore && !empty($copyright)) continue; // just show files without copyright
 
     $V = $filepath . ": ". $copyright;
     #$V = $filepath;
