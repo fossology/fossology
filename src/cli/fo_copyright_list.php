@@ -32,14 +32,15 @@ $Usage = "Usage: " . basename($argv[0]) . "
   --user username     :: user name
   --password password :: password
   --container         :: include container or not, 1: yes, 0: no (default)
-  -x                  :: 1: do not show files without copyright information, -1: just show files without copyright, 0(default): show all files
+  -x                  :: -1: show files without specific(see option -X, default as none) copyright, 1: show files with specific(see option -X, default as none) copyright, 0(default): show all files
+  -X copyright        :: work with -x, default as none
   -h  help, this message
   ";
 
 $upload = $item = $type = "";
 
 $longopts = array("user:", "password:", "type:", "container:");
-$options = getopt("c:u:t:hx:", $longopts);
+$options = getopt("c:u:t:hx:X:", $longopts);
 if (empty($options) || !is_array($options))
 {
   print $Usage;
@@ -48,7 +49,8 @@ if (empty($options) || !is_array($options))
 
 $user = $passwd = "";
 $container = 0; // include container or not, 1: yes, 0: no (default)
-$ignore = 0; // do not show files which have no copyright information, 1: yes, 0: no (default)
+$copyright_switch = 0; // 1: files with copyright, -1: file without copyrgiht, 0: all files
+$specfic_copyright = ""; // copyright you want or not
 
 foreach($options as $option => $value)
 {
@@ -78,7 +80,10 @@ foreach($options as $option => $value)
       $container = $value;
       break;
     case 'x':
-      $ignore = $value;
+      $copyright_switch = $value;
+      break;
+    case 'X':
+      $specific_copyright = $value;
       break;
     default:
       print "unknown option $option\n";
@@ -124,7 +129,8 @@ return 0;
 function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container = 0) 
 {
   global $PG_CONN;
-  global $ignore;
+  global $copyright_switch;
+  global $specific_copyright;
   if (empty($uploadtree_pk)) {
       /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
       $uploadtreeRec = GetSingleRec("uploadtree", "where parent is NULL and upload_fk='$upload_pk'");
@@ -181,13 +187,20 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container = 0)
     }
 
     $copyright = GetFileCopyright_string($agent_pk, 0, $row['uploadtree_pk'], $type) ;
-    if (1 == $ignore && empty($copyright)) continue; // just show files with copyright
-    if (-1 == $ignore && !empty($copyright)) continue; // just show files without copyright
-
-    $V = $filepath . ": ". $copyright;
-    #$V = $filepath;
-    print "$V";
-    print "\n";
+    /* show files without copyright */
+    if ((1 == $copyright_switch && empty($specific_copyright) && empty($copyright))|| 
+        /**show files with specific copyright */ 
+        (1 == $copyright_switch && !empty($specific_copyright) && stristr($copyright, $specific_copyright)) || 
+        /**show files with copyright */ 
+        (-1 == $copyright_switch && empty($specific_copyright) && !empty($copyright)) || 
+        /**show files without specific copyright */ 
+        (-1 == $copyright_switch && !empty($specific_copyright) && !stristr($copyright, $specific_copyright)) || 
+        (empty($copyright_switch)))
+        {
+        $V = $filepath . ": ". $copyright;
+        print "$V";
+        print "\n";
+        }
   } 
     pg_free_result($outerresult);
 }
