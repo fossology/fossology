@@ -2,7 +2,7 @@
 # FOSSology mod_deps script
 # This script helps you install dependencies on a system. for a module
 #
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -93,7 +93,7 @@ if [ $RUNTIME ]; then
     Debian|Ubuntu|LinuxMint)
       apt-get $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip \
-        poppler-utils rpm tar upx unzip gzip sleuthkit p7zip-full unrar-free;;
+        poppler-utils rpm tar upx-ucl unzip gzip sleuthkit p7zip-full unrar-free;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
         YesOpt='-y'
