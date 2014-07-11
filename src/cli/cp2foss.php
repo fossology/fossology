@@ -500,7 +500,7 @@ for ($i = 1;$i < $argc;$i++) {
       $VCS = 'SVN';
       break;
     case '-G': /* upload from git repo */
-      $VCS = 'GIT';
+      $VCS = 'Git';
       break;
     default:
       if (substr($argv[$i], 0, 1) == '-') {
