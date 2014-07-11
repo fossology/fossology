@@ -233,7 +233,7 @@
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(12, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
 
     /** help, not authentication */
@@ -242,7 +242,7 @@
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(12, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
