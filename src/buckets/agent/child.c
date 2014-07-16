@@ -51,12 +51,10 @@ FUNCTION int childInBucket(PGconn *pgConn, pbucketdef_t bucketDef, puploadtree_t
               inner join bucket_container \
                 on uploadtree_fk=uploadtree_pk and bucket_fk=%d \
                    and agent_fk=%d and nomosagent_fk=%d \
-            where upload_fk=%d and %s.lft BETWEEN %d and %d limit 1",
+            where upload_fk=%d and uploadtree.lft BETWEEN %d and %d limit 1",
            bucketDef->uploadtree_tablename,
            bucketDef->bucket_pk, bucketDef->bucket_agent_pk, 
-           bucketDef->nomos_agent_pk, upload_pk,
-           bucketDef->uploadtree_tablename,
-           lft, rgt);
+           bucketDef->nomos_agent_pk, upload_pk, lft, rgt);
 //  if (debug) printf("===%s:%d:\n%s\n===\n", __FILE__, __LINE__, sql);
   result = PQexec(pgConn, sql);
   if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return -1;
@@ -68,15 +66,12 @@ FUNCTION int childInBucket(PGconn *pgConn, pbucketdef_t bucketDef, puploadtree_t
   snprintf(sql, sizeof(sql), 
            "select uploadtree_pk from %s \
               inner join bucket_file \
-                on %s.pfile_fk=bucket_file.pfile_fk and bucket_fk=%d \
+                on uploadtree.pfile_fk=bucket_file.pfile_fk and bucket_fk=%d \
                    and agent_fk=%d and nomosagent_fk=%d \
-            where upload_fk=%d and %s.lft BETWEEN %d and %d limit 1",
-           bucketDef->uploadtree_tablename,
+            where upload_fk=%d and uploadtree.lft BETWEEN %d and %d limit 1",
            bucketDef->uploadtree_tablename,
            bucketDef->bucket_pk, bucketDef->bucket_agent_pk, 
-           bucketDef->nomos_agent_pk, upload_pk,
-           bucketDef->uploadtree_tablename,
-           lft, rgt);
+           bucketDef->nomos_agent_pk, upload_pk, lft, rgt);
 //  if (debug) printf("===%s:%d:\n%s\n===\n", __FILE__, __LINE__, sql);
   result = PQexec(pgConn, sql);
   if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return -1;

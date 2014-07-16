@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -744,5 +744,30 @@ function GetFolderArray($RootFolder=-1, &$FolderArray)
     }
   }
   pg_free_result($result);
+}
+
+/*
+ * \brief check if one file path contains an excluding text
+ * 
+ * \param $FilePath - file path
+ * \param $ExcludingText - excluding text
+ * 
+ * \return 1: include, 0: not include
+ */
+function ContainExcludeString($FilePath, $ExcludingText) {
+  $excluding_length = 0;
+  $excluding_flag = 0; // 1: exclude 0: not exclude
+  if ($ExcludingText) {
+    $excluding_length = strlen($ExcludingText);
+  }
+
+  /* filepath contains 'xxxx/', '/xxxx/', 'xxxx', '/xxxx' */
+  if ($excluding_length > 0 && strstr($FilePath, $ExcludingText)) {
+    $excluding_flag = 1;
+    /* filepath does not contain 'xxxx/' */
+    if ('/' != $ExcludingText[0] && '/' == $ExcludingText[$excluding_length - 1] && !strstr($FilePath, '/'.$ExcludingText)) 
+      $excluding_flag = 0;
+  }
+  return $excluding_flag;
 }
 ?>

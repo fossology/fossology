@@ -31,15 +31,20 @@ $Usage = "Usage: " . basename($argv[0]) . "
   --password password :: password
   --container         :: include container or not, 1: yes, 0: no (default)
   -x                  :: do not show files which have unuseful license 'No_license_found' or no license
+  -X excluding        :: Exclude files containing [free text] in the path.
+                         'mac/' should exclude all files in the mac directory. 
+                         'mac' and it should exclude all files in any directory containing the substring 'mac'
+                         '/mac' and it should exclude all files in any directory that starts with 'mac'
   -h  help, this message
   ";
 $upload = ""; // upload id
 $item = ""; // uploadtree id
 $container = 0; // include container or not, 1: yes, 0: no (default)
 $ignore = 0; // do not show files which have no license, 1: yes, 0: no (default) 
+$excluding = '';
 
 $longopts = array("user:", "password:", "container:");
-$options = getopt("c:u:t:hx", $longopts);
+$options = getopt("c:u:t:hxX:", $longopts);
 if (empty($options) || !is_array($options)) 
 { 
   print $Usage;
@@ -73,6 +78,9 @@ foreach($options as $option => $value)
       break;
     case 'x':
       $ignore = 1;
+      break;
+    case 'X':
+      $excluding = $value;
       break;
     default:
       print "unknown option $option\n";
@@ -118,6 +126,7 @@ return 0;
 function GetLicenseList($uploadtree_pk, $upload_pk, $container = 0) 
 {
   global $ignore;
+  global $excluding;
   global $PG_CONN;
   if (empty($uploadtree_pk)) {
       /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
@@ -164,6 +173,7 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $container = 0)
    * filepath : license list
    * e.g. Pound-2.4.tgz/Pound-2.4/svc.c: GPL_v3+, Indemnity
    */
+  $excluding_flag = 0; // 1: exclude 0: not exclude
   while ($row = pg_fetch_assoc($outerresult))
   { 
     $filepatharray = array();
@@ -171,9 +181,17 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $container = 0)
     $filepath = "";
     foreach($filepatharray as $uploadtreeRow)
     {
-      if (!empty($filepath)) $filepath .= "/";
+      if (!empty($filepath)) {  // filepath is not empty
+        $filepath .= "/";
+        /* filepath contains 'xxxx/', '/xxxx/', 'xxxx', '/xxxx' */
+          $excluding_flag = ContainExcludeString($filepath, $excluding);
+          if (1 == $excluding_flag) {
+            break;
+          }
+        }
       $filepath .= $uploadtreeRow['ufile_name'];
     }
+    if (1 == $excluding_flag) continue; // excluding files whose path contains excluding text
     $license_name = GetFileLicenses_string($agent_pk, 0, $row['uploadtree_pk'], $uploadtree_tablename);
     if ($ignore && (empty($license_name) || 'No_license_found' == $license_name)) continue;
     $V = $filepath . ": ". $license_name;
