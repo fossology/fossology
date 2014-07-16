@@ -1,0 +1,32 @@
+
+# FOSSology performance test getresult script
+# Copyright (C) 2014 Hewlett-Packard Development Company, L.P.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#create the cookies for website
+curl "http://localhost/repo/?mod=auth" --data-urlencode "username=fossy" --data-urlencode "password=fossy" --cookie "cookies.txt" --cookie-jar "cookies.txt"  --location --verbose > "login_log.html"
+
+#check the showjob page 
+curl "http://localhost/repo/?mod=showjobs" --cookie "cookies.txt" --cookie-jar "cookies.txt"|grep ">Started<"
+
+#create the result html page when finished
+if [ $? = 0 ]; then
+  echo "not finished!/n"
+else
+  n=`date +%F`
+  echo "<html><body><table>" > ./result/$1-$n-result.html
+  curl "http://localhost/repo/?mod=showjobs" --cookie "cookies.txt" --cookie-jar "cookies.txt"|grep "Completed" >> ./result/$1-$n-result.html
+  echo "</body></html>" >> ./result/$1-$n-result.html
+  rm -rf cookies.txt login_log.html
+fi
