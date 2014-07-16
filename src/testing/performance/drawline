@@ -1,0 +1,40 @@
+
+# FOSSology perpare the data for line chart of performance test result
+# Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#parameter: $1 agent name
+agent=$1
+DIR="/var/lib/jenkins/workspace/Fossology_Performance/result/"
+labelsstart="labels : ["
+labels=$labelsstart
+for k in $(ls $DIR)
+do
+if [ "$k" != "chartresult.html" ];then
+  labels=$labels\"`echo $k |cut -c1-17`\",
+  sed -i 's|<\/tr><tr|<\/tr>\n<tr|g' $k
+  items=`cat $k|grep $agent|awk -F items '{print $1}'|awk -F ">" '{print $13}'|awk -F "," '{print $1,$2}'`
+  items=`echo $items|tr -d ' '`
+  st=`date -d "$(cat $k|grep $agent|awk -F " - " '{print $1}'|awk -F "items<\/td><td>" '{print $2}')" +%s`
+  et=`date -d "$(cat $k|grep $agent|awk -F " - " '{print $2}'|awk -F " " '{print $1,$2}'|awk -F "<" '{print $1}')" +%s`
+  time=$(($et-$st))  
+  sectime=$(($items/$time))
+  sectimes=$sectimes$sectime,
+fi
+done
+labels=$labels],
+echo $labels
+echo $sectimes
+sed -i "s/.*labels : .*/$labels/" ./chartresult.html
+sed -i "s/data : $agent.*/data : [$sectimes]/" ./chartresult.html

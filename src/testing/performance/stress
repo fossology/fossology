@@ -1,0 +1,104 @@
+
+# FOSSology stress test script
+# Copyright (C) 2014 Hewlett-Packard Development Company, L.P.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#parameters: $1 the FOSSology version for test; $2 test file
+if [ -e $1 ]; then
+  version="latest"
+else
+  version=$1
+fi
+if [ -e $2 ]; then
+  upload="/iso/debian-7.5.0-i386-CD-1.iso"
+else
+  upload=$2
+fi
+
+# cleanup all old fossology version
+apt-get -y --force-yes purge fossology*;
+
+# cleanup logs
+if [ -e /var/log/fossology ]; then
+	rm -rf /var/log/fossology || echo "ERROR: could not remove /var/log/fossology"
+fi
+rm -rf /etc/apache2/sites-enabled/fossology.conf
+
+#first check that the db is running
+su postgres -c 'echo \\q|psql' || (echo "WARNING: postgresql not running, not dropping database"; exit 0)
+# and next that the db exists
+su postgres -c 'psql -l' |grep -q fossology || (echo "NOTE: database already cleaned up";exit 0)
+echo "*** Removing database ***"
+# kill anybody using the database
+pkill -f -u postgres fossy || true
+su postgres -c 'echo "drop database fossology"|psql' || echo "WARNING: failed to drop database, please clean up by hand"
+
+echo "removing FOSSology user..."
+deluser --system fossy || true
+echo "removing FOSSology group..."
+delgroup fossy || true
+# purge will remove the repository directory
+echo "removing the FOSSology repository..."
+if [ -d /srv/fossology/repository ]; then
+	rm -rf /srv/fossology
+        if [ $? != 0 ]; then
+           echo "ERROR: failed to delete repository"
+           exit 1
+        fi
+else
+        echo "NOTE: repository does not exist, so not deleting"
+fi
+
+# clean up /var/lib/fossology
+if [ -d /var/lib/fossology ]; then
+	rm -rf /var/lib/fossology
+fi
+# clean up /etc/init.d/fossology
+if [ -e /etc/init.d/fossology ]; then
+        rm -rf /etc/init.d/fossology || echo "ERROR: could not remove /etc/init.d/fossology"
+fi
+
+# install the new version of fossology
+echo "The FOSSology version is: $version"
+if [ "$version" = "latest" ];then
+	cp /etc/apt/sources.list.bak /etc/apt/source.list.new
+        echo "deb http://fobuild.fc.hp.com/fossology/2.6.0/testing/current/debian/ 6.0 contrib" >> /etc/apt/source.list.new
+	cp /etc/apt/source.list.new /etc/apt/sources.list
+else
+	cp /etc/apt/sources.list.bak /etc/apt/source.list.new
+        echo "deb http://fobuild.fc.hp.com/fossology/$version/debian/ 6.0 contrib" >> /etc/apt/source.list.new
+        cp /etc/apt/source.list.new /etc/apt/sources.list
+fi
+
+apt-get clean
+apt-get update
+apt-get -y --force-yes install fossology
+
+#restart apache server
+/etc/init.d/apache2 restart
+
+#check if scheduler running
+/usr/share/fossology/scheduler/agent/fo_cli -S
+if [ $? != 0 ]; then
+   /etc/init.d/fossology start
+fi
+curl http://localhost/repo/
+
+#upload the test file and query all the agent
+if [ "$version" = "latest" ];then
+  cp2foss --username fossy --password fossy -q all $upload 
+else
+  cp2foss --user fossy --password fossy -q all $upload
+fi
+
