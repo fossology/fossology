@@ -6028,9 +6028,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   gl.flags |= ~FL_SAVEBASE; /* turn off, regardless */
   /*
-   * ... and, there are several generic claims that "this is free software".
-   * For lack of a better, more generally-accepted term, we called these
-   * claims "BSD-lite", after the notion of the BSD "gift" licenses.
+   * ... and, there are several generic claims that "you are free to use this 
+   * software".
+   * We call these claims "Freeware", because you can use the software free of charge,
+   * but some other copyright holder exclusive rights are not granted in some cases.
    */
   if (*licStr == NULL_CHAR) {
     for (i = 0; i < NFREECLAIM; i++) {
@@ -6045,7 +6046,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         continue;
       }
       if (INFILE(_FREECLAIM_first+i)) {
-        (void) strcpy(name, "BSD-lite");
+        (void) strcpy(name, "Freeware");
         if (lDebug) {
           (void) sprintf(name+8, "(%d)", i+1);
         }

@@ -68,6 +68,7 @@ int main(int argc, char **argv)
   char *bucketpool_name;
   char *SVN_REV;
   char *VERSION;
+  char *uploadtree_tablename;
   char agent_rev[myBUFSIZ];
   int rerun = 0;
 
@@ -321,11 +322,17 @@ int main(int argc, char **argv)
     bucketDefArray->bucket_agent_pk = agent_pk;
 
     /* Find the correct uploadtree table name */
-    bucketDefArray->uploadtree_tablename = GetUploadtreeTableName(pgConn, uploadtree.upload_fk);
-    if (!(bucketDefArray->uploadtree_tablename))
+    uploadtree_tablename = GetUploadtreeTableName(pgConn, uploadtree.upload_fk);
+    if (!(uploadtree_tablename))
     {
       LOG_FATAL("buckets passed invalid upload, upload_pk = %d", uploadtree.upload_fk);
       return(-110);
+    }
+
+    /* set uploadtree_tablename in all the bucket definition structs */
+    for (tmpbucketDefArray = bucketDefArray; tmpbucketDefArray->bucket_pk; tmpbucketDefArray++)
+    {
+      tmpbucketDefArray->uploadtree_tablename = uploadtree_tablename;
     }
 
     /* loop through rules (bucket defs) to see if there are any package only rules */
