@@ -42401,7 +42401,7 @@ Of course, compatibility with a low-quality product isn''t satisfactory. What a 
 In my experience, UNIX vendors pay very little attention to the costs. If they could fork off their own variants of qmail, they would---just as they''ve done to sendmail. They''d never stop to consider the damage they''re doing.
 
 A single version of qmail has climbed past smail into the #2 spot in the market. Practically every site will be happy with the current version until the Internet moves to IPv6. Splitting the community, for the sake of frivolous vendor-specific changes, would be the height of foolishness.', 'http://archive.today/KD8O2#selection-209.0-281.280', NULL, NULL, NULL, 'D. J. Bernstein  Internet mail  qmail', NULL, NULL, NULL, '', NULL, false, false, false, 'a61bb4c72bfb11f296bd6e5268cd8ee3', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (556, 'JISP ', '------------------------------------------------------------------------------------------------
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (556, 'JISP', '------------------------------------------------------------------------------------------------
 JISP - Java Index Serialization Package
 
 version 1.0.2
