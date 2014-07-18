@@ -373,9 +373,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * when the "%%PS" directive isn't the first line in a file... but the rest
    * of the data really IS PostScript
    */
-  if (!isPS && strncasecmp(filetext, "%%page:", 7) == 0) {
+  if (!isPS && (strncasecmp(filetext, "%%page:", 7) == 0 || strncasecmp(filetext, "{\\rtf", 5) == 0)) {
 #if defined(DEBUG) || defined(DOCTOR_DEBUG)
-    printf("File is really postscript!\n");
+    printf("File is really postscript, %s filetext !\n", filetext);
 #endif  /* DEBUG || DOCTOR_DEBUG */
     isPS = 1;
   }
@@ -1241,11 +1241,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mLGPL] = 1;
       }
     }
-    else if (INFILE(_PHR_LGPL21_ONLY_ref))
-    {
-      INTERESTING("LGPL-2.1");
-      lmem[_mLGPL] = 1;
-    }
     if (INFILE(_LT_GFDL)) {
       cp = GFDLVERS();
       INTERESTING(lDebug ? "GFDL(#1)" : cp);
@@ -1358,10 +1353,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "LGPL(or)" : cp);
         lmem[_mLGPL] = 1;
       }
+      else if (INFILE(_PHR_LGPL21_ONLY_ref)) {
+        INTERESTING("LGPL-2.1");
+        lmem[_mLGPL] = 1;
+      }
     }
     if (!lmem[_mGPL] && !HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED)
       && !INFILE(_LT_GPL_EXCEPT_BISON_1) && !INFILE(_LT_GPL_EXCEPT_BISON_2)
-      && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)) {
+      && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_2)) {
       if (GPL_INFILE(_LT_GPL_ALT) && !INFILE(_LT_LGPL_ALT)) {
         cp = GPLVERS();
         INTERESTING(lDebug ? "GPL(alternate)" : cp);
@@ -1556,7 +1555,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * Listed _explictly_ as an exception to the GPL -- this is NOT an 'else'
      * clause!
      */
-    if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2) 
+    if ((INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) || INFILE(_LT_GPL_EXCEPT_CLASSPATH_2)) && 
+        GPL_INFILE(_PHR_GPL3_OR_LATER)) {
+      INTERESTING(lDebug ? "GPL-except-classpath-3+" : "GPL-3.0+-with-classpath-exception");
+      lmem[_mGPL] = 1;
+    }
+    else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2) 
           || GPL_INFILE(_PHR_FSF_V3_ONLY) || GPL_INFILE(_PHR_GPL3_ONLY) || INFILE(_FILE_GPLv3))) {
       INTERESTING(lDebug ? "GPL-except-classpath_3" : "GPL-3.0-with-classpath-exception");
       lmem[_mGPL] = 1;
@@ -1629,12 +1633,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           INTERESTING("GPL-2.0+-with-bison-exception");
           lmem[_mGPL] = 1;
         }
-        else if (INFILE(_LT_GPL_EXCEPT_BISON_1)) {
-          INTERESTING(lDebug ? "GPL-except-Bison-1" : "GPL-2.0-with-bison-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (INFILE(_LT_GPL_EXCEPT_BISON_2)) {
-          INTERESTING(lDebug ? "GPL-except-Bison-2" : "GPL-2.0-with-bison-exception");
+        else if ((INFILE(_LT_GPL_EXCEPT_BISON_1)  || INFILE(_LT_GPL_EXCEPT_BISON_2)) &&
+            (INFILE(_LT_GPL_V2_NAMED) || INFILE(_LT_GPL_V2_NAMED_ref1)) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+          INTERESTING("GPL-2.0-with-bison-exception");
           lmem[_mGPL] = 1;
         }
         else if (INFILE(_LT_GPL_EXCEPT_1)) {
@@ -1726,7 +1727,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "GPL(proj)" : cp);
     lmem[_mGPL] = 1;
   }
-  if (INFILE(_LT_GPL_V2_NAMED_later) || HASTEXT(_LT_GPL_V2_NAMED_later, REG_EXTENDED))
+  if (INFILE(_LT_GPL_V2_NAMED_later) || HASTEXT(_LT_GPL_V2_NAMED_later, REG_EXTENDED) || INFILE(_TITLE_GPL2_ref1_later))
   {
     INTERESTING(lDebug ? "GPLV2+(named)" : "GPL-2.0+");
   }
@@ -1755,9 +1756,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     cp = GPLVERS();
     INTERESTING(lDebug ? "GPL(named)" : cp);
   }
-  else if (INFILE(_LT_GPL_V2_NAMED) && !lmem[_mGPL] && !INFILE(_TITLE_MIROS))
+  else if ((INFILE(_LT_GPL_V2_NAMED) || INFILE(_LT_GPL_V2_NAMED_ref1)) && !lmem[_mGPL] && !INFILE(_TITLE_MIROS))
   {
     INTERESTING(lDebug ? "GPLV2(named)" : "GPL-2.0");
+    lmem[_mGPL] = 1;
   }
   else if (INFILE(_LT_GPL_V3_NAMED) && !lmem[_mGPL])
   {
@@ -5443,7 +5445,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Code Project Open License
    */
   if (INFILE(_LT_CPOL)) {
-    INTERESTING("CPOL");
+    if (HASTEXT(_LT_CPOL_V102, REG_EXTENDED)) {
+      INTERESTING("CPOL-1.02");
+    } else {
+      INTERESTING("CPOL");
+    }
   }
   /*
    * Macrovision
@@ -5985,6 +5991,22 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if(INFILE(_LT_Sendmail_title) ) {
      INTERESTING("Sendmail");
   }
+
+  /** Giftware */
+  if(INFILE(_LT_GIFTWARE)) {
+    INTERESTING("Giftware");
+  } 
+
+  /** Logica opensource */
+  if(INFILE(_LT_LOGICA)) {
+    INTERESTING("Logica-OSL-1.0");
+  } 
+
+  /** Unidex */
+  if(INFILE(_LT_UNIDEX)) {
+    INTERESTING("Unidex");
+  } 
+
   /*
    * Some licenses say "licensed under the same terms as FOO".
    */
