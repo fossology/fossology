@@ -154,7 +154,7 @@ if ($UpdateLiceneseRef)
     $version230 = 6922;
 
     /** when the version is less than or equal to svn 6922, when we switch to git, always greater than 6932, call Update reference licenses process */
-    if (5 > strlen($matches[1]) && $matches[1] <= $version230) {
+    if (empty($matches[1]) || 5 > strlen($matches[1]) && $matches[1] <= $version230) {
       print "Update reference licenses\n";
       initLicenseRefTable(false);
     }
