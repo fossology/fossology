@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -37,6 +37,7 @@
 #include "nomos_regex.h"
 #include "_autodefs.h"
 
+
 #ifdef SVN_REV_S
 char BuildVersion[]="nomos build version: " VERSION_S " r(" SVN_REV_S ").\n";
 #else
@@ -48,6 +49,7 @@ struct globals gl;
 struct curScan cur;
 int schedulerMode = 0; /**< Non-zero when being run from scheduler */
 int Verbose = 0; 
+FILE **pFile;
 
 /** shortname cache very simple nonresizing hash table */
 struct cachenode 
@@ -566,6 +568,8 @@ FUNCTION void Usage(char *Name) {
       "  file :: if files are listed, print the licenses detected within them.\n");
   printf("  no file :: process data from the scheduler.\n");
   printf("  -V   :: print the version info, then exit.\n");
+  printf("  -d   :: specify a directory to scan.\n");
+  printf("  -n   :: spaw n - 1 child processes to run, there will be n running processes(the parent and n - 1 children). \n the default n is 2(when n is less than 2 or not setting, will be changed to 2) when -d is specified.\n");
 } /* Usage() */
 
 FUNCTION void Bail(int exitval) {
@@ -779,6 +783,127 @@ FUNCTION int recordScanToDB(cacheroot_t *pcroot, struct curScan *scanRecord) {
   return (0);
 } /* recordScanToDb */
 
+/**
+ * \brief list all files(store file paths) in the specified directory
+ *
+ * \pamram dir_name - directory
+ * \param process_count - process count
+ */
+void list_dir (const char * dir_name, int process_count)
+{
+  struct dirent *dp;
+  DIR *dfd;
+  int list_file_count = 0;
+  const char *dir = dir_name;
+
+  if ((dfd = opendir(dir)) == NULL)
+  {
+    fprintf(stderr, "Can't open %s\n", dir);
+    return;
+  }
+
+  int i = 1;
+  char *filename_qfd = NULL; // store one file path
+  filename_qfd = (char *)malloc(MAX_FILE_PATH *sizeof(char));
+  while ((dp = readdir(dfd)) != NULL)
+  {
+    struct stat stbuf ;
+
+    /** allocte memory to store the path */
+    while ((strlen(dir) + strlen(dp->d_name)) >= i*MAX_FILE_PATH)
+    {
+      filename_qfd = (char *)realloc(filename_qfd, (++i*MAX_FILE_PATH)*sizeof(char));
+    }
+
+    /* get the file path */
+    sprintf( filename_qfd , "%s/%s",dir,dp->d_name) ;
+
+    if( stat(filename_qfd,&stbuf ) == -1 )
+    {
+      LOG_FATAL("Unable to stat file: %s\n",filename_qfd) ;
+      continue ;
+    }
+
+    if (strcmp (dp->d_name, "..") != 0 && strcmp (dp->d_name, ".") != 0)
+    {
+      if ((stbuf.st_mode & S_IFMT)  == S_IFDIR)
+      {
+        list_dir(filename_qfd, process_count);
+      }
+      else {
+        sprintf(filename_qfd, "%s\n", filename_qfd);
+        pid_t pid = getpid();
+        int file_number = list_file_count%process_count;
+        int size = fwrite (filename_qfd, sizeof(char), strlen(filename_qfd), pFile[file_number]);
+        list_file_count++;
+
+        if (process_count == list_file_count) list_file_count = 0; // reset list_file_count each cycle
+
+        if (0 == size)
+        LOG_NOTICE("file_number, pid, size, filename_qfd, process_count, list_file_count are:%d, %d, %s, %d, %d, %d\n", pid, size, filename_qfd, process_count, list_file_count);
+       continue;
+      }
+    }
+  }
+  filename_qfd = NULL;
+  free(filename_qfd);
+}
+
+/** 
+ * \brief read line by line, then call processFile to grab license line by line
+ * 
+ * \param file_number - while temp path file do you want to read and process
+ */
+void read_file_grab_license(int file_number)
+{
+  char *line = NULL;
+  size_t len = 0;
+  ssize_t read;
+  char path_file[TEMP_FILE_LEN] = "";
+
+  sprintf(path_file, "/tmp/fossology_file_list_%d.txt", file_number);
+  FILE *file = fopen(path_file, "r");
+  if (!file) 
+  {
+    LOG_FATAL("failed to open %s\n", path_file);
+    return;
+  }
+  while ((read = getline(&line, &len, file)) != -1) {
+    line = trim(line);
+    processFile(line);
+  }
+  fclose(file);
+
+  if (line) free(line);
+}
+
+/**
+ * \brief the recursive create process and process grabbing licenses
+ *
+ * \param proc_num - how many child processes(proc_num - 1) will be created
+ */
+void myFork(int proc_num) {
+  pid_t pid;
+  pid = fork();
+
+  if (pid < 0)
+  {
+    LOG_FATAL("fork failed\n");
+  }
+  else if (pid == 0) { // chile process, every singe process runs on one temp path file
+    read_file_grab_license(proc_num); // grabbing licenses on /tmp/fossology_file_list_%d.txt
+    return;
+  }
+  else if (pid > 0) {
+    // if pid != 0, we're in the parent
+    // let's call ourself again, decreasing the counter, until it reaches 1.
+    if (proc_num > 1) {
+      myFork(proc_num - 1);
+    }
+    else read_file_grab_license(0); // main(parent) process run on /tmp/fossology_file_list_%0.txt
+  }
+}
+
 int main(int argc, char **argv) 
 {
   int i;
@@ -800,6 +925,8 @@ int main(int argc, char **argv)
   char *VERSION = NULL;
   char agent_rev[myBUFSIZ];
   cacheroot_t cacheroot;
+  char *scanning_directory= NULL;
+  int process_count = 2;
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &(gl.pgConn));
@@ -864,7 +991,7 @@ int main(int argc, char **argv)
   }
 
   /* Process command line options */
-  while ((c = getopt(argc, argv, "Vvhilc:")) != -1)
+  while ((c = getopt(argc, argv, "Vvhilc:d:n:")) != -1)
   {
     switch (c) {
       case 'c': break; /* handled by fo_scheduler_connect() */
@@ -880,6 +1007,20 @@ int main(int argc, char **argv)
       case 'V':
         printf("%s", BuildVersion);
         Bail(0);
+      case 'd': /* diretory to scan */
+        scanning_directory = optarg;
+        struct stat dir_sta;
+        int ret = stat(scanning_directory, &dir_sta);
+        if (-1 == ret || S_IFDIR != (dir_sta.st_mode & S_IFMT))
+        {
+          printf("Waning: scaning directory %s from -d is invalid, please confirm it.\n", scanning_directory);
+          Usage(argv[0]);
+          Bail(-__LINE__);
+        }
+        break;
+      case 'n': /* spawn mutiple processes to scan */
+        process_count = atoi(optarg);
+        break;
       case 'h':
       default:
         Usage(argv[0]);
@@ -897,7 +1038,7 @@ int main(int argc, char **argv)
   licenseInit();
   gl.flags = 0;
 
-  if (file_count == 0)
+  if (file_count == 0 && !scanning_directory)
   {
     char *repFile;
 
@@ -985,10 +1126,75 @@ int main(int argc, char **argv)
   else
   { /******** Files on the command line ********/
     cur.cliMode = 1;
-    for (i = 0; i < file_count; i++) {
-      processFile(files_to_be_scanned[i]);
-      recordScanToDB(&cacheroot, &cur);
-      freeAndClearScan(&cur);
+    //printf("process_count, scanning_directory are:%d, %s\n", process_count, scanning_directory);
+    if (scanning_directory) {
+      if (process_count < 2) process_count = 2; // the least count is 2, at least has one child process
+
+      pFile = (FILE **)malloc(process_count*(sizeof(FILE)));
+      int i = 0;
+      char temp_path_file_name[TEMP_FILE_LEN] = ""; // store file path list
+      for(i = 0; i < process_count; i++)
+      {
+        sprintf(temp_path_file_name, "/tmp/fossology_file_list_%d.txt", i);
+        FILE *file = fopen(temp_path_file_name, "r");
+        /** check if this file exists or not, delete when existing */
+        if (file)
+        {
+          fclose(file);
+          unlink(temp_path_file_name);
+        }
+        /** get the temp path file distriptors */
+        pFile[i] = fopen(temp_path_file_name, "a");
+        if (!pFile[i])
+        {
+          LOG_FATAL("failed to open %s\n", temp_path_file_name);
+        }
+      }
+      /** walk through the specified directory to get all the file(file path) and */
+      /** store into mutiple files(/tmp/fossology_file_list_%d.txt */
+      /** /tmp/fossology_file_list_0.txt is used by the main process */
+      list_dir(scanning_directory, process_count);
+
+      /** after the walking through and strore job is done, close all the temp path file distriptors */
+      for(i = 0; i < process_count; i++) fclose(pFile[i]);
+
+      /** create process_count - 1 child processes(please do not forget we always have the main process) */
+      if (process_count > 1) {
+        myFork(process_count - 1);
+        int status = 0;
+        pid_t wpid = 0;
+        /** wait all processes done. */
+        do {
+          wpid = wait(&status);
+          if (-1 == wpid) break; // failed during waitting for processes done
+        } while (wpid > 0);
+
+#if 0
+#endif
+        /** delete the temp path files */
+        for(i = 0; i < process_count; i++)
+        {
+          sprintf(temp_path_file_name, "/tmp/fossology_file_list_%d.txt", i);
+          FILE *file = fopen(temp_path_file_name, "r");
+          /** check if this file exists or not, delete when existing */
+          if (file)
+          {
+            fclose(file);
+            unlink(temp_path_file_name);
+          }
+        }
+
+        /** free memeory */
+        pFile = NULL;
+        free(pFile);
+      }
+    }
+    else {
+      for (i = 0; i < file_count; i++) {
+        processFile(files_to_be_scanned[i]);
+        recordScanToDB(&cacheroot, &cur);
+        freeAndClearScan(&cur);
+      }
     }
   }
 

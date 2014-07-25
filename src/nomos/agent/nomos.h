@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -66,6 +66,8 @@
 
 #define	myBUFSIZ	2048
 #define	MAX_RENAME	1000
+#define	MAX_FILE_PATH 1000
+#define TEMP_FILE_LEN 100
 
 /* MAX_SCANBYTES is the maximum number of bytes that will be scanned
  * in a file.  Historically, we have never found a license more than
