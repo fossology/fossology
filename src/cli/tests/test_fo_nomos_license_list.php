@@ -219,7 +219,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(10, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(14, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
 
     /** help, not authentication */
@@ -228,7 +228,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(10, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(14, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }
