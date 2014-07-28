@@ -840,7 +840,7 @@ void list_dir (const char * dir_name, int process_count)
         if (process_count == list_file_count) list_file_count = 0; // reset list_file_count each cycle
 
         if (0 == size)
-        LOG_NOTICE("file_number, pid, size, filename_qfd, process_count, list_file_count are:%d, %d, %s, %d, %d, %d\n", pid, size, filename_qfd, process_count, list_file_count);
+        LOG_NOTICE("file_number, pid, size, filename_qfd, process_count, list_file_count are:%d, %d, %s, %d, %d\n", pid, size, filename_qfd, process_count, list_file_count);
        continue;
       }
     }
@@ -869,7 +869,13 @@ void read_file_grab_license(int file_number)
     return;
   }
   while ((read = getline(&line, &len, file)) != -1) {
-    line = trim(line);
+    if (line && line[0])
+    {
+      int lenth = strlen(line);
+      while(isspace(line[lenth - 1])) line[--lenth] = 0;  // right trim
+      while(isspace(*line)) ++line;  // left trim
+    }
+    //line = trim(line);
     processFile(line);
   }
   fclose(file);
