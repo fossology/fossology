@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -385,8 +385,15 @@ class admin_license_file extends FO_Plugin
     $url = pg_escape_string($_POST['rf_url']);
     $notes = pg_escape_string($_POST['rf_notes']);
     $text = pg_escape_string($_POST['rf_text']);
-    $text = trim($text);
     $licmd5 = md5($text);
+    $shortname = trim($shortname);
+    $fullname = trim($fullname);
+    $text = trim($text);
+
+    if (empty($shortname)) {
+      $text = _("ERROR: The license shortname is empty.");
+      return "<b>$text</b><p>";
+    }
 
     /** check if shortname or license text of this license is existing */
     $sql = "SELECT count(*) from license_ref where rf_pk <> $_POST[rf_pk] and (LOWER(rf_shortname) = LOWER('$shortname') or (rf_text <> ''
@@ -453,7 +460,14 @@ class admin_license_file extends FO_Plugin
     $rf_url = pg_escape_string($_POST['rf_url']);
     $rf_notes = pg_escape_string($_POST['rf_notes']);
     $rf_text = pg_escape_string($_POST['rf_text']);
+    $rf_shortname = trim($rf_shortname);
+    $rf_fullname = trim($rf_fullname);
     $rf_text = trim($rf_text);
+
+    if (empty($rf_shortname)) {
+      $text = _("ERROR: The license shortname is empty.");
+      return "<b>$text</b><p>";
+    }
 
     /** check if shortname or license text of this license is existing */
     $sql = "SELECT count(*) from license_ref where rf_shortname = '$rf_shortname' or (rf_text <> '' 
