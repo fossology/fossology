@@ -932,7 +932,7 @@ int main(int argc, char **argv)
   char agent_rev[myBUFSIZ];
   cacheroot_t cacheroot;
   char *scanning_directory= NULL;
-  int process_count = 2;
+  int process_count = 0;
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &(gl.pgConn));
@@ -1019,7 +1019,7 @@ int main(int argc, char **argv)
         int ret = stat(scanning_directory, &dir_sta);
         if (-1 == ret || S_IFDIR != (dir_sta.st_mode & S_IFMT))
         {
-          printf("Waning: scaning directory %s from -d is invalid, please confirm it.\n", scanning_directory);
+          printf("Warning: scaning directory %s from -d is invalid, please confirm it.\n", scanning_directory);
           Usage(argv[0]);
           Bail(-__LINE__);
         }
@@ -1196,6 +1196,10 @@ int main(int argc, char **argv)
       }
     }
     else {
+      if (0 != process_count) 
+      {
+        printf("Warning: -n {nprocs} ONLY works with -d {directory}.\n");
+      }
       for (i = 0; i < file_count; i++) {
         processFile(files_to_be_scanned[i]);
         recordScanToDB(&cacheroot, &cur);
