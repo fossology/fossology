@@ -99,7 +99,7 @@ function add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
   pg_free_result($result);
   // set active group = own group
   // TODO prepare statement
-  $sql = "update users SET groupid=$group_pk WHERE user_pk=$user_pk";
+  $sql = "update users SET group_id=$group_pk WHERE user_pk=$user_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);

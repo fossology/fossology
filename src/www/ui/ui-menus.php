@@ -361,51 +361,40 @@ class ui_menu extends FO_Plugin
   }
   
   function createHtmlFromUser(){
-    
-    if (@$_POST['selectMemberGroup']){
-  global $container;
-  $dbManager = $container->get("db.manager");
-  $dbManager->prepare("selectMemberGroup","UPDATE users SET group_id=$1 WHERE user_pk=$2");
-  $dbManager->execute("selectMemberGroup",array($_POST['selectMemberGroup'],$_SESSION['UserId']));
-  $_SESSION['GroupId'] = $_POST['selectMemberGroup'];
-}
-    
-    $V = "";
-                $text = _("User");
-            $V .= "<small>$text:</small> " . @$_SESSION['User'] . "<br>Group: ";
-            global $container;
-            $dbManager=$container->get("db.manager");
-            
-            $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
-      $stmt = __METHOD__;
-            $dbManager->prepare($stmt, $sql);
-            $res = $dbManager->execute($stmt,array($_SESSION['UserId']));
-            $allAssignedGroups = pg_fetch_all($res);
-            pg_free_result($res);
-          if(count($allAssignedGroups)>1)  {
-            $V .= "<form action='".Traceback_uri(). "?mod=" .Traceback_parm()."' method='post'>";
-            $V .= "<select id='selectMemberGroup' name='selectMemberGroup' onChange='this.form.submit()'>";
-            foreach($allAssignedGroups as $memberGroup){
-              $V .= "<option ";
-              if ($memberGroup['group_pk'] == $_SESSION['GroupId'])
+    $gettextUser = _("User");
+    $html = "<small>$gettextUser:</small> " . @$_SESSION['User'] . "<br>";
+    global $container;
+    $dbManager = $container->get("db.manager");
+    $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
+    $stmt = __METHOD__ . '.availableGroups';
+    $dbManager->prepare($stmt, $sql);
+    $res = $dbManager->execute($stmt, array($_SESSION['UserId']));
+    $allAssignedGroups = pg_fetch_all($res);
+    pg_free_result($res);
+    $gettextGroup = _('Group');
+    if (count($allAssignedGroups) > 1)
+    {
+      $html .= "<form action='" . Traceback_uri() . "?mod=" . Traceback_parm() . "' method='post'>";
+      $html .= "$gettextGroup: <select id='selectMemberGroup' name='selectMemberGroup' onChange='this.form.submit()'>";
+      foreach ($allAssignedGroups as $memberGroup)
+      {
+        $html .= "<option ";
+        if ($memberGroup['group_pk'] == $_SESSION['GroupId'])
         {
-          $V .= " selected ";
+          $html .= " selected ";
         }
-        $V .= "value='$memberGroup[group_pk]'>$memberGroup[group_name]</option>";
-            }
-      $V .= "</select></form>";
-          }
-          else
-          {
-            $V .= " (".@$_SESSION['GroupName'].")";
-          }
-          $V .= " <br>";
-            if (plugin_find_id("auth") >= 0)
-            $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
-            else
-            $V .= "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
-return $V;
-    
+        $html .= "value='$memberGroup[group_pk]'>$memberGroup[group_name]</option>";
+      }
+      $html .= "</select></form>";
+    } else
+    {
+      $html .= "$gettextGroup: " . @$_SESSION['GroupName'] . "<br>";
+    }
+    if (plugin_find_id("auth") >= 0)
+      $html .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
+    else
+      $html .= "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
+    return $html;
   }
 }
 

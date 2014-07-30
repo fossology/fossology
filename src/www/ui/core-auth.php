@@ -149,13 +149,21 @@ class core_auth extends FO_Plugin {
 	 * Authentication happens.
 	 */
 	function PostInitialize() {
-		global $Plugins;
 		global $PG_CONN;
 		global $SysConf;
 		
 		if (empty($PG_CONN)) {
 			return (0);
 		}
+                
+    if (array_key_exists('selectMemberGroup', $_POST))
+    {
+      global $container;
+      $dbManager = $container->get("db.manager");
+      $dbManager->prepare("selectMemberGroup", "UPDATE users SET group_id=$1 WHERE user_pk=$2");
+      $dbManager->execute("selectMemberGroup", array($_POST['selectMemberGroup'], $_SESSION['UserId']));
+      $_SESSION['GroupId'] = $_POST['selectMemberGroup'];
+    }
 
 		/* if Site Minder enabled core-auth will be disabled*/
 		if (siteminder_check() != -1)
