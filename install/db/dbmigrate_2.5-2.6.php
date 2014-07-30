@@ -20,7 +20,7 @@ function setActiveGroup($verbose)
 {
   global $dbManager;
   $stmt = __METHOD__;
-  $sql = "SELECT user_pk,group_pk FROM users LEFT JOIN groups ON group_name=user_name WHERE user_pk IS NULL";
+  $sql = "SELECT user_pk,group_pk FROM users LEFT JOIN groups ON group_name=user_name WHERE group_id IS NULL";
   $dbManager->prepare($stmt,$sql);
   $res = $dbManager->execute($stmt);
   if (pg_num_rows($res)==0)

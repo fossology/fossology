@@ -1954,6 +1954,11 @@
   $Schema["TABLE"]["users"]["new_upload_perm"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"new_upload_perm\" int4;";
   $Schema["TABLE"]["users"]["new_upload_perm"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"new_upload_perm\" DROP NOT NULL;";
   $Schema["TABLE"]["users"]["new_upload_perm"]["UPDATE"] = "";
+  
+  $Schema["TABLE"]["users"]["group_id"]["DESC"] = "";
+  $Schema["TABLE"]["users"]["group_id"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"group_id\" int4;";
+  $Schema["TABLE"]["users"]["group_id"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"group_id\" DROP NOT NULL;";
+  $Schema["TABLE"]["users"]["group_id"]["UPDATE"] = "";
 
 
 
@@ -2160,6 +2165,7 @@
   $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["users_default_bucketpool_pk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_default_bucketpool_pk_fkey\" FOREIGN KEY (\"default_bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["users_new_upload_group_fk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_new_upload_group_fk_fkey\" FOREIGN KEY (\"new_upload_group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE RESTRICT;";
+  $Schema["CONSTRAINT"]["users_group_id_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_group_id_fkey\" FOREIGN KEY (\"group_id\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
 
   $Schema["INDEX"]["agent_lic_meta"]["lic_fk_btree"] = "CREATE INDEX lic_fk_btree ON agent_lic_meta USING btree (lic_fk);";
   $Schema["INDEX"]["agent_lic_meta"]["pfile_fk_idx"] = "CREATE INDEX pfile_fk_idx ON agent_lic_meta USING btree (pfile_fk);";
