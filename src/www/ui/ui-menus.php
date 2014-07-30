@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Db\DbManager;
+
 define("TITLE_ui_menu", _("Menus"));
 
 class ui_menu extends FO_Plugin
@@ -54,101 +56,103 @@ class ui_menu extends FO_Plugin
   /**
    * \brief Recursively generate the menu in HTML.
    */
-  function menu_html(&$Menu,$Indent)
+  function menu_html(&$Menu, $Indent)
   {
-    if (empty($Menu)) { return; }
-    $V="";
+    if (empty($Menu))
+    {
+      return;
+    }
+    $V = "";
     $V .= "<!--[if lt IE 7]><table><tr><td><![endif]-->\n";
     $V .= "<ul id='menu-$Indent'>\n";
-    /*** NOTE: http://www.cssplay.co.uk/menus/final_drop.html identifies
-     why menus fail for IE6. IE6 needs the </a> to exist outside the
-     submenus rather than before the submenus. ***/
-    /*** Since his menus work under IE6 (and mine don't), I should
-     use one of his menus instead: http://www.cssplay.co.uk/menus/.
-     I'll make this change TBD...
-     This looks like a good one:
-     http://www.cssplay.co.uk/menus/simple_vertical.html
-     ***/
-    foreach($Menu as $M)
+    
+    foreach ($Menu as $M)
     {
       $V .= '<li>';
 
       if (!empty($M->HTML))
       {
         $V .= $M->HTML;
-      }
-      else /* create HTML */
+      } else /* create HTML */
       {
-        if (!empty($M->URI))
-        {
-          $V .= '<a href="' . Traceback_uri() . "?mod=" . $M->URI;
-          if (empty($M->Target) || ($M->Target == ""))
-          {
-            // $V .= '" target="basenav">';
-            $V .= '">';
-          }
-          else
-          {
-            $V .= '" target="' . $M->Target . '">';
-          }
-          if (@$_SESSION['fullmenudebug'] == 1)
-          {
-            $V .= $M->FullName . "(" . $M->Order . ")";
-          }
-          else
-          {
-            $V .= $M->Name;
-          }
-        }
-        else
-        {
-          $V .= '<a href="#">';
-          if (empty($M->SubMenu))
-          {
-            $V .= "<font color='#C0C0C0'>";
-            if (@$_SESSION['fullmenudebug'] == 1)
-            {
-              $V .= $M->FullName . "(" . $M->Order . ")";
-            }
-            //else { $V .= $M->Name; }
-            else
-            {
-              $V .= '';
-            }
-            $V .= "</font>";
-          }
-          else
-          {
-            if (@$_SESSION['fullmenudebug'] == 1)
-            {
-              $V .= $M->FullName . "(" . $M->Order . ")";
-            }
-            else
-            {
-              $V .= $M->Name;
-            }
-          }
-        }
-
-        if (!empty($M->SubMenu) && ($Indent > 0))
-        {
-          $V .= " <span>&raquo;</span>";
-        }
-        $V .= "</a>\n";
+        $V .= $this->createHtmlFromMenuEntry($M,$Indent);
       }
 
       if (!empty($M->SubMenu))
       {
-        $V .= $this->menu_html($M->SubMenu,$Indent+1);
+        $V .= $this->menu_html($M->SubMenu, $Indent + 1);
       }
     }
     $V .= "</ul>\n";
     $V .= "<!--[if lt IE 7]></td></tr></table></a><![endif]-->\n";
-    // Remove all empty menus of the form
-    // <li><a href=\"#\"><font color='#C0C0C0'></font></a>
     $NewV = preg_replace("|<li><a href=\"#\"><font color(.*)*?$|m", '', $V);
     return($NewV);
-  } // menu_html()
+  }
+
+
+  function createHtmlFromMenuEntry($M,$Indent)
+  {
+    if (!empty($M->URI))
+    {
+      $V .= '<a href="' . Traceback_uri() . "?mod=" . $M->URI;
+      if (empty($M->Target) || ($M->Target == ""))
+      {
+        // $V .= '" target="basenav">';
+        $V .= '">';
+      } else
+      {
+        $V .= '" target="' . $M->Target . '">';
+      }
+      if (@$_SESSION['fullmenudebug'] == 1)
+      {
+        $V .= $M->FullName . "(" . $M->Order . ")";
+      } else
+      {
+        $V .= $M->Name;
+      }
+    }
+    else
+    {
+      $V .= '<a href="#">';
+      if (empty($M->SubMenu))
+      {
+        $V .= "<font color='#C0C0C0'>";
+        if (@$_SESSION['fullmenudebug'] == 1)
+        {
+          $V .= $M->FullName . "(" . $M->Order . ")";
+        }
+        //else { $V .= $M->Name; }
+        else
+        {
+          $V .= '';
+        }
+        $V .= "</font>";
+      } else
+      {
+        if (@$_SESSION['fullmenudebug'] == 1)
+        {
+          $V .= $M->FullName . "(" . $M->Order . ")";
+        } else
+        {
+          $V .= $M->Name;
+        }
+      }
+    }
+
+    if (!empty($M->SubMenu) && ($Indent > 0))
+    {
+      $V .= " <span>&raquo;</span>";
+    }
+    $V .= "</a>\n";
+    return $V;
+  }
+  
+  
+  
+  
+  
+  
+  
 
   /**
    * \brief Create the output CSS.
@@ -331,12 +335,7 @@ class ui_menu extends FO_Plugin
           }
           else
           {
-            $text = _("User");
-            $V .= "<small>$text:</small> " . @$_SESSION['User'] . "<br>";
-            if (plugin_find_id("auth") >= 0)
-            $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
-            else
-            $V .= "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
+            $V .= $this->createHtmlFromUser();
           }
 
           /* Use global system SupportEmail variables, if addr and label are set */
@@ -360,9 +359,56 @@ class ui_menu extends FO_Plugin
     print "$V";
     return;
   }
+  
+  function createHtmlFromUser(){
+    
+    if (@$_POST['selectMemberGroup']){
+  global $container;
+  $dbManager = $container->get("db.manager");
+  $dbManager->prepare("selectMemberGroup","UPDATE users SET group_id=$1 WHERE user_pk=$2");
+  $dbManager->execute("selectMemberGroup",array($_POST['selectMemberGroup'],$_SESSION['UserId']));
+  $_SESSION['GroupId'] = $_POST['selectMemberGroup'];
+}
+    
+    $V = "";
+                $text = _("User");
+            $V .= "<small>$text:</small> " . @$_SESSION['User'] . "<br>Group: ";
+            global $container;
+            $dbManager=$container->get("db.manager");
+            
+            $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
+      $stmt = __METHOD__;
+            $dbManager->prepare($stmt, $sql);
+            $res = $dbManager->execute($stmt,array($_SESSION['UserId']));
+            $allAssignedGroups = pg_fetch_all($res);
+            pg_free_result($res);
+          if(count($allAssignedGroups)>1)  {
+            $V .= "<form action='".Traceback_uri(). "?mod=" .Traceback_parm()."' method='post'>";
+            $V .= "<select id='selectMemberGroup' name='selectMemberGroup' onChange='this.form.submit()'>";
+            foreach($allAssignedGroups as $memberGroup){
+              $V .= "<option ";
+              if ($memberGroup['group_pk'] == $_SESSION['GroupId'])
+        {
+          $V .= " selected ";
+        }
+        $V .= "value='$memberGroup[group_pk]'>$memberGroup[group_name]</option>";
+            }
+      $V .= "</select></form>";
+          }
+          else
+          {
+            $V .= " (".@$_SESSION['GroupName'].")";
+          }
+          $V .= " <br>";
+            if (plugin_find_id("auth") >= 0)
+            $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
+            else
+            $V .= "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
+return $V;
+    
+  }
+}
 
-};
-$NewPlugin = new ui_menu;
+$NewPlugin = new ui_menu();
 $NewPlugin->Initialize();
 
-?>

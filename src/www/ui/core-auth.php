@@ -202,7 +202,7 @@ class core_auth extends FO_Plugin {
 				$_SESSION['time_check'] = time() + (480 * 60);
 			}
 			if (time() >= @$_SESSION['time_check']) {
-				$sql = "SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';";
+                          $sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_id=group_pk WHERE user_name = '" . @$_SESSION['UserId'] . "'";
 				$result = pg_query($PG_CONN, $sql);
 				DBCheckResult($result, $sql, __FILE__, __LINE__);
 				$R = pg_fetch_assoc($result);
@@ -239,6 +239,8 @@ class core_auth extends FO_Plugin {
       $_SESSION['UserLevel'] = $UserRow['user_perm'];
       $_SESSION['UserEmail'] = $UserRow['user_email'];
       $_SESSION['UserEnote'] = $UserRow['email_notify'];
+      $_SESSION['GroupId'] = $UserRow['group_id'];
+      $_SESSION['GroupName'] = $UserRow['group_name'];
     }
 
 
@@ -262,7 +264,7 @@ class core_auth extends FO_Plugin {
 		$User = str_replace("'", "''", $User); /* protect DB */
 
 		/* See if the user exists */
-		$sql = "SELECT * FROM users WHERE user_name = '$User';";
+		$sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_id=group_pk WHERE user_name = '$User';";
 		$result = pg_query($PG_CONN, $sql);
 		DBCheckResult($result, $sql, __FILE__, __LINE__);
 		$R = pg_fetch_assoc($result);
@@ -417,6 +419,5 @@ class core_auth extends FO_Plugin {
 		return;
 	} // Output()
 
-};
+}
 $NewPlugin = new core_auth;
-?>
