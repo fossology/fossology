@@ -50,6 +50,7 @@ struct curScan cur;
 int schedulerMode = 0; /**< Non-zero when being run from scheduler */
 int Verbose = 0; 
 FILE **pFile;
+pid_t mainPid = 0; // main process id
 
 /** shortname cache very simple nonresizing hash table */
 struct cachenode 
@@ -1166,27 +1167,29 @@ int main(int argc, char **argv)
 
       /** create process_count - 1 child processes(please do not forget we always have the main process) */
       if (process_count > 1) {
+        mainPid = getpid(); // get main process id
         myFork(process_count - 1);
         int status = 0;
         pid_t wpid = 0;
-        /** wait all processes done. */
-        do {
-          wpid = wait(&status);
-          if (-1 == wpid) break; // failed during waitting for processes done
-        } while (wpid > 0);
-
-#if 0
-#endif
-        /** delete the temp path files */
-        for(i = 0; i < process_count; i++)
+        if (mainPid == getpid())
         {
-          sprintf(temp_path_file_name, "/tmp/fossology_file_list_%d.txt", i);
-          FILE *file = fopen(temp_path_file_name, "r");
-          /** check if this file exists or not, delete when existing */
-          if (file)
+          /** wait all processes done. */
+          while(1){
+            wpid = wait(&status);
+            if (-1 == wpid) break;
+          }
+
+          /** delete the temp path files */
+          for(i = 0; i < process_count; i++)
           {
-            fclose(file);
-            unlink(temp_path_file_name);
+            sprintf(temp_path_file_name, "/tmp/fossology_file_list_%d.txt", i);
+            FILE *file = fopen(temp_path_file_name, "r");
+            /** check if this file exists or not, delete when existing */
+            if (file)
+            {
+              fclose(file);
+              unlink(temp_path_file_name);
+            }
           }
         }
 
