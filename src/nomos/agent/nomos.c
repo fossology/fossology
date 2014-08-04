@@ -1152,7 +1152,7 @@ int main(int argc, char **argv)
           unlink(temp_path_file_name);
         }
         /** get the temp path file distriptors */
-        pFile[i] = fopen(temp_path_file_name, "a");
+        pFile[i] = fopen(temp_path_file_name, "w");
         if (!pFile[i])
         {
           LOG_FATAL("failed to open %s\n", temp_path_file_name);
