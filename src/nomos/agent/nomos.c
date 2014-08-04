@@ -1020,7 +1020,8 @@ int main(int argc, char **argv)
         int ret = stat(scanning_directory, &dir_sta);
         if (-1 == ret || S_IFDIR != (dir_sta.st_mode & S_IFMT))
         {
-          printf("Warning: scaning directory %s from -d is invalid, please confirm it.\n", scanning_directory);
+          if (-1 == ret) printf("stat('%s') error message: %s.\n",scanning_directory, strerror(errno));
+          else printf("Warning: '%s' from -d is not a good directory(dir_sta.st_mode & S_IFMT = %o).\n", scanning_directory, dir_sta.st_mode & S_IFMT);
           Usage(argv[0]);
           Bail(-__LINE__);
         }
