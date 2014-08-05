@@ -141,10 +141,10 @@ if [ $COMMON ]; then
       # not if it's a symlink (probably to /usr/sbin/useradd)
       if [ -f /usr/sbin/adduser -a ! -L /usr/sbin/adduser ]; then
          adduser --gecos "{$PROJECT}" --ingroup {$PROJECTGROUP} --system \
-           --shell /bin/bash --home /home/fossy {$PROJECTUSER}
+           --shell /bin/bash {$PROJECTUSER}
       else
          useradd -c "{$PROJECT}" -g {$PROJECTGROUP} -m \
-           -s /bin/bash -d /home/fossy {$PROJECTUSER}
+           -s /bin/bash {$PROJECTUSER}
       fi
       if [ "$?" != "0" ] ; then
          echo "ERROR: Unable to create user '{$PROJECTUSER}'"
