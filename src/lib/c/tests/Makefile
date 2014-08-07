@@ -27,6 +27,7 @@ EXE = testlibs
 OBJS = test_fossconfig.o    \
        test_fossscheduler.o \
        test_libfossdb.o     \
+       test_libfossdbmanager.o \
 
 all: test
 test: $(EXE)

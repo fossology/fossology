@@ -32,9 +32,6 @@ class ui_topnav extends FO_Plugin
    */
   function Output()
   {
-    global $Plugins;
-    global $SysConf;
-
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     switch($this->OutputType)
@@ -42,33 +39,7 @@ class ui_topnav extends FO_Plugin
       case "XML":
         break;
       case "HTML":
-        $Uri = Traceback_dir();
-        $V .= "<table width='100%' border=0 cellpadding=0>\n";
-        $V .= "  <tr>\n";
-
-        /* custom or default logo? */
-        if (@$SysConf['SYSCONFIG']['LogoImage'] and @$SysConf['SYSCONFIG']['LogoLink'])
-        {
-          $LogoLink = $SysConf['SYSCONFIG']['LogoLink'];
-          $LogoImg = $SysConf['SYSCONFIG']['LogoImage'];
-        }
-        else
-        {
-          $LogoLink = 'http://fossology.org';
-          $LogoImg = Traceback_uri . 'images/fossology-logo.gif';
-        }
-
-        $V .= "    <td width='15%'>";
-        $V .= "<a href='$LogoLink' target='_top'><img src='$LogoImg' align=absmiddle border=0></a>";
-        $V .= "</td>\n";
-        $V .= "    <td valign='top'>";
-        $Menu = &$Plugins[plugin_find_id("menus")];
-        $Menu->OutputSet($this->OutputType,0);
-        $V .= $Menu->Output();
-        $Menu->OutputUnSet();
-        $V .= "    </td>\n";
-        $V .= "  </tr>\n";
-        $V .= "</table>\n";
+        $V = $this->outputHtml();
         break;
       case "Text":
         break;
@@ -79,7 +50,40 @@ class ui_topnav extends FO_Plugin
     print("$V");
     return;
   }
-};
+  
+  function outputHtml()
+  {
+    global $SysConf;
+    global $Plugins;
+
+    $html = "<table width='100%' border=0 cellpadding=0>\n  <tr>\n";
+
+    $Uri = Traceback_dir();
+
+    if (@$SysConf['SYSCONFIG']['LogoImage'] and @$SysConf['SYSCONFIG']['LogoLink'])
+    {
+      $LogoLink = $SysConf['SYSCONFIG']['LogoLink'];
+      $LogoImg = $SysConf['SYSCONFIG']['LogoImage'];
+    }
+    else
+    {
+      $LogoLink = 'http://fossology.org';
+      $LogoImg = Traceback_uri . 'images/fossology-logo.gif';
+    }
+
+    $html .= "    <td width='15%'>";
+    $html .= "<a href='$LogoLink' target='_top'><img src='$LogoImg' align=absmiddle border=0></a>";
+    $html .= "</td>\n";
+    $html .= "    <td valign='top'>";
+    $Menu = &$Plugins[plugin_find_id("menus")];
+    $Menu->OutputSet($this->OutputType,0);
+    $html .= $Menu->Output();
+    $html .= "    </td>\n";
+    $html .= "  </tr>\n";
+    $html .= "</table>\n";
+    return $html;
+  }
+}
+
 $NewPlugin = new ui_topnav;
 $NewPlugin->Initialize();
-?>

@@ -33,12 +33,12 @@ include $(TOP)/Makefile.process
 
 install: all
 
-	
 	mkdir -p $(DESTDIR)$(MODDIR)/lib/php; \
 	
 	for file in $(FILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/lib/php/$$file; \
 	done
+	$(INSTALL_DATA) services.xml $(DESTDIR)$(MODDIR)/lib/php/services.xml; \
 
 uninstall:
 	@echo "Removing php libs"; \

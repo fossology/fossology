@@ -69,5 +69,5 @@ else
   print "</script>\n";
 }
 plugin_unload();
+$container->get("db.manager")->flushStats();
 return(0);
-?>

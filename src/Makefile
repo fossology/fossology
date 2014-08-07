@@ -7,7 +7,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # the directories we do things in by default
-DIRS = adj2nest ununpack buckets cli copyright lib scheduler nomos pkgagent delagent wget_agent mimetype maintagent www debug
+DIRS = adj2nest ununpack buckets cli copyright lib scheduler nomos monk pkgagent delagent wget_agent mimetype maintagent www debug
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
@@ -25,7 +25,7 @@ $(BUILDDIRS):
 	$(MAKE) -s -C $(@:build-%=%)
 
 # install depends on everything being built first
-install: all $(INSTALLDIRS)
+install: all $(INSTALLDIRS) composer_install
 $(INSTALLDIRS):
 	$(MAKE) -s -C $(@:install-%=%) install
 
@@ -45,6 +45,14 @@ $(COVDIRS):
 clean: $(CLEANDIRS)
 $(CLEANDIRS):
 	$(MAKE) -s -C $(@:clean-%=%) clean
+
+phpvendors: 
+	composer install
+
+composer_install:
+	echo "current dir: '${PWD}'"
+	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
+	(cd $(DESTDIR)$(MODDIR); composer install --no-dev)
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)

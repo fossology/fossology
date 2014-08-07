@@ -1,18 +1,18 @@
 /* **************************************************************
-Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ************************************************************** */
 
 /*
@@ -101,7 +101,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * Uses the X-Macro defined in @link agent.h
  */
 #define SELECT_STRING(passed) MK_STRING_LIT(AGENT_##passed),
-const char* agent_status_strings[] = { AGENT_STATUS_TYPES(SELECT_STRING) };
+const char* agent_status_strings[] =
+{ AGENT_STATUS_TYPES(SELECT_STRING) };
 #undef SELECT_STRING
 
 /* ************************************************************************** */
@@ -120,7 +121,7 @@ const char* agent_status_strings[] = { AGENT_STATUS_TYPES(SELECT_STRING) };
 static int agent_close_fd(int* pid_ptr, agent_t* agent, agent_t* excepted)
 {
   TEST_NULL(agent, 0);
-  if(agent != excepted)
+  if (agent != excepted)
   {
     close(agent->from_child);
     close(agent->to_child);
@@ -143,14 +144,12 @@ static int agent_close_fd(int* pid_ptr, agent_t* agent, agent_t* excepted)
 static int update(int* pid_ptr, agent_t* agent, gpointer unused)
 {
   TEST_NULL(agent, 0);
-  int nokill = is_agent_special(agent, SAG_NOKILL) ||
-               is_meta_special(agent->type, SAG_NOKILL);
+  int nokill = is_agent_special(agent, SAG_NOKILL) || is_meta_special(agent->type, SAG_NOKILL);
 
-  if(agent->status == AG_SPAWNED || agent->status == AG_RUNNING || agent->status == AG_PAUSED)
+  if (agent->status == AG_SPAWNED || agent->status == AG_RUNNING || agent->status == AG_PAUSED)
   {
     /* check last checkin time */
-    if(time(NULL) - agent->check_in > CONF_agent_death_timer
-        && !(agent->owner->status == JB_PAUSED) && !nokill)
+    if (time(NULL) - agent->check_in > CONF_agent_death_timer && !(agent->owner->status == JB_PAUSED) && !nokill)
     {
       AGENT_CONCURRENT_PRINT("no heartbeat for %d seconds\n", (time(NULL) - agent->check_in));
       agent_kill(agent);
@@ -158,7 +157,7 @@ static int update(int* pid_ptr, agent_t* agent, gpointer unused)
     }
 
     /* check items processed */
-    if(agent->status != AG_PAUSED && !agent->alive)
+    if (agent->status != AG_PAUSED && !agent->alive)
     {
       agent->n_updates++;
     }
@@ -166,15 +165,15 @@ static int update(int* pid_ptr, agent_t* agent, gpointer unused)
     {
       agent->n_updates = 0;
     }
-    if(agent->n_updates > CONF_agent_update_number && !nokill)
+    if (agent->n_updates > CONF_agent_update_number && !nokill)
     {
       AGENT_CONCURRENT_PRINT("agent has not set the alive flag in at least 10 minutes, killing\n");
       agent_kill(agent);
       return 0;
     }
 
-    AGENT_SEQUENTIAL_PRINT("agent updated correctly, processed %d items: %d\n",
-        agent->total_analyzed, agent->n_updates);
+    AGENT_SEQUENTIAL_PRINT("agent updated correctly, processed %d items: %d\n", agent->total_analyzed,
+        agent->n_updates);
     agent->alive = 0;
   }
 
@@ -208,10 +207,10 @@ static int agent_kill_traverse(int* pid, agent_t* agent, gpointer unused)
  */
 static int agent_list(char* name, meta_agent_t* ma, GOutputStream* ostr)
 {
-  if(ma->valid)
+  if (ma->valid)
   {
     g_output_stream_write(ostr, name, strlen(name), NULL, NULL);
-    g_output_stream_write(ostr, " ",  1,            NULL, NULL);
+    g_output_stream_write(ostr, " ", 1, NULL, NULL);
   }
   return FALSE;
 }
@@ -231,16 +230,15 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
 {
   static int32_t id_gen = -1;
 
-  GList*  iter;
+  GList* iter;
   host_t* host;
-  char   *jq_cmd_args = 0;
+  char *jq_cmd_args = 0;
 
-  for(iter = scheduler->host_queue; iter != NULL; iter = iter->next)
+  for (iter = scheduler->host_queue; iter != NULL; iter = iter->next)
   {
-    host = (host_t*)iter->data;
+    host = (host_t*) iter->data;
     V_AGENT("META_AGENT[%s] testing on HOST[%s]\n", ma->name, host->name);
-    job_t* job = job_init(scheduler->job_list, scheduler->job_queue, ma->name,
-        host->name, id_gen--, 0, 0, jq_cmd_args);
+    job_t* job = job_init(scheduler->job_list, scheduler->job_queue, ma->name, host->name, id_gen--, 0, 0, jq_cmd_args);
     agent_init(scheduler, host, job);
   }
 
@@ -256,11 +254,11 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
 static void agent_listen(scheduler_t* scheduler, agent_t* agent)
 {
   /* static locals */
-  #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
-    static GMutex version_lock;
-  #else
-    static GStaticMutex version_lock = G_STATIC_MUTEX_INIT;
-  #endif
+#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+  static GMutex version_lock;
+#else
+  static GStaticMutex version_lock = G_STATIC_MUTEX_INIT;
+#endif
 
   /* locals */
   char buffer[1024]; // buffer to store c strings read from agent
@@ -279,7 +277,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
    *   4. the agent doesn't send version information    => invalidate the agent
    *   5. the agent crashed before sending information  => close the thread
    */
-  if(fgets(buffer, sizeof(buffer), agent->read) == NULL)
+  if (fgets(buffer, sizeof(buffer), agent->read) == NULL)
   {
     AGENT_CONCURRENT_PRINT("pipe from child closed: %s\n", strerror(errno));
     g_thread_exit(NULL);
@@ -287,63 +285,59 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
 
   /* check to make sure "VERSION" was sent */
   buffer[strlen(buffer) - 1] = '\0';
-  if(strncmp(buffer, "VERSION: ", 9) != 0)
+  if (strncmp(buffer, "VERSION: ", 9) != 0)
   {
-    if(strncmp(buffer, "@@@1", 4) == 0)
+    if (strncmp(buffer, "@@@1", 4) == 0)
     {
-      THREAD_FATAL(job_log(agent->owner),
-          "agent crashed before sending version information");
+      THREAD_FATAL(job_log(agent->owner), "agent crashed before sending version information");
     }
     else
     {
       agent->type->valid = 0;
       agent_fail_event(scheduler, agent);
       agent_kill(agent);
-      con_printf(main_log, "ERROR %s.%d: agent %s.%s has been invalidated, removing from agents\n",
-          __FILE__, __LINE__, agent->host->name, agent->type->name);
+      con_printf(main_log, "ERROR %s.%d: agent %s.%s has been invalidated, removing from agents\n", __FILE__, __LINE__,
+          agent->host->name, agent->type->name);
       AGENT_CONCURRENT_PRINT("agent didn't send version information: \"%s\"\n", buffer);
       return;
     }
   }
 
   /* check that the VERSION information is correct */
-  #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
   g_mutex_lock(&version_lock);
-  #else
+#else
   g_static_mutex_lock(&version_lock);
-  #endif
+#endif
   strcpy(buffer, &buffer[9]);
-  if(agent->type->version == NULL && agent->type->valid)
+  if (agent->type->version == NULL && agent->type->valid)
   {
     agent->type->version_source = agent->host->name;
     agent->type->version = g_strdup(buffer);
-    if(TVERB_AGENT)
-      con_printf(main_log, "META_AGENT[%s.%s] version is: \"%s\"\n",
-          agent->host->name, agent->type->name, agent->type->version);
+    if (TVERB_AGENT)
+      con_printf(main_log, "META_AGENT[%s.%s] version is: \"%s\"\n", agent->host->name, agent->type->name,
+          agent->type->version);
   }
-  else if(strcmp(agent->type->version, buffer) != 0)
+  else if (strcmp(agent->type->version, buffer) != 0)
   {
-    con_printf(job_log(agent->owner),
-        "ERROR %s.%d: META_DATA[%s] invalid agent spawn check\n",
-        __FILE__, __LINE__, agent->type->name);
-    con_printf(job_log(agent->owner),
-        "ERROR: versions don't match: %s(%s) != received: %s(%s)\n",
-        agent->type->version_source, agent->type->version,
-        agent->host->name,        buffer);
+    con_printf(job_log(agent->owner), "ERROR %s.%d: META_DATA[%s] invalid agent spawn check\n", __FILE__, __LINE__,
+        agent->type->name);
+    con_printf(job_log(agent->owner), "ERROR: versions don't match: %s(%s) != received: %s(%s)\n",
+        agent->type->version_source, agent->type->version, agent->host->name, buffer);
     agent->type->valid = 0;
     agent_kill(agent);
-    #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
     g_mutex_unlock(&version_lock);
-    #else
+#else
     g_static_mutex_unlock(&version_lock);
-    #endif
+#endif
     return;
   }
-  #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
   g_mutex_unlock(&version_lock);
-  #else
+#else
   g_static_mutex_unlock(&version_lock);
-  #endif
+#endif
 
   /* If we reach here the agent has correctly sent VERION information to the
    * scheduler. The agent now enters a listening loop. The communication thread
@@ -353,18 +347,18 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
    * NOTE: any command prepended by "@@@" is a message from the scheduler to the
    *       communication thread, not from the agent.
    */
-  while(1)
+  while (1)
   {
     /* get message from agent */
-    if(fgets(buffer, sizeof(buffer), agent->read) == NULL)
+    if (fgets(buffer, sizeof(buffer), agent->read) == NULL)
       g_thread_exit(NULL);
 
     buffer[strlen(buffer) - 1] = '\0';
 
-    if(strlen(buffer) == 0)
+    if (strlen(buffer) == 0)
       continue;
 
-    if(TVERB_AGENT && (TVERB_SPECIAL || strncmp(buffer, "SPECIAL", 7) != 0))
+    if (TVERB_AGENT && (TVERB_SPECIAL || strncmp(buffer, "SPECIAL", 7) != 0))
       AGENT_CONCURRENT_PRINT("received: \"%s\"\n", buffer);
 
     /* command: "BYE"
@@ -374,9 +368,9 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      * correctly, anything else can be used as an error code. Regardless of
      * whether the agent completed, the communication thread will shutdown.
      */
-    if(strncmp(buffer, "BYE", 3) == 0)
+    if (strncmp(buffer, "BYE", 3) == 0)
     {
-      if((agent->return_code = atoi(&(buffer[4]))) != 0)
+      if ((agent->return_code = atoi(&(buffer[4]))) != 0)
       {
         AGENT_CONCURRENT_PRINT("agent failed with error code %d\n", agent->return_code);
         event_signal(agent_fail_event, agent);
@@ -390,7 +384,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      * normally only happen if the agent crashes and the scheduler receives a
      * SIGCHLD for it before it sends "BYE #".
      */
-    if(strncmp(buffer, "@@@1", 4) == 0)
+    if (strncmp(buffer, "@@@1", 4) == 0)
       break;
 
     /* command "@@@0"
@@ -399,7 +393,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      * This is sent after an agent sends the "OK" command, and the scheduler has
      * processed the resulting agent_ready_event().
      */
-    if(strncmp(buffer, "@@@0", 4) == 0 && agent->updated)
+    if (strncmp(buffer, "@@@0", 4) == 0 && agent->updated)
     {
       aprintf(agent, "%s\n", agent->data);
       aprintf(agent, "END\n");
@@ -419,9 +413,9 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      *   2. the agent has finished the last piece of the job it was working on
      *      and is ready for the next piece or to be shutdown
      */
-    if(strncmp(buffer, "OK", 2) == 0)
+    if (strncmp(buffer, "OK", 2) == 0)
     {
-      if(agent->status != AG_PAUSED)
+      if (agent->status != AG_PAUSED)
         event_signal(agent_ready_event, agent);
     }
 
@@ -432,7 +426,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      * agent is still working it must periodically update the scheduler with
      * how much of the job it has processed.
      */
-    else if(strncmp(buffer, "HEART", 5) == 0)
+    else if (strncmp(buffer, "HEART", 5) == 0)
     {
       g_regex_match(scheduler->parse_agent_msg, buffer, 0, &match);
 
@@ -456,7 +450,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      * notification email. This grabs the message and sets inside the job that
      * the agent is running under.
      */
-    else if(strncmp(buffer, "EMAIL", 5) == 0)
+    else if (strncmp(buffer, "EMAIL", 5) == 0)
     {
       agent->owner->message = g_strdup(buffer + 6);
     }
@@ -468,7 +462,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      * or false. Agents use this by calling fo_scheduler_set_special() in the
      * agent api.
      */
-    else if(strncmp(buffer, "SPECIAL", 7) == 0)
+    else if (strncmp(buffer, "SPECIAL", 7) == 0)
     {
       relevant = INT_MAX;
 
@@ -479,14 +473,14 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       g_free(arg);
 
       arg = g_match_info_fetch(match, 6);
-      if(atoi(arg))
+      if (atoi(arg))
       {
-        if(agent->special & relevant)
+        if (agent->special & relevant)
           relevant = 0;
       }
       else
       {
-        if(!(agent->special & relevant))
+        if (!(agent->special & relevant))
           relevant = 0;
       }
       g_free(arg);
@@ -501,7 +495,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      * The agent has requested the value of a special attribute. The scheduler
      * will respond with the value of the special attribute.
      */
-    else if(strncmp(buffer, "GETSPECIAL", 10) == 0)
+    else if (strncmp(buffer, "GETSPECIAL", 10) == 0)
     {
       g_regex_match(scheduler->parse_agent_msg, buffer, 0, &match);
 
@@ -509,7 +503,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       relevant = atoi(arg);
       g_free(arg);
 
-      if(agent->special & relevant)
+      if (agent->special & relevant)
         aprintf(agent, "VALUE: 1\n");
       else
         aprintf(agent, "VALUE: 0\n");
@@ -522,11 +516,11 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      * The agent didn't use a legal command. This will simply put what the agent
      * printed into the log and move on.
      */
-    else if(!(TVERB_AGENT))
+    else if (!(TVERB_AGENT))
       AGENT_CONCURRENT_PRINT("\"%s\"\n", buffer);
   }
 
-  if(TVERB_AGENT)
+  if (TVERB_AGENT)
     AGENT_CONCURRENT_PRINT("communication thread closing\n");
 }
 
@@ -539,13 +533,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
  * @param argc     return: returns the number of arguments parsed
  * @param argv     return: the parsed arguments
  */
-static void shell_parse(
-    char* confdir,
-    int32_t userid,
-    char* input,
-    char *jq_cmd_args,
-    int* argc,
-    char*** argv)
+static void shell_parse(char* confdir, int32_t userid, char* input, char *jq_cmd_args, int* argc, char*** argv)
 {
   char* begin;
   char* curr;
@@ -554,28 +542,28 @@ static void shell_parse(
   *argv = g_new0(char*, 30);
   begin = NULL;
 
-  for(curr = input; *curr; curr++)
+  for (curr = input; *curr; curr++)
   {
-    if(*curr == ' ')
+    if (*curr == ' ')
     {
-      if(begin == NULL)
+      if (begin == NULL)
         continue;
 
-      if(*begin == '"')
+      if (*begin == '"')
         continue;
 
       *curr = '\0';
       (*argv)[idx++] = g_strdup(begin);
       begin = NULL;
     }
-    else if(begin == NULL)
+    else if (begin == NULL)
     {
       begin = curr;
     }
-    else if(*begin == '"' && *curr == '"')
+    else if (*begin == '"' && *curr == '"')
     {
       *begin = '\0';
-      *curr  = '\0';
+      *curr = '\0';
 
       (*argv)[idx++] = g_strdup(begin + 1);
       begin = NULL;
@@ -585,16 +573,18 @@ static void shell_parse(
   (*argv)[idx++] = g_strdup_printf("--config=%s", confdir);
   (*argv)[idx++] = g_strdup_printf("--userID=%d", userid);
   (*argv)[idx++] = "--scheduler_start";
-  if (jq_cmd_args) (*argv)[idx++] = jq_cmd_args;
+  if (jq_cmd_args)
+    (*argv)[idx++] = jq_cmd_args;
   (*argc) = idx;
 }
 
 /**
  * For the agent_spawn() function.
  */
-typedef struct {
-    scheduler_t* scheduler;
-    agent_t* agent;
+typedef struct
+{
+  scheduler_t* scheduler;
+  agent_t* agent;
 } agent_spawn_args;
 
 /**
@@ -619,7 +609,7 @@ static void* agent_spawn(agent_spawn_args* pass)
 {
   /* locals */
   scheduler_t* scheduler = pass->scheduler;
-  agent_t*     agent     = pass->agent;
+  agent_t* agent = pass->agent;
   gchar* tmp;                 // pointer to temporary string
   gchar** args;               // the arguments that will be passed to the child
   int argc;                   // the number of arguments parsed
@@ -627,11 +617,11 @@ static void* agent_spawn(agent_spawn_args* pass)
   char buffer[2048];          // character buffer
 
   /* spawn the new process */
-  while((agent->pid = fork()) < 0)
+  while ((agent->pid = fork()) < 0)
     sleep(rand() % CONF_fork_backoff_time);
 
   /* we are in the child */
-  if(agent->pid == 0)
+  if (agent->pid == 0)
   {
     /* set the child's stdin and stdout to use the pipes */
     dup2(agent->from_parent, fileno(stdin));
@@ -639,32 +629,29 @@ static void* agent_spawn(agent_spawn_args* pass)
     dup2(agent->to_parent, fileno(stderr));
 
     /* close all the unnecessary file descriptors */
-    g_tree_foreach(scheduler->agents, (GTraverseFunc)agent_close_fd, agent);
+    g_tree_foreach(scheduler->agents, (GTraverseFunc) agent_close_fd, agent);
     close(agent->from_child);
     close(agent->to_child);
 
     /* set the priority of the process to the job's priority */
-    if(nice(agent->owner->priority) == -1)
+    if (nice(agent->owner->priority) == -1)
       ERROR("unable to correctly set priority of agent process %d", agent->pid);
 
     /* if host is null, the agent will run locally to */
     /* run the agent locally, use the commands that    */
     /* were parsed when the meta_agent was created    */
-    if(strcmp(agent->host->address, LOCAL_HOST) == 0)
+    if (strcmp(agent->host->address, LOCAL_HOST) == 0)
     {
-      shell_parse(scheduler->sysconfigdir, agent->owner->user_id,
-          agent->type->raw_cmd, agent->owner->jq_cmd_args, &argc, &args);
+      shell_parse(scheduler->sysconfigdir, agent->owner->user_id, agent->type->raw_cmd, agent->owner->jq_cmd_args,
+          &argc, &args);
 
       tmp = args[0];
-      args[0] = g_strdup_printf(AGENT_BINARY,
-          scheduler->sysconfigdir,
-          AGENT_CONF,
-          agent->type->name,
-          tmp);
+      args[0] = g_strdup_printf(AGENT_BINARY, scheduler->sysconfigdir,
+      AGENT_CONF, agent->type->name, tmp);
 
       strcpy(buffer, args[0]);
       *strrchr(buffer, '/') = '\0';
-      if(chdir(buffer) != 0)
+      if (chdir(buffer) != 0)
       {
         ERROR("unable to change working directory: %s\n", strerror(errno));
       }
@@ -678,13 +665,9 @@ static void* agent_spawn(agent_spawn_args* pass)
     else
     {
       args = g_new0(char*, 5);
-      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY,
-          agent->host->agent_dir,
-          AGENT_CONF,
-          agent->type->name,
-          agent->type->raw_cmd);
-      len = snprintf(buffer + len, sizeof(buffer) - len, " --userID=%d",
-          agent->owner->user_id);
+      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY, agent->host->agent_dir,
+      AGENT_CONF, agent->type->name, agent->type->raw_cmd);
+      len = snprintf(buffer + len, sizeof(buffer) - len, " --userID=%d", agent->owner->user_id);
       args[0] = "/usr/bin/ssh";
       args[1] = agent->host->address;
       args[2] = buffer;
@@ -694,9 +677,8 @@ static void* agent_spawn(agent_spawn_args* pass)
     }
 
     /* If we reach here, the exec call has failed */
-    log_printf("ERROR %s.%d: JOB[%d.%s]: exec failed: pid = %d, errno = \"%s\"",
-        __FILE__, __LINE__, agent->owner->id, agent->owner->agent_type,
-        getpid(), strerror(errno));
+    log_printf("ERROR %s.%d: JOB[%d.%s]: exec failed: pid = %d, errno = \"%s\"", __FILE__, __LINE__, agent->owner->id,
+        agent->owner->agent_type, getpid(), strerror(errno));
   }
   /* we are in the parent */
   else
@@ -732,14 +714,14 @@ meta_agent_t* meta_agent_init(char* name, char* cmd, int max, int spc)
   meta_agent_t* ma;
 
   /* test inputs */
-  if(!name || !cmd)
+  if (!name || !cmd)
   {
     ERROR("invalid arguments passed to meta_agent_init()");
     return NULL;
   }
 
   /* confirm valid inputs */
-  if(strlen(name) > MAX_NAME || strlen(cmd) > MAX_CMD)
+  if (strlen(name) > MAX_NAME || strlen(cmd) > MAX_CMD)
   {
     log_printf("ERROR failed to load %s meta agent", name);
     return NULL;
@@ -754,7 +736,7 @@ meta_agent_t* meta_agent_init(char* name, char* cmd, int max, int spc)
   ma->max_run = max;
   ma->special = spc;
   ma->version = NULL;
-  ma->valid   = TRUE;
+  ma->valid = TRUE;
 
   return ma;
 }
@@ -790,7 +772,7 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   agent_spawn_args* pass;
 
   /* check job input */
-  if(!job)
+  if (!job)
   {
     log_printf("ERROR %s.%d: NULL job passed to agent init\n", __FILE__, __LINE__);
     log_printf("ERROR: no other information available\n");
@@ -798,10 +780,10 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   }
 
   /* check that the agent type exists */
-  if(g_tree_lookup(scheduler->meta_agents, job->agent_type) == NULL)
+  if (g_tree_lookup(scheduler->meta_agents, job->agent_type) == NULL)
   {
-    log_printf("ERROR %s.%d: jq_pk %d jq_type %s does not match any module in mods-enabled\n",
-        __FILE__, __LINE__, job->id, job->agent_type);
+    log_printf("ERROR %s.%d: jq_pk %d jq_type %s does not match any module in mods-enabled\n", __FILE__, __LINE__,
+        job->id, job->agent_type);
     job->message = NULL;
     job_fail_event(scheduler, job);
     job_remove_agent(job, scheduler->job_list, NULL);
@@ -814,27 +796,27 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   agent->status = AG_CREATED;
 
   /* make sure that there is a metaagent for the job */
-  if(agent->type == NULL)
+  if (agent->type == NULL)
   {
     ERROR("meta agent %s does not exist", job->agent_type);
     return NULL;
   }
 
   /* check if the agent is valid */
-  if(!agent->type->valid)
+  if (!agent->type->valid)
   {
     ERROR("agent %s has been invalidated by version information", job->agent_type);
     return NULL;
   }
 
   /* create the pipes between the child and the parent */
-  if(pipe(parent_to_child) != 0)
+  if (pipe(parent_to_child) != 0)
   {
     ERROR("JOB[%d.%s] failed to create parent to child pipe", job->id, job->agent_type);
     g_free(agent);
     return NULL;
   }
-  if(pipe(child_to_parent) != 0)
+  if (pipe(child_to_parent) != 0)
   {
     ERROR("JOB[%d.%s] failed to create child to parent pipe", job->id, job->agent_type);
     g_free(agent);
@@ -843,9 +825,9 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
 
   /* set file identifiers to correctly talk to children */
   agent->from_parent = parent_to_child[0];
-  agent->to_child    = parent_to_child[1];
-  agent->from_child  = child_to_parent[0];
-  agent->to_parent   = child_to_parent[1];
+  agent->to_child = parent_to_child[1];
+  agent->from_child = child_to_parent[0];
+  agent->to_parent = child_to_parent[1];
 
   /* initialize other info */
   agent->host = host;
@@ -858,13 +840,13 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   agent->special = 0;
 
   /* open the relevant file pointers */
-  if((agent->read = fdopen(agent->from_child, "r")) == NULL)
+  if ((agent->read = fdopen(agent->from_child, "r")) == NULL)
   {
     ERROR("JOB[%d.%s] failed to initialize read file", job->id, job->agent_type);
     g_free(agent);
     return NULL;
   }
-  if((agent->write = fdopen(agent->to_child, "w")) == NULL)
+  if ((agent->write = fdopen(agent->to_child, "w")) == NULL)
   {
     ERROR("JOB[%d.%s] failed to initialize write file", job->id, job->agent_type);
     g_free(agent);
@@ -872,7 +854,7 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   }
 
   /* increase the load on the host */
-  if(agent->owner->id > 0)
+  if (agent->owner->id > 0)
     host_increase_load(agent->host);
 
   /* spawn the listen thread */
@@ -881,7 +863,7 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   pass->agent = agent;
 
 #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
-  agent->thread = g_thread_new(agent->type->name, (GThreadFunc)agent_spawn, pass);
+  agent->thread = g_thread_new(agent->type->name, (GThreadFunc) agent_spawn, pass);
 #else
   agent->thread = g_thread_create((GThreadFunc)agent_spawn, pass, 1, NULL);
 #endif
@@ -932,53 +914,51 @@ void agent_death_event(scheduler_t* scheduler, pid_t* pid)
   agent_t* agent;
   int status = pid[1];
 
-  if((agent = g_tree_lookup(scheduler->agents, &pid[0])) == NULL)
+  if ((agent = g_tree_lookup(scheduler->agents, &pid[0])) == NULL)
   {
     ERROR("invalid agent death event: pid[%d]", pid[0]);
     return;
   }
 
-  if(agent->owner->id >= 0)
+  if (agent->owner->id >= 0)
     event_signal(database_update_event, NULL);
 
-  if(write(agent->to_parent, "@@@1\n", 5) != 5)
+  if (write(agent->to_parent, "@@@1\n", 5) != 5)
     AGENT_SEQUENTIAL_PRINT("write to agent unsuccessful: %s\n", strerror(errno));
   g_thread_join(agent->thread);
 
-  if(agent->return_code != 0)
+  if (agent->return_code != 0)
   {
-    if(WIFEXITED(status))
+    if (WIFEXITED(status))
     {
       AGENT_CONCURRENT_PRINT("agent failed, code: %d\n", (status >> 8));
     }
-    else if(WIFSIGNALED(status))
+    else if (WIFSIGNALED(status))
     {
-      AGENT_CONCURRENT_PRINT("agent was killed by signal: %d.%s\n",
-          WTERMSIG(status), strsignal(WTERMSIG(status)));
-      if(WCOREDUMP(status))
+      AGENT_CONCURRENT_PRINT("agent was killed by signal: %d.%s\n", WTERMSIG(status), strsignal(WTERMSIG(status)));
+      if (WCOREDUMP(status))
         AGENT_CONCURRENT_PRINT("agent produced core dump\n");
     }
     else
     {
       AGENT_CONCURRENT_PRINT("agent failed, code: %d\n", agent->return_code);
     }
-    AGENT_WARNING("agent closed unexpectedly, agent status was %s",
-        agent_status_strings[agent->status]);
+    AGENT_WARNING("agent closed unexpectedly, agent status was %s", agent_status_strings[agent->status]);
     agent_fail_event(scheduler, agent);
   }
 
-  if(agent->status != AG_PAUSED && agent->status != AG_FAILED)
+  if (agent->status != AG_PAUSED && agent->status != AG_FAILED)
     agent_transition(agent, AG_PAUSED);
 
   job_update(scheduler, agent->owner);
-  if(agent->status == AG_FAILED && agent->owner->id < 0)
+  if (agent->status == AG_FAILED && agent->owner->id < 0)
   {
-    log_printf("ERROR %s.%d: agent %s.%s has failed scheduler startup test\n",
-        __FILE__, __LINE__, agent->host->name, agent->type->name);
+    log_printf("ERROR %s.%d: agent %s.%s has failed scheduler startup test\n", __FILE__, __LINE__, agent->host->name,
+        agent->type->name);
     agent->type->valid = 0;
   }
 
-  if(agent->owner->id < 0 && !agent->type->valid)
+  if (agent->owner->id < 0 && !agent->type->valid)
     AGENT_SEQUENTIAL_PRINT("agent failed startup test, removing from meta agents\n");
 
   AGENT_SEQUENTIAL_PRINT("successfully remove from the system\n");
@@ -1018,20 +998,20 @@ void agent_ready_event(scheduler_t* scheduler, agent_t* agent)
   int ret;
 
   TEST_NULV(agent);
-  if(agent->status == AG_SPAWNED)
+  if (agent->status == AG_SPAWNED)
   {
     agent_transition(agent, AG_RUNNING);
     AGENT_SEQUENTIAL_PRINT("agent successfully created\n");
   }
 
-  if((ret = job_is_open(scheduler, agent->owner)) == 0)
+  if ((ret = job_is_open(scheduler, agent->owner)) == 0)
   {
     agent_transition(agent, AG_PAUSED);
     job_finish_agent(agent->owner, agent);
     job_update(scheduler, agent->owner);
     return;
   }
-  else if(ret < 0)
+  else if (ret < 0)
   {
     agent_transition(agent, AG_FAILED);
     return;
@@ -1042,7 +1022,7 @@ void agent_ready_event(scheduler_t* scheduler, agent_t* agent)
     agent->updated = 1;
   }
 
-  if(write(agent->to_parent, "@@@0\n", 5) != 5)
+  if (write(agent->to_parent, "@@@0\n", 5) != 5)
   {
     AGENT_ERROR("failed sending new data to agent");
     agent_kill(agent);
@@ -1059,7 +1039,7 @@ void agent_ready_event(scheduler_t* scheduler, agent_t* agent)
  */
 void agent_update_event(scheduler_t* scheduler, void* unused)
 {
-  g_tree_foreach(scheduler->agents, (GTraverseFunc)update, NULL);
+  g_tree_foreach(scheduler->agents, (GTraverseFunc) update, NULL);
 }
 
 /**
@@ -1074,7 +1054,7 @@ void agent_fail_event(scheduler_t* scheduler, agent_t* agent)
   TEST_NULV(agent);
   agent_transition(agent, AG_FAILED);
   job_fail_agent(agent->owner, agent);
-  if(write(agent->to_parent, "@@@1\n", 5) != 5)
+  if (write(agent->to_parent, "@@@1\n", 5) != 5)
     AGENT_ERROR("Failed to kill agent thread cleanly");
 }
 
@@ -1085,7 +1065,7 @@ void agent_fail_event(scheduler_t* scheduler, agent_t* agent)
  */
 void list_agents_event(scheduler_t* scheduler, GOutputStream* ostr)
 {
-  g_tree_foreach(scheduler->meta_agents, (GTraverseFunc)agent_list, ostr);
+  g_tree_foreach(scheduler->meta_agents, (GTraverseFunc) agent_list, ostr);
   g_output_stream_write(ostr, "\nend\n", 5, NULL, NULL);
 }
 
@@ -1103,14 +1083,14 @@ void list_agents_event(scheduler_t* scheduler, GOutputStream* ostr)
  */
 void agent_transition(agent_t* agent, agent_status new_status)
 {
-  AGENT_SEQUENTIAL_PRINT("agent status change: %s -> %s\n",
-      agent_status_strings[agent->status], agent_status_strings[new_status]);
+  AGENT_SEQUENTIAL_PRINT("agent status change: %s -> %s\n", agent_status_strings[agent->status],
+      agent_status_strings[new_status]);
 
-  if(agent->owner->id > 0)
+  if (agent->owner->id > 0)
   {
-    if(agent->status == AG_PAUSED)
+    if (agent->status == AG_PAUSED)
       host_increase_load(agent->host);
-    if(new_status == AG_PAUSED)
+    if (new_status == AG_PAUSED)
       host_decrease_load(agent->host);
   }
 
@@ -1161,14 +1141,10 @@ void agent_print_status(agent_t* agent, GOutputStream* ostr)
 
   strcpy(time_buf, "(none)");
   time_info = localtime(&agent->check_in);
-  if(time_info)
+  if (time_info)
     strftime(time_buf, sizeof(time_buf), "%F %T", localtime(&agent->check_in));
-  status_str = g_strdup_printf("agent:%d host:%s type:%s status:%s time:%s\n",
-      agent->pid,
-      agent->host->name,
-      agent->type->name,
-      agent_status_strings[agent->status],
-      time_buf);
+  status_str = g_strdup_printf("agent:%d host:%s type:%s status:%s time:%s\n", agent->pid, agent->host->name,
+      agent->type->name, agent_status_strings[agent->status], time_buf);
 
   AGENT_SEQUENTIAL_PRINT("AGENT_STATUS: %s", status_str);
   g_output_stream_write(ostr, status_str, strlen(status_str), NULL, NULL);
@@ -1203,7 +1179,7 @@ int aprintf(agent_t* agent, const char* fmt, ...)
   char* tmp;
 
   va_start(args, fmt);
-  if(TVERB_AGENT)
+  if (TVERB_AGENT)
   {
     tmp = g_strdup_vprintf(fmt, args);
     tmp[strlen(tmp) - 1] = '\0';
@@ -1249,7 +1225,7 @@ ssize_t agent_write(agent_t* agent, const void* buf, int count)
  */
 void test_agents(scheduler_t* scheduler)
 {
-  g_tree_foreach(scheduler->meta_agents, (GTraverseFunc)agent_test, scheduler);
+  g_tree_foreach(scheduler->meta_agents, (GTraverseFunc) agent_test, scheduler);
 }
 
 /**
@@ -1259,7 +1235,7 @@ void test_agents(scheduler_t* scheduler)
  */
 void kill_agents(scheduler_t* scheduler)
 {
-  g_tree_foreach(scheduler->agents, (GTraverseFunc)agent_kill_traverse, NULL);
+  g_tree_foreach(scheduler->agents, (GTraverseFunc) agent_kill_traverse, NULL);
 }
 
 /**
@@ -1275,12 +1251,12 @@ int add_meta_agent(GTree* meta_agents, char* name, char* cmd, int max, int spc)
 {
   meta_agent_t* ma;
 
-  if(name == NULL)
+  if (name == NULL)
     return 0;
 
-  if(g_tree_lookup(meta_agents, name) == NULL)
+  if (g_tree_lookup(meta_agents, name) == NULL)
   {
-    if((ma = meta_agent_init(name, cmd, max, spc)) == NULL)
+    if ((ma = meta_agent_init(name, cmd, max, spc)) == NULL)
       return 0;
     g_tree_insert(meta_agents, ma->name, ma);
     return 1;

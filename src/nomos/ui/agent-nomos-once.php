@@ -15,6 +15,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+use Fossology\Lib\Data\Highlight;
 
 /**
  * \file agent-nomos-once.php
@@ -35,6 +36,9 @@ class agent_nomos_once extends FO_Plugin {
   public $DBaccess   = PLUGIN_DB_NONE;
   public $LoginFlag  = 0;
 
+  
+  public $HighlightInfoKeywords = array();
+  public $HighlightInfoLicenses = array();
   /** To require login access, use: **/
   //  public $DBaccess = PLUGIN_DB_WRITE;
   //  public $LoginFlag = 1;
@@ -47,18 +51,21 @@ class agent_nomos_once extends FO_Plugin {
    * \return string $V, html to display the results.
    */
   function AnalyzeFile($FilePath) {
-     
-    global $SYSCONFDIR;
+   global $SYSCONFDIR;
 
-    $licenses = array();
-
-    $licenseResult = "";
     /* move the temp file */
-    $licenseResult = exec("$SYSCONFDIR/mods-enabled/nomos/agent/nomos $FilePath",$out,$rtn);
-    $licenses = explode('contains license(s)',$out[0]);
-    $last = end($licenses);
-    return ($last);
+    $licenseResult = exec("$SYSCONFDIR/mods-enabled/nomos/agent/nomos -S $FilePath",$out,$rtn);
+    $licenses_and_Highlight = end( explode('contains license(s)',$out[0]) );
+    $licenses = explode ('Highlighting Info at',  $licenses_and_Highlight);
+   
+    $a = preg_match_all('/Keyword at (?P<position>\d+), length (?P<length>\d+),/',
+            $licenses[1],$this->HighlightInfoKeywords );
+    $a = preg_match_all('/License #(?P<name>[^#]*)# at (?P<position>\d+), length (?P<length>\d+),/',
+            $licenses[1],$this->HighlightInfoLicenses);
 
+   
+    return ($licenses[0]);
+//    return ($licenses[0]);
   } // AnalyzeFile()
 
   /**
@@ -177,16 +184,35 @@ class agent_nomos_once extends FO_Plugin {
         unlink($tmp_name);
       }
 
-      /** show file content */
-      $View = & $Plugins[plugin_find_id("view") ];
+      /** @var ui_view $view */
+      $view = & $Plugins[plugin_find_id("view") ];
       $ModBack = GetParm("modback",PARM_STRING);
-      $Fin = fopen($tmp_name, "r");
-      if ($Fin) {
-        $View->ShowView($Fin,$ModBack, 0,0,NULL,True, False); // do not show Header and micro menus
-        fclose($Fin);
+      
+      $highlights = array();
+
+      for ($index = 0; $index < count($this->HighlightInfoKeywords['position']); $index++)
+      {
+        $position = $this->HighlightInfoKeywords['position'][$index];
+        $length = $this->HighlightInfoKeywords['length'][$index];
+
+        $highlights[] = new Highlight($position, $position + $length, Highlight::KEYWORD);
       }
 
-      return;
+      for ($index = 0; $index < count($this->HighlightInfoLicenses['position']); $index++)
+      {
+        $position = $this->HighlightInfoLicenses['position'][$index];
+        $length = $this->HighlightInfoLicenses['length'][$index];
+        $name = $this->HighlightInfoLicenses['name'][$index];
+
+        $highlights[] = new Highlight($position, $position + $length, Highlight::SIGNATURE, $name);
+      }
+      
+      $inputFile = fopen($tmp_name, "r");
+      if ($inputFile) {
+        $view->ShowView($inputFile, $ModBack, 0, 0, NULL, True, False, $highlights);
+        fclose($inputFile);
+      }
+      return "";
     }
 
     $V = "";
@@ -234,8 +260,7 @@ class agent_nomos_once extends FO_Plugin {
       return ($V);
     }
     print ($V);
-    return;
   }
-};
+}
+
 $NewPlugin = new agent_nomos_once;
-?>

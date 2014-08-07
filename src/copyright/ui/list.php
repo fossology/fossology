@@ -191,13 +191,16 @@ class copyright_list extends FO_Plugin
 
 
       /* rewrite content for easier human assimilation */
-      if (MassageContent($rows[$RowIdx], $hash))
+      if (MassageContent($rows[$RowIdx], $hash)) {
       unset($rows[$RowIdx]);
+      }
     }
 
     /* reset array keys, keep order (uploadtree_pk) */
     $rows2 = array();
-    foreach ($rows as $row) $rows2[] = $row;
+    foreach ($rows as $row) {
+      $rows2[] = $row;
+    }
     unset($rows);
 
     /* remove duplicate files */

@@ -19,6 +19,8 @@
 #ifndef _UTIL_H
 #define _UTIL_H
 
+#include <stdio.h>
+#include <sys/stat.h>
 int isDIR(char *dpath);
 int isEMPTYDIR(char *dpath);
 int isEMPTYFILE(char *fpath);
@@ -56,7 +58,7 @@ void memStats(char *s);
 
 void makeSymlink(char *path);
 
-void freeAndClearScan(struct curScan *thisScan);
+//void freeAndClearScan(struct curScan *thisScan);
 void printRegexMatch(int n, int cached);
 char *mmapFile(char *pathname);
 void mmapOpenListing();

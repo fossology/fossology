@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Db\DbManager;
+
 define("TITLE_ui_about", _("About FOSSology"));
 define("_PROJECT", _("FOSSology"));
 define("_COPYRIGHT", _("Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P."));
@@ -58,6 +60,10 @@ class ui_about extends FO_Plugin
         $text = _("FOSSology version");
         $text1 = _("code revision");
         $V .= "<b>$text $VERSION ($text1 $SVN_REV)</b>\n";
+        global $container;
+        $dbManager = $container->get('db.manager');
+        $licenseRefTable = $dbManager->getSingleRow("SELECT COUNT(*) cnt FROM license_ref WHERE rf_text!=$1" ,array("License by Nomos."));
+        $V .= " with $licenseRefTable[cnt] known licenses in database";
         $V .= "<P/>\n";
         $V .= "$this->_Copyright<P>\n";
         $V .= str_replace("\n","\n<P>\n",$this->_Text);

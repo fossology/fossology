@@ -29,6 +29,7 @@
 #include "util.h"
 #include "list.h"
 #include "nomos_regex.h"
+#include  "nomos_utils.h"
 
 #define MM_CACHESIZE 20
 #define MAXLENGTH     100 
