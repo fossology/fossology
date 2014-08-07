@@ -890,7 +890,6 @@ int main(int argc, char** argv)
         break;
       case 'T': /* report type, Copyright Statements | URLs| Emails */
         report_type = atoi(optarg);
-        printf("report_type is:%d\n", report_type);
         break;
       case 't': /* run accuracy testing */
         run_test_files(copy);

@@ -24,6 +24,8 @@
  * @version "$Id: licenses.c 4032 2011-04-05 22:16:20Z bobgo $"
  */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -33,6 +35,7 @@
 
 #include "nomos.h"
 #include "licenses.h"
+#include "nomos_utils.h"
 #include "util.h"
 #include "list.h"
 #include "nomos_regex.h"
@@ -51,8 +54,7 @@ static void findLines(char *, char *, int, int, list_t *);
 static int searchStrategy(int, char *, int);
 static void saveLicenseData(scanres_t *, int, int, int);
 static int scoreCompare(const void *, const void *);
-
-static char miscbuf[myBUFSIZ];
+static void printHighlightInfo(GArray* keyWords,  GArray* theMatches);
 static char any[6];
 static char some[7];
 static char few[6];
@@ -559,35 +561,27 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
 }
 #endif	/* FIX_STRINGS */
 
-/**
- * \brief scan the list for a license(s)
- * This routine takes a list, but in fossology we always pass in a single file
- */
-void licenseScan(list_t *licenseList) {
+char* createRelativePath(item_t *p, scanres_t *scp)
+{
+  char* cp;
+  if (*(p->str) == '/')
+  {
+    (void) strcpy(scp->fullpath, p->str);
+    scp->nameOffset = (size_t) (cur.targetLen + 1);
+    cp = scp->fullpath; /* full pathname */
+  }
+  else
+  {
+    (void) sprintf(scp->fullpath, "%s/%s", cur.cwd, p->str);
+    scp->nameOffset = (size_t) (cur.cwdLen + 1);
+    cp = p->str; /* relative path == faster open() */
+  }
 
-  int i;
-  int c;
-  int lowWater;
-  int nCand;
-  char *textp;
-  char *cp;
-  int counts[NKEYWORDS + 1];
-  scanres_t *scores;
-  scanres_t *scp;
-  item_t *p;
+  return cp;
+}
 
-#ifdef	PROC_TRACE
-  traceFunc("== licenseScan(%p, %d)\n", l);
-#endif	/* PROC_TRACE */
-
-#ifdef	MEMSTATS
-  printf("... allocating %d bytes for scanres_t[] array\n",
-      sizeof(*scp)*licenseList->used);
-#endif	/* MEMSTATS */
-
-  scores = (scanres_t *) memAlloc(sizeof(*scp) * licenseList->used, MTAG_SCANRES);
-  memset((void *) counts, 0, (size_t)((NKEYWORDS + 1) * sizeof(int)));
-
+void scanForKeywordsAndSetScore(scanres_t* scores, list_t* licenseList)
+{
   /*
      CDB -- Some other part of FOSSology has already decided we
      want to scan this file, so we need to look into removing this
@@ -598,29 +592,25 @@ void licenseScan(list_t *licenseList) {
    * the candidate files for keywords (to obtain a "score" -- the higher
    * the score, the more likely it has a real open source license in it).
    *****
-   * There are lots of things that will 'disintest' us in a file (below).
+   * There are lots of things that will 'disinterest' us in a file (below).
    *****
    * PERFORMANCE NOTE: this loop is called 400,000 to 500,000 times
    * when parsing a distribution.  Little slow-downs ADD UP quickly!
    */
-
-  for (scp = scores; (p = listIterate(licenseList)) != NULL_ITEM; scp++) {
+  scanres_t* scp;
+  int c;
+  item_t* p;
+  char* textp;
+  char* cp;
+  for (scp = scores; (p = listIterate(licenseList)) != NULL_ITEM ; scp++)
+  {
 
     /*
      * Use *relative* pathnames wherever possible -- we'll spend less time in
      * the kernel looking up inodes and pathname components that way.
      */
+    cp = createRelativePath(p, scp);
 
-    if (*(p->str) == '/') {
-      (void) strcpy(scp->fullpath, p->str);
-      scp->nameOffset = (size_t)(cur.targetLen + 1);
-      cp = scp->fullpath; /* full pathname */
-    }
-    else {
-      (void) sprintf(scp->fullpath, "%s/%s", cur.cwd, p->str);
-      scp->nameOffset = (size_t)(cur.cwdLen + 1);
-      cp = p->str; /* relative path == faster open() */
-    }
 #ifdef	DEBUG
     printf("licenseScan: scan %s\n",
         (char *)(scp->fullpath+scp->nameOffset));
@@ -654,9 +644,11 @@ void licenseScan(list_t *licenseList) {
      */
     assert(NKEYWORDS >= sizeof(scp->kwbm));
 
-    for (scp->kwbm = c = 0; c < NKEYWORDS; c++) {
-      if (idxGrep(c + _KW_first, textp, REG_EXTENDED | REG_ICASE)) {
-        scp->kwbm |= (1 << c);
+    for (scp->kwbm = c = 0; c < NKEYWORDS; c++)
+    {
+      if (idxGrep_recordPosition(c + _KW_first, textp, REG_EXTENDED | REG_ICASE))
+      {
+        scp->kwbm |= (1 << c);  // put a one at c'th position in kwbm (KeywordByteMap)
         scp->score++;
 #if	(DEBUG > 5)
         printf("Keyword %d (\"%s\"): YES\n", c, _REGEX(c+_KW_first));
@@ -669,46 +661,42 @@ void licenseScan(list_t *licenseList) {
         scp->score);
 #endif	/* DEBUG > 5 */
 
-  } /*** for ***/
+  }
+  return;
+}
 
-  c = licenseList->used;
-
+void relaxScoreCriterionForSingleFile(scanres_t* scores)
+{
   /*
    * CDB - It is always the case that we are doing one file at a time.
    */
-
   /*
    * If we were invoked with a single-file-only option, just over-ride the
    * score calculation -- give the file any greater-than-zero score so it
    * appears as a valid candidate.  This is important when the file to be
    * evaluated has no keywords, yet might contain authorship inferences.
    */
-  if (scores->score == 0) {
-    scores->score = 1; /* force to be a valid candidate  */
+  if (scores->score == 0)
+  {
+    scores->score = 1;
   }
+}
 
-#ifdef	PROC_TRACE
-  traceFunc("=> invoking qsort(): callback == scoreCompare()\n");
-#endif	/* PROC_TRACE */
-
-  qsort(scores, (size_t) c, sizeof(*scp), scoreCompare);
-  /*
-   * Set up defaults for the minimum-scores for which we'll save files.
-   * Try to ensure a minimum # of license files will be recorded for this
-   * source/package (try, don't force it too hard); see if lower scores
-   * yield a better fit, but recognize the of a non-license file increases
-   * as we lower the bar.
-   */
-
-  lowWater = 1;
-
+int fiterResultsOfKeywordScan(int lowWater, scanres_t* scores, int nFiles)
+{
   /*
    * Run through the list once more; this time we record and count the
    * license candidates to process.  License candidates are determined
    * by either (score >= low) *OR* matching a set of filename patterns.
    */
 
-  for (scp = scores, i = nCand = 0; i < c; i++, scp++) {
+  int nCand;
+
+  scanres_t* scp;
+  int i;
+
+  for (scp = scores, i = nCand = 0; i < nFiles; i++, scp++)
+  {
     scp->relpath = (char *) (scp->fullpath + scp->nameOffset);
     if (idxGrep(_FN_LICENSEPATT, pathBasename(scp->relpath), REG_ICASE
         | REG_EXTENDED)) {
@@ -731,13 +719,66 @@ void licenseScan(list_t *licenseList) {
 #endif	/* DEBUG > 3 */
       nCand++;
     }
-  } /* for */
+  }
+  return nCand;
+}
 
+/**
+ * \brief scan the list for a license(s)
+ * This routine takes a list, but in fossology we always pass in a single file
+ */
+void licenseScan(list_t *licenseList)
+{
+
+  /*
+   * Set up defaults for the minimum-scores for which we'll save files.
+   * Try to ensure a minimum # of license files will be recorded for this
+   * source/package (try, don't force it too hard); see if lower scores
+   * yield a better fit, but recognize the of a non-license file increases
+   * as we lower the bar.
+   */
+
+  int lowWater = 1; // constant
+
+  int nCand; //relevant output
+
+  //fields
+  int counts[NKEYWORDS + 1];
+  scanres_t *scores;
+
+  //recycled temp variables
+  scanres_t *scp;
+  int nFilesInList;
+
+#ifdef	PROC_TRACE
+  traceFunc("== licenseScan(%p, %d)\n", l);
+#endif	/* PROC_TRACE */
+
+#ifdef	MEMSTATS
+  printf("... allocating %d bytes for scanres_t[] array\n",
+      sizeof(*scp)*licenseList->used);
+#endif	/* MEMSTATS */
+
+  scores = (scanres_t *) memAlloc(sizeof(*scp) * licenseList->used, MTAG_SCANRES);
+  memset((void *) counts, 0, (size_t) ((NKEYWORDS + 1) * sizeof(int)));
+
+  scanForKeywordsAndSetScore(scores, licenseList);
+  relaxScoreCriterionForSingleFile(scores);
+
+#ifdef	PROC_TRACE
+  traceFunc("=> invoking qsort(): callback == scoreCompare()\n");
+#endif	/* PROC_TRACE */
+
+  nFilesInList = licenseList->used;
+  qsort(scores, (size_t) nFilesInList, sizeof(*scp), scoreCompare);
+
+  //recycled temp variables
+  nCand = fiterResultsOfKeywordScan(lowWater, scores, nFilesInList);
   /*
    * OF SPECIAL INTEREST: saveLicenseData() changes directory (to "..")!!!
    */
   /* DBug: printf("licenseScan: gl.initwd is:%s\n",gl.initwd); */
-  saveLicenseData(scores, nCand, c, lowWater);
+  saveLicenseData(scores, nCand, nFilesInList, lowWater);
   /*
    * At this point, we don't need either the raw-source directory or the
    * unpacked results anymore, so get rid of 'em.
@@ -783,6 +824,109 @@ static void noLicenseFound() {
   return;
 }
 
+static void printHighlightInfo(GArray* keyWords,  GArray* theMatches){
+  if ( optionIsSet(OPTS_HIGHLIGHT_STDOUT) )
+  {
+    printf(" Highlighting Info at");
+    int currentKeyw;
+    for (currentKeyw=0; currentKeyw < keyWords->len; ++currentKeyw ) {
+      MatchPositionAndType* ourMatchv = getMatchfromHighlightInfo(keyWords,currentKeyw );
+      printf(" Keyword at %i, length %i, index = 0,",  ourMatchv->start, ourMatchv->end - ourMatchv->start );
+    }
+    int currentLicence;
+    for (currentLicence = 0; currentLicence < theMatches->len; ++currentLicence)
+    {
+      LicenceAndMatchPositions* theLicence = getLicenceAndMatchPositions(theMatches, currentLicence);
+
+      int highl;
+      for (highl = 0; highl < theLicence->matchPositions->len; ++highl)
+      {
+        MatchPositionAndType* ourMatchv = getMatchfromHighlightInfo(theLicence->matchPositions, highl);
+        printf(" License #%s# at %i, length %i, index = %i,", theLicence->licenceName , ourMatchv->start, ourMatchv->end - ourMatchv->start,    ourMatchv->index  );
+
+      }
+    }
+  }
+  printf("\n");
+  return;
+}
+
+static void printKeyWordMatches(scanres_t *scores, int idx)
+{
+  int c;
+  int base;
+  char miscbuf[myBUFSIZ];
+  int offset;
+  /*
+   * construct the list of keywords that matched in licenseScan()
+   */
+  (void) strcpy(miscbuf, "Matches: ");
+  offset = 9; /* e.g., strlen("Matches: ") */
+  for (base = c = 0; c < NKEYWORDS; c++)
+  {
+    if (scores[idx].kwbm & (1 << c))
+    {
+      if (base++)
+      {
+        miscbuf[offset++] = ',';
+        miscbuf[offset++] = ' ';
+      }
+      offset += sprintf(miscbuf + offset, "%s", _REGEX(c + _KW_first));
+    }
+  }
+
+  printf("%s\n", miscbuf);
+
+}
+
+/*Returns :
+ negative value if a < b; zero if a = b; positive value if a > b.
+ */
+
+static gint compare_integer(gconstpointer a, gconstpointer b)
+{
+  gint out;
+
+  if (a < b)
+    out = -1;
+  else if (a == b)
+    out = 0;
+  else
+    out = 1;
+  return out;
+
+}
+
+
+static void rescanOriginalTextForFoundLicences(char* textp, int isFileMarkupLanguage, int isPS){
+  if (cur.theMatches->len > 0 )
+  {
+    if (cur.cliMode == 1 && !optionIsSet(OPTS_HIGHLIGHT_STDOUT) ) return;
+    // do a fresh doctoring of the buffer
+    g_array_free(cur.docBufferPositionsAndOffsets, TRUE);
+    cur.docBufferPositionsAndOffsets = g_array_new(FALSE, FALSE, sizeof(pairPosOff));
+    doctorBuffer(textp, isFileMarkupLanguage, isPS, NO);
+
+    for (cur.currentLicenceIndex = 0; cur.currentLicenceIndex < cur.theMatches->len; ++cur.currentLicenceIndex)
+    {
+      LicenceAndMatchPositions* currentLicence = getLicenceAndMatchPositions(cur.theMatches, cur.currentLicenceIndex);
+
+      //we want to only look for each found index once
+      g_array_sort(currentLicence->indexList, compare_integer);
+
+      int myIndex;
+      int lastindex = -1;
+      for (myIndex = 0; myIndex < currentLicence->indexList->len; ++myIndex)
+      {
+        int currentIndex = g_array_index(currentLicence->indexList, int, myIndex);
+        if (currentIndex == lastindex) continue;
+        idxGrep_recordPositionDoctored(currentIndex, textp, REG_ICASE | REG_EXTENDED);
+        lastindex = currentIndex;
+      }
+    }
+  }
+}
+
 /**
  * \brief Save/creates all the license-data in a specific directory temp
  * directory?
@@ -795,13 +939,13 @@ static void noLicenseFound() {
 static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     int lowWater) {
   int i;
-  int c;
-  int base;
+ // int c;
+ // int base;
   int size;
   int highScore = scores->score;
-  int isML = 0;
+  int isFileMarkupLanguage = 0;
   int isPS = 0;
-  int offset;
+  // int offset;
   int idx;
   char *fileName;
   char *textp;
@@ -871,20 +1015,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
      */
 
     /*
-     * construct the list of keywords that matched in licenseScan()
-     */
-    (void) strcpy(miscbuf, "Matches: ");
-    offset = 9; /* e.g., strlen("Matches: ") */
-    for (base = c = 0; c < NKEYWORDS; c++) {
-      if (scores[idx].kwbm & (1 << c)) {
-        if (base++) {
-          miscbuf[offset++] = ',';
-          miscbuf[offset++] = ' ';
-        }
-        offset += sprintf(miscbuf + offset, "%s", _REGEX(c + _KW_first));
-      }
-    }
-    /*
      * Since we hard-wire the score of every file (invoked as --file), a score
      * of 1 could be either 0 or 1, so scores[idx].kwbm tells the real story...
      */
@@ -893,7 +1023,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
           (scores[idx].kwbm ? scores[idx].score : scores[idx].kwbm),
           scores[idx].kwbm);
       if (scores[idx].kwbm) {
-        printf("%s\n", miscbuf);
+        printKeyWordMatches(scores, idx);
       }
     }
     /*
@@ -917,10 +1047,13 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     printf("*** PROCESS File: %s\n", scores[idx].relpath);
     printf("... %d bytes, score %d\n", scores[idx].size, scores[idx].score);
 #endif /* DEBUG || DOCTOR_DEBUG || LTSR_DEBUG || BATCH_DEBUG || PARSE_STOPWATCH || MEMSTATS || MEM_DEBUG || defined(UNKNOWN_CHECK_DEBUG)*/
-    isML = idxGrep(_UTIL_MARKUP, textp, REG_ICASE | REG_EXTENDED);
+
+    isFileMarkupLanguage = idxGrep(_UTIL_MARKUP, textp, REG_ICASE | REG_EXTENDED);
+
 #ifdef	DOCTOR_DEBUG
-    printf("idxGrep(ML) returns %d\n", isML);
-    if (isML) {
+    printf("idxGrep(ML) returns %d\n", isFileMarkupLanguage);
+    if (isFileMarkupLanguage)
+    {
       int n;
       printf("isMarkUp@%d: [", cur.regm.rm_so);
       for (n = cur.regm.rm_so; n <= cur.regm.rm_eo; n++) {
@@ -947,7 +1080,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
      * Interesting - copyString(parseLicenses(args), MTAG_FILELIC)...
      * will randomly segfault on 32-bit Debian releases.  Split the calls.
      */
-    fileName = parseLicenses(textp, size, &scores[idx], isML, isPS);
+    fileName = parseLicenses(textp, size, &scores[idx], isFileMarkupLanguage, isPS);
     scores[idx].licenses = copyString(fileName, MTAG_FILELIC);
 #ifdef	QA_CHECKS
     if (fileName == NULL_STR) {
@@ -971,6 +1104,10 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
       memFree(cur.licPara, MTAG_TEXTPARA); /* be free! */
       cur.licPara = NULL_STR; /* remember */
     }
+
+    //! careful this function changes the content of textp
+    rescanOriginalTextForFoundLicences(textp, isFileMarkupLanguage, isPS);
+    //! but as it is freed right here we do not make a copy..
     munmapFile(textp);
 
     /*
@@ -1030,9 +1167,10 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
   if(cur.cliMode) 
   {
     if (optionIsSet(OPTS_LONG_CMD_OUTPUT))
-      printf("File %s contains license(s) %s\n", cur.targetFile, cur.compLic);
+      printf("File %s contains license(s) %s", cur.targetFile, cur.compLic);
     else
-      printf("File %s contains license(s) %s\n", basename(cur.targetFile), cur.compLic);
+      printf("File %s contains license(s) %s", basename(cur.targetFile), cur.compLic);
+    printHighlightInfo(cur.keywordPositions, cur.theMatches);
   }
   return;
 } /* saveLicenseData */

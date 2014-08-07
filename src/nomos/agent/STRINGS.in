@@ -30,7 +30,7 @@
 #####
 %ENTRY%	_KW_acknowledgement
 %KEY%	=NULL=
-%STR%	"acknowledgement"
+%STR%	"acknowledge?ment"
 %ALIAS%	_KW_first
 #
 %ENTRY%	_KW_agreement
@@ -1228,6 +1228,10 @@
 %ENTRY%	_LT_CPOL
 %KEY%	"licen[cs]"
 %STR%	"the work as defined below is provided under the terms of this code project open licen[cs]e"
+#
+%ENTRY%	_LT_CPOL_V102
+%KEY%	=NULL=
+%STR%	"(the Code Project Open License|CPOL) =FEW= 1\.?02"
 #####
 # DELETED: are separate modules of ... their own licen[cs]e agreement
 #####
@@ -2113,6 +2117,10 @@
 %ENTRY%	_LT_GFDL
 %KEY%	"so(ftware|urce)"
 %STR%	"in order to use it for manuals for free software because"
+#
+%ENTRY% _LT_GIFTWARE
+%KEY% "cooperation"
+%STR% "is gift-?ware\.? it was created by a number of people working in cooperation,? and is given to you freely"
 #####
 # DELETED: ... an appropriate copyright notice
 #####
@@ -2194,7 +2202,7 @@
 #
 %ENTRY%	_LT_GPL_EXCEPT_CLASSPATH_2
 %KEY%	"produce"
-%STR%	"special exception =ANY= link this library with =SOME= to produce an executable"
+%STR%	"special exception =ANY= link this (library|software) with =SOME= to produce an executable"
 #
 %ENTRY%	_LT_GNU_JAVAMAIL_EXCEPT
 %KEY%	"gnu"
@@ -2262,6 +2270,10 @@
 %ENTRY%	_LT_GPL_V2_NAMED
 %KEY%	"gpl"
 %STR%	"\<gplv2\>"
+#
+%ENTRY%	_LT_GPL_V2_NAMED_ref1
+%KEY%	"gpl"
+%STR%	"gpl( )?v2"
 #
 %ENTRY%	_LT_GPL_V2_NAMED_later
 %KEY%	"gpl"
@@ -3194,6 +3206,10 @@ e /* (INFILE(j)) */
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"\<(either|or|alternately)\> =SOME= (lgpl|lesser GNU general public licen[cs]e|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))"
 #
+%ENTRY% _LT_LOGICA
+%KEY% "documentation"
+%STR% "all associated documentation and other material must acknowledge logica"
+#
 %ENTRY%	_LT_UNRARref1
 %KEY% "unrar" 
 %STR%	"unrar restriction"
@@ -3674,7 +3690,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_NVIDIA
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
-%STR%	"hereby granted a non-?exclusive royalty-free copyright licen[cs]e"
+%STR%	"hereby granted a non-?exclusive,? royalty-free copyright (and design patent)? licen[cs]e"
 #
 %ENTRY%	_LT_NVIDIA_EULA
 %KEY%	"so(ftware|urce)"
@@ -4766,6 +4782,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_URL_UNICODE
 %KEY%	"\<terms\>"
 %STR%	"w?w?w?\.?unicode\.?org/terms_of_use\.?html"
+#
+%ENTRY%	_LT_UNIDEX
+%KEY%	"grants"
+%STR%	"unidex,? inc\.? grants you permission to copy,? modify,? distribute"
 #
 %ENTRY%	_LT_USGOVT_1
 %KEY%	"licen[cs]"
@@ -7084,6 +7104,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"gnu (general p|p)ublic licen[cs]e =SOME= version 2"
 #
+%ENTRY% _TITLE_GPL2_ref1_later
+%KEY% "licen[cs]"
+%STR% "licen[cs]e(:?) (gnu )?gpl[ -]v?2\.?0?\+"
+#
 %ENTRY%	_TITLE_MODULE_LICENSE
 %KEY%	"licen[cs]"
 %STR%	"MODULE_LICENSE"
@@ -8290,7 +8314,7 @@ k
 #
 %ENTRY%	_PHR_LGPL21_ONLY_ref
 %KEY%	"licen[cs]"
-%STR%	"licen[cs]ed under =FEW= (gnu (lesser|library)|(lesser|library) gnu) (general p|p)ublic licen[cs]e\,? =FEW= (v|[^_-]version )2\.?1"
+%STR%	"under =FEW= (gnu (lesser|library)|(lesser|library) gnu) (general p|p)ublic licen[cs]e\,? =SOME= (v|[^_-]version )2\.?1"
 #
 %ENTRY%	_PHR_LGPL21_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -9728,7 +9752,7 @@ k
 #
 %ENTRY%	_UTIL_POSTSCR
 %KEY%	=NULL=
-%STR%	"(^[(][0-9]+[)] |^[-0-9.]+ [A-Z] |[-0-9.]+ [-0-9.]+ [A-Z]$|\) *[A-Z]$|\{\\\\[0-9a-z\]*[^ ])"
+%STR%	"(^[(][0-9]+[)] |^[-0-9.]+ [A-Z] |[-0-9.]+ [-0-9.]+ [A-Z]$|\) *[A-Z]$|\{\\\\[0-9a-z\]*[^ ]|\\par$)"
 #
 %ENTRY%	_UTIL_BZPATCH
 %KEY%	=NULL=

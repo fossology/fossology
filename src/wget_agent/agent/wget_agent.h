@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -45,6 +45,7 @@ typedef struct stat stat_t;
 #include "../../ununpack/agent/checksum.h"
 
 #define MAXCMD  2048
+#define FILEPATH 5000
 
 extern char SQL[MAXCMD];
 
@@ -114,6 +115,8 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
 int GetVersionControl();
 
 void GetProxy();
+
+void replace_url_with_auth();
 
 #endif /* _WGET_AGENT_H */
 

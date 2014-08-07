@@ -13,10 +13,9 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*********************************************************************/
+ *********************************************************************/
 
 #include "libfocunit.h"
-
 
 /**
  * \brief fossology cunit main test function
@@ -39,13 +38,16 @@
  */
 int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites)
 {
-  int   iopt;
+  int iopt;
   char *SuiteName = 0;
   char *TestName = 0;
   CU_pTestRegistry pRegistry;
-  CU_pSuite        pSuite;
-  CU_pTest         pTest;
-  CU_ErrorCode     ErrCode;
+  CU_pSuite pSuite;
+  CU_pTest pTest;
+  CU_ErrorCode ErrCode;
+  CU_pFailureRecord FailureList;
+  CU_RunSummary *pRunSummary;
+  int FailRec;
 
   /** test name is empty? */
   if (!test_name)
@@ -58,12 +60,12 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites)
   {
     fprintf(stderr, "FATAL: Initialization of Test Registry failed.\n");
     exit(1);
-  } 
+  }
 
   assert(CU_get_registry());
   assert(!CU_is_test_running());
 
-  if(CU_register_suites(suites) != CUE_SUCCESS)
+  if (CU_register_suites(suites) != CUE_SUCCESS)
   {
     fprintf(stderr, "FATAL: Register suites failed - %s\n", CU_get_error_msg());
     exit(1);
@@ -73,19 +75,19 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites)
   /* option -s suitename to run
    *        -t testname to run
    */
-  while((iopt = getopt(argc,argv,"s:t:")) != -1)
+  while ((iopt = getopt(argc, argv, "s:t:")) != -1)
   {
-    switch(iopt)
+    switch (iopt)
     {
-      case 's':
-          SuiteName = optarg;
-          break;
-      case 't':
-          TestName = optarg;
-          break;
-      default:
-          fprintf(stderr, "Invalid argument for %s\n", argv[0]);
-          exit(-1);
+    case 's':
+      SuiteName = optarg;
+      break;
+    case 't':
+      TestName = optarg;
+      break;
+    default:
+      fprintf(stderr, "Invalid argument for %s\n", argv[0]);
+      exit(-1);
     }
   }
 
@@ -134,13 +136,35 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites)
     CU_automated_run_tests();
   }
 
+  pRunSummary = CU_get_run_summary();
   printf("%s summary:\n", test_name);
-  printf("  Number of suites run: %d\n", CU_get_number_of_suites_run());
-  printf("  Number of tests run: %d\n", CU_get_number_of_tests_run());
-  printf("  Number of tests failed: %d\n", CU_get_number_of_tests_failed());
-  printf("  Number of asserts: %d\n", CU_get_number_of_asserts());
-  printf("  Number of successes: %d\n", CU_get_number_of_successes());
-  printf("  Number of failures: %d\n", CU_get_number_of_failures());
+  printf("  Number of suites run: %d\n", pRunSummary->nSuitesRun);
+  printf("  Number of suites failed: %d\n", pRunSummary->nSuitesFailed);
+  printf("  Number of tests run: %d\n", pRunSummary->nTestsRun);
+  printf("  Number of tests failed: %d\n", pRunSummary->nTestsFailed);
+  printf("  Number of asserts: %d\n", pRunSummary->nAsserts);
+  printf("  Number of asserts failed: %d\n", pRunSummary->nAssertsFailed);
+  printf("  Number of failures: %d\n", pRunSummary->nFailureRecords);
+
+  /* Print any failures */
+  if (pRunSummary->nFailureRecords)
+  {
+    printf("\nFailures:\n");
+    FailRec = 1;
+    for (FailureList = CU_get_failure_list(); FailureList; FailureList = FailureList->pNext)
+    {
+      printf("%d. File: %s  Line: %u   Test: %s\n",
+             FailRec,
+             FailureList->strFileName,
+             FailureList->uiLineNumber,
+             (FailureList->pTest)->pName);
+      printf("  %s\n",
+             FailureList->strCondition);
+      FailRec++;
+    }
+    printf("\n");
+  }
+
   CU_cleanup_registry();
 
   return 0;

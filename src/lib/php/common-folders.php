@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2014 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -31,14 +32,11 @@
  */
 function FolderGetTop()
 {
-  global $Plugins;
-  global $PG_CONN;
-
   /* Get the list of folders */
   if (!empty($_SESSION['Folder'])) { return($_SESSION['Folder']); }
-
+  global $PG_CONN;
   if (empty($PG_CONN)) { return; }
-  $sql = "SELECT root_folder_fk FROM users ORDER BY user_pk ASC LIMIT 1;";
+  $sql = "SELECT root_folder_fk FROM users ORDER BY user_pk ASC LIMIT 1";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
@@ -228,7 +226,6 @@ function GetFolderFromItem($upload_pk="", $uploadtree_pk="")
  */
 function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
 {
-  global $Plugins;
   if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
   if (empty($ParentFolder)) { return; }
   global $PG_CONN;
@@ -745,4 +742,28 @@ function GetFolderArray($RootFolder=-1, &$FolderArray)
   }
   pg_free_result($result);
 }
-?>
+
+/*
+ * \brief check if one file path contains an excluding text
+ * 
+ * \param $FilePath - file path
+ * \param $ExcludingText - excluding text
+ * 
+ * \return 1: include, 0: not include
+ */
+function ContainExcludeString($FilePath, $ExcludingText) {
+  $excluding_length = 0;
+  $excluding_flag = 0; // 1: exclude 0: not exclude
+  if ($ExcludingText) {
+    $excluding_length = strlen($ExcludingText);
+  }
+
+  /* filepath contains 'xxxx/', '/xxxx/', 'xxxx', '/xxxx' */
+  if ($excluding_length > 0 && strstr($FilePath, $ExcludingText)) {
+    $excluding_flag = 1;
+    /* filepath does not contain 'xxxx/' */
+    if ('/' != $ExcludingText[0] && '/' == $ExcludingText[$excluding_length - 1] && !strstr($FilePath, '/'.$ExcludingText)) 
+      $excluding_flag = 0;
+  }
+  return $excluding_flag;
+}

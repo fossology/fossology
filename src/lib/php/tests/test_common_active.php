@@ -21,7 +21,7 @@
  * \brief unit tests for common-active.php
  */
 
-require_once('../common-active.php');
+require_once(dirname(__FILE__) .'/../common-active.php');
 
 /**
  * \class test_common_active

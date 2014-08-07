@@ -368,6 +368,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   LOG_VERBOSE0("CMD: %s", CMD);
   rc = system(CMD); 
 
+  LOG_FATAL("GlobalType is:%s\n", GlobalType);
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
   {
     LOG_FATAL("upload %ld Download failed; Return code %d from: %s",GlobalUploadKey,WEXITSTATUS(rc),CMD);
@@ -477,6 +478,7 @@ int GetVersionControl()
   }
   else if (0 == strcmp(GlobalType, Type[1]))
   {
+    replace_url_with_auth();
     if (GlobalProxy[0] && GlobalProxy[0][0])
       sprintf(command, "git config --global http.proxy %s && git clone %s %s %s  && rm -rf %s/.git", GlobalProxy[0], GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
     else
@@ -491,6 +493,7 @@ int GetVersionControl()
 
   if (rc != 0)
   {
+    LOG_FATAL("command is:%s\n", command);
     /** for user fossy */
     /** git: git config --global http.proxy web-proxy.cce.hp.com:8088; git clone http://github.com/schacon/grit.git */
     /** svn: svn checkout --config-option servers:global:http-proxy-host=web-proxy.cce.hp.com --config-option servers:global:http-proxy-port=8088 https://svn.code.sf.net/p/fossology/code/trunk/fossology/utils/ **/
@@ -503,7 +506,9 @@ int GetVersionControl()
   rc = system(command);
   if (rc != 0)
   {
+    LOG_FATAL("command is:%s\n", command);
     system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    LOG_FATAL("DeleteTempDirCmd is:%s\n", DeleteTempDirCmd);
     return 1;
   }
 
@@ -790,4 +795,42 @@ void Usage(char *Name)
   printf("         the DB and repository.\n");
   printf("  no file :: process data from the scheduler.\n");
 } /* Usage() */
+
+ /**
+  * \brief translate authentication of git clone
+  * from http://git.code.sf.net/p/fossology/fossology.git --username --password password (input)
+  * to http://username:password@git.code.sf.net/p/fossology/fossology.git
+  */
+void replace_url_with_auth()
+{
+  const char needle[] = " ";
+  const char needle2[] = "//";
+  int index = 0;
+  char *username = NULL;
+  char *password = NULL;
+  char http[10] = "";
+  char URI[FILEPATH] = "";
+  char *token = NULL;
+  char *temp = NULL;
+
+  if (strstr(GlobalParam, "password") && strstr(GlobalParam, "username"))
+  {
+    temp = strstr(GlobalURL, needle2);
+    strcpy(URI, temp + 2);
+    strncpy(http, GlobalURL, strlen(GlobalURL) - strlen(URI));
+
+    /* get the first token */
+    token = strtok(GlobalParam, needle);
+    /* walk through other tokens */
+    while( token != NULL )
+    {
+      if (1 == index) username = token;
+      if (3 == index) password = token;
+      token = strtok(NULL, needle);
+      index++;
+    }
+    snprintf(GlobalURL, FILEPATH, "%s%s:%s@%s", http, username, password, URI);
+    memset(GlobalParam,'\0',MAXCMD);
+  }
+}
 

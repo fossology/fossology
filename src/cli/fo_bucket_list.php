@@ -33,13 +33,18 @@ $Usage = "Usage: " . basename($argv[0]) . "
   -b bucket id        :: bucket id
   -a bucket agent id  :: bucket agent id
   -n nomos agent id   :: nomos agent id
+  -X excluding        :: Exclude files containing [free text] in the path.
+                         'mac/' should exclude all files in the mac directory. 
+                         'mac' and it should exclude all files in any directory containing the substring 'mac'
+                         '/mac' and it should exclude all files in any directory that starts with 'mac'
   -h  help, this message
   ";
 
 $upload = $item = $bucket = $bucket_agent = $nomos_agent = "";
 
+$excluding = '';
 $longopts = array("user:", "password:");
-$options = getopt("c:u:t:b:a:n:h", $longopts);
+$options = getopt("c:u:t:b:a:n:hX:", $longopts);
 if (empty($options) || !is_array($options))
 {
   print $Usage;
@@ -77,6 +82,9 @@ foreach($options as $option => $value)
       break;
     case 'password':
       $passwd = $value;
+      break;
+    case 'X':
+      $excluding = $value;
       break;
     default:
       print "unknown option $option\n";
@@ -158,6 +166,7 @@ return 0;
 function GetBucketList($bucket_pk, $bucket_agent, $nomos_agent, $uploadtree_pk, $upload_pk = 0)
 {
   global $PG_CONN;
+  global $excluding;
 
   /** get bucket name */
   $sql = "SELECT bucket_name from bucket_def where bucket_pk = $bucket_pk;";
@@ -199,15 +208,24 @@ function GetBucketList($bucket_pk, $bucket_agent, $nomos_agent, $uploadtree_pk, 
   $outerresult = pg_query($PG_CONN, $sql);
 
   /* Select each uploadtree row in this tree, write out text */
+  $excluding_flag = 0; // 1: exclude 0: not exclude
   while ($row = pg_fetch_assoc($outerresult))
   { 
     $filepatharray = Dir2Path($row['uploadtree_pk'], $uploadtree_tablename);
     $filepath = "";
     foreach($filepatharray as $uploadtreeRow)
     {
-      if (!empty($filepath)) $filepath .= "/";
+      if (!empty($filepath)){
+        $filepath .= "/";
+        /* filepath contains 'xxxx/', '/xxxx/', 'xxxx', '/xxxx' */
+        $excluding_flag = ContainExcludeString($filepath, $excluding);
+        if (1 == $excluding_flag) {
+          break;
+        }
+      }
       $filepath .= $uploadtreeRow['ufile_name'];
     }
+    if (1 == $excluding_flag) continue; // excluding files whose path contains excluding text
     $V = $filepath;
     print "$V";
     print "\n";

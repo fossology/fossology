@@ -32726,13 +32726,6 @@ INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_c
 
 GCC Linking Exception 
 In addition to the permissions in the GNU General Public License, the Free Software Foundation gives you unlimited permission to link the compiled version of this file into combinations with other programs, and to distribute those combinations without any restriction coming from the use of this file. (The General Public License restrictions do apply in other respects; for example, they cover modification of the file, and distribution when not linked into a combine executable.)', '', NULL, NULL, NULL, 'GNU General Public License v2.0 w/GCC Runtime Library exception', NULL, NULL, NULL, '', NULL, false, false, false, '5dd21a7c43ce6c65eeefdf29371b9afa', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (6, 'GPL-2.0-with-classpath-exception', 'nsert GPL v2 license text here 
-
-Class Path Exception 
-
-Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination. 
-
-As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.', 'http://www.gnu.org/software/classpath/license.html', NULL, NULL, NULL, 'GNU General Public License v2.0 w/Classpath exception', NULL, NULL, NULL, '', NULL, false, false, false, '78307e5640197d1287b314eeb67a2b7a', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (417, 'CC-BY-NC-2.0', 'Creative Commons Attribution-NonCommercial 2.0 
 
 CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE 
@@ -40809,160 +40802,6 @@ Any person who transfers this source code or any derivative work must include th
 
 COPYRIGHT   I B M   CORPORATION 2002 
 LICENSED MATERIAL  -  PROGRAM PROPERTY OF I B M', 'http://spdx.org/licenses/IBM-pibs#licenseText', NULL, NULL, NULL, 'IBM PowerPC Initialization and Boot Software', NULL, NULL, NULL, '', NULL, false, false, false, '811c6517f4a7d9626374f81b5e52394d', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (335, 'RealNetworks-EULA', 'REALNETWORKS, INC.
-REAL LICENSING PROGRAM
-LICENSE SUPPLEMENT
-REDISTRIBUTION NOT PERMITTED
-IMPORTANT: READ CAREFULLY:
-This RealNetworks, Inc. License Supplement (“License Supplement”) is a legal
-agreement between you (either an individual or an entity, “You”) and RealNetworks, Inc.
-and its suppliers and licensors (collectively, “RealNetworks”) for the products (the
-“Software”) listed on the Real Licensing Program invoice (the “Invoice”) provided to
-You by RealNetworks.
-BY CLICKING ON “ACCEPT”, INSTALLING, COPYING OR OTHERWISE USING
-THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS
-LICENSE SUPPLEMENT. IF YOU DO NOT AGREE TO THE TERMS OF THIS
-LICENSE SUPPLEMENT, CLICK THE “I DO NOT ACCEPT” TO TERMINATE THE
-SOFTWARE INSTALLATION PROCESS.
-YOU AGREE THAT YOUR USE OF THE SOFTWARE ACKNOWLEDGES THAT
-YOU HAVE READ THIS LICENSE SUPPLEMENT, UNDERSTAND IT, AND
-AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
-1. SUPPLEMENT. This License Supplement supplements the End User License
-Agreement(s) accompanying the Software (“EULA”). In the event of any conflict
-between the terms of this License Supplement and any EULA, the terms of this License
-Supplement will control. Except for the provisions set forth in this License Supplement,
-all EULA provisions will remain in full force and effect.
-2. ELIGIBILITY. Notwithstanding anything to the contrary in the EULA, the Software
-covered by the EULA and this License Supplement are available only to the following
-types of entities, and You represent and warrant that You are one of the following:
-(a) Corporations, educational institutions, government organizations or not-for-profit
-organizations who deploy the server for their own internal non-commercial use. Wireless
-Network service providers or wireless network operators may not deploy this Software
-within their network(s). (b) End User Network Service Providers of less than 200,000
-subscribers. As used in this License Supplement, "End User Network Service Providers"
-means an entity that provides data network services to consumers or individuals. (c )
-Media Companies with less than fifty million dollars ($50,000,000) in annual revenue.
-As used in this License Supplement, "Media Company" means an entity that provides
-text, audio or video programming to distributors or direct to consumers in exchange for
-fees or based on an advertising business model. Notwithstanding the above, this License
-Supplement is not available to an organization that is using this Software to provide
-content to consumers via an Operator. As used in this License Supplement, "Operator"
-means an organization that provides voice and/or data network services to consumers and
-businesses through wireless wide area network technologies, including but not limited to
-GPRS, Edge, CDMA2000, UMTS, EVDO and WiMax; eligible organizations may either
-own or lease network infrastructure (MVNO).
-The Software is not available to organizations that provide network services to consumers
-or businesses or provide content aggregation and digital media application services to
-businesses.
-3. SEATS. Notwithstanding anything to the contrary in the EULA, You may install the
-number of copies of the Software sufficient to distribute content up to the number of seats
-specified in the applicable Invoice. You may increase the number of seats by purchasing
-additional license rights from RealNetworks.
-4. TERMINATION. This License Supplement and Your right to use the Software
-automatically terminate if You fail to comply with any material provision of this License
-Supplement. No notice will be required from RealNetworks to effect such termination.
-You and RealNetworks may terminate the EULA pursuant to the termination provisions
-set forth therein. Any termination of a EULA automatically terminates this License
-Supplement with respect to the Software covered by such EULA.
-Copyright © 1995-2010 RealNetworks, Inc. and/or its suppliers. 2601 Elliott Ave., Suite
-1000, Seattle, Washington 98121 U.S.A. This product may incorporate one or more of
-the following: U.S. Patent # 5,793,980; U.S. Patent # 5,917,835; U.S. Patent # 6,151,634.
-Other U.S. patents pending. All rights reserved. RealNetworks, Helix, RealPlayer,
-RealAudio, and RealVideo are trademarks or registered trademarks of RealNetworks,
-Inc.', 'http://www.realnetworks.com/uploadedFiles/Support/helix-support/eula-Real-LicProg-Perp-Supp.pdf', NULL, NULL, NULL, 'RealNetworks Real Licensing Program License Supplement', NULL, NULL, NULL, '', NULL, false, false, false, '90596696ef8824e2674cfcc66521d586', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (347, 'Yahoo-EULA', 'Software License
-
-Welcome to Yahoo! software (the "Yahoo! Software"). By clicking the "I Agree" button below, you agree to these software license terms (the "Software License") that supplement the Yahoo! Terms of Service ("TOS") below, also located at http://info.yahoo.com/legal/us/yahoo/utos/utos-173.html. If you disagree with any of the terms below, Yahoo! does not grant you a license to use the Yahoo! Software; click the "I Disagree" or "Cancel" button to exit the installer.
-
-Information collected through Yahoo! Software by Yahoo! is subject to the full Yahoo! Privacy Policy: http://info.yahoo.com/privacy/us/yahoo/. To find out more about setting your preferences and the information collected by the Yahoo! Software and used by Yahoo!, go to: http://info.yahoo.com/privacy/us/yahoo/toolbar/details.html.
-
-Yahoo! reserves the right to update and change, from time to time, this Software License and all documents incorporated by reference. You can always find the most recent version of this Software License at http://info.yahoo.com/legal/us/yahoo/toolbar/tbeula/tbeula-282.html. Yahoo! may change this Software License by posting a new version without notice to you. Use of the Yahoo! Software after such change constitutes acceptance of such changes.
-
-Licensed Uses and Restrictions.
-
-By accepting the terms of this Agreement, you represent to Yahoo! Inc. and its affiliates (collectively, "Yahoo!") that you are at least 18 years old. The Yahoo! Software applications, documentation, and local computer files installed or utilized by the installer application (collectively, the "Yahoo! Software") are owned by Yahoo!, or Yahoo!''s licensors and content and data providers ("Yahoo! Licensors"), and are licensed to you on a worldwide (except as limited below), non-exclusive, non-sublicenseable basis on the terms and conditions set forth herein. This Software License defines legal use of the Yahoo! Software, all updates, revisions, substitutions, and any copies of the Yahoo! Software made by or for you. All rights not expressly granted to you are reserved by Yahoo! or their respective owners.
-
-YOU MAY install and personally use the Yahoo! Software and any updates provided by Yahoo! (in its sole discretion) in object code form on a personal computer owned or controlled by you and may use the Yahoo! Software for your own noncommercial use or benefit. Your license to the Yahoo! Software under this Software License continues until it is terminated by either party. You may terminate the Software License by discontinuing use of all or any of the Yahoo! Software and by destroying all your copies of the applicable Yahoo! Software. To uninstall the Yahoo! Software, you may use the standard Microsoft Windows “Add/Remove Programs” menu in either the My Computer/Control Panel option or the Settings/Control Panel option. Once you access the Microsoft Windows Control Panel option, select “Add/Remove Programs”, and then the name of the Yahoo! Software. The Yahoo! Software will be uninstalled and will no longer be visible when you restart Internet Explorer. This Software License terminates automatically if you violate any term of this Software License, Yahoo! publicly posts a written notice of termination on Yahoo!''s web site, or Yahoo! sends a written notice of termination to you.
-
-YOU MAY NOT:
-
-(i) decompile, reverse engineer, disassemble, modify, rent, lease, loan, distribute, or create derivative works (as defined by the U.S. Copyright Act) or improvements (as defined by U.S. patent law) from the Yahoo! Software or any portion thereof.
-
-(ii) incorporate the Yahoo! Software into any computer chip or the firmware of a computing device manufactured by or for you.
-
-(iii) use the Yahoo! Software in any unlawful manner, for any unlawful purpose, or in any manner inconsistent with TOS or this Software License.
-
-(iv) you may not use the Yahoo! Software to operate nuclear facilities, life support, or other mission critical application where human life or property may be at stake. You understand that the Yahoo! Software is not designed for such purposes and that its failure in such cases could lead to death, personal injury, or severe property or environmental damage for which Yahoo! is not responsible.
-
-(v) use, or export the Yahoo! Software in violation of applicable U.S. laws or regulations.
-
-(vi) sell, lease, loan, distribute, transfer, or sublicense the Yahoo! Software or access thereto or derive income from the use or provision of the Yahoo! Software, whether for direct commercial or monetary gain or otherwise, without Yahoo!''s prior, express, written permission.
-
-Ownership and Relationship of Parties; Support.
-
-The Yahoo! Software is protected by copyrights, trademarks, service marks, international treaties, and/or other proprietary rights and laws of the U.S. and other countries. You agree to abide by all applicable proprietary rights laws and other laws, as well as any additional copyright notices or restrictions contained in this Software License and in the TOS. Yahoo! and Yahoo!''s Licensors own all rights, title, and interest in and to their applicable contributions to the Yahoo! Software. This Software License grants you no right, title, or interest in any intellectual property owned or licensed by Yahoo!, including (but not limited to) the Yahoo! Software and Yahoo! trademarks, and creates no relationship between yourself and Yahoo!''s Licensors, or between you and Yahoo! other than that of Yahoo! to licensee.
-
-The Yahoo! Software and its components contain software licensed from Yahoo! Licensors ("Licensor Software"). The Licensor Software enables the Yahoo! Software to perform certain functions, including, without limitation, access proprietary data on third -party data servers. You agree that you will use the Yahoo! Software, and any data accessed through the Yahoo! Software, for your own personal non-commercial use only. You agree not to assign, copy, transfer, or transmit the Yahoo! Software, or any data obtained through the Yahoo! Software, to any third party. Your license to use the Yahoo! Software, its components, and any third -party data, will terminate if you violate these restrictions. If your license terminates, you agree to cease any and all use of the Yahoo! Software, its components, and any third -party data. All rights in any third -party data, any third -party software, and any third -party data servers, including all ownership rights are reserved and remain with the respective third parties. You agree that these third parties may enforce their rights under this Agreement against you directly in their own name.
-
-Yahoo! may elect to provide you with customer support and/or software upgrades, enhancements, or modifications for the Yahoo! Software (collectively, "Support"), in its sole discretion, and may terminate such Support at any time without notice to you. Yahoo! may change, suspend, or discontinue any aspect of the Yahoo! Software at any time, including the availability of any Yahoo! Software feature, database, or content. Yahoo! may also impose limits on certain features and services or restrict your access to parts or all of the Yahoo! Software or the Yahoo! web site without notice or liability. Additionally, in order to enhance the security of the Yahoo! Software or to fix bugs, from time to time, Yahoo! may automatically download and install updates to the Yahoo! Software with or without prior notification.
-
-Yahoo! Search Protection Auto-Updater.
-
-If you installed Yahoo! Search Protection, from time to time, Yahoo! may automatically download and install the latest version of Yahoo! Search Protection without prior notification. Visit the Privacy Module to turn off or change your settings for this feature and find out more.
-
-Fees and Payments.
-
-Also Yahoo! reserves the right to charge fees for future use of or access to the Yahoo! Software or the Yahoo! services and web sites (collectively, "Yahoo! Software Services") in Yahoo!''s sole discretion. If Yahoo! decides to charge for the Yahoo! Software Services, such charges will be disclosed to you prior.
-
-Disclaimer of Warranties by Yahoo!.
-
-USE OF THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THROUGH THE YAHOO! SOFTWARE (SUCH AS STOCK QUOTES, MARKET INFORMATION, NEWS, OR OTHER INFORMATION) IS AT YOUR SOLE RISK. THEY ARE PROVIDED "AS IS."
-
-ANY MATERIAL OR SERVICE DOWNLOADED OR OTHERWISE OBTAINED THROUGH THE USE OF THE YAHOO! SOFTWARE (SUCH AS ANY ANTI-SPYWARE FEATURE) IS DONE AT YOUR OWN DISCRETION AND RISK, AND YOU WILL BE SOLELY RESPONSIBLE FOR ANY DAMAGE TO YOUR COMPUTER SYSTEM OR LOSS OF DATA THAT RESULTS FROM THE DOWNLOAD AND/OR USE OF ANY SUCH MATERIAL OR SERVICE.
-
-YAHOO!, ITS OFFICERS, DIRECTORS, EMPLOYEES, CONTRACTORS, AGENTS, AFFILIATES, AND ASSIGNS (COLLECTIVELY, "YAHOO! ENTITIES") AND YAHOO! LICENSORS DO NOT REPRESENT THAT THE YAHOO! SOFTWARE OR ANY DATA ACCESSED THEREFROM IS APPROPRIATE OR AVAILABLE FOR USE OUTSIDE THE UNITED STATES.
-
-THE YAHOO! ENTITIES AND YAHOO! LICENSORS EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, RELATING TO THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THEREFROM, OR THE ACCURACY, TIMELINESS, COMPLETENESS, OR ADEQUACY OF THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THEREFROM, INCLUDING THE IMPLIED WARRANTIES OF TITLE, MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
-
-THE YAHOO! SOFTWARE IS NOT DESIGNED, INTENDED OR LICENSED FOR USE IN HAZARDOUS ENVIRONMENTS REQUIRING FAIL-SAFE CONTROLS, INCLUDING WITHOUT LIMITATION, THE DESIGN, CONSTRUCTION, MAINTENANCE OR OPERATION OF NUCLEAR FACILITIES, AIRCRAFT NAVIGATION OR COMMUNICATION SYSTEMS, AIR TRAFFIC CONTROL, AND LIFE SUPPORT OR WEAPONS SYSTEMS. YAHOO! SPECIFICALLY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTY OF FITNESS FOR SUCH PURPOSES.
-
-IF THE YAHOO! SOFTWARE OR ANY DATA ACCESSED THEREFROM PROVES DEFECTIVE, YOU (AND NOT THE YAHOO! ENTITIES OR THE YAHOO! LICENSORS) ASSUME THE ENTIRE COST OF ALL REPAIR OR INJURY OF ANY KIND, EVEN IF THE YAHOO! ENTITIES OR YAHOO! LICENSORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH A DEFECT OR DAMAGES. SOME JURISDICTIONS DO NOT ALLOW RESTRICTIONS ON IMPLIED WARRANTIES SO SOME OF THESE LIMITATIONS MAY NOT APPLY TO YOU.
-
-Limitation of Liability.
-
-THE YAHOO! ENTITIES AND YAHOO! LICENSORS WILL NOT BE LIABLE TO YOU FOR CLAIMS AND LIABILITIES OF ANY KIND ARISING OUT OF OR IN ANY WAY RELATED TO THE USE OF THE YAHOO! SOFTWARE BY YOURSELF OR BY THIRD PARTIES, TO THE USE OR NON-USE OF ANY BROKERAGE FIRM OR DEALER, OR TO THE SALE OR PURCHASE OF ANY SECURITY, WHETHER SUCH CLAIMS AND LIABILITIES ARE BASED ON ANY LEGAL OR EQUITABLE THEORY.
-
-THE YAHOO! ENTITIES AND YAHOO! LICENSORS ARE NOT LIABLE TO YOU FOR ANY AND ALL DIRECT, INCIDENTAL, SPECIAL, INDIRECT, OR CONSEQUENTIAL DAMAGES ARISING OUT OF OR RELATED TO ANY THIRD -PARTY SOFTWARE, ANY DATA ACCESSED THROUGH THE YAHOO! SOFTWARE, YOUR USE OR INABILITY TO USE OR ACCESS THE YAHOO!
-
-SOFTWARE, OR ANY DATA PROVIDED THROUGH THE YAHOO! SOFTWARE, WHETHER SUCH DAMAGE CLAIMS ARE BROUGHT UNDER ANY THEORY OF LAW OR EQUITY. DAMAGES EXCLUDED BY THIS CLAUSE INCLUDE, WITHOUT LIMITATION, THOSE FOR LOSS OF BUSINESS PROFITS, INJURY TO PERSON OR PROPERTY, BUSINESS INTERRUPTION, LOSS OF BUSINESS OR PERSONAL INFORMATION. SOME JURISDICTIONS DO NOT ALLOW LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES SO THIS RESTRICTION MAY NOT APPLY TO YOU.
-
-INFORMATION PROVIDED THROUGH THE YAHOO! SOFTWARE, INCLUDING STOCK QUOTES, ANALYSIS, MARKET INFORMATION, NEWS, AND FINANCIAL DATA, MAY BE DELAYED, INACCURATE, OR CONTAIN ERRORS OR OMISSIONS, AND THE YAHOO! ENTITIES AND YAHOO! LICENSORS WILL HAVE NO LIABILITY WITH RESPECT THERETO. YAHOO! MAY CHANGE OR DISCONTINUE ANY ASPECT OR FEATURE OF THE YAHOO! SOFTWARE OR THE USE OF ALL OR ANY FEATURES OR TECHNOLOGY IN THE YAHOO! SOFTWARE AT ANY TIME WITHOUT PRIOR NOTICE TO YOU, INCLUDING, BUT NOT LIMITED TO, CONTENT, HOURS OF AVAILABILITY.
-
-Indemnification.
-
-You agree to indemnify and hold the Yahoo! Entities harmless from any claim or demand, including reasonable attorneys'' fees, made by any third party in connection with or arising out of your use of the Yahoo! Software, your violation of any terms or conditions of this Software License, your violation of applicable laws, or your violation of any rights of another person or entity.
-
-Government End Users.
-
-If the Yahoo! Software and related documentation are supplied to or purchased by or on behalf of the United States Government, then the Yahoo! Software is deemed to be "commercial software" as that term is used in the Federal Acquisition Regulation system. Rights of the United States shall not exceed the minimum rights set forth in FAR 52.227- 19 for "restricted computer software." All other terms and conditions of this Software License apply.
-
-Controlling Law.
-
-This Software License and the relationship between you and Yahoo! is governed by the laws of the State of California without regard to its conflict of law provisions. You and Yahoo! agree to submit to the personal and exclusive jurisdiction of the courts located within the county of Santa Clara, California. The United Nations Convention on the International Sale of Goods does not apply to this Software License.
-
-No General Waiver; Severability.
-
-The failure of Yahoo! to exercise or enforce any right or provision of this Software License shall not constitute a waiver of such right or provision. If any provision of this Software License is found by a court of competent jurisdiction to be invalid, the parties nevertheless agree that the court should endeavor to give effect to the parties'' intentions as reflected in the provision, and the other provisions of this Software License remain in full force and effect.
-
-Complete Agreement.
-
-This Software License and the TOS constitute the entire understanding between the parties respecting use of the Yahoo! Software, superseding all prior agreements between you and Yahoo!. In the event of any conflict between the terms and conditions of this Software License and those in the TOS, the terms and conditions of this Software License will control, except to the extent that the TOS impose additional restrictions and liabilities on your actions. In the event of a conflict between the terms of this Software License and the TOS, this Software License will control to the extent of such conflict.
-
-Surviving Provisions.
-
-Sections 1.b, 2, and 4 through 12, will survive any termination of this Agreement.
-
-Version date: February 4, 2009', 'http://info.yahoo.com/legal/us/yahoo/toolbar/tbeula/tbeula-282.html', NULL, NULL, NULL, 'Yahoo Software License', NULL, NULL, NULL, '', NULL, false, false, false, '40f189830818d0468048f5da21bd12d0', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (531, 'Intel-WLAN', 'Intel wireless LAN adapters are engineered, manufactured, tested, and
 quality checked to ensure that they meet all necessary local and
 governmental regulatory agency requirements for the regions that they
@@ -41594,65 +41433,123 @@ To the extent possible, if any provision of this Public License is deemed unenfo
 No term or condition of this Public License will be waived and no failure to comply consented to unless expressly agreed to by the Licensor.
 Nothing in this Public License constitutes or may be interpreted as a limitation upon, or waiver of, any privileges and immunities that apply to the Licensor or You, including from the legal processes of any jurisdiction or authority.
 Creative Commons is not a party to its public licenses. Notwithstanding, Creative Commons may elect to apply one of its public licenses to material it publishes and in those instances will be considered the “Licensor.” Except for the limited purpose of indicating that material is shared under a Creative Commons public license or as otherwise permitted by the Creative Commons policies published at creativecommons.org/policies, Creative Commons does not authorize the use of the trademark “Creative Commons” or any other trademark or logo of Creative Commons without its prior written consent including, without limitation, in connection with any unauthorized modifications to any of its public licenses or any other arrangements, understandings, or agreements concerning use of licensed material. For the avoidance of doubt, this paragraph does not form part of the public licenses.', 'http://creativecommons.org/licenses/by-nc-nd/4.0/legalcode', NULL, NULL, NULL, 'Creative Commons Attribution Non Commercial No Derivatives 4.0', NULL, NULL, NULL, '', NULL, false, false, false, 'ca3dccf53daf891819084678ff6a916f', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel-EULA', 'Intel Open Source License 
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (542, 'ClearSilver', 'Copyright 2001-2009 Brandon Long
+ClearSilver is now licensed under the New BSD License.
 
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
 
-Copyright (c) 1996-2000 Intel Corporation All rights reserved. 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', ' http://www.clearsilver.net/license.hdf', NULL, NULL, NULL, 'ClearSilver', NULL, NULL, NULL, '', NULL, false, false, false, 'a924f13305c50cc585a148ff46f09c37', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (347, 'Yahoo-EULA', 'Software License
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
-•	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
-•	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
-•	Neither the name of the Intel Corporation nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
+Welcome to Yahoo! software (the "Yahoo! Software"). By clicking the "I Agree" button below, you agree to these software license terms (the "Software License") that supplement the Yahoo! Terms of Service ("TOS") below, also located at http://info.yahoo.com/legal/us/yahoo/utos/utos-173.html. If you disagree with any of the terms below, Yahoo! does not grant you a license to use the Yahoo! Software; click the "I Disagree" or "Cancel" button to exit the installer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE INTEL OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. EXPORT LAWS: THIS LICENSE ADDS NO RESTRICTIONS TO THE EXPORT LAWS OF YOUR JURISDICTION. It is licensee''s responsibility to comply with any export regulations applicable in licensee''s jurisdiction. Under CURRENT (May 2000) U.S. export regulations this software is eligible for export from the U.S. and can be downloaded by or otherwise exported or reexported worldwide EXCEPT to U.S. embargoed destinations which include Cuba, Iraq, Libya, North Korea, Iran, Syria, Sudan, Afghanistan and any other country to which the U.S. has embargoed goods and services.', 'http://opensource.org/licenses/Intel', NULL, NULL, NULL, 'Intel Open Source License', NULL, NULL, NULL, '', NULL, false, false, false, '273a6c7b3d192b2f6c368e706423b815', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (320, 'Naumen', 'NAUMEN Public License
-This software is Copyright (c) NAUMEN (tm) and Contributors.
-All rights reserved.
+Information collected through Yahoo! Software by Yahoo! is subject to the full Yahoo! Privacy Policy: http://info.yahoo.com/privacy/us/yahoo/. To find out more about setting your preferences and the information collected by the Yahoo! Software and used by Yahoo!, go to: http://info.yahoo.com/privacy/us/yahoo/toolbar/details.html.
 
-Redistribution and use in source and binary forms, with or
-without modification, are permitted provided that the following
-conditions are met:
+Yahoo! reserves the right to update and change, from time to time, this Software License and all documents incorporated by reference. You can always find the most recent version of this Software License at http://info.yahoo.com/legal/us/yahoo/toolbar/tbeula/tbeula-282.html. Yahoo! may change this Software License by posting a new version without notice to you. Use of the Yahoo! Software after such change constitutes acceptance of such changes.
 
-1. Redistributions in source code must retain the above
-copyright notice, this list of conditions, and the following
-disclaimer.
+Licensed Uses and Restrictions.
 
-2. Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions, and the following
-disclaimer in the documentation and/or other materials
-provided with the distribution.
+By accepting the terms of this Agreement, you represent to Yahoo! Inc. and its affiliates (collectively, "Yahoo!") that you are at least 18 years old. The Yahoo! Software applications, documentation, and local computer files installed or utilized by the installer application (collectively, the "Yahoo! Software") are owned by Yahoo!, or Yahoo!''s licensors and content and data providers ("Yahoo! Licensors"), and are licensed to you on a worldwide (except as limited below), non-exclusive, non-sublicenseable basis on the terms and conditions set forth herein. This Software License defines legal use of the Yahoo! Software, all updates, revisions, substitutions, and any copies of the Yahoo! Software made by or for you. All rights not expressly granted to you are reserved by Yahoo! or their respective owners.
 
-3. The name NAUMEN (tm) must not be used to
-endorse or promote products derived from this software without prior
-written permission from NAUMEN.
+YOU MAY install and personally use the Yahoo! Software and any updates provided by Yahoo! (in its sole discretion) in object code form on a personal computer owned or controlled by you and may use the Yahoo! Software for your own noncommercial use or benefit. Your license to the Yahoo! Software under this Software License continues until it is terminated by either party. You may terminate the Software License by discontinuing use of all or any of the Yahoo! Software and by destroying all your copies of the applicable Yahoo! Software. To uninstall the Yahoo! Software, you may use the standard Microsoft Windows “Add/Remove Programs” menu in either the My Computer/Control Panel option or the Settings/Control Panel option. Once you access the Microsoft Windows Control Panel option, select “Add/Remove Programs”, and then the name of the Yahoo! Software. The Yahoo! Software will be uninstalled and will no longer be visible when you restart Internet Explorer. This Software License terminates automatically if you violate any term of this Software License, Yahoo! publicly posts a written notice of termination on Yahoo!''s web site, or Yahoo! sends a written notice of termination to you.
 
-4. The right to distribute this software or to use it for any
-purpose does not give you the right to use Servicemarks (sm)
-or Trademarks (tm) of NAUMEN.
+YOU MAY NOT:
 
-5. If any files originating from NAUMEN or Contributors are modified, you must
-cause the modified files to carry prominent notices stating
-that you changed the files and the date of any change.
+(i) decompile, reverse engineer, disassemble, modify, rent, lease, loan, distribute, or create derivative works (as defined by the U.S. Copyright Act) or improvements (as defined by U.S. patent law) from the Yahoo! Software or any portion thereof.
 
-Disclaimer:
+(ii) incorporate the Yahoo! Software into any computer chip or the firmware of a computing device manufactured by or for you.
 
-THIS SOFTWARE IS PROVIDED BY NAUMEN "AS IS" AND ANY EXPRESSED
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NAUMEN
-OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGE.
+(iii) use the Yahoo! Software in any unlawful manner, for any unlawful purpose, or in any manner inconsistent with TOS or this Software License.
 
-This software consists of contributions made by NAUMEN
-and Contributors. Specific attributions are listed in the
-accompanying credits file.', 'http://www.opensource.org/licenses/naumen.php', NULL, NULL, NULL, 'Naumen Public License', NULL, NULL, NULL, '', NULL, false, false, false, '19fb518675cb6fb01d4724c2667f16c6', 1);
+(iv) you may not use the Yahoo! Software to operate nuclear facilities, life support, or other mission critical application where human life or property may be at stake. You understand that the Yahoo! Software is not designed for such purposes and that its failure in such cases could lead to death, personal injury, or severe property or environmental damage for which Yahoo! is not responsible.
+
+(v) use, or export the Yahoo! Software in violation of applicable U.S. laws or regulations.
+
+(vi) sell, lease, loan, distribute, transfer, or sublicense the Yahoo! Software or access thereto or derive income from the use or provision of the Yahoo! Software, whether for direct commercial or monetary gain or otherwise, without Yahoo!''s prior, express, written permission.
+
+Ownership and Relationship of Parties; Support.
+
+The Yahoo! Software is protected by copyrights, trademarks, service marks, international treaties, and/or other proprietary rights and laws of the U.S. and other countries. You agree to abide by all applicable proprietary rights laws and other laws, as well as any additional copyright notices or restrictions contained in this Software License and in the TOS. Yahoo! and Yahoo!''s Licensors own all rights, title, and interest in and to their applicable contributions to the Yahoo! Software. This Software License grants you no right, title, or interest in any intellectual property owned or licensed by Yahoo!, including (but not limited to) the Yahoo! Software and Yahoo! trademarks, and creates no relationship between yourself and Yahoo!''s Licensors, or between you and Yahoo! other than that of Yahoo! to licensee.
+
+The Yahoo! Software and its components contain software licensed from Yahoo! Licensors ("Licensor Software"). The Licensor Software enables the Yahoo! Software to perform certain functions, including, without limitation, access proprietary data on third -party data servers. You agree that you will use the Yahoo! Software, and any data accessed through the Yahoo! Software, for your own personal non-commercial use only. You agree not to assign, copy, transfer, or transmit the Yahoo! Software, or any data obtained through the Yahoo! Software, to any third party. Your license to use the Yahoo! Software, its components, and any third -party data, will terminate if you violate these restrictions. If your license terminates, you agree to cease any and all use of the Yahoo! Software, its components, and any third -party data. All rights in any third -party data, any third -party software, and any third -party data servers, including all ownership rights are reserved and remain with the respective third parties. You agree that these third parties may enforce their rights under this Agreement against you directly in their own name.
+
+Yahoo! may elect to provide you with customer support and/or software upgrades, enhancements, or modifications for the Yahoo! Software (collectively, "Support"), in its sole discretion, and may terminate such Support at any time without notice to you. Yahoo! may change, suspend, or discontinue any aspect of the Yahoo! Software at any time, including the availability of any Yahoo! Software feature, database, or content. Yahoo! may also impose limits on certain features and services or restrict your access to parts or all of the Yahoo! Software or the Yahoo! web site without notice or liability. Additionally, in order to enhance the security of the Yahoo! Software or to fix bugs, from time to time, Yahoo! may automatically download and install updates to the Yahoo! Software with or without prior notification.
+
+Yahoo! Search Protection Auto-Updater.
+
+If you installed Yahoo! Search Protection, from time to time, Yahoo! may automatically download and install the latest version of Yahoo! Search Protection without prior notification. Visit the Privacy Module to turn off or change your settings for this feature and find out more.
+
+Fees and Payments.
+
+Also Yahoo! reserves the right to charge fees for future use of or access to the Yahoo! Software or the Yahoo! services and web sites (collectively, "Yahoo! Software Services") in Yahoo!''s sole discretion. If Yahoo! decides to charge for the Yahoo! Software Services, such charges will be disclosed to you prior.
+
+Disclaimer of Warranties by Yahoo!.
+
+USE OF THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THROUGH THE YAHOO! SOFTWARE (SUCH AS STOCK QUOTES, MARKET INFORMATION, NEWS, OR OTHER INFORMATION) IS AT YOUR SOLE RISK. THEY ARE PROVIDED "AS IS."
+
+ANY MATERIAL OR SERVICE DOWNLOADED OR OTHERWISE OBTAINED THROUGH THE USE OF THE YAHOO! SOFTWARE (SUCH AS ANY ANTI-SPYWARE FEATURE) IS DONE AT YOUR OWN DISCRETION AND RISK, AND YOU WILL BE SOLELY RESPONSIBLE FOR ANY DAMAGE TO YOUR COMPUTER SYSTEM OR LOSS OF DATA THAT RESULTS FROM THE DOWNLOAD AND/OR USE OF ANY SUCH MATERIAL OR SERVICE.
+
+YAHOO!, ITS OFFICERS, DIRECTORS, EMPLOYEES, CONTRACTORS, AGENTS, AFFILIATES, AND ASSIGNS (COLLECTIVELY, "YAHOO! ENTITIES") AND YAHOO! LICENSORS DO NOT REPRESENT THAT THE YAHOO! SOFTWARE OR ANY DATA ACCESSED THEREFROM IS APPROPRIATE OR AVAILABLE FOR USE OUTSIDE THE UNITED STATES.
+
+THE YAHOO! ENTITIES AND YAHOO! LICENSORS EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, RELATING TO THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THEREFROM, OR THE ACCURACY, TIMELINESS, COMPLETENESS, OR ADEQUACY OF THE YAHOO! SOFTWARE AND ANY DATA ACCESSED THEREFROM, INCLUDING THE IMPLIED WARRANTIES OF TITLE, MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+THE YAHOO! SOFTWARE IS NOT DESIGNED, INTENDED OR LICENSED FOR USE IN HAZARDOUS ENVIRONMENTS REQUIRING FAIL-SAFE CONTROLS, INCLUDING WITHOUT LIMITATION, THE DESIGN, CONSTRUCTION, MAINTENANCE OR OPERATION OF NUCLEAR FACILITIES, AIRCRAFT NAVIGATION OR COMMUNICATION SYSTEMS, AIR TRAFFIC CONTROL, AND LIFE SUPPORT OR WEAPONS SYSTEMS. YAHOO! SPECIFICALLY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTY OF FITNESS FOR SUCH PURPOSES.
+
+IF THE YAHOO! SOFTWARE OR ANY DATA ACCESSED THEREFROM PROVES DEFECTIVE, YOU (AND NOT THE YAHOO! ENTITIES OR THE YAHOO! LICENSORS) ASSUME THE ENTIRE COST OF ALL REPAIR OR INJURY OF ANY KIND, EVEN IF THE YAHOO! ENTITIES OR YAHOO! LICENSORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH A DEFECT OR DAMAGES. SOME JURISDICTIONS DO NOT ALLOW RESTRICTIONS ON IMPLIED WARRANTIES SO SOME OF THESE LIMITATIONS MAY NOT APPLY TO YOU.
+
+Limitation of Liability.
+
+THE YAHOO! ENTITIES AND YAHOO! LICENSORS WILL NOT BE LIABLE TO YOU FOR CLAIMS AND LIABILITIES OF ANY KIND ARISING OUT OF OR IN ANY WAY RELATED TO THE USE OF THE YAHOO! SOFTWARE BY YOURSELF OR BY THIRD PARTIES, TO THE USE OR NON-USE OF ANY BROKERAGE FIRM OR DEALER, OR TO THE SALE OR PURCHASE OF ANY SECURITY, WHETHER SUCH CLAIMS AND LIABILITIES ARE BASED ON ANY LEGAL OR EQUITABLE THEORY.
+
+THE YAHOO! ENTITIES AND YAHOO! LICENSORS ARE NOT LIABLE TO YOU FOR ANY AND ALL DIRECT, INCIDENTAL, SPECIAL, INDIRECT, OR CONSEQUENTIAL DAMAGES ARISING OUT OF OR RELATED TO ANY THIRD -PARTY SOFTWARE, ANY DATA ACCESSED THROUGH THE YAHOO! SOFTWARE, YOUR USE OR INABILITY TO USE OR ACCESS THE YAHOO!
+
+SOFTWARE, OR ANY DATA PROVIDED THROUGH THE YAHOO! SOFTWARE, WHETHER SUCH DAMAGE CLAIMS ARE BROUGHT UNDER ANY THEORY OF LAW OR EQUITY. DAMAGES EXCLUDED BY THIS CLAUSE INCLUDE, WITHOUT LIMITATION, THOSE FOR LOSS OF BUSINESS PROFITS, INJURY TO PERSON OR PROPERTY, BUSINESS INTERRUPTION, LOSS OF BUSINESS OR PERSONAL INFORMATION. SOME JURISDICTIONS DO NOT ALLOW LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES SO THIS RESTRICTION MAY NOT APPLY TO YOU.
+
+INFORMATION PROVIDED THROUGH THE YAHOO! SOFTWARE, INCLUDING STOCK QUOTES, ANALYSIS, MARKET INFORMATION, NEWS, AND FINANCIAL DATA, MAY BE DELAYED, INACCURATE, OR CONTAIN ERRORS OR OMISSIONS, AND THE YAHOO! ENTITIES AND YAHOO! LICENSORS WILL HAVE NO LIABILITY WITH RESPECT THERETO. YAHOO! MAY CHANGE OR DISCONTINUE ANY ASPECT OR FEATURE OF THE YAHOO! SOFTWARE OR THE USE OF ALL OR ANY FEATURES OR TECHNOLOGY IN THE YAHOO! SOFTWARE AT ANY TIME WITHOUT PRIOR NOTICE TO YOU, INCLUDING, BUT NOT LIMITED TO, CONTENT, HOURS OF AVAILABILITY.
+
+Indemnification.
+
+You agree to indemnify and hold the Yahoo! Entities harmless from any claim or demand, including reasonable attorneys'' fees, made by any third party in connection with or arising out of your use of the Yahoo! Software, your violation of any terms or conditions of this Software License, your violation of applicable laws, or your violation of any rights of another person or entity.
+
+Government End Users.
+
+If the Yahoo! Software and related documentation are supplied to or purchased by or on behalf of the United States Government, then the Yahoo! Software is deemed to be "commercial software" as that term is used in the Federal Acquisition Regulation system. Rights of the United States shall not exceed the minimum rights set forth in FAR 52.227- 19 for "restricted computer software." All other terms and conditions of this Software License apply.
+
+Controlling Law.
+
+This Software License and the relationship between you and Yahoo! is governed by the laws of the State of California without regard to its conflict of law provisions. You and Yahoo! agree to submit to the personal and exclusive jurisdiction of the courts located within the county of Santa Clara, California. The United Nations Convention on the International Sale of Goods does not apply to this Software License.
+
+No General Waiver; Severability.
+
+The failure of Yahoo! to exercise or enforce any right or provision of this Software License shall not constitute a waiver of such right or provision. If any provision of this Software License is found by a court of competent jurisdiction to be invalid, the parties nevertheless agree that the court should endeavor to give effect to the parties'' intentions as reflected in the provision, and the other provisions of this Software License remain in full force and effect.
+
+Complete Agreement.
+
+This Software License and the TOS constitute the entire understanding between the parties respecting use of the Yahoo! Software, superseding all prior agreements between you and Yahoo!. In the event of any conflict between the terms and conditions of this Software License and those in the TOS, the terms and conditions of this Software License will control, except to the extent that the TOS impose additional restrictions and liabilities on your actions. In the event of a conflict between the terms of this Software License and the TOS, this Software License will control to the extent of such conflict.
+
+Surviving Provisions.
+
+Sections 1.b, 2, and 4 through 12, will survive any termination of this Agreement.
+
+Version date: February 4, 2009', 'http://info.yahoo.com/legal/us/yahoo/toolbar/tbeula/tbeula-282.html', NULL, NULL, NULL, 'Yahoo Software License', NULL, NULL, NULL, '', NULL, false, false, false, '40f189830818d0468048f5da21bd12d0', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (538, 'See-file', 'This license means that you can get copyright or license information through a reference file.
 
 one example below:
@@ -41703,30 +41600,54 @@ along with libjava; see the file COPYING.  If not, write to the
 Free Software Foundation, 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.', '', NULL, NULL, NULL, 'LIBGCJ', NULL, NULL, NULL, '', NULL, false, false, false, '458324bdae28af6aaf3a4613f33035e9', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (541, 'WordNet-3.0', 'WordNet Release 3.0 This software and database is being provided to you, the LICENSEE, by Princeton University under the following license. By obtaining, using and/or copying this software and database, you agree that you have read, understood, and will comply with these terms and conditions.: Permission to use, copy, modify and distribute this software and database and its documentation for any purpose and without fee or royalty is hereby granted, provided that you agree to comply with the following copyright notice and statements, including the disclaimer, and that the same appear on ALL copies of the software, database and documentation, including modifications that you make for internal use or for distribution. WordNet 3.0 Copyright 2006 by Princeton University. All rights reserved. THIS SOFTWARE AND DATABASE IS PROVIDED "AS IS" AND PRINCETON UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED. BY WAY OF EXAMPLE, BUT NOT LIMITATION, PRINCETON UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES OF MERCHANT- ABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE, DATABASE OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS. The name of Princeton University or Princeton may not be used in advertising or publicity pertaining to distribution of the software and/or database. Title to copyright in this software, database and any associated documentation shall at all times remain with Princeton University and LICENSEE agrees to preserve same.', '', NULL, NULL, NULL, 'WordNet 3.0 license', NULL, NULL, NULL, '', NULL, false, false, false, 'eb77df57e088fba17c3bfc522b24b5d6', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (542, 'ClearSilver', 'Copyright 2001-2009 Brandon Long
-ClearSilver is now licensed under the New BSD License.
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (320, 'Naumen', 'NAUMEN Public License
+This software is Copyright (c) NAUMEN (tm) and Contributors.
+All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
+Redistribution and use in source and binary forms, with or
+without modification, are permitted provided that the following
+conditions are met:
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', ' http://www.clearsilver.net/license.hdf', NULL, NULL, NULL, 'ClearSilver', NULL, NULL, NULL, '', NULL, false, false, false, 'a924f13305c50cc585a148ff46f09c37', 1);
+1. Redistributions in source code must retain the above
+copyright notice, this list of conditions, and the following
+disclaimer.
+
+2. Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions, and the following
+disclaimer in the documentation and/or other materials
+provided with the distribution.
+
+3. The name NAUMEN (tm) must not be used to
+endorse or promote products derived from this software without prior
+written permission from NAUMEN.
+
+4. The right to distribute this software or to use it for any
+purpose does not give you the right to use Servicemarks (sm)
+or Trademarks (tm) of NAUMEN.
+
+5. If any files originating from NAUMEN or Contributors are modified, you must
+cause the modified files to carry prominent notices stating
+that you changed the files and the date of any change.
+
+Disclaimer:
+
+THIS SOFTWARE IS PROVIDED BY NAUMEN "AS IS" AND ANY EXPRESSED
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NAUMEN
+OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+This software consists of contributions made by NAUMEN
+and Contributors. Specific attributions are listed in the
+accompanying credits file.', 'http://www.opensource.org/licenses/naumen.php', NULL, NULL, NULL, 'Naumen Public License', NULL, NULL, NULL, '', NULL, false, false, false, '19fb518675cb6fb01d4724c2667f16c6', 1);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (543, 'FaCE', '==
 == Copyright and Licensing Information
 == $Id: License.txt 94670 2011-10-07 09:56:15Z johnnyw $
@@ -42211,3 +42132,335 @@ permitted only if each of the following conditions of 1-6 are met:
    USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 $Revision: 1.11 $ $Date: 2004/05/18 01:26:24 $', 'http://www.sendmail.org/~ca/email/sm-X/LICENSE', NULL, NULL, NULL, 'Sendmail', NULL, NULL, NULL, '', NULL, false, false, false, '42c7540cab891e2746585c2fca09bdff', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel-EULA', 'Intel Open Source License 
+
+
+Copyright (c) 1996-2000 Intel Corporation All rights reserved. 
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
+•	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+•	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+•	Neither the name of the Intel Corporation nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE INTEL OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. EXPORT LAWS: THIS LICENSE ADDS NO RESTRICTIONS TO THE EXPORT LAWS OF YOUR JURISDICTION. It is licensee''s responsibility to comply with any export regulations applicable in licensee''s jurisdiction. Under CURRENT (May 2000) U.S. export regulations this software is eligible for export from the U.S. and can be downloaded by or otherwise exported or reexported worldwide EXCEPT to U.S. embargoed destinations which include Cuba, Iraq, Libya, North Korea, Iran, Syria, Sudan, Afghanistan and any other country to which the U.S. has embargoed goods and services.', 'http://opensource.org/licenses/Intel', NULL, NULL, NULL, 'Intel Open Source License', NULL, NULL, NULL, '', NULL, false, false, false, '273a6c7b3d192b2f6c368e706423b815', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (335, 'RealNetworks-EULA', 'REALNETWORKS, INC.
+REAL LICENSING PROGRAM
+LICENSE SUPPLEMENT
+REDISTRIBUTION NOT PERMITTED
+IMPORTANT: READ CAREFULLY:
+This RealNetworks, Inc. License Supplement (“License Supplement”) is a legal
+agreement between you (either an individual or an entity, “You”) and RealNetworks, Inc.
+and its suppliers and licensors (collectively, “RealNetworks”) for the products (the
+“Software”) listed on the Real Licensing Program invoice (the “Invoice”) provided to
+You by RealNetworks.
+BY CLICKING ON “ACCEPT”, INSTALLING, COPYING OR OTHERWISE USING
+THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS
+LICENSE SUPPLEMENT. IF YOU DO NOT AGREE TO THE TERMS OF THIS
+LICENSE SUPPLEMENT, CLICK THE “I DO NOT ACCEPT” TO TERMINATE THE
+SOFTWARE INSTALLATION PROCESS.
+YOU AGREE THAT YOUR USE OF THE SOFTWARE ACKNOWLEDGES THAT
+YOU HAVE READ THIS LICENSE SUPPLEMENT, UNDERSTAND IT, AND
+AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
+1. SUPPLEMENT. This License Supplement supplements the End User License
+Agreement(s) accompanying the Software (“EULA”). In the event of any conflict
+between the terms of this License Supplement and any EULA, the terms of this License
+Supplement will control. Except for the provisions set forth in this License Supplement,
+all EULA provisions will remain in full force and effect.
+2. ELIGIBILITY. Notwithstanding anything to the contrary in the EULA, the Software
+covered by the EULA and this License Supplement are available only to the following
+types of entities, and You represent and warrant that You are one of the following:
+(a) Corporations, educational institutions, government organizations or not-for-profit
+organizations who deploy the server for their own internal non-commercial use. Wireless
+Network service providers or wireless network operators may not deploy this Software
+within their network(s). (b) End User Network Service Providers of less than 200,000
+subscribers. As used in this License Supplement, "End User Network Service Providers"
+means an entity that provides data network services to consumers or individuals. (c )
+Media Companies with less than fifty million dollars ($50,000,000) in annual revenue.
+As used in this License Supplement, "Media Company" means an entity that provides
+text, audio or video programming to distributors or direct to consumers in exchange for
+fees or based on an advertising business model. Notwithstanding the above, this License
+Supplement is not available to an organization that is using this Software to provide
+content to consumers via an Operator. As used in this License Supplement, "Operator"
+means an organization that provides voice and/or data network services to consumers and
+businesses through wireless wide area network technologies, including but not limited to
+GPRS, Edge, CDMA2000, UMTS, EVDO and WiMax; eligible organizations may either
+own or lease network infrastructure (MVNO).
+The Software is not available to organizations that provide network services to consumers
+or businesses or provide content aggregation and digital media application services to
+businesses.
+3. SEATS. Notwithstanding anything to the contrary in the EULA, You may install the
+number of copies of the Software sufficient to distribute content up to the number of seats
+specified in the applicable Invoice. You may increase the number of seats by purchasing
+additional license rights from RealNetworks.
+4. TERMINATION. This License Supplement and Your right to use the Software
+automatically terminate if You fail to comply with any material provision of this License
+Supplement. No notice will be required from RealNetworks to effect such termination.
+You and RealNetworks may terminate the EULA pursuant to the termination provisions
+set forth therein. Any termination of a EULA automatically terminates this License
+Supplement with respect to the Software covered by such EULA.
+Copyright © 1995-2010 RealNetworks, Inc. and/or its suppliers. 2601 Elliott Ave., Suite
+1000, Seattle, Washington 98121 U.S.A. This product may incorporate one or more of
+the following: U.S. Patent # 5,793,980; U.S. Patent # 5,917,835; U.S. Patent # 6,151,634.
+Other U.S. patents pending. All rights reserved. RealNetworks, Helix, RealPlayer,
+RealAudio, and RealVideo are trademarks or registered trademarks of RealNetworks,
+Inc.', 'http://www.realnetworks.com/uploadedFiles/Support/helix-support/eula-Real-LicProg-Perp-Supp.pdf', NULL, NULL, NULL, 'RealNetworks Real Licensing Program License Supplement', NULL, NULL, NULL, '', NULL, false, false, false, '90596696ef8824e2674cfcc66521d586', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (549, 'Giftware', 'Allegro is gift-ware. It was created by a number of people working in cooperation, and is given to you freely as a gift. You may use, modify, redistribute, and generally hack it about in any way you like, and you do not have to give us anything in return.
+
+However, if you like this product you are encouraged to thank us by making a return gift to the Allegro community. This could be by writing an add-on package, providing a useful bug report, making an improvement to the library, or perhaps just releasing the sources of your program so that other people can learn from them. If you redistribute parts of this code or make a game using it, it would be nice if you mentioned Allegro somewhere in the credits, but you are not required to do this. We trust you not to abuse our generosity.
+
+By Shawn Hargreaves, 18 October 1998.
+
+DISCLAIMER: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.', 'http://alleg.sourceforge.net/license.html', NULL, NULL, NULL, 'the giftware license', NULL, NULL, NULL, '', NULL, false, false, false, 'd38dfef67c81b25d082563b3cda62a5e', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (550, 'Unidex', 'Copyright (c) 2001 Unidex, Inc. All rights reserved.
+
+     Unidex, Inc. grants you permission to copy, modify, distribute,
+     and/or use the DTD provided that you agree to the
+     following conditions:
+
+     1. You must include this COPYRIGHT NOTICE and LICENSE
+        in all copies or substantial portions of the DTD.
+
+     2. The DTD is licensed to the user on an "AS IS" basis.
+        Unidex Inc. makes no warranties, either express or implied,
+        with respect to the DTD including but not limited to any
+        warranty of merchantability or fitness for any particular
+        purpose. Unidex Inc. does not warrant that the operation
+        of the DTD will be uninterrupted or error-free,
+        or that defects in the DTD will be corrected.
+        You the user are solely responsible for determining the 
+        appropriateness of the DTD for your use and accept
+        full responsibility for all risks associated with its use. 
+        Unidex Inc. is not and will not be liable for any
+        direct, indirect, special, incidental or other damages 
+        of any kind (including loss of profits or interruption of business)
+        however caused even if Unidex Inc. has been advised of the 
+        possibility of such damages.', 'http://www.unidex.com/turing/tmml.dtd.htm', NULL, NULL, NULL, 'Unidex', NULL, NULL, NULL, '', NULL, false, false, false, '9fc2583a5d24c21095749e10bb884b11', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (551, 'Nvidia', 'Copyright (c) 1996 NVIDIA, Corp. All rights reserved.
+
+NOTICE TO USER: The source code is copyrighted under U.S. and international laws. NVIDIA, Corp. of Sunnyvale, California owns the copyright and as design patents pending on the design and interface of the NV chips. Users and possessors of this source code are hereby granted a nonexclusive, royalty-free copyright and design patent license to use this code in individual and commercial software.
+
+Any use of this source code must include, in the user documentation and internal comments to the code, notices to the end user as follows:
+
+Copyright (c) 1996 NVIDIA, Corp. NVIDIA design patents pending in the U.S. and foreign countries.
+
+NVIDIA, CORP. MAKES NO REPRESENTATION ABOUT THE SUITABILITY OF THIS SOURCE CODE FOR ANY PURPOSE. IT IS PROVIDED "AS IS" WITHOUT EXPRESS OR IMPLIED WARRANTY OF ANY KIND. NVIDIA, CORP. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOURCE CODE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL NVIDIA, CORP. BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOURCE CODE.', 'http://www.xfree86.org/current/LICENSE8.html', NULL, NULL, NULL, 'Nvidia', NULL, NULL, NULL, '', NULL, false, false, true, '2d8dbb6d3f39d1affcdd846b794eba83', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (552, 'Logica-OSL-1.0', 'Logica Open Source License Version 1.0
+Copyright (c) 1996-2001 Logica Mobile Networks Limited, all rights reserved.
+
+Logica Mobile Networks Limited ("Logica") is the owner of the rights
+in the software programs ("Software"). In the following text, the term
+"you" or "your" refers to you as an individual and/or (as the case may be)
+to the legal entity to which the Software has been supplied.  
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided all copies and partial copies
+made and/or distributed (in whatever form) and all associated documentation
+and other material must acknowledge Logica''s rights by the inclusion
+of the following notice:
+
+"Copyright (c) 1996-2001 Logica Mobile Networks Limited;
+this product includes software developed by Logica by whom copyright
+and know-how are retained, all rights reserved."  
+
+The location of such notice shall be such that it is clearly displayed
+and readable to any person accessing the Software.  
+
+
+Any use, copying or distribution of the Software is subject to the following:
+
+* Your rights in respect of the Software are confined to the non-exclusive
+  and non-assignable license expressed herein. If you breach any of these
+  term and conditions then your license may be terminated. 
+
+* The copyright and other intellectual property rights in and in connection
+  with the Software are and shall remain the exclusive property of Logica
+  or its third party licensors. You must not remove or alter any copyright
+  or other proprietary notice on any of the software.  
+
+
+To the extent permitted by law and in the absence of a formal written contract
+between you and Logica the following limitations and exclusions also apply:
+
+* The Software is supplied and licensed on an "as is" basis without any
+  warranty or representation from Logica of any kind.  
+
+* Conditions, warranties and representations that might be attributed
+  to Logica or the Software (including, but not limited to, any implied
+  condition or warranty relating to merchantability, fitness, suitability
+  or quality) are excluded.
+
+* In no event shall Logica be liable in respect of or in connection
+  with the supply, licensing, use or distribution of the software in any
+  form for any direct, special, indirect or consequential loss or damages
+  or for any loss of use, loss of data or of profits or for any business
+  interruption or loss of goodwill. 
+
+* Logica shall have no obligation to fix any defect or deficiency
+  in the Software and Logica shall have no liability for any consequences
+  (direct or consequential) that may arise from any such defect or deficiency.
+
+* Logica''s maximum liability (if any) in relation to the licensing,
+  provision and/or performance of the Software shall not exceed the price
+  you paid to secure your license.
+
+The laws of Ireland shall apply to these terms and conditions and shall
+govern every aspect of the supply and licensing of the Software.', 'https://github.com/OpenSmpp/opensmpp/blob/master/LICENSE_LOGICA', NULL, NULL, NULL, 'Logica Open Source License Version 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'feabfb787440a278f3941abb4421b410', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (553, 'Freeware', 'Software classified as freeware is licensed at no cost and is either fully functional for an unlimited time; or has only basic functions enabled with a fully functional version available commercially or as shareware.[8] In contrast to free software, the author usually restricts one or more rights of the user, including the rights to use, copy, distribute, modify and make derivative works of the software or extract the source code.[1][2][9][10] The software license may impose various additional restrictions on the type of use, e.g. only for personal use, private use, individual use, non-profit use, non-commercial use, academic use, educational use, use in charity or humanitarian organizations, non-military use, use by public authorities or various other combinations of these type of restrictions.[11] For instance, the license may be "free for private, non-commercial use". The software license may also impose various other restrictions, such as restricted use over a network, restricted use on a server, restricted use in a combination with some types of other software or with some hardware devices, prohibited distribution over the Internet other than linking to author''s website, restricted distribution without author''s consent, restricted number of copies, etc.', 'http://en.wikipedia.org/wiki/Freeware#Software_license', NULL, NULL, NULL, 'freeware', NULL, NULL, NULL, '', NULL, false, false, false, '2cb860615b8238f94c3bba784fd7d3d9', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (554, 'Migemo', 'THE PERMISSION CONDITION ABOUT USING C/Migemo AND Migemo DLL
+
+                                                Since: 16-Dec-2001
+                                                       Version 1.0
+                                      Author: MURAOKA Taro (KoRoN)
+                                          Last Change: 16-Dec-2003
+
+                                       Translated into English by:
+           Translator: Mamoru Tasaka 
+                                                     Version 1.0-1
+                                                Date: Apr, 10 2007
+
+THE DEFINITION OF TERMS
+The meaning of each term is defined as below:
+
+This software:    C/Migemo and Migemo DLL
+                  (including binary form and source codes, but
+                   excluding dictionary data).
+Malfunction:      The behavior which differs from which is
+                  documented or which is not documented.
+Manager:          Those who own this software (who are
+                  the developers or the copyright owners of this
+                  software). At the time this copyright is
+                  written, it is Taro Muraoka.
+                  
+User:             Those who use or used this software.
+others:           Those who are not managers or users. Especially,
+                  the developers and the copyright owner of 
+                  the dictionaries for this software are included
+                  into "others".
+
+THE MAIN RULE
+Those who agreed with the following conditions may use this 
+software. Those who won\\x27t agree with them should stop using 
+this software and should remove the files related to this software 
+from the memory media they are using.
+
+THE CONDITIONS IMPOSED ON MANAGERS
+The managers own the following rights related to this software.
+   - the right to modify this software
+   - the right to distribute this software
+   - the right to let this software used
+   - the right to devolve the part or the whole of the rights
+     related to this software
+
+The managers have a duty to resolve malfunctions of this software.
+
+The managers have no responsibility for any damages the users
+may cause and may sustain.
+
+THE CONDITIONS IMPOSED ON USERS
+A user has the following duties on using this software
+    - The duty to pay a fee to the developers based on the 
+      consideration regulation described below.
+    - To protect the rights of the managers
+    - To protect the rights of others.
+
+A user has a right to use this software for any purpose
+provided the usage won\\x27t violate any other conditions.
+
+THE CONSIDERATION REGULATION
+The consideration regulation of this software is defined as
+below.
+    - zero yen
+
+THE MAIN RULE ENDS HERE
+If you cannot agree with the conditions above, please
+stop using this software.', 'http://olex.openlogic.com/licenses/c_migemo', NULL, NULL, NULL, 'C/Migemo License', NULL, NULL, NULL, '', NULL, false, false, false, '236be0a901ff96a7a5f6db7c38665be6', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (555, 'Qmail', 'Information for distributors
+
+If you''re a distributor, you should join the qmaildist mailing list.
+You may distribute copies of qmail-1.00.tar.gz, with MD5 checksum d3033be700fd6f59ac0548c832652dd3.
+
+You may distribute copies of qmail-1.01.tar.gz, with MD5 checksum 1f606d6a5d1caaca6da6b6fa5db500bf.
+
+You may distribute copies of qmail-1.02.tar.gz, with MD5 checksum 01071fe52b5257adb4bb6bcf8149eb16.
+
+You may distribute copies of qmail-1.03.tar.gz, with MD5 checksum 622f65f982e380dbe86e6574f3abcb7c.
+
+Vendors: I''d be interested in hearing about any CDs that include the package, but you don''t have to check with me if you don''t want to.
+
+If you want to distribute modified versions of qmail (including ports, no matter how minor the changes are) you''ll have to get my approval. This does not mean approval of your distribution method, your intentions, your e-mail address, your haircut, or any other irrelevant information. It means a detailed review of the exact package that you want to distribute.
+
+Exception: You are permitted to distribute a precompiled var-qmail package if (1) installing the package produces exactly the same /var/qmail hierarchy as a user would obtain by downloading, compiling, and installing qmail-1.03.tar.gz, fastforward-0.51.tar.gz, and dot-forward-0.71.tar.gz; (2) the package behaves correctly, i.e., the same way as normal qmail+fastforward+dot-forward installations on all other systems; and (3) the package''s creator warrants that he has made a good-faith attempt to ensure that the package behaves correctly. It is not acceptable to have qmail working differently on different machines; any variation is a bug. If there''s something about a system (compiler, libraries, kernel, hardware, whatever) that changes qmail''s behavior, then that platform is not supported, and you are not permitted to distribute binaries.
+
+Notes on compatibility
+
+Each UNIX vendor has made its own incompatible changes to the OS. This fractures the user community, creating separate pockets of knowledge and experience for each system. It dramatically increases the costs of cross-platform support. It turns 300-page books into 1000-page books.
+In short, vendors have thrown away the efficiencies of the mass market. Diehard UNIX fans adapt; most users and sysadmins give up in disgust.
+
+Of course, compatibility with a low-quality product isn''t satisfactory. What a disaster it would be if we all had to use Windows NT! But the benefits of change have to be measured against the costs.
+
+In my experience, UNIX vendors pay very little attention to the costs. If they could fork off their own variants of qmail, they would---just as they''ve done to sendmail. They''d never stop to consider the damage they''re doing.
+
+A single version of qmail has climbed past smail into the #2 spot in the market. Practically every site will be happy with the current version until the Internet moves to IPv6. Splitting the community, for the sake of frivolous vendor-specific changes, would be the height of foolishness.', 'http://archive.today/KD8O2#selection-209.0-281.280', NULL, NULL, NULL, 'D. J. Bernstein  Internet mail  qmail', NULL, NULL, NULL, '', NULL, false, false, false, 'a61bb4c72bfb11f296bd6e5268cd8ee3', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (556, 'JISP', '------------------------------------------------------------------------------------------------
+JISP - Java Index Serialization Package
+
+version 1.0.2
+5 August 2001
+------------------------------------------------------------------------------------------------
+
+COPYRIGHT NOTICE, DISCLAIMER, and LICENSE:
+
+If you modify this file, you may insert additional notices immediately following this sentence.
+
+Copyright 2001 Scott Robert Ladd. All rights reserved, except as noted herein.
+
+This computer program source file is supplied "AS IS". Scott Robert Ladd (hereinafter referred to 
+as "Author") disclaims all warranties, expressed or implied, including, without limitation, the 
+warranties of merchantability and of fitness for any purpose. The Author assumes no liability for 
+direct, indirect, incidental, special, exemplary, or consequential damages, which may result from 
+the use of the PNG Reference Library, even if advised of the possibility of such damage.
+
+The Author hereby grants anyone permission to use, copy, modify, and distribute this source code, 
+or portions hereof, for any purpose, without fee, subject to the following restrictions:
+
+1. The origin of this source code must not be misrepresented.
+
+2. Altered versions must be plainly marked as such and must not be misrepresented as being the 
+original source.
+
+3. This Copyright notice may not be removed or altered from any source or altered source 
+distribution.
+
+The Author specifically permits (without fee) and encourages the use of this source code for 
+entertainment, education, or decoration. If you use this source code in a product, acknowledgment 
+is not required but would be appreciated.
+
+The Author''s contact information is:
+
+Scott Robert Ladd 
+scott@coyotegulch.com
+http://www.coyotegulch.com
+
+Acknowledgement: 
+This document is based on the wonderful simple license that accompanies libpng.', 'https://svn.apache.org/repos/asf/forrest/branches/PDF_IMAGE_BRANCH/legal/LICENSE.jisp', NULL, NULL, NULL, 'Java Index Serialization Package', NULL, NULL, NULL, '', NULL, false, false, false, '7a4a33e74af880629c93970564182bd2', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (557, 'GPL-3.0+-with-classpath-exception', 'insert GPL v3+ license text here 
+
+Class Path Exception 
+
+Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination. 
+
+As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.', '', NULL, NULL, NULL, 'GPL-3.0+-with-classpath-exception', NULL, NULL, NULL, '', NULL, false, false, false, 'cc1f944dcc0a13507be4d402c490a2db', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (6, 'GPL-2.0-with-classpath-exception', 'insert GPL v2 license text here 
+
+Class Path Exception 
+
+Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination. 
+
+As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.', 'http://www.gnu.org/software/classpath/license.html', NULL, NULL, NULL, 'GNU General Public License v2.0 w/Classpath exception', NULL, NULL, NULL, '', NULL, false, false, false, '1a27b344460f49ce2d93365712a202ca', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (558, 'GPL-2.0+-with-classpath-exception', 'insert GPL v2+ text here 
+
+Class Path Exception 
+
+Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination. 
+
+As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.', '', NULL, NULL, NULL, 'GPL-2.0+-with-classpath-exception', NULL, NULL, NULL, '', NULL, false, false, false, '7940d4b7aba4100c88b54e2d46edc883', 1);

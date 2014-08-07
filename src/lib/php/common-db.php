@@ -30,46 +30,57 @@
  * \param $Options an optional list of attributes for
  *             connecting to the database. E.g.:
  *   "dbname=text host=text user=text password=text"
- * \param $FailExit true (default) to print error, backtrace and call exit on failure
+ * \param $exitOnFail true (default) to print error and call exit on failure
  *                  false to return $PG_CONN === false on failure
  *
- * If $Options is null, then connection parameters 
- * will be read from Db.conf.
+ * If $Options is empty, then connection parameters will be read from Db.conf.
  *
  * \return 
  *   Success: $PG_CONN, the postgres connection object
- *   Failure: Error message is printed and exit
+ *   Failure: Error message is printed
  **/
-function DBconnect($sysconfdir, $Options="", $FailExit=true)
+function DBconnect($sysconfdir, $options="", $exitOnFail=true)
 {
   global $PG_CONN;
 
   if (!empty($PG_CONN)) return $PG_CONN;
 
   $path="$sysconfdir/Db.conf";
-  if (empty($Options))
-    $PG_CONN = pg_connect(str_replace(";", " ", file_get_contents($path)));
-  else
-    $PG_CONN = pg_connect(str_replace(";", " ", $Options));
+  if (empty($options))
+  {
+    $dbConf = file_get_contents($path);
+    if ($exitOnFail && (false===$dbConf))
+    {
+      $text = _("Could not connect to FOSSology database.");
+      echo "<h2>$text</h2>";
+      echo _('permission denied for configuration file');
+      exit;
+    }
+    if(false===$dbConf)
+    {
+      $PG_CONN = false;
+      return;
+    }
+    $options = $dbConf;
+  }
+  if (!empty($options))
+  {
+    $PG_CONN = pg_connect(str_replace(";", " ", $options));
+  }
 
-  if (!empty($PG_CONN)) return($PG_CONN); /* success */
+  if (!empty($PG_CONN)) /* success */
+  {
+    return $PG_CONN;
+  }
 
-  if ($FailExit)
+  if ($exitOnFail)
   {
     $text = _("Could not connect to FOSSology database.");
     echo "<h2>$text</h2>";
-// I'm (bobg) commenting out this backtrace because it exposes the ConfigInit() calling parameters which contain
-// the db user and password in plain text.  Unfortunately, those are exactly the data you need to help debug a connect
-// problem.
-//    debugbacktrace();
     exit;
   }
-  else
-  {
-    $PG_CONN = false;
-    return;
-  }
-} /* End DBconnect() */
+  $PG_CONN = false;
+}
 
 
 /**
@@ -231,5 +242,4 @@ function GetLastSeq($seqname, $tablename)
   $mykey = $row["mykey"];
   pg_free_result($result);
   return($mykey);
-} /* GetLastSeq()  */
-?>
+}

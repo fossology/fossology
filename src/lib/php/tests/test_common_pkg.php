@@ -21,8 +21,8 @@
  * \brief unit tests for common-pkg.php
  */
 
-require_once('../common-pkg.php');
-require_once('../common-db.php');
+require_once(dirname(__FILE__) . '/../common-pkg.php');
+require_once(dirname(__FILE__) . '/../common-db.php');
 
 /**
  * \class test_common_pkg
@@ -36,6 +36,9 @@ class test_common_pkg extends PHPUnit_Framework_TestCase
   /* initialization */
   protected function setUp()
   {
+    if (!is_callable('pg_connect')) {
+      $this->markTestSkipped("php-psql not found");
+    }
     global $PG_CONN;
     global $DB_COMMAND;
     global $DB_NAME;
@@ -92,6 +95,9 @@ class test_common_pkg extends PHPUnit_Framework_TestCase
    * \brief clean the env
    */
   protected function tearDown() {
+    if (!is_callable('pg_connect')) {
+      return;
+    }
     global $PG_CONN;
     global $DB_COMMAND;
     global $DB_NAME;

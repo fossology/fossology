@@ -370,9 +370,9 @@ fi
 %postun common
 if [ $1 -eq 0 ]; then
   echo "removing FOSSology user..."
-  deluser --system fossy || true
+  userdel --system fossy || true
   echo "removing FOSSology group..."
-  delgroup fossy || true
+  groupdel fossy || true
   # remove the conf directory
   echo "removing the conf directory..."
   if [ -e /etc/PBPROJ ]; then

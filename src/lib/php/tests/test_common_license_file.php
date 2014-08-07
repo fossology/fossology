@@ -21,10 +21,10 @@
  * \brief unit tests for common-license-file.php
  */
 
-require_once('../common-license-file.php');
-require_once('../common-db.php');
-require_once('../common-dir.php');
-require_once('../common-ui.php');
+require_once(dirname(__FILE__) . '/../common-license-file.php');
+require_once(dirname(__FILE__) . '/../common-db.php');
+require_once(dirname(__FILE__) . '/../common-dir.php');
+require_once(dirname(__FILE__) . '/../common-ui.php');
 
 /**
  * \class test_common_license_file
@@ -48,6 +48,10 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
    */
   protected function setUp() 
   {
+    if (!is_callable('pg_connect')) {
+      $this->markTestSkipped("php-psql not found");
+    }
+
     global $PG_CONN;
     global $upload_pk;
     global $uploadtree_pk_parent;
@@ -334,6 +338,9 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
    * \brief clean the env
    */
   protected function tearDown() {
+    if (!is_callable('pg_connect')) {
+      return;
+    }
     global $PG_CONN;
     global $pfile_pk_parent;
     global $pfile_pk_child;

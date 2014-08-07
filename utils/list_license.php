@@ -1,7 +1,7 @@
 #!/usr/bin/php -q
 <?php
 /***********************************************************
- Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2013-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -26,6 +26,7 @@
 
 $PREFIX = "/usr/local/";
 require_once("$PREFIX/share/fossology/lib/php/common.php");
+$sysconfig = "$PREFIX/etc/fossology/";
 
 $AllPossibleOpts = "nrh";
 $reference_flag = 0; // 1: include; 0: exclude
@@ -58,7 +59,6 @@ if (0 == $reference_flag && 0 == $nomos_flag)
   $nomos_flag = 1; 
 }
 
-$sysconfig = "$PREFIX/etc/fossology/";
 $PG_CONN = DBconnect($sysconfig);
 list_license($reference_flag, $nomos_flag);
 
@@ -66,7 +66,8 @@ function list_license($reference_flag, $nomos_flag)
 {
   global $PG_CONN;
   $sql_statment = "SELECT rf_shortname from license_ref ";
-  if ($reference_flag) $sql_statment .= " where rf_detector_type = 1";
+  if ($reference_flag && $nomos_flag) ;
+  else if ($reference_flag) $sql_statment .= " where rf_detector_type = 1";
   else if ($nomos_flag) $sql_statment .= " where rf_detector_type = 2";
   $sql_statment .= " order by rf_shortname";
   $result = pg_query($PG_CONN, $sql_statment);

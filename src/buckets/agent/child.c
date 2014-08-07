@@ -54,7 +54,7 @@ FUNCTION int childInBucket(PGconn *pgConn, pbucketdef_t bucketDef, puploadtree_t
             where upload_fk=%d and %s.lft BETWEEN %d and %d limit 1",
            bucketDef->uploadtree_tablename,
            bucketDef->bucket_pk, bucketDef->bucket_agent_pk, 
-           bucketDef->nomos_agent_pk, upload_pk,
+           bucketDef->nomos_agent_pk, upload_pk, 
            bucketDef->uploadtree_tablename,
            lft, rgt);
 //  if (debug) printf("===%s:%d:\n%s\n===\n", __FILE__, __LINE__, sql);
@@ -74,7 +74,7 @@ FUNCTION int childInBucket(PGconn *pgConn, pbucketdef_t bucketDef, puploadtree_t
            bucketDef->uploadtree_tablename,
            bucketDef->uploadtree_tablename,
            bucketDef->bucket_pk, bucketDef->bucket_agent_pk, 
-           bucketDef->nomos_agent_pk, upload_pk,
+           bucketDef->nomos_agent_pk, upload_pk, 
            bucketDef->uploadtree_tablename,
            lft, rgt);
 //  if (debug) printf("===%s:%d:\n%s\n===\n", __FILE__, __LINE__, sql);

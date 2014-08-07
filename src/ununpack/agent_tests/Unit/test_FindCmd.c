@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -50,7 +50,7 @@ void testFindCmdNormal()
   int result = 0;
   result = FindCmd(Filename);
   //FO_ASSERT_EQUAL(result, 15);
-  if (result == 15 || result == 16)
+  if (result == 16 || result == 17)
   {
     FO_PASS(result);
   
@@ -68,7 +68,7 @@ void testFindCmd4DscFile()
   char *Filename = "../test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 27);
+  FO_ASSERT_EQUAL(result, 28);
 }
 
 /**
@@ -79,7 +79,7 @@ void testFindCmd4CabFile()
   char *Filename = "../test-data/testdata4unpack/SKU011.CAB";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 16);
+  FO_ASSERT_EQUAL(result, 17);
 }
 
 /**
@@ -90,7 +90,7 @@ void testFindCmd4MsiFile()
   char *Filename = "../test-data/testdata4unpack/xunzai_Contacts.msi.msi";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 16);
+  FO_ASSERT_EQUAL(result, 17);
 }
 
 /**
@@ -101,10 +101,10 @@ void testFindCmd4RpmFile()
   char *Filename = "../test-data/testdata4unpack/libgnomeui2-2.24.3-1pclos2010.src.rpm";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 17);
+  FO_ASSERT_EQUAL(result, 18);
   Filename = "../test-data/testdata4unpack/fossology-1.2.0-1.el5.i386.rpm";
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 17);
+  FO_ASSERT_EQUAL(result, 18);
 }
 
 /**
@@ -115,7 +115,7 @@ void testFindCmd4IsoFile()
   char *Filename = "../test-data/testdata4unpack/imagefile.iso";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 20);  // let isoinfo handle the isos
+  FO_ASSERT_EQUAL(result, 21);  // let isoinfo handle the isos
 }
 
 /**
@@ -126,7 +126,7 @@ void testFindCmd4ZipFile()
   char *Filename = "../test-data/testdata4unpack/threezip.zip";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 9);
+  FO_ASSERT_EQUAL(result, 10);
 }
 
 /**
@@ -137,7 +137,7 @@ void testFindCmd4RarFile()
   char *Filename = "../test-data/testdata4unpack/winscp376.rar";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 13);
+  FO_ASSERT_EQUAL(result, 14);
 }
 
 /**
@@ -148,7 +148,7 @@ void testFindCmd4CpioFile()
   char *Filename = "../test-data/testdata4unpack/test.cpio";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 12);
+  FO_ASSERT_EQUAL(result, 13);
 }
 
 
@@ -160,7 +160,7 @@ void testFindCmd4DebFile()
   char *Filename = "../test-data/testdata4unpack/libpango1.0-udeb_1.28.1-1_i386.udeb";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 19);  /* let ar handle udeb */
+  FO_ASSERT_EQUAL(result, 20);  /* let ar handle udeb */
 }
 
 /**
@@ -171,7 +171,7 @@ void testFindCmd4ArchiveLibFile()
   char *Filename = "../test-data/testdata4unpack/libfossagent.a";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 18);
+  FO_ASSERT_EQUAL(result, 19);
 }
 
 
@@ -183,7 +183,7 @@ void testFindCmd4TarFile()
   char *Filename = "../test-data/testdata4unpack/rpm.tar";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 10);
+  FO_ASSERT_EQUAL(result, 11);
 }
 
 
@@ -195,7 +195,7 @@ void testFindCmd4ZFile()
   char *Filename = "../test-data/testdata4unpack/FileName.tar.Z";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 2);
+  FO_ASSERT_EQUAL(result, 3);
 }
 
 /**
@@ -206,7 +206,7 @@ void testFindCmd4ExeFile()
   char *Filename = "../test-data/testdata4unpack/PUTTY.EXE";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 16);  /* this can be unpacked by 7z */
+  FO_ASSERT_EQUAL(result, 17);  /* this can be unpacked by 7z */
 }
 
 /**
@@ -217,7 +217,7 @@ void testFindCmd4Bz2File()
   char *Filename = "../test-data/testdata4unpack/test.tar.bz2";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 3);
+  FO_ASSERT_EQUAL(result, 4);
 }
 
 /**
@@ -228,7 +228,7 @@ void testFindCmd4Ext3File()
   char *Filename = "../test-data/testdata4unpack/ext3test-image";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 25);
+  FO_ASSERT_EQUAL(result, 26);
 }
 
 /**
@@ -239,7 +239,7 @@ void testFindCmd4Ext2File()
   char *Filename = "../test-data/testdata4unpack/ext2test-image";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 24);
+  FO_ASSERT_EQUAL(result, 25);
 }
 
 /**
@@ -251,7 +251,7 @@ void testFindCmd4FatFile()
   int result = 0;
   result = FindCmd(Filename);
   //FO_ASSERT_EQUAL(result, 22);
-  if (result == 16 || result == 22)
+  if (result == 17 || result == 23)
   {
     FO_PASS(result);
   }else{
@@ -268,7 +268,7 @@ void testFindCmd4NtfsFile()
   char *Filename = "../test-data/testdata4unpack/ntfstest-image";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 23);
+  FO_ASSERT_EQUAL(result, 24);
 }
 
 /**
@@ -279,7 +279,7 @@ void testFindCmd4PartitionFile()
   char *Filename = "../test-data/testdata4unpack/vmlinuz-2.6.26-2-686";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 26);
+  FO_ASSERT_EQUAL(result, 27);
 }
 
 

@@ -21,8 +21,8 @@
  * \brief unit tests for common-cache.php
  */
 
-require_once('../common-cache.php');
-require_once('../common-db.php');
+require_once(dirname(__FILE__) . '/../common-cache.php');
+require_once(dirname(__FILE__) . '/../common-db.php');
 
 /**
  * \class test_common_cache
@@ -41,6 +41,9 @@ class test_common_cached extends PHPUnit_Framework_TestCase
   {
     global $PG_CONN;
     $sysconfig = './sysconfigDirTest';
+    if (!is_callable('pg_connect')) {
+      $this->markTestSkipped("php-psql not found");
+    }
     $PG_CONN = DBconnect($sysconfig);
   }
 
@@ -192,7 +195,9 @@ class test_common_cached extends PHPUnit_Framework_TestCase
   protected function tearDown() {
     global $PG_CONN;
     /** db close */
-    pg_close($PG_CONN);
+    if (is_callable('pg_close')) {
+      pg_close($PG_CONN);
+    }
   }
 
 }
