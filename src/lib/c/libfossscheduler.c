@@ -160,28 +160,7 @@ void  fo_scheduler_heart(int i)
   fflush(stderr);
 }
 
-/**
- * @brief Establish a connection between an agent and the scheduler.
- *
- * Steps taken by this function:
- *   - initialize memory associated with agent connection
- *   - send "SPAWNED" to the scheduler
- *   - receive the number of items between notifications
- *   - check the nfs mounts for the agent
- *   - set up the heartbeat()
- *
- * Making a call to this function should be the first thing that an agent does
- * after parsing its command line arguments.
- *
- * If the database connection passed is NULL, then this will not return a
- * database connection, and will not check the agent's database record.
- *
- * @param argc     pointer to the number of arguments passed to the agent
- * @param argv     the command line arguments for the agent
- * @param db_conn  pointer to the location for the database connection
- * @return void
- */
-void fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn)
+void fo_scheduler_connect_conf(int* argc, char** argv, PGconn** db_conn, char** db_conf)
 {
   /* locals */
   GError* error = NULL;
@@ -268,7 +247,10 @@ void fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn)
   {
     db_config  = g_strdup_printf("%s/Db.conf", sysconfigdir);
     (*db_conn) = fo_dbconnect(db_config, &db_error);
-    g_free(db_config);
+    if (db_conf)
+      *db_conf = db_config;
+    else
+      g_free(db_config);
     if(db_error)
     {
       fprintf(stderr, "FATAL %s.%d: unable to open database connection: %s\n",
@@ -301,6 +283,41 @@ void fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn)
   fflush(stderr);
 
   alive = TRUE;
+}
+
+/**
+ * @brief Establish a connection between an agent and the scheduler.
+ *
+ * Steps taken by this function:
+ *   - initialize memory associated with agent connection
+ *   - send "SPAWNED" to the scheduler
+ *   - receive the number of items between notifications
+ *   - check the nfs mounts for the agent
+ *   - set up the heartbeat()
+ *
+ * Making a call to this function should be the first thing that an agent does
+ * after parsing its command line arguments.
+ *
+ * If the database connection passed is NULL, then this will not return a
+ * database connection, and will not check the agent's database record.
+ *
+ * @param argc     pointer to the number of arguments passed to the agent
+ * @param argv     the command line arguments for the agent
+ * @param db_conn  pointer to the location for the database connection
+ * @return void
+ */
+void fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn)
+{
+  fo_scheduler_connect_conf(argc, argv, db_conn, NULL);
+}
+
+void fo_scheduler_connect_dbMan(int* argc, char** argv, fo_dbManager** dbManager)
+{
+  char* dbConf;
+  PGconn* dbConnection;
+  fo_scheduler_connect_conf(argc, argv, &dbConnection, &dbConf);
+  *dbManager = fo_dbManager_new_withConf(dbConnection, dbConf);
+  free(dbConf);
 }
 
 /**

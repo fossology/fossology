@@ -277,9 +277,15 @@ function DownloadString2File($text, $name, $contentType)
  */
 function GetUploadtreeTableName($upload_pk)
 {
-  $upload_rec = GetSingleRec("upload", "where upload_pk='$upload_pk'");
-  if (empty($upload_rec['uploadtree_tablename'])) return "uploadtree";
-  else return $upload_rec['uploadtree_tablename'];
+  if (!empty($upload_pk))
+  {
+    $upload_rec = GetSingleRec("upload", "where upload_pk='$upload_pk'");
+    if (!empty($upload_rec['uploadtree_tablename']))
+    {
+      return $upload_rec['uploadtree_tablename'];
+    }
+  }
+  return "uploadtree";
 }
 
 /**

@@ -21,7 +21,7 @@
  * \brief unit tests for common-cli.php
  */
 
-require_once('../common-cli.php');
+require_once(dirname(__FILE__) . '/../common-cli.php');
 
 /**
  * \class test_common_cli

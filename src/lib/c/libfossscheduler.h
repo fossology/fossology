@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* local includes */
 #include <fossconfig.h>
+#include <libfossdbmanager.h>
 
 /* library includes */
 #include <stdio.h>
@@ -174,6 +175,7 @@ extern char*    sysconfigdir;
 
 void  fo_scheduler_heart(int i);
 void  fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn);
+void  fo_scheduler_connect_dbMan(int* argc, char** argv, fo_dbManager** dbManager);
 void  fo_scheduler_disconnect(int retcode);
 char* fo_scheduler_next();
 

@@ -499,7 +499,7 @@ $ChildCount can also be zero if the directory is empty.
   }
 
 };
-$NewPlugin = new ui_license;
+$NewPlugin = new ui_browse_license;
 $NewPlugin->Initialize();
 
 ?>

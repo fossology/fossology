@@ -15,10 +15,12 @@ dbcreate: dbcreate-process
 install: all
 	$(INSTALL_DATA) fossologyinit.sql $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
 	$(INSTALL_DATA) licenseref.sql $(DESTDIR)$(LIBEXECDIR)/licenseref.sql
+	$(INSTALL_DATA) clearingProperties.dat $(DESTDIR)$(LIBEXECDIR)/clearingProperties.dat
 	$(INSTALL_DATA) dbmigrate_1.4-2.0.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_1.4-2.0.php
 	$(INSTALL_DATA) dbmigrate_2.0-2.1.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.1.php
 	$(INSTALL_DATA) dbmigrate_2.1-2.2.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.1-2.2.php
 	$(INSTALL_DATA) dbmigrate_2.0-2.5-pre.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.5-pre.php
+	$(INSTALL_DATA) dbmigrate_2.5-2.6.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.5-2.6.php
 	$(INSTALL_DATA) fo_mapping_license.php $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 	
 	$(INSTALL_PROGRAM) export_license_ref.php $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php
@@ -35,10 +37,12 @@ install: all
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
 	rm -f $(DESTDIR)$(LIBEXECDIR)/licenseref.sql
+	rm -f $(DESTDIR)$(LIBEXECDIR)/clearingProperties.*
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbcreate
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_1.4-2.0.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.1.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.1-2.2.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.5-2.6.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 

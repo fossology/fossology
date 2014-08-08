@@ -17,8 +17,7 @@
  ***************************************************************/
 #ifndef _PARSE_H
 #define _PARSE_H
-
+#include "doctorBuffer_utils.h"
 char *parseLicenses(char *filetext, int size, scanres_t *scp, int isML, int isPS);
-void doctorBuffer(char *buf, int isML, int isPS, int isCR);
 
 #endif /* _PARSE_H */

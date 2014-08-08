@@ -21,7 +21,7 @@
  * \brief unit tests for common-dir.php
  */
 
-require_once('../common-dir.php');
+require_once(dirname(__FILE__) . '/../common-dir.php');
 
 /**
  * \class test_common_dir

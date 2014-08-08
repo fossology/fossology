@@ -166,7 +166,7 @@ function ReportCachePurgeAll()
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
-} // ReportCachePurgeByDate()
+} // ReportCachePurgeAll()
 
 /**
  * \brief Purge from the report cache records

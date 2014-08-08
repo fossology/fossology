@@ -21,8 +21,9 @@
  * \brief unit tests for common-sysconfig.php
  */
 
-require_once('../common-sysconfig.php');
-require_once('../common-db.php');
+require_once(dirname(__FILE__) . '/../common-container.php');
+require_once(dirname(__FILE__) . '/../common-db.php');
+require_once(dirname(__FILE__) . '/../common-sysconfig.php');
 
 /**
  * \class test_common_sysconfig
@@ -39,6 +40,9 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
    */
   protected function setUp()
   {
+    if (!is_callable('pg_connect')) {
+      $this->markTestSkipped("php-psql not found");
+    }
     global $PG_CONN;
     global $DB_COMMAND;
     global $DB_NAME;
@@ -51,7 +55,7 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
     preg_match("/(\d+)/", $dbout[0], $matches);
     $test_name = $matches[1];
     $sys_conf = $dbout[0];
-    $DB_NAME = "fosstest".$test_name;
+//    $DB_NAME = "fosstest".$test_name;
     #$sysconfig = './sysconfigDirTest';
     $PG_CONN = DBconnect($sys_conf);
   }
@@ -68,7 +72,7 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
     print "\nStart unit test for common-sysconfig.php\n";
     print "test function ConfigInit()\n";
     #$sysconfig = './sysconfigDirTest';
-    ConfigInit($sys_conf, &$SysConf);
+    ConfigInit($sys_conf, $SysConf);
     $this->assertEquals("FOSSology Support",  $SysConf['SYSCONFIG']['SupportEmailSubject']);
     $hostname = exec("hostname -f");
     if (empty($hostname)) $hostname = "localhost";
@@ -82,6 +86,9 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
    * \brief clean the env
    */
   protected function tearDown() {
+    if (!is_callable('pg_connect')) {
+      return;
+    }
     global $PG_CONN;
     global $DB_COMMAND;
     global $DB_NAME;

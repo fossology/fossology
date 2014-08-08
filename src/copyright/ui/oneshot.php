@@ -15,6 +15,8 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+use Fossology\Lib\Data\Highlight;
+
 /**
  * \file oneshot.php
  * \brief One-Shot Copyright/Email/URL Analysis
@@ -23,42 +25,48 @@
 define("TITLE_agent_copyright_once", _("One-Shot Copyright/Email/URL Analysis"));
 
 class agent_copyright_once extends FO_Plugin {
-  public $Name = "agent_copyright_once";
-  public $Title = TITLE_agent_copyright_once;
-  // Note: menuList is not needed for this plugin, it inserts into the menu
-  // in the code below.
-  //public $MenuList = "Upload::One-Shot Bsam";
-  public $Version = "1.0";
-  public $NoHTML = 0;
-  /** For anyone to access, without login, use: **/
-  public $DBaccess   = PLUGIN_DB_NONE;
-  public $LoginFlag  = 0;
 
-  /** To require login access, use: **/
-  // public $DBaccess = PLUGIN_DB_WRITE;
-  // public $LoginFlag = 1;
+  function __construct()
+  {
+    $this->Name = "agent_copyright_once";
+    $this->Title = TITLE_agent_copyright_once;
+    $this->Version = "1.0";
+    $this->Dependency = array("browse", "view");
+    $this->DBaccess = PLUGIN_DB_NONE;
+    $this->LoginFlag = 0;
+    $this->NoMenu = 0;
+    $this->NoHTML = 0;
+
+    parent::__construct();
+
+    global $container;
+    $this->uploadDao = $container->get('dao.upload');
+    $this->copyrightDao = $container->get('dao.copyright');
+  }
 
   /**
    * \brief Analyze one uploaded file.
    * \param $Highlight - if copyright info lines would be highlight, now always yes
    */
-  function AnalyzeOne($Highlight=1) {
+  function AnalyzeOne() {
     global $Plugins;
     global $SYSCONFDIR;
     $ModBack = GetParm("modback",PARM_STRING);
     $copyright_array = array();
 
     $V = "";
-    $View = & $Plugins[plugin_find_id("view") ];
-    $TempFile = $_FILES['licfile']['tmp_name'];
+
+    /** @var ui_view $view */
+    $view = & $Plugins[plugin_find_id("view") ];
+    $tempFileName = $_FILES['licfile']['tmp_name'];
     $ui_dir = getcwd();
     $copyright_dir =  "$SYSCONFDIR/mods-enabled/copyright/agent/";
     if(!chdir($copyright_dir)) {
       $errmsg = _("unable to change working directory to $copyright_dir\n");
       return $errmsg;
     }
-    $Sys = "./copyright -C $TempFile -c $SYSCONFDIR";
-    $Fin = popen($Sys, "r");
+    $Sys = "./copyright -C $tempFileName -c $SYSCONFDIR";
+    $inputFile = popen($Sys, "r");
     $colors = Array();
     $colors['statement'] = 0;
     $colors['email'] = 1;
@@ -68,8 +76,16 @@ class agent_copyright_once extends FO_Plugin {
     $stuff['email'] = Array();
     $stuff['url'] = Array();
     $realline = "";
-    while (!feof($Fin)) {
-      $Line = fgets($Fin);
+
+    $highlights = array();
+
+    $typeToHighlightTypeMap = array(
+        'statement' => Highlight::COPYRIGHT,
+        'email' => Highlight::EMAIL,
+        'url' => Highlight::URL);
+
+    while (!feof($inputFile)) {
+      $Line = fgets($inputFile);
       if ($Line[0] == '/') continue;
       $count = strlen($Line);
       if ($count > 0) {
@@ -89,24 +105,23 @@ class agent_copyright_once extends FO_Plugin {
           $stuff[$match['type'][0]][] = $match['content'][0];
           if ($this->NoHTML) // For REST API
             array_push($copyright_array, $match['content'][0]);
-          else 
-            $View->AddHighlight($match['start'][0], $match['end'][0], $colors[$match['type'][0]], '', $match['content'][0],-1);
+          else
+            $highlights[] = new Highlight($match['start'][0], $match['end'][0], $typeToHighlightTypeMap[$match['type'][0]], -1, -1, $match['content'][0]);
         }
       }
       $realline = "";
     }
-    pclose($Fin);
+    pclose($inputFile);
 
     if ($this->NoHTML) // For REST API:
     {
       return $copyright_array;
     }
 
-    $Fin = fopen($TempFile, "r");
-    if ($Fin) {
-      $View->SortHighlightMenu();
-      $View->ShowView($Fin,$ModBack, 0,0,NULL,True, False); // do not show Header and micro menus
-      fclose($Fin);
+    $inputFile = fopen($tempFileName, "r");
+    if ($inputFile) {
+      $view->ShowView($inputFile, $ModBack, 0, 0, NULL, True, False, $highlights); // do not show Header and micro menus
+      fclose($inputFile);
     }
     if(!chdir($ui_dir)) {
       $errmsg = _("unable to change back to working directory $ui_dir\n");
@@ -214,11 +229,10 @@ class agent_copyright_once extends FO_Plugin {
         break;
       case "HTML":
         /* If this is a POST, then process the request. */
-        $Highlight = GetParm('highlight', PARM_INTEGER); // may be null
         if (file_exists(@$_FILES['licfile']['tmp_name'])) {
           if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
             /* Size is not too big.  */
-            print $this->AnalyzeOne($Highlight) . "\n";
+            print $this->AnalyzeOne() . "\n";
           }
           if (!empty($_FILES['licfile']['unlink_flag'])) {
             unlink($_FILES['licfile']['tmp_name']);
@@ -258,5 +272,5 @@ class agent_copyright_once extends FO_Plugin {
     return;
   }
 };
-$NewPlugin = new agent_copyright_once;
-?>
+
+$NewPlugin = new agent_copyright_once();

@@ -1,5 +1,6 @@
 /***************************************************************
  Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2014, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,9 +16,13 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ***************************************************************/
+
 #ifndef _NOMOS_REGEX_H
 #define _NOMOS_REGEX_H
-
+#include <regex.h>
+#include <ctype.h>
+#include "nomos.h"
+#include "util.h"
 #include "_autodefs.h"
 
 regex_t regc[NFOOTPRINTS];
@@ -28,5 +33,13 @@ int lineInFile(char *pathname, char *regex);
 int textInFile(char *pathname, char *regex, int flags);
 int strGrep(char *regex, char *data, int flags);
 int idxGrep(int index, char *data, int flags);
+int idxGrep_recordPosition(int index, char *data, int flags);
+int idxGrep_recordPositionDoctored(int index, char *data, int flags);
+int idxGrep_recordIndex(int index, char *data, int flags);
+int idxGrep_base(int index, char *data, int flags,  int mode);
 int strNbuf(char *data, char *str);
+
+void rememberWhatWeFound(GArray* highlight, regmatch_t *allmatches, int max_size_all_matches, int index, int mode);
+void recordIndex(GArray* indexList, int index);
+
 #endif /* _NOMOS_REGEX_H */

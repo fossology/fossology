@@ -9,7 +9,7 @@ CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' 
         -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
 EXE=sqlCopyTest fossconfigTest reppath
 LIB=libfossology.a
-OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o
+OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o libfossdbmanager.o
 COVERAGE=$(OBJS:%.o=%_cov.o)
 
 all: $(LIB) $(VARS) $(EXE)
@@ -27,7 +27,7 @@ $(EXE): %: %.c $(LIB) $(VARS)
 
 %.o: %.c %.h
 	$(CC) -c $< $(CONFDEF)  $(CFLAGS_LOCAL)
-#	$(CC) -c $< $(CONFDEF)  -I`pg_config --includedir` -fPIC 
+#	$(CC) -c $< $(CONFDEF)  -I`pg_config --includedir` -fPIC
 
 $(COVERAGE): %_cov.o: %.c
 	$(CC) -c $< $(CONFDEF)  $(CFLAGS_LOCAL) $(FLAG_COV) -o $@

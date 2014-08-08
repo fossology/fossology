@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2014 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -22,6 +23,7 @@
  * license_file and license_ref tables.
  */
 
+
 /**
  * \brief get all the licenses for a single file or uploadtree
  * 
@@ -30,16 +32,16 @@
  * \param $uploadtree_pk - (used only if $pfile_pk is empty)
  * \param $uploadtree_tablename
  * \param $duplicate - get duplicated licenses or not, if NULL: No, or Yes
- * 
+ *
  * \return Array of file licenses   LicArray[fl_pk] = rf_shortname if $duplicate is Not NULL
  * LicArray[rf_pk] = rf_shortname if $duplicate is NULL
  * FATAL if neither pfile_pk or uploadtree_pk were passed in
  */
-function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree', $duplicate="")
+function GetFileLicenses($agent, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree', $duplicate="")
 {
   global $PG_CONN;
 
-  if (empty($agent_pk)) Fatal("Missing parameter: agent_pk", __FILE__, __LINE__);
+  if (empty($agent)) Fatal("Missing parameter: agent", __FILE__, __LINE__);
 
   if ($uploadtree_pk)
   {
@@ -54,13 +56,15 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_table
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
+    $agentIdCondition = $agent != "any" ?  "and agent_fk=$agent" : "";
+
     /*  Get the licenses under this $uploadtree_pk*/
     $sql = "SELECT distinct(rf_shortname) as rf_shortname, rf_pk as rf_fk, fl_pk
               from license_file_ref,
                   (SELECT distinct(pfile_fk) as PF from $uploadtree_tablename 
                      where upload_fk=$upload_pk 
                        and lft BETWEEN $lft and $rgt) as SS
-              where PF=pfile_fk and agent_fk=$agent_pk
+              where PF=pfile_fk $agentIdCondition
               order by rf_shortname asc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -98,17 +102,7 @@ function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtre
 {
   $LicStr = "";
   $LicArray = GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename);
-  $first = true;
-  foreach($LicArray as $Lic)
-  {
-    if ($first)
-      $first = false;
-    else
-      $LicStr .= " ,";
-    $LicStr .= $Lic;
-  }
-
-  return $LicStr;
+  return implode($LicArray,', ');
 }
 
 /**
@@ -137,8 +131,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   global $PG_CONN;
 
   /* Find lft and rgt bounds for this $uploadtree_pk  */
-  $sql = "SELECT lft, rgt, upload_fk FROM $uploadtree_tablename
-                 WHERE uploadtree_pk = $uploadtree_pk";
+  $sql = "SELECT lft, rgt, upload_fk FROM $uploadtree_tablename WHERE uploadtree_pk = $uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
@@ -174,18 +167,19 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
     $TagTable = "tag_file,";
     $TagClause = "and PF=tag_file.pfile_fk and tag_fk=$tag_pk";
   }
+
+  $agentCondition = $agent_pk != "any" ? "and agent_fk=$agent_pk" : "";
+
   $sql = "select uploadtree_pk, license_file.pfile_fk, ufile_name
           from license_file, $TagTable
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from $uploadtree_tablename 
                  where upload_fk=$upload_pk and lft BETWEEN $lft and $rgt 
                  and ((ufile_mode & (1<<28))=0) and ((ufile_mode & (1<<29))=0)) as SS
-          where PF=license_file.pfile_fk and agent_fk=$agent_pk and rf_fk in ($rf_pk)
+          where PF=license_file.pfile_fk $agentCondition and rf_fk in ($rf_pk)
                 $TagClause
   $order limit $limit offset $offset";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-  //echo "<br>$sql<br>";
   return $result;
 }
 
@@ -248,19 +242,20 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
     $TagClause = "and PF=tag_file.pfile_fk and tag_fk=$tag_pk";
   }
 
+  $agentCondition = $agent_pk != "any" ? "and agent_fk=$agent_pk" : "";
+
   $sql = "select count(license_file.pfile_fk) as count, count(distinct license_file.pfile_fk) as unique
           from license_file, $TagTable
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from $uploadtree_tablename 
                  where upload_fk=$upload_pk
                    and lft BETWEEN $lft and $rgt) as SS
-          where PF=license_file.pfile_fk and agent_fk=$agent_pk and rf_fk in ($rf_pk)
+          where PF=license_file.pfile_fk $agentCondition and rf_fk in ($rf_pk)
                 $TagClause $chkonly";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
   $RetArray = pg_fetch_assoc($result);
   pg_free_result($result);
-  //echo "<br>$sql<br>";
   return $RetArray;
 }
 
@@ -345,7 +340,6 @@ function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=Tr
     $text1 = _("Info");
     $text2 = _("Download");
 
-
     $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=view-license&upload=$upload_fk&item=$uploadtree_pk&napk=$napk' >$text</a>]";
     $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=view_info&upload=$upload_fk&item=$uploadtree_pk&show=detail' >$text1</a>]";
     $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=download&upload=$upload_fk&item=$uploadtree_pk' >$text2</a>]";
@@ -387,4 +381,3 @@ function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=Tr
   }
   return $LinkStr;
 }
-?>

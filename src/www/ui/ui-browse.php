@@ -15,11 +15,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-/*************************************************
- Restrict usage: Every PHP file should have this
- at the very beginning.
- This prevents hacking attempts.
- *************************************************/
+use Fossology\Lib\Db\DbManager;
 
 define("TITLE_ui_browse", _("Browse"));
 
@@ -69,7 +65,7 @@ class ui_browse extends FO_Plugin {
       $row = pg_fetch_assoc($result);
       pg_free_result($result);
       $Max = intval($row['max']);
-      if (empty($Max) || ($Max < 1)) {
+      if ($Max < 1) {
         $Max = 1;
       }
       else {
@@ -341,14 +337,12 @@ class ui_browse extends FO_Plugin {
   } /* ShowFolder() */
 
 
-
   /**
    * \brief This function returns the output html
    */
   function Output()
   {
     global $PG_CONN;
-    global $Plugins;
 
     if ($this->State != PLUGIN_STATE_READY)  return (0);
 
@@ -364,7 +358,7 @@ class ui_browse extends FO_Plugin {
       if ($UploadPerm < PERM_READ)
       {
         $text = _("Permission Denied");
-        echo "<h2>$text<h2>";
+        echo "<h2>$text</h2>";
         return;
       }
     }
@@ -402,83 +396,11 @@ class ui_browse extends FO_Plugin {
       }
     }
 
-    $Folder = $folder_pk;
-
-    $Show = 'detail';                                           // always use detail
-
     switch ($this->OutputType) {
       case "XML":
         break;
       case "HTML":
-        /************************/
-        /* Show the folder path */
-        /************************/
-        $uploadtree_tablename = "";
-        if (!empty($Item)) {
-          /* Make sure the item is not a file */
-          $sql = "SELECT ufile_mode, upload_fk FROM uploadtree WHERE uploadtree_pk = '$Item';";
-          $result = pg_query($PG_CONN, $sql);
-          DBCheckResult($result, $sql, __FILE__, __LINE__);
-          $row = pg_fetch_assoc($result);
-          pg_free_result($result);
-
-          $Upload = $row['upload_fk'];
-          $UploadPerm = GetUploadPerm($Upload);
-          if ($UploadPerm < PERM_READ)
-          {
-            $text = _("Permission Denied");
-            echo "<h2>$text<h2>";
-            return;
-          }
-
-          if (!Iscontainer($row['ufile_mode'])) {
-            /* Not a container! */
-            $View = & $Plugins[plugin_find_id("view") ];
-            if (!empty($View)) {
-              return ($View->ShowView(NULL, "browse"));
-            }
-          }
-          $V.= "<font class='text'>\n";
-          $uploadtree_tablename = GetUploadtreeTableName($row['upload_fk']);
-          $V.= Dir2Browse($this->Name, $Item, NULL, 1, "Browse", -1, '','',$uploadtree_tablename) . "\n";
-        }
-        else if (!empty($Upload)) {
-          $V.= "<font class='text'>\n";
-          $uploadtree_tablename = GetUploadtreeTableName($Upload);
-          $V.= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse", $uploadtree_tablename) . "\n";
-        }
-        else {
-          $V.= "<font class='text'>\n";
-        }
-        /******************************/
-        /* Get the folder description */
-        /******************************/
-        if (!empty($Upload)) {
-          if (empty($Item))
-          {
-            $sql = "select uploadtree_pk from uploadtree
-                where parent is NULL and upload_fk=$Upload ";
-            $result = pg_query($PG_CONN, $sql);
-            DBCheckResult($result, $sql, __FILE__, __LINE__);
-            if ( pg_num_rows($result))
-            {
-              $row = pg_fetch_assoc($result);
-              $Item = $row['uploadtree_pk'];
-            }
-            else
-            {
-              $text = _("Missing upload tree parent for upload");
-              $V.= "<hr><h2>$text $Upload</h2><hr>";
-              break;
-            }
-            pg_free_result($result);
-          }
-          $V.= $this->ShowItem($Upload, $Item, $Show, $Folder, $uploadtree_tablename);
-        }
-        else
-          $V.= $this->ShowFolder($Folder, $Show);
-
-        $V.= "</font>\n";
+        $V.= $this->outputHTML($Item,$folder_pk,$Upload);
         break;
       case "Text":
         break;
@@ -491,7 +413,69 @@ class ui_browse extends FO_Plugin {
     print "$V";
     return;
   }
-};
+  
+  function outputHTML($uploadTreeId,$Folder,$Upload)
+  {
+    global $PG_CONN, $container;
+    $dbManager = $container->get('db.manager');
+    $show = 'detail';
+    $html = '';
+    $uploadtree_tablename = "";
+    if (!empty($uploadTreeId)) {
+      $sql = "SELECT ufile_mode, upload_fk FROM uploadtree WHERE uploadtree_pk = $1";
+      $row = $dbManager->getSingleRow($sql,array($uploadTreeId));
+      $Upload = $row['upload_fk'];
+      $UploadPerm = GetUploadPerm($Upload);
+      if ($UploadPerm < PERM_READ)
+      {
+        $text = _("Permission Denied");
+        echo "<h2>$text</h2>";
+        return;
+      }
+
+      if (!Iscontainer($row['ufile_mode'])) {
+        global $Plugins;
+        $View = & $Plugins[plugin_find_id("view") ];
+        if (!empty($View)) {
+          return ($View->ShowView(NULL, "browse"));
+        }
+      }
+      $uploadtree_tablename = GetUploadtreeTableName($row['upload_fk']);
+      $html.= Dir2Browse($this->Name, $uploadTreeId, NULL, 1, "Browse", -1, '','',$uploadtree_tablename) . "\n";
+    }
+    else if (!empty($Upload)) {
+      $uploadtree_tablename = GetUploadtreeTableName($Upload);
+      $html.= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse", $uploadtree_tablename) . "\n";
+    }
+
+    if (!empty($Upload)) {
+      if (empty($uploadTreeId))
+      {
+        $sql = "select uploadtree_pk from uploadtree
+            where parent is NULL and upload_fk=$Upload ";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        if ( pg_num_rows($result))
+        {
+          $row = pg_fetch_assoc($result);
+          $uploadTreeId = $row['uploadtree_pk'];
+        }
+        else
+        {
+          $text = _("Missing upload tree parent for upload");
+          $html.= "<hr><h2>$text $Upload</h2><hr>";
+          break;
+        }
+        pg_free_result($result);
+      }
+      $html.= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
+    }
+    else
+      $html.= $this->ShowFolder($Folder, $show);
+
+    return  "<font class='text'>\n$html</font>\n";
+  }
+  
+}
 $NewPlugin = new ui_browse;
 $NewPlugin->Install();
-?>

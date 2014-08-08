@@ -21,8 +21,8 @@
  * \brief unit tests for common-menu.php
  */
 
-require_once('../common-menu.php');
-require_once('../common-parm.php');
+require_once(dirname(__FILE__) . '/../common-menu.php');
+require_once(dirname(__FILE__) . '/../common-parm.php');
 
 /**
  * \class test_common_menu

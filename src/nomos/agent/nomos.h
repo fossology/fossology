@@ -1,5 +1,6 @@
 /***************************************************************
  Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2014, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -41,12 +42,18 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#include "nomos_gap.h"
+#include <stdbool.h>
+
 
 #ifdef STANDALONE
 #include "standalone.h"
 #else
 #include <libfossology.h>
+#include <libfossdbmanager.h>
 #endif
+
+#include <glib.h>
 
 /*
  * TO use our local version of debug-malloc(), compile -DMEMORY_TRACING
@@ -83,6 +90,7 @@
 #define	OPTS_DEBUG		0x1
 #define	OPTS_TRACE_SWITCH	0x2
 #define OPTS_LONG_CMD_OUTPUT 0x4
+#define OPTS_HIGHLIGHT_STDOUT 0x8
 
 char debugStr[myBUFSIZ];
 char dbErrString[myBUFSIZ];
@@ -294,7 +302,22 @@ struct globals {
   long uploadFk;
   int arsPk;
   PGconn *pgConn;
+  fo_dbManager *dbManager;
 };
+
+typedef struct  {
+  int start;
+  int end;
+  int index; //Enums from index (Entrynumber) in STRINGS.in
+} MatchPositionAndType;
+
+typedef struct  {
+  GArray* matchPositions;
+  GArray* indexList;
+  char* licenceName;
+  int licenseFileId;
+} LicenceAndMatchPositions;
+
 
 
 /**
@@ -326,7 +349,14 @@ struct curScan {
   int cliMode;                /**< boolean to indicate running from command line */
   char *tmpLics;              /**< pointer to storage for parsed names */
   char *licenseList[512];     /**< list of license names found, can be a single name */
+
+  GArray* indexList;
+  GArray* theMatches;
+  GArray* keywordPositions;
+  GArray* docBufferPositionsAndOffsets;
+  int currentLicenceIndex;
 };
+
 
 struct license {
   int len;

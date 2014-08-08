@@ -1,4 +1,18 @@
-create role fossy with createdb login password 'fossy';
+-- create role fossy with createdb login password 'fossy';
+
+do 
+$$
+declare num_users integer;
+begin
+   SELECT count(*) into num_users FROM pg_user WHERE usename = 'fossy';
+   IF num_users = 0 THEN
+      CREATE ROLE fossy LOGIN PASSWORD 'fossy';
+   END IF;
+end
+$$
+;
+
+
 --
 -- version "$Id$"
 --
@@ -19,7 +33,7 @@ CREATE DATABASE fosstest WITH TEMPLATE = template0 ENCODING = 'SQL_ASCII';
 ALTER DATABASE fosstest OWNER TO fossy;
 
 \connect fosstest
-CREATE LANGUAGE plpgsql;
+CREATE OR REPLACE LANGUAGE plpgsql;
 
 SET client_encoding = 'SQL_ASCII';
 SET check_function_bodies = false;

@@ -30,7 +30,7 @@
 #####
 %ENTRY%	_KW_acknowledgement
 %KEY%	=NULL=
-%STR%	"acknowledgement"
+%STR%	"acknowledge?ment"
 %ALIAS%	_KW_first
 #
 %ENTRY%	_KW_agreement

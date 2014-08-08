@@ -96,8 +96,8 @@ if [ $BUILDTIME ]; then
       Debian|Ubuntu|LinuxMint)
          echo "DB: Installing build essiential....."
          apt-get $YesOpt install \
-            libxml2-dev \
-            build-essential libtext-template-perl subversion rpm
+            curl libxml2-dev libcunit1-dev \
+            build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0
          POSTGRE=`dpkg --get-selections|grep postgresql-server-dev`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
            case "$CODENAME" in
@@ -108,7 +108,7 @@ if [ $BUILDTIME ]; then
               lucid|natty) apt-get $YesOpt install postgresql-server-dev-8.4;;
               isadora) apt-get $YesOpt install postgresql-server-dev-8.4;;
               precise|oneiric|quantal|raring|saucy) apt-get $YesOpt install postgresql-server-dev-9.1;;
-              trusty) apt-get $YesOpt install postgresql-server-dev-9.3;;
+              trusty|jessie) apt-get $YesOpt install postgresql-server-dev-9.3;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac
          fi
@@ -174,7 +174,7 @@ if [ $RUNTIME ]; then
                  apt-get $YesOpt install postgresql-8.4;;
               precise|oneiric|quantal|raring|saucy)
                  apt-get $YesOpt install postgresql-9.1;;
-              trusty)
+              trusty|jessie)
                  apt-get $YesOpt install postgresql-9.3;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac

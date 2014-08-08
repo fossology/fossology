@@ -240,5 +240,3 @@ function MassageContent(&$row, $hash)
 
   return false;
 }  /* End of MassageContent() */
-
-?>

@@ -33,6 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern CU_TestInfo fossconfig_testcases[];
 extern CU_TestInfo fossscheduler_testcases[];
 extern CU_TestInfo libfossdb_testcases[];
+extern CU_TestInfo libfossdbmanager_testcases[];
 
 /**
  * array of every test suite. There should be at least one test suite for every
@@ -40,8 +41,9 @@ extern CU_TestInfo libfossdb_testcases[];
  */
 CU_SuiteInfo suites[] =
 {
-    // TODO fix { "Testing libfossdb",    NULL, NULL,      libfossdb_testcases },
+    { "Testing libfossdb",    NULL, NULL,      libfossdb_testcases },
     { "Testing fossconfig",    NULL, NULL,    fossconfig_testcases },
+    { "Testing libfossdbmanger",    NULL, NULL,    libfossdbmanager_testcases },
     // TODO fix { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
     CU_SUITE_INFO_NULL
 };

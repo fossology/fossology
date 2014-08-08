@@ -72,8 +72,8 @@ if ($uid_info['name'] === 'root') $gflag = 1; // user is root
 
 if ($gflag == 0)
 {
-    echo "FATAL: The user must be in the fossy group.\n";
-    exit(1);
+//    echo "FATAL: The user must be in the fossy group.\n";
+//    exit(1);
 }
 
 // create .pgpass file and place in the users home dir who is running this
@@ -179,19 +179,7 @@ if(array_key_exists('d', $Options))
   $last = system("sudo rm -rf $rmConf $rmRepo", $rmRtn);
   exit(0);
 }
-$createEmpty = FALSE;
-if(array_key_exists('e', $Options))
-{
-  $createEmpty = TRUE;
-}
-$startSched = FALSE;
-if(array_key_exists('s', $Options))
-{
-  $startSched = TRUE;
-}
 
-// If not passed in, in see if we can get SYSCONFDIR from the environment,
-// if not, stop
 if(empty($sysconfig))
 {
   $sysconfig = getenv('SYSCONFDIR');
@@ -204,13 +192,15 @@ if(empty($sysconfig))
     exit(1);
   }
 }
-//echo "DB: sysconfig is:$sysconfig\n";
 
 putenv("SYSCONFDIR=$sysconfig");
 $_ENV['SYSCONFDIR'] = $sysconfig;
 
 $unique = mt_rand();
 $DbName = $dbPrefix . $unique;
+
+$createEmpty = array_key_exists('e', $Options);
+$startSched = array_key_exists('s', $Options);
 
 // create the db
 $newDB = createTestDB($DbName);
@@ -304,23 +294,15 @@ if(file_exists($fossConf))
     exit(1);
   }
 }
-// create an empty db?  if so, still need to export and print
-if($createEmpty)
-{
-  putenv("SYSCONFDIR=$confPath");
-  $_ENV['SYSCONFDIR'] = $confPath;
-  $GLOBALS['SYSCONFDIR'] = $confPath;
-  
-  echo $confPath . "\n";
-  exit(0);
-}
-// export to environment the new sysconf dir
-// The update has to happen before schema-update gets called or schema-update
-// will not end up with the correct sysconf
-
 putenv("SYSCONFDIR=$confPath");
 $_ENV['SYSCONFDIR'] = $confPath;
 $GLOBALS['SYSCONFDIR'] = $confPath;
+
+if($createEmpty)
+{
+  echo $confPath . "\n";
+  exit(0);
+}
 
 // load the schema
 $loaded = TestDBInit(NULL, $DbName);
@@ -357,4 +339,3 @@ if($startSched)
 }
 echo $confPath . "\n";
 exit(0);
-?>
