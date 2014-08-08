@@ -519,6 +519,85 @@
   $Schema["TABLE"]["bucketpool"]["description"]["UPDATE"] = "";
 
 
+  $Schema["TABLE"]["clearing_decision"]["clearing_id"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["clearing_id"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"clearing_id\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["clearing_id"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"clearing_id\" SET NOT NULL, ALTER COLUMN \"clearing_id\" SET DEFAULT nextval('clearing_decision_clearing_id_seq'::regclass);";
+  $Schema["TABLE"]["clearing_decision"]["clearing_id"]["UPDATE"] = "UPDATE clearing_decision SET clearing_id=nextval('clearing_decision_clearing_id_seq'::regclass)";
+
+  $Schema["TABLE"]["clearing_decision"]["uploadtree_id"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["uploadtree_id"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"uploadtree_id\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["uploadtree_id"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"uploadtree_id\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["uploadtree_id"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision"]["pfile_id"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["pfile_id"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"pfile_id\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["pfile_id"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"pfile_id\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["pfile_id"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision"]["user_id"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["user_id"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"user_id\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["user_id"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"user_id\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["user_id"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision"]["type"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["type"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"type\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["type"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"type\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["type"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision"]["scope"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["scope"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"scope\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["scope"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"scope\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["scope"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision"]["comment"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["comment"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"comment\" text;";
+  $Schema["TABLE"]["clearing_decision"]["comment"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"comment\" DROP NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["comment"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision"]["reportinfo"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["reportinfo"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"reportinfo\" text;";
+  $Schema["TABLE"]["clearing_decision"]["reportinfo"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"reportinfo\" DROP NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["reportinfo"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision"]["date_added"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["date_added"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"date_added\" timestamptz;";
+  $Schema["TABLE"]["clearing_decision"]["date_added"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now();";
+  $Schema["TABLE"]["clearing_decision"]["date_added"]["UPDATE"] = "UPDATE clearing_decision SET date_added=now()";
+
+
+  $Schema["TABLE"]["clearing_decision_scopes"]["type"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision_scopes"]["type"]["ADD"] = "ALTER TABLE \"clearing_decision_scopes\" ADD COLUMN \"type\" int4;";
+  $Schema["TABLE"]["clearing_decision_scopes"]["type"]["ALTER"] = "ALTER TABLE \"clearing_decision_scopes\" ALTER COLUMN \"type\" SET NOT NULL, ALTER COLUMN \"type\" SET DEFAULT nextval('clearing_decision_scopes_type_seq'::regclass);";
+  $Schema["TABLE"]["clearing_decision_scopes"]["type"]["UPDATE"] = "UPDATE clearing_decision_scopes SET type=nextval('clearing_decision_scopes_type_seq'::regclass)";
+
+  $Schema["TABLE"]["clearing_decision_scopes"]["meaning"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision_scopes"]["meaning"]["ADD"] = "ALTER TABLE \"clearing_decision_scopes\" ADD COLUMN \"meaning\" varchar(30);";
+  $Schema["TABLE"]["clearing_decision_scopes"]["meaning"]["ALTER"] = "ALTER TABLE \"clearing_decision_scopes\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
+  $Schema["TABLE"]["clearing_decision_scopes"]["meaning"]["UPDATE"] = "";
+
+
+  $Schema["TABLE"]["clearing_decision_types"]["type"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision_types"]["type"]["ADD"] = "ALTER TABLE \"clearing_decision_types\" ADD COLUMN \"type\" int4;";
+  $Schema["TABLE"]["clearing_decision_types"]["type"]["ALTER"] = "ALTER TABLE \"clearing_decision_types\" ALTER COLUMN \"type\" SET NOT NULL, ALTER COLUMN \"type\" SET DEFAULT nextval('clearing_decision_types_type_seq'::regclass);";
+  $Schema["TABLE"]["clearing_decision_types"]["type"]["UPDATE"] = "UPDATE clearing_decision_types SET type=nextval('clearing_decision_types_type_seq'::regclass)";
+
+  $Schema["TABLE"]["clearing_decision_types"]["meaning"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision_types"]["meaning"]["ADD"] = "ALTER TABLE \"clearing_decision_types\" ADD COLUMN \"meaning\" varchar(30);";
+  $Schema["TABLE"]["clearing_decision_types"]["meaning"]["ALTER"] = "ALTER TABLE \"clearing_decision_types\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
+  $Schema["TABLE"]["clearing_decision_types"]["meaning"]["UPDATE"] = "";
+
+
+  $Schema["TABLE"]["clearing_licenses"]["clearing_id"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["clearing_id"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"clearing_id\" int4;";
+  $Schema["TABLE"]["clearing_licenses"]["clearing_id"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"clearing_id\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_licenses"]["clearing_id"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_licenses"]["license_id"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["license_id"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"license_id\" int4;";
+  $Schema["TABLE"]["clearing_licenses"]["license_id"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"license_id\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_licenses"]["license_id"]["UPDATE"] = "";
+
+
   $Schema["TABLE"]["copyright"]["ct_pk"]["DESC"] = "";
   $Schema["TABLE"]["copyright"]["ct_pk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"ct_pk\" int8;";
   $Schema["TABLE"]["copyright"]["ct_pk"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('copyright_ct_pk_seq'::regclass);";
@@ -658,6 +737,53 @@
   $Schema["TABLE"]["groups"]["group_name"]["ADD"] = "ALTER TABLE \"groups\" ADD COLUMN \"group_name\" varchar(64);";
   $Schema["TABLE"]["groups"]["group_name"]["ALTER"] = "ALTER TABLE \"groups\" ALTER COLUMN \"group_name\" DROP NOT NULL;";
   $Schema["TABLE"]["groups"]["group_name"]["UPDATE"] = "";
+
+
+  $Schema["TABLE"]["highlight"]["type"]["DESC"] = "";
+  $Schema["TABLE"]["highlight"]["type"]["ADD"] = "ALTER TABLE \"highlight\" ADD COLUMN \"type\" char(2);";
+  $Schema["TABLE"]["highlight"]["type"]["ALTER"] = "ALTER TABLE \"highlight\" ALTER COLUMN \"type\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight"]["type"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["highlight"]["start"]["DESC"] = "";
+  $Schema["TABLE"]["highlight"]["start"]["ADD"] = "ALTER TABLE \"highlight\" ADD COLUMN \"start\" int8;";
+  $Schema["TABLE"]["highlight"]["start"]["ALTER"] = "ALTER TABLE \"highlight\" ALTER COLUMN \"start\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight"]["start"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["highlight"]["len"]["DESC"] = "";
+  $Schema["TABLE"]["highlight"]["len"]["ADD"] = "ALTER TABLE \"highlight\" ADD COLUMN \"len\" int8;";
+  $Schema["TABLE"]["highlight"]["len"]["ALTER"] = "ALTER TABLE \"highlight\" ALTER COLUMN \"len\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight"]["len"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["highlight"]["fl_fk"]["DESC"] = "";
+  $Schema["TABLE"]["highlight"]["fl_fk"]["ADD"] = "ALTER TABLE \"highlight\" ADD COLUMN \"fl_fk\" int8;";
+  $Schema["TABLE"]["highlight"]["fl_fk"]["ALTER"] = "ALTER TABLE \"highlight\" ALTER COLUMN \"fl_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight"]["fl_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["highlight"]["rf_start"]["DESC"] = "";
+  $Schema["TABLE"]["highlight"]["rf_start"]["ADD"] = "ALTER TABLE \"highlight\" ADD COLUMN \"rf_start\" int8;";
+  $Schema["TABLE"]["highlight"]["rf_start"]["ALTER"] = "ALTER TABLE \"highlight\" ALTER COLUMN \"rf_start\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight"]["rf_start"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["highlight"]["rf_len"]["DESC"] = "";
+  $Schema["TABLE"]["highlight"]["rf_len"]["ADD"] = "ALTER TABLE \"highlight\" ADD COLUMN \"rf_len\" int8;";
+  $Schema["TABLE"]["highlight"]["rf_len"]["ALTER"] = "ALTER TABLE \"highlight\" ALTER COLUMN \"rf_len\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight"]["rf_len"]["UPDATE"] = "";
+
+
+  $Schema["TABLE"]["highlight_keyword"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["highlight_keyword"]["pfile_fk"]["ADD"] = "ALTER TABLE \"highlight_keyword\" ADD COLUMN \"pfile_fk\" int8;";
+  $Schema["TABLE"]["highlight_keyword"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"highlight_keyword\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight_keyword"]["pfile_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["highlight_keyword"]["start"]["DESC"] = "";
+  $Schema["TABLE"]["highlight_keyword"]["start"]["ADD"] = "ALTER TABLE \"highlight_keyword\" ADD COLUMN \"start\" int8;";
+  $Schema["TABLE"]["highlight_keyword"]["start"]["ALTER"] = "ALTER TABLE \"highlight_keyword\" ALTER COLUMN \"start\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight_keyword"]["start"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["highlight_keyword"]["len"]["DESC"] = "";
+  $Schema["TABLE"]["highlight_keyword"]["len"]["ADD"] = "ALTER TABLE \"highlight_keyword\" ADD COLUMN \"len\" int8;";
+  $Schema["TABLE"]["highlight_keyword"]["len"]["ALTER"] = "ALTER TABLE \"highlight_keyword\" ALTER COLUMN \"len\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight_keyword"]["len"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["job"]["job_pk"]["DESC"] = "";
@@ -1878,6 +2004,7 @@
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"] = "CREATE SEQUENCE \"mimetype_mimetype_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pfile_pfile_pk_seq"] = "CREATE SEQUENCE \"pfile_pfile_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_deb_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_pkg_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["clearing_decision_clearing_id_seq"] = "CREATE SEQUENCE \"clearing_decision_clearing_id_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_deb_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_req_req_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_rpm_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_pkg_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_rpm_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_req_req_pk_seq\" START 1;";
@@ -1891,6 +2018,8 @@
   $Schema["SEQUENCE"]["tag_ns_group_tag_ns_group_pk_seq"] = "CREATE SEQUENCE \"tag_ns_group_tag_ns_group_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["tags_uploadtree_tag_uploadtree_pk_seq"] = "CREATE SEQUENCE \"tags_uploadtree_tag_uploadtree_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["users_user_pk_seq"] = "CREATE SEQUENCE \"users_user_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["clearing_decision_scopes_type_seq"] = "CREATE SEQUENCE \"clearing_decision_scopes_type_seq\" START 1;";
+  $Schema["SEQUENCE"]["clearing_decision_types_type_seq"] = "CREATE SEQUENCE \"clearing_decision_types_type_seq\" START 1;";
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"] = "CREATE SEQUENCE \"sysconfig_sysconfig_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["file_picker_file_picker_pk_seq"] = "CREATE SEQUENCE \"file_picker_file_picker_pk_seq\" START 1;";
 
@@ -1905,6 +2034,9 @@
   $Schema["CONSTRAINT"]["bucket_file_pkey"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_pkey\" PRIMARY KEY (\"bf_pk\");";
   $Schema["CONSTRAINT"]["bucket_pkey"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucket_pkey\" PRIMARY KEY (\"bucket_pk\");";
   $Schema["CONSTRAINT"]["bucketpool_pkey"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_pkey\" PRIMARY KEY (\"bucketpool_pk\");";
+  $Schema["CONSTRAINT"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pkey\" PRIMARY KEY (\"clearing_id\");";
+  $Schema["CONSTRAINT"]["clearing_decision_scopes_pkey"] = "ALTER TABLE \"clearing_decision_scopes\" ADD CONSTRAINT \"clearing_decision_scopes_pkey\" PRIMARY KEY (\"type\");";
+  $Schema["CONSTRAINT"]["clearing_decision_types_pkey"] = "ALTER TABLE \"clearing_decision_types\" ADD CONSTRAINT \"clearing_decision_types_pkey\" PRIMARY KEY (\"type\");";
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
@@ -1984,6 +2116,7 @@
   $Schema["CONSTRAINT"]["bucket_container_agent_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["bucket_container_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["bucketpool_fk"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucketpool_fk\" FOREIGN KEY (\"bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["clearing_decision_clearid_Id"] = "ALTER TABLE \"clearing_licenses\" ADD CONSTRAINT \"clearing_decision_clearid_Id\" FOREIGN KEY (\"clearing_id\") REFERENCES \"clearing_decision\" (\"clearing_id\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["group_user_member_group_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["group_user_member_user_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
@@ -2041,6 +2174,10 @@
   $Schema["INDEX"]["copyright"]["agent_fk_idx"] = "CREATE INDEX agent_fk_idx ON copyright USING btree (agent_fk);";
   $Schema["INDEX"]["copyright"]["copyright_pfile_fk_index"] = "CREATE INDEX copyright_pfile_fk_index ON copyright USING btree (pfile_fk);";
 
+  $Schema["INDEX"]["highlight"]["highlight_fl_fk_idx"] = "CREATE INDEX highlight_fl_fk_idx ON highlight USING btree (fl_fk);";
+
+  $Schema["INDEX"]["highlight_keyword"]["highlight_keyword_pfile_fk_idx"] = "CREATE INDEX highlight_keyword_pfile_fk_idx ON highlight_keyword USING btree (pfile_fk);";
+
   $Schema["INDEX"]["license_file"]["fl_rf_fk"] = "CREATE INDEX fl_rf_fk ON license_file USING btree (rf_fk);";
   $Schema["INDEX"]["license_file"]["lf_pfile_fk"] = "CREATE INDEX lf_pfile_fk ON license_file USING btree (pfile_fk);";
 
@@ -2066,6 +2203,7 @@
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_parent_idx"] = "CREATE INDEX uploadtree_a_parent_idx ON uploadtree_a USING btree (parent);";
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_pfile_fk_idx"] = "CREATE INDEX uploadtree_a_pfile_fk_idx ON uploadtree_a USING btree (pfile_fk);";
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_idx"] = "CREATE INDEX uploadtree_a_upload_fk_idx ON uploadtree_a USING btree (upload_fk);";
+  $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_lft_idx"] = "CREATE INDEX uploadtree_a_upload_fk_lft_idx ON uploadtree_a USING btree (upload_fk, lft);";
 
 
 ?>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright Siemens AG 2014
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
+-->
+
+<container xmlns="http://symfony.com/schema/dic/services"
+        >
+
+    <services>
+        <service id="logger" class="\Monolog\Logger">
+            <argument type="string">default</argument>
+        </service>
+        <service id="db.manager" class="\Fossology\Lib\Db\DbManager">
+            <argument type="service" id="logger"/>
+            <tag name="monolog.processor" method="processRecord" handler="main"/>
+        </service>
+
+        <service id="dao.upload" class="\Fossology\Lib\Dao\UploadDao">
+            <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.license" class="\Fossology\Lib\Dao\LicenseDao">
+            <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.clearing" class="\Fossology\Lib\Dao\ClearingDao">
+            <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.highlight" class="\Fossology\Lib\Dao\HighlightDao">
+            <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.copyright" class="\Fossology\Lib\Dao\CopyrightDao">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.upload"/>
+        </service>
+
+        <service id="view.highlight_processor" class="\Fossology\Lib\View\HighlightProcessor">
+            <argument type="service" id="dao.license"/>
+        </service>
+        <service id="view.highlight_renderer" class="\Fossology\Lib\View\HighlightRenderer">
+        </service>
+        <service id="view.license_processor" class="\Fossology\Lib\View\LicenseProcessor">
+        </service>
+        <service id="view.license_renderer" class="\Fossology\Lib\View\LicenseRenderer">
+        </service>
+        <service id="view.text_renderer" class="\Fossology\Lib\View\TextRenderer">
+            <argument type="service" id="view.highlight_renderer"/>
+        </service>
+    </services>
+</container>

@@ -93,7 +93,13 @@ if [ $RUNTIME ]; then
     Debian|Ubuntu|LinuxMint)
       apt-get $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip \
-        poppler-utils rpm tar upx-ucl unzip gzip sleuthkit p7zip-full unrar-free;;
+        poppler-utils rpm tar upx-ucl unzip gzip sleuthkit p7zip-full
+      case "$CODENAME" in
+        jessie)
+          apt-get $YesOpt install unrar;;
+        *)
+          apt-get $YesOpt install unrar-free;;
+      esac;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
         YesOpt='-y'

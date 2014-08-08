@@ -17,7 +17,7 @@
  ***************************************************************/
 #ifndef _LIST_H
 #define _LIST_H
-
+#include "nomos.h"
 void listInit(list_t *l, int size, char *label);
 void listClear(list_t *l, int deallocFlag);
 item_t *listGetItem(list_t *l, char *s);

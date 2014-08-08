@@ -56,10 +56,11 @@ for ($i = 1;$i < $argc;$i++)
   }
 }
 $SysConf = bootstrap($sysconfdir);
-require_once("$MODDIR/lib/php/libschema.php");
 
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
+
+require_once("$MODDIR/lib/php/libschema.php");
 
 /* Locations where the target .php file might exist */
 $FO_phpLocations = "$BINDIR" 
@@ -157,9 +158,7 @@ function bootstrap($sysconfdir="")
     exit(1);
   }
 
-  //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
-  require_once("$MODDIR/www/ui/template/template-plugin.php");
+  require_once("$MODDIR/lib/php/Plugin/FO_Plugin.php");
   require_once("$MODDIR/lib/php/common.php");
   return $SysConf;
 }
-?>

@@ -21,7 +21,7 @@
  * \brief unit tests for common-auth.php
  */
 
-require_once('../common-auth.php');
+require_once(dirname(__FILE__) . '/../common-auth.php');
 
 /**
  * \class test_common_auth

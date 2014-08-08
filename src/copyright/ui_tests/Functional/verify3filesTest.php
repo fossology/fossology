@@ -27,7 +27,7 @@ $where = dirname(__FILE__);
 if(preg_match('!/home/jenkins.*?tests.*!', $where, $matches))
 {
   //echo "running from jenkins....fossology/tests\n";
-  require_once('fossologyTestCase.php');
+  require_once($where . 'fossologyTestCase.php');
   require_once('commonTestFuncs.php');
   require_once('TestEnvironment.php');
   require_once('testClasses/parseBrowseMenu.php');

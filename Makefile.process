@@ -13,14 +13,14 @@ endif
 VARIABLES := PROJECT PROJECTUSER PROJECTGROUP DESTDIR PREFIX BINDIR SBINDIR SYSCONFDIR INITDIR LIBDIR INCLUDEDIR LIBEXECDIR DATAROOTDIR MODDIR LOCALSTATEDIR LOGDIR PROJECTSTATEDIR MANDIR MAN1DIR DOCDIR WEBDIR PHPDIR 
 
 %-process: %.in
-	@ echo "Regenerating variables list ..."
+	@echo "Regenerating variables list ..."
 	@rm -f $(TOP)/variable.list
 	@TOP=$(TOP) $(MAKE) -f $(TOP)/Makefile.process $(TOP)/variable.list
 	@echo "Generating $* ..."
 	$(TOP)/utils/preprocess $(TOP)/variable.list $< > $*
 
 %-process_php: %.php.in
-	@ echo "Regenerating variables list ..."
+	@echo "Regenerating variables list ..."
 	@rm -f $(TOP)/variable.list
 	@TOP=$(TOP) $(MAKE) -f $(TOP)/Makefile.process $(TOP)/variable.list
 	@echo "Generating $* ..."

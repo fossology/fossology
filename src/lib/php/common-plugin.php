@@ -39,8 +39,7 @@ $Plugins = array();
 function plugin_cmp($a,$b)
 {
   /* Sort by plugin version only when the name is the same */
-  $rc = strcmp($a->Name,$b->Name);
-  if ($rc == 0)
+  if (0 == strcmp($a->Name,$b->Name))
   {
     /* Sort by plugin version (descending order) */
     $rc = strcmp($a->Version,$b->Version);
@@ -64,10 +63,12 @@ function plugin_cmp($a,$b)
   // print "STILL Comparing $a->Name with $b->Name\n";
 
   /* If same dependencies, then sort by plugin level (highest comes first) */
-  if ($a->PluginLevel != $b->PluginLevel)
+    if ($a->PluginLevel > $b->PluginLevel)
   {
-    if ($a->PluginLevel > $b->PluginLevel) { return(-1); }
-    else { return(1); }
+    return(-1);
+  } elseif ($a->PluginLevel < $b->PluginLevel)
+  {
+    return(1);
   }
 
   /* Nothing else to sort by -- sort by number of dependencies */
@@ -348,17 +349,15 @@ function plugin_unload()
 {
   global $Plugins;
 
-  foreach($Plugins as $Key => $Val)
+  foreach($Plugins as $key => $val)
   {
     /* The plugin stucture's last entry is -1 bogus class, which will
      * cause the $P->Destroy to fail below. */
-    if($Key == -1) {
+    if($key == -1) {
       break;
     }
-    if (empty($Val)) { continue; }
-    $P = &$Plugins[$Key];
+    if (empty($val)) { continue; }
+    $P = &$Plugins[$key];
     if ($P->State != PLUGIN_STATE_INVALID) { $P->Destroy(); }
   }
 } // plugin_unload()
-
-?>

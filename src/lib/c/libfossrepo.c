@@ -186,9 +186,10 @@ char *	_RepGetHost	(char *Type, char *Filename, int MatchNum)
     for(j = 0; j < hl; j++)
     {
       entry = fo_config_get_list(sysconfig, REPONAME, hosts[i], j, &error);
-      strtok(entry, " ");
-      start = strtok(NULL, " ");
-      end   = strtok(NULL, " ");
+      char* remainder = NULL;
+      strtok_r(entry, " ", &remainder);
+      start = strtok_r(NULL, " ", &remainder);
+      end   = strtok_r(NULL, " ", &remainder);
 
       if(strcmp(entry, "*") == 0 || strcmp(entry, Type) == 0)
       {

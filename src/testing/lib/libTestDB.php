@@ -24,34 +24,29 @@
  * Created on Sep 15, 2011 by Mark Donohoe
  */
 
-function _ModFossConf($sysConfPath, $repoPath)
+function _modFossConf($sysConfPath, $repoPath)
 {
-
-  if(file_exists($sysConfPath . '/fossology.conf'))
-  {
-    $fossConf = file_get_contents($sysConfPath . '/fossology.conf');
-    if($fossConf === FALSE)
-    {
-      echo "ERROR! could not read\n$sysConfPath/fossology.conf\n";
-      return(FALSE);
-    }
-    $pat = '!/srv/fossology/repository!';
-    $testConf = preg_replace($pat, $repoPath, $fossConf);
-    //echo "DB: testConf is:$testConf\n";
-
-    $stat = file_put_contents("$sysConfPath/fossology.conf",$testConf);
-    if($stat === FALSE)
-    {
-      echo "ERROR! could not write\n$sysConfPath/fossology.conf\n";
-      return(FALSE);
-    }
-  }
-  else
+  if(!file_exists($sysConfPath . '/fossology.conf'))
   {
     echo "ERROR! can't find fossology.conf at:\n$sysConfPath/fossology.conf\n";
-    return(FALSE);
+    return FALSE;
   }
-  return(TRUE);
+  
+  $fossConf = file_get_contents($sysConfPath . '/fossology.conf');
+  if($fossConf === FALSE)
+  {
+    echo "ERROR! could not read\n$sysConfPath/fossology.conf\n";
+    return FALSE;
+  }
+  $pat = '!/srv/fossology/repository!';
+  $testConf = preg_replace($pat, $repoPath, $fossConf);
+  $stat = file_put_contents("$sysConfPath/fossology.conf",$testConf);
+  if($stat === FALSE)
+  {
+    echo "ERROR! could not write\n$sysConfPath/fossology.conf\n";
+    return FALSE;
+  }
+  return TRUE;
 }
 
 /**
@@ -66,7 +61,7 @@ function _ModFossConf($sysConfPath, $repoPath)
  * Created on Sep 14, 2011 by Mark Donohoe
  */
 
-function CreateTestDB($name)
+function createTestDB($name)
 {
   if(empty($name))
   {
@@ -76,9 +71,7 @@ function CreateTestDB($name)
   // can use it.  We live in testing/lib, so just remove /lib.
 
   $path = __DIR__;
-  $plenth = strlen($path);
-  $TESTROOT = substr($path, 0, $plenth-4);
-  //echo "DB TR is:$TESTROOT\n";
+  $TESTROOT = dirname($path);
   $_ENV['TESTROOT'] = $TESTROOT;
   putenv("TESTROOT=$TESTROOT");
 
@@ -87,12 +80,10 @@ function CreateTestDB($name)
     return("FATAL! could no cd to $TESTROOT/db\n");
   }
   $cmd = "sudo ./ftdbcreate.sh $name 2>&1";
-  $last = exec($cmd, $cmdOut, $cmdRtn);
-  //echo "results of dbcreate are:\n"; print_r($cmdOut) . "\n";
+  exec($cmd, $cmdOut, $cmdRtn);
   if($cmdRtn != 0)
   {
     $err = "Error could not create Data Base $name\n";
-    //    echo "DB: returning Error, ftdbcreate.sh did not succeed\n";
     return($err);
   }
   return(NULL);
@@ -110,7 +101,6 @@ function CreateTestDB($name)
 function RestoreFile($filename)
 {
   global $SYSCONFDIR;
-
 
   if(empty($filename))
   {
@@ -146,16 +136,11 @@ function RestoreFile($filename)
 
 function SetRepo($sysConfPath,$repoPath)
 {
-
-  if(empty($repoPath))
+  if(empty($repoPath) || empty($sysConfPath))
   {
-    return(FALSE);
+    return FALSE;
   }
-  if(empty($sysConfPath))
-  {
-    return(FALSE);
-  }
-  return(_modFossConf($sysConfPath,$repoPath));
+  return _modFossConf($sysConfPath,$repoPath);
 }
 
 /**
@@ -190,7 +175,8 @@ function TestDBInit($path=NULL, $dbName)
   $sysc = getenv('SYSCONFDIR');
   $fossInit = __DIR__ . '/../../../install/fossinit.php';
   $upOut = array();
-  $last = exec("$fossInit -d $dbName -f $path", $upOut, $upRtn);
+  $cmd="$fossInit -d $dbName -f $path";
+  $last = exec($cmd, $upOut, $upRtn);
   //echo "DB: schema up output is:\n" . implode("\n",$upOut) . "\n";
 
   if($upRtn != 0)
@@ -202,4 +188,3 @@ function TestDBInit($path=NULL, $dbName)
     return(NULL);
   }
 }
-?>

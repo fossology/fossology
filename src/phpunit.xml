@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<phpunit bootstrap="./phpunit-bootstrap.php">
+
+    <testsuites>
+        <testsuite name="Fossology PhpUnit Test Suite">
+            <directory suffix="Test.php">lib/php</directory>
+            <directory suffix=".php">lib/php/tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">.</directory>
+            <exclude>
+                <directory suffix=".php">vendor</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+</phpunit>

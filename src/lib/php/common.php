@@ -21,6 +21,11 @@
  * \brief These are common functions to be used by anyone.
  */
 
+// setup autoloading
+require_once(dirname(dirname(dirname(__FILE__))) . "/vendor/autoload.php");
+// setup dependency injection
+require_once("common-container.php");
+
 require_once("common-sysconfig.php");
 require_once("common-scheduler.php");
 require_once("common-menu.php");
@@ -51,5 +56,3 @@ if (!empty($UI_CLI) && ($UI_CLI == 1))
 {
   require_once("common-cli.php");
 }
-
-?>
