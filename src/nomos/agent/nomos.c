@@ -36,14 +36,6 @@
 extern licText_t licText[]; /* Defined in _autodata.c */
 struct globals gl;
 struct curScan cur;
-<<<<<<< HEAD
-int schedulerMode = 0; /**< Non-zero when being run from scheduler */
-int Verbose = 0; 
-=======
-FILE **pFile;
-pid_t mainPid = 0; // main process id
->>>>>>> 099b6471ee4521110409fe9891e46d3dd11dab35
-
 
 int schedulerMode = 0; /**< Non-zero when being run from scheduler */
 int Verbose = 0;
@@ -147,101 +139,7 @@ void arsNomos(cacheroot_t* cacheroot){
 }
 
 /**
-<<<<<<< HEAD
- * processFile
- * \brief process a single file
- *
- * \callgraph
- */
-FUNCTION void processFile(char *fileToScan) {
-
-  char *pathcopy;
-#ifdef PROC_TRACE
-  traceFunc("== processFile(%s)\n", fileToScan);
-#endif /* PROC_TRACE */
-
-  /* printf("   LOG: nomos scanning file %s.\n", fileToScan);  DEBUG */
-
-  (void) strcpy(cur.cwd, gl.initwd);
-
-  strcpy(cur.filePath, fileToScan);
-  pathcopy = strdup(fileToScan);
-  strcpy(cur.targetDir, dirname(pathcopy));
-  free(pathcopy);
-  strcpy(cur.targetFile, fileToScan);
-  cur.targetLen = strlen(cur.targetDir);
-
-  if (!isFILE(fileToScan)) {
-    LOG_FATAL("\"%s\" is not a plain file", fileToScan)
-                          Bail(-__LINE__);
-  }
-
-  getFileLists(cur.targetDir);
-  listInit(&cur.fLicFoundMap, 0, "file-license-found map");
-  listInit(&cur.parseList, 0, "license-components list");
-  listInit(&cur.lList, 0, "license-list");
-
-  processRawSource();
-
-  /* freeAndClearScan(&cur); */
-} /* Process File */
-
-/**
- recordScanToDb
-
- Write out the information about the scan to the FOSSology database.
-
- curScan is passed as an arg even though it's available as a global,
- in order to facilitate future modularization of the code.
-
- Returns: 0 if successful, -1 if not.
-
- \callgraph
- */
-FUNCTION int recordScanToDB(cacheroot_t *pcroot, struct curScan *scanRecord) {
-
-  char *noneFound;
-  long rf_pk;
-  int  numLicenses;
-
-#ifdef SIMULATESCHED
-  /* BOBG: This allows a developer to simulate the scheduler
-     with a load file for testing/debugging, without updating the
-     database.  Like:
-     cat myloadfile | ./nomos
-     myloadfile is same as what scheduler sends:
-     pfile_pk=311667 pfilename=9A96127E7D3B2812B50BF7732A2D0FF685EF6D6A.78073D1CA7B4171F8AFEA1497E4C6B33.183
-     pfile_pk=311727 pfilename=B7F5EED9ECB679EE0F980599B7AA89DCF8FA86BD.72B00E1B419D2C83D1050C66FA371244.368
-     etc.
-   */
-  printf("%s\n",scanRecord->compLic);
-  return(0);
-#endif
-
-  noneFound = strstr(scanRecord->compLic, LS_NONE);
-  if (noneFound != NULL)
-  {
-    rf_pk = get_rfpk(pcroot, "No_license_found");
-    if (updateLicenseFile(rf_pk) == FALSE)  return (-1);
-    return (0);
-  }
-
-  /* we have one or more license names, parse them */
-  parseLicenseList();
-  /* loop through the found license names */
-  for (numLicenses = 0; cur.licenseList[numLicenses] != NULL; numLicenses++) {
-    rf_pk = get_rfpk(pcroot, cur.licenseList[numLicenses]);
-    if (rf_pk == 0) return(-1);
-    if (updateLicenseFile(rf_pk) == FALSE)  return (-1);
-  }
-  return (0);
-} /* recordScanToDb */
-
-/**
  * \brief list all files and store file paths from the specified directory
-=======
- * \brief list all files(store file paths) in the specified directory
->>>>>>> 099b6471ee4521110409fe9891e46d3dd11dab35
  *
  * \pamram dir_name - directory
  * \param process_count - process count, write file paths into temp files on average process_count
@@ -320,16 +218,9 @@ void read_file_grab_license(int file_number, FILE **pFile)
       while(isspace(*line)) ++line;  // left trim
       //printf("line is:%s, getpid() is:%d\n", line, getpid());
     }
-<<<<<<< HEAD
+    initializeCurScan(&cur);
     processFile(line); // start to scan licenses
   } // while
-=======
-    //line = trim(line);
-    initializeCurScan(&cur);
-    processFile(line);
-  }
-  fclose(file);
->>>>>>> 099b6471ee4521110409fe9891e46d3dd11dab35
 
   if (line) free(line);
 }
@@ -512,12 +403,8 @@ int main(int argc, char **argv)
     if (scanning_directory) {
       if (process_count < 2) process_count = 2; // the least count is 2, at least has one child process
 
-<<<<<<< HEAD
       pFile = malloc(process_count*(sizeof(FILE*)));
       pTempFileName = malloc(process_count*sizeof(char[50]));
-=======
-      pFile = (FILE **)malloc(process_count*(sizeof(FILE*)));
->>>>>>> 099b6471ee4521110409fe9891e46d3dd11dab35
       int i = 0;
       int file_descriptor = 0;
       for(i = 0; i < process_count; i++)
@@ -535,18 +422,8 @@ int main(int argc, char **argv)
         strcpy(pTempFileName[i], file_template); // store temp file names
       }
 
-      /** walk through the specified directory to get all the file(file path) and
-          store into mutiple files - /tmp/foss-XXXXXX */
-      int distribute_count = 0; // record how many files are found in one directory
-      list_dir(scanning_directory, process_count, &distribute_count, pFile); // list and store files into /tmp/foss-XXXXXX in one directory
-
-      /** after the walking through and writing job is done, close all the temp path file distriptors.
-          then open the temp path files to read */
-      for(i = 0; i < process_count; i++)
-      {
-        if (pFile[i]) fclose(pFile[i]);  //  write all the paths
-        pFile[i] = fopen(pTempFileName[i], "r"); // open the temp files to read
-      }
+      /** after the walking through and strore job is done, close all the temp path file distriptors */
+      for(i = 0; i < process_count; i++) fclose(pFile[i]);
 
       /** create process_count - 1 child processes(please do not forget we always have the main process) */
       mainPid = getpid(); // get main process id
