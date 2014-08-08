@@ -66,7 +66,6 @@
 
 #define	myBUFSIZ	2048
 #define	MAX_RENAME	1000
-#define	MAX_FILE_PATH 1000
 #define TEMP_FILE_LEN 100
 
 /* MAX_SCANBYTES is the maximum number of bytes that will be scanned

@@ -49,8 +49,6 @@ struct globals gl;
 struct curScan cur;
 int schedulerMode = 0; /**< Non-zero when being run from scheduler */
 int Verbose = 0; 
-FILE **pFile;
-pid_t mainPid = 0; // main process id
 
 /** shortname cache very simple nonresizing hash table */
 struct cachenode 
@@ -785,101 +783,87 @@ FUNCTION int recordScanToDB(cacheroot_t *pcroot, struct curScan *scanRecord) {
 } /* recordScanToDb */
 
 /**
- * \brief list all files(store file paths) in the specified directory
+ * \brief list all files and store file paths from the specified directory
  *
  * \pamram dir_name - directory
- * \param process_count - process count
+ * \param process_count - process count, write file paths into temp files on average process_count
+ * \param FILE **pFile - file descriptor array
  */
-void list_dir (const char * dir_name, int process_count)
+void list_dir (const char * dir_name, int process_count, int *distribute_count, FILE **pFile)
 {
-  struct dirent *dp;
-  DIR *dfd;
-  int list_file_count = 0;
-  const char *dir = dir_name;
+  struct dirent *dirent_handler;
+  DIR *dir_handler;
 
-  if ((dfd = opendir(dir)) == NULL)
+  if ((dir_handler = opendir(dir_name)) == NULL)
   {
-    fprintf(stderr, "Can't open %s\n", dir);
+    fprintf(stderr, "Can't open %s\n", dir_name);
     return;
   }
 
-  int i = 1;
-  char *filename_qfd = NULL; // store one file path
-  filename_qfd = (char *)malloc(MAX_FILE_PATH *sizeof(char));
-  while ((dp = readdir(dfd)) != NULL)
+  char filename_buf[PATH_MAX] = {}; // store one file path
+  struct stat stat_buf ;
+  int file_number = 0;
+  while ((dirent_handler = readdir(dir_handler)) != NULL)
   {
-    struct stat stbuf ;
+    /* get the file path, form the file path /dir_name/file_name, 
+       e.g. dir_name is '/tmp' file_name is 'test_file_1.txt', form one path '/tmp/test_file_1.txt' */
+    sprintf( filename_buf , "%s/%s",dir_name, dirent_handler->d_name); 
 
-    /** allocte memory to store the path */
-    while ((strlen(dir) + strlen(dp->d_name)) >= i*MAX_FILE_PATH)
+    if (stat(filename_buf, &stat_buf) == -1) // if can access the current file, return 
     {
-      filename_qfd = (char *)realloc(filename_qfd, (++i*MAX_FILE_PATH)*sizeof(char));
+      LOG_FATAL("Unable to stat file: %s, error message: %s\n", filename_buf, strerror(errno)) ;
+      return;
     }
 
-    /* get the file path */
-    sprintf( filename_qfd , "%s/%s",dir,dp->d_name) ;
-
-    if( stat(filename_qfd,&stbuf ) == -1 )
+    /** 1) do not travel '..', '.' directory 
+        2) when the file type is directory, travel it 
+        3) when the file type is reguler file, write it into temp files on average (value from -n) */
+    if (strcmp (dirent_handler->d_name, "..") != 0 && strcmp (dirent_handler->d_name, ".") != 0)
     {
-      LOG_FATAL("Unable to stat file: %s\n",filename_qfd) ;
-      continue ;
-    }
-
-    if (strcmp (dp->d_name, "..") != 0 && strcmp (dp->d_name, ".") != 0)
-    {
-      if ((stbuf.st_mode & S_IFMT)  == S_IFDIR)
+      /** the file type is a directory (exclude '..' and '.') */
+      if ((stat_buf.st_mode & S_IFMT)  == S_IFDIR)
       {
-        list_dir(filename_qfd, process_count);
+        list_dir(filename_buf, process_count, distribute_count, pFile); // deep into this directory and travel it
       }
       else {
-        sprintf(filename_qfd, "%s\n", filename_qfd);
-        pid_t pid = getpid();
-        int file_number = list_file_count%process_count;
-        int size = fwrite (filename_qfd, sizeof(char), strlen(filename_qfd), pFile[file_number]);
-        list_file_count++;
+        sprintf(filename_buf, "%s\n", filename_buf); // add one new line character by the end of one file path, one line is one file path
+        /* write on average process_count */
+        file_number = *distribute_count%process_count;
+        fwrite (filename_buf, sizeof(char), strlen(filename_buf), pFile[file_number]);
+        (*distribute_count)++; // increase the file count
 
-        if (process_count == list_file_count) list_file_count = 0; // reset list_file_count each cycle
-
-        if (0 == size)
-        LOG_NOTICE("file_number, pid, size, filename_qfd, process_count, list_file_count are:%d, %d, %s, %d, %d\n", pid, size, filename_qfd, process_count, list_file_count);
-       continue;
+        if (process_count == *distribute_count) *distribute_count = 0; // reset list_file_count each cycle
+        continue;
       }
     }
   }
-  filename_qfd = NULL;
-  free(filename_qfd);
 }
 
 /** 
  * \brief read line by line, then call processFile to grab license line by line
  * 
  * \param file_number - while temp path file do you want to read and process
+ * \param FILE **pFile - file descriptor array
  */
-void read_file_grab_license(int file_number)
+void read_file_grab_license(int file_number, FILE **pFile)
 {
   char *line = NULL;
   size_t len = 0;
-  ssize_t read;
-  char path_file[TEMP_FILE_LEN] = "";
+  int lenth_tmp = 0;
+  ssize_t read = 0;
 
-  sprintf(path_file, "/tmp/fossology_file_list_%d.txt", file_number);
-  FILE *file = fopen(path_file, "r");
-  if (!file) 
-  {
-    LOG_FATAL("failed to open %s\n", path_file);
-    return;
-  }
-  while ((read = getline(&line, &len, file)) != -1) {
-    if (line && line[0])
+  /*read line by line, then start to scan licenses */
+  while ((read = getline(&line, &len, pFile[file_number])) != -1) {
+    if (line && line[0]) // line is not empty
     {
-      int lenth = strlen(line);
-      while(isspace(line[lenth - 1])) line[--lenth] = 0;  // right trim
+      lenth_tmp = strlen(line);
+      /* trim the line */
+      while(isspace(line[lenth_tmp - 1])) line[--lenth_tmp] = 0;  // right trim
       while(isspace(*line)) ++line;  // left trim
+      //printf("line is:%s, getpid() is:%d\n", line, getpid());
     }
-    //line = trim(line);
-    processFile(line);
-  }
-  fclose(file);
+    processFile(line); // start to scan licenses
+  } // while
 
   if (line) free(line);
 }
@@ -887,9 +871,10 @@ void read_file_grab_license(int file_number)
 /**
  * \brief the recursive create process and process grabbing licenses
  *
- * \param proc_num - how many child processes(proc_num - 1) will be created
+ * \param int proc_num - how many child processes(proc_num - 1) will be created
+ * \param FILE **pFile - temp path file pointers
  */
-void myFork(int proc_num) {
+void myFork(int proc_num, FILE **pFile) {
   pid_t pid;
   pid = fork();
 
@@ -898,16 +883,19 @@ void myFork(int proc_num) {
     LOG_FATAL("fork failed\n");
   }
   else if (pid == 0) { // chile process, every singe process runs on one temp path file
-    read_file_grab_license(proc_num); // grabbing licenses on /tmp/fossology_file_list_%d.txt
+    read_file_grab_license(proc_num, pFile); // grabbing licenses on /tmp/foss-XXXXXX
     return;
   }
   else if (pid > 0) {
     // if pid != 0, we're in the parent
     // let's call ourself again, decreasing the counter, until it reaches 1.
     if (proc_num > 1) {
-      myFork(proc_num - 1);
+      myFork(proc_num - 1, pFile);
     }
-    else read_file_grab_license(0); // main(parent) process run on /tmp/fossology_file_list_%0.txt
+    else
+    {
+      read_file_grab_license(0, pFile); // main(parent) process run on /tmp/foss-XXXXXX
+    }
   }
 }
 
@@ -933,7 +921,7 @@ int main(int argc, char **argv)
   char agent_rev[myBUFSIZ];
   cacheroot_t cacheroot;
   char *scanning_directory= NULL;
-  int process_count = 0;
+  int process_count = 0; // record file number, then write the file paths into temp path files on average process_count
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &(gl.pgConn));
@@ -1133,70 +1121,73 @@ int main(int argc, char **argv)
   }
   else
   { /******** Files on the command line ********/
+    FILE **pFile = NULL; // store temp file descriptors
+    char (*pTempFileName)[50] = NULL; // store temp file names, they are looking like /tmp/foss-XXXXXX
+    pid_t mainPid = 0; // main process id
     cur.cliMode = 1;
-    //printf("process_count, scanning_directory are:%d, %s\n", process_count, scanning_directory);
+
+    /** when scanning_directory is real direcotry, scan license in parallel */
     if (scanning_directory) {
       if (process_count < 2) process_count = 2; // the least count is 2, at least has one child process
 
-      pFile = (FILE **)malloc(process_count*(sizeof(FILE)));
+      pFile = malloc(process_count*(sizeof(FILE*)));
+      pTempFileName = malloc(process_count*sizeof(char[50]));
       int i = 0;
-      char temp_path_file_name[TEMP_FILE_LEN] = ""; // store file path list
+      int file_descriptor = 0;
       for(i = 0; i < process_count; i++)
       {
-        sprintf(temp_path_file_name, "/tmp/fossology_file_list_%d.txt", i);
-        FILE *file = fopen(temp_path_file_name, "r");
-        /** check if this file exists or not, delete when existing */
-        if (file)
-        {
-          fclose(file);
-          unlink(temp_path_file_name);
-        }
+        /** create temp file */
+        char file_template[] = "/tmp/foss-XXXXXX"; // 'XXXXXX' will be replaced after mkstemp
+        file_descriptor = mkstemp(file_template);
+
         /** get the temp path file distriptors */
-        pFile[i] = fopen(temp_path_file_name, "w");
+        pFile[i] = fdopen(file_descriptor, "w");  // open the files to write later
         if (!pFile[i])
         {
-          LOG_FATAL("failed to open %s\n", temp_path_file_name);
+          LOG_FATAL("failed to open %s, %s\n", file_template, strerror(errno));
         }
+        strcpy(pTempFileName[i], file_template); // store temp file names
       }
-      /** walk through the specified directory to get all the file(file path) and */
-      /** store into mutiple files(/tmp/fossology_file_list_%d.txt */
-      /** /tmp/fossology_file_list_0.txt is used by the main process */
-      list_dir(scanning_directory, process_count);
 
-      /** after the walking through and strore job is done, close all the temp path file distriptors */
-      for(i = 0; i < process_count; i++) fclose(pFile[i]);
+      /** walk through the specified directory to get all the file(file path) and
+          store into mutiple files - /tmp/foss-XXXXXX */
+      int distribute_count = 0; // record how many files are found in one directory
+      list_dir(scanning_directory, process_count, &distribute_count, pFile); // list and store files into /tmp/foss-XXXXXX in one directory
+
+      /** after the walking through and writing job is done, close all the temp path file distriptors.
+          then open the temp path files to read */
+      for(i = 0; i < process_count; i++)
+      {
+        if (pFile[i]) fclose(pFile[i]);  //  write all the paths
+        pFile[i] = fopen(pTempFileName[i], "r"); // open the temp files to read
+      }
 
       /** create process_count - 1 child processes(please do not forget we always have the main process) */
-      if (process_count > 1) {
-        mainPid = getpid(); // get main process id
-        myFork(process_count - 1);
-        int status = 0;
-        pid_t wpid = 0;
-        if (mainPid == getpid())
-        {
-          /** wait all processes done. */
-          while(1){
-            wpid = wait(&status);
-            if (-1 == wpid) break;
-          }
+      mainPid = getpid(); // get main process id
+      myFork(process_count - 1, pFile); // spawn process_count - 1 chile processes and grab licenses through process_count processes
+      int status = 0;
+      pid_t wpid = 0;
+      if (mainPid == getpid())
+      {
+        /** wait all processes done. */
+        while(1){
+          wpid = wait(&status);
+          if (-1 == wpid) break;
+        }
 
-          /** delete the temp path files */
-          for(i = 0; i < process_count; i++)
+        /** close the opening files, then delete the temp path files */
+        for(i = 0; i < process_count; i++)
+        {
+          if (pFile[i])
           {
-            sprintf(temp_path_file_name, "/tmp/fossology_file_list_%d.txt", i);
-            FILE *file = fopen(temp_path_file_name, "r");
-            /** check if this file exists or not, delete when existing */
-            if (file)
-            {
-              fclose(file);
-              unlink(temp_path_file_name);
-            }
+            fclose(pFile[i]);
+            unlink(pTempFileName[i]);
           }
         }
 
         /** free memeory */
-        pFile = NULL;
         free(pFile);
+        free(pTempFileName);
       }
     }
     else {
