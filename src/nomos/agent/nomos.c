@@ -270,7 +270,7 @@ int main(int argc, char **argv)
   char agent_rev[myBUFSIZ];
   cacheroot_t cacheroot;
   char *scanning_directory= NULL;
-  int process_count = 0; // record file number, then write the file paths into temp path files on average process_count
+  int process_count = 0;
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &(gl.pgConn));
@@ -422,8 +422,18 @@ int main(int argc, char **argv)
         strcpy(pTempFileName[i], file_template); // store temp file names
       }
 
-      /** after the walking through and strore job is done, close all the temp path file distriptors */
-      for(i = 0; i < process_count; i++) fclose(pFile[i]);
+      /** walk through the specified directory to get all the file(file path) and
+          store into mutiple files - /tmp/foss-XXXXXX */
+      int distribute_count = 0; // record how many files are found in one directory
+      list_dir(scanning_directory, process_count, &distribute_count, pFile); // list and store files into /tmp/foss-XXXXXX in one directory
+
+      /** after the walking through and writing job is done, close all the temp path file distriptors.
+          then open the temp path files to read */
+      for(i = 0; i < process_count; i++)
+      {
+        if (pFile[i]) fclose(pFile[i]);  //  write all the paths
+        pFile[i] = fopen(pTempFileName[i], "r"); // open the temp files to read
+      }
 
       /** create process_count - 1 child processes(please do not forget we always have the main process) */
       mainPid = getpid(); // get main process id
