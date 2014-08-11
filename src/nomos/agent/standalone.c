@@ -21,6 +21,10 @@ int     fo_tableExists(PGconn *pgConn, char *tableName){return(0);}
 char * fo_RepMkPath (char *Type, char *Filename){return(0);}
 int GetUploadPerm(PGconn *pgConn, long UploadPk, int user_pk){return(10);}
 
+fo_dbManager* fo_dbManager_new(PGconn* dbConnection) {return NULL;}
+void fo_dbManager_free(fo_dbManager* dbManager) {}
+fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(fo_dbManager* dbManager, const char* name, const char* query, const char* paramtypes) {return NULL;}
+PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...) {return NULL;}
 
 //ExecStatusType PQresultStatus(const PGresult *res);
 int PQresultStatus(const PGresult *res){ return(PGRES_COMMAND_OK);}

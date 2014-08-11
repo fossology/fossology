@@ -68,6 +68,13 @@ extern int GetUploadPerm(PGconn *pgConn, long UploadPk, int user_pk);
 extern char * fo_RepMkPath (char *Type, char *Filename);
 
 
+typedef struct {} fo_dbManager;
+typedef struct {} fo_dbManager_PreparedStatement;
+
+fo_dbManager* fo_dbManager_new(PGconn* dbConnection);
+void fo_dbManager_free(fo_dbManager* dbManager);
+fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(fo_dbManager* dbManager, const char* name, const char* query, const char* paramtypes);
+PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...);
 
 //ExecStatusType PQresultStatus(const PGresult *res);
 extern int PQresultStatus(const PGresult *res);
