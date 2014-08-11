@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <glib.h>
 #include <libfossdb.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 /* cunit includes */
 #include <CUnit/CUnit.h>
