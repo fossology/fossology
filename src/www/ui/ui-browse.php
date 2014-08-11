@@ -400,7 +400,7 @@ class ui_browse extends FO_Plugin {
       case "XML":
         break;
       case "HTML":
-        $V.= $this->outputHTML($Item,$folder_pk,$Upload);
+        $V.= $this->outputItemHtml($Item,$folder_pk,$Upload);
         break;
       case "Text":
         break;
@@ -414,7 +414,7 @@ class ui_browse extends FO_Plugin {
     return;
   }
   
-  function outputHTML($uploadTreeId,$Folder,$Upload)
+  function outputItemHtml($uploadTreeId,$Folder,$Upload)
   {
     global $PG_CONN, $container;
     $dbManager = $container->get('db.manager');
@@ -464,7 +464,7 @@ class ui_browse extends FO_Plugin {
         {
           $text = _("Missing upload tree parent for upload");
           $html.= "<hr><h2>$text $Upload</h2><hr>";
-          break;
+          return;
         }
         pg_free_result($result);
       }
