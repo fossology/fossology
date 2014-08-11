@@ -21,9 +21,14 @@ typedef enum
 } ExecStatusType;
 #define PG_DIAG_SQLSTATE  0
 
-
+#ifndef FALSE
 #define FALSE 0
+#endif
+
+#ifndef TRUE
 #define TRUE 1
+#endif
+
 typedef int PGresult;
 
 #define PERM_WRITE 2
@@ -70,6 +75,14 @@ extern char * fo_RepMkPath (char *Type, char *Filename);
 
 typedef struct {} fo_dbManager;
 typedef struct {} fo_dbManager_PreparedStatement;
+
+#define fo_dbManager_PrepareStamement(dbManager, name, query, ...) \
+fo_dbManager_PrepareStamement_str(dbManager, \
+  name, \
+  query, \
+  #__VA_ARGS__\
+)
+
 
 fo_dbManager* fo_dbManager_new(PGconn* dbConnection);
 void fo_dbManager_free(fo_dbManager* dbManager);

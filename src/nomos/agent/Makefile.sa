@@ -18,7 +18,7 @@ GENOBJS=_precheck.o _autodata.o
 HDRS=nomos.h $(OBJS:.o=.h) _autodefs.h
 
 #CFLAGS_LOCAL= -DSTANDALONE -g -O2 -Wall -D_FILE_OFFSET_BITS=64
-CFLAGS_LOCAL= -DSTANDALONE -Wall -D_FILE_OFFSET_BITS=64 -I`pkg-config glib-2.0 --cflags --libs`
+CFLAGS_LOCAL= -DSTANDALONE -Wall -D_FILE_OFFSET_BITS=64 `pkg-config glib-2.0 --cflags --libs`
 
 all: encode nomos
 

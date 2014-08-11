@@ -15,10 +15,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-
 #ifndef NOMOS_GAP_H
 #define	NOMOS_GAP_H
-
+#ifndef  _GNU_SOURCE
+#define  _GNU_SOURCE
+#endif   /* not defined _GNU_SOURCE */
 #include <glib.h>
 
 struct PairPosOff {
