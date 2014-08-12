@@ -157,6 +157,50 @@ void test_findAllMatchesAllIncluded(){
   licenses_free(licenses);
 }
 
+void test_formatMatchArray() {
+  DiffMatchInfo diff1 = (DiffMatchInfo){
+    .diffType = "a", .diffSize = 42,
+    .text = (DiffPoint) { .start = 1, .length = 2 },
+    .search = (DiffPoint) { .start = 3, .length = 4 },
+  };
+  DiffMatchInfo diff2 = (DiffMatchInfo){
+    .diffType = "b", .diffSize = 42,
+    .text = (DiffPoint) { .start = 1, .length = 0 },
+    .search = (DiffPoint) { .start = 3, .length = 4 },
+  };
+  DiffMatchInfo diff3 = (DiffMatchInfo){
+    .diffType = "b", .diffSize = 42,
+    .text = (DiffPoint) { .start = 2, .length = 2 },
+    .search = (DiffPoint) { .start = 3, .length = 0 },
+  };
+  DiffMatchInfo diff4 = (DiffMatchInfo){
+    .diffType = "b", .diffSize = 42,
+    .text = (DiffPoint) { .start = 4, .length = 0 },
+    .search = (DiffPoint) { .start = 3, .length = 0 },
+  };
+
+  char* result;
+  GArray* matchInfo = g_array_new(TRUE, FALSE, sizeof(DiffMatchInfo));
+
+  g_array_append_val(matchInfo, diff1);
+  result = formatMatchArray(matchInfo);
+  CU_ASSERT_STRING_EQUAL(result, "t[1+2] a s[3+4]");
+  free(result);
+
+  g_array_append_val(matchInfo, diff2);
+  result = formatMatchArray(matchInfo);
+  CU_ASSERT_STRING_EQUAL(result, "t[1+2] a s[3+4], t[1] b s[3+4]");
+  free(result);
+
+  g_array_append_val(matchInfo, diff3);
+  g_array_append_val(matchInfo, diff4);
+  result = formatMatchArray(matchInfo);
+  CU_ASSERT_STRING_EQUAL(result, "t[1+2] a s[3+4], t[1] b s[3+4], t[2+2] b s[3], t[4] b s[3]");
+  free(result);
+
+  g_array_free(matchInfo, TRUE);
+}
+
 // match initialized with just enough to run _getRank() and _free()
 // if type == MATCH_TYPE_FULL then _getRank() == 100 irrespective of the rank variable
 Match* _matchWithARank(int type, double rank){
@@ -309,6 +353,7 @@ CU_TestInfo match_testcases[] = {
   {"Testing match of all licenses with included full matches:", test_findAllMatchesAllIncluded},
   {"Testing match of all licenses with two included group:", test_findAllMatchesTwoGroups},
   {"Testing match of all licenses with two included group and diffs:", test_findAllMatchesTwoGroupsWithDiff},
+  {"Testing formatting the diff information output:", test_formatMatchArray},
   {"Testing finding best match in a group:", test_greatestMatchInGroup},
   {"Testing finding best match in a group, 2:", test_greatestMatchInGroup2},
   {"Testing finding best match in a group, 3:", test_greatestMatchInGroup3},

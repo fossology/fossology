@@ -127,7 +127,7 @@ char* formatMatchArray(GArray * matchInfo){
                            "t[%zu] %s ",
                            current->text.start, current->diffType);
 
-    if(current->text.length > 0)
+    if(current->search.length > 0)
       stringBuilder_printf(stringBuilder,
                            "s[%zu+%zu]",
                            current->search.start, current->search.length);
