@@ -93,11 +93,11 @@ class ClearingDao extends Object
 
     $this->dbManager->prepare($statementName,
         "SELECT
-           CD.clearing_id AS id,
-           CD.uploadtree_id AS uploadtree_id,
-           CD.pfile_id AS pfile_id,
+           CD.clearing_pk AS id,
+           CD.uploadtree_fk AS uploadtree_id,
+           CD.pfile_fk AS pfile_id,
            users.user_name AS user_name,
-           CD.user_id AS user_id,
+           CD.user_fk AS user_id,
            CD_types.meaning AS type,
            CD_scopes.meaning AS scope,
            CD.comment AS comment,
@@ -106,13 +106,13 @@ class ClearingDao extends Object
            ut2.upload_fk = $1 AS same_upload,
            ut2.upload_fk = $1 and ut2.lft BETWEEN $2 and $3 AS is_local
          FROM clearing_decision CD
-         LEFT JOIN clearing_decision_types CD_types ON CD.type=CD_types.type
-         LEFT JOIN clearing_decision_scopes CD_scopes ON CD.scope=CD_scopes.type
-         LEFT JOIN users ON CD.user_id=users.user_pk
-         INNER JOIN uploadtree ut2 ON CD.uploadtree_id = ut2.uploadtree_pk
-         INNER JOIN uploadtree ut ON CD.pfile_id = ut.pfile_fk
+         LEFT JOIN clearing_decision_types CD_types ON CD.type_fk=CD_types.type_pk
+         LEFT JOIN clearing_decision_scopes CD_scopes ON CD.scope_fk=CD_scopes.scope_pk
+         LEFT JOIN users ON CD.user_fk=users.user_pk
+         INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
+         INNER JOIN uploadtree ut ON CD.pfile_fk = ut.pfile_fk
            WHERE ut.upload_fk=$1 and ut.lft BETWEEN $2 and $3
-         ORDER by pfile_id, CD.clearing_id desc;");
+         ORDER by CD.pfile_fk, CD.clearing_pk desc");
 // the array needs to be sorted with the newest clearingDecision first.
     $result = $this->dbManager->execute($statementName, array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
     $clearingsWithLicensesArray = array();
@@ -156,8 +156,8 @@ class ClearingDao extends Object
                license_ref.rf_shortname as shortname,
                license_ref.rf_fullname  as fullname
            from clearing_licenses
-           left join license_ref on clearing_licenses.license_id=license_ref.rf_pk
-               where clearing_id=$1");
+           left join license_ref on clearing_licenses.rf_fk=license_ref.rf_pk
+               where clearing_fk=$1");
 
     $res = $this->dbManager->execute($statementN, array($id));
 
@@ -181,7 +181,7 @@ class ClearingDao extends Object
     $res = $this->dbManager->execute($statementN);
     while ($rw = pg_fetch_assoc($res))
     {
-      $clearingTypes[] = new DatabaseEnum($rw['type'], $rw['meaning']);
+      $clearingTypes[] = new DatabaseEnum($rw['type_pk'], $rw['meaning']);
     }
     pg_free_result($res);
     return $clearingTypes;
@@ -200,7 +200,7 @@ class ClearingDao extends Object
 
     while ($rw = pg_fetch_assoc($res))
     {
-      $clearingScopes[] = new DatabaseEnum($rw['type'], $rw['meaning']);
+      $clearingScopes[] = new DatabaseEnum($rw['scope_pk'], $rw['meaning']);
     }
 
     return $clearingScopes;
@@ -219,23 +219,24 @@ class ClearingDao extends Object
   {
     $statementName2 = __METHOD__ . ".d";
     $row = $this->dbManager->getSingleRow(
-        "delete from clearing_decision where uploadtree_id = $1 and type = (select type from clearing_decision_types where meaning ='To be determined')",
+        "delete from clearing_decision where uploadtree_fk = $1 and type_fk = (select type_pk from clearing_decision_types where meaning ='To be determined')",
         array($uploadTreeId),
         $statementName2);
 
     $statementName = __METHOD__;
     $row = $this->dbManager->getSingleRow(
-        "insert into clearing_decision (uploadtree_id,pfile_id,user_id,type,scope,comment,reportinfo) values ($1,(SELECT pfile_fk FROM uploadtree where uploadtree_pk = $1),$2,$3,$4,$5,$6) RETURNING clearing_id",
+        "insert into clearing_decision (uploadtree_fk,pfile_fk,user_fk,type_fk,scope_fk,comment,reportinfo) values ($1,(SELECT pfile_fk FROM uploadtree where uploadtree_pk = $1),$2,$3,$4,$5,$6) RETURNING clearing_pk",
         array($uploadTreeId, $userid, $type, $scope, $comment, $remark),
         $statementName);
+    $lastClearingId=$row['clearing_pk'];
 
     $statementN = __METHOD__ . ".l";
     $this->dbManager->prepare($statementN,
-        "insert into clearing_licenses (clearing_id,license_id) values ($1,$2)");
+        "insert into clearing_licenses (clearing_fk,rf_fk) values ($1,$2)");
 
     foreach ($licenses as $license)
     {
-      $res = $this->dbManager->execute($statementN, array($row['clearing_id'], $license));
+      $res = $this->dbManager->execute($statementN, array($lastClearingId, $license));
       pg_free_result($res);
     }
 

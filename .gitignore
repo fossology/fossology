@@ -48,6 +48,7 @@ src/lib/c/sqlCopyTest
 src/lib/c/tests/lib-c-Listing.xml
 src/lib/c/tests/lib-c-Results.xml
 src/lib/c/tests/testlibs
+src/lib/php/tests/lib-php-Xunit-Results.xml
 src/lib/php/bootstrap.php
 src/lib/php/id.patch
 src/maintagent/agent/maintagent

@@ -34,9 +34,9 @@ function migrate_25_26($verbose)
   // ensure that these results where not inserted before
   $sql = "SELECT pureInserts.* FROM ($sql) pureInserts
             LEFT JOIN clearing_decision cd
-              ON pureInserts.uploadtree_id=cd.uploadtree_id and pureInserts.user_id=cd.user_id
+              ON pureInserts.uploadtree_id=cd.uploadtree_fk and pureInserts.user_id=cd.user_fk
                 AND pureInserts.date_added=cd.date_added and pureInserts.reportinfo=cd.reportinfo
-          WHERE cd.clearing_id is null";
+          WHERE cd.clearing_pk is null";
   $dbManager->prepare($stmt,$sql);
   $res = $dbManager->execute($stmt);
   if (pg_num_rows($res)==0)
@@ -45,29 +45,30 @@ function migrate_25_26($verbose)
     {
       echo "no unknown decision\n";
     }
-    pg_free_result($res);
+    $dbManager->freeResult($res);
     return 0;
   }
   $auditDecisions = pg_fetch_all($res);
-  pg_free_result($res);
-  $scope = $dbManager->getSingleRow('SELECT type FROM clearing_decision_scopes WHERE meaning=$1',array('global'));
-  $scope = $scope['type'];
-  $type = $dbManager->getSingleRow('SELECT type FROM clearing_decision_types WHERE meaning=$1',array('userDecision'));
-  $type = $scope['type'];
+  $dbManager->freeResult($res);
+  $scope = $dbManager->getSingleRow('SELECT scope_pk FROM clearing_decision_scopes WHERE meaning=$1',array('global'));
+  $scope = $scope['scope_pk'];
+  $type = $dbManager->getSingleRow('SELECT type_pk FROM clearing_decision_types WHERE meaning=$1',array('userDecision'));
+  $type = $scope['type_pk'];
   $dbManager->prepare($stmt='insertClearingDecision',
           'INSERT INTO clearing_decision'
-          . ' (uploadtree_id, pfile_id,user_id,type,comment,reportinfo,scope,date_added) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)'
-          . ' RETURNING clearing_id');
+          . ' (uploadtree_fk,pfile_fk,user_fk,type_fk,scope_fk,comment,reportinfo,date_added) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)'
+          . ' RETURNING clearing_pk');
   $dbManager->prepare($stmt='insertClearingLicense','INSERT INTO clearing_licenses'
-          . ' (clearingid,licenseid) VALUES ($1,$2)');
+          . ' (clearing_fk,rf_fk) VALUES ($1,$2)');
   $pfiles = array();
   foreach($auditDecisions as $audit)
   {
    $cd = $dbManager->execute('insertClearingDecision',
-           array($audit['uploadtree_id'],$audit['pfile_id'] ,$audit['user_id'],$type,'migrated',$audit['reportinfo'],$scope,$audit['date_added']));
-   $clearingId = pg_fetch_result($cd, 0, 'clearing_id');
-   pg_free_result($cd);
-   pg_free_result( $dbManager->execute('insertClearingLicense',array($clearingId,$audit['license_id'])) );
+           array($audit['uploadtree_id'],$audit['pfile_id'] ,$audit['user_id'],$type,$scope,'migrated',$audit['reportinfo'],$audit['date_added']));
+   $clearing = $dbManager->fetchArray($cd);
+   $clearingId = $clearing['clearing_pk'];
+   $dbManager->freeResult($cd);
+   $dbManager->freeResult( $dbManager->execute('insertClearingLicense',array($clearingId,$audit['license_id'])) );
    $pfiles[$audit['pfile_id']] = 0;
   }
   if ($verbose)

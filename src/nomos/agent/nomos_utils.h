@@ -70,12 +70,12 @@ int lrcache_add(cacheroot_t *pcroot, long rf_pk, char *rf_shortname);
 long lrcache_lookup(cacheroot_t *pcroot, char *rf_shortname);
 void lrcache_free(cacheroot_t *pcroot);
 void initializeCurScan(struct curScan* cur);
-inline void addLicence(GArray* theMatches, char* licenceName );
-inline void cleanLicenceBuffer();
-inline bool clearLastElementOfLicenceBuffer();   //returns true to be used in if-statements
-inline void cleanLicenceAndMatchPositions( LicenceAndMatchPositions* in );
-inline MatchPositionAndType* getMatchfromHighlightInfo(GArray* in, int index);
-inline LicenceAndMatchPositions* getLicenceAndMatchPositions(GArray* in,int  index);
-inline void cleanTheMatches(GArray* in);
+void addLicence(GArray* theMatches, char* licenceName );
+void cleanLicenceBuffer();
+bool clearLastElementOfLicenceBuffer();   //returns true to be used in if-statements
+void cleanLicenceAndMatchPositions( LicenceAndMatchPositions* in );
+MatchPositionAndType* getMatchfromHighlightInfo(GArray* in, int index);
+LicenceAndMatchPositions* getLicenceAndMatchPositions(GArray* in,int  index);
+void cleanTheMatches(GArray* in);
 
 #endif /* NOMOS_UTILS_H_ */

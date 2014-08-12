@@ -50,7 +50,7 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
     
     #$sysconfig = './sysconfigDirTest';
     #$PG_CONN = DBconnect($sysconfig);
-    $DB_COMMAND  = "../../../testing/db/createTestDB.php";
+    $DB_COMMAND  = dirname(dirname(dirname(dirname(__FILE__))))."/testing/db/createTestDB.php";
     exec($DB_COMMAND, $dbout, $rc);
     preg_match("/(\d+)/", $dbout[0], $matches);
     $test_name = $matches[1];

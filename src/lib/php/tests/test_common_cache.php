@@ -40,7 +40,7 @@ class test_common_cached extends PHPUnit_Framework_TestCase
   protected function setUp() 
   {
     global $PG_CONN;
-    $sysconfig = './sysconfigDirTest';
+    $sysconfig = dirname(__FILE__).'/sysconfigDirTest';
     if (!is_callable('pg_connect')) {
       $this->markTestSkipped("php-psql not found");
     }

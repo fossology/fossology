@@ -34,12 +34,15 @@ coverage: run_tests.c $(OBJECTS) libnomos_cov.a ${FOLIB}
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
-$(EXE): $(OBJECTS) libnomos.a run_tests.c ${FOLIB}
+$(EXE): agent $(OBJECTS) libnomos.a run_tests.c ${FOLIB}
 	${MAKE} -C ${TESTDIR}
 	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libnomos.a $(CFLAGS_LOCAL)
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
+
+agent:
+	$(MAKE) -C $(LOCALAGENTDIR)
 
 libnomos.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@

@@ -519,42 +519,42 @@
   $Schema["TABLE"]["bucketpool"]["description"]["UPDATE"] = "";
 
 
-  $Schema["TABLE"]["clearing_decision"]["clearing_id"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision"]["clearing_id"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"clearing_id\" int4;";
-  $Schema["TABLE"]["clearing_decision"]["clearing_id"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"clearing_id\" SET NOT NULL, ALTER COLUMN \"clearing_id\" SET DEFAULT nextval('clearing_decision_clearing_id_seq'::regclass);";
-  $Schema["TABLE"]["clearing_decision"]["clearing_id"]["UPDATE"] = "UPDATE clearing_decision SET clearing_id=nextval('clearing_decision_clearing_id_seq'::regclass)";
+  $Schema["TABLE"]["clearing_decision"]["clearing_pk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["clearing_pk"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"clearing_pk\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["clearing_pk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"clearing_pk\" SET NOT NULL, ALTER COLUMN \"clearing_pk\" SET DEFAULT nextval('clearing_decision_clearing_id_seq'::regclass);";
+  $Schema["TABLE"]["clearing_decision"]["clearing_pk"]["UPDATE"] = "UPDATE clearing_decision SET clearing_pk=nextval('clearing_decision_clearing_id_seq'::regclass)";
 
-  $Schema["TABLE"]["clearing_decision"]["uploadtree_id"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision"]["uploadtree_id"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"uploadtree_id\" int4;";
-  $Schema["TABLE"]["clearing_decision"]["uploadtree_id"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"uploadtree_id\" SET NOT NULL;";
-  $Schema["TABLE"]["clearing_decision"]["uploadtree_id"]["UPDATE"] = "";
+  $Schema["TABLE"]["clearing_decision"]["uploadtree_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"uploadtree_fk\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["uploadtree_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_decision"]["pfile_id"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision"]["pfile_id"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"pfile_id\" int4;";
-  $Schema["TABLE"]["clearing_decision"]["pfile_id"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"pfile_id\" SET NOT NULL;";
-  $Schema["TABLE"]["clearing_decision"]["pfile_id"]["UPDATE"] = "";
+  $Schema["TABLE"]["clearing_decision"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["pfile_fk"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"pfile_fk\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["pfile_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_decision"]["user_id"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision"]["user_id"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"user_id\" int4;";
-  $Schema["TABLE"]["clearing_decision"]["user_id"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"user_id\" SET NOT NULL;";
-  $Schema["TABLE"]["clearing_decision"]["user_id"]["UPDATE"] = "";
+  $Schema["TABLE"]["clearing_decision"]["user_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["user_fk"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"user_fk\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["user_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["user_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_decision"]["type"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision"]["type"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"type\" int4;";
-  $Schema["TABLE"]["clearing_decision"]["type"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"type\" SET NOT NULL;";
-  $Schema["TABLE"]["clearing_decision"]["type"]["UPDATE"] = "";
+  $Schema["TABLE"]["clearing_decision"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"type_fk\" IS 'Identifier for clearing_decision_types';";
+  $Schema["TABLE"]["clearing_decision"]["type_fk"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"type_fk\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["type_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["type_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_decision"]["scope"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision"]["scope"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"scope\" int4;";
-  $Schema["TABLE"]["clearing_decision"]["scope"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"scope\" SET NOT NULL;";
-  $Schema["TABLE"]["clearing_decision"]["scope"]["UPDATE"] = "";
+  $Schema["TABLE"]["clearing_decision"]["scope_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"scope_fk\" IS 'Identifier for clearing_decision_scopes';";
+  $Schema["TABLE"]["clearing_decision"]["scope_fk"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"scope_fk\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["scope_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"scope_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["scope_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_decision"]["comment"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["comment"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"comment\" IS 'User comment';";
   $Schema["TABLE"]["clearing_decision"]["comment"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"comment\" text;";
   $Schema["TABLE"]["clearing_decision"]["comment"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"comment\" DROP NOT NULL;";
   $Schema["TABLE"]["clearing_decision"]["comment"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_decision"]["reportinfo"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["reportinfo"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"reportinfo\" IS 'public comment';";
   $Schema["TABLE"]["clearing_decision"]["reportinfo"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"reportinfo\" text;";
   $Schema["TABLE"]["clearing_decision"]["reportinfo"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"reportinfo\" DROP NOT NULL;";
   $Schema["TABLE"]["clearing_decision"]["reportinfo"]["UPDATE"] = "";
@@ -565,10 +565,10 @@
   $Schema["TABLE"]["clearing_decision"]["date_added"]["UPDATE"] = "UPDATE clearing_decision SET date_added=now()";
 
 
-  $Schema["TABLE"]["clearing_decision_scopes"]["type"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision_scopes"]["type"]["ADD"] = "ALTER TABLE \"clearing_decision_scopes\" ADD COLUMN \"type\" int4;";
-  $Schema["TABLE"]["clearing_decision_scopes"]["type"]["ALTER"] = "ALTER TABLE \"clearing_decision_scopes\" ALTER COLUMN \"type\" SET NOT NULL, ALTER COLUMN \"type\" SET DEFAULT nextval('clearing_decision_scopes_type_seq'::regclass);";
-  $Schema["TABLE"]["clearing_decision_scopes"]["type"]["UPDATE"] = "UPDATE clearing_decision_scopes SET type=nextval('clearing_decision_scopes_type_seq'::regclass)";
+  $Schema["TABLE"]["clearing_decision_scopes"]["scope_pk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision_scopes"]["scope_pk"]["ADD"] = "ALTER TABLE \"clearing_decision_scopes\" ADD COLUMN \"scope_pk\" int4;";
+  $Schema["TABLE"]["clearing_decision_scopes"]["scope_pk"]["ALTER"] = "ALTER TABLE \"clearing_decision_scopes\" ALTER COLUMN \"scope_pk\" SET NOT NULL, ALTER COLUMN \"scope_pk\" SET DEFAULT nextval('clearing_decision_scopes_type_seq'::regclass);";
+  $Schema["TABLE"]["clearing_decision_scopes"]["scope_pk"]["UPDATE"] = "UPDATE clearing_decision_scopes SET scope_pk=nextval('clearing_decision_scopes_type_seq'::regclass)";
 
   $Schema["TABLE"]["clearing_decision_scopes"]["meaning"]["DESC"] = "";
   $Schema["TABLE"]["clearing_decision_scopes"]["meaning"]["ADD"] = "ALTER TABLE \"clearing_decision_scopes\" ADD COLUMN \"meaning\" varchar(30);";
@@ -576,10 +576,10 @@
   $Schema["TABLE"]["clearing_decision_scopes"]["meaning"]["UPDATE"] = "";
 
 
-  $Schema["TABLE"]["clearing_decision_types"]["type"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision_types"]["type"]["ADD"] = "ALTER TABLE \"clearing_decision_types\" ADD COLUMN \"type\" int4;";
-  $Schema["TABLE"]["clearing_decision_types"]["type"]["ALTER"] = "ALTER TABLE \"clearing_decision_types\" ALTER COLUMN \"type\" SET NOT NULL, ALTER COLUMN \"type\" SET DEFAULT nextval('clearing_decision_types_type_seq'::regclass);";
-  $Schema["TABLE"]["clearing_decision_types"]["type"]["UPDATE"] = "UPDATE clearing_decision_types SET type=nextval('clearing_decision_types_type_seq'::regclass)";
+  $Schema["TABLE"]["clearing_decision_types"]["type_pk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision_types"]["type_pk"]["ADD"] = "ALTER TABLE \"clearing_decision_types\" ADD COLUMN \"type_pk\" int4;";
+  $Schema["TABLE"]["clearing_decision_types"]["type_pk"]["ALTER"] = "ALTER TABLE \"clearing_decision_types\" ALTER COLUMN \"type_pk\" SET NOT NULL, ALTER COLUMN \"type_pk\" SET DEFAULT nextval('clearing_decision_types_type_seq'::regclass);";
+  $Schema["TABLE"]["clearing_decision_types"]["type_pk"]["UPDATE"] = "UPDATE clearing_decision_types SET type_pk=nextval('clearing_decision_types_type_seq'::regclass)";
 
   $Schema["TABLE"]["clearing_decision_types"]["meaning"]["DESC"] = "";
   $Schema["TABLE"]["clearing_decision_types"]["meaning"]["ADD"] = "ALTER TABLE \"clearing_decision_types\" ADD COLUMN \"meaning\" varchar(30);";
@@ -587,15 +587,15 @@
   $Schema["TABLE"]["clearing_decision_types"]["meaning"]["UPDATE"] = "";
 
 
-  $Schema["TABLE"]["clearing_licenses"]["clearing_id"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_licenses"]["clearing_id"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"clearing_id\" int4;";
-  $Schema["TABLE"]["clearing_licenses"]["clearing_id"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"clearing_id\" SET NOT NULL;";
-  $Schema["TABLE"]["clearing_licenses"]["clearing_id"]["UPDATE"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"clearing_fk\" int4;";
+  $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"clearing_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_licenses"]["license_id"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_licenses"]["license_id"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"license_id\" int4;";
-  $Schema["TABLE"]["clearing_licenses"]["license_id"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"license_id\" SET NOT NULL;";
-  $Schema["TABLE"]["clearing_licenses"]["license_id"]["UPDATE"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"rf_fk\" int4;";
+  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["copyright"]["ct_pk"]["DESC"] = "";
@@ -739,7 +739,7 @@
   $Schema["TABLE"]["groups"]["group_name"]["UPDATE"] = "";
 
 
-  $Schema["TABLE"]["highlight"]["type"]["DESC"] = "";
+  $Schema["TABLE"]["highlight"]["type"]["DESC"] = "COMMENT ON COLUMN \"highlight\".\"type\" IS 'Monk: full match ''M'', Diff ''M0'', DiffAdd ''M+'', DiffRemove ''M-'', DiffReplace ''MR''; Nomos License ''L''';";
   $Schema["TABLE"]["highlight"]["type"]["ADD"] = "ALTER TABLE \"highlight\" ADD COLUMN \"type\" char(2);";
   $Schema["TABLE"]["highlight"]["type"]["ALTER"] = "ALTER TABLE \"highlight\" ALTER COLUMN \"type\" DROP NOT NULL;";
   $Schema["TABLE"]["highlight"]["type"]["UPDATE"] = "";
@@ -2004,9 +2004,9 @@
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"] = "CREATE SEQUENCE \"mimetype_mimetype_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pfile_pfile_pk_seq"] = "CREATE SEQUENCE \"pfile_pfile_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_deb_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_pkg_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["clearing_decision_clearing_id_seq"] = "CREATE SEQUENCE \"clearing_decision_clearing_id_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_deb_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_req_req_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_rpm_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_pkg_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["clearing_decision_clearing_id_seq"] = "CREATE SEQUENCE \"clearing_decision_clearing_id_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_rpm_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_req_req_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["report_cache_report_cache_pk_seq"] = "CREATE SEQUENCE \"report_cache_report_cache_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["report_cache_user_report_cache_user_pk_seq"] = "CREATE SEQUENCE \"report_cache_user_report_cache_user_pk_seq\" START 1;";
@@ -2034,9 +2034,9 @@
   $Schema["CONSTRAINT"]["bucket_file_pkey"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_pkey\" PRIMARY KEY (\"bf_pk\");";
   $Schema["CONSTRAINT"]["bucket_pkey"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucket_pkey\" PRIMARY KEY (\"bucket_pk\");";
   $Schema["CONSTRAINT"]["bucketpool_pkey"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_pkey\" PRIMARY KEY (\"bucketpool_pk\");";
-  $Schema["CONSTRAINT"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pkey\" PRIMARY KEY (\"clearing_id\");";
-  $Schema["CONSTRAINT"]["clearing_decision_scopes_pkey"] = "ALTER TABLE \"clearing_decision_scopes\" ADD CONSTRAINT \"clearing_decision_scopes_pkey\" PRIMARY KEY (\"type\");";
-  $Schema["CONSTRAINT"]["clearing_decision_types_pkey"] = "ALTER TABLE \"clearing_decision_types\" ADD CONSTRAINT \"clearing_decision_types_pkey\" PRIMARY KEY (\"type\");";
+  $Schema["CONSTRAINT"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pkey\" PRIMARY KEY (\"clearing_pk\");";
+  $Schema["CONSTRAINT"]["clearing_decision_scopes_pkey"] = "ALTER TABLE \"clearing_decision_scopes\" ADD CONSTRAINT \"clearing_decision_scopes_pkey\" PRIMARY KEY (\"scope_pk\");";
+  $Schema["CONSTRAINT"]["clearing_decision_types_pkey"] = "ALTER TABLE \"clearing_decision_types\" ADD CONSTRAINT \"clearing_decision_types_pkey\" PRIMARY KEY (\"type_pk\");";
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
@@ -2116,7 +2116,7 @@
   $Schema["CONSTRAINT"]["bucket_container_agent_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["bucket_container_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["bucketpool_fk"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucketpool_fk\" FOREIGN KEY (\"bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["clearing_decision_clearid_Id"] = "ALTER TABLE \"clearing_licenses\" ADD CONSTRAINT \"clearing_decision_clearid_Id\" FOREIGN KEY (\"clearing_id\") REFERENCES \"clearing_decision\" (\"clearing_id\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["clearing_decision_clearid_Id"] = "ALTER TABLE \"clearing_licenses\" ADD CONSTRAINT \"clearing_decision_clearid_Id\" FOREIGN KEY (\"clearing_fk\") REFERENCES \"clearing_decision\" (\"clearing_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["group_user_member_group_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["group_user_member_user_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";

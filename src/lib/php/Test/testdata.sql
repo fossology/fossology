@@ -62,57 +62,65 @@ INSERT INTO upload (upload_pk, upload_desc, upload_filename, user_fk, upload_mod
 INSERT INTO bucketpool (bucketpool_pk, bucketpool_name, version, active, description) VALUES (1, 'GPL Demo bucket pool', 1, 'Y', 'Demonstration of a very simple GPL/non-gpl bucket pool');
 INSERT INTO bucket_def (bucket_pk, bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to) VALUES (1, 'GPL Licenses (Demo)', 'orange', 50, 50, 1, 3, '(affero|gpl)', NULL, 'N', 'f');
 INSERT INTO bucket_def (bucket_pk, bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to) VALUES (2, 'non-gpl (Demo)', 'yellow', 50, 1000, 1, 99, NULL, NULL, 'N', 'f');
-INSERT INTO clearing_decision (clearing_id, uploadtree_id, pfile_id, user_id, type, scope, comment, reportinfo, date_added) VALUES (1, 7, 4, 2, 1, 1, '', '', '2014-08-07 09:59:27.17262+00');
-INSERT INTO clearing_decision (clearing_id, uploadtree_id, pfile_id, user_id, type, scope, comment, reportinfo, date_added) VALUES (2, 8, 5, 2, 1, 1, '', '', '2014-08-07 09:59:39.796902+00');
-INSERT INTO clearing_decision (clearing_id, uploadtree_id, pfile_id, user_id, type, scope, comment, reportinfo, date_added) VALUES (3, 6, 3, 2, 1, 1, '', '', '2014-08-07 09:59:48.999742+00');
-INSERT INTO clearing_decision (clearing_id, uploadtree_id, pfile_id, user_id, type, scope, comment, reportinfo, date_added) VALUES (4, 11, 7, 2, 1, 1, '', '', '2014-08-07 10:00:05.541258+00');
-INSERT INTO clearing_decision (clearing_id, uploadtree_id, pfile_id, user_id, type, scope, comment, reportinfo, date_added) VALUES (5, 12, 8, 2, 1, 2, '', '', '2014-08-07 10:00:33.505955+00');
-INSERT INTO clearing_decision (clearing_id, uploadtree_id, pfile_id, user_id, type, scope, comment, reportinfo, date_added) VALUES (6, 10, 6, 2, 1, 2, '', '', '2014-08-07 10:00:48.535576+00');
-INSERT INTO clearing_decision (clearing_id, uploadtree_id, pfile_id, user_id, type, scope, comment, reportinfo, date_added) VALUES (7, 23, 4, 2, 1, 2, '', '', '2014-08-07 10:02:35.374565+00');
-INSERT INTO clearing_decision (clearing_id, uploadtree_id, pfile_id, user_id, type, scope, comment, reportinfo, date_added) VALUES (8, 24, 5, 2, 1, 1, '', '', '2014-08-07 10:03:43.235674+00');
-INSERT INTO clearing_decision (clearing_id, uploadtree_id, pfile_id, user_id, type, scope, comment, reportinfo, date_added) VALUES (9, 22, 3, 2, 2, 1, '', '', '2014-08-07 10:04:19.403175+00');
-INSERT INTO clearing_decision (clearing_id, uploadtree_id, pfile_id, user_id, type, scope, comment, reportinfo, date_added) VALUES (10, 19, 8, 2, 1, 2, '', '', '2014-08-07 10:05:34.48741+00');
-INSERT INTO clearing_decision (clearing_id, uploadtree_id, pfile_id, user_id, type, scope, comment, reportinfo, date_added) VALUES (11, 20, 6, 2, 1, 1, '', '', '2014-08-07 10:06:29.394152+00');
+INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (1, 7, 4, 2, 1, 1, '', '', '2014-08-07 09:59:27.17262+00');
+INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (2, 8, 5, 2, 1, 1, '', '', '2014-08-07 09:59:39.796902+00');
+INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (3, 6, 3, 2, 1, 1, '', '', '2014-08-07 09:59:48.999742+00');
+INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (4, 11, 7, 2, 1, 1, '', '', '2014-08-07 10:00:05.541258+00');
+INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (5, 12, 8, 2, 1, 2, '', '', '2014-08-07 10:00:33.505955+00');
+INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (6, 10, 6, 2, 1, 2, '', '', '2014-08-07 10:00:48.535576+00');
+INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (7, 23, 4, 2, 1, 2, '', '', '2014-08-07 10:02:35.374565+00');
+INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (8, 24, 5, 2, 1, 1, '', '', '2014-08-07 10:03:43.235674+00');
+INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (9, 22, 3, 2, 2, 1, '', '', '2014-08-07 10:04:19.403175+00');
+INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (10, 19, 8, 2, 1, 2, '', '', '2014-08-07 10:05:34.48741+00');
+INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (11, 20, 6, 2, 1, 1, '', '', '2014-08-07 10:06:29.394152+00');
 INSERT INTO clearing_decision_scopes (type, meaning) VALUES (1, 'global');
 INSERT INTO clearing_decision_scopes (type, meaning) VALUES (2, 'upload');
 INSERT INTO clearing_decision_types (type, meaning) VALUES (1, 'User decision');
 INSERT INTO clearing_decision_types (type, meaning) VALUES (2, 'To be determined');
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (1, 199);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (2, 454);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (3, 544);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (4, 200);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (4, 559);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (4, 498);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (5, 560);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (6, 202);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (7, 199);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (7, 211);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (8, 213);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (9, 219);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (10, 499);
-INSERT INTO clearing_licenses (clearing_id, license_id) VALUES (11, 203);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (1, 199);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (2, 454);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (3, 544);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (4, 200);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (4, 559);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (4, 498);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (5, 560);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (6, 202);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (7, 199);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (7, 211);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (8, 213);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (9, 219);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (10, 499);
+INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (11, 203);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (1, 8, 3, 'copyright (c) 1993-2009, all rights reserved. since doc software is open-source, freely available software, you are free to use, modify, copy, and distribute--perpetually and irrevocably--the doc softw', '0xc94dcc0ecf38ec1b', 'statement', 342, 543);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (2, 8, 3, 'modified versions of this software. you must, however, include this copyright statement along with any code built using doc software that you release. no copyright statement needs to be provided if you', '0x3a910990f114f12f', 'statement', 632, 833);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (3, 8, 3, 'maintained by the doc group at the institute for software integrated systems (isis) and the center for distributed object computing of washington university, st. louis for the development of open-sourc', '0x39f39190219b296f', 'statement', 1563, 1764);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (4, 8, 3, 'written permission from washington university, uc irvine, or vanderbilt university. this license grants no permission to call products or services derived from this source ace(tm), tao(tm), ciao(tm), d', '0xd9cce4755af8544e', 'statement', 4021, 4222);
-INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (5, 8, 4, 'copyright 3dfx interactive, inc. 1999, all rights reserved this ', '0xd5b4932ee22d9d53', 'statement', 5063, 5128);
+INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (5, 8, 4, 'copyright 3dfx interactive, inc. 1999, all rights reserved this 
+', '0xd5b4932ee22d9d53', 'statement', 5063, 5128);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (6, 8, 4, 'written permission of 3dfx interactive, 
-inc. see the 3dfx glide general public license for a full text of the ', '0x6efc9d9755ede08', 'statement', 5290, 5403);
+inc. see the 3dfx glide general public license for a full text of the 
+', '0x6efc9d9755ede08', 'statement', 5290, 5403);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (7, 8, 4, 'copyright laws of 
 the united states. 
 
-copyright 3dfx interactive, inc. 1999, all rights reserved" ', '0x68a5892b51a5958b', 'statement', 6854, 6958);
+copyright 3dfx interactive, inc. 1999, all rights reserved" 
+', '0x68a5892b51a5958b', 'statement', 6854, 6958);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (8, 8, 4, 'info@3dfx.com', '0x7214ac670cc0668', 'email', 5467, 5480);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (9, 8, 4, 'info@3dfx.com', '0x7214ac670cc0668', 'email', 6322, 6335);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (10, 8, 5, 'copyright (c) 2002 by author 
-professional identification * url ', '0xcd38e0e5aeb1930f', 'statement', 31, 97);
+professional identification * url 
+', '0xcd38e0e5aeb1930f', 'statement', 31, 97);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (11, 8, 5, '(c) url ("url"). 
-3. neither the name nor any trademark of the author may be used to ', '0x2e0e72503af8034', 'statement', 1252, 1339);
+3. neither the name nor any trademark of the author may be used to 
+', '0x2e0e72503af8034', 'statement', 1252, 1339);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (12, 8, 6, 'copyright (c) 2002 lawrence e. rosen. all rights
-reserved. permission is hereby granted to copy and distribute this', '0x746a69946ff2da41', 'statement', 4499, 4616);
+reserved. permission is hereby granted to copy and distribute this
+', '0x746a69946ff2da41', 'statement', 4499, 4616);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (13, 8, 6, 'copyright grant to the software. the
-    bsd and apache licenses are vague and incomplete in that respect.', '0xd4a26567ae3c6dde', 'statement', 5431, 5539);
-INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (14, 8, 6, 'copyright to the license will control changes. the apache', '0x5c8f0370f2ab5d52', 'statement', 6363, 6421);
+    bsd and apache licenses are vague and incomplete in that respect.
+', '0xd4a26567ae3c6dde', 'statement', 5431, 5539);
+INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (14, 8, 6, 'copyright to the license will control changes. the apache
+', '0x5c8f0370f2ab5d52', 'statement', 6363, 6421);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (15, 8, 8, 'written permission.
 
 you agree to indemnify, hold harmless and defend adobe systems incorporated from and against any loss, damage, claims or lawsuits, including attorney''''s fees that arise or result ', '0x32c91329da4f38ae', 'statement', 698, 899);

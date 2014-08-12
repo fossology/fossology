@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <phpunit bootstrap="./phpunit-bootstrap.php">
+  <php>
+    <env name="SYSCONFDIR" value="/usr/local/etc/fossology/"/>
+  </php>
+  <logging>
+    <log type="coverage-html" target="../testReport" charset="UTF-8" highlight="false"/>
+  </logging>
 
     <testsuites>
         <testsuite name="Fossology PhpUnit Test Suite">

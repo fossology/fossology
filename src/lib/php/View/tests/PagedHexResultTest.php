@@ -2,6 +2,7 @@
 
 /*
 Copyright (C) 2014, Siemens AG
+Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
