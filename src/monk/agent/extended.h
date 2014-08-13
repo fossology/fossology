@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "diff.h"
 
 int handleArguments(MonkState* state, int argc, char** argv);
+void onNoMatch(File* file);
 void onFullMatch(File* file, License* license, DiffMatchInfo* matchInfo);
 void onDiffMatch(File* file, License* license, DiffResult* diffResult, unsigned short rank);
 

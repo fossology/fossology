@@ -20,14 +20,34 @@ _runmonk()
 _testAllFull()
 {
   out="$( _runmonk "$@" | grep 'full match' )"
-  
+
   if [ -z "${out}" ]; then
-    fail "no result for $@"
+    fail "no result for $*"
   else
     while IFS='"' read t1 a t2 b t3; do
       lic="$(basename "$a")"
       licExpected="$b"
       assertEquals "$lic" "$licExpected"
+    done <<EOF
+$out
+EOF
+  fi
+}
+
+_testAllNone(){
+  out="$( _runmonk -v "$@" | grep 'no match' )"
+
+  if [ -z "${out}" ]; then
+    fail "no result for $*"
+  else
+    while IFS='"' read t1 a t2; do
+      found=''
+      for file; do
+        if [ "x$file" = "x$a" ]; then
+          found='yes'
+        fi
+      done
+      assertEquals "$found" "yes"
     done <<EOF
 $out
 EOF
@@ -83,6 +103,22 @@ testOneNegative()
   assertNull "$out"
 
   rm -f /tmp/negative
+}
+
+# \file cli_test.sh:testNegativeWithVerbose
+# \brief Perform a cli license analysis on a file which is not a license in verbose mode
+#       The output should be no license found
+#
+
+testNegativeWithVerbose()
+{
+  echo "This is not a license" > /tmp/negative1
+  echo "This is not a license either" > /tmp/negative2
+  echo "This is one too" > /tmp/negative3
+
+  _testAllNone /tmp/negative*
+
+  rm -f /tmp/negative*
 }
 
 # \file cli_test.sh:testAllDiffs

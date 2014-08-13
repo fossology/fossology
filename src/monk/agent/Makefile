@@ -75,7 +75,7 @@ match.o: %.o: %.c %.h _squareVisitor.o
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
 extended.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
 
 _squareVisitor.o: _squareVisitor.c
 	$(CC) -c $(CFLAGS_LOCAL) $<

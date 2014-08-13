@@ -396,6 +396,11 @@ inline void processMatches(MonkState* state, File* file, GArray* matches) {
        hasAlreadyResultsFor(state->dbManager, state->agentId, file->id))
     return;
 
+  if ((state->scanMode != MODE_SCHEDULER) && (state->verbosity >= 1) && (matches->len == 0)) {
+    onNoMatch(file);
+    return;
+  }
+
   for (size_t matchIndex = 0; matchIndex < matches->len; matchIndex++)  {
     Match* match = g_array_index(matches, Match*, matchIndex);
     processMatch(state, file, match);

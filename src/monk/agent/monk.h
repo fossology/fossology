@@ -38,6 +38,7 @@ typedef struct {
     fo_dbManager* dbManager;
     int agentId;
     int scanMode;
+    int verbosity;
 } MonkState;
 
 typedef struct {
