@@ -131,7 +131,7 @@ install-arch:
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/bsam install
 
-        $(MAKE) DESTDIR=$(CURDIR)/debian/fossology-monk \
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-monk \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/monk install
 	dh_install -s
