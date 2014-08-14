@@ -19,7 +19,7 @@
  * \brief Perform a one-shot license analysis on a file (include bsd license)
  */
 
-require_once ('../../../testing/lib/createRC.php');
+require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
 
 
 class OneShotbsdTest extends PHPUnit_Framework_TestCase
@@ -31,29 +31,26 @@ class OneShotbsdTest extends PHPUnit_Framework_TestCase
   {
     createRC();
     $sysconf = getenv('SYSCONFDIR');
-    //echo "DB: sysconf is:$sysconf\n";
     $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-    //echo "DB: nomos is:$this->nomos\n";
   }
 
-  function testOneShotbsd()
+  function testOneShotBsd()
   {
-    /** test 1 */
-    /* check to see if the file exists */
-    $this->bsd = '../../../testing/dataFiles/TestData/licenses/BSD_style_d.txt';
+    $this->bsd = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/BSD_style_d.txt';
     $this->assertFileExists($this->bsd,"OneShotbsdTest FAILURE! $this->bsd not found\n");
     $bsdlic = "BSD-3-Clause";
     $last = exec("$this->nomos $this->bsd 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
     $this->assertEquals($fname, 'BSD_style_d.txt', "Error filename $fname does not equal BSD_style_d.txt");
     $this->assertEquals($license, $bsdlic);
+  }
 
-    /** test 2 */
-    /* check to see if the file exists */
+  function testOneShotDnsdigest()
+  {
     $this->bsd = "";
     $license = "";
     $out = "";
-    $this->bsd = '../../../testing/dataFiles/TestData/licenses/DNSDigest.c';
+    $this->bsd = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/DNSDigest.c';
     $this->assertFileExists($this->bsd,"OneShotbsdTest FAILURE! $this->bsd not found\n");
     $bsdlic = "Apache-2.0,BSD-style,GPL";
     $last = exec("$this->nomos $this->bsd 2>&1", $out, $rtn);
@@ -62,4 +59,3 @@ class OneShotbsdTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($license, $bsdlic);
   }
 }
-?>

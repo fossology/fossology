@@ -21,9 +21,9 @@
  * \file test_showjobs.php
  */
 
-require_once("../../ui/template/template-plugin.php");
-require_once("../../../lib/php/common.php");
-require_once("../../ui/showjobs.php");
+require_once(dirname(dirname(dirname(dirname(__FILE__))))."/lib/php/Plugin/FO_Plugin.php");
+require_once(dirname(dirname(dirname(dirname(__FILE__))))."/lib/php/common.php");
+require_once(dirname(dirname(dirname(__FILE__)))."/ui/showjobs.php");
 
 /**
  * \class test_showjobs
@@ -32,8 +32,8 @@ class test_showjobs extends PHPUnit_Framework_TestCase {
   /**
    * \brief initialization
    */
-  protected function setUp() {
-
+  protected function setUp()
+  {
     DBconnect("/usr/local/etc/fossology/");
   }
   
@@ -44,7 +44,6 @@ class test_showjobs extends PHPUnit_Framework_TestCase {
   function test_ShowJobDB() {
     global $NewPlugin;
     $res = $NewPlugin->ShowJobDB(1);
-    print "\$result is:$res\n";
   }
 
 
@@ -55,7 +54,6 @@ class test_showjobs extends PHPUnit_Framework_TestCase {
   function test_Uploads2Jobs() {
     global $NewPlugin;
     $res = $NewPlugin->Uploads2Jobs(array(6));
-    print_r($res);
   }
 
   /**
@@ -66,5 +64,3 @@ class test_showjobs extends PHPUnit_Framework_TestCase {
     pg_close($PG_CONN);
   }
 }
-
-?>

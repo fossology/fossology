@@ -70,11 +70,6 @@ class LicenseRenderer
 
     $rendered .= "<br/><br/>";
     $rendered .= _("Hint: Click on the license name to search for where the license is found in the file listing.") . "<br/><br/>\n";
-    
-    if ($uniqueLicenseCount==0)
-    {
-      $rendered = '<b>'._('Neither license found by scanner nor concluded by user.').'</b>';
-    }
 
     $rendered .= $this->totalCountHist($fileCount, $uniqueLicenseCount, $scannerUniqueLicenseCount,
         $editedUniqueLicenseCount, $totalScannerLicenseCount, $noScannerLicenseFoundCount, $editedTotalLicenseCount, $editedNoLicenseFoundCount);

@@ -20,7 +20,7 @@
  *
  */
 
-require_once ('../../../testing/lib/createRC.php');
+require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
 
 
 class OneShot_Oracle_Berkeley_DB extends PHPUnit_Framework_TestCase
@@ -40,7 +40,7 @@ class OneShot_Oracle_Berkeley_DB extends PHPUnit_Framework_TestCase
   function testOneShotOracle_Berkeley_DB()
   {
     /** Oracle-Berkeley-DB */
-    $this->tested_file = '../../../testing/dataFiles/TestData/licenses/Oracle-Berkeley-DB.java';
+    $this->tested_file = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/Oracle-Berkeley-DB.java';
     $license_report = "Oracle-Berkeley-DB";
     $last = exec("$this->nomos $this->tested_file 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
@@ -49,11 +49,10 @@ class OneShot_Oracle_Berkeley_DB extends PHPUnit_Framework_TestCase
 
     $out = "";
     /** sleepycat */
-    $this->tested_file = '../../../testing/dataFiles/TestData/licenses/sleepycat.php';
+    $this->tested_file = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/sleepycat.php';
     $license_report = "Sleepycat";
     $last = exec("$this->nomos $this->tested_file 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
     $this->assertEquals($license, $license_report);
   }
 }
-?>

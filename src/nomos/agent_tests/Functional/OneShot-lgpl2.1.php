@@ -25,7 +25,7 @@
  * Created on March 1, 2012
  */
 
-require_once ('../../../testing/lib/createRC.php');
+require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
 
 
 class OneShotgplv21Test extends PHPUnit_Framework_TestCase
@@ -35,20 +35,15 @@ class OneShotgplv21Test extends PHPUnit_Framework_TestCase
 
   function setUp()
   {
-    /* check to see if the file exists */
-    $this->gplv21 = '../../../testing/dataFiles/TestData/licenses/gplv2.1';
+    $this->gplv21 = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/gplv2.1';
     $this->assertFileExists($this->gplv21,"OneShotgplv21Test FAILURE! $this->gplv21 not found\n");
     createRC();
     $sysconf = getenv('SYSCONFDIR');
-    //echo "DB: sysconf is:$sysconf\n";
     $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-    //echo "DB: nomos is:$this->nomos\n";
   }
 
   function testOneShotgplv21()
   {
-
-    //print "starting OneShotgplv21Test\n";
     $last = exec("$this->nomos $this->gplv21 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
     $this->assertEquals($fname, 'gplv2.1', "Error filename $fname does not equal gplv2.1");
@@ -56,4 +51,3 @@ class OneShotgplv21Test extends PHPUnit_Framework_TestCase
        $license was returned");
   }
 }
-?>

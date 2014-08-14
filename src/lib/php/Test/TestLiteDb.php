@@ -138,6 +138,44 @@ class TestLiteDb
     }
   }
   
+  public function insertData_license_ref($limit=140)
+  {
+    $LIBEXECDIR = $this->dirnameRec(__FILE__, 5) . '/install/db';
+    $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
+
+    $delimiter = "INSERT INTO license_ref";
+    $splitted = explode($delimiter, $sqlstmts);
+
+    for ($i = 1; $i < count($splitted); $i++)
+    {
+      $partial = $splitted[$i];
+      $sql = $delimiter . str_replace(' false,', " 'false',", $partial);
+      $sql = str_replace(' true,', " 'true',", $sql);
+      $this->dbManager->queryOnce($sql);
+      if ($i > $limit)
+      {
+        break;
+      }
+    }
+  }
+
+  /**
+   * @param array $viewList
+   * @param bool $invert 
+   */
+  public function createViews($viewList, $invert=FALSE)
+  {
+    $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
+    $Schema = array();
+    require($coreSchemaFile);
+    foreach($Schema['VIEW'] as $viewName=>$sql){
+      if( $invert^!in_array($viewName, $viewList) ){
+        continue;
+      }
+      $this->dbManager->queryOnce($sql);
+    }
+  }
+  
   public function &getDbManager()
   {
     return $this->dbManager;

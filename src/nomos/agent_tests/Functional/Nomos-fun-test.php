@@ -19,7 +19,7 @@
  * \brief Perform nomos functional test
  */
 
-require_once ('../../../testing/lib/createRC.php');
+require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
 
 
 class NomosFunTest extends PHPUnit_Framework_TestCase
@@ -29,30 +29,26 @@ class NomosFunTest extends PHPUnit_Framework_TestCase
 
   function setUp()
   {
-    /* check to see if the file exists */
-    $this->testdir = '../testdata/NomosTestfiles';
+    $this->testdir = dirname(dirname(__FILE__)).'/testdata/NomosTestfiles';
     $this->assertFileExists($this->testdir,"NomoFunTest FAILURE! $this->testdir not found\n");
     createRC();
     $sysconf = getenv('SYSCONFDIR');
-    //echo "DB: sysconf is:$sysconf\n";
     $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-    //echo "DB: nomos is:$this->nomos\n";
   }
 
   function testDiffNomos()
   {
-
     print "starting NomosFunTest\n";
     $last = exec("find $this->testdir -type f -not \( -wholename \"*svn*\" \) -exec $this->nomos -l '{}' + > scan.out", $out, $rtn);
 
-    $file_correct = "../testdata/LastGoodNomosTestfilesScan";
+    $file_correct = dirname(dirname(__FILE__))."/testdata/LastGoodNomosTestfilesScan";
     $last = exec("wc -l < $file_correct");
     $regtest_msg = "Right now, we have $last nomos regression tests\n";
     print $regtest_msg;
     $regtest_cmd = "echo '$regtest_msg' >./nomos-regression-test.html";
     $last = exec($regtest_cmd);
-    $old = " ..\/testdata\/";
-    $last = exec("sed 's/$old/ /g' ./scan.out > ./scan.out.r");
+    $old = str_replace('/','\/',dirname(dirname(__FILE__))."/testdata/");
+    $last = exec("sed 's/ $old/ /g' ./scan.out > ./scan.out.r");
     $last = exec("sort $file_correct >./LastGoodNomosTestfilesScan.s");
     $last = exec("sort ./scan.out.r >./scan.out.s");
     $last = exec("diff ./LastGoodNomosTestfilesScan.s ./scan.out.s >./report.d", $out, $rtn);
@@ -60,4 +56,3 @@ class NomosFunTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($count,'0', "some lines of licenses are different, please view ./report.d for the details!");
   }
 }
-?>

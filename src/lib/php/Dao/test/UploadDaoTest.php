@@ -57,5 +57,4 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->assertInstanceOf('Fossology\Lib\Data\FileTreeBounds', $fileTreeBounds);
     $this->assertEquals($expected=101, $fileTreeBounds->getUploadId());    
   }
-
 }

@@ -19,10 +19,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Data\FileTreeBounds;
+use Fossology\Lib\Data\LicenseMatch;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
-use Fossology\Lib\Data\FileTreeBounds;
-use Mockery;
 
 class LicenseDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -43,36 +45,6 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $this->dbManager = null;
   }
 
-  private function dirnameRec($path, $depth = 1)
-  {
-    for ($i = 0; $i < $depth; $i++)
-    {
-      $path = dirname($path);
-    }
-    return $path;
-  }
-
-  private function createTable_license_ref()
-  {
-    $LIBEXECDIR = $this->dirnameRec(__FILE__, 6) . '/install/db';
-    $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
-
-    $delimiter = "INSERT INTO license_ref";
-    $splitted = explode($delimiter, $sqlstmts);
-
-    for ($i = 1; $i < count($splitted); $i++)
-    {
-      $partial = $splitted[$i];
-      $sql = $delimiter . str_replace(' false,', " 'false',", $partial);
-      $sql = str_replace(' true,', " 'true',", $sql);
-      $this->dbManager->queryOnce($sql);
-      if ($i > 140)
-      {
-        break;
-      }
-    }
-  }
-
   public function testSimple()
   {
     $licDao = new LicenseDao($this->dbManager);
@@ -82,9 +54,9 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
   public function testGetFileLicenseMatches()
   {
     $this->testDb->createPlainTables(array('license_ref','uploadtree','license_file','agent'));
-    $this->createTable_license_ref();
+    $this->testDb->insertData_license_ref();
 
-    $lic0 = $this->dbManager->getSingleRow("Select rf_pk from license_ref limit 1");
+    $lic0 = $this->dbManager->getSingleRow("Select * from license_ref limit 1");
     $licenseRefNumber = $lic0['rf_pk'];
     $licenseFileId= 1;
     $pfileId= 42;
@@ -94,47 +66,36 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $uploadID =123;
     $left=2009;
     $right=2014;
-    $agentID=23;
-    $agentName="'fake'";
+    $agentName="fake";
     $agentRev=1;
     $mydate = "'2014-06-04 14:01:30.551093+02'";
-    $this->dbManager->queryOnce('CREATE VIEW license_file_ref AS 
-            SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk,
-            license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp,
-            license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
-            FROM license_file JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk');
-
-    $this->dbManager->queryOnce("INSERT INTO license_file(
-            fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk)
+    $this->testDb->createViews(array('license_file_ref'));
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk)
             VALUES ($licenseFileId, $licenseRefNumber, $agentId, $matchPercent, $mydate, $pfileId)");
-
-    $this->dbManager->queryOnce("INSERT INTO uploadtree(uploadtree_pk, upload_fk, pfile_fk, lft, rgt)
+    $this->dbManager->queryOnce("INSERT INTO uploadtree (uploadtree_pk, upload_fk, pfile_fk, lft, rgt)
             VALUES ($uploadtreeId, $uploadID, $pfileId, $left, $right)");
-
-    $uploadDao = new UploadDao($this->dbManager);
-    $fileTreeBounds = $uploadDao->getFileTreeBounds($uploadtreeId);
-    assertThat($fileTreeBounds, is(new FileTreeBounds($uploadtreeId,"uploadtree",$uploadID,$left,$right )));
-
-//    $fileTreeBounds = Mockery::mock('Fossology\Lib\Data\FileTreeBounds');
-//    $fileTreeBounds->shouldReceive('getUploadTreeTableName')->once()->andReturn('uploadtree');
-//    $fileTreeBounds->shouldReceive('getUploadId')->andReturn($uploadID);
-//    $fileTreeBounds->shouldReceive('getLeft')->andReturn($left);
-//    $fileTreeBounds->shouldReceive('getRight')->andReturn($right);
-
-    $this->dbManager->queryOnce("INSERT INTO agent ( agent_pk, agent_name, agent_rev)
-            VALUES ($agentID, $agentName, $agentRev)");
-
+    $stmt = __METHOD__.'.insert.agent';
+    $this->dbManager->prepare($stmt,"INSERT INTO agent (agent_pk, agent_name, agent_rev) VALUES ($1,$2,$3)");
+    $this->dbManager->execute($stmt,array($agentId, $agentName, $agentRev));
 
     $licDao = new LicenseDao($this->dbManager);
+    $fileTreeBounds = new FileTreeBounds($uploadtreeId,"uploadtree",$uploadID,$left,$right);
     $matches = $licDao->getFileLicenseMatches($fileTreeBounds);
-    $this->assertInstanceOf('Fossology\Lib\Data\LicenseMatch', $matches[0]);
+    
+    $licenseRef = new LicenseRef($licenseRefNumber, $lic0['rf_shortname'], $lic0['rf_fullname']);
+    $agentRef = new AgentRef($agentId, $agentName, $agentRev);
+    $expected = array( new LicenseMatch($pfileId, $licenseRef, $agentRef, $licenseFileId, $matchPercent) );
+    
+    assertThat($matches, equalTo($expected));
+//    $this->assertInstanceOf(LicenseMatch::className(), $matches[0]);
+    assertThat($matches[0], is(anInstanceOf(LicenseMatch::classname())) );
   }
   
 
   public function testGetLicenseByShortName()
   {
     $this->testDb->createPlainTables(array('license_ref'));
-    $this->createTable_license_ref();
+    $this->testDb->insertData_license_ref($limit=3);
     $licDao = new LicenseDao($this->dbManager);
     $lic0 = $this->dbManager->getSingleRow("Select rf_shortname from license_ref limit 1");
     $sname = $lic0['rf_shortname'];
@@ -150,7 +111,7 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
   public function testGetLicenseId()
   {
     $this->testDb->createPlainTables(array('license_ref'));
-    $this->createTable_license_ref();
+    $this->testDb->insertData_license_ref($limit=3);
     $licDao = new LicenseDao($this->dbManager);
     $lic0 = $this->dbManager->getSingleRow("Select rf_pk from license_ref limit 1");
     $id = $lic0['rf_pk'];
@@ -166,12 +127,52 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
   public function testGetLicenseRefs()
   {
     $this->testDb->createPlainTables(array('license_ref'));
-    $this->createTable_license_ref();
+    $this->testDb->insertData_license_ref();
     $licDao = new LicenseDao($this->dbManager);
     $licAll = $licDao->getLicenseRefs();
     $cntA = $this->dbManager->getSingleRow("Select count(*) cnt from license_ref limit 1");
     $this->assertEquals($cntA['cnt'], count($licAll));
     $this->assertInstanceOf('Fossology\Lib\Data\LicenseRef', $licAll[0]);
+  }
+  
+  public function testGetLicenseShortnamesContained()
+  {
+    $this->testDb->createPlainTables(array('license_ref','license_file','uploadtree'));
+    $this->dbManager->queryOnce("CREATE TABLE \"uploadtree_a\" AS SELECT * FROM uploadtree");
+    $this->testDb->createViews(array('license_file_ref'));
+    $this->testDb->insertData(array('license_file','uploadtree_a'));
+    $this->testDb->insertData_license_ref($limit=3);
+    $stmt = __METHOD__.'.select.license_ref';
+    $this->dbManager->prepare($stmt,"SELECT rf_pk,rf_shortname FROM license_ref");
+    $licRes = $this->dbManager->execute($stmt);
+    $licAll = array();
+    while ($erg=$this->dbManager->fetchArray($licRes))
+    {
+      $licAll[$erg['rf_pk']] = $erg['rf_shortname'];
+    }
+    $this->dbManager->freeResult($licRes);
+    $pfileId= 42;
+    $agentId = 23;
+    $matchPercent = 50;
+    $uploadtreeId= 512;
+    $uploadId =123;
+    $left=2009;
+    $right=2014;
+    $mydate = "'2014-06-04 14:01:30.551093+02'";
+    foreach ($licAll as $licenseRefNumber=>$shortname)
+    {
+      $this->dbManager->queryOnce("INSERT INTO license_file (rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk)
+            VALUES ($licenseRefNumber, $agentId, $matchPercent, $mydate, $pfileId)");
+    }
+    $this->dbManager->queryOnce("INSERT INTO uploadtree (uploadtree_pk, upload_fk, pfile_fk, lft, rgt)
+            VALUES ($uploadtreeId, $uploadId, $pfileId, $left, $right)");
+
+    $licDao = new LicenseDao($this->dbManager);
+    $fileTreeBounds = new FileTreeBounds($uploadtreeId,"uploadtree",$uploadId,$left,$right);
+    $licenses = $licDao->getLicenseShortnamesContained($fileTreeBounds);
+    
+    asort($licAll);    
+    assertThat($licenses, is(array_values($licAll)));
   }
 }
  

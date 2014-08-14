@@ -168,8 +168,11 @@ class LicenseDao extends Object
     $result = $this->dbManager->execute($statementName,
         array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
 
+    $licenseHistogram = pg_fetch_all($result);
+    pg_free_result($result);
+
     $assocLicenseHist = array();
-    while ($res = $this->dbManager->fetchArray($result))
+    foreach ($licenseHistogram as $res)
     {
       $assocLicenseHist[$res['license_shortname']] = $res['count'];
     }
@@ -195,11 +198,11 @@ class LicenseDao extends Object
         array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
 
     $licenses = array();
-    while ($row = pg_fetch_assoc($result))
+    while ($row = $this->dbManager->fetchArray($result))
     {
       $licenses[] = $row['rf_shortname'];
     }
-    pg_free_result($result);
+    $this->dbManager->freeResult($result);
 
     return $licenses;
   }

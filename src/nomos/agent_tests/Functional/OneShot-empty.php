@@ -26,7 +26,7 @@
  * Created on March 1, 2012
  */
 
-require_once ('../../../testing/lib/createRC.php');
+require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
 
 
 class OneShotemptyTest extends PHPUnit_Framework_TestCase
@@ -37,19 +37,15 @@ class OneShotemptyTest extends PHPUnit_Framework_TestCase
   function setUp()
   {
     /* check to see if the file exists */
-    $this->empty = '../testdata/empty';
+    $this->empty = dirname(dirname(__FILE__)).'/testdata/empty';
     $this->assertFileExists($this->empty,"OneShotemptyTest FAILURE! $this->empty not found\n");
     createRC();
     $sysconf = getenv('SYSCONFDIR');
-    //echo "DB: sysconf is:$sysconf\n";
     $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-    //echo "DB: nomos is:$this->nomos\n";
   }
 
   function testOneShotempty()
   {
-
-    //print "starting OneShotemptyTest\n";
     $last = exec("$this->nomos $this->empty 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
     $this->assertEquals($fname, 'empty', "Error filename $fname does not equal empty");
@@ -57,4 +53,3 @@ class OneShotemptyTest extends PHPUnit_Framework_TestCase
       equal No_license_found, $license was returned");
   }
 }
-?>

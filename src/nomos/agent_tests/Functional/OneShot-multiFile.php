@@ -25,13 +25,13 @@
  * Created on March 1, 2012
  */
 
-require_once ('../../../testing/lib/createRC.php');
+require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
 
 
 class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
 {
   public $nomos;
-  public $files = '../../../testing/dataFiles/TestData/licenses/*';
+  public $files;
   public $Results = array(
     'Affero-v1.0' => 'AGPL-1.0',
     'Apache-v1.1' => 'Apache-1.1',
@@ -82,9 +82,10 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
 
   function setUp()
   {
+    $this->files = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/*';
     /* check to see if the files exist and load up the array */
-    $this->gplv3 = '../../../testing/dataFiles/TestData/licenses/gpl-3.0.txt';
-    $this->assertTrue(file_exists('../../../testing/dataFiles/TestData/licenses/'));
+    $this->gplv3 = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/gpl-3.0.txt';
+    $this->assertTrue(file_exists(dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/'));
     createRC();
     $sysconf = getenv('SYSCONFDIR');
     $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
@@ -93,7 +94,6 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
   function testOneShotmultiFile()
   {
     $last = exec("$this->nomos $this->files 2>&1", $out, $rtn);
-    //echo "DB: out is:\n";print_r($out) . "\n";
     foreach($out as $nomosResults)
     {
       list(,$fileName,,,$licenses) = preg_split('/[\s]+/', $nomosResults);
@@ -105,4 +105,3 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
     }
   }
 }
-?>

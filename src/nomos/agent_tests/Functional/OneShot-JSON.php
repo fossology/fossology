@@ -20,7 +20,7 @@
  *
  */
 
-require_once ('../../../testing/lib/createRC.php');
+require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
 
 
 class OneShot_JSON extends PHPUnit_Framework_TestCase
@@ -32,18 +32,15 @@ class OneShot_JSON extends PHPUnit_Framework_TestCase
   {
     createRC();
     $sysconf = getenv('SYSCONFDIR');
-    //echo "DB: sysconf is:$sysconf\n";
     $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-    //echo "DB: nomos is:$this->nomos\n";
   }
 
   function testOneShot_JSON()
   {
-    $this->tested_file = '../../../testing/dataFiles/TestData/licenses/jslint.js';
+    $this->tested_file = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/jslint.js';
     $license_report = "JSON";
     $last = exec("$this->nomos $this->tested_file 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
     $this->assertEquals($license, $license_report);
   }
 }
-?>

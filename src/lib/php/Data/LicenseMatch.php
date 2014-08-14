@@ -19,7 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-class LicenseMatch
+use Fossology\Lib\Util\Object;
+
+class LicenseMatch extends Object
 {
   /**
    * @var LicenseRef
@@ -76,7 +78,7 @@ class LicenseMatch
   }
 
   /**
-   * @return \Fossology\Lib\Data\AgentRef
+   * @return AgentRef
    */
   public function getAgentRef()
   {

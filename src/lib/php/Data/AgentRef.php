@@ -64,5 +64,10 @@ class AgentRef
   {
     return $this->agentRevision;
   }
+  
+  public function __toString()
+  {
+    return 'AgentRef('.$this->agentId.','.$this->agentName.','.$this->agentRevision.')';
+  }
 
 } 

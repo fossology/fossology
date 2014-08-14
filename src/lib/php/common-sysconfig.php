@@ -318,8 +318,7 @@ function check_fossology_url($url)
   {
     $hostname = exec("hostname -f");
     if (empty($hostname)) $hostname = "localhost";
-    $res = check_IP($name);
-    if($res)
+    if(check_IP($name))
     {
       $hostname1 = gethostbyaddr($name);
       if (strcmp($hostname, $hostname1) == 0)  return 0;  // host is not reachable
@@ -424,9 +423,7 @@ function is_available($url, $timeout = 2, $tries = 2)
 
 /**
  * \brief check if the url is valid
- *
  * \param $url - the url which will be checked 
- * 
  * \return 1: the url is valid, 0: invalid
  */
 function check_url($url)
@@ -440,18 +437,11 @@ function check_url($url)
 
 /**
  * \brief check if the ip address is valid
- *
  * \param $ip - IP address
- *
- * \return 1: yes, 0: not
+ * \return 1: yes
  */
 function check_IP($ip)
 {
   $e="([0-9]|1[0-9]{2}|[1-9][0-9]|2[0-4][0-9]|25[0-5])";
-  if(preg_match("/^$e\.$e\.$e\.$e/",$ip))
-  {
-    return 1;
-  }
-  else return 0;
+  return preg_match("/^$e\.$e\.$e\.$e$/",$ip);
 }
-?>
