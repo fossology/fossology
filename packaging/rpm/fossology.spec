@@ -84,6 +84,11 @@ Requires:       fossology-web
 Summary:        Architecture for analyzing software, bsam
 Group:          PBGRP
 
+%package monk
+Requires:       fossology-common
+Summary:        Architecture for analyzing software, monk
+Group:          PBGRP
+
 %description
 PBDESC
 
@@ -134,6 +139,9 @@ This package contains the debug UI.
 
 %description bsam
 This package contains the bsam UI.
+
+%description monk
+This package contains the monk agent programs and their resources.
 
 %prep
 %setup -q
@@ -288,6 +296,16 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %dir %{_datadir}/PBPROJ
 %{_sysconfdir}/PBPROJ/mods-enabled/bsam
 %{_datadir}/PBPROJ/bsam/*
+
+%files monk
+%defattr(-,root,root)
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%dir %{_datadir}/PBPROJ
+%{_sysconfdir}/PBPROJ/mods-enabled/monk
+%{_datadir}/PBPROJ/monk/*
+%{_datadir}/PBPROJ/composer.json
+%{_datadir}/PBPROJ/composer.lock
+%{_datadir}/PBPROJ/vendor/*
 
 %post common
 # Run the postinstall script
