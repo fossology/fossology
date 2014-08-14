@@ -292,13 +292,12 @@ class ui_view extends FO_Plugin
    * \note This function is intended to be called from other plugins.
    */
   function ShowView($inputFile = NULL, $BackMod = "browse",
-                    $ShowMenu = 1, $ShowHeader = 1, $ShowText = NULL, $ViewOnly = False, $DispView = True, $highlightEntries = null, $insertBacklink = false)
+                    $ShowMenu = 1, $ShowHeader = 1, $ShowText = NULL, $ViewOnly = False, $DispView = True, $highlightEntries = array(), $insertBacklink = false)
   {
     if ($this->State != PLUGIN_STATE_READY)
     {
       return;
     }
-    $V = "";
     global $Plugins;
 
     $Upload = GetParm("upload", PARM_INTEGER);
@@ -346,13 +345,13 @@ class ui_view extends FO_Plugin
         $Opt .= "&show=$Show";
       }
       /* No item */
-      $V .= Dir2Browse($BackMod, $Item, NULL, 1, "View", -1, '', '', $uploadtree_tablename) . "<P />\n";
+      $header = Dir2Browse($BackMod, $Item, NULL, 1, "View", -1, '', '', $uploadtree_tablename) . "<P />\n";
+      print($header);
     } // if ShowHeader
 
     /***********************************
      * Display file contents
      ***********************************/
-    print $V;
     $V = "";
     $openedFin = False;
     if (empty($inputFile))
