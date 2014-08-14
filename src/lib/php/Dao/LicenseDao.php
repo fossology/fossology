@@ -168,11 +168,8 @@ class LicenseDao extends Object
     $result = $this->dbManager->execute($statementName,
         array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
 
-    $licenseHistogram = pg_fetch_all($result);
-    pg_free_result($result);
-
     $assocLicenseHist = array();
-    foreach ($licenseHistogram as $res)
+    while ($res = $this->dbManager->fetchArray($result))
     {
       $assocLicenseHist[$res['license_shortname']] = $res['count'];
     }
