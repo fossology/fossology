@@ -134,6 +134,10 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-monk \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/monk install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-monk \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src composer_install
+
 	dh_install -s
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep
