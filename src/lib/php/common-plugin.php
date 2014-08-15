@@ -24,6 +24,7 @@
 /**
  * \brief Global plugins array
  **/
+global $Plugins;
 $Plugins = array();
 
 /**

@@ -88,6 +88,10 @@ class HighlightProcessor extends Object
    */
   public function calculateSplitPositions($highlights)
   {
+    if (empty($highlights))
+    {
+      return array();
+    }
     $this->sortHighlights($highlights);
 
     $splitPositions = $this->getSplitPositions($highlights);

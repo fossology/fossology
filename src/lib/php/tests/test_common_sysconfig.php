@@ -21,9 +21,9 @@
  * \brief unit tests for common-sysconfig.php
  */
 
-require_once(dirname(__FILE__) . '/../common-container.php');
-require_once(dirname(__FILE__) . '/../common-db.php');
-require_once(dirname(__FILE__) . '/../common-sysconfig.php');
+require_once(dirname(dirname(__FILE__)) . '/common-container.php');
+require_once(dirname(dirname(__FILE__)) . '/common-db.php');
+require_once(dirname(dirname(__FILE__)) . '/common-sysconfig.php');
 
 /**
  * \class test_common_sysconfig
@@ -36,27 +36,20 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
   public $sys_conf = ""; 
 
   /**
-   * \brief initialization
+   * \brief initialization with db
    */
-  protected function setUp()
+  protected function setUpDb()
   {
     if (!is_callable('pg_connect')) {
       $this->markTestSkipped("php-psql not found");
     }
     global $PG_CONN;
     global $DB_COMMAND;
-    global $DB_NAME;
     global $sys_conf;
-    
-    #$sysconfig = './sysconfigDirTest';
-    #$PG_CONN = DBconnect($sysconfig);
+
     $DB_COMMAND  = dirname(dirname(dirname(dirname(__FILE__))))."/testing/db/createTestDB.php";
     exec($DB_COMMAND, $dbout, $rc);
-    preg_match("/(\d+)/", $dbout[0], $matches);
-    $test_name = $matches[1];
     $sys_conf = $dbout[0];
-//    $DB_NAME = "fosstest".$test_name;
-    #$sysconfig = './sysconfigDirTest';
     $PG_CONN = DBconnect($sys_conf);
   }
 
@@ -68,24 +61,22 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
    */
   function testConfigInit()
   {
+    $this->setUpDb();
     global $sys_conf;
-    print "\nStart unit test for common-sysconfig.php\n";
-    print "test function ConfigInit()\n";
-    #$sysconfig = './sysconfigDirTest';
     ConfigInit($sys_conf, $SysConf);
     $this->assertEquals("FOSSology Support",  $SysConf['SYSCONFIG']['SupportEmailSubject']);
     $hostname = exec("hostname -f");
     if (empty($hostname)) $hostname = "localhost";
     $FOSSologyURL = $hostname."/repo/";
     $this->assertEquals($FOSSologyURL,  $SysConf['SYSCONFIG']['FOSSologyURL']);
-    print "unit test for common-sysconfig.php end\n";
+    $this->tearDownDb();
   }
 
 
   /**
-   * \brief clean the env
+   * \brief clean the env db
    */
-  protected function tearDown() {
+  protected function tearDownDb() {
     if (!is_callable('pg_connect')) {
       return;
     }
@@ -97,6 +88,13 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
     exec("$DB_COMMAND -d $DB_NAME");
   }
 
+  /**
+   * \brief clean the env
+   */
+  public function test_check_IP() {
+    foreach(array(''=>false,'1.2.3.4'=>true,'1.7.49.343'=>false,'255.249.199.0'=>true) as $ip=>$correct){
+      $this->assertEquals(check_IP($ip),$correct,$message="result for IP $ip is false");
+      print('.');
+    }
+  }  
 }
-
-?>

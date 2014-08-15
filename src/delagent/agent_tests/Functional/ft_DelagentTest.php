@@ -16,7 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-require_once("../../../cli/tests/test_common.php");
+require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/cli/tests/test_common.php');
 
 /**
  * \brief test delagent cli

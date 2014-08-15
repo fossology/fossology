@@ -58,20 +58,20 @@ class HighlightDao extends Object
   }
 
   /**
-   * @param int $item
+   * @param int $uploadTreeId
    * @param int $licenseId
    * @param int $agentId
    * @param null $highlightId
    * @return array
-   */
-  public function getHighlightEntries($item, $licenseId = null, $agentId = null, $highlightId = null)
+   */ 
+  private function getHighlightDiffs($uploadTreeId, $licenseId = null, $agentId = null, $highlightId = null)
   {
     $sql = "SELECT start,len,type,rf_fk,rf_start,rf_len
             FROM license_file
               INNER JOIN highlight ON license_file.fl_pk = highlight.fl_fk
               INNER JOIN uploadtree ON uploadtree.pfile_fk = license_file.pfile_fk
               WHERE uploadtree_pk = $1 AND (type LIKE 'M_' OR type = 'L')";
-    $params = array($item);
+    $params = array($uploadTreeId);
     $stmt = __METHOD__;
     if (!empty($licenseId))
     {
@@ -91,19 +91,10 @@ class HighlightDao extends Object
       $stmt .= '.Highlight';
       $sql .= " AND fl_pk=$" . count($params);
     }
-
-    $stmt1 = __METHOD__ . ":keywords";
-    $sql2 = "SELECT start,len
-             FROM highlight_keyword
-             WHERE pfile_fk = (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1)";
-
     $this->dbManager->prepare($stmt, $sql);
-    $this->dbManager->prepare($stmt1, $sql2);
-
     $result = $this->dbManager->execute($stmt, $params);
-    $result2 = $this->dbManager->execute($stmt1, array($item));
     $highlightEntries = array();
-    while ($row = pg_fetch_assoc($result))
+    while ($row = $this->dbManager->fetchArray($result))
     {
       $newHiglight = new Highlight(
           intval($row['start']), intval($row['start'] + $row['len']),
@@ -117,15 +108,44 @@ class HighlightDao extends Object
       }
       $highlightEntries[] = $newHiglight;
     }
-    while ($row = pg_fetch_assoc($result2))
+    $this->dbManager->freeResult($result);
+    return $highlightEntries;
+  }
+  
+  /*
+   * @param int $uploadTreeId
+   */
+  private function getHighlightKeywords($uploadTreeId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT start,len
+             FROM highlight_keyword
+             WHERE pfile_fk = (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1)";
+    $this->dbManager->prepare($stmt, $sql);
+    $result = $this->dbManager->execute($stmt, array($uploadTreeId));
+    $highlightEntries = array();
+    while ($row = $this->dbManager->fetchArray($result))
     {
       $highlightEntries[] = new Highlight(
           intval($row['start']), intval($row['start'] + $row['len']),
           'K', 0, 0);
     }
-
-    pg_free_result($result);
-    pg_free_result($result2);
+    $this->dbManager->freeResult($result);
+    return $highlightEntries;
+  }
+  
+  
+  /**
+   * @param int $item
+   * @param int $licenseId
+   * @param int $agentId
+   * @param null $highlightId
+   * @return array
+   */ 
+  public function getHighlightEntries($item, $licenseId = null, $agentId = null, $highlightId = null){
+    $highlightDiffs = $this->getHighlightDiffs($item, $licenseId, $agentId, $highlightId);
+    $highlightKeywords = $this->getHighlightKeywords($item);
+    $highlightEntries = array_merge($highlightDiffs,$highlightKeywords);
     return $highlightEntries;
   }
 }

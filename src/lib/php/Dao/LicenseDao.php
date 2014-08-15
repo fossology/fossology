@@ -198,11 +198,11 @@ class LicenseDao extends Object
         array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
 
     $licenses = array();
-    while ($row = pg_fetch_assoc($result))
+    while ($row = $this->dbManager->fetchArray($result))
     {
       $licenses[] = $row['rf_shortname'];
     }
-    pg_free_result($result);
+    $this->dbManager->freeResult($result);
 
     return $licenses;
   }

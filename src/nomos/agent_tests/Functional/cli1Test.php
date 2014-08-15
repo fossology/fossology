@@ -22,7 +22,7 @@
  *
  */
 
-require_once('../../../testing/lib/createRC.php');
+require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
 class cli1Test extends PHPUnit_Framework_TestCase
 {
 	public function testHelp()
@@ -31,10 +31,10 @@ class cli1Test extends PHPUnit_Framework_TestCase
     createRC();
     $sysconf = getenv('SYSCONFDIR');
 		$nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
+                $nomos = str_replace('//', '/', $nomos);
 		// run it
 		$last = exec("$nomos -h 2>&1", $out, $rtn);
 		$usage = 'Usage: /usr/local/etc/fossology/mods-enabled/nomos/agent/nomos [options] [file [file [...]]';
 		$this->assertEquals($usage, $out[0]);
 	}
 }
-?>

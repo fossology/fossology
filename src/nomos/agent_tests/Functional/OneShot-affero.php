@@ -27,7 +27,7 @@
  * Created on March 1, 2012
  */
 
-require_once ('../../../testing/lib/createRC.php');
+require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
 
 
 class OneShotafferoTest extends PHPUnit_Framework_TestCase
@@ -39,20 +39,17 @@ class OneShotafferoTest extends PHPUnit_Framework_TestCase
   function setUp()
   {
     /* check to see if the file exists */
-    $this->affero1 = '../../../testing/dataFiles/TestData/licenses/Affero-v1.0';
-    $this->affero3 = '../../../testing/dataFiles/TestData/licenses/agpl-3.0.txt';
+    $this->affero1 = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/Affero-v1.0';
+    $this->affero3 = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/agpl-3.0.txt';
     $this->assertFileExists($this->affero1,"OneShotaffero1Test FAILURE! $this->affero1 not found\n");
     $this->assertFileExists($this->affero3,"OneShotaffero1Test FAILURE! $this->affero3 not found\n");
     createRC();
     $sysconf = getenv('SYSCONFDIR');
-    //echo "DB: sysconf is:$sysconf\n";
     $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-    //echo "DB: nomos is:$this->nomos\n";
   }
 
   function testOneShotafferos()
   {
-
     // could do a loop but it's more work.
     $last = exec("$this->nomos $this->affero1 2>&1", $out, $rtn);
     list(,$fname,,,$license) = explode(' ', implode($out));
@@ -68,4 +65,3 @@ class OneShotafferoTest extends PHPUnit_Framework_TestCase
       does not equal Affero_v3, $license was returned");
   }
 }
-?>

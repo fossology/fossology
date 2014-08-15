@@ -25,15 +25,12 @@ require_once("../../lib/php/bootstrap.php");
 
 $SysConf = array();  // fo system configuration variables
 $PG_CONN = 0;   // Database connection
-$Plugins = array();
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap();
 
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
-//debugprint($SysConf, "SysConf");
-
 plugin_load();
 
 // call install method of every plugin, core-auth creates the default user and

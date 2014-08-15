@@ -25,7 +25,7 @@
  * Created on March 1, 2012
  */
 
-require_once ('../../../testing/lib/createRC.php');
+require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
 
 
 class OneShotgpl3Test extends PHPUnit_Framework_TestCase
@@ -36,13 +36,11 @@ class OneShotgpl3Test extends PHPUnit_Framework_TestCase
   function setUp()
   {
     /* check to see if the file exists */
-    $this->gplv3 = '../../../testing/dataFiles/TestData/licenses/gpl-3.0.txt';
+    $this->gplv3 = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/gpl-3.0.txt';
     $this->assertFileExists($this->gplv3,"OneShotgplv21Test FAILURE! $this->gplv3 not found\n");
     createRC();
     $sysconf = getenv('SYSCONFDIR');
-    //echo "DB: sysconf is:$sysconf\n";
     $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-    //echo "DB: nomos is:$this->nomos\n";
   }
 
   function testOneShotgplv3()
@@ -54,4 +52,3 @@ class OneShotgpl3Test extends PHPUnit_Framework_TestCase
       "Error license does not equal FSF,GPL_v3. $license was returned");
   }
 }
-?>
