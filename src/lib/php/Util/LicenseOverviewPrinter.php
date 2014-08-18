@@ -96,6 +96,10 @@ class LicenseOverviewPrinter extends Object
    */
   function createLicenseOverview($licenseMatches, $uploadId, $uploadTreeId, $selectedAgentId = 0, $selectedLicenseId = 0, $selectedLicenseFileId = 0, $hasHighlights = false, $showReadOnly = true)
   {
+    if (count($licenseMatches)==0)
+    {
+      return '<br><b>'._('No scanner result found').'</b>';
+    }
     $output = "<h3>" . _("Scanner results") . "</h3>\n";
 
     foreach ($licenseMatches as $fileId => $agents)
