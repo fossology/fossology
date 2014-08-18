@@ -222,7 +222,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     //print_r($out);
     $output_msg_count = count($out);
-    $this->assertEquals(8, $output_msg_count);
+    $this->assertEquals(9, $output_msg_count);
 
     /** list uploads */
     $out = "";
