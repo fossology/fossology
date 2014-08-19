@@ -1,5 +1,5 @@
 # FOSSology Makefile - agent/nomos
-# Copyright (C) 2006-2013 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
@@ -15,6 +15,8 @@ LICFIX=GENSEARCHDATA
 OBJS=licenses.o list.o parse.o process.o nomos_regex.o util.o nomos_gap.o nomos_utils.o doctorBuffer_utils.o # sources.o DMalloc.o 
 GENOBJS=_precheck.o _autodata.o
 HDRS=nomos.h $(OBJS:.o=.h) _autodefs.h
+COVERAGE=$(OBJS:%.o=%_cov.o)
+GENOBJS_COV=$(GENOBJS:%.o=%_cov.o)
 
 CFLAGS_LOCAL= $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS) -Werror
 CFLAGS_LOCALO= $(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
@@ -37,6 +39,9 @@ nomos-g.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
 
 $(OBJS) $(GENOBJS): %.o: %.c $(HDRS) $(DB) $(VARS)
 	$(CC) -c $< $(CFLAGS_DBO) $(ALL_CFLAGS) 
+
+$(COVERAGE) $(GENOBJS_COV): %_cov.o: %.c $(HDRS) $(DB) $(VARS)
+	$(CC) -c $< $(CFLAGS_DBO) $(ALL_CFLAGS) $(FLAG_COV) -o $@
 
 #
 # Non "standard" preprocessing stuff starts here...
@@ -76,7 +81,7 @@ coverage:
 	@echo "NOTICE: no coverage available for nomos"
 
 clean:
-	rm -f encode nomos  *.o libnomos.a core \
+	rm -f encode nomos  core *.a *.gc* \
            _autodata.c _autodefs.c _autodefs.h _precheck.c \
            _strings.data _STRFILTER strings.HISTOGRAM words.HISTOGRAM \
            split.OTHER checkstr.OK
@@ -84,7 +89,8 @@ clean:
 libnomos.a: $(OBJS) $(GENOBJS)
 	ar cvr $@ $(OBJS) $(GENOBJS)
 
-
+libnomos_cov.a: $(COVERAGE) $(GENOBJS)
+	ar cvr $@ $(COVERAGE) $(GENOBJS)
 
 include $(DEPS)
 

@@ -26,7 +26,7 @@ test: $(EXE)
 	@echo "make nomos Unit agent_tests"
 	./$(EXE)
 
-coverage: run_tests.c $(OBJECTS) libnomos_cov.a ${FOLIB}
+coverage: agent run_tests.c $(OBJECTS) libnomos_cov.a ${FOLIB}
 	@echo "make nomos agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
 	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libnomos_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
