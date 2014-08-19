@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2012-2014 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,7 +22,7 @@ include $(VARS)
 
 all:
 
-test: fossology_testconfig
+test: fossology_testconfig phpvendors
 	@echo "make functional test for cli scripts"
 	$(MAKE) -C $(TOP)
 	phpunit --log-junit cli-Xunit.xml --configuration tests.xml
@@ -32,6 +32,9 @@ coverage:
 
 clean:
 	rm -f cli-Xunit.xml
+
+phpvendors:
+	$(MAKE) -C $(TOP)/src $@
 
 .PHONY: all test coverage clean
 
