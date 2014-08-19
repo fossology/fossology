@@ -56,7 +56,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
 
     $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
     /** set default config dir as /etc/fossology/ */
-    if (empty($fossology_testconfig)) $fossology_testconfig = "/etc/fossology/";
+    if (empty($fossology_testconfig)) $fossology_testconfig = "/usr/local/etc/fossology/";
     fwrite(STDOUT, __METHOD__ . " got fossology_testconfig = '$fossology_testconfig'\n");
 
     $cp2foss_path = "cp2foss";
@@ -166,8 +166,9 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $this->assertGreaterThan(0, $repo_pos);
     $scheduled_agent_info_1 = "agent_pkgagent is queued to run on";
     $scheduled_agent_info_2 = "agent_nomos is queued to run on";
-    $scheduled_agent_info_3 = "agent_mimetype is queued to run on";
-    $scheduled_agent_info_4 = "agent_copyright is queued to run on";
+    $scheduled_agent_info_3 = "agent_monk is queued to run on";
+    $scheduled_agent_info_4 = "agent_mimetype is queued to run on";
+    $scheduled_agent_info_5 = "agent_copyright is queued to run on";
     $pos = false;
     $pos = strpos($out[$output_msg_count - 1], $scheduled_agent_info_1);
     $this->assertEquals(0, $pos);
@@ -179,6 +180,9 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $this->assertEquals(0, $pos);
     $pos = false;
     $pos = strpos($out[$output_msg_count - 4], $scheduled_agent_info_4);
+    $this->assertEquals(0, $pos);
+    $pos = false;
+    $pos = strpos($out[$output_msg_count - 5], $scheduled_agent_info_5);
     $this->assertEquals(0, $pos);
     $upload_id = 0;
 
