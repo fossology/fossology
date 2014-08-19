@@ -441,7 +441,7 @@ class ui_browse_license extends FO_Plugin
 
       $tableColumns = array(
           array("sTitle" => _("Files"), "sClass"=>"left" ),
-          array("sTitle" => _("Scanner Results"), "sClass"=>"left" ),
+          array("sTitle" => _("Scanner Results(N: nomos, M: monk)"), "sClass"=>"left" ),
           array("sTitle" => _("Edited Results"), "sClass"=>"left" ),
           array("sTitle" => _("Actions"), "sClass"=>"left",  "bSortable"=>false, "bSearchable"=>false, "sWidth"=>"14.6%" )
         );
