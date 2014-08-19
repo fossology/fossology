@@ -293,10 +293,13 @@ class fo_libschema
     }
     foreach ($this->currSchema['CONSTRAINT'] as $name => $sql)
     {
-      if (empty($name) || $this->schema['CONSTRAINT'][$name] == $sql)
+      // skip if constraint name is empty or does not exist
+      if (empty($name) || ($this->schema['CONSTRAINT'][$name] == $sql)
+          || (DB_ConstraintExists($name) == False))
       {
         continue;
       }
+
       /* Only process tables that I know about */
       $table = preg_replace("/^ALTER TABLE \"(.*)\" ADD CONSTRAINT.*/", '${1}', $sql);
       $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES \"(.*)\" \(.*/", '${1}', $sql);
