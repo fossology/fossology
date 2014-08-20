@@ -96,7 +96,7 @@ int handleArguments(MonkState* state, int argc, char** argv) {
   return !threadError;
 }
 void onNoMatch(File* file) {
-  printf("found no match for \"%s\"\n", file->fileName);
+  printf("File %s contains license(s) No_license_found\n", file->fileName);
 }
 
 void onFullMatch(File* file, License* license, DiffMatchInfo* matchInfo) {
