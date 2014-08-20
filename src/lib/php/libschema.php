@@ -229,8 +229,8 @@ class fo_libschema
           if (!empty($rename))
           {
             /* copy over the old data */
-            $this->applyOrEchoOnce($sql = "UPDATE \"$table\" SET \"$column\" = \"$rename");
-            $this->applyOrEchoOnce($sql = "ALTER TABLE \"$table\" DROP COLUMN \"$rename");
+            $this->applyOrEchoOnce($sql = "UPDATE \"$table\" SET \"$column\" = \"$rename\"");
+            $this->applyOrEchoOnce($sql = "ALTER TABLE \"$table\" DROP COLUMN \"$rename\"");
           }
         }
         if ($this->currSchema['TABLE'][$table][$column]['ALTER'] != $modification['ALTER'])
