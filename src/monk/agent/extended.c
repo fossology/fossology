@@ -69,14 +69,18 @@ int handleArguments(MonkState* state, int argc, char** argv) {
   GArray* licenses = extractLicenses(state->dbManager, licensesResult);
 
   int threadError = 0;
+#ifdef MONK_MULTI_THREAD
   #pragma omp parallel
+#endif
   {
     MonkState threadLocalStateStore = *state;
     MonkState* threadLocalState = &threadLocalStateStore;
 
     threadLocalState->dbManager = fo_dbManager_fork(state->dbManager);
     if (threadLocalState->dbManager) {
+#ifdef MONK_MULTI_THREAD
       #pragma omp for
+#endif
       for (int fileId = fileOptInd; fileId < argc; fileId++) {
         matchCliFileWithLicenses(threadLocalState, licenses, fileId, argv);
       }

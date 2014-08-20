@@ -74,13 +74,13 @@ char* getFileName(MonkState* state, long pFileId) {
 }
 
 void match_array_free(GArray* matches) {
-#ifndef GLIB_VERSION_2_32
-    for (unsigned int i=0; i< matches->len; ++i) {
-      Match* tmp = g_array_index(matches, Match*, i);
-      match_free(tmp);
-    }
+#if GLIB_CHECK_VERSION(2,32,0)
+  g_array_set_clear_func(matches, match_destroyNotify);
 #else
-    g_array_set_clear_func(matches, match_destroyNotify);
+  for (unsigned int i=0; i< matches->len; ++i) {
+    Match* tmp = g_array_index(matches, Match*, i);
+    match_free(tmp);
+  }
 #endif
     g_array_free(matches, TRUE);
 }
@@ -439,7 +439,7 @@ void findDiffMatches(File* file, License* license, GArray* matches,
   }
 }
 
-#ifdef GLIB_VERSION_2_32
+#if GLIB_CHECK_VERSION(2,32,0)
 void match_destroyNotify(gpointer matchP){
   match_free(*((Match**) matchP));
 }
