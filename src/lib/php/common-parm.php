@@ -24,7 +24,7 @@
 define("PARM_INTEGER",1);
 define("PARM_NUMBER",2);
 define("PARM_STRING",3);
-define("PARM_TEXT",4);
+@define("PARM_TEXT",4);
 define("PARM_RAW",5);
 
 /**

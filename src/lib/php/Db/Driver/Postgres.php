@@ -32,13 +32,34 @@ class Postgres implements Driver
   }
 
   /**
+   * @brief PostgreSQL uses no more than NAMEDATALEN-1 characters of an identifier; hence long statementNames
+   *        needs to be hashed to be shorter and do not collidate due to equivalence of truncated strings
+   * @param string $stmt
+   * @return string
+   */
+  private function identifierHash($stmt)
+  {
+    $namedatalen = 63;
+    if ($namedatalen >= strlen($stmt))
+    {
+      return $stmt;
+    }
+    $hash = substr($stmt, 0, $namedatalen);
+    for($i=$namedatalen; $i<strlen($stmt);$i++)
+    {
+      $hash[$i%$namedatalen] = chr((ord($hash[$i%$namedatalen])+ord($stmt[$i])-32)%96+32);
+    }
+    return $hash;
+  }
+
+  /**
    * @param string $statementName
    * @param string $sqlStatement
    * @return resource
    */
   public function prepare($statementName, $sqlStatement)
   {
-    return pg_prepare($this->dbConnection, $statementName, $sqlStatement);
+    return pg_prepare($this->dbConnection, $this->identifierHash($statementName), $sqlStatement);
   }
 
   /**
@@ -48,7 +69,7 @@ class Postgres implements Driver
    */
   public function execute($statementName, $parameters)
   {
-    return pg_execute($this->dbConnection, $statementName, $parameters);
+    return pg_execute($this->dbConnection, $this->identifierHash($statementName), $parameters);
   }
 
   /**

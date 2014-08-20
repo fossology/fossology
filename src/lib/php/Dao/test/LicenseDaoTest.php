@@ -75,8 +75,8 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->queryOnce("INSERT INTO uploadtree (uploadtree_pk, upload_fk, pfile_fk, lft, rgt)
             VALUES ($uploadtreeId, $uploadID, $pfileId, $left, $right)");
     $stmt = __METHOD__.'.insert.agent';
-    $this->dbManager->prepare($stmt,"INSERT INTO agent (agent_pk, agent_name, agent_rev) VALUES ($1,$2,$3)");
-    $this->dbManager->execute($stmt,array($agentId, $agentName, $agentRev));
+    $this->dbManager->prepare($stmt,"INSERT INTO agent (agent_pk, agent_name, agent_rev, agent_enabled) VALUES ($1,$2,$3,$4)");
+    $this->dbManager->execute($stmt,array($agentId, $agentName, $agentRev, 'true'));
 
     $licDao = new LicenseDao($this->dbManager);
     $fileTreeBounds = new FileTreeBounds($uploadtreeId,"uploadtree",$uploadID,$left,$right);

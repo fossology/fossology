@@ -49,15 +49,16 @@ class TestLiteDb
     
     require (dirname(dirname(__FILE__)).'/common-container.php');
 
-    $logger = new Logger('default');
+    $logger = $container->get('logger');
+//    $logger = new Logger('default');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.sqlite.log';
-    $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));
-
-    $dbManager = new DbManager($logger);
+    $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));    
+    
+//    $dbManager = new DbManager($logger);
     $sqlite3Connection = new SQLite3($this->dbFileName, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
 
-    $dbManager->setDriver(new SqliteE($sqlite3Connection));
-    $this->dbManager = &$dbManager;
+    $container->get('db.manager')->setDriver(new SqliteE($sqlite3Connection));
+    $this->dbManager = $container->get('db.manager');
   }
   
   function __destruct()

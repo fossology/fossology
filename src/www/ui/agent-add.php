@@ -139,7 +139,7 @@ class agent_add extends FO_Plugin
         }
         $uploadpk = GetParm('upload',PARM_INTEGER);
         if (array_key_exists('agents', $_REQUEST))
-        $agents = $_POST['agents'];
+        $agents = $_REQUEST['agents'];
         else
         $agents = '';
 

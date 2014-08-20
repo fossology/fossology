@@ -161,9 +161,65 @@ class ui_browse_license extends FO_Plugin
       $V = "<b>$text</b><p>";
       return $V;
     }
+    
+    $uploadId = GetParm('upload', PARM_NUMBER);
+    $scannerAgents = array('nomos','monk');
+    global $container;
+    $dbManager = $container->get('db.manager');
+    $allScans = array();
+    foreach($scannerAgents as $agentName){
+      $newestAgent = $dbManager->getSingleRow("SELECT agent_pk,agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
+              . "ORDER BY agent_pk DESC LIMIT 1",array($agentName));
+      $stmt = __METHOD__.".getAgent.$agentName";
+      $dbManager->prepare($stmt,
+                $sql="SELECT agent_pk,agent_rev,agent_name FROM agent LEFT JOIN ".$agentName."_ars ON agent_fk=agent_pk "
+              . "WHERE agent_name=$2 AND agent_enabled "
+              . "  AND upload_fk=$1 AND ars_success "
+              . "ORDER BY agent_pk DESC");
+      $res = $dbManager->execute($stmt,array($uploadId,$agentName));
+      $latestRun = $dbManager->fetchArray($res);
+      if($latestRun)
+      {
+        $allScans[] = $latestRun;
+      }
+      while($run=$dbManager->fetchArray($res) )
+      {
+        $allScans[] = $run;
+      }
+      $dbManager->freeResult($res);
+      
+      if (false===$latestRun)
+      {
+        $V .= "The agent $agentName did never succeed run on this upload.<br/>";
+      }
+      else if ($latestRun['agent_pk']!=$newestAgent['agent_pk'])
+      {
+        $V .= "There is the newer revision $newestAgent[agent_rev] of agent $agentName which did not run on this upload.<br/>";
+      }
+    }    
 
-    list($jsBlockLicenseHist,$VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds);
-    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uploadtree_pk, $Uri, $tag_pk, $fileTreeBounds,  $ModLicView, $UniqueTagArray);
+    if(empty($allScans))
+    {
+      return _("There is no successful scan for this upload");
+    }
+
+    $selectedAgentId = GetParm('agentId', PARM_INTEGER);
+    $selectedAgentText = "";
+    $URI = Traceback_uri().'?mod='.Traceback_parm().'&updcache=1';
+    $V .= "<form action='$URI' method='post'><select name='agentId' id='agentId'>";
+    foreach($allScans as $run)
+    {
+      $V .= "<option value='$run[agent_pk]'>$run[agent_name] $run[agent_rev]</option>\n";
+      if ($run['agent_pk'] == $selectedAgentId)
+      {
+        $selectedAgentText = '('._("You see")." $run[agent_name] $run[agent_rev])";
+      }
+    }
+    $V .= "</select><input type='submit' name='' value='Show'/>$selectedAgentText</form>";
+    
+    
+    list($jsBlockLicenseHist,$VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId);
+    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uploadtree_pk, $Uri, $tag_pk, $fileTreeBounds,  $ModLicView, $UniqueTagArray, $selectedAgentId);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -330,10 +386,11 @@ class ui_browse_license extends FO_Plugin
    * @param FileTreeBounds $fileTreeBounds
    * @param $ModLicView
    * @param $UniqueTagArray
+   * @param $selectedAgentId
    * @internal param $uploadId
    * @return array
    */
-  public function createFileListing($uploadTreeId, $Uri, $tagId, FileTreeBounds $fileTreeBounds, $ModLicView, $UniqueTagArray)
+  public function createFileListing($uploadTreeId, $Uri, $tagId, FileTreeBounds $fileTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId)
   {
     /** change the license result when selecting one version of nomos */
     $uploadId = $fileTreeBounds->getUploadId();
@@ -344,7 +401,7 @@ class ui_browse_license extends FO_Plugin
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
     $AddInfoText = "";
-    $pfileLicenses = $this->licenseDao->getLicensesPerFileId($fileTreeBounds);
+    $pfileLicenses = $this->licenseDao->getLicensesPerFileId($fileTreeBounds, $selectedAgentId);
     $editedPfileLicenses = $this->clearingDao->getGoodClearingDecPerFileId($fileTreeBounds);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
@@ -392,7 +449,9 @@ class ui_browse_license extends FO_Plugin
           $fileName = "<a href='$LicUri'><span style='color: darkblue'> <b>$fileName</b> </span></a>";
         else if (!empty($LinkUri))
           $fileName = "<a href='$LinkUri'>$fileName</a>";
+        $ChildCount++;
 
+        
         /* show licenses under file name */
         $licenseList="";
         $editedLicenseList= "";
@@ -403,35 +462,35 @@ class ui_browse_license extends FO_Plugin
           $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($containerFileTreeBounds);
           $editedLicenseList .= implode(', ', $editedLicenses);
         }
-        else if (array_key_exists($fileId, $pfileLicenses)) {
-          $licenseEntries = array();
-          foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo) {
-            $agentEntries = array();
-            foreach ($rfInfo as $agent => $lic) {
-              $linkInfo = $goodAgents[$agent];
-              $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$lic[agent_id]&licenseId=$lic[license_id]#highlight'>$linkInfo[name]</a>";
-              if ($lic['agent_id'] != $linkInfo['latest']) {
-                $agentEntry .= "&dagger;";
-                $haveUnconfirmed = true;
+        else{
+          if (array_key_exists($fileId, $pfileLicenses)) {
+            $licenseEntries = array();
+            foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo) {
+              $agentEntries = array();
+              foreach ($rfInfo as $agent => $lic) {
+                $linkInfo = $goodAgents[$agent];
+                $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$lic[agent_id]&licenseId=$lic[license_id]#highlight'>$linkInfo[name]</a>";
+                if ($lic['agent_id'] != $linkInfo['latest']) {
+                  $agentEntry .= "&dagger;";
+                  $haveUnconfirmed = true;
+                }
+                if ($lic['match_percentage'] > 0) {
+                  $agentEntry .= ": $lic[match_percentage]%";
+                }
+                $agentEntries[] = $agentEntry;
               }
-              if ($lic['match_percentage'] > 0) {
-                $agentEntry .= ": $lic[match_percentage]%";
-              }
-              $agentEntries[] = $agentEntry;
+              $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
             }
-            $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
+            $licenseList = implode(", ", $licenseEntries);
           }
-          $licenseList = implode(", ", $licenseEntries);
-
-            if (array_key_exists($fileId, $editedPfileLicenses)) {
-              $editedLicenseList .= implode(", ", array_map(function ($licenseRef) use ($uploadId, $childUploadTreeId) {
-                return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
-              }, $editedPfileLicenses[$fileId]->getLicenses() ));
+          if (array_key_exists($fileId, $editedPfileLicenses)) {
+            $editedLicenseList .= implode(", ", array_map(function ($licenseRef) use ($uploadId, $childUploadTreeId) {
+              return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
+            }, $editedPfileLicenses[$fileId]->getLicenses() ));
           }
         }
         $fileListLinks=FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
         $tableData[]=array($fileName, $licenseList,$editedLicenseList, $fileListLinks);
-        $ChildCount++;
       }
         
       if ($haveUnconfirmed)
@@ -483,15 +542,16 @@ class ui_browse_license extends FO_Plugin
    * @param $uploadTreeId
    * @param $tagId
    * @param FileTreeBounds $fileTreeBounds
+   * @param int|null $agentId 
    * @return string
    */
-  public function createLicenseHistogram($uploadTreeId, $tagId, FileTreeBounds $fileTreeBounds)
+  public function createLicenseHistogram($uploadTreeId, $tagId, FileTreeBounds $fileTreeBounds, $agentId)
   {
     $FileCount = $this->uploadDao->countPlainFiles($fileTreeBounds);
-    $licenseHistogram = $this->licenseDao->getLicenseHistogram($fileTreeBounds);
+    $licenseHistogram = $this->licenseDao->getLicenseHistogram($fileTreeBounds, $orderStmt="", $agentId);
     $editedLicensesHist = $this->clearingDao->getEditedLicenseShortnamesContainedWithCount($fileTreeBounds);
 
-    return $this->licenseRenderer->renderLicenseHistogram($licenseHistogram,$editedLicensesHist , $uploadTreeId , $tagId, $FileCount);
+    return $this->licenseRenderer->renderLicenseHistogram($licenseHistogram,$editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
   }
 }
 
