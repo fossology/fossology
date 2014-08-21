@@ -10,7 +10,7 @@ Group:          PBGRP
 Url:            PBURL
 Source:         PBSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
-Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent fossology-monk PBDEP
+Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent PBDEP
 BuildRequires:  postgresql-devel >= 8.1.11 glib2-devel libxml2 gcc make perl rpm-devel pcre-devel openssl-devel PBBUILDDEP
 Summary:        FOSSology is a licenses exploration tool
 
@@ -20,7 +20,7 @@ Summary:        Architecture for analyzing software, common files
 Group:          PBGRP
 
 %package web
-Requires:       fossology-common fossology-db httpd
+Requires:       fossology-common fossology-db fossology-monk httpd
 Summary:        Architecture for analyzing software, web interface
 Group:          PBGRP
 
