@@ -41,8 +41,10 @@ $upload = $item = $type = "";
 
 $longopts = array("user:", "password:", "type:", "container:");
 $options = getopt("c:u:t:hx:X:", $longopts);
-if (empty($options) || !is_array($options))
+if (($options === false) || empty($options) || !is_array($options))
 {
+  $text = _("Invalid option or missing argument.");
+  print "$text\n";
   print $Usage;
   return 1;
 }
@@ -97,7 +99,7 @@ if (is_numeric($item) && !is_numeric($upload)) $upload = GetUploadID($item);
 /** check if parameters are valid */
 if (!is_numeric($upload) || (!empty($item) && !is_numeric($item)))
 {
-  print "Upload ID or Uploadtree ID is not digital number\n";
+  print "Upload ID or Uploadtree ID must be numeric\n";
   print $Usage;
   return 1;
 }
