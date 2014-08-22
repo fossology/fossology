@@ -396,7 +396,7 @@ inline void processMatches(MonkState* state, File* file, GArray* matches) {
        hasAlreadyResultsFor(state->dbManager, state->agentId, file->id))
     return;
 
-  if ((state->scanMode != MODE_SCHEDULER) && (matches->len == 0)) {
+  if ((state->scanMode != MODE_SCHEDULER) && (state->verbosity >= 1) && (matches->len == 0)) {
     onNoMatch(file);
     return;
   }
