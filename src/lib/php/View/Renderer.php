@@ -16,21 +16,29 @@ Copyright (C) 2014, Siemens AG
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+namespace Fossology\Lib\Plugin;
+
 /* light weight renderer */
-class FO_Renderer
+class Renderer extends Object
 {
   var $language='en';
   var $vars=array();
+  var $templatePath;
+
+  function __construct($templatePath="")
+  {
+    $this->templatePath = $templatePath?:dir(dirname(dirname(dirname(__FILE__)))).'www/ui/template/';
+  }
+  
   /**
-   * \brief Generate output
-   * \param template name
-   * \return output
+   * @param template name
+   * @return output
    */
   function renderTemplate($templateName){
-    $filename = 'template/' . $templateName . '.htm';
+    $filename = $this->templatePath . $templateName . '.htm';
     if (!file_exists($filename))
     {
-      $this->makeTemplate('template/' . $templateName . '.htc');
+      $this->makeTemplate($this->templatePath . $templateName . '.htc');
     }
     if (!file_exists($filename))
     {
@@ -47,7 +55,9 @@ class FO_Renderer
   /*
    * rewrite all templates
    */
-  function updateTemplates($folder='template',$extension='htc') {
+  function updateTemplates() {
+    $folder = $this->templatePath;
+    $extension = 'htc';
     foreach(glob("$folder/*.$extension") as $file) {
       $this->makeTemplate($file);
     }
@@ -138,7 +148,9 @@ class FO_Renderer
     return "<?php echo $var; ?>";
   }
 }
-$renderer = new FO_Renderer();
+/*
 if ('m'==@$argv[1]){
+ $renderer = new FO_Renderer();
  $renderer->updateTemplates();
 }
+ */

@@ -50,5 +50,9 @@ without any warranty.
         <service id="view.text_renderer" class="\Fossology\Lib\View\TextRenderer">
             <argument type="service" id="view.highlight_renderer"/>
         </service>
+        
+        <service id="renderer" class="\Fossology\Lib\View\Renderer">
+            <argument type="string"></argument>
+        </service>
     </services>
 </container>

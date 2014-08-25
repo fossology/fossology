@@ -68,4 +68,4 @@ else
 }
 plugin_unload();
 $container->get("db.manager")->flushStats();
-return 0;1
+return 0;
