@@ -374,7 +374,7 @@ class ui_menu extends FO_Plugin
     $gettextGroup = _('Group');
     
     $html .= "<table style='align:left;'><tr><td align='right'><small>$gettextUser:</small></td><td>" . @$_SESSION['User'] . "</td></tr>";
-    $html .= "<tr><td align='right'>$gettextGroup:</td><td>";
+    $html .= "<tr><td align='right'><small>$gettextGroup:</small></td><td>";
     $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
     $stmt = __METHOD__ . '.availableGroups';
     $dbManager->prepare($stmt, $sql);
