@@ -115,7 +115,7 @@ class Renderer extends Object
   /**
    * \brief evaluates variables in format {{ x }}
    */
-  function parseVars($haystack){
+  private function parseVars($haystack){
     $res = '';
     $offset = 0;
     while (false!==($open=strpos($haystack,'{{ ',$offset)))
@@ -143,13 +143,29 @@ class Renderer extends Object
   /*
    * \brief handles expression within {{ }}
    */
-  function translateVar($subject){
+  private function translateVar($subject){
     if (preg_match($pattern='/^[a-zA-Z0-9]+$/', $subject) )
       $var = '$renderer->vars["'.$subject.'"]';
     else if (preg_match($pattern='/^([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)$/', $subject, $matches) ){
       $var = '$renderer->vars["'.$matches[1].'"]["'.$matches[2].'"]';
     }
     return "<?php echo $var; ?>";
+  }
+  
+  public function createSelect($id,$options,$select="",$actions="")
+  {
+    $html = "<select name=\"$id\" id=\"$id\" $actions>";
+    foreach($options as $key=>$disp)
+    {
+      $html .= '<option value="'.$key.'"';
+      if ($key == $select)
+      {
+        $html .= ' selected';
+      }
+      $html .= ">$disp</option>";
+    }
+    $html .= '</select>';
+    return $html;    
   }
 }
 

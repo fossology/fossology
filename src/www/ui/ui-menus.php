@@ -362,39 +362,40 @@ class ui_menu extends FO_Plugin
   }
   
   function createHtmlFromUser(){
-    $gettextUser = _("User");
-    $html = "<small>$gettextUser:</small> " . @$_SESSION['User'] . "<br>";
     global $container;
     $dbManager = $container->get("db.manager");
+    $renderer = $container->get("renderer");
+
+    if (plugin_find_id("auth") >= 0)
+      $html = "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
+    else
+      $html = "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
+    $gettextUser = _("User");
+    $gettextGroup = _('Group');
+    
+    $html .= "<table style='align:left;'><tr><td align='right'><small>$gettextUser:</small></td><td>" . @$_SESSION['User'] . "</td></tr>";
+    $html .= "<tr><td align='right'>$gettextGroup:</td><td>";
     $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
     $stmt = __METHOD__ . '.availableGroups';
     $dbManager->prepare($stmt, $sql);
     $res = $dbManager->execute($stmt, array($_SESSION['UserId']));
-    $allAssignedGroups = pg_fetch_all($res);
-    pg_free_result($res);
-    $gettextGroup = _('Group');
+    $allAssignedGroups = array();
+    while ($row = $dbManager->fetchArray($res))
+    {
+      $allAssignedGroups[$row['group_pk']] = $row['group_name'];
+    }       
+    $dbManager->freeResult($res);
     if (count($allAssignedGroups) > 1)
     {
       $html .= "<form action='" . Traceback_uri() . "?mod=" . Traceback_parm() . "' method='post'>";
-      $html .= "$gettextGroup: <select id='selectMemberGroup' name='selectMemberGroup' onChange='this.form.submit()'>";
-      foreach ($allAssignedGroups as $memberGroup)
-      {
-        $html .= "<option ";
-        if ($memberGroup['group_pk'] == $_SESSION['GroupId'])
-        {
-          $html .= " selected ";
-        }
-        $html .= "value='$memberGroup[group_pk]'>$memberGroup[group_name]</option>";
-      }
-      $html .= "</select></form>";
-    } else
-    {
-      $html .= "$gettextGroup: " . @$_SESSION['GroupName'] . "<br>";
+      $html .= $renderer->createSelect('selectMemberGroup', $allAssignedGroups, $_SESSION['GroupId'], $action=" onChange='this.form.submit()'");
+      $html .= "</form>";
     }
-    if (plugin_find_id("auth") >= 0)
-      $html .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
     else
-      $html .= "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
+    {
+      $html .= @$_SESSION['GroupName'] ;
+    }
+    $html .= '</td></tr></table>';
     return $html;
   }
 }
