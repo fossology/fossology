@@ -20,7 +20,7 @@ function setActiveGroup($verbose)
 {
   global $dbManager;
   $stmt = __METHOD__;
-  $sql = "SELECT user_pk,group_pk FROM users LEFT JOIN groups ON group_name=user_name WHERE group_id IS NULL";
+  $sql = "SELECT user_pk,group_pk FROM users LEFT JOIN groups ON group_name=user_name WHERE group_fk IS NULL";
   $dbManager->prepare($stmt,$sql);
   $res = $dbManager->execute($stmt);
   if (pg_num_rows($res)==0)
@@ -31,9 +31,9 @@ function setActiveGroup($verbose)
   $userGroupMap = pg_fetch_all($res);
   pg_free_result($res);
   $selectStmt = __METHOD__.'.select';
-  $sql = "SELECT user_fk,min(group_fk) group_id FROM group_user_member WHERE user_fk=$1";
+  $sql = "SELECT user_fk,min(group_fk) group_fk FROM group_user_member WHERE user_fk=$1";
   $updateStmt = __METHOD__.'.update';
-  $dbManager->prepare($updateStmt,"UPDATE users SET group_id=$2 WHERE user_pk=$1");
+  $dbManager->prepare($updateStmt,"UPDATE users SET group_fk=$2 WHERE user_pk=$1");
   foreach($userGroupMap as $row)
   {
     if (!empty($row['group_pk']))
