@@ -250,7 +250,7 @@ class ui_browse extends FO_Plugin {
     $V.= "</td><td valign='top'>\n";
     $text = _("Uploads");
     $V.= "<div align='center'><H3>$text</H3></div>\n";
-    $V.= "<table class='text' id='browsetbl' border=0 width='100%' cellpadding=0></table>";
+    $V.= "<table class='semibordered' id='browsetbl'  width='100%' cellpadding=0></table>";
     $V.= "</table>";
 
     $V .= $this->ShowFolderCreateFileTable($Folder, $Show);
