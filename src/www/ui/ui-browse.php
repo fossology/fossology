@@ -524,7 +524,7 @@ class ui_browse extends FO_Plugin {
     $tableData= $this->ShowFolderGetTableData($Folder, $Show);
 
     $tableColumns = array(
-      array("sTitle" => _("Upload Name and Description"), "sClass"=>"center" ),
+      array("sTitle" => _("Upload Name and Description"), "sClass"=>"left" ),
       array("sTitle" => _("Status"), "sClass"=>"center" ),
       array("sTitle" => _("Reject-job"), "sClass"=>"center" ),
       array("sTitle" => _("Assigned to"), "sClass"=>"center" ),
@@ -580,25 +580,31 @@ class ui_browse extends FO_Plugin {
   //todo REFACTOR COMPLETELY
   private function ShowFolderGetTableData($Folder, $Show)
   {
+    global $container;
+    $dbManager = $container->get('db.manager');
 
-    return array(array("File" , "Status" , "reject" , "assinged" , "date" , "priority" ) ) ;
+    /* Browse-Pfile menu */
+    $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
 
-     global $PG_CONN;
+    /* Browse-Pfile menu without the compare menu item */
+    $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
+
+    $Uri = Traceback_uri() . "?mod=" . $this->Name;
+
+    $output = array();
     /* Get list of uploads in this folder */
-    $sql = "SELECT * FROM upload
+    $stmt = __METHOD__."getFolderContents";
+    $dbManager->prepare($stmt,"SELECT * FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
         AND parent IS NULL
         AND lft IS NOT NULL
         WHERE upload_pk IN
-        (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
-        ORDER BY upload_filename,upload_desc,upload_pk,upload_origin;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+        (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1)
+        ORDER BY upload_filename,upload_desc,upload_pk,upload_origin");
+    $result = $dbManager->execute($stmt,array($Folder));
 
-    $V ="";
-
-        while ($Row = pg_fetch_assoc($result)) {
+    while ($Row = pg_fetch_assoc($result)) {
       if (empty($Row['upload_pk'])) {
         continue;
       }
@@ -622,39 +628,37 @@ class ui_browse extends FO_Plugin {
       else
       $UploadtreePk = $Row['uploadtree_pk'];
 
-      $V.= "<tr><td>";
+      $nameColumn = "<tr><td>";
       if (IsContainer($Row['ufile_mode'])) {
-        $V.= "<a href='$Uri&upload=$UploadPk&folder=$Folder&item=$UploadtreePk&show=$Show'>";
-        $V.= "<b>" . $Name . "</b>";
-        $V.= "</a>";
+        $nameColumn .= "<a href='$Uri&upload=$UploadPk&folder=$Folder&item=$UploadtreePk&show=$Show'>";
+        $nameColumn .= "<b>" . $Name . "</b>";
+        $nameColumn .= "</a>";
       }
       else {
-        $V.= "<b>" . $Name . "</b>";
+        $nameColumn .= "<b>" . $Name . "</b>";
       }
-      $V.= "<br>";
-      if (!empty($Desc)) $V.= "<i>" . $Desc . "</i><br>";
+        $nameColumn.= "<br>";
+      if (!empty($Desc)) $nameColumn.= "<i>" . $Desc . "</i><br>";
       $Upload = $Row['upload_pk'];
       $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
       if (Iscontainer($Row['ufile_mode']))
-      $V.= menu_to_1list($MenuPfile, $Parm, " ", " ", 1, $UploadPk);
+        $nameColumn.= menu_to_1list($MenuPfile, $Parm, " ", " ", 1, $UploadPk);
       else
-      $V.= menu_to_1list($MenuPfileNoCompare, $Parm, " ", " ", 1, $UploadPk);
+        $nameColumn.= menu_to_1list($MenuPfileNoCompare, $Parm, " ", " ", 1, $UploadPk);
 
       /* Job queue link */
       $text = _("History");
+      $dateCol="";
       if (plugin_find_id('showjobs') >= 0) {
-        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>[$text]</a>";
+        $nameColumn .= "<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>[$text]</a>";
 
-      $V.= "</td>\n";
-      $V.= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
+        $nameColumn .= "</td>\n";
+        $dateCol .= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
       }
-      $V.= "<tr><td colspan=2>&nbsp;</td></tr>\n";
-    }
+     $output[]= array($nameColumn , "Status" , "reject" , "assinged" , $dateCol , "priority" );
+  }
 
-
-
-
-
+  return $output;
   }
 
 }
