@@ -42,7 +42,8 @@ class ui_welcome extends FO_Plugin
       {
         $Login = "<a href='$SiteURI?mod=auth'>$Login</a>";
       }
-      global $renderer;
+      global $container;
+      $renderer = $container->get('renderer');
       $renderer->login = $Login;
       $V = str_replace('${SiteURI}', $SiteURI, $renderer->renderTemplate("welcome"));
     }

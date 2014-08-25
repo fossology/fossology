@@ -41,7 +41,8 @@ class ui_default extends FO_Plugin
     $V = "";
     if ($this->OutputType == "HTML")
     {
-      global $renderer;
+      global $container;
+      $renderer = $container->get('renderer');
       $V = $renderer->renderTemplate("default");
     }
     if (!$this->OutputToStdout)

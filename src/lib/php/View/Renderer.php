@@ -16,7 +16,9 @@ Copyright (C) 2014, Siemens AG
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-namespace Fossology\Lib\Plugin;
+namespace Fossology\Lib\View;
+
+use Fossology\Lib\Util\Object;
 
 /* light weight renderer */
 class Renderer extends Object
@@ -27,7 +29,7 @@ class Renderer extends Object
 
   function __construct($templatePath="")
   {
-    $this->templatePath = $templatePath?:dir(dirname(dirname(dirname(__FILE__)))).'www/ui/template/';
+    $this->templatePath = $templatePath?:dirname(dirname(dirname(dirname(__FILE__)))).'/www/ui/template/';
   }
   
   /**

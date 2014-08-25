@@ -22,7 +22,6 @@
  */
 
 require_once("../../lib/php/bootstrap.php");
-include_once("fo-render.php");
 
 $SysConf = array();  // fo system configuration variables
 $PG_CONN = 0;   // Database connection

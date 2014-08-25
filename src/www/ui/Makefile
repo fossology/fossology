@@ -34,7 +34,7 @@ OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|
 RMFILES=FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$"`
 
 all:
-	php5 fo-render.php m
+#	php5 fo-render.php m
 
 install: all
 

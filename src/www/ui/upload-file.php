@@ -152,7 +152,8 @@ class upload_file extends FO_Plugin {
     if ($this->OutputType != "HTML") {
       return;
     }
-    global $renderer;
+    global $container;
+    $renderer = $container->get('renderer');
     /* If this is a POST, then process the request. */
     $folder_pk = GetParm('folder', PARM_INTEGER);
     $renderer->vars['description'] = GetParm('description', PARM_TEXT); // may be null
