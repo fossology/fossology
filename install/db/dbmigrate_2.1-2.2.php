@@ -186,13 +186,23 @@ function Migrate_21_22($Verbose)
   }
   pg_free_result($conresult);
 
-
   /** Run program to rename licenses **/
+  global $MODDIR;
   global $LIBEXECDIR;
-  require_once("$LIBEXECDIR/fo_mapping_license.php");
-  if($Verbose)
+  $command = "$MODDIR/nomos/agent/nomos -V";
+  $version = system($command, $return_var);
+  $pattern = '/r\((\w+)\)/';
+  preg_match($pattern, $version, $matches);
+
+  $version230 = 6922;
+
+  /** when the version is less than or equal to svn 6922, when we switch to git, always greater than 6932, call Update reference licenses process */
+  if (empty($matches[1]) || 5 > strlen($matches[1]) && $matches[1] <= $version230) {
+    require_once("$LIBEXECDIR/fo_mapping_license.php");
     print "Rename license in $LIBEXECDIR\n";
-  Rename_Licenses($Verbose);
+    Rename_Licenses($Verbose);
+  }
+
   /** Clear out the report cache **/
   if($Verbose)
     print "Clear out the report cache.\n";
