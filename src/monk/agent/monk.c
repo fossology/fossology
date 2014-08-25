@@ -53,7 +53,9 @@ inline int processUploadId(MonkState* state, int uploadId, GArray* licenses){
   }
 
   int threadError = 0;
+#ifdef MONK_MULTI_THREAD
   #pragma omp parallel
+#endif
   {
     MonkState threadLocalStateStore = *state;
     MonkState* threadLocalState = &threadLocalStateStore;
@@ -61,7 +63,9 @@ inline int processUploadId(MonkState* state, int uploadId, GArray* licenses){
     threadLocalState->dbManager = fo_dbManager_fork(state->dbManager);
     if (threadLocalState->dbManager) {
       int count = PQntuples(fileIdResult);
+#ifdef MONK_MULTI_THREAD
       #pragma omp for
+#endif
       for (int i = 0; i < count; i++) {
         long pFileId = atol(PQgetvalue(fileIdResult, i, 0));
 

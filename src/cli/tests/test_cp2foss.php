@@ -381,7 +381,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(8, $output_msg_count);
+    $this->assertEquals(9, $output_msg_count);
     /** uplaod NULL */
     $out = "";
     $pos = 0;

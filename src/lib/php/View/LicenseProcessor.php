@@ -40,7 +40,8 @@ class LicenseProcessor extends Object
           array(
               'licenseId' => $licenseRef->getId(),
               'agentRev' => $agentRef->getAgentRevision(),
-              'percent' => $match->getPercent());
+              'percent' => $match->getPercent(),
+              'agentId' => $agentRef->getAgentId() );
     }
 
     return $extractedMatches;

@@ -34,10 +34,15 @@ You should have received a copy of the GNU General Public License along with thi
 #include <glib.h>
 #include "libfossdbmanager.h"
 
+#if GLIB_CHECK_VERSION(2,32,0)
+#define MONK_MULTI_THREAD
+#endif
+
 typedef struct {
     fo_dbManager* dbManager;
     int agentId;
     int scanMode;
+    int verbosity;
 } MonkState;
 
 typedef struct {

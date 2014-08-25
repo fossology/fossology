@@ -84,6 +84,40 @@ class LicenseOverviewPrinter extends Object
   }
 
   /**
+   * @param array which keys are agentNames
+   * @param int uploadId
+   */
+  private function fillAgentLatestMap($agentLatestMap,$uploadId)
+  {
+    foreach( array_keys($agentLatestMap) as $agentName)
+    {
+      $latestAgentId = GetAgentKey($agentName, "why is this agent missing?");
+      if (empty($latestAgentId))
+      {
+        throw new \Exception('currupted match');
+      }
+
+      global $container;
+      /* @param DbManager */
+      $dbManager = $container->get("db.manager");
+      $sql = "SELECT agent_fk,ars_success,ars_endtime FROM ".$agentName."_ars WHERE upload_fk=$1 ORDER BY agent_fk";
+      $stmt = __METHOD__.".$agentName";
+      $dbManager->prepare($stmt,$sql);
+      $res = $dbManager->execute($stmt,array($uploadId));
+      $latestArs = array();
+      while($row=$dbManager->fetchArray($res) )
+      {
+        $key = $row['ars_success']?'good':($row['ars_endtime']?'bad':'n/a');
+        $latestArs[$key] = $row['agent_fk'];
+      }
+      $dbManager->freeResult($res);
+      
+      $agentLatestMap[$agentName] = array('latest'=>$latestAgentId,'ars'=>$latestArs);
+    }
+    return $agentLatestMap;    
+  }
+  
+  /**
    * @param $licenseMatches
    * @param $uploadId
    * @param $uploadTreeId
@@ -94,35 +128,36 @@ class LicenseOverviewPrinter extends Object
    * @param bool $showReadOnly
    * @return string
    */
-  function createLicenseOverview($licenseMatches, $uploadId, $uploadTreeId, $selectedAgentId = 0, $selectedLicenseId = 0, $selectedLicenseFileId = 0, $hasHighlights = false, $showReadOnly = true)
+  function createLicenseOverview($licenseMatches, $uploadId, $uploadTreeId,
+          $selectedAgentId=0, $selectedLicenseId=0, $selectedLicenseFileId=0, $hasHighlights=false, $showReadOnly=true)
   {
     if (count($licenseMatches)==0)
     {
       return '<br><b>'._('No scanner result found').'</b>';
     }
-    $output = "<h3>" . _("Scanner results") . "</h3>\n";
 
+    $agentLatestMap = array();    
+    foreach($licenseMatches as $agents)
+    {
+      foreach (array_keys($agents) as $agentName)
+      {
+        $agentLatestMap[$agentName] = array();
+      }
+    }
+    $agentLatestMap = $this->fillAgentLatestMap($agentLatestMap,$uploadId);
+
+    $output = "<h3>" . _("Scanner results") . "</h3>\n";
     foreach ($licenseMatches as $fileId => $agents)
     {
       ksort($agents);
+      $breakCounter = 0;
       foreach ($agents as $agentName => $foundLicenses)
       {
-        $text = _("The $agentName license scanner found:");
-        $output .= "$text <br><b>\n";
-        foreach ($foundLicenses as $licenseShortname => $agentDetails)
-        {
-          $output .= $this->printLicenseNameAsLink($licenseShortname); //$Upload, $uploadTreeId,
-          ksort($agentDetails);
-          $keys = array_keys($agentDetails);
-          $mostRecentAgentId = $keys[count($keys) - 1];
-          $output .= $this->createPercentInfoAndAnchors($uploadId, $uploadTreeId,  $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $agentDetails, $mostRecentAgentId, $showReadOnly);
-          $output .= "<br/>\n";
-        }
-        $output = substr($output, 0, count($output) - 7);
-        $output .= '</b><br/>';
-        $output .= '<br/>';
+        if($breakCounter++ > 0) $output .= "<br/>";
+        $latestAgentId = $agentLatestMap[$agentName]['latest'];
+        $output .= $this->renderMatches($foundLicenses,$agentName,$latestAgentId,$agentLatestMap[$agentName]['ars'],
+                           $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly);
       }
-
     }
 
     if ($hasHighlights)
@@ -138,6 +173,66 @@ class LicenseOverviewPrinter extends Object
     return $output;
   }
 
+  
+  private function renderMatches($foundLicenses,$agentName,$latestAgentId,$agentArs,
+          $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly)
+  {        
+    $latestMatches = array();
+    $obsoleteMatches = array();
+    foreach ($foundLicenses as $licenseShortname => $agentDetails)
+    {
+      $mostRecentAgentId = max(array_keys($agentDetails) );
+      if ($mostRecentAgentId == $latestAgentId)
+      {
+        $latestMatches[$licenseShortname] = $agentDetails[$mostRecentAgentId];
+        continue;
+      }
+      $obsoleteMatches[$licenseShortname] = $agentDetails[$mostRecentAgentId];
+    }
+
+    $output = _('The newest version of')." $agentName "._('license scanner');
+    if (count($latestMatches)==0 && array_key_exists('good', $agentArs) && $latestAgentId==$agentArs['good'])
+    {
+      $output .= ' ' . _('ran successful on this file without any match');
+    }
+    else if (count($latestMatches)==0 && array_key_exists('bad', $agentArs) && $latestAgentId==$agentArs['bad'])
+    {
+      $output .= ' ' . _('failed on this upload');
+      $output .= '. '._('Please re-run');
+      $link = Traceback_uri()."?mod=agent_add&upload=$uploadId&agents[]=agent_$agentName";
+      $output .= " <a href='$link'>Scheduler for $agentName</a>";
+    }
+    else if (count($latestMatches)==0)
+    {
+      $output .= ' ' . _('did not finish the run on this file');
+    }
+    else
+    {
+      $output .= ' ' . _('found') . ':<b>';
+      foreach ($latestMatches as $licenseShortname => $agentDetails)
+      {
+        $output .= "<br/>\n";
+        $output .= $this->printLicenseNameAsLink($licenseShortname);
+        $output .= $this->createPercentInfoAndAnchors($uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $agentDetails, $showReadOnly);
+      }
+      $output .= '</b>';
+    }
+
+    if(count($obsoleteMatches)>0)
+    {
+      $text = _("Other versions of the $agentName license scanner also found");
+      $output .=  "<br/>\n$text: <b>";
+      foreach ($obsoleteMatches as $licenseShortname => $agentDetails)
+      {
+        $output .= "<br/>\n";
+        $output .= $this->printLicenseNameAsLink($licenseShortname);
+        $output .= $this->createPercentInfoAndAnchors($uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $agentDetails, $showReadOnly);
+      }
+      $output .= '</b><br/><br/>';
+    }
+    return $output;
+  }  
+  
   /**
    * @param $Upload
    * @param $Item
@@ -145,23 +240,26 @@ class LicenseOverviewPrinter extends Object
    * @param $selectedLicenseId
    * @param $selectedLicenseFileId
    * @param $hasHighlights
-   * @param $agentDetails
-   * @param $mostRecentAgentId
+   * @param $agentRecentDetails
    * @param $showReadOnly
    * @return string
    */
-  private function createPercentInfoAndAnchors($Upload, $Item, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $agentDetails, $mostRecentAgentId, $showReadOnly)
+  private function createPercentInfoAndAnchors($Upload, $Item, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $agentRecentDetails, $showReadOnly)
   {
-    $output = "(";
+    $output = "";
     $foundIndex = 1;
 
-    foreach ($agentDetails[$mostRecentAgentId] as $licenseFileId => $scanDetails)
+    foreach ($agentRecentDetails as $licenseFileId => $scanDetails)
     {
+      if (!empty($output))
+      {
+        $output .= ", ";
+      }
       $licenseId = $scanDetails['licenseId'];
       $foundLabel = '#' . $foundIndex++;
       if ($showReadOnly)
       {
-        $output .= $this->createAnchor($Upload, $Item, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $mostRecentAgentId, $licenseId, $licenseFileId, $foundLabel);
+        $output .= $this->createAnchor($Upload, $Item, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $scanDetails['agentId'], $licenseId, $licenseFileId, $foundLabel);
       } else
       {
         $output .= $foundLabel;
@@ -170,11 +268,8 @@ class LicenseOverviewPrinter extends Object
       {
         $output .= ': ' . $scanDetails['percent'] . '%';
       }
-      $output .= ", ";
     }
-    $output = substr($output, 0, count($output) - 3);
-    $output .= ')';
-    return $output;
+    return "($output)";
   }
 
   /**
@@ -192,7 +287,7 @@ class LicenseOverviewPrinter extends Object
    */
   private function createAnchor($Upload, $Item, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $mostRecentAgentId, $licenseId, $licenseFileId, $foundLabel)
   {
-    // TODO include pages in here... unfortunately this is not easy but it should be possible
+
     $format = GetParm("format", PARM_TEXT) ?: "text";
     $linkTarget = Traceback_uri() . "?mod=view-license&upload=$Upload&item=$Item&format=$format&licenseId=$licenseId&agentId=$mostRecentAgentId&highlightId=$licenseFileId#highlight";
     if (intval($licenseId) != $selectedLicenseId || intval($licenseFileId) != $selectedLicenseFileId || intval($mostRecentAgentId) != $selectedAgentId)

@@ -14,6 +14,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "database.h"
 #include "license.h"
 #include "match.h"
+#include "getopt.h"
 
 void matchCliFileWithLicenses(MonkState* state, GArray* licenses, int argi, char** argv) {
   File file;
@@ -26,21 +27,61 @@ void matchCliFileWithLicenses(MonkState* state, GArray* licenses, int argi, char
   g_array_free(file.tokens, TRUE);
 }
 
+int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
+  int c;
+  state->verbosity = 0;
+  while ((c = getopt(argc, argv, "Vvh")) != -1)
+  {
+    switch (c) {
+      case 'v':
+        state->verbosity++;
+        break;
+      case 'V':
+#ifdef SVN_REV_S
+        printf(AGENT_NAME " version " VERSION_S " r(" SVN_REV_S ")\n");
+#else
+        printf(AGENT_NAME " (no version available)\n");
+#endif
+        return 0;
+      case 'h':
+      default:
+        printf("Usage: %s [options] -- [file [file [...]]\n", argv[0]);
+        printf("  -h   :: help (print this message), then exit.\n"
+               "  -c   :: specify the directory for the system configuration.\n"
+               "  -v   :: verbose output.\n"
+               "  file :: scan file and print licenses detected within it.\n"
+               "  no file :: process data from the scheduler.\n"
+               "  -V   :: print the version info, then exit.\n");
+        return 0;
+    }
+  }
+  *fileOptInd = optind;
+  return 1;
+}
+
 int handleArguments(MonkState* state, int argc, char** argv) {
+  int fileOptInd;
+  if (!parseArguments(state, argc, argv, &fileOptInd))
+    return 0;
+
   /* extended mode */
   PGresult* licensesResult = queryAllLicenses(state->dbManager);
   GArray* licenses = extractLicenses(state->dbManager, licensesResult);
 
   int threadError = 0;
+#ifdef MONK_MULTI_THREAD
   #pragma omp parallel
+#endif
   {
     MonkState threadLocalStateStore = *state;
     MonkState* threadLocalState = &threadLocalStateStore;
 
     threadLocalState->dbManager = fo_dbManager_fork(state->dbManager);
     if (threadLocalState->dbManager) {
+#ifdef MONK_MULTI_THREAD
       #pragma omp for
-      for (int fileId = 1; fileId < argc; fileId++) {
+#endif
+      for (int fileId = fileOptInd; fileId < argc; fileId++) {
         matchCliFileWithLicenses(threadLocalState, licenses, fileId, argv);
       }
       fo_dbManager_finish(threadLocalState->dbManager);
@@ -53,6 +94,9 @@ int handleArguments(MonkState* state, int argc, char** argv) {
   PQclear(licensesResult);
 
   return !threadError;
+}
+void onNoMatch(File* file) {
+  printf("File %s contains license(s) No_license_found\n", file->fileName);
 }
 
 void onFullMatch(File* file, License* license, DiffMatchInfo* matchInfo) {

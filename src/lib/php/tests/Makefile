@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,13 +20,16 @@ include $(VARS)
 
 all: 
 
-test: all
+test: all phpvendors
 	@echo "make unit test for commom php files"
 	phpunit --log-junit lib-php-Xunit-Results.xml --configuration tests.xml
 
-coverage: all
+coverage: all phpvendors
 	@echo "make unit coverage for commom php files"
 	phpunit --coverage-html ./results --configuration tests.xml
+
+phpvendors:
+	$(MAKE) -C $(TOP)/src $@
 
 clean:
 # note do not remove *.xml, it remove the php unit config file tests.xml

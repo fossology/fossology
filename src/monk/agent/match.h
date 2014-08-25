@@ -35,7 +35,7 @@ typedef struct {
 void match_array_free(GArray* matches);
 void match_free(Match* match);
 
-#ifdef GLIB_VERSION_2_32
+#if GLIB_CHECK_VERSION(2,32,0)
 void match_destroyNotify(gpointer matchP);
 #endif
 

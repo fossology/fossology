@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2014, Siemens AG
 
  This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
  *
  **/
 
-require_once("$MODDIR/vendor/autoload.php");
+require_once(__DIR__ . '/../../vendor/autoload.php');
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Db\Driver\Postgres;
@@ -77,6 +77,28 @@ class fo_libschema
    **/
   function applySchema($filename = NULL, $debug = false, $catalog = 'fossology')
   {
+    global $PG_CONN;
+    $this->dbman->setDriver(new Postgres($PG_CONN));
+
+    // first check to make sure we don't already have the plpgsql language installed
+    $sql_statement = "select lanname from pg_language where lanname = 'plpgsql'";
+
+    $result = pg_query($PG_CONN, $sql_statement)
+      or die("Could not check the database for plpgsql language\n");
+
+    $plpgsql_already_installed = FALSE;
+    if ( $row = pg_fetch_row($result) ) {
+      $plpgsql_already_installed = TRUE;
+    }
+
+    // then create language plpgsql if not already created
+    if ( $plpgsql_already_installed == FALSE ) {
+      $sql_statement = "CREATE LANGUAGE plpgsql";
+      $result = pg_query($PG_CONN, $sql_statement)
+        or die("Could not create plpgsql language in the database\n");
+    }
+
+
     $this->debug = $debug;
     if (!file_exists($filename))
     {
@@ -207,8 +229,8 @@ class fo_libschema
           if (!empty($rename))
           {
             /* copy over the old data */
-            $this->applyOrEchoOnce($sql = "UPDATE \"$table\" SET \"$column\" = \"$rename");
-            $this->applyOrEchoOnce($sql = "ALTER TABLE \"$table\" DROP COLUMN \"$rename");
+            $this->applyOrEchoOnce($sql = "UPDATE \"$table\" SET \"$column\" = \"$rename\"");
+            $this->applyOrEchoOnce($sql = "ALTER TABLE \"$table\" DROP COLUMN \"$rename\"");
           }
         }
         if ($this->currSchema['TABLE'][$table][$column]['ALTER'] != $modification['ALTER'])
@@ -271,10 +293,13 @@ class fo_libschema
     }
     foreach ($this->currSchema['CONSTRAINT'] as $name => $sql)
     {
-      if (empty($name) || $this->schema['CONSTRAINT'][$name] == $sql)
+      // skip if constraint name is empty or does not exist
+      if (empty($name) || ($this->schema['CONSTRAINT'][$name] == $sql)
+          || (DB_ConstraintExists($name) == False))
       {
         continue;
       }
+
       /* Only process tables that I know about */
       $table = preg_replace("/^ALTER TABLE \"(.*)\" ADD CONSTRAINT.*/", '${1}', $sql);
       $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES \"(.*)\" \(.*/", '${1}', $sql);
@@ -942,8 +967,6 @@ if (empty($dbManager) || !($dbManager instanceof DbManager))
   $logger = new Logger(__FILE__);
   $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel));
   $dbManager = new DbManager($logger);
-  global $PG_CONN;
-  $dbManager->setDriver(new Postgres($PG_CONN));
 }
 /* simulate the old functions*/
 $libschema = new fo_libschema($dbManager);

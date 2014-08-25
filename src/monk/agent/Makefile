@@ -17,7 +17,6 @@ CFLAGS_LINK  = $(ALL_CFLAGS) -lm -fopenmp
 
 EXE=monk
 TESTDIR = ../agent_tests
-LIBDIR = $(TOP)/src/lib/c
 OBJECTS  = monk.o string_operations.o file_operations.o database.o\
            license.o highlight.o match.o hash.o diff.o extended.o\
            _squareVisitor.o
@@ -28,7 +27,7 @@ COVERAGE = monk_cov.o string_operations_cov.o file_operations_cov.o\
 $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
 	$(CC) $(OBJECTS) $(DEF) $(CFLAGS_LINK) -o $@
 
-all: _squareVisitor.h fossologyLib $(EXE)
+all: _squareVisitor.h $(FOLIB) $(EXE)
 
 #######################
 # library build rules #
@@ -75,7 +74,7 @@ match.o: %.o: %.c %.h _squareVisitor.o
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
 extended.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
 
 _squareVisitor.o: _squareVisitor.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
@@ -83,9 +82,6 @@ _squareVisitor.o: _squareVisitor.c
 _squareVisitor.c _squareVisitor.h: squareBuilder
 	sh genSquareVisitor
 
-fossologyLib: 
-	$(MAKE) -C $(LIBDIR)
-	
 squareBuilder: buildSquareVisitor.c
 	$(CC) buildSquareVisitor.c $(DEF) $(CFLAGS_LOCAL) -lm -o $@
 

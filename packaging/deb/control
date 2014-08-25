@@ -37,7 +37,7 @@ Description: architecture for analyzing software, common files
 
 Package: fossology-web
 Architecture: any
-Depends: fossology-common, fossology-db, apache2, libapache2-mod-php5, ${misc:Depends}
+Depends: fossology-common, fossology-db, fossology-monk, apache2, libapache2-mod-php5, ${misc:Depends}
 Description: architecture for analyzing software, web interface
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents

@@ -84,3 +84,4 @@ src/ununpack/agent/departition
 src/ununpack/agent/ununpack
 src/wget_agent/agent/wget_agent
 variable.list
+/nbproject/private/

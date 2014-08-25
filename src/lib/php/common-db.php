@@ -200,24 +200,49 @@ function DB_TableExists($tableName)
 
 /**
  * \brief Check if a column exists.
- *        Note, this assumes the database name is 'fossology'.
+ *        This is postgresql specific.
  *
  * \param $tableName
  * \param $colName
+ * \param $DBName, default "fossology"
  *
  * \return 1 if column exists, 0 if not.
 **/
-function DB_ColExists($tableName, $colName)
+function DB_ColExists($tableName, $colName, $DBName='fossology')
 {
   global $PG_CONN;
 
-  $sql = "select count(*) as count from information_schema.columns where table_catalog='fossology' and table_name='$tableName' and column_name='$colName'";
+  $sql = "select count(*) as count from information_schema.columns where table_catalog='$DBName' and table_name='$tableName' and column_name='$colName'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
   $count = $row['count'];
   pg_free_result($result);
   return($count);
+} /* DB_ColExists()  */
+
+
+/**
+ * \brief Check if a constraint exists.
+ *        This is postgresql specific.
+ *
+ * \param $ConstraintName
+ * \param $DBName, default "fossology"
+ *
+ * \return True if constraint exists, False if not.
+**/
+function DB_ConstraintExists($ConstraintName, $DBName='fossology')
+{
+  global $PG_CONN;
+
+  $sql = "select count(*) as count from information_schema.table_constraints where table_catalog='$DBName' and constraint_name='$ConstraintName' limit 1";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  $count = $row['count'];
+  pg_free_result($result);
+  if ($count == 1) return True;
+  return False;
 } /* DB_ColExists()  */
 
 

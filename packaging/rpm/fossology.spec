@@ -20,7 +20,7 @@ Summary:        Architecture for analyzing software, common files
 Group:          PBGRP
 
 %package web
-Requires:       fossology-common fossology-db httpd
+Requires:       fossology-common fossology-db fossology-monk httpd
 Summary:        Architecture for analyzing software, web interface
 Group:          PBGRP
 

@@ -59,8 +59,7 @@ class LicenseDao extends Object
     $statementName = __METHOD__ . ".$uploadTreeTableName";
 
     $this->dbManager->prepare($statementName,
-        "SELECT
-                  rf_shortname AS license_shortname,
+        "SELECT   rf_shortname AS license_shortname,
                   rf_fullname AS license_fullname,
                   rf_pk AS license_id,
                   fl_pk AS license_file_id,
@@ -75,6 +74,7 @@ class LicenseDao extends Object
           INNER JOIN license_file_ref ON SS.file_id = pFile_fk
           INNER JOIN agent ON agent_pk = agent_fk
           WHERE SS.file_id=pfile_fk
+            AND agent_enabled='true'
           ORDER BY license_shortname ASC, percent_match DESC");
 
     $result = $this->dbManager->execute($statementName,
@@ -115,16 +115,16 @@ class LicenseDao extends Object
 
   /**
    * @param FileTreeBounds $fileTreeBounds
+   * @param $selectedAgentId
    * @return array
    */
-  public function getLicensesPerFileId(FileTreeBounds $fileTreeBounds)
+  public function getLicensesPerFileId(FileTreeBounds $fileTreeBounds, $selectedAgentId=null)
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
+    $param = array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight());
 
-    $this->dbManager->prepare($statementName,
-        "SELECT
-           license_file_ref.pfile_fk as file_id,
+    $sql = "SELECT license_file_ref.pfile_fk as file_id,
            rf_shortname as license_shortname,
            rf_pk as license_id,
            agent_name,
@@ -136,44 +136,51 @@ class LicenseDao extends Object
          INNER JOIN agent ON agent_fk=agent_pk
          WHERE utree.upload_fk=$1 and utree.lft BETWEEN $2 and $3
            AND license_file_ref.pfile_fk=utree.pfile_fk
-           AND rf_shortname != 'No_license_found'
-         GROUP BY file_id, license_shortname, license_id, agent_name, parent, match_percentage
-         ORDER BY match_percentage ASC, license_shortname ASC");
-
-    $result = $this->dbManager->execute($statementName,
-        array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
-
+           AND rf_shortname != 'No_license_found'";
+    if (!empty($selectedAgentId)){
+      $sql .= " AND agent_pk=$4";
+      $param[] = $selectedAgentId;
+    }
+    $sql .= "GROUP BY file_id, license_shortname, license_id, agent_name, parent, match_percentage
+         ORDER BY match_percentage ASC, license_shortname ASC";
+    
+    $this->dbManager->prepare($statementName, $sql);
+    $result = $this->dbManager->execute($statementName, $param);
     $licensesPerFileId = array();
-    while ($row = pg_fetch_assoc($result))
+    while ($row = $this->dbManager->fetchArray($result))
     {
       $licensesPerFileId[$row['file_id']][$row['license_shortname']][$row['agent_name']] = $row;
     }
-    pg_free_result($result);
+    $this->dbManager->freeResult($result);
     return $licensesPerFileId;
   }
 
 
-  public function getLicenseHistogram(FileTreeBounds $fileTreeBounds, $orderStatement = "")
+  public function getLicenseHistogram(FileTreeBounds $fileTreeBounds, $orderStatement = "", $agentId=null)
   {
-    $statementName = __METHOD__ . '.' . $fileTreeBounds->getUploadTreeTableName() . "." . $orderStatement;
-
-    $orderStatement = $orderStatement ? " ORDER BY $orderStatement" : "";
-
-    $this->dbManager->prepare($statementName,
-        "SELECT rf_shortname AS license_shortname, count(*) AS count
-         FROM license_file_ref
-         RIGHT JOIN uploadtree ON license_file_ref.pfile_fk = uploadtree.pfile_fk
-         WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND uploadtree.lft BETWEEN $2 and $3
-         GROUP BY license_shortname" . $orderStatement);
-    $result = $this->dbManager->execute($statementName,
-        array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
-
+    $statementName = __METHOD__ . '.' . $fileTreeBounds->getUploadTreeTableName() . ".$orderStatement.$agentId";
+    $param = array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight());
+    $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count
+         FROM license_file_ref RIGHT JOIN uploadtree ON license_file_ref.pfile_fk = uploadtree.pfile_fk
+         WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND uploadtree.lft BETWEEN $2 and $3";
+    if (!empty($agentId))
+    {
+      $sql .= ' AND agent_fk=$4';
+      $param[] = $agentId;
+    }
+    $sql .= "GROUP BY license_shortname";
+    if ($orderStatement)
+    {
+      $sql .= $orderStatement;
+    }
+    $this->dbManager->prepare($statementName, $sql);
+    $result = $this->dbManager->execute($statementName,$param);
     $assocLicenseHist = array();
     while ($res = $this->dbManager->fetchArray($result))
     {
       $assocLicenseHist[$res['license_shortname']] = $res['count'];
     }
-
+    $this->dbManager->freeResult($result);
     return $assocLicenseHist;
   }
 
