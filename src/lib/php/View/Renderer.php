@@ -20,6 +20,8 @@ namespace Fossology\Lib\View;
 
 use Fossology\Lib\Util\Object;
 
+require_once(dirname(dirname(__FILE__)).'/Util/Object.php');
+
 /* light weight renderer */
 class Renderer extends Object
 {
@@ -150,9 +152,8 @@ class Renderer extends Object
     return "<?php echo $var; ?>";
   }
 }
-/*
+
 if ('m'==@$argv[1]){
- $renderer = new FO_Renderer();
+ $renderer = new Renderer();
  $renderer->updateTemplates();
 }
- */
