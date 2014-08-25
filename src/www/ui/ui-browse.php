@@ -526,10 +526,11 @@ class ui_browse extends FO_Plugin {
     $tableColumns = array(
       array("sTitle" => _("Upload Name and Description"), "sClass"=>"left" ),
       array("sTitle" => _("Status"), "sClass"=>"center" ),
-      array("sTitle" => _("Reject-job"), "sClass"=>"center" ),
+      array("sTitle" => _("Reject-job"), "sClass"=>"center", "bSortable"=>false ),
       array("sTitle" => _("Assigned to"), "sClass"=>"center" ),
-      array("sTitle" => _("Upload Date"), "sClass"=>"center" ),
-      array("sTitle" => _("Priority"), "sClass"=>"center")
+      array("sTitle" => _("Upload Date"), "sClass"=>"center", "sType"=>"hiddenmagic"),
+      array("sTitle" => _("Priority"), "sClass"=>"center", 
+      array("sTitle" => 'PrioIndex', 'bVisible'=>FALSE)    )
       //,  "bSortable"=>false, "bSearchable"=>false, "sWidth"=>"14.6%" )
     );
 
@@ -552,7 +553,8 @@ class ui_browse extends FO_Plugin {
       "aaData" => $tableData,
       "aoColumns" => $tableColumns,
       "aaSorting" => $tableSorting,
-      "iDisplayLength" => 50 //,
+      "iDisplayLength" => 50,
+      "aoColumnDefs" => array( "iDataSort"=>5, "aTargets"=>array(6) )
     //  "oLanguage" => $tableLanguage
     );
 
@@ -569,11 +571,9 @@ class ui_browse extends FO_Plugin {
     private function createJavaScriptBlock()
   {
     $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
-    $output .=  '<script> $(document).ready(function() {
-        createBrowseTable();
-      });
-      </script>';
+//    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
+    $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
+    $output .= "\n<script src=\"scripts/browse.js\" type=\"text/javascript\"></script>\n";
     return $output;
   }
 
@@ -583,8 +583,14 @@ class ui_browse extends FO_Plugin {
     global $container;
     $dbManager = $container->get('db.manager');
 
+//<<<<<<< Updated upstream
     /* Browse-Pfile menu */
     $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
+// =======
+    return array(array("File R" , "Status" , "reject" , "assiNGed" , "2002-05-20" , "priority", 1 ),
+        array("File G" , "Status" , "reject" , "assigned" , "2013-02-11" , "priorities" , 2),
+        array("File B" , "Status" , "reject" , "assigned to" , "2011-03-31" , "prioritY" , 3)    );
+// >>>>>>> Stashed changes
 
     /* Browse-Pfile menu without the compare menu item */
     $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
