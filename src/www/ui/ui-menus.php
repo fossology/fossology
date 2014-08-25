@@ -92,6 +92,7 @@ class ui_menu extends FO_Plugin
 
   function createHtmlFromMenuEntry($M,$Indent)
   {
+    $V = "";
     if (!empty($M->URI))
     {
       $V .= '<a href="' . Traceback_uri() . "?mod=" . $M->URI;
