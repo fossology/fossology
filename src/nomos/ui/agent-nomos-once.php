@@ -36,7 +36,6 @@ class agent_nomos_once extends FO_Plugin {
   public $DBaccess   = PLUGIN_DB_NONE;
   public $LoginFlag  = 0;
 
-  
   public $HighlightInfoKeywords = array();
   public $HighlightInfoLicenses = array();
   /** To require login access, use: **/
@@ -44,28 +43,24 @@ class agent_nomos_once extends FO_Plugin {
   //  public $LoginFlag = 1;
 
   /**
-   * \biref Analyze one uploaded file.
-   *
-   * \param string $FilePath the filepath to the file to analyze.
-   *
-   * \return string $V, html to display the results.
+   * @brief Analyze one uploaded file.
+   * @param string $FilePath the filepath to the file to analyze.
+   * @return string $V, html to display the results.
    */
   function AnalyzeFile($FilePath) {
-   global $SYSCONFDIR;
+    global $SYSCONFDIR;
 
-    /* move the temp file */
-    $licenseResult = exec("$SYSCONFDIR/mods-enabled/nomos/agent/nomos -S $FilePath",$out,$rtn);
-    $licenses_and_Highlight = end( explode('contains license(s)',$out[0]) );
+    exec("$SYSCONFDIR/mods-enabled/nomos/agent/nomos -S $FilePath",$out,$rtn);
+    $licensesFromAgent = explode('contains license(s)',$out[0]);
+    $licenses_and_Highlight = end( $licensesFromAgent );
     $licenses = explode ('Highlighting Info at',  $licenses_and_Highlight);
    
-    $a = preg_match_all('/Keyword at (?P<position>\d+), length (?P<length>\d+),/',
+     preg_match_all('/Keyword at (?P<position>\d+), length (?P<length>\d+),/',
             $licenses[1],$this->HighlightInfoKeywords );
-    $a = preg_match_all('/License #(?P<name>[^#]*)# at (?P<position>\d+), length (?P<length>\d+),/',
+    preg_match_all('/License #(?P<name>[^#]*)# at (?P<position>\d+), length (?P<length>\d+),/',
             $licenses[1],$this->HighlightInfoLicenses);
-
    
     return ($licenses[0]);
-//    return ($licenses[0]);
   } // AnalyzeFile()
 
   /**
