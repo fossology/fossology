@@ -155,15 +155,6 @@ class core_auth extends FO_Plugin {
 		if (empty($PG_CONN)) {
 			return (0);
 		}
-                
-    if (array_key_exists('selectMemberGroup', $_POST))
-    {
-      global $container;
-      $dbManager = $container->get("db.manager");
-      $dbManager->prepare("selectMemberGroup", "UPDATE users SET group_id=$1 WHERE user_pk=$2");
-      $dbManager->execute("selectMemberGroup", array($_POST['selectMemberGroup'], $_SESSION['UserId']));
-      $_SESSION['GroupId'] = $_POST['selectMemberGroup'];
-    }
 
 		/* if Site Minder enabled core-auth will be disabled*/
 		if (siteminder_check() != -1)
@@ -174,6 +165,16 @@ class core_auth extends FO_Plugin {
 		session_name("Login");
         $mysess = session_id();
         if (empty($mysess)) session_start();
+        
+    if (array_key_exists('selectMemberGroup', $_POST))
+    {
+      global $container;
+      $dbManager = $container->get("db.manager");
+      $dbManager->prepare("selectMemberGroup", "UPDATE users SET group_fk=$1 WHERE user_pk=$2");
+      $dbManager->execute("selectMemberGroup", array($_POST['selectMemberGroup'], $_SESSION['UserId']));
+      $_SESSION['GroupId'] = $_POST['selectMemberGroup'];
+    }
+        
         if (array_key_exists('UserId', $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION['UserId'];
 		$Now = time();
 		if (!empty($_SESSION['time'])) 
@@ -210,7 +211,7 @@ class core_auth extends FO_Plugin {
 				$_SESSION['time_check'] = time() + (480 * 60);
 			}
 			if (time() >= @$_SESSION['time_check']) {
-                          $sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_id=group_pk WHERE user_name = '" . @$_SESSION['UserId'] . "'";
+                          $sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name = '" . @$_SESSION['UserId'] . "'";
 				$result = pg_query($PG_CONN, $sql);
 				DBCheckResult($result, $sql, __FILE__, __LINE__);
 				$R = pg_fetch_assoc($result);
@@ -247,94 +248,107 @@ class core_auth extends FO_Plugin {
       $_SESSION['UserLevel'] = $UserRow['user_perm'];
       $_SESSION['UserEmail'] = $UserRow['user_email'];
       $_SESSION['UserEnote'] = $UserRow['email_notify'];
-      $_SESSION['GroupId'] = $UserRow['group_id'];
+      $_SESSION['GroupId'] = $UserRow['group_fk'];
       $_SESSION['GroupName'] = $UserRow['group_name'];
     }
 
 
 	/**
-	 * \brief See if a username/password is valid.
-	 *
-	 * \return string on match, or null on no-match.
-	 */
-	function CheckUser($User, $Pass, $Referer) 
+   * \brief See if a username/password is valid.
+   *
+   * \return string on match, or null on no-match.
+   */
+  function CheckUser($User, $Pass, $Referer)
+  {
+    global $container;
+
+    if (empty($User))
     {
-		global $PG_CONN;
-		global $SysConf;
-
-		$V = "";
-		if (empty($User)) {
-			return;
-		}
-		if ($User == 'Default User') {
-			return;
-		}
-		$User = str_replace("'", "''", $User); /* protect DB */
-
-		/* See if the user exists */
-		$sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_id=group_pk WHERE user_name = '$User';";
-		$result = pg_query($PG_CONN, $sql);
-		DBCheckResult($result, $sql, __FILE__, __LINE__);
-		$R = pg_fetch_assoc($result);
-		pg_free_result($result);
-		if (empty($R['user_name'])) {
-			return;
-		} /* no user */
-		/* Check the password -- only if a password exists */
-		if (!empty($R['user_seed']) && !empty($R['user_pass'])) {
-			$Hash = sha1($R['user_seed'] . $Pass);
-			if (strcmp($Hash, $R['user_pass']) != 0) {
-				return;
-			}
-		} else if (!empty($R['user_seed'])) {
-			/* Seed with no password hash = no login */
-			return;
-		} else {
-			if (!empty($Pass)) {
-				return;
-			} /* empty password required */
-		}
-		/* If you make it here, then username and password were good! */
-        $this->UpdateSess($R);
-		$_SESSION['time_check'] = time() + (480 * 60);
-		/* No specified permission means ALL permission */
-		if ("X" . $R['user_perm'] == "X") {
-			$_SESSION['UserLevel'] = PLUGIN_DB_ADMIN;
-		} else {
-			$_SESSION['UserLevel'] = $R['user_perm'];
-		}
-		$_SESSION['checkip'] = GetParm("checkip", PARM_STRING);
-		/* Check for the no-popup flag */
-		if (GetParm("nopopup", PARM_INTEGER) == 1) {
-			$_SESSION['NoPopup'] = 1;
-		} else {
-			$_SESSION['NoPopup'] = 0;
-		}
-		/* Need to refresh the screen */
-		$V .= "<script language='javascript'>\n";
-		/* Use the previous redirect, but only use it if it comes from this
-		 server's Traceback_uri().  (Ignore hostname.) */
-		$Redirect = preg_replace("@^[^/]*//[^/]*@", "", GetParm("redirect", PARM_TEXT));
-		$Uri = Traceback_uri();
-		if (preg_match("/[?&]mod=(Default|" . $this->Name . ")/", $Redirect)) {
-			$Redirect = ""; /* don't reference myself! */
-		}
-		if (empty($Redirect) || strncmp($Redirect, $Uri, strlen($Uri))) {
-			$Uri = Traceback_uri();
-		} else {
-			$Uri = $Redirect;
-		}
-		/* Redirect window */
-		$V .= "window.open('$Referer','_top');\n";
-		$V .= "</script>\n";
-		return ($V);
-	} // CheckUser()
-
-	/**
-	 * \brief This is only called when the user logs out.
-	 */
-	function Output() 
+      return;
+    }
+    if ($User == 'Default User')
     {
+      return;
+    }
+    $dbManager = $container->get('db.manager');
+
+    $dbManager->prepare($stmt=__METHOD__.'select.user',
+                 $sql="SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1");
+    $result = $dbManager->execute($stmt,array($User));
+    $R = $dbManager->fetchArray($result);
+    $dbManager->freeResult($result);
+    if (empty($R['user_name']))
+    {
+      return;
+    }
+    /* Check the password -- only if a password exists */
+    if (!empty($R['user_seed']) && !empty($R['user_pass']))
+    {
+      $Hash = sha1($R['user_seed'] . $Pass);
+      if (strcmp($Hash, $R['user_pass']) != 0)
+      {
+        return;
+      }
+    }
+    else if (!empty($R['user_seed']))
+    {
+      /* Seed with no password hash = no login */
+      return;
+    }
+    else if (!empty($Pass))
+    {
+      /* empty password required */
+      return;
+    }
+    /* If you make it here, then username and password were good! */
+    $this->UpdateSess($R);
+    $_SESSION['time_check'] = time() + (480 * 60);
+    /* No specified permission means ALL permission */
+    if ("X" . $R['user_perm'] == "X")
+    {
+      $_SESSION['UserLevel'] = PLUGIN_DB_ADMIN;
+    }
+    else
+    {
+      $_SESSION['UserLevel'] = $R['user_perm'];
+    }
+    $_SESSION['checkip'] = GetParm("checkip", PARM_STRING);
+    /* Check for the no-popup flag */
+    if (GetParm("nopopup", PARM_INTEGER) == 1)
+    {
+      $_SESSION['NoPopup'] = 1;
+    }
+    else
+    {
+      $_SESSION['NoPopup'] = 0;
+    }
+
+    /* Use the previous redirect, but only use it if it comes from this
+      server's Traceback_uri().  (Ignore hostname.) */
+    $Redirect = preg_replace("@^[^/]*//[^/]*@", "", GetParm("redirect", PARM_TEXT));
+    $Uri = Traceback_uri();
+    if (preg_match("/[?&]mod=(Default|" . $this->Name . ")/", $Redirect))
+    {
+      $Redirect = ""; /* don't reference myself! */
+    }
+    if (empty($Redirect) || strncmp($Redirect, $Uri, strlen($Uri)))
+    {
+      $Uri = Traceback_uri();
+    }
+    else
+    {
+      $Uri = $Redirect;
+    }
+    /* Redirect window */
+    $V = "<script language='javascript'>\n"." window.open('$Referer','_top');\n"."</script>\n";
+    return $V;
+  }
+
+  /**
+   * \brief This is only called when the user logs out.
+   */
+  function Output() 
+  {
 		global $SysConf;
 
 		if ($this->State != PLUGIN_STATE_READY) {
