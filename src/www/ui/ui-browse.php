@@ -221,9 +221,48 @@ class ui_browse extends FO_Plugin {
   } // ShowItem()
 
   /**
+   * \brief Given a upload_pk, list every item in it.
+   * If it is an individual file, then list the file contents.
+   */
+  function ShowFolder($Folder, $Show)
+  {
+    $V = "<table border=1 width='100%'>";
+    $V.= "<tr><td valign='top' width='20%'>\n";
+    $V.= FolderListScript();
+    $text = _("Folder Navigation");
+    $V.= "<div align='center'><H3>$text</H3></div>\n";
+    $V.= "<div align='center'><small>";
+    if ($Folder != GetUserRootFolder()) {
+      $text = _("Top");
+      $V.= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>$text</a> |";
+    }
+    $text = _("Expand");
+    $V.= "<a href='javascript:Expand();'>$text</a> |";
+    $text = _("Collapse");
+    $V.= "<a href='javascript:Collapse();'>$text</a> |";
+    $text = _("Refresh");
+    $V.= "<a href='" . Traceback() . "'>$text</a>";
+    $V.= "</small></div>";
+    $V.= "<P>\n";
+    $V.= "<form>\n";
+    $V.= FolderListDiv($Folder, 0, $Folder, 1);
+    $V.= "</form>\n";
+    $V.= "</td><td valign='top'>\n";
+    $text = _("Uploads");
+    $V.= "<div align='center'><H3>$text</H3></div>\n";
+    $V.= "<table class='text' id='browsetbl' border=0 width='100%' cellpadding=0></table>";
+    $V.= "</table>";
+
+    $V .= $this->ShowFolderCreateFileTable($Folder, $Show);
+
+    return $V;
+  }
+
+
+  /**
    * \brief Given a Folder_pk, list every upload in the folder.
    */
-  function ShowFolder($Folder, $Show) 
+  function ShowFolder2($Folder, $Show)
   {
     global $Plugins;
     global $PG_CONN;
@@ -359,7 +398,7 @@ class ui_browse extends FO_Plugin {
       {
         $text = _("Permission Denied");
         echo "<h2>$text</h2>";
-        return;
+        return "";
       }
     }
 
@@ -379,7 +418,7 @@ class ui_browse extends FO_Plugin {
         if ( pg_num_rows($result) < 1)
         {
           echo "This upload no longer exists on this system.";
-          return;
+          return "";
         }
 
         $sql = "select parent_fk from foldercontents where child_id=$Upload and foldercontents_mode=2";
@@ -411,7 +450,7 @@ class ui_browse extends FO_Plugin {
       return ($V);
     }
     print "$V";
-    return;
+    return "";
   }
   
   function outputItemHtml($uploadTreeId,$Folder,$Upload)
@@ -430,7 +469,7 @@ class ui_browse extends FO_Plugin {
       {
         $text = _("Permission Denied");
         echo "<h2>$text</h2>";
-        return;
+        return "";
       }
 
       if (!Iscontainer($row['ufile_mode'])) {
@@ -462,20 +501,162 @@ class ui_browse extends FO_Plugin {
         }
         else
         {
-          $text = _("Missing upload tree parent for upload");
-          $html.= "<hr><h2>$text $Upload</h2><hr>";
-          return;
+          $text  = _("Missing upload tree parent for upload");
+          $html .= "<hr><h2>$text $Upload</h2><hr>";
+          return $html;
         }
         pg_free_result($result);
       }
       $html.= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
     }
     else
+    {
+      $html.= $this->createJavaScriptBlock();
       $html.= $this->ShowFolder($Folder, $show);
-
+    }
     return  "<font class='text'>\n$html</font>\n";
   }
-  
+
+  private function ShowFolderCreateFileTable($Folder, $Show)
+  {
+
+
+    $tableData= $this->ShowFolderGetTableData($Folder, $Show);
+
+    $tableColumns = array(
+      array("sTitle" => _("Upload Name and Description"), "sClass"=>"center" ),
+      array("sTitle" => _("Status"), "sClass"=>"center" ),
+      array("sTitle" => _("Reject-job"), "sClass"=>"center" ),
+      array("sTitle" => _("Assigned to"), "sClass"=>"center" ),
+      array("sTitle" => _("Upload Date"), "sClass"=>"center" ),
+      array("sTitle" => _("Priority"), "sClass"=>"center")
+      //,  "bSortable"=>false, "bSearchable"=>false, "sWidth"=>"14.6%" )
+    );
+
+    $tableSorting = array(
+      array(0,"asc"),
+      array(2,"desc"),
+      array(1,"desc")
+    );
+
+//    $tableLanguage = array(
+//      "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
+//      "sSearch" => "Search _INPUT_ in all columns" // or <input type=\"text\" id=\"dirlist_filter_scanner\" name=\"dirlist_filter_license\" style=\"padding:0px;\"/>
+//        // in results.
+//        . "<button onclick='resetFileFields()' >" . _("Show all files") . "</button>",
+//      "sInfoPostFix" => $AddInfoText,
+//      "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
+//    );
+
+    $dataTableConfig = array(
+      "aaData" => $tableData,
+      "aoColumns" => $tableColumns,
+      "aaSorting" => $tableSorting,
+      "iDisplayLength" => 50 //,
+    //  "oLanguage" => $tableLanguage
+    );
+
+    $VF   = "<script>
+              function createBrowseTable() {
+                    dTable=$('#browsetbl').dataTable(" . json_encode($dataTableConfig) .");
+                }
+            </script>";
+
+    return $VF;
+
+  }
+
+    private function createJavaScriptBlock()
+  {
+    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
+    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
+    $output .=  '<script> $(document).ready(function() {
+        createBrowseTable();
+      });
+      </script>';
+    return $output;
+  }
+
+  //todo REFACTOR COMPLETELY
+  private function ShowFolderGetTableData($Folder, $Show)
+  {
+
+    return array(array("File" , "Status" , "reject" , "assinged" , "date" , "priority" ) ) ;
+
+     global $PG_CONN;
+    /* Get list of uploads in this folder */
+    $sql = "SELECT * FROM upload
+        INNER JOIN uploadtree ON upload_fk = upload_pk
+        AND upload.pfile_fk = uploadtree.pfile_fk
+        AND parent IS NULL
+        AND lft IS NOT NULL
+        WHERE upload_pk IN
+        (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
+        ORDER BY upload_filename,upload_desc,upload_pk,upload_origin;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    $V ="";
+
+        while ($Row = pg_fetch_assoc($result)) {
+      if (empty($Row['upload_pk'])) {
+        continue;
+      }
+      $Desc = htmlentities($Row['upload_desc']);
+      $UploadPk = $Row['upload_pk'];
+
+      /* check permission on upload */
+      $UploadPerm = GetUploadPerm($UploadPk);
+      if ($UploadPerm < PERM_READ) continue;
+
+      $Name = $Row['ufile_name'];
+      if (empty($Name)) {
+        $Name = $Row['upload_filename'];
+      }
+
+      /* If UploadtreePk is not an artifact, then use it as the root.
+       Else get the first non artifact under it.
+       */
+      if (Isartifact($Row['ufile_mode']))
+      $UploadtreePk = DirGetNonArtifact($Row['uploadtree_pk'], $uploadtree_tablename);
+      else
+      $UploadtreePk = $Row['uploadtree_pk'];
+
+      $V.= "<tr><td>";
+      if (IsContainer($Row['ufile_mode'])) {
+        $V.= "<a href='$Uri&upload=$UploadPk&folder=$Folder&item=$UploadtreePk&show=$Show'>";
+        $V.= "<b>" . $Name . "</b>";
+        $V.= "</a>";
+      }
+      else {
+        $V.= "<b>" . $Name . "</b>";
+      }
+      $V.= "<br>";
+      if (!empty($Desc)) $V.= "<i>" . $Desc . "</i><br>";
+      $Upload = $Row['upload_pk'];
+      $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
+      if (Iscontainer($Row['ufile_mode']))
+      $V.= menu_to_1list($MenuPfile, $Parm, " ", " ", 1, $UploadPk);
+      else
+      $V.= menu_to_1list($MenuPfileNoCompare, $Parm, " ", " ", 1, $UploadPk);
+
+      /* Job queue link */
+      $text = _("History");
+      if (plugin_find_id('showjobs') >= 0) {
+        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>[$text]</a>";
+
+      $V.= "</td>\n";
+      $V.= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
+      }
+      $V.= "<tr><td colspan=2>&nbsp;</td></tr>\n";
+    }
+
+
+
+
+
+  }
+
 }
 $NewPlugin = new ui_browse;
 $NewPlugin->Install();
