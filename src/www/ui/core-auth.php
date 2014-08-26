@@ -210,16 +210,16 @@ class core_auth extends FO_Plugin {
 			if (empty($_SESSION['time_check'])) {
 				$_SESSION['time_check'] = time() + (480 * 60);
 			}
-			if (time() >= @$_SESSION['time_check']) {
-                          $sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name = '" . @$_SESSION['UserId'] . "'";
-				$result = pg_query($PG_CONN, $sql);
-				DBCheckResult($result, $sql, __FILE__, __LINE__);
-				$R = pg_fetch_assoc($result);
-				pg_free_result($result);
-                $this->UpdateSess($R);
-				/* Check for instant logouts */
-				if (empty($R['user_pass']))  $this->UpdateSess("");
-			}
+			if (time() >= @$_SESSION['time_check'])
+      {
+        $sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1";
+        $R = $dbManager->getSingleRow($sql,array(@$_SESSION['UserId']));
+        /* Check for instant logouts */
+        if (empty($R['user_pass'])) {
+          $R = "";
+        }
+        $this->UpdateSess($R);
+      }
 		} 
         else 
           $this->UpdateSess("");
@@ -239,7 +239,12 @@ class core_auth extends FO_Plugin {
       global $SysConf;
 
       if (empty($UserRow))
-        $UserRow = GetSingleRec("Users", "where user_name='Default User'");
+      {
+        global $container;
+        $dbManager = $container->get("db.manager");
+        $sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1";
+        $UserRow = $dbManager->getSingleRow($sql,array('Default User'));
+      }
 
       $_SESSION['UserId'] = $UserRow['user_pk'];
       $SysConf['auth']['UserId'] = $UserRow['user_pk'];
