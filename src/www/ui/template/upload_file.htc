@@ -19,7 +19,7 @@
    <input type="text" name="description" size="60" value="{{ description }}"/>
    <p />
   <li><input type="checkbox" name="public" value="public" /><i18n>(Optional) Make Public</i18n>
-  <?php global $renderer; if ($renderer->vars['agentCheckBoxMake']){ ?>
+  <?php if ($this->vars['agentCheckBoxMake']){ ?>
           <li><i18n>Select optional analysis</i18n><br />
             {{ agentCheckBoxMake }}
   <?php } ?>
