@@ -1802,7 +1802,12 @@
   $Schema["TABLE"]["upload"]["public_perm"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"public_perm\" DROP NOT NULL;";
   $Schema["TABLE"]["upload"]["public_perm"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["upload"]["priority"]["DESC"] = "";
+  $Schema["TABLE"]["upload"]["priority"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"priority\" double precision;";
+  $Schema["TABLE"]["upload"]["priority"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"priority\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload"]["priority"]["UPDATE"] = "";
 
+  
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["DESC"] = "";
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"uploadtree_pk\" int4;";
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"uploadtree_pk\" SET NOT NULL, ALTER COLUMN \"uploadtree_pk\" SET DEFAULT nextval('uploadtree_uploadtree_pk_seq'::regclass);";

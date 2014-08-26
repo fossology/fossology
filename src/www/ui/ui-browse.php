@@ -657,7 +657,7 @@ class ui_browse extends FO_Plugin {
         $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>$text</a>]";
         $dateCol .= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
       }
-      $prio = intval(substr($Row['upload_ts'], 12, 1));
+      $prio = $Row['priority'];
       $magicPrio = "<input type=\"hidden\" class=\"hidePriority\" value=\"$prio\"/>";
       $magicUpload = "<input type=\"hidden\" class=\"hideUploadid\" value=\"$Row[upload_pk]\"/>";
       $magicImg = '<img alt="move" src="images/dataTable/sort_both.png"/>';

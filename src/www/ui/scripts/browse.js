@@ -28,6 +28,7 @@ $(document).ready(function() {
       $(".priobucket").each( function(){
         $(this).find("img").attr("src", "images/dataTable/sort_both.png");
       });
+      myKey = 0;
       return;
     }
     if(myKey>0){
