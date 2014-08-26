@@ -64,7 +64,7 @@ class upload_file extends FO_Plugin {
       UPLOAD_ERR_RESEND => _("This seems to be a resent file.")
     );
     
-    if($_SESSION['uploadformbuild']!=$_REQUEST['uploadformbuild']){
+    if(@$_SESSION['uploadformbuild']!=@$_REQUEST['uploadformbuild']){
       $UploadFile['error'] = UPLOAD_ERR_RESEND;
       return $upload_errors[$UploadFile['error']];
     }
@@ -156,19 +156,19 @@ class upload_file extends FO_Plugin {
     $renderer = $container->get('renderer');
     /* If this is a POST, then process the request. */
     $folder_pk = GetParm('folder', PARM_INTEGER);
-    $renderer->vars['description'] = GetParm('description', PARM_TEXT); // may be null
+    $description = GetParm('description', PARM_TEXT); // may be null
     $Name = GetParm('name', PARM_TEXT); // may be null
     $public = GetParm('public', PARM_TEXT); // may be null
     if (empty($public))
       $public_perm = PERM_NONE;
     else
       $public_perm = PERM_READ;
-
+    $V = '';
     if (file_exists(@$_FILES['getfile']['tmp_name']) && !empty($folder_pk)) {
-      $rc = $this->Upload($folder_pk, @$_FILES['getfile']['tmp_name'], $Desc, $Name, $public_perm);
+      $rc = $this->Upload($folder_pk, @$_FILES['getfile']['tmp_name'], $description, $Name, $public_perm);
       if (empty($rc)) {
         // reset form fields
-        $renderer->vars['description'] = NULL;
+        $description = NULL;
         $Name = NULL;
       }
       else {
@@ -178,13 +178,13 @@ class upload_file extends FO_Plugin {
     }
 
     /* Display instructions */
-    $renderer->vars['description'] = $renderer->vars['description'];
+    $renderer->vars['description'] = $description;
     $renderer->vars['agentCheckBoxMake'] = '';
     if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
       $renderer->vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $Skip);
     }        
-    $V = $renderer->renderTemplate("upload_file");        
+    $V .= $renderer->renderTemplate("upload_file");        
     if (!$this->OutputToStdout) {
       return ($V);
     }
