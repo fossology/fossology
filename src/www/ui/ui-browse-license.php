@@ -164,10 +164,17 @@ class ui_browse_license extends FO_Plugin
     
     $uploadId = GetParm('upload', PARM_NUMBER);
     $scannerAgents = array('nomos','monk');
+
     global $container;
     $dbManager = $container->get('db.manager');
     $allScans = array();
     foreach($scannerAgents as $agentName){
+      /** if the agent_ars table is not existing, continue  */
+      $res = DB_TableExists($agentName."_ars");
+      if (empty($res)) {
+        continue;
+      }
+
       $newestAgent = $dbManager->getSingleRow("SELECT agent_pk,agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
               . "ORDER BY agent_pk DESC LIMIT 1",array($agentName));
       $stmt = __METHOD__.".getAgent.$agentName";
@@ -200,7 +207,7 @@ class ui_browse_license extends FO_Plugin
 
     if(empty($allScans))
     {
-      return _("There is no successful scan for this upload");
+      return _("There is no successful scan for this upload, please schedule one license scanner on this upload.");
     }
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
