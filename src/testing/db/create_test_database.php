@@ -493,6 +493,7 @@ pg_query($test_db_conn, $user_sql)
     or die("FAIL: could not insert default user into user table\n");
 
 $LIBEXECDIR = "/usr/local/lib/fossology/";
+$MODDIR = "/usr/local/share/fossology/";
 /* for the 2.0 -> 2.1 migration, create the uploadtree_0 table */
 require_once("/usr/local/lib/fossology/dbmigrate_2.0-2.1.php"); // hardcode for now
 require_once("/usr/local/lib/fossology/dbmigrate_2.1-2.2.php"); // hardcode for now
