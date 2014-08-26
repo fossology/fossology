@@ -20,5 +20,55 @@ jQuery.fn.dataTableExt.oSort["hiddenmagic-desc"] = function ( a, b ) {
 };
 
 $(document).ready(function() {
-        createBrowseTable();
+  createBrowseTable();
+  var myKey = 0;
+  $(".priobucket").click( function() {
+    yourKey = $(this).find("input.hideUploadid").val();
+    if (yourKey==myKey){
+      $(".priobucket").each( function(){
+        $(this).find("img").attr("src", "images/dataTable/sort_both.png");
       });
+      return;
+    }
+    if(myKey>0){
+      window.location.href = window.location.href+'&move='+myKey+'&beyond='+yourKey;
+      return;
+    }
+    myKey = $(this).find("input.hideUploadid").val();
+    var myVal = $(this).find("input.hidePriority").val();
+    $(".priobucket").each( function(){
+      var yourVal = $(this).find("input.hidePriority").val();
+      if (myVal>yourVal){
+        $(this).find("img").attr("src", "images/dataTable/sort_asc.png");
+        //$(this).css("background-image","url(images/dataTable/sort_asc.png)");
+      }
+      else if(myVal<yourVal){
+        $(this).find("img").attr("src", "images/dataTable/sort_desc.png");
+      }
+    } );
+  } );
+  
+  /*
+  $(".priobucket").mouseup( function() {
+    var yourKey = $(this).find("input.hideUploadid").val();
+    if(myKey>0 && (yourKey != myKey)){
+      window.location.href = window.location.href+'&move='+myKey+'&beyond='+yourKey;
+    }
+    else
+    {
+      $(".priobucket").each( function(){
+        $(this).find("img").attr("src", "images/dataTable/sort_both.png");
+        // $(this).css("background-image","url(images/dataTable/sort_both.png)");
+      });
+      myKey = 0;
+    }
+  });
+  
+  $("body").mouseup( function() {
+    $(".priobucket").find("img").attr("src", "images/dataTable/sort_both.png");
+    // $(".priobucket").css("background-image","url(images/dataTable/sort_both.png)");
+    myKey = 0;
+  } );
+  */
+  
+});
