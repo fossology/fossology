@@ -529,9 +529,8 @@ class ui_browse extends FO_Plugin {
       array("sTitle" => _("Reject-job"), "sClass"=>"center", "bSortable"=>false ),
       array("sTitle" => _("Assigned to"), "sClass"=>"center" ),
       array("sTitle" => _("Upload Date"), "sClass"=>"center", "sType"=>"hiddenmagic"),
-      array("sTitle" => _("Priority"), "sClass"=>"center", 
-      array("sTitle" => 'PrioIndex', 'bVisible'=>FALSE)    )
-      //,  "bSortable"=>false, "bSearchable"=>false, "sWidth"=>"14.6%" )
+      array("sTitle" => _("Priority"), "sClass"=>"center", "bSearchable"=>false, "iDataSort"=>6),
+      array("sTitle" => 'PrioIndex', 'bVisible'=>FALSE)
     );
 
     $tableSorting = array(
@@ -554,7 +553,6 @@ class ui_browse extends FO_Plugin {
       "aoColumns" => $tableColumns,
       "aaSorting" => $tableSorting,
       "iDisplayLength" => 50,
-      "aoColumnDefs" => array( "iDataSort"=>5, "aTargets"=>array(6) )
     //  "oLanguage" => $tableLanguage
     );
 
@@ -571,8 +569,8 @@ class ui_browse extends FO_Plugin {
     private function createJavaScriptBlock()
   {
     $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-//    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
-    $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
+    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
+//    $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/browse.js\" type=\"text/javascript\"></script>\n";
     return $output;
   }
@@ -583,14 +581,13 @@ class ui_browse extends FO_Plugin {
     global $container;
     $dbManager = $container->get('db.manager');
 
-//<<<<<<< Updated upstream
     /* Browse-Pfile menu */
     $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
-// =======
+/*
     return array(array("File R" , "Status" , "reject" , "assiNGed" , "2002-05-20" , "priority", 1 ),
         array("File G" , "Status" , "reject" , "assigned" , "2013-02-11" , "priorities" , 2),
         array("File B" , "Status" , "reject" , "assigned to" , "2011-03-31" , "prioritY" , 3)    );
-// >>>>>>> Stashed changes
+*/
 
     /* Browse-Pfile menu without the compare menu item */
     $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
@@ -630,11 +627,11 @@ class ui_browse extends FO_Plugin {
        Else get the first non artifact under it.
        */
       if (Isartifact($Row['ufile_mode']))
-      $UploadtreePk = DirGetNonArtifact($Row['uploadtree_pk'], $uploadtree_tablename);
+        $UploadtreePk = DirGetNonArtifact($Row['uploadtree_pk'], $uploadtree_tablename);
       else
-      $UploadtreePk = $Row['uploadtree_pk'];
+        $UploadtreePk = $Row['uploadtree_pk'];
 
-      $nameColumn = "<tr><td>";
+      $nameColumn = "";
       if (IsContainer($Row['ufile_mode'])) {
         $nameColumn .= "<a href='$Uri&upload=$UploadPk&folder=$Folder&item=$UploadtreePk&show=$Show'>";
         $nameColumn .= "<b>" . $Name . "</b>";
@@ -643,8 +640,9 @@ class ui_browse extends FO_Plugin {
       else {
         $nameColumn .= "<b>" . $Name . "</b>";
       }
-        $nameColumn.= "<br>";
-      if (!empty($Desc)) $nameColumn.= "<i>" . $Desc . "</i><br>";
+      $nameColumn.= "<br>";
+      if (!empty($Desc))
+        $nameColumn.= "<i>" . $Desc . "</i><br>";
       $Upload = $Row['upload_pk'];
       $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
       if (Iscontainer($Row['ufile_mode']))
@@ -656,13 +654,11 @@ class ui_browse extends FO_Plugin {
       $text = _("History");
       $dateCol="";
       if (plugin_find_id('showjobs') >= 0) {
-        $nameColumn .= "<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>[$text]</a>";
-
-        $nameColumn .= "</td>\n";
+        $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>$text</a>]";
         $dateCol .= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
       }
-     $output[]= array($nameColumn , "Status" , "reject" , "assinged" , $dateCol , "priority" );
-  }
+     $output[]= array($nameColumn , "Status" , "reject" , "assinged" , $dateCol , "priority=last digit of hour", intval(substr($Row['upload_ts'], 12, 1)) );
+    }
 
   return $output;
   }
