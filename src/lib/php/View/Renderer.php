@@ -50,7 +50,7 @@ class Renderer extends Object
     }
     // return $filename. file_get_contents ($filename);
     ob_start();
-    require_once($filename);
+    require($filename);
     $output = ob_get_contents();
     ob_end_clean();
     return $output;
@@ -147,7 +147,7 @@ class Renderer extends Object
     if (preg_match($pattern='/^[a-zA-Z0-9]+$/', $subject) )
       $var = '$renderer->vars["'.$subject.'"]';
     else if (preg_match($pattern='/^([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)$/', $subject, $matches) ){
-      $var = '$renderer->vars["'.$matches[1].'"]["'.$matches[2].'"]';
+      $var = '$this->vars["'.$matches[1].'"]["'.$matches[2].'"]';
     }
     return "<?php echo $var; ?>";
   }
