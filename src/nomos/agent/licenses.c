@@ -899,6 +899,7 @@ static gint compare_integer(gconstpointer a, gconstpointer b)
 
 
 static void rescanOriginalTextForFoundLicences(char* textp, int isFileMarkupLanguage, int isPS){
+  return;
   if (cur.theMatches->len > 0 )
   {
     if (cur.cliMode == 1 && !optionIsSet(OPTS_HIGHLIGHT_STDOUT) ) return;
