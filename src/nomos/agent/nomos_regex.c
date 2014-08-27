@@ -247,12 +247,10 @@ int idxGrep_base(int index, char *data, int flags, int mode)
     return (0);
   }
 
-  if (ltp->plain && ( mode == 0  || mode == 3))
+  if (ltp->plain && mode == 0) //this exits without recording
   {
     ret = strNbuf(data, ltp->regex);
-    if (mode == 3 ) {
-        recordIndex(cur.indexList, index);
-    }
+
     return (ret);
   }
 
