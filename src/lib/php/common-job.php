@@ -59,40 +59,35 @@
  */
 function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=PERM_NONE) 
 {
-  global $PG_CONN;
+  global $container;
   global $SysConf;
 
+  $dbManager = $container->get('db.manager');
   /* check all required inputs */
   if (empty($user_pk) or empty($job_name) or empty($filename) or 
       empty($UploadMode) or empty($folder_pk)) return;
-
+/* not required with prepared
   $job_name = pg_escape_string($job_name);
   $filename = pg_escape_string($filename);
   $desc = pg_escape_string($desc);
-
-  $sql = "INSERT INTO upload
-      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm) VALUES
-      ('$desc','$job_name','$user_pk','$UploadMode','$filename', '$public_perm')";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+*/
+  $dbManager->getSingleRow("INSERT INTO upload
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm) VALUES ($1,$2,$3,$4,$5,$6)",
+      array($desc,$job_name,$user_pk,$UploadMode,$filename, $public_perm),'insert.upload');
 
   /* get upload_pk of just added upload */
   $upload_pk = GetLastSeq("upload_upload_pk_seq", "upload");
-
-  /* Add the upload record to the folder */
-  /** Mode == 2 means child_id is upload_pk **/
-  $sql = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) 
-               VALUES ('$folder_pk',2,'$upload_pk')";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  $dbManager->getSingleRow("UPDATE upload SET priority=$1 WHERE upload_pk=$2",
+               array($upload_pk,$upload_pk),'update.upload');
+  /* Mode == 2 means child_id is upload_pk */
+  $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
+               array($folder_pk,2,$upload_pk),'insert.foldercontents');
 
   /****  Add user permission to perm_upload *****/
   /* First look up user's group_pk */
-  $usersRow = GetSingleRec("users", "where user_pk='$user_pk'");
+  $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',array($user_pk),__METHOD__.'.select.user');
   $UserName = $usersRow['user_name'];
-  $GroupRow = GetSingleRec("Groups", "where group_name='$UserName'");
+  $GroupRow = $dbManager->getSingleRow('SELECT * FROM groups WHERE group_name=$1',array($UserName),__METHOD__.'.select.group');
   if (empty($GroupRow))
   {
     $text = _("Error!");
@@ -107,39 +102,11 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
 
   // before inserting this new record, delete any record for the same upload and group since
   // that would be a duplicate.  This shouldn't happen except maybe in development testing
-  $sql = "delete from perm_upload where upload_fk=$upload_pk and group_fk=$group_pk";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  $dbManager->getSingleRow("delete from perm_upload where upload_fk=$1 and group_fk=$2",array($upload_pk,$group_pk),'except.maybe.in.development');
+  $dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES ($1,$2,$3)",
+               array($perm_admin, $upload_pk, $group_pk),'insert.perm_upload');
 
-  $sql = "INSERT INTO perm_upload (perm, upload_fk, group_fk) 
-               VALUES ($perm_admin, $upload_pk, $group_pk)";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-
-  /* Now add any user new_upload_group_fk/new_upload_perm to perm_upload */
-/* this code is inactivated here and in the user account settings (user-edit-self.php and user-edit-any.php)
-because it may be too confusing for the user.
-  if (empty($usersRow))
-  {
-    $text1 = _("User");
-    echo "$text $text1 $UserName $text2<br>";
-    return NULL;
-  }
-  $new_upload_group_fk = $usersRow['new_upload_group_fk'];
-  $new_upload_perm = $usersRow['new_upload_perm'];
-  if (!empty($new_upload_group_fk) and !empty($new_upload_perm))
-  {
-    $sql = "INSERT INTO perm_upload (perm, upload_fk, group_fk) 
-               VALUES ($new_upload_perm, $upload_pk, $new_upload_group_fk)";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-  }
-*/
-
-  return ($upload_pk);
+return ($upload_pk);
 } // JobAddUpload()
 
 

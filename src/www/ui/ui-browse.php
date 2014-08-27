@@ -528,7 +528,7 @@ class ui_browse extends FO_Plugin {
       array("sTitle" => _("Status"), "sClass"=>"center" ),
       array("sTitle" => _("Reject-job"), "sClass"=>"center", "bSortable"=>false ),
       array("sTitle" => _("Assigned to"), "sClass"=>"center" ),
-      array("sTitle" => _("Upload Date"), "sClass"=>"center", "sType"=>"hiddenmagic"),
+      array("sTitle" => _("Upload Date"), "sClass"=>"center", "sType"=>"string"),
       array("sTitle" => _("Priority"), "sClass"=>"center", "bSearchable"=>false, "iDataSort"=>6),
       array("sTitle" => 'PrioIndex', 'bVisible'=>FALSE)
     );
@@ -657,7 +657,12 @@ class ui_browse extends FO_Plugin {
         $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>$text</a>]";
         $dateCol .= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
       }
-     $output[]= array($nameColumn , "Status" , "reject" , "assinged" , $dateCol , "priority=last digit of hour", intval(substr($Row['upload_ts'], 12, 1)) );
+      $prio = $Row['priority'];
+      $magicPrio = "<input type=\"hidden\" class=\"hidePriority\" value=\"$prio\"/>";
+      $magicUpload = "<input type=\"hidden\" class=\"hideUploadid\" value=\"$Row[upload_pk]\"/>";
+      $magicImg = '<img alt="move" src="images/dataTable/sort_both.png"/>';
+      $magicFull = "<span class=\"priobucket\">$magicPrio$magicUpload$magicImg</span>";
+      $output[]= array($nameColumn , "Status" , "reject" , "assinged" , $dateCol , $magicFull, $prio );
     }
 
   return $output;
