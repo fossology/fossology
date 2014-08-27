@@ -250,7 +250,7 @@ class ui_browse extends FO_Plugin {
     $V.= "</td><td valign='top'>\n";
     $text = _("Uploads");
     $V.= "<div align='center'><H3>$text</H3></div>\n";
-    $V.= "<table class='semibordered' id='browsetbl'  width='100%' cellpadding=0></table>";
+    $V.= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0></table>";
     $V.= "</table>";
 
     $V .= $this->ShowFolderCreateFileTable($Folder, $Show);
@@ -408,7 +408,7 @@ class ui_browse extends FO_Plugin {
     if (empty($folder_pk))
     {
       if (empty($Upload))
-      $folder_pk = GetUserRootFolder();
+        $folder_pk = GetUserRootFolder();
       else
       {
         /* Make sure the upload record exists */
@@ -433,6 +433,14 @@ class ui_browse extends FO_Plugin {
         $folder_pk = $row['parent_fk'];
         pg_free_result($result);
       }
+    }
+    
+    /* This is a bad space to place action code here */
+    $moveUpload = GetParm("move", PARM_INTEGER);
+    $beyondUpload = GetParm("beyond", PARM_INTEGER);
+    if (!empty($moveUpload) && !empty($beyondUpload))
+    {
+      $this->moveUploadBeyond($moveUpload, $beyondUpload);
     }
 
     switch ($this->OutputType) {
@@ -519,8 +527,6 @@ class ui_browse extends FO_Plugin {
 
   private function ShowFolderCreateFileTable($Folder, $Show)
   {
-
-
     $tableData= $this->ShowFolderGetTableData($Folder, $Show);
 
     $tableColumns = array(
@@ -657,7 +663,7 @@ class ui_browse extends FO_Plugin {
         $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>$text</a>]";
         $dateCol .= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
       }
-      $prio = $Row['priority'];
+      $prio = floatval($Row['priority']);
       $magicPrio = "<input type=\"hidden\" class=\"hidePriority\" value=\"$prio\"/>";
       $magicUpload = "<input type=\"hidden\" class=\"hideUploadid\" value=\"$Row[upload_pk]\"/>";
       $magicImg = '<img alt="move" src="images/dataTable/sort_both.png"/>';
@@ -668,6 +674,36 @@ class ui_browse extends FO_Plugin {
   return $output;
   }
 
+  private function moveUploadBeyond($moveUpload, $beyondUpload)
+  {
+    global $container;
+    $dbManager = $container->get('db.manager');
+    $dbManager->prepare($stmt=__METHOD__.'.get.single.Upload',
+            $sql='SELECT upload_pk,priority FROM upload WHERE upload_pk=$1');
+    $movePoint = $dbManager->getSingleRow($sql,array($moveUpload),$stmt);
+    $beyondPoint = $dbManager->getSingleRow($sql,array($beyondUpload),$stmt);
+    if ($movePoint['priority'] > $beyondPoint['priority'])
+    {
+      $farPoint = $dbManager->getSingleRow("SELECT priority FROM upload WHERE priority<$1 ORDER BY priority DESC LIMIT 1", array($beyondPoint['priority']), 'get.upload.with.lower.priority');
+    }
+    else
+    {
+      $farPoint = $dbManager->getSingleRow("SELECT priority FROM upload WHERE priority>$1 ORDER BY priority ASC LIMIT 1", array($beyondPoint['priority']), 'get.upload.with.higher.priority');
+    }
+    if (false !== $farPoint)
+    {
+      $newPriority = 1.5 * $farPoint['priority'] - 0.5 * $beyondPoint['priority'];
+    }
+    else if ($movePoint['priority'] > $beyondPoint['priority'])
+    {
+      $newPriority = $beyondPoint['priority'] - 0.5;
+    }
+    else
+    {
+      $newPriority = $beyondPoint['priority'] + 0.5;
+    }
+    $dbManager->getSingleRow('UPDATE upload SET priority=$1 WHERE upload_pk=$2',array($newPriority,$moveUpload),'update.priority');
+  }
 }
 $NewPlugin = new ui_browse;
 $NewPlugin->Install();
