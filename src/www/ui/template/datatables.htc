@@ -1,0 +1,31 @@
+<script src="scripts/jquery-1.11.1.min.js" type="text/javascript"></script>
+<script src="scripts/jquery.dataTables-1.9.4.min.js" type="text/javascript"></script>
+
+Most datatables look similar to the following one:
+<table aria-describedby="dirlist_info" id="dirlist" style="margin-left: 9px; width: 1298px;" class="semibordered dataTable" border="0">
+ <thead>
+  <tr role="row">
+   <th aria-label="Files: activate to sort column descending" aria-sort="ascending" style="width: 343px;" colspan="1" rowspan="1" tabindex="0" class="left sorting_asc">Files</th>
+   <th aria-label="Scanner Results: activate to sort column ascending" style="width: 617px;" colspan="1" rowspan="1" tabindex="0" class="left sorting">Scanner Results</th>
+   <th aria-label="Actions" style="width: 168px;" colspan="1" rowspan="1" tabindex="0" class="sorting_disabled left">Non-sortable</th>
+  </tr>
+ </thead>
+ <tbody aria-relevant="all" aria-live="polite" role="alert">
+  <tr class="odd">
+   <td class="left sorting_1">File3DFX</a></td>
+   <td class="left">3DFX [M: 100%]</td>
+   <td class="left">-</td>
+  </tr>
+  <tr class="even">
+   <td class="left sorting_1">File4Dfx</a></td>
+   <td class="left">3DFX [M: 95%]</td>
+   <td class="left">Faked license</td>
+  </tr>
+  <tr class="odd">
+   <td class="left sorting_1">FileACE</a></td>
+   <td class="left">ACE [M: 100%]</td>
+   <td class="left">Vitamin</td>
+  </tr>
+ </tbody>
+</table>
+Be happy with the features which a deactivated here. (Hint: Hold <i>Shift</i> to sort by multiple columns.)

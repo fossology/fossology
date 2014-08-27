@@ -20,40 +20,71 @@ define("TITLE_ui_welcome", _("Getting Started with FOSSology"));
 
 class ui_welcome extends FO_Plugin
 {
-  var $Name       = "Getting Started";
-  var $Title      = TITLE_ui_welcome;
-  var $Version    = "1.0";
-  var $MenuList   = "Help::Getting Started";
-  var $DBaccess   = PLUGIN_DB_NONE;
-  var $LoginFlag  = 0;
 
+  function __construct()
+  {
+    // $this->State = PLUGIN_STATE_READY;
+    $this->Name       = "Getting Started";
+    $this->Title      = TITLE_ui_welcome;
+    $this->Version    = "1.0";
+    $this->MenuList   = "Help::Getting Started";
+    $this->DBaccess   = PLUGIN_DB_NONE;
+    $this->LoginFlag  = 0;
+    parent::__construct();
+  }
+
+  /**
+   * \brief Customize submenus.
+   */
+  function RegisterMenus()
+  {
+    if ($this->State != PLUGIN_STATE_READY) {
+      return(0);
+    }
+    $topMenuList = "Main::" . $this->MenuList;
+    menu_insert($topMenuList.'::Overview', $this->MenuOrder-10, $this->Name."&show=welcome");
+    menu_insert($topMenuList.'::Datatables', $this->MenuOrder, $this->Name."&show=datatables");
+  }
+  
   /**
    * \brief Generate the text for this plugin.
    */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
-    $SiteURI = Traceback_uri();
     $V = "";
-    if ($this->OutputType == "HTML")
-    {
-      $Login = _("Login");
-      if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
-      {
-        $Login = "<a href='$SiteURI?mod=auth'>$Login</a>";
-      }
-      global $container;
-      $renderer = $container->get('renderer');
-      $renderer->login = $Login;
-      $V = str_replace('${SiteURI}', $SiteURI, $renderer->renderTemplate("welcome"));
+    if ($this->OutputType=="HTML"){
+      $V = $this->outputHtml();
     }
     if (!$this->OutputToStdout)
     {
-      return($V);
+      return $V;
     }
     print($V);
     return;
   }
+  
+  /*
+   * @return string rendered template
+   */
+  function outputHtml() {
+    global $container;
+    $renderer = $container->get('renderer');
+    $show = GetParm('show', PARM_STRING);
+    if ($show=='datatables'){
+      return $renderer->renderTemplate("datatables");
+    }
+    $Login = _("Login");
+    if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
+    {
+      $Login = "<a href='$SiteURI?mod=auth'>$Login</a>";
+    }
+    $renderer->vars['login'] = $Login;
+    $renderer->vars['SiteURI'] = Traceback_uri();;
+    return $renderer->renderTemplate("welcome");
+  }
+ 
 }
-  $NewPlugin = new ui_welcome;
-  $NewPlugin->Initialize();
+
+$NewPlugin = new ui_welcome;
+$NewPlugin->Initialize();
