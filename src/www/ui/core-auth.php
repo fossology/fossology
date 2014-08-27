@@ -212,6 +212,8 @@ class core_auth extends FO_Plugin {
 			}
 			if (time() >= @$_SESSION['time_check'])
       {
+        global $container;
+        $dbManager = $container->get("db.manager");
         $sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1";
         $R = $dbManager->getSingleRow($sql,array(@$_SESSION['UserId']));
         /* Check for instant logouts */
