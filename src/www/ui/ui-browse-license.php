@@ -197,7 +197,7 @@ class ui_browse_license extends FO_Plugin
       
       if (false===$latestRun)
       {
-        $V .= "The agent $agentName did never succeed run on this upload.<br/>";
+        $V .= "The agent $agentName did never successfully run on this upload.<br/>";
       }
       else if ($latestRun['agent_pk']!=$newestAgent['agent_pk'])
       {
@@ -211,18 +211,26 @@ class ui_browse_license extends FO_Plugin
     }
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    $selectedAgentText = "";
     $URI = Traceback_uri().'?mod='.Traceback_parm().'&updcache=1';
     $V .= "<form action='$URI' method='post'><select name='agentId' id='agentId'>";
+    $V .= "<option value='0'";
+    if ($run['agent_pk'] == $selectedAgentId)
+    {
+      $V .= " selected='selected'";
+    }
+    $V .= '>'._('current agents')."</option>\n";
     foreach($allScans as $run)
     {
-      $V .= "<option value='$run[agent_pk]'>$run[agent_name] $run[agent_rev]</option>\n";
       if ($run['agent_pk'] == $selectedAgentId)
       {
-        $selectedAgentText = '('._("You see")." $run[agent_name] $run[agent_rev])";
+        $isSelected = " selected='selected'";
+      } else
+      {
+        $isSelected = "";
       }
+      $V .= "<option value='$run[agent_pk]'$isSelected>$run[agent_name] $run[agent_rev]</option>\n";
     }
-    $V .= "</select><input type='submit' name='' value='Show'/>$selectedAgentText</form>";
+    $V .= "</select><input type='submit' name='' value='Show'/></form>";
     
     
     list($jsBlockLicenseHist,$VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId);
