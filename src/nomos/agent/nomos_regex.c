@@ -194,17 +194,52 @@ int idxGrep(int index, char *data, int flags)
 
 int idxGrep_recordPosition(int index, char *data, int flags)
 {
-  return idxGrep_base(index, data, flags, 1);
+  if( optionIsSet(OPTS_NO_HIGHLIGHTINFO) ) {
+    return idxGrep_base(index, data, flags, 0);
+  }
+  else {
+    return idxGrep_base(index, data, flags, 1);
+  }
 }
 
 int idxGrep_recordPositionDoctored(int index, char *data, int flags)
 {
-  return idxGrep_base(index, data, flags, 2);
+
+  if( optionIsSet(OPTS_NO_HIGHLIGHTINFO) ) {
+    return idxGrep_base(index, data, flags, 0);
+  }
+  else {
+    return idxGrep_base(index, data, flags, 2);
+  }
 }
 
 int idxGrep_recordIndex(int index, char *data, int flags)
 {
-  return idxGrep_base(index, data, flags, 3);
+  if( optionIsSet(OPTS_NO_HIGHLIGHTINFO) ) {
+    return idxGrep_base(index, data, flags, 0);
+  }
+  else {
+    return idxGrep_base(index, data, flags, 3);
+  }
+}
+
+
+int matchOnce(int isPlain,char *data, char* regex, regex_t *rp, regmatch_t* regmatch ) {
+  if(isPlain) {
+    return !strNbuf_noGlobals(data, regex, regmatch , 0 , cur.matchBase );
+  }
+
+  return regexec(rp, data, 1, regmatch, 0);
+}
+
+int storeOneMatch(regmatch_t currentRegMatch, int lastmatch, GArray* allmatches, char** tmpData, char* data){
+  regmatch_t storeRegMatch;
+  storeRegMatch.rm_so = currentRegMatch.rm_so + lastmatch;
+  storeRegMatch.rm_eo = currentRegMatch.rm_eo + lastmatch;
+  g_array_append_val(allmatches, storeRegMatch);
+  lastmatch += currentRegMatch.rm_eo;
+  *tmpData = data + lastmatch;
+  return lastmatch;
 }
 
 /* idxGrep_base
@@ -247,107 +282,93 @@ int idxGrep_base(int index, char *data, int flags, int mode)
     return (0);
   }
 
-  if (ltp->plain && mode == 0) //this exits without recording
+  if (ltp->plain )
   {
     ret = strNbuf(data, ltp->regex);
-
-    return (ret);
+    if(ret == 0) return (ret);
   }
-
-  if ((ret = regcomp(rp, ltp->regex, flags)))
-  {
-    fprintf(stderr, "Compile failed, regex #%d\n", index);
-    regexError(ret, rp, ltp->regex);
-    regfree(rp);
-    printf("Compile error \n");
-    return (-1); /* <0 indicates compile failure */
-  }
-
-  if (regexec(rp, data, 1, &cur.regm, 0))
-  {
-    regfree(rp);
-    return (0);
-  }
-#ifdef  QA_CHECKS
-  if (cur.regm.rm_so == cur.regm.rm_eo)
-  {
-    regfree(rp);
-    Assert(NO, "start/end offsets are identical in idxGrep(%d)",
-        index);
-  }
-#endif  /* QA_CHECKS */
-  /* Set up a global match-length variable? */
-  if (show)
-  {
-#ifdef  DEBUG
-    printf("REGEX(%d) \"%s\"\n", index, ltp->regex);
-#endif  /* DEBUG */
-    printf("MATCH @ %d! = {", cur.regm.rm_so);
-    for (i = cur.regm.rm_so; i < cur.regm.rm_eo; i++)
+  else {
+    if ((ret = regcomp(rp, ltp->regex, flags)))
     {
-      printf("%c", data[i]);
+      fprintf(stderr, "Compile failed, regex #%d\n", index);
+      regexError(ret, rp, ltp->regex);
+      regfree(rp);
+      printf("Compile error \n");
+      return (-1); /* <0 indicates compile failure */
     }
-    printf("}\n");
-  }
-  if (gl.flags & FL_SAVEBASE)
-  {
-    cur.matchBase = data;
+
+    if (regexec(rp, data, 1, &cur.regm, 0))
+    {
+      regfree(rp);
+      return (0);
+    }
+    else ret  =1;
+
+  #ifdef  QA_CHECKS
+    if (cur.regm.rm_so == cur.regm.rm_eo)
+    {
+      regfree(rp);
+      Assert(NO, "start/end offsets are identical in idxGrep(%d)",
+          index);
+    }
+  #endif  /* QA_CHECKS */
+    /* Set up a global match-length variable? */
+    if (show)
+    {
+  #ifdef  DEBUG
+      printf("REGEX(%d) \"%s\"\n", index, ltp->regex);
+  #endif  /* DEBUG */
+      printf("MATCH @ %d! = {", cur.regm.rm_so);
+      for (i = cur.regm.rm_so; i < cur.regm.rm_eo; i++)
+      {
+        printf("%c", data[i]);
+      }
+      printf("}\n");
+    }
+    if (gl.flags & FL_SAVEBASE)
+    {
+      cur.matchBase = data;
+    }
   }
 
-  if (mode==1 || mode == 2)
+  //! Now we have a match
+
+  if (mode == 3 ) {
+      recordIndex(cur.indexList, index);
+    }
+  else if (mode==1 || mode == 2)
   {
     CALL_IF_DEBUG_MODE(printf("MATCH!\n");)
     //! All sanity checks have passed and we have at least one match
 
     CALL_IF_DEBUG_MODE(printf("%s", data);)
 
-    size_t currentMaxMatches = 64;
 
-    int nomoreMatches = 0;
-    while (nomoreMatches == 0)
+    GArray* allmatches = g_array_new(FALSE, FALSE, sizeof(regmatch_t));
+    regmatch_t currentRegMatch;
+    int lastmatch = 0;
+
+    char* tmpData = data;
+
+    lastmatch = storeOneMatch(cur.regm, lastmatch, allmatches, &tmpData, data);
+
+    while (!matchOnce(ltp->plain,tmpData, ltp->regex, rp, &currentRegMatch )  )
     {
-      currentMaxMatches *= 2;
-
-      regmatch_t allmatches[currentMaxMatches];
-      int c = 0;
-
-      regmatch_t currentRegMatch;
-      int lastmatch = 0;
-
-      char* tmpData = data;
-      while (!regexec(rp, tmpData, 1, &currentRegMatch, 0) && c < currentMaxMatches)
-      {
-        allmatches[c].rm_so = currentRegMatch.rm_so + lastmatch;
-        allmatches[c].rm_eo = currentRegMatch.rm_eo + lastmatch;
-        c++;
-
-        lastmatch += currentRegMatch.rm_eo;
-        tmpData = data + lastmatch;
-      }
-
-      if (c == currentMaxMatches)
-        nomoreMatches = 0;
-      else
-      {
-        if(index >= _KW_first  && index <= _KW_last ) {
-          rememberWhatWeFound(cur.keywordPositions, allmatches, c, index, mode);
-        }
-        else if (cur.currentLicenceIndex > -1 ) {
-           rememberWhatWeFound( getLicenceAndMatchPositions(cur.theMatches, cur.currentLicenceIndex )->matchPositions , allmatches, c, index, mode);
-        }
-//        else {
-//          FOSSY_EXIT( "Undefined currentLicenceIndex" , 8);
-//        }
-        nomoreMatches = -1;
-      }
-
+      lastmatch = storeOneMatch(currentRegMatch, lastmatch, allmatches, &tmpData, data);
     }
-  CALL_IF_DEBUG_MODE(printf("Bye!\n");)
+
+  
+    if(index >= _KW_first  && index <= _KW_last ) {
+      rememberWhatWeFound(cur.keywordPositions, allmatches, index, mode);
+    }
+    else if (cur.currentLicenceIndex > -1 ) {
+       rememberWhatWeFound( getLicenceAndMatchPositions(cur.theMatches, cur.currentLicenceIndex )->matchPositions , allmatches, index, mode);
+    }
+
+    CALL_IF_DEBUG_MODE(printf("Bye!\n");)
  }
-  else if (mode == 3 ) {
-    recordIndex(cur.indexList, index);
-  }
-regfree(rp);
+
+  if (!ltp->plain ) regfree(rp);
 return (1);
 
 }
@@ -359,223 +380,212 @@ void recordIndex(GArray* indexList, int index){
 
 static int getOffset(int posInDoctoredBuffer)
 {
+  return uncollapsePosition(posInDoctoredBuffer, cur.docBufferPositionsAndOffsets);
+}
 
-return uncollapsePosition(posInDoctoredBuffer, cur.docBufferPositionsAndOffsets);
+regmatch_t* getRegmatch_t(GArray* in,int  index){
+ return & g_array_index(in, regmatch_t, index);
+}
 
-int i = 0;
-pairPosOff* thePoA;
-for (i = 0; i < cur.docBufferPositionsAndOffsets->len; ++i)
+void rememberWhatWeFound(GArray* highlight, GArray* regmatch_tArray,  int index, int mode)
 {
-  thePoA = getPairPosOff(cur.docBufferPositionsAndOffsets, i);
-  unsigned int nextMissingBytePosInDocBuf = thePoA->pos;
-  if (nextMissingBytePosInDocBuf > posInDoctoredBuffer)
+
+  if (mode != 1 && mode != 2)
   {
-    break;
-  }
-
-}
-if (i > 0)
-{
-  thePoA = getPairPosOff(cur.docBufferPositionsAndOffsets, i - 1);
-  return posInDoctoredBuffer + thePoA->off;
-}
-return posInDoctoredBuffer;
-}
-
-void rememberWhatWeFound(GArray* highlight, regmatch_t *allmatches, int max_size_all_matches, int index, int mode)
-{
-if (mode != 1 && mode != 2)
-{
-  FOSSY_EXIT("This mode is not supported\n", 8);
-  return;
-}
-//! Todo clean up the code
-
-int i = 0;
-int nmatches = 0;
-for (i = 0; i < max_size_all_matches; ++i)
-{
-  if (allmatches[i].rm_eo != -1 && allmatches[i].rm_so != -1)
-    nmatches++;
-  else
-  {
-    FOSSY_EXIT("Found match at negative position... this should not happen\n", 9);
+    FOSSY_EXIT("This mode is not supported\n", 8);
     return;
   }
-}
-int alreadyFound = highlight->len;
-g_array_set_size(highlight, alreadyFound + nmatches);
-for (i = 0; i < nmatches; ++i)
-{
-  MatchPositionAndType* ourMatchv = getMatchfromHighlightInfo(highlight, i + alreadyFound);
-  ourMatchv->start = (mode == 1) ? allmatches[i].rm_so : getOffset(allmatches[i].rm_so);
-  ourMatchv->end = (mode == 1) ? allmatches[i].rm_eo : getOffset(allmatches[i].rm_eo);
-  ourMatchv->index = index;
 
-CALL_IF_DEBUG_MODE(printf("here: %i - %i \n", ourMatchv->start, ourMatchv->end);)
-}
-CALL_IF_DEBUG_MODE(printf(" We go and now we know  %d ", highlight->len);)
+  int i = 0;
+  int nmatches = regmatch_tArray->len;
+  int alreadyFound = highlight->len;
+  g_array_set_size(highlight, alreadyFound + nmatches);
+
+  for (i = 0; i < nmatches; ++i)
+  {
+    regmatch_t* theRegmatch = getRegmatch_t(regmatch_tArray, i);
+    if (theRegmatch->rm_eo == -1 || theRegmatch->rm_so == -1)
+    {
+      FOSSY_EXIT("Found match at negative position... this should not happen\n", 9);
+      return;
+    }
+
+    MatchPositionAndType* ourMatchv = getMatchfromHighlightInfo(highlight, i + alreadyFound);
+    ourMatchv->start = (mode == 1) ? theRegmatch->rm_so : getOffset(theRegmatch->rm_so);
+    ourMatchv->end = (mode == 1) ? theRegmatch->rm_eo : getOffset(theRegmatch->rm_eo);
+    ourMatchv->index = index;
+
+  CALL_IF_DEBUG_MODE(printf("here: %i - %i \n", ourMatchv->start, ourMatchv->end);)
+  }
+  CALL_IF_DEBUG_MODE(printf(" We go and now we know  %d ", highlight->len);)
 }
 
 #define	_XC(q)	((char) xascii[q])
+
+
+int strNbuf(char *data, char *str){
+
+  return strNbuf_noGlobals(data, str, &(cur.regm), gl.flags & FL_SAVEBASE , cur.matchBase );
+}
+
 
 /**
  * \brief This is our own internal, case-insensitive version of strstr().  No
  * open-source code was consulted/used in the construction of this function.
  */
-int strNbuf(char *data, char *str)
+int strNbuf_noGlobals(char *data, char *str , regmatch_t* matchPos, int doSave , char* saveData)
 {
-static int firstFlag = 1;
-static char xascii[128];
-int i;
-int alph = 0;
-int save = 0;
-char *bufp;
-char *pattp;
-char *mark;
-char x;
-char firstx = 0;
+  static int firstFlag = 1;
+  static char xascii[128];
+  int i;
+  int alph = 0;
+  int save = 0;
+  char *bufp;
+  char *pattp;
+  char *mark;
+  char x;
+  char firstx = 0;
 
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG)
-traceFunc("== strNbuf(%p, %p)\n", data, str);
+  traceFunc("== strNbuf(%p, %p)\n", data, str);
 #endif	/* PROC_TRACE || PHRASE_DEBUG */
 
-if (firstFlag)
-{
-firstFlag = 0;
-/*
- * 32 characters separate 'A' (65) and 'a' (97), contiguous up to 'Z'.
- * Therefore, 'Z' == 90, 'a' == 97, and 'z' == 122
- */
-for (i = 0; i < sizeof(xascii); i++)
-{
-if ((i >= 65) && (i <= 90))
-{ /* isupper */
-  xascii[i] = i + 32; /* -> tolower */
-}
-else if ((i >= 97) && (i <= 122))
-{ /* islower */
-  xascii[i] = i - 32; /* -> toupper */
-}
-else
-{
-  /* *foo = tolower((char)i); */
-  xascii[i] = (char) /*i*/0;
-}
-}
+  if (firstFlag)
+  {
+    firstFlag = 0;
+    /*
+     * 32 characters separate 'A' (65) and 'a' (97), contiguous up to 'Z'.
+     * Therefore, 'Z' == 90, 'a' == 97, and 'z' == 122
+     */
+    for (i = 0; i < sizeof(xascii); i++)
+    {
+      if ((i >= 65) && (i <= 90))
+      { /* isupper */
+        xascii[i] = i + 32; /* -> tolower */
+      }
+      else if ((i >= 97) && (i <= 122))
+      { /* islower */
+        xascii[i] = i - 32; /* -> toupper */
+      }
+      else
+      {
+        /* *foo = tolower((char)i); */
+        xascii[i] = (char) /*i*/0;
+      }
+    }
 #ifdef	STRSTR_DEBUG
-/*
- * Dump the table (debugging purposes only)
- */
-for (i = 0; i < sizeof (xascii); i++)
-{
-if (xascii[i])
-{
-  printf(" %c%c  ", (unsigned) i, xascii[i]);
-}
-else
-{
-  printf("\\%03d ", (int) xascii[i]);
-}
-if (i & 16 == 15)
-{
-  printf("\n");
-}
-}
+    /*
+     * Dump the table (debugging purposes only)
+     */
+    for (i = 0; i < sizeof (xascii); i++)
+    {
+      if (xascii[i])
+      {
+        printf(" %c%c  ", (unsigned) i, xascii[i]);
+      }
+      else
+      {
+        printf("\\%03d ", (int) xascii[i]);
+      }
+      if (i & 16 == 15)
+      {
+        printf("\n");
+      }
+    }
 #endif	/* STRSTR_DEBUG */
-}
+  }
 #ifdef	STRSTR_DEBUG
-printf("DATA \"%s\"\nPATT \"%s\"\n", data, str);
+  printf("DATA \"%s\"\nPATT \"%s\"\n", data, str);
 #endif	/* STRSTR_DEBUG */
-if (data == NULL_STR || str == NULL_STR)
-{
-return (0);
-}
-alph = isalpha(*str);
-if (alph)
-{
-firstx = xascii[(int) *str];
+  if (data == NULL_STR || str == NULL_STR)
+  {
+    return (0);
+  }
+  alph = isalpha(*str);
+  if (alph)
+  {
+    firstx = xascii[(int) *str];
 #ifdef	STRSTR_DEBUG
-printf("NOTE: first char (%c) is Alphabetic - alternate is (%c)\n",
-  *str, firstx);
+    printf("NOTE: first char (%c) is Alphabetic - alternate is (%c)\n",
+                *str, firstx);
 #endif	/* STRSTR_DEBUG */
 #ifdef	QA_CHECKS
-if (firstx == NULL_CHAR)
-{
-LOG_FATAL("Unexpected initialization")
-Bail(-__LINE__);
-}
+    if (firstx == NULL_CHAR)
+    {
+      LOG_FATAL("Unexpected initialization")
+              Bail(-__LINE__);
+    }
 #endif	/* QA_CHECKS */
-}
-for (bufp = data; /* *pattp && */*bufp; bufp = mark)
-{
+  }
+  for (bufp = data; /* *pattp && */*bufp; bufp = mark)
+  {
 #ifdef	STRSTR_DEBUG
-printf("\nDEBUG: start, buffer = \"%s\"\n", bufp);
+    printf("\nDEBUG: start, buffer = \"%s\"\n", bufp);
 #endif	/* STRSTR_DEBUG */
-pattp = str;
-/*
- * Locate the first character of our target-pattern in the buffer...
- */
-while (*bufp)
-{
+    pattp = str;
+    /*
+     * Locate the first character of our target-pattern in the buffer...
+     */
+    while (*bufp)
+    {
 #ifdef	STRSTR_DEBUG
-printf("... findfirst, *bufp is '%c' == [%c%c]?\n",
-    *bufp, *str, alph ? firstx : *str);
+      printf("... findfirst, *bufp is '%c' == [%c%c]?\n",
+                  *bufp, *str, alph ? firstx : *str);
 #endif	/* STRSTR_DEBUG */
-if (*bufp == *pattp)
-{
-  break;
-}
-if (alph && (*bufp == firstx))
-{
-  break;
-}
-bufp++;
-}
-if (*bufp == NULL_CHAR)
-{
-return (0);
-}
-save = bufp - data;
-mark = ++bufp; /* could optimize this in loop below */
+      if (*bufp == *pattp)
+      {
+        break;
+      }
+      if (alph && (*bufp == firstx))
+      {
+        break;
+      }
+      bufp++;
+    }
+    if (*bufp == NULL_CHAR)
+    {
+      return (0);
+    }
+    save = bufp - data;
+    mark = ++bufp; /* could optimize this in loop below */
 #ifdef	STRSTR_DEBUG
-printf("GOT IT, at offset %d (*mark now is '%c')\n",
-  bufp - data - 1, *mark);
+    printf("GOT IT, at offset %d (*mark now is '%c')\n",
+                bufp - data - 1, *mark);
 #endif	/* STRSTR_DEBUG */
-/* optimizeMark = 1; */
-for (++pattp; *bufp && *pattp; bufp++, pattp++)
-{
+    /* optimizeMark = 1; */
+    for (++pattp; *bufp && *pattp; bufp++, pattp++)
+    {
 #ifdef	STRSTR_DEBUG
-printf("STRING-COMPARE: %c == %c ??\n", *bufp, *pattp);
+      printf("STRING-COMPARE: %c == %c ??\n", *bufp, *pattp);
 #endif	/* STRSTR_DEBUG */
-if (*bufp == *pattp)
-{
-  continue;
-}
+      if (*bufp == *pattp)
+      {
+        continue;
+      }
 #ifdef	STRSTR_DEBUG
-printf("... or perhaps: %c == %c ??\n", *bufp,
-    xascii[*pattp]);
+      printf("... or perhaps: %c == %c ??\n", *bufp,
+                  xascii[*pattp]);
 #endif	/* STRSTR_DEBUG */
-if (((x = xascii[(int) *pattp])) && (*bufp == x))
-{
-  continue;
-}
-break;
-}
-if (*pattp == NULL_CHAR)
-{
-cur.regm.rm_so = save;
-cur.regm.rm_eo = save + strlen(str);
-if (gl.flags & FL_SAVEBASE)
-{
-  cur.matchBase = data;
-}
-return (1); /* end of pattern == success */
-}
-if (*bufp == NULL_CHAR)
-{
-return (0); /* end of buffer == success */
-}
-}
-return (0);
+      if (((x = xascii[(int) *pattp])) && (*bufp == x))
+      {
+        continue;
+      }
+      break;
+    }
+    if (*pattp == NULL_CHAR)
+    {
+      matchPos->rm_so = save;
+      matchPos->rm_eo = save + strlen(str);
+      if (doSave)
+      {
+         saveData = data;
+      }
+      return (1); /* end of pattern == success */
+    }
+    if (*bufp == NULL_CHAR)
+    {
+      return (0); /* end of buffer == success */
+    }
+  }
+  return (0);
 }

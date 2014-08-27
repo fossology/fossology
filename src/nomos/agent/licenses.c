@@ -899,7 +899,7 @@ static gint compare_integer(gconstpointer a, gconstpointer b)
 
 
 static void rescanOriginalTextForFoundLicences(char* textp, int isFileMarkupLanguage, int isPS){
-  if (cur.theMatches->len > 0 )
+ if (cur.theMatches->len > 0 )
   {
     if (cur.cliMode == 1 && !optionIsSet(OPTS_HIGHLIGHT_STDOUT) ) return;
     // do a fresh doctoring of the buffer
@@ -1105,9 +1105,13 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
       cur.licPara = NULL_STR; /* remember */
     }
 
-    //! careful this function changes the content of textp
-    rescanOriginalTextForFoundLicences(textp, isFileMarkupLanguage, isPS);
-    //! but as it is freed right here we do not make a copy..
+
+    if( !optionIsSet(OPTS_NO_HIGHLIGHTINFO) ) {
+      //careful this function changes the content of textp
+      rescanOriginalTextForFoundLicences(textp, isFileMarkupLanguage, isPS);
+      //but as it is freed right here we do not make a copy..
+    }
+
     munmapFile(textp);
 
     /*

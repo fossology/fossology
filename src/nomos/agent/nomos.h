@@ -90,6 +90,7 @@
 #define	OPTS_TRACE_SWITCH	0x2
 #define OPTS_LONG_CMD_OUTPUT 0x4
 #define OPTS_HIGHLIGHT_STDOUT 0x8
+#define OPTS_NO_HIGHLIGHTINFO 0x10
 
 char debugStr[myBUFSIZ];
 char dbErrString[myBUFSIZ];

@@ -38,8 +38,10 @@ int idxGrep_recordPositionDoctored(int index, char *data, int flags);
 int idxGrep_recordIndex(int index, char *data, int flags);
 int idxGrep_base(int index, char *data, int flags,  int mode);
 int strNbuf(char *data, char *str);
-
-void rememberWhatWeFound(GArray* highlight, regmatch_t *allmatches, int max_size_all_matches, int index, int mode);
+int strNbuf_noGlobals(char *data, char *str , regmatch_t* matchPos, int doSave , char* saveData);
+int matchOnce(int isPlain,char *data, char* regex, regex_t *rp, regmatch_t* regmatch );
+regmatch_t* getRegmatch_t(GArray* in,int  index);
+void rememberWhatWeFound(GArray* highlight, GArray* regmatch_tArray,  int index, int mode);
 void recordIndex(GArray* indexList, int index);
 
 #endif /* _NOMOS_REGEX_H */
