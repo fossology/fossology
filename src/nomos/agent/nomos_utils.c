@@ -714,10 +714,6 @@ FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
     for (j = 0; j < ourLicence->matchPositions->len; ++j)
     {
       MatchPositionAndType* ourMatchv = getMatchfromHighlightInfo(ourLicence->matchPositions, j);
-      if(ourLicence->licenseFileId == -1) {
-        //! the license File ID was never set and we should not insert it in the database
-        continue;
-      }
       result = fo_dbManager_ExecPrepared(
         fo_dbManager_PrepareStamement(
           gl.dbManager,
@@ -929,7 +925,6 @@ FUNCTION inline void addLicence(GArray* theMatches, char* licenceName ) {
   //! fill this later
   newMatch.matchPositions = g_array_new(FALSE, FALSE, sizeof(MatchPositionAndType));
   newMatch.licenceName = (char*) malloc(strlen(licenceName));
-  newMatch.licenseFileId = -1; //initial Value <- check if it was set
   strcpy(  newMatch.licenceName,licenceName );
   g_array_append_val(theMatches , newMatch);
 }

@@ -18,7 +18,7 @@ HDRS=nomos.h $(OBJS:.o=.h) _autodefs.h
 COVERAGE=$(OBJS:%.o=%_cov.o)
 GENOBJS_COV=$(GENOBJS:%.o=%_cov.o)
 
-CFLAGS_LOCAL= $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS) -Werror 
+CFLAGS_LOCAL= $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS) -Werror
 CFLAGS_LOCALO= $(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
 
 all: encode nomos libnomos.a
