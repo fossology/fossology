@@ -48,28 +48,6 @@ $(document).ready(function() {
       }
     } );
   } );
-  
-  /*
-  $(".priobucket").mouseup( function() {
-    var yourKey = $(this).find("input.hideUploadid").val();
-    if(myKey>0 && (yourKey != myKey)){
-      window.location.href = window.location.href+'&move='+myKey+'&beyond='+yourKey;
-    }
-    else
-    {
-      $(".priobucket").each( function(){
-        $(this).find("img").attr("src", "images/dataTable/sort_both.png");
-        // $(this).css("background-image","url(images/dataTable/sort_both.png)");
-      });
-      myKey = 0;
-    }
-  });
-  
-  $("body").mouseup( function() {
-    $(".priobucket").find("img").attr("src", "images/dataTable/sort_both.png");
-    // $(".priobucket").css("background-image","url(images/dataTable/sort_both.png)");
-    myKey = 0;
-  } );
-  */
+
   
 });

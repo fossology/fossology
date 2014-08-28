@@ -276,7 +276,7 @@ class ui_browse extends FO_Plugin {
         AND lft IS NOT NULL 
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
-        ORDER BY upload_filename,upload_desc,upload_pk,upload_origin;";
+        ORDER BY priority, upload_filename,upload_desc,upload_pk,upload_origin";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
@@ -540,6 +540,7 @@ class ui_browse extends FO_Plugin {
     );
 
     $tableSorting = array(
+      array(5,'asc'),
       array(0,"asc"),
       array(2,"desc"),
       array(1,"desc")
@@ -558,8 +559,8 @@ class ui_browse extends FO_Plugin {
       "aaData" => $tableData,
       "aoColumns" => $tableColumns,
       "aaSorting" => $tableSorting,
-      "iDisplayLength" => 50,
-    //  "oLanguage" => $tableLanguage
+      "iDisplayLength" => 50
+    //,  "oLanguage" => $tableLanguage
     );
 
     $VF   = "<script>
@@ -589,11 +590,6 @@ class ui_browse extends FO_Plugin {
 
     /* Browse-Pfile menu */
     $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
-/*
-    return array(array("File R" , "Status" , "reject" , "assiNGed" , "2002-05-20" , "priority", 1 ),
-        array("File G" , "Status" , "reject" , "assigned" , "2013-02-11" , "priorities" , 2),
-        array("File B" , "Status" , "reject" , "assigned to" , "2011-03-31" , "prioritY" , 3)    );
-*/
 
     /* Browse-Pfile menu without the compare menu item */
     $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
@@ -610,7 +606,7 @@ class ui_browse extends FO_Plugin {
         AND lft IS NOT NULL
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1)
-        ORDER BY upload_filename,upload_desc,upload_pk,upload_origin");
+        ORDER BY priority, upload_filename,upload_desc,upload_pk,upload_origin");
     $result = $dbManager->execute($stmt,array($Folder));
 
     while ($Row = pg_fetch_assoc($result)) {
