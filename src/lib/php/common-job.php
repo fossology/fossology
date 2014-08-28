@@ -66,19 +66,16 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
   /* check all required inputs */
   if (empty($user_pk) or empty($job_name) or empty($filename) or 
       empty($UploadMode) or empty($folder_pk)) return;
-/* not required with prepared
-  $job_name = pg_escape_string($job_name);
-  $filename = pg_escape_string($filename);
-  $desc = pg_escape_string($desc);
-*/
+
+  $fifo = $dbManager->getSingleRow("SELECT MIN(priority) old_prio FROM upload");
+  $prio = $fifo['old_prio']-1;  
+  
   $dbManager->getSingleRow("INSERT INTO upload
-      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm) VALUES ($1,$2,$3,$4,$5,$6)",
-      array($desc,$job_name,$user_pk,$UploadMode,$filename, $public_perm),'insert.upload');
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm, priority) VALUES ($1,$2,$3,$4,$5,$6,$7)",
+      array($desc,$job_name,$user_pk,$UploadMode,$filename, $public_perm, $prio),'insert.upload');
 
   /* get upload_pk of just added upload */
   $upload_pk = GetLastSeq("upload_upload_pk_seq", "upload");
-  $dbManager->getSingleRow("UPDATE upload SET priority=$1 WHERE upload_pk=$2",
-               array($upload_pk,$upload_pk),'update.upload');
   /* Mode == 2 means child_id is upload_pk */
   $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
                array($folder_pk,2,$upload_pk),'insert.foldercontents');

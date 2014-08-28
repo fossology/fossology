@@ -540,7 +540,7 @@ class ui_browse extends FO_Plugin {
     );
 
     $tableSorting = array(
-      array(5,'asc'),
+      array(5,'desc'),
       array(0,"asc"),
       array(2,"desc"),
       array(1,"desc")
@@ -688,7 +688,7 @@ class ui_browse extends FO_Plugin {
     }
     if (false !== $farPoint)
     {
-      $newPriority = 1.5 * $farPoint['priority'] - 0.5 * $beyondPoint['priority'];
+      $newPriority = ($farPoint['priority'] + $beyondPoint['priority'] )/2;
     }
     else if ($movePoint['priority'] > $beyondPoint['priority'])
     {

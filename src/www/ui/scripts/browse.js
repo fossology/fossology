@@ -19,9 +19,10 @@ jQuery.fn.dataTableExt.oSort["hiddenmagic-desc"] = function ( a, b ) {
   return jQuery.fn.dataTableExt.oSort["hiddenmagic-asc"](b,a);
 };
 
+var myKey = 0;
+var myVal = 0;
 $(document).ready(function() {
   createBrowseTable();
-  var myKey = 0;
   $(".priobucket").click( function() {
     yourKey = $(this).find("input.hideUploadid").val();
     if (yourKey==myKey){
@@ -36,18 +37,16 @@ $(document).ready(function() {
       return;
     }
     myKey = $(this).find("input.hideUploadid").val();
-    var myVal = $(this).find("input.hidePriority").val();
+    myVal = $(this).find("input.hidePriority").val();
     $(".priobucket").each( function(){
       var yourVal = $(this).find("input.hidePriority").val();
-      if (myVal>yourVal){
+      if (myVal<yourVal){
         $(this).find("img").attr("src", "images/dataTable/sort_asc.png");
-        //$(this).css("background-image","url(images/dataTable/sort_asc.png)");
       }
-      else if(myVal<yourVal){
+      else if(myVal>yourVal){
         $(this).find("img").attr("src", "images/dataTable/sort_desc.png");
       }
     } );
   } );
-
   
 });
