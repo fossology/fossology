@@ -675,24 +675,38 @@ FUNCTION char convertIndexToHighlightType(int index)
  * \callgraph
  */
 FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
-  PGresult *result;
 
   /* If files are coming from command line instead of fossology repo,
    then there are no pfiles.  So don't update the db
+
+   Also if we specifically do not want highlight information in the
+   database skip this function
    */
-  if (cur.cliMode == 1) return (TRUE);
+  if(cur.cliMode == 1 || optionIsSet(OPTS_NO_HIGHLIGHTINFO ) ){
+    return (TRUE);
+  }
+  PGresult *result;
+
+
+
 
 #ifdef GLOBAL_DEBUG
   printf("%s %s %i \n", cur.filePath,cur.compLic , cur.theMatches->len);
 #endif
 
-  fo_dbManager_PreparedStatement* preparedKeywords = fo_dbManager_PrepareStamement(
-    gl.dbManager,
-    "updateLicenseHighlighting:keyword",
-    "INSERT INTO highlight_keyword (pfile_fk, start, len) VALUES($1, $2, $3)",
-    long, int, int
-  );
+  // This speeds up the writing to the database and ensures that we have either full highlight information or none
+  PGresult* begin1 = PQexec(gl.pgConn, "BEGIN");
+  PQclear(begin1);
 
+  fo_dbManager_PreparedStatement* preparedKeywords;
+  if(cur.keywordPositions->len > 0 ) {
+    preparedKeywords = fo_dbManager_PrepareStamement(
+      gl.dbManager,
+      "updateLicenseHighlighting:keyword",
+      "INSERT INTO highlight_keyword (pfile_fk, start, len) VALUES($1, $2, $3)",
+      long, int, int
+    );
+  }
   int i;
   for (i = 0; i < cur.keywordPositions->len; ++i)
   {
@@ -705,6 +719,21 @@ FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
       PQclear(result);
     }
   }
+  PGresult* commit1 = PQexec(gl.pgConn, "COMMIT");
+  PQclear(commit1);
+
+  PGresult* begin2 =PQexec(gl.pgConn, "BEGIN");
+  PQclear(begin2);
+  fo_dbManager_PreparedStatement* preparedLicenses;
+
+  if(cur.theMatches->len > 0 ) {
+    preparedLicenses=fo_dbManager_PrepareStamement(
+       gl.dbManager,
+       "updateLicenseHighlighting",
+       "INSERT INTO highlight (fl_fk, start, len, type) VALUES($1, $2, $3,'L')",
+       long, int, int
+     );
+  }
 
   for (i = 0; i < cur.theMatches->len; ++i)
   {
@@ -714,13 +743,12 @@ FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
     for (j = 0; j < ourLicence->matchPositions->len; ++j)
     {
       MatchPositionAndType* ourMatchv = getMatchfromHighlightInfo(ourLicence->matchPositions, j);
+      if(ourLicence->licenseFileId == -1) {
+        //! the license File ID was never set and we should not insert it in the database
+        continue;
+      }
       result = fo_dbManager_ExecPrepared(
-        fo_dbManager_PrepareStamement(
-          gl.dbManager,
-          "updateLicenseHighlighting",
-          "INSERT INTO highlight (fl_fk, start, len, type) VALUES($1, $2, $3,'L')",
-          long, int, int
-        ),
+                  preparedLicenses,
         ourLicence->licenseFileId,
         ourMatchv->start, ourMatchv->end - ourMatchv->start
       );
@@ -732,6 +760,9 @@ FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
       }
     }
   }
+
+  PGresult* commit2 = PQexec(gl.pgConn, "COMMIT");
+  PQclear(commit2);
   return (TRUE);
 } /* updateLicenseHighlighting */
 
@@ -925,6 +956,7 @@ FUNCTION inline void addLicence(GArray* theMatches, char* licenceName ) {
   //! fill this later
   newMatch.matchPositions = g_array_new(FALSE, FALSE, sizeof(MatchPositionAndType));
   newMatch.licenceName = (char*) malloc(strlen(licenceName));
+  newMatch.licenseFileId = -1; //initial Value <- check if it was set
   strcpy(  newMatch.licenceName,licenceName );
   g_array_append_val(theMatches , newMatch);
 }

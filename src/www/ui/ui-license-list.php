@@ -192,8 +192,6 @@ class ui_license_list extends FO_Plugin {
       echo _("NO DB connection");
     }
 
-    print "in license-list\n";
-
     if ($this->State != PLUGIN_STATE_READY)
       return (0);
     $V = "";

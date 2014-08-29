@@ -163,18 +163,8 @@ if ($UpdateLiceneseRef)
 {
   $row = $dbManager->getSingleRow("SELECT count(*) FROM license_ref",array(),'license_ref.count');
   if ($row['count'] >  0) {
-    $command = "$MODDIR/nomos/agent/nomos -V";
-    $version = system($command, $return_var);
-    $pattern = '/r\((\w+)\)/';
-    preg_match($pattern, $version, $matches);
-
-    $version230 = 6922;
-
-    /** when the version is less than or equal to svn 6922, when we switch to git, always greater than 6932, call Update reference licenses process */
-    if (empty($matches[1]) || 5 > strlen($matches[1]) && $matches[1] <= $version230) {
-      print "Update reference licenses\n";
-      initLicenseRefTable(false);
-    }
+    print "Update reference licenses\n";
+    initLicenseRefTable(false);
   }
   else if ($row['count'] ==  0) {
     /** import licenseref.sql */
@@ -281,24 +271,20 @@ function initLicenseRefTable($Verbose)
   
   $dbManager->queryOnce("BEGIN");
   $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2",$stmt=__METHOD__.'.dropAncientBackUp');
-  $dbManager->queryOnce("CREATE TABLE license_ref_2 as select * from license_ref",$stmt=__METHOD__.'.backUpData');
-  $dbManager->queryOnce("TRUNCATE license_ref",$stmt=__METHOD__.'.deleteOldData');
+  /* create a new temp table structure only - license_ref_2 */
+  $dbManager->queryOnce("CREATE TABLE license_ref_2 as select * from license_ref WHERE 1=2",$stmt=__METHOD__.'.backUpData');
 
   /** import licenseref.sql */  
   $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
-  $dbManager->queryOnce($sqlstmts,$stmt=__METHOD__."$LIBEXECDIR/licenseref.sql");
+  $sqlstmts = str_replace("license_ref","license_ref_2", $sqlstmts);
+  $dbManager->queryOnce($sqlstmts);
   
-  $row_max = $dbManager->getSingleRow("SELECT max(rf_pk) from license_ref",array(),'license_ref.max.rf_pk');
-  $current_license_ref_rf_pk_seq = $row_max['max'];
-  $dbManager->getSingleRow("SELECT setval('license_ref_rf_pk_seq', $current_license_ref_rf_pk_seq)",array(),
-            'set next license_ref_rf_pk_seq value');
-
-  $dbManager->prepare(__METHOD__.".allBackUp", "select * from license_ref_2");
-  $result_old = $dbManager->execute(__METHOD__.".allBackUp");
+  $dbManager->prepare(__METHOD__.".newLic", "select * from license_ref_2");
+  $result_new = $dbManager->execute(__METHOD__.".newLic");
   
   $dbManager->prepare(__METHOD__.'.licenseRefByShortname','SELECT * from license_ref where rf_shortname=$1');
   /** traverse all records in user's license_ref table, update or insert */
-  while ($row = pg_fetch_assoc($result_old))
+  while ($row = pg_fetch_assoc($result_new))
   {
     $rf_shortname = $row['rf_shortname'];
     $escaped_name = pg_escape_string($rf_shortname);
@@ -341,26 +327,19 @@ function initLicenseRefTable($Verbose)
       if ($sql != "UPDATE license_ref set") // check if have something to update
       {
         $sql .= " where rf_shortname = '$escaped_name'";
-        $dbManager->getSingleRow($sql);
+        $dbManager->queryOnce($sql);
       }
     }
     else  // insert when it is new
     {
       pg_free_result($result_check);
       $sql = "INSERT INTO license_ref (rf_shortname, rf_text, rf_url, rf_fullname, rf_notes, rf_active, rf_text_updatable, rf_detector_type, marydone)"
-              . "VALUES ('$escaped_name', '$rf_text', '$rf_url', '$rf_fullname', '$rf_notes', '$row[rf_active]', '$row[rf_text_updatable]', '$row[rf_detector_type]', '$row[marydone]');";
-      $dbManager->getSingleRow($sql);
+              . "VALUES ('$escaped_name', '$rf_text', '$rf_url', '$rf_fullname', '$rf_notes', '$rf_active', '$rf_text_updatable', '$rf_detector_type', '$marydone');";
+      $dbManager->queryOnce($sql);
     }
   }
-  pg_free_result($result_old);
+  pg_free_result($result_new);
 
-  /* Update license_file and license_file_audit substituting the new rf_pk  for the old rf_fk */
-  $sql = "update license_file set rf_fk = license_ref.rf_pk from license_ref,license_ref_2"
-          . " where license_ref.rf_shortname = license_ref_2.rf_shortname and rf_fk = license_ref_2.rf_pk;";
-  $dbManager->getSingleRow($sql);
-  $sql = "update license_file_audit set rf_fk = license_ref.rf_pk from license_ref,license_ref_2"
-          . " where license_ref.rf_shortname = license_ref_2.rf_shortname and rf_fk = license_ref_2.rf_pk;";
-  $dbManager->getSingleRow($sql);
   $dbManager->queryOnce("DROP TABLE license_ref_2");
   $dbManager->queryOnce("COMMIT");
 

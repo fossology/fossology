@@ -337,7 +337,7 @@ int main(int argc, char **argv)
   }
 
   /* Process command line options */
-  while ((c = getopt(argc, argv, "VSvhilc:d:n:")) != -1)
+  while ((c = getopt(argc, argv, "VSNvhilc:d:n:")) != -1)
   {
     switch (c) {
       case 'c': break; /* handled by fo_scheduler_connect() */
@@ -352,6 +352,9 @@ int main(int argc, char **argv)
         Verbose++; break;
     case 'S':
       gl.progOpts |= OPTS_HIGHLIGHT_STDOUT;
+      break;
+    case 'N':
+      gl.progOpts |= OPTS_NO_HIGHLIGHTINFO;
       break;
       case 'V':
         printf("%s", BuildVersion);
@@ -377,6 +380,7 @@ int main(int argc, char **argv)
         Bail(-__LINE__);
     }
   }
+
 
   /* Copy filename args (if any) into array */
   for (i = optind; i < argc; i++)
