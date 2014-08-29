@@ -535,8 +535,7 @@ class ui_browse extends FO_Plugin {
       array("sTitle" => _("Reject-job"), "sClass"=>"center", "bSortable"=>false ),
       array("sTitle" => _("Assigned to"), "sClass"=>"center" ),
       array("sTitle" => _("Upload Date"), "sClass"=>"center", "sType"=>"string"),
-      array("sTitle" => _("Priority"), "sClass"=>"center", "bSearchable"=>false, "iDataSort"=>6),
-      array("sTitle" => 'PrioIndex', 'bVisible'=>FALSE)
+      array("sTitle" => _("Priority"), "sClass"=>"center priobucket", "bSearchable"=>false, "mRender"=>'xyyzzz')
     );
 
     $tableSorting = array(
@@ -554,18 +553,22 @@ class ui_browse extends FO_Plugin {
 //      "sInfoPostFix" => $AddInfoText,
 //      "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
 //    );
-
+    
     $dataTableConfig = array(
       "aaData" => $tableData,
       "aoColumns" => $tableColumns,
       "aaSorting" => $tableSorting,
       "iDisplayLength" => 50
+       , "bStateSave"=>true
     //,  "oLanguage" => $tableLanguage
     );
 
+    
+    $xyyzzz = ' function ( source, type, val ) { return prioColumn( source, type, val ); }';
+    
     $VF   = "<script>
               function createBrowseTable() {
-                    dTable=$('#browsetbl').dataTable(" . json_encode($dataTableConfig) .");
+                    dTable=$('#browsetbl').dataTable(" . str_replace('"xyyzzz"',$xyyzzz, json_encode($dataTableConfig) ).");
                 }
             </script>";
 
@@ -576,8 +579,8 @@ class ui_browse extends FO_Plugin {
     private function createJavaScriptBlock()
   {
     $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
-//    $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
+//    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
+    $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/browse.js\" type=\"text/javascript\"></script>\n";
     return $output;
   }
@@ -657,16 +660,13 @@ class ui_browse extends FO_Plugin {
       $dateCol="";
       if (plugin_find_id('showjobs') >= 0) {
         $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>$text</a>]";
-        $dateCol .= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
+        // $dateCol .= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
+        $dateCol = substr($Row['upload_ts'], 0, 19);
       }
-      $prio = floatval($Row['priority']);
-      $magicPrio = "<input type=\"hidden\" class=\"hidePriority\" value=\"$prio\"/>";
-      $magicUpload = "<input type=\"hidden\" class=\"hideUploadid\" value=\"$Row[upload_pk]\"/>";
-      $magicImg = '<img alt="move" src="images/dataTable/sort_both.png"/>';
-      $magicFull = "<span class=\"priobucket\">$magicPrio$magicUpload$magicImg</span>";
-      $output[]= array($nameColumn , "Status" , "reject" , "assinged" , $dateCol , $magicFull, $prio );
+      // $pairIdPrio = array('id'=>intval($Row['upload_pk']), 'prio'=> floatval($Row['priority']));
+      $pairIdPrio = array(intval($Row['upload_pk']), floatval($Row['priority']));
+      $output[]= array($Name , "Status" , "reject" , "assinged" , $dateCol , $pairIdPrio );
     }
-
   return $output;
   }
 
