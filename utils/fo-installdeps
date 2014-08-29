@@ -24,7 +24,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o rbehy --long runtime,buildtime,everything,help -n 'fo-installdeps' -- "$@"`
+OPTS=`getopt -o rbeohy --long runtime,buildtime,everything,offline,help -n 'fo-installdeps' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -42,11 +42,16 @@ fi
 # it without being careful can destroy your system.
 #
 YesOpt=
+
+#Default should be installation with internet connection
+OFFLINE=0
+
 while true; do
    case "$1" in
       -r|--runtime) RUNTIME=1; shift;;
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
+      -o|--offline) OFFLINE=1; shift;;
       -y) 
          YesOpt=" -y "; shift;;
       -h|--help)
@@ -54,6 +59,7 @@ while true; do
 	 echo "  -r or --runtime    : install runtime dependencies"
 	 echo "  -b or --buildtime  : install buildtime dependencies"
 	 echo "  -e or --everything : install all dependencies (default)"
+	 echo "  -o or --offline : do not run composer installation"
 	 echo "  -y                 : Automatic yes to prompts"
 	 echo "  -h or --help       : this help text"
 	 exit;;
@@ -243,10 +249,19 @@ if [ $RUNTIME ]; then
    esac
    
    which composer
-    if [ $? -eq 0 ]; then
-      composer selfupdate
+    if [ $? -eq 0  ]; then
+        if [ $OFFLINE -eq 0 ]; then
+            composer selfupdate
+        else
+           echo "WARNING: composer is not updated due to the offline switch"
+        fi
     else
-      curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
+        if [ $OFFLINE -eq 0 ]; then
+            curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
+        else
+            echo "WARNING: composer is not installed, and the installer does not install it due to the offline switch"
+            echo "Please run the equivalent of 'curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer'"
+        fi
     fi
 fi
 
