@@ -368,7 +368,6 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   LOG_VERBOSE0("CMD: %s", CMD);
   rc = system(CMD); 
 
-  LOG_FATAL("GlobalType is:%s\n", GlobalType);
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
   {
     LOG_FATAL("upload %ld Download failed; Return code %d from: %s",GlobalUploadKey,WEXITSTATUS(rc),CMD);
