@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "match.h"
 #include "monk.h"
 
-int parseBulkArguments(int argc, char** argv, BulkArguments* bulkArguments) {
+int parseBulkArguments(int argc, char** argv, MonkState* state) {
   if (argc < 1)
     return 0;
   /* TODO use normal cli arguments instead of this indian string
@@ -53,6 +53,8 @@ int parseBulkArguments(int argc, char** argv, BulkArguments* bulkArguments) {
     ((strcmp(tempargs[0], "B") == 0) || (strcmp(tempargs[0], "N") == 0)) &&
     (index >= 6))
   {
+    BulkArguments* bulkArguments = malloc(sizeof(BulkArguments));
+
     bulkArguments->sign = tempargs[0][0] == 'N' ? 1 : -1;
     bulkArguments->uploadId = atol(tempargs[1]);
     //not using targs[2] (uploadTreeId)
@@ -61,6 +63,8 @@ int parseBulkArguments(int argc, char** argv, BulkArguments* bulkArguments) {
     bulkArguments->refText = g_strdup(tempargs[5]);
     bulkArguments->groupId = atoi(tempargs[6]);
     bulkArguments->fullLicenseName = index > 7 ? g_strdup(tempargs[7]) : NULL;
+
+    state->bulkArguments = bulkArguments;
 
     result = 1;
   }
@@ -74,6 +78,8 @@ void bulkArguments_contents_free(BulkArguments* bulkArguments) {
     g_free(bulkArguments->fullLicenseName);
   g_free(bulkArguments->licenseName);
   g_free(bulkArguments->refText);
+
+  free(bulkArguments);
 }
 
 long insertNewBulkLicense(fo_dbManager* dbManager, const char* shortName, const char* fullName, const char* refText,
@@ -96,7 +102,9 @@ long insertNewBulkLicense(fo_dbManager* dbManager, const char* shortName, const 
   return 1;
 }
 
-void bulk_identification(MonkState* state, BulkArguments* bulkArguments) {
+void bulk_identification(MonkState* state) {
+  BulkArguments* bulkArguments = state->bulkArguments;
+
   if (bulkArguments->sign == -1)
     state->scanMode = MODE_BULK_NEGATIVE;
 
@@ -135,11 +143,13 @@ void bulk_identification(MonkState* state, BulkArguments* bulkArguments) {
   }
 }
 
-int handleBulkMode(MonkState* state, BulkArguments* bulkArguments) {
+int handleBulkMode(MonkState* state) {
+  BulkArguments* bulkArguments = state->bulkArguments;
+
   int arsId = fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
                           0, bulkArguments->uploadId, state->agentId, AGENT_ARS, NULL, 0);
 
-  bulk_identification(state, bulkArguments);
+  bulk_identification(state);
 
   fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
               arsId, bulkArguments->uploadId, state->agentId, AGENT_ARS, NULL, 1);
@@ -157,23 +167,28 @@ void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchI
   printf("sign: %d\n", sign);
 #endif
 
-  /* TODO write correct query and remove if */
-  if (0) {
+  /* TODO write correct query after changing the db format */
   PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "saveBulkResult",
-      "INSERT INTO bulk_results(fileid, licid, start, length, sign) VALUES($1,$2,$3,$4,$5)",
-      long, long, size_t, size_t, int
+      "WITH clearingId AS ("
+      " INSERT INTO clearing_decision(uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk)"
+      " SELECT uploadtree_pk, $1, $2, 1, 2 FROM uploadtree WHERE upload_fk = $3 AND pfile_fk = $1" // TODO change 2 and 2 to correct type and scope
+      " RETURNING clearing_pk "
+      ")"
+      "INSERT INTO clearing_licenses(clearing_fk, rf_fk) "
+      "SELECT clearing_pk,$4 FROM clearingId",
+      long, long, long, long
     ),
     file->id,
-    license->refId,
-    matchInfo->text.start, matchInfo->text.length,
-    sign
+    state->bulkArguments->userId,
+    state->bulkArguments->uploadId,
+    license->refId
   );
+  //TODO we also want to save sign and highlights
 
   /* ignore errors */
   if (insertResult)
     PQclear(insertResult);
-  }
 }

@@ -56,11 +56,10 @@ int handleArguments(MonkState* state, int argc, char** argv) {
     return 0;
 
   int result;
-  BulkArguments bulkArguments;
-  if (parseBulkArguments(argc, argv, &bulkArguments)) {
+  if (parseBulkArguments(argc, argv, state)) {
     state->scanMode = MODE_BULK;
-    result = handleBulkMode(state, &bulkArguments);
-    bulkArguments_contents_free(&bulkArguments);
+    result = handleBulkMode(state);
+    bulkArguments_contents_free(state->bulkArguments);
   } else {
     state->scanMode = MODE_CLI;
     result = handleCliMode(state, argc, argv, fileOptInd);

@@ -40,10 +40,21 @@ You should have received a copy of the GNU General Public License along with thi
 #endif
 
 typedef struct {
+  long uploadId;
+  int sign;
+  int userId;
+  int groupId;
+  char* licenseName;
+  char* fullLicenseName;
+  char* refText;
+} BulkArguments;
+
+typedef struct {
     fo_dbManager* dbManager;
     int agentId;
     int scanMode;
     int verbosity;
+    BulkArguments* bulkArguments;
 } MonkState;
 
 typedef struct {
