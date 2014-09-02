@@ -77,43 +77,8 @@ void bulkArguments_contents_free(BulkArguments* bulkArguments) {
   free(bulkArguments);
 }
 
-/*
- * TODO save refText in the database?
-long insertNewBulkLicense(fo_dbManager* dbManager, const char* shortName, const char* fullName, const char* refText,
-                          long uploadId, int userId, int groupId) {
-  const char* fullNameNotNull =
-    fullName == NULL
-    ? shortName
-    : fullName;
-
-  //TODO build unique shortname and insert it
-  if (0) {
-    fo_dbManager_Exec_printf(dbManager,
-      "INSERT",
-      shortName, fullName, refText
-    );
-  } else {
-    printf("adding bulk license to db: sn='%s', fn='%s', txt='%s', uid=%d, gid=%d, upl=%ld\n", shortName, fullNameNotNull, refText, userId, groupId, uploadId);
-  }
-
-  return 1;
-}
-*/
-
 void bulk_identification(MonkState* state) {
   BulkArguments* bulkArguments = state->bulkArguments;
-
-  /*  long licenseId = insertNewBulkLicense(state->dbManager,
-   *                                        bulkArguments->licenseName,
-   *                                        bulkArguments->fullLicenseName,
-   *                                        bulkArguments->refText,
-   *                                        bulkArguments->uploadId,
-   *                                        bulkArguments->userId,
-   *                                        bulkArguments->groupId);
-   */
-
-  bulkArguments->uploadId = queryUploadIdFromTreeId(state->dbManager,
-                                                    bulkArguments->uploadTreeId);
 
   License license = (License){
     .refId = bulkArguments->licenseId,
@@ -144,6 +109,9 @@ void bulk_identification(MonkState* state) {
 int handleBulkMode(MonkState* state) {
   BulkArguments* bulkArguments = state->bulkArguments;
 
+  bulkArguments->uploadId = queryUploadIdFromTreeId(state->dbManager,
+                                                    bulkArguments->uploadTreeId);
+
   int arsId = fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
                           0, bulkArguments->uploadId, state->agentId, AGENT_ARS, NULL, 0);
 
@@ -158,8 +126,7 @@ int handleBulkMode(MonkState* state) {
 void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
   int removed = state->bulkArguments->removing ? 1 : 0;
 
-// TODO remove debug
-#define DEBUG_BULK
+//#define DEBUG_BULK
 #ifdef DEBUG_BULK
   printf("found bulk match: fileId=%ld, licId=%ld, ", file->id, license->refId);
   printf("start: %zu, length: %zu, ", matchInfo->text.start, matchInfo->text.length);
@@ -167,7 +134,7 @@ void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchI
 #endif
 
   /* TODO write correct query after changing the db format */
-  //TODO we also want to save sign and highlights
+  //TODO we also want to save highlights
 
   /* we add a clearing decision for each uploadtree_fk corresponding to this pfile_fk
    * For each bulk scan scan we only have a n the other hand we have only one license per clearing decision
