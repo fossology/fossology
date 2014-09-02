@@ -20,16 +20,19 @@ use Fossology\Lib\Db\DbManager;
 define("TITLE_ui_browse", _("Browse"));
 
 class ui_browse extends FO_Plugin {
-  var $Name = "browse";
-  var $Title = TITLE_ui_browse;
-  var $Version = "1.0";
-  var $MenuList = "Browse";
-  var $MenuOrder = 80; // just to right of Home(100)
-  var $MenuTarget = "";
-  var $Dependency = array();
-  public $DBaccess = PLUGIN_DB_READ;
-  public $LoginFlag = 0;
 
+  function __construct()
+  {
+    $this->Name = "browse";
+    $this->Title = TITLE_ui_browse;
+    $this->MenuList = "Browse";
+    $this->MenuOrder = 80; // just to right of Home(100)
+    $this->MenuTarget = "";
+    $this->DBaccess = PLUGIN_DB_READ;
+    $this->LoginFlag = 0;
+
+    parent::__construct();
+  }
 
   /**
    * \brief Create and configure database tables
@@ -264,7 +267,6 @@ class ui_browse extends FO_Plugin {
    */
   function ShowFolder2($Folder, $Show)
   {
-    global $Plugins;
     global $PG_CONN;
 
     $V = "";
@@ -372,7 +374,7 @@ class ui_browse extends FO_Plugin {
     $V.= "</table>\n";
     $V.= "</td></tr>\n";
     $V.= "</table>\n";
-    return ($V);
+    return $V;
   } /* ShowFolder() */
 
 
@@ -383,7 +385,10 @@ class ui_browse extends FO_Plugin {
   {
     global $PG_CONN;
 
-    if ($this->State != PLUGIN_STATE_READY)  return (0);
+    if ($this->State != PLUGIN_STATE_READY)
+    {
+      return 0;
+    }
 
     $V = "";
     $folder_pk = GetParm("folder", PARM_INTEGER);
@@ -663,7 +668,6 @@ class ui_browse extends FO_Plugin {
         // $dateCol .= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
         $dateCol = substr($Row['upload_ts'], 0, 19);
       }
-      // $pairIdPrio = array('id'=>intval($Row['upload_pk']), 'prio'=> floatval($Row['priority']));
       $pairIdPrio = array(intval($Row['upload_pk']), floatval($Row['priority']));
       $output[]= array($Name , "Status" , "reject" , "assinged" , $dateCol , $pairIdPrio );
     }
@@ -701,5 +705,5 @@ class ui_browse extends FO_Plugin {
     $dbManager->getSingleRow('UPDATE upload SET priority=$1 WHERE upload_pk=$2',array($newPriority,$moveUpload),'update.priority');
   }
 }
-$NewPlugin = new ui_browse;
+$NewPlugin = new ui_browse();
 $NewPlugin->Install();
