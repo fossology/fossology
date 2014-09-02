@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include <libfossology.h>
 #include "highlight.h"
 
+int queryUploadIdFromTreeId(fo_dbManager* dbManager, long uploadTreeId);
 PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId);
 char* queryPFileForFileId(fo_dbManager* dbManager, long int fileId);
 PGresult* queryAllLicenses(fo_dbManager* dbManager);

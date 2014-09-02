@@ -56,13 +56,11 @@ int parseBulkArguments(int argc, char** argv, MonkState* state) {
     BulkArguments* bulkArguments = malloc(sizeof(BulkArguments));
 
     bulkArguments->removing = (tempargs[0][0] == 'N');
-    bulkArguments->uploadId = atol(tempargs[1]);
-    //not using targs[2] (uploadTreeId)
-    bulkArguments->licenseName = g_strdup(tempargs[3]);
-    bulkArguments->userId = atoi(tempargs[4]);
+    bulkArguments->userId = atoi(tempargs[1]);
+    bulkArguments->groupId = atoi(tempargs[2]);
+    bulkArguments->uploadTreeId = atol(tempargs[3]);
+    bulkArguments->licenseId = atol(tempargs[4]);
     bulkArguments->refText = g_strdup(tempargs[5]);
-    bulkArguments->groupId = atoi(tempargs[6]);
-    bulkArguments->fullLicenseName = index > 7 ? g_strdup(tempargs[7]) : NULL;
 
     state->bulkArguments = bulkArguments;
 
@@ -74,14 +72,13 @@ int parseBulkArguments(int argc, char** argv, MonkState* state) {
 }
 
 void bulkArguments_contents_free(BulkArguments* bulkArguments) {
-  if (bulkArguments->fullLicenseName)
-    g_free(bulkArguments->fullLicenseName);
-  g_free(bulkArguments->licenseName);
   g_free(bulkArguments->refText);
 
   free(bulkArguments);
 }
 
+/*
+ * TODO save refText in the database?
 long insertNewBulkLicense(fo_dbManager* dbManager, const char* shortName, const char* fullName, const char* refText,
                           long uploadId, int userId, int groupId) {
   const char* fullNameNotNull =
@@ -101,43 +98,47 @@ long insertNewBulkLicense(fo_dbManager* dbManager, const char* shortName, const 
 
   return 1;
 }
+*/
 
 void bulk_identification(MonkState* state) {
   BulkArguments* bulkArguments = state->bulkArguments;
 
-  long licenseId = insertNewBulkLicense(state->dbManager,
-                                        bulkArguments->licenseName,
-                                        bulkArguments->fullLicenseName,
-                                        bulkArguments->refText,
-                                        bulkArguments->uploadId,
-                                        bulkArguments->userId,
-                                        bulkArguments->groupId);
+  /*  long licenseId = insertNewBulkLicense(state->dbManager,
+   *                                        bulkArguments->licenseName,
+   *                                        bulkArguments->fullLicenseName,
+   *                                        bulkArguments->refText,
+   *                                        bulkArguments->uploadId,
+   *                                        bulkArguments->userId,
+   *                                        bulkArguments->groupId);
+   */
 
-  if (licenseId > 0) {
-    License license = (License){
-      .refId = licenseId,
-      .shortname = bulkArguments->licenseName,
-    };
-    license.tokens = tokenize(bulkArguments->refText, DELIMITERS);
+  bulkArguments->uploadId = queryUploadIdFromTreeId(state->dbManager,
+                                                    bulkArguments->uploadTreeId);
 
-    GArray* licenses = g_array_new(TRUE, FALSE, sizeof (License));
-    g_array_append_val(licenses, license);
+  License license = (License){
+    .refId = bulkArguments->licenseId,
+    .shortname = "unused" // we could query it, but we do not need it
+  };
+  license.tokens = tokenize(bulkArguments->refText, DELIMITERS);
 
-    PGresult* filesResult = queryFileIdsForUpload(state->dbManager, bulkArguments->uploadId);
+  GArray* licenses = g_array_new(TRUE, FALSE, sizeof (License));
+  g_array_append_val(licenses, license);
 
-    if (filesResult != NULL) {
-      for (int i = 0; i<PQntuples(filesResult); i++) {
-        long fileId = atol(PQgetvalue(filesResult, i, 0));
+  PGresult* filesResult = queryFileIdsForUpload(state->dbManager,
+                                                bulkArguments->uploadId);
 
-        // this will call onFullMatch_Bulk if it finds matches
-        matchPFileWithLicenses(state, fileId, licenses);
-        fo_scheduler_heart(1);
-      }
-      PQclear(filesResult);
+  if (filesResult != NULL) {
+    for (int i = 0; i<PQntuples(filesResult); i++) {
+      long fileId = atol(PQgetvalue(filesResult, i, 0));
+
+      // this will call onFullMatch_Bulk if it finds matches
+      matchPFileWithLicenses(state, fileId, licenses);
+      fo_scheduler_heart(1);
     }
-
-    freeLicenseArray(licenses);
+    PQclear(filesResult);
   }
+
+  freeLicenseArray(licenses);
 }
 
 int handleBulkMode(MonkState* state) {

@@ -264,6 +264,7 @@ class change_license extends FO_Plugin
     $output .= "</td>";
     $output .= "</tr>";
     $output .= "<tr><td>&nbsp;</td></tr></table>";
+    $output .= "<button  type=\"button\" autofocus  onclick='scheduleBulkScan()'>Run Bulk scan</button>";
     $output .= "<input name=\"licenseNumbersToBeSubmitted\" id=\"licenseNumbersToBeSubmitted\" type=\"hidden\" value=\"\" />\n";
     $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
 

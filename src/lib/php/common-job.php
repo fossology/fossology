@@ -193,6 +193,7 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
 {
   global $PG_CONN;
   $jq_args = pg_escape_string($jq_args);
+  $jq_cmd_args = pg_escape_string($jq_cmd_args);
 
   /* Make sure all dependencies exist */
   if (is_array($Depends)) 

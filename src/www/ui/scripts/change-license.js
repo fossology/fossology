@@ -123,3 +123,19 @@ function performNoLicensePostRequest() {
     selectNoLicenseFound(licenseLeft, licenseRight);
     performPostRequest();
 }
+
+function scheduleBulkScan() {
+    var data = {
+        "mode": "B",
+        "refText": "copyright",
+        "licenseId": "200",
+        "uploadTreeId": $('#uploadTreeId').val()
+    };
+
+    $.ajax({
+        type: "POST",
+        url: "?mod=change-license-bulk",
+        data: data
+    });
+
+}
