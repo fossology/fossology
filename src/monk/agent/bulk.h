@@ -18,7 +18,7 @@ typedef struct {
   long uploadId;
   int sign;
   int userId;
-  char* groupId; //TODO change to int to use id instead of name
+  int groupId;
   char* licenseName;
   char* fullLicenseName;
   char* refText;

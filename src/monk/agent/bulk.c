@@ -53,13 +53,13 @@ int parseBulkArguments(int argc, char** argv, BulkArguments* bulkArguments) {
     ((strcmp(tempargs[0], "B") == 0) || (strcmp(tempargs[0], "N") == 0)) &&
     (index >= 6))
   {
-    bulkArguments->sign = tempargs[0][0] == 'N' ? -1 : 1;
+    bulkArguments->sign = tempargs[0][0] == 'N' ? 1 : -1;
     bulkArguments->uploadId = atol(tempargs[1]);
     //not using targs[2] (uploadTreeId)
     bulkArguments->licenseName = g_strdup(tempargs[3]);
     bulkArguments->userId = atoi(tempargs[4]);
     bulkArguments->refText = g_strdup(tempargs[5]);
-    bulkArguments->groupId = g_strdup(tempargs[6]); //TODO change this dup to an atoi
+    bulkArguments->groupId = atoi(tempargs[6]);
     bulkArguments->fullLicenseName = index > 7 ? g_strdup(tempargs[7]) : NULL;
 
     result = 1;
@@ -73,12 +73,11 @@ void bulkArguments_contents_free(BulkArguments* bulkArguments) {
   if (bulkArguments->fullLicenseName)
     g_free(bulkArguments->fullLicenseName);
   g_free(bulkArguments->licenseName);
-  g_free(bulkArguments->groupId);
   g_free(bulkArguments->refText);
 }
 
 long insertNewBulkLicense(fo_dbManager* dbManager, const char* shortName, const char* fullName, const char* refText,
-                          long uploadId, int userId, const char* group) {
+                          long uploadId, int userId, int groupId) {
   const char* fullNameNotNull =
     fullName == NULL
     ? shortName
@@ -91,7 +90,7 @@ long insertNewBulkLicense(fo_dbManager* dbManager, const char* shortName, const 
       shortName, fullName, refText
     );
   } else {
-    printf("adding bulk license to db: sn='%s', fn='%s', txt='%s', uid=%d, gr='%s', upl=%ld\n", shortName, fullNameNotNull, refText, userId, group, uploadId);
+    printf("adding bulk license to db: sn='%s', fn='%s', txt='%s', uid=%d, gid=%d, upl=%ld\n", shortName, fullNameNotNull, refText, userId, groupId, uploadId);
   }
 
   return 1;
