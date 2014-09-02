@@ -180,9 +180,11 @@ void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchI
       "saveBulkResult",
       "WITH clearingIds AS ("
       " INSERT INTO clearing_decision(uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk)"
-      "  SELECT uploadtree_pk, $1, $2, 1, 2" // TODO change 1 and 2 to correct type and scope
-      "  FROM uploadtree"
-      "  WHERE upload_fk = $3 AND pfile_fk = $1"
+      "  SELECT uploadtree_pk, $1, $2, type_pk, scope_pk"
+      "  FROM uploadtree, clearing_decision_types, clearing_decision_scopes"
+      "  WHERE upload_fk = $3 AND pfile_fk = $1 "
+      "  AND clearing_decision_types.meaning = '" BULK_DECISION_TYPE "'"
+      "  AND clearing_decision_scopes.meaning = '" BULK_DECISION_SCOPE "'"
       " RETURNING clearing_pk "
       ")"
       "INSERT INTO clearing_licenses(clearing_fk, rf_fk, removed) "

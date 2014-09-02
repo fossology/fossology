@@ -14,6 +14,8 @@ You should have received a copy of the GNU General Public License along with thi
 #include "monk.h"
 #include "diff.h"
 
+#define BULK_DECISION_TYPE "bulk"
+#define BULK_DECISION_SCOPE "upload"
 
 void bulkArguments_contents_free(BulkArguments* bulkArguments);
 int parseBulkArguments(int argc, char** argv, MonkState* state);

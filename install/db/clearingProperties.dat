@@ -14,5 +14,6 @@ $clearingStorage['clearing_decision_scopes.meaning'] = array(
 
 $clearingStorage['clearing_decision_types.meaning'] = array(
   'User decision',
-  'To be determined'
+  'To be determined',
+  'bulk'
 );
