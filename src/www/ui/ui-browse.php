@@ -261,123 +261,6 @@ class ui_browse extends FO_Plugin {
     return $V;
   }
 
-
-  /**
-   * \brief Given a Folder_pk, list every upload in the folder.
-   */
-  function ShowFolder2($Folder, $Show)
-  {
-    global $PG_CONN;
-
-    $V = "";
-    /* Get list of uploads in this folder */
-    $sql = "SELECT * FROM upload
-        INNER JOIN uploadtree ON upload_fk = upload_pk
-        AND upload.pfile_fk = uploadtree.pfile_fk
-        AND parent IS NULL
-        AND lft IS NOT NULL 
-        WHERE upload_pk IN
-        (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
-        ORDER BY priority, upload_filename,upload_desc,upload_pk,upload_origin";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-    $Uri = Traceback_uri() . "?mod=" . $this->Name;
-    $V.= "<table border=1 width='100%'>";
-    $V.= "<tr><td valign='top' width='20%'>\n";
-    $V.= FolderListScript();
-    $text = _("Folder Navigation");
-    $V.= "<center><H3>$text</H3></center>\n";
-    $V.= "<center><small>";
-    if ($Folder != GetUserRootFolder()) {
-      $text = _("Top");
-      $V.= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>$text</a> |";
-    }
-    $text = _("Expand");
-    $V.= "<a href='javascript:Expand();'>$text</a> |";
-    $text = _("Collapse");
-    $V.= "<a href='javascript:Collapse();'>$text</a> |";
-    $text = _("Refresh");
-    $V.= "<a href='" . Traceback() . "'>$text</a>";
-    $V.= "</small></center>";
-    $V.= "<P>\n";
-    $V.= "<form>\n";
-    $V.= FolderListDiv($Folder, 0, $Folder, 1);
-    $V.= "</form>\n";
-    $V.= "</td><td valign='top'>\n";
-    $text = _("Uploads");
-    $V.= "<center><H3>$text</H3></center>\n";
-    $V.= "<table class='text' id='browsetbl' border=0 width='100%' cellpadding=0>\n";
-    $text = _("Upload Name and Description");
-    $text1 = _("Upload Date");
-    $V.= "<th>$text</th><th>$text1</th></tr>\n";
-
-    /* Browse-Pfile menu */
-    $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
-
-    /* Browse-Pfile menu without the compare menu item */
-    $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
-
-    while ($Row = pg_fetch_assoc($result)) {
-      if (empty($Row['upload_pk'])) {
-        continue;
-      }
-      $Desc = htmlentities($Row['upload_desc']);
-      $UploadPk = $Row['upload_pk'];
-
-      /* check permission on upload */
-      $UploadPerm = GetUploadPerm($UploadPk);
-      if ($UploadPerm < PERM_READ) continue;
-
-      $Name = $Row['ufile_name'];
-      if (empty($Name)) {
-        $Name = $Row['upload_filename'];
-      }
-
-      /* If UploadtreePk is not an artifact, then use it as the root.
-       Else get the first non artifact under it.
-       */
-      if (Isartifact($Row['ufile_mode']))
-      $UploadtreePk = DirGetNonArtifact($Row['uploadtree_pk'], $uploadtree_tablename);
-      else
-      $UploadtreePk = $Row['uploadtree_pk'];
-
-      $V.= "<tr><td>";
-      if (IsContainer($Row['ufile_mode'])) {
-        $V.= "<a href='$Uri&upload=$UploadPk&folder=$Folder&item=$UploadtreePk&show=$Show'>";
-        $V.= "<b>" . $Name . "</b>";
-        $V.= "</a>";
-      }
-      else {
-        $V.= "<b>" . $Name . "</b>";
-      }
-      $V.= "<br>";
-      if (!empty($Desc)) $V.= "<i>" . $Desc . "</i><br>";
-      $Upload = $Row['upload_pk'];
-      $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
-      if (Iscontainer($Row['ufile_mode']))
-      $V.= menu_to_1list($MenuPfile, $Parm, " ", " ", 1, $UploadPk);
-      else
-      $V.= menu_to_1list($MenuPfileNoCompare, $Parm, " ", " ", 1, $UploadPk);
-
-      /* Job queue link */
-      $text = _("History");
-      if (plugin_find_id('showjobs') >= 0) {
-        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>[$text]</a>";
-
-      $V.= "</td>\n";
-      $V.= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
-      }
-      $V.= "<tr><td colspan=2>&nbsp;</td></tr>\n";
-    }
-    pg_free_result($result);
-    $V.= "</table>\n";
-    $V.= "</td></tr>\n";
-    $V.= "</table>\n";
-    return $V;
-  } /* ShowFolder() */
-
-
   /**
    * \brief This function returns the output html
    */
@@ -439,14 +322,6 @@ class ui_browse extends FO_Plugin {
         pg_free_result($result);
       }
     }
-    
-    /* This is a bad space to place action code here */
-    $moveUpload = GetParm("move", PARM_INTEGER);
-    $beyondUpload = GetParm("beyond", PARM_INTEGER);
-    if (!empty($moveUpload) && !empty($beyondUpload))
-    {
-      $this->moveUploadBeyond($moveUpload, $beyondUpload);
-    }
 
     switch ($this->OutputType) {
       case "XML":
@@ -489,6 +364,7 @@ class ui_browse extends FO_Plugin {
         global $Plugins;
         $View = & $Plugins[plugin_find_id("view") ];
         if (!empty($View)) {
+          /** @var ui_view $View */
           return ($View->ShowView(NULL, "browse"));
         }
       }
@@ -532,48 +408,40 @@ class ui_browse extends FO_Plugin {
 
   private function ShowFolderCreateFileTable($Folder, $Show)
   {
-    $tableData= $this->ShowFolderGetTableData($Folder, $Show);
+    $tableColumns = '[
+      { "sTitle" : "'._("Upload Name and Description").'", "sClass": "left" },
+      { "sTitle" : "'._("Status").'", "sClass": "center" },
+      { "sTitle" : "'._("Reject-job").'", "sClass": "center", "bSortable": false },
+      { "sTitle" : "'._("Assigned to").'", "sClass": "center" },
+      { "sTitle" : "'._("Upload Date").'", "sClass": "center" , "sType": "string"},
+      { "sTitle" : "'._("Priority").'", "sClass": "center priobucket", "bSearchable": false, "mRender": function ( source, type, val ) { return prioColumn( source, type, val ); } }
+    ]';
 
-    $tableColumns = array(
-      array("sTitle" => _("Upload Name and Description"), "sClass"=>"left" ),
-      array("sTitle" => _("Status"), "sClass"=>"center" ),
-      array("sTitle" => _("Reject-job"), "sClass"=>"center", "bSortable"=>false ),
-      array("sTitle" => _("Assigned to"), "sClass"=>"center" ),
-      array("sTitle" => _("Upload Date"), "sClass"=>"center", "sType"=>"string"),
-      array("sTitle" => _("Priority"), "sClass"=>"center priobucket", "bSearchable"=>false, "mRender"=>'xyyzzz')
-    );
 
-    $tableSorting = array(
-      array(5,'desc'),
-      array(0,"asc"),
-      array(2,"desc"),
-      array(1,"desc")
-    );
-
-//    $tableLanguage = array(
-//      "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
-//      "sSearch" => "Search _INPUT_ in all columns" // or <input type=\"text\" id=\"dirlist_filter_scanner\" name=\"dirlist_filter_license\" style=\"padding:0px;\"/>
-//        // in results.
-//        . "<button onclick='resetFileFields()' >" . _("Show all files") . "</button>",
-//      "sInfoPostFix" => $AddInfoText,
-//      "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
-//    );
+    $tableSorting = '[
+      [5 , "desc"],
+      [0 , "asc"],
+      [2 , "desc"],
+      [1 , "desc"],
+    ]';
     
-    $dataTableConfig = array(
-      "aaData" => $tableData,
-      "aoColumns" => $tableColumns,
-      "aaSorting" => $tableSorting,
-      "iDisplayLength" => 50
-       , "bStateSave"=>true
-    //,  "oLanguage" => $tableLanguage
-    );
+    $dataTableConfig =
+   '{  "bServerSide": true,
+       "sAjaxSource": "?mod=browse-processPost",
+       "fnServerData": function ( sSource, aoData, fnCallback ) {
+        aoData.push( { "folder": "'.$Folder.'" , "show" : "'.$Show.'" } );
+                        $.getJSON( sSource, aoData, function (json) { fnCallback(json);  });
+                    },
+      "aoColumns": '.$tableColumns.',
+      "aaSorting": '.$tableSorting.',
+      "iDisplayLength": 50,
+      "bStateSave": true
+    }';
 
-    
-    $xyyzzz = ' function ( source, type, val ) { return prioColumn( source, type, val ); }';
     
     $VF   = "<script>
               function createBrowseTable() {
-                    dTable=$('#browsetbl').dataTable(" . str_replace('"xyyzzz"',$xyyzzz, json_encode($dataTableConfig) ).");
+                    dTable=$('#browsetbl').dataTable(". $dataTableConfig . ");
                 }
             </script>";
 
@@ -590,120 +458,9 @@ class ui_browse extends FO_Plugin {
     return $output;
   }
 
-  //todo REFACTOR COMPLETELY
-  private function ShowFolderGetTableData($Folder, $Show)
-  {
-    global $container;
-    $dbManager = $container->get('db.manager');
 
-    /* Browse-Pfile menu */
-    $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
 
-    /* Browse-Pfile menu without the compare menu item */
-    $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
 
-    $Uri = Traceback_uri() . "?mod=" . $this->Name;
-
-    $output = array();
-    /* Get list of uploads in this folder */
-    $stmt = __METHOD__."getFolderContents";
-    $dbManager->prepare($stmt,"SELECT * FROM upload
-        INNER JOIN uploadtree ON upload_fk = upload_pk
-        AND upload.pfile_fk = uploadtree.pfile_fk
-        AND parent IS NULL
-        AND lft IS NOT NULL
-        WHERE upload_pk IN
-        (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1)
-        ORDER BY priority, upload_filename,upload_desc,upload_pk,upload_origin");
-    $result = $dbManager->execute($stmt,array($Folder));
-
-    while ($Row = pg_fetch_assoc($result)) {
-      if (empty($Row['upload_pk'])) {
-        continue;
-      }
-      $Desc = htmlentities($Row['upload_desc']);
-      $UploadPk = $Row['upload_pk'];
-
-      /* check permission on upload */
-      $UploadPerm = GetUploadPerm($UploadPk);
-      if ($UploadPerm < PERM_READ) continue;
-
-      $Name = $Row['ufile_name'];
-      if (empty($Name)) {
-        $Name = $Row['upload_filename'];
-      }
-
-      /* If UploadtreePk is not an artifact, then use it as the root.
-       Else get the first non artifact under it.
-       */
-      if (Isartifact($Row['ufile_mode']))
-        $UploadtreePk = DirGetNonArtifact($Row['uploadtree_pk'], $uploadtree_tablename);
-      else
-        $UploadtreePk = $Row['uploadtree_pk'];
-
-      $nameColumn = "";
-      if (IsContainer($Row['ufile_mode'])) {
-        $nameColumn .= "<a href='$Uri&upload=$UploadPk&folder=$Folder&item=$UploadtreePk&show=$Show'>";
-        $nameColumn .= "<b>" . $Name . "</b>";
-        $nameColumn .= "</a>";
-      }
-      else {
-        $nameColumn .= "<b>" . $Name . "</b>";
-      }
-      $nameColumn.= "<br>";
-      if (!empty($Desc))
-        $nameColumn.= "<i>" . $Desc . "</i><br>";
-      $Upload = $Row['upload_pk'];
-      $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
-      if (Iscontainer($Row['ufile_mode']))
-        $nameColumn.= menu_to_1list($MenuPfile, $Parm, " ", " ", 1, $UploadPk);
-      else
-        $nameColumn.= menu_to_1list($MenuPfileNoCompare, $Parm, " ", " ", 1, $UploadPk);
-
-      /* Job queue link */
-      $text = _("History");
-      $dateCol="";
-      if (plugin_find_id('showjobs') >= 0) {
-        $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>$text</a>]";
-        // $dateCol .= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td>";
-        $dateCol = substr($Row['upload_ts'], 0, 19);
-      }
-      $pairIdPrio = array(intval($Row['upload_pk']), floatval($Row['priority']));
-      $output[]= array($Name , "Status" , "reject" , "assinged" , $dateCol , $pairIdPrio );
-    }
-  return $output;
-  }
-
-  private function moveUploadBeyond($moveUpload, $beyondUpload)
-  {
-    global $container;
-    $dbManager = $container->get('db.manager');
-    $dbManager->prepare($stmt=__METHOD__.'.get.single.Upload',
-            $sql='SELECT upload_pk,priority FROM upload WHERE upload_pk=$1');
-    $movePoint = $dbManager->getSingleRow($sql,array($moveUpload),$stmt);
-    $beyondPoint = $dbManager->getSingleRow($sql,array($beyondUpload),$stmt);
-    if ($movePoint['priority'] > $beyondPoint['priority'])
-    {
-      $farPoint = $dbManager->getSingleRow("SELECT priority FROM upload WHERE priority<$1 ORDER BY priority DESC LIMIT 1", array($beyondPoint['priority']), 'get.upload.with.lower.priority');
-    }
-    else
-    {
-      $farPoint = $dbManager->getSingleRow("SELECT priority FROM upload WHERE priority>$1 ORDER BY priority ASC LIMIT 1", array($beyondPoint['priority']), 'get.upload.with.higher.priority');
-    }
-    if (false !== $farPoint)
-    {
-      $newPriority = ($farPoint['priority'] + $beyondPoint['priority'] )/2;
-    }
-    else if ($movePoint['priority'] > $beyondPoint['priority'])
-    {
-      $newPriority = $beyondPoint['priority'] - 0.5;
-    }
-    else
-    {
-      $newPriority = $beyondPoint['priority'] + 0.5;
-    }
-    $dbManager->getSingleRow('UPDATE upload SET priority=$1 WHERE upload_pk=$2',array($newPriority,$moveUpload),'update.priority');
-  }
 }
 $NewPlugin = new ui_browse();
 $NewPlugin->Install();
