@@ -98,7 +98,6 @@ int main(int argc, char** argv) {
   queryAgentId(state);
 
   if (argc > 1) {
-    state->scanMode = MODE_EXTENDED;
     if (!handleArguments(state, argc, argv))
       bail(state, 3);
   } else {

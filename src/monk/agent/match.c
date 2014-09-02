@@ -353,7 +353,7 @@ inline void processFullMatch(MonkState* state, File* file, License* license, Dif
              getFileNameForFileId(state->dbManager, file->id), file->id, license->shortname, license->refId);
 #endif //DEBUG
   } else {
-    onFullMatch(file, license, matchInfo);
+    onFullMatch(state, file, license, matchInfo);
   }
 }
 
@@ -374,7 +374,7 @@ inline void processDiffMatch(MonkState* state, File* file, License* license, Dif
     free(formattedMatchArray);
 #endif //DEBUG
   } else {
-    onDiffMatch(file, license, diffResult, matchPercent);
+    onDiffMatch(state, file, license, diffResult, matchPercent);
   }
 }
 
@@ -403,7 +403,7 @@ inline void processMatches(MonkState* state, File* file, GArray* matches) {
     return;
 
   if ((state->scanMode != MODE_SCHEDULER) && (state->verbosity >= 1) && (matches->len == 0)) {
-    onNoMatch(file);
+    onNoMatch(state, file);
     return;
   }
 

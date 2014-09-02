@@ -16,7 +16,8 @@ You should have received a copy of the GNU General Public License along with thi
 #define AGENT_ARS  "monk_ars" 
 
 #define MODE_SCHEDULER 1
-#define MODE_EXTENDED 2
+#define MODE_CLI 2
+#define MODE_BULK 3
 
 #define FULL_MATCH "M"
 #define DIFF_TYPE_MATCH "M0"
@@ -30,7 +31,6 @@ You should have received a copy of the GNU General Public License along with thi
 #define MIN_TRAILING_MATCHES 5
 #define MIN_ALLOWED_RANK 66
 
-#include "libpq-fe.h"
 #include <glib.h>
 #include "libfossdbmanager.h"
 
