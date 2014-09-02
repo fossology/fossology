@@ -126,13 +126,11 @@ int handleBulkMode(MonkState* state) {
 void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
   int removed = state->bulkArguments->removing ? 1 : 0;
 
-//#define DEBUG_BULK
-#ifdef DEBUG_BULK
+if (0) {
   printf("found bulk match: fileId=%ld, licId=%ld, ", file->id, license->refId);
   printf("start: %zu, length: %zu, ", matchInfo->text.start, matchInfo->text.length);
   printf("removed: %d\n", removed);
-#endif
-
+}
   /* TODO write correct query after changing the db format */
   //TODO we also want to save highlights
 
