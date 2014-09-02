@@ -20,6 +20,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\FileTreeBounds;
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
 
@@ -167,6 +168,7 @@ class ui_browse_license extends FO_Plugin
 
     global $container;
     $dbManager = $container->get('db.manager');
+    /** @var DbManager $dbManager */
     $allScans = array();
     foreach($scannerAgents as $agentName){
       $agentHasArsTable = DB_TableExists($agentName."_ars");
@@ -196,15 +198,15 @@ class ui_browse_license extends FO_Plugin
       
       if (false===$latestRun)
       {
-        $V .= "The agent <b>$agentName</b> did never successfully run on this upload.<br/>";
+        $V .= _("The agent"). " <b>$agentName</b> "._("did never successfully run on this upload.")."<br/>";
         continue;
       }
       
-      $V .= "The latest results of agent <b>$agentName</b> are from revision $latestRun[agent_rev].";
+      $V .= _("The latest results of agent")." <b>$agentName</b> "._("are from revision ")."$latestRun[agent_rev].";
       if ($latestRun['agent_pk']!=$newestAgent['agent_pk'])
       {
         $link = Traceback_uri().'?mod=agent_add&upload='.$uploadId;
-        $V .= " (The newer revision $newestAgent[agent_rev] did not run on this upload: <a href='$link'>schedule agents</a>)";
+        $V .= _(" (The newer revision")." $newestAgent[agent_rev] "._("did not run on this upload: ")."<a href='$link'>"._("schedule agents")."</a>)";
       }
       $V .= '<br/>';
     }    

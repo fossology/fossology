@@ -62,8 +62,14 @@ char* getFileName(MonkState* state, long pFileId) {
     printf("file not found for pFileId=%ld\n", pFileId);
     return NULL;
   }
+  char* pFileName;
 
-  char* pFileName = fo_RepMkPath("files", pFile);
+#ifdef MONK_MULTI_THREAD
+  #pragma omp critical(getFileName)
+#endif
+  {
+    pFileName = fo_RepMkPath("files", pFile);
+  }
 
   if (!pFileName)
     printf("file '%s' not found\n", pFile);
