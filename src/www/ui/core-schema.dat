@@ -597,6 +597,11 @@
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["clearing_licenses"]["removed"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["removed"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"removed\" boolean;";
+  $Schema["TABLE"]["clearing_licenses"]["removed"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"removed\" SET NOT NULL, ALTER COLUMN \"removed\" SET DEFAULT FALSE;";
+  $Schema["TABLE"]["clearing_licenses"]["removed"]["UPDATE"] = "";
+
 
   $Schema["TABLE"]["copyright"]["ct_pk"]["DESC"] = "";
   $Schema["TABLE"]["copyright"]["ct_pk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"ct_pk\" int8;";

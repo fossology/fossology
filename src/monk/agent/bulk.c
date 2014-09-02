@@ -158,35 +158,43 @@ int handleBulkMode(MonkState* state) {
 }
 
 void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
+  int removed = state->scanMode == MODE_BULK_NEGATIVE ? 1 : 0;
+
 // TODO remove debug
-  int sign = state->scanMode == MODE_BULK_NEGATIVE ? 1 : -1;
 #define DEBUG_BULK
 #ifdef DEBUG_BULK
   printf("found bulk match: fileId=%ld, licId=%ld, ", file->id, license->refId);
   printf("start: %zu, length: %zu, ", matchInfo->text.start, matchInfo->text.length);
-  printf("sign: %d\n", sign);
+  printf("removed: %d\n", removed);
 #endif
 
   /* TODO write correct query after changing the db format */
+  //TODO we also want to save sign and highlights
+
+  /* we add a clearing decision for each uploadtree_fk corresponding to this pfile_fk
+   * For each bulk scan scan we only have a n the other hand we have only one license per clearing decision
+   */
   PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "saveBulkResult",
-      "WITH clearingId AS ("
+      "WITH clearingIds AS ("
       " INSERT INTO clearing_decision(uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk)"
-      " SELECT uploadtree_pk, $1, $2, 1, 2 FROM uploadtree WHERE upload_fk = $3 AND pfile_fk = $1" // TODO change 2 and 2 to correct type and scope
+      "  SELECT uploadtree_pk, $1, $2, 1, 2" // TODO change 1 and 2 to correct type and scope
+      "  FROM uploadtree"
+      "  WHERE upload_fk = $3 AND pfile_fk = $1"
       " RETURNING clearing_pk "
       ")"
-      "INSERT INTO clearing_licenses(clearing_fk, rf_fk) "
-      "SELECT clearing_pk,$4 FROM clearingId",
-      long, long, long, long
+      "INSERT INTO clearing_licenses(clearing_fk, rf_fk, removed) "
+      "SELECT clearing_pk,$4,$5 FROM clearingIds",
+      long, long, int, long, int
     ),
     file->id,
     state->bulkArguments->userId,
     state->bulkArguments->uploadId,
-    license->refId
+    license->refId,
+    removed
   );
-  //TODO we also want to save sign and highlights
 
   /* ignore errors */
   if (insertResult)
