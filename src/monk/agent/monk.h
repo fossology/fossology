@@ -41,7 +41,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 typedef struct {
   long uploadId;
-  int sign;
+  int removing;
   int userId;
   int groupId;
   char* licenseName;

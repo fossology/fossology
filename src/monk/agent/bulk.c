@@ -55,7 +55,7 @@ int parseBulkArguments(int argc, char** argv, MonkState* state) {
   {
     BulkArguments* bulkArguments = malloc(sizeof(BulkArguments));
 
-    bulkArguments->sign = tempargs[0][0] == 'N' ? 1 : -1;
+    bulkArguments->removing = (tempargs[0][0] == 'N');
     bulkArguments->uploadId = atol(tempargs[1]);
     //not using targs[2] (uploadTreeId)
     bulkArguments->licenseName = g_strdup(tempargs[3]);
@@ -104,9 +104,6 @@ long insertNewBulkLicense(fo_dbManager* dbManager, const char* shortName, const 
 
 void bulk_identification(MonkState* state) {
   BulkArguments* bulkArguments = state->bulkArguments;
-
-  if (bulkArguments->sign == -1)
-    state->scanMode = MODE_BULK_NEGATIVE;
 
   long licenseId = insertNewBulkLicense(state->dbManager,
                                         bulkArguments->licenseName,
@@ -158,7 +155,7 @@ int handleBulkMode(MonkState* state) {
 }
 
 void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
-  int removed = state->scanMode == MODE_BULK_NEGATIVE ? 1 : 0;
+  int removed = state->bulkArguments->removing ? 1 : 0;
 
 // TODO remove debug
 #define DEBUG_BULK
