@@ -81,7 +81,7 @@ class agent_fomonkbulk extends FO_Plugin
    **/
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $jq_cmd_args)
   {
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $jq_cmd_args);
+    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, "", $jq_cmd_args);
   }
 }
 
