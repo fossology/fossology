@@ -14,8 +14,19 @@ You should have received a copy of the GNU General Public License along with thi
 #include "monk.h"
 #include "diff.h"
 
-int parsableAsBulk(int argc, char** argv);
-int handleBulkMode(MonkState* state, int argc, char** argv);
-void onFullMatch_Bulk(File* file, License* license, DiffMatchInfo* matchInfo);
+typedef struct {
+  long uploadId;
+  int sign;
+  int userId;
+  char* groupId; //TODO change to int to use id instead of name
+  char* licenseName;
+  char* fullLicenseName;
+  char* refText;
+} BulkArguments;
+
+void bulkArguments_contents_free(BulkArguments* bulkArguments);
+int parseBulkArguments(int argc, char** argv, BulkArguments* bulkArguments);
+int handleBulkMode(MonkState* state, BulkArguments* bulkArguments);
+void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo);
 
 #endif

@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License along with thi
 #define MODE_SCHEDULER 1
 #define MODE_CLI 2
 #define MODE_BULK 3
+#define MODE_BULK_NEGATIVE 4
 
 #define FULL_MATCH "M"
 #define DIFF_TYPE_MATCH "M0"

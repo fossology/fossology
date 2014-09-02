@@ -55,13 +55,17 @@ int handleArguments(MonkState* state, int argc, char** argv) {
   if (!parseArguments(state, argc, argv, &fileOptInd))
     return 0;
 
-  if (parsableAsBulk(argc, argv)) {
+  int result;
+  BulkArguments bulkArguments;
+  if (parseBulkArguments(argc, argv, &bulkArguments)) {
     state->scanMode = MODE_BULK;
-    return handleBulkMode(state, argc, argv);
+    result = handleBulkMode(state, &bulkArguments);
+    bulkArguments_contents_free(&bulkArguments);
   } else {
     state->scanMode = MODE_CLI;
-    return handleCliMode(state, argc, argv, fileOptInd);
+    result = handleCliMode(state, argc, argv, fileOptInd);
   }
+  return result;
 }
 
 void onNoMatch(MonkState* state, File* file) {
@@ -76,7 +80,7 @@ void onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* 
   if (state->scanMode == MODE_CLI) {
     onFullMatch_Cli(file, license, matchInfo);
   } else {
-    onFullMatch_Bulk(file, license, matchInfo);
+    onFullMatch_Bulk(state, file, license, matchInfo);
   }
 }
 
