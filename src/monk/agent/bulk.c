@@ -77,7 +77,7 @@ void bulkArguments_contents_free(BulkArguments* bulkArguments) {
   free(bulkArguments);
 }
 
-void bulk_identification(MonkState* state) {
+int bulk_identification(MonkState* state) {
   BulkArguments* bulkArguments = state->bulkArguments;
 
   License license = (License){
@@ -91,19 +91,40 @@ void bulk_identification(MonkState* state) {
 
   PGresult* filesResult = queryFileIdsForUpload(state->dbManager,
                                                 bulkArguments->uploadId);
-
+  int haveError = 1;
   if (filesResult != NULL) {
-    for (int i = 0; i<PQntuples(filesResult); i++) {
-      long fileId = atol(PQgetvalue(filesResult, i, 0));
+    int resultsCount = PQntuples(filesResult);
+    haveError = 0;
+#ifdef MONK_MULTI_THREAD
+    #pragma omp parallel
+#endif
+    {
+      MonkState threadLocalStateStore = *state;
+      MonkState* threadLocalState = &threadLocalStateStore;
 
-      // this will call onFullMatch_Bulk if it finds matches
-      matchPFileWithLicenses(state, fileId, licenses);
-      fo_scheduler_heart(1);
+      threadLocalState->dbManager = fo_dbManager_fork(state->dbManager);
+      if (threadLocalState->dbManager) {
+#ifdef MONK_MULTI_THREAD
+        #pragma omp for
+#endif
+        for (int i = 0; i<resultsCount; i++) {
+          long fileId = atol(PQgetvalue(filesResult, i, 0));
+
+          // this will call onFullMatch_Bulk if it finds matches
+          matchPFileWithLicenses(threadLocalState, fileId, licenses);
+          fo_scheduler_heart(1);
+        }
+        fo_dbManager_finish(threadLocalState->dbManager);
+      } else {
+        haveError = 1;
+      }
     }
     PQclear(filesResult);
   }
 
   freeLicenseArray(licenses);
+
+  return !haveError;
 }
 
 int handleBulkMode(MonkState* state) {
@@ -115,12 +136,12 @@ int handleBulkMode(MonkState* state) {
   int arsId = fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
                           0, bulkArguments->uploadId, state->agentId, AGENT_ARS, NULL, 0);
 
-  bulk_identification(state);
+  int result = bulk_identification(state);
 
   fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
               arsId, bulkArguments->uploadId, state->agentId, AGENT_ARS, NULL, 1);
 
-  return 1;
+  return result;
 }
 
 void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
