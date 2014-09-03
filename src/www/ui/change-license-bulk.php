@@ -65,47 +65,50 @@ class changeLicenseBulk extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
+    $ErrorMsg = "";
+    $jq_pk = -1;
 
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
     $groupId = 2; // TODO
-    $uploadTreeId = $_POST['uploadTreeId'];
+    $uploadTreeId = intval($_POST['uploadTreeId']);
     $refText = $_POST['refText'];
-    $licenseId = $_POST['licenseId'];
+    $licenseId = intval($_POST['licenseId']);
     $removing = $_POST['removing'];
-    // TODO sanitize input
 
     $license = $this->licenseDao->getLicenseById($licenseId);
     $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId);
-    $uploadId = $uploadEntry['upload_fk'];
-    $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
-    $uploadName = $uploadInfo['upload_filename'];
+    $uploadId = intval($uploadEntry['upload_fk']);
 
-    $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
-      "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
-      VALUES($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
-      array($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
-    );
+    if ($uploadId > 0) {
+      $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
+      $uploadName = $uploadInfo['upload_filename'];
 
-    if ($licenseRefBulkIdResult !== false) {
-      $licenseRefBulkId = $licenseRefBulkIdResult['lrb_pk'];
-      $jq_cmd_args = "-B".$licenseRefBulkId;
-      $job_pk = JobAddJob($userId, $uploadName, $uploadId);
-      $ErrorMsg = "";
+      $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
+        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
+        VALUES($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
+        array($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
+      );
 
-      global $Plugins;
-      $MonkBulkPlugin = plugin_find("agent_monk_bulk");
-      $jq_pk = $MonkBulkPlugin->AgentAdd($job_pk, $uploadId, &$ErrorMsg, array(), $jq_cmd_args);
+      if ($licenseRefBulkIdResult !== false) {
+        $bulkId = $licenseRefBulkIdResult['lrb_pk'];
+        $job_pk = JobAddJob($userId, $uploadName, $uploadId);
+
+        global $Plugins;
+        $MonkBulkPlugin = plugin_find("agent_monk_bulk");
+        $jq_pk = $MonkBulkPlugin->AgentAdd($job_pk, $uploadId, &$ErrorMsg, array(), $bulkId);
+      } else {
+        $ErrorMsg = "can not insert bulk reference";
+      }
     } else {
-      $ErrorMsg = "can not insert bulk reference";
-      $jq_pk = -1;
+      $ErrorMsg = "bad request";
     }
 
     ReportCachePurgeAll();
 
-    if ($jq_pk>0) {
+    if (empty($ErrorMsg) && ($jq_pk>0)) {
       header('Content-type: text/json');
-      print json_encode(array("jobid" => $job_pk, "jqid" => $jq_pk ));
+      print json_encode(array("jqid" => $jq_pk));
     } else {
       header('Content-type: text/json', true, 500);
       print json_encode(array("error" => $ErrorMsg));

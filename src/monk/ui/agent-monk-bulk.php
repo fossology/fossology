@@ -28,6 +28,8 @@ class agent_fomonkbulk extends FO_Plugin
 {
   public $AgentName;
 
+  const BULKFLAG = "-B";
+
   function __construct() {
     $this->Name = "agent_monk_bulk";
     $this->Title = "TITLE_agent_fomonkbulk";
@@ -79,9 +81,9 @@ class agent_fomonkbulk extends FO_Plugin
    * -   0   Not queued, latest version of agent has previously run successfully
    * -  -1   Not queued, error, error string in $ErrorMsg
    **/
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $jq_cmd_args)
+  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $bulkId)
   {
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, "", $jq_cmd_args);
+    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $bulkId, $this::BULKFLAG . $bulkId);
   }
 }
 
