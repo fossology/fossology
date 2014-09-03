@@ -140,6 +140,9 @@ class change_license extends FO_Plugin
       $output .= "<b>$text</b>";
 
       $output .= $this->createChangeLicenseForm($uploadTreeId);
+
+      $text = _("Clearing History:");
+      $output .= "<h2>$text</h2>";
       $output .= $this->createClearingHistoryTable($uploadTreeId);
       $output .= $this->createJavaScriptBlock();
 
