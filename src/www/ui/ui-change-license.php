@@ -269,7 +269,7 @@ class change_license extends FO_Plugin
     $output .= "<h2>$text</h2>";
     $text = _("reference text:");
     $output .= "$text:<br><textarea name=\"bulkRefText\" id=\"bulkRefText\" type=\"text\" cols=\"50\" rows=\"8\" maxlength=\"150\"></textarea>";
-    $output .= $this->changeLicenseUtility->createListSelect("bulkLicense", $licenseRefs);
+    $output .= $this->changeLicenseUtility->createListSelect("bulkLicense", $licenseRefs, false);
     $output .= "<button  type=\"button\" onclick='scheduleBulkScan()'>Run Bulk scan</button>";
 
     $output .= "<input name=\"licenseNumbersToBeSubmitted\" id=\"licenseNumbersToBeSubmitted\" type=\"hidden\" value=\"\" />\n";

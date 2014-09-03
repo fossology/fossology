@@ -125,15 +125,10 @@ function performNoLicensePostRequest() {
 }
 
 function scheduleBulkScan() {
-    var licenseId;
-    $('#bulkLicense').find('option').each(function () {
-      licenseId = this.value;
-    });
-
     var data = {
         "mode": "B",
         "refText": $('#bulkRefText').val(),
-        "licenseId": licenseId,
+        "licenseId": $('#bulkLicense').val(),
         "uploadTreeId": $('#uploadTreeId').val()
     };
 
