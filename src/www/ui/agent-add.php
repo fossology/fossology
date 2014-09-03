@@ -139,9 +139,9 @@ class agent_add extends FO_Plugin
         }
         $uploadpk = GetParm('upload',PARM_INTEGER);
         if (array_key_exists('agents', $_REQUEST))
-        $agents = $_REQUEST['agents'];
+          $agents = $_REQUEST['agents'];
         else
-        $agents = '';
+          $agents = '';
 
         if (!empty($uploadpk) && !empty($agents) && is_array($agents))
         {
@@ -223,7 +223,8 @@ class agent_add extends FO_Plugin
         $List = FolderListUploads_perm($Folder, PERM_WRITE);
         foreach($List as $L)
         {
-          $V .= "<option value='" . $L['upload_pk'] . "'>";
+          $isSelected = (!empty($uploadpk) && $L['upload_pk']==$uploadpk) ? " selected='selected'" : '';
+          $V .= "<option value='" . $L['upload_pk'] . "'$isSelected>";
           $V .= htmlentities($L['name']);
           if (!empty($L['upload_desc']))
           {
@@ -239,6 +240,13 @@ class agent_add extends FO_Plugin
         $V .= "<select multiple size='10' id='agents' name='agents[]'></select>\n";
         $V .= "</div>\n";
         $V .= "</ol>\n";
+        
+        if ($uploadpk)
+        {
+          $V .= "<script language='javascript'>\n";
+          $V .= "Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=$uploadpk\");</script>";
+        }
+       
         $text = _("Analyze");
         $V .= "<input type='submit' value='$text!'>\n";
         $V .= "</form>\n";

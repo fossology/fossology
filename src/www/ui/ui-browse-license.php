@@ -20,6 +20,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\FileTreeBounds;
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
 
@@ -146,7 +147,7 @@ class ui_browse_license extends FO_Plugin
    */
   function ShowUploadHist($Uploadtree_pk, $Uri, $tag_pk)
   {
-     $V = ""; // total return value
+    $V = ""; // total return value
     $UniqueTagArray = array();
     global $Plugins;
 
@@ -167,11 +168,11 @@ class ui_browse_license extends FO_Plugin
 
     global $container;
     $dbManager = $container->get('db.manager');
+    /** @var DbManager $dbManager */
     $allScans = array();
     foreach($scannerAgents as $agentName){
-      /** if the agent_ars table is not existing, continue  */
-      $res = DB_TableExists($agentName."_ars");
-      if (empty($res)) {
+      $agentHasArsTable = DB_TableExists($agentName."_ars");
+      if (empty($agentHasArsTable)) {
         continue;
       }
 
@@ -197,42 +198,27 @@ class ui_browse_license extends FO_Plugin
       
       if (false===$latestRun)
       {
-        $V .= "The agent $agentName did never successfully run on this upload.<br/>";
+        $V .= _("The agent"). " <b>$agentName</b> "._("did never successfully run on this upload.")."<br/>";
+        continue;
       }
-      else if ($latestRun['agent_pk']!=$newestAgent['agent_pk'])
+      
+      $V .= _("The latest results of agent")." <b>$agentName</b> "._("are from revision ")."$latestRun[agent_rev].";
+      if ($latestRun['agent_pk']!=$newestAgent['agent_pk'])
       {
-        $V .= "There is the newer revision $newestAgent[agent_rev] of agent $agentName which did not run on this upload.<br/>";
+        $link = Traceback_uri().'?mod=agent_add&upload='.$uploadId;
+        $V .= _(" (The newer revision")." $newestAgent[agent_rev] "._("did not run on this upload: ")."<a href='$link'>"._("schedule agents")."</a>)";
       }
+      $V .= '<br/>';
     }    
 
     if(empty($allScans))
     {
       return _("There is no successful scan for this upload, please schedule one license scanner on this upload.");
     }
+    
+    $V .= $this->buildAgentSelector($allScans);   
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    $URI = Traceback_uri().'?mod='.Traceback_parm().'&updcache=1';
-    $V .= "<form action='$URI' method='post'><select name='agentId' id='agentId'>";
-    $V .= "<option value='0'";
-    if ($run['agent_pk'] == $selectedAgentId)
-    {
-      $V .= " selected='selected'";
-    }
-    $V .= '>'._('current agents')."</option>\n";
-    foreach($allScans as $run)
-    {
-      if ($run['agent_pk'] == $selectedAgentId)
-      {
-        $isSelected = " selected='selected'";
-      } else
-      {
-        $isSelected = "";
-      }
-      $V .= "<option value='$run[agent_pk]'$isSelected>$run[agent_name] $run[agent_rev]</option>\n";
-    }
-    $V .= "</select><input type='submit' name='' value='Show'/></form>";
-    
-    
     list($jsBlockLicenseHist,$VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId);
     list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uploadtree_pk, $Uri, $tag_pk, $fileTreeBounds,  $ModLicView, $UniqueTagArray, $selectedAgentId);
 
@@ -444,6 +430,10 @@ class ui_browse_license extends FO_Plugin
         if (!empty($fileId) && !empty($ModLicView)) {
           $LinkUri = Traceback_uri();
           $LinkUri .= "?mod=view-license&upload=$uploadId&item=$childUploadTreeId";
+          if ($selectedAgentId)
+          {
+            $LinkUri .= "&agentId=$selectedAgentId";
+          }
         } else {
           $LinkUri = NULL;
         }
@@ -453,6 +443,10 @@ class ui_browse_license extends FO_Plugin
         if ($isContainer) {
           $uploadtree_pk = DirGetNonArtifact($childUploadTreeId, $this->uploadtree_tablename);
           $LicUri = "$Uri&item=" . $uploadtree_pk;
+          if ($selectedAgentId)
+          {
+            $LicUri .= "&agentId=$selectedAgentId";
+          }
         } else {
           $LicUri = NULL;
         }
@@ -515,7 +509,7 @@ class ui_browse_license extends FO_Plugin
 
       $tableColumns = array(
           array("sTitle" => _("Files"), "sClass"=>"left" ),
-          array("sTitle" => _("Scanner Results(N: nomos, M: monk)"), "sClass"=>"left" ),
+          array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass"=>"left" ),
           array("sTitle" => _("Edited Results"), "sClass"=>"left" ),
           array("sTitle" => _("Actions"), "sClass"=>"left",  "bSortable"=>false, "bSearchable"=>false, "sWidth"=>"14.6%" )
         );
@@ -568,6 +562,34 @@ class ui_browse_license extends FO_Plugin
 
     return $this->licenseRenderer->renderLicenseHistogram($licenseHistogram,$editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
   }
+
+  private function buildAgentSelector($allScans)
+  {
+    $selectedAgentId = GetParm('agentId', PARM_INTEGER);
+    if (count($allScans)==1)
+    {
+      $run = reset($allScans);
+      return "Only one revision of <b>$run[agent_name]</b> ran for this upload. <br/>";
+    }
+    $URI = Traceback_uri().'?mod='.Traceback_parm().'&updcache=1';
+    $V = "<form action='$URI' method='post'><select name='agentId' id='agentId'>";
+    $isSelected = (0==$selectedAgentId) ? " selected='selected'" : '';
+    $V .= "<option value='0' $isSelected>"._('Latest run')."</option>\n";
+    foreach($allScans as $run)
+    {
+      if ($run['agent_pk'] == $selectedAgentId)
+      {
+        $isSelected = " selected='selected'";
+      } else
+      {
+        $isSelected = "";
+      }
+      $V .= "<option value='$run[agent_pk]'$isSelected>$run[agent_name] $run[agent_rev]</option>\n";
+    }
+    $V .= "</select><input type='submit' name='' value='Show'/></form>";
+    return $V;
+  }
+
 }
 
 $NewPlugin = new ui_browse_license;
