@@ -268,13 +268,14 @@ class change_license extends FO_Plugin
     $output .= "</tr>";
     $output .= "<tr><td>&nbsp;</td></tr></table>";
 
+    $allLicenseRefs = $this->licenseDao->getLicenseRefs();
     $text = _("Bulk recognition");
     $output .= "<h2>$text</h2>";
     $output .= "<select name=\"bulkAction\" id=\"bulkAction\">";
     $output .= "<option value=\"B\">Add license</option>";
     $output .= "<option value=\"N\">Remove license</option>";
     $output .= "</select>";
-    $output .= $this->changeLicenseUtility->createListSelect("bulkLicense", $licenseRefs, false, 1);
+    $output .= $this->changeLicenseUtility->createListSelect("bulkLicense", $allLicenseRefs, false, 1);
     $text = _("reference text");
     $output .= "<br>$text:<br><textarea name=\"bulkRefText\" id=\"bulkRefText\" type=\"text\" cols=\"80\" rows=\"12\"></textarea><br>";
     $output .= "<br><button type=\"button\" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>";
